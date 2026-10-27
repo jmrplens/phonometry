@@ -191,7 +191,7 @@ SPB_WEIGHTING_FACTORS: Mapping[RoadSpeedCategory, Mapping[VehicleCategory, float
 
 #: 7.3: the fewest vehicles to be measured for surface classification, by
 #: category, with ``"2"`` for the two heavy categories together.
-SPB_MIN_VEHICLE_COUNTS: Mapping[str, int] = MappingProxyType(
+SPB_MIN_VEHICLE_COUNTS: Mapping[VehicleCategory | Literal["2"], int] = MappingProxyType(
     {"1": 100, "2a": 30, "2b": 30, "2": 80}
 )
 
@@ -281,7 +281,7 @@ def _reported_levels(
     return {key: _round_tenth(value) for key, value in levels.items()}
 
 
-def _road_category(road_speed_category: str) -> RoadSpeedCategory:
+def _road_category(road_speed_category: object) -> RoadSpeedCategory:
     return require_choice(
         road_speed_category, "road_speed_category", SPB_ROAD_SPEED_CATEGORIES
     )

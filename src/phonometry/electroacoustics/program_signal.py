@@ -107,6 +107,7 @@ import numpy as np
 from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, read_only
 from .._internal.validation import (
+    require_choice,
     require_count,
     require_positive,
     require_scalar,
@@ -395,11 +396,10 @@ def simulated_program_signal(
     :raises ValueError: If an input is invalid, or ``peak_to_rms`` is not
         below the ratio of the unclipped record.
     :raises TypeError: if ``duration_s``, ``peak_to_rms`` or ``rms`` is not a single
-        number, or ``fs`` is a flag, a text or an array where a count goes.
+        number, or ``fs`` is a flag, a text or an array where a count goes, or
+        ``spectrum`` is not a text.
     """
-    if spectrum not in {"table", "figure_2"}:
-        msg = f"'spectrum' must be 'table' or 'figure_2'; got {spectrum!r}."
-        raise ValueError(msg)
+    require_choice(spectrum, "spectrum", ("table", "figure_2"))
     rate = require_count(fs, "fs")
     duration = require_positive(duration_s, "duration_s")
     level = require_positive(rms, "rms")

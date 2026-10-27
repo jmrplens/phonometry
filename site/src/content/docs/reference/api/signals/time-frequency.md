@@ -112,6 +112,7 @@ tones, sweeps, transients - not a low-variance spectral estimator.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs or parameters are invalid. |
+| TypeError | if `scaling` is not a text. |
 
 ## SpectrogramResult
 

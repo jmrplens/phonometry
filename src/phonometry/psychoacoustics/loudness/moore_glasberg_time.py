@@ -83,6 +83,7 @@ from .moore_glasberg import (
     _ROEX_D,
     _T3_10LGG,
     _T3_ALPHA,
+    Presentation,
     _cochlea_levels,
     _erb_bandwidth,
     _fc_from_cam,
@@ -389,7 +390,7 @@ class MooreGlasbergTimeVaryingLoudness(OwnsArrays):
     loudness_level_max: float
     percentiles: dict[float, float]
     field: Literal["free", "diffuse", "eardrum"]
-    presentation: str
+    presentation: Presentation
 
     def __post_init__(self) -> None:
         """Reject traces that do not share the frame axis they are drawn on.
@@ -773,7 +774,7 @@ def loudness_moore_glasberg_time(
     fs: float | None = None,
     *,
     field: Literal["free", "diffuse", "eardrum"] = "free",
-    presentation: Literal["binaural", "diotic", "monaural"] = "binaural",
+    presentation: Presentation = "binaural",
     percentiles: Sequence[float] = (1.0, 5.0, 10.0, 50.0, 90.0, 95.0),
 ) -> MooreGlasbergTimeVaryingLoudness:
     """Time-varying loudness of a calibrated pressure signal (ISO 532-3:2023).
@@ -803,7 +804,8 @@ def loudness_moore_glasberg_time(
     :param percentiles: Fractions (percent) for which the exceeded long-term
         loudness is reported.
     :return: A :class:`MooreGlasbergTimeVaryingLoudness`.
-    :raises TypeError: if ``fs`` is not a single number.
+    :raises TypeError: if ``fs`` is not a single number, or ``presentation`` is not a
+        text.
 
     A steady 1 kHz tone at 40 dB SPL, binaural, free field, yields a peak
     long-term loudness of 1.000 sone (40 phon) by definition of the sone.

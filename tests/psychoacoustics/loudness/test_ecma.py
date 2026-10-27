@@ -146,7 +146,7 @@ def test_result_structure(ref_1k_40: psychoacoustics.EcmaLoudness) -> None:
 
 def test_invalid_field() -> None:
     tone = _tone(1000.0, 40.0, seconds=0.5)
-    with pytest.raises(ValueError, match="field must be"):
+    with pytest.raises(ValueError, match="'field' must be one of"):
         psychoacoustics.loudness_ecma(tone, FS, field="reverberant")
 
 

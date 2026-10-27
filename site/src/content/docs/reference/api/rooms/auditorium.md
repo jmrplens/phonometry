@@ -83,12 +83,13 @@ and this function refuses to invent one.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the symbol is not one Table A.1 prints, if the table prints no just-noticeable difference for it, or if the two values do not have the same shape. |
+| TypeError | if `symbol` is not a text. |
 
 ## AuditoriumQuantity
 
 ```python
 AuditoriumQuantity(
-    symbol: str,
+    symbol: Literal['G', 'EDT', 'C80', 'D50', 'Ts', 'J_LF', 'L_J'],
     aspect: str,
     averaging_bands_hz: tuple[float, ...],
     just_noticeable_difference: float | None,
@@ -694,7 +695,7 @@ LATERAL_WEIGHTINGS = ('squared', 'cosine')
 LateralEnergyResult(
     frequencies: NDArray[np.float64] | None,
     energy_fraction: NDArray[np.float64],
-    weighting: str,
+    weighting: Literal['squared', 'cosine'],
 )
 ```
 
@@ -1030,6 +1031,7 @@ table.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the symbol is not one Table A.1 prints, if the two arrays disagree in length, or if the band axis does not carry every band the quantity averages. |
+| TypeError | if `symbol` is not a text. |
 
 ## sound_pressure_exposure_level
 

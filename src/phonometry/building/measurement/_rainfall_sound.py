@@ -184,7 +184,7 @@ class ArtificialRain(RichDisplay):
 #: standard rain for comparing products (ISO 10140-1:2021 K.4.1); intense rain
 #: is recommended only where a lower rate is needed. ISO 10140-5:2010/Amd 1:2014
 #: printed the same two tables.
-ARTIFICIAL_RAIN: Mapping[str, ArtificialRain] = MappingProxyType(
+ARTIFICIAL_RAIN: Mapping[RainType, ArtificialRain] = MappingProxyType(
     {
         "intense": ArtificialRain(
             rainfall_rate_mm_h=15.0,

@@ -253,7 +253,7 @@ def test_impedance_is_a_scalar_or_one_value_per_frequency() -> None:
 
 
 def test_unknown_ground_model_raises() -> None:
-    with pytest.raises(ValueError, match="unknown ground model"):
+    with pytest.raises(ValueError, match="'model' must be one of"):
         environment.ground_effect(
             _BANDS, 1.0, 1.0, 20.0, flow_resistivity_pa_s_m2=2e5, model="jca"
         )  # type: ignore[arg-type]

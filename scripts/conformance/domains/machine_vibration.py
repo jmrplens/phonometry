@@ -21,13 +21,16 @@ from __future__ import annotations
 
 import functools
 import math
-from typing import Literal
+from typing import TYPE_CHECKING, Literal
 
 import numpy as np
 
 import phonometry as ph
 
 from ..registry import Outcome, numeric, register
+
+if TYPE_CHECKING:
+    from phonometry.vibration.machinery.evaluation import BoundedZone
 
 _MACHINE_VIB = "Machine vibration evaluation (ISO 20816)"
 
@@ -53,7 +56,7 @@ _PRINTED_RANGES = {
     "C/D": (4.5, 14.7),
 }
 #: Annex C.2: the factors that move the zone A curve onto the other limits.
-_PRINTED_FACTORS = {"A": 1.0, "B": 2.56, "C": 6.4}
+_PRINTED_FACTORS: dict[BoundedZone, float] = {"A": 1.0, "B": 2.56, "C": 6.4}
 
 #: A criterion shaped like Figure 9, for the rows that exercise Formula (C.1).
 _V_A = 1.12
@@ -95,7 +98,7 @@ def _chk_magnitude_change() -> Outcome:
     )
 
 
-def _chk_zone_factor(zone: str) -> Outcome:
+def _chk_zone_factor(zone: BoundedZone) -> Outcome:
     """One of the three factors of Annex C.2, read back off the criterion.
 
     Recovered as the ratio of the zone limit to the zone A limit rather than
@@ -120,7 +123,7 @@ def _chk_zone_factor(zone: str) -> Outcome:
 
 def _register_zone_factors() -> None:
     """Register the three zone-limit factors of Annex C.2."""
-    for zone in ("A", "B", "C"):
+    for zone in _PRINTED_FACTORS:
         register(
             _MACHINE_VIB,
             "ISO 20816-1:2016 Annex C.2",

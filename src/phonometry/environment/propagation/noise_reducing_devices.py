@@ -82,6 +82,7 @@ import numpy as np
 
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
+    require_choice,
     require_finite_array,
     require_positive,
     require_scalar,
@@ -190,7 +191,7 @@ NORMALIZED_RAILWAY_NOISE_SPECTRUM_DB: tuple[float, ...] = (
 
 #: The two spectra a device can be rated against, by the standard that
 #: prints each: ``"road"`` is EN 1793-3 and ``"railway"`` is EN 16272-3-1.
-SPECTRA: Mapping[str, tuple[float, ...]] = MappingProxyType(
+SPECTRA: Mapping[Spectrum, tuple[float, ...]] = MappingProxyType(
     {
         "road": NORMALIZED_TRAFFIC_NOISE_SPECTRUM_DB,
         "railway": NORMALIZED_RAILWAY_NOISE_SPECTRUM_DB,
@@ -313,12 +314,10 @@ def _round_half_up(value: float) -> int:
 
 
 def _weighted(
-    values: ArrayLike, name: str, spectrum: str
+    values: ArrayLike, name: str, spectrum: object
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """The band values and the spectrum weights, checked against each other."""
-    if spectrum not in SPECTRA:
-        msg = f"spectrum must be one of {tuple(SPECTRA)}; got {spectrum!r}"
-        raise ValueError(msg)
+    weights = SPECTRA[require_choice(spectrum, "spectrum", tuple(SPECTRA))]
     band_values = require_finite_array(values, name)
     if band_values.size != len(TRAFFIC_NOISE_BANDS_HZ):
         msg = (
@@ -326,7 +325,7 @@ def _weighted(
             f"octave bands from 100 Hz to 5 kHz; got {band_values.size}"
         )
         raise ValueError(msg)
-    return band_values, np.asarray(SPECTRA[spectrum], dtype=float)
+    return band_values, np.asarray(weights, dtype=np.float64)
 
 
 def _category(
@@ -360,7 +359,7 @@ def sound_absorption_rating(
     :raises ValueError: If the input does not cover the eighteen bands, is
         not finite, or the spectrum is not one of the two.
     :raises TypeError: if ``absorption_coefficients`` holds a text or a value that is
-        not a real number.
+        not a real number, or ``spectrum`` is not a text.
     :warns RoadDeviceWarning: If the weighted ratio reaches the 0,99 limit
         both standards put on it, which means the rating is the limit and
         not the data.
@@ -413,7 +412,7 @@ def airborne_insulation_rating(
     :raises ValueError: If the input does not cover the eighteen bands, is
         not finite, or the spectrum is not one of the two.
     :raises TypeError: if ``sound_reduction_index`` holds a text or a value that is not
-        a real number.
+        a real number, or ``spectrum`` is not a text.
     """
     reduction, weights = _weighted(
         sound_reduction_index, "sound_reduction_index", spectrum

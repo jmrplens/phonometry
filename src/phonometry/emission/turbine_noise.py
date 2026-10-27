@@ -123,6 +123,7 @@ from .._internal.frozen import OwnsArrays, read_only
 from .._internal.levels_math import energy_mean
 from .._internal.types import as_float_or_array
 from .._internal.validation import (
+    require_choice,
     require_count,
     require_finite,
     require_finite_array,
@@ -419,6 +420,7 @@ class TurbineMeasurementSurface(OwnsArrays):
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to the outline of the measurement surface.
         :return: The axes.
+        :raises TypeError: if ``view`` is not a text.
         """
         from .._i18n import check_language
         from .._plot.emission import plot_turbine_layout
@@ -595,6 +597,7 @@ class TurbineMicrophoneArray(OwnsArrays):
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to the outline of the measurement surface.
         :return: The axes.
+        :raises TypeError: if ``view`` is not a text.
         """
         from .._i18n import check_language
         from .._plot.emission import plot_turbine_layout
@@ -970,13 +973,9 @@ class TurbineEnvironmentalCorrection(OwnsArrays):
 
         :raises ValueError: if ``method`` is neither route, if the route's
             inputs are missing, or if a value is not finite.
+        :raises TypeError: if ``method`` is not a text.
         """
-        if self.method not in ("absorption", _REFERENCE_SOURCE):
-            msg = (
-                "TurbineEnvironmentalCorrection: 'method' must be 'absorption' or "
-                f"'reference source'; got {self.method!r}."
-            )
-            raise ValueError(msg)
+        require_choice(self.method, "method", ("absorption", _REFERENCE_SOURCE))
         if self.method == "absorption" and (
             self.surface_area is None or self.absorption_area is None
         ):

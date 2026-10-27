@@ -111,7 +111,7 @@ def test_the_four_categories_are_the_printed_ones() -> None:
 
 
 def test_an_unknown_category_is_refused() -> None:
-    with pytest.raises(ValueError, match="Table 4"):
+    with pytest.raises(ValueError, match="'category' must be one of"):
         room.prediction_method("3")
 
 
@@ -154,7 +154,7 @@ def test_the_typical_ranges_are_the_printed_ones() -> None:
 
 
 def test_an_unknown_region_is_refused() -> None:
-    with pytest.raises(ValueError, match="4.3"):
+    with pytest.raises(ValueError, match="'region' must be one of"):
         room.typical_decay_range("close")
 
 

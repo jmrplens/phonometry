@@ -110,8 +110,8 @@ def test_the_indirect_method_matches_the_direct_one_for_one_receiver_kind() -> N
             reference_after,
             RECEIVER_BEFORE,
             receiver_after,
-            receiver_type_before=kind,  # type: ignore[arg-type]
-            receiver_type_after=kind,  # type: ignore[arg-type]
+            receiver_type_before=kind,
+            receiver_type_after=kind,
         )
         assert np.allclose(indirect.insertion_loss, direct.insertion_loss)
         assert indirect.symbol == "D'_IL"

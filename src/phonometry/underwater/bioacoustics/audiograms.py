@@ -46,7 +46,7 @@ import numpy as np
 
 from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
-from ..._internal.validation import require_ranks, require_same_length
+from ..._internal.validation import require_choice, require_ranks, require_same_length
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -82,7 +82,7 @@ class AudiogramParameters(RichDisplay):
     :ivar in_air: Whether the group's reference pressure is 20 µPa (in air).
     """
 
-    group: str
+    group: AudiogramGroup
     t0: float
     f1_khz: float
     f2_khz: float
@@ -146,16 +146,18 @@ AUDIOGRAM_GROUPS: tuple[AudiogramGroup, ...] = get_args(AudiogramGroup)
 #: Southall et al. (2019) Table 4, PDF page 24 (printed p. 148): frequency of
 #: best hearing
 #: ``f0`` (kHz) from the original and from the normalised fits.
-BEST_HEARING_FREQUENCY_KHZ: Mapping[str, tuple[float, float]] = MappingProxyType(
-    {
-        "HF": (55.0, 58.0),
-        "VHF": (105.0, 105.0),
-        "SI": (16.0, 12.0),
-        "PCW": (8.6, 13.0),
-        "OCW": (12.0, 10.0),
-        "PCA": (2.3, 2.3),
-        "OCA": (10.0, 10.0),
-    }
+BEST_HEARING_FREQUENCY_KHZ: Mapping[AudiogramGroup, tuple[float, float]] = (
+    MappingProxyType(
+        {
+            "HF": (55.0, 58.0),
+            "VHF": (105.0, 105.0),
+            "SI": (16.0, 12.0),
+            "PCW": (8.6, 13.0),
+            "OCW": (12.0, 10.0),
+            "PCA": (2.3, 2.3),
+            "OCA": (10.0, 10.0),
+        }
+    )
 )
 
 #: Validity range of Ainslie's orca audiogram, Equation (11.159), in kHz.
@@ -177,6 +179,7 @@ def audiogram_parameters(
     :raises TypeError: If ``group`` is not a text.
     :raises ValueError: If the group has no published audiogram.
     """
+    require_choice(group, "group", ("HF", "VHF", "SI", "PCW", "OCW", "PCA", "OCA"))
     if not isinstance(group, str):
         msg = f"'group' must be a text, one of {AUDIOGRAM_GROUPS}; got {group!r}."
         raise TypeError(msg)
@@ -213,7 +216,7 @@ class AudiogramResult(OwnsArrays):
 
     frequencies: NDArray[np.float64]
     threshold: NDArray[np.float64]
-    group: str
+    group: AudiogramGroup | Literal["orca"]
     source: str
     _: KW_ONLY
     in_air: bool
@@ -265,7 +268,7 @@ def _frequency_khz(
 def _bundle(
     freq_hz: NDArray[np.float64],
     threshold: NDArray[np.float64],
-    group: str,
+    group: AudiogramGroup | Literal["orca"],
     source: str,
     *,
     in_air: bool,
@@ -301,6 +304,7 @@ def group_audiogram(
     :raises ValueError: If the group is unknown or a frequency is invalid.
     :raises TypeError: if ``group`` is not a text.
     """
+    require_choice(group, "group", ("HF", "VHF", "SI", "PCW", "OCW", "PCA", "OCA"))
     params = audiogram_parameters(group, normalized=normalized)
     f_khz = _frequency_khz(frequency_hz)
     threshold = (

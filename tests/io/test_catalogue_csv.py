@@ -1766,8 +1766,8 @@ def test_a_provenance_entry_a_row_empties_is_refused(
 @pytest.mark.parametrize(
     ("delimiter", "decimal", "said"),
     [
-        ("|", ".", "delimiter='|'"),
-        (";", ";", "decimal=';'"),
+        ("|", ".", "'delimiter' must be one of"),
+        (";", ";", "'decimal' must be one of"),
         (",", ",", "a decimal comma needs another delimiter"),
     ],
 )

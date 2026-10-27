@@ -117,7 +117,7 @@ signal is - or use odd lengths, and the operation is exact.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs or parameters are invalid. |
-| TypeError | if `delay` is not a single number. |
+| TypeError | if `delay` is not a single number, or `mode` is not a text. |
 
 ## noise_signal
 
@@ -157,7 +157,7 @@ zero-mean and rescaled to the requested RMS exactly.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs or parameters are invalid. |
-| TypeError | if `duration_s`, `fs` or `rms` is not a single number. |
+| TypeError | if `duration_s`, `fs` or `rms` is not a single number, or `color` is not a text. |
 
 ## resample_signal
 

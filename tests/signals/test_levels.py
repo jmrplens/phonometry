@@ -581,7 +581,7 @@ def test_no_weighting_is_z_and_none_is_refused_by_name(
     """
     x = _tone(1000)
     assert level(x, FS) == level(x, FS, weighting="Z")
-    with pytest.raises(TypeError, match=r"'weighting' must be a string"):
+    with pytest.raises(TypeError, match="'weighting' must be one of .*, a text"):
         level(x, FS, weighting=None)
 
 

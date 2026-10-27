@@ -125,6 +125,7 @@ the name used here).
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an unknown FRF name, a non-positive frequency, or a zero *value* (dead channel) when the conversion involves a force-per-motion reciprocal. |
+| TypeError | if `source` or `target` is not a text. |
 
 ## FRF_UNITS
 
@@ -246,6 +247,12 @@ The force-per-motion kinds are element-wise reciprocals, i.e. the
 (`driving_point=False`), `to("impedance")` returns the free
 impedance $1/Y_{ij}$, not the blocked matrix impedance of Table 1
 (which does not invert element-wise).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `target` is not a text. |
 
 ## random_error_percent
 
@@ -544,4 +551,4 @@ clause's and is not a parameter.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an unknown quantity, non-positive mass or frequency, or mismatched shapes. |
-| TypeError | if `mass` is not a single number. |
+| TypeError | if `mass` is not a single number, or `quantity` is not a text. |

@@ -605,7 +605,7 @@ def test_field_comparison_needs_the_reference_band() -> None:
 
 def test_field_comparison_refuses_another_field() -> None:
     emf = np.full((8, BANDS.size), 0.05)
-    with pytest.raises(ValueError, match="'free' or 'diffuse'"):
+    with pytest.raises(ValueError, match="'field' must be one of"):
         ea.field_comparison_response(
             70.0,
             emf,

@@ -1398,4 +1398,47 @@ except TypeError as error:
 # TypeError
 ```
 
+## The filter bank returns a result, not a tuple
+
+`octave_filter()` and `OctaveFilterBank.filter()` returned two items normally
+and three when `sigbands=True` asked for the band waveforms. The length of the
+answer depended on a keyword, which is why the pair needed twelve `@overload`
+declarations to be typed at all, and why `_, _, bands = bank.filter(...)` was
+a line you had to count commas in.
+
+They now return an `OctaveFilterResult` with named fields. The other answers
+of the bank that were tuples are records too: the spectrogram is an
+`OctaveSpectrogramResult`, and the band set the bank is designed on is read
+from attributes spelled out in full.
+
+| 3.3.0 | 4.0 |
+| --- | --- |
+| `spl, freq = octave_filter(x, fs)` | `r = octave_filter(x, fs)`, then `r.levels` and `r.frequencies` |
+| `spl, _ = octave_filter(x, fs)` | `octave_filter(x, fs).levels` |
+| `_, freq = octave_filter(x, fs)` | `octave_filter(x, fs).frequencies` |
+| `_, _, bands = bank.filter(x, sigbands=True)` | `bank.filter(x, sigbands=True).require_bands()` |
+| `levels, freq, times = bank.spectrogram(x)` | `r = bank.spectrogram(x)`, then `r.levels`, `r.frequencies` and `r.times` (an `OctaveSpectrogramResult`, drawn with `r.plot()`) |
+| `bank.freq`, `bank.freq_d`, `bank.freq_u`, `bank.nominal_freq`, `bank.num_bands` | `bank.frequencies`, `bank.lower_edges`, `bank.upper_edges`, `bank.labels`, `bank.n_bands`, read-only: the arrays refuse writes and `labels` is a tuple |
+
+```python
+import numpy as np
+from phonometry import filters
+
+result = filters.octave_filter(np.zeros(8000) + 1e-6, 8000, fraction=3)
+print(len(result.frequencies), result.bands)
+# 25 None
+```
+
+`bands` is `None` unless the call asked for `sigbands=True`, and `levels` is
+`None` for a call made with `calculate_level=False`. Code that needs either
+one can say so with `require_bands()` or `require_levels()`, which return the
+value or raise naming the argument that was missing, rather than handing back
+a `None` that fails several lines later.
+
+The result also draws itself, so the band spectrum is one call:
+
+```python
+ax = result.plot()
+```
+
 ---

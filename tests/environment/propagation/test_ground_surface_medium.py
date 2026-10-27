@@ -138,7 +138,7 @@ def test_an_interval_is_refused_in_the_pages_terms() -> None:
 
 
 def test_an_unknown_model_is_refused() -> None:
-    with pytest.raises(ValueError, match="'model' must be 'delany_bazley' or 'miki'"):
+    with pytest.raises(ValueError, match="'model' must be one of"):
         CLASS_D.medium(BANDS, model="johnson_champoux_allard")  # type: ignore[arg-type]
 
 

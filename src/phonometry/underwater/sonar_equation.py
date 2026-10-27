@@ -414,6 +414,8 @@ def detection_range(
         number, or ``n_points`` is a flag, a text or an array where a count goes, or
         ``law`` or ``model`` is not a text.
     """
+    require_choice(law, "law", ("spherical", "cylindrical", "practical"))
+    require_choice(model, "model", ("francois-garrison", "ainslie-mccolm", "thorp"))
     require_scalar(ph, "ph")
     from scipy.optimize import brentq
 

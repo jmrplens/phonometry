@@ -924,7 +924,9 @@ def standard_speech_spectrum(
         ``"shout"``.
     :return: The 18-band equivalent speech spectrum level ``Ui``, in dB SPL.
     :raises ValueError: for an unknown vocal effort.
+    :raises TypeError: if ``vocal_effort`` is not a text.
     """
+    require_choice(vocal_effort, "vocal_effort", ("normal", "raised", "loud", "shout"))
     try:
         return _SPEECH_SPECTRA[vocal_effort].copy()
     except KeyError:
@@ -1176,7 +1178,13 @@ def speech_intelligibility_index(
     :return: An :class:`SIIResult` with the overall index and its ``.plot()``.
     :raises ValueError: if a spectrum has the wrong length or carries a
         non-finite value, or the method or effort name is unknown.
+    :raises TypeError: if ``method`` is not a text.
     """
+    require_choice(
+        method,
+        "method",
+        ("critical-band", "equally-contributing", "one-third-octave", "octave"),
+    )
     proc = _procedure(method)
     n_bands = proc.band_importance.size
     if isinstance(speech_spectrum, str):
@@ -1367,7 +1375,13 @@ def sii_procedure(method: Method = "one-third-octave") -> SIIProcedure:
         noise spectrum level and normal-effort standard speech spectrum level
         of that procedure.
     :raises ValueError: for an unknown procedure name.
+    :raises TypeError: if ``method`` is not a text.
     """
+    require_choice(
+        method,
+        "method",
+        ("critical-band", "equally-contributing", "one-third-octave", "octave"),
+    )
     proc = _procedure(method)
     return SIIProcedure(
         method=proc.method,

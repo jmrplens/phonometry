@@ -1121,6 +1121,7 @@ that way.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for records of different shapes, not finite or too short, a non-positive sample rate, an unknown response quantity, an invalid window, a range that holds no bin above 0 Hz, or a force spectrum that vanishes at some frequency of the range. |
+| TypeError | if `response_quantity` is not a text. |
 
 **Warns**
 
@@ -1293,6 +1294,12 @@ ImpactMobilityResult.to(
 ```
 
 Convert the mobility to another FRF kind (see [`.convert_frf`](/phonometry/reference/api/vibration/mechanical-mobility/#convert_frf)).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `target` is not a text. |
 
 ## OverloadCheck
 
@@ -1568,7 +1575,7 @@ the record the exponential window multiplied:
 | Exception | When |
 | :--- | :--- |
 | ValueError | for mismatched or non-finite data, a band that is not a pair of positive numbers or holds fewer than three frequencies, an unknown kind, or a band whose data hold no lightly damped mode. |
-| TypeError | if `exponential_decay_rate_per_s` is not a single number. |
+| TypeError | if `exponential_decay_rate_per_s` is not a single number, or `kind` is not a text. |
 
 ## SingleModeFitResult
 

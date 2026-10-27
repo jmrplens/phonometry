@@ -294,7 +294,7 @@ def test_time_weighting_class_invalid_params() -> None:
 
     with pytest.raises(ValueError, match=r"'fs' must be positive"):
         filters.TimeWeighting(0)
-    with pytest.raises(ValueError, match="Invalid time weighting mode"):
+    with pytest.raises(ValueError, match="'mode' must be one of"):
         filters.TimeWeighting(48000, mode="banana")
 
 

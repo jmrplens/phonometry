@@ -425,7 +425,7 @@ the cube of equal volume with its volume annotated.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if *geometry* is not a mapping, or if one of its values is not a single number. |
+| TypeError | if *geometry* is not a mapping, or if one of its values is not a single number, or `kind` is not a text. |
 | ValueError | for an unknown *kind*, a key the kind does not take, a key it needs that is missing, or dimensions that cannot be built. |
 
 ## quarter_wave_impedance
@@ -513,7 +513,7 @@ ReactiveSilencerResult(
     transmission_loss: np.ndarray,
     insertion_loss: np.ndarray | None,
     transfer_matrix: np.ndarray,
-    kind: str,
+    kind: Literal['expansion chamber', 'Helmholtz resonator', 'quarter-wave resonator', 'extended-tube chamber', 'element chain'],
     *,
     resonances: np.ndarray | None,
     geometry: dict[Literal['length', 'chamber_area', 'pipe_area', 'inlet_extension', 'outlet_extension', 'duct_area', 'neck_area', 'neck_length', 'cavity_volume', 'branch_area'], float] | None,

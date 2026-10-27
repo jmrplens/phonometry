@@ -22,6 +22,7 @@ other.
 from __future__ import annotations
 
 import math
+from typing import TYPE_CHECKING
 
 import numpy as np
 import reference_data as ref
@@ -29,6 +30,9 @@ import reference_data as ref
 import phonometry as ph
 
 from ..registry import Outcome, numeric, record, register
+
+if TYPE_CHECKING:
+    from phonometry.metrology.reference_values import Medium
 
 _FS = 48000
 
@@ -523,7 +527,7 @@ def _chk_steady_state_spl() -> Outcome:
 # in the library is divided by it.
 # ---------------------------------------------------------------------------
 def _iso1683_value(
-    medium: str, key: str, expected: float, printed: str, unit: str
+    medium: Medium, key: str, expected: float, printed: str, unit: str
 ) -> Outcome:
     """One printed ISO 1683 value against the published table row."""
     row = ph.metrology.REFERENCE_VALUES[medium][key]

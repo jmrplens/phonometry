@@ -116,7 +116,7 @@ Cepstrum of a record: power, real or complex.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs or parameters are invalid. |
-| TypeError | if `nfft` is a flag, a text or an array where a count goes. |
+| TypeError | if `nfft` is a flag, a text or an array where a count goes, or `kind` is not a text. |
 
 ## CepstrumResult
 
@@ -332,7 +332,7 @@ modes are exactly complementary in dB.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs or parameters are invalid. |
-| TypeError | if `nfft` is a flag, a text or an array where a count goes. |
+| TypeError | if `nfft` is a flag, a text or an array where a count goes, or `mode` is not a text. |
 
 ## LifterResult
 

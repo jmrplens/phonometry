@@ -94,10 +94,9 @@ def test_invalid_inputs() -> None:
     with pytest.raises(ValueError, match="'order' must be a whole number"):
         filters.octave_filter(x, fs, order=-1)
 
-    # Invalid filter_type
-    invalid_design = filters.FilterDesign(filter_type="invalid_type")
-    with pytest.raises(ValueError, match="Invalid filter_type"):
-        filters.octave_filter(x, fs, design=invalid_design)
+    # Invalid filter_type, refused when the design is built
+    with pytest.raises(ValueError, match="'filter_type' must be one of"):
+        filters.FilterDesign(filter_type="invalid_type")  # type: ignore[arg-type]
 
 
 def test_short_signal() -> None:

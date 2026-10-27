@@ -11,6 +11,11 @@ each with the LEX,8h and the uncertainty its worked example prints.
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from phonometry.hearing._real_ear_attenuation import Protector
+
 # ---------------------------------------------------------------------------
 # ISO 9612:2009 occupational noise exposure: the three normative worked
 # examples (Annexes D/E/F), reproduced digit-for-digit by the test suite. Each
@@ -335,7 +340,7 @@ ISO4869_1_TABLE_B1_SIGNIFICANT = [8000.0]
 #: Tables A.2 and B.2: the three components (u_meth, u_eq, u_env) in dB, then
 #: the printed combined u and expanded U95, keyed by protector, one tuple per
 #: column (<250 Hz, 250 Hz up to 4 kHz, >4 kHz).
-ISO4869_1_TABLE_A2: dict[str, list[tuple[float, float, float, float, float]]] = {
+ISO4869_1_TABLE_A2: dict[Protector, list[tuple[float, float, float, float, float]]] = {
     "earplug": [
         (1.5, 0.2, 0.5, 1.6, 3.2),
         (1.0, 0.2, 0.5, 1.1, 2.3),
@@ -347,7 +352,7 @@ ISO4869_1_TABLE_A2: dict[str, list[tuple[float, float, float, float, float]]] = 
         (1.0, 0.2, 0.5, 1.1, 2.3),
     ],
 }
-ISO4869_1_TABLE_B2: dict[str, list[tuple[float, float, float, float, float]]] = {
+ISO4869_1_TABLE_B2: dict[Protector, list[tuple[float, float, float, float, float]]] = {
     "earplug": [
         (4.0, 0.3, 0.8, 4.1, 8.2),
         (3.2, 0.3, 0.8, 3.3, 6.6),

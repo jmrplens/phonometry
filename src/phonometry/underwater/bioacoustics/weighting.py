@@ -577,6 +577,25 @@ def weighting_parameters(
     :raises TypeError: If ``group`` or ``guidance`` is not a text.
     :raises ValueError: If the version or the group is unknown.
     """
+    require_choice(
+        group,
+        "group",
+        (
+            "LF",
+            "MF",
+            "HF",
+            "VHF",
+            "PW",
+            "OW",
+            "PA",
+            "OA",
+            "SI",
+            "PCW",
+            "OCW",
+            "PCA",
+            "OCA",
+        ),
+    )
     key = _check_guidance(guidance)
     table = _PARAMETERS[key]
     if not isinstance(group, str):
@@ -703,6 +722,25 @@ def auditory_weighting(
     :raises ValueError: If an input is invalid.
     :raises TypeError: if ``group`` or ``guidance`` is not a text.
     """
+    require_choice(
+        group,
+        "group",
+        (
+            "LF",
+            "MF",
+            "HF",
+            "VHF",
+            "PW",
+            "OW",
+            "PA",
+            "OA",
+            "SI",
+            "PCW",
+            "OCW",
+            "PCA",
+            "OCA",
+        ),
+    )
     params = weighting_parameters(group, guidance=guidance)
     f = _positive_frequencies(frequency_hz)
     shape = _band_pass_db(f / 1000.0, params)
@@ -733,6 +771,25 @@ def exposure_criteria(
     :raises ValueError: If the version or the group is unknown.
     :raises TypeError: if ``group`` or ``guidance`` is not a text.
     """
+    require_choice(
+        group,
+        "group",
+        (
+            "LF",
+            "MF",
+            "HF",
+            "VHF",
+            "PW",
+            "OW",
+            "PA",
+            "OA",
+            "SI",
+            "PCW",
+            "OCW",
+            "PCA",
+            "OCA",
+        ),
+    )
     params = weighting_parameters(group, guidance=guidance)
     cont, imp, label, cont_source, imp_source = _CRITERIA[params.guidance]
     tts_sel, injury_sel, tts_peak, injury_peak = (imp if impulsive else cont)[
@@ -1116,6 +1173,25 @@ def weighted_exposure(
         is a flag, a text or an array where a count goes, or ``group`` or
         ``guidance`` is not a text.
     """
+    require_choice(
+        group,
+        "group",
+        (
+            "LF",
+            "MF",
+            "HF",
+            "VHF",
+            "PW",
+            "OW",
+            "PA",
+            "OA",
+            "SI",
+            "PCW",
+            "OCW",
+            "PCA",
+            "OCA",
+        ),
+    )
     f = _positive_frequencies(frequencies_hz, "frequencies_hz")
     sel = np.array(band_sel, dtype=np.float64, copy=True, ndmin=1)
     require_equal_shapes(

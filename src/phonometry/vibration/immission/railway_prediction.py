@@ -109,6 +109,11 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
 
 Floor = Literal["concrete", "timber"]
 Statistic = Literal["mean", "lower", "upper"]
+#: Where the foundation of Tables A.3 and A.4 lies: under a basement or at
+#: ground level.
+FoundationLevel = Literal["basement", "ground_floor"]
+#: How a point excitation's decay was fitted (Annex B).
+DecayFit = Literal["power_and_damping", "power_law"]
 
 __all__ = [
     "FLOOR_NATURAL_FREQUENCIES_HZ",
@@ -216,7 +221,7 @@ PEAK_VELOCITY_FACTOR: float = 3.0
 #: to get the exponent of a train, up to the transition distance of Formula
 #: (B.1): 0,3 when the point fit separated spreading and damping (Formula
 #: (5)), 0,5 when it lumped both into a power law (Formula (6)).
-LINE_SOURCE_EXPONENT_CORRECTION: Mapping[str, float] = MappingProxyType(
+LINE_SOURCE_EXPONENT_CORRECTION: Mapping[DecayFit, float] = MappingProxyType(
     {
         "power_and_damping": 0.3,
         "power_law": 0.5,
@@ -234,7 +239,7 @@ FLOOR_NATURAL_FREQUENCIES_HZ: tuple[float, ...] = (
 #: building with concrete floors and one with timber floors, by the natural
 #: frequency of the floor (the key) and along :data:`PREDICTION_BAND_CENTERS_HZ`.
 #: Valid for every storey. From building measurements, not a formula.
-GROUND_TO_FLOOR_LEVEL_DIFFERENCES: Mapping[str, Mapping[float, tuple[float, ...]]] = MappingProxyType({
+GROUND_TO_FLOOR_LEVEL_DIFFERENCES: Mapping[Floor, Mapping[float, tuple[float, ...]]] = MappingProxyType({
     "concrete": MappingProxyType({
         8.0: (
             -0.51, 1.42, 6.88, 15.0, 5.87, 0.17, -1.26, -0.96, -2.58, -3.5, -3.47,
@@ -334,7 +339,7 @@ GROUND_TO_FLOOR_LEVEL_DIFFERENCES: Mapping[str, Mapping[float, tuple[float, ...]
 #: decibels, for a basement and for a ground floor, as a mean over the
 #: buildings measured with the deviation either way, along the 14 bands from
 #: 4 Hz to 80 Hz. The print writes the 12,5 Hz row as 12.
-GROUND_TO_FOUNDATION_LEVEL_DIFFERENCES: Mapping[str, Mapping[str, tuple[float, ...]]] = MappingProxyType({
+GROUND_TO_FOUNDATION_LEVEL_DIFFERENCES: Mapping[FoundationLevel, Mapping[Statistic, tuple[float, ...]]] = MappingProxyType({
     "basement": MappingProxyType({
         "lower": (
             -9.1, -8.2, -8.3, -8.7, -8.2, -8.3, -9.5, -12.5, -14.7, -15.6, -14.5,
@@ -382,7 +387,7 @@ FOUNDATION_TO_FLOOR_RATIOS: tuple[float, ...] = (
 #: at 0,08 and its mean alone reaches 8. The timber table prints its lower
 #: deviation above its mean at the ratios 0,2, 3,15, 4 and 5, and above its
 #: upper one at 5, so no order between the three is enforced.
-FOUNDATION_TO_FLOOR_LEVEL_DIFFERENCES: Mapping[str, Mapping[str, tuple[float, ...]]] = MappingProxyType({
+FOUNDATION_TO_FLOOR_LEVEL_DIFFERENCES: Mapping[Floor, Mapping[Statistic, tuple[float, ...]]] = MappingProxyType({
     "concrete": MappingProxyType({
         "lower": (
             -1.52, -1.53, -1.74, -2.42, -2.63, -1.89, -1.81, -1.73, -1.27, -0.72,
@@ -421,7 +426,7 @@ FOUNDATION_TO_FLOOR_LEVEL_DIFFERENCES: Mapping[str, Mapping[str, tuple[float, ..
 
 _FLOORS = tuple(GROUND_TO_FLOOR_LEVEL_DIFFERENCES)
 _LEVELS = tuple(GROUND_TO_FOUNDATION_LEVEL_DIFFERENCES)
-_STATISTICS = ("mean", "lower", "upper")
+_STATISTICS: tuple[Statistic, ...] = ("mean", "lower", "upper")
 _FITS = tuple(LINE_SOURCE_EXPONENT_CORRECTION)
 #: Half a sixth of an octave, the tolerance within which a frequency is
 #: taken to be a nominal centre.
@@ -661,7 +666,7 @@ def ground_to_floor_level_difference(
 
 
 def ground_to_foundation_level_difference(
-    level: Literal["basement", "ground_floor"], *, statistic: Statistic = "mean"
+    level: FoundationLevel, *, statistic: Statistic = "mean"
 ) -> NDArray[np.float64]:
     r"""The level difference from the ground into the foundation, Tables A.3 and A.4.
 
@@ -987,7 +992,7 @@ def line_source_correction(
 def train_decay_exponent(
     point_exponent: float,
     *,
-    fitted_with: Literal["power_and_damping", "power_law"] = "power_and_damping",
+    fitted_with: DecayFit = "power_and_damping",
 ) -> float:
     r"""The decay exponent of a train from that of a point excitation, Annex B.
 

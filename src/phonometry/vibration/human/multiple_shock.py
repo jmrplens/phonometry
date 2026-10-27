@@ -62,12 +62,15 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Literal, overload
+from typing import TYPE_CHECKING, Any, overload
 
 import numpy as np
 
 from ..._internal.frozen import OwnsArrays
-from ..._internal.types import ReportEngine, as_float_or_array
+
+# Sex is imported to run, not only to type: typing.get_type_hints resolves the
+# sex field of MultipleShockResult in this module's namespace.
+from ..._internal.types import ReportEngine, Sex, as_float_or_array
 from ..._internal.validation import (
     check_engine,
     require_1d_signal,
@@ -385,9 +388,7 @@ def static_stress(mz: float = _MZ_MALE) -> float:
     return mz * _GRAVITY
 
 
-def ultimate_strength(
-    age: ArrayLike, *, sex: Literal["male", "female"] = "male"
-) -> np.ndarray:
+def ultimate_strength(age: ArrayLike, *, sex: Sex = "male") -> np.ndarray:
     r"""Ultimate lumbar strength :math:`S_\mathrm{u}` at an age (Annex C,
     Formula C.4).
 
@@ -410,7 +411,7 @@ def injury_risk(
     start_age: float,
     exposure_duration_years: int | np.integer[Any],
     days_per_year: float,
-    sex: Literal["male", "female"] = "male",
+    sex: Sex = "male",
     mz: float | None = None,
 ) -> float:
     r"""Cumulative injury stress variable :math:`R` (Annex C, Formula C.3).
@@ -461,25 +462,23 @@ def injury_risk(
 
 
 @overload
-def injury_probability[S: RealScalar](
-    risk: S, *, sex: Literal["male", "female"] = "male"
-) -> float: ...
+def injury_probability[S: RealScalar](risk: S, *, sex: Sex = "male") -> float: ...
 
 
 @overload
 def injury_probability[V: RealValues](
-    risk: V, *, sex: Literal["male", "female"] = "male"
+    risk: V, *, sex: Sex = "male"
 ) -> NDArray[np.float64]: ...
 
 
 @overload
 def injury_probability[A: ArrayLike](
-    risk: A, *, sex: Literal["male", "female"] = "male"
+    risk: A, *, sex: Sex = "male"
 ) -> float | NDArray[np.float64]: ...
 
 
 def injury_probability(
-    risk: ArrayLike, *, sex: Literal["male", "female"] = "male"
+    risk: ArrayLike, *, sex: Sex = "male"
 ) -> float | NDArray[np.float64]:
     r"""Probability of lumbar injury :math:`P(R)` (Annex C, Formula C.5).
 
@@ -523,7 +522,7 @@ class MultipleShockResult(OwnsArrays):
         risk of injury for this sex (Table C.2).
     """
 
-    sex: Literal["male", "female"]
+    sex: Sex
     acceleration_dose: float
     daily_dose: float
     compression_dose: float
@@ -655,7 +654,7 @@ def multiple_shock_assessment(
     days_per_year: float,
     exposure_time: float,
     measurement_time: float,
-    sex: Literal["male", "female"] = ...,
+    sex: Sex = ...,
     mz: float | None = ...,
 ) -> MultipleShockResult: ...
 
@@ -668,7 +667,7 @@ def multiple_shock_assessment(
     start_age: float,
     exposure_duration_years: int | np.integer[Any],
     days_per_year: float,
-    sex: Literal["male", "female"] = ...,
+    sex: Sex = ...,
     mz: float | None = ...,
 ) -> MultipleShockResult: ...
 
@@ -682,7 +681,7 @@ def multiple_shock_assessment(
     days_per_year: float,
     exposure_time: float | None = None,
     measurement_time: float | None = None,
-    sex: Literal["male", "female"] = "male",
+    sex: Sex = "male",
     mz: float | None = None,
 ) -> MultipleShockResult:
     r"""Full multiple-shock assessment from a seat acceleration time

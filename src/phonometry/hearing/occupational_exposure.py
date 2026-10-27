@@ -129,7 +129,7 @@ _TABLE1_LARGE_GROUP_MAX: int = 40
 InstrumentClass = Literal["class1", "class2", "personal_exposimeter"]
 
 #: Instrument standard uncertainty u2 by class (Table C.5), dB.
-INSTRUMENT_U2: Mapping[str, float] = MappingProxyType(
+INSTRUMENT_U2: Mapping[InstrumentClass, float] = MappingProxyType(
     {
         "class1": 0.7,  # sound level meter IEC 61672-1:2002 class 1
         "class2": 1.5,  # sound level meter IEC 61672-1:2002 class 2
@@ -335,8 +335,15 @@ class Task(RichDisplay):
         Inf" -- naming neither the task nor the sample that carried it.
 
         :raises TypeError: if ``duration_hours`` is not a single number, or ``samples``
-            holds a text or a value that is not a real number.
+            holds a text or a value that is not a real number, or ``instrument`` is not
+            a text.
         """
+        if self.instrument is not None:
+            require_choice(
+                self.instrument,
+                "instrument",
+                ("class1", "class2", "personal_exposimeter"),
+            )
         if len(self.samples) == 0:
             msg = "A Task needs at least one Lp,A,eqT sample."
             raise ValueError(msg)

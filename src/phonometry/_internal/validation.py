@@ -466,7 +466,7 @@ def require_band_fraction(value: object, name: str) -> BandFraction:
     return cast("BandFraction", int(value))
 
 
-def check_engine(engine: str) -> ReportEngine:
+def check_engine(engine: object) -> ReportEngine:
     """Require *engine* to name the one report engine there is.
 
     The counterpart of :func:`phonometry._i18n.check_language` for the
@@ -478,8 +478,12 @@ def check_engine(engine: str) -> ReportEngine:
 
     :param engine: The requested report engine.
     :return: The engine, typed as the one choice there is.
-    :raises ValueError: for any value other than ``"reportlab"``.
+    :raises TypeError: for a value that is not a text.
+    :raises ValueError: for any text other than ``"reportlab"``.
     """
+    if not isinstance(engine, str):
+        msg = f"'engine' must be 'reportlab', a text; got {engine!r}."
+        raise TypeError(msg)
     if engine == "reportlab":
         return "reportlab"
     msg = f"Unknown report engine {engine!r}; only 'reportlab' is supported."

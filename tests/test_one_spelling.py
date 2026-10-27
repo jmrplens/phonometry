@@ -74,25 +74,25 @@ _DROPPED_SPELLINGS: list[tuple[str, Callable[[], object], type[Exception], str]]
         "WeightingFilter 'a'",
         lambda: filters.WeightingFilter(48000, "a"),  # type: ignore[arg-type]
         ValueError,
-        r"'weighting' must be 'A'",
+        "'weighting' must be one of",
     ),
     (
         "time_weighting mode 'FAST'",
         lambda: filters.time_weighting(_SIGNAL, 48000, mode="FAST"),  # type: ignore[call-overload]
         ValueError,
-        "Invalid time weighting mode",
+        "'mode' must be one of",
     ),
     (
         "TimeWeighting mode 'Slow'",
         lambda: filters.TimeWeighting(48000, mode="Slow"),  # type: ignore[arg-type]
         ValueError,
-        "Invalid time weighting mode",
+        "'mode' must be one of",
     ),
     (
         "time_weighting initial_state 'ZERO'",
         lambda: filters.time_weighting(_SIGNAL, 48000, initial_state="ZERO"),  # type: ignore[call-overload]
         ValueError,
-        "initial_state must be",
+        "'initial_state' must be one of",
     ),
     (
         "OctaveFilterBank.filter mode 'RMS'",
@@ -104,13 +104,13 @@ _DROPPED_SPELLINGS: list[tuple[str, Callable[[], object], type[Exception], str]]
         "ln_levels mode 'FAST'",
         lambda: signals.ln_levels(_SIGNAL, 48000, mode="FAST"),  # type: ignore[arg-type]
         ValueError,
-        "Invalid time weighting mode",
+        "'mode' must be one of",
     ),
     (
         "ln_levels weighting 'z'",
         lambda: signals.ln_levels(_SIGNAL, 48000, weighting="z"),  # type: ignore[arg-type]
         ValueError,
-        r"'weighting' must be 'A'",
+        "'weighting' must be one of",
     ),
     (
         "engine mounting 'Wing'",
@@ -140,7 +140,7 @@ _DROPPED_SPELLINGS: list[tuple[str, Callable[[], object], type[Exception], str]]
             flow_resistivity="g",  # type: ignore[arg-type]
         ),
         ValueError,
-        "'flow_resistivity' class must be one of",
+        "'flow_resistivity' must be one of",
     ),
     (
         "survey room alias 'other'",

@@ -25,11 +25,15 @@ from __future__ import annotations
 import math
 import warnings
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
 from .._internal.frozen import OwnsArrays, read_only
+
+# Imported to run, not only to type: typing.get_type_hints resolves the
+# sex field of HTLANResult in this module's namespace.
+from .._internal.types import Sex  # noqa: TC001
 from .._internal.validation import (
     check_engine,
     require_finite_fields,
@@ -345,7 +349,7 @@ class HTLANResult(OwnsArrays):
     """
 
     age: float
-    sex: Literal["male", "female"]
+    sex: Sex
     l_ex: float
     exposure_duration_years: float
     fractile: float
@@ -621,7 +625,7 @@ def age_and_noise_threshold(htla: ArrayLike, nipts_value: ArrayLike) -> np.ndarr
 
 def htlan(
     age: float,
-    sex: Literal["male", "female"],
+    sex: Sex,
     l_ex: float,
     exposure_duration_years: float,
     fractile: float = 0.5,
@@ -648,6 +652,8 @@ def htlan(
         ``.plot()``.
     :raises ValueError: for an age below 18, an unknown sex, a non-positive
         duration, a fractile outside (0, 1), or an unknown frequency.
+    :raises TypeError: if ``age`` or ``fractile`` is not a single number, or
+        ``sex`` is not a text.
 
     The noise component inherits the validated-domain checks of :func:`nipts`,
     so exposure conditions outside the standard's stated ranges raise a

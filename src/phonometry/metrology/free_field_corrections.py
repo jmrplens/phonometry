@@ -102,6 +102,7 @@ from .._internal.frozen import OwnsArrays, read_only
 from .._internal.validation import (
     _as_float64,
     check_engine,
+    require_choice,
     require_count,
     require_finite,
     require_finite_array,
@@ -952,12 +953,7 @@ class FreeFieldCorrection(OwnsArrays):
             ``frequencies`` or ``reference_correction`` holds a text or a value that is
             not a real number.
         """
-        if self.source not in _SOURCES:
-            msg = (
-                f"FreeFieldCorrection: 'source' must be one of {tuple(_SOURCES)}; "
-                f"got {self.source!r}."
-            )
-            raise ValueError(msg)
+        require_choice(self.source, "source", tuple(_SOURCES))
         frequencies = _frequency_axis(self.frequencies)
         object.__setattr__(self, "frequencies", read_only(frequencies))
         corrections = np.array(self.corrections, dtype=np.float64, ndmin=2, copy=None)
@@ -1700,13 +1696,17 @@ def correction_uncertainty_budget(
     expected = tuple(IEC62585_TABLE_I1)
     given = tuple(stated_uncertainties_db)
     missing = [key for key in expected if key not in stated_uncertainties_db]
-    extra = [key for key in given if key not in IEC62585_TABLE_I1]
+    extra = [
+        key for key in given if isinstance(key, str) and key not in IEC62585_TABLE_I1
+    ]
     if missing or extra:
         msg = (
             "'stated_uncertainties_db' must hold the 15 components of IEC 62585 Table I.1, keyed "
             f"'a1' to 'a15'; missing {missing}, unknown {extra}."
         )
         raise ValueError(msg)
+    for key in given:
+        require_choice(key, "stated_uncertainties_db", tuple(IEC62585_TABLE_I1))
     frequency = require_positive(frequency_hz, "frequency_hz")
     dof = _repeatability_dof(repeatability_dof)
     quantities: list[Quantity] = []

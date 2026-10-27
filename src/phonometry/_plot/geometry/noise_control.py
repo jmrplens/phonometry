@@ -26,6 +26,7 @@ from typing import TYPE_CHECKING, Any, Literal, cast
 import numpy as np
 
 from ..._internal.validation import (
+    require_choice,
     require_non_negative,
     require_positive,
     require_scalar,
@@ -483,7 +484,8 @@ def _require_silencer_keys(
     """Refuse a geometry that is not a mapping, or that holds a key the kind
     is not drawn from, naming every such key.
 
-    :raises TypeError: if *geometry* is not a mapping.
+    :raises TypeError: if *geometry* is not a mapping, or one of its keys is
+        not a text.
     :raises ValueError: if *geometry* holds a key *kind* does not take.
     """
     if not isinstance(geometry, Mapping):
@@ -493,12 +495,8 @@ def _require_silencer_keys(
         )
         raise TypeError(msg)
     allowed = _SILENCER_KEYS[kind]
-    extra = [key for key in geometry if key not in allowed]
-    if extra:
-        names = ", ".join(repr(key) for key in extra)
-        keys = ", ".join(repr(key) for key in allowed)
-        msg = f"The {kind} drawing takes no {names}; its geometry keys are {keys}."
-        raise ValueError(msg)
+    for key in geometry:
+        require_choice(key, "geometry", allowed)
 
 
 def plot_silencer_geometry(
@@ -536,15 +534,13 @@ def plot_silencer_geometry(
     :param kwargs: Forwarded to the outline of the main bore: the chamber
         shell of a chamber, the duct of a side branch.
     :return: The axes.
-    :raises TypeError: if *geometry* is not a mapping, or if one of its
-        values is not a single number.
+    :raises TypeError: if *geometry* is not a mapping, or if one of its values is not a
+        single number, or ``kind`` is not a text.
     :raises ValueError: for an unknown *kind*, a key the kind does not take,
         a key it needs that is missing, or dimensions that cannot be built.
     """
     _check_language(language)
-    if kind not in _SILENCER_KINDS:
-        msg = f"Unknown silencer kind {kind!r}; expected one of {_SILENCER_KINDS}."
-        raise ValueError(msg)
+    require_choice(kind, "kind", _SILENCER_KINDS)
     _require_silencer_keys(kind, geometry)
     length = geometry.get("length")
     chamber_area = geometry.get("chamber_area")

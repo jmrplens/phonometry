@@ -12,10 +12,15 @@ lets a hall between its rows be answered at all.
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import numpy as np
 import pytest
 
 from phonometry import room
+
+if TYPE_CHECKING:
+    from phonometry.room.auditorium import RowSymbol
 
 OCTAVES = np.array([125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0])
 
@@ -85,7 +90,7 @@ class TestTableA1:
         ],
     )
     def test_the_printed_values_are_transcribed(
-        self, symbol: str, jnd: float, low: float, high: float
+        self, symbol: RowSymbol, jnd: float, low: float, high: float
     ) -> None:
         row = room.TABLE_A1[symbol]
         assert row.just_noticeable_difference == pytest.approx(jnd)
@@ -152,7 +157,7 @@ class TestSingleNumberAverage:
             )
 
     def test_it_refuses_a_quantity_the_table_does_not_print(self) -> None:
-        with pytest.raises(ValueError, match="Table A.1 prints"):
+        with pytest.raises(ValueError, match="'symbol' must be one of"):
             room.single_number_average("C50", np.zeros(6), frequencies=OCTAVES)
 
     def test_it_names_both_axes_when_their_lengths_differ(self) -> None:

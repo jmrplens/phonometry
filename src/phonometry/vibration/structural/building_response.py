@@ -86,6 +86,9 @@ __all__ = [
 
 #: The four predictors of Annex D, by what they are computed from.
 PeriodModel = Literal["stories", "height", "height_width", "slenderness"]
+#: A model of :data:`PeriodModel` whose code coefficient Annex D draws from
+#: a printed range: every one but the storey count.
+CoefficientModel = Literal["height", "height_width", "slenderness"]
 
 PERIOD_MODELS: tuple[PeriodModel, ...] = (
     "stories",
@@ -98,12 +101,14 @@ PERIOD_MODELS: tuple[PeriodModel, ...] = (
 #: :math:`k_1` of Formula (D.1), ``height_width`` is :math:`k_2` of (D.2) and
 #: ``slenderness`` is :math:`k_3` of (D.3). The midpoint of each range is what
 #: this module uses when a caller states no coefficient.
-PERIOD_COEFFICIENT_RANGES: Mapping[str, tuple[float, float]] = MappingProxyType(
-    {
-        "height": (0.014, 0.03),
-        "height_width": (0.087, 0.109),
-        "slenderness": (0.06, 0.08),
-    }
+PERIOD_COEFFICIENT_RANGES: Mapping[CoefficientModel, tuple[float, float]] = (
+    MappingProxyType(
+        {
+            "height": (0.014, 0.03),
+            "height_width": (0.087, 0.109),
+            "slenderness": (0.06, 0.08),
+        }
+    )
 )
 
 #: D.2: the storey rule as a period, ``T = 0,1 n`` seconds, which is the
@@ -128,7 +133,7 @@ EMPIRICAL_FREQUENCY_TOLERANCE: float = 0.5
 DAMPING_RATIO_RANGE: tuple[float, float] = (0.005, 0.021)
 
 
-def _coefficient(model: str, coefficient: float | None) -> float:
+def _coefficient(model: CoefficientModel, coefficient: float | None) -> float:
     """The code coefficient to use, or the midpoint of its printed range."""
     if coefficient is not None:
         return require_positive(coefficient, "coefficient")

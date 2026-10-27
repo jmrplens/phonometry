@@ -376,20 +376,19 @@ def delany_bazley(
         relative_humidity_percent=70.0)``, to work in the air of the room.
     :return: A :class:`PorousMediumResult`.
     :raises TypeError: if ``flow_resistivity_pa_s_m2`` is not a single number, or
-        ``frequency`` holds a text or a value that is not a real number.
+        ``frequency`` holds a text or a value that is not a real number, or
+        ``coefficients`` is not a text.
     """
     f = require_positive_array(frequency, "frequency")
     sigma = require_positive(flow_resistivity_pa_s_m2, "flow_resistivity_pa_s_m2")
     c0 = fluid.speed_of_sound
     rho0 = fluid.density
     if isinstance(coefficients, str):
-        try:
-            coeffs = DELANY_BAZLEY_COEFFICIENTS[coefficients]
-        except KeyError:
-            options = ", ".join(sorted(DELANY_BAZLEY_COEFFICIENTS))
-            msg = f"unknown coefficient preset {coefficients!r}; options: {options}."
-            raise ValueError(msg) from None
-        model = f"delany_bazley[{coefficients}]"
+        preset = require_choice(
+            coefficients, "coefficients", tuple(DELANY_BAZLEY_COEFFICIENTS)
+        )
+        coeffs = DELANY_BAZLEY_COEFFICIENTS[preset]
+        model = f"delany_bazley[{preset}]"
     else:
         coeffs = tuple(float(v) for v in coefficients)
         model = "delany_bazley[custom]"
@@ -828,6 +827,13 @@ class FiberResistivityFit(RichDisplay):
     bulk_density_range_kg_m3: tuple[float, float]
     direction: Literal["lateral", "longitudinal"]
     source: str
+
+    def __post_init__(self) -> None:
+        """Refuse a choice its ``Literal`` does not list, when the record is built.
+
+        :raises TypeError: if ``direction`` is not a text.
+        """
+        require_choice(self.direction, "direction", ("lateral", "longitudinal"))
 
 
 #: The rock wool of Hopkins Fig. 1.49, measured across two UK manufacturers at

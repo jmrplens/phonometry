@@ -46,6 +46,11 @@ Stdlib only, like every module of this package.
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from phonometry.noise_control.enclosure_insulation import TestEnvironmentStandard
+
 # ---------------------------------------------------------------------------
 # ISO 11546-2:1995 Annex C, the two tables of the standard itself
 # ---------------------------------------------------------------------------
@@ -57,7 +62,9 @@ from __future__ import annotations
 #: where the cell prints a dash. ISO 9614-1 and ISO 9614-2 share one column.
 #: The last column is headed ISO 10204, which is no standard; its own footnote
 #: names ISO 11204, and that is the key here (see the errata registry).
-ISO11546_2_TABLE_C1_DB: dict[str, tuple[float | None, float | None]] = {
+ISO11546_2_TABLE_C1_DB: dict[
+    TestEnvironmentStandard, tuple[float | None, float | None]
+] = {
     "ISO 3743-1": (None, 6.0),
     "ISO 3744": (2.0, 6.0),
     "ISO 3746": (7.0, 3.0),

@@ -97,6 +97,7 @@ from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     check_engine,
+    require_choice,
     require_finite,
     require_finite_fields,
     require_non_negative,
@@ -603,7 +604,20 @@ class TransferStiffnessResult(OwnsArrays):
         ``target`` is ``"impedance"`` (:math:`Z = k/(j\omega)`) or
         ``"apparent_mass"`` (:math:`m_{\mathrm{eff}} = -k/\omega^2`); see
         :func:`phonometry.vibration.convert_frf`.
+        :raises TypeError: if ``target`` is not a text.
         """
+        require_choice(
+            target,
+            "target",
+            (
+                "receptance",
+                "mobility",
+                "accelerance",
+                "dynamic_stiffness",
+                "impedance",
+                "apparent_mass",
+            ),
+        )
         return convert_frf(
             self.transfer_stiffness,
             frequency=self.frequencies,
@@ -1103,6 +1117,7 @@ class LevelDifferenceCheck(OwnsArrays):
         :raises ValueError: if the arrays differ in length or rank, a
             frequency is not finite, a difference is NaN or ``-inf``, or the
             condition is unknown.
+        :raises TypeError: if ``condition`` is not a text.
         """
         owner = type(self).__name__
         require_ranks(self, frequencies=1, difference=1)
@@ -1112,12 +1127,7 @@ class LevelDifferenceCheck(OwnsArrays):
         if np.any(np.isnan(difference)) or np.any(np.isneginf(difference)):
             msg = f"{owner}: 'difference' must not hold NaN or -inf."
             raise ValueError(msg)
-        if self.condition not in _CONDITIONS:
-            msg = (
-                f"{owner}: 'condition' must be one of {_CONDITIONS}; "
-                f"got {self.condition!r}."
-            )
-            raise ValueError(msg)
+        require_choice(self.condition, "condition", _CONDITIONS)
 
     @property
     def limit_db(self) -> float:

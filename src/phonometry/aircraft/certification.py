@@ -32,6 +32,7 @@ from .._internal.boundary import settled
 from .._internal.frozen import OwnsArrays, read_only
 from .._internal.validation import (
     check_engine,
+    require_choice,
     require_count,
     require_equal_shapes,
     require_finite,
@@ -861,7 +862,9 @@ def effective_perceived_noise_level(
     :return: An :class:`EPNLResult`.
     :raises ValueError: If the input is not a ``(K, 24)`` finite array, or
         ``procedure`` is not ``"airplane"`` or ``"helicopter"``.
+    :raises TypeError: if ``procedure`` is not a text.
     """
+    require_choice(procedure, "procedure", ("airplane", "helicopter"))
     arr = np.asarray(spectra, dtype=np.float64)
     # The number is a count of array axes, not a quantity.
     if arr.ndim != 2 or arr.shape[1] != NOY_BANDS_HZ.size or arr.shape[0] < 1:  # noqa: PLR2004

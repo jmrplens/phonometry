@@ -255,7 +255,10 @@ _METHODS: tuple[CabinMethod, ...] = (
     "in-situ-loudspeaker",
     "in-situ-actual-noise",
 )
-_IN_SITU_METHODS: tuple[str, ...] = ("in-situ-loudspeaker", "in-situ-actual-noise")
+_IN_SITU_METHODS: tuple[CabinMethod, ...] = (
+    "in-situ-loudspeaker",
+    "in-situ-actual-noise",
+)
 _ACTUAL_NOISE = "in-situ-actual-noise"
 
 #: The nominal one-third-octave centre frequencies of each nominal octave, in

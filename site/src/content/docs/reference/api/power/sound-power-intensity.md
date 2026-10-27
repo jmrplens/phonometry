@@ -535,7 +535,7 @@ screening.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `fraction` is not an integer (a word, a flag or a float), or `frequencies` holds a text or a value that is not a real number. |
+| TypeError | if `fraction` is not an integer (a word, a flag or a float), or `frequencies` holds a text or a value that is not a real number, or `grade` is not a text. |
 
 ## sound_power_intensity_precision
 

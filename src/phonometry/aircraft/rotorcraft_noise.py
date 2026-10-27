@@ -57,6 +57,10 @@ import numpy as np
 
 from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays
+
+# Imported to run, not only to type: typing.get_type_hints resolves the
+# flow_resistivity field of RotorcraftGround in this module's namespace.
+from .._internal.types import GroundClass  # noqa: TC001
 from .._internal.validation import (
     require_choice,
     require_equal_shapes,
@@ -1311,6 +1315,15 @@ class RotorcraftAtmosphere(RichDisplay):
     static_pressure_kpa: float = 101.325
     atmospheric_method: Literal["iso9613", "sae"] = "iso9613"
 
+    def __post_init__(self) -> None:
+        """Refuse a choice its ``Literal`` does not list, when the record is built.
+
+        :raises TypeError: if ``atmospheric_method`` is not a text.
+        """
+        require_choice(
+            self.atmospheric_method, "atmospheric_method", ("iso9613", "sae")
+        )
+
 
 @dataclass(frozen=True, kw_only=True)
 class RotorcraftGround(OwnsArrays):
@@ -1353,7 +1366,7 @@ class RotorcraftGround(OwnsArrays):
     )
     flow_resistivity: (
         float
-        | str
+        | GroundClass
         | np.floating[Any]
         | np.integer[Any]
         | NDArray[np.float64]
@@ -1366,6 +1379,18 @@ class RotorcraftGround(OwnsArrays):
         | None
     ) = None
     terrain_resolution: float | None = None
+
+    def __post_init__(self) -> None:
+        """Refuse a choice its ``Literal`` does not list, when the record is built.
+
+        :raises TypeError: if ``flow_resistivity`` is not a text.
+        """
+        if isinstance(self.flow_resistivity, str):
+            require_choice(
+                self.flow_resistivity,
+                "flow_resistivity",
+                ("A", "B", "C", "D", "E", "F", "G", "H"),
+            )
 
 
 @dataclass(frozen=True)
@@ -1535,9 +1560,7 @@ def _event_setup(
     spacing = _section_spacing(dem, ground.terrain_resolution)
     sigma = _setup_resistivity(ground.flow_resistivity, dem)
     elevation = _setup_ground_elevation(ground.ground_elevation, dem)
-    method = require_choice(
-        atmosphere.atmospheric_method, "atmospheric_method", ("iso9613", "sae")
-    )
+    method = atmosphere.atmospheric_method
     spd, gam, hdg, bank = _resolved_track_state(t, p, track_state)
     off = _per_point(level_offset, t.size, "level_offset")
     offsets = off if off is not None else np.zeros(t.size)

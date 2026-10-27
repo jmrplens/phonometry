@@ -174,7 +174,7 @@ at `(receiver_distance, receiver_height)`. Three models are available:
 | Exception | When |
 | :--- | :--- |
 | ValueError | On a non-positive/ordered geometry, a `method` other than the two listed, or if a ground is requested with `method="kurze_anderson"`. |
-| TypeError | if `barrier_distance`, `barrier_height_m`, `receiver_distance` or `thickness_m` is not a single number, `frequencies` holds a text or a value that is not a real number, or `method` is not a text. |
+| TypeError | if `barrier_distance`, `barrier_height_m`, `receiver_distance` or `thickness_m` is not a single number, `frequencies` holds a text or a value that is not a real number, or `method` is not a text, or `ground_model` is not a text. |
 
 ## BarrierInsertionLoss
 
@@ -393,7 +393,7 @@ of the materials domain. Exactly one of the two must be given.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If neither or both of `impedance`/`flow_resistivity_pa_s_m2` are given, a height is negative, or the distance is not positive. |
-| TypeError | if `distance`, `flow_resistivity_pa_s_m2`, `receiver_height_m` or `source_height_m` is not a single number, or `frequencies` holds a text or a value that is not a real number. |
+| TypeError | if `distance`, `flow_resistivity_pa_s_m2`, `receiver_height_m` or `source_height_m` is not a single number, or `frequencies` holds a text or a value that is not a real number, or `model` is not a text. |
 
 ## kurze_anderson_attenuation
 

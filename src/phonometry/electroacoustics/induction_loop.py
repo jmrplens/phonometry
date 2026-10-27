@@ -1429,12 +1429,15 @@ class OverloadTestFrequency(RichDisplay):
     test_frequency_hz: float
 
 
+#: A programme row of IEC 60118-4:2014/A1:2017 Table 4.
+Program = Literal["transient_speech", "speech", "music"]
+
 #: Table 4 of IEC 60118-4:2014/A1:2017, "Programme material and test
 #: frequency": speech for transient use such as small-volume systems, speech
 #: (the default) and music. The test runs at about twice the upper limit of the
 #: maximum power bandwidth, with the level 7 dB down, which loads the power
 #: supply the way real programme does (10.3.1).
-OVERLOAD_TEST_FREQUENCIES: Mapping[str, OverloadTestFrequency] = MappingProxyType(
+OVERLOAD_TEST_FREQUENCIES: Mapping[Program, OverloadTestFrequency] = MappingProxyType(
     {
         "transient_speech": OverloadTestFrequency(
             program="speech for transient use, for example small-volume systems",
@@ -1547,7 +1550,7 @@ def verify_amplifier_overload(
     impedance: LoopImpedance,
     compliance_voltage_v: float,
     *,
-    program: Literal["transient_speech", "speech", "music"] = "speech",
+    program: Program = "speech",
     current_response: AmplifierFrequencyResponse | None = None,
 ) -> AmplifierOverloadVerification:
     r"""Does the amplifier clip in the overload test of 10.3 as amended?

@@ -356,7 +356,7 @@ The lower limit uses the Clause 4.2 guideline that the spacing exceed
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `diameter_m`, `spacing_m` or `speed_of_sound` is not a single number. |
+| TypeError | if `diameter_m`, `spacing_m` or `speed_of_sound` is not a single number, or `shape` is not a text. |
 
 ## plot_impedance_tube_geometry
 
@@ -404,7 +404,7 @@ working range of [`plane_wave_frequency_range`](/phonometry/reference/api/materi
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a spacing, distance, diameter or sample thickness that is not finite and positive, or an `x1` no greater than the spacing. |
-| TypeError | if `diameter_m`, `sample_thickness_m`, `spacing_m` or `x1` is not a single number. |
+| TypeError | if `diameter_m`, `sample_thickness_m`, `spacing_m` or `x1` is not a single number, or `shape` is not a text. |
 
 ## plot_transmission_tube_geometry
 
@@ -458,7 +458,7 @@ range of
 | Exception | When |
 | :--- | :--- |
 | ValueError | naming the first length or diameter that is not finite and positive, or an `l2` no greater than the thickness. |
-| TypeError | if `diameter_m`, `l2` or `thickness_m` is not a single number. |
+| TypeError | if `diameter_m`, `l2` or `thickness_m` is not a single number, or `shape` is not a text. |
 
 ## reflection_factor
 
@@ -658,3 +658,9 @@ supplied, frequencies outside the plane-wave range (Eqs. (1)-(4)) raise an
 | `shape` | Tube cross-section, `"circular"`, `"rectangular"` or `"square"`. |
 
 **Returns:** An [`ImpedanceTubeResult`](/phonometry/reference/api/materials/impedance-tube/#impedancetuberesult) (the tube geometry is retained on the result).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `shape` is not a text. |

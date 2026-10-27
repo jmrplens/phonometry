@@ -56,6 +56,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from .._internal.validation import require_choice
 from ._backends import _FLAC_NAME, _import_soundfile, _sniff, info
 from ._blocks import read_blocks
 from ._chunks import (
@@ -308,7 +309,12 @@ def convert(
         a sidecar is refused before a sample is written.
     :raises ImportError: If source or target needs the ``[audio]`` extra
         and it is not installed.
+    :raises TypeError: if ``subtype`` is not a text.
     """
+    if subtype is not None:
+        require_choice(
+            subtype, "subtype", ("PCM_16", "PCM_24", "PCM_32", "FLOAT", "DOUBLE")
+        )
     source, target = Path(src), Path(dst)
     _check_conversion_paths(src, dst)
 

@@ -44,7 +44,7 @@ _TOLERANCE = 5e-4
 
 #: Table 4, as the decimals printed beside the exponents the library builds
 #: the frequencies from.
-_TABLE_4_PRINTED = {
+_TABLE_4_PRINTED: dict[WeightingName, tuple[float, float, float, float]] = {
     "Wk": (0.2512, 0.631, 63.1, 158.5),
     "Wf": (0.05012, 0.1259, 0.3981, 1.0),
     "Wh": (3.981, 10.0, 794.3, 1995.0),
@@ -67,7 +67,9 @@ def _register_table_4() -> None:
         for index, printed in enumerate(corners, start=1):
 
             def _check(
-                weighting: str = weighting, index: int = index, printed: float = printed
+                weighting: WeightingName = weighting,
+                index: int = index,
+                printed: float = printed,
             ) -> Outcome:
                 built = ph.vibration.TRANSITION_FREQUENCIES_HZ[weighting][index - 1]
                 return numeric(printed, built, 2e-4, unit="Hz", places=5, rel=True)
@@ -84,7 +86,7 @@ def _register_table_1() -> None:
     for weighting, (frequency, indication) in _TABLE_1_PRINTED.items():
 
         def _check_frequency(
-            weighting: str = weighting, printed: float = frequency
+            weighting: WeightingName = weighting, printed: float = frequency
         ) -> Outcome:
             built = ph.vibration.REFERENCE_FREQUENCY_HZ[weighting]
             return numeric(printed, built, 1e-4, unit="Hz", places=4, rel=True)
@@ -336,7 +338,7 @@ def _chk_nominal_frequency_ranges() -> Outcome:
     opens at "8 Hz", which is the band centred on 10**(9/10) = 7,943 Hz, and
     the range is the printed 8 rather than that centre.
     """
-    printed = {
+    printed: dict[WeightingName, tuple[float, float]] = {
         "Wb": (0.5, 80.0),
         "Wc": (0.5, 80.0),
         "Wd": (0.5, 80.0),

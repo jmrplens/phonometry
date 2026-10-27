@@ -186,7 +186,7 @@ scaled to metres by `radius`.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `radius` is not a single number. |
+| TypeError | if `radius` is not a single number, or `array` or `surface` is not a text. |
 
 ## precision_uncertainty
 
@@ -248,7 +248,7 @@ PrecisionSoundPowerResult(
     directivity_index: np.ndarray,
     non_uniformity_index: np.ndarray,
     surface_area: float,
-    surface: str,
+    surface: Literal['sphere', 'hemisphere'],
     sound_power_level_a: float,
     uncertainty: float,
     uncertainty_bands: np.ndarray,
@@ -414,4 +414,4 @@ environmental term. The reproducibility `sigma_R0` is taken from Table 3
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a room qualification of the other room type. |
-| TypeError | if `radius` is not a single number. |
+| TypeError | if `radius` is not a single number, or `surface` is not a text. |

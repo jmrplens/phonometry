@@ -165,7 +165,7 @@ Apply time weighting to a signal (Exponential averaging).
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `fs` is not a single number. |
+| TypeError | if `fs` is not a single number, or `initial_state` or `mode` is not a text. |
 
 ## TimeWeightedEnvelope
 
@@ -276,7 +276,7 @@ across blocks, so concatenated block outputs equal a single continuous call.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `fs` is not a single number. |
+| TypeError | if `fs` is not a single number, or `mode` is not a text. |
 
 ### TimeWeighting.process()
 

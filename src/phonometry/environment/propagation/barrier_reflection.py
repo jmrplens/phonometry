@@ -254,11 +254,15 @@ ADRIENNE_CALIBRATION_LENGTH_S = 1.3e-3
 #: the two upper rows of the grid; from 200 Hz all nine are averaged.
 REFLECTION_LOW_BAND_MICROPHONES: tuple[int, ...] = (1, 2, 3, 4, 5, 6)
 
+#: A column group of Table A.1: the ISO 5725 precision condition of a
+#: standard deviation.
+Precision = Literal["repeatability", "reproducibility"]
+
 
 def _precision_row(
     repeatability: tuple[float, float, float],
     reproducibility: tuple[float, float, float],
-) -> Mapping[str, tuple[float, float, float]]:
+) -> Mapping[Precision, tuple[float, float, float]]:
     """One row of Table A.1, as a read-only mapping of its two column groups."""
     return MappingProxyType(
         {"repeatability": repeatability, "reproducibility": reproducibility}
@@ -271,34 +275,34 @@ def _precision_row(
 #: hertz, each as ``(median, low, high)``. A.2 takes :math:`s_\mathrm{R}` as the
 #: combined standard uncertainty; Annex B.5 takes the high column for a
 #: conservative estimate.
-REFLECTION_INDEX_PRECISION: Mapping[float, Mapping[str, tuple[float, float, float]]] = (
-    MappingProxyType(
-        {
-            100.0: _precision_row((0.25, 0.21, 0.30), (0.27, 0.23, 0.32)),
-            125.0: _precision_row((0.12, 0.10, 0.14), (0.14, 0.12, 0.18)),
-            160.0: _precision_row((0.06, 0.05, 0.07), (0.09, 0.08, 0.12)),
-            200.0: _precision_row((0.08, 0.07, 0.10), (0.11, 0.09, 0.14)),
-            250.0: _precision_row((0.08, 0.06, 0.09), (0.10, 0.09, 0.13)),
-            315.0: _precision_row((0.08, 0.07, 0.10), (0.10, 0.09, 0.13)),
-            400.0: _precision_row((0.07, 0.06, 0.09), (0.10, 0.08, 0.12)),
-            500.0: _precision_row((0.07, 0.06, 0.08), (0.09, 0.08, 0.12)),
-            630.0: _precision_row((0.09, 0.08, 0.11), (0.11, 0.09, 0.14)),
-            800.0: _precision_row((0.10, 0.09, 0.12), (0.12, 0.11, 0.15)),
-            1000.0: _precision_row((0.09, 0.08, 0.10), (0.10, 0.09, 0.13)),
-            1250.0: _precision_row((0.10, 0.08, 0.12), (0.12, 0.10, 0.15)),
-            1600.0: _precision_row((0.12, 0.10, 0.14), (0.14, 0.12, 0.16)),
-            2000.0: _precision_row((0.11, 0.09, 0.13), (0.13, 0.11, 0.15)),
-            2500.0: _precision_row((0.11, 0.09, 0.13), (0.13, 0.11, 0.15)),
-            3150.0: _precision_row((0.12, 0.10, 0.14), (0.14, 0.12, 0.17)),
-            4000.0: _precision_row((0.15, 0.13, 0.18), (0.17, 0.15, 0.20)),
-            5000.0: _precision_row((0.17, 0.14, 0.20), (0.19, 0.16, 0.23)),
-        }
-    )
+REFLECTION_INDEX_PRECISION: Mapping[
+    float, Mapping[Precision, tuple[float, float, float]]
+] = MappingProxyType(
+    {
+        100.0: _precision_row((0.25, 0.21, 0.30), (0.27, 0.23, 0.32)),
+        125.0: _precision_row((0.12, 0.10, 0.14), (0.14, 0.12, 0.18)),
+        160.0: _precision_row((0.06, 0.05, 0.07), (0.09, 0.08, 0.12)),
+        200.0: _precision_row((0.08, 0.07, 0.10), (0.11, 0.09, 0.14)),
+        250.0: _precision_row((0.08, 0.06, 0.09), (0.10, 0.09, 0.13)),
+        315.0: _precision_row((0.08, 0.07, 0.10), (0.10, 0.09, 0.13)),
+        400.0: _precision_row((0.07, 0.06, 0.09), (0.10, 0.08, 0.12)),
+        500.0: _precision_row((0.07, 0.06, 0.08), (0.09, 0.08, 0.12)),
+        630.0: _precision_row((0.09, 0.08, 0.11), (0.11, 0.09, 0.14)),
+        800.0: _precision_row((0.10, 0.09, 0.12), (0.12, 0.11, 0.15)),
+        1000.0: _precision_row((0.09, 0.08, 0.10), (0.10, 0.09, 0.13)),
+        1250.0: _precision_row((0.10, 0.08, 0.12), (0.12, 0.10, 0.15)),
+        1600.0: _precision_row((0.12, 0.10, 0.14), (0.14, 0.12, 0.16)),
+        2000.0: _precision_row((0.11, 0.09, 0.13), (0.13, 0.11, 0.15)),
+        2500.0: _precision_row((0.11, 0.09, 0.13), (0.13, 0.11, 0.15)),
+        3150.0: _precision_row((0.12, 0.10, 0.14), (0.14, 0.12, 0.17)),
+        4000.0: _precision_row((0.15, 0.13, 0.18), (0.17, 0.15, 0.20)),
+        5000.0: _precision_row((0.17, 0.14, 0.20), (0.19, 0.16, 0.23)),
+    }
 )
 
 #: Table A.1, last row: the same two standard deviations for the single-number
 #: rating :math:`DL_{RI}`, in decibels, each as ``(median, low, high)``.
-REFLECTION_RATING_PRECISION_DB: Mapping[str, tuple[float, float, float]] = (
+REFLECTION_RATING_PRECISION_DB: Mapping[Precision, tuple[float, float, float]] = (
     _precision_row((0.53, 0.44, 0.62), (0.68, 0.54, 0.81))
 )
 

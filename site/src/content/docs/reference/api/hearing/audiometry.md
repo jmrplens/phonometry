@@ -158,7 +158,7 @@ conservative reading.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an unknown presentation, lowest test frequency, earphone or threshold shift, or an earphone with bone conduction or sound field. |
-| TypeError | if `allowed_threshold_shift_db`, `lowest_hearing_level` or `lowest_test_frequency_hz` is not a single number. |
+| TypeError | if `allowed_threshold_shift_db`, `lowest_hearing_level` or `lowest_test_frequency_hz` is not a single number, or `earphone` or `presentation` is not a text. |
 
 ## AmbientNoiseCheck
 
@@ -507,6 +507,7 @@ levels are averages about which individuals vary widely.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for neither set of levels, levels that do not match the frequencies, a frequency that is not positive, or an unknown placement. |
+| TypeError | if `vibrator_placement` is not a text. |
 
 ## AudiogramCautions
 
@@ -660,7 +661,7 @@ Table A.2: $u$ = 4,9 dB and $U$ = 10 dB.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an unknown conduction, a frequency that is not positive, or a component or step that is negative or not finite. |
-| TypeError | if `environment_uncertainty_db`, `frequency`, `level_step_db`, `special_uncertainty_db`, `subject_uncertainty_db` or `tester_uncertainty_db` is not a single number. |
+| TypeError | if `environment_uncertainty_db`, `frequency`, `level_step_db`, `special_uncertainty_db`, `subject_uncertainty_db` or `tester_uncertainty_db` is not a single number, or `conduction` is not a text. |
 
 ## AudiometricUncertaintyBudget
 
@@ -1067,6 +1068,7 @@ a narrow-band noise signal.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for the reasons [`ambient_noise_limits`](/phonometry/reference/api/hearing/audiometry/#ambient_noise_limits) gives, a frequency the table does not list, or levels that do not match the bands. |
+| TypeError | if `presentation` or `earphone` is not a text. |
 
 ## check_retest_agreement
 

@@ -65,6 +65,7 @@ from ..._internal.frozen import OwnsArrays
 from ..._internal.utils import _typesignal
 from ..._internal.validation import (
     require_1d_signal,
+    require_choice,
     require_ranks,
     require_same_length,
     require_scalar,
@@ -748,16 +749,14 @@ def loudness_ecma(
     :return: An :class:`EcmaLoudness` with the single loudness value N
         (Formula 117), the average specific loudness N'(z) (Formula 115) and
         the time-dependent loudness N(l) (Formula 116).
-    :raises TypeError: if ``fs`` is not a single number.
+    :raises TypeError: if ``fs`` is not a single number, or ``field`` is not a text.
 
     The 1 kHz / 40 dB SPL sinusoid defines 1 sone_HMS via the calibration
     constant of Formula (23); with the full Clause 6.2.3 averaging this
     chain computes 0.9845 sone_HMS for it (see the module docstring for the
     residual's origin). Monaural only (no Clause 8.1.5 binaural combination).
     """
-    if field not in ("free", "diffuse"):
-        msg = "field must be 'free' or 'diffuse'"
-        raise ValueError(msg)
+    require_choice(field, "field", ("free", "diffuse"))
     fs = resolve_fs(x, fs, name="x")
     samples = apply_calibration(
         x,

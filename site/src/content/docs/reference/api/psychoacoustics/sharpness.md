@@ -61,7 +61,7 @@ tolerance and is a known DIN 45692 implementation property.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `field` is not a text. |
+| TypeError | if `field` or `method` is not a text. |
 
 ## sharpness_din_from_specific
 
@@ -82,3 +82,9 @@ Sharpness in acum from a specific-loudness pattern (DIN 45692 Eq. 1).
 | `method` | `'din'` (default, Eq. 1), or the informative Annex B variants `'aures'` / `'bismarck'`. |
 
 **Returns:** Sharpness in acum (0.0 for silence).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `method` is not a text. |

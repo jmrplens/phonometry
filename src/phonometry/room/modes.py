@@ -62,7 +62,7 @@ field (:mod:`phonometry.room.steady_field`).
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, overload
+from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 
@@ -90,8 +90,11 @@ __all__ = [
 #: Speed of sound in air used when none is given, in m/s (20 degC).
 _SPEED_OF_SOUND_M_S = 343.0
 
+#: The kind of a room mode, by how many axes it travels along.
+ModeKind = Literal["axial", "tangential", "oblique"]
+
 #: Mode kinds, ordered from the strongest (one axis) to the weakest (three).
-MODE_KINDS: tuple[str, str, str] = ("axial", "tangential", "oblique")
+MODE_KINDS: tuple[ModeKind, ModeKind, ModeKind] = ("axial", "tangential", "oblique")
 
 #: Largest order lattice :func:`room_modes` will enumerate. The count grows as
 #: ``f_max^3``, so a whole-audio-band request on an ordinary room asks for
@@ -388,7 +391,7 @@ class RoomModesResult(OwnsArrays):
         lx, ly, lz = self.dimensions
         return 4.0 * (lx + ly + lz)
 
-    def count_by_kind(self) -> dict[str, int]:
+    def count_by_kind(self) -> dict[ModeKind, int]:
         """Number of enumerated modes of each kind, keyed by :data:`MODE_KINDS`."""
         return {kind: int(np.count_nonzero(self.kinds == kind)) for kind in MODE_KINDS}
 

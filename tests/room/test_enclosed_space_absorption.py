@@ -182,7 +182,7 @@ def test_invalid_inputs_raise() -> None:
         m.reverberation_time(2.0, 30.0, speed_of_sound=0.0)
     with pytest.raises(ValueError, match="'volume' must be positive"):
         m.reverberation_time(2.0, float("nan"))
-    with pytest.raises(ValueError, match="air_condition must be"):
+    with pytest.raises(ValueError, match="'air_condition' must be one of"):
         m.enclosed_space_reverberation([(20.0, 0.5)], 50.0, air_condition="hot")
 
 

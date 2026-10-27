@@ -15,6 +15,7 @@ half of this file is theirs. Suva 66008.f, a Swiss guide for industrial
 workrooms, prints a 21 position curve and the 42 descriptors its own analysis
 program read off it, without ever naming ISO 14257: it takes the two quantities
 from VDI 3760 and EN ISO 11690-1. IFA-LSA 01-234, a German guidance sheet,
+
 prints four levels at four distances and the decay rate they give. And BAuA
 research report Fb 1083 prints the fitting density an independent VDI 3760 tool
 computed for surveyed workrooms, which is the quantity the prediction of
@@ -27,6 +28,7 @@ folio and the page it was read on, and the conformance rows read it there too.
 from __future__ import annotations
 
 import warnings
+from typing import TYPE_CHECKING
 
 import numpy as np
 import pytest
@@ -48,6 +50,9 @@ from phonometry.room.spatial_decay import (
     TYPICAL_FAR_LIMIT_M,
     TYPICAL_NEAR_LIMIT_M,
 )
+
+if TYPE_CHECKING:
+    from phonometry.room.spatial_decay import EvaluatedRegion
 
 #: Table C.1: where the eleven microphones stood, as an array to select from.
 DISTANCES_M = np.array(oracle.ANNEX_C_DISTANCES_M, dtype=float)
@@ -129,7 +134,7 @@ def test_the_normalized_curve_reproduces_the_last_column_of_table_c6() -> None:
 
 @pytest.mark.parametrize("region", ["near", "middle", "far"])
 @pytest.mark.parametrize("band", [125, 250, 500, 1000, 2000, 4000])
-def test_the_decay_rate_reproduces_table_c7(region: str, band: int) -> None:
+def test_the_decay_rate_reproduces_table_c7(region: EvaluatedRegion, band: int) -> None:
     low, high = oracle.ANNEX_C_RANGES_M[region]
     keep = _select(low, high)
     got = room.spatial_decay_rate(_corrected(band)[keep], DISTANCES_M[keep])
@@ -138,7 +143,7 @@ def test_the_decay_rate_reproduces_table_c7(region: str, band: int) -> None:
 
 @pytest.mark.parametrize("region", ["near", "middle", "far"])
 @pytest.mark.parametrize("band", [125, 250, 500, 1000, 2000, 4000])
-def test_the_excess_reproduces_table_c9(region: str, band: int) -> None:
+def test_the_excess_reproduces_table_c9(region: EvaluatedRegion, band: int) -> None:
     low, high = oracle.ANNEX_C_RANGES_M[region]
     keep = _select(low, high)
     got = room.mean_level_excess(_raw(band)[keep], DISTANCES_M[keep])
@@ -146,7 +151,9 @@ def test_the_excess_reproduces_table_c9(region: str, band: int) -> None:
 
 
 @pytest.mark.parametrize("region", ["near", "middle", "far"])
-def test_the_normalized_results_reproduce_tables_c8_and_c10(region: str) -> None:
+def test_the_normalized_results_reproduce_tables_c8_and_c10(
+    region: EvaluatedRegion,
+) -> None:
     """The decay rate at 0,06 dB, a slope that does not see the offset of
     Equation (4); the excess at 0,11 dB, a level that carries the 0,05 dB the
     printed 6,2 falls short of the sum of the printed Table 1 weights, which is
@@ -517,7 +524,7 @@ def test_equation_eight_does_not_give_tables_c11_and_c12() -> None:
 # printed page 9.
 
 
-def _suva_range(column: str, region: str) -> tuple[np.ndarray, np.ndarray]:
+def _suva_range(column: str, region: EvaluatedRegion) -> tuple[np.ndarray, np.ndarray]:
     """One printed column over one printed range, as values and distances."""
     index = oracle.SUVA_COLUMNS.index(column)
     low, high = oracle.SUVA_RANGES_M[region]
@@ -528,7 +535,7 @@ def _suva_range(column: str, region: str) -> tuple[np.ndarray, np.ndarray]:
 
 @pytest.mark.parametrize("region", ["near", "middle", "far"])
 @pytest.mark.parametrize("column", oracle.SUVA_COLUMNS)
-def test_the_suva_decay_rates_reproduce(column: str, region: str) -> None:
+def test_the_suva_decay_rates_reproduce(column: str, region: EvaluatedRegion) -> None:
     """Equation (5) over a curve this project had no part in measuring.
 
     The tolerance is 0,06 dB rather than the 0,05 dB the printed tenth would
@@ -544,7 +551,7 @@ def test_the_suva_decay_rates_reproduce(column: str, region: str) -> None:
 
 @pytest.mark.parametrize("region", ["near", "middle", "far"])
 @pytest.mark.parametrize("column", oracle.SUVA_COLUMNS)
-def test_the_suva_excesses_reproduce(column: str, region: str) -> None:
+def test_the_suva_excesses_reproduce(column: str, region: EvaluatedRegion) -> None:
     """Equations (6) and (7) over the same curve, every value to the tenth."""
     want = oracle.SUVA_EXCESS_DB[region][oracle.SUVA_COLUMNS.index(column)]
     got = room.mean_level_excess(*_suva_range(column, region))

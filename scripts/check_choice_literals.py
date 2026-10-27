@@ -97,12 +97,14 @@ reads it.
 from __future__ import annotations
 
 import ast
+import collections.abc
 import dataclasses
 import enum
 import functools
 import importlib
 import importlib.util
 import inspect
+import pathlib
 import pkgutil
 import re
 import sys
@@ -198,6 +200,13 @@ _GRADED = (
     "a requirement name read back from the result's own requirements, a key "
     "refused with KeyError (A44), not a choice a caller makes"
 )
+
+_PRINTED_TEXT = (
+    "the words the standard prints in that row of its table, read, not chosen"
+)
+_CLAUSE = "the clause, table or figure the standard prints a row under, a reference"
+_UNIT = "the unit or reference a value is printed with, a label for display"
+_REFERENCE = "the document a row cites, as the source prints it, a reference"
 
 #: Strings that are open on purpose, keyed by ``(module, qualified name,
 #: parameter)``, each with its reason. An entry that matches nothing fails.
@@ -441,6 +450,194 @@ OPEN: dict[tuple[str, str, str], str] = {
     ("phonometry.noise_control.enclosure_insulation", "MethodEntry", "quantities"): (
         "the symbols of the quantities a row of Table 1 gives, as it prints them"
     ),
+    (
+        "phonometry.building.measurement.heavy_impact",
+        "HeavyImpactSourceSpec",
+        "description",
+    ): _PRINTED_TEXT,
+    (
+        "phonometry.building.measurement.service_equipment",
+        "OperatingCondition",
+        "clause",
+    ): _CLAUSE,
+    (
+        "phonometry.building.measurement.service_equipment",
+        "OperatingCondition",
+        "conditions",
+    ): _PRINTED_TEXT,
+    (
+        "phonometry.building.measurement.service_equipment",
+        "OperatingCondition",
+        "equipment",
+    ): _PRINTED_TEXT,
+    ("phonometry.building.regulation.spain", "DBHRRequirement", "unit"): _UNIT,
+    (
+        "phonometry.electroacoustics.induction_loop",
+        "LoopRequirement",
+        "clause",
+    ): _CLAUSE,
+    (
+        "phonometry.electroacoustics.induction_loop",
+        "OverloadTestFrequency",
+        "program",
+    ): _PRINTED_TEXT,
+    (
+        "phonometry.electroacoustics.induction_loop_components",
+        "NeckLoopType",
+        "description",
+    ): _PRINTED_TEXT,
+    (
+        "phonometry.emission.sound_power_plant",
+        "PlantRequirement",
+        "description",
+    ): _PRINTED_TEXT,
+    ("phonometry.emission.sound_power_plant", "PlantRequirement", "key"): _GRADED,
+    ("phonometry.emission.sound_power_plant", "PlantRequirement", "unit"): _UNIT,
+    (
+        "phonometry.environment.assessment.soundscape",
+        "QuestionnaireScale",
+        "figure",
+    ): _CLAUSE,
+    (
+        "phonometry.environment.assessment.soundscape",
+        "QuestionnaireScale",
+        "instruction",
+    ): _PRINTED_TEXT,
+    (
+        "phonometry.environment.assessment.soundscape",
+        "QuestionnaireScale",
+        "question",
+    ): _PRINTED_TEXT,
+    (
+        "phonometry.environment.assessment.soundscape",
+        "QuestionnaireScale",
+        "subject",
+    ): _PRINTED_TEXT,
+    (
+        "phonometry.environment.assessment.soundscape_binaural",
+        "BinauralMetric",
+        "method",
+    ): _PRINTED_TEXT,
+    (
+        "phonometry.environment.assessment.soundscape_binaural",
+        "BinauralMetric",
+        "unit",
+    ): _UNIT,
+    (
+        "phonometry.environment.assessment.soundscape_binaural",
+        "BinauralParameter",
+        "metrics",
+    ): _NOTATION,
+    (
+        "phonometry.environment.assessment.soundscape_binaural",
+        "BinauralParameter",
+        "parameter",
+    ): _PRINTED_TEXT,
+    (
+        "phonometry.environment.assessment.soundscape_binaural",
+        "BinauralParameter",
+        "reference",
+    ): _REFERENCE,
+    (
+        "phonometry.environment.assessment.spain",
+        "RegulationLimits",
+        "reference",
+    ): _REFERENCE,
+    (
+        "phonometry.environment.assessment.wind_turbine_receptor",
+        "GroundImpedanceClass",
+        "description",
+    ): _PRINTED_TEXT,
+    (
+        "phonometry.environment.sources.rolling_stock_noise",
+        "TrackCondition",
+        "clause",
+    ): _CLAUSE,
+    ("phonometry.filters.periodic_tests", "PeriodicTestClause", "title"): _PRINTED_TEXT,
+    (
+        "phonometry.io._video",
+        "VideoOptions",
+        "vaapi_device",
+    ): "the path of a render device on the caller's machine",
+    (
+        "phonometry.materials.absorbers.porous",
+        "FiberResistivityFit",
+        "source",
+    ): _REFERENCE,
+    (
+        "phonometry.metrology.comparison_calibration",
+        "ComparisonUncertaintyRow",
+        "component",
+    ): _PRINTED_TEXT,
+    (
+        "phonometry.metrology.comparison_calibration",
+        "ReferenceCalibrationRow",
+        "method",
+    ): _PRINTED_TEXT,
+    (
+        "phonometry.metrology.comparison_calibration",
+        "ReferenceCalibrationRow",
+        "references",
+    ): _REFERENCE,
+    (
+        "phonometry.metrology.free_field_corrections",
+        "UncertaintyComponentRow",
+        "description",
+    ): _PRINTED_TEXT,
+    (
+        "phonometry.metrology.reciprocity_calibration",
+        "ReciprocityUncertaintyRow",
+        "group",
+    ): _PRINTED_TEXT,
+    (
+        "phonometry.metrology.reference_values",
+        "ReferenceValue",
+        "printed",
+    ): _PRINTED_TEXT,
+    ("phonometry.metrology.reference_values", "ReferenceValue", "unit"): _UNIT,
+    (
+        "phonometry.metrology.sound_level_meter",
+        "SoundLevelMeterPeriodicRequirement",
+        "tables",
+    ): _CLAUSE,
+    (
+        "phonometry.noise_control.enclosure_insulation",
+        "MethodEntry",
+        "base_standard",
+    ): _REFERENCE,
+    (
+        "phonometry.noise_control.enclosure_insulation",
+        "MethodEntry",
+        "subclause",
+    ): _CLAUSE,
+    (
+        "phonometry.noise_control.enclosure_insulation",
+        "MethodEntry",
+        "test_environment",
+    ): _PRINTED_TEXT,
+    ("phonometry.room.auditorium", "AuditoriumQuantity", "aspect"): _PRINTED_TEXT,
+    ("phonometry.room.auditorium", "AuditoriumQuantity", "unit"): _UNIT,
+    ("phonometry.room.workroom_prediction", "PredictionMethod", "rooms"): _PRINTED_TEXT,
+    (
+        "phonometry.underwater.bioacoustics.weighting",
+        "ExposureCriteria",
+        "peak_reference",
+    ): _UNIT,
+    (
+        "phonometry.underwater.bioacoustics.weighting",
+        "ExposureCriteria",
+        "sel_reference",
+    ): _UNIT,
+    (
+        "phonometry.underwater.bioacoustics.weighting",
+        "WeightingParameters",
+        "description",
+    ): _PRINTED_TEXT,
+    (
+        "phonometry.underwater.propagation.weston_regimes",
+        "WestonSeabed",
+        "name",
+    ): "the name a caller gives a seabed of their own; the two published ones are the keys of WESTON_SEABEDS",
 }
 
 #: Why a catalogue row is passed over: the catalogue contract
@@ -794,9 +991,18 @@ def _import_source(node: ast.ImportFrom, package: str) -> str | None:
 
 def _parsed_module(module_name: str) -> tuple[ModuleType, ast.Module, str] | None:
     """The imported module *module_name*, its parsed source and its package,
-    or None when it is not imported or its source cannot be read.
+    or None when it cannot be imported or its source cannot be read.
+
+    A module of the package imported only under ``TYPE_CHECKING`` is not
+    loaded yet: it is imported here, or the readers cached on this keep it
+    empty whatever runs later.
     """
     module = sys.modules.get(module_name)
+    if module is None and module_name.startswith("phonometry"):
+        try:
+            module = importlib.import_module(module_name)
+        except ImportError:
+            module = None
     if module is None:
         return None
     try:
@@ -2607,9 +2813,1004 @@ def _cleaned_up_parameters(
             yield Choice(home, qualname, parameter.name, annotation, tuple(evidence))
 
 
+# ---------------------------------------------------------------------------
+# A vocabulary written down twice: a table keyed by text, a record field of
+# text, and a choice that is not checked on every path
+# ---------------------------------------------------------------------------
+
+#: The FDTD engines: every change to them is proven against their golden
+#: digests on the GPU node, so their choices are typed and checked in one
+#: change of their own rather than piece by piece. Keyed by module.
+GPU_PARITY: dict[str, str] = {
+    "phonometry.simulation.fdtd": (
+        "an FDTD engine: its choices change together with the proof of its "
+        "golden digests on the GPU node"
+    ),
+    "phonometry.simulation.elastic_fdtd": (
+        "an FDTD engine: its choices change together with the proof of its "
+        "golden digests on the GPU node"
+    ),
+}
+
+#: A published table keyed by text, or a tuple of texts, whose keys equal a
+#: vocabulary of the package by coincidence, keyed by ``(module, name)``, with
+#: the reason. An entry that matches nothing fails.
+OPEN_TABLES: dict[tuple[str, str], str] = {}
+
+_MAPPING_ORIGINS = frozenset({"Mapping", "MappingProxyType", "dict", "MutableMapping"})
+
+
+def _package(module_name: str) -> str:
+    """The top-level package of a module: ``building`` for
+    ``phonometry.building.measurement.ratings``.
+    """
+    parts = module_name.split(".")
+    return parts[1] if len(parts) > 1 else parts[0]
+
+
+@functools.cache
+def _vocabularies() -> tuple[tuple[str, str, frozenset[str]], ...]:
+    """Every vocabulary of text the package writes: ``(module, name, options)``.
+
+    The ``Literal`` aliases of each module, and every ``Literal`` of texts an
+    annotation spells in place (named ``Literal@<line>``), so a table keyed by
+    the options of an inline ``Literal`` is found as surely as one keyed by an
+    alias.
+    """
+    found: list[tuple[str, str, frozenset[str]]] = []
+    for module_name, module in list(sys.modules.items()):
+        if not module_name.startswith("phonometry") or module is None:
+            continue
+        for name, value in vars(module).items():
+            if typing.get_origin(value) is typing.Literal:
+                options = typing.get_args(value)
+                if options and all(isinstance(option, str) for option in options):
+                    found.append((module_name, name, frozenset(options)))
+        try:
+            tree = ast.parse(inspect.getsource(module))
+        except (OSError, TypeError, SyntaxError):
+            continue
+        for node in ast.walk(tree):
+            if not (
+                isinstance(node, ast.Subscript)
+                and (
+                    (isinstance(node.value, ast.Name) and node.value.id == "Literal")
+                    or (
+                        isinstance(node.value, ast.Attribute)
+                        and node.value.attr == "Literal"
+                    )
+                )
+            ):
+                continue
+            elements = (
+                node.slice.elts if isinstance(node.slice, ast.Tuple) else [node.slice]
+            )
+            if elements and all(
+                isinstance(element, ast.Constant) and isinstance(element.value, str)
+                for element in elements
+            ):
+                written = frozenset(
+                    element.value
+                    for element in elements
+                    if isinstance(element, ast.Constant)
+                    and isinstance(element.value, str)
+                )
+                found.append((module_name, f"Literal@{node.lineno}", written))
+    return tuple(found)
+
+
+def _vocabulary_of(texts: frozenset[str], module_name: str) -> str | None:
+    """The vocabulary *texts* spell, read where a table of *module_name* is.
+
+    Equal to a vocabulary of the same top-level package, or a part of at least
+    two options of one its own module writes.
+    """
+    package = _package(module_name)
+    for home, name, options in _vocabularies():
+        if options == texts and _package(home) == package:
+            return f"the options of {home}.{name}"
+    # One text is no vocabulary: a part has to hold two options at least.
+    if len(texts) >= 2:  # noqa: PLR2004
+        for home, name, options in _vocabularies():
+            if home == module_name and texts < options:
+                return f"part of the options of {home}.{name}"
+    return None
+
+
+def _annotation_node(annotation: object) -> ast.expr | None:
+    if annotation is None:
+        return None
+    text = annotation if isinstance(annotation, str) else _annotation(annotation)
+    try:
+        return ast.parse(text, mode="eval").body
+    except SyntaxError:
+        return None
+
+
+def _origin_and_arguments(node: ast.expr | None) -> tuple[str, list[ast.expr]]:
+    if not isinstance(node, ast.Subscript):
+        return "", []
+    origin = node.value
+    name = (
+        origin.attr if isinstance(origin, ast.Attribute) else getattr(origin, "id", "")
+    )
+    arguments = node.slice.elts if isinstance(node.slice, ast.Tuple) else [node.slice]
+    return name, list(arguments)
+
+
+def _takes_text(node: ast.expr | None, module_name: str) -> bool:
+    """Whether a key or item annotation lets any text through (or is absent)."""
+    if node is None:
+        return True
+    return takes_any_string(expanded(ast.unparse(node), module_name))
+
+
+def _keyed_by_text(
+    value: object, annotation: ast.expr | None, module_name: str, path: str, depth: int
+) -> Iterator[tuple[str, frozenset[str]]]:
+    """Each key set or item set of a published value its annotation types ``str``."""
+    if depth > _TABLE_DEPTH + 2:
+        return
+    origin, arguments = _origin_and_arguments(annotation)
+    if isinstance(value, collections.abc.Mapping):
+        key_type = arguments[0] if origin in _MAPPING_ORIGINS and arguments else None
+        value_type = (
+            arguments[1] if origin in _MAPPING_ORIGINS and len(arguments) > 1 else None
+        )
+        keys = list(value)
+        if (
+            keys
+            and all(isinstance(key, str) for key in keys)
+            and (annotation is None or origin in _MAPPING_ORIGINS)
+            and _takes_text(key_type, module_name)
+        ):
+            yield path, frozenset(keys)
+        seen: set[int] = set()
+        for held in value.values():
+            if id(held) not in seen:
+                seen.add(id(held))
+                yield from _keyed_by_text(
+                    held, value_type, module_name, f"{path}[...]", depth + 1
+                )
+    elif isinstance(value, tuple | frozenset):
+        items = list(value)
+        open_ended = (
+            origin in {"tuple", "Tuple"}
+            # tuple[X, ...]: the item type and the ellipsis.
+            and len(arguments) == 2  # noqa: PLR2004
+            and isinstance(arguments[1], ast.Constant)
+            and arguments[1].value is Ellipsis
+        ) or origin in {"frozenset", "FrozenSet"}
+        item_type = arguments[0] if open_ended and arguments else None
+        if (
+            items
+            and all(isinstance(item, str) for item in items)
+            and (annotation is None or open_ended)
+            and _takes_text(item_type, module_name)
+        ):
+            yield path, frozenset(items)
+
+
+def _home_of_constant(
+    module: ModuleType, name: str, value: object
+) -> tuple[str, object]:
+    """The module that annotates a published constant, and its annotation."""
+    holders: list[str] = []
+    for module_name, other in list(sys.modules.items()):
+        if not module_name.startswith("phonometry") or other is None:
+            continue
+        if getattr(other, name, None) is not value:
+            continue
+        annotations = getattr(other, "__annotations__", {}) or {}
+        if name in annotations:
+            return module_name, annotations[name]
+        holders.append(module_name)
+    holders.sort(key=lambda held: -held.count("."))
+    return (holders[0] if holders else module.__name__), None
+
+
+def vocabulary_tables() -> Iterator[Choice]:
+    """Every published table keyed by text whose keys are a vocabulary.
+
+    A published ``Mapping[str, ...]``, ``tuple[str, ...]`` or ``frozenset[str]``
+    (or one with no annotation, which a type checker reads as keyed by any
+    text), at any depth of the table, whose keys or items are the options of
+    a ``Literal`` of its top-level package, or part of a ``Literal`` of its own
+    module, is the vocabulary written twice: a caller indexing it with a
+    misspelling meets a ``KeyError`` when the call runs, where a table keyed
+    by the ``Literal`` is refused by ``mypy``. This is rule A21.
+    """
+    seen: set[tuple[str, str]] = set()
+    for module in _public_modules():
+        for name in getattr(module, "__all__", ()):
+            value = getattr(module, name, None)
+            if not isinstance(
+                value, collections.abc.Mapping | tuple | frozenset
+            ) or isinstance(value, str):
+                continue
+            home, annotation = _home_of_constant(module, name, value)
+            if (home, name) in seen or home in GPU_PARITY:
+                continue
+            seen.add((home, name))
+            for path, texts in _keyed_by_text(
+                value, _annotation_node(annotation), home, "", 0
+            ):
+                vocabulary = _vocabulary_of(texts, home)
+                if vocabulary is not None:
+                    yield Choice(
+                        home,
+                        f"{name}{path}",
+                        "keys",
+                        str(annotation),
+                        (f"its keys are {vocabulary}",),
+                    )
+
+
+@functools.cache
+def _construction_sites() -> MappingProxyType[
+    str, tuple[tuple[str, ast.AST | None, ast.Call], ...]
+]:
+    """Every call in the package by the name it calls: ``(module, function, call)``.
+
+    *function* is the function the call is written in, or ``None`` at module
+    level, so an argument is read where it is written.
+    """
+    sites: dict[str, list[tuple[str, ast.AST | None, ast.Call]]] = {}
+    root = pathlib.Path(phonometry.__file__).parent
+    for path in sorted(root.rglob("*.py")):
+        parts = list(path.relative_to(root.parent).with_suffix("").parts)
+        if parts[-1] == "__init__":
+            parts = parts[:-1]
+        module_name = ".".join(parts)
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+
+        def visit(
+            node: ast.AST, function: ast.AST | None, module_name: str = module_name
+        ) -> None:
+            for child in ast.iter_child_nodes(node):
+                inner = (
+                    child
+                    if isinstance(child, ast.FunctionDef | ast.AsyncFunctionDef)
+                    else function
+                )
+                if isinstance(child, ast.Call):
+                    called = child.func
+                    name = (
+                        called.id
+                        if isinstance(called, ast.Name)
+                        else called.attr
+                        if isinstance(called, ast.Attribute)
+                        else None
+                    )
+                    if name is not None:
+                        sites.setdefault(name, []).append(
+                            (module_name, function, child)
+                        )
+                visit(child, inner)
+
+        visit(tree, None)
+    return MappingProxyType({name: tuple(found) for name, found in sites.items()})
+
+
+#: How deep a value is followed back to where it is written: through locals,
+#: the callers of a private helper and the fields of the records it is read
+#: off.
+_SOURCE_DEPTH = 4
+
+
+class _Source(NamedTuple):
+    """What a value is made of: fixed texts, a ``Literal``, or something open."""
+
+    kind: str  # "texts", "literal", "none" or "open"
+    texts: frozenset[str]
+
+
+_OPEN_SOURCE = _Source("open", frozenset())
+
+
+def _merged(sources: list[_Source]) -> _Source:
+    texts: set[str] = set()
+    kinds: set[str] = set()
+    for source in sources:
+        if source.kind == "open":
+            return _OPEN_SOURCE
+        if source.kind != "none":
+            kinds.add(source.kind)
+            texts |= source.texts
+    if not kinds:
+        return _Source("none", frozenset())
+    return _Source("literal" if "literal" in kinds else "texts", frozenset(texts))
+
+
+def _module_object(module_name: str) -> ModuleType | None:
+    try:
+        return importlib.import_module(module_name)
+    except ImportError:
+        return None
+
+
+def _parameters_of(function: ast.AST) -> list[ast.arg]:
+    if not isinstance(function, ast.FunctionDef | ast.AsyncFunctionDef):
+        return []
+    arguments = function.args
+    return [*arguments.posonlyargs, *arguments.args, *arguments.kwonlyargs]
+
+
+def _literal_annotation(
+    annotation: ast.expr | None, module_name: str
+) -> frozenset[str]:
+    if annotation is None:
+        return frozenset()
+    read = expanded(ast.unparse(annotation), module_name)
+    return _literal_options(read) if _is_literal(read) else frozenset()
+
+
+def _source(
+    expression: ast.expr, function: ast.AST | None, module_name: str, depth: int
+) -> _Source:
+    """What *expression*, written in *function* of *module_name*, is made of."""
+    if depth > _SOURCE_DEPTH:
+        return _OPEN_SOURCE
+    if isinstance(expression, ast.Constant):
+        if isinstance(expression.value, str):
+            return _Source("texts", frozenset({expression.value}))
+        return (
+            _Source("none", frozenset()) if expression.value is None else _OPEN_SOURCE
+        )
+    if isinstance(expression, ast.IfExp):
+        return _merged(
+            [
+                _source(expression.body, function, module_name, depth + 1),
+                _source(expression.orelse, function, module_name, depth + 1),
+            ]
+        )
+    if isinstance(expression, ast.Call) and _call_name(expression) in VALIDATORS:
+        return _Source("literal", frozenset())
+    if isinstance(expression, ast.Name):
+        return _name_source(expression.id, function, module_name, depth)
+    if isinstance(expression, ast.Attribute):
+        return _attribute_source(expression, function, module_name)
+    if isinstance(expression, ast.Subscript) and isinstance(expression.value, ast.Name):
+        table = getattr(_module_object(module_name), expression.value.id, None)
+        if (
+            isinstance(table, collections.abc.Mapping)
+            and table
+            and all(isinstance(held, str) for held in table.values())
+        ):
+            return _Source("texts", frozenset(table.values()))
+    return _OPEN_SOURCE
+
+
+def _name_source(
+    name: str, function: ast.AST | None, module_name: str, depth: int
+) -> _Source:
+    if function is None:
+        value = getattr(_module_object(module_name), name, None)
+        return (
+            _Source("texts", frozenset({value}))
+            if isinstance(value, str)
+            else _OPEN_SOURCE
+        )
+    for parameter in _parameters_of(function):
+        if parameter.arg != name:
+            continue
+        options = _literal_annotation(parameter.annotation, module_name)
+        if options:
+            return _Source("literal", options)
+        if (
+            isinstance(function, ast.FunctionDef | ast.AsyncFunctionDef)
+            and function.name.startswith("_")
+            and not function.name.startswith("__")
+        ):
+            return _callers_source(function, name, module_name, depth)
+        return _OPEN_SOURCE
+    found: list[_Source] = []
+    for node in ast.walk(function):
+        if isinstance(node, ast.Assign) and any(
+            isinstance(target, ast.Name) and target.id == name
+            for target in node.targets
+        ):
+            found.append(_source(node.value, function, module_name, depth + 1))
+        elif (
+            isinstance(node, ast.AnnAssign)
+            and isinstance(node.target, ast.Name)
+            and node.target.id == name
+        ):
+            options = _literal_annotation(node.annotation, module_name)
+            if options:
+                found.append(_Source("literal", options))
+            elif node.value is not None:
+                found.append(_source(node.value, function, module_name, depth + 1))
+        elif (
+            isinstance(node, ast.For | ast.comprehension)
+            and isinstance(node.target, ast.Name)
+            and node.target.id == name
+        ):
+            held = node.iter
+            found.append(
+                _merged(
+                    [
+                        _source(item, function, module_name, depth + 1)
+                        for item in held.elts
+                    ]
+                )
+                if isinstance(held, ast.Tuple | ast.List | ast.Set)
+                else _OPEN_SOURCE
+            )
+    if found:
+        return _merged(found)
+    value = getattr(_module_object(module_name), name, None)
+    return (
+        _Source("texts", frozenset({value})) if isinstance(value, str) else _OPEN_SOURCE
+    )
+
+
+def _callers_source(
+    function: ast.FunctionDef | ast.AsyncFunctionDef,
+    name: str,
+    module_name: str,
+    depth: int,
+) -> _Source:
+    """What every caller of a private helper hands its parameter *name*."""
+    defined = getattr(_module_object(module_name), function.name, None)
+    positional = [
+        argument.arg for argument in (*function.args.posonlyargs, *function.args.args)
+    ]
+    if positional and positional[0] in {"self", "cls"}:
+        positional = positional[1:]
+    found: list[_Source] = []
+    for caller_module, caller, call in _construction_sites().get(function.name, ()):
+        if getattr(_module_object(caller_module), function.name, None) is not defined:
+            continue
+        handed: ast.expr | None = None
+        for keyword in call.keywords:
+            if keyword.arg is None:
+                return _OPEN_SOURCE
+            if keyword.arg == name:
+                handed = keyword.value
+        if handed is None and name in positional:
+            index = positional.index(name)
+            if index < len(call.args) and not any(
+                isinstance(argument, ast.Starred) for argument in call.args[: index + 1]
+            ):
+                handed = call.args[index]
+        if handed is None:
+            return _OPEN_SOURCE
+        found.append(_source(handed, caller, caller_module, depth + 1))
+    return _merged(found) if found else _OPEN_SOURCE
+
+
+def _field_options(record: object, name: str) -> frozenset[str]:
+    if not (inspect.isclass(record) and dataclasses.is_dataclass(record)):
+        return frozenset()
+    for field in dataclasses.fields(record):
+        if field.name == name:
+            read = expanded(_annotation(field.type), _field_module(record, name))
+            return _literal_options(read) if _is_literal(read) else frozenset()
+    return frozenset()
+
+
+def _attribute_source(
+    expression: ast.Attribute, function: ast.AST | None, module_name: str
+) -> _Source:
+    """A field read off a record whose class types it with a ``Literal``.
+
+    ``self.<field>`` in a method of the record's class, a parameter annotated
+    with the record, or a local bound to what a function annotated to return
+    it hands back.
+    """
+    module = _module_object(module_name)
+    holder = expression.value
+    if not isinstance(holder, ast.Name) or function is None or module is None:
+        return _OPEN_SOURCE
+    candidates: list[object] = [
+        getattr(module, ast.unparse(parameter.annotation).strip("'\""), None)
+        for parameter in _parameters_of(function)
+        if parameter.arg == holder.id and parameter.annotation is not None
+    ]
+    for node in ast.walk(function):
+        if (
+            isinstance(node, ast.Assign)
+            and any(
+                isinstance(target, ast.Name) and target.id == holder.id
+                for target in node.targets
+            )
+            and isinstance(node.value, ast.Call)
+        ):
+            called = getattr(module, _call_name(node.value), None)
+            returned = (
+                inspect.get_annotations(called).get("return")
+                if callable(called)
+                else None
+            )
+            if inspect.isclass(called):
+                candidates.append(called)
+            elif isinstance(returned, str):
+                home = _module_object(getattr(called, "__module__", module_name))
+                candidates.append(getattr(home, returned.strip("'\""), None))
+    for candidate in candidates:
+        options = _field_options(candidate, expression.attr)
+        if options:
+            return _Source("literal", options)
+    return _OPEN_SOURCE
+
+
+def _argument_for(
+    call: ast.Call, field: dataclasses.Field[object], positional: list[str]
+) -> ast.expr | None | str:
+    """What a call to a record's constructor hands *field*: the expression,
+    ``None`` when the field keeps its default, or ``"**"`` when a spread of
+    keywords may.
+    """
+    for keyword in call.keywords:
+        if keyword.arg == field.name:
+            return keyword.value
+        if keyword.arg is None:
+            return "**"
+    if field.name in positional:
+        index = positional.index(field.name)
+        if any(
+            isinstance(argument, ast.Starred) for argument in call.args[: index + 1]
+        ):
+            return "**"
+        if index < len(call.args):
+            return call.args[index]
+    return None
+
+
+def constant_fields() -> Iterator[Choice]:
+    """Every public record field of text that the package fills from fixed texts.
+
+    A field annotated ``str`` (or ``tuple[str, ...]``) that every call to its
+    record's constructor in the package fills with a string constant, a
+    ``Literal``-typed value, or a choice from a fixed set of them, is a closed
+    vocabulary typed open: a reader of the record cannot tell the four kinds
+    of a silencer from free text. Each value is followed back through locals,
+    the callers of a private helper and the fields of the records it is read
+    off. A field no call fills, or one call fills from an open text, is not
+    held to it. This is rule A21 for a record.
+    """
+    for home, qualname, target in _targets():
+        if home in GPU_PARITY or not inspect.isclass(target):
+            continue
+        if not dataclasses.is_dataclass(target) or issubclass(target, CatalogueRow):
+            continue
+        record: type = target
+        fields = dataclasses.fields(record)
+        positional = [
+            field.name for field in fields if field.init and not field.kw_only
+        ]
+        for field in fields:
+            read = expanded(_annotation(field.type), _field_module(record, field.name))
+            collection = takes_any_strings(read)
+            if not (collection or takes_any_string(read)):
+                continue
+            if (home, qualname, field.name) in OPEN:
+                continue
+            sources: list[_Source] = []
+            for module_name, function, call in _construction_sites().get(
+                record.__name__, ()
+            ):
+                if (
+                    getattr(_module_object(module_name), record.__name__, None)
+                    is not record
+                ):
+                    continue
+                handed = _argument_for(call, field, positional)
+                if handed == "**":
+                    sources.append(_OPEN_SOURCE)
+                elif handed is None:
+                    default = field.default
+                    sources.append(
+                        _Source("texts", frozenset({default}))
+                        if isinstance(default, str)
+                        else _Source("none", frozenset())
+                        if default is None
+                        else _OPEN_SOURCE
+                    )
+                elif collection and isinstance(handed, ast.Tuple | ast.List):
+                    sources.append(
+                        _merged(
+                            [
+                                _source(item, function, module_name, 0)
+                                for item in handed.elts
+                            ]
+                        )
+                    )
+                elif isinstance(handed, ast.expr):
+                    sources.append(_source(handed, function, module_name, 0))
+            built = _merged(sources) if sources else _OPEN_SOURCE
+            if built.kind in {"texts", "literal"}:
+                spelled = ", ".join(repr(text) for text in sorted(built.texts)[:6])
+                yield Choice(
+                    home,
+                    qualname,
+                    field.name,
+                    _annotation(field.type),
+                    (
+                        f"every one of the {len(sources)} constructions in the "
+                        f"package fills it with {spelled or 'a checked choice'}",
+                    ),
+                )
+
+
+#: The statements a check of a choice may sit inside without leaving a path on
+#: which the choice goes unchecked: a test that is about the choice itself
+#: (``if text is not None``, ``if isinstance(text, str)``, ``for item in
+#: texts``) runs the check whenever the choice is there to check.
+
+
+def _parents(tree: ast.AST) -> dict[ast.AST, ast.AST]:
+    return {
+        child: node for node in ast.walk(tree) for child in ast.iter_child_nodes(node)
+    }
+
+
+def _mentions(node: ast.AST, is_raw: Callable[[ast.expr], bool]) -> bool:
+    return any(isinstance(part, ast.expr) and is_raw(part) for part in ast.walk(node))
+
+
+def _branches_away(
+    holder: ast.AST, child: ast.AST, is_raw: Callable[[ast.expr], bool]
+) -> bool:
+    """Whether *holder* runs *child* on some paths only, for a reason that is
+    not the choice itself.
+    """
+    if isinstance(holder, ast.If | ast.IfExp) and child is not holder.test:
+        return not _mentions(holder.test, is_raw)
+    if isinstance(holder, ast.While):
+        return child is not holder.test
+    if isinstance(holder, ast.BoolOp) and child in holder.values:
+        before = holder.values[: holder.values.index(child)]
+        return bool(before) and not any(_mentions(value, is_raw) for value in before)
+    if isinstance(holder, ast.For | ast.AsyncFor) and child is not holder.iter:
+        return not _mentions(holder.iter, is_raw)
+    if isinstance(holder, ast.Try):
+        return child in holder.orelse
+    return isinstance(
+        holder,
+        ast.ExceptHandler
+        | ast.match_case
+        | ast.Lambda
+        | ast.FunctionDef
+        | ast.AsyncFunctionDef
+        | ast.comprehension,
+    )
+
+
+def _on_some_path_only(
+    node: ast.AST,
+    parents: dict[ast.AST, ast.AST],
+    is_raw: Callable[[ast.expr], bool],
+    root: ast.AST,
+) -> bool:
+    """Whether *node* runs on some paths through *root* and not on others,
+    for a reason that is not the choice itself.
+    """
+    child, holder = node, parents.get(node)
+    while holder is not None and holder is not root:
+        if _branches_away(holder, child, is_raw):
+            return True
+        child, holder = holder, parents.get(holder)
+    return False
+
+
+class _Check(NamedTuple):
+    """One check a choice reaches: whether every path runs it, and whether it
+    refuses a value that is not a text with ``TypeError`` (a shared validator)
+    or only an unknown text, with ``ValueError`` (``if text not in OPTIONS``).
+    """
+
+    every_path: bool
+    validator: bool
+
+
+def _carries(value: ast.expr, target: Callable[[ast.expr], bool]) -> bool:
+    """Whether *value* holds the target's items: the target itself, a call
+    that only holds its items (``tuple(x)``), or the one-item tuple ``(x,)``
+    that wraps a single choice of a choice-or-sequence parameter.
+    """
+    value = _held(value)
+    if (
+        isinstance(value, ast.Call)
+        and isinstance(value.func, ast.Name)
+        and value.func.id == "dict"
+        and len(value.args) == 1
+        and not value.keywords
+    ):
+        # dict(levels) or dict(levels.items()): the same keys.
+        source = value.args[0]
+        if (
+            isinstance(source, ast.Call)
+            and isinstance(source.func, ast.Attribute)
+            and source.func.attr == "items"
+            and not source.args
+        ):
+            source = source.func.value
+        return target(_held(source))
+    return target(value) or (
+        isinstance(value, ast.Tuple) and len(value.elts) == 1 and target(value.elts[0])
+    )
+
+
+def _with_copies(
+    tree: ast.AST, target: Callable[[ast.expr], bool]
+) -> Callable[[ast.expr], bool]:
+    """*target* widened to the locals bound to a copy of its items.
+
+    ``rows = tuple(dict.fromkeys(parameters))`` or ``efforts = (effort,) if
+    isinstance(effort, str) else tuple(effort)``: a check of each item of
+    the local is a check of each item of the target.
+    """
+    copies: set[str] = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Assign) and len(node.targets) == 1:
+            bound, value = node.targets[0], node.value
+        elif isinstance(node, ast.AnnAssign) and node.value is not None:
+            bound, value = node.target, node.value
+        else:
+            continue
+        if not isinstance(bound, ast.Name):
+            continue
+        branches = (
+            [value.body, value.orelse] if isinstance(value, ast.IfExp) else [value]
+        )
+        if all(_carries(branch, target) for branch in branches):
+            copies.add(bound.id)
+
+    def matches(node: ast.expr) -> bool:
+        return target(node) or (isinstance(node, ast.Name) and node.id in copies)
+
+    return matches
+
+
+def _record_constructor(callee: Callable[..., object]) -> type | None:
+    """The record a dataclass ``__init__`` builds, so a choice handed to it is
+    read in the record's ``__post_init__``.
+    """
+    qualname = getattr(callee, "__qualname__", "")
+    if not qualname.endswith(".__init__"):
+        return None
+    owner = sys.modules.get(getattr(callee, "__module__", ""))
+    for part in qualname.split(".")[:-1]:
+        owner = getattr(owner, part, None)
+    return owner if inspect.isclass(owner) and dataclasses.is_dataclass(owner) else None
+
+
+@functools.cache
+def _checks_of(
+    function: Callable[..., object],
+    name: str,
+    *,
+    field: bool,
+    collection: bool,
+    depth: int,
+) -> tuple[_Check, ...]:
+    """The checks a choice reaches in *function*, received as parameter (or,
+    with *field*, read as ``self.<name>``) *name*.
+    """
+    tree = _parsed(function)
+    if tree is None:
+        return ()
+    module_name = getattr(function, "__module__", "") or ""
+    namespace = _namespace(function, tree, module_name)
+    spread = _spread_dicts(tree)
+    target = _with_copies(tree, _field_of_self(name) if field else _the_name(name))
+    items = _item_names(tree, target) if collection else set()
+
+    def is_raw(node: ast.expr) -> bool:
+        return target(node) or (isinstance(node, ast.Name) and node.id in items)
+
+    root = tree.body[0] if isinstance(tree, ast.Module) and tree.body else tree
+    parents = _parents(tree)
+    found: list[_Check] = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.If) and _raises(node.body):
+            test = node.test
+            if (
+                isinstance(test, ast.Compare)
+                and is_raw(test.left)
+                and isinstance(test.ops[0], ast.NotIn)
+            ):
+                found.append(
+                    _Check(
+                        not _on_some_path_only(node, parents, is_raw, root),
+                        validator=False,
+                    )
+                )
+        if not isinstance(node, ast.Call):
+            continue
+        if node.args and is_raw(node.args[0]) and _call_name(node) in VALIDATORS:
+            found.append(
+                _Check(
+                    not _on_some_path_only(node, parents, is_raw, root), validator=True
+                )
+            )
+            continue
+        callee = _callee(node, namespace, module_name)
+        if callee is None or depth >= _SPELLING_DEPTH:
+            continue
+        here = not _on_some_path_only(node, parents, is_raw, root)
+        if field and _reads_own_field(node, callee, namespace):
+            found.extend(
+                _Check(here and check.every_path, check.validator)
+                for check in _checks_of(
+                    callee, name, field=True, collection=collection, depth=depth + 1
+                )
+            )
+        record = _record_constructor(callee)
+        for parameter, handed in _arguments(node, callee, spread).items():
+            value = _held(handed)
+            if not is_raw(value):
+                continue
+            if record is not None:
+                check = _post_init(record)
+                inner = (
+                    _checks_of(
+                        check,
+                        parameter,
+                        field=True,
+                        collection=collection and target(value),
+                        depth=depth + 1,
+                    )
+                    if check is not None
+                    else ()
+                )
+            else:
+                inner = _checks_of(
+                    callee,
+                    parameter,
+                    field=False,
+                    collection=collection and target(value),
+                    depth=depth + 1,
+                )
+            found.extend(
+                _Check(here and check.every_path, check.validator) for check in inner
+            )
+    return tuple(found)
+
+
+def _reads_own_field(
+    node: ast.Call, callee: Callable[..., object], namespace: dict[str, object]
+) -> bool:
+    """Whether a call is ``self.<method>(...)`` of the record's own class, whose
+    body reads the record's fields as ``self.<field>`` too.
+    """
+    called = node.func
+    owner = namespace.get("self")
+    return (
+        isinstance(called, ast.Attribute)
+        and isinstance(called.value, ast.Name)
+        and called.value.id == "self"
+        and inspect.isclass(owner)
+        and getattr(inspect.getattr_static(owner, called.attr, None), "__func__", None)
+        in {callee, None}
+        and callable(inspect.getattr_static(owner, called.attr, None))
+    )
+
+
+def _verdict(checks: tuple[_Check, ...]) -> str | None:
+    """What is wrong with how a choice is checked, or ``None``."""
+    if any(check.validator and check.every_path for check in checks):
+        return None
+    if any(check.validator for check in checks):
+        return "checked on some paths only, so a misspelling passes on the others"
+    if checks:
+        return (
+            "checked with ``not in``, so a value that is not a text is refused "
+            "with ValueError instead of TypeError"
+        )
+    return "never checked, so a misspelling passes"
+
+
+#: Choices a function or a record leaves unchecked on purpose, keyed by
+#: ``(module, qualified name, parameter)``, with the reason. An entry that
+#: matches nothing fails.
+UNCHECKED: dict[tuple[str, str, str], str] = {
+    ("phonometry._internal.catalogue", "Provenance", "kind"): (
+        "a field of a catalogue's provenance: the catalogue contract refuses a "
+        "field it cannot read, of any type, with the CatalogueError that names "
+        "the field and where the file holds it"
+    ),
+}
+
+
+@functools.cache
+def _input_records() -> frozenset[type]:
+    """The public records a caller builds: one a public function takes, or one
+    such a record holds, as the parameter-units guard reads them.
+    """
+    # A sibling guard, imported where it is needed so this one runs alone.
+    import check_parameter_units  # noqa: PLC0415
+
+    taken = check_parameter_units._taken_as_arguments()
+    return frozenset(
+        record
+        for name, record in check_parameter_units._public_records().items()
+        if (record.__module__, record.__qualname__)
+        not in check_parameter_units.RECORD_AXIS_EXEMPT
+        and re.search(rf"\b{re.escape(name)}\b", taken)
+    )
+
+
+def unchecked_choices() -> Iterator[Choice]:
+    """Every public ``Literal`` choice a caller can pass unchecked.
+
+    A parameter typed with a ``Literal`` of texts, and a field of a record a
+    caller builds, must reach a shared validator (``require_choice``,
+    ``check_language``, ``check_engine``) on every path, in the function, in
+    one it is handed to or in the ``__post_init__`` of the record it is handed
+    to: a choice compared with ``==`` takes a misspelling down the ``else``
+    branch, one checked only beside another argument passes a misspelling when
+    that argument is absent, and one checked with ``if text not in OPTIONS``
+    refuses a number with ``ValueError``. A check behind a test of the choice
+    itself (``if text is not None``, ``if isinstance(text, str)``) runs
+    whenever there is a choice to check. This is rule A45.
+    """
+    inputs = _input_records()
+    for home, qualname, obj in _targets():
+        if home in GPU_PARITY:
+            continue
+        if inspect.isclass(obj):
+            if (
+                not dataclasses.is_dataclass(obj)
+                or issubclass(obj, CatalogueRow)
+                or obj not in inputs
+            ):
+                continue
+            check = _post_init(obj)
+            for field in dataclasses.fields(obj):
+                read = expanded(_annotation(field.type), _field_module(obj, field.name))
+                literal, collection = _literal_shape(read)
+                if not (literal and _literal_options(read)):
+                    continue
+                checks = (
+                    _checks_of(
+                        check, field.name, field=True, collection=collection, depth=0
+                    )
+                    if check is not None
+                    else ()
+                )
+                verdict = _verdict(checks)
+                if verdict is not None:
+                    yield Choice(
+                        home, qualname, field.name, _annotation(field.type), (verdict,)
+                    )
+            continue
+        if not callable(obj) or _parsed(obj) is None:
+            continue
+        try:
+            signature = inspect.signature(obj)
+        except (TypeError, ValueError):
+            continue
+        for parameter in signature.parameters.values():
+            read = expanded(_annotation(parameter.annotation), home)
+            literal, collection = _literal_shape(read)
+            if not (literal and _literal_options(read)):
+                continue
+            verdict = _verdict(
+                _checks_of(
+                    obj, parameter.name, field=False, collection=collection, depth=0
+                )
+            )
+            if verdict is not None:
+                yield Choice(
+                    home,
+                    qualname,
+                    parameter.name,
+                    _annotation(parameter.annotation),
+                    (verdict,),
+                )
+
+
 def offenders() -> tuple[list[Choice], list[tuple[str, str, str]]]:
-    """The closed choices typed ``str``, and the stale entries of :data:`OPEN`."""
-    found: list[Choice] = []
+    """The closed choices typed ``str``, and the stale entries of :data:`OPEN`.
+
+    A closed choice is one the code treats as one (:func:`string_choices`) or
+    a record field the package fills only from fixed texts
+    (:func:`constant_fields`).
+    """
+    found: dict[tuple[str, str, str], Choice] = {}
     used: set[tuple[str, str, str]] = set()
     for choice in string_choices():
         key = (choice.module, choice.qualname, choice.name)
@@ -2617,55 +3818,118 @@ def offenders() -> tuple[list[Choice], list[tuple[str, str, str]]]:
             used.add(key)
             continue
         if choice.evidence:
-            found.append(choice)
-    return found, [key for key in OPEN if key not in used]
+            found[key] = choice
+    for choice in constant_fields():
+        found.setdefault((choice.module, choice.qualname, choice.name), choice)
+    return list(found.values()), [key for key in OPEN if key not in used]
+
+
+def _stale_tables(tables: list[Choice]) -> list[tuple[str, str]]:
+    """The entries of :data:`OPEN_TABLES` no table of the walk needs."""
+    flagged = {(choice.module, choice.qualname) for choice in tables}
+    return [key for key in OPEN_TABLES if key not in flagged]
+
+
+def _stale_unchecked(unchecked: list[Choice]) -> list[tuple[str, str, str]]:
+    """The entries of :data:`UNCHECKED` no choice of the walk needs."""
+    flagged = {(choice.module, choice.qualname, choice.name) for choice in unchecked}
+    return [key for key in UNCHECKED if key not in flagged]
+
+
+def _report(title: str, choices: list[Choice], advice: str) -> None:
+    print(f"::error::{title}")
+    for choice in sorted(choices):
+        print(
+            f"  {choice.module}.{choice.qualname}({choice.name}): "
+            + "; ".join(dict.fromkeys(choice.evidence))
+        )
+    print(f"  -> {advice}")
 
 
 def main() -> int:
-    """Report every closed choice typed ``str`` and every ``Literal`` choice
-    cleaned up before its check; the exit status says if any.
+    """Report every closed choice typed ``str``, every ``Literal`` choice
+    cleaned up before its check or not checked on every path, and every
+    published table keyed by text that is a vocabulary; the exit status says
+    if any.
     """
     found, stale = offenders()
     cleaned = sorted(cleaned_up_choices())
-    if not (found or stale or cleaned):
+    tables = [
+        choice
+        for choice in vocabulary_tables()
+        if (choice.module, choice.qualname) not in OPEN_TABLES
+    ]
+    every_unchecked = list(unchecked_choices())
+    unchecked = [
+        choice
+        for choice in every_unchecked
+        if (choice.module, choice.qualname, choice.name) not in UNCHECKED
+    ]
+    stale_tables = _stale_tables(list(vocabulary_tables()))
+    stale_unchecked = _stale_unchecked(every_unchecked)
+    if not (
+        found
+        or stale
+        or cleaned
+        or tables
+        or unchecked
+        or stale_tables
+        or stale_unchecked
+    ):
         print(
             "Every public choice of a fixed set of strings is typed Literal, "
-            "every string left open says why, and every Literal choice is "
-            "checked as the caller wrote it."
+            "every string left open says why, every Literal choice is checked "
+            "as the caller wrote it on every path, and every published table "
+            "of a vocabulary is keyed by it."
         )
         return 0
-    for choice in cleaned:
-        print(
-            "::error::a Literal choice takes a spelling its Literal does not "
-            f"list: {choice.module}.{choice.qualname}({choice.name}): "
-            + "; ".join(dict.fromkeys(choice.evidence))
-        )
     if cleaned:
-        print(
-            "  -> check the text as written (require_choice) against the "
-            "options the Literal lists, before any clean-up, and drop the "
-            "folding: the Literal lists the one spelling of each option "
-            "(rule A45)."
+        _report(
+            "a Literal choice takes a spelling its Literal does not list",
+            cleaned,
+            "check the text as written (require_choice) against the options "
+            "the Literal lists, before any clean-up, and drop the folding: the "
+            "Literal lists the one spelling of each option (rule A45).",
         )
-    if not (found or stale):
-        return 1
+    if unchecked:
+        _report(
+            "a Literal choice is not checked on every path",
+            unchecked,
+            "hand it to require_choice where the function starts (in "
+            "__post_init__ for a record a caller builds), so a misspelling is "
+            "a ValueError and a value that is not a text a TypeError on every "
+            "path (rule A45).",
+        )
+    if tables:
+        _report(
+            "a published table of a vocabulary is keyed by any text",
+            tables,
+            "key it by the Literal of its vocabulary (one of its own module "
+            "when none fits); a table whose keys match a vocabulary by "
+            "coincidence goes in OPEN_TABLES with its reason (rule A21).",
+        )
     if found:
-        print("::error::a public choice of a fixed set is typed str")
-        print(f"{len(found)} parameter(s) or field(s) take any string:")
-        for choice in sorted(found):
-            print(
-                f"  {choice.module}.{choice.qualname}({choice.name}): "
-                + "; ".join(dict.fromkeys(choice.evidence))
-            )
-        print(
-            "  -> annotate it with the Literal of its options (a shared alias "
-            "where the vocabulary recurs); a string that is open by its nature "
-            "goes in OPEN of scripts/check_choice_literals.py with its reason."
+        _report(
+            "a public choice of a fixed set is typed str",
+            found,
+            "annotate it with the Literal of its options (a shared alias where "
+            "the vocabulary recurs); a string that is open by its nature goes "
+            "in OPEN of scripts/check_choice_literals.py with its reason.",
         )
     for key in stale:
         print(
             f"::error::OPEN of scripts/check_choice_literals.py lists {key}, "
             "which no longer exists or no longer needs it"
+        )
+    for table_key in stale_tables:
+        print(
+            f"::error::OPEN_TABLES of scripts/check_choice_literals.py lists "
+            f"{table_key}, which no longer matches a vocabulary"
+        )
+    for choice_key in stale_unchecked:
+        print(
+            f"::error::UNCHECKED of scripts/check_choice_literals.py lists "
+            f"{choice_key}, which is now checked or no longer exists"
         )
     return 1
 

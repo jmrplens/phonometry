@@ -113,7 +113,7 @@ the implementation.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs or parameters are invalid. |
-| TypeError | if `overlap` is not a single number, or `nperseg` is a flag, a text or an array where a count goes. |
+| TypeError | if `overlap` is not a single number, or `nperseg` is a flag, a text or an array where a count goes, or `scaling` is not a text. |
 
 ## CoherentOutputSpectrumResult
 
@@ -241,7 +241,7 @@ with the measured coherence in place of the unknown true value.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs or parameters are invalid. |
-| TypeError | if `overlap` is not a single number, or `nperseg` is a flag, a text or an array where a count goes. |
+| TypeError | if `overlap` is not a single number, or `nperseg` is a flag, a text or an array where a count goes, or `scaling` is not a text. |
 
 ## CrossSpectralDensityResult
 
@@ -359,7 +359,7 @@ are copied unchanged.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs or parameters are invalid. |
-| TypeError | if `fraction` is not a single number. |
+| TypeError | if `fraction` is not a single number, or `domain` is not a text. |
 
 ## power_spectral_density
 
@@ -408,7 +408,7 @@ resolution-bias error at a resonance peak see
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs or parameters are invalid. |
-| TypeError | if `confidence` or `overlap` is not a single number, or `nperseg` is a flag, a text or an array where a count goes. |
+| TypeError | if `confidence` or `overlap` is not a single number, or `nperseg` is a flag, a text or an array where a count goes, or `scaling` is not a text. |
 
 ## resolution_bias_error
 

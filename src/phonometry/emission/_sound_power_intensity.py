@@ -88,7 +88,7 @@ from __future__ import annotations
 import math
 import warnings
 from dataclasses import KW_ONLY, dataclass
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -117,7 +117,7 @@ from .._internal.validation import (
     require_scalar,
 )
 from ..metrology.reference_values import REFERENCE_VALUES
-from ._shared import SoundPowerWarning, _a_weighting_corrections, _check_grade
+from ._shared import Grade, SoundPowerWarning, _a_weighting_corrections, _check_grade
 from .intensity import dynamic_capability_index
 
 #: Reference sound power, in watts (ISO 9614-2, 3.6.3; ISO 1683:2015 Table 1).
@@ -127,10 +127,9 @@ _S0 = 1.0  #: Reference surface area, in square metres (ISO 9614-2, A.2.1).
 #: Rejection message for a 'frequencies' vector that does not span the bands.
 _FREQUENCIES_BAND_COUNT_MSG = "'frequencies' length must match the number of bands."
 
-Grade = Literal["engineering", "survey"]
 
 #: Deviation error factor K, in dB (ISO 9614-2:1996 Table 1).
-_K: dict[str, float] = {"engineering": 10.0, "survey": 7.0}
+_K: dict[Grade, float] = {"engineering": 10.0, "survey": 7.0}
 #: Criterion 2 limit on the negative-partial-power indicator (Eq. B.2), in dB.
 _F_PLUS_MINUS_LIMIT = 3.0
 #: Grade-3 (control) per-band repeatability limit s, in dB. Table 2 tabulates
@@ -605,7 +604,8 @@ def sound_power_intensity(
         4 dB reused per band (extrapolated -- non-normative).
     :return: :class:`SoundPowerIntensityResult`.
     :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a float), or
-        ``frequencies`` holds a text or a value that is not a real number.
+        ``frequencies`` holds a text or a value that is not a real number, or ``grade``
+        is not a text.
     """
     grade = _check_grade(grade)
     intensity, seg = _validate_scan(normal_intensity, areas, frequencies, fraction)
@@ -786,7 +786,7 @@ def _a_weighting_omission(
     fpi: np.ndarray | None,
     ld: np.ndarray | None,
     f_plus_minus: np.ndarray,
-    grade: str,
+    grade: Grade,
     negative_band: np.ndarray,
 ) -> np.ndarray | None:
     r"""Bands to omit from the A-weighted total (ISO 9614-2:1996 clause 10.6 b).

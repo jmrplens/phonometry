@@ -276,7 +276,7 @@ def test_an_unknown_band_is_refused() -> None:
 
 def test_the_weighting_has_to_be_said() -> None:
     levels = np.zeros((1, 7))
-    with pytest.raises(ValueError, match=r"'weighting' must be 'A' or 'Z'"):
+    with pytest.raises(ValueError, match="'weighting' must be one of"):
         env.amplitude_modulation_band_levels(
             levels, frequencies=wtm.AM_FREQUENCY_BANDS_HZ[1], band=1, weighting="C"
         )

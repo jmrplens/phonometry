@@ -183,6 +183,7 @@ representative value marked.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if the row was not computed or nothing was. |
+| TypeError | if `parameter` is not a text. |
 
 ### BinauralIndicators.reporting_results()
 
@@ -233,7 +234,7 @@ The single representative value of a metric: the higher ear (D.2).
 ```python
 BinauralMetric(
     symbol: str,
-    parameter: str,
+    parameter: Literal['sound_pressure_level', 'loudness', 'sharpness', 'tonality', 'roughness', 'fluctuation_strength'],
     left: float,
     right: float,
     unit: str,

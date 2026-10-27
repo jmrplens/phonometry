@@ -214,7 +214,7 @@ def test_unknown_quantity_rejected(tmp_path: Path) -> None:
     """An unknown facade quantity raises ``ValueError``."""
     result = _facade_dnt()
     out = str(tmp_path / "x.pdf")
-    with pytest.raises(ValueError, match=r"Unknown facade quantity"):
+    with pytest.raises(ValueError, match="'quantity' must be one of"):
         result.report(out, quantity="dnt")
 
 

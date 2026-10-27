@@ -1123,7 +1123,7 @@ _METHODS: dict[tuple[str, str], tuple[MethodEntry, ...]] = {
 
 
 def _method_pair(
-    condition: str, source_kind: str
+    condition: object, source_kind: object
 ) -> tuple[EnclosureCondition, SourceKind]:
     """The condition and the source kind of a combination Table 1 prints.
 

@@ -54,12 +54,13 @@ from __future__ import annotations
 import math
 from dataclasses import KW_ONLY, dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, ClassVar, Literal
+from typing import TYPE_CHECKING, Any, ClassVar
 
 import numpy as np
 
 from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
+    require_choice,
     require_equal_shapes,
     require_non_negative,
     require_positive,
@@ -75,6 +76,7 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
+    from .._internal.types import GroundClass
 
 __all__ = [
     "MeanGroundPlaneResult",
@@ -92,9 +94,6 @@ __all__ = [
 _RH = 60.0
 #: Speed of sound at ICAO reference conditions, in m/s (Eq. 22).
 _C = 346.1
-#: A CNOSSOS-EU ground class, by the letter Doc 32 Table 5 gives it.
-GroundClass = Literal["A", "B", "C", "D", "E", "F", "G", "H"]
-
 #: CNOSSOS-EU flow resistivity by ground class, in Pa·s/m² (Doc 32 Table 5 / D1.5d Table 5).
 _FLOW_RESISTIVITY: dict[str, float] = {
     "A": 12.5e3,  # very soft (snow, moss)
@@ -309,10 +308,7 @@ def ground_effect_adjustment(
 def _resolve_flow_resistivity(flow_resistivity: float | str) -> float:
     """The flow resistivity ``σ`` in Pa·s/m² from a value or CNOSSOS class letter."""
     if isinstance(flow_resistivity, str):
-        if flow_resistivity not in _FLOW_RESISTIVITY:
-            valid = ", ".join(sorted(_FLOW_RESISTIVITY))
-            msg = f"'flow_resistivity' class must be one of {valid}, got {flow_resistivity!r}."
-            raise ValueError(msg)
+        require_choice(flow_resistivity, "flow_resistivity", tuple(_FLOW_RESISTIVITY))
         return _FLOW_RESISTIVITY[flow_resistivity]
     return require_positive(flow_resistivity, "flow_resistivity")
 

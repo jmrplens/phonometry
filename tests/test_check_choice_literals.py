@@ -22,7 +22,7 @@ import pathlib
 import sys
 import textwrap
 import typing
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Literal
@@ -1240,3 +1240,195 @@ def test_a_method_the_package_inherits_from_a_private_base_is_read_once() -> Non
         if qualname.endswith("_DrawableLayer.plot")
     ]
     assert plots == [("phonometry.materials.absorbers.layered", "_DrawableLayer.plot")]
+
+
+def _never_checked(mode: _Pace) -> bool:
+    return mode == "fast"
+
+
+def _checked_with_not_in(mode: _Pace) -> _Pace:
+    if mode not in _PACES:
+        raise ValueError(mode)
+    return mode
+
+
+def _checked_beside_another(mode: _Pace, *, strict: bool) -> _Pace:
+    if strict:
+        require_choice(mode, "mode", _PACES)
+    return mode
+
+
+def _checked_behind_its_own_test(mode: _Pace | None) -> _Pace | None:
+    if mode is not None:
+        require_choice(mode, "mode", _PACES)
+    return mode
+
+
+def _verdict_of(
+    function: Callable[..., object], name: str, *, collection: bool = False
+) -> str | None:
+    return ccl._verdict(
+        ccl._checks_of(function, name, field=False, collection=collection, depth=0)
+    )
+
+
+def test_a_choice_is_checked_by_a_shared_validator_on_every_path() -> None:
+    """``require_choice`` where the function starts passes; a check only
+    beside another argument, a ``not in`` that refuses a number with
+    ``ValueError`` and no check at all each fail with their own verdict.
+    """
+    assert _verdict_of(_validated, "mode") is None
+    assert _verdict_of(_checked_behind_its_own_test, "mode") is None
+    assert _verdict_of(_checked_beside_another, "mode") == (
+        "checked on some paths only, so a misspelling passes on the others"
+    )
+    assert _verdict_of(_checked_with_not_in, "mode") == (
+        "checked with ``not in``, so a value that is not a text is refused "
+        "with ValueError instead of TypeError"
+    )
+    assert _verdict_of(_never_checked, "mode") == (
+        "never checked, so a misspelling passes"
+    )
+
+
+def _rows_once_each(paces: Sequence[_Pace]) -> tuple[_Pace, ...]:
+    rows = tuple(dict.fromkeys(paces))
+    for row in rows:
+        require_choice(row, "paces", _PACES)
+    return rows
+
+
+def _one_or_several_paces(paces: _Pace | Sequence[_Pace]) -> list[_Pace]:
+    chosen = (paces,) if isinstance(paces, str) else tuple(paces)
+    return [require_choice(pace, "paces", _PACES) for pace in chosen]
+
+
+def _keys_of_a_copy(levels: Mapping[_Pace, float]) -> None:
+    given: Mapping[_Pace, float] = dict(levels.items())
+    for key in given:
+        require_choice(key, "levels", _PACES)
+
+
+def _a_copy_left_unchecked(levels: Mapping[_Pace, float]) -> None:
+    given = dict(levels.items())
+    if not given:
+        raise ValueError(levels)
+
+
+def test_a_check_of_a_copy_of_the_items_is_a_check_of_the_items() -> None:
+    """``tuple(dict.fromkeys(x))``, ``(x,) if isinstance(x, str) else
+    tuple(x)`` and ``dict(x.items())`` hold the caller's items, so a check
+    of each item of the copy checks each item of the choice; a copy nobody
+    checks leaves the choice unchecked.
+    """
+    assert _verdict_of(_rows_once_each, "paces", collection=True) is None
+    assert _verdict_of(_one_or_several_paces, "paces", collection=True) is None
+    assert _verdict_of(_keys_of_a_copy, "levels", collection=True) is None
+    assert _verdict_of(_a_copy_left_unchecked, "levels", collection=True) == (
+        "never checked, so a misspelling passes"
+    )
+
+
+@dataclass(frozen=True)
+class _Strides:
+    """A record that checks each of its choices when it is built."""
+
+    paces: tuple[_Pace, ...]
+
+    def __post_init__(self) -> None:
+        for pace in self.paces:
+            require_choice(pace, "paces", _PACES)
+
+    @classmethod
+    def of(cls, paces: Sequence[_Pace]) -> _Strides:
+        return cls(paces=tuple(paces))
+
+
+def test_a_choice_handed_to_the_record_a_classmethod_builds_is_checked_there() -> None:
+    """``cls(paces=tuple(paces))`` is followed into the record's
+    ``__post_init__``, where each item is checked.
+    """
+    assert _verdict_of(_Strides.of, "paces", collection=True) is None
+
+
+def test_a_stale_unchecked_entry_fails_and_a_needed_one_does_not(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """An entry of ``UNCHECKED`` the walk still finds is kept; one it no
+    longer finds is stale. The walk hands back every unchecked choice, the
+    exempt ones too, so a needed entry is never mistaken for a stale one.
+    """
+    needed = ("phonometry.synthetic", "_never_checked", "mode")
+    gone = ("phonometry.nowhere", "gone", "mode")
+    monkeypatch.setitem(ccl.UNCHECKED, needed, "a reason that still applies")
+    monkeypatch.setitem(ccl.UNCHECKED, gone, "a reason that no longer applies")
+    walk = [ccl.Choice(*needed, "_Pace", ("never checked",))]
+    stale = ccl._stale_unchecked(walk)
+    assert needed not in stale
+    assert gone in stale
+
+
+def test_every_literal_choice_is_checked_on_every_path() -> None:
+    """The package passes: every public ``Literal`` choice and every one a
+    record a caller builds holds reaches a shared validator on every path,
+    and no entry of ``UNCHECKED`` is stale (rule A45).
+    """
+    every = list(ccl.unchecked_choices())
+    assert [
+        choice
+        for choice in every
+        if (choice.module, choice.qualname, choice.name) not in ccl.UNCHECKED
+    ] == []
+    assert ccl._stale_unchecked(every) == []
+
+
+#: A table of this module keyed by the options of ``_Pace`` but typed ``str``.
+_PACE_LIMITS_TEXT: dict[str, float] = {"fast": 0.125, "slow": 1.0}
+#: The same table keyed by the vocabulary.
+_PACE_LIMITS: dict[_Pace, float] = {"fast": 0.125, "slow": 1.0}
+
+
+def test_a_table_keyed_by_any_text_whose_keys_are_a_vocabulary_is_found() -> None:
+    """A ``dict[str, ...]`` whose keys are the options of a ``Literal`` of its
+    module is the vocabulary written twice; keyed by the ``Literal`` it is not.
+    """
+    text = list(
+        ccl._keyed_by_text(
+            _PACE_LIMITS_TEXT,
+            ccl._annotation_node("dict[str, float]"),
+            __name__,
+            "",
+            0,
+        )
+    )
+    typed = list(
+        ccl._keyed_by_text(
+            _PACE_LIMITS,
+            ccl._annotation_node("dict[_Pace, float]"),
+            __name__,
+            "",
+            0,
+        )
+    )
+    assert text == [("", frozenset({"fast", "slow"}))]
+    assert typed == []
+
+
+def test_a_stale_open_table_entry_fails(monkeypatch: pytest.MonkeyPatch) -> None:
+    """An exemption for a table the walk no longer flags cannot outlive its reason."""
+    key = ("phonometry.nowhere", "GONE")
+    monkeypatch.setitem(ccl.OPEN_TABLES, key, "a reason that no longer applies")
+    assert ccl._stale_tables([]) == [key]
+
+
+def test_every_published_table_of_a_vocabulary_is_keyed_by_it() -> None:
+    """The package passes: no published table keyed by any text holds the
+    options of a vocabulary, and no entry of ``OPEN_TABLES`` is stale (rule A21).
+    """
+    tables = list(ccl.vocabulary_tables())
+    assert [
+        table
+        for table in tables
+        if (table.module, table.qualname) not in ccl.OPEN_TABLES
+    ] == []
+    assert ccl._stale_tables(tables) == []

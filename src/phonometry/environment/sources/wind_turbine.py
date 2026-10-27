@@ -35,6 +35,7 @@ from ..._internal.boundary import settled
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     check_engine,
+    require_choice,
     require_equal_shapes,
     require_ranks,
     require_same_length,
@@ -111,8 +112,9 @@ def slant_distance(
     :raises ValueError: If a dimension is not positive or ``rotor_axis`` is
         not one of the two orientations.
     :raises TypeError: if ``hub_height_m`` or ``rotor_diameter_m`` is not a single
-        number.
+        number, or ``rotor_axis`` is not a text.
     """
+    require_choice(rotor_axis, "rotor_axis", ("horizontal", "vertical"))
     h = _positive(hub_height_m, "hub_height_m")
     d = _positive(rotor_diameter_m, "rotor_diameter_m")
     if rotor_axis == "horizontal":

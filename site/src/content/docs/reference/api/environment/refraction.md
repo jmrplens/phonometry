@@ -127,7 +127,7 @@ convention.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid or the impedance is unspecified. |
-| TypeError | if `frequency_hz`, `height_step_m`, `max_height_m`, `max_range`, `range_step` or `source_height_m` is not a single number. |
+| TypeError | if `frequency_hz`, `height_step_m`, `max_height_m`, `max_range`, `range_step` or `source_height_m` is not a single number, or `model` is not a text. |
 
 ## atmospheric_ray_paths
 

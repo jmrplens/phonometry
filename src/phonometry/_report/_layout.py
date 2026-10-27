@@ -798,7 +798,7 @@ def compliance_table(
         leading=11,
     )
 
-    def _result_markup(status: str) -> str:
+    def _result_markup(status: object) -> str:
         """The result cell of one row: a verdict, or the informational dash.
 
         The dash is what an unjudged row prints, so it has to be asked for by

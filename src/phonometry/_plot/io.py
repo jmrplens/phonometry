@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -13,6 +13,7 @@ if TYPE_CHECKING:
     from .._i18n import Language
     from ..io._signal import Signal
 
+from .._internal.validation import require_choice
 from .common import (
     _C_PRIMARY,
     _LEGEND_UPPER_RIGHT,
@@ -101,7 +102,7 @@ def plot_signal(
     ax: Axes | None = None,
     *,
     language: Language = "en",
-    scale: str = "linear",
+    scale: Literal["linear", "db"] = "linear",
     **kwargs: Any,
 ) -> Axes:
     """Waveform of a :class:`~phonometry.io.Signal`, calibrated when it can be.
@@ -125,14 +126,13 @@ def plot_signal(
         result plots.
     :param kwargs: Forwarded to every channel's ``plot`` call.
     :return: The axes drawn on.
+    :raises TypeError: if ``scale`` is not a text.
     :raises ValueError: If ``scale`` is neither ``"linear"`` nor ``"db"``, or
         if ``"db"`` is asked of an uncalibrated Signal.
     """
     from .._i18n import localize_axes
 
-    if scale not in ("linear", "db"):
-        msg = f"scale must be 'linear' or 'db'; got {scale!r}"
-        raise ValueError(msg)
+    require_choice(scale, "scale", ("linear", "db"))
 
     factor = result.calibration_factor
     calibrated = factor is not None

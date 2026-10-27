@@ -550,8 +550,9 @@ def band_uncertainty(
     :param situation: Measurement situation ``"A"``, ``"B"`` or ``"C"`` (Clause 5.2).
     :param upper_limit: Select the ``σR95`` upper limit (airborne, situation A).
     :raises ValueError: Unknown measurand, or a situation not tabulated for it.
-    :raises TypeError: if ``measurand`` is not a text.
+    :raises TypeError: if ``measurand`` or ``situation`` is not a text.
     """
+    require_choice(situation, "situation", ("A", "B", "C"))
     # The measurand is validated on its own first, so an unknown one is
     # refused by name instead of being misreported by the ``upper_limit``
     # branch below as a real measurand that merely lacks a σR95 table.
@@ -603,7 +604,7 @@ def single_number_uncertainty(
     :param upper_limit: Select the ``σR95`` upper limit (airborne, situation A).
     :raises ValueError: Unknown descriptor, an untabulated situation, or an
         ``upper_limit`` request outside airborne/situation A.
-    :raises TypeError: if ``quantity`` is not a text.
+    :raises TypeError: if ``quantity`` or ``situation`` is not a text.
     """
     key = _canonical(quantity)
     situations, sigma_r95 = _SINGLE[key]
@@ -615,9 +616,7 @@ def single_number_uncertainty(
             msg = f"No σR95 upper limit tabulated for {quantity!r}."
             raise ValueError(msg)
         return sigma_r95
-    if situation not in _SITUATION_INDEX:
-        msg = f"Unknown situation {situation!r}. Valid: A, B, C."
-        raise ValueError(msg)
+    require_choice(situation, "situation", tuple(_SITUATION_INDEX))
     value = situations[_SITUATION_INDEX[situation]]
     if value is None:
         msg = f"Situation {situation!r} is not tabulated for descriptor {quantity!r}."
@@ -717,7 +716,7 @@ def uncertain_value(
     :param coverage: Coverage probability as a fraction.
     :param one_sided: Use the one-sided coverage factor.
     :param upper_limit: Use the ``σR95`` upper limit (airborne, situation A).
-    :raises TypeError: if ``quantity`` is not a text.
+    :raises TypeError: if ``quantity`` or ``situation`` is not a text.
     """
     u = single_number_uncertainty(quantity, situation, upper_limit=upper_limit)
     k = max(insulation_coverage_factor(coverage, one_sided=one_sided), 1.0)
@@ -965,6 +964,7 @@ def assess_requirement_conformity(
     :raises ValueError: For an unknown ``bound``, a value that is not finite or
         a negative uncertainty.
     """
+    require_choice(bound, "bound", ("minimum", "maximum"))
     return RequirementConformity(
         rating=float(require_finite(rating, "rating")),
         expanded_uncertainty_db=float(

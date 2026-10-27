@@ -439,6 +439,7 @@ Plot the distribution, as its class density, density or exceedance.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `view` is not one of the three names above. |
+| TypeError | if `view` is not a text. |
 
 ## turbulence_level_shift
 

@@ -16,6 +16,7 @@ produces it, which is also what establishes its reference force.
 from __future__ import annotations
 
 import math
+from typing import TYPE_CHECKING
 
 import numpy as np
 import pytest
@@ -23,7 +24,11 @@ import pytest
 from phonometry import building
 from phonometry.vibration.structural.point_mobility import infinite_plate_mobility
 
+if TYPE_CHECKING:
+    from phonometry.building.prediction.installed_structure_borne import Structure
+
 # ---------------------------------------------------------------------------
+
 # Annex D, Table D.1 (PDF page 48, printed folio 46)
 # ---------------------------------------------------------------------------
 #: The "Describing quantities" column, row by row, as printed.
@@ -177,7 +182,7 @@ def test_plate_row_is_formula_f4_in_other_symbols() -> None:
 
 @pytest.mark.parametrize("structure", list(building.TABLE_D1_QUANTITIES))
 def test_table_d1_rejects_a_quantity_that_does_not_describe_the_row(
-    structure: str,
+    structure: Structure,
 ) -> None:
     """Only the quantities of the row's own second column are accepted."""
     supplied: dict[str, float] = dict.fromkeys(

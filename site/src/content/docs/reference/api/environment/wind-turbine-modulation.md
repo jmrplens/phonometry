@@ -183,7 +183,7 @@ value at each nominal centre frequency.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the band is not one of the band numbers (`1.5` and `True` are not), a band centre is missing or duplicated, the weighting is neither `"A"` nor `"Z"`, or the levels are not finite. |
-| TypeError | if `band` is a flag, a text or an array where a count goes, or `band_levels` or `frequencies` holds a text or a value that is not a real number. |
+| TypeError | if `band` is a flag, a text or an array where a count goes, or `band_levels` or `frequencies` holds a text or a value that is not a real number, or `weighting` is not a text. |
 
 ## amplitude_modulation_block
 
@@ -455,6 +455,12 @@ of the reconstruction.
 | `kwargs` | Forwarded to the primary artist. |
 
 **Returns:** The axes.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `kind` is not a text. |
 
 ### ModulationBlock.status
 

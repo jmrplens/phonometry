@@ -234,7 +234,7 @@ corrections are the 2-D fits of Sci. Rep. 7:5389 Eqs. (11)-(12); both
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `lattice_step_m` or `slit_height_m` is not a single number, or `frequency` holds a text or a value that is not a real number. |
+| TypeError | if `lattice_step_m` or `slit_height_m` is not a single number, or `frequency` holds a text or a value that is not a real number, or `geometry` is not a text. |
 
 ## HelmholtzResonator
 

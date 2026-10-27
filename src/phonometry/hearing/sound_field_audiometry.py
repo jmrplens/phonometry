@@ -374,9 +374,12 @@ def _position_grid[P: str](
     :param name: The argument name, for the error message.
     :param clause: The clause that names the positions, for the message.
     :return: A ``(positions, bands)`` float array.
+    :raises TypeError: if a position is not a text.
     :raises ValueError: if a position is missing or unknown, or a row does not
         fit.
     """
+    for position in levels:
+        require_choice(position, name, positions)
     names = set(levels)
     if names != set(positions):
         msg = (

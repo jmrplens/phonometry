@@ -162,7 +162,7 @@ def test_ground_effect_class_letters_and_values_agree() -> None:
 def test_ground_effect_invalid_inputs() -> None:
     with pytest.raises(ValueError, match=r"'horizontal_distance_m' must be positive"):
         ground_effect_adjustment([500.0], 100.0, 1.5, 0.0)
-    with pytest.raises(ValueError, match=r"'flow_resistivity' class must be one of"):
+    with pytest.raises(ValueError, match="'flow_resistivity' must be one of"):
         ground_effect_adjustment([500.0], 100.0, 1.5, 300.0, flow_resistivity="Z")
 
 
@@ -1536,17 +1536,8 @@ def test_event_validation() -> None:
     pos = np.array([[0.0, -50.0, 100.0], [0.0, 50.0, 100.0]])
     with pytest.raises(ValueError, match=r"'receiver' must be a finite"):
         rotorcraft_event_level(hems, [50.0], [0.0], t, pos, (0.0, 0.0, 0.0, 0.0))
-    unknown_method_atmosphere = RotorcraftAtmosphere(atmospheric_method="exact")
     with pytest.raises(ValueError, match=r"'atmospheric_method' must be one of"):
-        rotorcraft_event_level(
-            hems,
-            [50.0],
-            [0.0],
-            t,
-            pos,
-            (0.0, 0.0),
-            atmosphere=unknown_method_atmosphere,
-        )
+        RotorcraftAtmosphere(atmospheric_method="exact")  # type: ignore[arg-type]
     mismatched_airspeed_state = RotorcraftTrackState(airspeed=[50.0, 50.0, 50.0])
     with pytest.raises(
         ValueError, match=r"'airspeed' must be a scalar or match the track length"

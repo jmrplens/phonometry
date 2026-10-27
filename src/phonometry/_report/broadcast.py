@@ -33,8 +33,9 @@ from __future__ import annotations
 
 import html
 import math
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
+from .._internal.validation import require_choice
 from ._i18n import decimal_comma, format_number, t
 from ._layout import (
     _ACCENT_HEX,
@@ -59,6 +60,9 @@ if TYPE_CHECKING:
 #: EBU R 128 target programme loudness, LUFS.
 _DEFAULT_TARGET_LUFS = -23.0
 
+#: The two tolerance rules a fiche can apply.
+type _Tolerance = Literal["qc", "live"]
+
 #: Programme-loudness tolerance about the target, in LU, per compliance rule
 #: (EBU R 128 v4/2020, unchanged in the 2023 revision): ``"qc"`` is the
 #: +-0.2 LU allowance of item i) for measurement errors in loudness workflows
@@ -66,10 +70,10 @@ _DEFAULT_TARGET_LUFS = -23.0
 #: permitted only where attaining the Target Level is not achievable
 #: practically (for example, live programmes). The pre-2020 blanket +-0.5 LU
 #: (the June 2014 V3 rule) no longer exists in R 128.
-_TOLERANCES_LU: dict[str, float] = {"qc": 0.2, "live": 1.0}
+_TOLERANCES_LU: dict[_Tolerance, float] = {"qc": 0.2, "live": 1.0}
 
 #: The R 128 recommendation item each tolerance rule cites on the fiche.
-_TOLERANCE_CLAUSES: dict[str, str] = {"qc": "item i", "live": "item h"}
+_TOLERANCE_CLAUSES: dict[_Tolerance, str] = {"qc": "item i", "live": "item h"}
 
 #: EBU R 128 maximum permitted true-peak level, dBTP (item m).
 _MAX_TRUE_PEAK_DBTP = -1.0
@@ -268,7 +272,7 @@ def _statement(result: ProgramLoudnessResult, language: Language = "en") -> str:
 def _verdict(
     result: ProgramLoudnessResult,
     target: float,
-    tolerance: str = "qc",
+    tolerance: _Tolerance = "qc",
     language: Language = "en",
 ) -> tuple[str, bool]:
     """Combined verdict text and PASS flag (integrated loudness and true peak).
@@ -299,7 +303,7 @@ def render_program_loudness_report(
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
     language: Language = "en",
-    tolerance: str = "qc",
+    tolerance: _Tolerance = "qc",
 ) -> str:
     """Render an EBU R 128 programme-loudness fiche to a PDF at ``path``.
 
@@ -322,17 +326,13 @@ def render_program_loudness_report(
         programmes). The applied rule and its R 128 item are printed on the
         fiche.
     :return: The written ``path`` as a :class:`str`.
+    :raises TypeError: if ``tolerance`` is not a text.
     :raises ValueError: If ``tolerance`` is not ``"qc"`` or ``"live"``.
     :raises ImportError: If reportlab (or, for the figure, matplotlib) is not
         installed.
     """
     del verbose  # uniform signature; the fiche has one stacked body layout
-    if tolerance not in _TOLERANCES_LU:
-        msg = (
-            f"Unknown tolerance rule {tolerance!r}; use 'qc' (+-0.2 LU, EBU "
-            "R 128 item i) or 'live' (+-1.0 LU, item h)."
-        )
-        raise ValueError(msg)
+    require_choice(tolerance, "tolerance", tuple(_TOLERANCES_LU))
     tolerance_lu = _TOLERANCES_LU[tolerance]
     try:
         from reportlab.lib import colors

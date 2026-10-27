@@ -1124,6 +1124,12 @@ def road_source_power(
         an invalid flow rate or speed.
     :raises TypeError: if ``surface`` is neither a text nor a road surface.
     """
+    # The surface is read once, so a misspelt name is refused before any flow.
+    row = (
+        surface
+        if isinstance(surface, RoadSurfaceCoefficients)
+        else road_surface_coefficients(surface)
+    )
     flows = [traffic] if isinstance(traffic, RoadTraffic) else list(traffic)
     if not flows:
         msg = "'traffic' must carry at least one vehicle category."
@@ -1143,7 +1149,7 @@ def road_source_power(
         lwr = road_rolling_noise(
             key,
             v,
-            surface=surface,
+            surface=row,
             temperature_c=temperature_c,
             studded_fraction=flow.studded_fraction,
             studded_months=studded_months,
@@ -1154,7 +1160,7 @@ def road_source_power(
         lwp = road_propulsion_noise(
             key,
             v,
-            surface=surface,
+            surface=row,
             road_slope_percent=road_slope_percent,
             junction_distance=junction_distance,
             junction_type=junction_type,

@@ -29,6 +29,11 @@ Stdlib only, like every module of this package.
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from phonometry.metrology.reciprocity_coupler import MicrophoneType
+
 #: IEC 61094-2:2009 and IEC 61094-3:2016 clause 4: 23,0 °C, 101,325 kPa, 50 %.
 IEC61094_RECIPROCITY_REFERENCE_CONDITIONS: tuple[float, float, float] = (
     23.0,
@@ -431,7 +436,7 @@ IEC61094_2_TABLE_B: tuple[tuple[float, tuple[tuple[float, float], ...]], ...] = 
 
 #: IEC 61094-2:2009 Table C.1, folio 28: the nominal dimensions of plane-wave
 #: couplers in mm, (ø A, ø B, ø C, D, E minimum, E maximum), per type.
-IEC61094_2_TABLE_C1_MM: dict[str, tuple[float, ...]] = {
+IEC61094_2_TABLE_C1_MM: dict[MicrophoneType, tuple[float, ...]] = {
     "LS1P": (23.77, 18.6, 18.6, 1.95, 3.5, 9.5),
     "LS2aP": (13.2, 9.3, 9.3, 0.5, 3.0, 7.0),
     "LS2bP": (12.15, 9.8, 9.8, 0.7, 3.5, 6.0),
@@ -440,7 +445,7 @@ IEC61094_2_TABLE_C1_MM: dict[str, tuple[float, ...]] = {
 #: IEC 61094-2:2009 Table C.2, folio 29: the nominal dimensions of
 #: large-volume couplers in mm, (ø A, ø B, ø C, D, E, F), per type, with a
 #: tolerance of ± 0,03 mm on C, E and F.
-IEC61094_2_TABLE_C2_MM: dict[str, tuple[float, ...]] = {
+IEC61094_2_TABLE_C2_MM: dict[MicrophoneType, tuple[float, ...]] = {
     "LS1P": (23.77, 18.6, 42.88, 1.95, 12.55, 0.80),
     "LS2aP": (13.2, 9.3, 18.30, 0.5, 3.50, 0.40),
     "LS2bP": (12.15, 9.8, 18.30, 0.7, 3.50, 0.40),
@@ -462,7 +467,7 @@ IEC61094_2_TABLE_C3_DB: dict[float, float] = {
 #: frequency range given by omega rho a**2 > 100 eta. This corresponds to
 #: frequencies higher than 3 Hz and 12 Hz for plane-wave couplers as given in
 #: Table C.1 for type LS1P and LS2aP microphones respectively."
-IEC61094_2_A3_LOWEST_HZ: dict[str, float] = {"LS1P": 3.0, "LS2aP": 12.0}
+IEC61094_2_A3_LOWEST_HZ: dict[MicrophoneType, float] = {"LS1P": 3.0, "LS2aP": 12.0}
 
 #: IEC 61094-2:2009 Table 1, folio 19: each measured quantity and the
 #: subclauses it is referred to, in the table's order, as printed.

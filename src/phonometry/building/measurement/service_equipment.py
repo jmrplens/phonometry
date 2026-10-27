@@ -305,6 +305,9 @@ _C_THIRD: Final = (
 _A_OCTAVE: Final = (-39.4, -26.2, -16.1, -8.6, -3.2, 0.0, 1.2, 1.0, -1.1)
 _C_OCTAVE: Final = (-3.0, -0.8, -0.2, 0.0, 0.0, 0.0, -0.2, -0.8, -3.0)
 
+#: A weighting of Table A.1 and of the single numbers of Table 2.
+Weighting = Literal["A", "C"]
+
 #: A- and C-weighting corrections of **ISO/DIS 16032:2023 Annex A, Table A.1**
 #: (E DIN EN ISO 16032:2023-05, printed p. 12 of the English text), in dB.
 #: Keyed by band set, the ``fraction`` of :func:`service_equipment_level` (3,
@@ -313,7 +316,7 @@ _C_OCTAVE: Final = (-3.0, -0.8, -0.2, 0.0, 0.0, 0.0, -0.2, -0.8, -3.0)
 #: Hz. The one-third-octave C-weighting at 25 Hz and from
 #: 1 600 Hz to 10 000 Hz is the IEC 61672-1:2013 value where the draft prints a
 #: defect; every other cell is the print.
-SERVICE_EQUIPMENT_WEIGHTING: Mapping[int, Mapping[str, Mapping[float, float]]] = (
+SERVICE_EQUIPMENT_WEIGHTING: Mapping[int, Mapping[Weighting, Mapping[float, float]]] = (
     MappingProxyType(
         {
             3: MappingProxyType(
@@ -384,8 +387,8 @@ SERVICE_EQUIPMENT_REPRODUCIBILITY: Mapping[int, Mapping[float, float]] = (
 #: **ISO/DIS 16032:2023 Table 2** (printed p. 10), in dB: 0,8 dB and 1,2 dB.
 #: Footnote a limits both to a constant sound with a relatively flat spectrum
 #: from 25 Hz to 10 000 Hz, at least 10 dB above the background.
-SERVICE_EQUIPMENT_WEIGHTED_REPRODUCIBILITY: Mapping[str, float] = MappingProxyType(
-    {"A": 0.8, "C": 1.2}
+SERVICE_EQUIPMENT_WEIGHTED_REPRODUCIBILITY: Mapping[Weighting, float] = (
+    MappingProxyType({"A": 0.8, "C": 1.2})
 )
 
 
@@ -1244,7 +1247,7 @@ class ServiceEquipmentResult(OwnsArrays):
             np.asarray(self.frequencies), _WEIGHTING_RANGES[self.fraction][key]
         )
 
-    def upper_limit(self, weighting: Literal["A", "C"]) -> bool:
+    def upper_limit(self, weighting: Weighting) -> bool:
         """Whether a weighted value is an upper limit because of the background.
 
         A band the background held at 2,2 dB (Clause 9) that lies in the range
@@ -1295,7 +1298,9 @@ class ServiceEquipmentResult(OwnsArrays):
         """
         return MappingProxyType(
             {
-                key: SERVICE_EQUIPMENT_WEIGHTED_REPRODUCIBILITY[key[1]]
+                key: SERVICE_EQUIPMENT_WEIGHTED_REPRODUCIBILITY[
+                    "A" if key.startswith("LA") else "C"
+                ]
                 for key in self.ratings
             }
         )

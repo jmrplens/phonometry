@@ -163,6 +163,7 @@ import numpy as np
 from .._internal.display import RichDisplay
 from .._internal.validation import (
     is_class_designation,
+    require_choice,
     require_count,
     require_real,
 )
@@ -398,32 +399,34 @@ _E_REFERENCES_DB = (
 #: exposure level (:math:`L_\mathrm{AE} - L_\mathrm{A}`, the 12 durations of
 #: F, whose limits it shares). The rows hold for the A, C and Z weightings
 #: alike (NOTE 3).
-IEC61672_TABLE_4: Mapping[str, tuple[ToneburstReference, ...]] = MappingProxyType(
-    {
-        "F": tuple(
-            _burst(duration, reference, *_F_AND_E_LIMITS_DB[duration])
-            for duration, reference in zip(
-                _F_AND_E_LIMITS_DB, _F_REFERENCES_DB, strict=True
-            )
-        ),
-        "S": (
-            _burst(1000.0, -2.0, (-0.5, 0.5), (-1.0, 1.0)),
-            _burst(500.0, -4.1, (-0.5, 0.5), (-1.0, 1.0)),
-            _burst(200.0, -7.4, (-0.5, 0.5), (-1.0, 1.0)),
-            _burst(100.0, -10.2, (-1.0, 1.0), (-1.0, 1.0)),
-            _burst(50.0, -13.1, (-1.0, 1.0), (-1.5, 1.0)),
-            _burst(20.0, -17.0, (-1.5, 1.0), (-2.0, 1.0)),
-            _burst(10.0, -20.0, (-2.0, 1.0), (-3.0, 1.0)),
-            _burst(5.0, -23.0, (-2.5, 1.0), (-4.0, 1.0)),
-            _burst(2.0, -27.0, (-3.0, 1.0), (-5.0, 1.0)),
-        ),
-        "E": tuple(
-            _burst(duration, reference, *_F_AND_E_LIMITS_DB[duration])
-            for duration, reference in zip(
-                _F_AND_E_LIMITS_DB, _E_REFERENCES_DB, strict=True
-            )
-        ),
-    }
+IEC61672_TABLE_4: Mapping[ToneburstResponse, tuple[ToneburstReference, ...]] = (
+    MappingProxyType(
+        {
+            "F": tuple(
+                _burst(duration, reference, *_F_AND_E_LIMITS_DB[duration])
+                for duration, reference in zip(
+                    _F_AND_E_LIMITS_DB, _F_REFERENCES_DB, strict=True
+                )
+            ),
+            "S": (
+                _burst(1000.0, -2.0, (-0.5, 0.5), (-1.0, 1.0)),
+                _burst(500.0, -4.1, (-0.5, 0.5), (-1.0, 1.0)),
+                _burst(200.0, -7.4, (-0.5, 0.5), (-1.0, 1.0)),
+                _burst(100.0, -10.2, (-1.0, 1.0), (-1.0, 1.0)),
+                _burst(50.0, -13.1, (-1.0, 1.0), (-1.5, 1.0)),
+                _burst(20.0, -17.0, (-1.5, 1.0), (-2.0, 1.0)),
+                _burst(10.0, -20.0, (-2.0, 1.0), (-3.0, 1.0)),
+                _burst(5.0, -23.0, (-2.5, 1.0), (-4.0, 1.0)),
+                _burst(2.0, -27.0, (-3.0, 1.0), (-5.0, 1.0)),
+            ),
+            "E": tuple(
+                _burst(duration, reference, *_F_AND_E_LIMITS_DB[duration])
+                for duration, reference in zip(
+                    _F_AND_E_LIMITS_DB, _E_REFERENCES_DB, strict=True
+                )
+            ),
+        }
+    )
 )
 
 #: The complete-cycle signal of IEC 61672-1:2013 Table 5, named once for its
@@ -613,8 +616,10 @@ ELECTRICAL_TEST_FREQUENCIES_HZ: Mapping[int, tuple[float, ...]] = MappingProxyTy
 #: tested at, in milliseconds: 200 ms, 2 ms and 0,25 ms for the maximum
 #: F-weighted level and the sound exposure level, 200 ms and 2 ms for the
 #: maximum S-weighted level.
-TONEBURST_TEST_DURATIONS_MS: Mapping[str, tuple[float, ...]] = MappingProxyType(
-    {"F": (200.0, 2.0, 0.25), "S": (200.0, 2.0), "E": (200.0, 2.0, 0.25)}
+TONEBURST_TEST_DURATIONS_MS: Mapping[ToneburstResponse, tuple[float, ...]] = (
+    MappingProxyType(
+        {"F": (200.0, 2.0, 0.25), "S": (200.0, 2.0), "E": (200.0, 2.0, 0.25)}
+    )
 )
 
 #: IEC 61672-3:2013 7.1: the ranges of environmental conditions periodic tests
@@ -1301,6 +1306,67 @@ class SoundLevelMeterPeriodicMeasurements(RichDisplay):
             starting point outside it, or a step at or past the first
             indication of overload or under-range.
         """
+        if self.electrical_self_noise_levels is not None:
+            for weighting in self.electrical_self_noise_levels:
+                require_choice(
+                    weighting, "electrical_self_noise_levels", ("A", "C", "Z")
+                )
+        if self.electrical_weighting_deviations_db is not None:
+            for weighting in self.electrical_weighting_deviations_db:
+                require_choice(
+                    weighting, "electrical_weighting_deviations_db", ("A", "C", "Z")
+                )
+        if self.electrical_weighting_uncertainties_db is not None:
+            for weighting in self.electrical_weighting_uncertainties_db:
+                require_choice(
+                    weighting, "electrical_weighting_uncertainties_db", ("A", "C", "Z")
+                )
+        if (
+            self.electrical_weighting_uncertainties_without_correction_data_db
+            is not None
+        ):
+            for (
+                weighting
+            ) in self.electrical_weighting_uncertainties_without_correction_data_db:
+                require_choice(
+                    weighting,
+                    "electrical_weighting_uncertainties_without_correction_data_db",
+                    ("A", "C", "Z"),
+                )
+        if self.weighting_at_1khz_deviations_db is not None:
+            for versus_a in self.weighting_at_1khz_deviations_db:
+                require_choice(versus_a, "weighting_at_1khz_deviations_db", ("C", "Z"))
+        if self.weighting_at_1khz_uncertainties_db is not None:
+            for versus_a in self.weighting_at_1khz_uncertainties_db:
+                require_choice(
+                    versus_a, "weighting_at_1khz_uncertainties_db", ("C", "Z")
+                )
+        if self.time_weighting_at_1khz_deviations_db is not None:
+            for display in self.time_weighting_at_1khz_deviations_db:
+                require_choice(
+                    display, "time_weighting_at_1khz_deviations_db", ("S", "eq")
+                )
+        if self.time_weighting_at_1khz_uncertainties_db is not None:
+            for display in self.time_weighting_at_1khz_uncertainties_db:
+                require_choice(
+                    display, "time_weighting_at_1khz_uncertainties_db", ("S", "eq")
+                )
+        if self.range_linearity_deviations_db is not None:
+            for reading in self.range_linearity_deviations_db:
+                require_choice(
+                    reading, "range_linearity_deviations_db", ("17.3", "17.4")
+                )
+        if self.range_linearity_uncertainties_db is not None:
+            for reading in self.range_linearity_uncertainties_db:
+                require_choice(
+                    reading, "range_linearity_uncertainties_db", ("17.3", "17.4")
+                )
+        if self.toneburst_responses_db is not None:
+            for response in self.toneburst_responses_db:
+                require_choice(response, "toneburst_responses_db", ("F", "S", "E"))
+        if self.toneburst_uncertainties_db is not None:
+            for response in self.toneburst_uncertainties_db:
+                require_choice(response, "toneburst_uncertainties_db", ("F", "S", "E"))
         self._freeze_environment()
         self._freeze_scalars()
         self._freeze_rows()

@@ -25,6 +25,7 @@ within ~1.5 phon.  Annex C.1 is therefore the tone oracle used.
 
 import dataclasses
 from collections.abc import Callable
+from typing import Any
 
 import numpy as np
 import pytest
@@ -482,9 +483,9 @@ def test_low_freq_band_not_truncated_across_sample_rates() -> None:
 def test_invalid_inputs_raise() -> None:
     """Invalid field, presentation, sampling rate and signal raise ValueError."""
     tone = _tone(1000.0, 40.0, duration=0.1)
-    with pytest.raises(ValueError, match="field must be one of"):
+    with pytest.raises(ValueError, match="'field' must be one of"):
         psychoacoustics.loudness_moore_glasberg_time(tone, FS, field="bogus")
-    with pytest.raises(ValueError, match="presentation must be one of"):
+    with pytest.raises(ValueError, match="'presentation' must be one of"):
         psychoacoustics.loudness_moore_glasberg_time(tone, FS, presentation="bogus")
     with pytest.raises(ValueError, match="'fs' must be a positive sampling rate"):
         psychoacoustics.loudness_moore_glasberg_time(tone, -1.0)
@@ -546,7 +547,7 @@ def test_n_max_left_behind_by_a_cropped_trace_is_refused(mg_tone: MgTone) -> Non
     """
     res = mg_tone(1000.0, 40.0)
     head = slice(0, 50)  # the attack, well below the settled peak
-    cropped = {
+    cropped: dict[str, Any] = {
         "times": res.times[head],
         "short_term_loudness": res.short_term_loudness[head],
         "long_term_loudness": res.long_term_loudness[head],

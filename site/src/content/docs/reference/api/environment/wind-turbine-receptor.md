@@ -166,7 +166,7 @@ whose first member is centred on north. Per bin:
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs disagree in length, a value is not finite, a wind speed or an uncertainty is negative, or `averaging` is unknown. |
-| TypeError | if `bin_width_m_s` or `sector_width_deg` is not a single number, or `levels`, `wind_directions_deg` or `wind_speeds_m_s` holds a text or a value that is not a real number. |
+| TypeError | if `bin_width_m_s` or `sector_width_deg` is not a single number, or `levels`, `wind_directions_deg` or `wind_speeds_m_s` holds a text or a value that is not a real number, or `averaging` is not a text. |
 
 ## BinnedSoundLevels
 

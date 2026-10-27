@@ -87,7 +87,7 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
 
     from ..._i18n import Language
-    from ..._internal.types import RealScalar, RealValues
+    from ..._internal.types import GroundClass, RealScalar, RealValues
 
 Averaging = Literal["energy", "arithmetic"]
 #: The three adjustments of Annex A, A.1, the most severe of which is applied.
@@ -305,7 +305,7 @@ class GroundImpedanceClass(RichDisplay):
 
 #: The ground impedance classes of Table C.1, keyed by their letter. The
 #: ground correction of Table C.2 is for class D.
-LOW_FREQUENCY_GROUND_IMPEDANCE_CLASSES: Mapping[str, GroundImpedanceClass] = (
+LOW_FREQUENCY_GROUND_IMPEDANCE_CLASSES: Mapping[GroundClass, GroundImpedanceClass] = (
     MappingProxyType(
         {
             "A": GroundImpedanceClass(
@@ -959,6 +959,13 @@ class BinnedSoundLevels(OwnsArrays):
     bin_width_m_s: float
     sector_width_deg: float
 
+    def __post_init__(self) -> None:
+        """Refuse a choice its ``Literal`` does not list, when the record is built.
+
+        :raises TypeError: if ``averaging`` is not a text.
+        """
+        require_choice(self.averaging, "averaging", ("energy", "arithmetic"))
+
     def _keys(self) -> list[tuple[int, int]]:
         """The integer (sector, wind speed class) index of each bin.
 
@@ -1100,8 +1107,9 @@ def bin_sound_levels(
         is unknown.
     :raises TypeError: if ``bin_width_m_s`` or ``sector_width_deg`` is not a single
         number, or ``levels``, ``wind_directions_deg`` or ``wind_speeds_m_s`` holds a
-        text or a value that is not a real number.
+        text or a value that is not a real number, or ``averaging`` is not a text.
     """
+    require_choice(averaging, "averaging", ("energy", "arithmetic"))
     known = tuple(member.value for member in _Averaging)
     if averaging not in known:
         msg = f"'averaging' must be one of {known}; got {averaging!r}."

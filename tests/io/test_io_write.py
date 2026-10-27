@@ -244,7 +244,7 @@ def test_dither_is_refused_outside_pcm16(tmp_path: Path) -> None:
             match=r"dither='tpdf' applies only when quantising to PCM_16",
         ):
             write(tmp_path / "d.wav", np.zeros(4), FS, subtype=subtype, dither="tpdf")
-    with pytest.raises(ValueError, match=r"unknown dither 'rectangular'"):
+    with pytest.raises(ValueError, match="'dither' must be one of"):
         write(tmp_path / "d.wav", np.zeros(4), FS, dither="rectangular")
     # rng exists to seed the dither; alone it would promise a
     # reproducibility nothing delivers.

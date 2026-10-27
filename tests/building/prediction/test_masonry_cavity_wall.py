@@ -100,7 +100,7 @@ def test_wall_tie_stiffness_ordering() -> None:
 
 
 def test_unknown_tie_is_rejected() -> None:
-    with pytest.raises(ValueError, match="Unknown wall tie"):
+    with pytest.raises(ValueError, match="'tie' must be one of"):
         building.wall_tie_stiffness("staple")
 
 
@@ -383,7 +383,7 @@ def test_coupling_rejects_a_non_positive_tie_density() -> None:
 
 
 def test_coupling_rejects_an_unknown_tie() -> None:
-    with pytest.raises(ValueError, match="Unknown wall tie"):
+    with pytest.raises(ValueError, match="'tie' must be one of"):
         building.wall_tie_coupling_loss_factor(
             [100.0], 150.0, 170.0, 1.0e5, 1.2e5, ties_per_area=2.5, tie="staple"
         )

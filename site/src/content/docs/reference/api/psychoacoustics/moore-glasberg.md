@@ -80,7 +80,7 @@ calibrated so that `x` is the instantaneous sound pressure in pascals.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `fs` is not a single number. |
+| TypeError | if `fs` is not a single number, or `field` or `presentation` is not a text. |
 
 ## loudness_moore_glasberg_from_spectrum
 
@@ -110,6 +110,12 @@ closely spaced components of clause 5.3.
 | `presentation` | `"binaural"` (default; `"diotic"` is an equivalent alias: the same sound at both ears) or `"monaural"` (one ear only). |
 
 **Returns:** A [`MooreGlasbergLoudness`](/phonometry/reference/api/psychoacoustics/moore-glasberg/#mooreglasbergloudness).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `field` or `presentation` is not a text. |
 
 A 1 kHz tone at 40 dB SPL in a free field presented binaurally yields
 1.000 sone / 40 phon by definition of the sone.
@@ -143,6 +149,12 @@ sinusoidal components and the exact method is applied.
 
 **Returns:** A [`MooreGlasbergLoudness`](/phonometry/reference/api/psychoacoustics/moore-glasberg/#mooreglasbergloudness).
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `field` or `presentation` is not a text. |
+
 ## MooreGlasbergLoudness
 
 ```python
@@ -153,7 +165,7 @@ MooreGlasbergLoudness(
     erb_number: np.ndarray,
     frequencies: np.ndarray,
     field: Literal['free', 'diffuse', 'eardrum'],
-    presentation: str,
+    presentation: Literal['binaural', 'diotic', 'monaural'],
 )
 ```
 

@@ -41,9 +41,8 @@ def test_octave_filter_bank_invalid_init() -> None:
     with pytest.raises(ValueError, match="less than the upper limit"):
         filters.OctaveFilterBank(fs=48000, limits=[2000, 1000])
 
-    invalid_design = filters.FilterDesign(filter_type="invalid")
-    with pytest.raises(ValueError, match="Invalid filter_type"):
-        filters.OctaveFilterBank(fs=48000, design=invalid_design)
+    with pytest.raises(ValueError, match="'filter_type' must be one of"):
+        filters.FilterDesign(filter_type="invalid")  # type: ignore[arg-type]
 
 
 def test_weighting_filter_invalid() -> None:
@@ -60,7 +59,7 @@ def test_weighting_filter_invalid() -> None:
     """
     rng = np.random.default_rng(42)
     x = rng.standard_normal(1000)
-    with pytest.raises(ValueError, match="'weighting' must be 'A'"):
+    with pytest.raises(ValueError, match="'weighting' must be one of"):
         filters.weighting_filter(x, 48000, weighting="E")
 
 
@@ -78,7 +77,7 @@ def test_time_weighting_invalid() -> None:
     """
     rng = np.random.default_rng(42)
     x = rng.standard_normal(1000)
-    with pytest.raises(ValueError, match="Invalid time weighting mode"):
+    with pytest.raises(ValueError, match="'mode' must be one of"):
         filters.time_weighting(x, 48000, mode="instant")
 
 

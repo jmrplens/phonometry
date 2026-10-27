@@ -78,7 +78,7 @@ __all__ = [
 #: without falsification, in hertz, by measuring direction (5.3.2.1, 5.3.2.2,
 #: 5.3.3.1, 5.3.3.2): 100 Hz vertically, 40 Hz horizontally, on a hard surface
 #: and on a soft covering alike.
-LOOSE_MOUNTING_LIMITS_HZ: Mapping[str, float] = MappingProxyType(
+LOOSE_MOUNTING_LIMITS_HZ: Mapping[Direction, float] = MappingProxyType(
     {"vertical": 100.0, "horizontal": 40.0}
 )
 
@@ -103,13 +103,13 @@ MASS_LOADING_RATIO_LIMIT: float = 0.01
 #: quantity, in per cent, as ``(class 1, class 2)``, for a value based on an
 #: r.m.s. and for a peak. The 2010 edition of DIN 45669-1 no longer
 #: distinguishes the two classes.
-INSTRUMENT_CONFIDENCE_LIMITS_PERCENT: Mapping[str, tuple[float, float]] = (
-    MappingProxyType(
-        {
-            "rms": (15.0, 25.0),
-            "peak": (20.0, 35.0),
-        }
-    )
+INSTRUMENT_CONFIDENCE_LIMITS_PERCENT: Mapping[
+    DisplayedQuantity, tuple[float, float]
+] = MappingProxyType(
+    {
+        "rms": (15.0, 25.0),
+        "peak": (20.0, 35.0),
+    }
 )
 
 #: How far the coupling of a transducer to the ground alone may move the

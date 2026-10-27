@@ -28,6 +28,13 @@ not used: its recordings carry a per-channel normalisation that the deposit
 does not document.
 """
 
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from phonometry.environment.assessment.soundscape import AffectiveQuality
+
 #: ISO/TS 12913-3:2019 A.3 (PDF page 11, folio 5): "The range of the
 #: coordinates that results from the formulas is +-(4 + sqrt(32)) = +-9,66".
 ISO12913_3_COORDINATE_RANGE_PRINTED = 9.66
@@ -66,7 +73,7 @@ ISO12913_2_METHOD_A_CATEGORIES = {
 
 #: ISO/TS 12913-2:2018 Figure C.4 (PDF page 22, printed p. 16): the eight
 #: scales of the perceived affective quality, in the order printed.
-ISO12913_2_FIGURE_C4_ATTRIBUTES = (
+ISO12913_2_FIGURE_C4_ATTRIBUTES: tuple[AffectiveQuality, ...] = (
     "pleasant",
     "chaotic",
     "vibrant",

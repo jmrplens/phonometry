@@ -119,6 +119,10 @@ __all__ = [
 
 #: The four grades of ISO 20816-1, 6.3.2.3, worst last.
 EvaluationZone = Literal["A", "B", "C", "D"]
+#: A zone of :data:`EvaluationZone` with an upper limit: every one but D.
+BoundedZone = Literal["A", "B", "C"]
+#: The quantity a gear unit is rated in, Table 1 of ISO 20816-9:2020.
+GearQuantity = Literal["displacement", "velocity", "acceleration"]
 
 #: The ladder of preferred magnitudes Table C.1 is drawn on, in millimetres
 #: per second r.m.s. It is an R5 series over most of its length, which is why
@@ -154,7 +158,7 @@ TYPICAL_ZONE_BOUNDARY_RANGES_MM_S: Mapping[str, tuple[float, float]] = MappingPr
 
 #: Annex C.2: the factor ``Zbound`` of Formula (C.1) that moves the zone A
 #: curve onto the limit of each zone.
-ZONE_LIMIT_FACTORS: Mapping[str, float] = MappingProxyType(
+ZONE_LIMIT_FACTORS: Mapping[BoundedZone, float] = MappingProxyType(
     {"A": 1.0, "B": 2.56, "C": 6.4}
 )
 
@@ -796,40 +800,42 @@ def trip_limit(zone_c_upper: float) -> float:
 #: velocity is housing r.m.s. in millimetres per second (Table 3), and
 #: acceleration is housing true peak in metres per second squared (Table 4),
 #: which is the vocabulary Table 1 fixes.
-GEAR_UNIT_ZONES: Mapping[str, Mapping[float, ZoneBoundaries]] = MappingProxyType(
-    {
-        "displacement": MappingProxyType(
-            {
-                31.5: ZoneBoundaries(a_b=20.0, b_c=31.5, c_d=50.0),
-                50.0: ZoneBoundaries(a_b=31.5, b_c=50.0, c_d=80.0),
-                80.0: ZoneBoundaries(a_b=50.0, b_c=80.0, c_d=125.0),
-                125.0: ZoneBoundaries(a_b=80.0, b_c=125.0, c_d=200.0),
-                200.0: ZoneBoundaries(a_b=125.0, b_c=200.0, c_d=315.0),
-            }
-        ),
-        "velocity": MappingProxyType(
-            {
-                3.15: ZoneBoundaries(a_b=2.0, b_c=3.15, c_d=5.0),
-                5.0: ZoneBoundaries(a_b=3.15, b_c=5.0, c_d=8.0),
-                8.0: ZoneBoundaries(a_b=5.0, b_c=8.0, c_d=12.5),
-                12.5: ZoneBoundaries(a_b=8.0, b_c=12.5, c_d=20.0),
-                20.0: ZoneBoundaries(a_b=12.5, b_c=20.0, c_d=31.5),
-            }
-        ),
-        "acceleration": MappingProxyType(
-            {
-                5.0: ZoneBoundaries(a_b=3.15, b_c=5.0, c_d=8.0),
-                8.0: ZoneBoundaries(a_b=5.0, b_c=8.0, c_d=12.5),
-                12.5: ZoneBoundaries(a_b=8.0, b_c=12.5, c_d=20.0),
-                20.0: ZoneBoundaries(a_b=12.5, b_c=20.0, c_d=31.5),
-                31.5: ZoneBoundaries(a_b=20.0, b_c=31.5, c_d=50.0),
-                50.0: ZoneBoundaries(a_b=31.5, b_c=50.0, c_d=80.0),
-                80.0: ZoneBoundaries(a_b=50.0, b_c=80.0, c_d=125.0),
-                125.0: ZoneBoundaries(a_b=80.0, b_c=125.0, c_d=200.0),
-                200.0: ZoneBoundaries(a_b=125.0, b_c=200.0, c_d=315.0),
-            }
-        ),
-    }
+GEAR_UNIT_ZONES: Mapping[GearQuantity, Mapping[float, ZoneBoundaries]] = (
+    MappingProxyType(
+        {
+            "displacement": MappingProxyType(
+                {
+                    31.5: ZoneBoundaries(a_b=20.0, b_c=31.5, c_d=50.0),
+                    50.0: ZoneBoundaries(a_b=31.5, b_c=50.0, c_d=80.0),
+                    80.0: ZoneBoundaries(a_b=50.0, b_c=80.0, c_d=125.0),
+                    125.0: ZoneBoundaries(a_b=80.0, b_c=125.0, c_d=200.0),
+                    200.0: ZoneBoundaries(a_b=125.0, b_c=200.0, c_d=315.0),
+                }
+            ),
+            "velocity": MappingProxyType(
+                {
+                    3.15: ZoneBoundaries(a_b=2.0, b_c=3.15, c_d=5.0),
+                    5.0: ZoneBoundaries(a_b=3.15, b_c=5.0, c_d=8.0),
+                    8.0: ZoneBoundaries(a_b=5.0, b_c=8.0, c_d=12.5),
+                    12.5: ZoneBoundaries(a_b=8.0, b_c=12.5, c_d=20.0),
+                    20.0: ZoneBoundaries(a_b=12.5, b_c=20.0, c_d=31.5),
+                }
+            ),
+            "acceleration": MappingProxyType(
+                {
+                    5.0: ZoneBoundaries(a_b=3.15, b_c=5.0, c_d=8.0),
+                    8.0: ZoneBoundaries(a_b=5.0, b_c=8.0, c_d=12.5),
+                    12.5: ZoneBoundaries(a_b=8.0, b_c=12.5, c_d=20.0),
+                    20.0: ZoneBoundaries(a_b=12.5, b_c=20.0, c_d=31.5),
+                    31.5: ZoneBoundaries(a_b=20.0, b_c=31.5, c_d=50.0),
+                    50.0: ZoneBoundaries(a_b=31.5, b_c=50.0, c_d=80.0),
+                    80.0: ZoneBoundaries(a_b=50.0, b_c=80.0, c_d=125.0),
+                    125.0: ZoneBoundaries(a_b=80.0, b_c=125.0, c_d=200.0),
+                    200.0: ZoneBoundaries(a_b=125.0, b_c=200.0, c_d=315.0),
+                }
+            ),
+        }
+    )
 )
 
 #: Figure A.1: the displacement rating curve is flat up to this corner and
@@ -888,9 +894,7 @@ GEAR_UNIT_CLASSES: Mapping[tuple[str, str], GearUnitRatings] = MappingProxyType(
 GEAR_ACCEPTANCE_HEADROOM = 1.25
 
 
-def gear_unit_zone_boundaries(
-    quantity: Literal["displacement", "velocity", "acceleration"], rating: float
-) -> ZoneBoundaries:
+def gear_unit_zone_boundaries(quantity: GearQuantity, rating: float) -> ZoneBoundaries:
     """The three boundaries Table 2, 3 or 4 prints for one rating.
 
     The tables are printed for the rating numbers they list and for no others,

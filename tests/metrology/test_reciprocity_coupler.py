@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import dataclasses
 import math
+from typing import TYPE_CHECKING
 
 import numpy as np
 import pytest
@@ -21,6 +22,9 @@ import reference_data as ref
 
 from phonometry import fluids, metrology
 from phonometry.metrology import reciprocity_coupler as rc
+
+if TYPE_CHECKING:
+    from phonometry.metrology.reciprocity_coupler import MicrophoneType
 
 _CONDITIONS = {
     "temperature_c": 23.0,
@@ -182,7 +186,7 @@ def test_temperature_transfer_refuses_an_unknown_method() -> None:
     ("kind", "printed"), sorted(ref.IEC61094_2_A3_LOWEST_HZ.items())
 )
 def test_broadband_validity_is_the_frequency_a3_prints(
-    kind: str, printed: float
+    kind: MicrophoneType, printed: float
 ) -> None:
     """A.3: omega rho a**2 > 100 eta above 3 Hz (LS1P) and 12 Hz (LS2aP).
 
@@ -260,7 +264,7 @@ def test_capillary_impedance_tends_to_poiseuille() -> None:
 
 
 @pytest.mark.parametrize("kind", ["LS1P", "LS2aP", "LS2bP"])
-def test_coupler_dimensions_are_tables_c1_and_c2(kind: str) -> None:
+def test_coupler_dimensions_are_tables_c1_and_c2(kind: MicrophoneType) -> None:
     plane = metrology.IEC61094_2_TABLE_C1[kind]
     large = metrology.IEC61094_2_TABLE_C2[kind]
     a, b, c, d, e_min, e_max = ref.IEC61094_2_TABLE_C1_MM[kind]
@@ -878,7 +882,7 @@ def test_check_coupler_needs_two_microphones() -> None:
     [("LS1P", 2.8, 2.9), ("LS2aP", 11.3, 11.4)],
 )
 def test_check_holds_formulas_a3_and_a4_to_their_bound(
-    kind: str, below_hz: float, above_hz: float
+    kind: MicrophoneType, below_hz: float, above_hz: float
 ) -> None:
     """omega rho a**2 > 100 eta at 2,83 Hz and 11,34 Hz in the couplers of
     Table C.1, which A.3 prints rounded up as 3 Hz and 12 Hz.

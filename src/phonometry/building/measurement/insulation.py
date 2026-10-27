@@ -97,6 +97,7 @@ from ..._internal.types import ReportEngine, as_float_if_reduced
 from ..._internal.validation import (
     check_engine,
     is_positive,
+    require_choice,
     require_equal_counts,
     require_equal_shapes,
     require_present,
@@ -294,7 +295,9 @@ class AirborneInsulationResult(OwnsArrays):
         :raises ImportError: If reportlab is not installed
             (``pip install "phonometry[report]"``), or matplotlib is missing for
             the embedded figure (``pip install "phonometry[plot]"``).
+        :raises TypeError: if ``quantity`` is not a text.
         """
+        require_choice(quantity, "quantity", ("dnt", "r_prime"))
         return _render_iso16283(
             self,
             path,
@@ -433,7 +436,9 @@ class ImpactInsulationResult(OwnsArrays):
         :raises ImportError: If reportlab is not installed
             (``pip install "phonometry[report]"``), or matplotlib is missing for
             the embedded figure (``pip install "phonometry[plot]"``).
+        :raises TypeError: if ``quantity`` is not a text.
         """
+        require_choice(quantity, "quantity", ("l_n_t", "l_n"))
         return _render_iso16283(
             self,
             path,
@@ -503,13 +508,9 @@ class FacadeInsulationResult(OwnsArrays):
 
         :raises ValueError: if ``method`` is unknown, or a per-band column
             disagrees with the rest.
+        :raises TypeError: if ``method`` is not a text.
         """
-        if self.method not in _FACADE_CORRECTION:
-            msg = (
-                "'method' must be 'loudspeaker' or 'road_traffic', got "
-                f"{self.method!r}."
-            )
-            raise ValueError(msg)
+        require_choice(self.method, "method", tuple(_FACADE_CORRECTION))
         require_ranks(self, d_2m=1, d_2m_nt=1, d_2m_n=1, r_prime=1, frequencies=1)
         require_same_length(self, "d_2m", "d_2m_nt", "d_2m_n", "r_prime", "frequencies")
 
@@ -578,6 +579,7 @@ class FacadeInsulationResult(OwnsArrays):
         :raises ImportError: If reportlab is not installed
             (``pip install "phonometry[report]"``), or matplotlib is missing for
             the embedded figure (``pip install "phonometry[plot]"``).
+        :raises TypeError: if ``quantity`` is not a text.
         """
         return _render_iso16283_facade(
             self,
@@ -666,14 +668,18 @@ def _render_iso16283(
 #: The reportable ISO 16283-3 facade quantities, mapping the ``quantity``
 #: argument of :meth:`FacadeInsulationResult.report` to the attribute holding
 #: the per-band curve.
-_FACADE_FIELD_QUANTITIES: tuple[str, ...] = ("d_2m_nt", "d_2m_n", "r_prime")
+_FACADE_FIELD_QUANTITIES: tuple[Literal["d_2m_nt", "d_2m_n", "r_prime"], ...] = (
+    "d_2m_nt",
+    "d_2m_n",
+    "r_prime",
+)
 
 
 def _render_iso16283_facade(
     result: FacadeInsulationResult,
     path: str,
     *,
-    quantity: str,
+    quantity: object,
     metadata: ReportMetadata | None,
     engine: ReportEngine,
     verbose: bool,
@@ -690,10 +696,7 @@ def _render_iso16283_facade(
 
     check_language(language)
     check_engine(engine)
-    if quantity not in _FACADE_FIELD_QUANTITIES:
-        expected = " or ".join(repr(q) for q in _FACADE_FIELD_QUANTITIES)
-        msg = f"Unknown facade quantity {quantity!r}; expected {expected}."
-        raise ValueError(msg)
+    quantity = require_choice(quantity, "quantity", _FACADE_FIELD_QUANTITIES)
     curve = getattr(result, quantity)
     if curve is None:
         msg = (
@@ -1383,9 +1386,7 @@ def facade_insulation(
         below 25 m³ and ``frequencies`` names any of the three bands but no
         ``low_frequency`` answers Clause 7.3.1.
     """
-    if method not in _FACADE_CORRECTION:
-        msg = f"'method' must be 'loudspeaker' or 'road_traffic', got {method!r}."
-        raise ValueError(msg)
+    require_choice(method, "method", tuple(_FACADE_CORRECTION))
 
     l1_bands = _as_band_levels(l1_2m, "l1_2m")
     l2_bands = _as_band_levels(l2, "l2")

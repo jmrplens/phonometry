@@ -56,6 +56,7 @@ import numpy as np
 
 from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
+    require_choice,
     require_count,
     require_ranks,
     require_real,
@@ -531,15 +532,14 @@ def envelope_spectrum(
         roll-off). Default ``None``: detect on the record as given.
     :return: An :class:`EnvelopeSpectrumResult`.
     :raises ValueError: If the inputs or parameters are invalid.
-    :raises TypeError: if ``nfft`` is a flag, a text or an array where a count goes.
+    :raises TypeError: if ``nfft`` is a flag, a text or an array where a count goes, or
+        ``kind`` is not a text.
     """
     from scipy import signal as sp_signal
 
     xa = _validate_signal(x, "x", context="an envelope spectrum")
     fs_v = _positive(resolve_fs(x, fs), "fs")
-    if kind not in ("magnitude", "squared"):
-        msg = f"'kind' must be 'magnitude' or 'squared', got {kind!r}."
-        raise ValueError(msg)
+    require_choice(kind, "kind", ("magnitude", "squared"))
     n = xa.size
     nfft_v = n if nfft is None else require_count(nfft, "nfft", at_least=None)
     if nfft_v < n:

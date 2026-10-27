@@ -100,6 +100,9 @@ if TYPE_CHECKING:
     from .._i18n import Language
 
 CalibratorClass = Literal["LS", "LS/M", "1", "1/M", "2"]
+#: The class a designation reads its limits from, without the ``/M`` of a
+#: multi-frequency calibrator: the column keys of Tables 3 to 9.
+BaseClass = Literal["LS", "1", "2"]
 EnvironmentalTest = Literal["full", "abbreviated"]
 CalibratorRequirement = Literal[
     "level",
@@ -258,14 +261,14 @@ FLUCTUATION_ACCEPTANCE_LIMITS_DB: tuple[CalibratorTableRow, ...] = (
 #: IEC 60942:2017 Table 3 (folio 16): the acceptance limit on the absolute
 #: difference between the level generated over the range of supply voltage
 #: and the level at the nominal supply voltage (5.3.4), in decibels, by class.
-SUPPLY_VOLTAGE_ACCEPTANCE_LIMITS_DB: Mapping[str, float] = MappingProxyType(
+SUPPLY_VOLTAGE_ACCEPTANCE_LIMITS_DB: Mapping[BaseClass, float] = MappingProxyType(
     {"LS": 0.02, "1": 0.06, "2": 0.16}
 )
 
 #: IEC 60942:2017 Table 4 (folio 17): the acceptance limit on the absolute
 #: difference between the generated and the specified frequency (5.4.2), in
 #: per cent of the specified frequency, by class.
-FREQUENCY_ACCEPTANCE_LIMITS_PERCENT: Mapping[str, float] = MappingProxyType(
+FREQUENCY_ACCEPTANCE_LIMITS_PERCENT: Mapping[BaseClass, float] = MappingProxyType(
     {"LS": 0.7, "1": 0.7, "2": 1.7}
 )
 
@@ -285,7 +288,7 @@ ENVIRONMENTAL_LEVEL_ACCEPTANCE_LIMITS_DB: tuple[CalibratorTableRow, ...] = (
 #: difference between the frequency generated over the environmental range
 #: of 5.5 and the frequency measured at reference conditions, in per cent of
 #: the specified frequency, by class.
-ENVIRONMENTAL_FREQUENCY_ACCEPTANCE_LIMITS_PERCENT: Mapping[str, float] = (
+ENVIRONMENTAL_FREQUENCY_ACCEPTANCE_LIMITS_PERCENT: Mapping[BaseClass, float] = (
     MappingProxyType({"LS": 0.7, "1": 0.7, "2": 1.7})
 )
 
@@ -324,7 +327,7 @@ FLUCTUATION_MAX_UNCERTAINTY_DB: tuple[CalibratorTableRow, ...] = (
 #: IEC 60942:2017 Table A.2 (folio 29): the maximum-permitted expanded
 #: uncertainty of the frequency at and around reference conditions, for a
 #: coverage probability of 95 %, in per cent of the specified frequency.
-FREQUENCY_MAX_UNCERTAINTY_PERCENT: Mapping[str, float] = MappingProxyType(
+FREQUENCY_MAX_UNCERTAINTY_PERCENT: Mapping[BaseClass, float] = MappingProxyType(
     {"LS": 0.2, "1": 0.2, "2": 0.2}
 )
 
@@ -353,8 +356,8 @@ ENVIRONMENTAL_LEVEL_MAX_UNCERTAINTY_DB: tuple[CalibratorTableRow, ...] = (
 #: IEC 60942:2017 Table A.5 (folio 35): the maximum-permitted expanded
 #: uncertainty of the frequency over the environmental range, for a coverage
 #: probability of 95 %, in per cent of the specified frequency.
-ENVIRONMENTAL_FREQUENCY_MAX_UNCERTAINTY_PERCENT: Mapping[str, float] = MappingProxyType(
-    {"LS": 0.2, "1": 0.2, "2": 0.2}
+ENVIRONMENTAL_FREQUENCY_MAX_UNCERTAINTY_PERCENT: Mapping[BaseClass, float] = (
+    MappingProxyType({"LS": 0.2, "1": 0.2, "2": 0.2})
 )
 
 #: IEC 60942:2017 A.5.5.7 and A.5.5.8 (folios 26 and 27): the
@@ -362,14 +365,14 @@ ENVIRONMENTAL_FREQUENCY_MAX_UNCERTAINTY_PERCENT: Mapping[str, float] = MappingPr
 #: difference, for a coverage probability of 95 %, in decibels. The clauses
 #: print it in the text, 0,02 dB for class LS and 0,04 dB for classes 1 and 2,
 #: and note that it is included in Table A.1.
-SUPPLY_VOLTAGE_MAX_UNCERTAINTY_DB: Mapping[str, float] = MappingProxyType(
+SUPPLY_VOLTAGE_MAX_UNCERTAINTY_DB: Mapping[BaseClass, float] = MappingProxyType(
     {"LS": 0.02, "1": 0.04, "2": 0.04}
 )
 
 #: IEC 60942:2017 5.9.4.2 (folio 21): the acceptance limit on the absolute
 #: difference between the level generated in the presence of a power- or
 #: radio-frequency field and in its absence, in decibels, by class.
-FIELD_IMMUNITY_ACCEPTANCE_LIMITS_DB: Mapping[str, float] = MappingProxyType(
+FIELD_IMMUNITY_ACCEPTANCE_LIMITS_DB: Mapping[BaseClass, float] = MappingProxyType(
     {"LS": 0.10, "1": 0.25, "2": 0.45}
 )
 
@@ -377,35 +380,35 @@ FIELD_IMMUNITY_ACCEPTANCE_LIMITS_DB: Mapping[str, float] = MappingProxyType(
 #: maximum-permitted expanded uncertainty of that level difference, for a
 #: coverage probability of 95 %, in decibels: 0,05 dB for every class, the
 #: measurement of the field itself excluded.
-FIELD_IMMUNITY_MAX_UNCERTAINTY_DB: Mapping[str, float] = MappingProxyType(
+FIELD_IMMUNITY_MAX_UNCERTAINTY_DB: Mapping[BaseClass, float] = MappingProxyType(
     {"LS": 0.05, "1": 0.05, "2": 0.05}
 )
 
 #: IEC 60942:2017 A.6.4.7 (folio 34): how much the abbreviated combined
 #: temperature and humidity test reduces the Table 5 level limits, in
 #: decibels, by class.
-ABBREVIATED_LEVEL_REDUCTIONS: Mapping[str, float] = MappingProxyType(
+ABBREVIATED_LEVEL_REDUCTIONS: Mapping[BaseClass, float] = MappingProxyType(
     {"LS": 0.05, "1": 0.05, "2": 0.10}
 )
 
 #: IEC 60942:2017 A.6.4.7 (folio 34): the reduced frequency acceptance limits
 #: of the abbreviated combined temperature and humidity test, in per cent of
 #: the specified frequency, by class.
-ABBREVIATED_FREQUENCY_ACCEPTANCE_LIMITS_PERCENT: Mapping[str, float] = MappingProxyType(
-    {"LS": 0.5, "1": 0.5, "2": 1.3}
+ABBREVIATED_FREQUENCY_ACCEPTANCE_LIMITS_PERCENT: Mapping[BaseClass, float] = (
+    MappingProxyType({"LS": 0.5, "1": 0.5, "2": 1.3})
 )
 
 #: The two environmental tests A.6 allows.
 _ENVIRONMENTAL_TESTS: tuple[EnvironmentalTest, ...] = ("full", "abbreviated")
 
 
-def _base_class(calibrator_class: str) -> CalibratorClass:
+def _base_class(calibrator_class: str) -> BaseClass:
     """The class a designation reads its limits from: ``"1/M"`` is class 1.
 
     :raises ValueError: for a designation Table 1 does not list.
     """
     designation = _designation(calibrator_class)
-    return cast("CalibratorClass", designation.split("/", 1)[0])
+    return cast("BaseClass", designation.split("/", 1)[0])
 
 
 def _designation(calibrator_class: object) -> CalibratorClass:
@@ -419,7 +422,7 @@ def _designation(calibrator_class: object) -> CalibratorClass:
 
 def _banded(
     table: tuple[CalibratorTableRow, ...],
-    base: CalibratorClass,
+    base: BaseClass,
     nominal_frequency_hz: float,
 ) -> float | None:
     """The figure a banded table prints for a class at a nominal frequency."""
@@ -871,7 +874,7 @@ _RULES: dict[str, _Rule] = {
 
 def _limits(
     requirement: CalibratorRequirement,
-    base: CalibratorClass,
+    base: BaseClass,
     nominal_frequency_hz: float,
     environmental_test: str,
 ) -> tuple[float, float]:
@@ -905,7 +908,9 @@ def _limits(
             limit -= ABBREVIATED_LEVEL_REDUCTIONS[base]
         maximum = _banded(ENVIRONMENTAL_LEVEL_MAX_UNCERTAINTY_DB, base, f)
     else:
-        by_class: dict[str, tuple[Mapping[str, float], Mapping[str, float]]] = {
+        by_class: dict[
+            str, tuple[Mapping[BaseClass, float], Mapping[BaseClass, float]]
+        ] = {
             "frequency": (
                 FREQUENCY_ACCEPTANCE_LIMITS_PERCENT,
                 FREQUENCY_MAX_UNCERTAINTY_PERCENT,

@@ -185,7 +185,7 @@ def test_rejects_bad_inputs() -> None:
         room.shaped_sweep_signal(FS, 50.0, 5000.0, 1.0, fade=0.7)
     with pytest.raises(ValueError, match=r"start_delay must be positive"):
         room.shaped_sweep_signal(FS, 50.0, 5000.0, 1.0, start_delay=0.0)
-    with pytest.raises(ValueError, match="unknown named target"):
+    with pytest.raises(ValueError, match="'target' must be one of"):
         room.shaped_sweep_signal(FS, 50.0, 5000.0, 1.0, target="blue")
     mismatched = (np.array([100.0, 200.0]), np.array([0.0]))
     with pytest.raises(ValueError, match=r"'frequencies'.*'magnitude_db'.*same shape"):

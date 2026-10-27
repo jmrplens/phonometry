@@ -513,7 +513,7 @@ def test_rejects_bad_fs_and_kind() -> None:
     tone = _tone(1000.0)
     with pytest.raises(ValueError, match="'fs' must be a positive"):
         electroacoustics.thd(tone, 0.0)
-    with pytest.raises(ValueError, match="'kind' must be 'F'"):
+    with pytest.raises(ValueError, match="'kind' must be one of"):
         electroacoustics.thd(tone, FS, 1000.0, kind="X")  # type: ignore[arg-type]
 
 
@@ -648,7 +648,7 @@ def test_weighted_thd_468_emphasises_6khz_products() -> None:
     assert w468 == pytest.approx(0.01 * 10.0 ** (12.2 / 20.0), rel=0.02)
     w_a = electroacoustics.weighted_thd(x, FS, 100.0, weighting="A")
     assert w468 / w_a == pytest.approx(10.0 ** (12.2 / 20.0), rel=0.05)
-    with pytest.raises(ValueError, match="'weighting' must be '468'"):
+    with pytest.raises(ValueError, match="'weighting' must be one of"):
         electroacoustics.weighted_thd(x, FS, 100.0, weighting="B")  # type: ignore[arg-type]
 
 

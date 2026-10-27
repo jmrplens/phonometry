@@ -93,6 +93,7 @@ measurements taken at slightly different distances.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs or parameters are invalid. |
+| TypeError | if `interpolation` is not a text. |
 
 ## AlignedImpulseResponseResult
 
@@ -192,6 +193,7 @@ Normalizations:
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs or parameters are invalid. |
+| TypeError | if `normalization` is not a text. |
 
 ## correlation_random_error
 
@@ -375,7 +377,7 @@ default `upsample=8`).
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs or parameters are invalid. |
-| TypeError | if `upsample` is a flag, a text or an array where a count goes. |
+| TypeError | if `upsample` is a flag, a text or an array where a count goes, or `interpolation` is not a text. |
 
 ## time_delay
 
@@ -464,7 +466,7 @@ interval (Eq. 8.130).
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs or parameters are invalid. |
-| TypeError | if `upsample` is a flag, a text or an array where a count goes. |
+| TypeError | if `upsample` is a flag, a text or an array where a count goes, or `interpolation`, `method` or `weighting` is not a text. |
 
 ## TimeDelayResult
 
@@ -473,7 +475,7 @@ TimeDelayResult(
     delay: float,
     delay_samples: float,
     method: Literal['direct', 'gcc', 'phase'],
-    weighting: str | None,
+    weighting: Literal['none', 'roth', 'scot', 'phat', 'ml'] | None,
     lags: NDArray[np.float64],
     correlation: NDArray[np.float64],
     peak_correlation: float,

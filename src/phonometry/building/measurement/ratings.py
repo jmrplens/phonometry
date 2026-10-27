@@ -1605,6 +1605,14 @@ _LIGHTWEIGHT_C1_C2 = _band_table(
     + (72.0, 69.0, 66.0, 63.0, 60.0, 57.0, 54.0, 51.0)
 )
 
+#: A reference floor of :data:`IMPACT_REFERENCE_FLOORS`.
+ReferenceFloor = Literal[
+    "heavyweight", "lightweight_1", "lightweight_2", "lightweight_3"
+]
+
+#: A standard basic element of :data:`LINING_REFERENCE_ELEMENTS`.
+BasicElement = Literal["heavy_wall", "heavy_floor", "lightweight_wall"]
+
 #: Normalized impact sound pressure level of the four reference floors, in dB,
 #: keyed by floor and then by one-third-octave band centre frequency in Hz,
 #: 100 Hz to 3 150 Hz: ``Ln,r,0`` of the heavyweight concrete floor and
@@ -1619,25 +1627,41 @@ _LIGHTWEIGHT_C1_C2 = _band_table(
 #: with ``CI`` of -11, 0 and -3 dB) are what :func:`weighted_impact_rating`
 #: returns for it, and they are not stored: Clause 5.3 obtains ``Ln,r,0,w``
 #: from the curve "in accordance with 4.3.1".
-IMPACT_REFERENCE_FLOORS: Mapping[str, Mapping[float, float]] = MappingProxyType(
-    {
-        "heavyweight": _band_table(
-            (67.0, 67.5, 68.0, 68.5, 69.0, 69.5, 70.0, 70.5)
-            + (71.0, 71.5, 72.0, 72.0, 72.0, 72.0, 72.0, 72.0)
-        ),
-        "lightweight_1": _LIGHTWEIGHT_C1_C2,
-        "lightweight_2": _LIGHTWEIGHT_C1_C2,
-        "lightweight_3": _band_table(
-            (69.0, 72.0, 75.0, 78.0, 78.0, 78.0, 78.0, 78.0)
-            + (78.0, 76.0, 74.0, 72.0, 69.0, 66.0, 63.0, 60.0)
-        ),
-    }
+IMPACT_REFERENCE_FLOORS: Mapping[ReferenceFloor, Mapping[float, float]] = (
+    MappingProxyType(
+        {
+            "heavyweight": _band_table(
+                (67.0, 67.5, 68.0, 68.5, 69.0, 69.5, 70.0, 70.5)
+                + (71.0, 71.5, 72.0, 72.0, 72.0, 72.0, 72.0, 72.0)
+            ),
+            "lightweight_1": _LIGHTWEIGHT_C1_C2,
+            "lightweight_2": _LIGHTWEIGHT_C1_C2,
+            "lightweight_3": _band_table(
+                (69.0, 72.0, 75.0, 78.0, 78.0, 78.0, 78.0, 78.0)
+                + (78.0, 76.0, 74.0, 72.0, 69.0, 66.0, 63.0, 60.0)
+            ),
+        }
+    )
 )
 
-#: A reference floor of :data:`IMPACT_REFERENCE_FLOORS`.
-ReferenceFloor = Literal[
-    "heavyweight", "lightweight_1", "lightweight_2", "lightweight_3"
-]
+#: The rows of Table E.1, each element with its 21 band values.
+_LINING_ROWS: tuple[tuple[BasicElement, tuple[float, ...]], ...] = (
+    (
+        "heavy_wall",
+        (35.3, 37.3, 39.4, 40.0, 40.0, 40.0, 40.0, 41.0, 43.5, 46.1, 48.5)
+        + (51.0, 53.6, 56.0, 58.4, 61.1, 63.6, 65.0, 65.0, 65.0, 65.0),
+    ),
+    (
+        "heavy_floor",
+        (34.0, 36.0, 38.1, 40.0, 40.0, 40.0, 40.0, 40.0, 41.8, 44.4, 46.8)
+        + (49.3, 51.9, 54.4, 56.8, 59.5, 61.9, 64.3, 65.0, 65.0, 65.0),
+    ),
+    (
+        "lightweight_wall",
+        (21.3, 23.3, 25.3, 27.0, 27.0, 27.0, 27.0, 27.0, 27.0, 27.0, 27.0)
+        + (28.0, 30.5, 32.8, 35.1, 37.6, 40.0, 42.3, 44.6, 47.1, 49.4),
+    ),
+)
 
 #: Sound reduction index of the three standard basic elements a lining is
 #: rated on, in dB, keyed by element and then by one-third-octave band centre
@@ -1649,31 +1673,15 @@ ReferenceFloor = Literal[
 #: numbers as its Table B.1. The single numbers under each curve (``Rw`` of 53,
 #: 52 and 33 dB with every adaptation term of Annex B) are what
 #: :func:`weighted_rating_extended` returns for it and are not stored.
-LINING_REFERENCE_ELEMENTS: Mapping[str, Mapping[float, float]] = MappingProxyType(
-    {
-        name: MappingProxyType(dict(zip(_FREQ_50_5000, values, strict=True)))
-        for name, values in (
-            (
-                "heavy_wall",
-                (35.3, 37.3, 39.4, 40.0, 40.0, 40.0, 40.0, 41.0, 43.5, 46.1, 48.5)
-                + (51.0, 53.6, 56.0, 58.4, 61.1, 63.6, 65.0, 65.0, 65.0, 65.0),
-            ),
-            (
-                "heavy_floor",
-                (34.0, 36.0, 38.1, 40.0, 40.0, 40.0, 40.0, 40.0, 41.8, 44.4, 46.8)
-                + (49.3, 51.9, 54.4, 56.8, 59.5, 61.9, 64.3, 65.0, 65.0, 65.0),
-            ),
-            (
-                "lightweight_wall",
-                (21.3, 23.3, 25.3, 27.0, 27.0, 27.0, 27.0, 27.0, 27.0, 27.0, 27.0)
-                + (28.0, 30.5, 32.8, 35.1, 37.6, 40.0, 42.3, 44.6, 47.1, 49.4),
-            ),
-        )
-    }
+LINING_REFERENCE_ELEMENTS: Mapping[BasicElement, Mapping[float, float]] = (
+    MappingProxyType(
+        {
+            name: MappingProxyType(dict(zip(_FREQ_50_5000, values, strict=True)))
+            for name, values in _LINING_ROWS
+        }
+    )
 )
 
-#: A standard basic element of :data:`LINING_REFERENCE_ELEMENTS`.
-BasicElement = Literal["heavy_wall", "heavy_floor", "lightweight_wall"]
 
 #: The index ISO 717-1:2020 D.3 appends to a lining rating to name the basic
 #: element it was rated on: "heavy" for the heavyweight wall and floor and
@@ -1683,12 +1691,12 @@ _ELEMENT_INDEX: Mapping[str, str] = MappingProxyType(
 )
 
 
-def _reference_floor_curve(reference_floor: str) -> np.ndarray:
+def _reference_floor_curve(reference_floor: object) -> np.ndarray:
     """A fresh array of the 16 ``Ln,r,0`` values of one reference floor."""
-    require_choice(reference_floor, "reference_floor", tuple(IMPACT_REFERENCE_FLOORS))
-    return np.fromiter(
-        IMPACT_REFERENCE_FLOORS[reference_floor].values(), dtype=np.float64
+    floor = require_choice(
+        reference_floor, "reference_floor", tuple(IMPACT_REFERENCE_FLOORS)
     )
+    return np.fromiter(IMPACT_REFERENCE_FLOORS[floor].values(), dtype=np.float64)
 
 
 def _validated_improvement(

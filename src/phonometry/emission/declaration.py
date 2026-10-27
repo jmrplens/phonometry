@@ -43,7 +43,7 @@ from typing import TYPE_CHECKING, Literal
 
 from .._internal.boundary import round_half_up
 from .._internal.display import RichDisplay
-from .._internal.validation import check_engine, require_scalar
+from .._internal.validation import check_engine, require_choice, require_scalar
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -276,7 +276,10 @@ class NoiseEmissionDeclaration(RichDisplay):
     form: DeclarationForm = "dual-number"
 
     def __post_init__(self) -> None:
-        """Coerce the sequences to tuples and validate the form and mode count."""
+        """Coerce the sequences to tuples and validate the form and mode count.
+
+        :raises TypeError: if ``form`` is not a text.
+        """
         modes = tuple(self.modes)
         if not modes:
             msg = "NoiseEmissionDeclaration requires at least one operating mode."
@@ -286,12 +289,7 @@ class NoiseEmissionDeclaration(RichDisplay):
             if isinstance(self.basic_standards, str)
             else tuple(self.basic_standards)
         )
-        if self.form not in ("dual-number", "single-number"):
-            msg = (
-                "NoiseEmissionDeclaration.form must be 'dual-number' or "
-                f"'single-number'; got {self.form!r}."
-            )
-            raise ValueError(msg)
+        require_choice(self.form, "form", ("dual-number", "single-number"))
         object.__setattr__(self, "modes", modes)
         object.__setattr__(self, "basic_standards", standards)
 

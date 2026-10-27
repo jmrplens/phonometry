@@ -397,7 +397,7 @@ def test_a_time_axis_with_a_second_axis_is_refused(
 
 def test_invalid_field_raises() -> None:
     sig = _tone(1000.0, 60.0, 1.0)
-    with pytest.raises(ValueError, match="field must be"):
+    with pytest.raises(ValueError, match="'field' must be one of"):
         psychoacoustics.fluctuation_strength_ecma(sig, FS, field="bogus")
 
 

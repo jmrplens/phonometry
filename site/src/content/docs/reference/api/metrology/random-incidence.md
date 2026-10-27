@@ -505,6 +505,7 @@ Plot the directional response or the weight of each reading.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if `view` is not one of the two names above, or `ax` is not polar for the response. |
+| TypeError | if `view` is not a text. |
 
 ### DirectivityFactor.relative_levels
 
@@ -741,6 +742,7 @@ Plot the sensitivity levels or the correction against frequency.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if `view` is not one of the two names above. |
+| TypeError | if `view` is not a text. |
 
 ## ReferenceMicrophoneRow
 

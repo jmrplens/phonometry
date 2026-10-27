@@ -140,11 +140,11 @@ def test_accelerance_matches_impedance_route() -> None:
 # Validation
 # ---------------------------------------------------------------------------
 def test_unknown_frf_raises() -> None:
-    with pytest.raises(ValueError, match="unknown source FRF"):
+    with pytest.raises(ValueError, match="'source' must be one of"):
         vibration.convert_frf(
             1.0, frequency=100.0, source="velocity", target="mobility"
         )
-    with pytest.raises(ValueError, match="unknown target FRF"):
+    with pytest.raises(ValueError, match="'target' must be one of"):
         vibration.convert_frf(
             1.0, frequency=100.0, source="mobility", target="velocity"
         )
@@ -234,7 +234,7 @@ def test_rigid_mass_calibration_accepts_complex_frf() -> None:
 
 
 def test_rigid_mass_calibration_validation() -> None:
-    with pytest.raises(ValueError, match=r"'quantity' must be 'accelerance'"):
+    with pytest.raises(ValueError, match="'quantity' must be one of"):
         vibration.verify_rigid_mass_calibration(
             [0.1], frequencies=[100.0], mass=10.0, quantity="receptance"
         )

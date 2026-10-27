@@ -276,6 +276,7 @@ verdict row and a footer with the identity block and disclaimer.
 | :--- | :--- |
 | ValueError | If `engine` or `quantity` is unknown, the selected quantity is not available, the result does not hold the 16 core one-third-octave bands (100 Hz to 3150 Hz) the ISO 717-1 rating needs. |
 | ImportError | If reportlab is not installed (`pip install "phonometry[report]"`), or matplotlib is missing for the embedded figure (`pip install "phonometry[plot]"`). |
+| TypeError | if `quantity` is not a text. |
 
 ## energy_average_level
 
@@ -487,6 +488,7 @@ and a footer with the identity block and disclaimer.
 | :--- | :--- |
 | ValueError | If `engine` or `quantity` is unknown, the selected quantity is not available, or the result does not hold the 16 core one-third-octave bands (100 Hz to 3150 Hz) the ISO 717-1 rating needs. |
 | ImportError | If reportlab is not installed (`pip install "phonometry[report]"`), or matplotlib is missing for the embedded figure (`pip install "phonometry[plot]"`). |
+| TypeError | if `quantity` is not a text. |
 
 ## impact_insulation
 
@@ -645,6 +647,7 @@ disclaimer.
 | :--- | :--- |
 | ValueError | If `engine` or `quantity` is unknown, the selected quantity is not available, the result does not hold the 16 core one-third-octave bands (100 Hz to 3150 Hz) the ISO 717-2 rating needs. |
 | ImportError | If reportlab is not installed (`pip install "phonometry[report]"`), or matplotlib is missing for the embedded figure (`pip install "phonometry[plot]"`). |
+| TypeError | if `quantity` is not a text. |
 
 ## ReportMetadata
 

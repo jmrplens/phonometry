@@ -234,7 +234,7 @@ def test_table_1_bias_error_factor_drives_the_dynamic_capability() -> None:
             areas,
             pressure_levels=levels,
             pressure_residual_index=18.0,
-            grade=grade,  # type: ignore[arg-type]
+            grade=grade,
         )
         assert result.dynamic_capability_index is not None
         assert result.dynamic_capability_index[0] == pytest.approx(18.0 - k)

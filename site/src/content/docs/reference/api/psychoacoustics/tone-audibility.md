@@ -815,6 +815,7 @@ Plot the assessment, either as audibilities or as levels.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `view` is not one of the two names above. |
+| TypeError | if `view` is not a text. |
 
 ### ToneAudibilityResult.report()
 

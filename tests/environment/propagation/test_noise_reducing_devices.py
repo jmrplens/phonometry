@@ -316,5 +316,9 @@ class TestRailwaySpectrum:
         assert got.rating == pytest.approx(20.0)
 
     def test_an_unknown_spectrum_is_refused(self) -> None:
-        with pytest.raises(ValueError, match="spectrum must be one of"):
-            prop.sound_absorption_rating(np.zeros(_BANDS), spectrum="aircraft")
+        with pytest.raises(ValueError, match="'spectrum' must be one of"):
+            prop.sound_absorption_rating(np.zeros(_BANDS), spectrum="aircraft")  # type: ignore[arg-type]
+
+    def test_a_spectrum_that_is_not_a_text_is_refused(self) -> None:
+        with pytest.raises(TypeError, match="'spectrum' must be one of .*, a text"):
+            prop.sound_absorption_rating(np.zeros(_BANDS), spectrum=1)  # type: ignore[arg-type]

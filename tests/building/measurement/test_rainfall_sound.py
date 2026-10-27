@@ -26,6 +26,7 @@ Oracles:
 from __future__ import annotations
 
 import math
+from typing import TYPE_CHECKING
 
 import numpy as np
 import pytest
@@ -34,7 +35,11 @@ import reference_data as ref
 from phonometry import building
 from phonometry.building.measurement import RainfallSoundResult
 
+if TYPE_CHECKING:
+    from phonometry.building.measurement._rainfall_sound import RainType
+
 #: The 18 bands of Formula (K.2), 100 Hz to 5000 Hz.
+
 _BANDS = [
     100.0,
     125.0,
@@ -91,7 +96,7 @@ def test_table_i1_reads_as_printed() -> None:
 
 
 @pytest.mark.parametrize("rain", sorted(ref.ISO10140_5_TABLES_H1_H2))
-def test_tables_h1_and_h2_read_as_printed(rain: str) -> None:
+def test_tables_h1_and_h2_read_as_printed(rain: RainType) -> None:
     """Every cell of ISO 10140-5:2021 Tables H.1 and H.2, and the H.1 tolerances."""
     row = building.ARTIFICIAL_RAIN[rain]
     cells = (

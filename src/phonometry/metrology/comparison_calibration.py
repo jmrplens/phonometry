@@ -2714,7 +2714,7 @@ def comparison_uncertainty_budget(
     given: Mapping[ComparisonComponent, float | Quantity] = dict(
         standard_uncertainties_db.items()
     )
-    unknown = [key for key in given if key not in table]
+    unknown = [key for key in given if isinstance(key, str) and key not in table]
     if unknown:
         msg = (
             f"{unknown} are not components of {_STANDARDS[field]}'s table; the "
@@ -2722,6 +2722,8 @@ def comparison_uncertainty_budget(
             "'additional_components'."
         )
         raise ValueError(msg)
+    for key in given:
+        require_choice(key, "standard_uncertainties_db", tuple(table))
     names: list[str] = []
     components: list[str] = []
     quantities: list[Quantity] = []
@@ -4344,6 +4346,9 @@ def time_selective_response(
     :raises ValueError: for what :class:`TimeSelectiveResponse` refuses.
     :raises TypeError: if ``window_shape`` is not a text.
     """
+    require_choice(
+        window_shape, "window_shape", ("tukey", "hann", "hamming", "rectangular")
+    )
     return TimeSelectiveResponse(
         impulse_response=np.asarray(impulse_response, dtype=np.float64),
         fs=fs,

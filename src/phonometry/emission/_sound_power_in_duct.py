@@ -127,7 +127,7 @@ __all__ = [
 #: The three microphone shields of clause 5.3 and their scope limits (1.1).
 MicrophoneShield = Literal["sampling-tube", "nose-cone", "foam-ball"]
 
-_SHIELDS: tuple[str, ...] = ("sampling-tube", "nose-cone", "foam-ball")
+_SHIELDS: tuple[MicrophoneShield, ...] = ("sampling-tube", "nose-cone", "foam-ball")
 
 #: Reference characteristic impedance (rho c)_0 of Eq. (12), N s/m^3 (8.2).
 _RHO_C_0 = 400.0
@@ -785,7 +785,7 @@ def _band_keys(frequencies: np.ndarray) -> list[int]:
     return [round(float(f)) for f in frequencies]
 
 
-def _check_shield(shield: str) -> str:
+def _check_shield(shield: object) -> str:
     return require_choice(shield, "shield", _SHIELDS)
 
 

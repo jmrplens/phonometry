@@ -233,7 +233,7 @@ _CYCLE_COUNTS = (1, 2, 4, 8, 16)
 #: ISO 8041-1:2017 Table 6 (folio 17), one entry per application. The
 #: continuous row of Tables 7 to 9 is requested with ``n_cycles=None`` and is
 #: not a sixth entry here, because Table 6 does not give it a burst length.
-SAWTOOTH_BURST_TESTS: Mapping[str, SawtoothBurstTest] = MappingProxyType(
+SAWTOOTH_BURST_TESTS: Mapping[BurstApplication, SawtoothBurstTest] = MappingProxyType(
     {
         _HAND_ARM: SawtoothBurstTest(
             application=_HAND_ARM,
@@ -407,7 +407,9 @@ _TABLE_9_ROWS: dict[str, dict[int | None, tuple[float, ...]]] = {
 #: The three printed tables, each with the application it grades and the
 #: columns it prints, in printed order.
 _PrintedTable = tuple[
-    str, tuple[BurstQuantity, ...], dict[str, dict[int | None, tuple[float, ...]]]
+    BurstApplication,
+    tuple[BurstQuantity, ...],
+    dict[str, dict[int | None, tuple[float, ...]]],
 ]
 _PRINTED_TABLES: tuple[_PrintedTable, ...] = (
     (_HAND_ARM, _TABLE_7_QUANTITIES, _TABLE_7_ROWS),
@@ -417,10 +419,12 @@ _PRINTED_TABLES: tuple[_PrintedTable, ...] = (
 
 
 def _build_response_table() -> dict[
-    tuple[str, str, int | None], Mapping[BurstQuantity, float]
+    tuple[BurstApplication, str, int | None], Mapping[BurstQuantity, float]
 ]:
     """Flatten the three printed tables into one indication lookup."""
-    table: dict[tuple[str, str, int | None], Mapping[BurstQuantity, float]] = {}
+    table: dict[
+        tuple[BurstApplication, str, int | None], Mapping[BurstQuantity, float]
+    ] = {}
     for application, quantities, rows in _PRINTED_TABLES:
         for row, cells in rows.items():
             for n_cycles, values in cells.items():
@@ -438,17 +442,17 @@ def _build_response_table() -> dict[
 #: response to a 1 m/s2 amplitude signal and scale with the amplitude of the
 #: actual test signal, which is what 5.9 says on folio 16.
 SIGNAL_BURST_RESPONSE: Mapping[
-    tuple[str, str, int | None], Mapping[BurstQuantity, float]
+    tuple[BurstApplication, str, int | None], Mapping[BurstQuantity, float]
 ] = MappingProxyType(_build_response_table())
 
 
-def _require_application(application: str) -> SawtoothBurstTest:
+def _require_application(application: object) -> SawtoothBurstTest:
     """Return the Table 6 row of ``application`` or raise ``ValueError``."""
     key = require_choice(application, "application", tuple(SAWTOOTH_BURST_TESTS))
     return SAWTOOTH_BURST_TESTS[key]
 
 
-def _require_row(test: SawtoothBurstTest, name: str) -> BurstRow:
+def _require_row(test: SawtoothBurstTest, name: object) -> BurstRow:
     """Return the row of ``name`` in ``test`` or raise ``ValueError``.
 
     A weighting that belongs to another application is refused rather than

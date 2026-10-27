@@ -715,7 +715,7 @@ The curve of one region with its two descriptors, clause 6.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For an unknown region, inputs that do not match, or a region holding fewer than two measured positions. |
-| TypeError | if `band` is not a single number, or `distances` or `distribution_levels` holds a text or a value that is not a real number. |
+| TypeError | if `band` is not a single number, or `distances` or `distribution_levels` holds a text or a value that is not a real number, or `region` is not a text. |
 
 ## spatial_decay_rate
 

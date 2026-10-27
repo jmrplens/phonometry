@@ -257,7 +257,7 @@ datasheets; the two agree to first order for small distortion.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the signal/parameters are invalid, `kind` is unknown, or no harmonic of the fundamental lies below Nyquist. |
-| TypeError | if `fs` is not a single number. |
+| TypeError | if `fs` is not a single number, or `kind` is not a text. |
 
 ## thd_plus_noise
 

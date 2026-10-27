@@ -97,6 +97,7 @@ import numpy as np
 from .._internal.boundary import settled
 from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
+    require_choice,
     require_finite,
     require_finite_array,
     require_positive,
@@ -113,6 +114,9 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
     from .._i18n import Language
 
 Region = Literal["near", "middle", "far", "whole"]
+#: A region of :data:`Region` read at a conventional distance: all but the
+#: whole curve.
+EvaluatedRegion = Literal["near", "middle", "far"]
 
 __all__ = [
     "ADJACENT_BAND_LIMIT_DB",
@@ -213,7 +217,7 @@ TYPICAL_FAR_LIMIT_M: float = 16.0
 PREFERRED_MIDDLE_LIMIT_M: float = 24.0
 
 #: 6.4.3: the conventional distance each region is read at, in metres.
-EVALUATION_DISTANCES_M: Mapping[str, float] = MappingProxyType(
+EVALUATION_DISTANCES_M: Mapping[EvaluatedRegion, float] = MappingProxyType(
     {
         "near": 4.0,
         "middle": 10.0,
@@ -275,7 +279,7 @@ _THIRD_OCTAVE_CENTRES_HZ: tuple[float, ...] = (
 )
 
 #: The regions clause 6.2 names, plus the whole path as one.
-_REGIONS: tuple[str, ...] = ("near", "middle", "far", "whole")
+_REGIONS: tuple[Region, ...] = ("near", "middle", "far", "whole")
 
 #: The fewest positions a regression or a trapezoidal mean can be taken over.
 _MIN_REGRESSION_POINTS = 2
@@ -1077,15 +1081,14 @@ def spatial_decay_curve(
     :raises ValueError: For an unknown region, inputs that do not match, or a
         region holding fewer than two measured positions.
     :raises TypeError: if ``band`` is not a single number, or ``distances`` or
-        ``distribution_levels`` holds a text or a value that is not a real number.
+        ``distribution_levels`` holds a text or a value that is not a real number, or
+        ``region`` is not a text.
     """
     values = require_finite_array(distribution_levels, "distribution_levels")
     radii = require_positive_array(distances, "distances")
     if values.shape != radii.shape:
         raise ValueError(_MISMATCH_MSG)
-    if region not in _REGIONS:
-        msg = f"'region' must be one of {_REGIONS}; got {region!r}."
-        raise ValueError(msg)
+    require_choice(region, "region", _REGIONS)
     if region == "whole":
         keep = np.ones(radii.shape, dtype=np.bool_)
     else:

@@ -827,8 +827,12 @@ def end_reflection_loss(
         the table is indexed by frequency directly).
     :return: A :class:`HVACSpectrumResult` of the reflection loss, dB.
     :raises TypeError: if ``method`` is not a text, or ``aspect_ratio``, ``diameter_m``,
-        ``max_reduction`` or ``speed_of_sound`` is not a single number.
+        ``max_reduction`` or ``speed_of_sound`` is not a single number, or
+        ``termination`` is not a text.
     """
+    require_choice(
+        termination, "termination", ("flush", "room", "wall", "edge", "corner", "free")
+    )
     if method == "vdi2081":
         bands = _frequencies(frequencies)
         bore = require_positive(diameter_m, "diameter_m")
@@ -936,7 +940,7 @@ def _vdi2081_bend_result(
     bend_type: str,
     vanes: bool,
     lined: bool,
-    lined_side: str,
+    lined_side: object,
     speed_of_sound: float,
 ) -> HVACSpectrumResult:
     """Pick the Table 7 row the arguments describe and shift it into place."""
@@ -1003,8 +1007,11 @@ def elbow_insertion_loss(
     :param model: ``"ashrae"`` (default) or ``"vdi2081"``.
     :return: A :class:`HVACSpectrumResult` of the insertion loss, dB per bend.
     :raises TypeError: if ``lined_side`` or ``model`` is not a text, or
-        ``speed_of_sound`` or ``width_m`` is not a single number.
+        ``speed_of_sound`` or ``width_m`` is not a single number, or ``bend_type`` is
+        not a text.
     """
+    require_choice(bend_type, "bend_type", ("round", "square"))
+    require_choice(lined_side, "lined_side", ("both", "one"))
     scheme = require_choice(model, "model", ("ashrae", "vdi2081"))
     if scheme == "vdi2081":
         return _vdi2081_bend_result(
@@ -1641,6 +1648,8 @@ def fan_sound_power(
         ``fan_total_pressure_pa``, ``n_blades``, ``relative_flow``,
         ``specific_sound_power_level`` or ``volume_flow`` is not a single number.
     """
+    if assembly is not None:
+        require_choice(assembly, "assembly", ("rr", "t", "am"))
     scheme = require_choice(model, "model", ("ashrae", "vdi2081"))
     q = require_positive(volume_flow, "volume_flow")
     f, idx = _octave_slots(frequencies)

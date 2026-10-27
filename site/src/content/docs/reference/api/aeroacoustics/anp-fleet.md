@@ -149,7 +149,7 @@ NPD curves for this aircraft (see [`ANPDatabase.npd_curves`](/phonometry/referen
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an `operation` or `metric` other than those listed (the spelling as written, `"departure"` and not `"Departure"`). |
-| TypeError | if `operation` is not a text. |
+| TypeError | if `operation` or `metric` is not a text. |
 
 ### ANPAircraft.profile()
 
@@ -192,7 +192,7 @@ NPD curves for another atmosphere (see [`ANPDatabase.revised_npd_curves`](/phono
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an `operation`, `metric` or `absorption` other than those listed (the spelling as written). |
-| TypeError | if `operation` or `absorption` is not a text. |
+| TypeError | if `operation`, `absorption` or `metric` is not a text. |
 
 ### ANPAircraft.spectral_class()
 
@@ -422,7 +422,7 @@ NPD curves for an aircraft, operation and noise metric.
 | :--- | :--- |
 | KeyError | If the aircraft has no NPD data for the request. |
 | ValueError | If the metric or operation is unknown. |
-| TypeError | if `operation` is not a text. |
+| TypeError | if `operation` or `metric` is not a text. |
 
 ### ANPDatabase.performance_aircraft()
 
@@ -608,7 +608,7 @@ it.
 | :--- | :--- |
 | KeyError | if the aircraft, its NPD data or its spectral class is missing. |
 | ValueError | for an unknown metric, operation or absorption route. |
-| TypeError | if `operation` or `absorption` is not a text. |
+| TypeError | if `operation`, `absorption` or `metric` is not a text. |
 
 ### ANPDatabase.spectral_class()
 

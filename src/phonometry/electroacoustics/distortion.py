@@ -37,6 +37,7 @@ import numpy as np
 
 from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
+    require_choice,
     require_count,
     require_ranks,
     require_same_length,
@@ -265,14 +266,12 @@ def thd(
     :return: Total harmonic distortion, as a ratio (0..).
     :raises ValueError: If the signal/parameters are invalid, ``kind`` is
         unknown, or no harmonic of the fundamental lies below Nyquist.
-    :raises TypeError: if ``fs`` is not a single number.
+    :raises TypeError: if ``fs`` is not a single number, or ``kind`` is not a text.
     """
     fs = resolve_fs(x, fs, name="x")
     sig = _validate_signal(x)
     fs_v = _positive(fs, "fs")
-    if kind not in ("F", "R"):
-        msg = "'kind' must be 'F' or 'R'."
-        raise ValueError(msg)
+    require_choice(kind, "kind", ("F", "R"))
     _f0, amps = _harmonic_amplitudes(sig, fs_v, fundamental, n_harmonics, window)
     if amps.size == 0 or amps[0] <= 0.0:
         msg = "No fundamental component found in the signal."
@@ -659,9 +658,7 @@ def weighted_thd(
     fs = resolve_fs(x, fs, name="x")
     sig = _validate_signal(x)
     fs_v = _positive(fs, "fs")
-    if weighting not in ("468", "A", "C"):
-        msg = "'weighting' must be '468', 'A' or 'C'."
-        raise ValueError(msg)
+    require_choice(weighting, "weighting", ("468", "A", "C"))
     _validate_notch_q(notch_q)
     if fundamental is None:
         freqs, amp = _amplitude_spectrum(sig, fs_v, window)

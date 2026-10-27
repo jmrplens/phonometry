@@ -139,6 +139,7 @@ from .._internal.validation import (
     is_at_most,
     is_positive,
     require_band_fraction,
+    require_choice,
     require_equal_counts,
     require_finite_fields,
     require_ranks,
@@ -182,11 +183,15 @@ _I0 = REFERENCE_VALUES["gas"]["sound_intensity"].value
 #: all three.
 DeterminationGrade = Literal["precision", "engineering", "survey"]
 
-_GRADES: tuple[str, ...] = ("precision", "engineering", "survey")
+_GRADES: tuple[DeterminationGrade, ...] = ("precision", "engineering", "survey")
 
 #: Deviation error factor K, in dB (Table 1, printed p. 11). Grades 1 and 2
 #: share 10 dB; grade 3 is allowed 7 dB, so its criterion 1 is the looser one.
-_K: dict[str, float] = {"precision": 10.0, "engineering": 10.0, "survey": 7.0}
+_K: dict[DeterminationGrade, float] = {
+    "precision": 10.0,
+    "engineering": 10.0,
+    "survey": 7.0,
+}
 
 #: Figure B.1's unnumbered third gate: the excess of the signed over the
 #: unsigned surface indicator, in dB. Above it the surface carries too much
@@ -370,16 +375,9 @@ _ACTION_TEXT: dict[ActionCode, str] = {
 }
 
 
-def _check_grade(grade: str) -> DeterminationGrade:
+def _check_grade(grade: object) -> DeterminationGrade:
     """Validate one of the three accuracy grades of ISO 9614-1 Table 1."""
-    if grade not in _GRADES:
-        msg = (
-            "'grade' must be 'precision' (grade 1), 'engineering' (grade 2) or "
-            f"'survey' (grade 3), the three grades of ISO 9614-1 Table 1; got "
-            f"{grade!r}."
-        )
-        raise ValueError(msg)
-    return cast(DeterminationGrade, grade)
+    return require_choice(grade, "grade", _GRADES)
 
 
 def _check_fraction(fraction: object) -> BandFraction:
@@ -510,7 +508,7 @@ def position_count_factor(
         one at the precision or engineering grade; or if ``frequency`` is not a
         tabulated band.
     :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a float), or
-        ``frequency`` is not a single number.
+        ``frequency`` is not a single number, or ``grade`` is not a text.
     """
     grade = _check_grade(grade)
     if frequency is None:
@@ -558,7 +556,7 @@ def determination_standard_deviation(
     :raises ValueError: On the same mismatches
         :func:`position_count_factor` refuses.
     :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a float), or
-        ``frequency`` is not a single number.
+        ``frequency`` is not a single number, or ``grade`` is not a text.
     """
     grade = _check_grade(grade)
     if frequency is None:
@@ -593,6 +591,7 @@ def error_factor(grade: DeterminationGrade, *, a_weighted: bool = False) -> floa
     :return: :math:`\Delta`, dimensionless.
     :raises ValueError: If ``grade`` is unknown, or the row asked for is blank
         at that grade.
+    :raises TypeError: if ``grade`` is not a text.
     """
     grade = _check_grade(grade)
     table = _TABLE_B1_A_WEIGHTED if a_weighted else _TABLE_B1_ALL_BANDS
@@ -793,6 +792,7 @@ def partial_power_concentration(
         table applies is not settled here: its two lower rows are conditioned
         on criterion 2 and on :math:`F_3 - F_2`, neither of which this function
         is given.
+    :raises TypeError: if ``grade`` is not a text.
     """
     grade = _check_grade(grade)
     i_n, seg = _positive_partial_powers(normal_intensity, areas)
@@ -1894,11 +1894,10 @@ def _a_weighted_grade(
     )
     inward_ok = bool(np.all((f3[summed] - f2[summed]) <= _NEGATIVE_POWER_LIMIT))
     for grade in _GRADES:
-        typed = cast(DeterminationGrade, grade)
-        ld = _dynamic_capability(residual_index, typed)
+        ld = _dynamic_capability(residual_index, grade)
         if not (stationary and inward_ok and bool(np.all(ld[summed] > f2[summed]))):
             continue
-        factor = _a_weighted_factor(contributions, frequencies, fraction, typed)
+        factor = _a_weighted_factor(contributions, frequencies, fraction, grade)
         if n_positions > float(settled(factor * f4_a**2)):
             return grade
     return "none"
@@ -1984,7 +1983,8 @@ def sound_power_intensity_points(
         ``temporal_intensity`` is neither 1D nor 2D, carries fewer than two
         samples, or holds a band whose mean is not positive and so leaves
         ``F1`` nothing to normalize by.
-    :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a float).
+    :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a float), or
+        ``grade`` is not a text.
     """
     grade = _check_grade(grade)
     fraction = _check_fraction(fraction)

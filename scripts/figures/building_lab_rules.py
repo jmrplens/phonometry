@@ -27,6 +27,7 @@ from .theme import (
 
 if TYPE_CHECKING:
     from phonometry import building
+    from phonometry.building.measurement.ratings import ReferenceFloor
 
 #: One-third-octave bands of ISO 717-1:2020 Table E.1, 50 Hz to 5000 Hz.
 _BANDS_50_5000 = [
@@ -112,11 +113,12 @@ def generate_lab_floor_covering_improvement(output_dir: str) -> None:
     _fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(13.0, 5.6))
     floors = building.IMPACT_REFERENCE_FLOORS
     positions = _band_axis(ax1, list(floors["heavyweight"]), language=_LANG)
-    for key, label, colour, style in (
+    curves: tuple[tuple[ReferenceFloor, str, str, str], ...] = (
         ("heavyweight", "heavyweight floor", COLOR_FG, "s--"),
         ("lightweight_1", "lightweight floors No 1 and No 2", COLOR_PRIMARY, "o-"),
         ("lightweight_3", "lightweight floor No 3", COLOR_TERTIARY, "^-"),
-    ):
+    )
+    for key, label, colour, style in curves:
         ax1.plot(
             positions,
             list(floors[key].values()),

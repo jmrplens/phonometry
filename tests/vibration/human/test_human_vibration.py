@@ -194,7 +194,7 @@ def test_weighting_response_fields_and_db() -> None:
 
 
 def test_unknown_weighting_raises() -> None:
-    with pytest.raises(ValueError, match="Unknown weighting"):
+    with pytest.raises(ValueError, match="'name' must be one of"):
         hv.frequency_weighting("Wz", [10.0])
 
 
@@ -296,13 +296,13 @@ def test_the_band_limiting_phase_is_the_annex_b_phase_column() -> None:
 
 
 def test_band_limiting_refuses_what_the_weighting_refuses() -> None:
-    with pytest.raises(ValueError, match="Unknown weighting"):
+    with pytest.raises(ValueError, match="'name' must be one of"):
         hv.band_limiting_factors("Wz", [10.0])
     with pytest.raises(ValueError, match=r"'frequencies' must be a non-empty"):
         hv.band_limiting_response("Wk", [])
     with pytest.raises(ValueError, match=r"'fs' must be a positive, finite"):
         hv.apply_band_limiting([1.0, 2.0], 0.0, name="Wk")
-    with pytest.raises(ValueError, match="Unknown weighting"):
+    with pytest.raises(ValueError, match="'name' must be one of"):
         hv.apply_band_limiting([1.0, 2.0], 100.0, name="Wz")
 
 
@@ -423,7 +423,7 @@ def test_mtvv_takes_the_two_averagings_running_rms_has_and_no_others() -> None:
     signal = [0.0, 1.0, 2.0, 1.0, 0.0]
     assert hv.mtvv(signal, 100.0, method="linear") > 0.0
     assert hv.mtvv(signal, 100.0, method="exponential") > 0.0
-    with pytest.raises(ValueError, match=r"'method' must be 'linear' or 'exponential'"):
+    with pytest.raises(ValueError, match="'method' must be one of"):
         hv.mtvv(signal, 100.0, method="Linear")
 
 
@@ -511,7 +511,7 @@ def test_running_rms_of_constant_power_signal() -> None:
 
 
 def test_running_rms_validation() -> None:
-    with pytest.raises(ValueError, match=r"'method' must be 'linear'"):
+    with pytest.raises(ValueError, match="'method' must be one of"):
         hv.running_rms([1.0, 2.0], 100.0, method="bogus")
     with pytest.raises(ValueError, match=r"'integration_time' must be positive"):
         hv.running_rms([1.0, 2.0], 100.0, integration_time=0.0)

@@ -211,7 +211,7 @@ binding for every microphone pair).
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `spacing_m` is not a single number. |
+| TypeError | if `spacing_m` is not a single number, or `shape` is not a text. |
 
 ## speed_of_sound_astm_e2611
 
@@ -292,7 +292,7 @@ $$
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `diameter_m`, `s1` or `s2` is not a single number. |
+| TypeError | if `diameter_m`, `s1` or `s2` is not a single number, or `shape` is not a text. |
 
 ## transfer_matrix_two_load
 
@@ -347,7 +347,7 @@ $$
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `diameter_m`, `s1` or `s2` is not a single number. |
+| TypeError | if `diameter_m`, `s1` or `s2` is not a single number, or `shape` is not a text. |
 
 ## TransferMatrix
 
@@ -656,7 +656,7 @@ air-layer transfer matrix (see [`air_layer_transfer_matrix`](/phonometry/referen
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `diameter_m`, `s1` or `s2` is not a single number. |
+| TypeError | if `diameter_m`, `s1` or `s2` is not a single number, or `shape` is not a text. |
 
 ## WaveAmplitudes
 

@@ -41,6 +41,8 @@ from phonometry.filters.weighting_compliance import _WEIGHTING_TABLE3
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+    from phonometry.building.measurement.service_equipment import Weighting
+
 THIRD = np.array([row[0] for row in ref.ISO16032_TABLE_A1_THIRD])
 OCTAVE = np.array([row[0] for row in ref.ISO16032_TABLE_A1_OCTAVE])
 RESTRICTED = THIRD[(THIRD >= 50.0) & (THIRD <= 5000.0)]
@@ -86,7 +88,8 @@ def test_third_octave_c_weighting_departs_from_print_only_in_the_defect() -> Non
 
 def test_corrected_c_cells_are_iec_61672_1_table_3() -> None:
     iec = {row[0]: (row[1], row[2]) for row in _WEIGHTING_TABLE3}
-    for weighting, column in (("A", 0), ("C", 1)):
+    columns: tuple[tuple[Weighting, int], ...] = (("A", 0), ("C", 1))
+    for weighting, column in columns:
         for f, value in building.SERVICE_EQUIPMENT_WEIGHTING[3][weighting].items():
             assert value == pytest.approx(iec[f][column], abs=1e-12)
 

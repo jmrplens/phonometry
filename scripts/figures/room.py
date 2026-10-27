@@ -38,6 +38,8 @@ from .theme import (
 if TYPE_CHECKING:
     from matplotlib.projections.polar import PolarAxes
 
+    from phonometry.room.auditorium import RowSymbol
+
 
 def generate_schroeder_decay(output_dir: str) -> None:
     """Schroeder backward integration with T20/T30/EDT regressions (ISO 3382)."""
@@ -3697,7 +3699,7 @@ def generate_directivity_and_tables(output_dir: str) -> None:
 
     # -- Right: which bands each single number of Table A.1 averages.
     octaves = [125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0]
-    symbols = ["G", "EDT", "C80", "D50", "Ts", "J_LF", "L_J"]
+    symbols: list[RowSymbol] = ["G", "EDT", "C80", "D50", "Ts", "J_LF", "L_J"]
     labels = {
         "G": "$G$",
         "EDT": "EDT",

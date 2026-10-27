@@ -47,7 +47,10 @@ from ..registry import Outcome, count, numeric, record, register
 from .signal_burst import _indications
 
 if TYPE_CHECKING:
-    from phonometry.vibration.human.signal_burst import BurstQuantity
+    from phonometry.vibration.human.signal_burst import (
+        BurstApplication,
+        BurstQuantity,
+    )
 
 _PVEM = "Personal vibration exposure meters (ISO 8041-2)"
 
@@ -61,7 +64,7 @@ _TABLE6_FIELDS = 6
 _TABLES: tuple[
     tuple[
         int,
-        str,
+        BurstApplication,
         tuple[BurstQuantity, ...],
         dict[tuple[str, int | None], tuple[tuple[float, float], ...]],
     ],
@@ -108,7 +111,7 @@ def _register_reproduction() -> None:
 
         def _check(
             number: int = number,
-            application: str = application,
+            application: BurstApplication = application,
             columns: tuple[BurstQuantity, ...] = columns,
             table: dict[
                 tuple[str, int | None], tuple[tuple[float, float], ...]
@@ -142,7 +145,7 @@ def _register_identity() -> None:
 
         def _check(
             number: int = number,
-            application: str = application,
+            application: BurstApplication = application,
             columns: tuple[BurstQuantity, ...] = columns,
             table: dict[
                 tuple[str, int | None], tuple[tuple[float, float], ...]

@@ -924,17 +924,21 @@ def pleasantness_eventfulness(
     :raises ValueError: for a mapping that does not name the eight
         attributes, a value outside 1 to 5, or sites that do not match the
         respondents.
-    :raises TypeError: if ``central_tendency`` is not a text.
+    :raises TypeError: if ``central_tendency`` or a key of ``scale_values`` is
+        not a text.
     """
     require_choice(central_tendency, "central_tendency", _CENTRAL_TENDENCIES)
     if isinstance(scale_values, Mapping):
+        for attribute in scale_values:
+            require_choice(
+                attribute, "scale_values", PERCEIVED_AFFECTIVE_QUALITY_ATTRIBUTES
+            )
         missing = set(PERCEIVED_AFFECTIVE_QUALITY_ATTRIBUTES) - set(scale_values)
-        extra = set(scale_values) - set(PERCEIVED_AFFECTIVE_QUALITY_ATTRIBUTES)
-        if missing or extra:
+        if missing:
             msg = (
                 "'scale_values' must name exactly the eight attributes "
                 f"{PERCEIVED_AFFECTIVE_QUALITY_ATTRIBUTES}; missing "
-                f"{sorted(missing)}, unexpected {sorted(extra)}."
+                f"{sorted(missing)}."
             )
             raise ValueError(msg)
         ordered: dict[str, ArrayLike] = {

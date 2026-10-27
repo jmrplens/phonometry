@@ -519,6 +519,7 @@ to one decimal, as the tables print them (see
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a protector type the tables do not list, or for frequencies that are not positive and finite. |
+| TypeError | if `protector` is not a text. |
 
 ## REAT_FIELD_VARIATION_LIMITS
 

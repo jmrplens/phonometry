@@ -43,6 +43,7 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike
 
     from phonometry.building import InSituElementResult
+    from phonometry.building.measurement.ratings import ReferenceFloor
 
 _A60 = 6.0 * math.log(10.0)
 
@@ -1172,7 +1173,7 @@ def _chk_iso717_1_table_e1_bands() -> Outcome:
 
 
 #: The floors that read each printed column of ISO 717-2:2020 Table 4.
-_TABLE_4_COLUMNS = {
+_TABLE_4_COLUMNS: dict[str, tuple[ReferenceFloor, ...]] = {
     "heavyweight": ("heavyweight",),
     "lightweight_1_and_2": ("lightweight_1", "lightweight_2"),
     "lightweight_3": ("lightweight_3",),

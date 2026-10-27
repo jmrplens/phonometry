@@ -16,6 +16,7 @@ from __future__ import annotations
 import dataclasses
 import math
 import re
+from typing import TYPE_CHECKING
 
 import numpy as np
 import pytest
@@ -24,7 +25,11 @@ from phonometry import building, io, solids, vibration
 from phonometry.fluids import Fluid
 from phonometry.materials import miki
 
+if TYPE_CHECKING:
+    from phonometry.building.prediction.panel_transmission import PlateauMaterialName
+
 # ISO 717-1 one-third-octave band centres, 100 Hz to 3150 Hz.
+
 BANDS = np.array(
     [
         100,
@@ -339,7 +344,7 @@ def test_plateau_table_matches_norton_table_31() -> None:
 
 @pytest.mark.parametrize(("material", "row"), sorted(NORTON_TABLE_31.items()))
 def test_plateau_table_row_matches_the_printed_row(
-    material: str, row: tuple[float, float, float]
+    material: PlateauMaterialName, row: tuple[float, float, float]
 ) -> None:
     # One case per material, so a corrupted row names itself in the failure.
 

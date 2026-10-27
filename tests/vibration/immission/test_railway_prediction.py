@@ -11,12 +11,20 @@ closed forms of Clauses 5.2, 5.3 and Annex B, which print no example.
 from __future__ import annotations
 
 import math
+from typing import TYPE_CHECKING
 
 import numpy as np
 import pytest
 from reference_data import din45672_3_annex_a as annex_a
 
 from phonometry.vibration import immission as im
+
+if TYPE_CHECKING:
+    from phonometry.vibration.immission.railway_prediction import (
+        Floor,
+        FoundationLevel,
+        Statistic,
+    )
 
 # Table C.1 (printed page 34): f_Tn, L_v,E, ΔL_v,BB, ΔL_v,DF and the printed L_v.
 TABLE_C1 = [
@@ -152,7 +160,7 @@ def _same(value: float, cell: str | None) -> bool:
     ],
 )
 def test_every_cell_of_the_ground_to_floor_tables_is_the_printed_one(
-    floor: str, table: tuple[tuple[str | None, ...], ...]
+    floor: Floor, table: tuple[tuple[str | None, ...], ...]
 ) -> None:
     """Tables A.1 and A.2, all 209 cells each, against the page."""
     columns = im.GROUND_TO_FLOOR_LEVEL_DIFFERENCES[floor]
@@ -180,7 +188,10 @@ def test_every_cell_of_the_ground_to_floor_tables_is_the_printed_one(
     ],
 )
 def test_every_cell_of_the_foundation_tables_is_the_printed_one(
-    mapping: str, kind: str, table: tuple[tuple[str | None, ...], ...], start: int
+    mapping: str,
+    kind: FoundationLevel | Floor,
+    table: tuple[tuple[str | None, ...], ...],
+    start: int,
 ) -> None:
     """Tables A.3 to A.6, every lower, mean and upper cell, against the page.
 
@@ -189,10 +200,12 @@ def test_every_cell_of_the_foundation_tables_is_the_printed_one(
     one from 0,08. A cell the page leaves empty is NaN.
     """
     if mapping == "foundation":
+        assert kind == "basement" or kind == "ground_floor"
         statistics = im.GROUND_TO_FOUNDATION_LEVEL_DIFFERENCES[kind]
         axis = im.PREDICTION_BAND_CENTERS_HZ
         tolerance = 0.5  # the print writes 12,5 Hz as 12
     else:
+        assert kind == "concrete" or kind == "timber"
         statistics = im.FOUNDATION_TO_FLOOR_LEVEL_DIFFERENCES[kind]
         axis = im.FOUNDATION_TO_FLOOR_RATIOS
         tolerance = 0.051  # the print writes 3,15 as 3,10
@@ -200,7 +213,8 @@ def test_every_cell_of_the_foundation_tables_is_the_printed_one(
     for offset, row in enumerate(table):
         index = start + offset
         assert abs(_printed(row[0]) - axis[index]) <= tolerance
-        for column, statistic in enumerate(("lower", "mean", "upper"), start=1):
+        columns: tuple[Statistic, ...] = ("lower", "mean", "upper")
+        for column, statistic in enumerate(columns, start=1):
             if not _same(statistics[statistic][index], row[column]):
                 wrong.append(
                     (row[0], statistic, statistics[statistic][index], row[column])

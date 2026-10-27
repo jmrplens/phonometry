@@ -410,6 +410,7 @@ print and converted, here and once, to the metres
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an unknown model name, or when the page does not print a parameter the model needs, in which case the message says what the page had there instead. |
+| TypeError | if `model` is not a text. |
 
 ### PorousMaterial.printed()
 

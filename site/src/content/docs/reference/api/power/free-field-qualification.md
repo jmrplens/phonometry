@@ -161,7 +161,7 @@ allows, "in conformity" but not "in full conformity".
 | Exception | When |
 | :--- | :--- |
 | ValueError | for results of different rooms, a frequency given to two sources, directionality results that do not align with `results`, an unknown bandwidth, an absorption coefficient outside 0 to 1, or a margin that is not finite. |
-| TypeError | for a working-area declaration that is not `True`, `False` or `None` (a NumPy truth value is one). |
+| TypeError | for a working-area declaration that is not `True`, `False` or `None` (a NumPy truth value is one), or a `bandwidth` that is not a text. |
 
 ## directionality_positions
 
@@ -195,7 +195,7 @@ hemi-anechoic room, 64 in an anechoic one (Figure B.1).
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `radius` is not a single number. |
+| TypeError | if `radius` is not a single number, or `room` is not a text. |
 
 ## directionality_tolerance
 
@@ -223,6 +223,7 @@ Allowable deviation of the test source directionality (ISO 26101 Table B.1).
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an unknown room, a non-positive frequency or frequencies that are not one value or a 1-D array. |
+| TypeError | if `room` is not a text. |
 
 ## FreeFieldCheck
 
@@ -506,6 +507,7 @@ span the frequency range, each with its own mathematical origin, and
 | Exception | When |
 | :--- | :--- |
 | ValueError | if both `origin_m` and `source_box_m` are given, a traverse's level columns do not match the frequencies, a traverse has no level at a frequency, or a point coincides with the origin. |
+| TypeError | if `room` is not a text. |
 
 ## inverse_square_law_tolerance
 
@@ -537,6 +539,7 @@ so a tone at 794 Hz is held to the 800 Hz row.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an unknown room, a non-positive frequency or frequencies that are not one value or a 1-D array. |
+| TypeError | if `room` is not a text. |
 
 ## InverseSquareLawResult
 
@@ -843,3 +846,4 @@ the room being qualified.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for the wrong number of positions, levels that are not finite, or bands that do not match. |
+| TypeError | if `room` is not a text. |

@@ -107,6 +107,12 @@ and the reverberation time (Formula 5).
 
 **Returns:** The [`ReverberationResult`](/phonometry/reference/api/rooms/enclosed-space-absorption/#reverberationresult).
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `air_condition` is not a text. |
+
 ## equivalent_absorption_area
 
 ```python

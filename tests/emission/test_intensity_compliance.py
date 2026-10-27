@@ -122,7 +122,7 @@ def test_frequency_outside_table_is_rejected() -> None:
 
 
 def test_unknown_device_is_rejected() -> None:
-    with pytest.raises(ValueError, match=r"'device' must be 'probe'"):
+    with pytest.raises(ValueError, match="'device' must be one of"):
         emission.residual_index_limits("analyser")
 
 

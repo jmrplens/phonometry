@@ -133,6 +133,7 @@ import numpy as np
 from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, read_only
 from .._internal.validation import (
+    require_choice,
     require_count,
     require_finite,
     require_finite_array,
@@ -580,14 +581,10 @@ class DirectivityFactor(OwnsArrays):
             value is not finite, :math:`\gamma` is not positive, the largest
             element is not a fraction of the sphere, or the formula is not one
             of the three.
-        :raises TypeError: if ``gamma`` or ``reference_level`` is not a single number.
+        :raises TypeError: if ``gamma`` or ``reference_level`` is not a single number,
+            or ``formula`` is not a text.
         """
-        if self.formula not in _FORMULAS:
-            msg = (
-                f"DirectivityFactor: 'formula' must be one of {_FORMULAS}; "
-                f"got {self.formula!r}."
-            )
-            raise ValueError(msg)
+        require_choice(self.formula, "formula", _FORMULAS)
         columns = ("incidence_angles_deg", "plane_angles_deg", "levels", "weights")
         arrays = {
             name: np.asarray(getattr(self, name), dtype=np.float64) for name in columns
@@ -673,13 +670,12 @@ class DirectivityFactor(OwnsArrays):
             (``pip install "phonometry[plot]"``).
         :raises ValueError: if ``view`` is not one of the two names above, or
             ``ax`` is not polar for the response.
+        :raises TypeError: if ``view`` is not a text.
         """
         from .._i18n import check_language
         from .._plot.metrology import plot_directivity_factor
 
-        if view not in _DIRECTIVITY_VIEWS:
-            msg = f"Unknown view {view!r}; use one of {_DIRECTIVITY_VIEWS}."
-            raise ValueError(msg)
+        require_choice(view, "view", _DIRECTIVITY_VIEWS)
         return plot_directivity_factor(
             self, ax=ax, view=view, language=check_language(language), **kwargs
         )
@@ -1037,13 +1033,12 @@ class RandomIncidenceSensitivity(OwnsArrays):
         :return: The axes. Requires matplotlib
             (``pip install "phonometry[plot]"``).
         :raises ValueError: if ``view`` is not one of the two names above.
+        :raises TypeError: if ``view`` is not a text.
         """
         from .._i18n import check_language
         from .._plot.metrology import plot_random_incidence_sensitivity
 
-        if view not in _SENSITIVITY_VIEWS:
-            msg = f"Unknown view {view!r}; use one of {_SENSITIVITY_VIEWS}."
-            raise ValueError(msg)
+        require_choice(view, "view", _SENSITIVITY_VIEWS)
         return plot_random_incidence_sensitivity(
             self, ax=ax, view=view, language=check_language(language), **kwargs
         )
@@ -1167,14 +1162,9 @@ class DiffuseFieldSensitivity(OwnsArrays):
             finite, the frequencies are not positive and increasing, or the
             route is not one of the three.
         :raises TypeError: if ``frequencies`` holds a text or a value that is not a real
-            number.
+            number, or ``route`` is not a text.
         """
-        if self.route not in _ROUTES:
-            msg = (
-                f"DiffuseFieldSensitivity: 'route' must be one of {_ROUTES}; "
-                f"got {self.route!r}."
-            )
-            raise ValueError(msg)
+        require_choice(self.route, "route", _ROUTES)
         frequencies = _frequency_axis(self.frequencies)
         object.__setattr__(self, "frequencies", read_only(frequencies))
         for name in (

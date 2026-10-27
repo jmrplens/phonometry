@@ -17,7 +17,7 @@ from dataclasses import dataclass, fields
 from typing import TYPE_CHECKING, Literal
 
 from .._internal.display import RichDisplay
-from .._internal.validation import require_count
+from .._internal.validation import require_choice, require_count
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -238,7 +238,14 @@ class ReportMetadata(RichDisplay):
             raise ValueError(msg)
 
     def __post_init__(self) -> None:
-        """Validate the supplied fields: the quantities, the counts, the choices."""
+        """Validate the supplied fields: the quantities, the counts, the choices.
+
+        :raises TypeError: if ``tube_shape`` is not a text.
+        """
+        if self.tube_shape is not None:
+            require_choice(
+                self.tube_shape, "tube_shape", ("circular", "rectangular", "square")
+            )
         self._validate_quantities()
         self._validate_counts()
         self._validate_choices()

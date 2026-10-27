@@ -20,6 +20,11 @@ Stdlib only, like every module of this package.
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from phonometry.building.measurement.service_equipment import Weighting
+
 #: Clause 9, folio 10 (PDF page 48): "A difference of 4 dB corresponds to a
 #: correction value of 2,2 dB. If the difference is less than 4 dB the
 #: correction value shall be limited to 2,2 dB." The difference and the
@@ -121,7 +126,10 @@ ISO16032_TABLE_2_BANDS: tuple[
 )
 
 #: Table 2, folio 10 (PDF page 48): the A- and C-weighted rows, in dB.
-ISO16032_TABLE_2_WEIGHTED: tuple[tuple[str, float], ...] = (("A", 0.8), ("C", 1.2))
+ISO16032_TABLE_2_WEIGHTED: tuple[tuple[Weighting, float], ...] = (
+    ("A", 0.8),
+    ("C", 1.2),
+)
 
 # The limits of the on-site checks, each read on its printed page of the
 # English text. None of them comes with a worked case; the rows that use them

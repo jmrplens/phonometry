@@ -174,7 +174,7 @@ def test_silencer_chain_without_a_duct_refuses_to_draw() -> None:
 
 
 def test_silencer_free_function_validation() -> None:
-    with pytest.raises(ValueError, match="Unknown silencer kind"):
+    with pytest.raises(ValueError, match="'kind' must be one of"):
         pm.noise_control.plot_silencer_geometry("muffler", {"length": 0.3})
     with pytest.raises(ValueError, match=r"'chamber_area' must exceed 'pipe_area'"):
         pm.noise_control.plot_silencer_geometry(
@@ -211,8 +211,8 @@ def test_silencer_geometry_names_a_key_its_kind_does_not_take() -> None:
     """
     with pytest.raises(
         ValueError,
-        match=r"The Helmholtz resonator drawing takes no 'length'; its geometry "
-        r"keys are 'duct_area', 'neck_area', 'neck_length', 'cavity_volume'\.",
+        match=r"'geometry' must be one of \('duct_area', 'neck_area', 'neck_length', "
+        r"'cavity_volume'\); got 'length'\.",
     ):
         pm.noise_control.plot_silencer_geometry(
             "Helmholtz resonator",
@@ -225,7 +225,9 @@ def test_silencer_geometry_names_a_key_its_kind_does_not_take() -> None:
             },
         )
     with pytest.raises(
-        ValueError, match=r"The expansion chamber drawing takes no 'inlet_extension'"
+        ValueError,
+        match=r"'geometry' must be one of \('length', 'chamber_area', 'pipe_area'\); "
+        r"got 'inlet_extension'\.",
     ):
         pm.noise_control.plot_silencer_geometry(
             "expansion chamber",
@@ -259,6 +261,7 @@ def test_silencer_geometry_draws_what_the_result_keeps() -> None:
         below_cut_on, 0.3, 0.1, 0.01, inlet_extension=0.05, outlet_extension=0.08
     )
     assert res.geometry is not None
+    assert res.kind != "element chain"
     free = pm.noise_control.plot_silencer_geometry(res.kind, res.geometry)
     drawn = res.plot_geometry()
     assert [t.get_text() for t in free.texts] == [t.get_text() for t in drawn.texts]

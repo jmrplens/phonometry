@@ -791,13 +791,22 @@ def _raises_type_error(function: ast.FunctionDef | ast.AsyncFunctionDef) -> int 
     return None
 
 
+#: The checks of the keywords every plot and every report takes: ``language``
+#: and ``engine`` are refused one way across the package (``TypeError`` for a
+#: value that is not a text, ``ValueError`` for a text that names no option),
+#: and the API reference says so once, in its notes, rather than every
+#: ``.plot`` and ``.report`` docstring repeating it.
+_DOCUMENTED_ONCE = frozenset({"check_engine", "check_language"})
+
+
 @functools.cache
 def _validators_raising_type_error() -> frozenset[str]:
     """The public validators of ``_internal/validation.py`` that raise TypeError.
 
     A validator raises it itself, or calls another of the module that does,
     as :func:`require_positive` reaches it through the number check every
-    scalar guard shares.
+    scalar guard shares. The checks of :data:`_DOCUMENTED_ONCE` are left
+    out: what they refuse is documented once for the whole package.
     """
     tree = ast.parse((SRC / "_internal" / "validation.py").read_text(encoding="utf-8"))
     functions = {f.name: f for f in tree.body if isinstance(f, ast.FunctionDef)}
@@ -816,7 +825,11 @@ def _validators_raising_type_error() -> frozenset[str]:
             if name not in raising and called & raising:
                 raising.add(name)
                 grown = True
-    return frozenset(name for name in raising if not name.startswith("_"))
+    return frozenset(
+        name
+        for name in raising
+        if not name.startswith("_") and name not in _DOCUMENTED_ONCE
+    )
 
 
 #: What a parameter goes through on its way to a validator and stays itself:
@@ -1188,9 +1201,10 @@ def _called_renderer(
 
 
 #: Checks a method may run on a parameter before it hands it to a renderer,
-#: which refuse any value outside their options with ``ValueError``, whatever
-#: its type (``language not in ("en", "es")``): the renderer's ``TypeError``
-#: for the same parameter is never reached.
+#: which refuse every value outside their options first (``TypeError`` for one
+#: that is not a text, ``ValueError`` for an unknown text): the renderer's
+#: ``TypeError`` for the same parameter is never reached, and the check's own
+#: is documented once (:data:`_DOCUMENTED_ONCE`).
 _REFUSED_BEFORE = frozenset({"check_language"})
 
 

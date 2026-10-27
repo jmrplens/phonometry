@@ -331,7 +331,7 @@ def test_tonal_frequency_vs_time_off_the_block_axis_is_refused(
 
 def test_invalid_field() -> None:
     tone = _tone(1000.0, 40.0, seconds=0.5)
-    with pytest.raises(ValueError, match="field must be"):
+    with pytest.raises(ValueError, match="'field' must be one of"):
         psychoacoustics.tonality_ecma(tone, FS, field="reverberant")
 
 

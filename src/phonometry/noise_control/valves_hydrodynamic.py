@@ -89,6 +89,8 @@ from .valves import (
 )
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
+    from collections.abc import Mapping
+
     from numpy.typing import ArrayLike, NDArray
 
 Coefficient = Literal["Cv", "Kv"]
@@ -145,7 +147,9 @@ __all__ = [
 #: estimate of 6.3.2. Equation (3b) has no flow coefficient in it, so it has
 #: no :math:`N_{34}` either; the constant printed at full size on its
 #: baseline is :math:`N_o`, a count of holes.
-CAPACITY_SCALE_CONSTANTS = MappingProxyType({"Cv": 1.17, "Kv": 1.0})
+CAPACITY_SCALE_CONSTANTS: Mapping[Coefficient, float] = MappingProxyType(
+    {"Cv": 1.17, "Kv": 1.0}
+)
 
 #: Table 2's acoustic power ratio :math:`r_W`, the fraction of the sound
 #: power that is radiated into the pipe rather than lost in the valve body.
@@ -188,7 +192,9 @@ REFERENCE_INLET_PRESSURE_PA = 6.0e5
 #: are not the same function of the valve: for Annex A's :math:`F_d = 0{,}42`
 #: the annex form is 6 % below the clause form, and for a plain single-port
 #: valve at :math:`F_d = 1` it is 80 % above it.
-STROUHAL_CONSTANTS = MappingProxyType({"annex": 0.036, "clause": 0.02})
+STROUHAL_CONSTANTS: Mapping[Form, float] = MappingProxyType(
+    {"annex": 0.036, "clause": 0.02}
+)
 
 #: The width in :math:`x_F` of the band just above incipient cavitation where
 #: the NOTE to Equation (17) floors the efficiency ratio. Inside it the
@@ -1458,6 +1464,13 @@ class LiquidTrim(RichDisplay):
     valve_diameter_m: float
     seat_diameter_m: float
     coefficient: Coefficient = "Cv"
+
+    def __post_init__(self) -> None:
+        """Refuse a choice its ``Literal`` does not list, when the record is built.
+
+        :raises TypeError: if ``coefficient`` is not a text.
+        """
+        require_choice(self.coefficient, "coefficient", ("Cv", "Kv"))
 
 
 @dataclass(frozen=True, kw_only=True)

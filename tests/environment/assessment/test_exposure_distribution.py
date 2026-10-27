@@ -710,5 +710,5 @@ def test_plot_forwards_style_and_composes_into_given_axes() -> None:
 
 def test_plot_refuses_an_unknown_view() -> None:
     dist = _annex_a()
-    with pytest.raises(ValueError, match="Unknown view 'cdf'"):
+    with pytest.raises(ValueError, match="'view' must be one of"):
         dist.plot(view="cdf")

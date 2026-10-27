@@ -86,6 +86,7 @@ from ..._internal.frozen import OwnsArrays, read_only
 from ..._internal.types import as_float_if_reduced, as_float_or_array
 from ..._internal.validation import (
     _as_float64,
+    require_choice,
     require_count,
     require_finite,
     require_positive,
@@ -679,13 +680,12 @@ class SELDistribution(OwnsArrays):
         :return: The axes. Requires matplotlib
             (``pip install "phonometry[plot]"``).
         :raises ValueError: If ``view`` is not one of the three names above.
+        :raises TypeError: if ``view`` is not a text.
         """
         from ..._i18n import check_language
         from ..._plot.environment import plot_sel_distribution
 
-        if view not in _VIEWS:
-            msg = f"Unknown view {view!r}; use one of {_VIEWS}."
-            raise ValueError(msg)
+        require_choice(view, "view", _VIEWS)
         return plot_sel_distribution(
             self, ax=ax, view=view, language=check_language(language), **kwargs
         )

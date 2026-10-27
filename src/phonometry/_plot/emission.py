@@ -3,10 +3,11 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Final
+from typing import TYPE_CHECKING, Any, Final, Literal
 
 import numpy as np
 
+from .._internal.validation import require_choice
 from .common import (
     _C_EDGE,
     _C_MUTED,
@@ -1853,7 +1854,7 @@ def plot_turbine_layout(
     array: TurbineMicrophoneArray | None,
     ax: Axes | None = None,
     *,
-    view: str = "plan",
+    view: Literal["plan", "elevation"] = "plan",
     language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
@@ -1877,13 +1878,12 @@ def plot_turbine_layout(
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the outline of the measurement surface.
     :return: The axes.
+    :raises TypeError: if ``view`` is not a text.
     :raises ValueError: for a view that is neither.
     """
     from .._i18n import format_number, localize_axes
 
-    if view not in ("plan", "elevation"):
-        msg = f"view must be 'plan' or 'elevation'; got {view!r}."
-        raise ValueError(msg)
+    require_choice(view, "view", ("plan", "elevation"))
     ax = ax if ax is not None else _new_axes()
     _turbine_boxes(surface, ax, view)
     xs, ys = _turbine_outline(surface, view)

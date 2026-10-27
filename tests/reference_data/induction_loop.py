@@ -13,6 +13,11 @@ the figure's own gridlines, and say so where they are kept.
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from phonometry.electroacoustics.induction_loop import Program
+
 # ---------------------------------------------------------------------------
 # IEC 60118-4:2014 3.1 (folio 9) and 4.3 (folio 11): 0 dB is 400 mA/m, and a
 # long-term average of -12 dB ref. 400 mA/m, "i.e. 100 mA/m", gives the output
@@ -93,7 +98,7 @@ IEC60118_4_A1_COMMISSIONING_MA_PER_M = (283.0, 566.0)
 IEC60118_4_A1_OVERLOAD_OFFSET_DB = -7.0
 #: Table 4: programme, upper limit of the maximum power bandwidth, test
 #: frequency, both in hertz.
-IEC60118_4_A1_TABLE4 = (
+IEC60118_4_A1_TABLE4: tuple[tuple[Program, float, float], ...] = (
     ("transient_speech", 1250.0, 2500.0),
     ("speech", 1600.0, 3150.0),
     ("music", 2000.0, 4000.0),

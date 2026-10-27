@@ -41,6 +41,7 @@ from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     check_engine,
     require_above_absolute_zero_array,
+    require_choice,
     require_equal_shapes,
     require_per_band,
     require_present,
@@ -479,8 +480,9 @@ def plane_wave_frequency_range(
         tube is the rectangular bound with ``d`` the side length).
     :return: Tuple ``(f_l, f_u)`` of the lower and upper frequency limits, in Hz.
     :raises TypeError: if ``diameter_m``, ``spacing_m`` or ``speed_of_sound`` is not a
-        single number.
+        single number, or ``shape`` is not a text.
     """
+    require_choice(shape, "shape", ("circular", "rectangular", "square"))
     require_scalar(spacing_m, "spacing_m")
     return _frequency_range(
         spacing_m,
@@ -763,7 +765,10 @@ def two_microphone_impedance(
         ``"square"``.
     :return: An :class:`ImpedanceTubeResult` (the tube geometry is retained on
         the result).
+
+    :raises TypeError: if ``shape`` is not a text.
     """
+    require_choice(shape, "shape", ("circular", "rectangular", "square"))
     # At least 1-D: a single-frequency reduction is legitimate, and the result
     # class pins a non-empty 1-D frequency axis so the fiche table and the
     # figure can always walk it.

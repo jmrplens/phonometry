@@ -154,7 +154,7 @@ class TestDelanyBazley:
 
     def test_rejects_bad_inputs(self) -> None:
         f = np.array([100.0])
-        with pytest.raises(ValueError, match=r"unknown coefficient preset"):
+        with pytest.raises(ValueError, match="'coefficients' must be one of"):
             delany_bazley(f, 10000.0, coefficients="nope")
         with pytest.raises(
             ValueError, match=r"'coefficients' must provide exactly 8 values"
@@ -540,9 +540,7 @@ class TestLayeredAbsorber:
             ValueError, match=r"'angle_rad' must satisfy 0 <= angle < pi/2"
         ):
             layered_absorber(f, layers, angle_rad=np.pi / 2.0)
-        with pytest.raises(
-            ValueError, match=r"'termination' must be .*complex impedance"
-        ):
+        with pytest.raises(ValueError, match="'termination' must be one of"):
             layered_absorber(f, layers, termination="soft")
         other = miki(_grid(100.0, 200.0, 7), 20000.0)
         mismatched = [PorousLayer(thickness_m=0.05, medium=other)]

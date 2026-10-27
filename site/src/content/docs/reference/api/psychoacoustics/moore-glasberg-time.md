@@ -99,7 +99,7 @@ the instantaneous sound pressure in pascals.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `fs` is not a single number. |
+| TypeError | if `fs` is not a single number, or `presentation` is not a text. |
 
 A steady 1 kHz tone at 40 dB SPL, binaural, free field, yields a peak
 long-term loudness of 1.000 sone (40 phon) by definition of the sone.
@@ -117,7 +117,7 @@ MooreGlasbergTimeVaryingLoudness(
     loudness_level_max: float,
     percentiles: dict[float, float],
     field: Literal['free', 'diffuse', 'eardrum'],
-    presentation: str,
+    presentation: Literal['binaural', 'diotic', 'monaural'],
 )
 ```
 

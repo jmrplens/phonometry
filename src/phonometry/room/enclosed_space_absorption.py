@@ -50,6 +50,7 @@ if TYPE_CHECKING:
 from .._internal.types import ReportEngine, as_float_or_array
 from .._internal.validation import (
     check_engine,
+    require_choice,
     require_finite_fields,
     require_fraction,
     require_positive,
@@ -479,7 +480,21 @@ def enclosed_space_reverberation(
         125 Hz to 8 kHz.
     :param speed_of_sound: Speed of sound ``c0``, m/s.
     :return: The :class:`ReverberationResult`.
+    :raises TypeError: if ``air_condition`` is not a text.
     """
+    if air_condition is not None:
+        require_choice(
+            air_condition,
+            "air_condition",
+            (
+                "10C_30-50",
+                "10C_50-70",
+                "10C_70-90",
+                "20C_30-50",
+                "20C_50-70",
+                "20C_70-90",
+            ),
+        )
     # The result owns its arrays and copies them on construction, so neither
     # the caller's array nor _OCTAVE_BANDS needs a copy of its own here.
     freq = np.asarray(frequencies, dtype=np.float64)

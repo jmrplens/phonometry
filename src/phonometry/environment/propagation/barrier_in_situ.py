@@ -241,7 +241,7 @@ MIN_RECEIVER_HEIGHT_M: float = 1.2
 
 #: 8.2.2: the correction for the kind of receiver position, in decibels. The
 #: 6 dB is the pressure doubling at a large hard surface.
-RECEIVER_CORRECTIONS: Mapping[str, float] = MappingProxyType(
+RECEIVER_CORRECTIONS: Mapping[ReceiverType, float] = MappingProxyType(
     {
         "hemi_free_field": 0.0,
         "reflecting_surface": 6.0,
@@ -267,7 +267,7 @@ POINT_SOURCE_DIVERGENCE_DB: float = 6.0
 LINE_SOURCE_DIVERGENCE_DB: float = 3.0
 
 ReceiverType = Literal["hemi_free_field", "reflecting_surface"]
-_RECEIVER_TYPES: tuple[str, ...] = ("hemi_free_field", "reflecting_surface")
+_RECEIVER_TYPES: tuple[ReceiverType, ...] = ("hemi_free_field", "reflecting_surface")
 
 
 class BarrierInSituWarning(PhonometryWarning):

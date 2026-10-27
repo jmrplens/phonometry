@@ -159,6 +159,7 @@ Look up a wall tie in Hopkins Table A4.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an unknown tie name. |
+| TypeError | if `tie` is not a text. |
 
 ## wall_tie_stiffness_per_area
 

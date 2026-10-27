@@ -314,7 +314,7 @@ def _resolve_interior(
     internal_area: float,
     internal_absorption: ArrayLike,
     frequencies: ArrayLike | None,
-    model: str,
+    model: object,
     name: str,
     owner: str,
 ) -> tuple[

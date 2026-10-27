@@ -26,6 +26,10 @@ if TYPE_CHECKING:
         TrackTransferCode,
         TractionVehicleName,
     )
+    from phonometry.environment.sources.cnossos_road import (
+        RoadSurfaceName,
+        RoadVehicleCode,
+    )
 
 #: Versioned root of the committed oracle data.
 _DATA = pathlib.Path(__file__).parent.parent / "data"
@@ -1931,7 +1935,7 @@ def cnossos_rail_2015_vehicles() -> dict[str, dict[str, str]]:
 # Table F-4 keeps the amended layout, in which categories 4a and 4b share a
 # single "4a/4b" row.
 # ---------------------------------------------------------------------------
-CNOSSOS_ROAD_TABLE_F1: dict[str, dict[str, tuple[float, ...]]] = {
+CNOSSOS_ROAD_TABLE_F1: dict[RoadVehicleCode, dict[str, tuple[float, ...]]] = {
     "1": {
         "AR": (83.1, 89.2, 87.7, 93.1, 100.1, 96.7, 86.8, 76.2),
         "BR": (30.0, 41.5, 38.9, 25.7, 32.5, 37.2, 39.0, 40.0),
@@ -1969,7 +1973,7 @@ CNOSSOS_ROAD_TABLE_F2: dict[str, tuple[float, ...]] = {
     "bi": (0.0, 0.0, 0.0, -3.1, -6.4, -14.0, -22.4, -11.4),
 }
 
-CNOSSOS_ROAD_TABLE_F3: dict[str, dict[int, tuple[float, float]]] = {
+CNOSSOS_ROAD_TABLE_F3: dict[RoadVehicleCode, dict[int, tuple[float, float]]] = {
     "1": {
         1: (-4.5, 5.5),
         2: (-4.4, 3.1),
@@ -1992,7 +1996,9 @@ CNOSSOS_ROAD_TABLE_F3: dict[str, dict[int, tuple[float, float]]] = {
     },
 }
 
-CNOSSOS_ROAD_TABLE_F4: dict[str, dict[str, tuple[tuple[float, ...], float]]] = {
+CNOSSOS_ROAD_TABLE_F4: dict[
+    RoadSurfaceName, dict[str, tuple[tuple[float, ...], float]]
+] = {
     "reference road surface": {
         "1": ((0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0), 0.0),
         "2": ((0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0), 0.0),
@@ -2099,7 +2105,7 @@ CNOSSOS_A_WEIGHTING_TABLE: tuple[float, ...] = (
 # Validity speed ranges printed in the two leading columns of Table F-4, in
 # km/h; the reference road surface carries none. Same instrument as
 # CNOSSOS_ROAD_TABLE_F4.
-CNOSSOS_ROAD_TABLE_F4_SPEED_RANGE: dict[str, tuple[float, float] | None] = {
+CNOSSOS_ROAD_TABLE_F4_SPEED_RANGE: dict[RoadSurfaceName, tuple[float, float] | None] = {
     "reference road surface": None,
     "1-layer ZOAB": (50.0, 130.0),
     "2-layer ZOAB": (50.0, 130.0),
@@ -2123,7 +2129,7 @@ CNOSSOS_ROAD_TABLE_F4_SPEED_RANGE: dict[str, tuple[float, float] | None] = {
 # and 3)" (Directive (EU) 2015/996, Annex II 2.2.3, unamended). The powered
 # two-wheelers of category 4 have no rolling noise, so the Directive prints no
 # K_m for them and the correction is identically zero.
-CNOSSOS_ROAD_TEMPERATURE_COEFFICIENTS_DB_PER_C: dict[str, float] = {
+CNOSSOS_ROAD_TEMPERATURE_COEFFICIENTS_DB_PER_C: dict[RoadVehicleCode, float] = {
     "1": 0.08,
     "2": 0.04,
     "3": 0.04,

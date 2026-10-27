@@ -55,6 +55,7 @@ from ..._internal.frozen import OwnsArrays
 from ..._internal.utils import _typesignal
 from ..._internal.validation import (
     require_1d_signal,
+    require_choice,
     require_ranks,
     require_same_length,
     require_scalar,
@@ -67,6 +68,10 @@ from ..erb_scale import (
     erb_bandwidth,
     frequency_from_cam,
 )
+
+#: How the sound reaches the listener: at both ears (``"binaural"``, with
+#: ``"diotic"`` its other name in the model) or at one (``"monaural"``).
+Presentation = Literal["binaural", "diotic", "monaural"]
 
 __all__ = [
     "MooreGlasbergLoudness",
@@ -560,7 +565,7 @@ class MooreGlasbergLoudness(OwnsArrays):
     erb_number: np.ndarray
     frequencies: np.ndarray
     field: Literal["free", "diffuse", "eardrum"]
-    presentation: str
+    presentation: Presentation
 
     def __post_init__(self) -> None:
         """Reject a pattern that does not run over one ERB-number grid.
@@ -821,7 +826,7 @@ def _result_from_components(
     freqs: np.ndarray,
     levels: np.ndarray,
     field: Literal["free", "diffuse", "eardrum"],
-    presentation: str,
+    presentation: Presentation,
 ) -> MooreGlasbergLoudness:
     """Run the full signal chain for one spectrum and both ears."""
     if freqs.size == 0:
@@ -854,13 +859,9 @@ def _result_from_components(
 # ---------------------------------------------------------------------------
 
 
-def _validate_conditions(field: str, presentation: str) -> None:
-    if field not in _FIELDS:
-        msg = f"field must be one of {_FIELDS}, got {field!r}."
-        raise ValueError(msg)
-    if presentation not in _PRESENTATIONS:
-        msg = f"presentation must be one of {_PRESENTATIONS}, got {presentation!r}."
-        raise ValueError(msg)
+def _validate_conditions(field: object, presentation: object) -> None:
+    require_choice(field, "field", _FIELDS)
+    require_choice(presentation, "presentation", _PRESENTATIONS)
 
 
 def _as_components(
@@ -892,7 +893,7 @@ def loudness_moore_glasberg_from_spectrum(
     components: ArrayLike,
     *,
     field: Literal["free", "diffuse", "eardrum"] = "free",
-    presentation: Literal["binaural", "diotic", "monaural"] = "binaural",
+    presentation: Presentation = "binaural",
 ) -> MooreGlasbergLoudness:
     """Moore-Glasberg loudness from a sinusoidal-component spectrum.
 
@@ -912,6 +913,7 @@ def loudness_moore_glasberg_from_spectrum(
         equivalent alias: the same sound at both ears) or ``"monaural"``
         (one ear only).
     :return: A :class:`MooreGlasbergLoudness`.
+    :raises TypeError: if ``field`` or ``presentation`` is not a text.
 
     A 1 kHz tone at 40 dB SPL in a free field presented binaurally yields
     1.000 sone / 40 phon by definition of the sone.
@@ -955,7 +957,7 @@ def loudness_moore_glasberg_from_third_octave(
     band_levels: ArrayLike,
     *,
     field: Literal["free", "diffuse", "eardrum"] = "free",
-    presentation: Literal["binaural", "diotic", "monaural"] = "binaural",
+    presentation: Presentation = "binaural",
 ) -> MooreGlasbergLoudness:
     """Moore-Glasberg loudness from 29 one-third-octave band levels.
 
@@ -970,6 +972,7 @@ def loudness_moore_glasberg_from_third_octave(
     :param presentation: ``"binaural"`` (default; alias ``"diotic"``) or
         ``"monaural"``.
     :return: A :class:`MooreGlasbergLoudness`.
+    :raises TypeError: if ``field`` or ``presentation`` is not a text.
     """
     _validate_conditions(field, presentation)
     levels = np.asarray(band_levels, dtype=np.float64)
@@ -1031,7 +1034,7 @@ def loudness_moore_glasberg(
     fs: float | None = None,
     *,
     field: Literal["free", "diffuse", "eardrum"] = "free",
-    presentation: Literal["binaural", "diotic", "monaural"] = "binaural",
+    presentation: Presentation = "binaural",
 ) -> MooreGlasbergLoudness:
     """Moore-Glasberg loudness of a calibrated stationary pressure signal.
 
@@ -1057,7 +1060,8 @@ def loudness_moore_glasberg(
     :param presentation: ``"binaural"`` (default; alias ``"diotic"``) or
         ``"monaural"``.
     :return: A :class:`MooreGlasbergLoudness`.
-    :raises TypeError: if ``fs`` is not a single number.
+    :raises TypeError: if ``fs`` is not a single number, or ``field`` or
+        ``presentation`` is not a text.
     """
     _validate_conditions(field, presentation)
     fs = resolve_fs(x, fs)

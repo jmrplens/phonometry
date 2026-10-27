@@ -186,7 +186,7 @@ $\bar{\tau} = \int_0^{\pi/2} \tau(\theta) \cos\theta \,\mathrm{d}\theta$, evalua
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive `chi`/`psi`, an unknown junction or section, or a straight section that does not exist. |
-| TypeError | if `chi` is not a single number, or `section` is not a text. |
+| TypeError | if `chi` is not a single number, or `section` is not a text, or `junction` is not a text. |
 
 ## corner_transmission_coefficient
 
@@ -516,7 +516,7 @@ the junction type follows
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an unknown junction type, or a thickness that is not positive and finite. |
-| TypeError | if `thickness1_m` or `thickness2_m` is not a single number. |
+| TypeError | if `thickness1_m` or `thickness2_m` is not a single number, or `junction` is not a text. |
 
 ## point_connection_coupling_loss_factor
 

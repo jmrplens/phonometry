@@ -21,7 +21,9 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
+    from phonometry.building.measurement._rainfall_sound import RainType
     from phonometry.building.measurement.ratings import BasicElement, ReferenceFloor
+    from phonometry.building.prediction.facade import FacadeShape
 
 # ---------------------------------------------------------------------------
 # ISO 717-1 Annex C, Table C.1 - measured airborne sound reduction index R
@@ -292,7 +294,7 @@ EN12354_4_ANNEX_G_LP_SIDE4_D5 = 44.6  # 72,9 - 28,3
 # render; the 2017 DIN EN ISO 12354-3 Tabelle C.1 tabulates identical
 # values). Row = (shape, line_of_sight_m, alpha_w, dLfs_dB).
 # ---------------------------------------------------------------------------
-EN12354_3_ANNEX_C_DLFS: list[tuple[str, float, float, float]] = [
+EN12354_3_ANNEX_C_DLFS: list[tuple[FacadeShape, float, float, float]] = [
     ("plane_facade", 1.0, 0.3, 0.0),
     ("plane_facade", 3.0, 0.9, 0.0),
     ("gallery_2", 1.0, 0.3, -1.0),
@@ -922,7 +924,7 @@ ISO10140_5_TABLE_I1: tuple[tuple[float, float, float], ...] = (
 # Table H.1. The tolerances are in the text of H.1 below Table H.2: rate within
 # +-2 mm/h, half of the drops within +-0,5 mm and within +-1 m/s.
 ISO10140_5_TABLES_H1_H2: dict[
-    str, tuple[float, float, float, tuple[float, float], float, float]
+    RainType, tuple[float, float, float, tuple[float, float], float, float]
 ] = {
     "intense": (15.0, 2.0, 4.0, (0.3, 0.5), 25.0, 1.0),
     "heavy": (40.0, 5.0, 7.0, (1.0, 1.0), 60.0, 3.5),

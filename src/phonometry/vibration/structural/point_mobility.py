@@ -63,6 +63,7 @@ from typing import TYPE_CHECKING, Literal
 import numpy as np
 
 from ..._internal.validation import (
+    require_choice,
     require_positive,
     require_scalar,
 )
@@ -203,13 +204,11 @@ def infinite_plate_impedance(
     :return: The point impedance ``Z``, in N.s/m.
     :raises ValueError: for a non-positive stiffness/mass or unknown location.
     :raises TypeError: if ``bending_stiffness`` or ``mass_per_area`` is not a single
-        number.
+        number, or ``location`` is not a text.
     """
     b = require_positive(bending_stiffness, "bending_stiffness")
     m2 = require_positive(mass_per_area, "mass_per_area")
-    if location not in _PLATE_CONSTANT:
-        msg = "'location' must be 'center' or 'edge'."
-        raise ValueError(msg)
+    require_choice(location, "location", tuple(_PLATE_CONSTANT))
     return float(_PLATE_CONSTANT[location] * np.sqrt(b * m2))
 
 
@@ -232,6 +231,7 @@ def infinite_plate_mobility(
         (:math:`C = 3.5`).
     :return: The point mobility ``Y``, in m/(N.s).
     :raises ValueError: for a non-positive stiffness/mass or unknown location.
+    :raises TypeError: if ``location`` is not a text.
     """
     return 1.0 / infinite_plate_impedance(
         bending_stiffness, mass_per_area, location=location
@@ -263,11 +263,10 @@ def infinite_beam_impedance(
     :param location: ``"center"`` or ``"end"``.
     :return: The complex point impedance ``Z``, in N.s/m.
     :raises ValueError: for a non-positive input or unknown location.
-    :raises TypeError: if ``mass_per_length`` is not a single number.
+    :raises TypeError: if ``mass_per_length`` is not a single number, or ``location`` is
+        not a text.
     """
-    if location not in _BEAM_CONSTANT:
-        msg = "'location' must be 'center' or 'end'."
-        raise ValueError(msg)
+    require_choice(location, "location", tuple(_BEAM_CONSTANT))
     m1 = require_positive(mass_per_length, "mass_per_length")
     c_b = beam_bending_wave_speed(frequency, bending_stiffness, m1)
     z = _BEAM_CONSTANT[location] * m1 * c_b * (1.0 + 1j)
@@ -294,6 +293,7 @@ def infinite_beam_mobility(
     :param location: ``"center"`` or ``"end"``.
     :return: The complex point mobility ``Y``, in m/(N.s).
     :raises ValueError: for a non-positive input or unknown location.
+    :raises TypeError: if ``location`` is not a text.
     """
     z = infinite_beam_impedance(
         frequency, bending_stiffness, mass_per_length, location=location
@@ -411,6 +411,7 @@ def infinite_plate_point_mobility(
     :param mass_per_area: Mass per unit area ``m''``, in kg/m^2.
     :param location: ``"center"`` or ``"edge"``.
     :return: The :class:`MobilityResult` (driving point).
+    :raises TypeError: if ``location`` is not a text.
     """
     freq = np.atleast_1d(np.asarray(frequency, dtype=np.float64))
     if np.any(freq <= 0.0):
@@ -435,6 +436,7 @@ def infinite_beam_point_mobility(
     :param mass_per_length: Mass per unit length ``m'``, in kg/m.
     :param location: ``"center"`` or ``"end"``.
     :return: The :class:`MobilityResult` (driving point).
+    :raises TypeError: if ``location`` is not a text.
     """
     freq = np.atleast_1d(np.asarray(frequency, dtype=np.float64))
     mob = infinite_beam_mobility(

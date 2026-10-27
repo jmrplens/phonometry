@@ -281,11 +281,14 @@ def coupling_term_velocity_source(
 # because it is the band frequency of the prediction rather than a property of
 # the element, but four of the six rows contain it.
 
+#: A row of EN 12354-5 Table D.1, the kind of element whose mobility it gives.
+Structure = Literal["mass", "bar_end", "beam", "plate", "pipe", "mass_spring"]
+
 #: EN 12354-5, Table D.1: the "Describing quantities" column, as the keyword
 #: names each row of :func:`typical_element_mobility` requires. The printed
 #: symbols are ``M`` [kg], ``rho`` [kg/m3], ``cL`` [m/s], ``S`` [m^2], ``t``
 #: [m], ``w`` [m], ``r`` (radius) [m], ``s`` [N/m] and ``eta`` [-].
-TABLE_D1_QUANTITIES: Mapping[str, tuple[str, ...]] = MappingProxyType(
+TABLE_D1_QUANTITIES: Mapping[Structure, tuple[str, ...]] = MappingProxyType(
     {
         "mass": ("mass",),
         "bar_end": ("density", "longitudinal_velocity", "area"),
@@ -482,7 +485,7 @@ def _mass_spring_mobility(
 
 
 def _table_d1_arguments(
-    structure: str, supplied: dict[str, float | None], frequency: ArrayLike | None
+    structure: Structure, supplied: dict[str, float | None], frequency: ArrayLike | None
 ) -> dict[str, float]:
     """Check the quantities supplied for one Table D.1 row against its column.
 
@@ -515,7 +518,7 @@ def _table_d1_arguments(
 
 
 def typical_element_mobility(
-    structure: Literal["mass", "bar_end", "beam", "plate", "pipe", "mass_spring"],
+    structure: Structure,
     *,
     frequency: ArrayLike | None = None,
     mass: float | None = None,

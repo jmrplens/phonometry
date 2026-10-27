@@ -409,7 +409,7 @@ def schroeder_frequency(
 #: ``Pi_0 Q`` (reflecting boundaries load it and it radiates *more*, the
 #: conservative upper bound), a constant-pressure source ``Pi_0 / Q`` (the
 #: theoretical lower bound).
-SOURCE_POWER_MODELS: Mapping[str, float] = MappingProxyType(
+SOURCE_POWER_MODELS: Mapping[SourceModel, float] = MappingProxyType(
     {
         "constant_power": 0.0,
         "constant_volume": 1.0,

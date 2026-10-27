@@ -49,6 +49,7 @@ import numpy as np
 
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
+    require_choice,
     require_equal_shapes,
     require_ranks,
     require_same_length,
@@ -152,11 +153,8 @@ _COEFFICIENT_QUANTITIES = frozenset(
 )
 
 
-def _condition(condition: str) -> Condition:
-    if condition not in _CONDITIONS:
-        msg = f"'condition' must be one of {_CONDITIONS}; got {condition!r}."
-        raise ValueError(msg)
-    return condition
+def _condition(condition: object) -> Condition:
+    return require_choice(condition, "condition", _CONDITIONS)
 
 
 def _finite_bands(values: ArrayLike, name: str) -> np.ndarray:
@@ -377,6 +375,7 @@ def sound_absorption_coefficient_uncertainty(
     :param coverage: Coverage probability for the coverage factor ``k`` (Table 3).
     :raises ValueError: Mismatched shapes, an untabulated frequency, an unknown
         ``condition`` or an untabulated ``coverage``.
+    :raises TypeError: if ``condition`` is not a text.
     """
     return _band_uncertainty(
         _finite_bands(alpha, "alpha"),
@@ -411,6 +410,7 @@ def equivalent_area_uncertainty(
     :param coverage: Coverage probability for the coverage factor ``k`` (Table 3).
     :raises ValueError: Mismatched shapes, an untabulated frequency, an unknown
         ``condition`` or an untabulated ``coverage``.
+    :raises TypeError: if ``condition`` is not a text.
     """
     a = _finite_bands(area, "area")
     f = _finite_bands(frequencies, "frequencies")
@@ -455,6 +455,7 @@ def practical_coefficient_uncertainty(
     :param coverage: Coverage probability for the coverage factor ``k`` (Table 3).
     :raises ValueError: Mismatched shapes, an untabulated frequency, an unknown
         ``condition`` or an untabulated ``coverage``.
+    :raises TypeError: if ``condition`` is not a text.
     """
     return _band_uncertainty(
         _finite_bands(alpha_p, "alpha_p"),
@@ -514,7 +515,8 @@ def weighted_coefficient_uncertainty(
     :param condition: ``"reproducibility"`` (default) or ``"repeatability"``.
     :param coverage: Coverage probability for the coverage factor ``k`` (Table 3).
     :raises ValueError: Unknown ``condition`` or an untabulated ``coverage``.
-    :raises TypeError: if ``alpha_w`` is not a single number.
+    :raises TypeError: if ``alpha_w`` is not a single number, or ``condition`` is not a
+        text.
     """
     require_scalar(alpha_w, "alpha_w")
     cond = _condition(condition)
@@ -544,7 +546,8 @@ def single_number_rating_uncertainty(
     :param coverage: Coverage probability for the coverage factor ``k`` (Table 3).
     :raises ValueError: Negative ``dl_alpha``, unknown ``condition`` or an
         untabulated ``coverage``.
-    :raises TypeError: if ``dl_alpha`` is not a single number.
+    :raises TypeError: if ``dl_alpha`` is not a single number, or ``condition`` is not a
+        text.
     """
     require_scalar(dl_alpha, "dl_alpha")
     value = float(dl_alpha)

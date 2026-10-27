@@ -275,7 +275,7 @@ def test_lifter_modes_are_exactly_complementary() -> None:
 
 def test_lifter_validates_inputs() -> None:
     x = _impulse_echo()
-    with pytest.raises(ValueError, match=r"'mode' must be 'lowpass'"):
+    with pytest.raises(ValueError, match="'mode' must be one of"):
         ph.signals.lifter(x, FS, cutoff=0.01, mode="bandpass")
     with pytest.raises(ValueError, match=r"'cutoff' must resolve to"):
         ph.signals.lifter(x, FS, cutoff=10.0)  # beyond nfft/2

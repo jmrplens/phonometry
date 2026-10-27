@@ -59,7 +59,7 @@ __all__ = [
 #: Reference length ``l0`` = 300 ft, expressed in metres.
 _L_REF_M = 300.0 / 3.28084
 
-_MODELS = ("jomopans-echo", "randi", "wales-heitmeyer")
+_MODELS: tuple[ShipModel, ...] = ("jomopans-echo", "randi", "wales-heitmeyer")
 
 #: Upper frequency bound, in Hz, of the cargo low-frequency hump in the
 #: JOMOPANS-ECHO reference spectrum: below it, cargo vessel classes switch to
@@ -118,6 +118,10 @@ VesselClass = Literal[
     "vehicle carrier",
 ]
 
+#: A source model of a ship's underwater sound: JOMOPANS-ECHO, RANDI or
+#: Wales and Heitmeyer.
+ShipModel = Literal["jomopans-echo", "randi", "wales-heitmeyer"]
+
 #: Available JOMOPANS-ECHO vessel classes (for discovery and validation).
 VESSEL_CLASSES: tuple[VesselClass, ...] = get_args(VesselClass)
 
@@ -137,7 +141,7 @@ def _clean_frequencies(
 
 
 def _jomopans_echo(
-    f: NDArray[np.float64], vessel_class: str, speed_kt: float, length_m: float
+    f: NDArray[np.float64], vessel_class: object, speed_kt: float, length_m: float
 ) -> NDArray[np.float64]:
     key = require_choice(vessel_class, "vessel_class", VESSEL_CLASSES)
     v_c, cargo, d_lo, d_hi = _VESSEL_CLASSES[key]
@@ -211,8 +215,8 @@ class ShipTrafficSpectrum(OwnsArrays):
     frequencies: NDArray[np.float64]
     source_psd: NDArray[np.float64]
     band_level: NDArray[np.float64]
-    model: str
-    vessel_class: str | None
+    model: ShipModel
+    vessel_class: VesselClass | None
     speed_kt: float | None
     length_m: float | None
 
@@ -259,7 +263,7 @@ def ship_source_spectrum(
     *,
     length_m: float = 100.0,
     vessel_class: VesselClass = "containership",
-    model: Literal["jomopans-echo", "randi", "wales-heitmeyer"] = "jomopans-echo",
+    model: ShipModel = "jomopans-echo",
     frequencies: ArrayLike | None = None,
 ) -> ShipTrafficSpectrum:
     """Predicted underwater source-level spectrum of a ship.
@@ -281,9 +285,28 @@ def ship_source_spectrum(
         ``frequencies`` holds a text or a value that is not a real number, or ``model``
         or ``vessel_class`` is not a text.
     """
+    require_choice(
+        vessel_class,
+        "vessel_class",
+        (
+            "bulker",
+            "containership",
+            "cruise",
+            "dredger",
+            "fishing",
+            "government/research",
+            "naval",
+            "other",
+            "passenger",
+            "recreational",
+            "tanker",
+            "tug",
+            "vehicle carrier",
+        ),
+    )
     f = _clean_frequencies(frequencies)
     key = require_choice(model, "model", _MODELS)
-    used_class: str | None = None
+    used_class: VesselClass | None = None
     used_speed: float | None = None
     used_length: float | None = None
     if key == "jomopans-echo":

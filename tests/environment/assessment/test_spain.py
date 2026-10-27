@@ -698,9 +698,7 @@ def test_assess_activity_validation() -> None:
     with pytest.raises(ValueError, match="no noise phases"):
         rd.assess_activity(empty_day, limits)
     afternoon = {"afternoon": [rd.NoisePhase(duration_hours=1.0, laeq=50.0)]}
-    with pytest.raises(
-        ValueError, match=r"None of the supplied keys is an evaluation period"
-    ):
+    with pytest.raises(ValueError, match="'measurements' must be one of"):
         rd.assess_activity(afternoon, limits)
     day = {"day": [rd.NoisePhase(duration_hours=12.0, laeq=50.0)]}
     with pytest.raises(

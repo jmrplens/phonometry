@@ -686,7 +686,7 @@ def _built_by_hand() -> dict[str, tuple[Callable[[np.ndarray], object], str]]:
             "measured",
         ),
         "ImpulseResponseResult": (
-            lambda a: room.ImpulseResponseResult(ir=a, fs=48000, method="sweep"),
+            lambda a: room.ImpulseResponseResult(ir=a, fs=48000, method="farina"),
             "ir",
         ),
         "OpenPlanResult": (

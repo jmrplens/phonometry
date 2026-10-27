@@ -62,7 +62,7 @@ _COLUMNS = {
 }
 
 #: How each table is titled in the report, and how many cells it prints.
-_TABLES = {
+_TABLES: dict[BurstApplication, tuple[str, int]] = {
     "hand-arm": ("ISO 8041-1:2017 Table 7", 12),
     "whole-body": ("ISO 8041-1:2017 Table 8", 192),
     "low-frequency-whole-body": ("ISO 8041-1:2017 Table 9", 24),
@@ -77,14 +77,14 @@ def _indications(
     return ph.vibration.signal_burst_indications(application, row, cycles)
 
 
-def _rows_of(application: str) -> list[tuple[str, int | None]]:
+def _rows_of(application: BurstApplication) -> list[tuple[str, int | None]]:
     """The printed lines of one application's table, in printed order."""
     test = ph.vibration.SAWTOOTH_BURST_TESTS[application]
     rows = [ph.vibration.BAND_LIMITING, *test.weightings]
     return [(row, cycles) for row in rows for cycles in (*test.cycle_counts, None)]
 
 
-def _cells_within_tolerance(application: str) -> tuple[int, int]:
+def _cells_within_tolerance(application: BurstApplication) -> tuple[int, int]:
     """How many printed cells of one table the library lands inside."""
     inside = 0
     total = 0
@@ -103,7 +103,9 @@ def _register_tables() -> None:
     """One aggregate row per printed table."""
     for application, (standard, cells) in _TABLES.items():
 
-        def _check(application: str = application, cells: int = cells) -> Outcome:
+        def _check(
+            application: BurstApplication = application, cells: int = cells
+        ) -> Outcome:
             inside, total = _cells_within_tolerance(application)
             # Counted against the printed cell count and not against the cells
             # the tables happen to hold: the coverage is part of the claim, so
@@ -138,7 +140,9 @@ _BAND_LIMITING_ROW = ph.vibration.BAND_LIMITING
 
 #: The sampled cells: application, row, burst length, column, the figure on the
 #: page and the relative tolerance the row is judged at.
-_SAMPLED: tuple[tuple[str, str, int | None, BurstQuantity, float, float], ...] = (
+_SAMPLED: tuple[
+    tuple[BurstApplication, str, int | None, BurstQuantity, float, float], ...
+] = (
     ("hand-arm", _BAND_LIMITING_ROW, 1, "rms", 0.0448, 5e-3),
     ("hand-arm", _BAND_LIMITING_ROW, None, "rms", 0.565, 5e-3),
     ("hand-arm", "Wh", 16, "rms", 0.0309, 5e-3),
@@ -163,7 +167,7 @@ def _register_sampled() -> None:
         column = _COLUMNS[quantity]
 
         def _check(
-            application: str = application,
+            application: BurstApplication = application,
             row: str = row,
             cycles: int | None = cycles,
             quantity: BurstQuantity = quantity,

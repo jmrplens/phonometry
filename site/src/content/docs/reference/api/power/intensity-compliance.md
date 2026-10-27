@@ -456,7 +456,7 @@ for a spacing in metres).
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `device` is unknown, `spacing_m` is not positive or a frequency is not a tabulated band. |
-| TypeError | if `spacing_m` is not a single number. |
+| TypeError | if `spacing_m` is not a single number, or `device` is not a text. |
 
 ## ResidualIndexLimits
 
@@ -534,3 +534,4 @@ intervals across the whole 50 Hz to 6.3 kHz range.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs disagree in length, a frequency is not a tabulated band, a band is repeated, or `device`/`spacing_m` are invalid. |
+| TypeError | if `device` is not a text. |

@@ -9,18 +9,24 @@ Three of these tests are about conventions the tables do not print, and each
 of them also runs the reading that was rejected, because a reproduction that
 only ever tries the right convention proves nothing: the continuous row read
 from the start time, the circular filtering of ``apply_weighting`` and a burst
+
 started at the peak instead of at a zero crossing.
 """
 
 from __future__ import annotations
 
 import math
+from typing import TYPE_CHECKING
 
 import numpy as np
 import pytest
 
 from phonometry import vibration
 from phonometry.vibration.human import signal_burst as sb
+
+if TYPE_CHECKING:
+    from phonometry.vibration.human.signal_burst import BurstApplication
+
 
 # Table 6 (folio 17): the angular frequency in radians per second, the hertz
 # printed beside it, the start time, the repeat time and the duration.
@@ -71,7 +77,7 @@ TABLE_9_PRINTED = {
 # ---------------------------------------------------------------------------
 @pytest.mark.parametrize(("application", "printed"), TABLE_6_PRINTED.items())
 def test_the_test_signal_is_table_6(
-    application: str, printed: tuple[float, float, float, float, float]
+    application: BurstApplication, printed: tuple[float, float, float, float, float]
 ) -> None:
     """Angular frequency, its hertz, start time, repeat time and duration."""
     omega, hertz, start, repeat, duration = printed
@@ -420,7 +426,9 @@ def test_the_amplitude_scales_the_record() -> None:
 # ---------------------------------------------------------------------------
 # The verdict
 # ---------------------------------------------------------------------------
-def _printed_rows(application: str, name: str) -> dict[int | None, dict[str, float]]:
+def _printed_rows(
+    application: BurstApplication, name: str
+) -> dict[int | None, dict[str, float]]:
     """The printed row as a laboratory would report it."""
     test = sb.SAWTOOTH_BURST_TESTS[application]
     return {

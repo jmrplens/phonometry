@@ -95,8 +95,10 @@ def test_subset_by_frequency() -> None:
 def test_invalid_inputs_raise() -> None:
     with pytest.raises(ValueError, match=r"age must be at least \d+ years"):
         h.age_threshold(10, "male")
-    with pytest.raises(ValueError, match="sex must be"):
-        h.age_threshold(40, "other")
+    with pytest.raises(ValueError, match="'sex' must be one of"):
+        h.age_threshold(40, "other")  # type: ignore[arg-type]
+    with pytest.raises(TypeError, match="'sex' must be one of .*, a text"):
+        h.age_threshold(40, None)  # type: ignore[arg-type]
     with pytest.raises(ValueError, match=r"fractile must be in"):
         h.age_threshold(40, "male", fractile=1.0)
     with pytest.raises(

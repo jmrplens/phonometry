@@ -51,6 +51,7 @@ from .._internal.frozen import OwnsArrays
 from .._internal.types import RealScalar
 from .._internal.validation import (
     require_axis_count,
+    require_choice,
     require_count,
     require_equal_counts,
     require_non_negative,
@@ -143,16 +144,12 @@ class Quantity(RichDisplay):
         the budget plot draws as an invisible bar -- indistinguishable from a
         zero contribution -- under a legend reading ``u_c = nan``.
 
-        :raises TypeError: if ``dof`` or ``uncertainty`` is not a single number.
+        :raises TypeError: if ``dof`` or ``uncertainty`` is not a single number, or
+            ``distribution`` is not a text.
         """
         require_scalar(self.dof, "dof")
         require_non_negative(self.uncertainty, "uncertainty")
-        if self.distribution not in _DISTRIBUTIONS:
-            msg = (
-                f"distribution must be one of {_DISTRIBUTIONS}; "
-                f"got {self.distribution!r}."
-            )
-            raise ValueError(msg)
+        require_choice(self.distribution, "distribution", _DISTRIBUTIONS)
         if self.dof <= 0.0:
             msg = "dof must be positive."
             raise ValueError(msg)

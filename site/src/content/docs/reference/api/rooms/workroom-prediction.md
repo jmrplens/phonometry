@@ -87,6 +87,7 @@ room shape has to go and gather a level-4 description of it.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For an unknown category or a level no table prints. |
+| TypeError | if `category` is not a text. |
 
 ## fitting_density
 
@@ -152,6 +153,7 @@ One category of Table 4, with the detail levels of Table E.1.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a category Table 4 does not print. |
+| TypeError | if `category` is not a text. |
 
 ## PREDICTION_METHODS
 
@@ -317,6 +319,7 @@ What 4.3 says `DL2` usually is in one region, in decibels.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a region 4.3 does not name. |
+| TypeError | if `region` is not a text. |
 
 ## TYPICAL_DECAY_RANGE_DB
 
@@ -352,6 +355,7 @@ the far region `DLf` may be negative; the near region it leaves open.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a region 4.3 does not name. |
+| TypeError | if `region` is not a text. |
 
 ## TYPICAL_EXCESS_RANGE_DB
 

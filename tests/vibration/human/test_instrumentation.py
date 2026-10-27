@@ -24,6 +24,9 @@ from phonometry.vibration.human.exposure import HumanVibrationWarning
 if TYPE_CHECKING:
     from collections.abc import Callable
 
+    from phonometry.vibration.human.exposure import WeightingName
+
+
 # Table 4, as the decimals printed beside the exponents. The module builds
 # them from the exponents, so these are the independent side of the check.
 TABLE_4_PRINTED = {
@@ -50,7 +53,7 @@ TABLE_1_PRINTED = {
 
 @pytest.mark.parametrize(("name", "printed"), TABLE_4_PRINTED.items())
 def test_the_transition_frequencies_are_table_4(
-    name: str, printed: tuple[float, ...]
+    name: WeightingName, printed: tuple[float, ...]
 ) -> None:
     """Built from the exponents, checked against the decimals beside them."""
     got = ins.TRANSITION_FREQUENCIES_HZ[name]
@@ -66,7 +69,7 @@ def test_every_weighting_has_its_four_transition_frequencies() -> None:
 
 @pytest.mark.parametrize(("name", "printed"), TABLE_1_PRINTED.items())
 def test_the_reference_conditions_are_table_1(
-    name: str, printed: tuple[float, float, float]
+    name: WeightingName, printed: tuple[float, float, float]
 ) -> None:
     """The reference frequency, the factor there, and their product.
 

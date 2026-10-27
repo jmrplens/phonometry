@@ -17,6 +17,10 @@ of them.
 from __future__ import annotations
 
 import math
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from phonometry.hearing.audiometry import Earphone
 
 # ---------------------------------------------------------------------------
 # ISO 8253-1:2010, Tables 2 to 4 (folios 17 to 19, PDF pages 25 to 27)
@@ -41,7 +45,7 @@ ISO8253_1_TABLE_2: dict[float, tuple[float, ...]] = {
 
 #: Table 3: average sound attenuation of three earphones, in dB; the HDA 200
 #: prints a dash below 63 Hz.
-ISO8253_1_TABLE_3: dict[str, tuple[float, ...]] = {
+ISO8253_1_TABLE_3: dict[Earphone, tuple[float, ...]] = {
     "supra-aural": (0, 0, 0, 1, 1, 2, 3, 4, 5, 5, 5, 6, 7, 9, 11, 15, 18, 21,
                     26, 28, 31, 32, 29, 26, 24),
     "ER-3A": (33, 33, 33, 33, 33, 33, 33, 34, 35, 36, 37, 37, 38, 37, 37, 37,

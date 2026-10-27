@@ -193,7 +193,7 @@ determination. Footnote 3 calls the grade-3 figure tentative.
 | Exception | When |
 | :--- | :--- |
 | ValueError | On the same mismatches [`position_count_factor`](/phonometry/reference/api/power/sound-power-intensity-points/#position_count_factor) refuses. |
-| TypeError | if `fraction` is not an integer (a word, a flag or a float), or `frequency` is not a single number. |
+| TypeError | if `fraction` is not an integer (a word, a flag or a float), or `frequency` is not a single number, or `grade` is not a text. |
 
 ## DiscretePointIntensityResult
 
@@ -469,6 +469,7 @@ remaining four cells are blank in the print.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `grade` is unknown, or the row asked for is blank at that grade. |
+| TypeError | if `grade` is not a text. |
 
 ## normal_intensity_from_levels
 
@@ -570,6 +571,7 @@ budget, and the procedure cannot help.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the positions and areas disagree in length, an area is not positive and finite, an intensity is not finite, the total sound power is not positive (clause 9.2 puts the band outside the method), no subset satisfies the two conditions of B.1.3, the subset is a single segment (equation (A.8) has no spread over one position, so equation (B.4) is undefined), the algebraic mean normal intensity over the remainder is not positive (A.2.3, which happens when the subset takes all the outward flow), or the remainder leaves no error budget for the subset. In the last four cases the selective modification cannot be carried out, and clause 8.3.2 then asks for the appropriate alternative actions in accordance with clause B.2 and Table B.3. Which row of that table applies is not settled here: its two lower rows are conditioned on criterion 2 and on $F_3 - F_2$, neither of which this function is given. |
+| TypeError | if `grade` is not a text. |
 
 ## PartialPowerConcentration
 
@@ -644,7 +646,7 @@ asked for, and asking the wrong half raises.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `grade` is unknown or `fraction` is not 1 or 3; if a per-band value is asked for at the survey grade, or an A-weighted one at the precision or engineering grade; or if `frequency` is not a tabulated band. |
-| TypeError | if `fraction` is not an integer (a word, a flag or a float), or `frequency` is not a single number. |
+| TypeError | if `fraction` is not an integer (a word, a flag or a float), or `frequency` is not a single number, or `grade` is not a text. |
 
 ## sound_power_intensity_points
 
@@ -725,4 +727,4 @@ achieved grade rather than the requested one, which is the grade clause
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `grade` is none of the three grades of Table 1, or `fraction` is neither 1 nor 3; if `normal_intensity` is neither 1D nor 2D, or `areas` is not 1D; if the position set is empty, the positions and areas disagree in length, or an area is not positive and finite; if an input is not finite; if the optional arrays do not span the same positions or bands; if a frequency is not a band of Tables B.2 and 2; or if `temporal_intensity` is neither 1D nor 2D, carries fewer than two samples, or holds a band whose mean is not positive and so leaves `F1` nothing to normalize by. |
-| TypeError | if `fraction` is not an integer (a word, a flag or a float). |
+| TypeError | if `fraction` is not an integer (a word, a flag or a float), or `grade` is not a text. |

@@ -38,6 +38,7 @@ from numpy.typing import ArrayLike, NDArray
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     require_above_absolute_zero_array,
+    require_choice,
     require_positive,
     require_scalar,
 )
@@ -181,8 +182,10 @@ def plane_wave_frequency_range_astm_e2611(
         spacing bound.
     :param shape: ``"circular"``, ``"rectangular"`` or ``"square"``.
     :return: Tuple ``(f_l, f_u)`` of the lower and upper frequency limits, in Hz.
-    :raises TypeError: if ``spacing_m`` is not a single number.
+    :raises TypeError: if ``spacing_m`` is not a single number, or ``shape`` is not a
+        text.
     """
+    require_choice(shape, "shape", ("circular", "rectangular", "square"))
     require_scalar(spacing_m, "spacing_m")
     return _frequency_range(
         spacing_m,
@@ -339,8 +342,10 @@ def wave_decomposition(
     :param shape: Tube cross-section, ``"circular"``, ``"rectangular"`` or
         ``"square"``.
     :return: The four complex amplitudes, as a :class:`WaveAmplitudes`.
-    :raises TypeError: if ``diameter_m``, ``s1`` or ``s2`` is not a single number.
+    :raises TypeError: if ``diameter_m``, ``s1`` or ``s2`` is not a single number, or
+        ``shape`` is not a text.
     """
+    require_choice(shape, "shape", ("circular", "rectangular", "square"))
     require_scalar(s1, "s1")
     require_scalar(s2, "s2")
     if s1 <= 0.0 or s2 <= 0.0:
@@ -824,8 +829,10 @@ def transfer_matrix_two_load(
         ``"square"``.
     :return: The specimen :class:`TransferMatrix` (measurement context
         retained on the result).
-    :raises TypeError: if ``diameter_m``, ``s1`` or ``s2`` is not a single number.
+    :raises TypeError: if ``diameter_m``, ``s1`` or ``s2`` is not a single number, or
+        ``shape`` is not a text.
     """
+    require_choice(shape, "shape", ("circular", "rectangular", "square"))
     canonical = _canonical_shape(shape)
     if diameter_m is not None:
         _warn_astm_plane_wave(
@@ -930,8 +937,10 @@ def transfer_matrix_one_load(
         ``"square"``.
     :return: The specimen :class:`TransferMatrix` (measurement context
         retained on the result).
-    :raises TypeError: if ``diameter_m``, ``s1`` or ``s2`` is not a single number.
+    :raises TypeError: if ``diameter_m``, ``s1`` or ``s2`` is not a single number, or
+        ``shape`` is not a text.
     """
+    require_choice(shape, "shape", ("circular", "rectangular", "square"))
     canonical = _canonical_shape(shape)
     if diameter_m is not None:
         _warn_astm_plane_wave(

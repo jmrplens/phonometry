@@ -91,6 +91,7 @@ from ..._internal.boundary import settled_ratio
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     check_engine,
+    require_choice,
     require_count,
     require_equal_shapes,
     require_non_negative,
@@ -141,7 +142,7 @@ _FRF_TYPES: dict[str, tuple[int, bool]] = {
 }
 
 #: SI unit strings for each FRF, for labelling.
-FRF_UNITS: Mapping[str, str] = MappingProxyType(
+FRF_UNITS: Mapping[FrfKind, str] = MappingProxyType(
     {
         "receptance": "m/N",
         "mobility": "m/(N·s)",
@@ -215,7 +216,32 @@ def convert_frf(
     :raises ValueError: for an unknown FRF name, a non-positive frequency, or
         a zero *value* (dead channel) when the conversion involves a
         force-per-motion reciprocal.
+    :raises TypeError: if ``source`` or ``target`` is not a text.
     """
+    require_choice(
+        source,
+        "source",
+        (
+            "receptance",
+            "mobility",
+            "accelerance",
+            "dynamic_stiffness",
+            "impedance",
+            "apparent_mass",
+        ),
+    )
+    require_choice(
+        target,
+        "target",
+        (
+            "receptance",
+            "mobility",
+            "accelerance",
+            "dynamic_stiffness",
+            "impedance",
+            "apparent_mass",
+        ),
+    )
     for name, role in ((source, "source"), (target, "target")):
         if name not in _FRF_TYPES:
             msg = f"unknown {role} FRF {name!r}; choose from {tuple(_FRF_TYPES)}."
@@ -320,7 +346,7 @@ def resonance_frequency(mass: float, stiffness: float) -> float:
 #: block "shall agree within +/-5 % of its known correct value".
 _RIGID_MASS_TOLERANCE = 0.05
 
-_RIGID_MASS_QUANTITIES: tuple[str, ...] = ("accelerance", "mobility")
+_RIGID_MASS_QUANTITIES: tuple[Quantity, ...] = ("accelerance", "mobility")
 
 
 @dataclass(frozen=True)
@@ -350,11 +376,10 @@ class RigidMassCalibrationResult(OwnsArrays):
         :raises ValueError: for an unknown quantity, a mass or a frequency
             that is not positive, or a measurement that does not carry one
             value per frequency.
-        :raises TypeError: if ``mass`` is not a single number.
+        :raises TypeError: if ``mass`` is not a single number, or ``quantity`` is not a
+            text.
         """
-        if self.quantity not in _RIGID_MASS_QUANTITIES:
-            msg = "'quantity' must be 'accelerance' or 'mobility'."
-            raise ValueError(msg)
+        require_choice(self.quantity, "quantity", _RIGID_MASS_QUANTITIES)
         require_positive(self.mass, "mass")
         require_ranks(self, frequencies=1, measured=1)
         require_same_length(self, "frequencies", "measured", axis="frequency")
@@ -469,11 +494,10 @@ def verify_rigid_mass_calibration(
     :return: A :class:`RigidMassCalibrationResult` with per-band pass flags.
     :raises ValueError: for an unknown quantity, non-positive mass or
         frequency, or mismatched shapes.
-    :raises TypeError: if ``mass`` is not a single number.
+    :raises TypeError: if ``mass`` is not a single number, or ``quantity`` is not a
+        text.
     """
-    if quantity not in _RIGID_MASS_QUANTITIES:
-        msg = "'quantity' must be 'accelerance' or 'mobility'."
-        raise ValueError(msg)
+    require_choice(quantity, "quantity", _RIGID_MASS_QUANTITIES)
     mass = require_positive(mass, "mass")
     freq = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
     measured = np.abs(np.atleast_1d(np.asarray(frf, dtype=np.complex128)))
@@ -617,7 +641,21 @@ class MobilityResult(OwnsArrays):
         (``driving_point=False``), ``to("impedance")`` returns the free
         impedance :math:`1/Y_{ij}`, not the blocked matrix impedance of Table 1
         (which does not invert element-wise).
+
+        :raises TypeError: if ``target`` is not a text.
         """
+        require_choice(
+            target,
+            "target",
+            (
+                "receptance",
+                "mobility",
+                "accelerance",
+                "dynamic_stiffness",
+                "impedance",
+                "apparent_mass",
+            ),
+        )
         return convert_frf(
             self.mobility, frequency=self.frequencies, source="mobility", target=target
         )

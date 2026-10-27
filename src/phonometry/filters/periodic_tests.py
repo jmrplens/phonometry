@@ -104,7 +104,12 @@ import numpy as np
 
 from .._internal.display import RichDisplay
 from .._internal.frozen import read_only
-from .._internal.validation import is_class_designation, require_count, require_positive
+from .._internal.validation import (
+    is_class_designation,
+    require_choice,
+    require_count,
+    require_positive,
+)
 from ..metrology.conformance import ConformanceVerification, verify_conformance
 from .compliance import _map_breakpoint
 
@@ -849,7 +854,9 @@ class FilterPeriodicVerification(RichDisplay):
             ``"13"``.
         :return: Its :class:`PeriodicTestClause`.
         :raises KeyError: when that clause was not measured.
+        :raises TypeError: if ``clause`` is not a text.
         """
+        require_choice(clause, "clause", ("10.2", "10.3", "11.7", "11.9", "13"))
         for item in self.clauses:
             if item.clause == clause:
                 return item

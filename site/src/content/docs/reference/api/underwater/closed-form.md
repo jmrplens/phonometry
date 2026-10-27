@@ -91,8 +91,8 @@ PropagationLossResult(
     absorption: NDArray[np.float64],
     frequency: float,
     absorption_db_per_km: float,
-    law: str,
-    model: str,
+    law: Literal['spherical', 'cylindrical', 'practical'],
+    model: Literal['francois-garrison', 'ainslie-mccolm', 'thorp'],
 )
 ```
 

@@ -158,23 +158,25 @@ HEAVY_IMPACT_OCTAVE_BANDS_HZ: tuple[float, ...] = (31.5, 63.0, 125.0, 250.0, 500
 #: Table A.1** (impact force characteristic 1, printed p. 6). Keyed by source
 #: name, each value is the tuple of ``(LFE, tolerance)`` pairs ordered as
 #: :data:`HEAVY_IMPACT_OCTAVE_BANDS_HZ`.
-HEAVY_IMPACT_SOURCES: Mapping[str, tuple[tuple[float, float], ...]] = MappingProxyType(
-    {
-        "rubber_ball": (
-            (39.0, 1.0),
-            (31.0, 1.5),
-            (23.0, 1.5),
-            (17.0, 2.0),
-            (12.5, 2.0),
-        ),
-        "bang_machine": (
-            (47.0, 1.0),
-            (40.0, 1.5),
-            (22.0, 1.5),
-            (11.5, 2.0),
-            (5.5, 2.0),
-        ),
-    }
+HEAVY_IMPACT_SOURCES: Mapping[Source, tuple[tuple[float, float], ...]] = (
+    MappingProxyType(
+        {
+            "rubber_ball": (
+                (39.0, 1.0),
+                (31.0, 1.5),
+                (23.0, 1.5),
+                (17.0, 2.0),
+                (12.5, 2.0),
+            ),
+            "bang_machine": (
+                (47.0, 1.0),
+                (40.0, 1.5),
+                (22.0, 1.5),
+                (11.5, 2.0),
+                (5.5, 2.0),
+            ),
+        }
+    )
 )
 
 #: A-weighting correction ``Aj`` for the one-third-octave bands 50 Hz to 630 Hz

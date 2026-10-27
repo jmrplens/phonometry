@@ -189,7 +189,7 @@ def test_monte_carlo_triangular_tiny_uncertainty() -> None:
 def test_invalid_inputs_raise() -> None:
     with pytest.raises(ValueError, match=r"'uncertainty' must be non-negative"):
         u.Quantity(value=0.0, uncertainty=-1.0)
-    with pytest.raises(ValueError, match=r"distribution must be one of"):
+    with pytest.raises(ValueError, match="'distribution' must be one of"):
         u.Quantity(value=0.0, uncertainty=1.0, distribution="weird")
     with pytest.raises(ValueError, match="dof must be positive"):
         u.Quantity(value=0.0, uncertainty=1.0, dof=0.0)

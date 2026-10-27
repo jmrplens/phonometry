@@ -2685,9 +2685,9 @@ def write_catalogue(
         :func:`read_catalogue` would refuse in the file: more than 50 000
         rows, a file past 16 MiB or a CSV header past 64 KiB, and a text
         longer than a reader takes among it.
-    :raises TypeError: for rows that are not catalogue rows of one class
-        (fluid states among them), or a *catalogue* or *about* the rows
-        need and do not bring.
+    :raises TypeError: for rows that are not catalogue rows of one class (fluid states
+        among them), or a *catalogue* or *about* the rows need and do not bring, or
+        ``decimal`` or ``delimiter`` is not a text.
     :raises ValueError: for a name that ends in neither ``.json`` nor
         ``.csv``, a dialect a CSV file cannot take, and a dialect beside a
         JSON file.

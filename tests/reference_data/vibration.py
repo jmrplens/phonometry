@@ -22,7 +22,7 @@ from scipy.special import erfc
 
 if TYPE_CHECKING:
     from phonometry.vibration.human.exposure import WeightingName
-    from phonometry.vibration.human.signal_burst import BurstQuantity
+    from phonometry.vibration.human.signal_burst import BurstApplication, BurstQuantity
 
 # ---------------------------------------------------------------------------
 # PR-F human vibration (ISO 8041-1 / ISO 2631 / ISO 5349 / Directive 2002/44/EC).
@@ -987,7 +987,8 @@ ISO8041_1_TABLE11_DECAY_RATE_DB_PER_S: tuple[tuple[float, float, float], ...] = 
 # in rad/s, the start time in s, the burst lengths in cycles, the repeat time
 # in s and the measurement duration in s.
 ISO8041_2_TABLE6: dict[
-    str, tuple[tuple[str, ...], float, float, tuple[int, ...], float, float]
+    BurstApplication,
+    tuple[tuple[WeightingName, ...], float, float, tuple[int, ...], float, float],
 ] = {
     "hand-arm": (("Wh",), 500.0, 0.2, (1, 2, 4, 8, 16), 2.0, 12.0),
     "whole-body": (

@@ -42,10 +42,11 @@ if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
 
     from phonometry.metrology import CalibratorTableRow
+    from phonometry.metrology.sound_calibrator import BaseClass
 
 _CALIBRATORS = "Sound calibrators and the conformance rule (IEC 60942, IEC 61672-1)"
 
-_CLASSES = ("LS", "1", "2")
+_CLASSES: tuple[BaseClass, ...] = ("LS", "1", "2")
 
 _VERDICT = {True: "Yes", False: "No"}
 
@@ -194,7 +195,7 @@ def _banded_matches(
 
 
 def _per_class_matches(
-    table: Mapping[str, float], printed: Sequence[float]
+    table: Mapping[BaseClass, float], printed: Sequence[float]
 ) -> tuple[int, int]:
     """Agreeing cells between a per-class table and the page."""
     published = tuple(table[c] for c in _CLASSES)

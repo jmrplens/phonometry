@@ -193,6 +193,7 @@ The verdict on one clause.
 | Exception | When |
 | :--- | :--- |
 | KeyError | when that clause was not measured. |
+| TypeError | if `clause` is not a text. |
 
 ### FilterPeriodicVerification.coverage_checked
 

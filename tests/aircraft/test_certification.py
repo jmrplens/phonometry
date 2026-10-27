@@ -324,7 +324,7 @@ def test_helicopter_procedure_catches_low_frequency_rotor_tone() -> None:
 
 def test_effective_perceived_noise_level_rejects_bad_procedure() -> None:
     spectra = np.zeros((5, 24))
-    with pytest.raises(ValueError, match=r"Unknown procedure"):
+    with pytest.raises(ValueError, match="'procedure' must be one of"):
         effective_perceived_noise_level(spectra, procedure="rocket")
 
 

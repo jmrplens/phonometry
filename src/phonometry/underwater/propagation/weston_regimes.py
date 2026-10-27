@@ -60,6 +60,7 @@ from scipy.special import erf
 from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
+    require_choice,
     require_positive,
     require_ranks,
     require_same_length,
@@ -89,8 +90,16 @@ __all__ = [
     "weston_regime_boundaries",
 ]
 
+#: A propagation regime of Weston's shallow-water waveguide.
+WestonRegime = Literal["spherical", "cylindrical", "mode-stripping", "single-mode"]
+
 #: Regime labels, in order of increasing range.
-WESTON_REGIMES = ("spherical", "cylindrical", "mode-stripping", "single-mode")
+WESTON_REGIMES: tuple[WestonRegime, ...] = (
+    "spherical",
+    "cylindrical",
+    "mode-stripping",
+    "single-mode",
+)
 
 #: How far, in dB, the composite loss of a result built by hand may be from
 #: the law of the regime in force: rounding, not a tolerance of the method.
@@ -134,7 +143,7 @@ SeabedName = Literal["sand", "mud"]
 #: (printed p. 454): medium sand
 #: (``Mz = 1.5``, a reflecting bottom with a critical angle) and mud
 #: (``Mz = 8``, refracting, no critical angle).
-WESTON_SEABEDS: Mapping[str, WestonSeabed] = MappingProxyType(
+WESTON_SEABEDS: Mapping[SeabedName, WestonSeabed] = MappingProxyType(
     {
         "sand": WestonSeabed(
             name="sand",
@@ -158,16 +167,13 @@ WESTON_SEABEDS: Mapping[str, WestonSeabed] = MappingProxyType(
 )
 
 
-def _seabed(seabed: str | WestonSeabed) -> WestonSeabed:
+def _seabed(seabed: object) -> WestonSeabed:
     if isinstance(seabed, WestonSeabed):
         return seabed
     if not isinstance(seabed, str):
         msg = f"'seabed' must be a text or a WestonSeabed; got {seabed!r}."
         raise TypeError(msg)
-    if seabed not in WESTON_SEABEDS:
-        msg = f"'seabed' must be one of {tuple(WESTON_SEABEDS)} or a WestonSeabed, got {seabed!r}."
-        raise ValueError(msg)
-    return WESTON_SEABEDS[seabed]
+    return WESTON_SEABEDS[require_choice(seabed, "seabed", tuple(WESTON_SEABEDS))]
 
 
 def critical_grazing_angle(sound_speed_ratio: float) -> float:
@@ -232,7 +238,8 @@ def reflection_loss_gradient(
     :return: The reflection loss gradient :math:`\eta`, in Np/rad.
     :raises ValueError: If the frequency is missing or invalid for a refracting
         seabed.
-    :raises TypeError: if ``frequency_hz`` is not a single number.
+    :raises TypeError: if ``frequency_hz`` is not a single number, or ``seabed`` is not
+        a text.
     """
     bed = _seabed(seabed)
     psi_c = critical_grazing_angle(bed.sound_speed_ratio)
@@ -281,7 +288,7 @@ def effective_depth(
     :raises ValueError: If the seabed has no critical angle or an input is
         invalid.
     :raises TypeError: if ``frequency_hz``, ``speed_of_sound`` or ``water_depth`` is not
-        a single number.
+        a single number, or ``seabed`` is not a text.
     """
     h = require_positive(water_depth, "water_depth")
     f = require_positive(frequency_hz, "frequency_hz")
@@ -317,7 +324,8 @@ def waveguide_cutoff_frequency(
     :return: The cut-off frequency, in Hz.
     :raises ValueError: If the seabed has no critical angle or an input is
         invalid.
-    :raises TypeError: if ``speed_of_sound`` or ``water_depth`` is not a single number.
+    :raises TypeError: if ``speed_of_sound`` or ``water_depth`` is not a single number,
+        or ``seabed`` is not a text.
     """
     h = require_positive(water_depth, "water_depth")
     c = require_positive(speed_of_sound, "speed_of_sound")
@@ -636,7 +644,7 @@ def _regime_labels(
 
 
 def _composite(
-    labels: NDArray[np.str_], laws: dict[str, NDArray[np.float64]]
+    labels: NDArray[np.str_], laws: Mapping[WestonRegime, NDArray[np.float64]]
 ) -> NDArray[np.float64]:
     """At each range, the value of the law of the regime its label names."""
     out = np.array(laws[WESTON_REGIMES[0]], dtype=np.float64, copy=True)
@@ -692,7 +700,7 @@ def weston_propagation_loss(
     :return: A :class:`WestonPropagationResult`.
     :raises ValueError: If an input is invalid.
     :raises TypeError: if ``frequency_hz``, ``speed_of_sound`` or ``water_depth`` is not
-        a single number.
+        a single number, or ``seabed`` is not a text.
     """
     f = require_positive(frequency_hz, "frequency_hz")
     h = require_positive(water_depth, "water_depth")

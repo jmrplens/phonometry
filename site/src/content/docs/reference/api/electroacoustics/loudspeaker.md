@@ -235,6 +235,7 @@ lines), `"thd"` (total harmonic distortion against frequency) and
 | :--- | :--- |
 | ValueError | If `quantity` or `language` is unknown, the result carries no data for `quantity`, or `ax` is not a polar axes for `"directivity"`. |
 | ImportError | If matplotlib is not installed (`pip install "phonometry[plot]"`). |
+| TypeError | if `quantity` is not a text. |
 
 ### LoudspeakerCharacteristics.report()
 

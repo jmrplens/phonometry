@@ -30,6 +30,7 @@ import dataclasses
 import functools
 import math
 import warnings
+from typing import TYPE_CHECKING
 
 import matplotlib as mpl
 
@@ -65,6 +66,9 @@ CATEGORIES = ("1", "2", "3", "4a", "4b")
 
 from cnossos_road_oracle import coefficients_2015 as _coefficients_2015
 from cnossos_road_oracle import surfaces_2015 as _surfaces_2015
+
+if TYPE_CHECKING:
+    from phonometry.environment.sources.cnossos_road import RoadVehicleCode
 
 
 @functools.cache
@@ -146,7 +150,7 @@ def test_workbook_total_level(case: dict[str, str]) -> None:
 
 
 @pytest.mark.parametrize("category", CATEGORIES)
-def test_table_f1_matches_official_journal(category: str) -> None:
+def test_table_f1_matches_official_journal(category: RoadVehicleCode) -> None:
     """Table F-1 as replaced by (EU) 2021/1226 Annex point (19)(a)."""
     expected = ref.CNOSSOS_ROAD_TABLE_F1[category]
     assert ROAD_COEFFICIENTS.rolling_a[category] == expected["AR"]
@@ -162,7 +166,7 @@ def test_table_f2_matches_official_journal() -> None:
 
 
 @pytest.mark.parametrize("category", CATEGORIES)
-def test_table_f3_matches_official_journal(category: str) -> None:
+def test_table_f3_matches_official_journal(category: RoadVehicleCode) -> None:
     """Table F-3 junction coefficients, unchanged since (EU) 2015/996."""
     expected = ref.CNOSSOS_ROAD_TABLE_F3[category]
     assert ROAD_COEFFICIENTS.junction_c[category] == (expected[1], expected[2])

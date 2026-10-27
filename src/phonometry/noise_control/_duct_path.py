@@ -87,6 +87,14 @@ if TYPE_CHECKING:
 #: The dimensions a duct cross section is described by, the keyword arguments
 #: of :func:`~phonometry.noise_control.duct_modes.plane_wave_limit`.
 DuctSectionDimension = Literal["diameter_m", "width_m", "height_m", "area"]
+#: The dimensions a duct section is given by, the keywords of
+#: :func:`~phonometry.noise_control.plane_wave_limit`.
+_SECTION_DIMENSIONS: tuple[DuctSectionDimension, ...] = (
+    "diameter_m",
+    "width_m",
+    "height_m",
+    "area",
+)
 
 
 #: Default self-noise sound power level, dB re 1 pW, used where an element has
@@ -532,6 +540,8 @@ def duct_path(
     family, goal = validate_target(criterion, target)
 
     if section is not None:
+        for dimension in section:
+            require_choice(dimension, "section", _SECTION_DIMENSIONS)
         from .duct_modes import _warn_above_plane_wave_limit, plane_wave_limit
 
         # The dimensions are the keyword arguments of plane_wave_limit, which

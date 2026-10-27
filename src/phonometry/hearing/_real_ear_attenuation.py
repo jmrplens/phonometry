@@ -80,7 +80,7 @@ from .._internal.boundary import settled
 from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays
 from .._internal.types import as_float_or_array
-from .._internal.validation import require_scalar
+from .._internal.validation import require_choice, require_scalar
 from .hearing_protectors import _octave_axis
 
 # Imported to run, not only to type: typing.get_type_hints resolves the
@@ -166,11 +166,17 @@ class ProtectorUncertaintyBudget(RichDisplay):
         return _COVERAGE_FACTOR * self.combined_uncertainty_db
 
 
+#: A protector type of Tables A.2 and B.2.
+Protector = Literal["earplug", "earmuff"]
+
+#: A frequency range of Tables A.2 and B.2, as the column heads print it.
+FrequencyRange = Literal["below 250 Hz", "250 Hz up to 4 kHz", "above 4 kHz"]
+
 #: The three frequency ranges Tables A.2 and B.2 print a column for, lowest
 #: first: below 250 Hz, 250 Hz up to 4 kHz (both ends included), and above
 #: 4 kHz. With the test signals of 4.1 that puts 63 Hz and 125 Hz in the
 #: first, 250 Hz to 4 kHz in the second and 8 kHz alone in the third.
-REAT_FREQUENCY_RANGES: tuple[str, ...] = (
+REAT_FREQUENCY_RANGES: tuple[FrequencyRange, ...] = (
     "below 250 Hz",
     "250 Hz up to 4 kHz",
     "above 4 kHz",
@@ -187,7 +193,7 @@ _RANGE_UPPER_EDGE_HZ = 4000.0
 #: :attr:`ProtectorUncertaintyBudget.expanded_uncertainty_db`; the table rounds them to
 #: one decimal after computing them at full precision (its NOTE).
 REAT_WITHIN_LABORATORY_UNCERTAINTY: Mapping[
-    str, Mapping[str, ProtectorUncertaintyBudget]
+    Protector, Mapping[FrequencyRange, ProtectorUncertaintyBudget]
 ] = MappingProxyType(
     {
         "earplug": MappingProxyType(
@@ -211,7 +217,7 @@ REAT_WITHIN_LABORATORY_UNCERTAINTY: Mapping[
 #: Every component is larger, and the method component most of all: what two
 #: laboratories disagree on is mostly how their subjects fit the protector.
 REAT_BETWEEN_LABORATORY_UNCERTAINTY: Mapping[
-    str, Mapping[str, ProtectorUncertaintyBudget]
+    Protector, Mapping[FrequencyRange, ProtectorUncertaintyBudget]
 ] = MappingProxyType(
     {
         "earplug": MappingProxyType(
@@ -438,7 +444,7 @@ def real_ear_attenuation(
     )
 
 
-def _frequency_range(frequency: float) -> str:
+def _frequency_range(frequency: float) -> FrequencyRange:
     """The Table A.2 and B.2 column a test signal falls in.
 
     :param frequency: The centre frequency of the test signal, in hertz.
@@ -454,7 +460,7 @@ def _frequency_range(frequency: float) -> str:
 def reat_expanded_uncertainty(
     frequencies: ArrayLike,
     *,
-    protector: Literal["earplug", "earmuff"],
+    protector: Protector,
     between_laboratories: bool = False,
 ) -> np.ndarray:
     """The typical :math:`U_{95}` of a mean attenuation, band by band (A.2, B.2).
@@ -474,16 +480,14 @@ def reat_expanded_uncertainty(
     :return: :math:`U_{95}` per band, in dB.
     :raises ValueError: for a protector type the tables do not list, or for
         frequencies that are not positive and finite.
+    :raises TypeError: if ``protector`` is not a text.
     """
     table = (
         REAT_BETWEEN_LABORATORY_UNCERTAINTY
         if between_laboratories
         else REAT_WITHIN_LABORATORY_UNCERTAINTY
     )
-    if protector not in table:
-        listed = ", ".join(repr(key) for key in table)
-        msg = f"'protector' must be one of {listed}; got {protector!r}."
-        raise ValueError(msg)
+    require_choice(protector, "protector", tuple(table))
     freqs = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
     if freqs.ndim != 1 or not np.all(np.isfinite(freqs)) or np.any(freqs <= 0.0):
         msg = "'frequencies' must be positive, finite centre frequencies in hertz."
@@ -983,6 +987,8 @@ def check_reat_sound_field(
         or the other way round, or if that rejection is below the 10 dB Table 1
         accepts.
     """
+    for position in position_levels:
+        require_choice(position, "position_levels", _POSITIONS)
     names = set(position_levels)
     if names != set(_POSITIONS):
         msg = (

@@ -192,7 +192,7 @@ def test_unknown_tolerance_rejected(tmp_path: Path) -> None:
     """An unknown tolerance rule raises ``ValueError``."""
     result = _case1_result()
     out = str(tmp_path / "bad.pdf")
-    with pytest.raises(ValueError, match=r"Unknown tolerance rule"):
+    with pytest.raises(ValueError, match="'tolerance' must be one of"):
         result.report(out, tolerance="broadcast")
 
 

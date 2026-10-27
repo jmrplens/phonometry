@@ -240,8 +240,10 @@ def test_facade_shape_level_difference_does_not_apply() -> None:
         building.facade_shape_level_difference("gallery_2", line_of_sight=2.0)
     with pytest.raises(ValueError, match="does not apply"):
         building.facade_shape_level_difference("gallery_5", line_of_sight=1.0)
-    with pytest.raises(ValueError, match="Unknown facade shape"):
-        building.facade_shape_level_difference("igloo")
+    with pytest.raises(ValueError, match="'shape' must be one of"):
+        building.facade_shape_level_difference("igloo")  # type: ignore[arg-type]
+    with pytest.raises(TypeError, match="'shape' must be one of .*, a text"):
+        building.facade_shape_level_difference(3)  # type: ignore[arg-type]
     with pytest.raises(ValueError, match=r"'absorption' must be an αw"):
         building.facade_shape_level_difference("balcony_6", absorption=1.5)
     with pytest.raises(

@@ -11,6 +11,7 @@ recomputation), and the mutual agreement of Francois-Garrison and Ainslie-McColm
 from __future__ import annotations
 
 import dataclasses
+from typing import Any
 
 import matplotlib as mpl
 
@@ -237,8 +238,9 @@ def test_propagation_loss_curves_must_run_over_one_range_axis() -> None:
         ("absorption", np.column_stack([good.absorption] * 2), _ONE_AXIS),
     )
     for field, value, fragment in cases:
+        changes: dict[str, Any] = {field: value}
         with pytest.raises(ValueError, match=rf"'{field}'.*{fragment}"):
-            dataclasses.replace(good, **{field: value})
+            dataclasses.replace(good, **changes)
 
 
 def test_propagation_loss_rejects_a_grid_of_ranges() -> None:

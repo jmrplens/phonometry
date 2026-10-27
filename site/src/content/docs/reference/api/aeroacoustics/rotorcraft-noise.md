@@ -632,7 +632,7 @@ RotorcraftGround(
     *,
     receiver_height_m: float = 1.2,
     ground_elevation: float | NDArray[np.float64] | list[float] | list[list[float]] = 0.0,
-    flow_resistivity: float | str | np.floating[Any] | np.integer[Any] | NDArray[np.float64] | list[float] | list[list[float]] = 'G',
+    flow_resistivity: float | Literal['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'] | np.floating[Any] | np.integer[Any] | NDArray[np.float64] | list[float] | list[list[float]] = 'G',
     terrain: tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]] | Sequence[NDArray[np.float64]] | None = None,
     terrain_resolution: float | None = None,
 )

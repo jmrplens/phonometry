@@ -104,7 +104,7 @@ Compare one measured peak velocity with its guideline value.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the velocity is negative or not finite, or for any reason [`guideline_velocity`](/phonometry/reference/api/vibration/building-damage/#guideline_velocity) raises. |
-| TypeError | if `velocity_mm_s` is not a single number. |
+| TypeError | if `velocity_mm_s` is not a single number, or `building_class`, `duration` or `location` is not a text. |
 
 ## bending_stress
 

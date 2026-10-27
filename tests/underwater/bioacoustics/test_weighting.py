@@ -19,6 +19,7 @@ Oracles:
 from __future__ import annotations
 
 import dataclasses
+from typing import TYPE_CHECKING
 
 import matplotlib as mpl
 
@@ -36,6 +37,9 @@ from phonometry.underwater.bioacoustics.weighting import (
     weighted_exposure,
     weighting_parameters,
 )
+
+if TYPE_CHECKING:
+    from phonometry.underwater.bioacoustics.audiograms import AudiogramGroup
 
 #: NMFS (2018) Appendix D worked example, printed p. 130.
 _APPENDIX_D_WFA_1KHZ = {
@@ -215,7 +219,9 @@ _IN_AIR_GROUPS = ("PCA", "OCA")
 
 
 @pytest.mark.parametrize("group", _PLUS_159_GROUPS)
-def test_southall_impulsive_peak_spl_is_threshold_at_f0_plus_159_db(group: str) -> None:
+def test_southall_impulsive_peak_spl_is_threshold_at_f0_plus_159_db(
+    group: AudiogramGroup,
+) -> None:
     """Printed p. 155: "159 dB was added to the value of the hearing threshold at f0".
 
     The article works the rule through for PCW: "Peak SPL TTS onset was
@@ -253,7 +259,11 @@ def test_the_plus_159_rule_rejects_the_printed_in_air_peak_values() -> None:
         group_audiogram,
     )
 
-    for group, printed, corrected in (("PCA", 138.0, 155.0), ("OCA", 161.0, 170.0)):
+    carnivores: tuple[tuple[AudiogramGroup, float, float], ...] = (
+        ("PCA", 138.0, 155.0),
+        ("OCA", 161.0, 170.0),
+    )
+    for group, printed, corrected in carnivores:
         f0_hz = BEST_HEARING_FREQUENCY_KHZ[group][0] * 1000.0
         derived = float(group_audiogram(f0_hz, group).threshold[0]) + 159.0
         assert abs(derived - printed) > 8.0

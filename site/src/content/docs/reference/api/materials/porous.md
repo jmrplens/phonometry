@@ -227,7 +227,7 @@ are still returned.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `flow_resistivity_pa_s_m2` is not a single number, or `frequency` holds a text or a value that is not a real number. |
+| TypeError | if `flow_resistivity_pa_s_m2` is not a single number, or `frequency` holds a text or a value that is not a real number, or `coefficients` is not a text. |
 
 ## DELANY_BAZLEY_COEFFICIENTS
 

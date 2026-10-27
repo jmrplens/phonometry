@@ -302,7 +302,7 @@ class BinauralMetric(RichDisplay):
     """
 
     symbol: str
-    parameter: str
+    parameter: BinauralRow
     left: float
     right: float
     unit: str
@@ -416,7 +416,21 @@ class BinauralIndicators(RichDisplay):
         :param kwargs: Forwarded to the left-ear bars.
         :return: The axes. Requires matplotlib (``pip install "phonometry[plot]"``).
         :raises ValueError: if the row was not computed or nothing was.
+        :raises TypeError: if ``parameter`` is not a text.
         """
+        if parameter is not None:
+            require_choice(
+                parameter,
+                "parameter",
+                (
+                    "sound_pressure_level",
+                    "loudness",
+                    "sharpness",
+                    "tonality",
+                    "roughness",
+                    "fluctuation_strength",
+                ),
+            )
         from ..._i18n import check_language
         from ..._plot.environment import plot_binaural_indicators
 
@@ -480,7 +494,9 @@ def _check_recording(duration_s: float, fs: float) -> None:
         )
 
 
-def _metric(symbol: str, parameter: str, left: float, right: float) -> BinauralMetric:
+def _metric(
+    symbol: str, parameter: BinauralRow, left: float, right: float
+) -> BinauralMetric:
     return BinauralMetric(
         symbol=symbol,
         parameter=parameter,
@@ -504,7 +520,7 @@ def _sound_pressure_levels(
     )
     l5 = np.atleast_1d(percentiles[5])
     l95 = np.atleast_1d(percentiles[95])
-    parameter = "sound_pressure_level"
+    parameter: BinauralRow = "sound_pressure_level"
     return [
         _metric(_LAEQ, parameter, a_eq[0], a_eq[1]),
         _metric(_LCEQ, parameter, c_eq[0], c_eq[1]),

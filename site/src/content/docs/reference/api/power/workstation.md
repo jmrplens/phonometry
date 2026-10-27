@@ -135,6 +135,7 @@ a [`SoundPowerWarning`](/phonometry/reference/api/power/sound-power/#soundpowerw
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the two arguments do not have the same shape, or the grade is neither of the two. |
+| TypeError | if `grade` is not a text. |
 
 ## DEFAULT_COVERAGE_FACTOR
 

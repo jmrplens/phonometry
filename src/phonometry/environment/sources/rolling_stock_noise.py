@@ -271,10 +271,15 @@ PREFERRED_PASS_BY_SPEEDS_KMH: tuple[float, ...] = (
 #: stationary mesh stands for in Formula 1, in metres.
 STATIONARY_END_POSITION_LENGTH_M: float = math.pi / 2.0 * 7.5
 
+#: A test whose result is the highest of the rounded means of its runs.
+TestMethod = Literal[
+    "constant_speed", "acceleration_maximum", "acceleration_averaged", "braking"
+]
+
 #: The tests whose result is the highest of the rounded means of three runs
 #: per position: constant speed (6.7.1), starting by the maximum level method
 #: (7.5.4) and by the averaged level method (7.6.4), and braking (8.7).
-ROLLING_STOCK_TEST_METHODS: tuple[str, ...] = (
+ROLLING_STOCK_TEST_METHODS: tuple[TestMethod, ...] = (
     "constant_speed",
     "acceleration_maximum",
     "acceleration_averaged",
@@ -879,9 +884,7 @@ class RollingStockTestResult(RichDisplay):
         method).
     """
 
-    method: Literal[
-        "constant_speed", "acceleration_maximum", "acceleration_averaged", "braking"
-    ]
+    method: TestMethod
     run_levels: Mapping[str, tuple[float, ...]]
 
     def __post_init__(self) -> None:
@@ -977,9 +980,7 @@ class RollingStockTestResult(RichDisplay):
 def rolling_stock_test(
     run_levels: Mapping[str, ArrayLike],
     *,
-    method: Literal[
-        "constant_speed", "acceleration_maximum", "acceleration_averaged", "braking"
-    ] = "constant_speed",
+    method: TestMethod = "constant_speed",
 ) -> RollingStockTestResult:
     """The result of a constant-speed, starting or braking test, 6.7.1, 7.5.4, 7.6.4, 8.7.
 
@@ -997,6 +998,11 @@ def rolling_stock_test(
     :raises ValueError: See :class:`RollingStockTestResult`.
     :raises TypeError: if ``method`` is not a text.
     """
+    require_choice(
+        method,
+        "method",
+        ("constant_speed", "acceleration_maximum", "acceleration_averaged", "braking"),
+    )
     return RollingStockTestResult(
         method=method,
         run_levels={
@@ -1955,10 +1961,13 @@ def _frozen_decay_limits(
 ) -> Mapping[Direction, Mapping[float, float]]:
     """A read-only copy of decay-rate limits, direction to band to rate.
 
+    :raises TypeError: if a direction is not a text.
     :raises ValueError: Unless the limits give at least one band for each
         direction of :data:`TRACK_DECAY_DIRECTIONS` and for no other, every
         band at a positive frequency and no two in one one-third octave band.
     """
+    for direction in limits:
+        require_choice(direction, "decay_limits_db_per_m", TRACK_DECAY_DIRECTIONS)
     given = set(limits)
     problems = [
         f"no limit for the {d} direction"
@@ -1969,10 +1978,6 @@ def _frozen_decay_limits(
         f"no band in the {d} limit"
         for d in TRACK_DECAY_DIRECTIONS
         if d in given and not limits[d]
-    ]
-    problems += [
-        f"an unknown direction {d!r}"
-        for d in sorted(given - set(TRACK_DECAY_DIRECTIONS), key=repr)
     ]
     if not problems:
         problems = [

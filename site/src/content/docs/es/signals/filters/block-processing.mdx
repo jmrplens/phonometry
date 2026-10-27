@@ -262,7 +262,7 @@ $y[n-1]$, que es el mismo valor que la API funcional devuelve como
   $B = 0{,}231\,f_\mathrm{m}$ para tercios de octava eso es alrededor de un segundo a
   12,5 Hz, una décima de segundo a 125 Hz y trece milisegundos a 1 kHz (la
   regla de duración del registro de [Bancos de
-  filtros](/phonometry/es/signals/filters/filter-banks/#cuánto-tiene-que-durar-el-registro)).
+  filtros](/phonometry/es/signals/filters/filter-banks/#cuanto-tiene-que-durar-el-registro)).
   Un detector exponencial suma encima sus propios $5\tau$: 0,6 s en Fast y 5 s
   en Slow. `steady_ic=True` arranca las secciones en el régimen permanente de un
   *escalón*, lo que elimina el transitorio ligado a la componente continua pero
@@ -429,6 +429,6 @@ estadísticos](/phonometry/es/signals/levels/levels/).
 - [Ponderación temporal](/phonometry/es/signals/levels/time-weighting/#6-procesado-por-bloques): la API funcional del detector, con el estado pasado a mano.
 - [Niveles integrados y estadísticos](/phonometry/es/signals/levels/levels/): qué métricas se acumulan entre bloques y cuáles hay que recalcular sobre la envolvente conjunta.
 - Referencia de la API: [`filters.weighting`](/phonometry/es/reference/api/filters/weighting/) y [`filters.core`](/phonometry/es/reference/api/filters/core/).
-- Teoría: [Diseño del banco y estabilidad numérica](/phonometry/es/reference/theory/signal-analysis/#diseño-del-banco-y-estabilidad-numérica): por qué un banco se diseña como secciones de segundo orden y se diezma por banda, que es lo que hace posible el estado en streaming.
+- Teoría: [Diseño del banco y estabilidad numérica](/phonometry/es/reference/theory/signal-analysis/#diseno-del-banco-y-estabilidad-numerica): por qué un banco se diseña como secciones de segundo orden y se diezma por banda, que es lo que hace posible el estado en streaming.
 
 </SeeAlso>

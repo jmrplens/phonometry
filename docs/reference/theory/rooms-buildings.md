@@ -83,6 +83,8 @@ and read where it crosses 0.50 and 0.20 for the distraction and privacy
 distances. If that second fit comes out flat or rising, the two distances do
 not exist rather than being large.*
 
+<a id="image-source-room-impulse-response-kuttruff-41-vorlander-11"></a>
+
 ### Image-source room impulse response (Kuttruff 4.1, Vorländer 11)
 
 A rectangular room reflects a point source in its walls; each reflection equals the free-field sound of a **mirror image** of the source. Mirroring a coordinate in a wall ($S_n = S - 2 d\,\mathbf{n}$, Vorländer Eq. 11.36) turns the source into a regular lattice of images, and the room impulse response is the sum of the direct sound and one delayed, attenuated impulse per image (Kuttruff Eqs. 4.4–4.5),

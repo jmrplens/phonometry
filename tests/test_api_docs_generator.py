@@ -11,6 +11,7 @@ depends on determinism).
 from __future__ import annotations
 
 import inspect
+import json
 import pathlib
 import re
 import sys
@@ -681,6 +682,25 @@ def test_the_api_index_shows_the_4_0_call_and_no_root_import() -> None:
     assert "r = filters.octave_filter(x, fs)" in index
     assert "spl, freq" not in index
     assert "from phonometry import leq" not in index
+
+
+def test_the_top_level_page_does_not_name_the_site_twice() -> None:
+    """Starlight would title it "phonometry | phonometry"; the head says what it is."""
+    pages, xref, _ = gad.build_model()
+    (top,) = (page for page in pages if page.module == "phonometry")
+    text = gad.render_module_page(top, xref, gad.RoleStats(), [])
+    frontmatter = text.split("\n---\n", 1)[0]
+    assert 'title: "phonometry"' in frontmatter
+    assert (
+        f"head:\n  - tag: title\n    content: {json.dumps(gad.TOP_LEVEL_HEAD_TITLE)}"
+        in frontmatter
+    )
+    assert gad.TOP_LEVEL_HEAD_TITLE.split(" | ")[0] != "phonometry"
+    # Every other page keeps the title Starlight builds from its module name.
+    for page in pages:
+        if page.module != "phonometry":
+            rendered = gad.render_module_page(page, xref, gad.RoleStats(), [])
+            assert "\nhead:" not in rendered.split("\n---\n", 1)[0], page.module
 
 
 def test_the_top_level_page_says_where_each_of_its_objects_is_documented() -> None:

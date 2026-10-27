@@ -1,5 +1,5 @@
 ---
-title: "Análisis de señal"
+title: "Teoría: análisis de señal"
 description: "Diseño de bancos de filtros, ponderaciones frecuenciales, integración temporal, métricas de nivel y exposición, intensidad acústica y el marco de incertidumbre del GUM detrás de phonometry."
 references:
   - type: book
@@ -70,6 +70,8 @@ references:
     url: "https://www.bipm.org/documents/20126/2071204/JCGM_101_2008_E.pdf"
     doi: "10.59161/JCGM101-2008"
     note: "La propagación de distribuciones mediante Monte Carlo y su construcción del intervalo de cobertura. El PDF enlazado es la descarga gratuita."
+sidebar:
+  label: "Análisis de señal"
 ---
 
 import ThemeImage from '../../../../../components/ThemeImage.astro';
@@ -126,6 +128,8 @@ cuyo centro exacto es 1258,9 Hz se etiqueta 1250 Hz, y la banda de sexto de
 octava centrada en 1059,3 Hz se etiqueta 1.06k. Los niveles de banda se comparan
 entre herramientas por índice o por centro exacto, nunca casando cadenas de
 etiqueta: cada herramienta redondea las etiquetas a su manera.
+
+<span id="resolucion-frecuencial-vs-separacion-de-bins-fft"></span>
 
 ## Resolución frecuencial vs separación de bins FFT
 
@@ -333,6 +337,8 @@ requieren tratamiento especial:
 - **Bessel**: se diseña con `norm="mag"`, que define el punto de −3 dB
   exactamente en `Wn` (la norma `phase` desplazaría los bordes a unos −10 dB).
 
+<span id="diseno-del-banco-y-estabilidad-numerica"></span>
+
 ## Diseño del banco y estabilidad numérica
 
 Un único paso banda de orden alto a 16 Hz y 192 kHz coloca sus polos a unos
@@ -389,6 +395,8 @@ ver las cinco arquitecturas una al lado de otra y [Verificación de clase de
 filtros](/phonometry/es/signals/filters/filter-compliance/) para comprobar un
 banco diseñado contra las máscaras de IEC 61260-1.
 
+<span id="curvas-de-ponderacion-iec-61672-1"></span>
+
 ## Curvas de ponderación (IEC 61672-1)
 
 Una ponderación frecuencial es una aproximación fija a la respuesta en
@@ -401,7 +409,7 @@ Ese origen es además su dominio de validez: como la A está anclada en 40 fonio
 subestima progresivamente el contenido de baja frecuencia de las fuentes
 fuertes, que es justo la razón de ser de los modelos de sonoridad, de los picos
 ponderados C y de la curva G de más abajo. Las líneas en sí están en [Líneas
-isofónicas](/phonometry/es/reference/theory/perception/#líneas-isofónicas-iso-2262023).
+isofónicas](/phonometry/es/reference/theory/perception/#lineas-isofonicas-iso-2262023).
 
 La función de transferencia de la ponderación A:
 
@@ -430,6 +438,8 @@ consulta
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/weighting_responses.svg" alt="Curvas de ponderación A, C y Z de IEC 61672-1 con zoom de la región positiva de la curva A (+1,27 dB a 2,5 kHz)" width="80%" />
 
 *Las tres curvas de ponderación de IEC 61672-1 que aplica la biblioteca, con la pequeña región positiva de la curva A ampliada. Las curvas especiales B, D y AU están en [Ponderaciones especiales](/phonometry/es/signals/levels/special-weightings/).*
+
+<span id="integracion-temporal"></span>
 
 ## Integración temporal
 
@@ -475,6 +485,8 @@ verificación de esta implementación con ráfagas tonales de IEC 61672-1.
 
 *El integrador exponencial con las tres constantes de tiempo normalizadas: Fast sigue la ráfaga, Slow la suaviza e Impulse retiene su pico.*
 
+<span id="ponderacion-g-iso-7196"></span>
+
 ## Ponderación G (ISO 7196)
 
 La curva G extiende la ponderación frecuencial al rango de los infrasonidos. La Tabla 1 de ISO 7196:1995 (p. 2) la define mediante cuatro ceros en el origen y cuatro pares de polos complejos conjugados, dados como coordenadas en Hz (multiplicadas por $2\pi$ para obtener rad/s):
@@ -507,6 +519,8 @@ Como G actúa sobre 0,25 Hz – 315 Hz, muy por debajo de la frecuencia de Nyqui
 
 Consulta la [guía de ponderaciones especiales](/phonometry/es/signals/levels/special-weightings/) para su uso.
 
+<span id="metricas-de-evento-y-de-dosis"></span>
+
 ## Métricas de evento y de dosis
 
 El **nivel de exposición sonora** (SEL; $L_{\mathrm{A}E}$ con ponderación A, IEC 61672-1:2013) normaliza la energía de un evento discreto (sobrevuelo de un avión, paso de un tren) a una duración de referencia de 1 s:
@@ -535,11 +549,13 @@ $$
 L_\mathrm{EX,8h} = 10 \log_{10}\left(\frac{E}{8\ \text{h} \cdot p_0^2}\right), \qquad p_0 = 20\ \mu\text{Pa}
 $$
 
-Es idéntico al $L_\mathrm{EP,d}$ de la Directiva 86/188/CEE y al $L_\mathrm{EX,8h}$ de ISO 1999 (IEC 61252, 3.3 NOTAS 5–6). El ancla de IEC 61252 (3.3 NOTA 4): una exposición de **3,2 Pa²h corresponde a un $L_\mathrm{EX,8h}$ de exactamente 90 dB**. ISO 9612 prescribe cómo muestrear una jornada de trabajo para obtenerlo y cómo acotar el resultado; consulta [Exposición al ruido en el trabajo](/phonometry/es/reference/theory/environment-transport/#exposición-al-ruido-en-el-trabajo-iso-9612).
+Es idéntico al $L_\mathrm{EP,d}$ de la Directiva 86/188/CEE y al $L_\mathrm{EX,8h}$ de ISO 1999 (IEC 61252, 3.3 NOTAS 5–6). El ancla de IEC 61252 (3.3 NOTA 4): una exposición de **3,2 Pa²h corresponde a un $L_\mathrm{EX,8h}$ de exactamente 90 dB**. ISO 9612 prescribe cómo muestrear una jornada de trabajo para obtenerlo y cómo acotar el resultado; consulta [Exposición al ruido en el trabajo](/phonometry/es/reference/theory/environment-transport/#exposicion-al-ruido-en-el-trabajo-iso-9612).
 
 **$L_\mathrm{Cpeak}$** (IEC 61672-1:2013, apartado 5.13) es el máximo absoluto de la presión acústica ponderada C expresado en dB, $L_\mathrm{Cpeak} = 20\log_{10}(\max|p_\mathrm{C}(t)|/p_0)$, la magnitud detrás de los límites de acción laborales de 135/137/140 dB(C). La implementación se verifica contra las respuestas de referencia de un ciclo y de medio ciclo de la Tabla 5.
 
 Consulta la [guía de niveles](/phonometry/es/signals/levels/levels/) para su uso y la [guía de calibración](/phonometry/es/signals/metrology/calibration/) para configurar la escala absoluta.
+
+<span id="intensidad-acustica-iec-61043"></span>
 
 ## Intensidad acústica (IEC 61043)
 

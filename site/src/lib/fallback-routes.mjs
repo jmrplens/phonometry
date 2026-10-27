@@ -20,9 +20,9 @@
  * choosing a canonical within one site ("Consolidate duplicate URLs").
  *
  * src/routeData.ts rewrites the head, src/components/Head.astro the graph,
- * astro.config.mjs filters the sitemap, and scripts/check-structured-data.mjs
- * holds the build to it. They all read the rule from here, so it is stated
- * once.
+ * astro.config.mjs filters the sitemap, and the dist checks
+ * (check-structured-data.mjs, check-crawl.mjs) hold the build to it. They all
+ * read the rule from here, so it is stated once.
  */
 
 /** A slug of the API reference, in either locale: `[es/]reference/api[/...]`. */

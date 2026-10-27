@@ -299,6 +299,58 @@ def test_a_same_page_link_to_an_accented_heading_is_refused() -> None:
     assert "'#la-medición' will be percent-encoded" in problems[0]
 
 
+def test_a_link_to_an_accented_heading_on_another_page_is_refused() -> None:
+    """The audit of the published site found 150 of these, all cross-page."""
+    text = "See [it](/phonometry/es/reference/theory/vibration/#la-medición).\n"
+    problems = cmh.check_text(text, "p.md")
+    assert len(problems) == 1
+    assert "'/phonometry/es/reference/theory/vibration/#la-medición'" in problems[0]
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "See [it](/phonometry/es/reference/theory/vibration/#la-medicion).\n",
+        "See [it](https://es.wikipedia.org/wiki/Ac%C3%BAstica#Historia).\n",
+        "See [it](https://es.wikipedia.org/wiki/Acústica#Física).\n",
+    ],
+)
+def test_an_ascii_fragment_or_another_site_is_left_alone(text: str) -> None:
+    assert cmh.check_text(text, "p.md") == []
+
+
+@pytest.mark.parametrize(
+    ("text", "level"),
+    [
+        # The errata entry that gave its page a second h1: a formula wrapped
+        # just before its equals sign, inside a list item.
+        ("- **The problem:** the quotient $M^2\n  =\n  (M_1 M_2)$ of three.\n", "h1"),
+        ("A sentence that wrapped\n---\n", "h2"),
+        ("A sentence that wrapped\n-\n", "h2"),
+    ],
+)
+def test_a_line_of_equals_or_hyphens_under_text_is_refused(
+    text: str, level: str
+) -> None:
+    problems = cmh.check_text(text, "p.md")
+    assert len(problems) == 1
+    assert f"becomes an {level}" in problems[0]
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "A paragraph.\n\n---\n\nAnother.\n",
+        "## A heading\n---\n",
+        "| a | b |\n|---|---|\n",
+        "```text\nlabel\n=====\n```\n",
+        "```text\nlabel\n```\n---\n",
+    ],
+)
+def test_a_thematic_break_a_table_or_code_is_not_a_setext_heading(text: str) -> None:
+    assert cmh.check_text(text, "p.md") == []
+
+
 def test_a_formula_on_the_opening_display_fence_is_refused() -> None:
     problems = cmh.check_text("$$x = 1\n", "p.md")
     assert len(problems) == 1

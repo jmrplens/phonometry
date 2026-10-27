@@ -40,7 +40,7 @@ calcula.
 | El trabajo | Dónde se responde |
 |---|---|
 | La potencia acústica de una máquina | [Potencia acústica](/phonometry/es/devices/emission/sound-power/): empieza aquí sean cuales sean tus instalaciones: su apartado «Elegir un método» encamina hacia el método por presión (ISO 3744/3745/3746), en cámara reverberante (ISO 3741), por intensidad (ISO 9614) o por vibración superficial (ISO/TS 7849) |
-| Un valor de emisión declarado para una hoja de características o un expediente CE | [Declarar la emisión sonora](/phonometry/es/devices/emission/sound-power/#declarar-la-emisión-sonora-iso-4871): ISO 4871, el nivel declarado ponderado A $L_{WAd}$ y su incertidumbre $K_{WA}$ |
+| Un valor de emisión declarado para una hoja de características o un expediente CE | [Declarar la emisión sonora](/phonometry/es/devices/emission/sound-power/#declarar-la-emision-sonora-iso-4871): ISO 4871, el nivel declarado ponderado A $L_{WAd}$ y su incertidumbre $K_{WA}$ |
 | Cuánto van a atenuar un silenciador, un cerramiento o un tramo de conducto | [Silenciadores](/phonometry/es/devices/noise-control/silencers/), [Control de ruido industrial](/phonometry/es/devices/noise-control/noise-control/) para cerramientos y climatización, [Ruido por conductos](/phonometry/es/devices/noise-control/duct-path/) |
 | Un altavoz, un micrófono o un amplificador medidos según su norma | [Medidas electroacústicas](/phonometry/es/devices/electroacoustics/electroacoustics/): IEC 60268-3/-4/-5 |
 | La sonoridad de un programa en LUFS | [Sonoridad de programa y pico verdadero](/phonometry/es/devices/broadcast/program-loudness/): ITU-R BS.1770-5 y EBU R 128 |
@@ -84,14 +84,14 @@ tiene el problema pero todavía no el método. Vale la pena abrirlas antes que l
 guía que crees necesitar:
 
 - [Elegir F, S o I](/phonometry/es/signals/levels/time-weighting/#elegir-f-s-o-i): qué ponderación temporal exponencial pide una medición.
-- [¿Qué arquitectura de filtro debería elegir?](/phonometry/es/signals/filters/filter-gallery/#qué-arquitectura-de-filtro-debería-elegir): Butterworth frente a las cuatro alternativas, y a qué renuncia cada una.
+- [¿Qué arquitectura de filtro debería elegir?](/phonometry/es/signals/filters/filter-gallery/#que-arquitectura-de-filtro-deberia-elegir): Butterworth frente a las cuatro alternativas, y a qué renuncia cada una.
 - [Elegir un criterio: NC, RC Mark II o NR](/phonometry/es/buildings/rooms/room-noise/#3-elegir-un-criterio-nc-rc-mark-ii-o-nr).
-- [Elegir un modelo, y cuándo fallan todos](/phonometry/es/buildings/rooms/reverberation-prediction/#4-elegir-un-modelo-y-cuándo-fallan-todos): Sabine, Eyring, Millington, Fitzroy, Arau.
-- [Elegir un método](/phonometry/es/devices/emission/sound-power/#elegir-un-método): las siete rutas hacia la potencia acústica y cuál permite cada instalación.
+- [Elegir un modelo, y cuándo fallan todos](/phonometry/es/buildings/rooms/reverberation-prediction/#4-elegir-un-modelo-y-cuando-fallan-todos): Sabine, Eyring, Millington, Fitzroy, Arau.
+- [Elegir un método](/phonometry/es/devices/emission/sound-power/#elegir-un-metodo): las siete rutas hacia la potencia acústica y cuál permite cada instalación.
 - [Elegir un modelo de sonoridad](/phonometry/es/perception/psychoacoustics/advanced-loudness/#elegir-un-modelo-de-sonoridad): Zwicker, Moore-Glasberg y Sottek.
-- [Qué medida usar y cuándo](/phonometry/es/perception/speech/objective-intelligibility/#4-qué-medida-usar-y-cuándo): el STI frente a las medidas intrusivas y no intrusivas.
-- [Qué métrica de tonalidad usar y cuándo](/phonometry/es/perception/psychoacoustics/tone-prominence/#3-qué-métrica-de-tonalidad-usar-y-cuándo).
-- [¿Directo o indirecto?](/phonometry/es/perception/speech/speech-transmission/#directo-o-indirecto-cómo-elegir): el STI de matriz completa frente a STIPA.
+- [Qué medida usar y cuándo](/phonometry/es/perception/speech/objective-intelligibility/#4-que-medida-usar-y-cuando): el STI frente a las medidas intrusivas y no intrusivas.
+- [Qué métrica de tonalidad usar y cuándo](/phonometry/es/perception/psychoacoustics/tone-prominence/#3-que-metrica-de-tonalidad-usar-y-cuando).
+- [¿Directo o indirecto?](/phonometry/es/perception/speech/speech-transmission/#directo-o-indirecto-como-elegir): el STI de matriz completa frente a STIPA.
 - [Elegir modelo](/phonometry/es/underwater/underwater-solvers/#6-elegir-modelo): modos normales, rayos, haces gaussianos y ecuación parabólica.
 
 ## Antes de medir nada

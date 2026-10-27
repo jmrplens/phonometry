@@ -1,5 +1,5 @@
 ---
-title: "Medio ambiente y transporte"
+title: "Teoría: medio ambiente y transporte"
 description: "Descriptores ambientales, ajustes por sonidos impulsivos, propagación en exteriores, exposición laboral y determinación de la potencia acústica detrás de phonometry."
 references:
   - type: book
@@ -114,6 +114,8 @@ references:
     designation: "ISO 9614-1:1993"
     url: "https://www.iso.org/standard/17427.html"
     note: "Los indicadores de campo y el criterio de capacidad dinámica compartidos por los métodos de barrido de intensidad."
+sidebar:
+  label: "Medio ambiente y transporte"
 ---
 
 import ThemeImage from '../../../../../components/ThemeImage.astro';
@@ -235,6 +237,8 @@ decide de cuánto es el ajuste, y es ISO 1996-1 la que después combina los
 periodos ajustados en un nivel de evaluación.
 
 Consulta la [guía de prominencia de sonidos impulsivos](/phonometry/es/environment/assessment/impulsive-sound/) para su uso.
+
+<span id="propagacion-en-exteriores-iso-9613-12"></span>
 
 ## Propagación en exteriores (ISO 9613-1/2)
 
@@ -387,10 +391,12 @@ exactitud declarada más allá de 1000 m, donde el método es una extrapolación
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_outdoor_geometry.svg" alt="Geometría fuente-barrera-receptor de ISO 9613-2: una fuente puntual a la altura hs, una barrera cuyo borde superior parte el recorrido en dss y dsr, y un receptor a la altura hr, con el rayo directo bloqueado y el rayo difractado sobre el borde, la diferencia de recorrido z y la fórmula de Dz" width="92%" />
 
+<span id="exposicion-al-ruido-en-el-trabajo-iso-9612"></span>
+
 ## Exposición al ruido en el trabajo (ISO 9612)
 
 La magnitud en sí, $L_\mathrm{EX,8h}$, se define a partir de la exposición sonora en
-[Análisis de señal](/phonometry/es/reference/theory/signal-analysis/#métricas-de-evento-y-de-dosis);
+[Análisis de señal](/phonometry/es/reference/theory/signal-analysis/#metricas-de-evento-y-de-dosis);
 esta sección trata de medirla en un puesto de trabajo y de acotar su
 incertidumbre.
 
@@ -463,6 +469,8 @@ acción.*
 Consulta la [guía de Propagación en exteriores](/phonometry/es/environment/propagation/outdoor-propagation/)
 y la [guía de exposición al ruido en el trabajo](/phonometry/es/perception/hearing/occupational-exposure/) para su uso.
 
+<span id="determinacion-de-la-potencia-acustica-iso-374437453746-iso-3741-iso-9614-123"></span>
+
 ## Determinación de la potencia acústica (ISO 3744/3745/3746, ISO 3741, ISO 9614-1/2/3)
 
 El nivel de potencia acústica $L_W = 10 \log_{10}(P/P_0)$ ($P_0 = 1$ pW) es una
@@ -481,7 +489,7 @@ discretos, e ISO 9614-2 (ingeniería) e ISO 9614-3 (precisión) por barrido. La
 **velocidad superficial** lee la carcasa radiante con un acelerómetro y no toma
 medición acústica alguna, y paga esa libertad con un factor de radiación: es la
 ISO/TS 7849, cuyo factor es la eficiencia de radiación que deduce la
-[referencia de vibración](/phonometry/es/reference/theory/vibration/#movilidades-puntuales-y-eficiencia-de-radiación-cremer-5-hopkins-29).
+[referencia de vibración](/phonometry/es/reference/theory/vibration/#movilidades-puntuales-y-eficiencia-de-radiacion-cremer-5-hopkins-29).
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_power_methods.svg" alt="Las siete vías de potencia acústica, una fila por cada magnitud medida y todas las celdas con los mismos cinco atributos. La fila de presión acústica: la superficie envolvente hemisférica de ISO 3744/3746 sobre un plano reflectante, la malla fija de micrófonos de ISO 3745 en una cámara anecoica revestida de cuñas y el campo difuso de una cámara reverberante de ISO 3741. La fila de intensidad acústica: la superficie de medición de ISO 9614-1 dividida en diez segmentos con la sonda detenida en un punto de cada uno, el barrido serpenteante de ISO 9614-2 sobre esa misma superficie y el barrido de precisión más estricto de ISO 9614-3. La fila de velocidad superficial lleva una sola vía a todo lo ancho, ISO/TS 7849 con un acelerómetro sobre una carcasa radiante y sin micrófono alguno" width="92%" />
 
@@ -659,7 +667,7 @@ familia ISO 9614: la ISO 9614-1 los llama $F_2$ (presión-intensidad), $F_3$
 escribe $F_{pI}$ y $F_{+/-}$; la Parte 3 escribe $F_{pI_\mathrm{n}}$ y $F_\mathrm{S}$. Cada
 subsección de aquí usa los símbolos de su propia parte. La nomenclatura de $F_2$
 a $F_4$ es la que se emplea en [Intensidad
-acústica](/phonometry/es/reference/theory/signal-analysis/#intensidad-acústica-iec-61043).
+acústica](/phonometry/es/reference/theory/signal-analysis/#intensidad-acustica-iec-61043).
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_intensity_scan.svg" alt="Barrido de intensidad acústica de precisión según ISO 9614-3: una fuente encerrada por una superficie de medición dividida en segmentos, una sonda de intensidad de dos micrófonos barrida en serpentina sobre cada segmento, y la potencia acústica formada sumando la intensidad normal por el área de cada segmento, sujeta a los criterios de aceptación de los indicadores de campo" width="92%" />
 

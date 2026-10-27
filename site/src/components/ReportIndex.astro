@@ -66,9 +66,9 @@ const entries = Object.entries(groups).sort(([a], [b]) =>
 	{
 		entries.map(([area, list]) => (
 			<section class="area">
-				<h3>
+				<h2>
 					{areaName(area)} <span class="count">{copy.count(list.length)}</span>
-				</h3>
+				</h2>
 				<ul>
 					{list.map((report) => (
 						<li>
@@ -96,7 +96,7 @@ const entries = Object.entries(groups).sort(([a], [b]) =>
 		margin-block-start: 2rem;
 	}
 
-	h3 {
+	h2 {
 		margin-block: 0 0.75rem;
 		font-size: var(--sl-text-h4);
 	}

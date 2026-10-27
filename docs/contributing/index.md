@@ -242,8 +242,8 @@ Each rule on a page has the same parts:
 | [F9](docs-and-figures.md#f9) | Pass `<ThemeImage>` the plain figure name; it adds the language and theme suffixes | `CI: Site builds and validates` |
 | [F10](docs-and-figures.md#f10) | Link an API reference page by its hyphenated module slug | review |
 | [F11](docs-and-figures.md#f11) | Write only absolute URLs in README.md: it is the PyPI page | review |
-| [F12](docs-and-figures.md#f12) | Never let a hard-wrapped line start with `-`, `>` or `N.` in mid-sentence | `scripts/check_markdown_hazards.py`, `make hazards`, `CI: Markdown renders the way it reads` |
-| [F13](docs-and-figures.md#f13) | Link an accented heading through an ASCII `<span id>` placed above it | `scripts/check_markdown_hazards.py`, `make hazards`, `CI: Markdown renders the way it reads` |
+| [F12](docs-and-figures.md#f12) | Never let a hard-wrapped line start with `-`, `>`, `=` or `N.` in mid-sentence | `scripts/check_markdown_hazards.py`, `make hazards`, `CI: Markdown renders the way it reads` |
+| [F13](docs-and-figures.md#f13) | Link an accented heading through an ASCII `<span id>` placed above it | `scripts/check_markdown_hazards.py`, `make hazards`, `CI: Markdown renders the way it reads`, `site/scripts/check-crawl.mjs`, `CI: Check what a search engine reads on every page` |
 | [F14](docs-and-figures.md#f14) | Open and close a `$$` display block on lines of their own | `scripts/check_markdown_hazards.py`, `make hazards`, `CI: Markdown renders the way it reads` |
 | [F15](docs-and-figures.md#f15) | Escape a `<` in MDX prose unless a space or a tag name follows it | `scripts/check_markdown_hazards.py`, `make hazards`, `CI: Markdown renders the way it reads` |
 | [F16](docs-and-figures.md#f16) | Write a page's Python blocks to run in reading order, on this branch's names | `scripts/check_doc_snippets.py`, `make snippets`, `CI: Documentation snippets run` |

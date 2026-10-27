@@ -284,6 +284,16 @@ jobs:
         # twelve days it took to notice.
         run: pnpm run check:structured-data
         working-directory: site
+      - name: Check what a search engine reads on every page
+        # The title, the one h1, the canonical and hreflang links, the sitemap
+        # and the links a page carries are read by crawlers and seen by nobody
+        # else. The Spanish API pages declared themselves Spanish pages of
+        # their own while carrying the English text, ten pages shared a title,
+        # the errata page had two h1 elements and the Spanish header linked an
+        # address that redirects, with this whole job green. This reads the
+        # build the way a crawler does, with no browser and no server.
+        run: pnpm run check:crawl
+        working-directory: site
       - name: Check every formula rendered
         # KaTeX does not fail a build on a parse error: it emits a
         # `katex-error` span and ships the page. A display block whose `$$`

@@ -1,5 +1,5 @@
 ---
-title: "Salas y edificación"
+title: "Teoría: salas y edificación"
 description: "Acústica de salas, criterios de ruido, aislamiento acústico y predicción de flancos detrás de phonometry."
 references:
   - type: book
@@ -214,6 +214,8 @@ references:
     publisher: "Springer"
     doi: "10.1007/b137728"
     note: "ISBN 978-3-540-22696-3. La teoría de transmisión estructural y de radiación en la que se apoya la subsección de predicción de paneles, compartida con la página de teoría de vibración."
+sidebar:
+  label: "Salas y edificación"
 ---
 
 import ThemeImage from '../../../../../components/ThemeImage.astro';
@@ -278,7 +280,11 @@ aula. El panel RC dice lo mismo en una sola letra: las bandas por debajo de
 y el remedio está del lado de la baja frecuencia, en el ventilador y en el
 recorrido de conductos, no en la rejilla.*
 
+<span id="respuesta-al-impulso-y-parametros-de-acustica-de-salas-iso-18233-iso-3382-1-2-3"></span>
+
 ## Respuesta al impulso y parámetros de acústica de salas (ISO 18233, ISO 3382-1/-2/-3)
+
+<span id="respuesta-al-impulso-por-excitacion-determinista-iso-18233"></span>
 
 ### Respuesta al impulso por excitación determinista (ISO 18233)
 
@@ -318,6 +324,8 @@ barrido empuja los productos de distorsión a tiempos negativos, donde se pueden
 recortar. El barrido es por tanto el valor por defecto, y la MLS se reserva para
 los casos en los que la excitación tiene que parecer ruido.
 
+<span id="integracion-inversa-de-schroeder-iso-3382-1-533"></span>
+
 ### Integración inversa de Schroeder (ISO 3382-1, 5.3.3)
 
 La curva de decaimiento por banda es la respuesta al impulso al cuadrado con **integración inversa** (Schroeder):
@@ -331,6 +339,8 @@ es decir, una suma acumulada invertida en tiempo discreto. La integración inver
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/schroeder_decay.webp" alt="Respuesta al impulso al cuadrado con su curva de decaimiento por integración inversa de Schroeder, y las ventanas de regresión EDT, T20 y T30 marcadas" width="80%" />
 
 *Una respuesta al impulso al cuadrado, su integral inversa de Schroeder y las ventanas de regresión EDT/T20/T30 del siguiente apartado.*
+
+<span id="ventanas-de-regresion-y-validez-iso-3382-2-apartado-6-anexo-bc"></span>
 
 ### Ventanas de regresión y validez (ISO 3382-2, apartado 6, Anexo B/C)
 
@@ -356,6 +366,8 @@ decaimiento temprano. Las posiciones más juntas que eso no son las posiciones
 independientes que cuenta la Tabla 1, y un $T$ promediado sobre ellas no tiene
 grado ninguno.
 
+<span id="claridad-definicion-y-tiempo-central-iso-3382-1-anexo-a"></span>
+
 ### Claridad, definición y tiempo central (ISO 3382-1, Anexo A)
 
 Repartir la energía en una frontera temprano/tardío $t_\mathrm{e}$ da el índice temprano-tardío y el cociente de definición:
@@ -375,6 +387,8 @@ aire y las superficies absorben más), el inferior es el reparto
 temprano/tardío de esa misma respuesta al impulso, y C50 y C80 crecen con la
 frecuencia por la misma razón por la que cae el tiempo de reverberación: cuanto
 más tardía es la energía, mayor parte de ella ha eliminado ya la sala.*
+
+<span id="decaimiento-espacial-en-oficinas-diafanas-iso-3382-3-apartado-6"></span>
 
 ### Decaimiento espacial en oficinas diáfanas (ISO 3382-3, apartado 6)
 
@@ -402,7 +416,11 @@ ajusta frente a $r$ mismo, de forma **lineal**, y se lee donde cruza 0,50 y
 0,20 para las distancias de distracción y de privacidad. Si ese segundo ajuste
 sale plano o creciente, las dos distancias no existen, no es que sean grandes.*
 
+<span id="aislamiento-acustico-y-absorcion-medidos-iso-16283-iso-10140-iso-717-iso-354"></span>
+
 ## Aislamiento acústico y absorción, medidos (ISO 16283, ISO 10140, ISO 717, ISO 354)
+
+<span id="aislamiento-en-campo-e-indice-ponderado-iso-16283-1-iso-717-1"></span>
 
 ### Aislamiento en campo e índice ponderado (ISO 16283-1, ISO 717-1)
 
@@ -478,6 +496,8 @@ referencia desplazada en pasos de 1 dB hasta que la suma desfavorable es lo
 mayor posible sin pasar de 32,0 dB, y el índice leído en la referencia
 desplazada a 500 Hz.*
 
+<span id="absorcion-en-camara-reverberante-iso-354"></span>
+
 ### Absorción en cámara reverberante (ISO 354)
 
 La absorción acústica (ISO 354) mide el área de absorción equivalente a partir de
@@ -522,6 +542,8 @@ cuanto más pequeña es la probeta y cuanto más baja la frecuencia, así que el
 valor pertenece a una probeta de *ese* tamaño, de esa relación de lados y con ese
 montaje, y no puede trasplantarse sin criterio a una superficie de otra forma.
 
+<span id="normalizacion-en-laboratorio-frente-a-campo-iso-10140-iso-16283"></span>
+
 ### Normalización en laboratorio frente a campo (ISO 10140, ISO 16283)
 
 Los índices de campo llevan una prima porque el nivel del recinto receptor del
@@ -565,7 +587,11 @@ dB para el método del altavoz a 45° ($R'_{45°}$) y $-3$ dB para el método de
 tráfico rodado con todos los ángulos ($R'_\mathrm{tr,s}$); los tres llevan el número
 único a ruido aéreo de ISO 717-1.
 
+<span id="aislamiento-acustico-y-absorcion-predichos-en-12354-1-2-6-bies-cremer-hopkins"></span>
+
 ## Aislamiento acústico y absorción, predichos (EN 12354-1/-2/-6, Bies, Cremer, Hopkins)
+
+<span id="prediccion-de-la-transmision-por-flancos-en-12354-12"></span>
 
 ### Predicción de la transmisión por flancos (EN 12354-1/2)
 
@@ -637,6 +663,8 @@ del total. La desviación típica de 2 dB que declara la norma (apartado 5) es l
 dispersión del modelo simplificado frente a la medición **dentro de esa población
 prevista**, no una barra de error general.
 
+<span id="absorcion-acustica-en-recintos-en-12354-6"></span>
+
 ### Absorción acústica en recintos (EN 12354-6)
 
 EN 12354-6:2003 predice el área de absorción equivalente de un recinto a
@@ -676,6 +704,8 @@ arriba es esta misma aritmética sobre una sala más pequeña ($A$ de 2,26 a
 mueven en sentidos opuestos y no de forma proporcional.*
 
 Consulta la [guía de absorción acústica en recintos](/phonometry/es/buildings/rooms/enclosed-space-absorption/) para su uso.
+
+<span id="prediccion-del-aislamiento-de-paneles-bies-72-hopkins-294310-cremer-5"></span>
 
 ### Predicción del aislamiento de paneles (Bies 7.2, Hopkins 2.9/4.3.10, Cremer 5)
 
@@ -735,6 +765,8 @@ merece la pena enseñar a un cliente.*
 
 Consulta la guía [Predicción del aislamiento de paneles](/phonometry/es/buildings/design/panel-sound-insulation/)
 para su uso.
+
+<span id="incertidumbre-de-medicion-iso-12999-1"></span>
 
 ## Incertidumbre de medición (ISO 12999-1)
 

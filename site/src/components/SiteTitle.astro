@@ -14,13 +14,21 @@
  * The accessible name comes from the visually hidden label inside the link, so
  * the header still announces the site title, and the document <title> and all
  * other metadata are untouched.
+ *
+ * The link ends in a slash. Starlight builds it as `formatPath(locale)`, which
+ * with no `trailingSlash` setting gives `/phonometry/es` on every Spanish page,
+ * an address GitHub Pages answers with a 301 to `/phonometry/es/`: the one
+ * internal link on the site that pointed at a redirect, repeated on 498 pages.
+ * Google asks for links to the canonical URL ("Consolidate duplicate URLs").
+ * scripts/check-crawl.mjs fails any link that answers with a redirect.
  */
 import BrandLockup from './BrandLockup.astro';
 
 const { siteTitle, siteTitleHref } = Astro.locals.starlightRoute;
+const href = siteTitleHref.endsWith('/') ? siteTitleHref : `${siteTitleHref}/`;
 ---
 
-<a href={siteTitleHref} class="site-title sl-flex">
+<a href={href} class="site-title sl-flex">
 	<BrandLockup asset="lockup" label={siteTitle} />
 </a>
 

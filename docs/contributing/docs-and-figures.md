@@ -248,9 +248,9 @@ references:
 ## Markdown that renders the way it reads
 
 <a id="f12"></a>
-### F12. Never let a hard-wrapped line start with `-`, `>` or `N.` in mid-sentence
+### F12. Never let a hard-wrapped line start with `-`, `>`, `=` or `N.` in mid-sentence
 
-**Why.** CommonMark reads such a line as a list item, a block quote or an ordered list and ends the paragraph: an inline `$...$` that wrapped onto `- K_{ij}` never closed and the MDX page failed with 'ReferenceError: n is not defined'; a wrapped `>` silently turned the tail of a sentence into a quote, three times.
+**Why.** CommonMark reads such a line as a list item, a block quote or an ordered list and ends the paragraph: an inline `$...$` that wrapped onto `- K_{ij}` never closed and the MDX page failed with 'ReferenceError: n is not defined'; a wrapped `>` silently turned the tail of a sentence into a quote, three times. A wrapped line of nothing but `=` or `-` is a setext underline that makes the text above it a heading: a formula wrapped before its `=` gave the errata page a second h1 and rendered the rest of its list item inside out.
 
 **Do**
 
@@ -268,12 +268,12 @@ the sum $L_{n,ij,w} = L_{n,w} - \Delta R_{j,w}
 
 **Enforced by:** `scripts/check_markdown_hazards.py`, `make hazards`, `CI: Markdown renders the way it reads`
 
-**Exceptions.** A list that follows its introducing line without a blank line is ordinary (3830 of them) and only reported when it interrupts an open `$`. A deliberate block quote is preceded by a blank line.
+**Exceptions.** A list that follows its introducing line without a blank line is ordinary (3830 of them) and only reported when it interrupts an open `$`. A deliberate block quote, and a thematic break, are preceded by a blank line.
 
 <a id="f13"></a>
 ### F13. Link an accented heading through an ASCII `<span id>` placed above it
 
-**Why.** Markdown percent-encodes non-ASCII in a URL, so a link to the fragment `#la-medición` ships as `#la-medici%C3%B3n` while the heading keeps its id unencoded; the accessibility check reports a dangling anchor, and five of six such links went unreported because it samples.
+**Why.** Markdown percent-encodes non-ASCII in a URL, so a link to the fragment `#la-medición` ships as `#la-medici%C3%B3n` while the heading keeps its id unencoded; the accessibility check reports a dangling anchor, and five of six such links went unreported because it samples. A link into another page of the site breaks the same way: a search engine audit of the published site found 150 of them, all from one Spanish page to another.
 
 **Do**
 
@@ -291,7 +291,7 @@ the sum $L_{n,ij,w} = L_{n,w} - \Delta R_{j,w}
 ... ver [la medición](#la-medición)
 ```
 
-**Enforced by:** `scripts/check_markdown_hazards.py`, `make hazards`, `CI: Markdown renders the way it reads`
+**Enforced by:** `scripts/check_markdown_hazards.py`, `make hazards`, `CI: Markdown renders the way it reads`, `site/scripts/check-crawl.mjs`, `CI: Check what a search engine reads on every page`
 
 <a id="f14"></a>
 ### F14. Open and close a `$$` display block on lines of their own

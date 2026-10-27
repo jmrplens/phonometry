@@ -7,6 +7,7 @@
   "scripts": {
     "build": "astro build",
     "check:cited-standards": "node scripts/check-cited-standards.mjs",
+    "check:crawl": "node scripts/check-crawl.mjs",
     "check:guides": "node scripts/check-guides-index.mjs",
     "check:i18n": "node scripts/check-i18n-parity.mjs",
     "check:icons": "node scripts/icon-sheet.mjs --check",

@@ -28,4 +28,4 @@ contourpy==1.4.0
 kiwisolver==1.5.1
 pyparsing==3.3.3
 cycler==0.12.1
-python-dateutil==2.9.0.post0
+python-dateutil==3.0.0

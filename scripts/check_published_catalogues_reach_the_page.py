@@ -25,11 +25,14 @@ import, re-exported from a parent package or moved between modules is still a
 name a caller can reach, and a grep over files would miss it.
 
 **What it deliberately does not check**, so that the message stays honest: not
-that the section renders, not that its prose exists in both languages, and not
-that the columns are the right ones. Those are the page's own business and the
-site build already fails on a broken page. This guard answers one question,
-which nothing else was answering: is there a catalogue the page has never
-heard of.
+that the catalogue renders, not that its prose exists in both languages, and
+not that the columns are the right ones. Those are the pages' own business,
+and the site build fails on each of them: on a broken page, on a catalogue the
+generator writes that no page of a language renders, and on a page under
+``reference/catalogues/`` that ``catalogueSlugs`` does not list
+(``site/src/lib/catalogue-pages.ts``). This guard answers one question, which
+nothing else was answering: is there a catalogue the pages have never heard
+of.
 
 Exit status 0 when every catalogue reaches the page, 1 otherwise.
 """
@@ -93,7 +96,7 @@ def _is_named(name: str, generator: str) -> bool:
 
 
 def main() -> int:
-    """Report every catalogue the catalogues page has never heard of."""
+    """Report every catalogue the catalogue pages have never heard of."""
     generator = _GENERATOR.read_text(encoding="utf-8")
     missing = {
         name: module

@@ -1347,9 +1347,9 @@ and a catalogue page shows it in both languages
 a new PUBLISHED_RESILIENT_LAYERS in src, absent from scripts/generate_catalogue_data.py
 ```
 
-**Enforced by:** `scripts/check_published_catalogues_reach_the_page.py`, `make published-catalogues`, `CI: Every published value names its page`
+**Enforced by:** `scripts/check_published_catalogues_reach_the_page.py`, `make published-catalogues`, `CI: Every published value names its page`, `site/src/lib/catalogue-pages.ts`
 
-**Exceptions.** A mapping deliberately kept off the page goes in `EXEMPT` with the reason, and only when showing it would mislead, never because registering it is work (empty). Registering means: the generator names it with its columns, a page under `site/src/content/docs/reference/catalogues/` renders it in both languages (a new catalogue gets a page of its own, listed in `catalogueSlugs` in `site/src/data/topics.mjs`; a table that belongs beside another, as the absorption areas belong beside the absorption coefficients, joins that page), and its key joins the union in `site/src/components/Catalogues.astro`.
+**Exceptions.** A mapping deliberately kept off the page goes in `EXEMPT` with the reason, and only when showing it would mislead, never because registering it is work (empty). Registering means: the generator names it with its columns, a page under `site/src/content/docs/reference/catalogues/` renders it in both languages (a new catalogue gets a page of its own, listed in `catalogueSlugs` in `site/src/data/topics.mjs`; a table that belongs beside another, as the absorption areas belong beside the absorption coefficients, joins that page), and its key joins the union in `site/src/components/Catalogues.astro`. The guard sees only the generator; the site build fails on the rest, a catalogue the generator writes that no page of a language renders and a page under `reference/catalogues/` missing from `catalogueSlugs`.
 
 ## Errata entries
 

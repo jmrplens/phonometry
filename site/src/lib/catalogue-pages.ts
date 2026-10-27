@@ -11,8 +11,16 @@
  * catalogues it shows are the `<Catalogues catalogue="...">` it renders, which
  * is also how the row count is known. Nothing here keeps a second list of
  * names, labels or keys to fall out of step with the pages.
+ *
+ * The order is the one list, so the build holds it to the pages both ways. A
+ * page under `reference/catalogues/` that `catalogueSlugs` does not name would
+ * build, reach the sitemap and the site search, and still be missing from the
+ * sidebar, the finder, the overview's list and its Markdown copy, and the
+ * router of old links; and a catalogue the generator writes that no page
+ * renders would be rows no reader meets. Either stops the build, in each
+ * language, naming the page or the key.
  */
-import { getEntry } from 'astro:content';
+import { getCollection, getEntry, type CollectionEntry } from 'astro:content';
 
 import { basePath } from '../data/site.mjs';
 import { catalogueSlugs } from '../data/topics.mjs';
@@ -37,11 +45,49 @@ export interface CataloguePage {
 /** The catalogues a page renders, read off its source in order. */
 const KEYS = /<Catalogues\s+catalogue="(\w+)"/g;
 
+/** The pages of each language, read once per build: the finder, the overview's
+    list and the router all ask for them on the pages they render. The dev
+    server reads them afresh, so an edited page shows at once. */
+const cache = new Map<'en' | 'es', Promise<CataloguePage[]>>();
+
 /** Every catalogue page of `lang`, in the order the sidebar lists them. */
-export async function cataloguePages(lang: 'en' | 'es'): Promise<CataloguePage[]> {
-	return Promise.all(
+export function cataloguePages(lang: 'en' | 'es'): Promise<CataloguePage[]> {
+	if (import.meta.env.DEV) return readPages(lang);
+	let pages = cache.get(lang);
+	if (!pages) {
+		pages = readPages(lang);
+		cache.set(lang, pages);
+	}
+	return pages;
+}
+
+async function readPages(lang: 'en' | 'es'): Promise<CataloguePage[]> {
+	const prefix = lang === 'es' ? 'es/' : '';
+	/* Every page under the overview is a catalogue page, so every one has to
+	   be in the list. The overview's own id is `reference/catalogues`, with no
+	   slash after it, and is not caught here. */
+	const listed = new Set<string>(catalogueSlugs);
+	/* Typed here because `getCollection` infers `any` for the docs schema (see
+	   routeData.ts). */
+	const docs: CollectionEntry<'docs'>[] = await getCollection('docs');
+	const strays = docs
+		.map((entry) => entry.id)
+		.filter((id) => id.startsWith(`${prefix}reference/catalogues/`))
+		.map((id) => id.slice(prefix.length))
+		.filter((path) => !listed.has(path))
+		.sort();
+	if (strays.length > 0) {
+		throw new Error(
+			`[catalogue-pages] ${strays.map((path) => `${prefix}${path}`).join(', ')} ` +
+				`${strays.length === 1 ? 'is' : 'are'} under reference/catalogues/ but not listed in catalogueSlugs ` +
+				'in src/data/topics.mjs. Add each catalogue page there, where the sidebar, the finder, the ' +
+				"overview's list and the router of old links read it.",
+		);
+	}
+
+	const pages = await Promise.all(
 		catalogueSlugs.map(async (path) => {
-			const id = `${lang === 'es' ? 'es/' : ''}${path}`;
+			const id = `${prefix}${path}`;
 			const entry = await getEntry('docs', id);
 			if (!entry) {
 				throw new Error(
@@ -67,4 +113,17 @@ export async function cataloguePages(lang: 'en' | 'es'): Promise<CataloguePage[]
 			};
 		}),
 	);
+
+	/* And every catalogue the generator writes is on a page of this language. */
+	const shown = new Set<string>(pages.flatMap((page) => page.keys));
+	const unshown = Object.keys(catalogues).filter((key) => !shown.has(key));
+	if (unshown.length > 0) {
+		throw new Error(
+			`[catalogue-pages] no ${lang === 'es' ? 'Spanish' : 'English'} catalogue page renders ` +
+				`${unshown.join(', ')}. Render each with <Catalogues catalogue="..."> on a page under ` +
+				`${prefix}reference/catalogues/ (a page of its own, listed in catalogueSlugs, or the page it ` +
+				'belongs beside), and add its key to the union in src/components/Catalogues.astro.',
+		);
+	}
+	return pages;
 }

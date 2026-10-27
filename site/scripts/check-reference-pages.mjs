@@ -25,7 +25,9 @@
 // with the markup of their rows cut to what a row's position does not say.
 // The finder that was the one place to choose a catalogue, a material and a
 // table now chooses among pages: it still lists every catalogue with its row
-// count, opens the chosen one at its table, filters the rows by name (on the
+// count and opens the chosen one at its table, but only from the button
+// beside the select, so a keyboard reader can walk the list by arrow or by
+// letter without leaving the page; it filters the rows by name (on the
 // Spanish page by the book's English name too) and by published table, and
 // says so when nothing is left; the marks still open their explanation on a
 // click; and a phone still gets each row as a card, labelled by its column,
@@ -33,6 +35,7 @@
 // old single page has to land on that catalogue's page.
 //
 // Usage: node scripts/check-reference-pages.mjs [--base http://localhost:4321]
+import { catalogueSlugs } from '../src/data/topics.mjs';
 import { BASE_PATH, baseFrom, createExpect, launchBrowser } from './shared/audit.mjs';
 
 const BASE = baseFrom();
@@ -495,7 +498,8 @@ for (const { path, query, guide, errata, title } of [
 
 // --- The published catalogues ---------------------------------------------
 
-const CATALOGUE_PAGES = 23;
+/** Every catalogue page the sidebar lists; the build holds the list to the pages. */
+const CATALOGUE_PAGES = catalogueSlugs.length;
 
 /** What the finder offers and where it sits, read off a loaded page. */
 const finderState = (page) =>
@@ -508,12 +512,50 @@ const finderState = (page) =>
 			shown: !!finder && !finder.hidden && !!jump && !jump.hidden,
 			pages: options.filter((option) => option.value).length,
 			selected: select?.selectedOptions[0]?.textContent.trim() ?? '',
+			// The button that opens the chosen page waits for a choice.
+			open: finder?.querySelector('[data-open]')?.disabled === false ? 'offered' : 'waiting',
 			aboveTable: finder?.nextElementSibling?.classList.contains('table-scroll') ?? false,
 			aboveIndex: finder?.nextElementSibling?.hasAttribute('data-catalogue-index') ?? false,
 			filters: !!finder?.querySelector('[data-search]'),
 			jump: jump?.querySelector('button')?.textContent.trim() ?? '',
 		};
 	});
+
+/**
+ * Run `act` on the finder and report whether the tab stayed where it was:
+ * the address after it (a navigation it started has had time to commit),
+ * whether the choice moved off the option the page was built with, whether
+ * the select kept the focus and whether the button now offers to open.
+ * A tab that left is brought back, so the checks after it run on the page
+ * they name, and unless `keep` is set the select goes back to the page's
+ * own choice.
+ */
+async function stays(page, act, { keep = false } = {}) {
+	const start = page.url();
+	await act();
+	await new Promise((resolve) => setTimeout(resolve, 1000));
+	const url = page.url();
+	if (url !== start) {
+		await page.goto(start, { waitUntil: 'networkidle0', timeout: 90000 });
+		return { url, moved: true, focused: false, open: 'left the page' };
+	}
+	const state = await page.evaluate(() => {
+		const select = document.querySelector('[data-category]');
+		return {
+			moved: !select.selectedOptions[0]?.defaultSelected,
+			focused: document.activeElement === select,
+		};
+	});
+	const { open } = await finderState(page);
+	if (!keep) {
+		await page.evaluate(() => {
+			const select = document.querySelector('[data-category]');
+			select.value = [...select.options].find((option) => option.defaultSelected)?.value ?? '';
+			select.dispatchEvent(new Event('change'));
+		});
+	}
+	return { url, ...state, open };
+}
 
 /** Type `query` into the finder and report the rows left and what it says. */
 async function filterRows(page, query) {
@@ -560,6 +602,7 @@ for (const { path, lang, label, steel, english, table, jump } of [
 		shown: true,
 		pages: CATALOGUE_PAGES,
 		selected: label,
+		open: 'waiting',
 		aboveTable: true,
 		aboveIndex: false,
 		filters: true,
@@ -678,27 +721,58 @@ for (const { path, lang, label, steel, english, table, jump } of [
 		await page.setViewport({ width: 1280, height: 900 });
 	}
 
-	// Choosing another catalogue opens its page at its table.
+	// Walking the list from the keyboard stays on the page: an arrow or a
+	// letter on the closed select changes the choice, and most browsers call
+	// each step a change.
+	for (const [key, how] of [['ArrowDown', 'an arrow'], [lang === 'es' ? 'm' : 'p', 'a letter']]) {
+		const got = await stays(page, async () => {
+			await page.focus('[data-category]');
+			await page.keyboard.press(key);
+		});
+		expect(`${path}: ${how} on the catalogue select moves the choice and stays on the page, focus kept`, got, {
+			url: page.url(),
+			moved: true,
+			focused: true,
+			open: 'offered',
+		});
+	}
+
+	// Choosing another catalogue opens its page at its table, once the button
+	// beside the select is pressed and not before.
 	{
 		const target = await page.$eval('[data-category]', (select) =>
 			[...select.options].find((option) => option.value.includes('/porous-materials/'))?.value,
 		);
-		await Promise.all([page.waitForNavigation({ waitUntil: 'networkidle0' }), page.select('[data-category]', target)]);
-		await new Promise((resolve) => setTimeout(resolve, 300));
-		const got = await page.evaluate(() => {
-			const finder = document.querySelector('[data-finder]');
-			const top = finder.getBoundingClientRect().top;
-			return { path: location.pathname, hash: location.hash, panelInView: top >= 0 && top < innerHeight / 2 };
-		});
-		expect(`${path}: choosing the porous materials opens their page at the table`, got, {
-			path: `${BASE_PATH}${lang === 'es' ? '/es' : ''}/reference/catalogues/porous-materials/`,
-			hash: '#catalogue-porous',
-			panelInView: true,
-		});
-		// Back on the page the choice was made on, the select names that page.
-		await Promise.all([page.waitForNavigation({ waitUntil: 'networkidle0' }), page.goBack()]);
-		const back = await page.$eval('[data-category]', (select) => select.selectedOptions[0]?.textContent.trim());
-		expect(`${path}: back from that page, the finder names this catalogue again`, back, label);
+		const chosen = await stays(page, () => page.select('[data-category]', target), { keep: true });
+		expect(`${path}: choosing the porous materials alone leaves the page where it is`, {
+			url: chosen.url,
+			moved: chosen.moved,
+			open: chosen.open,
+		}, { url: page.url(), moved: true, open: 'offered' });
+		// Without a button to press there is nothing more to see here, and the
+		// line above has already said so.
+		if (chosen.open === 'offered') {
+			await Promise.all([page.waitForNavigation({ waitUntil: 'networkidle0' }), page.click('[data-open]')]);
+			await new Promise((resolve) => setTimeout(resolve, 300));
+			const got = await page.evaluate(() => {
+				const finder = document.querySelector('[data-finder]');
+				const top = finder.getBoundingClientRect().top;
+				return { path: location.pathname, hash: location.hash, panelInView: top >= 0 && top < innerHeight / 2 };
+			});
+			expect(`${path}: the button opens the porous materials' page at the table`, got, {
+				path: `${BASE_PATH}${lang === 'es' ? '/es' : ''}/reference/catalogues/porous-materials/`,
+				hash: '#catalogue-porous',
+				panelInView: true,
+			});
+			// Back on the page the choice was made on, the select names that
+			// page and the button waits again.
+			await Promise.all([page.waitForNavigation({ waitUntil: 'networkidle0' }), page.goBack()]);
+			const back = await finderState(page);
+			expect(`${path}: back from that page, the finder names this catalogue again`, {
+				selected: back.selected,
+				open: back.open,
+			}, { selected: label, open: 'waiting' });
+		}
 	}
 
 	await page.close();
@@ -738,12 +812,33 @@ for (const { path, choose, jump } of [
 		shown: true,
 		pages: CATALOGUE_PAGES,
 		selected: choose,
+		open: 'waiting',
 		aboveTable: false,
 		aboveIndex: true,
 		filters: false,
 		jump,
 		links: CATALOGUE_PAGES,
 	});
+	// An arrow off the line that asks for a choice picks the first catalogue
+	// and stays here; the button then opens it.
+	const arrow = await stays(
+		page,
+		async () => {
+			await page.focus('[data-category]');
+			await page.keyboard.press('ArrowDown');
+		},
+		{ keep: true },
+	);
+	expect(`${path}: an arrow on the catalogue select stays on the overview, focus kept`, arrow, {
+		url: page.url(),
+		moved: true,
+		focused: true,
+		open: 'offered',
+	});
+	if (arrow.open === 'offered') {
+		await Promise.all([page.waitForNavigation({ waitUntil: 'networkidle0' }), page.click('[data-open]')]);
+		expect(`${path}: the button then opens the first catalogue at its table`, new URL(page.url()).pathname.endsWith('/reference/catalogues/solids/') && new URL(page.url()).hash, '#catalogue-solids');
+	}
 	await page.close();
 }
 

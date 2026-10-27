@@ -10,9 +10,18 @@
  *
  * So the three choices a reader actually makes, which catalogue, which
  * material and which published table, are made here, once. Each catalogue is
- * a page of its own now (src/data/topics.mjs says why), and choosing one here
- * opens its page at its table; the material and the table are then chosen in
- * the same panel, which sits directly above the rows it filters.
+ * a page of its own now (src/data/topics.mjs says why): choosing one here and
+ * pressing the button beside it opens its page at its table, and the material
+ * and the table are then chosen in the same panel, which sits directly above
+ * the rows it filters.
+ *
+ * The choice alone goes nowhere. A select changes its value on every arrow
+ * key and every letter typed on it while it is closed, and most browsers
+ * report each step as a change, so a select that opened a page on change sent
+ * a keyboard reader to the next catalogue on the first arrow, with the focus
+ * back at the top of a page they had not asked for. With the button the
+ * reader walks the list as long as they like, by arrow or by typing a name,
+ * and leaves the page only when they press it.
  *
  * The panel sits where the table starts, not at the top of the page. At the
  * top, a reader who had scrolled down a table to compare two rows had to
@@ -51,24 +60,26 @@ const copy = {
 		choose: 'Choose a catalogue',
 		table: 'Published table',
 		everyTable: 'Every table',
+		open: 'Open',
 		jump: 'Go to the table',
 		jumpIndex: 'Go to the catalogues',
 		row: 'row',
 		rows: 'rows',
-		hint: 'Each catalogue has a page of its own: choose another one here, or narrow the rows of this one by name and by the table that printed them.',
-		hintIndex: 'Each catalogue has a page of its own. Choose one to go to its table.',
+		hint: 'Each catalogue has a page of its own: choose another one here and open it, or narrow the rows of this one by name and by the table that printed them.',
+		hintIndex: 'Each catalogue has a page of its own: choose one, and Open takes you to its table.',
 	},
 	es: {
 		category: 'Categoría',
 		choose: 'Elige un catálogo',
 		table: 'Tabla publicada',
 		everyTable: 'Todas las tablas',
+		open: 'Abrir',
 		jump: 'Ir a la tabla',
 		jumpIndex: 'Ir a los catálogos',
 		row: 'fila',
 		rows: 'filas',
-		hint: 'Cada catálogo tiene su propia página: elige otro aquí, o filtra las filas de este por nombre y por la tabla que las imprimió.',
-		hintIndex: 'Cada catálogo tiene su propia página. Elige uno para ir a su tabla.',
+		hint: 'Cada catálogo tiene su propia página: elige otro aquí y ábrelo, o filtra las filas de este por nombre y por la tabla que las imprimió.',
+		hintIndex: 'Cada catálogo tiene su propia página: elige uno y «Abrir» te lleva a su tabla.',
 	},
 }[lang];
 
@@ -85,22 +96,29 @@ const rowCount = (rows: number) => `${rows} ${rows === 1 ? copy.row : copy.rows}
 <div class="finder not-content" data-finder data-rows-word={copy.rows} data-row-word={copy.row} hidden>
 	<p class="hint">{here ? copy.hint : copy.hintIndex}</p>
 	<div class="controls">
-		<label class="wide">
-			<span>{copy.category}</span>
-			{/* Each option is a page, opened at its table: the section's id is
-			    what the page lands on, and the script there puts the panel
-			    in view. */}
-			<select data-category autocomplete="off">
-				{!here && <option value="" selected disabled>{copy.choose}</option>}
-				{
-					pages.map((page) => (
-						<option value={`${page.href}#catalogue-${page.keys[0]}`} selected={page === here}>
-							{page.label} ({rowCount(page.rows)})
-						</option>
-					))
-				}
-			</select>
-		</label>
+		{/* The label names the select by its id rather than by wrapping it:
+		    wrapped, the button beside the select would be read into its name. */}
+		<div class="wide choose">
+			<label for="catalogue-category">{copy.category}</label>
+			<div class="pick">
+				{/* Each option is a page, opened at its table: the section's id
+				    is what the page lands on, and the script there puts the
+				    panel in view. */}
+				<select id="catalogue-category" data-category autocomplete="off">
+					{!here && <option value="" selected disabled>{copy.choose}</option>}
+					{
+						pages.map((page) => (
+							<option value={`${page.href}#catalogue-${page.keys[0]}`} selected={page === here}>
+								{page.label} ({rowCount(page.rows)})
+							</option>
+						))
+					}
+				</select>
+				{/* Offered only while the select names a page other than this
+				    one: on the overview, once a catalogue is chosen. */}
+				<button type="button" data-open disabled>{copy.open}</button>
+			</div>
+		</div>
 		{
 			here && (
 				<>
@@ -127,24 +145,34 @@ const rowCount = (rows: number) => `${rows} ${rows === 1 ? copy.row : copy.rows}
 		const jumpBar = document.querySelector<HTMLElement>('[data-finder-jump]');
 		const jump = jumpBar?.querySelector<HTMLButtonElement>('[data-jump]');
 		const category = finder?.querySelector<HTMLSelectElement>('[data-category]');
-		if (!finder || !jumpBar || !jump || !category) return;
+		const openButton = finder?.querySelector<HTMLButtonElement>('[data-open]');
+		if (!finder || !jumpBar || !jump || !category || !openButton) return;
 
 		/** Bring the panel, and with it the top of the table, into view. */
 		const toPanel = (behavior: ScrollBehavior = 'smooth') =>
 			finder.scrollIntoView({ behavior, block: 'start' });
 
-		/* Choosing a catalogue opens its page at its table. The address names
-		   the table's section, so the page lands there even before its own
-		   copy of this script has put the panel in view. */
-		category.addEventListener('change', () => {
-			if (category.value) location.assign(category.value);
+		/** The option the page was built with: this page, or on the overview
+		    the line that asks for a choice. */
+		const here = () => [...category.options].find((option) => option.defaultSelected);
+		/* The button opens the chosen catalogue's page at its table, and is
+		   offered only while the select names another page. Choosing alone
+		   leaves the page where it is (see the comment at the top). The
+		   address names the table's section, so the page lands there even
+		   before its own copy of this script has put the panel in view. */
+		const offerOpen = () => {
+			openButton.disabled = !category.value || category.selectedOptions[0] === here();
+		};
+		category.addEventListener('change', offerOpen);
+		openButton.addEventListener('click', () => {
+			if (!openButton.disabled) location.assign(category.value);
 		});
 		/* Back from the page a choice opened, the browser can show this page
 		   as it was left, with the other catalogue still chosen: the select
 		   goes back to naming the page it is on. */
 		window.addEventListener('pageshow', () => {
-			const here = [...category.options].find((option) => option.defaultSelected);
-			category.value = here?.value ?? '';
+			category.value = here()?.value ?? '';
+			offerOpen();
 		});
 		jump.addEventListener('click', () => toPanel());
 
@@ -340,6 +368,51 @@ const rowCount = (rows: number) => `${rows} ${rows === 1 ? copy.row : copy.rows}
 		color: var(--sl-color-white);
 	}
 
+	/* The select of catalogues under its label, and the button that opens the
+	   one chosen beside the select, on one line at every width. */
+	.choose {
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+		font-size: var(--sl-text-sm);
+	}
+
+	/* The row stretches the button to the select's height, which a select
+	   sets for itself whatever the line height around it. */
+	.pick {
+		display: flex;
+		gap: 0.5rem;
+	}
+
+	.pick select {
+		flex: 1 1 auto;
+		min-width: 0;
+	}
+
+	.pick button {
+		flex: none;
+		font: inherit;
+		padding: 0 0.9rem;
+		border: 1px solid var(--sl-color-text-accent);
+		border-radius: 0.25rem;
+		background: var(--sl-color-text-accent);
+		color: var(--sl-color-black);
+		cursor: pointer;
+	}
+
+	.pick button:hover:enabled {
+		background: color-mix(in srgb, var(--sl-color-text-accent) 82%, var(--sl-color-black));
+	}
+
+	/* Nothing to open yet: the select still names this page, or on the
+	   overview no catalogue is chosen. */
+	.pick button:disabled {
+		border-color: var(--sl-color-gray-5);
+		background: transparent;
+		color: var(--sl-color-gray-3);
+		cursor: default;
+	}
+
 	.count {
 		font-size: var(--sl-text-sm);
 		color: var(--sl-color-gray-3);
@@ -353,7 +426,8 @@ const rowCount = (rows: number) => `${rows} ${rows === 1 ? copy.row : copy.rows}
 			gap: 0.7rem;
 		}
 
-		.controls label,
+		.controls > label,
+		.controls > .choose,
 		.jump button {
 			flex: 1 1 100%;
 			width: 100%;

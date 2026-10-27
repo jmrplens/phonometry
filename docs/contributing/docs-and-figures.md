@@ -1530,6 +1530,6 @@ description: "Airport noise by ECAC Doc 29: the noise-power-distance engine, per
 description: "The ECAC Doc 29 airport-noise method: the noise-power-distance engine, the per-segment corrections of the single-event calculation (impedance, lateral attenuation, engine installation, duration, noise fraction, start-of-roll directivity) and the ground-grid SEL contour."
 ```
 
-**Enforced by:** `site/scripts/check-descriptions.mjs`, `CI: Check every page has a short meta description of its own`, `tests/test_api_docs_generator.py::test_every_api_page_has_a_description_short_enough_to_show_whole`
+**Enforced by:** `site/scripts/check-descriptions.mjs`, `CI: Check every page has a short meta description of its own`, `site/scripts/check-descriptions.test.mjs`, `CI: Test the build checks on small builds made to fail them`, `tests/test_api_docs_generator.py::test_every_api_page_has_a_description_short_enough_to_show_whole`
 
 **Exceptions.** The Spanish API pages carry the English description of their twin and name that twin canonical (`site/src/lib/fallback-routes.mjs`), and the redirect stubs and the error page are not pages a search engine indexes; the check skips all three. A Spanish description is written for its page, not cut down from the English one, and the length counts characters, not bytes.

@@ -213,6 +213,16 @@ jobs:
       - name: Check EN/ES translation parity
         run: node scripts/check-i18n-parity.mjs
         working-directory: site
+      - name: Test the build checks on small builds made to fail them
+        # A check of the build only ever reads a build that passes it, so a
+        # check that stopped seeing a missing description, counted one
+        # character too many or compared two descriptions as written rather
+        # than as read would stay green here for good. A check's tests hand it
+        # builds of a few pages that have the defect, and the routes it skips,
+        # and assert its exit status; check-descriptions.mjs has them. Node's
+        # own test runner and no dependencies, so it runs before the install.
+        run: pnpm run test:scripts
+        working-directory: site
       - name: Build site
         run: pnpm install --frozen-lockfile && pnpm build
         working-directory: site

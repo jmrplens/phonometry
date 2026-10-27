@@ -293,7 +293,7 @@ Each rule on a page has the same parts:
 | [F60](docs-and-figures.md#f60) | Hold every frame of a clip to the figure gates before it is encoded | `scripts/clip_frame_audit.py`, `make animation-audit`, `tests/test_clip_frame_audit.py` |
 | [F61](docs-and-figures.md#f61) | Step a clip's field where the registry puts it, and keep it on that device between captures | `tests/test_clip_scenes_on_devices.py`, `tests/test_clip_placement.py` |
 | [F62](docs-and-figures.md#f62) | Quote the extras of every install command | `scripts/check_quoted_extras.py`, `CI: Every install command quotes its extras`, `tests/test_check_quoted_extras.py` |
-| [F63](docs-and-figures.md#f63) | Give every page a description of 160 characters or fewer that no other page of its language repeats | `site/scripts/check-descriptions.mjs`, `CI: Check every page has a short meta description of its own`, `tests/test_api_docs_generator.py::test_every_api_page_has_a_description_short_enough_to_show_whole` |
+| [F63](docs-and-figures.md#f63) | Give every page a description of 160 characters or fewer that no other page of its language repeats | `site/scripts/check-descriptions.mjs`, `CI: Check every page has a short meta description of its own`, `site/scripts/check-descriptions.test.mjs`, `CI: Test the build checks on small builds made to fail them`, `tests/test_api_docs_generator.py::test_every_api_page_has_a_description_short_enough_to_show_whole` |
 
 ### Prose, commits and pull requests
 

@@ -30,7 +30,8 @@
     "prebuild": "node scripts/stage-media.mjs && node scripts/copy-llms.mjs",
     "preview": "astro preview",
     "redirects": "node scripts/generate-redirects.mjs",
-    "redirects:cloudflare": "node scripts/cloudflare-redirects.mjs"
+    "redirects:cloudflare": "node scripts/cloudflare-redirects.mjs",
+    "test:scripts": "node --test 'scripts/**/*.test.mjs'"
   },
   "dependencies": {
     "@astrojs/markdown-remark": "^7.3.3",

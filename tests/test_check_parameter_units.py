@@ -1481,6 +1481,8 @@ def test_a_tuple_return_exemption_nothing_needs_is_stale(
         ("tuple[Axes, Axes]", None),
         ("Axes | tuple[Axes, Axes, Axes]", None),
         ("tuple[PolarAxes, Axes]", None),
+        ("tuple[Axes3D, Axes3D]", None),
+        ("tuple[AxesImage, AxesImage]", ("AxesImage", "AxesImage")),
         ("tuple[Axes, float]", ("Axes", "float")),
         ("list[tuple[float, float]]", None),
         ("float", None),

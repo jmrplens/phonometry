@@ -38,6 +38,8 @@ from phonometry.room.steady_field import SteadyFieldResult, steady_state_field
 if TYPE_CHECKING:  # pragma: no cover - typing only
     from collections.abc import Callable
 
+    from matplotlib.axes import Axes
+
 #: What the builders below return: every room result with a ``.plot()`` renderer.
 _RoomResult = (
     CrowdNoiseResult
@@ -65,9 +67,9 @@ def _decaying_ir() -> np.ndarray:
     return rng.standard_normal(t.size) * np.exp(-6.9 * t / 0.4)
 
 
-def _texts(ax_or_axes: object) -> str:
+def _texts(ax_or_axes: Axes | tuple[Axes, ...]) -> str:
     """Concatenate every axis label, title and legend text for inspection."""
-    axes = np.atleast_1d(ax_or_axes).ravel()
+    axes = ax_or_axes if isinstance(ax_or_axes, tuple) else (ax_or_axes,)
     parts: list[str] = []
     for ax in axes:
         parts += [ax.get_xlabel(), ax.get_ylabel(), ax.get_title()]

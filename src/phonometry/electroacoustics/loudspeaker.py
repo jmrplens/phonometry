@@ -662,8 +662,9 @@ class LoudspeakerCharacteristics(OwnsArrays):
         :param quantity: Which characteristic to plot (see above).
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :return: The axes the characteristic was drawn on, polar for ``"directivity"``.
-        :raises ValueError: If ``quantity`` or ``language`` is unknown, or the
-            result carries no data for ``quantity``.
+        :raises ValueError: If ``quantity`` or ``language`` is unknown, the
+            result carries no data for ``quantity``, or ``ax`` is not a polar
+            axes for ``"directivity"``.
         :raises ImportError: If matplotlib is not installed
             (``pip install "phonometry[plot]"``).
         """

@@ -1319,21 +1319,21 @@ def test_spanish_labels_on_the_impact_figures() -> None:
     res = vibration.impact_mobility(
         force, response, FS, exponential_decay_rate_per_s=20.0
     )
-    axes = np.asarray(res.plot(language="es"))
+    axes = res.plot(language="es")
     title = axes[0].get_title()
     assert title.startswith("ISO 7626-5 movilidad por excitación con impacto")
     assert axes[1].get_xlabel() == "Frecuencia [Hz]"
     fit_ax = res.fit_mode((30.0, 50.0)).plot(language="es")
     assert fit_ax.get_title().startswith("Ajuste de un modo en 40,")
     double = vibration.check_double_hit(force + np.roll(force, 245), FS)
-    check_axes = np.asarray(double.plot(language="es"))
+    check_axes = double.plot(language="es")
     assert check_axes[0].get_title().endswith("(NO CUMPLE)")
     plt.close("all")
 
 
-def _figure_width_px(axes: object) -> tuple[Figure, float]:
+def _figure_width_px(axes: Axes | tuple[Axes, ...]) -> tuple[Figure, float]:
     """The figure a renderer drew *axes* on, drawn, and its width in pixels."""
-    first = cast("Axes", np.asarray(axes).ravel()[0])
+    first = axes[0] if isinstance(axes, tuple) else axes
     figure = cast("Figure", first.get_figure(root=True))
     figure.canvas.draw()
     return figure, float(figure.bbox.width)
@@ -1433,7 +1433,7 @@ def test_the_channel_figure_holds_every_deviation() -> None:
     check = vibration.verify_channel_match(
         frequencies=freqs, response=response, frequency_range_hz=(20.0, 800.0)
     )
-    magnitude_ax, phase_ax = np.asarray(check.plot())
+    magnitude_ax, phase_ax = check.plot()
     low, high = magnitude_ax.get_ylim()
     assert high >= 100.0 * float(np.max(np.abs(check.magnitude_deviation)))
     assert low <= -high + 1e-9
@@ -1455,7 +1455,7 @@ def test_a_single_impact_is_not_called_an_average() -> None:
         force, response, FS, frequency_range_hz=(5.0, 400.0)
     )
     for language, word in (("en", "single impact"), ("es", "un solo impacto")):
-        axes = np.asarray(single.plot(language=language))
+        axes = single.plot(language=language)
         labels = axes[0].get_legend_handles_labels()[1]
         assert any(word in label for label in labels)
         coherence = vibration.check_coherence(single, frequency_range_hz=(10.0, 400.0))

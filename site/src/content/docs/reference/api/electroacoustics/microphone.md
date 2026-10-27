@@ -237,7 +237,7 @@ against sound pressure level).
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If `quantity` or `language` is unknown, or the result carries no data for `quantity`. |
+| ValueError | If `quantity` or `language` is unknown, the result carries no data for `quantity`, or `ax` is not a polar axes for `"directivity"`. |
 | ImportError | If matplotlib is not installed (`pip install "phonometry[plot]"`). |
 
 ### MicrophoneCharacteristics.report()

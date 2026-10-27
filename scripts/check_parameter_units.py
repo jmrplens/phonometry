@@ -3056,9 +3056,14 @@ TUPLE_RETURN_EXEMPT: dict[tuple[str, str], str] = {
 }
 
 
+#: The name of a matplotlib axes class: one that ends in ``Axes``
+#: (``PolarAxes``), or ``Axes3D``; ``AxesImage`` is not one.
+_AXES_NAME = re.compile(r"Axes(?:3D)?$")
+
+
 def _names_axes(node: ast.expr) -> bool:
     """Whether a tuple item names a matplotlib axes class (``Axes``, ``PolarAxes``)."""
-    return ast.unparse(node).strip("'\"").rpartition(".")[2].endswith("Axes")
+    return bool(_AXES_NAME.search(ast.unparse(node).strip("'\"").rpartition(".")[2]))
 
 
 def fixed_tuple_items(annotation: object) -> tuple[str, ...] | None:
@@ -3068,8 +3073,8 @@ def fixed_tuple_items(annotation: object) -> tuple[str, ...] | None:
     fixed-length tuples of two items; ``tuple[A, ...]`` is a sequence of like
     items of any length and is not, and neither is a one-item ``tuple[A]``.
     Nor is a tuple of matplotlib axes (``tuple[Axes, Axes]``): the panels of
-    one figure, top first, as matplotlib's own ``subplots`` hands them back,
-    which a multi-panel ``.plot()`` returns without ``ax`` (rule A57).
+    one figure, top first, in the order matplotlib's ``subplots`` lays them
+    out, which a multi-panel ``.plot()`` returns without ``ax`` (rule A57).
     """
     if annotation is inspect.Signature.empty:
         return None

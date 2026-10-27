@@ -3499,9 +3499,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   the drawing. `scripts/check_return_overloads.py` (`make return-overloads`,
   and a CI job) fails on a return that names one axes and several with no
   overloads, on an overload head that returns such a union, and on a function
-  that reaches a polar axes typed plain `Axes`, reading annotations through
-  the package's aliases and following calls across modules; rule A57 of the
-  contributor guide states it, and the upgrading guide maps the change.
+  that reaches a polar axes typed plain `Axes`, `Any`, or panels none of which
+  is `PolarAxes`, reading annotations through the package's aliases and
+  following calls across modules; rule A57 of the contributor guide states it,
+  and the upgrading guide maps the change.
 
 - **The documentation's clips are computed by the public engines and encoded
   by `phonometry.io.write_video`, the road a user has, and all 43 were

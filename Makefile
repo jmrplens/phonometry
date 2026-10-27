@@ -351,9 +351,12 @@ record-display:
 # that names one axes and several (a tuple, a list or an array of them) with
 # no overload heads before it, on a head that returns such a union, and on a
 # function that reaches a polar axes (making one, or calling a function that
-# returns or reaches one) typed plain Axes with no head that returns
-# PolarAxes. Annotations are read through the package's aliases and imports.
-# On the tree it was written against it found 74 such functions. Stdlib only.
+# returns or reaches one) with no head that returns PolarAxes and a return
+# that leaves it unsaid: a plain Axes, Any, or panels none of which is polar.
+# Annotations are read through the package's aliases and imports, and a
+# projection through the module constant that holds it. On the tree it was
+# written against it found 74 such functions, one of which
+# (_plot_one_quantity) it now exempts. Stdlib only.
 return-overloads:
 	$(PYTHON) scripts/check_return_overloads.py
 

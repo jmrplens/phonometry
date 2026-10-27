@@ -115,6 +115,8 @@ Plot the predicted polar response with the diffusion coefficient annotated.
 Requires matplotlib (`pip install "phonometry[plot]"`); returns the polar
 axes it drew on and never calls `plt.show`.
 
+**Returns:** The polar axes.
+
 **Raises**
 
 | Exception | When |

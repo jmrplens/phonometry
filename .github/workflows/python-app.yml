@@ -1101,9 +1101,10 @@ jobs:
   # typed caller narrow a value the call already fixed. This fails on a
   # return naming one axes and several with no overload heads, on a head that
   # returns such a union, and on a function that reaches a polar axes, by
-  # making one or calling one that does, typed plain Axes. It reads the
-  # annotations through the package's aliases and imports and follows calls
-  # across modules. Static and dependency-free, so it runs on its own.
+  # making one or calling one that does, typed plain Axes, Any, or panels
+  # none of which is polar. It reads the annotations through the package's
+  # aliases and imports and follows calls across modules. Static and
+  # dependency-free, so it runs on its own.
   return-overloads:
     name: Every return an argument decides is overloaded on it
     runs-on: ubuntu-latest

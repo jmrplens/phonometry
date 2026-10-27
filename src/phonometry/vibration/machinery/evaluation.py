@@ -362,6 +362,8 @@ class VectorChangeResult(RichDisplay):
         :param kwargs: ``unit``, the name of the unit the two states were
             given in, and anything forwarded to the change chord; see
             :func:`phonometry._plot.vibration.plot_vector_change`.
+        :return: The polar axes.
+        :raises ValueError: If *ax* is not a polar axes.
         """
         from ..._i18n import check_language
         from ..._plot.vibration import plot_vector_change

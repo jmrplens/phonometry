@@ -307,6 +307,7 @@ class DiffuserPolarResponse(OwnsArrays):
         Requires matplotlib (``pip install "phonometry[plot]"``); returns the polar
         axes it drew on and never calls ``plt.show``.
 
+        :return: The polar axes.
         :raises ValueError: If *ax* is not a polar axes.
         """
         from ..._i18n import check_language

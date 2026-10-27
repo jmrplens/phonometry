@@ -14,33 +14,43 @@ implementation, which a caller never sees.
 The rule, read from the source of every function of the package, private
 ones included, because a public method returns what its renderer returns:
 
-* a return annotation that is a union of an axes class (``Axes`` or a
-  subclass, ``PolarAxes`` among them) with several axes (a ``tuple``, a
-  ``list`` or a ``Sequence`` of them, or a numpy array) is allowed on an
-  implementation only when overloads stand before it, and never on an
-  overload head, which states one case;
+* a return annotation that is a union of an axes class (a matplotlib or
+  ``mpl_toolkits`` class whose name ends in ``Axes``, ``PolarAxes`` among
+  them, or ``Axes3D``) with several axes (a ``tuple``, a ``list`` or a
+  ``Sequence`` of them, or a numpy array) is allowed on an implementation
+  only when overloads stand before it, and never on an overload head, which
+  states one case;
 * a function that reaches a polar axes, by making one (``projection="polar"``
   in a call or in a ``subplot_kw`` mapping, ``polar=True``, or either of them
   computed, which may be polar), by calling a
   function of the package whose return names ``PolarAxes``, or by calling
-  one that reaches a polar axes itself, down any depth, and that is
-  annotated to return a plain ``Axes``, is overloaded on the argument that
-  decides the projection, or is annotated ``PolarAxes``; when it is
-  overloaded, one of its heads returns ``PolarAxes``.
+  one that reaches a polar axes itself, down any depth, is overloaded on the
+  argument that decides the projection, one of its heads returning
+  ``PolarAxes``, or says ``PolarAxes`` in its return: a plain ``Axes``, an
+  ``Any``, or a tuple, list or ``Sequence`` of axes none of which is
+  ``PolarAxes`` is refused.
 
 Annotations are read through the package's type aliases (``type X = ...``,
-``X: TypeAlias = ...`` and an assignment whose value reads as a type), and a
-name is followed through the imports that bring it in, so an alias of an
-alias, or an axes class imported under another name, is read for what it
-is. A call is followed through the imports of its module and of its own
-function, through ``self`` and ``cls`` to the class's own methods, and
-through an imported module to its functions, and a name a module only
-re-exports is followed to the module that defines it.
+``X: TypeAlias = ...``, and an assignment whose value is a subscript, a
+``|`` union, a dotted name, or a bare name that stands for a class or for
+another alias), and a name is followed through the imports that bring it
+in, so an alias of an alias, or an axes class imported under another name,
+is read for what it is. A name handed to ``projection=``, ``polar=``,
+``subplot_kw=`` or a ``**`` mapping, when the function does not bind it
+itself, is read through the module constant it names, in its own module or
+imported from another. A call is followed through the imports of its module
+and of its own function, through ``self`` and ``cls`` to the class's own
+methods, and through an imported module to its functions, and a name a
+module only re-exports is followed to the module that defines it. A method
+called on any other object (``result.plot()``) is not followed: the source
+does not say which class the object is.
 
 :data:`EXEMPT` is the escape hatch, keyed by file and qualified function,
-each entry with its reason; an overload head's key ends in ``(overload)``,
-so that excusing a head never excuses the implementation for having none. An
-entry that covers nothing fails the check too.
+each entry with its reason. An overload head's key adds, in parentheses, the
+parameters that tell it from the other heads, as they are annotated there
+(``plot (overload ax: None)``), so that excusing one head excuses neither the
+others nor the implementation. An entry that covers nothing fails the check
+too.
 
 Static and dependency-free, so it runs on its own.
 """
@@ -51,6 +61,7 @@ import argparse
 import ast
 import builtins
 import pathlib
+import re
 import sys
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
@@ -63,16 +74,13 @@ if TYPE_CHECKING:
 #: Where the package lives; the default when no path is given.
 SOURCE = ROOT / "src" / "phonometry"
 
-#: What the key of an overload head appends to the function's name.
-OVERLOAD_KEY = " (overload)"
-
 #: Returns a caller's argument does not decide, keyed by file and qualified
-#: function (an overload head's name followed by :data:`OVERLOAD_KEY`), each
-#: with the reason.
+#: function (an overload head's as :func:`head_key` writes it), each with the
+#: reason.
 EXEMPT: dict[tuple[str, str], str] = {
     (
         "src/phonometry/psychoacoustics/loudness/zwicker.py",
-        "ZwickerLoudness.plot" + OVERLOAD_KEY,
+        "ZwickerLoudness.plot (overload ax: None)",
     ): (
         "without ax the panels follow the data, not an argument: a "
         "time-varying result draws loudness against time below the specific "
@@ -81,7 +89,7 @@ EXEMPT: dict[tuple[str, str], str] = {
     ),
     (
         "src/phonometry/_plot/psychoacoustics.py",
-        "plot_zwicker_loudness" + OVERLOAD_KEY,
+        "plot_zwicker_loudness (overload ax: None)",
     ): (
         "the renderer of ZwickerLoudness.plot, whose panel count without ax "
         "the data decide (see its entry)"
@@ -97,6 +105,19 @@ EXEMPT: dict[tuple[str, str], str] = {
 
 #: The modules an axes class comes from.
 _AXES_PACKAGES = ("matplotlib.", "mpl_toolkits.")
+
+#: The name of an axes class: one that ends in ``Axes`` (``PolarAxes``,
+#: ``HostAxes``), or ``Axes3D``; ``AxesImage`` and ``AxesWidget`` are not.
+_AXES_NAME = re.compile(r"Axes(?:3D)?$")
+
+#: What ``Any`` is spelled with.
+_ANY = frozenset({"typing.Any", "typing_extensions.Any"})
+
+#: The keywords whose value says whether a new axes is polar.
+_PROJECTION_KEYWORDS = frozenset({"projection", "polar"})
+
+#: The keywords whose value is a mapping that may say so (``None`` is ``**``).
+_MAPPING_KEYWORDS = frozenset({"subplot_kw", None})
 
 #: The containers that hold several axes.
 _SEVERAL = frozenset(
@@ -184,7 +205,11 @@ def _imports(
 
 
 def _alias(node: ast.stmt) -> tuple[str, ast.expr] | None:
-    """The name and the value of a type alias a statement defines, if it does."""
+    """The name and the value of a type alias a statement may define.
+
+    A bare name on the right (``Panel = Axes``) is only a candidate: the
+    package keeps it when the name stands for a class or another alias.
+    """
     if isinstance(node, ast.TypeAlias) and isinstance(node.name, ast.Name):
         return node.name.id, node.value
     if (
@@ -198,7 +223,7 @@ def _alias(node: ast.stmt) -> tuple[str, ast.expr] | None:
         isinstance(node, ast.Assign)
         and len(node.targets) == 1
         and isinstance(node.targets[0], ast.Name)
-        and isinstance(node.value, ast.Subscript | ast.BinOp | ast.Attribute)
+        and isinstance(node.value, ast.Subscript | ast.BinOp | ast.Attribute | ast.Name)
         and (
             not isinstance(node.value, ast.BinOp)
             or isinstance(node.value.op, ast.BitOr)
@@ -222,6 +247,95 @@ def _statements(body: Iterable[ast.stmt]) -> Iterator[ast.stmt]:
             yield node
 
 
+def _assigned(node: ast.stmt) -> tuple[str, ast.expr] | None:
+    """The name and the value a module-level assignment binds, if it binds one."""
+    if (
+        isinstance(node, ast.Assign)
+        and len(node.targets) == 1
+        and isinstance(node.targets[0], ast.Name)
+    ):
+        return node.targets[0].id, node.value
+    if (
+        isinstance(node, ast.AnnAssign)
+        and isinstance(node.target, ast.Name)
+        and node.value is not None
+    ):
+        return node.target.id, node.value
+    return None
+
+
+def _parameters(
+    node: ast.FunctionDef | ast.AsyncFunctionDef,
+) -> dict[str, ast.arg]:
+    """Every parameter of a definition, by name, in the order written."""
+    arguments = node.args
+    every = [*arguments.posonlyargs, *arguments.args]
+    if arguments.vararg is not None:
+        every.append(arguments.vararg)
+    every.extend(arguments.kwonlyargs)
+    if arguments.kwarg is not None:
+        every.append(arguments.kwarg)
+    return {parameter.arg: parameter for parameter in every}
+
+
+def _annotation(parameter: ast.arg | None) -> str | None:
+    if parameter is None or parameter.annotation is None:
+        return None
+    return ast.unparse(parameter.annotation)
+
+
+def head_key(
+    qualname: str,
+    head: ast.FunctionDef | ast.AsyncFunctionDef,
+    heads: Sequence[ast.FunctionDef | ast.AsyncFunctionDef],
+) -> str:
+    """The key of an overload head: its function, and what tells it from the others.
+
+    The parameters a head annotates otherwise than one of its siblings (or
+    that a sibling lacks) are the ones that decide which head a call takes,
+    so they name the head: ``plot (overload ax: None)``.
+    """
+    siblings = [_parameters(other) for other in heads]
+    own = _parameters(head)
+    deciding = [
+        f"{name}: {_annotation(parameter)}"
+        if parameter.annotation is not None
+        else name
+        for name, parameter in own.items()
+        if len({_annotation(parameters.get(name)) for parameters in siblings}) > 1
+    ]
+    return f"{qualname} (overload {', '.join(deciding)})".replace(" )", ")")
+
+
+def _entries(node: ast.AST) -> list[tuple[str | None, ast.expr]]:
+    """The keyword arguments of a call, or the entries of a dict literal, by name.
+
+    ``None`` names a ``**`` spread; a dict key that is not a text is left out.
+    """
+    if isinstance(node, ast.keyword):
+        return [(node.arg, node.value)]
+    if not isinstance(node, ast.Dict):
+        return []
+    entries: list[tuple[str | None, ast.expr]] = []
+    for key, value in zip(node.keys, node.values, strict=True):
+        if key is None:
+            entries.append((None, value))
+        elif isinstance(key, ast.Constant) and isinstance(key.value, str):
+            entries.append((key.value, value))
+    return entries
+
+
+def _bound(node: ast.FunctionDef | ast.AsyncFunctionDef) -> frozenset[str]:
+    """The names a function binds itself: its parameters, and what it assigns."""
+    names = {
+        child.id
+        for child in ast.walk(node)
+        if isinstance(child, ast.Name) and isinstance(child.ctx, ast.Store | ast.Del)
+    }
+    names.update(child.arg for child in ast.walk(node) if isinstance(child, ast.arg))
+    return frozenset(names)
+
+
 class Package:
     """Every function of the package, its aliases, and how its names resolve."""
 
@@ -233,6 +347,10 @@ class Package:
         self.defined: dict[str, set[str]] = {}
         #: Type aliases, by their dotted name, with the module that reads them.
         self.aliases: dict[str, tuple[str, ast.expr]] = {}
+        #: Module-level assignments, by their dotted name, with their module.
+        self.constants: dict[str, tuple[str, ast.expr]] = {}
+        #: Every class a module defines at its top level, by its dotted name.
+        self.classes: set[str] = set()
         #: Every function, by its dotted name.
         self.functions: dict[str, Function] = {}
         #: The imports a function makes in its own body.
@@ -243,6 +361,7 @@ class Package:
             self.trees[module] = ast.parse(
                 path.read_text(encoding="utf-8"), filename=str(path)
             )
+        candidates: dict[str, tuple[str, ast.expr]] = {}
         for module, tree in self.trees.items():
             package = (
                 module
@@ -252,15 +371,53 @@ class Package:
             self.imports[module] = _imports(_statements(tree.body), package, into={})
             self.defined[module] = set()
             for node in _statements(tree.body):
+                assigned = _assigned(node)
+                if assigned is not None:
+                    self.constants[f"{module}.{assigned[0]}"] = (module, assigned[1])
+                    self.defined[module].add(assigned[0])
                 found = _alias(node)
                 if found is not None:
-                    self.aliases[f"{module}.{found[0]}"] = (module, found[1])
+                    into = (
+                        candidates if isinstance(found[1], ast.Name) else self.aliases
+                    )
+                    into[f"{module}.{found[0]}"] = (module, found[1])
                     self.defined[module].add(found[0])
                 elif isinstance(
                     node, ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef
                 ):
                     self.defined[module].add(node.name)
+                    if isinstance(node, ast.ClassDef):
+                        self.classes.add(f"{module}.{node.name}")
             self._read_body(module, package, tree.body, "", None)
+        self._keep_type_names(candidates)
+
+    def _keep_type_names(self, candidates: dict[str, tuple[str, ast.expr]]) -> None:
+        """Keep, as aliases, the bare names that stand for a class or an alias."""
+        changed = True
+        while changed:
+            changed = False
+            for dotted, (module, value) in list(candidates.items()):
+                if self._names_a_type(module, value):
+                    self.aliases[dotted] = candidates.pop(dotted)
+                    changed = True
+
+    def _names_a_type(self, module: str, value: ast.expr) -> bool:
+        """Whether a name stands for a class or an alias, as far as the source says.
+
+        A builtin is a type when Python says so, and a name of the package
+        when it is a class or an alias there; a name imported from outside
+        the package (``Axes``) is taken for a type, since only a type is
+        worth an alias in an annotation.
+        """
+        target = self.resolve(module, value)
+        if target is None:
+            return False
+        home, _, name = target.rpartition(".")
+        if home == "builtins":
+            return isinstance(getattr(builtins, name, None), type)
+        if home in self.trees:
+            return target in self.aliases or target in self.classes
+        return True
 
     def _read_body(
         self,
@@ -359,30 +516,50 @@ class Package:
         if (
             dotted is not None
             and dotted.startswith(_AXES_PACKAGES)
-            and dotted.rpartition(".")[2].endswith("Axes")
+            and _AXES_NAME.search(dotted.rpartition(".")[2])
         ):
             return dotted
         return None
 
+    def held_axes(self, module: str, node: ast.expr) -> list[str]:
+        """The axes classes a ``tuple``, ``list`` or ``Sequence`` member holds."""
+        if not (
+            isinstance(node, ast.Subscript)
+            and self.resolve(module, node.value) in _SEVERAL
+        ):
+            return []
+        items = node.slice.elts if isinstance(node.slice, ast.Tuple) else [node.slice]
+        return [
+            name
+            for item in items
+            for where, member in self.members(module, item)
+            if (name := self.axes(where, member)) is not None
+        ]
+
     def several_axes(self, module: str, node: ast.expr) -> bool:
         """Whether a member holds several axes: a container of them, or an array."""
-        if isinstance(node, ast.Subscript):
-            base = self.resolve(module, node.value)
-            if base in _ARRAYS:
+        base = node.value if isinstance(node, ast.Subscript) else node
+        return self.resolve(module, base) in _ARRAYS or bool(
+            self.held_axes(module, node)
+        )
+
+    def hides_polar(self, module: str, node: ast.expr | None) -> bool:
+        """Whether the return of a function that reaches a polar axes leaves it unsaid.
+
+        A plain axes class, an ``Any``, or a container of axes none of which
+        is ``PolarAxes`` leaves it unsaid; ``None``, a figure, an array, or a
+        container with a ``PolarAxes`` among its panels does not.
+        """
+        for where, member in self.members(module, node):
+            if self.resolve(where, member) in _ANY:
                 return True
-            if base in _SEVERAL:
-                items = (
-                    node.slice.elts
-                    if isinstance(node.slice, ast.Tuple)
-                    else [node.slice]
-                )
-                return any(
-                    self.axes(where, member) is not None
-                    for item in items
-                    for where, member in self.members(module, item)
-                )
-            return False
-        return self.resolve(module, node) in _ARRAYS
+            name = self.axes(where, member)
+            if name is not None and not _is_polar(name):
+                return True
+            held = self.held_axes(where, member)
+            if held and not any(_is_polar(axes) for axes in held):
+                return True
+        return False
 
     def decided(
         self, module: str, node: ast.expr | None
@@ -421,6 +598,91 @@ class Package:
             if target is not None and target in self.functions:
                 yield target
 
+    def makes_polar(self, function: Function) -> bool:
+        """Whether a function's implementation makes a polar axes itself, or may."""
+        node = function.implementation
+        if node is None:
+            return False
+        local = self.local_imports.get(node, {})
+        bound = _bound(node) - set(local)
+        return self._asks_polar(function.module, node, local, bound, frozenset())
+
+    def _asks_polar(
+        self,
+        module: str,
+        node: ast.AST,
+        local: dict[str, str],
+        bound: frozenset[str],
+        seen: frozenset[str],
+    ) -> bool:
+        """Whether code asks matplotlib for a polar axes, or may."""
+        return any(
+            self._entry_asks_polar(module, name, value, local, bound, seen)
+            for child in ast.walk(node)
+            for name, value in _entries(child)
+        )
+
+    def _entry_asks_polar(
+        self,
+        module: str,
+        name: str | None,
+        value: ast.expr,
+        local: dict[str, str],
+        bound: frozenset[str],
+        seen: frozenset[str],
+    ) -> bool:
+        """Whether one keyword argument, or one dict entry, may ask for polar."""
+        if name in _PROJECTION_KEYWORDS:
+            return self._polar_value(
+                module, value, local, bound, seen, flag=name == "polar"
+            )
+        if name not in _MAPPING_KEYWORDS:
+            return False
+        found = self._constant(module, value, local, bound, seen)
+        return found is not None and self._asks_polar(
+            found[1], found[2], {}, frozenset(), seen | {found[0]}
+        )
+
+    def _constant(
+        self,
+        module: str,
+        value: ast.expr,
+        local: dict[str, str],
+        bound: frozenset[str],
+        seen: frozenset[str],
+    ) -> tuple[str, str, ast.expr] | None:
+        """The module constant a name stands for: its dotted name, module and value.
+
+        ``None`` for anything else: a name the function binds itself, one
+        no module of the package assigns, or one already being read.
+        """
+        if not isinstance(value, ast.Name) or value.id in bound:
+            return None
+        dotted = self.resolve(module, value, local)
+        if dotted is None or dotted in seen or dotted not in self.constants:
+            return None
+        where, constant = self.constants[dotted]
+        return dotted, where, constant
+
+    def _polar_value(
+        self,
+        module: str,
+        value: ast.expr,
+        local: dict[str, str],
+        bound: frozenset[str],
+        seen: frozenset[str],
+        *,
+        flag: bool,
+    ) -> bool:
+        """Whether a ``projection=`` value, or a ``polar=`` flag, may ask for polar."""
+        found = self._constant(module, value, local, bound, seen)
+        if found is not None:
+            dotted, where, constant = found
+            return self._polar_value(
+                where, constant, {}, frozenset(), seen | {dotted}, flag=flag
+            )
+        return _may_be_polar(value, flag=flag)
+
 
 def _may_be_polar(value: ast.expr | None, *, flag: bool) -> bool:
     """Whether a ``projection=`` value, or a ``polar=`` flag, may ask for polar.
@@ -433,24 +695,6 @@ def _may_be_polar(value: ast.expr | None, *, flag: bool) -> bool:
     if flag:
         return value.value not in {False, None}
     return value.value == "polar"
-
-
-def _makes_polar(node: ast.AST) -> bool:
-    """Whether a function body makes a polar axes itself, or may."""
-    for child in ast.walk(node):
-        if isinstance(child, ast.keyword) and (
-            (child.arg == "projection" and _may_be_polar(child.value, flag=False))
-            or (child.arg == "polar" and _may_be_polar(child.value, flag=True))
-        ):
-            return True
-        if isinstance(child, ast.Dict) and any(
-            isinstance(key, ast.Constant)
-            and key.value == "projection"
-            and _may_be_polar(value, flag=False)
-            for key, value in zip(child.keys, child.values, strict=True)
-        ):
-            return True
-    return False
 
 
 def _is_polar(dotted: str) -> bool:
@@ -472,7 +716,7 @@ def reaching_polar(package: Package) -> set[str]:
     reached = {
         name
         for name, function in package.functions.items()
-        if function.implementation is not None and _makes_polar(function.implementation)
+        if package.makes_polar(function)
     }
     changed = True
     while changed:
@@ -499,7 +743,7 @@ def findings_in(files: Sequence[pathlib.Path], root: pathlib.Path) -> list[Findi
                     Finding(
                         path,
                         head.lineno,
-                        function.qualname + OVERLOAD_KEY,
+                        head_key(function.qualname, head, function.heads),
                         f"an overload head returns {ast.unparse(head.returns)}"
                         if head.returns is not None
                         else "an overload head returns a union",
@@ -536,7 +780,7 @@ def findings_in(files: Sequence[pathlib.Path], root: pathlib.Path) -> list[Findi
                         "PolarAxes",
                     )
                 )
-        elif any(not _is_polar(axes) for axes in single):
+        elif package.hides_polar(module, implementation.returns):
             found.append(
                 Finding(
                     path,

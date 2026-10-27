@@ -609,6 +609,14 @@ polar axes it drew on.
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | `unit`, the name of the unit the two states were given in, and anything forwarded to the change chord; see `phonometry._plot.vibration.plot_vector_change`. |
 
+**Returns:** The polar axes.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If *ax* is not a polar axes. |
+
 ## vibration_vector_change
 
 ```python

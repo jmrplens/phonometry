@@ -20,8 +20,9 @@ import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { basePath } from '../src/data/site.mjs';
+import { basePath, siteUrl } from '../src/data/site.mjs';
 import { redirects as committed } from '../src/data/redirects.mjs';
+import { cloudflareItems } from './cloudflare-redirects.mjs';
 import {
 	deriveRedirects,
 	redirectModuleSource,
@@ -116,6 +117,39 @@ if (misquoted.length > 0) {
 	ok(`every comment that states the size of the map states ${redirects.size}`);
 }
 
+// --- The edge list covers the map, in both spellings -----------------------
+// docs.jmrp.io answers these addresses with a 301 from a Cloudflare Bulk
+// Redirects list that scripts/cloudflare-redirects.mjs prints from this map.
+// Each address has to be there with and without its trailing slash, aimed at
+// the same absolute destination, or one spelling falls through to the stub.
+{
+	const items = cloudflareItems(committed);
+	const host = new URL(siteUrl).host;
+	const expected = new Map();
+	for (const [from, to] of Object.entries(committed)) {
+		expected.set(`${host}${basePath}${from}`, `${siteUrl}${to}`);
+		if (from.endsWith('/') && from.length > 1) {
+			expected.set(`${host}${basePath}${from.slice(0, -1)}`, `${siteUrl}${to}`);
+		}
+	}
+	const sources = new Map(items.map(({ redirect }) => [redirect.source_url, redirect]));
+	const wrong = [];
+	if (sources.size !== items.length) wrong.push(`${items.length - sources.size} source(s) listed twice`);
+	for (const [source, target] of expected) {
+		const item = sources.get(source);
+		if (!item) wrong.push(`${source} is missing`);
+		else if (item.target_url !== target || item.status_code !== 301) {
+			wrong.push(`${source} -> ${item.status_code} ${item.target_url}, not 301 ${target}`);
+		}
+	}
+	for (const source of sources.keys()) if (!expected.has(source)) wrong.push(`${source} is in no redirect`);
+	if (wrong.length > 0) {
+		fail(`the Cloudflare list disagrees with the map: ${wrong.slice(0, 8).join('; ')}`);
+	} else {
+		ok(`the Cloudflare list carries every address in both spellings: ${items.length} items, each a 301`);
+	}
+}
+
 // --- Every redirect the build emitted lands on a real page ---------------
 if (!existsSync(dist)) {
 	console.log(
@@ -125,15 +159,29 @@ if (!existsSync(dist)) {
 } else {
 	/** Every route the build wrote, and whether it is a redirect stub. */
 	const built = new Map();
+	/** Stubs still telling search engines not to index the address. */
+	const noindexed = [];
 	(function walk(dir, route = '/') {
 		for (const entry of readdirSync(dir, { withFileTypes: true })) {
 			if (entry.isDirectory()) walk(join(dir, entry.name), `${route}${entry.name}/`);
 			else if (entry.name === 'index.html') {
 				const html = readFileSync(join(dir, entry.name), 'utf8');
-				built.set(route, html.includes('http-equiv="refresh"'));
+				const isStub = html.includes('http-equiv="refresh"');
+				built.set(route, isStub);
+				if (isStub && /<meta[^>]*name="robots"[^>]*noindex/i.test(html)) noindexed.push(route);
 			}
 		}
 	})(dist);
+
+	// A noindex on a stub keeps the old address out of the index instead of
+	// handing it on: Google lists it under "Excluded by 'noindex' tag" and
+	// advises against noindex for choosing a canonical within one site.
+	// fix-redirect-stubs.mjs removes the tag Astro writes.
+	if (noindexed.length > 0) {
+		fail(`${noindexed.length} redirect stub(s) carry noindex: ${noindexed.slice(0, 8).join(' ')}`);
+	} else {
+		ok(`no redirect stub carries noindex`);
+	}
 
 	const emitted = [...built].filter(([, isStub]) => isStub).map(([route]) => route);
 	const expected = new Set(Object.keys(committed));

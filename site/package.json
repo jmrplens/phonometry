@@ -28,7 +28,8 @@
     "postbuild": "node scripts/add-sitemap-lastmod.mjs && node scripts/fix-redirect-stubs.mjs && node scripts/optimize-images.mjs && node scripts/emit-page-markdown.mjs",
     "prebuild": "node scripts/stage-media.mjs && node scripts/copy-llms.mjs",
     "preview": "astro preview",
-    "redirects": "node scripts/generate-redirects.mjs"
+    "redirects": "node scripts/generate-redirects.mjs",
+    "redirects:cloudflare": "node scripts/cloudflare-redirects.mjs"
   },
   "dependencies": {
     "@astrojs/markdown-remark": "^7.3.3",

@@ -218,11 +218,18 @@ All output arrays share the (possibly decimated) time axis
 
 ```python
 EnvelopeResult.plot(
-    ax: Axes | None = None,
+    ax: None = None,
     *,
     language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
-) -> Axes | NDArray[Any]
+) -> tuple[Axes, Axes]
+
+EnvelopeResult.plot(
+    ax: Axes,
+    *,
+    language: Literal['en', 'es'] = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the signal with its envelope and the instantaneous frequency.
@@ -274,11 +281,18 @@ Amplitude spectrum of a signal's envelope (B&P Section 13.3).
 
 ```python
 EnvelopeSpectrumResult.plot(
-    ax: Axes | None = None,
+    ax: None = None,
     *,
     language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
-) -> Axes | NDArray[Any]
+) -> tuple[Axes, Axes]
+
+EnvelopeSpectrumResult.plot(
+    ax: Axes,
+    *,
+    language: Literal['en', 'es'] = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the detected envelope and its amplitude spectrum.

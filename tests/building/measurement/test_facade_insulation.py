@@ -437,7 +437,7 @@ def test_plot_returns_axes_with_dnt_curve() -> None:
         frequencies=_CORE_FREQS,
     )
     ax = res.plot()
-    assert not isinstance(ax, np.ndarray)
+    assert not isinstance(ax, tuple)
     # The standardized level difference is drawn as the first line.
     np.testing.assert_allclose(ax.lines[0].get_ydata(), res.d_2m_nt)
     plt.close("all")

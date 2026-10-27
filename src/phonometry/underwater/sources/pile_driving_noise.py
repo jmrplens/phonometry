@@ -25,7 +25,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, overload
 
 import numpy as np
 
@@ -342,9 +342,17 @@ class PileStrikeResult(OwnsArrays):
         require_finite_fields(self, "pressure_pa")
         _require_metrics_restate(self)
 
+    @overload
+    def plot(
+        self, ax: None = None, *, language: Language = "en", **kwargs: Any
+    ) -> tuple[Axes, Axes]: ...
+
+    @overload
+    def plot(self, ax: Axes, *, language: Language = "en", **kwargs: Any) -> Axes: ...
+
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
-    ) -> Axes | NDArray[Any]:
+    ) -> Axes | tuple[Axes, Axes]:
         """Plot the strike waveform and its cumulative energy."""
         from ..._i18n import check_language
         from ..._plot.underwater import plot_pile_strike

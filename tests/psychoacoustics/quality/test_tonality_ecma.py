@@ -353,4 +353,4 @@ def test_plot_smoke(ref_1k_40: psychoacoustics.EcmaTonality) -> None:
 
     mpl.use("Agg")
     axes = ref_1k_40.plot()
-    assert axes.shape == (2,)
+    assert len(axes) == 2

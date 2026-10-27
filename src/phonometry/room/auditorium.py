@@ -53,7 +53,7 @@ import math
 import warnings
 from dataclasses import KW_ONLY, dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, ClassVar, Literal
+from typing import TYPE_CHECKING, Any, ClassVar, Literal, overload
 
 import numpy as np
 
@@ -614,15 +614,23 @@ class SoundStrengthResult(OwnsArrays):
     exposure_level: NDArray[np.float64]
     reference_level: NDArray[np.float64]
 
+    @overload
+    def plot(
+        self, ax: None = None, *, language: Language = "en", **kwargs: Any
+    ) -> tuple[Axes, Axes]: ...
+
+    @overload
+    def plot(self, ax: Axes, *, language: Language = "en", **kwargs: Any) -> Axes: ...
+
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
-    ) -> Axes | np.ndarray:
+    ) -> Axes | tuple[Axes, Axes]:
         """Plot the per-band sound strength against the Table A.1 range.
 
         With ``ax`` given, only the strength panel is drawn on it; otherwise a
         second panel shows the two levels G is the difference of. Requires
         matplotlib (``pip install "phonometry[plot]"``); returns the
-        :class:`~matplotlib.axes.Axes` (or an array of two).
+        :class:`~matplotlib.axes.Axes` it drew on, or the tuple of two without ``ax``.
         """
         from .._i18n import check_language
         from .._plot.room import plot_sound_strength

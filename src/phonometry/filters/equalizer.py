@@ -495,6 +495,26 @@ class EQResponseResult(OwnsArrays):
             self, "section_magnitude_db", "sos", "sections", axis="section"
         )
 
+    @overload
+    def plot(
+        self,
+        ax: None = None,
+        *,
+        language: Language = "en",
+        show_sections: bool = True,
+        **kwargs: Any,
+    ) -> tuple[Axes, Axes]: ...
+
+    @overload
+    def plot(
+        self,
+        ax: Axes,
+        *,
+        language: Language = "en",
+        show_sections: bool = True,
+        **kwargs: Any,
+    ) -> Axes: ...
+
     def plot(
         self,
         ax: Axes | None = None,
@@ -502,7 +522,7 @@ class EQResponseResult(OwnsArrays):
         language: Language = "en",
         show_sections: bool = True,
         **kwargs: Any,
-    ) -> Axes | NDArray[Any]:
+    ) -> Axes | tuple[Axes, Axes]:
         """Plot the cascade magnitude and phase response.
 
         With ``ax`` given, only the magnitude panel is drawn on it.
@@ -512,7 +532,7 @@ class EQResponseResult(OwnsArrays):
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param show_sections: Overlay each section's individual response under
             the cascade curve (default ``True``).
-        :return: The magnitude axes (``ax`` given) or the array of two axes.
+        :return: The magnitude axes (``ax`` given) or the tuple of two axes.
         """
         from .._i18n import check_language
         from .._plot.filters import plot_parametric_eq

@@ -181,11 +181,18 @@ Number of separated harmonic orders (including the linear H1).
 
 ```python
 SweptSineDistortionResult.plot(
-    ax: Axes | None = None,
+    ax: None = None,
     *,
     language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
-) -> Axes | NDArray[Any]
+) -> tuple[Axes, Axes]
+
+SweptSineDistortionResult.plot(
+    ax: Axes,
+    *,
+    language: Literal['en', 'es'] = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the harmonic responses and the THD(f).

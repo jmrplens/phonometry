@@ -9,7 +9,7 @@ against, and the GUM budget that puts an uncertainty on the number finally
 reported. Everything here is embedded by a page under ``signals/metrology/``.
 """
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -34,6 +34,8 @@ from .theme import (
 
 if TYPE_CHECKING:
     from collections.abc import Callable
+
+    from matplotlib.projections.polar import PolarAxes
 
     from phonometry.metrology import (
         ComparisonCalibration,
@@ -1498,7 +1500,9 @@ def generate_random_incidence_directivity(output_dir: str) -> None:
     )
     result = metrology.directivity_factor(levels)
     fig = plt.figure(figsize=(13.5, 6.0))
-    result.plot(fig.add_subplot(1, 2, 1, projection="polar"), language=_LANG)
+    # matplotlib types a projected subplot as Axes; this one is polar.
+    polar = cast("PolarAxes", fig.add_subplot(1, 2, 1, projection="polar"))
+    result.plot(polar, language=_LANG)
     result.plot(fig.add_subplot(1, 2, 2), view="weights", language=_LANG)
     fig.tight_layout()
     save_figure(output_dir, "random_incidence_directivity.svg")

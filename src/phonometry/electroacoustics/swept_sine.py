@@ -56,7 +56,7 @@ the same system.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 
@@ -321,9 +321,17 @@ class SweptSineDistortionResult(OwnsArrays):
         """Number of separated harmonic orders (including the linear H1)."""
         return int(self.harmonic_responses.shape[0])
 
+    @overload
+    def plot(
+        self, ax: None = None, *, language: Language = "en", **kwargs: Any
+    ) -> tuple[Axes, Axes]: ...
+
+    @overload
+    def plot(self, ax: Axes, *, language: Language = "en", **kwargs: Any) -> Axes: ...
+
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
-    ) -> Axes | NDArray[Any]:
+    ) -> Axes | tuple[Axes, Axes]:
         """Plot the harmonic responses and the THD(f).
 
         Two stacked panels: the magnitudes of ``H1..HN`` in dB against

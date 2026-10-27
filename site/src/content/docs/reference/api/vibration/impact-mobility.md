@@ -166,11 +166,18 @@ Per frequency, whether the phase is within +/- 5 degrees of zero.
 
 ```python
 ChannelMatchVerification.plot(
-    ax: Axes | None = None,
+    ax: None = None,
     *,
     language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
-) -> Axes | np.ndarray
+) -> tuple[Axes, Axes]
+
+ChannelMatchVerification.plot(
+    ax: Axes,
+    *,
+    language: Literal['en', 'es'] = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the magnitude and phase deviations against their tolerances.
@@ -188,7 +195,7 @@ Requires matplotlib (`pip install "phonometry[plot]"`).
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the magnitude-deviation curve. |
 
-**Returns:** The axes, or the two-axes array.
+**Returns:** The axes, or the tuple of two axes.
 
 ## check_coherence
 
@@ -576,11 +583,18 @@ Whether the record holds a single impact.
 
 ```python
 DoubleHitCheck.plot(
-    ax: Axes | None = None,
+    ax: None = None,
     *,
     language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
-) -> Axes | np.ndarray
+) -> tuple[Axes, Axes]
+
+DoubleHitCheck.plot(
+    ax: Axes,
+    *,
+    language: Literal['en', 'es'] = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the force record with its impacts, and its energy spectral density.
@@ -600,7 +614,7 @@ Requires matplotlib (`pip install "phonometry[plot]"`).
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the force curve. |
 
-**Returns:** The axes, or the two-axes array.
+**Returns:** The axes, or the tuple of two axes.
 
 ### DoubleHitCheck.ripple_db
 
@@ -1200,11 +1214,18 @@ Mobility phase, in radians.
 
 ```python
 ImpactMobilityResult.plot(
-    ax: Axes | None = None,
+    ax: None = None,
     *,
     language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
-) -> Axes | np.ndarray
+) -> tuple[Axes, Axes]
+
+ImpactMobilityResult.plot(
+    ax: Axes,
+    *,
+    language: Literal['en', 'es'] = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the averaged mobility and its coherence.
@@ -1222,7 +1243,7 @@ Requires matplotlib (`pip install "phonometry[plot]"`).
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the magnitude curve. |
 
-**Returns:** The axes, or the two-axes array.
+**Returns:** The axes, or the tuple of two axes.
 
 ### ImpactMobilityResult.report()
 

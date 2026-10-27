@@ -103,17 +103,23 @@ A predicted far-field polar response of a diffuser at one frequency.
 
 ```python
 DiffuserPolarResponse.plot(
-    ax: Axes | None = None,
+    ax: PolarAxes | None = None,
     *,
     language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
-) -> Axes
+) -> PolarAxes
 ```
 
 Plot the predicted polar response with the diffusion coefficient annotated.
 
 Requires matplotlib (`pip install "phonometry[plot]"`); returns the polar
-`Axes` and never calls `plt.show`.
+axes it drew on and never calls `plt.show`.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If *ax* is not a polar axes. |
 
 ### DiffuserPolarResponse.plot_geometry()
 

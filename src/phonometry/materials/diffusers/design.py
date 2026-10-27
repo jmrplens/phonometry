@@ -76,6 +76,7 @@ from .scattering_diffusion import (
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
     from matplotlib.axes import Axes
+    from matplotlib.projections.polar import PolarAxes
 
     from ..._i18n import Language
     from ..._internal.types import Real
@@ -299,12 +300,14 @@ class DiffuserPolarResponse(OwnsArrays):
         require_present(self, "well_width", "n_repetitions")
 
     def plot(
-        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
-    ) -> Axes:
+        self, ax: PolarAxes | None = None, *, language: Language = "en", **kwargs: Any
+    ) -> PolarAxes:
         """Plot the predicted polar response with the diffusion coefficient annotated.
 
         Requires matplotlib (``pip install "phonometry[plot]"``); returns the polar
-        :class:`~matplotlib.axes.Axes` and never calls ``plt.show``.
+        axes it drew on and never calls ``plt.show``.
+
+        :raises ValueError: If *ax* is not a polar axes.
         """
         from ..._i18n import check_language
         from ..._plot.materials import plot_diffuser_polar_response

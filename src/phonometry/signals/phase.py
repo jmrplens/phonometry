@@ -44,7 +44,7 @@ coarse grids degrade it and are what ``oversample`` mitigates.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, overload
 
 import numpy as np
 
@@ -346,9 +346,17 @@ class PhaseDecompositionResult(OwnsArrays):
             axis="frequency bin",
         )
 
+    @overload
+    def plot(
+        self, ax: None = None, *, language: Language = "en", **kwargs: Any
+    ) -> tuple[Axes, Axes, Axes]: ...
+
+    @overload
+    def plot(self, ax: Axes, *, language: Language = "en", **kwargs: Any) -> Axes: ...
+
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
-    ) -> Axes | NDArray[Any]:
+    ) -> Axes | tuple[Axes, Axes, Axes]:
         r"""Plot the magnitude, the phase decomposition and the group delay.
 
         Three stacked panels: :math:`\lvert H \rvert` in dB, the

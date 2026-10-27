@@ -67,11 +67,18 @@ records the assumed sound field.
 
 ```python
 EcmaTonality.plot(
-    ax: Axes | None = None,
+    ax: None = None,
     *,
     language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
-) -> Axes | np.ndarray
+) -> tuple[Axes, Axes]
+
+EcmaTonality.plot(
+    ax: Axes,
+    *,
+    language: Literal['en', 'es'] = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the average specific tonality T'(z) (see `phonometry._plot.psychoacoustics`).

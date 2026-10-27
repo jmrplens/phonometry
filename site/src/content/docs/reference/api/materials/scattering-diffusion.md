@@ -135,7 +135,14 @@ A measured polar response and its diffusion coefficient (ISO 17497-2).
 
 ```python
 DiffusionResult.plot(
-    ax: Axes | None = None,
+    ax: None = None,
+    *,
+    language: Literal['en', 'es'] = 'en',
+    **kwargs: Any,
+) -> PolarAxes
+
+DiffusionResult.plot(
+    ax: Axes,
     *,
     language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
@@ -145,7 +152,8 @@ DiffusionResult.plot(
 Plot the polar response with the diffusion coefficient annotated.
 
 Requires matplotlib (`pip install "phonometry[plot]"`); returns the
-polar `Axes` and never calls `plt.show`.
+axes it drew on: a new polar axes without `ax`, else `ax`, polar or
+not. Never calls `plt.show`.
 
 ### DiffusionResult.report()
 

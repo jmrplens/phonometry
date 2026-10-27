@@ -86,11 +86,18 @@ assumed sound field.
 
 ```python
 EcmaRoughness.plot(
-    ax: Axes | None = None,
+    ax: None = None,
     *,
     language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
-) -> Axes | np.ndarray
+) -> tuple[Axes, Axes]
+
+EcmaRoughness.plot(
+    ax: Axes,
+    *,
+    language: Literal['en', 'es'] = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the roughness result (see `phonometry._plot.psychoacoustics`).

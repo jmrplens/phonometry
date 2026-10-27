@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Literal, cast
+from typing import TYPE_CHECKING, Any, Literal, cast, overload
 
 import numpy as np
 
@@ -311,12 +311,27 @@ def _band_labels(
     return labels, True
 
 
+@overload
+def plot_room_acoustics(
+    result: RoomAcousticsResult,
+    ax: None = None,
+    language: Language = "en",
+    **kwargs: Any,
+) -> tuple[Axes, Axes]: ...
+
+
+@overload
+def plot_room_acoustics(
+    result: RoomAcousticsResult, ax: Axes, language: Language = "en", **kwargs: Any
+) -> Axes: ...
+
+
 def plot_room_acoustics(
     result: RoomAcousticsResult,
     ax: Axes | None = None,
     language: Language = "en",
     **kwargs: Any,
-) -> Axes | np.ndarray:
+) -> Axes | tuple[Axes, Axes]:
     """Per-band decay times (EDT/T20/T30) and clarity (C50/C80).
 
     The first panel shows the three decay times as grouped bars per band,
@@ -328,7 +343,7 @@ def plot_room_acoustics(
     :param result: A :class:`~phonometry.room.acoustics.RoomAcousticsResult`.
     :param ax: Existing axes for a single-panel (decay-times only) plot, or
         ``None`` to create the full two-panel figure.
-    :return: The axes, or an array of two axes for the default figure.
+    :return: The axes, or a tuple of two axes for the default figure.
     """
     n = np.asarray(result.t30, dtype=np.float64).size
     labels, use_freq_axis = _band_labels(result.frequencies, n, language)
@@ -338,7 +353,7 @@ def plot_room_acoustics(
         ax_times = ax
     else:
         axes = _new_axes_column(2, figsize=(7.5, 6.0), sharex=True)
-        ax_times = cast("Axes", axes[0])
+        ax_times = axes[0]
 
     _draw_decay_times(ax_times, positions, result, **kwargs)
     ax_times.set_ylabel(_t("Reverberation time [s]", language))
@@ -353,7 +368,7 @@ def plot_room_acoustics(
         _localize_band_axes(ax_times, language)
         return ax_times
 
-    ax_clarity = cast("Axes", axes[1])
+    ax_clarity = axes[1]
     ax_clarity.plot(
         positions,
         np.asarray(result.c50, dtype=np.float64),
@@ -414,12 +429,27 @@ def _band_indices(
     return picked if len(picked) == len(bands) else None
 
 
+@overload
+def plot_sound_strength(
+    result: SoundStrengthResult,
+    ax: None = None,
+    language: Language = "en",
+    **kwargs: Any,
+) -> tuple[Axes, Axes]: ...
+
+
+@overload
+def plot_sound_strength(
+    result: SoundStrengthResult, ax: Axes, language: Language = "en", **kwargs: Any
+) -> Axes: ...
+
+
 def plot_sound_strength(
     result: SoundStrengthResult,
     ax: Axes | None = None,
     language: Language = "en",
     **kwargs: Any,
-) -> Axes | np.ndarray:
+) -> Axes | tuple[Axes, Axes]:
     """Per-band sound strength G against the Table A.1 typical range.
 
     The first panel draws G band by band over the -2 dB to +10 dB range
@@ -434,7 +464,7 @@ def plot_sound_strength(
         ``None`` to create the full two-panel figure.
     :param language: ``"en"`` or ``"es"``.
     :param kwargs: Forwarded to the strength curve's ``plot`` call.
-    :return: The axes, or an array of two axes for the default figure.
+    :return: The axes, or a tuple of two axes for the default figure.
     """
     strength = np.asarray(result.strength, dtype=np.float64)
     labels, use_freq_axis = _band_labels(result.frequencies, strength.size, language)
@@ -445,7 +475,7 @@ def plot_sound_strength(
         ax_strength = ax
     else:
         axes = _new_axes_column(2, figsize=(7.5, 6.0), sharex=True)
-        ax_strength = cast("Axes", axes[0])
+        ax_strength = axes[0]
 
     low, high = _STRENGTH_TYPICAL_RANGE_DB
     ax_strength.axhspan(
@@ -483,7 +513,7 @@ def plot_sound_strength(
         _localize_band_axes(ax_strength, language)
         return ax_strength
 
-    ax_levels = cast("Axes", axes[1])
+    ax_levels = axes[1]
     ax_levels.plot(
         positions,
         np.asarray(result.exposure_level, dtype=np.float64),
@@ -808,12 +838,27 @@ def plot_decay_curve(
     return ax
 
 
+@overload
+def plot_impulse_response(
+    result: ImpulseResponseResult,
+    ax: None = None,
+    language: Language = "en",
+    **kwargs: Any,
+) -> tuple[Axes, Axes]: ...
+
+
+@overload
+def plot_impulse_response(
+    result: ImpulseResponseResult, ax: Axes, language: Language = "en", **kwargs: Any
+) -> Axes: ...
+
+
 def plot_impulse_response(
     result: ImpulseResponseResult,
     ax: Axes | None = None,
     language: Language = "en",
     **kwargs: Any,
-) -> Axes | np.ndarray:
+) -> Axes | tuple[Axes, Axes]:
     """Impulse-response waveform and its log-magnitude / Schroeder decay.
 
     Two stacked panels: the (peak-normalised) time-domain waveform on top and,
@@ -825,7 +870,7 @@ def plot_impulse_response(
     :param ax: Existing axes for the decay panel, or ``None`` for a fresh
         two-panel figure.
     :param kwargs: Forwarded to the waveform / envelope ``plot`` calls.
-    :return: The decay-panel axes (``ax`` given) or the array of two axes.
+    :return: The decay-panel axes (``ax`` given) or the tuple of two axes.
     """
     h = np.asarray(result.ir, dtype=np.float64)
     n = h.shape[-1]
@@ -1177,6 +1222,30 @@ def plot_open_plan(
     return ax
 
 
+@overload
+def plot_excitation(
+    x: ArrayLike,
+    fs: int,
+    *,
+    kind: Literal["sweep", "mls"] = "sweep",
+    ax: None = None,
+    language: Language = "en",
+    **kwargs: Any,
+) -> tuple[Axes, Axes]: ...
+
+
+@overload
+def plot_excitation(
+    x: ArrayLike,
+    fs: int,
+    *,
+    kind: Literal["sweep", "mls"] = "sweep",
+    ax: Axes,
+    language: Language = "en",
+    **kwargs: Any,
+) -> Axes: ...
+
+
 def plot_excitation(
     x: ArrayLike,
     fs: int,
@@ -1185,7 +1254,7 @@ def plot_excitation(
     ax: Axes | None = None,
     language: Language = "en",
     **kwargs: Any,
-) -> Axes | np.ndarray:
+) -> Axes | tuple[Axes, Axes]:
     """Plot an ISO 18233 excitation signal (sweep or MLS).
 
     A documented helper for the raw arrays returned by
@@ -1201,7 +1270,7 @@ def plot_excitation(
     :param ax: Existing axes for the top (time-domain) panel, or ``None`` for a
         fresh two-panel figure.
     :param kwargs: Forwarded to the time-domain ``plot`` call.
-    :return: The time-domain axes (``ax`` given) or the array of two axes.
+    :return: The time-domain axes (``ax`` given) or the tuple of two axes.
     :raises ValueError: for an unknown ``kind``, or an empty signal.
     :raises TypeError: if ``kind`` is not a text.
     """
@@ -1225,7 +1294,7 @@ def plot_excitation(
     two_panel = ax is None
     if two_panel:
         axes = _new_axes_column(2, figsize=(8.0, 6.0))
-        ax_time = cast("Axes", axes[0])
+        ax_time = axes[0]
     else:
         ax_time = cast("Axes", ax)
 
@@ -1476,12 +1545,24 @@ def plot_steady_field(
     return ax
 
 
+@overload
+def plot_shaped_sweep(
+    result: ShapedSweepResult, ax: None = None, language: Language = "en", **kwargs: Any
+) -> tuple[Axes, Axes]: ...
+
+
+@overload
+def plot_shaped_sweep(
+    result: ShapedSweepResult, ax: Axes, language: Language = "en", **kwargs: Any
+) -> Axes: ...
+
+
 def plot_shaped_sweep(
     result: ShapedSweepResult,
     ax: Axes | None = None,
     language: Language = "en",
     **kwargs: Any,
-) -> Axes | np.ndarray:
+) -> Axes | tuple[Axes, Axes]:
     """Shaped-sweep waveform and its Welch spectrum against the target.
 
     Two stacked panels: the time-domain waveform on top and, below it, the
@@ -1493,7 +1574,7 @@ def plot_shaped_sweep(
     :param ax: Existing axes for the spectrum panel, or ``None`` for a
         fresh two-panel figure.
     :param kwargs: Forwarded to the waveform ``plot`` call.
-    :return: The spectrum axes (``ax`` given) or the array of two axes.
+    :return: The spectrum axes (``ax`` given) or the tuple of two axes.
     """
     from scipy import signal as sp_signal
 
@@ -1581,12 +1662,24 @@ def plot_shaped_sweep(
     return axes
 
 
+@overload
+def plot_room_modes(
+    result: RoomModesResult, ax: None = None, language: Language = "en", **kwargs: Any
+) -> tuple[Axes, Axes]: ...
+
+
+@overload
+def plot_room_modes(
+    result: RoomModesResult, ax: Axes, language: Language = "en", **kwargs: Any
+) -> Axes: ...
+
+
 def plot_room_modes(
     result: RoomModesResult,
     ax: Axes | None = None,
     language: Language = "en",
     **kwargs: Any,
-) -> Axes | np.ndarray:
+) -> Axes | tuple[Axes, Axes]:
     """Mode ladder by kind and modal density of a rectangular room.
 
     The upper panel stems every enumerated eigenfrequency (Long Equation
@@ -1601,17 +1694,17 @@ def plot_room_modes(
         the two-panel figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the ``Axes.vlines`` calls of the ladder.
-    :return: The two axes as an array, or the single axes when ``ax`` is given.
+    :return: The two axes as a tuple, or the single axes when ``ax`` is given.
     """
     from .._i18n import format_number, localize_axes
 
-    single = ax is not None
-    axes = (
-        np.array([ax], dtype=object)
-        if ax is not None
-        else _new_axes_column(2, sharex=True, gridspec_kw={"height_ratios": [2, 1]})
-    )
-    ladder = cast("Axes", axes[0])
+    column: tuple[Axes, Axes] | None = None
+    if ax is None:
+        column = _new_axes_column(2, sharex=True, gridspec_kw={"height_ratios": [2, 1]})
+        panels: tuple[Axes, ...] = column
+    else:
+        panels = (ax,)
+    ladder = panels[0]
 
     freqs = np.asarray(result.frequencies, dtype=np.float64)
     kinds = np.asarray(result.kinds)
@@ -1651,14 +1744,14 @@ def plot_room_modes(
         label = _t("Schroeder $f_\\mathrm{{s}}$ = {value} Hz", language).format(
             value=format_number(fs, language, decimals=0)
         )
-        for panel in axes:
+        for panel in panels:
             panel.axvline(fs, color=_C_REFERENCE, ls="-.", lw=1.2, label=label)
     ladder.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small", ncol=2)
 
-    if single:
+    if column is None:
         ladder.set_xlabel(_t(_FREQUENCY_LABEL, language))
     else:
-        density_axes = axes[1]
+        density_axes = column[1]
         grid = np.linspace(0.0, result.max_frequency, 200)
         density = np.asarray(result.density(grid), dtype=np.float64)
         density_axes.plot(
@@ -1675,7 +1768,7 @@ def plot_room_modes(
         localize_axes(density_axes, language)
 
     localize_axes(ladder, language)
-    return axes[0] if single else axes
+    return ladder if column is None else column
 
 
 def plot_crowd_noise(

@@ -157,8 +157,8 @@ def test_window_metrics_rejects_taps_of_another_length() -> None:
 def test_window_metrics_plot_two_panels_and_single_axes() -> None:
     res = ph.signals.window_metrics("hann", N)
     axes = res.plot(linewidth=2)
-    assert isinstance(axes, np.ndarray)
-    assert axes.size == 2
+    assert isinstance(axes, tuple)
+    assert len(axes) == 2
     assert "Harris 1978" in axes[0].get_title()
     assert any(line.get_linewidth() == 2.0 for line in axes[1].lines)
     plt.close("all")

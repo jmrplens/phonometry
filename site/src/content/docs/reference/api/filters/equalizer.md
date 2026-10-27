@@ -92,12 +92,20 @@ Frequency response of a parametric-EQ cascade (RBJ Audio EQ Cookbook).
 
 ```python
 EQResponseResult.plot(
-    ax: Axes | None = None,
+    ax: None = None,
     *,
     language: Literal['en', 'es'] = 'en',
     show_sections: bool = True,
     **kwargs: Any,
-) -> Axes | NDArray[Any]
+) -> tuple[Axes, Axes]
+
+EQResponseResult.plot(
+    ax: Axes,
+    *,
+    language: Literal['en', 'es'] = 'en',
+    show_sections: bool = True,
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the cascade magnitude and phase response.
@@ -112,7 +120,7 @@ With `ax` given, only the magnitude panel is drawn on it.
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `show_sections` | Overlay each section's individual response under the cascade curve (default `True`). |
 
-**Returns:** The magnitude axes (`ax` given) or the array of two axes.
+**Returns:** The magnitude axes (`ax` given) or the tuple of two axes.
 
 ## EQSection
 

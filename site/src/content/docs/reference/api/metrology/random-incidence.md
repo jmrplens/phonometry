@@ -471,9 +471,17 @@ $G_\mathrm{F}$, and what Table B.1 tabulates.
 
 ```python
 DirectivityFactor.plot(
+    ax: PolarAxes | None = None,
+    *,
+    view: Literal['response'] = 'response',
+    language: Literal['en', 'es'] = 'en',
+    **kwargs: Any,
+) -> PolarAxes
+
+DirectivityFactor.plot(
     ax: Axes | None = None,
     *,
-    view: Literal['response', 'weights'] = 'response',
+    view: Literal['weights'],
     language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
@@ -490,7 +498,7 @@ Plot the directional response or the weight of each reading.
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the curve of the first plane. |
 
-**Returns:** The axes. Requires matplotlib (`pip install "phonometry[plot]"`).
+**Returns:** The axes, polar for the response. Requires matplotlib (`pip install "phonometry[plot]"`).
 
 **Raises**
 

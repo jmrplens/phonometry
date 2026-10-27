@@ -54,7 +54,7 @@ The random errors follow Bendat & Piersol Section 9.3: conditioning on the
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 
@@ -550,9 +550,17 @@ class MISOCoherenceResult(OwnsArrays):
             np.argmax(self.coherent_output_spectra, axis=0), dtype=np.intp
         )
 
+    @overload
+    def plot(
+        self, ax: None = None, *, language: Language = "en", **kwargs: Any
+    ) -> tuple[Axes, Axes]: ...
+
+    @overload
+    def plot(self, ax: Axes, *, language: Language = "en", **kwargs: Any) -> Axes: ...
+
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
-    ) -> Axes | NDArray[Any]:
+    ) -> Axes | tuple[Axes, Axes]:
         """Plot the per-input coherent output spectra and multiple coherence.
 
         :param language: Label language, ``"en"`` (default) or ``"es"``.

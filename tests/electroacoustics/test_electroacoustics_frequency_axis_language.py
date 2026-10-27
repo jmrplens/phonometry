@@ -50,7 +50,7 @@ def _frequency_response() -> ph.electroacoustics.FrequencyResponseResult:
 
 def _frequency_response_panels(language: str) -> list[Axes]:
     axes = _frequency_response().plot(language=language)
-    assert isinstance(axes, np.ndarray)
+    assert isinstance(axes, tuple)
     # The three panels share one x-axis, and its labels sit under the last.
     return [axes[-1]]
 
@@ -58,7 +58,7 @@ def _frequency_response_panels(language: str) -> list[Axes]:
 def _frequency_response_on_given_axes(language: str) -> list[Axes]:
     _fig, ax = plt.subplots()
     drawn = _frequency_response().plot(ax=ax, language=language)
-    assert not isinstance(drawn, np.ndarray)
+    assert not isinstance(drawn, tuple)
     return [drawn]
 
 
@@ -73,14 +73,14 @@ def _swept_sine() -> ph.electroacoustics.SweptSineDistortionResult:
 
 def _swept_sine_panels(language: str) -> list[Axes]:
     axes = _swept_sine().plot(language=language)
-    assert isinstance(axes, np.ndarray)
+    assert isinstance(axes, tuple)
     return list(axes)
 
 
 def _swept_sine_on_given_axes(language: str) -> list[Axes]:
     _fig, ax = plt.subplots()
     drawn = _swept_sine().plot(ax=ax, language=language)
-    assert not isinstance(drawn, np.ndarray)
+    assert not isinstance(drawn, tuple)
     return [drawn]
 
 

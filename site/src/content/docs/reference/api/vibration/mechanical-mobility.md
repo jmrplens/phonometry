@@ -350,18 +350,25 @@ Known correct magnitude of the block per frequency.
 
 ```python
 RigidMassCalibrationResult.plot(
-    ax: Axes | None = None,
+    ax: None = None,
     *,
     language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
-) -> Axes | np.ndarray
+) -> tuple[Axes, Axes]
+
+RigidMassCalibrationResult.plot(
+    ax: Axes,
+    *,
+    language: Literal['en', 'es'] = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the rigid-mass calibration check (ISO 7626-2, 7.5.2).
 
 The measured FRF magnitude against the known rigid-mass line with its
 tolerance band, and the relative deviation against the same band. With
-no `ax` a two-panel figure is drawn and its axes array returned; with
+no `ax` a two-panel figure is drawn and its two axes returned as a tuple; with
 `ax` the deviation diagnostic is drawn on it and that axes returned.
 
 Requires matplotlib (`pip install "phonometry[plot]"`).

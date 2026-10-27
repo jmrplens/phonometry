@@ -261,8 +261,8 @@ def test_plot_returns_two_panels_and_marks_the_schroeder_frequency() -> None:
 
     result = room.room_modes(LONG_ROOM, max_frequency=150.0, reverberation_time=0.8)
     axes = result.plot()
-    assert isinstance(axes, np.ndarray)
-    assert axes.size == 2
+    assert isinstance(axes, tuple)
+    assert len(axes) == 2
     ladder_labels = [t.get_text() for t in axes[0].get_legend().get_texts()]
     assert {"axial", "tangential", "oblique"} <= set(ladder_labels)
     assert any("Schroeder" in label for label in ladder_labels)

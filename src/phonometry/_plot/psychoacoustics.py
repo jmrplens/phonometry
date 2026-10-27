@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any, cast, overload
 
 import numpy as np
 
@@ -145,18 +145,34 @@ def _t(text: str, language: Language = "en") -> str:
     return _STRINGS.get(text, text) if language == "es" else text
 
 
+@overload
+def plot_zwicker_loudness(
+    result: ZwickerLoudness,
+    ax: None = None,
+    *,
+    language: Language = "en",
+    **kwargs: Any,
+) -> Axes | tuple[Axes, Axes]: ...
+
+
+@overload
+def plot_zwicker_loudness(
+    result: ZwickerLoudness, ax: Axes, *, language: Language = "en", **kwargs: Any
+) -> Axes: ...
+
+
 def plot_zwicker_loudness(
     result: ZwickerLoudness,
     ax: Axes | None = None,
     *,
     language: Language = "en",
     **kwargs: Any,
-) -> Axes | np.ndarray:
+) -> Axes | tuple[Axes, Axes]:
     """Specific loudness N'(z) over the Bark scale (ISO 532-1).
 
     When the result carries the time-varying loudness trace
     (``times`` / ``loudness_vs_time``) *and* ``ax`` is ``None``, a second
-    panel with loudness vs time is added and an array of two axes is
+    panel with loudness vs time is added and a tuple of two axes is
     returned; otherwise (a stationary result, or an ``ax`` was supplied) a
     single axes is returned.
 
@@ -164,7 +180,7 @@ def plot_zwicker_loudness(
     :param ax: Existing axes to draw on, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the specific-loudness line ``plot`` call.
-    :return: The axes, or an array of two axes for time-varying input.
+    :return: The axes, or a tuple of two axes for time-varying input.
     """
     from .._i18n import format_number, localize_axes
 
@@ -176,7 +192,7 @@ def plot_zwicker_loudness(
 
     if time_varying:
         axes = _new_axes_column(2, figsize=(7.0, 6.0))
-        ax_specific = cast("Axes", axes[0])
+        ax_specific = axes[0]
     else:
         ax_specific = ax if ax is not None else _new_axes()
 
@@ -201,7 +217,7 @@ def plot_zwicker_loudness(
         localize_axes(ax_specific, language)
         return ax_specific
 
-    ax_time = cast("Axes", axes[1])
+    ax_time = axes[1]
     plot_zwicker_loudness_time(result, ax=ax_time, language=language)
     localize_axes(ax_specific, language)
     return axes
@@ -269,17 +285,29 @@ def plot_zwicker_loudness_time(
     return ax_time
 
 
+@overload
+def plot_ecma_loudness(
+    result: EcmaLoudness, ax: None = None, *, language: Language = "en", **kwargs: Any
+) -> tuple[Axes, Axes]: ...
+
+
+@overload
+def plot_ecma_loudness(
+    result: EcmaLoudness, ax: Axes, *, language: Language = "en", **kwargs: Any
+) -> Axes: ...
+
+
 def plot_ecma_loudness(
     result: EcmaLoudness,
     ax: Axes | None = None,
     *,
     language: Language = "en",
     **kwargs: Any,
-) -> Axes | np.ndarray:
+) -> Axes | tuple[Axes, Axes]:
     """Average specific loudness N'(z) and time-dependent loudness N(l).
 
     When ``ax`` is ``None`` a two-panel figure is drawn (specific loudness
-    over the critical-band-rate scale and loudness vs time) and an array of
+    over the critical-band-rate scale and loudness vs time) and a tuple of
     two axes is returned; when ``ax`` is supplied only the specific-loudness
     panel is drawn on it and that single axes is returned.
 
@@ -287,7 +315,7 @@ def plot_ecma_loudness(
     :param ax: Existing axes to draw on, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the specific-loudness line ``plot`` call.
-    :return: The axes, or an array of two axes.
+    :return: The axes, or a tuple of two axes.
     """
     from .._i18n import format_number, localize_axes
 
@@ -297,7 +325,7 @@ def plot_ecma_loudness(
 
     if two_panel:
         axes = _new_axes_column(2, figsize=(7.0, 6.0))
-        ax_specific = cast("Axes", axes[0])
+        ax_specific = axes[0]
     else:
         ax_specific = cast("Axes", ax)
 
@@ -329,7 +357,7 @@ def plot_ecma_loudness(
         localize_axes(ax_specific, language)
         return ax_specific
 
-    ax_time = cast("Axes", axes[1])
+    ax_time = axes[1]
     time = np.asarray(result.times, dtype=np.float64)
     lvt = np.asarray(result.loudness_vs_time, dtype=np.float64)
     ax_time.plot(time, lvt, color=_C_TERTIARY, label="$N(l)$")
@@ -439,17 +467,29 @@ def plot_moore_glasberg_time_loudness(
     return ax
 
 
+@overload
+def plot_ecma_tonality(
+    result: EcmaTonality, ax: None = None, *, language: Language = "en", **kwargs: Any
+) -> tuple[Axes, Axes]: ...
+
+
+@overload
+def plot_ecma_tonality(
+    result: EcmaTonality, ax: Axes, *, language: Language = "en", **kwargs: Any
+) -> Axes: ...
+
+
 def plot_ecma_tonality(
     result: EcmaTonality,
     ax: Axes | None = None,
     *,
     language: Language = "en",
     **kwargs: Any,
-) -> Axes | np.ndarray:
+) -> Axes | tuple[Axes, Axes]:
     """Average specific tonality T'(z) and time-dependent tonality T(l).
 
     When ``ax`` is ``None`` a two-panel figure is drawn (specific tonality over
-    the critical-band-rate scale and tonality vs time) and an array of two axes
+    the critical-band-rate scale and tonality vs time) and a tuple of two axes
     is returned; when ``ax`` is supplied only the specific-tonality panel is
     drawn on it and that single axes is returned.
 
@@ -457,7 +497,7 @@ def plot_ecma_tonality(
     :param ax: Existing axes to draw on, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the specific-tonality line ``plot`` call.
-    :return: The axes, or an array of two axes.
+    :return: The axes, or a tuple of two axes.
     """
     from .._i18n import format_number, localize_axes
 
@@ -467,7 +507,7 @@ def plot_ecma_tonality(
 
     if two_panel:
         axes = _new_axes_column(2, figsize=(7.0, 6.0))
-        ax_specific = cast("Axes", axes[0])
+        ax_specific = axes[0]
     else:
         ax_specific = cast("Axes", ax)
 
@@ -499,7 +539,7 @@ def plot_ecma_tonality(
         localize_axes(ax_specific, language)
         return ax_specific
 
-    ax_time = cast("Axes", axes[1])
+    ax_time = axes[1]
     time = np.asarray(result.times, dtype=np.float64)
     tvt = np.asarray(result.tonality_vs_time, dtype=np.float64)
     ax_time.plot(time, tvt, color=_C_QUATERNARY, label="$T(l)$")
@@ -511,6 +551,38 @@ def plot_ecma_tonality(
     localize_axes(ax_specific, language)
     localize_axes(ax_time, language)
     return axes
+
+
+@overload
+def _plot_hms_time_and_heatmap(
+    time: np.ndarray,
+    vs_time: np.ndarray,
+    spec_vs_time: np.ndarray,
+    bark: np.ndarray,
+    ax: None,
+    color: str,
+    ylabel: str,
+    title: str,
+    heat_label: str,
+    kwargs: dict[str, Any],
+    language: Language = "en",
+) -> tuple[Axes, Axes]: ...
+
+
+@overload
+def _plot_hms_time_and_heatmap(
+    time: np.ndarray,
+    vs_time: np.ndarray,
+    spec_vs_time: np.ndarray,
+    bark: np.ndarray,
+    ax: Axes,
+    color: str,
+    ylabel: str,
+    title: str,
+    heat_label: str,
+    kwargs: dict[str, Any],
+    language: Language = "en",
+) -> Axes: ...
 
 
 def _plot_hms_time_and_heatmap(
@@ -525,12 +597,12 @@ def _plot_hms_time_and_heatmap(
     heat_label: str,
     kwargs: dict[str, Any],
     language: Language = "en",
-) -> Axes | np.ndarray:
+) -> Axes | tuple[Axes, Axes]:
     """Shared renderer for the HMS time-trace + specific-value heatmaps.
 
     Used by the ECMA-418-2 roughness and fluctuation-strength results: when
     ``ax`` is ``None`` a two-panel figure (time trace + heatmap over the
-    critical-band-rate scale) is drawn and an array of two axes is returned;
+    critical-band-rate scale) is drawn and a tuple of two axes is returned;
     otherwise only the time trace is drawn on ``ax`` and it is returned.
     """
     from .._i18n import localize_axes
@@ -538,7 +610,7 @@ def _plot_hms_time_and_heatmap(
     two_panel = ax is None
     if two_panel:
         axes = _new_axes_column(2, figsize=(7.0, 6.0))
-        ax_time = cast("Axes", axes[0])
+        ax_time = axes[0]
     else:
         ax_time = cast("Axes", ax)
 
@@ -556,7 +628,7 @@ def _plot_hms_time_and_heatmap(
         localize_axes(ax_time, language)
         return ax_time
 
-    ax_heat = cast("Axes", axes[1])
+    ax_heat = axes[1]
     if time.size >= _MIN_HEATMAP_TIME_SAMPLES and spec_vs_time.size:
         mesh = ax_heat.pcolormesh(
             time, bark, spec_vs_time.T, cmap="magma", shading="auto"
@@ -570,25 +642,37 @@ def _plot_hms_time_and_heatmap(
     return axes
 
 
+@overload
+def plot_ecma_roughness(
+    result: EcmaRoughness, ax: None = None, *, language: Language = "en", **kwargs: Any
+) -> tuple[Axes, Axes]: ...
+
+
+@overload
+def plot_ecma_roughness(
+    result: EcmaRoughness, ax: Axes, *, language: Language = "en", **kwargs: Any
+) -> Axes: ...
+
+
 def plot_ecma_roughness(
     result: EcmaRoughness,
     ax: Axes | None = None,
     *,
     language: Language = "en",
     **kwargs: Any,
-) -> Axes | np.ndarray:
+) -> Axes | tuple[Axes, Axes]:
     """Time-dependent roughness R(l50) and a specific-roughness heatmap.
 
     When ``ax`` is ``None`` a two-panel figure is drawn (roughness vs time and
     a specific-roughness R'(l50, z) heatmap over the critical-band-rate scale)
-    and an array of two axes is returned; when ``ax`` is supplied only the
+    and a tuple of two axes is returned; when ``ax`` is supplied only the
     time-dependent roughness is drawn on it and that single axes is returned.
 
     :param result: An :class:`~phonometry.psychoacoustics.quality.EcmaRoughness`.
     :param ax: Existing axes to draw on, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the roughness-vs-time line ``plot`` call.
-    :return: The axes, or an array of two axes.
+    :return: The axes, or a tuple of two axes.
     """
     from .._i18n import format_number
 
@@ -612,18 +696,38 @@ def plot_ecma_roughness(
     )
 
 
+@overload
+def plot_ecma_fluctuation_strength(
+    result: EcmaFluctuationStrength,
+    ax: None = None,
+    *,
+    language: Language = "en",
+    **kwargs: Any,
+) -> tuple[Axes, Axes]: ...
+
+
+@overload
+def plot_ecma_fluctuation_strength(
+    result: EcmaFluctuationStrength,
+    ax: Axes,
+    *,
+    language: Language = "en",
+    **kwargs: Any,
+) -> Axes: ...
+
+
 def plot_ecma_fluctuation_strength(
     result: EcmaFluctuationStrength,
     ax: Axes | None = None,
     *,
     language: Language = "en",
     **kwargs: Any,
-) -> Axes | np.ndarray:
+) -> Axes | tuple[Axes, Axes]:
     """Time-dependent fluctuation strength F(l50) and a specific heatmap.
 
     When ``ax`` is ``None`` a two-panel figure is drawn (fluctuation strength
     vs time and a specific-fluctuation-strength F'(l50, z) heatmap over the
-    critical-band-rate scale) and an array of two axes is returned; when
+    critical-band-rate scale) and a tuple of two axes is returned; when
     ``ax`` is supplied only the time-dependent fluctuation strength is drawn
     on it and that single axes is returned.
 
@@ -632,7 +736,7 @@ def plot_ecma_fluctuation_strength(
     :param ax: Existing axes to draw on, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the time-trace line ``plot`` call.
-    :return: The axes, or an array of two axes.
+    :return: The axes, or a tuple of two axes.
     """
     from .._i18n import format_number
 

@@ -370,11 +370,18 @@ A log spectrum split by liftering (Milner Sec. 4.3).
 
 ```python
 LifterResult.plot(
-    ax: Axes | None = None,
+    ax: None = None,
     *,
     language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
-) -> Axes | NDArray[Any]
+) -> tuple[Axes, Axes]
+
+LifterResult.plot(
+    ax: Axes,
+    *,
+    language: Literal['en', 'es'] = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the cepstrum with the cutoff and the two log spectra.

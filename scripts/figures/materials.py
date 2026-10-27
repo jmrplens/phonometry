@@ -10,7 +10,7 @@ under ``materials/``.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -38,6 +38,7 @@ from .theme import (
 )
 
 if TYPE_CHECKING:
+    from matplotlib.projections.polar import PolarAxes
     from numpy.typing import NDArray
 
     from phonometry.materials import CriticalCouplingResult, HelmholtzResonator
@@ -1412,8 +1413,10 @@ def generate_metadiffuser_polar(output_dir: str) -> None:
         figsize=(10, 6.2),
         subplot_kw={"projection": "polar"},
     )
+    # matplotlib types a projected subplot as Axes; this one is polar.
+    polar = cast("PolarAxes", ax)
     meta.plot(
-        ax=ax,
+        ax=polar,
         color=COLOR_SECONDARY,
         marker="",
         linewidth=2.2,
@@ -1421,7 +1424,7 @@ def generate_metadiffuser_polar(output_dir: str) -> None:
         language=_LANG,
     )
     qrd.plot(
-        ax=ax,
+        ax=polar,
         color=COLOR_PRIMARY,
         marker="",
         linewidth=1.6,
@@ -1431,7 +1434,6 @@ def generate_metadiffuser_polar(output_dir: str) -> None:
     )
     # The default theta formatter writes its negative angles with an ASCII
     # hyphen; restate the same grid with the typographic minus.
-    polar: Any = ax
     polar.set_thetagrids(
         np.arange(-90, 91, 30), [f"{_fmt_minus(a, '.0f')}°" for a in range(-90, 91, 30)]
     )

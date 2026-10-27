@@ -194,9 +194,17 @@ rated range is given.
 
 ```python
 LoudspeakerCharacteristics.plot(
+    ax: PolarAxes | None = None,
+    *,
+    quantity: Literal['directivity'],
+    language: Literal['en', 'es'] = 'en',
+    **kwargs: Any,
+) -> PolarAxes
+
+LoudspeakerCharacteristics.plot(
     ax: Axes | None = None,
     *,
-    quantity: Literal['response', 'impedance', 'thd', 'directivity'] = 'response',
+    quantity: Literal['response', 'impedance', 'thd'] = 'response',
     language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
@@ -219,7 +227,7 @@ lines), `"thd"` (total harmonic distortion against frequency) and
 | `quantity` | Which characteristic to plot (see above). |
 | `language` | Label language, `"en"` (default) or `"es"`. |
 
-**Returns:** The axes the characteristic was drawn on.
+**Returns:** The axes the characteristic was drawn on, polar for `"directivity"`.
 
 **Raises**
 

@@ -1094,6 +1094,32 @@ jobs:
     - name: Check that every public record displays itself
       run: python scripts/check_record_display.py
 
+  # A multi-panel .plot() draws one panel on the axes a caller hands it and
+  # returns that axes, and without one makes a column of panels and returns a
+  # tuple of them; a polar plot returns a polar axes. The argument decides, so
+  # the return is overloaded on it: annotated as one union, it makes every
+  # typed caller narrow a value the call already fixed. This fails on a
+  # return naming one axes and several with no overload heads, on a head that
+  # returns such a union, and on a function that reaches a polar axes, by
+  # making one or calling one that does, typed plain Axes. It reads the
+  # annotations through the package's aliases and imports and follows calls
+  # across modules. Static and dependency-free, so it runs on its own.
+  return-overloads:
+    name: Every return an argument decides is overloaded on it
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+    - uses: actions/checkout@v7
+      with:
+        persist-credentials: false
+    - name: Set up Python 3.13
+      uses: actions/setup-python@v7
+      with:
+        python-version: "3.13"
+    - name: Check that every return an argument decides is overloaded
+      run: python scripts/check_return_overloads.py
+
   # A conformance row states what a standard prints and what this library
   # computes. A row that computes the expected value itself, from the same
   # constants, compares a formula with a second copy of it and reports Pass

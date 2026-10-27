@@ -28,7 +28,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, overload
 
 import numpy as np
 
@@ -46,6 +46,7 @@ from .reverberation_room_scattering import _positive_scalar
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
     from matplotlib.axes import Axes
+    from matplotlib.projections.polar import PolarAxes
     from numpy.typing import ArrayLike
 
     from ..._i18n import Language
@@ -148,13 +149,22 @@ class DiffusionResult(OwnsArrays):
             )
             raise ValueError(msg)
 
+    @overload
+    def plot(
+        self, ax: None = None, *, language: Language = "en", **kwargs: Any
+    ) -> PolarAxes: ...
+
+    @overload
+    def plot(self, ax: Axes, *, language: Language = "en", **kwargs: Any) -> Axes: ...
+
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the polar response with the diffusion coefficient annotated.
 
         Requires matplotlib (``pip install "phonometry[plot]"``); returns the
-        polar :class:`~matplotlib.axes.Axes` and never calls ``plt.show``.
+        axes it drew on: a new polar axes without ``ax``, else ``ax``, polar or
+        not. Never calls ``plt.show``.
         """
         from ..._i18n import check_language
         from ..._plot.materials import plot_diffusion_polar

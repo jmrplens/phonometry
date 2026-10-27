@@ -132,11 +132,18 @@ fluctuation strength F'(l50, z) (Formula 168) of shape
 
 ```python
 EcmaFluctuationStrength.plot(
-    ax: Axes | None = None,
+    ax: None = None,
     *,
     language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
-) -> Axes | np.ndarray
+) -> tuple[Axes, Axes]
+
+EcmaFluctuationStrength.plot(
+    ax: Axes,
+    *,
+    language: Literal['en', 'es'] = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the fluctuation-strength result (see `phonometry._plot.psychoacoustics`).

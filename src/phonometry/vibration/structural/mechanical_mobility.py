@@ -72,7 +72,7 @@ from __future__ import annotations
 
 from dataclasses import KW_ONLY, dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 
@@ -412,14 +412,22 @@ class RigidMassCalibrationResult(OwnsArrays):
         )
         raise TypeError(msg)
 
+    @overload
+    def plot(
+        self, ax: None = None, *, language: Language = "en", **kwargs: Any
+    ) -> tuple[Axes, Axes]: ...
+
+    @overload
+    def plot(self, ax: Axes, *, language: Language = "en", **kwargs: Any) -> Axes: ...
+
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
-    ) -> Axes | np.ndarray:
+    ) -> Axes | tuple[Axes, Axes]:
         """Plot the rigid-mass calibration check (ISO 7626-2, 7.5.2).
 
         The measured FRF magnitude against the known rigid-mass line with its
         tolerance band, and the relative deviation against the same band. With
-        no ``ax`` a two-panel figure is drawn and its axes array returned; with
+        no ``ax`` a two-panel figure is drawn and its two axes returned as a tuple; with
         ``ax`` the deviation diagnostic is drawn on it and that axes returned.
 
         Requires matplotlib (``pip install "phonometry[plot]"``).

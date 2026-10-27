@@ -9,7 +9,7 @@ embedded by a page under ``vibration/``.
 """
 
 import math
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, cast
 
 
 def _sci_math(value: float, digits: int = 2) -> str:
@@ -51,6 +51,7 @@ from .theme import (
 
 if TYPE_CHECKING:
     from matplotlib.artist import Artist
+    from matplotlib.projections.polar import PolarAxes
 
     from phonometry.vibration._choices import BuildingClass
     from phonometry.vibration.human.exposure import WeightingName
@@ -2997,7 +2998,8 @@ def generate_machine_vector_change(output_dir: str) -> None:
     # ISO 20816-1 Annex D, D.2: the worked case the annex prints.
     result = vibration.vibration_vector_change(3.0, 40.0, 2.5, 180.0)
     _fig, ax = plt.subplots(figsize=(7.6, 7.0), subplot_kw={"projection": "polar"})
-    result.plot(ax=ax, language=_LANG, unit="mm/s")
+    # matplotlib types a projected subplot as Axes; this one is polar.
+    result.plot(ax=cast("PolarAxes", ax), language=_LANG, unit="mm/s")
     plt.tight_layout()
     save_figure(output_dir, "machine_vector_change.svg")
     plt.close()

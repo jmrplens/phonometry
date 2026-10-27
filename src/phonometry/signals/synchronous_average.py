@@ -79,7 +79,7 @@ No resampling onto an ``M``-point angular grid is performed.
 from __future__ import annotations
 
 from dataclasses import KW_ONLY, dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, overload
 
 import numpy as np
 
@@ -309,9 +309,17 @@ class SynchronousAverageResult(OwnsArrays):
         r"""Amplitude signal-to-noise improvement :math:`\sqrt{N}`."""
         return float(np.sqrt(self.n_averages))
 
+    @overload
+    def plot(
+        self, ax: None = None, *, language: Language = "en", **kwargs: Any
+    ) -> tuple[Axes, Axes]: ...
+
+    @overload
+    def plot(self, ax: Axes, *, language: Language = "en", **kwargs: Any) -> Axes: ...
+
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
-    ) -> Axes | NDArray[Any]:
+    ) -> Axes | tuple[Axes, Axes]:
         """Plot the averaged waveform and the comb-filter magnitude.
 
         With ``ax`` given, only the averaged-waveform panel is drawn on it.

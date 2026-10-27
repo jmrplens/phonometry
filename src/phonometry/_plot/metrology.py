@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 import math
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal, cast, overload
 
 import numpy as np
 
@@ -12,6 +12,7 @@ if TYPE_CHECKING:
     from collections.abc import Sequence
 
     from matplotlib.axes import Axes
+    from matplotlib.projections.polar import PolarAxes
     from matplotlib.ticker import FuncFormatter
     from numpy.typing import NDArray
 
@@ -1643,18 +1644,16 @@ def _plane_label(
     return _t(r"Plane $\alpha$ = {alpha}°", language, alpha=alpha)
 
 
-def _new_polar() -> Axes:
+def _new_polar() -> PolarAxes:
     """A fresh figure with one polar axes.
 
     The figure lays itself out with the legend under the disc inside it: a
     plain figure places the axes first and leaves the legend, anchored below
     the rim, hanging off the bottom edge.
     """
-    from typing import cast
-
     plt = _import_pyplot()
     _fig, ax = plt.subplots(subplot_kw={"projection": "polar"}, layout="constrained")
-    return cast("Axes", ax)
+    return cast("PolarAxes", ax)
 
 
 def _plane_curve(
@@ -1700,21 +1699,20 @@ def _radial_formatter(top: float, language: Language) -> FuncFormatter:
 
 def _plot_directivity_response(
     result: DirectivityFactor, ax: Axes | None, language: Language, **kwargs: Any
-) -> Axes:
+) -> PolarAxes:
     r"""Polar :math:`L(\phi) - L_\mathrm{rd}`, one closed curve per plane."""
     from matplotlib.ticker import MaxNLocator
 
     from .._i18n import format_number, localize_axes
+    from .common import _polar_axes
     from .electroacoustics import _sign_theta_labels
 
-    if ax is not None and getattr(ax, "name", None) != "polar":
-        msg = (
-            "'ax' must be a polar axes (subplot_kw={'projection': 'polar'}) for "
-            "the response view; pass ax=None to create one."
-        )
-        raise ValueError(msg)
-    ax = ax if ax is not None else _new_polar()
-    polar: Any = ax
+    polar = (
+        _new_polar()
+        if ax is None
+        else _polar_axes(ax, purpose=" for the response view")
+    )
+    ax = polar
     polar.set_theta_zero_location("N")
     polar.set_theta_direction(-1)
     _sign_theta_labels(polar)
@@ -1804,11 +1802,33 @@ def _plot_directivity_weights(
     return ax
 
 
+@overload
 def plot_directivity_factor(
     result: DirectivityFactor,
     ax: Axes | None = None,
     *,
-    view: str = "response",
+    view: Literal["response"] = "response",
+    language: Language = "en",
+    **kwargs: Any,
+) -> PolarAxes: ...
+
+
+@overload
+def plot_directivity_factor(
+    result: DirectivityFactor,
+    ax: Axes | None = None,
+    *,
+    view: Literal["weights"],
+    language: Language = "en",
+    **kwargs: Any,
+) -> Axes: ...
+
+
+def plot_directivity_factor(
+    result: DirectivityFactor,
+    ax: Axes | None = None,
+    *,
+    view: Literal["response", "weights"] = "response",
     language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
@@ -1823,7 +1843,7 @@ def plot_directivity_factor(
         first plane against its angle).
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the curve of the first plane.
-    :return: The axes.
+    :return: The axes: polar for the response view.
     :raises ValueError: if ``ax`` is not polar for the response view.
     """
     if view == "weights":

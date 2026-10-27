@@ -19,7 +19,7 @@ RNG = np.random.default_rng(20260720)
 
 
 def _labels(obj: object) -> str:
-    axes = obj if isinstance(obj, np.ndarray) else [obj]
+    axes = obj if isinstance(obj, tuple) else [obj]
     parts = []
     for a in axes:
         parts += [a.get_xlabel(), a.get_ylabel(), a.get_title()]
@@ -187,7 +187,7 @@ def test_loudspeaker_characteristics_es() -> None:
     }
     for quantity, title in titles.items():
         ax = res.plot(quantity=quantity, language="es")
-        assert not isinstance(ax, np.ndarray)
+        assert not isinstance(ax, tuple)
         assert ax.get_title() == title
         plt.close("all")
     assert res.plot(quantity="response", language="es").get_ylabel() == (
@@ -212,7 +212,7 @@ def test_microphone_characteristics_es() -> None:
     }
     for quantity, title in titles.items():
         ax = res.plot(quantity=quantity, language="es")
-        assert not isinstance(ax, np.ndarray)
+        assert not isinstance(ax, tuple)
         assert ax.get_title() == title
         plt.close("all")
     assert res.plot(quantity="distortion", language="es").get_xlabel() == (

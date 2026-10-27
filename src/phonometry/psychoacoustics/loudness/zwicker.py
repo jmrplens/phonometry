@@ -21,7 +21,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 
@@ -226,14 +226,23 @@ class ZwickerLoudness(OwnsArrays):
                 raise ValueError(msg)
         require_choice(self.field, "field", ("free", "diffuse"))
 
+    @overload
+    def plot(
+        self, ax: None = None, *, language: Language = "en", **kwargs: Any
+    ) -> Axes | tuple[Axes, Axes]: ...
+
+    @overload
+    def plot(self, ax: Axes, *, language: Language = "en", **kwargs: Any) -> Axes: ...
+
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
-    ) -> Axes | np.ndarray:
+    ) -> Axes | tuple[Axes, Axes]:
         """Plot the specific loudness N'(z) over Bark (see :mod:`phonometry._plot.psychoacoustics`).
 
         Adds a loudness-vs-time panel when the time-varying trace is
         present.  Requires matplotlib (``pip install "phonometry[plot]"``);
-        returns the :class:`~matplotlib.axes.Axes` (or array thereof).
+        returns the :class:`~matplotlib.axes.Axes`, or a tuple of two for a
+        time-varying result drawn without ``ax``.
         """
         from ..._i18n import check_language
         from ..._plot.psychoacoustics import plot_zwicker_loudness

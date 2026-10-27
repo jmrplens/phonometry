@@ -3056,12 +3056,20 @@ TUPLE_RETURN_EXEMPT: dict[tuple[str, str], str] = {
 }
 
 
+def _names_axes(node: ast.expr) -> bool:
+    """Whether a tuple item names a matplotlib axes class (``Axes``, ``PolarAxes``)."""
+    return ast.unparse(node).strip("'\"").rpartition(".")[2].endswith("Axes")
+
+
 def fixed_tuple_items(annotation: object) -> tuple[str, ...] | None:
     """The items of a fixed-length tuple an annotation returns, or ``None``.
 
     ``tuple[A, B]``, ``tuple[A, B] | None`` and ``Optional[tuple[A, B]]`` are
     fixed-length tuples of two items; ``tuple[A, ...]`` is a sequence of like
     items of any length and is not, and neither is a one-item ``tuple[A]``.
+    Nor is a tuple of matplotlib axes (``tuple[Axes, Axes]``): the panels of
+    one figure, top first, as matplotlib's own ``subplots`` hands them back,
+    which a multi-panel ``.plot()`` returns without ``ax`` (rule A57).
     """
     if annotation is inspect.Signature.empty:
         return None
@@ -3088,8 +3096,8 @@ def fixed_tuple_items(annotation: object) -> tuple[str, ...] | None:
         items = inner.elts if isinstance(inner, ast.Tuple) else [inner]
         if any(isinstance(i, ast.Constant) and i.value is Ellipsis for i in items):
             continue
-        # One item is not a bundle
-        if len(items) >= 2:
+        # One item is not a bundle, and neither are the panels of one figure
+        if len(items) >= 2 and not all(_names_axes(i) for i in items):
             return tuple(ast.unparse(i) for i in items)
     return None
 

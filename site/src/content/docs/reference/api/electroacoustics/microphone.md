@@ -197,9 +197,17 @@ plane-wave sensitivity level minus the directivity index (13.2).
 
 ```python
 MicrophoneCharacteristics.plot(
+    ax: PolarAxes | None = None,
+    *,
+    quantity: Literal['directivity'],
+    language: Literal['en', 'es'] = 'en',
+    **kwargs: Any,
+) -> PolarAxes
+
+MicrophoneCharacteristics.plot(
     ax: Axes | None = None,
     *,
-    quantity: Literal['response', 'directivity', 'noise', 'distortion'] = 'response',
+    quantity: Literal['response', 'noise', 'distortion'] = 'response',
     language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
@@ -223,7 +231,7 @@ against sound pressure level).
 | `quantity` | Which characteristic to plot (see above). |
 | `language` | Label language, `"en"` (default) or `"es"`. |
 
-**Returns:** The axes the characteristic was drawn on.
+**Returns:** The axes the characteristic was drawn on, polar for `"directivity"`.
 
 **Raises**
 

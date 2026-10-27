@@ -455,7 +455,7 @@ def test_plot_smoke(
 
     mpl.use("Agg")
     axes = ref_calibration.plot()
-    assert axes.shape == (2,)
+    assert len(axes) == 2
     single = ref_calibration.plot(ax=axes[0])
     assert single is axes[0]
 

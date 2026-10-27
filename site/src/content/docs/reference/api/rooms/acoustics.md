@@ -385,11 +385,18 @@ At least 10 dB + 15 dB under the maximum (ISO 3382-1:2009, 5.3.3);
 
 ```python
 RoomAcousticsResult.plot(
-    ax: Axes | None = None,
+    ax: None = None,
     *,
     language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
-) -> Axes | np.ndarray
+) -> tuple[Axes, Axes]
+
+RoomAcousticsResult.plot(
+    ax: Axes,
+    *,
+    language: Literal['en', 'es'] = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot per-band decay times (EDT/T20/T30) and clarity (C50/C80).
@@ -397,7 +404,7 @@ Plot per-band decay times (EDT/T20/T30) and clarity (C50/C80).
 Invalid bands are hatched and greyed. With `ax` given, only the
 decay-times panel is drawn on it. Requires matplotlib
 (`pip install "phonometry[plot]"`); returns the
-`Axes` (or array thereof).
+`Axes` it drew on, or the tuple of two without `ax`.
 
 ### RoomAcousticsResult.report()
 

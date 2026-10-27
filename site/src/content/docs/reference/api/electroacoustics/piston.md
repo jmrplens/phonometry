@@ -208,7 +208,7 @@ PistonDirectivity.plot(
     *,
     language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
-) -> Axes
+) -> PolarAxes
 ```
 
 Plot the far-field directivity (beam) pattern on a polar axes.

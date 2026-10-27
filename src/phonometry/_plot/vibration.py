@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any, overload
 
 import numpy as np
 
@@ -840,13 +840,33 @@ def plot_mobility(
     return ax
 
 
+@overload
+def plot_rigid_mass_calibration(
+    result: RigidMassCalibrationResult,
+    ax: None = None,
+    *,
+    language: Language = "en",
+    **kwargs: Any,
+) -> tuple[Axes, Axes]: ...
+
+
+@overload
+def plot_rigid_mass_calibration(
+    result: RigidMassCalibrationResult,
+    ax: Axes,
+    *,
+    language: Language = "en",
+    **kwargs: Any,
+) -> Axes: ...
+
+
 def plot_rigid_mass_calibration(
     result: RigidMassCalibrationResult,
     ax: Axes | None = None,
     *,
     language: Language = "en",
     **kwargs: Any,
-) -> Axes | np.ndarray:
+) -> Axes | tuple[Axes, Axes]:
     """Rigid-mass operational calibration check (ISO 7626-2, 7.5.2).
 
     The single-concept calibration-check figure: the measured driving-point
@@ -858,7 +878,7 @@ def plot_rigid_mass_calibration(
 
     With ``ax`` supplied, only the deviation diagnostic is drawn on it and that
     axes is returned; otherwise a fresh two-panel column is created and the
-    two-axes array is returned.
+    tuple of two axes is returned.
 
     :param result: A
         :class:`~phonometry.vibration.structural.mechanical_mobility.RigidMassCalibrationResult`.
@@ -868,7 +888,7 @@ def plot_rigid_mass_calibration(
     :param kwargs: Forwarded to the primary artist: the measured-magnitude
         curve for the full two-panel figure, or the deviation curve when ``ax``
         is supplied.
-    :return: The deviation axes (``ax`` given) or the two-axes array.
+    :return: The deviation axes (``ax`` given) or the tuple of two axes.
     """
     from .._i18n import format_number, localize_axes
 
@@ -2570,12 +2590,12 @@ def _polar_chord(
 
 def plot_vector_change(
     result: VectorChangeResult,
-    ax: Axes | None = None,
+    ax: PolarAxes | None = None,
     *,
     language: Language = "en",
     unit: str | None = None,
     **kwargs: Any,
-) -> Axes:
+) -> PolarAxes:
     """Change in vibration between two steady states (ISO 20816-1, Figure D.1).
 
     The two states as phasors from the origin and the change as the chord
@@ -2595,15 +2615,10 @@ def plot_vector_change(
     :raises ValueError: If *ax* is not a polar axes.
     """
     from .._i18n import format_number, localize_axes
-    from .electroacoustics import _new_polar_axes, _sign_theta_labels
+    from .common import _polar_axes
+    from .electroacoustics import _sign_theta_labels
 
-    if ax is not None and getattr(ax, "name", None) != "polar":
-        msg = (
-            "'ax' must be a polar axes (subplot_kw={'projection': 'polar'}); "
-            "pass ax=None to create one."
-        )
-        raise ValueError(msg)
-    polar = cast("PolarAxes", ax) if ax is not None else _new_polar_axes()
+    polar = _polar_axes(ax)
     ax = polar
 
     first = result.initial[0] * np.exp(1j * np.radians(result.initial[1]))
@@ -3282,13 +3297,29 @@ def _verdict_word(*, passes: bool, language: Language) -> str:
     return _t("PASS" if passes else "FAIL", language)
 
 
+@overload
+def plot_impact_mobility(
+    result: ImpactMobilityResult,
+    ax: None = None,
+    *,
+    language: Language = "en",
+    **kwargs: Any,
+) -> tuple[Axes, Axes]: ...
+
+
+@overload
+def plot_impact_mobility(
+    result: ImpactMobilityResult, ax: Axes, *, language: Language = "en", **kwargs: Any
+) -> Axes: ...
+
+
 def plot_impact_mobility(
     result: ImpactMobilityResult,
     ax: Axes | None = None,
     *,
     language: Language = "en",
     **kwargs: Any,
-) -> Axes | np.ndarray:
+) -> Axes | tuple[Axes, Axes]:
     """Averaged impact mobility ``|Y(f)|`` and its coherence (ISO 7626-5, 8.6).
 
     With ``ax`` only the magnitude is drawn on it; otherwise a two-panel
@@ -3299,7 +3330,7 @@ def plot_impact_mobility(
     :param ax: Existing axes for the magnitude, or ``None`` for a fresh figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the magnitude curve.
-    :return: The axes (``ax`` given) or the two-axes array.
+    :return: The axes (``ax`` given) or the tuple of two axes.
     """
     from .._i18n import format_number, localize_axes
     from ..vibration.structural._impact_mobility import HIGH_COHERENCE
@@ -3496,13 +3527,25 @@ def plot_exponential_window_correction(
     return ax
 
 
+@overload
+def plot_double_hit_check(
+    result: DoubleHitCheck, ax: None = None, *, language: Language = "en", **kwargs: Any
+) -> tuple[Axes, Axes]: ...
+
+
+@overload
+def plot_double_hit_check(
+    result: DoubleHitCheck, ax: Axes, *, language: Language = "en", **kwargs: Any
+) -> Axes: ...
+
+
 def plot_double_hit_check(
     result: DoubleHitCheck,
     ax: Axes | None = None,
     *,
     language: Language = "en",
     **kwargs: Any,
-) -> Axes | np.ndarray:
+) -> Axes | tuple[Axes, Axes]:
     """The force record with its impacts, and its energy spectral density (6.4).
 
     :param result: A
@@ -3511,7 +3554,7 @@ def plot_double_hit_check(
         two-panel figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the force curve.
-    :return: The axes (``ax`` given) or the two-axes array.
+    :return: The axes (``ax`` given) or the tuple of two axes.
     """
     from .._i18n import format_number, localize_axes
     from ..vibration.structural._impact_mobility import energy_spectral_density
@@ -3947,13 +3990,33 @@ def _symmetric_limits(values: np.ndarray, tolerance: float) -> tuple[float, floa
     return -reach, reach
 
 
+@overload
+def plot_channel_match(
+    result: ChannelMatchVerification,
+    ax: None = None,
+    *,
+    language: Language = "en",
+    **kwargs: Any,
+) -> tuple[Axes, Axes]: ...
+
+
+@overload
+def plot_channel_match(
+    result: ChannelMatchVerification,
+    ax: Axes,
+    *,
+    language: Language = "en",
+    **kwargs: Any,
+) -> Axes: ...
+
+
 def plot_channel_match(
     result: ChannelMatchVerification,
     ax: Axes | None = None,
     *,
     language: Language = "en",
     **kwargs: Any,
-) -> Axes | np.ndarray:
+) -> Axes | tuple[Axes, Axes]:
     """Channel-to-channel magnitude and phase deviations against 8.1.
 
     :param result: A
@@ -3962,7 +4025,7 @@ def plot_channel_match(
         two-panel figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the magnitude-deviation curve.
-    :return: The axes (``ax`` given) or the two-axes array.
+    :return: The axes (``ax`` given) or the tuple of two axes.
     """
     from .._i18n import localize_axes
     from ..vibration.structural._impact_mobility import (

@@ -32,7 +32,7 @@ import phonometry as ph
 def test_zwicker_stationary_returns_single_axes_with_specific_curve() -> None:
     res = _zwicker_stationary()
     ax = res.plot()
-    assert not isinstance(ax, np.ndarray)
+    assert not isinstance(ax, tuple)
     ydata = ax.lines[0].get_ydata()
     np.testing.assert_allclose(ydata, res.specific)
     xdata = ax.lines[0].get_xdata()
@@ -48,8 +48,8 @@ def test_zwicker_time_varying_returns_two_panels() -> None:
     res = ph.psychoacoustics.loudness_zwicker(sig, FS, stationary=False)
     assert res.loudness_vs_time is not None
     axes = res.plot()
-    assert isinstance(axes, np.ndarray)
-    assert axes.size == 2
+    assert isinstance(axes, tuple)
+    assert len(axes) == 2
     np.testing.assert_allclose(axes[0].lines[0].get_ydata(), res.specific)
     np.testing.assert_allclose(axes[1].lines[0].get_ydata(), res.loudness_vs_time)
     plt.close("all")
@@ -61,7 +61,7 @@ def test_zwicker_time_varying_returns_two_panels() -> None:
 def test_moore_glasberg_returns_single_axes_with_specific_curve() -> None:
     res = ph.psychoacoustics.loudness_moore_glasberg_from_spectrum([(1000.0, 60.0)])
     ax = res.plot()
-    assert not isinstance(ax, np.ndarray)
+    assert not isinstance(ax, tuple)
     np.testing.assert_allclose(ax.lines[0].get_ydata(), res.specific)
     xdata = ax.lines[0].get_xdata()
     assert xdata[0] == pytest.approx(1.8)

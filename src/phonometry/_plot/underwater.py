@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Final
+from typing import TYPE_CHECKING, Any, Final, overload
 
 import numpy as np
 
@@ -229,13 +229,29 @@ def plot_ship_source_level(
     return ax
 
 
+@overload
+def plot_pile_strike(
+    result: PileStrikeResult,
+    ax: None = None,
+    *,
+    language: Language = "en",
+    **kwargs: Any,
+) -> tuple[Axes, Axes]: ...
+
+
+@overload
+def plot_pile_strike(
+    result: PileStrikeResult, ax: Axes, *, language: Language = "en", **kwargs: Any
+) -> Axes: ...
+
+
 def plot_pile_strike(
     result: PileStrikeResult,
     ax: Axes | None = None,
     *,
     language: Language = "en",
     **kwargs: Any,
-) -> Axes | np.ndarray:
+) -> Axes | tuple[Axes, Axes]:
     """Pile-strike pressure waveform and its cumulative energy.
 
     Two stacked panels: the pressure waveform with the peak marked on top, and
@@ -247,7 +263,7 @@ def plot_pile_strike(
         two-panel figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the waveform ``plot`` call.
-    :return: The waveform axes (``ax`` given) or the array of two axes.
+    :return: The waveform axes (``ax`` given) or the tuple of two axes.
     """
     from .._i18n import format_number, localize_axes
     from ..io._resolve import apply_calibration

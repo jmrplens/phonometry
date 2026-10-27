@@ -377,7 +377,7 @@ def test_plot_returns_axes() -> None:
     result = ph.signals.time_synchronous_average(_repeat(one, 8), FS, period_s=PERIOD)
 
     axes = result.plot()
-    assert axes.shape == (2,)
+    assert len(axes) == 2
     plt.close("all")
 
     _, ax = plt.subplots()

@@ -260,7 +260,7 @@ class PistonDirectivity(OwnsArrays):
 
     def plot(
         self, ax: PolarAxes | None = None, *, language: Language = "en", **kwargs: Any
-    ) -> Axes:
+    ) -> PolarAxes:
         """Plot the far-field directivity (beam) pattern on a polar axes.
 
         Draws the directivity in dB against the polar angle: one curve per

@@ -586,11 +586,11 @@ magnitude, and only the second is the change in the vibration.
 
 ```python
 VectorChangeResult.plot(
-    ax: Axes | None = None,
+    ax: PolarAxes | None = None,
     *,
     language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
-) -> Axes
+) -> PolarAxes
 ```
 
 Draw the polar diagram of Figure D.1.
@@ -599,7 +599,7 @@ The two states as vectors from the origin and the change as the vector
 joining their tips, which is the picture that makes the point.
 
 Requires matplotlib (`pip install "phonometry[plot]"`); returns the
-`Axes`.
+polar axes it drew on.
 
 **Parameters**
 

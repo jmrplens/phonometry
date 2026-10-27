@@ -794,7 +794,7 @@ freq, lower, upper, labels = filters.nominal_frequencies(1)
 
 **Enforced by:** `scripts/check_parameter_units.py`, `make parameter-units`, `CI: Every public quantity names its unit`, `tests/test_check_parameter_units.py::test_the_tree_answers_several_quantities_as_records`, `tests/test_public_vocabulary.py::test_no_record_unpacks_like_a_tuple`
 
-**Exceptions.** A tuple stays only for like items whose order nobody has to remember (the two ends of a range, lower first; the two biquad stages of BS.1770 in cascade order; the `*_named` collections), declared in `TUPLE_RETURN_EXEMPT` of `scripts/check_parameter_units.py`, keyed by module and qualified name, with the reason. A `NamedTuple` counts as a tuple, and a public record is never one: a record has no `__iter__`, so unpacking it raises `TypeError`.
+**Exceptions.** A tuple stays only for like items whose order nobody has to remember (the two ends of a range, lower first; the two biquad stages of BS.1770 in cascade order; the `*_named` collections), declared in `TUPLE_RETURN_EXEMPT` of `scripts/check_parameter_units.py`, keyed by module and qualified name, with the reason. The panels of one figure are like items too: a multi-panel `.plot()` without `ax` returns a tuple of its `Axes`, top first, as matplotlib's own `subplots` does ([A57](#a57)), and the check reads a tuple of axes as no bundle. A `NamedTuple` counts as a tuple, and a public record is never one: a record has no `__iter__`, so unpacking it raises `TypeError`.
 
 <a id="a33"></a>
 ### A33. Give a result a `.plot()` that draws its guide figure where a figure says something
@@ -1424,3 +1424,47 @@ subprocess.run(f"ffmpeg -i - {output}", shell=True)
 Keep the last lines of the program's standard error for the error message. A new program named by a bare name goes through `past_the_working_directory` of `phonometry._internal.programs`, as `find_ffmpeg` and `ssh_program` do, and refuses, with an error of its own, a program it gives `None` for; `tests/test_internal_programs.py` tests the rule once and holds both lookups to it. In tests, a stand-in written in Python takes the program's place on every system. `tests/fake_ffmpeg.py` writes a launcher (a shell script, or a `.cmd` file on Windows) that runs it with the test's interpreter, points `rcParams["animation.ffmpeg_path"]` at it and puts its directory first on `PATH`, and is steered by a JSON file the test writes and rewrites (the encoders it lists, the ones that work, when it dies). `tests/simulation/fake_ssh.py` is run through `command._SSH_PROGRAM`, which the `node` fixture points at it (a batch file on `PATH` could not carry the remote command intact on Windows), and is steered by `FAKE_SSH_MODE` (a refused key, a login banner, a hang, bytes that are no frame) and `FAKE_SSH_LOG` (a line per start). The Windows lookup is tested on every system: `tests/windows_lookup.py` answers as `shutil.which` does on Windows, and a test that puts it in the place of `shutil.which` and sets `sys.platform` to `"win32"` plants the program in the working directory and on `PATH`. A test that needs the real program skips without it, with a reason that names the CI job that runs it there. Bandit reports every call as `B603`, and its `nosec` gives the reason ([C4](docstrings.md#c4)).
 
 **Enforced by:** `CI: Videos encode with a real ffmpeg`, `CI: Remote simulation on a localhost node`, `tests/io/test_video_encoders.py`, `tests/simulation/test_remote_command.py`, `tests/test_internal_programs.py`, `bandit`
+
+<a id="a57"></a>
+### A57. Overload a return whose type one argument decides
+
+**Why.** Twenty-seven multi-panel `.plot()` methods and `room.plot_excitation` drew one panel on the axes a caller handed them and returned it, and without one made a column of panels and returned an ndarray of them, annotated `Axes | ndarray` and nothing more: a typed caller narrowed a value the call had already fixed, and `result.plot(ax=ax).set_title(...)` was a type error. Seven public plots that draw on a polar axes returned it typed plain `Axes`. Each case now has an overload head that says what it returns: a tuple of exactly its axes without `ax`, the `Axes` it was handed with one, and `PolarAxes` where the axes is polar, always or for the `view` or `quantity` that chooses the polar panel. The union stays on the implementation, which no caller sees.
+
+**Do**
+
+```python
+from typing import TYPE_CHECKING, overload
+
+if TYPE_CHECKING:
+    from matplotlib.axes import Axes
+
+
+class TwoPanelResult:
+    @overload
+    def plot(self, ax: None = None) -> "tuple[Axes, Axes]": ...
+
+    @overload
+    def plot(self, ax: "Axes") -> "Axes": ...
+
+    def plot(self, ax: "Axes | None" = None) -> "Axes | tuple[Axes, Axes]":
+        import matplotlib.pyplot as plt
+
+        if ax is not None:
+            return ax
+        _fig, (top, bottom) = plt.subplots(2, 1)
+        return top, bottom
+
+
+top, bottom = TwoPanelResult().plot()
+```
+
+**Don't**
+
+```py
+def plot(self, ax: Axes | None = None) -> Axes | np.ndarray:  # the caller narrows what ax decided
+    ...
+```
+
+**Enforced by:** `scripts/check_return_overloads.py`, `make return-overloads`, `CI: Every return an argument decides is overloaded on it`, `tests/test_check_return_overloads.py::test_the_package_keeps_the_rule`, `tests/test_result_plots.py::test_a_plot_returns_what_its_signature_promises`, `tests/test_result_plots.py::test_every_decided_plot_has_a_built_result`
+
+**Exceptions.** A return the data decide rather than an argument keeps its union on the head, with its reason in `EXEMPT` of `scripts/check_return_overloads.py`: `ZwickerLoudness.plot` without `ax` draws a second panel only for a time-varying result. A private helper that takes the projection from a table row it is handed rather than from an argument of its own is exempt the same way.

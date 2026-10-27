@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 import math
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, overload
 
 import numpy as np
 
@@ -939,6 +939,28 @@ def _normalized_frequency_axis(
     ax.xaxis.set_minor_formatter(mticker.NullFormatter())
 
 
+@overload
+def plot_parametric_eq(
+    result: EQResponseResult,
+    ax: None = None,
+    *,
+    language: Language = "en",
+    show_sections: bool = True,
+    **kwargs: Any,
+) -> tuple[Axes, Axes]: ...
+
+
+@overload
+def plot_parametric_eq(
+    result: EQResponseResult,
+    ax: Axes,
+    *,
+    language: Language = "en",
+    show_sections: bool = True,
+    **kwargs: Any,
+) -> Axes: ...
+
+
 def plot_parametric_eq(
     result: EQResponseResult,
     ax: Axes | None = None,
@@ -946,7 +968,7 @@ def plot_parametric_eq(
     language: Language = "en",
     show_sections: bool = True,
     **kwargs: Any,
-) -> Axes | np.ndarray:
+) -> Axes | tuple[Axes, Axes]:
     """Magnitude and phase response of a parametric-EQ cascade.
 
     With ``ax`` given, only the magnitude panel is drawn on it.
@@ -959,7 +981,7 @@ def plot_parametric_eq(
     :param show_sections: Also draw each section's magnitude (light lines)
         when the cascade has more than one section.
     :param kwargs: Forwarded to the cascade magnitude line.
-    :return: The magnitude axes (``ax`` given) or the array of two axes.
+    :return: The magnitude axes (``ax`` given) or the tuple of two axes.
     """
     from .._i18n import decimal_comma, localize_axes
 

@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Final, cast
+from typing import TYPE_CHECKING, Any, Final, Literal, overload
 
 import numpy as np
 
@@ -17,9 +17,9 @@ from .common import (
     _LEGEND_UPPER_RIGHT,
     _OFFSET_POINTS,
     _format_freq,
-    _import_pyplot,
     _new_axes,
     _new_axes_column,
+    _polar_axes,
     format_frequency_axis,
     style_default,
     style_pop,
@@ -37,8 +37,14 @@ if TYPE_CHECKING:
         FrequencyResponseResult,
     )
     from ..electroacoustics.intermodulation import ModulationDistortionResult
-    from ..electroacoustics.loudspeaker import LoudspeakerCharacteristics
-    from ..electroacoustics.microphone import MicrophoneCharacteristics
+    from ..electroacoustics.loudspeaker import (
+        LoudspeakerCharacteristics,
+        LoudspeakerQuantity,
+    )
+    from ..electroacoustics.microphone import (
+        MicrophoneCharacteristics,
+        MicrophoneQuantity,
+    )
     from ..electroacoustics.piston import PistonDirectivity, RadiatingPistonResult
     from ..electroacoustics.sound_reinforcement import FeedbackStabilityResult
     from ..electroacoustics.swept_sine import SweptSineDistortionResult
@@ -337,13 +343,33 @@ def plot_modulation_distortion(
     return ax
 
 
+@overload
+def plot_frequency_response(
+    result: FrequencyResponseResult,
+    ax: None = None,
+    *,
+    language: Language = "en",
+    **kwargs: Any,
+) -> tuple[Axes, Axes, Axes]: ...
+
+
+@overload
+def plot_frequency_response(
+    result: FrequencyResponseResult,
+    ax: Axes,
+    *,
+    language: Language = "en",
+    **kwargs: Any,
+) -> Axes: ...
+
+
 def plot_frequency_response(
     result: FrequencyResponseResult,
     ax: Axes | None = None,
     *,
     language: Language = "en",
     **kwargs: Any,
-) -> Axes | np.ndarray:
+) -> Axes | tuple[Axes, Axes, Axes]:
     """Bode magnitude / phase and coherence of an estimated frequency response.
 
     Three stacked panels: the magnitude in dB, the phase in degrees and the
@@ -356,7 +382,7 @@ def plot_frequency_response(
         three-panel figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the magnitude ``plot`` call.
-    :return: The magnitude-panel axes (``ax`` given) or the array of three axes.
+    :return: The magnitude-panel axes (``ax`` given) or the tuple of three axes.
     """
     from .._i18n import localize_axes
 
@@ -403,13 +429,33 @@ def plot_frequency_response(
     return axes
 
 
+@overload
+def plot_swept_sine_distortion(
+    result: SweptSineDistortionResult,
+    ax: None = None,
+    *,
+    language: Language = "en",
+    **kwargs: Any,
+) -> tuple[Axes, Axes]: ...
+
+
+@overload
+def plot_swept_sine_distortion(
+    result: SweptSineDistortionResult,
+    ax: Axes,
+    *,
+    language: Language = "en",
+    **kwargs: Any,
+) -> Axes: ...
+
+
 def plot_swept_sine_distortion(
     result: SweptSineDistortionResult,
     ax: Axes | None = None,
     *,
     language: Language = "en",
     **kwargs: Any,
-) -> Axes | np.ndarray:
+) -> Axes | tuple[Axes, Axes]:
     """Harmonic frequency responses and THD(f) of a swept-sine measurement.
 
     Two stacked panels: the magnitudes of ``H1..HN`` in dB against their own
@@ -423,7 +469,7 @@ def plot_swept_sine_distortion(
         two-panel figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the THD ``plot`` call.
-    :return: The THD axes (``ax`` given) or the array of two axes.
+    :return: The THD axes (``ax`` given) or the tuple of two axes.
     """
     from .._i18n import localize_axes
 
@@ -563,7 +609,7 @@ def plot_piston_directivity(
     *,
     language: Language = "en",
     **kwargs: Any,
-) -> Axes:
+) -> PolarAxes:
     """Far-field directivity (beam) pattern of a baffled circular piston.
 
     Draws the directivity in dB against the polar angle on a polar axes: one
@@ -583,13 +629,7 @@ def plot_piston_directivity(
     """
     from .._i18n import decimal_comma, localize_axes
 
-    if ax is not None and getattr(ax, "name", None) != "polar":
-        msg = (
-            "'ax' must be a polar axes (subplot_kw={'projection': 'polar'}); "
-            "pass ax=None to create one."
-        )
-        raise ValueError(msg)
-    ax = ax if ax is not None else _new_polar_axes()
+    ax = _polar_axes(ax)
     theta = np.asarray(result.angles_rad, dtype=np.float64)
     ka = np.asarray(result.ka, dtype=np.float64)
     levels = np.clip(
@@ -884,13 +924,6 @@ def _draw_microphone_distortion(
     ax.legend(loc="upper left", fontsize="small")
 
 
-def _new_polar_axes() -> PolarAxes:
-    """Create a single fresh polar figure + axes and return the axes."""
-    plt = _import_pyplot()
-    _fig, ax = plt.subplots(subplot_kw={"projection": "polar"})
-    return cast("PolarAxes", ax)
-
-
 #: The loudspeaker ``.plot()`` quantities: the panel drawer, whether the panel
 #: is polar, and the optional-data attribute that must be present (``None`` for
 #: the always-available on-axis response).
@@ -935,22 +968,40 @@ def _plot_one_quantity(
     drawer, polar, attr = table[quantity]
     if attr is not None and getattr(result, attr) is None:
         raise ValueError(missing[quantity])
-    if polar and ax is not None and getattr(ax, "name", None) != "polar":
-        msg = (
-            f"'ax' must be a polar axes for quantity {quantity!r}; "
-            "pass ax=None to create one."
-        )
-        raise ValueError(msg)
-    if ax is None:
-        ax = _new_polar_axes() if polar else _new_axes()
+    if polar:
+        ax = _polar_axes(ax, purpose=f" for quantity {quantity!r}")
+    elif ax is None:
+        ax = _new_axes()
     drawer(result, ax, language=language)
     localize_axes(ax, language)
     return ax
 
 
+@overload
 def plot_loudspeaker_characteristics(
     result: LoudspeakerCharacteristics,
-    quantity: str = "response",
+    quantity: Literal["directivity"],
+    ax: Axes | None = None,
+    *,
+    language: Language = "en",
+    **kwargs: Any,
+) -> PolarAxes: ...
+
+
+@overload
+def plot_loudspeaker_characteristics(
+    result: LoudspeakerCharacteristics,
+    quantity: Literal["response", "impedance", "thd"] = "response",
+    ax: Axes | None = None,
+    *,
+    language: Language = "en",
+    **kwargs: Any,
+) -> Axes: ...
+
+
+def plot_loudspeaker_characteristics(
+    result: LoudspeakerCharacteristics,
+    quantity: LoudspeakerQuantity = "response",
     ax: Axes | None = None,
     *,
     language: Language = "en",
@@ -972,7 +1023,7 @@ def plot_loudspeaker_characteristics(
         axes is created for ``"directivity"``).
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Reserved for a uniform ``.plot()`` signature; unused.
-    :return: The axes the characteristic was drawn on.
+    :return: The axes the characteristic was drawn on, polar for ``"directivity"``.
     :raises ValueError: If ``quantity`` is unknown, the result carries no data
         for it, or *ax* is not polar for a polar quantity.
     """
@@ -987,9 +1038,31 @@ def plot_loudspeaker_characteristics(
     )
 
 
+@overload
 def plot_microphone_characteristics(
     result: MicrophoneCharacteristics,
-    quantity: str = "response",
+    quantity: Literal["directivity"],
+    ax: Axes | None = None,
+    *,
+    language: Language = "en",
+    **kwargs: Any,
+) -> PolarAxes: ...
+
+
+@overload
+def plot_microphone_characteristics(
+    result: MicrophoneCharacteristics,
+    quantity: Literal["response", "noise", "distortion"] = "response",
+    ax: Axes | None = None,
+    *,
+    language: Language = "en",
+    **kwargs: Any,
+) -> Axes: ...
+
+
+def plot_microphone_characteristics(
+    result: MicrophoneCharacteristics,
+    quantity: MicrophoneQuantity = "response",
     ax: Axes | None = None,
     *,
     language: Language = "en",
@@ -1011,7 +1084,7 @@ def plot_microphone_characteristics(
         axes is created for ``"directivity"``).
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Reserved for a uniform ``.plot()`` signature; unused.
-    :return: The axes the characteristic was drawn on.
+    :return: The axes the characteristic was drawn on, polar for ``"directivity"``.
     :raises ValueError: If ``quantity`` is unknown, the result carries no data
         for it, or *ax* is not polar for a polar quantity.
     """

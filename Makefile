@@ -344,6 +344,19 @@ array-aliasing:
 record-display:
 	$(PYTHON) scripts/check_record_display.py
 
+# A multi-panel .plot() returns the axes it is handed, or a tuple of the axes
+# it makes, and a polar plot returns a polar axes: the caller's ax, view or
+# quantity decides which. Annotated as one union, the return makes every
+# typed caller narrow what the call already fixed. This fails on a return
+# that names one axes and several (a tuple, a list or an array of them) with
+# no overload heads before it, on a head that returns such a union, and on a
+# function that reaches a polar axes (making one, or calling a function that
+# returns or reaches one) typed plain Axes with no head that returns
+# PolarAxes. Annotations are read through the package's aliases and imports.
+# On the tree it was written against it found 74 such functions. Stdlib only.
+return-overloads:
+	$(PYTHON) scripts/check_return_overloads.py
+
 # A pressure of 101 325 and a pressure of 101.325 are both legitimate values
 # in this tree, so a bare `pressure` loses its unit the moment a caller types
 # a number. This holds every public pressure, temperature and humidity to a
@@ -835,6 +848,6 @@ check: lint security test
 	snippets snippets-static claims subscripts euler-number docstring-math language-forwarding \
 	fence-names fence-readers decimal-comma spanish-accents figure-decimal-point figure-legends figure-tick-clearance \
 	figure-text-clearance figure-minus-sign control-characters hazards dead-constants raises-blocks reference-values \
-	boundary-comparisons array-aliasing record-display \
+	boundary-comparisons array-aliasing record-display return-overloads \
 	conformance-rows conformance-vocabulary parameter-units identifier-spelling choice-literals frozen-constants published-sources \
 	solid-agreement shared-sources catalogue-data catalogue-schema published-catalogues

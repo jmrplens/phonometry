@@ -94,7 +94,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 from numpy.lib.stride_tricks import sliding_window_view
@@ -287,9 +287,17 @@ class EcmaFluctuationStrength(OwnsArrays):
             axis="50 Hz frame",
         )
 
+    @overload
+    def plot(
+        self, ax: None = None, *, language: Language = "en", **kwargs: Any
+    ) -> tuple[Axes, Axes]: ...
+
+    @overload
+    def plot(self, ax: Axes, *, language: Language = "en", **kwargs: Any) -> Axes: ...
+
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
-    ) -> Axes | np.ndarray:
+    ) -> Axes | tuple[Axes, Axes]:
         """Plot the fluctuation-strength result (see :mod:`phonometry._plot.psychoacoustics`).
 
         Draws the time-dependent fluctuation strength F(l50) and a

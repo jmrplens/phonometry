@@ -15,7 +15,7 @@ figure, so both paths are drawn.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Protocol
+from typing import TYPE_CHECKING, Protocol
 
 import numpy as np
 import pytest
@@ -32,7 +32,6 @@ if TYPE_CHECKING:
     from collections.abc import Callable
 
     from matplotlib.axes import Axes
-    from numpy.typing import NDArray
 
     from phonometry.vibration.human.exposure import WeightingResponse
     from phonometry.vibration.structural import (
@@ -52,7 +51,7 @@ if TYPE_CHECKING:
         TransferStiffnessResult,
     )
 
-    Drawn = Axes | NDArray[Any]
+    Drawn = Axes | tuple[Axes, ...]
 
 
 class _Plottable(Protocol):
@@ -194,7 +193,7 @@ def _frequency_tick_labels(drawn: Drawn) -> list[str]:
     A column of panels shares one frequency axis and only the bottom panel
     shows its labels, so the panels are read together.
     """
-    axes = drawn.ravel() if isinstance(drawn, np.ndarray) else [drawn]
+    axes = list(drawn) if isinstance(drawn, tuple) else [drawn]
     return [t.get_text() for ax in axes for t in ax.get_xticklabels() if t.get_text()]
 
 

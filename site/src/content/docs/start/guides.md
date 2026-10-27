@@ -1,6 +1,6 @@
 ---
 title: "Guides"
-description: "The 168 guides of phonometry, grouped into the thirteen topics the library covers: what each area is for, the standards implemented in it, and a one-line summary of every guide inside it."
+description: "All 168 guides of phonometry in the thirteen topics it covers: what each area is for, the standards it implements and a one-line summary of every guide."
 head:
   - tag: script
     attrs:

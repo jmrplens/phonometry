@@ -1,7 +1,6 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
-r"""Sound power level of a small movable source in a special reverberation
-test room: ISO 3743-2:2018 (engineering grade 2), the direct method and the
-comparison method.
+r"""Sound power level of a small movable source in a special reverberation test
+room: ISO 3743-2:2018 (engineering grade 2), direct and comparison methods.
 
 Part 1 of ISO 3743 asks little of the room and pays with a reference sound
 source at every determination. Part 2 turns that round: the room is built to

@@ -1,15 +1,14 @@
 ---
 title: "emission: sound power in situ"
-description: "Sound power and sound energy levels of a noise source determined in situ by comparison with a reference sound source: ISO 3747:2010 (engineering grade 2 and survey grade 3)."
+description: "Sound power and sound energy levels of a source in situ, by comparison with a reference sound source: ISO 3747:2010 (engineering grade 2, survey grade 3)."
 sidebar:
   label: "sound_power_in_situ"
 ---
 
 Every name on this page is published by `phonometry.emission`: `from phonometry import emission`, then `emission.<name>`.
 
-Sound power and sound energy levels of a noise source determined in situ
-by comparison with a reference sound source: ISO 3747:2010 (engineering
-grade 2 and survey grade 3).
+Sound power and sound energy levels of a source in situ, by comparison with
+a reference sound source: ISO 3747:2010 (engineering grade 2, survey grade 3).
 
 The source stays where it works. A calibrated reference sound source (RSS)
 of known octave-band sound power `LW(RSS)` is set beside it and the same

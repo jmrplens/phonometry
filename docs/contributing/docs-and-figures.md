@@ -2,7 +2,7 @@
 
 # Documentation and figures
 
-This page governs what a reader of phonometry sees outside the code: the guides of the site, their Spanish twins and their plain-markdown mirror under `docs/`; the code fences those pages print; the figures, plates, fiches and clips the generators draw, and the `.plot()` code that draws them; how a record shows itself in a notebook; the published catalogues page; the errata register; the frames of a clip, held to the figure gates before it is encoded, and the device its field steps on; and the install commands a page prints. Read it before you add or change a guide, a figure or a renderer, an animation, an errata entry or an install command. The signature of `.plot()` and where a renderer imports matplotlib are API rules ([A28](api.md#a28), [A10](api.md#a10)); the slope of a subscript, in a docstring or on a plate, is set by [D16 to D21](docstrings.md#d16); the wording of the prose itself is in [prose.md](prose.md). Examples that import from `phonometry._plot`, `phonometry._i18n` or `phonometry._internal` stand for code inside the package, where the import is relative ([A11](api.md#a11)).
+This page governs what a reader of phonometry sees outside the code: the guides of the site, their Spanish twins and their plain-markdown mirror under `docs/`; the code fences those pages print; the figures, plates, fiches and clips the generators draw, and the `.plot()` code that draws them; how a record shows itself in a notebook; the published catalogues page; the errata register; the frames of a clip, held to the figure gates before it is encoded, and the device its field steps on; the install commands a page prints; and the description a search result shows for each page. Read it before you add or change a guide, a figure or a renderer, an animation, an errata entry or an install command. The signature of `.plot()` and where a renderer imports matplotlib are API rules ([A28](api.md#a28), [A10](api.md#a10)); the slope of a subscript, in a docstring or on a plate, is set by [D16 to D21](docstrings.md#d16); the wording of the prose itself is in [prose.md](prose.md). Examples that import from `phonometry._plot`, `phonometry._i18n` or `phonometry._internal` stand for code inside the package, where the import is relative ([A11](api.md#a11)).
 
 ## Guides and the docs mirror
 
@@ -1510,3 +1510,26 @@ pip install phonometry[torch]   # zsh: no matches found: phonometry[torch]
 **Enforced by:** `scripts/check_quoted_extras.py`, `CI: Every install command quotes its extras`, `tests/test_check_quoted_extras.py`
 
 **Exceptions.** A line that shows zsh's own "no matches found" is the failure shown on purpose. Tests are not published and are not read. A sentence that names an extra without installing it (the `[torch]` extra) is not a command. A requirement is one word of the command, so a quote that opens it quotes all of it, a path or a variable inside included.
+
+## Page descriptions
+
+<a id="f63"></a>
+### F63. Give every page a description of 160 characters or fewer that no other page of its language repeats
+
+**Why.** The frontmatter `description` is the line a search result shows under the title, and no reader of the page ever sees it. 461 of the 996 published pages carried one longer than 160 characters: Bing's tools flag "Meta Description too long or too short" (160 is the figure its older guidelines stated), Google cuts the snippet wherever it needs to, so the reader gets half a sentence, and Bing's Recommendations count "Too many pages with identical meta descriptions". A page with no description inherits the 319-character site description and fails on both counts. An API page takes its description from the opening of the module docstring ([D1](docstrings.md#d1)): the lead paragraph when it fits in 155 characters, otherwise its opening sentence, and `make api-docs` stops on a module where neither fits rather than cut one mid-sentence.
+
+**Do**
+
+```yaml
+description: "Airport noise by ECAC Doc 29: the noise-power-distance engine, per-segment corrections of a single event and SEL contours on a ground grid."
+```
+
+**Don't**
+
+```yaml
+description: "The ECAC Doc 29 airport-noise method: the noise-power-distance engine, the per-segment corrections of the single-event calculation (impedance, lateral attenuation, engine installation, duration, noise fraction, start-of-roll directivity) and the ground-grid SEL contour."
+```
+
+**Enforced by:** `site/scripts/check-descriptions.mjs`, `CI: Check every page has a short meta description of its own`, `tests/test_api_docs_generator.py::test_every_api_page_has_a_description_short_enough_to_show_whole`
+
+**Exceptions.** The Spanish API pages carry the English description of their twin and name that twin canonical (`site/src/lib/fallback-routes.mjs`), and the redirect stubs and the two error pages are not pages a search engine indexes; the check skips all three. A Spanish description is written for its page, not cut down from the English one, and the length counts characters, not bytes.

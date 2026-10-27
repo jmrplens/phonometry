@@ -1,13 +1,12 @@
 ---
 title: "emission.sound_power_plant"
-description: "Sound power levels of multisource industrial plants for the evaluation of sound pressure levels in the environment: ISO 8297:1994, engineering method (grade 2)."
+description: "Sound power levels of multisource industrial plants for evaluation of sound pressure levels in the environment: ISO 8297:1994 (engineering grade 2)."
 sidebar:
   label: "sound_power_plant"
 ---
 
-Sound power levels of multisource industrial plants for the evaluation of
-sound pressure levels in the environment: ISO 8297:1994, engineering method
-(grade 2).
+Sound power levels of multisource industrial plants for evaluation of sound
+pressure levels in the environment: ISO 8297:1994 (engineering grade 2).
 
 A petrochemical complex, a quarry or a crushing plant is too large for any
 enveloping surface of ISO 3744, and too full of sources for any one of them

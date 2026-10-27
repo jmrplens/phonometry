@@ -1,7 +1,7 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
-r"""Sound power level of a noise source by sound-intensity **scanning**:
-ISO 9614-2:1996 (engineering, grade 2; survey/control, grade 3) and
-ISO 9614-3:2002 (precision, grade 1).
+r"""Sound power level by sound-intensity **scanning**: ISO 9614-2:1996
+(engineering, grade 2; survey/control, grade 3) and ISO 9614-3:2002 (precision,
+grade 1).
 
 A probe is swept continuously over each segment of a hypothetical surface that
 encloses the source, reporting the time-averaged signed normal intensity

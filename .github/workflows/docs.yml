@@ -294,6 +294,15 @@ jobs:
         # build the way a crawler does, with no browser and no server.
         run: pnpm run check:crawl
         working-directory: site
+      - name: Check every page has a short meta description of its own
+        # The description is the line a search result shows under the title,
+        # and no reader of the page ever sees it. 461 of the 996 pages carried
+        # one past 160 characters, which Bing's tools flag as too long and
+        # Google cuts mid-sentence, with this whole job green. This reads the
+        # build and fails on a page with no description, one over 160
+        # characters or one another page of its language repeats.
+        run: pnpm run check:descriptions
+        working-directory: site
       - name: Check every formula rendered
         # KaTeX does not fail a build on a parse error: it emits a
         # `katex-error` span and ships the page. A display block whose `$$`

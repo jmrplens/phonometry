@@ -1,6 +1,6 @@
 ---
 title: "Same bits on every machine"
-description: "Why floating point drifts between hosts, what phonometry pins so a designed filter is the same filter byte for byte on any CPU, BLAS or thread count, what still separates the platforms, and the measured evidence behind the claim."
+description: "Determinism: why floating point drifts, how a designed filter stays byte-identical on any CPU, BLAS or thread count, what still differs, and the evidence."
 ---
 
 A weighting filter designed by phonometry is the same filter, byte for byte,

@@ -32,7 +32,7 @@ Each rule on a page has the same parts:
 - [Docstrings and comments](docstrings.md) (D, C): the module docstring and the document it names, function and class docstrings, the mathematics they carry, comments in the code, and how long a module grows. D rules cover docstrings and modules, C rules cover comments.
 - [Numbers and data](numerics.md) (X): comparing computed values, validating what a caller passes, the arrays a result keeps, units, references and precision, the data the package publishes, and the fields an FDTD engine steps.
 - [Tests](tests.md) (T): where a test lives, where an expected value comes from, how a test waits on an error or a warning, the data the repository keeps, guards and their exemptions, conformance rows, the workflows under `.github/`, and what the pytest configuration may import.
-- [Documentation and figures](docs-and-figures.md) (F): the guides, their Spanish twins and the `docs/` mirror, code fences, figures and the `.plot()` code that draws them, records in a notebook, the catalogues page, the errata register, the frames of a clip and the device its field steps on, and the install commands a page prints.
+- [Documentation and figures](docs-and-figures.md) (F): the guides, their Spanish twins and the `docs/` mirror, code fences, figures and the `.plot()` code that draws them, records in a notebook, the catalogues page, the errata register, the frames of a clip and the device its field steps on, the install commands a page prints, and the description of each page.
 - [Prose, commits and pull requests](prose.md) (P): the language of each surface, the characters a text may hold, citing a page, the CHANGELOG, commit messages and pull request text.
 
 ## Rules
@@ -293,6 +293,7 @@ Each rule on a page has the same parts:
 | [F60](docs-and-figures.md#f60) | Hold every frame of a clip to the figure gates before it is encoded | `scripts/clip_frame_audit.py`, `make animation-audit`, `tests/test_clip_frame_audit.py` |
 | [F61](docs-and-figures.md#f61) | Step a clip's field where the registry puts it, and keep it on that device between captures | `tests/test_clip_scenes_on_devices.py`, `tests/test_clip_placement.py` |
 | [F62](docs-and-figures.md#f62) | Quote the extras of every install command | `scripts/check_quoted_extras.py`, `CI: Every install command quotes its extras`, `tests/test_check_quoted_extras.py` |
+| [F63](docs-and-figures.md#f63) | Give every page a description of 160 characters or fewer that no other page of its language repeats | `site/scripts/check-descriptions.mjs`, `CI: Check every page has a short meta description of its own`, `tests/test_api_docs_generator.py::test_every_api_page_has_a_description_short_enough_to_show_whole` |
 
 ### Prose, commits and pull requests
 

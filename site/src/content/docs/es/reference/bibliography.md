@@ -1,6 +1,6 @@
 ---
 title: "Bibliografía"
-description: "Todas las fuentes que hay detrás de las guías en una sola lista, agrupadas por área: las normas con su ficha de catálogo, los libros y artículos con un DOI verificado o un enlace del editor, cada uno con una nota y las guías que lo citan."
+description: "Toda fuente que citan las guías, por área: normas con ficha de catálogo, libros y artículos con DOI verificado o enlace del editor, cada uno con una nota."
 ---
 
 Cada guía de este sitio nombra sus fuentes dos veces. Bajo el título va una

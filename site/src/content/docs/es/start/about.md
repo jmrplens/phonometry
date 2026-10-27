@@ -1,6 +1,6 @@
 ---
 title: "Acerca de"
-description: "Quién mantiene phonometry, cómo se construye cada métrica a partir del texto de la norma que la rige y se comprueba en CI, cómo informar de un error y cómo citar el software."
+description: "Acerca de phonometry: quién la mantiene, cómo se construye cada métrica desde su norma y se comprueba en CI, cómo informar de un error y cómo citarla."
 ---
 
 Esta página existe porque una biblioteca que te pide que confíes en sus números

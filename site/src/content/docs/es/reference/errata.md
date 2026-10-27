@@ -1,6 +1,6 @@
 ---
 title: "Erratas de las fuentes publicadas"
-description: "Defectos encontrados en las normas, los documentos de guía y los libros de los que parte la biblioteca: erratas de imprenta, ejemplos resueltos que contradicen su propio articulado y qué hace la biblioteca con cada uno."
+description: "Defectos de normas, documentos de guía y libros que usa la biblioteca: erratas, ejemplos resueltos que contradicen su articulado y cómo se trata cada uno."
 ---
 
 Implementar una norma en sala limpia significa volver a deducir cada fórmula,

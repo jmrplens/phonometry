@@ -1,6 +1,6 @@
 ---
 title: "Errata in published sources"
-description: "Defects found in the standards, guidance documents and textbooks the library implements from: misprints, worked examples that contradict their own clauses, and what the library does about each one."
+description: "Defects in the standards, guidance and textbooks the library uses: misprints, worked examples contradicting their own clauses, and how each is handled."
 ---
 
 Implementing a standard clean-room means re-deriving every formula, constant

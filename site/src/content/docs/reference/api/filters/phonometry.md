@@ -1,6 +1,6 @@
 ---
 title: "phonometry"
-description: "The top level publishes the domain subpackages and four objects that belong to no single domain. PhonometryWarning and __version__ are documented here, ReportMetadata with phonometry.building.measurement.insulation and Signal with phonometry.io; every other name is imported from its subpackage."
+description: "The top level publishes the domain subpackages and four objects that belong to no single domain."
 sidebar:
   label: "phonometry"
 head:

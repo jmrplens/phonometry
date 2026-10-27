@@ -1,6 +1,6 @@
 ---
 title: "About"
-description: "Who maintains phonometry, how each metric is built from the text of its governing standard and checked in CI, how to report an error, and how to cite the software."
+description: "About phonometry: who maintains it, how each metric is built from its governing standard and checked in CI, how to report an error and how to cite it."
 ---
 
 This page exists because a library that asks you to trust its numbers owes you

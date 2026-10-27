@@ -1,6 +1,6 @@
 ---
 title: "Inicio"
-description: "Por dónde empezar con phonometry: el primer análisis de principio a fin, el índice por tareas, el mapa de todas las guías, por qué existe la biblioteca y quién la mantiene."
+description: "Por dónde empezar con phonometry: el primer análisis completo, el índice por tareas, el mapa de guías, por qué existe la biblioteca y quién la mantiene."
 ---
 
 phonometry calcula magnitudes acústicas a partir del texto de las normas que

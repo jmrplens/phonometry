@@ -11,7 +11,10 @@ because ``list`` is invariant (a ``list[int]`` is not a ``list[float]``,
 since a function could append a float to it). The caller's code runs and
 the type checker says it does not. The remedy is the type numpy gives
 for what it converts, ``ArrayLike`` (``Signal | ArrayLike`` where a
-:class:`~phonometry.io.Signal` is accepted too).
+:class:`~phonometry.io.Signal` is accepted too). A count, a band fraction
+or a flag the body validates the way numpy code hands it over, a
+``np.int64`` from ``np.argmax`` or a ``np.True_`` from a comparison, is
+the same defect on one number.
 
 The rule, read from the source of every public function and method of the
 package (a function or class in the ``__all__`` of a public module, the
@@ -48,11 +51,43 @@ extends, an explicit ``__init__`` or ``__call__`` included):
   holds several numbers only in an array or in a ``tuple`` of a fixed
   length (``Sequence[tuple[float, float]]``, ``tuple[NDArray, NDArray]``)
   refuses the list the conversion takes, and fails;
+* a parameter that reaches a validator taking a numpy integer
+  (``require_count``, ``require_band_fraction``, ``is_class_designation``),
+  an ``isinstance`` check that lets one through (``not isinstance(n, (int,
+  np.integer))`` before a ``raise``; one that also names a float reads a
+  real number, not a count), or a public function whose own parameter is
+  annotated ``np.integer``, admits ``np.integer[Any]`` (``int |
+  np.integer[Any]``, ``BandFraction | np.integer[Any]``); one an
+  ``isinstance`` check lets ``np.bool_`` through admits ``np.bool_``
+  (``bool | np.bool_``). It is followed as a conversion is, a validation one
+  item at a time holding each item type to it. A whole float such as
+  ``3.0``, which ``require_count`` also takes, stays a leniency the
+  annotation does not state;
+* the same holds for the fields of a public record that its
+  ``__post_init__`` (or a method it calls on ``self``, or ``super()``'s)
+  validates: by attribute, by ``getattr``, in a loop over field names or
+  handed by name to a method that reads it with ``getattr``. A field the
+  record stores a value of its own in holds what it stores (the int a
+  validator returns) and keeps that annotation;
+* a mapping a parameter takes is keyed by what a typed caller's ``dict``
+  matches: ``Mapping`` is invariant in its key, so one keyed by ``float``
+  stands beside one keyed by ``int`` in the same union (``BandMapping``),
+  and one keyed by a union of several members beside one keyed by each
+  member. A key of ``Literal`` choices is narrowed by the caller as a
+  ``Literal`` parameter is, and is left as it stands;
+* the scalar quantities of the vocabulary (:data:`NAME_FAMILIES`: a sample
+  rate ``fs``, ``volume``, ``coverage``, ``confidence``,
+  ``energy_fraction``, ``fraction``) keep one family of numbers across the
+  API, parameters and record fields alike: a sample rate is a ``float``
+  wherever a function takes one, so the rate one function returns is the
+  rate the next one takes. One of another family on purpose is listed in
+  :data:`FAMILY_EXEMPT` with its reason;
 * when the function is overloaded, a caller sees only the heads, so a head
-  that takes such a parameter narrower than ``ArrayLike`` fails as well,
-  unless it takes it as a type parameter: that is a head that tells the
-  shape of its argument apart (rule A57), beside a last head that takes
-  ``ArrayLike``;
+  that takes such a parameter narrower than ``ArrayLike`` (or than the
+  numpy scalar) fails as well, unless it takes it as a type parameter:
+  that is a head that tells the shape of its argument apart (rule A57),
+  beside a last head that takes ``ArrayLike``; a head that a ``None``
+  selects takes no number;
 * a parameter whose annotation holds ``list``, ``dict`` or ``set``
   anywhere, at the top or inside (``Mapping[str, dict[str, str]]``),
   fails whatever the body does, on the implementation and on every head:
@@ -66,17 +101,18 @@ that bring them in, as ``scripts/check_return_overloads.py`` reads them
 (an alias of an alias, a renamed import, a type parameter's bound), so a
 parameter typed with an alias is held to what the alias stands for. A
 parameter of a dataclass's generated ``__init__`` is a field, which the
-record's own contract governs, and is not read here.
+record's own contract governs, and is not read by the array part.
 
-:data:`EXEMPT` is the escape hatch, keyed by file, qualified function and
-parameter, each with its reason; an entry that covers nothing fails the
-check too. The files ``scripts/gpu_parity.py`` fingerprints are exempt as a
-whole, read from its ``_COVERED`` so that the list cannot drift: an
-annotation edit there moves the fingerprint the GPU parity lock holds, and
-their parameters are typed in one batch with a GPU run of their own; the
-report counts what they hold back. A copy of the package read elsewhere
-(the scratch tree a defect is put into to see the check fail) names its
-files as the repository does, so the exemptions read it the same way.
+:data:`EXEMPT` is the escape hatch of the array part, keyed by file,
+qualified function and parameter, each with its reason; an entry that
+covers nothing fails the check too, as one of :data:`FAMILY_EXEMPT` does.
+The files ``scripts/gpu_parity.py`` fingerprints are exempt as a whole,
+read from its ``_COVERED`` so that the list cannot drift: an annotation
+edit there moves the fingerprint the GPU parity lock holds, and their
+parameters are typed in one batch with a GPU run of their own; the report
+counts what they hold back. A copy of the package read elsewhere (the
+scratch tree a defect is put into to see the check fail) names its files
+as the repository does, so the exemptions read it the same way.
 
 Static and dependency-free, so it runs on its own.
 """
@@ -95,7 +131,7 @@ import check_return_overloads as overloads
 from ast_scan import ROOT, python_files
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable, Iterator, Sequence
+    from collections.abc import Callable, Iterable, Iterator, Sequence
 
 #: Where the package lives; the default when no path is given.
 SOURCE = ROOT / "src" / "phonometry"
@@ -259,6 +295,146 @@ _SCOPES = (
     *_COMPREHENSIONS,
 )
 
+#: The names a method reads its own fields through.
+_OWNERS = frozenset({"self", "cls"})
+
+#: The arguments of ``getattr(self, "name")``: the object and the name.
+_GETATTR = 2
+
+#: The numpy integers, abstract and sized, by every name: what an
+#: ``isinstance`` check that admits a numpy integer names.
+_NUMPY_INTEGERS = frozenset(
+    name
+    for name in overloads._SCALARS
+    if name.startswith(("numpy.int", "numpy.uint"))
+    or name
+    in {
+        "numpy.integer",
+        "numpy.signedinteger",
+        "numpy.unsignedinteger",
+        "numpy.byte",
+        "numpy.short",
+        "numpy.long",
+        "numpy.longlong",
+        "numpy.ubyte",
+        "numpy.ushort",
+        "numpy.ulong",
+        "numpy.ulonglong",
+    }
+)
+
+#: The numpy truth value, by both its names.
+_NUMPY_BOOLS = frozenset({"numpy.bool_", "numpy.bool"})
+
+#: The protocols every numpy integer satisfies, which admit one as they stand.
+_INDEX_PROTOCOLS = frozenset(
+    {
+        "typing.SupportsIndex",
+        "typing.SupportsInt",
+        "typing_extensions.SupportsIndex",
+        "typing_extensions.SupportsInt",
+    }
+)
+
+#: The validators of the package that take a numpy integer as a count or a
+#: band fraction, by their name below the package, and which argument of
+#: theirs the value is: ``require_count(n, "n")``.
+_INTEGER_VALIDATORS: dict[str, tuple[int | None, str | None]] = {
+    "_internal.validation.require_count": (0, "value"),
+    "_internal.validation.require_band_fraction": (0, "value"),
+    "_internal.validation.is_class_designation": (0, "value"),
+}
+
+
+@dataclass(frozen=True)
+class Target:
+    """What one part of the rule follows a parameter to.
+
+    The array part ends at a conversion; a scalar part ends where the body
+    admits a numpy scalar of its kind: a validator of the package that takes
+    one, or an ``isinstance`` check that names one and lets it through.
+    """
+
+    #: The kind a route ends in: ``"array"``, ``"integer"`` or ``"flag"``.
+    kind: str
+    #: The calls that end a route, by dotted name (below the package for the
+    #: package's own), with the argument that is the value: its position
+    #: (``None``: every one of them) and its keyword.
+    calls: dict[str, tuple[int | None, str | None]]
+    #: The numpy types an ``isinstance`` check names to admit the kind.
+    accepted: frozenset[str] = frozenset()
+    #: Whether the calls are named below the package (``_internal...``).
+    relative: bool = False
+    #: The types that make an ``isinstance`` check one of another kind: a
+    #: check that admits a float with a numpy integer reads a real number,
+    #: not a count.
+    excluded: frozenset[str] = frozenset()
+    #: The types that end a route where a function of the package annotates
+    #: the parameter it is handed to with one of them: ``ArrayLike`` for the
+    #: array part, the numpy scalar for a scalar part.
+    typed: frozenset[str] = frozenset()
+
+
+#: The array part: a conversion of any array-like.
+CONVERSION = Target("array", _CONVERTERS, typed=_ARRAY_LIKE)
+
+#: A count, a band fraction or a class designation a validator takes a
+#: numpy integer for, or an ``isinstance`` check lets one through.
+INTEGER = Target(
+    "integer",
+    _INTEGER_VALIDATORS,
+    accepted=_NUMPY_INTEGERS | {"numbers.Integral"},
+    relative=True,
+    typed=frozenset({"numpy.integer"}),
+    excluded=frozenset(
+        {
+            "builtins.float",
+            "builtins.complex",
+            "numpy.number",
+            "numpy.inexact",
+            "numpy.floating",
+            "numpy.float64",
+            "numpy.float32",
+            "numbers.Real",
+            "numbers.Number",
+        }
+    ),
+)
+
+#: A flag an ``isinstance`` check lets ``np.bool_`` through for.
+FLAG = Target("flag", {}, accepted=_NUMPY_BOOLS, typed=_NUMPY_BOOLS)
+
+#: The scalar parts of the rule.
+SCALAR_TARGETS = (INTEGER, FLAG)
+
+#: What each scalar kind's annotation must name to admit the numpy scalar.
+_ADMITS: dict[str, frozenset[str]] = {
+    "integer": frozenset({"numpy.integer"}) | _INDEX_PROTOCOLS,
+    "flag": _NUMPY_BOOLS,
+}
+
+#: How a finding names the numpy scalar of each kind.
+_SCALAR_NAMES = {"integer": "np.integer[Any]", "flag": "np.bool_"}
+
+#: What a parameter that may hold one number is annotated with: a function
+#: whose parameter is typed otherwise (a text, a record, an array) is not
+#: followed by a scalar part.
+_SCALAR_HOLDERS = (
+    _NUMBERS
+    | _INDEX_PROTOCOLS
+    | _ARRAY_LIKE
+    | _ANYTHING
+    | {
+        "typing.SupportsFloat",
+        "typing_extensions.SupportsFloat",
+        "numbers.Number",
+        "numbers.Real",
+        "numbers.Integral",
+        "typing.Literal",
+        "typing_extensions.Literal",
+    }
+)
+
 
 @dataclass(frozen=True)
 class Finding:
@@ -269,6 +445,10 @@ class Finding:
     function: str
     parameter: str
     problem: str
+    #: The part of the rule it breaks: ``"array"`` (a conversion, or an
+    #: invariant container), ``"integer"`` or ``"flag"`` (a numpy scalar),
+    #: ``"key"`` (a mapping's key) or ``"name"`` (a quantity's family).
+    part: str = "array"
 
     @property
     def key(self) -> tuple[str, str, str]:
@@ -356,6 +536,19 @@ class Annotations:
             for where, member in self.members(module, node, bounds)
         )
 
+    def names(
+        self,
+        module: str,
+        node: ast.expr | None,
+        bounds: dict[str, ast.expr],
+        wanted: frozenset[str],
+    ) -> str | None:
+        """The member of an annotation that is one of *wanted*, as written, if one is."""
+        for where, member in self.members(module, node, bounds):
+            if self.resolve(where, member) in wanted:
+                return ast.unparse(member)
+        return None
+
     def names_array_like(
         self, module: str, node: ast.expr | None, bounds: dict[str, ast.expr]
     ) -> bool:
@@ -384,6 +577,79 @@ class Annotations:
             if self._holds_numbers(where, member, depth=0, top=False):
                 return True
         return False
+
+    def may_hold_a_number(
+        self, module: str, node: ast.expr | None, bounds: dict[str, ast.expr]
+    ) -> bool:
+        """Whether an annotation leaves room for one number.
+
+        None at all, an unbound type parameter, or a member that is a number,
+        a protocol a number satisfies, ``ArrayLike``, ``Any`` or a
+        ``Literal``; a function whose parameter is typed a text, a record or
+        an array is not followed by a scalar part.
+        """
+        if node is None:
+            return True
+        return any(
+            dotted is None or dotted in _SCALAR_HOLDERS
+            for dotted in (
+                self.resolve(where, member)
+                for where, member in self.members(module, node, bounds)
+                if not _is_none(member)
+            )
+        )
+
+    def admits_scalar(
+        self,
+        kind: str,
+        module: str,
+        node: ast.expr | None,
+        bounds: dict[str, ast.expr],
+    ) -> bool:
+        """Whether an annotation lets the numpy scalar of *kind* through.
+
+        ``np.integer[Any]`` (or a protocol every numpy integer satisfies,
+        ``SupportsIndex``) for an integer, ``np.bool_`` for a flag; or
+        ``ArrayLike`` or anything, which take every numpy scalar. No
+        annotation at all admits it too.
+        """
+        if node is None:
+            return True
+        return any(
+            self.resolve(where, member) in _ADMITS[kind] | _ARRAY_LIKE | _ANYTHING
+            for where, member in self.members(module, node, bounds)
+        )
+
+    def items_refusing(
+        self,
+        kind: str,
+        module: str,
+        node: ast.expr | None,
+        bounds: dict[str, ast.expr],
+    ) -> list[str]:
+        """The item types of an annotation's sequences that refuse the numpy scalar of *kind*.
+
+        A body that validates a parameter one item at a time (``for n in
+        orders: require_count(n, ...)``) takes each item as the validator
+        does. One sequence of the annotation whose items admit it is enough:
+        ``Sequence[int] | Sequence[np.integer[Any]]`` takes a list of numpy
+        integers as it takes a list of ints.
+        """
+        if node is None or self.admits_array_like(module, node, bounds):
+            return []
+        found: dict[str, None] = {}
+        for where, member in self.members(module, node, bounds):
+            if self.resolve(where, member) not in _CONTAINERS:
+                continue
+            refusing = [
+                ast.unparse(item)
+                for item in _items(member)
+                if not (_is_ellipsis(item) or self.admits_scalar(kind, where, item, {}))
+            ]
+            if not refusing:
+                return []
+            found.update(dict.fromkeys(refusing))
+        return list(found)
 
     def several_numbers(
         self, module: str, node: ast.expr | None, bounds: dict[str, ast.expr]
@@ -491,6 +757,10 @@ class Annotations:
         return sorted(set(found))
 
 
+def _is_none(node: ast.expr) -> bool:
+    return isinstance(node, ast.Constant) and node.value is None
+
+
 def _is_ellipsis(node: ast.expr) -> bool:
     return isinstance(node, ast.Constant) and node.value is Ellipsis
 
@@ -520,10 +790,55 @@ def _is_type_parameter(written: ast.expr | None, own: dict[str, ast.expr]) -> bo
     return isinstance(written, ast.Name) and written.id in own
 
 
+def _named(node: ast.expr | None) -> str | None:
+    """The name an expression reads: a local name, or a field of ``self`` or ``cls``.
+
+    ``self.fraction`` and ``getattr(self, "fraction")`` read the field a
+    record's ``__post_init__`` validates, named ``self.fraction``.
+    """
+    if isinstance(node, ast.Name):
+        return node.id
+    if (
+        isinstance(node, ast.Attribute)
+        and isinstance(node.value, ast.Name)
+        and node.value.id in _OWNERS
+    ):
+        return f"{node.value.id}.{node.attr}"
+    if (
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id == "getattr"
+        and len(node.args) >= _GETATTR
+        and isinstance(node.args[0], ast.Name)
+        and node.args[0].id in _OWNERS
+    ):
+        field = node.args[1]
+        if isinstance(field, ast.Constant) and isinstance(field.value, str):
+            return f"{node.args[0].id}.{field.value}"
+        if isinstance(field, ast.Name):
+            return _by_name(node.args[0].id, field.id)
+    return None
+
+
+def _is_super(node: ast.expr) -> bool:
+    """Whether an expression is ``super()``."""
+    return (
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id == "super"
+    )
+
+
+def _by_name(owner: str, name: str) -> str:
+    """How a body names the field a local name holds the name of: ``getattr(self, name)``."""
+    return f"{owner}.{{{name}}}"
+
+
 def _carries(node: ast.expr | None, names: frozenset[str]) -> bool:
     """Whether an expression is one of *names*, or chooses between them."""
-    if isinstance(node, ast.Name):
-        return node.id in names
+    named = _named(node)
+    if named is not None:
+        return named in names
     if isinstance(node, ast.IfExp):
         return _carries(node.body, names) or _carries(node.orelse, names)
     if isinstance(node, ast.BoolOp):
@@ -675,7 +990,7 @@ def _scope_nodes(scope: ast.AST) -> tuple[list[ast.AST], list[ast.AST]]:
     return own, nested
 
 
-def _rebound(
+def _own_bindings(
     scope: ast.AST, own: list[ast.AST], nested: list[ast.AST]
 ) -> frozenset[str]:
     """The names a nested scope binds for itself, which hide the enclosing body's.
@@ -726,10 +1041,18 @@ def _rebound(
 
 def _close(own: list[ast.AST], names: dict[str, set[str]]) -> None:
     """Add to *names* every local name the nodes of one scope bind to the parameter."""
+    statements = [
+        child
+        for child in own
+        if isinstance(
+            child,
+            ast.Assign | ast.AnnAssign | ast.For | ast.AsyncFor | ast.comprehension,
+        )
+    ]
     changed = True
     while changed:
         changed = False
-        for child in own:
+        for child in statements:
             if isinstance(child, ast.Assign):
                 found = [
                     pair
@@ -748,9 +1071,63 @@ def _close(own: list[ast.AST], names: dict[str, set[str]]) -> None:
                     changed = True
 
 
+def _visible(name: str, hidden: frozenset[str]) -> bool:
+    """Whether a name bound to the parameter reads it in a nested scope that binds *hidden* for itself.
+
+    ``self.n_tubes`` reads the field while ``self`` is the enclosing body's,
+    and ``getattr(self, name)`` while ``name`` is too.
+    """
+    owner, _, field = name.partition(".")
+    if owner in hidden:
+        return False
+    return not (field.startswith("{") and field[1:-1] in hidden)
+
+
+#: How a scope splits into the nodes it evaluates itself and the scopes
+#: nested in it (:func:`_scope_nodes`).
+type Splitter = Callable[[ast.AST], tuple[list[ast.AST], list[ast.AST]]]
+
+
+@dataclass(frozen=True)
+class Reading:
+    """One parameter read through the scopes of a body."""
+
+    #: The parameter, or a field of the record a method reads (``self.n_tubes``).
+    name: str
+    #: The texts a constant of the module holds, a tuple of field names.
+    texts: Callable[[ast.expr], tuple[str, ...]]
+    #: How a scope splits, read once per scope by a reader of several names.
+    split: Splitter
+
+    def by_name(self, loops: list[ast.AST], names: dict[str, set[str]]) -> set[str]:
+        """The names ``getattr(self, name)`` reads the field under in the loops of one scope.
+
+        A loop over field names that holds the field's (``for name in
+        ("n_tubes", ...)``, or over a constant of the module that holds
+        them, read by :attr:`texts`) binds ``getattr(self, name)`` to it,
+        where the field is the enclosing body's.
+        """
+        owner, _, field = self.name.partition(".")
+        if (
+            owner not in _OWNERS
+            or not field
+            or field.startswith("{")
+            or self.name not in names["whole"]
+        ):
+            return set()
+        return {
+            _by_name(owner, loop.target.id)
+            for loop in loops
+            if isinstance(loop, ast.For | ast.AsyncFor | ast.comprehension)
+            and isinstance(loop.target, ast.Name)
+            and field in _field_names(loop.iter, self.texts)
+        }
+
+
 def _scoped(
     scope: ast.AST,
     names: dict[str, set[str]],
+    reading: Reading,
     outside: dict[str, set[str]] | None = None,
 ) -> Iterator[tuple[ast.Call, Bound]]:
     """Each call of a scope and of its nested scopes, with the names bound to the parameter there.
@@ -762,7 +1139,9 @@ def _scoped(
     enclosing body, a closure, is. The scopes nested in a class body read
     the scope around the class (*outside*), not the class's own names.
     """
-    own, nested = _scope_nodes(scope)
+    own, nested = reading.split(scope)
+    first = [scope.generators[0]] if isinstance(scope, _COMPREHENSIONS) else []
+    names["whole"].update(reading.by_name([*first, *own], names))
     _close(own, names)
     bound = Bound(
         whole=frozenset(names["whole"]),
@@ -776,22 +1155,49 @@ def _scoped(
         outside if isinstance(scope, ast.ClassDef) and outside is not None else names
     )
     for inner in nested:
-        hidden = _rebound(inner, *_scope_nodes(inner))
-        seeds = {kind: values - hidden for kind, values in around.items()}
+        hidden = _own_bindings(inner, *reading.split(inner))
+        seeds = {
+            kind: {value for value in values if _visible(value, hidden)}
+            for kind, values in around.items()
+        }
         if isinstance(inner, _COMPREHENSIONS):
-            first = inner.generators[0]
-            for local, kind in _taken(first.target, first.iter, names):
+            first_loop = inner.generators[0]
+            for local, kind in _taken(first_loop.target, first_loop.iter, names):
                 seeds[kind].add(local)
-        yield from _scoped(inner, seeds, names)
+        yield from _scoped(inner, seeds, reading, names)
 
 
 def _bound(
-    node: ast.FunctionDef | ast.AsyncFunctionDef, name: str, *, vararg: bool
-) -> Iterator[tuple[ast.Call, Bound]]:
-    """Each call of a body, with the local names bound to parameter *name* where it is made."""
+    node: ast.FunctionDef | ast.AsyncFunctionDef,
+    name: str,
+    *,
+    vararg: bool,
+    texts: Callable[[ast.expr], tuple[str, ...]] = lambda _node: (),
+    split: Splitter = _scope_nodes,
+) -> list[tuple[ast.Call, Bound]]:
+    """Each call of a body, with the local names bound to parameter *name* where it is made.
+
+    For a field, ``self.n_tubes``, a loop over field names that holds its
+    name binds ``getattr(self, name)`` to it (:meth:`Reading.by_name`).
+    *split* is how a scope splits (:func:`_scope_nodes`), which a reader of
+    several names of one body reads once per scope.
+    """
     names: dict[str, set[str]] = {"whole": set(), "pack": set(), "item": set()}
     names["pack" if vararg else "whole"].add(name)
-    return _scoped(node, names)
+    return list(_scoped(node, names, Reading(name, texts, split)))
+
+
+def _field_names(
+    node: ast.expr, texts: Callable[[ast.expr], tuple[str, ...]]
+) -> tuple[str, ...]:
+    """The texts a loop takes in turn: a literal of them, or a constant that holds them."""
+    if isinstance(node, ast.Tuple | ast.List | ast.Set):
+        return tuple(
+            element.value
+            for element in node.elts
+            if isinstance(element, ast.Constant) and isinstance(element.value, str)
+        )
+    return texts(node)
 
 
 def _holds(node: ast.expr, names: frozenset[str]) -> bool:
@@ -816,11 +1222,22 @@ def _is_static(node: ast.FunctionDef | ast.AsyncFunctionDef) -> bool:
 
 
 class Reader:
-    """Follows a parameter from a public function to a conversion of it."""
+    """Follows a parameter from a public function to where its body admits it."""
 
     def __init__(self, package: overloads.Package) -> None:
         self.package = package
         self.annotations = Annotations(package)
+        #: The package's own top-level name, which names its validators.
+        self.root = min(package.trees, key=len).split(".")[0] if package.trees else ""
+        self._binding: dict[tuple[int, str, bool], list[tuple[ast.Call, Bound]]] = {}
+        self._scopes: dict[int, tuple[list[ast.AST], list[ast.AST]]] = {}
+        self._rebound: dict[int, frozenset[str]] = {}
+        self._calls: dict[int, list[ast.Call]] = {}
+        self._refusing: dict[int, frozenset[int]] = {}
+        self._memo: dict[tuple[str, str, str, str], list[tuple[str, bool, int]]] = {}
+        self._active: set[tuple[str, str, str, str]] = set()
+        self._cut = False
+        self._public: frozenset[str] | None = None
 
     def _bounds(self, function: overloads.Function) -> dict[str, ast.expr]:
         owner = (
@@ -849,10 +1266,47 @@ class Reader:
                     return method
         return None
 
+    @property
+    def public_names(self) -> frozenset[str]:
+        """The dotted names of the public functions and methods of the package.
+
+        A scalar part ends where a parameter is handed to one of them that
+        takes the numpy scalar: the public API takes a count the same way at
+        each step of a hand-off. A private helper typed widely, a resolver
+        that also serves the functions of a whole-number rate, says nothing
+        about what its callers take.
+        """
+        if self._public is None:
+            self._public = frozenset(
+                f"{function.module}.{function.qualname}"
+                for function in public_functions(self.package)
+            )
+        return self._public
+
+    def _inherited(self, owner: str, name: str) -> str | None:
+        """The method ``super().name`` reaches from a class: its bases' first."""
+        found = self.annotations.classes.get(owner)
+        if found is None:
+            return None
+        module, node = found
+        for base in node.bases:
+            target = self.package.resolve(module, base)
+            if target is not None and target in self.annotations.classes:
+                method = self._method(target, name)
+                if method is not None:
+                    return method
+        return None
+
+    def _ends(self, target: Target) -> dict[str, tuple[int | None, str | None]]:
+        """The calls that end a route of *target*, by their dotted name."""
+        if not target.relative:
+            return target.calls
+        return {f"{self.root}.{name}": where for name, where in target.calls.items()}
+
     def _callee(
-        self, function: overloads.Function, call: ast.Call
+        self, function: overloads.Function, call: ast.Call, ends: Iterable[str]
     ) -> tuple[str, bool] | None:
-        """What a call reaches: a function of the package, or a numpy conversion.
+        """What a call reaches: a function of the package, or one that ends a route.
 
         With whether the callee's first parameter is filled by the call
         itself (``self`` of a method, the instance of a constructor).
@@ -860,8 +1314,18 @@ class Reader:
         func = call.func
         if (
             isinstance(func, ast.Attribute)
+            and _is_super(func.value)
+            and function.owner is not None
+        ):
+            method = self._inherited(f"{function.module}.{function.owner}", func.attr)
+            if method is None:
+                return None
+            node = self.package.functions[method].implementation
+            return method, node is not None and not _is_static(node)
+        if (
+            isinstance(func, ast.Attribute)
             and isinstance(func.value, ast.Name)
-            and func.value.id in {"self", "cls"}
+            and func.value.id in _OWNERS
             and function.owner is not None
         ):
             owner = f"{function.module}.{function.owner}"
@@ -878,7 +1342,7 @@ class Reader:
         target = self.package.resolve(function.module, func, local)
         if target is None:
             return None
-        if target in _CONVERTERS:
+        if target in ends or target == "builtins.isinstance":
             return target, False
         if target in self.annotations.classes:
             constructor = self._method(target, "__init__")
@@ -893,35 +1357,181 @@ class Reader:
         return None
 
     def conversion(
-        self, function: overloads.Function, name: str, *, item: bool = False
+        self,
+        function: overloads.Function,
+        name: str,
+        *,
+        item: bool = False,
+        target: Target = CONVERSION,
     ) -> str | None:
-        """How parameter *name* of *function* reaches a conversion, if it does.
+        """How parameter *name* of *function* reaches the end of a route of *target*.
 
-        With *item*, how one item of it does, the body reading the parameter
-        item by item.
+        A conversion for the array part, a validator or a check that admits
+        a numpy scalar for a scalar part. With *item*, how one item of it
+        does, the body reading the parameter item by item.
         """
-        for how, of_item in self._routes(function, name, 0, frozenset()):
+        for how, of_item in self._routes(function, name, 0, target):
             if of_item == item:
                 return how
         return None
+
+    def _bound(
+        self,
+        function: overloads.Function,
+        node: ast.FunctionDef | ast.AsyncFunctionDef,
+        name: str,
+        *,
+        vararg: bool,
+    ) -> list[tuple[ast.Call, Bound]]:
+        """Each call of a body, with the names bound to *name* where it is made, read once."""
+        key = (id(node), name, vararg)
+        if key not in self._binding:
+            self._binding[key] = _bound(
+                node,
+                name,
+                vararg=vararg,
+                texts=lambda found: self._texts(function.module, found),
+                split=self._split,
+            )
+        return self._binding[key]
+
+    def _split(self, scope: ast.AST) -> tuple[list[ast.AST], list[ast.AST]]:
+        """How a scope splits (:func:`_scope_nodes`), read once per scope."""
+        if id(scope) not in self._scopes:
+            self._scopes[id(scope)] = _scope_nodes(scope)
+        return self._scopes[id(scope)]
+
+    def rebound(self, function: overloads.Function) -> frozenset[str]:
+        """The fields a method stores a value of its own in, by name.
+
+        ``object.__setattr__(self, "n", ...)``, ``setattr(self, "n", ...)``,
+        or either of them in a loop over field names (``for name in
+        _FEATURES: object.__setattr__(self, name, ...)``).
+        """
+        node = function.implementation
+        if node is None:
+            return frozenset()
+        if id(node) not in self._rebound:
+            self._rebound[id(node)] = _rebound(
+                node, lambda found: self._texts(function.module, found)
+            )
+        return self._rebound[id(node)]
+
+    def _texts(self, module: str, node: ast.expr) -> tuple[str, ...]:
+        """The texts a module constant holds, a tuple of field names."""
+        dotted = self.package.resolve(module, node)
+        if dotted is None or dotted not in self.package.constants:
+            return ()
+        where, value = self.package.constants[dotted]
+        if isinstance(value, ast.Call) and value.args:
+            value = value.args[0]
+        return _field_names(value, lambda _node: ())
+
+    def _calls_of(self, node: ast.FunctionDef | ast.AsyncFunctionDef) -> list[ast.Call]:
+        if id(node) not in self._calls:
+            self._calls[id(node)] = [
+                call for call in ast.walk(node) if isinstance(call, ast.Call)
+            ]
+        return self._calls[id(node)]
+
+    def _admits(
+        self, function: overloads.Function, call: ast.Call, target: Target
+    ) -> bool:
+        """Whether an ``isinstance`` call lets the numpy scalar of *target* through.
+
+        It names one of the types the target accepts and is not a refusal:
+        a check that raises when it holds (``if isinstance(x, np.bool_):
+        raise``) keeps that type out.
+        """
+        node = function.implementation
+        if node is None or len(call.args) != _GETATTR or not target.accepted:
+            return False
+        named = self._type_names(function.module, call.args[1], 0)
+        if not named & target.accepted or named & target.excluded:
+            return False
+        if id(node) not in self._refusing:
+            self._refusing[id(node)] = _refusals(node)
+        return id(call) not in self._refusing[id(node)]
+
+    def _type_names(self, module: str, node: ast.expr, depth: int) -> set[str]:
+        """The classes the second argument of ``isinstance`` names, constants read through."""
+        if depth > _NESTING:
+            return set()
+        if isinstance(node, ast.Tuple | ast.List):
+            return {
+                name
+                for element in node.elts
+                for name in self._type_names(module, element, depth + 1)
+            }
+        if isinstance(node, ast.BinOp) and isinstance(node.op, ast.BitOr):
+            return self._type_names(module, node.left, depth + 1) | self._type_names(
+                module, node.right, depth + 1
+            )
+        dotted = self.package.resolve(module, node)
+        if dotted is None:
+            return set()
+        if dotted in self.package.constants:
+            where, value = self.package.constants[dotted]
+            return self._type_names(where, value, depth + 1)
+        return {dotted}
 
     def _routes(
         self,
         function: overloads.Function,
         name: str,
         depth: int,
-        seen: frozenset[str],
+        target: Target,
     ) -> Iterator[tuple[str, bool]]:
-        """Each way parameter *name* reaches a conversion, and whether an item of it does."""
+        """Each way parameter *name* reaches the end of a route, and whether an item of it does.
+
+        Only the routes that stay within :data:`DEPTH` calls of the public
+        function, *depth* calls having been made to reach this one.
+        """
+        for how, of_item, hops in self._known_routes(function, name, target):
+            if hops <= DEPTH - depth:
+                yield how, of_item
+
+    def _known_routes(
+        self, function: overloads.Function, name: str, target: Target
+    ) -> list[tuple[str, bool, int]]:
+        """Every route of one parameter, with the calls it takes, read once.
+
+        A helper several public functions hand a value to is read once per
+        part of the rule. A route that comes back to a parameter still being
+        read (a recursion) ends there, as a path that visits a parameter twice
+        does; what was read along it is not kept, so another way in reads it
+        whole.
+        """
+        key = (function.module, function.qualname, name, target.kind)
+        if key in self._memo:
+            return self._memo[key]
+        if key in self._active:
+            self._cut = True
+            return []
+        self._active.add(key)
+        outer, self._cut = self._cut, False
+        found = list(self._read_routes(function, name, target))
+        self._active.discard(key)
+        if not self._cut:
+            self._memo[key] = found
+        self._cut = self._cut or outer
+        return found
+
+    def _read_routes(
+        self, function: overloads.Function, name: str, target: Target
+    ) -> Iterator[tuple[str, bool, int]]:
         node = function.implementation
-        if node is None or depth > DEPTH:
+        if node is None:
             return
         vararg = node.args.vararg is not None and node.args.vararg.arg == name
-        for call, bound in _bound(node, name, vararg=vararg):
+        ends = self._ends(target)
+        for call, bound in self._bound(function, node, name, vararg=vararg):
             for names, of_item in (
                 (bound.whole | bound.pack, False),
                 (bound.item, True),
             ):
+                if not names:
+                    continue
                 positions = [
                     index
                     for index, value in enumerate(call.args)
@@ -934,38 +1544,144 @@ class Reader:
                 ]
                 if not (positions or keywords):
                     continue
-                callee = self._callee(function, call)
+                callee = self._callee(function, call, ends)
                 if callee is None:
                     continue
-                target, bound_self = callee
-                if target in _CONVERTERS:
-                    where, keyword = _CONVERTERS[target]
-                    if where is None or where in positions or keyword in keywords:
-                        yield f"{target.replace('numpy.', 'np.')}()", of_item
+                reached, bound_self = callee
+                if reached == "builtins.isinstance":
+                    if 0 in positions and self._admits(function, call, target):
+                        accepted = sorted(
+                            self._type_names(function.module, call.args[1], 0)
+                            & target.accepted
+                        )
+                        shown = accepted[0].replace("numpy.", "np.")
+                        yield f"isinstance(..., {shown}) admits it", of_item, 0
                     continue
-                for how, deeper in self._handed(
-                    target,
-                    positions,
-                    keywords,
-                    bound=bound_self,
-                    depth=depth,
-                    seen=seen,
+                if reached in ends:
+                    where, keyword = ends[reached]
+                    if where is None or where in positions or keyword in keywords:
+                        yield _ending(reached, target), of_item, 0
+                    continue
+                for how, deeper, hops in self._handed(
+                    reached, positions, keywords, bound=bound_self, target=target
                 ):
                     if not (of_item and deeper):
-                        yield how, of_item or deeper
+                        yield how, of_item or deeper, hops
+            yield from self._handed_by_name(function, call, name, target)
+            yield from self._read_in_method(function, call, name, target)
+
+    def _read_in_method(
+        self,
+        function: overloads.Function,
+        call: ast.Call,
+        name: str,
+        target: Target,
+    ) -> Iterator[tuple[str, bool, int]]:
+        """A field a method of the record reads for itself (``self._hold_counts()``)."""
+        owner, _, field = name.partition(".")
+        func = call.func
+        if not (
+            owner in _OWNERS
+            and field
+            and isinstance(func, ast.Attribute)
+            and (
+                (isinstance(func.value, ast.Name) and func.value.id == owner)
+                or _is_super(func.value)
+            )
+        ):
+            return
+        callee = self._callee(function, call, ())
+        if callee is None or callee[0] not in self.package.functions:
+            return
+        method = self.package.functions[callee[0]]
+        for deeper, of_item, hops in self._known_routes(method, name, target):
+            yield f"read in {method.qualname}(), {deeper}", of_item, hops + 1
+
+    def stored_fields(
+        self, function: overloads.Function, depth: int = 0
+    ) -> frozenset[str]:
+        """The fields a method, or a method of its class it calls on ``self``, stores in."""
+        node = function.implementation
+        if node is None or depth > _HIERARCHY:
+            return frozenset()
+        stored = set(self.rebound(function))
+        for call in self._calls_of(node):
+            func = call.func
+            if not (
+                isinstance(func, ast.Attribute)
+                and (
+                    (isinstance(func.value, ast.Name) and func.value.id == "self")
+                    or _is_super(func.value)
+                )
+            ):
+                continue
+            callee = self._callee(function, call, ())
+            if callee is None or callee[0] not in self.package.functions:
+                continue
+            stored |= self.stored_fields(self.package.functions[callee[0]], depth + 1)
+        return frozenset(stored)
+
+    def _handed_by_name(
+        self,
+        function: overloads.Function,
+        call: ast.Call,
+        name: str,
+        target: Target,
+    ) -> Iterator[tuple[str, bool, int]]:
+        """A field handed by its name to a method that reads it with ``getattr``.
+
+        ``self._check_bool("overload_latched", ...)`` hands the field
+        ``self.overload_latched`` to a method whose parameter holds its name.
+        """
+        owner, _, field = name.partition(".")
+        if owner not in _OWNERS or not field or field.startswith("{"):
+            return
+        given = [
+            index
+            for index, value in enumerate(call.args)
+            if isinstance(value, ast.Constant) and value.value == field
+        ]
+        keywords = [
+            keyword.arg
+            for keyword in call.keywords
+            if keyword.arg is not None
+            and isinstance(keyword.value, ast.Constant)
+            and keyword.value.value == field
+        ]
+        if not (given or keywords):
+            return
+        callee = self._callee(function, call, ())
+        if callee is None or callee[0] not in self.package.functions:
+            return
+        reached, bound_self = callee
+        node = self.package.functions[reached].implementation
+        if node is None:
+            return
+        positional = _positional(node, bound=bound_self)
+        received = [positional[index].arg for index in given if index < len(positional)]
+        received.extend(keywords)
+        method = self.package.functions[reached]
+        for parameter in dict.fromkeys(received):
+            for deeper, of_item, hops in self._known_routes(
+                method, _by_name(owner, parameter), target
+            ):
+                yield (
+                    f"handed by name to {method.qualname}({parameter}), {deeper}",
+                    of_item,
+                    hops + 1,
+                )
 
     def _handed(
         self,
-        target: str,
+        reached: str,
         positions: list[int],
         keywords: list[str],
         *,
         bound: bool,
-        depth: int,
-        seen: frozenset[str],
-    ) -> Iterator[tuple[str, bool]]:
+        target: Target,
+    ) -> Iterator[tuple[str, bool, int]]:
         """What the function a parameter is handed to does with it."""
-        callee = self.package.functions[target]
+        callee = self.package.functions[reached]
         node = callee.implementation
         if node is None:
             return
@@ -976,20 +1692,72 @@ class Reader:
         ]
         received.extend(keyword for keyword in keywords if keyword in parameters)
         bounds = self._bounds(callee)
-        for parameter in received:
-            key = f"{target}({parameter})"
-            if key in seen:
-                continue
+        annotations = self.annotations
+        for parameter in dict.fromkeys(received):
             annotation = parameters[parameter].annotation
-            if self.annotations.names_array_like(callee.module, annotation, bounds):
-                yield f"handed to {callee.qualname}({parameter}: ArrayLike)", False
-                continue
-            if not self.annotations.may_hold_numbers(callee.module, annotation, bounds):
-                continue
-            for deeper, of_item in self._routes(
-                callee, parameter, depth + 1, seen | {key}
+            named = annotations.names(callee.module, annotation, bounds, target.typed)
+            if named is not None and (
+                target is CONVERSION or reached in self.public_names
             ):
-                yield f"handed to {callee.qualname}({parameter}), {deeper}", of_item
+                yield f"handed to {callee.qualname}({parameter}: {named})", False, 1
+                continue
+            if target is CONVERSION:
+                if not annotations.may_hold_numbers(callee.module, annotation, bounds):
+                    continue
+            elif not annotations.may_hold_a_number(callee.module, annotation, bounds):
+                continue
+            for deeper, of_item, hops in self._known_routes(callee, parameter, target):
+                yield (
+                    f"handed to {callee.qualname}({parameter}), {deeper}",
+                    of_item,
+                    hops + 1,
+                )
+
+
+def _ending(reached: str, target: Target) -> str:
+    """How a route names the call it ends in: ``np.asarray()``, ``require_count() takes it``."""
+    short = reached.rpartition(".")[2]
+    if target is CONVERSION:
+        return f"{'np.' if reached.startswith('numpy.') else ''}{short}()"
+    return f"{short}() takes it"
+
+
+def _refusals(node: ast.FunctionDef | ast.AsyncFunctionDef) -> frozenset[int]:
+    """The ``isinstance`` calls of a body that keep a type out.
+
+    A call an ``if`` tests as it stands, not negated, whose branch raises
+    (``if isinstance(x, bool | np.bool_): raise TypeError``) refuses what it
+    names; one tested under ``not`` (``if not isinstance(x, (int,
+    np.integer)): raise``) admits it, as does any other use.
+    """
+    refusing: set[int] = set()
+    for child in ast.walk(node):
+        if (
+            isinstance(child, ast.If)
+            and child.body
+            and isinstance(child.body[0], ast.Raise)
+        ):
+            refusing.update(
+                id(call) for call, negated in _tested(child.test) if not negated
+            )
+    return frozenset(refusing)
+
+
+def _tested(
+    node: ast.expr, *, negated: bool = False
+) -> Iterator[tuple[ast.Call, bool]]:
+    """The ``isinstance`` calls a condition tests, each with whether it is negated."""
+    if isinstance(node, ast.UnaryOp) and isinstance(node.op, ast.Not):
+        yield from _tested(node.operand, negated=not negated)
+    elif isinstance(node, ast.BoolOp):
+        for value in node.values:
+            yield from _tested(value, negated=negated)
+    elif (
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id == "isinstance"
+    ):
+        yield node, negated
 
 
 def public_functions(package: overloads.Package) -> Iterator[overloads.Function]:
@@ -1090,6 +1858,13 @@ def findings_in(files: Sequence[pathlib.Path], root: pathlib.Path) -> list[Findi
         found.extend(
             _conversion_findings(reader, function, path, bounds, method=method)
         )
+        found.extend(_scalar_findings(reader, function, path, bounds, method=method))
+        for definition in function.definitions:
+            found.extend(
+                _key_findings(reader, function, definition, path, bounds, method=method)
+            )
+    found.extend(_field_findings(reader, root))
+    found.extend(_name_findings(reader, root))
     return sorted(set(found), key=lambda item: (item.path, item.line, item.parameter))
 
 
@@ -1231,6 +2006,744 @@ def _invariant_findings(
     return found
 
 
+def _definitions(
+    function: overloads.Function,
+    name: str,
+    bounds: dict[str, ast.expr],
+) -> list[
+    tuple[ast.FunctionDef | ast.AsyncFunctionDef, ast.expr | None, dict[str, ast.expr]]
+]:
+    """The implementation and each head that names parameter *name*, with its annotation.
+
+    A head that takes the parameter as one of its own type parameters tells
+    the shape of its argument apart (rule A57) and is left out.
+    """
+    found: list[
+        tuple[
+            ast.FunctionDef | ast.AsyncFunctionDef, ast.expr | None, dict[str, ast.expr]
+        ]
+    ] = []
+    node = function.implementation
+    if node is not None and name in overloads._parameters(node):
+        found.append((node, overloads._parameters(node)[name].annotation, bounds))
+    for head in function.heads:
+        parameters = overloads._parameters(head)
+        if name not in parameters:
+            continue
+        written, own = parameters[name].annotation, _type_bounds(head)
+        if not _is_type_parameter(written, own):
+            found.append((head, written, {**bounds, **own}))
+    return found
+
+
+def _scalar_findings(
+    reader: Reader,
+    function: overloads.Function,
+    path: str,
+    bounds: dict[str, ast.expr],
+    *,
+    method: bool,
+) -> list[Finding]:
+    """The parameters whose body admits a numpy scalar their annotation refuses.
+
+    A count a validator such as ``require_count`` takes a numpy integer for,
+    a band fraction ``require_band_fraction`` takes one for, a flag an
+    ``isinstance`` check lets ``np.bool_`` through for: the implementation
+    and every head that names the parameter admit that numpy scalar too, as
+    a whole or, for a body that validates one item at a time, in each item.
+    """
+    node = function.implementation
+    if node is None:
+        return []
+    found: list[Finding] = []
+    for parameter in _arguments(node, method=method):
+        found.extend(
+            _scalar_problems(
+                reader,
+                function,
+                f"{function.module}",
+                parameter.arg,
+                _definitions(function, parameter.arg, bounds),
+                path,
+            )
+        )
+    return found
+
+
+def _scalar_problems(
+    reader: Reader,
+    function: overloads.Function,
+    module: str,
+    name: str,
+    definitions: Sequence[tuple[ast.AST | _Line, ast.expr | None, dict[str, ast.expr]]],
+    path: str,
+    *,
+    owner: str | None = None,
+) -> list[Finding]:
+    """The scalar findings of one parameter or field, read against its definitions."""
+    annotations = reader.annotations
+    shown = owner if owner is not None else function.qualname
+    field = name.removeprefix("self.")
+    found: list[Finding] = []
+    for target in SCALAR_TARGETS:
+        kind = target.kind
+        numpy_name = _SCALAR_NAMES[kind]
+        how = reader.conversion(function, name, target=target)
+        if how is not None:
+            for definition, written, own in definitions:
+                if annotations.admits_scalar(
+                    kind, module, written, own
+                ) or not annotations.may_hold_a_number(module, written, own):
+                    continue
+                found.append(
+                    Finding(
+                        path,
+                        getattr(definition, "lineno", 0),
+                        shown,
+                        field,
+                        f"annotated {_shown(written)}, which refuses {numpy_name}, "
+                        f"while {how}",
+                        part=kind,
+                    )
+                )
+                break
+        how = reader.conversion(function, name, item=True, target=target)
+        if how is None:
+            continue
+        for definition, written, own in definitions:
+            items = annotations.items_refusing(kind, module, written, own)
+            if not items:
+                continue
+            found.append(
+                Finding(
+                    path,
+                    getattr(definition, "lineno", 0),
+                    shown,
+                    field,
+                    f"annotated {_shown(written)}, whose items ({', '.join(items)}) "
+                    f"refuse {numpy_name}, while an item {how}",
+                    part=kind,
+                )
+            )
+            break
+    return found
+
+
+def _shown(annotation: ast.expr | None) -> str:
+    return ast.unparse(annotation) if annotation is not None else "nothing"
+
+
+#: The containers whose key a typed caller's ``dict`` must match exactly.
+_MAPPINGS = frozenset(
+    {
+        "typing.Mapping",
+        "typing.MutableMapping",
+        "collections.abc.Mapping",
+        "collections.abc.MutableMapping",
+    }
+)
+
+#: The choices a key may be a ``Literal`` of, which a typed caller narrows.
+_LITERALS = frozenset({"typing.Literal", "typing_extensions.Literal"})
+
+#: A key a ``dict`` of a narrower key does not match: a mapping keyed by
+#: ``float`` refuses a ``dict[int, ...]``, one keyed by ``complex`` a
+#: ``dict[int, ...]`` and a ``dict[float, ...]`` too.
+_WIDENED_KEYS: dict[str, tuple[str, ...]] = {
+    "builtins.float": ("builtins.int",),
+    "builtins.complex": ("builtins.int", "builtins.float"),
+}
+
+#: What a finding calls each key a mapping must also be offered with.
+_KEY_NAMES = {"builtins.int": "int", "builtins.float": "float", "None": "None"}
+
+
+def _key(annotations: Annotations, module: str, node: ast.expr) -> str:
+    """One member of a mapping's key, by its dotted name (``None`` for ``None``)."""
+    if isinstance(node, ast.Constant) and node.value is None:
+        return "None"
+    dotted = annotations.resolve(module, node)
+    return dotted if dotted is not None else ast.unparse(node)
+
+
+def key_problems(
+    annotations: Annotations,
+    module: str,
+    node: ast.expr | None,
+    bounds: dict[str, ast.expr],
+    depth: int = 0,
+) -> list[str]:
+    """The mappings of an annotation whose key refuses a typed caller's ``dict``.
+
+    ``Mapping`` is invariant in its key, so a ``dict[int, float]`` is not a
+    ``Mapping[float, float]``, and a ``dict[int, M]`` is not a
+    ``Mapping[int | None, M]``. A mapping keyed by ``float`` (or ``complex``)
+    is offered beside one keyed by ``int`` (and ``float``) in the same union,
+    and one keyed by a union of several members beside one keyed by each
+    member: ``Mapping[int, float] | Mapping[float, float]``. A key that is a
+    ``Literal`` of choices is narrowed by the caller as a ``Literal``
+    parameter is, and is left as it stands. Mappings inside the items of a
+    container or the values of a mapping are read too.
+    """
+    if node is None or depth > _NESTING:
+        return []
+    members = annotations.members(module, node, bounds)
+    keyed: list[tuple[str, ast.expr, list[str]]] = []
+    for where, member in members:
+        if annotations.resolve(where, member) not in _MAPPINGS:
+            continue
+        items = _items(member)
+        if not items:
+            continue
+        keys = [
+            _key(annotations, inner_module, inner)
+            for inner_module, inner in annotations.members(where, items[0])
+            if annotations.resolve(inner_module, inner) not in _LITERALS
+        ]
+        keyed.append((where, member, keys))
+    offered = {keys[0] for _, _, keys in keyed if len(keys) == 1}
+    problems: list[str] = []
+    for _, member, keys in keyed:
+        wanted = set(keys) if len(keys) > 1 else set()
+        for key in keys:
+            wanted.update(_WIDENED_KEYS.get(key, ()))
+        missing = sorted(wanted - offered)
+        if missing:
+            names = ", ".join(
+                _KEY_NAMES.get(key, key.rpartition(".")[2]) for key in missing
+            )
+            problems.append(f"{ast.unparse(member)} with no mapping keyed by {names}")
+    for where, member in members:
+        if annotations.resolve(where, member) in _LITERALS:
+            continue
+        for item in _items(member):
+            for inner in item.elts if isinstance(item, ast.List) else [item]:
+                problems.extend(key_problems(annotations, where, inner, {}, depth + 1))
+    return list(dict.fromkeys(problems))
+
+
+def _key_findings(
+    reader: Reader,
+    function: overloads.Function,
+    node: ast.FunctionDef | ast.AsyncFunctionDef,
+    path: str,
+    bounds: dict[str, ast.expr],
+    *,
+    method: bool,
+) -> list[Finding]:
+    """The parameters of one definition with a mapping a typed caller's ``dict`` cannot match."""
+    found: list[Finding] = []
+    own = {**bounds, **_type_bounds(node)}
+    for parameter in _arguments(node, method=method):
+        problems = key_problems(
+            reader.annotations, function.module, parameter.annotation, own
+        )
+        if problems:
+            found.append(
+                Finding(
+                    path,
+                    node.lineno,
+                    function.qualname,
+                    parameter.arg,
+                    f"holds {'; '.join(problems)}, which refuses a typed caller's "
+                    "dict of the narrower key",
+                    part="key",
+                )
+            )
+    return found
+
+
+#: The decorator that makes a class a record with generated fields.
+_DATACLASS = frozenset({"dataclasses.dataclass"})
+
+#: The annotations that make a class attribute something other than a field.
+_NOT_FIELDS = frozenset(
+    {"typing.ClassVar", "typing_extensions.ClassVar", "dataclasses.InitVar"}
+)
+
+
+@dataclass(frozen=True)
+class Field:
+    """A field of a public record: where it is written, and its annotation."""
+
+    #: The record the field belongs to, by its dotted name.
+    record: str
+    #: The module the field is written in, and the line.
+    module: str
+    line: int
+    name: str
+    annotation: ast.expr
+
+
+def _is_dataclass(package: overloads.Package, module: str, node: ast.ClassDef) -> bool:
+    for decorator in node.decorator_list:
+        called = decorator.func if isinstance(decorator, ast.Call) else decorator
+        if package.resolve(module, called) in _DATACLASS:
+            return True
+    return False
+
+
+def _field_default_off(
+    node: ast.AnnAssign, package: overloads.Package, module: str
+) -> bool:
+    """Whether a field is left out of ``__init__`` (``field(init=False)``)."""
+    value = node.value
+    return (
+        isinstance(value, ast.Call)
+        and package.resolve(module, value.func) == "dataclasses.field"
+        and any(
+            keyword.arg == "init"
+            and isinstance(keyword.value, ast.Constant)
+            and keyword.value.value is False
+            for keyword in value.keywords
+        )
+    )
+
+
+def record_fields(
+    package: overloads.Package, annotations: Annotations, record: str, depth: int = 0
+) -> dict[str, Field]:
+    """The fields a record's ``__init__`` takes, its bases' first, by name."""
+    found = annotations.classes.get(record)
+    if found is None or depth > _HIERARCHY:
+        return {}
+    module, node = found
+    fields: dict[str, Field] = {}
+    for base in node.bases:
+        target = package.resolve(module, base)
+        if target is not None and target in annotations.classes:
+            fields.update(record_fields(package, annotations, target, depth + 1))
+    if not _is_dataclass(package, module, node):
+        return fields
+    for child in node.body:
+        if not (
+            isinstance(child, ast.AnnAssign)
+            and isinstance(child.target, ast.Name)
+            and child.simple
+        ):
+            continue
+        written = child.annotation
+        base = written.value if isinstance(written, ast.Subscript) else written
+        if package.resolve(module, base) in _NOT_FIELDS:
+            continue
+        if _field_default_off(child, package, module):
+            fields.pop(child.target.id, None)
+            continue
+        fields[child.target.id] = Field(
+            record, module, child.lineno, child.target.id, written
+        )
+    return fields
+
+
+def public_records(
+    package: overloads.Package, annotations: Annotations
+) -> Iterator[str]:
+    """Every public record of the package, by its dotted name, each once."""
+    seen: set[str] = set()
+    for module, tree in sorted(package.trees.items()):
+        if any(part.startswith("_") for part in module.split(".")[1:]):
+            continue
+        for name in _exported(tree):
+            target = package.canonical(f"{module}.{name}")
+            if target in seen or target not in annotations.classes:
+                continue
+            seen.add(target)
+            where, node = annotations.classes[target]
+            if _is_dataclass(package, where, node):
+                yield target
+
+
+def _rebound(
+    node: ast.FunctionDef | ast.AsyncFunctionDef,
+    texts: Callable[[ast.expr], tuple[str, ...]],
+) -> frozenset[str]:
+    """The fields a method stores a value of its own in, by name.
+
+    By the field's name, or through a loop over field names
+    (``for name in _FEATURES: object.__setattr__(self, name, ...)``).
+    """
+    looping: dict[str, tuple[str, ...]] = {}
+    for loop in ast.walk(node):
+        if isinstance(loop, ast.For | ast.AsyncFor | ast.comprehension) and isinstance(
+            loop.target, ast.Name
+        ):
+            looping.setdefault(loop.target.id, ())
+            looping[loop.target.id] += _field_names(loop.iter, texts)
+    stored: set[str] = set()
+    for call in ast.walk(node):
+        if not (isinstance(call, ast.Call) and len(call.args) >= _SETATTR):
+            continue
+        func = call.func
+        setter = (
+            isinstance(func, ast.Attribute)
+            and func.attr == "__setattr__"
+            and isinstance(func.value, ast.Name)
+            and func.value.id == "object"
+        ) or (isinstance(func, ast.Name) and func.id == "setattr")
+        if not setter:
+            continue
+        field = call.args[1]
+        if isinstance(field, ast.Constant) and isinstance(field.value, str):
+            stored.add(field.value)
+        elif isinstance(field, ast.Name):
+            stored.update(looping.get(field.id, ()))
+    return frozenset(stored)
+
+
+#: The arguments of ``object.__setattr__(self, "name", value)``.
+_SETATTR = 3
+
+
+def _field_findings(reader: Reader, root: pathlib.Path) -> list[Finding]:
+    """The fields of public records whose ``__post_init__`` admits a numpy scalar their annotation refuses.
+
+    A field a validator takes a numpy integer for, or an ``isinstance``
+    check lets ``np.bool_`` through for, and that the record keeps as it was
+    given, holds that numpy scalar: its annotation names it. A field the
+    ``__post_init__`` stores a value of its own in holds what it stores.
+    """
+    package = reader.package
+    annotations = reader.annotations
+    found: list[Finding] = []
+    for record in public_records(package, annotations):
+        dotted = reader._method(record, "__post_init__")
+        if dotted is None:
+            continue
+        post_init = package.functions[dotted]
+        node = post_init.implementation
+        if node is None:
+            continue
+        stored = reader.stored_fields(post_init)
+        for field in record_fields(package, annotations, record).values():
+            if field.name in stored:
+                continue
+            path = repository_path(package.paths[field.module], root)
+            found.extend(
+                _scalar_problems(
+                    reader,
+                    post_init,
+                    field.module,
+                    f"self.{field.name}",
+                    [(_Line(field.line), field.annotation, {})],
+                    path,
+                    owner=record.removeprefix(f"{field.module}."),
+                )
+            )
+    return found
+
+
+@dataclass(frozen=True)
+class _Line:
+    """A line a finding is reported on, where no definition stands."""
+
+    lineno: int
+
+
+#: The scalar quantities of the library's vocabulary (rule N12 of
+#: ``docs/contributing/naming.md``), and the family of numbers each one is
+#: annotated with across the API: a sample rate is a real number wherever a
+#: function takes one, so that the rate one function returns is the rate
+#: another one takes.
+NAME_FAMILIES: dict[str, str] = {
+    "fs": "real",
+    "volume": "real",
+    "coverage": "real",
+    "confidence": "real",
+    "energy_fraction": "real",
+    "fraction": "whole",
+}
+
+#: Why a generator takes a whole number of samples per second.
+_GENERATED_AT_A_WHOLE_RATE = (
+    "builds its record sample by sample at a whole number of samples per "
+    "second, the rate a converter plays it at, and refuses a fraction "
+    "(require_count): a whole rate takes an int or a numpy integer"
+)
+
+#: Why an analysis takes a whole number of samples per second.
+_RESAMPLED_BY_AN_INTEGER_RATIO = (
+    "resamples the record by an integer ratio (scipy.signal.resample_poly), "
+    "which a fractional rate has none of, and refuses one (require_count)"
+)
+
+#: Why a function that hands its rate to loudness_zwicker takes a whole one.
+_HANDED_TO_ZWICKER = (
+    "hands its rate to loudness_zwicker, which resamples by an integer ratio "
+    "and takes a whole number of samples per second"
+)
+
+#: Why a record of a whole-rate function holds an int.
+_HOLDS_THE_WHOLE_RATE = (
+    "holds the whole rate its function validated (require_count), as the int it is"
+)
+
+#: Why the filter functions take any positive bandwidth.
+_BANDWIDTH_DESIGNATOR = (
+    "the bandwidth designator b of a 1/b-octave filter (IEC 61260-1), any "
+    "positive number (1.5, 6, 12 and 24 run), not the 1 or 3 of a band set"
+)
+
+_SRC = "src/phonometry/"
+
+#: The parameters and fields named for a quantity of :data:`NAME_FAMILIES`
+#: that keep another family on purpose, keyed by file, function or record,
+#: and name, each with the reason.
+FAMILY_EXEMPT: dict[tuple[str, str, str], str] = {
+    (
+        f"{_SRC}electroacoustics/headphones.py",
+        "headphone_modulation_signal",
+        "fs",
+    ): _GENERATED_AT_A_WHOLE_RATE,
+    (
+        f"{_SRC}electroacoustics/headphones.py",
+        "headphone_difference_frequency_signal",
+        "fs",
+    ): _GENERATED_AT_A_WHOLE_RATE,
+    (
+        f"{_SRC}electroacoustics/induction_loop.py",
+        "loop_test_noise",
+        "fs",
+    ): _GENERATED_AT_A_WHOLE_RATE,
+    (
+        f"{_SRC}electroacoustics/induction_loop.py",
+        "combi_signal",
+        "fs",
+    ): _GENERATED_AT_A_WHOLE_RATE,
+    (
+        f"{_SRC}electroacoustics/program_signal.py",
+        "simulated_program_signal",
+        "fs",
+    ): _GENERATED_AT_A_WHOLE_RATE,
+    (f"{_SRC}room/image_source.py", "image_source_rir", "fs"): (
+        "samples the impulse response on a grid of a whole number of samples "
+        "per second, the rate the record it is convolved with or written to "
+        "holds, and refuses a fraction (require_count)"
+    ),
+    (
+        f"{_SRC}electroacoustics/induction_loop.py",
+        "field_strength_meter",
+        "fs",
+    ): (
+        "reads a record taken at a whole number of samples per second through "
+        "its weighting and time-weighting filters and refuses a fraction "
+        "(require_count), as the meter of IEC 60118-4 Annex B does"
+    ),
+    (
+        f"{_SRC}psychoacoustics/loudness/zwicker.py",
+        "loudness_zwicker",
+        "fs",
+    ): _RESAMPLED_BY_AN_INTEGER_RATIO,
+    (f"{_SRC}speech/objective_intelligibility.py", "stoi", "fs"): (
+        _RESAMPLED_BY_AN_INTEGER_RATIO
+    ),
+    (
+        f"{_SRC}psychoacoustics/quality/annoyance.py",
+        "psychoacoustic_annoyance_from_signal",
+        "fs",
+    ): _HANDED_TO_ZWICKER,
+    (f"{_SRC}psychoacoustics/quality/sharpness.py", "sharpness_din", "fs"): (
+        _HANDED_TO_ZWICKER
+    ),
+    (
+        f"{_SRC}electroacoustics/induction_loop.py",
+        "FieldStrengthReading",
+        "fs",
+    ): _HOLDS_THE_WHOLE_RATE,
+    (f"{_SRC}room/image_source.py", "ImageSourceResult", "fs"): (_HOLDS_THE_WHOLE_RATE),
+    (f"{_SRC}speech/objective_intelligibility.py", "STOIResult", "fs"): (
+        "the 10 kHz the measure resamples every record to, a whole number "
+        "fixed by the method"
+    ),
+    (f"{_SRC}io/_wav.py", "AudioFileInfo", "fs"): (
+        "read from the file's header, which stores a whole number of samples per second"
+    ),
+    (
+        f"{_SRC}emission/_sound_power_intensity.py",
+        "PrecisionFieldIndicators",
+        "fs",
+    ): (
+        "F_S, the field non-uniformity indicator of ISO 9614-3 Annex B, one "
+        "value per band: the symbol the standard prints, not a sample rate"
+    ),
+    (f"{_SRC}room/auditorium.py", "LateralEnergyResult", "energy_fraction"): (
+        "the early lateral energy fraction of each band, which a result "
+        "holds as an array, one per band"
+    ),
+    (f"{_SRC}filters/compliance.py", "class_limits", "fraction"): (
+        _BANDWIDTH_DESIGNATOR
+    ),
+    (f"{_SRC}filters/core.py", "OctaveFilterBank.__init__", "fraction"): (
+        _BANDWIDTH_DESIGNATOR
+    ),
+    (f"{_SRC}filters/core.py", "octave_filter", "fraction"): _BANDWIDTH_DESIGNATOR,
+    (f"{_SRC}filters/frequencies.py", "nominal_frequencies", "fraction"): (
+        _BANDWIDTH_DESIGNATOR
+    ),
+    (
+        f"{_SRC}filters/periodic_tests.py",
+        "periodic_test_frequencies",
+        "fraction",
+    ): _BANDWIDTH_DESIGNATOR,
+    (
+        f"{_SRC}filters/periodic_tests.py",
+        "FilterPeriodicVerification",
+        "fraction",
+    ): _BANDWIDTH_DESIGNATOR,
+    (f"{_SRC}filters/periodic_tests.py", "verify_filter_periodic", "fraction"): (
+        _BANDWIDTH_DESIGNATOR
+    ),
+    (f"{_SRC}filters/time_invariance.py", "swept_band_level", "fraction"): (
+        _BANDWIDTH_DESIGNATOR
+    ),
+    (f"{_SRC}filters/time_invariance.py", "TimeInvarianceResult", "fraction"): (
+        _BANDWIDTH_DESIGNATOR
+    ),
+    (f"{_SRC}signals/spectra.py", "fractional_octave_smoothing", "fraction"): (
+        _BANDWIDTH_DESIGNATOR
+    ),
+}
+
+#: The real numbers, as an annotation names them.
+_REALS = frozenset(
+    {
+        "builtins.float",
+        "numpy.floating",
+        "numpy.float16",
+        "numpy.float32",
+        "numpy.float64",
+        "numpy.half",
+        "numpy.single",
+        "numpy.double",
+        "numpy.longdouble",
+        "typing.SupportsFloat",
+        "typing_extensions.SupportsFloat",
+        "numbers.Real",
+    }
+)
+
+#: The whole numbers, as an annotation names them; a ``Literal`` of them
+#: (``BandFraction``) is one too.
+_WHOLES = _NUMPY_INTEGERS | _INDEX_PROTOCOLS | {"builtins.int", "numbers.Integral"}
+
+
+def family(
+    annotations: Annotations,
+    module: str,
+    node: ast.expr | None,
+    bounds: dict[str, ast.expr],
+) -> str:
+    """The family of numbers an annotation takes: ``"array"``, ``"real"``, ``"whole"``.
+
+    The widest one it names, ``None`` left out: an array or a sequence, then
+    a real number, then a whole one. An annotation that names none of them is
+    its own family, written as it stands.
+    """
+    if node is None:
+        return "unannotated"
+    kinds: set[str] = set()
+    for where, member in annotations.members(module, node, bounds):
+        if isinstance(member, ast.Constant) and member.value is None:
+            continue
+        dotted = annotations.resolve(where, member)
+        if dotted in overloads._ARRAYS | _ARRAY_LIKE | _CONTAINERS:
+            kinds.add("array")
+        elif dotted in _REALS:
+            kinds.add("real")
+        elif dotted in _WHOLES or (
+            dotted in _LITERALS and _literal_values(member, int)
+        ):
+            kinds.add("whole")
+        else:
+            kinds.add(ast.unparse(member))
+    for kind in ("array", "real", "whole"):
+        if kind in kinds:
+            return kind
+    return " | ".join(sorted(kinds))
+
+
+def _literal_values(node: ast.expr, kind: type) -> bool:
+    """Whether every choice of a ``Literal`` is of *kind* (``int`` for ``Literal[1, 3]``)."""
+    values = _items(node)
+    return bool(values) and all(
+        isinstance(value, ast.Constant) and type(value.value) is kind
+        for value in values
+    )
+
+
+def _name_findings(reader: Reader, root: pathlib.Path) -> list[Finding]:
+    """The parameters and fields named for a quantity whose annotation leaves its family.
+
+    Every public parameter (of the implementation and of each overload
+    head) and every field of a public record named for a quantity of
+    :data:`NAME_FAMILIES`.
+    """
+    package = reader.package
+    annotations = reader.annotations
+    found: list[Finding] = []
+    for function in public_functions(package):
+        path = repository_path(package.paths[function.module], root)
+        method = function.owner is not None
+        bounds = reader._bounds(function)
+        for definition in function.definitions:
+            own = {**bounds, **_type_bounds(definition)}
+            for parameter in _arguments(definition, method=method):
+                expected = NAME_FAMILIES.get(parameter.arg)
+                if expected is None:
+                    continue
+                kind = family(annotations, function.module, parameter.annotation, own)
+                if kind != expected:
+                    found.append(
+                        _family_finding(
+                            path,
+                            definition.lineno,
+                            function.qualname,
+                            parameter.arg,
+                            parameter.annotation,
+                            kind,
+                            expected,
+                        )
+                    )
+    for record in public_records(package, annotations):
+        for field in record_fields(package, annotations, record).values():
+            expected = NAME_FAMILIES.get(field.name)
+            if expected is None:
+                continue
+            kind = family(annotations, field.module, field.annotation, {})
+            if kind != expected:
+                found.append(
+                    _family_finding(
+                        repository_path(package.paths[field.module], root),
+                        field.line,
+                        record.removeprefix(f"{field.module}."),
+                        field.name,
+                        field.annotation,
+                        kind,
+                        expected,
+                    )
+                )
+    return found
+
+
+def _family_finding(
+    path: str,
+    line: int,
+    owner: str,
+    name: str,
+    annotation: ast.expr | None,
+    kind: str,
+    expected: str,
+) -> Finding:
+    return Finding(
+        path,
+        line,
+        owner,
+        name,
+        f"annotated {_shown(annotation)}, a {kind} number, where every '{name}' "
+        f"of the API is a {expected} one",
+        part="name",
+    )
+
+
 def repository_path(path: str, root: pathlib.Path) -> str:
     """A file of the package as the repository names it, a copy's included.
 
@@ -1267,6 +2780,29 @@ def checked(
     return kept, sorted(set(exempt) - used)
 
 
+def judged(
+    findings: Sequence[Finding],
+) -> tuple[list[Finding], list[tuple[str, tuple[str, str, str]]]]:
+    """The findings no exemption covers, and each exemption that covers none.
+
+    :data:`EXEMPT` covers the array part, :data:`FAMILY_EXEMPT` the
+    quantities kept in another family; the numpy-scalar and mapping-key
+    parts have no exemption. A stale exemption comes with the table that
+    lists it.
+    """
+    found, stale = checked([f for f in findings if f.part == "array"], EXEMPT)
+    named, stale_named = checked(
+        [f for f in findings if f.part == "name"], FAMILY_EXEMPT
+    )
+    rest = [f for f in findings if f.part not in {"array", "name"}]
+    every = sorted(
+        [*found, *named, *rest], key=lambda item: (item.path, item.line, item.parameter)
+    )
+    return every, [("EXEMPT", key) for key in stale] + [
+        ("FAMILY_EXEMPT", key) for key in stale_named
+    ]
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     """Report every public parameter annotated narrower than what its body accepts."""
     parser = argparse.ArgumentParser(description=__doc__)
@@ -1283,7 +2819,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     root = arguments.package.resolve()
     every = findings_in(python_files([], root), root)
     kept, held = held_for_gpu(every, gpu_parity_files())
-    found, stale = checked(kept, EXEMPT)
+    found, stale = judged(kept)
     if held:
         print(
             f"{len(held)} parameter(s) of the GPU-parity files are left out: "
@@ -1291,8 +2827,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         )
     if not (found or stale):
         print(
-            "Every public parameter admits what its body converts, and none "
-            "holds an invariant list, dict or set."
+            "Every public parameter admits what its body converts and the "
+            "numpy scalar its body validates, none holds an invariant list, "
+            "dict or set or a mapping a narrower key cannot match, and every "
+            "quantity of the vocabulary keeps its family of numbers."
         )
         return 0
     if found:
@@ -1306,11 +2844,16 @@ def main(argv: Sequence[str] | None = None) -> int:
             "  -> annotate a parameter the body converts with ArrayLike "
             "(Signal | ArrayLike where a Signal is taken too), a list of "
             "records or texts with Sequence[...], and a mapping with "
-            "Mapping[...]. A parameter narrower on purpose goes in EXEMPT at "
+            "Mapping[...]; a count a validator takes a numpy integer for with "
+            "int | np.integer[Any], a band fraction with BandFraction | "
+            "np.integer[Any], a flag with bool | np.bool_; a mapping keyed by "
+            "float beside one keyed by int (BandMapping); a sample rate as the "
+            "float every 'fs' of the API is. A parameter narrower on purpose "
+            "goes in EXEMPT, a quantity of another family in FAMILY_EXEMPT, at "
             "the top of scripts/check_parameter_annotations.py with its reason."
         )
-    for key in stale:
-        print(f"::error::EXEMPT lists {key}, which needs no exemption any more")
+    for table, key in stale:
+        print(f"::error::{table} lists {key}, which needs no exemption any more")
     return 1
 
 

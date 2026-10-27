@@ -70,8 +70,8 @@ does not pass: nothing was measured, so nothing was qualified.
 ```python
 verify_aircraft_noise_system(
     *,
-    directional: Mapping[float, Mapping[float, float]] | None = None,
-    frequency_response: Mapping[float, float] | None = None,
+    directional: Mapping[int, Mapping[int, float] | Mapping[float, float]] | Mapping[float, Mapping[int, float] | Mapping[float, float]] | None = None,
+    frequency_response: Mapping[int, float] | Mapping[float, float] | None = None,
     linearity: Mapping[str, float] | None = None,
     resolution: float | None = None,
 ) -> AircraftSystemComplianceResult

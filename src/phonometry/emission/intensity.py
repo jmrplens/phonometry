@@ -605,7 +605,7 @@ def _band_integrals(
     df: float,
     fraction: int,
     band_limits: list[float],
-    fs: int,
+    fs: float,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Integrate the two spectral densities over the ANSI S1.11/IEC 61260-1 bands.
 
@@ -644,7 +644,7 @@ def _validate_probe_signals(x1: np.ndarray, x2: np.ndarray) -> None:
     require_equal_counts("sound_intensity", {"p1": x1.size, "p2": x2.size}, "sample")
 
 
-def _validate_probe_medium(fs: int, spacing: float, rho: float, c: float) -> None:
+def _validate_probe_medium(fs: float, spacing: float, rho: float, c: float) -> None:
     """Reject a non-physical sample rate, probe spacing or medium."""
     require_scalar(c, "c")
     require_scalar(fs, "fs")
@@ -685,7 +685,7 @@ def _validate_band_options(fraction: int | None, limits: RealValues | None) -> N
 def sound_intensity(
     p1: SignalInput,
     p2: SignalInput,
-    fs: int | None = None,
+    fs: float | None = None,
     *,
     spacing_m: float,
     density: float = 1.204,

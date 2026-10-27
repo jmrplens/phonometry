@@ -348,7 +348,7 @@ def reference_source_reproducibility(
     *,
     environment: CalibrationEnvironment,
     arrangement: MicrophoneArrangement | None = None,
-    fraction: BandFraction = 3,
+    fraction: BandFraction | np.integer[Any] = 3,
 ) -> np.ndarray:
     r"""Standard deviation of reproducibility of a calibration (ISO 6926 Table 2).
 
@@ -602,7 +602,7 @@ class ReferenceSourceCalibration(OwnsArrays):
         self,
         frequencies: ArrayLike,
         *,
-        fraction: BandFraction = 3,
+        fraction: BandFraction | np.integer[Any] = 3,
         temperature_c: float | None = None,
         static_pressure_kpa: float | None = None,
     ) -> np.ndarray:

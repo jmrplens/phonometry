@@ -481,7 +481,7 @@ def strike_sel_spectrum(
     pressure_pa: SignalInput,
     fs: float | None = None,
     *,
-    fraction: int = 3,
+    fraction: int | np.integer[Any] = 3,
     limits: tuple[float, float] = (10.0, 20_000.0),
 ) -> StrikeSELSpectrum:
     r"""Band-resolved single-strike sound exposure level.

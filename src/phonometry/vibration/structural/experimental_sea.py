@@ -223,7 +223,7 @@ def cylindrical_shell_modal_density(
     mean_radius: float,
     longitudinal_wave_speed: float,
     *,
-    fraction: BandFraction = 1,
+    fraction: BandFraction | np.integer[Any] = 1,
 ) -> NDArray[np.float64]:
     r"""Average modal density of a thin-walled cylinder (Norton 6.27-6.29).
 

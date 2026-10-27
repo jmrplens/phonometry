@@ -515,7 +515,7 @@ check_service_equipment_positions(
     room_positions_m: ArrayLike,
     *,
     source_positions_m: ArrayLike | None = None,
-    small_room: bool = False,
+    small_room: bool | np.bool_ = False,
     corner_obstacle_distance_m: ArrayLike | None = None,
 ) -> ServiceEquipmentPositionCheck
 ```
@@ -693,7 +693,7 @@ Requires matplotlib (`pip install "phonometry[plot]"`).
 loudest_corner(
     c_weighted_levels: ArrayLike,
     *,
-    excluded: Sequence[int] = (),
+    excluded: Sequence[int | np.integer[Any]] = (),
 ) -> int
 ```
 
@@ -993,7 +993,7 @@ service_equipment_level(
     *,
     frequencies: ArrayLike,
     quantity: Literal['Smax', 'Fmax', 'eq'],
-    fraction: Literal[1, 3] = 3,
+    fraction: Literal[1, 3] | np.integer[Any] = 3,
     background_levels: ArrayLike | None = None,
     reverberation_time: ArrayLike | None = None,
     volume: float | None = None,
@@ -1355,7 +1355,7 @@ At least 0,50 m (0,30 m in a small room) from every surface.
 ```python
 ServiceEquipmentResult(
     frequencies: np.ndarray,
-    fraction: int,
+    fraction: Literal[1, 3],
     quantity: Literal['Smax', 'Fmax', 'eq'],
     a_weighting_range: Literal['restricted', 'extended'],
     reading_levels: np.ndarray,

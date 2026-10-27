@@ -295,7 +295,7 @@ def harmonic_distortion(
     fs: float | None = None,
     *,
     fundamental: float,
-    order: int,
+    order: int | np.integer[Any],
     n_harmonics: int = _DEFAULT_N_HARMONICS,
     window: str = "hann",
 ) -> float:

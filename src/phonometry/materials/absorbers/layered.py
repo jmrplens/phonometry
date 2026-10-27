@@ -838,7 +838,7 @@ def diffuse_field_absorption(
     layers: Sequence[Layer],
     *,
     angle_limit_rad: float = np.pi / 2.0,
-    n_quadrature_points: int = 64,
+    n_quadrature_points: int | np.integer[Any] = 64,
     termination: TerminationName | ArrayLike = "rigid",
     fluid: Fluid = ABSORBER_AIR,
 ) -> DiffuseFieldAbsorptionResult:

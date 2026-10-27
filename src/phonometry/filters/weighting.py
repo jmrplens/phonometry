@@ -517,7 +517,9 @@ def _cached_weighting_sos(curve: str, fs: int, *, high_accuracy: bool) -> np.nda
     return shared
 
 
-def _weighting_sos(curve: str, fs: int, *, high_accuracy: bool) -> np.ndarray:
+def _weighting_sos(
+    curve: str, fs: float, *, high_accuracy: bool | np.bool_
+) -> np.ndarray:
     """Second-order sections of *curve* at *fs*, cached on the three inputs.
 
     Two designs live here, and ``high_accuracy`` picks between them:
@@ -569,12 +571,12 @@ class WeightingFilter:
 
     def __init__(
         self,
-        fs: int,
+        fs: float,
         weighting: Weighting = "A",
         *,
         stateful: bool = False,
         steady_ic: bool = False,
-        high_accuracy: bool = True,
+        high_accuracy: bool | np.bool_ = True,
     ) -> None:
         """Initialize the weighting filter.
 
@@ -771,7 +773,7 @@ def _cached_weighting_filter(
 def _as_envelope(
     x: Signal | ArrayLike,
     mean_square: np.ndarray,
-    fs: int,
+    fs: float,
     mode: Mode,
 ) -> TimeWeightedEnvelope | np.ndarray:
     """Wrap the envelope for a Signal input, leave a bare array alone.
@@ -817,7 +819,7 @@ class TimeWeightedEnvelope(OwnsArrays):
     """
 
     mean_square: np.ndarray
-    fs: int
+    fs: float
     mode: Mode
     _: KW_ONLY
     calibrated: bool
@@ -884,29 +886,29 @@ class TimeWeightedEnvelope(OwnsArrays):
 @overload
 def weighting_filter(
     x: Signal,
-    fs: int | None = ...,
+    fs: float | None = ...,
     weighting: Weighting = ...,
     *,
-    high_accuracy: bool = ...,
+    high_accuracy: bool | np.bool_ = ...,
 ) -> Signal: ...
 
 
 @overload
 def weighting_filter(
     x: ArrayLike,
-    fs: int,
+    fs: float,
     weighting: Weighting = ...,
     *,
-    high_accuracy: bool = ...,
+    high_accuracy: bool | np.bool_ = ...,
 ) -> np.ndarray: ...
 
 
 def weighting_filter(
     x: Signal | ArrayLike,
-    fs: int | None = None,
+    fs: float | None = None,
     weighting: Weighting = "A",
     *,
-    high_accuracy: bool = True,
+    high_accuracy: bool | np.bool_ = True,
 ) -> Signal | np.ndarray:
     """Apply a frequency weighting to a signal.
 
@@ -1008,7 +1010,7 @@ else:  # pragma: no cover - exercised only without numba installed
 @overload
 def time_weighting(
     x: Signal,
-    fs: int | None = ...,
+    fs: float | None = ...,
     mode: Mode = ...,
     initial_state: InitialState | ArrayLike | None = ...,
 ) -> TimeWeightedEnvelope: ...
@@ -1017,7 +1019,7 @@ def time_weighting(
 @overload
 def time_weighting(
     x: ArrayLike,
-    fs: int,
+    fs: float,
     mode: Mode = ...,
     initial_state: InitialState | ArrayLike | None = ...,
 ) -> np.ndarray: ...
@@ -1025,7 +1027,7 @@ def time_weighting(
 
 def time_weighting(
     x: Signal | ArrayLike,
-    fs: int | None = None,
+    fs: float | None = None,
     mode: Mode = "fast",
     initial_state: InitialState | ArrayLike | None = None,
 ) -> TimeWeightedEnvelope | np.ndarray:
@@ -1101,7 +1103,7 @@ class TimeWeighting:
     across blocks, so concatenated block outputs equal a single continuous call.
     """
 
-    def __init__(self, fs: int, mode: Mode = "fast") -> None:
+    def __init__(self, fs: float, mode: Mode = "fast") -> None:
         """:param fs: Sample rate in Hz.
         :param mode: 'fast' (125 ms), 'slow' (1000 ms) or 'impulse' (35 ms / 1.5 s).
         :raises TypeError: if ``fs`` is not a single number.
@@ -1152,19 +1154,19 @@ class TimeWeighting:
 
 @overload
 def linkwitz_riley(
-    x: Signal, fs: int | None = ..., *, frequency: float, order: int = ...
+    x: Signal, fs: float | None = ..., *, frequency: float, order: int = ...
 ) -> tuple[Signal, Signal]: ...
 
 
 @overload
 def linkwitz_riley(
-    x: ArrayLike, fs: int, *, frequency: float, order: int = ...
+    x: ArrayLike, fs: float, *, frequency: float, order: int = ...
 ) -> tuple[np.ndarray, np.ndarray]: ...
 
 
 def linkwitz_riley(
     x: Signal | ArrayLike,
-    fs: int | None = None,
+    fs: float | None = None,
     *,
     frequency: float,
     order: int = 4,

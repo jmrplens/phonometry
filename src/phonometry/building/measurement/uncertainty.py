@@ -735,7 +735,7 @@ def uncertain_value(
 def prediction_input_uncertainty(
     sigma_reproducibility: float,
     sigma_product: float,
-    n: int,
+    n: int | np.integer[Any],
 ) -> float:
     r"""The prediction input uncertainty ``u_input`` (Formula A.1).
 

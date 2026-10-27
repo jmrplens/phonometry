@@ -417,11 +417,13 @@ def passage_average_level(levels: ArrayLike, *, axis: None = None) -> float: ...
 
 
 @overload
-def passage_average_level(levels: ArrayLike, *, axis: int) -> NDArray[np.float64]: ...
+def passage_average_level(
+    levels: ArrayLike, *, axis: int | np.integer[Any]
+) -> NDArray[np.float64]: ...
 
 
 def passage_average_level(
-    levels: ArrayLike, *, axis: int | None = None
+    levels: ArrayLike, *, axis: int | np.integer[Any] | None = None
 ) -> float | NDArray[np.float64]:
     r"""The energy average of levels over repeated passages (Clause 9), in dB.
 
@@ -466,7 +468,7 @@ class AmplitudeDistribution(OwnsArrays):
 
 
 def amplitude_distribution(
-    velocity_mm_s: ArrayLike, *, n_bins: int = 101
+    velocity_mm_s: ArrayLike, *, n_bins: int | np.integer[Any] = 101
 ) -> AmplitudeDistribution:
     """The amplitude distribution of a stretch of velocity (Clause 6.3).
 

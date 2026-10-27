@@ -35,7 +35,7 @@ coherence(
     y: Signal | ArrayLike,
     fs: float | None = None,
     *,
-    nperseg: int | None = None,
+    nperseg: int | np.integer[Any] | None = None,
     overlap: float = 0.5,
 ) -> CoherenceResult
 ```
@@ -174,7 +174,7 @@ transfer_function(
     fs: float | None = None,
     *,
     estimator: Literal['H1', 'H2'] = 'H1',
-    nperseg: int | None = None,
+    nperseg: int | np.integer[Any] | None = None,
     overlap: float = 0.5,
 ) -> FrequencyResponseResult
 ```

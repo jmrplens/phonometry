@@ -275,7 +275,7 @@ calculated_sound_reduction_index(
     total_loss_factor: ArrayLike,
     radiation_factor: ArrayLike,
     forced_radiation_factor: ArrayLike,
-    fraction: Literal[1, 3] = 3,
+    fraction: Literal[1, 3] | np.integer[Any] = 3,
     resonant_only: bool = False,
     density: float | None = None,
     longitudinal_velocity: float | None = None,
@@ -349,7 +349,7 @@ detailed_airborne_prediction(
     direct_index: ArrayLike,
     flanking_paths: Sequence[BandPath] = (),
     direct_label: str = 'Dd',
-    fraction: Literal[1, 3] = 3,
+    fraction: Literal[1, 3] | np.integer[Any] = 3,
 ) -> DetailedAirborneResult
 ```
 
@@ -391,7 +391,7 @@ detailed_impact_prediction(
     direct_level: ArrayLike | None = None,
     flanking_paths: Sequence[BandPath] = (),
     direct_label: str = 'Dd',
-    fraction: Literal[1, 3] = 3,
+    fraction: Literal[1, 3] | np.integer[Any] = 3,
 ) -> DetailedImpactResult
 ```
 
@@ -1194,7 +1194,7 @@ in_situ_element(
     element: HomogeneousElement,
     frequencies: ArrayLike,
     *,
-    fraction: Literal[1, 3] = 3,
+    fraction: Literal[1, 3] | np.integer[Any] = 3,
     resonant_only: bool = False,
     fluid: Fluid = ...,
 ) -> InSituElementResult
@@ -1558,7 +1558,7 @@ reciprocity_impact_level(
     sound_reduction_index: ArrayLike,
     *,
     frequencies: ArrayLike,
-    fraction: Literal[1, 3] = 3,
+    fraction: Literal[1, 3] | np.integer[Any] = 3,
 ) -> np.ndarray
 ```
 

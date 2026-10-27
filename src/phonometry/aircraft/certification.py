@@ -389,7 +389,9 @@ def _tone_factor(excess: float, frequency: float) -> float:
     return 10.0 / 3.0
 
 
-def tone_correction(spl: ArrayLike, *, start_band: int = _TONE_START) -> float:
+def tone_correction(
+    spl: ArrayLike, *, start_band: int | np.integer[Any] = _TONE_START
+) -> float:
     """Tone-correction factor ``C`` for a spectrum (ICAO Annex 16 App. 2 §4.3).
 
     The maximum over bands of the tone-correction factor derived from the tone
@@ -767,6 +769,7 @@ class EPNLResult(OwnsArrays):
                 f"{self.band_limits!r}."
             )
             raise ValueError(msg)
+        object.__setattr__(self, "band_limits", (kf, kl))
 
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any

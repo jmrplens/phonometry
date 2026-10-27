@@ -558,7 +558,7 @@ def assess_building_vibration(
     )
 
 
-def story_fundamental_frequency(n_stories: int) -> float:
+def story_fundamental_frequency(n_stories: int | np.integer[Any]) -> float:
     """The rough lowest horizontal natural frequency of a building.
 
     ``f ~ 10 / n``, offered for buildings from about five storeys up. Three

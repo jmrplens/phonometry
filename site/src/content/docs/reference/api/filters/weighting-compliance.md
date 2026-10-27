@@ -49,7 +49,7 @@ around each mid-band frequency, live in [`phonometry.filters.compliance`](/phono
 verify_weighting_class(
     wf: WeightingFilter,
     *,
-    n_sweep_points: int = 4096,
+    n_sweep_points: int | np.integer[Any] = 4096,
     edition: Literal['2013', '1979'] = '2013',
 ) -> WeightingComplianceResult
 ```

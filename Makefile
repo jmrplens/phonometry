@@ -382,7 +382,17 @@ return-overloads:
 # parameters of 313 functions and methods, 534 converted and 25 holding a
 # list or a dict, the 9 of the files gpu_parity.py fingerprints and two
 # exempt label lists among them: those files are left out as a whole, read
-# from its _COVERED, and the two lists keep their reasons. Stdlib only.
+# from its _COVERED, and the two lists keep their reasons. It holds one
+# number the same way: a count, a band fraction or a flag that reaches a
+# validator taking a numpy integer (require_count, require_band_fraction,
+# an isinstance check that lets one through) or np.bool_, or a public
+# function that takes one, admits np.integer[Any] or np.bool_, a record field
+# kept as given included; a mapping keyed by float stands beside one keyed by
+# int; and fs, fraction and the other scalar quantities of the vocabulary
+# keep one family of numbers across the API, each exception in
+# FAMILY_EXEMPT with its reason. On the tree before that part it found 231
+# counts, band fractions and flags, 12 mappings and 41 sample rates. Stdlib
+# only.
 parameter-annotations:
 	$(PYTHON) scripts/check_parameter_annotations.py
 

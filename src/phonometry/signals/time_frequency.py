@@ -203,7 +203,7 @@ def spectrogram(
     fs: float | None = None,
     *,
     window: str = "hann",
-    nperseg: int | None = None,
+    nperseg: int | np.integer[Any] | None = None,
     overlap: float = _DEFAULT_OVERLAP,
     scaling: Literal["density", "spectrum"] = "density",
 ) -> SpectrogramResult:
@@ -389,7 +389,7 @@ def zoom_fft(
     *,
     f_min: float,
     f_max: float,
-    n_points: int | None = None,
+    n_points: int | np.integer[Any] | None = None,
     window: str = "hann",
 ) -> ZoomFFTResult:
     r"""Zoom FFT: the spectrum of a narrow band on a fine grid (B&P 11.5.4).

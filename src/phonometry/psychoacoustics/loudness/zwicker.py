@@ -873,7 +873,7 @@ def loudness_zwicker_from_spectrum(
 
 def loudness_zwicker(
     x: Signal | ArrayLike,
-    fs: int | None = None,
+    fs: int | np.integer[Any] | None = None,
     field: Literal["free", "diffuse"] = "free",
     *,
     stationary: bool = False,
@@ -949,9 +949,9 @@ def loudness_zwicker(
         text or an array where a count goes.
     """
     diffuse = _validate_field(field)
-    fs = resolve_fs(x, fs)
-    if fs <= 0:
-        msg = f"'fs' must be a positive sampling rate, got {fs!r}."
+    rate = resolve_fs(x, fs)
+    if rate <= 0:
+        msg = f"'fs' must be a positive sampling rate, got {rate!r}."
         raise ValueError(msg)
     factor = resolve_calibration(x, calibration_factor)
     require_positive(factor, "calibration_factor")
@@ -967,11 +967,11 @@ def loudness_zwicker(
         raise ValueError(msg)
     pressure = pressure * factor
 
-    require_scalar(fs, "fs")
-    if require_count(fs, "fs", at_least=None) != fs:
-        msg = f"'fs' must be an integer sampling rate, got {fs!r}."
+    require_scalar(rate, "fs")
+    if require_count(rate, "fs", at_least=None) != rate:
+        msg = f"'fs' must be an integer sampling rate, got {rate!r}."
         raise ValueError(msg)
-    fs_int = require_count(fs, "fs", at_least=None)
+    fs_int = require_count(rate, "fs", at_least=None)
     if fs_int != _FS_REF:
         gcd = math.gcd(_FS_REF, fs_int)
         up, down = _FS_REF // gcd, fs_int // gcd

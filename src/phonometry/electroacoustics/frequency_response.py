@@ -115,7 +115,7 @@ def _spectra(
 
 
 def _welch_params(
-    n: int, fs: float, nperseg: int | None, overlap: float
+    n: int, fs: float, nperseg: int | np.integer[Any] | None, overlap: float
 ) -> tuple[int, float]:
     """Validated Welch segment length and overlap fraction.
 
@@ -243,7 +243,7 @@ def transfer_function(
     fs: float | None = None,
     *,
     estimator: Literal["H1", "H2"] = "H1",
-    nperseg: int | None = None,
+    nperseg: int | np.integer[Any] | None = None,
     overlap: float = _DEFAULT_OVERLAP,
 ) -> FrequencyResponseResult:
     r"""Estimate the frequency response from input ``x`` to output ``y``.
@@ -352,7 +352,7 @@ def coherence(
     y: Signal | ArrayLike,
     fs: float | None = None,
     *,
-    nperseg: int | None = None,
+    nperseg: int | np.integer[Any] | None = None,
     overlap: float = _DEFAULT_OVERLAP,
 ) -> CoherenceResult:
     r"""Ordinary coherence :math:`\gamma^2(f)` between ``x`` and ``y``

@@ -71,8 +71,8 @@ swept_sine_distortion(
     f2: float,
     duration_s: float,
     method: Literal['synchronized', 'farina'] = 'synchronized',
-    n_harmonics: int = 5,
-    ir_length: int | None = None,
+    n_harmonics: int | np.integer[Any] = 5,
+    ir_length: int | np.integer[Any] | None = None,
     amplitude: float = 1.0,
     fade: float | None = None,
     remove_dc: bool = True,
@@ -212,7 +212,7 @@ panel is drawn on it.
 
 ```python
 synchronized_sweep_signal(
-    fs: int,
+    fs: float,
     f1: float,
     f2: float,
     duration_s: float,

@@ -259,7 +259,7 @@ def _proximity_spacing(fp: float) -> float:
 
 
 def _averaged_spectrum(
-    x: np.ndarray, fs: int, resolution_hz: float
+    x: np.ndarray, fs: float, resolution_hz: float
 ) -> tuple[np.ndarray, np.ndarray, float]:
     """Hann-windowed, RMS-averaged power spectrum (clauses 11.1 / 12.1).
 
@@ -355,7 +355,7 @@ def _pr_criterion(ft: float) -> float:
 
 def tone_to_noise_ratio(
     x: Signal | ArrayLike,
-    fs: int | None = None,
+    fs: float | None = None,
     *,
     tone_frequency: float | None = None,
     resolution_hz: float = 1.0,
@@ -491,7 +491,7 @@ def _fitted_edge(
 
 def prominence_ratio(
     x: Signal | ArrayLike,
-    fs: int | None = None,
+    fs: float | None = None,
     *,
     tone_frequency: float | None = None,
     resolution_hz: float = 1.0,

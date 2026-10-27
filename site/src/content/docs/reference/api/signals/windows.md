@@ -30,7 +30,7 @@ the window as this library actually uses it.
 ```python
 window_metrics(
     window: str | tuple[Any, ...],
-    n: int = 1024,
+    n: int | np.integer[Any] = 1024,
 ) -> WindowMetricsResult
 ```
 

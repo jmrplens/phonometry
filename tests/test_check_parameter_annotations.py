@@ -637,8 +637,429 @@ def test_the_package_keeps_the_rule() -> None:
     """The tree today, with its exemptions, and none of them stale."""
     every = cpa.findings_in(ast_scan.python_files([], cpa.SOURCE), cpa.SOURCE)
     kept, _held = cpa.held_for_gpu(every, cpa.gpu_parity_files())
-    found, stale = cpa.checked(kept, cpa.EXEMPT)
+    found, stale = cpa.judged(kept)
     assert not found, "\n".join(
         f"{f.path}:{f.line}: {f.function}({f.parameter}): {f.problem}" for f in found
     )
     assert not stale
+
+
+_VALIDATION = """
+def require_count(value: object, name: str, *, at_least: int | None = 1) -> int:
+    raise NotImplementedError
+
+def require_band_fraction(value: object, name: str) -> int:
+    raise NotImplementedError
+"""
+
+
+def test_a_count_a_validator_takes_admits_a_numpy_integer(
+    tmp_path: pathlib.Path,
+) -> None:
+    refused = _refused(
+        tmp_path,
+        **{
+            "_internal.validation": _VALIDATION,
+            "api": """
+            from ._internal.validation import require_count
+
+            __all__ = ["grid", "grid_or_default", "grid_typed"]
+
+            def _points(offset: float, n: int) -> int:
+                return require_count(
+                    n,
+                    "n_points",
+                )
+
+            def grid(n_points: int) -> int:
+                return _points(
+                    0.0,
+                    n_points,
+                )
+
+            def grid_or_default(n_points: int | None = None) -> int:
+                return 1 if n_points is None else require_count(n_points, "n")
+
+            def grid_typed(n_points: int | np.integer[Any]) -> int:
+                return _points(0.0, n_points)
+            """,
+        },
+    )
+    assert sorted(refused) == ["grid(n_points)", "grid_or_default(n_points)"]
+    assert refused["grid(n_points)"] == [
+        "annotated int, which refuses np.integer[Any], while handed to "
+        "_points(n), require_count() takes it"
+    ]
+
+
+def test_a_band_fraction_alias_imported_from_another_module_is_read_through(
+    tmp_path: pathlib.Path,
+) -> None:
+    refused = _refused(
+        tmp_path,
+        **{
+            "_internal.validation": _VALIDATION,
+            "_internal.types": """
+            from typing import Literal
+
+            BandFraction = Literal[1, 3]
+            """,
+            "api": """
+            from ._internal.types import BandFraction
+            from ._internal.validation import require_band_fraction
+
+            __all__ = ["rating", "rating_wide"]
+
+            def rating(fraction: BandFraction = 3) -> int:
+                return require_band_fraction(fraction, "fraction")
+
+            def rating_wide(fraction: BandFraction | np.integer[Any] = 3) -> int:
+                return require_band_fraction(fraction, "fraction")
+            """,
+        },
+    )
+    assert list(refused) == ["rating(fraction)"]
+    assert refused["rating(fraction)"] == [
+        "annotated BandFraction, which refuses np.integer[Any], while "
+        "require_band_fraction() takes it"
+    ]
+
+
+def test_a_flag_an_isinstance_check_lets_through_admits_np_bool(
+    tmp_path: pathlib.Path,
+) -> None:
+    refused = _refused(
+        tmp_path,
+        api="""
+        __all__ = ["accepts", "accepts_typed", "refuses", "real"]
+
+        def accepts(small_room: bool) -> bool:
+            if not isinstance(small_room, (bool, np.bool_)):
+                raise TypeError("small_room")
+            return bool(small_room)
+
+        def accepts_typed(small_room: bool | np.bool_) -> bool:
+            if not isinstance(small_room, bool | np.bool_):
+                raise TypeError("small_room")
+            return bool(small_room)
+
+        def refuses(count: int) -> int:
+            if isinstance(count, (bool, np.bool_)):
+                raise TypeError("count")
+            return count
+
+        def real(overlap: float) -> float:
+            if not isinstance(overlap, (int, float, np.integer, np.floating)):
+                raise TypeError("overlap")
+            return float(overlap)
+        """,
+    )
+    assert list(refused) == ["accepts(small_room)"]
+    assert refused["accepts(small_room)"] == [
+        "annotated bool, which refuses np.bool_, while isinstance(..., np.bool_) "
+        "admits it"
+    ]
+
+
+def test_items_validated_one_at_a_time_admit_the_numpy_integer(
+    tmp_path: pathlib.Path,
+) -> None:
+    refused = _refused(
+        tmp_path,
+        **{
+            "_internal.validation": _VALIDATION,
+            "api": """
+            from ._internal.validation import require_count
+
+            __all__ = ["corners", "corners_either", "pair"]
+
+            def corners(excluded: Sequence[int] = ()) -> list[int]:
+                return [require_count(i, "excluded", at_least=0) for i in excluded]
+
+            def corners_either(
+                excluded: Sequence[int] | Sequence[np.integer[Any]] = (),
+            ) -> list[int]:
+                return [require_count(i, "excluded", at_least=0) for i in excluded]
+
+            def pair(limits: tuple[int, int]) -> list[int]:
+                checked = []
+                for k in limits:
+                    checked.append(require_count(k, "limits"))
+                return checked
+            """,
+        },
+    )
+    assert sorted(refused) == ["corners(excluded)", "pair(limits)"]
+    assert refused["pair(limits)"] == [
+        "annotated tuple[int, int], whose items (int) refuse np.integer[Any], "
+        "while an item require_count() takes it"
+    ]
+
+
+def test_an_overload_head_a_none_selects_is_left_alone(
+    tmp_path: pathlib.Path,
+) -> None:
+    refused = _refused(
+        tmp_path,
+        **{
+            "_internal.validation": _VALIDATION,
+            "api": """
+            from ._internal.validation import require_count
+
+            __all__ = ["average", "average_narrow"]
+
+            @overload
+            def average(levels: ArrayLike, *, axis: None = None) -> float: ...
+            @overload
+            def average(
+                levels: ArrayLike, *, axis: int | np.integer[Any]
+            ) -> np.ndarray: ...
+            def average(
+                levels: ArrayLike, *, axis: int | np.integer[Any] | None = None
+            ) -> float | np.ndarray:
+                if axis is not None:
+                    require_count(axis, "axis", at_least=None)
+                return float(np.mean(np.asarray(levels)))
+
+            @overload
+            def average_narrow(levels: ArrayLike, *, axis: None = None) -> float: ...
+            @overload
+            def average_narrow(levels: ArrayLike, *, axis: int) -> np.ndarray: ...
+            def average_narrow(
+                levels: ArrayLike, *, axis: int | np.integer[Any] | None = None
+            ) -> float | np.ndarray:
+                if axis is not None:
+                    require_count(axis, "axis", at_least=None)
+                return float(np.mean(np.asarray(levels)))
+            """,
+        },
+    )
+    assert list(refused) == ["average_narrow(axis)"]
+
+
+def test_a_record_field_kept_as_given_is_held_and_one_stored_is_not(
+    tmp_path: pathlib.Path,
+) -> None:
+    refused = _refused(
+        tmp_path,
+        **{
+            "_internal.validation": _VALIDATION,
+            "api": """
+            from dataclasses import dataclass
+
+            from ._internal.validation import require_count
+
+            __all__ = ["Tubes", "Meter"]
+
+            _FLAGS = ("latched", "indicated")
+
+            @dataclass(frozen=True)
+            class Tubes:
+                n_tubes: int
+                n_stored: int
+                n_wide: int | np.integer[Any] = 1
+
+                def __post_init__(self) -> None:
+                    require_count(self.n_tubes, "n_tubes")
+                    object.__setattr__(
+                        self, "n_stored", require_count(self.n_stored, "n_stored")
+                    )
+                    require_count(self.n_wide, "n_wide")
+
+            @dataclass(frozen=True)
+            class Meter:
+                latched: bool | None = None
+                indicated: bool | None = None
+                stored: bool | None = None
+
+                def __post_init__(self) -> None:
+                    self._check("latched")
+                    for name in ("stored",):
+                        value = getattr(self, name)
+                        if not isinstance(value, bool | np.bool_):
+                            raise TypeError(name)
+                        object.__setattr__(self, name, bool(value))
+                    self._hold()
+
+                def _check(self, name: str) -> None:
+                    value = getattr(self, name)
+                    if value is not None and not isinstance(value, bool | np.bool_):
+                        raise TypeError(name)
+
+                def _hold(self) -> None:
+                    if self.indicated is not None and not isinstance(
+                        self.indicated, bool | np.bool_
+                    ):
+                        raise TypeError("indicated")
+            """,
+        },
+    )
+    assert sorted(refused) == [
+        "Meter(indicated)",
+        "Meter(latched)",
+        "Tubes(n_tubes)",
+    ]
+    assert refused["Meter(latched)"] == [
+        "annotated bool | None, which refuses np.bool_, while handed by name to "
+        "Meter._check(name), isinstance(..., np.bool_) admits it"
+    ]
+    assert refused["Meter(indicated)"] == [
+        "annotated bool | None, which refuses np.bool_, while read in "
+        "Meter._hold(), isinstance(..., np.bool_) admits it"
+    ]
+
+
+def test_a_count_handed_to_a_public_function_that_takes_a_numpy_integer(
+    tmp_path: pathlib.Path,
+) -> None:
+    refused = _refused(
+        tmp_path,
+        api="""
+        __all__ = ["bank", "decay", "decay_through_a_helper"]
+
+        def bank(bandwidth: float | np.integer[Any] = 1) -> float:
+            return float(bandwidth)
+
+        def _rate(fs: float | np.integer[Any] | None) -> float:
+            return 1.0 if fs is None else float(fs)
+
+        def decay(bandwidth: int = 1) -> float:
+            return bank(bandwidth)
+
+        def decay_through_a_helper(fs: float | None = None) -> float:
+            return _rate(fs)
+        """,
+    )
+    assert list(refused) == ["decay(bandwidth)"]
+    assert refused["decay(bandwidth)"] == [
+        "annotated int, which refuses np.integer[Any], while handed to "
+        "bank(bandwidth: np.integer[Any])"
+    ]
+
+
+def test_a_mapping_keyed_by_float_is_offered_beside_one_keyed_by_int(
+    tmp_path: pathlib.Path,
+) -> None:
+    refused = _refused(
+        tmp_path,
+        api="""
+        from typing import Literal
+
+        Side = Literal["left", "right"]
+        BandMapping = Mapping[int, float] | Mapping[float, float]
+
+        __all__ = [
+            "rating", "rating_both", "limits", "limits_both", "burst", "burst_named",
+            "sides",
+        ]
+
+        def rating(values: Mapping[float, float] | ArrayLike) -> float:
+            return 0.0
+
+        def rating_both(values: BandMapping | ArrayLike) -> float:
+            return 0.0
+
+        def limits(per_direction: Mapping[str, Mapping[float, float]]) -> float:
+            return 0.0
+
+        def limits_both(per_direction: Mapping[str, BandMapping]) -> float:
+            return 0.0
+
+        def burst(measured: Mapping[int | None, Mapping[str, float]]) -> float:
+            return 0.0
+
+        def burst_named(
+            measured: Mapping[int, Mapping[str, float]]
+            | Mapping[int | None, Mapping[str, float]]
+            | Mapping[None, Mapping[str, float]],
+        ) -> float:
+            return 0.0
+
+        def sides(by_side: Mapping[Side, float]) -> float:
+            return 0.0
+        """,
+    )
+    assert sorted(refused) == [
+        "burst(measured)",
+        "limits(per_direction)",
+        "rating(values)",
+    ]
+    assert refused["rating(values)"] == [
+        "holds Mapping[float, float] with no mapping keyed by int, which refuses "
+        "a typed caller's dict of the narrower key"
+    ]
+    assert refused["burst(measured)"] == [
+        "holds Mapping[int | None, Mapping[str, float]] with no mapping keyed by "
+        "None, int, which refuses a typed caller's dict of the narrower key"
+    ]
+
+
+def test_a_sample_rate_keeps_one_family_across_the_api(
+    tmp_path: pathlib.Path,
+) -> None:
+    root = _package(
+        tmp_path,
+        api="""
+        from dataclasses import dataclass
+
+        __all__ = ["level", "level_whole", "Recording", "Fixed"]
+
+        def level(x: ArrayLike, fs: float | None = None) -> float:
+            return 0.0
+
+        def level_whole(x: ArrayLike, fs: int | None = None) -> float:
+            return 0.0
+
+        @dataclass(frozen=True)
+        class Recording:
+            fs: float
+
+        @dataclass(frozen=True)
+        class Fixed:
+            fs: int
+        """,
+    )
+    findings = [
+        finding
+        for finding in cpa.findings_in(sorted(root.rglob("*.py")), root)
+        if finding.part == "name"
+    ]
+    assert [(f.function, f.parameter) for f in findings] == [
+        ("level_whole", "fs"),
+        ("Fixed", "fs"),
+    ]
+    assert findings[0].problem == (
+        "annotated int | None, a whole number, where every 'fs' of the API is a "
+        "real one"
+    )
+    path = findings[0].path
+    exempt = {
+        (path, "Fixed", "fs"): "the whole rate its function validated",
+        (path, "Gone", "fs"): "a record that no longer exists",
+    }
+    kept, stale = cpa.checked(findings, exempt)
+    assert [f.function for f in kept] == ["level_whole"]
+    assert stale == [(path, "Gone", "fs")]
+
+
+def test_the_scalar_parts_hold_back_the_gpu_parity_files_too(
+    tmp_path: pathlib.Path,
+) -> None:
+    root = _package(
+        tmp_path,
+        **{
+            "_internal.validation": _VALIDATION,
+            "simulation.fdtd": """
+            from .._internal.validation import require_count
+
+            __all__ = ["run"]
+
+            def run(n_steps: int) -> int:
+                return require_count(n_steps, "n_steps")
+            """,
+        },
+    )
+    every = cpa.findings_in(sorted(root.rglob("*.py")), root)
+    kept, held = cpa.held_for_gpu(every, cpa.gpu_parity_files())
+    assert kept == []
+    assert [(f.function, f.part) for f in held] == [("run", "integer")]

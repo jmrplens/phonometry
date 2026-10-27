@@ -1050,9 +1050,9 @@ def _band_class(
 def verify_filter_class(
     bank: OctaveFilterBank,
     *,
-    n_points: int = 2**15,
+    n_points: int | np.integer[Any] = 2**15,
     edition: Edition = "2014",
-    points_per_bandwidth: int = _MIN_POINTS_PER_BANDWIDTH,
+    points_per_bandwidth: int | np.integer[Any] = _MIN_POINTS_PER_BANDWIDTH,
 ) -> FilterComplianceResult:
     r"""Verify a filter bank against the IEC 61260 class limits.
 
@@ -1114,6 +1114,7 @@ def verify_filter_class(
     if n_points < _MIN_GRID_POINTS:
         msg = "'n_points' must be at least 16."
         raise ValueError(msg)
+    n_points = require_count(n_points, "n_points", at_least=None)
     points_per_bandwidth = require_count(
         points_per_bandwidth, "points_per_bandwidth", at_least=_MIN_POINTS_PER_BANDWIDTH
     )
@@ -1148,7 +1149,7 @@ def verify_filter_class(
         frequencies=np.asarray(bank.frequencies, dtype=np.float64),
         factors=tuple(int(f) for f in bank.factor),
         fs=float(bank.fs),
-        n_points=require_count(n_points, "n_points", at_least=None),
+        n_points=n_points,
         points_per_bandwidth=points_per_bandwidth,
     )
 

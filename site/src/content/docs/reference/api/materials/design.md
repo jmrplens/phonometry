@@ -198,7 +198,7 @@ predict_diffuser_polar_response(
     depths: ArrayLike,
     angles_deg: ArrayLike = ...,
     source_angle_deg: float = ...,
-    n_repetitions: int = ...,
+    n_repetitions: int | np.integer[Any] = ...,
     speed_of_sound: float = ...,
     include_aperture: bool = ...,
     include_obliquity: bool = ...,
@@ -211,7 +211,7 @@ predict_diffuser_polar_response(
     reflection: ArrayLike,
     angles_deg: ArrayLike = ...,
     source_angle_deg: float = ...,
-    n_repetitions: int = ...,
+    n_repetitions: int | np.integer[Any] = ...,
     speed_of_sound: float = ...,
     include_aperture: bool = ...,
     include_obliquity: bool = ...,
@@ -262,7 +262,7 @@ predicted_diffusion_spectrum(
     reflection_of: None = None,
     angles_deg: ArrayLike = (-90, -85, -80, -75, -70, -65, -60, -55, -50, -45, -40, -35, -30, -25, -20, -15, -10, -5, 0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90),
     source_angle_deg: float = 0.0,
-    n_repetitions: int = 1,
+    n_repetitions: int | np.integer[Any] = 1,
     speed_of_sound: float = 343.0,
     include_aperture: bool = True,
     include_obliquity: bool = True,
@@ -314,7 +314,7 @@ for this helper (build the spectrum yourself from
 
 ```python
 qrd_well_depths(
-    prime: int,
+    prime: int | np.integer[Any],
     design_frequency: float,
     *,
     speed_of_sound: float = 343.0,
@@ -348,7 +348,9 @@ $\lambda_0 / 2$.
 ## quadratic_residue_sequence
 
 ```python
-quadratic_residue_sequence(prime: int) -> NDArray[np.float64]
+quadratic_residue_sequence(
+    prime: int | np.integer[Any],
+) -> NDArray[np.float64]
 ```
 
 Quadratic residue sequence `s_n` (Cox and D'Antonio, Eq. (10.2)).

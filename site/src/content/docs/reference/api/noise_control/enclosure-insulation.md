@@ -222,7 +222,7 @@ enclosure_artificial_source_insulation(
     frequencies: ArrayLike | None = None,
     quantity: Literal['sound_power', 'sound_pressure'] = 'sound_power',
     condition: Literal['laboratory', 'in-situ'] = 'laboratory',
-    fraction: Literal[1, 3] = 3,
+    fraction: Literal[1, 3] | np.integer[Any] = 3,
 ) -> EnclosureInsulationResult
 ```
 
@@ -267,7 +267,7 @@ enclosure_reciprocity_insulation(
     internal_levels: ArrayLike,
     *,
     frequencies: ArrayLike | None = None,
-    fraction: Literal[1, 3] = 3,
+    fraction: Literal[1, 3] | np.integer[Any] = 3,
 ) -> EnclosureInsulationResult
 ```
 
@@ -311,7 +311,7 @@ enclosure_sound_power_insulation(
     base_standard: str = 'ISO 3744',
     condition: Literal['laboratory', 'in-situ'] = 'laboratory',
     source_kind: Literal['actual', 'reciprocity', 'artificial'] = 'actual',
-    fraction: Literal[1, 3] = 3,
+    fraction: Literal[1, 3] | np.integer[Any] = 3,
 ) -> EnclosureInsulationResult
 ```
 
@@ -358,7 +358,7 @@ enclosure_sound_pressure_insulation(
     base_standard: str = 'ISO 11201',
     condition: Literal['laboratory', 'in-situ'] = 'laboratory',
     source_kind: Literal['actual', 'reciprocity', 'artificial'] = 'actual',
-    fraction: Literal[1, 3] = 3,
+    fraction: Literal[1, 3] | np.integer[Any] = 3,
 ) -> EnclosureInsulationResult
 ```
 
@@ -407,7 +407,7 @@ EnclosureInsulationResult(
     condition: Literal['laboratory', 'in-situ'],
     source_kind: Literal['actual', 'reciprocity', 'artificial'],
     base_standard: str,
-    fraction: int,
+    fraction: Literal[1, 3],
 )
 ```
 
@@ -768,7 +768,7 @@ weighted_enclosure_insulation(
     insulation: ArrayLike,
     *,
     quantity: Literal['sound_power', 'reciprocity'] = 'sound_power',
-    fraction: Literal[1, 3] = 3,
+    fraction: Literal[1, 3] | np.integer[Any] = 3,
 ) -> WeightedEnclosureInsulation
 ```
 

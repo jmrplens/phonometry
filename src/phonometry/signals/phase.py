@@ -103,7 +103,7 @@ def _validate_response(
     return out
 
 
-def _validate_oversample(oversample: int) -> int:
+def _validate_oversample(oversample: int | np.integer[Any]) -> int:
     require_scalar(oversample, "oversample")
     factor = require_count(oversample, "oversample", at_least=None)
     if factor < 1:
@@ -141,7 +141,7 @@ def _trig_oversample(
 def min_phase(
     response: ArrayLike,
     *,
-    oversample: int = 8,
+    oversample: int | np.integer[Any] = 8,
 ) -> NDArray[np.complex128]:
     r"""Minimum-phase response with the magnitude of ``response``.
 
@@ -223,7 +223,7 @@ def group_delay(
 def excess_phase(
     response: ArrayLike,
     *,
-    oversample: int = 8,
+    oversample: int | np.integer[Any] = 8,
 ) -> NDArray[np.float64]:
     r"""Excess phase: measured phase minus the minimum phase of
     :math:`\lvert H \rvert`.
@@ -378,7 +378,7 @@ def phase_decomposition(
     response: ArrayLike,
     fs: float,
     *,
-    oversample: int = 8,
+    oversample: int | np.integer[Any] = 8,
 ) -> PhaseDecompositionResult:
     """Decompose a response into its minimum-phase and all-pass parts.
 

@@ -300,7 +300,7 @@ turbine_microphone_positions(
     *,
     microphone_height_m: float,
     spacing_m: float,
-    n_turbine_boxes: int = 1,
+    n_turbine_boxes: int | np.integer[Any] = 1,
     include_overhead: bool = True,
 ) -> TurbineMicrophoneArray
 ```

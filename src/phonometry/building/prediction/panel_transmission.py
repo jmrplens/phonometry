@@ -213,7 +213,7 @@ __all__ = [
 ]
 
 
-def field_incidence_correction(fraction: BandFraction = 3) -> float:
+def field_incidence_correction(fraction: BandFraction | np.integer[Any] = 3) -> float:
     """Field-incidence mass-law correction ``dB`` (Bies Eq. 7.42).
 
     :param fraction: The band set, 3 for one-third octaves (5.5 dB) or 1 for
@@ -230,7 +230,7 @@ def mass_law_transmission_loss(
     mass_per_area: float,
     *,
     incidence: Literal["normal", "field"] = "field",
-    fraction: BandFraction = 3,
+    fraction: BandFraction | np.integer[Any] = 3,
     field_correction: float | None = None,
     fluid: Fluid = ABSORBER_AIR,
 ) -> np.ndarray:
@@ -272,7 +272,9 @@ def mass_law_transmission_loss(
     return np.asarray(tl, dtype=np.float64)
 
 
-def _resolve_field_correction(fraction: BandFraction, override: float | None) -> float:
+def _resolve_field_correction(
+    fraction: BandFraction | np.integer[Any], override: float | None
+) -> float:
     """The field-incidence correction to subtract, in dB."""
     if override is None:
         return field_incidence_correction(fraction)
@@ -356,7 +358,9 @@ class SoundReductionResult(OwnsArrays):
         r = np.asarray(self.transmission_loss, dtype=np.float64)
         return np.asarray(10.0 ** (-r / 10.0), dtype=np.float64)
 
-    def rating(self, fraction: BandFraction | None = None) -> WeightedRatingResult:
+    def rating(
+        self, fraction: BandFraction | np.integer[Any] | None = None
+    ) -> WeightedRatingResult:
         """Single-number weighted rating ``Rw`` of the predicted ``R(f)``.
 
         Delegates to :func:`phonometry.building.weighted_rating` (ISO 717-1);
@@ -442,7 +446,7 @@ def single_panel_transmission_loss(
     critical_frequency: float | None = None,
     bending_stiffness: float | None = None,
     loss_factor: float = 0.01,
-    fraction: BandFraction = 3,
+    fraction: BandFraction | np.integer[Any] = 3,
     coincidence_model: Literal["sharp", "cremer"] = "sharp",
     field_correction: float | None = None,
     fluid: Fluid = ABSORBER_AIR,
@@ -975,8 +979,8 @@ def corrugated_plate_stiffness(
 
 
 def orthotropic_plate_resonance(
-    mode_x: int,
-    mode_z: int,
+    mode_x: int | np.integer[Any],
+    mode_z: int | np.integer[Any],
     *,
     length_x: float,
     length_z: float,
@@ -1216,7 +1220,7 @@ def orthotropic_transmission_loss(
     method: Literal["integral", "heckl"] = "integral",
     area: float | None = None,
     limiting_angle_deg: float = 78.0,
-    fraction: BandFraction = 3,
+    fraction: BandFraction | np.integer[Any] = 3,
     fluid: Fluid = ABSORBER_AIR,
 ) -> SoundReductionResult:
     r"""Orthotropic-panel sound reduction index (Vigran 6.5.3, Bies 7.2.4.5).
@@ -1445,7 +1449,7 @@ def double_wall_transmission_loss(
     loss_factor: float = 0.1,
     cavity_medium: PorousMediumResult | None = None,
     tie_stiffness_per_area: float = 0.0,
-    fraction: BandFraction = 3,
+    fraction: BandFraction | np.integer[Any] = 3,
     fluid: Fluid = ABSORBER_AIR,
 ) -> SoundReductionResult:
     r"""Sound reduction index of a double wall (Bies 7.2.6, Eq. 7.64).

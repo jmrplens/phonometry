@@ -131,7 +131,7 @@ intensity_element_normalized_difference(
     l_in: ArrayLike,
     *,
     measurement_area: float,
-    n: int = 1,
+    n: int | np.integer[Any] = 1,
 ) -> IntensityElementNormalizedResult
 ```
 
@@ -548,10 +548,10 @@ low_frequency_element_normalized_difference(
     l_in: ArrayLike,
     *,
     measurement_area: float,
-    n_elements: int = 1,
+    n_elements: int | np.integer[Any] = 1,
     l_p: ArrayLike | None = None,
     frequencies: ArrayLike | None = None,
-    absorbing_specimen_surface: bool = False,
+    absorbing_specimen_surface: bool | np.bool_ = False,
 ) -> LowFrequencyElementResult
 ```
 
@@ -604,7 +604,7 @@ low_frequency_intensity_reduction(
     area: float,
     l_p: ArrayLike | None = None,
     frequencies: ArrayLike | None = None,
-    absorbing_specimen_surface: bool = False,
+    absorbing_specimen_surface: bool | np.bool_ = False,
 ) -> LowFrequencyIntensityResult
 ```
 

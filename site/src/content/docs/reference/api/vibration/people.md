@@ -308,7 +308,7 @@ CONSTRUCTION_GUIDE_VALUES = {'I': {1: GuideValues(a_u=0.8, a_o=5.0, a_r=0.4, tim
 
 ```python
 construction_guide_values(
-    duration_days: int,
+    duration_days: int | np.integer[Any],
     *,
     stage: Literal['I', 'II', 'III'] = 'I',
     area: Literal['industrial', 'commercial', 'mixed', 'residential', 'sensitive'] = 'residential',

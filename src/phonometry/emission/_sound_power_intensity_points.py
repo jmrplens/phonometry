@@ -481,7 +481,7 @@ def position_count_factor(
     grade: DeterminationGrade,
     frequency: float | None = None,
     *,
-    fraction: BandFraction = 3,
+    fraction: BandFraction | np.integer[Any] = 3,
 ) -> float:
     r"""Criterion-2 factor ``C`` of ISO 9614-1:1993 Table B.2.
 
@@ -523,7 +523,7 @@ def position_count_factor(
             )
             raise ValueError(msg)
         return value
-    _check_fraction(fraction)
+    fraction = _check_fraction(fraction)
     _per_band_or_raise(grade, "Table B.2", _C_A_WEIGHTED["survey"])
     grade1, grade2 = _row_for(_TABLE_B2, float(frequency), fraction)
     return grade1 if grade == "precision" else grade2
@@ -533,7 +533,7 @@ def determination_standard_deviation(
     grade: DeterminationGrade,
     frequency: float | None = None,
     *,
-    fraction: BandFraction = 3,
+    fraction: BandFraction | np.integer[Any] = 3,
 ) -> float:
     r"""Standard deviation ``s`` of the determination, ISO 9614-1:1993 Table 2.
 
@@ -571,7 +571,7 @@ def determination_standard_deviation(
             )
             raise ValueError(msg)
         return value
-    _check_fraction(fraction)
+    fraction = _check_fraction(fraction)
     _per_band_or_raise(grade, "Table 2", _S_A_WEIGHTED["survey"])
     grade1, grade2 = _row_for(_TABLE_2_S, float(frequency), fraction)
     return grade1 if grade == "precision" else grade2
@@ -964,7 +964,7 @@ class DiscretePointIntensityResult(OwnsArrays):
     f3: np.ndarray | None
     f4: np.ndarray | None
     pressure_residual_index: np.ndarray | None
-    fraction: int
+    fraction: BandFraction
     grade: str
 
     def __post_init__(self) -> None:
@@ -995,7 +995,7 @@ class DiscretePointIntensityResult(OwnsArrays):
             float).
         """
         _check_grade(self.grade)
-        _check_fraction(self.fraction)
+        object.__setattr__(self, "fraction", _check_fraction(self.fraction))
         require_ranks(
             self,
             frequencies=1,
@@ -1914,7 +1914,7 @@ def sound_power_intensity_points(
     pressure_residual_index: float | ArrayLike | None = None,
     temporal_intensity: ArrayLike | None = None,
     frequencies: ArrayLike | None = None,
-    fraction: BandFraction = 3,
+    fraction: BandFraction | np.integer[Any] = 3,
     grade: DeterminationGrade = "engineering",
 ) -> DiscretePointIntensityResult:
     r"""Sound power by sound intensity at discrete points (ISO 9614-1:1993).

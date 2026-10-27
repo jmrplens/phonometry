@@ -419,7 +419,7 @@ binary, is the 6 dB it is, and 64,1 - 55,6 dB the 8,5 dB that rounds up.
 plant_characteristic_height_m(
     source_heights_m: ArrayLike,
     *,
-    n_low_sources: int = 0,
+    n_low_sources: int | np.integer[Any] = 0,
 ) -> float
 ```
 

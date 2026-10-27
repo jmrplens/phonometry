@@ -893,7 +893,9 @@ def sound_power_hard_walled(
     )
 
 
-def _event_grid(arr: np.ndarray, n_events: int | None) -> tuple[np.ndarray, bool, int]:
+def _event_grid(
+    arr: np.ndarray, n_events: int | np.integer[Any] | None
+) -> tuple[np.ndarray, bool, int]:
     r"""The single event levels reduced to one event, as ``(NS, NM, NB)``.
 
     Measured one event at a time (``n_events`` ``None``) the events are on the
@@ -937,7 +939,7 @@ def sound_energy_hard_walled(
     reference_sound_power_levels: ArrayLike | ReferenceSourceCalibration,
     *,
     frequencies: ArrayLike,
-    n_events: int | None = None,
+    n_events: int | np.integer[Any] | None = None,
     background_levels: ArrayLike | None = None,
     integration_time: float | None = None,
     reference_background_levels: ArrayLike | None = None,

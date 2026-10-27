@@ -353,7 +353,7 @@ def test_only_clauses_9_to_14_state_a_maximum(
 
 
 def test_a_numpy_integer_clause_is_accepted() -> None:
-    maxima = metrology.max_expanded_uncertainty([1000.0], clause=np.int64(12))  # type: ignore[arg-type]
+    maxima = metrology.max_expanded_uncertainty([1000.0], clause=np.int64(12))
     assert maxima[0] == pytest.approx(0.25)
 
 

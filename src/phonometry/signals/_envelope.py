@@ -202,7 +202,7 @@ def envelope(
     x: Signal | ArrayLike,
     fs: float | None = None,
     *,
-    decimation_factor: int = 1,
+    decimation_factor: int | np.integer[Any] = 1,
     antialias: bool = True,
 ) -> EnvelopeResult:
     r"""Envelope, instantaneous phase and frequency via Hilbert transform.
@@ -466,7 +466,7 @@ def envelope_spectrum(
     *,
     kind: Kind = "magnitude",
     window: str = "hann",
-    nfft: int | None = None,
+    nfft: int | np.integer[Any] | None = None,
     remove_dc: bool = True,
     band: tuple[float, float] | None = None,
 ) -> EnvelopeSpectrumResult:

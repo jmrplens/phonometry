@@ -158,7 +158,7 @@ def _validate_signal(
 
 
 def _validate_welch_params(
-    n: int, fs: float, nperseg: int | None, overlap: float
+    n: int, fs: float, nperseg: int | np.integer[Any] | None, overlap: float
 ) -> tuple[int, float]:
     require_scalar(n, "n")
     require_scalar(overlap, "overlap")
@@ -486,7 +486,7 @@ def power_spectral_density(
     fs: float | None = None,
     *,
     window: str = "hann",
-    nperseg: int | None = None,
+    nperseg: int | np.integer[Any] | None = None,
     overlap: float = _DEFAULT_OVERLAP,
     scaling: Literal["density", "spectrum"] = "density",
     confidence: float = 0.95,
@@ -712,7 +712,7 @@ def cross_spectral_density(
     fs: float | None = None,
     *,
     window: str = "hann",
-    nperseg: int | None = None,
+    nperseg: int | np.integer[Any] | None = None,
     overlap: float = _DEFAULT_OVERLAP,
     scaling: Literal["density", "spectrum"] = "density",
 ) -> CrossSpectralDensityResult:
@@ -949,7 +949,7 @@ def coherent_output_spectrum(
     fs: float | None = None,
     *,
     window: str = "hann",
-    nperseg: int | None = None,
+    nperseg: int | np.integer[Any] | None = None,
     overlap: float = _DEFAULT_OVERLAP,
     scaling: Literal["density", "spectrum"] = "density",
 ) -> CoherentOutputSpectrumResult:

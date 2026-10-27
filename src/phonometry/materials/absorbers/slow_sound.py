@@ -248,7 +248,7 @@ def rectangular_duct_properties(
     *,
     side_m: float,
     fluid: Fluid = ABSORBER_AIR,
-    n_sum_terms: int = _DUCT_TERMS,
+    n_sum_terms: int | np.integer[Any] = _DUCT_TERMS,
 ) -> EffectiveFluidProperties:
     r"""Effective density and bulk modulus of a square duct of the given side.
 
@@ -417,7 +417,7 @@ def _square_resonator_ducts(
     *,
     end_correction: bool,
     fluid: Fluid,
-    n_sum_terms: int,
+    n_sum_terms: int | np.integer[Any],
 ) -> tuple[Complex, Complex, Complex, Complex, Complex, Complex, float]:
     """Duct parameters of the square resonator (APL Eqs. (A23)-(A26))."""
     channel = rectangular_duct_properties(
@@ -451,7 +451,7 @@ def helmholtz_resonator_impedance(
     end_correction: bool = True,
     geometry: Geometry = "square",
     fluid: Fluid = ABSORBER_AIR,
-    n_sum_terms: int = _DUCT_TERMS,
+    n_sum_terms: int | np.integer[Any] = _DUCT_TERMS,
 ) -> Complex:
     r"""Acoustic impedance of a Helmholtz resonator with visco-thermal losses.
 

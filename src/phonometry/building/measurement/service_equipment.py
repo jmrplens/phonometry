@@ -140,7 +140,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass, field
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Final, Literal
+from typing import TYPE_CHECKING, Any, Final, Literal, cast
 
 import numpy as np
 
@@ -1169,7 +1169,7 @@ class ServiceEquipmentResult(OwnsArrays):
     """
 
     frequencies: np.ndarray
-    fraction: int
+    fraction: BandFraction
     quantity: Literal["Smax", "Fmax", "eq"]
     a_weighting_range: Literal["restricted", "extended"]
     reading_levels: np.ndarray
@@ -1191,7 +1191,9 @@ class ServiceEquipmentResult(OwnsArrays):
         :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a
             float).
         """
-        require_band_fraction(self.fraction, "fraction")
+        object.__setattr__(
+            self, "fraction", require_band_fraction(self.fraction, "fraction")
+        )
         shape = np.asarray(self.frequencies).shape
         bands = [
             self.average_levels,
@@ -1326,7 +1328,7 @@ def service_equipment_level(
     *,
     frequencies: ArrayLike,
     quantity: _Quantity,
-    fraction: BandFraction = 3,
+    fraction: BandFraction | np.integer[Any] = 3,
     background_levels: ArrayLike | None = None,
     reverberation_time: ArrayLike | None = None,
     volume: float | None = None,
@@ -1685,7 +1687,9 @@ def check_position_spread(levels: ArrayLike) -> PositionSpreadCheck:
 
 
 def loudest_corner(
-    c_weighted_levels: ArrayLike, *, excluded: Sequence[int] = ()
+    c_weighted_levels: ArrayLike,
+    *,
+    excluded: Sequence[int | np.integer[Any]] = (),
 ) -> int:
     """The corner that becomes microphone position 1 (ISO/DIS 16032:2023 7.2).
 
@@ -1713,7 +1717,9 @@ def loudest_corner(
         raise ValueError(msg)
     msg = "'excluded' must be a sequence of corner indices, such as [1]."
     try:
-        rank = np.ndim(excluded)
+        # A sequence that mixes int and np.int64 is one numpy reads; its
+        # static type is no ArrayLike, since numpy's nests hold one kind.
+        rank = np.ndim(cast("ArrayLike", excluded))
     except TypeError as exc:  # a ragged nesting of lists
         raise TypeError(msg) from exc
     except ValueError as exc:  # a ragged nesting of lists
@@ -1987,7 +1993,7 @@ def check_service_equipment_positions(
     room_positions_m: ArrayLike,
     *,
     source_positions_m: ArrayLike | None = None,
-    small_room: bool = False,
+    small_room: bool | np.bool_ = False,
     corner_obstacle_distance_m: ArrayLike | None = None,
 ) -> ServiceEquipmentPositionCheck:
     """Are the microphone positions far enough apart (ISO/DIS 16032:2023 7.2, 7.3)?

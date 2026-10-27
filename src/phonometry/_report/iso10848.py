@@ -101,7 +101,7 @@ _MIN_BANDS_TO_INFER_FRACTION = 2
 _OCTAVE_STEP_THRESHOLD = 1.6
 
 
-def _part_designation(part: int) -> str:
+def _part_designation(part: int | np.integer[Any]) -> str:
     """The designation of ISO 10848 part ``part``, or raise."""
     require_scalar(part, "part")
     try:
@@ -188,7 +188,7 @@ def render_flanking_level_difference_report(
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
     language: Language = "en",
-    part: int = 2,
+    part: int | np.integer[Any] = 2,
 ) -> str:
     """Render a normalized flanking level difference ``Dn,f`` fiche (ISO 10848).
 
@@ -235,7 +235,7 @@ def render_flanking_impact_level_report(
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
     language: Language = "en",
-    part: int = 2,
+    part: int | np.integer[Any] = 2,
 ) -> str:
     """Render a normalized flanking impact level ``Ln,f`` fiche (ISO 10848).
 

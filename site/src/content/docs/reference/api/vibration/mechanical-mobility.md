@@ -250,7 +250,10 @@ impedance $1/Y_{ij}$, not the blocked matrix impedance of Table 1
 ## random_error_percent
 
 ```python
-random_error_percent(coherence: ArrayLike, n_averages: int) -> np.ndarray
+random_error_percent(
+    coherence: ArrayLike,
+    n_averages: int | np.integer[Any],
+) -> np.ndarray
 ```
 
 Normalized random error of an averaged FRF magnitude (ISO 7626-2 Annex A).

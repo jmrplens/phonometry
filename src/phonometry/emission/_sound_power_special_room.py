@@ -1174,7 +1174,7 @@ def special_room_source_locations(
     levels: ArrayLike,
     *,
     frequencies: ArrayLike,
-    n_microphone_positions: int = _SURVEY_MICROPHONES,
+    n_microphone_positions: int | np.integer[Any] = _SURVEY_MICROPHONES,
     a_weighted_levels: ArrayLike | None = None,
 ) -> SourceLocationPlan:
     r"""The number of source locations for a number of microphone positions,

@@ -673,7 +673,7 @@ def _between_nominals_sweep(
     wf: WeightingFilter,
     freqs_exact: np.ndarray,
     masks: dict[int, tuple[np.ndarray, np.ndarray]],
-    n_sweep_points: int,
+    n_sweep_points: int | np.integer[Any],
 ) -> dict[str, float]:
     """Subclause 5.5.7 sweep between adjacent exact nominal frequencies.
 
@@ -907,7 +907,10 @@ def _margin_classes(band: Mapping[str, Any]) -> list[int]:
 
 
 def verify_weighting_class(
-    wf: WeightingFilter, *, n_sweep_points: int = 4096, edition: Edition = "2013"
+    wf: WeightingFilter,
+    *,
+    n_sweep_points: int | np.integer[Any] = 4096,
+    edition: Edition = "2013",
 ) -> WeightingComplianceResult:
     r"""Verify a frequency-weighting filter against its standard's tolerances.
 

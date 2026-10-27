@@ -62,7 +62,7 @@ spectrogram(
     fs: float | None = None,
     *,
     window: str = 'hann',
-    nperseg: int | None = None,
+    nperseg: int | np.integer[Any] | None = None,
     overlap: float = 0.5,
     scaling: Literal['density', 'spectrum'] = 'density',
 ) -> SpectrogramResult
@@ -179,7 +179,7 @@ zoom_fft(
     *,
     f_min: float,
     f_max: float,
-    n_points: int | None = None,
+    n_points: int | np.integer[Any] | None = None,
     window: str = 'hann',
 ) -> ZoomFFTResult
 ```

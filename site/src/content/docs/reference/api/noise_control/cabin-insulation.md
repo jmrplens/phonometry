@@ -135,7 +135,7 @@ cabin_insulation(
     *,
     frequencies: ArrayLike | None = None,
     method: Literal['laboratory', 'in-situ-loudspeaker', 'in-situ-actual-noise'] = 'laboratory',
-    fraction: Literal[1, 3] = 3,
+    fraction: Literal[1, 3] | np.integer[Any] = 3,
     room_background_levels: ArrayLike | None = None,
     cabin_background_levels: ArrayLike | None = None,
     a_weighted_room_level: float | None = None,
@@ -198,7 +198,7 @@ CabinInsulationResult(
     a_weighted_insulation: float | None,
     internal_noise_level: float | None,
     method: Literal['laboratory', 'in-situ-loudspeaker', 'in-situ-actual-noise'],
-    fraction: int,
+    fraction: Literal[1, 3],
 )
 ```
 
@@ -820,7 +820,7 @@ weighted_cabin_insulation(
     insulation: ArrayLike,
     *,
     method: Literal['laboratory', 'in-situ-loudspeaker', 'in-situ-actual-noise'] = 'laboratory',
-    fraction: Literal[1, 3] = 3,
+    fraction: Literal[1, 3] | np.integer[Any] = 3,
 ) -> WeightedCabinInsulation
 ```
 

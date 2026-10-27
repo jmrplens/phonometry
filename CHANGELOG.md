@@ -2152,6 +2152,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **`io.write` refuses a Signal whose own rate is fractional with a
+  `ValueError` that names `fs`.** A WAV header holds a whole number of
+  samples per second, and a fractional `fs=` was refused that way, but a
+  `Signal` built at 44100.5 Hz reached the header and failed there with
+  `struct.error: required argument is not an integer`.
+
 - **The type check reads the conformance scripts against the oracle tables
   they compare with, and every place that gives the command runs the same
   one.** The conformance scripts import their oracle tables from `tests/`,
@@ -3477,6 +3483,58 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   carries each kind of empty list, printed the way the older versions print.
 
 ### Changed
+
+- **A count, a band fraction and a flag take the NumPy scalar their validator
+  takes, a mapping of band values takes integer keys, and a sample rate is a
+  `float` wherever any positive rate runs.** 231 counts, band fractions and
+  flags of public functions and records were annotated `int`,
+  `BandFraction` or `bool` while `require_count`, `require_band_fraction` or
+  an `isinstance` check took the `np.int64` that `np.argmax` or a shape gives
+  and the `np.True_` of a comparison; they take `int | np.integer[Any]`,
+  `BandFraction | np.integer[Any]` and `bool | np.bool_`, and so do the
+  `fraction` of `filters.OctaveFilterBank` and `filters.octave_filter`
+  (`float | np.integer[Any]`) and the `fraction` of the `room` functions that
+  hand it to them. A whole float such as `3.0`, which `require_count` takes
+  too, stays a leniency the annotation does not state. The 12 mappings of
+  values by band typed `Mapping[float, float]` refused the `{125: 40.0}` a
+  caller writes: `building.weighted_rating`, `building.weighted_impact_rating`,
+  `building.weighted_impact_improvement`,
+  `building.impact_improvement_adaptation_term`,
+  `aircraft.verify_aircraft_noise_system`,
+  `environment.check_small_roughness_deviations`,
+  `environment.check_reference_track` and the `limit_db` and
+  `limit_db_per_m` of `AcousticRoughnessSpectrum.plot` and
+  `TrackDecayRate.plot` take a mapping keyed by `int` or by `float`, and
+  `vibration.verify_signal_burst_response` one keyed by burst length with or
+  without the continuous row's `None`. `Signal.fs` reads as the `float` it
+  holds, where a type checker read an `int`, and the 41 rates that run at any
+  positive value and were `int` (`filters.OctaveFilterBank`,
+  `filters.WeightingFilter`, `filters.TimeWeighting`, `signals.laeq` and the
+  other levels of a signal, `room.impulse_response`, `speech.stipa` and their
+  kin, the `fs` of `filters.TimeWeightedEnvelope` and
+  `room.ImpulseResponseResult` among them) are `float`, so the rate
+  `signals.resample_signal` returns is the rate the next function takes.
+  The rates that need a whole number of samples per second stay
+  `int | np.integer[Any]`: the test signals of `electroacoustics`,
+  `room.image_source_rir`, `psychoacoustics.loudness_zwicker` and the two
+  functions that hand their rate to it, and `speech.stoi`; `io.write`, which
+  every Signal reaches, takes `float | np.integer[Any]` and refuses a
+  fraction when the call runs. `metrology.uncertainty_propagation` takes a
+  model that returns one number (a Python or a NumPy one) and
+  `metrology.monte_carlo` one that returns an array of trials, where both
+  took a model typed to return a `float`, which refused the vectorised model
+  Monte Carlo needs. The result records that validate a count or a band
+  fraction store the `int` their validator returns, so their `fraction` is a
+  `BandFraction` and a NumPy integer given to one reads back as an `int`.
+  `scripts/check_parameter_annotations.py` holds each of them: a parameter
+  or a record field that reaches such a validator or check, or a public
+  function that takes the NumPy scalar, through the helpers it is handed to,
+  admits it; a mapping keyed by `float`, or by a union, stands beside one
+  keyed by each key a caller writes; and the scalar quantities of the
+  vocabulary (`fs`, `fraction`, `volume`, `coverage`, `confidence`,
+  `energy_fraction`) keep one family of numbers across the API, each
+  exception listed with its reason. Rule A58 of the contributor guide states
+  it.
 
 - **A public parameter that converts its argument takes any array-like, and
   one that reads a sequence or a mapping says so.** 559 public parameters of

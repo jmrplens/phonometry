@@ -863,7 +863,7 @@ def stationarity_test(
     x: Signal | ArrayLike,
     fs: float | None = None,
     *,
-    n_segments: int = 20,
+    n_segments: int | np.integer[Any] = 20,
     statistic: Statistic = "mean_square",
     method: Method = "reverse_arrangements",
     alpha: float = 0.05,
@@ -949,7 +949,7 @@ def stationarity_test(
 
 
 def _spectral_moments(
-    x: NDArray[np.float64], fs: float, nperseg: int | None
+    x: NDArray[np.float64], fs: float, nperseg: int | np.integer[Any] | None
 ) -> tuple[float, float, float]:
     r"""Frequency moments ``m0, m2, m4`` of the one-sided Welch autospectrum.
 
@@ -1060,7 +1060,7 @@ def level_crossing_rate(
     fs: float | None = None,
     *,
     levels: ArrayLike | None = None,
-    nperseg: int | None = None,
+    nperseg: int | np.integer[Any] | None = None,
 ) -> LevelCrossingResult:
     r"""Level-crossing rates of a record and their Rice expectations.
 
@@ -1421,7 +1421,7 @@ def peak_statistics(
     x: Signal | ArrayLike,
     fs: float | None = None,
     *,
-    nperseg: int | None = None,
+    nperseg: int | np.integer[Any] | None = None,
 ) -> PeakStatisticsResult:
     r"""Peak rate, irregularity factor and peak-height distribution of a record.
 

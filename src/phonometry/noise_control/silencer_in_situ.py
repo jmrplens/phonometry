@@ -351,7 +351,7 @@ def _build_cases() -> dict[int, InstallationCase]:
 INSTALLATION_CASES: Mapping[int, InstallationCase] = MappingProxyType(_build_cases())
 
 
-def installation_case(number: int) -> InstallationCase:
+def installation_case(number: int | np.integer[Any]) -> InstallationCase:
     """One installation of Figure 1, with the area rules clause 9 gives it.
 
     The figure is a matrix: the source side may be a duct, a room with a
@@ -890,7 +890,7 @@ def in_situ_transmission_loss(
     receiver_area_m2: ArrayLike,
     frequencies: ArrayLike | None = None,
     field_correction_difference: ArrayLike = 0.0,
-    case: int | None = None,
+    case: int | np.integer[Any] | None = None,
 ) -> SilencerInSituResult:
     r"""The transmission loss of a silencer in place, Equation (19).
 
@@ -962,7 +962,7 @@ def in_situ_insertion_loss(
     area_with_m2: ArrayLike,
     frequencies: ArrayLike | None = None,
     field_correction_difference: ArrayLike = 0.0,
-    case: int | None = None,
+    case: int | np.integer[Any] | None = None,
 ) -> SilencerInSituResult:
     r"""The insertion loss of a silencer in place, Equation (21).
 

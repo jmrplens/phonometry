@@ -162,7 +162,7 @@ def test_passby_levels_and_loudness_match_the_published_row(
 
     # N50: the value exceeded 50 % of the time, i.e. the median of the
     # time-varying total loudness (ISO 532-1:2017 method B).
-    result = loudness_zwicker(x, sig.fs, calibration_factor=factor)
+    result = loudness_zwicker(x, int(sig.fs), calibration_factor=factor)
     assert result.loudness_vs_time is not None
     n50 = float(np.percentile(result.loudness_vs_time, 50))
     assert n50 == pytest.approx(n50_pub, rel=_N50_TOL)

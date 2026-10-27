@@ -61,7 +61,7 @@ envelope(
     x: Signal | ArrayLike,
     fs: float | None = None,
     *,
-    decimation_factor: int = 1,
+    decimation_factor: int | np.integer[Any] = 1,
     antialias: bool = True,
 ) -> EnvelopeResult
 ```
@@ -114,7 +114,7 @@ envelope_spectrum(
     *,
     kind: Literal['magnitude', 'squared'] = 'magnitude',
     window: str = 'hann',
-    nfft: int | None = None,
+    nfft: int | np.integer[Any] | None = None,
     remove_dc: bool = True,
     band: tuple[float, float] | None = None,
 ) -> EnvelopeSpectrumResult

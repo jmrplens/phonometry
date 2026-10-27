@@ -364,7 +364,7 @@ class OctaveSpectrogramResult(OwnsArrays):
         self,
         ax: Axes | None = None,
         *,
-        channel: int | None = None,
+        channel: int | np.integer[Any] | None = None,
         language: Language = "en",
         **kwargs: Any,
     ) -> Axes:
@@ -490,8 +490,8 @@ _DEFAULT_RESPONSE_PLOT = ResponsePlot()
 
 
 def _validate_bank_design(
-    fs: int,
-    fraction: float,
+    fs: float,
+    fraction: float | np.integer[Any],
     order: int,
     limits: RealValues | None,
     design: FilterDesign,
@@ -618,8 +618,8 @@ class OctaveFilterBank:
 
     def __init__(
         self,
-        fs: int,
-        fraction: float = 1,
+        fs: float,
+        fraction: float | np.integer[Any] = 1,
         order: int = 6,
         limits: RealValues | None = None,
         *,
@@ -656,6 +656,10 @@ class OctaveFilterBank:
         limits = _validate_bank_design(
             fs, fraction, order, limits, design, block_processing
         )
+        # A NumPy integer is read as the number it holds, so the bank keeps
+        # the plain number every reader of it expects.
+        if isinstance(fraction, np.integer):
+            fraction = float(fraction)
 
         self.fs = fs
         self.fraction = fraction
@@ -1119,7 +1123,7 @@ def _decimate(x: np.ndarray, factor: int) -> np.ndarray:
 @lru_cache(maxsize=32)
 def _cached_filter_bank(
     fs: int,
-    fraction: float,
+    fraction: float | np.integer[Any],
     order: int,
     limits: tuple[float, ...] | None,
     design: FilterDesign,
@@ -1138,8 +1142,8 @@ def _cached_filter_bank(
 
 def octave_filter(
     x: Signal | ArrayLike,
-    fs: int | None = None,
-    fraction: float = 1,
+    fs: float | None = None,
+    fraction: float | np.integer[Any] = 1,
     order: int = 6,
     limits: RealValues | None = None,
     *,

@@ -79,7 +79,7 @@ golay_impulse_response(
     pair: tuple[ArrayLike, ArrayLike],
     *,
     length: int | None = None,
-    fs: int | None = None,
+    fs: float | None = None,
 ) -> ImpulseResponseResult
 ```
 
@@ -161,7 +161,7 @@ autocorrelation of an MLS.
 impulse_response(
     recorded: Signal | ArrayLike,
     reference: Signal | ArrayLike,
-    fs: int | None = None,
+    fs: float | None = None,
     *,
     method: Literal['farina'],
     f_range: tuple[float, float],
@@ -173,7 +173,7 @@ impulse_response(
 impulse_response(
     recorded: Signal | ArrayLike,
     reference: Signal | ArrayLike,
-    fs: int | None = None,
+    fs: float | None = None,
     *,
     method: Literal['spectral', 'farina'] = ...,
     f_range: tuple[float, float] | None = ...,
@@ -210,7 +210,7 @@ causal part (B.5).
 ## ImpulseResponseResult
 
 ```python
-ImpulseResponseResult(ir: np.ndarray, fs: int | None, method: str)
+ImpulseResponseResult(ir: np.ndarray, fs: float | None, method: str)
 ```
 
 Recovered broadband impulse response with its acquisition metadata.
@@ -282,7 +282,7 @@ Warns about suspect recovered impulse responses (e.g. MLS aliasing).
 
 ```python
 inverse_filter(
-    fs: int,
+    fs: float,
     f1: float,
     f2: float,
     duration_s: float,
@@ -325,7 +325,7 @@ mls_impulse_response(
     mls: Signal | ArrayLike,
     *,
     length: int | None = None,
-    fs: int | None = None,
+    fs: float | None = None,
 ) -> ImpulseResponseResult
 ```
 
@@ -392,7 +392,7 @@ autocorrelation is a near-perfect periodic delta
 ```python
 plot_excitation(
     x: ArrayLike,
-    fs: int,
+    fs: float,
     *,
     kind: Literal['sweep', 'mls'] = 'sweep',
     ax: None = None,
@@ -402,7 +402,7 @@ plot_excitation(
 
 plot_excitation(
     x: ArrayLike,
-    fs: int,
+    fs: float,
     *,
     kind: Literal['sweep', 'mls'] = 'sweep',
     ax: Axes,
@@ -443,7 +443,7 @@ bipolar sequence and its (flat) magnitude spectrum.
 
 ```python
 shaped_sweep_signal(
-    fs: int,
+    fs: float,
     f1: float,
     f2: float,
     duration_s: float,
@@ -586,7 +586,7 @@ Number of samples in the sweep.
 
 ```python
 sweep_signal(
-    fs: int,
+    fs: float,
     f1: float,
     f2: float,
     duration_s: float,

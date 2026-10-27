@@ -790,7 +790,7 @@ def intensity_element_normalized_difference(
     l_in: ArrayLike,
     *,
     measurement_area: float,
-    n: int = 1,
+    n: int | np.integer[Any] = 1,
 ) -> IntensityElementNormalizedResult:
     r"""Intensity element normalized level difference per ISO 15186-1 (Formula (8)).
 
@@ -1076,7 +1076,7 @@ def _low_frequency_qualification(
     l_in: np.ndarray,
     *,
     owner: str,
-    absorbing_specimen_surface: bool,
+    absorbing_specimen_surface: bool | np.bool_,
 ) -> np.ndarray | None:
     """Formula (5), which the Clause 6.4.2 verdict is read from, or ``None``.
 
@@ -1252,7 +1252,7 @@ def low_frequency_intensity_reduction(
     area: float,
     l_p: ArrayLike | None = None,
     frequencies: ArrayLike | None = None,
-    absorbing_specimen_surface: bool = False,
+    absorbing_specimen_surface: bool | np.bool_ = False,
 ) -> LowFrequencyIntensityResult:
     r"""Intensity sound reduction index at low frequencies (ISO 15186-3:2002).
 
@@ -1452,10 +1452,10 @@ def low_frequency_element_normalized_difference(
     l_in: ArrayLike,
     *,
     measurement_area: float,
-    n_elements: int = 1,
+    n_elements: int | np.integer[Any] = 1,
     l_p: ArrayLike | None = None,
     frequencies: ArrayLike | None = None,
-    absorbing_specimen_surface: bool = False,
+    absorbing_specimen_surface: bool | np.bool_ = False,
 ) -> LowFrequencyElementResult:
     r"""Element normalized level difference at low frequencies (ISO 15186-3).
 

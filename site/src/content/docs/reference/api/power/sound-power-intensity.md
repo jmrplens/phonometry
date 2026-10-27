@@ -485,7 +485,7 @@ sound_power_intensity(
     pressure_levels: ArrayLike | None = None,
     pressure_residual_index: ArrayLike | None = None,
     frequencies: ArrayLike | None = None,
-    fraction: Literal[1, 3] = 3,
+    fraction: Literal[1, 3] | np.integer[Any] = 3,
     grade: Literal['engineering', 'survey'] = 'engineering',
     repeatability_limit: ArrayLike | None = None,
 ) -> SoundPowerIntensityResult
@@ -593,7 +593,7 @@ SoundPowerIntensityResult(
     repeatability: np.ndarray | None,
     pressure_residual_index: np.ndarray | None,
     surface_area: float,
-    fraction: int,
+    fraction: Literal[1, 3],
     grade: str,
     repeatability_limit_db: np.ndarray | None = None,
 )

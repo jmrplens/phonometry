@@ -1361,7 +1361,7 @@ def _fit_segment(
 
 
 def _time_axis(
-    n: int, fs: int | None, *, language: Language = "en"
+    n: int, fs: float | None, *, language: Language = "en"
 ) -> tuple[np.ndarray, str]:
     """Sample times in seconds when ``fs`` is known, else sample index."""
     if fs:

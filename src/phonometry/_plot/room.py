@@ -1226,7 +1226,7 @@ def plot_open_plan(
 @overload
 def plot_excitation(
     x: ArrayLike,
-    fs: int,
+    fs: float,
     *,
     kind: Literal["sweep", "mls"] = "sweep",
     ax: None = None,
@@ -1238,7 +1238,7 @@ def plot_excitation(
 @overload
 def plot_excitation(
     x: ArrayLike,
-    fs: int,
+    fs: float,
     *,
     kind: Literal["sweep", "mls"] = "sweep",
     ax: Axes,
@@ -1249,7 +1249,7 @@ def plot_excitation(
 
 def plot_excitation(
     x: ArrayLike,
-    fs: int,
+    fs: float,
     *,
     kind: Literal["sweep", "mls"] = "sweep",
     ax: Axes | None = None,

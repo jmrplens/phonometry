@@ -532,7 +532,7 @@ def normal_modes(
     ranges_m: ArrayLike | None = None,
     density: float = 1000.0,
     bottom: Literal["pressure-release", "rigid"] = "pressure-release",
-    n_depth_points: int | None = None,
+    n_depth_points: int | np.integer[Any] | None = None,
 ) -> NormalModeResult:
     r"""Normal-mode propagation loss for a range-independent waveguide.
 
@@ -865,7 +865,7 @@ def ray_trace(
     source_depth: float,
     launch_angles_deg: ArrayLike,
     max_range: float = 10_000.0,
-    n_steps: int = 2000,
+    n_steps: int | np.integer[Any] = 2000,
     bathymetry: tuple[ArrayLike, ArrayLike] | None = None,
 ) -> RayTraceResult:
     r"""Trace acoustic rays through a range-independent sound-speed profile.
@@ -1381,7 +1381,7 @@ def _arrival_bottom_coefficient(
 
 def _earliest_arrivals(
     times: NDArray[np.float64],
-    max_n_arrivals: int,
+    max_n_arrivals: int | np.integer[Any],
 ) -> NDArray[np.intp]:
     """The stable order of the arrival times, truncated to the cap and said."""
     order = np.argsort(times, kind="stable")
@@ -1404,8 +1404,8 @@ def eigenrays(
     receiver_range: float,
     receiver_depth: float,
     bottom: BottomType | FluidSeabed = "pressure-release",
-    max_n_arrivals: int = 64,
-    n_steps: int | None = None,
+    max_n_arrivals: int | np.integer[Any] = 64,
+    n_steps: int | np.integer[Any] | None = None,
 ) -> EigenrayResult:
     r"""The eigenrays a traced fan brackets between a source and a receiver.
 
@@ -2872,7 +2872,7 @@ def _beam_range_grid(
 def _beam_receiver_grid(
     receiver_depths_m: ArrayLike | None,
     *,
-    n_depth_points: int,
+    n_depth_points: int | np.integer[Any],
     water_depth: float,
 ) -> NDArray[np.float64]:
     """The depths the field is evaluated at.
@@ -3095,7 +3095,7 @@ def gaussian_beams(
     max_range: float = 10_000.0,
     ranges_m: ArrayLike | None = None,
     receiver_depths_m: ArrayLike | None = None,
-    n_depth_points: int = 200,
+    n_depth_points: int | np.integer[Any] = 200,
     fan: BeamFan | None = None,
     range_step: float = 25.0,
     bottom: BottomType | FluidSeabed = "pressure-release",
@@ -3698,7 +3698,7 @@ def parabolic_equation(
     source_depth: float,
     max_range: float = 10_000.0,
     range_step: float = 10.0,
-    n_depth_points: int = 1024,
+    n_depth_points: int | np.integer[Any] = 1024,
 ) -> ParabolicEquationResult:
     r"""Propagation-loss field from the standard (Tappert) parabolic
     equation.

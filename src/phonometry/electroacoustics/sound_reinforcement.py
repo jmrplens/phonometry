@@ -89,6 +89,7 @@ from .._internal.display import RichDisplay
 from .._internal.validation import require_count, require_scalar
 
 if TYPE_CHECKING:
+    import numpy as np
     from matplotlib.axes import Axes
 
     from .._i18n import Language
@@ -110,7 +111,7 @@ DEFAULT_STABILITY_MARGIN_DB = 10.0
 CARDIOID_RELATIVE_DIRECTIVITY_DB = -2.0
 
 
-def open_microphone_correction(n_open_microphones: int) -> float:
+def open_microphone_correction(n_open_microphones: int | np.integer[Any]) -> float:
     r"""Number-of-open-microphones correction (Long Equation (18.23)).
 
     :math:`\Delta L_\text{nom} = 10 \log_{10} N_\mathrm{m}`: doubling the number
@@ -256,7 +257,7 @@ def feedback_stability(
     level_loudspeaker_at_listener: float,
     *,
     microphone_directivity: float = 0.0,
-    n_open_microphones: int = 1,
+    n_open_microphones: int | np.integer[Any] = 1,
     stability_margin: float = DEFAULT_STABILITY_MARGIN_DB,
 ) -> FeedbackStabilityResult:
     r"""Stability of a reinforcement loop (Long Equations (18.16) to

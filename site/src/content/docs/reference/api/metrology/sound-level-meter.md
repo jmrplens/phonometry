@@ -263,7 +263,9 @@ One row of IEC 61672-1:2013 Table 5, the C-weighted peak reference difference.
 ### PeakReference.limits_db()
 
 ```python
-PeakReference.limits_db(meter_class: int) -> tuple[float, float]
+PeakReference.limits_db(
+    meter_class: int | np.integer[Any],
+) -> tuple[float, float]
 ```
 
 The `(lower, upper)` acceptance limits for a class, in decibels.
@@ -390,10 +392,10 @@ SoundLevelMeterPeriodicMeasurements(
     toneburst_uncertainties_db: Mapping[str, Sequence[float]] | None = None,
     c_peak_differences: Sequence[float] | None = None,
     c_peak_uncertainties_db: Sequence[float] | None = None,
-    c_peak_overload_indicated: bool | None = None,
+    c_peak_overload_indicated: bool | np.bool_ | None = None,
     overload_difference: float | None = None,
     overload_uncertainty_db: float | None = None,
-    overload_latched: bool | None = None,
+    overload_latched: bool | np.bool_ | None = None,
     high_level_stability_db: float | None = None,
     high_level_stability_uncertainty_db: float | None = None,
 )
@@ -829,7 +831,9 @@ One row of IEC 61672-1:2013 Table 4, the reference 4 kHz toneburst response.
 ### ToneburstReference.limits_db()
 
 ```python
-ToneburstReference.limits_db(meter_class: int) -> tuple[float, float]
+ToneburstReference.limits_db(
+    meter_class: int | np.integer[Any],
+) -> tuple[float, float]
 ```
 
 The `(lower, upper)` acceptance limits for a class, in decibels.
@@ -853,7 +857,7 @@ The `(lower, upper)` acceptance limits for a class, in decibels.
 
 ```python
 verify_sound_level_meter_periodic(
-    meter_class: int,
+    meter_class: int | np.integer[Any],
     measurements: SoundLevelMeterPeriodicMeasurements,
     *,
     pattern_approval_public: bool = False,

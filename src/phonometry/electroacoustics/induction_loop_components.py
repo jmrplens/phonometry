@@ -478,7 +478,7 @@ def rectangular_loop_field(
     y_m: ArrayLike,
     z_m: ArrayLike,
     *,
-    n_turns: int = 1,
+    n_turns: int | np.integer[Any] = 1,
 ) -> LoopField:
     r"""The magnetic field of a rectangular loop, by Biot and Savart.
 
@@ -555,7 +555,11 @@ def rectangular_loop_field(
 
 
 def loop_center_field(
-    current_a: float, length_m: float, *, width_m: float | None = None, n_turns: int = 1
+    current_a: float,
+    length_m: float,
+    *,
+    width_m: float | None = None,
+    n_turns: int | np.integer[Any] = 1,
 ) -> float:
     r"""The field at the centre of a loop, in its plane (IEC 60118-4:2014 E.1).
 
@@ -596,7 +600,7 @@ def loop_current(
     *,
     height_m: float = _MEASUREMENT_HEIGHT_M,
     field_strength_a_per_m: float = _REFERENCE_FIELD_STRENGTH_A_PER_M,
-    n_turns: int = 1,
+    n_turns: int | np.integer[Any] = 1,
 ) -> float:
     """The current a loop needs for a field strength above its centre.
 
@@ -649,7 +653,7 @@ def loop_dimensions(
     aspect_ratio: float = 1.0,
     height_m: float = _MEASUREMENT_HEIGHT_M,
     field_strength_a_per_m: float = _REFERENCE_FIELD_STRENGTH_A_PER_M,
-    n_turns: int = 1,
+    n_turns: int | np.integer[Any] = 1,
 ) -> LoopDimensions:
     """The largest loop an amplifier's current drives to a field strength (5.4.11).
 
@@ -726,7 +730,7 @@ def loop_resistance(
     perimeter_m: float,
     conductor_area_mm2: float,
     *,
-    n_turns: int = 1,
+    n_turns: int | np.integer[Any] = 1,
     conductor_temperature_c: float = _COPPER_REFERENCE_TEMPERATURE_C,
 ) -> float:
     r"""The resistance of a copper loop (IEC 62489-1:2010 B.2).
@@ -770,7 +774,7 @@ def rectangular_loop_inductance(
     width_m: float,
     conductor_area_mm2: float,
     *,
-    n_turns: int = 1,
+    n_turns: int | np.integer[Any] = 1,
     internal_inductance: bool = True,
 ) -> float:
     r"""The inductance of a rectangular loop of round wire (Grover, Formula (58)).
@@ -1850,7 +1854,10 @@ class NeckLoopVerification(RichDisplay):
 
 
 def verify_neck_loop(
-    dc_resistance_ohm: float, input_voltage_v: float, *, neck_loop_type: int = 1
+    dc_resistance_ohm: float,
+    input_voltage_v: float,
+    *,
+    neck_loop_type: int | np.integer[Any] = 1,
 ) -> NeckLoopVerification:
     """Does a neck loop meet one type of the draft Annex D (prA2:2017)?
 

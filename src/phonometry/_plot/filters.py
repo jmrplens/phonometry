@@ -1227,7 +1227,7 @@ def _log_frequency_rows(ax: Axes) -> Transform:
 
 
 def _spectrogram_grid(
-    result: OctaveSpectrogramResult, channel: int | None
+    result: OctaveSpectrogramResult, channel: int | np.integer[Any] | None
 ) -> np.ndarray:
     """The ``(bands, frames)`` grid of the channel to draw.
 
@@ -1266,7 +1266,7 @@ def plot_octave_spectrogram(
     result: OctaveSpectrogramResult,
     ax: Axes | None = None,
     *,
-    channel: int | None = None,
+    channel: int | np.integer[Any] | None = None,
     language: Language = "en",
     **kwargs: Any,
 ) -> Axes:

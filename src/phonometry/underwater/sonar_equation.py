@@ -383,7 +383,7 @@ def detection_range(
     ph: float = 8.0,
     model: AbsorptionModel = "francois-garrison",
     max_range: float = 500_000.0,
-    n_points: int = 400,
+    n_points: int | np.integer[Any] = 400,
 ) -> DetectionRangeResult:
     r"""Range at which the closed-form propagation loss equals the figure of
     merit.

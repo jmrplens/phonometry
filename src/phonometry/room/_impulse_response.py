@@ -169,7 +169,7 @@ class ImpulseResponseResult(OwnsArrays):
     """
 
     ir: np.ndarray
-    fs: int | None
+    fs: float | None
     method: str
 
     def __array__(
@@ -231,7 +231,7 @@ class ImpulseResponseResult(OwnsArrays):
 
 
 def sweep_signal(
-    fs: int,
+    fs: float,
     f1: float,
     f2: float,
     duration_s: float,
@@ -319,7 +319,7 @@ def _apply_fade(x: np.ndarray, fade: float) -> np.ndarray:
 
 
 def inverse_filter(
-    fs: int,
+    fs: float,
     f1: float,
     f2: float,
     duration_s: float,
@@ -383,7 +383,7 @@ def inverse_filter(
 def _farina_deconvolve(
     rec: np.ndarray,
     ref: np.ndarray,
-    fs: int,
+    fs: float,
     f_range: tuple[float, float] | None,
 ) -> np.ndarray:
     """Farina inverse-filter deconvolution (ISO 18233:2006, Figure B.2).
@@ -427,7 +427,7 @@ def _farina_deconvolve(
 def impulse_response(
     recorded: Signal | ArrayLike,
     reference: Signal | ArrayLike,
-    fs: int | None = None,
+    fs: float | None = None,
     *,
     method: Literal["farina"],
     f_range: tuple[float, float],
@@ -441,7 +441,7 @@ def impulse_response(
 def impulse_response(
     recorded: Signal | ArrayLike,
     reference: Signal | ArrayLike,
-    fs: int | None = None,
+    fs: float | None = None,
     *,
     method: Literal["spectral", "farina"] = ...,
     f_range: tuple[float, float] | None = ...,
@@ -454,7 +454,7 @@ def impulse_response(
 def impulse_response(
     recorded: Signal | ArrayLike,
     reference: Signal | ArrayLike,
-    fs: int | None = None,
+    fs: float | None = None,
     *,
     method: Literal["spectral", "farina"] = "spectral",
     f_range: tuple[float, float] | None = None,
@@ -595,7 +595,7 @@ def mls_impulse_response(
     mls: Signal | ArrayLike,
     *,
     length: int | None = None,
-    fs: int | None = None,
+    fs: float | None = None,
 ) -> ImpulseResponseResult:
     """Recover an impulse response from a periodic MLS excitation.
 
@@ -749,7 +749,7 @@ def golay_impulse_response(
     pair: tuple[ArrayLike, ArrayLike],
     *,
     length: int | None = None,
-    fs: int | None = None,
+    fs: float | None = None,
 ) -> ImpulseResponseResult:
     r"""Recover an impulse response from a complementary Golay-pair excitation.
 
@@ -1053,7 +1053,7 @@ def _band_edge_taper(
 
 
 def shaped_sweep_signal(
-    fs: int,
+    fs: float,
     f1: float,
     f2: float,
     duration_s: float,

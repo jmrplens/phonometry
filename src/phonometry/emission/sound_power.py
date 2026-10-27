@@ -1377,7 +1377,7 @@ class SoundEnergyResult(OwnsArrays):
 
 
 def mean_single_event_level(
-    levels: ArrayLike, *, n_events: int | None = None
+    levels: ArrayLike, *, n_events: int | np.integer[Any] | None = None
 ) -> np.ndarray:
     r"""Mean single event time-integrated level of one event (ISO 3744 Eq. 19/20).
 
@@ -1514,7 +1514,7 @@ def reference_atmosphere_correction(
 
 
 def _event_position_levels(
-    levels_positions: ArrayLike, n_events: int | None
+    levels_positions: ArrayLike, n_events: int | np.integer[Any] | None
 ) -> tuple[np.ndarray, int | None]:
     """The ``(NM, NB)`` mean single event levels behind the three input forms.
 
@@ -1568,7 +1568,7 @@ def sound_energy_pressure(
     dimensions: tuple[float, float, float] | None = None,
     distance: float | None = None,
     n_reflecting_planes: int = 1,
-    n_events: int | None = None,
+    n_events: int | np.integer[Any] | None = None,
     background_levels: ArrayLike | None = None,
     integration_time: float | None = None,
     frequencies: ArrayLike | None = None,

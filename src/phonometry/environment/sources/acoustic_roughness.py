@@ -95,12 +95,13 @@ from ..._internal.validation import (
 from ._shared import _TOLERANCE
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
-    from collections.abc import Mapping, Sequence
+    from collections.abc import Sequence
 
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
     from ..._i18n import Language
+    from ..._internal.types import BandMapping
     from ...filters import OctaveFilterBank
 
 __all__ = [
@@ -541,7 +542,7 @@ class AcousticRoughnessSpectrum(OwnsArrays):
         self,
         ax: Axes | None = None,
         *,
-        limit_db: Mapping[float, float] | None = None,
+        limit_db: BandMapping | None = None,
         language: Language = "en",
         **kwargs: Any,
     ) -> Axes:

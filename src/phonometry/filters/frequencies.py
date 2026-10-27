@@ -215,7 +215,7 @@ def _bandedge(g: float, b: float) -> float:
     return float(g ** (1 / (2 * b)))
 
 
-def _deleteouters(bands: FractionalOctaveBands, fs: int) -> FractionalOctaveBands:
+def _deleteouters(bands: FractionalOctaveBands, fs: float) -> FractionalOctaveBands:
     """Remove the bands whose upper edge exceeds the Nyquist frequency.
 
     :param bands: The bands the limits asked for.
@@ -238,7 +238,7 @@ def _deleteouters(bands: FractionalOctaveBands, fs: int) -> FractionalOctaveBand
     )
 
 
-def _genfreqs(limits: RealValues, fraction: float, fs: int) -> FractionalOctaveBands:
+def _genfreqs(limits: RealValues, fraction: float, fs: float) -> FractionalOctaveBands:
     """Determine the bands within limits that a bank at ``fs`` can hold.
 
     :param limits: [f_min, f_max].

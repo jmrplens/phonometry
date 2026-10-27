@@ -145,7 +145,7 @@ _RIFF_FOURCC = b"RIFF"
 
 def _resolve_input(
     x: Signal | ArrayLike,
-    fs: int | None,
+    fs: float | np.integer[Any] | None,
 ) -> tuple[np.ndarray, int]:
     """Normalise the input to ``(channels, samples)`` plus a sample rate.
 
@@ -163,7 +163,9 @@ def _resolve_input(
                 "pass one or the other, not a disagreement"
             )
             raise ValueError(msg)
-        return x.data, x.fs
+        # The header holds a whole number of samples per second: a Signal
+        # whose own rate is fractional is refused here, as a bare rate is.
+        return x.data, require_count(x.fs, "fs", at_least=None)
     data = np.asarray(x)
     if fs is None:
         msg = "fs is required when writing a bare array"
@@ -714,7 +716,7 @@ def _write_through_scipy(
 def write(
     path: str | Path,
     x: Signal | ArrayLike,
-    fs: int | None = ...,
+    fs: float | np.integer[Any] | None = ...,
     *,
     subtype: Subtype | None = ...,
     bext: BroadcastMetadata | Literal["loudness"] | None = ...,
@@ -728,7 +730,7 @@ def write(
 def write(
     path: str | Path,
     x: Signal | ArrayLike,
-    fs: int | None = ...,
+    fs: float | np.integer[Any] | None = ...,
     *,
     subtype: Subtype | None = ...,
     bext: BroadcastMetadata | Literal["loudness"] | None = ...,
@@ -739,7 +741,7 @@ def write(
 def write(
     path: str | Path,
     x: Signal | ArrayLike,
-    fs: int | None = None,
+    fs: float | np.integer[Any] | None = None,
     *,
     subtype: Subtype | None = None,
     bext: BroadcastMetadata | Literal["loudness"] | None = None,
@@ -777,7 +779,9 @@ def write(
         quantised per ``subtype``; ``int16``/``int32`` arrays are written
         as a bit-exact pass-through of their codes.
     :param fs: Sample rate, Hz. Required for bare arrays; forbidden to
-        disagree with a :class:`Signal`'s own rate.
+        disagree with a :class:`Signal`'s own rate. A WAV header holds a
+        whole number of samples per second, so a fractional rate, given or
+        a Signal's own, is refused.
     :param subtype: Target sample format (see above); ``None`` picks
         ``FLOAT`` for float data and the matching depth for integer data.
     :param bext: The broadcast provenance chunk (EBU Tech 3285; see
@@ -809,7 +813,8 @@ def write(
         argument at all. Requires a calibrated :class:`Signal`: a sidecar
         without a calibration would be a promise with nothing behind it.
     :raises ValueError: For an unknown suffix or subtype, a missing or
-        conflicting ``fs``, a dither request outside ``PCM_16``, an
+        conflicting ``fs`` or one that is not a whole number (given or the
+        :class:`Signal`'s own), a dither request outside ``PCM_16``, an
         ``rng`` without a ``dither`` for it to seed, bext
         metadata that violates Tech 3285 (oversize field, version too old
         for a carried UMID or loudness), a sidecar request without a

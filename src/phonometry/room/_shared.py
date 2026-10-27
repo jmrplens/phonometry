@@ -12,7 +12,7 @@ them be printed as rows of one table.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -42,7 +42,7 @@ ONSET_DB = 20.0
 NOISE_TAIL_FRACTION = 0.1
 
 
-def validate_ir(ir: Signal | ArrayLike, fs: int) -> NDArray[np.float64]:
+def validate_ir(ir: Signal | ArrayLike, fs: float) -> NDArray[np.float64]:
     """Accept a one-dimensional, non-silent impulse response, calibrated.
 
     :param ir: The impulse response, as an array or a
@@ -105,9 +105,9 @@ def noise_power(p2: NDArray[np.float64]) -> float:
 
 def split_bands(
     x: NDArray[np.float64],
-    fs: int,
+    fs: float,
     limits: tuple[float, float] | None,
-    fraction: int,
+    fraction: int | np.integer[Any],
     *,
     zero_phase: bool = False,
     name: str = "limits",
@@ -177,7 +177,7 @@ NO_DECAY_SLOPE_DB_PER_S = -1e-7
 
 
 def truncation(
-    p2: NDArray[np.float64], fs: int, noise: float
+    p2: NDArray[np.float64], fs: float, noise: float
 ) -> tuple[int, float, float]:
     r"""Truncation point and tail compensation (ISO 3382-1, 5.3.3, Eq. (3)).
 

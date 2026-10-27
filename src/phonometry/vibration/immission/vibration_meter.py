@@ -967,7 +967,10 @@ def assessment_weighting_response(
 
 
 def assessment_weighting_taps(
-    fs: float, *, building_class: BuildingClass, n_taps: int | None = None
+    fs: float,
+    *,
+    building_class: BuildingClass,
+    n_taps: int | np.integer[Any] | None = None,
 ) -> NDArray[np.float64]:
     """A linear-phase FIR that realises an Annex E weighting.
 
@@ -1023,7 +1026,7 @@ def assessment_velocity(
     fs: float,
     *,
     building_class: BuildingClass,
-    n_taps: int | None = None,
+    n_taps: int | np.integer[Any] | None = None,
 ) -> NDArray[np.float64]:
     """The assessment velocity ``v_Bn(t)`` of Annex E, in mm/s.
 
@@ -1130,7 +1133,7 @@ def assess_short_term_vibration(
     fs: float,
     *,
     building_class: BuildingClass,
-    n_taps: int | None = None,
+    n_taps: int | np.integer[Any] | None = None,
 ) -> AssessmentVelocity:
     """Judge short-term vibration on a building by Annex E.
 

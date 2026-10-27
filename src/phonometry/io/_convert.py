@@ -52,7 +52,7 @@ not the library, accepts that narrowing.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -176,7 +176,7 @@ def _quantised_blocks(
     src: str | Path,
     dst: str | Path,
     subtype: str,
-    block_size: int,
+    block_size: int | np.integer[Any],
     total_samples: int,
 ) -> Iterator[np.ndarray]:
     """Stream source blocks quantised for the target, counting every clip.
@@ -277,7 +277,7 @@ def convert(
     dst: str | Path,
     *,
     subtype: str | None = None,
-    block_size: int = 1 << 20,
+    block_size: int | np.integer[Any] = 1 << 20,
 ) -> AudioFileInfo:
     """Convert a measurement file, keeping samples, bext and sidecar whole.
 

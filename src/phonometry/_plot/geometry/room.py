@@ -81,7 +81,7 @@ def plot_image_source_geometry(
     result: ImageSourceResult,
     ax: Axes | None = None,
     *,
-    max_order: int | None = None,
+    max_order: int | np.integer[Any] | None = None,
     language: Language = "en",
     **kwargs: Any,
 ) -> Axes:

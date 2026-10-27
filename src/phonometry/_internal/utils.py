@@ -117,7 +117,7 @@ def _resample_to_length(
     return y_resampled
 
 
-def _downsamplingfactor(freq: list[float], fs: int, headroom: float) -> np.ndarray:
+def _downsamplingfactor(freq: list[float], fs: float, headroom: float) -> np.ndarray:
     """Compute the largest downsampling factors that keep each band's headroom.
 
     :param freq: Band upper-edge frequencies.

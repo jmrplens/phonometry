@@ -355,7 +355,7 @@ The largest deviation in magnitude, signed as it was measured.
 verify_signal_burst_response(
     application: Literal['hand-arm', 'whole-body', 'low-frequency-whole-body'],
     name: Literal[Literal['Wb', 'Wc', 'Wd', 'We', 'Wf', 'Wh', 'Wj', 'Wk', 'Wm'], 'band-limiting'],
-    measured: Mapping[int | None, Mapping[str, float]],
+    measured: Mapping[int, Mapping[str, float]] | Mapping[int | None, Mapping[str, float]] | Mapping[None, Mapping[str, float]],
     *,
     amplitude_m_s2: float = 1.0,
 ) -> SignalBurstVerification

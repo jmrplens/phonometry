@@ -624,7 +624,7 @@ Feed them to [`tapping_machine_characteristic_power_level`](/phonometry/referenc
 tapping_machine_force_level_estimate(
     frequency: ArrayLike,
     *,
-    fraction: Literal[1, 3] = 1,
+    fraction: Literal[1, 3] | np.integer[Any] = 1,
 ) -> np.ndarray
 ```
 

@@ -343,11 +343,11 @@ the two exchanged (see `docs/ERRATA.md`). The plus or minus 1 dB flatness
 
 ```python
 combi_signal(
-    fs: int,
+    fs: int | np.integer[Any],
     *,
     sine_s: float = 1.0,
     noise_s: float = 4.0,
-    n_cycles: int = 1,
+    n_cycles: int | np.integer[Any] = 1,
     seed: int | None = None,
 ) -> np.ndarray
 ```
@@ -428,7 +428,7 @@ $$
 ```python
 field_strength_meter(
     x: ArrayLike,
-    fs: int,
+    fs: int | np.integer[Any],
     *,
     weighting: Literal['Z', 'A'] = 'Z',
 ) -> FieldStrengthReading
@@ -595,7 +595,7 @@ The verdict on one requirement.
 
 ```python
 loop_test_noise(
-    fs: int,
+    fs: int | np.integer[Any],
     duration_s: float,
     *,
     rms: float = 1.0,

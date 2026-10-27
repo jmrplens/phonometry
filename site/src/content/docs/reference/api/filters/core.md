@@ -78,8 +78,8 @@ How the energy in a band becomes a level reading.
 ```python
 octave_filter(
     x: Signal | ArrayLike,
-    fs: int | None = None,
-    fraction: float = 1,
+    fs: float | None = None,
+    fraction: float | np.integer[Any] = 1,
     order: int = 6,
     limits: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any] | None = None,
     *,
@@ -124,8 +124,8 @@ Multichannel support: If x is 2D (channels, samples), each channel is filtered.
 
 ```python
 OctaveFilterBank(
-    fs: int,
-    fraction: float = 1,
+    fs: float,
+    fraction: float | np.integer[Any] = 1,
     order: int = 6,
     limits: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any] | None = None,
     *,
@@ -379,7 +379,7 @@ tuple, so it cannot be unpacked by position: read `.levels`,
 OctaveSpectrogramResult.plot(
     ax: Axes | None = None,
     *,
-    channel: int | None = None,
+    channel: int | np.integer[Any] | None = None,
     language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes

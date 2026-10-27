@@ -430,7 +430,7 @@ def regularized_inverse_filter(
     regularization_outside: float = 1.0,
     transition_octaves: float = 1.0 / 3.0,
     n_fft: int | None = None,
-    delay: int | None = None,
+    delay: int | np.integer[Any] | None = None,
 ) -> InverseFilterResult:
     r"""Design a regularized inverse filter for a measured impulse response.
 

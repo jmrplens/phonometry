@@ -48,7 +48,7 @@ from typing import TYPE_CHECKING, Any, Literal
 import numpy as np
 
 from ..._internal.display import RichDisplay
-from ..._internal.validation import require_positive, require_scalar
+from ..._internal.validation import require_count, require_positive, require_scalar
 from ...io._resolve import SignalInput, resolve_calibration, resolve_fs
 
 if TYPE_CHECKING:
@@ -181,7 +181,7 @@ def psychoacoustic_annoyance(
 
 def psychoacoustic_annoyance_from_signal(
     x: SignalInput,
-    fs: int | None = None,
+    fs: int | np.integer[Any] | None = None,
     *,
     field: Literal["free", "diffuse"] = "free",
     calibration_factor: float | None = None,
@@ -226,7 +226,7 @@ def psychoacoustic_annoyance_from_signal(
     from ._roughness_ecma import roughness_ecma
     from .sharpness import sharpness_din_from_specific
 
-    fs = resolve_fs(x, fs)
+    rate = resolve_fs(x, fs)
     # The factor is applied here rather than passed down, so the check that
     # loudness_zwicker would have run has to happen here too: without it a
     # zero or negative factor silences the signal and reports PA = 0.
@@ -234,12 +234,14 @@ def psychoacoustic_annoyance_from_signal(
         resolve_calibration(x, calibration_factor), "calibration_factor"
     )
     signal = np.asarray(x, dtype=np.float64) * float(factor)
-    loud = loudness_zwicker(signal, fs, field=field, stationary=False)
+    loud = loudness_zwicker(
+        signal, require_count(rate, "fs", at_least=None), field=field, stationary=False
+    )
     # N5: the 5 % percentile loudness of the time-varying trace; fall back to
     # the total loudness for signals too short to yield a percentile.
     n5 = loud.n5 if loud.n5 is not None else loud.loudness
     s = sharpness_din_from_specific(loud.specific)
-    r = roughness_ecma(signal, float(fs), field=field).roughness
+    r = roughness_ecma(signal, float(rate), field=field).roughness
     # The Osses 2016 fluctuation-strength model is free-field only.
-    f = _fluctuation_strength(signal, float(fs)).fluctuation_strength
+    f = _fluctuation_strength(signal, float(rate)).fluctuation_strength
     return psychoacoustic_annoyance(n5, s, f, r)

@@ -468,7 +468,7 @@ def _apparent_reduction(
 
 
 def _single_number(
-    values: np.ndarray, fraction: BandFraction | None
+    values: np.ndarray, fraction: BandFraction | np.integer[Any] | None
 ) -> tuple[int, int] | None:
     """(rating, Ctr) via ISO 717-1 for 5 octave or 16 third-octave bands."""
     from ..measurement.ratings import weighted_rating
@@ -485,7 +485,7 @@ def facade_sound_reduction(
     area: float,
     volume: float,
     delta_l_fs: float = 0.0,
-    fraction: BandFraction | None = None,
+    fraction: BandFraction | np.integer[Any] | None = None,
     frequencies: ArrayLike | None = None,
 ) -> FacadePredictionResult:
     """Predict façade airborne sound insulation ``D2m,nT`` (EN 12354-3:2000).

@@ -144,7 +144,7 @@ def _sweep_rate(f1: float, f2: float, duration_s: float) -> float:
 
 
 def synchronized_sweep_signal(
-    fs: int,
+    fs: float,
     f1: float,
     f2: float,
     duration_s: float,
@@ -549,7 +549,7 @@ def _sweep_timing(
 
 
 def _harmonic_window(
-    ir_length: int | None,
+    ir_length: int | np.integer[Any] | None,
     delays_samples: NDArray[np.float64],
     n_orders: int,
 ) -> int:
@@ -636,8 +636,8 @@ def swept_sine_distortion(
     f2: float,
     duration_s: float,
     method: Literal["synchronized", "farina"] = "synchronized",
-    n_harmonics: int = 5,
-    ir_length: int | None = None,
+    n_harmonics: int | np.integer[Any] = 5,
+    ir_length: int | np.integer[Any] | None = None,
     amplitude: float = 1.0,
     fade: float | None = None,
     remove_dc: bool = True,

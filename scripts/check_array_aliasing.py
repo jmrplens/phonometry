@@ -132,6 +132,7 @@ from __future__ import annotations
 import argparse
 import ast
 import pathlib
+import re
 import sys
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
@@ -973,11 +974,25 @@ def _method_astype(node: ast.Call) -> bool:
     )
 
 
+#: A numpy scalar class written with its type argument, ``np.integer[Any]``:
+#: one number, whose ``Any`` says nothing about an array.
+_NUMPY_SCALAR_ARGUMENT = re.compile(
+    r"\b(?:np|numpy)\.(?:generic|number|integer|signedinteger|unsignedinteger"
+    r"|inexact|floating|complexfloating)\[[^\[\]]*\]"
+)
+
+
 def holds_array(annotation: str | None) -> bool:
-    """Whether a field so annotated may hold an array."""
+    """Whether a field so annotated may hold an array.
+
+    The type argument of a numpy scalar class is left out first, so that
+    ``int | np.integer[Any]``, a count numpy code hands over, is one number
+    and not the ``Any`` that may be an array.
+    """
     if annotation is None:
         return True
-    return any(word in annotation for word in _ARRAY_WORDS)
+    text = _NUMPY_SCALAR_ARGUMENT.sub("number", annotation)
+    return any(word in text for word in _ARRAY_WORDS)
 
 
 @dataclass

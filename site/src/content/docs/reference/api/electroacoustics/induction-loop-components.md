@@ -461,7 +461,7 @@ loop_center_field(
     length_m: float,
     *,
     width_m: float | None = None,
-    n_turns: int = 1,
+    n_turns: int | np.integer[Any] = 1,
 ) -> float
 ```
 
@@ -506,7 +506,7 @@ loop_current(
     *,
     height_m: float = 1.4,
     field_strength_a_per_m: float = 0.4,
-    n_turns: int = 1,
+    n_turns: int | np.integer[Any] = 1,
 ) -> float
 ```
 
@@ -547,7 +547,7 @@ loop_dimensions(
     aspect_ratio: float = 1.0,
     height_m: float = 1.4,
     field_strength_a_per_m: float = 0.4,
-    n_turns: int = 1,
+    n_turns: int | np.integer[Any] = 1,
 ) -> LoopDimensions
 ```
 
@@ -616,7 +616,7 @@ loop_resistance(
     perimeter_m: float,
     conductor_area_mm2: float,
     *,
-    n_turns: int = 1,
+    n_turns: int | np.integer[Any] = 1,
     conductor_temperature_c: float = 20.0,
 ) -> float
 ```
@@ -1290,7 +1290,7 @@ rectangular_loop_field(
     y_m: ArrayLike,
     z_m: ArrayLike,
     *,
-    n_turns: int = 1,
+    n_turns: int | np.integer[Any] = 1,
 ) -> LoopField
 ```
 
@@ -1334,7 +1334,7 @@ rectangular_loop_inductance(
     width_m: float,
     conductor_area_mm2: float,
     *,
-    n_turns: int = 1,
+    n_turns: int | np.integer[Any] = 1,
     internal_inductance: bool = True,
 ) -> float
 ```
@@ -1386,7 +1386,7 @@ verify_neck_loop(
     dc_resistance_ohm: float,
     input_voltage_v: float,
     *,
-    neck_loop_type: int = 1,
+    neck_loop_type: int | np.integer[Any] = 1,
 ) -> NeckLoopVerification
 ```
 

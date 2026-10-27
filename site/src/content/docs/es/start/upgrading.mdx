@@ -1307,6 +1307,32 @@ de una señal, `building.energy_average_level`,
 `room.directivity_energy_average` y sus afines), cuyo resultado es un número
 para una entrada de una dimensión, conservan la unión y su comportamiento.
 
+## Una frecuencia de muestreo es un `float`, y un recuento admite un entero de NumPy
+
+La frecuencia de muestreo de una `Signal` es el `float` que se le dio, así
+que un comprobador de tipos lee `sig.fs` como un `float`, donde leía un
+`int`, y toda función que funciona a cualquier frecuencia positiva admite un
+`float`: la frecuencia que devuelve una función es la que admite la
+siguiente. Las funciones que necesitan un número entero de muestras por
+segundo siguen rechazando una fraccionaria: `io.write`, que escribe la
+frecuencia en la cabecera del archivo, las señales de prueba de
+`electroacoustics`, `room.image_source_rir`,
+`psychoacoustics.loudness_zwicker`, `psychoacoustics.sharpness_din`,
+`psychoacoustics.psychoacoustic_annoyance_from_signal` y `speech.stoi`.
+
+| 3.3.0 o 4.0.0rc1 | 4.0 |
+| --- | --- |
+| `psychoacoustics.loudness_zwicker(x, sig.fs)` pasaba la comprobación de tipos, con `sig.fs` leída como un `int` | se entrega la Signal, `loudness_zwicker(sig)`, o `int(sig.fs)` |
+| `io.write(path, io.Signal(x, 44100.5))` fallaba dentro de la cabecera con `struct.error` | lanza `ValueError` nombrando `fs`, como lo hace `fs=44100.5` |
+
+Un recuento, una fracción de banda o un indicador admiten el entero o el
+valor de verdad de NumPy que admite su validador (`int | np.integer[Any]`,
+`BandFraction | np.integer[Any]`, `bool | np.bool_`), y los valores por
+banda admiten un mapeo con claves enteras (`{125: 40.0}`) igual que uno con
+claves de coma flotante, así que no se rechaza nada que funcionara. Un
+registro de resultado que valida un recuento o una fracción de banda guarda
+el `int` que lee, donde guardaba el entero de NumPy tal como se le dio.
+
 ## Los veredictos son objetos de resultado, no diccionarios
 
 Las tres funciones `verify_*` de la 3.3.0 devolvían `dict[str, Any]` y ahora

@@ -218,7 +218,7 @@ class AuditoriumWarning(PhonometryWarning):
     """A measurement outside the conditions ISO 3382-1:2009 prints for it."""
 
 
-def _filter_quality_factor(fraction: int) -> float:
+def _filter_quality_factor(fraction: int | np.integer[Any]) -> float:
     r"""Quality factor of an IEC 61260 filter of the given bandwidth fraction.
 
     The band edges sit at :math:`f_c 2^{\pm 1/2n}`, so the relative
@@ -229,7 +229,7 @@ def _filter_quality_factor(fraction: int) -> float:
     return 1.0 / (edge - 1.0 / edge)
 
 
-def _exposure_level(p2: NDArray[np.float64], fs: int) -> float:
+def _exposure_level(p2: NDArray[np.float64], fs: float) -> float:
     """Sound pressure exposure level of one squared band response.
 
     The integral is truncated where the fitted decay meets the noise floor
@@ -270,7 +270,7 @@ def _decay_range_is_thin(p2: NDArray[np.float64]) -> bool:
     return bool(float(np.max(p2)) / floor < 10.0 ** (_MINIMUM_DECAY_RANGE_DB / 10.0))
 
 
-def _ring_down_seconds(centre_hz: float, fraction: int) -> float:
+def _ring_down_seconds(centre_hz: float, fraction: int | np.integer[Any]) -> float:
     """How long a band filter of that centre needs to ring down.
 
     The 2,2 is the number of cycles a one-pole envelope of quality factor
@@ -309,9 +309,9 @@ def _warn_cut_short(name: str) -> None:
 
 def _band_exposure_levels(
     ir: Signal | ArrayLike,
-    fs: int,
+    fs: float,
     limits: tuple[float, float] | None,
-    fraction: int,
+    fraction: int | np.integer[Any],
     name: str,
     *,
     check_decay: bool = False,
@@ -340,29 +340,29 @@ def _band_exposure_levels(
 @overload
 def sound_pressure_exposure_level(
     ir: Signal | ArrayLike,
-    fs: int | None = None,
+    fs: float | None = None,
     *,
     limits: None,
-    fraction: int = 1,
+    fraction: int | np.integer[Any] = 1,
 ) -> float: ...
 
 
 @overload
 def sound_pressure_exposure_level(
     ir: Signal | ArrayLike,
-    fs: int | None = None,
+    fs: float | None = None,
     *,
     limits: tuple[float, float] = _DEFAULT_BANDS,
-    fraction: int = 1,
+    fraction: int | np.integer[Any] = 1,
 ) -> NDArray[np.float64]: ...
 
 
 def sound_pressure_exposure_level(
     ir: Signal | ArrayLike,
-    fs: int | None = None,
+    fs: float | None = None,
     *,
     limits: tuple[float, float] | None = _DEFAULT_BANDS,
-    fraction: int = 1,
+    fraction: int | np.integer[Any] = 1,
 ) -> float | NDArray[np.float64]:
     r"""Sound pressure exposure level of an impulse response, per band.
 
@@ -733,11 +733,11 @@ class SoundStrengthResult(OwnsArrays):
 def sound_strength(
     ir: Signal | ArrayLike,
     reference_ir: Signal | ArrayLike | None = None,
-    fs: int | None = None,
+    fs: float | None = None,
     *,
     reference_level: ArrayLike | None = None,
     limits: tuple[float, float] | None = _DEFAULT_BANDS,
-    fraction: int = 1,
+    fraction: int | np.integer[Any] = 1,
 ) -> SoundStrengthResult:
     r"""Sound strength G of a measured impulse response, per band.
 
@@ -857,7 +857,7 @@ LATERAL_WEIGHTINGS = ("squared", "cosine")
 
 
 def _window_energy(
-    p2: NDArray[np.float64], fs: int, start: float, stop: float | None
+    p2: NDArray[np.float64], fs: float, start: float, stop: float | None
 ) -> float:
     """Energy of a squared response between two times from its own sample 0.
 
@@ -922,11 +922,11 @@ class LateralEnergyResult(OwnsArrays):
 def early_lateral_energy_fraction(
     ir: Signal | ArrayLike,
     lateral_ir: Signal | ArrayLike,
-    fs: int | None = None,
+    fs: float | None = None,
     *,
     weighting: Literal["squared", "cosine"] = "squared",
     limits: tuple[float, float] | None = _DEFAULT_BANDS,
-    fraction: int = 1,
+    fraction: int | np.integer[Any] = 1,
 ) -> LateralEnergyResult:
     r"""Early lateral energy fraction of a pair of responses, per band.
 
@@ -1062,11 +1062,11 @@ def late_lateral_sound_level(
     ir: Signal | ArrayLike,
     lateral_ir: Signal | ArrayLike,
     reference_ir: Signal | ArrayLike | None = None,
-    fs: int | None = None,
+    fs: float | None = None,
     *,
     reference_level: ArrayLike | None = None,
     limits: tuple[float, float] | None = _DEFAULT_BANDS,
-    fraction: int = 1,
+    fraction: int | np.integer[Any] = 1,
 ) -> LateLateralResult:
     r"""Late lateral sound level of a measured response, per band.
 
@@ -1259,11 +1259,11 @@ class InterauralCorrelationResult(OwnsArrays):
 def interaural_cross_correlation(
     left: Signal | ArrayLike,
     right: Signal | ArrayLike,
-    fs: int | None = None,
+    fs: float | None = None,
     *,
     window: tuple[float, float | None] = (0.0, None),
     limits: tuple[float, float] | None = _DEFAULT_BANDS,
-    fraction: int = 1,
+    fraction: int | np.integer[Any] = 1,
 ) -> InterauralCorrelationResult:
     r"""Interaural cross correlation of a binaural response, per band.
 
@@ -1381,7 +1381,7 @@ def interaural_cross_correlation(
 def _correlation_curve(
     left: NDArray[np.float64],
     right: NDArray[np.float64],
-    fs: int,
+    fs: float,
     start: float,
     stop: float | None,
     lags: NDArray[np.int64],
@@ -1498,10 +1498,10 @@ class StageSupportResult(OwnsArrays):
 
 def stage_support(
     ir: Signal | ArrayLike,
-    fs: int | None = None,
+    fs: float | None = None,
     *,
     limits: tuple[float, float] | None = (250.0, 2000.0),
-    fraction: int = 1,
+    fraction: int | np.integer[Any] = 1,
 ) -> StageSupportResult:
     r"""Early and late stage support of a platform response, per band.
 

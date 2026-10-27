@@ -19,10 +19,13 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from .._internal.frozen import OwnsArrays
+from .._internal.types import float_keyed
 from .._internal.validation import require_scalar
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
+
+    from .._internal.types import BandMapping
 
 __all__ = [
     "AircraftSystemComplianceResult",
@@ -212,8 +215,8 @@ def _rebuilt_result(
 
 def verify_aircraft_noise_system(
     *,
-    directional: Mapping[float, Mapping[float, float]] | None = None,
-    frequency_response: Mapping[float, float] | None = None,
+    directional: Mapping[int, BandMapping] | Mapping[float, BandMapping] | None = None,
+    frequency_response: BandMapping | None = None,
     linearity: Mapping[str, float] | None = None,
     resolution: float | None = None,
 ) -> AircraftSystemComplianceResult:
@@ -236,8 +239,12 @@ def verify_aircraft_noise_system(
     :raises ValueError: If a frequency or angle is out of the tabulated range.
     """
     return AircraftSystemComplianceResult(
-        directional=directional,
-        frequency_response=frequency_response,
+        directional=None
+        if directional is None
+        else {float(f): float_keyed(row) for f, row in directional.items()},
+        frequency_response=None
+        if frequency_response is None
+        else float_keyed(frequency_response),
         linearity=linearity,
         resolution=resolution,
     )

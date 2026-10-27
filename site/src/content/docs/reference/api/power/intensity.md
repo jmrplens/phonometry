@@ -407,7 +407,7 @@ intensity axis through both; default is the classic 12 mm spacer.
 sound_intensity(
     p1: Signal | ArrayLike,
     p2: Signal | ArrayLike,
-    fs: int | None = None,
+    fs: float | None = None,
     *,
     spacing_m: float,
     density: float = 1.204,

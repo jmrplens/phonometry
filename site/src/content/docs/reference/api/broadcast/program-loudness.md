@@ -187,7 +187,7 @@ k_weighting_response(
     fs: float = 48000.0,
     *,
     frequencies: ArrayLike | None = None,
-    n: int = 512,
+    n: int | np.integer[Any] = 512,
 ) -> KWeightingResponse
 ```
 
@@ -320,7 +320,7 @@ program_loudness(
     *,
     momentary_step: float = 0.01,
     short_term_step: float = 0.1,
-    oversample: int | None = None,
+    oversample: int | np.integer[Any] | None = None,
 ) -> ProgramLoudnessResult
 ```
 
@@ -474,7 +474,7 @@ PASS/FAIL verdict row and a footer with the fixed disclaimer.
 true_peak_level(
     x: Signal | ArrayLike,
     fs: float | None = None,
-    oversample: int | None = None,
+    oversample: int | np.integer[Any] | None = None,
 ) -> float | NDArray[np.float64]
 ```
 

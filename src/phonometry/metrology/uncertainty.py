@@ -37,16 +37,18 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
+from numpy.typing import ArrayLike
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from .._i18n import Language
 
 
 from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays
+from .._internal.types import RealScalar
 from .._internal.validation import (
     require_axis_count,
     require_equal_counts,
@@ -72,7 +74,17 @@ __all__ = [
     "uncertainty_propagation",
 ]
 
-Model = Callable[..., float]
+#: A measurement function of the law of propagation: it takes one number per
+#: input estimate and returns the estimate of the output, one number, a
+#: Python or a NumPy one. A model that returns an array of outputs is the
+#: Monte Carlo method's (:data:`VectorModel`).
+ScalarModel = Callable[..., RealScalar]
+
+#: A measurement function of the Monte Carlo method: it takes one array of
+#: trials per input and returns the output of every trial, read with
+#: ``np.asarray``, so it may return a number, a sequence or an array; a
+#: model written for numbers that broadcasts over arrays is one.
+VectorModel = Callable[..., ArrayLike]
 
 # Eigenvalues of a caller-supplied correlation matrix down to minus this
 # tolerance are accepted as zero within floating point; anything more
@@ -411,7 +423,7 @@ class MonteCarloResult(OwnsArrays):
 
 
 def _sensitivity(
-    model: Model, values: np.ndarray, uncertainties: np.ndarray
+    model: ScalarModel, values: np.ndarray, uncertainties: np.ndarray
 ) -> np.ndarray:
     r"""Central-difference sensitivities :math:`\partial f/\partial x_i`.
 
@@ -527,7 +539,7 @@ def _effective_dof(
 
 
 def uncertainty_propagation(
-    model: Model,
+    model: ScalarModel,
     quantities: Sequence[Quantity],
     correlation: ArrayLike | None = None,
 ) -> UncertaintyResult:
@@ -726,7 +738,7 @@ def _sample(q: Quantity, size: int, rng: np.random.Generator) -> np.ndarray:
 
 
 def monte_carlo(
-    model: Model,
+    model: VectorModel,
     quantities: Sequence[Quantity],
     n_trials: int = 1_000_000,
     coverage: float = 0.95,

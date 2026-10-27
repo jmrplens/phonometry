@@ -320,7 +320,7 @@ class EnclosureInsulationResult(OwnsArrays):
     condition: Literal["laboratory", "in-situ"]
     source_kind: Literal["actual", "reciprocity", "artificial"]
     base_standard: str
-    fraction: int
+    fraction: BandFraction
 
     def __post_init__(self) -> None:
         """Refuse a band set ISO 11546 does not rate in.
@@ -329,7 +329,9 @@ class EnclosureInsulationResult(OwnsArrays):
         :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a
             float).
         """
-        require_band_fraction(self.fraction, "fraction")
+        object.__setattr__(
+            self, "fraction", require_band_fraction(self.fraction, "fraction")
+        )
 
     @property
     def rounded(self) -> NDArray[np.int_]:
@@ -503,7 +505,7 @@ def _insulation(
     base_standard: str,
     condition: str,
     source_kind: str,
-    fraction: int,
+    fraction: int | np.integer[Any],
 ) -> EnclosureInsulationResult:
     """The body every one of Equations (1) to (5) shares."""
     without, with_, freqs = _pair(level_without, level_with, frequencies)
@@ -564,7 +566,7 @@ def enclosure_sound_power_insulation(
     base_standard: str = _ISO_3744,
     condition: EnclosureCondition = "laboratory",
     source_kind: SourceKind = "actual",
-    fraction: BandFraction = 3,
+    fraction: BandFraction | np.integer[Any] = 3,
 ) -> EnclosureInsulationResult:
     r"""Insertion loss from two sound power determinations, Equations (1) and (2).
 
@@ -620,7 +622,7 @@ def enclosure_sound_pressure_insulation(
     base_standard: str = _ISO_11201,
     condition: EnclosureCondition = "laboratory",
     source_kind: SourceKind = "actual",
-    fraction: BandFraction = 3,
+    fraction: BandFraction | np.integer[Any] = 3,
 ) -> EnclosureInsulationResult:
     r"""Insertion loss from two sound pressure levels, Equations (3) and (4).
 
@@ -672,7 +674,7 @@ def enclosure_reciprocity_insulation(
     internal_levels: ArrayLike,
     *,
     frequencies: ArrayLike | None = None,
-    fraction: BandFraction = 3,
+    fraction: BandFraction | np.integer[Any] = 3,
 ) -> EnclosureInsulationResult:
     r"""Insertion loss measured from the outside in, Equation (5) of part 1.
 
@@ -719,7 +721,7 @@ def enclosure_artificial_source_insulation(
     frequencies: ArrayLike | None = None,
     quantity: Literal["sound_power", "sound_pressure"] = "sound_power",
     condition: EnclosureCondition = "laboratory",
-    fraction: BandFraction = 3,
+    fraction: BandFraction | np.integer[Any] = 3,
 ) -> EnclosureInsulationResult:
     r"""Insertion loss with the tapping source of Annex A, 7.3 of part 1 and 7.2 of part 2.
 
@@ -790,7 +792,7 @@ def weighted_enclosure_insulation(
     insulation: ArrayLike,
     *,
     quantity: Quantity = "sound_power",
-    fraction: BandFraction = 3,
+    fraction: BandFraction | np.integer[Any] = 3,
 ) -> WeightedEnclosureInsulation:
     r"""The single-number rating of an insertion loss, 7.4 of part 1 and 7.3 of part 2.
 

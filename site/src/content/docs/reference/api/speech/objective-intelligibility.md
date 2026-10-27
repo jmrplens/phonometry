@@ -50,7 +50,7 @@ dependency).
 stoi(
     clean: Signal | ArrayLike,
     degraded: Signal | ArrayLike,
-    fs: int | None = None,
+    fs: int | np.integer[Any] | None = None,
     *,
     extended: bool = False,
 ) -> STOIResult

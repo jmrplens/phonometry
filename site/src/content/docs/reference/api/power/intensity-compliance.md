@@ -71,8 +71,8 @@ ISO 9614 dynamic capability $L_\mathrm{d} = \delta_{pI0} - K$ follows from
 
 ```python
 instrument_class_from_components(
-    probe_class: int,
-    processor_class: int,
+    probe_class: int | np.integer[Any],
+    processor_class: int | np.integer[Any],
 ) -> int
 ```
 
@@ -145,7 +145,7 @@ so a band exactly on the limit passes. A fresh copy at every read.
 
 ```python
 IntensityInstrumentComplianceResult.binding_margin(
-    device_class: int | None = None,
+    device_class: int | np.integer[Any] | None = None,
 ) -> float
 ```
 
@@ -168,7 +168,7 @@ Smallest per-band margin to a class, in dB (the binding margin).
 
 ```python
 IntensityInstrumentComplianceResult.failing_bands(
-    device_class: int | None = None,
+    device_class: int | np.integer[Any] | None = None,
 ) -> list[float]
 ```
 

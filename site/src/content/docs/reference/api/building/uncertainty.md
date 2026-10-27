@@ -245,7 +245,7 @@ deviation of `nx` repeated measurements stays below these values.
 prediction_input_uncertainty(
     sigma_reproducibility: float,
     sigma_product: float,
-    n: int,
+    n: int | np.integer[Any],
 ) -> float
 ```
 

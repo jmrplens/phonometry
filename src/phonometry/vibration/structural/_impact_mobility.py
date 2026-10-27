@@ -355,7 +355,7 @@ def energy_spectral_density(
 
 
 def force_window(
-    n_samples: int,
+    n_samples: int | np.integer[Any],
     fs: float,
     *,
     width_s: float,
@@ -425,7 +425,7 @@ def force_window(
 
 
 def exponential_window(
-    n_samples: int, fs: float, *, decay_rate_per_s: float
+    n_samples: int | np.integer[Any], fs: float, *, decay_rate_per_s: float
 ) -> np.ndarray:
     r"""The exponential window of 8.5.2: :math:`w(t) = \mathrm{e}^{-a t}`.
 
@@ -453,7 +453,9 @@ def exponential_window(
     return np.asarray(np.exp(-a * np.arange(n) / fs), dtype=np.float64)
 
 
-def exponential_decay_rate(n_samples: int, fs: float, *, final_value: float) -> float:
+def exponential_decay_rate(
+    n_samples: int | np.integer[Any], fs: float, *, final_value: float
+) -> float:
     r"""The decay rate of an exponential window that ends the record at a value.
 
     8.5.2 describes an exponential window by the value it decays to at the end
@@ -2289,8 +2291,12 @@ class CoherenceCheck(OwnsArrays):
             msg = f"{owner}: 'min_coherence' must lie in (0, 1)."
             raise ValueError(msg)
         # int() would read 5.9 as 5 and True as 1: a count is a whole number.
-        require_count(self.n_impacts, "n_impacts")
-        require_count(self.min_n_records, "min_n_records")
+        object.__setattr__(
+            self, "n_impacts", require_count(self.n_impacts, "n_impacts")
+        )
+        object.__setattr__(
+            self, "min_n_records", require_count(self.min_n_records, "min_n_records")
+        )
         # With nothing judged, every judged frequency is high by default and
         # the verdict passes without having looked at the coherence.
         if not np.any(np.asarray(self.judged, dtype=bool)):
@@ -2363,7 +2369,7 @@ def check_coherence(
     frequency_range_hz: tuple[float, float],
     exclude_hz: Sequence[tuple[float, float]] = (),
     min_coherence: float = HIGH_COHERENCE,
-    min_n_records: int = COHERENCE_RECORDS,
+    min_n_records: int | np.integer[Any] = COHERENCE_RECORDS,
 ) -> CoherenceCheck:
     """Is the averaged estimate's coherence high over the range of interest? (9.1)
 

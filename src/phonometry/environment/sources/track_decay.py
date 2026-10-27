@@ -63,12 +63,11 @@ from ..._internal.validation import (
 from ._shared import _TOLERANCE
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
-    from collections.abc import Mapping
-
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
     from ..._i18n import Language
+    from ..._internal.types import BandMapping
 
 Direction = Literal["vertical", "lateral"]
 
@@ -364,7 +363,7 @@ class TrackDecayRate(OwnsArrays):
         self,
         ax: Axes | None = None,
         *,
-        limit_db_per_m: Mapping[float, float] | None = None,
+        limit_db_per_m: BandMapping | None = None,
         language: Language = "en",
         **kwargs: Any,
     ) -> Axes:

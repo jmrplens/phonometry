@@ -267,7 +267,7 @@ def metadiffuser_polar_response(
     period_m: float,
     angles_deg: ArrayLike = DEFAULT_POLAR_ANGLES_DEG,
     source_angle_deg: float = 0.0,
-    n_repetitions: int = 1,
+    n_repetitions: int | np.integer[Any] = 1,
     resonator_geometry: ResonatorGeometry = "slit",
     fluid: Fluid = ABSORBER_AIR,
 ) -> DiffuserPolarResponse:
@@ -335,7 +335,7 @@ def metadiffuser_diffusion_spectrum(
     period_m: float,
     angles_deg: ArrayLike = DEFAULT_POLAR_ANGLES_DEG,
     source_angle_deg: float = 0.0,
-    n_repetitions: int = 1,
+    n_repetitions: int | np.integer[Any] = 1,
     resonator_geometry: ResonatorGeometry = "slit",
     fluid: Fluid = ABSORBER_AIR,
 ) -> DiffusionSpectrum:

@@ -135,7 +135,7 @@ def test_non_finite_or_non_positive_fs_is_rejected(bad: float) -> None:
     """NaN and infinity pass a bare <= 0 check; the constructor must not."""
     tone = _tone()
     with pytest.raises(ValueError, match="fs must be a positive finite"):
-        Signal(data=tone, fs=bad)  # type: ignore[arg-type]
+        Signal(data=tone, fs=bad)
 
 
 @pytest.mark.parametrize("bad", [float("nan"), float("inf"), float("-inf"), 0.0, -0.5])

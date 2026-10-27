@@ -230,7 +230,7 @@ def amplitude_modulation_band_levels(
     band_levels: ArrayLike,
     *,
     frequencies: ArrayLike,
-    band: int,
+    band: int | np.integer[Any],
     weighting: Literal["A", "Z"],
 ) -> NDArray[np.float64]:
     """Band-limited A-weighted 100 ms levels of one AM band (13.6.2.1.1).
@@ -930,7 +930,7 @@ def bin_amplitude_modulation(
     wind_speeds_m_s: ArrayLike,
     *,
     wind_directions_deg: ArrayLike | None = None,
-    bands: Iterable[int] = (1, 2, 3),
+    bands: Iterable[int | np.integer[Any]] = (1, 2, 3),
     excluded: ArrayLike | None = None,
     sector_width_deg: float = 30.0,
 ) -> BinnedModulation:

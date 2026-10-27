@@ -54,7 +54,7 @@ test an analyser, which this module is not.
 amplitude_distribution(
     velocity_mm_s: ArrayLike,
     *,
-    n_bins: int = 101,
+    n_bins: int | np.integer[Any] = 101,
 ) -> AmplitudeDistribution
 ```
 
@@ -411,7 +411,7 @@ passage_average_level(levels: ArrayLike, *, axis: None = None) -> float
 passage_average_level(
     levels: ArrayLike,
     *,
-    axis: int,
+    axis: int | np.integer[Any],
 ) -> NDArray[np.float64]
 ```
 

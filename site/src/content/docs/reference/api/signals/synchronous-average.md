@@ -87,7 +87,7 @@ No resampling onto an `M`-point angular grid is performed.
 comb_filter_response(
     frequencies: ArrayLike,
     period_s: float,
-    n_averages: int,
+    n_averages: int | np.integer[Any],
 ) -> NDArray[np.float64]
 ```
 
@@ -210,8 +210,8 @@ time_synchronous_average(
     fs: float | None = None,
     *,
     period_s: float,
-    n_averages: int | None = None,
-    n_harmonics: int = 8,
+    n_averages: int | np.integer[Any] | None = None,
+    n_harmonics: int | np.integer[Any] = 8,
 ) -> SynchronousAverageResult
 ```
 

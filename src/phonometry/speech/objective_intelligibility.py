@@ -327,7 +327,7 @@ def _row_col_normalize(seg: NDArray[np.float64]) -> NDArray[np.float64]:
 def stoi(
     clean: Signal | ArrayLike,
     degraded: Signal | ArrayLike,
-    fs: int | None = None,
+    fs: int | np.integer[Any] | None = None,
     *,
     extended: bool = False,
 ) -> STOIResult:
@@ -360,15 +360,15 @@ def stoi(
         silent-frame removal (too little speech to score).
     :raises TypeError: if ``fs`` is a flag, a text or an array where a count goes.
     """
-    fs = resolve_pair_fs(clean, degraded, fs, names=("clean", "degraded"))
+    rate = resolve_pair_fs(clean, degraded, fs, names=("clean", "degraded"))
     x, y = _validate_pair(clean, degraded)
-    require_scalar(fs, "fs")
-    if require_count(fs, "fs", at_least=None) <= 0:
+    require_scalar(rate, "fs")
+    if require_count(rate, "fs", at_least=None) <= 0:
         msg = "'fs' must be a positive sample rate."
         raise ValueError(msg)
 
-    x = _resample_to_internal(x, require_count(fs, "fs", at_least=None))
-    y = _resample_to_internal(y, require_count(fs, "fs", at_least=None))
+    x = _resample_to_internal(x, require_count(rate, "fs", at_least=None))
+    y = _resample_to_internal(y, require_count(rate, "fs", at_least=None))
     x, y = _remove_silent_frames(x, y)
 
     # Guard before the transform: with fewer than 30 short-time frames left

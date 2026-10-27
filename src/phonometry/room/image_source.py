@@ -377,7 +377,7 @@ class ImageSourceResult(OwnsArrays):
         self,
         ax: Axes | None = None,
         *,
-        max_order: int | None = None,
+        max_order: int | np.integer[Any] | None = None,
         language: Language = "en",
         **kwargs: Any,
     ) -> Axes:
@@ -548,7 +548,7 @@ def _image_amplitudes(
 def _sample_ir(
     times: NDArray[np.float64],
     amp: NDArray[np.float64],
-    fs: int,
+    fs: int | np.integer[Any],
     duration_s: float | None,
     n_bands: int,
 ) -> NDArray[np.float64]:
@@ -575,8 +575,8 @@ def image_source_rir(
     receiver: ArrayLike,
     absorption: ArrayLike,
     *,
-    fs: int,
-    max_order: int = 20,
+    fs: int | np.integer[Any],
+    max_order: int | np.integer[Any] = 20,
     speed_of_sound: float = _SPEED_OF_SOUND_M_S,
     air_attenuation_per_m: ArrayLike = 0.0,
     duration_s: float | None = None,
@@ -714,7 +714,7 @@ def image_source_rir(
     )
 
 
-def audible_image_count(max_order: int) -> int:
+def audible_image_count(max_order: int | np.integer[Any]) -> int:
     r"""Number of audible shoebox images up to reflection order ``max_order``.
 
     Kuttruff *Room Acoustics* 6th ed., Equation (9.23):

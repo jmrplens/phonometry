@@ -295,7 +295,7 @@ class SoftwareQualityWarning(PhonometryWarning):
 # --------------------------------------------------------------------------- #
 # Annex C.4: ranking positions and the characteristic values
 # --------------------------------------------------------------------------- #
-def ranking_positions(sample_size: int) -> tuple[int, int]:
+def ranking_positions(sample_size: int | np.integer[Any]) -> tuple[int, int]:
     r"""Ranking positions of the 0,1- and 0,9-quantiles (ISO 17534-1 C.4).
 
     For a sample of ``N`` values sorted in ascending order, the positions,
@@ -496,8 +496,8 @@ def level_difference_quantiles(
 # Annex C.2 and C.3: where the sample is taken
 # --------------------------------------------------------------------------- #
 def uniform_sample_indices(
-    n_points: int,
-    sample_size: int,
+    n_points: int | np.integer[Any],
+    sample_size: int | np.integer[Any],
     *,
     horizontal_clearances_m: ArrayLike | None = None,
 ) -> NDArray[np.intp]:
@@ -574,7 +574,7 @@ def uniform_sample_indices(
 
 
 def contour_sample_chainages_m(
-    total_length_m: float, sample_size: int
+    total_length_m: float, sample_size: int | np.integer[Any]
 ) -> NDArray[np.float64]:
     r"""Where the sample points sit on the sound contours (ISO 17534-1:2015, C.3).
 

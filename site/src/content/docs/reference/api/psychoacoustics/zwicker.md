@@ -29,7 +29,7 @@ A.9 of the standard digit for digit.
 ```python
 loudness_zwicker(
     x: Signal | ArrayLike,
-    fs: int | None = None,
+    fs: int | np.integer[Any] | None = None,
     field: Literal['free', 'diffuse'] = 'free',
     *,
     stationary: bool = False,

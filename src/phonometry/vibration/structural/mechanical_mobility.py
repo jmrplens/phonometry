@@ -491,7 +491,9 @@ def verify_rigid_mass_calibration(
     )
 
 
-def random_error_percent(coherence: ArrayLike, n_averages: int) -> np.ndarray:
+def random_error_percent(
+    coherence: ArrayLike, n_averages: int | np.integer[Any]
+) -> np.ndarray:
     r"""Normalized random error of an averaged FRF magnitude (ISO 7626-2 Annex A).
 
     :math:`\epsilon = \sqrt{(1 - \gamma^2) / (2 n \gamma^2)}`, the normalized

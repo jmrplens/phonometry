@@ -149,7 +149,12 @@ values were computed with.
 ## CapillaryTube
 
 ```python
-CapillaryTube(*, length_m: float, radius_m: float, n_tubes: int = 1)
+CapillaryTube(
+    *,
+    length_m: float,
+    radius_m: float,
+    n_tubes: int | np.integer[Any] = 1,
+)
 ```
 
 Identical open capillary tubes that equalise the static pressure of a

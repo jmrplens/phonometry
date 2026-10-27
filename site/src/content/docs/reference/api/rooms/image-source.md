@@ -76,7 +76,7 @@ no diffraction or diffuse scattering.
 ## audible_image_count
 
 ```python
-audible_image_count(max_order: int) -> int
+audible_image_count(max_order: int | np.integer[Any]) -> int
 ```
 
 Number of audible shoebox images up to reflection order `max_order`.
@@ -110,8 +110,8 @@ image_source_rir(
     receiver: ArrayLike,
     absorption: ArrayLike,
     *,
-    fs: int,
-    max_order: int = 20,
+    fs: int | np.integer[Any],
+    max_order: int | np.integer[Any] = 20,
     speed_of_sound: float = 343.0,
     air_attenuation_per_m: ArrayLike = 0.0,
     duration_s: float | None = None,
@@ -240,7 +240,7 @@ Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 ImageSourceResult.plot_geometry(
     ax: Axes | None = None,
     *,
-    max_order: int | None = None,
+    max_order: int | np.integer[Any] | None = None,
     language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes

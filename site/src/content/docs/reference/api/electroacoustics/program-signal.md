@@ -298,7 +298,7 @@ One row of IEC 60268-1:1985 Table II.
 
 ```python
 simulated_program_signal(
-    fs: int,
+    fs: int | np.integer[Any],
     duration_s: float,
     *,
     rms: float = 1.0,

@@ -1425,7 +1425,9 @@ def _period_durations(
 
 
 def _validate_annual_inputs(
-    operating_days: int | None, year_days: int, closed_level: float
+    operating_days: int | np.integer[Any] | None,
+    year_days: int | np.integer[Any],
+    closed_level: float,
 ) -> None:
     """Reject the annual parameters the Article 25.1 b i criterion cannot use.
 
@@ -1456,8 +1458,8 @@ def _annual_index(
     period: str,
     *,
     long_term_levels: Mapping[str, float] | None,
-    operating_days: int | None,
-    year_days: int,
+    operating_days: int | np.integer[Any] | None,
+    year_days: int | np.integer[Any],
     closed_level: float,
 ) -> float | None:
     """The annual index ``LK,x`` of a period: given, derived, or unavailable.
@@ -1489,8 +1491,8 @@ def _assess_period(
     limit: float,
     *,
     long_term_levels: Mapping[str, float] | None,
-    operating_days: int | None,
-    year_days: int,
+    operating_days: int | np.integer[Any] | None,
+    year_days: int | np.integer[Any],
     closed_level: float,
     new_activity: bool,
 ) -> PeriodAssessment:
@@ -1537,8 +1539,8 @@ def assess_activity(
     limits: RegulationLimits,
     *,
     long_term_levels: Mapping[str, float] | None = None,
-    operating_days: int | None = None,
-    year_days: int = 365,
+    operating_days: int | np.integer[Any] | None = None,
+    year_days: int | np.integer[Any] = 365,
     closed_level: float = 0.0,
     new_activity: bool = True,
     period_hours: Mapping[str, float] | None = None,

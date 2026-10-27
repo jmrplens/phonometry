@@ -514,7 +514,7 @@ def _index_of(frequencies: NDArray[np.float64], target_hz: float, name: str) -> 
 
 
 def exact_frequencies(
-    lowest_hz: float, highest_hz: float, *, fraction: int = 12
+    lowest_hz: float, highest_hz: float, *, fraction: int | np.integer[Any] = 12
 ) -> NDArray[np.float64]:
     r"""The exact base-ten frequencies between two limits (IEC 62585:2012,
     Annex H, Formula (H.1)).
@@ -1822,7 +1822,7 @@ def _maximum_at(frequency: float, clause: int) -> float:
 
 
 def max_expanded_uncertainty(
-    frequencies: ArrayLike, *, clause: int
+    frequencies: ArrayLike, *, clause: int | np.integer[Any]
 ) -> NDArray[np.float64]:
     r"""The maximum permitted expanded uncertainty of a correction
     (IEC 62585:2012, clauses 9 to 14).
@@ -1912,7 +1912,7 @@ class CorrectionUncertaintyVerification(OwnsArrays):
         :raises TypeError: if ``clause`` is a flag, a text or an array where a count
             goes, or ``frequencies`` holds a text or a value that is not a real number.
         """
-        _clause(self.clause)
+        object.__setattr__(self, "clause", _clause(self.clause))
         frequencies = _frequency_axis(self.frequencies)
         object.__setattr__(self, "frequencies", read_only(frequencies))
         max_expanded_uncertainty(frequencies, clause=self.clause)
@@ -2084,7 +2084,7 @@ def verify_correction_uncertainty(
     expanded_uncertainty_db: ArrayLike,
     *,
     frequencies: ArrayLike,
-    clause: int,
+    clause: int | np.integer[Any],
     correction: ArrayLike | None = None,
     coverage_factor: ArrayLike | None = None,
     correction_range_db: ArrayLike | None = None,

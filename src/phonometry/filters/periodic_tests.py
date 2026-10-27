@@ -1056,7 +1056,7 @@ def _clause_13(
 
 
 def verify_filter_periodic(
-    filter_class: int,
+    filter_class: int | np.integer[Any],
     measurements: FilterPeriodicMeasurements,
     *,
     fraction: float,

@@ -200,7 +200,7 @@ The level of the band a nominal wavelength names, dB re 1 µm.
 AcousticRoughnessSpectrum.plot(
     ax: Axes | None = None,
     *,
-    limit_db: Mapping[float, float] | None = None,
+    limit_db: Mapping[int, float] | Mapping[float, float] | None = None,
     language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes

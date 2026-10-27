@@ -151,7 +151,7 @@ covering_improvement(
     *,
     mass: float = 0.5,
     impact_rate: float = 10.0,
-    fraction: Literal[1, 3] = 3,
+    fraction: Literal[1, 3] | np.integer[Any] = 3,
 ) -> CoveringImprovementResult
 ```
 
@@ -697,7 +697,7 @@ gives; the two forms agree.
 short_pulse_mean_square_force(
     frequencies: ArrayLike,
     *,
-    fraction: Literal[1, 3] = 3,
+    fraction: Literal[1, 3] | np.integer[Any] = 3,
 ) -> np.ndarray
 ```
 
@@ -784,7 +784,7 @@ tapping_force_spectrum(
     mass: float = 0.5,
     impact_rate: float = 10.0,
     impact_velocity: float | None = None,
-    fraction: Literal[1, 3] = 3,
+    fraction: Literal[1, 3] | np.integer[Any] = 3,
 ) -> TappingForceResult
 ```
 
@@ -868,7 +868,7 @@ TappingForceResult(
     impedance: float,
     lower_limit: float,
     upper_limit: float,
-    fraction: int = 3,
+    fraction: Literal[1, 3] = 3,
     mass: float = 0.5,
 )
 ```

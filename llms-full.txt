@@ -75687,6 +75687,30 @@ caller narrows. The reducers (`signals.leq` and the other levels of a signal,
 kin), whose result is one number for a one-dimensional input, keep the union
 and their behaviour.
 
+## A sample rate is a `float`, and a count takes a NumPy integer
+
+The rate of a `Signal` is the `float` it was given, so a type checker reads
+`sig.fs` as a `float`, where it read an `int`, and every function that runs
+at any positive rate takes a `float`: the rate one function returns is the
+rate the next one takes. The functions that need a whole number of samples
+per second keep refusing a fractional one: `io.write`, which writes the rate
+into the file's header, the test signals of `electroacoustics`,
+`room.image_source_rir`, `psychoacoustics.loudness_zwicker`,
+`psychoacoustics.sharpness_din`,
+`psychoacoustics.psychoacoustic_annoyance_from_signal` and `speech.stoi`.
+
+| 3.3.0 or 4.0.0rc1 | 4.0 |
+| --- | --- |
+| `psychoacoustics.loudness_zwicker(x, sig.fs)` type checked, `sig.fs` read as an `int` | hand over the Signal, `loudness_zwicker(sig)`, or `int(sig.fs)` |
+| `io.write(path, io.Signal(x, 44100.5))` failed inside the header with `struct.error` | it raises `ValueError` naming `fs`, as `fs=44100.5` does |
+
+A count, a band fraction or a flag takes the NumPy integer or truth value
+its validator takes (`int | np.integer[Any]`, `BandFraction |
+np.integer[Any]`, `bool | np.bool_`), and values by band take a mapping keyed
+by integers (`{125: 40.0}`) as they take one keyed by floats, so nothing that
+ran is refused. A result record that validates a count or a band fraction
+holds the `int` it reads, where it kept a NumPy integer as it was given.
+
 ## Verdicts are result objects, not dictionaries
 
 The three `verify_*` functions of 3.3.0 returned `dict[str, Any]` and now

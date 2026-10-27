@@ -361,7 +361,7 @@ class CabinInsulationResult(OwnsArrays):
     a_weighted_insulation: float | None
     internal_noise_level: float | None
     method: Method
-    fraction: int
+    fraction: BandFraction
 
     def __post_init__(self) -> None:
         """Reject a method the standard does not describe, or a number it does not give.
@@ -376,7 +376,9 @@ class CabinInsulationResult(OwnsArrays):
         :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a
             float), or ``method`` is not a text.
         """
-        require_band_fraction(self.fraction, "fraction")
+        object.__setattr__(
+            self, "fraction", require_band_fraction(self.fraction, "fraction")
+        )
         how = require_choice(self.method, "method", _METHODS)
         if self.a_weighted_insulation is not None and how != _ACTUAL_NOISE:
             msg = (
@@ -717,7 +719,7 @@ def cabin_insulation(
     *,
     frequencies: ArrayLike | None = None,
     method: CabinMethod = "laboratory",
-    fraction: BandFraction = 3,
+    fraction: BandFraction | np.integer[Any] = 3,
     room_background_levels: ArrayLike | None = None,
     cabin_background_levels: ArrayLike | None = None,
     a_weighted_room_level: float | None = None,
@@ -829,7 +831,7 @@ def weighted_cabin_insulation(
     insulation: ArrayLike,
     *,
     method: CabinMethod = "laboratory",
-    fraction: BandFraction = 3,
+    fraction: BandFraction | np.integer[Any] = 3,
 ) -> WeightedCabinInsulation:
     r"""The single-number rating of a cabin, clause 8.
 

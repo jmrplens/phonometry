@@ -125,7 +125,7 @@ facade_sound_reduction(
     area: float,
     volume: float,
     delta_l_fs: float = 0.0,
-    fraction: Literal[1, 3] | None = None,
+    fraction: Literal[1, 3] | np.integer[Any] | None = None,
     frequencies: ArrayLike | None = None,
 ) -> FacadePredictionResult
 ```

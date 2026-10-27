@@ -419,7 +419,7 @@ def _directional_angles(
 
 
 def plant_characteristic_height_m(
-    source_heights_m: ArrayLike, *, n_low_sources: int = 0
+    source_heights_m: ArrayLike, *, n_low_sources: int | np.integer[Any] = 0
 ) -> float:
     r"""The characteristic height of the plant :math:`H`, 9.2 c) and NOTE 7.
 
@@ -1063,6 +1063,7 @@ class PlantMeasurementContour(OwnsArrays):
         if len(omitted) >= count:
             msg = "'omitted_positions' leaves no position to measure."
             raise ValueError(msg)
+        object.__setattr__(self, "n_positions", count)
         object.__setattr__(self, "omitted_positions", omitted)
         if not np.all(_inside(plant, contour)):
             msg = "'contour_m' must enclose every vertex of 'plant_outline_m'."

@@ -84,7 +84,7 @@ from ..._internal.boundary import round_half_away_from_zero, round_half_up
 from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
 from ..._internal.levels_math import energy_sum
-from ..._internal.types import BAND_SET_NAMES, ReportEngine
+from ..._internal.types import BAND_SET_NAMES, ReportEngine, float_keyed
 from ..._internal.validation import (
     check_engine,
     require_band_fraction,
@@ -103,7 +103,7 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike
 
     from ..._i18n import Language
-    from ..._internal.types import BandFraction
+    from ..._internal.types import BandFraction, BandValues
     from ..._report.metadata import ReportMetadata
 
 __all__ = [
@@ -399,8 +399,8 @@ _THIRD_OCTAVE_ONLY: frozenset[float] = frozenset(_FREQ_THIRD_OCTAVE) - frozenset
 
 
 def _by_band(
-    values: Mapping[float, float] | ArrayLike,
-    fraction: BandFraction | None,
+    values: BandValues,
+    fraction: BandFraction | np.integer[Any] | None,
     name: str,
 ) -> tuple[np.ndarray, BandFraction | None]:
     """The values in rating order, read from a mapping by band when given one.
@@ -423,6 +423,7 @@ def _by_band(
         fraction = require_band_fraction(fraction, "fraction")
     if not isinstance(values, Mapping):
         return np.asarray(values, dtype=np.float64), fraction
+    values = float_keyed(values)
     if fraction is None:
         third = any(centre in values for centre in _THIRD_OCTAVE_ONLY)
         fraction = 3 if third else 1
@@ -945,8 +946,8 @@ def _adaptation_term(
 
 
 def weighted_rating(
-    values_by_band: Mapping[float, float] | ArrayLike,
-    fraction: BandFraction | None = None,
+    values_by_band: BandValues,
+    fraction: BandFraction | np.integer[Any] | None = None,
 ) -> WeightedRatingResult:
     """Single-number weighted rating and C / Ctr per ISO 717-1.
 
@@ -1060,8 +1061,8 @@ def _impact_ci(measured: np.ndarray, rating: int, n_bands: int) -> int:
 
 
 def weighted_impact_rating(
-    values_by_band: Mapping[float, float] | ArrayLike,
-    fraction: BandFraction | None = None,
+    values_by_band: BandValues,
+    fraction: BandFraction | np.integer[Any] | None = None,
 ) -> ImpactRatingResult:
     r"""Single-number weighted impact rating and CI per ISO 717-2.
 
@@ -1199,7 +1200,7 @@ class ImpactImprovementRatingResult(OwnsArrays):
 
 
 def _impact_improvement_rating(
-    delta_l: Mapping[float, float] | Sequence[float] | np.ndarray,
+    delta_l: BandValues,
 ) -> ImpactImprovementRatingResult:
     """``ΔLw``, ``CI,Δ`` and ``CI,r`` of one improvement spectrum."""
     dl, _ = _by_band(delta_l, 3, "delta_l")
@@ -1697,7 +1698,7 @@ def _validated_improvement(
 
 
 def _impact_improvement_ratings(
-    delta_l: Mapping[float, float] | ArrayLike,
+    delta_l: BandValues,
     reference_floor: str,
     *,
     one_decimal: bool,
@@ -1717,7 +1718,7 @@ def _impact_improvement_ratings(
 
 @overload
 def weighted_impact_improvement(
-    delta_l: Mapping[float, float] | ArrayLike,
+    delta_l: BandValues,
     *,
     reference_floor: ReferenceFloor = ...,
     one_decimal: Literal[False] = ...,
@@ -1726,7 +1727,7 @@ def weighted_impact_improvement(
 
 @overload
 def weighted_impact_improvement(
-    delta_l: Mapping[float, float] | ArrayLike,
+    delta_l: BandValues,
     *,
     reference_floor: ReferenceFloor = ...,
     one_decimal: Literal[True],
@@ -1735,7 +1736,7 @@ def weighted_impact_improvement(
 
 @overload
 def weighted_impact_improvement(
-    delta_l: Mapping[float, float] | ArrayLike,
+    delta_l: BandValues,
     *,
     reference_floor: ReferenceFloor = ...,
     one_decimal: bool = ...,
@@ -1743,7 +1744,7 @@ def weighted_impact_improvement(
 
 
 def weighted_impact_improvement(
-    delta_l: Mapping[float, float] | ArrayLike,
+    delta_l: BandValues,
     *,
     reference_floor: ReferenceFloor = "heavyweight",
     one_decimal: bool = False,
@@ -1790,7 +1791,7 @@ def weighted_impact_improvement(
 
 @overload
 def impact_improvement_adaptation_term(
-    delta_l: Mapping[float, float] | ArrayLike,
+    delta_l: BandValues,
     *,
     reference_floor: ReferenceFloor = ...,
     one_decimal: Literal[False] = ...,
@@ -1799,7 +1800,7 @@ def impact_improvement_adaptation_term(
 
 @overload
 def impact_improvement_adaptation_term(
-    delta_l: Mapping[float, float] | ArrayLike,
+    delta_l: BandValues,
     *,
     reference_floor: ReferenceFloor = ...,
     one_decimal: Literal[True],
@@ -1808,7 +1809,7 @@ def impact_improvement_adaptation_term(
 
 @overload
 def impact_improvement_adaptation_term(
-    delta_l: Mapping[float, float] | ArrayLike,
+    delta_l: BandValues,
     *,
     reference_floor: ReferenceFloor = ...,
     one_decimal: bool = ...,
@@ -1816,7 +1817,7 @@ def impact_improvement_adaptation_term(
 
 
 def impact_improvement_adaptation_term(
-    delta_l: Mapping[float, float] | ArrayLike,
+    delta_l: BandValues,
     *,
     reference_floor: ReferenceFloor = "heavyweight",
     one_decimal: bool = False,

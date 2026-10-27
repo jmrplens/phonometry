@@ -60,7 +60,7 @@ import math
 import warnings
 from dataclasses import KW_ONLY, dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, ClassVar, Literal
+from typing import TYPE_CHECKING, Any, ClassVar, Literal
 
 import numpy as np
 
@@ -430,7 +430,7 @@ def flow_regime(pressure_ratio: float, boundaries: RegimeBoundaries) -> int:
 
 
 def valve_style_modifier(
-    passage_area: float, wetted_perimeter: float, n_passages: int
+    passage_area: float, wetted_perimeter: float, n_passages: int | np.integer[Any]
 ) -> float:
     r"""The valve style modifier of Equations (8a) to (8c).
 
@@ -1037,7 +1037,7 @@ def multiple_passage_jet_diameter(
 
 def stage_level_correction(
     last_stage_level: float,
-    n_stages: int,
+    n_stages: int | np.integer[Any],
     inlet_pressure_pa: float,
     stagnation_pressure_pa: float,
 ) -> float:

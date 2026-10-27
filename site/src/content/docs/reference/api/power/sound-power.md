@@ -223,7 +223,7 @@ with that shape; scalar inputs return a scalar, unchanged.
 mean_single_event_level(
     levels: ArrayLike,
     *,
-    n_events: int | None = None,
+    n_events: int | np.integer[Any] | None = None,
 ) -> np.ndarray
 ```
 
@@ -481,7 +481,7 @@ sound_energy_pressure(
     dimensions: tuple[float, float, float] | None = None,
     distance: float | None = None,
     n_reflecting_planes: int = 1,
-    n_events: int | None = None,
+    n_events: int | np.integer[Any] | None = None,
     background_levels: ArrayLike | None = None,
     integration_time: float | None = None,
     frequencies: ArrayLike | None = None,

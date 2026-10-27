@@ -106,7 +106,7 @@ class Signal(RichDisplay):
     """
 
     data: NDArray[np.float64]
-    fs: int
+    fs: float
     _: KW_ONLY
     calibration_factor: float | None = None
     channel_labels: tuple[str, ...] | None = None
@@ -208,7 +208,7 @@ class Signal(RichDisplay):
         """Length in seconds."""
         return self.n_samples / float(self.fs)
 
-    def pick(self, channels: int | Sequence[int]) -> Signal:
+    def pick(self, channels: int | np.integer[Any] | Sequence[int]) -> Signal:
         """The chosen channels, as a new Signal.
 
         Indexing a Signal yields the samples, which is what makes it a

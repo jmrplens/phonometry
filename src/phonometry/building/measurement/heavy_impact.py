@@ -806,7 +806,7 @@ class AWeightedMaxImpactResult(OwnsArrays):
     """
 
     frequencies: np.ndarray
-    fraction: int
+    fraction: BandFraction
     levels: np.ndarray
     a_weighting: np.ndarray
     corrected: np.ndarray
@@ -840,7 +840,9 @@ class AWeightedMaxImpactResult(OwnsArrays):
         :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a
             float).
         """
-        require_band_fraction(self.fraction, "fraction")
+        object.__setattr__(
+            self, "fraction", require_band_fraction(self.fraction, "fraction")
+        )
         require_ranks(self, frequencies=1, levels=1, a_weighting=1, corrected=1)
         require_same_length(self, "frequencies", "levels", "a_weighting", "corrected")
 
@@ -875,7 +877,7 @@ def a_weighted_max_impact_level(
     levels: ArrayLike,
     *,
     frequencies: ArrayLike | Sequence[float] | None = None,
-    fraction: BandFraction | None = None,
+    fraction: BandFraction | np.integer[Any] | None = None,
 ) -> AWeightedMaxImpactResult:
     r"""A-weighted maximum impact level ``XiA,Fmax`` (ISO 717-2:2020, (D.1)).
 

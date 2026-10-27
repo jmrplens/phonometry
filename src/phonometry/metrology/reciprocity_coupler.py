@@ -565,7 +565,7 @@ class CapillaryTube(RichDisplay):
 
     length_m: float
     radius_m: float
-    n_tubes: int = 1
+    n_tubes: int | np.integer[Any] = 1
 
     def __post_init__(self) -> None:
         """Refuse a length or radius that is not positive, or no tube.

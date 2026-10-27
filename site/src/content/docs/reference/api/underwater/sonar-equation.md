@@ -163,7 +163,7 @@ detection_range(
     ph: float = 8.0,
     model: Literal['francois-garrison', 'ainslie-mccolm', 'thorp'] = 'francois-garrison',
     max_range: float = 500000.0,
-    n_points: int = 400,
+    n_points: int | np.integer[Any] = 400,
 ) -> DetectionRangeResult
 ```
 

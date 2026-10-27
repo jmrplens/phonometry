@@ -241,7 +241,7 @@ class SoundPowerIntensityResult(OwnsArrays):
     repeatability: np.ndarray | None
     pressure_residual_index: np.ndarray | None
     surface_area: float
-    fraction: int
+    fraction: BandFraction
     grade: str
     repeatability_limit_db: np.ndarray | None = None
 
@@ -277,7 +277,9 @@ class SoundPowerIntensityResult(OwnsArrays):
             float).
         """
         _check_grade(self.grade)
-        require_band_fraction(self.fraction, "fraction")
+        object.__setattr__(
+            self, "fraction", require_band_fraction(self.fraction, "fraction")
+        )
         require_ranks(
             self,
             frequencies=1,
@@ -498,7 +500,7 @@ def _validate_scan(
     normal_intensity: ArrayLike,
     areas: ArrayLike,
     frequencies: ArrayLike | None,
-    fraction: BandFraction,
+    fraction: BandFraction | np.integer[Any],
 ) -> tuple[np.ndarray, np.ndarray]:
     """Validate an ISO 9614-2 scan and normalise its arrays.
 
@@ -557,7 +559,7 @@ def sound_power_intensity(
     pressure_levels: ArrayLike | None = None,
     pressure_residual_index: ArrayLike | None = None,
     frequencies: ArrayLike | None = None,
-    fraction: BandFraction = 3,
+    fraction: BandFraction | np.integer[Any] = 3,
     grade: Grade = "engineering",
     repeatability_limit: ArrayLike | None = None,
 ) -> SoundPowerIntensityResult:
@@ -701,7 +703,7 @@ def sound_power_intensity(
         repeatability=repeatability,
         pressure_residual_index=dpi0_arr,
         surface_area=s_total,
-        fraction=fraction,
+        fraction=require_band_fraction(fraction, "fraction"),
         grade=grade,
         repeatability_limit_db=s_arr,
     )

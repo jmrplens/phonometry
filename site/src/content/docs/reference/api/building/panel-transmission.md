@@ -225,7 +225,7 @@ double_wall_transmission_loss(
     loss_factor: float = 0.1,
     cavity_medium: PorousMediumResult | None = None,
     tie_stiffness_per_area: float = 0.0,
-    fraction: Literal[1, 3] = 3,
+    fraction: Literal[1, 3] | np.integer[Any] = 3,
     fluid: Fluid = ...,
 ) -> SoundReductionResult
 ```
@@ -269,7 +269,9 @@ unit area as *tie_stiffness_per_area* (see
 ## field_incidence_correction
 
 ```python
-field_incidence_correction(fraction: Literal[1, 3] = 3) -> float
+field_incidence_correction(
+    fraction: Literal[1, 3] | np.integer[Any] = 3,
+) -> float
 ```
 
 Field-incidence mass-law correction `dB` (Bies Eq. 7.42).
@@ -297,7 +299,7 @@ mass_law_transmission_loss(
     mass_per_area: float,
     *,
     incidence: Literal['normal', 'field'] = 'field',
-    fraction: Literal[1, 3] = 3,
+    fraction: Literal[1, 3] | np.integer[Any] = 3,
     field_correction: float | None = None,
     fluid: Fluid = ...,
 ) -> np.ndarray
@@ -427,8 +429,8 @@ dominates over most of the useful frequency range.
 
 ```python
 orthotropic_plate_resonance(
-    mode_x: int,
-    mode_z: int,
+    mode_x: int | np.integer[Any],
+    mode_z: int | np.integer[Any],
     *,
     length_x: float,
     length_z: float,
@@ -490,7 +492,7 @@ orthotropic_transmission_loss(
     method: Literal['integral', 'heckl'] = 'integral',
     area: float | None = None,
     limiting_angle_deg: float = 78.0,
-    fraction: Literal[1, 3] = 3,
+    fraction: Literal[1, 3] | np.integer[Any] = 3,
     fluid: Fluid = ...,
 ) -> SoundReductionResult
 ```
@@ -723,7 +725,7 @@ single_panel_transmission_loss(
     critical_frequency: float | None = None,
     bending_stiffness: float | None = None,
     loss_factor: float = 0.01,
-    fraction: Literal[1, 3] = 3,
+    fraction: Literal[1, 3] | np.integer[Any] = 3,
     coincidence_model: Literal['sharp', 'cremer'] = 'sharp',
     field_correction: float | None = None,
     fluid: Fluid = ...,
@@ -865,7 +867,7 @@ Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 
 ```python
 SoundReductionResult.rating(
-    fraction: Literal[1, 3] | None = None,
+    fraction: Literal[1, 3] | np.integer[Any] | None = None,
 ) -> WeightedRatingResult
 ```
 

@@ -152,7 +152,7 @@ cylindrical_shell_modal_density(
     mean_radius: float,
     longitudinal_wave_speed: float,
     *,
-    fraction: Literal[1, 3] = 1,
+    fraction: Literal[1, 3] | np.integer[Any] = 1,
 ) -> NDArray[np.float64]
 ```
 

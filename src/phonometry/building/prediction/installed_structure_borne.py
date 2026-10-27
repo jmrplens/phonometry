@@ -727,7 +727,7 @@ def tapping_machine_force_level() -> np.ndarray:
 
 
 def tapping_machine_force_level_estimate(
-    frequency: ArrayLike, *, fraction: BandFraction = 1
+    frequency: ArrayLike, *, fraction: BandFraction | np.integer[Any] = 1
 ) -> np.ndarray:
     r"""Closed form printed under Table F.1 for the tapping machine force level.
 

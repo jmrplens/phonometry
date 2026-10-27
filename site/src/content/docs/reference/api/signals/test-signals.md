@@ -169,7 +169,7 @@ resample_signal(
     fs_new: float,
     stopband_attenuation: float = 120.0,
     transition_width: float = 0.05,
-    max_denominator: int = 1000,
+    max_denominator: int | np.integer[Any] = 1000,
 ) -> ResampledSignalResult
 ```
 
@@ -283,10 +283,10 @@ attenuation and the rejected band shaded.
 tone_burst(
     fs: float,
     frequency: float,
-    n_cycles: int,
+    n_cycles: int | np.integer[Any],
     *,
     amplitude: float = 1.0,
-    n_repetitions: int = 1,
+    n_repetitions: int | np.integer[Any] = 1,
     repetition_rate: float | None = None,
     pre_silence: float = 0.0,
     post_silence: float = 0.0,

@@ -225,7 +225,7 @@ of 8.3.4 with the level of the whole signal
 ```python
 check_limiting_test_signal(
     x: Signal | ArrayLike,
-    fs: int | None = None,
+    fs: float | None = None,
 ) -> LimitingTestSignalCheck
 ```
 
@@ -844,7 +844,7 @@ The sample standard deviation; zero with a single person.
 
 ```python
 headphone_difference_frequency_signal(
-    fs: int,
+    fs: int | np.integer[Any],
     duration_s: float,
     *,
     upper_frequency_hz: float,
@@ -923,7 +923,7 @@ $$
 
 ```python
 headphone_modulation_signal(
-    fs: int,
+    fs: int | np.integer[Any],
     duration_s: float,
     *,
     rated_source_emf_v: float,

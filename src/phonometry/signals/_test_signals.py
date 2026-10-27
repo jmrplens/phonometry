@@ -319,9 +319,9 @@ class ToneBurstResult(OwnsArrays):
 def _tone_burst_scalars(
     fs: float,
     frequency: float,
-    n_cycles: int,
+    n_cycles: int | np.integer[Any],
     amplitude: float,
-    n_repetitions: int,
+    n_repetitions: int | np.integer[Any],
     pre_silence: float,
     post_silence: float,
 ) -> tuple[float, float, int, float, int]:
@@ -380,10 +380,10 @@ def _tone_burst_period(
 def tone_burst(
     fs: float,
     frequency: float,
-    n_cycles: int,
+    n_cycles: int | np.integer[Any],
     *,
     amplitude: float = 1.0,
-    n_repetitions: int = 1,
+    n_repetitions: int | np.integer[Any] = 1,
     repetition_rate: float | None = None,
     pre_silence: float = 0.0,
     post_silence: float = 0.0,
@@ -611,7 +611,7 @@ def resample_signal(
     fs_new: float,
     stopband_attenuation: float = 120.0,
     transition_width: float = 0.05,
-    max_denominator: int = 1000,
+    max_denominator: int | np.integer[Any] = 1000,
 ) -> ResampledSignalResult:
     r"""Resample a record with a stated anti-alias specification.
 

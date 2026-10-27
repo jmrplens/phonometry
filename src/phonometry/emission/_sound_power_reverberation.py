@@ -1031,7 +1031,7 @@ class ReverberationSoundEnergyResult(OwnsArrays):
 
 
 def _room_event_levels(
-    levels: ArrayLike, n_events: int | None
+    levels: ArrayLike, n_events: int | np.integer[Any] | None
 ) -> tuple[np.ndarray, int | None]:
     """The mean single event level of one event behind the three input forms.
 
@@ -1083,7 +1083,7 @@ def sound_energy_reverberation(
     surface_area: float,
     *,
     frequencies: ArrayLike,
-    n_events: int | None = None,
+    n_events: int | np.integer[Any] | None = None,
     background_levels: ArrayLike | None = None,
     integration_time: float | None = None,
     temperature_c: float = 23.0,
@@ -1191,7 +1191,7 @@ def sound_energy_comparison(
     reference_sound_power_levels: ReferenceSourceCalibration | ArrayLike,
     *,
     frequencies: ArrayLike | None = None,
-    n_events: int | None = None,
+    n_events: int | np.integer[Any] | None = None,
     background_levels: ArrayLike | None = None,
     integration_time: float | None = None,
     reference_background_levels: ArrayLike | None = None,

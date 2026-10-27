@@ -311,7 +311,7 @@ FlankingImpactLevelResult.report(
     engine: Literal['reportlab'] = 'reportlab',
     verbose: bool = False,
     language: Literal['en', 'es'] = 'en',
-    part: int = 2,
+    part: int | np.integer[Any] = 2,
 ) -> str
 ```
 
@@ -385,7 +385,7 @@ FlankingLevelDifferenceResult.report(
     engine: Literal['reportlab'] = 'reportlab',
     verbose: bool = False,
     language: Literal['en', 'es'] = 'en',
-    part: int = 2,
+    part: int | np.integer[Any] = 2,
 ) -> str
 ```
 
@@ -495,7 +495,7 @@ normalized_flanking_impact_level(
     absorption_area: ArrayLike,
     *,
     reference_area: float = 10.0,
-    fraction: Literal[1, 3] | None = None,
+    fraction: Literal[1, 3] | np.integer[Any] | None = None,
 ) -> FlankingImpactLevelResult
 ```
 
@@ -532,7 +532,7 @@ normalized_flanking_level_difference(
     absorption_area: ArrayLike,
     *,
     reference_area: float = 10.0,
-    fraction: Literal[1, 3] | None = None,
+    fraction: Literal[1, 3] | np.integer[Any] | None = None,
 ) -> FlankingLevelDifferenceResult
 ```
 
@@ -818,7 +818,7 @@ VibrationReductionResult(
     frequencies: np.ndarray | None,
     k_ij: np.ndarray,
     modal_overlap: np.ndarray | None = None,
-    fraction: int | None = None,
+    fraction: Literal[1, 3] | None = None,
 )
 ```
 

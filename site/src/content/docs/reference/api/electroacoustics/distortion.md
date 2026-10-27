@@ -84,7 +84,7 @@ harmonic_distortion(
     fs: float | None = None,
     *,
     fundamental: float,
-    order: int,
+    order: int | np.integer[Any],
     n_harmonics: int = 10,
     window: str = 'hann',
 ) -> float

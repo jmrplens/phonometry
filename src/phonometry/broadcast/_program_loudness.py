@@ -355,7 +355,7 @@ def k_weighting_response(
     fs: float = _TABLE_RATE,
     *,
     frequencies: ArrayLike | None = None,
-    n: int = 512,
+    n: int | np.integer[Any] = 512,
 ) -> KWeightingResponse:
     """K-weighting magnitude frequency response (BS.1770-5 Annex 1, Tables 1-2).
 
@@ -627,7 +627,9 @@ def loudness_range(short_term_loudness: ArrayLike) -> float:
 
 
 def true_peak_level(
-    x: SignalInput, fs: float | None = None, oversample: int | None = None
+    x: SignalInput,
+    fs: float | None = None,
+    oversample: int | np.integer[Any] | None = None,
 ) -> float | NDArray[np.float64]:
     """True-peak level in dBTP (BS.1770-5 Annex 2).
 
@@ -977,7 +979,7 @@ def program_loudness(
     *,
     momentary_step: float = 0.01,
     short_term_step: float = 0.1,
-    oversample: int | None = None,
+    oversample: int | np.integer[Any] | None = None,
 ) -> ProgramLoudnessResult:
     """Measure a programme per EBU R 128: I, M, S, LRA and true peak.
 

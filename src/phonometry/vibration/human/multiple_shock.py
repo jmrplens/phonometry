@@ -82,9 +82,10 @@ from ...io._resolve import SignalInput, resolve_fs, resolve_samples
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike
+    from numpy.typing import ArrayLike, NDArray
 
     from ..._i18n import Language
+    from ..._internal.types import RealScalar, RealValues
     from ..._report.metadata import ReportMetadata
 
 __all__ = [
@@ -457,15 +458,35 @@ def injury_risk(
     return float(total ** (1.0 / _DOSE_EXPONENT))
 
 
+@overload
+def injury_probability[S: RealScalar](
+    risk: S, *, sex: Literal["male", "female"] = "male"
+) -> float: ...
+
+
+@overload
+def injury_probability[V: RealValues](
+    risk: V, *, sex: Literal["male", "female"] = "male"
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def injury_probability[A: ArrayLike](
+    risk: A, *, sex: Literal["male", "female"] = "male"
+) -> float | NDArray[np.float64]: ...
+
+
 def injury_probability(
     risk: ArrayLike, *, sex: Literal["male", "female"] = "male"
-) -> np.ndarray | float:
+) -> float | NDArray[np.float64]:
     r"""Probability of lumbar injury :math:`P(R)` (Annex C, Formula C.5).
 
     :param risk: The stress variable :math:`R` (see :func:`injury_risk`);
         scalar or array-like.
     :param sex: ``"male"`` or ``"female"`` (sets the Weibull coefficients).
-    :return: The injury probability
+    :return: The injury probability :math:`P = 1 - \exp(-(R/\alpha)^\beta)` in 0-1; a
+        ``float`` for a number; an array for a sequence or an array, a zero-dimensional
+        one included. Negative :math:`R` gives 0.
         :math:`P = 1 - \exp(-(R/\alpha)^\beta)` in 0-1; a float for a
         scalar input, otherwise an array. Negative :math:`R` gives 0.
     :raises TypeError: if ``sex`` is not a text.
@@ -474,7 +495,7 @@ def injury_probability(
     alpha, beta = _WEIBULL_MALE if sex == "male" else _WEIBULL_FEMALE
     r = np.asarray(risk, dtype=np.float64)
     prob = 1.0 - np.exp(-((np.maximum(r, 0.0) / alpha) ** beta))
-    return as_float_or_array(prob)
+    return as_float_or_array(prob, like=(risk,))
 
 
 def _risk_thresholds(sex: str) -> tuple[float, float, float]:

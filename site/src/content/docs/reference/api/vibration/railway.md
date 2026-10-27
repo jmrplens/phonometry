@@ -406,11 +406,13 @@ NARROWBAND_RESOLUTION_HZ = 1.25
 ## passage_average_level
 
 ```python
+passage_average_level(levels: ArrayLike, *, axis: None = None) -> float
+
 passage_average_level(
     levels: ArrayLike,
     *,
-    axis: int | None = None,
-) -> float | NDArray[np.float64]
+    axis: int,
+) -> NDArray[np.float64]
 ```
 
 The energy average of levels over repeated passages (Clause 9), in dB.

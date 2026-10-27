@@ -54,6 +54,16 @@ def test_an_ordered_page_passes(tmp_path: pathlib.Path) -> None:
     assert check_fence_names.check_page(page) == []
 
 
+def test_a_type_parameter_is_bound_by_its_function(tmp_path: pathlib.Path) -> None:
+    """``def f[S: float](x: S)`` defines ``S``; a class's type parameter too."""
+    page = _page(
+        tmp_path,
+        "```python\ndef first[S: float](x: S) -> S:\n    return x\n\n\n"
+        "class Box[T]:\n    item: T\n```\n",
+    )
+    assert check_fence_names.check_page(page) == []
+
+
 def test_an_undefined_name_is_flagged_toward_the_registry(
     tmp_path: pathlib.Path,
 ) -> None:

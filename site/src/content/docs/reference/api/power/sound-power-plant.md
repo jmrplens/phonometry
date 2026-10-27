@@ -377,6 +377,14 @@ PLANT_BACKGROUND_CORRECTION = {6: 1.0, 7: 1.0, 8: 1.0, 9: 0.5, 10: 0.5}
 
 ```python
 plant_background_correction(
+    level_difference: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+plant_background_correction(
+    level_difference: Sequence[float] | NDArray[Any],
+) -> NDArray[np.float64]
+
+plant_background_correction(
     level_difference: ArrayLike,
 ) -> float | NDArray[np.float64]
 ```
@@ -397,7 +405,7 @@ binary, is the 6 dB it is, and 64,1 - 55,6 dB the 8,5 dB that rounds up.
 | :--- | :--- |
 | `level_difference` | The level with the plant operating less the background level alone, in decibels: one value or an array. |
 
-**Returns:** The correction, in decibels, a `float` for one difference and an array of the same shape otherwise.
+**Returns:** The correction, in decibels, of the shape of `level_difference`; a `float` for a number; an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

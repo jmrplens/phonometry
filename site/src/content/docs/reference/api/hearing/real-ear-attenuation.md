@@ -285,8 +285,16 @@ separate requirements of the test site and are not judged here.
 
 ```python
 min_significant_difference(
+    expanded_uncertainty_db: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+min_significant_difference(
+    expanded_uncertainty_db: Sequence[float] | NDArray[Any],
+) -> NDArray[np.float64]
+
+min_significant_difference(
     expanded_uncertainty_db: ArrayLike,
-) -> float | np.ndarray
+) -> float | NDArray[np.float64]
 ```
 
 The smallest difference between two means that is significant (B.1.1).
@@ -310,7 +318,7 @@ value the comparison should rest on.
 | :--- | :--- |
 | `expanded_uncertainty_db` | $U_{95}$, in dB, a number or an array. |
 
-**Returns:** $\sqrt{2}\,U_{95}$, in dB, a float for a scalar input and an array otherwise.
+**Returns:** $\sqrt{2}\,U_{95}$, in dB; a `float` for a number; an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

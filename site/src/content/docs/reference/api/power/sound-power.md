@@ -127,12 +127,52 @@ bound (clause 8.2.3).
 environmental_correction(
     surface_area: float,
     *,
-    absorption_area: float | np.ndarray | None = None,
-    reverberation_time: float | np.ndarray | None = None,
+    absorption_area: float | np.floating[Any] | np.integer[Any] | None = None,
+    reverberation_time: float | np.floating[Any] | np.integer[Any] | None = None,
     volume: float | None = None,
-    mean_absorption_coefficient: float | np.ndarray | None = None,
+    mean_absorption_coefficient: float | np.floating[Any] | np.integer[Any] | None = None,
     room_surface: float | None = None,
-) -> float | np.ndarray
+) -> float
+
+environmental_correction(
+    surface_area: float,
+    *,
+    absorption_area: Sequence[float] | NDArray[Any],
+    reverberation_time: ArrayLike | None = None,
+    volume: float | None = None,
+    mean_absorption_coefficient: ArrayLike | None = None,
+    room_surface: float | None = None,
+) -> NDArray[np.float64]
+
+environmental_correction(
+    surface_area: float,
+    *,
+    absorption_area: float | np.floating[Any] | np.integer[Any] | None = None,
+    reverberation_time: Sequence[float] | NDArray[Any],
+    volume: float | None = None,
+    mean_absorption_coefficient: ArrayLike | None = None,
+    room_surface: float | None = None,
+) -> NDArray[np.float64]
+
+environmental_correction(
+    surface_area: float,
+    *,
+    absorption_area: float | np.floating[Any] | np.integer[Any] | None = None,
+    reverberation_time: float | np.floating[Any] | np.integer[Any] | None = None,
+    volume: float | None = None,
+    mean_absorption_coefficient: Sequence[float] | NDArray[Any],
+    room_surface: float | None = None,
+) -> NDArray[np.float64]
+
+environmental_correction(
+    surface_area: float,
+    *,
+    absorption_area: ArrayLike | None = None,
+    reverberation_time: ArrayLike | None = None,
+    volume: float | None = None,
+    mean_absorption_coefficient: ArrayLike | None = None,
+    room_surface: float | None = None,
+) -> float | NDArray[np.float64]
 ```
 
 Environmental correction `K2` (ISO 3744:2010 Eq. A.2).
@@ -164,7 +204,7 @@ with that shape; scalar inputs return a scalar, unchanged.
 | `mean_absorption_coefficient` | `alpha` in (0, 1], scalar or per band, with `room_surface` (Eq. A.7). |
 | `room_surface` | Room boundary area `Sv` (m^2), with `alpha`. |
 
-**Returns:** `K2` in decibels; a scalar for scalar inputs, otherwise an array per band.
+**Returns:** `K2` in decibels, `0.0` without room data; a `float` when the room data given are all numbers; an array of their broadcast shape when one is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

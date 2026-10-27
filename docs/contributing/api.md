@@ -1430,6 +1430,8 @@ Keep the last lines of the program's standard error for the error message. A new
 
 **Why.** Twenty-seven multi-panel `.plot()` methods and `room.plot_excitation` drew one panel on the axes a caller handed them and returned it, and without one made a column of panels and returned an ndarray of them, annotated `Axes | ndarray` and nothing more: a typed caller narrowed a value the call had already fixed, and `result.plot(ax=ax).set_title(...)` was a type error. Seven public plots that draw on a polar axes returned it typed plain `Axes`. Each case now has an overload head that says what it returns: a tuple of exactly its axes without `ax`, the `Axes` it was handed with one, and `PolarAxes` where the axes is polar, always or for the `view` or `quantity` that chooses the polar panel. The union stays on the implementation, which no caller sees. In the package the tuples are written `TwoPanels` and `ThreePanels`, the aliases of `phonometry._internal.types` ([A5](#a5)), which the API reference prints as `tuple[Axes, Axes]` and `tuple[Axes, Axes, Axes]`.
 
+A function of a number or an array of them is the same case. Eighty-four returned `float | ndarray`, or a grade or an array of grades, with no overload, and a zero-dimensional array came back as a `float`, so neither the type nor the rule followed what the caller handed over. They follow it now, an array in and an array out: a `float` only when every argument that decides the shape is a number, an array as soon as one is a sequence or an array, a zero-dimensional one included, which `as_float_or_array(values, like=(...))` of `phonometry._internal.types` applies. The heads say it in three forms, and one more for each further argument that decides: a number, a sequence or an array, and a last head for what a type checker cannot shape, an `ArrayLike` or a nested list, which returns the union. Each head takes its argument as a type parameter bounded by the form rather than the form itself: mypy reads an argument whose type holds an `Any`, as the shape of every `NDArray[np.float64]` does, as matching every head it fits, and answers `Any` unless those heads agree on its type, which a type parameter makes them do.
+
 **Do**
 
 ```python
@@ -1458,13 +1460,43 @@ class TwoPanelResult:
 top, bottom = TwoPanelResult().plot()
 ```
 
+```python
+from typing import overload
+
+import numpy as np
+from numpy.typing import ArrayLike, NDArray
+
+from phonometry._internal.types import RealScalar, RealValues, as_float_or_array
+
+
+@overload
+def doubled[S: RealScalar](level: S) -> float: ...
+
+
+@overload
+def doubled[V: RealValues](level: V) -> NDArray[np.float64]: ...
+
+
+@overload
+def doubled[A: ArrayLike](level: A) -> float | NDArray[np.float64]: ...
+
+
+def doubled(level: ArrayLike) -> float | NDArray[np.float64]:
+    return as_float_or_array(2.0 * np.asarray(level, dtype=np.float64), like=(level,))
+
+
+doubled(3.0), doubled([3.0, 4.0]), doubled(np.array(3.0))
+```
+
 **Don't**
 
 ```py
 def plot(self, ax: Axes | None = None) -> Axes | np.ndarray:  # the caller narrows what ax decided
     ...
+def doubled(level: ArrayLike) -> float | np.ndarray:  # and narrows what it handed over
+    ...
 ```
 
-**Enforced by:** `scripts/check_return_overloads.py`, `make return-overloads`, `CI: Every return an argument decides is overloaded on it`, `tests/test_check_return_overloads.py::test_the_package_keeps_the_rule`, `tests/test_result_plots.py::test_a_plot_returns_what_its_signature_promises`, `tests/test_result_plots.py::test_every_decided_plot_has_a_built_result`
+**Enforced by:** `scripts/check_return_overloads.py`, `make return-overloads`, `CI: Every return an argument decides is overloaded on it`, `tests/test_check_return_overloads.py::test_the_package_keeps_the_rule`, `tests/test_result_plots.py::test_a_plot_returns_what_its_signature_promises`, `tests/test_result_plots.py::test_every_decided_plot_has_a_built_result`, `tests/test_scalar_or_array_returns.py::test_every_function_of_a_number_or_an_array_has_a_case`
 
-**Exceptions.** A return the data decide rather than an argument keeps its union on that one head, with its reason in `EXEMPT` of `scripts/check_return_overloads.py`, keyed by the parameters that tell the head from its siblings (`ZwickerLoudness.plot (overload ax: None)`), so that the other heads are still held to the rule: `ZwickerLoudness.plot` without `ax` draws a second panel only for a time-varying result. A private helper that takes the projection from a table row it is handed rather than from an argument of its own is exempt the same way.
+**Exceptions.** A return the data decide rather than an argument keeps its union on that one head, with its reason in `EXEMPT` of `scripts/check_return_overloads.py`, keyed by the parameters that tell the head from its siblings (`ZwickerLoudness.plot (overload ax: None)`), so that the other heads are still held to the rule: `ZwickerLoudness.plot` without `ax` draws a second panel only for a time-varying result. A private helper that takes the projection from a table row it is handed rather than from an argument of its own is exempt the same way. Of the functions of a number or an array, the exempt ones keep the union with their reason: one that reduces an axis (`signals.leq`, `room.directivity_energy_average`), where the rank of the input decides whether one number is left; one whose shape comes from values inside a tuple or a record (`room.sabine_reverberation_time` and its surfaces); a property, which has no argument to overload on; and one where four or more arguments broadcast (`room.steady_state_spl`), whose heads would number more than the union says. Each of them still applies the rule at run time.

@@ -66,8 +66,16 @@ turbine.
 
 ```python
 amplitude_modulation_adjustment(
+    modulation_depth_db: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+amplitude_modulation_adjustment(
+    modulation_depth_db: Sequence[float] | NDArray[Any],
+) -> NDArray[np.float64]
+
+amplitude_modulation_adjustment(
     modulation_depth_db: ArrayLike,
-) -> NDArray[np.float64] | float
+) -> float | NDArray[np.float64]
 ```
 
 The amplitude modulation adjustment of Figure A.1, in dB.
@@ -84,7 +92,7 @@ reconstructed time-series modulation depth of clause 13 (the AM rating of
 | :--- | :--- |
 | `modulation_depth_db` | The modulation depth, in dB. |
 
-**Returns:** The adjustment $K_\mathrm{am}$, in dB; a `float` for a scalar depth.
+**Returns:** The adjustment $K_\mathrm{am}$, in dB; a `float` for a number; an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -294,12 +302,28 @@ One impedance class of Table C.1.
 
 ```python
 logarithmic_wind_speed(
+    reference_speed_m_s: float | np.floating[Any] | np.integer[Any],
+    *,
+    height_m: float,
+    reference_height_m: float,
+    roughness_length: float = 0.05,
+) -> float
+
+logarithmic_wind_speed(
+    reference_speed_m_s: Sequence[float] | NDArray[Any],
+    *,
+    height_m: float,
+    reference_height_m: float,
+    roughness_length: float = 0.05,
+) -> NDArray[np.float64]
+
+logarithmic_wind_speed(
     reference_speed_m_s: ArrayLike,
     *,
     height_m: float,
     reference_height_m: float,
     roughness_length: float = 0.05,
-) -> NDArray[np.float64] | float
+) -> float | NDArray[np.float64]
 ```
 
 Wind speed at another height by the logarithmic profile.
@@ -319,7 +343,7 @@ brought to 10 m is the binning wind speed $V_\mathrm{bin}$ of
 | `reference_height_m` | Height of the known wind speed, in m. |
 | `roughness_length` | Roughness length $z_0$, in m. |
 
-**Returns:** The wind speed at `height_m`, in m/s; a `float` for scalar inputs.
+**Returns:** The wind speed at `height_m`, in m/s; a `float` for a number; an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -435,12 +459,36 @@ MODELING_UNCERTAINTY_DB = 0.5
 
 ```python
 power_law_wind_speed(
+    reference_speed_m_s: float | np.floating[Any] | np.integer[Any],
+    *,
+    height_m: float,
+    reference_height_m: float,
+    shear_exponent: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+power_law_wind_speed(
+    reference_speed_m_s: Sequence[float] | NDArray[Any],
+    *,
+    height_m: float,
+    reference_height_m: float,
+    shear_exponent: ArrayLike,
+) -> NDArray[np.float64]
+
+power_law_wind_speed(
+    reference_speed_m_s: float | np.floating[Any] | np.integer[Any],
+    *,
+    height_m: float,
+    reference_height_m: float,
+    shear_exponent: Sequence[float] | NDArray[Any],
+) -> NDArray[np.float64]
+
+power_law_wind_speed(
     reference_speed_m_s: ArrayLike,
     *,
     height_m: float,
     reference_height_m: float,
     shear_exponent: ArrayLike,
-) -> NDArray[np.float64] | float
+) -> float | NDArray[np.float64]
 ```
 
 Wind speed at another height by the power law (Equation (K.1)).
@@ -458,7 +506,7 @@ profile of IEC 61400-11:2012 D.3 that Table K.1 evaluates for 120 m and
 | `reference_height_m` | Height of the known wind speed, in m. |
 | `shear_exponent` | The wind shear exponent $\alpha$. |
 
-**Returns:** The wind speed at `height_m`, in m/s; a `float` for scalar inputs.
+**Returns:** The wind speed at `height_m`, in m/s; a `float` when `reference_speed_m_s` and `shear_exponent` are both numbers; an array of their broadcast shape when one is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -1032,12 +1080,36 @@ top of ISO 9613-1, when no band reaches 20 dB.
 
 ```python
 wind_shear_exponent(
+    speed_m_s: float | np.floating[Any] | np.integer[Any],
+    reference_speed_m_s: float | np.floating[Any] | np.integer[Any],
+    *,
+    height_m: float,
+    reference_height_m: float,
+) -> float
+
+wind_shear_exponent(
+    speed_m_s: Sequence[float] | NDArray[Any],
+    reference_speed_m_s: ArrayLike,
+    *,
+    height_m: float,
+    reference_height_m: float,
+) -> NDArray[np.float64]
+
+wind_shear_exponent(
+    speed_m_s: float | np.floating[Any] | np.integer[Any],
+    reference_speed_m_s: Sequence[float] | NDArray[Any],
+    *,
+    height_m: float,
+    reference_height_m: float,
+) -> NDArray[np.float64]
+
+wind_shear_exponent(
     speed_m_s: ArrayLike,
     reference_speed_m_s: ArrayLike,
     *,
     height_m: float,
     reference_height_m: float,
-) -> NDArray[np.float64] | float
+) -> float | NDArray[np.float64]
 ```
 
 Wind shear exponent from two wind speeds (Equation (K.2)).
@@ -1056,7 +1128,7 @@ computed; Table K.2 leaves them blank.
 | `height_m` | The higher (or other) height, in m. |
 | `reference_height_m` | The reference height, in m. |
 
-**Returns:** The shear exponent; a `float` for scalar inputs.
+**Returns:** The shear exponent; a `float` when the two speeds are numbers; an array of their broadcast shape when one is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -1247,8 +1319,16 @@ the lower point is drawn for comparison, as the binning wind speed of
 
 ```python
 WindShearProfile.speed_at(
+    height_m: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+WindShearProfile.speed_at(
+    height_m: Sequence[float] | NDArray[Any],
+) -> NDArray[np.float64]
+
+WindShearProfile.speed_at(
     height_m: ArrayLike,
-) -> NDArray[np.float64] | float
+) -> float | NDArray[np.float64]
 ```
 
 The power-law wind speed at `height_m` (Equation (K.1)), in m/s.

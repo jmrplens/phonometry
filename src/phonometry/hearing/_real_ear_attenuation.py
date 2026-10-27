@@ -72,13 +72,14 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 
 from .._internal.boundary import settled
 from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays
+from .._internal.types import as_float_or_array
 from .._internal.validation import require_scalar
 from .hearing_protectors import _octave_axis
 
@@ -86,9 +87,10 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike
+    from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
+    from .._internal.types import RealScalar, RealValues
 
 __all__ = [
     "REAT_BETWEEN_LABORATORY_UNCERTAINTY",
@@ -482,9 +484,25 @@ def reat_expanded_uncertainty(
     )
 
 
+@overload
+def min_significant_difference[S: RealScalar](expanded_uncertainty_db: S) -> float: ...
+
+
+@overload
+def min_significant_difference[V: RealValues](
+    expanded_uncertainty_db: V,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def min_significant_difference[A: ArrayLike](
+    expanded_uncertainty_db: A,
+) -> float | NDArray[np.float64]: ...
+
+
 def min_significant_difference(
     expanded_uncertainty_db: ArrayLike,
-) -> float | np.ndarray:
+) -> float | NDArray[np.float64]:
     r"""The smallest difference between two means that is significant (B.1.1).
 
     For two measurements with the same expanded uncertainty the criterion of
@@ -502,8 +520,8 @@ def min_significant_difference(
 
     :param expanded_uncertainty_db: :math:`U_{95}`, in dB, a number or an
         array.
-    :return: :math:`\sqrt{2}\,U_{95}`, in dB, a float for a scalar input and an
-        array otherwise.
+    :return: :math:`\sqrt{2}\,U_{95}`, in dB; a ``float`` for a number; an array for a
+        sequence or an array, a zero-dimensional one included.
     :raises ValueError: for an uncertainty that is negative or not finite.
     """
     values = np.asarray(expanded_uncertainty_db, dtype=np.float64)
@@ -511,7 +529,7 @@ def min_significant_difference(
         msg = "'expanded_uncertainty_db' must be finite and not negative, in dB."
         raise ValueError(msg)
     difference = math.sqrt(2.0) * values
-    return float(difference) if difference.ndim == 0 else difference
+    return as_float_or_array(difference, like=(expanded_uncertainty_db,))
 
 
 @dataclass(frozen=True)

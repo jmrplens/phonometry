@@ -90,10 +90,34 @@ evaluated.
 
 ```python
 excess_sound_pressure_level(
+    level: float | np.floating[Any] | np.integer[Any],
+    reference_sound_power_levels: float | np.floating[Any] | np.integer[Any],
+    distance: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+excess_sound_pressure_level(
+    level: Sequence[float] | NDArray[Any],
+    reference_sound_power_levels: ArrayLike,
+    distance: ArrayLike,
+) -> NDArray[np.float64]
+
+excess_sound_pressure_level(
+    level: float | np.floating[Any] | np.integer[Any],
+    reference_sound_power_levels: Sequence[float] | NDArray[Any],
+    distance: ArrayLike,
+) -> NDArray[np.float64]
+
+excess_sound_pressure_level(
+    level: float | np.floating[Any] | np.integer[Any],
+    reference_sound_power_levels: float | np.floating[Any] | np.integer[Any],
+    distance: Sequence[float] | NDArray[Any],
+) -> NDArray[np.float64]
+
+excess_sound_pressure_level(
     level: ArrayLike,
     reference_sound_power_levels: ArrayLike,
     distance: ArrayLike,
-) -> np.ndarray | float
+) -> float | NDArray[np.float64]
 ```
 
 Excess of sound pressure level over the free field at a distance from
@@ -119,7 +143,7 @@ traverse of levels and distances.
 | `reference_sound_power_levels` | Calibrated sound power level `LW(RSS)` of the reference source, in decibels (per band, or A-weighted). |
 | `distance` | Distance(s) `r` from the microphone to the reference source, in metres. |
 
-**Returns:** The excess `dLf(r)`, in decibels, as a float for scalar input or an array of the broadcast shape.
+**Returns:** The excess `dLf(r)`, in decibels; a `float` when the three are all numbers; an array of their broadcast shape when one is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

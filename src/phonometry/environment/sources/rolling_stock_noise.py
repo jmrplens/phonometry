@@ -94,12 +94,13 @@ from __future__ import annotations
 import math
 from dataclasses import KW_ONLY, dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 
 from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays, read_only
+from ..._internal.types import as_float_or_array
 from ..._internal.validation import (
     require_1d_signal,
     require_choice,
@@ -131,6 +132,7 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
     from numpy.typing import ArrayLike, NDArray
 
     from ..._i18n import Language
+    from ..._internal.types import RealScalar, RealValues
     from ...metrology.uncertainty import Quantity
 
 __all__ = [
@@ -1125,6 +1127,30 @@ def impulsiveness_rise_speed(times: ArrayLike, levels: ArrayLike) -> RiseSpeedRe
     )
 
 
+@overload
+def background_level_increase[S1: RealScalar, S2: RealScalar](
+    measured_level: S1, background_level: S2
+) -> float: ...
+
+
+@overload
+def background_level_increase[V: RealValues, A2: ArrayLike](
+    measured_level: V, background_level: A2
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def background_level_increase[S1: RealScalar, V: RealValues](
+    measured_level: S1, background_level: V
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def background_level_increase[A1: ArrayLike, A2: ArrayLike](
+    measured_level: A1, background_level: A2
+) -> float | NDArray[np.float64]: ...
+
+
 def background_level_increase(
     measured_level: ArrayLike, background_level: ArrayLike
 ) -> float | NDArray[np.float64]:
@@ -1144,7 +1170,9 @@ def background_level_increase(
         the unit, in dB; one value or one per band.
     :param background_level: :math:`L_\mathrm{bg}`, the background alone,
         in dB.
-    :return: :math:`\Delta L`, in dB, as one value or one per band.
+    :return: :math:`\Delta L`, in dB; a ``float`` when the two levels are numbers; an
+        array of their broadcast shape when one is a sequence or an array, a
+        zero-dimensional one included.
     :raises ValueError: For levels that are not finite, of different lengths,
         or no more than 3 dB above the background.
     :raises TypeError: if ``background_level`` or ``measured_level`` holds a text or a
@@ -1164,7 +1192,7 @@ def background_level_increase(
     increase = measured - 10.0 * np.log10(
         10.0 ** (measured / 10.0) - 10.0 ** (background / 10.0)
     )
-    return float(increase[0]) if np.ndim(measured_level) == 0 else increase
+    return as_float_or_array(increase, like=(measured_level, background_level))
 
 
 @dataclass(frozen=True)

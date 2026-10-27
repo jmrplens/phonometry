@@ -113,7 +113,7 @@ import math
 import warnings
 from dataclasses import KW_ONLY, dataclass, field
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Final, Literal
+from typing import TYPE_CHECKING, Any, Final, Literal, overload
 
 import numpy as np
 
@@ -121,6 +121,7 @@ from .._internal.boundary import round_half_up
 from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, read_only
 from .._internal.levels_math import energy_mean
+from .._internal.types import as_float_or_array
 from .._internal.validation import (
     require_count,
     require_finite,
@@ -135,9 +136,10 @@ if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike
+    from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
+    from .._internal.types import RealScalar, RealValues
 
 __all__ = [
     "TurbineEnvironmentalCorrection",
@@ -868,7 +870,25 @@ def turbine_microphone_positions(
 # ---------------------------------------------------------------------------
 
 
-def turbine_background_correction(level_difference: ArrayLike) -> float | np.ndarray:
+@overload
+def turbine_background_correction[S: RealScalar](level_difference: S) -> float: ...
+
+
+@overload
+def turbine_background_correction[V: RealValues](
+    level_difference: V,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def turbine_background_correction[A: ArrayLike](
+    level_difference: A,
+) -> float | NDArray[np.float64]: ...
+
+
+def turbine_background_correction(
+    level_difference: ArrayLike,
+) -> float | NDArray[np.float64]:
     r"""Correction for background noise of Table 2 (clause 8.1).
 
     The correction to subtract from the level measured with the source
@@ -899,13 +919,12 @@ def turbine_background_correction(level_difference: ArrayLike) -> float | np.nda
 
     :param level_difference: The level with the source operating less the
         background level, at each position, in dB (scalar or 1-D array).
-    :return: The correction to subtract, in dB: a ``float`` for a scalar, an
-        array for an array.
+    :return: The correction to subtract, in dB; a ``float`` for a number; an array for a
+        sequence or an array, a zero-dimensional one included.
     :raises ValueError: if a difference is not finite.
     :raises TypeError: if ``level_difference`` holds a text or a value that is not a
         real number.
     """
-    scalar = np.ndim(level_difference) == 0
     difference = require_finite_array(level_difference, "level_difference")
     first_row = _TABLE_2[int(_BACKGROUND_CRITERION_DB)]
     last_row = max(_TABLE_2)
@@ -920,7 +939,7 @@ def turbine_background_correction(level_difference: ArrayLike) -> float | np.nda
         return _TABLE_2[_round_half_up(raw)]
 
     correction = np.array([row(float(raw)) for raw in difference], dtype=np.float64)
-    return float(correction[0]) if scalar else correction
+    return as_float_or_array(correction, like=(level_difference,))
 
 
 @dataclass(frozen=True, kw_only=True)

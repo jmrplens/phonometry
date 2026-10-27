@@ -858,6 +858,7 @@ def _format_one_signature(
     """Render a single ``name(params) -> ret`` from ``inspect.signature``."""
     signature = inspect.signature(obj)
     module = _defining_module(obj)
+    bounds = _type_parameter_bounds(obj, module)
     parameters = list(signature.parameters.values())
     if drop_first and parameters and parameters[0].name in ("self", "cls"):
         parameters = parameters[1:]
@@ -876,13 +877,15 @@ def _format_one_signature(
             star_emitted = True
         if parameter.kind is inspect.Parameter.VAR_POSITIONAL:
             star_emitted = True
-        parts.append(_format_parameter(parameter, module))
+        parts.append(_format_parameter(parameter, module, bounds))
     if saw_positional_only:
         parts.append("/")
 
     returns = ""
     if not omit_return and signature.return_annotation is not (inspect.Signature.empty):
-        returns = f" -> {_format_annotation(signature.return_annotation, module)}"
+        returns = (
+            f" -> {_format_annotation(signature.return_annotation, module, bounds)}"
+        )
     one_line = f"{name}({', '.join(parts)}){returns}"
     if len(one_line) <= _MAX_SIGNATURE_LINE or not parts:
         return one_line
@@ -890,7 +893,67 @@ def _format_one_signature(
     return f"{name}(\n    {joined},\n){returns}"
 
 
-def _format_annotation(annotation: object, module: str | None = None) -> str:
+def _type_parameter_bounds(
+    obj: Callable[..., object], module: str | None
+) -> Mapping[str, str]:
+    """The bound of each type parameter ``obj`` names once, as its source writes it.
+
+    An overload head of a function of a number or an array of them takes its
+    argument as ``frequency: S`` with ``[S: RealScalar]``, so that a type
+    checker matches an array whose shape it does not know to one head only;
+    the page shows the bound in its place, which is what the head accepts. A
+    type parameter the signature names more than once ties those places
+    together (``row_type: type[R]`` and ``-> Catalogue[R]``), so it stays a
+    name. Read from the module's source, because evaluating a bound would
+    need the names the module imports only for the type checker.
+    """
+    target = inspect.unwrap(obj)
+    if not getattr(target, "__type_params__", ()) or module is None:
+        return {}
+    tree = _module_tree(module)
+    code = getattr(target, "__code__", None)
+    if tree is None or code is None:
+        return {}
+    for node in ast.walk(tree):
+        if (
+            isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef)
+            and node.name == target.__name__
+            and code.co_firstlineno
+            in {node.lineno, *(d.lineno for d in node.decorator_list[:1])}
+        ):
+            named = [
+                child.id
+                for annotation in (
+                    *(argument.annotation for argument in _arguments(node)),
+                    node.returns,
+                )
+                if annotation is not None
+                for child in ast.walk(annotation)
+                if isinstance(child, ast.Name)
+            ]
+            return {
+                parameter.name: ast.unparse(parameter.bound)
+                for parameter in node.type_params
+                if isinstance(parameter, ast.TypeVar)
+                and parameter.bound is not None
+                and named.count(parameter.name) == 1
+            }
+    return {}
+
+
+def _arguments(node: ast.FunctionDef | ast.AsyncFunctionDef) -> list[ast.arg]:
+    """Every parameter of a definition, in the order written."""
+    arguments = node.args
+    every = [*arguments.posonlyargs, *arguments.args, *arguments.kwonlyargs]
+    every.extend(a for a in (arguments.vararg, arguments.kwarg) if a is not None)
+    return every
+
+
+def _format_annotation(
+    annotation: object,
+    module: str | None = None,
+    bounds: Mapping[str, str] | None = None,
+) -> str:
     if isinstance(annotation, str):
         # PEP 563 stringizes annotations; an annotation that was already a
         # string literal in the source keeps its quotes. Strip them.
@@ -899,10 +962,18 @@ def _format_annotation(annotation: object, module: str | None = None) -> str:
             text = text[1:-1]
     else:
         text = inspect.formatannotation(annotation)
+    if bounds:
+        text = _ANNOTATION_NAME_RE.sub(
+            lambda match: bounds.get(match.group(0), match.group(0)), text
+        )
     return expand_unpublished_aliases(text, module) if module else text
 
 
-def _format_parameter(parameter: inspect.Parameter, module: str | None = None) -> str:
+def _format_parameter(
+    parameter: inspect.Parameter,
+    module: str | None = None,
+    bounds: Mapping[str, str] | None = None,
+) -> str:
     text = parameter.name
     if parameter.kind is inspect.Parameter.VAR_POSITIONAL:
         text = f"*{text}"
@@ -910,7 +981,7 @@ def _format_parameter(parameter: inspect.Parameter, module: str | None = None) -
         text = f"**{text}"
     annotated = parameter.annotation is not inspect.Parameter.empty
     if annotated:
-        text = f"{text}: {_format_annotation(parameter.annotation, module)}"
+        text = f"{text}: {_format_annotation(parameter.annotation, module, bounds)}"
     if parameter.default is not inspect.Parameter.empty:
         if parameter.default is Ellipsis:
             # The placeholder an overload head uses for "whatever the

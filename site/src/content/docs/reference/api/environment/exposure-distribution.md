@@ -289,6 +289,14 @@ normal distribution of standard deviation `sigma_db` centred
 
 ```python
 SELDistribution.class_density(
+    levels: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+SELDistribution.class_density(
+    levels: Sequence[float] | NDArray[Any],
+) -> NDArray[np.float64]
+
+SELDistribution.class_density(
     levels: ArrayLike,
 ) -> float | NDArray[np.float64]
 ```
@@ -306,11 +314,19 @@ neighbour, it is zero.
 | :--- | :--- |
 | `levels` | Level or levels `x`, in dB. |
 
-**Returns:** $\rho(x)$, a float for a scalar `x`.
+**Returns:** $\rho(x)$; a `float` for a number; an array for a sequence or an array, a zero-dimensional one included.
 
 ### SELDistribution.density()
 
 ```python
+SELDistribution.density(
+    levels: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+SELDistribution.density(
+    levels: Sequence[float] | NDArray[Any],
+) -> NDArray[np.float64]
+
 SELDistribution.density(levels: ArrayLike) -> float | NDArray[np.float64]
 ```
 
@@ -322,11 +338,19 @@ The continuous density $\rho^{*}(x)$ (Equations (21), (23)), in 1/dB.
 | :--- | :--- |
 | `levels` | Level or levels `x`, in dB. |
 
-**Returns:** $\rho^{*}(x)$, a float for a scalar `x`.
+**Returns:** $\rho^{*}(x)$; a `float` for a number; an array for a sequence or an array, a zero-dimensional one included.
 
 ### SELDistribution.exceedance()
 
 ```python
+SELDistribution.exceedance(
+    levels: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+SELDistribution.exceedance(
+    levels: Sequence[float] | NDArray[Any],
+) -> NDArray[np.float64]
+
 SELDistribution.exceedance(levels: ArrayLike) -> float | NDArray[np.float64]
 ```
 
@@ -346,11 +370,19 @@ falls.
 | :--- | :--- |
 | `levels` | Level or levels `x`, in dB. |
 
-**Returns:** The probability, a float for a scalar `x`.
+**Returns:** The probability; a `float` for a number; an array for a sequence or an array, a zero-dimensional one included.
 
 ### SELDistribution.exceedance_level()
 
 ```python
+SELDistribution.exceedance_level(
+    percent: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+SELDistribution.exceedance_level(
+    percent: Sequence[float] | NDArray[Any],
+) -> NDArray[np.float64]
+
 SELDistribution.exceedance_level(
     percent: ArrayLike,
 ) -> float | NDArray[np.float64]
@@ -369,7 +401,7 @@ the lowest of the usual set; `exceedance_level(1)` the highest.
 | :--- | :--- |
 | `percent` | `n`, in per cent, strictly between 0 and 100 times the total probability of the classes. |
 
-**Returns:** The level, in dB, a float for a scalar `percent`.
+**Returns:** The level, in dB; a `float` for a number; an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

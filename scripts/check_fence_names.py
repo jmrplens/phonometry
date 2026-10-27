@@ -146,8 +146,9 @@ def _route(path: pathlib.Path) -> str:
 def _defined(tree: ast.AST) -> set[str]:
     """Every name a fence binds, at any depth.
 
-    Comprehension targets and function arguments are scoped tighter than the
-    module in real Python; counting them as page-wide definitions is
+    Comprehension targets, function arguments and the type parameters of a
+    generic function or class are scoped tighter than the module in real
+    Python; counting them as page-wide definitions is
     deliberately permissive, because this check hunts reading-order breaks,
     not scope leaks.
 
@@ -168,6 +169,9 @@ def _defined(tree: ast.AST) -> set[str]:
         elif isinstance(node, ast.arg):
             names.add(node.arg)
         elif isinstance(node, (ast.ExceptHandler, ast.MatchAs)) and node.name:
+            names.add(node.name)
+        elif isinstance(node, ast.TypeVar | ast.ParamSpec | ast.TypeVarTuple):
+            # ``def f[S: float](x: S)`` binds ``S`` for its own signature.
             names.add(node.name)
     return names
 

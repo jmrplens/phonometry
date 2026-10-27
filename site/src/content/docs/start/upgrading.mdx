@@ -1246,6 +1246,31 @@ do `DiffusionResult.plot()` without `ax`, `DirectivityFactor.plot()` for its
 cartesian axes with a `ValueError` that names `ax`, as the other polar plots
 do, where it raised an `AttributeError` from matplotlib.
 
+## A zero-dimensional array gives a zero-dimensional array
+
+A function of a number or an array of them returns a `float` only when every
+argument that decides the shape of its result is a number, a Python or a
+NumPy one, and an array as soon as one of them is a sequence or an array,
+where 3.3.0 and 4.0.0rc1 returned a `float` for a zero-dimensional array.
+Ninety public functions and methods follow the rule, `room.room_constant`,
+`room.critical_distance`, `fluids.sea_water_sound_speed` and
+`vibration.evaluation_zone` among them:
+
+| 3.3.0 or 4.0.0rc1 | 4.0 |
+| --- | --- |
+| `room.room_constant(100.0, np.array(0.2))` returned the `float` `25.0` | it returns `array(25.)`; `float(...)` or `.item()` gives the number |
+| `emission.local_environmental_correction([0.5])` returned a `float`, as did its three neighbours and `WorkstationBackgroundCorrection.correction` for any one-element input | it returns a one-element array; hand over `0.5` for a number |
+| `electroacoustics.piston_resistance(1.0)` returned a `numpy.float64`, as did `piston_reactance` and `piston_directivity` | it returns a Python `float`, with no `.shape` or `.dtype` |
+
+Sixty-six of them are typed overloads now, so a type checker reads
+`room.room_constant(100.0, 0.2)` as a `float` and
+`room.room_constant(100.0, alphas)` as an array whatever the shape of
+`alphas`; an `ArrayLike` or a nested list reads as the union, which a typed
+caller narrows. The reducers (`signals.leq` and the other levels of a signal,
+`building.energy_average_level`, `room.directivity_energy_average` and their
+kin), whose result is one number for a one-dimensional input, keep the union
+and their behaviour.
+
 ## Verdicts are result objects, not dictionaries
 
 The three `verify_*` functions of 3.3.0 returned `dict[str, Any]` and now

@@ -476,7 +476,7 @@ by the factor $\sin(k \Delta r)/(k \Delta r)$ (IEC 61043:1993,
 ```python
 temporal_variability_indicator(
     short_time_intensity: list[float] | np.ndarray,
-) -> float | np.ndarray
+) -> float | NDArray[np.float64]
 ```
 
 ISO 9614-1:1993 temporal variability indicator F1 (equation (A.1)).

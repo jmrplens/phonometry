@@ -98,6 +98,7 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
+    from .._internal.types import RealScalar, RealValues
 
 #: The three sound power models of a source near reflecting planes (Norton Table 4.5).
 SourceModel = Literal["constant_power", "constant_volume", "constant_pressure"]
@@ -177,9 +178,25 @@ def _one_absorption_measure(
     raise ValueError(msg)
 
 
+@overload
+def room_constant[S: RealScalar](surface_area: float, mean_absorption: S) -> float: ...
+
+
+@overload
+def room_constant[V: RealValues](
+    surface_area: float, mean_absorption: V
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def room_constant[A: ArrayLike](
+    surface_area: float, mean_absorption: A
+) -> float | NDArray[np.float64]: ...
+
+
 def room_constant(
     surface_area: float, mean_absorption: ArrayLike
-) -> np.ndarray | float:
+) -> float | NDArray[np.float64]:
     r"""Room constant :math:`R = S \bar{\alpha} / (1 - \bar{\alpha})`
     (Bies Equation (6.44)).
 
@@ -187,25 +204,63 @@ def room_constant(
     :param mean_absorption: Area-weighted mean Sabine absorption
         ``alpha_bar`` in ``(0, 1)`` (scalar or per-band); e.g. from
         :func:`phonometry.room.mean_absorption`.
-    :return: The room constant ``R``, m2; a float for a scalar input,
-        otherwise a per-band array.
+    :return: The room constant ``R``, m2; a ``float`` for a number; an array for a
+        sequence or an array, a zero-dimensional one included.
     :raises TypeError: if ``surface_area`` is not a single number.
     """
     surface_area = require_positive(surface_area, "surface_area")
     alpha = _require_fraction_below_one(mean_absorption, "mean_absorption")
-    return as_float_or_array(surface_area * alpha / (1.0 - alpha))
+    return as_float_or_array(
+        surface_area * alpha / (1.0 - alpha), like=(mean_absorption,)
+    )
 
 
 @overload
-def critical_distance(
-    room_constant: ArrayLike, *, directivity: ArrayLike = ...
-) -> np.ndarray | float: ...
+def critical_distance[S1: RealScalar, S2: RealScalar](
+    room_constant: S1, *, directivity: S2 = ...
+) -> float: ...
 
 
 @overload
-def critical_distance(
-    *, absorption_area: ArrayLike, directivity: ArrayLike = ...
-) -> np.ndarray | float: ...
+def critical_distance[V: RealValues, A2: ArrayLike](
+    room_constant: V, *, directivity: A2 = ...
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def critical_distance[S1: RealScalar, V: RealValues](
+    room_constant: S1, *, directivity: V
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def critical_distance[A1: ArrayLike, A2: ArrayLike](
+    room_constant: A1, *, directivity: A2 = ...
+) -> float | NDArray[np.float64]: ...
+
+
+@overload
+def critical_distance[S1: RealScalar, S2: RealScalar](
+    *, absorption_area: S1, directivity: S2 = ...
+) -> float: ...
+
+
+@overload
+def critical_distance[V: RealValues, A2: ArrayLike](
+    *, absorption_area: V, directivity: A2 = ...
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def critical_distance[S1: RealScalar, V: RealValues](
+    *, absorption_area: S1, directivity: V
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def critical_distance[A1: ArrayLike, A2: ArrayLike](
+    *, absorption_area: A1, directivity: A2 = ...
+) -> float | NDArray[np.float64]: ...
 
 
 def critical_distance(
@@ -213,7 +268,7 @@ def critical_distance(
     *,
     absorption_area: ArrayLike | None = None,
     directivity: ArrayLike = 1.0,
-) -> np.ndarray | float:
+) -> float | NDArray[np.float64]:
     r"""Critical (reverberation) distance
     :math:`r_\mathrm{c} = \sqrt{Q R / (16 \pi)}`.
 
@@ -236,21 +291,41 @@ def critical_distance(
     :param directivity: Source directivity factor ``Q`` (``1`` omnidirectional,
         ``2`` on one reflecting plane, ``4`` in an edge, ``8`` in a corner),
         scalar or per-band.
-    :return: The critical distance ``rc``, m.
+    :return: The critical distance ``rc``, m; a ``float`` when the absorption measure
+        and ``directivity`` are both numbers; an array of their broadcast shape when one
+        is a sequence or an array, a zero-dimensional one included.
     :raises ValueError: unless exactly one absorption measure is given, or if
         a value is not positive and finite.
     """
     measure = _one_absorption_measure(room_constant, absorption_area)
     q = _require_positive_array(directivity, "directivity")
-    return as_float_or_array(np.sqrt(q * measure / (16.0 * np.pi)))
+    return as_float_or_array(
+        np.sqrt(q * measure / (16.0 * np.pi)),
+        like=(room_constant, absorption_area, directivity),
+    )
+
+
+@overload
+def sabine_absorption_area[S: RealScalar](
+    volume: float, reverberation_time: S, *, speed_of_sound: float = 343.0
+) -> float: ...
+
+
+@overload
+def sabine_absorption_area[V: RealValues](
+    volume: float, reverberation_time: V, *, speed_of_sound: float = 343.0
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def sabine_absorption_area[A: ArrayLike](
+    volume: float, reverberation_time: A, *, speed_of_sound: float = 343.0
+) -> float | NDArray[np.float64]: ...
 
 
 def sabine_absorption_area(
-    volume: float,
-    reverberation_time: ArrayLike,
-    *,
-    speed_of_sound: float = 343.0,
-) -> np.ndarray | float:
+    volume: float, reverberation_time: ArrayLike, *, speed_of_sound: float = 343.0
+) -> float | NDArray[np.float64]:
     r"""Equivalent absorption area from a reverberation time (Sabine, inverted).
 
     .. math::
@@ -270,7 +345,8 @@ def sabine_absorption_area(
         per-band).
     :param speed_of_sound: Speed of sound ``c0``, m/s (default 343, giving the
         familiar 0,161; pass 339 for the 0,163 of VDI 2081).
-    :return: The equivalent absorption area ``A``, m2.
+    :return: The equivalent absorption area ``A``, m2; a ``float`` for a number; an
+        array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: If the volume, the time or the speed is not positive
         and finite.
     :raises TypeError: if ``speed_of_sound`` or ``volume`` is not a single number.
@@ -278,12 +354,32 @@ def sabine_absorption_area(
     v = require_positive(volume, "volume")
     c = require_positive(speed_of_sound, "speed_of_sound")
     t = _require_positive_array(reverberation_time, "reverberation_time")
-    return as_float_or_array(24.0 * np.log(10.0) / c * v / t)
+    return as_float_or_array(
+        24.0 * np.log(10.0) / c * v / t, like=(reverberation_time,)
+    )
+
+
+@overload
+def schroeder_frequency[S: RealScalar](
+    reverberation_time: S, volume: float
+) -> float: ...
+
+
+@overload
+def schroeder_frequency[V: RealValues](
+    reverberation_time: V, volume: float
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def schroeder_frequency[A: ArrayLike](
+    reverberation_time: A, volume: float
+) -> float | NDArray[np.float64]: ...
 
 
 def schroeder_frequency(
     reverberation_time: ArrayLike, volume: float
-) -> np.ndarray | float:
+) -> float | NDArray[np.float64]:
     r"""Schroeder frequency :math:`f_\mathrm{s} = 2000 \sqrt{T / V}`
     (Kuttruff Equation (3.44)).
 
@@ -294,7 +390,8 @@ def schroeder_frequency(
 
     :param reverberation_time: Reverberation time ``T``, s (scalar or per-band).
     :param volume: Room volume ``V``, m3.
-    :return: The Schroeder frequency, Hz.
+    :return: The Schroeder frequency, Hz; a ``float`` for a number; an array for a
+        sequence or an array, a zero-dimensional one included.
     :raises TypeError: if ``volume`` is not a single number.
     """
     volume = require_positive(volume, "volume")
@@ -302,7 +399,7 @@ def schroeder_frequency(
     if np.any(t <= 0.0) or not np.all(np.isfinite(t)):
         msg = "'reverberation_time' must be positive and finite."
         raise ValueError(msg)
-    return as_float_or_array(2000.0 * np.sqrt(t / volume))
+    return as_float_or_array(2000.0 * np.sqrt(t / volume), like=(reverberation_time,))
 
 
 #: Sound power models of Norton & Karczub (2003) Table 4.5, PDF page 301
@@ -330,7 +427,7 @@ def steady_state_spl(
     directivity: ArrayLike = ...,
     source_model: SourceModel = ...,
     characteristic_impedance: float | None = ...,
-) -> np.ndarray | float: ...
+) -> float | NDArray[np.float64]: ...
 
 
 @overload
@@ -342,7 +439,7 @@ def steady_state_spl(
     directivity: ArrayLike = ...,
     source_model: SourceModel = ...,
     characteristic_impedance: float | None = ...,
-) -> np.ndarray | float: ...
+) -> float | NDArray[np.float64]: ...
 
 
 def steady_state_spl(
@@ -354,7 +451,7 @@ def steady_state_spl(
     directivity: ArrayLike = 1.0,
     source_model: SourceModel = "constant_power",
     characteristic_impedance: float | None = None,
-) -> np.ndarray | float:
+) -> float | NDArray[np.float64]:
     r"""Steady-state sound pressure level in a room (Bies Equation (6.43)).
 
     .. math::
@@ -397,9 +494,10 @@ def steady_state_spl(
         Pa s/m. When given, the :math:`10 \log_{10}(\rho c / 400)` term is
         added (about ``+0.14 dB`` at 20 degC where :math:`\rho c = 413`);
         ``None`` (default) omits it, matching the common textbook form.
-    :return: The steady-state SPL ``Lp``, dB; a float for scalar inputs,
-        otherwise an array broadcasting ``sound_power_level``, ``distance``,
-        the absorption measure and ``directivity``.
+    :return: The steady-state SPL ``Lp``, dB; a ``float`` when ``sound_power_level``,
+        ``distance``, the absorption measure and ``directivity`` are all numbers; an
+        array of their broadcast shape when one is a sequence or an array, a
+        zero-dimensional one included.
     :raises ValueError: unless exactly one absorption measure is given; if
         ``distance``, the measure or ``directivity`` is not positive and
         finite; or if ``source_model`` is not one of
@@ -423,7 +521,10 @@ def steady_state_spl(
     if characteristic_impedance is not None:
         rho_c = require_positive(characteristic_impedance, "characteristic_impedance")
         lp = lp + 10.0 * np.log10(rho_c / 400.0)
-    return as_float_or_array(lp)
+    return as_float_or_array(
+        lp,
+        like=(sound_power_level, distance, room_constant, absorption_area, directivity),
+    )
 
 
 @dataclass(frozen=True)

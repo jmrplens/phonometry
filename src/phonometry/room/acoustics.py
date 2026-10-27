@@ -46,6 +46,7 @@ from typing import TYPE_CHECKING, Any, overload
 import numpy as np
 
 from .._internal.frozen import OwnsArrays
+from .._internal.types import as_float_or_array
 from .._internal.validation import (
     check_engine,
     require_ranks,
@@ -66,10 +67,10 @@ from ._shared import (
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike
+    from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
-    from .._internal.types import ReportEngine, TwoPanels
+    from .._internal.types import RealScalar, RealValues, ReportEngine, TwoPanels
     from .._report.metadata import ReportMetadata
     from ..io._signal import Signal
 
@@ -678,7 +679,25 @@ MIN_BANDWIDTH_TIME_PRODUCT = 16.0
 MIN_DETECTOR_MULTIPLE = 2.0
 
 
-def filter_bandwidth(center: ArrayLike, fraction: int = 1) -> np.ndarray | float:
+@overload
+def filter_bandwidth[S: RealScalar](center: S, fraction: int = 1) -> float: ...
+
+
+@overload
+def filter_bandwidth[V: RealValues](
+    center: V, fraction: int = 1
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def filter_bandwidth[A: ArrayLike](
+    center: A, fraction: int = 1
+) -> float | NDArray[np.float64]: ...
+
+
+def filter_bandwidth(
+    center: ArrayLike, fraction: int = 1
+) -> float | NDArray[np.float64]:
     """Bandwidth of a fractional-octave filter (ISO 3382-1:2009, 7.1).
 
     The ``B`` of Equations (4) to (6), as the clause prints it: 0,71 times
@@ -689,7 +708,8 @@ def filter_bandwidth(center: ArrayLike, fraction: int = 1) -> np.ndarray | float
     :param center: Mid-band frequency, in Hz.
     :param fraction: Bandwidth fraction: 1 for an octave filter, 3 for a
         one-third-octave one.
-    :return: The bandwidth in Hz, in the shape of ``center``.
+    :return: The bandwidth in Hz, in the shape of ``center``; a ``float`` for a number;
+        an array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: If ``fraction`` is not one the clause prints a
         coefficient for, or a centre frequency is not positive and finite.
     """
@@ -707,7 +727,7 @@ def filter_bandwidth(center: ArrayLike, fraction: int = 1) -> np.ndarray | float
     width = np.asarray(
         FILTER_BANDWIDTH_FRACTION[fraction] * frequencies, dtype=np.float64
     )
-    return float(width) if width.ndim == 0 else width
+    return as_float_or_array(width, like=(center,))
 
 
 def reverberation_time_standard_deviation(
@@ -717,7 +737,7 @@ def reverberation_time_standard_deviation(
     evaluation_range: float = 30.0,
     decays: ArrayLike = INTEGRATED_RESPONSE_DECAYS,
     positions: ArrayLike = 1,
-) -> np.ndarray | float:
+) -> float | NDArray[np.float64]:
     r"""Standard deviation of a measured reverberation time (7.1).
 
     ISO 3382-1:2009, Equations (4) and (5):
@@ -751,7 +771,9 @@ def reverberation_time_standard_deviation(
     :param positions: Independent measurement positions, the ``N``: source
         and receiver combinations, not receivers alone. Broadcast against
         the rest, so a sweep over survey sizes is one call.
-    :return: The standard deviation in seconds, of the broadcast shape.
+    :return: The standard deviation in seconds; a ``float`` when the four arguments that
+        broadcast are all numbers; an array of their broadcast shape when one is a
+        sequence or an array, a zero-dimensional one included.
     :raises ValueError: If ``evaluation_range`` is not one the clause prints
         coefficients for, if ``decays`` or ``positions`` is below one, or if a
         reverberation time or bandwidth is not positive and finite. An
@@ -786,12 +808,32 @@ def reverberation_time_standard_deviation(
         * np.sqrt((1.0 + decay_term / counted) / (places * width * times)),
         dtype=np.float64,
     )
-    return float(sigma) if sigma.ndim == 0 else sigma
+    return as_float_or_array(
+        sigma, like=(reverberation_time, bandwidth, decays, positions)
+    )
+
+
+@overload
+def min_reliable_reverberation_time[S: RealScalar](
+    bandwidth: S, detector_time: float = 0.0
+) -> float: ...
+
+
+@overload
+def min_reliable_reverberation_time[V: RealValues](
+    bandwidth: V, detector_time: float = 0.0
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def min_reliable_reverberation_time[A: ArrayLike](
+    bandwidth: A, detector_time: float = 0.0
+) -> float | NDArray[np.float64]: ...
 
 
 def min_reliable_reverberation_time(
     bandwidth: ArrayLike, detector_time: float = 0.0
-) -> np.ndarray | float:
+) -> float | NDArray[np.float64]:
     r"""Shortest decay time a forward analysis can be trusted with (7.3).
 
     ISO 3382-1:2009, Equations (6) and (7) put two lower limits on a
@@ -819,8 +861,9 @@ def min_reliable_reverberation_time(
         :func:`filter_bandwidth` gives the clause's own figure for it.
     :param detector_time: Reverberation time of the averaging detector, in
         seconds. Zero, the default, for an analysis with no detector.
-    :return: The exclusive lower bound on a reliable reverberation time, in
-        seconds, of the shape of ``bandwidth``.
+    :return: The exclusive lower bound on a reliable reverberation time, in seconds, of
+        the shape of ``bandwidth``; a ``float`` for a number; an array for a sequence or
+        an array, a zero-dimensional one included.
     :raises ValueError: If a bandwidth is not positive and finite, or the
         detector time is not a finite time of zero seconds or more.
     :raises TypeError: if ``detector_time`` is not a single number.
@@ -840,4 +883,4 @@ def min_reliable_reverberation_time(
         ),
         dtype=np.float64,
     )
-    return float(limit) if limit.ndim == 0 else limit
+    return as_float_or_array(limit, like=(bandwidth,))

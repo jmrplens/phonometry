@@ -50,7 +50,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 
@@ -63,9 +63,10 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike
+    from numpy.typing import ArrayLike, NDArray
 
     from ..._i18n import Language
+    from ..._internal.types import RealScalar, RealValues
 
 __all__ = [
     "DAMPING_RATIO_RANGE",
@@ -259,7 +260,21 @@ def fundamental_frequency(
     )
 
 
-def height_fundamental_frequency(height_m: ArrayLike) -> np.ndarray | float:
+@overload
+def height_fundamental_frequency[S: RealScalar](height_m: S) -> float: ...
+
+
+@overload
+def height_fundamental_frequency[V: RealValues](height_m: V) -> NDArray[np.float64]: ...
+
+
+@overload
+def height_fundamental_frequency[A: ArrayLike](
+    height_m: A,
+) -> float | NDArray[np.float64]: ...
+
+
+def height_fundamental_frequency(height_m: ArrayLike) -> float | NDArray[np.float64]:
     """The ``f = 46/h`` fit D.2 closes with, in hertz.
 
     Fitted to 163 rectangular-plan buildings rather than taken from a code,
@@ -267,14 +282,15 @@ def height_fundamental_frequency(height_m: ArrayLike) -> np.ndarray | float:
     frequencies correlate with measurement *worse* than this line does.
 
     :param height_m: Height ``h`` above the base, in metres (scalar or array).
-    :return: The predicted fundamental frequency, in hertz.
+    :return: The predicted fundamental frequency, in hertz; a ``float`` for a number; an
+        array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: If a height is not positive and finite.
     """
     h = np.asarray(height_m, dtype=np.float64)
     if np.any(h <= 0.0) or not np.all(np.isfinite(h)):
         msg = "'height_m' must be positive and finite."
         raise ValueError(msg)
-    return as_float_or_array(HEIGHT_FREQUENCY_CONSTANT_HZ_M / h)
+    return as_float_or_array(HEIGHT_FREQUENCY_CONSTANT_HZ_M / h, like=(height_m,))
 
 
 def empirical_frequency_bounds(frequency_hz: float) -> tuple[float, float]:

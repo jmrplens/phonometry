@@ -114,6 +114,18 @@ $x_i$. Both slips are in `docs/ERRATA.md`.
 
 ```python
 method_a_scale_values(
+    positions: float | np.floating[Any] | np.integer[Any],
+    *,
+    part: int,
+) -> float
+
+method_a_scale_values(
+    positions: Sequence[float] | NDArray[Any],
+    *,
+    part: int,
+) -> NDArray[np.float64]
+
+method_a_scale_values(
     positions: ArrayLike,
     *,
     part: int,
@@ -135,7 +147,7 @@ are 5 and the value is `6 - position`.
 | `positions` | The position of each ticked box, 1 (left) to 5 (right); `NaN` for a question left blank. |
 | `part` | The part of the questionnaire, 1 to 4. |
 
-**Returns:** The scale values, a float for a scalar input; an array is always a new one, never a view of *positions*.
+**Returns:** The scale values; a `float` for a number; an array for a sequence or an array, a zero-dimensional one included. An array is always a new one, never a view of *positions*.
 
 **Raises**
 
@@ -189,6 +201,14 @@ METHOD_B_MAX_SOURCES = 8
 
 ```python
 method_b_scale_values(
+    marked_fraction: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+method_b_scale_values(
+    marked_fraction: Sequence[float] | NDArray[Any],
+) -> NDArray[np.float64]
+
+method_b_scale_values(
     marked_fraction: ArrayLike,
 ) -> float | NDArray[np.float64]
 ```
@@ -209,7 +229,7 @@ requires ("determined at least with one decimal place").
 | :--- | :--- |
 | `marked_fraction` | The position of each mark from the left-hand tick, 0, to the right-hand one, 1; `NaN` for a scale left blank. |
 
-**Returns:** The scale values, a float for a scalar input.
+**Returns:** The scale values; a `float` for a number; an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

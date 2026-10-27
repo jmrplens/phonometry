@@ -167,7 +167,7 @@ def test_a_machine_it_cannot_place_is_refused(
 ) -> None:
     """The group, the support class and at least one measured quantity."""
     with pytest.raises(ValueError, match=match):
-        vibration.industrial_machine_zone(**kwargs)  # type: ignore[arg-type]
+        vibration.industrial_machine_zone(**kwargs)  # type: ignore[call-overload]
 
 
 # --------------------------------------------------------------------------- #

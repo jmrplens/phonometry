@@ -30,7 +30,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 
@@ -40,9 +40,10 @@ if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike
+    from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
+    from .._internal.types import RealScalar, RealValues
     from .._report.metadata import ReportMetadata
 
 
@@ -151,16 +152,36 @@ def hard_object_absorption(object_volume: ArrayLike) -> np.ndarray:
     return vol**_OBJECT_EXPONENT
 
 
+@overload
+def air_absorption_area[S: RealScalar](
+    m: S, volume: float, object_fraction: float = 0.0
+) -> float: ...
+
+
+@overload
+def air_absorption_area[V: RealValues](
+    m: V, volume: float, object_fraction: float = 0.0
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def air_absorption_area[A: ArrayLike](
+    m: A, volume: float, object_fraction: float = 0.0
+) -> float | NDArray[np.float64]: ...
+
+
 def air_absorption_area(
     m: ArrayLike, volume: float, object_fraction: float = 0.0
-) -> np.ndarray | float:
+) -> float | NDArray[np.float64]:
     r"""Equivalent absorption area of the air (Formula 2).
 
     :param m: Power attenuation coefficient of air, in Neper per metre (Table 1
         prints it for the six conditions ``air_condition`` names).
     :param volume: Volume of the empty enclosed space ``V``, m3.
     :param object_fraction: Object fraction ``psi`` (0-1).
-    :return: The air absorption area
+    :return: The air absorption area :math:`A_{\text{air}} = 4 m V (1 - \psi)`, m2; a
+        ``float`` for a number; an array for a sequence or an array, a zero-dimensional
+        one included.
         :math:`A_{\text{air}} = 4 m V (1 - \psi)`, m2.
     :raises TypeError: if ``object_fraction`` or ``volume`` is not a single number.
     """
@@ -171,7 +192,7 @@ def air_absorption_area(
         msg = "the attenuation coefficient m must be non-negative."
         raise ValueError(msg)
     area = 4.0 * m_arr * volume * (1.0 - object_fraction)
-    return as_float_or_array(area)
+    return as_float_or_array(area, like=(m,))
 
 
 def equivalent_absorption_area(
@@ -179,7 +200,7 @@ def equivalent_absorption_area(
     *,
     objects: ArrayLike = (),
     air_area: ArrayLike = 0.0,
-) -> np.ndarray | float:
+) -> float | NDArray[np.float64]:
     """Total equivalent sound absorption area (Formula 1).
 
     :param surfaces: Sequence of ``(area, absorption_coefficient)`` pairs, one
@@ -191,8 +212,10 @@ def equivalent_absorption_area(
         per-band values; summed over the objects.
     :param air_area: Air absorption area ``Aair``, m2 (see
         :func:`air_absorption_area`); scalar or per-band.
-    :return: The total equivalent absorption area ``A``, m2; a float for
-        all-scalar inputs, otherwise a per-band array.
+    :return: The total equivalent absorption area ``A``, m2; a ``float`` when the
+        coefficients, an object's entry and ``air_area`` are all numbers, otherwise a
+        per-band array, a zero-dimensional one when one of them is a zero-dimensional
+        array.
     """
     total = np.asarray(air_area, dtype=np.float64)
     if np.any(total < 0.0):
@@ -213,12 +236,46 @@ def equivalent_absorption_area(
             msg = "object absorption areas must be non-negative."
             raise ValueError(msg)
         total = total + obj.sum(axis=0)
-    return as_float_or_array(total)
+    # The objects are summed, so one object's entry decides the band axis
+    # they bring: a value each, or a row of bands each.
+    return as_float_or_array(
+        total, like=(*(alpha for _, alpha in surfaces), air_area, *obj[:1])
+    )
 
 
 # ---------------------------------------------------------------------------
 # Clause 4.4 - reverberation time.
 # ---------------------------------------------------------------------------
+
+
+@overload
+def reverberation_time[S: RealScalar](
+    absorption_area: S,
+    volume: float,
+    *,
+    object_fraction: float = 0.0,
+    speed_of_sound: float = _SPEED_OF_SOUND,
+) -> float: ...
+
+
+@overload
+def reverberation_time[V: RealValues](
+    absorption_area: V,
+    volume: float,
+    *,
+    object_fraction: float = 0.0,
+    speed_of_sound: float = _SPEED_OF_SOUND,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def reverberation_time[A: ArrayLike](
+    absorption_area: A,
+    volume: float,
+    *,
+    object_fraction: float = 0.0,
+    speed_of_sound: float = _SPEED_OF_SOUND,
+) -> float | NDArray[np.float64]: ...
 
 
 def reverberation_time(
@@ -227,7 +284,7 @@ def reverberation_time(
     *,
     object_fraction: float = 0.0,
     speed_of_sound: float = _SPEED_OF_SOUND,
-) -> np.ndarray | float:
+) -> float | NDArray[np.float64]:
     r"""Reverberation time from the equivalent absorption area (Formula 5).
 
     :param absorption_area: Total equivalent absorption area ``A``, m2.
@@ -235,7 +292,9 @@ def reverberation_time(
     :param object_fraction: Object fraction ``psi`` (0-1).
     :param speed_of_sound: Speed of sound ``c0``, m/s (default 345.6, which
         gives the factor ``0.16``).
-    :return: The reverberation time
+    :return: The reverberation time :math:`T = \frac{55.3}{c_0} \frac{V (1 - \psi)}{A}`,
+        s; a ``float`` for a number; an array for a sequence or an array, a
+        zero-dimensional one included.
         :math:`T = \frac{55.3}{c_0} \frac{V (1 - \psi)}{A}`, s.
     :raises ValueError: if ``absorption_area`` is not positive and finite.
     :raises TypeError: if ``object_fraction``, ``speed_of_sound`` or ``volume`` is not a
@@ -255,7 +314,7 @@ def reverberation_time(
         msg = "absorption_area must be positive."
         raise ValueError(msg)
     t = _RT_CONSTANT / speed_of_sound * volume * (1.0 - object_fraction) / area
-    return as_float_or_array(t)
+    return as_float_or_array(t, like=(absorption_area,))
 
 
 @dataclass(frozen=True)

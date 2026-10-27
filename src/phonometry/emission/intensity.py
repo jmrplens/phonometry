@@ -59,7 +59,7 @@ from __future__ import annotations
 import math
 from dataclasses import KW_ONLY, dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, ClassVar
+from typing import TYPE_CHECKING, Any, ClassVar, Literal, overload
 
 import numpy as np
 
@@ -905,7 +905,7 @@ def _coefficient_of_variation(
 
 def temporal_variability_indicator(
     short_time_intensity: list[float] | np.ndarray,
-) -> float | np.ndarray:
+) -> float | NDArray[np.float64]:
     r"""ISO 9614-1:1993 temporal variability indicator F1 (equation (A.1)).
 
     In the initial test a "typical" measurement position is chosen on an
@@ -982,12 +982,45 @@ def _field_indicators_1d(lp: np.ndarray, i_n: np.ndarray) -> tuple[float, float,
     return lp_surface - li_abs, lp_surface - li_alg, f4
 
 
+@overload
+def _temporal_indicator_for(
+    temporal_intensity: None, n_bands: int, *, scalar_surface: bool
+) -> None: ...
+
+
+@overload
+def _temporal_indicator_for(
+    temporal_intensity: list[float] | np.ndarray,
+    n_bands: int,
+    *,
+    scalar_surface: Literal[True],
+) -> float: ...
+
+
+@overload
+def _temporal_indicator_for(
+    temporal_intensity: list[float] | np.ndarray,
+    n_bands: int,
+    *,
+    scalar_surface: Literal[False],
+) -> NDArray[np.float64]: ...
+
+
+@overload
 def _temporal_indicator_for(
     temporal_intensity: list[float] | np.ndarray | None,
     n_bands: int,
     *,
     scalar_surface: bool,
-) -> float | np.ndarray | None:
+) -> float | NDArray[np.float64] | None: ...
+
+
+def _temporal_indicator_for(
+    temporal_intensity: list[float] | np.ndarray | None,
+    n_bands: int,
+    *,
+    scalar_surface: bool,
+) -> float | NDArray[np.float64] | None:
     """F1 from the optional short-time samples, checked against the band count.
 
     ``None`` in, ``None`` out: F1 is optional on a :class:`FieldIndicators`,
@@ -1015,11 +1048,9 @@ def _temporal_indicator_for(
             f"{f1_size} for {n_bands} band(s)."
         )
         raise ValueError(msg)
-    if scalar_surface and np.ndim(f1) != 0:
+    if scalar_surface:
         return float(np.asarray(f1).reshape(()))
-    if not scalar_surface and np.ndim(f1) == 0:
-        return np.asarray([f1], dtype=np.float64)
-    return f1
+    return np.atleast_1d(np.asarray(f1, dtype=np.float64))
 
 
 def field_indicators(

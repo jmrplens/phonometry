@@ -97,6 +97,28 @@ it.
 
 ```python
 allowable_velocity(
+    frequency: float | np.floating[Any] | np.integer[Any],
+    *,
+    constant_velocity_mm_s: float,
+    zone_factor: float = 1.0,
+    corner_low_hz: float,
+    corner_high_hz: float,
+    exponent_low: float = 1.0,
+    exponent_high: float = 1.0,
+) -> float
+
+allowable_velocity(
+    frequency: Sequence[float] | NDArray[Any],
+    *,
+    constant_velocity_mm_s: float,
+    zone_factor: float = 1.0,
+    corner_low_hz: float,
+    corner_high_hz: float,
+    exponent_low: float = 1.0,
+    exponent_high: float = 1.0,
+) -> NDArray[np.float64]
+
+allowable_velocity(
     frequency: ArrayLike,
     *,
     constant_velocity_mm_s: float,
@@ -105,7 +127,7 @@ allowable_velocity(
     corner_high_hz: float,
     exponent_low: float = 1.0,
     exponent_high: float = 1.0,
-) -> np.ndarray | float
+) -> float | NDArray[np.float64]
 ```
 
 Frequency-shaped velocity criterion of Figure 9 (Formula (C.1)).
@@ -131,7 +153,7 @@ fastest, and flat in between. A machine-specific part that states its own
 | `exponent_low` | `k`, the slope below the lower corner. |
 | `exponent_high` | `m`, the slope above the upper corner. |
 
-**Returns:** The allowable r.m.s. velocity, in millimetres per second; a float for a scalar frequency, otherwise an array.
+**Returns:** The allowable r.m.s. velocity, in millimetres per second; a `float` for a number; an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -177,6 +199,16 @@ magnitude.
 
 ```python
 evaluation_zone(
+    magnitude: float | np.floating[Any] | np.integer[Any],
+    boundaries: ZoneBoundaries,
+) -> Literal['A', 'B', 'C', 'D']
+
+evaluation_zone(
+    magnitude: Sequence[float] | NDArray[Any],
+    boundaries: ZoneBoundaries,
+) -> NDArray[np.str_]
+
+evaluation_zone(
     magnitude: ArrayLike,
     boundaries: ZoneBoundaries,
 ) -> Literal['A', 'B', 'C', 'D'] | NDArray[np.str_]
@@ -195,7 +227,7 @@ limit reads in the tables of the machine-specific parts.
 | `magnitude` | The vibration severity, in the same quantity and unit as `boundaries` (scalar or array). |
 | `boundaries` | The three zone boundaries of the applicable part of ISO 20816. |
 
-**Returns:** `"A"`, `"B"`, `"C"` or `"D"`; a string for a scalar input, otherwise an array of them.
+**Returns:** `"A"`, `"B"`, `"C"` or `"D"`: a string for a number; an array of them for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -231,6 +263,18 @@ GEAR_DISPLACEMENT_SLOPE_DB_PER_DECADE = 10.0
 
 ```python
 gear_housing_velocity_limit(
+    frequency: float | np.floating[Any] | np.integer[Any],
+    *,
+    rating: float,
+) -> float
+
+gear_housing_velocity_limit(
+    frequency: Sequence[float] | NDArray[Any],
+    *,
+    rating: float,
+) -> NDArray[np.float64]
+
+gear_housing_velocity_limit(
     frequency: ArrayLike,
     *,
     rating: float,
@@ -252,7 +296,7 @@ curve rather than two implementations of it.
 | `frequency` | Frequency `f`, in hertz (scalar or array). |
 | `rating` | The velocity rating `VR`, in millimetres per second. |
 
-**Returns:** The allowable r.m.s. velocity, in millimetres per second; a float for a scalar frequency, otherwise an array.
+**Returns:** The allowable r.m.s. velocity, in millimetres per second; a `float` for a number; an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -264,6 +308,18 @@ curve rather than two implementations of it.
 ## gear_shaft_displacement_limit
 
 ```python
+gear_shaft_displacement_limit(
+    frequency: float | np.floating[Any] | np.integer[Any],
+    *,
+    rating: float,
+) -> float
+
+gear_shaft_displacement_limit(
+    frequency: Sequence[float] | NDArray[Any],
+    *,
+    rating: float,
+) -> NDArray[np.float64]
+
 gear_shaft_displacement_limit(
     frequency: ArrayLike,
     *,
@@ -292,7 +348,7 @@ by 10 dB per decade, which on an amplitude is an exponent of one half.
 | `frequency` | Frequency `f`, in hertz (scalar or array). |
 | `rating` | The displacement rating `DR`, in micrometres. |
 
-**Returns:** The allowable peak-to-peak displacement, in micrometres; a float for a scalar frequency, otherwise an array.
+**Returns:** The allowable peak-to-peak displacement, in micrometres; a `float` for a number; an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -394,6 +450,30 @@ industrial_machine_zone(
     group: Literal['group_1', 'group_2'],
     support: Literal['rigid', 'flexible'],
     *,
+    displacement_um: float | np.floating[Any] | np.integer[Any] | None = None,
+    velocity_mm_s: float | np.floating[Any] | np.integer[Any] | None = None,
+) -> Literal['A', 'B', 'C', 'D']
+
+industrial_machine_zone(
+    group: Literal['group_1', 'group_2'],
+    support: Literal['rigid', 'flexible'],
+    *,
+    displacement_um: Sequence[float] | NDArray[Any],
+    velocity_mm_s: ArrayLike | None = None,
+) -> NDArray[np.str_]
+
+industrial_machine_zone(
+    group: Literal['group_1', 'group_2'],
+    support: Literal['rigid', 'flexible'],
+    *,
+    displacement_um: float | np.floating[Any] | np.integer[Any] | None = None,
+    velocity_mm_s: Sequence[float] | NDArray[Any],
+) -> NDArray[np.str_]
+
+industrial_machine_zone(
+    group: Literal['group_1', 'group_2'],
+    support: Literal['rigid', 'flexible'],
+    *,
     displacement_um: ArrayLike | None = None,
     velocity_mm_s: ArrayLike | None = None,
 ) -> Literal['A', 'B', 'C', 'D'] | NDArray[np.str_]
@@ -414,7 +494,7 @@ reason the tables state each class twice.
 | `displacement_um` | Measured broad-band r.m.s. displacement of the bearing, pedestal or housing, in micrometres (scalar or array). |
 | `velocity_mm_s` | Measured broad-band r.m.s. velocity, in millimetres per second (scalar or array). |
 
-**Returns:** `"A"`, `"B"`, `"C"` or `"D"`; a string when every measurement given is a scalar, otherwise an array of them, broadcast over the two if both are arrays.
+**Returns:** `"A"`, `"B"`, `"C"` or `"D"`: a string when every measurement given is a number; an array of them, broadcast over the two, when one is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

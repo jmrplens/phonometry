@@ -175,6 +175,21 @@ Draw the two levels and the 2 dB the adjacent vehicle may add.
 
 ```python
 background_level_increase(
+    measured_level: float | np.floating[Any] | np.integer[Any],
+    background_level: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+background_level_increase(
+    measured_level: Sequence[float] | NDArray[Any],
+    background_level: ArrayLike,
+) -> NDArray[np.float64]
+
+background_level_increase(
+    measured_level: float | np.floating[Any] | np.integer[Any],
+    background_level: Sequence[float] | NDArray[Any],
+) -> NDArray[np.float64]
+
+background_level_increase(
     measured_level: ArrayLike,
     background_level: ArrayLike,
 ) -> float | NDArray[np.float64]
@@ -198,7 +213,7 @@ spectrum.
 | `measured_level` | $L_\mathrm{meas}$, the level measured with the unit, in dB; one value or one per band. |
 | `background_level` | $L_\mathrm{bg}$, the background alone, in dB. |
 
-**Returns:** $\Delta L$, in dB, as one value or one per band.
+**Returns:** $\Delta L$, in dB; a `float` when the two levels are numbers; an array of their broadcast shape when one is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

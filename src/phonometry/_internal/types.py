@@ -9,8 +9,9 @@ they are touched.
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 from numpy.typing import NDArray
@@ -19,9 +20,21 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
+    from numpy.typing import ArrayLike
 
 #: Real-valued float64 array alias shared across the library.
 Real = NDArray[np.float64]
+
+#: One real number, as a function that takes a number or an array of them is
+#: handed it: a Python ``float`` or ``int``, or a numpy one (``np.float32``
+#: and ``np.int64`` are not Python numbers to a type checker). Such a function
+#: returns a Python ``float`` for it.
+RealScalar = float | np.floating[Any] | np.integer[Any]
+
+#: Several real numbers: a sequence of them, or a numpy array of any shape, a
+#: zero-dimensional one included. A function that takes a number or an array
+#: of them returns an array for it.
+RealValues = Sequence[float] | NDArray[Any]
 
 #: The band set of a spectrum, as every public ``fraction`` writes it: 1 for
 #: octaves, 3 for one-third octaves (the denominator ``b`` of the IEC 61260-1
@@ -64,10 +77,91 @@ A_OR_Z_WEIGHTINGS: tuple[AOrZWeighting, ...] = ("A", "Z")
 CALIBRATION_FIELDS: tuple[CalibrationField, ...] = ("pressure", "free")
 
 
-def as_float_or_array(x: np.ndarray | float) -> np.ndarray | float:
-    """Return a Python ``float`` for a 0-d array or scalar, the array otherwise.
+#: How the arguments that decide a result's shape came in: all single numbers,
+#: single numbers among which a zero-dimensional array, or with a sequence or an
+#: array of values among them.
+AnswerForm = Literal["number", "zero-dimensional", "array"]
 
-    :param x: The array (or scalar) produced by a vectorised computation.
-    :return: ``float(x)`` when *x* is zero-dimensional, else *x* unchanged.
+
+def answer_form(like: tuple[ArrayLike | None, ...]) -> AnswerForm:
+    """The form a result takes for the arguments that decide its shape.
+
+    An array in, an array out: ``"array"`` when one of *like* holds more
+    than one dimension's worth of values (a sequence, or an array of one
+    dimension or more), ``"zero-dimensional"`` when all are single numbers
+    and one of them is a numpy array, ``"number"`` otherwise. ``None`` (an
+    optional argument left out) decides nothing.
+
+    :param like: Every argument that decides the shape of the result, as the
+        caller was handed it.
+    :return: The form the result is given in.
     """
-    return float(x) if np.ndim(x) == 0 else x
+    given = [argument for argument in like if argument is not None]
+    if any(np.ndim(argument) != 0 for argument in given):
+        return "array"
+    if any(isinstance(argument, np.ndarray) for argument in given):
+        return "zero-dimensional"
+    return "number"
+
+
+def as_float_or_array(
+    values: ArrayLike, *, like: tuple[ArrayLike | None, ...]
+) -> float | NDArray[np.float64]:
+    """Return *values* in the form the arguments that decide their shape came in.
+
+    An array in, an array out: the result is a Python ``float`` only when
+    none of *like* is a numpy array and every one of them is a single number;
+    a sequence or an array among them, a zero-dimensional array included,
+    gives an array (:func:`answer_form`). When every argument in *like* is a
+    single number the result is one number too, so a validator that hands a
+    scalar back as a one-element array is read through, and an argument left
+    out of *like* that does shape the result fails loudly instead of being
+    dropped.
+
+    :param values: The result of a computation that broadcasts *like*.
+    :param like: Every argument that decides the shape of the result, as the
+        caller was handed it: ``like=(frequency,)``, ``like=(a, b)``. A tuple
+        always, so an argument that is itself a tuple of numbers is not read
+        as several arguments.
+    :return: ``float`` for numbers in, a ``float64`` array otherwise.
+    :raises ValueError: If every argument in *like* is a single number and
+        *values* holds more than one.
+    """
+    result = np.asarray(values, dtype=np.float64)
+    form = answer_form(like)
+    if form == "array":
+        return result
+    return float(one_value(result)) if form == "number" else one_value(result)
+
+
+def one_value[T: np.generic](values: NDArray[T]) -> NDArray[T]:
+    """*values* as the zero-dimensional array of the one value they hold.
+
+    :param values: A result computed from arguments that are all single
+        numbers, which a validator may have made one-element and 1-D.
+    :return: The same value, zero-dimensional.
+    :raises ValueError: If *values* holds more than one value: an argument
+        that shapes it is missing from the ``like`` it was read against.
+    """
+    if values.size != 1:
+        msg = (
+            f"a result of shape {values.shape} from arguments that are all "
+            "single numbers: an argument that shapes it is missing from 'like'."
+        )
+        raise ValueError(msg)
+    return values.reshape(())
+
+
+def as_float_if_reduced(values: ArrayLike) -> float | NDArray[np.float64]:
+    """Return a Python ``float`` for a result reduced to one number, else the array.
+
+    For a function that reduces an axis (a level over the samples of a
+    signal, an energy average over positions): the rank of what it was handed
+    decides whether one number is left, not whether it was an array.
+
+    :param values: The result of the reduction.
+    :return: ``float`` when *values* is zero-dimensional, else a ``float64``
+        array.
+    """
+    result = np.asarray(values, dtype=np.float64)
+    return float(result) if result.ndim == 0 else result

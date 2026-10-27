@@ -83,16 +83,52 @@ overlapping modes where the statistical field of this module applies.
 
 ```python
 critical_distance(
+    room_constant: float | np.floating[Any] | np.integer[Any],
+    *,
+    directivity: float | np.floating[Any] | np.integer[Any] = ...,
+) -> float
+
+critical_distance(
+    room_constant: Sequence[float] | NDArray[Any],
+    *,
+    directivity: ArrayLike = ...,
+) -> NDArray[np.float64]
+
+critical_distance(
+    room_constant: float | np.floating[Any] | np.integer[Any],
+    *,
+    directivity: Sequence[float] | NDArray[Any],
+) -> NDArray[np.float64]
+
+critical_distance(
     room_constant: ArrayLike,
     *,
     directivity: ArrayLike = ...,
-) -> np.ndarray | float
+) -> float | NDArray[np.float64]
+
+critical_distance(
+    *,
+    absorption_area: float | np.floating[Any] | np.integer[Any],
+    directivity: float | np.floating[Any] | np.integer[Any] = ...,
+) -> float
+
+critical_distance(
+    *,
+    absorption_area: Sequence[float] | NDArray[Any],
+    directivity: ArrayLike = ...,
+) -> NDArray[np.float64]
+
+critical_distance(
+    *,
+    absorption_area: float | np.floating[Any] | np.integer[Any],
+    directivity: Sequence[float] | NDArray[Any],
+) -> NDArray[np.float64]
 
 critical_distance(
     *,
     absorption_area: ArrayLike,
     directivity: ArrayLike = ...,
-) -> np.ndarray | float
+) -> float | NDArray[np.float64]
 ```
 
 Critical (reverberation) distance
@@ -117,7 +153,7 @@ ventilation opening begins.
 | `absorption_area` | Equivalent absorption area `A`, m2 (scalar or per-band); from [`sabine_absorption_area`](/phonometry/reference/api/rooms/steady-field/#sabine_absorption_area). Give this or `room_constant`, not both. |
 | `directivity` | Source directivity factor `Q` (`1` omnidirectional, `2` on one reflecting plane, `4` in an edge, `8` in a corner), scalar or per-band. |
 
-**Returns:** The critical distance `rc`, m.
+**Returns:** The critical distance `rc`, m; a `float` when the absorption measure and `directivity` are both numbers; an array of their broadcast shape when one is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -130,8 +166,18 @@ ventilation opening begins.
 ```python
 room_constant(
     surface_area: float,
+    mean_absorption: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+room_constant(
+    surface_area: float,
+    mean_absorption: Sequence[float] | NDArray[Any],
+) -> NDArray[np.float64]
+
+room_constant(
+    surface_area: float,
     mean_absorption: ArrayLike,
-) -> np.ndarray | float
+) -> float | NDArray[np.float64]
 ```
 
 Room constant $R = S \bar{\alpha} / (1 - \bar{\alpha})$
@@ -144,7 +190,7 @@ Room constant $R = S \bar{\alpha} / (1 - \bar{\alpha})$
 | `surface_area` | Total boundary area `S` of the room, m2. |
 | `mean_absorption` | Area-weighted mean Sabine absorption `alpha_bar` in `(0, 1)` (scalar or per-band); e.g. from [`phonometry.room.mean_absorption`](/phonometry/reference/api/rooms/reverberation-prediction/#mean_absorption). |
 
-**Returns:** The room constant `R`, m2; a float for a scalar input, otherwise a per-band array.
+**Returns:** The room constant `R`, m2; a `float` for a number; an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -157,10 +203,24 @@ Room constant $R = S \bar{\alpha} / (1 - \bar{\alpha})$
 ```python
 sabine_absorption_area(
     volume: float,
+    reverberation_time: float | np.floating[Any] | np.integer[Any],
+    *,
+    speed_of_sound: float = 343.0,
+) -> float
+
+sabine_absorption_area(
+    volume: float,
+    reverberation_time: Sequence[float] | NDArray[Any],
+    *,
+    speed_of_sound: float = 343.0,
+) -> NDArray[np.float64]
+
+sabine_absorption_area(
+    volume: float,
     reverberation_time: ArrayLike,
     *,
     speed_of_sound: float = 343.0,
-) -> np.ndarray | float
+) -> float | NDArray[np.float64]
 ```
 
 Equivalent absorption area from a reverberation time (Sabine, inverted).
@@ -185,7 +245,7 @@ is the same expression at 339 m/s.
 | `reverberation_time` | Reverberation time `T`, s (scalar or per-band). |
 | `speed_of_sound` | Speed of sound `c0`, m/s (default 343, giving the familiar 0,161; pass 339 for the 0,163 of VDI 2081). |
 
-**Returns:** The equivalent absorption area `A`, m2.
+**Returns:** The equivalent absorption area `A`, m2; a `float` for a number; an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -198,9 +258,19 @@ is the same expression at 339 m/s.
 
 ```python
 schroeder_frequency(
+    reverberation_time: float | np.floating[Any] | np.integer[Any],
+    volume: float,
+) -> float
+
+schroeder_frequency(
+    reverberation_time: Sequence[float] | NDArray[Any],
+    volume: float,
+) -> NDArray[np.float64]
+
+schroeder_frequency(
     reverberation_time: ArrayLike,
     volume: float,
-) -> np.ndarray | float
+) -> float | NDArray[np.float64]
 ```
 
 Schroeder frequency $f_\mathrm{s} = 2000 \sqrt{T / V}$
@@ -218,7 +288,7 @@ modes and `R` / `rc` lose their meaning.
 | `reverberation_time` | Reverberation time `T`, s (scalar or per-band). |
 | `volume` | Room volume `V`, m3. |
 
-**Returns:** The Schroeder frequency, Hz.
+**Returns:** The Schroeder frequency, Hz; a `float` for a number; an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -285,7 +355,7 @@ steady_state_spl(
     directivity: ArrayLike = ...,
     source_model: Literal['constant_power', 'constant_volume', 'constant_pressure'] = ...,
     characteristic_impedance: float | None = ...,
-) -> np.ndarray | float
+) -> float | NDArray[np.float64]
 
 steady_state_spl(
     sound_power_level: ArrayLike,
@@ -295,7 +365,7 @@ steady_state_spl(
     directivity: ArrayLike = ...,
     source_model: Literal['constant_power', 'constant_volume', 'constant_pressure'] = ...,
     characteristic_impedance: float | None = ...,
-) -> np.ndarray | float
+) -> float | NDArray[np.float64]
 ```
 
 Steady-state sound pressure level in a room (Bies Equation (6.43)).
@@ -325,7 +395,7 @@ such as a room-to-room transmission uses.
 | `source_model` | Sound power model of Norton & Karczub 2e Table 4.5: `"constant_power"` (default, $\Pi = \Pi_0$, the position of the source does not change its radiated power), `"constant_volume"` ($\Pi = \Pi_0 Q$, reflecting boundaries raise the radiated power by $10 \log_{10} Q$; the conservative upper bound) or `"constant_pressure"` ($\Pi = \Pi_0 / Q$, the theoretical lower bound). See [`SOURCE_POWER_MODELS`](/phonometry/reference/api/rooms/steady-field/#source_power_models). |
 | `characteristic_impedance` | Air characteristic impedance `rho c`, Pa s/m. When given, the $10 \log_{10}(\rho c / 400)$ term is added (about `+0.14 dB` at 20 degC where $\rho c = 413$); `None` (default) omits it, matching the common textbook form. |
 
-**Returns:** The steady-state SPL `Lp`, dB; a float for scalar inputs, otherwise an array broadcasting `sound_power_level`, `distance`, the absorption measure and `directivity`.
+**Returns:** The steady-state SPL `Lp`, dB; a `float` when `sound_power_level`, `distance`, the absorption measure and `directivity` are all numbers; an array of their broadcast shape when one is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

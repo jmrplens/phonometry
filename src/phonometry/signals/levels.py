@@ -20,7 +20,7 @@ from typing import TYPE_CHECKING, Literal
 import numpy as np
 
 from .._internal.peaks import inter_sample_peak
-from .._internal.types import as_float_or_array
+from .._internal.types import as_float_if_reduced
 from .._internal.validation import (
     require_count,
     require_scalar,
@@ -39,6 +39,8 @@ from ..metrology.reference_values import REFERENCE_VALUES
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
+
+    from numpy.typing import NDArray
 
     from ..filters.weighting import Weighting
     from ..io._signal import Signal
@@ -87,7 +89,7 @@ def leq(
     *,
     calibration_factor: float | None = None,
     dbfs: bool = False,
-) -> float | np.ndarray:
+) -> float | NDArray[np.float64]:
     """Equivalent continuous sound level (Leq) over the whole signal.
 
     :param x: Input signal (1D or 2D [channels, samples]) in raw pressure
@@ -109,7 +111,7 @@ def leq(
     out = _level_db(
         mean_square=np.asarray(ms), calibration_factor=calibration, dbfs=dbfs
     )
-    return as_float_or_array(out)
+    return as_float_if_reduced(out)
 
 
 def laeq(
@@ -118,7 +120,7 @@ def laeq(
     *,
     calibration_factor: float | None = None,
     dbfs: bool = False,
-) -> float | np.ndarray:
+) -> float | NDArray[np.float64]:
     """A-weighted equivalent continuous sound level (LAeq).
 
     :param x: Input signal (1D or 2D [channels, samples]) in raw pressure
@@ -219,7 +221,7 @@ def lc_peak(
     calibration_factor: float | None = None,
     dbfs: bool = False,
     oversample: int = 8,
-) -> float | np.ndarray:
+) -> float | NDArray[np.float64]:
     """C-weighted peak sound level, LCpeak (IEC 61672-1:2013, subclause 5.13).
 
     The absolute maximum of the C-weighted signal, expressed in dB. This is
@@ -264,7 +266,7 @@ def lc_peak(
         calibration_factor=calibration_factor,
         dbfs=dbfs,
     )
-    return as_float_or_array(out)
+    return as_float_if_reduced(out)
 
 
 def sel(
@@ -274,7 +276,7 @@ def sel(
     *,
     calibration_factor: float | None = None,
     dbfs: bool = False,
-) -> float | np.ndarray:
+) -> float | NDArray[np.float64]:
     r"""Sound exposure level (SEL / LAE): the event level normalized to 1 second.
 
     :math:`\text{SEL} = L_{\mathrm{eq},T} + 10 \log_{10}(T / 1\,\text{s})`, the
@@ -312,7 +314,7 @@ def sel(
     duration_s = x_proc.shape[-1] / fs
     base = leq(x_proc, calibration_factor=calibration_factor, dbfs=dbfs)
     out = np.asarray(base) + 10 * np.log10(duration_s)
-    return as_float_or_array(out)
+    return as_float_if_reduced(out)
 
 
 def sound_exposure(
@@ -321,7 +323,7 @@ def sound_exposure(
     *,
     duration_hours: float | None = None,
     calibration_factor: float | None = None,
-) -> float | np.ndarray:
+) -> float | NDArray[np.float64]:
     """A-weighted sound exposure E in pascal-squared hours (IEC 61252, 3.1).
 
     The time integral of the squared A-weighted sound pressure. By default
@@ -357,7 +359,7 @@ def sound_exposure(
         duration_hours if duration_hours is not None else x_proc.shape[-1] / fs / 3600.0
     )
     out = np.asarray(mean_square * hours)
-    return as_float_or_array(out)
+    return as_float_if_reduced(out)
 
 
 def lex_8h(
@@ -366,7 +368,7 @@ def lex_8h(
     *,
     duration_hours: float | None = None,
     calibration_factor: float | None = None,
-) -> float | np.ndarray:
+) -> float | NDArray[np.float64]:
     """Normalized 8-h average sound level, LEX,8h (IEC 61252, 3.3).
 
     The daily personal noise exposure level: the steady level that, sustained
@@ -393,4 +395,4 @@ def lex_8h(
     )
     eps = np.finfo(float).eps
     out = 10 * np.log10(np.maximum(exposure, eps) / (8.0 * _REF_PRESSURE**2))
-    return as_float_or_array(out)
+    return as_float_if_reduced(out)

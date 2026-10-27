@@ -192,10 +192,22 @@ scaled to metres by `radius`.
 
 ```python
 precision_uncertainty(
-    sigma_r0: float | np.ndarray,
+    sigma_r0: float | np.floating[Any] | np.integer[Any],
     sigma_omc_db: float = 0.0,
     coverage_factor: float = 2.0,
-) -> float | np.ndarray
+) -> float
+
+precision_uncertainty(
+    sigma_r0: Sequence[float] | NDArray[Any],
+    sigma_omc_db: float = 0.0,
+    coverage_factor: float = 2.0,
+) -> NDArray[np.float64]
+
+precision_uncertainty(
+    sigma_r0: ArrayLike,
+    sigma_omc_db: float = 0.0,
+    coverage_factor: float = 2.0,
+) -> float | NDArray[np.float64]
 ```
 
 Expanded uncertainty $U = k \sigma_\mathrm{tot}$ (ISO 3745:2012).
@@ -213,7 +225,7 @@ $k = 1.6$ (95 %, one-sided, when comparing to a limit).
 | `sigma_omc_db` | Operating/mounting standard deviation `sigma_omc_db`, dB. |
 | `coverage_factor` | `k` (typically 2 or 1.6). |
 
-**Returns:** `U` in decibels, scalar or per band matching `sigma_r0`.
+**Returns:** `U` in decibels, one value or one per band as `sigma_r0` is; a `float` for a number; an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

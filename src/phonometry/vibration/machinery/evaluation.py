@@ -63,12 +63,12 @@ import functools
 import math
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 
 from ..._internal.display import RichDisplay
-from ..._internal.types import as_float_or_array
+from ..._internal.types import answer_form, as_float_or_array, one_value
 from ..._internal.validation import (
     require_choice,
     require_finite_fields,
@@ -84,6 +84,7 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
 
     from ..._i18n import Language
+    from ..._internal.types import RealScalar, RealValues
 
 __all__ = [
     "GEAR_ACCEPTANCE_HEADROOM",
@@ -211,6 +212,24 @@ class ZoneBoundaries(RichDisplay):
         return (float(self.a_b), float(self.b_c), float(self.c_d))
 
 
+@overload
+def evaluation_zone[S: RealScalar](
+    magnitude: S, boundaries: ZoneBoundaries
+) -> EvaluationZone: ...
+
+
+@overload
+def evaluation_zone[V: RealValues](
+    magnitude: V, boundaries: ZoneBoundaries
+) -> NDArray[np.str_]: ...
+
+
+@overload
+def evaluation_zone[A: ArrayLike](
+    magnitude: A, boundaries: ZoneBoundaries
+) -> EvaluationZone | NDArray[np.str_]: ...
+
+
 def evaluation_zone(
     magnitude: ArrayLike, boundaries: ZoneBoundaries
 ) -> EvaluationZone | NDArray[np.str_]:
@@ -224,11 +243,11 @@ def evaluation_zone(
         ``boundaries`` (scalar or array).
     :param boundaries: The three zone boundaries of the applicable part of
         ISO 20816.
-    :return: ``"A"``, ``"B"``, ``"C"`` or ``"D"``; a string for a scalar
-        input, otherwise an array of them.
+    :return: ``"A"``, ``"B"``, ``"C"`` or ``"D"``: a string for a number; an array of
+        them for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: If a magnitude is negative or not finite.
     """
-    return _zone_letters(_zone_index(magnitude, boundaries))
+    return _zone_letters(_zone_index(magnitude, boundaries), like=(magnitude,))
 
 
 #: The four grades in order of severity, so that the worse of two gradings is
@@ -236,6 +255,9 @@ def evaluation_zone(
 #: the most-restrictive rule of 5.2.3 is applied to indices and the letters are
 #: looked up once at the end.
 _ZONE_LETTERS = np.array(["A", "B", "C", "D"])
+
+#: The same four grades, as the vocabulary a single grade is returned in.
+_ZONES: tuple[EvaluationZone, ...] = ("A", "B", "C", "D")
 
 
 def _zone_index(magnitude: ArrayLike, boundaries: ZoneBoundaries) -> NDArray[np.intp]:
@@ -249,12 +271,62 @@ def _zone_index(magnitude: ArrayLike, boundaries: ZoneBoundaries) -> NDArray[np.
     return np.searchsorted(cuts, values, side="left")
 
 
-def _zone_letters(index: NDArray[np.intp]) -> EvaluationZone | NDArray[np.str_]:
-    """The grade or grades an index or array of them stands for."""
-    zones = _ZONE_LETTERS[index]
-    # Indexing with a 0-d index yields a numpy string scalar, not a 0-d array,
-    # so it is converted rather than indexed.
-    return str(zones) if zones.ndim == 0 else zones  # type: ignore[return-value]
+def _zone_letters(
+    index: NDArray[np.intp], *, like: tuple[ArrayLike | None, ...]
+) -> EvaluationZone | NDArray[np.str_]:
+    """The grade or grades an index or array of them stands for.
+
+    In the form the magnitudes were graded from, as
+    :func:`~phonometry._internal.types.as_float_or_array` returns a number:
+    one grade for single numbers, an array of them for a sequence or an
+    array, a zero-dimensional array included.
+    """
+    zones = np.asarray(_ZONE_LETTERS[index])
+    form = answer_form(like)
+    if form == "array":
+        return zones
+    if form == "zero-dimensional":
+        return one_value(zones)
+    return _ZONES[int(one_value(np.asarray(index)))]
+
+
+@overload
+def allowable_velocity[S: RealScalar](
+    frequency: S,
+    *,
+    constant_velocity_mm_s: float,
+    zone_factor: float = 1.0,
+    corner_low_hz: float,
+    corner_high_hz: float,
+    exponent_low: float = 1.0,
+    exponent_high: float = 1.0,
+) -> float: ...
+
+
+@overload
+def allowable_velocity[V: RealValues](
+    frequency: V,
+    *,
+    constant_velocity_mm_s: float,
+    zone_factor: float = 1.0,
+    corner_low_hz: float,
+    corner_high_hz: float,
+    exponent_low: float = 1.0,
+    exponent_high: float = 1.0,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def allowable_velocity[A: ArrayLike](
+    frequency: A,
+    *,
+    constant_velocity_mm_s: float,
+    zone_factor: float = 1.0,
+    corner_low_hz: float,
+    corner_high_hz: float,
+    exponent_low: float = 1.0,
+    exponent_high: float = 1.0,
+) -> float | NDArray[np.float64]: ...
 
 
 def allowable_velocity(
@@ -266,7 +338,7 @@ def allowable_velocity(
     corner_high_hz: float,
     exponent_low: float = 1.0,
     exponent_high: float = 1.0,
-) -> np.ndarray | float:
+) -> float | NDArray[np.float64]:
     r"""Frequency-shaped velocity criterion of Figure 9 (Formula (C.1)).
 
     Flat between the two corner frequencies and sloped outside them. The
@@ -289,8 +361,8 @@ def allowable_velocity(
         ``corner_low_hz``.
     :param exponent_low: ``k``, the slope below the lower corner.
     :param exponent_high: ``m``, the slope above the upper corner.
-    :return: The allowable r.m.s. velocity, in millimetres per second; a float
-        for a scalar frequency, otherwise an array.
+    :return: The allowable r.m.s. velocity, in millimetres per second; a ``float`` for a
+        number; an array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: If a frequency is not positive, a velocity or corner
         is not positive and finite, or the corners are not in order.
     :raises TypeError: if ``constant_velocity_mm_s``, ``corner_high_hz``,
@@ -317,7 +389,7 @@ def allowable_velocity(
     f_z = np.minimum(f, f_x)
     f_w = np.maximum(f, f_y)
     values = v_a * z * (f_z / f_x) ** exponent_low * (f_y / f_w) ** exponent_high
-    return as_float_or_array(values)
+    return as_float_or_array(values, like=(frequency,))
 
 
 @dataclass(frozen=True)
@@ -496,6 +568,46 @@ SIGNIFICANT_CHANGE_FRACTION = 0.25
 OPERATIONAL_LIMIT_HEADROOM = 1.25
 
 
+@overload
+def industrial_machine_zone[S1: RealScalar, S2: RealScalar](
+    group: Literal["group_1", "group_2"],
+    support: Literal["rigid", "flexible"],
+    *,
+    displacement_um: S1 | None = None,
+    velocity_mm_s: S2 | None = None,
+) -> EvaluationZone: ...
+
+
+@overload
+def industrial_machine_zone[V: RealValues, A2: ArrayLike](
+    group: Literal["group_1", "group_2"],
+    support: Literal["rigid", "flexible"],
+    *,
+    displacement_um: V,
+    velocity_mm_s: A2 | None = None,
+) -> NDArray[np.str_]: ...
+
+
+@overload
+def industrial_machine_zone[S1: RealScalar, V: RealValues](
+    group: Literal["group_1", "group_2"],
+    support: Literal["rigid", "flexible"],
+    *,
+    displacement_um: S1 | None = None,
+    velocity_mm_s: V,
+) -> NDArray[np.str_]: ...
+
+
+@overload
+def industrial_machine_zone[A1: ArrayLike, A2: ArrayLike](
+    group: Literal["group_1", "group_2"],
+    support: Literal["rigid", "flexible"],
+    *,
+    displacement_um: A1 | None = None,
+    velocity_mm_s: A2 | None = None,
+) -> EvaluationZone | NDArray[np.str_]: ...
+
+
 def industrial_machine_zone(
     group: Literal["group_1", "group_2"],
     support: Literal["rigid", "flexible"],
@@ -520,9 +632,9 @@ def industrial_machine_zone(
         bearing, pedestal or housing, in micrometres (scalar or array).
     :param velocity_mm_s: Measured broad-band r.m.s. velocity, in millimetres
         per second (scalar or array).
-    :return: ``"A"``, ``"B"``, ``"C"`` or ``"D"``; a string when every
-        measurement given is a scalar, otherwise an array of them, broadcast
-        over the two if both are arrays.
+    :return: ``"A"``, ``"B"``, ``"C"`` or ``"D"``: a string when every measurement given
+        is a number; an array of them, broadcast over the two, when one is a sequence or
+        an array, a zero-dimensional one included.
     :raises ValueError: If the group or support class is unknown, or neither
         measured quantity is given.
     :raises TypeError: if ``group`` or ``support`` is not a text.
@@ -549,7 +661,9 @@ def industrial_machine_zone(
     # "The severity zone which is most restrictive shall apply" (5.2.3), which
     # is the later zone of the two, so the larger index. Reduced pairwise
     # rather than over the stack, so one scalar broadcasts against one array.
-    return _zone_letters(functools.reduce(np.maximum, graded))
+    return _zone_letters(
+        functools.reduce(np.maximum, graded), like=(displacement_um, velocity_mm_s)
+    )
 
 
 @dataclass(frozen=True)
@@ -811,6 +925,24 @@ def gear_unit_zone_boundaries(
     raise ValueError(msg)
 
 
+@overload
+def gear_shaft_displacement_limit[S: RealScalar](
+    frequency: S, *, rating: float
+) -> float: ...
+
+
+@overload
+def gear_shaft_displacement_limit[V: RealValues](
+    frequency: V, *, rating: float
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def gear_shaft_displacement_limit[A: ArrayLike](
+    frequency: A, *, rating: float
+) -> float | NDArray[np.float64]: ...
+
+
 def gear_shaft_displacement_limit(
     frequency: ArrayLike, *, rating: float
 ) -> float | NDArray[np.float64]:
@@ -828,8 +960,8 @@ def gear_shaft_displacement_limit(
 
     :param frequency: Frequency ``f``, in hertz (scalar or array).
     :param rating: The displacement rating ``DR``, in micrometres.
-    :return: The allowable peak-to-peak displacement, in micrometres; a float
-        for a scalar frequency, otherwise an array.
+    :return: The allowable peak-to-peak displacement, in micrometres; a ``float`` for a
+        number; an array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: If a frequency or the rating is not positive.
     :raises TypeError: if ``rating`` is not a single number.
     """
@@ -841,7 +973,25 @@ def gear_shaft_displacement_limit(
     exponent = GEAR_DISPLACEMENT_SLOPE_DB_PER_DECADE / 20.0
     corner = GEAR_DISPLACEMENT_CORNER_HZ
     limit = value * (corner / np.maximum(freq, corner)) ** exponent
-    return float(limit) if limit.ndim == 0 else limit
+    return as_float_or_array(limit, like=(frequency,))
+
+
+@overload
+def gear_housing_velocity_limit[S: RealScalar](
+    frequency: S, *, rating: float
+) -> float: ...
+
+
+@overload
+def gear_housing_velocity_limit[V: RealValues](
+    frequency: V, *, rating: float
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def gear_housing_velocity_limit[A: ArrayLike](
+    frequency: A, *, rating: float
+) -> float | NDArray[np.float64]: ...
 
 
 def gear_housing_velocity_limit(
@@ -857,8 +1007,8 @@ def gear_housing_velocity_limit(
 
     :param frequency: Frequency ``f``, in hertz (scalar or array).
     :param rating: The velocity rating ``VR``, in millimetres per second.
-    :return: The allowable r.m.s. velocity, in millimetres per second; a float
-        for a scalar frequency, otherwise an array.
+    :return: The allowable r.m.s. velocity, in millimetres per second; a ``float`` for a
+        number; an array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: If a frequency or the rating is not positive.
     :raises TypeError: if ``rating`` is not a single number.
     """

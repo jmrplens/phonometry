@@ -70,11 +70,12 @@ no diffraction or diffuse scattering.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, overload
 
 import numpy as np
 
 from .._internal.frozen import OwnsArrays
+from .._internal.types import as_float_or_array
 from .._internal.validation import (
     require_axis_count,
     require_axis_rank,
@@ -91,6 +92,7 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
+    from .._internal.types import RealScalar, RealValues
 
 __all__ = [
     "ImageSourceResult",
@@ -730,9 +732,27 @@ def audible_image_count(max_order: int) -> int:
     return (2 * (2 * i0**3 + 3 * i0**2 + 4 * i0)) // 3
 
 
+@overload
+def reflection_density[S: RealScalar](
+    time: S, volume: float, *, speed_of_sound: float = _SPEED_OF_SOUND_M_S
+) -> float: ...
+
+
+@overload
+def reflection_density[V: RealValues](
+    time: V, volume: float, *, speed_of_sound: float = _SPEED_OF_SOUND_M_S
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def reflection_density[A: ArrayLike](
+    time: A, volume: float, *, speed_of_sound: float = _SPEED_OF_SOUND_M_S
+) -> float | NDArray[np.float64]: ...
+
+
 def reflection_density(
     time: ArrayLike, volume: float, *, speed_of_sound: float = _SPEED_OF_SOUND_M_S
-) -> np.ndarray | float:
+) -> float | NDArray[np.float64]:
     r"""Temporal density of reflections :math:`dN/dt = 4 \pi c^3 t^2 / V`.
 
     Kuttruff *Room Acoustics* 6th ed., Equation (4.6): the number of image
@@ -745,7 +765,8 @@ def reflection_density(
     :param time: Time after the direct sound, s (scalar or array).
     :param volume: Room volume ``V``, m3.
     :param speed_of_sound: Speed of sound ``c``, m/s.
-    :return: ``dN/dt`` in reflections per second.
+    :return: ``dN/dt`` in reflections per second; a ``float`` for a number; an array for
+        a sequence or an array, a zero-dimensional one included.
     :raises TypeError: if ``speed_of_sound`` or ``volume`` is not a single number.
     """
     volume = require_positive(volume, "volume")
@@ -754,4 +775,4 @@ def reflection_density(
     # Physical density is zero before the direct sound; clamp negative times
     # so the t**2 squaring does not report a spurious positive density.
     out = 4.0 * np.pi * speed_of_sound**3 * np.maximum(t, 0.0) ** 2 / volume
-    return float(out) if out.ndim == 0 else out
+    return as_float_or_array(out, like=(time,))

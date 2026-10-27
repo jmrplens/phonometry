@@ -128,7 +128,20 @@ EDT/T20/T30 fit lines.
 ## filter_bandwidth
 
 ```python
-filter_bandwidth(center: ArrayLike, fraction: int = 1) -> np.ndarray | float
+filter_bandwidth(
+    center: float | np.floating[Any] | np.integer[Any],
+    fraction: int = 1,
+) -> float
+
+filter_bandwidth(
+    center: Sequence[float] | NDArray[Any],
+    fraction: int = 1,
+) -> NDArray[np.float64]
+
+filter_bandwidth(
+    center: ArrayLike,
+    fraction: int = 1,
+) -> float | NDArray[np.float64]
 ```
 
 Bandwidth of a fractional-octave filter (ISO 3382-1:2009, 7.1).
@@ -145,7 +158,7 @@ those two figures sit against the exact IEC 61260 band edges.
 | `center` | Mid-band frequency, in Hz. |
 | `fraction` | Bandwidth fraction: 1 for an octave filter, 3 for a one-third-octave one. |
 
-**Returns:** The bandwidth in Hz, in the shape of `center`.
+**Returns:** The bandwidth in Hz, in the shape of `center`; a `float` for a number; an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -189,9 +202,19 @@ MIN_DETECTOR_MULTIPLE = 2.0
 
 ```python
 min_reliable_reverberation_time(
+    bandwidth: float | np.floating[Any] | np.integer[Any],
+    detector_time: float = 0.0,
+) -> float
+
+min_reliable_reverberation_time(
+    bandwidth: Sequence[float] | NDArray[Any],
+    detector_time: float = 0.0,
+) -> NDArray[np.float64]
+
+min_reliable_reverberation_time(
     bandwidth: ArrayLike,
     detector_time: float = 0.0,
-) -> np.ndarray | float
+) -> float | NDArray[np.float64]
 ```
 
 Shortest decay time a forward analysis can be trusted with (7.3).
@@ -224,7 +247,7 @@ filtering is time-reversed, which is what
 | `bandwidth` | Bandwidth of the analysis filter, in Hz; [`filter_bandwidth`](/phonometry/reference/api/rooms/acoustics/#filter_bandwidth) gives the clause's own figure for it. |
 | `detector_time` | Reverberation time of the averaging detector, in seconds. Zero, the default, for an analysis with no detector. |
 
-**Returns:** The exclusive lower bound on a reliable reverberation time, in seconds, of the shape of `bandwidth`.
+**Returns:** The exclusive lower bound on a reliable reverberation time, in seconds, of the shape of `bandwidth`; a `float` for a number; an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -243,7 +266,7 @@ reverberation_time_standard_deviation(
     evaluation_range: float = 30.0,
     decays: ArrayLike = 10,
     positions: ArrayLike = 1,
-) -> np.ndarray | float
+) -> float | NDArray[np.float64]
 ```
 
 Standard deviation of a measured reverberation time (7.1).
@@ -276,7 +299,7 @@ larger absolute uncertainty and a smaller relative one.
 | `decays` | Decays measured in each position, the `n` of the equations. Broadcast against the rest. |
 | `positions` | Independent measurement positions, the `N`: source and receiver combinations, not receivers alone. Broadcast against the rest, so a sweep over survey sizes is one call. |
 
-**Returns:** The standard deviation in seconds, of the broadcast shape.
+**Returns:** The standard deviation in seconds; a `float` when the four arguments that broadcast are all numbers; an array of their broadcast shape when one is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

@@ -147,7 +147,7 @@ directivity_energy_average(
     levels: ArrayLike,
     *,
     axis: int = -1,
-) -> NDArray[np.float64] | float
+) -> float | NDArray[np.float64]
 ```
 
 Average a free-field measurement over bearings around the source.
@@ -302,9 +302,19 @@ EARLY_SUPPORT_WINDOW_S = (0.02, 0.1)
 
 ```python
 free_field_reference_level(
+    level: float | np.floating[Any] | np.integer[Any],
+    distance: float,
+) -> float
+
+free_field_reference_level(
+    level: Sequence[float] | NDArray[Any],
+    distance: float,
+) -> NDArray[np.float64]
+
+free_field_reference_level(
     level: ArrayLike,
     distance: float,
-) -> NDArray[np.float64] | float
+) -> float | NDArray[np.float64]
 ```
 
 Free-field level at 10 m from one measured at another distance.
@@ -334,7 +344,7 @@ its docstring says what the printed step does and does not determine.
 | `level` | The level measured at `distance`, in dB. Any shape. |
 | `distance` | Source-to-microphone distance of that measurement, in metres. |
 
-**Returns:** The level referred to 10 m, in dB, in the shape of `level`.
+**Returns:** The level referred to 10 m, in dB, in the shape of `level`; a `float` for a number; an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -749,7 +759,15 @@ MID_FREQUENCY_THIRD_OCTAVES_HZ = (400.0, 500.0, 630.0, 800.0, 1000.0, 1250.0)
 ## min_receiver_positions
 
 ```python
-min_receiver_positions(seats: ArrayLike) -> NDArray[np.float64] | float
+min_receiver_positions(
+    seats: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+min_receiver_positions(
+    seats: Sequence[float] | NDArray[Any],
+) -> NDArray[np.float64]
+
+min_receiver_positions(seats: ArrayLike) -> float | NDArray[np.float64]
 ```
 
 Fewest microphone positions a hall of a given size wants (Table A.2).
@@ -778,7 +796,7 @@ as balconies and under-balcony areas will need more than this.
 | :--- | :--- |
 | `seats` | The number of seats in the hall. |
 
-**Returns:** The minimum number of positions, not rounded, clamped to the 6 to 10 the table and A.4 between them authorise.
+**Returns:** The minimum number of positions, not rounded, clamped to the 6 to 10 the table and A.4 between them authorise; a `float` for a number; an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -904,9 +922,24 @@ REFERENCE_DISTANCE_M = 10.0
 
 ```python
 reverberation_room_reference_level(
+    reverberation_room_level: float | np.floating[Any] | np.integer[Any],
+    absorption_area: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+reverberation_room_reference_level(
+    reverberation_room_level: Sequence[float] | NDArray[Any],
+    absorption_area: ArrayLike,
+) -> NDArray[np.float64]
+
+reverberation_room_reference_level(
+    reverberation_room_level: float | np.floating[Any] | np.integer[Any],
+    absorption_area: Sequence[float] | NDArray[Any],
+) -> NDArray[np.float64]
+
+reverberation_room_reference_level(
     reverberation_room_level: ArrayLike,
     absorption_area: ArrayLike,
-) -> NDArray[np.float64] | float
+) -> float | NDArray[np.float64]
 ```
 
 Free-field reference level at 10 m from a reverberation-room measurement.
@@ -947,7 +980,7 @@ reproduces the method rather than quietly improving it.
 | `reverberation_room_level` | Spatial-average sound pressure exposure level measured in the reverberation room, in dB. The standard calls this $L_{pE}$ too, which is the same symbol it gave the level measured in the hall under test a page earlier; substituting (A.5) into (A.1) as printed would cancel the hall out of G altogether. The two roles get different names here, and `docs/ERRATA.md` carries the rest. |
 | `absorption_area` | Equivalent sound absorption area of that room, in m², broadcast against `reverberation_room_level`. |
 
-**Returns:** The reference exposure level at 10 m, in dB.
+**Returns:** The reference exposure level at 10 m, in dB; a `float` when the level and the absorption area are both numbers; an array of their broadcast shape when one is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -1005,9 +1038,17 @@ sound_pressure_exposure_level(
     ir: Signal | list[float] | NDArray[np.float64],
     fs: int | None = None,
     *,
-    limits: tuple[float, float] | None = (125.0, 4000.0),
+    limits: None,
     fraction: int = 1,
-) -> NDArray[np.float64] | float
+) -> float
+
+sound_pressure_exposure_level(
+    ir: Signal | list[float] | NDArray[np.float64],
+    fs: int | None = None,
+    *,
+    limits: tuple[float, float] = (125.0, 4000.0),
+    fraction: int = 1,
+) -> NDArray[np.float64]
 ```
 
 Sound pressure exposure level of an impulse response, per band.
@@ -1113,9 +1154,24 @@ a calibrated source where every other measure in Table A.1 does not.
 
 ```python
 sound_strength_from_power(
+    pressure_level: float | np.floating[Any] | np.integer[Any],
+    power_level: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+sound_strength_from_power(
+    pressure_level: Sequence[float] | NDArray[Any],
+    power_level: ArrayLike,
+) -> NDArray[np.float64]
+
+sound_strength_from_power(
+    pressure_level: float | np.floating[Any] | np.integer[Any],
+    power_level: Sequence[float] | NDArray[Any],
+) -> NDArray[np.float64]
+
+sound_strength_from_power(
     pressure_level: ArrayLike,
     power_level: ArrayLike,
-) -> NDArray[np.float64] | float
+) -> float | NDArray[np.float64]
 ```
 
 Sound strength from the source's sound power level.
@@ -1140,7 +1196,7 @@ ISO 3741, which the library implements in
 | `pressure_level` | Sound pressure level at the measurement point in the room under test, in dB. |
 | `power_level` | Sound power level of the source, in dB, broadcast against `pressure_level`. |
 
-**Returns:** The sound strength G, in dB.
+**Returns:** The sound strength G, in dB; a `float` when the two levels are numbers; an array of their broadcast shape when one is a sequence or an array, a zero-dimensional one included.
 
 ## SOUND_STRENGTH_POWER_OFFSET_DB
 

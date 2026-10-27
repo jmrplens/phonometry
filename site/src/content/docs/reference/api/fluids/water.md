@@ -189,21 +189,48 @@ a depth.
 
 ```python
 sea_water_sound_speed(
-    temperature_c: float,
-    salinity_psu: float,
-    depth_m: float,
+    temperature_c: float | np.floating[Any] | np.integer[Any],
+    salinity_psu: float | np.floating[Any] | np.integer[Any],
+    depth_m: float | np.floating[Any] | np.integer[Any],
     *,
-    model: Literal['unesco', 'del_grosso', 'mackenzie', 'medwin'] = ...,
-    latitude_deg: float = ...,
+    model: Literal['unesco', 'del_grosso', 'mackenzie', 'medwin'] = 'unesco',
+    latitude_deg: float = 45.0,
 ) -> float
+
+sea_water_sound_speed(
+    temperature_c: Sequence[float] | NDArray[Any],
+    salinity_psu: ArrayLike,
+    depth_m: ArrayLike,
+    *,
+    model: Literal['unesco', 'del_grosso', 'mackenzie', 'medwin'] = 'unesco',
+    latitude_deg: float = 45.0,
+) -> NDArray[np.float64]
+
+sea_water_sound_speed(
+    temperature_c: float | np.floating[Any] | np.integer[Any],
+    salinity_psu: Sequence[float] | NDArray[Any],
+    depth_m: ArrayLike,
+    *,
+    model: Literal['unesco', 'del_grosso', 'mackenzie', 'medwin'] = 'unesco',
+    latitude_deg: float = 45.0,
+) -> NDArray[np.float64]
+
+sea_water_sound_speed(
+    temperature_c: float | np.floating[Any] | np.integer[Any],
+    salinity_psu: float | np.floating[Any] | np.integer[Any],
+    depth_m: Sequence[float] | NDArray[Any],
+    *,
+    model: Literal['unesco', 'del_grosso', 'mackenzie', 'medwin'] = 'unesco',
+    latitude_deg: float = 45.0,
+) -> NDArray[np.float64]
 
 sea_water_sound_speed(
     temperature_c: ArrayLike,
     salinity_psu: ArrayLike,
     depth_m: ArrayLike,
     *,
-    model: Literal['unesco', 'del_grosso', 'mackenzie', 'medwin'] = ...,
-    latitude_deg: float = ...,
+    model: Literal['unesco', 'del_grosso', 'mackenzie', 'medwin'] = 'unesco',
+    latitude_deg: float = 45.0,
 ) -> float | NDArray[np.float64]
 ```
 
@@ -219,7 +246,7 @@ Speed of sound in sea water, in metres per second.
 | `model` | `"unesco"` (default), `"del_grosso"`, `"mackenzie"` or `"medwin"`. |
 | `latitude_deg` | Latitude for the depth→pressure conversion, in degrees (used by `"unesco"` and `"del_grosso"`; default 45°). |
 
-**Returns:** The sound speed `c`, in m/s.
+**Returns:** The sound speed `c`, in m/s; a `float` when temperature, salinity and depth are all numbers; an array of their broadcast shape when one is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

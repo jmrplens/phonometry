@@ -77,7 +77,7 @@ import math
 import warnings
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 
@@ -113,8 +113,10 @@ if TYPE_CHECKING:
     from collections.abc import Sequence
 
     from matplotlib.axes import Axes
+    from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
+    from .._internal.types import RealScalar, RealValues
     from .._report.metadata import ReportMetadata
     from .declaration import DeclarationForm, NoiseEmissionDeclaration
 
@@ -628,7 +630,7 @@ def background_noise_correction(
 
 
 def _require_room_pair(
-    first: float | np.ndarray | None,
+    first: ArrayLike | None,
     second: float | None,
     first_name: str,
     second_name: str,
@@ -657,11 +659,11 @@ def _require_room_pair(
 
 
 def _room_absorption_area(
-    reverberation_time: float | np.ndarray | None,
+    reverberation_time: ArrayLike | None,
     volume: float | None,
-    mean_absorption_coefficient: float | np.ndarray | None,
+    mean_absorption_coefficient: ArrayLike | None,
     room_surface: float | None,
-) -> float | np.ndarray | None:
+) -> NDArray[np.float64] | None:
     """Equivalent absorption area ``A`` from the room data, or ``None``.
 
     ``None`` means no room data was supplied at all, i.e. a free field.
@@ -694,25 +696,85 @@ def _room_absorption_area(
         if volume <= 0 or np.any(t <= 0.0):
             msg = "reverberation_time and volume must be > 0."
             raise ValueError(msg)
-        return 0.16 * volume / t
+        return np.asarray(0.16 * volume / t, dtype=np.float64)
     if mean_absorption_coefficient is not None and room_surface is not None:
         alpha = np.asarray(mean_absorption_coefficient, dtype=np.float64)
         if room_surface <= 0 or np.any(alpha <= 0.0) or np.any(alpha > 1.0):
             msg = "mean_absorption_coefficient must be in (0, 1] and room_surface > 0."
             raise ValueError(msg)
-        return alpha * room_surface
+        return np.asarray(alpha * room_surface, dtype=np.float64)
     return None
+
+
+@overload
+def environmental_correction[S1: RealScalar, S2: RealScalar, S3: RealScalar](
+    surface_area: float,
+    *,
+    absorption_area: S1 | None = None,
+    reverberation_time: S2 | None = None,
+    volume: float | None = None,
+    mean_absorption_coefficient: S3 | None = None,
+    room_surface: float | None = None,
+) -> float: ...
+
+
+@overload
+def environmental_correction[V: RealValues, A2: ArrayLike, A3: ArrayLike](
+    surface_area: float,
+    *,
+    absorption_area: V,
+    reverberation_time: A2 | None = None,
+    volume: float | None = None,
+    mean_absorption_coefficient: A3 | None = None,
+    room_surface: float | None = None,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def environmental_correction[S1: RealScalar, V: RealValues, A3: ArrayLike](
+    surface_area: float,
+    *,
+    absorption_area: S1 | None = None,
+    reverberation_time: V,
+    volume: float | None = None,
+    mean_absorption_coefficient: A3 | None = None,
+    room_surface: float | None = None,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def environmental_correction[S1: RealScalar, S2: RealScalar, V: RealValues](
+    surface_area: float,
+    *,
+    absorption_area: S1 | None = None,
+    reverberation_time: S2 | None = None,
+    volume: float | None = None,
+    mean_absorption_coefficient: V,
+    room_surface: float | None = None,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def environmental_correction[A1: ArrayLike, A2: ArrayLike, A3: ArrayLike](
+    surface_area: float,
+    *,
+    absorption_area: A1 | None = None,
+    reverberation_time: A2 | None = None,
+    volume: float | None = None,
+    mean_absorption_coefficient: A3 | None = None,
+    room_surface: float | None = None,
+) -> float | NDArray[np.float64]: ...
 
 
 def environmental_correction(
     surface_area: float,
     *,
-    absorption_area: float | np.ndarray | None = None,
-    reverberation_time: float | np.ndarray | None = None,
+    absorption_area: ArrayLike | None = None,
+    reverberation_time: ArrayLike | None = None,
     volume: float | None = None,
-    mean_absorption_coefficient: float | np.ndarray | None = None,
+    mean_absorption_coefficient: ArrayLike | None = None,
     room_surface: float | None = None,
-) -> float | np.ndarray:
+) -> float | NDArray[np.float64]:
     r"""Environmental correction ``K2`` (ISO 3744:2010 Eq. A.2).
 
     :math:`K_2 = 10 \log_{10}\left( 1 + 4 S / A \right)` where ``A`` is the
@@ -740,24 +802,27 @@ def environmental_correction(
     :param mean_absorption_coefficient: ``alpha`` in (0, 1], scalar or per band,
         with ``room_surface`` (Eq. A.7).
     :param room_surface: Room boundary area ``Sv`` (m^2), with ``alpha``.
-    :return: ``K2`` in decibels; a scalar for scalar inputs, otherwise an array
-        per band.
+    :return: ``K2`` in decibels, ``0.0`` without room data; a ``float`` when the room
+        data given are all numbers; an array of their broadcast shape when one is a
+        sequence or an array, a zero-dimensional one included.
     :raises TypeError: if ``room_surface``, ``surface_area`` or ``volume`` is not a
         single number.
     """
     surface_area = require_positive(surface_area, "surface_area")
-    if absorption_area is None:
-        absorption_area = _room_absorption_area(
+    given = (absorption_area, reverberation_time, mean_absorption_coefficient)
+    area = absorption_area
+    if area is None:
+        area = _room_absorption_area(
             reverberation_time, volume, mean_absorption_coefficient, room_surface
         )
-        if absorption_area is None:
+        if area is None:
             return 0.0  # no room data at all: the field is treated as free
-    a = np.asarray(absorption_area, dtype=np.float64)
+    a = np.asarray(area, dtype=np.float64)
     if np.any(a <= 0.0):
         msg = "absorption_area must be positive."
         raise ValueError(msg)
     k2 = 10.0 * np.log10(1.0 + 4.0 * surface_area / a)
-    return as_float_or_array(k2)
+    return as_float_or_array(k2, like=given)
 
 
 def _hemisphere_position_table(

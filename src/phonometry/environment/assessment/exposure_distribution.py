@@ -78,11 +78,12 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 
 from ..._internal.frozen import OwnsArrays, read_only
+from ..._internal.types import as_float_or_array
 from ..._internal.validation import (
     _as_float64,
     require_count,
@@ -95,6 +96,7 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
 
     from ..._i18n import Language
+    from ..._internal.types import RealScalar, RealValues
 
 __all__ = [
     "SELDistribution",
@@ -499,6 +501,15 @@ class SELDistribution(OwnsArrays):
             raise ValueError(msg)
         require_positive(self.sigma_db, "sigma_db")
 
+    @overload
+    def class_density[S: RealScalar](self, levels: S) -> float: ...
+
+    @overload
+    def class_density[V: RealValues](self, levels: V) -> NDArray[np.float64]: ...
+
+    @overload
+    def class_density[A: ArrayLike](self, levels: A) -> float | NDArray[np.float64]: ...
+
     def class_density(self, levels: ArrayLike) -> float | NDArray[np.float64]:
         r"""The class density :math:`\rho(x)` before the turbulent spread
         (Equations (15), (16)), in 1/dB.
@@ -508,14 +519,15 @@ class SELDistribution(OwnsArrays):
         neighbour, it is zero.
 
         :param levels: Level or levels ``x``, in dB.
-        :return: :math:`\rho(x)`, a float for a scalar ``x``.
+        :return: :math:`\rho(x)`; a ``float`` for a number; an array for a sequence or
+            an array, a zero-dimensional one included.
         """
         x = np.asarray(levels, dtype=np.float64)
         inside = (x[..., None] > self.lower_bounds_db) & (
             x[..., None] < self.upper_bounds_db
         )
         value = np.sum(np.where(inside, self.class_densities_per_db, 0.0), axis=-1)
-        return float(value) if value.ndim == 0 else value
+        return as_float_or_array(value, like=(levels,))
 
     def _spread(self) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
         r"""Means and weights of the ``M * subclasses`` Gaussian subclasses.
@@ -527,11 +539,21 @@ class SELDistribution(OwnsArrays):
         weights = np.repeat(self.probabilities / self.n_subclasses, self.n_subclasses)
         return means, weights
 
+    @overload
+    def density[S: RealScalar](self, levels: S) -> float: ...
+
+    @overload
+    def density[V: RealValues](self, levels: V) -> NDArray[np.float64]: ...
+
+    @overload
+    def density[A: ArrayLike](self, levels: A) -> float | NDArray[np.float64]: ...
+
     def density(self, levels: ArrayLike) -> float | NDArray[np.float64]:
         r"""The continuous density :math:`\rho^{*}(x)` (Equations (21), (23)), in 1/dB.
 
         :param levels: Level or levels ``x``, in dB.
-        :return: :math:`\rho^{*}(x)`, a float for a scalar ``x``.
+        :return: :math:`\rho^{*}(x)`; a ``float`` for a number; an array for a sequence
+            or an array, a zero-dimensional one included.
         """
         means, weights = self._spread()
         x = np.asarray(levels, dtype=np.float64)
@@ -539,7 +561,16 @@ class SELDistribution(OwnsArrays):
         value = np.sum(weights * np.exp(-0.5 * z * z), axis=-1) / (
             self.sigma_db * math.sqrt(2.0 * math.pi)
         )
-        return float(value) if value.ndim == 0 else value
+        return as_float_or_array(value, like=(levels,))
+
+    @overload
+    def exceedance[S: RealScalar](self, levels: S) -> float: ...
+
+    @overload
+    def exceedance[V: RealValues](self, levels: V) -> NDArray[np.float64]: ...
+
+    @overload
+    def exceedance[A: ArrayLike](self, levels: A) -> float | NDArray[np.float64]: ...
 
     def exceedance(self, levels: ArrayLike) -> float | NDArray[np.float64]:
         r"""Probability that the level exceeds ``x`` (Equation (24)).
@@ -554,14 +585,26 @@ class SELDistribution(OwnsArrays):
         falls.
 
         :param levels: Level or levels ``x``, in dB.
-        :return: The probability, a float for a scalar ``x``.
+        :return: The probability; a ``float`` for a number; an array for a sequence or
+            an array, a zero-dimensional one included.
         """
         from scipy.special import ndtr
 
         means, weights = self._spread()
         x = np.asarray(levels, dtype=np.float64)
         value = np.sum(weights * ndtr((means - x[..., None]) / self.sigma_db), axis=-1)
-        return float(value) if value.ndim == 0 else value
+        return as_float_or_array(value, like=(levels,))
+
+    @overload
+    def exceedance_level[S: RealScalar](self, percent: S) -> float: ...
+
+    @overload
+    def exceedance_level[V: RealValues](self, percent: V) -> NDArray[np.float64]: ...
+
+    @overload
+    def exceedance_level[A: ArrayLike](
+        self, percent: A
+    ) -> float | NDArray[np.float64]: ...
 
     def exceedance_level(self, percent: ArrayLike) -> float | NDArray[np.float64]:
         r"""The ``n``-percent exceedance level :math:`L_{E,\mathrm{w},n}` (Equation (25)).
@@ -573,7 +616,8 @@ class SELDistribution(OwnsArrays):
 
         :param percent: ``n``, in per cent, strictly between 0 and 100 times the
             total probability of the classes.
-        :return: The level, in dB, a float for a scalar ``percent``.
+        :return: The level, in dB; a ``float`` for a number; an array for a sequence or
+            an array, a zero-dimensional one included.
         :raises ValueError: for a percentage outside that range.
         """
         from scipy.optimize import brentq
@@ -612,9 +656,7 @@ class SELDistribution(OwnsArrays):
             )
 
         flat = np.array([solve(float(p)) for p in np.ravel(target)])
-        if n.ndim == 0:
-            return float(flat[0])
-        return flat.reshape(n.shape)
+        return as_float_or_array(flat.reshape(n.shape), like=(percent,))
 
     def plot(
         self,

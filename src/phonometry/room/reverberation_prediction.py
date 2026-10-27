@@ -276,7 +276,7 @@ def _eyring_absorption(
 
 def _reverberation_time(
     volume: float, absorption: NDArray[np.float64], speed_of_sound: float
-) -> np.ndarray | float:
+) -> NDArray[np.float64]:
     r""":math:`T = 24 \ln 10 / c_0 \cdot V / \text{absorption}`, with a
     positive-absorption guard.
     """
@@ -286,22 +286,34 @@ def _reverberation_time(
             "has no finite reverberation time."
         )
         raise ValueError(msg)
-    t = _SABINE_NUMERATOR / speed_of_sound * volume / absorption
-    return as_float_or_array(t)
+    return np.asarray(
+        _SABINE_NUMERATOR / speed_of_sound * volume / absorption, dtype=np.float64
+    )
 
 
-def mean_absorption(surfaces: Sequence[Surface]) -> np.ndarray | float:
+def _coefficients(surfaces: Sequence[Surface]) -> tuple[ArrayLike, ...]:
+    """The absorption coefficient of every surface, as the caller gave it.
+
+    What decides whether a prediction is one number or one per band, handed
+    to :func:`~phonometry._internal.types.as_float_or_array` as ``like``.
+    """
+    return tuple(alpha for _, alpha in surfaces)
+
+
+def mean_absorption(surfaces: Sequence[Surface]) -> float | NDArray[np.float64]:
     r"""Area-weighted mean absorption coefficient
     :math:`\bar{\alpha} = A / S`.
 
     :param surfaces: Sequence of ``(area, absorption_coefficient)`` pairs; each
         coefficient a scalar or a per-band array.
-    :return: The mean absorption
+    :return: The mean absorption :math:`\sum_i S_i \alpha_i / \sum_i S_i`; a ``float``
+        when the coefficients are all numbers, otherwise a per-band array, a
+        zero-dimensional one when one of them is a zero-dimensional array.
         :math:`\sum_i S_i \alpha_i / \sum_i S_i`; a float for
         scalar coefficients, otherwise a per-band array.
     """
     total_area, absorption_area, _ = _accumulate_surfaces(surfaces)
-    return as_float_or_array(absorption_area / total_area)
+    return as_float_or_array(absorption_area / total_area, like=_coefficients(surfaces))
 
 
 # ---------------------------------------------------------------------------
@@ -315,7 +327,7 @@ def sabine_reverberation_time(
     *,
     air_attenuation_per_m: ArrayLike = 0.0,
     speed_of_sound: float = _SPEED_OF_SOUND_M_S,
-) -> np.ndarray | float:
+) -> float | NDArray[np.float64]:
     r"""Sabine reverberation time :math:`T = k V / (A + 4 m V)`.
 
     :math:`A = \sum_i S_i \alpha_i` is finite for any non-negative
@@ -336,15 +348,19 @@ def sabine_reverberation_time(
         (air absorption neglected).
     :param speed_of_sound: Speed of sound ``c0``, m/s (default
         343 m/s, dry air at 20 °C, giving the factor ``0.161``).
-    :return: The reverberation time ``T``, s; a float for scalar inputs,
-        otherwise a per-band array.
+    :return: The reverberation time ``T``, s; a ``float`` when the coefficients and the
+        air attenuation are all numbers, otherwise a per-band array, a zero-dimensional
+        one when one of them is a zero-dimensional array.
     :raises TypeError: if ``speed_of_sound`` or ``volume`` is not a single number.
     """
     volume = require_positive(volume, "volume")
     speed_of_sound = require_positive(speed_of_sound, "speed_of_sound")
     _, absorption_area, _ = _accumulate_surfaces(surfaces)
     absorption = _add_air(absorption_area, air_attenuation_per_m, volume)
-    return _reverberation_time(volume, absorption, speed_of_sound)
+    return as_float_or_array(
+        _reverberation_time(volume, absorption, speed_of_sound),
+        like=(*_coefficients(surfaces), air_attenuation_per_m),
+    )
 
 
 def eyring_reverberation_time(
@@ -353,7 +369,7 @@ def eyring_reverberation_time(
     *,
     air_attenuation_per_m: ArrayLike = 0.0,
     speed_of_sound: float = _SPEED_OF_SOUND_M_S,
-) -> np.ndarray | float:
+) -> float | NDArray[np.float64]:
     r"""Eyring (Norris-Eyring) reverberation time.
 
     .. math::
@@ -373,7 +389,9 @@ def eyring_reverberation_time(
     :param surfaces: Sequence of ``(area, absorption_coefficient)`` pairs.
     :param air_attenuation_per_m: Air power-attenuation coefficient ``m`` (1/m).
     :param speed_of_sound: Speed of sound ``c0``, m/s.
-    :return: The reverberation time ``T``, s.
+    :return: The reverberation time ``T``, s; a ``float`` when the coefficients and the
+        air attenuation are all numbers, otherwise a per-band array, a zero-dimensional
+        one when one of them is a zero-dimensional array.
     :raises TypeError: if ``speed_of_sound`` or ``volume`` is not a single number.
     """
     volume = require_positive(volume, "volume")
@@ -383,7 +401,10 @@ def eyring_reverberation_time(
     absorption = _add_air(
         _eyring_absorption(total_area, mean), air_attenuation_per_m, volume
     )
-    return _reverberation_time(volume, absorption, speed_of_sound)
+    return as_float_or_array(
+        _reverberation_time(volume, absorption, speed_of_sound),
+        like=(*_coefficients(surfaces), air_attenuation_per_m),
+    )
 
 
 def millington_sette_reverberation_time(
@@ -392,7 +413,7 @@ def millington_sette_reverberation_time(
     *,
     air_attenuation_per_m: ArrayLike = 0.0,
     speed_of_sound: float = _SPEED_OF_SOUND_M_S,
-) -> np.ndarray | float:
+) -> float | NDArray[np.float64]:
     r"""Millington-Sette reverberation time.
 
     .. math::
@@ -412,14 +433,19 @@ def millington_sette_reverberation_time(
     :param surfaces: Sequence of ``(area, absorption_coefficient)`` pairs.
     :param air_attenuation_per_m: Air power-attenuation coefficient ``m`` (1/m).
     :param speed_of_sound: Speed of sound ``c0``, m/s.
-    :return: The reverberation time ``T``, s.
+    :return: The reverberation time ``T``, s; a ``float`` when the coefficients and the
+        air attenuation are all numbers, otherwise a per-band array, a zero-dimensional
+        one when one of them is a zero-dimensional array.
     :raises TypeError: if ``speed_of_sound`` or ``volume`` is not a single number.
     """
     volume = require_positive(volume, "volume")
     speed_of_sound = require_positive(speed_of_sound, "speed_of_sound")
     _, _, pairs = _accumulate_surfaces(surfaces)
     absorption = _add_air(_millington_absorption(pairs), air_attenuation_per_m, volume)
-    return _reverberation_time(volume, absorption, speed_of_sound)
+    return as_float_or_array(
+        _reverberation_time(volume, absorption, speed_of_sound),
+        like=(*_coefficients(surfaces), air_attenuation_per_m),
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -453,7 +479,7 @@ def _axial_eyring_times(
     absorptions: Sequence[ArrayLike],
     air_attenuation_per_m: ArrayLike,
     speed_of_sound: float,
-) -> tuple[NDArray[np.float64], list[np.ndarray | float]]:
+) -> tuple[NDArray[np.float64], list[NDArray[np.float64]]]:
     """Per-axis Eyring reverberation times and their area weights ``S_i / S``.
 
     Each axial time uses the *whole* room surface ``S`` and the mean absorption
@@ -492,7 +518,7 @@ def _axial_eyring_times(
     _broadcast_or_raise(
         [m.shape for m in means] + [air.shape], "axis absorptions and air attenuation"
     )
-    times: list[np.ndarray | float] = []
+    times: list[NDArray[np.float64]] = []
     for mean in means:
         absorption = _eyring_absorption(total_area, mean) + air
         times.append(_reverberation_time(volume, absorption, speed_of_sound))
@@ -506,7 +532,7 @@ def fitzroy_reverberation_time(
     *,
     air_attenuation_per_m: ArrayLike = 0.0,
     speed_of_sound: float = _SPEED_OF_SOUND_M_S,
-) -> np.ndarray | float:
+) -> float | NDArray[np.float64]:
     r"""Fitzroy reverberation time -- area-weighted arithmetic mean of axial times.
 
     :math:`T = \sum_i (S_i / S)\, T_i` with :math:`T_i` the Eyring time of
@@ -524,7 +550,9 @@ def fitzroy_reverberation_time(
         array.
     :param air_attenuation_per_m: Air power-attenuation coefficient ``m`` (1/m).
     :param speed_of_sound: Speed of sound ``c0``, m/s.
-    :return: The reverberation time ``T``, s.
+    :return: The reverberation time ``T``, s; a ``float`` when the three absorptions and
+        the air attenuation are all numbers, otherwise a per-band array, a
+        zero-dimensional one when one of them is a zero-dimensional array.
     :raises TypeError: if ``speed_of_sound`` is not a single number.
     """
     weights, times = _axial_eyring_times(
@@ -533,7 +561,7 @@ def fitzroy_reverberation_time(
     total = sum(
         w * np.asarray(t, dtype=np.float64) for w, t in zip(weights, times, strict=True)
     )
-    return as_float_or_array(total)
+    return as_float_or_array(total, like=(*absorptions, air_attenuation_per_m))
 
 
 def arau_puchades_reverberation_time(
@@ -542,7 +570,7 @@ def arau_puchades_reverberation_time(
     *,
     air_attenuation_per_m: ArrayLike = 0.0,
     speed_of_sound: float = _SPEED_OF_SOUND_M_S,
-) -> np.ndarray | float:
+) -> float | NDArray[np.float64]:
     r"""Arau-Puchades reverberation time -- area-weighted geometric mean of axial times.
 
     :math:`T = \prod_i T_i^{S_i / S}` with :math:`T_i` the Eyring time of the
@@ -558,7 +586,9 @@ def arau_puchades_reverberation_time(
         array.
     :param air_attenuation_per_m: Air power-attenuation coefficient ``m`` (1/m).
     :param speed_of_sound: Speed of sound ``c0``, m/s.
-    :return: The reverberation time ``T``, s.
+    :return: The reverberation time ``T``, s; a ``float`` when the three absorptions and
+        the air attenuation are all numbers, otherwise a per-band array, a
+        zero-dimensional one when one of them is a zero-dimensional array.
     :raises TypeError: if ``speed_of_sound`` is not a single number.
     """
     weights, times = _axial_eyring_times(
@@ -568,7 +598,7 @@ def arau_puchades_reverberation_time(
         w * np.log(np.asarray(t, dtype=np.float64))
         for w, t in zip(weights, times, strict=True)
     )
-    return as_float_or_array(np.exp(log_t))
+    return as_float_or_array(np.exp(log_t), like=(*absorptions, air_attenuation_per_m))
 
 
 # ---------------------------------------------------------------------------

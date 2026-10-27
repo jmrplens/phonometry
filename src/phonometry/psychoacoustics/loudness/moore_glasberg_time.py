@@ -58,7 +58,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 
@@ -68,11 +68,13 @@ if TYPE_CHECKING:
     from collections.abc import Sequence
 
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
     from ...io._signal import Signal
 
 from ..._internal.frozen import OwnsArrays
+from ..._internal.types import as_float_or_array
 from ..._internal.validation import require_ranks, require_same_length, require_scalar
 from ...metrology.reference_values import REFERENCE_VALUES
 from .moore_glasberg import (
@@ -594,15 +596,23 @@ def _short_term_loudness(stsl_l: np.ndarray, stsl_r: np.ndarray) -> tuple[float,
     return s_left, s_right
 
 
-def _loudness_level(loudness: np.ndarray | float) -> np.ndarray | float:
+@overload
+def _loudness_level(loudness: float) -> float: ...
+
+
+@overload
+def _loudness_level(loudness: NDArray[np.float64]) -> NDArray[np.float64]: ...
+
+
+def _loudness_level(
+    loudness: NDArray[np.float64] | float,
+) -> NDArray[np.float64] | float:
     """Loudness level L_N in phon from loudness N in sone (invert Table 5)."""
     values = np.asarray(loudness, dtype=np.float64)
     out = np.zeros_like(values)
     positive = values > 0.0
     out[positive] = np.interp(np.log10(values[positive]), _LOG_T5_SONE, _T5_PHON)
-    if np.isscalar(loudness) or values.ndim == 0:
-        return float(out)
-    return out
+    return as_float_or_array(out, like=(loudness,))
 
 
 # ---------------------------------------------------------------------------

@@ -3478,6 +3478,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- **A function of a number or an array of them returns an array for an array,
+  a zero-dimensional one included, and says so in its signature.** Ninety
+  public functions and methods such as `room.room_constant`,
+  `room.critical_distance`,
+  `fluids.sea_water_sound_speed` and `vibration.evaluation_zone` returned a
+  `float` (or a grade) for a zero-dimensional array, most of them annotated
+  `float | ndarray` with no overload, so a typed caller narrowed a value its
+  own argument had already fixed. They return a `float` now only when every
+  argument that decides the shape is a number, a Python or a numpy one, and an
+  array as soon as one of them is a sequence or an array: `np.array(0.2)`
+  gives a zero-dimensional array, and a one-element list a one-element array,
+  where the ISO 11200 functions (`emission.local_environmental_correction`,
+  its three neighbours and `WorkstationBackgroundCorrection.correction`)
+  returned a `float` for any one-element input. `piston_resistance`,
+  `piston_reactance` and `piston_directivity` return a Python `float` for a
+  number, where they returned `numpy.float64`. Sixty-six of them are
+  overloaded, so `room.room_constant(100.0, 0.2)` reads as a `float`,
+  `room.room_constant(100.0, alphas)` as an array whatever the shape of
+  `alphas`, and an `ArrayLike` or a nested list as the union; the heads take
+  their arguments as type parameters bounded by those forms, which keeps mypy
+  from answering `Any` for an `NDArray[np.float64]`. The reducers (the
+  `signals` levels, `broadcast.true_peak_level`,
+  `building.energy_average_level`, `room.directivity_energy_average` and their
+  kin), the predictions that read their bands from the surfaces they are
+  given, the two properties, `room.reverberation_time_standard_deviation` and
+  `room.steady_state_spl` keep the union with the rule at run time.
+  `scripts/check_return_overloads.py` also fails on a single value and an
+  array in one return with no overload saying which, rule A57 states it, the
+  API reference shows each head with the bounds of its type parameters, and
+  the upgrading guide maps the change.
+
 - **A multi-panel `.plot()` returns a tuple of axes without `ax`, and every
   plot whose return an argument decides says so in its signature.**
   Twenty-seven `.plot()` methods and `room.plot_excitation` drew one panel on

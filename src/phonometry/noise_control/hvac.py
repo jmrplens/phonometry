@@ -91,6 +91,7 @@ import numpy as np
 
 from .._internal.boundary import settled
 from .._internal.frozen import OwnsArrays, read_only
+from .._internal.types import as_float_or_array
 from .._internal.validation import (
     check_engine,
     require_choice,
@@ -109,7 +110,7 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
-    from .._internal.types import ReportEngine
+    from .._internal.types import RealScalar, RealValues, ReportEngine
     from .._report.metadata import ReportMetadata
 
 Shape = Literal["rectangular", "round"]
@@ -1043,6 +1044,39 @@ def elbow_insertion_loss(
     )
 
 
+@overload
+def plenum_attenuation[S: RealScalar](
+    exit_area: float,
+    line_of_sight: float,
+    wall_area: float,
+    mean_absorption: S,
+    *,
+    angle_rad: float = 0.0,
+) -> float: ...
+
+
+@overload
+def plenum_attenuation[V: RealValues](
+    exit_area: float,
+    line_of_sight: float,
+    wall_area: float,
+    mean_absorption: V,
+    *,
+    angle_rad: float = 0.0,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def plenum_attenuation[A: ArrayLike](
+    exit_area: float,
+    line_of_sight: float,
+    wall_area: float,
+    mean_absorption: A,
+    *,
+    angle_rad: float = 0.0,
+) -> float | NDArray[np.float64]: ...
+
+
 def plenum_attenuation(
     exit_area: float,
     line_of_sight: float,
@@ -1050,7 +1084,7 @@ def plenum_attenuation(
     mean_absorption: ArrayLike,
     *,
     angle_rad: float = 0.0,
-) -> np.ndarray | float:
+) -> float | NDArray[np.float64]:
     r"""Plenum-chamber transmission loss by Wells' method (Bies Eq. (8.275)).
 
     .. math::
@@ -1072,8 +1106,8 @@ def plenum_attenuation(
         (scalar or per-band).
     :param angle_rad: Angle ``theta`` between the inlet axis and the line to the
         outlet, in ``[0, pi/2]`` rad (default 0).
-    :return: The transmission loss, dB (float for scalar absorption, else a
-        per-band array).
+    :return: The transmission loss, dB; a ``float`` for a number as the mean absorption;
+        a per-band array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: If a dimension is not positive, ``mean_absorption``
         leaves ``(0, 1)`` or ``angle_rad`` leaves ``[0, pi/2]``.
     :raises TypeError: if ``angle_rad``, ``exit_area``, ``line_of_sight`` or
@@ -1099,7 +1133,7 @@ def plenum_attenuation(
     direct = np.cos(angle_rad) / (np.pi * r**2)
     reverberant = 1.0 / r_const
     tl = -10.0 * np.log10(s_out * (direct + reverberant))
-    return float(tl) if tl.ndim == 0 else tl
+    return as_float_or_array(tl, like=(mean_absorption,))
 
 
 def flow_noise_straight_duct(
@@ -2904,21 +2938,51 @@ def _room_measure(
 
 
 @overload
-def room_effect(
-    distance: float,
-    room_constant: ArrayLike,
-    *,
-    directivity: ArrayLike = ...,
-) -> np.ndarray | float: ...
+def room_effect[S1: RealScalar, S2: RealScalar](
+    distance: float, room_constant: S1, *, directivity: S2 = ...
+) -> float: ...
 
 
 @overload
-def room_effect(
-    distance: float,
-    *,
-    absorption_area: ArrayLike,
-    directivity: ArrayLike = ...,
-) -> np.ndarray | float: ...
+def room_effect[V: RealValues, A2: ArrayLike](
+    distance: float, room_constant: V, *, directivity: A2 = ...
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def room_effect[S1: RealScalar, V: RealValues](
+    distance: float, room_constant: S1, *, directivity: V
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def room_effect[A1: ArrayLike, A2: ArrayLike](
+    distance: float, room_constant: A1, *, directivity: A2 = ...
+) -> float | NDArray[np.float64]: ...
+
+
+@overload
+def room_effect[S1: RealScalar, S2: RealScalar](
+    distance: float, *, absorption_area: S1, directivity: S2 = ...
+) -> float: ...
+
+
+@overload
+def room_effect[V: RealValues, A2: ArrayLike](
+    distance: float, *, absorption_area: V, directivity: A2 = ...
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def room_effect[S1: RealScalar, V: RealValues](
+    distance: float, *, absorption_area: S1, directivity: V
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def room_effect[A1: ArrayLike, A2: ArrayLike](
+    distance: float, *, absorption_area: A1, directivity: A2 = ...
+) -> float | NDArray[np.float64]: ...
 
 
 def room_effect(
@@ -2927,7 +2991,7 @@ def room_effect(
     *,
     absorption_area: ArrayLike | None = None,
     directivity: ArrayLike = 2.0,
-) -> np.ndarray | float:
+) -> float | NDArray[np.float64]:
     r"""Room effect: the drop from the terminal sound power to the room level.
 
     The last step of a duct-path calculation turns the sound power arriving at
@@ -2960,8 +3024,10 @@ def room_effect(
     :param directivity: Directivity factor ``Q`` of the terminal device
         (``2`` flush in a ceiling or wall, ``4`` at an edge, ``8`` in a
         corner), scalar or per-band.
-    :return: The room effect as a positive attenuation, dB (a float when every
-        input is scalar, otherwise a per-band array).
+    :return: The room effect as a positive attenuation, dB; a ``float`` when the
+        absorption measure and ``directivity`` are both numbers; an array of their
+        broadcast shape when one is a sequence or an array, a zero-dimensional one
+        included.
     :raises ValueError: unless exactly one absorption measure is given, or if
         an argument is not positive and finite.
     :raises TypeError: if ``distance`` is not a single number.
@@ -2973,4 +3039,4 @@ def room_effect(
         msg = "'directivity' must be positive and finite."
         raise ValueError(msg)
     values = -10.0 * np.log10(q / (4.0 * np.pi * r**2) + 4.0 / measure)
-    return float(values) if values.ndim == 0 else values
+    return as_float_or_array(values, like=(room_constant, absorption_area, directivity))

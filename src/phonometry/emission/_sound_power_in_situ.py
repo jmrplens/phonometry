@@ -85,20 +85,22 @@ from __future__ import annotations
 import warnings
 from dataclasses import dataclass
 from itertools import pairwise
-from typing import TYPE_CHECKING, Any, Literal, cast
+from typing import TYPE_CHECKING, Any, Literal, cast, overload
 
 import numpy as np
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike
+    from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
+    from .._internal.types import RealScalar, RealValues
     from .reference_sound_source import ReferenceSourceCalibration
 
 from .._internal.boundary import settled
 from .._internal.frozen import OwnsArrays
 from .._internal.levels_math import energy_mean, energy_sum
+from .._internal.types import as_float_or_array
 from .._internal.validation import (
     _as_float64,
     require_choice,
@@ -439,9 +441,39 @@ def static_pressure_from_altitude(altitude: float) -> float:
     return float(_PS0 * base**_ALTITUDE_B)
 
 
+@overload
+def excess_sound_pressure_level[S1: RealScalar, S2: RealScalar, S3: RealScalar](
+    level: S1, reference_sound_power_levels: S2, distance: S3
+) -> float: ...
+
+
+@overload
+def excess_sound_pressure_level[V: RealValues, A2: ArrayLike, A3: ArrayLike](
+    level: V, reference_sound_power_levels: A2, distance: A3
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def excess_sound_pressure_level[S1: RealScalar, V: RealValues, A3: ArrayLike](
+    level: S1, reference_sound_power_levels: V, distance: A3
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def excess_sound_pressure_level[S1: RealScalar, S2: RealScalar, V: RealValues](
+    level: S1, reference_sound_power_levels: S2, distance: V
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def excess_sound_pressure_level[A1: ArrayLike, A2: ArrayLike, A3: ArrayLike](
+    level: A1, reference_sound_power_levels: A2, distance: A3
+) -> float | NDArray[np.float64]: ...
+
+
 def excess_sound_pressure_level(
     level: ArrayLike, reference_sound_power_levels: ArrayLike, distance: ArrayLike
-) -> np.ndarray | float:
+) -> float | NDArray[np.float64]:
     r"""Excess of sound pressure level over the free field at a distance from
     the reference sound source (ISO 3747:2010 Annex A, Eq. A.1).
 
@@ -465,8 +497,9 @@ def excess_sound_pressure_level(
         source, in decibels (per band, or A-weighted).
     :param distance: Distance(s) ``r`` from the microphone to the reference
         source, in metres.
-    :return: The excess ``dLf(r)``, in decibels, as a float for scalar input
-        or an array of the broadcast shape.
+    :return: The excess ``dLf(r)``, in decibels; a ``float`` when the three are all
+        numbers; an array of their broadcast shape when one is a sequence or an array, a
+        zero-dimensional one included.
     :raises ValueError: if any input is empty or not finite, any ``distance``
         is not positive, or the three shapes do not broadcast against each
         other.
@@ -500,9 +533,9 @@ def excess_sound_pressure_level(
         )
         raise ValueError(msg) from exc
     excess = lp - lw + _SPHERICAL_CONSTANT_DB + 20.0 * np.log10(r / _R0_M)
-    if excess.ndim == 0:
-        return float(excess)
-    return np.asarray(excess, dtype=np.float64)
+    return as_float_or_array(
+        excess, like=(level, reference_sound_power_levels, distance)
+    )
 
 
 def _background_correction(delta: np.ndarray) -> tuple[np.ndarray, np.ndarray]:

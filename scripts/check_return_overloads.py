@@ -6,10 +6,15 @@ returns that axes, and without one it makes a column of panels and returns
 them all: the caller's ``ax`` decides which. Annotated ``Axes | tuple[Axes,
 Axes]`` and nothing more, the return makes every typed caller narrow a value
 whose type the call already fixed, and ``result.plot(ax=ax).set_title(...)``
-is a type error for a call that cannot return anything but an ``Axes``. The
-remedy is a pair of ``typing.overload`` heads, one per value of the argument
-that decides, each with the one type it returns; the union stays on the
-implementation, which a caller never sees.
+is a type error for a call that cannot return anything but an ``Axes``. A
+function of a number or an array of them is the same case:
+``room.room_constant(100.0, 0.2)`` returns a ``float`` and
+``room.room_constant(100.0, alphas)`` an array, and ``float | NDArray`` on
+its own makes the caller narrow both. The remedy is ``typing.overload``
+heads, one per case of the argument that decides, each with the one type it
+returns; the union stays on the implementation, which a caller never sees,
+and on a last head that takes whatever the others do not (an ``ArrayLike``
+whose shape a type checker cannot know).
 
 The rule, read from the source of every function of the package, private
 ones included, because a public method returns what its renderer returns:
@@ -20,6 +25,13 @@ ones included, because a public method returns what its renderer returns:
   ``Sequence`` of them, or a numpy array) is allowed on an implementation
   only when overloads stand before it, and never on an overload head, which
   states one case;
+* a return annotation that is a union of a single value (``float``,
+  ``int``, ``complex``, ``bool``, ``str``, a numpy scalar or a ``Literal``)
+  with a numpy array is allowed on an implementation only when overloads
+  stand before it, and on an overload head only when the function's other
+  heads say both cases apart, one returning the single value alone and one
+  the array alone, so that the union head is the one left for the inputs
+  whose shape a type checker cannot know;
 * a function that reaches a polar axes, by making one (``projection="polar"``
   in a call or in a ``subplot_kw`` mapping, ``polar=True``, or either of them
   computed, which may be polar), by calling a
@@ -101,6 +113,201 @@ EXEMPT: dict[tuple[str, str], str] = {
         "overloaded on their quantity Literal and return PolarAxes for "
         "'directivity'"
     ),
+    ("src/phonometry/signals/levels.py", "leq"): (
+        "a level of a signal: reduces the last axis of what it is "
+        "handed, so the rank of the input decides whether one number is "
+        "left (a 1-D signal or row gives a float, a 2-D one an array), "
+        "which no overload on the argument's type can say"
+    ),
+    ("src/phonometry/signals/levels.py", "laeq"): (
+        "a level of a signal: reduces the last axis of what it is "
+        "handed, so the rank of the input decides whether one number is "
+        "left (a 1-D signal or row gives a float, a 2-D one an array), "
+        "which no overload on the argument's type can say"
+    ),
+    ("src/phonometry/signals/levels.py", "lc_peak"): (
+        "a level of a signal: reduces the last axis of what it is "
+        "handed, so the rank of the input decides whether one number is "
+        "left (a 1-D signal or row gives a float, a 2-D one an array), "
+        "which no overload on the argument's type can say"
+    ),
+    ("src/phonometry/signals/levels.py", "sel"): (
+        "a level of a signal: reduces the last axis of what it is "
+        "handed, so the rank of the input decides whether one number is "
+        "left (a 1-D signal or row gives a float, a 2-D one an array), "
+        "which no overload on the argument's type can say"
+    ),
+    ("src/phonometry/signals/levels.py", "sound_exposure"): (
+        "a level of a signal: reduces the last axis of what it is "
+        "handed, so the rank of the input decides whether one number is "
+        "left (a 1-D signal or row gives a float, a 2-D one an array), "
+        "which no overload on the argument's type can say"
+    ),
+    ("src/phonometry/signals/levels.py", "lex_8h"): (
+        "a level of a signal: reduces the last axis of what it is "
+        "handed, so the rank of the input decides whether one number is "
+        "left (a 1-D signal or row gives a float, a 2-D one an array), "
+        "which no overload on the argument's type can say"
+    ),
+    ("src/phonometry/broadcast/_program_loudness.py", "true_peak_level"): (
+        "a level of a signal: reduces the last axis of what it is "
+        "handed, so the rank of the input decides whether one number is "
+        "left (a 1-D signal or row gives a float, a 2-D one an array), "
+        "which no overload on the argument's type can say"
+    ),
+    ("src/phonometry/building/measurement/insulation.py", "energy_average_level"): (
+        "the energy average over the positions along axis: the rank of "
+        "the input decides whether one number is left (a 1-D input "
+        "gives a float, a 2-D one an array), which no overload on the "
+        "argument's type can say"
+    ),
+    (
+        "src/phonometry/environment/assessment/exposure_distribution.py",
+        "frequency_weighted_sel",
+    ): (
+        "sums the bands along the last axis: the rank of the input "
+        "decides whether one number is left (one spectrum gives a "
+        "float, a 2-D one an array), which no overload on the "
+        "argument's type can say"
+    ),
+    ("src/phonometry/room/auditorium.py", "directivity_energy_average"): (
+        "averages the bearings along axis: the rank of the input "
+        "decides whether one number is left (one turn of bearings gives "
+        "a float, a 2-D one an array), which no overload on the "
+        "argument's type can say"
+    ),
+    ("src/phonometry/emission/intensity.py", "temporal_variability_indicator"): (
+        "one F1 over the samples of a 1-D input, one per band of a 2-D "
+        "(samples, bands) input: the rank decides, not the type"
+    ),
+    ("src/phonometry/room/modes.py", "room_mode_frequency"): (
+        "one frequency for a triple of orders, one per row of an (N, 3) "
+        "array: the rank of orders decides, and a triple and a row of "
+        "three are the same type"
+    ),
+    ("src/phonometry/room/reverberation_prediction.py", "sabine_reverberation_time"): (
+        "one number or one per band as the absorption coefficients "
+        "inside the surfaces tuples are, which a type checker reads as "
+        "one type; each is passed as like, so a sequence or an array "
+        "among them returns an array"
+    ),
+    ("src/phonometry/room/reverberation_prediction.py", "eyring_reverberation_time"): (
+        "one number or one per band as the absorption coefficients "
+        "inside the surfaces tuples are, which a type checker reads as "
+        "one type; each is passed as like, so a sequence or an array "
+        "among them returns an array"
+    ),
+    (
+        "src/phonometry/room/reverberation_prediction.py",
+        "millington_sette_reverberation_time",
+    ): (
+        "one number or one per band as the absorption coefficients "
+        "inside the surfaces tuples are, which a type checker reads as "
+        "one type; each is passed as like, so a sequence or an array "
+        "among them returns an array"
+    ),
+    ("src/phonometry/room/reverberation_prediction.py", "mean_absorption"): (
+        "one number or one per band as the absorption coefficients "
+        "inside the surfaces tuples are, which a type checker reads as "
+        "one type; each is passed as like, so a sequence or an array "
+        "among them returns an array"
+    ),
+    ("src/phonometry/room/reverberation_prediction.py", "fitzroy_reverberation_time"): (
+        "one number or one per band as the three wall-pair absorptions "
+        "inside the absorptions sequence are, which a type checker "
+        "reads as one type; each is passed as like"
+    ),
+    (
+        "src/phonometry/room/reverberation_prediction.py",
+        "arau_puchades_reverberation_time",
+    ): (
+        "one number or one per band as the three wall-pair absorptions "
+        "inside the absorptions sequence are, which a type checker "
+        "reads as one type; each is passed as like"
+    ),
+    (
+        "src/phonometry/room/enclosed_space_absorption.py",
+        "equivalent_absorption_area",
+    ): (
+        "one number or one per band as the coefficients inside the "
+        "surfaces tuples and the rows of objects are, which a type "
+        "checker reads as one type; each is passed as like"
+    ),
+    ("src/phonometry/room/acoustics.py", "reverberation_time_standard_deviation"): (
+        "four arguments broadcast into the result (reverberation_time, "
+        "bandwidth, decays, positions): the heads that say which one "
+        "first holds an array would number six, and the union says it "
+        "as well; each is passed as like"
+    ),
+    (
+        "src/phonometry/room/steady_field.py",
+        "steady_state_spl (overload room_constant: ArrayLike)",
+    ): (
+        "four arguments broadcast into the result (sound_power_level, "
+        "distance, the absorption measure, directivity) on each of the "
+        "two heads that take one measure or the other: twelve heads "
+        "would say what the union says; each is passed as like"
+    ),
+    (
+        "src/phonometry/room/steady_field.py",
+        "steady_state_spl (overload absorption_area: ArrayLike)",
+    ): (
+        "the head for the absorption area, the other measure of the "
+        "room_constant head: the same four arguments broadcast (see that "
+        "entry)"
+    ),
+    ("src/phonometry/emission/intensity.py", "FieldStationarityCheck.stationary"): (
+        "a property: one verdict for a scalar F1, one per band for an "
+        "array of them, as the record holds it; there is no argument to "
+        "overload on"
+    ),
+    (
+        "src/phonometry/emission/workstation.py",
+        "WorkstationBackgroundCorrection.correction",
+    ): (
+        "a property: one correction for a scalar margin, one per band "
+        "for an array of them, as the record holds it; there is no "
+        "argument to overload on"
+    ),
+    ("src/phonometry/_internal/types.py", "as_float_or_array"): (
+        "the private helper behind every public overload: what it "
+        "returns follows the arguments its caller hands it as like, and "
+        "the caller's own heads say each case"
+    ),
+    ("src/phonometry/_internal/types.py", "as_float_if_reduced"): (
+        "the private helper of the reducers: the rank of what was "
+        "reduced decides, as for the reducers it serves (see leq)"
+    ),
+    ("src/phonometry/vibration/machinery/evaluation.py", "_zone_letters"): (
+        "the private helper of evaluation_zone and "
+        "industrial_machine_zone: one grade or an array of them as the "
+        "magnitudes it is handed as like came in, and its two callers' "
+        "heads say each case"
+    ),
+    ("src/phonometry/aircraft/rotorcraft_noise.py", "_setup_resistivity"): (
+        "reads a RotorcraftGround field that holds a single value for a "
+        "uniform ground or an array for a per-path map, typed with "
+        "both; a zero-dimensional array is a single value there, so the "
+        "rank decides, not the type"
+    ),
+    ("src/phonometry/aircraft/rotorcraft_noise.py", "_setup_ground_elevation"): (
+        "reads a RotorcraftGround field that holds a single value for a "
+        "uniform ground or an array for a per-path map, typed with "
+        "both; a zero-dimensional array is a single value there, so the "
+        "rank decides, not the type"
+    ),
+    ("src/phonometry/simulation/video.py", "_acoustic_scale"): (
+        "the colour limit a caller gave, or the cells a first pass "
+        "reads without one: handed on as a callable that takes "
+        "color_limit as float or None, so the union is what the "
+        "callable type needs"
+    ),
+    ("src/phonometry/simulation/video.py", "_elastic_scale"): (
+        "the colour limit a caller gave, or the cells a first pass "
+        "reads without one: handed on as a callable that takes "
+        "color_limit as float or None, so the union is what the "
+        "callable type needs"
+    ),
 }
 
 #: The modules an axes class comes from.
@@ -133,6 +340,45 @@ _SEVERAL = frozenset(
 
 #: The numpy arrays, of any dtype, that hold several axes.
 _ARRAYS = frozenset({"numpy.ndarray", "numpy.typing.NDArray"})
+
+#: The single values a function may return in place of an array of them.
+_SCALARS = frozenset(
+    {
+        "builtins.float",
+        "builtins.int",
+        "builtins.complex",
+        "builtins.bool",
+        "builtins.str",
+        "typing.Literal",
+        "typing_extensions.Literal",
+        "numpy.generic",
+        "numpy.number",
+        "numpy.floating",
+        "numpy.integer",
+        "numpy.signedinteger",
+        "numpy.unsignedinteger",
+        "numpy.complexfloating",
+        "numpy.float16",
+        "numpy.float32",
+        "numpy.float64",
+        "numpy.longdouble",
+        "numpy.int8",
+        "numpy.int16",
+        "numpy.int32",
+        "numpy.int64",
+        "numpy.intp",
+        "numpy.uint8",
+        "numpy.uint16",
+        "numpy.uint32",
+        "numpy.uint64",
+        "numpy.complex64",
+        "numpy.complex128",
+        "numpy.bool",
+        "numpy.bool_",
+        "numpy.str_",
+        "numpy.bytes_",
+    }
+)
 
 #: What a union is spelled with besides ``|``.
 _UNIONS = frozenset({"typing.Union", "typing.Optional"})
@@ -575,6 +821,24 @@ class Package:
                 several.append(ast.unparse(member))
         return single, several
 
+    def values(self, module: str, node: ast.expr | None) -> tuple[list[str], list[str]]:
+        """The single values, and the arrays, a return annotation names.
+
+        A member counts by what it stands for, its subscript read off
+        (``np.floating[Any]``, ``Literal["A", "B"]``), through the
+        package's aliases.
+        """
+        single: list[str] = []
+        several: list[str] = []
+        for where, member in self.members(module, node):
+            base = member.value if isinstance(member, ast.Subscript) else member
+            dotted = self.resolve(where, base)
+            if dotted in _SCALARS:
+                single.append(ast.unparse(member))
+            elif dotted in _ARRAYS:
+                several.append(ast.unparse(member))
+        return single, several
+
     def callees(self, function: Function) -> Iterator[str]:
         """The functions of the package a function's implementation calls."""
         node = function.implementation
@@ -728,6 +992,47 @@ def reaching_polar(package: Package) -> set[str]:
     return reached
 
 
+def _scalar_findings(package: Package, function: Function, path: str) -> list[Finding]:
+    """A single value or an array, where an overload should say which.
+
+    The union is the implementation's, and the last-resort head's when the
+    other heads tell the two cases apart; anywhere else it is a finding.
+    """
+    module = function.module
+    shapes = [package.values(module, head.returns) for head in function.heads]
+    says_single = any(single and not several for single, several in shapes)
+    says_several = any(several and not single for single, several in shapes)
+    found: list[Finding] = []
+    for head, (single, several) in zip(function.heads, shapes, strict=True):
+        if head.returns is None or not (single and several):
+            continue
+        if not (says_single and says_several):
+            found.append(
+                Finding(
+                    path,
+                    head.lineno,
+                    head_key(function.qualname, head, function.heads),
+                    f"an overload head returns {ast.unparse(head.returns)}, and "
+                    "no other head returns the value alone and the array alone",
+                )
+            )
+    implementation = function.implementation
+    if implementation is None or implementation.returns is None or function.heads:
+        return found
+    single, several = package.values(module, implementation.returns)
+    if single and several:
+        found.append(
+            Finding(
+                path,
+                implementation.lineno,
+                function.qualname,
+                f"returns {ast.unparse(implementation.returns)}, and no overload "
+                "says which argument decides between the value and the array",
+            )
+        )
+    return found
+
+
 def findings_in(files: Sequence[pathlib.Path], root: pathlib.Path) -> list[Finding]:
     """Every return one argument decides that is written as one type."""
     package = Package(files, root)
@@ -749,6 +1054,7 @@ def findings_in(files: Sequence[pathlib.Path], root: pathlib.Path) -> list[Findi
                         else "an overload head returns a union",
                     )
                 )
+        found.extend(_scalar_findings(package, function, path))
         implementation = function.implementation
         if implementation is None or implementation.returns is None:
             continue
@@ -823,11 +1129,12 @@ def main(argv: Sequence[str] | None = None) -> int:
             "  -> overload the function on the argument that decides, one "
             "typing.overload head per case, each returning the one type it "
             "gives (Axes for a given ax, a tuple of Axes for none; PolarAxes "
-            "where the axes is polar), and keep the union on the "
-            "implementation; a polar axes the function always returns is "
-            "annotated PolarAxes. A return the data decide, not an argument, "
-            "goes in EXEMPT at the top of scripts/check_return_overloads.py "
-            "with its reason."
+            "where the axes is polar; a float for numbers and an NDArray for "
+            "a sequence or an array, with a last head taking ArrayLike), and "
+            "keep the union on the implementation; a polar axes the function "
+            "always returns is annotated PolarAxes. A return the data decide, "
+            "not an argument, goes in EXEMPT at the top of "
+            "scripts/check_return_overloads.py with its reason."
         )
     for key in stale:
         print(f"::error::EXEMPT lists {key}, which needs no exemption any more")

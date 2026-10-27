@@ -1266,9 +1266,9 @@ def test_the_digest_file_named_here_is_the_one_the_digests_are_written_to() -> N
     assert fp.ENGINE_DIGESTS == engine_digests.DIGESTS_FILE.name
 
 
-def test_the_engine_clips_of_the_repository_are_the_field_clips() -> None:
-    from figures import registry
-
+def test_the_engine_clips_of_the_repository_are_the_field_clips(
+    registry: ModuleType,
+) -> None:
     root = pathlib.Path(__file__).resolve().parents[1]
     assert fp.engine_clips(root) == set(registry._ANIM_FIELDS)
 

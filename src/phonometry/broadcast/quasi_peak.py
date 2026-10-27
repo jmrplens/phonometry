@@ -550,7 +550,7 @@ class QuasiPeakResult(OwnsArrays):
     ) -> Axes:
         """Plot the quasi-peak trace over time, with the reading marked.
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
 
         :param ax: Existing axes, or ``None`` to create a figure.

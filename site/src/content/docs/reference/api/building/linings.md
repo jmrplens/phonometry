@@ -235,7 +235,7 @@ Plot the Annex D ratings against the resonance frequency.
 
 Draws the three Annex D curves over the tabulated range with this
 system's own resonance marked, the analogue of Figures D.2 and D.3.
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 ## weighted_lining_improvement

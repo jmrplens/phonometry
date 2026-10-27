@@ -436,7 +436,7 @@ level is *identical*, not merely close.
 
 ## What each install reads and writes
 
-| | Base install (NumPy + SciPy) | With `pip install phonometry[audio]` |
+| | Base install (NumPy + SciPy) | With `pip install "phonometry[audio]"` |
 | :--- | :--- | :--- |
 | Read | WAV/BWF: PCM at any depth, IEEE float 32/64, EXTENSIBLE (channel labels), `bext`, cue points, RF64/BW64 | + FLAC, AIFF, Ogg Vorbis, Opus, MP3, compressed WAV (ADPCM, A-law/µ-law) |
 | Write | WAV/BWF: PCM 16/24/32, float 32/64, RF64 automatic, `bext`, sidecar | + FLAC (PCM up to 24-bit, `bext` carried) |

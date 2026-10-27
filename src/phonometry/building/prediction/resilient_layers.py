@@ -636,7 +636,7 @@ class TappingForceResult(OwnsArrays):
     ) -> Axes:
         """Plot the force spectrum ``|Fn|`` with its asymptotes and ``fco``.
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from ..._i18n import check_language
@@ -847,7 +847,7 @@ class CoveringImprovementResult(OwnsArrays):
     ) -> Axes:
         """Plot ``ΔL(f)`` from the force ratio beside the two-line estimate.
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from ..._i18n import check_language
@@ -1160,7 +1160,7 @@ class FloatingFloorImprovementResult(OwnsArrays):
     ) -> Axes:
         """Plot ``ΔL(f)`` with the resonance and the asymptotic slope marked.
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from ..._i18n import check_language

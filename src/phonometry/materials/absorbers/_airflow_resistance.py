@@ -261,7 +261,7 @@ class StaticAirflowResult(RichDisplay):
     ) -> Axes:
         """Plot the fitted ``dp(u)`` curve with the evaluation point.
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from ..._i18n import check_language

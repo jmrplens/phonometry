@@ -230,7 +230,7 @@ against sound pressure level).
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `quantity` or `language` is unknown, or the result carries no data for `quantity`. |
-| ImportError | If matplotlib is not installed (`pip install phonometry[plot]`). |
+| ImportError | If matplotlib is not installed (`pip install "phonometry[plot]"`). |
 
 ### MicrophoneCharacteristics.report()
 
@@ -272,7 +272,7 @@ requirement is given, and the footer.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` is not `"reportlab"` or `language` is unknown. |
-| ImportError | If reportlab is not installed (`pip install phonometry[report]`), or matplotlib is missing for the embedded figure (`pip install phonometry[plot]`). |
+| ImportError | If reportlab is not installed (`pip install "phonometry[report]"`), or matplotlib is missing for the embedded figure (`pip install "phonometry[plot]"`). |
 
 ### MicrophoneCharacteristics.sensitivity_v_per_pa
 

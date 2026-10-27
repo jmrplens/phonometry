@@ -962,7 +962,7 @@ PorousMediumResult.plot(
 
 Plot the normalised `Zc` and `k` components against frequency.
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 ## ROCK_WOOL_FIBER_DENSITY_KG_M3

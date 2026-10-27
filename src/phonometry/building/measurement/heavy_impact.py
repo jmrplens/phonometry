@@ -529,7 +529,7 @@ class HeavyImpactSourceCheck(OwnsArrays):
     ) -> Axes:
         """Plot the measured ``LFE`` against the printed tolerance band.
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from ..._i18n import check_language
@@ -687,7 +687,7 @@ class StandardizedMaxImpactResult(OwnsArrays):
     ) -> Axes:
         """Plot ``Li,Fmax`` and ``L'i,Fmax,V,T`` per band.
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from ..._i18n import check_language
@@ -850,7 +850,7 @@ class AWeightedMaxImpactResult(OwnsArrays):
     ) -> Axes:
         """Plot the band levels, their A-weighted contributions and the rating.
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from ..._i18n import check_language

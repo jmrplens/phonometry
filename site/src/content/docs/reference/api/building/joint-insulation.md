@@ -208,7 +208,7 @@ GapWidthCheck.plot(
 
 Plot the readings with their average and the 0,3 mm band.
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 ### GapWidthCheck.spread_mm
@@ -391,7 +391,7 @@ Plot a single number against the gap width, as Figure J.8.
 The measured widths as open circles on the line through them, with
 $b_\mathrm{min}$, $b_\mathrm{n}$ and
 $b_\mathrm{n} + 3$ marked. Requires matplotlib
-(`pip install phonometry[plot]`); returns the
+(`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 **Raises**
@@ -414,7 +414,7 @@ JointGapSeries.plot_octave_bands(
 Plot $R_\mathrm{s}$ in octave bands at every gap width, as Figure J.9.
 
 Every result must hold whole octaves of one-third-octave bands.
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 ### JointGapSeries.single_number()
@@ -503,7 +503,7 @@ JointGapSeriesCheck.plot(
 
 Plot the measured gap widths against the three widths J.4 asks for.
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 ### JointGapSeriesCheck.tolerance_mm
@@ -565,7 +565,7 @@ JointOpenBandRating.plot(
 
 Plot the open-band single numbers beside the bands taken as open.
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 ## JointTestElementCheck
@@ -620,7 +620,7 @@ JointTestElementCheck.plot(
 
 Plot the length and width of the joint against their bounds.
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 ### JointTestElementCheck.width_ok
@@ -787,7 +787,7 @@ Plot $R_\mathrm{s}$ per band with the maximum of the arrangement.
 The test curve with its minimum values marked, $R_\mathrm{s}'$
 and $R_\mathrm{s,max}$, and the shifted ISO 717-1 reference
 curve over the rating range, as the diagram of Figure J.7. Requires
-matplotlib (`pip install phonometry[plot]`); returns the
+matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 ### LaboratoryJointInsulationResult.r_s_w

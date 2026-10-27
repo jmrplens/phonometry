@@ -267,7 +267,7 @@ AssessmentVelocity.plot(
 
 Draw the weighted velocity against its guideline value.
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 **Parameters**
@@ -818,7 +818,7 @@ VibrationMeterReading.plot(
 
 Draw $KB_\mathrm{F}(t)$ with its maximum and the clock maxima on it.
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 **Parameters**
@@ -891,7 +891,7 @@ VibrationMeterVerification.plot(
 
 Draw the deviation against the tolerance band it is judged by.
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 **Parameters**

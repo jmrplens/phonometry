@@ -206,17 +206,22 @@ def test_the_real_environment_wins_over_the_env_file(
     """An exported variable beats ``.env``; the ones it leaves unset are loaded."""
     env_file = tmp_path / ".env"
     env_file.write_text(
-        '# comment line\nPHONO_GPU_HOST=file-host\nPHONO_GPU_NAME="lab GPU"\n',
+        "# comment line\n"
+        "PHONOMETRY_ASSETS_DIR=file-host\n"
+        'PHONOMETRY_EXAMPLE_NAME="lab GPU"\n',
         encoding="utf-8",
     )
-    monkeypatch.setenv("PHONO_GPU_HOST", "env-host")
+    monkeypatch.setenv("PHONOMETRY_ASSETS_DIR", "env-host")
     # Guarantee the variable is absent and restored either way.
-    monkeypatch.setenv("PHONO_GPU_NAME", "sentinel")
-    monkeypatch.delenv("PHONO_GPU_NAME")
+    monkeypatch.setenv("PHONOMETRY_EXAMPLE_NAME", "sentinel")
+    monkeypatch.delenv("PHONOMETRY_EXAMPLE_NAME")
     values = repo_env.load_env(env_file)
-    assert values == {"PHONO_GPU_HOST": "file-host", "PHONO_GPU_NAME": "lab GPU"}
-    assert os.environ["PHONO_GPU_HOST"] == "env-host"  # real env wins
-    assert os.environ["PHONO_GPU_NAME"] == "lab GPU"  # quotes stripped
+    assert values == {
+        "PHONOMETRY_ASSETS_DIR": "file-host",
+        "PHONOMETRY_EXAMPLE_NAME": "lab GPU",
+    }
+    assert os.environ["PHONOMETRY_ASSETS_DIR"] == "env-host"  # real env wins
+    assert os.environ["PHONOMETRY_EXAMPLE_NAME"] == "lab GPU"  # quotes stripped
 
 
 def _worktree_of(main: pathlib.Path, worktree: pathlib.Path, *, relative: bool) -> None:
@@ -234,15 +239,14 @@ def test_a_worktree_reads_the_env_file_of_its_main_checkout(
 ) -> None:
     """``.env`` is untracked, so a worktree has none and must read its checkout's.
 
-    If this fallback broke, a render started from a worktree would find no GPU
-    settings and encode VP9 on the CPU, and the GPU parity tests, which skip
-    when no ``.env`` is found, would skip rather than fail. The pointer is
-    resolved against the worktree, so the directory the run starts in must not
-    matter either.
+    If this fallback broke, a clip written from a worktree would find no
+    assets directory and go to the default checkout without saying so. The
+    pointer is resolved against the worktree, so the directory the run starts
+    in must not matter either.
     """
     main, worktree = tmp_path / "main", tmp_path / "worktree"
     _worktree_of(main, worktree, relative=pointer == "relative")
-    (main / ".env").write_text("PHONO_GPU_HOST=main-host\n", encoding="utf-8")
+    (main / ".env").write_text("PHONOMETRY_ASSETS_DIR=main-host\n", encoding="utf-8")
     monkeypatch.setattr(repo_env, "_REPO_ROOT", worktree)
     monkeypatch.chdir(tmp_path)
     assert repo_env.env_file() == (main / ".env").resolve()
@@ -254,8 +258,8 @@ def test_an_env_file_beside_the_checkout_wins(
     """A worktree that does carry a ``.env`` reads its own, not its checkout's."""
     main, worktree = tmp_path / "main", tmp_path / "worktree"
     _worktree_of(main, worktree, relative=False)
-    (main / ".env").write_text("PHONO_GPU_HOST=main-host\n", encoding="utf-8")
-    (worktree / ".env").write_text("PHONO_GPU_HOST=own-host\n", encoding="utf-8")
+    (main / ".env").write_text("PHONOMETRY_ASSETS_DIR=main-host\n", encoding="utf-8")
+    (worktree / ".env").write_text("PHONOMETRY_ASSETS_DIR=own-host\n", encoding="utf-8")
     monkeypatch.setattr(repo_env, "_REPO_ROOT", worktree)
     assert repo_env.env_file() == worktree / ".env"
 

@@ -122,7 +122,7 @@ class _DrawableLayer(RichDisplay):
     ) -> Axes:
         """Draw this layer's cross-section to scale (dimensioned).
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from ..._i18n import check_language
@@ -292,7 +292,7 @@ class LayeredAbsorberResult(OwnsArrays):
         r"""Plot the absorption spectrum :math:`\alpha(f)` with
         :math:`\lvert R \rvert` overlaid.
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from ..._i18n import check_language
@@ -306,7 +306,7 @@ class LayeredAbsorberResult(OwnsArrays):
     ) -> Axes:
         """Draw the solved stack cross-section to scale (dimensioned).
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from ..._i18n import check_language
@@ -336,7 +336,7 @@ class DiffuseFieldAbsorptionResult(OwnsArrays):
         r"""Plot the random-incidence absorption spectrum
         :math:`\alpha_{\mathrm{dif}}(f)`.
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from ..._i18n import check_language

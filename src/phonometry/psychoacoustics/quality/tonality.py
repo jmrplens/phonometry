@@ -215,7 +215,7 @@ class ToneAssessment(RichDisplay):
         prominent. The criterion family (tone-to-noise ratio, clause 11, or
         prominence ratio, clause 12) is recovered from ``prominence_limit_db``.
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
 
         :param ax: Existing axes to draw on, or ``None`` to create a figure.

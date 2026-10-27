@@ -575,7 +575,7 @@ class HighFrequencySoundPowerResult(OwnsArrays):
         Broadband bands are drawn as bars over the one-third octave bands; a
         tonal determination is drawn as one stem per tone on a frequency axis,
         with the line 10 dB below the highest tone that clause 13 c) reports
-        down to. Requires matplotlib (``pip install phonometry[plot]``);
+        down to. Requires matplotlib (``pip install "phonometry[plot]"``);
         returns the :class:`~matplotlib.axes.Axes`.
 
         :param ax: Existing axes, or ``None`` to create a figure.

@@ -431,7 +431,7 @@ StructureBornePowerResult.plot(
 
 Plot the characteristic structure-borne power level per band.
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 ### StructureBornePowerResult.report()
@@ -479,7 +479,7 @@ EN 12354-5.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` is not `"reportlab"` or `language` is unknown. |
-| ImportError | If reportlab (or, for the figure, matplotlib) is not installed (`pip install phonometry[report]`). |
+| ImportError | If reportlab (or, for the figure, matplotlib) is not installed (`pip install "phonometry[report]"`). |
 
 ### StructureBornePowerResult.total_level
 

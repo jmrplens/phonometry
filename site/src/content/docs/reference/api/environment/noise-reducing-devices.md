@@ -188,7 +188,7 @@ RoadDeviceRating.plot(
 
 Plot the per-band input against the spectrum that weights it.
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 ## RoadDeviceWarning

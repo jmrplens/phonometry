@@ -360,7 +360,7 @@ StaticAirflowResult.plot(
 
 Plot the fitted `dp(u)` curve with the evaluation point.
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 ### StaticAirflowResult.report()

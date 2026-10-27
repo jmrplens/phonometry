@@ -620,7 +620,7 @@ OutdoorAttenuation.plot(
 
 Plot the stacked per-band attenuation terms with the total.
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 ### OutdoorAttenuation.report()

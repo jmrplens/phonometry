@@ -34,7 +34,7 @@ from ..theme import (
     COLOR_SECONDARY,
     COLOR_TERTIARY,
 )
-from ._core import _anim_speaker
+from ._core import _anim_speaker, _host
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -206,7 +206,11 @@ def _impedance_tube_fields(
     running envelope stacks max|p(x)| over the trailing period, the frame
     times and the analytic absorption of the sample at the drive frequency.
     """
-    import fdtd2d
+    import clip_placement
+
+    from phonometry.simulation import FDTD2D, CWSource, PlaneWaveSource
+
+    compute = clip_placement.compute_for("anim_fdtd_impedance_tube")
 
     dx = _VTUBE_DX
     ny, nx = 40, 480  # 0.1 m x 1.2 m
@@ -221,16 +225,18 @@ def _impedance_tube_fields(
             c_map[:, nx - sample_cells :] = _VTUBE_C2
             rho_map[:, nx - sample_cells :] = _VTUBE_RHO2
             damping[:, nx - sample_cells :] = _VTUBE_SIGMA
-        sim = fdtd2d.FDTD2D(
+        sim = FDTD2D(
             c_map,
             dx,
             rho=rho_map,
             damping=damping,
             edge_impedance={"left": 1.2 * 343.0},
+            compute=compute,
         )
-        tone = fdtd2d.CWSource(ix=0, iy=0, frequency=_VTUBE_F)
+        xp = sim._backend.xp
+        tone = CWSource(ix=0, iy=0, frequency=_VTUBE_F)
         sim.add_source(
-            fdtd2d.PlaneWaveSource(direction="right", waveform=tone.value, offset=2)
+            PlaneWaveSource(direction="right", waveform=tone.value, offset=2)
         )
         period_frames = max(1, round(1.0 / (_VTUBE_F * every * sim.dt)))
         ps: list[Any] = []
@@ -240,11 +246,11 @@ def _impedance_tube_fields(
         while len(ps) < n_frames:
             sim.step()
             if sim.n % every == 0:
-                row = np.abs(sim.p[ny // 2, :]).astype(np.float32)
+                row = _host(sim, xp.abs(sim.p[ny // 2, :]))
                 recent.append(row)
                 if len(recent) > period_frames:
                     recent.pop(0)
-                ps.append(sim.p[::2, ::2].astype(np.float32))
+                ps.append(_host(sim, sim.p[::2, ::2]))
                 env.append(np.max(np.stack(recent), axis=0))
                 ts.append(sim.time)
         runs.append((np.stack(ps), np.stack(env)))
@@ -449,7 +455,11 @@ def _transmission_tube_fields(
     stacks, the frame times and the analytic transmission loss at the
     carrier frequency.
     """
-    import fdtd2d
+    import clip_placement
+
+    from phonometry.simulation import FDTD2D
+
+    compute = clip_placement.compute_for("anim_fdtd_transmission_tube")
 
     dx = _VTUBE_DX
     ny, nx = 40, 640  # 0.1 m x 1.6 m
@@ -466,15 +476,16 @@ def _transmission_tube_fields(
             c_map[:, sl] = _VTUBE_C2
             rho_map[:, sl] = _VTUBE_RHO2
             damping[:, sl] = _VTUBE_SIGMA
-        sim = fdtd2d.FDTD2D(
+        sim = FDTD2D(
             c_map,
             dx,
             rho=rho_map,
             damping=damping,
             edge_impedance={"left": 1.2 * 343.0, "right": 1.2 * 343.0},
+            compute=compute,
         )
         sim.add_plane_wave(
-            "right", center=0.35, width=0.10, wavelength=343.0 / _VTUBE_F
+            "right", center_m=0.35, half_width_m=0.10, wavelength_m=343.0 / _VTUBE_F
         )
         ps: list[Any] = []
         ts: list[float] = []
@@ -482,7 +493,7 @@ def _transmission_tube_fields(
         while len(ps) < active:
             sim.step()
             if sim.n % every == 0:
-                ps.append(sim.p[::2, ::2].astype(np.float32))
+                ps.append(_host(sim, sim.p[::2, ::2]))
                 ts.append(sim.time)
         while len(ps) < n_frames:  # end hold on the last frame
             ps.append(ps[-1])

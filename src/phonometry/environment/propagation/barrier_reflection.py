@@ -691,7 +691,7 @@ class DirectSoundSubtraction(OwnsArrays):
     ) -> Axes:
         """Draw the record, the aligned direct sound and what is left.
 
-        Requires matplotlib (``pip install phonometry[plot]``).
+        Requires matplotlib (``pip install "phonometry[plot]"``).
 
         :param ax: Existing axes, or ``None`` to create a figure.
         :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -1255,7 +1255,7 @@ class ReflectionIndexResult(OwnsArrays):
     ) -> Axes:
         """Draw the index per band, each grid position and the rating.
 
-        Requires matplotlib (``pip install phonometry[plot]``).
+        Requires matplotlib (``pip install "phonometry[plot]"``).
 
         :param ax: Existing axes, or ``None`` to create a figure.
         :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -1701,7 +1701,7 @@ class ReflectionFrequencyLimit(OwnsArrays):
     ) -> Axes:
         """Draw the limit at each microphone and what sets it.
 
-        Requires matplotlib (``pip install phonometry[plot]``).
+        Requires matplotlib (``pip install "phonometry[plot]"``).
 
         :param ax: Existing axes, or ``None`` to create a figure.
         :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -1931,7 +1931,7 @@ class ReflectionGridCheck(OwnsArrays):
     ) -> Axes:
         """Draw each microphone's deviation against the 25 mm tolerance.
 
-        Requires matplotlib (``pip install phonometry[plot]``).
+        Requires matplotlib (``pip install "phonometry[plot]"``).
 
         :param ax: Existing axes, or ``None`` to create a figure.
         :param language: Label language, ``"en"`` (default) or ``"es"``.

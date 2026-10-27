@@ -241,7 +241,7 @@ class FeedbackStabilityResult(RichDisplay):
         Bars for :math:`Z_\mathrm{S}`, :math:`G_\mathrm{S}` and :math:`\Delta L_\text{nom}`
         accumulate into the total loop gain, with the 0 dB oscillation
         threshold of Equation (18.16) and the required stability margin
-        marked. Requires matplotlib (``pip install phonometry[plot]``).
+        marked. Requires matplotlib (``pip install "phonometry[plot]"``).
         """
         from .._i18n import check_language
         from .._plot.electroacoustics import plot_feedback_stability

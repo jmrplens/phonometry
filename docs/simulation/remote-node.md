@@ -17,7 +17,8 @@ to set up a Docker node or a Python node, what can go wrong and what each
 error says, how to follow a run, what each side trusts of the other, and when
 a run there gives the numbers a run here gives. The device itself, NumPy,
 CuPy or torch, is chosen as [Where a simulation runs](compute.md) explains,
-and all of it holds on a node.
+and all of it holds on a node. [Where heavy work runs](where-it-runs.md) maps
+the devices, the nodes and the encoders in one place.
 
 ## 1. What happens when a run goes to a node
 
@@ -368,6 +369,17 @@ the image on your node from your checkout, with the Dockerfile and the
 bootstrap as you changed them. After a change to an engine, `make gpu-parity`,
 run from your checkout in that image on the node's GPU, renews the GPU proof
 in `gpu-parity.lock`.
+
+### Rendering the documentation clips on a node
+
+The documentation's animated clips, most of them simulations stepped on the
+engines of this page, can be rendered on the same node: with the node in the
+hosts file, `PHONOMETRY_COMPUTE=cupy@<name> make animations` sends the
+repository's committed code there, renders the clips two at a time with the
+GPU and NVENC, and brings them back checked. The
+[contributing guide](https://github.com/jmrplens/phonometry/blob/main/CONTRIBUTING.md#clips)
+explains it, and how to render them here on a CPU, which gives clips fit to
+publish too.
 
 ## What this guide covers
 

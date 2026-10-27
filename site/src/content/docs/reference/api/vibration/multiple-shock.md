@@ -363,7 +363,7 @@ MultipleShockResult.plot(
 Plot the injury-probability curve with this assessment's
 $R$.
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 ### MultipleShockResult.report()

@@ -197,8 +197,8 @@ Every figure, diagram, animation and report preview in the documentation is
 generated with the library itself, never hand-made. There are two pipelines,
 and they end in two different places. What separates them is whether CI can
 regenerate the output on a pull request: the figures, yes; the clips, no,
-because a clip is an FDTD run plus four video encodes, minutes of GPU each,
-and the encoders are not bit-reproducible across machines anyway.
+because a clip takes minutes to compute and four video encodes, and an
+encoder is not bit-reproducible across machines anyway.
 
 | What | Made by | Lives in | Checked by CI |
 | --- | --- | --- | --- |
@@ -244,11 +244,12 @@ from the docs, and commit exactly what the generation wrote
 
 #### Clips
 
-The clips are rendered into a local checkout of the assets repository and
-published from it in the same command. Where that checkout is:
+Every clip, rendered here or on a node, is written into a local checkout of
+the assets repository and published from it in the same command. Where that
+checkout is:
 
-- `PHONOMETRY_ASSETS_DIR` in `.env`, beside the GPU settings, naming the
-  `images/` directory of a checkout; or otherwise
+- `PHONOMETRY_ASSETS_DIR` in `.env`, naming the `images/` directory of a
+  checkout; or otherwise
 - `../phonometry-assets`, a sibling of this repository, which `make assets`
   clones, and fast-forwards when it already exists.
 
@@ -257,12 +258,90 @@ by `check_figures.py` as a figure nobody committed
 ([F51](docs/contributing/docs-and-figures.md#f51)).
 
 ```bash
-make assets                                              # once: the checkout
-make animations                                          # render every clip
-python scripts/generate_graphs.py --animations --anim anim_<name>   # or one
-make posters                                             # only the stills, no re-encode
-make animation-audit ANIM=anim_<name>                    # inspect every frame, encode nothing
+make assets                             # once: the checkout
+# every clip, here: NumPy and SVT-AV1, with the ffmpeg the clips are calibrated on
+ffmpeg_dir="$(make -s clip-ffmpeg)" && PATH="$ffmpeg_dir:$PATH" make animations
+# one clip
+ffmpeg_dir="$(make -s clip-ffmpeg)" && PATH="$ffmpeg_dir:$PATH" make animations ANIM=anim_<name>
+make posters                            # only the stills, no re-encode
+make animation-audit ANIM=anim_<name>   # inspect every frame, encode nothing
 ```
+
+A clip renders on this machine by default: its field steps on NumPy and its
+WebM is encoded as AV1 by SVT-AV1 on the CPU, at the quality NVENC gives the
+clips and in a smaller file, so it is publishable as it is. That setting is
+calibrated on SVT-AV1 4, the library in the ffmpeg build the node image pins
+(`docker/node/Dockerfile`), and a CRF means something else on another
+SVT-AV1 major: a render whose ffmpeg has another one is refused before the
+first field is computed, naming the version it found. On Linux on x86_64,
+`make clip-ffmpeg` downloads that build once, checks it against the pinned
+SHA-256 and prints the directory of its `ffmpeg` and `ffprobe`, which the
+lines above put first on `PATH` for the one command. A fetch that fails says
+why in one line and exits with an error, so the `&&` stops there and nothing
+renders.
+Elsewhere, use an ffmpeg whose SVT-AV1 is 4.x, or render on a node.
+
+Where a clip's field is computed is recorded per clip in
+`figures.registry._ANIM_DEVICES`, measured: a small grid stays on NumPy, a
+large one goes to a GPU when one is named. With an NVIDIA GPU and CuPy here,
+`PHONOMETRY_COMPUTE=cupy make animations CLIP_ENCODER=av1_nvenc` steps the
+large fields on it and encodes with NVENC, under the rules a node keeps: two
+clips at a time, each with half of the GPU memory free when the run starts
+(the card may be shared with other programs), the NVENC sessions the card
+allows shared between them, and a clip measured to need more rendered after
+the others, alone.
+
+To render on a GPU node instead, name it in your hosts file (the guide page
+on sending a simulation to a remote node explains the file and the node
+image), build the image on it once with `make node-image HOST=<node>`, and
+ask it:
+
+```bash
+PHONOMETRY_COMPUTE=cupy@<node> make clip-node-check    # can it render? nothing is rendered
+PHONOMETRY_COMPUTE=cupy@<node> make animations         # the stale clips, on the node
+PHONOMETRY_COMPUTE=cupy@<node> make animations ANIM=anim_<name> FORCE=1   # one clip, fresh or not
+PHONOMETRY_COMPUTE=cupy@<node> make animation-audit    # the frame audit, on the node
+```
+
+A node run renders only the clips whose fingerprint has moved, and `FORCE=1`
+renders the fresh ones too. A run here renders every clip it is given, so
+`FORCE=1` without a host in `PHONOMETRY_COMPUTE` stops the run before
+anything is rendered. A node encodes with NVENC when `PHONOMETRY_COMPUTE`
+names a GPU and with SVT-AV1 when it names the CPU (`cpu@<node>`);
+`CLIP_ENCODER=` names the encoder instead.
+
+What travels is this checkout as `git archive` of HEAD (`src`, `scripts` and
+the few files a render reads), so the node renders exactly the committed
+code: a tracked file with changes, or an untracked one under `scripts/` or
+`src/`, stops the run before anything is sent; the stamps a run writes into
+the manifest, and the `assets.lock` it publishes, wait for your commit and
+stop nothing. The node checks that it has what a clip needs (the encoder, a
+software AV1 decoder for the posters and GIFs, WebP, the pinned figure
+stack, and the GPU memory and RAM each clip was measured to need, beside
+whatever else runs there) and renders two clips at a time, each in its four
+variants, a clip that needs more than half of what is free running alone.
+Each clip's ten files come back as soon as it is done and are checked here
+(names, sizes, first bytes, and the fingerprint the node computed against
+this checkout's) before they are copied into the assets checkout and the
+clip is stamped; a run that is interrupted keeps every clip that arrived,
+and the next run renders only the rest. Ctrl-C ends everything the run
+started on the node. A run that cannot go on, for an archive larger than a
+node takes or a frame the run did not ask for, stops with a
+`clip_transport.NodeRunError` that says why in one line.
+
+To read the clips back before they are published, render with `PUBLISH=no`,
+run `make clip-codecs`, which reads every WebM in the assets checkout and
+confirms it is AV1 from the encoder its manifest line names, and then
+publish with `python scripts/publish_assets.py`.
+
+A clip that shows a simulated field is tied to what the engines compute,
+not to their source: its fingerprint covers `engine-digests.json`, the
+golden digests of the engines' NumPy numbers, which one CI job measures and
+checks (`make engine-digests RUN=<run id>` takes the file that job
+measured). Rewording an engine moves no clip; a change meant to move the
+engines' numbers moves the digests, and then every field clip is stale until
+it is rendered again. Scenes step their engine where
+[F61](docs/contributing/docs-and-figures.md#f61) says.
 
 Before a clip is encoded, every frame of it is held to the gates the figures
 pass ([F60](docs/contributing/docs-and-figures.md#f60)):
@@ -282,8 +361,9 @@ finding that is a decision goes in the gate's own exemption table, keyed for
 the clip the way that table keys a figure, with the reason. No CI job runs the
 audit, because CI cannot render a clip; the freshness check
 (`scripts/check_animation_freshness.py`) fails a change to a clip's drawing
-code, in `scripts/figures` or in the `phonometry._plot` helpers it draws
-with, until the clip is rendered again, and the render runs the audit.
+code, in `scripts/figures`, in the `phonometry._plot` helpers it draws with
+or in the encode path of `phonometry.io`, until the clip is rendered again,
+and the render runs the audit.
 
 After rendering, `make animations` and `make posters` publish what they
 wrote: `scripts/publish_assets.py` stages `images/` in the assets checkout,
@@ -300,6 +380,9 @@ Your commit in this repository is then two text files:
   was drawn by. The render stamps it, and so does `make posters`, because the
   poster extractor is part of that code: a change to how a poster is cut marks
   every clip stale, and re-extracting is the answer that renders nothing.
+  Each line also names the ffmpeg encoder that wrote the clip's WebM
+  (`av1_nvenc` or `libsvtav1`); re-extracting the posters keeps the one
+  recorded, and `make clip-codecs` checks every published WebM against it.
 - `assets.lock`, the assets commit the clips were published to.
 
 This works from any branch. A clip is published the moment it is rendered and

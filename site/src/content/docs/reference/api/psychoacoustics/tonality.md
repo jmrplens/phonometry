@@ -150,7 +150,7 @@ the margin to the criterion marked; a tone on or above the curve is
 prominent. The criterion family (tone-to-noise ratio, clause 11, or
 prominence ratio, clause 12) is recovered from `prominence_limit_db`.
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 **Parameters**

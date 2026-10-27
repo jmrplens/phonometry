@@ -323,7 +323,7 @@ class BuildingFrequencyEstimate(RichDisplay):
         The ``f = 46/h`` line against height on logarithmic axes, the ± 50 %
         band around it, and this estimate as a point.
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
 
         :param ax: Existing axes, or ``None`` to create a figure.

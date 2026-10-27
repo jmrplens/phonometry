@@ -783,6 +783,13 @@ jobs:
       # alike; a standard's title reproduced as printed keeps its own. Static,
       # stdlib only, so it runs here with the markdown checks.
       run: python scripts/check_em_dashes.py
+    - name: Every install command quotes its extras
+      # zsh reads the brackets of an extras requirement as a glob and stops
+      # before pip runs, so every install command a reader copies (the pages,
+      # the docstrings, the library's messages, the README, the llms files,
+      # the CHANGELOG) quotes the requirement that carries extras. Static,
+      # stdlib only, so it runs here with the markdown checks.
+      run: python scripts/check_quoted_extras.py
     - name: Every Spanish label keeps its accents, eñes and glossary terms
       # A translation typed without the Spanish keyboard layout reads fine to
       # every other gate, and twenty-nine figure labels shipped as
@@ -1398,6 +1405,67 @@ jobs:
         tests/simulation/test_write_fdtd_animation.py
         tests/simulation/test_write_elastic_fdtd_animation.py
         tests/simulation/test_video_job.py
+
+  # The FDTD engines' NumPy numbers, held to the golden digests in
+  # engine-digests.json. Their bits depend on the C library's libm and on
+  # NumPy's SIMD dispatch, so they are checked in the one environment the
+  # file records, which is this job's: Ubuntu 24.04 and its C library, glibc
+  # 2.39 (GitHub refreshes the image behind the label, not its release),
+  # Python 3.13, the pinned stack, and NumPy's AVX-512 kernels switched off,
+  # so whichever x86 runner this lands on computes the same bits. The
+  # measured file is kept as an artifact: a moved digest can be read there
+  # and, when the move is meant, committed with
+  # `make engine-digests RUN=<this run's id>`. A NumPy bump fails here on the
+  # environment line alone until that is done.
+  engine-digests:
+    name: FDTD engines hold their golden digests
+    runs-on: ubuntu-24.04
+    # Under a minute in its first five runs, and a hung test ends the run
+    # fifteen minutes after it started (pyproject.toml).
+    timeout-minutes: 25
+    permissions:
+      contents: read
+    steps:
+    - uses: actions/checkout@v7
+      with:
+        persist-credentials: false
+    - name: Set up Python 3.13
+      uses: actions/setup-python@v7
+      with:
+        python-version: "3.13"
+        cache: 'pip'
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt -r requirements-dev.txt
+        pip install -e .
+    # Assigned before it is written: echo would return its own status and
+    # hide the helper's, so a helper that fails would not fail the step.
+    - name: Name NumPy's AVX-512 kernels to switch off
+      id: avx512
+      run: |
+        features="$(python scripts/engine_digests.py --avx512-features)"
+        echo "features=$features" >> "$GITHUB_OUTPUT"
+    - name: Measure the engines' digests
+      env:
+        PHONOMETRY_ENGINE_DIGESTS: require
+        NPY_DISABLE_CPU_FEATURES: ${{ steps.avx512.outputs.features }}
+      run: python scripts/engine_digests.py --output engine-digests.measured.json
+    # A step of its own, which runs when the measurement fails: a moved digest
+    # fails the measurement, and this test names the scenario and the key.
+    # Not when the helper above failed, which would leave the kernels on.
+    - name: Hold the engines to their golden digests
+      if: (success() || failure()) && steps.avx512.outcome == 'success'
+      env:
+        PHONOMETRY_ENGINE_DIGESTS: require
+        NPY_DISABLE_CPU_FEATURES: ${{ steps.avx512.outputs.features }}
+      run: pytest -q -n0 tests/simulation/test_engine_golden_digests.py
+    - name: Keep the measured digests
+      if: always()
+      uses: actions/upload-artifact@v7
+      with:
+        name: engine-digests-measured
+        path: engine-digests.measured.json
 
   # Apple's MPS device, on the macOS runners that expose a working one
   # (macOS 14 reports MPS available but cannot allocate on it). It holds the

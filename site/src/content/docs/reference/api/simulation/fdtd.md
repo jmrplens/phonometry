@@ -62,7 +62,7 @@ edge, and second-order convergence under grid refinement.
 
 ```python
 ContourProbe(
-    sim: FDTD2D,
+    engine: FDTD2D,
     ix0: int,
     ix1: int,
     iy0: int,
@@ -105,13 +105,18 @@ float32 with Neumaier's compensated summation.
 | `positions` | Face-sample positions `(x, y)` [m], shape `(n_points, 2)`, ordered left, right, top, bottom face. |
 | `normals` | Outward unit normals of each sample, same shape. |
 | `frequencies` | The tracked frequencies [Hz]. |
-| `samples` | Number of steps accumulated since the last reset. |
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
 | TypeError | if `ix0`, `ix1`, `iy0` or `iy1` is a flag, a text or an array where a count goes. |
+
+### ContourProbe.n_samples
+
+*property*
+
+Number of DFT samples accumulated since the last reset, one per step.
 
 ### ContourProbe.phasors()
 
@@ -188,9 +193,9 @@ FDTD2D(
     *,
     rho: float | NDArray[np.float64] = 1.2,
     cfl: float = 0.6,
-    sponge_width: int = 0,
-    sponge_sides: Literal['left', 'right', 'top', 'bottom'] | Iterable[Literal['left', 'right', 'top', 'bottom']] | None = None,
-    sponge_reflection: float = 0.0001,
+    absorbing_layer_cells: int = 0,
+    absorbing_sides: Literal['left', 'right', 'top', 'bottom'] | Iterable[Literal['left', 'right', 'top', 'bottom']] | None = None,
+    absorbing_layer_reflection: float = 0.0001,
     damping: float | NDArray[np.float64] = 0.0,
     shape: tuple[int, int] | None = None,
     edge_impedance: Mapping[Literal['left', 'right', 'top', 'bottom'], float | NDArray[np.float64]] | None = None,
@@ -218,9 +223,9 @@ sides into absorbing or locally reacting boundaries. Sources are soft
 | `dx` | Grid spacing [m] (square cells). |
 | `rho` | Density map [kg/m3]; scalar or `(ny, nx)` array (default 1.2). |
 | `cfl` | Courant number $C_\mathrm{N} = c_{\max}\, \Delta t \sqrt{2} / \Delta x$ (Eq. 4.13); the explicit scheme is stable for $C_\mathrm{N} \le 1$ (Eq. 4.14) and values in `(0, 1)` are accepted. The default 0.6 keeps a wide stability margin with moderate numerical dispersion. |
-| `sponge_width` | Thickness of the absorbing layer in cells (0 = no absorbing sides). |
-| `sponge_sides` | Which sides absorb: a single side name or an iterable drawn from `{"left", "right", "top", "bottom"}` (default: all four when `sponge_width > 0`). `left`/`right` are the low/high column edges and `top`/`bottom` the low/high row edges (the default `imshow` origin). |
-| `sponge_reflection` | Target round-trip amplitude reflection of the sponge layer; sets the peak absorption rate. |
+| `absorbing_layer_cells` | Thickness of the absorbing (sponge) layer, in cells (default 0, no layer and no absorbing side). |
+| `absorbing_sides` | Which sides absorb: a single side name or an iterable drawn from `{"left", "right", "top", "bottom"}` (default: all four when `absorbing_layer_cells > 0`). `left`/`right` are the low/high column edges and `top`/`bottom` the low/high row edges (the default `imshow` origin). |
+| `absorbing_layer_reflection` | Target round-trip amplitude reflection of the sponge layer; sets the peak absorption rate. |
 | `damping` | Bulk amplitude decay rate [1/s]: a scalar applied to the whole field (a simple stand-in for air/wall absorption; `6.91 / T60` gives a `T60` seconds reverberant decay) or an `(ny, nx)` map for locally lossy regions, e.g. an equivalent fluid modelling a porous sample (plane waves inside a uniform lossy region follow $k = (\omega - j \sigma) / c$ with the real characteristic impedance $\rho c$). |
 | `shape` | Grid shape `(ny, nx)`, required only when `c` is a scalar. |
 | `edge_impedance` | Locally reacting boundary sides: a mapping from side name to a real specific acoustic impedance [Pa s/m], either a scalar or a per-edge-cell 1D array (length `ny` for `left`/ `right`, `nx` for `top`/`bottom`). Implements Eqs. (4.33)-(4.35); $Z = \rho c$ is a normal-incidence matched (anechoic) edge. A side cannot be both a sponge and an impedance boundary. |
@@ -231,7 +236,7 @@ sides into absorbing or locally reacting boundaries. Sources are soft
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `cfl`, `dx` or `sponge_reflection` is not a single number, `sponge_width` is a flag, a text or an array where a count goes, or `compute` is neither a [`Compute`](/phonometry/reference/api/simulation/compute/#compute) nor `None`. |
+| TypeError | if `cfl`, `dx` or `absorbing_layer_reflection` is not a single number, `absorbing_layer_cells` is a flag, a text or an array where a count goes, or `compute` is neither a [`Compute`](/phonometry/reference/api/simulation/compute/#compute) nor `None`. |
 | ValueError | for an argument out of its range, and for a `compute` that names a host: an engine steps in this process, and only [`fdtd_simulation`](/phonometry/reference/api/simulation/fdtd/#fdtd_simulation) runs on a node. |
 | ComputeImportError | when the library of the device `compute` asks for is not installed or does not import. |
 | ComputeDeviceError | when that device is not present, or fails a first small computation; with `fallback=True` the engine warns with [`ComputeFallbackWarning`](/phonometry/reference/api/simulation/compute/#computefallbackwarning) and steps on NumPy instead. |
@@ -293,16 +298,16 @@ radiated field itself is the quantity of interest).
 FDTD2D.add_plane_wave(
     direction: Literal['down', 'up', 'left', 'right'],
     *,
-    center: float,
-    width: float,
+    center_m: float,
+    half_width_m: float,
     amplitude: float = 1.0,
-    wavelength: float | None = None,
+    wavelength_m: float | None = None,
 ) -> None
 ```
 
 Superimpose a one-way plane wave packet as an initial condition.
 
-A Gaussian envelope (optionally carrying a sine at `wavelength`)
+A Gaussian envelope (optionally carrying a sine at `wavelength_m`)
 is written onto the pressure field, and the leapfrog-consistent
 particle velocity is written a half time step back, so the packet
 propagates only toward `direction` (the axes of
@@ -319,17 +324,17 @@ cells), as a physical incident wave would be.
 | Name | Description |
 | :--- | :--- |
 | `direction` | Travel direction, one of `"down"`, `"up"`, `"left"`, `"right"`. |
-| `center` | Envelope centre along the travel axis, in metres. |
-| `width` | Gaussian envelope width (the `1/e` half-width), in metres. |
-| `amplitude` | Peak pressure of the envelope, in pascals. |
-| `wavelength` | Optional carrier wavelength, in metres; `None` gives the pure Gaussian pulse. |
+| `center_m` | Envelope centre along the travel axis [m]. |
+| `half_width_m` | Gaussian envelope half-width $w$ [m], the `1/e` point of $\mathrm{e}^{-((x - x_0)/w)^2}$, as [`GaussianPulse.half_width_s`](/phonometry/reference/api/simulation/fdtd/#gaussianpulse) is in time. |
+| `amplitude` | Peak pressure of the envelope [Pa]. |
+| `wavelength_m` | Optional carrier wavelength [m]; `None` gives the pure Gaussian pulse. |
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | For an unknown direction, a non-positive or non-finite `width`/`wavelength`, or a non-finite `center`/`amplitude`. |
-| TypeError | if `amplitude`, `center`, `wavelength` or `width` is not a single number. |
+| ValueError | For an unknown direction, a non-positive or non-finite `half_width_m`/`wavelength_m`, or a non-finite `center_m`/`amplitude`. |
+| TypeError | if `amplitude`, `center_m`, `wavelength_m` or `half_width_m` is not a single number. |
 
 ### FDTD2D.add_source()
 
@@ -354,25 +359,25 @@ FDTD2D.energy() -> float
 
 Total acoustic field energy [J per metre of depth].
 
-### FDTD2D.host_field()
+### FDTD2D.numpy_field()
 
 ```python
-FDTD2D.host_field(name: Literal['p', 'vx', 'vy']) -> NDArray[np.floating]
+FDTD2D.numpy_field(field: Literal['p', 'vx', 'vy']) -> NDArray[np.floating]
 ```
 
-A NumPy copy of the stored field *name*, whatever the device.
+A NumPy copy of the stored *field*, in this process, whatever the device.
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
-| `name` | `"p"` (cell centres), `"vx"` or `"vy"` (faces). |
+| `field` | `"p"` (cell centres), `"vx"` or `"vy"` (faces). |
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `name` is not a text. |
+| TypeError | if `field` is not a text. |
 | ValueError | for a field the engine does not store. |
 
 ### FDTD2D.plot_geometry()
@@ -381,7 +386,7 @@ A NumPy copy of the stored field *name*, whatever the device.
 FDTD2D.plot_geometry(
     ax: Axes | None = None,
     *,
-    probes: ArrayLike | None = None,
+    probes: Iterable[tuple[int, int]] | None = None,
     language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
@@ -390,9 +395,9 @@ FDTD2D.plot_geometry(
 Draw the configured domain before running it.
 
 Domain extent, obstacles, sponge layers, impedance and rigid edges
-and the added sources, with optional probe positions previewed; no
+and the added sources, with optional probe cells previewed; no
 time stepping happens. Requires matplotlib
-(`pip install phonometry[plot]`); returns the
+(`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 **Parameters**
@@ -400,9 +405,16 @@ time stepping happens. Requires matplotlib
 | Name | Description |
 | :--- | :--- |
 | `ax` | Existing axes, or `None` to create a figure. |
-| `probes` | Optional probe positions `(x, y)` in metres, shape `(N, 2)` (the [`fdtd_simulation`](/phonometry/reference/api/simulation/fdtd/#fdtd_simulation) convention). |
+| `probes` | Optional probe cells as `(ix, iy)` index pairs, the cells [`FDTDRecording`](/phonometry/reference/api/simulation/fdtd/#fdtdrecording) takes. Each is drawn at its cell centre `((ix + 0.5) * dx, (iy + 0.5) * dx)`, where the run records it ([`FDTDResult.probe_positions`](/phonometry/reference/api/simulation/fdtd/#fdtdresult)). |
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the obstacle `imshow`. |
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | for a probe that is not a pair, or an index that is not a number. |
+| ValueError | for a probe of more or fewer than two indices, an index that is not whole, or a cell outside the grid or inside an obstacle, refused in the words a run uses. |
 
 ### FDTD2D.provenance
 
@@ -415,6 +427,7 @@ Where this engine steps: device, dtype and library versions.
 ```python
 FDTD2D.run(
     n_steps: int,
+    *,
     snapshot_every: int | None = None,
     snapshot_decimation: int = 1,
 ) -> NDArray[np.floating]
@@ -422,13 +435,14 @@ FDTD2D.run(
 
 Advance `n_steps` steps, optionally recording pressure frames.
 
-With `snapshot_every = k` a host copy of `p` is stored after
+With `snapshot_every = k` a NumPy copy of `p` is stored after
 every `k`-th step (and one of the initial state), keeping every
 `snapshot_decimation`-th cell along each axis; the stacked
 `(n_frames, ny', nx')` array plugs straight into a `FuncAnimation`
 `imshow` update. Without `snapshot_every` an empty array is
 returned and only the final state is kept (read it with
-`host_field`).
+`numpy_field`). The two counts are taken by name, as
+[`FDTDRecording`](/phonometry/reference/api/simulation/fdtd/#fdtdrecording) takes them.
 
 **Raises**
 
@@ -728,7 +742,7 @@ Source waveform at time `t` (seconds).
 ```python
 PlaneWaveSource(
     *,
-    direction: str,
+    direction: Literal['down', 'up', 'left', 'right'],
     waveform: Callable[[float], float],
     offset: int = 0,
     amplitude: float = 1.0,

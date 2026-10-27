@@ -513,7 +513,7 @@ InterauralCorrelationResult.plot(
 
 Plot the correlation function over the search window, per band.
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 ## late_lateral_average
@@ -667,7 +667,7 @@ LateLateralResult.plot(
 
 Plot the per-band late lateral level against the Table A.1 range.
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 ## LATERAL_WEIGHTINGS
@@ -711,7 +711,7 @@ LateralEnergyResult.plot(
 
 Plot the per-band lateral fraction against the Table A.1 range.
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 ## MAX_DIRECTIVITY_STEP_DEG
@@ -1187,7 +1187,7 @@ Plot the per-band sound strength against the Table A.1 range.
 
 With `ax` given, only the strength panel is drawn on it; otherwise a
 second panel shows the two levels G is the difference of. Requires
-matplotlib (`pip install phonometry[plot]`); returns the
+matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes` (or an array of two).
 
 ## source_directivity_limit
@@ -1355,7 +1355,7 @@ StageSupportResult.plot(
 
 Plot both supports per band against the Table C.1 ranges.
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 ## TABLE_A1

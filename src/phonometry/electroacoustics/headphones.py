@@ -649,7 +649,7 @@ class RatedImpedanceVerification(OwnsArrays):
     ) -> Axes:
         """Draw the modulus against frequency with the rated value and its 80 %.
 
-        Requires matplotlib (``pip install phonometry[plot]``).
+        Requires matplotlib (``pip install "phonometry[plot]"``).
 
         :param ax: Existing axes, or ``None`` to create a figure.
         :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -1035,7 +1035,7 @@ class ProgramCharacteristicVoltage(OwnsArrays):
     ) -> Axes:
         """Draw the band levels at the characteristic voltage and their 94 dB sum.
 
-        Requires matplotlib (``pip install phonometry[plot]``).
+        Requires matplotlib (``pip install "phonometry[plot]"``).
 
         :param ax: Existing axes, or ``None`` to create a figure.
         :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -1157,7 +1157,7 @@ class LimitingTestSignalCheck(RichDisplay):
     ) -> Axes:
         """Draw the spectrum against Table II, with the ratio in the title.
 
-        Requires matplotlib (``pip install phonometry[plot]``).
+        Requires matplotlib (``pip install "phonometry[plot]"``).
 
         :param ax: Existing axes, or ``None`` to create a figure.
         :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -1274,7 +1274,7 @@ class ProtectionVoltage(OwnsArrays):
     ) -> Axes:
         """Draw the sensitivity change against the e.m.f., with the 1 dB line.
 
-        Requires matplotlib (``pip install phonometry[plot]``).
+        Requires matplotlib (``pip install "phonometry[plot]"``).
 
         :param ax: Existing axes, or ``None`` to create a figure.
         :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -1394,7 +1394,7 @@ class CouplerFrequencyResponse(OwnsArrays):
 
         8.6.2.2 c): "the preferred scale has the same length representing
         50 dB as represents one decade of frequency (see IEC 60268-1 and
-        IEC 60263)". Requires matplotlib (``pip install phonometry[plot]``).
+        IEC 60263)". Requires matplotlib (``pip install "phonometry[plot]"``).
 
         :param ax: Existing axes, or ``None`` to create a figure.
         :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -1480,7 +1480,7 @@ class CrosstalkAttenuation(OwnsArrays):
     ) -> Axes:
         """Draw the attenuation against frequency.
 
-        Requires matplotlib (``pip install phonometry[plot]``).
+        Requires matplotlib (``pip install "phonometry[plot]"``).
 
         :param ax: Existing axes, or ``None`` to create a figure.
         :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -1595,7 +1595,7 @@ class FieldComparisonResponse(OwnsArrays):
         deviation of the results in each band should be indicated on the
         graph. The scales for the graph preferably shall be such that 50 dB
         is represented by the same length as one decade of frequency."
-        Requires matplotlib (``pip install phonometry[plot]``).
+        Requires matplotlib (``pip install "phonometry[plot]"``).
 
         :param ax: Existing axes, or ``None`` to create a figure.
         :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -1804,7 +1804,7 @@ class EarCanalFrequencyResponse(OwnsArrays):
         8.6.5.2 h): the results "may be tabulated or presented graphically,
         the scales being preferably chosen so that 50 dB and one decade of
         frequency are represented by the same length". Requires matplotlib
-        (``pip install phonometry[plot]``).
+        (``pip install "phonometry[plot]"``).
 
         :param ax: Existing axes, or ``None`` to create a figure.
         :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -1954,7 +1954,7 @@ class EarCanalMicrophoneVerification(RichDisplay):
     ) -> Axes:
         """Draw each requirement's value as a share of its limit.
 
-        Requires matplotlib (``pip install phonometry[plot]``).
+        Requires matplotlib (``pip install "phonometry[plot]"``).
 
         :param ax: Existing axes, or ``None`` to create a figure.
         :param language: Label language, ``"en"`` (default) or ``"es"``.

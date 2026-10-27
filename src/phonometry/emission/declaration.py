@@ -334,7 +334,7 @@ class NoiseEmissionDeclaration(RichDisplay):
         :raises ValueError: If ``engine`` is not ``"reportlab"`` or ``language``
             is unknown.
         :raises ImportError: If reportlab is not installed
-            (``pip install phonometry[report]``).
+            (``pip install "phonometry[report]"``).
         """
         from .._i18n import check_language
 

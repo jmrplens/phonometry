@@ -18,6 +18,7 @@ from ..theme import (
     FIELD_INK,
     FIELD_STROKE,
 )
+from ._core import _host
 
 if TYPE_CHECKING:
     from numpy.typing import NDArray
@@ -83,7 +84,11 @@ def _ducting_fields(
     frame times, the depth grid, the c(z) profile and the full-resolution
     energy maps for the trapping physics check.
     """
-    import fdtd2d
+    import clip_placement
+
+    from phonometry.simulation import FDTD2D, GaussianPulse
+
+    compute = clip_placement.compute_for("anim_fdtd_ducting")
 
     dx = 2.0
     ny, nx = 400, 1200  # 800 m depth x 2400 m range
@@ -95,11 +100,11 @@ def _ducting_fields(
     p_all, e_all = [], []
     times = np.zeros(0)
     for depth in _DUCT_SRC_DEPTHS:
-        sim = fdtd2d.FDTD2D(c_map, dx, rho=1025.0, sponge_width=30)
+        sim = FDTD2D(c_map, dx, rho=1025.0, absorbing_layer_cells=30, compute=compute)
         iy = round(depth / dx)
-        sim.add_source(fdtd2d.GaussianPulse(ix=100, iy=iy, half_width_s=width))
+        sim.add_source(GaussianPulse(ix=100, iy=iy, half_width_s=width))
         sim.add_source(
-            fdtd2d.GaussianPulse(
+            GaussianPulse(
                 ix=100,
                 iy=iy,
                 half_width_s=width,
@@ -107,17 +112,17 @@ def _ducting_fields(
                 amplitude=-1.0,
             )
         )
-        energy = np.zeros_like(sim.p)
+        energy = sim._backend.zeros(tuple(sim.p.shape))
         ps: list[Any] = []
         ts: list[float] = []
         for _ in range(every * n_frames):
             sim.step()
             energy += sim.p**2
             if sim.n % every == 0 and len(ps) < n_frames:
-                ps.append(sim.p[::2, ::2].astype(np.float32))
+                ps.append(_host(sim, sim.p[::2, ::2]))
                 ts.append(sim.time)
         p_all.append(np.stack(ps))
-        e_all.append(energy)
+        e_all.append(_host(sim, energy, dtype=np.float64))
         times = np.asarray(ts)
     energy_maps = np.stack(e_all)
     # Verdict overlay: the time-integrated p**2 map in dB (shared scale),

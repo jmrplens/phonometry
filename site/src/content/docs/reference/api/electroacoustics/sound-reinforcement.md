@@ -241,7 +241,7 @@ lines.
 Bars for $Z_\mathrm{S}$, $G_\mathrm{S}$ and $\Delta L_\text{nom}$
 accumulate into the total loop gain, with the 0 dB oscillation
 threshold of Equation (18.16) and the required stability margin
-marked. Requires matplotlib (`pip install phonometry[plot]`).
+marked. Requires matplotlib (`pip install "phonometry[plot]"`).
 
 ## open_microphone_correction
 

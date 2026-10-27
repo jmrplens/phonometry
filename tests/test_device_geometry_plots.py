@@ -653,26 +653,76 @@ def test_fdtd_domain_preview() -> None:
         343.0,
         0.05,
         shape=(40, 60),
-        sponge_width=6,
-        sponge_sides=("left", "right"),
+        absorbing_layer_cells=6,
+        absorbing_sides=("left", "right"),
         edge_impedance={"top": 413.0},
         obstacle_mask=mask,
     )
     sim.add_source(GaussianPulse(ix=8, iy=20, half_width_s=1e-3))
-    assert sim.sponge_width == 6
-    assert sim.sponge_sides == ("left", "right")
+    assert sim.absorbing_layer_cells == 6
+    assert sim.absorbing_sides == ("left", "right")
     assert set(sim.edge_impedance) == {"top"}
-    ax = sim.plot_geometry(probes=[(2.0, 1.0)])
+    ax = sim.plot_geometry(probes=[(39, 19)])
     labels = [t.get_text() for t in ax.get_legend().get_texts()]
     assert len(labels) == 5
-    bad_probes = np.zeros((2, 3))
-    with pytest.raises(ValueError, match=r"'probes' must have shape \(N, 2\)"):
-        sim.plot_geometry(probes=bad_probes)
+    with pytest.raises(ValueError, match=r"probes must hold \(ix, iy\) index pairs"):
+        sim.plot_geometry(probes=np.zeros((2, 3), dtype=int))
     # A plain rigid box keeps the record empty and still draws.
     plain = FDTD2D(343.0, 0.05, shape=(10, 10))
-    assert plain.sponge_sides == ()
+    assert plain.absorbing_sides == ()
     assert plain.edge_impedance == {}
     assert plain.plot_geometry() is not None
+
+
+def _probe_markers(ax: Axes) -> np.ndarray:
+    """The ``(x, y)`` of the probe dots a domain preview drew, in metres."""
+    (dots,) = [line for line in ax.get_lines() if line.get_marker() == "o"]
+    return np.column_stack([dots.get_xdata(), dots.get_ydata()])
+
+
+@pytest.mark.parametrize(
+    ("probe", "match"),
+    [
+        ((60, 5), r"probe \(60, 5\) lies outside the grid"),
+        ((-1, 5), r"probe \(-1, 5\) lies outside the grid"),
+        ((29, 20), r"probe \(29, 20\) lies inside an obstacle"),
+        ((2.5, 5), "'probe ix' must be a whole number"),
+    ],
+)
+def test_fdtd_domain_preview_refuses_a_probe_the_run_would_refuse(
+    probe: tuple[float, int], match: str
+) -> None:
+    from phonometry.simulation import FDTD2D
+
+    mask = np.zeros((40, 60), dtype=bool)
+    mask[15:25, 28:31] = True
+    sim = FDTD2D(343.0, 0.05, shape=(40, 60), obstacle_mask=mask)
+    with pytest.raises(ValueError, match=match):
+        sim.plot_geometry(probes=[probe])  # type: ignore[list-item]
+
+
+def test_fdtd_domain_preview_places_the_probes_where_the_run_records_them() -> None:
+    from phonometry.simulation import (
+        FDTD2D,
+        FDTDRecording,
+        FDTDRun,
+        GaussianPulse,
+        fdtd_simulation,
+    )
+
+    recording = FDTDRecording(probes=[(5, 3), (17, 9)])
+    run = FDTDRun(
+        c=343.0,
+        dx=0.05,
+        duration_s=2e-3,
+        shape=(12, 20),
+        sources=[GaussianPulse(ix=10, iy=6, half_width_s=2e-4)],
+        recording=recording,
+    )
+    result = fdtd_simulation(run)
+    sim = FDTD2D(343.0, 0.05, shape=(12, 20))
+    ax = sim.plot_geometry(probes=run.recording.probes)
+    np.testing.assert_array_equal(_probe_markers(ax), result.probe_positions)
 
 
 def test_device_geometry_language_validation() -> None:

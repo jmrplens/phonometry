@@ -168,7 +168,7 @@ HeavyImpactImprovementResult.plot(
 
 Plot the improvement `ΔLr` per band.
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 ## laboratory_floor_covering_improvement
@@ -344,7 +344,7 @@ LaboratoryFloorCoveringImprovementResult.plot(
 
 Plot the improvement `ΔL` per band with its weighted reduction.
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 **Parameters**
@@ -464,7 +464,7 @@ LaboratoryLiningImprovementResult.plot(
 
 Plot the improvement `ΔR` per band with its single numbers.
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 ## LiningCuringCheck
@@ -538,5 +538,5 @@ LiningCuringCheck.plot(
 
 Plot the admissible curing time and time lag with this measurement.
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.

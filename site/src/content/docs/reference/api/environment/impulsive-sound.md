@@ -258,7 +258,7 @@ ImpulseProminenceResult.plot(
 
 Plot the adjustment curve `KI(P)` with the impulses marked.
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 ### ImpulseProminenceResult.prominence
@@ -323,7 +323,7 @@ and a footer with the fixed disclaimer.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `language` is not one of the supported languages, or if `engine` is not `"reportlab"`. |
-| ImportError | If reportlab is not installed (`pip install phonometry[report]`), or matplotlib is missing for the embedded figure (`pip install phonometry[plot]`). |
+| ImportError | If reportlab is not installed (`pip install "phonometry[report]"`), or matplotlib is missing for the embedded figure (`pip install "phonometry[plot]"`). |
 
 ## ImpulseProminenceWarning
 
@@ -440,7 +440,7 @@ Draws the level history, the starting/end points of each onset, the
 least-squares onset line and the level difference of the governing
 impulse, annotated with the prominence, adjustment and category.
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 ### ImpulsiveSoundResult.prominence
@@ -492,7 +492,7 @@ LevelHistory.plot(
 
 Plot the level trace against time.
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 ## predicted_prominence

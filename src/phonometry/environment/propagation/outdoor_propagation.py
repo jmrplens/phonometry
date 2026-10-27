@@ -408,7 +408,7 @@ class OutdoorAttenuation(OwnsArrays):
     ) -> Axes:
         """Plot the stacked per-band attenuation terms with the total.
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from ..._i18n import check_language

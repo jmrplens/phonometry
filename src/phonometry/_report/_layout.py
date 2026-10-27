@@ -46,15 +46,15 @@ if TYPE_CHECKING:
 #: Installation hints for the three soft dependencies of the report.
 _REPORTLAB_HINT = (
     "Rendering a report requires reportlab. Install it with: "
-    "pip install phonometry[report]"
+    'pip install "phonometry[report]"'
 )
 _MATPLOTLIB_HINT = (
     "Rendering the report figure requires matplotlib. Install it with: "
-    "pip install phonometry[plot]"
+    'pip install "phonometry[plot]"'
 )
 _SVGLIB_HINT = (
     "Embedding the report figure as vector graphics requires svglib. Install "
-    "it with: pip install phonometry[report]"
+    'it with: pip install "phonometry[report]"'
 )
 
 #: Accent and light shades used for the header row and the zebra striping,

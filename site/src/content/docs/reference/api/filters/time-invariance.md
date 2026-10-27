@@ -232,7 +232,7 @@ TimeInvarianceResult.plot(
 
 Plot every band's deviation from Formula (17), one line per rate.
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 **Parameters**

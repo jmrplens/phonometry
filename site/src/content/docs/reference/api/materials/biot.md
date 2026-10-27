@@ -310,7 +310,7 @@ BiotWavesResult.plot(
 
 Plot the three Biot wavenumbers against frequency.
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 ## frame_bulk_modulus

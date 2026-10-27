@@ -216,7 +216,7 @@ Plot the far-field directivity (beam) pattern on a polar axes.
 Draws the directivity in dB against the polar angle: one curve per
 `ka` value as a single family (still one concept, the directivity
 pattern). A polar axes is created when `ax` is `None`. Requires
-matplotlib (`pip install phonometry[plot]`).
+matplotlib (`pip install "phonometry[plot]"`).
 
 **Parameters**
 
@@ -375,7 +375,7 @@ Plot the normalized piston resistance and reactance against `ka`.
 
 Reproduces the classic Beranek & Mellow figure: `R1` rising to 1 and
 `X1` peaking then decaying, over the `ka` range of the result.
-Requires matplotlib (`pip install phonometry[plot]`).
+Requires matplotlib (`pip install "phonometry[plot]"`).
 
 **Parameters**
 
@@ -397,7 +397,7 @@ RadiatingPistonResult.plot_geometry(
 
 Draw the baffled piston to scale, with its directivity lobe.
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 **Parameters**

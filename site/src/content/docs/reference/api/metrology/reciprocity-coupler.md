@@ -217,7 +217,7 @@ GPa·s/m³, the unit of Tables B.1 and B.2.
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the real-part curve. |
 
-**Returns:** The axes. Requires matplotlib (`pip install phonometry[plot]`).
+**Returns:** The axes. Requires matplotlib (`pip install "phonometry[plot]"`).
 
 ## check_coupler
 
@@ -497,7 +497,7 @@ Plot each condition as its margin to the limit it is held to.
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to `barh`. |
 
-**Returns:** The axes. Requires matplotlib (`pip install phonometry[plot]`).
+**Returns:** The axes. Requires matplotlib (`pip install "phonometry[plot]"`).
 
 ### CouplerCheck.ratio_recommended
 
@@ -641,7 +641,7 @@ Plot each component against frequency.
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the first component's curve. |
 
-**Returns:** The axes. Requires matplotlib (`pip install phonometry[plot]`).
+**Returns:** The axes. Requires matplotlib (`pip install "phonometry[plot]"`).
 
 ## CouplerTransferImpedance
 
@@ -705,7 +705,7 @@ impedance, in dB, against frequency.
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the heat-conduction curve. |
 
-**Returns:** The axes. Requires matplotlib (`pip install phonometry[plot]`).
+**Returns:** The axes. Requires matplotlib (`pip install "phonometry[plot]"`).
 
 ### CouplerTransferImpedance.transfer_impedance_pa_s_m3
 
@@ -815,7 +815,7 @@ Plot $|\Delta_\mathrm{H}|$ in dB and its phase against frequency.
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the modulus curve. |
 
-**Returns:** The axes. Requires matplotlib (`pip install phonometry[plot]`).
+**Returns:** The axes. Requires matplotlib (`pip install "phonometry[plot]"`).
 
 ### HeatConductionCorrection.volume_factor
 
@@ -1360,4 +1360,4 @@ Plot the correction against frequency, with the rows of Table C.3.
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the correction curve. |
 
-**Returns:** The axes. Requires matplotlib (`pip install phonometry[plot]`).
+**Returns:** The axes. Requires matplotlib (`pip install "phonometry[plot]"`).

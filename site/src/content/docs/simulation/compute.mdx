@@ -19,8 +19,8 @@ engines of `phonometry.simulation`, the acoustic `FDTD2D` behind
 `fdtd_simulation` and the elastic `ElasticFDTD2D` behind
 `elastic_fdtd_simulation`, step on NumPy by default, and on an NVIDIA GPU
 through CuPy or on PyTorch (on a CPU, an NVIDIA GPU or Apple's MPS) when you
-ask. It is one stepping code for all of them: each engine builds its maps on
-the host in NumPy float64 when it is constructed, hands them to the device
+ask. It is one stepping code for all of them: each engine builds its maps in
+NumPy float64, in this process, when it is constructed, hands them to the device
 once, and from then on touches its fields only with operations of the Python
 array API standard, which the three libraries implement.
 
@@ -31,6 +31,8 @@ about the numbers on each device. The physics, the sources and the
 boundaries are the same everywhere; they are explained in
 [2D FDTD wave simulation](/phonometry/simulation/fdtd-simulation/) and
 [Elastic waves and fluid-solid coupling](/phonometry/simulation/elastic-waves/).
+[Where heavy work runs](/phonometry/simulation/where-it-runs/) maps the
+devices, the nodes and the encoders in one place.
 
 ## 1. Asking for a device: `Compute`
 
@@ -118,7 +120,10 @@ pip install "phonometry[torch]"
 ```
 
 Adding that index with `--extra-index-url` is not enough: pip takes the
-newest torch it finds on either index, PyPI's CUDA build included.
+newest torch it finds on either index, PyPI's CUDA build included. When
+torch is missing, the `ComputeImportError` an engine raises gives the same
+advice: these two commands for `"torch:cpu"`, and the extra alone for
+`"torch:cuda"` and `"torch:mps"`.
 
 `"torch:mps"` needs a Mac with Apple silicon and steps in float32 only. CuPy
 needs an NVIDIA GPU and its driver; the proof of section 6 ran on
@@ -171,12 +176,13 @@ PHONOMETRY_COMPUTE=cupy:1,fallback python study.py
 ```
 
 A host, `Compute(host="nas")` or `@nas` in the variable, sends a whole run to
-another machine, and only the two simulation functions take one:
-`fdtd_simulation(run, compute=...)` and
+another machine, and only the two simulation functions and the two video
+writers take one: `fdtd_simulation(run, compute=...)` and
 `elastic_fdtd_simulation(run, compute=...)` run there and return the record a
-run here returns. An engine built directly steps in this process, and it
-raises `ValueError` for a placement that names a host, wherever the placement
-came from. [Sending a simulation to a remote node](/phonometry/simulation/remote-node/)
+run here returns, and the writers bring back the video too. An engine built
+directly steps in this process, and it raises `ValueError` for a placement
+that names a host, wherever the placement came from.
+[Sending a simulation to a remote node](/phonometry/simulation/remote-node/)
 says how to name a node and set one up.
 
 **Threads and processes.** `use()` holds its record in a context variable.
@@ -297,10 +303,10 @@ print(on_gpu.provenance)
 An engine's fields live on its device. `sim.p`, `sim.vx` and `sim.vy` of an
 `FDTD2D`, the five stress and velocity arrays of an `ElasticFDTD2D`, its
 synthetic pressure `sim.p` and `sim.collocated(field)` are NumPy arrays on
-NumPy and the device library's own arrays elsewhere. `sim.host_field(name)`
+NumPy and the device library's own arrays elsewhere. `sim.numpy_field(field)`
 returns a NumPy copy of a stored field on every device, and `sim.run(...)`
-returns its snapshot frames on the host. What a simulation function returns
-is on the host already: a result holds NumPy arrays whatever device stepped.
+returns its snapshot frames as NumPy arrays. What a simulation function
+returns is NumPy already: a result holds NumPy arrays whatever device stepped.
 On CuPy with a `device_index` other than 0, a write into a field from
 outside the engine, such as `sim.p[10, 10] = 1.0`, runs on CuPy's current
 device, so make it inside `with cupy.cuda.Device(i):` with `i` the engine's
@@ -310,7 +316,7 @@ index.
 sim = simulation.FDTD2D(343.0, 0.01, shape=(100, 150), compute=simulation.Compute(dtype="float32"))
 sim.add_source(simulation.GaussianPulse(ix=30, iy=50, half_width_s=3.0e-4))
 frames = sim.run(200, snapshot_every=50, snapshot_decimation=2)
-field = sim.host_field("p")
+field = sim.numpy_field("p")
 print(frames.shape, frames.dtype, type(field).__name__, sim.provenance.device)
 # (5, 50, 75) float32 ndarray cpu
 ```
@@ -327,8 +333,9 @@ decimated snapshots in two of them.
 
 **NumPy, float64: bit-identical.** Identical inputs give bit-identical
 outputs on the same platform: no random numbers, and every operation in a
-fixed order. The NumPy path is also held bit for bit to a frozen copy of the
-two engines as they stood before they could step anywhere else, so the other
+fixed order. The NumPy path is also held to SHA-256 digests of every number
+those scenarios give, recorded from the two engines as they stood before they
+could step anywhere else (`engine-digests.json`, checked in CI), so the other
 devices cost the NumPy numbers nothing.
 
 **CuPy, float64: bit-identical fields, as measured.** On an NVIDIA GeForce RTX
@@ -403,8 +410,8 @@ frame of a 400 by 600 cell grid takes 1.9 MB, and a run keeps one every
 `snapshot_decimation=d` keeps every `d`-th cell along each axis, starting
 with the first, so a frame is $\lceil n_y/d \rceil$ by $\lceil n_x/d \rceil$:
 `d = 2` stores a quarter of the cells and `d = 4` a sixteenth. On a GPU the
-field is sliced on the device first, and only the kept cells cross to the
-host.
+field is sliced on the device first, and only the kept cells are copied into
+NumPy.
 
 The option has the same name and the same rule everywhere:
 `FDTDRecording(snapshot_every=, snapshot_decimation=)`,

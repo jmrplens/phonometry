@@ -526,10 +526,36 @@ assets:
 # clip is encoded, every frame of its four variants is held to the figure
 # gates (see `animation-audit`): a finding stops the render, naming the clip,
 # the variant, the frame and the finding, and nothing of the clip is encoded
-# or published.
+# or published. ANIM=anim_<name> renders one clip; CLIP_ENCODER=av1_nvenc
+# encodes on an NVIDIA GPU here (the default is SVT-AV1 on the CPU,
+# publishable with SVT-AV1 4, the major the clips are calibrated on:
+# `clip-ffmpeg` fetches the build the node image pins, to put first on
+# PATH). With a host in PHONOMETRY_COMPUTE
+# (PHONOMETRY_COMPUTE=cupy@nas make animations), the clips are rendered on
+# that node (scripts/clip_transport.py), only the stale ones unless FORCE=1,
+# and copied and stamped here as each comes back; FORCE=1 without a host
+# there stops the run, as only a node run skips the fresh clips. With a GPU
+# here (PHONOMETRY_COMPUTE=cupy), two clips render at a time, as on a node.
 animations: assets
-	$(FIGURE_LANGUAGE_ENV) $(PYTHON) scripts/generate_graphs.py --animations
+	$(FIGURE_LANGUAGE_ENV) $(PYTHON) scripts/generate_graphs.py --animations $(if $(ANIM),--anim $(ANIM)) $(if $(CLIP_ENCODER),--clip-encoder $(CLIP_ENCODER)) $(if $(FORCE),--force)
 	@if [ "$(PUBLISH)" != "no" ]; then $(PYTHON) scripts/publish_assets.py; fi
+
+# Whether the node in PHONOMETRY_COMPUTE can render the clips: its encoder,
+# a software AV1 decoder, WebP, the pinned figure stack, the free memory of
+# its GPU, and one NVENC frame or the SVT-AV1 the clips were calibrated for.
+# Nothing is rendered.
+clip-node-check:
+	$(PYTHON) scripts/clip_transport.py --check $(if $(CLIP_ENCODER),--clip-encoder $(CLIP_ENCODER))
+
+# The ffmpeg build the node image pins (docker/node/Dockerfile), for a CPU
+# render of the clips on this machine (Linux on x86_64): downloaded once into
+# ~/.cache/phonometry/ffmpeg/<sha256>, checked against the pinned SHA-256,
+# cut to ffmpeg and ffprobe, and its directory printed, for
+#   ffmpeg_dir="$(make -s clip-ffmpeg)" && PATH="$ffmpeg_dir:$PATH" make animations
+# A fetch that fails says why in one line and exits 1, so the && stops there
+# and nothing runs with an empty entry on PATH.
+clip-ffmpeg:
+	@$(PYTHON) scripts/node_ffmpeg.py fetch
 
 # The clips are never regenerated in CI, so nothing else can tell that the
 # code drawing one has moved since the clip was published -- which is how
@@ -540,6 +566,13 @@ animations: assets
 # looks in the assets checkout for the files; CI hands it a manifest instead.
 animation-freshness:
 	$(PYTHON) scripts/check_animation_freshness.py
+
+# Every published clip is AV1 in WebM, written by the encoder its manifest
+# line names (scripts/check_clip_codecs.py), read with the ffprobe on PATH.
+# Runs where the clips are: after a render, before publishing; CI never
+# fetches them.
+clip-codecs:
+	$(PYTHON) scripts/check_clip_codecs.py
 
 # The gates above read the committed SVGs for a label a line strikes through
 # or a later fill paints over, a mark over a tick label, a legend or a label's
@@ -553,12 +586,13 @@ animation-freshness:
 # the render: every frame of every clip in its four variants, no video, no
 # fingerprint stamped, nothing published, and every finding listed with the
 # frames it holds over. ANIM=anim_<name> inspects one clip; the field clips
-# need their simulation, so the GPU settings in .env. No CI job runs it,
+# step their simulation; with a host in PHONOMETRY_COMPUTE the inspection
+# runs on that node. No CI job runs it,
 # because CI cannot render a clip: the freshness check fails a change to a
-# clip's drawing code (scripts/figures, and the phonometry._plot helpers it
-# draws with) until the clip is rendered again, and the render runs this
-# audit. A change to the audit or to a checker moves no fingerprint: run this
-# over every clip after one.
+# clip's drawing code (scripts/figures, the phonometry._plot helpers it draws
+# with, and the encode path of phonometry.io) until the clip is rendered
+# again, and the render runs this audit. A change to the audit or to a
+# checker moves no fingerprint: run this over every clip after one.
 animation-audit:
 	$(FIGURE_ENV) $(PYTHON) scripts/generate_graphs.py --animations --audit-only $(if $(ANIM),--anim $(ANIM))
 
@@ -757,13 +791,6 @@ coverage:
 test-perf:
 	$(TEST_ENV) NUMBA_DISABLE_JIT=0 $(PYTHON) -m pytest -n auto tests/
 
-# The FDTD GPU parity, which needs a CUDA device. There is one either way: a
-# local CuPy install, or the machine named by PHONO_GPU_HOST in .env, which is
-# where the animation renders already run. With neither, every GPU case skips
-# and says which of the two is missing.
-test-gpu:
-	$(TEST_ENV) $(PYTHON) -m pytest -rs tests/test_fdtd_gpu_parity.py
-
 # The CuPy proof in gpu-parity.lock, run where CuPy and an NVIDIA GPU are
 # (docker/node/Dockerfile builds such an environment). Rerun it after any
 # change to the engines, fdtd.py, elastic_fdtd.py and _backends.py under
@@ -782,12 +809,29 @@ gpu-parity:
 node-image:
 	PYTHONPATH=src $(PYTHON) scripts/node_image.py --host "$(HOST)" --target "$(or $(TARGET),gpu)"
 
+# The FDTD engines' NumPy numbers as golden digests (engine-digests.json). The
+# bits depend on the environment the file records (the C library's libm and
+# NumPy's SIMD dispatch), and the committed file is the one the engine-digests
+# CI job measured: when a change is meant to move what the engines compute,
+# take that job's artifact with `make engine-digests RUN=<run id>`. Without
+# RUN this measures here and compares, on NumPy whatever PHONOMETRY_COMPUTE
+# says and with NumPy's AVX-512 kernels switched off as in that job; where the
+# environment differs from the file's, a moved digest may be that alone.
+engine-digests:
+	@if [ -n "$(RUN)" ]; then \
+		rm -rf build/engine-digests && \
+		gh run download "$(RUN)" -n engine-digests-measured -D build/engine-digests && \
+		cp build/engine-digests/engine-digests.measured.json engine-digests.json; \
+	else \
+		env -u PHONOMETRY_COMPUTE NPY_DISABLE_CPU_FEATURES="$$(PYTHONPATH=src $(PYTHON) scripts/engine_digests.py --avx512-features)" PYTHONPATH=src $(PYTHON) scripts/engine_digests.py; \
+	fi
+
 check: lint security test
 
 .PHONY: install lint format security snyk sonar graphs figure-contrast figure-language \
 	figure-annotations figure-ticks figures reports \
-	assets animations animation-freshness animation-audit posters brand lighthouse \
-	llms pypi-readme api-docs site-reports conformance install-hooks test test-perf test-gpu gpu-parity node-image coverage check \
+	assets animations clip-node-check clip-ffmpeg animation-freshness clip-codecs animation-audit posters brand lighthouse \
+	llms pypi-readme api-docs site-reports conformance install-hooks test test-perf gpu-parity node-image engine-digests coverage check \
 	snippets snippets-static claims subscripts euler-number docstring-math language-forwarding \
 	fence-names fence-readers decimal-comma spanish-accents figure-decimal-point figure-legends figure-tick-clearance \
 	figure-text-clearance figure-minus-sign control-characters hazards dead-constants raises-blocks reference-values \

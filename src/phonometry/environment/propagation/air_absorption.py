@@ -479,7 +479,7 @@ class AtmosphericAttenuation(OwnsArrays):
 
         Draws ``alpha`` (in dB/km, as Table 1 tabulates it) on a logarithmic
         frequency axis, the classic ISO 9613-1 curve for the stored atmospheric
-        conditions. Requires matplotlib (``pip install phonometry[plot]``);
+        conditions. Requires matplotlib (``pip install "phonometry[plot]"``);
         returns the :class:`~matplotlib.axes.Axes` and never calls ``plt.show``.
 
         :param ax: Existing axes, or ``None`` to create a figure.

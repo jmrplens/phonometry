@@ -278,7 +278,7 @@ PrecisionSoundPowerResult.plot(
 
 Plot the precision `LW` spectrum with the A-weighted total.
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 ### PrecisionSoundPowerResult.report()
@@ -322,7 +322,7 @@ energy-averaged level `Lp'`.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` is not `"reportlab"` or `language` is unknown. |
-| ImportError | If reportlab (or, for the figure, matplotlib) is not installed (`pip install phonometry[report]`). |
+| ImportError | If reportlab (or, for the figure, matplotlib) is not installed (`pip install "phonometry[report]"`). |
 
 ## sound_power_anechoic
 

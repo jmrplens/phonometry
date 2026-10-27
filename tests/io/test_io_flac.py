@@ -205,5 +205,5 @@ def test_flac_target_without_the_extra_names_it(
         return real_import(name, *args, **kwargs)  # type: ignore[arg-type]
 
     monkeypatch.setattr(builtins, "__import__", blocked)
-    with pytest.raises(ImportError, match=r"phonometry\[audio\]"):
+    with pytest.raises(ImportError, match=r'pip install "phonometry\[audio\]"'):
         write(tmp_path / "x.flac", np.zeros(4), FS)

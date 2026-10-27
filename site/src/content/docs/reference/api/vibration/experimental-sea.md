@@ -424,7 +424,7 @@ The two coupling loss factors and the two internal loss factors on one
 log axis: their ordering is the whole diagnosis, because SEA is only
 valid where the coupling stays below the internal damping.
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 **Parameters**

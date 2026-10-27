@@ -293,7 +293,7 @@ class NCResult(OwnsArrays):
     ) -> Axes:
         """Plot the measured spectrum against the NC curves.
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from .._i18n import check_language
@@ -336,8 +336,8 @@ class NCResult(OwnsArrays):
         :return: The written ``path`` as a :class:`str`.
         :raises ValueError: If ``engine`` is not ``"reportlab"``.
         :raises ImportError: If reportlab is not installed
-            (``pip install phonometry[report]``), or matplotlib is missing for
-            the embedded figure (``pip install phonometry[plot]``).
+            (``pip install "phonometry[report]"``), or matplotlib is missing for
+            the embedded figure (``pip install "phonometry[plot]"``).
         """
         from .._i18n import check_language
 
@@ -484,7 +484,7 @@ class RCResult(OwnsArrays):
     ) -> Axes:
         """Plot the measured spectrum against the reference RC Mark II curve.
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from .._i18n import check_language
@@ -526,8 +526,8 @@ class RCResult(OwnsArrays):
         :return: The written ``path`` as a :class:`str`.
         :raises ValueError: If ``engine`` is not ``"reportlab"``.
         :raises ImportError: If reportlab is not installed
-            (``pip install phonometry[report]``), or matplotlib is missing for
-            the embedded figure (``pip install phonometry[plot]``).
+            (``pip install "phonometry[report]"``), or matplotlib is missing for
+            the embedded figure (``pip install "phonometry[plot]"``).
         """
         from .._i18n import check_language
 

@@ -636,7 +636,7 @@ class IntensityInstrumentComplianceResult(OwnsArrays):
         """Plot the measured ``delta_pI0`` over the Table 2 class masks.
 
         See :func:`phonometry._plot.emission.plot_intensity_class`. Requires
-        matplotlib (``pip install phonometry[plot]``) and returns the
+        matplotlib (``pip install "phonometry[plot]"``) and returns the
         :class:`~matplotlib.axes.Axes`.
 
         :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -675,8 +675,8 @@ class IntensityInstrumentComplianceResult(OwnsArrays):
         :return: The written ``path`` as a :class:`str`.
         :raises ValueError: If ``engine`` is not ``"reportlab"``.
         :raises ImportError: If reportlab is not installed
-            (``pip install phonometry[report]``), or matplotlib is missing for
-            the embedded figure (``pip install phonometry[plot]``).
+            (``pip install "phonometry[report]"``), or matplotlib is missing for
+            the embedded figure (``pip install "phonometry[plot]"``).
         """
         from .._i18n import check_language
 

@@ -639,8 +639,8 @@ class MicrophoneCharacteristics(OwnsArrays):
         :raises ValueError: If ``engine`` is not ``"reportlab"`` or ``language``
             is unknown.
         :raises ImportError: If reportlab is not installed
-            (``pip install phonometry[report]``), or matplotlib is missing for
-            the embedded figure (``pip install phonometry[plot]``).
+            (``pip install "phonometry[report]"``), or matplotlib is missing for
+            the embedded figure (``pip install "phonometry[plot]"``).
         """
         from .._i18n import check_language
 
@@ -679,7 +679,7 @@ class MicrophoneCharacteristics(OwnsArrays):
         :raises ValueError: If ``quantity`` or ``language`` is unknown, or the
             result carries no data for ``quantity``.
         :raises ImportError: If matplotlib is not installed
-            (``pip install phonometry[plot]``).
+            (``pip install "phonometry[plot]"``).
         """
         from .._i18n import check_language
         from .._plot.electroacoustics import plot_microphone_characteristics

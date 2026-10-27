@@ -1,8 +1,11 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
 """Lamb's problem: three speeds, and the surface wave the boundary makes."""
 
+from __future__ import annotations
+
+from dataclasses import dataclass
 from functools import lru_cache
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -17,6 +20,19 @@ from ..theme import (
     FIELD_INK,
     FIELD_STROKE,
 )
+from ._core import _host
+
+if TYPE_CHECKING:
+    from collections.abc import Sequence
+
+    from matplotlib.figure import Figure
+    from matplotlib.gridspec import SubplotSpec
+    from matplotlib.image import AxesImage
+    from matplotlib.lines import Line2D
+    from matplotlib.patches import Circle
+    from matplotlib.patheffects import AbstractPathEffect
+    from matplotlib.text import Text
+    from numpy.typing import NDArray
 
 # Aluminium half-space, the material of the still figure this clip promotes
 # (simulation/elastic-waves.mdx section 3) and of the solver's own Rayleigh
@@ -102,8 +118,11 @@ def _halfspace_fields() -> tuple[Any, Any, Any, Any, Any, float]:
     histories, the frame times and the Rayleigh speed measured off the free
     run's probes.
     """
+    import clip_placement
+
     from phonometry import simulation
 
+    compute = clip_placement.compute_for("anim_elastic_halfspace_waves")
     dx = _HS_DX
     dt = 0.6 * dx / (_HS_CP * float(np.sqrt(2.0)))
     corner = float(np.hypot(_HS_HALF * dx, _HS_HALF * dx))
@@ -128,15 +147,18 @@ def _halfspace_fields() -> tuple[Any, Any, Any, Any, Any, float]:
             dx,
             rho=_HS_RHO,
             shape=(_HS_NY, _HS_NX),
-            sponge_width=_HS_SPONGE,
-            sponge_sides=("left", "right", "bottom"),
+            absorbing_layer_cells=_HS_SPONGE,
+            absorbing_sides=("left", "right", "bottom"),
             free_sides=("top",) if free else None,
+            compute=compute,
         )
         sim.add_source(
             simulation.ForceSource(
                 ix=src_ix, iy=0, direction="y", amplitude=1e6, waveform=pulse
             )
         )
+        xp = sim._backend.xp
+        probe_cells = sim._backend.index(np.asarray(probe_cols))
         frames: list[Any] = []
         probe: list[Any] = []
         ts: list[float] = []
@@ -144,11 +166,11 @@ def _halfspace_fields() -> tuple[Any, Any, Any, Any, Any, float]:
             sim.step()
             if sim.n % every == 0:
                 vy = sim.collocated("vy")
-                frames.append(vy[rows, cols].astype(np.float32))
-                probe.append([float(vy[0, probe_cols[0]]), float(vy[0, probe_cols[1]])])
+                frames.append(_host(sim, vy[rows, cols]))
+                probe.append(xp.take(vy[0], probe_cells))
                 ts.append(sim.time)
         stacks.append(np.stack(frames))
-        traces.append(np.asarray(probe, dtype=np.float32))
+        traces.append(_host(sim, xp.stack(probe)))
         times = np.asarray(ts)
     # The surface train is the largest thing either probe ever sees on the
     # free run, so the speed is the peak-to-peak time of flight over the
@@ -166,6 +188,203 @@ def _halfspace_fields() -> tuple[Any, Any, Any, Any, Any, float]:
         times,
         c_meas,
     )
+
+
+@dataclass(frozen=True)
+class _HsPanel:
+    """The artists of one field panel of the halfspace clip that move.
+
+    :ivar im: The field image.
+    :ivar arcs: The P and S arcs, dotted at ``c t`` round the impact.
+    :ivar labels: The P and S letters riding the arcs.
+    :ivar mark: The two Rayleigh markers on the surface.
+    :ivar r_lab: The Rayleigh letter beside the right-hand marker.
+    :ivar v_txt: The verdict pill.
+    """
+
+    im: AxesImage
+    arcs: tuple[Circle, Circle]
+    labels: tuple[Text, Text]
+    mark: Line2D
+    r_lab: Text
+    v_txt: Text
+
+
+def _hs_field_panel(
+    fig: Figure,
+    cell: SubplotSpec,
+    data: NDArray[np.float32],
+    title: str,
+    *,
+    vmax: float,
+    free: bool,
+    bottom: bool,
+    outline: Sequence[AbstractPathEffect],
+) -> _HsPanel:
+    """One field panel: the block, the impact, the arcs and the surface probes."""
+    from matplotlib.patches import Circle
+
+    T = _translate_str
+    half = _HS_HALF * _HS_DX
+    ax = fig.add_subplot(cell)
+    ax.grid(visible=False)
+    im = ax.imshow(
+        data[0],
+        origin="upper",
+        extent=(-half, half, half, 0.0),
+        cmap=CMAP_FIELD,
+        vmin=-vmax,
+        vmax=vmax,
+        aspect="equal",
+        interpolation="bilinear",
+    )
+    ax.set_title(title, fontsize=9.5)
+    ax.plot(
+        [0.0],
+        [0.0],
+        marker="v",
+        ms=6,
+        color=COLOR_SECONDARY,
+        markeredgecolor=FIELD_STROKE,
+        markeredgewidth=0.6,
+        clip_on=False,
+        zorder=6,
+    )
+    p_arc = Circle(
+        (0.0, 0.0), 0.0, fill=False, ls=":", lw=1.0, edgecolor=FIELD_INK, zorder=4
+    )
+    s_arc = Circle(
+        (0.0, 0.0), 0.0, fill=False, ls=":", lw=1.0, edgecolor=FIELD_INK, zorder=4
+    )
+    ax.add_patch(p_arc)
+    ax.add_patch(s_arc)
+    p_lab = ax.text(
+        0.0,
+        0.0,
+        "P",
+        fontsize=8,
+        ha="center",
+        va="center",
+        color=FIELD_INK,
+        path_effects=outline,
+        zorder=5,
+    )
+    s_lab = ax.text(
+        0.0,
+        0.0,
+        "S",
+        fontsize=8,
+        ha="center",
+        va="center",
+        color=FIELD_INK,
+        path_effects=outline,
+        zorder=5,
+    )
+    (mark,) = ax.plot(
+        [],
+        [],
+        marker="o",
+        ms=4,
+        ls="none",
+        color=COLOR_PRIMARY,
+        markeredgecolor=FIELD_STROKE,
+        markeredgewidth=0.6,
+        zorder=6,
+    )
+    # The Rayleigh label rides the right-hand marker instead of sitting
+    # over the source, where it collided with the panel title, and on
+    # the source's side of it: the shear arc meets the surface just
+    # beyond the marker, and a label centred under the marker had the
+    # dotted arc run through it.
+    r_lab = ax.text(
+        0.0,
+        0.018,
+        "R",
+        fontsize=8.5,
+        ha="right",
+        va="top",
+        color=COLOR_PRIMARY,
+        fontweight="bold",
+        path_effects=outline,
+        zorder=7,
+        visible=free,
+    )
+    for col in (0.15, 0.30):
+        ax.plot([col], [0.0], marker="|", ms=8, color=COLOR_FG, clip_on=False, zorder=6)
+    ax.set_ylabel(T("depth [m]"), fontsize=8)
+    ax.tick_params(labelsize=7)
+    ax.set_xticks([-0.3, -0.15, 0.0, 0.15, 0.3])
+    if bottom:
+        ax.set_xlabel(T("distance from the impact [m]"), fontsize=8)
+    else:
+        ax.set_xticklabels([])
+    v_txt = ax.text(
+        -half + 0.008,
+        half - 0.008,
+        "",
+        ha="left",
+        va="bottom",
+        color="white",
+        fontsize=7.5,
+        zorder=7,
+        bbox={
+            "boxstyle": _ANIM_PILL_BOX,
+            "facecolor": "black",
+            "alpha": 0.55,
+            "edgecolor": "none",
+        },
+    )
+    return _HsPanel(
+        im=im,
+        arcs=(p_arc, s_arc),
+        labels=(p_lab, s_lab),
+        mark=mark,
+        r_lab=r_lab,
+        v_txt=v_txt,
+    )
+
+
+def _hs_trace_panel(
+    fig: Figure, cell: SubplotSpec, *, t_end: float, bottom: bool
+) -> tuple[Line2D, Line2D]:
+    """The surface probe traces beside a field panel, empty until the frames fill them."""
+    T = _translate_str
+    tax = fig.add_subplot(cell)
+    tax.grid(visible=False)
+    tax.set_xlim(0.0, t_end)
+    tax.set_ylim(-1.15, 1.15)
+    tax.set_yticks([])
+    tax.tick_params(labelsize=7)
+    tax.set_title(T("surface $v_y$ at 0.15 and 0.30 m"), fontsize=7.5)
+    if bottom:
+        tax.set_xlabel(T("t [µs]"), fontsize=7.5)
+    (ln0,) = tax.plot([], [], color=COLOR_PRIMARY, lw=1.0)
+    (ln1,) = tax.plot([], [], color=COLOR_SECONDARY, lw=1.0)
+    return ln0, ln1
+
+
+def _hs_place_fronts(panel: _HsPanel, r_p: float, r_s: float) -> None:
+    """Put the P and S arcs at their radii, and their letters on them once apart."""
+    half = _HS_HALF * _HS_DX
+    p_arc, s_arc = panel.arcs
+    p_arc.set_radius(r_p)
+    s_arc.set_radius(r_s)
+    for arc, lab, rad in (
+        (p_arc, panel.labels[0], r_p),
+        (s_arc, panel.labels[1], r_s),
+    ):
+        arc.set_visible(rad > 0.01)
+        lab.set_visible(_HS_LABEL_FROM < rad < half * 1.35)
+        lab.set_position((rad * 0.72, rad * 0.72))
+
+
+def _hs_place_rayleigh(panel: _HsPanel, r_r: float) -> None:
+    """Put the Rayleigh markers and letter at ``c_R t`` while they are in the view."""
+    half = _HS_HALF * _HS_DX
+    inside = 0.02 < r_r < half
+    panel.mark.set_data(([-r_r, r_r] if inside else []), ([0.0, 0.0] if inside else []))
+    panel.r_lab.set_visible(_HS_LABEL_FROM < r_r < half)
+    panel.r_lab.set_position((r_r - 0.006, 0.018))
 
 
 def animate_elastic_halfspace_waves(output_dir: str) -> None:
@@ -188,13 +407,11 @@ def animate_elastic_halfspace_waves(output_dir: str) -> None:
     reason a Rayleigh wave exists.
     """
     from matplotlib import patheffects
-    from matplotlib.patches import Circle
 
     T = _translate_str
     vy_free, vy_rigid, tr_free, tr_rigid, times, c_meas = _halfspace_fields()
     c_r = _rayleigh_speed(_HS_CP, _HS_CS)
     n_active = int(times.size)
-    half = _HS_HALF * _HS_DX
     outline = [patheffects.withStroke(linewidth=2.0, foreground=FIELD_STROKE)]
     # Each field panel on its own colour scale, taken off the second half of
     # its own run. Two reasons, and the panels say so. The source blob is
@@ -226,150 +443,28 @@ def animate_elastic_halfspace_waves(output_dir: str) -> None:
         T("Free top surface: a Rayleigh train rides it"),
         T("Rigid top surface: same block, no surface wave"),
     ]
-    ims: list[Any] = []
-    arcs: list[tuple[Any, Any]] = []
-    marks: list[Any] = []
-    labels: list[tuple[Any, Any]] = []
-    lines: list[tuple[Any, Any]] = []
-    v_txts: list[Any] = []
-    r_labs: list[Any] = []
-    # `trace` is unpacked and not read here (B007): the later block re-derives
-    # it as `(tr_free, tr_rigid)[row]`. Renaming it is cosmetic and moves this
-    # closure's fingerprint, which the clip freshness gate reads to decide
-    # whether the committed animation is stale. An unused binding is not worth
-    # re-rendering an FDTD animation over.
-    for row, (data, trace, title, free) in enumerate(  # noqa: B007
-        ((vy_free, tr_free, titles[0], True), (vy_rigid, tr_rigid, titles[1], False))
-    ):
-        ax = fig.add_subplot(grid[row, 0])
-        ax.grid(visible=False)
-        im = ax.imshow(
-            data[0],
-            origin="upper",
-            extent=(-half, half, half, 0.0),
-            cmap=CMAP_FIELD,
-            vmin=-vmaxes[row],
-            vmax=vmaxes[row],
-            aspect="equal",
-            interpolation="bilinear",
-        )
-        ax.set_title(title, fontsize=9.5)
-        ax.plot(
-            [0.0],
-            [0.0],
-            marker="v",
-            ms=6,
-            color=COLOR_SECONDARY,
-            markeredgecolor=FIELD_STROKE,
-            markeredgewidth=0.6,
-            clip_on=False,
-            zorder=6,
-        )
-        p_arc = Circle(
-            (0.0, 0.0), 0.0, fill=False, ls=":", lw=1.0, edgecolor=FIELD_INK, zorder=4
-        )
-        s_arc = Circle(
-            (0.0, 0.0), 0.0, fill=False, ls=":", lw=1.0, edgecolor=FIELD_INK, zorder=4
-        )
-        ax.add_patch(p_arc)
-        ax.add_patch(s_arc)
-        p_lab = ax.text(
-            0.0,
-            0.0,
-            "P",
-            fontsize=8,
-            ha="center",
-            va="center",
-            color=FIELD_INK,
-            path_effects=outline,
-            zorder=5,
-        )
-        s_lab = ax.text(
-            0.0,
-            0.0,
-            "S",
-            fontsize=8,
-            ha="center",
-            va="center",
-            color=FIELD_INK,
-            path_effects=outline,
-            zorder=5,
-        )
-        (mark,) = ax.plot(
-            [],
-            [],
-            marker="o",
-            ms=4,
-            ls="none",
-            color=COLOR_PRIMARY,
-            markeredgecolor=FIELD_STROKE,
-            markeredgewidth=0.6,
-            zorder=6,
-        )
-        # The Rayleigh label rides the right-hand marker instead of sitting
-        # over the source, where it collided with the panel title, and on
-        # the source's side of it: the shear arc meets the surface just
-        # beyond the marker, and a label centred under the marker had the
-        # dotted arc run through it.
-        r_lab = ax.text(
-            0.0,
-            0.018,
-            "R",
-            fontsize=8.5,
-            ha="right",
-            va="top",
-            color=COLOR_PRIMARY,
-            fontweight="bold",
-            path_effects=outline,
-            zorder=7,
-            visible=free,
-        )
-        r_labs.append(r_lab)
-        for col in (0.15, 0.30):
-            ax.plot(
-                [col], [0.0], marker="|", ms=8, color=COLOR_FG, clip_on=False, zorder=6
+    panels: list[_HsPanel] = []
+    lines: list[tuple[Line2D, Line2D]] = []
+    for row, (data, free) in enumerate(((vy_free, True), (vy_rigid, False))):
+        panels.append(
+            _hs_field_panel(
+                fig,
+                grid[row, 0],
+                data,
+                titles[row],
+                vmax=vmaxes[row],
+                free=free,
+                bottom=row == 1,
+                outline=outline,
             )
-        ax.set_ylabel(T("depth [m]"), fontsize=8)
-        ax.tick_params(labelsize=7)
-        ax.set_xticks([-0.3, -0.15, 0.0, 0.15, 0.3])
-        if row == 1:
-            ax.set_xlabel(T("distance from the impact [m]"), fontsize=8)
-        else:
-            ax.set_xticklabels([])
-        v_txt = ax.text(
-            -half + 0.008,
-            half - 0.008,
-            "",
-            ha="left",
-            va="bottom",
-            color="white",
-            fontsize=7.5,
-            zorder=7,
-            bbox={
-                "boxstyle": _ANIM_PILL_BOX,
-                "facecolor": "black",
-                "alpha": 0.55,
-                "edgecolor": "none",
-            },
         )
-        ims.append(im)
-        arcs.append((p_arc, s_arc))
-        labels.append((p_lab, s_lab))
-        marks.append(mark)
-        v_txts.append(v_txt)
-
-        tax = fig.add_subplot(grid[row, 1])
-        tax.grid(visible=False)
-        tax.set_xlim(0.0, float(t_us[-1]))
-        tax.set_ylim(-1.15, 1.15)
-        tax.set_yticks([])
-        tax.tick_params(labelsize=7)
-        tax.set_title(T("surface $v_y$ at 0.15 and 0.30 m"), fontsize=7.5)
-        if row == 1:
-            tax.set_xlabel(T("t [µs]"), fontsize=7.5)
-        (ln0,) = tax.plot([], [], color=COLOR_PRIMARY, lw=1.0)
-        (ln1,) = tax.plot([], [], color=COLOR_SECONDARY, lw=1.0)
-        lines.append((ln0, ln1))
+        lines.append(
+            _hs_trace_panel(fig, grid[row, 1], t_end=float(t_us[-1]), bottom=row == 1)
+        )
+    ims = [panel.im for panel in panels]
+    marks = [panel.mark for panel in panels]
+    r_labs = [panel.r_lab for panel in panels]
+    v_txts = [panel.v_txt for panel in panels]
     verdicts = [
         T(f"surface train: {c_meas:.0f} m/s measured, {c_r:.0f} m/s exact"),
         T("only P and S: a clamped wall carries no surface wave"),
@@ -426,23 +521,9 @@ def animate_elastic_halfspace_waves(output_dir: str) -> None:
         r_p, r_s, r_r = _HS_CP * t, _HS_CS * t, c_r * t
         for row in range(2):
             ims[row].set_data((vy_free, vy_rigid)[row][kf])
-            p_arc, s_arc = arcs[row]
-            p_arc.set_radius(r_p)
-            s_arc.set_radius(r_s)
-            for arc, lab, rad in (
-                (p_arc, labels[row][0], r_p),
-                (s_arc, labels[row][1], r_s),
-            ):
-                arc.set_visible(rad > 0.01)
-                lab.set_visible(_HS_LABEL_FROM < rad < half * 1.35)
-                lab.set_position((rad * 0.72, rad * 0.72))
+            _hs_place_fronts(panels[row], r_p, r_s)
             if row == 0:
-                inside = 0.02 < r_r < half
-                marks[row].set_data(
-                    ([-r_r, r_r] if inside else []), ([0.0, 0.0] if inside else [])
-                )
-                r_labs[row].set_visible(_HS_LABEL_FROM < r_r < half)
-                r_labs[row].set_position((r_r - 0.006, 0.018))
+                _hs_place_rayleigh(panels[row], r_r)
             trace = (tr_free, tr_rigid)[row]
             for i, line in enumerate(lines[row]):
                 line.set_data(t_us[: kf + 1], trace[: kf + 1, i])

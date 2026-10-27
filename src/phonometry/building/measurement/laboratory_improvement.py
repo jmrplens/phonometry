@@ -229,7 +229,7 @@ class LaboratoryLiningImprovementResult(OwnsArrays):
     ) -> Axes:
         """Plot the improvement ``ΔR`` per band with its single numbers.
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from ..._i18n import check_language
@@ -400,7 +400,7 @@ class LiningCuringCheck(RichDisplay):
     ) -> Axes:
         """Plot the admissible curing time and time lag with this measurement.
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from ..._i18n import check_language
@@ -537,7 +537,7 @@ class LaboratoryFloorCoveringImprovementResult(OwnsArrays):
     ) -> Axes:
         """Plot the improvement ``ΔL`` per band with its weighted reduction.
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
 
         :param ax: Existing axes, or ``None`` to create a figure.
@@ -736,7 +736,7 @@ class HeavyImpactImprovementResult(OwnsArrays):
     ) -> Axes:
         """Plot the improvement ``ΔLr`` per band.
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from ..._i18n import check_language

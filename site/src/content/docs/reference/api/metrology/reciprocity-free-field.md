@@ -161,7 +161,7 @@ axis.
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the fitted line. |
 
-**Returns:** The axes. Requires matplotlib (`pip install phonometry[plot]`).
+**Returns:** The axes. Requires matplotlib (`pip install "phonometry[plot]"`).
 
 ### AcousticCenter.position_m
 
@@ -521,7 +521,7 @@ Plot each distance against ten diameters and the range of Annex A.
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to `barh`. |
 
-**Returns:** The axes. Requires matplotlib (`pip install phonometry[plot]`).
+**Returns:** The axes. Requires matplotlib (`pip install "phonometry[plot]"`).
 
 ### FreeFieldArrangementCheck.support_ok
 
@@ -615,7 +615,7 @@ Plot each component against frequency.
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the first component's curve. |
 
-**Returns:** The axes. Requires matplotlib (`pip install phonometry[plot]`).
+**Returns:** The axes. Requires matplotlib (`pip install "phonometry[plot]"`).
 
 ## reciprocity_air_attenuation
 
@@ -750,7 +750,7 @@ Plot the attenuation in dB/m and its three parts against frequency.
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the total-attenuation curve. |
 
-**Returns:** The axes. Requires matplotlib (`pip install phonometry[plot]`).
+**Returns:** The axes. Requires matplotlib (`pip install "phonometry[plot]"`).
 
 ### ReciprocityAirAttenuation.within_stated_accuracy
 

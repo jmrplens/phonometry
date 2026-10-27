@@ -598,7 +598,7 @@ Draw the polar diagram of Figure D.1.
 The two states as vectors from the origin and the change as the vector
 joining their tips, which is the picture that makes the point.
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 **Parameters**

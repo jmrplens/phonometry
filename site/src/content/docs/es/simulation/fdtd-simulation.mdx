@@ -180,6 +180,8 @@ print(on_gpu.provenance.device, on_gpu.provenance.gpu)   # cupy, y el nombre de 
 
 Con un `host`, la misma ejecución va a otra máquina: véase
 [Enviar una simulación a un nodo remoto](/phonometry/es/simulation/remote-node/).
+[Dónde se ejecuta el trabajo pesado](/phonometry/es/simulation/where-it-runs/)
+reúne en un sitio los dispositivos, los nodos y los codificadores.
 
 El paso temporal no es una entrada. Sale de `cfl` y de la mayor velocidad
 del sonido del mapa, y `res.dt` informa del valor que se usó: por eso la
@@ -195,7 +197,7 @@ convierte con ``ix = round(x / dx - 0.5)``.
 Tres tipos de fuente inyectan una **fuente blanda** (una contribución de
 presión aditiva que no dispersa las ondas que pasan) en una celda de la
 malla: `GaussianPulse` (un pulso de banda ancha con semianchura temporal
-`width`), `CWSource` (un tono sinusoidal con rampa de coseno alzado para que su
+`half_width_s`), `CWSource` (un tono sinusoidal con rampa de coseno alzado para que su
 arranque no salpique el campo con un transitorio de banda ancha) y
 `SignalSource` (una forma de onda muestreada arbitraria, interpolada
 linealmente sobre los pasos temporales de la simulación). Las sondas
@@ -209,7 +211,7 @@ realidad una fuente lineal, así que un difusor o una barrera se interrogan
 mejor con un frente plano. Dos herramientas lo cubren, cada una
 unidireccional por su propio mecanismo:
 
-- `sim.add_plane_wave(direction, center=..., width=..., wavelength=...)`
+- `sim.add_plane_wave(direction, center_m=..., half_width_m=..., wavelength_m=...)`
   superpone un paquete gaussiano (opcionalmente con portadora sinusoidal)
   como condición inicial viajando hacia `"down"`, `"up"`, `"left"` o
   `"right"`; la velocidad consistente con el leapfrog escrita medio paso
@@ -227,12 +229,12 @@ unidireccional por su propio mecanismo:
 ```python
 from phonometry.simulation import FDTD2D, CWSource, PlaneWaveSource
 
-sim = FDTD2D(343.0, 0.01, shape=(160, 80), sponge_width=20,
-             sponge_sides=("top", "bottom"))
+sim = FDTD2D(343.0, 0.01, shape=(160, 80), absorbing_layer_cells=20,
+             absorbing_sides=("top", "bottom"))
 tone = CWSource(ix=0, iy=0, frequency=1000.0)          # reutilizada como forma de onda
 sim.add_source(PlaneWaveSource(direction="down", waveform=tone.value, offset=22))
-# o, para un paquete único: sim.add_plane_wave("down", center=0.4,
-#                                              width=0.08, wavelength=0.34)
+# o, para un paquete único: sim.add_plane_wave("down", center_m=0.4,
+#                                              half_width_m=0.08, wavelength_m=0.34)
 ```
 
 Las dos afirmaciones cuantitativas de ese punto son medibles, y la figura de
@@ -265,8 +267,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # `FDTD2D`, `CWSource` y `PlaneWaveSource` son los nombres importados arriba.
-sim = FDTD2D(343.0, 0.01, shape=(160, 80), sponge_width=20,
-             sponge_sides=("top", "bottom"))
+sim = FDTD2D(343.0, 0.01, shape=(160, 80), absorbing_layer_cells=20,
+             absorbing_sides=("top", "bottom"))
 sim.add_source(PlaneWaveSource(
     direction="down", waveform=CWSource(ix=0, iy=0, frequency=1000.0).value, offset=22))
 sim.run(700)                                   # rampa + llenado + unos periodos
@@ -416,10 +418,12 @@ print(round(float(echo[np.abs(echo).argmax()] / incident), 2))  # 0.5
 
 Antes de gastar un solo paso de tiempo, `sim.plot_geometry()` dibuja el
 dominio configurado: bordes, esponjas, obstáculos, fuentes y las sondas que
-piensas registrar. Pillar una esponja en el lado equivocado o una sonda mal
+piensas registrar, dadas como las celdas `(ix, iy)` que toma un
+`FDTDRecording` y rechazadas con las mismas palabras que una ejecución cuando
+alguna cae fuera de la malla o dentro de un obstáculo. Pillar una esponja en el lado equivocado o una sonda mal
 colocada cuesta segundos aquí y una ejecución entera después.
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/fdtd_domain_geometry.svg" alt="Dibujo de configuración de un dominio FDTD de 4,5 por 3 metros antes de cualquier paso de tiempo: capas de esponja azul pálido a lo largo de los bordes izquierdo y derecho, un borde de impedancia naranja a lo largo del borde superior, un obstáculo rectangular gris justo a la izquierda del centro, la estrella de la fuente en (0.5, 1.5) y dos círculos de sonda en (3, 1.5) y (4, 2), con una leyenda que nombra la capa de esponja, el borde de impedancia, el borde rígido, la fuente y la sonda" width="88%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/fdtd_domain_geometry.svg" alt="Dibujo de configuración de un dominio FDTD de 4,5 por 3 metros antes de cualquier paso de tiempo: capas de esponja azul pálido a lo largo de los bordes izquierdo y derecho, un borde de impedancia naranja a lo largo del borde superior, un obstáculo rectangular gris justo a la izquierda del centro, la estrella de la fuente en torno a (0,5, 1,5) y dos círculos de sonda en torno a (3, 1,5) y (4, 2), los centros de las celdas (59, 29) y (79, 39), con una leyenda que nombra la capa de esponja, el borde de impedancia, el borde rígido, la fuente y la sonda" width="88%" />
 
 *Todo lo que la simulación verá, antes de correrla: las capas de esponja se
 comen los contornos izquierdo y derecho, el borde superior lleva la
@@ -436,13 +440,14 @@ from phonometry import simulation
 
 mask = np.zeros((60, 90), dtype=bool)
 mask[25:35, 40:44] = True
-sim = simulation.FDTD2D(343.0, 0.05, shape=(60, 90), sponge_width=8,
-                        sponge_sides=("left", "right"),
+sim = simulation.FDTD2D(343.0, 0.05, shape=(60, 90), absorbing_layer_cells=8,
+                        absorbing_sides=("left", "right"),
                         edge_impedance={"top": 413.0}, obstacle_mask=mask)
 sim.add_source(simulation.GaussianPulse(ix=10, iy=30, half_width_s=1e-3))
 
 # Comprueba el dominio antes de correrlo: aún no se ha dado ningún paso.
-sim.plot_geometry(probes=[(3.0, 1.5), (4.0, 2.0)], language="es")
+# Las sondas son las celdas (ix, iy) que toma un FDTDRecording, dibujadas en su centro.
+sim.plot_geometry(probes=[(59, 29), (79, 39)], language="es")
 plt.show()
 ```
 
@@ -511,15 +516,15 @@ estacionario, el **transitorio** que se tira antes de la **ventana DFT** que
 se conserva. Cada uno tiene su regla, y cada uno falla en silencio cuando
 está mal.
 
-**Ancho de banda de la fuente.** Un `GaussianPulse` de semianchura `width`
-es $s(t) = A\,\mathrm{e}^{-((t-t_0)/\text{width})^2}$, cuyo espectro de magnitud es
-$\mathrm{e}^{-(\pi f\,\text{width})^2}$: queda 20 dB por debajo en
-$f = 0{,}483/\text{width}$ y 40 dB por debajo en $0{,}683/\text{width}$.
+**Ancho de banda de la fuente.** Un `GaussianPulse` de semianchura $w$ (`half_width_s`)
+es $s(t) = A\,\mathrm{e}^{-((t-t_0)/w)^2}$, cuyo espectro de magnitud es
+$\mathrm{e}^{-(\pi f\,w)^2}$: queda 20 dB por debajo en
+$f = 0{,}483/w$ y 40 dB por debajo en $0{,}683/w$.
 Trabaja en la dirección del lector: elige $f_\text{max}$, saca de ahí
-$\Delta x$, y toma después $\text{width} \ge 0{,}5/f_\text{max}$; así el
+$\Delta x$, y toma después $w \ge 0{,}5/f_\text{max}$; así el
 pulso está al menos 20 dB por debajo donde la malla deja de resolver. De
 forma equivalente, en términos de la malla,
-$\text{width} \ge 4{,}83\,\Delta x/c_\text{min}$, que con $\Delta x = 1$ cm
+$w \ge 4{,}83\,\Delta x/c_\text{min}$, que con $\Delta x = 1$ cm
 en aire son $1{,}4 \times 10^{-4}$ s, y es la razón por la que los ejemplos
 de aquí usan $3 \times 10^{-4}$ s, excitando hasta unos 1,6 kHz dentro de
 los 3,4 kHz que la malla resuelve. La energía por encima de $f_\text{max}$
@@ -548,7 +553,7 @@ que vuelve lo refleja el *gradiente*. Eso convierte la regla en una regla en
 **celdas**, no en longitudes de onda, y merece la pena ver la medición,
 tomada a incidencia normal sobre un conducto de onda plana:
 
-| `sponge_width` | 5 | 10 | 20 | 40 | 60 |
+| `absorbing_layer_cells` | 5 | 10 | 20 | 40 | 60 |
 |---|---|---|---|---|---|
 | eco/incidente a 1 kHz | −36 dB | −49 dB | −62 dB | −76 dB | −85 dB |
 | eco/incidente a 125 Hz | — | — | −61 dB | — | — |
@@ -556,7 +561,7 @@ tomada a incidencia normal sobre un conducto de onda plana:
 Una capa de 20 celdas devuelve −61 dB a 125 Hz, donde mide 0,07 longitudes
 de onda de grosor, y −64 dB a 2 kHz, donde mide 1,2 longitudes de onda: el
 residuo es plano dentro de 3 dB sobre un margen de frecuencias de 16:1.
-Veinte celdas son un buen suelo; cuarenta, generosas. `sponge_reflection`
+Veinte celdas son un buen suelo; cuarenta, generosas. `absorbing_layer_reflection`
 (por defecto $10^{-4}$) fija la amplitud de ida y vuelta para la que la
 rampa está *diseñada*, y no es una promesa: con 20 celdas el residuo medido
 es de −51 dB para $10^{-2}$, −62 dB para $10^{-4}$ y −59 dB para $10^{-6}$,
@@ -592,7 +597,7 @@ después debería abarcar un número entero de periodos de la fuente, para que
 la DFT al vuelo no vea truncamiento; con diez periodos sobra.
 
 En una línea: $\Delta x$ a partir de $f_\text{max}$ y $c_\text{min}$,
-$\Delta t$ a partir del número de Courant y $c_\text{max}$, `width` a partir
+$\Delta t$ a partir del número de Courant y $c_\text{max}$, `half_width_s` a partir
 de $\Delta x$, la esponja a partir de las celdas que se le puedan dedicar,
 la duración a partir de la geometría y de la resolución espectral, el
 transitorio a partir del dominio y de sus resonancias, y la ventana a partir
@@ -631,7 +636,7 @@ import numpy as np
 from phonometry import simulation
 
 c0, dx, f0 = 343.0, 0.005, 2000.0
-sim = simulation.FDTD2D(c0, dx, shape=(300, 300), sponge_width=40)
+sim = simulation.FDTD2D(c0, dx, shape=(300, 300), absorbing_layer_cells=40)
 sim.add_source(simulation.CWSource(ix=150, iy=150, frequency=f0))
 probe = sim.add_contour_probe(90, 210, 90, 210, frequencies=[f0])
 sim.run(round(4.5e-3 / sim.dt))            # agotar el transitorio
@@ -718,7 +723,7 @@ for n, (h, ln, lc, wn, wc) in enumerate(rows):
         mask[r0:r1, lat + round((xn + ln * 1e-3) / dx):
              lat + round((xn + (ln + lc) * 1e-3) / dx)] = False
 
-sim = simulation.FDTD2D(c0, dx, shape=mask.shape, sponge_width=sponge,
+sim = simulation.FDTD2D(c0, dx, shape=mask.shape, absorbing_layer_cells=sponge,
                         cfl=0.9, obstacle_mask=mask)  # 340 celdas/lambda:
 sim.add_source(simulation.PlaneWaveSource(          # dispersión despreciable
     direction="down", waveform=simulation.CWSource(ix=0, iy=0, frequency=f0).value, offset=sponge))
@@ -1188,15 +1193,16 @@ que [la sección 6 mide en tres mallas](#dispersion-numerica-y-precision).
 
 ### ¿Qué anchura deben tener el pulso de fuente y la esponja?
 
-El espectro del `GaussianPulse` es $\mathrm{e}^{-(\pi f\,\text{width})^2}$, 20 dB por
-debajo en $f = 0{,}483/\text{width}$, así que con
-`width` $\ge 0{,}5/f_\text{max}$ la energía inyectada se mantiene dentro de
+El espectro de un `GaussianPulse` de semianchura $w$ (`half_width_s`) es
+$\mathrm{e}^{-(\pi f\,w)^2}$, 20 dB por
+debajo en $f = 0{,}483/w$, así que con
+$w \ge 0{,}5/f_\text{max}$ la energía inyectada se mantiene dentro de
 la banda que la malla resuelve. La esponja es una regla en **celdas**, no en
 longitudes de onda: como su tasa de absorción actúa a la vez sobre la
 presión y sobre la velocidad, la capa conserva una impedancia real $\rho c$
 y solo refleja su *gradiente*. Veinte celdas devuelven unos −61 dB a
 incidencia normal, planos dentro de 3 dB de 125 Hz a 2 kHz; cuarenta celdas
-devuelven unos −76 dB. Apretar `sponge_reflection` más allá de su valor por
+devuelven unos −76 dB. Apretar `absorbing_layer_reflection` más allá de su valor por
 defecto de 1e-4 hace la rampa más abrupta y empeora el residuo. La sección 3
 desarrolla todo esto, y con ello la duración de la ejecución y la ventana
 DFT.

@@ -737,7 +737,7 @@ class InDuctSoundPowerResult(OwnsArrays):
 
         One bar per one-third-octave band of ``sound_power_level``, the
         :math:`L_{W\mathrm{A}}` of Annex C in the title. Requires matplotlib
-        (``pip install phonometry[plot]``); returns the
+        (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
 
         :param ax: Existing axes, or ``None`` to create a figure.

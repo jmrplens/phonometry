@@ -315,7 +315,7 @@ InstalledSourceResult.plot(
 
 Plot the per-path and total normalised sound pressure levels.
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 ### InstalledSourceResult.report()
@@ -362,7 +362,7 @@ the prediction disclaimer.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` is not `"reportlab"` or `language` is unknown. |
-| ImportError | If reportlab (or, for the figure, matplotlib) is not installed (`pip install phonometry[report]`). |
+| ImportError | If reportlab (or, for the figure, matplotlib) is not installed (`pip install "phonometry[report]"`). |
 
 ## MIN_MULTI_JUNCTION_KIJ
 

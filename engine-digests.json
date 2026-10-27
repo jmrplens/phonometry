@@ -1,0 +1,80 @@
+{
+ "environment": {
+  "libc": "glibc 2.39",
+  "machine": "x86_64",
+  "numpy": "2.5.4",
+  "numpy_avx512": "off",
+  "python": "3.13",
+  "system": "Linux"
+ },
+ "fluid_energy": {
+  "0": "0x1.0a66524721268p-17",
+  "1": "0x1.1b4fb571c164cp-17",
+  "2": "0x1.182568a779f9cp-17",
+  "3": "0x1.e09ef58c80a43p-18",
+  "4": "0x1.1ebe72fdb1f3ap-17"
+ },
+ "measured_on": {
+  "cpu": "AMD EPYC 7763 64-Core Processor"
+ },
+ "scenarios": {
+  "contour": {
+   "contour0_1500_p": "1d34d3030c1abf53657b3213de5898778384f733b87e3cc9282645d50c57ddd6",
+   "contour0_1500_v": "a367d6ccf69b7b89b157ebe5ce1ee99284d9639e206a26ecf1c9328409fcb91c",
+   "contour0_3000_p": "13325d1672ccb726565c9939b7b4f588cc76437e864249c65e462be936eec443",
+   "contour0_3000_v": "7c3a3b2bbe55d5a4c2044e0bd11f169fcef375a7bc71739e1dbf67756e200b6d",
+   "energy": "f7936ad4d1ff943ca81a936ce2f0b0a9ba52d95dc5c1cda406a7eaeb6f77e1a0",
+   "p": "eb2a29c484ee6e51422e551cf95de0fca29641a9dff84395ba6d2dbf8ddecb32",
+   "vx": "73a3d2411fbc65a89462e34bdd474db6eff361b29ff2adc5420059fe2d2574e6",
+   "vy": "6e2165ea54b557e5e543be67ebf6875b3b79d66ffa27a2e4517e2cc7bb96c7ca"
+  },
+  "elastic_force_obstacle": {
+   "collocated_vx": "897808a09da86331ed4cbf502a5b305e2ab213e3913f6aa3fbcccbc7a763e32d",
+   "collocated_vy": "6810cb96b76d3c423d766b3312f31379d7990c02e1d61564059cff3334a381a9",
+   "energy": "90774eb1e6363c9a3284eb6714175ad485a3afd3ab5ad9913258fbfff81df04c",
+   "frames": "600f54f2a53a1b1fca0e5a61bdcaada2d15b37d66d1997a6deede67e27a83d19",
+   "txx": "814c935a1a90489f7778e94814acb6a26616edf27c14f2b284bc6bc35a11abe4",
+   "txy": "2a3fc204bf7d6db1fc8c3e009f502aa8cd37818d6220f361f5c893a8e667430b",
+   "tyy": "150436230cd5df63039805b2264f44680903ba0070b54a59b2536d3212878651",
+   "vx": "efd6903ddfdbcc748c0fd90cb382cc9db85c32ab3255f7d8925f70797bbb1aa0",
+   "vy": "421b2ae4e023d62bcd3d41659d1e675775489312c2454b524733603049fa5d34"
+  },
+  "elastic_layers": {
+   "collocated_vx": "c3d5bf2a61f401c464092150172900ec16615389dfb3f369513748a2acb428ce",
+   "collocated_vy": "8a8ef3bc5143a1a0c30ad35b34c321de7408efe629e3c2d1f7c688871c43a313",
+   "energy": "fe487ebd9fb10b6217e0297ea17d291b31c79e6f44cdce8fdde7c85a8026fd8c",
+   "frames": "0ce2a1ea924e21620c512d86a4e4f754bea2da8b989564a996b7055e861f243d",
+   "txx": "640800c00af4df4fcb88fcff306917c6f73ae017cf3a4fb6c933759b9b8605d4",
+   "txy": "edd0ef470ac71327f4b0e137042bf9f505ab4551d0dfe7453cd521f16c76a84b",
+   "tyy": "7bdd038eeff287424ffd33df7f8f95e2df40fa530b964cfb0a10accce6c8fdfb",
+   "vx": "2adaef84eef405a9319fd5608efc56bfc445f4c7d7f2a2614db48a0e04e5e879",
+   "vy": "9c856bea2c7eb590444a9f14525f26c8b5f19316a9911b514b15bf6199df569a"
+  },
+  "impedance": {
+   "energy": "eaf16d672d2bcdd7df1c6ae2a6bb9ee546d5f378c578994e9fdb43b09b3a9ab7",
+   "p": "ced14673a51a1355fa9a42a47e013e3a373be39a34ff785d8706929480b3a149",
+   "vx": "a629278fa8cce2a3afaa86b97d11652bee057f7232aa6f615587127d8c3543cb",
+   "vy": "e6b6bdab6c1b84420de8b85f7c719382073bdfc2cffe437d048e6453956a98da"
+  },
+  "obstacle_damping": {
+   "energy": "5e6f3f1e3c5de0196c9dcd5edc204e2ef42cedf2892c93b14deb174d674c1dca",
+   "frames": "4dd62b5a7ba1e282b144384a73f25fea2222bd487c8a2fdc44419368471c17d2",
+   "p": "bfa9ee13efe592301e52400f708cccf85eb4624030d7b301c26215b16fc69fc7",
+   "vx": "84524f916d4841ae35867ee1ae10a773c3fe2268740978ee872b354ad1d096d8",
+   "vy": "f40585b1aef0bd2818f33b77984266a79bc52c811faa2948134ec528f447f119"
+  },
+  "plane_wave": {
+   "energy": "a7a4ab96ac8ee3f6a854364d1385ac0fa038ff4a053b38439468593f607191ea",
+   "p": "fc049dd873283851c5995789aa4028cbdc6cf6fbe1eefdc152d83403baf0f376",
+   "vx": "8bbeac43f20bffd96aadcfeb9cb333039745ce4a5acbc7b1fe632bd178b49cbf",
+   "vy": "18c44cc55aeacfbcbc33165af46764c99ea0d47ea947fcd2ca00e7b27f3e10b5"
+  },
+  "sponge": {
+   "energy": "76a3fec2eb883a40052115164ded518ef392a9f204ced5d7b180231d30384ddd",
+   "frames": "b59b11686a8b8e1af8b6231a2b2a96700305ccfb17188cf26bf6e492a8fb3bcd",
+   "p": "f664a6924cab68f3fa804c7d8661ca29334489c6950f013e792afa7ae4623bd3",
+   "vx": "f1fe5c71e45fd7aa8de8a4c774d1cb88480dff58a10cd1f7edad7b71470eab8b",
+   "vy": "41ea4bead4b596f7d3d41be303a53535ddb2f377687e524259a4664a1f2db7b8"
+  }
+ }
+}

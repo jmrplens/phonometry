@@ -600,7 +600,7 @@ class WeightedRatingResult(OwnsArrays):
 
         Unfavourable deviations (reference above measurement) are shaded and
         ``Rw (C; Ctr)`` annotated. Requires matplotlib
-        (``pip install phonometry[plot]``); returns the
+        (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from ..._i18n import check_language
@@ -649,8 +649,8 @@ class WeightedRatingResult(OwnsArrays):
             without the per-band data (``frequencies``, ``measured``,
             ``shifted_reference``).
         :raises ImportError: If reportlab is not installed
-            (``pip install phonometry[report]``), or matplotlib is missing for
-            the embedded figure (``pip install phonometry[plot]``).
+            (``pip install "phonometry[report]"``), or matplotlib is missing for
+            the embedded figure (``pip install "phonometry[plot]"``).
         """
         return _render_iso717(
             self,
@@ -734,7 +734,7 @@ class ImpactRatingResult(OwnsArrays):
 
         Unfavourable deviations (measurement above the reference, the sign
         opposite to airborne) are shaded and ``Ln,w (CI)`` annotated.
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from ..._i18n import check_language
@@ -782,8 +782,8 @@ class ImpactRatingResult(OwnsArrays):
             without the per-band data (``frequencies``, ``measured``,
             ``shifted_reference``).
         :raises ImportError: If reportlab is not installed
-            (``pip install phonometry[report]``), or matplotlib is missing for
-            the embedded figure (``pip install phonometry[plot]``).
+            (``pip install "phonometry[report]"``), or matplotlib is missing for
+            the embedded figure (``pip install "phonometry[plot]"``).
         """
         return _render_iso717(
             self,
@@ -1187,7 +1187,7 @@ class ImpactImprovementRatingResult(OwnsArrays):
     ) -> Axes:
         """Plot the improvement spectrum with its rating (ISO 717-2).
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from ..._i18n import check_language
@@ -1290,7 +1290,7 @@ class ExtendedWeightedRatingResult(OwnsArrays):
         core bands and the bands outside the core range marked as the
         enlarged range; the title carries ``Rw (C; Ctr)`` and every Annex B
         adaptation term the input covered. Requires matplotlib
-        (``pip install phonometry[plot]``); returns the
+        (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from ..._i18n import check_language
@@ -1358,7 +1358,7 @@ class ExtendedImpactRatingResult(OwnsArrays):
         above the reference) shaded on the core bands and the bands outside
         the core range marked as the enlarged range; the title carries the
         impact rating with ``CI`` and, when covered, ``CI,50-2500``.
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from ..._i18n import check_language
@@ -1936,7 +1936,7 @@ class ReductionImprovementRating(RichDisplay):
         Draws the reference curve of the basic element and the same curve
         raised by the measured ``ΔR``, the two curves Annex D rates; the title
         carries ``ΔRw``, ``Δ(Rw + C)`` and ``Δ(Rw + Ctr)`` with the element
-        index. Requires matplotlib (``pip install phonometry[plot]``); returns
+        index. Requires matplotlib (``pip install "phonometry[plot]"``); returns
         the :class:`~matplotlib.axes.Axes`.
         """
         from ..._i18n import check_language

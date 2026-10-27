@@ -211,6 +211,45 @@ def test_the_jit_job_comment_quotes_the_numba_floor_that_is_declared() -> None:
     )
 
 
+def _engine_digests_step(steps: list[dict[str, object]], runs: str) -> int:
+    """The index of the one step of the engine-digests job whose script has *runs*."""
+    found = [i for i, step in enumerate(steps) if runs in str(step.get("run", ""))]
+    assert len(found) == 1, f"{len(found)} engine-digests steps run {runs!r}"
+    return found[0]
+
+
+def test_the_engine_digests_test_names_a_moved_digest_after_the_measurement_fails() -> (
+    None
+):
+    """The measurement and the test are two steps, and the test runs after a failure.
+
+    A moved digest fails the measurement; in one step with the test, the step
+    stopped there and the test that names the scenario and the key never ran.
+    Both steps run under the same switches, and the measured file is kept
+    whatever happened.
+    """
+    workflow = yaml.safe_load(_PYTHON_WORKFLOW.read_text(encoding="utf-8"))
+    steps: list[dict[str, object]] = workflow["jobs"]["engine-digests"]["steps"]
+    measure = _engine_digests_step(steps, "scripts/engine_digests.py --output")
+    test = _engine_digests_step(steps, "tests/simulation/test_engine_golden_digests.py")
+    assert measure < test
+    condition = str(steps[test].get("if", ""))
+    assert "success()" in condition
+    assert "failure()" in condition
+    assert "always()" not in condition, "a cancelled run should not start the test"
+    for index in (measure, test):
+        env = steps[index].get("env")
+        assert isinstance(env, dict)
+        assert env.get("PHONOMETRY_ENGINE_DIGESTS") == "require"
+        assert "NPY_DISABLE_CPU_FEATURES" in env
+    upload = [
+        step
+        for step in steps
+        if str(step.get("uses", "")).startswith("actions/upload-artifact@")
+    ]
+    assert [step.get("if") for step in upload] == ["always()"]
+
+
 @pytest.mark.parametrize(
     ("pattern", "path", "expected"),
     [

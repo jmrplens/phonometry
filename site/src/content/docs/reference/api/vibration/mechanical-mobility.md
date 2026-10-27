@@ -180,7 +180,7 @@ MobilityResult.plot(
 
 Plot the mobility magnitude `|Y(f)|`.
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 ### MobilityResult.report()
@@ -364,7 +364,7 @@ tolerance band, and the relative deviation against the same band. With
 no `ax` a two-panel figure is drawn and its axes array returned; with
 `ax` the deviation diagnostic is drawn on it and that axes returned.
 
-Requires matplotlib (`pip install phonometry[plot]`).
+Requires matplotlib (`pip install "phonometry[plot]"`).
 
 ### RigidMassCalibrationResult.relative_deviation
 

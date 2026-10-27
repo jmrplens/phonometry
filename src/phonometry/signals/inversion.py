@@ -312,7 +312,7 @@ class InverseFilterResult(OwnsArrays):
         :math:`\lvert H_{\mathrm{inv}} \rvert` and the equalized product
         :math:`\lvert H \, H_{\mathrm{inv}} \rvert` in dB over
         log-frequency, with the equalized band
-        shaded. Requires matplotlib (``pip install phonometry[plot]``).
+        shaded. Requires matplotlib (``pip install "phonometry[plot]"``).
 
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         """

@@ -297,7 +297,7 @@ class PorousMediumResult(OwnsArrays):
     ) -> Axes:
         """Plot the normalised ``Zc`` and ``k`` components against frequency.
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from ..._i18n import check_language

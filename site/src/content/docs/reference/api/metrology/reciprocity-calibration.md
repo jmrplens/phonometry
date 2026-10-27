@@ -199,7 +199,7 @@ with the expanded uncertainty as a band when it is known.
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the curve of the first microphone. |
 
-**Returns:** The axes. Requires matplotlib (`pip install phonometry[plot]`).
+**Returns:** The axes. Requires matplotlib (`pip install "phonometry[plot]"`).
 
 ### ReciprocityCalibration.sensitivity_level
 
@@ -298,7 +298,7 @@ frequency.
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the expanded-uncertainty curve. |
 
-**Returns:** The axes. Requires matplotlib (`pip install phonometry[plot]`).
+**Returns:** The axes. Requires matplotlib (`pip install "phonometry[plot]"`).
 
 ### ReciprocityUncertaintyBudget.standard
 

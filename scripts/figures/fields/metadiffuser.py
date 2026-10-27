@@ -22,10 +22,19 @@ from ..theme import (
     FIELD_INK,
     FIELD_STROKE,
 )
-from ._core import _solid_in_field
+from ._core import _host, _solid_in_field
 
 if TYPE_CHECKING:
+    from collections.abc import Sequence
+
+    from matplotlib.figure import Figure
+    from matplotlib.gridspec import GridSpec
+    from matplotlib.image import AxesImage
+    from matplotlib.patheffects import AbstractPathEffect
+    from matplotlib.text import Text
     from numpy.typing import NDArray
+
+    from phonometry.simulation import Compute
 
 
 @lru_cache(maxsize=1)
@@ -44,6 +53,7 @@ def _meshed_metadiffuser_ntff_levels() -> tuple[Any, Any]:
     """
     from phonometry.simulation import (
         FDTD2D,
+        Compute,
         CWSource,
         PlaneWaveSource,
         far_field_from_contour,
@@ -80,7 +90,13 @@ def _meshed_metadiffuser_ntff_levels() -> tuple[Any, Any]:
     # cfl 0.9 trims the step count; at 340 cells per wavelength the
     # numerical dispersion is negligible at any stable Courant number.
     sim = FDTD2D(
-        343.0, dx, shape=(ny, nx), sponge_width=sponge, cfl=0.9, obstacle_mask=mask
+        343.0,
+        dx,
+        shape=(ny, nx),
+        absorbing_layer_cells=sponge,
+        cfl=0.9,
+        obstacle_mask=mask,
+        compute=Compute(),
     )
     sim.add_source(
         PlaneWaveSource(
@@ -221,49 +237,99 @@ def _meta_taper() -> NDArray[np.float64]:
 _META_FRAMES = 600  # 6.13 ms / 10.2 us per frame (49 frames per period)
 
 
-def _meta_pair_worker(kind: str, n_frames: int) -> tuple[Any, Any, Any]:
-    """One panel run in lockstep with its own free-field reference.
+def _meta_pair(
+    kind: str, n_frames: int, compute: Compute
+) -> tuple[NDArray[np.float32], NDArray[np.float32], NDArray[np.float64]]:
+    """One panel stepped in lockstep with its own free-field reference.
 
-    Each worker process pays for its private incident-field run, but the
-    three workers advance in parallel, so the wall time of the cached
-    field computation is about two simulations instead of four.
+    The trail is ``|p_kind - p_ref|`` at the same step, above the panel face,
+    kept as a running maximum that halves every 1.5 ms. It is computed on
+    whichever device the pair steps on, every step, and only the captured
+    frames come back to the host.
     """
-    import fdtd2d
+    from phonometry.simulation import FDTD2D
 
     c0, dx = 343.0, _META_DX
-    y1 = _META_FACE
     lam0 = c0 / _META_F0
     # Duration rule: full flight source -> deepest well bottom -> top of
     # the visible frame, (0.714 + 1.034) m / c * 1.2 = 6.12 ms, sampled at
     # four times the 12 frames-per-period visual floor (49/period at 2 kHz).
     every = 33
-    sims = []
-    for rho in (_meta_rho(kind), _meta_rho("ref")):
-        sim = fdtd2d.FDTD2D(
-            c0, dx, rho=rho, shape=(_META_NY, _META_NX), sponge_width=200
+    sims = [
+        FDTD2D(
+            c0,
+            dx,
+            rho=rho,
+            shape=(_META_NY, _META_NX),
+            absorbing_layer_cells=200,
+            compute=compute,
         )
-        sim.add_plane_wave("up", center=0.80, width=0.05, wavelength=lam0)
-        taper = _meta_taper()
-        sim.p *= taper[np.newaxis, :]
-        sim.vy *= taper[np.newaxis, :]
-        sims.append(sim)
+        for rho in (_meta_rho(kind), _meta_rho("ref"))
+    ]
+    backend = sims[0]._backend
+    xp = backend.xp
+    # The two engines step on one device, so one copy of the taper serves both.
+    lateral = backend.asarray(_meta_taper()[np.newaxis, :])
+    for sim in sims:
+        sim.add_plane_wave("up", center_m=0.80, half_width_m=0.05, wavelength_m=lam0)
+        sim.p *= lateral
+        sim.vy *= lateral
     decay = float(2.0 ** (-sims[0].dt / 0.0015))
-    face_row = round(y1 / dx)
-    trail = np.zeros_like(sims[0].p)
-    tot_frames: list[Any] = []
-    trail_frames: list[Any] = []
+    face_row = round(_META_FACE / dx)
+    trail = backend.zeros(tuple(sims[0].p.shape))
+    tot_frames: list[NDArray[np.float32]] = []
+    trail_frames: list[NDArray[np.float32]] = []
     ts: list[float] = []
     for _ in range(every * n_frames):
         for sim in sims:
             sim.step()
         scat = sims[0].p - sims[1].p
         scat[:face_row, :] = 0.0
-        np.maximum(trail * decay, np.abs(scat), out=trail)
+        xp.maximum(trail * decay, xp.abs(scat), out=trail)
         if sims[0].n % every == 0 and len(ts) < n_frames:
-            tot_frames.append(sims[0].p[::20, ::20].astype(np.float32))
-            trail_frames.append(trail[::20, ::20].astype(np.float32))
+            tot_frames.append(_host(sims[0], sims[0].p[::20, ::20]))
+            trail_frames.append(_host(sims[0], trail[::20, ::20]))
             ts.append(sims[0].time)
     return np.stack(tot_frames), np.stack(trail_frames), np.asarray(ts)
+
+
+#: The RAM one float64 lockstep pair holds while it steps: 24 grids of
+#: _META_NY x _META_NX doubles (ten per engine, the trail and three per-step
+#: temporaries), the count the GPU node's memory measurement found, 5.9 GB.
+_META_PAIR_BYTES = 24 * _META_NY * _META_NX * 8
+
+#: What a pair needs over its grids, as a factor: 1.45 times the grids is
+#: 8.55 GB (8156 MiB) a pair. Measured on the node on 2026-10-22, the full
+#: float64 run of 600 frames peaked at 7248 to 7250 MiB resident in each
+#: pair's process: the grids, the frames it captures, the interpreter and its
+#: libraries. The parent holds each pair's returned frames, two stacks of 600
+#: float32 frames of 240 x 320, 2 x 600 x 240 x 320 x 4 B = 352 MiB, so a
+#: pair side by side takes 7250 + 352 = 7602 MiB, 554 MiB under what it is
+#: given (1.35 times the grids). One at a time in one process, the third pair
+#: steps beside the first two pairs' frames, 7250 + 2 x 352 = 7954 MiB,
+#: 202 MiB under. Side by side, the parent's own interpreter and libraries
+#: are charged to no pair: they ride on the pairs' slack, which holds them
+#: while they stay under 2 x 554 = 1108 MiB with two pairs, or under
+#: 3 x 554 = 1662 MiB with three, at the least RAM that steps that many. The
+#: parent's own peak, 3828 MiB once the pool had closed (the three pairs'
+#: frames and their stacks), comes after the pairs' processes have given back
+#: their 3 x 7250 MiB.
+_META_PAIR_MARGIN = 1.45
+
+
+def _meta_workers(available: int | None) -> int:
+    """How many pairs step side by side in *available* bytes of RAM: one to three.
+
+    Each pair is given 8.55 GB (``_META_PAIR_BYTES * _META_PAIR_MARGIN``):
+    25.7 GB or more steps the three side by side, 17.1 GB or more steps two
+    and then the third, and less steps them one at a time; the fields are the
+    same in every case, only the wall time changes. Where the RAM cannot be
+    read (*available* is None, off Linux) the three step side by side, which
+    asks the machine for those 25.7 GB.
+    """
+    if available is None:
+        return 3
+    return max(1, min(3, int(available // (_META_PAIR_BYTES * _META_PAIR_MARGIN))))
 
 
 @lru_cache(maxsize=1)
@@ -275,93 +341,238 @@ def _metadiffuser_fields(
     A 1.6 m x 1.2 m free-field box at dx = 0.25 mm, fine enough to mesh the
     real millimetre slits, necks and cavities of the Table-1 metadiffuser
     (density contrast 1e6:1 builds the panels). Each panel (flat control
-    with the metadiffuser's silhouette, deep QRD, metadiffuser) advances
-    in lockstep with a free-field reference inside its own worker process,
-    so ``total - incident`` is exact; a downgoing carrier packet at the
-    2 kHz evaluation frequency plays the goniometer source. Returns the total
-    frame stacks, the fading scattered-envelope trails [dB] and the frame
-    times. The quantitative far-field comparison lives in the companion
-    polar figure; this clip shows the near fields of the meshed panels.
+    with the metadiffuser's silhouette, deep QRD, metadiffuser) advances in
+    lockstep with a free-field reference, so ``total - incident`` is exact at
+    every step: on NumPy the pairs run side by side in worker processes as
+    far as the RAM holds them (5.9 GB of grids, 7.6 GB a process measured),
+    else one after another, and on a GPU one after another; the fields are
+    the same either way. A downgoing carrier packet at the 2 kHz evaluation
+    frequency plays the goniometer source. Returns the total frame stacks,
+    the fading scattered-envelope trails [dB] and the frame times. The
+    quantitative far-field comparison lives in the companion polar figure;
+    this clip shows the near fields of the meshed panels.
     """
-    import multiprocessing as mp
+    import clip_placement
 
-    tot, trail, times = None, None, None
-    try:
-        # The GPU host of .env turns the half-hour CPU computation into a
-        # couple of minutes (the runner falls back by itself, but the CPU
-        # pool below is faster than its single-process local mode).
-        import fdtd_gpu_remote
+    compute = clip_placement.compute_for("anim_fdtd_metadiffuser")
+    kinds = ("flat", "qrd", "meta")
+    workers = (
+        _meta_workers(clip_placement.host_bytes()) if compute.device == "cpu" else 1
+    )
+    if workers > 1:
+        import concurrent.futures as cf
+        import multiprocessing as mp
+        from concurrent.futures.process import BrokenProcessPool
 
-        fdtd_gpu_remote.load_env()
-        config = fdtd_gpu_remote.RemoteConfig.from_env()
-        use_gpu = bool(config.host) and fdtd_gpu_remote.remote_available(config)
-    except (ImportError, OSError, ValueError):
-        use_gpu = False
-    if use_gpu:
-        import fdtd2d
-
-        # Same duration rule as the CPU worker: 6.12 ms at 49 frames/period.
-        every = 33
-        stride = 20
-        dt = fdtd2d.FDTD2D(343.0, _META_DX, shape=(4, 8)).dt
-        sample_steps = [every * k for k in range(1, n_frames + 1)]
-        lam0 = 343.0 / _META_F0
-        frames: dict[str, Any] = {}
-        for kind in ("flat", "qrd", "meta", "ref"):
-            job = fdtd_gpu_remote.build_job(
-                343.0,
-                _META_DX,
-                steps=every * n_frames,
-                sample_steps=sample_steps,
-                shape=(_META_NY, _META_NX),
-                rho=_meta_rho(kind),
-                sponge_width=200,
-                plane_waves=[
-                    {
-                        "direction": "up",
-                        "center": 0.80,
-                        "width": 0.05,
-                        "wavelength": lam0,
-                    }
-                ],
-                init_scale_x=_meta_taper(),
-                sample_stride=stride,
-                sample_dtype="float32",
-            )
-            # The four 19 800-step field jobs run ~10-12 min each on the
-            # GPU host; give each submit an hour before falling back.
-            frames[kind] = fdtd_gpu_remote.submit(job, config, timeout=3600.0)["frames"]
-        face_row = round(_META_FACE / _META_DX) // stride
-        decay = float(2.0 ** (-(every * dt) / 0.0015))
-        tot_list, trail_list = [], []
-        for kind in ("flat", "qrd", "meta"):
-            scat = frames[kind] - frames["ref"]
-            scat[:, :face_row, :] = 0.0
-            running = np.zeros_like(scat[0])
-            history = np.empty_like(scat)
-            for k in range(scat.shape[0]):
-                np.maximum(running * decay, np.abs(scat[k]), out=running)
-                history[k] = running
-            tot_list.append(frames[kind].astype(np.float32))
-            trail_list.append(history)
-        tot = np.stack(tot_list)
-        trail = np.stack(trail_list)
-        times = np.asarray(sample_steps, dtype=np.float64) * dt
+        # Pairs side by side, one per process, as many as the RAM holds: with
+        # three the wall time of the cached field is that of one pair, two
+        # simulations instead of six, and with two that of two pairs, four. A
+        # process the kernel kills for its memory breaks the pool, and the
+        # wait for its pair ends in BrokenProcessPool instead of lasting for
+        # ever: the pool notices the death at the latest when another pair
+        # returns, since it may start watching the last process it started
+        # only then. It is raised again in this field's own words, which name
+        # the pairs and the remedy: in the standard library's it reads as the
+        # render's own pool breaking. The results come back in the order of
+        # the kinds.
+        with cf.ProcessPoolExecutor(
+            max_workers=workers, mp_context=mp.get_context("spawn")
+        ) as pool:
+            try:
+                parts = list(
+                    pool.map(
+                        _meta_pair,
+                        kinds,
+                        [n_frames] * len(kinds),
+                        [compute] * len(kinds),
+                    )
+                )
+            except BrokenProcessPool as error:
+                msg = (
+                    f"the metadiffuser's pairs stepped {workers} at once and "
+                    "the process of one of them died, most likely killed for "
+                    "its memory (each pair is given "
+                    f"{_META_PAIR_BYTES * _META_PAIR_MARGIN / 1e9:.2f} GB); set "
+                    f"{clip_placement.HOST_BYTES_ENV} lower so that fewer pairs "
+                    "step at once"
+                )
+                raise BrokenProcessPool(msg) from error
     else:
-        ctx = mp.get_context("spawn")
-        with ctx.Pool(processes=3) as pool:
-            parts = pool.starmap(
-                _meta_pair_worker,
-                [(kind, n_frames) for kind in ("flat", "qrd", "meta")],
-            )
-        tot = np.stack([part[0] for part in parts])
-        trail = np.stack([part[1] for part in parts])
-        times = parts[0][2]
+        # One pair at a time: on a GPU a pair is what the free memory holds,
+        # and on NumPy where the RAM holds only one.
+        parts = []
+        for kind in kinds:
+            parts.append(_meta_pair(kind, n_frames, compute))
+            clip_placement.release_device()
+    tot = np.stack([part[0] for part in parts])
+    trail = np.stack([part[1] for part in parts])
+    times = parts[0][2]
     ref = float(trail[:, trail.shape[1] // 3 :].max()) or 1.0
     with np.errstate(divide="ignore"):
         trail_db = 20.0 * np.log10(trail / ref)
     trail_db = np.clip(trail_db, -30.0, 0.0).astype(np.float32)
     return tot, trail_db, times
+
+
+#: The right edge of the two periods of either panel [m].
+_META_XR = _META_XL + _META_PERIODS * 5 * _META_PITCH
+
+
+def _meta_qrd_outline() -> list[tuple[float, float]]:
+    """The deep QRD drawn over the field: its slab with the wells cut down from the face."""
+    y1, x_l, x_r = _META_FACE, _META_XL, _META_XR
+    qrd_poly: list[tuple[float, float]] = [(x_l, 0.05), (x_l, y1)]
+    for wx0, wx1, d in _meta_qrd_wells():
+        qrd_poly += [(wx0, y1), (wx0, y1 - d), (wx1, y1 - d), (wx1, y1)]
+    qrd_poly += [(x_r, y1), (x_r, 0.05)]
+    return qrd_poly
+
+
+def _meta_column(
+    fig: Figure,
+    gs: GridSpec,
+    col: int,
+    title: str,
+    *,
+    first: tuple[NDArray[np.float32], NDArray[np.float32]],
+    vmax: float,
+    outline: Sequence[AbstractPathEffect],
+) -> tuple[AxesImage, AxesImage, Text]:
+    """One column of the clip: the total field over the scattered trail of one panel.
+
+    *first* is the column's first total frame and first trail frame. Returns
+    the two images and the verdict line, empty until the frames write it.
+    """
+    from matplotlib.patches import Polygon, Rectangle
+
+    T = _translate_str
+    y1, x_l, x_r = _META_FACE, _META_XL, _META_XR
+    xc = 0.5 * (x_l + x_r)
+    ax_t = fig.add_subplot(gs[0, col])
+    ax_s = fig.add_subplot(gs[1, col])
+    im_t = ax_t.imshow(
+        first[0],
+        origin="lower",
+        extent=(0.0, 1.6, 0.0, 1.2),
+        cmap=CMAP_FIELD,
+        vmin=-vmax,
+        vmax=vmax,
+        interpolation="bilinear",
+    )
+    im_s = ax_s.imshow(
+        first[1],
+        origin="lower",
+        extent=(0.0, 1.6, 0.0, 1.2),
+        cmap="magma",
+        vmin=-30.0,
+        vmax=0.0,
+        interpolation="bilinear",
+    )
+    ax_t.set_title(title, fontsize=10)
+    for ax in (ax_t, ax_s):
+        ax.grid(visible=False)
+        if col == 1:
+            ax.add_patch(
+                Polygon(
+                    _meta_qrd_outline(),
+                    closed=True,
+                    facecolor=_solid_in_field(ax),
+                    edgecolor=COLOR_FG,
+                    lw=0.8,
+                )
+            )
+        else:
+            ax.add_patch(
+                Rectangle(
+                    (x_l, y1 - 0.023),
+                    x_r - x_l,
+                    0.023,
+                    facecolor=_solid_in_field(ax),
+                    edgecolor=COLOR_FG,
+                    lw=0.8,
+                )
+            )
+        ax.set_xlim(0.06, 1.54)
+        ax.set_ylim(0.0, 1.12)
+        ax.tick_params(labelsize=7)
+    ax_t.tick_params(labelbottom=False)
+    ax_s.set_xlabel("$x$ [m]", fontsize=8)
+    if col == 1:
+        ax_t.text(
+            xc,
+            0.97,
+            T("incident plane wavefront"),
+            ha="center",
+            va="bottom",
+            color=FIELD_INK,
+            fontsize=7.5,
+            path_effects=outline,
+        )
+        ax_t.annotate(
+            "",
+            xy=(xc, 0.83),
+            xytext=(xc, 0.955),
+            arrowprops={"arrowstyle": "-|>", "color": FIELD_INK, "lw": 1.2},
+        )
+    d_txt = ax_s.text(
+        xc,
+        1.03,
+        "",
+        ha="center",
+        va="top",
+        color="white",
+        fontsize=7.5,
+        fontweight="bold",
+    )
+    if col == 0:
+        ax_t.set_ylabel(T("sound field $p$"), fontsize=9)
+        ax_s.set_ylabel(T("scattered field (total − incident)"), fontsize=8)
+    else:
+        ax_t.tick_params(labelleft=False)
+        ax_s.tick_params(labelleft=False)
+    if col == 1:
+        ax_t.annotate(
+            "",
+            xy=(x_r + 0.045, y1 - 0.274),
+            xytext=(x_r + 0.045, y1),
+            arrowprops={"arrowstyle": "-", "color": COLOR_FG, "lw": 1.6},
+        )
+        ax_t.text(
+            x_r + 0.07,
+            y1 - 0.14,
+            "27 cm",
+            ha="left",
+            va="center",
+            fontsize=7,
+            color=COLOR_FG,
+        )
+    if col == 2:
+        ax_t.text(
+            xc,
+            0.06,
+            T("real slits and resonators meshed at 0.25 mm"),
+            ha="center",
+            va="bottom",
+            color=FIELD_INK,
+            fontsize=6.5,
+            path_effects=outline,
+        )
+        # No dimension bar on this one: the panel is 2 cm deep against
+        # the QRD's 27, and a bar drawn to that scale is four pixels of
+        # a stroke 1.6 wide -- a full stop in front of the text, not a
+        # measurement. The number sits against the end of the slab it
+        # measures instead, which at this thickness is the slab's own
+        # thickness anyway.
+        ax_t.text(
+            x_r + 0.02,
+            y1 - 0.012,
+            "2 cm",
+            ha="left",
+            va="center",
+            fontsize=7,
+            color=COLOR_FG,
+        )
+    return im_t, im_s, d_txt
 
 
 def animate_fdtd_metadiffuser(output_dir: str) -> None:
@@ -371,14 +582,10 @@ def animate_fdtd_metadiffuser(output_dir: str) -> None:
     scattered fan, from a panel 13.7 times thinner.
     """
     from matplotlib import patheffects
-    from matplotlib.patches import Polygon, Rectangle
 
     T = _translate_str
     outline = [patheffects.withStroke(linewidth=2.0, foreground=FIELD_STROKE)]
     tot_all, trail_db, times = _metadiffuser_fields()
-    y1 = _META_FACE
-    x_l = _META_XL
-    x_r = x_l + _META_PERIODS * 5 * _META_PITCH
     vmax = float(np.quantile(np.abs(tot_all[:, 0]), 0.999))
 
     fig = _anim_figure()
@@ -391,139 +598,19 @@ def animate_fdtd_metadiffuser(output_dir: str) -> None:
         T("QRD, wells down to 27 cm"),
         T("Metadiffuser, 2 cm panel"),
     ]
-    qrd_poly: list[tuple[float, float]] = [(x_l, 0.05), (x_l, y1)]
-    for wx0, wx1, d in _meta_qrd_wells():
-        qrd_poly += [(wx0, y1), (wx0, y1 - d), (wx1, y1 - d), (wx1, y1)]
-    qrd_poly += [(x_r, y1), (x_r, 0.05)]
-    xc = 0.5 * (x_l + x_r)
 
     ims: list[Any] = []
     d_txts: list[Any] = []
     for col in range(3):
-        ax_t = fig.add_subplot(gs[0, col])
-        ax_s = fig.add_subplot(gs[1, col])
-        im_t = ax_t.imshow(
-            tot_all[col][0],
-            origin="lower",
-            extent=(0.0, 1.6, 0.0, 1.2),
-            cmap=CMAP_FIELD,
-            vmin=-vmax,
+        im_t, im_s, d_txt = _meta_column(
+            fig,
+            gs,
+            col,
+            titles[col],
+            first=(tot_all[col][0], trail_db[col][0]),
             vmax=vmax,
-            interpolation="bilinear",
+            outline=outline,
         )
-        im_s = ax_s.imshow(
-            trail_db[col][0],
-            origin="lower",
-            extent=(0.0, 1.6, 0.0, 1.2),
-            cmap="magma",
-            vmin=-30.0,
-            vmax=0.0,
-            interpolation="bilinear",
-        )
-        ax_t.set_title(titles[col], fontsize=10)
-        for ax in (ax_t, ax_s):
-            ax.grid(visible=False)
-            if col == 1:
-                ax.add_patch(
-                    Polygon(
-                        qrd_poly,
-                        closed=True,
-                        facecolor=_solid_in_field(ax),
-                        edgecolor=COLOR_FG,
-                        lw=0.8,
-                    )
-                )
-            else:
-                ax.add_patch(
-                    Rectangle(
-                        (x_l, y1 - 0.023),
-                        x_r - x_l,
-                        0.023,
-                        facecolor=_solid_in_field(ax),
-                        edgecolor=COLOR_FG,
-                        lw=0.8,
-                    )
-                )
-            ax.set_xlim(0.06, 1.54)
-            ax.set_ylim(0.0, 1.12)
-            ax.tick_params(labelsize=7)
-        ax_t.tick_params(labelbottom=False)
-        ax_s.set_xlabel("$x$ [m]", fontsize=8)
-        if col == 1:
-            ax_t.text(
-                xc,
-                0.97,
-                T("incident plane wavefront"),
-                ha="center",
-                va="bottom",
-                color=FIELD_INK,
-                fontsize=7.5,
-                path_effects=outline,
-            )
-            ax_t.annotate(
-                "",
-                xy=(xc, 0.83),
-                xytext=(xc, 0.955),
-                arrowprops={"arrowstyle": "-|>", "color": FIELD_INK, "lw": 1.2},
-            )
-        d_txt = ax_s.text(
-            xc,
-            1.03,
-            "",
-            ha="center",
-            va="top",
-            color="white",
-            fontsize=7.5,
-            fontweight="bold",
-        )
-        if col == 0:
-            ax_t.set_ylabel(T("sound field $p$"), fontsize=9)
-            ax_s.set_ylabel(T("scattered field (total − incident)"), fontsize=8)
-        else:
-            ax_t.tick_params(labelleft=False)
-            ax_s.tick_params(labelleft=False)
-        if col == 1:
-            ax_t.annotate(
-                "",
-                xy=(x_r + 0.045, y1 - 0.274),
-                xytext=(x_r + 0.045, y1),
-                arrowprops={"arrowstyle": "-", "color": COLOR_FG, "lw": 1.6},
-            )
-            ax_t.text(
-                x_r + 0.07,
-                y1 - 0.14,
-                "27 cm",
-                ha="left",
-                va="center",
-                fontsize=7,
-                color=COLOR_FG,
-            )
-        if col == 2:
-            ax_t.text(
-                xc,
-                0.06,
-                T("real slits and resonators meshed at 0.25 mm"),
-                ha="center",
-                va="bottom",
-                color=FIELD_INK,
-                fontsize=6.5,
-                path_effects=outline,
-            )
-            # No dimension bar on this one: the panel is 2 cm deep against
-            # the QRD's 27, and a bar drawn to that scale is four pixels of
-            # a stroke 1.6 wide -- a full stop in front of the text, not a
-            # measurement. The number sits against the end of the slab it
-            # measures instead, which at this thickness is the slab's own
-            # thickness anyway.
-            ax_t.text(
-                x_r + 0.02,
-                y1 - 0.012,
-                "2 cm",
-                ha="left",
-                va="center",
-                fontsize=7,
-                color=COLOR_FG,
-            )
         ims += [im_t, im_s]
         d_txts.append(d_txt)
     # Top-left margin, beside the centred suptitle: three columns of field

@@ -1,18 +1,21 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
 """What more than one wave-field clip needs: capture, dB and gain.
 
-The continuous-wave capture loop and the running-RMS to dB conversion every
-FDTD clip post-processes its frames with, the weak-field display gain the
-clips that put a loud and a quiet region in the same colour ramp share, the
-loudspeaker drawn on the clips that drive a bore, the fill of a solid drawn
-into a field, and the measure-then-slide pass that keeps an annotation inside
-its panel in either language.
+The capture of a CW run and the reductions it keeps on the engine's device,
+the settled envelope of a standing wave, the host copies a clip draws from,
+the running-RMS to dB conversion every FDTD clip post-processes its frames
+with, the weak-field display gain the clips that put a loud and a quiet
+region in the same colour ramp share, the loudspeaker drawn on the clips
+that drive a bore, the fill of a solid drawn into a field, and the
+measure-then-slide pass that keeps an annotation inside its panel in either
+language.
 """
 
 from __future__ import annotations
 
 import sys
-from typing import TYPE_CHECKING
+from dataclasses import dataclass
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -21,12 +24,16 @@ from phonometry._plot.common import theme_fill
 from ..theme import COLOR_FG
 
 if TYPE_CHECKING:
-    from fdtd_dispatch import Scene
+    from collections.abc import Sequence
+
     from matplotlib.axes import Axes
     from matplotlib.figure import Figure
     from matplotlib.text import Text
     from matplotlib.transforms import Bbox
     from numpy.typing import NDArray
+
+    from phonometry.simulation import FDTD2D, ElasticFDTD2D
+    from phonometry.simulation._backends import DeviceArray
 
 
 #: How far a solid drawn into a field sits from the page, in CIEDE2000: where
@@ -46,44 +53,224 @@ def _solid_in_field(ax: Axes) -> tuple[float, float, float]:
     return theme_fill(COLOR_FG, ax, delta_e=_SOLID_DELTA_E)
 
 
-def _cw_beta(scene: Scene, frequency: float) -> float:
+def _host(
+    sim: FDTD2D | ElasticFDTD2D,
+    array: DeviceArray,
+    *,
+    dtype: type[np.floating[Any]] = np.float32,
+) -> NDArray[Any]:
+    """*array*, a field of *sim* or anything computed from one, as a host copy.
+
+    What a clip draws from has to be on the host and in the dtype it is
+    stored in; ``to_host`` hands back the array itself on NumPy, so the cast
+    is what detaches the copy from a field the next step overwrites.
+    """
+    return sim._backend.to_host(array).astype(dtype)
+
+
+def _blanked(
+    sim: FDTD2D | ElasticFDTD2D, field: DeviceArray, blank: NDArray[np.bool_]
+) -> NDArray[np.float32]:
+    """A float32 host frame of *field*, NaN (transparent under imshow) where *blank*."""
+    frame = _host(sim, field)
+    frame[blank] = np.nan
+    return frame
+
+
+def _cw_beta(dt: float, frequency: float) -> float:
     """The one-pole coefficient of the running mean square of a CW run.
 
     A two-period time constant: the RMS map (the lobe/shadow pattern) builds
     up as the field settles, rather than carrying the onset transient into
     the picture.
     """
-    return float(np.exp(-scene.dt * frequency / 2.0))
+    return float(np.exp(-dt * frequency / 2.0))
+
+
+@dataclass(frozen=True)
+class _Capture:
+    """What :func:`_step_and_capture` brings back to the host.
+
+    An array that was not asked for is empty.
+
+    :ivar frames: The pressure on the sample schedule, every ``stride``-th
+        cell, float32.
+    :ivar times: The time of each frame on the engine's own clock [s], which
+        counts the steps it took before the capture too.
+    :ivar rms_frames: The running RMS on the same schedule and stride.
+    :ivar rms_final: The running RMS after the last step, every cell.
+    :ivar settled_rms: The RMS over the settle window, every cell.
+    """
+
+    frames: NDArray[np.float32]
+    times: NDArray[np.float64]
+    rms_frames: NDArray[np.float32]
+    rms_final: NDArray[np.float64]
+    settled_rms: NDArray[np.float64]
+
+
+class _RunningSums:
+    """The running mean square and the settle-window sum of one run, on its device."""
+
+    def __init__(
+        self, sim: FDTD2D, *, rms_beta: float, settle: tuple[int, int] | None
+    ) -> None:
+        self._sim = sim
+        self._xp = sim._backend.xp
+        shape = tuple(sim.p.shape)
+        self._beta = rms_beta
+        self.ms = sim._backend.zeros(shape) if rms_beta > 0.0 else None
+        self._window = settle or (0, 0)
+        self._acc = sim._backend.zeros(shape) if settle is not None else None
+
+    def update(self, step: int) -> None:
+        """Fold in the pressure after *step* of the capture.
+
+        The mean square decays by ``rms_beta`` and takes ``1 - rms_beta`` of
+        the squared pressure; the settle sum takes the squared pressure when
+        *step* is inside its window.
+        """
+        p = self._sim.p
+        if self.ms is not None:
+            self.ms *= self._beta
+            self.ms += (1.0 - self._beta) * p**2
+        start, stop = self._window
+        if self._acc is not None and start < step <= stop:
+            self._acc += p**2
+
+    def rms_frame(self, stride: int) -> NDArray[np.float32]:
+        if self.ms is None:
+            return np.zeros((0, 0), dtype=np.float32)
+        return _host(self._sim, self._xp.sqrt(self.ms[::stride, ::stride]))
+
+    def rms_final(self) -> NDArray[np.float64]:
+        if self.ms is None:
+            return np.zeros((0, 0))
+        return _host(self._sim, self._xp.sqrt(self.ms), dtype=np.float64)
+
+    def settled_rms(self) -> NDArray[np.float64]:
+        if self._acc is None:
+            return np.zeros((0, 0))
+        start, stop = self._window
+        return _host(
+            self._sim, self._xp.sqrt(self._acc / (stop - start)), dtype=np.float64
+        )
+
+
+def _stack32(frames: list[NDArray[np.float32]]) -> NDArray[np.float32]:
+    return np.stack(frames) if frames else np.zeros((0, 0, 0), dtype=np.float32)
+
+
+def _check_schedule(
+    steps: int, wanted: list[int], settle: tuple[int, int] | None
+) -> None:
+    """Refuse a sample step or a settle window outside a capture of *steps* steps.
+
+    :raises ValueError: for a sample step outside ``1..steps``, or a settle
+        window ``(start, stop)`` other than ``0 <= start < stop <= steps``.
+    """
+    if wanted and (wanted[0] < 1 or wanted[-1] > steps):
+        msg = f"sample steps must lie in 1..{steps}; got {wanted[0]}..{wanted[-1]}"
+        raise ValueError(msg)
+    if settle is not None and not 0 <= settle[0] < settle[1] <= steps:
+        msg = (
+            "the settle window (start, stop) must hold 0 <= start < stop <= "
+            f"{steps}; got {settle}"
+        )
+        raise ValueError(msg)
+
+
+def _step_and_capture(
+    sim: FDTD2D,
+    *,
+    steps: int,
+    sample_steps: Sequence[int],
+    stride: int,
+    rms_beta: float = 0.0,
+    settle: tuple[int, int] | None = None,
+) -> _Capture:
+    """Step *sim* and bring back the frames and the reductions a clip reads.
+
+    The frames are the pressure after each step in ``sample_steps`` (counted
+    from 1), every ``stride``-th cell, as float32. With ``rms_beta`` the
+    running mean square of the pressure (a one-pole average of its square,
+    updated after each step and before a frame is taken off it) comes back
+    on the same schedule, and at every cell as it stands at the end. With
+    ``settle=(start, stop)`` the RMS of the pressure over the steps
+    ``start < n <= stop`` comes back too: the settled level a scene measures
+    once the transient is out. The reductions stay on the engine's device;
+    only the captured frames cross to the host.
+
+    The sample steps and the settle window count the steps of this capture,
+    from 1; the times are the engine's own clock, so a frame taken at sample
+    step ``s`` of an engine that had already taken ``n`` steps is at
+    ``(n + s) * dt``, and ``s * dt`` on a fresh engine.
+
+    :raises ValueError: for a sample step outside ``1..steps``, or a settle
+        window other than ``0 <= start < stop <= steps``.
+    """
+    wanted = sorted(set(sample_steps))
+    _check_schedule(steps, wanted, settle)
+    first = sim.n
+    sums = _RunningSums(sim, rms_beta=rms_beta, settle=settle)
+    capture = set(wanted)
+    frames: list[NDArray[np.float32]] = []
+    rms_frames: list[NDArray[np.float32]] = []
+    for step in range(1, steps + 1):
+        sim.step()
+        sums.update(step)
+        if step in capture:
+            frames.append(_host(sim, sim.p[::stride, ::stride]))
+            if sums.ms is not None:
+                rms_frames.append(sums.rms_frame(stride))
+    return _Capture(
+        frames=_stack32(frames),
+        times=np.asarray([first + s for s in wanted], dtype=np.float64) * sim.dt,
+        rms_frames=_stack32(rms_frames),
+        rms_final=sums.rms_final(),
+        settled_rms=sums.settled_rms(),
+    )
 
 
 def _fdtd_cw_capture(
-    scene: Scene, frequency: float, every: int, n_frames: int, decimate: int = 2
+    sim: FDTD2D, frequency: float, every: int, n_frames: int, decimate: int = 2
 ) -> tuple[
     NDArray[np.float32], NDArray[np.float32], NDArray[np.float64], NDArray[np.float64]
 ]:
-    """Drive a CW scene and capture instantaneous + running-RMS frames.
+    """Drive a CW run and capture instantaneous and running-RMS frames.
 
-    The scene is stepped wherever :mod:`fdtd_dispatch` sends it (the GPU
-    box of ``.env`` when it answers, this machine otherwise) and the two
-    reductions are computed there, so a clip's field never travels a frame
-    per step. Returns the float32 frame stacks (decimated), the frame times
-    and the final full-resolution RMS map for physics probes.
+    Returns the float32 frame stacks (decimated), the frame times and the
+    final full-resolution RMS map for physics probes. The run steps on its
+    own device and only the frames come back.
     """
-    import fdtd_dispatch
-
-    out = fdtd_dispatch.run(
-        scene,
+    capture = _step_and_capture(
+        sim,
         steps=every * n_frames,
         sample_steps=[every * (k + 1) for k in range(n_frames)],
-        sample_stride=decimate,
-        rms_beta=_cw_beta(scene, frequency),
+        stride=decimate,
+        rms_beta=_cw_beta(sim.dt, frequency),
     )
-    return (
-        out["frames"],
-        out["rms_frames"],
-        out["sample_steps"] * scene.dt,
-        out["rms_final"],
-    )
+    return capture.frames, capture.rms_frames, capture.times, capture.rms_final
+
+
+def _settled_envelope(
+    sim: FDTD2D, *, settle: int, period: int, row: int, columns: slice
+) -> DeviceArray:
+    """Step *sim* *settle* times and keep the envelope of one row, on its device.
+
+    The envelope is the running maximum of ``|p[row, columns]|`` over the
+    last *period* of those steps: the standing wave a CW run leaves once it
+    has settled, a whole period of it, so its maxima and minima are both in
+    it. It stays on the engine's device; a scene brings it back with
+    :func:`_host` when it keeps it.
+    """
+    xp = sim._backend.xp
+    envelope = sim._backend.zeros(tuple(sim.p[row, columns].shape))
+    for step in range(settle):
+        sim.step()
+        if step >= settle - period:
+            envelope = xp.maximum(envelope, xp.abs(sim.p[row, columns]))
+    return envelope
 
 
 def _rms_to_db(

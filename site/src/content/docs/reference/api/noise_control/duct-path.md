@@ -250,7 +250,7 @@ Plot the spectrum cascading down the path against the criterion curve.
 One line per element shows where the spectrum stands after that
 element, from the source at the top to the received level at the
 bottom, with the design criterion curve overlaid. Requires matplotlib
-(`pip install phonometry[plot]`).
+(`pip install "phonometry[plot]"`).
 
 **Parameters**
 
@@ -315,7 +315,7 @@ criterion, and a method-basis strip.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` is not `"reportlab"` or `language` is unknown. |
-| ImportError | If reportlab (or, for the figure, matplotlib) is not installed (`pip install phonometry[report]`). |
+| ImportError | If reportlab (or, for the figure, matplotlib) is not installed (`pip install "phonometry[report]"`). |
 
 ### DuctPathResult.table()
 

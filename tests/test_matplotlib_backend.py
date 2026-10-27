@@ -331,7 +331,7 @@ def test_showfilter_raises_helpful_error_without_matplotlib(
 
     spectrum = np.array([1])
     monkeypatch.setattr(builtins, "__import__", blocked_import)
-    with pytest.raises(ImportError, match=r"pip install phonometry\[plot\]"):
+    with pytest.raises(ImportError, match=r'pip install "phonometry\[plot\]"'):
         design._showfilter(
             [], [1000.0], [1122.0], [891.0], 48000, spectrum, show=True, plot_file=None
         )

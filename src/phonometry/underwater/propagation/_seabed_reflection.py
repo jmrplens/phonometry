@@ -332,7 +332,7 @@ class SeabedReflection(OwnsArrays):
 
         Draws ``|R|`` on a linear grazing-angle axis (0..90°), marking the
         critical angle when the sediment is faster than the water. Requires
-        matplotlib (``pip install phonometry[plot]``); returns the
+        matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes` and never calls ``plt.show``.
 
         :param ax: Existing axes, or ``None`` to create a figure.

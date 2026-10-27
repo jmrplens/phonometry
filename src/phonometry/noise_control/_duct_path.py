@@ -397,7 +397,7 @@ class DuctPathResult(OwnsArrays):
         One line per element shows where the spectrum stands after that
         element, from the source at the top to the received level at the
         bottom, with the design criterion curve overlaid. Requires matplotlib
-        (``pip install phonometry[plot]``).
+        (``pip install "phonometry[plot]"``).
 
         :param ax: Existing axes, or ``None`` to create a figure.
         :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -449,7 +449,7 @@ class DuctPathResult(OwnsArrays):
         :raises ValueError: If ``engine`` is not ``"reportlab"`` or
             ``language`` is unknown.
         :raises ImportError: If reportlab (or, for the figure, matplotlib) is
-            not installed (``pip install phonometry[report]``).
+            not installed (``pip install "phonometry[report]"``).
         """
         from .._i18n import check_language
 

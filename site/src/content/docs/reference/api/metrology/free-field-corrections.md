@@ -252,7 +252,7 @@ with the tolerances it was weighed against.
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the adjusted-response curve. |
 
-**Returns:** The axes. Requires matplotlib (`pip install phonometry[plot]`).
+**Returns:** The axes. Requires matplotlib (`pip install "phonometry[plot]"`).
 
 ### AdjustmentValue.pressure_indicated_level
 
@@ -503,7 +503,7 @@ $u_\mathrm{c}$, $k$ and $U$.
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to `barh`. |
 
-**Returns:** The axes. Requires matplotlib (`pip install phonometry[plot]`).
+**Returns:** The axes. Requires matplotlib (`pip install "phonometry[plot]"`).
 
 ### CorrectionUncertaintyBudget.standard_uncertainties_db
 
@@ -607,7 +607,7 @@ the clause.
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the expanded-uncertainty curve. |
 
-**Returns:** The axes. Requires matplotlib (`pip install phonometry[plot]`).
+**Returns:** The axes. Requires matplotlib (`pip install "phonometry[plot]"`).
 
 ### CorrectionUncertaintyVerification.range_passes
 
@@ -654,7 +654,7 @@ maximum permitted values.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` is not `"reportlab"`. |
-| ImportError | If reportlab is not installed (`pip install phonometry[report]`), or matplotlib is missing for the embedded figure (`pip install phonometry[plot]`). |
+| ImportError | If reportlab is not installed (`pip install "phonometry[report]"`), or matplotlib is missing for the embedded figure (`pip install "phonometry[plot]"`). |
 
 ### CorrectionUncertaintyVerification.subject
 
@@ -878,7 +878,7 @@ and the range between them.
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the mean-correction curve. |
 
-**Returns:** The axes. Requires matplotlib (`pip install phonometry[plot]`).
+**Returns:** The axes. Requires matplotlib (`pip install "phonometry[plot]"`).
 
 ### FreeFieldCorrection.range_db
 

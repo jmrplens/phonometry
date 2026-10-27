@@ -197,7 +197,7 @@ EnclosureInsertionLossResult.plot(
 
 Plot the panel `R`, correction `C` and net insertion loss.
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 ### EnclosureInsertionLossResult.report()
@@ -245,4 +245,4 @@ $C = 10 \log_{10}(0.3 + S_\mathrm{E} / R_\mathrm{i})$.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` is not `"reportlab"` or `language` is unknown. |
-| ImportError | If reportlab (or, for the figure, matplotlib) is not installed (`pip install phonometry[report]`). |
+| ImportError | If reportlab (or, for the figure, matplotlib) is not installed (`pip install "phonometry[report]"`). |

@@ -1,10 +1,9 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
 """The repository ``.env``, read with the standard library alone.
 
-``.env`` holds the machine-specific settings no commit should carry: the GPU
-host the FDTD fields and the AV1 encodes run on (``PHONO_GPU_*``) and where
+``.env`` holds the machine-specific settings no commit should carry: where
 the published clips are checked out (``PHONOMETRY_ASSETS_DIR``). It is
-untracked; ``.env.example`` documents every key.
+untracked; ``.env.example`` documents it.
 
 This lives in a module of its own, and imports nothing outside the standard
 library, because the readers of ``.env`` are not all renderers. The clip
@@ -32,12 +31,12 @@ def env_file() -> Path:
 
     ``.env`` is untracked, so it exists only next to the main checkout. Run
     from a linked worktree, the copy beside this file is absent and every
-    setting would read as unset, which downgrades an AV1 render to VP9 without
-    saying so. Fall back to the directory holding the common git dir, which is
-    the main checkout for every worktree of the repository. The pointer git
-    writes is absolute, or relative to the worktree when it was added with
-    ``--relative-paths``; both are read against the worktree, never against
-    the directory the process happens to run in.
+    setting would read as unset, which points the clips at the default
+    checkout without saying so. Fall back to the directory holding the common
+    git dir, which is the main checkout for every worktree of the repository.
+    The pointer git writes is absolute, or relative to the worktree when it
+    was added with ``--relative-paths``; both are read against the worktree,
+    never against the directory the process happens to run in.
     """
     local = _REPO_ROOT / ".env"
     if local.is_file():

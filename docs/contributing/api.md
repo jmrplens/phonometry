@@ -218,7 +218,7 @@ from ..room.modes import RoomModesResult  # at module level in src/phonometry/_p
 <a id="a10"></a>
 ### A10. Import matplotlib inside the function that draws, never at module scope
 
-**Why.** matplotlib is a soft dependency: importing phonometry and computing must work without it, and `.plot()` without it must fail with the install command (`pip install phonometry[plot]`), not a bare `ModuleNotFoundError`.
+**Why.** matplotlib is a soft dependency: importing phonometry and computing must work without it, and `.plot()` without it must fail with the install command (`pip install "phonometry[plot]"`), not a bare `ModuleNotFoundError`.
 
 **Do**
 

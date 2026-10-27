@@ -181,12 +181,12 @@ ElasticFDTD2D(
     *,
     rho: float | NDArray[np.float64],
     cfl: float = 0.6,
-    sponge_width: int = 0,
-    sponge_sides: Literal['left', 'right', 'top', 'bottom'] | Iterable[Literal['left', 'right', 'top', 'bottom']] | None = None,
-    sponge_reflection: float = 0.0001,
+    absorbing_layer_cells: int = 0,
+    absorbing_sides: Literal['left', 'right', 'top', 'bottom'] | Iterable[Literal['left', 'right', 'top', 'bottom']] | None = None,
+    absorbing_layer_reflection: float = 0.0001,
     damping: float | NDArray[np.float64] = 0.0,
     shape: tuple[int, int] | None = None,
-    free_sides: str | Iterable[str] | None = None,
+    free_sides: Literal['left', 'right', 'top', 'bottom'] | Iterable[Literal['left', 'right', 'top', 'bottom']] | None = None,
     obstacle_mask: NDArray[np.bool_] | None = None,
     compute: Compute | None = None,
 )
@@ -224,12 +224,12 @@ interfaces converge to the physical traction continuity.
 | `dx` | Grid spacing [m] (square cells). |
 | `rho` | Density map [kg/m3]; scalar or `(ny, nx)` array. |
 | `cfl` | Courant number $C_\mathrm{N} = c_{\mathrm{p},\max}\, \Delta t \sqrt{2} / \Delta x$; the scheme is stable for $C_\mathrm{N} < 1$ (Virieux Eqs. 6-7, a bound on `c_P` alone, independent of `c_S` and of the Poisson ratio) and values in `(0, 1)` are accepted. The default 0.6 keeps a wide stability margin with moderate numerical dispersion. |
-| `sponge_width` | Thickness of the absorbing layer in cells (0 = no absorbing sides). |
-| `sponge_sides` | Which sides absorb: a single side name or an iterable drawn from `{"left", "right", "top", "bottom"}` (default: all four when `sponge_width > 0`). |
-| `sponge_reflection` | Target round-trip amplitude reflection of the sponge layer; sets the peak absorption rate. |
+| `absorbing_layer_cells` | Thickness of the absorbing (sponge) layer, in cells (default 0, no layer and no absorbing side). |
+| `absorbing_sides` | Which sides absorb: a single side name or an iterable drawn from `{"left", "right", "top", "bottom"}` (default: all four when `absorbing_layer_cells > 0`). |
+| `absorbing_layer_reflection` | Target round-trip amplitude reflection of the sponge layer; sets the peak absorption rate. |
 | `damping` | Bulk amplitude decay rate [1/s]: a scalar for the whole field or an `(ny, nx)` map for locally lossy regions. |
 | `shape` | Grid shape `(ny, nx)`, required only when `c_p` is a scalar. |
-| `free_sides` | Sides carrying a traction-free surface (stress imaging, Moczo et al. Eq. 9.9): the surface plane runs through the boundary row/column of cell centres, the normal stress is pinned to zero there and the shear stress is imaged antisymmetrically above it. A side cannot be both free and absorbing. |
+| `free_sides` | Sides carrying a traction-free surface (stress imaging, Moczo et al. Eq. 9.9): a single side name or an iterable drawn from `{"left", "right", "top", "bottom"}` (default: none). The surface plane runs through the boundary row/column of cell centres, the normal stress is pinned to zero there and the shear stress is imaged antisymmetrically above it. A side cannot be both free and absorbing. |
 | `obstacle_mask` | Boolean map, shape `(ny, nx)`, of rigid cells: every face adjacent to a masked cell is closed (zero normal velocity) and every touching corner shear stress is zeroed, i.e. a shear-free rigid inclusion, rasterising arbitrary interior geometry. |
 | `compute` | Where the engine steps ([`Compute`](/phonometry/reference/api/simulation/compute/#compute)); `None` follows [`use`](/phonometry/reference/api/simulation/compute/#use), then `PHONOMETRY_COMPUTE`, then NumPy. |
 
@@ -237,7 +237,7 @@ interfaces converge to the physical traction continuity.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `cfl` is not a single number, `sponge_width` is a flag, a text or an array where a count goes, or `compute` is neither a [`Compute`](/phonometry/reference/api/simulation/compute/#compute) nor `None`. |
+| TypeError | if `cfl` or `absorbing_layer_reflection` is not a single number, `absorbing_layer_cells` is a flag, a text or an array where a count goes, or `compute` is neither a [`Compute`](/phonometry/reference/api/simulation/compute/#compute) nor `None`. |
 | ValueError | for an argument out of its range, and for a `compute` that names a host: an engine steps in this process, and only [`elastic_fdtd_simulation`](/phonometry/reference/api/simulation/elastic-fdtd/#elastic_fdtd_simulation) runs on a node. |
 | ComputeImportError | when the library of the device `compute` asks for is not installed or does not import. |
 | ComputeDeviceError | when that device is not present, or fails a first small computation; with `fallback=True` the engine warns with [`ComputeFallbackWarning`](/phonometry/reference/api/simulation/compute/#computefallbackwarning) and steps on NumPy instead. |
@@ -267,7 +267,7 @@ adjacent faces (domain-edge faces count as zero, their built-in
 value), so probes and snapshots of every field share the cell-centre
 positions. The result is on the engine's device, where the fields
 live: a NumPy array by default, the backend's own array on another
-device; `host_field` gives host copies of the stored fields.
+device; `numpy_field` gives NumPy copies of the stored fields.
 
 ### ElasticFDTD2D.energy()
 
@@ -324,7 +324,7 @@ or `numpy.s_[120:, :]` for the same thing spelled as a slice.
 | `dx` | Grid spacing [m] (square cells). |
 | `background` | The material filling the whole grid first: a [`Material`](/phonometry/reference/api/simulation/elastic-fdtd/#material), a `(c_p, c_s, rho)` triple, e.g. [`WATER`](/phonometry/reference/api/simulation/elastic-fdtd/#water), or a solid's catalogue row ([`SolidMaterial`](/phonometry/reference/api/solids/catalogue/#solidmaterial)), whose bulk longitudinal speed, transverse speed and density are read through [`printed`](/phonometry/reference/api/io/io/#cataloguerowprinted). |
 | `regions` | `(where, material)` pairs painted in order, each material taken in any of the forms `background` takes. |
-| `kwargs` | Forwarded to [`ElasticFDTD2D`](/phonometry/reference/api/simulation/elastic-fdtd/#elasticfdtd2d) (`cfl`, `sponge_width`, `sponge_sides`, `sponge_reflection`, `damping`, `free_sides`, `obstacle_mask`, `compute`). |
+| `kwargs` | Forwarded to [`ElasticFDTD2D`](/phonometry/reference/api/simulation/elastic-fdtd/#elasticfdtd2d) (`cfl`, `absorbing_layer_cells`, `absorbing_sides`, `absorbing_layer_reflection`, `damping`, `free_sides`, `obstacle_mask`, `compute`). |
 
 **Returns:** The configured stepping engine.
 
@@ -337,27 +337,27 @@ or `numpy.s_[120:, :]` for the same thing spelled as a slice.
 | ComputeImportError | When the library of the device a `compute` keyword asks for is not installed or does not import. |
 | ComputeDeviceError | When that device is not present, or fails a first small computation; with `fallback=True` the engine warns with [`ComputeFallbackWarning`](/phonometry/reference/api/simulation/compute/#computefallbackwarning), pointing at the line that called this method, and steps on NumPy instead. |
 
-### ElasticFDTD2D.host_field()
+### ElasticFDTD2D.numpy_field()
 
 ```python
-ElasticFDTD2D.host_field(
-    name: Literal['txx', 'tyy', 'txy', 'vx', 'vy'],
+ElasticFDTD2D.numpy_field(
+    field: Literal['txx', 'tyy', 'txy', 'vx', 'vy'],
 ) -> NDArray[np.floating]
 ```
 
-A NumPy copy of the stored field *name*, whatever the device.
+A NumPy copy of the stored *field*, in this process, whatever the device.
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
-| `name` | `"txx"` or `"tyy"` (cell centres), `"txy"` (interior corners), `"vx"` or `"vy"` (faces). |
+| `field` | `"txx"` or `"tyy"` (cell centres), `"txy"` (interior corners), `"vx"` or `"vy"` (faces). |
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `name` is not a text. |
+| TypeError | if `field` is not a text. |
 | ValueError | for a field the engine does not store. |
 
 ### ElasticFDTD2D.p
@@ -370,8 +370,8 @@ The mean compressive normal stress: in fluid (`c_s = 0`) regions
 it is exactly the acoustic pressure, and in solids it is the
 convenient scalar for probes and snapshots. It is computed on the
 engine's device, where the stresses live: a NumPy array by default,
-the backend's own array on another device; `host_field` gives
-host copies of the stresses it is built from.
+the backend's own array on another device; `numpy_field` gives
+NumPy copies of the stresses it is built from.
 
 ### ElasticFDTD2D.provenance
 
@@ -384,6 +384,7 @@ Where this engine steps: device, dtype and library versions.
 ```python
 ElasticFDTD2D.run(
     n_steps: int,
+    *,
     snapshot_every: int | None = None,
     snapshot_decimation: int = 1,
 ) -> NDArray[np.floating]
@@ -391,13 +392,14 @@ ElasticFDTD2D.run(
 
 Advance `n_steps` steps, optionally recording pressure frames.
 
-With `snapshot_every = k` a host copy of the synthetic pressure
+With `snapshot_every = k` a NumPy copy of the synthetic pressure
 `p` is stored after every `k`-th step (and one of the initial
 state), keeping every `snapshot_decimation`-th cell along each
 axis; the stacked `(n_frames, ny', nx')` array plugs straight into
 a `FuncAnimation` `imshow` update. Without `snapshot_every` an
 empty array is returned and only the final state is kept (read it
-with `host_field`).
+with `numpy_field`). The two counts are taken by name, as
+[`ElasticRecording`](/phonometry/reference/api/simulation/elastic-fdtd/#elasticrecording) takes them.
 
 **Raises**
 
@@ -426,7 +428,7 @@ Elapsed simulated time [s].
 ElasticFDTDResult(
     times: NDArray[np.float64],
     signals: NDArray[np.float64],
-    probe_fields: tuple[str, ...],
+    probe_fields: tuple[Literal['p', 'vx', 'vy'], ...],
     probes: NDArray[np.int_],
     probe_positions: NDArray[np.float64],
     dx: float,
@@ -437,7 +439,7 @@ ElasticFDTDResult(
     snapshot_times: NDArray[np.float64] | None,
     snapshot_field: Literal['p', 'vx', 'vy'],
     obstacle_mask: NDArray[np.bool_] | None,
-    free_sides: tuple[str, ...],
+    free_sides: tuple[Literal['left', 'right', 'top', 'bottom'], ...],
     snapshot_decimation: int,
     provenance: RunProvenance,
 )
@@ -505,7 +507,7 @@ Domain size `(lx, ly)` [m].
 ElasticRecording(
     *,
     probes: Sequence[tuple[int, int]] = (),
-    probe_fields: Sequence[str] = ('vy',),
+    probe_fields: Sequence[Literal['p', 'vx', 'vy']] = ('vy',),
     snapshot_every: int | None = None,
     snapshot_field: Literal['p', 'vx', 'vy'] = 'p',
     snapshot_decimation: int = 1,

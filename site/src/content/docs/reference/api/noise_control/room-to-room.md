@@ -279,7 +279,7 @@ Plot the source-room level, the noise reduction and what arrives.
 
 The source-room and receiving-room spectra are drawn against the design
 criterion curve, with the band-by-band noise reduction on a twin axis.
-Requires matplotlib (`pip install phonometry[plot]`).
+Requires matplotlib (`pip install "phonometry[plot]"`).
 
 **Parameters**
 

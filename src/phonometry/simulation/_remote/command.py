@@ -142,19 +142,32 @@ def ssh_program() -> tuple[str, ...]:
     return (installed,)
 
 
-def ssh_argv(entry: HostEntry, request: Compute) -> list[str]:
-    """The ssh command that runs a job on *entry* for *request*."""
+def ssh_argv(entry: HostEntry, request: Compute, *, loader: bool = False) -> list[str]:
+    """The ssh command that runs a job on *entry* for *request*.
+
+    With *loader*, the node's Python runs :data:`LOADER` whatever the node
+    is, and the caller sends the program to run on its standard input.
+
+    :raises FileNotFoundError: when no ``ssh`` is on ``PATH``, or on Windows
+        when it was found only in the working directory.
+    """
     return [
         *ssh_program(),
         *SSH_OPTIONS,
         "--",
         entry.ssh,
-        remote_command(entry, request),
+        remote_command(entry, request, loader=loader),
     ]
 
 
-def remote_command(entry: HostEntry, request: Compute) -> str:
-    """What the node's shell runs: the image's bootstrap, or the interpreter on the loader."""
+def remote_command(entry: HostEntry, request: Compute, *, loader: bool = False) -> str:
+    """What the node's shell runs: the image's bootstrap, or the interpreter on the loader.
+
+    A Python node always runs :data:`LOADER`, and the client sends it the
+    bootstrap. A Docker node runs the bootstrap its image keeps, unless
+    *loader* asks for :data:`LOADER` in its place, for a caller that sends a
+    program of its own.
+    """
     if entry.runner == "python":
         return shlex.join([entry.target, "-I", "-c", LOADER])
     docker = [
@@ -182,7 +195,8 @@ def remote_command(entry: HostEntry, request: Compute) -> str:
     # prints a banner there). The GPU reaches the container through the
     # runtime's hook, not through that entrypoint.
     docker += ["--entrypoint", "python"]
-    image = shlex.join([entry.target, "-I", bootstrap.IMAGE_PATH])
+    program = ["-I", "-c", LOADER] if loader else ["-I", bootstrap.IMAGE_PATH]
+    image = shlex.join([entry.target, *program])
     # The user and the cache are the node's: the shell there expands them. The
     # cache is where the bootstrap looks for it: XDG's, which ignores a
     # relative XDG_CACHE_HOME, else ~/.cache.

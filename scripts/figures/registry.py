@@ -11,16 +11,23 @@ silently degrouping a cached figure or dropping a clip's field builder.
 :func:`main` is the command line over the same tables.
 """
 
+import argparse
 import os
+import subprocess
 import sys
-from collections.abc import Callable
+import warnings
+from collections.abc import Callable, Iterable
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal, NamedTuple
 
 import assets_dir
+import clip_placement
+import encode_slots
 import matplotlib.pyplot as plt
 
 from phonometry._i18n import Language
+from phonometry.io import FFmpegNotFoundError
+from phonometry.simulation import Compute, ComputeFallbackWarning
 
 from .aircraft import (
     generate_aircraft_atmospheric_absorption,
@@ -375,6 +382,7 @@ from .fields import (
     animate_fdtd_transmission_tube,
     animate_standing_wave_tube,
 )
+from .fields.metadiffuser import _META_PAIR_BYTES, _META_PAIR_MARGIN
 from .i18n import set_lang
 from .io import generate_signal_provenance
 from .materials import (
@@ -434,7 +442,7 @@ from .materials import (
     generate_transmission_tube_geometry,
     generate_tube_working_ranges,
 )
-from .media import _extract_poster
+from .media import CLIP_ENCODER_ENV, _clip_encoder, _clip_options, _extract_poster
 from .metrology import (
     generate_calibration_narrowband_bias,
     generate_calibration_stability,
@@ -1653,7 +1661,7 @@ def generate_posters(output_dir: str) -> None:
         poster = _extract_poster(webm, _poster_ss_for(webm))
         print(f"  {Path(webm).name} -> {Path(poster).name}")
     clips = sorted({_clip_of(Path(webm).stem) for webm in webms})
-    _stamp_clips(clips, output_dir)
+    _stamp_clips(clips, output_dir, keep_encoder=True)
 
 
 def _clip_of(stem: str) -> str:
@@ -1830,6 +1838,9 @@ def _render_anim_variants(clip: str, output_dir: str) -> None:
         return
     if builder is not None:
         builder()
+        # The field is on the host now; give its device blocks back before
+        # four children inherit a claim on them.
+        clip_placement.release_device()
     ctx = mp.get_context("fork")
 
     def side_by_side() -> None:
@@ -1853,7 +1864,9 @@ def _render_anim_variants(clip: str, output_dir: str) -> None:
     _audited_first(clip, side_by_side)
 
 
-def _stamp_clips(clips: list[str], output_dir: str) -> None:
+def _stamp_clips(
+    clips: list[str], output_dir: str, *, keep_encoder: bool = False
+) -> None:
     """Record the fingerprint of every clip whose four variants were written.
 
     Both render paths end here -- the sequential one and the process pool of
@@ -1863,8 +1876,22 @@ def _stamp_clips(clips: list[str], output_dir: str) -> None:
 
     Only a run that wrote into the published clips directory stamps: the
     renderer takes any output directory, and a render into a scratch one is
-    for looking at, not a statement about what is published. An audit-only
-    run (``--audit-only``) writes no clip at all, so it never stamps.
+    for looking at, not a statement about what is published. A scratch run
+    (``--scratch-dir``, a node's lane) never comes here, wherever its
+    directory is: its renders are told not to stamp. An audit-only run
+    (``--audit-only``) writes no clip at all, so it never stamps.
+
+    Each stamp names the encoder this run writes the WebM with
+    (:func:`figures.media._clip_encoder`). With *keep_encoder* the WebM was
+    not written here (``--posters`` cuts its stills from the one already
+    published), so the encoder recorded for it stays.
+
+    :raises ValueError: when the encoder named for the run is not a clip
+        encoder, when *keep_encoder* is set and a clip has none recorded, or
+        when a clip steps an FDTD engine and ``engine-digests.json`` does not
+        hold the engines' digests (the stamp takes the fingerprints here).
+    :raises FileNotFoundError: when a clip steps an FDTD engine and there
+        is no ``engine-digests.json``.
     """
     import pathlib
 
@@ -1877,11 +1904,28 @@ def _stamp_clips(clips: list[str], output_dir: str) -> None:
         or pathlib.Path(output_dir).resolve() != assets_dir.clips_dir().resolve()
     ):
         return
-    animation_fingerprint.stamp(clips)
+    animation_fingerprint.stamp(
+        clips, encoder=None if keep_encoder else _clip_encoder()
+    )
+
+
+#: The checkout this generator belongs to, whose ``engine-digests.json`` the
+#: stamps read.
+_REPO_ROOT = Path(__file__).resolve().parents[2]
+
+#: Why a render that encodes clips cannot start without ffmpeg.
+_NO_FFMPEG = (
+    "ffmpeg was not found on PATH; it is required to encode the "
+    "animation WebM/GIF outputs. Install ffmpeg and retry."
+)
 
 
 def generate_animations(
-    output_dir: str, names: list[str] | None = None, *, variants: bool = False
+    output_dir: str,
+    names: list[str] | None = None,
+    *,
+    variants: bool = False,
+    stamp: bool = True,
 ) -> None:
     """Render the Tier-1 animations, by default in the active language/theme.
 
@@ -1898,7 +1942,8 @@ def generate_animations(
     drawing a committed clip has moved on without it. The stamp is written
     here, with the files it describes, so a re-render cannot forget it; a
     single-variant render does not stamp, because it leaves the other three
-    variants of that clip as they were.
+    variants of that clip as they were, and nor does one told not to
+    (*stamp* false: a scratch run's).
 
     The stamping is in a ``finally`` because a batch does not fail as a
     whole: a clip that raises halfway through leaves the ones before it
@@ -1913,11 +1958,7 @@ def generate_animations(
     import clip_frame_audit
 
     if shutil.which("ffmpeg") is None and not clip_frame_audit.audit_only():
-        msg = (
-            "ffmpeg was not found on PATH; it is required to encode the "
-            "animation WebM/GIF outputs. Install ffmpeg and retry."
-        )
-        raise RuntimeError(msg)
+        raise RuntimeError(_NO_FFMPEG)
     if names:
         unknown = sorted(set(names) - _ANIMATIONS.keys())
         if unknown:
@@ -1937,7 +1978,8 @@ def generate_animations(
             else:
                 _ANIMATIONS[clip](output_dir)
     finally:
-        _stamp_clips(stamped, output_dir)
+        if stamp:
+            _stamp_clips(stamped, output_dir)
 
 
 # ====================================================================# Command line / parallel figure generation
@@ -2171,6 +2213,120 @@ if not _ANIM_WEIGHTS.keys() <= _ANIMATIONS.keys():
     msg = f"animation names not in _ANIMATIONS: {_unknown_anim}"
     raise RuntimeError(msg)
 
+# Where each clip's field is computed (scripts/clip_placement.py), measured
+# on the GPU node (an RTX 4060 shared with other services): the wall time of
+# the field alone on CuPy against NumPy, taken on 2026-10-21, a clip going to
+# the GPU when it saves a fifth or more and its whole field on CuPy agrees
+# with its NumPy field, output by output, compared on 2026-10-24 and
+# 2026-10-26 with both fields computed in one image (NumPy's float32 log10
+# changed bits between releases on the same CPU). Every output keeps its NaN
+# and infinities in the same places; a float64 output stays within 1e-9 of
+# its peak; a float32 output, a frame among them, within 1e-9 of its peak or
+# within one float32 step of every value, since a bound below a float32
+# value's own resolution would demand bit identity and neither result is
+# more accurate than the other.
+# The metadiffuser goes there in float64 by choice: its lockstep pairs fit
+# the card only with the card to themselves, so a node runs it alone and
+# refuses it while other programs hold the memory. "cpu" steps a clip's
+# field on NumPy, where every clip stays until a measurement sends it to the
+# GPU; "gpu" shares the GPU with the other render lane, "gpu-whole" takes
+# all the GPU memory that is free and runs alone. Kept here beside the
+# scheduling weights, and out of every clip's fingerprint: the engines step
+# bit for bit on CuPy (gpu-parity.lock), and a clip goes to the GPU only once
+# its whole field, the scene's own arithmetic on the device included, has
+# been measured against its NumPy field.
+_ANIM_DEVICES: dict[str, clip_placement.ClipDevice] = {
+    "anim_fdtd_open_end": "gpu",
+    "anim_fdtd_room_modes": "gpu",
+    "anim_fdtd_barrier": "gpu",
+    "anim_fdtd_critical_angle": "gpu",
+    "anim_fdtd_ground_effect": "gpu",
+    "anim_fdtd_ducting": "gpu",
+    "anim_fdtd_diffusion": "gpu",
+    "anim_fdtd_dispersion": "cpu",
+    "anim_fdtd_duct_cut_on": "gpu",
+    "anim_fdtd_metadiffuser": "gpu",
+    "anim_fdtd_impedance_tube": "cpu",
+    "anim_fdtd_transmission_tube": "cpu",
+    "anim_fdtd_slit_absorber": "gpu",
+    "anim_fdtd_expansion_chamber": "gpu",
+    "anim_fdtd_side_branch": "gpu",
+    "anim_fdtd_absorption_placement": "gpu",
+    "anim_fdtd_aperture_slit": "gpu",
+    "anim_fdtd_refraction": "gpu",
+    "anim_elastic_plate_junction": "gpu",
+    "anim_elastic_coincidence": "gpu",
+    "anim_elastic_halfspace_waves": "gpu",
+    "anim_elastic_mode_conversion": "gpu",
+    "anim_elastic_radiation_efficiency": "cpu",  # CuPy: two values two float32 steps off
+    "anim_fdtd_pillar_hall": "gpu",
+}
+
+
+def _require_the_same_clips(
+    first: Iterable[str], second: Iterable[str], tables: str
+) -> None:
+    """Stop the import when two clip tables name different clips, naming each of them.
+
+    :raises RuntimeError: listing the clips one of the tables names and the
+        other does not.
+    """
+    mismatch = sorted(set(first) ^ set(second))
+    if mismatch:
+        msg = f"{tables} name different clips: {mismatch}"
+        raise RuntimeError(msg)
+
+
+# Every clip with a field has a device, and nothing else does; fail fast.
+_require_the_same_clips(_ANIM_DEVICES, _ANIM_FIELDS, "_ANIM_DEVICES and _ANIM_FIELDS")
+
+# The most bytes CuPy's pool held in use while each GPU clip's field was
+# computed, measured on the GPU node on 2026-10-24, the metadiffuser's on
+# 2026-10-26 with the card to itself. A node gives a clip a lane's share of
+# the GPU memory it has free, runs it alone when its peak
+# needs more, and refuses it when even all that is free would not hold it
+# (scripts/clip_node.py).
+_ANIM_GPU_BYTES: dict[str, int] = {
+    "anim_fdtd_open_end": 38270976,
+    "anim_fdtd_room_modes": 29363712,
+    "anim_fdtd_barrier": 33558528,
+    "anim_fdtd_critical_angle": 18462720,
+    "anim_fdtd_ground_effect": 32513024,
+    "anim_fdtd_ducting": 80566272,
+    "anim_fdtd_diffusion": 75966976,
+    "anim_fdtd_duct_cut_on": 51883008,
+    "anim_fdtd_slit_absorber": 101320704,
+    "anim_fdtd_expansion_chamber": 7155200,
+    "anim_fdtd_side_branch": 22141952,
+    "anim_fdtd_absorption_placement": 10107392,
+    "anim_fdtd_aperture_slit": 147385344,
+    "anim_fdtd_refraction": 111309312,
+    "anim_elastic_plate_junction": 100576256,
+    "anim_elastic_coincidence": 196166144,
+    "anim_elastic_halfspace_waves": 170378240,
+    "anim_elastic_mode_conversion": 15355904,
+    "anim_fdtd_pillar_hall": 84403200,
+    "anim_fdtd_metadiffuser": 6143398400,
+}
+
+# The least RAM a clip's field steps in on NumPy, recorded for the one clip
+# that can outgrow a lane's share of a node's RAM there: the metadiffuser
+# steps one float64 lockstep pair at the least (fields/metadiffuser.py). It
+# counts in every render that shares out lanes (a node's, or one on this
+# machine's GPU) wherever the clip steps on NumPy there: always for a "cpu"
+# clip, and for a clip on a GPU only with no GPU named; where its pairs step
+# on a GPU it does not count (clip_placement.lane_fit).
+_ANIM_HOST_BYTES: dict[str, int] = {
+    "anim_fdtd_metadiffuser": int(_META_PAIR_BYTES * _META_PAIR_MARGIN),
+}
+
+# Every GPU clip has a measured peak, and nothing else has one; fail fast.
+_require_the_same_clips(
+    _ANIM_GPU_BYTES,
+    {clip for clip, device in _ANIM_DEVICES.items() if device != "cpu"},
+    "_ANIM_GPU_BYTES and the clips _ANIM_DEVICES puts on a GPU",
+)
+
 
 def _run_anim_task(clip: str, img_dir: str) -> str:
     """Render one clip in all four language/theme variants (worker entry).
@@ -2199,16 +2355,20 @@ def _run_anim_task(clip: str, img_dir: str) -> str:
         # The banner's 2.5 mm frame stack is ~2.5 GB; do not let it stay
         # pinned in this worker while it renders the next clip.
         _pillar_fields.cache_clear()
+        clip_placement.release_device()
     return clip
 
 
-def _generate_animations_parallel(img_dir: str, clips: list[str], jobs: int) -> None:
+def _generate_animations_parallel(
+    img_dir: str, clips: list[str], jobs: int, *, stamp: bool = True
+) -> None:
     """Render ``clips`` (all four variants each) on a ``jobs``-wide pool.
 
     Mirrors :func:`_generate_figures_parallel`: spawned workers each import a
     pristine module (numerical thread pools pinned to one thread), one grouped
     task per clip, heaviest clips submitted first so the long-pole FDTD field
-    clips are not left to serialise at the tail of the run.
+    clips are not left to serialise at the tail of the run. The clips that
+    finished are stamped, unless *stamp* is false (a scratch run).
     """
     import multiprocessing as mp
     from concurrent.futures import FIRST_EXCEPTION, ProcessPoolExecutor, wait
@@ -2231,14 +2391,15 @@ def _generate_animations_parallel(img_dir: str, clips: list[str], jobs: int) -> 
             if exc.__cause__ is not None:
                 detail += f"\n{exc.__cause__}"
             failures.append(f"{clip}: {detail}")
-    _stamp_clips(
-        [
-            clip
-            for future, clip in futures.items()
-            if not future.cancelled() and future.exception() is None
-        ],
-        img_dir,
-    )
+    if stamp:
+        _stamp_clips(
+            [
+                clip
+                for future, clip in futures.items()
+                if not future.cancelled() and future.exception() is None
+            ],
+            img_dir,
+        )
     if failures:
         skipped = (
             f"\n  ({cancelled} queued clips cancelled, not attempted)"
@@ -2266,46 +2427,678 @@ def _select_figures(names: list[str] | None) -> list[Callable[[str], None]]:
     return selected
 
 
-def _audit_animations(names: list[str] | None, jobs: int | None) -> None:
-    """Hold every frame of *names* (every clip by default) to the figure gates.
+def _audit_animations(
+    parser: argparse.ArgumentParser,
+    args: argparse.Namespace,
+    jobs: int,
+    placement: Compute,
+) -> None:
+    """Hold every frame of the clips asked for (every clip by default) to the figure gates.
 
     The clips are rendered as for an encode, through the same
     ``_render_clip``, with :data:`clip_frame_audit.AUDIT_ENV` naming the
     directory each variant writes its findings to: while it is set a clip is
-    inspected and not encoded, and :func:`_stamp_clips` stamps nothing. One
-    clip, or ``--jobs 1``, walks the clips in this process (a field clip's
-    four variants fork off one simulation); otherwise the clips go to the
-    process pool of a full render. Exits with the status of
-    :func:`clip_frame_audit.report`, after every clip has been inspected.
+    inspected and not encoded, and :func:`_stamp_clips` stamps nothing. The
+    findings go to ``DIR/audit`` of ``--scratch-dir DIR``, emptied first, or
+    to :data:`clip_frame_audit.DEFAULT_DIR`. The clips are walked as a
+    render walks them (:func:`_dispatch_clips`): one clip, or ``--jobs 1``,
+    in this process (a field clip's four variants fork off one simulation),
+    otherwise on the process pool of a full render, and on this machine's
+    GPU under a node's rules, which are settled before the directory is
+    emptied. Exits with the status of :func:`clip_frame_audit.report`, after
+    every clip has been inspected.
+
+    :raises SystemExit: through :meth:`argparse.ArgumentParser.error`, before
+        anything is emptied, when a clip does not fit this machine's GPU
+        even alone or its free memory cannot be read; with the status of the
+        audit when it ends.
+    :warns ComputeFallbackWarning: where CuPy does not work here (it does
+        not import, CUDA refuses the GPU, or the probe answers no count) and
+        the placement falls back, so the clips are drawn on NumPy.
     """
     import shutil
 
     import clip_frame_audit
 
-    clips = list(names) if names else list(_ANIMATIONS)
-    unknown = sorted(set(clips) - _ANIMATIONS.keys())
-    if unknown:
-        msg = f"unknown animation(s) {unknown}; available: {', '.join(sorted(_ANIMATIONS))}"
-        raise SystemExit(msg)
-    directory = Path(clip_frame_audit.DEFAULT_DIR).resolve()
+    clips = list(args.anim or _ANIMATIONS)
+    lanes = _clip_lanes(parser, args, placement)
+    scratch = _scratch(args, "audit")
+    directory = (
+        Path(clip_frame_audit.DEFAULT_DIR) if scratch is None else scratch
+    ).resolve()
     shutil.rmtree(directory, ignore_errors=True)
     directory.mkdir(parents=True)
     os.environ[clip_frame_audit.AUDIT_ENV] = str(directory)
     print(f"--- Inspecting the frames of {len(clips)} clip(s) x 4 variants ---")
-    workers = jobs if jobs is not None else _default_jobs()
     try:
-        if names or workers == 1:
-            generate_animations(str(directory), clips, variants=True)
-        else:
-            _generate_animations_parallel(str(directory), clips, workers)
+        _dispatch_clips(args, str(directory), jobs, lanes)
     finally:
         status = clip_frame_audit.report(directory, clips)
     raise SystemExit(status)
 
 
-def main(argv: list[str] | None = None) -> None:
-    """CLI entry point: figures by default, clips behind ``--animations``."""
-    import argparse
+def _name_clip_encoder(encoder: str | None) -> None:
+    """Hand ``--clip-encoder`` to every process of the run through the environment.
+
+    The pool workers and the forked variants of a clip read the encoder from
+    :data:`figures.media.CLIP_ENCODER_ENV`, so it is set before any of them
+    starts. Without the option the environment is left as it is: a variable
+    already set there still names the encoder, and with neither the run names
+    SVT-AV1 (:func:`figures.media._clip_encoder`).
+    """
+    if encoder is not None:
+        os.environ[CLIP_ENCODER_ENV] = encoder
+
+
+def _require_a_clip_encoder(
+    parser: argparse.ArgumentParser, args: argparse.Namespace
+) -> None:
+    """Stop a run that renders clips when its encoder cannot write them.
+
+    A field can take an hour; an encoder that cannot write the clip is found
+    before the first one is computed, and before the GPU is asked what it
+    has free: an encoder that is not a clip encoder, an SVT-AV1 of a major
+    the clips were not calibrated on, one that does not say its version, or
+    no ffmpeg to ask; and, for NVENC as well, no ffmpeg on ``PATH`` to cut
+    the posters and the GIFs. An audit-only run encodes nothing, and is not
+    stopped.
+
+    :raises SystemExit: through :meth:`argparse.ArgumentParser.error`, with
+        the reason, when the encoder cannot write the clips.
+    """
+    import shutil
+
+    if not (args.animations or args.do_all) or args.audit_only:
+        return
+    try:
+        _clip_options(_clip_encoder())
+    except (ValueError, RuntimeError, FFmpegNotFoundError) as exc:
+        parser.error(str(exc))
+    if shutil.which("ffmpeg") is None:
+        parser.error(_NO_FFMPEG)
+
+
+#: Why ``--force`` stops a run it does nothing for.
+_FORCE_GOES_WITH = "--force goes with --animations and a host in PHONOMETRY_COMPUTE"
+
+
+def _check_arguments(parser: argparse.ArgumentParser, args: argparse.Namespace) -> None:
+    """Stop a run with an option that goes with nothing else it asks for.
+
+    An option is never ignored in silence: ``--anim`` and ``--clip-encoder``
+    go with the clips, ``--audit-only`` and ``--scratch-dir`` with
+    ``--animations``; ``--force``, which goes with a node run, is checked
+    with the placement (:func:`_local_run_refusal`). Checked before the run
+    writes anything, a directory included.
+
+    :raises SystemExit: through :meth:`argparse.ArgumentParser.error`,
+        naming the option.
+    """
+    do_anim = args.animations or args.do_all
+    if args.anim and not do_anim:
+        parser.error("--anim requires --animations (or --all)")
+    if args.clip_encoder is not None and not do_anim:
+        parser.error("--clip-encoder requires --animations (or --all)")
+    if args.audit_only and (not args.animations or args.do_all or args.posters):
+        parser.error("--audit-only goes with --animations alone")
+    _require_animations_for_a_scratch_dir(parser, args)
+    if args.jobs is not None and args.jobs < 1:
+        parser.error("--jobs must be >= 1")
+    _require_known_clips(parser, args.anim)
+
+
+def _require_known_clips(
+    parser: argparse.ArgumentParser, names: list[str] | None
+) -> None:
+    """Stop a run that names a clip the registry does not have.
+
+    :raises SystemExit: through :meth:`argparse.ArgumentParser.error`,
+        naming the clips that are not registered and those that are.
+    """
+    unknown = sorted(set(names or ()) - _ANIMATIONS.keys())
+    if unknown:
+        available = ", ".join(sorted(_ANIMATIONS))
+        parser.error(f"unknown animation(s) {unknown}; available: {available}")
+
+
+def _require_animations_for_a_scratch_dir(
+    parser: argparse.ArgumentParser, args: argparse.Namespace
+) -> None:
+    """Stop a run that names a scratch directory and renders no clips.
+
+    :raises SystemExit: through :meth:`argparse.ArgumentParser.error` when
+        ``--scratch-dir`` comes without ``--animations``.
+    """
+    if args.scratch_dir is not None and not args.animations:
+        parser.error("--scratch-dir goes with --animations")
+
+
+def _scratch(args: argparse.Namespace, name: Literal["clips", "audit"]) -> Path | None:
+    """``DIR/name`` of ``--scratch-dir DIR``, or ``None`` when the run names none."""
+    return None if args.scratch_dir is None else args.scratch_dir / name
+
+
+def _clips_directory(scratch: Path | None, *, needed: bool) -> str:
+    """The directory this run writes its clips and posters into.
+
+    The clips and their posters are binary and live in a repository of their
+    own; see scripts/assets_dir.py. Its checkout is resolved only when the
+    run is about to write one (*needed*), so a figures-only run needs none.
+    A *scratch* directory needs none either, and is made if missing: what is
+    written there is not published, and a scratch run stamps nothing
+    (:func:`_render_clips`). ``""`` when nothing is written.
+
+    :raises FileNotFoundError: when the run writes clips, names no scratch
+        directory, and the clips directory is not inside an assets checkout.
+    """
+    if scratch is not None:
+        scratch.mkdir(parents=True, exist_ok=True)
+        return str(scratch)
+    return str(assets_dir.require_clips_dir()) if needed else ""
+
+
+def _placement() -> Compute:
+    """Where ``PHONOMETRY_COMPUTE`` asks the clips to step, read once per run.
+
+    :raises ValueError: when ``PHONOMETRY_COMPUTE`` does not parse.
+    """
+    from phonometry.simulation.compute import _requested
+
+    return _requested(None)
+
+
+def _node_run(args: argparse.Namespace, placement: Compute) -> bool:
+    """Whether this run sends the clips to the node *placement* names.
+
+    A render into a scratch directory is a node's own lane, rendered where
+    it runs.
+    """
+    return placement.host is not None and args.scratch_dir is None
+
+
+def _node_run_refusal(args: argparse.Namespace, placement: Compute) -> str | None:
+    """Why a node run cannot take what this run asks for; None when it can.
+
+    The clips are computed in float64 on a node too, which the node run
+    would refuse only once the checkout is archived and fingerprinted.
+    """
+    if not args.animations or args.do_all or args.posters:
+        return "a host in PHONOMETRY_COMPUTE goes with --animations alone"
+    if args.jobs is not None:
+        return (
+            "--jobs does not go with a host in PHONOMETRY_COMPUTE: "
+            "the node renders two clips at a time"
+        )
+    if placement.dtype != "float64":
+        return "the clips are computed in float64; PHONOMETRY_COMPUTE asks for float32"
+    return None
+
+
+def _local_run_refusal(
+    args: argparse.Namespace, placement: Compute, jobs: int
+) -> str | None:
+    """Why a run here cannot take what it asks for; None when it can.
+
+    A run that draws a clip placed on a GPU (one ``_ANIM_DEVICES`` does not
+    put on ``"cpu"``, among the clips asked for) is refused a placement that
+    clip's field would refuse (:func:`clip_placement.placement_refusal`: a
+    GPU other than the first, float32, a library other than CuPy, a host in
+    a node's own lane), before it asks the GPU anything or draws a clip, a
+    schematic one included. A run whose clips all step on NumPy is not: no
+    field of theirs reads the placement. The figures step their engines
+    wherever ``PHONOMETRY_COMPUTE`` says. A GPU budget given by hand to a
+    pool of every clip is refused too (:func:`_budget_by_hand`).
+    """
+    if args.force:
+        return _FORCE_GOES_WITH
+    if not (args.animations or args.do_all):
+        return None
+    refusal = None
+    if any(
+        _ANIM_DEVICES.get(clip, "cpu") != "cpu" for clip in args.anim or _ANIMATIONS
+    ):
+        refusal = clip_placement.placement_refusal(placement)
+    if refusal is None and _budget_by_hand(args, placement, jobs):
+        refusal = (
+            f"{clip_placement.GPU_BYTES_ENV} is one lane's budget, as a node gives "
+            "each of its lanes; with no budget, a render of every clip on this "
+            "machine's GPU divides what it has free itself, two clips at a time: "
+            f"unset {clip_placement.GPU_BYTES_ENV}, or render one clip at a time "
+            "(--anim, or --jobs 1)"
+        )
+    return refusal
+
+
+def _budget_by_hand(args: argparse.Namespace, placement: Compute, jobs: int) -> bool:
+    """Whether a lane's GPU budget was given by hand to a pool of every clip on this machine's GPU.
+
+    Such a run would take the plain pool of :func:`_dispatch_clips`, with
+    no two-lane cap, no NVENC slots and no clip held back to run alone, and
+    a lane's budget cannot hold a pool of workers to anything; so it is
+    refused rather than read another way. A node's lane (a scratch
+    directory) keeps the budget its node gave it, one clip at a time keeps
+    one given by hand (it is the whole of what that clip may hold), and a
+    run with no GPU named never uses one.
+    """
+    return (
+        placement.device == "cupy"
+        and args.scratch_dir is None
+        and not args.anim
+        and jobs > 1
+        and bool(os.environ.get(clip_placement.GPU_BYTES_ENV, "").strip())
+    )
+
+
+def _placement_of_run(
+    parser: argparse.ArgumentParser, args: argparse.Namespace, jobs: int
+) -> Compute:
+    """:func:`_placement`, or a stop naming what does not go with it.
+
+    :raises SystemExit: through :meth:`argparse.ArgumentParser.error` when
+        ``PHONOMETRY_COMPUTE`` does not parse, when a host there comes with
+        anything but ``--animations``, with ``--jobs`` or in float32, when
+        ``--force`` comes without a host, when the clips this run draws here
+        could not step on the placement, or when a GPU budget given by hand
+        comes with a pool of every clip on this machine's GPU.
+    """
+    try:
+        placement = _placement()
+    except ValueError as exc:
+        parser.error(str(exc))
+    if _node_run(args, placement):
+        refusal = _node_run_refusal(args, placement)
+    else:
+        refusal = _local_run_refusal(args, placement, jobs)
+    if refusal is not None:
+        parser.error(refusal)
+    return placement
+
+
+def _send_to_a_node(
+    parser: argparse.ArgumentParser, args: argparse.Namespace, placement: Compute
+) -> None:
+    """With a host in ``PHONOMETRY_COMPUTE``, render the clips on that node and end the run.
+
+    The node asks its own ffmpeg before it renders, never this machine's, so
+    this comes before :func:`_require_a_clip_encoder`. A render into a
+    scratch directory is a node's own, and is rendered where it runs
+    (:func:`_node_run`); what a node run takes was checked with the
+    placement (:func:`_placement_of_run`), and the clips asked for with the
+    arguments (:func:`_check_arguments`). What stops the node run is named
+    in one line: a host the hosts file does not name, or a hosts file that
+    does not parse, both looked up before the run (:func:`_require_a_host`);
+    a checkout with changes or a node that refuses the job (a
+    ``RuntimeError``); no ``ssh``, no assets checkout or no engine digests
+    (a ``FileNotFoundError``); an archive over the node's limit, an
+    ``engine-digests.json`` that does not hold the engines' digests or a
+    frame of the node's the run did not ask for (a
+    ``clip_transport.NodeRunError``, a ``RuntimeError``, as the node run
+    documents them). The node run's ``ValueError`` is for what was checked
+    before it (an unknown clip or encoder, a float32 placement, a missing
+    host), so one that comes out of it keeps its traceback, as any other
+    error of the run does.
+
+    :raises SystemExit: with the node run's status when it ends; through
+        :meth:`argparse.ArgumentParser.error` with what stopped the node run.
+    :raises OSError: when a clip's files cannot be written.
+    :raises tarfile.TarError: when the archive sent does not unpack here.
+    :raises subprocess.CalledProcessError: when this is not a checkout.
+    :raises subprocess.TimeoutExpired: when git does not answer in time.
+    """
+    if not _node_run(args, placement):
+        return
+    import clip_transport
+
+    _require_a_host(parser, placement)
+    encoder = args.clip_encoder or clip_transport.default_encoder(placement)
+    try:
+        status = clip_transport.main_on_host(
+            placement,
+            requested=args.anim,
+            force=args.force,
+            audit_only=args.audit_only,
+            encoder=encoder,
+        )
+    except (RuntimeError, FileNotFoundError) as exc:
+        parser.error(str(exc))
+    raise SystemExit(status)
+
+
+def _stamps_clips(args: argparse.Namespace, placement: Compute) -> bool:
+    """Whether this run fingerprints clips to stamp them.
+
+    A render here into the published clips and the posters re-extracted
+    from them stamp what they write; a node run fingerprints the archive it
+    sends and stamps what comes back. An audit here, a node's lane (a
+    scratch directory) and the figures stamp nothing.
+    """
+    if _node_run(args, placement):
+        return True
+    renders = (args.animations or args.do_all) and not args.audit_only
+    return (renders or args.posters) and args.scratch_dir is None
+
+
+def _require_engine_digests(
+    parser: argparse.ArgumentParser, args: argparse.Namespace, placement: Compute
+) -> None:
+    """Stop a run that stamps clips when ``engine-digests.json`` cannot stamp a field clip.
+
+    A field clip's fingerprint holds the engines' digests
+    (:func:`animation_fingerprint.engine_digest`), and the stamp is taken
+    after the render: a digest file that is missing or holds no digests is
+    named in one line before anything runs, not after an hour of fields.
+
+    :raises SystemExit: through :meth:`argparse.ArgumentParser.error`,
+        naming the file and ``make engine-digests``.
+    """
+    if not _stamps_clips(args, placement):
+        return
+    import animation_fingerprint
+
+    try:
+        animation_fingerprint.engine_digest(_REPO_ROOT)
+    except (FileNotFoundError, ValueError) as exc:
+        parser.error(str(exc))
+
+
+def _require_a_host(parser: argparse.ArgumentParser, placement: Compute) -> None:
+    """Stop a node run whose host the hosts file does not name, before anything is archived.
+
+    :raises SystemExit: through :meth:`argparse.ArgumentParser.error` for a
+        host the hosts file does not name, no hosts file, or a hosts file
+        that cannot be read or does not parse.
+    """
+    import clip_link
+
+    host = str(placement.host)
+    try:
+        clip_link.host_entry(host)
+    except KeyError as exc:
+        # A KeyError prints its key quoted; the message is the key itself.
+        parser.error(str(exc.args[0]) if exc.args else f"no host {host!r}")
+    except ValueError as exc:
+        parser.error(str(exc))
+
+
+def _lane_env_here(free_gpu: int, available: int | None, *, alone: bool) -> None:
+    """Give the render's workers a lane's budgets and the NVENC slots, as a node's lanes get them."""
+    os.environ[clip_placement.GPU_BYTES_ENV] = str(
+        clip_placement.gpu_budget(free_gpu, alone=alone)
+    )
+    if available is not None:
+        os.environ[clip_placement.HOST_BYTES_ENV] = str(
+            clip_placement.host_share(available, alone=alone)
+        )
+    if os.name == "posix":
+        os.environ.setdefault(
+            encode_slots.SLOTS_ENV,
+            f"{encode_slots.shared_directory()}:{encode_slots.NVENC_SESSIONS}",
+        )
+
+
+def _split_for_gpu_here(
+    clips: list[str], free_gpu: int, available: int | None
+) -> tuple[list[str], list[str]]:
+    """The clips that share this machine's GPU two at a time, and those that run alone.
+
+    :raises ValueError: naming every clip whose recorded needs do not fit even alone.
+    """
+    shared: list[str] = []
+    alone: list[str] = []
+    reasons: list[str] = []
+    for clip in clips:
+        runs_alone, why = clip_placement.lane_fit(
+            clip,
+            _ANIM_DEVICES.get(clip, "cpu"),
+            gpu_need=_ANIM_GPU_BYTES.get(clip, 0),
+            host_need=_ANIM_HOST_BYTES.get(clip, 0),
+            free_gpu=free_gpu,
+            available=available,
+        )
+        reasons.extend(why)
+        (alone if runs_alone else shared).append(clip)
+    if reasons:
+        raise ValueError("; ".join(reasons))
+    return shared, alone
+
+
+def _unreadable_gpu(index: int, exc: subprocess.SubprocessError | OSError) -> str:
+    """Why the free memory of GPU *index* could not be read, in CuPy's last words.
+
+    A probe that could not even start (no memory left to fork it) has no
+    words of its own, and its error stands in for them.
+    """
+    # A probe that timed out keeps its output as bytes, whatever it was asked.
+    said = getattr(exc, "stderr", None) or b""
+    text = said.decode("utf-8", "replace") if isinstance(said, bytes) else str(said)
+    lines = text.strip().splitlines()
+    return (
+        f"the free memory of GPU {index} could not be read through CuPy: "
+        f"{lines[-1] if lines else exc}"
+    )
+
+
+class _Lanes(NamedTuple):
+    """This machine's GPU and RAM divided between a run's clips, as a node divides its own."""
+
+    #: The bytes free on the GPU when the run asked.
+    free_gpu: int
+    #: The bytes of RAM the run may hold; None off Linux.
+    available: int | None
+    #: The clips that share the GPU two at a time, a lane's share each.
+    shared: list[str]
+    #: The clips that need more than a lane's share, rendered after them alone.
+    alone: list[str]
+
+
+#: The frames a fallback warning skips, so it points at the run's caller.
+_FIGURES_PREFIX = f"{__file__.rsplit(os.sep, 1)[0]}{os.sep}"
+
+
+def _without_the_gpu(
+    parser: argparse.ArgumentParser, placement: Compute, reason: str
+) -> None:
+    """Render the clips on NumPy when *placement* may fall back; stop the run with *reason* otherwise.
+
+    As an engine falls back: with a warning that says why, and on NumPy in
+    every worker (``PHONOMETRY_COMPUTE`` is ``cpu`` from here on), with no
+    lane budget, since nothing steps on the GPU.
+
+    :raises SystemExit: through :meth:`argparse.ArgumentParser.error`, with
+        *reason*, when the placement does not fall back.
+    :warns ComputeFallbackWarning: when it does, with *reason*.
+    """
+    if not placement.fallback:
+        parser.error(reason)
+    warnings.warn(
+        f"{reason}; rendering the clips on NumPy instead (fallback)",
+        ComputeFallbackWarning,
+        skip_file_prefixes=(_FIGURES_PREFIX,),
+    )
+    os.environ["PHONOMETRY_COMPUTE"] = "cpu"
+
+
+def _gpu_lanes_here(
+    parser: argparse.ArgumentParser, clips: list[str], placement: Compute
+) -> _Lanes | None:
+    """What this machine's GPU and RAM have free, the clips that share them and those that run alone.
+
+    Asked before any field is computed, so a GPU whose free memory cannot be
+    read (a probe that fails, hangs or cannot start), RAM that cannot be
+    read (a memory file this run may not read, or one, or
+    ``PHONOMETRY_CLIP_HOST_BYTES``, that holds no count), or a clip that
+    does not fit even alone, stops the run first. A placement that may fall
+    back (``cupy,fallback``) renders on NumPy instead where CuPy does not
+    work here: it does not import, CUDA refuses the GPU (the probe fails),
+    or the probe answers no count; None says so (:func:`_without_the_gpu`).
+    A probe that hangs or cannot start says nothing about CuPy, and stops
+    the run whatever the placement.
+
+    :raises SystemExit: through :meth:`argparse.ArgumentParser.error`, with
+        the reason, in each case.
+    :warns ComputeFallbackWarning: for a CuPy that does not work here, when
+        the placement may fall back.
+    """
+    try:
+        free_gpu = clip_placement.free_gpu_bytes(placement.device_index)
+    except subprocess.CalledProcessError as exc:
+        _without_the_gpu(
+            parser, placement, _unreadable_gpu(placement.device_index, exc)
+        )
+        return None
+    except (subprocess.TimeoutExpired, OSError) as exc:
+        parser.error(_unreadable_gpu(placement.device_index, exc))
+    except ValueError as exc:
+        _without_the_gpu(parser, placement, str(exc))
+        return None
+    try:
+        available = clip_placement.host_bytes()
+    except (OSError, ValueError) as exc:
+        parser.error(f"the RAM free here could not be read: {exc}")
+    try:
+        shared, alone = _split_for_gpu_here(clips, free_gpu, available)
+    except ValueError as exc:
+        parser.error(str(exc))
+    return _Lanes(free_gpu, available, shared, alone)
+
+
+def _gpu_here(placement: Compute, args: argparse.Namespace) -> bool:
+    """Whether this run divides this machine's GPU between its clips itself, as a node does.
+
+    Only with CuPy named here and no budget given. A node's lane renders
+    into a scratch directory with the share of the GPU its node gave it
+    (``PHONOMETRY_CLIP_GPU_BYTES``), or none for a clip that steps on NumPy;
+    it keeps what it was given and asks the GPU nothing more, as does a run
+    of one clip at a time given a budget by hand (a pool of every clip given
+    one is refused, :func:`_budget_by_hand`).
+    """
+    return (
+        placement.host is None
+        and placement.device == "cupy"
+        and args.scratch_dir is None
+        and not os.environ.get(clip_placement.GPU_BYTES_ENV, "").strip()
+    )
+
+
+def _clip_lanes(
+    parser: argparse.ArgumentParser, args: argparse.Namespace, placement: Compute
+) -> _Lanes | None:
+    """This machine's GPU divided between the clips asked for, when the run divides it itself.
+
+    None where it does not (:func:`_gpu_here`): no GPU named here, a node's
+    lane, a budget given by hand; and where CuPy does not work here (it does
+    not import, CUDA refuses the GPU, or the probe answers no count) and the
+    placement falls back to NumPy.
+
+    :raises SystemExit: through :meth:`argparse.ArgumentParser.error`, before
+        any field is computed, for a clip that does not fit even alone, or a
+        GPU or RAM whose free memory cannot be read.
+    :warns ComputeFallbackWarning: where CuPy does not work here (it does
+        not import, CUDA refuses the GPU, or the probe answers no count), when
+        the placement may fall back.
+    """
+    if not _gpu_here(placement, args):
+        return None
+    return _gpu_lanes_here(parser, list(args.anim or _ANIMATIONS), placement)
+
+
+def _run_line(args: argparse.Namespace, what: str, out_dir: str) -> str:
+    """The log line a pool of clips starts with: an audit inspects, a render generates."""
+    if args.audit_only:
+        return f"--- Inspecting the frames ({what}), findings into {out_dir} ---"
+    return f"--- Generating animations ({what}) into {out_dir} ---"
+
+
+def _render_on_gpu_here(
+    args: argparse.Namespace, out_dir: str, jobs: int, lanes: _Lanes
+) -> None:
+    """Render every clip on this machine's GPU under a node's rules.
+
+    At most two clips at a time (``clip_placement.LANES``), each worker's CuPy
+    pool held to a lane's share of what the GPU has free now and its RAM to a
+    lane's share of what is available, the NVENC sessions shared through
+    ``encode_slots``; a clip whose recorded needs do not fit a lane's share
+    renders after them, one at a time, with all of it.
+
+    The log says what runs: the clips that share the GPU and how many at a
+    time, and how many run alone after them, never the workers asked for;
+    in an audit-only run, that they are inspected (:func:`_run_line`).
+
+    :raises RuntimeError: when a clip fails to render on the pool; a clip
+        that runs alone raises what its render raises.
+    """
+    at_once = min(jobs, clip_placement.LANES)
+    after = f", then {len(lanes.alone)} alone" if lanes.alone else ""
+    what = f"{len(lanes.shared)} clips x 4 variants, {at_once} at a time on the GPU"
+    print(_run_line(args, what + after, out_dir))
+    if lanes.shared:
+        _lane_env_here(lanes.free_gpu, lanes.available, alone=False)
+        _generate_animations_parallel(out_dir, lanes.shared, at_once)
+    if lanes.alone:
+        _lane_env_here(lanes.free_gpu, lanes.available, alone=True)
+        generate_animations(out_dir, lanes.alone, variants=True)
+
+
+def _dispatch_clips(
+    args: argparse.Namespace, out_dir: str, jobs: int, lanes: _Lanes | None
+) -> None:
+    """Walk the clips asked for into *out_dir*: one at a time, or on a process pool.
+
+    A targeted re-render (``--anim``) and an explicit ``--jobs 1`` walk the
+    clips one at a time: each clip's field is simulated once and its four
+    language/theme variants then render off that single computation (see
+    :func:`_render_anim_variants`). With *lanes*, this machine's GPU divided
+    as a node divides its own, one clip at a time has all of what the GPU
+    has free, and a pool renders as a node does (:func:`_render_on_gpu_here`).
+    A scratch run's renders stamp nothing. A render and an audit-only run
+    both walk the clips here.
+
+    :raises RuntimeError: when a clip fails to render on the pool.
+    """
+    stamp = args.scratch_dir is None
+    if args.anim or jobs == 1:
+        if lanes is not None:
+            _lane_env_here(lanes.free_gpu, lanes.available, alone=True)
+        generate_animations(out_dir, args.anim, variants=True, stamp=stamp)
+        return
+    if lanes is not None:
+        _render_on_gpu_here(args, out_dir, jobs, lanes)
+        return
+    clips = list(_ANIMATIONS)
+    print(_run_line(args, f"{len(clips)} clips x 4 variants, {jobs} jobs", out_dir))
+    _generate_animations_parallel(out_dir, clips, jobs, stamp=stamp)
+
+
+def _render_clips(
+    parser: argparse.ArgumentParser,
+    args: argparse.Namespace,
+    clip_dir: str,
+    jobs: int,
+    placement: Compute,
+) -> None:
+    """Render the clips here into *clip_dir* (:func:`_dispatch_clips`).
+
+    On this machine's GPU (``PHONOMETRY_COMPUTE=cupy``) the run divides the
+    GPU as a node does (:func:`_clip_lanes`); a node's lane keeps the budget
+    its node gave it (:func:`_gpu_here`). The clips asked for, ffmpeg and
+    the encoder were checked before this is called
+    (:func:`_check_arguments`, :func:`_require_a_clip_encoder`), so the GPU
+    is asked what it has free only once nothing else can stop the run.
+
+    :raises SystemExit: through :meth:`argparse.ArgumentParser.error`, before
+        any field is computed, when a clip does not fit this machine's GPU
+        even alone or its free memory cannot be read.
+    :raises RuntimeError: when a clip fails to render on the pool.
+    :warns ComputeFallbackWarning: where CuPy does not work here (it does
+        not import, CUDA refuses the GPU, or the probe answers no count) and
+        the placement falls back, so the clips render on NumPy.
+    """
+    _dispatch_clips(args, clip_dir, jobs, _clip_lanes(parser, args, placement))
+
+
+def _parser() -> argparse.ArgumentParser:
+    """The command line of :func:`main`."""
+    import animation_fingerprint
 
     parser = argparse.ArgumentParser(
         description="Regenerate the documentation figures (and animations) "
@@ -2330,6 +3123,19 @@ def main(argv: list[str] | None = None) -> None:
         metavar="NAME",
         help="with --animations, render only this clip (repeatable; use "
         "the output stem, e.g. --anim anim_schroeder)",
+    )
+    parser.add_argument(
+        "--clip-encoder",
+        choices=animation_fingerprint.CLIP_ENCODERS,
+        default=None,
+        help="with --animations, the ffmpeg encoder that writes each WebM: "
+        "libsvtav1 (a CPU; the default here) or av1_nvenc (an NVIDIA GPU)",
+    )
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="with --animations and a host in PHONOMETRY_COMPUTE, render the "
+        "clips that are fresh too (by default a node run renders only the stale ones)",
     )
     parser.add_argument(
         "--audit-only",
@@ -2360,71 +3166,88 @@ def main(argv: list[str] | None = None) -> None:
         help="render only this figure (repeatable; the generate_ prefix is "
         "optional, e.g. --figure loudness_models_comparison)",
     )
-    args = parser.parse_args(argv)
+    parser.add_argument(
+        "--scratch-dir",
+        type=Path,
+        default=None,
+        metavar="DIR",
+        help="with --animations, write the clips into DIR/clips and the audit "
+        "findings into DIR/audit, without the assets checkout and without "
+        "stamping a fingerprint (how a render node works); an audit-only run "
+        "empties DIR/audit first",
+    )
+    return parser
 
-    img_dir = ".github/images"
+
+def _render_figures(img_dir: str, names: list[str] | None, jobs: int) -> None:
+    """Render the figures *names* (every figure by default) in all four variants.
+
+    ``jobs`` 1 renders them one variant after another in this process;
+    otherwise they go to a ``jobs``-wide process pool. *img_dir* is made
+    here, when there is a figure to write into it.
+    """
+    funcs = _select_figures(names)
     Path(img_dir).mkdir(parents=True, exist_ok=True)
+    if jobs == 1:
+        for lang, dark in _VARIANTS:
+            set_lang(lang)
+            set_theme(dark=dark)
+            print(
+                f"--- Generating {lang} {'dark' if dark else 'light'} theme figures ---"
+            )
+            for func in funcs:
+                func(img_dir)
+    else:
+        print(f"--- Generating figures ({len(funcs)} x 4 variants, {jobs} jobs) ---")
+        _generate_figures_parallel(img_dir, funcs, jobs)
+
+
+def main(argv: list[str] | None = None) -> None:
+    """CLI entry point: figures by default, clips behind ``--animations``.
+
+    :raises SystemExit: through :meth:`argparse.ArgumentParser.error` for
+        arguments that do not go together, an unknown clip, a
+        ``PHONOMETRY_COMPUTE`` that does not parse or that the clips cannot
+        step on, a GPU budget given by hand to a pool of every clip, an
+        ``engine-digests.json`` that cannot stamp a field clip, an encoder
+        that cannot write the clips, no ffmpeg on ``PATH``, or a clip that
+        cannot fit this machine's GPU; with the status of a node run or an
+        audit-only run when it ends.
+    :raises RuntimeError: when a clip fails to render.
+    :raises FileNotFoundError: when the run writes clips, names no scratch
+        directory, and the clips directory is not inside an assets checkout.
+    :warns ComputeFallbackWarning: where CuPy does not work on this machine
+        (it does not import, CUDA refuses the GPU, or the probe answers no
+        count) and ``PHONOMETRY_COMPUTE`` falls back, so the clips render on
+        NumPy.
+    """
+    parser = _parser()
+    args = parser.parse_args(argv)
+    _name_clip_encoder(args.clip_encoder)
+    _check_arguments(parser, args)
 
     do_figs = not (args.animations or args.posters) or args.do_all
     do_anim = args.animations or args.do_all
 
-    if args.anim and not do_anim:
-        parser.error("--anim requires --animations (or --all)")
+    jobs = args.jobs if args.jobs is not None else _default_jobs()
+    placement = _placement_of_run(parser, args, jobs)
+    _require_engine_digests(parser, args, placement)
+    _send_to_a_node(parser, args, placement)
+    _require_a_clip_encoder(parser, args)
+
     if args.audit_only:
-        if not args.animations or args.do_all or args.posters:
-            parser.error("--audit-only goes with --animations alone")
-        _audit_animations(args.anim, args.jobs)
+        _audit_animations(parser, args, jobs, placement)
         return
-    # The clips and their posters are binary and live in a repository of
-    # their own; see scripts/assets_dir.py. Resolved only when a run is about
-    # to write one, so a figures-only run needs no checkout of it.
-    clip_dir = str(assets_dir.require_clips_dir()) if (do_anim or args.posters) else ""
+    clip_dir = _clips_directory(_scratch(args, "clips"), needed=do_anim or args.posters)
     if args.posters and not do_anim:
         print(f"--- Re-extracting animation posters into {clip_dir} ---")
         generate_posters(clip_dir)
-    jobs = args.jobs if args.jobs is not None else _default_jobs()
-    if jobs < 1:
-        parser.error("--jobs must be >= 1")
 
     if do_figs:
-        funcs = _select_figures(args.figure)
-        if jobs == 1:
-            for lang, dark in _VARIANTS:
-                set_lang(lang)
-                set_theme(dark=dark)
-                print(
-                    f"--- Generating {lang} {'dark' if dark else 'light'} theme figures ---"
-                )
-                for func in funcs:
-                    func(img_dir)
-        else:
-            print(
-                f"--- Generating figures ({len(funcs)} x 4 variants, {jobs} jobs) ---"
-            )
-            _generate_figures_parallel(img_dir, funcs, jobs)
+        _render_figures(".github/images", args.figure, jobs)
 
     if do_anim:
-        if args.anim or jobs == 1:
-            # A targeted re-render (``--anim``) and an explicit ``--jobs 1``
-            # walk the clips one at a time: each clip's field is simulated
-            # once and its four language/theme variants then render off that
-            # single computation (see _render_anim_variants).
-            generate_animations(clip_dir, args.anim, variants=True)
-        else:
-            import shutil
-
-            if shutil.which("ffmpeg") is None:
-                msg = (
-                    "ffmpeg was not found on PATH; it is required to encode "
-                    "the animation WebM/GIF outputs. Install ffmpeg and retry."
-                )
-                raise RuntimeError(msg)
-            clips = list(_ANIMATIONS)
-            print(
-                f"--- Generating animations ({len(clips)} clips "
-                f"x 4 variants, {jobs} jobs) into {clip_dir} ---"
-            )
-            _generate_animations_parallel(clip_dir, clips, jobs)
+        _render_clips(parser, args, clip_dir, jobs, placement)
 
     print("Graphics generated successfully.")
 

@@ -747,7 +747,7 @@ class InSituAbsorptionResult(OwnsArrays):
     ) -> Axes:
         """Plot the in-situ absorption spectrum ``alpha(f)``.
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes` and never calls ``plt.show``.
         """
         from ..._i18n import check_language
@@ -761,7 +761,7 @@ class InSituAbsorptionResult(OwnsArrays):
     ) -> Axes:
         """Draw the measurement set-up to scale.
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from ..._i18n import check_language

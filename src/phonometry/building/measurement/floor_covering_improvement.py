@@ -249,7 +249,7 @@ class BackgroundCorrectedLevel(OwnsArrays):
         are drawn across the bands and the three regimes are told apart. A
         (positions, bands) record draws one line per position.
 
-        Requires matplotlib (``pip install phonometry[plot]``).
+        Requires matplotlib (``pip install "phonometry[plot]"``).
 
         :param ax: Existing axes, or ``None`` to create a figure.
         :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -421,7 +421,7 @@ class FloorCoveringImprovementResult(OwnsArrays):
     ) -> Axes:
         """Plot the improvement spectrum ``ΔL`` (with ``ΔLw`` when available).
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from ..._i18n import check_language
@@ -476,8 +476,8 @@ class FloorCoveringImprovementResult(OwnsArrays):
         :return: The written ``path`` as a :class:`str`.
         :raises ValueError: If ``engine`` is not ``"reportlab"``.
         :raises ImportError: If reportlab is not installed
-            (``pip install phonometry[report]``), or matplotlib is missing for
-            the embedded figure (``pip install phonometry[plot]``).
+            (``pip install "phonometry[report]"``), or matplotlib is missing for
+            the embedded figure (``pip install "phonometry[plot]"``).
         """
         from ..._i18n import check_language
 
@@ -660,7 +660,7 @@ class OctaveBandSpectrum(OwnsArrays):
     ) -> Axes:
         """Plot the octave values against their octave bands.
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
 
         :param ax: Existing axes, or ``None`` to create a figure.

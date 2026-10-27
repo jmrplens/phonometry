@@ -272,7 +272,7 @@ Plot the reflection-coefficient magnitude `|R|` versus grazing angle.
 
 Draws `|R|` on a linear grazing-angle axis (0..90°), marking the
 critical angle when the sediment is faster than the water. Requires
-matplotlib (`pip install phonometry[plot]`); returns the
+matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes` and never calls `plt.show`.
 
 **Parameters**

@@ -413,7 +413,7 @@ class SoundPowerIntensityResult(OwnsArrays):
     ) -> Axes:
         """Plot the LW spectrum; non-positive bands are hatched as unusable.
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from .._i18n import check_language
@@ -462,7 +462,7 @@ class SoundPowerIntensityResult(OwnsArrays):
         :raises ValueError: If ``engine`` is not ``"reportlab"`` or ``language``
             is unknown.
         :raises ImportError: If reportlab (or, for the figure, matplotlib) is
-            not installed (``pip install phonometry[report]``).
+            not installed (``pip install "phonometry[report]"``).
         """
         from .._i18n import check_language
 
@@ -1285,7 +1285,7 @@ class PrecisionIntensityResult(OwnsArrays):
     ) -> Axes:
         """Plot the ``LW`` spectrum; non-applicable bands are hatched/greyed.
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from .._i18n import check_language
@@ -1367,7 +1367,7 @@ class PrecisionIntensityResult(OwnsArrays):
             is unknown, or a supplied ``indicators``, ``criteria`` or
             ``residual_index`` does not span the result's bands.
         :raises ImportError: If reportlab (or, for the figure, matplotlib) is
-            not installed (``pip install phonometry[report]``).
+            not installed (``pip install "phonometry[report]"``).
         """
         from .._i18n import check_language
 

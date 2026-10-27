@@ -3,10 +3,21 @@
 
 from __future__ import annotations
 
+import hashlib
+import io
+import os
+import re
+import shutil
 import sys
+import tarfile
+import urllib.error
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import pytest
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 _ROOT = Path(__file__).resolve().parents[1]
 if str(_ROOT / "scripts") not in sys.path:
@@ -168,3 +179,177 @@ def test_the_check_names_each_problem_and_fails(
     assert [line.startswith("::error::") for line in lines] == [True, True]
     assert "no longer downloads" in lines[0]
     assert "no month-end release" in lines[1]
+
+
+def _archive(
+    tmp_path: Path, names: tuple[str, ...] = ("ffmpeg", "ffprobe")
+) -> tuple[Path, str]:
+    """A small build laid out as BtbN's: ``<top>/bin/<program>``, a licence, the docs."""
+    source = tmp_path / "build.tar.xz"
+    with tarfile.open(source, "w:xz") as tar:
+        for name in (
+            *(f"bin/{program}" for program in names),
+            "LICENSE.txt",
+            "doc/ffmpeg.html",
+        ):
+            data = f"#!/bin/sh\necho {name}\n".encode()
+            info = tarfile.TarInfo(
+                f"ffmpeg-n9.0.2-17-g2a571b6068-linux64-gpl-9.0/{name}"
+            )
+            info.size = len(data)
+            tar.addfile(info, io.BytesIO(data))
+    return source, hashlib.sha256(source.read_bytes()).hexdigest()
+
+
+def _copy_from(source: Path, calls: list[str]) -> Callable[[str, Path], None]:
+    def download(url: str, target: Path) -> None:
+        calls.append(url)
+        shutil.copyfile(source, target)
+
+    return download
+
+
+def test_the_pinned_build_is_fetched_once_checked_and_cut_to_its_two_programs(
+    tmp_path: Path,
+) -> None:
+    source, sha256 = _archive(tmp_path)
+    pinned = node_ffmpeg.Pin("https://example.org/ffmpeg.tar.xz", sha256)
+    calls: list[str] = []
+    bin_dir = node_ffmpeg.fetch(
+        pinned, tmp_path / "cache", download=_copy_from(source, calls)
+    )
+    assert bin_dir == tmp_path / "cache" / sha256 / "bin"
+    assert sorted(path.name for path in bin_dir.iterdir()) == ["ffmpeg", "ffprobe"]
+    assert all(os.access(path, os.X_OK) for path in bin_dir.iterdir())
+    assert (
+        node_ffmpeg.fetch(
+            pinned, tmp_path / "cache", download=_copy_from(source, calls)
+        )
+        == bin_dir
+    )
+    assert calls == [pinned.url]
+
+
+def test_a_download_with_another_sha256_is_refused_and_leaves_nothing(
+    tmp_path: Path,
+) -> None:
+    source, _ = _archive(tmp_path)
+    pinned = node_ffmpeg.Pin("https://example.org/ffmpeg.tar.xz", "0" * 64)
+    download = _copy_from(source, [])
+    with pytest.raises(ValueError, match=r"not the pinned 0{64}"):
+        node_ffmpeg.fetch(pinned, tmp_path / "cache", download=download)
+    assert list((tmp_path / "cache").iterdir()) == []
+
+
+def test_a_build_without_ffprobe_is_refused(tmp_path: Path) -> None:
+    source, sha256 = _archive(tmp_path, ("ffmpeg",))
+    pinned = node_ffmpeg.Pin("https://example.org/ffmpeg.tar.xz", sha256)
+    download = _copy_from(source, [])
+    with pytest.raises(ValueError, match=r"bin/ffprobe"):
+        node_ffmpeg.fetch(pinned, tmp_path / "cache", download=download)
+    assert list((tmp_path / "cache").iterdir()) == []
+
+
+def _fetch_here(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    sha256: str,
+    download: Callable[[str, Path], None],
+) -> node_ffmpeg.Pin:
+    """``fetch`` as on Linux x86_64, from a Dockerfile pinning *sha256*, into a cache under *tmp_path*."""
+    dockerfile = tmp_path / "Dockerfile"
+    dockerfile.write_text(
+        "ARG FFMPEG_URL=https://example.org/ffmpeg.tar.xz\n"
+        f"ARG FFMPEG_SHA256={sha256}\n",
+        encoding="utf-8",
+    )
+    fetch = node_ffmpeg.fetch
+
+    def fetch_from(pinned: node_ffmpeg.Pin, cache: Path) -> Path:
+        return fetch(pinned, cache, download=download)
+
+    monkeypatch.setattr(node_ffmpeg, "DOCKERFILE", dockerfile)
+    monkeypatch.setattr(node_ffmpeg, "_cache", lambda: tmp_path / "cache")
+    monkeypatch.setattr(node_ffmpeg, "_linux_x86_64", lambda: True)
+    monkeypatch.setattr(node_ffmpeg, "fetch", fetch_from)
+    return node_ffmpeg.pin(dockerfile.read_text(encoding="utf-8"))
+
+
+def _unreachable(url: str, target: Path) -> None:
+    msg = "[Errno -2] Name or service not known"
+    raise urllib.error.URLError(msg)
+
+
+@pytest.mark.parametrize(
+    ("pinned_sha256", "download", "said"),
+    [
+        (
+            "0" * 64,
+            None,
+            r"the download of https://example\.org/ffmpeg\.tar\.xz has SHA-256 "
+            r"[0-9a-f]{64}, not the pinned 0{64}",
+        ),
+        (
+            None,
+            _unreachable,
+            r"<urlopen error \[Errno -2\] Name or service not known>",
+        ),
+    ],
+    ids=["another-sha256", "no-network"],
+)
+def test_a_fetch_that_fails_says_why_in_one_line_and_exits_1(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    tmp_path: Path,
+    pinned_sha256: str | None,
+    download: Callable[[str, Path], None] | None,
+    said: str,
+) -> None:
+    """No traceback, and nothing on stdout, so ``make -s clip-ffmpeg`` fails visibly and prints no directory."""
+    source, sha256 = _archive(tmp_path)
+    _fetch_here(
+        monkeypatch,
+        tmp_path,
+        pinned_sha256 or sha256,
+        download or _copy_from(source, []),
+    )
+    assert node_ffmpeg.main(["fetch"]) == 1
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert re.fullmatch(
+        r"error: the pinned ffmpeg \(https://example\.org/ffmpeg\.tar\.xz\) could not "
+        rf"be fetched into {re.escape(str(tmp_path / 'cache'))}: {said}\n",
+        captured.err,
+    )
+
+
+def test_a_fetch_says_it_downloaded_and_checked_the_build(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str], tmp_path: Path
+) -> None:
+    source, sha256 = _archive(tmp_path)
+    pinned = _fetch_here(monkeypatch, tmp_path, sha256, _copy_from(source, []))
+    assert node_ffmpeg.main(["fetch"]) == 0
+    captured = capsys.readouterr()
+    assert captured.out == f"{tmp_path / 'cache' / sha256 / 'bin'}\n"
+    assert captured.err == (
+        f"ffmpeg downloaded from {pinned.url} and checked against SHA-256 {sha256}\n"
+    )
+
+
+def test_a_fetch_the_cache_answers_says_it_was_served_from_the_cache(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str], tmp_path: Path
+) -> None:
+    """Nothing is downloaded or checked again: the cache holds the build checked when it came."""
+    source, sha256 = _archive(tmp_path)
+    calls: list[str] = []
+    pinned = _fetch_here(monkeypatch, tmp_path, sha256, _copy_from(source, calls))
+    assert node_ffmpeg.main(["fetch"]) == 0
+    capsys.readouterr()
+    assert node_ffmpeg.main(["fetch"]) == 0
+    captured = capsys.readouterr()
+    assert captured.out == f"{tmp_path / 'cache' / sha256 / 'bin'}\n"
+    assert captured.err == (
+        f"ffmpeg served from the cache, checked against SHA-256 {sha256} when it "
+        f"was downloaded from {pinned.url}\n"
+    )
+    assert calls == [pinned.url]

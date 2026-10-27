@@ -340,7 +340,7 @@ it (a lower impact level is better). Setting `verbose=True` swaps the two-column
 shifted reference, unfavourable deviation).
 
 Rendering needs reportlab, kept out of the runtime dependencies as the optional
-`phonometry[report]` extra (`pip install phonometry[report]`); a missing
+`phonometry[report]` extra (`pip install "phonometry[report]"`); a missing
 reportlab raises a clear `ImportError` with the install command, and the plot
 still needs matplotlib (`phonometry[plot]`). Only `engine="reportlab"` is
 supported; any other engine raises `ValueError`. The fiche renders in English by

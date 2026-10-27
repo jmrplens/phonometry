@@ -23,8 +23,10 @@ the picture by tens of decibels. What is robust is the internal amplitude,
 whose bandwidth is ``f/Q`` and therefore percent-wide.
 """
 
+from __future__ import annotations
+
 from functools import lru_cache
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -42,7 +44,12 @@ from ..theme import (
     COLOR_PRIMARY,
     COLOR_SECONDARY,
 )
-from ._core import _anim_speaker
+from ._core import _anim_speaker, _blanked, _host
+
+if TYPE_CHECKING:
+    from numpy.typing import NDArray
+
+    from phonometry.simulation import FDTD2D, Compute
 
 _SBR_C0 = 343.0
 _SBR_DX = 0.0025
@@ -79,58 +86,73 @@ _SBR_HOLD = round(2.0 * _SBR_FPS)
 _SBR_TRACE_EVERY = 4
 
 
-def _sbr_rig() -> tuple[Any, Any, int]:
-    """The duct-plus-stub rig: air mask, density-contrast walls, rho c ends.
+#: The first air row of the duct, under its wall.
+_SBR_DUCT0 = _SBR_WALL
 
-    Walls are a 10^6 density contrast rather than an obstacle mask so the
-    sustained plane wave can be injected across the full left edge, exactly
-    as in the expansion-chamber clip this rig is cloned from.
-    """
-    import fdtd2d
 
+def _sbr_air() -> NDArray[np.bool_]:
+    """The air path of the rig, True: the duct and the stub that hangs from it."""
     ny = _SBR_WALL + _SBR_BORE_C + _SBR_STUB_D + _SBR_WALL
     air = np.zeros((ny, _SBR_NX), dtype=bool)
-    duct0 = _SBR_WALL
+    duct0 = _SBR_DUCT0
     air[duct0 : duct0 + _SBR_BORE_C, :] = True
     air[
         duct0 + _SBR_BORE_C : duct0 + _SBR_BORE_C + _SBR_STUB_D,
         _SBR_JUNC : _SBR_JUNC + _SBR_STUB_W,
     ] = True
+    return air
+
+
+def _sbr_rig(compute: Compute) -> FDTD2D:
+    """The duct-plus-stub rig: density-contrast walls round the air path, rho c ends.
+
+    Walls are a 10^6 density contrast rather than an obstacle mask so the
+    sustained plane wave can be injected across the full left edge, exactly
+    as in the expansion-chamber clip this rig is cloned from.
+
+    :param compute: Where the rig steps.
+    """
+    from phonometry.simulation import FDTD2D
+
+    air = _sbr_air()
     rho_map = np.where(air, 1.2, 1.2e6)
-    sim = fdtd2d.FDTD2D(
+    return FDTD2D(
         _SBR_C0,
         _SBR_DX,
-        shape=(ny, _SBR_NX),
+        shape=air.shape,
         rho=rho_map,
         edge_impedance={"left": 1.2 * _SBR_C0, "right": 1.2 * _SBR_C0},
+        compute=compute,
     )
-    return sim, air, duct0
 
 
-def _sbr_ring_down() -> float:
+def _sbr_ring_down(compute: Compute) -> float:
     """Measure the 2D device's own resonance from a pulse ring-down.
 
     A broadband plane pulse rings the stub; the closed-end trace after the
     pulse has left (t > 30 ms) is windowed, zero-padded and peak-refined.
     Measured on the same grid the clip runs on, because the junction end
     correction this measures is a property of the rasterised device.
-    """
-    import fdtd2d
 
-    sim, _, duct0 = _sbr_rig()
+    :param compute: Where the pulse run steps.
+    """
+    from phonometry.simulation import PlaneWaveSource
+
+    sim = _sbr_rig(compute)
     w = 0.0008
 
     def wave(t: float) -> float:
         return float(np.exp(-(((t - 4.0 * w) / w) ** 2)))
 
-    sim.add_source(fdtd2d.PlaneWaveSource(direction="right", waveform=wave, offset=2))
-    iy = duct0 + _SBR_BORE_C + _SBR_STUB_D - 1
+    sim.add_source(PlaneWaveSource(direction="right", waveform=wave, offset=2))
+    iy = _SBR_DUCT0 + _SBR_BORE_C + _SBR_STUB_D - 1
     ix = _SBR_JUNC + _SBR_STUB_W // 2
     n_steps = round(0.10 / sim.dt)
-    trace = np.empty(n_steps)
+    history = sim._backend.zeros((n_steps,))
     for i in range(n_steps):
         sim.step()
-        trace[i] = sim.p[iy, ix]
+        history[i] = sim.p[iy, ix]
+    trace = _host(sim, history, dtype=np.float64)
     t = (np.arange(n_steps) + 1) * sim.dt
     tail = trace[t > 0.03]
     spec = np.abs(np.fft.rfft(tail * np.hanning(tail.size), n=2**18))
@@ -151,9 +173,12 @@ def _side_branch_fields() -> tuple[Any, ...]:
     library tuning frequency, the measured 2D resonance, and the two
     closed-end plateau ratios with the on-tune charge time in periods.
     """
-    import fdtd2d
+    import clip_placement
 
     from phonometry import noise_control
+    from phonometry.simulation import CWSource, PlaneWaveSource
+
+    compute = clip_placement.compute_for("anim_fdtd_side_branch")
 
     f_grid = np.linspace(20.0, 600.0, 4000)
     resonances = noise_control.quarter_wave_resonator(
@@ -166,34 +191,35 @@ def _side_branch_fields() -> tuple[Any, ...]:
     if resonances is None:  # never for a closed stub; narrows the type
         raise RuntimeError("quarter_wave_resonator returned no resonances")  # noqa: EM101
     f0 = float(resonances[0])
-    f_sim = _sbr_ring_down()
+    f_sim = _sbr_ring_down(compute)
 
     runs: list[tuple[Any, Any]] = []
     metrics: list[tuple[float, float]] = []
     times = np.zeros(0)
     t_tr = np.zeros(0)
+    blank = ~_sbr_air()[::2, ::2]
     for f in (f0, _SBR_F_OFF):
-        sim, air, duct0 = _sbr_rig()
-        tone = fdtd2d.CWSource(ix=0, iy=0, frequency=f, ramp_cycles=2.0)
+        sim = _sbr_rig(compute)
+        tone = CWSource(ix=0, iy=0, frequency=f, ramp_cycles=2.0)
         sim.add_source(
-            fdtd2d.PlaneWaveSource(direction="right", waveform=tone.value, offset=2)
+            PlaneWaveSource(direction="right", waveform=tone.value, offset=2)
         )
-        iy = duct0 + _SBR_BORE_C + _SBR_STUB_D - 1
+        iy = _SBR_DUCT0 + _SBR_BORE_C + _SBR_STUB_D - 1
         ix = _SBR_JUNC + _SBR_STUB_W // 2
         n_steps = _SBR_EVERY * _SBR_FRAMES
+        history = sim._backend.zeros((n_steps // _SBR_TRACE_EVERY,))
         ps: list[Any] = []
         ts: list[float] = []
-        tr: list[float] = []
         tt: list[float] = []
         for i in range(n_steps):
             sim.step()
             if (i + 1) % _SBR_TRACE_EVERY == 0:
-                tr.append(float(sim.p[iy, ix]))
+                history[(i + 1) // _SBR_TRACE_EVERY - 1] = sim.p[iy, ix]
                 tt.append(sim.time)
             if (i + 1) % _SBR_EVERY == 0:
-                ps.append(np.where(air, sim.p, np.nan)[::2, ::2].astype(np.float32))
+                ps.append(_blanked(sim, sim.p[::2, ::2], blank))
                 ts.append(sim.time)
-        trace = np.asarray(tr)
+        trace = _host(sim, history, dtype=np.float64)
         # Per-period closed-end amplitude: the plateau ratio (the incident
         # wave has amplitude 1) and the time to 90 % of it, counted in
         # periods of the drive from the front's arrival at the junction.

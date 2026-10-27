@@ -880,7 +880,7 @@ class EnvironmentalSensitivityCorrection(OwnsArrays):
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to the :math:`C_\mathrm{env}` curve.
         :return: The axes. Requires matplotlib
-            (``pip install phonometry[plot]``).
+            (``pip install "phonometry[plot]"``).
         """
         from .._i18n import check_language
         from .._plot.metrology import plot_environmental_sensitivity_correction
@@ -1039,7 +1039,7 @@ class JigDiameterCorrection(OwnsArrays):
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to the correction curve.
         :return: The axes. Requires matplotlib
-            (``pip install phonometry[plot]``).
+            (``pip install "phonometry[plot]"``).
         """
         from .._i18n import check_language
         from .._plot.metrology import plot_jig_diameter_correction
@@ -1204,7 +1204,7 @@ class DiameterSoundFieldCorrection(OwnsArrays):
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to the correction curve.
         :return: The axes. Requires matplotlib
-            (``pip install phonometry[plot]``).
+            (``pip install "phonometry[plot]"``).
         """
         from .._i18n import check_language
         from .._plot.metrology import plot_diameter_sound_field_correction
@@ -1748,7 +1748,7 @@ class ComparisonCalibration(OwnsArrays):
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to the curve of the microphone under test.
         :return: The axes. Requires matplotlib
-            (``pip install phonometry[plot]``).
+            (``pip install "phonometry[plot]"``).
         :raises ValueError: for an unknown quantity, or the phase of a
             calibration of the level alone.
         :raises TypeError: if ``quantity`` is not a text.
@@ -2535,7 +2535,7 @@ class ComparisonUncertaintyBudget(OwnsArrays):
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to :meth:`~matplotlib.axes.Axes.barh`.
         :return: The axes. Requires matplotlib
-            (``pip install phonometry[plot]``).
+            (``pip install "phonometry[plot]"``).
         """
         from .._i18n import check_language
         from .._plot.metrology import plot_comparison_budget
@@ -2913,7 +2913,7 @@ class JigCouplerVerification(OwnsArrays):
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to the difference curve.
         :return: The axes. Requires matplotlib
-            (``pip install phonometry[plot]``).
+            (``pip install "phonometry[plot]"``).
         """
         from .._i18n import check_language
         from .._plot.metrology import plot_jig_coupler_verification
@@ -3172,7 +3172,7 @@ class FreeFieldRegion(RichDisplay):
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to the boundary of the region.
         :return: The axes. Requires matplotlib
-            (``pip install phonometry[plot]``).
+            (``pip install "phonometry[plot]"``).
         """
         from .._i18n import check_language
         from .._plot.metrology import plot_free_field_region
@@ -3461,7 +3461,7 @@ class ImpedancePressureRatio(OwnsArrays):
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to the curve of :math:`R_P`.
         :return: The axes. Requires matplotlib
-            (``pip install phonometry[plot]``).
+            (``pip install "phonometry[plot]"``).
         :raises ValueError: for an unknown quantity.
         :raises TypeError: if ``quantity`` is not a text.
         """
@@ -3796,7 +3796,7 @@ class RectangularPulse(RichDisplay):
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to the spectrum.
         :return: The axes. Requires matplotlib
-            (``pip install phonometry[plot]``).
+            (``pip install "phonometry[plot]"``).
         :raises TypeError: if ``upper_frequency_hz`` is not a single number.
         """
         from .._i18n import check_language
@@ -4174,7 +4174,7 @@ class TimeSelectiveResponse(OwnsArrays):
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to the windowed curve.
         :return: The axes. Requires matplotlib
-            (``pip install phonometry[plot]``).
+            (``pip install "phonometry[plot]"``).
         :raises ValueError: for an unknown quantity.
         :raises TypeError: if ``quantity`` is not a text.
         """
@@ -4316,7 +4316,7 @@ class SteppedSineImpulseResponse(OwnsArrays):
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to the curve.
         :return: The axes. Requires matplotlib
-            (``pip install phonometry[plot]``).
+            (``pip install "phonometry[plot]"``).
         """
         from .._i18n import check_language
         from .._plot.metrology import plot_stepped_sine_impulse_response

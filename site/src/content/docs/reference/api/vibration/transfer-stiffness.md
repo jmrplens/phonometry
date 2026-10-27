@@ -204,7 +204,7 @@ BandAveragedStiffness.plot(
 
 Plot the band levels, with the undetermined bands marked.
 
-Requires matplotlib (`pip install phonometry[plot]`).
+Requires matplotlib (`pip install "phonometry[plot]"`).
 
 **Parameters**
 
@@ -697,7 +697,7 @@ DrivingPointStiffnessResult.plot(
 
 Plot the driving-point stiffness level with the 6.2 threshold and $f_\mathrm{UL}$.
 
-Requires matplotlib (`pip install phonometry[plot]`).
+Requires matplotlib (`pip install "phonometry[plot]"`).
 
 **Parameters**
 
@@ -802,7 +802,7 @@ DrivingPointUncertainty.plot(
 
 Plot the contribution of each input quantity, with `u` and `U`.
 
-Requires matplotlib (`pip install phonometry[plot]`).
+Requires matplotlib (`pip install "phonometry[plot]"`).
 
 **Parameters**
 
@@ -925,7 +925,7 @@ EffectiveBlockingMass.plot(
 
 Plot the deviation from `m2` with the 1 dB tolerance and `f3`.
 
-Requires matplotlib (`pip install phonometry[plot]`).
+Requires matplotlib (`pip install "phonometry[plot]"`).
 
 **Parameters**
 
@@ -1071,7 +1071,7 @@ LevelDifferenceCheck.plot(
 
 Plot the level difference against its limit, failures marked.
 
-Requires matplotlib (`pip install phonometry[plot]`).
+Requires matplotlib (`pip install "phonometry[plot]"`).
 
 **Parameters**
 
@@ -1219,7 +1219,7 @@ OutputMassCheck.plot(
 
 Plot the mass limit over frequency against the mass in place.
 
-Requires matplotlib (`pip install phonometry[plot]`).
+Requires matplotlib (`pip install "phonometry[plot]"`).
 
 **Parameters**
 
@@ -1437,7 +1437,7 @@ TransferStiffnessResult.plot(
 
 Plot the transfer-stiffness level `L_k(f)`.
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 ### TransferStiffnessResult.report()

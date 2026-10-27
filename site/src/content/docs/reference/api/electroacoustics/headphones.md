@@ -331,7 +331,7 @@ Draw the level against frequency, 50 dB to the length of a decade.
 
 8.6.2.2 c): "the preferred scale has the same length representing
 50 dB as represents one decade of frequency (see IEC 60268-1 and
-IEC 60263)". Requires matplotlib (`pip install phonometry[plot]`).
+IEC 60263)". Requires matplotlib (`pip install "phonometry[plot]"`).
 
 **Parameters**
 
@@ -448,7 +448,7 @@ CrosstalkAttenuation.plot(
 
 Draw the attenuation against frequency.
 
-Requires matplotlib (`pip install phonometry[plot]`).
+Requires matplotlib (`pip install "phonometry[plot]"`).
 
 **Parameters**
 
@@ -578,7 +578,7 @@ Draw the persons' responses, their mean and its standard deviation.
 8.6.5.2 h): the results "may be tabulated or presented graphically,
 the scales being preferably chosen so that 50 dB and one decade of
 frequency are represented by the same length". Requires matplotlib
-(`pip install phonometry[plot]`).
+(`pip install "phonometry[plot]"`).
 
 **Parameters**
 
@@ -676,7 +676,7 @@ EarCanalMicrophoneVerification.plot(
 
 Draw each requirement's value as a share of its limit.
 
-Requires matplotlib (`pip install phonometry[plot]`).
+Requires matplotlib (`pip install "phonometry[plot]"`).
 
 **Parameters**
 
@@ -810,7 +810,7 @@ comparison frequency response of the headphone. The standard
 deviation of the results in each band should be indicated on the
 graph. The scales for the graph preferably shall be such that 50 dB
 is represented by the same length as one decade of frequency."
-Requires matplotlib (`pip install phonometry[plot]`).
+Requires matplotlib (`pip install "phonometry[plot]"`).
 
 **Parameters**
 
@@ -1100,7 +1100,7 @@ LimitingTestSignalCheck.plot(
 
 Draw the spectrum against Table II, with the ratio in the title.
 
-Requires matplotlib (`pip install phonometry[plot]`).
+Requires matplotlib (`pip install "phonometry[plot]"`).
 
 **Parameters**
 
@@ -1292,7 +1292,7 @@ ProgramCharacteristicVoltage.plot(
 
 Draw the band levels at the characteristic voltage and their 94 dB sum.
 
-Requires matplotlib (`pip install phonometry[plot]`).
+Requires matplotlib (`pip install "phonometry[plot]"`).
 
 **Parameters**
 
@@ -1393,7 +1393,7 @@ ProtectionVoltage.plot(
 
 Draw the sensitivity change against the e.m.f., with the 1 dB line.
 
-Requires matplotlib (`pip install phonometry[plot]`).
+Requires matplotlib (`pip install "phonometry[plot]"`).
 
 **Parameters**
 
@@ -1491,7 +1491,7 @@ RatedImpedanceVerification.plot(
 
 Draw the modulus against frequency with the rated value and its 80 %.
 
-Requires matplotlib (`pip install phonometry[plot]`).
+Requires matplotlib (`pip install "phonometry[plot]"`).
 
 **Parameters**
 

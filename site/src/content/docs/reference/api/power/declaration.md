@@ -127,7 +127,7 @@ identity/disclaimer block.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` is not `"reportlab"` or `language` is unknown. |
-| ImportError | If reportlab is not installed (`pip install phonometry[report]`). |
+| ImportError | If reportlab is not installed (`pip install "phonometry[report]"`). |
 
 ## OperatingModeDeclaration
 

@@ -308,7 +308,7 @@ achieved (or, when non-compliant, the loosest) class; see
 `"effective_bandwidth"` draws $\Delta B$ of every band between
 the limits of 5.12.2, and `"summation"` the Formula (3) curve of
 every inner band between the limits of 5.16. Requires matplotlib
-(`pip install phonometry[plot]`) and returns the
+(`pip install "phonometry[plot]"`) and returns the
 `Axes`.
 
 **Parameters**
@@ -396,7 +396,7 @@ class-compliance result, an optional verdict row against a supplied
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` is not `"reportlab"`. |
-| ImportError | If reportlab is not installed (`pip install phonometry[report]`), or matplotlib is missing for the embedded figure (`pip install phonometry[plot]`). |
+| ImportError | If reportlab is not installed (`pip install "phonometry[report]"`), or matplotlib is missing for the embedded figure (`pip install "phonometry[plot]"`). |
 
 ### FilterComplianceResult.requirement_class()
 

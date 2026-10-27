@@ -489,7 +489,7 @@ class FieldStrengthReading(OwnsArrays):
     ) -> Axes:
         """Draw the meter reading against time, with the 0 dB reference.
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
 
         :param ax: Existing axes, or ``None`` to create a figure.
@@ -853,7 +853,7 @@ class BackgroundNoiseAssessment(OwnsArrays):
     ) -> Axes:
         """Draw the noise at each point against the 47, 32 and 22 dB lines.
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
 
         :param ax: Existing axes, or ``None`` to create a figure.
@@ -976,7 +976,7 @@ class LoopRequirement(RichDisplay):
     ) -> Axes:
         """Draw each judged value against its limits.
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
 
         :param ax: Existing axes, or ``None`` to create a figure.
@@ -1052,7 +1052,7 @@ class InductionLoopVerification(RichDisplay):
 
         A requirement is met when its bar stands at or above zero.
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
 
         :param ax: Existing axes, or ``None`` to create a figure.
@@ -1524,7 +1524,7 @@ class AmplifierOverloadVerification(OwnsArrays):
     ) -> Axes:
         """Draw the loop voltage along the sweep against the compliance voltage.
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
 
         :param ax: Existing axes, or ``None`` to create a figure.

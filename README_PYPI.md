@@ -46,7 +46,7 @@ Weightings and levels are class 1 per
 
 <a href="https://github.com/jmrplens/phonometry/blob/v4.0.0rc1/docs/CONFORMANCE.md"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/v4.0.0rc1/.github/badges/conformance-summary.svg" alt="All 1893 conformance checks pass, across 111 domains and 523 standards"></a>
 
-<img src="https://raw.githubusercontent.com/jmrplens/phonometry-assets/6ff70d76d85a649c5bdd90a1e51543ec56a94137/images/anim_fdtd_pillar_hall_poster.webp" alt="An 800 Hz plane wavefront sweeps through a hall of rigid columns in a 2D FDTD simulation; every column diffracts the front and the scattered wavelets interfere until the whole hall is filled" width="100%">
+<img src="https://raw.githubusercontent.com/jmrplens/phonometry-assets/d782463376d71a0d64fe99bc1c11e3c77839af4d/images/anim_fdtd_pillar_hall_poster.webp" alt="An 800 Hz plane wavefront sweeps through a hall of rigid columns in a 2D FDTD simulation; every column diffracts the front and the scattered wavelets interfere until the whole hall is filled" width="100%">
 
 *An 800 Hz wavefront threading a hall of columns, computed with the library's
 own [2D FDTD engine](https://github.com/jmrplens/phonometry/blob/v4.0.0rc1/docs/simulation/fdtd-simulation.md)
@@ -78,10 +78,10 @@ engines of `phonometry.simulation` run on PyTorch, on a CPU, an NVIDIA GPU or
 Apple's MPS; `[full]` leaves it out, since the torch wheels PyPI serves on
 Linux bring gigabytes of CUDA libraries). On a Linux machine without an NVIDIA
 GPU, run `pip install torch --index-url https://download.pytorch.org/whl/cpu`
-before `pip install phonometry[torch]`: torch then comes from PyTorch's CPU
+before `pip install "phonometry[torch]"`: torch then comes from PyTorch's CPU
 index and those libraries stay out.
 
-I recommend `pip install phonometry[full]`: it brings matplotlib, numba,
+I recommend `pip install "phonometry[full]"`: it brings matplotlib, numba,
 reportlab, svglib and soundfile in one go, so every feature of the library is
 enabled except the torch backend of the FDTD engines, which `[torch]` adds. The
 base install computes every metric on NumPy and SciPy alone: it includes

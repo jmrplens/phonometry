@@ -235,7 +235,7 @@ The direct-field level of the talker across the table and the
 speech-to-noise limit of Equation (17.53) are drawn as references, so
 the crossing point reads directly as the occupancy at which the room
 stops working. Requires matplotlib
-(`pip install phonometry[plot]`).
+(`pip install "phonometry[plot]"`).
 
 ### CrowdNoiseResult.speech_to_noise()
 

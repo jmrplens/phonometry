@@ -282,7 +282,7 @@ class AgeThresholdResult(OwnsArrays):
     ) -> Axes:
         """Plot the median threshold with the fractile band over frequency.
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from .._i18n import check_language

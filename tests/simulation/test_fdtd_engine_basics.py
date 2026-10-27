@@ -1,39 +1,32 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
-"""Basic physics and determinism tests for the ``fdtd2d`` engine shim.
+"""Physics checks of the acoustic engine on small grids, and what it refuses.
 
-``scripts/fdtd2d.py`` re-exports :mod:`phonometry.simulation.fdtd`, and the
-engine renders the committed FDTD documentation animations, so what
-matters here is that (a) the shim import path used by the animation
-scripts keeps working, (b) the physics is not obviously wrong (a rigid box
-conserves energy, a sponge absorbs it, a centred pulse stays symmetric),
-and (c) the output is bit-reproducible run to run. The analytic-oracle
-validation of the solver lives in ``tests/simulation/test_fdtd.py``.
+A rigid box conserves energy, a sponge absorbs it, a centred pulse stays
+symmetric, a faster region refracts, and the constructor, the two sources and
+``run`` refuse what they should. The analytic-oracle validation and the check
+that two runs are bit-identical are in ``test_fdtd.py``; these are the quick
+checks that used to run through the documentation's import shim.
 """
 
 from __future__ import annotations
 
-import pathlib
-import sys
-
 import numpy as np
 import pytest
 
-_SCRIPTS = str(pathlib.Path(__file__).resolve().parent.parent / "scripts")
-if _SCRIPTS not in sys.path:
-    sys.path.insert(0, _SCRIPTS)
-
-import fdtd2d
+from phonometry.simulation.fdtd import FDTD2D, CWSource, GaussianPulse
 
 
-def _pulse_box(sponge_width: int) -> fdtd2d.FDTD2D:
+def _pulse_box(absorbing_layer_cells: int) -> FDTD2D:
     """A homogeneous box with a centred Gaussian pulse (odd grid)."""
-    sim = fdtd2d.FDTD2D(343.0, 0.05, shape=(81, 101), sponge_width=sponge_width)
-    sim.add_source(fdtd2d.GaussianPulse(ix=50, iy=40, half_width_s=6 * sim.dt))
+    sim = FDTD2D(
+        343.0, 0.05, shape=(81, 101), absorbing_layer_cells=absorbing_layer_cells
+    )
+    sim.add_source(GaussianPulse(ix=50, iy=40, half_width_s=6 * sim.dt))
     return sim
 
 
 def test_rigid_box_conserves_energy() -> None:
-    sim = _pulse_box(sponge_width=0)
+    sim = _pulse_box(absorbing_layer_cells=0)
     sim.run(200)
     e_ref = sim.energy()
     sim.run(600)
@@ -43,7 +36,7 @@ def test_rigid_box_conserves_energy() -> None:
 
 
 def test_sponge_absorbs_energy() -> None:
-    sim = _pulse_box(sponge_width=20)
+    sim = _pulse_box(absorbing_layer_cells=20)
     sim.run(60)  # pulse radiated, front just reaching the layer
     e_ref = sim.energy()
     sim.run(740)  # wavefront crosses the absorbing layer
@@ -51,25 +44,11 @@ def test_sponge_absorbs_energy() -> None:
 
 
 def test_centered_pulse_stays_symmetric() -> None:
-    sim = _pulse_box(sponge_width=0)
+    sim = _pulse_box(absorbing_layer_cells=0)
     sim.run(500)
     # A centred source in a homogeneous rigid box has both mirror symmetries.
     np.testing.assert_allclose(sim.p, sim.p[::-1, :], atol=1e-12)
     np.testing.assert_allclose(sim.p, sim.p[:, ::-1], atol=1e-12)
-
-
-def test_two_runs_are_bit_identical() -> None:
-    frames = [_pulse_box(sponge_width=10).run(300, snapshot_every=50) for _ in range(2)]
-    assert frames[0].shape == (7, 81, 101)
-    assert np.array_equal(frames[0], frames[1])
-
-
-def test_cw_source_and_decimation() -> None:
-    sim = fdtd2d.FDTD2D(343.0, 0.05, shape=(80, 100), damping=5.0)
-    sim.add_source(fdtd2d.CWSource(ix=10, iy=10, frequency=200.0))
-    frames = sim.run(400, snapshot_every=100, snapshot_decimation=2)
-    assert frames.shape == (5, 40, 50)
-    assert float(np.abs(frames[-1]).max()) > 0.0
 
 
 def test_heterogeneous_speed_refracts_faster() -> None:
@@ -78,10 +57,8 @@ def test_heterogeneous_speed_refracts_faster() -> None:
     ny, nx = 81, 161
     c = np.full((ny, nx), 200.0)
     c[:, nx // 2 :] = 400.0
-    sim = fdtd2d.FDTD2D(c, 0.05)
-    sim.add_source(
-        fdtd2d.GaussianPulse(ix=nx // 2, iy=ny // 2, half_width_s=6 * sim.dt)
-    )
+    sim = FDTD2D(c, 0.05)
+    sim.add_source(GaussianPulse(ix=nx // 2, iy=ny // 2, half_width_s=6 * sim.dt))
     sim.run(150)
     row = np.abs(sim.p[ny // 2])
     threshold = 1e-3 * row.max()
@@ -92,14 +69,7 @@ def test_heterogeneous_speed_refracts_faster() -> None:
 
 def test_scalar_c_requires_shape() -> None:
     with pytest.raises(ValueError, match="shape is required"):
-        fdtd2d.FDTD2D(343.0, 0.05)
-
-
-def test_source_outside_the_grid_is_rejected() -> None:
-    sim = fdtd2d.FDTD2D(343.0, 0.05, shape=(10, 10))
-    pulse = fdtd2d.GaussianPulse(ix=99, iy=0, half_width_s=1e-4)
-    with pytest.raises(ValueError, match="source position lies outside the grid"):
-        sim.add_source(pulse)
+        FDTD2D(343.0, 0.05)
 
 
 @pytest.mark.parametrize(
@@ -114,14 +84,26 @@ def test_source_outside_the_grid_is_rejected() -> None:
         ({"dx": np.nan}, "dx must be positive"),
         ({"damping": -1.0}, "damping must be non-negative"),
         ({"damping": np.inf}, "damping must be non-negative"),
-        ({"sponge_width": -1}, "sponge_width must be non-negative"),
-        ({"sponge_width": 10}, "sponge_width must be narrower"),
-        ({"sponge_width": 4, "sponge_reflection": 0.0}, "sponge_reflection"),
-        ({"sponge_width": 4, "sponge_reflection": 1.0}, "sponge_reflection"),
-        ({"sponge_width": 4, "sponge_sides": ("north",)}, "sponge sides"),
-        ({"sponge_width": 4, "sponge_sides": "north"}, "sponge sides"),
+        ({"absorbing_layer_cells": -1}, "absorbing_layer_cells must be non-negative"),
+        ({"absorbing_layer_cells": 10}, "absorbing_layer_cells must be fewer"),
+        (
+            {"absorbing_layer_cells": 4, "absorbing_layer_reflection": 0.0},
+            "absorbing_layer_reflection must lie strictly between 0 and 1",
+        ),
+        (
+            {"absorbing_layer_cells": 4, "absorbing_layer_reflection": 1.0},
+            "absorbing_layer_reflection must lie strictly between 0 and 1",
+        ),
+        (
+            {"absorbing_layer_cells": 4, "absorbing_sides": ("north",)},
+            "unknown absorbing sides",
+        ),
+        (
+            {"absorbing_layer_cells": 4, "absorbing_sides": "north"},
+            "unknown absorbing sides",
+        ),
         # A malformed grid shape used to be reported by somebody else: numpy,
-        # or the sponge_width guard for a zero-length side, or a message
+        # or the absorbing_layer_cells guard for a zero-length side, or a message
         # blaming c. A complex c or rho ran to completion on its real part.
         ({"shape": (0, 10)}, "shape must be a pair of positive integers"),
         ({"shape": (-1, 10)}, "shape must be a pair of positive integers"),
@@ -137,7 +119,7 @@ def test_constructor_rejects_invalid_arguments(
     c = full.pop("c")
     dx = full.pop("dx")
     with pytest.raises(ValueError, match=match):
-        fdtd2d.FDTD2D(c, dx, **full)  # type: ignore[arg-type]
+        FDTD2D(c, dx, **full)  # type: ignore[arg-type]
 
 
 @pytest.mark.parametrize(
@@ -160,18 +142,18 @@ def test_constructor_rejects_arguments_of_the_wrong_type(
     c = full.pop("c")
     dx = full.pop("dx")
     with pytest.raises(TypeError, match=match):
-        fdtd2d.FDTD2D(c, dx, **full)  # type: ignore[arg-type]
+        FDTD2D(c, dx, **full)  # type: ignore[arg-type]
 
 
 def test_a_whole_float_grid_shape_is_taken_as_its_counts() -> None:
-    sim = fdtd2d.FDTD2D(343.0, 0.05, shape=(10.0, 12))  # type: ignore[arg-type]
+    sim = FDTD2D(343.0, 0.05, shape=(10.0, 12))  # type: ignore[arg-type]
     assert sim.c.shape == (10, 12)
 
 
-def test_sponge_sides_accepts_a_bare_string() -> None:
+def test_absorbing_sides_accepts_a_bare_string() -> None:
     # A single side name must mean that side, not its individual characters.
-    sim = fdtd2d.FDTD2D(
-        343.0, 0.05, shape=(20, 20), sponge_width=5, sponge_sides="left"
+    sim = FDTD2D(
+        343.0, 0.05, shape=(20, 20), absorbing_layer_cells=5, absorbing_sides="left"
     )
     assert float(sim._decay_p[10, 0]) < 1.0  # left edge absorbs
     assert float(sim._decay_p[10, -1]) == 1.0  # right edge stays rigid
@@ -191,7 +173,7 @@ def test_gaussian_pulse_rejects_invalid_parameters(
     match: str,
 ) -> None:
     with pytest.raises(ValueError, match=match):
-        fdtd2d.GaussianPulse(ix=0, iy=0, **kwargs)
+        GaussianPulse(ix=0, iy=0, **kwargs)
 
 
 @pytest.mark.parametrize(
@@ -208,7 +190,7 @@ def test_cw_source_rejects_invalid_parameters(
     match: str,
 ) -> None:
     with pytest.raises(ValueError, match=match):
-        fdtd2d.CWSource(ix=0, iy=0, **kwargs)
+        CWSource(ix=0, iy=0, **kwargs)
 
 
 @pytest.mark.parametrize(
@@ -229,6 +211,6 @@ def test_run_rejects_invalid_recording_controls(
     kwargs: dict[str, int],
     match: str,
 ) -> None:
-    sim = fdtd2d.FDTD2D(343.0, 0.05, shape=(10, 10))
+    sim = FDTD2D(343.0, 0.05, shape=(10, 10))
     with pytest.raises(ValueError, match=match):
         sim.run(**kwargs)

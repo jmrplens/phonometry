@@ -191,7 +191,7 @@ def _showfilter(
     try:
         import matplotlib.pyplot as plt
     except ImportError as exc:
-        msg = "Plotting requires matplotlib. Install it with: pip install phonometry[plot]"
+        msg = 'Plotting requires matplotlib. Install it with: pip install "phonometry[plot]"'
         raise ImportError(msg) from exc
 
     wn = 8192

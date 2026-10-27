@@ -113,7 +113,7 @@ Plot the per-task contributions with the `LEX,8h` line.
 
 Only task-based results carry per-task contributions (the job and
 full-day strategies raise `ValueError`). Requires matplotlib
-(`pip install phonometry[plot]`); returns the
+(`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 ### ExposureResult.report()
@@ -161,7 +161,7 @@ a footer identity/disclaimer block.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` is not `"reportlab"` or `language` is unknown. |
-| ImportError | If reportlab (or, for a task-based result's chart, matplotlib) is not installed (`pip install phonometry[report]`). |
+| ImportError | If reportlab (or, for a task-based result's chart, matplotlib) is not installed (`pip install "phonometry[report]"`). |
 
 ### ExposureResult.sampling_advisory
 

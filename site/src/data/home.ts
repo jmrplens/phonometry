@@ -258,7 +258,7 @@ export const en: HomeContent = {
 			{
 				title: 'Install it',
 				body: 'Python 3.12 or newer. The base install pulls in NumPy and SciPy; the [full] extra adds four more, [plot] for the figures, [perf] for the faster impulse ballistics, [report] for the PDF fiches and [audio] for the audio formats beyond uncompressed WAV. [torch], which [full] leaves out, runs the FDTD simulations on PyTorch.',
-				code: 'pip install phonometry[full]',
+				code: 'pip install "phonometry[full]"',
 				href: '/phonometry/start/getting-started/',
 				linkText: 'Installation options',
 			},
@@ -413,7 +413,7 @@ export const es: HomeContent = {
 			{
 				title: 'Instálala',
 				body: 'Python 3.12 o posterior. La instalación básica trae NumPy y SciPy; el extra [full] añade cuatro más, [plot] para las figuras, [perf] para la ponderación temporal de impulso acelerada, [report] para las fichas PDF y [audio] para los formatos de audio más allá del WAV sin comprimir. [torch], que [full] deja fuera, calcula las simulaciones FDTD con PyTorch.',
-				code: 'pip install phonometry[full]',
+				code: 'pip install "phonometry[full]"',
 				href: '/phonometry/es/start/getting-started/',
 				linkText: 'Opciones de instalación',
 			},

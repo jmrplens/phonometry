@@ -252,7 +252,7 @@ CoveringImprovementResult.plot(
 
 Plot `ΔL(f)` from the force ratio beside the two-line estimate.
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 ## double_floating_floor_resonances
@@ -465,7 +465,7 @@ FloatingFloorImprovementResult.plot(
 
 Plot `ΔL(f)` with the resonance and the asymptotic slope marked.
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 ## force_pulse
@@ -919,7 +919,7 @@ TappingForceResult.plot(
 
 Plot the force spectrum `|Fn|` with its asymptotes and `fco`.
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 ### TappingForceResult.power_input_level

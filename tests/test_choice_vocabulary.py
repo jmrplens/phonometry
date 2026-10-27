@@ -107,8 +107,9 @@ _QUASI_FREE = (
 )
 _RECORD_FIELD = "names the record field a rate is read from, for a message"
 _SIMULATION_FIELD = (
-    "names a field quantity of the simulation grid, the pressure 'p' or a "
-    "particle velocity 'vx' or 'vy', not a sound field"
+    "names a field quantity of the simulation grid, the pressure 'p', a "
+    "particle velocity 'vx' or 'vy' or a stress 'txx', 'tyy' or 'txy', not a "
+    "sound field"
 )
 #: Where a ``field`` offers another value, keyed by location, with the reason.
 _FIELD_EXEMPT = {
@@ -130,6 +131,10 @@ _FIELD_EXEMPT = {
     "phonometry.simulation.elastic_fdtd.ElasticFDTD2D.collocated(field)": (
         _SIMULATION_FIELD
     ),
+    "phonometry.simulation.elastic_fdtd.ElasticFDTD2D.numpy_field(field)": (
+        _SIMULATION_FIELD
+    ),
+    "phonometry.simulation.fdtd.FDTD2D.numpy_field(field)": _SIMULATION_FIELD,
     "phonometry._internal.catalogue.CatalogueError.__init__(field)": _CATALOGUE_COLUMN,
     "phonometry._internal.catalogue.CatalogueIssue.field": _CATALOGUE_COLUMN,
     "phonometry.psychoacoustics.loudness.moore_glasberg.loudness_moore_glasberg(field)": (

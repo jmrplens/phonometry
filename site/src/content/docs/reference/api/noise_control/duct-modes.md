@@ -138,7 +138,7 @@ DuctModeResult.plot(
 
 Plot the cut-on ladder, with and without flow, over the mode order.
 
-Requires matplotlib (`pip install phonometry[plot]`).
+Requires matplotlib (`pip install "phonometry[plot]"`).
 
 **Parameters**
 

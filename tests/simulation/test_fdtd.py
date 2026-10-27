@@ -472,8 +472,8 @@ def test_side_cannot_be_absorbing_and_impedance() -> None:
             C0,
             0.05,
             shape=(30, 30),
-            sponge_width=5,
-            sponge_sides="left",
+            absorbing_layer_cells=5,
+            absorbing_sides="left",
             edge_impedance={"left": 400.0},
         )
 
@@ -761,8 +761,10 @@ def test_non_integral_counts_and_coordinates_are_rejected() -> None:
     # Fractional cell counts or indices raise instead of being truncated
     # (a float probe would silently record a different cell) or crashing
     # later inside numpy indexing, slicing or range().
-    with pytest.raises(ValueError, match="'sponge_width' must be a whole number"):
-        FDTD2D(C0, 0.05, shape=(20, 20), sponge_width=2.5)  # type: ignore[arg-type]
+    with pytest.raises(
+        ValueError, match="'absorbing_layer_cells' must be a whole number"
+    ):
+        FDTD2D(C0, 0.05, shape=(20, 20), absorbing_layer_cells=2.5)  # type: ignore[arg-type]
     sim = FDTD2D(C0, 0.05, shape=(20, 20))
     with pytest.raises(ValueError, match="'ix' must be a whole number"):
         GaussianPulse(ix=2.5, iy=3, half_width_s=1e-4)  # type: ignore[arg-type]
@@ -951,3 +953,73 @@ def test_the_simulation_keeps_a_medium_of_its_own() -> None:
     assert sim.edge_impedance["top"] == 415.0
     for kept in (sim.c, sim.rho, sim.edge_impedance["left"]):
         assert not kept.flags.writeable
+
+
+def test_the_snapshot_counts_of_run_are_taken_by_name() -> None:
+    """``run(4, 2)`` read the 2 as a cadence; the records take both counts by name."""
+    sim = FDTD2D(C0, 0.05, shape=(12, 12))
+    with pytest.raises(TypeError, match="positional argument"):
+        sim.run(4, 2)  # type: ignore[misc]
+    assert sim.n == 0
+    frames = sim.run(4, snapshot_every=2, snapshot_decimation=2)
+    assert frames.shape == (3, 6, 6)
+    assert sim.n == 4
+
+
+@pytest.mark.parametrize(
+    ("old", "value"),
+    [("sponge_width", 4), ("sponge_sides", "left"), ("sponge_reflection", 1e-3)],
+)
+def test_the_engine_refuses_the_old_names_of_its_absorbing_layer(
+    old: str, value: object
+) -> None:
+    with pytest.raises(TypeError, match=old):
+        FDTD2D(C0, 0.05, shape=(12, 12), **{old: value})
+
+
+def test_the_engine_names_its_absorbing_layer_as_the_run_does() -> None:
+    sim = FDTD2D(
+        C0,
+        0.05,
+        shape=(20, 20),
+        absorbing_layer_cells=4,
+        absorbing_sides=("left", "top"),
+        absorbing_layer_reflection=1e-3,
+    )
+    assert sim.absorbing_layer_cells == 4
+    assert sim.absorbing_sides == ("left", "top")
+    assert not hasattr(sim, "sponge_width")
+    assert not hasattr(sim, "sponge_sides")
+    # No layer by default, and no side absorbs without one.
+    plain = FDTD2D(C0, 0.05, shape=(20, 20), absorbing_sides="left")
+    assert plain.absorbing_layer_cells == 0
+    assert plain.absorbing_sides == ()
+
+
+@pytest.mark.parametrize(
+    ("kwargs", "error", "match"),
+    [
+        ({"absorbing_layer_cells": -1}, ValueError, "absorbing_layer_cells must be"),
+        ({"absorbing_layer_cells": 10}, ValueError, "absorbing_layer_cells must be"),
+        (
+            {"absorbing_layer_cells": 4, "absorbing_layer_reflection": 1.5},
+            ValueError,
+            "absorbing_layer_reflection must lie strictly between 0 and 1",
+        ),
+        (
+            {"absorbing_layer_cells": 4, "absorbing_sides": ("north",)},
+            ValueError,
+            r"unknown absorbing sides: \['north'\]",
+        ),
+        (
+            {"absorbing_layer_cells": "4"},
+            TypeError,
+            "'absorbing_layer_cells' must be one number, not a text",
+        ),
+    ],
+)
+def test_the_absorbing_layer_is_refused_in_its_own_words(
+    kwargs: dict[str, object], error: type[Exception], match: str
+) -> None:
+    with pytest.raises(error, match=match):
+        FDTD2D(C0, 0.05, shape=(10, 10), **kwargs)  # type: ignore[arg-type]

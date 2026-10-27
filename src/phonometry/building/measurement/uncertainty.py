@@ -478,7 +478,7 @@ class BandUncertainty(RichDisplay):
     ) -> Axes:
         """Plot the per-band standard uncertainty spectrum.
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from ..._i18n import check_language

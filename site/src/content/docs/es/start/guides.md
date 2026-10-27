@@ -1,6 +1,6 @@
 ---
 title: "Guías"
-description: "Las 167 guías de phonometry, agrupadas en los trece temas que cubre la biblioteca: para qué sirve cada área, las normas que implementa y un resumen de una línea de cada guía que contiene."
+description: "Las 168 guías de phonometry, agrupadas en los trece temas que cubre la biblioteca: para qué sirve cada área, las normas que implementa y un resumen de una línea de cada guía que contiene."
 head:
   - tag: script
     attrs:
@@ -118,7 +118,7 @@ hay ninguna panorámica del campo: cada página es la documentación de trabajo 
 un módulo, escrita para que un resultado se pueda defender apartado por
 apartado en lugar de darlo por bueno.
 
-Esta página es el mapa. Ciento sesenta y siete guías repartidas en trece temas, y cada
+Esta página es el mapa. Ciento sesenta y ocho guías repartidas en trece temas, y cada
 área tiene su propio índice con el relato largo de cómo encajan sus piezas. Si
 llegas sin una pregunta concreta, lee primero la
 [introducción](/phonometry/es/start/getting-started/): recorre una señal por toda la
@@ -1024,3 +1024,6 @@ solución en forma cerrada que reproduce.
   calcular cualquiera de las dos simulaciones FDTD en otra máquina por SSH,
   en Docker o en un entorno de Python, con GPU o sin ella, y recibir el mismo
   registro de vuelta.
+- [Dónde se ejecuta el trabajo pesado: CPU, GPU o un nodo](/phonometry/es/simulation/where-it-runs/):
+  el mapa de dispositivos, nodos y codificadores de vídeo para simulaciones y
+  vídeos, y la página que explica cada uno.

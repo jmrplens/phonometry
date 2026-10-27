@@ -74,8 +74,8 @@ decay curves -- that step belongs to downstream room-acoustics modules.
 
 ```python
 golay_impulse_response(
-    recorded_a: Signal | list[float] | np.ndarray,
-    recorded_b: Signal | list[float] | np.ndarray,
+    recorded_a: Signal | ArrayLike,
+    recorded_b: Signal | ArrayLike,
     pair: tuple[np.ndarray, np.ndarray],
     *,
     length: int | None = None,
@@ -159,8 +159,8 @@ autocorrelation of an MLS.
 
 ```python
 impulse_response(
-    recorded: Signal | list[float] | np.ndarray,
-    reference: Signal | list[float] | np.ndarray,
+    recorded: Signal | ArrayLike,
+    reference: Signal | ArrayLike,
     fs: int | None = None,
     *,
     method: Literal['farina'],
@@ -171,8 +171,8 @@ impulse_response(
 ) -> ImpulseResponseResult
 
 impulse_response(
-    recorded: Signal | list[float] | np.ndarray,
-    reference: Signal | list[float] | np.ndarray,
+    recorded: Signal | ArrayLike,
+    reference: Signal | ArrayLike,
     fs: int | None = None,
     *,
     method: Literal['spectral', 'farina'] = ...,
@@ -321,8 +321,8 @@ the spectral-division convention (rather than a unit pulse peak).
 
 ```python
 mls_impulse_response(
-    recorded: Signal | list[float] | np.ndarray,
-    mls: Signal | list[float] | np.ndarray,
+    recorded: Signal | ArrayLike,
+    mls: Signal | ArrayLike,
     *,
     length: int | None = None,
     fs: int | None = None,

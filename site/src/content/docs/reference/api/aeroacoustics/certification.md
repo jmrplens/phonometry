@@ -31,8 +31,8 @@ is built from a half-second spectral time history (24 one-third-octave bands,
 
 ```python
 effective_perceived_noise_level(
-    spectra: NDArray[np.float64] | list[list[float]],
-    dt: float | NDArray[np.float64] | list[float] = 0.5,
+    spectra: ArrayLike,
+    dt: ArrayLike = 0.5,
     *,
     reference_time: float = 10.0,
     procedure: Literal['airplane', 'helicopter'] = 'airplane',
@@ -68,11 +68,11 @@ the 10 dB-down window give $\mathrm{EPNL} = \mathrm{PNLTM} + D$.
 
 ```python
 epnl_from_pnlt(
-    pnlt: NDArray[np.float64] | list[float],
-    dt: float | NDArray[np.float64] | list[float] = 0.5,
+    pnlt: ArrayLike,
+    dt: ArrayLike = 0.5,
     *,
     reference_time: float = 10.0,
-    tone_corrections: NDArray[np.float64] | list[float] | None = None,
+    tone_corrections: ArrayLike | None = None,
 ) -> EPNLIntegration
 ```
 
@@ -246,7 +246,7 @@ strip and a footer with the fixed disclaimer.
 ## perceived_noise_level
 
 ```python
-perceived_noise_level(spl: NDArray[np.float64] | list[float]) -> float
+perceived_noise_level(spl: ArrayLike) -> float
 ```
 
 Perceived noise level `PNL` (ICAO Annex 16 App. 2 §4.2), in PNdB.
@@ -272,9 +272,7 @@ noisiness is not positive the PNL is defined as 0.
 ## perceived_noisiness
 
 ```python
-perceived_noisiness(
-    spl: NDArray[np.float64] | list[float],
-) -> NDArray[np.float64]
+perceived_noisiness(spl: ArrayLike) -> NDArray[np.float64]
 ```
 
 Per-band perceived noisiness `n` in noys (ICAO Annex 16 App. 2 §4.7).
@@ -309,11 +307,7 @@ The analytic piecewise noy law, using the Table A2-3 constants:
 ## tone_correction
 
 ```python
-tone_correction(
-    spl: NDArray[np.float64] | list[float],
-    *,
-    start_band: int = 2,
-) -> float
+tone_correction(spl: ArrayLike, *, start_band: int = 2) -> float
 ```
 
 Tone-correction factor `C` for a spectrum (ICAO Annex 16 App. 2 §4.3).

@@ -34,7 +34,7 @@ of the same record are directly comparable.
 
 ```python
 multitaper_psd(
-    x: Signal | NDArray[np.float64] | list[float],
+    x: Signal | ArrayLike,
     fs: float | None = None,
     *,
     time_half_bandwidth: float = 4.0,

@@ -53,7 +53,7 @@ meteorological_corrections(
     *,
     temperature_c: float = 23.0,
     static_pressure_kpa: float = 101.325,
-    air_absorption_db_per_m: float | np.ndarray | None = None,
+    air_absorption_db_per_m: ArrayLike | None = None,
     radius: float = 1.0,
 ) -> MeteorologicalCorrection
 ```
@@ -118,10 +118,10 @@ $\overline{L_p} + 10 \log_{10}(S/S_0)$ to obtain `LW`.
 
 ```python
 precision_background_correction(
-    source_levels: np.ndarray,
-    background_levels: np.ndarray,
+    source_levels: ArrayLike,
+    background_levels: ArrayLike,
     *,
-    frequencies: np.ndarray,
+    frequencies: ArrayLike,
 ) -> np.ndarray
 ```
 
@@ -339,31 +339,31 @@ energy-averaged level `Lp'`.
 
 ```python
 sound_power_anechoic(
-    levels_positions: np.ndarray,
+    levels_positions: ArrayLike,
     surface: Literal['sphere', 'hemisphere'],
     *,
     radius: float,
-    background_levels: np.ndarray,
-    frequencies: np.ndarray,
-    areas: np.ndarray | None = ...,
+    background_levels: ArrayLike,
+    frequencies: ArrayLike,
+    areas: ArrayLike | None = ...,
     temperature_c: float = ...,
     static_pressure_kpa: float = ...,
-    air_absorption_db_per_m: float | np.ndarray | None = ...,
+    air_absorption_db_per_m: ArrayLike | None = ...,
     sigma_omc_db: float = ...,
     coverage_factor: float = ...,
     room_qualification: FreeFieldCheck | None = ...,
 ) -> PrecisionSoundPowerResult
 
 sound_power_anechoic(
-    levels_positions: np.ndarray,
+    levels_positions: ArrayLike,
     surface: Literal['sphere', 'hemisphere'],
     *,
     radius: float,
-    frequencies: np.ndarray | None = ...,
-    areas: np.ndarray | None = ...,
+    frequencies: ArrayLike | None = ...,
+    areas: ArrayLike | None = ...,
     temperature_c: float = ...,
     static_pressure_kpa: float = ...,
-    air_absorption_db_per_m: float | np.ndarray | None = ...,
+    air_absorption_db_per_m: ArrayLike | None = ...,
     sigma_omc_db: float = ...,
     coverage_factor: float = ...,
     room_qualification: FreeFieldCheck | None = ...,

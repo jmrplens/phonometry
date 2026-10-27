@@ -44,7 +44,7 @@ a tuple, so it cannot be unpacked by position: read `.frequencies`,
 ```python
 nominal_frequencies(
     fraction: float,
-    limits: list[float] | None = None,
+    limits: Sequence[float] | None = None,
 ) -> FractionalOctaveBands
 ```
 

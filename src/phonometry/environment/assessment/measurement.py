@@ -59,8 +59,6 @@ from ..._internal.validation import require_equal_counts, require_scalar
 from ..._internal.warnings import PhonometryWarning
 
 if TYPE_CHECKING:
-    from collections.abc import Sequence
-
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
@@ -446,7 +444,7 @@ class TonalSurveyAssessment(OwnsArrays):
 
 
 def assess_tonal_survey(
-    levels: Sequence[float] | np.ndarray, *, frequencies: Sequence[float] | np.ndarray
+    levels: ArrayLike, *, frequencies: ArrayLike
 ) -> TonalSurveyAssessment:
     """Which one-third-octave bands hold a prominent tone? (Annex K, survey method).
 
@@ -722,7 +720,7 @@ class RepeatedMeasurementResult(RichDisplay):
 
 
 def uncertainty_from_repeated_measurements(
-    levels: Sequence[float] | np.ndarray,
+    levels: ArrayLike,
 ) -> RepeatedMeasurementResult:
     r"""Energy mean and its uncertainty from repeated levels (Formulae (17)–(20)).
 

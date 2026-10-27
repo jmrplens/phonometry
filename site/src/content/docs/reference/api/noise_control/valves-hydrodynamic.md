@@ -1075,7 +1075,7 @@ stage_conditions(
     inlet_pressure_pa: float,
     outlet_pressure_pa: float,
     vapor_pressure_pa: float,
-    stage_coefficients: Sequence[float],
+    stage_coefficients: ArrayLike,
     flow_coefficient: float,
 ) -> tuple[StageConditions, ...]
 ```

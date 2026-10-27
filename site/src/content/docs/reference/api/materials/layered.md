@@ -60,11 +60,11 @@ A plain air gap of `thickness_m` metres inside the stack.
 ```python
 diffuse_field_absorption(
     frequency: ArrayLike,
-    layers: list[AirLayer | PorousLayer | PerforatedPlateLayer | MicroperforatedPlateLayer | MembraneLayer | PoroelasticLayer] | tuple[AirLayer | PorousLayer | PerforatedPlateLayer | MicroperforatedPlateLayer | MembraneLayer | PoroelasticLayer, ...],
+    layers: Sequence[AirLayer | PorousLayer | PerforatedPlateLayer | MicroperforatedPlateLayer | MembraneLayer | PoroelasticLayer],
     *,
     angle_limit_rad: float = 1.5707963267948966,
     n_quadrature_points: int = 64,
-    termination: Literal['rigid', 'free'] | complex | Sequence[complex] | NDArray[np.number[Any]] = 'rigid',
+    termination: Literal['rigid', 'free'] | ArrayLike = 'rigid',
     fluid: Fluid = ...,
 ) -> DiffuseFieldAbsorptionResult
 ```
@@ -140,10 +140,10 @@ Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 ```python
 layered_absorber(
     frequency: ArrayLike,
-    layers: list[AirLayer | PorousLayer | PerforatedPlateLayer | MicroperforatedPlateLayer | MembraneLayer | PoroelasticLayer] | tuple[AirLayer | PorousLayer | PerforatedPlateLayer | MicroperforatedPlateLayer | MembraneLayer | PoroelasticLayer, ...],
+    layers: Sequence[AirLayer | PorousLayer | PerforatedPlateLayer | MicroperforatedPlateLayer | MembraneLayer | PoroelasticLayer],
     *,
     angle_rad: float = 0.0,
-    termination: Literal['rigid', 'free'] | complex | Sequence[complex] | NDArray[np.number[Any]] = 'rigid',
+    termination: Literal['rigid', 'free'] | ArrayLike = 'rigid',
     fluid: Fluid = ...,
 ) -> LayeredAbsorberResult
 ```

@@ -288,7 +288,7 @@ cone makes the flow unstable in ways the standard does not model.
 
 ```python
 expander_noise(
-    frequencies: NDArray[np.float64],
+    frequencies: ArrayLike,
     *,
     mass_flow: float,
     downstream_density: float,
@@ -469,7 +469,7 @@ IEC60534_MOLAR_GAS_CONSTANT_J_KMOL_K = 8314.0
 internal_spectrum(
     internal_level: float,
     peak_frequency: float,
-    frequencies: NDArray[np.float64],
+    frequencies: ArrayLike,
 ) -> NDArray[np.float64]
 ```
 
@@ -735,7 +735,7 @@ PIPE_SPEED_OF_SOUND_M_S = 5000.0
 
 ```python
 pipe_transmission_loss(
-    frequencies: NDArray[np.float64],
+    frequencies: ArrayLike,
     *,
     internal_diameter_m: float,
     wall_thickness_m: float,

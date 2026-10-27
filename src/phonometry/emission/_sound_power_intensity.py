@@ -93,8 +93,6 @@ from typing import TYPE_CHECKING, Any, Literal
 import numpy as np
 
 if TYPE_CHECKING:
-    from collections.abc import Sequence
-
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
@@ -497,9 +495,9 @@ def _as_2d(name: str, arr: np.ndarray, n_seg: int, n_bands: int) -> np.ndarray:
 
 
 def _validate_scan(
-    normal_intensity: np.ndarray,
-    areas: np.ndarray,
-    frequencies: np.ndarray | None,
+    normal_intensity: ArrayLike,
+    areas: ArrayLike,
+    frequencies: ArrayLike | None,
     fraction: BandFraction,
 ) -> tuple[np.ndarray, np.ndarray]:
     """Validate an ISO 9614-2 scan and normalise its arrays.
@@ -552,16 +550,16 @@ def _validate_scan(
 
 
 def sound_power_intensity(
-    normal_intensity: np.ndarray,
-    areas: np.ndarray,
+    normal_intensity: ArrayLike,
+    areas: ArrayLike,
     *,
-    normal_intensity_2: np.ndarray | None = None,
-    pressure_levels: np.ndarray | None = None,
-    pressure_residual_index: float | np.ndarray | None = None,
-    frequencies: np.ndarray | None = None,
+    normal_intensity_2: ArrayLike | None = None,
+    pressure_levels: ArrayLike | None = None,
+    pressure_residual_index: ArrayLike | None = None,
+    frequencies: ArrayLike | None = None,
     fraction: BandFraction = 3,
     grade: Grade = "engineering",
-    repeatability_limit: float | np.ndarray | None = None,
+    repeatability_limit: ArrayLike | None = None,
 ) -> SoundPowerIntensityResult:
     r"""Sound power level by sound-intensity scanning (ISO 9614-2:1996).
 
@@ -1113,7 +1111,7 @@ def _table_1_repeatability_db(frequencies: np.ndarray) -> np.ndarray:
 def _check_report_bands(
     indicators: PrecisionFieldIndicators | None,
     criteria: PrecisionCriteria | None,
-    residual_index: float | Sequence[float] | np.ndarray | None,
+    residual_index: ArrayLike | None,
     n_bands: int,
 ) -> None:
     """Reject fiche inputs that do not span the determination's bands.
@@ -1304,7 +1302,7 @@ class PrecisionIntensityResult(OwnsArrays):
         language: Language = "en",
         indicators: PrecisionFieldIndicators | None = None,
         criteria: PrecisionCriteria | None = None,
-        residual_index: float | Sequence[float] | np.ndarray | None = None,
+        residual_index: ArrayLike | None = None,
     ) -> str:
         """Render an ISO 9614-3 precision sound-power determination fiche.
 
@@ -1391,10 +1389,10 @@ class PrecisionIntensityResult(OwnsArrays):
 
 
 def precision_field_indicators(
-    segment_intensity: np.ndarray,
-    segment_pressure_levels: np.ndarray,
+    segment_intensity: ArrayLike,
+    segment_pressure_levels: ArrayLike,
     *,
-    time_window_intensity: np.ndarray | None = None,
+    time_window_intensity: ArrayLike | None = None,
 ) -> PrecisionFieldIndicators:
     r"""ISO 9614-3:2002 Annex B field indicators from segment data.
 
@@ -1482,7 +1480,7 @@ def precision_field_indicators(
 
 
 def _checked_band_centres(
-    frequencies: np.ndarray | None, f_pi_signed: np.ndarray, n_bands: int
+    frequencies: ArrayLike | None, f_pi_signed: np.ndarray, n_bands: int
 ) -> np.ndarray | None:
     """The band centres validated against the indicator's band axis.
 
@@ -1543,13 +1541,13 @@ def _sigma_r0_9614_3(nominal: int) -> float:
 def precision_qualification(
     indicators: PrecisionFieldIndicators,
     *,
-    scan_intensity_level_1: np.ndarray | None = None,
-    scan_intensity_level_2: np.ndarray | None = None,
-    pressure_residual_index: float | np.ndarray | None = None,
-    field_nonuniformity_1: np.ndarray | None = None,
-    field_nonuniformity_2: np.ndarray | None = None,
-    frequencies: np.ndarray | None = None,
-    repeatability_limit: float | np.ndarray | None = None,
+    scan_intensity_level_1: ArrayLike | None = None,
+    scan_intensity_level_2: ArrayLike | None = None,
+    pressure_residual_index: ArrayLike | None = None,
+    field_nonuniformity_1: ArrayLike | None = None,
+    field_nonuniformity_2: ArrayLike | None = None,
+    frequencies: ArrayLike | None = None,
+    repeatability_limit: ArrayLike | None = None,
 ) -> PrecisionCriteria:
     r"""Evaluate the five ISO 9614-3:2002 Annex C acceptance criteria per band.
 
@@ -1650,10 +1648,10 @@ def _precision_a_weighted_total(
 
 
 def sound_power_intensity_precision(
-    partial_intensity: np.ndarray,
-    areas: np.ndarray,
+    partial_intensity: ArrayLike,
+    areas: ArrayLike,
     *,
-    frequencies: np.ndarray | None = None,
+    frequencies: ArrayLike | None = None,
     temperature_c: float = 23.0,
     static_pressure_pa: float = 101325.0,
 ) -> PrecisionIntensityResult:

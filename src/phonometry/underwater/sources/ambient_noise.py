@@ -47,7 +47,7 @@ from ...metrology.reference_values import REFERENCE_VALUES
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from numpy.typing import NDArray
+    from numpy.typing import ArrayLike, NDArray
 
     from ..._i18n import Language
 
@@ -75,7 +75,7 @@ _WIND_ANCHOR_DB = 25.0 + 20.0 * np.log10(
 
 
 def wind_noise_spectrum(
-    frequency_hz: NDArray[np.float64] | list[float] | float, wind_speed_kt: float
+    frequency_hz: ArrayLike, wind_speed_kt: float
 ) -> NDArray[np.float64]:
     r"""Wind / sea-surface noise spectrum level (Wenz rule of fives), dB re
     1 µPa²/Hz.
@@ -110,7 +110,7 @@ def wind_noise_spectrum(
 
 
 def thermal_noise_spectrum(
-    frequency_hz: NDArray[np.float64] | list[float] | float,
+    frequency_hz: ArrayLike,
     *,
     temperature_c: float = 16.85,
     density: float = 1025.0,
@@ -206,10 +206,10 @@ class AmbientNoiseResult(OwnsArrays):
 
 
 def ocean_ambient_noise(
-    frequencies_hz: NDArray[np.float64] | list[float],
+    frequencies_hz: ArrayLike,
     *,
     wind_speed_kt: float,
-    shipping: NDArray[np.float64] | list[float] | None = None,
+    shipping: ArrayLike | None = None,
     temperature_c: float = 16.85,
     density: float = 1025.0,
     speed_of_sound: float = 1500.0,

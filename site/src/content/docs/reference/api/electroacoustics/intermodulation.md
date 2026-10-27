@@ -36,7 +36,7 @@ and the tones are assumed to fall on (or very near) FFT bins.
 
 ```python
 difference_frequency_distortion(
-    x: Signal | NDArray[np.float64] | list[float],
+    x: Signal | ArrayLike,
     fs: float | None = None,
     *,
     f1: float,
@@ -89,7 +89,7 @@ tone or DC read zero.
 
 ```python
 dynamic_intermodulation_distortion(
-    x: Signal | NDArray[np.float64] | list[float],
+    x: Signal | ArrayLike,
     fs: float | None = None,
     *,
     f_sine: float = 15000.0,
@@ -129,7 +129,7 @@ sine amplitude.
 
 ```python
 modulation_distortion(
-    x: Signal | NDArray[np.float64] | list[float],
+    x: Signal | ArrayLike,
     fs: float | None = None,
     *,
     f_low: float,
@@ -249,7 +249,7 @@ the carrier, the modulation counterpart of
 
 ```python
 total_difference_frequency_distortion(
-    x: Signal | NDArray[np.float64] | list[float],
+    x: Signal | ArrayLike,
     fs: float | None = None,
     f1: float = 8000.0,
     f2: float = 11950.0,

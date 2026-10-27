@@ -46,7 +46,7 @@ from ..._internal.validation import (
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from numpy.typing import NDArray
+    from numpy.typing import ArrayLike, NDArray
 
     from ..._i18n import Language
 
@@ -76,7 +76,7 @@ def critical_angle(c1: float, c2: float) -> float:
 
 
 def reflection_coefficient(
-    grazing_angle_deg: NDArray[np.float64] | list[float] | float,
+    grazing_angle_deg: ArrayLike,
     *,
     rho1: float,
     c1: float,
@@ -203,7 +203,7 @@ class BottomLossResult(OwnsArrays):
 
 
 def bottom_reflection_loss(
-    grazing_angle_deg: NDArray[np.float64] | list[float] | float,
+    grazing_angle_deg: ArrayLike,
     *,
     rho1: float = 1000.0,
     c1: float = 1500.0,
@@ -349,7 +349,7 @@ class SeabedReflection(OwnsArrays):
 
 
 def seabed_reflection(
-    grazing_angle_deg: NDArray[np.float64] | list[float] | float,
+    grazing_angle_deg: ArrayLike,
     *,
     rho1: float = 1000.0,
     c1: float = 1500.0,

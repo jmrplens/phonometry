@@ -57,8 +57,8 @@ per-band values are supplied.
 
 ```python
 background_correction(
-    signal_and_background: Sequence[float] | np.ndarray,
-    background: Sequence[float] | np.ndarray,
+    signal_and_background: ArrayLike,
+    background: ArrayLike,
 ) -> np.ndarray
 ```
 
@@ -113,9 +113,9 @@ directly.
 
 ```python
 laboratory_airborne_insulation(
-    l1: Sequence[float] | np.ndarray,
-    l2: Sequence[float] | np.ndarray,
-    t2: Sequence[float] | np.ndarray,
+    l1: ArrayLike,
+    l2: ArrayLike,
+    t2: ArrayLike,
     *,
     area: float,
     volume: float,
@@ -162,8 +162,8 @@ assumed already corrected for background noise (see
 
 ```python
 laboratory_impact_insulation(
-    li: Sequence[float] | np.ndarray,
-    t2: Sequence[float] | np.ndarray,
+    li: ArrayLike,
+    t2: ArrayLike,
     *,
     volume: float,
 ) -> LaboratoryImpactInsulationResult

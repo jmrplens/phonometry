@@ -583,8 +583,8 @@ class SoundPowerResult(OwnsArrays):
 
 
 def background_noise_correction(
-    source_levels: np.ndarray,
-    background_levels: np.ndarray,
+    source_levels: ArrayLike,
+    background_levels: ArrayLike,
     grade: Grade = "engineering",
 ) -> np.ndarray:
     r"""Background-noise correction ``K1`` per band (ISO 3744:2010 Eq. 16).
@@ -1001,7 +1001,7 @@ def _measurement_surface(
 
 
 def _surface_background_correction(
-    background_levels: np.ndarray | None,
+    background_levels: ArrayLike | None,
     levels: np.ndarray,
     mean_level: np.ndarray,
     grade: Grade,
@@ -1079,7 +1079,7 @@ def _surface_environmental_correction(
 
 
 def _a_weighted_total(
-    lw: np.ndarray, frequencies: np.ndarray | None, n_bands: int
+    lw: np.ndarray, frequencies: ArrayLike | None, n_bands: int
 ) -> tuple[np.ndarray | None, float]:
     """Band frequencies and the A-weighted total ``LWA`` (ISO 3744 Annex E).
 
@@ -1105,15 +1105,15 @@ def _a_weighted_total(
 
 
 def sound_power_pressure(
-    levels_positions: np.ndarray,
+    levels_positions: ArrayLike,
     surface: Surface,
     *,
     radius: float | None = None,
     dimensions: tuple[float, float, float] | None = None,
     distance: float | None = None,
     n_reflecting_planes: int = 1,
-    background_levels: np.ndarray | None = None,
-    frequencies: np.ndarray | None = None,
+    background_levels: ArrayLike | None = None,
+    frequencies: ArrayLike | None = None,
     room: RoomEnvironment | None = None,
     grade: Grade = "engineering",
     sigma_omc_db: float = 0.0,
@@ -1377,7 +1377,7 @@ class SoundEnergyResult(OwnsArrays):
 
 
 def mean_single_event_level(
-    levels: np.ndarray, *, n_events: int | None = None
+    levels: ArrayLike, *, n_events: int | None = None
 ) -> np.ndarray:
     r"""Mean single event time-integrated level of one event (ISO 3744 Eq. 19/20).
 
@@ -1514,7 +1514,7 @@ def reference_atmosphere_correction(
 
 
 def _event_position_levels(
-    levels_positions: np.ndarray, n_events: int | None
+    levels_positions: ArrayLike, n_events: int | None
 ) -> tuple[np.ndarray, int | None]:
     """The ``(NM, NB)`` mean single event levels behind the three input forms.
 
@@ -1561,7 +1561,7 @@ def _event_position_levels(
 
 
 def sound_energy_pressure(
-    levels_positions: np.ndarray,
+    levels_positions: ArrayLike,
     surface: Surface,
     *,
     radius: float | None = None,
@@ -1569,9 +1569,9 @@ def sound_energy_pressure(
     distance: float | None = None,
     n_reflecting_planes: int = 1,
     n_events: int | None = None,
-    background_levels: np.ndarray | None = None,
+    background_levels: ArrayLike | None = None,
     integration_time: float | None = None,
-    frequencies: np.ndarray | None = None,
+    frequencies: ArrayLike | None = None,
     room: RoomEnvironment | None = None,
     grade: Grade = "engineering",
     sigma_omc_db: float = 0.0,

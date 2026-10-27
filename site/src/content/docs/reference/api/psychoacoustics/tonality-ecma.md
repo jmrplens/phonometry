@@ -90,7 +90,7 @@ Adds a tonality-vs-time panel. Requires matplotlib
 
 ```python
 tonality_ecma(
-    x: Signal | np.ndarray,
+    x: Signal | ArrayLike,
     fs: float | None = None,
     field: Literal['free', 'diffuse'] = 'free',
     f_low: float | None = None,

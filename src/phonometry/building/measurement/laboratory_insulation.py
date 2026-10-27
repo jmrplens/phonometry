@@ -73,9 +73,8 @@ from .ratings import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import Sequence
-
     from matplotlib.axes import Axes
+    from numpy.typing import ArrayLike
 
     from ..._i18n import Language
     from ..._internal.types import ReportEngine
@@ -415,9 +414,7 @@ def _render_iso10140(
     )
 
 
-def _absorption_area(
-    t2: Sequence[float] | np.ndarray, volume: float, n_bands: int
-) -> np.ndarray:
+def _absorption_area(t2: ArrayLike, volume: float, n_bands: int) -> np.ndarray:
     r"""Sabine equivalent absorption area :math:`A = 0.16\,V/T` per band.
 
     (ISO 10140-4:2010, Clause 4.6.3, Formula (5).)
@@ -441,8 +438,8 @@ def _absorption_area(
 
 
 def background_correction(
-    signal_and_background: Sequence[float] | np.ndarray,
-    background: Sequence[float] | np.ndarray,
+    signal_and_background: ArrayLike,
+    background: ArrayLike,
 ) -> np.ndarray:
     r"""Correct receiving-room levels for background noise (ISO 10140-4:2010).
 
@@ -518,9 +515,9 @@ def background_correction(
 
 
 def laboratory_airborne_insulation(
-    l1: Sequence[float] | np.ndarray,
-    l2: Sequence[float] | np.ndarray,
-    t2: Sequence[float] | np.ndarray,
+    l1: ArrayLike,
+    l2: ArrayLike,
+    t2: ArrayLike,
     *,
     area: float,
     volume: float,
@@ -578,8 +575,8 @@ def laboratory_airborne_insulation(
 
 
 def laboratory_impact_insulation(
-    li: Sequence[float] | np.ndarray,
-    t2: Sequence[float] | np.ndarray,
+    li: ArrayLike,
+    t2: ArrayLike,
     *,
     volume: float,
 ) -> LaboratoryImpactInsulationResult:

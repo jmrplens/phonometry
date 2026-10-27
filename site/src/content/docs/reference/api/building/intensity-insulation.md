@@ -82,13 +82,13 @@ supplied.
 
 ```python
 adaptation_term_kc(
-    frequencies: Sequence[float] | np.ndarray,
+    frequencies: ArrayLike,
     *,
     boundary_area: float,
     volume: float,
 ) -> np.ndarray
 
-adaptation_term_kc(frequencies: Sequence[float] | np.ndarray) -> np.ndarray
+adaptation_term_kc(frequencies: ArrayLike) -> np.ndarray
 ```
 
 Adaptation term `Kc` per ISO 15186-1:2000, Annex B.
@@ -127,8 +127,8 @@ $R_{I,\mathrm{M}} = R_I + K_\mathrm{c}$ (Clause 3.10). Two forms are available:
 
 ```python
 intensity_element_normalized_difference(
-    lp1: Sequence[float] | np.ndarray,
-    l_in: Sequence[float] | np.ndarray,
+    lp1: ArrayLike,
+    l_in: ArrayLike,
     *,
     measurement_area: float,
     n: int = 1,
@@ -192,12 +192,12 @@ function implements the corrected per-unit form and warns when
 
 ```python
 intensity_sound_reduction(
-    lp1: Sequence[float] | np.ndarray,
-    l_in: Sequence[float] | np.ndarray,
+    lp1: ArrayLike,
+    l_in: ArrayLike,
     *,
     measurement_area: float,
     area: float,
-    kc: Sequence[float] | np.ndarray | None = None,
+    kc: ArrayLike | None = None,
 ) -> IntensityReductionResult
 ```
 
@@ -466,7 +466,7 @@ and name the measurement standard in `measurement_standard`
 
 ```python
 limp_panel_reduction_index(
-    frequencies: Sequence[float] | np.ndarray,
+    frequencies: ArrayLike,
     *,
     surface_mass: float,
     area: float,
@@ -544,13 +544,13 @@ that range and nowhere else.
 
 ```python
 low_frequency_element_normalized_difference(
-    lp_surface: Sequence[float] | np.ndarray,
-    l_in: Sequence[float] | np.ndarray,
+    lp_surface: ArrayLike,
+    l_in: ArrayLike,
     *,
     measurement_area: float,
     n_elements: int = 1,
-    l_p: Sequence[float] | np.ndarray | None = None,
-    frequencies: Sequence[float] | np.ndarray | None = None,
+    l_p: ArrayLike | None = None,
+    frequencies: ArrayLike | None = None,
     absorbing_specimen_surface: bool = False,
 ) -> LowFrequencyElementResult
 ```
@@ -597,13 +597,13 @@ disagree on the page, and this is the one that agrees with the physics.
 
 ```python
 low_frequency_intensity_reduction(
-    lp_surface: Sequence[float] | np.ndarray,
-    l_in: Sequence[float] | np.ndarray,
+    lp_surface: ArrayLike,
+    l_in: ArrayLike,
     *,
     measurement_area: float,
     area: float,
-    l_p: Sequence[float] | np.ndarray | None = None,
-    frequencies: Sequence[float] | np.ndarray | None = None,
+    l_p: ArrayLike | None = None,
+    frequencies: ArrayLike | None = None,
     absorbing_specimen_surface: bool = False,
 ) -> LowFrequencyIntensityResult
 ```
@@ -821,8 +821,8 @@ indicator itself is `None`.
 
 ```python
 subarea_intensity_level(
-    l_in: Sequence[Sequence[float]] | np.ndarray,
-    measurement_area: Sequence[float] | np.ndarray,
+    l_in: ArrayLike,
+    measurement_area: ArrayLike,
 ) -> SubareaIntensityLevel
 ```
 
@@ -884,8 +884,8 @@ unpacked by position.
 
 ```python
 surface_pressure_intensity_indicator(
-    lp: Sequence[float] | np.ndarray,
-    l_in: Sequence[float] | np.ndarray,
+    lp: ArrayLike,
+    l_in: ArrayLike,
 ) -> np.ndarray
 ```
 

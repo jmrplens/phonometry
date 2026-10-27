@@ -126,12 +126,12 @@ Engine-installation lateral-directivity correction `ΔI(φ)` (Eq. 4-15/4-16).
 
 ```python
 event_level(
-    path: NDArray[np.float64] | list[list[float]],
-    observer: NDArray[np.float64] | list[float],
-    powers: NDArray[np.float64] | list[float],
-    distances_m: NDArray[np.float64] | list[float],
-    exposure_levels: NDArray[np.float64] | list[list[float]],
-    max_levels: NDArray[np.float64] | list[list[float]],
+    path: ArrayLike,
+    observer: ArrayLike,
+    powers: ArrayLike,
+    distances_m: ArrayLike,
+    exposure_levels: ArrayLike,
+    max_levels: ArrayLike,
     *,
     reference_speed_m_s: float = 82.31104,
     mounting: Literal['wing', 'fuselage', 'propeller'] = 'wing',
@@ -296,14 +296,14 @@ Excess lateral attenuation `Λ(β, ℓ)` over soft ground (Eq. 4-18/4-19).
 
 ```python
 noise_contour(
-    path: NDArray[np.float64] | list[list[float]],
-    powers: NDArray[np.float64] | list[float],
-    distances_m: NDArray[np.float64] | list[float],
-    exposure_levels: NDArray[np.float64] | list[list[float]],
-    max_levels: NDArray[np.float64] | list[list[float]],
+    path: ArrayLike,
+    powers: ArrayLike,
+    distances_m: ArrayLike,
+    exposure_levels: ArrayLike,
+    max_levels: ArrayLike,
     *,
-    x: NDArray[np.float64] | list[float],
-    y: NDArray[np.float64] | list[float],
+    x: ArrayLike,
+    y: ArrayLike,
     reference_speed_m_s: float = 82.31104,
     mounting: Literal['wing', 'fuselage', 'propeller'] = 'wing',
     metric: Literal['exposure', 'maximum'] = 'exposure',
@@ -409,12 +409,12 @@ Plot filled noise contours over the ground plane.
 
 ```python
 npd_curve(
-    powers: NDArray[np.float64] | list[float],
-    distances_m: NDArray[np.float64] | list[float],
-    levels: NDArray[np.float64] | list[list[float]],
+    powers: ArrayLike,
+    distances_m: ArrayLike,
+    levels: ArrayLike,
     power: float,
     *,
-    query_distances_m: NDArray[np.float64] | list[float] | None = None,
+    query_distances_m: ArrayLike | None = None,
 ) -> NPDLevelResult
 ```
 
@@ -442,11 +442,11 @@ NPD event level over a distance sweep at one power setting.
 
 ```python
 npd_level(
-    powers: NDArray[np.float64] | list[float],
-    distances_m: NDArray[np.float64] | list[float],
-    levels: NDArray[np.float64] | list[list[float]],
+    powers: ArrayLike,
+    distances_m: ArrayLike,
+    levels: ArrayLike,
     power: float,
-    distance_m: NDArray[np.float64] | list[float] | float,
+    distance_m: ArrayLike,
 ) -> NDArray[np.float64]
 ```
 

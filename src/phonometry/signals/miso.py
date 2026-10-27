@@ -53,6 +53,7 @@ The random errors follow Bendat & Piersol Section 9.3: conditioning on the
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Literal, overload
 
@@ -78,10 +79,8 @@ from .spectra import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import Sequence
-
     from matplotlib.axes import Axes
-    from numpy.typing import NDArray
+    from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
     from .._internal.types import TwoPanels
@@ -109,12 +108,8 @@ _MIN_INPUT_RECORDS = 2
 
 
 def _resolve_miso_fs(
-    inputs: (
-        Signal
-        | Sequence[Signal | NDArray[np.float64] | list[float]]
-        | NDArray[np.float64]
-    ),
-    output: Signal | NDArray[np.float64] | list[float],
+    inputs: Signal | Sequence[Signal | ArrayLike] | ArrayLike,
+    output: Signal | ArrayLike,
     fs: float | None,
 ) -> float:
     """The one rate of a MISO measurement, from whichever side knows it.
@@ -125,8 +120,8 @@ def _resolve_miso_fs(
     against each other, and two rates would mis-time every phase in the
     result.
     """
-    carrier: Signal | NDArray[np.float64] | list[float]
-    if isinstance(inputs, (Signal, np.ndarray)):
+    carrier: Signal | ArrayLike
+    if isinstance(inputs, (Signal, np.ndarray)) or not isinstance(inputs, Sequence):
         carrier = inputs
     else:
         signals = [row for row in inputs if isinstance(row, Signal)]
@@ -150,18 +145,14 @@ def _resolve_miso_fs(
 
 
 def _validate_inputs(
-    inputs: (
-        Signal
-        | Sequence[Signal | NDArray[np.float64] | list[float]]
-        | NDArray[np.float64]
-    ),
-    output: Signal | NDArray[np.float64] | list[float],
+    inputs: Signal | Sequence[Signal | ArrayLike] | ArrayLike,
+    output: Signal | ArrayLike,
 ) -> tuple[list[NDArray[np.float64]], NDArray[np.float64]]:
     """Validate the input records and the output, all one-dimensional.
 
     Accepts a sequence of 1-D arrays or a 2-D ``(q, n)`` array of inputs.
     """
-    rows: list[Signal | NDArray[np.float64] | list[float]]
+    rows: list[Signal | ArrayLike]
     if isinstance(inputs, Signal):
         # A multichannel Signal *is* the set of input records: the q channels
         # of one recording are exactly what the model calls x1..xq. Its
@@ -172,10 +163,14 @@ def _validate_inputs(
     # The number is a count of array axes, not a quantity.
     elif isinstance(inputs, np.ndarray) and inputs.ndim == 2:  # noqa: PLR2004
         rows = [np.ascontiguousarray(row, dtype=np.float64) for row in inputs]
-    else:
+    elif isinstance(inputs, Sequence):
         # A sequence may hold Signals of its own; each element keeps its own
         # calibration, applied by _validate_signal below.
         rows = list(inputs)
+    else:
+        # Anything else numpy reads as an array: its rows are the records,
+        # and one row is one record, which the count below refuses.
+        rows = list(np.atleast_2d(np.asarray(inputs, dtype=np.float64)))
     if len(rows) < _MIN_INPUT_RECORDS:
         msg = "'inputs' must hold at least two input records."
         raise ValueError(msg)
@@ -574,12 +569,8 @@ class MISOCoherenceResult(OwnsArrays):
 
 
 def miso_coherence(
-    inputs: (
-        Signal
-        | Sequence[Signal | NDArray[np.float64] | list[float]]
-        | NDArray[np.float64]
-    ),
-    output: Signal | NDArray[np.float64] | list[float],
+    inputs: Signal | Sequence[Signal | ArrayLike] | ArrayLike,
+    output: Signal | ArrayLike,
     fs: float | None = None,
     *,
     order: Sequence[int] | None = None,

@@ -57,20 +57,24 @@ The rules, identical everywhere:
 from __future__ import annotations
 
 import math
-from collections.abc import Sequence
 from typing import overload
 
 import numpy as np
+from numpy.typing import ArrayLike
 
 from .._internal.utils import _typesignal
 from .._internal.validation import require_scalar
 from ._signal import Signal
 
 #: What a function that consumes a recording accepts for its signal
-#: argument. ``Sequence[float]`` rather than ``list[float]`` so that a
-#: surface already typed for tuples does not have to narrow its signature
-#: to adopt the contract; ``str`` is a ``Sequence[str]`` and so stays out.
-SignalInput = Signal | Sequence[float] | np.ndarray
+#: argument: a Signal, or the samples as anything ``np.asarray`` converts
+#: (a list, a tuple, an array of any dtype, ``[channels, samples]`` as a
+#: nested list), since that is what each of them does with the samples.
+#: ``ArrayLike`` admits a ``str`` as well, which numpy would read as one
+#: text: the samples reach the computation through ``_typesignal`` or
+#: :func:`resolve_samples`, which refuse text with a ``TypeError`` naming
+#: the parameter (rule A42 of the contributor guide).
+SignalInput = Signal | ArrayLike
 
 # The rate type parameter below is value-restricted to ``(int, float)``
 # rather than bound to ``float`` so that a module typing its rate as ``int``
@@ -283,7 +287,7 @@ def like_input(x: Signal, samples: np.ndarray, fs: int | None = ...) -> Signal: 
 
 @overload
 def like_input(
-    x: Sequence[float] | np.ndarray, samples: np.ndarray, fs: int | None = ...
+    x: ArrayLike, samples: np.ndarray, fs: int | None = ...
 ) -> np.ndarray: ...
 
 

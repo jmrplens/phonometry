@@ -75,10 +75,10 @@ Plot the composite spectrum and its components versus frequency.
 
 ```python
 ocean_ambient_noise(
-    frequencies_hz: NDArray[np.float64] | list[float],
+    frequencies_hz: ArrayLike,
     *,
     wind_speed_kt: float,
-    shipping: NDArray[np.float64] | list[float] | None = None,
+    shipping: ArrayLike | None = None,
     temperature_c: float = 16.85,
     density: float = 1025.0,
     speed_of_sound: float = 1500.0,
@@ -114,7 +114,7 @@ components, plus an optional caller-supplied shipping spectrum.
 
 ```python
 thermal_noise_spectrum(
-    frequency_hz: NDArray[np.float64] | list[float] | float,
+    frequency_hz: ArrayLike,
     *,
     temperature_c: float = 16.85,
     density: float = 1025.0,
@@ -149,7 +149,7 @@ level is $10 \log_{10}(\langle p^2 \rangle / p_0^2)$.
 
 ```python
 wind_noise_spectrum(
-    frequency_hz: NDArray[np.float64] | list[float] | float,
+    frequency_hz: ArrayLike,
     wind_speed_kt: float,
 ) -> NDArray[np.float64]
 ```

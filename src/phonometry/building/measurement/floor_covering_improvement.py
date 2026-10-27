@@ -70,10 +70,10 @@ from ...metrology.reference_values import REFERENCE_VALUES
 from .ratings import impact_improvement_adaptation_term, weighted_impact_improvement
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping, Sequence
+    from collections.abc import Mapping
 
     from matplotlib.axes import Axes
-    from numpy.typing import NDArray
+    from numpy.typing import ArrayLike, NDArray
 
     from ..._i18n import Language
     from ..._internal.types import ReportEngine
@@ -121,7 +121,7 @@ _RATING_FREQS = (
 )
 
 
-def _finite(values: float | Sequence[float] | np.ndarray, name: str) -> np.ndarray:
+def _finite(values: ArrayLike, name: str) -> np.ndarray:
     a = np.atleast_1d(np.asarray(values, dtype=np.float64))
     if not np.all(np.isfinite(a)):
         msg = f"'{name}' must contain only finite values."
@@ -130,7 +130,7 @@ def _finite(values: float | Sequence[float] | np.ndarray, name: str) -> np.ndarr
 
 
 def acceleration_level(
-    acceleration: float | Sequence[float] | np.ndarray,
+    acceleration: ArrayLike,
     *,
     reference: float = _ACCELERATION_REFERENCE,
 ) -> np.ndarray:
@@ -265,10 +265,10 @@ class BackgroundCorrectedLevel(OwnsArrays):
 
 
 def background_corrected_level(
-    signal_and_background: float | Sequence[float] | np.ndarray,
-    background: float | Sequence[float] | np.ndarray,
+    signal_and_background: ArrayLike,
+    background: ArrayLike,
     *,
-    frequencies: Sequence[float] | np.ndarray | None = None,
+    frequencies: ArrayLike | None = None,
 ) -> BackgroundCorrectedLevel:
     r"""Correct a measured level for background noise (ISO 16251-1 F. (2)).
 
@@ -524,11 +524,11 @@ def _rating(
 
 
 def impact_improvement(
-    bare: float | Sequence[float] | np.ndarray,
-    with_covering: float | Sequence[float] | np.ndarray,
+    bare: ArrayLike,
+    with_covering: ArrayLike,
     *,
-    frequencies: float | Sequence[float] | np.ndarray,
-    background: float | Sequence[float] | np.ndarray | None = None,
+    frequencies: ArrayLike,
+    background: ArrayLike | None = None,
 ) -> FloorCoveringImprovementResult:
     r"""Improvement of impact sound insulation ``ΔL`` of a floor covering.
 
@@ -675,9 +675,9 @@ class OctaveBandSpectrum(OwnsArrays):
 
 
 def improvement_octave_bands(
-    improvement: Sequence[float] | np.ndarray,
+    improvement: ArrayLike,
     *,
-    frequencies: Sequence[float] | np.ndarray,
+    frequencies: ArrayLike,
     quantity: Quantity = "ΔL",
 ) -> OctaveBandSpectrum:
     r"""Convert a one-third-octave improvement spectrum to octaves (F. (5)).

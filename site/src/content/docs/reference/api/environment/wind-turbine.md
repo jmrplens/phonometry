@@ -32,10 +32,7 @@ uncertainty budgets) is out of scope; these are the underlying closed forms.
 ## apparent_sound_power_level
 
 ```python
-apparent_sound_power_level(
-    band_levels: float | NDArray[np.float64] | list[float],
-    r1: float,
-) -> float
+apparent_sound_power_level(band_levels: ArrayLike, r1: float) -> float
 ```
 
 A-weighted apparent sound power level `L_WA` (IEC 61400-11 Formula 26).
@@ -102,9 +99,9 @@ $R_0 = H + D/2$
 
 ```python
 wind_turbine_tonality(
-    levels: NDArray[np.float64] | list[float],
+    levels: ArrayLike,
     *,
-    frequencies: NDArray[np.float64] | list[float],
+    frequencies: ArrayLike,
     tone_frequency: float | None = None,
 ) -> WindTurbineTonalityResult
 ```

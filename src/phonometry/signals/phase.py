@@ -59,7 +59,7 @@ from ._cepstrum import _fold_causal
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from numpy.typing import NDArray
+    from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
     from .._internal.types import ThreePanels
@@ -82,7 +82,7 @@ _MIN_BINS = 8
 
 
 def _validate_response(
-    response: NDArray[np.complex128] | NDArray[np.float64] | list[float],
+    response: ArrayLike,
     *,
     name: str = "response",
 ) -> NDArray[np.complex128]:
@@ -139,7 +139,7 @@ def _trig_oversample(
 
 
 def min_phase(
-    response: NDArray[np.complex128] | NDArray[np.float64] | list[float],
+    response: ArrayLike,
     *,
     oversample: int = 8,
 ) -> NDArray[np.complex128]:
@@ -189,7 +189,7 @@ def min_phase(
 
 
 def group_delay(
-    response: NDArray[np.complex128] | list[float],
+    response: ArrayLike,
     fs: float,
 ) -> NDArray[np.float64]:
     r"""Group delay :math:`\tau_\mathrm{g}(f) = -(1/2\pi) \, d\phi/df` of a response.
@@ -221,7 +221,7 @@ def group_delay(
 
 
 def excess_phase(
-    response: NDArray[np.complex128] | list[float],
+    response: ArrayLike,
     *,
     oversample: int = 8,
 ) -> NDArray[np.float64]:
@@ -375,7 +375,7 @@ class PhaseDecompositionResult(OwnsArrays):
 
 
 def phase_decomposition(
-    response: NDArray[np.complex128] | list[float],
+    response: ArrayLike,
     fs: float,
     *,
     oversample: int = 8,

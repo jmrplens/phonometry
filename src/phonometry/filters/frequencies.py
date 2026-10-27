@@ -128,7 +128,7 @@ def _band_set(
 
 def nominal_frequencies(
     fraction: float,
-    limits: list[float] | None = None,
+    limits: Sequence[float] | None = None,
 ) -> FractionalOctaveBands:
     r"""The fractional-octave bands that cover a frequency range.
 
@@ -235,7 +235,9 @@ def _deleteouters(bands: FractionalOctaveBands, fs: int) -> FractionalOctaveBand
     )
 
 
-def _genfreqs(limits: list[float], fraction: float, fs: int) -> FractionalOctaveBands:
+def _genfreqs(
+    limits: Sequence[float], fraction: float, fs: int
+) -> FractionalOctaveBands:
     """Determine the bands within limits that a bank at ``fs`` can hold.
 
     :param limits: [f_min, f_max].

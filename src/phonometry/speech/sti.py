@@ -32,9 +32,8 @@ from typing import TYPE_CHECKING, Any, overload
 import numpy as np
 
 if TYPE_CHECKING:
-    from collections.abc import Sequence
-
     from matplotlib.axes import Axes
+    from numpy.typing import ArrayLike
 
     from .._i18n import Language
     from .._internal.types import ReportEngine
@@ -263,8 +262,8 @@ class STIResult(OwnsArrays):
     def adjusted_for_levels(
         self,
         *,
-        operational_levels: Sequence[float] | np.ndarray,
-        operational_ambient: Sequence[float] | np.ndarray | None = None,
+        operational_levels: ArrayLike,
+        operational_ambient: ArrayLike | None = None,
     ) -> STIResult:
         """This result moved to another speech and noise condition (Annex M).
 
@@ -351,9 +350,7 @@ def _octave_bank(fs: int) -> OctaveFilterBank:
     return bank
 
 
-def _validate_band_vector(
-    values: Sequence[float] | np.ndarray, name: str
-) -> np.ndarray:
+def _validate_band_vector(values: ArrayLike, name: str) -> np.ndarray:
     arr = np.asarray(values, dtype=np.float64)
     if arr.shape != (_NUM_BANDS,):
         msg = (
@@ -367,7 +364,7 @@ def _validate_band_vector(
     return arr
 
 
-def _truncated_mtf(mtf: np.ndarray, *, stacklevel: int = 4) -> np.ndarray:
+def _truncated_mtf(mtf: ArrayLike, *, stacklevel: int = 4) -> np.ndarray:
     """Validate the modulation transfer matrix and truncate it to 1,0.
 
     Ed.4 A.5.3 NOTE 1 (= Ed.5): a value above 1,3 means the measurement is
@@ -398,7 +395,7 @@ def _truncated_mtf(mtf: np.ndarray, *, stacklevel: int = 4) -> np.ndarray:
 
 
 def _snr_vector(
-    snr: float | Sequence[float] | np.ndarray | None,
+    snr: ArrayLike | None,
 ) -> np.ndarray | None:
     """The per-band signal-to-noise ratios, broadcast from a scalar if given."""
     if snr is None:
@@ -500,8 +497,8 @@ def _level_correction(
 def _corrected_mtf(
     m: np.ndarray,
     snr_arr: np.ndarray | None,
-    level: Sequence[float] | np.ndarray | None,
-    ambient: Sequence[float] | np.ndarray | None,
+    level: ArrayLike | None,
+    ambient: ArrayLike | None,
 ) -> tuple[np.ndarray, np.ndarray | None, np.ndarray | None]:
     """Apply the noise and level-dependent corrections of A.5.3.
 
@@ -572,9 +569,9 @@ def _index_from_corrected_mtf(
 
 def _sti_from_mtf(
     mtf: np.ndarray,
-    snr: float | Sequence[float] | np.ndarray | None = None,
-    level: Sequence[float] | np.ndarray | None = None,
-    ambient: Sequence[float] | np.ndarray | None = None,
+    snr: ArrayLike | None = None,
+    level: ArrayLike | None = None,
+    ambient: ArrayLike | None = None,
 ) -> STIResult:
     r"""STI computation chain from a matrix of modulation transfer values.
 
@@ -605,12 +602,12 @@ def _sti_from_mtf(
 
 
 def sti_adjusted_for_levels(
-    mtf: np.ndarray,
+    mtf: ArrayLike,
     *,
-    measured_levels: Sequence[float] | np.ndarray,
-    measured_ambient: Sequence[float] | np.ndarray | None = None,
-    operational_levels: Sequence[float] | np.ndarray,
-    operational_ambient: Sequence[float] | np.ndarray | None = None,
+    measured_levels: ArrayLike,
+    measured_ambient: ArrayLike | None = None,
+    operational_levels: ArrayLike,
+    operational_ambient: ArrayLike | None = None,
 ) -> STIResult:
     r"""STI of a measured MTF matrix moved to other speech and noise levels.
 
@@ -691,40 +688,40 @@ def sti_adjusted_for_levels(
 
 @overload
 def sti_from_impulse_response(
-    ir: Signal | list[float] | np.ndarray,
+    ir: Signal | ArrayLike,
     fs: int | None,
     snr: None,
-    levels: Sequence[float] | np.ndarray,
-    ambient: Sequence[float] | np.ndarray,
+    levels: ArrayLike,
+    ambient: ArrayLike,
 ) -> STIResult: ...
 
 
 @overload
 def sti_from_impulse_response(
-    ir: Signal | list[float] | np.ndarray,
+    ir: Signal | ArrayLike,
     fs: int | None = ...,
     snr: None = ...,
     *,
-    levels: Sequence[float] | np.ndarray,
-    ambient: Sequence[float] | np.ndarray,
+    levels: ArrayLike,
+    ambient: ArrayLike,
 ) -> STIResult: ...
 
 
 @overload
 def sti_from_impulse_response(
-    ir: Signal | list[float] | np.ndarray,
+    ir: Signal | ArrayLike,
     fs: int | None = ...,
-    snr: float | Sequence[float] | np.ndarray | None = ...,
-    levels: Sequence[float] | np.ndarray | None = ...,
+    snr: ArrayLike | None = ...,
+    levels: ArrayLike | None = ...,
 ) -> STIResult: ...
 
 
 def sti_from_impulse_response(
-    ir: Signal | list[float] | np.ndarray,
+    ir: Signal | ArrayLike,
     fs: int | None = None,
-    snr: float | Sequence[float] | np.ndarray | None = None,
-    levels: Sequence[float] | np.ndarray | None = None,
-    ambient: Sequence[float] | np.ndarray | None = None,
+    snr: ArrayLike | None = None,
+    levels: ArrayLike | None = None,
+    ambient: ArrayLike | None = None,
 ) -> STIResult:
     r"""Full STI from a room/system impulse response (indirect method).
 
@@ -897,40 +894,40 @@ def _stipa_modulation_depths(env: np.ndarray, fs: int) -> np.ndarray:
 
 @overload
 def stipa(
-    x: Signal | list[float] | np.ndarray,
+    x: Signal | ArrayLike,
     fs: int | None,
-    reference: Signal | list[float] | np.ndarray | None,
-    levels: Sequence[float] | np.ndarray,
-    ambient: Sequence[float] | np.ndarray,
+    reference: Signal | ArrayLike | None,
+    levels: ArrayLike,
+    ambient: ArrayLike,
 ) -> STIResult: ...
 
 
 @overload
 def stipa(
-    x: Signal | list[float] | np.ndarray,
+    x: Signal | ArrayLike,
     fs: int | None = ...,
-    reference: Signal | list[float] | np.ndarray | None = ...,
+    reference: Signal | ArrayLike | None = ...,
     *,
-    levels: Sequence[float] | np.ndarray,
-    ambient: Sequence[float] | np.ndarray,
+    levels: ArrayLike,
+    ambient: ArrayLike,
 ) -> STIResult: ...
 
 
 @overload
 def stipa(
-    x: Signal | list[float] | np.ndarray,
+    x: Signal | ArrayLike,
     fs: int | None = ...,
-    reference: Signal | list[float] | np.ndarray | None = ...,
-    levels: Sequence[float] | np.ndarray | None = ...,
+    reference: Signal | ArrayLike | None = ...,
+    levels: ArrayLike | None = ...,
 ) -> STIResult: ...
 
 
 def stipa(
-    x: Signal | list[float] | np.ndarray,
+    x: Signal | ArrayLike,
     fs: int | None = None,
-    reference: Signal | list[float] | np.ndarray | None = None,
-    levels: Sequence[float] | np.ndarray | None = None,
-    ambient: Sequence[float] | np.ndarray | None = None,
+    reference: Signal | ArrayLike | None = None,
+    levels: ArrayLike | None = None,
+    ambient: ArrayLike | None = None,
 ) -> STIResult:
     """STIPA on a recorded test signal (direct method, Annex B).
 

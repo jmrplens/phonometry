@@ -48,7 +48,7 @@ mixes two methods and is a convenience, not a normative chain.
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from dataclasses import KW_ONLY, dataclass, fields
 from enum import Enum
 from types import MappingProxyType
@@ -68,7 +68,7 @@ from ..._internal.validation import (
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from numpy.typing import NDArray
+    from numpy.typing import ArrayLike, NDArray
 
     from ..._i18n import Language
 
@@ -1078,7 +1078,7 @@ class RoadEmissionResult(OwnsArrays):
 
 
 def road_source_power(
-    traffic: RoadTraffic | list[RoadTraffic] | tuple[RoadTraffic, ...],
+    traffic: RoadTraffic | Sequence[RoadTraffic],
     *,
     surface: RoadSurface | RoadSurfaceName | RoadSurfaceCoefficients = (
         RoadSurface.REFERENCE
@@ -1179,7 +1179,7 @@ def road_source_power(
 
 
 def line_source_segment_power(
-    line_power: NDArray[np.float64] | list[float] | float, length: float
+    line_power: ArrayLike, length: float
 ) -> NDArray[np.float64]:
     r"""Sound power of the point source representing a segment of source line.
 

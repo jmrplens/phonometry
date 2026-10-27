@@ -185,7 +185,7 @@ Upper limit `LEX,8h + U` of the one-sided 95 % interval, dB.
 
 ```python
 full_day_exposure(
-    samples: Sequence[float],
+    samples: ArrayLike,
     effective_duration_hours: float,
     instrument: Literal['class1', 'class2', 'personal_exposimeter'] = 'personal_exposimeter',
     u3: float = 1.0,
@@ -231,7 +231,7 @@ INSTRUMENT_U2 = {'class1': 0.7, 'class2': 1.5, 'personal_exposimeter': 1.5}
 
 ```python
 job_based_exposure(
-    samples: Sequence[float],
+    samples: ArrayLike,
     effective_duration_hours: float,
     instrument: Literal['class1', 'class2', 'personal_exposimeter'] = 'personal_exposimeter',
     u3: float = 1.0,

@@ -39,8 +39,10 @@ from .design import _cheby2_headroom, _design_sos_filter
 from .frequencies import _genfreqs
 
 if TYPE_CHECKING:
+    from collections.abc import Sequence
+
     from matplotlib.axes import Axes
-    from numpy.typing import NDArray
+    from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
 
@@ -492,7 +494,7 @@ def _validate_bank_design(
     fs: int,
     fraction: float,
     order: int,
-    limits: list[float] | None,
+    limits: Sequence[float] | None,
     design: FilterDesign,
     block_processing: BlockProcessing,
 ) -> list[float]:
@@ -538,7 +540,7 @@ def _validate_bank_design(
         # a stateful resampling algorithm would be required...
         msg = "Resampling and stateful behaviour (block processing) are not supported."
         raise ValueError(msg)
-    return limits
+    return list(limits)
 
 
 def _require_level_mode(mode: str) -> Mode:
@@ -587,7 +589,7 @@ def _require_bank_input(x_proc: np.ndarray) -> None:
         raise ValueError(msg)
 
 
-def _resolve_limits(limits: list[float] | None) -> list[float] | None:
+def _resolve_limits(limits: Sequence[float] | None) -> list[float] | None:
     """Check ``limits`` is a pair of numbers before it is hashed or compared.
 
     The bank constructor owns the value checks (count, positivity, ordering,
@@ -620,7 +622,7 @@ class OctaveFilterBank:
         fs: int,
         fraction: float = 1,
         order: int = 6,
-        limits: list[float] | None = None,
+        limits: Sequence[float] | None = None,
         *,
         design: FilterDesign = _DEFAULT_DESIGN,
         calibration: LevelCalibration = _DEFAULT_CALIBRATION,
@@ -753,7 +755,7 @@ class OctaveFilterBank:
 
     def filter(
         self,
-        x: Signal | list[float] | np.ndarray,
+        x: Signal | ArrayLike,
         *,
         sigbands: bool = False,
         mode: Mode = "rms",
@@ -835,7 +837,7 @@ class OctaveFilterBank:
         return OctaveFilterResult(spl, freq_out)
 
     def _prepare_signal(
-        self, x: Signal | list[float] | np.ndarray, *, detrend: bool
+        self, x: Signal | ArrayLike, *, detrend: bool
     ) -> tuple[np.ndarray, bool]:
         """Coerce the input to a 2D ``[channels, samples]`` array for filtering.
 
@@ -875,7 +877,7 @@ class OctaveFilterBank:
 
     def spectrogram(
         self,
-        x: Signal | list[float] | np.ndarray,
+        x: Signal | ArrayLike,
         window_time: float = 0.125,
         overlap: float = 0.5,
         mode: Mode = "rms",
@@ -1135,11 +1137,11 @@ def _cached_filter_bank(
 
 
 def octave_filter(
-    x: Signal | list[float] | np.ndarray,
+    x: Signal | ArrayLike,
     fs: int | None = None,
     fraction: float = 1,
     order: int = 6,
-    limits: list[float] | None = None,
+    limits: Sequence[float] | None = None,
     *,
     sigbands: bool = False,
     detrend: bool = True,

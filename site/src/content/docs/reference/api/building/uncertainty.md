@@ -392,8 +392,8 @@ available for impact sound insulation (Table 5, footnote a).
 
 ```python
 single_number_uncertainty_uncorrelated(
-    band_uncertainties: Sequence[float] | np.ndarray,
-    reference_differences: Sequence[float] | np.ndarray,
+    band_uncertainties: ArrayLike,
+    reference_differences: ArrayLike,
 ) -> float
 ```
 

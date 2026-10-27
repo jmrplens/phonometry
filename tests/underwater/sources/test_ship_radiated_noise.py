@@ -119,20 +119,20 @@ def test_hydrophone_depths_rejects_non_finite_angles() -> None:
 def test_hydrophone_depths_rejects_a_nested_angle_grid() -> None:
     # A pair of pairs used to come back as a 2-D "depths" array as if valid.
     with pytest.raises(ValueError, match="'angles_deg' must be a non-empty 1-D array"):
-        underwater.hydrophone_depths(100.0, angles_deg=((15.0, 30.0), (45.0, 60.0)))  # type: ignore[arg-type]
+        underwater.hydrophone_depths(100.0, angles_deg=((15.0, 30.0), (45.0, 60.0)))
 
 
 def test_hydrophone_depths_rejects_a_non_numeric_angle() -> None:
     # A string element used to escape as numpy's anonymous "could not
     # convert string to float" instead of naming the parameter.
     with pytest.raises(TypeError, match="'angles_deg' must be numbers, not text"):
-        underwater.hydrophone_depths(100.0, angles_deg=("bad",))  # type: ignore[arg-type]
+        underwater.hydrophone_depths(100.0, angles_deg=("bad",))
 
 
 def test_hydrophone_depths_normalises_a_single_angle() -> None:
     # A bare scalar used to come back 0-d, so the documented per-hydrophone
     # read depths[0] died in numpy; it is normalised to one entry instead.
-    depths = underwater.hydrophone_depths(100.0, angles_deg=45.0)  # type: ignore[arg-type]
+    depths = underwater.hydrophone_depths(100.0, angles_deg=45.0)
     assert depths.shape == (1,)
     assert float(depths[0]) == pytest.approx(100.0)
 
@@ -184,6 +184,6 @@ def test_monopole_source_level_rejects_non_numeric_inputs() -> None:
     # Both shared array guards name the parameter a conversion failure sits
     # in, instead of letting numpy's anonymous error escape.
     with pytest.raises(TypeError, match="'frequency' must be numbers, not text"):
-        underwater.monopole_source_level(140.0, frequency=("bad",), draft_m=8.0)  # type: ignore[arg-type]
+        underwater.monopole_source_level(140.0, frequency=("bad",), draft_m=8.0)
     with pytest.raises(TypeError, match="'rnl' must be numbers, not text"):
-        underwater.monopole_source_level(("bad",), frequency=125.0, draft_m=8.0)  # type: ignore[arg-type]
+        underwater.monopole_source_level(("bad",), frequency=125.0, draft_m=8.0)

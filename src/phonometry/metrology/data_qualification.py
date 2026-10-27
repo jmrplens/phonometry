@@ -95,7 +95,7 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
-    from numpy.typing import NDArray
+    from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
     from ..io._signal import Signal
@@ -650,7 +650,7 @@ def _trend_test_runs(values: NDArray[np.float64], alpha: float) -> TrendTestResu
 
 
 def _validate_trend_inputs(
-    values: NDArray[np.float64] | list[float], method: str, alpha: float
+    values: ArrayLike, method: str, alpha: float
 ) -> NDArray[np.float64]:
     require_scalar(alpha, "alpha")
     seq = np.asarray(values, dtype=np.float64)
@@ -676,7 +676,7 @@ def _validate_trend_inputs(
 
 
 def trend_test(
-    values: NDArray[np.float64] | list[float],
+    values: ArrayLike,
     *,
     method: Method = "reverse_arrangements",
     alpha: float = 0.05,
@@ -703,8 +703,8 @@ def trend_test(
     monotonic trends (B&P Sec. 4.5.2); the runs test also reacts to
     non-monotonic clustering.
 
-    :param values: Sequence of observations or parameter estimates
-        (e.g. segment mean square values), at least 10.
+    :param values: Observations or parameter estimates (e.g. segment mean
+        square values), at least 10, as a sequence or an array.
     :param method: ``"reverse_arrangements"`` (default) or ``"runs"``.
     :param alpha: Two-sided significance level (default 0.05, the level
         tabulated by B&P).
@@ -860,7 +860,7 @@ def _segment_statistic(
 
 
 def stationarity_test(
-    x: Signal | NDArray[np.float64] | list[float],
+    x: Signal | ArrayLike,
     fs: float | None = None,
     *,
     n_segments: int = 20,
@@ -1056,10 +1056,10 @@ class LevelCrossingResult(OwnsArrays):
 
 
 def level_crossing_rate(
-    x: Signal | NDArray[np.float64] | list[float],
+    x: Signal | ArrayLike,
     fs: float | None = None,
     *,
-    levels: NDArray[np.float64] | list[float] | None = None,
+    levels: ArrayLike | None = None,
     nperseg: int | None = None,
 ) -> LevelCrossingResult:
     r"""Level-crossing rates of a record and their Rice expectations.
@@ -1378,9 +1378,7 @@ class PeakStatisticsResult(OwnsArrays):
             owner,
         )
 
-    def peak_exceedance(
-        self, z: NDArray[np.float64] | list[float] | float
-    ) -> NDArray[np.float64]:
+    def peak_exceedance(self, z: ArrayLike) -> NDArray[np.float64]:
         r""":math:`P[\text{peak} > z]` at the record's irregularity
         factor.
 
@@ -1396,9 +1394,7 @@ class PeakStatisticsResult(OwnsArrays):
         za = np.atleast_1d(np.asarray(z, dtype=np.float64))
         return _rice_peak_exceedance(za, self.irregularity_factor)
 
-    def peak_density(
-        self, z: NDArray[np.float64] | list[float] | float
-    ) -> NDArray[np.float64]:
+    def peak_density(self, z: ArrayLike) -> NDArray[np.float64]:
         """Peak probability density ``w(z)`` (B&P Eq. (5.217)).
 
         :param z: Standardized peak heights (units of the record RMS).
@@ -1422,7 +1418,7 @@ class PeakStatisticsResult(OwnsArrays):
 
 
 def peak_statistics(
-    x: Signal | NDArray[np.float64] | list[float],
+    x: Signal | ArrayLike,
     fs: float | None = None,
     *,
     nperseg: int | None = None,

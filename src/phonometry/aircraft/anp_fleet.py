@@ -82,7 +82,7 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from matplotlib.axes import Axes
-    from numpy.typing import NDArray
+    from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
     from .flight_performance import Aerodrome
@@ -332,9 +332,7 @@ class ANPNPDCurves(OwnsArrays):
         require_same_length(self, "powers", "levels", axis="power setting")
         require_same_length(self, "distances_m", ("levels", 1), axis="slant distance")
 
-    def level(
-        self, power: float, distance_m: NDArray[np.float64] | list[float] | float
-    ) -> NDArray[np.float64]:
+    def level(self, power: float, distance_m: ArrayLike) -> NDArray[np.float64]:
         """Interpolated NPD level ``L(P, d)`` (Doc 29 Eq. 4-3/4-4).
 
         :param power: Query engine power setting.
@@ -571,7 +569,7 @@ class ANPAircraft(RichDisplay):
 
     def event_level(
         self,
-        observer: NDArray[np.float64] | list[float],
+        observer: ArrayLike,
         operation: Operation,
         *,
         aerodrome: Aerodrome | None = None,
@@ -600,8 +598,8 @@ class ANPAircraft(RichDisplay):
         self,
         operation: Operation,
         *,
-        x: NDArray[np.float64] | list[float],
-        y: NDArray[np.float64] | list[float],
+        x: ArrayLike,
+        y: ArrayLike,
         aerodrome: Aerodrome | None = None,
         stage_length: int | str = 1,
         metric: EventMetric = "exposure",
@@ -664,11 +662,11 @@ class ANPDatabase:
 
     def __init__(
         self,
-        aircraft: Mapping[str, dict[str, str]],
+        aircraft: Mapping[str, Mapping[str, str]],
         npd: Mapping[
             tuple[str, str, str], tuple[NDArray[np.float64], NDArray[np.float64]]
         ],
-        distances_m: NDArray[np.float64],
+        distances_m: ArrayLike,
         profiles: Mapping[tuple[str, str, str, int], NDArray[np.float64]],
         spectral_classes: Mapping[str, SpectralClass] | None = None,
     ) -> None:
@@ -691,7 +689,7 @@ class ANPDatabase:
     @classmethod
     def _from_export(
         cls,
-        aircraft: Mapping[str, dict[str, str]],
+        aircraft: Mapping[str, Mapping[str, str]],
         npd: Mapping[
             tuple[str, str, str], tuple[NDArray[np.float64], NDArray[np.float64]]
         ],
@@ -1274,7 +1272,7 @@ class ANPDatabase:
     def event_level(
         self,
         aircraft_id: str,
-        observer: NDArray[np.float64] | list[float],
+        observer: ArrayLike,
         operation: Operation,
         *,
         aerodrome: Aerodrome | None = None,
@@ -1344,8 +1342,8 @@ class ANPDatabase:
         aircraft_id: str,
         operation: Operation,
         *,
-        x: NDArray[np.float64] | list[float],
-        y: NDArray[np.float64] | list[float],
+        x: ArrayLike,
+        y: ArrayLike,
         aerodrome: Aerodrome | None = None,
         stage_length: int | str = 1,
         metric: EventMetric = "exposure",

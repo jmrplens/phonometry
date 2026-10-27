@@ -44,7 +44,7 @@ ship_source_spectrum(
     length_m: float = 100.0,
     vessel_class: Literal['bulker', 'containership', 'cruise', 'dredger', 'fishing', 'government/research', 'naval', 'other', 'passenger', 'recreational', 'tanker', 'tug', 'vehicle carrier'] = 'containership',
     model: Literal['jomopans-echo', 'randi', 'wales-heitmeyer'] = 'jomopans-echo',
-    frequencies: NDArray[np.float64] | list[float] | None = None,
+    frequencies: ArrayLike | None = None,
 ) -> ShipTrafficSpectrum
 ```
 

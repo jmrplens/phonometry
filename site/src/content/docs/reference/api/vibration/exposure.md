@@ -73,7 +73,7 @@ ACCELERATION_LEVEL_REFERENCE_M_S2 = 1e-06
 
 ```python
 apply_band_limiting(
-    x: Signal | Sequence[float] | np.ndarray,
+    x: Signal | ArrayLike,
     fs: float | None = None,
     *,
     name: Literal['Wb', 'Wc', 'Wd', 'We', 'Wf', 'Wh', 'Wj', 'Wk', 'Wm'],
@@ -116,7 +116,7 @@ and the switch-on transient is part of what they measure.
 
 ```python
 apply_weighting(
-    x: Signal | Sequence[float] | np.ndarray,
+    x: Signal | ArrayLike,
     fs: float | None = None,
     *,
     name: Literal['Wb', 'Wc', 'Wd', 'We', 'Wf', 'Wh', 'Wj', 'Wk', 'Wm'],
@@ -246,7 +246,7 @@ $A(8) = \sqrt{\sum_i A_i(8)^2}$.
 ## crest_factor
 
 ```python
-crest_factor(x: Signal | Sequence[float] | np.ndarray) -> float
+crest_factor(x: Signal | ArrayLike) -> float
 ```
 
 Crest factor of a weighted signal (ISO 2631-1 clause 6.2.1).
@@ -652,7 +652,7 @@ Advisory for out-of-range human-vibration measurement conditions.
 
 ```python
 motion_sickness_dose_value(
-    x: Signal | Sequence[float] | np.ndarray,
+    x: Signal | ArrayLike,
     fs: float | None = None,
 ) -> float
 ```
@@ -683,7 +683,7 @@ m/s^1.5; the `Wf`-weighted signal is the intended input.
 
 ```python
 mtvv(
-    x: Signal | Sequence[float] | np.ndarray,
+    x: Signal | ArrayLike,
     fs: float | None = None,
     *,
     integration_time: float = 1.0,
@@ -732,7 +732,7 @@ REFERENCE_DURATION_S = 28800.0
 
 ```python
 running_rms(
-    x: Signal | Sequence[float] | np.ndarray,
+    x: Signal | ArrayLike,
     fs: float | None = None,
     *,
     integration_time: float = 1.0,
@@ -764,7 +764,7 @@ Running r.m.s. of a weighted signal (ISO 2631-1 Eqs. (2)/(3)).
 
 ```python
 vibration_dose_value(
-    x: Signal | Sequence[float] | np.ndarray,
+    x: Signal | ArrayLike,
     fs: float | None = None,
 ) -> float
 ```

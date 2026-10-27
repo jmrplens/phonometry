@@ -87,6 +87,8 @@ from ..._internal.warnings import PhonometryWarning
 from .porous import ABSORBER_AIR, Complex
 
 if TYPE_CHECKING:
+    from collections.abc import Sequence
+
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
@@ -700,9 +702,7 @@ def _matmul(a: Complex, b: Complex) -> Complex:
 
 def slit_helmholtz_absorber(
     frequency: ArrayLike,
-    resonators: HelmholtzResonator
-    | list[HelmholtzResonator]
-    | tuple[HelmholtzResonator, ...],
+    resonators: HelmholtzResonator | Sequence[HelmholtzResonator],
     *,
     slit_height_m: float,
     lattice_step_m: float,

@@ -55,6 +55,7 @@ from ...io._resolve import apply_calibration, resolve_fs
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
+    from numpy.typing import ArrayLike
 
     from ..._i18n import Language
     from ..._internal.types import TwoPanels
@@ -727,7 +728,7 @@ def _assemble_loudness(
 
 
 def loudness_ecma(
-    x: Signal | np.ndarray,
+    x: Signal | ArrayLike,
     fs: float | None = None,
     field: Literal["free", "diffuse"] = "free",
 ) -> EcmaLoudness:

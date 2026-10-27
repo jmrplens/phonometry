@@ -58,8 +58,8 @@ $n_\mathrm{d} - (q-1)$ (Eqs. 9.98/9.99).
 
 ```python
 miso_coherence(
-    inputs: Signal | Sequence[Signal | NDArray[np.float64] | list[float]] | NDArray[np.float64],
-    output: Signal | NDArray[np.float64] | list[float],
+    inputs: Signal | Sequence[Signal | ArrayLike] | ArrayLike,
+    output: Signal | ArrayLike,
     fs: float | None = None,
     *,
     order: Sequence[int] | None = None,

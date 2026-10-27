@@ -1172,7 +1172,7 @@ class LimitingTestSignalCheck(RichDisplay):
 
 
 def check_limiting_test_signal(
-    x: Signal | NDArray[np.float64] | list[float], fs: int | None = None
+    x: Signal | ArrayLike, fs: int | None = None
 ) -> LimitingTestSignalCheck:
     """Is this the clipped programme signal IEC 60268-7 8.3.2.2 b) asks for?
 

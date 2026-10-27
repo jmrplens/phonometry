@@ -56,9 +56,8 @@ from ..._internal.validation import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import Sequence
-
     from matplotlib.axes import Axes
+    from numpy.typing import ArrayLike
 
     from ..._i18n import Language
 
@@ -160,9 +159,7 @@ def _condition(condition: str) -> Condition:
     return condition
 
 
-def _finite_bands(
-    values: float | Sequence[float] | np.ndarray, name: str
-) -> np.ndarray:
+def _finite_bands(values: ArrayLike, name: str) -> np.ndarray:
     a = np.atleast_1d(np.asarray(values, dtype=np.float64))
     if not np.all(np.isfinite(a)):
         msg = f"'{name}' must contain only finite values."
@@ -361,9 +358,9 @@ def _band_uncertainty(
 
 
 def sound_absorption_coefficient_uncertainty(
-    alpha: float | Sequence[float] | np.ndarray,
+    alpha: ArrayLike,
     *,
-    frequencies: float | Sequence[float] | np.ndarray,
+    frequencies: ArrayLike,
     condition: Condition = "reproducibility",
     coverage: float = 0.95,
 ) -> AbsorptionUncertaintyResult:
@@ -395,9 +392,9 @@ def sound_absorption_coefficient_uncertainty(
 
 
 def equivalent_area_uncertainty(
-    area: float | Sequence[float] | np.ndarray,
+    area: ArrayLike,
     *,
-    frequencies: float | Sequence[float] | np.ndarray,
+    frequencies: ArrayLike,
     condition: Condition = "reproducibility",
     coverage: float = 0.95,
 ) -> AbsorptionUncertaintyResult:
@@ -439,9 +436,9 @@ def equivalent_area_uncertainty(
 
 
 def practical_coefficient_uncertainty(
-    alpha_p: float | Sequence[float] | np.ndarray,
+    alpha_p: ArrayLike,
     *,
-    frequencies: float | Sequence[float] | np.ndarray,
+    frequencies: ArrayLike,
     condition: Condition = "reproducibility",
     coverage: float = 0.95,
 ) -> AbsorptionUncertaintyResult:

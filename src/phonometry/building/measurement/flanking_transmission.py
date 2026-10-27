@@ -96,10 +96,8 @@ from .ratings import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import Sequence
-
     from matplotlib.axes import Axes
-    from numpy.typing import NDArray
+    from numpy.typing import ArrayLike, NDArray
 
     from ..._i18n import Language
     from ..._internal.types import BandFraction, ReportEngine
@@ -188,7 +186,7 @@ _OCTAVE_CENTRES = (31.5, 63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000
 _OCTAVE_STEP_THRESHOLD = _OCTAVE_SPACING_MIN_RATIO
 
 
-def _as_1d(values: float | Sequence[float] | np.ndarray, name: str) -> np.ndarray:
+def _as_1d(values: ArrayLike, name: str) -> np.ndarray:
     """Coerce to a finite 1-D float array."""
     data = np.atleast_1d(np.asarray(values, dtype=np.float64))
     if data.ndim != 1:
@@ -213,9 +211,7 @@ def _positive(value: float, name: str) -> float:
     return scalar
 
 
-def _positive_array(
-    values: float | Sequence[float] | np.ndarray, name: str
-) -> np.ndarray:
+def _positive_array(values: ArrayLike, name: str) -> np.ndarray:
     """Validate a 1-D array of positive, finite values."""
     data = _as_1d(values, name)
     if np.any(data <= 0.0):
@@ -228,8 +224,8 @@ def _positive_array(
 # Velocity level differences (Part 1, Clauses 3.6/3.7)
 # --------------------------------------------------------------------------- #
 def velocity_level_difference(
-    source_level: Sequence[float] | np.ndarray,
-    receive_level: Sequence[float] | np.ndarray,
+    source_level: ArrayLike,
+    receive_level: ArrayLike,
 ) -> np.ndarray:
     r"""Velocity level difference :math:`D_{\mathrm{v},ij} = L_{\mathrm{v},i} - L_{\mathrm{v},j}` (Formula (8)).
 
@@ -252,8 +248,8 @@ def velocity_level_difference(
 
 
 def direction_averaged_level_difference(
-    dv_ij: Sequence[float] | np.ndarray,
-    dv_ji: Sequence[float] | np.ndarray,
+    dv_ij: ArrayLike,
+    dv_ji: ArrayLike,
 ) -> np.ndarray:
     r"""Direction-averaged velocity level difference (Formula (11)).
 
@@ -282,9 +278,9 @@ def direction_averaged_level_difference(
 # Structural quantities (Part 1, Clauses 3.5/3.8)
 # --------------------------------------------------------------------------- #
 def total_loss_factor(
-    structural_reverberation_time: float | Sequence[float] | np.ndarray,
+    structural_reverberation_time: ArrayLike,
     *,
-    frequencies: Sequence[float] | np.ndarray,
+    frequencies: ArrayLike,
 ) -> np.ndarray:
     r"""Total loss factor :math:`\eta = 2.2 / (f \, T_\mathrm{s})` (Clause 7.3.1).
 
@@ -303,9 +299,9 @@ def total_loss_factor(
 
 def equivalent_absorption_length(
     area: float,
-    structural_reverberation_time: float | Sequence[float] | np.ndarray,
+    structural_reverberation_time: ArrayLike,
     *,
-    frequencies: Sequence[float] | np.ndarray,
+    frequencies: ArrayLike,
     speed_of_sound: float = _DEFAULT_SPEED_OF_SOUND,
 ) -> np.ndarray:
     r"""Equivalent absorption length ``aj`` (Formula (12)).
@@ -599,16 +595,16 @@ def _single_number_kij(
 
 
 def vibration_reduction_index(
-    velocity_level_difference: Sequence[float] | np.ndarray,
+    velocity_level_difference: ArrayLike,
     junction_length: float,
     area_i: float,
     area_j: float,
     *,
-    frequencies: Sequence[float] | np.ndarray | None = None,
-    structural_reverberation_time_i: float | Sequence[float] | np.ndarray | None = None,
-    structural_reverberation_time_j: float | Sequence[float] | np.ndarray | None = None,
+    frequencies: ArrayLike | None = None,
+    structural_reverberation_time_i: ArrayLike | None = None,
+    structural_reverberation_time_j: ArrayLike | None = None,
     speed_of_sound: float = _DEFAULT_SPEED_OF_SOUND,
-    modal_overlap: Sequence[float] | np.ndarray | None = None,
+    modal_overlap: ArrayLike | None = None,
 ) -> VibrationReductionResult:
     r"""Vibration reduction index ``Kij`` (Formula (13), or simplified (14)).
 
@@ -708,14 +704,14 @@ def vibration_reduction_index(
 
 
 def vibration_reduction_index_from_flanking(
-    normalized_flanking_level_difference: Sequence[float] | np.ndarray,
-    reduction_index_i: Sequence[float] | np.ndarray,
-    reduction_index_j: Sequence[float] | np.ndarray,
+    normalized_flanking_level_difference: ArrayLike,
+    reduction_index_i: ArrayLike,
+    reduction_index_j: ArrayLike,
     junction_length: float,
     area_i: float,
     area_j: float,
-    absorption_length_i: Sequence[float] | np.ndarray,
-    absorption_length_j: Sequence[float] | np.ndarray,
+    absorption_length_i: ArrayLike,
+    absorption_length_j: ArrayLike,
     *,
     reference_area: float = _REFERENCE_ABSORPTION_AREA,
 ) -> np.ndarray:
@@ -950,9 +946,9 @@ class FlankingImpactLevelResult(OwnsArrays):
 
 
 def normalized_flanking_level_difference(
-    source_level: Sequence[float] | np.ndarray,
-    receive_level: Sequence[float] | np.ndarray,
-    absorption_area: Sequence[float] | np.ndarray,
+    source_level: ArrayLike,
+    receive_level: ArrayLike,
+    absorption_area: ArrayLike,
     *,
     reference_area: float = _REFERENCE_ABSORPTION_AREA,
     fraction: BandFraction | None = None,
@@ -994,8 +990,8 @@ def normalized_flanking_level_difference(
 
 
 def normalized_flanking_impact_level(
-    receive_level: Sequence[float] | np.ndarray,
-    absorption_area: Sequence[float] | np.ndarray,
+    receive_level: ArrayLike,
+    absorption_area: ArrayLike,
     *,
     reference_area: float = _REFERENCE_ABSORPTION_AREA,
     fraction: BandFraction | None = None,
@@ -1216,13 +1212,13 @@ class StrongCouplingCheck(OwnsArrays):
 
 
 def check_strong_coupling(
-    velocity_level_difference: Sequence[float] | np.ndarray,
+    velocity_level_difference: ArrayLike,
     mass_i: float,
     mass_j: float,
     critical_frequency_i: float,
     critical_frequency_j: float,
     *,
-    frequencies: Sequence[float] | np.ndarray | None = None,
+    frequencies: ArrayLike | None = None,
 ) -> StrongCouplingCheck:
     r"""Is the coupling of the two elements weak enough for ``Kij``? (Part 1, Formula (15)).
 
@@ -1287,7 +1283,7 @@ def modal_density(
 def modal_overlap_factor(
     area: float,
     critical_frequency: float,
-    structural_reverberation_time: float | Sequence[float] | np.ndarray,
+    structural_reverberation_time: ArrayLike,
     *,
     speed_of_sound: float = _DEFAULT_SPEED_OF_SOUND,
 ) -> np.ndarray:
@@ -1315,7 +1311,7 @@ def modal_overlap_factor(
 
 
 def band_mode_count(
-    frequencies: Sequence[float] | np.ndarray,
+    frequencies: ArrayLike,
     area: float,
     critical_frequency: float,
     *,

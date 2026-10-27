@@ -59,7 +59,7 @@ section is declared and the analysis runs past it.
 
 ```python
 combine_duct_paths(
-    paths: list[DuctPathResult] | tuple[DuctPathResult, ...],
+    paths: Sequence[DuctPathResult],
     *,
     criterion: str | None = None,
     target: float | None = None,
@@ -96,7 +96,7 @@ criterion.
 ```python
 duct_path(
     source_level: ArrayLike,
-    elements: list[DuctElement] | tuple[DuctElement, ...],
+    elements: Sequence[DuctElement],
     *,
     frequencies: ArrayLike,
     room_effect: ArrayLike | None = None,
@@ -104,7 +104,7 @@ duct_path(
     criterion: Literal['NC', 'RC'] = 'NC',
     target: float | None = None,
     self_noise_floor: float | None = 0.0,
-    section: dict[str, float] | None = None,
+    section: Mapping[str, float] | None = None,
     flow_velocity: float = 0.0,
     speed_of_sound: float = 343.0,
     label: str = 'Duct path',

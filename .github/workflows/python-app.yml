@@ -1123,6 +1123,33 @@ jobs:
     - name: Check that every return an argument decides is overloaded
       run: python scripts/check_return_overloads.py
 
+  # A function that hands its levels to np.asarray takes a list, a tuple, an
+  # array of any dtype and a nested list; annotated list[float] or
+  # NDArray[np.float64], it makes a typed caller's working code a type error,
+  # and list is invariant besides. This fails on a public parameter that
+  # holds an array or a sequence of numbers and no ArrayLike while its body
+  # converts it, followed through the helpers it is handed to, on an overload
+  # head that takes such a parameter narrower, and on any public parameter
+  # that holds list, dict or set. The files gpu_parity.py fingerprints are
+  # left out as a whole, read from its _COVERED. It reads the annotations
+  # through the package's aliases and imports. Static and dependency-free,
+  # so it runs on its own.
+  parameter-annotations:
+    name: Every public parameter admits what its body converts
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+    - uses: actions/checkout@v7
+      with:
+        persist-credentials: false
+    - name: Set up Python 3.13
+      uses: actions/setup-python@v7
+      with:
+        python-version: "3.13"
+    - name: Check that every public parameter admits what its body converts
+      run: python scripts/check_parameter_annotations.py
+
   # A conformance row states what a standard prints and what this library
   # computes. A row that computes the expected value itself, from the same
   # constants, compares a formula with a second copy of it and reports Pass

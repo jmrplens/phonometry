@@ -76,7 +76,7 @@ remedy, exactly like the `oversample` padding of
 
 ```python
 cepstrum(
-    x: Signal | NDArray[np.float64] | list[float],
+    x: Signal | ArrayLike,
     fs: float | None = None,
     *,
     kind: Literal['power', 'real', 'complex'] = 'power',
@@ -196,7 +196,7 @@ Plot the cepstrum against quefrency (positive quefrencies).
 
 ```python
 echo_detection(
-    x: Signal | NDArray[np.float64] | list[float],
+    x: Signal | ArrayLike,
     fs: float | None = None,
     *,
     min_quefrency: float | None = None,
@@ -296,7 +296,7 @@ Plot the power cepstrum with the detected echo marked.
 
 ```python
 lifter(
-    x: Signal | NDArray[np.float64] | list[float],
+    x: Signal | ArrayLike,
     fs: float | None = None,
     *,
     cutoff: float,

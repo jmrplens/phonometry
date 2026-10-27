@@ -24,7 +24,7 @@ signatures are unchanged -- a plain array with an explicit `fs` and
 
 ```python
 laeq(
-    x: Signal | list[float] | np.ndarray,
+    x: Signal | ArrayLike,
     fs: int | None = None,
     *,
     calibration_factor: float | None = None,
@@ -49,7 +49,7 @@ A-weighted equivalent continuous sound level (LAeq).
 
 ```python
 lc_peak(
-    x: Signal | list[float] | np.ndarray,
+    x: Signal | ArrayLike,
     fs: int | None = None,
     *,
     calibration_factor: float | None = None,
@@ -95,7 +95,7 @@ maximum is taken, recovering the inter-sample peak to within about
 
 ```python
 leq(
-    x: Signal | list[float] | np.ndarray,
+    x: Signal | ArrayLike,
     *,
     calibration_factor: float | None = None,
     dbfs: bool = False,
@@ -118,7 +118,7 @@ Equivalent continuous sound level (Leq) over the whole signal.
 
 ```python
 lex_8h(
-    x: Signal | list[float] | np.ndarray,
+    x: Signal | ArrayLike,
     fs: int | None = None,
     *,
     duration_hours: float | None = None,
@@ -148,7 +148,7 @@ and LEX,8h of ISO 1999 (BS EN 61252:1995, 3.3 NOTES 5-6).
 
 ```python
 ln_levels(
-    x: Signal | list[float] | np.ndarray,
+    x: Signal | ArrayLike,
     fs: int | None = None,
     n: Sequence[int] = (10, 50, 90),
     mode: Literal['fast', 'slow', 'impulse'] = 'fast',
@@ -188,7 +188,7 @@ distribution), L90 the level exceeded 90% of the time, etc.
 
 ```python
 sel(
-    x: Signal | list[float] | np.ndarray,
+    x: Signal | ArrayLike,
     fs: int | None = None,
     weighting: Literal['A', 'C', 'B', 'D', 'G', 'AU', '468', 'Z'] = 'Z',
     *,
@@ -227,7 +227,7 @@ reference responses, Equation 8, in the test suite).
 
 ```python
 sound_exposure(
-    x: Signal | list[float] | np.ndarray,
+    x: Signal | ArrayLike,
     fs: int | None = None,
     *,
     duration_hours: float | None = None,

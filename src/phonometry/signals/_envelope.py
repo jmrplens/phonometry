@@ -69,7 +69,7 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
-    from numpy.typing import NDArray
+    from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
     from .._internal.types import TwoPanels
@@ -199,7 +199,7 @@ def _decimate_envelope(
 
 
 def envelope(
-    x: Signal | NDArray[np.float64] | list[float],
+    x: Signal | ArrayLike,
     fs: float | None = None,
     *,
     decimation_factor: int = 1,
@@ -461,7 +461,7 @@ def _bandpass_pre_filter(
 
 
 def envelope_spectrum(
-    x: Signal | NDArray[np.float64] | list[float],
+    x: Signal | ArrayLike,
     fs: float | None = None,
     *,
     kind: Kind = "magnitude",

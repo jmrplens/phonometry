@@ -111,7 +111,7 @@ from ._weighting_design import design_sos
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from numpy.typing import DTypeLike
+    from numpy.typing import ArrayLike, DTypeLike
 
     from .._i18n import Language
 
@@ -693,7 +693,7 @@ class WeightingFilter:
         """Check whether ``zi`` must be (re)allocated for *x_proc*."""
         return _sos_state_mismatch(self.zi, x_proc)
 
-    def filter(self, x: Signal | list[float] | np.ndarray) -> Signal | np.ndarray:
+    def filter(self, x: Signal | ArrayLike) -> Signal | np.ndarray:
         """Apply the weighting filter to a signal.
 
         :param x: Input signal (1D or 2D [channels, samples]), or a
@@ -769,7 +769,7 @@ def _cached_weighting_filter(
 
 
 def _as_envelope(
-    x: Signal | list[float] | np.ndarray,
+    x: Signal | ArrayLike,
     mean_square: np.ndarray,
     fs: int,
     mode: Mode,
@@ -893,7 +893,7 @@ def weighting_filter(
 
 @overload
 def weighting_filter(
-    x: list[float] | np.ndarray,
+    x: ArrayLike,
     fs: int,
     weighting: Weighting = ...,
     *,
@@ -902,7 +902,7 @@ def weighting_filter(
 
 
 def weighting_filter(
-    x: Signal | list[float] | np.ndarray,
+    x: Signal | ArrayLike,
     fs: int | None = None,
     weighting: Weighting = "A",
     *,
@@ -939,7 +939,7 @@ def weighting_filter(
 
 def _prepare_time_weighting_initial_state(
     x_sq: np.ndarray,
-    initial_state: InitialState | float | np.ndarray | None,
+    initial_state: InitialState | ArrayLike | None,
 ) -> np.ndarray:
     """Return the previous output state ``y[-1]`` for time weighting."""
     invalid_initial_state_message = (
@@ -1010,24 +1010,24 @@ def time_weighting(
     x: Signal,
     fs: int | None = ...,
     mode: Mode = ...,
-    initial_state: InitialState | float | np.ndarray | None = ...,
+    initial_state: InitialState | ArrayLike | None = ...,
 ) -> TimeWeightedEnvelope: ...
 
 
 @overload
 def time_weighting(
-    x: list[float] | np.ndarray,
+    x: ArrayLike,
     fs: int,
     mode: Mode = ...,
-    initial_state: InitialState | float | np.ndarray | None = ...,
+    initial_state: InitialState | ArrayLike | None = ...,
 ) -> np.ndarray: ...
 
 
 def time_weighting(
-    x: Signal | list[float] | np.ndarray,
+    x: Signal | ArrayLike,
     fs: int | None = None,
     mode: Mode = "fast",
-    initial_state: InitialState | float | np.ndarray | None = None,
+    initial_state: InitialState | ArrayLike | None = None,
 ) -> TimeWeightedEnvelope | np.ndarray:
     """Apply time weighting to a signal (Exponential averaging).
 
@@ -1117,9 +1117,7 @@ class TimeWeighting:
         self.mode: Mode = folded
         self._state: np.ndarray | None = None
 
-    def process(
-        self, x: Signal | list[float] | np.ndarray
-    ) -> TimeWeightedEnvelope | np.ndarray:
+    def process(self, x: Signal | ArrayLike) -> TimeWeightedEnvelope | np.ndarray:
         """Apply time weighting to a block, continuing from the previous block.
 
         The block form of :func:`time_weighting`, and it returns the same
@@ -1160,12 +1158,12 @@ def linkwitz_riley(
 
 @overload
 def linkwitz_riley(
-    x: list[float] | np.ndarray, fs: int, *, frequency: float, order: int = ...
+    x: ArrayLike, fs: int, *, frequency: float, order: int = ...
 ) -> tuple[np.ndarray, np.ndarray]: ...
 
 
 def linkwitz_riley(
-    x: Signal | list[float] | np.ndarray,
+    x: Signal | ArrayLike,
     fs: int | None = None,
     *,
     frequency: float,

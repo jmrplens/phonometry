@@ -68,6 +68,7 @@ if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
 
     from matplotlib.axes import Axes
+    from numpy.typing import ArrayLike
 
     from .._i18n import Language
     from .._internal.types import ReportEngine
@@ -273,7 +274,7 @@ def min_cumulative_duration_hours(n_workers: int) -> float:
 # --------------------------------------------------------------------------- #
 # Energy helpers.
 # --------------------------------------------------------------------------- #
-def _sampling_std(levels: Sequence[float]) -> float:
+def _sampling_std(levels: ArrayLike) -> float:
     """Sample standard deviation about the arithmetic mean (Eq C.12), dB.
 
     Used for the job/full-day sampling uncertainty ``u1`` (denominator ``N-1``).
@@ -818,7 +819,7 @@ def task_based_exposure(
 # Strategies 2 and 3: job-based (Clauses 10, C.3) and full-day (Clauses 11, C.4).
 # --------------------------------------------------------------------------- #
 def _sampled_exposure(
-    samples: Sequence[float],
+    samples: ArrayLike,
     effective_duration_hours: float,
     instrument: InstrumentClass,
     u3: float,
@@ -841,10 +842,10 @@ def _sampled_exposure(
         msg = "'u3' must be non-negative."
         raise ValueError(msg)
 
-    lp_aeqte = energy_mean(samples)  # Eq 11
+    lp_aeqte = energy_mean(arr)  # Eq 11
     lex_8h = lp_aeqte + 10.0 * log10(effective_duration_hours / _T0)  # Eq 12/13
 
-    u1 = _sampling_std(samples)  # Eq C.12
+    u1 = _sampling_std(arr)  # Eq C.12
     c1u1 = table_c4_contribution(n, u1)  # Table C.4
     u2 = INSTRUMENT_U2[instrument]
     # Eq C.9 with c2 = c3 = 1.
@@ -879,7 +880,7 @@ def _sampled_exposure(
 
 
 def job_based_exposure(
-    samples: Sequence[float],
+    samples: ArrayLike,
     effective_duration_hours: float,
     instrument: InstrumentClass = "personal_exposimeter",
     u3: float = _U3_DEFAULT,
@@ -925,7 +926,7 @@ def job_based_exposure(
     )
     if n_workers is not None and sample_duration_hours is not None:
         required = min_cumulative_duration_hours(n_workers)
-        cumulative = len(samples) * sample_duration_hours
+        cumulative = np.asarray(samples).size * sample_duration_hours
         if cumulative < required - 1e-9 and warn:
             warnings.warn(
                 f"Cumulative measurement duration {cumulative:.2f} h is below the "
@@ -940,7 +941,7 @@ def job_based_exposure(
 
 
 def full_day_exposure(
-    samples: Sequence[float],
+    samples: ArrayLike,
     effective_duration_hours: float,
     instrument: InstrumentClass = "personal_exposimeter",
     u3: float = _U3_DEFAULT,

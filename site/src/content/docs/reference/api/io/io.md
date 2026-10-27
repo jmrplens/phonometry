@@ -1780,7 +1780,7 @@ checked when the path is known, still before anything starts.
 ```python
 write(
     path: str | Path,
-    x: Signal | NDArray[np.generic] | list[float],
+    x: Signal | ArrayLike,
     fs: int | None = ...,
     *,
     subtype: Literal['PCM_16', 'PCM_24', 'PCM_32', 'FLOAT', 'DOUBLE'] | None = ...,
@@ -1792,7 +1792,7 @@ write(
 
 write(
     path: str | Path,
-    x: Signal | NDArray[np.generic] | list[float],
+    x: Signal | ArrayLike,
     fs: int | None = ...,
     *,
     subtype: Literal['PCM_16', 'PCM_24', 'PCM_32', 'FLOAT', 'DOUBLE'] | None = ...,

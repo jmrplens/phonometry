@@ -493,7 +493,7 @@ def _k1_lower_criterion(frequencies: np.ndarray) -> np.ndarray:
 
 
 def precision_background_correction(
-    source_levels: np.ndarray, background_levels: np.ndarray, *, frequencies: np.ndarray
+    source_levels: ArrayLike, background_levels: ArrayLike, *, frequencies: ArrayLike
 ) -> np.ndarray:
     r"""Per-position background correction ``K1i`` (ISO 3745:2012 Eq. 11).
 
@@ -550,7 +550,7 @@ def meteorological_corrections(
     *,
     temperature_c: float = 23.0,
     static_pressure_kpa: float = _PS0_KPA,
-    air_absorption_db_per_m: float | np.ndarray | None = None,
+    air_absorption_db_per_m: ArrayLike | None = None,
     radius: float = 1.0,
 ) -> MeteorologicalCorrection:
     r"""Meteorological corrections C1, C2, C3 (ISO 3745:2012 Eq. 14 block).
@@ -694,7 +694,7 @@ def precision_uncertainty(
 
 def _precision_k1(
     levels: np.ndarray,
-    background_levels: np.ndarray | None,
+    background_levels: ArrayLike | None,
     freqs: np.ndarray | None,
 ) -> np.ndarray:
     """Per-position background correction K1i (Eq. 11), zero without background.
@@ -724,7 +724,7 @@ def _precision_k1(
 
 
 def _precision_surface_level(
-    corrected: np.ndarray, areas: np.ndarray | None
+    corrected: np.ndarray, areas: ArrayLike | None
 ) -> np.ndarray:
     """Surface time-averaged level Lp_bar: equal-area Eq. 12 or area-weighted
     Eq. 13 when partial areas ``Si`` are supplied.
@@ -783,7 +783,7 @@ def _room_qualification_warnings(
     check: FreeFieldCheck,
     surface: PrecisionSurface,
     radius: float,
-    frequencies: np.ndarray | None,
+    frequencies: ArrayLike | None,
 ) -> None:
     """Warn where the measurement leaves the room qualification (Annex A)."""
     room = "anechoic" if surface == "sphere" else "hemi-anechoic"
@@ -831,16 +831,16 @@ def _room_qualification_warnings(
 
 @overload
 def sound_power_anechoic(
-    levels_positions: np.ndarray,
+    levels_positions: ArrayLike,
     surface: PrecisionSurface,
     *,
     radius: float,
-    background_levels: np.ndarray,
-    frequencies: np.ndarray,
-    areas: np.ndarray | None = ...,
+    background_levels: ArrayLike,
+    frequencies: ArrayLike,
+    areas: ArrayLike | None = ...,
     temperature_c: float = ...,
     static_pressure_kpa: float = ...,
-    air_absorption_db_per_m: float | np.ndarray | None = ...,
+    air_absorption_db_per_m: ArrayLike | None = ...,
     sigma_omc_db: float = ...,
     coverage_factor: float = ...,
     room_qualification: FreeFieldCheck | None = ...,
@@ -849,15 +849,15 @@ def sound_power_anechoic(
 
 @overload
 def sound_power_anechoic(
-    levels_positions: np.ndarray,
+    levels_positions: ArrayLike,
     surface: PrecisionSurface,
     *,
     radius: float,
-    frequencies: np.ndarray | None = ...,
-    areas: np.ndarray | None = ...,
+    frequencies: ArrayLike | None = ...,
+    areas: ArrayLike | None = ...,
     temperature_c: float = ...,
     static_pressure_kpa: float = ...,
-    air_absorption_db_per_m: float | np.ndarray | None = ...,
+    air_absorption_db_per_m: ArrayLike | None = ...,
     sigma_omc_db: float = ...,
     coverage_factor: float = ...,
     room_qualification: FreeFieldCheck | None = ...,
@@ -865,16 +865,16 @@ def sound_power_anechoic(
 
 
 def sound_power_anechoic(
-    levels_positions: np.ndarray,
+    levels_positions: ArrayLike,
     surface: PrecisionSurface,
     *,
     radius: float,
-    background_levels: np.ndarray | None = None,
-    frequencies: np.ndarray | None = None,
-    areas: np.ndarray | None = None,
+    background_levels: ArrayLike | None = None,
+    frequencies: ArrayLike | None = None,
+    areas: ArrayLike | None = None,
     temperature_c: float = 23.0,
     static_pressure_kpa: float = _PS0_KPA,
-    air_absorption_db_per_m: float | np.ndarray | None = None,
+    air_absorption_db_per_m: ArrayLike | None = None,
     sigma_omc_db: float = 0.0,
     coverage_factor: float = 2.0,
     room_qualification: FreeFieldCheck | None = None,

@@ -96,7 +96,7 @@ from .spectra import _positive
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from numpy.typing import NDArray
+    from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
     from .._internal.types import TwoPanels
@@ -118,7 +118,7 @@ _MIN_SAMPLES_PER_PERIOD = 2
 
 
 def comb_filter_response(
-    frequencies: NDArray[np.float64] | list[float],
+    frequencies: ArrayLike,
     period_s: float,
     n_averages: int,
 ) -> NDArray[np.float64]:
@@ -401,7 +401,7 @@ def _comb_grid(
 
 
 def time_synchronous_average(
-    x: Signal | NDArray[np.float64] | list[float],
+    x: Signal | ArrayLike,
     fs: float | None = None,
     *,
     period_s: float,

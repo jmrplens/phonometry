@@ -31,6 +31,7 @@ from ...signals.spectra import _welch_autospectrum
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
+    from numpy.typing import ArrayLike
 
     from ..._i18n import Language
     from ...io._signal import Signal
@@ -353,7 +354,7 @@ def _pr_criterion(ft: float) -> float:
 
 
 def tone_to_noise_ratio(
-    x: Signal | list[float] | np.ndarray,
+    x: Signal | ArrayLike,
     fs: int | None = None,
     *,
     tone_frequency: float | None = None,
@@ -489,7 +490,7 @@ def _fitted_edge(
 
 
 def prominence_ratio(
-    x: Signal | list[float] | np.ndarray,
+    x: Signal | ArrayLike,
     fs: int | None = None,
     *,
     tone_frequency: float | None = None,

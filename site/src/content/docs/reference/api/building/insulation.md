@@ -94,25 +94,25 @@ box the rating on the field report form.
 
 ```python
 airborne_insulation(
-    l1: Sequence[float] | np.ndarray,
-    l2: Sequence[float] | np.ndarray,
-    t2: Sequence[float] | np.ndarray,
+    l1: ArrayLike,
+    l2: ArrayLike,
+    t2: ArrayLike,
     *,
     area: float,
     volume: float,
     t0: float = ...,
-    frequencies: Sequence[float] | np.ndarray | None = ...,
+    frequencies: ArrayLike | None = ...,
     source_low_frequency: LowFrequencyProcedure | None = ...,
     receiver_low_frequency: LowFrequencyProcedure | None = ...,
 ) -> AirborneInsulationResult
 
 airborne_insulation(
-    l1: Sequence[float] | np.ndarray,
-    l2: Sequence[float] | np.ndarray,
-    t2: Sequence[float] | np.ndarray,
+    l1: ArrayLike,
+    l2: ArrayLike,
+    t2: ArrayLike,
     *,
     t0: float = ...,
-    frequencies: Sequence[float] | np.ndarray | None = ...,
+    frequencies: ArrayLike | None = ...,
     source_low_frequency: LowFrequencyProcedure | None = ...,
     receiver_low_frequency: LowFrequencyProcedure | None = ...,
 ) -> AirborneInsulationResult
@@ -281,7 +281,7 @@ verdict row and a footer with the identity block and disclaimer.
 
 ```python
 energy_average_level(
-    levels: Sequence[float] | np.ndarray,
+    levels: ArrayLike,
     *,
     axis: int = -1,
 ) -> float | NDArray[np.float64]
@@ -312,16 +312,16 @@ $L = 10 \log_{10}\left( \frac{1}{n} \sum_j 10^{L_j/10} \right)$.
 
 ```python
 facade_insulation(
-    l1_2m: Sequence[float] | np.ndarray,
-    l2: Sequence[float] | np.ndarray,
-    t2: Sequence[float] | np.ndarray,
+    l1_2m: ArrayLike,
+    l2: ArrayLike,
+    t2: ArrayLike,
     *,
     area: float | None = None,
     volume: float | None = None,
-    surface_level: Sequence[float] | np.ndarray | None = None,
+    surface_level: ArrayLike | None = None,
     method: Literal['road_traffic', 'loudspeaker'] = 'loudspeaker',
     t0: float = 0.5,
-    frequencies: Sequence[float] | np.ndarray | None = None,
+    frequencies: ArrayLike | None = None,
     low_frequency: LowFrequencyProcedure | None = None,
 ) -> FacadeInsulationResult
 ```
@@ -492,12 +492,12 @@ and a footer with the identity block and disclaimer.
 
 ```python
 impact_insulation(
-    li: Sequence[float] | np.ndarray,
-    t2: Sequence[float] | np.ndarray,
+    li: ArrayLike,
+    t2: ArrayLike,
     *,
     volume: float | None = None,
     t0: float = 0.5,
-    frequencies: Sequence[float] | np.ndarray | None = None,
+    frequencies: ArrayLike | None = None,
     low_frequency: LowFrequencyProcedure | None = None,
 ) -> ImpactInsulationResult
 ```

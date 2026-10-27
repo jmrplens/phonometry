@@ -93,6 +93,8 @@ from ..._internal.validation import (
 )
 
 if TYPE_CHECKING:
+    from collections.abc import Sequence
+
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
@@ -2833,7 +2835,7 @@ def _directed_vehicle_power(
 
 
 def railway_source_power(
-    traffic: RailwayVehicle | list[RailwayVehicle] | tuple[RailwayVehicle, ...],
+    traffic: RailwayVehicle | Sequence[RailwayVehicle],
     track: RailwayTrack,
     *,
     psi: float = 0.0,

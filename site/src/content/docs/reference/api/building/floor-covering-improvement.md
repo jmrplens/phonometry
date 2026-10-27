@@ -58,7 +58,7 @@ results (Clause 8 e)) also carries the spectrum adaptation term `CI,Δ` (ISO
 
 ```python
 acceleration_level(
-    acceleration: float | Sequence[float] | np.ndarray,
+    acceleration: ArrayLike,
     *,
     reference: float = 1e-06,
 ) -> np.ndarray
@@ -88,10 +88,10 @@ $L_a = 10 \log_{10}(a_\mathrm{rms}^2 / a_0^2) = 20 \log_{10}(a_\mathrm{rms} / a_
 
 ```python
 background_corrected_level(
-    signal_and_background: float | Sequence[float] | np.ndarray,
-    background: float | Sequence[float] | np.ndarray,
+    signal_and_background: ArrayLike,
+    background: ArrayLike,
     *,
-    frequencies: Sequence[float] | np.ndarray | None = None,
+    frequencies: ArrayLike | None = None,
 ) -> BackgroundCorrectedLevel
 ```
 
@@ -302,11 +302,11 @@ rating bands 100-3150 Hz), an optional verdict row and a footer.
 
 ```python
 impact_improvement(
-    bare: float | Sequence[float] | np.ndarray,
-    with_covering: float | Sequence[float] | np.ndarray,
+    bare: ArrayLike,
+    with_covering: ArrayLike,
     *,
-    frequencies: float | Sequence[float] | np.ndarray,
-    background: float | Sequence[float] | np.ndarray | None = None,
+    frequencies: ArrayLike,
+    background: ArrayLike | None = None,
 ) -> FloorCoveringImprovementResult
 ```
 
@@ -348,9 +348,9 @@ over positions $\Delta L = \mathrm{mean}(\Delta L_{t,a})$
 
 ```python
 improvement_octave_bands(
-    improvement: Sequence[float] | np.ndarray,
+    improvement: ArrayLike,
     *,
-    frequencies: Sequence[float] | np.ndarray,
+    frequencies: ArrayLike,
     quantity: Literal['ΔL', 'ΔR', 'Rs', 'LI', 'LI,norm'] = 'ΔL',
 ) -> OctaveBandSpectrum
 ```

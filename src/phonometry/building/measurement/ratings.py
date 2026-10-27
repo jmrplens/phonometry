@@ -100,6 +100,7 @@ if TYPE_CHECKING:
     from collections.abc import Sequence
 
     from matplotlib.axes import Axes
+    from numpy.typing import ArrayLike
 
     from ..._i18n import Language
     from ..._internal.types import BandFraction
@@ -398,7 +399,7 @@ _THIRD_OCTAVE_ONLY: frozenset[float] = frozenset(_FREQ_THIRD_OCTAVE) - frozenset
 
 
 def _by_band(
-    values: Mapping[float, float] | Sequence[float] | np.ndarray,
+    values: Mapping[float, float] | ArrayLike,
     fraction: BandFraction | None,
     name: str,
 ) -> tuple[np.ndarray, BandFraction | None]:
@@ -944,7 +945,7 @@ def _adaptation_term(
 
 
 def weighted_rating(
-    values_by_band: Mapping[float, float] | Sequence[float] | np.ndarray,
+    values_by_band: Mapping[float, float] | ArrayLike,
     fraction: BandFraction | None = None,
 ) -> WeightedRatingResult:
     """Single-number weighted rating and C / Ctr per ISO 717-1.
@@ -1059,7 +1060,7 @@ def _impact_ci(measured: np.ndarray, rating: int, n_bands: int) -> int:
 
 
 def weighted_impact_rating(
-    values_by_band: Mapping[float, float] | Sequence[float] | np.ndarray,
+    values_by_band: Mapping[float, float] | ArrayLike,
     fraction: BandFraction | None = None,
 ) -> ImpactRatingResult:
     r"""Single-number weighted impact rating and CI per ISO 717-2.
@@ -1397,8 +1398,8 @@ def _match_bands(
 
 def _validated_extended_input(
     owner: str,
-    values_by_band: Sequence[float] | np.ndarray,
-    frequencies: Sequence[float] | np.ndarray | None,
+    values_by_band: ArrayLike,
+    frequencies: ArrayLike | None,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Validate the extended-range input; return (measured, freqs, core_idx).
 
@@ -1441,9 +1442,9 @@ def _validated_extended_input(
 
 
 def weighted_rating_extended(
-    values_by_band: Sequence[float] | np.ndarray,
+    values_by_band: ArrayLike,
     *,
-    frequencies: Sequence[float] | np.ndarray | None = None,
+    frequencies: ArrayLike | None = None,
     one_decimal: bool = False,
 ) -> ExtendedWeightedRatingResult:
     r"""Weighted rating with enlarged-range adaptation terms (ISO 717-1 An. B).
@@ -1518,9 +1519,9 @@ def weighted_rating_extended(
 
 
 def weighted_impact_rating_extended(
-    values_by_band: Sequence[float] | np.ndarray,
+    values_by_band: ArrayLike,
     *,
-    frequencies: Sequence[float] | np.ndarray | None = None,
+    frequencies: ArrayLike | None = None,
     one_decimal: bool = False,
 ) -> ExtendedImpactRatingResult:
     r"""Weighted impact rating with ``CI,50-2500`` (ISO 717-2:2020 A.2.1).
@@ -1696,7 +1697,7 @@ def _validated_improvement(
 
 
 def _impact_improvement_ratings(
-    delta_l: Mapping[float, float] | Sequence[float] | np.ndarray,
+    delta_l: Mapping[float, float] | ArrayLike,
     reference_floor: str,
     *,
     one_decimal: bool,
@@ -1716,7 +1717,7 @@ def _impact_improvement_ratings(
 
 @overload
 def weighted_impact_improvement(
-    delta_l: Mapping[float, float] | Sequence[float] | np.ndarray,
+    delta_l: Mapping[float, float] | ArrayLike,
     *,
     reference_floor: ReferenceFloor = ...,
     one_decimal: Literal[False] = ...,
@@ -1725,7 +1726,7 @@ def weighted_impact_improvement(
 
 @overload
 def weighted_impact_improvement(
-    delta_l: Mapping[float, float] | Sequence[float] | np.ndarray,
+    delta_l: Mapping[float, float] | ArrayLike,
     *,
     reference_floor: ReferenceFloor = ...,
     one_decimal: Literal[True],
@@ -1734,7 +1735,7 @@ def weighted_impact_improvement(
 
 @overload
 def weighted_impact_improvement(
-    delta_l: Mapping[float, float] | Sequence[float] | np.ndarray,
+    delta_l: Mapping[float, float] | ArrayLike,
     *,
     reference_floor: ReferenceFloor = ...,
     one_decimal: bool = ...,
@@ -1742,7 +1743,7 @@ def weighted_impact_improvement(
 
 
 def weighted_impact_improvement(
-    delta_l: Mapping[float, float] | Sequence[float] | np.ndarray,
+    delta_l: Mapping[float, float] | ArrayLike,
     *,
     reference_floor: ReferenceFloor = "heavyweight",
     one_decimal: bool = False,
@@ -1789,7 +1790,7 @@ def weighted_impact_improvement(
 
 @overload
 def impact_improvement_adaptation_term(
-    delta_l: Mapping[float, float] | Sequence[float] | np.ndarray,
+    delta_l: Mapping[float, float] | ArrayLike,
     *,
     reference_floor: ReferenceFloor = ...,
     one_decimal: Literal[False] = ...,
@@ -1798,7 +1799,7 @@ def impact_improvement_adaptation_term(
 
 @overload
 def impact_improvement_adaptation_term(
-    delta_l: Mapping[float, float] | Sequence[float] | np.ndarray,
+    delta_l: Mapping[float, float] | ArrayLike,
     *,
     reference_floor: ReferenceFloor = ...,
     one_decimal: Literal[True],
@@ -1807,7 +1808,7 @@ def impact_improvement_adaptation_term(
 
 @overload
 def impact_improvement_adaptation_term(
-    delta_l: Mapping[float, float] | Sequence[float] | np.ndarray,
+    delta_l: Mapping[float, float] | ArrayLike,
     *,
     reference_floor: ReferenceFloor = ...,
     one_decimal: bool = ...,
@@ -1815,7 +1816,7 @@ def impact_improvement_adaptation_term(
 
 
 def impact_improvement_adaptation_term(
-    delta_l: Mapping[float, float] | Sequence[float] | np.ndarray,
+    delta_l: Mapping[float, float] | ArrayLike,
     *,
     reference_floor: ReferenceFloor = "heavyweight",
     one_decimal: bool = False,
@@ -1949,9 +1950,9 @@ class ReductionImprovementRating(RichDisplay):
 
 
 def weighted_reduction_improvement(
-    delta_r: Sequence[float] | np.ndarray,
+    delta_r: ArrayLike,
     *,
-    frequencies: Sequence[float] | np.ndarray | None = None,
+    frequencies: ArrayLike | None = None,
     basic_element: BasicElement = "heavy_wall",
     one_decimal: bool = False,
 ) -> ReductionImprovementRating:

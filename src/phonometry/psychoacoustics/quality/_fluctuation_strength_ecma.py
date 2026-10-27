@@ -105,6 +105,7 @@ from ...io._resolve import apply_calibration, resolve_fs
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
+    from numpy.typing import ArrayLike
 
     from ..._i18n import Language
     from ..._internal.types import TwoPanels
@@ -931,7 +932,7 @@ def _aggregate(
 
 
 def fluctuation_strength_ecma(
-    x: Signal | np.ndarray,
+    x: Signal | ArrayLike,
     fs: float | None = None,
     field: Literal["free", "diffuse"] = "free",
 ) -> EcmaFluctuationStrength:

@@ -40,7 +40,7 @@ from ..acoustics import UNDERWATER_REFERENCE_PRESSURE_PA, _positive
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from numpy.typing import NDArray
+    from numpy.typing import ArrayLike, NDArray
 
     from ..._i18n import Language
 
@@ -90,7 +90,7 @@ def radiated_noise_level(rms_pressure_pa: float, distance: float) -> float:
 
 
 def hydrophone_depths(
-    cpa_distance: float, *, angles_deg: tuple[float, ...] = _STANDARD_ANGLES
+    cpa_distance: float, *, angles_deg: ArrayLike = _STANDARD_ANGLES
 ) -> NDArray[np.float64]:
     r"""Hydrophone depths for the ISO 17208-1 deep-water geometry.
 
@@ -222,10 +222,10 @@ class ShipSourceLevelResult(OwnsArrays):
 
 
 def monopole_source_level(
-    rnl: float | NDArray[np.float64] | list[float],
+    rnl: ArrayLike,
     draft_m: float,
     *,
-    frequency: float | NDArray[np.float64] | list[float],
+    frequency: ArrayLike,
     speed_of_sound: float = _DEFAULT_SOUND_SPEED,
 ) -> ShipSourceLevelResult:
     r"""Equivalent monopole source level from radiated noise level

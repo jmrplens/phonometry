@@ -79,7 +79,7 @@ are bracketed and excluded from the single-number mean when the per-band
 
 ```python
 band_mode_count(
-    frequencies: Sequence[float] | np.ndarray,
+    frequencies: ArrayLike,
     area: float,
     critical_frequency: float,
     *,
@@ -116,13 +116,13 @@ band is
 
 ```python
 check_strong_coupling(
-    velocity_level_difference: Sequence[float] | np.ndarray,
+    velocity_level_difference: ArrayLike,
     mass_i: float,
     mass_j: float,
     critical_frequency_i: float,
     critical_frequency_j: float,
     *,
-    frequencies: Sequence[float] | np.ndarray | None = None,
+    frequencies: ArrayLike | None = None,
 ) -> StrongCouplingCheck
 ```
 
@@ -205,8 +205,8 @@ Hopkins Eq. 2.201 derives. See `docs/ERRATA.md`.
 
 ```python
 direction_averaged_level_difference(
-    dv_ij: Sequence[float] | np.ndarray,
-    dv_ji: Sequence[float] | np.ndarray,
+    dv_ij: ArrayLike,
+    dv_ji: ArrayLike,
 ) -> np.ndarray
 ```
 
@@ -237,9 +237,9 @@ $\overline{D}_{\mathrm{v},ij} = \frac{1}{2}(D_{\mathrm{v},ij} + D_{\mathrm{v},ji
 ```python
 equivalent_absorption_length(
     area: float,
-    structural_reverberation_time: float | Sequence[float] | np.ndarray,
+    structural_reverberation_time: ArrayLike,
     *,
-    frequencies: Sequence[float] | np.ndarray,
+    frequencies: ArrayLike,
     speed_of_sound: float = 343.0,
 ) -> np.ndarray
 ```
@@ -454,7 +454,7 @@ Modal density $n = \pi \cdot S \cdot f_\mathrm{c} / c_0^2$ (Part 4, (5)).
 modal_overlap_factor(
     area: float,
     critical_frequency: float,
-    structural_reverberation_time: float | Sequence[float] | np.ndarray,
+    structural_reverberation_time: ArrayLike,
     *,
     speed_of_sound: float = 343.0,
 ) -> np.ndarray
@@ -491,8 +491,8 @@ bracketing and single-number exclusion.
 
 ```python
 normalized_flanking_impact_level(
-    receive_level: Sequence[float] | np.ndarray,
-    absorption_area: Sequence[float] | np.ndarray,
+    receive_level: ArrayLike,
+    absorption_area: ArrayLike,
     *,
     reference_area: float = 10.0,
     fraction: Literal[1, 3] | None = None,
@@ -527,9 +527,9 @@ tapping machine on the source-room floor.
 
 ```python
 normalized_flanking_level_difference(
-    source_level: Sequence[float] | np.ndarray,
-    receive_level: Sequence[float] | np.ndarray,
-    absorption_area: Sequence[float] | np.ndarray,
+    source_level: ArrayLike,
+    receive_level: ArrayLike,
+    absorption_area: ArrayLike,
     *,
     reference_area: float = 10.0,
     fraction: Literal[1, 3] | None = None,
@@ -659,9 +659,9 @@ Requires matplotlib (`pip install "phonometry[plot]"`).
 
 ```python
 total_loss_factor(
-    structural_reverberation_time: float | Sequence[float] | np.ndarray,
+    structural_reverberation_time: ArrayLike,
     *,
-    frequencies: Sequence[float] | np.ndarray,
+    frequencies: ArrayLike,
 ) -> np.ndarray
 ```
 
@@ -686,8 +686,8 @@ Total loss factor $\eta = 2.2 / (f \, T_\mathrm{s})$ (Clause 7.3.1).
 
 ```python
 velocity_level_difference(
-    source_level: Sequence[float] | np.ndarray,
-    receive_level: Sequence[float] | np.ndarray,
+    source_level: ArrayLike,
+    receive_level: ArrayLike,
 ) -> np.ndarray
 ```
 
@@ -712,16 +712,16 @@ Velocity level difference $D_{\mathrm{v},ij} = L_{\mathrm{v},i} - L_{\mathrm{v},
 
 ```python
 vibration_reduction_index(
-    velocity_level_difference: Sequence[float] | np.ndarray,
+    velocity_level_difference: ArrayLike,
     junction_length: float,
     area_i: float,
     area_j: float,
     *,
-    frequencies: Sequence[float] | np.ndarray | None = None,
-    structural_reverberation_time_i: float | Sequence[float] | np.ndarray | None = None,
-    structural_reverberation_time_j: float | Sequence[float] | np.ndarray | None = None,
+    frequencies: ArrayLike | None = None,
+    structural_reverberation_time_i: ArrayLike | None = None,
+    structural_reverberation_time_j: ArrayLike | None = None,
     speed_of_sound: float = 343.0,
-    modal_overlap: Sequence[float] | np.ndarray | None = None,
+    modal_overlap: ArrayLike | None = None,
 ) -> VibrationReductionResult
 ```
 
@@ -763,14 +763,14 @@ is used.
 
 ```python
 vibration_reduction_index_from_flanking(
-    normalized_flanking_level_difference: Sequence[float] | np.ndarray,
-    reduction_index_i: Sequence[float] | np.ndarray,
-    reduction_index_j: Sequence[float] | np.ndarray,
+    normalized_flanking_level_difference: ArrayLike,
+    reduction_index_i: ArrayLike,
+    reduction_index_j: ArrayLike,
     junction_length: float,
     area_i: float,
     area_j: float,
-    absorption_length_i: Sequence[float] | np.ndarray,
-    absorption_length_j: Sequence[float] | np.ndarray,
+    absorption_length_i: ArrayLike,
+    absorption_length_j: ArrayLike,
     *,
     reference_area: float = 10.0,
 ) -> np.ndarray

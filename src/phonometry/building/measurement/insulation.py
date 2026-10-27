@@ -121,7 +121,7 @@ if TYPE_CHECKING:
     from collections.abc import Sequence
 
     from matplotlib.axes import Axes
-    from numpy.typing import NDArray
+    from numpy.typing import ArrayLike, NDArray
 
     from ..._i18n import Language
     from ..._report.metadata import ReportMetadata
@@ -726,7 +726,7 @@ def _render_iso16283_facade(
 
 
 def energy_average_level(
-    levels: Sequence[float] | np.ndarray, *, axis: int = -1
+    levels: ArrayLike, *, axis: int = -1
 ) -> float | NDArray[np.float64]:
     r"""Energy-average sound pressure level (ISO 16283-1:2014, Formula (9)).
 
@@ -754,7 +754,7 @@ def energy_average_level(
     return as_float_if_reduced(energy_mean(data, axis=axis))
 
 
-def _as_band_levels(levels: Sequence[float] | np.ndarray, name: str) -> np.ndarray:
+def _as_band_levels(levels: ArrayLike, name: str) -> np.ndarray:
     """Coerce room levels to per-band values, energy-averaging positions.
 
     A one-dimensional input is taken as one already-averaged level per
@@ -799,7 +799,7 @@ def _validate_reverberation(t: np.ndarray, t0: float) -> None:
 
 
 def _checked_frequency_axis(
-    frequencies: Sequence[float] | np.ndarray | None, band_count: int, owner: str
+    frequencies: ArrayLike | None, band_count: int, owner: str
 ) -> np.ndarray | None:
     """The band-centre vector, checked against the measured band count.
 
@@ -924,14 +924,14 @@ def _apparent_reduction_index(
 
 @overload
 def airborne_insulation(
-    l1: Sequence[float] | np.ndarray,
-    l2: Sequence[float] | np.ndarray,
-    t2: Sequence[float] | np.ndarray,
+    l1: ArrayLike,
+    l2: ArrayLike,
+    t2: ArrayLike,
     *,
     area: float,
     volume: float,
     t0: float = ...,
-    frequencies: Sequence[float] | np.ndarray | None = ...,
+    frequencies: ArrayLike | None = ...,
     source_low_frequency: LowFrequencyProcedure | None = ...,
     receiver_low_frequency: LowFrequencyProcedure | None = ...,
 ) -> AirborneInsulationResult: ...
@@ -939,26 +939,26 @@ def airborne_insulation(
 
 @overload
 def airborne_insulation(
-    l1: Sequence[float] | np.ndarray,
-    l2: Sequence[float] | np.ndarray,
-    t2: Sequence[float] | np.ndarray,
+    l1: ArrayLike,
+    l2: ArrayLike,
+    t2: ArrayLike,
     *,
     t0: float = ...,
-    frequencies: Sequence[float] | np.ndarray | None = ...,
+    frequencies: ArrayLike | None = ...,
     source_low_frequency: LowFrequencyProcedure | None = ...,
     receiver_low_frequency: LowFrequencyProcedure | None = ...,
 ) -> AirborneInsulationResult: ...
 
 
 def airborne_insulation(
-    l1: Sequence[float] | np.ndarray,
-    l2: Sequence[float] | np.ndarray,
-    t2: Sequence[float] | np.ndarray,
+    l1: ArrayLike,
+    l2: ArrayLike,
+    t2: ArrayLike,
     *,
     area: float | None = None,
     volume: float | None = None,
     t0: float = 0.5,
-    frequencies: Sequence[float] | np.ndarray | None = None,
+    frequencies: ArrayLike | None = None,
     source_low_frequency: LowFrequencyProcedure | None = None,
     receiver_low_frequency: LowFrequencyProcedure | None = None,
 ) -> AirborneInsulationResult:
@@ -1116,12 +1116,12 @@ def airborne_insulation(
 
 
 def impact_insulation(
-    li: Sequence[float] | np.ndarray,
-    t2: Sequence[float] | np.ndarray,
+    li: ArrayLike,
+    t2: ArrayLike,
     *,
     volume: float | None = None,
     t0: float = 0.5,
-    frequencies: Sequence[float] | np.ndarray | None = None,
+    frequencies: ArrayLike | None = None,
     low_frequency: LowFrequencyProcedure | None = None,
 ) -> ImpactInsulationResult:
     r"""Field impact sound insulation per ISO 16283-2:2020 (tapping machine).
@@ -1249,7 +1249,7 @@ def impact_insulation(
 def _validate_facade_geometry(
     area: float | None,
     volume: float | None,
-    surface_level: Sequence[float] | np.ndarray | None,
+    surface_level: ArrayLike | None,
 ) -> None:
     """Check the optional façade geometry against the element method.
 
@@ -1286,16 +1286,16 @@ def _validate_facade_geometry(
 
 
 def facade_insulation(
-    l1_2m: Sequence[float] | np.ndarray,
-    l2: Sequence[float] | np.ndarray,
-    t2: Sequence[float] | np.ndarray,
+    l1_2m: ArrayLike,
+    l2: ArrayLike,
+    t2: ArrayLike,
     *,
     area: float | None = None,
     volume: float | None = None,
-    surface_level: Sequence[float] | np.ndarray | None = None,
+    surface_level: ArrayLike | None = None,
     method: Method = "loudspeaker",
     t0: float = 0.5,
-    frequencies: Sequence[float] | np.ndarray | None = None,
+    frequencies: ArrayLike | None = None,
     low_frequency: LowFrequencyProcedure | None = None,
 ) -> FacadeInsulationResult:
     r"""Field façade sound insulation per ISO 16283-3:2016.

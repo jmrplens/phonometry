@@ -40,7 +40,7 @@ from ..metrology.reference_values import REFERENCE_VALUES
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
-    from numpy.typing import NDArray
+    from numpy.typing import ArrayLike, NDArray
 
     from ..filters.weighting import Weighting
     from ..io._signal import Signal
@@ -85,7 +85,7 @@ def _validate_level_input(x_proc: np.ndarray, calibration_factor: float) -> None
 
 
 def leq(
-    x: Signal | list[float] | np.ndarray,
+    x: Signal | ArrayLike,
     *,
     calibration_factor: float | None = None,
     dbfs: bool = False,
@@ -115,7 +115,7 @@ def leq(
 
 
 def laeq(
-    x: Signal | list[float] | np.ndarray,
+    x: Signal | ArrayLike,
     fs: int | None = None,
     *,
     calibration_factor: float | None = None,
@@ -146,7 +146,7 @@ def laeq(
 
 
 def ln_levels(
-    x: Signal | list[float] | np.ndarray,
+    x: Signal | ArrayLike,
     fs: int | None = None,
     n: Sequence[int] = (10, 50, 90),
     mode: Literal["fast", "slow", "impulse"] = "fast",
@@ -214,7 +214,7 @@ def ln_levels(
 
 
 def lc_peak(
-    x: Signal | list[float] | np.ndarray,
+    x: Signal | ArrayLike,
     fs: int | None = None,
     *,
     calibration_factor: float | None = None,
@@ -269,7 +269,7 @@ def lc_peak(
 
 
 def sel(
-    x: Signal | list[float] | np.ndarray,
+    x: Signal | ArrayLike,
     fs: int | None = None,
     weighting: Weighting = "Z",
     *,
@@ -317,7 +317,7 @@ def sel(
 
 
 def sound_exposure(
-    x: Signal | list[float] | np.ndarray,
+    x: Signal | ArrayLike,
     fs: int | None = None,
     *,
     duration_hours: float | None = None,
@@ -362,7 +362,7 @@ def sound_exposure(
 
 
 def lex_8h(
-    x: Signal | list[float] | np.ndarray,
+    x: Signal | ArrayLike,
     fs: int | None = None,
     *,
     duration_hours: float | None = None,

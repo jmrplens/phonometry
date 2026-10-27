@@ -457,9 +457,9 @@ values (Article 23.1).
 
 ```python
 long_term_corrected_level(
-    daily_levels: Sequence[float] | np.ndarray,
+    daily_levels: ArrayLike,
     *,
-    weights: Sequence[float] | np.ndarray | None = None,
+    weights: ArrayLike | None = None,
 ) -> float
 ```
 
@@ -842,9 +842,9 @@ for a negative level differs from Python's banker's `round`.
 
 ```python
 tonal_correction(
-    levels: Sequence[float] | np.ndarray,
+    levels: ArrayLike,
     *,
-    frequencies: Sequence[float] | np.ndarray,
+    frequencies: ArrayLike,
 ) -> TonalCorrectionResult
 ```
 

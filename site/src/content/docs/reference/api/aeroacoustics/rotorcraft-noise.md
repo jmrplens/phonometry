@@ -57,13 +57,13 @@ levels and event metrics).
 
 ```python
 flight_condition_weights(
-    airspeeds: NDArray[np.float64] | list[float],
-    path_angles_deg: NDArray[np.float64] | list[float],
+    airspeeds: ArrayLike,
+    path_angles_deg: ArrayLike,
     airspeed: float,
     path_angle_deg: float,
     *,
     scaling_factor: float = 2.0,
-    triangles: NDArray[np.int_] | list[list[int]] | None = None,
+    triangles: ArrayLike | None = None,
 ) -> list[tuple[int, float]]
 ```
 
@@ -116,8 +116,8 @@ as the database conditions.
 
 ```python
 flight_path_kinematics(
-    times: NDArray[np.float64] | list[float],
-    positions: NDArray[np.float64] | list[list[float]],
+    times: ArrayLike,
+    positions: ArrayLike,
     *,
     gravity: float = 9.80665,
 ) -> FlightPathKinematics
@@ -312,10 +312,10 @@ reference implementation.
 
 ```python
 hover_ring_hemisphere(
-    bearings: NDArray[np.float64] | list[float],
-    levels: NDArray[np.float64] | list[list[float]],
+    bearings: ArrayLike,
+    levels: ArrayLike,
     *,
-    frequencies: NDArray[np.float64] | list[float],
+    frequencies: ArrayLike,
     distance_m: float = 70.0,
     azimuth_step: float = 10.0,
     polar_step: float = 10.0,
@@ -380,15 +380,15 @@ and the propagation adjustments honour as the reference distance.
 ```python
 interpolated_source_level(
     hemispheres: Sequence[RotorcraftHemisphere],
-    airspeeds: NDArray[np.float64] | list[float],
-    path_angles_deg: NDArray[np.float64] | list[float],
+    airspeeds: ArrayLike,
+    path_angles_deg: ArrayLike,
     airspeed: float,
     path_angle_deg: float,
     azimuth_deg: float,
     polar_deg: float,
     *,
     scaling_factor: float = 2.0,
-    triangles: NDArray[np.int_] | list[list[int]] | None = None,
+    triangles: ArrayLike | None = None,
 ) -> NDArray[np.float64]
 ```
 
@@ -424,13 +424,13 @@ by [`flight_condition_weights`](/phonometry/reference/api/aeroacoustics/rotorcra
 ```python
 rotorcraft_event_level(
     hemispheres: Sequence[RotorcraftHemisphere],
-    airspeeds: NDArray[np.float64] | list[float],
-    path_angles_deg: NDArray[np.float64] | list[float],
-    times: NDArray[np.float64] | list[float],
-    positions: NDArray[np.float64] | list[list[float]],
-    receiver: tuple[float, float] | NDArray[np.float64] | list[float],
+    airspeeds: ArrayLike,
+    path_angles_deg: ArrayLike,
+    times: ArrayLike,
+    positions: ArrayLike,
+    receiver: ArrayLike,
     *,
-    level_offset: float | NDArray[np.float64] | list[float] = 0.0,
+    level_offset: ArrayLike = 0.0,
     atmosphere: RotorcraftAtmosphere = ...,
     ground: RotorcraftGround = ...,
     track_state: RotorcraftTrackState = ...,
@@ -489,15 +489,15 @@ oriented by the heading and tilted by the bank angle in turns (guidance
 ```python
 rotorcraft_noise_contour(
     hemispheres: Sequence[RotorcraftHemisphere],
-    airspeeds: NDArray[np.float64] | list[float],
-    path_angles_deg: NDArray[np.float64] | list[float],
-    times: NDArray[np.float64] | list[float],
-    positions: NDArray[np.float64] | list[list[float]],
+    airspeeds: ArrayLike,
+    path_angles_deg: ArrayLike,
+    times: ArrayLike,
+    positions: ArrayLike,
     *,
-    x: NDArray[np.float64] | list[float],
-    y: NDArray[np.float64] | list[float],
+    x: ArrayLike,
+    y: ArrayLike,
     metric: Literal['exposure', 'maximum'] = 'exposure',
-    level_offset: float | NDArray[np.float64] | list[float] = 0.0,
+    level_offset: ArrayLike = 0.0,
     atmosphere: RotorcraftAtmosphere = ...,
     ground: RotorcraftGround = ...,
     track_state: RotorcraftTrackState = ...,

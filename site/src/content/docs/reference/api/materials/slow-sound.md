@@ -442,7 +442,7 @@ $\kappa_0 = \gamma P_0$.
 ```python
 slit_helmholtz_absorber(
     frequency: ArrayLike,
-    resonators: HelmholtzResonator | list[HelmholtzResonator] | tuple[HelmholtzResonator, ...],
+    resonators: HelmholtzResonator | Sequence[HelmholtzResonator],
     *,
     slit_height_m: float,
     lattice_step_m: float,

@@ -619,7 +619,7 @@ def _peak_frequency(
 
 
 def internal_spectrum(
-    internal_level: float, peak_frequency: float, frequencies: NDArray[np.float64]
+    internal_level: float, peak_frequency: float, frequencies: ArrayLike
 ) -> NDArray[np.float64]:
     r"""Equation (19): the internal level spread over the third-octave bands.
 
@@ -765,7 +765,7 @@ def _damping_factor(valve_outlet_diameter_m: float) -> float:
 
 
 def pipe_transmission_loss(
-    frequencies: NDArray[np.float64],
+    frequencies: ArrayLike,
     *,
     internal_diameter_m: float,
     wall_thickness_m: float,
@@ -1156,7 +1156,7 @@ class ExpanderNoise(OwnsArrays):
 
 
 def expander_noise(
-    frequencies: NDArray[np.float64],
+    frequencies: ArrayLike,
     *,
     mass_flow: float,
     downstream_density: float,

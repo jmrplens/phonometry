@@ -3478,6 +3478,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- **A public parameter that converts its argument takes any array-like, and
+  one that reads a sequence or a mapping says so.** 561 public
+  parameters of 313 functions and methods handed their argument to
+  `np.asarray`, or to a helper that does, while their annotation said
+  `list[float]`, `NDArray[np.float64]` or `Sequence[float] | np.ndarray`: a
+  typed caller's tuple, list of integers, integer array or nested
+  `[channels, samples]` list ran and was a type error, and `list[float]`
+  refused a `list[int]` besides, `list` being invariant. They take
+  `ArrayLike` now, `Signal | ArrayLike` where a Signal is taken too (the
+  `SignalInput` alias), so `broadcast.true_peak_level` takes the two-channel
+  list it documents, and so does every overload head that names them. A
+  sequence of records or texts is a `Sequence` (`materials.layered_absorber`
+  and `materials.diffuse_field_absorption` `layers`,
+  `noise_control.duct_path` `elements`, `noise_control.combine_duct_paths`
+  `paths`, `environment.road_source_power` and
+  `environment.railway_source_power` `traffic`,
+  `building.joint_gap_series` `results`,
+  `building.installed_source_prediction` `paths`), a mapping a `Mapping`
+  (`noise_control.duct_path` `section`, `aircraft.ANPDatabase` `aircraft`),
+  and a pair of frequency limits a `Sequence[float]`
+  (`filters.octave_filter`, `filters.OctaveFilterBank`,
+  `filters.nominal_frequencies` and `emission.sound_intensity` `limits`).
+  Nothing a call took before is refused; `signals.miso_coherence` reads an
+  array that is not a sequence of records, a 1-D one among them, as its
+  rows, and refuses one row for the second record it lacks, naming
+  `inputs`. `scripts/check_parameter_annotations.py` fails on a public
+  parameter whose body converts what its annotation refuses, followed
+  through the helpers it is handed to, and on any that holds a `list`, a
+  `dict` or a `set` (`io.write_sidecar` `channel_labels` and
+  `vibration.daily_vibration_exposure` `labels` keep `tuple[str, ...] |
+  list[str]`, so that one text stays a type error), and rule A58 of the
+  contributor guide states it.
+
 - **A function of a number or an array of them returns an array for an array,
   a zero-dimensional one included, and says so in its signature.** Ninety
   public functions and methods such as `room.room_constant`,

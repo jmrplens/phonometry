@@ -366,6 +366,22 @@ record-display:
 return-overloads:
 	$(PYTHON) scripts/check_return_overloads.py
 
+# A function that hands its levels to np.asarray takes a list, a tuple, an
+# array of any dtype and a nested list, and annotated list[float] or
+# NDArray[np.float64] it makes a type checker refuse most of them; list is
+# invariant besides, so a list[int] is no list[float]. This fails on a public
+# parameter that holds an array or a sequence of numbers and no ArrayLike
+# while its body converts it (np.asarray and its kin, or a function of the
+# package whose parameter is ArrayLike, followed through helpers six calls
+# deep), on an overload head that takes such a parameter narrower, and on a
+# public parameter that holds list, dict or set anywhere. Annotations are
+# read through the package's aliases and imports. On the tree it was written
+# against it found 561 such parameters of 313 functions and methods; the
+# files gpu_parity.py fingerprints are left out as a whole, read from its
+# _COVERED, and two label lists stay exempt with their reasons. Stdlib only.
+parameter-annotations:
+	$(PYTHON) scripts/check_parameter_annotations.py
+
 # A pressure of 101 325 and a pressure of 101.325 are both legitimate values
 # in this tree, so a bare `pressure` loses its unit the moment a caller types
 # a number. This holds every public pressure, temperature and humidity to a
@@ -857,6 +873,6 @@ check: lint security test
 	snippets snippets-static claims subscripts euler-number docstring-math language-forwarding \
 	fence-names fence-readers decimal-comma spanish-accents figure-decimal-point figure-legends figure-tick-clearance \
 	figure-text-clearance figure-minus-sign control-characters hazards dead-constants raises-blocks reference-values \
-	boundary-comparisons array-aliasing record-display return-overloads \
+	boundary-comparisons array-aliasing record-display return-overloads parameter-annotations \
 	conformance-rows conformance-vocabulary parameter-units identifier-spelling choice-literals frozen-constants published-sources \
 	solid-agreement shared-sources catalogue-data catalogue-schema published-catalogues

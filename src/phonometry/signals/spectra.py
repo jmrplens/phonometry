@@ -80,7 +80,7 @@ from ..io._resolve import apply_calibration, resolve_fs, resolve_pair_fs
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from numpy.typing import NDArray
+    from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
     from .._internal.types import ThreePanels, TwoPanels
@@ -128,7 +128,7 @@ def _positive(value: float, name: str) -> float:
 
 
 def _validate_signal(
-    x: Signal | NDArray[np.float64] | list[float],
+    x: Signal | ArrayLike,
     name: str,
     *,
     context: str = "a spectral estimate",
@@ -482,7 +482,7 @@ class SpectralDensityResult(OwnsArrays):
 
 
 def power_spectral_density(
-    x: Signal | NDArray[np.float64] | list[float],
+    x: Signal | ArrayLike,
     fs: float | None = None,
     *,
     window: str = "hann",
@@ -707,8 +707,8 @@ class CrossSpectralDensityResult(OwnsArrays):
 
 
 def cross_spectral_density(
-    x: Signal | NDArray[np.float64] | list[float],
-    y: Signal | NDArray[np.float64] | list[float],
+    x: Signal | ArrayLike,
+    y: Signal | ArrayLike,
     fs: float | None = None,
     *,
     window: str = "hann",
@@ -944,8 +944,8 @@ class CoherentOutputSpectrumResult(OwnsArrays):
 
 
 def coherent_output_spectrum(
-    x: Signal | NDArray[np.float64] | list[float],
-    y: Signal | NDArray[np.float64] | list[float],
+    x: Signal | ArrayLike,
+    y: Signal | ArrayLike,
     fs: float | None = None,
     *,
     window: str = "hann",
@@ -1128,9 +1128,9 @@ def _smoothing_window_average(
 
 
 def fractional_octave_smoothing(
-    values: NDArray[np.float64] | list[float],
+    values: ArrayLike,
     *,
-    frequencies: NDArray[np.float64] | list[float],
+    frequencies: ArrayLike,
     fraction: float = 3.0,
     domain: Literal["power", "amplitude", "db"] = "power",
 ) -> NDArray[np.float64]:

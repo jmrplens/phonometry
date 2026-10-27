@@ -43,7 +43,7 @@ from .distortion import (
 )
 
 if TYPE_CHECKING:
-    from numpy.typing import NDArray
+    from numpy.typing import ArrayLike, NDArray
 
     from ..io._signal import Signal
 
@@ -102,7 +102,7 @@ def _full_scale_rms(full_scale: float) -> float:
 
 
 def dynamic_range(
-    x: Signal | NDArray[np.float64] | list[float],
+    x: Signal | ArrayLike,
     fs: float | None = None,
     fundamental: float | None = None,
     *,
@@ -173,7 +173,7 @@ def dynamic_range(
 
 
 def idle_channel_noise(
-    x: Signal | NDArray[np.float64] | list[float],
+    x: Signal | ArrayLike,
     fs: float | None = None,
     *,
     bandwidth: float | None = _AES17_BANDWIDTH_HZ,

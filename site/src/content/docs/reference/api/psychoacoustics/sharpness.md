@@ -23,7 +23,7 @@ at, 1.00 acum (~0.96 Aures / ~1.02 von Bismarck through this front-end).
 
 ```python
 sharpness_din(
-    x: Signal | list[float] | np.ndarray,
+    x: Signal | ArrayLike,
     fs: int | None = None,
     field: Literal['free', 'diffuse'] = 'free',
     method: Literal['din', 'aures', 'bismarck'] = 'din',
@@ -61,7 +61,7 @@ tolerance and is a known DIN 45692 implementation property.
 
 ```python
 sharpness_din_from_specific(
-    specific: np.ndarray,
+    specific: ArrayLike,
     method: Literal['din', 'aures', 'bismarck'] = 'din',
 ) -> float
 ```

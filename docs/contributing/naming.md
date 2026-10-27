@@ -544,7 +544,10 @@ noise_signal(48000, 0.5)
 **Do**
 
 ```python
-def correct(levels: list[float], background_levels: list[float], fixture_uncertainty_db: float) -> list[float]:
+from collections.abc import Sequence
+
+
+def correct(levels: Sequence[float], background_levels: Sequence[float], fixture_uncertainty_db: float) -> list[float]:
     return [a - b + fixture_uncertainty_db for a, b in zip(levels, background_levels, strict=True)]
 ```
 

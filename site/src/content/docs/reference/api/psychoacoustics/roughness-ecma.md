@@ -109,7 +109,7 @@ heatmap. Requires matplotlib (`pip install "phonometry[plot]"`).
 
 ```python
 roughness_ecma(
-    x: Signal | np.ndarray,
+    x: Signal | ArrayLike,
     fs: float | None = None,
     field: Literal['free', 'diffuse'] = 'free',
 ) -> EcmaRoughness

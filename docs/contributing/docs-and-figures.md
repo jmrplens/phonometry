@@ -801,10 +801,13 @@ ax.plot(x, y, **{"color": _C_PRIMARY, "lw": 1.5, **kwargs})
 **Do**
 
 ```python
+from collections.abc import Mapping
 from typing import Any
 
+from numpy.typing import ArrayLike
 
-def draw(ax: Axes, curves: dict[str, list[float]], **kwargs: Any) -> None:
+
+def draw(ax: Axes, curves: Mapping[str, ArrayLike], **kwargs: Any) -> None:
     for name, values in curves.items():
         style = {**kwargs}
         style.setdefault("label", name)

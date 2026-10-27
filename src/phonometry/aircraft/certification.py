@@ -45,7 +45,7 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
-    from numpy.typing import NDArray
+    from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
     from .._internal.types import ReportEngine
@@ -133,7 +133,7 @@ _A2_3: NDArray[np.float64] = np.array(
 _PNL_FACTOR = 10.0 / np.log10(2.0)
 
 
-def _validate_spectrum(spl: NDArray[np.float64] | list[float]) -> NDArray[np.float64]:
+def _validate_spectrum(spl: ArrayLike) -> NDArray[np.float64]:
     sig = np.asarray(spl, dtype=np.float64)
     if sig.shape != (24,):
         msg = "'spl' must contain the 24 one-third-octave-band levels."
@@ -144,7 +144,7 @@ def _validate_spectrum(spl: NDArray[np.float64] | list[float]) -> NDArray[np.flo
     return sig
 
 
-def perceived_noisiness(spl: NDArray[np.float64] | list[float]) -> NDArray[np.float64]:
+def perceived_noisiness(spl: ArrayLike) -> NDArray[np.float64]:
     r"""Per-band perceived noisiness ``n`` in noys (ICAO Annex 16 App. 2 §4.7).
 
     The analytic piecewise noy law, using the Table A2-3 constants:
@@ -194,7 +194,7 @@ def perceived_noisiness(spl: NDArray[np.float64] | list[float]) -> NDArray[np.fl
     return np.asarray(np.select(conditions, choices, default=0.0), dtype=np.float64)
 
 
-def perceived_noise_level(spl: NDArray[np.float64] | list[float]) -> float:
+def perceived_noise_level(spl: ArrayLike) -> float:
     r"""Perceived noise level ``PNL`` (ICAO Annex 16 App. 2 §4.2), in PNdB.
 
     :math:`N = 0.85 \cdot n_{\mathrm{max}} + 0.15 \cdot \sum n` and
@@ -244,7 +244,7 @@ _MAX_TONE_START_BAND = 3
 
 
 def _tone_background(
-    spl: NDArray[np.float64] | list[float],
+    spl: ArrayLike,
     start: int | None = None,
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     r"""Tone-correction background level ``SPL''`` and excess ``F`` (App. 2 §4.3).
@@ -389,9 +389,7 @@ def _tone_factor(excess: float, frequency: float) -> float:
     return 10.0 / 3.0
 
 
-def tone_correction(
-    spl: NDArray[np.float64] | list[float], *, start_band: int = _TONE_START
-) -> float:
+def tone_correction(spl: ArrayLike, *, start_band: int = _TONE_START) -> float:
     """Tone-correction factor ``C`` for a spectrum (ICAO Annex 16 App. 2 §4.3).
 
     The maximum over bands of the tone-correction factor derived from the tone
@@ -545,11 +543,11 @@ class EPNLIntegration(OwnsArrays):
 
 
 def epnl_from_pnlt(
-    pnlt: NDArray[np.float64] | list[float],
-    dt: float | NDArray[np.float64] | list[float] = 0.5,
+    pnlt: ArrayLike,
+    dt: ArrayLike = 0.5,
     *,
     reference_time: float = _EPNL_REFERENCE_TIME,
-    tone_corrections: NDArray[np.float64] | list[float] | None = None,
+    tone_corrections: ArrayLike | None = None,
 ) -> EPNLIntegration:
     r"""EPNL from a tone-corrected perceived-noise-level time history (App. 2 §4.5-4.6).
 
@@ -836,8 +834,8 @@ _PROCEDURE_START_BAND: dict[str, int] = {"airplane": _TONE_START, "helicopter": 
 
 
 def effective_perceived_noise_level(
-    spectra: NDArray[np.float64] | list[list[float]],
-    dt: float | NDArray[np.float64] | list[float] = 0.5,
+    spectra: ArrayLike,
+    dt: ArrayLike = 0.5,
     *,
     reference_time: float = _EPNL_REFERENCE_TIME,
     procedure: Literal["airplane", "helicopter"] = "airplane",

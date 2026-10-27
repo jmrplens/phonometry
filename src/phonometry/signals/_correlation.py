@@ -83,7 +83,7 @@ from .spectra import (
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from numpy.typing import NDArray
+    from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
 
@@ -252,8 +252,8 @@ class CorrelationResult(OwnsArrays):
 
 
 def correlation(
-    x: Signal | NDArray[np.float64] | list[float],
-    y: Signal | NDArray[np.float64] | list[float] | None = None,
+    x: Signal | ArrayLike,
+    y: Signal | ArrayLike | None = None,
     fs: float | None = None,
     *,
     normalization: _Normalization = "unbiased",
@@ -730,8 +730,8 @@ def _gcc_curve(
 
 
 def time_delay(
-    x: Signal | NDArray[np.float64] | list[float],
-    y: Signal | NDArray[np.float64] | list[float],
+    x: Signal | ArrayLike,
+    y: Signal | ArrayLike,
     fs: float | None = None,
     *,
     method: _Method = "gcc",
@@ -887,10 +887,10 @@ def time_delay(
 
 
 def impulse_response_delay(
-    ir: Signal | NDArray[np.float64] | list[float],
+    ir: Signal | ArrayLike,
     fs: float | None = None,
     *,
-    reference: Signal | NDArray[np.float64] | list[float] | None = None,
+    reference: Signal | ArrayLike | None = None,
     interpolation: _Interpolation = "parabolic",
     upsample: int = 8,
 ) -> float:
@@ -1019,8 +1019,8 @@ class AlignedImpulseResponseResult(OwnsArrays):
 
 
 def align_impulse_responses(
-    ir: Signal | NDArray[np.float64] | list[float],
-    reference: Signal | NDArray[np.float64] | list[float],
+    ir: Signal | ArrayLike,
+    reference: Signal | ArrayLike,
     fs: float | None = None,
     *,
     interpolation: _Interpolation = "parabolic",

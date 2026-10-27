@@ -45,9 +45,8 @@ import numpy as np
 from ...io._resolve import apply_calibration, resolve_fs
 
 if TYPE_CHECKING:
-    from collections.abc import Sequence
-
     from matplotlib.axes import Axes
+    from numpy.typing import ArrayLike
 
     from ..._i18n import Language
     from ...io._signal import Signal
@@ -865,7 +864,7 @@ def _validate_conditions(field: str, presentation: str) -> None:
 
 
 def _as_components(
-    components: Sequence[tuple[float, float]] | np.ndarray,
+    components: ArrayLike,
 ) -> tuple[np.ndarray, np.ndarray]:
     """Split a sequence of (frequency, level) pairs into arrays and validate."""
     array = np.asarray(components, dtype=np.float64)
@@ -890,7 +889,7 @@ def _as_components(
 
 
 def loudness_moore_glasberg_from_spectrum(
-    components: Sequence[tuple[float, float]] | np.ndarray,
+    components: ArrayLike,
     *,
     field: Literal["free", "diffuse", "eardrum"] = "free",
     presentation: Literal["binaural", "diotic", "monaural"] = "binaural",
@@ -903,8 +902,8 @@ def loudness_moore_glasberg_from_spectrum(
     sound field).  Bands of noise can be represented by the equivalent set of
     closely spaced components of clause 5.3.
 
-    :param components: Sequence of ``(frequency_Hz, level_dB)`` pairs (or an
-        ``(n, 2)`` array).  An empty spectrum yields zero loudness.
+    :param components: ``(frequency_Hz, level_dB)`` pairs, as a sequence of
+        pairs or an ``(n, 2)`` array.  An empty spectrum yields zero loudness.
     :param field: Listening condition setting the outer-ear transfer:
         ``"free"`` (frontal free field, default), ``"diffuse"`` (diffuse
         field) or ``"eardrum"`` (levels already specified at the tympanic
@@ -953,7 +952,7 @@ def _third_octave_components(
 
 
 def loudness_moore_glasberg_from_third_octave(
-    band_levels: Sequence[float] | np.ndarray,
+    band_levels: ArrayLike,
     *,
     field: Literal["free", "diffuse", "eardrum"] = "free",
     presentation: Literal["binaural", "diotic", "monaural"] = "binaural",
@@ -1028,7 +1027,7 @@ def _signal_components(pressure: np.ndarray, fs: float) -> np.ndarray:
 
 
 def loudness_moore_glasberg(
-    x: Signal | list[float] | np.ndarray,
+    x: Signal | ArrayLike,
     fs: float | None = None,
     *,
     field: Literal["free", "diffuse", "eardrum"] = "free",

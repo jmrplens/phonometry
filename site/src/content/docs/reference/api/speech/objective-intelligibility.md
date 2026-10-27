@@ -48,8 +48,8 @@ dependency).
 
 ```python
 stoi(
-    clean: Signal | list[float] | np.ndarray,
-    degraded: Signal | list[float] | np.ndarray,
+    clean: Signal | ArrayLike,
+    degraded: Signal | ArrayLike,
     fs: int | None = None,
     *,
     extended: bool = False,

@@ -77,11 +77,11 @@ How the energy in a band becomes a level reading.
 
 ```python
 octave_filter(
-    x: Signal | list[float] | np.ndarray,
+    x: Signal | ArrayLike,
     fs: int | None = None,
     fraction: float = 1,
     order: int = 6,
-    limits: list[float] | None = None,
+    limits: Sequence[float] | None = None,
     *,
     sigbands: bool = False,
     detrend: bool = True,
@@ -127,7 +127,7 @@ OctaveFilterBank(
     fs: int,
     fraction: float = 1,
     order: int = 6,
-    limits: list[float] | None = None,
+    limits: Sequence[float] | None = None,
     *,
     design: FilterDesign = ...,
     calibration: LevelCalibration = ...,
@@ -164,7 +164,7 @@ Initialize the Octave Filter Bank.
 
 ```python
 OctaveFilterBank.filter(
-    x: Signal | list[float] | np.ndarray,
+    x: Signal | ArrayLike,
     *,
     sigbands: bool = False,
     mode: Literal['rms', 'peak'] = 'rms',
@@ -219,7 +219,7 @@ How many bands the bank holds.
 
 ```python
 OctaveFilterBank.spectrogram(
-    x: Signal | list[float] | np.ndarray,
+    x: Signal | ArrayLike,
     window_time: float = 0.125,
     overlap: float = 0.5,
     mode: Literal['rms', 'peak'] = 'rms',

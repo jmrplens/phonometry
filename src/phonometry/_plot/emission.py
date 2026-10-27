@@ -40,6 +40,7 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from matplotlib.container import BarContainer
     from matplotlib.patches import Rectangle
+    from numpy.typing import ArrayLike
 
     from .._i18n import Language
     from ..emission._sound_power_anechoic import PrecisionSoundPowerResult
@@ -805,7 +806,7 @@ def plot_field_indicators(
     result: FieldIndicators,
     ax: Axes | None = None,
     *,
-    dynamic_capability: float | np.ndarray | None = None,
+    dynamic_capability: ArrayLike | None = None,
     language: Language = "en",
     **kwargs: Any,
 ) -> Axes:

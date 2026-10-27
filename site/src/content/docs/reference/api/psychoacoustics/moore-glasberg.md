@@ -45,7 +45,7 @@ the exact sinusoidal-component method.
 
 ```python
 loudness_moore_glasberg(
-    x: Signal | list[float] | np.ndarray,
+    x: Signal | ArrayLike,
     fs: float | None = None,
     *,
     field: Literal['free', 'diffuse', 'eardrum'] = 'free',
@@ -86,7 +86,7 @@ calibrated so that `x` is the instantaneous sound pressure in pascals.
 
 ```python
 loudness_moore_glasberg_from_spectrum(
-    components: Sequence[tuple[float, float]] | np.ndarray,
+    components: ArrayLike,
     *,
     field: Literal['free', 'diffuse', 'eardrum'] = 'free',
     presentation: Literal['binaural', 'diotic', 'monaural'] = 'binaural',
@@ -105,7 +105,7 @@ closely spaced components of clause 5.3.
 
 | Name | Description |
 | :--- | :--- |
-| `components` | Sequence of `(frequency_Hz, level_dB)` pairs (or an `(n, 2)` array).  An empty spectrum yields zero loudness. |
+| `components` | `(frequency_Hz, level_dB)` pairs, as a sequence of pairs or an `(n, 2)` array.  An empty spectrum yields zero loudness. |
 | `field` | Listening condition setting the outer-ear transfer: `"free"` (frontal free field, default), `"diffuse"` (diffuse field) or `"eardrum"` (levels already specified at the tympanic membrane, e.g. a flat earphone). |
 | `presentation` | `"binaural"` (default; `"diotic"` is an equivalent alias: the same sound at both ears) or `"monaural"` (one ear only). |
 
@@ -118,7 +118,7 @@ A 1 kHz tone at 40 dB SPL in a free field presented binaurally yields
 
 ```python
 loudness_moore_glasberg_from_third_octave(
-    band_levels: Sequence[float] | np.ndarray,
+    band_levels: ArrayLike,
     *,
     field: Literal['free', 'diffuse', 'eardrum'] = 'free',
     presentation: Literal['binaural', 'diotic', 'monaural'] = 'binaural',

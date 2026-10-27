@@ -29,6 +29,7 @@ from ...io._resolve import resolve_calibration, resolve_fs
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
+    from numpy.typing import ArrayLike
 
     from ..._i18n import Language
     from ..._internal.types import ReportEngine, TwoPanels
@@ -830,7 +831,7 @@ def _core_loudness_from_levels(levels: np.ndarray, *, diffuse: bool) -> np.ndarr
 
 
 def loudness_zwicker_from_spectrum(
-    levels: list[float] | np.ndarray,
+    levels: ArrayLike,
     field: Literal["free", "diffuse"] = "free",
 ) -> ZwickerLoudness:
     """Stationary Zwicker loudness from one-third-octave band levels.
@@ -871,7 +872,7 @@ def loudness_zwicker_from_spectrum(
 
 
 def loudness_zwicker(
-    x: Signal | list[float] | np.ndarray,
+    x: Signal | ArrayLike,
     fs: int | None = None,
     field: Literal["free", "diffuse"] = "free",
     *,

@@ -83,6 +83,7 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
+    from numpy.typing import ArrayLike
 
     from .._i18n import Language
     from .._internal.types import ReportEngine
@@ -236,7 +237,7 @@ def residual_index_limits(
     device: Device = "instrument",
     *,
     spacing_m: float = _REFERENCE_SPACING_M,
-    frequencies: list[float] | np.ndarray | None = None,
+    frequencies: ArrayLike | None = None,
 ) -> ResidualIndexLimits:
     r"""IEC 61043:1993 Table 2 minimum pressure-residual intensity index.
 
@@ -339,9 +340,9 @@ def _band_verdicts(
 
 
 def verify_intensity_class(
-    residual_index: list[float] | np.ndarray,
+    residual_index: ArrayLike,
     *,
-    frequencies: list[float] | np.ndarray,
+    frequencies: ArrayLike,
     device: Device = "instrument",
     spacing_m: float = _REFERENCE_SPACING_M,
 ) -> IntensityInstrumentComplianceResult:
@@ -716,10 +717,10 @@ def _plane_wave_phase_deg(
 
 
 def phase_mismatch_from_residual_index(
-    residual_index: float | list[float] | np.ndarray,
+    residual_index: ArrayLike,
     spacing_m: float,
     *,
-    frequency: float | list[float] | np.ndarray,
+    frequency: ArrayLike,
     speed_of_sound: float = 343.0,
 ) -> np.ndarray:
     r"""Channel phase mismatch equivalent to a pressure-residual intensity index.
@@ -760,10 +761,10 @@ def phase_mismatch_from_residual_index(
 
 
 def residual_index_from_phase_mismatch(
-    phase_mismatch_deg: float | list[float] | np.ndarray,
+    phase_mismatch_deg: ArrayLike,
     spacing_m: float,
     *,
-    frequency: float | list[float] | np.ndarray,
+    frequency: ArrayLike,
     speed_of_sound: float = 343.0,
 ) -> np.ndarray:
     r"""Pressure-residual intensity index of a given channel phase mismatch.

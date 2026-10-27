@@ -72,7 +72,7 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
-    from numpy.typing import NDArray
+    from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
 
@@ -150,7 +150,7 @@ def spherical_spreading_adjustment(
 
 
 def atmospheric_adjustment(
-    frequencies: NDArray[np.float64] | list[float],
+    frequencies: ArrayLike,
     distance_m: float,
     *,
     temperature_c: float = 25.0,
@@ -261,7 +261,7 @@ def _delany_bazley_impedance(
 
 
 def ground_effect_adjustment(
-    frequencies: NDArray[np.float64] | list[float],
+    frequencies: ArrayLike,
     source_height_m: float,
     receiver_height_m: float,
     horizontal_distance_m: float,
@@ -421,7 +421,7 @@ class MeanGroundPlaneResult(OwnsArrays):
         require_ranks(self, distances_m=1, heights_m=1)
         require_same_length(self, "distances_m", "heights_m", axis="section vertex")
 
-    def height(self, distance_m: float | NDArray[np.float64]) -> NDArray[np.float64]:
+    def height(self, distance_m: ArrayLike) -> NDArray[np.float64]:
         r"""The plane height :math:`a\,d + b` at ``distance_m``, in metres.
 
         :param distance_m: Distance :math:`d` along the section, in metres
@@ -458,8 +458,8 @@ class MeanGroundPlaneResult(OwnsArrays):
 
 
 def mean_ground_plane(
-    distances_m: NDArray[np.float64] | list[float],
-    heights_m: NDArray[np.float64] | list[float],
+    distances_m: ArrayLike,
+    heights_m: ArrayLike,
 ) -> MeanGroundPlaneResult:
     r"""The mean ground plane of a terrain section (guidance Eq. 36-40).
 
@@ -481,8 +481,8 @@ def mean_ground_plane(
 
 
 def _validated_section(
-    distances_m: NDArray[np.float64] | list[float],
-    heights_m: NDArray[np.float64] | list[float],
+    distances_m: ArrayLike,
+    heights_m: ArrayLike,
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """The validated ``(d, z)`` arrays of a terrain section."""
     d = np.atleast_1d(np.asarray(distances_m, dtype=np.float64))
@@ -518,8 +518,8 @@ def _mean_plane_coefficients(
 
 
 def mean_flow_resistivity(
-    lengths: NDArray[np.float64] | list[float],
-    resistivities: NDArray[np.float64] | list[float],
+    lengths: ArrayLike,
+    resistivities: ArrayLike,
 ) -> float:
     r"""Logarithmic mean flow resistivity along a path (guidance Eq. 41).
 
@@ -548,7 +548,7 @@ def mean_flow_resistivity(
 
 
 def diffraction_attenuation(
-    frequencies: NDArray[np.float64] | list[float],
+    frequencies: ArrayLike,
     path_difference: float,
     *,
     edge_height_m: float,
@@ -754,11 +754,11 @@ class TerrainScreeningResult(OwnsArrays):
 def terrain_screening_adjustment(
     source: tuple[float, float],
     receiver: tuple[float, float],
-    distances_m: NDArray[np.float64] | list[float],
-    heights_m: NDArray[np.float64] | list[float],
+    distances_m: ArrayLike,
+    heights_m: ArrayLike,
     *,
-    frequencies: NDArray[np.float64] | list[float],
-    flow_resistivity: float | GroundClass | NDArray[np.float64] | list[float] = "G",
+    frequencies: ArrayLike,
+    flow_resistivity: GroundClass | ArrayLike = "G",
 ) -> TerrainScreeningResult:
     r"""Ground effect and terrain screening over a vertical section (§A.4.4-A.4.5).
 
@@ -852,7 +852,7 @@ def _section_ends(
 
 
 def _segment_resistivities(
-    flow_resistivity: float | str | NDArray[np.float64] | list[float],
+    flow_resistivity: str | ArrayLike,
     n_segments: int,
 ) -> NDArray[np.float64]:
     """Per-segment ``σ`` from a scalar, class letter or per-segment array."""

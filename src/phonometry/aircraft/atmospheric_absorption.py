@@ -231,7 +231,7 @@ class AircraftBandAttenuation(OwnsArrays):
 
 
 def band_attenuation_arp5534(
-    frequencies: NDArray[np.float64] | list[float],
+    frequencies: ArrayLike,
     path_length_m: float,
     *,
     temperature_c: float = 25.0,

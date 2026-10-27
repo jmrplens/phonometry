@@ -2627,7 +2627,7 @@ def test_the_standard_library_is_read_alike_on_every_supported_python() -> None:
 
 
 class _FakeMsvcrt:
-    """Stand-in for Windows' :mod:`msvcrt`: refuses the first lock with EDEADLOCK."""
+    """Stand-in for Windows' :mod:`msvcrt`: refuses the first locks with EDEADLK."""
 
     LK_LOCK = 1
     LK_UNLCK = 0
@@ -2643,7 +2643,7 @@ class _FakeMsvcrt:
         self.calls.append(mode)
         if mode == self.LK_LOCK and self.refusals:
             self.refusals -= 1
-            raise OSError(errno.EDEADLOCK, "Resource deadlock avoided")
+            raise OSError(errno.EDEADLK, "Resource deadlock avoided")
 
 
 def test_the_stamp_lock_waits_out_a_busy_lock_on_windows_and_releases_it(
@@ -2661,7 +2661,7 @@ def test_the_stamp_lock_waits_out_a_busy_lock_on_windows_and_releases_it(
 def test_the_stamp_lock_on_windows_raises_what_is_not_a_busy_lock(
     tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """A lock failure other than EDEADLOCK is not retried for ever."""
+    """A lock failure other than EDEADLK is not retried for ever."""
     import errno
 
     class _Denied(_FakeMsvcrt):

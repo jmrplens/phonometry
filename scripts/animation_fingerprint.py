@@ -2751,16 +2751,16 @@ def _locked(path: pathlib.Path) -> Iterator[None]:
         if sys.platform == "win32":
             import msvcrt
 
-            # msvcrt locks a byte range, and LK_LOCK gives up with EDEADLOCK
-            # after ten tries a second apart; a run behind a long batch keeps
-            # waiting, as flock does.
+            # msvcrt locks a byte range, and LK_LOCK gives up with EDEADLK
+            # (EDEADLOCK on Windows, the same number) after ten tries a second
+            # apart; a run behind a long batch keeps waiting, as flock does.
             while True:
                 handle.seek(0)
                 try:
                     msvcrt.locking(handle.fileno(), msvcrt.LK_LOCK, 1)
                     break
                 except OSError as exc:
-                    if exc.errno != errno.EDEADLOCK:
+                    if exc.errno != errno.EDEADLK:
                         raise
             try:
                 yield

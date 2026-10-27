@@ -582,6 +582,7 @@ def sea_water(
     :param sound_speed_model: Which of the four fits to use; see the module
         docstring.
     :return: The :class:`~phonometry.fluids.Fluid` at that point.
+    :raises TypeError: if ``sound_speed_model`` is not a text.
 
     The density and the speed of sound come from different sources, which is
     why both are named in the result's ``model``. Neither source in this

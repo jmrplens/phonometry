@@ -189,6 +189,10 @@ _ANP_FILE = (
     "a word as the ANP database file spells it, and a caller's own database "
     "file may spell it otherwise"
 )
+_GRADED = (
+    "a requirement name read back from the result's own requirements, a key "
+    "refused with KeyError (A44), not a choice a caller makes"
+)
 
 #: Strings that are open on purpose, keyed by ``(module, qualified name,
 #: parameter)``, each with its reason. An entry that matches nothing fails.
@@ -263,6 +267,16 @@ OPEN: dict[tuple[str, str, str], str] = {
         "one of the result's own requirements, a set that depends on the "
         "filter class and the edition the result was judged against"
     ),
+    (
+        "phonometry.filters.compliance",
+        "FilterComplianceResult.binding_margin",
+        "requirement",
+    ): _GRADED,
+    (
+        "phonometry.filters.compliance",
+        "FilterComplianceResult.requirement_class",
+        "requirement",
+    ): _GRADED,
     ("phonometry.fluids.catalogue", "gases_named", "name"): _CATALOGUE_NAME,
     ("phonometry.materials.absorbers.carpets", "carpets_named", "name"): (
         _CATALOGUE_NAME
@@ -910,12 +924,7 @@ def strings_of(
     if node is None or depth > _STRINGS_DEPTH:
         return ()
     if isinstance(node, ast.Tuple | ast.List | ast.Set):
-        values = [
-            element.value
-            for element in node.elts
-            if isinstance(element, ast.Constant) and isinstance(element.value, str)
-        ]
-        return tuple(values) if values and len(values) == len(node.elts) else ()
+        return _display_strings(node.elts, constants, depth)
     if isinstance(node, ast.Dict):
         return tuple(
             text for key in node.keys if (text := _key_text(key, constants)) is not None
@@ -925,6 +934,31 @@ def strings_of(
     if isinstance(node, ast.Name) and node.id in constants:
         return strings_of(constants[node.id], constants, depth + 1)
     return _picked_strings(node, constants, depth)
+
+
+def _display_strings(
+    elements: list[ast.expr], constants: Mapping[str, ast.expr], depth: int
+) -> tuple[str, ...]:
+    """The strings a tuple, list or set display holds, or ``()``.
+
+    Each item is a string written in place or a starred set of strings
+    (``(*_SINGLE, *_ALIASES)`` holds the items of one and the keys of the
+    other); one item of another kind makes the display no set of strings.
+    """
+    values: list[str] = []
+    for element in elements:
+        if isinstance(element, ast.Constant) and isinstance(element.value, str):
+            values.append(element.value)
+            continue
+        held = (
+            strings_of(element.value, constants, depth + 1)
+            if isinstance(element, ast.Starred)
+            else ()
+        )
+        if not held:
+            return ()
+        values.extend(held)
+    return tuple(values)
 
 
 def _key_text(key: ast.expr | None, constants: Mapping[str, ast.expr]) -> str | None:
@@ -1291,14 +1325,31 @@ def _callee(
 ) -> FunctionType | None:
     """The function a call names, looked up in *namespace*.
 
-    One of the package's, or one of the module *home* the caller lives in.
+    One of the package's, or one of the module *home* the caller lives in. A
+    method reaches its own class through ``self`` and ``cls``
+    (:func:`_namespace`), and an object it holds through the annotation of
+    the field (``self.database.event_level(...)``).
     """
     target: object | None = None
-    if isinstance(node.func, ast.Name):
-        target = namespace.get(node.func.id)
-    elif isinstance(node.func, ast.Attribute) and isinstance(node.func.value, ast.Name):
-        owner = namespace.get(node.func.value.id)
-        target = getattr(owner, node.func.attr, None) if owner is not None else None
+    function = node.func
+    if isinstance(function, ast.Name):
+        target = namespace.get(function.id)
+    elif isinstance(function, ast.Attribute) and isinstance(function.value, ast.Name):
+        owner = namespace.get(function.value.id)
+        target = getattr(owner, function.attr, None) if owner is not None else None
+    elif (
+        isinstance(function, ast.Attribute)
+        and isinstance(function.value, ast.Attribute)
+        and isinstance(function.value.value, ast.Name)
+        and function.value.value.id == "self"
+    ):
+        holder = namespace.get("self")
+        held = (
+            _held_class(holder, function.value.attr)
+            if inspect.isclass(holder)
+            else None
+        )
+        target = getattr(held, function.attr, None) if held is not None else None
     target = getattr(target, "__func__", target)
     if inspect.isclass(target):
         target = vars(target).get("__init__")
@@ -1392,13 +1443,57 @@ def _namespace(function: object, tree: ast.AST, module_name: str) -> dict[str, o
 
     A wrapped function (a record's ``__post_init__`` is wrapped where the
     record takes ownership of its arrays) names what its own module imports,
-    not what the wrapper's module does.
+    not what the wrapper's module does. A method also names its own class as
+    ``self`` and ``cls``, so ``self._range_mask(weighting)`` is followed into
+    the method it calls.
     """
     unwrapped = inspect.unwrap(function) if callable(function) else function
-    return {
+    names: dict[str, object] = {
         **getattr(unwrapped, "__globals__", {}),
         **_local_imports(tree, module_name),
     }
+    owner = _owning_class(unwrapped, module_name)
+    if owner is not None:
+        names["self"] = owner
+        names["cls"] = owner
+    return names
+
+
+def _owning_class(function: object, module_name: str) -> type | None:
+    """The class *function* is defined in, read off its ``__qualname__``."""
+    path = (getattr(function, "__qualname__", "") or "").split(".")[:-1]
+    if not path or "<locals>" in path:
+        return None
+    owner: object = sys.modules.get(module_name)
+    for part in path:
+        owner = getattr(owner, part, None)
+    return owner if inspect.isclass(owner) else None
+
+
+def _held_class(owner: type, attribute: str) -> type | None:
+    """The class the field *attribute* of *owner* is annotated with.
+
+    ``database: ANPDatabase`` makes ``self.database.event_level`` the method
+    of :class:`ANPDatabase`. An annotation written as text (``from
+    __future__ import annotations``) is read in the module that wrote it; a
+    union holding one class is that class.
+    """
+    for base in owner.__mro__:
+        hint = inspect.get_annotations(base).get(attribute)
+        if hint is None:
+            continue
+        if isinstance(hint, str):
+            namespace = vars(sys.modules[base.__module__])
+            candidates = [namespace.get(part.strip()) for part in hint.split("|")]
+        else:
+            candidates = [hint, *typing.get_args(hint)]
+        classes = [
+            candidate
+            for candidate in candidates
+            if inspect.isclass(candidate) and candidate is not type(None)
+        ]
+        return classes[0] if len(classes) == 1 else None
+    return None
 
 
 def _checks_received(
@@ -1556,18 +1651,50 @@ def _exported_targets(exported: str, obj: object) -> Iterator[tuple[str, object]
 
 
 def _targets() -> Iterator[tuple[str, str, object]]:
-    """``(module, qualname, object)`` of every public callable and record."""
+    """``(module, qualname, object)`` of every public callable and record.
+
+    A public method a public class inherits from a base the package does not
+    export (``plot`` of the layers of :mod:`~phonometry.materials.absorbers.layered`,
+    defined on a private ``_DrawableLayer``) is a public method of each of
+    them; it is read once, under the base that defines it.
+    """
     seen: set[tuple[str, str]] = set()
+    walked: set[int] = set()
+    classes: dict[type, None] = {}
     for module in _public_modules():
         for exported in getattr(module, "__all__", ()):
             obj = getattr(module, exported, None)
             home = getattr(obj, "__module__", "") or ""
             if not home.startswith("phonometry"):
                 continue
+            if inspect.isclass(obj):
+                classes[obj] = None
             for qualname, target in _exported_targets(exported, obj):
                 if (home, qualname) not in seen:
                     seen.add((home, qualname))
+                    walked.add(id(target))
                     yield home, qualname, target
+    for cls in classes:
+        for base, attribute, function in _inherited_methods(cls):
+            if id(function) not in walked:
+                walked.add(id(function))
+                yield base.__module__, f"{base.__qualname__}.{attribute}", function
+
+
+def _inherited_methods(cls: type) -> Iterator[tuple[type, str, object]]:
+    """``(base, name, function)`` of every public method *cls* inherits from
+    a base of the package, and does not define again itself.
+    """
+    row = issubclass(cls, CatalogueRow)
+    for base in cls.__mro__[1:]:
+        if not base.__module__.startswith("phonometry"):
+            continue
+        for attribute, function in _public_methods(base):
+            if attribute == "__init__" and row:
+                continue
+            resolved = inspect.getattr_static(cls, attribute, None)
+            if getattr(resolved, "__func__", resolved) is function:
+                yield base, attribute, function
 
 
 def _parsed(obj: object) -> ast.AST | None:
@@ -2155,9 +2282,31 @@ def _read_call(
         folds.append((_start(node), label))
     if node.args and reader.is_raw(node.args[0]) and _call_name(node) in VALIDATORS:
         checks.append(_end(node))
+        wider = _beyond_the_literal(node, reader)
+        if wider:
+            folds.append((_start(node), f"options wider than the Literal {wider}"))
     callee = _callee(node, reader.namespace, reader.module_name)
     if callee is not None and reader.depth < _SPELLING_DEPTH:
         _read_handed_on(node, callee, reader, folds, checks)
+
+
+def _beyond_the_literal(node: ast.Call, reader: _Reader) -> tuple[str, ...]:
+    """The options a check of the text as written takes that the ``Literal``
+    does not list.
+
+    ``require_choice(text, "quantity", (*_SINGLE, *_ALIASES))`` reads the text
+    as the caller wrote it, and still takes an alias of the table's own that
+    no option spells: the check holds the text to the ``Literal`` only when
+    its options are among the ones the ``Literal`` lists.
+    """
+    if not reader.options:
+        return ()
+    argument = node.args[2] if len(node.args) > 2 else None
+    for keyword in node.keywords:
+        if keyword.arg == "options":
+            argument = keyword.value
+    held = strings_of(argument, reader.constants)
+    return tuple(sorted(set(held) - reader.options))
 
 
 def _read_handed_on(
@@ -2303,9 +2452,12 @@ def cleaned_up_choices() -> Iterator[Choice]:
     ``check_engine``, or ``if text not in OPTIONS: raise``) before it folds
     the case, strips the spaces, makes a text of another value with
     ``str()`` or maps an alias it does not list (``ALIASES.get(text,
-    text)``), in its own body or in a function it hands the text to;
-    otherwise ``"a"`` passes for ``"A"`` when the call runs while a type
-    checker refuses it. This is rule A45.
+    text)``), in its own body or in a function it hands the text to, and the
+    check must hold no option the ``Literal`` does not list; otherwise ``"a"``
+    passes for ``"A"`` when the call runs while a type checker refuses it.
+    A method is followed into the methods of its own class it calls
+    (``self._range_mask(weighting)``) and into those of an object it holds
+    (``self.database.event_level(...)``). This is rule A45.
     """
     for home, qualname, obj in _targets():
         if inspect.isclass(obj):
@@ -2392,15 +2544,16 @@ def main() -> int:
         return 0
     for choice in cleaned:
         print(
-            "::error::a Literal choice is cleaned up before it is checked: "
-            f"{choice.module}.{choice.qualname}({choice.name}): "
+            "::error::a Literal choice takes a spelling its Literal does not "
+            f"list: {choice.module}.{choice.qualname}({choice.name}): "
             + "; ".join(dict.fromkeys(choice.evidence))
         )
     if cleaned:
         print(
-            "  -> check the text as written (require_choice) before any "
-            "clean-up, and drop the folding: the Literal lists the one "
-            "spelling of each option (rule A45)."
+            "  -> check the text as written (require_choice) against the "
+            "options the Literal lists, before any clean-up, and drop the "
+            "folding: the Literal lists the one spelling of each option "
+            "(rule A45)."
         )
     if not (found or stale):
         return 1

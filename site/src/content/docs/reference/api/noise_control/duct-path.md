@@ -142,7 +142,7 @@ calculation of Long Table 14.9 and of AHRI 885 Table 8.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the spectra do not share one value per band or the criterion family is unknown. |
-| TypeError | If an entry of `elements` is not a [`DuctElement`](/phonometry/reference/api/noise_control/duct-path/#ductelement). |
+| TypeError | If an entry of `elements` is not a, or `criterion` is not a text. [`DuctElement`](/phonometry/reference/api/noise_control/duct-path/#ductelement). |
 
 ## DuctElement
 

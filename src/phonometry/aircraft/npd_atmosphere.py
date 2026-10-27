@@ -511,6 +511,7 @@ def revise_npd_curves(
     :param absorption: ``"arp5534"`` (default) or ``"arp866a"``.
     :return: A :class:`RevisedNPDCurves`.
     :raises ValueError: as :func:`npd_atmosphere_increment` does.
+    :raises TypeError: if ``absorption`` is not a text.
     """
     increment = npd_atmosphere_increment(
         spectrum,

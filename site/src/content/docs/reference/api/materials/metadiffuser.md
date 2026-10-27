@@ -77,7 +77,7 @@ exactly as the paper reports `delta_n`.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `depth_m` or `period_m` is not a single number. |
+| TypeError | if `depth_m` or `period_m` is not a single number, or `resonator_geometry` is not a text. |
 
 ## metadiffuser_polar_response
 
@@ -125,7 +125,7 @@ with
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `frequency` is not a single number. |
+| TypeError | if `frequency` is not a single number, or `resonator_geometry` is not a text. |
 
 ## metadiffuser_reflection
 
@@ -172,7 +172,7 @@ air impedance.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `depth_m` or `period_m` is not a single number, or `frequency` holds a text or a value that is not a real number. |
+| TypeError | if `depth_m` or `period_m` is not a single number, or `frequency` holds a text or a value that is not a real number, or `resonator_geometry` is not a text. |
 
 ## MetadiffuserResult
 

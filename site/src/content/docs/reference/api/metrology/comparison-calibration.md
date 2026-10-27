@@ -2265,6 +2265,7 @@ their responses at the calibration frequencies go to
 | Exception | When |
 | :--- | :--- |
 | ValueError | for what [`TimeSelectiveResponse`](/phonometry/reference/api/metrology/comparison-calibration/#timeselectiveresponse) refuses. |
+| TypeError | if `window_shape` is not a text. |
 
 ## TimeSelectiveResponse
 

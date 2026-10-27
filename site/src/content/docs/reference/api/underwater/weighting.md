@@ -90,6 +90,7 @@ Auditory weighting function `W(f)` of a marine-mammal hearing group.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If an input is invalid. |
+| TypeError | if `group` or `guidance` is not a text. |
 
 ## AuditoryWeightingResult
 
@@ -160,6 +161,7 @@ Published TTS and injury onset criteria of a hearing group.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the version or the group is unknown. |
+| TypeError | if `group` or `guidance` is not a text. |
 
 ## ExposureCriteria
 
@@ -272,7 +274,7 @@ dual-metric rule requires.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If an input is invalid. |
-| TypeError | if `peak_spl` is not a single number, or `n_events` is a flag, a text or an array where a count goes. |
+| TypeError | if `peak_spl` is not a single number, `n_events` is a flag, a text or an array where a count goes, or `group` or `guidance` is not a text. |
 
 ## WeightedExposureResult
 

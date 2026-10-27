@@ -365,6 +365,7 @@ def heavy_impact_source_limits(
         tolerance limits in dB re 1 N, lower first, as a
         :class:`HeavyImpactSourceLimits`.
     :raises ValueError: for an unknown source name.
+    :raises TypeError: if ``source`` is not a text.
     """
     spec = heavy_impact_source_specification(source)
     nominal = np.asarray(spec.force_exposure_level, dtype=np.float64)
@@ -554,7 +555,7 @@ def check_heavy_impact_source(
     :return: A :class:`HeavyImpactSourceCheck`.
     :raises ValueError: for an unknown source or a wrong number of bands.
     :raises TypeError: if ``force_exposure_level`` holds a text or a value that is not a
-        real number.
+        real number, or ``source`` is not a text.
     """
     spec = heavy_impact_source_specification(source)
     measured = require_finite_array(force_exposure_level, "force_exposure_level")

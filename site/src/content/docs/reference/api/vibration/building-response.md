@@ -185,7 +185,7 @@ One prediction, bundled with the coefficient and the error band.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For anything [`fundamental_period`](/phonometry/reference/api/vibration/building-response/#fundamental_period) refuses. |
-| TypeError | if `coefficient` is not a single number. |
+| TypeError | if `coefficient` is not a single number, or `model` is not a text. |
 
 ## fundamental_frequency
 
@@ -217,6 +217,12 @@ reader should not have to remember which.
 | `coefficient` | The code coefficient, or `None` for the midpoint. |
 
 **Returns:** The fundamental frequency, in hertz.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `model` is not a text. |
 
 ## fundamental_period
 

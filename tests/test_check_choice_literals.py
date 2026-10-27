@@ -1057,3 +1057,103 @@ def test_a_table_keyed_by_named_constants_holds_their_strings() -> None:
     assert ccl.strings_of(ast.Name(id="_ROUTES"), constants) == ("per_leaf", "together")
     found = ccl.code_evidence(_tree(_route), ccl._the_name("quantity"), constants)
     assert found == ["'in' a set of strings", "a lookup by key"]
+
+
+class _Pacer:
+    """A class whose public method hands its choice to a method of its own."""
+
+    def pace(self, mode: _Pace) -> bool:
+        return self._matches(mode)
+
+    def _matches(self, mode: str) -> bool:
+        return mode.lower() in _PACES
+
+
+@dataclass(frozen=True)
+class _Holder:
+    """A record whose public method hands its choice to an object it holds."""
+
+    pacer: _Pacer
+
+    def pace(self, mode: _Pace) -> bool:
+        return self.pacer.pace(mode)
+
+
+def test_a_clean_up_in_a_method_of_its_own_class_is_followed() -> None:
+    """``self._matches(mode)`` and ``self.pacer.pace(mode)`` are followed
+    into the method they call, through the class and through the annotation
+    of the field that holds the object.
+    """
+    assert _cleaned(_Pacer.pace, "mode", options=_PACES) == [
+        "handed to _Pacer._matches(mode), .lower()"
+    ]
+    assert _cleaned(_Holder.pace, "mode", options=_PACES) == [
+        "handed to _Pacer.pace(mode), handed to _Pacer._matches(mode), .lower()"
+    ]
+
+
+#: The options of a check that also takes a spelling of its own.
+_QUICK = {"quick": "fast"}
+
+
+def _checked_against_more(mode: _Pace) -> str:
+    named = require_choice(mode, "mode", (*_PACES, *_QUICK))
+    return _QUICK.get(named, named)
+
+
+def test_a_check_against_options_the_literal_does_not_list_is_refused() -> None:
+    """``require_choice(mode, "mode", (*_PACES, *_QUICK))`` reads the text as
+    written and still takes ``"quick"``, which no option spells.
+    """
+    constants = ccl._module_constants(sys.modules[__name__])
+    starred = ast.parse("(*_PACES, *_QUICK)", mode="eval").body
+    assert ccl.strings_of(starred, constants) == ("fast", "slow", "quick")
+    assert _cleaned(_checked_against_more, "mode", options=_PACES) == [
+        "options wider than the Literal ('quick',)"
+    ]
+    assert _cleaned(_checked_before_the_fold, "mode", options=_PACES) == []
+
+
+class _PrivateBase:
+    """A base the package would not export, with a public method."""
+
+    def paced(self, mode: _Pace) -> bool:
+        return mode.upper() == "FAST"
+
+
+class _Exported(_PrivateBase):
+    """A class that inherits ``paced`` and defines nothing of its own."""
+
+
+class _Overriding(_PrivateBase):
+    """A class that defines ``paced`` again, so it inherits nothing."""
+
+    def paced(self, mode: _Pace) -> bool:
+        return require_choice(mode, "mode", _PACES) == "fast"
+
+
+def test_a_public_method_inherited_from_a_private_base_is_read(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """``paced`` is a public method of ``_Exported``, defined on its base:
+    it is read, under the base, and its clean-up fails; a method the class
+    defines again is its own.
+    """
+    monkeypatch.setattr(_PrivateBase, "__module__", "phonometry.synthetic")
+    inherited = list(ccl._inherited_methods(_Exported))
+    overridden = list(ccl._inherited_methods(_Overriding))
+    assert inherited == [(_PrivateBase, "paced", _PrivateBase.paced)]
+    assert overridden == []
+    assert _cleaned(_PrivateBase.paced, "mode", options=_PACES) == [".upper()"]
+
+
+def test_a_method_the_package_inherits_from_a_private_base_is_read_once() -> None:
+    """``plot`` of the six layers of ``materials.absorbers.layered`` is
+    defined on ``_DrawableLayer``: the walk reads it once, under that base.
+    """
+    plots = [
+        (home, qualname)
+        for home, qualname, _ in ccl._targets()
+        if qualname.endswith("_DrawableLayer.plot")
+    ]
+    assert plots == [("phonometry.materials.absorbers.layered", "_DrawableLayer.plot")]

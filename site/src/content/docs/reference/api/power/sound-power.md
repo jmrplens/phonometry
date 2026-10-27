@@ -555,7 +555,7 @@ The level holds for the meteorological conditions of the test; above
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a malformed or non-finite level array, a geometry that does not describe the surface, too few positions, a background without its `integration_time`, or a mismatched `frequencies` length. |
-| TypeError | if `distance`, `integration_time`, `radius` or `sigma_omc_db` is not a single number, `n_events` is a flag, a text or an array where a count goes, or `dimensions` holds a text or a value that is not a real number. |
+| TypeError | if `distance`, `integration_time`, `radius` or `sigma_omc_db` is not a single number, `n_events` is a flag, a text or an array where a count goes, or `dimensions` holds a text or a value that is not a real number, or `grade` is not a text. |
 
 ## sound_power_pressure
 
@@ -616,7 +616,7 @@ sound power level is combined via ISO 3744 Annex E.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `distance`, `radius` or `sigma_omc_db` is not a single number, or `dimensions` holds a text or a value that is not a real number. |
+| TypeError | if `distance`, `radius` or `sigma_omc_db` is not a single number, or `dimensions` holds a text or a value that is not a real number, or `grade` is not a text. |
 
 ## SoundEnergyResult
 

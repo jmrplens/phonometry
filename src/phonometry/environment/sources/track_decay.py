@@ -427,7 +427,7 @@ def track_decay_rate(
         at 0 or does not strictly increase, frequencies that do not name
         distinct bands in increasing order, or shapes that do not agree.
     :raises TypeError: if ``frequencies`` holds a text or a value that is not a real
-        number.
+        number, or ``direction`` is not a text.
     """
     frequencies = require_positive_array(frequencies, "frequencies")
     grid: ArrayLike = (

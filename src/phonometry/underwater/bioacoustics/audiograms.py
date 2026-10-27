@@ -299,6 +299,7 @@ def group_audiogram(
     :param normalized: Use the normalised fit (0 dB at best sensitivity).
     :return: An :class:`AudiogramResult`.
     :raises ValueError: If the group is unknown or a frequency is invalid.
+    :raises TypeError: if ``group`` is not a text.
     """
     params = audiogram_parameters(group, normalized=normalized)
     f_khz = _frequency_khz(frequency_hz)

@@ -425,7 +425,7 @@ def kb_weighting_response(
         is Formula (6).
     :raises ValueError: For a non-positive frequency or an unknown range.
     :raises TypeError: if ``frequencies`` holds a text or a value that is not a real
-        number.
+        number, or ``working_range`` is not a text.
     """
     f = _frequencies(frequencies)
     band = band_limitation_response(f, working_range=working_range)
@@ -505,7 +505,7 @@ class VibrationMeterVerification(OwnsArrays):
 
         :raises ValueError: for an unknown working range or weighting, a
             frequency that is not positive, or columns of different lengths.
-        :raises TypeError: if ``weighting`` is not a text.
+        :raises TypeError: if ``weighting`` or ``working_range`` is not a text.
         """
         require_choice(self.weighting, "weighting", _WEIGHTINGS)
         response_tolerance_percent(self.frequencies, working_range=self.working_range)
@@ -719,7 +719,8 @@ def kbf_signal(
     :return: :math:`KB_\mathrm{F}(t)`, one value per sample.
     :raises ValueError: For a bad record, a non-positive time constant, or a
         rate that cannot carry the working range.
-    :raises TypeError: if ``fs`` or ``time_constant_s`` is not a single number.
+    :raises TypeError: if ``fs`` or ``time_constant_s`` is not a single number, or
+        ``working_range`` is not a text.
     """
     kb = kb_signal(velocity_mm_s, fs, working_range=working_range)
     return _exponential_running_rms(kb, fs, time_constant_s=time_constant_s)
@@ -1044,7 +1045,7 @@ def assessment_velocity(
     :raises ValueError: For a bad record, a rate below 630 Hz, or an unknown
         class.
     :raises TypeError: if ``velocity_mm_s`` holds a text or a value that is not a real
-        number.
+        number, or ``building_class`` is not a text.
     """
     x = _record(velocity_mm_s)
     taps = assessment_weighting_taps(fs, building_class=building_class, n_taps=n_taps)

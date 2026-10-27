@@ -121,6 +121,7 @@ def sound_speed_profile(
     :param latitude: Latitude for the depth→pressure conversion, in degrees.
     :return: A :class:`SoundSpeedProfile`.
     :raises ValueError: If the inputs are invalid.
+    :raises TypeError: if ``model`` is not a text.
     """
     z = np.asarray(depths, dtype=np.float64)
     if z.ndim != 1 or z.size < _MIN_POLYLINE_NODES:

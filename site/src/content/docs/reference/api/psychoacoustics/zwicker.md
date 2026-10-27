@@ -83,7 +83,7 @@ with `ref` scaled to +-1 full scale as well.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `time_skip` is not a single number, or `fs` is a flag, a text or an array where a count goes. |
+| TypeError | if `time_skip` is not a single number, or `fs` is a flag, a text or an array where a count goes, or `field` is not a text. |
 
 ## loudness_zwicker_from_spectrum
 
@@ -108,6 +108,12 @@ center frequencies 25 Hz to 12.5 kHz (base-ten bands, IEC 61260-1).
 | `field` | Sound field the levels were measured in: 'free' or 'diffuse'. |
 
 **Returns:** [`ZwickerLoudness`](/phonometry/reference/api/psychoacoustics/zwicker/#zwickerloudness) with `loudness` (N in sone), `loudness_level` (LN in phon) and `specific` (N' in sone/Bark, 240 values at 0.1-Bark steps); the time-varying fields are None.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `field` is not a text. |
 
 ## ZwickerLoudness
 

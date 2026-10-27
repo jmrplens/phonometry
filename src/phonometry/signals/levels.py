@@ -178,7 +178,8 @@ def ln_levels(
     :param dbfs: If True, return dBFS instead of dB SPL.
     :return: Dict mapping each N to its level (scalar for 1D input,
         array (channels,) for 2D input).
-    :raises TypeError: if ``calibration_factor`` is not a single number.
+    :raises TypeError: if ``calibration_factor`` is not a single number, or
+        ``weighting`` is not a text.
     """
     fs = _resolve_fs(x, fs)
     calibration_factor = _resolve_calibration(x, calibration_factor)
@@ -298,7 +299,8 @@ def sel(
         calibrated Signal's own factor, then 1.0.
     :param dbfs: If True, reference digital full scale instead of 20 uPa.
     :return: Scalar for 1D input, array of shape (channels,) for 2D input.
-    :raises TypeError: if ``calibration_factor`` or ``fs`` is not a single number.
+    :raises TypeError: if ``calibration_factor`` or ``fs`` is not a single number, or
+        ``weighting`` is not a text.
     """
     require_scalar(fs, "fs")
     fs = _resolve_fs(x, fs)

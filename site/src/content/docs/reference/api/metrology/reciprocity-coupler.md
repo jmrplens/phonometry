@@ -761,7 +761,7 @@ coupler.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a volume, surface or ratio that is not positive, or frequencies that are not positive and increasing. |
-| TypeError | if `surface_area_m2` or `volume_m3` is not a single number. |
+| TypeError | if `surface_area_m2` or `volume_m3` is not a single number, or `method` is not a text. |
 
 ## HeatConductionCorrection
 

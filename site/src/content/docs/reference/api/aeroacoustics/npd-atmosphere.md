@@ -271,6 +271,7 @@ time history (Appendix D, last paragraph of step 3).
 | Exception | When |
 | :--- | :--- |
 | ValueError | as [`npd_atmosphere_increment`](/phonometry/reference/api/aeroacoustics/npd-atmosphere/#npd_atmosphere_increment) does. |
+| TypeError | if `absorption` is not a text. |
 
 ## RevisedNPDCurves
 

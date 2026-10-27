@@ -2272,6 +2272,7 @@ que cubre:
 | `RegulationLimits[period]` para un periodo que no guarda | `ValueError` | `KeyError`. La clave se compara tal cual, como la de un `dict`: `limits["Day"]` y `limits[" night "]`, que se leían como `"day"` y `"night"`, ahora también lanzan `KeyError`. El periodo de `environment.PeriodAssessment`, que es una elección, sigue lanzando `ValueError` |
 | `emission.measurement_positions("hemisphere", ..., n_reflecting_planes=3, grade="survey")` | `NotImplementedError` | las posiciones 14, 21 y 22 de la Tabla B.2 de ISO 3746:2010 |
 | `emission.measurement_positions("hemisphere", ..., grade="survey")` sobre un plano reflectante | las posiciones 4, 5, 6 y 10 de la Tabla B.1 de ISO 3744, el conjunto para una fuente con tonos | las posiciones 4, 5, 6 y 10 de la Tabla B.1 de ISO 3746:2010, las que prescribe el apartado 8.2.1: las posiciones de banda ancha con esos números de la Tabla B.2 de ISO 3744 |
+| un `instrument=` que la tabla C.5 no enumera (`"Class 1"` por `"class1"`), en `hearing.task_based_exposure`, `hearing.job_based_exposure` y `hearing.full_day_exposure` | `KeyError` | `ValueError`, y `TypeError` para un valor que no es texto: el instrumento es una elección, no una clave que el llamador vuelve a leer |
 | `fluids.FluidPropertyUnavailable` | la excepción | `fluids.FluidPropertyUnavailableError`, que sigue siendo un `AttributeError`, así que `hasattr` y `getattr` con un valor por defecto se comportan como antes |
 
 Estos avisos derivan ahora de `PhonometryWarning`, cada uno con un tema propio,
@@ -2313,16 +2314,21 @@ print(issubclass(environment.RoadDeviceWarning, phonometry.PhonometryWarning))
 
 ## Una opción se compara tal como se escribe
 
-Un parámetro o un campo de registro tipado con un `Literal` de sus opciones
-acepta las grafías que ese `Literal` enumera, y solo esas. Antes de 4.0, 186
-de ellos cambiaban mayúsculas y minúsculas, quitaban espacios,
-intercambiaban `_`, `-` y espacios, traducían un alias propio o convertían en
-texto cualquier valor con `str()` antes de buscar la opción, de modo que una
-llamada que un comprobador de tipos rechazaba se ejecutaba igualmente:
+Un parámetro o un campo de registro tipado con un `Literal` de sus opciones,
+cuyo código limpiaba el texto antes de comprobarlo, acepta ahora las grafías
+que ese `Literal` enumera, y solo esas. Antes de 4.0, 198 de ellos cambiaban
+mayúsculas y minúsculas, quitaban espacios, intercambiaban `_`, `-` y
+espacios, traducían un alias propio o convertían en texto cualquier valor con
+`str()` antes de buscar la opción, de modo que una llamada que un comprobador
+de tipos rechazaba se ejecutaba igualmente:
 `filters.WeightingFilter(48000, "a")`, `filters.time_weighting(x, fs,
-mode="FAST")`, `vibration.guide_values("residential", edition=1999)`. En 4.0
-esa llamada lanza `ValueError`, o `TypeError` para un valor que no es texto, y
-el arreglo es escribir la opción tal como la enumera su `Literal`. Los alias
+mode="FAST")`, `vibration.guide_values("residential", edition=1999)`. Otros
+dos leían una opción y tomaban cualquier otro valor por la segunda: el
+`onset_rate_method` de `environment.detect_onsets` y de
+`environment.impulsive_sound_adjustment` ajustaba como mínimos cuadrados todo
+lo que no fuera `"upper_half"`. En 4.0 esa llamada lanza `ValueError`, o
+`TypeError` para un valor que no es texto, y el arreglo es escribir la opción
+tal como la enumera su `Literal`. Los alias
 que un `Literal` enumera a propósito siguen valiendo: `"docente"` por
 `"educational"` en `building.db_hr_facade_requirement`, `"dnt_w"` por `"r_w"`
 en `building.single_number_uncertainty`. Los ficheros que lee la biblioteca,
@@ -2350,12 +2356,24 @@ afectan al código escrito desde entonces.
 
 | Parámetro | Aceptaba antes de 4.0 | 4.0 lanza |
 | --- | --- | --- |
+| `aircraft.ANPAircraft.event_level(metric=)` | otras mayúsculas (`"EXPOSURE"` por `"exposure"`); espacios alrededor (`" exposure "` por `"exposure"`) | `ValueError` |
+| `aircraft.ANPAircraft.event_level(operation=)` | otras mayúsculas (`"DEPARTURE"` por `"departure"`); espacios alrededor (`" departure "` por `"departure"`); alias propios (`"a"`, `"approach"`, `"arrivals"`, `"d"`, `"departures"`, `"landing"`, `"take-off"`, `"takeoff"`); un valor que no es texto pero se escribe como una opción | `ValueError`, y `TypeError` para un valor que no es texto |
+| `aircraft.ANPAircraft.noise_contour(metric=)` | otras mayúsculas (`"EXPOSURE"` por `"exposure"`); espacios alrededor (`" exposure "` por `"exposure"`) | `ValueError` |
+| `aircraft.ANPAircraft.noise_contour(operation=)` | otras mayúsculas (`"DEPARTURE"` por `"departure"`); espacios alrededor (`" departure "` por `"departure"`); alias propios (`"a"`, `"approach"`, `"arrivals"`, `"d"`, `"departures"`, `"landing"`, `"take-off"`, `"takeoff"`); un valor que no es texto pero se escribe como una opción | `ValueError`, y `TypeError` para un valor que no es texto |
+| `aircraft.ANPAircraft.npd_curves(operation=)` | otras mayúsculas (`"DEPARTURE"` por `"departure"`); espacios alrededor (`" departure "` por `"departure"`); alias propios (`"a"`, `"approach"`, `"arrivals"`, `"d"`, `"departures"`, `"landing"`, `"take-off"`, `"takeoff"`); un valor que no es texto pero se escribe como una opción | `ValueError`, y `TypeError` para un valor que no es texto |
+| `aircraft.ANPAircraft.profile(operation=)` | otras mayúsculas (`"DEPARTURE"` por `"departure"`); espacios alrededor (`" departure "` por `"departure"`); alias propios (`"a"`, `"approach"`, `"arrivals"`, `"d"`, `"departures"`, `"landing"`, `"take-off"`, `"takeoff"`); un valor que no es texto pero se escribe como una opción | `ValueError`, y `TypeError` para un valor que no es texto |
+| `aircraft.ANPAircraft.revised_npd_curves(operation=)` | otras mayúsculas (`"DEPARTURE"` por `"departure"`); espacios alrededor (`" departure "` por `"departure"`); alias propios (`"a"`, `"approach"`, `"arrivals"`, `"d"`, `"departures"`, `"landing"`, `"take-off"`, `"takeoff"`); un valor que no es texto pero se escribe como una opción | `ValueError`, y `TypeError` para un valor que no es texto |
 | `aircraft.ANPAircraft.spectral_class(operation=)` | otras mayúsculas (`"DEPARTURE"` por `"departure"`); espacios alrededor (`" departure "` por `"departure"`); un valor que no es texto pero se escribe como una opción | `ValueError`, y `TypeError` para un valor que no es texto |
 | `aircraft.ANPDatabase.event_level(metric=)` | otras mayúsculas (`"EXPOSURE"` por `"exposure"`); espacios alrededor (`" exposure "` por `"exposure"`) | `ValueError` |
+| `aircraft.ANPDatabase.event_level(operation=)` | otras mayúsculas (`"DEPARTURE"` por `"departure"`); espacios alrededor (`" departure "` por `"departure"`); alias propios (`"a"`, `"approach"`, `"arrivals"`, `"d"`, `"departures"`, `"landing"`, `"take-off"`, `"takeoff"`); un valor que no es texto pero se escribe como una opción | `ValueError`, y `TypeError` para un valor que no es texto |
 | `aircraft.ANPDatabase.flight_profile(operation=)` | otras mayúsculas (`"DEPARTURE"` por `"departure"`); espacios alrededor (`" departure "` por `"departure"`); un valor que no es texto pero se escribe como una opción | `ValueError`, y `TypeError` para un valor que no es texto |
 | `aircraft.ANPDatabase.noise_contour(metric=)` | otras mayúsculas (`"EXPOSURE"` por `"exposure"`); espacios alrededor (`" exposure "` por `"exposure"`) | `ValueError` |
+| `aircraft.ANPDatabase.noise_contour(operation=)` | otras mayúsculas (`"DEPARTURE"` por `"departure"`); espacios alrededor (`" departure "` por `"departure"`); alias propios (`"a"`, `"approach"`, `"arrivals"`, `"d"`, `"departures"`, `"landing"`, `"take-off"`, `"takeoff"`); un valor que no es texto pero se escribe como una opción | `ValueError`, y `TypeError` para un valor que no es texto |
 | `aircraft.ANPDatabase.npd_curves(operation=)` | otras mayúsculas (`"DEPARTURE"` por `"departure"`); espacios alrededor (`" A "` por `"A"`); alias propios (`"a"`, `"approach"`, `"arrivals"`, `"d"`, `"departures"`, `"landing"`, `"take-off"`, `"takeoff"`); un valor que no es texto pero se escribe como una opción | `ValueError`, y `TypeError` para un valor que no es texto |
+| `aircraft.ANPDatabase.procedural_profile(operation=)` | otras mayúsculas (`"DEPARTURE"` por `"departure"`); espacios alrededor (`" departure "` por `"departure"`); alias propios (`"a"`, `"approach"`, `"arrivals"`, `"d"`, `"departures"`, `"landing"`, `"take-off"`, `"takeoff"`); un valor que no es texto pero se escribe como una opción | `ValueError`, y `TypeError` para un valor que no es texto |
+| `aircraft.ANPDatabase.procedural_steps(operation=)` | otras mayúsculas (`"DEPARTURE"` por `"departure"`); espacios alrededor (`" departure "` por `"departure"`); alias propios (`"a"`, `"approach"`, `"arrivals"`, `"d"`, `"departures"`, `"landing"`, `"take-off"`, `"takeoff"`); un valor que no es texto pero se escribe como una opción | `ValueError`, y `TypeError` para un valor que no es texto |
 | `aircraft.ANPDatabase.profile(operation=)` | otras mayúsculas (`"DEPARTURE"` por `"departure"`); espacios alrededor (`" departure "` por `"departure"`); un valor que no es texto pero se escribe como una opción | `ValueError`, y `TypeError` para un valor que no es texto |
+| `aircraft.ANPDatabase.revised_npd_curves(operation=)` | otras mayúsculas (`"DEPARTURE"` por `"departure"`); espacios alrededor (`" departure "` por `"departure"`); alias propios (`"a"`, `"approach"`, `"arrivals"`, `"d"`, `"departures"`, `"landing"`, `"take-off"`, `"takeoff"`); un valor que no es texto pero se escribe como una opción | `ValueError`, y `TypeError` para un valor que no es texto |
 | `aircraft.AircraftSystemComplianceResult(linearity=)` | claves que no son texto pero se escriben como opciones | `TypeError` para un valor que no es texto |
 | `aircraft.PerformanceAircraft.flap(operation=)` | otras mayúsculas (`"d"` por `"D"`); espacios alrededor (`" D "` por `"D"`); un valor que no es texto pero se escribe como una opción | `ValueError`, y `TypeError` para un valor que no es texto |
 | `aircraft.engine_installation_correction(mounting=)` | otras mayúsculas (`"WING"` por `"wing"`); espacios alrededor (`" wing "` por `"wing"`); alias propios (`"prop"`) | `ValueError` |
@@ -2385,6 +2403,8 @@ afectan al código escrito desde entonces.
 | `environment.adjacent_premises_limits(room_type=)` | otras mayúsculas (`"BEDROOMS"` por `"bedrooms"`); espacios alrededor (`" bedrooms "` por `"bedrooms"`) | `ValueError` |
 | `environment.assess_activity(period_hours=)` | otras mayúsculas (claves: `{"Day": 12.0}`); espacios alrededor (claves: `{" day ": 12.0}`); claves que no son texto pero se escriben como opciones | `ValueError`, y `TypeError` para un valor que no es texto |
 | `environment.bridge_transfer(bridge=)` | un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
+| `environment.detect_onsets(onset_rate_method=)` | cualquier valor: todo lo que no fuera exactamente `"upper_half"` se ajustaba como `"least_squares"` (`"UPPER_HALF"`, `" upper_half "`, `"banana"`, `5`) | `ValueError`, y `TypeError` para un valor que no es texto |
+| `environment.impulsive_sound_adjustment(onset_rate_method=)` | cualquier valor: todo lo que no fuera exactamente `"upper_half"` se ajustaba como `"least_squares"` (`"UPPER_HALF"`, `" upper_half "`, `"banana"`, `5`) | `ValueError`, y `TypeError` para un valor que no es texto |
 | `environment.indoor_quality_objectives(building_use=)` | otras mayúsculas (`"RESIDENTIAL"` por `"residential"`); espacios alrededor (`" residential "` por `"residential"`) | `ValueError` |
 | `environment.indoor_quality_objectives(room_type=)` | otras mayúsculas (`"LIVING"` por `"living"`); espacios alrededor (`" living "` por `"living"`) | `ValueError` |
 | `environment.infrastructure_limits(area_type=)` | otras mayúsculas (`"E"` por `"e"`); espacios alrededor (`" e "` por `"e"`) | `ValueError` |

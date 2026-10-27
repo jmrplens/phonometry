@@ -139,6 +139,12 @@ Sea water at one point of the ocean.
 
 **Returns:** The [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) at that point.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `sound_speed_model` is not a text. |
+
 The density and the speed of sound come from different sources, which is
 why both are named in the result's `model`. Neither source in this
 library prints a ratio of specific heats, a viscosity or a thermal

@@ -701,6 +701,7 @@ def auditory_weighting(
         ``"southall-2019"``.
     :return: An :class:`AuditoryWeightingResult`.
     :raises ValueError: If an input is invalid.
+    :raises TypeError: if ``group`` or ``guidance`` is not a text.
     """
     params = weighting_parameters(group, guidance=guidance)
     f = _positive_frequencies(frequency_hz)
@@ -730,6 +731,7 @@ def exposure_criteria(
         ones.
     :return: An :class:`ExposureCriteria`.
     :raises ValueError: If the version or the group is unknown.
+    :raises TypeError: if ``group`` or ``guidance`` is not a text.
     """
     params = weighting_parameters(group, guidance=guidance)
     cont, imp, label, cont_source, imp_source = _CRITERIA[params.guidance]
@@ -1110,8 +1112,9 @@ def weighted_exposure(
         metric.
     :return: A :class:`WeightedExposureResult`.
     :raises ValueError: If an input is invalid.
-    :raises TypeError: if ``peak_spl`` is not a single number, or ``n_events``
-        is a flag, a text or an array where a count goes.
+    :raises TypeError: if ``peak_spl`` is not a single number, ``n_events``
+        is a flag, a text or an array where a count goes, or ``group`` or
+        ``guidance`` is not a text.
     """
     f = _positive_frequencies(frequencies_hz, "frequencies_hz")
     sel = np.array(band_sel, dtype=np.float64, copy=True, ndmin=1)

@@ -194,6 +194,7 @@ Table 3 (`normalized=True`).
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the group is unknown or a frequency is invalid. |
+| TypeError | if `group` is not a text. |
 
 ## orca_audiogram
 

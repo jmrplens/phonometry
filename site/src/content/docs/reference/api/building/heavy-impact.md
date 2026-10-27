@@ -212,7 +212,7 @@ Table A.1 (bang machine).
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an unknown source or a wrong number of bands. |
-| TypeError | if `force_exposure_level` holds a text or a value that is not a real number. |
+| TypeError | if `force_exposure_level` holds a text or a value that is not a real number, or `source` is not a text. |
 
 ## fast_reverberation_correction
 
@@ -325,6 +325,7 @@ Octave-band `LFE` tolerance band of a heavy impact source.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an unknown source name. |
+| TypeError | if `source` is not a text. |
 
 ## heavy_impact_source_specification
 

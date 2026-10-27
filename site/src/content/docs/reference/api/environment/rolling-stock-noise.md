@@ -941,6 +941,7 @@ normalisation, when one is required, goes on the runs before this
 | Exception | When |
 | :--- | :--- |
 | ValueError | See [`RollingStockTestResult`](/phonometry/reference/api/environment/rolling-stock-noise/#rollingstocktestresult). |
+| TypeError | if `method` is not a text. |
 
 ## ROLLING_STOCK_TEST_METHODS
 

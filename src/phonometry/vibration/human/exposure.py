@@ -1324,7 +1324,10 @@ def exposure_assessment(
     :return: An :class:`ExposureAssessment`.
     :raises ValueError: for an unknown ``kind``/``metric`` combination or a
         non-finite or negative ``value``.
+    :raises TypeError: if ``kind`` or ``metric`` is not a text.
     """
+    require_choice(kind, "kind", ("hav", "wbv"))
+    require_choice(metric, "metric", ("a8", "vdv"))
     if (kind, metric) not in _DIRECTIVE_VALUES:
         raise ValueError(_KIND_METRIC_MSG)
     return ExposureAssessment(value=float(value), kind=kind, metric=metric)
@@ -1485,7 +1488,7 @@ def daily_vibration_exposure(
     :raises ValueError: if the inputs differ in length, carry non-finite
         values, or ``labels`` mismatches.
     :raises TypeError: if ``durations_s`` or ``total_values`` holds a text or a value
-        that is not a real number.
+        that is not a real number, or ``kind`` is not a text.
     """
     # Finite up front, naming the parameter the caller typed: a NaN magnitude
     # slips every `< 0.0` guard downstream and surfaces as an A(8) of NaN

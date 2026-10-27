@@ -1578,7 +1578,7 @@ def in_situ_element(
     :return: The :class:`InSituElementResult`.
     :raises ValueError: If any element property is not positive and finite.
     :raises TypeError: if ``frequencies`` holds a text or a value that is not a real
-        number.
+        number, or ``fraction`` is not an integer (a word, a flag or a float).
     """
     f = require_positive_array(frequencies, "frequencies")
     sigma = bending_radiation_factor(

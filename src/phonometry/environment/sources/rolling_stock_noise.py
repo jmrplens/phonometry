@@ -995,6 +995,7 @@ def rolling_stock_test(
     :param method: One of :data:`ROLLING_STOCK_TEST_METHODS`.
     :return: The test.
     :raises ValueError: See :class:`RollingStockTestResult`.
+    :raises TypeError: if ``method`` is not a text.
     """
     return RollingStockTestResult(
         method=method,

@@ -1110,7 +1110,7 @@ def __getitem__(self, period):
 <a id="a45"></a>
 ### A45. Refuse an unknown choice with `ValueError`, and a choice that is not text with `TypeError`, checked as written
 
-**Why.** A choice names an option whatever it looks up inside, so a miss is a bad value; a number where a name belongs is the wrong type, as `require_choice` has it. The check reads the text as the caller wrote it: a `Literal` lists one spelling of each option, and a body that folds the case, strips the spaces, swaps separators, maps an alias of its own or makes a text of any value with `str()` before it checks took `"a"` for `"A"`, `" fast "` for `"fast"` and `2023` for `"2023"` at run time while a type checker refused all three. 186 public parameters and record fields did, the core filters among them (`WeightingFilter(48000, "a")`, `time_weighting(x, fs, mode="FAST")`).
+**Why.** A choice names an option whatever it looks up inside, so a miss is a bad value; a number where a name belongs is the wrong type, as `require_choice` has it. The check reads the text as the caller wrote it: a `Literal` lists one spelling of each option, and a body that folds the case, strips the spaces, swaps separators, maps an alias of its own or makes a text of any value with `str()` before it checks took `"a"` for `"A"`, `" fast "` for `"fast"` and `2023` for `"2023"` at run time while a type checker refused all three. 198 public parameters and record fields did, the core filters among them (`WeightingFilter(48000, "a")`, `time_weighting(x, fs, mode="FAST")`), twelve of them through a method of their own class or of the database a record holds. A check as written holds the text to the `Literal` only when its options are the ones the `Literal` lists: `require_choice(quantity, "quantity", (*_SINGLE, *_ALIASES))` takes an alias of the table's own as surely as a fold does.
 
 **Do**
 
@@ -1131,6 +1131,7 @@ if period not in PERIODS:
     raise KeyError(period)
 key = period.strip().lower()
 year = require_choice(str(edition), "edition", EDITIONS)
+row = require_choice(quantity, "quantity", (*_SINGLE, *_ALIASES))
 ```
 
 **Enforced by:** `scripts/check_choice_literals.py`, `make choice-literals`, `tests/test_check_choice_literals.py::test_every_literal_choice_is_checked_as_written`, `tests/test_choice_vocabulary.py::test_a_retired_spelling_is_refused`, review

@@ -79,7 +79,7 @@ $\mathrm{PL} = \text{spreading} + \alpha R$ versus range.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
-| TypeError | if `frequency_hz` is not a single number. |
+| TypeError | if `frequency_hz` is not a single number, or `law` or `model` is not a text. |
 
 ## PropagationLossResult
 

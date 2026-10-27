@@ -813,12 +813,13 @@ def _percentile(values: np.ndarray, percentile: int) -> float:
 # ---------------------------------------------------------------------------
 
 
-def _validate_field(field: str) -> bool:
-    """Return True for the diffuse field; raise on invalid values."""
-    if field not in ("free", "diffuse"):
-        msg = f"'field' must be 'free' or 'diffuse', got {field!r}."
-        raise ValueError(msg)
-    return field == "diffuse"
+def _validate_field(field: object) -> bool:
+    """Return True for the diffuse field, the field named as written.
+
+    :raises ValueError: for a field other than ``"free"`` and ``"diffuse"``.
+    :raises TypeError: for a field that is not a text.
+    """
+    return require_choice(field, "field", ("free", "diffuse")) == "diffuse"
 
 
 def _core_loudness_from_levels(levels: np.ndarray, *, diffuse: bool) -> np.ndarray:
@@ -846,6 +847,7 @@ def loudness_zwicker_from_spectrum(
     :return: :class:`ZwickerLoudness` with ``loudness`` (N in sone),
         ``loudness_level`` (LN in phon) and ``specific`` (N' in sone/Bark,
         240 values at 0.1-Bark steps); the time-varying fields are None.
+    :raises TypeError: if ``field`` is not a text.
     """
     diffuse = _validate_field(field)
     band_levels = np.asarray(levels, dtype=np.float64)
@@ -946,7 +948,7 @@ def loudness_zwicker(
         ``n5``/``n10`` the percentile values and ``times`` /
         ``loudness_vs_time`` the loudness trace at 500 Hz.
     :raises TypeError: if ``time_skip`` is not a single number, or ``fs`` is a flag, a
-        text or an array where a count goes.
+        text or an array where a count goes, or ``field`` is not a text.
     """
     diffuse = _validate_field(field)
     rate = resolve_fs(x, fs)

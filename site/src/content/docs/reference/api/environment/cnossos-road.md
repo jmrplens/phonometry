@@ -156,7 +156,7 @@ propulsion noise, a noisy one does not increase it.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If an input is invalid. |
-| TypeError | if `junction_distance`, `road_slope_percent` or `speed_kmh` is not a single number, or `category` is not a text. |
+| TypeError | if `junction_distance`, `road_slope_percent` or `speed_kmh` is not a single number, `category` is not a text, or `surface` is neither a text nor a road surface. |
 
 ## ROAD_REFERENCE_SPEED_KMH
 
@@ -220,7 +220,7 @@ and their total power is the propulsion term alone (2.2.3).
 | Exception | When |
 | :--- | :--- |
 | ValueError | If an input is invalid. |
-| TypeError | if `junction_distance`, `speed_kmh`, `studded_fraction`, `studded_months` or `temperature_c` is not a single number, or `category` is not a text. |
+| TypeError | if `junction_distance`, `speed_kmh`, `studded_fraction`, `studded_months` or `temperature_c` is not a single number, `category` is not a text, or `surface` is neither a text nor a road surface. |
 
 ## ROAD_SOURCE_HEIGHT_M
 
@@ -278,6 +278,7 @@ temperature, the gradient, the studded-tyre season and the junction.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the traffic is empty, repeats a category, or carries an invalid flow rate or speed. |
+| TypeError | if `surface` is neither a text nor a road surface. |
 
 ## road_surface_coefficients
 

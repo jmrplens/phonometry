@@ -935,12 +935,15 @@ def barrier_insertion_loss(
         values). Pass a computed one, such as ``fluids.air(temperature_c=30.0,
         relative_humidity_percent=70.0)``, to work in the air of the room.
     :return: A :class:`BarrierInsertionLoss`.
-    :raises ValueError: On a non-positive/ordered geometry, or if a ground is
-        requested with ``method="kurze_anderson"``.
+    :raises ValueError: On a non-positive/ordered geometry, a ``method``
+        other than the two listed, or if a ground is requested with
+        ``method="kurze_anderson"``.
     :raises TypeError: if ``barrier_distance``, ``barrier_height_m``,
-        ``receiver_distance`` or ``thickness_m`` is not a single number, or
-        ``frequencies`` holds a text or a value that is not a real number.
+        ``receiver_distance`` or ``thickness_m`` is not a single number,
+        ``frequencies`` holds a text or a value that is not a real number, or
+        ``method`` is not a text.
     """
+    require_choice(method, "method", _BARRIER_METHODS)
     thickness_m = _validate_barrier_geometry(
         source_height_m,
         barrier_distance,
@@ -973,7 +976,7 @@ def barrier_insertion_loss(
             msg = "the coherent ground model requires method='exact'."
             raise ValueError(msg)
         il = kurze_anderson_attenuation(n)
-    elif method == "exact":
+    else:
         il = _exact_barrier_il(
             _ExactBarrierSetup(
                 frequencies=f,
@@ -990,9 +993,6 @@ def barrier_insertion_loss(
                 ground_model=ground_model,
             )
         )
-    else:
-        msg = f"unknown method {method!r}; options: {_BARRIER_METHODS}."
-        raise ValueError(msg)
     return BarrierInsertionLoss(
         frequencies=f,
         insertion_loss=np.asarray(il, dtype=np.float64),

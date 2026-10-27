@@ -1389,7 +1389,7 @@ exactly zero, so the two branches meet without a step.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a value is outside the range its equation is written for, or if the operating point is at or past flashing, where Equations (9) and (13) divide by zero. |
-| TypeError | if `frequencies` holds a text or a value that is not a real number. |
+| TypeError | if `frequencies` holds a text or a value that is not a real number, or `strouhal_form` is not a text. |
 
 ## vena_contracta_velocity
 

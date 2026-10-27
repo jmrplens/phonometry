@@ -153,7 +153,7 @@ indices (Formulas 11-12) and the standardized level difference (Formula 13).
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `area` or `volume` is not a single number. |
+| TypeError | if `area` or `volume` is not a single number, or `fraction` is not an integer (a word, a flag or a float). |
 
 ## FacadeElement
 

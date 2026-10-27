@@ -22,12 +22,15 @@ import pytest
 from phonometry import (
     aircraft,
     building,
+    emission,
     environment,
     filters,
     fluids,
+    hearing,
     materials,
     metrology,
     noise_control,
+    psychoacoustics,
     signals,
     underwater,
     vibration,
@@ -48,6 +51,17 @@ class _Printed:
 
 
 _SIGNAL = np.sin(2.0 * np.pi * 1000.0 * np.arange(4800) / 48000.0)
+
+#: The ANP database the aircraft cases look their operations up in.
+_ANP = aircraft.load_anp_database()
+
+#: A receiver of an ANP single event, 500 m along and 600 m beside the track.
+_OBSERVER = [500.0, 600.0, 0.0]
+
+#: An ``LpAF`` history with one onset of 30 dB over 0,1 s.
+_ONSET = np.concatenate(
+    [np.full(20, 50.0), np.linspace(50.0, 80.0, 10), np.full(20, 80.0)]
+)
 
 
 def _not_a_text(name: str) -> str:
@@ -429,6 +443,117 @@ _DROPPED_SPELLINGS: list[tuple[str, Callable[[], object], type[Exception], str]]
         ),
         ValueError,
         "'section' must be one of",
+    ),
+    (
+        "ANPDatabase.event_level operation 'takeoff'",
+        lambda: _ANP.event_level("747100", _OBSERVER, "takeoff"),  # type: ignore[arg-type]
+        ValueError,
+        "'operation' must be one of",
+    ),
+    (
+        "ANPAircraft.noise_contour operation ' departure '",
+        lambda: _ANP.aircraft("747100").noise_contour(
+            " departure ",  # type: ignore[arg-type]
+            x=[0.0, 1000.0],
+            y=[0.0, 500.0],
+        ),
+        ValueError,
+        "'operation' must be one of",
+    ),
+    (
+        "ANPAircraft.event_level metric 'EXPOSURE'",
+        lambda: _ANP.aircraft("747100").event_level(
+            _OBSERVER,
+            "departure",
+            metric="EXPOSURE",  # type: ignore[arg-type]
+        ),
+        ValueError,
+        "'metric' must be one of",
+    ),
+    (
+        "detect_onsets onset_rate_method 'UPPER_HALF'",
+        lambda: environment.detect_onsets(
+            _ONSET,
+            0.01,
+            onset_rate_method="UPPER_HALF",  # type: ignore[arg-type]
+        ),
+        ValueError,
+        "'onset_rate_method' must be one of",
+    ),
+    (
+        "impulsive_sound_adjustment onset_rate_method 5",
+        lambda: environment.impulsive_sound_adjustment(
+            _SIGNAL,
+            48000,
+            onset_rate_method=5,  # type: ignore[arg-type]
+        ),
+        TypeError,
+        _not_a_text("onset_rate_method"),
+    ),
+    (
+        "job_based_exposure instrument 'Class 1'",
+        lambda: hearing.job_based_exposure(
+            [80.0, 82.0, 81.0, 83.0, 80.0],
+            8.0,
+            instrument="Class 1",  # type: ignore[arg-type]
+        ),
+        ValueError,
+        "'instrument' must be one of",
+    ),
+    (
+        "task_based_exposure instrument 5",
+        lambda: hearing.task_based_exposure(
+            [hearing.Task(samples=(80.0, 81.0, 82.0), duration_hours=8.0)],
+            instrument=5,  # type: ignore[arg-type]
+        ),
+        TypeError,
+        _not_a_text("instrument"),
+    ),
+    (
+        "sound_power_pressure grade 5",
+        lambda: emission.sound_power_pressure(
+            np.full((10, 1), 80.0),
+            "hemisphere",
+            radius=1.0,
+            grade=5,  # type: ignore[arg-type]
+        ),
+        TypeError,
+        _not_a_text("grade"),
+    ),
+    (
+        "weighting_class_limits edition 2013",
+        lambda: filters.weighting_class_limits(1, edition=2013),  # type: ignore[arg-type]
+        TypeError,
+        _not_a_text("edition"),
+    ),
+    (
+        "loudness_zwicker_from_spectrum field 5",
+        lambda: psychoacoustics.loudness_zwicker_from_spectrum(
+            np.full(28, 60.0),
+            field=5,  # type: ignore[arg-type]
+        ),
+        TypeError,
+        _not_a_text("field"),
+    ),
+    (
+        "exposure_assessment kind 5",
+        lambda: vibration.exposure_assessment(2.0, kind=5),  # type: ignore[arg-type]
+        TypeError,
+        _not_a_text("kind"),
+    ),
+    (
+        "barrier_insertion_loss method 5",
+        lambda: environment.barrier_insertion_loss(
+            [500.0, 1000.0],
+            1.0,
+            50.0,
+            4.0,
+            100.0,
+            1.5,
+            method=5,  # type: ignore[arg-type]
+        ),
+        TypeError,
+        _not_a_text("method"),
     ),
 ]
 

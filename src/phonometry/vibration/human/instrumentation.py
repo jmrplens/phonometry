@@ -995,6 +995,7 @@ class PhaseVerification(OwnsArrays):
 
         :raises ValueError: if the weighting is not one of the nine, or a
             characteristic frequency is not positive and finite.
+        :raises TypeError: if ``weighting`` is not a text.
         """
         phase_tolerance_deg(self.weighting, self.characteristic_frequencies_hz)
 
@@ -1338,6 +1339,7 @@ class RunningRMSDecayVerification(RichDisplay):
 
         :raises ValueError: if ``method`` is neither average, or the
             integration time is not one of the three printed time constants.
+        :raises TypeError: if ``method`` is not a text.
         """
         self._row()
 

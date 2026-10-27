@@ -365,7 +365,8 @@ def propagation_loss(
     :param transition_range: Transition range for the ``"practical"`` law, in m.
     :return: A :class:`PropagationLossResult`.
     :raises ValueError: If the inputs are invalid.
-    :raises TypeError: if ``frequency_hz`` is not a single number.
+    :raises TypeError: if ``frequency_hz`` is not a single number, or ``law`` or
+        ``model`` is not a text.
     """
     f = _positive(frequency_hz, "frequency_hz")
     r = _positive_array(range_m, "range_m")

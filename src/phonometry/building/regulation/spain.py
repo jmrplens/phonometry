@@ -655,8 +655,7 @@ def d2m_nt_a(
     :raises ValueError: For a spectrum Formula (A.5) does not cover.
     :raises TypeError: if ``spectrum`` is not a text.
     """
-    key = require_choice(spectrum, "spectrum", _SPECTRA)
-    if key not in _A5_SPECTRA:
+    if isinstance(spectrum, str) and spectrum in _A6_SPECTRA:
         msg = (
             "Formula (A.5) evaluates 'D2m,nT,A' for pink noise or, on a "
             "railway-dominant site, the Table A.4 railway spectrum; "
@@ -664,6 +663,7 @@ def d2m_nt_a(
             "as 'D2m,nT,Atr' through Formula (A.6): use d2m_nt_atr()."
         )
         raise ValueError(msg)
+    key = require_choice(spectrum, "spectrum", _A5_SPECTRA)
     return db_hr_global_index(
         level_difference, key, frequencies=frequencies, name="D2m,nT,A"
     )
@@ -698,8 +698,7 @@ def d2m_nt_atr(
     :raises ValueError: For a spectrum Formula (A.6) does not cover.
     :raises TypeError: if ``spectrum`` is not a text.
     """
-    key = require_choice(spectrum, "spectrum", _SPECTRA)
-    if key not in _A6_SPECTRA:
+    if isinstance(spectrum, str) and spectrum in _A5_SPECTRA:
         msg = (
             "Formula (A.6) evaluates 'D2m,nT,Atr' for road-traffic noise or, "
             "on an aircraft-dominant site, the Table A.2 aircraft spectrum; "
@@ -707,6 +706,7 @@ def d2m_nt_atr(
             "through Formula (A.5): use d2m_nt_a()."
         )
         raise ValueError(msg)
+    key = require_choice(spectrum, "spectrum", _A6_SPECTRA)
     return db_hr_global_index(
         level_difference, key, frequencies=frequencies, name=_D2M_NT_ATR
     )

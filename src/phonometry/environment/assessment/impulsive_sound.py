@@ -69,6 +69,7 @@ from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     check_engine,
     require_1d_signal,
+    require_choice,
     require_equal_shapes,
     require_ranks,
     require_same_length,
@@ -500,6 +501,8 @@ _CATEGORY_HIGHLY_IMPULSIVE = "highly impulsive"
 _MIN_SLOPE_SAMPLES: int = 2
 
 _OnsetRateMethod = Literal["least_squares", "upper_half"]
+#: The two onset-rate fits of 3.5: the whole onset, or its upper half (Note 1).
+_ONSET_RATE_METHODS: tuple[_OnsetRateMethod, ...] = ("least_squares", "upper_half")
 
 
 @dataclass(frozen=True)
@@ -887,9 +890,12 @@ def detect_onsets(
         onset; ``"upper_half"`` fits the upper half of the slope, the variant
         for pass-bys of road vehicles, trains or aircraft (3.5, Note 1).
     :return: The detected onsets, ordered in time (empty when none is found).
-    :raises ValueError: for a non-positive ``dt`` or fewer than two samples.
-    :raises TypeError: if ``dt`` is not a single number.
+    :raises ValueError: for a non-positive ``dt``, fewer than two samples, or
+        an ``onset_rate_method`` other than the two listed.
+    :raises TypeError: if ``dt`` is not a single number, or
+        ``onset_rate_method`` is not a text.
     """
+    method = require_choice(onset_rate_method, "onset_rate_method", _ONSET_RATE_METHODS)
     lev = np.asarray(levels, dtype=np.float64).ravel()
     require_scalar(dt, "dt")
     if not math.isfinite(dt) or dt <= 0.0:
@@ -905,7 +911,7 @@ def detect_onsets(
 
     onsets: list[ImpulseOnset] = []
     for s, e in runs:
-        orate = _onset_rate(times[s : e + 1], lev[s : e + 1], onset_rate_method)
+        orate = _onset_rate(times[s : e + 1], lev[s : e + 1], method)
         onsets.append(
             ImpulseOnset(
                 index_start=int(s),
@@ -971,9 +977,12 @@ def impulsive_sound_adjustment(
         computed from the A-weighted signal energy.
     :return: An :class:`ImpulsiveSoundResult` with the level history, onsets,
         prominence, adjustment, category and adjusted ``LAeq``.
-    :raises ValueError: for invalid ``fs``, ``dt``, an empty signal, or an ``x``
-        that is not one channel (a 1-D series).
+    :raises ValueError: for invalid ``fs``, ``dt``, an empty signal, an ``x``
+        that is not one channel (a 1-D series), or an ``onset_rate_method``
+        other than the two listed.
+    :raises TypeError: if ``onset_rate_method`` is not a text.
     """
+    require_choice(onset_rate_method, "onset_rate_method", _ONSET_RATE_METHODS)
     fs = resolve_fs(x, fs, name="x")
     x = require_1d_signal(resolve_samples(x, name="x"), "x")
     history = sound_pressure_level_history(

@@ -464,6 +464,12 @@ dataclasses. For conformity checks pass `one_sided=True` and read
 | `one_sided` | Use the one-sided coverage factor. |
 | `upper_limit` | Use the `σR95` upper limit (airborne, situation A). |
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `quantity` is not a text. |
+
 ## UncertainValue
 
 ```python

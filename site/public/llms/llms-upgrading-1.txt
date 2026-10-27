@@ -1347,4 +1347,55 @@ object refuses to be read as a truth value, so an
 `if verify_running_rms_decay(...):` written against the release candidate
 raises `TypeError` instead of passing every meter.
 
+## A verdict says `passes`, refuses a truth value, and comes from a verb
+
+A judgement is named for what it judges: `verify_` an instrument, `assess_` a
+measured situation, `check_` the setup a method needs. Each returns a record
+that keeps its reasons, and a pass or a fail is spelled `passes` on every one of
+them. A record a judging function returns, and every record with a `passes`,
+refuses to be read as a truth value: `if verdict:` raises `TypeError` and the
+message names what to read. In 3.3.0 and 4.0.0rc1 these records were always
+true, so an `if` written against them passed every failure: read `.passes` on
+`QuasiPeakDynamicsResult`, `AircraftSystemComplianceResult`,
+`WeightingVerification`, `PhaseVerification`, `SignalBurstVerification`,
+`DBHRCheck`, `DBHRAssessment`, `ActivityAssessment` and `PeriodAssessment`;
+`.overall_class` on `FilterComplianceResult`, `WeightingComplianceResult` and
+`IntensityInstrumentComplianceResult`; `.within_guideline` on
+`DamageAssessment`, since exceeding a guideline value of DIN 4150-3 is not a
+failure; `.qualified` on `PrecisionCriteria`; `.adjustment` on
+`TonalAssessmentResult`; and `.decisive_audibility` or `.audible` on
+`ToneAudibilityResult`.
+
+| 3.3.0 or 4.0.0rc1 | 4.0 |
+| --- | --- |
+| `.complies` on `DbHrCheck`, `DbHrAssessment` (now `DBHRCheck`, `DBHRAssessment`), `ActivityAssessment` and `PeriodAssessment` | `.passes` |
+| `vibration.is_significant_change(change, zone_b_upper)` | `vibration.assess_operational_change(change, zone_b_upper).significant`, beside the `.threshold` it is read against. A significant change is a reason to investigate, not a failure, so the flag keeps its name |
+| `materials.limp_frame_applicable(k_c, criterion=...)` | `materials.check_limp_frame(k_c, criterion=...).passes`, beside the `.ratio` and the `.threshold`. A ratio exactly on the threshold no longer passes: Allard & Atalla print both criteria as strict inequalities |
+| `fi.field_is_stationary(limit=...)` on a `FieldIndicators` | `fi.check_field_stationarity().passes`, and band by band its `.stationary`. The limit is the 0.6 of Table B.3, read as `.limit`, and no longer an argument |
+| `room.perceptibly_different(symbol, first, second)` | `room.assess_perceptible_difference(symbol, first, second).different`; the two values must now have the same shape |
+| `materials.check_base_plate_scattering(s) == ()` | `materials.check_base_plate_scattering(s).passes`, with the bands over the limit in `.exceeded_frequencies` and the per-band `.margins`, `.exceeds` and `.limits` beside them. A coefficient that is not finite raises `ValueError`, where it used to pass |
+| `corrected, limited = building.background_corrected_level(lp, lb)` | `result = building.background_corrected_level(lp, lb)`, then `result.corrected_levels` and `result.limited` |
+| `k1, held = emission.background_noise_correction_at_workstation(lp, lb)` | `result = emission.background_noise_correction_at_workstation(lp, lb)`, then `result.correction` and `result.upper_bound` |
+
+The 3.3.0 top-level names this renames (`rigid_mass_calibration_check`,
+`satisfies_lower_requirement`, `satisfies_upper_requirement`,
+`strong_coupling_satisfied` and `tonal_seeking_survey`) are in the table of
+the names that are gone, at the end of this page.
+
+```python
+from phonometry import building, materials
+
+conformity = building.assess_requirement_conformity(52.0, 1.5, 50.0, bound="minimum")
+print(conformity.passes, conformity.margin_db)
+# True 0.5
+check = materials.check_base_plate_scattering([0.02] * len(materials.BASE_PLATE_BANDS_HZ))
+print(check.passes, check.exceeded_frequencies.size)
+# True 0
+try:
+    bool(check)
+except TypeError as error:
+    print(type(error).__name__)
+# TypeError
+```
+
 ---

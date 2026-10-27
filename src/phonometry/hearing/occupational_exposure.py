@@ -776,8 +776,11 @@ def task_based_exposure(
     :param warn: Emit :class:`OccupationalExposureWarning` when a task triggers the 3 dB
         spread rule (Clause 9.3).
     :return: An :class:`ExposureResult` with per-task contributions.
-    :raises TypeError: if ``u3`` is not a single number.
+    :raises ValueError: for an ``instrument`` Table C.5 does not list.
+    :raises TypeError: if ``u3`` is not a single number, or ``instrument`` is
+        not a text.
     """
+    require_choice(instrument, "instrument", tuple(INSTRUMENT_U2))
     require_scalar(u3, "u3")
     if not tasks:
         msg = "At least one task is required."
@@ -847,7 +850,7 @@ def _sampled_exposure(
 
     u1 = _sampling_std(arr)  # Eq C.12
     c1u1 = table_c4_contribution(n, u1)  # Table C.4
-    u2 = INSTRUMENT_U2[instrument]
+    u2 = INSTRUMENT_U2[require_choice(instrument, "instrument", tuple(INSTRUMENT_U2))]
     # Eq C.9 with c2 = c3 = 1.
     u = sqrt(c1u1**2 + u2**2 + u3**2)
 
@@ -910,10 +913,11 @@ def job_based_exposure(
     :param warn: Emit :class:`OccupationalExposureWarning` for the Table C.4 / Table 1 advisories.
     :return: An :class:`ExposureResult`.
     :raises ValueError: for a ``sample_duration_hours`` that is not positive,
-        or an ``n_workers`` that is not a whole number from 1.
+        an ``n_workers`` that is not a whole number from 1, or an
+        ``instrument`` Table C.5 does not list.
     :raises TypeError: if ``effective_duration_hours``, ``sample_duration_hours`` or
-        ``u3`` is not a single number, or ``n_workers`` is a flag, a text or an
-        array where a count goes.
+        ``u3`` is not a single number, ``n_workers`` is a flag, a text or an
+        array where a count goes, or ``instrument`` is not a text.
     """
     if n_workers is not None:
         n_workers = require_count(n_workers, "n_workers")
@@ -968,7 +972,9 @@ def full_day_exposure(
     :param warn: Emit :class:`OccupationalExposureWarning` for the 3 dB spread rule and the
         Table C.4 advisory.
     :return: An :class:`ExposureResult`.
-    :raises TypeError: if ``effective_duration_hours`` or ``u3`` is not a single number.
+    :raises ValueError: for an ``instrument`` Table C.5 does not list.
+    :raises TypeError: if ``effective_duration_hours`` or ``u3`` is not a single
+        number, or ``instrument`` is not a text.
     """
     arr = np.asarray(samples, dtype=float)
     spread = (

@@ -57,6 +57,12 @@ tolerance and is a known DIN 45692 implementation property.
 
 **Returns:** Sharpness in acum.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `field` is not a text. |
+
 ## sharpness_din_from_specific
 
 ```python

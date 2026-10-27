@@ -527,7 +527,13 @@ class ANPAircraft(RichDisplay):
     database: ANPDatabase = field(repr=False, compare=False)
 
     def npd_curves(self, operation: Operation, metric: Metric = "SEL") -> ANPNPDCurves:
-        """NPD curves for this aircraft (see :meth:`ANPDatabase.npd_curves`)."""
+        """NPD curves for this aircraft (see :meth:`ANPDatabase.npd_curves`).
+
+        :raises ValueError: for an ``operation`` or ``metric`` other than those
+            listed (the spelling as written, ``"departure"`` and not
+            ``"Departure"``).
+        :raises TypeError: if ``operation`` is not a text.
+        """
         return self.database.npd_curves(self.aircraft_id, operation, metric)
 
     def spectral_class(self, operation: Operation) -> SpectralClass:
@@ -556,7 +562,12 @@ class ANPAircraft(RichDisplay):
         static_pressure_kpa: float = _STANDARD_PRESSURE_KPA,
         absorption: Absorption = "arp5534",
     ) -> RevisedNPDCurves:
-        """NPD curves for another atmosphere (see :meth:`ANPDatabase.revised_npd_curves`)."""
+        """NPD curves for another atmosphere (see :meth:`ANPDatabase.revised_npd_curves`).
+
+        :raises ValueError: for an ``operation``, ``metric`` or ``absorption``
+            other than those listed (the spelling as written).
+        :raises TypeError: if ``operation`` or ``absorption`` is not a text.
+        """
         return self.database.revised_npd_curves(
             self.aircraft_id,
             operation,
@@ -574,7 +585,12 @@ class ANPAircraft(RichDisplay):
         *,
         profile_id: str | None = None,
     ) -> ANPProfile:
-        """Fixed-point profile (see :meth:`ANPDatabase.profile`)."""
+        """Fixed-point profile (see :meth:`ANPDatabase.profile`).
+
+        :raises ValueError: for an ``operation`` other than the four listed
+            (the spelling as written, ``"arrival"`` and not ``"ARRIVAL"``).
+        :raises TypeError: if ``operation`` is not a text.
+        """
         return self.database.profile(
             self.aircraft_id, operation, stage_length, profile_id=profile_id
         )
@@ -592,7 +608,13 @@ class ANPAircraft(RichDisplay):
         relative_humidity_percent: float | None = None,
         absorption: Absorption = "arp5534",
     ) -> FlyoverResult:
-        """Single-event level at a receiver (see :meth:`ANPDatabase.event_level`)."""
+        """Single-event level at a receiver (see :meth:`ANPDatabase.event_level`).
+
+        :raises ValueError: for an ``operation``, ``metric`` or ``absorption``
+            other than those listed (the spelling as written).
+        :raises TypeError: if ``operation``, ``metric`` or ``absorption`` is not
+            a text.
+        """
         return self.database.event_level(
             self.aircraft_id,
             observer,
@@ -620,7 +642,13 @@ class ANPAircraft(RichDisplay):
         relative_humidity_percent: float | None = None,
         absorption: Absorption = "arp5534",
     ) -> NoiseContourResult:
-        """Single-event ground contour (see :meth:`ANPDatabase.noise_contour`)."""
+        """Single-event ground contour (see :meth:`ANPDatabase.noise_contour`).
+
+        :raises ValueError: for an ``operation``, ``metric`` or ``absorption``
+            other than those listed (the spelling as written).
+        :raises TypeError: if ``operation``, ``metric`` or ``absorption`` is not
+            a text.
+        """
         return self.database.noise_contour(
             self.aircraft_id,
             operation,
@@ -809,6 +837,7 @@ class ANPDatabase:
         :raises KeyError: if the aircraft, its NPD data or its spectral class is
             missing.
         :raises ValueError: for an unknown metric, operation or absorption route.
+        :raises TypeError: if ``operation`` or ``absorption`` is not a text.
         """
         from .npd_atmosphere import revise_npd_curves
 
@@ -1046,7 +1075,9 @@ class ANPDatabase:
         :raises KeyError: If the aircraft has no procedural-step profile for the
             request, or ``profile_id`` is not among the available ones.
         :raises ValueError: If ``profile_id`` is ``None`` and several profiles
-            exist with none of them named ``"DEFAULT"``.
+            exist with none of them named ``"DEFAULT"``, or for an ``operation``
+            other than the four listed.
+        :raises TypeError: if ``operation`` is not a text.
         """
         return self._selected_procedural_steps(
             aircraft_id, operation, stage_length, profile_id=profile_id
@@ -1183,6 +1214,9 @@ class ANPDatabase:
         Takes the same arguments as :meth:`flight_profile`.
 
         :return: An :class:`ANPProfile`.
+        :raises ValueError: for an ``operation`` other than the four listed (the
+            spelling as written), and as :meth:`flight_profile` does.
+        :raises TypeError: if ``operation`` is not a text.
         """
         flown = self.flight_profile(
             aircraft_id,
@@ -1325,7 +1359,11 @@ class ANPDatabase:
         :param absorption: The Appendix D absorption route, ``"arp5534"``
             (default) or ``"arp866a"``; read only with a humidity.
         :return: A :class:`~phonometry.aircraft.airport_noise.FlyoverResult`.
-        :raises TypeError: if ``absorption`` is not a text.
+        :raises ValueError: for an ``operation``, ``metric`` or ``absorption``
+            other than those listed (the spelling as written, ``"departure"``
+            and not ``"DEPARTURE"`` or ``"takeoff"``).
+        :raises TypeError: if ``operation``, ``metric`` or ``absorption`` is not
+            a text.
         """
         atmosphere = _impedance_atmosphere(
             aerodrome, temperature_c, static_pressure_kpa
@@ -1395,7 +1433,11 @@ class ANPDatabase:
         :param absorption: The Appendix D absorption route, ``"arp5534"``
             (default) or ``"arp866a"``; read only with a humidity.
         :return: A :class:`~phonometry.aircraft.airport_noise.NoiseContourResult`.
-        :raises TypeError: if ``absorption`` is not a text.
+        :raises ValueError: for an ``operation``, ``metric`` or ``absorption``
+            other than those listed (the spelling as written, ``"departure"``
+            and not ``"DEPARTURE"`` or ``"takeoff"``).
+        :raises TypeError: if ``operation``, ``metric`` or ``absorption`` is not
+            a text.
         """
         atmosphere = _impedance_atmosphere(
             aerodrome, temperature_c, static_pressure_kpa

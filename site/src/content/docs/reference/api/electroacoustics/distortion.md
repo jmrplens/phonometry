@@ -353,7 +353,7 @@ between 31,5 Hz and 400 Hz.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
-| TypeError | if `fs`, `fundamental` or `notch_q` is not a single number. |
+| TypeError | if `fs`, `fundamental` or `notch_q` is not a single number, or `weighting` is not a text. |
 
 ## weighting_bs468
 

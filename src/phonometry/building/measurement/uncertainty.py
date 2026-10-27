@@ -717,6 +717,7 @@ def uncertain_value(
     :param coverage: Coverage probability as a fraction.
     :param one_sided: Use the one-sided coverage factor.
     :param upper_limit: Use the ``σR95`` upper limit (airborne, situation A).
+    :raises TypeError: if ``quantity`` is not a text.
     """
     u = single_number_uncertainty(quantity, situation, upper_limit=upper_limit)
     k = max(insulation_coverage_factor(coverage, one_sided=one_sided), 1.0)

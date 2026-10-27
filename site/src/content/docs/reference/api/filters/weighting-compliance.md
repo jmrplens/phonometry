@@ -145,7 +145,7 @@ over the standard's full frequency range.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if the edition is unknown, the edition does not define the filter's weighting, or `n_sweep_points` is below 64. |
-| TypeError | if `n_sweep_points` is a flag, a text or an array where a count goes. |
+| TypeError | if `n_sweep_points` is a flag, a text or an array where a count goes, or `edition` is not a text. |
 
 ## weighting_class_limits
 
@@ -182,7 +182,7 @@ footnote makes one mask govern every weighting characteristic, B included.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if the edition is unknown or does not define the requested class, or `weighting_class` is not a whole number. |
-| TypeError | if `weighting_class` is a flag, a text or an array where a class goes. |
+| TypeError | if `weighting_class` is a flag, a text or an array where a class goes, or `edition` is not a text. |
 
 ## WeightingClassLimits
 

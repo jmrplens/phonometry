@@ -372,7 +372,7 @@ reads the straight line between the two widths either side.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the width lies outside the measured widths. |
-| TypeError | if `gap_mm` is not a single number. |
+| TypeError | if `gap_mm` is not a single number, or `quantity` is not a text. |
 
 ### JointGapSeries.plot()
 

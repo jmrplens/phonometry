@@ -4342,6 +4342,7 @@ def time_selective_response(
         measurement, divided out of the response (Default: None).
     :return: The :class:`TimeSelectiveResponse`.
     :raises ValueError: for what :class:`TimeSelectiveResponse` refuses.
+    :raises TypeError: if ``window_shape`` is not a text.
     """
     return TimeSelectiveResponse(
         impulse_response=np.asarray(impulse_response, dtype=np.float64),

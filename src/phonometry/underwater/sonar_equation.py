@@ -411,7 +411,8 @@ def detection_range(
     :return: A :class:`DetectionRangeResult`.
     :raises ValueError: If an input is invalid.
     :raises TypeError: if ``figure_of_merit``, ``max_range`` or ``ph`` is not a single
-        number, or ``n_points`` is a flag, a text or an array where a count goes.
+        number, or ``n_points`` is a flag, a text or an array where a count goes, or
+        ``law`` or ``model`` is not a text.
     """
     require_scalar(ph, "ph")
     from scipy.optimize import brentq

@@ -453,16 +453,15 @@ def _analytic_weighting_db(curve: str, frequencies: np.ndarray) -> np.ndarray:
     return np.asarray(20.0 * np.log10(gain(f) / ref), dtype=np.float64)
 
 
-def _edition_spec(edition: str) -> dict[str, Any]:
-    """The mask spec of *edition*, refusing an unknown one.
+def _edition_spec(edition: object) -> dict[str, Any]:
+    """The mask spec of *edition*, named as written.
 
     :raises ValueError: if ``edition`` names no published edition.
+    :raises TypeError: if ``edition`` is not a text.
     """
-    spec = _WEIGHTING_EDITIONS.get(edition)
-    if spec is None:
-        msg = "edition must be '2013' or '1979'."
-        raise ValueError(msg)
-    return spec
+    return _WEIGHTING_EDITIONS[
+        require_choice(edition, "edition", tuple(_WEIGHTING_EDITIONS))
+    ]
 
 
 def _quoted_list(items: tuple[str, ...]) -> str:
@@ -536,7 +535,7 @@ def weighting_class_limits(
     :raises ValueError: if the edition is unknown or does not define the
         requested class, or ``weighting_class`` is not a whole number.
     :raises TypeError: if ``weighting_class`` is a flag, a text or an array
-        where a class goes.
+        where a class goes, or ``edition`` is not a text.
     """
     weighting_class = require_count(weighting_class, "weighting_class", at_least=None)
     spec = _edition_spec(edition)
@@ -1001,7 +1000,7 @@ def verify_weighting_class(
     :raises ValueError: if the edition is unknown, the edition does not define
         the filter's weighting, or ``n_sweep_points`` is below 64.
     :raises TypeError: if ``n_sweep_points`` is a flag, a text or an array where a count
-        goes.
+        goes, or ``edition`` is not a text.
     """
     spec = _edition_spec(edition)
     if wf.weighting not in spec["curves"]:

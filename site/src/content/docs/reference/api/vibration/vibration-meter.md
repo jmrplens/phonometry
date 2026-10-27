@@ -142,7 +142,7 @@ in time with the record it came from.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a bad record, a rate below 630 Hz, or an unknown class. |
-| TypeError | if `velocity_mm_s` holds a text or a value that is not a real number. |
+| TypeError | if `velocity_mm_s` holds a text or a value that is not a real number, or `building_class` is not a text. |
 
 ## assessment_weighting_response
 
@@ -512,7 +512,7 @@ The KB frequency weighting, Formula (4).
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a non-positive frequency or an unknown range. |
-| TypeError | if `frequencies` holds a text or a value that is not a real number. |
+| TypeError | if `frequencies` holds a text or a value that is not a real number, or `working_range` is not a text. |
 
 ## kbf_signal
 
@@ -551,7 +551,7 @@ why a measurement is started before the event it is about.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a bad record, a non-positive time constant, or a rate that cannot carry the working range. |
-| TypeError | if `fs` or `time_constant_s` is not a single number. |
+| TypeError | if `fs` or `time_constant_s` is not a single number, or `working_range` is not a text. |
 
 ## measure_vibration_immission
 

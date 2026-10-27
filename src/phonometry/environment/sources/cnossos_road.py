@@ -787,8 +787,8 @@ def road_rolling_noise(
     :return: ``L_WR,i,m`` over the eight octave bands, in dB re 1 pW.
     :raises ValueError: If an input is invalid.
     :raises TypeError: if ``junction_distance``, ``speed_kmh``, ``studded_fraction``,
-        ``studded_months`` or ``temperature_c`` is not a single number, or ``category``
-        is not a text.
+        ``studded_months`` or ``temperature_c`` is not a single number, ``category``
+        is not a text, or ``surface`` is neither a text nor a road surface.
     """
     key = _category_key(category)
     _require_category(key, coefficients)
@@ -858,7 +858,8 @@ def road_propulsion_noise(
     :return: ``L_WP,i,m`` over the eight octave bands, in dB re 1 pW.
     :raises ValueError: If an input is invalid.
     :raises TypeError: if ``junction_distance``, ``road_slope_percent`` or ``speed_kmh``
-        is not a single number, or ``category`` is not a text.
+        is not a single number, ``category`` is not a text, or ``surface`` is neither
+        a text nor a road surface.
     """
     key = _category_key(category)
     _require_category(key, coefficients)
@@ -1121,6 +1122,7 @@ def road_source_power(
     :return: A :class:`RoadEmissionResult`.
     :raises ValueError: If the traffic is empty, repeats a category, or carries
         an invalid flow rate or speed.
+    :raises TypeError: if ``surface`` is neither a text nor a road surface.
     """
     flows = [traffic] if isinstance(traffic, RoadTraffic) else list(traffic)
     if not flows:

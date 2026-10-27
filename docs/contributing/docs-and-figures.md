@@ -268,7 +268,7 @@ the sum $L_{n,ij,w} = L_{n,w} - \Delta R_{j,w}
 
 **Enforced by:** `scripts/check_markdown_hazards.py`, `make hazards`, `CI: Markdown renders the way it reads`
 
-**Exceptions.** A list that follows its introducing line without a blank line is ordinary (3830 of them) and only reported when it interrupts an open `$`. A deliberate block quote, and a thematic break, are preceded by a blank line.
+**Exceptions.** A list that follows its introducing line without a blank line is ordinary (3830 of them) and only reported when it interrupts an open `$`. A deliberate block quote, and a thematic break, are preceded by a blank line. A display block between two `$$` lines is maths, not markdown: a formula written one term per line may put `=` alone on a line.
 
 <a id="f13"></a>
 ### F13. Link an accented heading through an ASCII `<span id>` placed above it

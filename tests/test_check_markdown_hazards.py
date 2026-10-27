@@ -351,6 +351,67 @@ def test_a_thematic_break_a_table_or_code_is_not_a_setext_heading(text: str) -> 
     assert cmh.check_text(text, "p.md") == []
 
 
+@pytest.mark.parametrize(
+    "text",
+    [
+        "$$\nx\n=\ny\n$$\n",
+        "Where\n\n$$\nL\n=\n10 \\lg x\n$$\n",
+        "- item\n\n  $$\n  a\n  -\n  b\n  $$\n",
+        "$$\nx = y\n$$\n---\n",
+        "$$\nx = y\n$$\n=\n",
+        "```math\nx\n=\ny\n```\n",
+    ],
+    ids=[
+        "equals-in-a-formula",
+        "after-a-paragraph",
+        "hyphen-in-a-list-item",
+        "rule-after-the-closing-fence",
+        "equals-after-the-closing-fence",
+        "math-code-fence",
+    ],
+)
+def test_a_line_of_equals_or_hyphens_in_display_maths_is_maths(text: str) -> None:
+    """A formula written one term per line may put ``=`` alone on a line.
+
+    remark-math reads a display block as a fence, so that line is maths, not
+    a setext underline, and the line after the closing ``$$`` underlines
+    nothing either: CommonMark has no paragraph above it to turn into a
+    heading.
+    """
+    assert cmh.check_text(text, "p.md") == []
+
+
+@pytest.mark.parametrize(
+    ("text", "line"),
+    [
+        ("A sentence that wrapped\n=\n\n$$\nx\n=\ny\n$$\n", 2),
+        ("$$\nx\n=\ny\n$$\n\nA sentence that wrapped\n=\n", 8),
+        ("```math\nx\n=\n```\n\nA sentence that wrapped\n=\n", 7),
+    ],
+    ids=["before-the-block", "after-the-block", "after-a-math-fence"],
+)
+def test_a_setext_underline_beside_display_maths_is_still_refused(
+    text: str, line: int
+) -> None:
+    problems = cmh.check_text(text, "p.md")
+    assert len(problems) == 1
+    assert f"p.md:{line}:" in problems[0]
+    assert "becomes an h1" in problems[0]
+
+
+def test_a_display_fence_that_holds_a_dollar_opens_no_block() -> None:
+    """``$$x = 1$$`` is inline maths in a paragraph, so a ``=`` under it underlines.
+
+    remark-math refuses a ``$`` in the meta of an opening fence, so the line
+    is a paragraph, the fourth rule reports it, and the line under it turns
+    it into a heading.
+    """
+    problems = cmh.check_text("$$x = 1$$\n=\n", "p.md")
+    assert len(problems) == 2
+    assert "It closes on this line" in problems[0]
+    assert "becomes an h1" in problems[1]
+
+
 def test_a_formula_on_the_opening_display_fence_is_refused() -> None:
     problems = cmh.check_text("$$x = 1\n", "p.md")
     assert len(problems) == 1

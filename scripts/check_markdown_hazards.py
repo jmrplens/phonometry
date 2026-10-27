@@ -90,6 +90,15 @@ the convention wants, opening and closing.
    raw TeX. GitHub's rendering of the mirror showed the same heading. A real
    heading is written with ``#`` here, and a thematic break stands after a
    blank line, so a line like this right under text is always the defect.
+   Inside a display block it is neither: ``=`` alone on a line of a formula
+   written one term per line is maths, and so is the line under it.
+
+Display maths is read the way ``remark-math`` reads it, as a fence of ``$``:
+a run of two or more opens it, with a meta after it that holds no ``$``, and
+only a line of a run as long or longer, with nothing after it, closes it. No
+rule but the fourth reads the opening line, and none reads what follows it
+until the block closes: like code, it is not markdown. Fenced code is not
+read at all, a ``math`` fence included.
 
 The YAML frontmatter at the top of a page is not markdown: it is read as
 data, and Astro blanks it before MDX compiles the body. No rule reads it, so
@@ -149,6 +158,15 @@ _MATH_META = re.compile(r"^[ \t]*\$\$\s*\S")
 
 #: A line of nothing but ``=`` or ``-``: a setext underline when text is above it.
 _SETEXT = re.compile(r"^[ \t]*(?:=+|-+)[ \t]*$")
+
+#: A line that opens display maths, as remark-math reads it: a run of two
+#: ``$`` or more and a meta with no ``$`` in it. A line with another ``$``
+#: after the run opens nothing: it is a paragraph that holds inline maths.
+_DISPLAY_OPEN = re.compile(r"^[ \t]*(\${2,})[^$]*$")
+
+#: A line that may close display maths: a run of ``$`` and nothing after it
+#: but blanks. It closes the block when the run is as long as the opening one.
+_DISPLAY_CLOSE = re.compile(r"^[ \t]*(\${2,})[ \t]*$")
 
 #: The line that opens and closes the YAML frontmatter, and nothing else.
 _FRONTMATTER = "---"
@@ -245,6 +263,31 @@ def _body_start(lines: list[str]) -> int:
     return 0
 
 
+def _display_maths(lines: list[str], code: list[bool]) -> list[str]:
+    """Each line's part in display maths: ``"open"``, ``"maths"`` or ``"prose"``.
+
+    ``"maths"`` is a line of the formula or the line that closes it. A line of
+    code opens nothing, and a block never closed runs to the end of the page,
+    as remark-math has it.
+    """
+    parts: list[str] = []
+    opening = ""
+    for line, is_code in zip(lines, code, strict=True):
+        if opening:
+            closing = _DISPLAY_CLOSE.match(line)
+            if closing and len(closing.group(1)) >= len(opening):
+                opening = ""
+            parts.append("maths")
+            continue
+        found = None if is_code else _DISPLAY_OPEN.match(line)
+        if found is None:
+            parts.append("prose")
+        else:
+            opening = found.group(1)
+            parts.append("open")
+    return parts
+
+
 def _mdx_prose(lines: list[str], start: int) -> list[str]:
     """The lines as MDX reads their prose, everything else blanked.
 
@@ -254,16 +297,14 @@ def _mdx_prose(lines: list[str], start: int) -> list[str]:
     page, since each can run over several lines. Blanking rather than
     dropping keeps every character on its line and column.
     """
-    kept = [""] * start
-    display = False
     body = lines[start:]
-    for line, code in zip(body, code_lines(body), strict=True):
-        if not code and line.strip() == "$$":
-            display = not display
-        elif not (code or display):
-            kept.append(line)
-            continue
-        kept.append("")
+    code = list(code_lines(body))
+    kept = [""] * start + [
+        line if not is_code and part == "prose" else ""
+        for line, is_code, part in zip(
+            body, code, _display_maths(body, code), strict=True
+        )
+    ]
     return _MDX_READING.sub(_as_mdx_reads_it, "\n".join(kept)).split("\n")
 
 
@@ -363,22 +404,33 @@ def _maths_left_open(line: str, *, open_math: bool) -> bool:
 
 
 def _markdown_problems(rel: str, lines: list[str], start: int) -> list[str]:
-    """Rules 1 to 4, which read the page line by line as CommonMark does."""
+    """Rules 1 to 4 and 6, which read the page line by line as CommonMark does.
+
+    Code and display maths are not markdown, so no rule reads them, but the
+    fourth reads the line that opens a display block, which is its business.
+    """
     problems: list[str] = []
     open_math = False
-    code = [False] * start + list(code_lines(lines[start:]))
+    body = lines[start:]
+    code = list(code_lines(body))
+    parts = [""] * start + [
+        "code" if is_code else part
+        for is_code, part in zip(code, _display_maths(body, code), strict=True)
+    ]
     for index in range(start, len(lines)):
         line = lines[index]
-        if code[index]:
+        where = f"{rel}:{index + 1}"
+        if parts[index] == "open":
+            problems.extend(_math_meta_problems(where, line))
+        if parts[index] != "prose":
             open_math = False
             continue
-        where = f"{rel}:{index + 1}"
         before = lines[index - 1] if index else ""
         problems.extend(_cut_maths_problems(where, line, index, open_math=open_math))
         problems.extend(_wrapped_quote_problems(where, line, before))
         problems.extend(_anchor_problems(where, line))
         problems.extend(_math_meta_problems(where, line))
-        if not code[index - 1]:
+        if index > start and parts[index - 1] == "prose":
             problems.extend(_setext_problems(where, line, before))
         open_math = _maths_left_open(line, open_math=open_math)
     return problems

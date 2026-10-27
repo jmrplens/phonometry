@@ -1,0 +1,144 @@
+---
+/**
+ * Sends a link written against the old single catalogues page to the page
+ * the catalogue has now.
+ *
+ * Until every catalogue had a page of its own, they were all sections of
+ * `/reference/catalogues/`, linked as `/reference/catalogues/#porous-materials`
+ * or, in Spanish, `#materiales-porosos`. Those links are in issues, papers,
+ * search results and other people's pages, and a static host cannot redirect
+ * a fragment, because the fragment never reaches the server. So the overview
+ * does it: when the address names a fragment no element of the overview
+ * carries, the script looks it up below and replaces the address with the
+ * catalogue's page. Three kinds of fragment were published:
+ *
+ * - a section's heading, in English or in Spanish, which is what the table of
+ *   contents and every guide linked;
+ * - the plain-ASCII anchor the Spanish page set above four accented headings,
+ *   which is what the guides linked when the heading had an accent;
+ * - the id of a table's own section, `#catalogue-solids`, the same word in
+ *   both languages, which the table still carries on its new page, so that
+ *   one keeps its fragment.
+ *
+ * The first two are written out below as the single page published them,
+ * because they are history: a catalogue renamed later must still answer to
+ * the anchor its section had. The third is worked out from the pages, since
+ * a table's id does not change with its page. A target with no page stops
+ * the build.
+ *
+ * `location.replace` rather than an assignment, so the dead address does not
+ * stay in the history for the back button to return to. A fragment the
+ * overview holds itself (one of its own sections) is left alone, and so is one
+ * nothing had, which then scrolls nowhere, as any unknown fragment does.
+ */
+import { cataloguePages } from '../lib/catalogue-pages';
+
+interface Props {
+	/** Locale of the page it is rendered on. */
+	lang?: 'en' | 'es';
+}
+const { lang = 'en' } = Astro.props;
+
+/** Every heading anchor the single page published, to the page it names. */
+const SECTION_ANCHORS: Record<string, string> = {
+	// The English headings, which are the pages' own names.
+	solids: 'solids',
+	'damping-materials': 'damping-materials',
+	'damping-treatments': 'damping-treatments',
+	'orthotropic-wood': 'orthotropic-wood',
+	'plateau-method-constants': 'plateau-method-constants',
+	'porous-materials': 'porous-materials',
+	'resistive-facings': 'resistive-facings',
+	'resilient-layers': 'resilient-layers',
+	'dynamic-modulus-of-resilient-materials': 'dynamic-modulus-of-resilient-materials',
+	'absorption-coefficients': 'absorption-coefficients',
+	carpets: 'carpets',
+	'transmission-loss': 'transmission-loss',
+	'impact-insulation': 'impact-insulation',
+	'duct-walls': 'duct-walls',
+	'scattering-coefficients': 'scattering-coefficients',
+	'diffusion-coefficients': 'diffusion-coefficients',
+	'predicted-scattering-coefficients': 'predicted-scattering-coefficients',
+	'ground-surfaces': 'ground-surfaces',
+	gases: 'gases',
+	fluids: 'fluids',
+	'nonlinearity-parameter-ba': 'nonlinearity-parameter-ba',
+	'nonlinearity-parameter-of-solids': 'nonlinearity-parameter-of-solids',
+	'air-attenuation': 'air-attenuation',
+	// The Spanish headings, as the build wrote their ids, accents included.
+	'sólidos': 'solids',
+	'materiales-amortiguadores': 'damping-materials',
+	'tratamientos-amortiguadores': 'damping-treatments',
+	'madera-ortótropa': 'orthotropic-wood',
+	'constantes-del-método-de-la-meseta': 'plateau-method-constants',
+	'materiales-porosos': 'porous-materials',
+	'velos-resistivos': 'resistive-facings',
+	'capas-elásticas': 'resilient-layers',
+	'módulo-dinámico-de-materiales-elásticos': 'dynamic-modulus-of-resilient-materials',
+	'coeficientes-de-absorción': 'absorption-coefficients',
+	alfombras: 'carpets',
+	'aislamiento-acústico': 'transmission-loss',
+	'aislamiento-al-ruido-de-impacto': 'impact-insulation',
+	'paredes-de-conducto': 'duct-walls',
+	'coeficientes-de-dispersión': 'scattering-coefficients',
+	'coeficientes-de-difusión': 'diffusion-coefficients',
+	'coeficientes-de-dispersión-calculados': 'predicted-scattering-coefficients',
+	'superficies-de-suelo': 'ground-surfaces',
+	fluidos: 'fluids',
+	'parámetro-de-no-linealidad-ba': 'nonlinearity-parameter-ba',
+	'parámetro-de-no-linealidad-de-sólidos': 'nonlinearity-parameter-of-solids',
+	'atenuación-del-aire': 'air-attenuation',
+	// The plain-ASCII anchors the Spanish page set above accented headings.
+	solidos: 'solids',
+	'coeficientes-de-absorcion': 'absorption-coefficients',
+	'aislamiento-acustico': 'transmission-loss',
+	'coeficientes-de-dispersion': 'scattering-coefficients',
+};
+
+const pages = await cataloguePages(lang);
+const hrefOf = new Map(pages.map((page) => [page.slug, page.href]));
+const routes: Record<string, string> = {};
+for (const [anchor, slug] of Object.entries(SECTION_ANCHORS)) {
+	const href = hrefOf.get(slug);
+	if (!href) {
+		throw new Error(
+			`[CatalogueRouter] the old anchor #${anchor} names "${slug}", which is no catalogue page. ` +
+				'Point it at the page that holds the catalogue now.',
+		);
+	}
+	routes[anchor] = href;
+}
+for (const page of pages) {
+	for (const key of page.keys) routes[`catalogue-${key}`] = `${page.href}#catalogue-${key}`;
+}
+/* JSON in a script element: `<` is escaped so that no value can close it. */
+const json = JSON.stringify(routes).replace(/</g, '\\u003c');
+---
+
+<script is:inline type="application/json" data-catalogue-routes set:html={json} />
+
+<script>
+	/** The fragment of the address bar, as the id it names. */
+	const fragment = () => {
+		try {
+			return decodeURIComponent(location.hash.replace(/^#/, ''));
+		} catch {
+			// A fragment nobody can decode names no catalogue.
+			return '';
+		}
+	};
+
+	const routes: Record<string, string> = JSON.parse(
+		document.querySelector('[data-catalogue-routes]')?.textContent ?? '{}',
+	);
+
+	const route = () => {
+		const wanted = fragment();
+		if (!wanted || document.getElementById(wanted)) return;
+		const target = routes[wanted];
+		if (target) location.replace(target);
+	};
+
+	route();
+	window.addEventListener('hashchange', route);
+</script>

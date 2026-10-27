@@ -1,0 +1,26 @@
+---
+title: "Catalogue of plateau-method constants"
+description: "The three numbers the plateau method sketches a single panel's transmission loss with: mass per millimetre, plateau height and plateau width."
+sidebar:
+  label: "Plateau-method constants"
+---
+
+import Catalogues from '../../../../components/Catalogues.astro';
+import CatalogueFinder from '../../../../components/CatalogueFinder.astro';
+
+<CatalogueFinder lang="en" />
+
+The three numbers the plateau method needs to sketch a single panel's
+transmission loss without solving the plate model: the mass one millimetre of
+the material brings, how high the plateau sits, and how wide it is in
+frequency. The first is a density in disguise, kilograms per square metre per
+millimetre, which is the density divided by a thousand; it is kept in that unit
+because that is the unit the method uses it in. The second is a transmission
+loss, the level the method draws as a horizontal line over the coincidence
+region, and it depends on the material and not on the thickness. These are the
+numbers the library's own plateau-method prediction reads, and it takes a row
+of this table, or a row of your own, as its material. The measured insulation
+of real constructions is in the [transmission
+loss](/phonometry/reference/catalogues/transmission-loss/) catalogue.
+
+<Catalogues catalogue="plateau" lang="en" />

@@ -1,0 +1,33 @@
+---
+title: "Catalogue of predicted scattering coefficients"
+description: "Scattering coefficients computed with two- and three-dimensional boundary element models, kept apart from the measured ones, with the solver of each row."
+sidebar:
+  label: "Predicted scattering coefficients"
+---
+
+import Catalogues from '../../../../components/Catalogues.astro';
+import CatalogueFinder from '../../../../components/CatalogueFinder.astro';
+
+<CatalogueFinder lang="en" />
+
+The same quantity as the [scattering
+coefficients](/phonometry/reference/catalogues/scattering-coefficients/) and
+not the same kind of number: these were computed with a boundary element model,
+and the two are separate catalogues so that a row cannot travel from one to the
+other unnoticed.
+
+Cox prints three of them. Two are three-dimensional predictions of 3 m by 3 m
+single-plane diffusers, at normal and at random incidence, over the bands from
+250 Hz upward, because the book says the coefficient below that should be
+taken as zero and prints nothing there. The third is two-dimensional, runs the
+whole range, and prints three lines per surface at 0, 56.9 and random
+incidence. Each row says which solver produced it.
+
+The book is unusually frank about what they are worth, and the notes on each
+table quote it: the coefficient reads absorption as scattering, so the
+formulation needs revising for a surface that absorbs; the random incidence
+values of the two-dimensional table run high at low frequencies; and the
+coefficient reads a redirection as a dispersion, so a 45 degree triangle that
+sends a strong reflection straight back scores as if it had scattered.
+
+<Catalogues catalogue="predictedScattering" lang="en" />

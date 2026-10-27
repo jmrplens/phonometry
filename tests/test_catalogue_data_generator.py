@@ -725,9 +725,9 @@ def test_the_committed_spanish_has_no_em_dash() -> None:
 _COMPONENT = (
     pathlib.Path(__file__).resolve().parents[1] / "site/src/components/Catalogues.astro"
 )
-_PAGE = (
+_PAGES = (
     pathlib.Path(__file__).resolve().parents[1]
-    / "site/src/content/docs/reference/catalogues.mdx"
+    / "site/src/content/docs/reference/catalogues"
 )
 
 #: The word columns the component prints and searches, as ``textColumns``
@@ -773,9 +773,14 @@ def _placeholders(language: str) -> dict[str, str]:
     )
     mapping = source.split("const placeholders:", 1)[1].split("};", 1)[0]
     chosen = dict(re.findall(r"^\t(\w+): copy\.(\w+),$", mapping, re.MULTILINE))
-    shown = re.findall(
-        r'<Catalogues catalogue="(\w+)"', _PAGE.read_text(encoding="utf-8")
-    )
+    shown = [
+        catalogue
+        for page in sorted(_PAGES.glob("*.mdx"))
+        for catalogue in re.findall(
+            r'<Catalogues catalogue="(\w+)"', page.read_text(encoding="utf-8")
+        )
+    ]
+    assert shown, f"no catalogue is shown under {_PAGES}"
     return {
         catalogue: copy[chosen.get(catalogue, "searchPlaceholder")]
         for catalogue in shown

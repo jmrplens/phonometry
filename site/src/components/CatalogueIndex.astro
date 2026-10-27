@@ -1,0 +1,62 @@
+---
+/**
+ * Every published catalogue, as the overview lists it: its name linked to its
+ * page, how many rows it holds and the line that says what they are.
+ *
+ * This is the way into the catalogues that needs nothing to run: the finder
+ * above it is a script, and a reader without one, a search engine and an
+ * agent reading the page all follow these links instead. The entries are the
+ * catalogue pages themselves, read by src/lib/catalogue-pages.ts in the order
+ * the sidebar gives, and the line under each is the page's own description,
+ * written to say in a sentence what the catalogue holds.
+ */
+import { cataloguePages } from '../lib/catalogue-pages';
+
+interface Props {
+	/** Locale of the page it is rendered on. */
+	lang?: 'en' | 'es';
+}
+const { lang = 'en' } = Astro.props;
+
+const pages = await cataloguePages(lang);
+const rowCount = (rows: number) =>
+	lang === 'es' ? `${rows} ${rows === 1 ? 'fila' : 'filas'}` : `${rows} ${rows === 1 ? 'row' : 'rows'}`;
+---
+
+<ul class="catalogue-index" data-catalogue-index>
+	{
+		pages.map((page) => (
+			<li>
+				<a href={page.href}>{page.label}</a>
+				<span class="rows">{rowCount(page.rows)}</span>
+				<p>{page.description}</p>
+			</li>
+		))
+	}
+</ul>
+
+<style>
+	.catalogue-index {
+		padding-inline-start: 0;
+		list-style: none;
+	}
+
+	.catalogue-index li {
+		margin-block: 0 0.9rem;
+	}
+
+	.catalogue-index a {
+		font-weight: 600;
+	}
+
+	.rows {
+		margin-inline-start: 0.4rem;
+		color: var(--sl-color-gray-3);
+		font-size: var(--sl-text-sm);
+	}
+
+	.catalogue-index p {
+		margin-block: 0.15rem 0;
+		color: var(--sl-color-gray-2);
+	}
+</style>

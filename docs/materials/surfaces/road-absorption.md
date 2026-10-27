@@ -306,7 +306,7 @@ few positions.
 - [Outdoor Sound Propagation](../../environment/propagation/outdoor-propagation.md): where the absorption
   of the ground surface enters the propagation models.
 - API reference: [`materials.surfaces.road_absorption`](https://docs.jmrp.io/phonometry/reference/api/materials/road-absorption/).
-- [Published catalogues](https://docs.jmrp.io/phonometry/reference/catalogues/#ground-surfaces): the
+- [Published catalogues](https://docs.jmrp.io/phonometry/reference/catalogues/ground-surfaces/): the
   flow resistivity and the model parameters the books print for grass, snow,
   asphalt and the rest of the ground surfaces.
 

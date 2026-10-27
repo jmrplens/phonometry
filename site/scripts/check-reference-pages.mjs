@@ -21,6 +21,17 @@
 // (src/lib/search-ui.mjs): the index check in check-search-designation.mjs
 // reads Pagefind directly and never sees the panel.
 //
+// The published catalogues became an overview and one page per catalogue,
+// with the markup of their rows cut to what a row's position does not say.
+// The finder that was the one place to choose a catalogue, a material and a
+// table now chooses among pages: it still lists every catalogue with its row
+// count, opens the chosen one at its table, filters the rows by name (on the
+// Spanish page by the book's English name too) and by published table, and
+// says so when nothing is left; the marks still open their explanation on a
+// click; and a phone still gets each row as a card, labelled by its column,
+// with the cells the row does not have left out. A link to a section of the
+// old single page has to land on that catalogue's page.
+//
 // Usage: node scripts/check-reference-pages.mjs [--base http://localhost:4321]
 import { BASE_PATH, baseFrom, createExpect, launchBrowser } from './shared/audit.mjs';
 
@@ -480,6 +491,309 @@ for (const { path, query, guide, errata, title } of [
 		},
 		{ title, noTag: true, guideFirst: true },
 	);
+}
+
+// --- The published catalogues ---------------------------------------------
+
+const CATALOGUE_PAGES = 23;
+
+/** What the finder offers and where it sits, read off a loaded page. */
+const finderState = (page) =>
+	page.evaluate(() => {
+		const finder = document.querySelector('[data-finder]');
+		const jump = document.querySelector('[data-finder-jump]');
+		const select = finder?.querySelector('[data-category]');
+		const options = [...(select?.options ?? [])];
+		return {
+			shown: !!finder && !finder.hidden && !!jump && !jump.hidden,
+			pages: options.filter((option) => option.value).length,
+			selected: select?.selectedOptions[0]?.textContent.trim() ?? '',
+			aboveTable: finder?.nextElementSibling?.classList.contains('table-scroll') ?? false,
+			aboveIndex: finder?.nextElementSibling?.hasAttribute('data-catalogue-index') ?? false,
+			filters: !!finder?.querySelector('[data-search]'),
+			jump: jump?.querySelector('button')?.textContent.trim() ?? '',
+		};
+	});
+
+/** Type `query` into the finder and report the rows left and what it says. */
+async function filterRows(page, query) {
+	await page.$eval('[data-search]', (input) => {
+		input.value = '';
+	});
+	await page.type('[data-search]', query);
+	return page.evaluate(() => {
+		const rows = [...document.querySelectorAll('[data-catalogue] tbody tr')];
+		const visible = rows.filter((row) => !row.hidden);
+		return {
+			total: rows.length,
+			visible: visible.length,
+			names: visible.map((row) => row.cells[0].textContent.trim()),
+			count: document.querySelector('[data-count]')?.textContent.trim() ?? '',
+			empty: document.querySelector('[data-empty-message]')?.textContent.trim() ?? '',
+		};
+	});
+}
+
+for (const { path, lang, label, steel, english, table, jump } of [
+	{
+		path: '/reference/catalogues/solids/',
+		lang: 'en',
+		label: 'Solids (260 rows)',
+		steel: 'steel',
+		english: null,
+		table: 'Published table',
+		jump: 'Go to the table',
+	},
+	{
+		path: '/es/reference/catalogues/solids/',
+		lang: 'es',
+		label: 'Sólidos (260 filas)',
+		steel: 'acero',
+		english: 'aluminium',
+		table: 'Tabla publicada',
+		jump: 'Ir a la tabla',
+	},
+]) {
+	const page = await open(path);
+
+	expect(`${path}: the finder lists every catalogue, this one chosen, above the table`, await finderState(page), {
+		shown: true,
+		pages: CATALOGUE_PAGES,
+		selected: label,
+		aboveTable: true,
+		aboveIndex: false,
+		filters: true,
+		jump,
+	});
+
+	// The controls speak the page's language.
+	{
+		const labels = await page.evaluate(() =>
+			[...document.querySelectorAll('[data-finder] label > span')].map((span) => span.textContent.trim()),
+		);
+		expect(`${path}: the table filter is labelled in ${lang}`, labels.includes(table), true);
+	}
+
+	// A material finds its rows and only rows that name it.
+	{
+		const got = await filterRows(page, steel);
+		expect(
+			`${path}: "${steel}" narrows the table to rows that name it, and the count says how many`,
+			{
+				some: got.visible > 0,
+				fewer: got.visible < got.total,
+				count: got.count.startsWith(`${got.visible} `),
+			},
+			{ some: true, fewer: true, count: true },
+		);
+	}
+
+	// The Spanish page still finds a row by the book's own English.
+	if (english) {
+		const got = await filterRows(page, english);
+		expect(`${path}: "${english}", the book's word, still finds the row that reads in Spanish`, got.visible > 0, true);
+	}
+
+	// A filter that empties the table says so, in the page's language.
+	{
+		const got = await filterRows(page, 'zzzz-no-such-material');
+		expect(`${path}: a filter that matches nothing says so`, {
+			visible: got.visible,
+			says: got.empty.length > 0,
+			spanish: lang === 'es' ? got.empty.startsWith('Ninguna') : got.empty.startsWith('No row'),
+		}, { visible: 0, says: true, spanish: true });
+		await page.$eval('[data-search]', (input) => {
+			input.value = '';
+			input.dispatchEvent(new Event('input'));
+		});
+	}
+
+	// The published table: one book's table, and only its rows.
+	{
+		const wanted = await page.$eval('[data-table] option:nth-child(2)', (option) => option.value);
+		await page.select('[data-table]', wanted);
+		const got = await page.evaluate(() => {
+			const rows = [...document.querySelectorAll('[data-catalogue] tbody tr')].filter((row) => !row.hidden);
+			return { some: rows.length > 0, tables: [...new Set(rows.map((row) => row.dataset.table))] };
+		});
+		expect(`${path}: choosing a published table shows its rows alone`, got, { some: true, tables: [wanted] });
+		await page.select('[data-table]', '');
+	}
+
+	// A mark opens its explanation on a click, and a second click closes it.
+	{
+		// One handle for both clicks: an open mark lends its `title` to the
+		// tooltip, so a selector on `[title]` would find the next mark instead.
+		const mark = await page.$('[data-catalogue] td > [class^="cell-"][title]');
+		const title = await mark.evaluate((element) => element.getAttribute('title'));
+		await mark.evaluate((element) => element.scrollIntoView({ block: 'center' }));
+		await mark.click();
+		const open = await page.$eval('.catalogue-tip', (tip) => ({ shown: !tip.hidden, text: tip.textContent }));
+		await mark.click();
+		const closed = await page.$eval('.catalogue-tip', (tip) => tip.hidden);
+		expect(`${path}: a mark opens its explanation on a click and closes on the next`, { ...open, closed }, {
+			shown: true,
+			text: title,
+			closed: true,
+		});
+	}
+
+	// The button at the top lands on the panel.
+	{
+		await page.evaluate(() => window.scrollTo(0, 0));
+		await page.click('[data-jump]');
+		await new Promise((resolve) => setTimeout(resolve, 1200));
+		const top = await page.$eval('[data-finder]', (finder) => finder.getBoundingClientRect().top);
+		expect(`${path}: the button at the top brings the panel into view`, top >= 0 && top < 400, true);
+	}
+
+	// On a phone each row is a card: a quantity reads its column's heading and
+	// unit, and a cell the row does not have is left out.
+	{
+		await page.setViewport({ width: 390, height: 844 });
+		const got = await page.evaluate(() => {
+			const section = document.querySelector('[data-catalogue]');
+			const headings = [...section.querySelectorAll('thead th')].map((th) => th.firstChild?.textContent.trim());
+			const units = [...section.querySelectorAll('thead th')].map((th) => th.querySelector('.unit')?.textContent.trim() ?? '');
+			const row = [...section.querySelectorAll('tbody tr')].find((tr) =>
+				[...tr.cells].some((cell, at) => at > 0 && units[at] && cell.textContent.trim()),
+			);
+			const at = [...row.cells].findIndex((cell, index) => index > 0 && units[index] && cell.textContent.trim());
+			const cell = row.cells[at];
+			const unquote = (text) => text.replace(/^"|"$/g, '');
+			const blank = [...row.cells].find((candidate) => candidate.tagName === 'TD' && candidate.childNodes.length === 0);
+			return {
+				label: unquote(getComputedStyle(cell, '::before').content) === headings[at],
+				unit: unquote(getComputedStyle(cell, '::after').content) === ` ${units[at]}`,
+				blankHidden: !blank || getComputedStyle(blank).display === 'none',
+				card: getComputedStyle(row).display === 'block',
+			};
+		});
+		expect(`${path}: on a phone a row is a card whose cells carry their column's heading and unit`, got, {
+			label: true,
+			unit: true,
+			blankHidden: true,
+			card: true,
+		});
+		await page.setViewport({ width: 1280, height: 900 });
+	}
+
+	// Choosing another catalogue opens its page at its table.
+	{
+		const target = await page.$eval('[data-category]', (select) =>
+			[...select.options].find((option) => option.value.includes('/porous-materials/'))?.value,
+		);
+		await Promise.all([page.waitForNavigation({ waitUntil: 'networkidle0' }), page.select('[data-category]', target)]);
+		await new Promise((resolve) => setTimeout(resolve, 300));
+		const got = await page.evaluate(() => {
+			const finder = document.querySelector('[data-finder]');
+			const top = finder.getBoundingClientRect().top;
+			return { path: location.pathname, hash: location.hash, panelInView: top >= 0 && top < innerHeight / 2 };
+		});
+		expect(`${path}: choosing the porous materials opens their page at the table`, got, {
+			path: `${BASE_PATH}${lang === 'es' ? '/es' : ''}/reference/catalogues/porous-materials/`,
+			hash: '#catalogue-porous',
+			panelInView: true,
+		});
+		// Back on the page the choice was made on, the select names that page.
+		await Promise.all([page.waitForNavigation({ waitUntil: 'networkidle0' }), page.goBack()]);
+		const back = await page.$eval('[data-category]', (select) => select.selectedOptions[0]?.textContent.trim());
+		expect(`${path}: back from that page, the finder names this catalogue again`, back, label);
+	}
+
+	await page.close();
+}
+
+// A page with two tables filters both: the absorption coefficients carry the
+// few rows the same books price in equivalent absorption area.
+{
+	const page = await open('/reference/catalogues/absorption-coefficients/');
+	const got = await page.evaluate(() => ({
+		sections: document.querySelectorAll('[data-catalogue]').length,
+		aboveFirst: document.querySelector('[data-finder]')?.closest('[data-catalogue]')?.dataset.catalogue,
+	}));
+	const filtered = await filterRows(page, 'audience');
+	const byTable = await page.evaluate(() =>
+		[...document.querySelectorAll('[data-catalogue]')].map((section) => [...section.querySelectorAll('tbody tr')].filter((row) => !row.hidden).length),
+	);
+	expect('/reference/catalogues/absorption-coefficients/: one panel filters both tables', {
+		sections: got.sections,
+		aboveFirst: got.aboveFirst,
+		some: filtered.visible > 0,
+		areasKept: byTable[1] > 0,
+	}, { sections: 2, aboveFirst: 'absorption', some: true, areasKept: true });
+	await page.close();
+}
+
+// The overview: the finder chooses a catalogue and sits above the list that
+// a reader without the script follows.
+for (const { path, choose, jump } of [
+	{ path: '/reference/catalogues/', choose: 'Choose a catalogue', jump: 'Go to the catalogues' },
+	{ path: '/es/reference/catalogues/', choose: 'Elige un catálogo', jump: 'Ir a los catálogos' },
+]) {
+	const page = await open(path);
+	const got = await finderState(page);
+	const links = await page.$$eval('[data-catalogue-index] a', (anchors) => anchors.length);
+	expect(`${path}: the finder offers every catalogue above the list of them`, { ...got, links }, {
+		shown: true,
+		pages: CATALOGUE_PAGES,
+		selected: choose,
+		aboveTable: false,
+		aboveIndex: true,
+		filters: false,
+		jump,
+		links: CATALOGUE_PAGES,
+	});
+	await page.close();
+}
+
+// A link written against the old single page lands on the catalogue's page.
+const CATALOGUE_MOVES = [
+	// An English heading.
+	{ from: '/reference/catalogues/#porous-materials', page: '/reference/catalogues/porous-materials/', hash: '' },
+	// A Spanish heading with an accent, percent-encoded as a browser sends it.
+	{
+		from: `/es/reference/catalogues/#${encodeURIComponent('coeficientes-de-absorción')}`,
+		page: '/es/reference/catalogues/absorption-coefficients/',
+		hash: '',
+	},
+	// The plain-ASCII anchor the Spanish guides linked.
+	{ from: '/es/reference/catalogues/#solidos', page: '/es/reference/catalogues/solids/', hash: '' },
+	// A table's own id, which the table keeps on its page.
+	{
+		from: '/reference/catalogues/#catalogue-gases',
+		page: '/reference/catalogues/gases/',
+		hash: 'catalogue-gases',
+	},
+	// A table that shares its page with another.
+	{
+		from: '/reference/catalogues/#catalogue-absorptionAreas',
+		page: '/reference/catalogues/absorption-coefficients/',
+		hash: 'catalogue-absorptionAreas',
+	},
+];
+
+for (const moved of CATALOGUE_MOVES) {
+	const got = await landing(moved.from);
+	expect(`catalogues: ${decodeURIComponent(moved.from)} lands on the catalogue's page`, {
+		path: got.path,
+		hash: got.hash,
+	}, { path: `${BASE_PATH}${moved.page}`, hash: moved.hash });
+}
+
+for (const path of ['/reference/catalogues/', '/es/reference/catalogues/']) {
+	// A section of the overview itself stays on the overview.
+	const section = await (async () => {
+		const page = await open(path);
+		const id = await page.evaluate(() => [...document.querySelectorAll('.sl-markdown-content h2[id]')].at(-1)?.id);
+		await page.close();
+		return id;
+	})();
+	expect(`catalogues: ${path}#${section} stays on the overview`, await landing(`${path}#${section}`), {
+		path: `${BASE_PATH}${path}`,
+		hash: section,
+		target: true,
+	});
 }
 
 await browser.close();

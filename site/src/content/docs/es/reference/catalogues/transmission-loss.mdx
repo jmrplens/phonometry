@@ -1,0 +1,42 @@
+---
+title: "Catálogo de aislamiento acústico"
+description: "Lo que hizo una partición en un laboratorio, banda a banda, y la clase de transmisión del sonido de muros, puertas, ventanas y sistemas de suelo-techo."
+sidebar:
+  label: "Aislamiento acústico"
+---
+
+import Catalogues from '../../../../../components/Catalogues.astro';
+import CatalogueFinder from '../../../../../components/CatalogueFinder.astro';
+
+<CatalogueFinder lang="es" />
+
+Lo que hizo una partición en un laboratorio, banda a banda, que es la otra
+mitad de una sala: la absorción dice cuánto se traga del sonido que se queda
+dentro, y esto dice cuánto sale. Las filas son construcciones, no materiales,
+así que cada una lleva el espesor y la masa superficial que la página imprime
+a su lado, y dos filas con la misma descripción se distinguen por eso y no por
+el nombre. Bies dice de sus valores que son representativos y que vienen de
+ensayos publicados por fabricantes y laboratorios, sin nombrar norma ni montaje
+para ninguno.
+
+Esta es la tabla en la que leer los números sale a cuenta: la ley de masa da
+una recta, y la misma pared de 280 mm de ladrillo son 40 dB a 500 Hz atada con
+llaves de fleje y 55 dB con llaves de metal desplegado, con la misma masa y el
+mismo espesor. Esa diferencia no la da ninguna fórmula del libro; la da la
+medida.
+
+Rossing añade veintitrés particiones corrientes en seis bandas con su clase de
+transmisión del sonido al lado, y siete tablas de la edición española de
+Harris añaden ciento veintinueve valoraciones sin banda ninguna: tabiques de
+montantes con una o dos placas de yeso por cara, con y sin absorbente en la
+cámara; muros de bloques de dos pesos y cinco espesores; muros de bloques con
+seis maneras de montar la placa; puertas sin sellar y bien selladas; puertas
+exteriores; ventanas selladas, cuya tabla se imprime con las valoraciones como
+filas y aquí se gira para que una fila sea una ventana; y sistemas de
+suelo-techo. Una construcción que la página valora en varias condiciones es una
+fila por condición, con la condición como variante. Una valoración no es un
+espectro, así que esas filas no responden por ninguna banda, y una ventana
+practicable es, según la propia nota de la página, de tres a cinco puntos peor
+que la sellada que aquí se valora.
+
+<Catalogues catalogue="transmissionLoss" lang="es" />

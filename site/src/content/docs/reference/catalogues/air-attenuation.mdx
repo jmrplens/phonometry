@@ -1,0 +1,29 @@
+---
+title: "Catalogue of air attenuation"
+description: "The air attenuation coefficient, band by band, for the six temperature and humidity conditions a building standard's room model tabulates, in neper per metre."
+sidebar:
+  label: "Air attenuation"
+---
+
+import Catalogues from '../../../../components/Catalogues.astro';
+import CatalogueFinder from '../../../../components/CatalogueFinder.astro';
+
+<CatalogueFinder lang="en" />
+
+The six conditions the building standard's own room model tabulates the air
+attenuation for, and the coefficient in each of them, band by band. A room
+model needs one. The air in a hall absorbs, the absorption grows with frequency
+and with dryness, and by 8 kHz it is no longer a correction to the surfaces but
+a term that decides the answer, which is why the model has an air term at all.
+So the standard prints a short table of two temperatures crossed with three
+ranges of relative humidity, and names the one to assume when the room's own
+temperature and humidity are not known. That row carries a note here saying so.
+
+The coefficient is a power attenuation in neper per metre, which is what the
+standard's own air term takes, and it is not the decibel per metre an outdoor
+propagation model works in. The page prints it in thousandths of a neper per
+metre and so does this table. Six rows is all there is: this is a table to look
+a value up in and not a model to interpolate, and the standard says nothing
+about a room at 15 °C and 60 % that would let a row be made for it.
+
+<Catalogues catalogue="airAttenuation" lang="en" />

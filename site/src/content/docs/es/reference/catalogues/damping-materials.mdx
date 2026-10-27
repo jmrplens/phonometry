@@ -1,0 +1,41 @@
+---
+title: "Catálogo de materiales amortiguadores"
+description: "Diecisiete materiales amortiguadores comerciales: el factor de pérdidas máximo, la temperatura del máximo a 10 Hz, 100 Hz y 1 kHz, y sus módulos."
+sidebar:
+  label: "Materiales amortiguadores"
+---
+
+import Catalogues from '../../../../../components/Catalogues.astro';
+import CatalogueFinder from '../../../../../components/CatalogueFinder.astro';
+
+<CatalogueFinder lang="es" />
+
+Diecisiete tratamientos amortiguadores comerciales, y una cosa que los separa
+de la tabla de [sólidos](/phonometry/es/reference/catalogues/solids/): aquí un
+factor de pérdidas no es un número. En el catálogo de sólidos cada factor de
+pérdidas es una cifra sola, porque en un metal apenas se mueve. En un polímero
+trabajado cerca de su transición vítrea se mueve dos órdenes de magnitud con la
+temperatura y con la frecuencia, y lo único que imprimen estas páginas es el
+pico. Por eso el pico viene con tres temperaturas al lado, una por cada
+frecuencia para la que la tabla imprime columna: dónde pica el material
+trabajando a 10 Hz, a 100 Hz y a 1 kHz. Un tratamiento cuyo pico cae en 20 °C a
+100 Hz no te está haciendo nada a 100 Hz una mañana de invierno, y una fila
+leída sin sus temperaturas dice lo contrario de lo que lleva.
+
+Los tres módulos de almacenamiento son el mismo argumento otra vez. Uno es el
+extremo rígido, a temperatura baja o frecuencia alta; otro es el extremo
+blando; y el tercero es el que rige en la banda donde pica el factor de
+pérdidas, que es el único de los tres que pinta al lado del pico. La cuarta
+columna es el módulo de pérdidas, la parte imaginaria, que el capítulo da como
+el producto de los otros dos y es la comprobación más barata que hay sobre una
+fila. La página va en grados Fahrenheit y en libras por pulgada cuadrada, así
+que todas las temperaturas y todos los módulos se convirtieron y van marcados
+como convertidos, con la cifra de la página y su unidad al lado. El factor de
+pérdidas es la única columna que no: no tiene unidades, así que se sirve tal
+como se imprime. La página
+dice en una nota al pie que los valores se leyeron sobre curvas publicadas y
+que los datos de amortiguamiento hay que pedírselos al suministrador del
+material; tres de sus celdas están corrompidas en la impresión, constan en las
+erratas del proyecto y aquí se quedan vacías en vez de adivinarse.
+
+<Catalogues catalogue="damping" lang="es" />

@@ -2,7 +2,7 @@
 
 # Documentation and figures
 
-This page governs what a reader of phonometry sees outside the code: the guides of the site, their Spanish twins and their plain-markdown mirror under `docs/`; the code fences those pages print; the figures, plates, fiches and clips the generators draw, and the `.plot()` code that draws them; how a record shows itself in a notebook; the published catalogues page; the errata register; the frames of a clip, held to the figure gates before it is encoded, and the device its field steps on; the install commands a page prints; and the description a search result shows for each page. Read it before you add or change a guide, a figure or a renderer, an animation, an errata entry or an install command. The signature of `.plot()` and where a renderer imports matplotlib are API rules ([A28](api.md#a28), [A10](api.md#a10)); the slope of a subscript, in a docstring or on a plate, is set by [D16 to D21](docstrings.md#d16); the wording of the prose itself is in [prose.md](prose.md). Examples that import from `phonometry._plot`, `phonometry._i18n` or `phonometry._internal` stand for code inside the package, where the import is relative ([A11](api.md#a11)).
+This page governs what a reader of phonometry sees outside the code: the guides of the site, their Spanish twins and their plain-markdown mirror under `docs/`; the code fences those pages print; the figures, plates, fiches and clips the generators draw, and the `.plot()` code that draws them; how a record shows itself in a notebook; the published catalogues pages; the errata register; the frames of a clip, held to the figure gates before it is encoded, and the device its field steps on; the install commands a page prints; the description a search result shows for each page; and how much HTML a page may weigh. Read it before you add or change a guide, a figure or a renderer, an animation, an errata entry or an install command. The signature of `.plot()` and where a renderer imports matplotlib are API rules ([A28](api.md#a28), [A10](api.md#a10)); the slope of a subscript, in a docstring or on a plate, is set by [D16 to D21](docstrings.md#d16); the wording of the prose itself is in [prose.md](prose.md). Examples that import from `phonometry._plot`, `phonometry._i18n` or `phonometry._internal` stand for code inside the package, where the import is relative ([A11](api.md#a11)).
 
 ## Guides and the docs mirror
 
@@ -1338,7 +1338,7 @@ class ReflectionResult(RichDisplay):
 
 ```text
 scripts/generate_catalogue_data.py names every PUBLISHED_ mapping (PUBLISHED_SOLIDS ...) with its columns,
-and both languages of the catalogues page give it a section
+and a catalogue page shows it in both languages
 ```
 
 **Don't**
@@ -1349,7 +1349,7 @@ a new PUBLISHED_RESILIENT_LAYERS in src, absent from scripts/generate_catalogue_
 
 **Enforced by:** `scripts/check_published_catalogues_reach_the_page.py`, `make published-catalogues`, `CI: Every published value names its page`
 
-**Exceptions.** A mapping deliberately kept off the page goes in `EXEMPT` with the reason, and only when showing it would mislead, never because registering it is work (empty). Registering means: the generator names it with its columns, both languages of `site/src/content/docs/reference/catalogues.mdx` give it a section, and its key joins the union in `site/src/components/Catalogues.astro`.
+**Exceptions.** A mapping deliberately kept off the page goes in `EXEMPT` with the reason, and only when showing it would mislead, never because registering it is work (empty). Registering means: the generator names it with its columns, a page under `site/src/content/docs/reference/catalogues/` renders it in both languages (a new catalogue gets a page of its own, listed in `catalogueSlugs` in `site/src/data/topics.mjs`; a table that belongs beside another, as the absorption areas belong beside the absorption coefficients, joins that page), and its key joins the union in `site/src/components/Catalogues.astro`.
 
 ## Errata entries
 
@@ -1533,3 +1533,28 @@ description: "The ECAC Doc 29 airport-noise method: the noise-power-distance eng
 **Enforced by:** `site/scripts/check-descriptions.mjs`, `CI: Check every page has a short meta description of its own`, `site/scripts/check-descriptions.test.mjs`, `CI: Test the build checks on small builds made to fail them`, `tests/test_api_docs_generator.py::test_every_api_page_has_a_description_short_enough_to_show_whole`
 
 **Exceptions.** The Spanish API pages carry the English description of their twin and name that twin canonical (`site/src/lib/fallback-routes.mjs`), and the redirect stubs and the error page are not pages a search engine indexes; the check skips all three. A Spanish description is written for its page, not cut down from the English one, and the length counts characters, not bytes.
+
+## Page size
+
+<a id="f64"></a>
+### F64. Keep every built page under 1 800 000 bytes of HTML
+
+**Why.** Googlebot fetches the first 2 MB of a page, counted on the uncompressed HTML, and indexes nothing past it ([Googlebot](https://developers.google.com/search/docs/crawling-indexing/googlebot)). No console reports the cut: the page shows as indexed and its tail is simply never searchable. The published catalogues reached 4.7 MB in English and 5.2 MB in Spanish on one page, so about two thirds of their rows never reached the index, and the errata registry (4.9 MB) and the conformance report (2.5 MB) were past the limit as well. The cap is a tenth under 2 000 000 bytes, so a page is caught while a table can still grow by some rows. A page that outgrows it is split where its readers already think of it as parts (one page per catalogue, one per document family of the errata), or loses the markup every row repeats (a scoped class on each cell, a copy of the row's text, a per-cell attribute the client can work out from the column).
+
+**Do**
+
+```text
+one page per catalogue under /reference/catalogues/, each well under 1 MB,
+and a row that carries only what its position does not say
+```
+
+**Don't**
+
+```text
+every catalogue on one page, each of its 25 800 cells carrying a scoped
+class, its column's heading and its unit
+```
+
+**Enforced by:** `site/scripts/check-page-size.mjs`, `CI: Check every page fits in what a search engine reads`
+
+**Exceptions.** None. The redirect stubs and the error page are small and are counted like any other file; a page that cannot be split or slimmed below the cap is a design question to settle before it is published, not an entry here.

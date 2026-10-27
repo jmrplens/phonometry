@@ -19,6 +19,7 @@ import { fileURLToPath } from "node:url";
 import { glob } from "node:fs/promises";
 import { hasMarkdownCopy, routeOf } from "../src/lib/page-markdown.mjs";
 import { basePath, siteUrl } from "../src/data/site.mjs";
+import { catalogueSlugs } from "../src/data/topics.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const siteRoot = join(here, "..");
@@ -50,6 +51,25 @@ function stripMdx(text) {
     .replace(/<\/?[A-Z][\w.]*\b[^>]*>/g, "")
     .replace(/\n{3,}/g, "\n\n")
     .trim();
+}
+
+/**
+ * The overview of the published catalogues lists them through a component
+ * (src/components/CatalogueIndex.astro), and stripping the MDX takes the
+ * component out with it: an agent would get the sentence that introduces the
+ * list and no list. So the list is written here as Markdown, from the same
+ * pages in the same order, each catalogue's label linked to its page and
+ * followed by its description.
+ */
+function catalogueIndex(lang) {
+  const prefix = lang === "es" ? "es/" : "";
+  return catalogueSlugs
+    .map((slug) => {
+      const source = readFileSync(join(contentDir, `${prefix}${slug}.mdx`), "utf8");
+      const field = (name) => source.match(new RegExp(`^\\s*${name}: "([^"]*)"`, "m"))?.[1] ?? "";
+      return `- [${field("label") || field("title")}](${basePath}/${prefix}${slug}/): ${field("description")}`;
+    })
+    .join("\n");
 }
 
 /**
@@ -144,7 +164,12 @@ for await (const file of glob("**/*.{md,mdx}", { cwd: contentDir })) {
 
   const raw = mirror
     ? readFileSync(mirror, "utf8")
-    : stripMdx(stripFrontmatter(readFileSync(abs, "utf8")));
+    : stripMdx(
+        stripFrontmatter(readFileSync(abs, "utf8")).replace(
+          /<CatalogueIndex lang="(en|es)" \/>/g,
+          (_, lang) => catalogueIndex(lang),
+        ),
+      );
   // A transplanted document sits at the root of docs/, not at its route, so
   // its relative links resolve from there: `ERRATA.es.md` beside `ERRATA.md`
   // is the Spanish registry, not a page under reference/.

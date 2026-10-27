@@ -1,0 +1,34 @@
+---
+title: "Catalogue of duct walls"
+description: "Forty-six measurements of the sound that leaves a sheet metal duct through its wall and the sound that enters it, by size, shape, gauge and lining."
+sidebar:
+  label: "Duct walls"
+---
+
+import Catalogues from '../../../../components/Catalogues.astro';
+import CatalogueFinder from '../../../../components/CatalogueFinder.astro';
+
+<CatalogueFinder lang="en" />
+
+Forty-six measurements of what the wall of a sheet metal duct does to the sound
+that crosses it, and the first thing to read on a row is which way it crossed.
+Breakout is the sound that leaves the duct through its wall, into the room the
+duct passes through. Break-in is the sound that enters the duct through the
+same wall and then travels along it to somewhere else. They are two different
+measurements of one wall and not two words for one number: the 305 mm by 305 mm
+duct in 24 gauge is 21 dB at 63 Hz on the way out and 16 dB on the way in, and
+27 against 16 at 250 Hz. Two rows that differ only in direction are two rows
+here, and the column says which.
+
+The rest of the row is what tells one duct from another. The shape is the
+chapter's own word, which is why the breakout table says round where the
+break-in table says circular for the same geometry. The gauge is the US sheet
+metal gauge as printed, keeping the asterisk that marks a duct lined
+internally, and the note on those rows says what the lining is. The size is the
+two sides or the diameter, in millimetres; two rows carry a diameter the page
+prints once over three consecutive rows, so those two are marked as worked out
+rather than read. Several cells are a lower bound and not a value, because the
+sound radiated was below the background in the room the duct was measured in,
+and a bound is published as one.
+
+<Catalogues catalogue="ductTransmissionLoss" lang="en" />

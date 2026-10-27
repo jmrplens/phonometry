@@ -1,0 +1,148 @@
+---
+title: "Catálogos publicados"
+description: "Todo material, gas y fluido que la biblioteca lee de una página impresa, de constantes elásticas a estados de fluido, con su tabla y lo que decía su celda."
+---
+
+import CatalogueFinder from '../../../../../components/CatalogueFinder.astro';
+import CatalogueIndex from '../../../../../components/CatalogueIndex.astro';
+import CatalogueRouter from '../../../../../components/CatalogueRouter.astro';
+
+<CatalogueFinder lang="es" />
+
+Una biblioteca que calcula con una densidad tiene que sacarla de algún sitio.
+Esta la saca de una página, y se queda con la página: cada fila de estos
+catálogos nombra el libro, la tabla, la página del PDF y el folio impreso en
+los que se leyó, y dice lo que decía su celda de verdad. Una densidad impresa
+como intervalo aquí es un intervalo, un factor de pérdidas impreso como cota
+superior es una cota, y una tortuosidad que una página imprime como la palabra
+`model` es esa palabra, porque ahí la magnitud depende de la frecuencia y
+ningún número suelto la representa.
+
+De esa disciplina se siguen tres cosas, y las tres se ven en las tablas.
+
+**Los libros discrepan, y la clave dice cuál habla.** Cuatro de ellos imprimen
+un acero a 7 800 kg/m³ y no hay dos que coincidan en su módulo. Eso no es un
+defecto que haya que promediar: es la dispersión de la literatura, y un
+catálogo que eligiera uno la estaría escondiendo. Las filas llevan por clave la
+tabla de la que salieron, y las búsquedas de la biblioteca devuelven la lectura
+de cada libro en vez de elegir entre ellas.
+
+**Un número que ha calculado esta biblioteca va marcado.** Una página que
+imprime un módulo y una densidad ha impreso una velocidad de barra sin
+escribirla, así que la fila la lleva; pero se muestra en cursiva, y de qué se
+calculó está a un puntero de distancia. Ningún valor derivado se guarda como si
+se hubiera leído. Otras dos clases de celda guardan el número de la propia
+página y dicen cómo llegó ahí: un valor que la página da en una unidad que
+esta biblioteca no guarda, grados Fahrenheit, psi o sabines, está convertido,
+y la marca da la cifra de la página y su unidad; y una celda que la página deja
+en blanco porque imprime el valor una sola vez para un bloque de filas está
+arrastrada, y la marca nombra la fila que lo imprime. Un valor que la propia fuente llama estimación va
+marcado como tal.
+
+Un material marcado con un asterisco lleva una nota que hizo su página sobre
+él, y la nota se lee sobre el nombre. Igual que el motivo de cualquier celda
+que no sea un número a secas.
+
+**Nada de esto es una especificación.** La densidad de un bloque varía con el
+fabricante, la de una espuma con el lote, y los libros lo dicen imprimiendo
+rangos donde un rango es lo que se sabe. Usa una fila para reproducir un
+ejemplo resuelto, para contrastar una medida o para tener un orden de magnitud;
+para lo que tenga que estar bien, mide la probeta.
+
+## Los catálogos
+
+Cada catálogo tiene su propia página, con el texto que explica qué son sus
+filas y la tabla que las contiene.
+
+<CatalogueIndex lang="es" />
+
+## Leer un catálogo desde el código
+
+Cada catálogo es un diccionario de `'<tabla>/<fila>'` a una fila, y la fila
+devuelve lo que su página imprimió. Una magnitud que la página dio es un
+atributo; una que no dio responde `None`, y la fila dice por qué.
+
+```python
+from phonometry import materials
+
+foam = materials.PUBLISHED_POROUS_MATERIALS["allard-2009-table-13-1/foam"]
+print(foam.source)
+print(foam.printed("flow_resistivity_pa_s_m2"), "Pa s/m2")
+
+screen = materials.PUBLISHED_POROUS_MATERIALS["allard-2009-table-11-5/screen_2"]
+print(screen.tortuosity)
+print(screen.why_missing("tortuosity"))
+```
+
+`printed` es la lectura estricta: devuelve el número que imprimió la página o
+se niega, nombrando la página y lo que había en la celda. Úsalo allí donde un
+número equivocado sea peor que una excepción.
+
+Preguntar por un nombre da todos los libros a la vez, que es la comparación que
+ningún libro por separado puede hacer. El nombre que se pregunta es el que
+imprime el libro, casi siempre en inglés: las tablas de los catálogos muestran
+los nombres, las notas y las fuentes en español, pero su buscador encuentra
+cada fila también por el nombre del libro, que es el que hay que escribir aquí.
+
+```python
+for row in materials.porous_materials_named("Mineral wool"):
+    interval = row.ranges.get("porosity")
+    print(row.table, row.porosity if interval is None else interval)
+```
+
+El catálogo de suelos funciona igual, y el `medium()` de una fila es el
+semiespacio poroso que los modelos de exteriores toman como suelo, calculado a
+partir de la resistividad que imprime la página:
+
+```python
+from phonometry import environment
+
+pasture = environment.PUBLISHED_GROUND_SURFACES["bies-2017-table-5-2/normal_uncompacted_ground"]
+print(pasture.harmonoise_class, pasture.printed("flow_resistivity_pa_s_m2"))
+
+octaves = [125.0, 250.0, 500.0, 1000.0]
+over_pasture = environment.ground_effect(
+    octaves, 1.0, 1.5, 50.0, impedance=pasture.medium(octaves)
+)
+print(over_pasture.excess_attenuation.round(2), "dB")
+```
+
+Un estado de fluido es un `Fluid` como cualquier otro, así que entra en las
+mismas llamadas; lo que lo distingue es que su `model` nombra una tabla y no
+una forma cerrada.
+
+```python
+from phonometry import fluids
+
+sea = fluids.PUBLISHED_FLUIDS["bies-2017-table-c1-fluids/sea_water"]
+print(sea.model)
+print(sea.validity)
+```
+
+## Tu propio catálogo
+
+Los catálogos muestran lo que la biblioteca ha leído de un libro o de una
+norma, y nunca mostrarán la tabla de un fabricante: una hoja de características
+se revisa bajo el mismo título, sus condiciones de uso rara vez permiten
+copiarla, y el valor que necesita un proyecto es el de la hoja con la que se
+especificó. Tus hojas de características, declaraciones de prestaciones,
+informes de ensayo y medidas van en un archivo de catálogo tuyo, un documento
+JSON o una hoja de cálculo guardada como CSV, que `io.read_catalogue` lee en
+las mismas clases de fila que las tablas publicadas, y todas las búsquedas por
+nombre buscan en él con `catalogue=`, solo o unido a un catálogo publicado.
+[Tus propios catálogos](/phonometry/es/io/material-catalogues/) explica cómo,
+desde una tabla publicada escrita como plantilla hasta el rechazo que señala
+una celda. Los coeficientes de absorción prácticos de una hoja de
+características, los coeficientes por tercios de octava de un informe de
+ensayo, el índice de reducción acústica de un laboratorio y la mejora a
+impactos de un revestimiento tienen clases de fila propias que ninguna tabla
+publicada usa, y [Cómo leer la hoja de características de un
+material](/phonometry/es/materials/reading-a-datasheet/) dice qué número de una
+hoja es cuál. El esquema JSON de un archivo de catálogo, para todas las clases
+de fila que publica la biblioteca, se sirve en
+[`schemas/phonometry-catalogue-1.json`](https://docs.jmrp.io/phonometry/schemas/phonometry-catalogue-1.json),
+para que un editor complete un archivo tuyo mientras lo escribes. Una tabla de
+un fabricante pegada en una issue o en una pull request nunca se incorpora, y
+nada de estos catálogos sale de una.
+
+<CatalogueRouter lang="es" />

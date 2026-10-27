@@ -32,12 +32,29 @@
  * off the page is the whole catalogue and only the filters are missing, and
  * Pagefind indexes every row.
  *
- * One catalogue per invocation, and the heading above it belongs to the page
- * rather than to this component. A heading rendered inside a component never
- * reaches Starlight's table of contents, so a page whose three sections came
- * from here offered a reader one entry, "Overview", and no way to jump to the
- * fluids. The prose that introduces each catalogue is in the page for the same
- * reason it always is: it is prose, and it is translated as prose.
+ * One catalogue per invocation, on the page of the catalogue it belongs to,
+ * and the heading above it belongs to that page rather than to this
+ * component. A heading rendered inside a component never reaches Starlight's
+ * table of contents, so a page whose three sections came from here offered a
+ * reader one entry, "Overview", and no way to jump to the fluids. The prose
+ * that introduces each catalogue is in the page for the same reason it always
+ * is: it is prose, and it is translated as prose.
+ *
+ * The markup is as lean as the table allows, because a crawler reads only so
+ * much of a page. Googlebot fetches the first 2 MB of uncompressed HTML and
+ * indexes nothing past it, and when every catalogue was on one page that page
+ * weighed 4.7 MB in English and 5.2 MB in Spanish, two thirds of it
+ * attributes every row repeated: the classes on every cell, the scoped one
+ * Astro writes among them, a lowercased copy of the row's words for the
+ * filter, and the heading and unit of its column on every cell for the
+ * stacked view a phone gets. The
+ * catalogues have a page each now, and each row carries only what cannot be
+ * worked out from where it sits. The styles are global under `.catalogue`, so
+ * no element carries a scoped class. A cell is numeric because of its column,
+ * not because of a class on it. The filter reads the words the row shows, and
+ * a row carries in `data-also` only the words it matches without showing them
+ * (on the Spanish page, the book's own English). The stacked view reads each
+ * column's heading and unit from custom properties set once on the table.
  */
 import {
 	catalogues,
@@ -325,34 +342,12 @@ const cellNote = (cell: CatalogueCell) => (lang === 'es' && cell.noteEs) || cell
 
 /** Lower case and without accents, so "hormigon" finds "hormigón" and
     "aluminium" still finds the row on the Spanish page. The finder folds what
-    the reader types the same way. */
+    the reader types, and the words a row shows, the same way. */
 const folded = (text: string) =>
 	text
 		.normalize('NFD')
 		.replace(/\p{M}/gu, '')
 		.toLowerCase();
-
-/** What the filter matches against: everything a reader might type, which
-    is the row's names and every word column the table shows for it. The word
-    columns are read from `textColumns` rather than listed again here, so a
-    column the table gains is searchable the day it appears; two of them, the
-    bonding of a solid and what an area is an area of, were shown and not
-    matched while this was a second list. */
-const haystack = (row: CatalogueRow) =>
-	folded(
-		[
-			row.name,
-			row.variant,
-			row.group,
-			row.table,
-			row.source,
-			row.model,
-			...textColumns.map((column) => row[column.field]),
-			...(lang === 'es' ? Object.values(row.es ?? {}) : []),
-		]
-			.filter(Boolean)
-			.join(' '),
-	);
 
 const data = catalogues[section];
 const tables = tablesOf(data.rows);
@@ -401,14 +396,102 @@ const textColumns = (
 		column.notOn !== section &&
 		data.rows.some((row) => row[column.field]),
 );
+
+/** What the filter matches a row by and the row does not show on this page.
+
+    The filter reads the words a row shows: its name, with the heading above it
+    and the variant under it, its note, every word column and its source,
+    together with the key of the table it came off. What a reader might type
+    and cannot see is the rest, and it is little. On the English page it is
+    nothing, or a source a fluid state does not print. On the Spanish page it is
+    the book's own English, so that "aluminium" still finds the row that reads
+    "aluminio", and the parts of the generator's Spanish the table does not
+    print. Each is written once, folded the way the filter folds, and only
+    when the row does not already show it. */
+const alsoOf = (row: CatalogueRow) => {
+	const shown = new Set(
+		[
+			say(row, 'name'),
+			say(row, 'variant'),
+			say(row, 'group'),
+			say(row, 'note'),
+			...textColumns.map((column) => say(row, column.field)),
+			say(row, section === 'fluids' ? 'model' : 'source'),
+		]
+			.filter(Boolean)
+			.map(folded),
+	);
+	const matched = [
+		row.name,
+		row.variant,
+		row.group,
+		row.source,
+		row.model,
+		...textColumns.map((column) => row[column.field]),
+		...(lang === 'es' ? Object.values(row.es ?? {}) : []),
+	];
+	return [...new Set(matched.filter((text): text is string => !!text).map(folded))]
+		.filter((text) => !shown.has(text))
+		.join(' ');
+};
+
+/** The highest column the stacked view labels: see the rules at the end of
+    the stylesheet below, which go up to `nth-child(24)`. */
+const LABELLED_COLUMNS = 24;
+
+/** Every column after the row's own heading, as the stacked view labels it:
+    the word columns, the conditions of a fluid, the quantities and the
+    source, in the order the row prints them. */
+const columnLabels = [
+	...textColumns.map((column) => ({ label: column.label, unit: '' })),
+	...(section === 'fluids' ? [{ label: copy.conditions, unit: '' }] : []),
+	...data.columns.map((column) => ({ label: heading(column), unit: column.unit })),
+	{ label: section === 'fluids' ? copy.fixedBy : copy.source, unit: '' },
+];
+if (columnLabels.length + 1 > LABELLED_COLUMNS) {
+	throw new Error(
+		`[Catalogues] the ${section} catalogue has ${columnLabels.length + 1} columns and the ` +
+			`stylesheet labels the first ${LABELLED_COLUMNS} in the stacked view: add the rules ` +
+			'for the others at the end of the stylesheet and raise LABELLED_COLUMNS.',
+	);
+}
+
+/** A CSS string literal holding `text`. */
+const cssString = (text: string) =>
+	`"${text.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\a ')}"`;
+
+/* The heading and the unit of each column, once per table, as the custom
+   properties the stacked view reads: `--l3` labels the third cell of a row and
+   `--u3` follows its number. The row heading is the first cell, so the first
+   labelled one is the second. Written per cell, as `data-label` and
+   `data-unit`, this was a fifth of the page. */
+const columnStyle = columnLabels
+	.flatMap(({ label, unit }, index) => [
+		`--l${index + 2}:${cssString(label)}`,
+		...(unit ? [`--u${index + 2}:${cssString(`\u00a0${unit}`)}`] : []),
+	])
+	.join(';');
+
+/** The title a marked cell carries: the page's own note when it made one,
+    otherwise what the mark means, and for a converted cell the figure and the
+    unit the page printed after it. A number the page simply printed has
+    nothing to explain and carries none. */
+const cellTitle = (cell: CatalogueCell) =>
+	cellNote(cell) ||
+	(cell.kind === 'printed' || cell.kind === 'absent'
+		? undefined
+		: cell.printed
+			? `${copy.kinds[cell.kind]}: ${cell.printed}`
+			: copy.kinds[cell.kind]);
 ---
 
-<!-- The filters live in CatalogueFinder.astro, at the top of the page, and
-     reach in here through these attributes: which catalogue this is, what its
-     filter should be called and suggest, how many rows it holds and which
-     published tables it draws on. The id is the same word in both languages,
-     which the finder resolves as well as the heading's own id; the guides link
-     to the heading, because that is the anchor the link checker can see. -->
+{/* The filters live in CatalogueFinder.astro, which sits above the rows of
+    the first catalogue on the page, and reach in here through these
+    attributes: which catalogue this is, what its filter should be called and
+    suggest, how many rows it holds and which published tables it draws on.
+    The id is the same word in both languages; a link from a guide goes to the
+    catalogue's page, and this id is what the finder lands on when it opens
+    the page at its table. */}
 <section
 	class="catalogue not-content"
 	id={`catalogue-${section}`}
@@ -420,12 +503,12 @@ const textColumns = (
 >
 	<p class="legend">{copy.legend}</p>
 
-	<!-- Focusable because it scrolls sideways and holds nothing focusable of
-	     its own: Chrome and Firefox focus such a region by themselves, WebKit
-	     does not, and a reader who cannot reach it cannot read past the third
-	     column. -->
+	{/* Focusable because it scrolls sideways and holds nothing focusable of
+	    its own: Chrome and Firefox focus such a region by themselves, WebKit
+	    does not, and a reader who cannot reach it cannot read past the third
+	    column. */}
 	<div class="table-scroll" tabindex="0" role="region" aria-label={copy.regionLabel}>
-		<table>
+		<table style={columnStyle}>
 			<thead>
 				<tr>
 					<th scope="col">{rowHeading}</th>
@@ -445,13 +528,13 @@ const textColumns = (
 			<tbody>
 				{
 					data.rows.map((row) => (
-						<tr data-row data-table={row.table} data-text={haystack(row)}>
-							<th
-								scope="row"
-								class={row.note ? 'name annotated' : 'name'}
-								title={say(row, 'note') || undefined}
-							>
-								<span class="wrap">
+						/* The row is told apart by where it sits and by what it
+						   holds: the first cell is its name, a word column is
+						   the one cell with a class, the last cell is its
+						   source and everything between is a quantity. */
+						<tr data-table={row.table} data-also={alsoOf(row) || undefined}>
+							<th scope="row" title={say(row, 'note') || undefined}>
+								<span>
 									{row.group && <span class="group">{say(row, 'group')}</span>}
 									{say(row, 'name')}
 									{row.variant && <span class="variant">{say(row, 'variant')}</span>}
@@ -459,75 +542,46 @@ const textColumns = (
 								{row.note && <span class="note">{say(row, 'note')}</span>}
 							</th>
 							{textColumns.map((column) => (
-								<td
-									class={column.field}
-									data-label={column.label}
-									data-empty={row[column.field] ? undefined : true}
-								>
-									{column.wrap ? (
-										<span class="wrap">{say(row, column.field)}</span>
-									) : (
-										say(row, column.field)
-									)}
+								<td class={column.field}>
+									{say(row, column.field) &&
+										(column.wrap ? <span>{say(row, column.field)}</span> : say(row, column.field))}
 								</td>
 							))}
 							{section === 'fluids' && (
-								<td class="conditions" data-label={copy.conditions}>
-									<span class="wrap">
+								<td class="conditions">
+									<span>
 										{row.temperature} °C, {row.pressure} Pa
 									</span>
 								</td>
 							)}
-							{row.cells.map((cell, index) => (
-								/* An empty cell with a note is one this library will not fill
-								   although the arithmetic would reach it, and the note says
-								   why; the cell stays blank because the page is blank there.
-
-								   `data-label` and `data-unit` carry the heading into the cell
-								   because the stacked view a phone gets has no header row to
-								   read up to, and `data-empty` is what lets that view leave
-								   out the quantities this row does not have. */
-								<td
-									class="numeric"
-									data-label={heading(data.columns[index])}
-									data-unit={data.columns[index].unit || undefined}
-									data-empty={cell.text ? undefined : true}
-									title={(!cell.text && cellNote(cell)) || undefined}
-								>
-									{cell.text ? (
-										/* A number the page simply printed has nothing to
-										   explain, so it carries no tooltip: the marked cells
-										   are the ones that are not a plain number, and
-										   "as the page prints it" on every other cell would
-										   bury them. It keeps its `cursor: auto` for the same
-										   reason. A converted cell names the page's figure and
-										   its unit after the kind's own words, so the reader
-										   gets them in the page's language. */
-										<span
-											class={`cell cell-${cell.kind}`}
-											title={
-												cellNote(cell) ||
-												(cell.kind === 'printed' || cell.kind === 'absent'
-													? undefined
-													: cell.printed
-														? `${copy.kinds[cell.kind]}: ${cell.printed}`
-														: copy.kinds[cell.kind])
-											}
-										>
-											{cellText(cell)}
-										</span>
-									) : (
-										<span class="cell-absent" aria-hidden="true">
-											&nbsp;
-										</span>
-									)}
-								</td>
-							))}
-							<td
-								class="source"
-								data-label={section === 'fluids' ? copy.fixedBy : copy.source}
-							>
-								<span class="wrap">{say(row, section === 'fluids' ? 'model' : 'source')}</span>
+							{row.cells.map((cell) =>
+								/* An empty cell is empty, so the stacked view leaves it
+								   out by `:empty`. One with a title is a cell this
+								   library will not fill although the arithmetic would
+								   reach it, and the title says why; it stays blank
+								   because the page is blank there. A number the page
+								   simply printed is bare text, and only the cells
+								   that are not a plain number carry a mark and a title:
+								   "as the page prints it" on every other cell would
+								   bury them. */
+								cell.text ? (
+									<td>
+										{cell.kind === 'printed' && !cellNote(cell) ? (
+											cellText(cell)
+										) : (
+											<span class={`cell-${cell.kind}`} title={cellTitle(cell)}>
+												{cellText(cell)}
+											</span>
+										)}
+									</td>
+								) : (
+									<td title={cellNote(cell) || undefined} />
+								),
+							)}
+							<td>
+								{say(row, section === 'fluids' ? 'model' : 'source') && (
+									<span>{say(row, section === 'fluids' ? 'model' : 'source')}</span>
+								)}
 							</td>
 						</tr>
 					))
@@ -535,13 +589,13 @@ const textColumns = (
 			</tbody>
 		</table>
 	</div>
-	<!-- The zero-result message is a live region, and a live region has to be
-	     in the document from the start: a screen reader announces a change to
-	     one it was already watching, and one that appears by losing `hidden` it
-	     may not have been watching at all. So the paragraph is always here and
-	     always empty, and the filter writes the sentence into it. The message
-	     travels on the element because the script that fills it is shared and
-	     this component is the only thing that knows which language it is in. -->
+	{/* The zero-result message is a live region, and a live region has to be
+	    in the document from the start: a screen reader announces a change to
+	    one it was already watching, and one that appears by losing `hidden` it
+	    may not have been watching at all. So the paragraph is always here and
+	    always empty, and the filter writes the sentence into it. The message
+	    travels on the element because the script that fills it is shared and
+	    this component is the only thing that knows which language it is in. */}
 	<p class="empty" data-empty-message role="status" data-message={copy.empty}></p>
 </section>
 
@@ -773,8 +827,7 @@ const textColumns = (
 	/* The tooltip is appended to the body so that nothing in the table can clip
 	   it: the scroll box the table lives in has `overflow-x: auto`, and a
 	   tooltip drawn inside it would be cut off exactly at the edges where the
-	   reader most needs it. That puts it outside this component's scope, so
-	   its rules are global and its class is named for the page it belongs to. */
+	   reader most needs it. Its class is named for the page it belongs to. */
 	.catalogue-tip {
 		position: fixed;
 		z-index: 100;
@@ -792,19 +845,17 @@ const textColumns = (
 		   it and the two would fight. */
 		pointer-events: none;
 	}
-</style>
 
-<style>
+	/* Everything below is global and starts at `.catalogue`, the section this
+	   component renders, rather than scoped: a scoped rule makes Astro write
+	   its class on every element it could match, which was one class on each
+	   of the twenty-five thousand cells, and nothing else on these pages uses
+	   these selectors. */
 	.catalogue {
 		margin-block: 2.5rem;
 	}
 
-	.blurb {
-		color: var(--sl-color-gray-3);
-		max-width: 60ch;
-	}
-
-	/* `not-content` on the section above is Starlight's own opt-out from the
+	/* `not-content` on the section is Starlight's own opt-out from the
 	   styles it gives markdown tables, and this table needs it. One of them
 	   reads
 	   `table tr > th:first-child:nth-last-child(n+4) { white-space: nowrap }`,
@@ -820,36 +871,36 @@ const textColumns = (
 	   without an explicit min-width the container reports
 	   scrollWidth == clientWidth in Chromium and clips the last columns with
 	   no way to reach them. */
-	.table-scroll {
+	.catalogue .table-scroll {
 		overflow-x: auto;
 		margin-block: 0.5rem 1rem;
 	}
 
-	.table-scroll:focus-visible {
+	.catalogue .table-scroll:focus-visible {
 		outline: 2px solid var(--sl-color-text-accent);
 		outline-offset: 2px;
 	}
 
-	.table-scroll table {
+	.catalogue .table-scroll table {
 		min-width: min-content;
 		border-collapse: collapse;
 		font-size: var(--sl-text-sm);
 	}
 
-	th,
-	td {
+	.catalogue th,
+	.catalogue td {
 		padding: 0.35rem 0.6rem;
 		border-block-end: 1px solid var(--sl-color-gray-5);
 		text-align: start;
 		vertical-align: top;
 	}
 
-	thead th {
+	.catalogue thead th {
 		white-space: nowrap;
 		font-weight: 600;
 	}
 
-	.unit {
+	.catalogue .unit {
 		display: block;
 		font-weight: 400;
 		font-size: 0.85em;
@@ -865,7 +916,7 @@ const textColumns = (
 	   printed folio; between folios 607 and 610)" over fifteen lines, and made
 	   every row of the solids three hundred pixels tall while the numbers in
 	   it occupied one line. */
-	.name {
+	.catalogue tbody th {
 		position: sticky;
 		inset-inline-start: 0;
 		background: var(--sl-color-black);
@@ -881,8 +932,14 @@ const textColumns = (
 	   "Dense aggregate blocks (solid) connected with mortar" straight over the
 	   density beside it. `min-width` on the cell is honoured and stays there,
 	   because a floor is what stops a column of prose collapsing to its
-	   longest word. */
-	.wrap {
+	   longest word. The block is the first span of the name, the one span of
+	   a phrase column and of the conditions, and the span of the source, which
+	   is the last cell of every row. */
+	.catalogue tbody th > span:first-child,
+	.catalogue .per > span,
+	.catalogue .model > span,
+	.catalogue .conditions > span,
+	.catalogue tbody td:last-child > span {
 		display: block;
 		max-width: 22ch;
 	}
@@ -898,11 +955,11 @@ const textColumns = (
 	   the cell, because that is the one the automatic table layout honours,
 	   and the ceiling is on the block inside it, because a cell treats
 	   `max-width` as a suggestion. */
-	[data-catalogue='impactInsulation'] .name {
+	.catalogue[data-catalogue='impactInsulation'] tbody th {
 		min-width: 44ch;
 	}
 
-	[data-catalogue='impactInsulation'] .name .wrap {
+	.catalogue[data-catalogue='impactInsulation'] tbody th > span:first-child {
 		max-width: 52ch;
 	}
 
@@ -911,7 +968,7 @@ const textColumns = (
 	   635-636 (no printed folio)" wrapped to four lines and set the height of
 	   a row whose numbers are one line, which is what made the table look
 	   full of holes. */
-	.source .wrap {
+	.catalogue tbody td:last-child > span {
 		max-width: 38ch;
 	}
 
@@ -919,11 +976,11 @@ const textColumns = (
 	   the width of a citation pushed the column that says which document
 	   fixes each state off the side of the table: five of the seven rows are
 	   an air, and that column is the only thing that tells them apart. */
-	.conditions .wrap {
+	.catalogue .conditions > span {
 		max-width: 20ch;
 	}
 
-	.variant {
+	.catalogue .variant {
 		display: block;
 		font-weight: 400;
 		font-size: 0.9em;
@@ -933,20 +990,24 @@ const textColumns = (
 	/* The heading the book prints above a block of rows. It goes above the
 	   name rather than beside it because it is what the name is short for:
 	   "h = w = 10 cm, L = 2h" is a batten only under "Periodic 1D battens". */
-	.group {
+	.catalogue .group {
 		display: block;
 		font-weight: 400;
 		font-size: 0.82em;
 		color: var(--sl-color-gray-3);
 	}
 
-	.numeric {
+	/* A quantity is every cell between the word columns, which are the cells
+	   with a class, and the source, which is the last: no cell says it is a
+	   number, its place in the row does. */
+	.catalogue thead th.numeric,
+	.catalogue tbody td:not([class]):not(:last-child) {
 		text-align: end;
 		font-variant-numeric: tabular-nums;
 		white-space: nowrap;
 	}
 
-	.source {
+	.catalogue tbody td:last-child {
 		color: var(--sl-color-gray-3);
 		min-width: 34ch;
 		white-space: normal;
@@ -956,11 +1017,11 @@ const textColumns = (
 	   "A" right-aligned under a heading called Mount reads as a quantity, and
 	   so does a sheet gauge of 24. None of them is longer than "flat oval", so
 	   none of them wraps and none needs the block that caps a phrase. */
-	.mounting,
-	.direction,
-	.shape,
-	.gauge,
-	.weave {
+	.catalogue .mounting,
+	.catalogue .direction,
+	.catalogue .shape,
+	.catalogue .gauge,
+	.catalogue .weave {
 		white-space: nowrap;
 		color: var(--sl-color-gray-2);
 	}
@@ -968,27 +1029,27 @@ const textColumns = (
 	/* Wide enough for "cubic metre of air at 50% RH" on two lines and no
 	   wider: the quantity columns are what the reader came for. At 16ch that
 	   phrase broke into five. */
-	.per {
+	.catalogue .per {
 		color: var(--sl-color-gray-2);
 		min-width: 14ch;
 	}
 
-	.per .wrap {
+	.catalogue .per > span {
 		max-width: 22ch;
 	}
 
 	/* Wide enough that "three-dimensional boundary element prediction"
 	   wraps onto three lines. At sixteen characters it broke into six, one
 	   word per line, and every row of the table grew to match. */
-	.model {
+	.catalogue .model {
 		min-width: 21ch;
 	}
 
-	.model .wrap {
+	.catalogue .model > span {
 		max-width: 26ch;
 	}
 
-	.conditions {
+	.catalogue .conditions {
 		color: var(--sl-color-gray-3);
 		min-width: 18ch;
 		white-space: normal;
@@ -1001,31 +1062,31 @@ const textColumns = (
 	   every number in the row away from its neighbours. It reads on the name
 	   instead, which is the cell that identifies the row, with a mark to say
 	   it is there. */
-	.annotated::after {
+	.catalogue tbody th:has(> .note)::after {
 		content: '*';
 		color: var(--sl-color-gray-3);
 		padding-inline-start: 0.15em;
 	}
 
-	.annotated {
+	.catalogue tbody th[title] {
 		cursor: help;
 	}
 
 	/* The note reads on hover in the table and on the card in the stacked
 	   view, because a phone has no hover and the mark alone would promise
 	   something the reader cannot reach. */
-	.note {
+	.catalogue .note {
 		display: none;
 	}
 
 	/* One mark per kind of cell, so the difference between a number a book
 	   printed and a number this library worked out survives the rendering. */
-	.cell {
+	.catalogue td > [class^='cell-'] {
 		border-block-end: 1px dotted transparent;
 		cursor: help;
 	}
 
-	.cell-printed {
+	.catalogue .cell-printed {
 		cursor: auto;
 	}
 
@@ -1033,30 +1094,30 @@ const textColumns = (
 	   printed table: the number is as firm as a printed one and it did not
 	   come from a page, so it is marked like the other cells that need a word
 	   of explanation and unlike the ones a book printed. */
-	.cell-fixed {
+	.catalogue .cell-fixed {
 		border-block-end-color: var(--sl-color-gray-3);
 	}
 
-	.cell-derived {
+	.catalogue .cell-derived {
 		font-style: italic;
 		border-block-end-color: var(--sl-color-gray-3);
 	}
 
-	.cell-approximate::before {
+	.catalogue .cell-approximate::before {
 		content: '~';
 		color: var(--sl-color-gray-3);
 	}
 
-	.cell-range,
-	.cell-bound,
-	.cell-reported,
-	.cell-estimated,
-	.cell-converted,
-	.cell-carried {
+	.catalogue .cell-range,
+	.catalogue .cell-bound,
+	.catalogue .cell-reported,
+	.catalogue .cell-estimated,
+	.catalogue .cell-converted,
+	.catalogue .cell-carried {
 		border-block-end-color: var(--sl-color-gray-3);
 	}
 
-	.cell-unquantified {
+	.catalogue .cell-unquantified {
 		font-style: italic;
 		color: var(--sl-color-gray-3);
 		border-block-end-color: var(--sl-color-gray-3);
@@ -1065,26 +1126,26 @@ const textColumns = (
 	/* Where the keyboard cursor is. It is not `:focus-visible`, because the
 	   element under the cursor never takes focus: the scroll box keeps it, so
 	   that the table stays one tab stop, and the ring has to be drawn by hand. */
-	.cell-cursor {
+	.catalogue .cell-cursor {
 		outline: 2px solid var(--sl-color-text-accent);
 		outline-offset: 2px;
 		border-radius: 2px;
 	}
 
-	.empty {
+	.catalogue .empty {
 		color: var(--sl-color-gray-3);
 	}
 
 	/* Nothing to say, and an empty paragraph still takes a line. */
-	.empty:empty {
+	.catalogue .empty:empty {
 		display: none;
 	}
 
 	/* What the marks in the table mean, beside the table. The prose above the
-	   page says it too, but a reader who arrived at a row from a search is not
-	   reading the prose, and `title` is not a text alternative anybody can
+	   table says it too, but a reader who arrived at a row from a search is
+	   not reading the prose, and `title` is not a text alternative anybody can
 	   rely on. */
-	.legend {
+	.catalogue .legend {
 		margin-block: 0 0.5rem;
 		color: var(--sl-color-gray-3);
 		font-size: var(--sl-text-sm);
@@ -1097,7 +1158,7 @@ const textColumns = (
 	   away from it whether that page is white or black. The sticky first
 	   column paints its own background, so it takes the stripe too or the
 	   numbers would scroll under a name of a different colour. */
-	tbody tr:nth-child(even) > * {
+	.catalogue tbody tr:nth-child(even) > * {
 		background: color-mix(in srgb, var(--sl-color-gray-5) 25%, var(--sl-color-black));
 	}
 
@@ -1107,36 +1168,37 @@ const textColumns = (
 	   sticky column that keeps the name in view takes a third of the screen
 	   to do it. Each row becomes a card titled by its material, holding only
 	   the quantities that row actually has, and the heading of each column
-	   travels in `data-label` because there is no header row left to look up
-	   to. */
+	   travels in a custom property of the table, `--l<n>` for the n-th cell
+	   of a row and `--u<n>` for its unit, because there is no header row left
+	   to look up to. */
 	@media (max-width: 55rem) {
-		.table-scroll {
+		.catalogue .table-scroll {
 			overflow-x: visible;
 		}
 
-		.table-scroll table {
+		.catalogue .table-scroll table {
 			display: block;
 			min-width: 0;
 			font-size: var(--sl-text-sm);
 		}
 
-		thead {
+		.catalogue thead {
 			display: none;
 		}
 
-		tbody,
-		tr {
+		.catalogue tbody,
+		.catalogue tr {
 			display: block;
 		}
 
 		/* `display: block` above outranks the user agent's `[hidden]` rule, which
 		   is what the filter sets, so without this a search that matched three
 		   rows still showed all two hundred and fifty-eight of them on a phone. */
-		tbody tr[hidden] {
+		.catalogue tbody tr[hidden] {
 			display: none;
 		}
 
-		tbody tr {
+		.catalogue tbody tr {
 			margin-block-end: 0.75rem;
 			padding: 0.6rem 0.75rem;
 			border: 1px solid var(--sl-color-gray-5);
@@ -1144,25 +1206,21 @@ const textColumns = (
 		}
 
 		/* The stripe moves to the card, because a card is the row now. */
-		tbody tr:nth-child(even) > * {
+		.catalogue tbody tr:nth-child(even) > * {
 			background: none;
 		}
 
-		tbody tr:nth-child(even) {
-			background: color-mix(
-				in srgb,
-				var(--sl-color-gray-5) 25%,
-				var(--sl-color-black)
-			);
+		.catalogue tbody tr:nth-child(even) {
+			background: color-mix(in srgb, var(--sl-color-gray-5) 25%, var(--sl-color-black));
 		}
 
-		th,
-		td {
+		.catalogue th,
+		.catalogue td {
 			padding: 0.15rem 0;
 			border-block-end: none;
 		}
 
-		.name {
+		.catalogue tbody th {
 			position: static;
 			display: block;
 			min-width: 0;
@@ -1174,13 +1232,15 @@ const textColumns = (
 			font-weight: 600;
 		}
 
-		.wrap,
-		.source .wrap,
-		.conditions .wrap {
+		.catalogue tbody th > span:first-child,
+		.catalogue .per > span,
+		.catalogue .model > span,
+		.catalogue .conditions > span,
+		.catalogue tbody td:last-child > span {
 			max-width: none;
 		}
 
-		td {
+		.catalogue td {
 			display: flex;
 			align-items: baseline;
 			text-align: end;
@@ -1189,7 +1249,7 @@ const textColumns = (
 		/* A row of a materials table is mostly empty: no book prints all
 		   fourteen quantities for one specimen, and a card that listed the
 		   twelve a row does not have would bury the three it does. */
-		td[data-empty] {
+		.catalogue td:empty {
 			display: none;
 		}
 
@@ -1197,8 +1257,7 @@ const textColumns = (
 		   keeps the number and its unit together there: `space-between` on
 		   three items would have put the unit on the edge and the number in
 		   the middle of the card. */
-		td::before {
-			content: attr(data-label);
+		.catalogue td::before {
 			flex: 0 1 auto;
 			margin-inline-end: auto;
 			padding-inline-end: 1rem;
@@ -1207,18 +1266,14 @@ const textColumns = (
 		}
 
 		/* In the table the unit is in the heading, which the card does not
-		   have, so it rides with the number. It hangs off the cell and not
-		   off the number inside it, because `attr()` reads the element the
-		   pseudo-element belongs to and nothing above it, and the unit is an
-		   attribute of the cell. */
-		td[data-unit]::after {
-			content: '\00a0' attr(data-unit);
+		   have, so it rides with the number. */
+		.catalogue td::after {
 			color: var(--sl-color-gray-3);
 			font-style: normal;
 			white-space: nowrap;
 		}
 
-		.note {
+		.catalogue .note {
 			display: block;
 			margin-block-start: 0.3rem;
 			color: var(--sl-color-gray-3);
@@ -1226,18 +1281,70 @@ const textColumns = (
 			font-weight: 400;
 		}
 
-		.annotated::after {
+		.catalogue tbody th:has(> .note)::after {
 			content: none;
 		}
 
-		.source {
+		.catalogue tbody td:last-child {
 			display: block;
 			margin-block-start: 0.35rem;
 			text-align: start;
 		}
 
-		.source::before {
+		.catalogue tbody td:last-child::before {
 			display: block;
 		}
+
+		/* The label and the unit of each cell, by its place in the row. The
+		   table sets the properties for the columns it has; a cell whose
+		   column has no unit takes `none` and prints nothing after its
+		   number. LABELLED_COLUMNS in the frontmatter is the last place
+		   written here, and a catalogue wider than that stops the build. */
+		.catalogue td:nth-child(2)::before { content: var(--l2, none); }
+		.catalogue td:nth-child(2)::after { content: var(--u2, none); }
+		.catalogue td:nth-child(3)::before { content: var(--l3, none); }
+		.catalogue td:nth-child(3)::after { content: var(--u3, none); }
+		.catalogue td:nth-child(4)::before { content: var(--l4, none); }
+		.catalogue td:nth-child(4)::after { content: var(--u4, none); }
+		.catalogue td:nth-child(5)::before { content: var(--l5, none); }
+		.catalogue td:nth-child(5)::after { content: var(--u5, none); }
+		.catalogue td:nth-child(6)::before { content: var(--l6, none); }
+		.catalogue td:nth-child(6)::after { content: var(--u6, none); }
+		.catalogue td:nth-child(7)::before { content: var(--l7, none); }
+		.catalogue td:nth-child(7)::after { content: var(--u7, none); }
+		.catalogue td:nth-child(8)::before { content: var(--l8, none); }
+		.catalogue td:nth-child(8)::after { content: var(--u8, none); }
+		.catalogue td:nth-child(9)::before { content: var(--l9, none); }
+		.catalogue td:nth-child(9)::after { content: var(--u9, none); }
+		.catalogue td:nth-child(10)::before { content: var(--l10, none); }
+		.catalogue td:nth-child(10)::after { content: var(--u10, none); }
+		.catalogue td:nth-child(11)::before { content: var(--l11, none); }
+		.catalogue td:nth-child(11)::after { content: var(--u11, none); }
+		.catalogue td:nth-child(12)::before { content: var(--l12, none); }
+		.catalogue td:nth-child(12)::after { content: var(--u12, none); }
+		.catalogue td:nth-child(13)::before { content: var(--l13, none); }
+		.catalogue td:nth-child(13)::after { content: var(--u13, none); }
+		.catalogue td:nth-child(14)::before { content: var(--l14, none); }
+		.catalogue td:nth-child(14)::after { content: var(--u14, none); }
+		.catalogue td:nth-child(15)::before { content: var(--l15, none); }
+		.catalogue td:nth-child(15)::after { content: var(--u15, none); }
+		.catalogue td:nth-child(16)::before { content: var(--l16, none); }
+		.catalogue td:nth-child(16)::after { content: var(--u16, none); }
+		.catalogue td:nth-child(17)::before { content: var(--l17, none); }
+		.catalogue td:nth-child(17)::after { content: var(--u17, none); }
+		.catalogue td:nth-child(18)::before { content: var(--l18, none); }
+		.catalogue td:nth-child(18)::after { content: var(--u18, none); }
+		.catalogue td:nth-child(19)::before { content: var(--l19, none); }
+		.catalogue td:nth-child(19)::after { content: var(--u19, none); }
+		.catalogue td:nth-child(20)::before { content: var(--l20, none); }
+		.catalogue td:nth-child(20)::after { content: var(--u20, none); }
+		.catalogue td:nth-child(21)::before { content: var(--l21, none); }
+		.catalogue td:nth-child(21)::after { content: var(--u21, none); }
+		.catalogue td:nth-child(22)::before { content: var(--l22, none); }
+		.catalogue td:nth-child(22)::after { content: var(--u22, none); }
+		.catalogue td:nth-child(23)::before { content: var(--l23, none); }
+		.catalogue td:nth-child(23)::after { content: var(--u23, none); }
+		.catalogue td:nth-child(24)::before { content: var(--l24, none); }
+		.catalogue td:nth-child(24)::after { content: var(--u24, none); }
 	}
 </style>

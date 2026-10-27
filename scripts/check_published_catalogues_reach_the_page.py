@@ -2,8 +2,9 @@
 """Every published catalogue reaches the page that publishes catalogues.
 
 A ``PUBLISHED_*`` mapping is rows this library read off a printed page and
-kept. The page at ``/reference/catalogues/`` exists to show them, and
-``scripts/generate_catalogue_data.py`` is what carries them there. Nothing
+kept. The pages under ``/reference/catalogues/`` exist to show them, one per
+catalogue, and ``scripts/generate_catalogue_data.py`` is what carries them
+there. Nothing
 made the two agree, so a catalogue could be written, tested, documented in the
 API reference and still be invisible to every reader who is not reading Python:
 the rows are in the package, the page does not know they exist, and no gate
@@ -109,10 +110,11 @@ def main() -> int:
             print(f"  {name}  <- {module}", file=sys.stderr)
         print(
             "  -> add each one to scripts/generate_catalogue_data.py with its "
-            "columns, give it a section in both languages of "
-            "site/src/content/docs/reference/catalogues.mdx, and add its key to "
-            "the catalogue union in site/src/components/Catalogues.astro. A "
-            "catalogue nobody can see is a catalogue nobody has.",
+            "columns, show it on a page under "
+            "site/src/content/docs/reference/catalogues/ in both languages, "
+            "listed in catalogueSlugs in site/src/data/topics.mjs, and add its "
+            "key to the catalogue union in site/src/components/Catalogues.astro. "
+            "A catalogue nobody can see is a catalogue nobody has.",
             file=sys.stderr,
         )
         return 1

@@ -1,0 +1,32 @@
+---
+title: "Catálogo de capas elásticas"
+description: "Quince capas elásticas sobre las que flota un suelo, cada una con la rigidez dinámica por unidad de superficie medida sobre ella, su densidad y su espesor."
+sidebar:
+  label: "Capas elásticas"
+---
+
+import Catalogues from '../../../../../components/Catalogues.astro';
+import CatalogueFinder from '../../../../../components/CatalogueFinder.astro';
+
+<CatalogueFinder lang="es" />
+
+Quince capas elásticas, que es sobre lo que flota un suelo flotante, cada una
+con la rigidez dinámica por unidad de superficie medida sobre ella según la ISO
+9052-1. Es una tabla delgada y con poco que interpretar: una rigidez, una
+densidad y un espesor, y las dos últimas están porque cuatro filas de lana de
+roca y cuatro de lana de vidrio no se diferencian en nada más.
+
+La rigidez es la que imprime la cabecera de la tabla, $s'$, la de la capa
+instalada, que es la que toma la frecuencia natural de un suelo, y no la
+aparente $s'_\mathrm{t}$ de la probeta de ensayo, que en una capa porosa deja
+fuera el aire de sus poros.
+
+Lo que una fila no es es un producto. Un suelo flotante se diseña con la
+rigidez que declara el fabricante del material que se va a poner de verdad;
+esto son probetas que alguien midió y publicó en un apéndice, y sirven para
+saber qué orden de magnitud esperar cuando no hay valor declarado delante, o
+para ver cuánto se mueve la rigidez cuando la misma lana se pone al doble de
+densidad. Once son medidas del propio autor y las cuatro de espuma reciclada se
+acreditan a un artículo suyo.
+
+<Catalogues catalogue="resilientLayers" lang="es" />

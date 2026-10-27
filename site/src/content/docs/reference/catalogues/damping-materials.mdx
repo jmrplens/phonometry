@@ -1,0 +1,40 @@
+---
+title: "Catalogue of damping materials"
+description: "Seventeen commercial damping materials: the peak loss factor, the temperature of the peak at 10 Hz, 100 Hz and 1 kHz, and the storage and loss moduli."
+sidebar:
+  label: "Damping materials"
+---
+
+import Catalogues from '../../../../components/Catalogues.astro';
+import CatalogueFinder from '../../../../components/CatalogueFinder.astro';
+
+<CatalogueFinder lang="en" />
+
+Seventeen commercial damping treatments, and one thing about them that makes
+this a different table from the [solids
+catalogue](/phonometry/reference/catalogues/solids/): a loss factor here is not
+a number. Every loss factor in the solids catalogue is a single figure, because
+for a metal it hardly moves. For a polymer worked near its glass transition it
+moves by two orders of magnitude with temperature and with frequency, and the
+peak is all these pages print. So the peak arrives with three temperatures
+beside it, one per frequency the table prints a column for: where the material
+peaks when it is worked at 10 Hz, at 100 Hz and at 1 kHz. A treatment whose
+peak sits at 20 °C at 100 Hz is doing nothing for you at 100 Hz on a winter
+morning, and a row read without its temperatures says the opposite of what it
+holds.
+
+The three storage moduli are the same argument again. One is the stiff end, at
+low temperature or high frequency, one is the soft end, and one is the modulus
+that applies in the band where the loss factor peaks, which is the only one of
+the three that belongs beside the peak. The fourth column is the loss modulus,
+the imaginary part, which the chapter gives as the product of the other two and
+is the cheapest check there is on a row. The page is in degrees Fahrenheit and
+pounds per square inch, so every temperature and every modulus here was
+converted and is marked as converted, with the page's figure and its unit
+beside it. The loss factor is the one column that was not: it has
+no units, so it is served exactly as printed. The page says in a footnote that the values were read off published
+curves and that damping data should come from the supplier of the material;
+three of its cells are corrupted in the printing, are registered in this
+project's errata and are left empty here rather than guessed at.
+
+<Catalogues catalogue="damping" lang="en" />

@@ -29,7 +29,9 @@
 // beside the select, so a keyboard reader can walk the list by arrow or by
 // letter without leaving the page; it filters the rows by name (on the
 // Spanish page by the book's English name too) and by published table, and
-// says so when nothing is left; the marks still open their explanation on a
+// says so when nothing is left; every word its filter suggests, on every
+// catalogue page and in both languages, finds a row of that catalogue
+// through the finder itself; the marks still open their explanation on a
 // click; and a phone still gets each row as a card, labelled by its column,
 // with the cells the row does not have left out. A link to a section of the
 // old single page has to land on that catalogue's page.
@@ -797,6 +799,45 @@ for (const { path, lang, label, steel, english, table, jump } of [
 		areasKept: byTable[1] > 0,
 	}, { sections: 2, aboveFirst: 'absorption', some: true, areasKept: true });
 	await page.close();
+}
+
+// Every word a filter suggests finds a row of its own catalogue, on every
+// catalogue page and in both languages. A suggestion that finds nothing tells
+// the reader the filter is broken. Each word is typed into the finder and the
+// rows it leaves are counted, so what is searched is what the browser
+// searches: the cells a row shows, the key of its table and the words it
+// carries in `data-also`, and not a list of the fields the generator writes.
+// A page with two tables suggests the words of its first one; the second
+// keeps its own, and they have to find its rows too.
+for (const slug of catalogueSlugs) {
+	for (const path of [`/${slug}/`, `/es/${slug}/`]) {
+		const page = await open(path);
+		const got = await page.evaluate(() => {
+			const search = document.querySelector('[data-search]');
+			const sections = [...document.querySelectorAll('[data-catalogue]')];
+			if (!search || sections.length === 0) return { shown: false, lost: [] };
+			const lost = [];
+			let words = 0;
+			for (const section of sections) {
+				for (const word of (section.dataset.placeholder ?? '').split(', ').filter(Boolean)) {
+					words += 1;
+					search.value = word;
+					search.dispatchEvent(new Event('input'));
+					if (![...section.querySelectorAll('tbody tr')].some((row) => !row.hidden)) {
+						lost.push(`${section.dataset.catalogue}: "${word}"`);
+					}
+				}
+			}
+			search.value = '';
+			search.dispatchEvent(new Event('input'));
+			return {
+				shown: words > 0 && search.placeholder === sections[0].dataset.placeholder,
+				lost,
+			};
+		});
+		expect(`${path}: every word the filter suggests finds a row of its catalogue`, got, { shown: true, lost: [] });
+		await page.close();
+	}
 }
 
 // The overview: the finder chooses a catalogue and sits above the list that

@@ -100,8 +100,9 @@ const { catalogue: section, lang = 'en' } = Astro.props;
 // words the generator attached to every row as well as the book's own English,
 // so its suggestions are Spanish; they were English, on purpose, while the
 // Spanish page matched only the book's words and "hierba" found nothing.
-// tests/test_catalogue_data_generator.py checks that every word of every
-// suggestion still finds a row in its own catalogue, in each language.
+// scripts/check-reference-pages.mjs types every word of every suggestion into
+// the finder of each catalogue page, in each language, and checks that it
+// still finds a row of its own catalogue.
 const copy = {
 	en: {
 		search: 'Filter by material',

@@ -487,7 +487,7 @@ PERCEIVED_AFFECTIVE_QUALITY_ATTRIBUTES = ('pleasant', 'chaotic', 'vibrant', 'une
 
 ```python
 pleasantness_eventfulness(
-    scale_values: Mapping[str, ArrayLike] | ArrayLike,
+    scale_values: Mapping[Literal['pleasant', 'chaotic', 'vibrant', 'uneventful', 'calm', 'annoying', 'eventful', 'monotonous'], ArrayLike] | ArrayLike,
     *,
     sites: ArrayLike | Sequence[object] | None = None,
     central_tendency: Literal['median', 'mean'] = 'median',

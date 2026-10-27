@@ -233,9 +233,15 @@ __all__ = [
 # Clause 4: classification, designation and coding
 # ---------------------------------------------------------------------------
 
+#: The letters of the four positions of the code, by position (Clause 4).
+TransducerPrinciple = Literal["D", "E", "F", "M", "P", "S"]
+EarphoneType = Literal["C", "E", "H", "I", "M", "S", "T"]
+AcousticCoupling = Literal["L", "S"]
+BackRadiation = Literal["C", "O"]
+
 #: The first letter of the code, the principle of the transducer
 #: (IEC 60268-7:2010 Clause 4, PDF page 11, printed page 9).
-TRANSDUCER_PRINCIPLES: Mapping[str, str] = MappingProxyType(
+TRANSDUCER_PRINCIPLES: Mapping[TransducerPrinciple, str] = MappingProxyType(
     {
         "D": "electrodynamic (moving coil)",
         "E": "electret (self-polarizing)",
@@ -247,7 +253,7 @@ TRANSDUCER_PRINCIPLES: Mapping[str, str] = MappingProxyType(
 )
 
 #: The second letter, the type of earphone (Clause 4).
-EARPHONE_TYPES: Mapping[str, str] = MappingProxyType(
+EARPHONE_TYPES: Mapping[EarphoneType, str] = MappingProxyType(
     {
         "C": "circumaural",
         "E": "intra-concha",
@@ -260,7 +266,7 @@ EARPHONE_TYPES: Mapping[str, str] = MappingProxyType(
 )
 
 #: The third letter, the intended acoustic coupling to the ear canal (Clause 4).
-ACOUSTIC_COUPLINGS: Mapping[str, str] = MappingProxyType(
+ACOUSTIC_COUPLINGS: Mapping[AcousticCoupling, str] = MappingProxyType(
     {
         "L": "acoustically open (controlled leakage)",
         "S": "acoustically closed (minimum leakage)",
@@ -269,7 +275,7 @@ ACOUSTIC_COUPLINGS: Mapping[str, str] = MappingProxyType(
 
 #: The fourth letter, the intended radiation to the external environment
 #: (Clause 4, with 3.14 and 3.15).
-BACK_RADIATIONS: Mapping[str, str] = MappingProxyType(
+BACK_RADIATIONS: Mapping[BackRadiation, str] = MappingProxyType(
     {
         "C": "closed-back",
         "O": "open-back",
@@ -327,13 +333,14 @@ def impedance_code(impedance_ohm: float) -> str:
     return f"{mantissa:02d}R{exponent}"
 
 
-def _require_letter(value: str, name: str, table: Mapping[str, str]) -> str:
-    """A code letter that is one of ``table``'s keys."""
-    if value not in table:
-        options = ", ".join(sorted(table))
-        msg = f"'{name}' must be one of {options}; got {value!r}."
-        raise ValueError(msg)
-    return value
+def _require_letter[L: str](value: str, name: str, table: Mapping[L, str]) -> L:
+    """A code letter that is one of ``table``'s keys, as the key it is."""
+    for letter in table:
+        if letter == value:
+            return letter
+    options = ", ".join(sorted(table))
+    msg = f"'{name}' must be one of {options}; got {value!r}."
+    raise ValueError(msg)
 
 
 @dataclass(frozen=True)
@@ -353,10 +360,10 @@ class HeadphoneClassification(RichDisplay):
     :ivar n_channels: The number of channels, 1 to 9.
     """
 
-    principle: str
-    earphone_type: str
-    coupling: str
-    radiation: str
+    principle: TransducerPrinciple
+    earphone_type: EarphoneType
+    coupling: AcousticCoupling
+    radiation: BackRadiation
     impedance_ohm: float
     n_channels: int
 
@@ -421,10 +428,10 @@ def parse_classification_code(code: str) -> HeadphoneClassification:
         match.groups()
     )
     return HeadphoneClassification(
-        principle=principle,
-        earphone_type=earphone,
-        coupling=coupling,
-        radiation=radiation,
+        principle=_require_letter(principle, "principle", TRANSDUCER_PRINCIPLES),
+        earphone_type=_require_letter(earphone, "earphone_type", EARPHONE_TYPES),
+        coupling=_require_letter(coupling, "coupling", ACOUSTIC_COUPLINGS),
+        radiation=_require_letter(radiation, "radiation", BACK_RADIATIONS),
         impedance_ohm=float(int(mantissa) * 10 ** int(exponent)),
         n_channels=int(n_channels),
     )

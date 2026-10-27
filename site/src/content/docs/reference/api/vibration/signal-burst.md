@@ -260,7 +260,7 @@ SignalBurstVerification(
     weighting: Literal[Literal['Wb', 'Wc', 'Wd', 'We', 'Wf', 'Wh', 'Wj', 'Wk', 'Wm'], 'band-limiting'],
     amplitude_m_s2: float,
     cycle_counts: tuple[int | None, ...],
-    quantities: tuple[str, ...],
+    quantities: tuple[Literal['rms', 'vdv', 'mtvv_linear', 'mtvv_exponential', 'msdv'], ...],
     measured: NDArray[np.float64],
 )
 ```

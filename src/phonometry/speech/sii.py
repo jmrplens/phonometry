@@ -956,7 +956,7 @@ class StandardSpeechSpectrum(OwnsArrays):
     """
 
     frequencies: np.ndarray
-    vocal_efforts: tuple[str, ...]
+    vocal_efforts: tuple[VocalEffort, ...]
     levels: np.ndarray
 
     def __post_init__(self) -> None:

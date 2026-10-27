@@ -104,7 +104,7 @@ duct_path(
     criterion: Literal['NC', 'RC'] = 'NC',
     target: float | None = None,
     self_noise_floor: float | None = 0.0,
-    section: Mapping[str, float] | None = None,
+    section: Mapping[Literal['diameter_m', 'width_m', 'height_m', 'area'], float] | None = None,
     flow_velocity: float = 0.0,
     speed_of_sound: float = 343.0,
     label: str = 'Duct path',

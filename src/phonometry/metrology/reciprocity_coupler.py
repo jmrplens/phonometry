@@ -1787,7 +1787,7 @@ class CouplerCheck(RichDisplay):
     lowest_x: float | None
     lowest_frequency_hz: float
     _: KW_ONLY
-    heat_conduction_method: str
+    heat_conduction_method: Method
     temperature_c: float
     static_pressure_pa: float
     relative_humidity_percent: float

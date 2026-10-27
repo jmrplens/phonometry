@@ -53,7 +53,10 @@ if TYPE_CHECKING:
         SoundscapeCorrelation,
         SourceRanking,
     )
-    from ..environment.assessment.soundscape_binaural import BinauralIndicators
+    from ..environment.assessment.soundscape_binaural import (
+        BinauralIndicators,
+        BinauralRow,
+    )
     from ..environment.assessment.spain import (
         ActivityAssessment,
         TonalCorrectionResult,
@@ -2734,7 +2737,7 @@ def plot_binaural_indicators(
     result: BinauralIndicators,
     ax: Axes | None = None,
     *,
-    parameter: str,
+    parameter: BinauralRow,
     language: Language = "en",
     **kwargs: Any,
 ) -> Axes:

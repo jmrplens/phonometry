@@ -864,7 +864,7 @@ OCTAVE_PAIRS_HZ = {'low': (125.0, 250.0), 'mid': (500.0, 1000.0), 'high': (2000.
 
 ```python
 PerceptibleDifference(
-    symbol: str,
+    symbol: Literal['G', 'EDT', 'C80', 'D50', 'Ts', 'J_LF', 'J_LFC', 'L_J'],
     first: NDArray[np.float64],
     second: NDArray[np.float64],
 )

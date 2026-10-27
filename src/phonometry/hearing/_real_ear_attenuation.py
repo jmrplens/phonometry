@@ -83,6 +83,10 @@ from .._internal.types import as_float_or_array
 from .._internal.validation import require_scalar
 from .hearing_protectors import _octave_axis
 
+# Imported to run, not only to type: typing.get_type_hints resolves the
+# positions field of REATSoundFieldCheck in this module's namespace.
+from .sound_field_audiometry import SoundFieldPosition  # noqa: TC001
+
 if TYPE_CHECKING:
     from collections.abc import Mapping
 
@@ -248,7 +252,14 @@ _LEFT_RIGHT_TOLERANCE_DB = 3.0
 #: 4.2.2 b): the directionality is evaluated from this test signal up.
 _DIRECTIONALITY_FROM_HZ = 500.0
 #: 4.2.2 a): the six positions, two on each of the three axes.
-_POSITIONS: tuple[str, ...] = ("front", "back", "left", "right", "up", "down")
+_POSITIONS: tuple[SoundFieldPosition, ...] = (
+    "front",
+    "back",
+    "left",
+    "right",
+    "up",
+    "down",
+)
 
 
 def _band_axis(frequencies: ArrayLike | None, count: int, owner: str) -> np.ndarray:
@@ -824,7 +835,7 @@ class REATSoundFieldCheck(OwnsArrays):
     left_right_difference: np.ndarray
     rotation_variation_db: np.ndarray
     free_field_rejection: float | None
-    positions: tuple[str, ...] = _POSITIONS
+    positions: tuple[SoundFieldPosition, ...] = _POSITIONS
 
     def __post_init__(self) -> None:
         """Reject a microphone Table 1 calls unsuitable.
@@ -930,7 +941,7 @@ class REATSoundFieldCheck(OwnsArrays):
 
 
 def check_reat_sound_field(
-    position_levels: Mapping[str, ArrayLike],
+    position_levels: Mapping[SoundFieldPosition, ArrayLike],
     reference_levels: ArrayLike,
     *,
     rotation_levels: ArrayLike | None = None,

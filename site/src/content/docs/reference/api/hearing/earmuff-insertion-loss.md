@@ -126,7 +126,7 @@ not a condition judged here.
 
 ```python
 check_random_incidence_field(
-    position_levels: Mapping[str, ArrayLike],
+    position_levels: Mapping[Literal['front', 'back', 'left', 'right', 'up', 'down'], ArrayLike],
     reference_levels: ArrayLike,
     *,
     directional_levels: ArrayLike | None = None,

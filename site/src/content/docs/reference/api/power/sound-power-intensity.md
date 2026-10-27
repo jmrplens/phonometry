@@ -594,7 +594,7 @@ SoundPowerIntensityResult(
     pressure_residual_index: np.ndarray | None,
     surface_area: float,
     fraction: Literal[1, 3],
-    grade: str,
+    grade: Literal['engineering', 'survey'],
     repeatability_limit_db: np.ndarray | None = None,
 )
 ```

@@ -166,7 +166,9 @@ SPB_ROAD_SPEED_CATEGORIES: tuple[RoadSpeedCategory, ...] = ("low", "medium", "hi
 
 #: Table 1: the reference speed of each vehicle category in each road speed
 #: category, in kilometres per hour.
-SPB_REFERENCE_SPEEDS_KMH: Mapping[str, Mapping[str, float]] = MappingProxyType(
+SPB_REFERENCE_SPEEDS_KMH: Mapping[
+    RoadSpeedCategory, Mapping[VehicleCategory, float]
+] = MappingProxyType(
     {
         "low": MappingProxyType({"1": 50.0, "2a": 50.0, "2b": 50.0}),
         "medium": MappingProxyType({"1": 80.0, "2a": 70.0, "2b": 70.0}),
@@ -177,12 +179,14 @@ SPB_REFERENCE_SPEEDS_KMH: Mapping[str, Mapping[str, float]] = MappingProxyType(
 #: Table 1: the weighting factor :math:`W_x` of each vehicle category in each
 #: road speed category, the assumed proportion of the category in the traffic.
 #: Each column adds up to 1.
-SPB_WEIGHTING_FACTORS: Mapping[str, Mapping[str, float]] = MappingProxyType(
-    {
-        "low": MappingProxyType({"1": 0.900, "2a": 0.075, "2b": 0.025}),
-        "medium": MappingProxyType({"1": 0.800, "2a": 0.100, "2b": 0.100}),
-        "high": MappingProxyType({"1": 0.700, "2a": 0.075, "2b": 0.225}),
-    }
+SPB_WEIGHTING_FACTORS: Mapping[RoadSpeedCategory, Mapping[VehicleCategory, float]] = (
+    MappingProxyType(
+        {
+            "low": MappingProxyType({"1": 0.900, "2a": 0.075, "2b": 0.025}),
+            "medium": MappingProxyType({"1": 0.800, "2a": 0.100, "2b": 0.100}),
+            "high": MappingProxyType({"1": 0.700, "2a": 0.075, "2b": 0.225}),
+        }
+    )
 )
 
 #: 7.3: the fewest vehicles to be measured for surface classification, by
@@ -194,21 +198,21 @@ SPB_MIN_VEHICLE_COUNTS: Mapping[str, int] = MappingProxyType(
 #: 9.3: how many standard deviations of the measured speed the reference speed
 #: may lie from the measured mean speed, one and a half for cars and one for
 #: the heavy vehicles.
-SPB_SPEED_WINDOW_STANDARD_DEVIATIONS: Mapping[str, float] = MappingProxyType(
-    {"1": 1.5, "2a": 1.0, "2b": 1.0}
+SPB_SPEED_WINDOW_STANDARD_DEVIATIONS: Mapping[VehicleCategory, float] = (
+    MappingProxyType({"1": 1.5, "2a": 1.0, "2b": 1.0})
 )
 
 #: Table 2: the standard deviation of individual vehicles about
 #: :math:`L_\mathrm{veh}`, with the speed effect removed, expected for the
 #: "medium" and "high" road speed categories, in decibels.
-SPB_VEHICLE_STANDARD_DEVIATIONS_DB: Mapping[str, float] = MappingProxyType(
+SPB_VEHICLE_STANDARD_DEVIATIONS_DB: Mapping[VehicleCategory, float] = MappingProxyType(
     {"1": 1.5, "2a": 2.0, "2b": 2.0}
 )
 
 #: Table 2: the 95 % confidence interval around :math:`L_\mathrm{veh}` those
 #: standard deviations leave, in decibels, for 100 cars and 40 heavy vehicles
 #: of each type (the NOTE under the table).
-SPB_CONFIDENCE_INTERVALS_DB: Mapping[str, float] = MappingProxyType(
+SPB_CONFIDENCE_INTERVALS_DB: Mapping[VehicleCategory, float] = MappingProxyType(
     {"1": 0.3, "2a": 0.7, "2b": 0.7}
 )
 
@@ -222,22 +226,24 @@ SPB_REFERENCE_AIR_TEMPERATURE_C: float = 20.0
 #: and 5 years old, maximum chippings 12, 14, 11 and 16 mm) and B1 to B3 stone
 #: mastic asphalt (4, 3 and 7 years, 12, 14 and 16 mm). An example, not a
 #: reference the standard sets.
-SPB_ANNEX_D_SURFACE_LEVELS: Mapping[str, Mapping[str, float]] = MappingProxyType(
-    {
-        "A1": MappingProxyType({"1": 76.6, "2a": 81.1, "2b": 84.1}),
-        "A2": MappingProxyType({"1": 75.9, "2a": 80.0, "2b": 83.0}),
-        "A3": MappingProxyType({"1": 76.4, "2a": 81.8, "2b": 84.0}),
-        "A4": MappingProxyType({"1": 77.2, "2a": 81.5, "2b": 84.9}),
-        "B1": MappingProxyType({"1": 76.1, "2a": 81.0, "2b": 84.4}),
-        "B2": MappingProxyType({"1": 76.4, "2a": 80.4, "2b": 83.3}),
-        "B3": MappingProxyType({"1": 76.4, "2a": 81.0, "2b": 84.1}),
-    }
+SPB_ANNEX_D_SURFACE_LEVELS: Mapping[str, Mapping[VehicleCategory, float]] = (
+    MappingProxyType(
+        {
+            "A1": MappingProxyType({"1": 76.6, "2a": 81.1, "2b": 84.1}),
+            "A2": MappingProxyType({"1": 75.9, "2a": 80.0, "2b": 83.0}),
+            "A3": MappingProxyType({"1": 76.4, "2a": 81.8, "2b": 84.0}),
+            "A4": MappingProxyType({"1": 77.2, "2a": 81.5, "2b": 84.9}),
+            "B1": MappingProxyType({"1": 76.1, "2a": 81.0, "2b": 84.4}),
+            "B2": MappingProxyType({"1": 76.4, "2a": 80.4, "2b": 83.3}),
+            "B3": MappingProxyType({"1": 76.4, "2a": 81.0, "2b": 84.1}),
+        }
+    )
 )
 
 #: Annex D: the "Average surface (Normalized reference case)" row, the vehicle
 #: sound levels of the example's fictitious reference surface for the medium
 #: speed range, in decibels.
-SPB_NORMALIZED_REFERENCE_LEVELS: Mapping[str, float] = MappingProxyType(
+SPB_NORMALIZED_REFERENCE_LEVELS: Mapping[VehicleCategory, float] = MappingProxyType(
     {"1": 76.4, "2a": 81.0, "2b": 84.0}
 )
 
@@ -254,7 +260,7 @@ _CONFIDENCE_LEVEL = 0.95
 _WEIGHT_SUM_TOLERANCE = 1e-9
 
 #: The heavy vehicles, which 7.3 also counts together.
-_HEAVY_CATEGORIES: tuple[str, ...] = ("2a", "2b")
+_HEAVY_CATEGORIES: tuple[VehicleCategory, ...] = ("2a", "2b")
 
 
 def _round_tenth(value: float) -> float:
@@ -268,7 +274,9 @@ def _round_tenth(value: float) -> float:
     return float(round_half_up(value, 1))
 
 
-def _reported_levels(levels: Mapping[str, float]) -> dict[str, float]:
+def _reported_levels(
+    levels: Mapping[VehicleCategory, float],
+) -> dict[VehicleCategory, float]:
     """Three vehicle sound levels as 9.2 reports them, to one decimal."""
     return {key: _round_tenth(value) for key, value in levels.items()}
 
@@ -291,7 +299,9 @@ def _vehicle_category(vehicle_category: object) -> VehicleCategory:
     return key
 
 
-def _per_category(values: Mapping[str, float], name: str) -> dict[str, float]:
+def _per_category(
+    values: Mapping[VehicleCategory, float], name: str
+) -> dict[VehicleCategory, float]:
     """Read a mapping holding exactly one finite value per vehicle category."""
     keys = {_vehicle_category(key) for key in values}
     if keys != set(SPB_VEHICLE_CATEGORIES) or len(values) != len(keys):
@@ -304,8 +314,9 @@ def _per_category(values: Mapping[str, float], name: str) -> dict[str, float]:
 
 
 def _weights(
-    weighting_factors: Mapping[str, float] | None, road_speed_category: str
-) -> dict[str, float]:
+    weighting_factors: Mapping[VehicleCategory, float] | None,
+    road_speed_category: RoadSpeedCategory,
+) -> dict[VehicleCategory, float]:
     if weighting_factors is None:
         return dict(SPB_WEIGHTING_FACTORS[road_speed_category])
     weights = _per_category(weighting_factors, "weighting_factors")
@@ -323,8 +334,10 @@ def _weights(
 
 
 def _index_terms(
-    levels: Mapping[str, float], weights: Mapping[str, float], road: str
-) -> dict[str, float]:
+    levels: Mapping[VehicleCategory, float],
+    weights: Mapping[VehicleCategory, float],
+    road: RoadSpeedCategory,
+) -> dict[VehicleCategory, float]:
     """The three energy terms of the 9.5 sum, by vehicle category."""
     speeds = SPB_REFERENCE_SPEEDS_KMH[road]
     car_speed = speeds["1"]
@@ -335,10 +348,10 @@ def _index_terms(
 
 
 def statistical_pass_by_index(
-    vehicle_sound_levels: Mapping[str, float],
+    vehicle_sound_levels: Mapping[VehicleCategory, float],
     *,
     road_speed_category: RoadSpeedCategory,
-    weighting_factors: Mapping[str, float] | None = None,
+    weighting_factors: Mapping[VehicleCategory, float] | None = None,
 ) -> float:
     r"""The Statistical Pass-By Index of three vehicle sound levels, 9.5.
 
@@ -684,16 +697,16 @@ class StatisticalPassByResult(RichDisplay):
     """
 
     road_speed_category: RoadSpeedCategory
-    regressions: Mapping[str, PassByRegression]
-    weighting_factors: Mapping[str, float]
-    vehicle_sound_levels: Mapping[str, float]
+    regressions: Mapping[VehicleCategory, PassByRegression]
+    weighting_factors: Mapping[VehicleCategory, float]
+    vehicle_sound_levels: Mapping[VehicleCategory, float]
     index: float
-    corrected_vehicle_sound_levels: Mapping[str, float] | None = None
+    corrected_vehicle_sound_levels: Mapping[VehicleCategory, float] | None = None
     corrected_index: float | None = None
     reference_index: float | None = None
 
     @property
-    def reference_speeds_kmh(self) -> Mapping[str, float]:
+    def reference_speeds_kmh(self) -> Mapping[VehicleCategory, float]:
         """The Table 1 reference speeds the levels are normalized to, in km/h."""
         return SPB_REFERENCE_SPEEDS_KMH[self.road_speed_category]
 
@@ -716,7 +729,7 @@ class StatisticalPassByResult(RichDisplay):
         return all(reg.reference_speed_in_window for reg in self.regressions.values())
 
     @property
-    def reported_vehicle_sound_levels(self) -> Mapping[str, float]:
+    def reported_vehicle_sound_levels(self) -> Mapping[VehicleCategory, float]:
         r""":math:`L_\mathrm{veh}` of each category rounded to one decimal (9.2).
 
         The levels the index is computed from, and the ones a report prints.
@@ -724,7 +737,9 @@ class StatisticalPassByResult(RichDisplay):
         return MappingProxyType(_reported_levels(self.vehicle_sound_levels))
 
     @property
-    def reported_corrected_vehicle_sound_levels(self) -> Mapping[str, float] | None:
+    def reported_corrected_vehicle_sound_levels(
+        self,
+    ) -> Mapping[VehicleCategory, float] | None:
         """The temperature-corrected levels rounded to one decimal, or ``None``."""
         if self.corrected_vehicle_sound_levels is None:
             return None
@@ -832,9 +847,9 @@ def statistical_pass_by(
     max_levels: ArrayLike,
     *,
     road_speed_category: RoadSpeedCategory,
-    corrected_vehicle_sound_levels: Mapping[str, float] | None = None,
-    reference_levels: float | Mapping[str, float] | None = None,
-    weighting_factors: Mapping[str, float] | None = None,
+    corrected_vehicle_sound_levels: Mapping[VehicleCategory, float] | None = None,
+    reference_levels: float | Mapping[VehicleCategory, float] | None = None,
+    weighting_factors: Mapping[VehicleCategory, float] | None = None,
 ) -> StatisticalPassByResult:
     r"""The Statistical Pass-By method of ISO 11819-1 from a list of pass-bys.
 
@@ -894,7 +909,7 @@ def statistical_pass_by(
         raise ValueError(msg)
     keys = np.array([_vehicle_category(label) for label in labels], dtype=object)
     weights = _weights(weighting_factors, road)
-    regressions: dict[str, PassByRegression] = {}
+    regressions: dict[VehicleCategory, PassByRegression] = {}
     for category in SPB_VEHICLE_CATEGORIES:
         rows = keys == category
         regressions[category] = _fit(speeds[rows], levels[rows], category, road)
@@ -908,7 +923,7 @@ def statistical_pass_by(
             StatisticalPassByWarning,
             stacklevel=2,
         )
-    vehicle_levels: dict[str, float] = {
+    vehicle_levels: dict[VehicleCategory, float] = {
         key: regressions[key].vehicle_sound_level for key in SPB_VEHICLE_CATEGORIES
     }
     index = statistical_pass_by_index(
@@ -916,7 +931,7 @@ def statistical_pass_by(
         road_speed_category=road,
         weighting_factors=weights,
     )
-    corrected_levels: Mapping[str, float] | None = None
+    corrected_levels: Mapping[VehicleCategory, float] | None = None
     corrected_index: float | None = None
     if corrected_vehicle_sound_levels is not None:
         corrected_levels = MappingProxyType(
@@ -953,8 +968,8 @@ def statistical_pass_by(
 
 
 def normalized_reference_levels(
-    surface_levels: Mapping[str, Mapping[str, float]],
-) -> Mapping[str, float]:
+    surface_levels: Mapping[str, Mapping[VehicleCategory, float]],
+) -> Mapping[VehicleCategory, float]:
     r"""The vehicle sound levels of a normalized reference surface, 10.2 and Annex D.
 
     The normalized reference case is a fictitious surface whose

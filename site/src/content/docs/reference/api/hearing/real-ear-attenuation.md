@@ -238,7 +238,7 @@ The test signals at which the two measurements differ, in hertz.
 
 ```python
 check_reat_sound_field(
-    position_levels: Mapping[str, ArrayLike],
+    position_levels: Mapping[Literal['front', 'back', 'left', 'right', 'up', 'down'], ArrayLike],
     reference_levels: ArrayLike,
     *,
     rotation_levels: ArrayLike | None = None,
@@ -553,7 +553,7 @@ REATSoundFieldCheck(
     left_right_difference: np.ndarray,
     rotation_variation_db: np.ndarray,
     free_field_rejection: float | None,
-    positions: tuple[str, ...] = ('front', 'back', 'left', 'right', 'up', 'down'),
+    positions: tuple[Literal['front', 'back', 'left', 'right', 'up', 'down'], ...] = ('front', 'back', 'left', 'right', 'up', 'down'),
 )
 ```
 

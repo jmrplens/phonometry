@@ -409,7 +409,7 @@ CouplerCheck(
     lowest_x: float | None,
     lowest_frequency_hz: float,
     *,
-    heat_conduction_method: str,
+    heat_conduction_method: Literal['exact', 'approximation'],
     temperature_c: float,
     static_pressure_pa: float,
     relative_humidity_percent: float,

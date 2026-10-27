@@ -71,6 +71,7 @@ from ._write import (
     _SUBTYPE_BITS,
     _SUBTYPE_SPEC,
     _WAV_SUFFIXES,
+    Subtype,
     _quantise,
     _resolve_bext,
     _warn_clipped,
@@ -276,7 +277,7 @@ def convert(
     src: str | Path,
     dst: str | Path,
     *,
-    subtype: str | None = None,
+    subtype: Subtype | None = None,
     block_size: int | np.integer[Any] = 1 << 20,
 ) -> AudioFileInfo:
     """Convert a measurement file, keeping samples, bext and sidecar whole.

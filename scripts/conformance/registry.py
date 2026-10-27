@@ -517,9 +517,9 @@ def mask(
     )
 
 
-def record(
-    expected: Mapping[str, float],
-    computed: Mapping[str, float],
+def record[K: str](
+    expected: Mapping[K, float],
+    computed: Mapping[K, float],
     *,
     unit: str = "",
     label: str | None = None,
@@ -547,11 +547,19 @@ def record(
             f"{sorted(expected)}, computed {sorted(computed)}."
         )
         raise ValueError(msg)
-    expected = {name: float(value) for name, value in expected.items()}
-    computed = {name: float(value) for name, value in computed.items()}
-    differing = sum(1 for name in expected if expected[name] != computed[name])
-    expected_text = label or _pairs(expected, unit)
-    computed_text = computed_label or _pairs(computed, unit)
+    # The names may be a Literal vocabulary of the library (a mapping keyed by
+    # vehicle category); the outcome records them as the text they are.
+    expected_values: dict[str, float] = {
+        name: float(value) for name, value in expected.items()
+    }
+    computed_values: dict[str, float] = {
+        name: float(value) for name, value in computed.items()
+    }
+    differing = sum(
+        1 for name in expected_values if expected_values[name] != computed_values[name]
+    )
+    expected_text = label or _pairs(expected_values, unit)
+    computed_text = computed_label or _pairs(computed_values, unit)
     return Outcome(
         expected=expected_text,
         computed=computed_text,
@@ -562,8 +570,8 @@ def record(
         tolerance=Tolerance(ToleranceMode.ABSOLUTE, 0.0),
         deviation=Deviation(value=float(differing)),
         precision=0,
-        expected_data=Side(label=expected_text, record=expected),
-        computed_data=Side(label=computed_text, record=computed),
+        expected_data=Side(label=expected_text, record=expected_values),
+        computed_data=Side(label=computed_text, record=computed_values),
     )
 
 

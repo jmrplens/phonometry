@@ -548,7 +548,7 @@ InverseSquareLawResult(
     origin_fitted: bool,
     source_box_m: np.ndarray | None,
     traverse_names: tuple[str, ...],
-    traverse_targets: tuple[tuple[str, ...], ...],
+    traverse_targets: tuple[tuple[Literal['dihedral corner', 'trihedral corner', 'boundary center', 'closest boundary', 'unique features'], ...], ...],
     positions_m: tuple[np.ndarray, ...],
     distances: tuple[np.ndarray, ...],
     levels: tuple[np.ndarray, ...],
@@ -645,7 +645,7 @@ MicrophoneTraverse(
     monitor_levels: np.ndarray | None = None,
     background_levels: np.ndarray | None = None,
     name: str = '',
-    targets: tuple[str, ...] = (),
+    targets: tuple[Literal['dihedral corner', 'trihedral corner', 'boundary center', 'closest boundary', 'unique features'], ...] = (),
 )
 ```
 
@@ -676,7 +676,7 @@ MicrophoneTraverse.along(
     monitor_levels: ArrayLike | None = None,
     background_levels: ArrayLike | None = None,
     name: str = '',
-    targets: Sequence[str] = (),
+    targets: Sequence[Literal['dihedral corner', 'trihedral corner', 'boundary center', 'closest boundary', 'unique features']] = (),
 ) -> MicrophoneTraverse
 ```
 
@@ -741,7 +741,7 @@ frequencies.
 ```python
 SourceDirectionalityResult(
     frequencies: np.ndarray,
-    room: str,
+    room: Literal['anechoic', 'hemi-anechoic'],
     mean_level: np.ndarray,
     max_positive_deviation_db: np.ndarray,
     max_negative_deviation_db: np.ndarray,

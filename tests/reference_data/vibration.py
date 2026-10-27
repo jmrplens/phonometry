@@ -22,6 +22,7 @@ from scipy.special import erfc
 
 if TYPE_CHECKING:
     from phonometry.vibration.human.exposure import WeightingName
+    from phonometry.vibration.human.signal_burst import BurstQuantity
 
 # ---------------------------------------------------------------------------
 # PR-F human vibration (ISO 8041-1 / ISO 2631 / ISO 5349 / Directive 2002/44/EC).
@@ -1005,7 +1006,7 @@ ISO8041_2_TABLE6: dict[
 # for the "Band limiting" row, holding one (indication, tolerance %) pair per
 # printed column in printed order. The tolerance is typed per cell, as the
 # page prints it, rather than once per column.
-ISO8041_2_TABLE7_COLUMNS: tuple[str, ...] = ("rms",)
+ISO8041_2_TABLE7_COLUMNS: tuple[BurstQuantity, ...] = ("rms",)
 ISO8041_2_TABLE7: dict[tuple[str, int | None], tuple[tuple[float, float], ...]] = {
     ("band-limiting", 1): ((0.0448, 10.0),),
     ("band-limiting", 2): ((0.0633, 10.0),),
@@ -1023,7 +1024,7 @@ ISO8041_2_TABLE7: dict[tuple[str, int | None], tuple[tuple[float, float], ...]] 
 
 # Table 8 spans folios 13 and 14: the Wm row is the "Table 8 (continued)" at
 # the head of folio 14.
-ISO8041_2_TABLE8_COLUMNS: tuple[str, ...] = (
+ISO8041_2_TABLE8_COLUMNS: tuple[BurstQuantity, ...] = (
     "rms",
     "vdv",
     "mtvv_linear",
@@ -1085,7 +1086,7 @@ ISO8041_2_TABLE8: dict[tuple[str, int | None], tuple[tuple[float, float], ...]] 
     ("Wm", None): ((0.158, 10.0), (0.52, 12.0), (0.16, 10.0), (0.159, 10.0)),
 }
 
-ISO8041_2_TABLE9_COLUMNS: tuple[str, ...] = ("rms", "msdv")
+ISO8041_2_TABLE9_COLUMNS: tuple[BurstQuantity, ...] = ("rms", "msdv")
 ISO8041_2_TABLE9: dict[tuple[str, int | None], tuple[tuple[float, float], ...]] = {
     ("band-limiting", 1): ((0.0341, 10.0), (1.671, 10.0)),
     ("band-limiting", 2): ((0.0487, 10.0), (2.386, 10.0)),

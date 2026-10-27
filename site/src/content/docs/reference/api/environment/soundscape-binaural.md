@@ -77,7 +77,7 @@ binaural_indicators(
     *,
     calibration_factor: float | None = None,
     field: Literal['free', 'diffuse'] = 'free',
-    parameters: Sequence[str] = ('sound_pressure_level', 'loudness', 'sharpness', 'tonality', 'roughness', 'fluctuation_strength'),
+    parameters: Literal['sound_pressure_level', 'loudness', 'sharpness', 'tonality', 'roughness', 'fluctuation_strength'] | Sequence[Literal['sound_pressure_level', 'loudness', 'sharpness', 'tonality', 'roughness', 'fluctuation_strength']] = ('sound_pressure_level', 'loudness', 'sharpness', 'tonality', 'roughness', 'fluctuation_strength'),
 ) -> BinauralIndicators
 ```
 
@@ -131,7 +131,7 @@ BINAURAL_PARAMETERS = {'sound_pressure_level': BinauralParameter(parameter='Soun
 BinauralIndicators(
     metrics: Mapping[str, BinauralMetric],
     not_implemented: Mapping[str, str],
-    parameters: tuple[str, ...],
+    parameters: tuple[Literal['sound_pressure_level', 'loudness', 'sharpness', 'tonality', 'roughness', 'fluctuation_strength'], ...],
     fs: float,
     duration_s: float,
     field: Literal['free', 'diffuse'],
@@ -158,7 +158,7 @@ Annex D, Table D.1).
 BinauralIndicators.plot(
     ax: Axes | None = None,
     *,
-    parameter: str | None = None,
+    parameter: Literal['sound_pressure_level', 'loudness', 'sharpness', 'tonality', 'roughness', 'fluctuation_strength'] | None = None,
     language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes

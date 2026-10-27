@@ -21,6 +21,7 @@ import pathlib
 import sys
 import textwrap
 import typing
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 _SCRIPTS = str(pathlib.Path(__file__).resolve().parent.parent / "scripts")
@@ -29,10 +30,13 @@ if _SCRIPTS not in sys.path:
 
 import check_choice_literals as ccl
 
+from phonometry._internal.frozen import OwnsArrays
 from phonometry._internal.validation import require_choice
 from phonometry.filters.weighting import time_weighting
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable, Sequence
+
     import pytest
 
 
@@ -113,6 +117,208 @@ def _documented(mode: str) -> None:
 
     :param mode: ``"fast"`` or ``"slow"``.
     """
+
+
+#: The sides a collection of strings is checked against, below.
+_SIDES = ("left", "right", "top", "bottom")
+
+
+def _set_difference(sides: Sequence[str]) -> None:
+    unknown = set(sides) - set(_SIDES)
+    if unknown:
+        raise ValueError(sorted(unknown))
+
+
+def _subset(sides: Sequence[str]) -> bool:
+    return set(sides) <= set(_SIDES)
+
+
+def _issubset(sides: Sequence[str]) -> bool:
+    return set(sides).issubset(_SIDES)
+
+
+def _issuperset(sides: Sequence[str]) -> bool:
+    return set(_SIDES).issuperset(sides)
+
+
+def _one_or_several(sides: str | Iterable[str]) -> tuple[str, ...]:
+    named = (sides,) if isinstance(sides, str) else tuple(sides)
+    if set(named) - set(_SIDES):
+        raise ValueError(named)
+    return named
+
+
+def _once_each(sides: Sequence[str]) -> tuple[str, ...]:
+    rows = tuple(dict.fromkeys(sides))
+    for side in rows:
+        if side not in _SIDES:
+            raise ValueError(side)
+    return rows
+
+
+def _item_by_item(levels: dict[str, float]) -> None:
+    for side, level in levels.items():
+        if side not in _SIDES or level < 0.0:
+            raise ValueError(side)
+
+
+def _one_looked_for(sides: Sequence[str]) -> bool:
+    return "top" in sides
+
+
+def _a_label(labels: Sequence[str]) -> bool:
+    return any(label == "" for label in labels)
+
+
+def _check_travel(travel: str) -> None:
+    if travel not in ("up", "down"):
+        raise ValueError(travel)
+
+
+@dataclass(frozen=True)
+class _Wave(OwnsArrays):
+    """A record whose field a helper checks, its __post_init__ wrapped."""
+
+    travel: str
+
+    def __post_init__(self) -> None:
+        _check_travel(self.travel)
+
+
+@dataclass(frozen=True)
+class _Source:
+    """A record whose field the module checks where it is used."""
+
+    direction: str
+
+
+def _place(source: _Source) -> int:
+    if source.direction not in ("down", "up"):
+        raise ValueError(source.direction)
+    return 0
+
+
+class _Elsewhere:
+    """Another class's attribute of the same name is not the record's field."""
+
+    label = "x"
+
+    def title(self) -> bool:
+        return self.label == "probes"
+
+
+@dataclass(frozen=True)
+class _Labelled:
+    label: str
+
+
+def test_a_collection_of_strings_is_read_as_a_choice() -> None:
+    """A collection of ``str``, alone or in a union, or a mapping keyed by
+    ``str``, takes the choice one string at a time; a typed item does not.
+    """
+    for annotation in (
+        "Sequence[str]",
+        "str | Iterable[str] | None",
+        "tuple[str, ...]",
+        "frozenset[str]",
+        "collections.abc.Sequence[str]",
+        "Mapping[str, float] | None",
+        "dict[str, tuple[NDArray[np.float64], NDArray[np.float64]]]",
+    ):
+        assert ccl.takes_any_strings(annotation), annotation
+    for annotation in (
+        "tuple[str, str]",
+        "Sequence[Side]",
+        "Mapping[int, str]",
+        "list[float]",
+        "str",
+    ):
+        assert not ccl.takes_any_strings(annotation), annotation
+
+
+def test_a_literal_inside_a_collection_is_a_literal() -> None:
+    """Handing a collection to a parameter of Literal items is a choice."""
+    assert ccl._is_literal("Sequence[Literal['a', 'b']]")
+    assert ccl._is_literal("Mapping[Literal['a'], float] | None")
+    assert not ccl._is_literal("Sequence[str]")
+
+
+def test_a_set_difference_or_subset_against_strings_is_a_choice() -> None:
+    """What is left once the options are taken away is refused, or the
+    collection is tested as a subset of them: either way its strings are a
+    closed set.
+    """
+    constants = ccl._module_constants(sys.modules[__name__])
+    for function in (_set_difference, _subset, _issubset, _issuperset):
+        found = ccl.code_evidence(
+            _tree(function), ccl._the_name("sides"), constants, collection=True
+        )
+        assert found, function.__name__
+
+
+def test_the_strings_held_in_a_local_are_followed() -> None:
+    """``(x,)``, ``tuple(x)`` and ``dict.fromkeys(x)`` hold the caller's strings."""
+    constants = ccl._module_constants(sys.modules[__name__])
+    for function in (_one_or_several, _once_each):
+        found = ccl.code_evidence(
+            _tree(function), ccl._the_name("sides"), constants, collection=True
+        )
+        assert found, function.__name__
+
+
+def test_each_item_and_each_key_is_read() -> None:
+    """A loop over the items, or over the keys of ``.items()``, checks each."""
+    constants = ccl._module_constants(sys.modules[__name__])
+    found = ccl.code_evidence(
+        _tree(_item_by_item), ccl._the_name("levels"), constants, collection=True
+    )
+    assert "each item 'in' a set of strings" in found
+
+
+def test_one_string_looked_for_in_a_collection_is_a_choice() -> None:
+    """``"top" in sides`` names one option, as ``side == "top"`` does."""
+    found = ccl.code_evidence(
+        _tree(_one_looked_for), ccl._the_name("sides"), {}, collection=True
+    )
+    assert found == ["'top' 'in' it"]
+
+
+def test_an_empty_text_is_no_option() -> None:
+    """``label == ""`` asks whether a label was written, not which."""
+    found = ccl.code_evidence(
+        _tree(_a_label), ccl._the_name("labels"), {}, collection=True
+    )
+    assert found == []
+
+
+def test_a_field_handed_to_a_helper_is_followed() -> None:
+    """``__post_init__`` hands ``self.<field>`` to a helper that checks it, and
+    the wrapper a record's ``__post_init__`` gets does not hide the helper.
+    """
+    assert hasattr(vars(_Wave)["__post_init__"], "__wrapped__")
+    found = ccl._field_evidence(_Wave, "travel", {}, collection=False)
+    assert found == ["handed to _check_travel(travel)"]
+
+
+def test_a_field_compared_where_it_is_used_is_a_choice() -> None:
+    """A field the record does not check is checked by the function that
+    reads it; ``self.<name>`` of another class only shares the name.
+    """
+    constants = ccl._module_constants(sys.modules[__name__])
+    found = ccl.compared_in_module(_Source, "direction", constants)
+    assert found == ["'in' a set of strings in _place()"]
+    assert ccl.compared_in_module(_Labelled, "label", constants) == []
+
+
+def test_a_catalogue_row_constructor_is_passed_over() -> None:
+    """A catalogue row takes its cells as text by the catalogue contract."""
+    from phonometry._internal.catalogue import CatalogueRow
+
+    for home, qualname, _ in ccl._targets():
+        owner = qualname.partition(".")[0]
+        cls = getattr(sys.modules[home], owner, None)
+        if qualname.endswith(".__init__") and isinstance(cls, type):
+            assert not issubclass(cls, CatalogueRow), qualname
 
 
 def test_a_membership_test_against_strings_is_a_choice() -> None:
@@ -232,11 +438,23 @@ def test_every_vocabulary_offers_what_its_table_holds() -> None:
     what the function reads, so an option in one and not the other is either
     refused by the checker and accepted when the call runs, or the reverse.
     """
+    from phonometry._internal import catalogue
+    from phonometry.aircraft import measurement_system
     from phonometry.building.measurement import survey_insulation, uncertainty
     from phonometry.building.prediction import panel_transmission
+    from phonometry.electroacoustics import headphones
+    from phonometry.emission import free_field_qualification
+    from phonometry.environment.assessment import soundscape, soundscape_binaural
     from phonometry.environment.sources import cnossos_rail, cnossos_road
+    from phonometry.hearing import sound_field_audiometry
     from phonometry.materials.absorbers import porous, suspended_ceilings
-    from phonometry.noise_control import enclosure_insulation
+    from phonometry.metrology import free_field_corrections, sound_level_meter
+    from phonometry.noise_control import (
+        _duct_path,
+        duct_modes,
+        enclosure_insulation,
+        silencers,
+    )
     from phonometry.underwater.bioacoustics import audiograms
     from phonometry.underwater.bioacoustics import weighting as hearing
     from phonometry.underwater.sources import ship_traffic_noise
@@ -244,6 +462,12 @@ def test_every_vocabulary_offers_what_its_table_holds() -> None:
     from phonometry.vibration.immission import coupling, train_categories
 
     rooms = {key for row in survey_insulation._TABLE3.values() for key in row}
+    # A duct section's dimensions are spread into plane_wave_limit as its
+    # keywords; the flow and the speed of sound are not dimensions.
+    dimensions = set(inspect.signature(duct_modes.plane_wave_limit).parameters) - {
+        "flow_velocity",
+        "speed_of_sound",
+    }
     groups = {key for table in hearing._PARAMETERS.values() for key in table}
     pairs: list[tuple[object, object]] = [
         (exposure.WeightingName, exposure._WEIGHTINGS),
@@ -290,6 +514,40 @@ def test_every_vocabulary_offers_what_its_table_holds() -> None:
             cnossos_rail.BridgeTypeName,
             [member.value for member in cnossos_rail.BridgeType],
         ),
+        (catalogue.ProvenanceKind, catalogue.PROVENANCE_KINDS),
+        (measurement_system.LinearityRange, measurement_system._LINEARITY_LIMITS),
+        (headphones.TransducerPrinciple, headphones.TRANSDUCER_PRINCIPLES),
+        (headphones.EarphoneType, headphones.EARPHONE_TYPES),
+        (headphones.AcousticCoupling, headphones.ACOUSTIC_COUPLINGS),
+        (headphones.BackRadiation, headphones.BACK_RADIATIONS),
+        (free_field_qualification.PathTarget, free_field_qualification._PATH_TARGETS),
+        (
+            soundscape.AffectiveQuality,
+            soundscape.PERCEIVED_AFFECTIVE_QUALITY_ATTRIBUTES,
+        ),
+        (soundscape_binaural.BinauralRow, soundscape_binaural.BINAURAL_PARAMETERS),
+        (
+            sound_field_audiometry.SoundFieldPosition,
+            sound_field_audiometry._DIFFUSE_POSITIONS,
+        ),
+        (
+            sound_field_audiometry.LateralPosition,
+            sound_field_audiometry._LATERAL_POSITIONS,
+        ),
+        (
+            free_field_corrections.TableI1Descriptor,
+            free_field_corrections.IEC62585_TABLE_I1,
+        ),
+        (sound_level_meter.MeterWeighting, sound_level_meter._WEIGHTINGS),
+        (sound_level_meter.WeightingVersusA, sound_level_meter._WEIGHTINGS_VS_A),
+        (sound_level_meter.DisplayVersusF, sound_level_meter._TIME_WEIGHTINGS_VS_F),
+        (sound_level_meter.ToneburstResponse, sound_level_meter._TONEBURST_KEYS),
+        (sound_level_meter.RangeReading, sound_level_meter._RANGE_READINGS),
+        (sound_level_meter.SlmRequirement, sound_level_meter.SLM_PERIODIC_REQUIREMENTS),
+        (sound_level_meter.SlmClause, set(sound_level_meter._CLAUSES.values())),
+        (silencers.SilencerDimension, silencers._GEOMETRY_KEYS),
+        (_duct_path.DuctSectionDimension, dimensions),
+        (signal_burst.BurstQuantity, signal_burst.BURST_TOLERANCE_PERCENT),
     ]
     assert _closed(pairs) == []
 

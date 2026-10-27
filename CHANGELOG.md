@@ -2181,6 +2181,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `weighting_filter(x, fs, high_accuracy=True)`, `high_accuracy=1` was. Each
   is now checked before the store is asked.
 
+- **The FDTD plots document the keywords their figure refuses.**
+  `FDTDResult.plot` and `ElasticFDTDResult.plot` raise `TypeError` for a
+  `color_limit` with `kind="snapshot"`, whose colour limits the field drawn
+  sets, and `FDTD2D.plot_geometry` for an `extent` or an `origin`, which the
+  grid sets; their reference pages did not say so, and now do under
+  `:raises TypeError:`. The rule that a function documents every
+  `TypeError` it raises now follows the keywords a function hands on into
+  the renderer that draws its figure, through that renderer's own helpers,
+  so a refusal there is named on the method a caller reads.
+
 - **The type check reads the conformance scripts against the oracle tables
   they compare with, and every place that gives the command runs the same
   one.** The conformance scripts import their oracle tables from `tests/`,
@@ -3832,6 +3842,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   the hearing groups of `underwater`, the string half of a union such as the
   `seabed` of the Weston functions, `"sand" | "mud"` beside a `WestonSeabed`,
   or the CNOSSOS-EU codes beside their `Enum`, and some four hundred more.
+  A collection of choices and the keys of a mapping are typed by their items
+  the same way: the targets of `emission.MicrophoneTraverse`, the positions
+  `hearing.check_free_sound_field` and its siblings read levels at, the
+  evaluation periods `environment.assess_activity` takes as keys, the
+  adjustments of `environment.WindTurbineRatingLevel`, the parameters of
+  `environment.BinauralIndicators`, the six measurement tables of
+  `metrology.SoundLevelMeterPeriodicMeasurements`, and some forty more. A
+  call that passes a variable typed `str` there now needs the variable typed
+  by the vocabulary, or the value written in place; nothing changes at run
+  time.
   `underwater.detection_range` takes the `law` and `model` of
   `propagation_loss` with the same types. A type checker and an
   editor offer the options and refuse a misspelling before the call runs; the
@@ -3846,7 +3866,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   that does one of those; it follows the text through `str(...)`,
   `.strip().lower()` and the locals bound from it, through a dict spread into
   a call and through a function the body imports, and a table handed on
-  beside it closes the helper that checks it. A test holds every such
+  beside it closes the helper that checks it. It reads a collection of
+  strings and the keys of a mapping item by item, through a loop, a
+  comprehension, `.items()` and `.keys()`, takes a set difference with the
+  options or a subset test as the closed set, reads a table held in a local
+  or imported from another module of the package as the one written in
+  place, follows a record field out of `__post_init__` into the helper that
+  checks it, and closes a field its own module compares with a string
+  anywhere. A test holds every such
   `Literal` to the table that answers it. `noise_control.InstallationCase`
   reads `"any"` in `source_side` for the four insertion cases, as its
   documentation said, instead of a sentence.

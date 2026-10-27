@@ -495,6 +495,13 @@ Plot the probe histories or one recorded field snapshot.
 
 **Returns:** The axes.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | for `color_limit` with `kind="snapshot"`, which the field drawn sets (`vmin` and `vmax` reach `imshow`). |
+| ValueError | for a `kind` other than `"probes"` and `"snapshot"`, a `language` other than `"en"` and `"es"`, or a snapshot asked of a result that holds none. |
+
 ### ElasticFDTDResult.size
 
 *property*

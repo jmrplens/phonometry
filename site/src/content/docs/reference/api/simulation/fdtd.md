@@ -413,7 +413,7 @@ time stepping happens. Requires matplotlib
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | for a probe that is not a pair, or an index that is not a number. |
+| TypeError | for a probe that is not a pair, or an index that is not a number, and for `extent` or `origin` in `kwargs`, which the grid sets: the obstacles are drawn on the grid the sources and probes are on. |
 | ValueError | for a probe of more or fewer than two indices, an index that is not whole, or a cell outside the grid or inside an obstacle, refused in the words a run uses. |
 
 ### FDTD2D.provenance
@@ -640,6 +640,13 @@ Plot the probe histories or one recorded field snapshot.
 | `kwargs` | Forwarded to the underlying `plot`/`imshow`. |
 
 **Returns:** The axes.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | for `color_limit` with `kind="snapshot"`, which the field drawn sets (`vmin` and `vmax` reach `imshow`). |
+| ValueError | for a `kind` other than `"probes"` and `"snapshot"`, a `language` other than `"en"` and `"es"`, or a snapshot asked of a result that holds none. |
 
 ### FDTDResult.size
 

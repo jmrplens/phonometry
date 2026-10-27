@@ -672,7 +672,7 @@ ReflectionFrequencyLimit(
     source_height_m: float,
     window_length_s: NDArray[np.float64],
     low_frequency_limit_hz: NDArray[np.float64],
-    limiting_component: tuple[str, ...],
+    limiting_component: tuple[Literal['ground', 'top edge', 'side edge'], ...],
 )
 ```
 

@@ -116,7 +116,16 @@ CATALOGUE_BASES: tuple[str, ...] = (
 #: calculation note, a book or a paper, or something else. The kind decides
 #: how a refusal names the document ("the datasheet prints an upper bound
 #: of ...") and how the citation of every row is composed from it.
-PROVENANCE_KINDS: tuple[str, ...] = (
+ProvenanceKind = Literal[
+    "datasheet",
+    "declaration_of_performance",
+    "test_report",
+    "measurement",
+    "calculation",
+    "publication",
+    "other",
+]
+PROVENANCE_KINDS: tuple[ProvenanceKind, ...] = (
     "datasheet",
     "declaration_of_performance",
     "test_report",
@@ -301,7 +310,7 @@ class Provenance(RichDisplay):
         takes precedence over :attr:`test_standard` for that field.
     """
 
-    kind: str
+    kind: ProvenanceKind
     document: str
     version: str | None
     consulted: str

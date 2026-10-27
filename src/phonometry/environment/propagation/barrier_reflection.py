@@ -1648,6 +1648,11 @@ def _warn_gain(gain: float, where: str) -> None:
 # --------------------------------------------------------------------------- #
 # Low frequency limit and sample size (5.5.7)
 # --------------------------------------------------------------------------- #
+#: What arrives first after the reflection from the device: the ground
+#: reflection on the source side, or a diffraction by an edge of the device.
+LimitingComponent = Literal["ground", "top edge", "side edge"]
+
+
 @dataclass(frozen=True)
 class ReflectionFrequencyLimit(OwnsArrays):
     r"""How far down a device of a given size can be measured, 5.5.7.
@@ -1673,7 +1678,7 @@ class ReflectionFrequencyLimit(OwnsArrays):
     source_height_m: float
     window_length_s: NDArray[np.float64]
     low_frequency_limit_hz: NDArray[np.float64]
-    limiting_component: tuple[str, ...]
+    limiting_component: tuple[LimitingComponent, ...]
 
     def __post_init__(self) -> None:
         """Refuse per-microphone fields that disagree about the microphones.
@@ -1787,11 +1792,11 @@ def reflection_low_frequency_limit(
     paths = reflection_grid_paths_m()
     windows = np.empty(_MICROPHONES)
     limits = np.empty(_MICROPHONES)
-    components: list[str] = []
+    components: list[LimitingComponent] = []
     for k, (lateral_steps, vertical_steps) in enumerate(_GRID_OFFSETS):
         lateral = lateral_steps * spacing
         z = source + vertical_steps * spacing
-        candidates = {
+        candidates: dict[LimitingComponent, float] = {
             "ground": math.sqrt((d_s - d_m) ** 2 + lateral**2 + (z + source) ** 2),
             "top edge": math.hypot(
                 math.hypot(d_s, height - source) + math.hypot(d_m, height - z), lateral

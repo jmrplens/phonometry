@@ -266,8 +266,19 @@ _GRID_RANK = 2
 #: Relative tolerance for matching a frequency to a tabulated one.
 _FREQUENCY_RTOL = 1e-3
 
-_LATERAL_POSITIONS: tuple[str, ...] = ("left", "right", "up", "down")
-_DIFFUSE_POSITIONS: tuple[str, ...] = ("front", "back", "left", "right", "up", "down")
+#: The positions around the reference point a diffuse field is surveyed at,
+#: and the four lateral ones a free or quasi-free field is.
+SoundFieldPosition = Literal["front", "back", "left", "right", "up", "down"]
+LateralPosition = Literal["left", "right", "up", "down"]
+_LATERAL_POSITIONS: tuple[LateralPosition, ...] = ("left", "right", "up", "down")
+_DIFFUSE_POSITIONS: tuple[SoundFieldPosition, ...] = (
+    "front",
+    "back",
+    "left",
+    "right",
+    "up",
+    "down",
+)
 
 
 def _at_most(values: np.ndarray, bound: np.ndarray | float) -> np.ndarray:
@@ -348,9 +359,9 @@ def _frequency_axis(
     return freqs
 
 
-def _position_grid(
-    levels: Mapping[str, ArrayLike],
-    positions: tuple[str, ...],
+def _position_grid[P: str](
+    levels: Mapping[P, ArrayLike],
+    positions: tuple[P, ...],
     count: int,
     name: str,
     clause: str,
@@ -459,7 +470,7 @@ class DiffuseSoundFieldCheck(OwnsArrays):
     directional_variation_db: np.ndarray
     front_to_random_index: np.ndarray | None
     standard: Literal["ISO 8253-2 5.3", "ISO 4869-3 5.2.2"]
-    positions: tuple[str, ...] = _DIFFUSE_POSITIONS
+    positions: tuple[SoundFieldPosition, ...] = _DIFFUSE_POSITIONS
 
     def __post_init__(self) -> None:
         """Reject a clause with no Table 1, or an index on other bands.
@@ -591,7 +602,7 @@ class DiffuseSoundFieldCheck(OwnsArrays):
 
 
 def _diffuse_field_check(
-    position_levels: Mapping[str, ArrayLike],
+    position_levels: Mapping[SoundFieldPosition, ArrayLike],
     reference_levels: ArrayLike,
     *,
     directional_levels: ArrayLike | None,
@@ -728,7 +739,7 @@ def _front_to_random_index(
 
 
 def check_diffuse_sound_field(
-    position_levels: Mapping[str, ArrayLike],
+    position_levels: Mapping[SoundFieldPosition, ArrayLike],
     reference_levels: ArrayLike,
     *,
     directional_levels: ArrayLike | None = None,
@@ -819,7 +830,7 @@ class FreeSoundFieldCheck(OwnsArrays):
     lateral_deviation_db: np.ndarray
     axis_difference: np.ndarray
     loudspeaker_distance_m: float
-    positions: tuple[str, ...] = _LATERAL_POSITIONS
+    positions: tuple[LateralPosition, ...] = _LATERAL_POSITIONS
 
     def __post_init__(self) -> None:
         """Refuse a field the clause does not name or a loudspeaker inside it.
@@ -999,7 +1010,7 @@ class FreeSoundFieldCheck(OwnsArrays):
 
 
 def _free_field_check(
-    lateral_levels: Mapping[str, ArrayLike],
+    lateral_levels: Mapping[LateralPosition, ArrayLike],
     reference_levels: ArrayLike,
     *,
     front_levels: ArrayLike,
@@ -1051,7 +1062,7 @@ def _free_field_check(
 
 
 def check_free_sound_field(
-    lateral_levels: Mapping[str, ArrayLike],
+    lateral_levels: Mapping[LateralPosition, ArrayLike],
     reference_levels: ArrayLike,
     *,
     front_levels: ArrayLike,
@@ -1114,7 +1125,7 @@ def check_free_sound_field(
 
 
 def check_quasi_free_sound_field(
-    lateral_levels: Mapping[str, ArrayLike],
+    lateral_levels: Mapping[LateralPosition, ArrayLike],
     reference_levels: ArrayLike,
     *,
     front_levels: ArrayLike,

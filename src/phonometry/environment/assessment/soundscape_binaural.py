@@ -142,6 +142,16 @@ _LAF95 = "LAF95,T"
 _N5_N95 = "N5/N95"
 
 
+#: The rows of Table D.1, by the name :func:`binaural_indicators` takes.
+BinauralRow = Literal[
+    "sound_pressure_level",
+    "loudness",
+    "sharpness",
+    "tonality",
+    "roughness",
+    "fluctuation_strength",
+]
+
 #: ISO/TS 12913-3:2019 Table D.1, keyed by the name :func:`binaural_indicators`
 #: takes in ``parameters``. For every row the representative single value is
 #: the higher of the left and right metric values; all but the first also
@@ -150,7 +160,7 @@ _N5_N95 = "N5/N95"
 #: (ISO/TS 12913-2 A.3 f)). The reference printed as ``[32]`` is an entry of
 #: the bibliography of ISO/TS 12913-3, the psychoacoustics textbook it cites for
 #: roughness and fluctuation strength.
-BINAURAL_PARAMETERS: Mapping[str, BinauralParameter] = MappingProxyType(
+BINAURAL_PARAMETERS: Mapping[BinauralRow, BinauralParameter] = MappingProxyType(
     {
         "sound_pressure_level": BinauralParameter(
             parameter="Sound pressure level",
@@ -337,7 +347,7 @@ class BinauralIndicators(RichDisplay):
 
     metrics: Mapping[str, BinauralMetric]
     not_implemented: Mapping[str, str]
-    parameters: tuple[str, ...]
+    parameters: tuple[BinauralRow, ...]
     fs: float
     duration_s: float
     field: Literal["free", "diffuse"]
@@ -392,7 +402,7 @@ class BinauralIndicators(RichDisplay):
         self,
         ax: Axes | None = None,
         *,
-        parameter: str | None = None,
+        parameter: BinauralRow | None = None,
         language: Language = "en",
         **kwargs: Any,
     ) -> Axes:
@@ -607,7 +617,7 @@ def binaural_indicators(
     *,
     calibration_factor: float | None = None,
     field: Literal["free", "diffuse"] = "free",
-    parameters: Sequence[str] = tuple(BINAURAL_PARAMETERS),
+    parameters: BinauralRow | Sequence[BinauralRow] = tuple(BINAURAL_PARAMETERS),
 ) -> BinauralIndicators:
     r"""The metrics of ISO/TS 12913-3 Table D.1 at each ear of a binaural
     recording, with their representative values (Annex D, D.2).

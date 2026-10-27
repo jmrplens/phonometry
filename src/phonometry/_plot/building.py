@@ -1355,6 +1355,8 @@ def plot_detailed_airborne_prediction(
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the stacked :meth:`~matplotlib.axes.Axes.bar`.
     :return: The axes.
+    :raises TypeError: for ``bottom``, which the plot sets itself: each
+        path's share stands on the shares of the paths below it.
     """
     from .._i18n import format_number
 
@@ -1390,6 +1392,8 @@ def plot_detailed_impact_prediction(
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the stacked :meth:`~matplotlib.axes.Axes.bar`.
     :return: The axes.
+    :raises TypeError: for ``bottom``, which the plot sets itself: each
+        path's share stands on the shares of the paths below it.
     """
     from .._i18n import format_number
 

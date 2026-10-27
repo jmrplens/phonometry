@@ -10,10 +10,15 @@ sound level meter with the uncertainty they are judged on (IEC 62585).
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import numpy as np
 
 import phonometry as ph
 from phonometry import ReportMetadata
+
+if TYPE_CHECKING:
+    from phonometry.metrology.free_field_corrections import TableI1Descriptor
 
 
 def _filter_class_example() -> tuple[object, ReportMetadata, str]:
@@ -285,7 +290,7 @@ def _free_field_correction_example() -> tuple[object, ReportMetadata, str]:
         reference_calibrator_level=94.0,
         reference_free_field_correction=c_ff_rm,
     )
-    table_i2 = {
+    table_i2: dict[TableI1Descriptor, float] = {
         "a1": 0.005,
         "a2": 0.005,
         "a3": 0.005,

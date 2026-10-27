@@ -17,9 +17,14 @@ Stdlib only, like every module of this package.
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from phonometry.metrology.free_field_corrections import TableI1Descriptor
+
 #: Table I.2, printed folio 38 (PDF page 40): the "Value +/- dB" column of the
 #: 15 components at 1 kHz, keyed by descriptor.
-IEC62585_TABLE_I2_VALUES_DB: dict[str, float] = {
+IEC62585_TABLE_I2_VALUES_DB: dict[TableI1Descriptor, float] = {
     "a1": 0.005,
     "a2": 0.005,
     "a3": 0.005,
@@ -83,7 +88,7 @@ IEC62585_TABLE_I2_EXPANDED_DB = 0.121
 
 #: Table I.3, printed folio 39 (PDF page 41): the values at 8 kHz, which differ
 #: from those at 1 kHz in four components.
-IEC62585_TABLE_I3_VALUES_DB: dict[str, float] = {
+IEC62585_TABLE_I3_VALUES_DB: dict[TableI1Descriptor, float] = {
     **IEC62585_TABLE_I2_VALUES_DB,
     "a7": 0.17,
     "a11": 0.104,

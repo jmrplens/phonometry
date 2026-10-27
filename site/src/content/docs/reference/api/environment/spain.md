@@ -237,15 +237,15 @@ the street is not.
 
 ```python
 assess_activity(
-    measurements: Mapping[str, Sequence[NoisePhase]],
+    measurements: Mapping[Literal['day', 'evening', 'night'], Sequence[NoisePhase]],
     limits: RegulationLimits,
     *,
-    long_term_levels: Mapping[str, float] | None = None,
+    long_term_levels: Mapping[Literal['day', 'evening', 'night'], float] | None = None,
     operating_days: int | np.integer[Any] | None = None,
     year_days: int | np.integer[Any] = 365,
     closed_level: float = 0.0,
     new_activity: bool = True,
-    period_hours: Mapping[str, float] | None = None,
+    period_hours: Mapping[Literal['day', 'evening', 'night'], float] | None = None,
 ) -> ActivityAssessment
 ```
 

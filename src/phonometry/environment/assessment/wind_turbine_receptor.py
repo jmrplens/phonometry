@@ -90,6 +90,8 @@ if TYPE_CHECKING:
     from ..._internal.types import RealScalar, RealValues
 
 Averaging = Literal["energy", "arithmetic"]
+#: The three adjustments of Annex A, A.1, the most severe of which is applied.
+TurbineAdjustment = Literal["tonal", "amplitude_modulation", "impulsive"]
 
 
 __all__ = [
@@ -2021,8 +2023,8 @@ class WindTurbineRatingLevel(RichDisplay):
     """
 
     equivalent_level: float
-    adjustments: Mapping[str, float]
-    governing: str | None
+    adjustments: Mapping[TurbineAdjustment, float]
+    governing: TurbineAdjustment | None
     rating_level: float
 
     def plot(
@@ -2074,7 +2076,7 @@ def wind_turbine_rating_level(
         ``impulsive_adjustment`` or ``tonal_adjustment`` is not a single number.
     """
     leq = require_finite(equivalent_level, "equivalent_level")
-    adjustments = {
+    adjustments: dict[TurbineAdjustment, float] = {
         "tonal": require_finite(tonal_adjustment, "tonal_adjustment"),
         "amplitude_modulation": require_finite(
             amplitude_modulation_adjustment, "amplitude_modulation_adjustment"

@@ -110,8 +110,8 @@ national foreword).
 
 ```python
 normalized_reference_levels(
-    surface_levels: Mapping[str, Mapping[str, float]],
-) -> Mapping[str, float]
+    surface_levels: Mapping[str, Mapping[Literal['1', '2a', '2b'], float]],
+) -> Mapping[Literal['1', '2a', '2b'], float]
 ```
 
 The vehicle sound levels of a normalized reference surface, 10.2 and Annex D.
@@ -423,9 +423,9 @@ statistical_pass_by(
     max_levels: ArrayLike,
     *,
     road_speed_category: Literal['low', 'medium', 'high'],
-    corrected_vehicle_sound_levels: Mapping[str, float] | None = None,
-    reference_levels: float | Mapping[str, float] | None = None,
-    weighting_factors: Mapping[str, float] | None = None,
+    corrected_vehicle_sound_levels: Mapping[Literal['1', '2a', '2b'], float] | None = None,
+    reference_levels: float | Mapping[Literal['1', '2a', '2b'], float] | None = None,
+    weighting_factors: Mapping[Literal['1', '2a', '2b'], float] | None = None,
 ) -> StatisticalPassByResult
 ```
 
@@ -469,10 +469,10 @@ speed windows are judged, kept on the result and emitted as
 
 ```python
 statistical_pass_by_index(
-    vehicle_sound_levels: Mapping[str, float],
+    vehicle_sound_levels: Mapping[Literal['1', '2a', '2b'], float],
     *,
     road_speed_category: Literal['low', 'medium', 'high'],
-    weighting_factors: Mapping[str, float] | None = None,
+    weighting_factors: Mapping[Literal['1', '2a', '2b'], float] | None = None,
 ) -> float
 ```
 
@@ -518,11 +518,11 @@ before calling this.
 ```python
 StatisticalPassByResult(
     road_speed_category: Literal['low', 'medium', 'high'],
-    regressions: Mapping[str, PassByRegression],
-    weighting_factors: Mapping[str, float],
-    vehicle_sound_levels: Mapping[str, float],
+    regressions: Mapping[Literal['1', '2a', '2b'], PassByRegression],
+    weighting_factors: Mapping[Literal['1', '2a', '2b'], float],
+    vehicle_sound_levels: Mapping[Literal['1', '2a', '2b'], float],
     index: float,
-    corrected_vehicle_sound_levels: Mapping[str, float] | None = None,
+    corrected_vehicle_sound_levels: Mapping[Literal['1', '2a', '2b'], float] | None = None,
     corrected_index: float | None = None,
     reference_index: float | None = None,
 )

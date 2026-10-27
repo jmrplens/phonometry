@@ -21,6 +21,7 @@ folio 13 (PDF page 19).
 from __future__ import annotations
 
 import math
+from typing import TYPE_CHECKING
 
 import numpy as np
 import reference_data as ref
@@ -29,6 +30,9 @@ from scipy import stats
 from phonometry import environment, psychoacoustics, signals
 
 from ..registry import Outcome, count, numeric, register, residue_text
+
+if TYPE_CHECKING:
+    from phonometry.environment.assessment.soundscape import AffectiveQuality
 
 #: The domain title carries the edition, because the report shows the title and
 #: not this docstring: the rows check the 2019 edition, and the 2025 edition
@@ -40,7 +44,7 @@ _SOUNDSCAPE = (
 _ATTRIBUTES = environment.PERCEIVED_AFFECTIVE_QUALITY_ATTRIBUTES
 
 
-def _answers(**scores: float) -> dict[str, list[float]]:
+def _answers(**scores: float) -> dict[AffectiveQuality, list[float]]:
     """One respondent, every attribute at 3 unless named."""
     return {name: [float(scores.get(name, 3.0))] for name in _ATTRIBUTES}
 

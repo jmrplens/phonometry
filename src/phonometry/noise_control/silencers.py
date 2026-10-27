@@ -110,7 +110,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import KW_ONLY, dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
@@ -491,7 +491,19 @@ def quarter_wave_impedance(
 #: The keys :attr:`ReactiveSilencerResult.geometry` may carry: the keys of
 #: the ``geometry`` mapping the silencer drawing reads (the union over the
 #: four named constructors, each of which stores a subset).
-_GEOMETRY_KEYS = frozenset(
+SilencerDimension = Literal[
+    "length",
+    "chamber_area",
+    "pipe_area",
+    "inlet_extension",
+    "outlet_extension",
+    "duct_area",
+    "neck_area",
+    "neck_length",
+    "cavity_volume",
+    "branch_area",
+]
+_GEOMETRY_KEYS: frozenset[SilencerDimension] = frozenset(
     {
         "length",
         "chamber_area",
@@ -573,7 +585,7 @@ class ReactiveSilencerResult(OwnsArrays):
     kind: str
     _: KW_ONLY
     resonances: np.ndarray | None
-    geometry: dict[str, float] | None
+    geometry: dict[SilencerDimension, float] | None
     plane_wave_limit: float
     chain: SilencerChain | None
 
@@ -759,7 +771,7 @@ def _result(
     radiation_impedance: ArrayLike | None,
     kind: str,
     resonances: NDArray[np.float64] | None = None,
-    geometry: dict[str, float] | None = None,
+    geometry: dict[SilencerDimension, float] | None = None,
     areas: Sequence[float] | None = None,
     chain: SilencerChain | None = None,
 ) -> ReactiveSilencerResult:

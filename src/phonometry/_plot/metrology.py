@@ -1317,6 +1317,9 @@ def plot_slm_periodic_requirement(
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the verdict markers.
     :return: The axes.
+    :raises TypeError: for ``yerr`` on the margins of the electrical test of
+        the frequency weightings, which the plot sets itself: each result's
+        error bar is its own uncertainty.
     """
     from .._i18n import localize_axes
     from .filters import _draw_margins, _margin_axis
@@ -1552,6 +1555,8 @@ def plot_slm_periodic_verification(
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the verdict markers.
     :return: The axes.
+    :raises TypeError: for ``yerr``, which the plot sets itself: each
+        clause's deciding result carries its own uncertainty.
     """
     from .filters import _margin_axis
 

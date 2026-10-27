@@ -48,6 +48,18 @@ call (``f(**options)``), and into a function the body imports itself; and a
 table handed on beside it (``_area_key(area_type, _ACTIVITY_LIMITS)``) is
 known to the receiving function by its keys, so the helper's ``key not in
 table`` is the closed set it is.
+
+A collection of strings (``Sequence[str]``, ``tuple[str, ...]``,
+``set[str]``) and the keys of a mapping are choices of the same kind: each
+item is followed through a ``for`` loop, a comprehension, ``enumerate``,
+``.items()`` and ``.keys()``, and a set difference with the options
+(``set(sides) - _SIDES``) or a subset test (``<=``, ``issubset``) closes the
+collection as a whole. The table a test reads may be written in place, held
+in a local (one branch of a conditional expression included) or imported
+from another module of the package. A record field is followed out of the
+``__post_init__`` into the helper it is handed to, and a comparison of
+``<record>.<field>`` with a string in any function of the record's module
+closes it as well.
 """
 
 from __future__ import annotations
@@ -64,6 +76,7 @@ import re
 import sys
 import textwrap
 import typing
+from types import MappingProxyType
 from typing import TYPE_CHECKING, NamedTuple
 
 import phonometry
@@ -75,6 +88,37 @@ if TYPE_CHECKING:
 
 #: The members of an annotation that let any string through.
 _STRING_MEMBERS = frozenset({"str", "Optional[str]"})
+
+#: The generic collections whose items a caller writes one by one.
+_COLLECTIONS = frozenset(
+    {
+        "AbstractSet",
+        "Collection",
+        "FrozenSet",
+        "Iterable",
+        "List",
+        "MutableSequence",
+        "MutableSet",
+        "Sequence",
+        "Set",
+        "Tuple",
+        "frozenset",
+        "list",
+        "set",
+        "tuple",
+    }
+)
+
+#: The generic mappings whose keys a caller writes.
+_MAPPINGS = frozenset({"Dict", "Mapping", "MutableMapping", "dict"})
+
+#: A subscripted annotation member, ``Sequence[str]`` or
+#: ``collections.abc.Mapping[str, float]``, split into its origin and arguments.
+_GENERIC = re.compile(r"(?:\w+\.)*(?P<origin>\w+)\[(?P<arguments>.*)\]", re.DOTALL)
+
+#: Calls that only hold the items of a collection in another container:
+#: ``set(sides)`` holds the strings ``sides`` holds.
+_CONTAINERS = frozenset({"frozenset", "list", "set", "sorted", "tuple"})
 
 #: Methods that only clean up a text: what they return is the caller's choice.
 _NORMALISERS = frozenset(
@@ -104,6 +148,16 @@ _CATALOGUE_KEY = (
 )
 _TEXT = "free text a caller writes into a record or a fiche"
 _LABEL = "a label the record prints as the page or the caller wrote it"
+_NOTATION = (
+    "the notation of a single number as the standard prints it (LA,eq, "
+    "LC,Fmax,nT), a label"
+)
+_POSITION_LABEL = "the name the caller gives a measurement position, a label"
+_ROW_LABEL = "the name the caller gives a row of the comparison, a label"
+_COLUMNS = (
+    "the columns of one row of the result, named as the record names them, not "
+    "a choice a caller makes"
+)
 _ANP_FILE = (
     "a word as the ANP database file spells it, and a caller's own database "
     "file may spell it otherwise"
@@ -226,6 +280,82 @@ OPEN: dict[tuple[str, str, str], str] = {
     ("phonometry.vibration.machinery.diagnostics", "FaultLine", "name"): (
         "a short label of the line, unique within a result"
     ),
+    (
+        "phonometry.building.measurement.service_equipment",
+        "ServiceEquipmentResult",
+        "ratings",
+    ): _NOTATION,
+    (
+        "phonometry.building.measurement.service_equipment",
+        "check_instrument_agreement",
+        "instrument_levels",
+    ): _NOTATION,
+    ("phonometry.emission.sound_power_plant", "partial_plant_contributions", "names"): (
+        "the name the caller gives each part, the label of its row"
+    ),
+    ("phonometry.emission.turbine_noise", "TurbineMicrophoneArray", "labels"): (
+        _POSITION_LABEL
+    ),
+    (
+        "phonometry.emission.turbine_noise",
+        "TurbineSoundPowerResult.plot",
+        "position_labels",
+    ): _POSITION_LABEL,
+    (
+        "phonometry.environment.assessment.soundscape",
+        "SoundscapeAcousticEnvironment",
+        "measurement_results",
+    ): (
+        "the symbols ISO/TS 12913-2 A.3 f) prints, seven required and any other "
+        "result the study reports allowed, so the set is open"
+    ),
+    (
+        "phonometry.environment.propagation.software_quality",
+        "CalculationVerification",
+        "labels",
+    ): _ROW_LABEL,
+    (
+        "phonometry.environment.propagation.software_quality",
+        "verify_calculation_results",
+        "labels",
+    ): _ROW_LABEL,
+    (
+        "phonometry.environment.sources._statistical_pass_by",
+        "normalized_reference_levels",
+        "surface_levels",
+    ): (
+        "a label for each surface averaged; the vehicle categories inside each "
+        "are the typed choice"
+    ),
+    (
+        "phonometry.environment.sources.rolling_stock_noise",
+        "rolling_stock_test",
+        "run_levels",
+    ): (_POSITION_LABEL),
+    (
+        "phonometry.filters.weighting_compliance",
+        "WeightingComplianceResult",
+        "between_nominals",
+    ): _COLUMNS,
+    ("phonometry.io._catalogue", "Catalogue", "name"): (
+        "the name the caller gives a catalogue, the table its rows are filed under"
+    ),
+    ("phonometry.io._catalogue", "write_catalogue", "rows"): _CATALOGUE_KEY,
+    ("phonometry.io._wav", "AudioFileInfo", "container"): (
+        "the container a file declares: WAV, RF64 or BW64 for the WAV family, or the "
+        "format name libsndfile reports for any other, an open set"
+    ),
+    (
+        "phonometry.metrology.free_field_corrections",
+        "CorrectionUncertaintyBudget",
+        "descriptors",
+    ): (
+        "a1 to a15 of Table I.1, then the names the laboratory gives the "
+        "components its own method adds"
+    ),
+    ("phonometry.noise_control.enclosure_insulation", "MethodEntry", "quantities"): (
+        "the symbols of the quantities a row of Table 1 gives, as it prints them"
+    ),
 }
 
 #: Why a catalogue row is passed over: the catalogue contract
@@ -273,6 +403,64 @@ def takes_any_string(annotation: str) -> bool:
     return any(member in _STRING_MEMBERS for member in _members(annotation))
 
 
+def _generic(member: str) -> tuple[str, list[str]] | None:
+    """The origin and the arguments of a subscripted member, or ``None``."""
+    found = _GENERIC.fullmatch(member.strip())
+    if found is None:
+        return None
+    return found["origin"], [part.strip() for part in _split(found["arguments"])]
+
+
+def _split(arguments: str) -> list[str]:
+    """The arguments of a subscript, split at its top-level commas."""
+    parts: list[str] = []
+    depth = 0
+    current: list[str] = []
+    for character in arguments:
+        if character in "[(":
+            depth += 1
+        elif character in "])":
+            depth -= 1
+        if character == "," and depth == 0:
+            parts.append("".join(current))
+            current = []
+        else:
+            current.append(character)
+    parts.append("".join(current))
+    return parts
+
+
+def _item(member: str) -> str | None:
+    """The annotation of what a caller writes into a collection or mapping member.
+
+    The item of ``Sequence[X]``, ``tuple[X, ...]`` or ``frozenset[X]``, and the
+    key of ``Mapping[X, Y]``; ``None`` for any other member.
+    """
+    parsed = _generic(member)
+    if parsed is None:
+        return None
+    origin, arguments = parsed
+    if origin in _MAPPINGS and len(arguments) == 2:
+        return arguments[0]
+    if origin in {"tuple", "Tuple"}:
+        homogeneous = len(arguments) == 2 and arguments[1] == "..."
+        return arguments[0] if homogeneous else None
+    if origin in _COLLECTIONS and len(arguments) == 1:
+        return arguments[0]
+    return None
+
+
+def takes_any_strings(annotation: str) -> bool:
+    """Whether an annotation lets a collection of any strings through.
+
+    A ``Sequence[str]``, ``Iterable[str]``, ``tuple[str, ...]``, ``set[str]``
+    or ``frozenset[str]``, or a ``Mapping[str, ...]`` whose keys a caller
+    writes, alone or in a union: ``free_sides: str | Iterable[str]`` takes the
+    choice one string at a time as surely as ``str`` takes one.
+    """
+    return any(_item(member) in _STRING_MEMBERS for member in _members(annotation))
+
+
 def enum_beside(annotation: str, module: ModuleType | None) -> list[str]:
     """The evidence that a ``str`` stands beside an ``Enum`` of the options.
 
@@ -305,18 +493,55 @@ def _bare(node: ast.expr) -> ast.expr:
 
 
 def _derived_from(value: ast.expr, matches: Callable[[ast.expr], bool]) -> bool:
-    """Whether an assigned *value* is the target, cleaned up or resolved.
+    """Whether an assigned *value* is the target, cleaned up, resolved or held.
 
     The target itself through the calls that only clean it up, an alias
-    lookup ``ALIASES.get(name, name)``, or a private helper handed the target
-    first (``_normalise(name, ALIASES, "name")``).
+    lookup ``ALIASES.get(name, name)``, a private helper handed the target
+    first (``_normalise(name, ALIASES, "name")``), or the strings of the
+    target held in another container: ``tuple(sides)``, ``set(sides)`` or
+    the one-item ``(side,)`` a bare string becomes, on either branch of a
+    conditional expression.
     """
     if matches(value):
         return True
     if isinstance(value, ast.Call) and value.args and matches(value.args[0]):
         name = _call_name(value)
-        return name == "get" or name.startswith("_")
+        return name == "get" or name.startswith("_") or _holds_items(value)
+    if isinstance(value, ast.Call) and _holds_items(value):
+        return _derived_from(value.args[0], matches)
+    if isinstance(value, ast.IfExp):
+        # ``(x,) if isinstance(x, str) else tuple(x)``: one name or several.
+        return _derived_from(value.body, matches) or _derived_from(
+            value.orelse, matches
+        )
+    if isinstance(value, ast.Tuple | ast.List | ast.Set):
+        return any(matches(element) for element in value.elts)
     return False
+
+
+def _holds_items(node: ast.Call) -> bool:
+    """Whether a call only holds the items of its one argument.
+
+    ``set(x)``, ``tuple(x)``, ``sorted(x)`` and ``dict.fromkeys(x)``, which
+    keeps the strings of ``x`` as its keys, in their order, once each.
+    """
+    if len(node.args) != 1 or node.keywords:
+        return False
+    if isinstance(node.func, ast.Name):
+        return node.func.id in _CONTAINERS
+    return (
+        isinstance(node.func, ast.Attribute)
+        and node.func.attr == "fromkeys"
+        and isinstance(node.func.value, ast.Name)
+        and node.func.value.id == "dict"
+    )
+
+
+def _held(node: ast.expr) -> ast.expr:
+    """*node* without a call that only holds its items: ``set(x)`` is ``x``."""
+    while isinstance(node, ast.Call) and _holds_items(node):
+        node = node.args[0]
+    return node
 
 
 def _following(
@@ -354,26 +579,78 @@ def _following(
 
 
 def _module_constants(module: ModuleType | None) -> dict[str, ast.expr]:
-    """The module-level assignments of *module*, by name, as expressions."""
+    """The module-level assignments of *module*, by name, as expressions.
+
+    A constant the module imports from another module of the package
+    (``from .fdtd import _SIDES``) is the expression it is assigned there.
+    """
     if module is None:
         return {}
+    return dict(_constants_of(module.__name__))
+
+
+#: How many imports deep a module's constants are followed.
+_IMPORT_DEPTH = 3
+
+
+def _assigned(node: ast.stmt) -> list[tuple[str, ast.expr]]:
+    """The names a module-level assignment binds, each with its value."""
+    if isinstance(node, ast.Assign):
+        return [
+            (target.id, node.value)
+            for target in node.targets
+            if isinstance(target, ast.Name)
+        ]
+    if (
+        isinstance(node, ast.AnnAssign)
+        and isinstance(node.target, ast.Name)
+        and node.value is not None
+    ):
+        return [(node.target.id, node.value)]
+    return []
+
+
+def _imported_constants(
+    node: ast.ImportFrom, package: str, depth: int
+) -> list[tuple[str, ast.expr]]:
+    """The constants a ``from ... import`` of the package brings in, by the
+    name the importing module gives them.
+    """
+    try:
+        source = importlib.util.resolve_name(
+            "." * node.level + (node.module or ""), package
+        )
+    except ValueError:
+        return []
+    if not source.startswith("phonometry"):
+        return []
+    imported = _constants_of(source, depth + 1)
+    return [
+        (alias.asname or alias.name, imported[alias.name])
+        for alias in node.names
+        if alias.name in imported
+    ]
+
+
+@functools.cache
+def _constants_of(module_name: str, depth: int = 0) -> MappingProxyType[str, ast.expr]:
+    module = sys.modules.get(module_name)
+    if module is None:
+        return MappingProxyType({})
     try:
         tree = ast.parse(inspect.getsource(module))
     except (OSError, TypeError, SyntaxError):
-        return {}
+        return MappingProxyType({})
+    package = module.__package__ or module_name.rpartition(".")[0]
     found: dict[str, ast.expr] = {}
     for node in tree.body:
-        if isinstance(node, ast.Assign) and node.value is not None:
-            for target in node.targets:
-                if isinstance(target, ast.Name):
-                    found[target.id] = node.value
-        elif (
-            isinstance(node, ast.AnnAssign)
-            and isinstance(node.target, ast.Name)
-            and node.value is not None
-        ):
-            found[node.target.id] = node.value
-    return found
+        if isinstance(node, ast.ImportFrom):
+            if depth < _IMPORT_DEPTH:
+                for name, value in _imported_constants(node, package, depth):
+                    found.setdefault(name, value)
+            continue
+        found.update(_assigned(node))
+    return MappingProxyType(found)
 
 
 def strings_of(
@@ -415,14 +692,173 @@ def _call_name(node: ast.Call) -> str:
     return ""
 
 
+#: The set methods that keep what is not, or say whether all is, in a set of
+#: strings: ``set(sides).difference(SIDES)``, ``set(sides).issubset(SIDES)``.
+_SET_TESTS = frozenset({"difference", "issubset"})
+
+_SUBSET = "a subset of a set of strings"
+
+
+def _set_call_evidence(
+    node: ast.Call,
+    is_target: Callable[[ast.expr], bool],
+    constants: dict[str, ast.expr],
+) -> list[str]:
+    """What a set method call says of the target's strings."""
+    if not (isinstance(node.func, ast.Attribute) and node.args):
+        return []
+    owner, argument = node.func.value, node.args[0]
+    if (
+        node.func.attr in _SET_TESTS
+        and is_target(_held(owner))
+        and strings_of(argument, constants)
+    ):
+        return [_SUBSET]
+    if (
+        node.func.attr == "issuperset"
+        and strings_of(owner, constants)
+        and is_target(_held(argument))
+    ):
+        return [_SUBSET]
+    return []
+
+
+def _text_evidence(
+    operator: ast.cmpop, right: ast.expr, constants: dict[str, ast.expr]
+) -> list[str]:
+    """What ``target <operator> right`` says of the target's text."""
+    if isinstance(operator, ast.In | ast.NotIn) and strings_of(right, constants):
+        return ["'in' a set of strings"]
+    # An empty text is no option: ``label == ""`` asks whether one was
+    # written at all.
+    if (
+        isinstance(operator, ast.Eq | ast.NotEq)
+        and isinstance(right, ast.Constant)
+        and isinstance(right.value, str)
+        and right.value
+    ):
+        return [f"== {right.value!r}"]
+    return []
+
+
+def _subset_evidence(
+    left: ast.expr,
+    operator: ast.cmpop,
+    right: ast.expr,
+    is_target: Callable[[ast.expr], bool],
+    constants: dict[str, ast.expr],
+) -> bool:
+    """Whether ``left <operator> right`` tests the target's strings as a
+    subset of a set of strings (``set(sides) <= SIDES``).
+    """
+    if isinstance(operator, ast.LtE | ast.Lt):
+        return is_target(_held(left)) and bool(strings_of(right, constants))
+    if isinstance(operator, ast.GtE | ast.Gt):
+        return bool(strings_of(left, constants)) and is_target(_held(right))
+    return False
+
+
+def _looked_for(
+    left: ast.expr,
+    operator: ast.cmpop,
+    right: ast.expr,
+    is_target: Callable[[ast.expr], bool],
+) -> list[str]:
+    """``"top" in sides``: one string looked for among the target's items."""
+    if (
+        isinstance(operator, ast.In | ast.NotIn)
+        and isinstance(left, ast.Constant)
+        and isinstance(left.value, str)
+        and is_target(right)
+    ):
+        return [f"{left.value!r} 'in' it"]
+    return []
+
+
+def _comparison_evidence(
+    node: ast.Compare,
+    is_target: Callable[[ast.expr], bool],
+    constants: dict[str, ast.expr],
+    *,
+    collection: bool,
+) -> list[str]:
+    """What one comparison says of the target, pair by pair."""
+    found: list[str] = []
+    left = node.left
+    for operator, right in zip(node.ops, node.comparators, strict=True):
+        if is_target(left):
+            found.extend(_text_evidence(operator, right, constants))
+        if _subset_evidence(left, operator, right, is_target, constants):
+            found.append(_SUBSET)
+        if collection:
+            found.extend(_looked_for(left, operator, right, is_target))
+        left = right
+    return found
+
+
+def _item_names(tree: ast.AST, is_target: Callable[[ast.expr], bool]) -> set[str]:
+    """The names a loop or a comprehension binds to each item of the target.
+
+    ``for side in sides``, ``[f for f in fields]``, ``for i, side in
+    enumerate(sides)`` and, for a mapping, the key of ``for key, value in
+    levels.items()`` or ``for key in levels.keys()``.
+    """
+    names: set[str] = set()
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.For | ast.AsyncFor | ast.comprehension):
+            continue
+        source, bound = node.iter, node.target
+        position = 0
+        if (
+            isinstance(source, ast.Call)
+            and isinstance(source.func, ast.Attribute)
+            and source.func.attr in {"items", "keys"}
+            and not source.args
+        ):
+            source = source.func.value
+        elif (
+            isinstance(source, ast.Call)
+            and isinstance(source.func, ast.Name)
+            and source.func.id == "enumerate"
+            and source.args
+        ):
+            source, position = source.args[0], 1
+        if not is_target(_held(source)):
+            continue
+        if isinstance(bound, ast.Tuple) and len(bound.elts) > position:
+            bound = bound.elts[position]
+        if isinstance(bound, ast.Name):
+            names.add(bound.id)
+    return names
+
+
 def code_evidence(
     tree: ast.AST,
     is_target: Callable[[ast.expr], bool],
     constants: dict[str, ast.expr],
+    *,
+    collection: bool = False,
 ) -> list[str]:
-    """What in *tree* treats the target as one of a fixed set of strings."""
+    """What in *tree* treats the target as one of a fixed set of strings.
+
+    A *collection* of strings is one when what is left of it once a set of
+    strings is taken away is refused (``set(sides) - set(SIDES)``), when it
+    is tested as a subset of one (``set(sides) <= SIDES``,
+    ``.issubset(SIDES)``), or when one string is looked for in it
+    (``"top" in sides``).
+    """
     found: list[str] = []
     is_target = _following(tree, is_target)
+    items = _item_names(tree, is_target) if collection else set()
+    if items:
+        found.extend(
+            f"each item {evidence}"
+            for evidence in code_evidence(
+                tree,
+                lambda node: isinstance(node, ast.Name) and node.id in items,
+                constants,
+            )
+        )
     for node in ast.walk(tree):
         if isinstance(node, ast.Call):
             name = _call_name(node)
@@ -436,18 +872,18 @@ def code_evidence(
                 and strings_of(node.func.value, constants)
             ):
                 found.append("a lookup by key")
-        elif isinstance(node, ast.Compare) and is_target(node.left):
-            for operator, right in zip(node.ops, node.comparators, strict=True):
-                if isinstance(operator, ast.In | ast.NotIn) and strings_of(
-                    right, constants
-                ):
-                    found.append("'in' a set of strings")
-                if (
-                    isinstance(operator, ast.Eq | ast.NotEq)
-                    and isinstance(right, ast.Constant)
-                    and isinstance(right.value, str)
-                ):
-                    found.append(f"== {right.value!r}")
+            found.extend(_set_call_evidence(node, is_target, constants))
+        elif isinstance(node, ast.Compare):
+            found.extend(
+                _comparison_evidence(node, is_target, constants, collection=collection)
+            )
+        elif (
+            isinstance(node, ast.BinOp)
+            and isinstance(node.op, ast.Sub)
+            and is_target(_held(node.left))
+            and strings_of(node.right, constants)
+        ):
+            found.append("a set difference with a set of strings")
         elif (
             isinstance(node, ast.Subscript)
             and is_target(node.slice)
@@ -607,19 +1043,63 @@ def _literal_aliases() -> frozenset[str]:
 
 
 def _is_literal(annotation: str) -> bool:
-    """Whether a parameter annotation, as written, is a ``Literal`` choice."""
-    parts = [part.strip() for part in annotation.split("|")]
-    return any(
-        part.startswith("Literal[") or part in _literal_aliases() for part in parts
+    """Whether a parameter annotation, as written, is a ``Literal`` choice.
+
+    Alone, in a union, or as what a collection holds (``Sequence[Field]``)
+    and a mapping is keyed by.
+    """
+    for part in _members(annotation):
+        if part.startswith("Literal[") or part in _literal_aliases():
+            return True
+        item = _item(part)
+        if item is not None and _is_literal(item):
+            return True
+    return False
+
+
+def _namespace(function: object, tree: ast.AST, module_name: str) -> dict[str, object]:
+    """The names *function* can call: its module's, and those it imports itself.
+
+    A wrapped function (a record's ``__post_init__`` is wrapped where the
+    record takes ownership of its arrays) names what its own module imports,
+    not what the wrapper's module does.
+    """
+    unwrapped = inspect.unwrap(function) if callable(function) else function
+    return {
+        **getattr(unwrapped, "__globals__", {}),
+        **_local_imports(tree, module_name),
+    }
+
+
+def _checks_received(
+    callee: Callable[..., object],
+    received: str,
+    constants: dict[str, ast.expr],
+    *,
+    collection: bool,
+) -> bool:
+    """Whether *callee* types its parameter *received* ``Literal`` or checks
+    it against a fixed set of strings itself.
+    """
+    annotation = str(inspect.signature(callee).parameters[received].annotation)
+    if _is_literal(annotation):
+        return True
+    tree = _parsed(callee)
+    return tree is not None and bool(
+        code_evidence(tree, _the_name(received), constants, collection=collection)
     )
 
 
-def passed_on_evidence(
+# PLR0913: the recursion carries what it has followed so far.
+def passed_on_evidence(  # noqa: PLR0913
     function: object,
     name: str,
     depth: int = 0,
     seen: frozenset[str] = frozenset(),
     constants: dict[str, ast.expr] | None = None,
+    *,
+    target: Callable[[ast.expr], bool] | None = None,
+    collection: bool = False,
 ) -> list[str]:
     """What a function that receives parameter *name* untouched says of it.
 
@@ -627,7 +1107,10 @@ def passed_on_evidence(
     reports the first one that checks it against a fixed set of strings or
     already types it ``Literal``. *constants* are the names the function
     knows as collections of strings: its module's, and the tables its caller
-    handed it.
+    handed it. *target* reads the value in *function* some other way than by
+    the parameter's name: ``self.<field>`` in a ``__post_init__`` that hands a
+    record field to a helper. *collection* says the value is a collection of
+    strings, whose items are the choice.
     """
     if depth >= _PASS_DEPTH:
         return []
@@ -637,11 +1120,8 @@ def passed_on_evidence(
     module_name = getattr(function, "__module__", "") or ""
     if constants is None:
         constants = _module_constants(sys.modules.get(module_name))
-    namespace = {
-        **getattr(function, "__globals__", {}),
-        **_local_imports(tree, module_name),
-    }
-    matches = _following(tree, _the_name(name))
+    namespace = _namespace(function, tree, module_name)
+    matches = _following(tree, target or _the_name(name))
     spread = _spread_dicts(tree)
     for node in ast.walk(tree):
         if not isinstance(node, ast.Call):
@@ -657,22 +1137,20 @@ def passed_on_evidence(
         key = f"{getattr(callee, '__qualname__', '')}.{received}"
         if received is None or key in seen:
             continue
-        annotation = str(inspect.signature(callee).parameters[received].annotation)
         callee_constants = {
             **_module_constants(sys.modules.get(callee.__module__)),
             **_bound_tables(handed, constants),
         }
-        callee_tree = _parsed(callee)
-        found = (
-            code_evidence(callee_tree, _the_name(received), callee_constants)
-            if callee_tree is not None
-            else []
-        )
         label = f"handed to {callee.__qualname__}({received})"
-        if found or _is_literal(annotation):
+        if _checks_received(callee, received, callee_constants, collection=collection):
             return [label]
         deeper = passed_on_evidence(
-            callee, received, depth + 1, seen | {key}, callee_constants
+            callee,
+            received,
+            depth + 1,
+            seen | {key},
+            callee_constants,
+            collection=collection,
         )
         if deeper:
             return [f"{label}, {deeper[0]}"]
@@ -700,6 +1178,43 @@ def _public_modules() -> Iterator[ModuleType]:
         yield importlib.import_module(info.name)
 
 
+def _public_methods(cls: type) -> Iterator[tuple[str, object]]:
+    """``(name, function)`` of every public method of *cls*, ``__init__``
+    included, a class or static method by the function it wraps.
+
+    A catalogue row's constructor takes its cells, which the catalogue
+    contract holds to str (:data:`CATALOGUE_ROW`), so it is passed over.
+    """
+    row = issubclass(cls, CatalogueRow)
+    for attribute, member in vars(cls).items():
+        if attribute == "__init__" and row:
+            continue
+        if attribute.startswith("_") and attribute != "__init__":
+            continue
+        function = (
+            member.__func__
+            if isinstance(member, classmethod | staticmethod)
+            else member
+        )
+        if inspect.isfunction(function):
+            yield attribute, function
+
+
+def _exported_targets(exported: str, obj: object) -> Iterator[tuple[str, object]]:
+    """``(qualname, object)`` of what one exported name puts under the rule:
+    a function, or a record and the public methods of a class.
+    """
+    if inspect.isfunction(obj):
+        yield exported, obj
+        return
+    if not inspect.isclass(obj):
+        return
+    if dataclasses.is_dataclass(obj):
+        yield exported, obj
+    for attribute, function in _public_methods(obj):
+        yield f"{exported}.{attribute}", function
+
+
 def _targets() -> Iterator[tuple[str, str, object]]:
     """``(module, qualname, object)`` of every public callable and record."""
     seen: set[tuple[str, str]] = set()
@@ -709,26 +1224,10 @@ def _targets() -> Iterator[tuple[str, str, object]]:
             home = getattr(obj, "__module__", "") or ""
             if not home.startswith("phonometry"):
                 continue
-            if inspect.isclass(obj):
-                if (home, exported) not in seen and dataclasses.is_dataclass(obj):
-                    seen.add((home, exported))
-                    yield home, exported, obj
-                for attribute, member in vars(obj).items():
-                    if attribute.startswith("_") and attribute != "__init__":
-                        continue
-                    function = (
-                        member.__func__
-                        if isinstance(member, classmethod | staticmethod)
-                        else member
-                    )
-                    if inspect.isfunction(function):
-                        key = (home, f"{exported}.{attribute}")
-                        if key not in seen:
-                            seen.add(key)
-                            yield home, f"{exported}.{attribute}", function
-            elif inspect.isfunction(obj) and (home, exported) not in seen:
-                seen.add((home, exported))
-                yield home, exported, obj
+            for qualname, target in _exported_targets(exported, obj):
+                if (home, qualname) not in seen:
+                    seen.add((home, qualname))
+                    yield home, qualname, target
 
 
 def _parsed(obj: object) -> ast.AST | None:
@@ -765,6 +1264,140 @@ def _the_name(name: str) -> Callable[[ast.expr], bool]:
     return matches
 
 
+def _field_read(name: str, *, own: bool) -> Callable[[ast.expr], bool]:
+    """A predicate for ``<expr>.<name>``, a field read off a record.
+
+    In a method of the record's own class (*own*) ``self.<name>`` is the
+    field too; in another class's method it is that class's attribute, which
+    only shares the name.
+    """
+
+    def matches(node: ast.expr) -> bool:
+        return (
+            isinstance(node, ast.Attribute)
+            and node.attr == name
+            and (
+                own
+                or not (isinstance(node.value, ast.Name) and node.value.id == "self")
+            )
+        )
+
+    return matches
+
+
+@functools.cache
+def _module_functions(
+    module_name: str,
+) -> tuple[tuple[str, ast.FunctionDef | ast.AsyncFunctionDef], ...]:
+    """Every function and method *module_name* defines, with its class.
+
+    Nested functions are included, each paired with the class whose body
+    holds it, or the empty string at module level.
+    """
+    module = sys.modules.get(module_name)
+    if module is None:
+        return ()
+    try:
+        tree = ast.parse(inspect.getsource(module))
+    except (OSError, TypeError, SyntaxError):
+        return ()
+    found: list[tuple[str, ast.FunctionDef | ast.AsyncFunctionDef]] = []
+
+    def visit(node: ast.AST, owner: str) -> None:
+        for child in ast.iter_child_nodes(node):
+            if isinstance(child, ast.ClassDef):
+                visit(child, child.name)
+            elif isinstance(child, ast.FunctionDef | ast.AsyncFunctionDef):
+                found.append((owner, child))
+                visit(child, owner)
+            else:
+                visit(child, owner)
+
+    visit(tree, "")
+    return tuple(found)
+
+
+@functools.cache
+def _attribute_readers(
+    module_name: str,
+) -> dict[str, tuple[tuple[str, ast.FunctionDef | ast.AsyncFunctionDef], ...]]:
+    """The functions of a module that read each attribute name, by the name."""
+    readers: dict[str, list[tuple[str, ast.FunctionDef | ast.AsyncFunctionDef]]] = {}
+    for owner, function in _module_functions(module_name):
+        for attribute in {
+            node.attr for node in ast.walk(function) if isinstance(node, ast.Attribute)
+        }:
+            readers.setdefault(attribute, []).append((owner, function))
+    return {attribute: tuple(found) for attribute, found in readers.items()}
+
+
+def _functions_reading(
+    module_name: str, name: str
+) -> tuple[tuple[str, ast.FunctionDef | ast.AsyncFunctionDef], ...]:
+    """The functions of a module that read ``<expr>.<name>``, with their class."""
+    return _attribute_readers(module_name).get(name, ())
+
+
+def compared_in_module(
+    record: type,
+    name: str,
+    constants: dict[str, ast.expr],
+    *,
+    collection: bool = False,
+) -> list[str]:
+    """What the record's module says of a field it reads as ``<expr>.<name>``.
+
+    A field the record does not check when it is built is often checked where
+    it is used: ``source.direction not in _SIDE_TRAVEL`` in the function that
+    places a plane wave. Each function of the module the record is defined in
+    is read on its own, so a local bound from the field in one function is not
+    taken for another's, and ``self.<name>`` counts only in the record's own
+    methods.
+    """
+    found: list[str] = []
+    for owner, function in _functions_reading(record.__module__, name):
+        is_field = _field_read(name, own=owner == record.__name__)
+        found.extend(
+            f"{evidence} in {function.name}()"
+            for evidence in code_evidence(
+                function, is_field, constants, collection=collection
+            )
+        )
+    return list(dict.fromkeys(found))
+
+
+def _field_evidence(
+    record: type,
+    name: str,
+    constants: dict[str, ast.expr],
+    *,
+    collection: bool,
+) -> list[str]:
+    """What the code says of record field *name*, where the record is built or used.
+
+    The ``__post_init__`` that checks it, the helper that ``__post_init__``
+    hands ``self.<name>`` to (followed as a parameter is), and the functions of
+    the record's module that compare ``<expr>.<name>`` with strings.
+    """
+    check = vars(record).get("__post_init__")
+    tree = _parsed(check) if check is not None else None
+    if tree is not None:
+        evidence = code_evidence(
+            tree, _field_of_self(name), constants, collection=collection
+        )
+        if evidence:
+            return evidence
+        evidence = passed_on_evidence(
+            check,
+            name,
+            target=_field_of_self(name),
+            collection=collection,
+        )
+        if evidence:
+            return evidence
+    return compared_in_module(record, name, constants, collection=collection)
+
+
 def string_choices() -> Iterator[Choice]:
     """Every public string parameter or field, with what says it is closed."""
     for home, qualname, obj in _targets():
@@ -772,18 +1405,13 @@ def string_choices() -> Iterator[Choice]:
         if inspect.isclass(obj):
             if issubclass(obj, CatalogueRow):
                 continue
-            check = vars(obj).get("__post_init__")
-            tree = _parsed(check) if check is not None else None
             for field in dataclasses.fields(obj):  # type: ignore[arg-type]
                 annotation = _annotation(field.type)
-                if not takes_any_string(annotation):
+                collection = takes_any_strings(annotation)
+                if not (collection or takes_any_string(annotation)):
                     continue
                 name = field.name
-                evidence = (
-                    code_evidence(tree, _field_of_self(name), constants)
-                    if tree is not None
-                    else []
-                )
+                evidence = _field_evidence(obj, name, constants, collection=collection)
                 options = documented_options(obj.__doc__, name)
                 if len(options) >= 2:
                     evidence.append("documented options " + ", ".join(options[:6]))
@@ -799,16 +1427,17 @@ def string_choices() -> Iterator[Choice]:
             if parameter.name in {"self", "cls"}:
                 continue
             annotation = _annotation(parameter.annotation)
-            if not takes_any_string(annotation):
+            collection = takes_any_strings(annotation)
+            if not (collection or takes_any_string(annotation)):
                 continue
             name = parameter.name
             evidence = (
-                code_evidence(tree, _the_name(name), constants)
+                code_evidence(tree, _the_name(name), constants, collection=collection)
                 if tree is not None
                 else []
             )
             if not evidence:
-                evidence = passed_on_evidence(obj, name)
+                evidence = passed_on_evidence(obj, name, collection=collection)
             options = documented_options(getattr(obj, "__doc__", None), name)
             if len(options) >= 2:
                 evidence.append("documented options " + ", ".join(options[:6]))

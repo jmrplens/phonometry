@@ -383,7 +383,13 @@ PEAK_TO_KB_FACTORS: Mapping[str, float] = MappingProxyType(
 
 _PERIODS: tuple[TimeOfDay, ...] = ("day", "night")
 _AREAS: tuple[Area, ...] = tuple(GUIDE_VALUES)
-_SOURCES = ("general", "road", "railway", "urban_railway", "quarry_blasting")
+_SOURCES: tuple[Source, ...] = (
+    "general",
+    "road",
+    "railway",
+    "urban_railway",
+    "quarry_blasting",
+)
 _RAILWAYS = ("railway", "urban_railway")
 _ROADS = ("road", "road_existing")
 #: The sources whose A_u and A_r are read raised by a factor: the urban
@@ -395,7 +401,7 @@ _RAISED_SOURCES = {
 #: The sources the draft of 2023 adds (6.5.2 and 6.5.1.3), and the one it
 #: drops: the factor 1,5 on the guide values of an urban railway gives way
 #: to the weighting factor of its Table 2.
-_SOURCES_2023 = (
+_SOURCES_2023: tuple[Source, ...] = (
     "general",
     "road",
     "road_existing",
@@ -943,7 +949,7 @@ class PeopleAssessment(RichDisplay):
     kb_fmax: float
     kb_ftr: float | None
     guide: GuideValues
-    source: str
+    source: Source
     _: KW_ONLY
     rare_short_events: bool = False
 

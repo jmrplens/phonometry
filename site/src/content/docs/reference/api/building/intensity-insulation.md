@@ -295,8 +295,8 @@ IntensityElementNormalizedResult.report(
     engine: Literal['reportlab'] = 'reportlab',
     verbose: bool = False,
     language: Literal['en', 'es'] = 'en',
-    fpi: Sequence[float] | np.ndarray | None = None,
-    residual_index: Sequence[float] | np.ndarray | None = None,
+    fpi: ArrayLike | None = None,
+    residual_index: ArrayLike | None = None,
 ) -> str
 ```
 
@@ -340,8 +340,8 @@ PASS/FAIL verdict; the element insulation passes at or above the target.
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | When `True`, the left table shows the ISO 717 evaluation per band (the `DI,n,e` value, the shifted reference and the unfavourable deviation) instead of the two-column form. |
 | `language` | Fiche language: `"en"` (default, English) or `"es"` (Spanish, with a comma decimal separator). |
-| `fpi` | Optional per-band surface pressure-intensity indicator `FpI` (Clause 8 i requires it as a function of frequency); annexed as a table column when supplied. |
-| `residual_index` | Optional per-band pressure-residual intensity index `δpI0` of the probe and analyser (Clause 8 i); annexed as a table column when supplied. |
+| `fpi` | Optional per-band surface pressure-intensity indicator `FpI` (Clause 8 i requires it as a function of frequency), one value per band as a sequence or an array; annexed as a table column when supplied. |
+| `residual_index` | Optional per-band pressure-residual intensity index `δpI0` of the probe and analyser (Clause 8 i), one value per band as a sequence or an array; annexed as a table column when supplied. |
 
 **Returns:** The written `path` as a `str`.
 
@@ -407,8 +407,8 @@ IntensityReductionResult.report(
     engine: Literal['reportlab'] = 'reportlab',
     verbose: bool = False,
     language: Literal['en', 'es'] = 'en',
-    fpi: Sequence[float] | np.ndarray | None = None,
-    residual_index: Sequence[float] | np.ndarray | None = None,
+    fpi: ArrayLike | None = None,
+    residual_index: ArrayLike | None = None,
 ) -> str
 ```
 
@@ -450,8 +450,8 @@ and name the measurement standard in `measurement_standard`
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | When `True` and the Kc-modified index `RI,M` is available, the table annexes `RI,M` beside the reported `RI`. |
 | `language` | Fiche language: `"en"` (default, English) or `"es"` (Spanish, with a comma decimal separator). |
-| `fpi` | Optional per-band surface pressure-intensity indicator `FpI` (Clause 8 i requires it as a function of frequency); annexed as a table column when supplied. |
-| `residual_index` | Optional per-band pressure-residual intensity index `δpI0` of the probe and analyser (Clause 8 i); annexed as a table column when supplied. |
+| `fpi` | Optional per-band surface pressure-intensity indicator `FpI` (Clause 8 i requires it as a function of frequency), one value per band as a sequence or an array; annexed as a table column when supplied. |
+| `residual_index` | Optional per-band pressure-residual intensity index `δpI0` of the probe and analyser (Clause 8 i), one value per band as a sequence or an array; annexed as a table column when supplied. |
 
 **Returns:** The written `path` as a `str`.
 

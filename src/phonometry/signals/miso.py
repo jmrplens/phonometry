@@ -53,7 +53,7 @@ The random errors follow Bendat & Piersol Section 9.3: conditioning on the
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Literal, overload
 
@@ -105,6 +105,25 @@ _MIN_INPUT_RECORDS = 2
 # ---------------------------------------------------------------------------
 # Cross-spectral matrix assembly (Welch core of spectra.py)
 # ---------------------------------------------------------------------------
+
+
+def _records(
+    inputs: Signal | Iterable[Signal | ArrayLike] | ArrayLike,
+) -> Signal | Sequence[Signal | ArrayLike] | ArrayLike:
+    """The input records in a form each check below can read in full.
+
+    A generator, a ``map`` or a ``dict`` view of records is read once into a
+    list: the records are validated first and the Signals among them are
+    checked for one rate after, and a second pass over a generator would find
+    it empty, so that a Signal in it would never be checked. An iterable that
+    numpy reads as an array (one with ``__array__``) is that array; a Signal,
+    a sequence and a number are handed on as they are.
+    """
+    if isinstance(inputs, Signal | Sequence) or not isinstance(inputs, Iterable):
+        return inputs
+    if hasattr(inputs, "__array__"):
+        return np.asarray(inputs)
+    return list(inputs)
 
 
 def _resolve_miso_fs(
@@ -569,7 +588,7 @@ class MISOCoherenceResult(OwnsArrays):
 
 
 def miso_coherence(
-    inputs: Signal | Sequence[Signal | ArrayLike] | ArrayLike,
+    inputs: Signal | Iterable[Signal | ArrayLike] | ArrayLike,
     output: Signal | ArrayLike,
     fs: float | None = None,
     *,
@@ -602,8 +621,9 @@ def miso_coherence(
     Absent a physical basis, Bendat & Piersol (Section 7.2.4) recommend
     ordering the inputs by descending ordinary coherence with the output.
 
-    :param inputs: The ``q`` input records (``q >= 2``), a sequence of
-        equal-length 1-D arrays or a 2-D ``(q, n)`` array. Accepts a
+    :param inputs: The ``q`` input records (``q >= 2``), a sequence (or
+        any iterable, a generator included) of equal-length 1-D arrays or a
+        2-D ``(q, n)`` array. Accepts a
         :class:`phonometry.io.Signal` whose channels are the records, or a
         sequence with Signals among its elements; their calibration is
         applied to the samples, and Signals recorded at different rates are
@@ -624,9 +644,10 @@ def miso_coherence(
     :return: A :class:`MISOCoherenceResult`.
     :raises ValueError: If the inputs or parameters are invalid.
     """
-    xs, ya = _validate_inputs(inputs, output)
+    records = _records(inputs)
+    xs, ya = _validate_inputs(records, output)
     q = len(xs)
-    fs_v = _positive(_resolve_miso_fs(inputs, output, fs), "fs")
+    fs_v = _positive(_resolve_miso_fs(records, output, fs), "fs")
     scaling_v = _validate_scaling(scaling)
     perm = _validate_order(order, q)
     seg, ovl = _validate_welch_params(ya.size, fs_v, nperseg, overlap)

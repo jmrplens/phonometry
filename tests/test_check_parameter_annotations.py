@@ -8,8 +8,11 @@ method of the package and asks that a parameter the body converts with
 invariant ``list``, ``dict`` or ``set``. Its own run only says the tree is
 clean today; these tests fix what it must catch, on small packages written
 for the purpose (a multiline call into a helper, an alias of the narrow
-union, an alias imported from another module, an overload head), and what it
-must let through (a pair of limits, a scalar validator, a private helper).
+union, an alias imported from another module, an overload head, a vararg
+converted one argument at a time, a loop over a literal of parameters, a
+sequence converted item by item), and what it must let through (a pair of
+limits, a scalar validator, a private helper, a sequence whose items take a
+sequence of numbers).
 """
 
 from __future__ import annotations
@@ -302,6 +305,112 @@ def test_a_sequence_of_pairs_the_body_converts_is_refused(
         """,
     )
     assert list(refused) == ["components(parts)"]
+
+
+def test_a_vararg_converted_one_argument_at_a_time_is_refused(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A vararg's annotation types each argument, which a loop takes in turn."""
+    refused = _refused(
+        tmp_path,
+        api="""
+        __all__ = ["cascade", "stacked", "widened"]
+
+        def cascade(*matrices: NDArray[np.complex128]) -> list[np.ndarray]:
+            arrays = []
+            for i, matrix in enumerate(matrices):
+                arrays.append(np.asarray(matrix, dtype=np.complex128))
+            return arrays
+
+        def stacked(*rows: NDArray[np.float64]) -> list[np.ndarray]:
+            return [np.asarray(row) for row in sorted(rows, key=len)]
+
+        def widened(*matrices: ArrayLike) -> list[np.ndarray]:
+            return [np.asarray(matrix) for matrix in matrices]
+        """,
+    )
+    assert sorted(refused) == ["cascade(matrices)", "stacked(rows)"]
+    assert refused["cascade(matrices)"] == [
+        "annotated NDArray[np.complex128], and np.asarray() converts any array-like"
+    ]
+
+
+def test_each_parameter_a_loop_over_a_literal_takes_is_followed(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``for v in (a, b)`` takes each parameter as it is, in a pair or alone."""
+    refused = _refused(
+        tmp_path,
+        api="""
+        __all__ = ["columns", "report"]
+
+        def columns(fpi: Sequence[float] | np.ndarray, delta: np.ndarray) -> None:
+            for values in (fpi, delta):
+                np.asarray(values, dtype=float)
+
+        def report(fpi: np.ndarray | None = None, delta: ArrayLike = None) -> None:
+            _columns(fpi, delta)
+
+        def _columns(fpi: np.ndarray | None, delta: ArrayLike) -> None:
+            for name, values in (("fpi", fpi), ("delta", delta)):
+                if values is not None:
+                    np.asarray(values)
+        """,
+    )
+    assert sorted(refused) == ["columns(delta)", "columns(fpi)", "report(fpi)"]
+
+
+def test_an_item_converted_alone_asks_its_item_type_for_a_sequence(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A body that converts a copy of the parameter item by item reads its items.
+
+    The parameter need not take ``ArrayLike``: each item takes a number, a
+    sequence of numbers or an array. An item typed a fixed pair or an array
+    alone refuses the list ``np.asarray`` takes, and is refused.
+    """
+    refused = _refused(
+        tmp_path,
+        api="""
+        __all__ = ["budget", "pairs", "codes", "rows"]
+
+        def budget(
+            contributions: (
+                Sequence[float | Sequence[float] | NDArray[np.floating[Any]]]
+                | NDArray[np.floating[Any]]
+            ),
+        ) -> float:
+            items = list(contributions)
+            total = 0.0
+            for item in items:
+                total += float(np.sum(np.asarray(item)))
+            return total
+
+        def pairs(contributions: Sequence[tuple[float, float]]) -> float:
+            items = list(contributions)
+            return sum(float(np.prod(np.asarray(item))) for item in items)
+
+        def codes(pair: tuple[np.ndarray, np.ndarray]) -> list[np.ndarray]:
+            return [_signal(code) for code in pair]
+
+        def rows(levels: Sequence[float]) -> list[np.ndarray]:
+            return [np.asarray(level) for level in levels]
+
+        def _signal(x: ArrayLike) -> np.ndarray:
+            return np.asarray(x)
+        """,
+    )
+    assert sorted(refused) == ["codes(pair)", "pairs(contributions)"]
+    assert refused["pairs(contributions)"] == [
+        "annotated Sequence[tuple[float, float]], whose items (tuple[float, float]) "
+        "take no sequence of numbers, and an item np.asarray() converts any "
+        "array-like"
+    ]
+    assert refused["codes(pair)"] == [
+        "annotated tuple[np.ndarray, np.ndarray], whose items (np.ndarray) take no "
+        "sequence of numbers, and an item handed to _signal(x: ArrayLike) converts "
+        "any array-like"
+    ]
 
 
 def test_a_method_taken_from_a_private_base_class_is_read(

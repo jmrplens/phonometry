@@ -19,6 +19,8 @@ if TYPE_CHECKING:
 
     from numpy.typing import NDArray
 
+    from .._internal.types import RealValues
+
 __all__ = [
     "FractionalOctaveBands",
     "nominal_frequencies",
@@ -128,7 +130,7 @@ def _band_set(
 
 def nominal_frequencies(
     fraction: float,
-    limits: Sequence[float] | None = None,
+    limits: RealValues | None = None,
 ) -> FractionalOctaveBands:
     r"""The fractional-octave bands that cover a frequency range.
 
@@ -141,7 +143,8 @@ def nominal_frequencies(
 
     :param fraction: Bandwidth fraction ``b`` (e.g., 1 for octaves, 3 for
         one-third octaves).
-    :param limits: ``[f_min, f_max]`` in hertz (Default: ``[12, 20000]``).
+    :param limits: ``[f_min, f_max]`` in hertz, a sequence or an array of
+        the two (Default: ``[12, 20000]``).
     :return: A :class:`FractionalOctaveBands` with the exact centres
         (``.frequencies``), the band edges (``.lower_edges`` and
         ``.upper_edges``) and the nominal labels (``.labels``).
@@ -235,9 +238,7 @@ def _deleteouters(bands: FractionalOctaveBands, fs: int) -> FractionalOctaveBand
     )
 
 
-def _genfreqs(
-    limits: Sequence[float], fraction: float, fs: int
-) -> FractionalOctaveBands:
+def _genfreqs(limits: RealValues, fraction: float, fs: int) -> FractionalOctaveBands:
     """Determine the bands within limits that a bank at ``fs`` can hold.
 
     :param limits: [f_min, f_max].

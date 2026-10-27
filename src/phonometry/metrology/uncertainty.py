@@ -40,7 +40,7 @@ import numpy as np
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike
+    from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
 
@@ -618,7 +618,10 @@ def uncertainty_propagation(
 
 
 def combined_standard_uncertainty(
-    contributions: Sequence[float] | Sequence[tuple[float, float]] | np.ndarray,
+    contributions: (
+        Sequence[float | Sequence[float] | NDArray[np.floating[Any]]]
+        | NDArray[np.floating[Any]]
+    ),
 ) -> float:
     r"""Combined standard uncertainty of independent contributions, root-sum-square.
 
@@ -636,8 +639,9 @@ def combined_standard_uncertainty(
 
     :param contributions: Either the products :math:`c_j u_j`, one per
         contribution, in the unit of the result (decibels for a level), or
-        ``(u_j, c_j)`` pairs whose product is formed here, with ``u_j``
-        non-negative. Independent inputs are assumed, so there is no
+        ``(u_j, c_j)`` pairs whose product is formed here (each a tuple, a
+        list or an array of the two), with ``u_j`` non-negative; the two
+        may be mixed, and an array of pairs is read row by row. Independent inputs are assumed, so there is no
         covariance term.
     :return: :math:`u_\mathrm{c}`, in the unit of the contributions.
     :raises ValueError: If ``contributions`` is empty, holds a value that is
@@ -650,7 +654,9 @@ def combined_standard_uncertainty(
         raise ValueError(msg)
     products = []
     for item in items:
-        if isinstance(item, (tuple, list, np.ndarray)):
+        if isinstance(item, Sequence | np.ndarray) and not isinstance(
+            item, str | bytes
+        ):
             pair = np.asarray(item, dtype=np.float64)
             if pair.shape != (2,):
                 msg = "Each pair must be (uncertainty, sensitivity)."

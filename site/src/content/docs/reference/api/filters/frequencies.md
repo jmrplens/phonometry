@@ -44,7 +44,7 @@ a tuple, so it cannot be unpacked by position: read `.frequencies`,
 ```python
 nominal_frequencies(
     fraction: float,
-    limits: Sequence[float] | None = None,
+    limits: Sequence[float] | NDArray[Any] | None = None,
 ) -> FractionalOctaveBands
 ```
 
@@ -62,7 +62,7 @@ reaches `limits[1]`.
 | Name | Description |
 | :--- | :--- |
 | `fraction` | Bandwidth fraction `b` (e.g., 1 for octaves, 3 for one-third octaves). |
-| `limits` | `[f_min, f_max]` in hertz (Default: `[12, 20000]`). |
+| `limits` | `[f_min, f_max]` in hertz, a sequence or an array of the two (Default: `[12, 20000]`). |
 
 **Returns:** A [`FractionalOctaveBands`](/phonometry/reference/api/filters/frequencies/#fractionaloctavebands) with the exact centres (`.frequencies`), the band edges (`.lower_edges` and `.upper_edges`) and the nominal labels (`.labels`).
 

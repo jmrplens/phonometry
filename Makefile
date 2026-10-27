@@ -373,12 +373,16 @@ return-overloads:
 # parameter that holds an array or a sequence of numbers and no ArrayLike
 # while its body converts it (np.asarray and its kin, or a function of the
 # package whose parameter is ArrayLike, followed through helpers six calls
-# deep), on an overload head that takes such a parameter narrower, and on a
-# public parameter that holds list, dict or set anywhere. Annotations are
-# read through the package's aliases and imports. On the tree it was written
-# against it found 561 such parameters of 313 functions and methods; the
-# files gpu_parity.py fingerprints are left out as a whole, read from its
-# _COVERED, and two label lists stay exempt with their reasons. Stdlib only.
+# deep, through the local names and copies bound to it, and through a loop
+# over a vararg or over a literal of parameters), on one converted item by
+# item whose item type takes no sequence of numbers, on an overload head
+# that takes such a parameter narrower, and on a public parameter that holds
+# list, dict or set anywhere. Annotations are read through the package's
+# aliases and imports. On the tree it was written against it found 559
+# parameters of 313 functions and methods, 534 converted and 25 holding a
+# list or a dict, the 9 of the files gpu_parity.py fingerprints and two
+# exempt label lists among them: those files are left out as a whole, read
+# from its _COVERED, and the two lists keep their reasons. Stdlib only.
 parameter-annotations:
 	$(PYTHON) scripts/check_parameter_annotations.py
 

@@ -14,12 +14,22 @@ the rule; this file holds the forms a caller writes.
 
 from __future__ import annotations
 
+import math
 from typing import assert_type
 
 import numpy as np
 from numpy.typing import NDArray
 
-from phonometry import aircraft, broadcast, filters, materials
+from phonometry import (
+    aircraft,
+    broadcast,
+    filters,
+    materials,
+    metrology,
+    noise_control,
+    room,
+    signals,
+)
 
 #: Two channels of samples, ``[channels, samples]``, as a nested list.
 _TWO_CHANNELS = [[0.1, -0.2, 0.3, -0.1] * 100, [0.05, 0.1, -0.1, 0.0] * 100]
@@ -55,3 +65,38 @@ def test_a_list_of_one_kind_of_layer_is_a_sequence_of_layers() -> None:
     layers: list[materials.AirLayer] = [materials.AirLayer(thickness_m=0.05)]
     result = materials.layered_absorber((250, 500, 1000), layers)
     assert_type(result, materials.LayeredAbsorberResult)
+
+
+def test_a_nested_list_is_a_four_pole_matrix_and_an_uncertainty_pair() -> None:
+    """Each matrix ``cascade`` collects and each pair of a budget is converted alone.
+
+    So a nested list is a four-pole matrix as an array is, and a list pair,
+    a mixed list and an array of pairs are contributions as a tuple pair is.
+    """
+    identity = [[[1, 0], [0, 1]]] * 3
+    compound = noise_control.cascade(identity, np.ones((3, 2, 2)))
+    assert_type(compound, NDArray[np.complex128])
+    assert compound.shape == (3, 2, 2)
+    pairs = metrology.combined_standard_uncertainty([[0.5, 1.0], [0.2, 2.0]])
+    mixed = metrology.combined_standard_uncertainty([0.3, (0.5, 1.0)])
+    stacked = metrology.combined_standard_uncertainty(
+        np.array([[0.5, 1.0], [0.2, 2.0]])
+    )
+    assert_type(pairs, float)
+    assert math.isclose(pairs, math.sqrt(0.41))
+    assert math.isclose(mixed, math.sqrt(0.34))
+    assert math.isclose(stacked, pairs)
+
+
+def test_records_from_a_generator_and_codes_as_lists_are_inputs() -> None:
+    """A generator of records is an input set; a Golay pair may hold lists."""
+    rng = np.random.default_rng(7)
+    x1, x2 = rng.standard_normal(4096), rng.standard_normal(4096)
+    records = (record for record in (x1, x2))
+    miso = signals.miso_coherence(records, x1 + x2, 1000.0, nperseg=256)
+    assert_type(miso, signals.MISOCoherenceResult)
+    assert miso.n_inputs == 2
+    # The order-2 pair of golay_pair(2), written as lists.
+    code_a, code_b = [1.0, 1.0, 1.0, -1.0], [1.0, 1.0, -1.0, 1.0]
+    ir = room.golay_impulse_response(code_a * 2, code_b * 2, (code_a, code_b))
+    assert_type(ir, room.ImpulseResponseResult)

@@ -1128,9 +1128,11 @@ jobs:
   # NDArray[np.float64], it makes a typed caller's working code a type error,
   # and list is invariant besides. This fails on a public parameter that
   # holds an array or a sequence of numbers and no ArrayLike while its body
-  # converts it, followed through the helpers it is handed to, on an overload
-  # head that takes such a parameter narrower, and on any public parameter
-  # that holds list, dict or set. The files gpu_parity.py fingerprints are
+  # converts it, followed through the helpers it is handed to and the loops
+  # over a vararg or a literal of parameters, on one converted item by item
+  # whose item type takes no sequence of numbers, on an overload head that
+  # takes such a parameter narrower, and on any public parameter that holds
+  # list, dict or set. The files gpu_parity.py fingerprints are
   # left out as a whole, read from its _COVERED. It reads the annotations
   # through the package's aliases and imports. Static and dependency-free,
   # so it runs on its own.

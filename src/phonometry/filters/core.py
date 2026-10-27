@@ -39,12 +39,11 @@ from .design import _cheby2_headroom, _design_sos_filter
 from .frequencies import _genfreqs
 
 if TYPE_CHECKING:
-    from collections.abc import Sequence
-
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
+    from .._internal.types import RealValues
 
 Mode = Literal["rms", "peak"]
 
@@ -494,7 +493,7 @@ def _validate_bank_design(
     fs: int,
     fraction: float,
     order: int,
-    limits: Sequence[float] | None,
+    limits: RealValues | None,
     design: FilterDesign,
     block_processing: BlockProcessing,
 ) -> list[float]:
@@ -540,7 +539,7 @@ def _validate_bank_design(
         # a stateful resampling algorithm would be required...
         msg = "Resampling and stateful behaviour (block processing) are not supported."
         raise ValueError(msg)
-    return list(limits)
+    return [float(f) for f in limits]
 
 
 def _require_level_mode(mode: str) -> Mode:
@@ -589,7 +588,7 @@ def _require_bank_input(x_proc: np.ndarray) -> None:
         raise ValueError(msg)
 
 
-def _resolve_limits(limits: Sequence[float] | None) -> list[float] | None:
+def _resolve_limits(limits: RealValues | None) -> list[float] | None:
     """Check ``limits`` is a pair of numbers before it is hashed or compared.
 
     The bank constructor owns the value checks (count, positivity, ordering,
@@ -622,7 +621,7 @@ class OctaveFilterBank:
         fs: int,
         fraction: float = 1,
         order: int = 6,
-        limits: Sequence[float] | None = None,
+        limits: RealValues | None = None,
         *,
         design: FilterDesign = _DEFAULT_DESIGN,
         calibration: LevelCalibration = _DEFAULT_CALIBRATION,
@@ -634,7 +633,8 @@ class OctaveFilterBank:
         :param fs: Sample rate in Hz.
         :param fraction: Bandwidth fraction (e.g., 1 for octave, 3 for 1/3 octave).
         :param order: Filter order.
-        :param limits: Frequency limits [f_min, f_max].
+        :param limits: Frequency limits [f_min, f_max], a sequence or an
+            array of the two.
         :param design: How the band filters are designed: family, ripple,
             stopband attenuation and multirate decimation
             (:class:`FilterDesign`). Only ``butter`` meets the class 1 mask
@@ -1141,7 +1141,7 @@ def octave_filter(
     fs: int | None = None,
     fraction: float = 1,
     order: int = 6,
-    limits: Sequence[float] | None = None,
+    limits: RealValues | None = None,
     *,
     sigbands: bool = False,
     detrend: bool = True,
@@ -1166,7 +1166,8 @@ def octave_filter(
         that disagrees with it raises instead of silently winning.
     :param fraction: Bandwidth 'b'. Examples: 1/3-octave b=3, 1-octave b=1, 2/3-octave b=1.5. Default: 1.
     :param order: Order of the filter. Default: 6.
-    :param limits: Minimum and maximum limit frequencies [f_min, f_max]. Default [12, 20000].
+    :param limits: Minimum and maximum limit frequencies [f_min, f_max], a
+        sequence or an array of the two. Default [12, 20000].
     :param sigbands: If True, also return the signal in the time domain divided into bands.
     :param detrend: If True, remove DC offset before filtering. Default: True.
     :param mode: 'rms' or 'peak'. Default: 'rms'.

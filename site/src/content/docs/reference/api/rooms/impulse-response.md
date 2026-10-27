@@ -76,7 +76,7 @@ decay curves -- that step belongs to downstream room-acoustics modules.
 golay_impulse_response(
     recorded_a: Signal | ArrayLike,
     recorded_b: Signal | ArrayLike,
-    pair: tuple[np.ndarray, np.ndarray],
+    pair: tuple[ArrayLike, ArrayLike],
     *,
     length: int | None = None,
     fs: int | None = None,
@@ -110,7 +110,7 @@ more exposed to time variance than a single sweep (Xiang, Sec. 2).
 | :--- | :--- |
 | `recorded_a` | Recorded response to the periodic `a` code; its length must be a positive multiple of the code length `L`. |
 | `recorded_b` | Recorded response to the periodic `b` code; its length must be a positive multiple of `L` (the period counts of the two recordings may differ). Both recordings accept a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples, so the recovered impulse response comes out in pascals per unit of excitation; two Signals recorded at different rates are refused rather than arbitrated. |
-| `pair` | The complementary pair `(a, b)` from [`golay_pair`](/phonometry/reference/api/rooms/impulse-response/#golay_pair). |
+| `pair` | The complementary pair `(a, b)` from [`golay_pair`](/phonometry/reference/api/rooms/impulse-response/#golay_pair), each code an array or a sequence of numbers. |
 | `length` | Number of IR samples to return. Defaults to `L`; longer requests are periodic extensions. |
 | `fs` | Optional sample rate in Hz, stored on the result so that [`ImpulseResponseResult.plot`](/phonometry/reference/api/rooms/impulse-response/#impulseresponseresultplot) can label a time axis in seconds (the recovery itself is sample-rate agnostic). Default `None`. Either record may be a [`Signal`](/phonometry/reference/api/io/io/#signal) and supply it instead; an explicit value that disagrees with one raises, and two Signals recorded at different rates are refused rather than arbitrated. |
 

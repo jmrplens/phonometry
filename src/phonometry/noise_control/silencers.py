@@ -283,14 +283,15 @@ def _shorting_frequency(
     return float(f[index])
 
 
-def cascade(*matrices: _Complex) -> _Complex:
+def cascade(*matrices: ArrayLike) -> _Complex:
     """Cascade element four-pole matrices from inlet to outlet.
 
     The compound matrix is the ordered product ``T1 @ T2 @ ... @ Tn`` (the
     state at the inlet equals the compound matrix times the state at the
     outlet), broadcast over the frequency axis.
 
-    :param matrices: One or more ``(n_freq, 2, 2)`` arrays sharing ``n_freq``.
+    :param matrices: One or more ``(n_freq, 2, 2)`` four-pole matrices sharing
+        ``n_freq``, each an array or a nested sequence numpy converts.
     :return: The compound ``(n_freq, 2, 2)`` array.
     :raises ValueError: If a matrix is not a ``(n_freq, 2, 2)`` array or the
         matrices disagree on ``n_freq``.

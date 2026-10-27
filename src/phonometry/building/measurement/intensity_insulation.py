@@ -98,8 +98,6 @@ from .laboratory_insulation import LaboratoryInsulationWarning
 from .ratings import WeightedRatingResult, weighted_rating
 
 if TYPE_CHECKING:
-    from collections.abc import Sequence
-
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
@@ -280,8 +278,8 @@ class IntensityReductionResult(OwnsArrays):
         engine: ReportEngine = "reportlab",
         verbose: bool = False,
         language: Language = "en",
-        fpi: Sequence[float] | np.ndarray | None = None,
-        residual_index: Sequence[float] | np.ndarray | None = None,
+        fpi: ArrayLike | None = None,
+        residual_index: ArrayLike | None = None,
     ) -> str:
         """Render an ISO 15186-1 intensity sound-insulation report to a PDF.
 
@@ -322,11 +320,13 @@ class IntensityReductionResult(OwnsArrays):
         :param language: Fiche language: ``"en"`` (default, English) or
             ``"es"`` (Spanish, with a comma decimal separator).
         :param fpi: Optional per-band surface pressure-intensity indicator
-            ``FpI`` (Clause 8 i requires it as a function of frequency);
-            annexed as a table column when supplied.
+            ``FpI`` (Clause 8 i requires it as a function of frequency), one
+            value per band as a sequence or an array; annexed as a table
+            column when supplied.
         :param residual_index: Optional per-band pressure-residual intensity
-            index ``δpI0`` of the probe and analyser (Clause 8 i); annexed as
-            a table column when supplied.
+            index ``δpI0`` of the probe and analyser (Clause 8 i), one value
+            per band as a sequence or an array; annexed as a table column
+            when supplied.
         :return: The written ``path`` as a :class:`str`.
         :raises ValueError: If ``engine`` is unknown, ``language`` is not one
             of the supported values, the result carries no single-number
@@ -407,8 +407,8 @@ class IntensityElementNormalizedResult(OwnsArrays):
         engine: ReportEngine = "reportlab",
         verbose: bool = False,
         language: Language = "en",
-        fpi: Sequence[float] | np.ndarray | None = None,
-        residual_index: Sequence[float] | np.ndarray | None = None,
+        fpi: ArrayLike | None = None,
+        residual_index: ArrayLike | None = None,
     ) -> str:
         """Render an ISO 15186-1 element-normalized insulation report to a PDF.
 
@@ -452,11 +452,13 @@ class IntensityElementNormalizedResult(OwnsArrays):
         :param language: Fiche language: ``"en"`` (default, English) or
             ``"es"`` (Spanish, with a comma decimal separator).
         :param fpi: Optional per-band surface pressure-intensity indicator
-            ``FpI`` (Clause 8 i requires it as a function of frequency);
-            annexed as a table column when supplied.
+            ``FpI`` (Clause 8 i requires it as a function of frequency), one
+            value per band as a sequence or an array; annexed as a table
+            column when supplied.
         :param residual_index: Optional per-band pressure-residual intensity
-            index ``δpI0`` of the probe and analyser (Clause 8 i); annexed as
-            a table column when supplied.
+            index ``δpI0`` of the probe and analyser (Clause 8 i), one value
+            per band as a sequence or an array; annexed as a table column
+            when supplied.
         :return: The written ``path`` as a :class:`str`.
         :raises ValueError: If ``engine`` is unknown, ``language`` is not one
             of the supported values, the result carries no single-number

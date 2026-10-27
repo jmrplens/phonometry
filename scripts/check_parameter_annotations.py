@@ -27,11 +27,23 @@ extends, an explicit ``__init__`` or ``__call__`` included):
   parameter is annotated ``ArrayLike``. The parameter is followed into
   the functions of the package it is handed to, by position or by
   keyword, into their own conversions, up to six calls deep, and through
-  the local names bound to it (``values = levels``); a function whose
-  parameter is annotated a single number, a text or a record says it takes
-  no array, and is not followed. A ``tuple`` of a fixed length at the top
-  of the annotation (``tuple[float, float]``, a pair of limits) is a record
-  of numbers whose arity the annotation states, not an array input;
+  the local names bound to it: a name assigned it (``values = levels``) or
+  a copy of it (``list(levels)``), the name a loop over a literal of
+  parameters takes each of them in (``for values in (fpi, delta)``), and,
+  for a vararg, whose annotation types each argument, the name a loop over
+  it takes each argument in (``for i, m in enumerate(matrices)``). A
+  function whose parameter is annotated a single number, a text or a record
+  says it takes no array, and is not followed. A ``tuple`` of a fixed length
+  at the top of the annotation (``tuple[float, float]``, a pair of limits)
+  is a record of numbers whose arity the annotation states, not an array
+  input;
+* a parameter the body converts item by item (``for item in contributions:
+  np.asarray(item)``) need not take ``ArrayLike``, but the item type of each
+  sequence it is annotated takes what numpy converts of one item: a number,
+  a sequence of numbers of any length, or ``ArrayLike``. An item type that
+  holds several numbers only in an array or in a ``tuple`` of a fixed
+  length (``Sequence[tuple[float, float]]``, ``tuple[NDArray, NDArray]``)
+  refuses the list the conversion takes, and fails;
 * when the function is overloaded, a caller sees only the heads, so a head
   that takes such a parameter narrower than ``ArrayLike`` fails as well,
   unless it takes it as a type parameter: that is a head that tells the
@@ -217,6 +229,17 @@ _CONVERTERS: dict[str, tuple[int | None, str | None]] = {
 #: Dunder methods a caller calls with arguments of its own.
 _CALLED_DUNDERS = frozenset({"__init__", "__new__", "__call__"})
 
+#: The builtins whose result holds what their one argument holds: a copy
+#: ``list(x)`` of a parameter is the parameter.
+_COPIES = frozenset({"list", "tuple", "sorted"})
+
+#: The builtins a loop reads the items of their first argument through, in
+#: its order or another: ``for x in sorted(xs)`` takes the items of ``xs``.
+_ORDERS = frozenset({"sorted", "reversed", "iter", "list", "tuple"})
+
+#: The names a loop over ``enumerate(xs)`` unpacks: the index and the item.
+_INDEXED = 2
+
 
 @dataclass(frozen=True)
 class Finding:
@@ -385,6 +408,51 @@ class Annotations:
         dotted = self.resolve(module, node)
         return dotted in _NUMBERS or self._holds_numbers(module, node, depth=depth)
 
+    def narrow_items(
+        self, module: str, node: ast.expr | None, bounds: dict[str, ast.expr]
+    ) -> list[str]:
+        """The item types of an annotation's sequences that take no sequence of numbers.
+
+        A body that converts a parameter one item at a time takes, for each
+        item, what numpy converts. An item type that holds several numbers
+        takes a sequence of them of any length (``Sequence[float]``) or
+        ``ArrayLike``; one that holds them only in an array or in a ``tuple``
+        of a fixed length refuses the list the conversion takes. An item that
+        is one number, a text or a record is typed as it is read, and the
+        items of an array are numbers or rows of one, which no annotation
+        narrows.
+        """
+        if node is None or self.admits_array_like(module, node, bounds):
+            return []
+        found: dict[str, None] = {}
+        for where, member in self.members(module, node, bounds):
+            if self.resolve(where, member) not in _CONTAINERS:
+                continue
+            for item in _items(member):
+                if not (_is_ellipsis(item) or self._takes_an_item(where, item)):
+                    found[ast.unparse(item)] = None
+        return list(found)
+
+    def _takes_an_item(self, module: str, item: ast.expr) -> bool:
+        members = self.members(module, item)
+        if any(
+            self.resolve(where, m) in _ARRAY_LIKE | _ANYTHING for where, m in members
+        ):
+            return True
+        if not any(self._holds_numbers(where, m, depth=0) for where, m in members):
+            return True
+        return any(self._open_numbers(where, m) for where, m in members)
+
+    def _open_numbers(self, module: str, node: ast.expr) -> bool:
+        """Whether a member is a sequence of numbers of any length."""
+        if self.resolve(module, node) in _TUPLES and not any(
+            map(_is_ellipsis, _items(node))
+        ):
+            return False
+        return self.resolve(module, node) in _CONTAINERS and self._holds_numbers(
+            module, node, depth=0
+        )
+
     def invariant(
         self, module: str, node: ast.expr | None, bounds: dict[str, ast.expr]
     ) -> list[str]:
@@ -446,28 +514,137 @@ def _carries(node: ast.expr | None, names: frozenset[str]) -> bool:
     return False
 
 
-def _bound_to(
-    node: ast.FunctionDef | ast.AsyncFunctionDef, name: str
-) -> frozenset[str]:
-    """The parameter and the local names a body binds to it as it stands."""
-    names = {name}
+@dataclass(frozen=True)
+class Bound:
+    """The local names a body binds to a parameter, by what each one holds."""
+
+    #: The value the annotation types: the parameter, a name assigned it, a
+    #: copy of it (``list(x)``, ``tuple(x)``, ``sorted(x)``), a name a loop
+    #: over a literal of parameters takes each of them in, and, for a
+    #: vararg, each of its arguments, which its annotation types.
+    whole: frozenset[str]
+    #: The tuple a vararg collects, and the names bound to it.
+    pack: frozenset[str]
+    #: One item of a whole value, which a loop over it takes in turn.
+    item: frozenset[str]
+
+
+#: What each kind of name holds once a loop reads it item by item: a pack
+#: gives its arguments, each a whole value; a whole value gives its items.
+#: An item of an item is not followed.
+_ITERATED = {"pack": "whole", "whole": "item"}
+
+
+def _kind(node: ast.expr | None, names: dict[str, set[str]]) -> str | None:
+    """What an expression holds of the parameter, if it holds it at all."""
+    for kind, bound in names.items():
+        if _carries(node, frozenset(bound)):
+            return kind
+    copied = _single_argument(node, _COPIES)
+    return _kind(copied, names) if copied is not None else None
+
+
+def _single_argument(
+    node: ast.expr | None, builtins: frozenset[str]
+) -> ast.expr | None:
+    """The one positional argument of a call to one of *builtins*, if it is one."""
+    if (
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id in builtins
+        and len(node.args) == 1
+        and not isinstance(node.args[0], ast.Starred)
+    ):
+        return node.args[0]
+    return None
+
+
+def _unpacked(
+    target: ast.expr, value: ast.expr, names: dict[str, set[str]]
+) -> Iterator[tuple[str, str]]:
+    """The names an assignment of *value* to *target* binds, and what each holds."""
+    if isinstance(target, ast.Name):
+        kind = _kind(value, names)
+        if kind is not None:
+            yield target.id, kind
+    elif (
+        isinstance(target, ast.Tuple | ast.List)
+        and isinstance(value, ast.Tuple | ast.List)
+        and len(target.elts) == len(value.elts)
+    ):
+        for part, element in zip(target.elts, value.elts, strict=True):
+            yield from _unpacked(part, element, names)
+
+
+def _taken(
+    target: ast.expr, source: ast.expr, names: dict[str, set[str]]
+) -> Iterator[tuple[str, str]]:
+    """The names a loop over *source* binds in *target*, and what each holds.
+
+    A loop over a literal (``for v in (a, b)``) takes each element as it is
+    written, a parameter itself; ``enumerate``, ``zip``, ``sorted`` and their
+    kin hand on the items of what they are given; any other loop over a name
+    bound to the parameter takes one item of it at a time.
+    """
+    if isinstance(source, ast.Tuple | ast.List):
+        for element in source.elts:
+            yield from _unpacked(target, element, names)
+        return
+    if isinstance(source, ast.Call) and isinstance(source.func, ast.Name):
+        builtin, arguments = source.func.id, source.args
+        parts = target.elts if isinstance(target, ast.Tuple | ast.List) else []
+        if builtin == "enumerate" and arguments and len(parts) == _INDEXED:
+            yield from _taken(parts[1], arguments[0], names)
+            return
+        if builtin == "zip" and arguments and len(parts) == len(arguments):
+            for part, iterable in zip(parts, arguments, strict=True):
+                yield from _taken(part, iterable, names)
+            return
+        if builtin in _ORDERS and arguments:
+            yield from _taken(target, arguments[0], names)
+            return
+    kind = _kind(source, names)
+    if kind in _ITERATED and isinstance(target, ast.Name):
+        yield target.id, _ITERATED[kind]
+
+
+def _bound(
+    node: ast.FunctionDef | ast.AsyncFunctionDef, name: str, *, vararg: bool
+) -> Bound:
+    """The local names a body binds to parameter *name*, as it stands or item by item."""
+    names: dict[str, set[str]] = {"whole": set(), "pack": set(), "item": set()}
+    names["pack" if vararg else "whole"].add(name)
     changed = True
     while changed:
         changed = False
         for child in ast.walk(node):
             if isinstance(child, ast.Assign):
-                targets, value = child.targets, child.value
+                found = [
+                    pair
+                    for target in child.targets
+                    for pair in _unpacked(target, child.value, names)
+                ]
             elif isinstance(child, ast.AnnAssign) and child.value is not None:
-                targets, value = [child.target], child.value
+                found = list(_unpacked(child.target, child.value, names))
+            elif isinstance(child, ast.For | ast.AsyncFor | ast.comprehension):
+                found = list(_taken(child.target, child.iter, names))
             else:
                 continue
-            if not _carries(value, frozenset(names)):
-                continue
-            for target in targets:
-                if isinstance(target, ast.Name) and target.id not in names:
-                    names.add(target.id)
+            for local, kind in found:
+                if local not in names[kind]:
+                    names[kind].add(local)
                     changed = True
-    return frozenset(names)
+    return Bound(
+        whole=frozenset(names["whole"]),
+        pack=frozenset(names["pack"]),
+        item=frozenset(names["item"]),
+    )
+
+
+def _holds(node: ast.expr, names: frozenset[str]) -> bool:
+    """Whether a call argument is one of *names*, or a copy of one."""
+    copied = _single_argument(node, _COPIES)
+    return _carries(node, names) or (copied is not None and _carries(copied, names))
 
 
 def _positional(
@@ -563,45 +740,69 @@ class Reader:
         return None
 
     def conversion(
+        self, function: overloads.Function, name: str, *, item: bool = False
+    ) -> str | None:
+        """How parameter *name* of *function* reaches a conversion, if it does.
+
+        With *item*, how one item of it does, the body reading the parameter
+        item by item.
+        """
+        for how, of_item in self._routes(function, name, 0, frozenset()):
+            if of_item == item:
+                return how
+        return None
+
+    def _routes(
         self,
         function: overloads.Function,
         name: str,
-        depth: int = 0,
-        seen: frozenset[str] = frozenset(),
-    ) -> str | None:
-        """How parameter *name* of *function* reaches a conversion, if it does."""
+        depth: int,
+        seen: frozenset[str],
+    ) -> Iterator[tuple[str, bool]]:
+        """Each way parameter *name* reaches a conversion, and whether an item of it does."""
         node = function.implementation
         if node is None or depth > DEPTH:
-            return None
-        names = _bound_to(node, name)
+            return
+        vararg = node.args.vararg is not None and node.args.vararg.arg == name
+        bound = _bound(node, name, vararg=vararg)
         for call in ast.walk(node):
             if not isinstance(call, ast.Call):
                 continue
-            positions = [
-                index for index, value in enumerate(call.args) if _carries(value, names)
-            ]
-            keywords = [
-                keyword.arg
-                for keyword in call.keywords
-                if keyword.arg is not None and _carries(keyword.value, names)
-            ]
-            if not (positions or keywords):
-                continue
-            callee = self._callee(function, call)
-            if callee is None:
-                continue
-            target, bound = callee
-            if target in _CONVERTERS:
-                where, keyword = _CONVERTERS[target]
-                if where is None or where in positions or keyword in keywords:
-                    return f"{target.replace('numpy.', 'np.')}()"
-                continue
-            found = self._handed(
-                target, positions, keywords, bound=bound, depth=depth, seen=seen
-            )
-            if found is not None:
-                return found
-        return None
+            for names, of_item in (
+                (bound.whole | bound.pack, False),
+                (bound.item, True),
+            ):
+                positions = [
+                    index
+                    for index, value in enumerate(call.args)
+                    if _holds(value, names)
+                ]
+                keywords = [
+                    keyword.arg
+                    for keyword in call.keywords
+                    if keyword.arg is not None and _holds(keyword.value, names)
+                ]
+                if not (positions or keywords):
+                    continue
+                callee = self._callee(function, call)
+                if callee is None:
+                    continue
+                target, bound_self = callee
+                if target in _CONVERTERS:
+                    where, keyword = _CONVERTERS[target]
+                    if where is None or where in positions or keyword in keywords:
+                        yield f"{target.replace('numpy.', 'np.')}()", of_item
+                    continue
+                for how, deeper in self._handed(
+                    target,
+                    positions,
+                    keywords,
+                    bound=bound_self,
+                    depth=depth,
+                    seen=seen,
+                ):
+                    if not (of_item and deeper):
+                        yield how, of_item or deeper
 
     def _handed(
         self,
@@ -612,12 +813,12 @@ class Reader:
         bound: bool,
         depth: int,
         seen: frozenset[str],
-    ) -> str | None:
+    ) -> Iterator[tuple[str, bool]]:
         """What the function a parameter is handed to does with it."""
         callee = self.package.functions[target]
         node = callee.implementation
         if node is None:
-            return None
+            return
         parameters = overloads._parameters(node)
         positional = _positional(node, bound=bound)
         received = [
@@ -631,13 +832,14 @@ class Reader:
                 continue
             annotation = parameters[parameter].annotation
             if self.annotations.names_array_like(callee.module, annotation, bounds):
-                return f"handed to {callee.qualname}({parameter}: ArrayLike)"
+                yield f"handed to {callee.qualname}({parameter}: ArrayLike)", False
+                continue
             if not self.annotations.may_hold_numbers(callee.module, annotation, bounds):
                 continue
-            deeper = self.conversion(callee, parameter, depth + 1, seen | {key})
-            if deeper is not None:
-                return f"handed to {callee.qualname}({parameter}), {deeper}"
-        return None
+            for deeper, of_item in self._routes(
+                callee, parameter, depth + 1, seen | {key}
+            ):
+                yield f"handed to {callee.qualname}({parameter}), {deeper}", of_item
 
 
 def public_functions(package: overloads.Package) -> Iterator[overloads.Function]:
@@ -768,19 +970,10 @@ def _conversion_findings(
         name = parameter.arg
         annotation = parameter.annotation
         if not annotations.admits_array_like(module, annotation, bounds):
-            if not annotations.several_numbers(module, annotation, bounds):
-                continue
-            how = reader.conversion(function, name)
-            if how is not None:
+            problem = _unconverted(reader, function, name, annotation, bounds)
+            if problem is not None:
                 found.append(
-                    Finding(
-                        path,
-                        node.lineno,
-                        function.qualname,
-                        name,
-                        f"annotated {ast.unparse(annotation) if annotation else '?'}"
-                        f", and {how} converts any array-like",
-                    )
+                    Finding(path, node.lineno, function.qualname, name, problem)
                 )
             continue
         heads = [
@@ -795,9 +988,7 @@ def _conversion_findings(
             and annotations.several_numbers(module, written, {**bounds, **own})
             and not annotations.admits_array_like(module, written, {**bounds, **own})
         ]
-        if not narrow:
-            continue
-        how = reader.conversion(function, name)
+        how = reader.conversion(function, name) if narrow else None
         if how is not None:
             found.append(
                 Finding(
@@ -809,7 +1000,56 @@ def _conversion_findings(
                     f"{how} converts any array-like",
                 )
             )
+            continue
+        narrow = [
+            head
+            for head, written, own in heads
+            if not _is_type_parameter(written, own)
+            and annotations.narrow_items(module, written, {**bounds, **own})
+        ]
+        how = reader.conversion(function, name, item=True) if narrow else None
+        if how is not None:
+            found.append(
+                Finding(
+                    path,
+                    narrow[0].lineno,
+                    function.qualname,
+                    name,
+                    "an overload head takes its items narrower than a sequence of "
+                    f"numbers, and an item {how} converts any array-like",
+                )
+            )
     return found
+
+
+def _unconverted(
+    reader: Reader,
+    function: overloads.Function,
+    name: str,
+    annotation: ast.expr | None,
+    bounds: dict[str, ast.expr],
+) -> str | None:
+    """Why an implementation's parameter refuses what its body converts, if it does.
+
+    The parameter is converted as it stands, and its annotation holds an
+    array or a sequence of numbers; or it is converted item by item, and the
+    item type of a sequence it is annotated takes no sequence of numbers.
+    """
+    module = function.module
+    annotations = reader.annotations
+    written = ast.unparse(annotation) if annotation else "?"
+    if annotations.several_numbers(module, annotation, bounds):
+        how = reader.conversion(function, name)
+        if how is not None:
+            return f"annotated {written}, and {how} converts any array-like"
+    items = annotations.narrow_items(module, annotation, bounds)
+    how = reader.conversion(function, name, item=True) if items else None
+    if how is not None:
+        return (
+            f"annotated {written}, whose items ({', '.join(items)}) take no "
+            f"sequence of numbers, and an item {how} converts any array-like"
+        )
+    return None
 
 
 def _invariant_findings(

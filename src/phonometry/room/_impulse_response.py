@@ -746,7 +746,7 @@ def golay_pair(order: int) -> tuple[np.ndarray, np.ndarray]:
 def golay_impulse_response(
     recorded_a: Signal | ArrayLike,
     recorded_b: Signal | ArrayLike,
-    pair: tuple[np.ndarray, np.ndarray],
+    pair: tuple[ArrayLike, ArrayLike],
     *,
     length: int | None = None,
     fs: int | None = None,
@@ -782,7 +782,8 @@ def golay_impulse_response(
         samples, so the recovered impulse response comes out in pascals per
         unit of excitation; two Signals recorded at different rates are
         refused rather than arbitrated.
-    :param pair: The complementary pair ``(a, b)`` from :func:`golay_pair`.
+    :param pair: The complementary pair ``(a, b)`` from :func:`golay_pair`,
+        each code an array or a sequence of numbers.
     :param length: Number of IR samples to return. Defaults to ``L``;
         longer requests are periodic extensions.
     :param fs: Optional sample rate in Hz, stored on the result so that

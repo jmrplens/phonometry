@@ -1,20 +1,25 @@
 /**
- * The conformance verdict marks, inlined into the page as an SVG sprite.
+ * The conformance verdict marks, as CSS images the page draws beside each
+ * verdict word.
  *
  * The same four files GitHub reads over `raw.githubusercontent.com`
  * (`.github/badges/verdict-*.svg`, written by `scripts/conformance_badges.py`),
- * read off disk at build time and turned into `<symbol>` definitions.
+ * read off disk at build time and turned into four `data:` URLs, which the
+ * report sets once on its root element as custom properties
+ * (`--cv-pass`, `--cv-fail`, ...). Every place that shows a verdict carries the
+ * verdict as an attribute, and one CSS rule draws the matching mark in a
+ * `::before` box beside the word.
  *
- * **Inlined, not fetched, and the reason is arithmetic.** The report draws a
- * mark on every one of 566 rows. Fetched, that is 566 `<img>` elements against
- * one cached file: cheap on the network, but every one of them is a layout box
- * that arrives late, and each carries an `alt` a screen reader announces
- * beside a word the row already states. Copying the file into every row is
- * worse: at 319 bytes for the smallest of the four that is 176 kB of markup.
- * A sprite is neither. Measured on the built page, the geometry costs 1002
- * bytes once and a row spends 149 on the `<svg><use>` that points at it, so
- * 566 rows come to 82 kB with no request and no flash, and the marks are in
- * the HTML that Pagefind indexes and that a reader without JavaScript sees.
+ * **Drawn by CSS, not by markup, and the reason is arithmetic.** The report
+ * draws a mark on every one of its rows, and there are close to two thousand
+ * of them. Fetched as `<img>`, each would be a layout box that arrives late and
+ * an `alt` a screen reader announces beside a word the row already states.
+ * Inlined as a sprite, the geometry costs a kilobyte once, but every row still
+ * spends about a hundred bytes on the `<svg><use>` that points at it: 200 kB
+ * of the page at 1,893 rows, which was a tenth of everything Googlebot reads
+ * of a page before it stops (2 MB, counted uncompressed). As a CSS image the
+ * mark costs nothing per row, needs no request, cannot flash, and is still
+ * invisible to assistive technology, which hears the word.
  *
  * The fills come across unchanged. They were chosen against every ground the
  * marks land on at once - GitHub's three canvases and two table stripes, and
@@ -103,9 +108,8 @@ if (onDisk.join() !== named.join()) {
  * The drawn geometry of one mark, without its root element or its title.
  *
  * The `<title>` is dropped on purpose. It is the text alternative for a reader
- * who opens the file on its own; inside this page the word beside the mark is
- * the alternative, and a `<title>` in a `<symbol>` would be a second, English,
- * announcement on the Spanish page.
+ * who opens the file on its own; inside the page the word beside the mark is
+ * the alternative, and a CSS image has no name to announce anyway.
  *
  * @param {string} file  Filename under `.github/badges`.
  * @returns {string} The inner markup.
@@ -120,30 +124,33 @@ function geometry(file) {
 }
 
 /**
- * Every verdict mark as a `<symbol>`, ready to be dropped into the page once.
+ * Every verdict mark as a standalone SVG document in a `data:` URL.
  *
- * @type {{verdict: string, id: string, symbol: string}[]}
+ * @type {{verdict: string, url: string}[]}
  */
-export const marks = FILES.map(([verdict, file]) => ({
-  verdict,
-  id: `cv-${verdict}`,
-  symbol: `<symbol id="cv-${verdict}" viewBox="0 0 16 16">${geometry(file)}</symbol>`,
-}));
-
-/** The whole sprite: the four symbols, concatenated in legend order. */
-export const sprite = marks.map((mark) => mark.symbol).join('');
+export const marks = FILES.map(([verdict, file]) => {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">${geometry(file)}</svg>`;
+  return { verdict, url: `url("data:image/svg+xml,${encodeURIComponent(svg)}")` };
+});
 
 /**
- * The `<symbol>` id a verdict draws with.
+ * The four marks as custom properties, for the `style` of the element that
+ * holds the report: `--cv-pass:url(...);--cv-fail:url(...);...`.
+ */
+export const markStyle = marks.map((mark) => `--cv-${mark.verdict}:${mark.url}`).join(';');
+
+/**
+ * The verdict a mark is drawn for.
  *
  * The fallback is the hollow ring, which is the only honest one: it is the
  * mark that means "nothing was decided here". It cannot be reached by a mark
  * this module has drifted away from, because the check above makes that a
  * build failure; it is there for a verdict the artefact carries and the badge
  * vocabulary does not.
+ *
+ * @param {string} verdict  The verdict as the artefact spells it.
+ * @returns {string} A verdict that has a mark.
  */
-export function markId(verdict) {
-  return marks.some((mark) => mark.verdict === verdict)
-    ? `cv-${verdict}`
-    : 'cv-not-applicable';
+export function markOf(verdict) {
+  return marks.some((mark) => mark.verdict === verdict) ? verdict : 'not-applicable';
 }

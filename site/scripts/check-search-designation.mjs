@@ -619,7 +619,9 @@ for (const lang of LANGS) {
   // order. Each search must then return the same pages from both, which is
   // what shows they read the same chunks, before its top five is compared.
   const weighted = await loadSearchIndex(distDir, lang, PAGEFIND_RANKING);
-  const unweighted = await loadSearchIndex(distDir, lang, { metaWeights: { standards: 0 } });
+  const unweighted = await loadSearchIndex(distDir, lang, {
+    metaWeights: { ...PAGEFIND_RANKING.metaWeights, standards: 0 },
+  });
   const fieldWords = new Set();
   for (const url of scope) for (const token of built.get(url).tokens) if (!/[0-9]/.test(token)) fieldWords.add(token);
   const plainFieldWords = [...fieldWords].filter((word) => !ISSUER_WORDS.has(word)).sort();
@@ -653,6 +655,45 @@ for (const lang of LANGS) {
       `${worstProseMarginQuery ? `; ${proseShapes} carry prose the field leaves out, closest ${worstProseMargin.toFixed(1)}x ("${worstProseMarginQuery}")` : ''}; ` +
       `${CONTROLS.length + plainFieldWords.length} control searches`,
   );
+}
+
+// ---------------------------------------------------------------------------
+// J. A page found by its own name.
+//
+// The errata registry is an index and one page per document family, and
+// every family page is titled with the register's word ("Errata in ISO
+// 3743"). Ranked by those titles, which Pagefind boosts five times, two family
+// pages came ahead of the index on a search for the registry by its name, so
+// the family pages are ranked by no title at all, and the one family page
+// that keeps its title, the properties that are not errata, is indexed at a
+// lower weight (`searchTitle` and `searchWeight` in their frontmatter, written
+// by scripts/generate_site_reports.py). Nothing on a page shows whether that
+// still does its job, so the searches a reader would type are run here, each
+// on a fresh copy of the index (see D above), and must list the page they name
+// first: the index for the registry's name, the page of properties that are
+// not errata for its own, and a family page for its document and the
+// register's word together, which a weight on the family pages would lose.
+// ---------------------------------------------------------------------------
+
+const OWN_NAME = [
+  { lang: 'en', query: 'errata', first: '/reference/errata/' },
+  { lang: 'en', query: 'errata registry', first: '/reference/errata/' },
+  { lang: 'en', query: 'not errata', first: '/reference/errata/not-errata/' },
+  { lang: 'en', query: 'Allard Atalla errata', first: '/reference/errata/allard-atalla/' },
+  { lang: 'en', query: 'NORAH2 errata', first: '/reference/errata/norah2/' },
+  { lang: 'es', query: 'erratas', first: '/es/reference/errata/' },
+  { lang: 'es', query: 'registro de erratas', first: '/es/reference/errata/' },
+  { lang: 'es', query: 'no son erratas', first: '/es/reference/errata/not-errata/' },
+  { lang: 'es', query: 'erratas Allard Atalla', first: '/es/reference/errata/allard-atalla/' },
+  { lang: 'es', query: 'erratas NORAH2', first: '/es/reference/errata/norah2/' },
+];
+for (const { lang, query, first } of OWN_NAME) {
+  const fresh = await loadSearchIndex(distDir, lang, PAGEFIND_RANKING);
+  const ranked = await searchAsReader(fresh, query);
+  const top = ranked.slice(0, 3).map((r) => `${r.url} ${r.score.toFixed(3)}`).join(', ');
+  if (ranked[0]?.url !== first) {
+    fail(`[${lang}] "${query}": ${first} must come first, got ${top || 'no results'}`);
+  }
 }
 
 // ---------------------------------------------------------------------------

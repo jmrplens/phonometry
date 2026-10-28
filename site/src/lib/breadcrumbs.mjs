@@ -50,13 +50,23 @@ function overviewSlugOf(group) {
  */
 const ANCESTORS = new Map();
 
+/**
+ * slug -> the tree's own entry for it (a bare slug, or an object with its
+ * label and translations), from the same placement ANCESTORS keeps. It names
+ * the crumb of a listed page that another page sits under.
+ */
+const ENTRIES = new Map();
+
 (function walk(items, trail) {
   for (const item of items) {
     const slug = slugOf(item);
     if (slug !== undefined) {
       // A page can legitimately appear twice in the tree; the first placement
       // wins, which keeps the trail stable rather than order-dependent.
-      if (!ANCESTORS.has(slug)) ANCESTORS.set(slug, trail);
+      if (!ANCESTORS.has(slug)) {
+        ANCESTORS.set(slug, trail);
+        ENTRIES.set(slug, item);
+      }
       continue;
     }
     if (item && Array.isArray(item.items)) {
@@ -80,7 +90,15 @@ export function breadcrumbsFor({ slug, title, lang, origin, base }) {
   const prefix = `${origin}${base}${lang === 'es' ? '/es' : ''}`;
   const crumbs = [{ name: 'phonometry', item: `${prefix}/` }];
 
-  for (const group of ANCESTORS.get(slug) ?? []) {
+  // A page the tree does not list sits under the nearest route it does: an
+  // errata page, `reference/errata/iso-3743`, is one of 96 the registry's
+  // index lists and the sidebar does not, and its trail is the index's with
+  // the index added, as its address says. Without this its trail skipped
+  // straight from the root to the page.
+  const parent = ANCESTORS.has(slug) ? undefined : listedParentOf(slug);
+
+  const trail = ANCESTORS.get(parent ?? slug) ?? [];
+  for (const group of trail) {
     const overview = overviewSlugOf(group);
     // Groups with no landing page (the two-row "Start" group, the API
     // subgroups) contribute nothing rather than a dead link.
@@ -91,8 +109,42 @@ export function breadcrumbsFor({ slug, title, lang, origin, base }) {
     crumbs.push({ name: labelOf(group, lang), item: `${prefix}/${overview}/` });
   }
 
+  if (parent !== undefined) {
+    const item = `${prefix}/${parent}/`;
+    // A route that is its group's landing page is already in the trail, under
+    // the group's name.
+    if (!crumbs.some((crumb) => crumb.item === item)) {
+      const entry = ENTRIES.get(parent);
+      // The crumb is named as the sidebar names the route. A route listed as
+      // a bare slug has no name of its own here, and inventing one from the
+      // slug would publish a label no reader ever sees on the site.
+      if (typeof entry !== 'object' || typeof entry.label !== 'string') {
+        throw new Error(
+          `[breadcrumbs] ${slug} is not in the navigation tree, and the route it sits under, ` +
+            `${parent}, is listed in src/data/topics.mjs without a label to name its crumb. ` +
+            'Give that entry a label (and its translations).',
+        );
+      }
+      crumbs.push({ name: labelOf(entry, lang), item });
+    }
+  }
+
   crumbs.push({ name: title, item: `${prefix}/${slug}/` });
   return crumbs;
+}
+
+/**
+ * The longest route above `slug` that the tree lists, or undefined.
+ *
+ * @param {string} slug A page slug the tree does not list.
+ * @returns {string | undefined}
+ */
+function listedParentOf(slug) {
+  for (let route = slug; route.includes('/'); ) {
+    route = route.slice(0, route.lastIndexOf('/'));
+    if (ANCESTORS.has(route)) return route;
+  }
+  return undefined;
 }
 
 /** Every slug the navigation tree knows about. Used by the route checks. */

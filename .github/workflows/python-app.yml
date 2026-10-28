@@ -277,9 +277,10 @@ jobs:
           exit 1
         fi
 
-  # Drift gate for the evidence pages the site renders from docs/: the body of
-  # docs/ERRATA.md is transplanted into the two reference/errata pages (EN +
-  # ES), so the site can never show a hand-copied or stale version of it. The
+  # Drift gate for the evidence pages the site renders from docs/: the entries
+  # of docs/ERRATA.md and docs/ERRATA.es.md are transplanted into one
+  # reference/errata page per document family and an index (EN + ES), so the
+  # site can never show a hand-copied or stale version of them. The
   # conformance pages are no longer transplanted - they render from
   # docs/conformance.json through src/components/Conformance.astro, which the
   # `conformance` job gates instead.

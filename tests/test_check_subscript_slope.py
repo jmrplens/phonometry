@@ -639,17 +639,39 @@ def test_an_upright_letter_opening_a_subscript_is_not_read_as_an_index(
     assert failures == []
 
 
+@pytest.mark.parametrize(
+    "rel",
+    [
+        "reference/errata.md",
+        # The site publishes the register as an index and one page per
+        # document family, in a folder of its own, in both languages.
+        "reference/errata/index.mdx",
+        "reference/errata/iso-3743.md",
+        "es/reference/errata/din-4150.md",
+    ],
+)
 def test_the_errata_register_may_quote_an_upright_index(
-    tmp_path: pathlib.Path,
+    tmp_path: pathlib.Path, rel: str
 ) -> None:
     """A transcription keeps the print; a drawing module is held to the rule."""
-    (tmp_path / "reference").mkdir()
+    (tmp_path / rel).parent.mkdir(parents=True, exist_ok=True)
     (tmp_path / "_plot").mkdir()
-    errata = _write(tmp_path, "reference/errata.md", "$D_\\mathrm{C,i}$\n")
+    errata = _write(tmp_path, rel, "$D_\\mathrm{C,i}$\n")
     plot = _write(tmp_path, "_plot/building.py", 'LABEL = r"$L_\\mathrm{v,i}$"\n')
     _, failures = css.check([], bases_only=[errata, plot])
     assert len(failures) == 1
     assert "building.py" in failures[0]
+    assert "the index i is upright on line 1" in failures[0]
+
+
+def test_a_page_beside_the_errata_folder_is_not_a_transcription(
+    tmp_path: pathlib.Path,
+) -> None:
+    """Only the register's own folder is exempt, not a name that starts like it."""
+    (tmp_path / "reference").mkdir()
+    page = _write(tmp_path, "reference/errata-guide.md", "$D_\\mathrm{C,i}$\n")
+    _, failures = css.check([], bases_only=[page])
+    assert len(failures) == 1
     assert "the index i is upright on line 1" in failures[0]
 
 

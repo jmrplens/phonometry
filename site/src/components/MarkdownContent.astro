@@ -15,12 +15,17 @@
  * already has one, which this site does; without this the zoom buttons would
  * render with nothing to open them. ZoomI18n translates the dialog control on
  * the Spanish pages.
+ *
+ * The body takes the page's search weight, when it sets one
+ * (SearchWeight.astro), outside Starlight's own wrapper so its typography and
+ * spacing are untouched.
  */
 import Default from '@astrojs/starlight/components/MarkdownContent.astro';
 import ImageZoom from 'starlight-image-zoom/components/ImageZoom.astro';
 import ZoomI18n from './ZoomI18n.astro';
 import References from './References.astro';
 import TopicSections from './TopicSections.astro';
+import SearchWeight from './SearchWeight.astro';
 ---
 
-<Default><ZoomI18n><ImageZoom /></ZoomI18n><TopicSections /><slot /><References /></Default>
+<SearchWeight><Default><ZoomI18n><ImageZoom /></ZoomI18n><TopicSections /><slot /><References /></Default></SearchWeight>

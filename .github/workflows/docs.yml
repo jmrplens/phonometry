@@ -357,11 +357,14 @@ jobs:
         # all green.
         run: pnpm run check:sidebar
         working-directory: site
-      - name: Check the landing, the contrast and the language bar
+      - name: Check the landing, the contrast, the language bar and the reference pages
         # Three audits that existed and ran for nobody: the colour tokens of
         # both themes against the contrast floor, the landing page's headings
         # and grid at ten viewport and font-size combinations, and the
-        # behaviour of the language suggestion bar. They share one preview.
+        # behaviour of the language suggestion bar. With them, the controls of
+        # the conformance report and the old errata links, which have to keep
+        # working on pages slimmed and split for the crawler's 2 MB. They
+        # share one preview.
         run: pnpm run check:visual
         working-directory: site
       # Only the branch that publishes needs the tarball. A pull request has

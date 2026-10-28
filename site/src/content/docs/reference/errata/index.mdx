@@ -1,0 +1,196 @@
+---
+title: "Errata in published sources"
+description: "Defects in the standards, guidance and textbooks the library uses: misprints, worked examples contradicting their own clauses, and how each is handled."
+---
+
+Implementing a standard clean-room means re-deriving every formula, constant
+and worked example from the source document rather than from anyone else's
+code. Done across hundreds of documents, that process finds defects in the
+sources themselves: a worked example that contradicts its own normative
+clause, a constant with a digit dropped in typesetting, a cross-reference that
+points at the wrong equation.
+
+This is the registry of those findings. Each entry names the printed
+edition and the exact location, quotes what the document says, shows why it
+cannot be right, gives the independent evidence, and states which reading the
+library implements and which regression test pins it. A defect listed here is
+never a defect of the *method*: in every case the intended reading could be
+established from the document itself or from physics.
+
+Read it alongside the [conformance report](/phonometry/reference/conformance/),
+which shows the numbers the library computes; the registry explains the
+handful of places where the printed expected value is the thing that is wrong.
+
+Each entry lives on the page of the document it is about, one page per
+document family: every part and edition of ISO 3743 on one page, a book on a
+page named after its authors. Every entry is listed below under its document.
+A link to an entry written as `/reference/errata/#entry`, from before the
+registry was split, still lands on it.
+
+The registry is maintained in
+[`docs/ERRATA.md`](https://github.com/jmrplens/phonometry/blob/main/docs/ERRATA.md)
+and transplanted into these pages at build time by `make site-reports`, so
+the two cannot disagree.
+
+{/* BEGIN GENERATED BODY - transplanted from docs/ERRATA.md by scripts/generate_site_reports.py (`make site-reports`). Edit the source document, never the text below. */}
+
+import ErrataFamily from '../../../../components/ErrataFamily.astro';
+import ErrataRouter from '../../../../components/ErrataRouter.astro';
+
+During the clean-room implementation of this library, every formula, constant
+and worked example is re-derived and recomputed independently from the source
+documents. That process occasionally surfaces defects in the sources
+themselves: misprints, worked examples that contradict their own normative
+text, and ambiguous wording. This file records each confirmed case with the
+evidence, what the library does about it, and whether it has been reported.
+
+The registry covers every kind of published source the library implements
+from: standards (ISO, IEC, EN), guidance documents and technical reports
+(EASA, ECAC, NRL), textbooks and journal papers. Non-normative sources are
+marked as such in their entry.
+
+Entries describe the specific printed editions cited. A defect listed here is
+not a defect of the method; in every case the intended reading could be
+established from the document itself or from physics, and the library
+implements that reading. Where the reading changes a number the library
+reports, the entry names the check or test that pins it; where the defect is a
+label, a cross-reference or a table the library never reads, the entry records
+that no change was required.
+
+Status legend: **unreported** (recorded here only) / **reported** (submitted
+to the issuing body, with date and reference).
+
+A claim that turns on the exact characters of a formula, constant,
+coefficient, symbol, inequality or table cell is verified against **the page
+as printed**, and its Evidence bullet cites that page by PDF page index and
+printed folio. Extracted text may locate a page; it is never quoted as "the
+print", because PDF text layers delete glyphs silently (most of the sources
+cited here emit no `√` at all, so `f_T/√2` extracts as `f_T/2`). The page
+offset of each document is established empirically, because it differs per
+document and drifts between chapters of the same book. Entries that rest on
+something else, a recomputation or a comparison of two sentences, say so
+either in a leading notice or on the allowlist of
+[`scripts/check_errata_evidence.py`](https://github.com/jmrplens/phonometry/blob/main/scripts/check_errata_evidence.py),
+which is the check that enforces the rule; see
+[CONTRIBUTING.md](https://github.com/jmrplens/phonometry/blob/main/CONTRIBUTING.md#6-filing-an-errata-entry).
+
+A Spanish edition of this registry, translated entry for entry, is maintained
+in [ERRATA.es.md](https://github.com/jmrplens/phonometry/blob/main/docs/ERRATA.es.md). The wording here is the authoritative one,
+and quoted print, mathematics and printed values are reproduced there
+untranslated; `make site-reports` holds the two editions to the same entries
+in the same order.
+
+## Standards
+
+One page per series, which gathers its parts, its editions and its national adoptions.
+
+<ErrataFamily slug="iso-717" name="ISO 717" />
+<ErrataFamily slug="iso-1996" name="ISO/PAS 1996" />
+<ErrataFamily slug="iso-2631" name="ISO 2631" />
+<ErrataFamily slug="iso-3095" name="ISO 3095" />
+<ErrataFamily slug="iso-3382" name="ISO 3382" />
+<ErrataFamily slug="iso-3743" name="ISO 3743" />
+<ErrataFamily slug="iso-3744" name="ISO 3744" />
+<ErrataFamily slug="iso-3745" name="ISO 3745" />
+<ErrataFamily slug="iso-3747" name="ISO 3747" />
+<ErrataFamily slug="iso-3891" name="ISO 3891" />
+<ErrataFamily slug="iso-4869" name="ISO 4869" />
+<ErrataFamily slug="iso-5136" name="ISO 5136" />
+<ErrataFamily slug="iso-6926" name="ISO 6926" />
+<ErrataFamily slug="iso-7235" name="ISO 7235" />
+<ErrataFamily slug="iso-8041" name="ISO 8041" />
+<ErrataFamily slug="iso-8253" name="ISO 8253" />
+<ErrataFamily slug="iso-8297" name="ISO 8297" />
+<ErrataFamily slug="iso-9053" name="ISO 9053" />
+<ErrataFamily slug="iso-9295" name="ISO 9295" />
+<ErrataFamily slug="iso-9613" name="ISO 9613" />
+<ErrataFamily slug="iso-9614" name="ISO 9614" />
+<ErrataFamily slug="iso-10052" name="ISO 10052" />
+<ErrataFamily slug="iso-10140" name="ISO 10140" />
+<ErrataFamily slug="iso-10846" name="ISO 10846" />
+<ErrataFamily slug="iso-10847" name="ISO 10847" />
+<ErrataFamily slug="iso-10848" name="ISO 10848" />
+<ErrataFamily slug="iso-11200" name="ISO 11200" />
+<ErrataFamily slug="iso-11546" name="ISO 11546" />
+<ErrataFamily slug="iso-11690" name="ISO 11690" />
+<ErrataFamily slug="iso-11819" name="ISO 11819" />
+<ErrataFamily slug="iso-11820" name="ISO 11820" />
+<ErrataFamily slug="iso-11957" name="ISO 11957" />
+<ErrataFamily slug="iso-12913" name="ISO/TS 12913" />
+<ErrataFamily slug="iso-12999" name="ISO 12999" />
+<ErrataFamily slug="iso-13474" name="ISO 13474" />
+<ErrataFamily slug="iso-14257" name="ISO 14257" />
+<ErrataFamily slug="iso-15186" name="ISO 15186" />
+<ErrataFamily slug="iso-16032" name="ISO/DIS 16032" />
+<ErrataFamily slug="iso-16283" name="ISO 16283" />
+<ErrataFamily slug="iso-17208" name="ISO 17208" />
+<ErrataFamily slug="iso-17534" name="ISO/TR 17534" />
+<ErrataFamily slug="iso-20065" name="ISO/PAS 20065" />
+<ErrataFamily slug="iec-60118" name="IEC 60118" />
+<ErrataFamily slug="iec-60268" name="IEC 60268" />
+<ErrataFamily slug="iec-60534" name="IEC 60534" />
+<ErrataFamily slug="iec-61063" name="IEC 61063" />
+<ErrataFamily slug="iec-61094" name="IEC 61094 and EN 61094" />
+<ErrataFamily slug="iec-61183" name="IEC 61183" />
+<ErrataFamily slug="iec-61260" name="IEC 61260 and EN 61260" />
+<ErrataFamily slug="iec-61400" name="IEC TS 61400" />
+<ErrataFamily slug="iec-61672" name="IEC 61672" />
+<ErrataFamily slug="iec-62489" name="IEC 62489" />
+<ErrataFamily slug="iec-62585" name="IEC 62585" />
+<ErrataFamily slug="en-1793" name="EN 1793" />
+<ErrataFamily slug="iso-12354" name="ISO 12354 and EN 12354" />
+<ErrataFamily slug="en-15610" name="EN 15610" />
+<ErrataFamily slug="en-15657" name="EN 15657" />
+<ErrataFamily slug="en-16272" name="EN 16272" />
+<ErrataFamily slug="en-61043" name="EN 61043" />
+<ErrataFamily slug="din-4150" name="DIN 4150" />
+<ErrataFamily slug="din-45669" name="DIN 45669" />
+<ErrataFamily slug="din-45672" name="DIN 45672" />
+<ErrataFamily slug="din-45681" name="DIN 45681" />
+<ErrataFamily slug="ansi-s1-4" name="ANSI S1.4" />
+<ErrataFamily slug="ansi-s3-5" name="ANSI S3.5" />
+<ErrataFamily slug="ecma-418" name="ECMA-418" />
+<ErrataFamily slug="itu-r-bs-468" name="ITU-R BS.468" />
+<ErrataFamily slug="vdi-2081" name="VDI 2081" />
+
+## Guidance, regulations, books and papers
+
+One page per document, named after its authors or its issuer.
+
+<ErrataFamily slug="ainslie" name="Ainslie (2010)" />
+<ErrataFamily slug="allard-atalla" name="Allard & Atalla (2009)" />
+<ErrataFamily slug="ashrae" name="ASHRAE (2019)" />
+<ErrataFamily slug="attenborough-van-renterghem" name="Attenborough & Van Renterghem (2021)" />
+<ErrataFamily slug="barham-barrera-figueroa-avison" name="Barham, Barrera-Figueroa & Avison (2014)" />
+<ErrataFamily slug="bies-hansen-howard" name="Bies, Hansen & Howard (2017)" />
+<ErrataFamily slug="cox-dantonio" name="Cox & D'Antonio (2017)" />
+<ErrataFamily slug="directive-eu-2015-996" name="Directive (EU) 2015/996" />
+<ErrataFamily slug="ecac-doc-29" name="ECAC Doc 29" />
+<ErrataFamily slug="harris" name="Harris (1995)" />
+<ErrataFamily slug="icao-annex-16" name="ICAO Annex 16" />
+<ErrataFamily slug="jarvis" name="Jarvis (1996)" />
+<ErrataFamily slug="jimenez" name="Jiménez et al. (2017)" />
+<ErrataFamily slug="long" name="Long (2014)" />
+<ErrataFamily slug="maa" name="Maa (1998)" />
+<ErrataFamily slug="mechel" name="Mechel (2008)" />
+<ErrataFamily slug="medwin-clay" name="Medwin & Clay (1998)" />
+<ErrataFamily slug="nmfs" name="NMFS (2024)" />
+<ErrataFamily slug="norah2" name="NORAH2 rotorcraft guidance" />
+<ErrataFamily slug="norton-karczub" name="Norton & Karczub (2003)" />
+<ErrataFamily slug="osses-garcia-kohlrausch" name="Osses, García & Kohlrausch (2016)" />
+<ErrataFamily slug="randi" name="RANDI 3.1 Physics Description" />
+<ErrataFamily slug="real-decreto-1367-2007" name="Real Decreto 1367/2007" />
+<ErrataFamily slug="rossing" name="Rossing (2014)" />
+<ErrataFamily slug="southall" name="Southall et al. (2019)" />
+<ErrataFamily slug="ver-beranek" name="Ver & Beranek (2006)" />
+<ErrataFamily slug="vigran" name="Vigran (2008)" />
+
+## Properties that are not errata
+
+Properties of the sources that look like misprints and are not, recorded so that nobody corrects the library to match them.
+
+<ErrataFamily slug="not-errata" name="Source properties that are not errata" />
+
+<ErrataRouter />
+
+{/* END GENERATED BODY */}

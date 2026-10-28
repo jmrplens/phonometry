@@ -671,10 +671,10 @@ claims:
 api-docs:
 	$(PYTHON) scripts/generate_api_docs.py
 
-# Transplant the bodies of docs/CONFORMANCE.md and docs/ERRATA.md into their
-# Starlight pages (site/src/content/docs/{,es/}reference/{conformance,errata}.md),
-# below the hand-written introduction each page keeps. CI fails if this drifts
-# (see the `site-reports` job in python-app.yml).
+# Transplant docs/ERRATA.md and docs/ERRATA.es.md into their Starlight pages:
+# one page per document family under site/src/content/docs/{,es/}reference/errata/,
+# and the index there, below the hand-written introduction it keeps. CI fails
+# if this drifts (see the `site-reports` job in python-app.yml).
 site-reports:
 	$(PYTHON) scripts/generate_site_reports.py
 

@@ -1,0 +1,124 @@
+---
+/**
+ * One document family of the errata registry, as the index lists it: the
+ * family's name linked to its page, and every entry on that page linked to the
+ * entry itself.
+ *
+ * The registry used to be one page, and its entries' anchors were the ids the
+ * build gives their headings. Those ids are computed after the mathematics in
+ * a heading is typeset ("$\sigma_\mathrm{TO}$" becomes "σto"), so nothing but
+ * the build can say what they are. Reading them here, off the family page as
+ * the build renders it, is what lets the index link every entry exactly, and
+ * what lets ErrataRouter.astro send a link written against the old single
+ * page to the entry's new home: the anchor did not change, only the page it
+ * is on.
+ *
+ * Each link reads as the entry's own heading, typeset as the family page
+ * typesets it: its inner HTML is taken from the page as the build rendered
+ * it, matched by the heading's id. The plain text of a heading
+ * (`heading.text`) is what is left once its mathematics is typeset, which
+ * drops a radical, an exponent and every subscript ("√(S_f2/π)" reads
+ * "Sf2/π", "25 m³" reads "25 m3") and leaves zero-width spaces behind, on
+ * the one page that lists printing defects. The heading HTML already went
+ * through the site's own KaTeX pipeline (rehypeKatex and
+ * rehypeSingleTextMath in astro.config.mjs), so the link carries the same
+ * formula with the same TeX for a screen reader, and the KaTeX stylesheet
+ * is already on every page.
+ *
+ * `scripts/generate_site_reports.py` writes both the family pages and the
+ * list of these components on the index, so a family named here without a
+ * page is a generator bug, and the build says so rather than listing nothing.
+ * So is a heading the rendered page does not hold: the link would otherwise
+ * fall back to the flattened text without anything noticing.
+ */
+import type { MarkdownHeading } from 'astro';
+import { getEntry, render } from 'astro:content';
+
+interface Props {
+	/** The family page's slug under `reference/errata/`. */
+	slug: string;
+	/** The name the index lists the family under. */
+	name: string;
+}
+const { slug, name } = Astro.props;
+
+const lang = (Astro.locals.starlightRoute?.lang ?? Astro.currentLocale ?? 'en').startsWith('es')
+	? 'es'
+	: 'en';
+const id = `${lang === 'es' ? 'es/' : ''}reference/errata/${slug}`;
+const entry = await getEntry('docs', id);
+if (!entry) {
+	throw new Error(
+		`[ErrataFamily] the errata index lists "${slug}", but there is no page ${id}. ` +
+			'Regenerate the errata pages with `make site-reports`.',
+	);
+}
+const { headings }: { headings: MarkdownHeading[] } = await render(entry);
+const html = entry.rendered?.html;
+if (!html) {
+	throw new Error(
+		`[ErrataFamily] ${id} has no rendered HTML to read its headings from. ` +
+			'The family pages are Markdown under the glob loader, which renders them.',
+	);
+}
+/** A heading id as a regular expression matches it literally. */
+const literal = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const entries = headings
+	.filter((heading) => heading.depth === 2)
+	.map((heading) => {
+		const match = new RegExp(`<h2\\b[^>]*\\bid="${literal(heading.slug)}"[^>]*>([\\s\\S]*?)</h2>`).exec(html);
+		if (!match) {
+			throw new Error(
+				`[ErrataFamily] ${id} lists the heading "${heading.text}" (#${heading.slug}), ` +
+					'but its rendered HTML holds no <h2> with that id.',
+			);
+		}
+		return { slug: heading.slug, html: match[1].trim() };
+	});
+
+const BASE = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
+const page = `${BASE}/${id}/`;
+const count =
+	lang === 'es'
+		? `${entries.length} ${entries.length === 1 ? 'entrada' : 'entradas'}`
+		: `${entries.length} ${entries.length === 1 ? 'entry' : 'entries'}`;
+---
+
+<div class="errata-family" data-errata-family>
+	<p class="errata-family-name">
+		<a href={page}>{name}</a>
+		<span class="errata-family-count">{count}</span>
+	</p>
+	<ul>
+		{entries.map((heading) => (
+			<li>
+				<a href={`${page}#${heading.slug}`} set:html={heading.html} />
+			</li>
+		))}
+	</ul>
+</div>
+
+<style is:global>
+	/* Global under a class of its own: the index lists close to a hundred
+	   families and every element of a scoped template carries the hash. */
+	.errata-family {
+		margin-block: 1rem;
+	}
+
+	.errata-family .errata-family-name {
+		margin-block: 0 0.25rem;
+		font-weight: 600;
+	}
+
+	.errata-family .errata-family-count {
+		margin-inline-start: 0.4rem;
+		font-weight: 400;
+		font-size: var(--sl-text-sm);
+		color: var(--sl-color-gray-3);
+	}
+
+	.errata-family ul {
+		margin-block: 0;
+		font-size: var(--sl-text-sm);
+	}
+</style>

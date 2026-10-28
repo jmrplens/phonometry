@@ -293,6 +293,19 @@ export const collections = {
       // no-op the day it is reached for.
       extend: z.object({
         references: references.optional(),
+        // The title the site search ranks the page by, when it should not be
+        // the page's own; an empty one ranks the page by no title at all.
+        // scripts/generate_site_reports.py sets it, empty, on the errata
+        // pages, which are titled after a document they do not implement;
+        // src/components/Head.astro and src/lib/search-ranking.mjs say what it
+        // does.
+        searchTitle: z.string().optional(),
+        // The weight the site search gives the page's title and text, against
+        // 1 for every other page; Pagefind takes 0 to 10. The same generator
+        // sets it on the one errata page that keeps its title, so that the
+        // registry's index outranks it on a search for the registry
+        // (src/components/SearchWeight.astro).
+        searchWeight: z.number().min(0).max(10).optional(),
       }).merge(topicSchema),
     }),
   }),

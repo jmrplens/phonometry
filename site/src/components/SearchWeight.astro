@@ -1,0 +1,30 @@
+---
+/**
+ * Gives what it wraps the page's search weight, when the page sets one.
+ *
+ * Pagefind weighs every word of a page alike, a heading by its level, and a
+ * `data-pagefind-weight` on an element replaces that weight for everything
+ * inside it. A page sets `searchWeight` in its frontmatter when it must rank
+ * below another page it shares its words with: the errata page of
+ * properties that are not errata is ranked by its own title, which carries
+ * the register's word as the registry's index does, and at the weight of any
+ * other page it came ahead of the index on a search for "erratas"
+ * (scripts/generate_site_reports.py, SEARCH_WEIGHT).
+ *
+ * Pagefind reads a page from Starlight's <main>, which no override can
+ * reach, so the weight is given to the two parts of it a page writes: the
+ * title (PageTitle.astro) and the body (MarkdownContent.astro). Both, and not
+ * the body alone: the weight replaces the boost a heading gets, so a page
+ * whose body alone is lighter keeps its heading at full weight.
+ *
+ * A page that sets no weight gets its content back untouched, with no wrapper
+ * in its markup.
+ */
+interface RouteData {
+  entry?: { data?: { searchWeight?: number } };
+}
+const route = (Astro.locals as { starlightRoute?: RouteData }).starlightRoute;
+const weight = route?.entry?.data?.searchWeight;
+---
+
+{weight === undefined ? <slot /> : <div data-pagefind-weight={String(weight)}><slot /></div>}

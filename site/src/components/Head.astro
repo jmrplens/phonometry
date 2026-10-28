@@ -52,7 +52,12 @@ interface RouteData {
   entry?: {
     id?: string;
     filePath?: string;
-    data?: { title?: string; description?: string; references?: ReferenceEntry[] };
+    data?: {
+      title?: string;
+      description?: string;
+      references?: ReferenceEntry[];
+      searchTitle?: string;
+    };
   };
   lastUpdated?: Date;
   /** Set in src/routeData.ts; absent on the pages that publish no copy. */
@@ -330,6 +335,20 @@ const jsonLd = graph.length
     data-pagefind-meta="standards[content]"
     content={standardTokens.join(' ')}
   />
+)}
+{/* The title the site search ranks this page by, when it is not the page's
+    own, an empty one included: an errata page is titled after a document it
+    does not implement and after the register, and the five-fold boost
+    Pagefind gives a title would put it above the guides written to that
+    document and above the registry's index (src/lib/search-ranking.mjs).
+    Pagefind takes an explicit `title` field over the page's h1, empty or not;
+    `display_title` ranks nothing and is what the search panel shows
+    (src/lib/search-ui.mjs). */}
+{data.searchTitle !== undefined && (
+  <>
+    <meta name="phonometry-search-title" data-pagefind-meta="title[content]" content={data.searchTitle} />
+    <meta name="phonometry-display-title" data-pagefind-meta="display_title[content]" content={title} />
+  </>
 )}
 {/* The page's one og:locale: src/routeData.ts drops Starlight's bare `en`
     or `es`, which the protocol's language_TERRITORY form replaces. The API

@@ -28,6 +28,7 @@ import { fileURLToPath } from 'node:url';
 
 import { basePath, siteUrl } from '../src/data/site.mjs';
 import { topicForSlug, topicSections } from '../src/data/topics.mjs';
+import { knownSlugs } from '../src/lib/breadcrumbs.mjs';
 import { englishTwin, isApiRoute, isFallbackRoute } from '../src/lib/fallback-routes.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -155,7 +156,19 @@ const files = walk(DIST).sort();
 if (files.length === 0) throw new Error(`no HTML under ${DIST}: build the site first`);
 
 // Tallies, so a check that silently stopped looking at anything says so.
-const seen = { pages: 0, redirects: 0, blocks: 0, sections: 0, guides: 0, api: 0, fallbacks: 0 };
+const seen = { pages: 0, redirects: 0, blocks: 0, sections: 0, guides: 0, api: 0, fallbacks: 0, unlisted: 0 };
+
+/** Every route the navigation tree lists (src/data/topics.mjs). */
+const LISTED = new Set(knownSlugs());
+
+/** The longest route above `slug` that the tree lists, or undefined. */
+const listedParentOf = (slug) => {
+	for (let route = slug; route.includes('/'); ) {
+		route = route.slice(0, route.lastIndexOf('/'));
+		if (LISTED.has(route)) return route;
+	}
+	return undefined;
+};
 const missingSection = [];
 const wrongSection = [];
 
@@ -339,6 +352,26 @@ for (const file of files) {
 		if (dangling.length > 0) {
 			fail(`${route}: ${dangling.length} crumb(s) point outside the site`);
 		}
+
+		// A page the tree does not list has no trail of its own there, and
+		// takes the trail of the route its address sits under: an errata page,
+		// /reference/errata/iso-3743/, is one of 96 the registry's index lists
+		// and the sidebar does not. Its trail used to run from the root straight
+		// to the page, skipping both the section and the index its address
+		// names. The tree decides a listed page's trail, and that one differs
+		// from the address on purpose in places (a URL prefix is often a
+		// grouping, not a page), so only an unlisted page is held to this.
+		const parent = LISTED.has(slug) ? undefined : listedParentOf(slug);
+		if (parent !== undefined) {
+			seen.unlisted += 1;
+			const wanted = `${ORIGIN}${lang === 'es' ? '/es' : ''}/${parent}/`;
+			if (!items.slice(0, -1).some((item) => item.item === wanted)) {
+				fail(
+					`${route}: the navigation tree does not list this page, and its trail skips ${wanted}, ` +
+						`the listed route it sits under (${items.map((item) => item.name).join(' > ')})`,
+				);
+			}
+		}
 	}
 
 	// The section, which is what this check exists for. The name comes from
@@ -395,6 +428,7 @@ if (missingSection.length === 0 && wrongSection.length === 0) {
 ok(`parsed ${seen.blocks} ld+json blocks across ${seen.pages} pages (${seen.redirects} redirect stubs skipped)`);
 ok(`checked ${seen.guides} guide pages for the learning-resource type and ${seen.api} API pages for APIReference`);
 ok(`checked ${seen.fallbacks} Spanish API routes against their English twin's graph`);
+ok(`checked ${seen.unlisted} pages the navigation tree does not list for the route they sit under in their trail`);
 
 console.log(`\n${failures} failing check(s).`);
 process.exit(failures ? 1 : 0);

@@ -65,9 +65,17 @@ const routeOfFile = (file) => routeOf(relative(contentDir, file));
 // its rows from `docs/conformance.json` through a component, so stripping the
 // MDX out of the page source would leave an agent with the introduction and no
 // evidence. `docs/CONFORMANCE.md` is the text copy of the same rows.
+//
+// The errata registry is published as an index and one page per document
+// family, and its Markdown copy at `reference/errata/` is still the whole
+// registry: the index lists the entries and the registry's text is the
+// evidence, so an agent reading the index's copy gets every entry in one
+// fetch. The Spanish index gets the Spanish edition for the same reason, so
+// it is the one Spanish route here.
 const TRANSPLANTED = {
   CONFORMANCE: "reference/conformance",
   ERRATA: "reference/errata",
+  "ERRATA.es": "es/reference/errata",
 };
 
 /**
@@ -83,7 +91,11 @@ function absolutize(text, fromRoute) {
   const here = fromRoute.includes("/") ? fromRoute.replace(/\/[^/]*$/, "") : "";
   return text
     .split("\n")
-    .filter((line) => !line.startsWith("← [Documentation index]"))
+    // The mirror's backlink to its own index, read by its target rather than
+    // its words, so it goes in any language: a page copy is not read from
+    // inside docs/, and the Spanish registry's, "Índice de la documentación",
+    // would send a Spanish reader to the English documentation's root.
+    .filter((line) => !/^← \[[^\]]*\]\((?:\.\.\/)*README\.md\)\s*$/.test(line))
     .join("\n")
     .replace(/\]\(((?:\.\.\/)*[\w./-]+)\.md(#[\w-]+)?\)/g, (whole, target, anchor = "") => {
       const base = target.replace(/^.*\//, "");
@@ -124,12 +136,19 @@ for await (const file of glob("**/*.{md,mdx}", { cwd: contentDir })) {
   if (!hasMarkdownCopy(route)) continue;
 
   const isSpanish = route === "es" || route.startsWith("es/");
-  const mirror = isSpanish ? undefined : docsMirror.get(route);
+  // A route one of the docs/ root documents is published at.
+  const isTransplanted = Object.values(TRANSPLANTED).includes(route);
+  // The mirror is English, so a Spanish route has a copy only where one of
+  // the transplanted documents is published in Spanish.
+  const mirror = isSpanish && !isTransplanted ? undefined : docsMirror.get(route);
 
   const raw = mirror
     ? readFileSync(mirror, "utf8")
     : stripMdx(stripFrontmatter(readFileSync(abs, "utf8")));
-  const body = absolutize(raw, route);
+  // A transplanted document sits at the root of docs/, not at its route, so
+  // its relative links resolve from there: `ERRATA.es.md` beside `ERRATA.md`
+  // is the Spanish registry, not a page under reference/.
+  const body = absolutize(raw, mirror && isTransplanted ? "" : route);
 
   const canonical = `${SITE_URL}/${route}/`;
   const text = `<!-- canonical: ${canonical} -->\nSource: ${canonical}\n\n${body.trim()}\n`;

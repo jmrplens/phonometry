@@ -1426,6 +1426,47 @@ def test_a_choice_handed_to_the_record_a_classmethod_builds_is_checked_there() -
     assert _verdict_of(_Strides.of, "paces", collection=True) is None
 
 
+@dataclass(frozen=True)
+class _CheckedPaceLimits:
+    """A record that checks each key of its limits when it is built."""
+
+    limits: Mapping[_Pace, float]
+
+    def __post_init__(self) -> None:
+        for pace in self.limits:
+            require_choice(pace, "limits", _PACES)
+
+
+@dataclass(frozen=True)
+class _UncheckedPaceLimits:
+    """A record that keeps its limits as they come."""
+
+    limits: Mapping[_Pace, float]
+
+
+def _limits_rebuilt(limits: Mapping[_Pace, float]) -> _CheckedPaceLimits:
+    return _CheckedPaceLimits(
+        limits={pace: float(value) for pace, value in limits.items()}
+    )
+
+
+def _limits_rebuilt_unchecked(limits: Mapping[_Pace, float]) -> _UncheckedPaceLimits:
+    return _UncheckedPaceLimits(
+        limits={pace: abs(value) for pace, value in limits.items()}
+    )
+
+
+def test_a_dict_comprehension_that_keeps_the_keys_hands_them_on() -> None:
+    """``{pace: float(value) for pace, value in limits.items()}`` gives each
+    key a new value and keeps the key, so the record that checks its keys
+    checks the caller's; a record that checks nothing leaves them unchecked.
+    """
+    assert _verdict_of(_limits_rebuilt, "limits", collection=True) is None
+    assert _verdict_of(_limits_rebuilt_unchecked, "limits", collection=True) == (
+        "never checked, so a misspelling passes"
+    )
+
+
 def test_a_stale_unchecked_entry_fails_and_a_needed_one_does_not(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

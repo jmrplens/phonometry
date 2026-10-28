@@ -3893,12 +3893,45 @@ class _Check(NamedTuple):
     validator: bool
 
 
+def _keeps_keys(value: ast.expr, target: Callable[[ast.expr], bool]) -> bool:
+    """Whether *value* is a dict comprehension that keeps the target's keys.
+
+    ``{side: float_keyed(row) for side, row in limits.items()}`` or ``{side:
+    0.0 for side in limits}`` maps each key of ``limits`` to a new value and
+    keeps the key as the caller wrote it.
+    """
+    if not isinstance(value, ast.DictComp) or len(value.generators) != 1:
+        return False
+    loop = value.generators[0]
+    source = loop.iter
+    bound = loop.target
+    if (
+        isinstance(source, ast.Call)
+        and isinstance(source.func, ast.Attribute)
+        and source.func.attr == "items"
+        and not source.args
+    ):
+        source = source.func.value
+        if not (isinstance(bound, ast.Tuple) and len(bound.elts) == 2):
+            return False
+        bound = bound.elts[0]
+    return (
+        isinstance(bound, ast.Name)
+        and isinstance(value.key, ast.Name)
+        and value.key.id == bound.id
+        and target(_held(source))
+    )
+
+
 def _carries(value: ast.expr, target: Callable[[ast.expr], bool]) -> bool:
     """Whether *value* holds the target's items: the target itself, a call
-    that only holds its items (``tuple(x)``), or the one-item tuple ``(x,)``
-    that wraps a single choice of a choice-or-sequence parameter.
+    that only holds its items (``tuple(x)``), the one-item tuple ``(x,)``
+    that wraps a single choice of a choice-or-sequence parameter, or a dict
+    comprehension that keeps its keys (:func:`_keeps_keys`).
     """
     value = _held(value)
+    if _keeps_keys(value, target):
+        return True
     if (
         isinstance(value, ast.Call)
         and isinstance(value.func, ast.Name)
@@ -4020,7 +4053,8 @@ def _checks_of(
         record = _record_constructor(callee)
         for parameter, handed in _arguments(node, callee, spread).items():
             value = _held(handed)
-            if not is_raw(value):
+            keys_kept = _keeps_keys(value, target)
+            if not (is_raw(value) or keys_kept):
                 continue
             if record is not None:
                 check = _post_init(record)
@@ -4030,7 +4064,7 @@ def _checks_of(
                             check,
                             parameter,
                             field=True,
-                            collection=collection and target(value),
+                            collection=collection and (target(value) or keys_kept),
                             depth=depth + 1,
                         )
                     )
@@ -4040,7 +4074,7 @@ def _checks_of(
                         callee,
                         parameter,
                         field=False,
-                        collection=collection and target(value),
+                        collection=collection and (target(value) or keys_kept),
                         depth=depth + 1,
                     )
                 )

@@ -107,7 +107,7 @@ from scipy.special import jn_zeros, jv
 
 from .._internal.boundary import settled
 from .._internal.display import RichDisplay
-from .._internal.frozen import OwnsArrays, read_only
+from .._internal.frozen import OwnsArrays, read_only, reduce_with_plain_rows
 from .._internal.validation import (
     require_choice,
     require_count,
@@ -2045,6 +2045,10 @@ class CouplerParameterUncertainty(OwnsArrays):
         PressureReciprocityComponent, NDArray[np.float64]
     ]
     microphone: int
+
+    def __reduce__(self) -> tuple[Any, tuple[type, dict[str, Any]]]:
+        """Travel with plain dictionaries, which pickle; they are wrapped again on arrival."""
+        return reduce_with_plain_rows(self)
 
     def __post_init__(self) -> None:
         """Publish the columns read-only.

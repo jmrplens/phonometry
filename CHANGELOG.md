@@ -2152,6 +2152,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **A record that holds a read-only mapping pickles and deep-copies.**
+  `MappingProxyType` can be neither pickled nor deep-copied, and 49 of the
+  records the test suite builds held one and failed both with `TypeError:
+  cannot pickle 'mappingproxy' object`: every catalogue row (`materials.PorousMaterial`,
+  `solids.SolidMaterial`, `building.TransmissionLossSpectrum` and the other
+  row classes, with their `Provenance` and the `Catalogue` that holds them),
+  `fluids.Fluid` and `fluids.Gas`, the reciprocity and comparison
+  calibrations, the IEC 61672-3 periodic measurements and verification,
+  `environment.StatisticalPassByResult`,
+  `environment.WindTurbineRatingLevel`, the ISO 16032 service-equipment
+  results and the soundscape and rolling-stock records among them, so none
+  of them could go to a process pool or a cache. Each travels as plain
+  dictionaries now and wraps them again when it is rebuilt, a mapping inside
+  a mapping included. `tests/test_package_architecture.py` fails a record
+  whose `__post_init__` builds a read-only mapping and that says nothing of
+  how to travel, and `tests/test_record_conversions.py` pickles and
+  deep-copies every record the plot factories build, every record each of
+  them holds and one row of each published catalogue.
+
 - **`io.write` refuses a Signal whose own rate is fractional with a
   `ValueError` that names `fs`.** A WAV header holds a whole number of
   samples per second, and a fractional `fs=` was refused that way, but a
@@ -4065,6 +4084,87 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `scripts/gpu_parity.py` fingerprints, keep their vocabularies as they are
   until they are retyped together.
 
+- **A record a caller builds holds what its fields say, and its constructor
+  says what it takes.** A record kept a list, a tuple or an array of the
+  wrong kind exactly as it was handed, though its field said it held an
+  array or a tuple: `environment.WavelengthSpectrum(levels=[...])` held the
+  list, so `spectrum.levels * 2` repeated it instead of doubling it, and the
+  frozen record held a list anyone could still append to. A record a caller
+  builds now converts what it is given and holds what its field says: an
+  array field a read-only array of its dtype, a tuple field a tuple, a pair
+  a pair of numbers, and a single number where a per-band value may be one
+  stays the number it was. That holds for `aircraft.ANPNPDCurves`,
+  `aircraft.FlightSegmentState`, `aircraft.FlightConditionInterpolation`,
+  `aircraft.RotorcraftGround`, `aircraft.RotorcraftHemisphere`,
+  `aircraft.RotorcraftTrackState`, `building.BandPath`,
+  `building.FacadeElement`, `building.LowFrequencyProcedure`,
+  `electroacoustics.LoudspeakerDirectivity`, `electroacoustics.LoudspeakerRatings`,
+  `electroacoustics.MicrophoneDirectivity`, `electroacoustics.MicrophoneNoise`,
+  `electroacoustics.MicrophoneOverload`, `emission.RoomEnvironment`,
+  `environment.AtmosphericAttenuation`, `environment.WavelengthSpectrum`,
+  `environment.RailSourceSpectra`, `environment.RollingStock`,
+  `environment.RailwayTrack`, `environment.RoadEmissionCoefficients`,
+  `environment.RoadSurfaceCoefficients`, `hearing.Task`, `io.Signal`
+  (`channel_labels`), `materials.FiberResistivityFit`,
+  `materials.MetadiffuserWell` and `materials.TransferMatrix`. A pair given
+  where a record takes one (a polar pattern, a noise spectrum, a distortion
+  curve, a rated frequency range) is refused when the record is built if it
+  is not one, where it failed later, when it was read: a number or a text
+  with `TypeError`, a sequence of other than two members with `ValueError`; `io.Signal` refuses
+  one text as its `channel_labels` with `TypeError`, where a two-letter
+  text named two channels a letter each. `materials.TransferMatrix` holds
+  each entry as a read-only `complex128` array: a scalar entry reads back
+  as a 0-d array, no longer a `complex` and no longer hashable
+  (`complex(m.t11)` or `m.t11.item()` gives the number), and a real entry
+  reads back with a zero imaginary part. Each of these records, and every
+  other record a caller builds that converts a field (`io.Signal`,
+  `environment.TrackDecayRate`, `emission.MicrophoneTraverse`,
+  `simulation.ContourPhasors`, the periodic-test measurements of
+  `filters`, `metrology.SoundCalibratorMeasurements` and
+  `metrology.SoundLevelMeterPeriodicMeasurements` among them), declares the
+  constructor a type checker reads, inside `if TYPE_CHECKING:` in its body:
+  a field converted from any array-like takes `ArrayLike` there and keeps
+  the type it holds, so `WavelengthSpectrum(levels=[1.0, 2.0])`
+  type-checks and `spectrum.levels` reads as the array it is. The API
+  reference shows that constructor. Four results that held a `dict` a caller
+  could edit hold a read-only mapping instead:
+  `building.FacadePredictionResult.element_r`,
+  `environment.RailwayEmissionResult.components`,
+  `noise_control.ReactiveSilencerResult.geometry` and
+  `psychoacoustics.MooreGlasbergTimeVaryingLoudness.percentiles`, so an
+  assignment into one raises `TypeError`, as one into
+  `RoadSurfaceCoefficients.alpha` and `.beta` does now. The
+  `filters.OctaveFilterResult` that `filters.octave_filter` and
+  `OctaveFilterBank.filter` return holds its band centres and its band
+  waveforms as tuples, where it held lists a caller could still append to
+  (`list(result.frequencies)` gives a list to edit).
+  `scripts/check_array_aliasing.py` fails a field of a record a caller
+  builds that is annotated as an array, a tuple, a list or a set and that
+  nothing converts; `tests/test_record_constructors.py` fails a record that
+  converts such a field and declares no constructor, and a declared
+  constructor out of step with its fields; and
+  `tests/test_record_conversions.py` gives every converted field a list,
+  and every tuple field an array, and wants them back converted.
+
+- **Typing: a name the package does not publish is an error, and no field
+  is typed `Any` or `dict`.** The root package imports its domains lazily
+  through a module `__getattr__`, which a type checker read as answering
+  every missing name, so `phonometry.stpia(...)` typed as a call on
+  `object`; it is defined for the running interpreter only now, and a
+  misspelt name is an `attr-defined` error. `noise_control.PanelTransmissionResult`
+  declares its two members as read-only properties, so a frozen
+  `building.SoundReductionResult` passed to
+  `noise_control.enclosure_insertion_loss` type-checks. The transfer
+  functions of `environment.RollingStock` and `environment.RailwayTrack`,
+  typed `Any`, are `NDArray[np.float64]`; the attenuation and self-noise of
+  a `noise_control.DuctElement`, typed `Any`, are `ArrayLike |
+  HVACSpectrumResult | None`; the band margins of a filter and of a weighting
+  verdict are mappings of numbers; and the `window` of
+  `signals.window_metrics` is a name or a tuple of a name and its
+  parameters. `tests/test_package_architecture.py` fails a published field
+  typed `Any` or `dict`, a protocol member that is not a property, and a
+  module `__getattr__` a type checker can see.
+
 - **A parameter whose name carries its unit and that has a default is written
   by name.** `signals.noise_signal(fs, duration_s=2.0)`,
   `speech.stipa_signal(fs, duration_s=18.0)`,
@@ -5973,6 +6073,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   too, the word its figure already used.
 
 ### Removed
+
+- **`filters.compliance` no longer serves the weighting transcriptions by
+  their old private names.** The tables and the analytic weighting
+  (`_WEIGHTING_TABLE3`, `_ANSI_S14_TABLE4_B`, `_ANSI_S14_TABLE5_12`,
+  `_IEC61012_TABLE1`, `_IEC61012_AU_HF`, `_U_POLES_HZ` and
+  `_analytic_weighting_db`) moved to `filters.weighting_compliance` with
+  their subject, and the module `__getattr__` that still answered for them
+  is gone; read them from `filters.weighting_compliance`.
 
 - **The replica FDTD engine of the documentation scripts and its GPU
   transport are gone** (`scripts/fdtd2d.py`, `fdtd_dispatch.py`,

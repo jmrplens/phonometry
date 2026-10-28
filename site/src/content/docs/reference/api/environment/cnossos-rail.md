@@ -418,11 +418,7 @@ Digit 2 of the track descriptor, Table [2.3.b].
 ## RailSourceSpectra
 
 ```python
-RailSourceSpectra(
-    *,
-    source_a: NDArray[np.float64],
-    source_b: NDArray[np.float64],
-)
+RailSourceSpectra(*, source_a: ArrayLike, source_b: ArrayLike)
 ```
 
 The sound power spectra of the two source heights of a railway source.
@@ -533,7 +529,7 @@ RailwayEmissionResult(
     third_octave_line_power: NDArray[np.float64],
     line_power: NDArray[np.float64],
     total_line_power: NDArray[np.float64],
-    components: dict[Literal['rolling', 'traction', 'aerodynamic', 'bridge'], tuple[NDArray[np.float64], NDArray[np.float64]]] = ...,
+    components: Mapping[Literal['rolling', 'traction', 'aerodynamic', 'bridge'], tuple[NDArray[np.float64], NDArray[np.float64]]] = ...,
 )
 ```
 
@@ -570,10 +566,10 @@ Plot the per-metre line power of the two equivalent source heights.
 RailwayTrack(
     *,
     rail_roughness: WavelengthSpectrum,
-    track_transfer: Any,
+    track_transfer: ArrayLike,
     impact_roughness: WavelengthSpectrum | None = None,
     joint_density: float = 0.01,
-    bridge_transfer: Any | None = None,
+    bridge_transfer: ArrayLike | None = None,
     squeal_excess: float = 0.0,
     length: float = 100.0,
 )
@@ -668,8 +664,8 @@ RollingStock(
     n_axles: int,
     wheel_roughness: WavelengthSpectrum,
     contact_filter: WavelengthSpectrum,
-    wheel_transfer: Any,
-    superstructure_transfer: Any | None = None,
+    wheel_transfer: ArrayLike,
+    superstructure_transfer: ArrayLike | None = None,
     traction: RailSourceSpectra | None = None,
     aerodynamic: RailSourceSpectra | None = None,
     aerodynamic_alpha: float = 50.0,
@@ -1078,11 +1074,7 @@ other source.
 ## WavelengthSpectrum
 
 ```python
-WavelengthSpectrum(
-    *,
-    wavelengths_mm: NDArray[np.float64],
-    levels: NDArray[np.float64],
-)
+WavelengthSpectrum(*, wavelengths_mm: ArrayLike, levels: ArrayLike)
 ```
 
 A roughness or contact-filter spectrum over wavelength (Appendix G).

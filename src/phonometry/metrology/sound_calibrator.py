@@ -96,6 +96,7 @@ if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
 
     from matplotlib.axes import Axes
+    from numpy.typing import ArrayLike
 
     from .._i18n import Language
 
@@ -600,6 +601,32 @@ class SoundCalibratorMeasurements(RichDisplay):
     environmental_frequency_uncertainty_percent: float | Sequence[float] | None = None
     field_immunity_deviation_db: float | Sequence[float] | None = None
     field_immunity_uncertainty_db: float | Sequence[float] | None = None
+
+    if TYPE_CHECKING:
+
+        def __init__(
+            self,
+            *,
+            level_deviation_db: ArrayLike | None = None,
+            level_uncertainty_db: ArrayLike | None = None,
+            static_pressure_correction: ArrayLike | None = None,
+            fluctuation_db: ArrayLike | None = None,
+            fluctuation_uncertainty_db: ArrayLike | None = None,
+            frequency_deviation_percent: ArrayLike | None = None,
+            frequency_uncertainty_percent: ArrayLike | None = None,
+            distortion_percent: ArrayLike | None = None,
+            distortion_uncertainty_percent: ArrayLike | None = None,
+            supply_voltage_deviation_db: ArrayLike | None = None,
+            supply_voltage_uncertainty_db: ArrayLike | None = None,
+            environmental_level_deviation_db: ArrayLike | None = None,
+            environmental_level_uncertainty_db: ArrayLike | None = None,
+            environmental_level_in_band_deviation_db: ArrayLike | None = None,
+            environmental_level_in_band_uncertainty_db: ArrayLike | None = None,
+            environmental_frequency_deviation_percent: ArrayLike | None = None,
+            environmental_frequency_uncertainty_percent: ArrayLike | None = None,
+            field_immunity_deviation_db: ArrayLike | None = None,
+            field_immunity_uncertainty_db: ArrayLike | None = None,
+        ) -> None: ...
 
     def __post_init__(self) -> None:
         """Freeze every field into a tuple and check that the pairs match.

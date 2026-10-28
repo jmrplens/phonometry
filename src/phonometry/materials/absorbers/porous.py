@@ -828,12 +828,27 @@ class FiberResistivityFit(RichDisplay):
     direction: Literal["lateral", "longitudinal"]
     source: str
 
+    if TYPE_CHECKING:
+
+        def __init__(
+            self,
+            *,
+            k1: float,
+            k2: float,
+            fiber_diameter_um: float,
+            bulk_density_range_kg_m3: ArrayLike,
+            direction: Literal["lateral", "longitudinal"],
+            source: str,
+        ) -> None: ...
+
     def __post_init__(self) -> None:
-        """Refuse a choice its ``Literal`` does not list, when the record is built.
+        """Refuse a choice its ``Literal`` does not list, and hold the range as a pair of floats.
 
         :raises TypeError: if ``direction`` is not a text.
         """
         require_choice(self.direction, "direction", ("lateral", "longitudinal"))
+        low, high = self.bulk_density_range_kg_m3
+        object.__setattr__(self, "bulk_density_range_kg_m3", (float(low), float(high)))
 
 
 #: The rock wool of Hopkins Fig. 1.49, measured across two UK manufacturers at

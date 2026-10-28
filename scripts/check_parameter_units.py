@@ -2668,6 +2668,25 @@ RECORD_AXIS_EXEMPT: dict[tuple[str, str], str] = {
 #: result stores to the value it stores. One that a public function no longer
 #: takes, or none returns, is stale.
 HANDED_ON_RESULTS: dict[tuple[str, str], str] = {
+    ("phonometry.aircraft.anp_fleet", "SpectralClass"): _handed_on(
+        "npd_atmosphere_increment and revise_npd_curves"
+    ),
+    (
+        "phonometry.building.measurement.joint_insulation",
+        "JointGapSeries",
+    ): _handed_on("check_joint_gap_series"),
+    (
+        "phonometry.electroacoustics.induction_loop_components",
+        "AmplifierFrequencyResponse",
+    ): _handed_on("verify_amplifier_overload"),
+    (
+        "phonometry.electroacoustics.induction_loop_components",
+        "LoopImpedance",
+    ): _handed_on("verify_amplifier_overload"),
+    (
+        "phonometry.emission._sound_power_intensity",
+        "PrecisionFieldIndicators",
+    ): _handed_on("precision_qualification"),
     (
         "phonometry.emission.free_field_qualification",
         "FreeFieldCheck",
@@ -2676,6 +2695,53 @@ HANDED_ON_RESULTS: dict[tuple[str, str], str] = {
         "phonometry.emission.sound_power_plant",
         "PlantMeasurementContour",
     ): _handed_on("check_plant_measurement"),
+    (
+        "phonometry.emission.turbine_noise",
+        "TurbineEnvironmentalCorrection",
+    ): _handed_on("check_turbine_test_environment"),
+    (
+        "phonometry.emission.turbine_noise",
+        "TurbineMeasurementSurface",
+    ): _handed_on("turbine_microphone_positions"),
+    (
+        "phonometry.emission.turbine_noise",
+        "TurbineSoundPowerResult",
+    ): _handed_on("turbine_noise_declaration"),
+    (
+        "phonometry.environment.assessment.wind_turbine_receptor",
+        "BinnedSoundLevels",
+    ): _handed_on("BinnedSoundLevels.background_corrected"),
+    (
+        "phonometry.environment.propagation.refraction",
+        "EffectiveSoundSpeedProfile",
+    ): _handed_on("atmospheric_ray_paths and atmospheric_parabolic_equation"),
+    ("phonometry.hearing.hearing_protectors", "HMLRatingResult"): _handed_on(
+        "hml_protected_level"
+    ),
+    ("phonometry.hearing.hearing_protectors", "SNRRatingResult"): _handed_on(
+        "snr_protected_level"
+    ),
+    ("phonometry.materials.absorbers.biot", "BiotWavesResult"): _handed_on(
+        "biot_surface_impedance and poroelastic_transfer_matrix"
+    ),
+    ("phonometry.materials.absorbers.porous", "PorousMediumResult"): _handed_on(
+        "the layered and the propagation models"
+    ),
+    ("phonometry.noise_control.hvac", "HVACSpectrumResult"): _handed_on(
+        "a DuctElement, whose attenuation or self-noise it is"
+    ),
+    (
+        "phonometry.metrology.comparison_calibration",
+        "EnvironmentalSensitivityCorrection",
+    ): _handed_on("the comparison calibrations"),
+    (
+        "phonometry.underwater.propagation.numerical",
+        "RayTraceResult",
+    ): _handed_on("eigenrays"),
+    (
+        "phonometry.vibration.machinery.diagnostics",
+        "FaultFrequencyResult",
+    ): _handed_on("combine_fault_lines"),
 }
 
 
@@ -2767,19 +2833,19 @@ def stale_handed_on_results() -> list[tuple[str, str]]:
     """The entries of :data:`HANDED_ON_RESULTS` that hand nothing on any more.
 
     A result is handed on while a public function takes it (a parameter
-    annotation names it) and a public callable returns it (a return
-    annotation names it); an entry whose record lacks either is stale.
+    annotation names it, or a field of a record a caller builds for one, as
+    :func:`_taken_as_arguments` reads them) and a public callable returns it
+    (a return annotation names it); an entry whose record lacks either is
+    stale.
     """
-    taken: list[str] = []
     returned: list[str] = []
     for _, target in _public_function_targets():
-        taken.extend(_annotations_of(target))
         try:
             returns = inspect.signature(target).return_annotation
         except (TypeError, ValueError):
             continue
         returned.append(str(returns))
-    takes, returns_text = "\n".join(taken), "\n".join(returned)
+    takes, returns_text = _taken_as_arguments(), "\n".join(returned)
     return [
         key
         for key in HANDED_ON_RESULTS

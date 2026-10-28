@@ -54,9 +54,10 @@ from typing import TYPE_CHECKING, Any, Literal, overload
 import numpy as np
 
 from .._internal.display import RichDisplay
-from .._internal.frozen import OwnsArrays
+from .._internal.frozen import OwnsArrays, read_only
 from .._internal.validation import (
     check_engine,
+    pair_of_arrays,
     require_choice,
     require_equal_shapes,
     require_finite_fields,
@@ -68,6 +69,8 @@ from .._internal.validation import (
 from ..metrology.reference_values import REFERENCE_VALUES
 
 if TYPE_CHECKING:
+    from collections.abc import Sequence
+
     from matplotlib.axes import Axes
     from matplotlib.projections.polar import PolarAxes
     from numpy.typing import ArrayLike, NDArray
@@ -292,9 +295,33 @@ class LoudspeakerDirectivity(OwnsArrays):
     """
 
     piston: RadiatingPistonResult | None = None
-    polar: tuple[ArrayLike, ArrayLike] | None = None
+    polar: tuple[NDArray[np.float64], NDArray[np.float64]] | None = None
     frequency: float | None = None
     index: float | None = None
+
+    if TYPE_CHECKING:
+
+        def __init__(
+            self,
+            *,
+            piston: RadiatingPistonResult | None = None,
+            polar: Sequence[ArrayLike] | None = None,
+            frequency: float | None = None,
+            index: float | None = None,
+        ) -> None: ...
+
+    def __post_init__(self) -> None:
+        """Hold the pattern as two read-only ``float64`` arrays, whatever pair it was given as.
+
+        :raises TypeError: if ``polar`` is a text or no sequence.
+        :raises ValueError: if ``polar`` holds other than two members.
+        """
+        if self.polar is not None:
+            first, second = pair_of_arrays(
+                self.polar, "polar", "(angles_deg, relative_db)"
+            )
+            pair = (read_only(first), read_only(second))
+            object.__setattr__(self, "polar", pair)
 
 
 #: No directional characteristics supplied: the Clause 23 default.
@@ -322,9 +349,29 @@ class LoudspeakerRatings(RichDisplay):
     sinusoidal_power: float | None = None
     resonance_frequency: float | None = None
 
+    if TYPE_CHECKING:
 
-#: No manufacturer ratings supplied: the Clause 18/19 default.
-_DEFAULT_RATINGS = LoudspeakerRatings()
+        def __init__(
+            self,
+            *,
+            frequency_range: ArrayLike | None = None,
+            noise_power: float | None = None,
+            sinusoidal_power: float | None = None,
+            resonance_frequency: float | None = None,
+        ) -> None: ...
+
+    def __post_init__(self) -> None:
+        """Hold the rated range as a ``(lo, hi)`` pair of floats, checked when built.
+
+        :raises TypeError: if ``frequency_range`` is not a flat pair, or a
+            member is not a number.
+        :raises ValueError: if ``frequency_range`` is not a finite, ordered,
+            positive pair of two.
+        """
+        _require_frequency_pair(self, "frequency_range")
+        if self.frequency_range is not None:
+            low, high = self.frequency_range
+            object.__setattr__(self, "frequency_range", (float(low), float(high)))
 
 
 def _require_frequency_pair(owner: object, name: str) -> None:
@@ -381,6 +428,10 @@ def _require_frequency_pair(owner: object, name: str) -> None:
             "with 0 < lo <= hi."
         )
         raise ValueError(msg)
+
+
+#: No manufacturer ratings supplied: the Clause 18/19 default.
+_DEFAULT_RATINGS = LoudspeakerRatings()
 
 
 @dataclass(frozen=True)

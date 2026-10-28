@@ -2631,6 +2631,72 @@ tipos una tabla publicada con un `str` libre (una variable `str` en
 `room.TABLE_A1` o en `hearing.EARPHONES`) necesita ahora el `Literal` por el
 que está indexada; los valores no cambian.
 
+## Un registro que construye quien llama guarda lo que dicen sus campos
+
+Antes de 4.0 un registro guardaba una lista, una tupla o un array de otro tipo
+tal como se le daba, aunque su campo dijera que guardaba un array o una tupla:
+`environment.WavelengthSpectrum(levels=[...])` guardaba la lista, de modo que
+`spectrum.levels * 2` repetía la lista en lugar de doblar los niveles, y el
+registro congelado guardaba una lista a la que cualquiera podía seguir
+añadiendo elementos. En 4.0 un registro que construye quien llama convierte lo
+que recibe y guarda lo que dice su campo: un campo de array guarda un array de
+solo lectura de su tipo, un campo de tupla una tupla y un par un par de
+números, y un único número donde un valor por banda puede serlo sigue siendo
+el número que era. El código que añadía elementos a una lista entregada a un
+registro, o que volvía a leer un campo esperando la lista que dio, lee ahora el
+array: `record.levels.tolist()` devuelve la lista. Un comprobador de tipos lee
+el constructor que cada uno de estos registros declara para él, de modo que una
+lista pasa la comprobación donde el registro la convierte.
+
+| Registro | Antes de 4.0 | 4.0 |
+| --- | --- | --- |
+| `aircraft.ANPNPDCurves(powers=, distances_m=, levels=)` | guardaba una lista tal cual | arrays `float64` de solo lectura |
+| `aircraft.FlightSegmentState(ground_roll=, landing_roll=, bank=)` | guardaba una lista tal cual | arrays de solo lectura, las máscaras `bool` y el alabeo `float64` |
+| `aircraft.FlightConditionInterpolation(triangles=)` | guardaba una lista de filas tal cual | un array de enteros de solo lectura |
+| `aircraft.RotorcraftGround(ground_elevation=, flow_resistivity=, terrain=)` | guardaba una lista tal cual | un valor por receptor como array `float64` de solo lectura y el modelo de elevación como tupla de tres; un número o una letra de clase tal cual |
+| `aircraft.RotorcraftHemisphere(frequencies=, azimuth_deg=, polar_deg=, levels=)` | guardaba una lista tal cual | arrays `float64` de solo lectura |
+| `aircraft.RotorcraftTrackState(airspeed=, path_angle_deg=, heading=, bank_angle_deg=)` | guardaba una lista tal cual | una secuencia como array `float64` de solo lectura; un número tal cual |
+| `building.BandPath(values=)` | guardaba una lista tal cual | un array `float64` de solo lectura |
+| `building.FacadeElement(r=, dn_e=, insertion_loss=)` | guardaba una lista tal cual | un valor por banda como array `float64` de solo lectura; un número tal cual |
+| `building.LowFrequencyProcedure(corner_levels=)` | guardaba la lista tal cual | un array `float64` de solo lectura |
+| `electroacoustics.LoudspeakerDirectivity(polar=)`, `electroacoustics.MicrophoneDirectivity(polar=)`, `electroacoustics.MicrophoneNoise(spectrum=)`, `electroacoustics.MicrophoneOverload(distortion=)` | guardaba el par tal cual, también una lista; lo que no fuera un par fallaba al leerse | una tupla de dos arrays `float64` de solo lectura; `TypeError` para un número o un texto y `ValueError` para más o menos de dos miembros, al construirse |
+| `electroacoustics.LoudspeakerRatings(frequency_range=)` | guardaba el par tal cual y lo comprobaba al leerse | un par `(low, high)` de floats, comprobado al construirse como los demás pares de frecuencias (`TypeError`, `ValueError`) |
+| `emission.RoomEnvironment(absorption_area=, reverberation_time=, mean_absorption_coefficient=)` | guardaba una lista tal cual | un valor por banda como array `float64` de solo lectura; un número tal cual |
+| `environment.AtmosphericAttenuation(frequencies, attenuation_db_per_m, ...)` | guardaba una lista tal cual | arrays `float64` de solo lectura |
+| `environment.WavelengthSpectrum(wavelengths_mm=, levels=)`, `environment.RailSourceSpectra(source_a=, source_b=)` | guardaba una lista tal cual | arrays `float64` de solo lectura |
+| `environment.RollingStock(wheel_transfer=, superstructure_transfer=)`, `environment.RailwayTrack(track_transfer=, bridge_transfer=)` | guardaba una lista o una tupla tal cual | arrays `float64` de solo lectura |
+| `environment.RoadEmissionCoefficients(studded_a=, studded_b=)` | guardaba una lista o un array tal cual | una tupla de floats |
+| `environment.RoadSurfaceCoefficients(speed_range_kmh=, alpha=, beta=)` | guardaba el par y los dos diccionarios tal cual, de modo que las tablas se podían editar después de construir la fila | un par de floats y dos mapeos de solo lectura |
+| `hearing.Task(samples=, duration_observations_hours=, duration_range_hours=)` | guardaba una lista o un array tal cual | tuplas de floats, el intervalo un par |
+| `io.Signal(channel_labels=)` | guardaba una lista tal cual; un texto de tantas letras como canales nombraba un canal por letra | una tupla; `TypeError` para un único texto |
+| `materials.FiberResistivityFit(bulk_density_range_kg_m3=)` | guardaba una lista tal cual | un par de floats |
+| `materials.MetadiffuserWell(resonators=)` | guardaba una lista tal cual | una tupla |
+| `materials.TransferMatrix(t11, t12, t21, t22, frequencies=)` | guardaba cada elemento tal cual: un `complex`, una lista o un array real | arrays `complex128` de solo lectura: un elemento escalar es un array de dimensión cero, ya no es un `complex` ni es hashable (`complex(m.t11)` o `m.t11.item()` devuelve el número), y un elemento real tiene parte imaginaria nula; `frequencies` un array `float64` de solo lectura |
+
+Cuatro resultados que guardaban un `dict` editable guardan en su lugar un mapeo
+de solo lectura, como las tablas publicadas, y asignar en uno de ellos lanza
+`TypeError`: `building.FacadePredictionResult.element_r`,
+`environment.RailwayEmissionResult.components`,
+`noise_control.ReactiveSilencerResult.geometry` y
+`psychoacoustics.MooreGlasbergTimeVaryingLoudness.percentiles`. El código que
+editaba uno lo copia antes, con `dict(result.element_r)`. Las frecuencias
+centrales y las formas de onda por banda del `filters.OctaveFilterResult` que
+devuelven `filters.octave_filter` y `OctaveFilterBank.filter` son tuplas donde
+eran listas, listas a las que quien llama aún podía añadir elementos:
+`result.frequencies.index(1000.0)` y la indexación se leen como antes, y
+`list(result.frequencies)` devuelve una lista que editar.
+
+```python
+from phonometry import environment, materials
+
+spectrum = environment.WavelengthSpectrum(wavelengths_mm=[2000.0, 1600.0], levels=[5.0, 4.0])
+matrix = materials.TransferMatrix(1.0, 0.0, 0.0, 1.0)
+print(type(spectrum.levels).__name__, spectrum.levels.flags.writeable, spectrum.levels.tolist())
+print(matrix.t11.shape, matrix.t11.dtype, complex(matrix.t11))
+# ndarray False [5.0, 4.0]
+# () complex128 (1+0j)
+```
+
 ## Los setenta y ocho nombres que ya no están
 
 Todo lo demás se movió. Estos setenta y ocho no existen en ningún módulo público:

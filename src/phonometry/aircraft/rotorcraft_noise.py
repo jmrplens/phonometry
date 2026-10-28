@@ -56,7 +56,7 @@ from typing import TYPE_CHECKING, Any, ClassVar, Final, Literal
 import numpy as np
 
 from .._internal.display import RichDisplay
-from .._internal.frozen import OwnsArrays
+from .._internal.frozen import OwnsArrays, read_only
 
 # Imported to run, not only to type: typing.get_type_hints resolves the
 # flow_resistivity field of RotorcraftGround in this module's namespace.
@@ -165,8 +165,24 @@ class RotorcraftHemisphere(OwnsArrays):
     levels: NDArray[np.float64]
     distance_m: float = _RH
 
+    if TYPE_CHECKING:
+
+        def __init__(
+            self,
+            *,
+            frequencies: ArrayLike,
+            azimuth_deg: ArrayLike,
+            polar_deg: ArrayLike,
+            levels: ArrayLike,
+            distance_m: float = _RH,
+        ) -> None: ...
+
     def __post_init__(self) -> None:
-        """Reject a hemisphere whose grid does not span its own axes.
+        """Hold the axes and the grid read-only, and reject a grid that does not span its axes.
+
+        Each axis and the level grid are held as the read-only ``float64``
+        arrays every reader of the hemisphere reads them as, whatever
+        sequence they were given as.
 
         Three axes meet in ``levels``, and every reader addresses one of them
         through the axis beside it. An angle axis of the wrong length is
@@ -185,6 +201,9 @@ class RotorcraftHemisphere(OwnsArrays):
 
         :raises ValueError: if the level grid disagrees with an angle or band axis.
         """
+        for name in ("frequencies", "azimuth_deg", "polar_deg", "levels"):
+            held = np.asarray(getattr(self, name), dtype=np.float64)
+            object.__setattr__(self, name, read_only(held))
         require_ranks(self, frequencies=1, azimuth_deg=1, polar_deg=1, levels=3)
         require_same_length(self, "azimuth_deg", "levels", axis="azimuth angle")
         require_same_length(self, "polar_deg", ("levels", 1), axis="polar angle")
@@ -1361,27 +1380,34 @@ class RotorcraftGround(OwnsArrays):
     """
 
     receiver_height_m: float = 1.2
-    ground_elevation: float | NDArray[np.float64] | list[float] | list[list[float]] = (
-        0.0
-    )
+    ground_elevation: float | NDArray[np.float64] = 0.0
     flow_resistivity: (
-        float
-        | GroundClass
-        | np.floating[Any]
-        | np.integer[Any]
-        | NDArray[np.float64]
-        | list[float]
-        | list[list[float]]
+        float | GroundClass | np.floating[Any] | np.integer[Any] | NDArray[np.float64]
     ) = "G"
     terrain: (
-        tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]]
-        | Sequence[NDArray[np.float64]]
-        | None
+        tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]] | None
     ) = None
     terrain_resolution: float | None = None
 
+    if TYPE_CHECKING:
+
+        def __init__(
+            self,
+            *,
+            receiver_height_m: float = 1.2,
+            ground_elevation: ArrayLike = 0.0,
+            flow_resistivity: GroundClass | ArrayLike = "G",
+            terrain: Sequence[ArrayLike] | None = None,
+            terrain_resolution: float | None = None,
+        ) -> None: ...
+
     def __post_init__(self) -> None:
-        """Refuse a choice its ``Literal`` does not list, when the record is built.
+        """Refuse a choice its ``Literal`` does not list, and hold every map read-only.
+
+        A ground elevation or a flow resistivity given per receiver, and the
+        three axes of an elevation model, are held as read-only ``float64``
+        arrays whatever sequence they were given as; a single number or a
+        class letter is held as it was given.
 
         :raises TypeError: if ``flow_resistivity`` is not a text.
         """
@@ -1391,6 +1417,16 @@ class RotorcraftGround(OwnsArrays):
                 "flow_resistivity",
                 ("A", "B", "C", "D", "E", "F", "G", "H"),
             )
+        for name in ("ground_elevation", "flow_resistivity"):
+            value = getattr(self, name)
+            if not isinstance(value, str) and np.ndim(value) > 0:
+                held = np.asarray(value, dtype=np.float64)
+                object.__setattr__(self, name, read_only(held))
+        if self.terrain is not None:
+            axes = tuple(
+                read_only(np.asarray(axis, dtype=np.float64)) for axis in self.terrain
+            )
+            object.__setattr__(self, "terrain", axes)
 
 
 @dataclass(frozen=True)
@@ -1410,10 +1446,34 @@ class RotorcraftTrackState(OwnsArrays):
     """
 
     _: KW_ONLY
-    airspeed: float | NDArray[np.float64] | list[float] | None = None
-    path_angle_deg: float | NDArray[np.float64] | list[float] | None = None
-    heading: float | NDArray[np.float64] | list[float] | None = None
-    bank_angle_deg: float | NDArray[np.float64] | list[float] | None = None
+    airspeed: float | NDArray[np.float64] | None = None
+    path_angle_deg: float | NDArray[np.float64] | None = None
+    heading: float | NDArray[np.float64] | None = None
+    bank_angle_deg: float | NDArray[np.float64] | None = None
+
+    if TYPE_CHECKING:
+
+        def __init__(
+            self,
+            *,
+            airspeed: ArrayLike | None = None,
+            path_angle_deg: ArrayLike | None = None,
+            heading: ArrayLike | None = None,
+            bank_angle_deg: ArrayLike | None = None,
+        ) -> None: ...
+
+    def __post_init__(self) -> None:
+        """Hold each per-point value read-only: one number as given, several as an array.
+
+        A sequence of values is held as the read-only ``float64`` array the
+        track computation reads it as, so a list kept as given cannot change
+        under the record.
+        """
+        for name in ("airspeed", "path_angle_deg", "heading", "bank_angle_deg"):
+            value = getattr(self, name)
+            if value is not None and np.ndim(value) > 0:
+                held = np.asarray(value, dtype=np.float64)
+                object.__setattr__(self, name, read_only(held))
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -1432,7 +1492,19 @@ class FlightConditionInterpolation(OwnsArrays):
     """
 
     scaling_factor: float = 2.0
-    triangles: NDArray[np.int_] | list[list[int]] | None = None
+    triangles: NDArray[np.intp] | None = None
+
+    if TYPE_CHECKING:
+
+        def __init__(
+            self, *, scaling_factor: float = 2.0, triangles: ArrayLike | None = None
+        ) -> None: ...
+
+    def __post_init__(self) -> None:
+        """Hold a triangulation given as rows of indices as a read-only integer array."""
+        if self.triangles is not None:
+            table = np.asarray(self.triangles, dtype=np.intp)
+            object.__setattr__(self, "triangles", read_only(table))
 
 
 #: The defaults of the event entry points, one shared instance each: the
@@ -1469,7 +1541,7 @@ class _EventSetup:
     alpha: NDArray[np.float64]
     rref: float
     scaling_factor: float
-    triangles: NDArray[np.int_] | list[list[int]] | None
+    triangles: NDArray[np.intp] | None
     band_integrated: bool
     terrain: tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]] | None
     terrain_resolution: float
@@ -1612,9 +1684,7 @@ def _setup_resistivity(
     | str
     | np.floating[Any]
     | np.integer[Any]
-    | NDArray[np.float64]
-    | list[float]
-    | list[list[float]],
+    | NDArray[np.float64],
     dem: tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]] | None,
 ) -> float | NDArray[np.float64]:
     """The scalar (or per-receiver) flow resistivity of an event run."""
@@ -1634,7 +1704,7 @@ def _setup_resistivity(
 
 
 def _setup_ground_elevation(
-    ground_elevation: float | NDArray[np.float64] | list[float] | list[list[float]],
+    ground_elevation: float | NDArray[np.float64],
     dem: tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]] | None,
 ) -> float | NDArray[np.float64]:
     """The scalar (or per-receiver) ground elevation of an event run."""

@@ -112,7 +112,7 @@ import numpy as np
 from scipy import stats
 
 from ..._internal.display import RichDisplay
-from ..._internal.frozen import OwnsArrays, read_only
+from ..._internal.frozen import OwnsArrays, read_only, reduce_with_plain_rows
 from ..._internal.types import as_float_or_array
 from ..._internal.validation import require_choice, require_real, require_scalar
 
@@ -1682,6 +1682,10 @@ class SoundscapeAcousticEnvironment(RichDisplay):
     measurement_results: Mapping[str, float]
     site_description: str | None = None
     recording_and_reproduction: str | None = None
+
+    def __reduce__(self) -> tuple[Any, tuple[type, dict[str, Any]]]:
+        """Travel with plain dictionaries, which pickle; they are wrapped again on arrival."""
+        return reduce_with_plain_rows(self)
 
     def __post_init__(self) -> None:
         """Refuse an item left empty and a missing result, naming the clause.

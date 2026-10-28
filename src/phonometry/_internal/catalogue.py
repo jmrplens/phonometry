@@ -81,6 +81,7 @@ from typing import TYPE_CHECKING, Any, ClassVar, Literal, NamedTuple, NoReturn, 
 import numpy as np
 
 from .._internal.display import RichDisplay
+from .._internal.frozen import reduce_with_plain_rows
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterator, Sequence
@@ -331,6 +332,10 @@ class Provenance(RichDisplay):
     # A mapping field makes the record unhashable; saying so here gives the
     # refusal the class's name instead of the mapping's.
     __hash__ = None  # type: ignore[assignment]
+
+    def __reduce__(self) -> tuple[Any, tuple[type, dict[str, Any]]]:
+        """Travel with plain dictionaries, which pickle; they are wrapped again on arrival."""
+        return reduce_with_plain_rows(self)
 
     def __post_init__(self) -> None:
         """Check each field and freeze the per-field standards.
@@ -2351,6 +2356,10 @@ class CatalogueRow(RichDisplay):
     group: str = ""
     note: str = ""
     provenance: Provenance | None = None
+
+    def __reduce__(self) -> tuple[Any, tuple[type, dict[str, Any]]]:
+        """Travel with plain dictionaries, which pickle; the row is checked and frozen again on arrival."""
+        return reduce_with_plain_rows(self)
 
     def __post_init__(self) -> None:
         """Hold the row to the contract every row is held to, and freeze it.

@@ -392,10 +392,16 @@ def frozen_row(row: Mapping[str, Any] | None) -> Mapping[str, Any] | None:
 
 
 def _thawed(value: object) -> object:
-    if isinstance(value, MappingProxyType):
-        return dict(value)
-    if isinstance(value, tuple) and any(isinstance(v, MappingProxyType) for v in value):
-        return tuple(_thawed(v) for v in value)
+    """*value* with every read-only mapping in it a plain dictionary, at any depth.
+
+    A mapping held in a mapping, or in a tuple, is thawed too, so that a
+    table of tables pickles as a whole; a named tuple, a record or an array
+    is left as it is, since it pickles by itself.
+    """
+    if isinstance(value, MappingProxyType | dict):
+        return {key: _thawed(item) for key, item in value.items()}
+    if type(value) is tuple:
+        return tuple(_thawed(item) for item in value)
     return value
 
 

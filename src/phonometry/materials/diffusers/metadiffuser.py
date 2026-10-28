@@ -93,12 +93,22 @@ class MetadiffuserWell(RichDisplay):
     slit_height_m: float
     resonators: tuple[HelmholtzResonator, ...]
 
+    if TYPE_CHECKING:
+
+        def __init__(
+            self, *, slit_height_m: float, resonators: Sequence[HelmholtzResonator]
+        ) -> None: ...
+
     def __post_init__(self) -> None:
         """Reject a non-positive ``slit_height_m`` and a well with no resonators.
+
+        The resonators are held as a tuple, whatever sequence they were given
+        as, so a list given by hand cannot change the well after it is built.
 
         :raises TypeError: if ``slit_height_m`` is not a single number.
         """
         require_positive(self.slit_height_m, "slit_height_m")
+        object.__setattr__(self, "resonators", tuple(self.resonators))
         if not self.resonators:
             msg = "'resonators' must contain at least one resonator."
             raise ValueError(msg)

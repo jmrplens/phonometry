@@ -281,7 +281,7 @@ LOW_FREQUENCY_VOLUME_LIMIT_M3 = 25.0
 LowFrequencyProcedure(
     *,
     volume: float,
-    corner_levels: Sequence[float] | np.ndarray,
+    corner_levels: ArrayLike,
     reverberation_63_octave: float | None = None,
 )
 ```

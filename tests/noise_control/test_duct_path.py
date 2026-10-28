@@ -45,6 +45,8 @@ from phonometry.noise_control.hvac import _OCTAVE_BANDS
 if TYPE_CHECKING:
     from collections.abc import Callable
 
+    from numpy.typing import ArrayLike
+
 #: Long Table 14.9, row 1 of both paths: the fan sound power level, dB re 1 pW.
 FAN_LW = [90.0, 86.0, 82.0, 79.0, 77.0, 75.0, 71.0, 61.0]
 
@@ -157,7 +159,7 @@ SHEET_TOLERANCE = 1.0
 
 
 def _build(
-    elements: tuple[tuple[str, object, object], ...],
+    elements: tuple[tuple[str, ArrayLike | None, ArrayLike | None], ...],
     room_effect: list[float],
     label: str,
 ) -> DuctPathResult:
@@ -195,7 +197,7 @@ def _row(value: object) -> list[int]:
 
 def _assert_path(
     result: DuctPathResult,
-    elements: tuple[tuple[str, object, object], ...],
+    elements: tuple[tuple[str, ArrayLike | None, ArrayLike | None], ...],
     self_noise_rows: tuple[list[int], ...],
     level_rows: tuple[tuple[list[int], list[int]], ...],
     room_effect: list[float],

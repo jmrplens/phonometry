@@ -209,7 +209,7 @@ def test_the_fibre_records_show_the_same_table() -> None:
 def test_the_mechanism_leaves_repr_and_str_alone() -> None:
     assert not {"__repr__", "__str__"} & set(vars(RichDisplay))
     levels = np.array([60.0, 61.5])
-    result = phonometry.filters.OctaveFilterResult(levels, [500.0, 1000.0], None)
+    result = phonometry.filters.OctaveFilterResult(levels, (500.0, 1000.0), None)
     assert repr(result).startswith("OctaveFilterResult(levels=array([60. , 61.5])")
 
 
@@ -352,7 +352,7 @@ def test_a_record_holding_signals_names_them() -> None:
         result = phonometry.filters.octave_filter(
             io.Signal(tone, fs), fraction=1, sigbands=True
         )
-    assert "list of 8 Signal" in _pretty(result)
+    assert "tuple of 8 Signal" in _pretty(result)
     _parsed(result)
     signal = io.Signal(np.vstack([tone, tone]), fs)
     text = _pretty(signal)

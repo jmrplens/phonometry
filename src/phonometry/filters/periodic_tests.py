@@ -117,6 +117,7 @@ if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
 
     from matplotlib.axes import Axes
+    from numpy.typing import ArrayLike
 
     from .._i18n import Language
 
@@ -388,6 +389,27 @@ class FilterPeriodicMeasurements(RichDisplay):
     relative_attenuations: Sequence[Sequence[float]] | None = None
     relative_attenuation_uncertainties_db: Sequence[Sequence[float]] | None = None
     tested_midband_frequencies_hz: Sequence[float] | None = None
+
+    if TYPE_CHECKING:
+
+        def __init__(
+            self,
+            *,
+            midband_attenuations: ArrayLike | None = None,
+            midband_uncertainties_db: ArrayLike | None = None,
+            bandwidth_deviations_db: ArrayLike | None = None,
+            bandwidth_uncertainties_db: ArrayLike | None = None,
+            set_midband_frequencies_hz: ArrayLike | None = None,
+            linearity_deviations_db: ArrayLike | None = None,
+            linearity_levels_below_upper: ArrayLike | None = None,
+            linearity_uncertainties_db: ArrayLike | None = None,
+            linearity_midband_frequencies_hz: ArrayLike | None = None,
+            range_linearity_deviations_db: ArrayLike | None = None,
+            range_linearity_uncertainties_db: ArrayLike | None = None,
+            relative_attenuations: ArrayLike | None = None,
+            relative_attenuation_uncertainties_db: ArrayLike | None = None,
+            tested_midband_frequencies_hz: ArrayLike | None = None,
+        ) -> None: ...
 
     def __post_init__(self) -> None:
         """Freeze every sequence and refuse results the rule cannot be read on.

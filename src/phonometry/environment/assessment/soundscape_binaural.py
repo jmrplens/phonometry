@@ -72,6 +72,7 @@ from typing import TYPE_CHECKING, Any, Literal
 import numpy as np
 
 from ..._internal.display import RichDisplay
+from ..._internal.frozen import reduce_with_plain_rows
 from ..._internal.validation import require_choice
 from ..._internal.warnings import PhonometryWarning
 from ...filters.weighting import weighting_filter
@@ -351,6 +352,10 @@ class BinauralIndicators(RichDisplay):
     fs: float
     duration_s: float
     field: Literal["free", "diffuse"]
+
+    def __reduce__(self) -> tuple[Any, tuple[type, dict[str, Any]]]:
+        """Travel with plain dictionaries, which pickle; they are wrapped again on arrival."""
+        return reduce_with_plain_rows(self)
 
     def __post_init__(self) -> None:
         """Freeze the two mappings and refuse unknown rows.

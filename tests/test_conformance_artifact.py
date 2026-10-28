@@ -168,7 +168,9 @@ def test_the_verdict_survives_a_deviation_that_rounds_onto_its_limit() -> None:
     """
     outcome = registry.numeric(1.0, 1.0499, 0.05, places=2)
     assert outcome.verdict is registry.Verdict.PASS
-    stored = artifact._rounded(outcome.deviation.value, 2)
+    deviation = outcome.deviation.value
+    assert deviation is not None
+    stored = artifact._rounded(deviation, 2)
     assert stored == pytest.approx(0.05)
 
 

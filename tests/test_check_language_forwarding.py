@@ -353,6 +353,39 @@ def test_a_uniform_name_is_not_reported_as_mixed(tmp_path: pathlib.Path) -> None
     assert tree.partial_namesakes() == []
 
 
+def test_a_constructor_declared_for_the_type_checker_is_no_namesake(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A ``TYPE_CHECKING`` ``__init__`` is never defined when the code runs.
+
+    A record declares the constructor a type checker reads inside ``if
+    TYPE_CHECKING:``, and one that takes a ``language`` would otherwise make
+    ``__init__`` a name only some of whose methods take it.
+    """
+    tree = _tree(
+        tmp_path,
+        **{
+            "pkg.records": """
+            from typing import TYPE_CHECKING
+
+
+            class Frame:
+                language: str = "en"
+
+                if TYPE_CHECKING:
+
+                    def __init__(self, *, language="en"): ...
+
+
+            class Other:
+                def __init__(self, size):
+                    self.size = size
+            """
+        },
+    )
+    assert tree.partial_namesakes() == []
+
+
 def test_an_exemption_covers_one_call_and_not_its_neighbour(
     tmp_path: pathlib.Path,
 ) -> None:

@@ -1287,7 +1287,7 @@ class FilterComplianceResult(OwnsArrays):
     A band's ``class`` is then the strictest class it meets on all of them.
     """
 
-    band_margins: tuple[Mapping[str, Any], ...]
+    band_margins: tuple[Mapping[str, float | None], ...]
     fraction: int
     edition: Edition
     sos: tuple[np.ndarray, ...]
@@ -1415,7 +1415,8 @@ class FilterComplianceResult(OwnsArrays):
         spec = _FILTER_EDITIONS[self.edition]
         mask_top_omega = _map_breakpoint(spec["stopband_min"][-1][0], self.fraction)
         return any(
-            band["checked_to_omega"] < mask_top_omega for band in self.band_margins
+            (reach := band["checked_to_omega"]) is not None and reach < mask_top_omega
+            for band in self.band_margins
         )
 
     def available_classes(self) -> list[int]:
@@ -1606,30 +1607,3 @@ class FilterComplianceResult(OwnsArrays):
         return render_iec61260_report(
             self, path, metadata=metadata, verbose=verbose, language=language
         )
-
-
-#: The frequency-weighting transcriptions this module used to carry went to
-#: :mod:`phonometry.filters.weighting_compliance` with their subject. The
-#: clean-room oracles pin the tables by this path, so the reads still resolve
-#: to the module that holds them now.
-_WEIGHTING_TRANSCRIPTIONS = frozenset(
-    {
-        "_ANSI_S14_TABLE4_B",
-        "_ANSI_S14_TABLE5_12",
-        "_IEC61012_AU_HF",
-        "_IEC61012_TABLE1",
-        "_U_POLES_HZ",
-        "_WEIGHTING_TABLE3",
-        "_analytic_weighting_db",
-    }
-)
-
-
-def __getattr__(name: str) -> object:
-    """Serve the transcriptions this module used to carry from their module."""
-    if name in _WEIGHTING_TRANSCRIPTIONS:
-        from . import weighting_compliance
-
-        return getattr(weighting_compliance, name)
-    msg = f"module {__name__!r} has no attribute {name!r}"
-    raise AttributeError(msg)

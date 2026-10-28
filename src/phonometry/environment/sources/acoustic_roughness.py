@@ -490,6 +490,18 @@ class AcousticRoughnessSpectrum(OwnsArrays):
     n_segments: int | None = None
     method: Literal["A", "B"] | None = None
 
+    if TYPE_CHECKING:
+
+        def __init__(
+            self,
+            *,
+            wavelengths_m: ArrayLike,
+            levels: ArrayLike,
+            record_length_m: float | None = None,
+            n_segments: int | None = None,
+            method: Literal["A", "B"] | None = None,
+        ) -> None: ...
+
     def __post_init__(self) -> None:
         """Hold the bands as read-only arrays, one level per band, longest first.
 

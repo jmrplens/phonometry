@@ -243,7 +243,7 @@ bank        # the last line of the cell: the notebook shows its table
 
 Jupyter shows it under the cell as this table:
 
-<div class="phonometry-record"><table style="border-collapse:collapse;margin:0"><caption style="caption-side:top;text-align:left;padding:2px 0"><strong>OctaveFilterResult</strong></caption><thead><tr><th style="text-align:left;vertical-align:top">field</th><th style="text-align:left;vertical-align:top">value</th><th style="text-align:left;vertical-align:top">unit</th></tr></thead><tbody><tr><td style="text-align:left;vertical-align:top"><code>levels</code></td><td style="text-align:left;vertical-align:top">array 31 float64, 17.125 to 82.986</td><td style="text-align:left;vertical-align:top">dB</td></tr><tr><td style="text-align:left;vertical-align:top"><code>frequencies</code></td><td style="text-align:left;vertical-align:top">list of 31 numbers, 19.953 to 19953</td><td style="text-align:left;vertical-align:top">Hz</td></tr><tr><td style="text-align:left;vertical-align:top"><code>bands</code></td><td style="text-align:left;vertical-align:top">None</td><td style="text-align:left;vertical-align:top"></td></tr></tbody></table><div style="font-size:smaller;opacity:0.8;padding-top:2px">plot()</div></div>
+<div class="phonometry-record"><table style="border-collapse:collapse;margin:0"><caption style="caption-side:top;text-align:left;padding:2px 0"><strong>OctaveFilterResult</strong></caption><thead><tr><th style="text-align:left;vertical-align:top">field</th><th style="text-align:left;vertical-align:top">value</th><th style="text-align:left;vertical-align:top">unit</th></tr></thead><tbody><tr><td style="text-align:left;vertical-align:top"><code>levels</code></td><td style="text-align:left;vertical-align:top">array 31 float64, 17.125 to 82.986</td><td style="text-align:left;vertical-align:top">dB</td></tr><tr><td style="text-align:left;vertical-align:top"><code>frequencies</code></td><td style="text-align:left;vertical-align:top">tuple of 31 numbers, 19.953 to 19953</td><td style="text-align:left;vertical-align:top">Hz</td></tr><tr><td style="text-align:left;vertical-align:top"><code>bands</code></td><td style="text-align:left;vertical-align:top">None</td><td style="text-align:left;vertical-align:top"></td></tr></tbody></table><div style="font-size:smaller;opacity:0.8;padding-top:2px">plot()</div></div>
 
 A verdict, in a cell of its own, shows its outcome in the title. This one
 applies Annex G.4 of ISO 10140-1 to a [lining test](../buildings/insulation/lab-application-rules.md) on a masonry wall:
@@ -262,8 +262,8 @@ The IPython terminal prints the same tables as text:
 
 ```text
 OctaveFilterResult
-  levels       array 31 float64, 17.125 to 82.986   dB
-  frequencies  list of 31 numbers, 19.953 to 19953  Hz
+  levels       array 31 float64, 17.125 to 82.986    dB
+  frequencies  tuple of 31 numbers, 19.953 to 19953  Hz
   bands        None
 plot()
 

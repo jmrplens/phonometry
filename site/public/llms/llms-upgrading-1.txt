@@ -1441,4 +1441,57 @@ The result also draws itself, so the band spectrum is one call:
 ax = result.plot()
 ```
 
+## Other answers that were tuples are records
+
+Every other answer that came back as a tuple of different quantities, to be
+unpacked by position, is a record with named fields now, and none of them
+unpacks: a line that still does raises `TypeError: cannot unpack
+non-iterable ...` instead of handing back the wrong column. A tuple is left
+only where its items are alike, such as the two ends of a range, lower
+first.
+
+| 3.3.0 or 4.0.0rc1 | 4.0 |
+| --- | --- |
+| `freq, lower, upper, labels = filters.nominal_frequencies(3)` | `b = filters.nominal_frequencies(3)`, then `b.frequencies`, `b.lower_edges`, `b.upper_edges` and `b.labels` (a `FractionalOctaveBands`) |
+| `epnl, pnltm, kf, kl = aircraft.epnl_from_pnlt(pnlt)` | `r = aircraft.epnl_from_pnlt(pnlt)`, then `r.epnl`, `r.pnltm`, `r.band_limits` (the pair `(kF, kL)`), `r.bandsharing_adjustment` and `r.duration_correction` (an `EPNLIntegration`) |
+| `freqs, delta_l = building.improvement_octave_bands(dl, f)` | `s = building.improvement_octave_bands(dl, frequencies=f)`, then `s.frequencies` and `s.values` (an `OctaveBandSpectrum`, whose `quantity` says what the values are) |
+| `freqs, values = result.octave_bands()` on a `building.FloorCoveringImprovementResult` | `result.octave_bands().frequencies` and `.values`, the same `OctaveBandSpectrum` |
+| `l_in, s_m = building.combine_subareas(l_in, areas)` | `r = building.subarea_intensity_level(l_in, areas)`, then `r.levels` and `r.measurement_area` (a `SubareaIntensityLevel`) |
+| `freqs, u = band_uncertainty.to_arrays()` on a `building.BandUncertainty` | `band_uncertainty.frequencies` and `band_uncertainty.uncertainties`, the fields it was read from |
+| `bx, bz, bxz = building.corrugated_plate_stiffness(...)` | `b = building.corrugated_plate_stiffness(...)`, then `b.b_x_n_m`, `b.b_z_n_m` and `b.b_xz_n_m` (a `CorrugatedPlateStiffness`) |
+| `f, lower, upper = building.heavy_impact_source_limits(source)` | `lim = building.heavy_impact_source_limits(source)`, then `lim.frequencies`, `lim.lower` and `lim.upper` (a `HeavyImpactSourceLimits`) |
+| `width, k = building.wall_tie_stiffness(tie)`, `building.WALL_TIE_STIFFNESS[tie][1]` | `t = building.wall_tie_stiffness(tie)`, then `t.cavity_width_m` and `t.stiffness` (a `WallTieStiffness`, which is also what each row of `WALL_TIE_STIFFNESS` holds) |
+| `result.ratings` on a `building.LiningImprovementResult` | `result.delta_rw`, `result.delta_ra` and `result.delta_ratr`, the fields the tuple was read from |
+| `f, gamma2 = electroacoustics.coherence(x, y, fs)` | `c = electroacoustics.coherence(x, y, fs)`, then `c.frequencies` and `c.coherence` (a `CoherenceResult`, with `.plot()`) |
+| `f, levels = emission.octave_band_levels(levels, f)` | `o = emission.octave_band_levels(levels, frequencies=f)`, then `o.frequencies` and `o.levels` (an `OctaveBandLevels`, with `.plot()`) |
+| `f, class_1, class_2 = emission.residual_index_limits(device)` | `lim = emission.residual_index_limits(device)`, then `lim.frequencies`, `lim.class_1` and `lim.class_2` (a `ResidualIndexLimits`) |
+| `wavelengths, levels = environment.wheel_roughness(brake)`, and the same of `rail_roughness`, `contact_filter` and `impact_roughness_single` | `w = environment.wheel_roughness(brake)`, then `w.wavelengths_mm` and `w.levels` (a `WavelengthSpectrum`, with `.plot()`) |
+| `source_a, source_b = environment.traction_sound_power(vehicle)`, and the same of `aerodynamic_sound_power` | `p = environment.traction_sound_power(vehicle)`, then `p.source_a` and `p.source_b` (a `RailSourceSpectra`) |
+| `RollingStock(wheel_roughness=(wavelengths, levels), traction=(a, b), ...)`, `RailwayTrack(rail_roughness=(wavelengths, levels), ...)` | the same fields given a `WavelengthSpectrum(wavelengths_mm=..., levels=...)` or a `RailSourceSpectra(source_a=..., source_b=...)`; a bare pair raises `TypeError` naming the field |
+| `f, lower, upper = filters.weighting_class_limits(1)` | `lim = filters.weighting_class_limits(1)`, then `lim.frequencies`, `lim.lower` and `lim.upper` (a `WeightingClassLimits`) |
+| `rho, kappa = materials.slit_effective_properties(f, ...)`, and the same of `rectangular_duct_properties` | `p = materials.slit_effective_properties(f, ...)`, then `p.effective_density` and `p.bulk_modulus` (an `EffectiveFluidProperties`) |
+| `fc, alpha = materials.one_third_octave_absorption(alpha, f)` | `b = materials.one_third_octave_absorption(alpha, frequencies=f)`, then `b.frequencies` and `b.absorption` (a `OneThirdOctaveAbsorption`, with `.plot()`) |
+| `a, b, c, d = materials.wave_decomposition(...)`, `p0, pd, u0, ud = materials.face_quantities(...)` | `w = materials.wave_decomposition(...)` with `w.a` to `w.d` (a `WaveAmplitudes`), `q = materials.face_quantities(...)` with `q.p0`, `q.pd`, `q.u0` and `q.ud` (a `FaceQuantities`) |
+| `k, U = result.expanded(0.95)` on a `metrology.UncertaintyResult` | `e = result.expanded(0.95)`, then `e.coverage_factor` and `e.expanded_uncertainty` (an `ExpandedUncertainty`) |
+| `f, spl = psychoacoustics.equal_loudness_contour(40.0)`, `f, tf = psychoacoustics.hearing_threshold()` | `c = psychoacoustics.equal_loudness_contour(40.0)`, then `c.frequencies`, `c.levels` and `c.phon`, which is `None` for the threshold (a `LoudnessContour`, with `.plot()`) |
+| `f, v = vibration.foundation_guideline_curve(building_class)` | `g = vibration.foundation_guideline_curve(building_class)`, then `g.frequencies` and `g.velocities_mm_s` (a `GuidelineCurve`) |
+| `chi, psi = vibration.junction_wave_parameters(...)` | `w = vibration.junction_wave_parameters(...)`, then `w.chi` and `w.psi` (a `JunctionWaveParameters`) |
+| `time, level = room.decay_curve(ir, fs)`, which still unpacked | `curve = room.decay_curve(ir, fs)`, then `curve.times` and `curve.levels` (a `DecayCurve`, which no longer unpacks) |
+| `times, levels = environment.sound_pressure_level_history(x, fs)` | `h = environment.sound_pressure_level_history(x, fs)`, then `h.times` and `h.levels` (a `LevelHistory`, which no longer unpacks) |
+
+```python
+import numpy as np
+from phonometry import aircraft, filters
+
+bands = filters.nominal_frequencies(1, [125, 1000])
+print(bands.labels)
+# ('125', '250', '500', '1k')
+
+epnl = aircraft.epnl_from_pnlt(np.array([90.0, 95.0, 90.0]), 0.5)
+print(epnl.band_limits, round(epnl.duration_correction, 2))
+# (0, 2) -10.88
+```
+
+The octave spectrum draws itself with `.plot()`, labelled by its quantity.
+
 ---

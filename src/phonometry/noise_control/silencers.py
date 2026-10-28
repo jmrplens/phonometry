@@ -110,12 +110,13 @@ from __future__ import annotations
 
 import math
 from dataclasses import KW_ONLY, dataclass
+from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Final, Literal
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
-from .._internal.frozen import OwnsArrays, read_only_copy
+from .._internal.frozen import OwnsArrays, read_only_copy, reduce_with_plain_rows
 from .._internal.validation import (
     check_engine,
     require_non_negative,
@@ -128,7 +129,7 @@ from .duct_modes import _warn_above_plane_wave_limit
 from .duct_modes import plane_wave_limit as _plane_wave_limit
 
 if TYPE_CHECKING:
-    from collections.abc import Sequence
+    from collections.abc import Mapping, Sequence
 
     from matplotlib.axes import Axes
 
@@ -594,7 +595,7 @@ class ReactiveSilencerResult(OwnsArrays):
     kind: SilencerKind
     _: KW_ONLY
     resonances: np.ndarray | None
-    geometry: dict[SilencerDimension, float] | None
+    geometry: Mapping[SilencerDimension, float] | None
     plane_wave_limit: float
     chain: SilencerChain | None
 
@@ -658,6 +659,7 @@ class ReactiveSilencerResult(OwnsArrays):
                 raise ValueError(msg)
             for key, value in self.geometry.items():
                 _require_finite_dimension(key, value)
+            object.__setattr__(self, "geometry", MappingProxyType(dict(self.geometry)))
         require_ranks(
             self,
             frequencies=1,
@@ -674,6 +676,10 @@ class ReactiveSilencerResult(OwnsArrays):
             "transfer_matrix",
             axis="frequency",
         )
+
+    def __reduce__(self) -> tuple[Any, tuple[type, dict[str, Any]]]:
+        """Travel with a plain dictionary, which pickles; it is wrapped again on arrival."""
+        return reduce_with_plain_rows(self)
 
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
@@ -780,7 +786,7 @@ def _result(
     radiation_impedance: ArrayLike | None,
     kind: SilencerKind,
     resonances: NDArray[np.float64] | None = None,
-    geometry: dict[SilencerDimension, float] | None = None,
+    geometry: Mapping[SilencerDimension, float] | None = None,
     areas: Sequence[float] | None = None,
     chain: SilencerChain | None = None,
 ) -> ReactiveSilencerResult:

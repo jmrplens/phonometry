@@ -263,11 +263,20 @@ class PanelTransmissionResult(Protocol):
     in ``frequencies``. Matching structurally (a :class:`typing.Protocol`)
     lets :func:`enclosure_insertion_loss` accept such a result directly without
     importing the ``building`` package, so ``noise_control`` keeps no
-    dependency on it.
+    dependency on it. Both members are read-only properties, which a frozen
+    record's field satisfies; a settable attribute in a protocol would ask a
+    record to accept a write it refuses.
     """
 
-    transmission_loss: NDArray[np.float64]
-    frequencies: NDArray[np.float64]
+    @property
+    def transmission_loss(self) -> NDArray[np.float64]:
+        """The predicted transmission loss per band, in decibels."""
+        ...
+
+    @property
+    def frequencies(self) -> NDArray[np.float64]:
+        """The band centre frequencies, in hertz."""
+        ...
 
 
 def _resolve_frequencies(

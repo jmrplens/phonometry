@@ -68,7 +68,7 @@ import math
 import os
 from dataclasses import dataclass
 from pathlib import Path
-from typing import cast
+from typing import TYPE_CHECKING, Any, cast
 
 import numpy as np
 
@@ -86,6 +86,11 @@ from .._internal.json_input import (
     write_beside,
 )
 from .._internal.validation import require_scalar
+
+if TYPE_CHECKING:
+    from numpy.typing import NDArray
+
+    from .._internal.types import RealScalar
 
 #: The schema identifier and the layout version this module writes.
 SIDECAR_SCHEMA = "phonometry-calibration"
@@ -131,6 +136,18 @@ class CalibrationSidecar(RichDisplay):
     calibrator_model: str | None = None
     channel_labels: tuple[str, ...] | None = None
     phonometry_version: str | None = None
+
+    if TYPE_CHECKING:
+
+        def __init__(
+            self,
+            calibration_factor: RealScalar | NDArray[np.floating[Any]],
+            reference_spl: RealScalar | NDArray[np.floating[Any]] | None = None,
+            calibrator_frequency: RealScalar | NDArray[np.floating[Any]] | None = None,
+            calibrator_model: str | None = None,
+            channel_labels: tuple[str, ...] | list[str] | None = None,
+            phonometry_version: str | None = None,
+        ) -> None: ...
 
     def __post_init__(self) -> None:
         factor = _real("calibration_factor", self.calibration_factor, "a real number")

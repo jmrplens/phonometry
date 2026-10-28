@@ -109,6 +109,19 @@ class ContourPhasors(OwnsArrays):
     normal_velocity: NDArray[np.complex128]
     segment: float
 
+    if TYPE_CHECKING:
+
+        def __init__(
+            self,
+            *,
+            frequency: float,
+            positions: ArrayLike,
+            normals: ArrayLike,
+            pressure: ArrayLike,
+            normal_velocity: ArrayLike,
+            segment: float,
+        ) -> None: ...
+
     def __post_init__(self) -> None:
         """Reject a contour whose geometry and phasors disagree; coerce dtypes.
 

@@ -598,7 +598,7 @@ def test_a_bad_frame_is_refused_when_the_record_is_built(
 
 def test_a_frame_holds_what_it_was_given() -> None:
     # A list with a whole float, held as the pair of ints it names.
-    frame = AnimationFrame(size=[640.0, 480], color_limit=2)  # type: ignore[arg-type]
+    frame = AnimationFrame(size=[640.0, 480], color_limit=2)  # type: ignore[list-item]
     assert frame.size == (640, 480)
     assert frame.color_limit == 2.0
     with pytest.raises(AttributeError, match="size"):

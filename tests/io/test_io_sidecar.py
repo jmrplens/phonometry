@@ -550,8 +550,10 @@ def test_a_number_that_is_not_finite_is_never_written(
     with pytest.raises(ValueError, match=f"{field} must be finite or None"):
         write_sidecar(audio, 2.5, **{field: value})
     assert kept.read_bytes() == before
+    # One number field, named at run time: the checker cannot tell it from the labels.
+    option: dict[str, typing.Any] = {field: value}
     with pytest.raises(ValueError, match=f"{field} must be finite or None"):
-        CalibrationSidecar(calibration_factor=1.0, **{field: value})
+        CalibrationSidecar(calibration_factor=1.0, **option)
 
 
 def _not_real(field: str, value: str, *, optional: bool = True) -> str:

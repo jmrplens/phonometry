@@ -115,7 +115,7 @@ MooreGlasbergTimeVaryingLoudness(
     long_term_loudness_level: np.ndarray,
     n_max: float,
     loudness_level_max: float,
-    percentiles: dict[float, float],
+    percentiles: Mapping[float, float],
     field: Literal['free', 'diffuse', 'eardrum'],
     presentation: Literal['binaural', 'diotic', 'monaural'],
 )

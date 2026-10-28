@@ -510,7 +510,7 @@ Corrected net thrust per engine, lb (Eq. B-9, and Eq. B-10 in kind).
 PerformanceAircraft(
     *,
     aircraft_id: str,
-    n_engines: int,
+    n_engines: int | np.integer[Any],
     max_static_thrust_lb: float,
     max_landing_weight_lb: float,
     jet_coefficients: Mapping[str, JetEngineCoefficients] = ...,

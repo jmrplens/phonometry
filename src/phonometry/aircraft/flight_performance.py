@@ -669,6 +669,22 @@ class PerformanceAircraft(RichDisplay):
         default_factory=dict
     )
 
+    if TYPE_CHECKING:
+
+        def __init__(
+            self,
+            *,
+            aircraft_id: str,
+            n_engines: int | np.integer[Any],
+            max_static_thrust_lb: float,
+            max_landing_weight_lb: float,
+            jet_coefficients: Mapping[str, JetEngineCoefficients] = ...,
+            propeller_coefficients: Mapping[str, PropellerEngineCoefficients] = ...,
+            aerodynamic_coefficients: Mapping[
+                tuple[str, str], AerodynamicCoefficients
+            ] = ...,
+        ) -> None: ...
+
     def __post_init__(self) -> None:
         """Reject an aeroplane no procedure could be flown with.
 

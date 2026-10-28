@@ -150,11 +150,22 @@ class OctaveFilterResult(OwnsArrays):
         filtering in dBFS, or one carrying a factor of its own, filtered
         digital units, so its bands are handed back as plain arrays rather
         than labelled pascals.
+
+    The band centres and the waveforms are tuples, as every other frozen
+    result holds a sequence: a list inside a frozen record is one a caller
+    could still append to. A record built by hand with lists holds them as
+    tuples.
     """
 
     levels: np.ndarray | None
-    frequencies: list[float] | list[str]
-    bands: list[Signal] | list[np.ndarray] | None = None
+    frequencies: tuple[float, ...] | tuple[str, ...]
+    bands: tuple[Signal, ...] | tuple[np.ndarray, ...] | None = None
+
+    def __post_init__(self) -> None:
+        """Hold the band centres and the waveforms as tuples."""
+        object.__setattr__(self, "frequencies", tuple(self.frequencies))
+        if self.bands is not None:
+            object.__setattr__(self, "bands", tuple(self.bands))
 
     def require_levels(self) -> np.ndarray:
         """The band levels, or a clear error when the call asked for none.
@@ -174,7 +185,7 @@ class OctaveFilterResult(OwnsArrays):
             raise ValueError(msg)
         return self.levels
 
-    def require_bands(self) -> list[Signal] | list[np.ndarray]:
+    def require_bands(self) -> tuple[Signal, ...] | tuple[np.ndarray, ...]:
         """The per-band waveforms, or a clear error when none were kept.
 
         Splitting a record into bands costs a copy per band, so it only
@@ -825,10 +836,8 @@ class OctaveFilterBank:
             if sigbands and xb is not None:
                 xb = [band[0] for band in xb]
 
-        # Return a copy: the bank (possibly shared via the octave_filter()
-        # design cache) must not be corrupted by callers mutating the list.
-        freq_out: list[float] | list[str] = (
-            list(self.labels) if nominal else self.frequencies.tolist()
+        freq_out: tuple[float, ...] | tuple[str, ...] = (
+            self.labels if nominal else tuple(self.frequencies.tolist())
         )
 
         if sigbands and xb is not None:
@@ -838,9 +847,9 @@ class OctaveFilterBank:
             # of its own, filtered digital units: handing those back as a
             # Signal would label them pascals. See _default_calibration.
             if isinstance(x, Signal) and self._default_calibration:
-                bands: list[Signal] = [like_input(x, band, fs=self.fs) for band in xb]
+                bands = tuple(like_input(x, band, fs=self.fs) for band in xb)
                 return OctaveFilterResult(spl, freq_out, bands)
-            return OctaveFilterResult(spl, freq_out, xb)
+            return OctaveFilterResult(spl, freq_out, tuple(xb))
         return OctaveFilterResult(spl, freq_out)
 
     def _prepare_signal(

@@ -553,11 +553,11 @@ Offset   Size  Field                          Held here as
 
 ```python
 CalibrationSidecar(
-    calibration_factor: float,
-    reference_spl: float | None = None,
-    calibrator_frequency: float | None = None,
+    calibration_factor: float | np.floating[Any] | np.integer[Any] | NDArray[np.floating[Any]],
+    reference_spl: float | np.floating[Any] | np.integer[Any] | NDArray[np.floating[Any]] | None = None,
+    calibrator_frequency: float | np.floating[Any] | np.integer[Any] | NDArray[np.floating[Any]] | None = None,
     calibrator_model: str | None = None,
-    channel_labels: tuple[str, ...] | None = None,
+    channel_labels: tuple[str, ...] | list[str] | None = None,
     phonometry_version: str | None = None,
 )
 ```
@@ -1539,11 +1539,11 @@ The sidecar filename of an audio file (see the module docstring).
 
 ```python
 Signal(
-    data: NDArray[np.float64],
+    data: ArrayLike,
     fs: float,
     *,
     calibration_factor: float | None = None,
-    channel_labels: tuple[str, ...] | None = None,
+    channel_labels: Sequence[str] | None = None,
     provenance: BroadcastMetadata | None = None,
     source: SignalOrigin | None = None,
 )
@@ -1574,13 +1574,14 @@ calibration is actually known -- the object never invents one.
 `channel_labels` names each channel (e.g. loudspeaker positions from
 an EXTENSIBLE channel mask); `provenance` carries the `bext`
 broadcast metadata when the file had it; `source` records the file,
-container, codec, bit depth and lossy flag of the origin.
+container, codec, bit depth and lossy flag of the origin. The labels are
+held as a tuple, whatever sequence of texts they were given as.
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `calibration_factor` or `fs` is not a single number. |
+| TypeError | if `calibration_factor` or `fs` is not a single number, or `channel_labels` is one text rather than a sequence of them. |
 
 ### Signal.crop()
 

@@ -79,7 +79,7 @@ from collections import deque
 from dataclasses import dataclass, replace
 from fractions import Fraction
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Final, TypedDict
+from typing import TYPE_CHECKING, Any, Final, TypedDict
 
 import numpy as np
 
@@ -242,6 +242,19 @@ class AnimationFrame(RichDisplay):
     language: Language = "en"
     size: tuple[int, int] = (960, 540)
     color_limit: float | None = None
+
+    if TYPE_CHECKING:
+
+        def __init__(
+            self,
+            *,
+            language: Language = "en",
+            size: (
+                tuple[int | np.integer[Any], int | np.integer[Any]]
+                | list[int | np.integer[Any]]
+            ) = (960, 540),
+            color_limit: float | None = None,
+        ) -> None: ...
 
     def __post_init__(self) -> None:
         """Refuse a field of the wrong type or value when the record is built."""

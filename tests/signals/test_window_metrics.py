@@ -180,8 +180,10 @@ def test_the_window_specification_keeps_weights_of_its_own() -> None:
     weights = np.array([0.5, 0.5])
     metrics = ph.signals.window_metrics(("general_cosine", weights))
     weights[0] = 0.1
-    np.testing.assert_array_equal(metrics.window[1], [0.5, 0.5])
-    assert not metrics.window[1].flags.writeable
+    held = metrics.window[1]
+    assert isinstance(held, np.ndarray)
+    np.testing.assert_array_equal(held, [0.5, 0.5])
+    assert not held.flags.writeable
     listed = ph.signals.window_metrics(("general_cosine", [0.5, 0.5]))
     assert listed.window == ("general_cosine", (0.5, 0.5))
     assert ph.signals.window_metrics("hann").window == "hann"

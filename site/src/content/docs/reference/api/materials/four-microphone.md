@@ -353,10 +353,10 @@ $$
 
 ```python
 TransferMatrix(
-    t11: NDArray[np.complex128],
-    t12: NDArray[np.complex128],
-    t21: NDArray[np.complex128],
-    t22: NDArray[np.complex128],
+    t11: ArrayLike,
+    t12: ArrayLike,
+    t21: ArrayLike,
+    t22: ArrayLike,
     *,
     l1: float | None = None,
     s1: float | None = None,
@@ -365,7 +365,7 @@ TransferMatrix(
     thickness_m: float | None = None,
     diameter_m: float | None = None,
     shape: Literal['circular', 'rectangular', 'square'] | None = None,
-    frequencies: NDArray[np.float64] | None = None,
+    frequencies: ArrayLike | None = None,
     air_characteristic_impedance: float | None = None,
 )
 ```
@@ -373,8 +373,13 @@ TransferMatrix(
 Acoustic transfer matrix `[[T11, T12], [T21, T22]]` (ASTM E2611-19).
 
 Relates the pressure and normal particle velocity across a specimen,
-$[p; u]_{x=0} = T \, [p; u]_{x=d}$ (Eq. (16)). Each entry is complex and
-may be scalar or a per-frequency array of matching shape.
+$[p; u]_{x=0} = T \, [p; u]_{x=d}$ (Eq. (16)). Each entry is given
+as a number or as a per-frequency array of matching shape (a list, a
+tuple or any array-like), and is stored as a read-only `complex128`
+array: a scalar entry as a 0-d array, which `complex(m.t11)` or
+`m.t11.item()` reads back as a number, and a real entry with a zero
+imaginary part. `frequencies`, when given, is stored as a read-only
+`float64` array.
 
 The trailing fields retain the measurement context when the matrix comes
 out of [`transfer_matrix_two_load`](/phonometry/reference/api/materials/four-microphone/#transfer_matrix_two_load) / [`transfer_matrix_one_load`](/phonometry/reference/api/materials/four-microphone/#transfer_matrix_one_load)

@@ -213,7 +213,7 @@ position.
 
 ```python
 WeightingComplianceResult(
-    band_margins: tuple[Mapping[str, Any], ...],
+    band_margins: tuple[Mapping[str, float], ...],
     between_nominals: Mapping[str, float] | None,
     weighting: Literal['A', 'B', 'C', 'AU', 'Z'],
     edition: Literal['2013', '1979'],

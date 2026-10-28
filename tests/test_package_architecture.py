@@ -2184,3 +2184,269 @@ def test_the_logging_rule_follows_a_logger_from_module_to_module() -> None:
         "x.py:3 calls node_log.error"
     ]
     assert logging_misuse(sources[3], "y.py", shared_loggers=shared) == []
+
+
+# --------------------------------------------------------------------------- #
+# Records: what their fields are typed, and that they travel
+# --------------------------------------------------------------------------- #
+#: A numpy generic's own type parameter, which says nothing about the field.
+_NUMPY_PARAMETER = re.compile(r"\b(?:np\.\w+|NDArray|dtype)\[[^\[\]]*\]")
+
+#: Published record fields typed ``Any`` on purpose, keyed by record and
+#: field, each with the reason.
+ANY_FIELD_EXEMPT: dict[tuple[str, str], str] = {}
+
+
+def _published_records() -> dict[str, type]:
+    return {
+        name: cls
+        for name, cls in _published_classes().items()
+        if dataclasses.is_dataclass(cls)
+    }
+
+
+def test_no_published_field_is_typed_any() -> None:
+    """A field typed ``Any`` tells a reader, and a type checker, nothing (rule A31).
+
+    The type parameter of a numpy generic (``np.integer[Any]``,
+    ``NDArray[Any]``) is not the field's type, and is read past.
+    """
+    found: set[tuple[str, str]] = set()
+    for name, cls in _published_records().items():
+        for each in dataclasses.fields(cls):
+            text = _NUMPY_PARAMETER.sub("X", str(each.type))
+            if re.search(r"\bAny\b", text):
+                found.add((name, each.name))
+    assert found - set(ANY_FIELD_EXEMPT) == set()
+    assert set(ANY_FIELD_EXEMPT) - found == set(), "stale ANY_FIELD_EXEMPT entries"
+
+
+def test_no_published_field_is_typed_dict() -> None:
+    """A ``dict`` field is invariant and editable: ``Mapping`` says what it holds.
+
+    A frozen record holds the mapping it was built with read-only, so the
+    field is annotated with the read-only supertype, and a typed caller's
+    ``dict`` of a narrower key or value type is taken.
+    """
+    found = sorted(
+        f"{name}.{each.name}: {each.type}"
+        for name, cls in _published_records().items()
+        for each in dataclasses.fields(cls)
+        if re.search(r"(?:^|[^\w.])dict\[", str(each.type))
+    )
+    assert found == []
+
+
+#: The calls of the package that build a read-only mapping.
+_PROXY_MAKERS = frozenset({"MappingProxyType", "frozen_rows", "frozen_row"})
+
+
+def _called_names(node: ast.AST) -> set[str]:
+    names: set[str] = set()
+    for call in ast.walk(node):
+        if isinstance(call, ast.Call):
+            func = call.func
+            if isinstance(func, ast.Name):
+                names.add(func.id)
+            elif isinstance(func, ast.Attribute):
+                names.add(func.attr)
+    return names
+
+
+def _proxy_makers(tree: ast.Module) -> set[str]:
+    """The functions of a module that hand back a read-only mapping, transitively."""
+    makers = set(_PROXY_MAKERS)
+    functions = {
+        node.name: node
+        for node in ast.walk(tree)
+        if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef)
+    }
+    grown = True
+    while grown:
+        grown = False
+        for name, function in functions.items():
+            if name in makers:
+                continue
+            returned = [
+                value
+                for node in ast.walk(function)
+                if isinstance(node, ast.Return) and (value := node.value) is not None
+            ]
+            if any(_called_names(value) & makers for value in returned):
+                makers.add(name)
+                grown = True
+    return makers
+
+
+def _stores_a_read_only_mapping(cls: type) -> bool:
+    """Whether a record's ``__post_init__``, or a method it calls, builds one.
+
+    Read from the source of each class of the package in its hierarchy: a
+    call to ``MappingProxyType``, to ``frozen_rows``/``frozen_row``, or to a
+    function of the class's module that hands one back.
+    """
+    import inspect
+    import textwrap
+
+    for base in cls.__mro__:
+        module = sys.modules.get(base.__module__)
+        if module is None or not base.__module__.startswith("phonometry"):
+            continue
+        if base.__module__ == "phonometry._internal.frozen":
+            continue
+        try:
+            source = textwrap.dedent(inspect.getsource(base))
+            module_tree = ast.parse(inspect.getsource(module))
+        except (OSError, TypeError):
+            continue
+        makers = _proxy_makers(module_tree)
+        tree = ast.parse(source)
+        node = tree.body[0]
+        if not isinstance(node, ast.ClassDef):
+            continue
+        methods = {
+            child.name: child
+            for child in node.body
+            if isinstance(child, ast.FunctionDef)
+        }
+        todo, seen = ["__post_init__"], set()
+        while todo:
+            name = todo.pop()
+            if name in seen or name not in methods:
+                continue
+            seen.add(name)
+            called = _called_names(methods[name])
+            if called & makers:
+                return True
+            todo.extend(called & set(methods))
+    return False
+
+
+def test_a_record_holding_a_read_only_mapping_travels() -> None:
+    """A record that wraps a mapping read-only says how to pickle and copy itself.
+
+    ``MappingProxyType`` can be neither pickled nor deep-copied, so a record
+    holding one fails ``pickle.dumps`` (a process pool, a cache) and
+    ``copy.deepcopy`` unless it travels as plain dictionaries and wraps them
+    again on arrival: ``__reduce__`` returning
+    ``phonometry._internal.frozen.reduce_with_plain_rows(self)``.
+    """
+    missing = sorted(
+        name
+        for name, cls in _published_records().items()
+        if _stores_a_read_only_mapping(cls)
+        and not any(
+            "__reduce__" in vars(base) for base in cls.__mro__ if base is not object
+        )
+    )
+    assert missing == []
+
+
+#: Protocols of the package that declare a settable member on purpose, keyed by
+#: file and protocol, each with the reason.
+PROTOCOL_ATTRIBUTE_EXEMPT: dict[tuple[str, str], str] = {
+    ("simulation/fdtd.py", "_PressureEngine"): (
+        "a private engine contract in a file scripts/gpu_parity.py fingerprints, "
+        "whose _backend is assigned by the engine that holds it"
+    ),
+}
+
+
+def _is_protocol(node: ast.AST) -> bool:
+    return isinstance(node, ast.ClassDef) and any(
+        (isinstance(base, ast.Name) and base.id == "Protocol")
+        or (isinstance(base, ast.Attribute) and base.attr == "Protocol")
+        for base in node.bases
+    )
+
+
+def _protocols() -> list[tuple[str, ast.ClassDef]]:
+    found: list[tuple[str, ast.ClassDef]] = []
+    for path in _iter_modules():
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        found.extend(
+            (path.relative_to(SRC).as_posix(), node)
+            for node in ast.walk(tree)
+            if isinstance(node, ast.ClassDef) and _is_protocol(node)
+        )
+    return found
+
+
+def test_a_protocol_declares_its_data_members_as_properties() -> None:
+    """A frozen record satisfies a protocol whose members it can only be read for.
+
+    A plain annotated attribute in a protocol is settable, and a frozen
+    dataclass's field is not, so a type checker refuses every frozen result
+    the protocol was written to accept (``enclosure_insertion_loss`` taking a
+    ``SoundReductionResult``). A read-only member is a ``@property``.
+    """
+    offenders = sorted(
+        f"{path}:{node.name}.{child.target.id}"
+        for path, node in _protocols()
+        for child in node.body
+        if isinstance(child, ast.AnnAssign)
+        and isinstance(child.target, ast.Name)
+        and (path, node.name) not in PROTOCOL_ATTRIBUTE_EXEMPT
+    )
+    assert offenders == []
+    protocols = {(path, node.name) for path, node in _protocols()}
+    assert set(PROTOCOL_ATTRIBUTE_EXEMPT) <= protocols, "stale exemption"
+
+
+def _is_type_checking(test: ast.expr) -> bool:
+    return (isinstance(test, ast.Name) and test.id == "TYPE_CHECKING") or (
+        isinstance(test, ast.Attribute) and test.attr == "TYPE_CHECKING"
+    )
+
+
+def _module_getattrs(tree: ast.Module) -> list[tuple[ast.FunctionDef, bool]]:
+    """Each module-level ``__getattr__``, with whether the type checker is kept from it."""
+    found: list[tuple[ast.FunctionDef, bool]] = []
+    for statement in tree.body:
+        if isinstance(statement, ast.FunctionDef) and statement.name == "__getattr__":
+            found.append((statement, False))
+        elif isinstance(statement, ast.If):
+            hidden = (
+                isinstance(statement.test, ast.UnaryOp)
+                and isinstance(statement.test.op, ast.Not)
+                and _is_type_checking(statement.test.operand)
+            )
+            found.extend(
+                (inner, hidden)
+                for inner in statement.body
+                if isinstance(inner, ast.FunctionDef) and inner.name == "__getattr__"
+            )
+    return found
+
+
+def test_a_module_getattr_is_hidden_from_the_type_checker() -> None:
+    """A module ``__getattr__`` sits under ``if not TYPE_CHECKING:``.
+
+    A type checker that sees a module ``__getattr__`` reads every name the
+    module lacks through it, so ``phonometry.stpia`` types as ``object`` and
+    a misspelling stops being an error. Defined for the running interpreter
+    only, it imports lazily as before, and the type checker reads the
+    imports the module declares for it.
+    """
+    offenders = []
+    seen = 0
+    for path in _iter_modules() + [SRC / "__init__.py"]:
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        for node, hidden in _module_getattrs(tree):
+            seen += 1
+            if not hidden:
+                offenders.append(f"{path.relative_to(SRC)}:{node.lineno}")
+    assert offenders == []
+    assert seen, "the root package's lazy __getattr__ is not read any more"
+
+
+def test_the_getattr_rule_reads_a_visible_one() -> None:
+    visible = ast.parse("def __getattr__(name):\n    raise AttributeError(name)\n")
+    hidden = ast.parse(
+        "from typing import TYPE_CHECKING\n"
+        "if not TYPE_CHECKING:\n"
+        "    def __getattr__(name):\n"
+        "        raise AttributeError(name)\n"
+    )
+    assert [flag for _, flag in _module_getattrs(visible)] == [False]
+    assert [flag for _, flag in _module_getattrs(hidden)] == [True]

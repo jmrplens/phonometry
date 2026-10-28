@@ -16,7 +16,7 @@ import numpy as np
 if TYPE_CHECKING:
     from collections.abc import Iterable, Mapping, Sequence
 
-    from numpy.typing import ArrayLike
+    from numpy.typing import ArrayLike, NDArray
 
     from .types import BandFraction, ReportEngine
 
@@ -1049,3 +1049,40 @@ def require_1d_signal(x: ArrayLike, name: str) -> np.ndarray:
         )
         raise ValueError(msg)
     return arr
+
+
+def pair_of_arrays(
+    value: object, name: str, members: str
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
+    """The two members of a pair, each as a ``float64`` array.
+
+    A record that takes a curve as a pair (``(angles_deg, relative_db)``)
+    takes it as a tuple, a list or a two-row array, and holds it as two
+    arrays, so it is unpacked here, once, when the record is built. Nothing
+    is copied: a member that is a ``float64`` array already comes back as
+    itself, so the caller is a record that inherits ``OwnsArrays``, whose
+    arrays are its own copies by then, and seals the two with ``read_only``.
+
+    :param value: The pair.
+    :param name: The field's name, for the message.
+    :param members: What the two members are, as the message spells them
+        (``"(angles_deg, relative_db)"``).
+    :return: The two members, each a ``float64`` array.
+    :raises TypeError: if *value* is a text or is not a sequence at all.
+    :raises ValueError: if it holds other than two members.
+    """
+    msg = f"'{name}' must be a pair {members} of two arrays"
+    if isinstance(value, str | bytes):
+        msg += f", not {type(value).__name__}."
+        raise TypeError(msg)
+    try:
+        items = list(cast("Iterable[ArrayLike]", value))
+    except TypeError:
+        msg += f", not {type(value).__name__}."
+        raise TypeError(msg) from None
+    try:
+        first, second = items
+    except ValueError:
+        msg += f", not {len(items)} of them."
+        raise ValueError(msg) from None
+    return np.asarray(first, dtype=np.float64), np.asarray(second, dtype=np.float64)

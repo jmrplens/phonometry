@@ -224,7 +224,8 @@ def test_a_removed_path_is_not_served_by_its_parent_package() -> None:
     with pytest.raises(AttributeError, match=r"has no attribute 'sti'"):
         _ = ph.hearing.sti
     with pytest.raises(AttributeError, match=r"has no attribute 'environmental'"):
-        _ = ph.environmental
+        # The type checker refuses the name too: the root answers for its domains only.
+        _ = ph.environmental  # type: ignore[attr-defined]
 
 
 def test_the_names_the_4_0_moves_carried_are_all_reachable() -> None:

@@ -326,8 +326,25 @@ class Task(RichDisplay):
     label: str | None = None
     instrument: InstrumentClass | None = None
 
+    if TYPE_CHECKING:
+
+        def __init__(
+            self,
+            *,
+            samples: ArrayLike,
+            duration_hours: float,
+            duration_observations_hours: ArrayLike | None = None,
+            duration_range_hours: ArrayLike | None = None,
+            label: str | None = None,
+            instrument: InstrumentClass | None = None,
+        ) -> None: ...
+
     def __post_init__(self) -> None:
-        """Reject empty or non-finite ``samples`` and a bad ``duration_hours``.
+        """Reject empty or non-finite ``samples`` and a bad ``duration_hours``, and hold each sequence as a tuple.
+
+        The samples and the duration observations are held as tuples of
+        floats, and the duration range as a ``(T_min, T_max)`` pair of
+        floats, whatever sequence or array they were given as.
 
         Both helpers reject NaN as well: a NaN sample (or duration) would
         pass a bare emptiness/sign check, make ``lex_8h`` NaN, and stop the
@@ -349,6 +366,20 @@ class Task(RichDisplay):
             raise ValueError(msg)
         require_finite_array(self.samples, "samples")
         require_positive(self.duration_hours, "duration_hours")
+        object.__setattr__(self, "samples", _floats(self.samples))
+        if self.duration_observations_hours is not None:
+            observations = _floats(self.duration_observations_hours)
+            object.__setattr__(self, "duration_observations_hours", observations)
+        if self.duration_range_hours is not None:
+            shortest, longest = self.duration_range_hours
+            object.__setattr__(
+                self, "duration_range_hours", (float(shortest), float(longest))
+            )
+
+
+def _floats(values: ArrayLike) -> tuple[float, ...]:
+    """A sequence of numbers as a tuple of floats, flattened."""
+    return tuple(float(value) for value in np.ravel(np.asarray(values, dtype=float)))
 
 
 @dataclass(frozen=True)

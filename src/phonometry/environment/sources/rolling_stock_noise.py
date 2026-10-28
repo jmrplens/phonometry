@@ -99,7 +99,7 @@ from typing import TYPE_CHECKING, Any, Literal, overload
 import numpy as np
 
 from ..._internal.display import RichDisplay
-from ..._internal.frozen import OwnsArrays, read_only
+from ..._internal.frozen import OwnsArrays, read_only, reduce_with_plain_rows
 from ..._internal.types import as_float_or_array, float_keyed
 from ..._internal.validation import (
     require_1d_signal,
@@ -887,6 +887,10 @@ class RollingStockTestResult(RichDisplay):
     method: TestMethod
     run_levels: Mapping[str, tuple[float, ...]]
 
+    def __reduce__(self) -> tuple[Any, tuple[type, dict[str, Any]]]:
+        """Travel with plain dictionaries, which pickle; they are wrapped again on arrival."""
+        return reduce_with_plain_rows(self)
+
     def __post_init__(self) -> None:
         """Check the method and the runs, and freeze them.
 
@@ -1390,6 +1394,10 @@ class SmallRoughnessDeviation(OwnsArrays):
     roughness_correction: NDArray[np.float64]
     noise_levels: NDArray[np.float64]
 
+    def __reduce__(self) -> tuple[Any, tuple[type, dict[str, Any]]]:
+        """Travel with plain dictionaries, which pickle; they are wrapped again on arrival."""
+        return reduce_with_plain_rows(self)
+
     def __post_init__(self) -> None:
         """Hold the arrays read-only and the limit as a read-only copy.
 
@@ -1799,6 +1807,10 @@ class ReferenceTrackCheck(RichDisplay):
     _: KW_ONLY
     curve_radius_m: float | None = None
     track_gradient_ratio: float | None = None
+
+    def __reduce__(self) -> tuple[Any, tuple[type, dict[str, Any]]]:
+        """Travel with plain dictionaries, which pickle; they are wrapped again on arrival."""
+        return reduce_with_plain_rows(self)
 
     def __post_init__(self) -> None:
         """Hold the sequences as tuples and the limits as read-only copies.

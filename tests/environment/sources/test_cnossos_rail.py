@@ -1045,7 +1045,8 @@ def test_a_component_missing_a_source_height_is_refused() -> None:
     traction = (result.components["traction"][0],)
     components = {**result.components, "traction": traction}
     with pytest.raises(ValueError, match=r"'components\['traction'\]'.*source height"):
-        dataclasses.replace(result, components=components)
+        # One height where the field holds two: the type checker refuses it too.
+        dataclasses.replace(result, components=components)  # type: ignore[arg-type]
 
 
 def test_a_collapsed_third_octave_table_is_refused() -> None:

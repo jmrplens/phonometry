@@ -15,9 +15,10 @@ from __future__ import annotations
 import dataclasses
 import math
 import types
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from .._internal.display import RichDisplay
+from .._internal.frozen import reduce_with_plain_rows
 from .._internal.validation import require_positive
 from .._internal.warnings import PhonometryWarning
 
@@ -113,6 +114,10 @@ class Fluid(RichDisplay):
     model: str
     validity: str
     properties: Mapping[str, float]
+
+    def __reduce__(self) -> tuple[Any, tuple[type, dict[str, Any]]]:
+        """Travel with plain dictionaries, which pickle; they are wrapped again on arrival."""
+        return reduce_with_plain_rows(self)
 
     def __post_init__(self) -> None:
         """Freeze the two mappings, which ``frozen=True`` does not reach.

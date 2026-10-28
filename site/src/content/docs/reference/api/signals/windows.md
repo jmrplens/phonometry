@@ -29,7 +29,7 @@ the window as this library actually uses it.
 
 ```python
 window_metrics(
-    window: str | tuple[Any, ...],
+    window: str | tuple[ArrayLike, ...],
     n: int | np.integer[Any] = 1024,
 ) -> WindowMetricsResult
 ```
@@ -66,7 +66,7 @@ the Welch estimators apply it.
 
 ```python
 WindowMetricsResult(
-    window: str | tuple[Any, ...],
+    window: str | tuple[ArrayLike, ...],
     n: int,
     taps: NDArray[np.float64],
     coherent_gain: float,

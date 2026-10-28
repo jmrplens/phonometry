@@ -150,8 +150,8 @@ calculation of Long Table 14.9 and of AHRI 885 Table 8.
 DuctElement(
     *,
     label: str,
-    attenuation: Any = None,
-    self_noise: Any = None,
+    attenuation: ArrayLike | HVACSpectrumResult | None = None,
+    self_noise: ArrayLike | HVACSpectrumResult | None = None,
     code: str = '',
 )
 ```
@@ -163,8 +163,8 @@ One element of a duct path: what it attenuates and what it regenerates.
 | Name | Description |
 | :--- | :--- |
 | `label` | Human description of the element, e.g. `"Silencer, 3 ft, standard pressure drop"`. |
-| `attenuation` | Octave-band attenuation as a **positive** loss, dB. A scalar is broadcast over the bands; an [`HVACSpectrumResult`](/phonometry/reference/api/noise_control/hvac/#hvacspectrumresult) (or anything exposing `values`) is accepted directly. `None` means no attenuation. |
-| `self_noise` | Octave-band regenerated sound power level of the element, dB re 1 pW, or `None` when the element regenerates nothing (the cascade then applies its self-noise floor). |
+| `attenuation` | Octave-band attenuation as a **positive** loss, dB. A scalar is broadcast over the bands; an [`HVACSpectrumResult`](/phonometry/reference/api/noise_control/hvac/#hvacspectrumresult) is accepted directly, its `values` read. `None` means no attenuation. |
+| `self_noise` | Octave-band regenerated sound power level of the element, dB re 1 pW, as a scalar, per band or an [`HVACSpectrumResult`](/phonometry/reference/api/noise_control/hvac/#hvacspectrumresult), or `None` when the element regenerates nothing (the cascade then applies its self-noise floor). |
 | `code` | A short worksheet code for the printed sheet (AHRI 885 style, e.g. `"D1"`, `"S"`); defaults to the row number. |
 
 ## DuctPathResult

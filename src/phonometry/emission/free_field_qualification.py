@@ -560,6 +560,19 @@ class MicrophoneTraverse(OwnsArrays):
     name: str = ""
     targets: tuple[PathTarget, ...] = ()
 
+    if TYPE_CHECKING:
+
+        def __init__(
+            self,
+            *,
+            positions_m: ArrayLike,
+            levels: ArrayLike,
+            monitor_levels: ArrayLike | None = None,
+            background_levels: ArrayLike | None = None,
+            name: str = "",
+            targets: PathTarget | Sequence[PathTarget] = (),
+        ) -> None: ...
+
     def __post_init__(self) -> None:
         """Hold every array as float64 and refuse inconsistent shapes.
 

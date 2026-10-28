@@ -40,7 +40,7 @@ if TYPE_CHECKING:
     from collections.abc import Sequence
 
     from matplotlib.axes import Axes
-    from numpy.typing import DTypeLike, NDArray
+    from numpy.typing import ArrayLike, DTypeLike, NDArray
 
     from .._i18n import Language
     from ._chunks import BroadcastMetadata
@@ -100,9 +100,12 @@ class Signal(RichDisplay):
     ``channel_labels`` names each channel (e.g. loudspeaker positions from
     an EXTENSIBLE channel mask); ``provenance`` carries the ``bext``
     broadcast metadata when the file had it; ``source`` records the file,
-    container, codec, bit depth and lossy flag of the origin.
+    container, codec, bit depth and lossy flag of the origin. The labels are
+    held as a tuple, whatever sequence of texts they were given as.
 
-    :raises TypeError: if ``calibration_factor`` or ``fs`` is not a single number.
+    :raises TypeError: if ``calibration_factor`` or ``fs`` is not a single
+        number, or ``channel_labels`` is one text rather than a sequence of
+        them.
     """
 
     data: NDArray[np.float64]
@@ -112,6 +115,19 @@ class Signal(RichDisplay):
     channel_labels: tuple[str, ...] | None = None
     provenance: BroadcastMetadata | None = None
     source: SignalOrigin | None = None
+
+    if TYPE_CHECKING:
+
+        def __init__(
+            self,
+            data: ArrayLike,
+            fs: float,
+            *,
+            calibration_factor: float | None = None,
+            channel_labels: Sequence[str] | None = None,
+            provenance: BroadcastMetadata | None = None,
+            source: SignalOrigin | None = None,
+        ) -> None: ...
 
     def __post_init__(self) -> None:
         require_scalar(self.calibration_factor, "calibration_factor")
@@ -128,6 +144,15 @@ class Signal(RichDisplay):
         # file is, for processing in place.
         object.__setattr__(self, "data", np.array(data, order="C"))
         if self.channel_labels is not None:
+            if isinstance(self.channel_labels, str):
+                # One text is a sequence of its characters: read as labels it
+                # would name one channel per letter.
+                msg = (
+                    "channel_labels must be a sequence of texts, one per channel, "
+                    f"not one text; got {self.channel_labels!r}"
+                )
+                raise TypeError(msg)
+            object.__setattr__(self, "channel_labels", tuple(self.channel_labels))
             require_equal_counts(
                 type(self).__name__,
                 {

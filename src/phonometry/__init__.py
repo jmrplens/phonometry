@@ -119,23 +119,29 @@ __all__ = [
 ]
 
 
-def __getattr__(name: str) -> object:
-    """Import a domain package, or one of the four names, on first use.
+# Defined for the running interpreter only. A type checker that saw a module
+# ``__getattr__`` would read every name the package lacks through it, so a
+# misspelt ``phonometry.stpia`` would type as ``object`` instead of failing;
+# it reads the imports above instead, which name exactly what is published.
+if not TYPE_CHECKING:
 
-    PEP 562. Importing every package eagerly cost a second and pulled in
-    twelve hundred modules for a caller who wanted one of them; the whole
-    library is still one attribute away, and the attribute is cached in the
-    module namespace so the import happens once.
-    """
-    if name in _PACKAGES:
-        value: object = import_module(f".{name}", __name__)
-    elif name in _NAMES:
-        value = getattr(import_module(_NAMES[name], __name__), name)
-    else:
-        msg = f"module {__name__!r} has no attribute {name!r}"
-        raise AttributeError(msg)
-    globals()[name] = value
-    return value
+    def __getattr__(name: str) -> object:
+        """Import a domain package, or one of the four names, on first use.
+
+        PEP 562. Importing every package eagerly cost a second and pulled in
+        twelve hundred modules for a caller who wanted one of them; the whole
+        library is still one attribute away, and the attribute is cached in
+        the module namespace so the import happens once.
+        """
+        if name in _PACKAGES:
+            value: object = import_module(f".{name}", __name__)
+        elif name in _NAMES:
+            value = getattr(import_module(_NAMES[name], __name__), name)
+        else:
+            msg = f"module {__name__!r} has no attribute {name!r}"
+            raise AttributeError(msg)
+        globals()[name] = value
+        return value
 
 
 def __dir__() -> list[str]:

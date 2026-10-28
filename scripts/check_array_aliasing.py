@@ -16,7 +16,7 @@ a copy of its own. Every public record that can hold an array inherits
 record is built, whoever builds it: a function of the package or a caller
 writing the record by hand. Anything else that keeps an array (a plain
 class, a private record) copies it through
-``phonometry._internal.frozen.read_only_copy``. The check has four parts.
+``phonometry._internal.frozen.read_only_copy``. The check has five parts.
 
 The first reads the classes: a public record (a dataclass or a named tuple
 that a public module defines or lists in ``__all__``) with a field annotated
@@ -104,6 +104,22 @@ lambda, the function named but not called) fails too, and this part has no
 exemption: an array that cannot be proved alone is copied, as every other
 one is.
 
+The fifth reads the records a caller builds: one a public function takes
+(or a record such a record holds), or one ``scripts/check_parameter_annotations.py``
+lists as built by hand (``CALLER_BUILT``); a result one function hands whole
+to another (``HANDED_ON_RESULTS`` of ``scripts/check_parameter_units.py``) is
+none. A field of such a record annotated as a container of a fixed kind (an
+array, a ``tuple``, a ``list`` or a set, aliases read, in any member of a
+union) is converted by the record: its ``__post_init__``, or a method it calls
+on ``self``, stores a value of its own in it (``object.__setattr__(self,
+"levels", ...)``, by name, through a loop over field names, or through a
+setter handed the name). Otherwise a list given to an array field is kept as
+a list, an array given to a tuple field as an array, and the record holds what
+its annotation says it does not, a list a caller can still append to inside a
+frozen record. :data:`KEPT_EXEMPT` is that part's escape hatch; the files
+``scripts/gpu_parity.py`` fingerprints are counted apart, as the parameter
+check counts them.
+
 A private helper is held to the rule whatever its callers pass today: the
 next caller may hand it the caller's array. The analysis reads names, not
 types, so a scalar that travels the same path as an array is read as one
@@ -181,6 +197,10 @@ EXEMPT: dict[tuple[str, str], str] = {
         "for the values with no array as the caller's array"
     ),
 }
+
+#: Fields of records a caller builds that keep a container of a fixed kind as
+#: they were given, keyed by file and ``Record.field``, each with the reason.
+KEPT_EXEMPT: dict[tuple[str, str], str] = {}
 
 #: The numpy functions that may return their first argument, or a view of it.
 _NUMPY_ALIASING = frozenset(
@@ -2959,6 +2979,44 @@ def _names_target(
     return isinstance(node, ast.Constant) and node.value == target[1]
 
 
+def containers_kept_as_given(root: pathlib.Path = SOURCE) -> tuple[list[Finding], int]:
+    """The fields of records a caller builds that keep a fixed container as given.
+
+    The fifth part: a field annotated as an array, a ``tuple``, a ``list`` or
+    a set that the record does not convert. The records and their fields are
+    read as ``scripts/check_parameter_annotations.py`` reads them, aliases
+    spelt out. Returns the findings and how many fields of the GPU-parity
+    files were left out.
+    """
+    import check_parameter_annotations as constructors
+    import check_return_overloads as overloads
+
+    package = overloads.Package(python_files([], root), root)
+    reader = constructors.Reader(package)
+    gpu_files = set(constructors.gpu_parity_files())
+    found: list[Finding] = []
+    held = 0
+    for record in sorted(constructors.built_records(reader)):
+        module = reader.annotations.classes[record][0]
+        path = constructors.repository_path(package.paths[module], root)
+        name = record.rpartition(".")[2]
+        for kept_field, fixed in constructors.kept_as_given(reader, record):
+            if path in gpu_files:
+                held += 1
+                continue
+            found.append(
+                Finding(
+                    path,
+                    f"{name}.{kept_field.name}",
+                    kept_field.line,
+                    f"{name}.{kept_field.name} is annotated {', '.join(fixed)} "
+                    "and keeps whatever it is given: nothing converts it",
+                    (),
+                )
+            )
+    return found, held
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     """Report every array kept without a copy of its own."""
     parser = argparse.ArgumentParser(description=__doc__)
@@ -2980,12 +3038,37 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
     found, stale = exempted(findings_in(files, root, tree=tree), EXEMPT)
     unproved = handovers_in(files, root, tree=tree)
-    if not (found or stale or unequipped or stale_records or unproved):
+    containers, held = containers_kept_as_given(root)
+    kept, stale_kept = exempted(containers, KEPT_EXEMPT)
+    if held:
+        print(
+            f"{held} field(s) of the GPU-parity files are left out: an edit to a "
+            "file scripts/gpu_parity.py fingerprints invalidates gpu-parity.lock, "
+            "so those records are converted in one batch of their own, with the "
+            "GPU run that records the lock again."
+        )
+    if not (
+        found or stale or unequipped or stale_records or unproved or kept or stale_kept
+    ):
         print(
             "Every array a result keeps is a copy of its own, or an array "
-            "nothing else can reach."
+            "nothing else can reach, and every record a caller builds "
+            "converts the containers it holds."
         )
         return 0
+    if kept:
+        print("::error::a record a caller builds keeps a container as it was given")
+        for finding in kept:
+            print(f"  {finding.path}:{finding.line}: {finding.sink}")
+        print(
+            "  -> convert the field in __post_init__ (read_only(np.asarray(...)) "
+            "for an array, tuple(...) for a tuple) and declare what the "
+            "constructor takes in a TYPE_CHECKING __init__; a field that has to "
+            "keep what it is given goes in KEPT_EXEMPT at the top of "
+            "scripts/check_array_aliasing.py with its reason."
+        )
+    for key in stale_kept:
+        print(f"::error::KEPT_EXEMPT lists {key}, which needs no exemption any more")
     if unequipped:
         print(
             "::error::a public record can hold an array and keeps whatever "

@@ -389,7 +389,8 @@ def test_a_retained_geometry_with_a_string_dimension_is_refused() -> None:
     assert res.geometry is not None
     geometry = {**res.geometry, "length": "0.3"}
     with pytest.raises(TypeError, match=r"'geometry\['length'\]' must be numeric"):
-        dataclasses.replace(res, geometry=geometry)
+        # A text where the field holds a number: the type checker refuses it too.
+        dataclasses.replace(res, geometry=geometry)  # type: ignore[arg-type]
 
 
 def test_chain_matches_the_hand_built_cascade() -> None:

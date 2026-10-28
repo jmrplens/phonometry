@@ -519,6 +519,7 @@ def test_segment_state_fields_must_cover_the_same_segments() -> None:
     with pytest.raises(ValueError, match=r"'bank'.*one value per segment"):
         FlightSegmentState(ground_roll=[True, False, False], bank=[0.0, 8.0])
     column = FlightSegmentState(bank=np.array([[0.0], [4.0], [8.0]]))
+    assert column.bank is not None
     assert np.size(column.bank) == 3
 
 

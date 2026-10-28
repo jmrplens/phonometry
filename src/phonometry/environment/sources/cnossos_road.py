@@ -501,6 +501,23 @@ class RoadEmissionCoefficients(RichDisplay):
     ]
     temperature_coefficient_db_per_k: Mapping[RoadVehicleCode, float]
 
+    if TYPE_CHECKING:
+
+        def __init__(
+            self,
+            *,
+            rolling_a: Mapping[RoadVehicleCode, tuple[float, ...]],
+            rolling_b: Mapping[RoadVehicleCode, tuple[float, ...]],
+            propulsion_a: Mapping[RoadVehicleCode, tuple[float, ...]],
+            propulsion_b: Mapping[RoadVehicleCode, tuple[float, ...]],
+            studded_a: ArrayLike,
+            studded_b: ArrayLike,
+            junction_c: Mapping[
+                RoadVehicleCode, tuple[tuple[float, float], tuple[float, float]]
+            ],
+            temperature_coefficient_db_per_k: Mapping[RoadVehicleCode, float],
+        ) -> None: ...
+
     def __post_init__(self) -> None:
         """Check each category key, and hold every per-category table read-only.
 
@@ -527,6 +544,9 @@ class RoadEmissionCoefficients(RichDisplay):
             value = getattr(self, field.name)
             if isinstance(value, Mapping):
                 object.__setattr__(self, field.name, MappingProxyType(dict(value)))
+        for name in ("studded_a", "studded_b"):
+            bands = tuple(float(value) for value in getattr(self, name))
+            object.__setattr__(self, name, bands)
 
     def __reduce__(self) -> tuple[Any, tuple[type, dict[str, Any]]]:
         """Rebuild from plain dictionaries when pickled or deep-copied.
@@ -568,12 +588,28 @@ class RoadSurfaceCoefficients(RichDisplay):
     """
 
     name: str
-    alpha: dict[RoadVehicleCode, tuple[float, ...]]
-    beta: dict[RoadVehicleCode, float]
+    alpha: Mapping[RoadVehicleCode, tuple[float, ...]]
+    beta: Mapping[RoadVehicleCode, float]
     speed_range_kmh: tuple[float, float] | None
 
+    if TYPE_CHECKING:
+
+        def __init__(
+            self,
+            *,
+            name: str,
+            alpha: Mapping[RoadVehicleCode, tuple[float, ...]],
+            beta: Mapping[RoadVehicleCode, float],
+            speed_range_kmh: ArrayLike | None,
+        ) -> None: ...
+
     def __post_init__(self) -> None:
-        """Check each category key of the row.
+        """Check each category key of the row, and hold both tables read-only.
+
+        ``frozen=True`` stops a field from being rebound, not a dictionary in
+        it from being edited, and a caller builds this record to swap in a
+        national surface. The two tables are wrapped as
+        :class:`RoadEmissionCoefficients` wraps its own.
 
         :raises ValueError: if a key of ``alpha`` or ``beta`` is not a code of
             Table [2.2.a].
@@ -581,6 +617,20 @@ class RoadSurfaceCoefficients(RichDisplay):
         """
         _require_codes(self.alpha, "alpha")
         _require_codes(self.beta, "beta")
+        object.__setattr__(self, "alpha", MappingProxyType(dict(self.alpha)))
+        object.__setattr__(self, "beta", MappingProxyType(dict(self.beta)))
+        if self.speed_range_kmh is not None:
+            low, high = self.speed_range_kmh
+            object.__setattr__(self, "speed_range_kmh", (float(low), float(high)))
+
+    def __reduce__(self) -> tuple[Any, tuple[type, dict[str, Any]]]:
+        """Rebuild from plain dictionaries when pickled or deep-copied.
+
+        A read-only mapping can be neither pickled nor deep-copied, so the
+        row travels as plain dictionaries, by keyword, and
+        :meth:`__post_init__` wraps them again on arrival.
+        """
+        return reduce_with_plain_rows(self)
 
 
 def road_surface_coefficients(

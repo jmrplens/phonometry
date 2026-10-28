@@ -112,7 +112,7 @@ import numpy as np
 
 from ..._internal.boundary import round_half_up
 from ..._internal.display import RichDisplay
-from ..._internal.frozen import OwnsArrays
+from ..._internal.frozen import OwnsArrays, reduce_with_plain_rows
 from ..._internal.validation import (
     require_choice,
     require_finite,
@@ -704,6 +704,22 @@ class StatisticalPassByResult(RichDisplay):
     corrected_vehicle_sound_levels: Mapping[VehicleCategory, float] | None = None
     corrected_index: float | None = None
     reference_index: float | None = None
+
+    def __post_init__(self) -> None:
+        """Hold each per-category table read-only, whoever built the result."""
+        for name in (
+            "regressions",
+            "weighting_factors",
+            "vehicle_sound_levels",
+            "corrected_vehicle_sound_levels",
+        ):
+            table = getattr(self, name)
+            if table is not None:
+                object.__setattr__(self, name, MappingProxyType(dict(table)))
+
+    def __reduce__(self) -> tuple[Any, tuple[type, dict[str, Any]]]:
+        """Travel with plain dictionaries, which pickle; they are wrapped again on arrival."""
+        return reduce_with_plain_rows(self)
 
     @property
     def reference_speeds_kmh(self) -> Mapping[VehicleCategory, float]:

@@ -98,16 +98,14 @@ from typing import TYPE_CHECKING, Any, Final, Literal
 
 import numpy as np
 
-from ..._internal.frozen import OwnsArrays
+from ..._internal.frozen import OwnsArrays, read_only
 from ..._internal.levels_math import energy_mean
 from ..._internal.validation import require_choice, require_scalar
 from ..._internal.warnings import PhonometryWarning
 
 if TYPE_CHECKING:
-    from collections.abc import Sequence
-
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike
+    from numpy.typing import ArrayLike, NDArray
 
     from ..._i18n import Language
 
@@ -496,8 +494,18 @@ class LowFrequencyProcedure(OwnsArrays):
     """
 
     volume: float
-    corner_levels: Sequence[float] | np.ndarray
+    corner_levels: NDArray[np.float64]
     reverberation_63_octave: float | None = None
+
+    if TYPE_CHECKING:
+
+        def __init__(
+            self,
+            *,
+            volume: float,
+            corner_levels: ArrayLike,
+            reverberation_63_octave: float | None = None,
+        ) -> None: ...
 
     def __post_init__(self) -> None:
         """Check the volume, the band axis and the 63 Hz octave time.
@@ -534,6 +542,7 @@ class LowFrequencyProcedure(OwnsArrays):
                 f"{corners.shape}."
             )
             raise ValueError(msg)
+        object.__setattr__(self, "corner_levels", read_only(corners))
         t63 = self.reverberation_63_octave
         if t63 is None:
             return

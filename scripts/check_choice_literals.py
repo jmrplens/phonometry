@@ -69,6 +69,12 @@ An annotation is read through the type aliases of the module that writes it
 (:func:`expanded`), the ones under ``if TYPE_CHECKING:`` and the imported
 ones included, so ``free_sides: _FreeSides | None`` with ``_FreeSides =
 Iterable[str]`` is a collection of any strings.
+
+A string a caller writes below the top level of a collection or a mapping
+(the columns of ``Mapping[int, Mapping[str, float]]``, the items of
+``Sequence[Sequence[str]]``) is not followed through the code, so it is
+called a choice as it stands: it is typed with its ``Literal``, or it goes
+in :data:`OPEN` with the reason it is open (:func:`takes_nested_strings`).
 """
 
 from __future__ import annotations
@@ -181,6 +187,10 @@ OPEN: dict[tuple[str, str, str], str] = {
     ),
     ("phonometry._report.metadata", "ReportMetadata", "measurement_standard"): (_TEXT),
     ("phonometry.aircraft.anp_fleet", "ANPAircraft", "engine_type"): _ANP_FILE,
+    ("phonometry.aircraft.anp_fleet", "ANPDatabase.__init__", "aircraft"): (
+        "the ANP aircraft rows by identifier, each keyed by the column names of "
+        "the file it was read from, which a database release may extend"
+    ),
     ("phonometry.aircraft.anp_fleet", "ANPDatabase.profile", "profile_id"): (
         "an identifier of the loaded ANP database, whose set depends on the file"
     ),
@@ -204,7 +214,23 @@ OPEN: dict[tuple[str, str, str], str] = {
     ("phonometry.building.regulation.spain", "DBHRRequirement", "quantity"): (
         "the symbol of the quantity the requirement is stated in, a label"
     ),
+    (
+        "phonometry.building.prediction.installed_structure_borne",
+        "installed_source_prediction",
+        "paths",
+    ): (
+        "the named terms of one transmission path, values of different kinds "
+        "the function reads by name, not a choice a caller makes"
+    ),
     ("phonometry.emission.sound_power_plant", "PlantRequirement", "clause"): (_LABEL),
+    (
+        "phonometry.environment.assessment.soundscape",
+        "method_b_source_ranking",
+        "rankings",
+    ): (
+        "the sources each participant names, compared as given; a study codes "
+        "them to its own vocabulary (ISO/TS 12913-2 C.3.2.4)"
+    ),
     (
         "phonometry.environment.assessment.soundscape",
         "SoundscapeAcousticEnvironment",
@@ -217,6 +243,9 @@ OPEN: dict[tuple[str, str, str], str] = {
     ): "the metric as Table D.1 prints it, a label",
     ("phonometry.environment.assessment.spain", "RegulationLimits", "index"): (
         "the noise index as the regulation prints it, a label"
+    ),
+    ("phonometry.filters.compliance", "FilterComplianceResult", "band_margins"): (
+        _COLUMNS
     ),
     ("phonometry.filters.compliance", "FilterComplianceResult.plot", "requirement"): (
         "one of the result's own requirements, a set that depends on the "
@@ -344,8 +373,16 @@ OPEN: dict[tuple[str, str, str], str] = {
     (
         "phonometry.filters.weighting_compliance",
         "WeightingComplianceResult",
+        "band_margins",
+    ): _COLUMNS,
+    (
+        "phonometry.filters.weighting_compliance",
+        "WeightingComplianceResult",
         "between_nominals",
     ): _COLUMNS,
+    ("phonometry.io._catalogue", "Catalogue", "extras"): (
+        "the caller's own x-... columns of each row, named by the caller"
+    ),
     ("phonometry.io._catalogue", "Catalogue", "name"): (
         "the name the caller gives a catalogue, the table its rows are filed under"
     ),
@@ -468,6 +505,47 @@ def takes_any_strings(annotation: str) -> bool:
     choice one string at a time as surely as ``str`` takes one.
     """
     return any(_item(member) in _STRING_MEMBERS for member in _members(annotation))
+
+
+def _inner(member: str) -> list[str]:
+    """What a caller writes inside one collection or mapping member.
+
+    The values of ``Mapping[X, Y]``, the item of ``Sequence[X]`` or
+    ``tuple[X, ...]`` and each member of a fixed ``tuple[X, Y]``; nothing for
+    any other member.
+    """
+    parsed = _generic(member)
+    if parsed is None:
+        return []
+    origin, arguments = parsed
+    if origin in _MAPPINGS and len(arguments) == 2:
+        return [arguments[1]]
+    if origin in {"tuple", "Tuple"}:
+        return [argument for argument in arguments if argument != "..."]
+    if origin in _COLLECTIONS and len(arguments) == 1:
+        return arguments
+    return []
+
+
+def takes_nested_strings(annotation: str) -> bool:
+    """Whether a caller writes any strings below the top level of an annotation.
+
+    The keys of the inner mapping of ``Mapping[int, Mapping[str, float]]``,
+    the items of the inner sequence of ``Sequence[Sequence[str]]``, at any
+    depth. The code evidence follows a collection's items and a mapping's
+    keys one level down and no further, so a string held deeper is called a
+    choice without it: it takes its ``Literal``, or :data:`OPEN` says why it
+    is open.
+    """
+    return any(
+        takes_any_strings(inner) or takes_nested_strings(inner)
+        for member in _members(annotation)
+        for inner in _inner(member)
+    )
+
+
+#: What a string below the top level of an annotation is called by.
+NESTED = "a string below the top level of what a caller writes, not followed"
 
 
 def enum_beside(annotation: str, module: ModuleType | None) -> list[str]:
@@ -1695,10 +1773,17 @@ def string_choices() -> Iterator[Choice]:
                 annotation = _annotation(field.type)
                 read = expanded(annotation, _field_module(obj, field.name))
                 collection = takes_any_strings(read)
-                if not (collection or takes_any_string(read)):
+                nested = takes_nested_strings(read)
+                if not (collection or nested or takes_any_string(read)):
                     continue
                 name = field.name
-                evidence = _field_evidence(obj, name, constants, collection=collection)
+                evidence = (
+                    _field_evidence(obj, name, constants, collection=collection)
+                    if collection or takes_any_string(read)
+                    else []
+                )
+                if nested:
+                    evidence.append(NESTED)
                 options = documented_options(obj.__doc__, name)
                 if len(options) >= 2:
                     evidence.append("documented options " + ", ".join(options[:6]))
@@ -1716,16 +1801,22 @@ def string_choices() -> Iterator[Choice]:
             annotation = _annotation(parameter.annotation)
             read = expanded(annotation, home)
             collection = takes_any_strings(read)
-            if not (collection or takes_any_string(read)):
+            # A constructor the dataclass machinery writes has no source; the
+            # record's own field is the one read for a nested string.
+            nested = tree is not None and takes_nested_strings(read)
+            if not (collection or nested or takes_any_string(read)):
                 continue
             name = parameter.name
-            evidence = (
-                code_evidence(tree, _the_name(name), constants, collection=collection)
-                if tree is not None
-                else []
-            )
-            if not evidence:
-                evidence = passed_on_evidence(obj, name, collection=collection)
+            evidence = []
+            if collection or takes_any_string(read):
+                if tree is not None:
+                    evidence = code_evidence(
+                        tree, _the_name(name), constants, collection=collection
+                    )
+                if not evidence:
+                    evidence = passed_on_evidence(obj, name, collection=collection)
+            if nested:
+                evidence.append(NESTED)
             options = documented_options(getattr(obj, "__doc__", None), name)
             if len(options) >= 2:
                 evidence.append("documented options " + ", ".join(options[:6]))

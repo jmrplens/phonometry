@@ -31,8 +31,11 @@ from phonometry import (
 
 if TYPE_CHECKING:
     import pathlib
+    from collections.abc import Mapping
 
     from numpy.typing import NDArray
+
+    from phonometry.vibration.human.signal_burst import BurstQuantity
 
 #: The sixteen one-third-octave centres ISO 717-1 rates, as integers.
 _THIRDS = (100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000, 1250, 1600)
@@ -84,10 +87,14 @@ def test_a_band_mapping_keyed_by_integers() -> None:
 
 
 def test_burst_indications_keyed_by_integers_alone() -> None:
-    """The continuous row is optional: a ``dict[int, ...]`` leaves it out."""
+    """The continuous row is optional: a ``dict[int, ...]`` leaves it out.
+
+    Each row is keyed by the columns the printed table is keyed by, so the
+    table's own rows go in as they are.
+    """
     test = vibration.SAWTOOTH_BURST_TESTS["whole-body"]
-    measured: dict[int, dict[str, float]] = {
-        cycles: dict(vibration.SIGNAL_BURST_RESPONSE["whole-body", "Wk", cycles])
+    measured: dict[int, Mapping[BurstQuantity, float]] = {
+        cycles: vibration.SIGNAL_BURST_RESPONSE["whole-body", "Wk", cycles]
         for cycles in test.cycle_counts
     }
     verdict = vibration.verify_signal_burst_response("whole-body", "Wk", measured)

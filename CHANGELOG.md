@@ -3858,7 +3858,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `metrology.SoundLevelMeterPeriodicMeasurements`, the components of
   `metrology.comparison_uncertainty_budget` and
   `metrology.reciprocity_uncertainty_budget`, the directions of the decay
-  limits `environment.check_reference_track` takes, and some sixty more. A
+  limits `environment.check_reference_track` takes, the columns of each
+  burst length `vibration.verify_signal_burst_response` reads and
+  `vibration.signal_burst_indications` returns, and some sixty more. A
   call that passes a variable typed `str` there now needs the variable typed
   by the vocabulary, or the value written in place. The published tables
   these vocabularies key (`SPB_*`, `IEC62585_TABLE_I1`, the IEC 61094 tables
@@ -3896,7 +3898,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   the source builds with code off the imported module, reads every
   annotation through the module's type aliases, follows a record field out
   of `__post_init__` into the helper that checks it, and closes a field its
-  own module compares with a string anywhere. A test holds every such
+  own module compares with a string anywhere. A string a caller writes
+  below the top level of a collection or a mapping, which it does not
+  follow, is a choice unless its reason for staying open is written down.
+  A test holds every such
   `Literal` to the table that answers it. `noise_control.InstallationCase`
   reads `"any"` in `source_side` for the four insertion cases, as its
   documentation said, instead of a sentence.

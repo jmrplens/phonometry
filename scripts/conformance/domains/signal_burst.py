@@ -35,7 +35,11 @@ import phonometry as ph
 from ..registry import Outcome, count, numeric, register
 
 if TYPE_CHECKING:
-    from phonometry.vibration.human.signal_burst import BurstApplication, BurstRow
+    from phonometry.vibration.human.signal_burst import (
+        BurstApplication,
+        BurstQuantity,
+        BurstRow,
+    )
 
 _BURST = "Saw-tooth signal burst (ISO 8041-1 5.9)"
 
@@ -68,7 +72,7 @@ _TABLES = {
 @functools.cache
 def _indications(
     application: BurstApplication, row: BurstRow, cycles: int | None
-) -> dict[str, float]:
+) -> dict[BurstQuantity, float]:
     """The library's indications for one printed line, computed once."""
     return ph.vibration.signal_burst_indications(application, row, cycles)
 
@@ -134,7 +138,7 @@ _BAND_LIMITING_ROW = ph.vibration.BAND_LIMITING
 
 #: The sampled cells: application, row, burst length, column, the figure on the
 #: page and the relative tolerance the row is judged at.
-_SAMPLED: tuple[tuple[str, str, int | None, str, float, float], ...] = (
+_SAMPLED: tuple[tuple[str, str, int | None, BurstQuantity, float, float], ...] = (
     ("hand-arm", _BAND_LIMITING_ROW, 1, "rms", 0.0448, 5e-3),
     ("hand-arm", _BAND_LIMITING_ROW, None, "rms", 0.565, 5e-3),
     ("hand-arm", "Wh", 16, "rms", 0.0309, 5e-3),
@@ -162,7 +166,7 @@ def _register_sampled() -> None:
             application: str = application,
             row: str = row,
             cycles: int | None = cycles,
-            quantity: str = quantity,
+            quantity: BurstQuantity = quantity,
             printed: float = printed,
             tolerance: float = tolerance,
         ) -> Outcome:

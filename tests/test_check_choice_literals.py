@@ -410,6 +410,24 @@ def test_each_item_and_each_key_is_read() -> None:
     assert "each item 'in' a set of strings" in found
 
 
+def test_a_string_below_the_top_level_is_read_as_it_stands() -> None:
+    """The columns of each row, or the items of each list, are not followed.
+
+    ``verify_signal_burst_response(measured)`` read the columns of each burst
+    length against the printed ones while the annotation let any string in;
+    a key one level down is called a choice by its annotation alone.
+    """
+    assert ccl.takes_nested_strings("Mapping[int, Mapping[str, float]]")
+    assert ccl.takes_nested_strings("Sequence[Sequence[str]]")
+    assert ccl.takes_nested_strings("tuple[Mapping[str, Any], ...] | None")
+    assert ccl.takes_nested_strings("Mapping[int, tuple[Sequence[str], float]]")
+    assert not ccl.takes_nested_strings("Mapping[str, float]")
+    assert not ccl.takes_nested_strings("Mapping[int, str]")
+    assert not ccl.takes_nested_strings(
+        "Mapping[int, Mapping[Literal['rms', 'vdv'], float]]"
+    )
+
+
 def test_one_string_looked_for_in_a_collection_is_a_choice() -> None:
     """``"top" in sides`` names one option, as ``side == "top"`` does."""
     found = ccl.code_evidence(

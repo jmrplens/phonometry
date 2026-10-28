@@ -132,7 +132,7 @@ BurstRow = Literal[WeightingName, "band-limiting"]
 BurstQuantity = Literal["rms", "vdv", "mtvv_linear", "mtvv_exponential", "msdv"]
 
 #: The indications of one burst length, by printed column name.
-BurstColumns = Mapping[str, float]
+BurstColumns = Mapping[BurstQuantity, float]
 
 #: The indications by burst length, ``None`` for the continuous row.
 #: ``Mapping`` is invariant in its key, so a ``dict[int, ...]`` that leaves
@@ -658,7 +658,7 @@ def signal_burst_indications(
     n_cycles: int | None,
     *,
     fs: float | None = None,
-) -> dict[str, float]:
+) -> dict[BurstQuantity, float]:
     """What a conforming meter indicates for one row of Tables 7 to 9.
 
     Runs the library chain the standard describes: the burst of
@@ -700,7 +700,7 @@ def signal_burst_indications(
     )
 
     printed = SIGNAL_BURST_RESPONSE[test.application, row, burst_cycles]
-    indications: dict[str, float] = {}
+    indications: dict[BurstQuantity, float] = {}
     method: Literal["linear", "exponential"]
     for quantity in printed:
         if quantity == "rms":

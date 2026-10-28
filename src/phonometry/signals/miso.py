@@ -516,6 +516,7 @@ class MISOCoherenceResult(OwnsArrays):
             axis, or the per-input arrays, the conditioning order and
             :attr:`n_inputs` disagree on the number of inputs.
         """
+        object.__setattr__(self, "window", own_window(self.window))
         require_ranks(
             self,
             frequencies=1,
@@ -691,7 +692,7 @@ def miso_coherence(
         n_segments=k,
         n_averages=nd,
         resolution_bandwidth=benbw,
-        window=own_window(window),
+        window=window,
         nperseg=seg,
         overlap=ovl,
         scaling=scaling_v,

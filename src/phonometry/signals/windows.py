@@ -123,6 +123,7 @@ class WindowMetricsResult(OwnsArrays):
             than the declared length.
         :raises TypeError: if ``taps`` is a single number where an array goes.
         """
+        object.__setattr__(self, "window", own_window(self.window))
         require_ranks(self, taps=1)
         owner = type(self).__name__
         require_equal_counts(
@@ -257,7 +258,7 @@ def window_metrics(
     edge = _mainlobe_edge(level)
     highest_sidelobe = float(np.max(level[edge:]))
     return WindowMetricsResult(
-        window=own_window(window),
+        window=window,
         n=n_v,
         taps=w,
         coherent_gain=coherent_gain,

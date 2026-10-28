@@ -1741,14 +1741,15 @@ print(signal.data[0, 0], signal.data.flags.writeable)
 La ventana con la que se calculó un resultado espectral se guarda igual.
 `signals.power_spectral_density`, `signals.cross_spectral_density`,
 `signals.coherent_output_spectrum`, `signals.miso_coherence`,
-`signals.spectrogram`, `signals.zoom_fft` y `signals.envelope_spectrum`
-guardan la `window` que recibieron, y una ventana dada con sus parámetros
-guarda unos parámetros propios: los pesos de `("general_cosine", weights)`
-dados como lista se guardan como una tupla de los mismos números, como ya
-los guardaba `signals.window_metrics`, donde la 3.3.0 guardaba la lista de
-quien llamaba, así que `result.window == ("general_cosine", (0.5, 0.5))`;
-dados como array son una copia de solo lectura, como todo array que guarda
-un resultado.
+`signals.spectrogram`, `signals.zoom_fft`, `signals.envelope_spectrum` y
+`signals.window_metrics` guardan la `window` que recibieron, y una ventana
+dada con sus parámetros guarda unos parámetros propios: los pesos de
+`("general_cosine", weights)` dados como lista se guardan como una tupla de
+los mismos números, donde la 3.3.0 guardaba la lista de quien llamaba, así
+que `result.window == ("general_cosine", (0.5, 0.5))`; dados como array son
+una copia de solo lectura, como todo array que guarda un resultado. Un
+resultado construido a mano, o de nuevo con `dataclasses.replace`, guarda su
+ventana igual.
 
 ## Una fila de catálogo dice lo que su fuente afirma de cada celda
 

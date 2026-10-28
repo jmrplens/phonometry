@@ -1382,6 +1382,141 @@ def test_a_mapping_keyed_by_float_is_offered_beside_one_keyed_by_int(
     ]
 
 
+def test_a_head_is_offered_keys_only_by_heads_that_take_its_other_arguments(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A key offered by a head that a call of this one misses offers it nothing.
+
+    ``rating("b", by_band)`` with a ``dict[int, float]`` matches no head:
+    the head keyed by ``int`` takes ``kind="a"`` only, and the one of
+    ``defaulted`` keyed by ``int`` asks for the ``kind`` the other lets a
+    call leave out. Heads that differ only in the mapping, that spell one
+    ``Literal`` once through an alias and once in full, that name a
+    positional-only parameter apart, or whose head keyed by ``int`` takes
+    more choices than the other, offer each other their keys.
+    """
+    refused = _refused(
+        tmp_path,
+        part="key",
+        api="""
+        from typing import Literal
+
+        Kind = Literal["a", "b"]
+
+        __all__ = ["rating", "spelt", "defaulted", "positional", "wider"]
+
+        @overload
+        def rating(kind: Literal["a"], by_band: Mapping[int, float]) -> float: ...
+        @overload
+        def rating(kind: Literal["b"], by_band: Mapping[float, float]) -> float: ...
+        def rating(
+            kind: Kind, by_band: Mapping[int, float] | Mapping[float, float]
+        ) -> float:
+            return 0.0
+
+        @overload
+        def spelt(kind: Kind, by_band: Mapping[int, float]) -> float: ...
+        @overload
+        def spelt(kind: Literal["b", "a"], by_band: Mapping[float, float]) -> float: ...
+        def spelt(
+            kind: Kind, by_band: Mapping[int, float] | Mapping[float, float]
+        ) -> float:
+            return 0.0
+
+        @overload
+        def defaulted(by_band: Mapping[int, float], *, kind: Kind) -> float: ...
+        @overload
+        def defaulted(
+            by_band: Mapping[float, float], *, kind: Kind = "a"
+        ) -> float: ...
+        def defaulted(
+            by_band: Mapping[int, float] | Mapping[float, float], *, kind: Kind = "a"
+        ) -> float:
+            return 0.0
+
+        @overload
+        def positional(by_band: Mapping[int, float], kind: Kind, /) -> float: ...
+        @overload
+        def positional(by_band: Mapping[float, float], other: Kind, /) -> float: ...
+        def positional(
+            by_band: Mapping[int, float] | Mapping[float, float], kind: Kind, /
+        ) -> float:
+            return 0.0
+
+        @overload
+        def wider(
+            by_band: Mapping[int, float], kind: Kind | None = None
+        ) -> float: ...
+        @overload
+        def wider(by_band: Mapping[float, float], kind: Literal["a"]) -> float: ...
+        def wider(
+            by_band: Mapping[int, float] | Mapping[float, float],
+            kind: Kind | None = None,
+        ) -> float:
+            return 0.0
+        """,
+    )
+    assert sorted(refused) == ["defaulted(by_band)", "rating(by_band)"]
+    assert refused["rating(by_band)"] == [
+        "holds Mapping[float, float] with no mapping keyed by int, which refuses "
+        "a typed caller's dict of the narrower key"
+    ]
+
+
+def test_a_union_split_across_heads_of_different_calls_offers_no_context(
+    tmp_path: pathlib.Path,
+) -> None:
+    """Each mapping alone in a head, but no call reaches both heads.
+
+    ``split("a", {None: {"rms": 1.0}})`` runs and matches no head; the heads
+    of ``covered`` that take ``Kind`` offer both mappings to every call,
+    and its narrower head beside them changes nothing.
+    """
+    refused = _refused(
+        tmp_path,
+        part="context",
+        api="""
+        from typing import Literal
+
+        Kind = Literal["a", "b"]
+        Columns = Mapping[Literal["rms", "vdv"], float]
+
+        __all__ = ["split", "covered"]
+
+        @overload
+        def split(kind: Literal["a"], measured: Mapping[int, Columns]) -> float: ...
+        @overload
+        def split(kind: Literal["b"], measured: Mapping[None, Columns]) -> float: ...
+        def split(
+            kind: Kind, measured: Mapping[int, Columns] | Mapping[None, Columns]
+        ) -> float:
+            return 0.0
+
+        @overload
+        def covered(
+            kind: Literal["a"], measured: Mapping[int, Columns]
+        ) -> float: ...
+        @overload
+        def covered(kind: Kind, measured: Mapping[int, Columns]) -> float: ...
+        @overload
+        def covered(kind: Kind, measured: Mapping[None, Columns]) -> float: ...
+        def covered(
+            kind: Kind, measured: Mapping[int, Columns] | Mapping[None, Columns]
+        ) -> float:
+            return 0.0
+        """,
+    )
+    assert refused == {
+        "split(measured)": [
+            "takes Mapping[int, Columns] | Mapping[None, Columns], and the "
+            "overload heads that take each of them alone take different calls "
+            "but for it, so a dict written in a call one of them takes is read "
+            "against that head's mapping, never against the others: offer each "
+            "mapping alone in heads that take the same other arguments"
+        ]
+    }
+
+
 def test_a_union_of_mappings_offers_a_written_dict_one_head_at_a_time(
     tmp_path: pathlib.Path,
 ) -> None:
@@ -1504,8 +1639,9 @@ def test_a_window_scipy_reads_takes_a_name_and_its_parameters(
     """``get_window`` takes ``("kaiser", 8.6)`` as it takes ``"hann"``.
 
     A parameter followed into a helper, on a multiline call, into a SciPy
-    reader by keyword or by position, and one typed by an alias of ``str``,
-    are refused; one typed with a tuple, or never handed to SciPy, passes.
+    reader by keyword or by position (``resample`` and ``firwin_2d`` among
+    them), and one typed by an alias of ``str``, are refused; one typed with
+    a tuple, or never handed to SciPy, passes.
     """
     refused = _refused(
         tmp_path,
@@ -1516,7 +1652,10 @@ def test_a_window_scipy_reads_takes_a_name_and_its_parameters(
         Taper = str
         Spec = str | tuple[ArrayLike, ...]
 
-        __all__ = ["psd", "taper", "spectrum", "named", "taken", "labelled"]
+        __all__ = [
+            "psd", "taper", "spectrum", "named", "taken", "labelled", "resampled",
+            "resampled_at", "design",
+        ]
 
         def _segments(x: ArrayLike, window: str) -> float:
             return float(sp_signal.welch(x, fs=1.0, window=window)[1][0])
@@ -1541,15 +1680,65 @@ def test_a_window_scipy_reads_takes_a_name_and_its_parameters(
 
         def labelled(window: tuple[ArrayLike, ...] | str) -> float:
             return _segments([0.0] * 8, window)  # type: ignore[arg-type]
+
+        def resampled(x: ArrayLike, window: str) -> float:
+            return float(sp_signal.resample(x, 8, window=window)[0])
+
+        def resampled_at(x: ArrayLike, window: str) -> float:
+            return float(sp_signal.resample(x, 8, None, 0, window)[0])
+
+        def design(window: str = "hamming") -> float:
+            return float(sp_signal.firwin_2d((5, 5), window, fc=0.5)[0, 0])
         """,
     )
-    assert sorted(refused) == ["psd(window)", "spectrum(window)", "taper(window)"]
+    assert sorted(refused) == [
+        "design(window)",
+        "psd(window)",
+        "resampled(window)",
+        "resampled_at(window)",
+        "spectrum(window)",
+        "taper(window)",
+    ]
     assert refused["psd(window)"] == [
         "annotated str, which refuses a window given as a tuple of its name and "
         "parameters, such as ('kaiser', 8.6), while handed to _segments(window), "
         "welch() takes it"
     ]
     assert refused["taper(window)"][0].startswith("annotated Taper, which refuses")
+
+
+def test_every_window_reader_of_scipy_is_listed() -> None:
+    """Each callable of ``scipy.signal`` that takes a window is a reader.
+
+    A ``window`` or ``win_param`` parameter of SciPy goes to ``get_window``;
+    one missing from the list lets a public ``window: str`` handed to it
+    through. Each is listed with its place, or with a place no call fills
+    when SciPy takes it by keyword only.
+    """
+    import inspect
+
+    from scipy import signal
+
+    readers: dict[str, tuple[int | None, str | None]] = {}
+    callables = [
+        (f"scipy.signal.{name}", getattr(signal, name)) for name in dir(signal)
+    ]
+    callables.append(
+        ("scipy.signal.ShortTimeFFT.from_window", signal.ShortTimeFFT.from_window)
+    )
+    for dotted, member in callables:
+        if not inspect.isfunction(member) and not inspect.ismethod(member):
+            continue
+        parameters = list(inspect.signature(member).parameters.values())
+        for index, parameter in enumerate(parameters):
+            if parameter.name in {"window", "win_param"}:
+                readers[dotted] = (index, parameter.name)
+    listed = {
+        dotted: cpa._WINDOW_READERS[dotted]
+        for dotted in readers
+        if dotted in cpa._WINDOW_READERS
+    }
+    assert listed == readers
 
 
 def test_a_record_field_offers_a_written_dict_one_mapping(

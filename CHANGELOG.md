@@ -3700,11 +3700,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   distortion, intermodulation and dynamic-range functions of
   `electroacoustics` take `str | tuple[ArrayLike, ...]`, as
   `signals.window_metrics` does, so `window=("kaiser", 8.6)` type-checks.
-  The seven results that store the window (`SpectralDensityResult`,
+  The eight results that store the window (`SpectralDensityResult`,
   `CrossSpectralDensityResult`, `CoherentOutputSpectrumResult`,
   `MISOCoherenceResult`, `SpectrogramResult`, `ZoomFFTResult`,
-  `EnvelopeSpectrumResult`) hold a list of weights as a tuple of the same
-  numbers, as `WindowMetricsResult` does, so editing the caller's weights
+  `EnvelopeSpectrumResult` and `WindowMetricsResult`) hold a list of weights
+  as a tuple of the same numbers however they are built, by the function, by
+  hand or anew by `dataclasses.replace`, so editing the caller's weights
   afterwards no longer renames the window a result was computed with. mypy
   reads a `dict` written in a call against the parameter's type only when
   that type holds one mapping: with a union of several it reads the `dict`

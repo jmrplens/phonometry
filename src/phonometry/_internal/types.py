@@ -120,11 +120,14 @@ def own_window(window: WindowSpec) -> WindowSpec:
     A name is kept as given. In a tuple, a list parameter, such as the
     weights of ``("general_cosine", weights)``, becomes a tuple, so editing
     the caller's weights afterwards does not rename the window a result
-    was computed with; a record that inherits
-    :class:`~phonometry._internal.frozen.OwnsArrays` makes an array
-    parameter a read-only copy of its own.
+    was computed with. Every result that keeps its window stores it through
+    this function first in its ``__post_init__``, so one a caller builds by
+    hand, or :func:`dataclasses.replace` builds anew, holds it as the
+    function that computes it would; an array parameter is the read-only
+    copy :class:`~phonometry._internal.frozen.OwnsArrays` made of it before
+    that hook ran.
 
-    :param window: The specification a function was given.
+    :param window: The specification a record was given.
     :return: The same specification, its list parameters as tuples.
     """
     if not isinstance(window, tuple):

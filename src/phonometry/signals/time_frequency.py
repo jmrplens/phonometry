@@ -183,6 +183,7 @@ class SpectrogramResult(OwnsArrays):
         :raises ValueError: if the power grid disagrees with either axis of
             the time-frequency plane.
         """
+        object.__setattr__(self, "window", own_window(self.window))
         require_ranks(self, times=1, frequencies=1, power=2)
         require_same_length(self, "frequencies", "power", axis="frequency bin")
         require_same_length(self, "times", ("power", 1), axis="segment")
@@ -285,7 +286,7 @@ def spectrogram(
         random_error=1.0,
         n_segments=k,
         hop=step,
-        window=own_window(window),
+        window=window,
         nperseg=seg,
         overlap=ovl,
         scaling=scaling_v,
@@ -365,6 +366,7 @@ class ZoomFFTResult(OwnsArrays):
         :raises ValueError: if any spectral quantity disagrees with the zoom
             grid.
         """
+        object.__setattr__(self, "window", own_window(self.window))
         require_ranks(self, frequencies=1, spectrum=1, amplitude=1, power=1)
         require_same_length(
             self,
@@ -492,6 +494,6 @@ def zoom_fft(
         power=power,
         bin_spacing_hz=(hi - lo) / (m - 1),
         resolution_bandwidth=fs_v * float(np.sum(w * w)) / float(np.sum(w)) ** 2,
-        window=own_window(window),
+        window=window,
         n_points=m,
     )

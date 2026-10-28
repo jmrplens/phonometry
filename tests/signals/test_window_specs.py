@@ -10,12 +10,14 @@ it what it gives with ``"hann"``: the tuple reaches the window, and is not
 dropped on the way. A record that stores the window holds the tuple, a list
 of weights as a tuple and an array of them as a read-only copy, so editing
 the caller's weights afterwards does not rename the window it was computed
-with. ``scripts/check_parameter_annotations.py`` holds every parameter that
-reaches a window reader of SciPy to the annotation.
+with, however the record was built. ``scripts/check_parameter_annotations.py``
+holds every parameter that reaches a window reader of SciPy to the
+annotation.
 """
 
 from __future__ import annotations
 
+import dataclasses
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -153,3 +155,33 @@ def test_a_result_holds_the_window_with_parameters_of_its_own(name: str) -> None
     assert isinstance(held, tuple)
     assert not held[1].flags.writeable
     np.testing.assert_array_equal(held[1], [0.5, 0.5])
+
+
+#: Each record that stores a window, with one of it the function computed.
+_RECORDS: dict[str, Callable[[], Any]] = {
+    **{name: (lambda name=name: _CASES[name]("hann")) for name in _STORED},
+    "window_metrics": lambda: signals.window_metrics("hann", 64),
+}
+
+
+@pytest.mark.parametrize("name", sorted(_RECORDS))
+def test_a_record_built_anew_holds_the_window_as_the_function_does(name: str) -> None:
+    """A record built by its constructor holds the window as the function's does.
+
+    ``dataclasses.replace`` calls the constructor as a caller who writes the
+    record by hand does. The record takes the window's parameters as its
+    own, not the function that computes it: a list of weights becomes a
+    tuple, so editing it afterwards does not rename the window, and an array
+    becomes a read-only copy.
+    """
+    computed = _RECORDS[name]()
+    weights = [0.5, 0.5]
+    rebuilt = dataclasses.replace(computed, window=("general_cosine", weights))
+    weights[0] = 0.1
+    assert rebuilt.window == ("general_cosine", (0.5, 0.5))
+    array = np.array([0.5, 0.5])
+    held = dataclasses.replace(computed, window=("general_cosine", array)).window
+    array[0] = 0.1
+    assert not held[1].flags.writeable
+    np.testing.assert_array_equal(held[1], [0.5, 0.5])
+    assert dataclasses.replace(computed, window="hamming").window == "hamming"

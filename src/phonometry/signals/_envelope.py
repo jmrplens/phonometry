@@ -384,6 +384,7 @@ class EnvelopeSpectrumResult(OwnsArrays):
             axis, the envelope with its time axis, or ``mean_level`` with the
             envelope it is the mean of.
         """
+        object.__setattr__(self, "window", own_window(self.window))
         require_ranks(self, frequencies=1, amplitude=1, times=1, envelope=1)
         require_same_length(self, "frequencies", "amplitude", axis="frequency")
         require_same_length(self, "times", "envelope", axis="sample")
@@ -573,7 +574,7 @@ def envelope_spectrum(
         kind=kind,
         times=np.arange(n, dtype=np.float64) / fs_v,
         envelope=detector,
-        window=own_window(window),
+        window=window,
         remove_dc=bool(remove_dc),
         fs=fs_v,
         nfft=nfft_v,

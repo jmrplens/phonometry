@@ -455,6 +455,7 @@ class SpectralDensityResult(OwnsArrays):
         :raises ValueError: if the axis and the three curves do not share one
             length.
         """
+        object.__setattr__(self, "window", own_window(self.window))
         require_ranks(
             self, frequencies=1, psd=1, confidence_lower=1, confidence_upper=1
         )
@@ -553,7 +554,7 @@ def power_spectral_density(
         n_averages=nd,
         degrees_of_freedom=2.0 * nd,
         resolution_bandwidth=benbw,
-        window=own_window(window),
+        window=window,
         nperseg=seg,
         overlap=ovl,
         scaling=scaling_v,
@@ -665,6 +666,7 @@ class CrossSpectralDensityResult(OwnsArrays):
         :raises ValueError: if the axis and the six curves do not share one
             length.
         """
+        object.__setattr__(self, "window", own_window(self.window))
         require_ranks(
             self,
             frequencies=1,
@@ -788,7 +790,7 @@ def cross_spectral_density(
         n_segments=k,
         n_averages=nd,
         resolution_bandwidth=benbw,
-        window=own_window(window),
+        window=window,
         nperseg=seg,
         overlap=ovl,
         scaling=scaling_v,
@@ -898,6 +900,7 @@ class CoherentOutputSpectrumResult(OwnsArrays):
         :raises ValueError: if the axis and the nine curves do not share one
             length.
         """
+        object.__setattr__(self, "window", own_window(self.window))
         require_ranks(
             self,
             frequencies=1,
@@ -1047,7 +1050,7 @@ def coherent_output_spectrum(
         n_segments=k,
         n_averages=nd,
         resolution_bandwidth=benbw,
-        window=own_window(window),
+        window=window,
         nperseg=seg,
         overlap=ovl,
         scaling=scaling_v,

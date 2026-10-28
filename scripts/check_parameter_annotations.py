@@ -490,9 +490,11 @@ COUNTED = Target(
 SCALAR_TARGETS = (INTEGER, FLAG, COUNTED)
 
 #: The functions of :mod:`scipy.signal` that read a window specification, and
-#: which of their arguments it is. Each takes a window name or a tuple of a
-#: name and its parameters (``("kaiser", 8.6)``); ``firwin`` and ``firwin2``
-#: take it by keyword only, so their position is one no call fills.
+#: which of their arguments it is: every callable of SciPy 1.18 with a
+#: ``window`` or ``win_param`` it hands to ``get_window``. Each takes a window
+#: name or a tuple of a name and its parameters (``("kaiser", 8.6)``), and
+#: ``firwin_2d`` a name or a pair of them, one per axis; ``firwin`` and
+#: ``firwin2`` take it by keyword only, so their position is one no call fills.
 _WINDOW_READERS: dict[str, tuple[int | None, str | None]] = {
     "scipy.signal.get_window": (0, "window"),
     "scipy.signal.windows.get_window": (0, "window"),
@@ -505,9 +507,11 @@ _WINDOW_READERS: dict[str, tuple[int | None, str | None]] = {
     "scipy.signal.istft": (2, "window"),
     "scipy.signal.check_COLA": (0, "window"),
     "scipy.signal.check_NOLA": (0, "window"),
+    "scipy.signal.resample": (4, "window"),
     "scipy.signal.resample_poly": (4, "window"),
     "scipy.signal.firwin": (3, "window"),
     "scipy.signal.firwin2": (4, "window"),
+    "scipy.signal.firwin_2d": (1, "window"),
     "scipy.signal.ShortTimeFFT.from_window": (0, "win_param"),
 }
 
@@ -2576,6 +2580,172 @@ def _definitions(
     return found
 
 
+def _shape(
+    annotations: Annotations,
+    module: str,
+    node: ast.expr | None,
+    bounds: dict[str, ast.expr] | None = None,
+    depth: int = 0,
+) -> object:
+    """An annotation as a value two annotations that read alike share.
+
+    Aliases and type parameters are spelt out, the members of a union and
+    the choices of a ``Literal`` are read in any order, and every name is
+    read as the dotted name it stands for: ``Side`` and ``Literal["left",
+    "right"]`` have one shape, ``Literal["a"]`` and ``Literal["b"]`` two.
+    """
+    if node is None:
+        return None
+    if depth > _NESTING:
+        return ast.unparse(node)
+    if isinstance(node, ast.List):
+        return tuple(
+            _shape(annotations, module, item, bounds, depth + 1) for item in node.elts
+        )
+    found: set[object] = set()
+    for where, member in annotations.members(module, node, bounds):
+        if isinstance(member, ast.Constant):
+            found.add(("constant", repr(member.value)))
+            continue
+        dotted = annotations.resolve(where, member)
+        name = dotted if dotted is not None else ast.unparse(member)
+        if dotted in _LITERALS:
+            for item in _items(member):
+                shape = _shape(annotations, where, item, None, depth + 1)
+                found.update(shape if isinstance(shape, frozenset) else {shape})
+            continue
+        items = tuple(
+            _shape(annotations, where, item, None, depth + 1) for item in _items(member)
+        )
+        found.add((name, items))
+    return frozenset(found)
+
+
+#: The shape :func:`_call_shape` gives the parameter it reads apart.
+_ASIDE = "aside"
+
+
+@dataclass(frozen=True)
+class _Slot:
+    """One parameter of a call shape, as a caller fills it."""
+
+    #: ``positional only``, ``positional``, ``*``, ``keyword`` or ``**``.
+    kind: str
+    #: The name a caller gives it by, ``""`` for one no caller names.
+    name: str
+    #: Its annotation's :func:`_shape`, ``None`` unannotated, :data:`_ASIDE`
+    #: for the parameter the shape is read apart from.
+    shape: object
+    #: Whether a call may leave it out.
+    optional: bool
+
+    def takes(self, other: _Slot) -> bool:
+        """Whether this slot takes every argument a call gives *other*."""
+        if (self.kind, self.name) != (other.kind, other.name):
+            return False
+        if other.optional and not self.optional:
+            return False
+        mine, theirs = self.shape, other.shape
+        if mine is None or mine == _ASIDE:
+            return True
+        if isinstance(mine, frozenset) and any(
+            isinstance(member, tuple) and member[0] in _ANYTHING for member in mine
+        ):
+            return True
+        if isinstance(mine, frozenset) and isinstance(theirs, frozenset):
+            return theirs <= mine
+        return bool(mine == theirs)
+
+
+@dataclass(frozen=True)
+class _CallShape:
+    """The calls a definition takes, read apart from one of its parameters."""
+
+    positional: tuple[_Slot, ...]
+    star: _Slot | None
+    keywords: tuple[_Slot, ...]
+    double_star: _Slot | None
+
+    def takes(self, other: _CallShape) -> bool:
+        """Whether a definition of this shape takes every call *other*'s takes.
+
+        Each parameter takes what the other's does, a member of its union
+        for each member of the other's; one the other lacks may be left out.
+        """
+        if len(self.positional) != len(other.positional) or not all(
+            mine.takes(theirs)
+            for mine, theirs in zip(self.positional, other.positional, strict=True)
+        ):
+            return False
+        for mine_star, theirs_star in (
+            (self.star, other.star),
+            (self.double_star, other.double_star),
+        ):
+            if theirs_star is not None and (
+                mine_star is None or not mine_star.takes(theirs_star)
+            ):
+                return False
+        mine = {slot.name: slot for slot in self.keywords}
+        theirs = {slot.name: slot for slot in other.keywords}
+        return all(
+            name in mine and mine[name].takes(slot) for name, slot in theirs.items()
+        ) and all(slot.optional for name, slot in mine.items() if name not in theirs)
+
+
+def _call_shape(
+    annotations: Annotations,
+    module: str,
+    node: ast.FunctionDef | ast.AsyncFunctionDef,
+    name: str,
+    bounds: dict[str, ast.expr],
+) -> _CallShape:
+    """The calls a definition takes, read apart from its parameter *name*.
+
+    Each parameter by its place, its name, its kind, its annotation's shape
+    (:func:`_shape`) and whether it may be left out. A head whose shape
+    takes every call another's takes (:meth:`_CallShape.takes`) is reached
+    by each of those calls, so a ``dict`` a call hands the other for *name*
+    reaches it too, with every other argument. *name* keeps its place and
+    its kind, and nothing else.
+    """
+    arguments = node.args
+    own = {**bounds, **_type_bounds(node)}
+    positional = [*arguments.posonlyargs, *arguments.args]
+    first_default = len(positional) - len(arguments.defaults)
+
+    def read(parameter: ast.arg, kind: str, *, optional: bool) -> _Slot:
+        named = parameter.arg if kind in {"positional", "keyword"} else ""
+        if parameter.arg == name:
+            return _Slot(kind, named, _ASIDE, optional=True)
+        shape = _shape(annotations, module, parameter.annotation, own)
+        return _Slot(kind, named, shape, optional=optional)
+
+    return _CallShape(
+        positional=tuple(
+            read(
+                parameter,
+                "positional only"
+                if index < len(arguments.posonlyargs)
+                else "positional",
+                optional=index >= first_default,
+            )
+            for index, parameter in enumerate(positional)
+        ),
+        star=None
+        if arguments.vararg is None
+        else read(arguments.vararg, "*", optional=True),
+        keywords=tuple(
+            read(parameter, "keyword", optional=default is not None)
+            for parameter, default in zip(
+                arguments.kwonlyargs, arguments.kw_defaults, strict=True
+            )
+        ),
+        double_star=None
+        if arguments.kwarg is None
+        else read(arguments.kwarg, "**", optional=True),
+    )
+
+
 def _scalar_findings(
     reader: Reader,
     function: overloads.Function,
@@ -2873,9 +3043,11 @@ def key_problems(
     container or the values of a mapping are read too.
 
     *offered_beside* names the keys the other overload heads of the function
-    offer the same parameter alone: an overloaded function offers each
-    mapping in a head of its own, so that a ``dict`` written in the call is
-    read against one of them, and a caller sees every head.
+    offer the same parameter alone, those of them that take every call the
+    head read takes but for it: an overloaded function offers each mapping
+    in a head of its own, so that a ``dict`` written in the call is read
+    against one of them, and a caller who gives the same other arguments
+    reaches every such head.
     """
     if node is None or depth > _NESTING:
         return []
@@ -2913,21 +3085,32 @@ def _key_findings(
 ) -> list[Finding]:
     """The parameters of one definition with a mapping a typed caller's ``dict`` cannot match.
 
-    A head is read with the keys every head of the function offers the same
-    parameter alone, which is what a caller of the overloaded function sees.
+    A head is read with the keys offered alone for the same parameter by
+    every head that takes each call it takes but for that parameter
+    (:func:`_call_shape`), which is what a caller who gives the head's other
+    arguments reaches. A head whose other parameters are narrower, a
+    ``Literal`` choice of its own for instance, is not reached by every such
+    call, and offers it no key.
     """
     found: list[Finding] = []
     own = {**bounds, **_type_bounds(node)}
     is_head = any(node is head for head in function.heads)
+    annotations = reader.annotations
     for parameter in _arguments(node, method=method):
         beside: frozenset[str] = frozenset()
         if is_head:
+            call = _call_shape(
+                annotations, function.module, node, parameter.arg, bounds
+            )
             beside = frozenset().union(
                 *(
-                    offered_keys(reader.annotations, function.module, written, scope)
-                    for _, written, scope in _definitions(
+                    offered_keys(annotations, function.module, written, scope)
+                    for head, written, scope in _definitions(
                         function, parameter.arg, bounds, heads_only=True
                     )
+                    if _call_shape(
+                        annotations, function.module, head, parameter.arg, bounds
+                    ).takes(call)
                 )
             )
         problems = key_problems(
@@ -3041,6 +3224,55 @@ def _sole_mapping(
     return ast.unparse(arms[0]) if len(arms) == 1 else None
 
 
+def _unsplit(
+    annotations: Annotations,
+    function: overloads.Function,
+    name: str,
+    arms: tuple[str, ...],
+    bounds: dict[str, ast.expr],
+) -> str | None:
+    """Why the heads of a function do not offer each mapping of a union alone.
+
+    Every mapping of the union is the one mapping of a head, and for one of
+    those heads, each mapping is the one mapping of a head that takes every
+    call it takes but for parameter *name* (:func:`_call_shape`): a head
+    whose other parameters are narrower, a ``Literal`` choice of its own for
+    instance, is not reached by a call another head takes, so its mapping is
+    no context for a ``dict`` written in that call. A head narrower than
+    such a set, beside it, is left as it stands.
+    """
+    module = function.module
+    heads: list[tuple[str, _CallShape]] = []
+    for head, written, scope in _definitions(function, name, bounds, heads_only=True):
+        sole = _sole_mapping(annotations, module, written, scope)
+        if sole is not None:
+            heads.append((sole, _call_shape(annotations, module, head, name, bounds)))
+    shown = " | ".join(arms)
+    missing = [arm for arm in arms if arm not in {sole for sole, _ in heads}]
+    if missing:
+        return (
+            f"takes {shown} with no overload head that takes "
+            f"{' or '.join(missing)} alone, so a dict written in the call is read "
+            "against none of them: a Literal key is read as a str and nested "
+            "mappings of two key types as object, and a call that runs is refused"
+        )
+    if any(
+        all(
+            any(sole == arm and call.takes(first) for sole, call in heads)
+            for arm in arms
+        )
+        for _, first in heads
+    ):
+        return None
+    return (
+        f"takes {shown}, and the overload heads that take each of them alone "
+        "take different calls but for it, so a dict written in a call one of "
+        "them takes is read against that head's mapping, never against the "
+        "others: offer each mapping alone in heads that take the same other "
+        "arguments"
+    )
+
+
 def _context_findings(
     reader: Reader,
     function: overloads.Function,
@@ -3080,22 +3312,12 @@ def _context_findings(
                         "written in the call no mapping to be read against"
                     )
                 else:
-                    alone = {
-                        _sole_mapping(annotations, module, written, scope)
-                        for _, written, scope in _definitions(
-                            function, parameter.arg, bounds, heads_only=True
-                        )
-                    }
-                    missing = [arm for arm in arms if arm not in alone]
-                    if not missing:
-                        continue
-                    problem = (
-                        f"takes {shown} with no overload head that takes "
-                        f"{' or '.join(missing)} alone, so a dict written in the "
-                        "call is read against none of them: a Literal key is "
-                        "read as a str and nested mappings of two key types as "
-                        "object, and a call that runs is refused"
+                    unsplit = _unsplit(
+                        annotations, function, parameter.arg, arms, bounds
                     )
+                    if unsplit is None:
+                        continue
+                    problem = unsplit
                 found.append(
                     Finding(
                         path,
@@ -4824,7 +5046,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             "np.integer[Any], a flag with bool | np.bool_; a mapping keyed by "
             "float beside one keyed by int (BandMapping), and each mapping of a "
             "union a dict written in the call needs as its context in an "
-            "overload head of its own; a window SciPy reads as a name or a "
+            "overload head of its own, the heads taking the same other "
+            "arguments; a window SciPy reads as a name or a "
             "tuple of a name and its parameters; a sample rate as the "
             "float every 'fs' of the API is. A parameter narrower on purpose "
             "goes in EXEMPT, a quantity of another family in FAMILY_EXEMPT, a "

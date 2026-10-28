@@ -317,7 +317,7 @@ direct one.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a speed that is not positive, a radius or gradient that is not a valid number, decay limits that leave out a direction, limits with a band that is not positive or two keys in one one-third octave band, or an Annex C verdict of another speed, of another roughness or against another roughness limit. |
-| TypeError | if `speed_kmh` is not a single number. |
+| TypeError | if `speed_kmh` is not a single number, or a direction of `decay_limits_db_per_m` is not a text. |
 
 ## check_small_roughness_deviations
 

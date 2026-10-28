@@ -777,7 +777,7 @@ class SoundCalibratorVerification(RichDisplay):
         requirement measured, in the order of :data:`CALIBRATOR_REQUIREMENTS`.
     """
 
-    calibrator_class: str
+    calibrator_class: CalibratorClass
     nominal_frequency_hz: float
     environmental_test: EnvironmentalTest
     measurements: SoundCalibratorMeasurements

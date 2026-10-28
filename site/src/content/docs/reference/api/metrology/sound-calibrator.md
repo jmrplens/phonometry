@@ -465,7 +465,7 @@ The unit the requirement is measured in, `"dB"` or `"%"`.
 
 ```python
 SoundCalibratorVerification(
-    calibrator_class: str,
+    calibrator_class: Literal['LS', 'LS/M', '1', '1/M', '2'],
     nominal_frequency_hz: float,
     environmental_test: Literal['full', 'abbreviated'],
     measurements: SoundCalibratorMeasurements,

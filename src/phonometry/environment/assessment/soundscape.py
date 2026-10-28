@@ -1689,8 +1689,8 @@ class SoundscapeAcousticEnvironment(RichDisplay):
         The results are frozen into a read-only mapping of floats.
 
         :raises TypeError: for an ``environment_type`` or an item that is not
-            a text, results that are not a mapping, or a result that is not
-            one number.
+            a text, ``measurement_results`` that are not a mapping, or a
+            result in them that is not one number.
         :raises ValueError: for an unknown environment type, an empty item, a
             required conditional item left out, or a missing or non-finite
             result.

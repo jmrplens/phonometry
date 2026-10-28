@@ -10,6 +10,7 @@ Annex B, clause by clause, and to the statements of Clause 14.
 from __future__ import annotations
 
 import math
+from typing import TYPE_CHECKING
 
 import matplotlib as mpl
 
@@ -21,6 +22,9 @@ import pytest
 import reference_data as ref
 
 from phonometry import filters
+
+if TYPE_CHECKING:
+    from phonometry.filters.periodic_tests import Clause
 
 _NAN = math.nan
 
@@ -271,6 +275,24 @@ def test_class_2_linearity_limits_are_5_13_3_and_5_13_4(
     clause = filters.verify_filter_periodic(2, record, fraction=3).clause("11.7")
     assert clause.verifications[0].upper_limit == (near if depth <= 40.0 else far)
     assert clause.passes is conforms
+
+
+def test_a_clause_is_a_choice_and_an_unmeasured_one_a_missing_key() -> None:
+    """A text that names none of the five clauses is a ValueError, a value
+    that is not text a TypeError, and a clause that was not measured the
+    KeyError of a missing key.
+    """
+    record = _record(**_one_linearity([0.1], [10.0], [0.1]))
+    verdict = filters.verify_filter_periodic(2, record, fraction=3)
+    with pytest.raises(ValueError, match=r"'clause' must be one of"):
+        verdict.clause("99")  # type: ignore[arg-type]
+    with pytest.raises(TypeError, match=r"'clause' must be one of .*, a text"):
+        verdict.clause(13)  # type: ignore[arg-type]
+    measured = {item.clause for item in verdict.clauses}
+    clauses: tuple[Clause, ...] = ("10.2", "10.3", "11.7", "11.9", "13")
+    missing = next(name for name in clauses if name not in measured)
+    with pytest.raises(KeyError, match=r"was not measured"):
+        verdict.clause(missing)
 
 
 def test_an_uncertainty_above_its_maximum_makes_the_result_unusable() -> None:

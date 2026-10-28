@@ -357,6 +357,7 @@ class BinauralIndicators(RichDisplay):
 
         :raises ValueError: for a row that is not in Table D.1, or a metric
             keyed under a symbol other than its own.
+        :raises TypeError: for an entry of ``parameters`` that is not a text.
         """
         for name in self.parameters:
             require_choice(name, "parameters", tuple(BINAURAL_PARAMETERS))
@@ -665,7 +666,7 @@ def binaural_indicators(
     :raises ValueError: for a recording that is not two channels, an unknown
         field or row, or a loudness exceeded 95 % of the time of zero, which
         leaves :math:`N_5/N_{95}` undefined.
-    :raises TypeError: if ``field`` is not a text.
+    :raises TypeError: if ``field`` or an entry of ``parameters`` is not a text.
     :warns SoundscapeWarning: for a recording shorter than the 3 min of
         ISO/TS 12913-2 D.3 or sampled below the 44.1 kHz of D.6.
     """

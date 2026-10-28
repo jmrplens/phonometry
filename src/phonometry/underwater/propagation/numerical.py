@@ -1813,7 +1813,7 @@ class GaussianBeamResult(OwnsArrays):
     beam_widths: NDArray[np.float64]
     wavefront_curvatures: NDArray[np.float64]
     initial_beam_widths: NDArray[np.float64]
-    absorption_model: str | None
+    absorption_model: AbsorptionModel | None
     absorption_db_per_km: float
     seabed_density: float | None
     seabed_sound_speed: float | None
@@ -2985,16 +2985,20 @@ def _resolve_absorption(
     absorption: AbsorptionModel | VolumeAbsorption | None,
     frequency_hz: float,
     zs: float,
-) -> tuple[str | None, float]:
-    """The validated model key and its dB/km coefficient at the source."""
+) -> tuple[AbsorptionModel | None, float]:
+    """The validated model key and its dB/km coefficient at the source.
+
+    :raises TypeError: for an ``absorption`` that is neither a model's name
+        nor a :class:`VolumeAbsorption`.
+    """
     if absorption is None:
         return None, 0.0
     spec = (
-        VolumeAbsorption(
+        absorption
+        if isinstance(absorption, VolumeAbsorption)
+        else VolumeAbsorption(
             model=require_choice(absorption, "absorption", _ABSORPTION_MODELS)
         )
-        if isinstance(absorption, str)
-        else absorption
     )
     key = spec.model
     return key, float(
@@ -3353,7 +3357,8 @@ def gaussian_beams(
     :raises ValueError: If the inputs are invalid.
     :raises TypeError: if ``frequency_hz``, ``max_range``, ``range_step`` or
         ``source_depth`` is not a single number, or ``n_depth_points`` is a flag, a text
-        or an array where a count goes, or ``absorption`` or ``bottom`` is not a text.
+        or an array where a count goes, ``bottom`` is not a text, or ``absorption``
+        is neither a text nor a :class:`VolumeAbsorption`.
     :warns NumericalPropagationWarning: when the source sits on a kink of the profile
         (Sect. 3.7.4's spurious horizontal jet), and when one marching step
         carries the steepest beam of the fan across more than a quarter of

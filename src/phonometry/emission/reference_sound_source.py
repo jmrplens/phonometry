@@ -196,6 +196,8 @@ _THIRD_OCTAVE = 3
 
 
 def _column(environment: str, arrangement: object) -> int:
+    if arrangement is not None:
+        require_choice(arrangement, "arrangement", ("paths", "fixed"))
     if environment == "reverberation-room":
         return 2
     if environment != "hemi-anechoic":
@@ -211,7 +213,6 @@ def _column(environment: str, arrangement: object) -> int:
             "room; got None."
         )
         raise ValueError(msg)
-    require_choice(arrangement, "arrangement", ("paths", "fixed"))
     return 0 if arrangement == "paths" else 1
 
 

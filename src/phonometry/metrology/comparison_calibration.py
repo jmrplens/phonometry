@@ -2706,8 +2706,9 @@ def comparison_uncertainty_budget(
         table, an additional component without a name or with the name of
         another component, no component at all, or a value that is negative
         or not finite.
-    :raises TypeError: if ``field`` is not a text, or ``coverage_factor`` or
-        ``frequency_hz`` is not a single number.
+    :raises TypeError: if ``field`` or a key of ``standard_uncertainties_db`` is
+        not a text, or ``coverage_factor`` or ``frequency_hz`` is not a single
+        number.
     """
     field = require_choice(field, "field", CALIBRATION_FIELDS)
     table = _BUDGET_TABLES[field]

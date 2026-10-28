@@ -1291,6 +1291,81 @@ def test_a_choice_is_checked_by_a_shared_validator_on_every_path() -> None:
     )
 
 
+def _checked_after_an_early_return(mode: _Pace, *, quick: bool) -> _Pace:
+    if quick:
+        return "fast"
+    require_choice(mode, "mode", _PACES)
+    return mode
+
+
+def _column_of(mode: _Pace, *, quick: bool) -> int:
+    if quick:
+        return 0
+    require_choice(mode, "mode", _PACES)
+    return 1
+
+
+def _checked_after_a_helper_returns_early(mode: _Pace, *, quick: bool) -> int:
+    return _column_of(mode, quick=quick)
+
+
+def _checked_after_its_own_early_return(mode: _Pace | None) -> _Pace | None:
+    if mode is None:
+        return None
+    require_choice(mode, "mode", _PACES)
+    return mode
+
+
+def _checked_before_an_early_return(mode: _Pace, *, quick: bool) -> _Pace:
+    require_choice(mode, "mode", _PACES)
+    if quick:
+        return "fast"
+    return mode
+
+
+def _checked_after_a_yield(mode: _Pace) -> typing.Iterator[_Pace]:
+    yield "fast"
+    yield require_choice(mode, "mode", _PACES)
+
+
+def _items_skipped_before_the_check(paces: Sequence[_Pace], *, skip: bool) -> None:
+    for pace in paces:
+        if skip:
+            continue
+        require_choice(pace, "paces", _PACES)
+
+
+def _items_checked_after_an_inner_loop(paces: Sequence[_Pace]) -> None:
+    for pace in paces:
+        for _ in range(2):
+            if pace:
+                break
+        require_choice(pace, "paces", _PACES)
+
+
+def test_a_return_before_the_check_leaves_a_path_unchecked() -> None:
+    """A ``return`` that runs before the check, in the function or in a
+    helper the choice is handed to, ends the paths that take it with the
+    choice unchecked, and so does a ``continue`` of the loop that checks each
+    item; one behind a test of the choice itself, one after the check, a
+    ``yield`` and a ``break`` of an inner loop leave none.
+    """
+    some_paths = "checked on some paths only, so a misspelling passes on the others"
+    assert _verdict_of(_checked_after_an_early_return, "mode") == some_paths
+    assert _verdict_of(_checked_after_a_helper_returns_early, "mode") == some_paths
+    assert (
+        _verdict_of(_items_skipped_before_the_check, "paces", collection=True)
+        == some_paths
+    )
+    assert _verdict_of(_checked_after_its_own_early_return, "mode") is None
+    assert _verdict_of(_checked_before_an_early_return, "mode") is None
+    assert _verdict_of(_checked_after_a_yield, "mode") is None
+    assert (
+        _verdict_of(_items_checked_after_an_inner_loop, "paces", collection=True)
+        is None
+    )
+
+
 def _rows_once_each(paces: Sequence[_Pace]) -> tuple[_Pace, ...]:
     rows = tuple(dict.fromkeys(paces))
     for row in rows:
@@ -1414,11 +1489,143 @@ def test_a_table_keyed_by_any_text_whose_keys_are_a_vocabulary_is_found() -> Non
     assert typed == []
 
 
+#: A table annotation spelled through an alias of this module.
+_PaceTable = dict[str, float]
+
+
+@dataclass(frozen=True)
+class _PaceLimits:
+    """A published record whose table field is keyed by any text."""
+
+    limits: dict[str, float]
+
+
+def _found(value: object, annotation: str | None) -> list[tuple[str, frozenset[str]]]:
+    return list(
+        ccl._keyed_by_text(
+            value, ccl._annotation_node(annotation, __name__), __name__, "", 0
+        )
+    )
+
+
+def test_a_table_is_read_through_its_alias_and_its_qualifier() -> None:
+    """An alias of the module, ``Final`` around the type and a ``Sequence``
+    of texts let any text in as surely as ``dict[str, ...]`` written out.
+    """
+    paces = frozenset({"fast", "slow"})
+    assert _found(_PACE_LIMITS_TEXT, "_PaceTable") == [("", paces)]
+    assert _found(_PACE_LIMITS_TEXT, "Final[dict[str, float]]") == [("", paces)]
+    assert _found(_PACE_LIMITS, "Final[dict[_Pace, float]]") == []
+    assert _found(_PACES, "Sequence[str]") == [("", paces)]
+    assert _found(_PACES, "Final[tuple[str, ...]]") == [("", paces)]
+    assert _found(_PACES, "Sequence[_Pace]") == []
+    # An annotation that says nothing of the keys lets any text in.
+    assert _found(_PACE_LIMITS_TEXT, "Any") == [("", paces)]
+
+
+def test_each_part_of_a_tuple_key_and_each_field_of_a_record_is_read() -> None:
+    """The parts of a key ``("fast", "dry")`` are a vocabulary each, and a
+    published record's table fields are read through the record's own
+    annotations.
+    """
+    table = {("fast", "dry"): 1.0, ("slow", "wet"): 2.0}
+    assert _found(table, "dict[tuple[str, str], float]") == [
+        ("[key]<0>", frozenset({"fast", "slow"})),
+        ("[key]<1>", frozenset({"dry", "wet"})),
+    ]
+    assert _found(table, "dict[tuple[_Pace, str], float]") == [
+        ("[key]<1>", frozenset({"dry", "wet"}))
+    ]
+    assert _found(_PaceLimits(limits=dict(_PACE_LIMITS_TEXT)), None) == [
+        (".limits", frozenset({"fast", "slow"}))
+    ]
+
+
+def _pace_of(*, quick: bool) -> _Pace:
+    return "fast" if quick else "slow"
+
+
+def _pace_and_count(*, quick: bool) -> tuple[_Pace, int]:
+    return _pace_of(quick=quick), 1
+
+
+def _text_of(*, quick: bool) -> str:
+    return "fast" if quick else "any text"
+
+
+@dataclass(frozen=True)
+class _Stride:
+    """A record whose field is typed with the vocabulary."""
+
+    pace: _Pace
+
+
+def _filled_from_returns(*, quick: bool) -> tuple[object, ...]:
+    def _stride() -> _Stride:
+        return _Stride(pace=_pace_of(quick=quick))
+
+    unpacked, _count = _pace_and_count(quick=quick)
+    stride = _stride()
+    return (_pace_of(quick=quick), unpacked, stride.pace, _text_of(quick=quick))
+
+
+def test_a_value_handed_back_by_a_function_typed_with_a_literal_is_closed() -> None:
+    """Guard (c) reads what fills a record field back to where it is written:
+    a call to a function annotated to return a ``Literal``, an item unpacked
+    from a ``tuple[...]`` such a helper returns, and a field of the record a
+    nested function returns are the vocabulary; a function annotated ``str``
+    hands back any text.
+    """
+    tree = _tree(_filled_from_returns)
+    function = next(
+        node
+        for node in ast.walk(tree)
+        if isinstance(node, ast.FunctionDef) and node.name == "_filled_from_returns"
+    )
+    returned = next(
+        node.value for node in ast.walk(function) if isinstance(node, ast.Return)
+    )
+    assert isinstance(returned, ast.Tuple)
+    sources = [ccl._source(item, function, __name__, 0) for item in returned.elts]
+    paces = frozenset({"fast", "slow"})
+    assert sources[:3] == [ccl._Source("literal", paces)] * 3
+    assert sources[3] == ccl._OPEN_SOURCE
+
+
+def test_the_gpu_parity_exemption_is_read_from_the_files_the_lock_holds(
+    tmp_path: pathlib.Path,
+) -> None:
+    """The modules exempt as the GPU-parity batch are the ``src/`` files of
+    ``_COVERED`` in ``scripts/gpu_parity.py``, so the list follows the lock.
+    """
+    script = tmp_path / "gpu_parity.py"
+    script.write_text(
+        "_COVERED = (\n"
+        '    _ROOT / "src/phonometry/simulation/engine.py",\n'
+        '    _ROOT / "scripts/scenarios.py",\n'
+        ")\n",
+        encoding="utf-8",
+    )
+    assert dict(ccl.gpu_parity_modules(script)) == {
+        "phonometry.simulation.engine": ccl.GPU_PARITY_REASON
+    }
+    assert set(ccl.GPU_PARITY) == {
+        "phonometry.simulation.fdtd",
+        "phonometry.simulation.elastic_fdtd",
+        "phonometry.simulation._backends",
+    }
+
+
 def test_a_stale_open_table_entry_fails(monkeypatch: pytest.MonkeyPatch) -> None:
     """An exemption for a table the walk no longer flags cannot outlive its reason."""
     key = ("phonometry.nowhere", "GONE")
     monkeypatch.setitem(ccl.OPEN_TABLES, key, "a reason that no longer applies")
-    assert ccl._stale_tables([]) == [key]
+    needed = ("phonometry.synthetic", "TABLE")
+    monkeypatch.setitem(ccl.OPEN_TABLES, needed, "a reason that still applies")
+    walk = [ccl.Choice(*needed, "keys", "dict[str, float]", ("its keys",))]
+    stale = ccl._stale_tables(walk)
+    assert key in stale
+    assert needed not in stale
 
 
 def test_every_published_table_of_a_vocabulary_is_keyed_by_it() -> None:

@@ -1650,6 +1650,7 @@ def fan_sound_power(
     """
     if assembly is not None:
         require_choice(assembly, "assembly", ("rr", "t", "am"))
+    kind = require_choice(fan_type, "fan_type", tuple(_FAN_LEVEL_CORRECTION))
     scheme = require_choice(model, "model", ("ashrae", "vdi2081"))
     q = require_positive(volume_flow, "volume_flow")
     f, idx = _octave_slots(frequencies)
@@ -1684,7 +1685,6 @@ def fan_sound_power(
     if fan_static_pressure_pa is None:
         msg = "model='ashrae' needs 'fan_static_pressure_pa'."
         raise ValueError(msg)
-    kind = require_choice(fan_type, "fan_type", tuple(_FAN_LEVEL_CORRECTION))
     p = require_positive(fan_static_pressure_pa, "fan_static_pressure_pa")
 
     duty = 10.0 * np.log10(q * 1000.0 / 0.472) + 10.0 * np.log10(p / _PA_PER_IN_WG)

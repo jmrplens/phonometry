@@ -22,7 +22,11 @@ from scipy.special import erfc
 
 if TYPE_CHECKING:
     from phonometry.vibration.human.exposure import WeightingName
-    from phonometry.vibration.human.signal_burst import BurstApplication, BurstQuantity
+    from phonometry.vibration.human.signal_burst import (
+        BurstApplication,
+        BurstQuantity,
+        BurstRow,
+    )
 
 # ---------------------------------------------------------------------------
 # PR-F human vibration (ISO 8041-1 / ISO 2631 / ISO 5349 / Directive 2002/44/EC).
@@ -1008,7 +1012,7 @@ ISO8041_2_TABLE6: dict[
 # printed column in printed order. The tolerance is typed per cell, as the
 # page prints it, rather than once per column.
 ISO8041_2_TABLE7_COLUMNS: tuple[BurstQuantity, ...] = ("rms",)
-ISO8041_2_TABLE7: dict[tuple[str, int | None], tuple[tuple[float, float], ...]] = {
+ISO8041_2_TABLE7: dict[tuple[BurstRow, int | None], tuple[tuple[float, float], ...]] = {
     ("band-limiting", 1): ((0.0448, 10.0),),
     ("band-limiting", 2): ((0.0633, 10.0),),
     ("band-limiting", 4): ((0.0895, 10.0),),
@@ -1031,7 +1035,7 @@ ISO8041_2_TABLE8_COLUMNS: tuple[BurstQuantity, ...] = (
     "mtvv_linear",
     "mtvv_exponential",
 )
-ISO8041_2_TABLE8: dict[tuple[str, int | None], tuple[tuple[float, float], ...]] = {
+ISO8041_2_TABLE8: dict[tuple[BurstRow, int | None], tuple[tuple[float, float], ...]] = {
     ("band-limiting", 1): ((0.0433, 10.0), (0.498, 12.0), (0.137, 10.0), (0.135, 10.0)),
     ("band-limiting", 2): ((0.0612, 10.0), (0.593, 12.0), (0.193, 10.0), (0.188, 10.0)),
     ("band-limiting", 4): ((0.0865, 10.0), (0.705, 12.0), (0.274, 10.0), (0.258, 10.0)),
@@ -1088,7 +1092,7 @@ ISO8041_2_TABLE8: dict[tuple[str, int | None], tuple[tuple[float, float], ...]] 
 }
 
 ISO8041_2_TABLE9_COLUMNS: tuple[BurstQuantity, ...] = ("rms", "msdv")
-ISO8041_2_TABLE9: dict[tuple[str, int | None], tuple[tuple[float, float], ...]] = {
+ISO8041_2_TABLE9: dict[tuple[BurstRow, int | None], tuple[tuple[float, float], ...]] = {
     ("band-limiting", 1): ((0.0341, 10.0), (1.671, 10.0)),
     ("band-limiting", 2): ((0.0487, 10.0), (2.386, 10.0)),
     ("band-limiting", 4): ((0.069, 10.0), (3.38, 10.0)),

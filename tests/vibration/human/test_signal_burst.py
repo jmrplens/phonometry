@@ -25,7 +25,7 @@ from phonometry import vibration
 from phonometry.vibration.human import signal_burst as sb
 
 if TYPE_CHECKING:
-    from phonometry.vibration.human.signal_burst import BurstApplication
+    from phonometry.vibration.human.signal_burst import BurstApplication, BurstRow
 
 
 # Table 6 (folio 17): the angular frequency in radians per second, the hertz
@@ -37,7 +37,7 @@ TABLE_6_PRINTED = {
 }
 
 # Table 7 (folio 17), r.m.s. value, band limiting and Wh.
-TABLE_7_PRINTED = {
+TABLE_7_PRINTED: dict[tuple[BurstRow, int | None], float] = {
     ("band-limiting", 1): 0.0448,
     ("band-limiting", 16): 0.179,
     ("band-limiting", None): 0.565,
@@ -48,7 +48,7 @@ TABLE_7_PRINTED = {
 
 # Table 8 (folios 18 and 19): r.m.s. value, VDV, MTVV linear, MTVV
 # exponential, for the rows this file re-types from the page.
-TABLE_8_PRINTED = {
+TABLE_8_PRINTED: dict[tuple[BurstRow, int | None], tuple[float, ...]] = {
     ("band-limiting", 1): (0.0433, 0.498, 0.137, 0.135),
     ("band-limiting", None): (0.546, 1.77, 0.547, 0.549),
     ("Wb", 2): (0.0435, 0.403, 0.137, 0.132),
@@ -63,7 +63,7 @@ TABLE_8_PRINTED = {
 }
 
 # Table 9 (folio 19): r.m.s. value and MSDV.
-TABLE_9_PRINTED = {
+TABLE_9_PRINTED: dict[tuple[BurstRow, int | None], tuple[float, ...]] = {
     ("band-limiting", 1): (0.0341, 1.671),
     ("band-limiting", None): (0.439, 21.51),
     ("Wf", 1): (0.0197, 0.9651),
@@ -248,14 +248,16 @@ def test_the_tolerance_is_ten_per_cent_except_the_dose_value() -> None:
 
 
 @pytest.mark.parametrize(("key", "printed"), TABLE_7_PRINTED.items())
-def test_table_7_is_transcribed(key: tuple[str, int | None], printed: float) -> None:
+def test_table_7_is_transcribed(
+    key: tuple[BurstRow, int | None], printed: float
+) -> None:
     row, cycles = key
     assert sb.SIGNAL_BURST_RESPONSE["hand-arm", row, cycles]["rms"] == printed
 
 
 @pytest.mark.parametrize(("key", "printed"), TABLE_8_PRINTED.items())
 def test_table_8_is_transcribed(
-    key: tuple[str, int | None], printed: tuple[float, ...]
+    key: tuple[BurstRow, int | None], printed: tuple[float, ...]
 ) -> None:
     row, cycles = key
     cells = sb.SIGNAL_BURST_RESPONSE["whole-body", row, cycles]
@@ -264,7 +266,7 @@ def test_table_8_is_transcribed(
 
 @pytest.mark.parametrize(("key", "printed"), TABLE_9_PRINTED.items())
 def test_table_9_is_transcribed(
-    key: tuple[str, int | None], printed: tuple[float, ...]
+    key: tuple[BurstRow, int | None], printed: tuple[float, ...]
 ) -> None:
     row, cycles = key
     cells = sb.SIGNAL_BURST_RESPONSE["low-frequency-whole-body", row, cycles]
@@ -274,7 +276,7 @@ def test_table_9_is_transcribed(
 @pytest.mark.parametrize(
     ("row", "cycles"), [("band-limiting", 1), ("band-limiting", None), ("Wh", 1)]
 )
-def test_the_library_reproduces_table_7(row: str, cycles: int | None) -> None:
+def test_the_library_reproduces_table_7(row: BurstRow, cycles: int | None) -> None:
     """Hand-arm, r.m.s. value: the printed cell to better than 0,5 %."""
     printed = TABLE_7_PRINTED[row, cycles]
     got = sb.signal_burst_indications("hand-arm", row, cycles, fs=50_000.0)["rms"]
@@ -284,7 +286,7 @@ def test_the_library_reproduces_table_7(row: str, cycles: int | None) -> None:
 @pytest.mark.parametrize(
     ("row", "cycles"), [("band-limiting", 1), ("Wk", 1), ("Wk", 16), ("Wk", None)]
 )
-def test_the_library_reproduces_table_8(row: str, cycles: int | None) -> None:
+def test_the_library_reproduces_table_8(row: BurstRow, cycles: int | None) -> None:
     """Whole-body, all four printed columns at once, to better than 0,5 %.
 
     The continuous row of ``Wk`` is the interesting one: its linear MTVV is
@@ -306,7 +308,7 @@ def test_the_library_reproduces_table_8(row: str, cycles: int | None) -> None:
 @pytest.mark.parametrize(
     ("row", "cycles"), [("band-limiting", 1), ("Wf", 1), ("Wf", 16)]
 )
-def test_the_library_reproduces_table_9(row: str, cycles: int | None) -> None:
+def test_the_library_reproduces_table_9(row: BurstRow, cycles: int | None) -> None:
     """Low-frequency whole-body: r.m.s. value and MSDV, to better than 1 %."""
     printed = dict(zip(("rms", "msdv"), TABLE_9_PRINTED[row, cycles], strict=True))
     got = sb.signal_burst_indications("low-frequency-whole-body", row, cycles)
@@ -427,7 +429,7 @@ def test_the_amplitude_scales_the_record() -> None:
 # The verdict
 # ---------------------------------------------------------------------------
 def _printed_rows(
-    application: BurstApplication, name: str
+    application: BurstApplication, name: BurstRow
 ) -> dict[int | None, dict[str, float]]:
     """The printed row as a laboratory would report it."""
     test = sb.SAWTOOTH_BURST_TESTS[application]

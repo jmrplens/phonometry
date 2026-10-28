@@ -1566,8 +1566,9 @@ def assess_activity(
     :raises ValueError: For an unknown period key, empty phase list,
         inconsistent durations, or invalid annual parameters.
     :raises TypeError: if ``closed_level`` is not a single number, ``operating_days``
-        or ``year_days`` is a flag, a text or an array where a count goes, or a
-        key of ``measurements`` or ``long_term_levels`` is not a text.
+        or ``year_days`` is a flag, a text or an array where a count goes, a key
+        of ``measurements``, ``long_term_levels`` or ``period_hours`` is not a
+        text, or a value of ``period_hours`` is not a single number.
     """
     for period in measurements:
         require_choice(period, "measurements", RD1367_EVALUATION_PERIODS)

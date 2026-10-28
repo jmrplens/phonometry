@@ -790,6 +790,7 @@ def check_diffuse_sound_field(
         not match, if a reading is given without its index or the other way
         round, if a single index is below 4 dB, or if a band from 500 Hz up has
         fewer than two finite readings.
+    :raises TypeError: if a position of ``position_levels`` is not a text.
     """
     return _diffuse_field_check(
         position_levels,
@@ -1113,7 +1114,8 @@ def check_free_sound_field(
     :return: :class:`FreeSoundFieldCheck`.
     :raises ValueError: if a position is missing or unknown, if the bands do
         not match, or if the distance is not larger than 0,15 m.
-    :raises TypeError: if ``loudspeaker_distance_m`` is not a single number.
+    :raises TypeError: if ``loudspeaker_distance_m`` is not a single number, or a
+        position of ``position_levels`` or ``lateral_levels`` is not a text.
     """
     return _free_field_check(
         lateral_levels,
@@ -1171,7 +1173,8 @@ def check_quasi_free_sound_field(
     :return: :class:`FreeSoundFieldCheck` with ``field="quasi-free"``.
     :raises ValueError: if a position is missing or unknown, if the bands do
         not match, or if the distance is not larger than 0,10 m.
-    :raises TypeError: if ``loudspeaker_distance_m`` is not a single number.
+    :raises TypeError: if ``loudspeaker_distance_m`` is not a single number, or a
+        position of ``position_levels`` or ``lateral_levels`` is not a text.
     """
     return _free_field_check(
         lateral_levels,

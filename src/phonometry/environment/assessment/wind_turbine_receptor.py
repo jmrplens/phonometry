@@ -90,6 +90,7 @@ if TYPE_CHECKING:
     from ..._internal.types import GroundClass, RealScalar, RealValues
 
 Averaging = Literal["energy", "arithmetic"]
+_AVERAGINGS: tuple[Averaging, ...] = ("energy", "arithmetic")
 #: The three adjustments of Annex A, A.1, the most severe of which is applied.
 TurbineAdjustment = Literal["tonal", "amplitude_modulation", "impulsive"]
 
@@ -964,7 +965,7 @@ class BinnedSoundLevels(OwnsArrays):
 
         :raises TypeError: if ``averaging`` is not a text.
         """
-        require_choice(self.averaging, "averaging", ("energy", "arithmetic"))
+        require_choice(self.averaging, "averaging", _AVERAGINGS)
 
     def _keys(self) -> list[tuple[int, int]]:
         """The integer (sector, wind speed class) index of each bin.
@@ -1109,12 +1110,7 @@ def bin_sound_levels(
         number, or ``levels``, ``wind_directions_deg`` or ``wind_speeds_m_s`` holds a
         text or a value that is not a real number, or ``averaging`` is not a text.
     """
-    require_choice(averaging, "averaging", ("energy", "arithmetic"))
-    known = tuple(member.value for member in _Averaging)
-    if averaging not in known:
-        msg = f"'averaging' must be one of {known}; got {averaging!r}."
-        raise ValueError(msg)
-    mode = _Averaging(averaging)
+    mode = _Averaging(require_choice(averaging, "averaging", _AVERAGINGS))
     levels = require_finite_array(levels, "levels")
     type_b = np.broadcast_to(
         np.asarray(type_b_uncertainty_db, dtype=np.float64), levels.shape

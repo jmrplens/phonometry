@@ -57,6 +57,7 @@ if TYPE_CHECKING:
     from phonometry.vibration.human.exposure import WeightingName
     from phonometry.vibration.human.instrumentation import Method
     from phonometry.vibration.human.signal_burst import BurstApplication
+    from phonometry.vibration.machinery.evaluation import MachineGroup, MachineSupport
     from phonometry.vibration.structural.building_damage import PipelineMaterial
     from phonometry.vibration.structural.building_response import CoefficientModel
 
@@ -3011,7 +3012,7 @@ def generate_industrial_machine_zones(output_dir: str) -> None:
     print("Generating industrial_machine_zones...")
     from phonometry import vibration
 
-    classes = (
+    classes: tuple[tuple[MachineGroup, MachineSupport, str], ...] = (
         ("group_1", "rigid", "group 1\nrigid"),
         ("group_1", "flexible", "group 1\nflexible"),
         ("group_2", "rigid", "group 2\nrigid"),

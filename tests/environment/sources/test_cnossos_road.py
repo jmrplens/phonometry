@@ -61,7 +61,7 @@ from phonometry.environment.sources.cnossos_road import (
 
 #: The workbook prints levels rounded to 0,01 dB, so that is the whole budget.
 WORKBOOK_TOLERANCE = 0.01
-CATEGORIES = ("1", "2", "3", "4a", "4b")
+CATEGORIES: tuple[RoadVehicleCode, ...] = ("1", "2", "3", "4a", "4b")
 
 
 from cnossos_road_oracle import coefficients_2015 as _coefficients_2015
@@ -229,7 +229,7 @@ def test_temperature_coefficients_match_the_directive() -> None:
 
 
 @pytest.mark.parametrize("category", CATEGORIES)
-def test_reference_conditions_reduce_to_table_f1(category: str) -> None:
+def test_reference_conditions_reduce_to_table_f1(category: RoadVehicleCode) -> None:
     """(2.2.4)/(2.2.11) at v_ref, reference surface, 20 degC, no junction."""
     rolling = road_rolling_noise(category, ROAD_REFERENCE_SPEED_KMH)
     propulsion = road_propulsion_noise(category, ROAD_REFERENCE_SPEED_KMH)
@@ -240,7 +240,7 @@ def test_reference_conditions_reduce_to_table_f1(category: str) -> None:
 
 
 @pytest.mark.parametrize("category", ["1", "2", "3"])
-def test_rolling_speed_law_is_exactly_logarithmic(category: str) -> None:
+def test_rolling_speed_law_is_exactly_logarithmic(category: RoadVehicleCode) -> None:
     """Doubling the speed adds exactly ``B_R lg 2`` to the rolling noise."""
     low = road_rolling_noise(category, 45.0)
     high = road_rolling_noise(category, 90.0)
@@ -249,7 +249,7 @@ def test_rolling_speed_law_is_exactly_logarithmic(category: str) -> None:
 
 
 @pytest.mark.parametrize("category", CATEGORIES)
-def test_propulsion_speed_law_is_exactly_linear(category: str) -> None:
+def test_propulsion_speed_law_is_exactly_linear(category: RoadVehicleCode) -> None:
     """(2.2.11) is affine in ``v``: equal speed steps give equal level steps."""
     step = np.asarray(ROAD_COEFFICIENTS.propulsion_b[category]) * (
         10.0 / ROAD_REFERENCE_SPEED_KMH
@@ -427,7 +427,7 @@ def test_junction_correction_breakpoints() -> None:
     [("1", -6.0, 2.0), ("2", -4.0, 0.0), ("3", -4.0, 0.0)],
 )
 def test_gradient_correction_is_zero_inside_the_flat_band(
-    category: str, flat_low: float, flat_high: float
+    category: RoadVehicleCode, flat_low: float, flat_high: float
 ) -> None:
     """(2.2.13)-(2.2.15): no correction between the two breakpoints."""
     base = road_propulsion_noise(category, 70.0)
@@ -491,7 +491,9 @@ def test_gradient_correction_uphill_branches() -> None:
     ],
 )
 def test_gradient_dead_band_is_pinned_on_both_sides_of_every_breakpoint(
-    category: str, inside: tuple[float, ...], just_outside: tuple[float, ...]
+    category: RoadVehicleCode,
+    inside: tuple[float, ...],
+    just_outside: tuple[float, ...],
 ) -> None:
     """(2.2.13)-(2.2.15): the dead band ends exactly at the printed breakpoints.
 

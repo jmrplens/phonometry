@@ -568,6 +568,7 @@ class MicrophoneTraverse(OwnsArrays):
             not have one row per point, a level is infinite, a monitor or
             background reading a measured level needs is not finite, or a
             target is not one of A.3.3.
+        :raises TypeError: if an entry of ``targets`` is not a text.
         """
         object.__setattr__(self, "targets", _checked_targets(self.targets))
         positions = _checked_positions(self.positions_m)

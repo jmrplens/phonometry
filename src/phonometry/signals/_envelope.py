@@ -532,8 +532,8 @@ def envelope_spectrum(
         roll-off). Default ``None``: detect on the record as given.
     :return: An :class:`EnvelopeSpectrumResult`.
     :raises ValueError: If the inputs or parameters are invalid.
-    :raises TypeError: if ``nfft`` is a flag, a text or an array where a count goes, or
-        ``kind`` is not a text.
+    :raises TypeError: if ``nfft`` is a flag, a text or an array where a count goes,
+        ``kind`` is not a text, or an edge of ``band`` is not a real number.
     """
     from scipy import signal as sp_signal
 

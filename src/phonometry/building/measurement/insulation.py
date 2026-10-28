@@ -1381,7 +1381,8 @@ def facade_insulation(
         described, by :class:`~.low_frequency.LowFrequencyProcedure` itself.
         Supplying ``surface_level`` alone is not an error: ``r_prime`` simply
         stays ``None``.
-    :raises TypeError: if ``area``, ``t0`` or ``volume`` is not a single number.
+    :raises TypeError: if ``area``, ``t0`` or ``volume`` is not a single number, or
+        ``method`` is not a text.
     :warns LowFrequencyWarning: when a loudspeaker-method ``volume`` rounds
         below 25 m³ and ``frequencies`` names any of the three bands but no
         ``low_frequency`` answers Clause 7.3.1.

@@ -886,6 +886,176 @@ def _parameters(function: ast.FunctionDef | ast.AsyncFunctionDef) -> list[str]:
     ]
 
 
+#: The calls that hold the keys or the items of what they are given, so that
+#: iterating over one iterates over the caller's: ``tuple(dict.fromkeys(x))``.
+_HOLDS_ITEMS = frozenset(
+    {"dict", "dict.fromkeys", "frozenset", "list", "set", "sorted", "tuple"}
+)
+
+#: The methods of a mapping that iterate over what it holds.
+_KEY_VIEWS = frozenset({"keys", "items", "values"})
+
+
+def _items_of(
+    node: ast.expr, parameters: set[str], copies: dict[str, str], *, through_self: bool
+) -> str | None:
+    """The parameter whose keys or items *node* holds, as given or copied.
+
+    The parameter itself, a local bound to a copy of it, a call that only
+    holds its items (``tuple(x)``, ``dict(x)``, ``sorted(x)``), and its
+    ``keys()``, ``items()`` or ``values()``.
+    """
+    while True:
+        if (
+            isinstance(node, ast.Call)
+            and ast.unparse(node.func) in _HOLDS_ITEMS
+            and len(node.args) == 1
+        ):
+            node = node.args[0]
+        elif (
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Attribute)
+            and node.func.attr in _KEY_VIEWS
+            and not node.args
+        ):
+            node = node.func.value
+        else:
+            break
+    if isinstance(node, ast.Name) and node.id in copies:
+        return copies[node.id]
+    return _handed_parameter(node, parameters, through_self=through_self)
+
+
+def _item_copies(
+    function: ast.FunctionDef | ast.AsyncFunctionDef,
+    parameters: set[str],
+    *,
+    through_self: bool,
+) -> dict[str, str]:
+    """The locals of *function* bound to a copy of a parameter's keys or
+    items, each mapped to the parameter: ``rows = tuple(dict.fromkeys(rows))``,
+    ``given = dict(levels.items())``, ``(x,) if isinstance(x, str) else
+    tuple(x)``.
+    """
+    copies: dict[str, str] = {}
+    grown = True
+    while grown:
+        grown = False
+        for node in _own_statements(function):
+            if isinstance(node, ast.Assign) and len(node.targets) == 1:
+                bound, value = node.targets[0], node.value
+            elif isinstance(node, ast.AnnAssign) and node.value is not None:
+                bound, value = node.target, node.value
+            else:
+                continue
+            if not isinstance(bound, ast.Name) or bound.id in copies:
+                continue
+            branches = (
+                [value.body, value.orelse] if isinstance(value, ast.IfExp) else [value]
+            )
+            held = {
+                _items_of(element, parameters, copies, through_self=through_self)
+                for branch in branches
+                for element in (
+                    branch.elts
+                    if isinstance(branch, ast.Tuple) and len(branch.elts) == 1
+                    else [branch]
+                )
+            }
+            if len(held) == 1 and None not in held:
+                copies[bound.id] = held.pop()  # type: ignore[assignment]
+                grown = True
+    return copies
+
+
+def _loops(node: ast.AST) -> list[tuple[ast.expr, ast.expr, list[ast.AST]]]:
+    """Each loop *node* opens: what it iterates over, the names it binds and
+    the code that runs with them bound (a loop's body, a comprehension's
+    element, conditions and later loops).
+    """
+    if isinstance(node, (ast.For, ast.AsyncFor)):
+        return [(node.iter, node.target, list(node.body))]
+    if not isinstance(
+        node, (ast.ListComp, ast.SetComp, ast.GeneratorExp, ast.DictComp)
+    ):
+        return []
+    produced: list[ast.AST] = (
+        [node.key, node.value] if isinstance(node, ast.DictComp) else [node.elt]
+    )
+    return [
+        (
+            generator.iter,
+            generator.target,
+            [*produced, *generator.ifs, *node.generators[index + 1 :]],
+        )
+        for index, generator in enumerate(node.generators)
+    ]
+
+
+def _items_in_loops(
+    function: ast.FunctionDef | ast.AsyncFunctionDef,
+    parameters: set[str],
+    *,
+    through_self: bool,
+) -> dict[int, dict[str, str]]:
+    """The calls of *function* that run inside a loop over a parameter's keys
+    or items, by ``id`` of the call, each with the names the loop binds mapped
+    to the parameter.
+
+    A loop or a comprehension over the parameter, over a local copy of it
+    (:func:`_item_copies`) or over its ``items()`` hands each key or item to
+    what it calls, so a check of each is a check of the parameter as given;
+    each name an item unpacks into (``for area, alpha in surfaces``) holds a
+    part of what the caller gave. Only a call inside the loop counts: a
+    comprehension's names are its own.
+    """
+    copies = _item_copies(function, parameters, through_self=through_self)
+    found: dict[int, dict[str, str]] = {}
+    for node in _own_statements(function):
+        for iterated, target, scope in _loops(node):
+            parameter = _items_of(
+                iterated, parameters, copies, through_self=through_self
+            )
+            if parameter is None:
+                continue
+            names = {
+                bound.id for bound in ast.walk(target) if isinstance(bound, ast.Name)
+            }
+            for part in scope:
+                for call in ast.walk(part):
+                    if isinstance(call, ast.Call):
+                        found.setdefault(id(call), {}).update(
+                            dict.fromkeys(names, parameter)
+                        )
+    return found
+
+
+def _items_checked(
+    function: ast.FunctionDef | ast.AsyncFunctionDef,
+    parameters: set[str],
+    validators: frozenset[str],
+    *,
+    through_self: bool,
+) -> dict[int, str]:
+    """The validator calls of *function* that check a parameter's keys or
+    items one at a time (:func:`_items_in_loops`), by ``id`` of the call,
+    each with the parameter.
+    """
+    looped = _items_in_loops(function, parameters, through_self=through_self)
+    checked: dict[int, str] = {}
+    for call in _own_statements(function):
+        if (
+            isinstance(call, ast.Call)
+            and isinstance(call.func, ast.Name)
+            and call.func.id in validators
+            and call.args
+            and isinstance(call.args[0], ast.Name)
+            and call.args[0].id in looped.get(id(call), {})
+        ):
+            checked[id(call)] = looped[id(call)][call.args[0].id]
+    return checked
+
+
 def _hands_to_a_type_checking_validator(
     function: ast.FunctionDef | ast.AsyncFunctionDef,
     helpers: dict[str, ast.FunctionDef],
@@ -897,19 +1067,21 @@ def _hands_to_a_type_checking_validator(
     """The parameters *function* hands as given to a validator raising TypeError.
 
     The validator is called with the parameter itself as its first argument,
-    by *function* or by a private helper of the same module it hands the
-    parameter to, four calls deep at most. A parameter only read to build
-    another value (``fluid.density``) is not handed: the validator refuses
-    that value, not the caller's argument.
+    or with each of its keys or items in turn (a loop over the parameter or
+    over a copy of it), by *function* or by a private helper of the same
+    module it hands the parameter to, four calls deep at most. A parameter
+    only read to build another value (``fluid.density``) is not handed: the
+    validator refuses that value, not the caller's argument.
     """
     parameters = set(_parameters(function)) - {"self", "cls"}
+    items = _items_checked(function, parameters, validators, through_self=through_self)
     handed: set[str] = set()
     for node in _own_statements(function):
         if not (isinstance(node, ast.Call) and isinstance(node.func, ast.Name)):
             continue
         name = node.func.id
         if name in validators and node.args:
-            parameter = _handed_parameter(
+            parameter = items.get(id(node)) or _handed_parameter(
                 node.args[0], parameters, through_self=through_self
             )
             if parameter is not None:
@@ -933,10 +1105,11 @@ def _hands_to_a_type_checking_validator(
 
 
 #: The text of the ``:raises TypeError:`` fields of a docstring, each up to the
-#: next field; a continuation line that opens with a role (``:class:``) stays.
+#: next field (``:param x:``, ``:warns W:``, ``:return:``, any of them); a
+#: continuation line that opens with a role (``:class:`X```) stays, a role
+#: being a name between colons followed at once by a backquote.
 _TYPE_ERROR_FIELD = re.compile(
-    r":raises TypeError:(.*?)"
-    r"(?=\n\s*:(?:param|raises|return|returns|rtype|ivar|var|cvar|type|yields?)\b|\Z)",
+    r":raises TypeError:(.*?)(?=\n\s*:\w+(?:[ \t][^:\n]*)?:(?!`)|\Z)",
     re.DOTALL,
 )
 
@@ -1636,6 +1809,11 @@ def handed_choices(  # noqa: PLR0913
     if depth > _CHOICE_DEPTH or not choices:
         return set()
     imported = _names_in_reach(module, function)
+    # A copy of a collection of choices holds the caller's items:
+    # ``efforts = (efforts,) if isinstance(efforts, str) else tuple(efforts)``.
+    copies = _item_copies(function, choices, through_self=through_self)
+    # Each item of one, handed on inside a loop over it, is the caller's too.
+    looped = _items_in_loops(function, choices, through_self=through_self)
     found: set[str] = set()
     for node in _own_statements(function):
         if not isinstance(node, ast.Call):
@@ -1645,9 +1823,14 @@ def handed_choices(  # noqa: PLR0913
             continue
         callee_module, callee, callee_owner = called
         positional, documented = _receiving(callee)
+        held = {**copies, **looped.get(id(node), {})}
         handed: dict[str, str] = {}
         for name, argument in _bound(node, positional).items():
-            parameter = _handed_parameter(argument, choices, through_self=through_self)
+            parameter = (
+                held[argument.id]
+                if isinstance(argument, ast.Name) and argument.id in held
+                else _handed_parameter(argument, choices, through_self=through_self)
+            )
             if parameter in choices:
                 handed[name] = parameter
         if not (
@@ -1759,10 +1942,51 @@ def undocumented_type_errors(
     return found
 
 
+#: The script whose ``_COVERED`` names the files the GPU parity lock holds.
+_GPU_PARITY = SRC.parent.parent / "scripts" / "gpu_parity.py"
+
+
+@functools.cache
+def _gpu_parity_files() -> frozenset[str]:
+    """The package files the GPU parity lock holds, relative to ``SRC``.
+
+    An edit to one of them invalidates ``gpu-parity.lock``, so their
+    docstrings move in one batch with the GPU run that records the lock
+    again, and the rule exempts them by location until then. Read from
+    ``_COVERED`` of ``scripts/gpu_parity.py``, so the exemption follows the
+    lock and cannot drift from it.
+    """
+    tree = ast.parse(_GPU_PARITY.read_text(encoding="utf-8"))
+    paths: list[str] = []
+    for node in tree.body:
+        if isinstance(node, ast.Assign) and any(
+            isinstance(target, ast.Name) and target.id == "_COVERED"
+            for target in node.targets
+        ):
+            paths = [
+                element.right.value
+                for element in getattr(node.value, "elts", [])
+                if isinstance(element, ast.BinOp)
+                and isinstance(element.right, ast.Constant)
+                and isinstance(element.right.value, str)
+            ]
+    prefix = "src/phonometry/"
+    return frozenset(path[len(prefix) :] for path in paths if path.startswith(prefix))
+
+
+def test_the_gpu_parity_files_are_read_from_the_lock() -> None:
+    assert _gpu_parity_files() == {
+        "simulation/fdtd.py",
+        "simulation/elastic_fdtd.py",
+        "simulation/_backends.py",
+    }
+
+
 def test_a_public_function_that_raises_type_error_documents_it() -> None:
     found = [
         f"{file.relative_to(SRC).as_posix()}:{where}"
         for file in sorted(SRC.rglob("*.py"))
+        if file.relative_to(SRC).as_posix() not in _gpu_parity_files()
         for where in undocumented_type_errors(
             file.read_text(encoding="utf-8"), module=_module_name(file)
         )
@@ -1921,6 +2145,50 @@ def test_a_type_error_field_names_every_parameter_it_hands_on() -> None:
     """
     found = undocumented_type_errors(_NAMES_ANOTHER, frozenset({"require_scalar"}))
     assert found == ["sound_power:10 names no alpha, speed"]
+
+
+_ITEMS = '''
+def keys_of_a_copy(levels, mode):
+    """Levels by position.
+
+    :raises TypeError: if ``mode`` is not a text.
+    :warns LevelWarning: when ``levels`` holds one position only.
+    """
+    require_choice(mode, "mode", ("a", "b"))
+    given = dict(levels.items())
+    for position in given:
+        require_choice(position, "levels", ("left", "right"))
+
+
+def items_unpacked(surfaces):
+    """The total area.
+
+    :raises TypeError: if an area of ``surfaces`` is not one number.
+    """
+    return sum(require_scalar(area, "area") for area, _alpha in surfaces)
+
+
+def a_name_of_its_own(rows, values):
+    """A comprehension's name is its own.
+
+    :raises TypeError: if an entry of ``values`` is not one number.
+    """
+    for row in values:
+        require_scalar(row, "values")
+    return tuple(float(row) for row in rows)
+'''
+
+
+def test_a_key_or_an_item_checked_one_by_one_is_the_parameter_checked() -> None:
+    """A validator that refuses each key of a parameter, of a copy of it or
+    each part of an item it unpacks refuses the parameter: the field names
+    it. A ``:warns`` field after the ``:raises TypeError:`` one is not part of
+    it, and a comprehension's loop name is not the name of a later loop.
+    """
+    found = undocumented_type_errors(
+        _ITEMS, frozenset({"require_choice", "require_scalar"})
+    )
+    assert found == ["keys_of_a_copy:2 names no levels"]
 
 
 def test_the_validators_the_rule_follows_include_the_band_set_and_the_scalar() -> None:

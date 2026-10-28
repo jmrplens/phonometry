@@ -3970,38 +3970,66 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   record's `__post_init__`: a text it does not offer raises `ValueError` and a
   value that is not a text raises `TypeError`, on every path. Before 4.0 a
   choice compared with `==` took a misspelling down the `else` branch, one
-  checked only beside another argument passed when that argument was absent,
-  one checked with `if text not in OPTIONS` refused a number with
-  `ValueError`, and a record stored any value and left it to whatever read it:
-  `noise_control.DesignCriterion(family="nc")`,
+  checked only beside another argument or after an early `return` passed on
+  the other paths, one checked with `if text not in OPTIONS` refused a number
+  with `ValueError`, and a record stored any value and left it to whatever
+  read it: `noise_control.DesignCriterion(family="nc")`,
   `noise_control.SourceRoom(model=...)`, `filters.FilterDesign`,
   `aircraft.RotorcraftAtmosphere`, `aircraft.RotorcraftGround`,
-  `electroacoustics.MicrophoneNoise` and 12 other records were built with a
-  choice they did not know and failed later, far from the mistake, and
-  `emission.MicrophoneTraverse`, `ReportMetadata` and the keys of
+  `electroacoustics.MicrophoneNoise` and 13 other records were built with a
+  choice they did not know and failed later, far from the mistake, among them
+  `environment.RoadEmissionCoefficients` and
+  `environment.RoadSurfaceCoefficients` with a category key Table [2.2.a]
+  does not print; `filters.EQSection`, `emission.MicrophoneTraverse`,
+  `ReportMetadata` and the keys of
   `metrology.SoundLevelMeterPeriodicMeasurements` refused a value that is not
-  text with `ValueError`. Each key of
-  a mapping and each item of a sequence is checked one by one too:
+  text with `ValueError`. A choice read on one path only took any value on
+  the others: `environment.ground_effect(model=)`,
+  `environment.barrier_insertion_loss(ground_model=)` and
+  `environment.atmospheric_parabolic_equation(model=)` without a flow
+  resistivity, `metrology.coupler_transfer_impedance(heat_conduction_method=)`
+  with a plane-wave coupler, `noise_control.elbow_insertion_loss(lined_side=)`
+  with `model="ashrae"`, `noise_control.fan_sound_power`
+  (`assembly=` with `model="ashrae"`, `fan_type=` with `model="vdi2081"`),
+  `signals.time_delay(weighting=)` unless `method="gcc"`,
+  `underwater.ship_source_spectrum(vessel_class=)` unless
+  `model="jomopans-echo"`, and the `arrangement=` of
+  `emission.reference_source_calibration` and
+  `emission.reference_source_reproducibility` in a reverberation room. Each
+  key of a mapping and each item of a sequence is checked one by one too:
   `environment.assess_activity` ignored a period it did not know beside one
-  it knew, `environment.pleasantness_eventfulness` and the sound field checks
-  of ISO 8253-2, ISO 4869-1 and ISO 4869-3 refused a key that is not a text
-  with `ValueError`, and the uncertainty budgets of the comparison, the
-  reciprocity and the free-field corrections now refuse such a key with
-  `TypeError`. A key of a duct `section` that `noise_control.duct_path` does
-  not take raises `ValueError`, where the `TypeError` of an unknown keyword
-  came before. `materials.layered_absorber`, `materials.diffuse_field_absorption`,
+  it knew; `environment.pleasantness_eventfulness` refused a key that is not
+  a text with `ValueError`, and the sound field checks of ISO 8253-2, ISO
+  4869-1 and ISO 4869-3 met such a key with an unrelated `TypeError` from
+  sorting and now name the parameter; and the uncertainty budgets of the
+  comparison, the reciprocity and the free-field corrections now refuse such
+  a key with `TypeError`. A key of a duct `section` that
+  `noise_control.duct_path` does not take raises `ValueError`, where the
+  `TypeError` of an unknown keyword came before.
+  `filters.FilterPeriodicVerification.clause` raises `ValueError` for a text
+  that names none of its five clauses, where any name it had not measured
+  was a `KeyError`; a clause that was not measured still is.
+  `underwater.gaussian_beams` raises `TypeError` for an `absorption` that is
+  neither a model's name nor a `VolumeAbsorption`, where an `AttributeError`
+  came before, and `io.write(subtype=)` beside integer samples,
+  `io.write_catalogue(delimiter=, decimal=)` beside a JSON document and
+  `building.single_number_uncertainty(situation=)` with `upper_limit=True`
+  refuse a value that is not text with `TypeError` instead of `ValueError`.
+  `materials.layered_absorber`, `materials.diffuse_field_absorption`,
   `environment.road_source_power` and the Delany-Bazley preset check their
   choice once, where they start. Twelve plots of the hearing protectors, the
   active noise reduction, the real-ear attenuation and the ISO 15186-3
   low-frequency results, and `building.SoundReductionResult.report`, refused
   no `language` at all, and now refuse it as every other plot does.
   `scripts/check_choice_literals.py` fails a public `Literal` choice or a
-  record field that does not reach a shared validator on every path, follows
-  it through a copy of its items (`tuple(dict.fromkeys(rows))`, `(x,) if
-  isinstance(x, str) else tuple(x)`, `dict(levels.items())`) and into the
-  record a classmethod builds, and keeps its exemptions in `UNCHECKED`, where
-  a stale entry fails (rule A45). The migration guide lists every record that
-  now refuses at construction.
+  record field that does not reach a shared validator on every path (a
+  `return` before the check, or a `continue` of the loop that checks each
+  item, leaves a path unchecked), follows it through a copy of its items
+  (`tuple(dict.fromkeys(rows))`, `(x,) if isinstance(x, str) else tuple(x)`,
+  `dict(levels.items())`) and into the record a classmethod builds, and keeps
+  its exemptions in `UNCHECKED`, where a stale entry fails (rule A45). The
+  migration guide lists every record that now refuses at construction and
+  every call that now refuses on a path that took any value.
 
 - **Typing: published tables are keyed by their vocabulary.** 86 published
   tables and option tuples whose keys or items are the options of a
@@ -4013,15 +4041,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `room.TABLE_A1` and the rest. They are keyed by that `Literal` now, so a
   type checker refuses a misspelt key where it used to meet a `KeyError` only
   when the code ran, and a typed caller that indexes one with a free `str`
-  needs the `Literal` instead. A record field the package fills only with
-  fixed texts is typed with them too: `ReactiveSilencerResult.kind`,
-  `MicrophoneTraverse.targets`, `SoundPowerIntensityResult.grade` (one
-  `Grade` for the intensity methods), `StandardSpeechSpectrum.vocal_efforts`,
-  `ImpulseResponseResult.method`, `AudiogramResult.group` and the others.
+  needs the `Literal` instead. So are the tables keyed by a pair or a triple
+  of choices (`vibration.INDUSTRIAL_MACHINE_ZONES`,
+  `vibration.SOURCE_EXPONENTS`, `vibration.SIGNAL_BURST_RESPONSE`) in each
+  part of their key, and the per-category tables of
+  `environment.ROAD_COEFFICIENTS` and of a `RoadSurfaceCoefficients`. A
+  record field the package fills only with fixed texts is typed with them
+  too: `ReactiveSilencerResult.kind`, `SoundPowerIntensityResult.grade` (one
+  `Grade` for the intensity methods), `ImpulseResponseResult.method`,
+  `AudiogramResult.group`, `DetectionRangeResult.law` and `.model`,
+  `SoundCalibratorVerification.calibrator_class`,
+  `GaussianBeamResult.absorption_model`, `STIResult.rating`,
+  `AbsorptionRatingResult.absorption_class` and the others.
   `scripts/check_choice_literals.py` fails a published table keyed by any text
-  whose keys are a vocabulary, at any depth, with `OPEN_TABLES` for the ones
-  that match by coincidence (rule A21). The GPU-parity engines keep their
-  vocabularies as they are until they are retyped together.
+  whose keys are a vocabulary, at any depth, in each part of a tuple key and
+  in each field of a published record, read through the module's aliases and
+  through `Final`, with `OPEN_TABLES` for the ones that match by coincidence
+  (rule A21); and a record field typed `str` that the package fills only with
+  fixed texts, followed back through the return annotation of the function
+  that hands them over. The GPU-parity engines, the files
+  `scripts/gpu_parity.py` fingerprints, keep their vocabularies as they are
+  until they are retyped together.
 
 - **A parameter whose name carries its unit and that has a default is written
   by name.** `signals.noise_signal(fs, duration_s=2.0)`,

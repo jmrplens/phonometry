@@ -109,7 +109,7 @@ stays empty, is in the module docstring; each metric carries its method.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a recording that is not two channels, an unknown field or row, or a loudness exceeded 95 % of the time of zero, which leaves $N_5/N_{95}$ undefined. |
-| TypeError | if `field` is not a text. |
+| TypeError | if `field` or an entry of `parameters` is not a text. |
 
 **Warns**
 

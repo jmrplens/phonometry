@@ -1305,6 +1305,17 @@ class SoundLevelMeterPeriodicMeasurements(RichDisplay):
             range whose lower boundary is not below its upper one, a
             starting point outside it, or a step at or past the first
             indication of overload or under-range.
+        :raises TypeError: if a key of ``electrical_self_noise_levels``,
+            ``electrical_weighting_deviations_db``,
+            ``electrical_weighting_uncertainties_db``,
+            ``electrical_weighting_uncertainties_without_correction_data_db``,
+            ``range_linearity_deviations_db``,
+            ``range_linearity_uncertainties_db``,
+            ``time_weighting_at_1khz_deviations_db``,
+            ``time_weighting_at_1khz_uncertainties_db``,
+            ``toneburst_responses_db``, ``toneburst_uncertainties_db``,
+            ``weighting_at_1khz_deviations_db`` or
+            ``weighting_at_1khz_uncertainties_db`` is not a text.
         """
         if self.electrical_self_noise_levels is not None:
             for weighting in self.electrical_self_noise_levels:

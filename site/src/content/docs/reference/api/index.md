@@ -20,6 +20,10 @@ The API reference is generated from the English source docstrings and is publish
 La referencia de la API se genera a partir de los docstrings del código (en inglés) y se publica únicamente en inglés; las rutas en español muestran esta versión inglesa como alternativa.
 :::
 
+:::note[Choices]
+A choice is checked as written: a text it does not offer is a `ValueError` and a value that is not a text a `TypeError`. That holds for `language` and `engine` everywhere they are taken, and is said here once rather than on every function.
+:::
+
 ## Filters and frequencies
 
 | Page | Summary |

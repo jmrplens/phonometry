@@ -1095,7 +1095,8 @@ def impact_mobility(
         short, a non-positive sample rate, an unknown response quantity, an
         invalid window, a range that holds no bin above 0 Hz, or a force
         spectrum that vanishes at some frequency of the range.
-    :raises TypeError: if ``response_quantity`` is not a text.
+    :raises TypeError: if ``response_quantity`` is not a text, or
+        ``frequency_range_hz`` is not a pair of numbers.
     :warns ImpactExcitationWarning: when the force window removes an impact.
     """
     rate = require_positive(
@@ -1571,8 +1572,8 @@ def single_mode_fit(
     :raises ValueError: for mismatched or non-finite data, a band that is not
         a pair of positive numbers or holds fewer than three frequencies, an
         unknown kind, or a band whose data hold no lightly damped mode.
-    :raises TypeError: if ``exponential_decay_rate_per_s`` is not a single number, or
-        ``kind`` is not a text.
+    :raises TypeError: if ``exponential_decay_rate_per_s`` is not a single number,
+        ``kind`` is not a text, or ``band_hz`` is not a pair of numbers.
     """
     freqs = np.asarray(frequencies, dtype=np.float64)
     values = np.asarray(frf, dtype=np.complex128)
@@ -1719,7 +1720,8 @@ class ForceSpectrumCheck(OwnsArrays):
 
         :raises ValueError: if the arrays differ in rank or length, the range
             holds fewer than two frequencies, or the limit is not positive.
-        :raises TypeError: if ``max_drop_db`` is not a single number.
+        :raises TypeError: if ``max_drop_db`` is not a single number, or
+            ``frequency_range_hz`` is not a pair of numbers.
         """
         require_ranks(self, frequencies=1, energy_spectral_density=1)
         require_same_length(
@@ -1824,6 +1826,8 @@ def check_force_spectrum(
     :param max_drop_db: The largest fall across the range to accept, in dB.
     :return: A :class:`ForceSpectrumCheck`.
     :raises ValueError: for an invalid record, sample rate, range or limit.
+    :raises TypeError: if ``frequency_range_hz`` is not a pair of numbers, or
+        ``fs`` or ``max_drop_db`` is not a single number.
     """
     rate = require_positive(resolve_fs(force_n, fs, name="force_n"), "fs")
     spectrum = energy_spectral_density(force_n, rate)
@@ -2399,8 +2403,9 @@ def check_coherence(
     :raises ValueError: for an invalid range, exclusion or limit, a
         ``min_n_records`` that is not a whole number of at least 1, or
         exclusions that leave no frequency of the range to judge.
-    :raises TypeError: if ``min_coherence`` is not a single number, or ``min_n_records``
-        is a flag, a text or an array where a count goes.
+    :raises TypeError: if ``min_coherence`` is not a single number, ``min_n_records``
+        is a flag, a text or an array where a count goes, or
+        ``frequency_range_hz`` is not a pair of numbers.
     """
     low, high = _frequency_range(frequency_range_hz)
     records = require_count(min_n_records, "min_n_records")
@@ -2578,6 +2583,7 @@ def verify_channel_match(
     :return: A :class:`ChannelMatchVerification` over the range.
     :raises ValueError: for mismatched or non-finite data, or a range that
         holds none of the frequencies.
+    :raises TypeError: if ``frequency_range_hz`` is not a pair of numbers.
     """
     freqs = np.asarray(frequencies, dtype=np.float64)
     values = np.asarray(response, dtype=np.complex128)

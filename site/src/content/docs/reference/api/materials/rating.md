@@ -55,7 +55,9 @@ part of the shift and is not produced here.
 ## absorption_class
 
 ```python
-absorption_class(alpha_w: float) -> str
+absorption_class(
+    alpha_w: float,
+) -> Literal['A', 'B', 'C', 'D', 'E', 'Not classified']
 ```
 
 Sound absorption class for `alpha_w` (ISO 11654 Table B.1, Annex B).
@@ -82,7 +84,7 @@ AbsorptionRatingResult(
     *,
     alpha_w: float,
     shape_indicator: str,
-    absorption_class: str,
+    absorption_class: Literal['A', 'B', 'C', 'D', 'E', 'Not classified'],
     shift: float,
     unfavorable_sum: float,
     frequencies: NDArray[np.float64],

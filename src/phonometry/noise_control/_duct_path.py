@@ -526,10 +526,11 @@ def duct_path(
     :param speed_of_sound: Speed of sound, m/s, for the same check.
     :param label: A short human label of the path.
     :return: A :class:`DuctPathResult`.
-    :raises ValueError: If the spectra do not share one value per band or the
-        criterion family is unknown.
-    :raises TypeError: If an entry of ``elements`` is not a
-        :class:`DuctElement`, or ``criterion`` is not a text.
+    :raises ValueError: If the spectra do not share one value per band, the
+        criterion family is unknown, or a key of ``section`` is not one of
+        ``diameter_m``, ``width_m``, ``height_m`` or ``area``.
+    :raises TypeError: If an entry of ``elements`` is not a :class:`DuctElement`,
+        or ``criterion`` or a key of ``section`` is not a text.
     """
     f = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
     if f.ndim != 1 or f.size == 0:

@@ -51,7 +51,7 @@ import math
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -141,14 +141,16 @@ _SHAPE_THRESHOLD_UNITS = 5
 
 #: Table B.1 absorption classes (Annex B): lowest twentieth of the class
 #: mapped to its letter; "Not classified" is the residual below E.
-_CLASS_TABLE: tuple[tuple[int, str], ...] = (
+#: A class of Table B.1, or the residual below E.
+AbsorptionClass = Literal["A", "B", "C", "D", "E", "Not classified"]
+_CLASS_TABLE: tuple[tuple[int, AbsorptionClass], ...] = (
     (18, "A"),  # 0,90 - 1,00
     (16, "B"),  # 0,80 - 0,85
     (12, "C"),  # 0,60 - 0,75
     (6, "D"),  # 0,30 - 0,55
     (3, "E"),  # 0,15 - 0,25
 )
-_NOT_CLASSIFIED = "Not classified"
+_NOT_CLASSIFIED: AbsorptionClass = "Not classified"
 
 #: The axis the measured absorption is reported over before it is collected
 #: into the octave bands the rating is read from.
@@ -287,7 +289,7 @@ class AbsorptionRatingResult(OwnsArrays):
 
     alpha_w: float
     shape_indicator: str
-    absorption_class: str
+    absorption_class: AbsorptionClass
     shift: float
     unfavorable_sum: float
     frequencies: NDArray[np.float64]
@@ -671,7 +673,7 @@ def weighted_absorption_from_third_octave(
     return _rate(_coerce(alpha_p, RATING_OCTAVE_BANDS_HZ, "alpha_p"), values)
 
 
-def absorption_class(alpha_w: float) -> str:
+def absorption_class(alpha_w: float) -> AbsorptionClass:
     """Sound absorption class for ``alpha_w`` (ISO 11654 Table B.1, Annex B).
 
     :param alpha_w: Weighted sound absorption coefficient (a multiple of

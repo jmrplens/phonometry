@@ -892,7 +892,8 @@ class RollingStockTestResult(RichDisplay):
 
         :raises ValueError: For an unknown method, no position, fewer than
             three runs at a position, or a run that is not finite.
-        :raises TypeError: if ``method`` is not a text.
+        :raises TypeError: if ``method`` is not a text, or a run of
+            ``run_levels`` holds a text or a value that is not a real number.
         """
         require_choice(self.method, "method", ROLLING_STOCK_TEST_METHODS)
         if not self.run_levels:
@@ -1814,7 +1815,8 @@ class ReferenceTrackCheck(RichDisplay):
             band, or an Annex C verdict of another speed, of another
             roughness or against another roughness limit.
         :raises TypeError: if ``curve_radius_m``, ``speed_kmh`` or
-            ``track_gradient_ratio`` is not a single number.
+            ``track_gradient_ratio`` is not a single number, or a direction of
+            ``decay_limits_db_per_m`` is not a text.
         """
         object.__setattr__(
             self, "speed_kmh", require_positive(self.speed_kmh, "speed_kmh")
@@ -2321,7 +2323,8 @@ def check_reference_track(
         direction, limits with a band that is not positive or two keys in one
         one-third octave band, or an Annex C verdict of another speed, of
         another roughness or against another roughness limit.
-    :raises TypeError: if ``speed_kmh`` is not a single number.
+    :raises TypeError: if ``speed_kmh`` is not a single number, or a direction of
+        ``decay_limits_db_per_m`` is not a text.
     """
     speed = require_positive(speed_kmh, "speed_kmh")
     roughness_limit = _frozen_roughness_limit(roughness_limit_db)

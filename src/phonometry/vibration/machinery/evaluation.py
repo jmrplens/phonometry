@@ -123,6 +123,11 @@ EvaluationZone = Literal["A", "B", "C", "D"]
 BoundedZone = Literal["A", "B", "C"]
 #: The quantity a gear unit is rated in, Table 1 of ISO 20816-9:2020.
 GearQuantity = Literal["displacement", "velocity", "acceleration"]
+#: The machine groups of ISO 10816-3:2009, 3.2: group 1 the large machines,
+#: group 2 the medium-sized ones.
+MachineGroup = Literal["group_1", "group_2"]
+#: The support classes of ISO 10816-3:2009, 4.3.
+MachineSupport = Literal["rigid", "flexible"]
 
 #: The ladder of preferred magnitudes Table C.1 is drawn on, in millimetres
 #: per second r.m.s. It is an R5 series over most of its length, which is why
@@ -526,6 +531,9 @@ class MachineZoneLimits(RichDisplay):
     velocity_mm_s: ZoneBoundaries
 
 
+_MACHINE_GROUPS: tuple[MachineGroup, ...] = ("group_1", "group_2")
+_MACHINE_SUPPORTS: tuple[MachineSupport, ...] = ("rigid", "flexible")
+
 #: Tables A.1 and A.2 of ISO 10816-3:2009, keyed by machine group and support
 #: class. Group 1 is large machines above 300 kW and electrical machines of
 #: shaft height 315 mm or more; group 2 is medium-sized machines above 15 kW up
@@ -541,27 +549,27 @@ class MachineZoneLimits(RichDisplay):
 #: predecessor of that part rather than a competing document, and the ISO
 #: 20816-1 framework these boundaries are used with cites the series as the
 #: place its numbers live.
-INDUSTRIAL_MACHINE_ZONES: Mapping[tuple[str, str], MachineZoneLimits] = (
-    MappingProxyType(
-        {
-            ("group_1", "rigid"): MachineZoneLimits(
-                displacement_um=ZoneBoundaries(a_b=29.0, b_c=57.0, c_d=90.0),
-                velocity_mm_s=ZoneBoundaries(a_b=2.3, b_c=4.5, c_d=7.1),
-            ),
-            ("group_1", "flexible"): MachineZoneLimits(
-                displacement_um=ZoneBoundaries(a_b=45.0, b_c=90.0, c_d=140.0),
-                velocity_mm_s=ZoneBoundaries(a_b=3.5, b_c=7.1, c_d=11.0),
-            ),
-            ("group_2", "rigid"): MachineZoneLimits(
-                displacement_um=ZoneBoundaries(a_b=22.0, b_c=45.0, c_d=71.0),
-                velocity_mm_s=ZoneBoundaries(a_b=1.4, b_c=2.8, c_d=4.5),
-            ),
-            ("group_2", "flexible"): MachineZoneLimits(
-                displacement_um=ZoneBoundaries(a_b=37.0, b_c=71.0, c_d=113.0),
-                velocity_mm_s=ZoneBoundaries(a_b=2.3, b_c=4.5, c_d=7.1),
-            ),
-        }
-    )
+INDUSTRIAL_MACHINE_ZONES: Mapping[
+    tuple[MachineGroup, MachineSupport], MachineZoneLimits
+] = MappingProxyType(
+    {
+        ("group_1", "rigid"): MachineZoneLimits(
+            displacement_um=ZoneBoundaries(a_b=29.0, b_c=57.0, c_d=90.0),
+            velocity_mm_s=ZoneBoundaries(a_b=2.3, b_c=4.5, c_d=7.1),
+        ),
+        ("group_1", "flexible"): MachineZoneLimits(
+            displacement_um=ZoneBoundaries(a_b=45.0, b_c=90.0, c_d=140.0),
+            velocity_mm_s=ZoneBoundaries(a_b=3.5, b_c=7.1, c_d=11.0),
+        ),
+        ("group_2", "rigid"): MachineZoneLimits(
+            displacement_um=ZoneBoundaries(a_b=22.0, b_c=45.0, c_d=71.0),
+            velocity_mm_s=ZoneBoundaries(a_b=1.4, b_c=2.8, c_d=4.5),
+        ),
+        ("group_2", "flexible"): MachineZoneLimits(
+            displacement_um=ZoneBoundaries(a_b=37.0, b_c=71.0, c_d=113.0),
+            velocity_mm_s=ZoneBoundaries(a_b=2.3, b_c=4.5, c_d=7.1),
+        ),
+    }
 )
 
 #: The fraction of the upper limit of zone B that 5.3 calls a significant
@@ -613,8 +621,8 @@ def industrial_machine_zone[A1: ArrayLike, A2: ArrayLike](
 
 
 def industrial_machine_zone(
-    group: Literal["group_1", "group_2"],
-    support: Literal["rigid", "flexible"],
+    group: MachineGroup,
+    support: MachineSupport,
     *,
     displacement_um: ArrayLike | None = None,
     velocity_mm_s: ArrayLike | None = None,
@@ -644,8 +652,8 @@ def industrial_machine_zone(
     :raises TypeError: if ``group`` or ``support`` is not a text.
     """
     key = (
-        require_choice(group, "group", ("group_1", "group_2")),
-        require_choice(support, "support", ("rigid", "flexible")),
+        require_choice(group, "group", _MACHINE_GROUPS),
+        require_choice(support, "support", _MACHINE_SUPPORTS),
     )
     limits = INDUSTRIAL_MACHINE_ZONES[key]
     graded = [

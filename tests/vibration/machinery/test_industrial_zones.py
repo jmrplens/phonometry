@@ -17,19 +17,23 @@ place its numbers live.
 from __future__ import annotations
 
 import math
+from typing import TYPE_CHECKING
 
 import numpy as np
 import pytest
 
 from phonometry import vibration
 
+if TYPE_CHECKING:
+    from phonometry.vibration.machinery.evaluation import MachineGroup, MachineSupport
+
 #: Table A.1, group 1: displacement in micrometres, velocity in mm/s.
-PRINTED_GROUP_1 = {
+PRINTED_GROUP_1: dict[MachineSupport, tuple[tuple[float, ...], tuple[float, ...]]] = {
     "rigid": ((29.0, 57.0, 90.0), (2.3, 4.5, 7.1)),
     "flexible": ((45.0, 90.0, 140.0), (3.5, 7.1, 11.0)),
 }
 #: Table A.2, group 2.
-PRINTED_GROUP_2 = {
+PRINTED_GROUP_2: dict[MachineSupport, tuple[tuple[float, ...], tuple[float, ...]]] = {
     "rigid": ((22.0, 45.0, 71.0), (1.4, 2.8, 4.5)),
     "flexible": ((37.0, 71.0, 113.0), (2.3, 4.5, 7.1)),
 }
@@ -39,7 +43,8 @@ PRINTED_GROUP_2 = {
     ("group", "printed"), [("group_1", PRINTED_GROUP_1), ("group_2", PRINTED_GROUP_2)]
 )
 def test_every_printed_cell_of_the_two_tables(
-    group: str, printed: dict[str, tuple[tuple[float, ...], tuple[float, ...]]]
+    group: MachineGroup,
+    printed: dict[MachineSupport, tuple[tuple[float, ...], tuple[float, ...]]],
 ) -> None:
     """Twelve cells per table, in both quantities and both support classes."""
     for support, (displacement, velocity) in printed.items():

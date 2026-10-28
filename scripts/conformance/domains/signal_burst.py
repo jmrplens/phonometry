@@ -77,10 +77,10 @@ def _indications(
     return ph.vibration.signal_burst_indications(application, row, cycles)
 
 
-def _rows_of(application: BurstApplication) -> list[tuple[str, int | None]]:
+def _rows_of(application: BurstApplication) -> list[tuple[BurstRow, int | None]]:
     """The printed lines of one application's table, in printed order."""
     test = ph.vibration.SAWTOOTH_BURST_TESTS[application]
-    rows = [ph.vibration.BAND_LIMITING, *test.weightings]
+    rows: list[BurstRow] = [ph.vibration.BAND_LIMITING, *test.weightings]
     return [(row, cycles) for row in rows for cycles in (*test.cycle_counts, None)]
 
 

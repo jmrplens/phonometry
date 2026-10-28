@@ -769,6 +769,9 @@ def compliance_table(
         numbers, not user text).
     :param col_widths: Optional explicit column widths; defaults to
         ``[64, 36, 50, 24]`` mm (summing to the 174 mm content width).
+    :raises TypeError: if the status of an entry of ``rows`` is not a text.
+    :raises ValueError: if the status of an entry of ``rows`` is not
+        ``"pass"``, ``"fail"`` or ``"info"``.
     """
     from reportlab.lib import colors
     from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet

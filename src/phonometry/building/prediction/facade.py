@@ -285,8 +285,9 @@ class FacadePredictionResult(OwnsArrays):
         :raises ValueError: if the per-band quantities disagree, if an element
             partial index does not run over the predicted bands, or if the
             retained geometry holds a different number of elements.
-        :raises TypeError: if ``elements`` is ``None``, or ``r_prime`` is a
-            single number rather than one value per band.
+        :raises TypeError: if ``elements`` is ``None``, or ``r_prime`` or an
+            entry of ``element_r`` is a single number rather than one value
+            per band.
         """
         require_present(self, "elements")
         require_ranks(self, r_prime=1, r_45=1, r_tr_s=1, d_2m_nt=1, frequencies=1)

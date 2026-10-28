@@ -312,15 +312,26 @@ def _dialect_problems(held: object) -> list[tuple[str, str]]:
     return problems
 
 
-def check_dialect(delimiter: _Delimiter, decimal: _Decimal) -> _Dialect:
+def check_dialect(
+    delimiter: _Delimiter, decimal: _Decimal, *, json_document: str | None = None
+) -> _Dialect:
     """The dialect :func:`~phonometry.io.write_catalogue` is asked to write.
 
+    :param json_document: The name of the JSON document written in place of
+        a CSV file, which takes no dialect but the default one.
     :raises TypeError: if ``delimiter`` or ``decimal`` is not a text.
     :raises ValueError: for a delimiter or a decimal mark a catalogue CSV
-        does not take, and for a decimal comma between commas.
+        does not take, for a decimal comma between commas, and for a dialect
+        beside a JSON document.
     """
     require_choice(delimiter, "delimiter", _DELIMITERS)
     require_choice(decimal, "decimal", _DECIMALS)
+    if json_document is not None and (delimiter, decimal) != (",", "."):
+        msg = (
+            "delimiter= and decimal= declare a CSV file's dialect, and "
+            f"{json_document!r} is a JSON document"
+        )
+        raise ValueError(msg)
     if delimiter == decimal:
         msg = (
             "decimal=',' with delimiter=',': a decimal comma needs another "

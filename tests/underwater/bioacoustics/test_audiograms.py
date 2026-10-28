@@ -119,6 +119,16 @@ def test_normalized_and_original_share_the_result_shape() -> None:
         audiogram_parameters("ocw", normalized=True)  # type: ignore[arg-type]
 
 
+def test_a_group_without_an_audiogram_says_why() -> None:
+    """The LF cetaceans weigh exposure but have no fitted audiogram, and the
+    refusal says so; a code that is not a text is the wrong type.
+    """
+    with pytest.raises(ValueError, match=r"no fitted audiogram for LF cetaceans"):
+        audiogram_parameters("LF")  # type: ignore[arg-type]
+    with pytest.raises(TypeError, match=r"'group' must be one of .*, a text"):
+        audiogram_parameters(5)  # type: ignore[arg-type]
+
+
 def test_in_air_groups_are_flagged() -> None:
     assert group_audiogram(2.3e3, "PCA").in_air is True
     assert group_audiogram(10e3, "OCA").in_air is True

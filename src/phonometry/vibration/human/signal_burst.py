@@ -299,7 +299,7 @@ _TABLE_9_QUANTITIES: tuple[BurstQuantity, ...] = ("rms", "msdv")
 
 #: The rows of Tables 7 to 9, keyed by burst length with ``None`` for the
 #: continuous row, in the printed column order of the table above them.
-_TABLE_7_ROWS: dict[str, dict[int | None, tuple[float, ...]]] = {
+_TABLE_7_ROWS: dict[BurstRow, dict[int | None, tuple[float, ...]]] = {
     BAND_LIMITING: {
         1: (0.0448,),
         2: (0.0633,),
@@ -318,7 +318,7 @@ _TABLE_7_ROWS: dict[str, dict[int | None, tuple[float, ...]]] = {
     },
 }
 
-_TABLE_8_ROWS: dict[str, dict[int | None, tuple[float, ...]]] = {
+_TABLE_8_ROWS: dict[BurstRow, dict[int | None, tuple[float, ...]]] = {
     BAND_LIMITING: {
         1: (0.0433, 0.498, 0.137, 0.135),
         2: (0.0612, 0.593, 0.193, 0.188),
@@ -385,7 +385,7 @@ _TABLE_8_ROWS: dict[str, dict[int | None, tuple[float, ...]]] = {
     },
 }
 
-_TABLE_9_ROWS: dict[str, dict[int | None, tuple[float, ...]]] = {
+_TABLE_9_ROWS: dict[BurstRow, dict[int | None, tuple[float, ...]]] = {
     BAND_LIMITING: {
         1: (0.0341, 1.671),
         2: (0.0487, 2.386),
@@ -409,7 +409,7 @@ _TABLE_9_ROWS: dict[str, dict[int | None, tuple[float, ...]]] = {
 _PrintedTable = tuple[
     BurstApplication,
     tuple[BurstQuantity, ...],
-    dict[str, dict[int | None, tuple[float, ...]]],
+    dict[BurstRow, dict[int | None, tuple[float, ...]]],
 ]
 _PRINTED_TABLES: tuple[_PrintedTable, ...] = (
     (_HAND_ARM, _TABLE_7_QUANTITIES, _TABLE_7_ROWS),
@@ -419,11 +419,11 @@ _PRINTED_TABLES: tuple[_PrintedTable, ...] = (
 
 
 def _build_response_table() -> dict[
-    tuple[BurstApplication, str, int | None], Mapping[BurstQuantity, float]
+    tuple[BurstApplication, BurstRow, int | None], Mapping[BurstQuantity, float]
 ]:
     """Flatten the three printed tables into one indication lookup."""
     table: dict[
-        tuple[BurstApplication, str, int | None], Mapping[BurstQuantity, float]
+        tuple[BurstApplication, BurstRow, int | None], Mapping[BurstQuantity, float]
     ] = {}
     for application, quantities, rows in _PRINTED_TABLES:
         for row, cells in rows.items():
@@ -442,7 +442,7 @@ def _build_response_table() -> dict[
 #: response to a 1 m/s2 amplitude signal and scale with the amplitude of the
 #: actual test signal, which is what 5.9 says on folio 16.
 SIGNAL_BURST_RESPONSE: Mapping[
-    tuple[BurstApplication, str, int | None], Mapping[BurstQuantity, float]
+    tuple[BurstApplication, BurstRow, int | None], Mapping[BurstQuantity, float]
 ] = MappingProxyType(_build_response_table())
 
 

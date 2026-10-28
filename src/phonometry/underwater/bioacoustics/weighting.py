@@ -58,7 +58,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import KW_ONLY, dataclass
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, get_args
 
 import numpy as np
 
@@ -89,6 +89,8 @@ Guidance = Literal["nmfs-2024", "nmfs-2018", "southall-2019"]
 HearingGroup = Literal[
     "LF", "MF", "HF", "VHF", "PW", "OW", "PA", "OA", "SI", "PCW", "OCW", "PCA", "OCA"
 ]
+#: Every group code of either guidance version, in the order of the Literal.
+_HEARING_GROUPS: tuple[HearingGroup, ...] = get_args(HearingGroup)
 
 __all__ = [
     "WEIGHTING_GUIDANCE",
@@ -577,30 +579,9 @@ def weighting_parameters(
     :raises TypeError: If ``group`` or ``guidance`` is not a text.
     :raises ValueError: If the version or the group is unknown.
     """
-    require_choice(
-        group,
-        "group",
-        (
-            "LF",
-            "MF",
-            "HF",
-            "VHF",
-            "PW",
-            "OW",
-            "PA",
-            "OA",
-            "SI",
-            "PCW",
-            "OCW",
-            "PCA",
-            "OCA",
-        ),
-    )
+    require_choice(group, "group", _HEARING_GROUPS)
     key = _check_guidance(guidance)
     table = _PARAMETERS[key]
-    if not isinstance(group, str):
-        msg = f"'group' must be a text, one of {tuple(table)}; got {group!r}."
-        raise TypeError(msg)
     if group not in table:
         msg = (
             f"'group' must be one of {tuple(table)} for guidance {key!r}, got {group!r}."

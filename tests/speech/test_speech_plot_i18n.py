@@ -110,7 +110,7 @@ def test_sti_with_a_non_octave_band_set_es() -> None:
         mti=np.linspace(0.4, 0.8, 5),
         mtf=np.zeros((5, 14)),
         band_levels=np.full(5, 60.0),
-        rating="good",
+        rating="D",
     )
     ax = res.plot(language="es")
     assert ax.get_xlabel() == "Banda"

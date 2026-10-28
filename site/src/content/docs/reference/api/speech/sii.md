@@ -305,6 +305,7 @@ function, which still returns the bare per-band array.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an unknown vocal effort, or an empty selection. |
+| TypeError | if an entry of `vocal_efforts` is not a text. |
 
 ## standard_speech_spectrum
 

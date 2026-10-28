@@ -1026,6 +1026,7 @@ def standard_speech_spectra(
         Defaults to the full family in the Table 3 order.
     :return: A frozen :class:`StandardSpeechSpectrum`.
     :raises ValueError: for an unknown vocal effort, or an empty selection.
+    :raises TypeError: if an entry of ``vocal_efforts`` is not a text.
     """
     efforts = (
         (vocal_efforts,) if isinstance(vocal_efforts, str) else tuple(vocal_efforts)

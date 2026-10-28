@@ -179,24 +179,19 @@ def audiogram_parameters(
     :raises TypeError: If ``group`` is not a text.
     :raises ValueError: If the group has no published audiogram.
     """
-    require_choice(group, "group", ("HF", "VHF", "SI", "PCW", "OCW", "PCA", "OCA"))
-    if not isinstance(group, str):
-        msg = f"'group' must be a text, one of {AUDIOGRAM_GROUPS}; got {group!r}."
-        raise TypeError(msg)
-    # Any text a caller writes, not only the codes the Literal lists: the LF
-    # cetaceans of the weighting groups have no audiogram, and say so.
-    named: str = group
-    table = _AUDIOGRAM_NORMALIZED if normalized else _AUDIOGRAM_ORIGINAL
-    if named not in table:
-        extra = (
-            " Southall et al. publish no fitted audiogram for LF cetaceans"
-            " (the F1 parameter is never printed)."
-            if named == "LF"
-            else ""
+    named: object = group
+    if named == "LF":
+        # A weighting group with no audiogram, which a caller may well try:
+        # say why, before the refusal that lists the codes.
+        msg = (
+            f"'group' must be one of {AUDIOGRAM_GROUPS}, got 'LF'. Southall et "
+            "al. publish no fitted audiogram for LF cetaceans (the F1 parameter "
+            "is never printed)."
         )
-        msg = f"'group' must be one of {AUDIOGRAM_GROUPS}, got {group!r}.{extra}"
         raise ValueError(msg)
-    return table[named]
+    key = require_choice(group, "group", AUDIOGRAM_GROUPS)
+    table = _AUDIOGRAM_NORMALIZED if normalized else _AUDIOGRAM_ORIGINAL
+    return table[key]
 
 
 @dataclass(frozen=True)

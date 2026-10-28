@@ -607,6 +607,7 @@ def single_number_uncertainty(
     :raises TypeError: if ``quantity`` or ``situation`` is not a text.
     """
     key = _canonical(quantity)
+    require_choice(situation, "situation", tuple(_SITUATION_INDEX))
     situations, sigma_r95 = _SINGLE[key]
     if upper_limit:
         if situation != "A":
@@ -616,7 +617,6 @@ def single_number_uncertainty(
             msg = f"No σR95 upper limit tabulated for {quantity!r}."
             raise ValueError(msg)
         return sigma_r95
-    require_choice(situation, "situation", tuple(_SITUATION_INDEX))
     value = situations[_SITUATION_INDEX[situation]]
     if value is None:
         msg = f"Situation {situation!r} is not tabulated for descriptor {quantity!r}."

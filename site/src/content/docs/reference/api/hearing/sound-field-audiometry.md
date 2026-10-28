@@ -121,6 +121,7 @@ them.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if a position is missing or unknown, if the bands do not match, if a reading is given without its index or the other way round, if a single index is below 4 dB, or if a band from 500 Hz up has fewer than two finite readings. |
+| TypeError | if a position of `position_levels` is not a text. |
 
 ## check_free_sound_field
 
@@ -179,7 +180,7 @@ to 5.2 says only an anechoic room does.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if a position is missing or unknown, if the bands do not match, or if the distance is not larger than 0,15 m. |
-| TypeError | if `loudspeaker_distance_m` is not a single number. |
+| TypeError | if `loudspeaker_distance_m` is not a single number, or a position of `position_levels` or `lateral_levels` is not a text. |
 
 ## check_quasi_free_sound_field
 
@@ -233,7 +234,7 @@ which [`FreeSoundFieldCheck.usable_frequencies`](/phonometry/reference/api/heari
 | Exception | When |
 | :--- | :--- |
 | ValueError | if a position is missing or unknown, if the bands do not match, or if the distance is not larger than 0,10 m. |
-| TypeError | if `loudspeaker_distance_m` is not a single number. |
+| TypeError | if `loudspeaker_distance_m` is not a single number, or a position of `position_levels` or `lateral_levels` is not a text. |
 
 ## DIFFUSE_FIELD_VARIATION_LIMITS
 

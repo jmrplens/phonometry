@@ -819,6 +819,8 @@ def write(
     """
     if dither is not None:
         require_choice(dither, "dither", ("tpdf",))
+    if subtype is not None:
+        require_choice(subtype, "subtype", _SUBTYPES)
     target = Path(path)
     _check_target_suffix(path, target)
     carried = _sidecar_request(x=x, sidecar=sidecar)

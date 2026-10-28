@@ -853,6 +853,7 @@ class FilterPeriodicVerification(RichDisplay):
         :param clause: ``"10.2"``, ``"10.3"``, ``"11.7"``, ``"11.9"`` or
             ``"13"``.
         :return: Its :class:`PeriodicTestClause`.
+        :raises ValueError: if ``clause`` is none of the five clauses.
         :raises KeyError: when that clause was not measured.
         :raises TypeError: if ``clause`` is not a text.
         """

@@ -286,8 +286,8 @@ DetectionRangeResult(
     range_m: NDArray[np.float64],
     propagation_loss: NDArray[np.float64],
     absorption_db_per_km: float,
-    law: str,
-    model: str,
+    law: Literal['spherical', 'cylindrical', 'practical'],
+    model: Literal['francois-garrison', 'ainslie-mccolm', 'thorp'],
 )
 ```
 

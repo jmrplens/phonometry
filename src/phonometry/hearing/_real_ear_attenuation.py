@@ -986,6 +986,7 @@ def check_reat_sound_field(
         not match, if a rotation is given without its microphone's rejection
         or the other way round, or if that rejection is below the 10 dB Table 1
         accepts.
+    :raises TypeError: if a position of ``position_levels`` is not a text.
     """
     for position in position_levels:
         require_choice(position, "position_levels", _POSITIONS)

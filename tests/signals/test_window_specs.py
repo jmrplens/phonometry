@@ -18,6 +18,7 @@ annotation.
 from __future__ import annotations
 
 import dataclasses
+import functools
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -157,10 +158,10 @@ def test_a_result_holds_the_window_with_parameters_of_its_own(name: str) -> None
     np.testing.assert_array_equal(held[1], [0.5, 0.5])
 
 
-#: Each record that stores a window, with one of it the function computed.
+#: Each record that stores a window, as its function computes it.
 _RECORDS: dict[str, Callable[[], Any]] = {
-    **{name: (lambda name=name: _CASES[name]("hann")) for name in _STORED},
-    "window_metrics": lambda: signals.window_metrics("hann", 64),
+    **{name: functools.partial(_CASES[name], "hann") for name in _STORED},
+    "window_metrics": functools.partial(signals.window_metrics, "hann", 64),
 }
 
 

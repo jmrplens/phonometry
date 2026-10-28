@@ -2522,3 +2522,87 @@ def test_the_getattr_rule_reads_a_visible_one() -> None:
     )
     assert [flag for _, flag in _module_getattrs(visible)] == [False]
     assert [flag for _, flag in _module_getattrs(hidden)] == [True]
+
+
+#: The cases mypy checks call by call: each holds an annotation to the forms
+#: a caller writes.
+STATIC_CASES = SRC.parent.parent / "tests" / "static_typing"
+
+#: The NumPy scalar types a dtype written by position names (``np.int64``).
+_SCALAR_TYPE = re.compile(
+    r"(u?int\d*|u?intp|float\d*|complex\d*|bool_?|half|c?single|c?double"
+    r"|c?longdouble|u?byte|u?short|u?intc|u?long|u?longlong)"
+)
+
+
+def _an_array_of_a_written_dtype(node: ast.expr) -> bool:
+    """Whether *node* builds an array whose dtype it writes in place.
+
+    ``np.zeros(4000, dtype=np.int64)``, ``np.array(2, np.int32)`` and
+    ``values.astype(np.int64)`` all qualify.
+    """
+    if not isinstance(node, ast.Call) or not isinstance(node.func, ast.Attribute):
+        return False
+    if node.func.attr == "astype":
+        return True
+    if any(keyword.arg == "dtype" for keyword in node.keywords):
+        return True
+    return (
+        isinstance(node.func.value, ast.Name)
+        and node.func.value.id == "np"
+        and any(
+            isinstance(argument, ast.Attribute)
+            and isinstance(argument.value, ast.Name)
+            and argument.value.id == "np"
+            and _SCALAR_TYPE.fullmatch(argument.attr) is not None
+            for argument in node.args[1:]
+        )
+    )
+
+
+def _arrays_of_a_written_dtype_handed_on(tree: ast.AST) -> list[int]:
+    """The lines where a call takes such an array as written, not by a name."""
+    lines: list[int] = []
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Call):
+            continue
+        for value in [*node.args, *(keyword.value for keyword in node.keywords)]:
+            argument = value.value if isinstance(value, ast.Starred) else value
+            if _an_array_of_a_written_dtype(argument):
+                lines.append(argument.lineno)
+    return sorted(lines)
+
+
+def test_a_static_case_names_an_array_of_a_given_dtype_before_the_call() -> None:
+    """A static case hands on an integer array by a name typed with its dtype.
+
+    Written in the call, ``np.zeros(4000, dtype=np.int64)`` takes its type
+    from the parameter it is handed to: against a floating array mypy picks
+    the overload that returns ``NDArray[Any]``, so the case passed however
+    narrow the parameter was, and could not catch the narrowing it was
+    written for. Named first (``integers: NDArray[np.int64] = ...``), the
+    array keeps its dtype and the case fails when the parameter refuses it.
+    """
+    offenders = [
+        f"{path.relative_to(STATIC_CASES)}:{line}"
+        for path in sorted(STATIC_CASES.glob("*.py"))
+        for line in _arrays_of_a_written_dtype_handed_on(
+            ast.parse(path.read_text(encoding="utf-8"))
+        )
+    ]
+    assert offenders == []
+
+
+def test_the_static_case_rule_reads_an_array_written_in_the_call() -> None:
+    written = ast.parse(
+        "f(np.zeros(4, dtype=np.int64))\n"
+        "f(x, scale=np.array(2, np.int32))\n"
+        "f(*values.astype(np.int64))\n"
+    )
+    named = ast.parse(
+        "integers: NDArray[np.int64] = np.zeros(4, dtype=np.int64)\n"
+        "f(integers)\n"
+        "f(np.zeros(4), np.full(3, 1.0))\n"
+    )
+    assert _arrays_of_a_written_dtype_handed_on(written) == [1, 2, 3]
+    assert _arrays_of_a_written_dtype_handed_on(named) == []

@@ -53,10 +53,17 @@ def test_integers_and_nested_lists_reach_a_table() -> None:
 
 
 def test_an_integer_array_and_a_list_of_integers_are_signals() -> None:
-    """The array head of an overloaded filter takes any array-like."""
+    """The array head of an overloaded filter takes any array-like.
+
+    The integer array is named, with its type, before the call: written in
+    the call, ``np.zeros(..., dtype=np.int64)`` takes its type from the
+    parameter, which mypy reads as ``NDArray[Any]`` when the parameter is a
+    floating array, so the case would pass however narrow the parameter were.
+    """
     weighted = filters.weighting_filter([0, 1, 0, -1] * 1000, 48000)
     assert_type(weighted, np.ndarray)
-    counted = filters.weighting_filter(np.zeros(4000, dtype=np.int64), 48000)
+    integers: NDArray[np.int64] = np.zeros(4000, dtype=np.int64)
+    counted = filters.weighting_filter(integers, 48000)
     assert_type(counted, np.ndarray)
 
 

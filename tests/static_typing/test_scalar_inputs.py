@@ -163,12 +163,17 @@ def test_a_zero_d_integer_array_is_a_calibration_number() -> None:
     ``np.array(2, dtype=np.int64)`` is what reading one value back out of an
     integer array gives; the sidecar holds it as the float it is, and its
     declared constructor takes an integer array, signed or unsigned, as well
-    as a floating one.
+    as a floating one. Each array is named, with its type, before the call:
+    written in the call, ``np.array(..., dtype=...)`` takes its type from
+    the parameter, which mypy reads as ``NDArray[Any]`` when the parameter is
+    a floating array, so the case would pass however narrow the parameter
+    were.
     """
+    factor: NDArray[np.int64] = np.array(2, dtype=np.int64)
+    reference: NDArray[np.int32] = np.array(94, dtype=np.int32)
+    frequency: NDArray[np.uint16] = np.array(1000, dtype=np.uint16)
     sidecar = io.CalibrationSidecar(
-        np.array(2, dtype=np.int64),
-        reference_spl=np.array(94, dtype=np.int32),
-        calibrator_frequency=np.array(1000, dtype=np.uint16),
+        factor, reference_spl=reference, calibrator_frequency=frequency
     )
     assert sidecar.calibration_factor == 2.0
     assert sidecar.reference_spl == 94.0

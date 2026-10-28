@@ -553,9 +553,9 @@ Offset   Size  Field                          Held here as
 
 ```python
 CalibrationSidecar(
-    calibration_factor: float | np.floating[Any] | np.integer[Any] | NDArray[np.floating[Any]],
-    reference_spl: float | np.floating[Any] | np.integer[Any] | NDArray[np.floating[Any]] | None = None,
-    calibrator_frequency: float | np.floating[Any] | np.integer[Any] | NDArray[np.floating[Any]] | None = None,
+    calibration_factor: float | np.floating[Any] | np.integer[Any] | NDArray[np.floating[Any] | np.integer[Any]],
+    reference_spl: float | np.floating[Any] | np.integer[Any] | NDArray[np.floating[Any] | np.integer[Any]] | None = None,
+    calibrator_frequency: float | np.floating[Any] | np.integer[Any] | NDArray[np.floating[Any] | np.integer[Any]] | None = None,
     calibrator_model: str | None = None,
     channel_labels: tuple[str, ...] | list[str] | None = None,
     phonometry_version: str | None = None,

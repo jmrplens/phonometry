@@ -141,9 +141,14 @@ class CalibrationSidecar(RichDisplay):
 
         def __init__(
             self,
-            calibration_factor: RealScalar | NDArray[np.floating[Any]],
-            reference_spl: RealScalar | NDArray[np.floating[Any]] | None = None,
-            calibrator_frequency: RealScalar | NDArray[np.floating[Any]] | None = None,
+            calibration_factor: RealScalar
+            | NDArray[np.floating[Any] | np.integer[Any]],
+            reference_spl: RealScalar
+            | NDArray[np.floating[Any] | np.integer[Any]]
+            | None = None,
+            calibrator_frequency: RealScalar
+            | NDArray[np.floating[Any] | np.integer[Any]]
+            | None = None,
             calibrator_model: str | None = None,
             channel_labels: tuple[str, ...] | list[str] | None = None,
             phonometry_version: str | None = None,

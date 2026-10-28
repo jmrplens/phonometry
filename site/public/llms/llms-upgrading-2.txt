@@ -1095,7 +1095,8 @@ record converts one.
 | `aircraft.ANPNPDCurves(powers=, distances_m=, levels=)` | kept a list as given | read-only `float64` arrays |
 | `aircraft.FlightSegmentState(ground_roll=, landing_roll=, bank=)` | kept a list as given | read-only arrays, the masks `bool` and the bank `float64` |
 | `aircraft.FlightConditionInterpolation(triangles=)` | kept a list of rows as given | a read-only integer array |
-| `aircraft.RotorcraftGround(ground_elevation=, flow_resistivity=, terrain=)` | kept a list as given | a value per receiver as a read-only `float64` array and the elevation model as a tuple of three; one number or a class letter as given |
+| `aircraft.PerformanceAircraft(jet_coefficients=, propeller_coefficients=, aerodynamic_coefficients=)` | kept the dictionaries as given, the database's own included, so a table could be edited after the aeroplane was checked | read-only copies (`dict(aircraft.jet_coefficients)` gives one to edit) |
+| `aircraft.RotorcraftGround(ground_elevation=, flow_resistivity=, terrain=)` | kept a list as given; an elevation model of other than three axes was refused when an event read it | a value per receiver as a read-only `float64` array and the elevation model as its three axes, each a read-only `float64` array; an elevation model of other than three axes refused with `ValueError` when built; one number or a class letter as given |
 | `aircraft.RotorcraftHemisphere(frequencies=, azimuth_deg=, polar_deg=, levels=)` | kept a list as given | read-only `float64` arrays |
 | `aircraft.RotorcraftTrackState(airspeed=, path_angle_deg=, heading=, bank_angle_deg=)` | kept a list as given | a sequence as a read-only `float64` array; one number as given |
 | `building.BandPath(values=)` | kept a list as given | a read-only `float64` array |
@@ -1107,13 +1108,16 @@ record converts one.
 | `environment.AtmosphericAttenuation(frequencies, attenuation_db_per_m, ...)` | kept a list as given | read-only `float64` arrays |
 | `environment.WavelengthSpectrum(wavelengths_mm=, levels=)`, `environment.RailSourceSpectra(source_a=, source_b=)` | kept a list as given | read-only `float64` arrays |
 | `environment.RollingStock(wheel_transfer=, superstructure_transfer=)`, `environment.RailwayTrack(track_transfer=, bridge_transfer=)` | kept a list or a tuple as given | read-only `float64` arrays |
-| `environment.RoadEmissionCoefficients(studded_a=, studded_b=)` | kept a list or an array as given | a tuple of floats |
-| `environment.RoadSurfaceCoefficients(speed_range_kmh=, alpha=, beta=)` | kept the pair and the two dictionaries as given, so the tables could be edited after the row was built | a pair of floats and two read-only mappings |
-| `hearing.Task(samples=, duration_observations_hours=, duration_range_hours=)` | kept a list or an array as given | tuples of floats, the range a pair |
+| `environment.RoadEmissionCoefficients(studded_a=, studded_b=)` | kept a list or an array as given | a tuple of floats; `TypeError` for a number, a text or a member that is not one number |
+| `environment.RoadSurfaceCoefficients(speed_range_kmh=, alpha=, beta=)` | kept the pair and the two dictionaries as given, so the tables could be edited after the row was built | a pair of floats (`TypeError` for a number, a text or a member that is not one number, `ValueError` for other than two) and two read-only mappings |
+| `hearing.Task(samples=, duration_observations_hours=, duration_range_hours=)` | kept a list or an array as given | tuples of floats, the range a pair; `TypeError` for a number or a text given as the observations or the range, `ValueError` for a range of other than two values |
 | `io.Signal(channel_labels=)` | kept a list as given; one text of as many letters as channels named a channel per letter | a tuple; `TypeError` for one text |
-| `materials.FiberResistivityFit(bulk_density_range_kg_m3=)` | kept a list as given | a pair of floats |
+| `materials.FiberResistivityFit(bulk_density_range_kg_m3=)` | kept a list as given | a pair of floats; `TypeError` for a number or a text, `ValueError` for other than two values |
 | `materials.MetadiffuserWell(resonators=)` | kept a list as given | a tuple |
 | `materials.TransferMatrix(t11, t12, t21, t22, frequencies=)` | kept each entry as given: a `complex`, a list or a real array | read-only `complex128` arrays: a scalar entry is a 0-d array, no longer a `complex` and no longer hashable (`complex(m.t11)` or `m.t11.item()` gives the number), and a real entry has a zero imaginary part; `frequencies` a read-only `float64` array |
+| `room.ImpulseResponseResult(ir=)` | kept a list as given | a read-only `float64` array |
+| `vibration.MultipleShockResult(peaks=, risk_thresholds=)` | kept a list as given | the peaks a read-only `float64` array and the thresholds a tuple of three floats; `TypeError` for a number or a text and `ValueError` for other than three thresholds |
+| `vibration.TransferStiffnessResult(frequencies=, transfer_stiffness=, transmissibility=)` | kept a list as given | read-only arrays, the frequencies `float64`, the stiffness and the transmissibility `complex128` (a real value with a zero imaginary part) |
 
 Four results that held a `dict` a caller could edit hold a read-only mapping
 instead, as the published tables do, and an assignment into one raises
@@ -1126,7 +1130,12 @@ and the band waveforms of the `filters.OctaveFilterResult` that
 `filters.octave_filter` and `OctaveFilterBank.filter` return are tuples where
 they were lists, the lists a caller could still append to:
 `result.frequencies.index(1000.0)` and indexing read as before, and
-`list(result.frequencies)` gives a list to edit.
+`list(result.frequencies)` gives a list to edit. A range or a set of numbers
+given as a text (`"12"`) is refused with a `TypeError` that names the field,
+whatever the text reads as. A record that comes back from `pickle` or
+`copy.deepcopy` holds its arrays read-only, as it held them when it left,
+where they came back writeable: `np.array(record.levels)` gives a copy to
+write into.
 
 ```python
 from phonometry import environment, materials

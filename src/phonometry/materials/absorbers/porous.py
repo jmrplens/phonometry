@@ -80,6 +80,7 @@ from ..._internal.boundary import settled
 from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
+    pair_of_floats,
     require_choice,
     require_non_negative,
     require_positive,
@@ -844,11 +845,17 @@ class FiberResistivityFit(RichDisplay):
     def __post_init__(self) -> None:
         """Refuse a choice its ``Literal`` does not list, and hold the range as a pair of floats.
 
-        :raises TypeError: if ``direction`` is not a text.
+        :raises TypeError: if ``direction`` is not a text, or
+            ``bulk_density_range_kg_m3`` is a number, a text or a pair with a
+            member that is not one number.
+        :raises ValueError: if ``direction`` is not one of its options, or
+            ``bulk_density_range_kg_m3`` holds other than two values.
         """
         require_choice(self.direction, "direction", ("lateral", "longitudinal"))
-        low, high = self.bulk_density_range_kg_m3
-        object.__setattr__(self, "bulk_density_range_kg_m3", (float(low), float(high)))
+        bulk_density_range = pair_of_floats(
+            self.bulk_density_range_kg_m3, "bulk_density_range_kg_m3", "(low, high)"
+        )
+        object.__setattr__(self, "bulk_density_range_kg_m3", bulk_density_range)
 
 
 #: The rock wool of Hopkins Fig. 1.49, measured across two UK manufacturers at

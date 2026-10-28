@@ -2653,7 +2653,8 @@ lista pasa la comprobación donde el registro la convierte.
 | `aircraft.ANPNPDCurves(powers=, distances_m=, levels=)` | guardaba una lista tal cual | arrays `float64` de solo lectura |
 | `aircraft.FlightSegmentState(ground_roll=, landing_roll=, bank=)` | guardaba una lista tal cual | arrays de solo lectura, las máscaras `bool` y el alabeo `float64` |
 | `aircraft.FlightConditionInterpolation(triangles=)` | guardaba una lista de filas tal cual | un array de enteros de solo lectura |
-| `aircraft.RotorcraftGround(ground_elevation=, flow_resistivity=, terrain=)` | guardaba una lista tal cual | un valor por receptor como array `float64` de solo lectura y el modelo de elevación como tupla de tres; un número o una letra de clase tal cual |
+| `aircraft.PerformanceAircraft(jet_coefficients=, propeller_coefficients=, aerodynamic_coefficients=)` | guardaba los diccionarios tal cual, también los de la propia base de datos, de modo que una tabla se podía editar después de comprobar el avión | copias de solo lectura (`dict(aircraft.jet_coefficients)` devuelve una que editar) |
+| `aircraft.RotorcraftGround(ground_elevation=, flow_resistivity=, terrain=)` | guardaba una lista tal cual; un modelo de elevación de más o menos de tres ejes se rechazaba cuando un evento lo leía | un valor por receptor como array `float64` de solo lectura y el modelo de elevación como sus tres ejes, cada uno un array `float64` de solo lectura; un modelo de elevación de más o menos de tres ejes se rechaza con `ValueError` al construirse; un número o una letra de clase tal cual |
 | `aircraft.RotorcraftHemisphere(frequencies=, azimuth_deg=, polar_deg=, levels=)` | guardaba una lista tal cual | arrays `float64` de solo lectura |
 | `aircraft.RotorcraftTrackState(airspeed=, path_angle_deg=, heading=, bank_angle_deg=)` | guardaba una lista tal cual | una secuencia como array `float64` de solo lectura; un número tal cual |
 | `building.BandPath(values=)` | guardaba una lista tal cual | un array `float64` de solo lectura |
@@ -2665,13 +2666,16 @@ lista pasa la comprobación donde el registro la convierte.
 | `environment.AtmosphericAttenuation(frequencies, attenuation_db_per_m, ...)` | guardaba una lista tal cual | arrays `float64` de solo lectura |
 | `environment.WavelengthSpectrum(wavelengths_mm=, levels=)`, `environment.RailSourceSpectra(source_a=, source_b=)` | guardaba una lista tal cual | arrays `float64` de solo lectura |
 | `environment.RollingStock(wheel_transfer=, superstructure_transfer=)`, `environment.RailwayTrack(track_transfer=, bridge_transfer=)` | guardaba una lista o una tupla tal cual | arrays `float64` de solo lectura |
-| `environment.RoadEmissionCoefficients(studded_a=, studded_b=)` | guardaba una lista o un array tal cual | una tupla de floats |
-| `environment.RoadSurfaceCoefficients(speed_range_kmh=, alpha=, beta=)` | guardaba el par y los dos diccionarios tal cual, de modo que las tablas se podían editar después de construir la fila | un par de floats y dos mapeos de solo lectura |
-| `hearing.Task(samples=, duration_observations_hours=, duration_range_hours=)` | guardaba una lista o un array tal cual | tuplas de floats, el intervalo un par |
+| `environment.RoadEmissionCoefficients(studded_a=, studded_b=)` | guardaba una lista o un array tal cual | una tupla de floats; `TypeError` para un número, un texto o un miembro que no es un número |
+| `environment.RoadSurfaceCoefficients(speed_range_kmh=, alpha=, beta=)` | guardaba el par y los dos diccionarios tal cual, de modo que las tablas se podían editar después de construir la fila | un par de floats (`TypeError` para un número, un texto o un miembro que no es un número, `ValueError` para más o menos de dos) y dos mapeos de solo lectura |
+| `hearing.Task(samples=, duration_observations_hours=, duration_range_hours=)` | guardaba una lista o un array tal cual | tuplas de floats, el intervalo un par; `TypeError` para un número o un texto dado como observaciones o como intervalo, `ValueError` para un intervalo de más o menos de dos valores |
 | `io.Signal(channel_labels=)` | guardaba una lista tal cual; un texto de tantas letras como canales nombraba un canal por letra | una tupla; `TypeError` para un único texto |
-| `materials.FiberResistivityFit(bulk_density_range_kg_m3=)` | guardaba una lista tal cual | un par de floats |
+| `materials.FiberResistivityFit(bulk_density_range_kg_m3=)` | guardaba una lista tal cual | un par de floats; `TypeError` para un número o un texto, `ValueError` para más o menos de dos valores |
 | `materials.MetadiffuserWell(resonators=)` | guardaba una lista tal cual | una tupla |
 | `materials.TransferMatrix(t11, t12, t21, t22, frequencies=)` | guardaba cada elemento tal cual: un `complex`, una lista o un array real | arrays `complex128` de solo lectura: un elemento escalar es un array de dimensión cero, ya no es un `complex` ni es hashable (`complex(m.t11)` o `m.t11.item()` devuelve el número), y un elemento real tiene parte imaginaria nula; `frequencies` un array `float64` de solo lectura |
+| `room.ImpulseResponseResult(ir=)` | guardaba una lista tal cual | un array `float64` de solo lectura |
+| `vibration.MultipleShockResult(peaks=, risk_thresholds=)` | guardaba una lista tal cual | los picos como array `float64` de solo lectura y los umbrales como tupla de tres floats; `TypeError` para un número o un texto y `ValueError` para más o menos de tres umbrales |
+| `vibration.TransferStiffnessResult(frequencies=, transfer_stiffness=, transmissibility=)` | guardaba una lista tal cual | arrays de solo lectura, las frecuencias `float64`, la rigidez y la transmisibilidad `complex128` (un valor real con parte imaginaria nula) |
 
 Cuatro resultados que guardaban un `dict` editable guardan en su lugar un mapeo
 de solo lectura, como las tablas publicadas, y asignar en uno de ellos lanza
@@ -2684,7 +2688,12 @@ centrales y las formas de onda por banda del `filters.OctaveFilterResult` que
 devuelven `filters.octave_filter` y `OctaveFilterBank.filter` son tuplas donde
 eran listas, listas a las que quien llama aún podía añadir elementos:
 `result.frequencies.index(1000.0)` y la indexación se leen como antes, y
-`list(result.frequencies)` devuelve una lista que editar.
+`list(result.frequencies)` devuelve una lista que editar. Un intervalo o una
+serie de números dados como un texto (`"12"`) se rechazan con un `TypeError`
+que nombra el campo, se lea como se lea el texto. Un registro que vuelve de
+`pickle` o de `copy.deepcopy` guarda sus arrays de solo lectura, como los
+guardaba al salir, donde antes volvían modificables: `np.array(record.levels)`
+devuelve una copia en la que escribir.
 
 ```python
 from phonometry import environment, materials

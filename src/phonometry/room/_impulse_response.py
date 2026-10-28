@@ -70,7 +70,7 @@ from typing import TYPE_CHECKING, Any, Literal, overload
 import numpy as np
 from scipy import signal
 
-from .._internal.frozen import OwnsArrays
+from .._internal.frozen import OwnsArrays, read_only
 from .._internal.utils import _typesignal
 from .._internal.validation import (
     require_choice,
@@ -98,7 +98,7 @@ class ImpulseResponseWarning(PhonometryWarning):
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, DTypeLike
+    from numpy.typing import ArrayLike, DTypeLike, NDArray
 
     from .._i18n import Language
     from .._internal.types import TwoPanels
@@ -175,9 +175,25 @@ class ImpulseResponseResult(OwnsArrays):
     forward to ``ir``.
     """
 
-    ir: np.ndarray
+    ir: NDArray[np.float64]
     fs: float | None
     method: ExcitationMethod
+
+    if TYPE_CHECKING:
+
+        def __init__(
+            self, ir: ArrayLike, fs: float | None, method: ExcitationMethod
+        ) -> None: ...
+
+    def __post_init__(self) -> None:
+        """Hold the impulse response as a read-only ``float64`` array.
+
+        Whatever sequence it was given as: a list kept as given would answer
+        ``len``, indexing and ``np.asarray`` as the list does, and leave the
+        frozen record open to an ``append``.
+        """
+        ir = np.asarray(self.ir, dtype=np.float64)
+        object.__setattr__(self, "ir", read_only(ir))
 
     def __array__(
         self, dtype: DTypeLike | None = None, *, copy: bool | None = None

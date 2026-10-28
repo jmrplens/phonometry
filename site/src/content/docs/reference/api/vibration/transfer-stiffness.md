@@ -1365,10 +1365,10 @@ stiffness.
 
 ```python
 TransferStiffnessResult(
-    frequencies: np.ndarray,
-    transfer_stiffness: np.ndarray,
+    frequencies: ArrayLike,
+    transfer_stiffness: ArrayLike,
     blocking_mass: float | None = None,
-    transmissibility: np.ndarray | None = None,
+    transmissibility: ArrayLike | None = None,
 )
 ```
 

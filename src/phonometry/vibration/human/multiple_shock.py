@@ -66,13 +66,14 @@ from typing import TYPE_CHECKING, Any, overload
 
 import numpy as np
 
-from ..._internal.frozen import OwnsArrays
+from ..._internal.frozen import OwnsArrays, read_only
 
 # Sex is imported to run, not only to type: typing.get_type_hints resolves the
 # sex field of MultipleShockResult in this module's namespace.
 from ..._internal.types import ReportEngine, Sex, as_float_or_array
 from ..._internal.validation import (
     check_engine,
+    floats_of,
     require_1d_signal,
     require_choice,
     require_count,
@@ -85,6 +86,8 @@ from ...hearing.threshold import SEXES as _SEXES
 from ...io._resolve import SignalInput, resolve_fs, resolve_samples
 
 if TYPE_CHECKING:
+    from collections.abc import Sequence
+
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
@@ -531,11 +534,35 @@ class MultipleShockResult(OwnsArrays):
     start_age: float
     exposure_duration_years: int
     days_per_year: float
-    peaks: np.ndarray
+    peaks: NDArray[np.float64]
     risk_thresholds: tuple[float, float, float]
 
+    if TYPE_CHECKING:
+
+        def __init__(
+            self,
+            sex: Sex,
+            acceleration_dose: float,
+            daily_dose: float,
+            compression_dose: float,
+            risk: float,
+            probability: float,
+            start_age: float,
+            exposure_duration_years: int,
+            days_per_year: float,
+            peaks: ArrayLike,
+            risk_thresholds: Sequence[float],
+        ) -> None: ...
+
     def __post_init__(self) -> None:
-        """Reject a non-finite dose chain, exposure scenario, or 2-D peaks.
+        """Hold the peaks and the thresholds, and reject a non-finite dose chain.
+
+        The peaks are held as a read-only ``float64`` array and the risk
+        thresholds as a tuple of three floats, whatever sequence they were
+        given as: a list kept as given would leave the frozen record open to
+        an ``append``.
+
+        A non-finite dose chain, exposure scenario, or 2-D peaks is refused.
 
         The health-risk fiche prints the whole Formula 3 to C.5 chain
         (``Dz``, ``Dzd``, ``Sd``, ``R``, ``P``) in its analysis table, boxes
@@ -547,9 +574,21 @@ class MultipleShockResult(OwnsArrays):
         classification or crashes the rounding with a bare "cannot convert
         float NaN to integer".
 
+        :raises TypeError: if ``risk_thresholds`` is a number, a text or a
+            sequence with a member that is not one number.
         :raises ValueError: if any dose, risk, probability or scenario value
-            is non-finite, or ``peaks`` is not one value per shock.
+            is non-finite, ``peaks`` is not one value per shock, or
+            ``risk_thresholds`` holds other than three values.
         """
+        peaks = np.asarray(self.peaks, dtype=np.float64)
+        object.__setattr__(self, "peaks", read_only(peaks))
+        r10, r50, r90 = floats_of(
+            self.risk_thresholds,
+            "risk_thresholds",
+            "the three R values for 10 %, 50 % and 90 % risk of injury",
+            3,
+        )
+        object.__setattr__(self, "risk_thresholds", (r10, r50, r90))
         require_ranks(self, peaks=1)
         for name in (
             "acceleration_dose",

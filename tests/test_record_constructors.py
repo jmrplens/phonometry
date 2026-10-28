@@ -23,6 +23,9 @@ catch on small packages written for the purpose.
 
 from __future__ import annotations
 
+import ast
+import dataclasses
+import importlib
 import pathlib
 import sys
 import textwrap
@@ -36,6 +39,7 @@ if _SCRIPTS not in sys.path:
 import check_parameter_annotations as cpa
 import check_return_overloads as overloads
 from ast_scan import ROOT, python_files
+from markdown_fences import python_fences
 
 _SOURCE = ROOT / "src" / "phonometry"
 
@@ -85,6 +89,155 @@ def test_the_records_a_caller_builds_cover_the_named_ones(reader: cpa.Reader) ->
         # Named only where no public function takes it: a record one takes is
         # read as built by a caller already, and the entry would say nothing.
         assert name not in reader.input_records, name
+
+
+#: Where the guides live: the plain-markdown mirror GitHub serves, both
+#: languages of the site, and the two front pages. The API reference the
+#: site generates from the docstrings is left out: it states signatures, it
+#: builds nothing.
+_GUIDES = (ROOT / "docs", ROOT / "site" / "src" / "content" / "docs")
+_FRONT_PAGES = (ROOT / "README.md", ROOT / "README_PYPI.md")
+
+
+def _guide_pages() -> list[pathlib.Path]:
+    pages = [
+        page
+        for folder in _GUIDES
+        for page in sorted(folder.rglob("*.md*"))
+        # docs/superpowers is gitignored scratch space, not documentation.
+        if "superpowers" not in page.parts and "reference/api" not in page.as_posix()
+    ]
+    return pages + [page for page in _FRONT_PAGES if page.exists()]
+
+
+def _phonometry_names(tree: ast.Module, names: dict[str, str]) -> None:
+    """Add to *names* each name a block binds to a module or object of the package."""
+    for node in ast.walk(tree):
+        if isinstance(node, ast.ImportFrom) and node.module:
+            if node.module.split(".")[0] == "phonometry":
+                for alias in node.names:
+                    names[alias.asname or alias.name] = f"{node.module}.{alias.name}"
+        elif isinstance(node, ast.Import):
+            for alias in node.names:
+                if alias.name.split(".")[0] == "phonometry":
+                    bound = alias.asname or alias.name.split(".")[0]
+                    names[bound] = alias.name if alias.asname else "phonometry"
+
+
+def _dotted(node: ast.expr, names: dict[str, str]) -> str | None:
+    """The package path a called name or attribute chain stands for, if it is one."""
+    parts: list[str] = []
+    while isinstance(node, ast.Attribute):
+        parts.append(node.attr)
+        node = node.value
+    if not (isinstance(node, ast.Name) and node.id in names):
+        return None
+    return ".".join([names[node.id], *reversed(parts)])
+
+
+def _resolved(dotted: str) -> object | None:
+    """The object a package path names, the longest importable module first."""
+    parts = dotted.split(".")
+    for cut in range(len(parts), 0, -1):
+        try:
+            found: object = importlib.import_module(".".join(parts[:cut]))
+        except ImportError:
+            continue
+        for part in parts[cut:]:
+            found = getattr(found, part, None)
+            if found is None:
+                return None
+        return found
+    return None
+
+
+def guide_built_records() -> dict[str, list[str]]:
+    """Every record of the package a guide builds, by dotted name, with its pages.
+
+    A block's call to a dataclass of the package, written as
+    ``<domain>.<Record>(`` or through a name it imports, builds one. The
+    names a page imports carry from one block to the next, as the page is
+    read.
+    """
+    found: dict[str, list[str]] = {}
+    for page in _guide_pages():
+        names: dict[str, str] = {}
+        for code in python_fences(page.read_text(encoding="utf-8")):
+            try:
+                tree = ast.parse(code)
+            except SyntaxError:
+                continue
+            _phonometry_names(tree, names)
+            for node in ast.walk(tree):
+                if not isinstance(node, ast.Call):
+                    continue
+                dotted = _dotted(node.func, names)
+                target = _resolved(dotted) if dotted is not None else None
+                if isinstance(target, type) and dataclasses.is_dataclass(target):
+                    record = f"{target.__module__}.{target.__qualname__}"
+                    where = page.relative_to(ROOT).as_posix()
+                    if where not in found.setdefault(record, []):
+                        found[record].append(where)
+    return found
+
+
+def test_every_record_a_guide_builds_is_read_as_built_by_a_caller(
+    reader: cpa.Reader,
+) -> None:
+    # A guide that builds a record by hand teaches a caller to: what that
+    # caller hands it must be converted as for any record a caller builds,
+    # so the record is one a public function takes or one CALLER_BUILT names.
+    built = cpa.built_records(reader)
+    guides = guide_built_records()
+    assert guides, "no guide builds a record: the reading of the guides is broken"
+    missing = {
+        record: pages[:3]
+        for record, pages in guides.items()
+        if record in reader.annotations.classes and record not in built
+    }
+    assert missing == {}
+
+
+def test_the_guide_reading_finds_a_record_built_through_its_domain() -> None:
+    guides = guide_built_records()
+    # transfer-stiffness.md builds it as vibration.TransferStiffnessResult(...),
+    # upgrading.md as room.ImpulseResponseResult(...).
+    assert (
+        "docs/vibration/structural/transfer-stiffness.md"
+        in guides[
+            "phonometry.vibration.structural.transfer_stiffness.TransferStiffnessResult"
+        ]
+    )
+    assert (
+        "docs/start/upgrading.md"
+        in guides["phonometry.room._impulse_response.ImpulseResponseResult"]
+    )
+
+
+def test_the_guide_reading_follows_each_way_of_importing() -> None:
+    names: dict[str, str] = {}
+    code = textwrap.dedent(
+        """
+        import phonometry as pm
+        import phonometry.room
+        from phonometry import vibration as vib
+        from phonometry.room import ImpulseResponseResult as IR
+        pm.room.ImpulseResponseResult([0.0], 1.0, "mls")
+        phonometry.room.ImpulseResponseResult([0.0], 1.0, "mls")
+        IR([0.0], 1.0, "mls")
+        vib.TransferStiffnessResult([1.0], [1.0])
+        print(len([]))
+        """
+    )
+    tree = ast.parse(code)
+    _phonometry_names(tree, names)
+    calls = [node.func for node in ast.walk(tree) if isinstance(node, ast.Call)]
+    found = [_dotted(call, names) for call in calls]
+    assert found.count("phonometry.room.ImpulseResponseResult") == 3
+    assert "phonometry.vibration.TransferStiffnessResult" in found
+    assert found.count(None) == 2  # print and len
+    for dotted in filter(None, found):
+        assert dataclasses.is_dataclass(_resolved(dotted))
 
 
 def test_a_stub_exemption_still_covers_a_record_that_converts(
@@ -259,3 +412,32 @@ class Spectrum:
 """,
     )
     assert cpa.constructor_problems(reader, "pkg.api.Spectrum") == []
+
+
+def test_a_mapping_field_nothing_wraps_is_kept_as_given(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A ``dict`` given to a mapping field is the caller's own, edited after the check."""
+    reader = _reader(
+        tmp_path,
+        _TAKER
+        + """
+
+Table = dict[str, float]
+
+
+@dataclass(frozen=True, kw_only=True)
+class Spectrum:
+    levels: Mapping[str, float]
+    extras: Table | None = None
+    wrapped: Mapping[str, float] = field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "wrapped", dict(self.wrapped))
+""",
+    )
+    kept = {
+        field.name: written
+        for field, written in cpa.kept_as_given(reader, "pkg.api.Spectrum")
+    }
+    assert kept == {"levels": ["Mapping[str, float]"], "extras": ["dict[str, float]"]}

@@ -35,10 +35,13 @@ import pytest
 import result_factories
 
 import phonometry as ph
+from phonometry._internal.catalogue import BandedRow, CatalogueRow
 from phonometry.io._sidecar import CalibrationSidecar
 
 if TYPE_CHECKING:
     from collections.abc import Callable
+
+    from numpy.typing import ArrayLike
 
 _SCRIPTS = str(pathlib.Path(__file__).resolve().parent.parent / "scripts")
 if _SCRIPTS not in sys.path:
@@ -232,6 +235,184 @@ _HAND_BUILT: dict[str, Callable[[], object]] = {
         segment=1.0,
     ),
     "AnimationFrame": lambda: ph.simulation.AnimationFrame(size=[960, 540]),
+    "ImpulseResponseResult": lambda: ph.room.ImpulseResponseResult(
+        ir=[1.0, 0.5, 0.25], fs=48000.0, method="farina"
+    ),
+    "TransferStiffnessResult": lambda: ph.vibration.TransferStiffnessResult(
+        frequencies=[100.0, 200.0],
+        transfer_stiffness=[1.0e6 + 1.0e4j, 1.0e6 + 2.0e4j],
+        blocking_mass=8.0,
+        transmissibility=[0.01, 0.02],
+    ),
+    "MultipleShockResult": lambda: ph.vibration.MultipleShockResult(
+        sex="male",
+        acceleration_dose=89.4,
+        daily_dose=89.4,
+        compression_dose=0.4,
+        risk=1.22,
+        probability=0.37,
+        start_age=20.0,
+        exposure_duration_years=20,
+        days_per_year=120.0,
+        peaks=[40.0] * 5,
+        risk_thresholds=[0.72, 1.42, 2.17],
+    ),
+}
+
+
+_ABSORPTION_BANDS = (
+    *(100, 125, 160, 200, 250, 315, 400, 500, 630),
+    *(800, 1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000),
+)
+_OCTAVES = (125, 250, 500, 1000, 2000, 4000)
+
+
+def _per_band(name: str, bands: tuple[int, ...], value: float) -> dict[str, Any]:
+    """One field per band, ``<name>_<band>``, each holding *value*, to unpack."""
+    return {f"{name}_{band}": value for band in bands}
+
+
+def _catalogue() -> object:
+    return ph.io.parse_catalogue(
+        {
+            "schema": "phonometry-catalogue",
+            "schema_version": 1,
+            "catalogue": "tiles",
+            "row_type": "AbsorptionSpectrum",
+            "about": "A sheet written by hand.",
+            "provenance": {
+                "kind": "datasheet",
+                "document": "Example tile data sheet",
+                "version": None,
+                "consulted": "2026-09-25",
+            },
+            "basis": "measured",
+            "rows": [
+                {
+                    "key": "tile",
+                    "name": "Tile",
+                    **{f"absorption_coefficient_{band}": 0.5 for band in _OCTAVES},
+                }
+            ],
+        },
+        row_type=ph.materials.AbsorptionSpectrum,
+    )
+
+
+def _facade() -> object:
+    return ph.building.facade_sound_reduction(
+        [ph.building.FacadeElement(name="wall", area=10.0, r=[40.0, 45.0])],
+        area=10.0,
+        volume=50.0,
+        frequencies=[500.0, 1000.0],
+        fraction=1,
+    )
+
+
+def _railway_emission() -> object:
+    stock = _HAND_BUILT["RollingStock"]()
+    track = _HAND_BUILT["RailwayTrack"]()
+    assert isinstance(stock, ph.environment.RollingStock)
+    assert isinstance(track, ph.environment.RailwayTrack)
+    return ph.environment.railway_source_power(
+        ph.environment.RailwayVehicle(stock=stock, flow_rate=10.0, speed_kmh=80.0),
+        track,
+    )
+
+
+def _time_varying_loudness() -> object:
+    times = np.arange(3200) / 32000.0
+    return ph.psychoacoustics.loudness_moore_glasberg_time(
+        0.02 * np.sin(2.0 * np.pi * 1000.0 * times), 32000.0, percentiles=(5.0, 50.0)
+    )
+
+
+#: A record that holds a mapping, one of each, for the round trip: a
+#: ``MappingProxyType`` can be neither pickled nor deep-copied, so each must
+#: say how it travels.
+_MAPPING_HOLDERS: dict[str, Callable[[], object]] = {
+    "CatalogueRow": lambda: CatalogueRow(name="a row", source="by hand"),
+    "BandedRow": lambda: BandedRow(name="a row", source="by hand"),
+    "Provenance": lambda: ph.io.Provenance(
+        kind="publication", document="A book", version=None, consulted="2026-09-25"
+    ),
+    "Catalogue": _catalogue,
+    "PerformanceAircraft": lambda: ph.aircraft.PerformanceAircraft(
+        aircraft_id="JET",
+        n_engines=2,
+        max_static_thrust_lb=25000.0,
+        max_landing_weight_lb=140000.0,
+        jet_coefficients={
+            "MaxTakeoff": ph.aircraft.JetEngineCoefficients(
+                e=25000.0, f=-25.0, ga=0.0, gb=1.0e-5, h=0.0
+            )
+        },
+    ),
+    "AircraftSystemComplianceResult": lambda: (
+        ph.aircraft.AircraftSystemComplianceResult(resolution=0.5)
+    ),
+    "SoundReductionSpectrum": lambda: ph.building.SoundReductionSpectrum(
+        name="partition",
+        source="a report",
+        **_per_band("sound_reduction_index", (50, 63, 80, *_ABSORPTION_BANDS), 30.0),
+    ),
+    "ImpactImprovementSpectrum": lambda: ph.building.ImpactImprovementSpectrum(
+        name="covering",
+        source="a report",
+        **_per_band("impact_improvement", _ABSORPTION_BANDS[:16], 10.0),
+    ),
+    "ThirdOctaveAbsorptionSpectrum": lambda: ph.materials.ThirdOctaveAbsorptionSpectrum(
+        name="panel",
+        source="a report",
+        **_per_band("absorption_coefficient", _ABSORPTION_BANDS, 0.5),
+    ),
+    "PracticalAbsorptionSpectrum": lambda: ph.materials.PracticalAbsorptionSpectrum(
+        name="panel",
+        source="a sheet",
+        **_per_band("practical_absorption_coefficient", _OCTAVES, 0.5),
+    ),
+    "OperatingCondition": lambda: ph.building.OperatingCondition(
+        clause="B.9",
+        equipment="a tap",
+        max_level=True,
+        equivalent_level=True,
+        conditions="normal use",
+        max_cycle=None,
+        equivalent_cycle=None,
+        nominal_integration_time_s=None,
+        parameters={"x_m": 1.0},
+    ),
+    "SoundscapeAcousticEnvironment": lambda: (
+        ph.environment.SoundscapeAcousticEnvironment(
+            environment_type="real",
+            sound_sources="traffic",
+            weather_and_wind="dry",
+            time_of_year_and_day="May, noon",
+            measurement_points="one point",
+            measurement_results=dict.fromkeys(
+                ("LAeq,T", "LCeq,T", "LAF5,T", "LAF95,T", "N5", "N95", "Nrmc"), 60.0
+            ),
+            site_description="street",
+        )
+    ),
+    "FilterComplianceResult": lambda: ph.filters.verify_filter_class(
+        ph.filters.OctaveFilterBank(fs=48000, fraction=1, order=6, limits=[125, 4000])
+    ),
+    "WeightingComplianceResult": lambda: ph.filters.verify_weighting_class(
+        ph.filters.WeightingFilter(48000, "B")
+    ),
+    "FDTDBoundaries": lambda: ph.simulation.FDTDBoundaries(
+        sides={"top": "absorbing"}, absorbing_layer_cells=10
+    ),
+    "ElasticBoundaries": lambda: ph.simulation.ElasticBoundaries(
+        sides={"top": "absorbing"}
+    ),
+    "FacadePredictionResult": _facade,
+    "RailwayEmissionResult": _railway_emission,
+    "ReactiveSilencerResult": lambda: ph.noise_control.silencers.expansion_chamber(
+        [100.0, 200.0], 0.5, 0.08, 0.01
+    ),
+    "MooreGlasbergTimeVaryingLoudness": _time_varying_loudness,
 }
 
 
@@ -268,21 +449,19 @@ def _held(records: list[object]) -> list[object]:
     stack: list[object] = list(records)
     while stack:
         value = stack.pop()
-        if isinstance(value, Mapping):
+        if dataclasses.is_dataclass(value) and not isinstance(value, type):
+            # A record first: one may be a mapping of its rows too.
+            if id(value) not in found:
+                found[id(value)] = value
+                stack.extend(
+                    getattr(value, each.name)
+                    for each in dataclasses.fields(value)
+                    if hasattr(value, each.name)
+                )
+        elif isinstance(value, Mapping):
             stack.extend(value.values())
         elif isinstance(value, tuple | list):
             stack.extend(value)
-        elif (
-            dataclasses.is_dataclass(value)
-            and not isinstance(value, type)
-            and id(value) not in found
-        ):
-            found[id(value)] = value
-            stack.extend(
-                getattr(value, each.name)
-                for each in dataclasses.fields(value)
-                if hasattr(value, each.name)
-            )
     return list(found.values())
 
 
@@ -304,7 +483,11 @@ def _published_rows() -> list[object]:
 
 @pytest.fixture(scope="module")
 def records() -> list[object]:
-    built = [build() for build in _HAND_BUILT.values()]
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        built = [
+            build() for build in (*_HAND_BUILT.values(), *_MAPPING_HOLDERS.values())
+        ]
     fluid = ph.fluids.air(
         temperature_c=20.0, static_pressure_pa=101325.0, relative_humidity_percent=50.0
     )
@@ -337,6 +520,59 @@ def test_every_record_a_caller_builds_that_converts_is_built_here(
         ):
             missing.append(record)
     assert sorted(missing) == []
+
+
+#: Records of the package that hold a mapping no instance is built of here,
+#: with the reason.
+MAPPING_HOLDERS_UNBUILT: dict[str, str] = {}
+
+
+def _published_records() -> dict[str, type]:
+    """Every dataclass a domain package (or the root) publishes, by dotted name."""
+    owners = [ph] + [
+        getattr(ph, name)
+        for name in sorted(dir(ph))
+        if not name.startswith("_") and inspect.ismodule(getattr(ph, name))
+    ]
+    return {
+        f"{cls.__module__}.{cls.__qualname__}": cls
+        for owner in owners
+        for name in getattr(owner, "__all__", ())
+        if inspect.isclass(cls := getattr(owner, name))
+        and dataclasses.is_dataclass(cls)
+    }
+
+
+def test_every_record_holding_a_mapping_is_built_here(
+    reader: cpa.Reader, records: list[object]
+) -> None:
+    """A published record whose field names a mapping travels under test.
+
+    ``MappingProxyType`` can be neither pickled nor deep-copied, so a record
+    that holds one fails ``pickle`` and ``copy.deepcopy`` unless it says how
+    to travel; reading its source cannot tell whether a function hands it a
+    read-only mapping, so an instance is built here and sent both ways. A
+    field names a mapping at any depth, aliases spelt out
+    (``tuple[Mapping[str, float], ...]`` included).
+    """
+    covered = {_dotted(record) for record in records}
+    annotations = reader.annotations
+    holders = set()
+    for dotted in _published_records():
+        assert dotted in annotations.classes, f"{dotted}: not read from the source"
+        fields = cpa.record_fields(reader.package, annotations, dotted)
+        if any(
+            annotations.named_within(
+                field.module, field.annotation, cpa._KEYED_CONTAINERS
+            )
+            for field in fields.values()
+        ):
+            holders.add(dotted)
+    unbuilt = {dotted.rpartition(".")[2] for dotted in holders - covered}
+    assert unbuilt - set(MAPPING_HOLDERS_UNBUILT) == set()
+    assert set(MAPPING_HOLDERS_UNBUILT) - unbuilt == set(), (
+        "stale MAPPING_HOLDERS_UNBUILT entries"
+    )
 
 
 def _given(value: object, *, arrays: bool) -> list[object]:
@@ -413,7 +649,96 @@ def _pickled(value: object) -> object:
     return pickle.loads(pickle.dumps(value))  # noqa: S301
 
 
+def _differences(
+    where: str, before: object, after: object, depth: int = 0
+) -> list[str]:
+    """Where a value that travelled differs from the one that left, read-only flags included.
+
+    An array must come back equal, of the same dtype and shape, and as
+    read-only as it left; a container, a mapping and a record are compared
+    member by member; anything else by ``==`` where that gives one answer.
+    """
+    if depth > _DEPTH:
+        return []
+    if type(after) is not type(before):
+        return [f"{where}: {type(before).__name__} came back {type(after).__name__}"]
+    if isinstance(before, np.ndarray):
+        assert isinstance(after, np.ndarray)
+        found = []
+        if after.flags.writeable != before.flags.writeable:
+            found.append(
+                f"{where}: writeable {before.flags.writeable} came back "
+                f"{after.flags.writeable}"
+            )
+        same = (
+            after.dtype == before.dtype
+            and after.shape == before.shape
+            and np.array_equal(after, before, equal_nan=before.dtype.kind in "fc")
+        )
+        if not same:
+            found.append(f"{where}: the array came back different")
+        return found
+    if isinstance(before, Mapping):
+        assert isinstance(after, Mapping)
+        if list(after) != list(before):
+            return [f"{where}: the keys came back different"]
+        return [
+            difference
+            for key in before
+            for difference in _differences(
+                f"{where}[{key!r}]", before[key], after[key], depth + 1
+            )
+        ]
+    if isinstance(before, tuple | list):
+        assert isinstance(after, tuple | list)
+        if len(after) != len(before):
+            return [f"{where}: {len(before)} members came back {len(after)}"]
+        return [
+            difference
+            for index, (old, new) in enumerate(zip(before, after, strict=True))
+            for difference in _differences(f"{where}[{index}]", old, new, depth + 1)
+        ]
+    if dataclasses.is_dataclass(before) and not isinstance(before, type):
+        return [
+            difference
+            for each in dataclasses.fields(before)
+            if hasattr(before, each.name)
+            for difference in _differences(
+                f"{where}.{each.name}",
+                getattr(before, each.name),
+                getattr(after, each.name, None),
+                depth + 1,
+            )
+        ]
+    if (
+        isinstance(before, float)
+        and isinstance(after, float)
+        and np.isnan(before)
+        and np.isnan(after)
+    ):
+        return []
+    try:
+        equal = before == after
+    except (TypeError, ValueError):
+        return []
+    if isinstance(equal, bool | np.bool_) and not equal:
+        return [f"{where}: {before!r} came back {after!r}"]
+    return []
+
+
+#: How deep the comparison of a travelled record goes, records in records
+#: included.
+_DEPTH = 8
+
+
 def test_every_record_survives_pickle_and_deepcopy(records: list[object]) -> None:
+    """Each record comes back whole: its values, and every array as read-only as it left.
+
+    ``pickle`` and ``copy.deepcopy`` rebuild a record without its
+    ``__post_init__``, and NumPy hands an array back writeable; a record
+    that came back from a process pool or a cache held arrays a caller
+    could write into while the one that left refused it.
+    """
     failed = []
     for record in records:
         travels: tuple[tuple[str, Callable[[object], object]], ...] = (
@@ -428,7 +753,10 @@ def test_every_record_survives_pickle_and_deepcopy(records: list[object]) -> Non
             except (TypeError, pickle.PicklingError) as error:
                 failed.append(f"{type(record).__name__} ({how}): {error}")
                 continue
-            assert type(back) is type(record)
+            failed.extend(
+                f"{how}: {difference}"
+                for difference in _differences(type(record).__name__, record, back)
+            )
     assert failed == []
 
 
@@ -491,6 +819,97 @@ def test_a_pair_is_refused_when_the_record_is_built(
     assert not first.flags.writeable
 
 
+def _road_surface(speed_range: ArrayLike) -> object:
+    return ph.environment.RoadSurfaceCoefficients(
+        name="national surface",
+        alpha={"1": (0.0,) * 8},
+        beta={"1": 0.0},
+        speed_range_kmh=speed_range,
+    )
+
+
+def _fiber_fit(bulk_density_range: ArrayLike) -> object:
+    return ph.materials.FiberResistivityFit(
+        k1=353.0,
+        k2=0.63,
+        fiber_diameter_um=4.75,
+        bulk_density_range_kg_m3=bulk_density_range,
+        direction="lateral",
+        source="a fit by hand",
+    )
+
+
+def _task(duration_range: ArrayLike) -> object:
+    return ph.hearing.Task(
+        samples=[85.0, 86.0, 87.0],
+        duration_hours=2.0,
+        duration_range_hours=duration_range,
+    )
+
+
+_NUMBER_PAIRS: tuple[tuple[str, Callable[[ArrayLike], object]], ...] = (
+    ("duration_range_hours", _task),
+    ("bulk_density_range_kg_m3", _fiber_fit),
+    ("speed_range_kmh", _road_surface),
+)
+
+
+@pytest.mark.parametrize(("name", "build"), _NUMBER_PAIRS)
+def test_a_pair_of_numbers_is_refused_when_the_record_is_built(
+    name: str, build: Callable[[ArrayLike], object]
+) -> None:
+    """A range is two numbers, checked where it is given, its field named."""
+    with pytest.raises(TypeError, match=rf"'{name}' must be a pair .* not float"):
+        build(2.0)
+    with pytest.raises(TypeError, match=rf"'{name}' must be a pair .* not str"):
+        build("12")
+    with pytest.raises(ValueError, match=rf"'{name}' must be a pair .* not 3 of them"):
+        build([1.0, 2.0, 3.0])
+    with pytest.raises(TypeError, match=rf"'{name}' must be a pair .* member is str"):
+        build(["1", "2"])
+    with pytest.raises(TypeError, match=rf"'{name}' must be a pair .* member is list"):
+        build([[1.0], [2.0]])
+    held = getattr(build(np.array([1, 3])), name)
+    assert held == (1.0, 3.0)
+    assert all(type(value) is float for value in held)
+
+
+def test_a_sequence_of_numbers_is_refused_with_its_field_named() -> None:
+    """Observations, studded-tyre coefficients and risk thresholds name their field."""
+    with pytest.raises(TypeError, match="'duration_observations_hours' must be"):
+        ph.hearing.Task(
+            samples=[85.0], duration_hours=2.0, duration_observations_hours="12"
+        )
+    coefficients = _HAND_BUILT["RoadEmissionCoefficients"]()
+    with pytest.raises(TypeError, match="'studded_a' must be .* not float"):
+        dataclasses.replace(coefficients, studded_a=5.0)  # type: ignore[type-var]
+    shock = _HAND_BUILT["MultipleShockResult"]()
+    with pytest.raises(ValueError, match="'risk_thresholds' must be .* not 2 of them"):
+        dataclasses.replace(shock, risk_thresholds=[0.72, 1.42])  # type: ignore[type-var]
+    with pytest.raises(TypeError, match="'risk_thresholds' must be .* not str"):
+        dataclasses.replace(shock, risk_thresholds="abc")  # type: ignore[type-var]
+    assert isinstance(shock, ph.vibration.MultipleShockResult)
+    assert shock.risk_thresholds == (0.72, 1.42, 2.17)
+    assert shock.peaks.dtype == np.float64
+    assert not shock.peaks.flags.writeable
+
+
+def test_a_hand_built_stiffness_and_impulse_response_hold_their_dtypes() -> None:
+    """A real stiffness reads as complex, a list of samples as a float array."""
+    stiffness = ph.vibration.TransferStiffnessResult(
+        frequencies=[100, 200], transfer_stiffness=[1.0e6, 2.0e6]
+    )
+    assert stiffness.frequencies.dtype == np.float64
+    assert stiffness.transfer_stiffness.dtype == np.complex128
+    assert stiffness.transmissibility is None
+    assert not stiffness.transfer_stiffness.flags.writeable
+    response = ph.room.ImpulseResponseResult(ir=[1, 0, 0], fs=48000.0, method="mls")
+    assert response.ir.dtype == np.float64
+    assert len(response) == 3
+    with pytest.raises(ValueError, match="read-only"):
+        response.ir[0] = 0.0
+
+
 def test_a_rated_frequency_range_is_checked_when_built() -> None:
     """``LoudspeakerRatings.frequency_range`` is refused when built, not when read."""
     with pytest.raises(TypeError, match="'frequency_range' must be a"):
@@ -513,28 +932,14 @@ def test_one_text_is_refused_as_channel_labels() -> None:
 
 def test_a_result_mapping_refuses_assignment() -> None:
     """The four results that held a ``dict`` hold a read-only mapping."""
-    facade = ph.building.facade_sound_reduction(
-        [ph.building.FacadeElement(name="wall", area=10.0, r=[40.0, 45.0])],
-        area=10.0,
-        volume=50.0,
-        frequencies=[500.0, 1000.0],
-        fraction=1,
-    )
-    silencer = ph.noise_control.silencers.expansion_chamber(
-        [100.0, 200.0], 0.5, 0.08, 0.01
-    )
-    stock = _HAND_BUILT["RollingStock"]()
-    track = _HAND_BUILT["RailwayTrack"]()
-    assert isinstance(stock, ph.environment.RollingStock)
-    assert isinstance(track, ph.environment.RailwayTrack)
-    railway = ph.environment.railway_source_power(
-        ph.environment.RailwayVehicle(stock=stock, flow_rate=10.0, speed_kmh=80.0),
-        track,
-    )
-    times = np.arange(3200) / 32000.0
-    loudness = ph.psychoacoustics.loudness_moore_glasberg_time(
-        0.02 * np.sin(2.0 * np.pi * 1000.0 * times), 32000.0, percentiles=(5.0, 50.0)
-    )
+    facade = _facade()
+    silencer = _MAPPING_HOLDERS["ReactiveSilencerResult"]()
+    railway = _railway_emission()
+    loudness = _time_varying_loudness()
+    assert isinstance(facade, ph.building.FacadePredictionResult)
+    assert isinstance(silencer, ph.noise_control.ReactiveSilencerResult)
+    assert isinstance(railway, ph.environment.RailwayEmissionResult)
+    assert isinstance(loudness, ph.psychoacoustics.MooreGlasbergTimeVaryingLoudness)
     assert silencer.geometry is not None
     mappings: tuple[Mapping[Any, Any], ...] = (
         facade.element_r,

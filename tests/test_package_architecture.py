@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import ast
 import dataclasses
+import functools
 import re
 import subprocess
 import sys
@@ -18,6 +19,14 @@ from pathlib import Path
 from typing import TypeGuard
 
 import pytest
+
+_SCRIPTS = str(Path(__file__).resolve().parent.parent / "scripts")
+if _SCRIPTS not in sys.path:
+    sys.path.insert(0, _SCRIPTS)
+
+import check_parameter_annotations as cpa
+import check_return_overloads as return_overloads
+from ast_scan import python_files
 
 SRC = Path(__file__).resolve().parent.parent / "src" / "phonometry"
 
@@ -2189,12 +2198,15 @@ def test_the_logging_rule_follows_a_logger_from_module_to_module() -> None:
 # --------------------------------------------------------------------------- #
 # Records: what their fields are typed, and that they travel
 # --------------------------------------------------------------------------- #
-#: A numpy generic's own type parameter, which says nothing about the field.
-_NUMPY_PARAMETER = re.compile(r"\b(?:np\.\w+|NDArray|dtype)\[[^\[\]]*\]")
-
 #: Published record fields typed ``Any`` on purpose, keyed by record and
 #: field, each with the reason.
 ANY_FIELD_EXEMPT: dict[tuple[str, str], str] = {}
+
+#: What ``Any`` is, as the reader of the annotations resolves it.
+_ANY = frozenset({"typing.Any", "typing_extensions.Any"})
+
+#: What a ``dict`` is, written bare, generic or through ``typing``.
+_DICT = frozenset({"builtins.dict", "typing.Dict"})
 
 
 def _published_records() -> dict[str, type]:
@@ -2205,18 +2217,41 @@ def _published_records() -> dict[str, type]:
     }
 
 
+@functools.cache
+def _record_reader() -> tuple[return_overloads.Package, cpa.Annotations]:
+    """The package's annotations, as ``scripts/check_parameter_annotations.py`` reads them."""
+    package = return_overloads.Package(python_files([], SRC), SRC)
+    return package, cpa.Annotations(package)
+
+
+def _fields_naming(wanted: frozenset[str]) -> dict[tuple[str, str], list[str]]:
+    """The published record fields whose annotation names one of *wanted*.
+
+    Read from the source through the annotations reader, which spells out an
+    alias at every level (``Untyped = Any``, ``Table = Dict[str, float]``)
+    and reads past the type parameter of a NumPy generic. A published record
+    the reader cannot find fails, rather than being read past.
+    """
+    package, annotations = _record_reader()
+    found: dict[tuple[str, str], list[str]] = {}
+    for name, cls in _published_records().items():
+        dotted = f"{cls.__module__}.{cls.__qualname__}"
+        assert dotted in annotations.classes, f"{name}: not read from the source"
+        for field in cpa.record_fields(package, annotations, dotted).values():
+            named = annotations.named_within(field.module, field.annotation, wanted)
+            if named:
+                found[(name, field.name)] = named
+    return found
+
+
 def test_no_published_field_is_typed_any() -> None:
     """A field typed ``Any`` tells a reader, and a type checker, nothing (rule A31).
 
     The type parameter of a numpy generic (``np.integer[Any]``,
-    ``NDArray[Any]``) is not the field's type, and is read past.
+    ``NDArray[Any]``) is not the field's type, and is read past; an alias
+    of ``Any`` is ``Any``.
     """
-    found: set[tuple[str, str]] = set()
-    for name, cls in _published_records().items():
-        for each in dataclasses.fields(cls):
-            text = _NUMPY_PARAMETER.sub("X", str(each.type))
-            if re.search(r"\bAny\b", text):
-                found.add((name, each.name))
+    found = set(_fields_naming(_ANY))
     assert found - set(ANY_FIELD_EXEMPT) == set()
     assert set(ANY_FIELD_EXEMPT) - found == set(), "stale ANY_FIELD_EXEMPT entries"
 
@@ -2226,15 +2261,48 @@ def test_no_published_field_is_typed_dict() -> None:
 
     A frozen record holds the mapping it was built with read-only, so the
     field is annotated with the read-only supertype, and a typed caller's
-    ``dict`` of a narrower key or value type is taken.
+    ``dict`` of a narrower key or value type is taken. Bare ``dict``,
+    ``dict[...]``, ``typing.Dict`` and an alias of any of them are read
+    alike.
     """
-    found = sorted(
-        f"{name}.{each.name}: {each.type}"
-        for name, cls in _published_records().items()
-        for each in dataclasses.fields(cls)
-        if re.search(r"(?:^|[^\w.])dict\[", str(each.type))
+    assert _fields_naming(_DICT) == {}
+
+
+def test_the_field_reader_spells_out_aliases(tmp_path: Path) -> None:
+    """An alias of ``Any`` or of ``Dict`` is read as what it stands for."""
+    root = tmp_path / "pkg"
+    root.mkdir()
+    (root / "__init__.py").write_text("", encoding="utf-8")
+    (root / "api.py").write_text(
+        "from dataclasses import dataclass\n"
+        "from typing import Any, Dict, Literal\n"
+        "import numpy as np\n"
+        "from numpy.typing import NDArray\n"
+        "Untyped = Any\n"
+        "Table = Dict[str, float]\n"
+        "@dataclass(frozen=True)\n"
+        "class Record:\n"
+        "    a: Untyped\n"
+        "    b: Table | None\n"
+        "    c: tuple[dict, ...]\n"
+        "    d: NDArray[Any]\n"
+        "    e: Literal['dict', 'Any']\n"
+        "    f: np.integer[Any] | None\n",
+        encoding="utf-8",
     )
-    assert found == []
+    package = return_overloads.Package(sorted(root.rglob("*.py")), root)
+    annotations = cpa.Annotations(package)
+    fields = cpa.record_fields(package, annotations, "pkg.api.Record")
+    anything = {
+        name: annotations.named_within(field.module, field.annotation, _ANY)
+        for name, field in fields.items()
+    }
+    dicts = {
+        name: annotations.named_within(field.module, field.annotation, _DICT)
+        for name, field in fields.items()
+    }
+    assert {name for name, named in anything.items() if named} == {"a"}
+    assert {name for name, named in dicts.items() if named} == {"b", "c"}
 
 
 #: The calls of the package that build a read-only mapping.
@@ -2329,7 +2397,11 @@ def test_a_record_holding_a_read_only_mapping_travels() -> None:
     holding one fails ``pickle.dumps`` (a process pool, a cache) and
     ``copy.deepcopy`` unless it travels as plain dictionaries and wraps them
     again on arrival: ``__reduce__`` returning
-    ``phonometry._internal.frozen.reduce_with_plain_rows(self)``.
+    ``phonometry._internal.frozen.reduce_with_plain_rows(self)``. This reads
+    the source of the record's own module; a proxy a function of another
+    module builds and hands to the record is what
+    ``tests/test_record_conversions.py`` catches, by building every
+    published record that holds a mapping and sending it both ways.
     """
     missing = sorted(
         name

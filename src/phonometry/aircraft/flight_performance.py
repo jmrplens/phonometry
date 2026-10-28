@@ -42,11 +42,13 @@ from __future__ import annotations
 import math
 import warnings
 from dataclasses import dataclass, field
+from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
 from .._internal.display import RichDisplay
+from .._internal.frozen import reduce_with_plain_rows
 from .._internal.validation import (
     require_choice,
     require_count,
@@ -700,6 +702,11 @@ class PerformanceAircraft(RichDisplay):
         aircraft table, and the step that needs a rating is where the absence
         can be reported against the rating it was looking for.
 
+        The three coefficient tables are copied into read-only mappings:
+        ``frozen=True`` stops a field from being rebound, not a dictionary in
+        it from being edited, so a table kept as given could still change
+        after the aeroplane was checked, the database's own table included.
+
         :raises ValueError: if the engine count is not a whole number from one,
             or a weight or thrust is not finite and positive.
         :raises TypeError: if ``n_engines`` is a flag, a text or an array where
@@ -709,6 +716,13 @@ class PerformanceAircraft(RichDisplay):
         object.__setattr__(
             self, "n_engines", require_count(self.n_engines, "n_engines")
         )
+        for name in (
+            "jet_coefficients",
+            "propeller_coefficients",
+            "aerodynamic_coefficients",
+        ):
+            table = MappingProxyType(dict(getattr(self, name)))
+            object.__setattr__(self, name, table)
         require_finite_fields(self, "max_static_thrust_lb", "max_landing_weight_lb")
         for name in ("max_static_thrust_lb", "max_landing_weight_lb"):
             if getattr(self, name) <= 0.0:
@@ -717,6 +731,15 @@ class PerformanceAircraft(RichDisplay):
                     f"{getattr(self, name)!r}."
                 )
                 raise ValueError(msg)
+
+    def __reduce__(self) -> tuple[Any, tuple[type, dict[str, Any]]]:
+        """Rebuild from plain dictionaries when pickled or deep-copied.
+
+        A read-only mapping can be neither pickled nor deep-copied, so the
+        aeroplane travels with its tables as plain dictionaries, by keyword,
+        and :meth:`__post_init__` wraps them again on arrival.
+        """
+        return reduce_with_plain_rows(self)
 
     @property
     def approach_weight_lb(self) -> float:

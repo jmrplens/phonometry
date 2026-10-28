@@ -861,6 +861,36 @@ class Annotations:
             module, node, depth=0
         )
 
+    def named_within(
+        self, module: str, node: ast.expr | None, wanted: frozenset[str]
+    ) -> list[str]:
+        """The members of an annotation that are one of *wanted*, at the top or inside.
+
+        Aliases are spelt out at every level, so ``Untyped = Any`` is read as
+        ``Any`` and ``Table = Dict[str, float]`` as ``typing.Dict``. The type
+        parameter of a NumPy generic (``NDArray[Any]``, ``np.integer[Any]``)
+        says what the array or the scalar holds, not what the value is, and
+        is read past, as are the choices a ``Literal`` lists, which are
+        values.
+        """
+        found: list[str] = []
+        stack = self.members(module, node)
+        seen = 0
+        while stack and seen < _MEMBERS_READ:
+            seen += 1
+            where, member = stack.pop()
+            dotted = self.resolve(where, member)
+            if dotted in wanted:
+                found.append(ast.unparse(member))
+            if dotted in _LITERALS or (
+                dotted is not None and dotted.partition(".")[0] == "numpy"
+            ):
+                continue
+            for item in _items(member):
+                for inner in item.elts if isinstance(item, ast.List) else [item]:
+                    stack.extend(self.members(where, inner))
+        return sorted(set(found))
+
     def invariant(
         self, module: str, node: ast.expr | None, bounds: dict[str, ast.expr]
     ) -> list[str]:
@@ -2873,18 +2903,67 @@ def _is_type_checking(node: ast.expr) -> bool:
 #: Records a caller builds that no public function takes as an argument, by
 #: dotted name, each with where its construction is documented. A record a
 #: public function takes is one already (:attr:`Reader.input_records`).
+#: ``tests/test_record_constructors.py`` reads the Python blocks of every
+#: guide and fails a record one builds that is neither.
 CALLER_BUILT: dict[str, str] = {
     "phonometry.io._sidecar.CalibrationSidecar": (
         "written beside an audio file by hand as well as by write_sidecar: its "
         "docstring documents the numbers and the labels it takes"
     ),
     "phonometry.environment.propagation.air_absorption.AtmosphericAttenuation": (
-        "its docstring and total_attenuation document a curve built by hand, "
-        "from a list as from an array"
+        "the docstring of its __post_init__ documents a curve built directly, "
+        "from a list given by hand as from an array"
     ),
     "phonometry.materials.absorbers.four_microphone.TransferMatrix": (
         "the impedance-tube guide builds one from the four entries of a chain "
         "matrix, and its docstring documents a scalar entry"
+    ),
+    "phonometry.vibration.structural.transfer_stiffness.TransferStiffnessResult": (
+        "the transfer-stiffness guide builds one from the frequencies and the "
+        "stiffness of the direct method"
+    ),
+    "phonometry.vibration.human.multiple_shock.MultipleShockResult": (
+        "the multiple-shock guide builds one by hand, with its peaks and the "
+        "risk thresholds of a sex"
+    ),
+    "phonometry.room._impulse_response.ImpulseResponseResult": (
+        "the migration guide wraps a measured impulse response in one, to plot "
+        "it as the deconvolution's result"
+    ),
+    "phonometry.building.datasheets.SoundReductionSpectrum": (
+        "the datasheet guide builds one from the third-octave sound reduction "
+        "a manufacturer prints"
+    ),
+    "phonometry.building.datasheets.ImpactImprovementSpectrum": (
+        "the datasheet guide builds one from the improvement a floor covering's "
+        "sheet prints"
+    ),
+    "phonometry.materials.absorbers.datasheets.ThirdOctaveAbsorptionSpectrum": (
+        "the datasheet guide builds one from the absorption coefficients a "
+        "panel's sheet prints"
+    ),
+    "phonometry.electroacoustics.headphones.HeadphoneClassification": (
+        "the headphone guide builds one to read the IEC 60268-7 code of a "
+        "headphone it describes"
+    ),
+    "phonometry.emission.declaration.OperatingModeDeclaration": (
+        "the sound-power guide builds two, one per operating mode of the "
+        "machine it declares"
+    ),
+    "phonometry.emission.declaration.NoiseEmissionDeclaration": (
+        "the sound-power guide builds one from the declarations of its operating modes"
+    ),
+    "phonometry.environment.assessment.soundscape.SoundscapeReport": (
+        "the soundscape guide builds one to report a study by hand"
+    ),
+    "phonometry.environment.assessment.soundscape.SoundscapeParticipants": (
+        "the soundscape guide builds one for the report of a study"
+    ),
+    "phonometry.environment.assessment.soundscape.SoundscapeAcousticEnvironment": (
+        "the soundscape guide builds one for the report of a study"
+    ),
+    "phonometry.environment.assessment.soundscape.SoundscapeDataCollection": (
+        "the soundscape guide builds one for the report of a study"
     ),
 }
 
@@ -2953,6 +3032,27 @@ def fixed_containers(
         ast.unparse(member)
         for where, member in annotations.members(module, node)
         if annotations.resolve(where, member) in _FIXED_CONTAINERS
+    ]
+
+
+#: What a field may be annotated that holds a table of keys and values: a
+#: mapping, a ``dict``, or a read-only mapping. A ``frozen=True`` record
+#: stops the field from being rebound, not the caller's ``dict`` in it from
+#: being edited after the record checked it, so a record a caller builds
+#: copies it into a read-only mapping.
+_KEYED_CONTAINERS = _MAPPINGS | frozenset(
+    {"builtins.dict", "typing.Dict", "types.MappingProxyType"}
+)
+
+
+def keyed_containers(
+    annotations: Annotations, module: str, node: ast.expr | None
+) -> list[str]:
+    """The members of an annotation that are a mapping, as written."""
+    return [
+        ast.unparse(member)
+        for where, member in annotations.members(module, node)
+        if annotations.resolve(where, member) in _KEYED_CONTAINERS
     ]
 
 
@@ -3142,11 +3242,13 @@ def stub_exemption(
 
 
 def kept_as_given(reader: Reader, record: str) -> list[tuple[Field, list[str]]]:
-    """The fields of a record a caller builds that are a fixed container nothing converts.
+    """The fields of a record a caller builds that hold a container nothing converts.
 
     A list given to an array field, or an array to a tuple field, is kept as
     it was handed: the record then holds what its annotation says it does
-    not, and a frozen record holds a list a caller can still append to.
+    not, and a frozen record holds a list a caller can still append to. A
+    ``dict`` given to a mapping field is kept as the caller's own, which the
+    caller can still edit after the record checked it.
     """
     annotations = reader.annotations
     converted = converted_fields(reader, record)
@@ -3154,9 +3256,11 @@ def kept_as_given(reader: Reader, record: str) -> list[tuple[Field, list[str]]]:
     for field in record_fields(reader.package, annotations, record).values():
         if field.name in converted:
             continue
-        fixed = fixed_containers(annotations, field.module, field.annotation)
-        if fixed:
-            found.append((field, fixed))
+        kept = fixed_containers(
+            annotations, field.module, field.annotation
+        ) + keyed_containers(annotations, field.module, field.annotation)
+        if kept:
+            found.append((field, kept))
     return found
 
 

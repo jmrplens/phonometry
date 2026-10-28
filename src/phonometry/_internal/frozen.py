@@ -367,6 +367,27 @@ class OwnsArrays(RichDisplay):
             return
         _take_ownership(self, None, ())
 
+    def __setstate__(self, state: object) -> None:
+        """Restore a pickled or deep-copied record with its arrays read-only again.
+
+        ``pickle`` and ``copy.deepcopy`` rebuild a record from its fields
+        without running ``__post_init__``, and NumPy hands every array back
+        writeable, so a record that came back from a process pool or a cache
+        held arrays anyone could write into. Each array is sealed again here,
+        inside a tuple, a list or a mapping too, as the constructor seals it;
+        a record held in a field answers for its own arrays, as it does when
+        the record is built.
+
+        :param state: The state ``object.__reduce_ex__`` gave: the instance
+            dictionary, or a ``(dictionary, slots)`` pair.
+        """
+        dictionary, slots = state if isinstance(state, tuple) else (state, None)
+        for part in (dictionary, slots):
+            if not isinstance(part, Mapping):
+                continue
+            for name, value in part.items():
+                object.__setattr__(self, name, _owned(value, always=False))
+
 
 _COMPOSED.add(OwnsArrays.__post_init__)
 

@@ -2153,7 +2153,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ### Fixed
 
 - **A record that holds a read-only mapping pickles and deep-copies.**
-  `MappingProxyType` can be neither pickled nor deep-copied, and 49 of the
+  `MappingProxyType` can be neither pickled nor deep-copied, and 48 of the
   records the test suite builds held one and failed both with `TypeError:
   cannot pickle 'mappingproxy' object`: every catalogue row (`materials.PorousMaterial`,
   `solids.SolidMaterial`, `building.TransmissionLossSpectrum` and the other
@@ -2169,7 +2169,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   whose `__post_init__` builds a read-only mapping and that says nothing of
   how to travel, and `tests/test_record_conversions.py` pickles and
   deep-copies every record the plot factories build, every record each of
-  them holds and one row of each published catalogue.
+  them holds, one row of each published catalogue and one instance of every
+  published record whose fields name a mapping, and fails such a record it
+  builds no instance of.
+
+- **A record that comes back from `pickle` or `copy.deepcopy` holds its
+  arrays read-only.** Neither round trip runs `__post_init__`, and NumPy
+  hands every array back writeable, so 313 of the 325 records the test suite
+  pickles that hold read-only arrays came back holding arrays a caller could
+  write into. A record that copies its arrays seals them again when it is
+  restored, inside a tuple, a list or a mapping too, and
+  `tests/test_record_conversions.py` compares every value, dtype, shape and
+  read-only flag of each record that travels with the one that left, where
+  it compared only the type.
 
 - **`io.write` refuses a Signal whose own rate is fractional with a
   `ValueError` that names `fs`.** A WAV header holds a whole number of
@@ -4106,11 +4118,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `environment.RailwayTrack`, `environment.RoadEmissionCoefficients`,
   `environment.RoadSurfaceCoefficients`, `hearing.Task`, `io.Signal`
   (`channel_labels`), `materials.FiberResistivityFit`,
-  `materials.MetadiffuserWell` and `materials.TransferMatrix`. A pair given
+  `materials.MetadiffuserWell`, `materials.TransferMatrix`,
+  `room.ImpulseResponseResult` (`ir`, a read-only `float64` array),
+  `vibration.MultipleShockResult` (`peaks`, a read-only `float64` array, and
+  `risk_thresholds`, a tuple of three floats) and
+  `vibration.TransferStiffnessResult` (the frequencies `float64`, the
+  stiffness and the transmissibility `complex128`), the last three built by
+  hand in the guides. A pair given
   where a record takes one (a polar pattern, a noise spectrum, a distortion
   curve, a rated frequency range) is refused when the record is built if it
   is not one, where it failed later, when it was read: a number or a text
-  with `TypeError`, a sequence of other than two members with `ValueError`; `io.Signal` refuses
+  with `TypeError`, a sequence of other than two members with `ValueError`.
+  A range or a set of numbers a record holds as floats (the duration range
+  and the duration observations of a `hearing.Task`, the bulk-density range
+  of a `materials.FiberResistivityFit`, the speed range of a
+  `environment.RoadSurfaceCoefficients`, the studded-tyre coefficients of a
+  `environment.RoadEmissionCoefficients`, the risk thresholds of a
+  `vibration.MultipleShockResult`) is refused the same way, with the field
+  named: a number, a text (`"12"`, whatever it reads as) or a member that is
+  not one number with `TypeError`, a count other than the field's with
+  `ValueError`. `aircraft.RotorcraftGround` refuses an elevation model of
+  other than three axes with `ValueError` when it is built, where the first
+  event that read it refused it. `io.Signal` refuses
   one text as its `channel_labels` with `TypeError`, where a two-letter
   text named two channels a letter each. `materials.TransferMatrix` holds
   each entry as a read-only `complex128` array: a scalar entry reads back
@@ -4133,16 +4162,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `noise_control.ReactiveSilencerResult.geometry` and
   `psychoacoustics.MooreGlasbergTimeVaryingLoudness.percentiles`, so an
   assignment into one raises `TypeError`, as one into
-  `RoadSurfaceCoefficients.alpha` and `.beta` does now. The
+  `RoadSurfaceCoefficients.alpha` and `.beta` does now. The engine,
+  propeller and aerodynamic coefficients of an `aircraft.PerformanceAircraft`
+  are read-only copies of the dictionaries it is given: it kept them as
+  given, the ANP database's own per-aircraft tables included, so a table
+  could change after the aeroplane was checked, and an edit to one reached
+  every later call of the database. The
   `filters.OctaveFilterResult` that `filters.octave_filter` and
   `OctaveFilterBank.filter` return holds its band centres and its band
   waveforms as tuples, where it held lists a caller could still append to
   (`list(result.frequencies)` gives a list to edit).
   `scripts/check_array_aliasing.py` fails a field of a record a caller
-  builds that is annotated as an array, a tuple, a list or a set and that
-  nothing converts; `tests/test_record_constructors.py` fails a record that
-  converts such a field and declares no constructor, and a declared
-  constructor out of step with its fields; and
+  builds that is annotated as an array, a tuple, a list, a set or a mapping
+  and that nothing converts; `tests/test_record_constructors.py` fails a
+  record that converts such a field and declares no constructor, a declared
+  constructor out of step with its fields, and a record a guide builds by
+  hand that is not read as one a caller builds; and
   `tests/test_record_conversions.py` gives every converted field a list,
   and every tuple field an array, and wants them back converted.
 
@@ -4161,9 +4196,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   HVACSpectrumResult | None`; the band margins of a filter and of a weighting
   verdict are mappings of numbers; and the `window` of
   `signals.window_metrics` is a name or a tuple of a name and its
-  parameters. `tests/test_package_architecture.py` fails a published field
-  typed `Any` or `dict`, a protocol member that is not a property, and a
-  module `__getattr__` a type checker can see.
+  parameters. The calibration sidecar's declared constructor takes an
+  integer 0-d array (`np.array(2)`) for its numbers, as the record does.
+  `tests/test_package_architecture.py` fails a published field typed `Any`
+  or `dict` at any depth of its annotation and through an alias of either,
+  a protocol member that is not a property, and a module `__getattr__` a
+  type checker can see.
 
 - **A parameter whose name carries its unit and that has a default is written
   by name.** `signals.noise_signal(fs, duration_s=2.0)`,

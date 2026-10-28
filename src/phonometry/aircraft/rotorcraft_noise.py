@@ -62,6 +62,7 @@ from .._internal.frozen import OwnsArrays, read_only
 # flow_resistivity field of RotorcraftGround in this module's namespace.
 from .._internal.types import GroundClass  # noqa: TC001
 from .._internal.validation import (
+    arrays_of,
     require_choice,
     require_equal_shapes,
     require_positive,
@@ -1407,9 +1408,14 @@ class RotorcraftGround(OwnsArrays):
         A ground elevation or a flow resistivity given per receiver, and the
         three axes of an elevation model, are held as read-only ``float64``
         arrays whatever sequence they were given as; a single number or a
-        class letter is held as it was given.
+        class letter is held as it was given. An elevation model of other
+        than three axes is refused here, where it is given, rather than when
+        an event reads it.
 
-        :raises TypeError: if ``flow_resistivity`` is not a text.
+        :raises TypeError: if ``flow_resistivity`` is not a text, or
+            ``terrain`` is a text or not a sequence at all.
+        :raises ValueError: if ``flow_resistivity`` is a text that is not a
+            class letter, or ``terrain`` holds other than three axes.
         """
         if isinstance(self.flow_resistivity, str):
             require_choice(
@@ -1423,10 +1429,12 @@ class RotorcraftGround(OwnsArrays):
                 held = np.asarray(value, dtype=np.float64)
                 object.__setattr__(self, name, read_only(held))
         if self.terrain is not None:
-            axes = tuple(
-                read_only(np.asarray(axis, dtype=np.float64)) for axis in self.terrain
+            x, y, z = arrays_of(
+                self.terrain, "terrain", "an (x, y, z) elevation model of three axes", 3
             )
-            object.__setattr__(self, "terrain", axes)
+            object.__setattr__(
+                self, "terrain", (read_only(x), read_only(y), read_only(z))
+            )
 
 
 @dataclass(frozen=True)

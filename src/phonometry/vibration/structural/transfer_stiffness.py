@@ -94,7 +94,7 @@ if TYPE_CHECKING:
 
 from ..._internal.boundary import settled
 from ..._internal.display import RichDisplay
-from ..._internal.frozen import OwnsArrays
+from ..._internal.frozen import OwnsArrays, read_only
 from ..._internal.validation import (
     check_engine,
     require_choice,
@@ -496,13 +496,29 @@ class TransferStiffnessResult(OwnsArrays):
         for the direct method; :attr:`valid` is read from it.
     """
 
-    frequencies: np.ndarray
-    transfer_stiffness: np.ndarray
+    frequencies: NDArray[np.float64]
+    transfer_stiffness: NDArray[np.complex128]
     blocking_mass: float | None = None
-    transmissibility: np.ndarray | None = None
+    transmissibility: NDArray[np.complex128] | None = None
+
+    if TYPE_CHECKING:
+
+        def __init__(
+            self,
+            frequencies: ArrayLike,
+            transfer_stiffness: ArrayLike,
+            blocking_mass: float | None = None,
+            transmissibility: ArrayLike | None = None,
+        ) -> None: ...
 
     def __post_init__(self) -> None:
-        r"""Reject a spectrum whose stiffnesses do not run over its own frequencies.
+        r"""Hold the arrays read-only, and reject stiffnesses that do not run over the frequencies.
+
+        The frequencies are held as ``float64`` and the stiffness and the
+        transmissibility as ``complex128``, whatever sequence was given: a
+        list kept as given would turn the arithmetic of :meth:`to` into list
+        arithmetic and leave the record open to an ``append``, and a real
+        stiffness reads as the complex one with no loss.
 
         A plain length difference is loud, in both directions, and the fiche is
         not where it shows. :meth:`report` characterises the element by its
@@ -543,6 +559,13 @@ class TransferStiffnessResult(OwnsArrays):
             does not carry one value per frequency, a field carries an extra
             axis, or a numeric field carries a non-finite value.
         """
+        frequencies = np.asarray(self.frequencies, dtype=np.float64)
+        object.__setattr__(self, "frequencies", read_only(frequencies))
+        for name in ("transfer_stiffness", "transmissibility"):
+            value = getattr(self, name)
+            if value is not None:
+                complex_values = np.asarray(value, dtype=np.complex128)
+                object.__setattr__(self, name, read_only(complex_values))
         require_ranks(self, frequencies=1, transfer_stiffness=1, transmissibility=1)
         require_same_length(
             self,

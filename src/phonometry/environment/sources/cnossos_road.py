@@ -59,6 +59,8 @@ import numpy as np
 from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays, reduce_with_plain_rows
 from ..._internal.validation import (
+    floats_of,
+    pair_of_floats,
     require_axis_count,
     require_choice,
     require_equal_counts,
@@ -530,7 +532,9 @@ class RoadEmissionCoefficients(RichDisplay):
             Table [2.2.a].
         :raises TypeError: if a key of ``rolling_a``, ``rolling_b``,
             ``propulsion_a``, ``propulsion_b``, ``junction_c`` or
-            ``temperature_coefficient_db_per_k`` is not a text.
+            ``temperature_coefficient_db_per_k`` is not a text, or
+            ``studded_a`` or ``studded_b`` is a number, a text or a sequence
+            with a member that is not one number.
         """
         _require_codes(self.rolling_a, "rolling_a")
         _require_codes(self.rolling_b, "rolling_b")
@@ -545,7 +549,9 @@ class RoadEmissionCoefficients(RichDisplay):
             if isinstance(value, Mapping):
                 object.__setattr__(self, field.name, MappingProxyType(dict(value)))
         for name in ("studded_a", "studded_b"):
-            bands = tuple(float(value) for value in getattr(self, name))
+            bands = floats_of(
+                getattr(self, name), name, "a sequence of octave-band coefficients"
+            )
             object.__setattr__(self, name, bands)
 
     def __reduce__(self) -> tuple[Any, tuple[type, dict[str, Any]]]:
@@ -612,16 +618,20 @@ class RoadSurfaceCoefficients(RichDisplay):
         :class:`RoadEmissionCoefficients` wraps its own.
 
         :raises ValueError: if a key of ``alpha`` or ``beta`` is not a code of
-            Table [2.2.a].
-        :raises TypeError: if a key of ``alpha`` or ``beta`` is not a text.
+            Table [2.2.a], or ``speed_range_kmh`` holds other than two values.
+        :raises TypeError: if a key of ``alpha`` or ``beta`` is not a text, or
+            ``speed_range_kmh`` is a number, a text or a pair with a member
+            that is not one number.
         """
         _require_codes(self.alpha, "alpha")
         _require_codes(self.beta, "beta")
         object.__setattr__(self, "alpha", MappingProxyType(dict(self.alpha)))
         object.__setattr__(self, "beta", MappingProxyType(dict(self.beta)))
         if self.speed_range_kmh is not None:
-            low, high = self.speed_range_kmh
-            object.__setattr__(self, "speed_range_kmh", (float(low), float(high)))
+            speed_range = pair_of_floats(
+                self.speed_range_kmh, "speed_range_kmh", "(v_min, v_max)"
+            )
+            object.__setattr__(self, "speed_range_kmh", speed_range)
 
     def __reduce__(self) -> tuple[Any, tuple[type, dict[str, Any]]]:
         """Rebuild from plain dictionaries when pickled or deep-copied.

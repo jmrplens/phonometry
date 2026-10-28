@@ -288,10 +288,14 @@ const rowCount = (rows: number) => `${rows} ${rows === 1 ? copy.row : copy.rows}
 		jumpBar.removeAttribute('hidden');
 		applyFilter();
 
-		/* Opened from the panel of another page, or from a link that names the
-		   table: land on the panel, clear of the header, rather than on the
-		   legend above it. */
-		if (sections.some((section) => `#${section.id}` === location.hash)) toPanel('instant');
+		/* Opened from the panel of another page, which names the first table,
+		   or from a link that names it: land on the panel, clear of the
+		   header, rather than on the legend above it. The first table only:
+		   the panel sits above it, and a link to a later one (the absorption
+		   areas, under the coefficients) is a link to that table: the
+		   browser scrolls to it by itself, and landing on the panel would
+		   leave a whole table between the reader and it. */
+		if (location.hash === `#${first.id}`) toPanel('instant');
 	})();
 </script>
 

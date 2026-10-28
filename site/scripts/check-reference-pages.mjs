@@ -34,7 +34,8 @@
 // through the finder itself; the marks still open their explanation on a
 // click; and a phone still gets each row as a card, labelled by its column,
 // with the cells the row does not have left out. A link to a section of the
-// old single page has to land on that catalogue's page.
+// old single page has to land on that catalogue's page, and a link to the
+// second table of a page on that table, not on the panel above the first.
 //
 // Usage: node scripts/check-reference-pages.mjs [--base http://localhost:4321]
 import { catalogueSlugs } from '../src/data/topics.mjs';
@@ -798,6 +799,51 @@ for (const { path, lang, label, steel, english, table, jump } of [
 		some: filtered.visible > 0,
 		areasKept: byTable[1] > 0,
 	}, { sections: 2, aboveFirst: 'absorption', some: true, areasKept: true });
+	await page.close();
+}
+
+// A link to the second table of a page lands on that table. The panel sits
+// above the first one, and the script puts it in view when the address names
+// the first table, which is what the Open button and the router send; a link
+// to the absorption areas names the second, and a script that put the panel
+// in view for any table pulled the reader back above every row of the first.
+// Chrome scrolls to the address's target again once the page has loaded,
+// which hides that pull there (Firefox keeps it), so the page is read twice:
+// when its scripts have run, the panel must not be on screen (Chrome has not
+// yet scrolled to the target then, so the table need not be either), and
+// once it has settled, the heading of the areas table must be and the panel
+// still not.
+for (const path of [
+	'/reference/catalogues/absorption-coefficients/#catalogue-absorptionAreas',
+	'/es/reference/catalogues/absorption-coefficients/#catalogue-absorptionAreas',
+]) {
+	const page = await browser.newPage();
+	await page.setViewport({ width: 1280, height: 900 });
+	await page.evaluateOnNewDocument(() => {
+		/** Whether the heading of the areas table and the panel are on screen. */
+		window.__catalogueView = () => {
+			const heading = document.querySelector('#catalogue-absorptionAreas thead')?.getBoundingClientRect();
+			const finder = document.querySelector('[data-finder]')?.getBoundingClientRect();
+			return {
+				areasHeading: !!heading && heading.top >= 0 && heading.bottom <= innerHeight,
+				finder: !!finder && finder.bottom > 0 && finder.top < innerHeight,
+			};
+		};
+		// Module scripts, the finder's among them, run before this fires.
+		document.addEventListener('DOMContentLoaded', () => {
+			window.__cataloguePanelAtScripts = window.__catalogueView().finder;
+		});
+	});
+	await page.goto(`${BASE}${BASE_PATH}${path}`, { waitUntil: 'networkidle0', timeout: 90000 });
+	await new Promise((resolve) => setTimeout(resolve, 300));
+	const got = await page.evaluate(() => ({
+		panelAtScripts: window.__cataloguePanelAtScripts,
+		settled: window.__catalogueView(),
+	}));
+	expect(`catalogues: ${path} lands on the areas table, not on the panel above the first`, got, {
+		panelAtScripts: false,
+		settled: { areasHeading: true, finder: false },
+	});
 	await page.close();
 }
 

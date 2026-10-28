@@ -60,6 +60,7 @@ from typing import TYPE_CHECKING, Any, Literal, overload
 import numpy as np
 
 from .._internal.frozen import OwnsArrays
+from .._internal.types import own_window
 from .._internal.validation import (
     indices_of,
     require_equal_counts,
@@ -84,7 +85,7 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
-    from .._internal.types import TwoPanels
+    from .._internal.types import TwoPanels, WindowSpec
 
 __all__ = [
     "MISOCoherenceResult",
@@ -221,7 +222,7 @@ def _augmented_matrix(
     fs: float,
     seg: int,
     nov: int,
-    window: str,
+    window: WindowSpec,
     scaling: str,
 ) -> tuple[NDArray[np.float64], NDArray[np.complex128]]:
     """Assemble the ``(F, q+1, q+1)`` Hermitian spectral matrix.
@@ -454,7 +455,8 @@ class MISOCoherenceResult(OwnsArrays):
     :ivar n_segments: Raw number of (possibly overlapped) segments averaged.
     :ivar n_averages: Effective number of independent averages :math:`n_\mathrm{d}`.
     :ivar resolution_bandwidth: Effective noise bandwidth :math:`B_\mathrm{e}`, in Hz.
-    :ivar window: Taper name.
+    :ivar window: The taper, a window name or a tuple of a name and its
+        parameters, as given (a list parameter as a tuple).
     :ivar nperseg: Segment length, in samples.
     :ivar overlap: Segment overlap fraction.
     :ivar scaling: ``'density'`` or ``'spectrum'``.
@@ -474,7 +476,7 @@ class MISOCoherenceResult(OwnsArrays):
     n_segments: int
     n_averages: float
     resolution_bandwidth: float
-    window: str
+    window: WindowSpec
     nperseg: int
     overlap: float
     scaling: Literal["density", "spectrum"]
@@ -596,7 +598,7 @@ def miso_coherence(
     fs: float | None = None,
     *,
     order: Sequence[int | np.integer[Any]] | NDArray[np.integer[Any]] | None = None,
-    window: str = "hann",
+    window: WindowSpec = "hann",
     nperseg: int | np.integer[Any] | None = None,
     overlap: float = _DEFAULT_OVERLAP,
     scaling: Literal["density", "spectrum"] = "density",
@@ -640,7 +642,8 @@ def miso_coherence(
         and two Signals recorded at different rates are refused rather than
         arbitrated.
     :param order: Conditioning order as input indices (default ``0..q-1``).
-    :param window: Segment taper (default Hann).
+    :param window: Segment taper, a scipy window name or a tuple of a name and its
+        parameters, such as ``("kaiser", 8.6)`` (default Hann).
     :param nperseg: Welch segment length; ``None`` picks a default.
     :param overlap: Segment overlap fraction in [0, 1) (default 0.5).
     :param scaling: ``'density'`` (units²/Hz) or ``'spectrum'`` (units²).
@@ -688,7 +691,7 @@ def miso_coherence(
         n_segments=k,
         n_averages=nd,
         resolution_bandwidth=benbw,
-        window=window,
+        window=own_window(window),
         nperseg=seg,
         overlap=ovl,
         scaling=scaling_v,

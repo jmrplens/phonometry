@@ -45,6 +45,7 @@ from .distortion import (
 if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
 
+    from .._internal.types import WindowSpec
     from ..io._signal import Signal
 
 __all__ = [
@@ -109,7 +110,7 @@ def dynamic_range(
     notch_q: float = _DEFAULT_NOTCH_Q,
     bandwidth: float | None = _AES17_BANDWIDTH_HZ,
     full_scale: float = 1.0,
-    window: str = "hann",
+    window: WindowSpec = "hann",
 ) -> float:
     r"""Dynamic range of an audio device (AES17-2015 6.4.1), in dB CCIR-RMS.
 
@@ -148,7 +149,8 @@ def dynamic_range(
     :param bandwidth: AES17 measurement bandwidth, in Hz (default 20 kHz;
         ``None`` measures the full Nyquist band).
     :param full_scale: Digital full-scale peak amplitude (default 1.0).
-    :param window: FFT window used only for fundamental auto-detection.
+    :param window: FFT window, a scipy window name or a tuple of a name and its
+        parameters, used only for fundamental auto-detection.
     :return: The dynamic range, in dB CCIR-RMS (a positive number).
     :raises ValueError: If the inputs are invalid or ``notch_q`` is out of
         range.

@@ -39,7 +39,7 @@ import phonometry
 from phonometry import io
 from phonometry._internal import display
 from phonometry._internal.display import RichDisplay
-from phonometry._internal.types import BandFraction
+from phonometry._internal.types import BandFraction, WindowSpec
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterator
@@ -731,9 +731,11 @@ def _annotation_names() -> dict[str, object]:
     reads them from here.
     """
     names: dict[str, object] = {"np": np, "numpy": np, "npt": npt}
-    # The band set a record's ``fraction`` holds, a ``Literal`` alias of a
-    # private module the records import for the type checker alone.
+    # The band set a record's ``fraction`` holds and the window a spectral
+    # result stores, aliases of a private module the records import for the
+    # type checker alone.
     names["BandFraction"] = BandFraction
+    names["WindowSpec"] = WindowSpec
     for module in (typing, collections.abc, numbers, npt):
         names.update(
             (name, obj) for name, obj in vars(module).items() if name[:1].isupper()

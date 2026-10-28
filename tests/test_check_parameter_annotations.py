@@ -61,11 +61,18 @@ def _package(tmp_path: pathlib.Path, **modules: str) -> pathlib.Path:
     return root
 
 
-def _refused(tmp_path: pathlib.Path, **modules: str) -> dict[str, list[str]]:
-    """The parameters refused, as ``function(parameter)``, with the reasons."""
+def _refused(
+    tmp_path: pathlib.Path, *, part: str | None = None, **modules: str
+) -> dict[str, list[str]]:
+    """The parameters refused, as ``function(parameter)``, with the reasons.
+
+    With *part*, only the findings of that part of the rule.
+    """
     root = _package(tmp_path, **modules)
     found: dict[str, list[str]] = {}
     for finding in cpa.findings_in(sorted(root.rglob("*.py")), root):
+        if part is not None and finding.part != part:
+            continue
         key = f"{finding.function}({finding.parameter})"
         found.setdefault(key, []).append(finding.problem)
     return found
@@ -1322,6 +1329,7 @@ def test_a_mapping_keyed_by_float_is_offered_beside_one_keyed_by_int(
 ) -> None:
     refused = _refused(
         tmp_path,
+        part="key",
         api="""
         from typing import Literal
 
@@ -1372,6 +1380,205 @@ def test_a_mapping_keyed_by_float_is_offered_beside_one_keyed_by_int(
         "holds Mapping[int | None, Mapping[str, float]] with no mapping keyed by "
         "None, int, which refuses a typed caller's dict of the narrower key"
     ]
+
+
+def test_a_union_of_mappings_offers_a_written_dict_one_head_at_a_time(
+    tmp_path: pathlib.Path,
+) -> None:
+    """mypy reads a ``dict`` written in a call against one mapping, not a union.
+
+    With two or more mappings in a union, the ``dict`` is read on its own: a
+    ``Literal`` key becomes a ``str`` and nested mappings of two key types
+    join to ``object``, so a call that runs is refused. Each mapping is
+    offered in an overload head of its own, every head together offering
+    the keys the key rule asks for; a union whose mappings hold only plain
+    numbers, and a head that takes one mapping, pass.
+    """
+    refused = _refused(
+        tmp_path,
+        api="""
+        from typing import Literal
+
+        Quantity = Literal["rms", "vdv"]
+        Columns = Mapping[Quantity, float]
+        BandMapping = Mapping[int, float] | Mapping[float, float]
+        Indications = (
+            Mapping[int, Columns] | Mapping[int | None, Columns] | Mapping[None, Columns]
+        )
+
+        __all__ = [
+            "named", "headed", "missing", "two_in_a_head", "nested", "bands",
+            "directional",
+        ]
+
+        def named(measured: Indications) -> float:
+            return 0.0
+
+        @overload
+        def headed(measured: Mapping[int, Columns]) -> float: ...
+        @overload
+        def headed(measured: Mapping[None, Columns]) -> float: ...
+        @overload
+        def headed(measured: Mapping[int | None, Columns]) -> float: ...
+        def headed(measured: Indications) -> float:
+            return 0.0
+
+        @overload
+        def missing(measured: Mapping[int, Columns]) -> float: ...
+        @overload
+        def missing(measured: Mapping[int | None, Columns]) -> float: ...
+        def missing(measured: Indications) -> float:
+            return 0.0
+
+        @overload
+        def two_in_a_head(measured: Mapping[int, Columns]) -> float: ...
+        @overload
+        def two_in_a_head(
+            measured: Mapping[int | None, Columns] | Mapping[None, Columns],
+        ) -> float: ...
+        def two_in_a_head(measured: Indications) -> float:
+            return 0.0
+
+        def nested(per_direction: Mapping[str, Indications]) -> float:
+            return 0.0
+
+        def bands(values: BandMapping | None = None) -> float:
+            return 0.0
+
+        def directional(
+            *,
+            by_band: Mapping[int, BandMapping]
+            | Mapping[float, BandMapping]
+            | None = None,
+        ) -> float:
+            return 0.0
+        """,
+    )
+    assert sorted(refused) == [
+        "directional(by_band)",
+        "missing(measured)",
+        "named(measured)",
+        "nested(per_direction)",
+        "two_in_a_head(measured)",
+    ]
+    assert refused["named(measured)"] == [
+        "takes Mapping[int, Columns] | Mapping[int | None, Columns] | "
+        "Mapping[None, Columns] with no overload head that takes Mapping[int, "
+        "Columns] or Mapping[int | None, Columns] or Mapping[None, Columns] "
+        "alone, so a dict written in the call is read against none of them: a "
+        "Literal key is read as a str and nested mappings of two key types as "
+        "object, and a call that runs is refused"
+    ]
+    assert sorted(refused["missing(measured)"]) == [
+        "holds Mapping[int | None, Columns] with no mapping keyed by None, which "
+        "refuses a typed caller's dict of the narrower key",
+        "takes Mapping[int, Columns] | Mapping[int | None, Columns] | "
+        "Mapping[None, Columns] with no overload head that takes Mapping[None, "
+        "Columns] alone, so a dict written in the call is read against none of "
+        "them: a Literal key is read as a str and nested mappings of two key "
+        "types as object, and a call that runs is refused",
+    ]
+    head, implementation = refused["two_in_a_head(measured)"]
+    assert head == (
+        "an overload head takes Mapping[int | None, Columns] | Mapping[None, "
+        "Columns], which gives a dict written in the call no mapping to be read "
+        "against"
+    )
+    assert "no overload head that takes Mapping[int | None, Columns] or " in (
+        implementation
+    )
+    assert refused["nested(per_direction)"] == [
+        "holds Mapping[int, Columns] | Mapping[int | None, Columns] | "
+        "Mapping[None, Columns] inside, where no overload can give a dict "
+        "written in the call the one mapping it is read against"
+    ]
+    assert refused["directional(by_band)"][0].startswith(
+        "takes Mapping[int, BandMapping] | Mapping[float, BandMapping] with no "
+        "overload head"
+    )
+
+
+def test_a_window_scipy_reads_takes_a_name_and_its_parameters(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``get_window`` takes ``("kaiser", 8.6)`` as it takes ``"hann"``.
+
+    A parameter followed into a helper, on a multiline call, into a SciPy
+    reader by keyword or by position, and one typed by an alias of ``str``,
+    are refused; one typed with a tuple, or never handed to SciPy, passes.
+    """
+    refused = _refused(
+        tmp_path,
+        part="window",
+        api="""
+        from scipy import signal as sp_signal
+
+        Taper = str
+        Spec = str | tuple[ArrayLike, ...]
+
+        __all__ = ["psd", "taper", "spectrum", "named", "taken", "labelled"]
+
+        def _segments(x: ArrayLike, window: str) -> float:
+            return float(sp_signal.welch(x, fs=1.0, window=window)[1][0])
+
+        def psd(x: ArrayLike, *, window: str = "hann") -> float:
+            return _segments(
+                x,
+                window,
+            )
+
+        def taper(window: Taper, n: int) -> float:
+            return float(sp_signal.get_window(window, n)[0])
+
+        def spectrum(x: ArrayLike, window: str = "hann") -> float:
+            return float(sp_signal.stft(x, 1.0, window)[2][0, 0])
+
+        def named(window: str) -> str:
+            return window
+
+        def taken(window: Spec = "hann") -> float:
+            return float(sp_signal.get_window(window, 8)[0])
+
+        def labelled(window: tuple[ArrayLike, ...] | str) -> float:
+            return _segments([0.0] * 8, window)  # type: ignore[arg-type]
+        """,
+    )
+    assert sorted(refused) == ["psd(window)", "spectrum(window)", "taper(window)"]
+    assert refused["psd(window)"] == [
+        "annotated str, which refuses a window given as a tuple of its name and "
+        "parameters, such as ('kaiser', 8.6), while handed to _segments(window), "
+        "welch() takes it"
+    ]
+    assert refused["taper(window)"][0].startswith("annotated Taper, which refuses")
+
+
+def test_a_record_field_offers_a_written_dict_one_mapping(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A record's generated constructor has no heads to split a union with."""
+    refused = _refused(
+        tmp_path,
+        part="context",
+        api="""
+        from dataclasses import dataclass
+        from typing import Literal
+
+        Quantity = Literal["rms", "vdv"]
+
+        __all__ = ["Readings", "Bands"]
+
+        @dataclass(frozen=True)
+        class Readings:
+            measured: Mapping[int, Mapping[Quantity, float]] | Mapping[
+                None, Mapping[Quantity, float]
+            ]
+
+        @dataclass(frozen=True)
+        class Bands:
+            values: Mapping[int, float] | Mapping[float, float]
+        """,
+    )
+    assert list(refused) == ["Readings(measured)"]
 
 
 def test_a_sample_rate_keeps_one_family_across_the_api(

@@ -113,7 +113,7 @@ envelope_spectrum(
     fs: float | None = None,
     *,
     kind: Literal['magnitude', 'squared'] = 'magnitude',
-    window: str = 'hann',
+    window: str | tuple[ArrayLike, ...] = 'hann',
     nfft: int | np.integer[Any] | None = None,
     remove_dc: bool = True,
     band: tuple[float, float] | None = None,
@@ -164,7 +164,7 @@ untouched) before the detector, the Figure 13.11 front end.
 | `x` | Signal, 1-D. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples, so the envelope, its spectral amplitude and the mean level come out in Pa under the default `kind='magnitude'`, and in Pa² under `'squared'`, which squares the envelope before transforming it. |
 | `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `kind` | `"magnitude"` (default) or `"squared"`. |
-| `window` | Taper (any scipy window name; default Hann). The amplitude is corrected for the taper's coherent gain. |
+| `window` | Taper, a scipy window name or a tuple of a name and its parameters, such as `("kaiser", 8.6)` (default Hann). The amplitude is corrected for the taper's coherent gain. |
 | `nfft` | FFT length, at least `x.size` (default: the record length). |
 | `remove_dc` | Remove the envelope mean before the transform (default `True`, the Figure 13.11 DC remover); the mean is reported either way. |
 | `band` | Optional `(low, high)` band-pass edges, in Hz ($0 < \text{low} < \text{high} < f_\mathrm{s}/2$), applied to the record before envelope detection as a zero-phase 4th-order Butterworth (`scipy.signal.sosfiltfilt`, giving an 8th-order magnitude roll-off). Default `None`: detect on the record as given. |
@@ -250,7 +250,7 @@ EnvelopeSpectrumResult(
     kind: Literal['magnitude', 'squared'],
     times: NDArray[np.float64],
     envelope: NDArray[np.float64],
-    window: str,
+    window: str | tuple[ArrayLike, ...],
     *,
     remove_dc: bool,
     fs: float,
@@ -271,7 +271,7 @@ Amplitude spectrum of a signal's envelope (B&P Section 13.3).
 | `kind` | `"magnitude"` (Hilbert envelope $A(t)$) or `"squared"` (the book's square-law detector, $A^2(t)$). |
 | `times` | Time axis of [`envelope`](/phonometry/reference/api/signals/envelope/#envelope), in seconds. |
 | `envelope` | The detector output that was transformed, at full rate (before mean removal and tapering). |
-| `window` | Taper name applied before the transform. |
+| `window` | The taper applied before the transform, a window name or a tuple of a name and its parameters, as given (a list parameter as a tuple). |
 | `remove_dc` | Whether the envelope mean was removed first. |
 | `fs` | Sample rate of the analysed record, in Hz. |
 | `nfft` | FFT length used. |

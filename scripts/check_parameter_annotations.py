@@ -69,6 +69,12 @@ extends, an explicit ``__init__`` or ``__call__`` included):
   :data:`COUNTED`), which take a numpy integer as they take an int, admits
   it too. A whole float such as ``3.0``, which ``require_count`` also takes,
   stays a leniency the annotation does not state;
+* a parameter that reaches a function of :mod:`scipy.signal` that reads a
+  window (``get_window``, ``welch``, ``csd``, ``stft`` and the others of
+  :data:`_WINDOW_READERS`), followed through the helpers it is handed to as
+  a conversion is, takes a tuple of the window's name and its parameters
+  (``("kaiser", 8.6)``, ``("general_cosine", weights)``) as it takes the
+  name: ``str | tuple[ArrayLike, ...]``;
 * the same holds for the fields of a public record that its
   ``__post_init__`` (or a method it calls on ``self``, or ``super()``'s)
   validates: by attribute, by ``getattr``, in a loop over field names (a
@@ -86,7 +92,19 @@ extends, an explicit ``__init__`` or ``__call__`` included):
   stands beside one keyed by ``int`` in the same union (``BandMapping``),
   and one keyed by a union of several members beside one keyed by each
   member. A key of ``Literal`` choices is narrowed by the caller as a
-  ``Literal`` parameter is, and is left as it stands;
+  ``Literal`` parameter is, and is left as it stands. An overload head is
+  read with the keys every head of the function offers alone, which is what
+  a caller sees;
+* a union of two or more mappings, one of whose key or value is not a
+  plain number, text or record (a ``Literal``, a mapping, a sequence,
+  ``ArrayLike`` or a union), gives a ``dict`` written in the call no type
+  context: mypy reads such a display against the type it is passed for only
+  when that type holds one mapping, and otherwise on its own, a ``Literal``
+  key as a ``str`` and nested mappings of two key types as ``object``, so a
+  call that runs is refused. Each of those mappings is offered alone in an
+  overload head, the implementation keeping the union; a head that takes
+  two of them, and a union of them below the top of a parameter or in the
+  field of a public record, where no head can split it, fail;
 * the scalar quantities of the vocabulary (:data:`NAME_FAMILIES`: a sample
   rate ``fs``, ``volume``, ``coverage``, ``confidence``,
   ``energy_fraction``, ``fraction``) keep one family of numbers across the
@@ -471,6 +489,32 @@ COUNTED = Target(
 #: The scalar parts of the rule.
 SCALAR_TARGETS = (INTEGER, FLAG, COUNTED)
 
+#: The functions of :mod:`scipy.signal` that read a window specification, and
+#: which of their arguments it is. Each takes a window name or a tuple of a
+#: name and its parameters (``("kaiser", 8.6)``); ``firwin`` and ``firwin2``
+#: take it by keyword only, so their position is one no call fills.
+_WINDOW_READERS: dict[str, tuple[int | None, str | None]] = {
+    "scipy.signal.get_window": (0, "window"),
+    "scipy.signal.windows.get_window": (0, "window"),
+    "scipy.signal.welch": (2, "window"),
+    "scipy.signal.csd": (3, "window"),
+    "scipy.signal.periodogram": (2, "window"),
+    "scipy.signal.coherence": (3, "window"),
+    "scipy.signal.spectrogram": (2, "window"),
+    "scipy.signal.stft": (2, "window"),
+    "scipy.signal.istft": (2, "window"),
+    "scipy.signal.check_COLA": (0, "window"),
+    "scipy.signal.check_NOLA": (0, "window"),
+    "scipy.signal.resample_poly": (4, "window"),
+    "scipy.signal.firwin": (3, "window"),
+    "scipy.signal.firwin2": (4, "window"),
+    "scipy.signal.ShortTimeFFT.from_window": (0, "win_param"),
+}
+
+#: The window part: a specification :mod:`scipy.signal` reads, which takes a
+#: tuple of a window's name and its parameters as it takes the name.
+WINDOW = Target("window", _WINDOW_READERS)
+
 #: What each scalar kind's annotation must name to admit the numpy scalar.
 _ADMITS: dict[str, frozenset[str]] = {
     "integer": frozenset({"numpy.integer"}) | _INDEX_PROTOCOLS,
@@ -511,7 +555,9 @@ class Finding:
     problem: str
     #: The part of the rule it breaks: ``"array"`` (a conversion, or an
     #: invariant container), ``"integer"`` or ``"flag"`` (a numpy scalar),
-    #: ``"key"`` (a mapping's key) or ``"name"`` (a quantity's family).
+    #: ``"key"`` (a mapping's key), ``"context"`` (a union of mappings a
+    #: written ``dict`` is not read against), ``"window"`` (a window SciPy
+    #: reads) or ``"name"`` (a quantity's family).
     part: str = "array"
     #: Whether it is a field a caller-built record stores the validated value
     #: in, which its constructor, not its field, is to admit.
@@ -702,6 +748,21 @@ class Annotations:
                 for item in _items(member)
                 if not _is_ellipsis(item)
             )
+            for where, member in self.members(module, node, bounds)
+        )
+
+    def admits_window(
+        self, module: str, node: ast.expr | None, bounds: dict[str, ast.expr]
+    ) -> bool:
+        """Whether an annotation lets a window's ``(name, parameters)`` tuple through.
+
+        A ``tuple``, ``ArrayLike`` (a tuple of a text and numbers is one) or
+        anything; no annotation at all admits it too.
+        """
+        if node is None:
+            return True
+        return any(
+            self.resolve(where, member) in _TUPLES | _ARRAY_LIKE | _ANYTHING
             for where, member in self.members(module, node, bounds)
         )
 
@@ -2155,7 +2216,9 @@ class Reader:
             if target is CONVERSION:
                 if not annotations.may_hold_numbers(callee.module, annotation, bounds):
                     continue
-            elif not annotations.may_hold_scalars(callee.module, annotation, bounds):
+            elif target is not WINDOW and not annotations.may_hold_scalars(
+                callee.module, annotation, bounds
+            ):
                 continue
             for deeper, level, hops in self._known_routes(callee, parameter, target):
                 yield (
@@ -2330,11 +2393,14 @@ def findings_in(
             _conversion_findings(reader, function, path, bounds, method=method)
         )
         found.extend(_scalar_findings(reader, function, path, bounds, method=method))
+        found.extend(_window_findings(reader, function, path, bounds, method=method))
         for definition in function.definitions:
             found.extend(
                 _key_findings(reader, function, definition, path, bounds, method=method)
             )
+        found.extend(_context_findings(reader, function, path, bounds, method=method))
     found.extend(_field_findings(reader, root))
+    found.extend(_field_context_findings(reader, root))
     found.extend(_name_findings(reader, root))
     return sorted(set(found), key=lambda item: (item.path, item.line, item.parameter))
 
@@ -2481,13 +2547,16 @@ def _definitions(
     function: overloads.Function,
     name: str,
     bounds: dict[str, ast.expr],
+    *,
+    heads_only: bool = False,
 ) -> list[
     tuple[ast.FunctionDef | ast.AsyncFunctionDef, ast.expr | None, dict[str, ast.expr]]
 ]:
     """The implementation and each head that names parameter *name*, with its annotation.
 
     A head that takes the parameter as one of its own type parameters tells
-    the shape of its argument apart (rule A57) and is left out.
+    the shape of its argument apart (rule A57) and is left out. With
+    *heads_only*, the implementation is left out too.
     """
     found: list[
         tuple[
@@ -2495,7 +2564,7 @@ def _definitions(
         ]
     ] = []
     node = function.implementation
-    if node is not None and name in overloads._parameters(node):
+    if node is not None and not heads_only and name in overloads._parameters(node):
         found.append((node, overloads._parameters(node)[name].annotation, bounds))
     for head in function.heads:
         parameters = overloads._parameters(head)
@@ -2538,6 +2607,49 @@ def _scalar_findings(
                 path,
             )
         )
+    return found
+
+
+def _window_findings(
+    reader: Reader,
+    function: overloads.Function,
+    path: str,
+    bounds: dict[str, ast.expr],
+    *,
+    method: bool,
+) -> list[Finding]:
+    """The parameters handed to a window reader of SciPy that refuse a tuple.
+
+    ``scipy.signal.get_window`` and the estimators that call it take a
+    window as a name or as a tuple of a name and its parameters
+    (``("kaiser", 8.6)``, ``("general_cosine", weights)``): a parameter
+    that reaches one, through the helpers it is handed to, takes the tuple
+    too, on the implementation and on every head that names it.
+    """
+    node = function.implementation
+    if node is None:
+        return []
+    found: list[Finding] = []
+    for parameter in _arguments(node, method=method):
+        how = reader.conversion(function, parameter.arg, target=WINDOW)
+        if how is None:
+            continue
+        for definition, written, own in _definitions(function, parameter.arg, bounds):
+            if reader.annotations.admits_window(function.module, written, own):
+                continue
+            found.append(
+                Finding(
+                    path,
+                    definition.lineno,
+                    function.qualname,
+                    parameter.arg,
+                    f"annotated {_shown(written)}, which refuses a window given as "
+                    "a tuple of its name and parameters, such as ('kaiser', 8.6), "
+                    f"while {how}",
+                    part="window",
+                )
+            )
+            break
     return found
 
 
@@ -2698,12 +2810,55 @@ def _key(annotations: Annotations, module: str, node: ast.expr) -> str:
     return dotted if dotted is not None else ast.unparse(node)
 
 
+def _keyed_mappings(
+    annotations: Annotations,
+    module: str,
+    node: ast.expr | None,
+    bounds: dict[str, ast.expr],
+) -> list[tuple[ast.expr, list[str]]]:
+    """The mappings at the top of an annotation, each with its key's members.
+
+    A key member that is a ``Literal`` of choices is left out: the caller
+    narrows it as a ``Literal`` parameter is narrowed.
+    """
+    keyed: list[tuple[ast.expr, list[str]]] = []
+    for where, member in annotations.members(module, node, bounds):
+        if annotations.resolve(where, member) not in _MAPPINGS:
+            continue
+        items = _items(member)
+        if not items:
+            continue
+        keys = [
+            _key(annotations, inner_module, inner)
+            for inner_module, inner in annotations.members(where, items[0])
+            if annotations.resolve(inner_module, inner) not in _LITERALS
+        ]
+        keyed.append((member, keys))
+    return keyed
+
+
+def offered_keys(
+    annotations: Annotations,
+    module: str,
+    node: ast.expr | None,
+    bounds: dict[str, ast.expr],
+) -> frozenset[str]:
+    """The keys an annotation offers a mapping keyed by one of them alone."""
+    return frozenset(
+        keys[0]
+        for _, keys in _keyed_mappings(annotations, module, node, bounds)
+        if len(keys) == 1
+    )
+
+
 def key_problems(
     annotations: Annotations,
     module: str,
     node: ast.expr | None,
     bounds: dict[str, ast.expr],
     depth: int = 0,
+    *,
+    offered_beside: frozenset[str] = frozenset(),
 ) -> list[str]:
     """The mappings of an annotation whose key refuses a typed caller's ``dict``.
 
@@ -2716,26 +2871,19 @@ def key_problems(
     ``Literal`` of choices is narrowed by the caller as a ``Literal``
     parameter is, and is left as it stands. Mappings inside the items of a
     container or the values of a mapping are read too.
+
+    *offered_beside* names the keys the other overload heads of the function
+    offer the same parameter alone: an overloaded function offers each
+    mapping in a head of its own, so that a ``dict`` written in the call is
+    read against one of them, and a caller sees every head.
     """
     if node is None or depth > _NESTING:
         return []
     members = annotations.members(module, node, bounds)
-    keyed: list[tuple[str, ast.expr, list[str]]] = []
-    for where, member in members:
-        if annotations.resolve(where, member) not in _MAPPINGS:
-            continue
-        items = _items(member)
-        if not items:
-            continue
-        keys = [
-            _key(annotations, inner_module, inner)
-            for inner_module, inner in annotations.members(where, items[0])
-            if annotations.resolve(inner_module, inner) not in _LITERALS
-        ]
-        keyed.append((where, member, keys))
-    offered = {keys[0] for _, _, keys in keyed if len(keys) == 1}
+    keyed = _keyed_mappings(annotations, module, node, bounds)
+    offered = {keys[0] for _, keys in keyed if len(keys) == 1} | set(offered_beside)
     problems: list[str] = []
-    for _, member, keys in keyed:
+    for member, keys in keyed:
         wanted = set(keys) if len(keys) > 1 else set()
         for key in keys:
             wanted.update(_WIDENED_KEYS.get(key, ()))
@@ -2763,12 +2911,31 @@ def _key_findings(
     *,
     method: bool,
 ) -> list[Finding]:
-    """The parameters of one definition with a mapping a typed caller's ``dict`` cannot match."""
+    """The parameters of one definition with a mapping a typed caller's ``dict`` cannot match.
+
+    A head is read with the keys every head of the function offers the same
+    parameter alone, which is what a caller of the overloaded function sees.
+    """
     found: list[Finding] = []
     own = {**bounds, **_type_bounds(node)}
+    is_head = any(node is head for head in function.heads)
     for parameter in _arguments(node, method=method):
+        beside: frozenset[str] = frozenset()
+        if is_head:
+            beside = frozenset().union(
+                *(
+                    offered_keys(reader.annotations, function.module, written, scope)
+                    for _, written, scope in _definitions(
+                        function, parameter.arg, bounds, heads_only=True
+                    )
+                )
+            )
         problems = key_problems(
-            reader.annotations, function.module, parameter.annotation, own
+            reader.annotations,
+            function.module,
+            parameter.annotation,
+            own,
+            offered_beside=beside,
         )
         if problems:
             found.append(
@@ -2782,6 +2949,192 @@ def _key_findings(
                     part="key",
                 )
             )
+    return found
+
+
+#: What a ``dict`` written in a call holds that it is inferred as on its own:
+#: a number, a text, ``None``, a record. A ``Literal`` choice is inferred as a
+#: ``str``, the numbers of a ``float`` key written ``125`` as an ``int``, a
+#: nested ``dict`` as one of its own, and values of two kinds as what they
+#: share (``object`` for a ``dict[int, float]`` beside a ``dict[float,
+#: float]``), so a key or a value of any other type needs the mapping the
+#: ``dict`` is passed for as its context.
+_CONTEXT_FREE_REFUSED = _LITERALS | _MAPPINGS | _CONTAINERS | _INVARIANT | _ARRAY_LIKE
+
+
+def _needs_context(annotations: Annotations, module: str, node: ast.expr) -> bool:
+    """Whether a key or a value of this type needs the context of its mapping.
+
+    One member besides ``None`` that is a plain type (a number, a text, a
+    record) is inferred the same with or without it; a union of several, a
+    ``Literal``, a mapping, a sequence or ``ArrayLike`` is not.
+    """
+    members = [
+        (where, member)
+        for where, member in annotations.members(module, node)
+        if not _is_none(member)
+    ]
+    if len(members) != 1:
+        return len(members) > 1
+    where, member = members[0]
+    return annotations.resolve(where, member) in _CONTEXT_FREE_REFUSED
+
+
+def _arm_needs_context(annotations: Annotations, module: str, arm: ast.expr) -> bool:
+    """Whether a ``dict`` written for this mapping is inferred wrong without it."""
+    items = [item for item in _items(arm) if not _is_ellipsis(item)]
+    return any(_needs_context(annotations, module, item) for item in items)
+
+
+def context_unions(
+    annotations: Annotations,
+    module: str,
+    node: ast.expr | None,
+    bounds: dict[str, ast.expr],
+    depth: int = 0,
+) -> list[tuple[int, tuple[str, ...]]]:
+    """The unions of two or more mappings a ``dict`` written in a call cannot meet.
+
+    mypy reads a ``dict`` display against the type it is passed for when
+    that type holds one mapping; with two or more in a union it reads the
+    display on its own, so a ``Literal`` key is a ``str``, an ``int`` key is
+    not a ``float`` one, and nested displays of two key types join to
+    ``object``: a call that runs is refused. Each union with two or more
+    mappings, one of whose key or value needs the context
+    (:func:`_needs_context`), comes with its depth (0 at the top of the
+    annotation) and its mappings as written, aliases spelt out.
+    """
+    if node is None or depth > _NESTING:
+        return []
+    members = annotations.members(module, node, bounds)
+    arms = [
+        (where, member)
+        for where, member in members
+        if annotations.resolve(where, member) in _MAPPINGS
+    ]
+    found: list[tuple[int, tuple[str, ...]]] = []
+    if len(arms) > 1 and any(
+        _arm_needs_context(annotations, where, member) for where, member in arms
+    ):
+        found.append((depth, tuple(ast.unparse(member) for _, member in arms)))
+    for where, member in members:
+        if annotations.resolve(where, member) in _LITERALS:
+            continue
+        for item in _items(member):
+            for inner in item.elts if isinstance(item, ast.List) else [item]:
+                found.extend(context_unions(annotations, where, inner, {}, depth + 1))
+    return list(dict.fromkeys(found))
+
+
+def _sole_mapping(
+    annotations: Annotations,
+    module: str,
+    node: ast.expr | None,
+    bounds: dict[str, ast.expr],
+) -> str | None:
+    """The one mapping at the top of an annotation, as written, if it holds one."""
+    arms = [
+        member
+        for where, member in annotations.members(module, node, bounds)
+        if annotations.resolve(where, member) in _MAPPINGS
+    ]
+    return ast.unparse(arms[0]) if len(arms) == 1 else None
+
+
+def _context_findings(
+    reader: Reader,
+    function: overloads.Function,
+    path: str,
+    bounds: dict[str, ast.expr],
+    *,
+    method: bool,
+) -> list[Finding]:
+    """The parameters that offer a ``dict`` written in the call no mapping to be read against.
+
+    A union of two or more mappings at the top of a parameter is offered
+    one mapping at a time, each in an overload head of its own, so that mypy
+    reads the ``dict`` against each in turn: the implementation keeps the
+    union, and every mapping of it is the one mapping of a head. A head that
+    takes two or more of them, or a union of them below the top, where no
+    head can split it, is refused.
+    """
+    annotations = reader.annotations
+    module = function.module
+    found: list[Finding] = []
+    for definition in function.definitions:
+        is_head = any(definition is head for head in function.heads)
+        own = {**bounds, **_type_bounds(definition)}
+        for parameter in _arguments(definition, method=method):
+            for depth, arms in context_unions(
+                annotations, module, parameter.annotation, own
+            ):
+                shown = " | ".join(arms)
+                if depth > 0:
+                    problem = (
+                        f"holds {shown} inside, where no overload can give a dict "
+                        "written in the call the one mapping it is read against"
+                    )
+                elif is_head:
+                    problem = (
+                        f"an overload head takes {shown}, which gives a dict "
+                        "written in the call no mapping to be read against"
+                    )
+                else:
+                    alone = {
+                        _sole_mapping(annotations, module, written, scope)
+                        for _, written, scope in _definitions(
+                            function, parameter.arg, bounds, heads_only=True
+                        )
+                    }
+                    missing = [arm for arm in arms if arm not in alone]
+                    if not missing:
+                        continue
+                    problem = (
+                        f"takes {shown} with no overload head that takes "
+                        f"{' or '.join(missing)} alone, so a dict written in the "
+                        "call is read against none of them: a Literal key is "
+                        "read as a str and nested mappings of two key types as "
+                        "object, and a call that runs is refused"
+                    )
+                found.append(
+                    Finding(
+                        path,
+                        definition.lineno,
+                        function.qualname,
+                        parameter.arg,
+                        problem,
+                        part="context",
+                    )
+                )
+    return found
+
+
+def _field_context_findings(reader: Reader, root: pathlib.Path) -> list[Finding]:
+    """The fields of public records that offer a ``dict`` written for them no mapping.
+
+    A record's generated ``__init__`` has no overload heads, so a field takes
+    at most one mapping that needs a written ``dict``'s context, at any depth.
+    """
+    package = reader.package
+    annotations = reader.annotations
+    found: list[Finding] = []
+    for record in public_records(package, annotations):
+        for field in record_fields(package, annotations, record).values():
+            for _, arms in context_unions(
+                annotations, field.module, field.annotation, {}
+            ):
+                found.append(
+                    Finding(
+                        repository_path(package.paths[field.module], root),
+                        field.line,
+                        record.removeprefix(f"{field.module}."),
+                        field.name,
+                        f"holds {' | '.join(arms)}, which gives a dict written "
+                        "for it no mapping to be read against, and a record's "
+                        "constructor has no overload to offer them one at a time",
+                        part="context",
+                    )
+                )
     return found
 
 
@@ -4449,8 +4802,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         print(
             "Every public parameter admits what its body converts and the "
             "numpy scalar its body validates, none holds an invariant list, "
-            "dict or set or a mapping a narrower key cannot match, and every "
-            "quantity of the vocabulary keeps its family of numbers."
+            "dict or set or a mapping a narrower key cannot match, each "
+            "mapping a written dict is read against is offered alone, every "
+            "window takes its parameters, and every quantity of the vocabulary "
+            "keeps its family of numbers."
         )
         return 0
     if found:
@@ -4467,7 +4822,10 @@ def main(argv: Sequence[str] | None = None) -> int:
             "Mapping[...]; a count a validator takes a numpy integer for with "
             "int | np.integer[Any], a band fraction with BandFraction | "
             "np.integer[Any], a flag with bool | np.bool_; a mapping keyed by "
-            "float beside one keyed by int (BandMapping); a sample rate as the "
+            "float beside one keyed by int (BandMapping), and each mapping of a "
+            "union a dict written in the call needs as its context in an "
+            "overload head of its own; a window SciPy reads as a name or a "
+            "tuple of a name and its parameters; a sample rate as the "
             "float every 'fs' of the API is. A parameter narrower on purpose "
             "goes in EXEMPT, a quantity of another family in FAMILY_EXEMPT, a "
             "field a caller-built record stores is admitted by its constructor "

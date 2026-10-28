@@ -105,6 +105,33 @@ GroundClass = Literal["A", "B", "C", "D", "E", "F", "G", "H"]
 #: ISO 2631-5 print their columns.
 Sex = Literal["male", "female"]
 
+#: A spectral-analysis taper, as :func:`scipy.signal.get_window` reads one: a
+#: window name (``"hann"``), or a tuple of a name and its parameters
+#: (``("kaiser", 8.6)``, ``("tukey", 0.5)``, ``("general_cosine", weights)``).
+#: A bare number, which ``get_window`` reads as the beta of a Kaiser window,
+#: is left out: the Welch estimators refuse it, and ``("kaiser", beta)``
+#: names it everywhere.
+WindowSpec = str | tuple[ArrayLike, ...]
+
+
+def own_window(window: WindowSpec) -> WindowSpec:
+    """The window specification with no parameter the caller can still edit.
+
+    A name is kept as given. In a tuple, a list parameter, such as the
+    weights of ``("general_cosine", weights)``, becomes a tuple, so editing
+    the caller's weights afterwards does not rename the window a result
+    was computed with; a record that inherits
+    :class:`~phonometry._internal.frozen.OwnsArrays` makes an array
+    parameter a read-only copy of its own.
+
+    :param window: The specification a function was given.
+    :return: The same specification, its list parameters as tuples.
+    """
+    if not isinstance(window, tuple):
+        return window
+    return tuple(tuple(item) if isinstance(item, list) else item for item in window)
+
+
 #: The engine a ``report`` entry point draws its fiche with. ``"reportlab"``
 #: is the only one; the parameter is the seam a second engine would come in by.
 ReportEngine = Literal["reportlab"]

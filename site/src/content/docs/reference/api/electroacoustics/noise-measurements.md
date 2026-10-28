@@ -39,7 +39,7 @@ dynamic_range(
     notch_q: float = 2.0,
     bandwidth: float | None = 20000.0,
     full_scale: float = 1.0,
-    window: str = 'hann',
+    window: str | tuple[ArrayLike, ...] = 'hann',
 ) -> float
 ```
 
@@ -69,7 +69,7 @@ known as the signal-to-noise ratio (6.4.1 note).
 | `notch_q` | Effective notch quality factor (AES17 5.2.8: 1.2..3; default 2.0). |
 | `bandwidth` | AES17 measurement bandwidth, in Hz (default 20 kHz; `None` measures the full Nyquist band). |
 | `full_scale` | Digital full-scale peak amplitude (default 1.0). |
-| `window` | FFT window used only for fundamental auto-detection. |
+| `window` | FFT window, a scipy window name or a tuple of a name and its parameters, used only for fundamental auto-detection. |
 
 **Returns:** The dynamic range, in dB CCIR-RMS (a positive number).
 

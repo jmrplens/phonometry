@@ -69,6 +69,7 @@ from typing import TYPE_CHECKING, Any, Literal, overload
 import numpy as np
 
 from .._internal.frozen import OwnsArrays
+from .._internal.types import own_window
 from .._internal.validation import (
     require_choice,
     require_count,
@@ -84,7 +85,7 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
-    from .._internal.types import ThreePanels, TwoPanels
+    from .._internal.types import ThreePanels, TwoPanels, WindowSpec
     from ..io._signal import Signal
 
 Scaling = Literal["density", "spectrum"]
@@ -193,7 +194,7 @@ def _welch_autospectrum(
     fs: float,
     nperseg: int,
     noverlap: int,
-    window: str = "hann",
+    window: WindowSpec = "hann",
     scaling: str = "density",
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """One-sided Welch autospectrum ``(freqs, Gxx)``, no detrending."""
@@ -220,7 +221,7 @@ def _welch_cross_spectrum(
     fs: float,
     nperseg: int,
     noverlap: int,
-    window: str = "hann",
+    window: WindowSpec = "hann",
     scaling: str = "density",
 ) -> tuple[NDArray[np.float64], NDArray[np.complex128]]:
     """One-sided Welch cross-spectrum ``(freqs, Gxy)``, no detrending."""
@@ -248,7 +249,7 @@ def _welch_pair(
     fs: float,
     nperseg: int,
     noverlap: int,
-    window: str = "hann",
+    window: WindowSpec = "hann",
     scaling: str = "density",
 ) -> tuple[
     NDArray[np.float64],
@@ -264,7 +265,7 @@ def _welch_pair(
 
 
 def _segment_statistics(
-    n: int, nperseg: int, noverlap: int, window: str, fs: float
+    n: int, nperseg: int, noverlap: int, window: WindowSpec, fs: float
 ) -> tuple[int, float, float]:
     r"""Averaging statistics of the Welch estimate.
 
@@ -414,7 +415,8 @@ class SpectralDensityResult(OwnsArrays):
         the interior bins (Eq. 8.162; :math:`n_\mathrm{d}` at DC/Nyquist).
     :ivar resolution_bandwidth: Effective noise bandwidth :math:`B_\mathrm{e}` of
         the tapered segment, in Hz (drives the bias error of Eq. 8.139).
-    :ivar window: Taper name.
+    :ivar window: The taper, a window name or a tuple of a name and its
+        parameters, as given (a list parameter as a tuple).
     :ivar nperseg: Segment length, in samples.
     :ivar overlap: Segment overlap fraction.
     :ivar scaling: ``'density'`` or ``'spectrum'``.
@@ -430,7 +432,7 @@ class SpectralDensityResult(OwnsArrays):
     n_averages: float
     degrees_of_freedom: float
     resolution_bandwidth: float
-    window: str
+    window: WindowSpec
     nperseg: int
     overlap: float
     scaling: Scaling
@@ -483,7 +485,7 @@ def power_spectral_density(
     x: Signal | ArrayLike,
     fs: float | None = None,
     *,
-    window: str = "hann",
+    window: WindowSpec = "hann",
     nperseg: int | np.integer[Any] | None = None,
     overlap: float = _DEFAULT_OVERLAP,
     scaling: Literal["density", "spectrum"] = "density",
@@ -509,8 +511,9 @@ def power_spectral_density(
     :param fs: Sample rate, in Hz. Required for a bare array; a
         :class:`~phonometry.io.Signal` brings its own, and an explicit value
         that disagrees with it raises instead of silently winning.
-    :param window: Segment taper (any scipy window name; default Hann,
-        the B&P Section 11.5.2 recommendation for side-lobe suppression).
+    :param window: Segment taper, a scipy window name or a tuple of a name and its
+        parameters, such as ``("kaiser", 8.6)`` (default Hann, the B&P Section 11.5.2
+        recommendation for side-lobe suppression).
     :param nperseg: Welch segment length; ``None`` picks a length giving a
         bin spacing of at most 4 Hz (the resolution bandwidth
         :math:`B_\mathrm{e}` further
@@ -550,7 +553,7 @@ def power_spectral_density(
         n_averages=nd,
         degrees_of_freedom=2.0 * nd,
         resolution_bandwidth=benbw,
-        window=window,
+        window=own_window(window),
         nperseg=seg,
         overlap=ovl,
         scaling=scaling_v,
@@ -616,7 +619,8 @@ class CrossSpectralDensityResult(OwnsArrays):
         :math:`n_\mathrm{d}`.
     :ivar resolution_bandwidth: Effective noise bandwidth :math:`B_\mathrm{e}`, in
         Hz.
-    :ivar window: Taper name.
+    :ivar window: The taper, a window name or a tuple of a name and its
+        parameters, as given (a list parameter as a tuple).
     :ivar nperseg: Segment length, in samples.
     :ivar overlap: Segment overlap fraction.
     :ivar scaling: ``'density'`` or ``'spectrum'``.
@@ -632,7 +636,7 @@ class CrossSpectralDensityResult(OwnsArrays):
     n_segments: int
     n_averages: float
     resolution_bandwidth: float
-    window: str
+    window: WindowSpec
     nperseg: int
     overlap: float
     scaling: Scaling
@@ -710,7 +714,7 @@ def cross_spectral_density(
     y: Signal | ArrayLike,
     fs: float | None = None,
     *,
-    window: str = "hann",
+    window: WindowSpec = "hann",
     nperseg: int | np.integer[Any] | None = None,
     overlap: float = _DEFAULT_OVERLAP,
     scaling: Literal["density", "spectrum"] = "density",
@@ -739,7 +743,8 @@ def cross_spectral_density(
         arrays; either may be a :class:`~phonometry.io.Signal` and supply it,
         and two Signals recorded at different rates are refused rather than
         arbitrated.
-    :param window: Segment taper (default Hann).
+    :param window: Segment taper, a scipy window name or a tuple of a name and its
+        parameters, such as ``("kaiser", 8.6)`` (default Hann).
     :param nperseg: Welch segment length; ``None`` picks a default.
     :param overlap: Segment overlap fraction in [0, 1) (default 0.5).
     :param scaling: ``'density'`` or ``'spectrum'``.
@@ -783,7 +788,7 @@ def cross_spectral_density(
         n_segments=k,
         n_averages=nd,
         resolution_bandwidth=benbw,
-        window=window,
+        window=own_window(window),
         nperseg=seg,
         overlap=ovl,
         scaling=scaling_v,
@@ -838,7 +843,8 @@ class CoherentOutputSpectrumResult(OwnsArrays):
         :math:`n_\mathrm{d}`.
     :ivar resolution_bandwidth: Effective noise bandwidth :math:`B_\mathrm{e}`, in
         Hz.
-    :ivar window: Taper name.
+    :ivar window: The taper, a window name or a tuple of a name and its
+        parameters, as given (a list parameter as a tuple).
     :ivar nperseg: Segment length, in samples.
     :ivar overlap: Segment overlap fraction.
     :ivar scaling: ``'density'`` or ``'spectrum'``.
@@ -857,7 +863,7 @@ class CoherentOutputSpectrumResult(OwnsArrays):
     n_segments: int
     n_averages: float
     resolution_bandwidth: float
-    window: str
+    window: WindowSpec
     nperseg: int
     overlap: float
     scaling: Scaling
@@ -947,7 +953,7 @@ def coherent_output_spectrum(
     y: Signal | ArrayLike,
     fs: float | None = None,
     *,
-    window: str = "hann",
+    window: WindowSpec = "hann",
     nperseg: int | np.integer[Any] | None = None,
     overlap: float = _DEFAULT_OVERLAP,
     scaling: Literal["density", "spectrum"] = "density",
@@ -982,7 +988,8 @@ def coherent_output_spectrum(
         arrays; either may be a :class:`~phonometry.io.Signal` and supply it,
         and two Signals recorded at different rates are refused rather than
         arbitrated.
-    :param window: Segment taper (default Hann).
+    :param window: Segment taper, a scipy window name or a tuple of a name and its
+        parameters, such as ``("kaiser", 8.6)`` (default Hann).
     :param nperseg: Welch segment length; ``None`` picks a default.
     :param overlap: Segment overlap fraction in [0, 1) (default 0.5).
     :param scaling: ``'density'`` or ``'spectrum'``.
@@ -1040,7 +1047,7 @@ def coherent_output_spectrum(
         n_segments=k,
         n_averages=nd,
         resolution_bandwidth=benbw,
-        window=window,
+        window=own_window(window),
         nperseg=seg,
         overlap=ovl,
         scaling=scaling_v,

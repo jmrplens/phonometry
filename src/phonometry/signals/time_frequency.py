@@ -55,6 +55,7 @@ from typing import TYPE_CHECKING, Any, Literal
 import numpy as np
 
 from .._internal.frozen import OwnsArrays
+from .._internal.types import own_window
 from .._internal.validation import (
     require_count,
     require_ranks,
@@ -76,6 +77,7 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
+    from .._internal.types import WindowSpec
     from ..io._signal import Signal
 
 __all__ = [
@@ -90,7 +92,7 @@ __all__ = [
 _MIN_ZOOM_GRID_POINTS = 2
 
 
-def _taper(window: str, nperseg: int) -> NDArray[np.float64]:
+def _taper(window: WindowSpec, nperseg: int) -> NDArray[np.float64]:
     """The (periodic) analysis taper, as the Welch core uses it."""
     from scipy import signal as sp_signal
 
@@ -140,7 +142,8 @@ class SpectrogramResult(OwnsArrays):
         are unaffected.
     :ivar n_segments: Number of segments (columns).
     :ivar hop: Hop between segment starts, in samples.
-    :ivar window: Taper name.
+    :ivar window: The taper, a window name or a tuple of a name and its
+        parameters, as given (a list parameter as a tuple).
     :ivar nperseg: Segment length, in samples.
     :ivar overlap: Segment overlap fraction.
     :ivar scaling: ``'density'`` or ``'spectrum'``.
@@ -154,7 +157,7 @@ class SpectrogramResult(OwnsArrays):
     random_error: float
     n_segments: int
     hop: int
-    window: str
+    window: WindowSpec
     nperseg: int
     overlap: float
     scaling: Literal["density", "spectrum"]
@@ -202,7 +205,7 @@ def spectrogram(
     x: Signal | ArrayLike,
     fs: float | None = None,
     *,
-    window: str = "hann",
+    window: WindowSpec = "hann",
     nperseg: int | np.integer[Any] | None = None,
     overlap: float = _DEFAULT_OVERLAP,
     scaling: Literal["density", "spectrum"] = "density",
@@ -239,7 +242,8 @@ def spectrogram(
     :param fs: Sample rate, in Hz. Required for a bare array; a
         :class:`~phonometry.io.Signal` brings its own, and an explicit value
         that disagrees with it raises instead of silently winning.
-    :param window: Segment taper (any scipy window name; default Hann).
+    :param window: Segment taper, a scipy window name or a tuple of a name and its
+        parameters, such as ``("kaiser", 8.6)`` (default Hann).
     :param nperseg: Segment length; ``None`` picks a length giving a bin
         spacing of at most 4 Hz (the Welch-module default).
     :param overlap: Segment overlap fraction in [0, 1) (default 0.5).
@@ -281,7 +285,7 @@ def spectrogram(
         random_error=1.0,
         n_segments=k,
         hop=step,
-        window=window,
+        window=own_window(window),
         nperseg=seg,
         overlap=ovl,
         scaling=scaling_v,
@@ -317,7 +321,8 @@ class ZoomFFTResult(OwnsArrays):
         tapered record, in Hz - the true
         resolution, set by the record length and taper, that no grid
         refinement improves.
-    :ivar window: Taper name.
+    :ivar window: The taper, a window name or a tuple of a name and its
+        parameters, as given (a list parameter as a tuple).
     :ivar n_points: Number of grid points.
     """
 
@@ -327,7 +332,7 @@ class ZoomFFTResult(OwnsArrays):
     power: NDArray[np.float64]
     bin_spacing_hz: float
     resolution_bandwidth: float
-    window: str
+    window: WindowSpec
     n_points: int
 
     def __post_init__(self) -> None:
@@ -391,7 +396,7 @@ def zoom_fft(
     f_min: float,
     f_max: float,
     n_points: int | np.integer[Any] | None = None,
-    window: str = "hann",
+    window: WindowSpec = "hann",
 ) -> ZoomFFTResult:
     r"""Zoom FFT: the spectrum of a narrow band on a fine grid (B&P 11.5.4).
 
@@ -426,8 +431,8 @@ def zoom_fft(
     :param n_points: Grid points across ``[f_min, f_max]`` (endpoints
         included); ``None`` places one point per record-length resolution
         :math:`f_\mathrm{s}/N`.
-    :param window: Record taper (any scipy window name; default Hann;
-        ``'boxcar'`` for none).
+    :param window: Record taper, a scipy window name or a tuple of a name and its
+        parameters (default Hann; ``'boxcar'`` for none).
     :return: A :class:`ZoomFFTResult`.
     :raises ValueError: If the inputs or parameters are invalid.
     :raises TypeError: if ``f_max`` or ``f_min`` is not a single number, or ``n_points``
@@ -487,6 +492,6 @@ def zoom_fft(
         power=power,
         bin_spacing_hz=(hi - lo) / (m - 1),
         resolution_bandwidth=fs_v * float(np.sum(w * w)) / float(np.sum(w)) ** 2,
-        window=window,
+        window=own_window(window),
         n_points=m,
     )

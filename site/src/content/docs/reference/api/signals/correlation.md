@@ -389,7 +389,7 @@ time_delay(
     *,
     method: Literal['gcc', 'direct', 'phase'] = 'gcc',
     weighting: Literal['none', 'roth', 'scot', 'phat', 'ml'] = 'phat',
-    window: str = 'hann',
+    window: str | tuple[ArrayLike, ...] = 'hann',
     nperseg: int | np.integer[Any] | None = None,
     overlap: float = 0.5,
     max_delay: float | None = None,
@@ -451,7 +451,7 @@ interval (Eq. 8.130).
 | `fs` | Sample rate, in Hz. Required when both records are bare arrays; either may be a [`Signal`](/phonometry/reference/api/io/io/#signal) and supply it, and two Signals recorded at different rates are refused rather than arbitrated. |
 | `method` | `'gcc'` (default), `'direct'` or `'phase'`. |
 | `weighting` | GCC weighting (default `'phat'`; ignored otherwise). |
-| `window` | Welch taper for `'gcc'`/`'phase'` (default Hann). |
+| `window` | Welch taper for `'gcc'`/`'phase'`, a scipy window name or a tuple of a name and its parameters (default Hann). |
 | `nperseg` | Welch segment length for `'gcc'`/`'phase'` (`None` picks the shared default). |
 | `overlap` | Welch overlap fraction for `'gcc'`/`'phase'`. |
 | `max_delay` | Largest delay magnitude searched, in seconds. |

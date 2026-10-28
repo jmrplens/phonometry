@@ -42,7 +42,7 @@ difference_frequency_distortion(
     f1: float,
     f2: float,
     order: int = 2,
-    window: str = 'hann',
+    window: str | tuple[ArrayLike, ...] = 'hann',
 ) -> float
 ```
 
@@ -75,7 +75,7 @@ tone or DC read zero.
 | `f1` | Lower tone, in Hz. |
 | `f2` | Upper tone, in Hz. |
 | `order` | Product order (2 or 3). |
-| `window` | FFT window (default `'hann'`). |
+| `window` | FFT window, a scipy window name or a tuple of a name and its parameters (default `'hann'`). |
 
 **Returns:** nth-order difference-frequency distortion, as a ratio.
 
@@ -94,7 +94,7 @@ dynamic_intermodulation_distortion(
     *,
     f_sine: float = 15000.0,
     f_square: float = 3150.0,
-    window: str = 'hann',
+    window: str | tuple[ArrayLike, ...] = 'hann',
 ) -> float
 ```
 
@@ -115,7 +115,7 @@ sine amplitude.
 | `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `f_sine` | High sine frequency, in Hz (default 15 kHz). |
 | `f_square` | Square-wave fundamental, in Hz (default 3.15 kHz). |
-| `window` | FFT window (default `'hann'`). |
+| `window` | FFT window, a scipy window name or a tuple of a name and its parameters (default `'hann'`). |
 
 **Returns:** Dynamic intermodulation distortion, as a ratio.
 
@@ -134,7 +134,7 @@ modulation_distortion(
     *,
     f_low: float,
     f_high: float,
-    window: str = 'hann',
+    window: str | tuple[ArrayLike, ...] = 'hann',
 ) -> ModulationDistortionResult
 ```
 
@@ -169,7 +169,7 @@ as `smpte`.
 | `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `f_low` | Low modulating tone `f1`, in Hz (e.g. 60 Hz). |
 | `f_high` | High carrier tone `f2`, in Hz (e.g. 7 kHz). |
-| `window` | FFT window (default `'hann'`). |
+| `window` | FFT window, a scipy window name or a tuple of a name and its parameters (default `'hann'`). |
 
 **Returns:** A [`ModulationDistortionResult`](/phonometry/reference/api/electroacoustics/intermodulation/#modulationdistortionresult) with `d2`, `d3` and the `smpte` combined RMS.
 
@@ -254,7 +254,7 @@ total_difference_frequency_distortion(
     f1: float = 8000.0,
     f2: float = 11950.0,
     *,
-    window: str = 'hann',
+    window: str | tuple[ArrayLike, ...] = 'hann',
 ) -> float
 ```
 
@@ -284,7 +284,7 @@ part of it.)
 | `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `f1` | Lower tone, in Hz (default 8 kHz, per 14.12.10.2 b). |
 | `f2` | Upper tone, in Hz (default 11.95 kHz, per 14.12.10.2 b). |
-| `window` | FFT window (default `'hann'`). |
+| `window` | FFT window, a scipy window name or a tuple of a name and its parameters (default `'hann'`). |
 
 **Returns:** Total difference-frequency distortion, as a ratio.
 

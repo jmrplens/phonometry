@@ -51,6 +51,7 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
+    from .._internal.types import WindowSpec
     from ..io._signal import Signal
 
 __all__ = [
@@ -154,7 +155,7 @@ def _validate_signal(
 
 
 def _amplitude_spectrum(
-    signal: NDArray[np.float64], fs: float, window: str
+    signal: NDArray[np.float64], fs: float, window: WindowSpec
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """Coherent-gain-normalised amplitude spectrum (a tone on a bin reads its peak)."""
     from scipy import signal as sp_signal
@@ -194,7 +195,7 @@ def _harmonic_amplitudes(
     fs: float,
     fundamental: float | None,
     n_harmonics: int,
-    window: str,
+    window: WindowSpec,
 ) -> tuple[float, NDArray[np.float64]]:
     """Return ``(f0, amplitudes)`` with ``amplitudes[k]`` the (k+1)-th harmonic."""
     freqs, amp = _amplitude_spectrum(signal, fs, window)
@@ -227,7 +228,7 @@ def thd(
     *,
     kind: Literal["F", "R"] = "F",
     n_harmonics: int = _DEFAULT_N_HARMONICS,
-    window: str = "hann",
+    window: WindowSpec = "hann",
 ) -> float:
     r"""Total harmonic distortion (IEC 60268-3 14.12.2-3).
 
@@ -262,7 +263,8 @@ def thd(
     :param kind: ``'F'`` (relative to the fundamental, the default) or ``'R'``
         (relative to the total RMS, the 14.12.3.2 quantity).
     :param n_harmonics: Highest harmonic order summed (default 10).
-    :param window: FFT window (default ``'hann'``).
+    :param window: FFT window, a scipy window name or a tuple of a name and its
+        parameters (default ``'hann'``).
     :return: Total harmonic distortion, as a ratio (0..).
     :raises ValueError: If the signal/parameters are invalid, ``kind`` is
         unknown, or no harmonic of the fundamental lies below Nyquist.
@@ -296,7 +298,7 @@ def harmonic_distortion(
     fundamental: float,
     order: int | np.integer[Any],
     n_harmonics: int = _DEFAULT_N_HARMONICS,
-    window: str = "hann",
+    window: WindowSpec = "hann",
 ) -> float:
     r"""nth-order harmonic distortion :math:`d_n` (IEC 60268-3 14.12.5).
 
@@ -315,7 +317,8 @@ def harmonic_distortion(
     :param order: Harmonic order ``n`` (an integer >= 2; an integral float
         such as ``3.0`` is accepted as its integer).
     :param n_harmonics: Highest harmonic order used for the total RMS.
-    :param window: FFT window (default ``'hann'``).
+    :param window: FFT window, a scipy window name or a tuple of a name and its
+        parameters (default ``'hann'``).
     :return: nth-order harmonic distortion, as a ratio.
     :raises ValueError: If ``order`` is not an integer, ``order`` < 2 or the
         inputs are invalid.
@@ -439,7 +442,7 @@ def thd_plus_noise(
     *,
     notch_q: float = _DEFAULT_NOTCH_Q,
     bandwidth: float | None = _AES17_BANDWIDTH_HZ,
-    window: str = "hann",
+    window: WindowSpec = "hann",
     as_db: bool = False,
 ) -> float:
     r"""THD+N ratio (AES17-2015 6.3.1).
@@ -467,7 +470,8 @@ def thd_plus_noise(
         (default 20 kHz, the 5.2.5 standard value; capped at Nyquist).
         ``None`` disables the chain and measures the full Nyquist band
         (20 Hz high-pass included only when the chain is active).
-    :param window: FFT window used only for fundamental auto-detection.
+    :param window: FFT window, a scipy window name or a tuple of a name and its
+        parameters, used only for fundamental auto-detection.
     :param as_db: Return :math:`20 \log_{10}(\text{ratio})` in dB instead of the
         ratio.
     :return: THD+N as a ratio (default) or in dB.
@@ -504,7 +508,7 @@ def sinad(
     *,
     notch_q: float = _DEFAULT_NOTCH_Q,
     bandwidth: float | None = _AES17_BANDWIDTH_HZ,
-    window: str = "hann",
+    window: WindowSpec = "hann",
 ) -> float:
     r"""Signal-to-noise-and-distortion ratio SINAD, in dB.
 
@@ -529,7 +533,8 @@ def sinad(
     :param notch_q: Effective notch quality factor (AES17: 1.2..3; default 2.0).
     :param bandwidth: Upper band-edge frequency of the AES17 chain, in Hz
         (default 20 kHz); ``None`` measures the full Nyquist band.
-    :param window: FFT window used only for fundamental auto-detection.
+    :param window: FFT window, a scipy window name or a tuple of a name and its
+        parameters, used only for fundamental auto-detection.
     :return: SINAD, in dB.
     :raises ValueError: If the inputs are invalid.
     """
@@ -619,7 +624,7 @@ def weighted_thd(
     *,
     notch_q: float = _DEFAULT_NOTCH_Q,
     weighting: Literal["468", "A", "C"] = "468",
-    window: str = "hann",
+    window: WindowSpec = "hann",
 ) -> float:
     """Weighted total harmonic distortion (IEC 60268-3 14.12.11).
 
@@ -649,7 +654,8 @@ def weighted_thd(
     :param weighting: Frequency weighting applied to the residual:
         ``'468'`` (ITU-R BS.468-4 / IEC 60268-1, the 14.12.11 default),
         ``'A'`` or ``'C'``.
-    :param window: FFT window used only for fundamental auto-detection.
+    :param window: FFT window, a scipy window name or a tuple of a name and its
+        parameters, used only for fundamental auto-detection.
     :return: Weighted THD, as a ratio.
     :raises ValueError: If the inputs are invalid.
     :raises TypeError: if ``fs``, ``fundamental`` or ``notch_q`` is not a single number,
@@ -751,7 +757,7 @@ def harmonic_analysis(
     n_harmonics: int = _DEFAULT_N_HARMONICS,
     notch_q: float = _DEFAULT_NOTCH_Q,
     bandwidth: float | None = _AES17_BANDWIDTH_HZ,
-    window: str = "hann",
+    window: WindowSpec = "hann",
 ) -> HarmonicDistortionResult:
     """Full harmonic analysis of a signal (THD, THD+N, SINAD).
 
@@ -772,7 +778,8 @@ def harmonic_analysis(
     :param notch_q: Effective notch quality factor for THD+N (default 2.0).
     :param bandwidth: AES17 measurement bandwidth for THD+N/SINAD, in Hz
         (default 20 kHz; ``None`` measures the full Nyquist band).
-    :param window: FFT window (default ``'hann'``).
+    :param window: FFT window, a scipy window name or a tuple of a name and its
+        parameters (default ``'hann'``).
     :return: A :class:`HarmonicDistortionResult`.
     :raises ValueError: If the inputs are invalid.
     :raises TypeError: if ``fs`` is not a single number.

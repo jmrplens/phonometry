@@ -4122,6 +4122,134 @@ def _with_copies(
     return matches
 
 
+def _wrapping_copies(tree: ast.AST, target: Callable[[ast.expr], bool]) -> set[str]:
+    """The locals bound to a one-item tuple of the target, on some branch.
+
+    ``given = (sides,) if isinstance(sides, str) else sides`` holds the
+    single choice of a choice-or-sequence parameter as its one item, so a
+    check of each item of ``given`` checks the single choice too.
+    """
+    names: set[str] = set()
+    for node in ast.walk(tree):
+        if not (
+            isinstance(node, ast.Assign)
+            and len(node.targets) == 1
+            and isinstance(node.targets[0], ast.Name)
+        ):
+            continue
+        value = node.value
+        branches = (
+            [value.body, value.orelse] if isinstance(value, ast.IfExp) else [value]
+        )
+        if any(
+            isinstance(branch, ast.Tuple)
+            and len(branch.elts) == 1
+            and target(branch.elts[0])
+            for branch in map(_held, branches)
+        ):
+            names.add(node.targets[0].id)
+    return names
+
+
+def _value_names(tree: ast.AST, target: Callable[[ast.expr], bool]) -> set[str]:
+    """The names a loop or a comprehension binds to each value of a mapping target.
+
+    The value of ``for side, value in sides.items()`` and the name of ``for
+    value in sides.values()``.
+    """
+    names: set[str] = set()
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.For | ast.AsyncFor | ast.comprehension):
+            continue
+        source, bound = node.iter, node.target
+        if not (
+            isinstance(source, ast.Call)
+            and isinstance(source.func, ast.Attribute)
+            and source.func.attr in {"items", "values"}
+            and not source.args
+            and target(_held(source.func.value))
+        ):
+            continue
+        if source.func.attr == "items":
+            if not (isinstance(bound, ast.Tuple) and len(bound.elts) == _PAIR):
+                continue
+            bound = bound.elts[1]
+        if isinstance(bound, ast.Name):
+            names.add(bound.id)
+    return names
+
+
+#: The parts of a choice a check may cover, each a branch of its annotation:
+#: the choice as one value (``Literal[...]``), each item of a sequence or key
+#: of a mapping (``Sequence[Side]``, ``Mapping[Side, ...]``), and each value
+#: of a mapping whose values may be a choice (``Mapping[..., Boundary |
+#: float]``).
+_WHOLE, _ITEMS, _VALUES = "the choice itself", "each item or key", "each value"
+_PAIR = 2
+
+
+def _branches(annotation: str) -> dict[str, frozenset[str]]:
+    """The parts of a ``Literal`` choice its annotation lets a caller write,
+    each with the options its own ``Literal`` lists.
+
+    ``Boundary | Mapping[Side, Boundary | float]`` takes a choice as one
+    value, a side as each key and a choice as each value: three parts, each
+    of which a check must cover, a key against the sides and a value against
+    the boundaries. The annotation is read with its aliases spelt out
+    (:func:`expanded`), so a ``Literal`` is one by what it is, not by a name
+    another module gives one.
+    """
+    found: dict[str, frozenset[str]] = {}
+
+    def add(part: str, annotations: list[str]) -> None:
+        literals = [each for each in annotations if each.startswith("Literal[")]
+        if literals:
+            options = frozenset(
+                text for each in literals for text in _literal_options(each)
+            )
+            found[part] = found.get(part, frozenset()) | options
+
+    for member in _members(annotation):
+        add(_WHOLE, [member])
+        item = _item(member)
+        if item is not None:
+            add(_ITEMS, _members(item))
+        parsed = _generic(member)
+        if parsed is not None and parsed[0] in _MAPPINGS and len(parsed[1]) == _PAIR:
+            add(_VALUES, _members(parsed[1][1]))
+    return found
+
+
+def _part_verdict(
+    function: Callable[..., object], name: str, annotation: str, *, field: bool
+) -> str | None:
+    """What is wrong with how one part of a choice of several parts is checked.
+
+    A choice whose annotation has more than one part (:func:`_branches`)
+    passes only when every part reaches a check on every path: a check of
+    the single name says nothing of the keys of a mapping, nor a check of
+    the keys of its values.
+    """
+    branches = _branches(annotation)
+    if len(branches) < _PAIR:
+        return None
+    for branch, options in branches.items():
+        verdict = _verdict(
+            _checks_of(
+                function,
+                name,
+                field=field,
+                collection=True,
+                depth=0,
+                options=options,
+                part=branch,
+            )
+        )
+        if verdict is not None:
+            return f"{branch}: {verdict}"
+    return None
+
+
 def _record_constructor(callee: Callable[..., object]) -> type | None:
     """The record a dataclass ``__init__`` builds, so a choice handed to it is
     read in the record's ``__post_init__``.
@@ -4144,6 +4272,7 @@ def _checks_of(
     collection: bool,
     depth: int,
     options: frozenset[str] = frozenset(),
+    part: str | None = None,
 ) -> tuple[_Check, ...]:
     """The checks a choice reaches in *function*, received as parameter (or,
     with *field*, read as ``self.<name>``) *name*.
@@ -4151,6 +4280,11 @@ def _checks_of(
     *options* are the texts the choice's ``Literal`` lists: a path that skips
     the check only when the choice holds one of them leaves no misspelling
     unchecked (:func:`_implies_listed`).
+
+    With *part* (:func:`_branches`), only the checks of that part: of the
+    choice as one value, of each item or key, or of each value of a mapping.
+    A test of the choice as a whole (``if isinstance(sides, Mapping)``)
+    still tells the paths apart for every part.
     """
     tree = _parsed(function)
     if tree is None:
@@ -4161,12 +4295,36 @@ def _checks_of(
     target = _with_copies(
         tree, _field_of_self(name) if field else _the_name(name), options
     )
-    items = _item_names(tree, target) if collection else set()
+    whole = part in {None, _WHOLE}
+    # What a test of emptiness is about: a collection of choices, which holds
+    # nothing to check when it is empty.
+    whole_of = target if collection else _never
+    if part is None:
+        items = _item_names(tree, target) if collection else set()
+    elif part == _WHOLE:
+        wrapping = _wrapping_copies(tree, target)
+        # The choice as one text has no emptiness to ask about (``""`` is no
+        # option); the one-item tuple that holds it is never empty.
+        whole_of = _with_copies(tree, lambda node: _the_names(node, wrapping), options)
+        items = _item_names(tree, whole_of)
+    elif part == _ITEMS:
+        items = _item_names(tree, target)
+    else:
+        items = _value_names(tree, target)
 
     def is_raw(node: ast.expr) -> bool:
-        return target(node) or (isinstance(node, ast.Name) and node.id in items)
+        if whole and target(node):
+            return True
+        if part == _VALUES and isinstance(node, ast.Subscript) and target(node.value):
+            return True
+        return isinstance(node, ast.Name) and node.id in items
 
-    subject = _Subject(is_raw, target if collection else _never, options)
+    def mentions(node: ast.expr) -> bool:
+        return target(node) or is_raw(node)
+
+    # A test of the choice as a whole (``if isinstance(sides, Mapping)``)
+    # tells the paths apart for every part.
+    subject = _Subject(mentions, whole_of, options)
     root = tree.body[0] if isinstance(tree, ast.Module) and tree.body else tree
     parents = _parents(tree)
     # Each place the choice meets a check, with the checks it meets there.
@@ -4198,38 +4356,30 @@ def _checks_of(
                     collection=collection,
                     depth=depth + 1,
                     options=options,
+                    part=part,
                 )
             )
         record = _record_constructor(callee)
         for parameter, handed in _arguments(node, callee, spread).items():
             value = _held(handed)
             keys_kept = _keeps_keys(value, target, options)
-            if not (is_raw(value) or keys_kept):
+            handed_part = _handed_part(part, value, target, is_raw, keys_kept=keys_kept)
+            if handed_part is False:
                 continue
-            if record is not None:
-                check = _post_init(record)
-                if check is not None:
-                    inner.extend(
-                        _checks_of(
-                            check,
-                            parameter,
-                            field=True,
-                            collection=collection and (target(value) or keys_kept),
-                            depth=depth + 1,
-                            options=options,
-                        )
-                    )
-            else:
-                inner.extend(
-                    _checks_of(
-                        callee,
-                        parameter,
-                        field=False,
-                        collection=collection and (target(value) or keys_kept),
-                        depth=depth + 1,
-                        options=options,
-                    )
+            check = _post_init(record) if record is not None else callee
+            if check is None:
+                continue
+            inner.extend(
+                _checks_of(
+                    check,
+                    parameter,
+                    field=record is not None,
+                    collection=collection and (target(value) or keys_kept),
+                    depth=depth + 1,
+                    options=options,
+                    part=handed_part,
                 )
+            )
         if inner:
             sites.append((node, tuple(inner)))
     validated = [
@@ -4259,6 +4409,34 @@ def _checks_of(
 
 def _contains(outer: ast.AST, node: ast.AST) -> bool:
     return any(part is node for part in ast.walk(outer))
+
+
+def _the_names(node: ast.expr, names: set[str]) -> bool:
+    return isinstance(node, ast.Name) and node.id in names
+
+
+def _handed_part(
+    part: str | None,
+    value: ast.expr,
+    target: Callable[[ast.expr], bool],
+    is_raw: Callable[[ast.expr], bool],
+    *,
+    keys_kept: bool,
+) -> str | None | bool:
+    """Which part of the choice a call hands on, read where it is received.
+
+    Without a part, any reading of the choice (``None``); the whole value,
+    or a mapping keeping its keys for the keys, hands the same part on; one
+    item, key or value hands the choice itself. ``False`` when the call
+    hands none of it.
+    """
+    if part is None:
+        return None if is_raw(value) or keys_kept else False
+    if (target(value) and part != _WHOLE) or (keys_kept and part == _ITEMS):
+        return part
+    if is_raw(value):
+        return _WHOLE
+    return False
 
 
 def _runs_before(
@@ -4364,7 +4542,9 @@ def unchecked_choices() -> Iterator[Choice]:
     test of each item: ``{side: v for side, v in limits.items() if side in
     SIDES}`` hands on only the keys it keeps, and a check in the element of
     ``[... for side in sides if side != "both"]`` runs only for the items it
-    keeps. This is rule A45.
+    keeps. A choice its annotation lets a caller write in several parts
+    (:func:`_branches`) is checked in each (:func:`_part_verdict`). This is
+    rule A45.
     """
     inputs = _input_records()
     for home, qualname, obj in _targets():
@@ -4394,6 +4574,8 @@ def unchecked_choices() -> Iterator[Choice]:
                     else ()
                 )
                 verdict = _verdict(checks)
+                if verdict is None and check is not None:
+                    verdict = _part_verdict(check, field.name, read, field=True)
                 if verdict is not None:
                     yield Choice(
                         home, qualname, field.name, _annotation(field.type), (verdict,)
@@ -4419,7 +4601,7 @@ def unchecked_choices() -> Iterator[Choice]:
                     depth=0,
                     options=_literal_options(read),
                 )
-            )
+            ) or _part_verdict(obj, parameter.name, read, field=False)
             if verdict is not None:
                 yield Choice(
                     home,

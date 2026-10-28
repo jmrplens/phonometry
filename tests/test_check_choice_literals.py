@@ -22,7 +22,7 @@ import pathlib
 import sys
 import textwrap
 import typing
-from collections.abc import Callable, Iterable
+from collections.abc import Callable, Iterable, Mapping
 from dataclasses import dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Literal
@@ -38,7 +38,7 @@ from phonometry._internal.validation import require_choice
 from phonometry.filters.weighting import time_weighting
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping, Sequence
+    from collections.abc import Sequence
 
     import pytest
 
@@ -1691,6 +1691,157 @@ def test_a_check_in_a_comprehension_runs_only_where_its_clauses_let_it() -> None
         is None
     )
     assert _verdict_of(_pace_checked_per_step, "pace") == some_paths
+
+
+_TERMINATIONS = (
+    "Literal['fast', 'slow'] | Mapping[Literal['left', 'right'], "
+    "Literal['fast', 'slow'] | float]"
+)
+_TWO_SIDES = ("left", "right")
+
+
+@dataclass(frozen=True)
+class _Terminations:
+    """A record that checks a single pace, each side and each pace it maps to."""
+
+    sides: _Pace | Mapping[_Side, _Pace | float]
+
+    def __post_init__(self) -> None:
+        if isinstance(self.sides, Mapping):
+            for side, value in self.sides.items():
+                require_choice(side, "sides", _TWO_SIDES)
+                if isinstance(value, str):
+                    require_choice(value, "sides", _PACES)
+        else:
+            require_choice(self.sides, "sides", _PACES)
+
+
+@dataclass(frozen=True)
+class _KeysUnchecked:
+    """A record that checks its single pace and the paces it maps to, not the sides."""
+
+    sides: _Pace | Mapping[_Side, _Pace | float]
+
+    def __post_init__(self) -> None:
+        if isinstance(self.sides, Mapping):
+            for value in self.sides.values():
+                if isinstance(value, str):
+                    require_choice(value, "sides", _PACES)
+        else:
+            require_choice(self.sides, "sides", _PACES)
+
+
+@dataclass(frozen=True)
+class _ValuesUnchecked:
+    """A record that checks its single pace and its sides, not the paces they map to."""
+
+    sides: _Pace | Mapping[_Side, _Pace | float]
+
+    def __post_init__(self) -> None:
+        if isinstance(self.sides, Mapping):
+            for side in self.sides:
+                require_choice(side, "sides", _TWO_SIDES)
+        else:
+            require_choice(self.sides, "sides", _PACES)
+
+
+@dataclass(frozen=True)
+class _SingleUnchecked:
+    """A record that checks every side and pace of a mapping, and no single pace."""
+
+    sides: _Pace | Mapping[_Side, _Pace | float]
+
+    def __post_init__(self) -> None:
+        if isinstance(self.sides, Mapping):
+            for side, value in self.sides.items():
+                require_choice(side, "sides", _TWO_SIDES)
+                if isinstance(value, str):
+                    require_choice(value, "sides", _PACES)
+
+
+@dataclass(frozen=True)
+class _KeysSkipAPace:
+    """A record that skips a key spelt as a pace before it checks the sides."""
+
+    sides: _Pace | Mapping[_Side, _Pace | float]
+
+    def __post_init__(self) -> None:
+        if isinstance(self.sides, Mapping):
+            for side, value in self.sides.items():
+                if side == "fast":
+                    continue
+                require_choice(side, "sides", _TWO_SIDES)
+                if isinstance(value, str):
+                    require_choice(value, "sides", _PACES)
+        else:
+            require_choice(self.sides, "sides", _PACES)
+
+
+def test_every_part_of_a_choice_of_several_parts_is_checked() -> None:
+    """``Pace | Mapping[Side, Pace | float]`` takes a pace as one value, a side
+    as each key and a pace as each value: a check of one part says nothing of
+    the others, so a record passes only when each part reaches a check, the
+    single name, the keys and the values each on every path. Each part is
+    read against the options of its own ``Literal``: a key skipped because it
+    is spelt as a pace is a misspelt side, not an option of the keys.
+    """
+    paces, sides = frozenset(_PACES), frozenset(_TWO_SIDES)
+    assert ccl._branches(_TERMINATIONS) == {
+        ccl._WHOLE: paces,
+        ccl._ITEMS: sides,
+        ccl._VALUES: paces,
+    }
+    assert ccl._branches("Literal['fast', 'slow'] | float") == {ccl._WHOLE: paces}
+
+    def verdict(record: type) -> str | None:
+        check = ccl._post_init(record)
+        assert check is not None
+        return ccl._part_verdict(check, "sides", _TERMINATIONS, field=True)
+
+    assert verdict(_Terminations) is None
+    assert verdict(_KeysUnchecked) == (
+        "each item or key: never checked, so a misspelling passes"
+    )
+    assert verdict(_ValuesUnchecked) == (
+        "each value: never checked, so a misspelling passes"
+    )
+    assert verdict(_SingleUnchecked) == (
+        "the choice itself: never checked, so a misspelling passes"
+    )
+    skipped = verdict(_KeysSkipAPace)
+    assert skipped is not None
+    assert skipped.startswith("each item or key: ")
+    # The rule before parts: one check anywhere was enough for all three.
+    for record in (_KeysUnchecked, _ValuesUnchecked, _SingleUnchecked):
+        check = ccl._post_init(record)
+        assert check is not None
+        assert (
+            ccl._verdict(
+                ccl._checks_of(check, "sides", field=True, collection=True, depth=0)
+            )
+            is None
+        )
+
+
+def _one_pace_read_by_letter(paces: _Pace | Sequence[_Pace]) -> tuple[_Pace, ...]:
+    given = paces if isinstance(paces, str) else paces
+    return tuple(require_choice(pace, "paces", _PACES) for pace in given)
+
+
+def test_a_single_choice_wrapped_as_one_item_is_checked_with_the_items() -> None:
+    """``(paces,) if isinstance(paces, str) else paces`` holds a single pace as
+    the one item the loop checks; read letter by letter it is not checked as
+    the pace it is.
+    """
+    annotation = "Literal['fast', 'slow'] | Sequence[Literal['fast', 'slow']]"
+    assert (
+        ccl._part_verdict(_one_or_several_paces, "paces", annotation, field=False)
+        is None
+    )
+    assert (
+        ccl._part_verdict(_one_pace_read_by_letter, "paces", annotation, field=False)
+        == "the choice itself: never checked, so a misspelling passes"
+    )
 
 
 def test_a_stale_unchecked_entry_fails_and_a_needed_one_does_not(

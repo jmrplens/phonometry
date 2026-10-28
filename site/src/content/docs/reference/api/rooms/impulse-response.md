@@ -459,7 +459,7 @@ shaped_sweep_signal(
     f2: float,
     duration_s: float,
     *,
-    target: Literal['white', 'pink'] | tuple[np.ndarray, np.ndarray] = 'pink',
+    target: Literal['white', 'pink'] | tuple[ArrayLike, ArrayLike] = 'pink',
     amplitude: float = 1.0,
     start_delay: float | None = None,
     fade: float = 0.01,

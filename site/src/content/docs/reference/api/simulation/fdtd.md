@@ -227,7 +227,7 @@ sides into absorbing or locally reacting boundaries. Sources are soft
 | `absorbing_sides` | Which sides absorb: a single side name or an iterable drawn from `{"left", "right", "top", "bottom"}` (default: all four when `absorbing_layer_cells > 0`). `left`/`right` are the low/high column edges and `top`/`bottom` the low/high row edges (the default `imshow` origin). |
 | `absorbing_layer_reflection` | Target round-trip amplitude reflection of the sponge layer; sets the peak absorption rate. |
 | `damping` | Bulk amplitude decay rate [1/s]: a scalar applied to the whole field (a simple stand-in for air/wall absorption; `6.91 / T60` gives a `T60` seconds reverberant decay) or an `(ny, nx)` map for locally lossy regions, e.g. an equivalent fluid modelling a porous sample (plane waves inside a uniform lossy region follow $k = (\omega - j \sigma) / c$ with the real characteristic impedance $\rho c$). |
-| `shape` | Grid shape `(ny, nx)`, required only when `c` is a scalar. |
+| `shape` | Grid shape `(ny, nx)`, required only when `c` is a scalar; beside a map it must be the map's own shape. |
 | `edge_impedance` | Locally reacting boundary sides: a mapping from side name to a real specific acoustic impedance [Pa s/m], either a scalar or a per-edge-cell 1D array (length `ny` for `left`/ `right`, `nx` for `top`/`bottom`). Implements Eqs. (4.33)-(4.35); $Z = \rho c$ is a normal-incidence matched (anechoic) edge. A side cannot be both a sponge and an impedance boundary. |
 | `obstacle_mask` | Boolean map, shape `(ny, nx)`, of rigid cells: every face adjacent to a masked cell is closed (zero normal velocity, Eq. 4.32), rasterising arbitrary interior geometry. |
 | `compute` | Where the engine steps ([`Compute`](/phonometry/reference/api/simulation/compute/#compute)); `None` follows [`use`](/phonometry/reference/api/simulation/compute/#use), then `PHONOMETRY_COMPUTE`, then NumPy. |
@@ -236,8 +236,8 @@ sides into absorbing or locally reacting boundaries. Sources are soft
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `cfl`, `dx` or `absorbing_layer_reflection` is not a single number, `absorbing_layer_cells` is a flag, a text or an array where a count goes, `shape` is not a pair or holds a count that is not a number, a side of `absorbing_sides` or `edge_impedance` is not a text, or `compute` is neither a [`Compute`](/phonometry/reference/api/simulation/compute/#compute) nor `None`. |
-| ValueError | for an argument out of its range, a side that is not `"left"`, `"right"`, `"top"` or `"bottom"`, and for a `compute` that names a host: an engine steps in this process, and only [`fdtd_simulation`](/phonometry/reference/api/simulation/fdtd/#fdtd_simulation) runs on a node. |
+| TypeError | if `cfl`, `dx` or `absorbing_layer_reflection` is not a single number, `absorbing_layer_cells` is a flag, a text or an array where a count goes, `shape` is not a pair or holds a count that is not a number, a side of `absorbing_sides` or `edge_impedance` is not a text, an impedance of `edge_impedance` is not a real number or an array of them (a flag, `None` or a text among them), or `compute` is neither a [`Compute`](/phonometry/reference/api/simulation/compute/#compute) nor `None`. |
+| ValueError | for an argument out of its range, a `shape` given beside a map of another shape, a side that is not `"left"`, `"right"`, `"top"` or `"bottom"`, and for a `compute` that names a host: an engine steps in this process, and only [`fdtd_simulation`](/phonometry/reference/api/simulation/fdtd/#fdtd_simulation) runs on a node. |
 | ComputeImportError | when the library of the device `compute` asks for is not installed or does not import. |
 | ComputeDeviceError | when that device is not present, or fails a first small computation; with `fallback=True` the engine warns with [`ComputeFallbackWarning`](/phonometry/reference/api/simulation/compute/#computefallbackwarning) and steps on NumPy instead. |
 
@@ -386,7 +386,7 @@ A NumPy copy of the stored *field*, in this process, whatever the device.
 FDTD2D.plot_geometry(
     ax: Axes | None = None,
     *,
-    probes: Iterable[tuple[int, int]] | None = None,
+    probes: Iterable[Sequence[int | np.integer[Any]]] | NDArray[np.integer[Any]] | None = None,
     language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
@@ -524,7 +524,7 @@ spreading rather than the 3D spherical $1/r$.
 ```python
 FDTDBoundaries(
     *,
-    sides: Literal['rigid', 'absorbing'] | Mapping[Literal['left', 'right', 'top', 'bottom'], Literal['rigid', 'absorbing'] | float | Sequence[float] | NDArray[np.floating[Any]]] = 'rigid',
+    sides: Literal['rigid', 'absorbing'] | Mapping[Literal['left', 'right', 'top', 'bottom'], Literal['rigid', 'absorbing'] | float | np.floating[Any] | np.integer[Any] | Sequence[float] | NDArray[np.floating[Any] | np.integer[Any]]] = 'rigid',
     absorbing_layer_cells: int | np.integer[Any] = 20,
 )
 ```
@@ -538,15 +538,15 @@ is why it travels with the sides rather than beside them.
 
 | Name | Description |
 | :--- | :--- |
-| `sides` | `"rigid"` (default), `"absorbing"`, or a mapping from side name (`left`/`right`/`top`/`bottom`) to `"rigid"`, `"absorbing"`, or a real specific impedance [Pa s/m] (scalar or per-edge-cell 1D array, Eqs. 4.33-4.35); a side the mapping leaves out is rigid. A mapping is held as a read-only copy, and an impedance profile given as a list as a read-only array of the record's own, so a change to the caller's dictionary or list afterwards does not reach the record. |
+| `sides` | `"rigid"` (default), `"absorbing"`, or a mapping from side name (`left`/`right`/`top`/`bottom`) to `"rigid"`, `"absorbing"`, or a real specific impedance [Pa s/m] (scalar or per-edge-cell 1D array, Eqs. 4.33-4.35); a side the mapping leaves out is rigid. A mapping is held as a read-only copy, an impedance as the float a run reads, and a profile, given as a list or as an array of any real type, as a read-only float64 array of the record's own, so a change to the caller's dictionary, list or array afterwards does not reach the record. |
 | `absorbing_layer_cells` | Sponge-layer thickness for absorbing sides, in cells, held as the whole number it names. |
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | for `sides` that are neither a name nor a mapping, a side of `sides` that is not a text, or an `absorbing_layer_cells` that is a flag, a text, an array or anything else that is not a number. |
-| ValueError | for a side that is not `"left"`, `"right"`, `"top"` or `"bottom"`, a termination name that is not `"rigid"` or `"absorbing"`, or an `absorbing_layer_cells` that is not a whole number. |
+| TypeError | for `sides` that are neither a name nor a mapping, a side of `sides` that is not a text, a termination that is neither a name nor a real number or an array of them (a flag, `None` or a complex number among them), or an `absorbing_layer_cells` that is a flag, a text, an array or anything else that is not a number. |
+| ValueError | for a side that is not `"left"`, `"right"`, `"top"` or `"bottom"`, a termination name that is not `"rigid"` or `"absorbing"`, a ragged impedance profile or an impedance too large for a float, or an `absorbing_layer_cells` that is not a whole number. |
 
 ## FDTDRecording
 
@@ -699,7 +699,7 @@ changes afterwards reaches a checked run.
 | `dx` | Grid spacing [m] (square cells). |
 | `duration_s` | Physical time to simulate [s]. |
 | `sources` | One or more of [`GaussianPulse`](/phonometry/reference/api/simulation/fdtd/#gaussianpulse), [`CWSource`](/phonometry/reference/api/simulation/fdtd/#cwsource), [`SignalSource`](/phonometry/reference/api/simulation/fdtd/#signalsource) or [`PlaneWaveSource`](/phonometry/reference/api/simulation/fdtd/#planewavesource). |
-| `shape` | Grid shape `(ny, nx)`, required when `c` is a scalar. |
+| `shape` | Grid shape `(ny, nx)`, required when `c` is a scalar; beside a map it must be the map's own shape. |
 | `rho` | Density map [kg/m3]; scalar or `(ny, nx)` array. |
 | `cfl` | Courant number in `(0, 1)` (Eqs. 4.13-4.14); the time step is $\Delta t = C_\mathrm{N}\, \Delta x / (c_{\max} \sqrt{2})$. Default 0.6. |
 | `recording` | What the run records ([`FDTDRecording`](/phonometry/reference/api/simulation/fdtd/#fdtdrecording)): the probe cells, and the snapshot cadence and decimation. `None` records nothing but the time axis. |
@@ -712,7 +712,7 @@ changes afterwards reaches a checked run.
 | Exception | When |
 | :--- | :--- |
 | TypeError | If an argument is of the wrong type: a `duration_s`, `cfl` or `dx` that is not one number, a `recording` that is neither an [`FDTDRecording`](/phonometry/reference/api/simulation/fdtd/#fdtdrecording) nor `None`, `boundaries` that are neither an [`FDTDBoundaries`](/phonometry/reference/api/simulation/fdtd/#fdtdboundaries) nor `None`, a `shape` that is not a pair or holds a count that is not a number, a complex medium, or an `obstacle_mask` that is not boolean. |
-| ValueError | If an argument is out of its range, a `shape` is not two whole numbers of one cell or more, or a source, a probe or the obstacle does not fit the grid. |
+| ValueError | If an argument is out of its range, a `shape` is not two whole numbers of one cell or more or is given beside a map of another shape, or a source, a probe or the obstacle does not fit the grid. |
 
 ## GaussianPulse
 

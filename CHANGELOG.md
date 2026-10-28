@@ -4219,40 +4219,59 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   a protocol member that is not a property, and a module `__getattr__` a
   type checker can see.
 
-- **The FDTD engines and the records they run take what runs, and a
-  misspelt side is refused where it is written.** `simulation.FDTD2D` and
+- **The FDTD engines and the records they run take what runs, and a misspelt
+  side is refused where it is written.** `simulation.FDTD2D` and
   `simulation.ElasticFDTD2D` take their maps (`c`, `rho`, `damping`, `c_p`,
-  `c_s`, `obstacle_mask` and an impedance profile of `edge_impedance`) as
-  any array-like, nested lists included, their `shape` as a tuple or a list
-  of two whole numbers, and every count (`absorbing_layer_cells`, the
-  `n_steps`, `snapshot_every` and `snapshot_decimation` of `run()`, the
-  bounds of `add_contour_probe`) as a NumPy integer too, as they did when the
-  call ran. `simulation.FDTDRun`, `simulation.ElasticRun`, the six sources,
-  the two recordings and the two boundaries declare the constructor a type
-  checker reads, which takes the same: `FDTDRun(c=[[343.0, ...], ...])`,
-  `GaussianPulse(ix=np.int64(4), ...)` and a float32 map type-check, and the
-  fields keep the types they hold (a map is any float array, since a float32
-  map is held as given). `simulation.FDTDBoundaries` and
-  `simulation.ElasticBoundaries` check their sides and the names that
-  terminate them when they are built, and hold the sponge thickness as the
-  whole number of cells it names, refused there when it is no count, where a
-  run that held them refused a misspelt side, and read the thickness only
-  when a side absorbed; `simulation.PlaneWaveSource` checks its direction
-  when it is built. The sides of `absorbing_sides`, `free_sides` and
-  `edge_impedance`, the fields of an `ElasticRecording`, the direction of a
-  `ForceSource` and of `FDTD2D.add_plane_wave`, the field of
-  `ElasticFDTD2D.collocated` and the `kind` of both results' `.plot()` are
-  checked as written: a value that is not a text raises `TypeError`, where it
-  raised `ValueError`, and the message is the one every choice raises. A run
-  holds a `shape` it is given as a pair of ints, a list included, and
-  refuses a malformed one beside a map too. What the engines compute did not
-  move: `engine-digests.json` is unchanged, and a new CuPy proof is recorded
-  in `gpu-parity.lock`. The checks of the parameters, of the records a
-  caller builds, of the choices and of the documented `TypeError` no longer
-  leave the files `scripts/gpu_parity.py` fingerprints out, and
+  `c_s`, `obstacle_mask` and an impedance profile of `edge_impedance`) as any
+  array-like, nested lists included, their `shape` as a tuple or a list of two
+  whole numbers, and every count (`absorbing_layer_cells`, the `n_steps`,
+  `snapshot_every` and `snapshot_decimation` of `run()`, the bounds of
+  `add_contour_probe`) as a NumPy integer too, as they did when the call ran;
+  `FDTD2D.plot_geometry` takes the probe cells `FDTDRecording` takes, NumPy
+  indices, lists and an array of pairs included. `simulation.FDTDRun`,
+  `simulation.ElasticRun`, the six sources, the two recordings and the two
+  boundaries declare the constructor a type checker reads, which takes the
+  same: `FDTDRun(c=[[343.0, ...], ...])`, `GaussianPulse(ix=np.int64(4), ...)`
+  and a float32 map type-check, and the fields keep the types they hold (a map
+  is any float array, since a float32 map is held as given).
+  `simulation.FDTDBoundaries` and `simulation.ElasticBoundaries` check their
+  sides and the names that terminate them when they are built, and hold the
+  sponge thickness as the whole number of cells it names, refused there when
+  it is no count, where a run that held them refused a misspelt side, and read
+  the thickness only when a side absorbed. `FDTDBoundaries` holds each
+  impedance as the float, or the read-only float64 profile, a run reads, an
+  integer profile and a float32 scalar included, and refuses one that is no
+  real number with `TypeError` when it is built, as
+  `FDTD2D(edge_impedance=...)` now does: a flag ran as an impedance of 1 Pa
+  s/m, and `None` was refused only by the run, as an impedance that is not
+  finite. `simulation.PlaneWaveSource` checks its direction when it is built.
+  The sides of `absorbing_sides`, `free_sides` and `edge_impedance`, the
+  fields of an `ElasticRecording`, the direction of a `ForceSource` and of
+  `FDTD2D.add_plane_wave`, the field of `ElasticFDTD2D.collocated` and the
+  `kind` of both results' `.plot()` are checked as written: a value that is
+  not a text raises `TypeError`, where it raised `ValueError`, and the message
+  is the one every choice raises; `ElasticRecording(probe_fields="vy")`
+  records that one field, where the name was read a letter at a time. Both
+  engines and both runs read a `shape` whenever it is given: held as a pair of
+  ints, a list included, refused when malformed, and refused with `ValueError`
+  beside a map whose grid it does not name, where an engine ignored it and a
+  run held it; `ElasticFDTD2D.from_regions` reads its `shape` the same way,
+  where a third count was dropped. What the engines compute did not move:
+  `engine-digests.json` is unchanged, and a new CuPy proof is recorded in
+  `gpu-parity.lock`. The checks of the parameters, of the records a caller
+  builds, of the choices and of the documented `TypeError` no longer leave the
+  files `scripts/gpu_parity.py` fingerprints out.
   `scripts/check_parameter_annotations.py` follows a field handed by its name
-  together with its record (`_hold_cells(self, "ix", "iy")`), which it read
-  as never validated.
+  together with its record (`_hold_cells(self, "ix", "iy")`), which it read as
+  never validated, and the items and elements a body unpacks or indexes (`ny,
+  nx = shape`, `shape[0]`, `ix, iy = entry`), which found
+  `plot_geometry(probes)` and `room.shaped_sweep_signal(target)`, whose two
+  arrays `np.asarray` converts and which now takes `tuple[ArrayLike,
+  ArrayLike]`; `scripts/check_choice_literals.py` holds each part of a choice
+  of several parts (the single name, each key and each value of `Boundary |
+  Mapping[Side, Boundary | float]`) to a check of its own; and a record that
+  stores a field back as it was given, or wrapped in `MappingProxyType`
+  without a copy, no longer counts as converting it.
 
 - **A parameter whose name carries its unit and that has a default is written
   by name.** `signals.noise_signal(fs, duration_s=2.0)`,

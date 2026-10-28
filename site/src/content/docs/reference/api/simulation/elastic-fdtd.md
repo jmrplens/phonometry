@@ -235,7 +235,7 @@ interfaces converge to the physical traction continuity.
 | `absorbing_sides` | Which sides absorb: a single side name or an iterable drawn from `{"left", "right", "top", "bottom"}` (default: all four when `absorbing_layer_cells > 0`). |
 | `absorbing_layer_reflection` | Target round-trip amplitude reflection of the sponge layer; sets the peak absorption rate. |
 | `damping` | Bulk amplitude decay rate [1/s]: a scalar for the whole field or an `(ny, nx)` map for locally lossy regions. |
-| `shape` | Grid shape `(ny, nx)`, required only when `c_p` is a scalar. |
+| `shape` | Grid shape `(ny, nx)`, required only when `c_p` is a scalar; beside a map it must be the map's own shape. |
 | `free_sides` | Sides carrying a traction-free surface (stress imaging, Moczo et al. Eq. 9.9): a single side name or an iterable drawn from `{"left", "right", "top", "bottom"}` (default: none). The surface plane runs through the boundary row/column of cell centres, the normal stress is pinned to zero there and the shear stress is imaged antisymmetrically above it. A side cannot be both free and absorbing. |
 | `obstacle_mask` | Boolean map, shape `(ny, nx)`, of rigid cells: every face adjacent to a masked cell is closed (zero normal velocity) and every touching corner shear stress is zeroed, i.e. a shear-free rigid inclusion, rasterising arbitrary interior geometry. |
 | `compute` | Where the engine steps ([`Compute`](/phonometry/reference/api/simulation/compute/#compute)); `None` follows [`use`](/phonometry/reference/api/simulation/compute/#use), then `PHONOMETRY_COMPUTE`, then NumPy. |
@@ -244,8 +244,8 @@ interfaces converge to the physical traction continuity.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `cfl` or `absorbing_layer_reflection` is not a single number, `absorbing_layer_cells` is a flag, a text or an array where a count goes, a side of `absorbing_sides` or `free_sides` is not a text, or `compute` is neither a [`Compute`](/phonometry/reference/api/simulation/compute/#compute) nor `None`. |
-| ValueError | for an argument out of its range, a side that is not `"left"`, `"right"`, `"top"` or `"bottom"`, and for a `compute` that names a host: an engine steps in this process, and only [`elastic_fdtd_simulation`](/phonometry/reference/api/simulation/elastic-fdtd/#elastic_fdtd_simulation) runs on a node. |
+| TypeError | if `cfl` or `absorbing_layer_reflection` is not a single number, `absorbing_layer_cells` is a flag, a text or an array where a count goes, `shape` is not a pair or holds a count that is not a number, a side of `absorbing_sides` or `free_sides` is not a text, or `compute` is neither a [`Compute`](/phonometry/reference/api/simulation/compute/#compute) nor `None`. |
+| ValueError | for an argument out of its range, a `shape` given beside a map of another shape, a side that is not `"left"`, `"right"`, `"top"` or `"bottom"`, and for a `compute` that names a host: an engine steps in this process, and only [`elastic_fdtd_simulation`](/phonometry/reference/api/simulation/elastic-fdtd/#elastic_fdtd_simulation) runs on a node. |
 | ComputeImportError | when the library of the device `compute` asks for is not installed or does not import. |
 | ComputeDeviceError | when that device is not present, or fails a first small computation; with `fallback=True` the engine warns with [`ComputeFallbackWarning`](/phonometry/reference/api/simulation/compute/#computefallbackwarning) and steps on NumPy instead. |
 
@@ -334,7 +334,7 @@ or `numpy.s_[120:, :]` for the same thing spelled as a slice.
 
 | Name | Description |
 | :--- | :--- |
-| `shape` | Grid shape `(ny, nx)`. |
+| `shape` | Grid shape `(ny, nx)`, a pair of whole numbers of at least two cells each. |
 | `dx` | Grid spacing [m] (square cells). |
 | `background` | The material filling the whole grid first: a [`Material`](/phonometry/reference/api/simulation/elastic-fdtd/#material), a `(c_p, c_s, rho)` triple, e.g. [`WATER`](/phonometry/reference/api/simulation/elastic-fdtd/#water), or a solid's catalogue row ([`SolidMaterial`](/phonometry/reference/api/solids/catalogue/#solidmaterial)), whose bulk longitudinal speed, transverse speed and density are read through [`printed`](/phonometry/reference/api/io/io/#cataloguerowprinted). |
 | `regions` | `(where, material)` pairs painted in order, each material taken in any of the forms `background` takes. |
@@ -346,8 +346,8 @@ or `numpy.s_[120:, :]` for the same thing spelled as a slice.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If a mask does not match `shape` or a material spec is invalid, a catalogue row's refusal among them, or a `compute` keyword names a host: the engine steps in this process. |
-| TypeError | For a mask array that is not boolean, a catalogue row of a class that lacks any of the bulk longitudinal speed, the transverse speed and the density, or a `compute` keyword that is neither a [`Compute`](/phonometry/reference/api/simulation/compute/#compute) nor `None`. |
+| ValueError | If `shape` is not two whole numbers of two cells or more, a mask does not match `shape` or a material spec is invalid, a catalogue row's refusal among them, or a `compute` keyword names a host: the engine steps in this process. |
+| TypeError | For a `shape` that is not a pair or holds a count that is not a number, a mask array that is not boolean, a catalogue row of a class that lacks any of the bulk longitudinal speed, the transverse speed and the density, or a `compute` keyword that is neither a [`Compute`](/phonometry/reference/api/simulation/compute/#compute) nor `None`. |
 | ComputeImportError | When the library of the device a `compute` keyword asks for is not installed or does not import. |
 | ComputeDeviceError | When that device is not present, or fails a first small computation; with `fallback=True` the engine warns with [`ComputeFallbackWarning`](/phonometry/reference/api/simulation/compute/#computefallbackwarning), pointing at the line that called this method, and steps on NumPy instead. |
 
@@ -528,7 +528,7 @@ Domain size `(lx, ly)` [m].
 ElasticRecording(
     *,
     probes: Sequence[Sequence[int | np.integer[Any]]] | NDArray[np.integer[Any]] = (),
-    probe_fields: Sequence[Literal['p', 'vx', 'vy']] = ('vy',),
+    probe_fields: Literal['p', 'vx', 'vy'] | Sequence[Literal['p', 'vx', 'vy']] = ('vy',),
     snapshot_every: int | np.integer[Any] | None = None,
     snapshot_field: Literal['p', 'vx', 'vy'] = 'p',
     snapshot_decimation: int | np.integer[Any] = 1,
@@ -547,7 +547,7 @@ nothing (the default) runs the physics and keeps only the time axis.
 | Name | Description |
 | :--- | :--- |
 | `probes` | Probe cells as `(ix, iy)` index pairs. |
-| `probe_fields` | Which fields each probe records, drawn from `("p", "vx", "vy")` (default `("vy",)`, the component a surface accelerometer would see). |
+| `probe_fields` | Which fields each probe records, drawn from `("p", "vx", "vy")` (default `("vy",)`, the component a surface accelerometer would see); a single name records that field alone. |
 | `snapshot_every` | Record a full field snapshot every this many steps (and at $t = 0$); `None` records none. |
 | `snapshot_field` | Field recorded in the snapshots (`"p"`/`"vx"`/`"vy"`, interpolated to cell centres). |
 | `snapshot_decimation` | Keep every this many cells along each axis in a snapshot (default 1, every cell); the result records it. |
@@ -598,7 +598,7 @@ grid), and nothing the caller changes afterwards reaches a checked run.
 | `duration_s` | Physical time to simulate [s]. |
 | `sources` | One or more of [`ExplosionSource`](/phonometry/reference/api/simulation/elastic-fdtd/#explosionsource) or [`ForceSource`](/phonometry/reference/api/simulation/elastic-fdtd/#forcesource). |
 | `rho` | Density map [kg/m3]; scalar or `(ny, nx)` array. |
-| `shape` | Grid shape `(ny, nx)`, required when `c_p` is scalar. |
+| `shape` | Grid shape `(ny, nx)`, required when `c_p` is scalar; beside a map it must be the map's own shape. |
 | `cfl` | Courant number in `(0, 1)` (Virieux Eqs. 6-7); the time step is $\Delta t = C_\mathrm{N}\, \Delta x / (c_{\mathrm{p},\max} \sqrt{2})$. Default 0.6. |
 | `recording` | What the run records ([`ElasticRecording`](/phonometry/reference/api/simulation/elastic-fdtd/#elasticrecording)): the probe cells and their fields, and the snapshot cadence and field. `None` records nothing but the time axis. |
 | `boundaries` | How the domain edges are terminated ([`ElasticBoundaries`](/phonometry/reference/api/simulation/elastic-fdtd/#elasticboundaries)); `None` is rigid on all four sides. |
@@ -610,7 +610,7 @@ grid), and nothing the caller changes afterwards reaches a checked run.
 | Exception | When |
 | :--- | :--- |
 | TypeError | If an argument is of the wrong type, among them a `cfl` or `dx` that is not one number, a `recording` that is neither an [`ElasticRecording`](/phonometry/reference/api/simulation/elastic-fdtd/#elasticrecording) nor `None`, `boundaries` that are neither an [`ElasticBoundaries`](/phonometry/reference/api/simulation/elastic-fdtd/#elasticboundaries) nor `None`, or a `shape` that is not a pair or holds a count that is not a number. |
-| ValueError | If an argument is out of its range, a `shape` is not two whole numbers of one cell or more, or a source, a probe or the obstacle does not fit the grid. |
+| ValueError | If an argument is out of its range, a `shape` is not two whole numbers of one cell or more or is given beside a map of another shape, or a source, a probe or the obstacle does not fit the grid. |
 
 ## ExplosionSource
 

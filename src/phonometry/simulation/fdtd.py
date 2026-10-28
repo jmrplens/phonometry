@@ -56,6 +56,7 @@ from __future__ import annotations
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from functools import cached_property
+from numbers import Real
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Literal, Protocol
 
@@ -130,6 +131,10 @@ _BOUNDARY_NAMES: tuple[AcousticBoundary, ...] = ("rigid", "absorbing")
 
 #: What a result's ``plot`` draws.
 _PLOT_KINDS: tuple[Literal["probes", "snapshot"], ...] = ("probes", "snapshot")
+
+#: The NumPy kinds of a real number an impedance may be given as: signed and
+#: unsigned integers and floats, never a flag, a complex number or a text.
+_REAL_KINDS = "iuf"
 
 #: The target reflection of a sponge layer when the caller names none: the
 #: default of both engines, which a run keeps.
@@ -661,22 +666,50 @@ def _grid_shape(shape: object) -> tuple[int, int]:
     return ny, nx
 
 
+def _given_grid(shape: GridShape | None) -> tuple[int, int] | None:
+    """The grid a given ``shape`` names, checked whether a map is given beside it or not.
+
+    :raises TypeError: as :func:`_grid_shape`.
+    :raises ValueError: as :func:`_grid_shape`.
+    """
+    return None if shape is None else _grid_shape(shape)
+
+
+def _map_on_grid(name: str, field: Field2D, grid: tuple[int, int] | None) -> None:
+    """Refuse a ``shape`` given beside a map that names another grid.
+
+    :raises ValueError: when *grid* is given and the map has another shape.
+    """
+    if grid is not None and field.shape != grid:
+        msg = (
+            f"shape {grid} does not match the {name} map, whose shape is "
+            f"{field.shape}; give shape only for a scalar {name}, or the map's own"
+        )
+        raise ValueError(msg)
+
+
 def _resolve_c_map(c: ArrayLike, shape: GridShape | None) -> Field2D:
-    """Broadcast/validate the sound-speed spec into a positive 2D map."""
+    """Broadcast/validate the sound-speed spec into a positive 2D map.
+
+    A ``shape`` is read whenever it is given: it spreads a scalar ``c`` over
+    the grid it names, and beside a map it must name the map's grid.
+    """
     if np.iscomplexobj(c):
         msg = "c must be real; a complex sound speed is not supported"
         raise TypeError(msg)
+    grid = _given_grid(shape)
     if np.isscalar(c):
-        if shape is None:
+        if grid is None:
             msg = "shape is required when c is a scalar"
             raise ValueError(msg)
-        c_map = np.full(_grid_shape(shape), float(np.real(c)), dtype=np.float64)
+        c_map = np.full(grid, float(np.real(c)), dtype=np.float64)
     else:
         c_map = np.asarray(c, dtype=np.float64)
     # The number is a count of array axes, not a quantity.
     if c_map.ndim != 2:  # noqa: PLR2004
         msg = "c must be a 2D (ny, nx) map"
         raise ValueError(msg)
+    _map_on_grid("c", c_map, grid)
     _positive_map("c", c_map)
     return c_map
 
@@ -714,9 +747,62 @@ def _resolve_sponge_sides(
     return tuple(require_choice(side, "absorbing_sides", _SIDES) for side in given)
 
 
+def _impedance_numbers(side: str, value: object) -> NDArray[Any]:
+    """One side's impedance read as numbers: a real scalar, or a profile of them.
+
+    Read as NumPy reads it, so no number moves; only what is no real number
+    is refused here, where ``np.asarray(value, float)`` would read a flag as
+    an impedance of 1 Pa s/m and ``None`` as NaN. Real numbers NumPy keeps
+    as objects (an int too large for 64 bits, a ``Fraction``) are read as
+    floats, and one too large for a float is no finite impedance.
+
+    :raises TypeError: for a flag, ``None``, a text, a complex number or
+        anything else that is not a real number or an array of them.
+    :raises ValueError: for a ragged profile, or a number too large for a
+        float.
+    """
+    read = None
+    if value is not None and not isinstance(value, str | bool | np.bool_):
+        try:
+            read = np.asarray(value)
+        except ValueError:
+            msg = f"impedance for side {side!r} must be a scalar or a 1D array"
+            raise ValueError(msg) from None
+    if read is not None and read.dtype == np.object_:
+        read = _real_objects(side, read)
+    if read is None or read.dtype.kind not in _REAL_KINDS:
+        msg = (
+            f"impedance for side {side!r} must be a real number [Pa s/m] or an "
+            f"array of them; got {type(value).__name__}"
+        )
+        raise TypeError(msg)
+    return read
+
+
+def _real_objects(side: str, read: NDArray[np.object_]) -> NDArray[np.float64] | None:
+    """Real numbers NumPy holds as objects, as floats, or ``None`` when one is no real number.
+
+    :raises ValueError: for a number too large for a float.
+    """
+    if not all(
+        isinstance(item, Real) and not isinstance(item, bool | np.bool_)
+        for item in read.ravel().tolist()
+    ):
+        return None
+    try:
+        return read.astype(np.float64)
+    except OverflowError:
+        msg = f"impedance for side {side!r} must be strictly positive and finite"
+        raise ValueError(msg) from None
+
+
 def _edge_impedance_profile(side: str, value: ArrayLike, n_edge: int) -> Field2D:
-    """Broadcast/validate one side's impedance into a positive 1D profile."""
-    z = np.asarray(value, dtype=np.float64)
+    """Broadcast/validate one side's impedance into a positive 1D profile.
+
+    :raises TypeError: for an impedance that is not a real number or an
+        array of them (:func:`_impedance_numbers`).
+    """
+    z = _impedance_numbers(side, value).astype(np.float64)
     if z.ndim == 0:
         z = np.full(n_edge, float(z), dtype=np.float64)
     if z.shape != (n_edge,):
@@ -1307,7 +1393,7 @@ class FDTD2D:
         lossy region follow :math:`k = (\omega - j \sigma) / c` with the
         real characteristic impedance :math:`\rho c`).
     :param shape: Grid shape ``(ny, nx)``, required only when ``c`` is a
-        scalar.
+        scalar; beside a map it must be the map's own shape.
     :param edge_impedance: Locally reacting boundary sides: a mapping from
         side name to a real specific acoustic impedance [Pa s/m], either a
         scalar or a per-edge-cell 1D array (length ``ny`` for ``left``/
@@ -1324,11 +1410,14 @@ class FDTD2D:
         a single number, ``absorbing_layer_cells`` is a flag, a text or an array
         where a count goes, ``shape`` is not a pair or holds a count that is
         not a number, a side of ``absorbing_sides`` or ``edge_impedance`` is
-        not a text, or ``compute`` is neither a :class:`Compute` nor ``None``.
-    :raises ValueError: for an argument out of its range, a side that is not
-        ``"left"``, ``"right"``, ``"top"`` or ``"bottom"``, and for a
-        ``compute`` that names a host: an engine steps in this process, and
-        only :func:`fdtd_simulation` runs on a node.
+        not a text, an impedance of ``edge_impedance`` is not a real number or
+        an array of them (a flag, ``None`` or a text among them), or
+        ``compute`` is neither a :class:`Compute` nor ``None``.
+    :raises ValueError: for an argument out of its range, a ``shape`` given
+        beside a map of another shape, a side that is not ``"left"``,
+        ``"right"``, ``"top"`` or ``"bottom"``, and for a ``compute`` that
+        names a host: an engine steps in this process, and only
+        :func:`fdtd_simulation` runs on a node.
     :raises ComputeImportError: when the library of the device ``compute``
         asks for is not installed or does not import.
     :raises ComputeDeviceError: when that device is not present, or fails a
@@ -1578,7 +1667,9 @@ class FDTD2D:
         self,
         ax: Axes | None = None,
         *,
-        probes: Iterable[tuple[int, int]] | None = None,
+        probes: Iterable[Sequence[int | np.integer[Any]]]
+        | NDArray[np.integer[Any]]
+        | None = None,
         language: Language = "en",
         **kwargs: Any,
     ) -> Axes:
@@ -2077,19 +2168,23 @@ class FDTDBoundaries(OwnsArrays):
         side name (``left``/``right``/``top``/``bottom``) to ``"rigid"``,
         ``"absorbing"``, or a real specific impedance [Pa s/m] (scalar or
         per-edge-cell 1D array, Eqs. 4.33-4.35); a side the mapping leaves
-        out is rigid. A mapping is held as a read-only copy, and an
-        impedance profile given as a list as a read-only array of the
-        record's own, so a change to the caller's dictionary or list
+        out is rigid. A mapping is held as a read-only copy, an impedance
+        as the float a run reads, and a profile, given as a list or as an
+        array of any real type, as a read-only float64 array of the
+        record's own, so a change to the caller's dictionary, list or array
         afterwards does not reach the record.
     :param absorbing_layer_cells: Sponge-layer thickness for absorbing sides,
         in cells, held as the whole number it names.
     :raises TypeError: for ``sides`` that are neither a name nor a mapping,
-        a side of ``sides`` that is not a text, or an ``absorbing_layer_cells``
-        that is a flag, a text, an array or anything else that is not a
-        number.
+        a side of ``sides`` that is not a text, a termination that is
+        neither a name nor a real number or an array of them (a flag,
+        ``None`` or a complex number among them), or an
+        ``absorbing_layer_cells`` that is a flag, a text, an array or
+        anything else that is not a number.
     :raises ValueError: for a side that is not ``"left"``, ``"right"``,
         ``"top"`` or ``"bottom"``, a termination name that is not
-        ``"rigid"`` or ``"absorbing"``, or an ``absorbing_layer_cells`` that
+        ``"rigid"`` or ``"absorbing"``, a ragged impedance profile or an
+        impedance too large for a float, or an ``absorbing_layer_cells`` that
         is not a whole number.
     """
 
@@ -2104,27 +2199,45 @@ class FDTDBoundaries(OwnsArrays):
             self,
             *,
             sides: AcousticBoundary
-            | Mapping[Side, AcousticBoundary | float | Sequence[float] | Field2D] = (
-                "rigid"
-            ),
+            | Mapping[
+                Side,
+                AcousticBoundary
+                | float
+                | np.floating[Any]
+                | np.integer[Any]
+                | Sequence[float]
+                | NDArray[np.floating[Any] | np.integer[Any]],
+            ] = "rigid",
             absorbing_layer_cells: int | np.integer[Any] = 20,
         ) -> None: ...
 
     def __post_init__(self) -> None:
         """Refuse an unknown side or termination, and hold the sides and the thickness.
 
-        A mapping of sides is held as a read-only copy of its own, and the
-        thickness as the whole number of cells it names. Whether an
-        impedance fits its edge, and the thickness the grid, is checked where
-        a run reads them, the first place a grid exists.
+        A mapping of sides is held as a read-only copy of its own, each
+        impedance as the float or the float64 profile a run reads, and the
+        thickness as the whole number of cells it names. Whether a profile
+        fits its edge, an impedance is positive, and the thickness fits the
+        grid, is checked where a run reads them, the first place a grid
+        exists.
         """
         if isinstance(self.sides, Mapping):
-            held: dict[Side, object] = {}
+            held: dict[Side, AcousticBoundary | float | Field2D] = {}
             for side, value in self.sides.items():
                 require_choice(side, "sides", _SIDES)
                 if isinstance(value, str):
-                    require_choice(value, f"sides[{side!r}]", _BOUNDARY_NAMES)
-                held[side] = _held_map(value)
+                    held[side] = require_choice(
+                        value, f"sides[{side!r}]", _BOUNDARY_NAMES
+                    )
+                    continue
+                # An impedance, held as the float or the float64 profile a
+                # run reads (_edge_impedance_profile), read once here.
+                numbers = _impedance_numbers(side, value)
+                held[side] = (
+                    float(numbers)
+                    if numbers.ndim == 0
+                    else read_only_copy(numbers, np.float64)
+                )
             object.__setattr__(self, "sides", MappingProxyType(held))
         else:
             require_choice(self.sides, "sides", _BOUNDARY_NAMES)
@@ -2188,7 +2301,8 @@ class FDTDRun(OwnsArrays):
     :param duration_s: Physical time to simulate [s].
     :param sources: One or more of :class:`GaussianPulse`,
         :class:`CWSource`, :class:`SignalSource` or :class:`PlaneWaveSource`.
-    :param shape: Grid shape ``(ny, nx)``, required when ``c`` is a scalar.
+    :param shape: Grid shape ``(ny, nx)``, required when ``c`` is a scalar;
+        beside a map it must be the map's own shape.
     :param rho: Density map [kg/m3]; scalar or ``(ny, nx)`` array.
     :param cfl: Courant number in ``(0, 1)`` (Eqs. 4.13-4.14); the time step
         is :math:`\Delta t = C_\mathrm{N}\, \Delta x / (c_{\max} \sqrt{2})`.
@@ -2211,8 +2325,9 @@ class FDTDRun(OwnsArrays):
         that is not a pair or holds a count that is not a number, a complex
         medium, or an ``obstacle_mask`` that is not boolean.
     :raises ValueError: If an argument is out of its range, a ``shape`` is
-        not two whole numbers of one cell or more, or a source, a probe or
-        the obstacle does not fit the grid.
+        not two whole numbers of one cell or more or is given beside a map of
+        another shape, or a source, a probe or the obstacle does not fit the
+        grid.
     """
 
     c: float | Field2D
@@ -2248,8 +2363,8 @@ class FDTDRun(OwnsArrays):
     def __post_init__(self) -> None:
         """Hold the containers and the maps so they cannot change, then check every argument.
 
-        A ``shape`` is held as the pair of whole numbers it names, whether
-        the grid is read from it (a scalar ``c``) or from the map.
+        A ``shape`` is held as the pair of whole numbers it names: the grid a
+        scalar ``c`` is spread over, or, beside a map, the map's own grid.
         """
         object.__setattr__(self, "sources", tuple(self.sources))
         if self.shape is not None:
@@ -2467,7 +2582,9 @@ def _parse_boundaries(
     return tuple(absorbing), impedance
 
 
-def _probe_pairs(probes: Iterable[tuple[int, int]]) -> tuple[tuple[int, int], ...]:
+def _probe_pairs(
+    probes: Iterable[Sequence[int | np.integer[Any]]] | NDArray[np.integer[Any]],
+) -> tuple[tuple[int, int], ...]:
     """The probe cells as whole ``(ix, iy)`` pairs, read before any grid exists.
 
     :class:`FDTDRecording` reads them here when it is built, and
@@ -2495,7 +2612,7 @@ def _probe_pairs(probes: Iterable[tuple[int, int]]) -> tuple[tuple[int, int], ..
 
 
 def _probe_indices(
-    probes: Iterable[tuple[int, int]],
+    probes: Iterable[Sequence[int | np.integer[Any]]] | NDArray[np.integer[Any]],
     shape: tuple[int, int],
     obstacle: NDArray[np.bool_] | None,
 ) -> NDArray[np.int_]:

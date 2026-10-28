@@ -192,3 +192,50 @@ def test_a_misspelt_side_is_a_type_error_and_refused_when_built() -> None:
             shape=(_NY, _NX),
             free_sides="middle",  # type: ignore[arg-type]
         )
+
+
+def test_the_geometry_preview_takes_the_cells_a_recording_takes() -> None:
+    """``plot_geometry(probes=...)`` reads each cell as ``FDTDRecording`` does:
+    NumPy indices, a list for a pair, an array of pairs, a generator of them.
+    """
+    pytest.importorskip("matplotlib")
+    import matplotlib.pyplot as plt
+
+    sim = FDTD2D(343.0, 0.01, shape=(_NY, _NX))
+    cells = np.array([[3, 4], [5, 6]], dtype=np.int64)
+    for probes in (
+        [(np.int64(3), np.int64(4))],
+        [[3, 4], [5, 6]],
+        cells,
+        ((i, i) for i in range(2, 4)),
+    ):
+        sim.plot_geometry(probes=probes)
+        plt.close("all")
+
+
+def test_an_impedance_of_any_real_type_is_held_as_the_run_reads_it() -> None:
+    """An integer profile, a float32 scalar and a NumPy integer all ran."""
+    boundaries = FDTDBoundaries(
+        sides={
+            "left": np.full(_NY, 415, dtype=np.int64),
+            "right": np.float32(415.0),
+            "top": np.int64(415),
+            "bottom": [415.0] * _NX,
+        }
+    )
+    sides = boundaries.sides
+    assert not isinstance(sides, str)
+    assert sides["right"] == 415.0
+    with pytest.raises(TypeError, match="impedance for side 'left' must be a real"):
+        FDTDBoundaries(sides={"left": None})  # type: ignore[dict-item]
+
+
+def test_a_single_probe_field_and_a_sweep_target_of_lists() -> None:
+    """A single field name, and a sweep's target spectrum written as lists."""
+    from phonometry.room import shaped_sweep_signal
+
+    assert ElasticRecording(probe_fields="vx").probe_fields == ("vx",)
+    sweep = shaped_sweep_signal(
+        8000.0, 100.0, 2000.0, 0.1, target=([100.0, 1000.0, 4000.0], [0.0, -3.0, -6.0])
+    )
+    assert np.asarray(sweep).size > 0

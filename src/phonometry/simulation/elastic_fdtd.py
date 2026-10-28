@@ -119,10 +119,12 @@ from .fdtd import (
     _cleared,
     _expected_arrays,
     _finite,
+    _given_grid,
     _grid_shape,
     _held_map,
     _hold_cells,
     _integer,
+    _map_on_grid,
     _placement_here,
     _positive_finite,
     _positive_map,
@@ -595,7 +597,11 @@ def _elastic_grid(
     :return: ``(cp_map, dx, dt)``; the step is bounded by ``c_p`` alone.
     """
     _require_courant(cfl)
-    cp_map = _resolve_speed_map("c_p", c_p, shape)
+    # A shape is read whenever it is given: it spreads a scalar c_p over the
+    # grid it names, and beside a map it must name the map's grid.
+    grid = _given_grid(shape)
+    cp_map = _resolve_speed_map("c_p", c_p, grid)
+    _map_on_grid("c_p", cp_map, grid)
     _positive_map("c_p", cp_map)
     ny, nx = cp_map.shape
     if ny < _MIN_GRID_CELLS or nx < _MIN_GRID_CELLS:
@@ -822,7 +828,7 @@ class ElasticFDTD2D:
     :param damping: Bulk amplitude decay rate [1/s]: a scalar for the whole
         field or an ``(ny, nx)`` map for locally lossy regions.
     :param shape: Grid shape ``(ny, nx)``, required only when ``c_p`` is a
-        scalar.
+        scalar; beside a map it must be the map's own shape.
     :param free_sides: Sides carrying a traction-free surface (stress
         imaging, Moczo et al. Eq. 9.9): a single side name or an iterable
         drawn from ``{"left", "right", "top", "bottom"}`` (default: none).
@@ -838,12 +844,14 @@ class ElasticFDTD2D:
         follows :func:`use`, then ``PHONOMETRY_COMPUTE``, then NumPy.
     :raises TypeError: if ``cfl`` or ``absorbing_layer_reflection`` is not a single
         number, ``absorbing_layer_cells`` is a flag, a text or an array where a
-        count goes, a side of ``absorbing_sides`` or ``free_sides`` is not a
+        count goes, ``shape`` is not a pair or holds a count that is not a
+        number, a side of ``absorbing_sides`` or ``free_sides`` is not a
         text, or ``compute`` is neither a :class:`Compute` nor ``None``.
-    :raises ValueError: for an argument out of its range, a side that is not
-        ``"left"``, ``"right"``, ``"top"`` or ``"bottom"``, and for a
-        ``compute`` that names a host: an engine steps in this process, and
-        only :func:`elastic_fdtd_simulation` runs on a node.
+    :raises ValueError: for an argument out of its range, a ``shape`` given
+        beside a map of another shape, a side that is not ``"left"``,
+        ``"right"``, ``"top"`` or ``"bottom"``, and for a ``compute`` that
+        names a host: an engine steps in this process, and only
+        :func:`elastic_fdtd_simulation` runs on a node.
     :raises ComputeImportError: when the library of the device ``compute``
         asks for is not installed or does not import.
     :raises ComputeDeviceError: when that device is not present, or fails a
@@ -993,7 +1001,8 @@ class ElasticFDTD2D:
         maps, e.g. ``(slice(120, None), slice(None))`` for the lower half
         or ``numpy.s_[120:, :]`` for the same thing spelled as a slice.
 
-        :param shape: Grid shape ``(ny, nx)``.
+        :param shape: Grid shape ``(ny, nx)``, a pair of whole numbers of at
+            least two cells each.
         :param dx: Grid spacing [m] (square cells).
         :param background: The material filling the whole grid first: a
             :class:`Material`, a ``(c_p, c_s, rho)`` triple, e.g.
@@ -1008,11 +1017,13 @@ class ElasticFDTD2D:
             ``absorbing_layer_reflection``, ``damping``, ``free_sides``,
             ``obstacle_mask``, ``compute``).
         :return: The configured stepping engine.
-        :raises ValueError: If a mask does not match ``shape`` or a
-            material spec is invalid, a catalogue row's refusal among them,
-            or a ``compute`` keyword names a host: the engine steps in this
+        :raises ValueError: If ``shape`` is not two whole numbers of two
+            cells or more, a mask does not match ``shape`` or a material
+            spec is invalid, a catalogue row's refusal among them, or a
+            ``compute`` keyword names a host: the engine steps in this
             process.
-        :raises TypeError: For a mask array that is not boolean, a
+        :raises TypeError: For a ``shape`` that is not a pair or holds a
+            count that is not a number, a mask array that is not boolean, a
             catalogue row of a class that lacks any of the bulk longitudinal
             speed, the transverse speed and the density, or a ``compute``
             keyword that is neither a :class:`Compute` nor ``None``.
@@ -1023,8 +1034,7 @@ class ElasticFDTD2D:
             with :class:`ComputeFallbackWarning`, pointing at the line that
             called this method, and steps on NumPy instead.
         """
-        ny = _integer("shape[0]", shape[0])
-        nx = _integer("shape[1]", shape[1])
+        ny, nx = _grid_shape(shape)
         if ny < _MIN_GRID_CELLS or nx < _MIN_GRID_CELLS:
             msg = "the grid must be at least 2 x 2 cells"
             raise ValueError(msg)
@@ -1624,7 +1634,7 @@ class ElasticRecording(RichDisplay):
     :param probes: Probe cells as ``(ix, iy)`` index pairs.
     :param probe_fields: Which fields each probe records, drawn from
         ``("p", "vx", "vy")`` (default ``("vy",)``, the component a surface
-        accelerometer would see).
+        accelerometer would see); a single name records that field alone.
     :param snapshot_every: Record a full field snapshot every this many steps
         (and at :math:`t = 0`); ``None`` records none.
     :param snapshot_field: Field recorded in the snapshots
@@ -1658,7 +1668,7 @@ class ElasticRecording(RichDisplay):
             *,
             probes: Sequence[Sequence[int | np.integer[Any]]]
             | NDArray[np.integer[Any]] = (),
-            probe_fields: Sequence[Field] = ("vy",),
+            probe_fields: Field | Sequence[Field] = ("vy",),
             snapshot_every: int | np.integer[Any] | None = None,
             snapshot_field: Field = "p",
             snapshot_decimation: int | np.integer[Any] = 1,
@@ -1796,7 +1806,8 @@ class ElasticRun(OwnsArrays):
     :param sources: One or more of :class:`ExplosionSource` or
         :class:`ForceSource`.
     :param rho: Density map [kg/m3]; scalar or ``(ny, nx)`` array.
-    :param shape: Grid shape ``(ny, nx)``, required when ``c_p`` is scalar.
+    :param shape: Grid shape ``(ny, nx)``, required when ``c_p`` is scalar;
+        beside a map it must be the map's own shape.
     :param cfl: Courant number in ``(0, 1)`` (Virieux Eqs. 6-7); the time
         step is :math:`\Delta t = C_\mathrm{N}\, \Delta x / (c_{\mathrm{p},\max} \sqrt{2})`.
         Default 0.6.
@@ -1815,8 +1826,9 @@ class ElasticRun(OwnsArrays):
         that are neither an :class:`ElasticBoundaries` nor ``None``, or a
         ``shape`` that is not a pair or holds a count that is not a number.
     :raises ValueError: If an argument is out of its range, a ``shape`` is
-        not two whole numbers of one cell or more, or a source, a probe or
-        the obstacle does not fit the grid.
+        not two whole numbers of one cell or more or is given beside a map of
+        another shape, or a source, a probe or the obstacle does not fit the
+        grid.
     """
 
     c_p: float | Field2D
@@ -1854,8 +1866,8 @@ class ElasticRun(OwnsArrays):
     def __post_init__(self) -> None:
         """Hold the sources and the maps so they cannot change, then check every argument.
 
-        A ``shape`` is held as the pair of whole numbers it names, whether
-        the grid is read from it (a scalar ``c_p``) or from the map.
+        A ``shape`` is held as the pair of whole numbers it names: the grid a
+        scalar ``c_p`` is spread over, or, beside a map, the map's own grid.
         """
         object.__setattr__(self, "sources", tuple(self.sources))
         if self.shape is not None:
@@ -1998,15 +2010,17 @@ def _parse_elastic_boundaries(
     return tuple(absorbing), tuple(free)
 
 
-def _resolve_probe_fields(probe_fields: Sequence[Field]) -> tuple[Field, ...]:
+def _resolve_probe_fields(probe_fields: Field | Sequence[Field]) -> tuple[Field, ...]:
     """Validate the probe-field spec into a non-empty unique tuple.
 
     :raises TypeError: for a field that is not a text.
     :raises ValueError: for no field, a repeated field, or a field that is
         not ``"p"``, ``"vx"`` or ``"vy"``.
     """
+    # A bare string would iterate per character; treat it as one field.
+    given = (probe_fields,) if isinstance(probe_fields, str) else probe_fields
     fields = tuple(
-        require_choice(field, "probe_fields", _FIELD_NAMES) for field in probe_fields
+        require_choice(field, "probe_fields", _FIELD_NAMES) for field in given
     )
     if not fields:
         msg = "probe_fields must not be empty"

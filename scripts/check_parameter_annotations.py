@@ -60,7 +60,10 @@ extends, an explicit ``__init__`` or ``__call__`` included):
   np.integer[Any]``, ``BandFraction | np.integer[Any]``); one an
   ``isinstance`` check lets ``np.bool_`` through admits ``np.bool_``
   (``bool | np.bool_``). It is followed as a conversion is, a validation one
-  item at a time holding each item type to it. A parameter annotated a
+  item at a time holding each item type to it: an item a loop takes, an
+  unpacking binds (``ny, nx = shape``) or an index reads (``shape[0]``), and
+  an element of an item unpacked or indexed in turn (``ix, iy = entry``),
+  read against the elements of the annotation's items. A parameter annotated a
   whole number (``int``, ``Sequence[int]``) that reaches one of the shared
   scalar checks (``require_scalar``, ``require_positive`` and their kin,
   :data:`COUNTED`), which take a numpy integer as they take an int, admits
@@ -140,7 +143,14 @@ import check_return_overloads as overloads
 from ast_scan import ROOT, python_files
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
+    from collections.abc import (
+        Callable,
+        Collection,
+        Iterable,
+        Iterator,
+        Mapping,
+        Sequence,
+    )
 
 #: Where the package lives; the default when no path is given.
 SOURCE = ROOT / "src" / "phonometry"
@@ -666,16 +676,29 @@ class Annotations:
         """Whether an annotation leaves room for one number, or for one in each item.
 
         What a scalar part follows a value into: a parameter or a field that
-        may be one number, or a sequence whose items may each be one, which a
+        may be one number, a sequence whose items may each be one, which a
         body validates one item at a time (``for i in omitted: require_count(i,
-        ...)``).
+        ...)``), or a sequence of sequences whose elements may, which a body
+        unpacks item by item (``ix, iy = entry``).
         """
+        return self._scalars_within(module, node, bounds, depth=0)
+
+    def _scalars_within(
+        self,
+        module: str,
+        node: ast.expr | None,
+        bounds: dict[str, ast.expr],
+        *,
+        depth: int,
+    ) -> bool:
         if self.may_hold_a_number(module, node, bounds):
             return True
+        if depth >= _DEEPEST:
+            return False
         return any(
             self.resolve(where, member) in _CONTAINERS
             and any(
-                self.may_hold_a_number(where, item, {})
+                self._scalars_within(where, item, {}, depth=depth + 1)
                 for item in _items(member)
                 if not _is_ellipsis(item)
             )
@@ -728,6 +751,38 @@ class Annotations:
                 ast.unparse(item)
                 for item in _items(member)
                 if not (_is_ellipsis(item) or self.admits_scalar(kind, where, item, {}))
+            ]
+            if not refusing:
+                return []
+            found.update(dict.fromkeys(refusing))
+        return list(found)
+
+    def elements_refusing(
+        self,
+        kind: str,
+        module: str,
+        node: ast.expr | None,
+        bounds: dict[str, ast.expr],
+    ) -> list[str]:
+        """The element types of an annotation's nested sequences that refuse the numpy scalar of *kind*.
+
+        A body that unpacks each item of a parameter (``for entry in probes:
+        ix, iy = entry``) and validates each element takes it as the
+        validator does: the items of the annotation's sequences hold the
+        element types :meth:`items_refusing` reads. One sequence of the
+        annotation whose items all admit it in their elements is enough.
+        """
+        if node is None or self.admits_array_like(module, node, bounds):
+            return []
+        found: dict[str, None] = {}
+        for where, member in self.members(module, node, bounds):
+            if self.resolve(where, member) not in _CONTAINERS:
+                continue
+            refusing = [
+                element
+                for item in _items(member)
+                if not _is_ellipsis(item)
+                for element in self.items_refusing(kind, where, item, {})
             ]
             if not refusing:
                 return []
@@ -979,23 +1034,91 @@ class Bound:
     whole: frozenset[str]
     #: The tuple a vararg collects, and the names bound to it.
     pack: frozenset[str]
-    #: One item of a whole value, which a loop over it takes in turn.
+    #: One item of a whole value, which a loop over it takes in turn, an
+    #: unpacking of it binds (``ny, nx = shape``) or an index reads
+    #: (``shape[0]``).
     item: frozenset[str]
+    #: One element of an item, which an unpacking of the item binds (``ix,
+    #: iy = entry`` for each ``entry`` of ``probes``), an index reads or a
+    #: loop over the item takes.
+    element: frozenset[str] = frozenset()
 
 
-#: What each kind of name holds once a loop reads it item by item: a pack
-#: gives its arguments, each a whole value; a whole value gives its items.
-#: An item of an item is not followed.
-_ITERATED = {"pack": "whole", "whole": "item"}
+#: What each kind of name holds once a loop, an unpacking or an index reads
+#: it item by item: a pack gives its arguments, each a whole value; a whole
+#: value gives its items, and an item its elements. An element is not read
+#: further.
+_ITERATED = {"pack": "whole", "whole": "item", "item": "element"}
+
+#: How deep a route reads a parameter: 0 the whole value, 1 one item of it,
+#: 2 one element of an item.
+_LEVELS = {"whole": 0, "pack": 0, "item": 1, "element": 2}
+_DEEPEST = 2
+
+
+def _indexed(node: ast.expr | None) -> ast.expr | None:
+    """What a subscript by a whole-number constant indexes: ``shape`` of ``shape[0]``.
+
+    A slice keeps the sequence it cuts, and a text indexes a mapping by a
+    key, so neither reads an item.
+    """
+    if not isinstance(node, ast.Subscript):
+        return None
+    index = node.slice
+    if isinstance(index, ast.UnaryOp) and isinstance(index.op, ast.USub):
+        index = index.operand
+    if (
+        isinstance(index, ast.Constant)
+        and isinstance(index.value, int)
+        and not isinstance(index.value, bool)
+    ):
+        return node.value
+    return None
 
 
 def _kind(node: ast.expr | None, names: dict[str, set[str]]) -> str | None:
-    """What an expression holds of the parameter, if it holds it at all."""
+    """What an expression holds of the parameter, if it holds it at all.
+
+    A copy holds what it copies, and a subscript by a whole-number constant
+    one item of what it indexes.
+    """
     for kind, bound in names.items():
         if _carries(node, frozenset(bound)):
             return kind
     copied = _single_argument(node, _COPIES)
-    return _kind(copied, names) if copied is not None else None
+    if copied is not None:
+        return _kind(copied, names)
+    indexed = _indexed(node)
+    if indexed is None:
+        return None
+    whole = _kind(indexed, names)
+    return _ITERATED.get(whole) if whole is not None else None
+
+
+def _level(node: ast.expr | None, bound: Bound) -> int | None:
+    """How deep a call argument reads the parameter: :data:`_LEVELS`, or ``None``.
+
+    The parameter or a copy of it, one of the names bound to an item or to
+    an element of one, or a subscript by a whole-number constant of any of
+    them, which reads one level deeper: ``shape[0]`` is an item of
+    ``shape``, and ``args[0]`` of a vararg's pack one whole argument.
+    """
+    if node is None:
+        return None
+    for names, at in (
+        (bound.whole | bound.pack, 0),
+        (bound.item, 1),
+        (bound.element, 2),
+    ):
+        if names and _holds(node, names):
+            return at
+    indexed = _indexed(node)
+    if indexed is None:
+        return None
+    if bound.pack and _holds(indexed, bound.pack):
+        return 0
+    deeper = _level(indexed, bound)
+    return deeper + 1 if deeper is not None and deeper < _DEEPEST else None
 
 
 def _single_argument(
@@ -1028,6 +1151,22 @@ def _unpacked(
     ):
         for part, element in zip(target.elts, value.elts, strict=True):
             yield from _unpacked(part, element, names)
+    elif isinstance(target, ast.Tuple | ast.List):
+        # ``ny, nx = shape`` binds each item of a whole value, and ``ix, iy =
+        # entry`` each element of an item.
+        yield from _spread(target, _kind(value, names))
+
+
+def _spread(
+    target: ast.Tuple | ast.List, kind: str | None
+) -> Iterator[tuple[str, str]]:
+    """The names an unpacking of a value of *kind* binds, each one level deeper."""
+    deeper = _ITERATED.get(kind) if kind is not None else None
+    if deeper is None:
+        return
+    for part in target.elts:
+        if isinstance(part, ast.Name):
+            yield part.id, deeper
 
 
 def _taken(
@@ -1058,8 +1197,13 @@ def _taken(
             yield from _taken(target, arguments[0], names)
             return
     kind = _kind(source, names)
-    if kind in _ITERATED and isinstance(target, ast.Name):
+    if kind not in _ITERATED:
+        return
+    if isinstance(target, ast.Name):
         yield target.id, _ITERATED[kind]
+    elif isinstance(target, ast.Tuple | ast.List):
+        # ``for ix, iy in probes`` unpacks each item it takes.
+        yield from _spread(target, _ITERATED[kind])
 
 
 def _enclosing_parts(scope: ast.AST) -> list[ast.AST]:
@@ -1268,6 +1412,7 @@ def _scoped(
         whole=frozenset(names["whole"]),
         pack=frozenset(names["pack"]),
         item=frozenset(names["item"]),
+        element=frozenset(names["element"]),
     )
     for node in own:
         if isinstance(node, ast.Call):
@@ -1303,7 +1448,12 @@ def _bound(
     *split* is how a scope splits (:func:`_scope_nodes`), which a reader of
     several names of one body reads once per scope.
     """
-    names: dict[str, set[str]] = {"whole": set(), "pack": set(), "item": set()}
+    names: dict[str, set[str]] = {
+        "whole": set(),
+        "pack": set(),
+        "item": set(),
+        "element": set(),
+    }
     names["pack" if vararg else "whole"].add(name)
     return list(_scoped(node, names, Reading(name, texts, split)))
 
@@ -1399,7 +1549,7 @@ class Reader:
         self._rebound: dict[int, frozenset[str]] = {}
         self._calls: dict[int, list[ast.Call]] = {}
         self._refusing: dict[int, frozenset[int]] = {}
-        self._memo: dict[tuple[str, str, str, str], list[tuple[str, bool, int]]] = {}
+        self._memo: dict[tuple[str, str, str, str], list[tuple[str, int, int]]] = {}
         self._active: set[tuple[str, str, str, str]] = set()
         self._cut = False
         self._public: frozenset[str] | None = None
@@ -1532,17 +1682,18 @@ class Reader:
         function: overloads.Function,
         name: str,
         *,
-        item: bool = False,
+        level: int = 0,
         target: Target = CONVERSION,
     ) -> str | None:
         """How parameter *name* of *function* reaches the end of a route of *target*.
 
         A conversion for the array part, a validator or a check that admits
-        a numpy scalar for a scalar part. With *item*, how one item of it
-        does, the body reading the parameter item by item.
+        a numpy scalar for a scalar part. At *level* 1, how one item of it
+        does, the body reading the parameter item by item; at level 2, how
+        one element of an item does (``ix, iy = entry``).
         """
-        for how, of_item in self._routes(function, name, 0, target):
-            if of_item == item:
+        for how, at in self._routes(function, name, 0, target):
+            if at == level:
                 return how
         return None
 
@@ -1652,19 +1803,19 @@ class Reader:
         name: str,
         depth: int,
         target: Target,
-    ) -> Iterator[tuple[str, bool]]:
-        """Each way parameter *name* reaches the end of a route, and whether an item of it does.
+    ) -> Iterator[tuple[str, int]]:
+        """Each way parameter *name* reaches the end of a route, and how deep it reads it.
 
         Only the routes that stay within :data:`DEPTH` calls of the public
         function, *depth* calls having been made to reach this one.
         """
-        for how, of_item, hops in self._known_routes(function, name, target):
+        for how, level, hops in self._known_routes(function, name, target):
             if hops <= DEPTH - depth:
-                yield how, of_item
+                yield how, level
 
     def _known_routes(
         self, function: overloads.Function, name: str, target: Target
-    ) -> list[tuple[str, bool, int]]:
+    ) -> list[tuple[str, int, int]]:
         """Every route of one parameter, with the calls it takes, read once.
 
         A helper several public functions hand a value to is read once per
@@ -1690,61 +1841,71 @@ class Reader:
 
     def _read_routes(
         self, function: overloads.Function, name: str, target: Target
-    ) -> Iterator[tuple[str, bool, int]]:
+    ) -> Iterator[tuple[str, int, int]]:
         node = function.implementation
         if node is None:
             return
         vararg = node.args.vararg is not None and node.args.vararg.arg == name
-        ends = self._ends(target)
         for call, bound in self._bound(function, node, name, vararg=vararg):
-            for names, of_item in (
-                (bound.whole | bound.pack, False),
-                (bound.item, True),
-            ):
-                if not names:
-                    continue
-                positions = [
-                    index
-                    for index, value in enumerate(call.args)
-                    if _holds(value, names)
-                ]
-                keywords = [
-                    keyword.arg
-                    for keyword in call.keywords
-                    if keyword.arg is not None and _holds(keyword.value, names)
-                ]
+            given = [_level(value, bound) for value in call.args]
+            named = [
+                (keyword.arg, _level(keyword.value, bound))
+                for keyword in call.keywords
+                if keyword.arg is not None
+            ]
+            for level in range(_DEEPEST + 1):
+                positions = [index for index, at in enumerate(given) if at == level]
+                keywords = [keyword for keyword, at in named if at == level]
                 if not (positions or keywords):
                     continue
-                callee = self._callee(function, call, ends)
-                if callee is None:
-                    continue
-                reached, bound_self = callee
-                if reached == "builtins.isinstance":
-                    if 0 in positions and self._admits(function, call, target):
-                        accepted = sorted(
-                            self._type_names(function.module, call.args[1], 0)
-                            & target.accepted
-                        )
-                        shown = accepted[0].replace("numpy.", "np.")
-                        yield f"isinstance(..., {shown}) admits it", of_item, 0
-                    continue
-                if reached in ends:
-                    where, keyword = ends[reached]
-                    if where is None or where in positions or keyword in keywords:
-                        yield _ending(reached, target), of_item, 0
-                    continue
-                handed = (
-                    self._constructed(reached, positions, keywords, target)
-                    if reached in self.annotations.classes
-                    else self._handed(
-                        reached, positions, keywords, bound=bound_self, target=target
-                    )
+                yield from self._called(
+                    function, call, positions, keywords, level, target
                 )
-                for how, deeper, hops in handed:
-                    if not (of_item and deeper):
-                        yield how, of_item or deeper, hops
             yield from self._handed_by_name(function, call, name, target)
             yield from self._read_in_method(function, call, name, target)
+
+    def _called(  # noqa: PLR0913
+        self,
+        function: overloads.Function,
+        call: ast.Call,
+        positions: list[int],
+        keywords: list[str],
+        level: int,
+        target: Target,
+    ) -> Iterator[tuple[str, int, int]]:
+        """Where a call takes the parameter, read at *level* (:data:`_LEVELS`), leads.
+
+        A route the callee reads one item of its own parameter along reads
+        one level deeper here, as far as an element of an item.
+        """
+        ends = self._ends(target)
+        callee = self._callee(function, call, ends)
+        if callee is None:
+            return
+        reached, bound_self = callee
+        if reached == "builtins.isinstance":
+            if 0 in positions and self._admits(function, call, target):
+                accepted = sorted(
+                    self._type_names(function.module, call.args[1], 0) & target.accepted
+                )
+                shown = accepted[0].replace("numpy.", "np.")
+                yield f"isinstance(..., {shown}) admits it", level, 0
+            return
+        if reached in ends:
+            where, keyword = ends[reached]
+            if where is None or where in positions or keyword in keywords:
+                yield _ending(reached, target), level, 0
+            return
+        handed = (
+            self._constructed(reached, positions, keywords, target)
+            if reached in self.annotations.classes
+            else self._handed(
+                reached, positions, keywords, bound=bound_self, target=target
+            )
+        )
+        for how, deeper, hops in handed:
+            if level + deeper <= _DEEPEST:
+                yield how, level + deeper, hops
 
     def _read_in_method(
         self,
@@ -1752,7 +1913,7 @@ class Reader:
         call: ast.Call,
         name: str,
         target: Target,
-    ) -> Iterator[tuple[str, bool, int]]:
+    ) -> Iterator[tuple[str, int, int]]:
         """A field a method of the record reads for itself (``self._hold_counts()``)."""
         owner, _, field = name.partition(".")
         func = call.func
@@ -1770,8 +1931,8 @@ class Reader:
         if callee is None or callee[0] not in self.package.functions:
             return
         method = self.package.functions[callee[0]]
-        for deeper, of_item, hops in self._known_routes(method, name, target):
-            yield f"read in {method.qualname}(), {deeper}", of_item, hops + 1
+        for deeper, level, hops in self._known_routes(method, name, target):
+            yield f"read in {method.qualname}(), {deeper}", level, hops + 1
 
     def stored_fields(
         self, function: overloads.Function, depth: int = 0
@@ -1805,7 +1966,7 @@ class Reader:
         call: ast.Call,
         name: str,
         target: Target,
-    ) -> Iterator[tuple[str, bool, int]]:
+    ) -> Iterator[tuple[str, int, int]]:
         """A field handed by its name to a method that reads it with ``getattr``.
 
         ``self._check_bool("overload_latched", ...)`` hands the field
@@ -1851,12 +2012,12 @@ class Reader:
             names.extend((vararg.arg, loop) for loop in _loops_over(node, vararg.arg))
         method = self.package.functions[reached]
         for parameter, local in names:
-            for deeper, of_item, hops in self._known_routes(
+            for deeper, level, hops in self._known_routes(
                 method, _by_name(holder, local), target
             ):
                 yield (
                     f"handed by name to {method.qualname}({parameter}), {deeper}",
-                    of_item,
+                    level,
                     hops + 1,
                 )
 
@@ -1922,7 +2083,7 @@ class Reader:
         positions: list[int],
         keywords: list[str],
         target: Target,
-    ) -> Iterator[tuple[str, bool, int]]:
+    ) -> Iterator[tuple[str, int, int]]:
         """What a record built with its generated ``__init__`` does with a value.
 
         The argument fills the field of its keyword, or of its position in
@@ -1956,10 +2117,10 @@ class Reader:
                 continue
             if post_init is None:
                 continue
-            for deeper, of_item, hops in self._known_routes(
+            for deeper, level, hops in self._known_routes(
                 post_init, f"self.{name}", target
             ):
-                yield f"handed to {shown}({name}), {deeper}", of_item, hops + 1
+                yield f"handed to {shown}({name}), {deeper}", level, hops + 1
 
     def _handed(
         self,
@@ -1969,7 +2130,7 @@ class Reader:
         *,
         bound: bool,
         target: Target,
-    ) -> Iterator[tuple[str, bool, int]]:
+    ) -> Iterator[tuple[str, int, int]]:
         """What the function a parameter is handed to does with it."""
         callee = self.package.functions[reached]
         node = callee.implementation
@@ -1996,10 +2157,10 @@ class Reader:
                     continue
             elif not annotations.may_hold_scalars(callee.module, annotation, bounds):
                 continue
-            for deeper, of_item, hops in self._known_routes(callee, parameter, target):
+            for deeper, level, hops in self._known_routes(callee, parameter, target):
                 yield (
                     f"handed to {callee.qualname}({parameter}), {deeper}",
-                    of_item,
+                    level,
                     hops + 1,
                 )
 
@@ -2242,7 +2403,7 @@ def _conversion_findings(
             if not _is_type_parameter(written, own)
             and annotations.narrow_items(module, written, {**bounds, **own})
         ]
-        how = reader.conversion(function, name, item=True) if narrow else None
+        how = reader.conversion(function, name, level=1) if narrow else None
         if how is not None:
             found.append(
                 Finding(
@@ -2278,7 +2439,7 @@ def _unconverted(
         if how is not None:
             return f"annotated {written}, and {how} converts any array-like"
     items = annotations.narrow_items(module, annotation, bounds)
-    how = reader.conversion(function, name, item=True) if items else None
+    how = reader.conversion(function, name, level=1) if items else None
     if how is not None:
         return (
             f"annotated {written}, whose items ({', '.join(items)}) take no "
@@ -2441,26 +2602,35 @@ def _scalar_problems(
                     )
                 )
                 break
-        how = reader.conversion(function, name, item=True, target=target)
-        if how is None:
-            continue
-        for definition, written, own in held:
-            items = annotations.items_refusing(kind, module, written, own)
-            if not items:
+        for level, refusing, reads in (
+            (1, annotations.items_refusing, ("items", "an item")),
+            (
+                2,
+                annotations.elements_refusing,
+                ("items' elements", "an element of an item"),
+            ),
+        ):
+            how = reader.conversion(function, name, level=level, target=target)
+            if how is None:
                 continue
-            found.append(
-                Finding(
-                    path,
-                    getattr(definition, "lineno", 0),
-                    shown,
-                    field,
-                    f"annotated {_shown(written)}, whose items ({', '.join(items)}) "
-                    f"refuse {numpy_name}, while an item {how}{built}",
-                    part=kind,
-                    constructor=constructor,
+            for definition, written, own in held:
+                items = refusing(kind, module, written, own)
+                if not items:
+                    continue
+                found.append(
+                    Finding(
+                        path,
+                        getattr(definition, "lineno", 0),
+                        shown,
+                        field,
+                        f"annotated {_shown(written)}, whose {reads[0]} "
+                        f"({', '.join(items)}) refuse {numpy_name}, while "
+                        f"{reads[1]} {how}{built}",
+                        part=kind,
+                        constructor=constructor,
+                    )
                 )
-            )
-            break
+                break
     return found
 
 
@@ -2855,6 +3025,7 @@ def _handed_stores(
     rest = call.args[len(positional) :]
     by_vararg = set(_loops_over(node, vararg.arg)) if vararg is not None else set()
     places = {argument.arg: index for index, argument in enumerate(positional)}
+    helper = reader.package.functions[callee[0]]
     stored: set[str] = set()
     for inner in ast.walk(node):
         if not (
@@ -2866,6 +3037,8 @@ def _handed_stores(
         ):
             continue
         field = inner.args[1]
+        if _given_back(reader, helper, inner.args[2], field, owners):
+            continue
         handed: list[ast.expr] = []
         if isinstance(field, ast.Constant) and isinstance(field.value, str):
             stored.add(field.value)
@@ -3470,6 +3643,77 @@ def _field_named(
     return None
 
 
+#: The calls that hand back what they are given, or a read-only view of it,
+#: without a copy, by their name below the package or their dotted name: a
+#: field stored back as one of them of itself still holds the caller's
+#: container. ``typing.cast`` hands back its second argument.
+_NOT_COPIED = frozenset(
+    {"types.MappingProxyType", "typing.cast", "typing_extensions.cast"}
+)
+_NOT_COPIED_HERE = frozenset(
+    {"_internal.frozen.read_only", "_internal.frozen.handed_over"}
+)
+
+
+def _reads_field(value: ast.expr, field: ast.expr, owners: Collection[str]) -> bool:
+    """Whether *value* reads the field a setter stores in: ``self.sides`` or ``getattr(self, name)``."""
+    if (
+        isinstance(field, ast.Constant)
+        and isinstance(field.value, str)
+        and isinstance(value, ast.Attribute)
+        and isinstance(value.value, ast.Name)
+        and value.value.id in owners
+        and value.attr == field.value
+    ):
+        return True
+    if not (
+        isinstance(value, ast.Call)
+        and isinstance(value.func, ast.Name)
+        and value.func.id == "getattr"
+        and len(value.args) == _GETATTR
+        and isinstance(value.args[0], ast.Name)
+        and value.args[0].id in owners
+    ):
+        return False
+    # The same text, the same loop name, or the same ``each.name``.
+    return ast.dump(value.args[1]) == ast.dump(field)
+
+
+def _given_back(
+    reader: Reader,
+    function: overloads.Function,
+    value: ast.expr,
+    field: ast.expr,
+    owners: Collection[str],
+) -> bool:
+    """Whether a setter stores the field back as the caller gave it, converting nothing.
+
+    The field itself (``object.__setattr__(self, "sides", self.sides)``), or
+    a call of :data:`_NOT_COPIED` on it (``MappingProxyType(self.sides)``),
+    which wraps the caller's dictionary and copies none of it: a change the
+    caller makes afterwards still reaches the record. ``dict(self.sides)``,
+    a comprehension or a helper that builds a value of its own converts it.
+    """
+    for _ in range(_NESTING):
+        if _reads_field(value, field, owners):
+            return True
+        if not (isinstance(value, ast.Call) and value.args):
+            return False
+        local = (
+            reader.package.local_imports.get(function.implementation, {})
+            if function.implementation is not None
+            else {}
+        )
+        dotted = reader.package.resolve(function.module, value.func, local)
+        if dotted is None:
+            return False
+        below = dotted.removeprefix(f"{reader.root}.")
+        if dotted not in _NOT_COPIED and below not in _NOT_COPIED_HERE:
+            return False
+        value = value.args[-1] if dotted.endswith(".cast") else value.args[0]
+    return False
+
+
 def _stores(
     reader: Reader, function: overloads.Function, depth: int = 0
 ) -> tuple[frozenset[str], frozenset[int]]:
@@ -3493,6 +3737,8 @@ def _stores(
     for call in reader._calls_of(node):
         name = _setattr_name(call)
         if name is not None:
+            if _given_back(reader, function, call.args[2], name, _OWNERS):
+                continue
             named = _field_named(name, looping)
             if named is not None:
                 stored.update(named)

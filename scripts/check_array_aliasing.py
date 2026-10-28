@@ -116,7 +116,9 @@ on ``self``, stores a value of its own in it (``object.__setattr__(self,
 setter handed the name). Otherwise a list given to an array field is kept as
 a list, an array given to a tuple field as an array, and the record holds what
 its annotation says it does not, a list a caller can still append to inside a
-frozen record. :data:`KEPT_EXEMPT` is that part's escape hatch.
+frozen record. A store that gives the field back as it was given, itself or
+wrapped in ``MappingProxyType``, ``read_only`` or ``cast`` without a copy,
+converts nothing. :data:`KEPT_EXEMPT` is that part's escape hatch.
 
 A private helper is held to the rule whatever its callers pass today: the
 next caller may hand it the caller's array. The analysis reads names, not

@@ -1494,4 +1494,32 @@ print(epnl.band_limits, round(epnl.duration_correction, 2))
 
 The octave spectrum draws itself with `.plot()`, labelled by its quantity.
 
+## Tolerance limits come lower first, and signed
+
+`vibration.weighting_tolerance_percent` returned the Table 5 band of
+ISO 8041-1 as `(upper, lower)`, and the three constants
+`CENTRAL_TOLERANCE_PERCENT`, `SKIRT_TOLERANCE_PERCENT` and
+`TAIL_TOLERANCE_PERCENT` held `(upper %, lower %, phase °)`. Every other pair of
+limits in the library is `(lower, upper)`, so these two now are too. The lower
+limit stays negative, as the table prints it, and `-100.0` still means that
+the standard sets no lower limit.
+
+This one changes no name and raises nothing: `upper, lower = ...` still
+unpacks two arrays, and swaps them. Read every unpacking of the four:
+
+| 4.0.0rc1 | 4.0 |
+| --- | --- |
+| `upper, lower = vibration.weighting_tolerance_percent(name, f)` | `lower, upper = vibration.weighting_tolerance_percent(name, f)` |
+| `vibration.CENTRAL_TOLERANCE_PERCENT == (12.0, -11.0, 6.0)` | `(-11.0, 12.0, 6.0)` |
+| `vibration.SKIRT_TOLERANCE_PERCENT == (26.0, -21.0, 12.0)` | `(-21.0, 26.0, 12.0)` |
+| `vibration.TAIL_TOLERANCE_PERCENT == (26.0, -100.0, inf)` | `(-100.0, 26.0, inf)` |
+
+```python
+from phonometry import vibration
+
+lower, upper = vibration.weighting_tolerance_percent("Wk", [16.0])
+print(lower, upper)
+# [-11.] [12.]
+```
+
 ---

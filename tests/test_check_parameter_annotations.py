@@ -767,6 +767,85 @@ def test_items_validated_one_at_a_time_admit_the_numpy_integer(
     ]
 
 
+def test_an_unpacked_or_indexed_item_and_its_elements_admit_the_numpy_integer(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``ny, nx = shape``, ``shape[0]``, ``ix, iy = entry`` and ``for ix, iy in
+    cells`` read the items of a parameter, or the elements of each item, as
+    a validator takes them.
+    """
+    refused = _refused(
+        tmp_path,
+        **{
+            "_internal.validation": _VALIDATION,
+            "api": """
+            from collections.abc import Iterable
+
+            from ._internal.validation import require_count
+
+            __all__ = [
+                "grid",
+                "grid_wide",
+                "first",
+                "probes",
+                "probes_wide",
+                "cells",
+                "rows",
+            ]
+
+            def _pairs(found: Iterable[tuple[int, int]]) -> list[tuple[int, int]]:
+                held = []
+                for k, entry in enumerate(found):
+                    ix, iy = entry
+                    held.append((require_count(ix, "ix"), require_count(iy, "iy")))
+                return held
+
+            def grid(shape: tuple[int, int]) -> int:
+                ny, nx = shape
+                return require_count(ny, "ny") * require_count(nx, "nx")
+
+            def grid_wide(shape: Sequence[int | np.integer[Any]]) -> int:
+                ny, nx = shape
+                return require_count(ny, "ny") * require_count(nx, "nx")
+
+            def first(shape: tuple[int, int]) -> int:
+                return require_count(shape[0], "shape[0]")
+
+            def probes(found: Iterable[tuple[int, int]]) -> int:
+                return len(_pairs(found))
+
+            def probes_wide(
+                found: Iterable[Sequence[int | np.integer[Any]]]
+                | NDArray[np.integer[Any]],
+            ) -> int:
+                return len(_pairs(found))
+
+            def cells(found: Sequence[tuple[int, int]]) -> list[int]:
+                return [require_count(ix, "ix") for ix, iy in found]
+
+            def rows(found: Sequence[tuple[int, int]]) -> list[int]:
+                return [require_count(row[-1], "iy") for row in found]
+            """,
+        },
+    )
+    assert sorted(refused) == [
+        "cells(found)",
+        "first(shape)",
+        "grid(shape)",
+        "probes(found)",
+        "rows(found)",
+    ]
+    assert refused["first(shape)"] == [
+        "annotated tuple[int, int], whose items (int) refuse np.integer[Any], "
+        "while an item require_count() takes it"
+    ]
+    assert refused["probes(found)"] == [
+        "annotated Iterable[tuple[int, int]], whose items' elements (int) refuse "
+        "np.integer[Any], while an element of an item handed to _pairs(found), "
+        "require_count() takes it"
+    ]
+
+
 def test_an_overload_head_a_none_selects_is_left_alone(
     tmp_path: pathlib.Path,
 ) -> None:

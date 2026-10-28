@@ -32,7 +32,7 @@ Each rule on a page has the same parts:
 - [Docstrings and comments](docstrings.md) (D, C): the module docstring and the document it names, function and class docstrings, the mathematics they carry, comments in the code, and how long a module grows. D rules cover docstrings and modules, C rules cover comments.
 - [Numbers and data](numerics.md) (X): comparing computed values, validating what a caller passes, the arrays a result keeps, units, references and precision, the data the package publishes, and the fields an FDTD engine steps.
 - [Tests](tests.md) (T): where a test lives, where an expected value comes from, how a test waits on an error or a warning, the data the repository keeps, guards and their exemptions, conformance rows, the workflows under `.github/`, and what the pytest configuration may import.
-- [Documentation and figures](docs-and-figures.md) (F): the guides, their Spanish twins and the `docs/` mirror, code fences, figures and the `.plot()` code that draws them, records in a notebook, the catalogues page, the errata register, the frames of a clip and the device its field steps on, the install commands a page prints, and the description of each page.
+- [Documentation and figures](docs-and-figures.md) (F): the guides, their Spanish twins and the `docs/` mirror, code fences, figures and the `.plot()` code that draws them, records in a notebook, the catalogues pages, the errata register, the frames of a clip and the device its field steps on, the install commands a page prints, the description of each page and its size.
 - [Prose, commits and pull requests](prose.md) (P): the language of each surface, the characters a text may hold, citing a page, the CHANGELOG, commit messages and pull request text.
 
 ## Rules
@@ -286,7 +286,7 @@ Each rule on a page has the same parts:
 | [F53](docs-and-figures.md#f53) | Embed an animation lazily, with its space reserved | review |
 | [F54](docs-and-figures.md#f54) | Let every public record inherit `RichDisplay`, and give it no display method of its own | `scripts/check_record_display.py`, `make record-display`, `CI: Every public record shows itself as a table in a notebook`, `tests/test_check_record_display.py::test_the_package_shows_every_public_record_as_a_table`, `scripts/check_notebook.py`, `CI: phonometry runs in a notebook kernel` |
 | [F55](docs-and-figures.md#f55) | Let a record field's unit read from its name, or declare it in `_display_units` | `tests/test_record_display.py::test_every_unit_a_record_names_is_needed_and_shown`, `tests/test_record_display.py::test_no_public_field_that_holds_no_number_is_shown_in_a_unit`, `tests/test_record_display.py::test_every_public_field_ending_in_a_unit_shows_it`, `tests/test_record_display.py::test_a_number_its_name_misreads_shows_its_own_unit` |
-| [F56](docs-and-figures.md#f56) | Register every `PUBLISHED_` catalogue in the catalogues page generator | `scripts/check_published_catalogues_reach_the_page.py`, `make published-catalogues`, `CI: Every published value names its page` |
+| [F56](docs-and-figures.md#f56) | Register every `PUBLISHED_` catalogue in the catalogues page generator | `scripts/check_published_catalogues_reach_the_page.py`, `make published-catalogues`, `CI: Every published value names its page`, `site/src/lib/catalogue-pages.ts` |
 | [F57](docs-and-figures.md#f57) | Cite an errata entry's page by document, edition, PDF page and printed folio | `scripts/check_errata_evidence.py`, `CI: Errata entries cite their page` |
 | [F58](docs-and-figures.md#f58) | Quote a printed value, its symbols and its separator exactly as the source prints them | review |
 | [F59](docs-and-figures.md#f59) | Add or remove an errata entry in docs/ERRATA.md and docs/ERRATA.es.md together | `make site-reports`, `CI: Generated evidence pages up to date` |
@@ -294,6 +294,7 @@ Each rule on a page has the same parts:
 | [F61](docs-and-figures.md#f61) | Step a clip's field where the registry puts it, and keep it on that device between captures | `tests/test_clip_scenes_on_devices.py`, `tests/test_clip_placement.py` |
 | [F62](docs-and-figures.md#f62) | Quote the extras of every install command | `scripts/check_quoted_extras.py`, `CI: Every install command quotes its extras`, `tests/test_check_quoted_extras.py` |
 | [F63](docs-and-figures.md#f63) | Give every page a description of 160 characters or fewer that no other page of its language repeats | `site/scripts/check-descriptions.mjs`, `CI: Check every page has a short meta description of its own`, `site/scripts/check-descriptions.test.mjs`, `CI: Test the build checks on small builds made to fail them`, `tests/test_api_docs_generator.py::test_every_api_page_has_a_description_short_enough_to_show_whole` |
+| [F64](docs-and-figures.md#f64) | Keep every built page under 1 800 000 bytes of HTML | `site/scripts/check-page-size.mjs`, `CI: Check every page fits in what a search engine reads` |
 
 ### Prose, commits and pull requests
 

@@ -313,6 +313,16 @@ jobs:
         # characters or one another page of its language repeats.
         run: pnpm run check:descriptions
         working-directory: site
+      - name: Check every page fits in what a search engine reads
+        # Googlebot fetches the first 2 MB of a page's HTML, uncompressed, and
+        # indexes nothing past it, and no console reports the cut. The
+        # published catalogues were 4.7 MB in English and 5.2 MB in Spanish
+        # on one page, so two thirds of their rows never reached the index,
+        # and the errata registry and the conformance report were past the
+        # limit too, with this whole job green. This fails on any built page
+        # over 1 800 000 bytes, a tenth under the limit.
+        run: pnpm run check:page-size
+        working-directory: site
       - name: Check every formula rendered
         # KaTeX does not fail a build on a parse error: it emits a
         # `katex-error` span and ships the page. A display block whose `$$`

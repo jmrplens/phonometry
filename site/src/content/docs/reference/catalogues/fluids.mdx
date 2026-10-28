@@ -1,0 +1,21 @@
+---
+title: "Catalogue of fluids"
+description: "Named fluid states: liquids and gases at the temperature each page states, read from two books, and four airs fixed by the models and standards that use them."
+sidebar:
+  label: "Fluids"
+---
+
+import Catalogues from '../../../../components/Catalogues.astro';
+import CatalogueFinder from '../../../../components/CatalogueFinder.astro';
+
+<CatalogueFinder lang="en" />
+
+Every named fluid state this library carries. The twenty-one read from a page
+are in `fluids.PUBLISHED_FLUIDS`: three from Bies and eighteen liquids and
+gases from Norton & Karczub, each at the temperature its page states and with
+the ratio of specific heats where the page prints one. The four airs below
+them sit elsewhere in the tree,
+each beside the model or the standard that fixes it, and they disagree because
+each is the air its own document assumes.
+
+<Catalogues catalogue="fluids" lang="en" />

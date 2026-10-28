@@ -1,0 +1,21 @@
+---
+title: "Catálogo de fluidos"
+description: "Estados de fluido con nombre: líquidos y gases a la temperatura de su página, leídos de dos libros, y cuatro aires que fijan los modelos y normas que los usan."
+sidebar:
+  label: "Fluidos"
+---
+
+import Catalogues from '../../../../../components/Catalogues.astro';
+import CatalogueFinder from '../../../../../components/CatalogueFinder.astro';
+
+<CatalogueFinder lang="es" />
+
+Todos los estados de fluido con nombre que lleva esta biblioteca. Los
+veintiuno que se leyeron de una página están en `fluids.PUBLISHED_FLUIDS`: tres
+de Bies y dieciocho líquidos y gases de Norton & Karczub, cada uno a la
+temperatura que dice su página y con la razón de calores específicos donde la
+página la imprime. Los cuatro aires de debajo viven en otros puntos del árbol, cada uno junto al modelo o la norma
+que lo fija, y discrepan porque cada uno es el aire que supone su propio
+documento.
+
+<Catalogues catalogue="fluids" lang="es" />

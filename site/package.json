@@ -13,6 +13,7 @@
     "check:i18n": "node scripts/check-i18n-parity.mjs",
     "check:icons": "node scripts/icon-sheet.mjs --check",
     "check:math": "node scripts/check-math-render.mjs",
+    "check:page-size": "node scripts/check-page-size.mjs",
     "check:redirects": "node scripts/check-redirects.mjs",
     "check:search": "node scripts/check-search-designation.mjs",
     "check:sidebar": "node scripts/with-preview.mjs -- node scripts/check-sidebar.mjs",

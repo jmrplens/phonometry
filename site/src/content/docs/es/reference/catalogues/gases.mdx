@@ -1,0 +1,25 @@
+---
+title: "Catálogo de gases"
+description: "La masa molar y la relación de calores específicos de los gases, que cierran el estado de gas ideal a cualquier temperatura y presión, según dos libros."
+sidebar:
+  label: "Gases"
+---
+
+import Catalogues from '../../../../../components/Catalogues.astro';
+import CatalogueFinder from '../../../../../components/CatalogueFinder.astro';
+
+<CatalogueFinder lang="es" />
+
+Una tabla de gases imprime algo que una tabla de fluidos no. No una densidad y
+una velocidad del sonido, que un gas sólo tiene una vez que se nombran una
+temperatura y una presión, sino la masa molar y la relación de calores
+específicos, que entre las dos cierran el estado de gas ideal a cualquier
+temperatura y presión. `fluids.PUBLISHED_GASES` guarda esas dos columnas, y
+`Gas.ideal_state` va de ellas al estado de gas ideal a la temperatura y la
+presión que se le pidan, llevándose la página junto con el número. Lo que vale
+ese cierre, y dónde empieza a quedársele corto a una molécula pesada, lo dice
+`fluids.IDEAL_GAS_VALIDITY`. El
+aire está en las dos tablas de abajo, porque los dos libros lo imprimen, y no
+imprimen exactamente el mismo par.
+
+<Catalogues catalogue="gases" lang="es" />

@@ -1,0 +1,37 @@
+---
+title: "Catalogue of resistive facings"
+description: "Twenty-nine wire meshes, glass cloths and sintered metal sheets, each with the flow resistance of unit area of it, which is not a resistivity per metre."
+sidebar:
+  label: "Resistive facings"
+---
+
+import Catalogues from '../../../../components/Catalogues.astro';
+import CatalogueFinder from '../../../../components/CatalogueFinder.astro';
+
+<CatalogueFinder lang="en" />
+
+Twenty-nine thin resistive facings, the wire meshes, glass cloths and sintered
+metal sheets that go over a porous absorber or across the mouth of a cavity,
+each with the flow resistance of unit **area** of it. That is the thing this
+table is most likely to be misread for. The [porous
+catalogue](/phonometry/reference/catalogues/porous-materials/) holds a flow
+**resistivity**, per metre of the bulk material it describes; a facing is a
+sheet with no thickness worth dividing by, so what is measured on it is a
+resistance in pascal seconds per metre, and the two quantities are a thickness
+apart. Multiplying one of these rows by a thickness gives a number nobody
+measured.
+
+Two of the three tables print that resistance twice, once as the page's N s/m³
+and once as a multiple of the characteristic impedance of air, and neither says
+what it took the impedance to be. Both columns are kept as printed rather than
+one being recomputed from the other, because dividing them gives the impedance
+back: the wire meshes imply 407 to 421 Pa s/m and the sintered sheets 400,
+except for the one block that implies 397,7, which is a property of the page
+and not of any facing. The sintered sheets are
+also the only rows with a nonlinearity factor, the ratio of the resistances
+measured at face velocities of 500 and 20 cm/s, and they run from 1,8 to 5: a
+facing at 1 would be the linear one the rest of this library assumes. The
+others are named by what a weaver would call them, a wire count or a weave, and
+the search matches a bare number because that is what a glass cloth is called.
+
+<Catalogues catalogue="flowResistance" lang="en" />

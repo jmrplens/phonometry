@@ -1,0 +1,31 @@
+---
+title: "Catálogo de atenuación del aire"
+description: "El coeficiente de atenuación del aire, banda a banda, en las seis condiciones de temperatura y humedad que tabula el modelo de sala de una norma de edificación."
+sidebar:
+  label: "Atenuación del aire"
+---
+
+import Catalogues from '../../../../../components/Catalogues.astro';
+import CatalogueFinder from '../../../../../components/CatalogueFinder.astro';
+
+<CatalogueFinder lang="es" />
+
+Las seis condiciones de aire para las que el modelo de sala de la norma de
+edificación tabula la atenuación, con su coeficiente banda a banda. Un modelo
+de sala necesita uno. El aire de una sala absorbe, la absorción crece con la
+frecuencia y con la sequedad, y en 8 kHz ya no es una corrección a las
+superficies sino un término que decide el resultado, que es para lo que el
+modelo tiene término de aire. Así que la norma imprime una tabla corta de dos
+temperaturas cruzadas con tres rangos de humedad relativa, y dice cuál suponer
+cuando no se conocen la temperatura ni la humedad de la sala. Esa fila lleva
+aquí una nota que lo advierte.
+
+El coeficiente es una atenuación de potencia en neper por metro, que es lo que
+pide el término de aire de la propia norma, y no es el decibelio por metro con
+el que trabaja un modelo de propagación exterior. La página lo imprime en
+milésimas de neper por metro, y esta tabla también. Seis filas es todo lo que
+hay: esto es una tabla en la que buscar un valor y no un modelo que
+interpolar, y la norma no dice nada de una sala a 15 °C y 60 % que permita
+inventarle una fila.
+
+<Catalogues catalogue="airAttenuation" lang="es" />

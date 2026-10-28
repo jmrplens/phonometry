@@ -39,6 +39,45 @@ const apiGroup = (...keys) => ({
   ],
 });
 
+/**
+ * The published catalogues, one page each, in the order the sidebar lists
+ * them and the catalogue finder offers them.
+ *
+ * They were one page, and at 4.7 MB of HTML in English and 5.2 MB in Spanish
+ * a search engine read about a third of it: Googlebot fetches the first 2 MB
+ * of a page and indexes nothing past it. Each catalogue is a page of its own
+ * now, named by the anchor its section had on the single page, so that
+ * `/reference/catalogues/#porous-materials` and
+ * `/reference/catalogues/porous-materials/` say the same thing. A catalogue
+ * joins the site by having its page in both languages and its line here;
+ * src/lib/catalogue-pages.ts reads the rest off the page.
+ */
+export const catalogueSlugs = [
+  'solids',
+  'damping-materials',
+  'damping-treatments',
+  'orthotropic-wood',
+  'plateau-method-constants',
+  'porous-materials',
+  'resistive-facings',
+  'resilient-layers',
+  'dynamic-modulus-of-resilient-materials',
+  'absorption-coefficients',
+  'carpets',
+  'transmission-loss',
+  'impact-insulation',
+  'duct-walls',
+  'scattering-coefficients',
+  'diffusion-coefficients',
+  'predicted-scattering-coefficients',
+  'ground-surfaces',
+  'gases',
+  'fluids',
+  'nonlinearity-parameter-ba',
+  'nonlinearity-parameter-of-solids',
+  'air-attenuation',
+].map((slug) => `reference/catalogues/${slug}`);
+
 export const topics = [
   {
     id: 'start',
@@ -577,10 +616,18 @@ export const topics = [
       // area: the rows belong to three packages and the question they answer,
       // which book does this number come from, is the same question the
       // conformance report and the errata register answer about a formula.
+      // One page per catalogue, under the overview that says how the rows
+      // were read and how to read them from code. The group is the trail a
+      // catalogue's breadcrumb hangs from and the one place in the sidebar a
+      // reader sees which catalogue they are on.
       {
-        slug: 'reference/catalogues',
         label: 'Published catalogues',
         translations: { es: 'Catálogos publicados' },
+        collapsed: true,
+        items: [
+          { slug: 'reference/catalogues', label: 'Overview', translations: { es: 'Resumen' } },
+          ...catalogueSlugs,
+        ],
       },
       // The fiches sit here for the same reason: a reader who wants to know
       // what the library can hand them on paper is asking about evidence, not

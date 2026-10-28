@@ -1,0 +1,26 @@
+---
+title: "Catálogo de constantes del método de la meseta"
+description: "Los tres números con los que el método de la meseta esboza la pérdida por transmisión de un panel simple: masa por milímetro, altura y anchura de la meseta."
+sidebar:
+  label: "Constantes del método de la meseta"
+---
+
+import Catalogues from '../../../../../components/Catalogues.astro';
+import CatalogueFinder from '../../../../../components/CatalogueFinder.astro';
+
+<CatalogueFinder lang="es" />
+
+Los tres números que necesita el método de la meseta para esbozar la pérdida
+por transmisión de un panel simple sin resolver el modelo de placa: la masa que
+aporta un milímetro del material, a qué altura está la meseta y lo ancha que es
+en frecuencia. El primero es una densidad disfrazada, kilogramos por metro
+cuadrado y por milímetro, que es la densidad dividida entre mil; se guarda en
+esa unidad porque es la unidad en la que la usa el método. El segundo es una
+pérdida por transmisión, el nivel que el método dibuja como una recta
+horizontal sobre la zona de coincidencia, y depende del material y no del
+espesor. Son los números que lee la predicción por el método de la meseta de la
+propia biblioteca, que admite como material una fila de esta tabla o una fila
+tuya. El aislamiento medido de construcciones reales está en el catálogo de
+[aislamiento acústico](/phonometry/es/reference/catalogues/transmission-loss/).
+
+<Catalogues catalogue="plateau" lang="es" />

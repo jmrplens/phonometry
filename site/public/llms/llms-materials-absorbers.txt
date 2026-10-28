@@ -632,7 +632,7 @@ print(float(materials.single_number_rating_uncertainty(8.1).reported_expanded_un
 - [Field Insulation Measurement (ISO 16283)](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-field/): the
   sound-insulation companion uncertainty standard, ISO 12999-1.
 - API reference: [`materials.absorbers.sound_absorption`](https://docs.jmrp.io/phonometry/reference/api/materials/sound-absorption/), [`materials.absorbers.rating`](https://docs.jmrp.io/phonometry/reference/api/materials/rating/) and [`materials.absorbers.uncertainty`](https://docs.jmrp.io/phonometry/reference/api/materials/uncertainty/).
-- [Published catalogues](https://docs.jmrp.io/phonometry/reference/catalogues/#absorption-coefficients): the
+- [Published catalogues](https://docs.jmrp.io/phonometry/reference/catalogues/absorption-coefficients/): the
   band-by-band absorption coefficients the books print, with the mounting each
   one was measured on.
 
@@ -1062,7 +1062,7 @@ the model, is $\sigma$.
   reverberation-room measurement and the ISO 11654 rating of the finished
   absorber.
 - API reference: [`materials`: airflow resistance](https://docs.jmrp.io/phonometry/reference/api/materials/airflow-resistance/).
-- [Published catalogues](https://docs.jmrp.io/phonometry/reference/catalogues/#porous-materials): the
+- [Published catalogues](https://docs.jmrp.io/phonometry/reference/catalogues/porous-materials/): the
   flow resistivity, porosity and tortuosity the books print, for named
   specimens and for whole classes of material.
 
@@ -2639,7 +2639,7 @@ found in the sources during this work are recorded in the
   half of Cox & D'Antonio, implemented separately; this guide covers only
   the absorber half of the book.
 - Theory: [Acoustic material characterisation](https://docs.jmrp.io/phonometry/reference/theory/materials-surfaces/#acoustic-material-characterisation-iso-11654-iso-9053-12-iso-10534-12-astm-e2611): the characterisation quantities the empirical and phenomenological models take as input.
-- [Published catalogues](https://docs.jmrp.io/phonometry/reference/catalogues/#porous-materials): the
+- [Published catalogues](https://docs.jmrp.io/phonometry/reference/catalogues/porous-materials/): the
   flow resistivity, porosity and tortuosity the books print, for named
   specimens and for whole classes of material.
 

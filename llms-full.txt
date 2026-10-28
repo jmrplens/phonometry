@@ -4510,7 +4510,7 @@ are taken as given, from laboratory data or from the mass-law estimates of
 - [Dynamic stiffness of resilient materials (EN 29052-1)](https://docs.jmrp.io/phonometry/materials/resilient/dynamic-stiffness/):
   the $s'$ input to the EN 12354-2 floating-floor term.
 - API reference: [`building.prediction.simplified_model`](https://docs.jmrp.io/phonometry/reference/api/building/simplified-model/) and [`building.prediction.facade`](https://docs.jmrp.io/phonometry/reference/api/building/facade/).
-- [Published catalogues](https://docs.jmrp.io/phonometry/reference/catalogues/#transmission-loss): the
+- [Published catalogues](https://docs.jmrp.io/phonometry/reference/catalogues/transmission-loss/): the
   band-by-band transmission loss and single-number ratings the books print for
   real constructions.
 
@@ -9154,7 +9154,7 @@ their own pages: intensity (ISO 15186), the floor-covering improvement
 - [Sound Power](https://docs.jmrp.io/phonometry/devices/emission/sound-power/): the $L_W$ methods that share the
   absorption-area machinery of the receiving room.
 - API reference: [`building.measurement.laboratory_insulation`](https://docs.jmrp.io/phonometry/reference/api/building/laboratory-insulation/).
-- [Published catalogues](https://docs.jmrp.io/phonometry/reference/catalogues/#transmission-loss): the
+- [Published catalogues](https://docs.jmrp.io/phonometry/reference/catalogues/transmission-loss/): the
   band-by-band transmission loss and single-number ratings the books print for
   real constructions.
 
@@ -14005,7 +14005,7 @@ repository. Click the preview to open the PDF:
   applies.
 - API reference: [`room.reverberation_prediction`](https://docs.jmrp.io/phonometry/reference/api/rooms/reverberation-prediction/) and [`environment.propagation.air_absorption`](https://docs.jmrp.io/phonometry/reference/api/environment/air-absorption/).
 - Theory: [Steady-state room field](https://docs.jmrp.io/phonometry/reference/theory/rooms-buildings/#steady-state-room-field-bies-64-kuttruff-56): the diffuse-field assumption every Sabine-family formula makes, and where it stops holding.
-- [Published catalogues](https://docs.jmrp.io/phonometry/reference/catalogues/#absorption-coefficients): the
+- [Published catalogues](https://docs.jmrp.io/phonometry/reference/catalogues/absorption-coefficients/): the
   band-by-band absorption coefficients the books print, with the mounting each
   one was measured on.
 
@@ -35472,7 +35472,7 @@ reciprocal, but it is not a boundary-element solution.
 - [Porous absorbers](https://docs.jmrp.io/phonometry/materials/absorbers/porous-absorbers/): the Delany-Bazley and Miki models behind `flow_resistivity_pa_s_m2`, and their fit range.
 - Theory: [Outdoor propagation](https://docs.jmrp.io/phonometry/reference/theory/environment-transport/#outdoor-propagation-general-method-iso-9613-2): the ground and barrier terms of ISO 9613-2 in the context of the whole attenuation sum.
 - API reference: [`environment.propagation.ground_barriers`](https://docs.jmrp.io/phonometry/reference/api/environment/ground-barriers/).
-- [Published catalogues](https://docs.jmrp.io/phonometry/reference/catalogues/#ground-surfaces): the
+- [Published catalogues](https://docs.jmrp.io/phonometry/reference/catalogues/ground-surfaces/): the
   flow resistivity and the model parameters the books print for grass, snow,
   asphalt and the rest of the ground surfaces.
 
@@ -36356,7 +36356,7 @@ against the exact half-plane and coherent-ground models.
 - [Environmental noise levels](https://docs.jmrp.io/phonometry/environment/assessment/environmental-levels/): what happens to the predicted level once it becomes an assessed one.
 - API reference: [`environment.propagation.outdoor_propagation`](https://docs.jmrp.io/phonometry/reference/api/environment/outdoor-propagation/) and [`environment.propagation.air_absorption`](https://docs.jmrp.io/phonometry/reference/api/environment/air-absorption/).
 - Theory: [Outdoor propagation](https://docs.jmrp.io/phonometry/reference/theory/environment-transport/#outdoor-propagation-general-method-iso-9613-2): the ISO 9613-2 attenuation terms derived one by one, and the atmospheric absorption of Part 1.
-- [Published catalogues](https://docs.jmrp.io/phonometry/reference/catalogues/#ground-surfaces): the
+- [Published catalogues](https://docs.jmrp.io/phonometry/reference/catalogues/ground-surfaces/): the
   flow resistivity and the model parameters the books print for grass, snow,
   asphalt and the rest of the ground surfaces.
 
@@ -42072,7 +42072,7 @@ print(float(materials.single_number_rating_uncertainty(8.1).reported_expanded_un
 - [Field Insulation Measurement (ISO 16283)](https://docs.jmrp.io/phonometry/buildings/insulation/insulation-field/): the
   sound-insulation companion uncertainty standard, ISO 12999-1.
 - API reference: [`materials.absorbers.sound_absorption`](https://docs.jmrp.io/phonometry/reference/api/materials/sound-absorption/), [`materials.absorbers.rating`](https://docs.jmrp.io/phonometry/reference/api/materials/rating/) and [`materials.absorbers.uncertainty`](https://docs.jmrp.io/phonometry/reference/api/materials/uncertainty/).
-- [Published catalogues](https://docs.jmrp.io/phonometry/reference/catalogues/#absorption-coefficients): the
+- [Published catalogues](https://docs.jmrp.io/phonometry/reference/catalogues/absorption-coefficients/): the
   band-by-band absorption coefficients the books print, with the mounting each
   one was measured on.
 
@@ -42370,7 +42370,7 @@ the model, is $\sigma$.
   reverberation-room measurement and the ISO 11654 rating of the finished
   absorber.
 - API reference: [`materials`: airflow resistance](https://docs.jmrp.io/phonometry/reference/api/materials/airflow-resistance/).
-- [Published catalogues](https://docs.jmrp.io/phonometry/reference/catalogues/#porous-materials): the
+- [Published catalogues](https://docs.jmrp.io/phonometry/reference/catalogues/porous-materials/): the
   flow resistivity, porosity and tortuosity the books print, for named
   specimens and for whole classes of material.
 
@@ -44413,7 +44413,7 @@ found in the sources during this work are recorded in the
   half of Cox & D'Antonio, implemented separately; this guide covers only
   the absorber half of the book.
 - Theory: [Acoustic material characterisation](https://docs.jmrp.io/phonometry/reference/theory/materials-surfaces/#acoustic-material-characterisation-iso-11654-iso-9053-12-iso-10534-12-astm-e2611): the characterisation quantities the empirical and phenomenological models take as input.
-- [Published catalogues](https://docs.jmrp.io/phonometry/reference/catalogues/#porous-materials): the
+- [Published catalogues](https://docs.jmrp.io/phonometry/reference/catalogues/porous-materials/): the
   flow resistivity, porosity and tortuosity the books print, for named
   specimens and for whole classes of material.
 
@@ -45278,9 +45278,11 @@ row = materials.PUBLISHED_SCATTERING[
 print(row.why_missing("scattering_coefficient_5000"))
 ```
 
-The whole of all three tables is on the
-[published catalogues page](https://docs.jmrp.io/phonometry/reference/catalogues/#scattering-coefficients),
-filterable and with the source of every row.
+All three tables are published whole, filterable and with the source of
+every row, each in its own catalogue: the
+[scattering coefficients](https://docs.jmrp.io/phonometry/reference/catalogues/scattering-coefficients/), the
+[diffusion coefficients](https://docs.jmrp.io/phonometry/reference/catalogues/diffusion-coefficients/) and the
+[predicted scattering coefficients](https://docs.jmrp.io/phonometry/reference/catalogues/predicted-scattering-coefficients/).
 
 ## Scattering or diffusion? Two coefficients, two jobs
 
@@ -45453,9 +45455,12 @@ Pages elsewhere on the site that this section leans on:
 - [Surfaces measured in place](https://docs.jmrp.io/phonometry/materials/surfaces/) and its guide
   [In-situ Road-Surface Absorption](https://docs.jmrp.io/phonometry/materials/surfaces/road-absorption/):
   the ISO 13472-1 subtraction technique and the ISO 13472-2 spot method.
-- [Published catalogues](https://docs.jmrp.io/phonometry/reference/catalogues/#scattering-coefficients): the
-  measured and the computed scattering and diffusion coefficients of the
-  appendices, surface by surface.
+- Published catalogues: the
+  [measured](https://docs.jmrp.io/phonometry/reference/catalogues/scattering-coefficients/) and the
+  [computed](https://docs.jmrp.io/phonometry/reference/catalogues/predicted-scattering-coefficients/)
+  scattering coefficients and the
+  [diffusion coefficients](https://docs.jmrp.io/phonometry/reference/catalogues/diffusion-coefficients/)
+  of the appendices, surface by surface.
 
 ## What this section does not cover
 
@@ -47350,7 +47355,7 @@ few positions.
 - [Outdoor Sound Propagation](https://docs.jmrp.io/phonometry/environment/propagation/outdoor-propagation/): where the absorption
   of the ground surface enters the propagation models.
 - API reference: [`materials.surfaces.road_absorption`](https://docs.jmrp.io/phonometry/reference/api/materials/road-absorption/).
-- [Published catalogues](https://docs.jmrp.io/phonometry/reference/catalogues/#ground-surfaces): the
+- [Published catalogues](https://docs.jmrp.io/phonometry/reference/catalogues/ground-surfaces/): the
   flow resistivity and the model parameters the books print for grass, snow,
   asphalt and the rest of the ground surfaces.
 
@@ -73491,9 +73496,9 @@ so in its own entry.
   speeds and their inverses, which one a printed table holds, and the
   thickness-critical-frequency product that lets two books be checked against
   each other for free.
-- [Published catalogues](https://docs.jmrp.io/phonometry/reference/catalogues/#solids):
-  the two hundred and nineteen rows six books print, filterable by material
-  and by table, each naming the page it was read on.
+- [Published catalogues](https://docs.jmrp.io/phonometry/reference/catalogues/solids/):
+  the two hundred and sixty rows nine tables in eight books print, filterable
+  by material and by table, each naming the page it was read on.
 
 ---
 
@@ -73624,9 +73629,9 @@ not a range: the low end is the internal loss factor and the high end the one a
 panel has once it is installed. Norton & Karczub **Appendix 4 A** adds
 twenty-one solids with the bar and the bulk speed in separate columns, their
 **Table 6.1** eleven structural loss factors, and Vigran **Table 3.1** nine
-building materials. Every row is also on the
-[published catalogues](https://docs.jmrp.io/phonometry/reference/catalogues/#solids)
-page, filterable, with the book and the page each one was read on.
+building materials. Every row is also in the
+[published catalogue of solids](https://docs.jmrp.io/phonometry/reference/catalogues/solids/),
+filterable, with the book and the page each one was read on.
 
 ```python
 from phonometry import solids

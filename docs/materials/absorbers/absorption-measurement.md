@@ -532,7 +532,7 @@ print(float(materials.single_number_rating_uncertainty(8.1).reported_expanded_un
 - [Field Insulation Measurement (ISO 16283)](../../buildings/insulation/insulation-field.md): the
   sound-insulation companion uncertainty standard, ISO 12999-1.
 - API reference: [`materials.absorbers.sound_absorption`](https://docs.jmrp.io/phonometry/reference/api/materials/sound-absorption/), [`materials.absorbers.rating`](https://docs.jmrp.io/phonometry/reference/api/materials/rating/) and [`materials.absorbers.uncertainty`](https://docs.jmrp.io/phonometry/reference/api/materials/uncertainty/).
-- [Published catalogues](https://docs.jmrp.io/phonometry/reference/catalogues/#absorption-coefficients): the
+- [Published catalogues](https://docs.jmrp.io/phonometry/reference/catalogues/absorption-coefficients/): the
   band-by-band absorption coefficients the books print, with the mounting each
   one was measured on.
 

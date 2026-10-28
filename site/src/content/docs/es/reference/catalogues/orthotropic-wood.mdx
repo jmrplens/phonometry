@@ -1,0 +1,31 @@
+---
+title: "Catálogo de madera ortótropa"
+description: "Las cuatro constantes elásticas de una placa delgada ortótropa para las dos maderas de un instrumento de cuerda, con las estimaciones del autor marcadas."
+sidebar:
+  label: "Madera ortótropa"
+---
+
+import Catalogues from '../../../../../components/Catalogues.astro';
+import CatalogueFinder from '../../../../../components/CatalogueFinder.astro';
+
+<CatalogueFinder lang="es" />
+
+Todos los sólidos del [catálogo de
+sólidos](/phonometry/es/reference/catalogues/solids/) son isótropos: un módulo
+de Young, un coeficiente de Poisson y la misma respuesta vaya la onda en la
+dirección que vaya. La madera no. Una placa de picea es trece veces más rígida
+a lo largo de la fibra que a través, y un constructor de instrumentos elige la
+madera justamente por esa diferencia, así que un solo módulo para ella no
+describe ninguna dirección. Estas dos maderas, las de las que se hace un
+instrumento de cuerda, llevan las cuatro constantes elásticas de una placa
+delgada ortótropa: D1 a lo largo de la fibra, D3 a través de ella, D2 el
+acoplamiento entre las dos direcciones y D4 la rigidez a torsión. Cada una es
+un módulo dividido entre doce o un tercio del módulo de cizalladura, no un
+módulo, así que no se comparan con el abeto y la picea de la tabla de sólidos.
+La página imprime las maderas como columnas y esta tabla la gira para que una
+madera sea una fila. Dos constantes del arce son estimaciones del propio autor,
+que la página marca y la tabla enseña, y el factor de escala que imprime para
+el arce no se sigue de su propia fila, lo que consta en las erratas del
+proyecto.
+
+<Catalogues catalogue="orthotropicWood" lang="es" />

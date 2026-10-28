@@ -1,0 +1,38 @@
+---
+title: "Catálogo de velos resistivos"
+description: "Veintinueve mallas metálicas, tejidos de vidrio y láminas sinterizadas, cada una con la resistencia al flujo de la unidad de área, que no es una resistividad."
+sidebar:
+  label: "Velos resistivos"
+---
+
+import Catalogues from '../../../../../components/Catalogues.astro';
+import CatalogueFinder from '../../../../../components/CatalogueFinder.astro';
+
+<CatalogueFinder lang="es" />
+
+Veintinueve velos resistivos finos, las mallas metálicas, los tejidos de vidrio
+y las láminas de metal sinterizado que se ponen delante de un absorbente poroso
+o en la boca de una cavidad, cada uno con la resistencia al flujo de la unidad
+de **área**. Es lo que esta tabla se presta más a que se lea mal. El catálogo
+de [materiales porosos](/phonometry/es/reference/catalogues/porous-materials/)
+guarda una **resistividad** al flujo, por metro del material en masa que
+describe; un velo es una lámina sin espesor que merezca la pena dividir, así
+que lo que se mide sobre él es una resistencia en pascal segundo por metro, y
+entre las dos magnitudes hay un espesor de diferencia. Multiplicar una de estas
+filas por un espesor da un número que no ha medido nadie.
+
+Dos de las tres tablas imprimen esa resistencia dos veces, una en los N s/m³ de
+la página y otra como múltiplo de la impedancia característica del aire, y
+ninguna dice qué impedancia tomó. Las dos columnas se guardan tal como están
+impresas en vez de recalcular una a partir de la otra, porque dividirlas la
+devuelve: las mallas metálicas implican de 407 a 421 Pa s/m y las láminas
+sinterizadas 400, salvo un bloque que implica 397,7, y eso es una propiedad de
+la página y no de ningún velo. Las
+sinterizadas son además las únicas con factor de no linealidad, el cociente
+entre las resistencias medidas a 500 y a 20 cm/s de velocidad de cara, y va de
+1,8 a 5: un velo que valiera 1 sería el lineal que da por supuesto el resto de
+esta biblioteca. A los demás los nombra lo que nombraría un tejedor, un número
+de hilos o un ligamento, y el buscador acepta un número a secas porque así es
+como se llama un tejido de vidrio.
+
+<Catalogues catalogue="flowResistance" lang="es" />

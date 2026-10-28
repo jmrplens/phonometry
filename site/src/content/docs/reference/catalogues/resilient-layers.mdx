@@ -1,0 +1,32 @@
+---
+title: "Catalogue of resilient layers"
+description: "Fifteen resilient layers a floating floor is laid on, each with the dynamic stiffness per unit area measured on it, its density and its thickness."
+sidebar:
+  label: "Resilient layers"
+---
+
+import Catalogues from '../../../../components/Catalogues.astro';
+import CatalogueFinder from '../../../../components/CatalogueFinder.astro';
+
+<CatalogueFinder lang="en" />
+
+Fifteen resilient layers, which is what a floating floor floats on, each with
+the dynamic stiffness per unit area measured on it to ISO 9052-1. It is a thin
+table with little to interpret: a stiffness, a density and a thickness, and the
+last two are here because four rock wool rows and four glass wool rows differ
+by nothing else.
+
+The stiffness is the one the table's heading prints, $s'$, the stiffness of
+the installed layer that a floor's natural frequency takes, and not the
+apparent $s'_\mathrm{t}$ of the test specimen, which for a porous layer leaves
+out the air in its pores.
+
+What a row is not is a product. A floating floor is designed with the stiffness
+its manufacturer declares for the material actually being laid; these are
+specimens somebody measured and published in an appendix, and they are the
+order of magnitude for when there is no declared value in front of you, or the
+way to see how far the stiffness moves when the same wool is laid at twice the
+density. Eleven are the author's own measurements and the four rebond foams are
+credited to a paper of his own.
+
+<Catalogues catalogue="resilientLayers" lang="en" />

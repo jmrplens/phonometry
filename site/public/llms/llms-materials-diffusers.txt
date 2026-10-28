@@ -60,9 +60,12 @@ Pages elsewhere on the site that this section leans on:
 - [Surfaces measured in place](https://docs.jmrp.io/phonometry/materials/surfaces/) and its guide
   [In-situ Road-Surface Absorption](https://docs.jmrp.io/phonometry/materials/surfaces/road-absorption/):
   the ISO 13472-1 subtraction technique and the ISO 13472-2 spot method.
-- [Published catalogues](https://docs.jmrp.io/phonometry/reference/catalogues/#scattering-coefficients): the
-  measured and the computed scattering and diffusion coefficients of the
-  appendices, surface by surface.
+- Published catalogues: the
+  [measured](https://docs.jmrp.io/phonometry/reference/catalogues/scattering-coefficients/) and the
+  [computed](https://docs.jmrp.io/phonometry/reference/catalogues/predicted-scattering-coefficients/)
+  scattering coefficients and the
+  [diffusion coefficients](https://docs.jmrp.io/phonometry/reference/catalogues/diffusion-coefficients/)
+  of the appendices, surface by surface.
 
 ## What this section does not cover
 
@@ -743,9 +746,11 @@ row = materials.PUBLISHED_SCATTERING[
 print(row.why_missing("scattering_coefficient_5000"))
 ```
 
-The whole of all three tables is on the
-[published catalogues page](https://docs.jmrp.io/phonometry/reference/catalogues/#scattering-coefficients),
-filterable and with the source of every row.
+All three tables are published whole, filterable and with the source of
+every row, each in its own catalogue: the
+[scattering coefficients](https://docs.jmrp.io/phonometry/reference/catalogues/scattering-coefficients/), the
+[diffusion coefficients](https://docs.jmrp.io/phonometry/reference/catalogues/diffusion-coefficients/) and the
+[predicted scattering coefficients](https://docs.jmrp.io/phonometry/reference/catalogues/predicted-scattering-coefficients/).
 
 ## Scattering or diffusion? Two coefficients, two jobs
 

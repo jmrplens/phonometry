@@ -1,0 +1,29 @@
+---
+title: "Catalogue of orthotropic wood"
+description: "The four elastic constants of a thin orthotropic plate for the two woods a stringed instrument is made of, with the author's own guesses marked."
+sidebar:
+  label: "Orthotropic wood"
+---
+
+import Catalogues from '../../../../components/Catalogues.astro';
+import CatalogueFinder from '../../../../components/CatalogueFinder.astro';
+
+<CatalogueFinder lang="en" />
+
+Every solid in the [solids catalogue](/phonometry/reference/catalogues/solids/)
+is isotropic: one Young's modulus, one Poisson ratio, and the same answer
+whichever way a wave runs through it. Wood is not. A spruce plate is thirteen
+times stiffer along the grain than across it, and an instrument maker chooses
+the wood precisely for that difference, so a single modulus for it describes no
+direction at all. These two woods, the ones a stringed instrument is made of,
+carry the four elastic constants of a thin orthotropic plate: D1 along the
+grain, D3 across it, D2 the coupling between the two directions and D4 the
+twisting stiffness. Each is a modulus divided by twelve or a third of the shear
+modulus rather than a modulus itself, so they do not compare with the fir and
+spruce in the solids table. The page prints the woods as its columns and this
+table turns it so that a wood is a row. Two of maple's constants are the
+author's own guesses, which the page marks and the table shows, and maple's
+printed scaling factor does not follow from its own row, which is registered in
+this project's errata.
+
+<Catalogues catalogue="orthotropicWood" lang="en" />

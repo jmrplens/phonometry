@@ -2,8 +2,9 @@
 """Every published catalogue reaches the page that publishes catalogues.
 
 A ``PUBLISHED_*`` mapping is rows this library read off a printed page and
-kept. The page at ``/reference/catalogues/`` exists to show them, and
-``scripts/generate_catalogue_data.py`` is what carries them there. Nothing
+kept. The pages under ``/reference/catalogues/`` exist to show them, one per
+catalogue, and ``scripts/generate_catalogue_data.py`` is what carries them
+there. Nothing
 made the two agree, so a catalogue could be written, tested, documented in the
 API reference and still be invisible to every reader who is not reading Python:
 the rows are in the package, the page does not know they exist, and no gate
@@ -24,11 +25,14 @@ import, re-exported from a parent package or moved between modules is still a
 name a caller can reach, and a grep over files would miss it.
 
 **What it deliberately does not check**, so that the message stays honest: not
-that the section renders, not that its prose exists in both languages, and not
-that the columns are the right ones. Those are the page's own business and the
-site build already fails on a broken page. This guard answers one question,
-which nothing else was answering: is there a catalogue the page has never
-heard of.
+that the catalogue renders, not that its prose exists in both languages, and
+not that the columns are the right ones. Those are the pages' own business,
+and the site build fails on each of them: on a broken page, on a catalogue the
+generator writes that no page of a language renders, and on a page under
+``reference/catalogues/`` that ``catalogueSlugs`` does not list
+(``site/src/lib/catalogue-pages.ts``). This guard answers one question, which
+nothing else was answering: is there a catalogue the pages have never heard
+of.
 
 Exit status 0 when every catalogue reaches the page, 1 otherwise.
 """
@@ -92,7 +96,7 @@ def _is_named(name: str, generator: str) -> bool:
 
 
 def main() -> int:
-    """Report every catalogue the catalogues page has never heard of."""
+    """Report every catalogue the catalogue pages have never heard of."""
     generator = _GENERATOR.read_text(encoding="utf-8")
     missing = {
         name: module
@@ -109,10 +113,11 @@ def main() -> int:
             print(f"  {name}  <- {module}", file=sys.stderr)
         print(
             "  -> add each one to scripts/generate_catalogue_data.py with its "
-            "columns, give it a section in both languages of "
-            "site/src/content/docs/reference/catalogues.mdx, and add its key to "
-            "the catalogue union in site/src/components/Catalogues.astro. A "
-            "catalogue nobody can see is a catalogue nobody has.",
+            "columns, show it on a page under "
+            "site/src/content/docs/reference/catalogues/ in both languages, "
+            "listed in catalogueSlugs in site/src/data/topics.mjs, and add its "
+            "key to the catalogue union in site/src/components/Catalogues.astro. "
+            "A catalogue nobody can see is a catalogue nobody has.",
             file=sys.stderr,
         )
         return 1

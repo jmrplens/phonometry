@@ -656,9 +656,11 @@ row = materials.PUBLISHED_SCATTERING[
 print(row.why_missing("scattering_coefficient_5000"))
 ```
 
-The whole of all three tables is on the
-[published catalogues page](https://docs.jmrp.io/phonometry/reference/catalogues/#scattering-coefficients),
-filterable and with the source of every row.
+All three tables are published whole, filterable and with the source of
+every row, each in its own catalogue: the
+[scattering coefficients](https://docs.jmrp.io/phonometry/reference/catalogues/scattering-coefficients/), the
+[diffusion coefficients](https://docs.jmrp.io/phonometry/reference/catalogues/diffusion-coefficients/) and the
+[predicted scattering coefficients](https://docs.jmrp.io/phonometry/reference/catalogues/predicted-scattering-coefficients/).
 
 ## Scattering or diffusion? Two coefficients, two jobs
 

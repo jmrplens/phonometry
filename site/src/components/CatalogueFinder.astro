@@ -1,18 +1,27 @@
 ---
 /**
- * The one place to choose what you are looking at on the catalogues page.
+ * The one place to choose what you are looking at among the catalogues.
  *
- * The page holds seventeen catalogues and more than fifteen hundred rows.
- * Printed one after another that is a page you scroll through rather than a
- * page you consult, and on a phone the first table is several screens below
- * the fold, so a reader who arrived wanting the density of lead met an essay
- * about how the rows are sourced and no sign that a table existed at all.
+ * There are twenty-three catalogues and two thousand rows. Printed one after
+ * another they were a page you scroll through rather than a page you consult,
+ * and on a phone the first table was several screens below the fold, so a
+ * reader who arrived wanting the density of lead met an essay about how the
+ * rows are sourced and no sign that a table existed at all.
  *
  * So the three choices a reader actually makes, which catalogue, which
- * material and which published table, are made here, once, and only the
- * chosen catalogue is shown. The per-catalogue filters that used to sit above
- * each table are gone: two of the three choices were repeated eleven times
- * and the third, the one that matters most, could not be made at all.
+ * material and which published table, are made here, once. Each catalogue is
+ * a page of its own now (src/data/topics.mjs says why): choosing one here and
+ * pressing the button beside it opens its page at its table, and the material
+ * and the table are then chosen in the same panel, which sits directly above
+ * the rows it filters.
+ *
+ * The choice alone goes nowhere. A select changes its value on every arrow
+ * key and every letter typed on it while it is closed, and most browsers
+ * report each step as a change, so a select that opened a page on change sent
+ * a keyboard reader to the next catalogue on the first arrow, with the focus
+ * back at the top of a page they had not asked for. With the button the
+ * reader walks the list as long as they like, by arrow or by typing a name,
+ * and leaves the page only when they press it.
  *
  * The panel sits where the table starts, not at the top of the page. At the
  * top, a reader who had scrolled down a table to compare two rows had to
@@ -20,19 +29,25 @@
  * the panel itself was a screen tall, so the button that was meant to carry
  * them past the prose was below the fold. What stays at the top is that one
  * button, and it lands on the panel; the script moves the panel above the
- * first table of whichever catalogue is shown.
+ * first table of the page. On the overview, which has no table, the panel
+ * sits above the list of catalogues, holds the choice of catalogue alone, and
+ * the button carries the reader there.
  *
- * Nothing here is rendered from a list of catalogues kept in this file. The
- * options are read out of the document: every `<section data-catalogue>` the
- * page rendered, labelled by the `## heading` above it, which is prose in the
- * page and therefore already translated. Adding a catalogue to the page adds
- * it to this control and to nothing else.
+ * Nothing here is a list of catalogues kept in this file. The options are the
+ * catalogue pages, read off the pages themselves by src/lib/catalogue-pages.ts:
+ * their labels are the headings the sections had, which are prose in the page
+ * and therefore already translated, and their row counts come from the
+ * catalogues each page renders. What the filter is called, what it suggests
+ * and which published tables it can narrow to are read out of the table on
+ * the page, as they always were.
  *
  * Progressive enhancement, like the table it drives: the panel stays hidden
- * until the script runs, and with JavaScript off the page is the eleven
- * catalogues one after another, exactly as it was, with every row in the
- * document for Pagefind to index.
+ * until the script runs, and with JavaScript off each page is its prose and
+ * its whole table, with every row in the document for Pagefind to index, and
+ * the overview lists every catalogue as a link.
  */
+import { cataloguePages } from '../lib/catalogue-pages';
+
 interface Props {
 	/** Locale of the page it is rendered on. */
 	lang?: 'en' | 'es';
@@ -42,273 +57,247 @@ const { lang = 'en' } = Astro.props;
 const copy = {
 	en: {
 		category: 'Category',
+		choose: 'Choose a catalogue',
 		table: 'Published table',
 		everyTable: 'Every table',
+		open: 'Open',
 		jump: 'Go to the table',
+		jumpIndex: 'Go to the catalogues',
+		row: 'row',
 		rows: 'rows',
-		hint: 'Every catalogue on this page is behind this control. Pick one and only that one is shown.',
+		hint: 'Each catalogue has a page of its own: choose another one here and open it, or narrow the rows of this one by name and by the table that printed them.',
+		hintIndex: 'Each catalogue has a page of its own: choose one, and Open takes you to its table.',
 	},
 	es: {
 		category: 'Categoría',
+		choose: 'Elige un catálogo',
 		table: 'Tabla publicada',
 		everyTable: 'Todas las tablas',
+		open: 'Abrir',
 		jump: 'Ir a la tabla',
+		jumpIndex: 'Ir a los catálogos',
+		row: 'fila',
 		rows: 'filas',
-		hint: 'Todos los catálogos de esta página están detrás de este control. Elige uno y sólo se muestra ese.',
+		hint: 'Cada catálogo tiene su propia página: elige otro aquí y ábrelo, o filtra las filas de este por nombre y por la tabla que las imprimió.',
+		hintIndex: 'Cada catálogo tiene su propia página: elige uno y «Abrir» te lleva a su tabla.',
 	},
 }[lang];
+
+const pages = await cataloguePages(lang);
+/** The catalogue this page is, or none on the overview. */
+const here = pages.find((page) => page.href === Astro.url.pathname);
+const rowCount = (rows: number) => `${rows} ${rows === 1 ? copy.row : copy.rows}`;
 ---
 
 <div class="jump not-content" data-finder-jump hidden>
-	<button type="button" data-jump>{copy.jump}</button>
+	<button type="button" data-jump>{here ? copy.jump : copy.jumpIndex}</button>
 </div>
 
-<div
-	class="finder not-content"
-	data-finder
-	data-rows-word={copy.rows}
-	data-every-table={copy.everyTable}
-	hidden
->
-	<p class="hint">{copy.hint}</p>
+<div class="finder not-content" data-finder data-rows-word={copy.rows} data-row-word={copy.row} hidden>
+	<p class="hint">{here ? copy.hint : copy.hintIndex}</p>
 	<div class="controls">
-		<label class="wide">
-			<span>{copy.category}</span>
-			<select data-category></select>
-		</label>
-		<label class="wide">
-			<span data-search-label></span>
-			<input type="search" data-search />
-		</label>
-		<label>
-			<span>{copy.table}</span>
-			<select data-table>
-				<option value="">{copy.everyTable}</option>
-			</select>
-		</label>
-		<span class="count" data-count></span>
+		{/* The label names the select by its id rather than by wrapping it:
+		    wrapped, the button beside the select would be read into its name. */}
+		<div class="wide choose">
+			<label for="catalogue-category">{copy.category}</label>
+			<div class="pick">
+				{/* Each option is a page, opened at its table: the section's id
+				    is what the page lands on, and the script there puts the
+				    panel in view. */}
+				<select id="catalogue-category" data-category autocomplete="off">
+					{!here && <option value="" selected disabled>{copy.choose}</option>}
+					{
+						pages.map((page) => (
+							<option value={`${page.href}#catalogue-${page.keys[0]}`} selected={page === here}>
+								{page.label} ({rowCount(page.rows)})
+							</option>
+						))
+					}
+				</select>
+				{/* Offered only while the select names a page other than this
+				    one: on the overview, once a catalogue is chosen. */}
+				<button type="button" data-open disabled>{copy.open}</button>
+			</div>
+		</div>
+		{
+			here && (
+				<>
+					<label class="wide">
+						<span data-search-label />
+						<input type="search" data-search />
+					</label>
+					<label>
+						<span>{copy.table}</span>
+						<select data-table>
+							<option value="">{copy.everyTable}</option>
+						</select>
+					</label>
+					<span class="count" data-count />
+				</>
+			)
+		}
 	</div>
 </div>
 
 <script>
-	/** One catalogue: a heading, the prose and tables under it, and the state
-	    the controls above need once it is picked. `key`, `rowCount` and
-	    `published` are filled in a second pass, right after every group is
-	    found and before any of them is read. */
-	interface CatalogueGroup {
-		heading: Element;
-		nodes: Element[];
-		tables: HTMLElement[];
-		key: string;
-		rowCount: number;
-		published: string[];
-	}
-
 	(() => {
 		const finder = document.querySelector<HTMLElement>('[data-finder]');
-		const sections = [...document.querySelectorAll<HTMLElement>('[data-catalogue]')];
-		if (!finder || sections.length === 0) return;
+		const jumpBar = document.querySelector<HTMLElement>('[data-finder-jump]');
+		const jump = jumpBar?.querySelector<HTMLButtonElement>('[data-jump]');
+		const category = finder?.querySelector<HTMLSelectElement>('[data-category]');
+		const openButton = finder?.querySelector<HTMLButtonElement>('[data-open]');
+		if (!finder || !jumpBar || !jump || !category || !openButton) return;
 
-		const category = finder.querySelector<HTMLSelectElement>('[data-category]');
+		/** Bring the panel, and with it the top of the table, into view. */
+		const toPanel = (behavior: ScrollBehavior = 'smooth') =>
+			finder.scrollIntoView({ behavior, block: 'start' });
+
+		/** The option the page was built with: this page, or on the overview
+		    the line that asks for a choice. */
+		const here = () => [...category.options].find((option) => option.defaultSelected);
+		/* The button opens the chosen catalogue's page at its table, and is
+		   offered only while the select names another page. Choosing alone
+		   leaves the page where it is (see the comment at the top). The
+		   address names the table's section, so the page lands there even
+		   before its own copy of this script has put the panel in view. */
+		const offerOpen = () => {
+			openButton.disabled = !category.value || category.selectedOptions[0] === here();
+		};
+		category.addEventListener('change', offerOpen);
+		openButton.addEventListener('click', () => {
+			if (!openButton.disabled) location.assign(category.value);
+		});
+		/* Back from the page a choice opened, the browser can show this page
+		   as it was left, with the other catalogue still chosen: the select
+		   goes back to naming the page it is on. */
+		window.addEventListener('pageshow', () => {
+			category.value = here()?.value ?? '';
+			offerOpen();
+		});
+		jump.addEventListener('click', () => toPanel());
+
+		const sections = [...document.querySelectorAll<HTMLElement>('[data-catalogue]')];
+		const index = document.querySelector<HTMLElement>('[data-catalogue-index]');
+
+		if (sections.length === 0) {
+			/* The overview: the panel goes above the list of catalogues, which
+			   is what a reader without the script follows instead. */
+			index?.before(finder);
+			finder.removeAttribute('hidden');
+			jumpBar.removeAttribute('hidden');
+			return;
+		}
+
 		const search = finder.querySelector<HTMLInputElement>('[data-search]');
 		const searchLabel = finder.querySelector<HTMLElement>('[data-search-label]');
 		const tableSelect = finder.querySelector<HTMLSelectElement>('[data-table]');
 		const count = finder.querySelector<HTMLElement>('[data-count]');
-		const jumpBar = document.querySelector<HTMLElement>('[data-finder-jump]');
-		const jump = jumpBar?.querySelector<HTMLButtonElement>('[data-jump]');
-		if (!category || !search || !searchLabel || !tableSelect || !count || !jumpBar || !jump) return;
-		/* The two words the control prints for itself. They travel on the panel
-		   rather than through `define:vars`, which would force this script inline
-		   and therefore to run where it is written, above every table it is
-		   looking for. */
+		if (!search || !searchLabel || !tableSelect || !count) return;
+		/* The words the control prints for itself. They travel on the panel
+		   rather than through `define:vars`, which would force this script
+		   inline and therefore to run where it is written, above every table it
+		   is looking for. */
 		const rowsWord = finder.dataset.rowsWord ?? '';
-		const everyTable = finder.dataset.everyTable ?? '';
+		const rowWord = finder.dataset.rowWord ?? rowsWord;
 
-		/* A catalogue on this page is a heading, the prose under it and one or
-		   more tables: three kinds of sibling in the same markdown flow rather
-		   than one element that could be hidden on its own. So the flow is walked
-		   once and cut at every `h2`, and a run that contains a table is a
-		   catalogue. It has to be a run rather than one table per heading because
-		   the absorption heading covers two: the coefficients, and the few rows
-		   the same pages price in equivalent absorption area because they have no
-		   surface to multiply. A reader who asks for absorption wants both. */
-		const root = sections[0].parentElement;
-		if (!root) return;
-		const flow = [...root.children];
-		const groups: CatalogueGroup[] = [];
-		let run: CatalogueGroup | null = null;
-		for (const node of flow) {
-			/* Starlight does not leave a heading bare: it wraps it, with its
-			   anchor link, in a `div.sl-heading-wrapper`, so the cut is made on
-			   whatever element holds the `h2` rather than on the `h2` itself. */
-			const h2 = node.tagName === 'H2' ? node : node.querySelector(':scope > h2');
-			if (h2) {
-				run = { heading: h2, nodes: [node], tables: [], key: '', rowCount: 0, published: [] };
-				groups.push(run);
-				continue;
-			}
-			if (!run) continue;
-			run.nodes.push(node);
-			if (node instanceof HTMLElement && node.matches('[data-catalogue]')) run.tables.push(node);
-		}
-		const catalogues = groups.filter((group) => group.tables.length > 0);
-		if (catalogues.length === 0) return;
-		for (const group of catalogues) {
-			group.key = group.tables[0].dataset.catalogue ?? '';
-			group.rowCount = group.tables.reduce(
-				(total, table) => total + Number(table.dataset.rowCount ?? 0),
-				0,
-			);
-			group.published = [
-				...new Set(group.tables.flatMap((table) => JSON.parse(table.dataset.tables ?? '[]'))),
-			].sort();
-		}
+		/* The panel goes where the table starts: after the heading, the prose
+		   that introduces the catalogue and the legend of the marks, directly
+		   above the rows it filters. A page can hold more than one table (the
+		   absorption coefficients carry the few rows the same pages price in
+		   equivalent absorption area), and the panel filters them all. */
+		const first = sections[0];
+		(first.querySelector(':scope > .table-scroll') ?? first).before(finder);
 
-		/** The heading's own words, without the anchor link Starlight adds. */
-		const labelOf = (group: CatalogueGroup) => {
-			// `cloneNode` is typed as returning a plain `Node` however specific the
-			// element cloned was; a clone of an `Element` is always an `Element`.
-			const clone = group.heading.cloneNode(true) as Element;
-			for (const anchor of clone.querySelectorAll('a')) anchor.remove();
-			return (clone.textContent ?? '').trim();
-		};
+		const rows = sections.flatMap((section) => [...section.querySelectorAll<HTMLTableRowElement>('tbody tr')]);
 
-		for (const group of catalogues) {
-			const option = document.createElement('option');
-			option.value = group.key;
-			option.textContent = `${labelOf(group)} (${group.rowCount} ${rowsWord})`;
-			category.append(option);
-		}
-
-		let active = catalogues[0];
-
-		const rowsOf = (group: CatalogueGroup) =>
-			group.tables.flatMap((table) => [...table.querySelectorAll<HTMLElement>('[data-row]')]);
-
-		const applyFilter = () => {
-			/* Folded the way Catalogues.astro folds each row's words, so a reader
-			   who types "hormigon" or "argon" finds "hormigón" and "argón". */
-			const needle = search.value
-				.trim()
+		/** Folded the way Catalogues.astro folds, so a reader who types
+		    "hormigon" or "argon" finds "hormigón" and "argón". */
+		const fold = (text: string) =>
+			text
 				.normalize('NFD')
 				.replace(/\p{M}/gu, '')
 				.toLowerCase();
+
+		/** Every text node of a cell, a space between each: the heading above a
+		    name, the name and the variant under it are separate words. */
+		const wordsOf = (cell: Element) => {
+			const walker = document.createTreeWalker(cell, NodeFilter.SHOW_TEXT);
+			const words: string[] = [];
+			while (walker.nextNode()) words.push(walker.currentNode.nodeValue ?? '');
+			return words.join(' ');
+		};
+
+		/* What a row is found by: the words it shows, which are every cell but
+		   the quantities (a quantity is a cell with no class between the name
+		   and the source), the key of the table it came off and whatever it
+		   carries in `data-also` because it is matched without being shown. A
+		   number is not a name, and "40", which is what a glass cloth is
+		   called, must not find every row with a 40 in it. Worked out once per
+		   row, the first time a filter needs it. */
+		const haystacks = new WeakMap<HTMLTableRowElement, string>();
+		const haystackOf = (row: HTMLTableRowElement) => {
+			let text = haystacks.get(row);
+			if (text === undefined) {
+				const cells = [...row.cells].filter(
+					(cell, at, all) => cell.tagName === 'TH' || cell.hasAttribute('class') || at === all.length - 1,
+				);
+				text = fold(
+					[...cells.map(wordsOf), row.dataset.table ?? '', row.dataset.also ?? ''].join(' '),
+				);
+				haystacks.set(row, text);
+			}
+			return text;
+		};
+
+		const applyFilter = () => {
+			const needle = fold(search.value.trim());
 			const wanted = tableSelect.value;
 			let shown = 0;
-			for (const row of rowsOf(active)) {
+			for (const row of rows) {
 				const visible =
-					(!needle || (row.dataset.text ?? '').includes(needle)) &&
-					(!wanted || row.dataset.table === wanted);
+					(!needle || haystackOf(row).includes(needle)) && (!wanted || row.dataset.table === wanted);
 				row.hidden = !visible;
 				if (visible) shown += 1;
 			}
-			count.textContent = `${shown} ${rowsWord}`;
+			count.textContent = `${shown} ${shown === 1 ? rowWord : rowsWord}`;
 			/* One message per table, so the reader is told which of the two
 			   absorption tables their filter emptied and which still has rows. */
-			for (const table of active.tables) {
-				const empty = table.querySelector<HTMLElement>('[data-empty-message]');
-				const left = [...table.querySelectorAll<HTMLElement>('[data-row]')].some(
-					(row) => !row.hidden,
-				);
+			for (const section of sections) {
+				const empty = section.querySelector<HTMLElement>('[data-empty-message]');
+				const left = [...section.querySelectorAll<HTMLElement>('tbody tr')].some((row) => !row.hidden);
 				if (empty) empty.textContent = left ? '' : (empty.dataset.message ?? '');
 			}
 		};
 
-		/** Bring the panel, and with it the top of the table, into view. */
-		const toPanel = () => finder.scrollIntoView({ behavior: 'smooth', block: 'start' });
+		searchLabel.textContent = first.dataset.searchLabel ?? '';
+		search.placeholder = first.dataset.placeholder ?? '';
+		const published = [
+			...new Set(sections.flatMap((section) => JSON.parse(section.dataset.tables ?? '[]') as string[])),
+		].sort();
+		for (const table of published) {
+			const option = document.createElement('option');
+			option.value = table;
+			option.textContent = table;
+			tableSelect.append(option);
+		}
 
-		const show = (
-			group: CatalogueGroup,
-			{ scroll }: { scroll?: 'heading' | 'panel' } = {},
-		) => {
-			active = group;
-			/* The panel goes where this catalogue's table starts: after its
-			   heading, the prose that introduces it and the legend of the
-			   marks, directly above the rows it filters. It sits inside the
-			   shown catalogue, so hiding the others never hides it. */
-			const first = group.tables[0];
-			(first.querySelector(':scope > .table-scroll') ?? first).before(finder);
-			for (const other of catalogues) {
-				const hide = other !== group;
-				for (const node of other.nodes) node.classList.toggle('catalogue-hidden', hide);
-			}
-			category.value = group.key;
-			searchLabel.textContent = group.tables[0].dataset.searchLabel ?? '';
-			search.placeholder = group.tables[0].dataset.placeholder ?? '';
-			search.value = '';
-			tableSelect.replaceChildren();
-			const every = document.createElement('option');
-			every.value = '';
-			every.textContent = everyTable;
-			tableSelect.append(every);
-			for (const table of group.published) {
-				const option = document.createElement('option');
-				option.value = table;
-				option.textContent = table;
-				tableSelect.append(option);
-			}
-			applyFilter();
-			if (scroll === 'heading') group.heading.scrollIntoView({ behavior: 'smooth', block: 'start' });
-			if (scroll === 'panel') toPanel();
-		};
-
-		/* A link can name a catalogue two ways: by the heading's own id, which is
-		   what this page's table of contents uses and what every guide links to,
-		   and is therefore Spanish on the Spanish page; or by the section's
-		   stable id, the same word in both languages, which nothing publishes
-		   but which is the obvious thing to try by hand. */
-		const fromHash = () => {
-			/* Decoded because the Spanish headings are `#sólidos` and
-			   `#coeficientes-de-absorción`, which a browser hands back
-			   percent-encoded. Anything can be typed after a `#`, though, and a
-			   fragment like `%zz` makes `decodeURIComponent` throw: unguarded
-			   that exception left the panel revealed and uninitialised, with all
-			   eleven catalogues on the page and no options in its table filter.
-			   A fragment nobody can decode names no catalogue. */
-			let hash;
-			try {
-				hash = decodeURIComponent(location.hash.replace('#', ''));
-			} catch {
-				return null;
-			}
-			if (!hash) return null;
-			return (
-				catalogues.find((group) => group.tables.some((table) => table.id === hash)) ??
-				catalogues.find((group) => group.heading.id === hash) ??
-				null
-			);
-		};
-
-		category.addEventListener('change', () => {
-			const group = catalogues.find((candidate) => candidate.key === category.value);
-			if (group) show(group, { scroll: 'panel' });
-		});
 		search.addEventListener('input', applyFilter);
 		tableSelect.addEventListener('change', applyFilter);
-		jump.addEventListener('click', toPanel);
-		/* A link from a guide names the catalogue's heading, so it lands on
-		   the heading and the prose that says what the table is. */
-		window.addEventListener('hashchange', () => {
-			const group = fromHash();
-			if (group) show(group, { scroll: 'heading' });
-		});
 
 		finder.removeAttribute('hidden');
 		jumpBar.removeAttribute('hidden');
-		show(fromHash() ?? catalogues[0]);
+		applyFilter();
+
+		/* Opened from the panel of another page, which names the first table,
+		   or from a link that names it: land on the panel, clear of the
+		   header, rather than on the legend above it. The first table only:
+		   the panel sits above it, and a link to a later one (the absorption
+		   areas, under the coefficients) is a link to that table: the
+		   browser scrolls to it by itself, and landing on the panel would
+		   leave a whole table between the reader and it. */
+		if (location.hash === `#${first.id}`) toPanel('instant');
 	})();
 </script>
-
-<style is:global>
-	/* The heading, the prose and the table of a catalogue nobody asked for.
-	   `!important` because the rule has to beat whatever display the markdown
-	   styles give an `h2` or a `p`, and losing that fight would leave eleven
-	   catalogues stacked on the page with one of them also claiming to be the
-	   only one shown. */
-	.catalogue-hidden {
-		display: none !important;
-	}
-</style>
 
 <style>
 	/* The button that stays at the top of the page. It is the only thing
@@ -383,6 +372,51 @@ const copy = {
 		color: var(--sl-color-white);
 	}
 
+	/* The select of catalogues under its label, and the button that opens the
+	   one chosen beside the select, on one line at every width. */
+	.choose {
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+		font-size: var(--sl-text-sm);
+	}
+
+	/* The row stretches the button to the select's height, which a select
+	   sets for itself whatever the line height around it. */
+	.pick {
+		display: flex;
+		gap: 0.5rem;
+	}
+
+	.pick select {
+		flex: 1 1 auto;
+		min-width: 0;
+	}
+
+	.pick button {
+		flex: none;
+		font: inherit;
+		padding: 0 0.9rem;
+		border: 1px solid var(--sl-color-text-accent);
+		border-radius: 0.25rem;
+		background: var(--sl-color-text-accent);
+		color: var(--sl-color-black);
+		cursor: pointer;
+	}
+
+	.pick button:hover:enabled {
+		background: color-mix(in srgb, var(--sl-color-text-accent) 82%, var(--sl-color-black));
+	}
+
+	/* Nothing to open yet: the select still names this page, or on the
+	   overview no catalogue is chosen. */
+	.pick button:disabled {
+		border-color: var(--sl-color-gray-5);
+		background: transparent;
+		color: var(--sl-color-gray-3);
+		cursor: default;
+	}
+
 	.count {
 		font-size: var(--sl-text-sm);
 		color: var(--sl-color-gray-3);
@@ -396,7 +430,8 @@ const copy = {
 			gap: 0.7rem;
 		}
 
-		.controls label,
+		.controls > label,
+		.controls > .choose,
 		.jump button {
 			flex: 1 1 100%;
 			width: 100%;

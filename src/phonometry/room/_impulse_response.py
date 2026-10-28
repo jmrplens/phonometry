@@ -73,6 +73,7 @@ from scipy import signal
 from .._internal.frozen import OwnsArrays
 from .._internal.utils import _typesignal
 from .._internal.validation import (
+    require_count,
     require_equal_shapes,
     require_ranks,
     require_same_length,
@@ -555,7 +556,7 @@ def impulse_response(
     return ImpulseResponseResult(ir=np.asarray(ir), fs=fs, method=method)
 
 
-def mls_signal(order: int) -> np.ndarray:
+def mls_signal(order: int | np.integer[Any]) -> np.ndarray:
     """Generate a maximum-length sequence (MLS) of the given order.
 
     A Fibonacci LFSR with primitive-polynomial feedback taps produces a
@@ -566,9 +567,11 @@ def mls_signal(order: int) -> np.ndarray:
     :param order: Register length ``N`` (2 to 20). The sequence length is
         ``2**order - 1``.
     :return: The bipolar MLS samples (values in ``{-1.0, +1.0}``).
-    :raises TypeError: if ``order`` is not a single number.
+    :raises ValueError: if ``order`` is not a whole number from 2 to 20.
+    :raises TypeError: if ``order`` is a flag, a text or an array where an
+        order goes.
     """
-    require_scalar(order, "order")
+    order = require_count(order, "order", at_least=None)
     if order not in _MLS_TAPS:
         msg = f"order must be one of {sorted(_MLS_TAPS)} (got {order})"
         raise ValueError(msg)
@@ -715,7 +718,7 @@ _GOLAY_MAX_ORDER = 22
 _SHAPED_EDGE_OCTAVES = 1.0 / 6.0
 
 
-def golay_pair(order: int) -> tuple[np.ndarray, np.ndarray]:
+def golay_pair(order: int | np.integer[Any]) -> tuple[np.ndarray, np.ndarray]:
     r"""Generate a complementary Golay pair of length ``2**order``.
 
     Built with the append recursion of Golay (1961): starting from
@@ -732,7 +735,7 @@ def golay_pair(order: int) -> tuple[np.ndarray, np.ndarray]:
     :return: The pair ``(a, b)`` as bipolar float arrays (values ``+1/-1``).
     :raises TypeError: if ``order`` is not a single number.
     """
-    require_scalar(order, "order")
+    order = require_count(order, "order", at_least=None)
     if not 1 <= order <= _GOLAY_MAX_ORDER:
         msg = f"order must be between 1 and {_GOLAY_MAX_ORDER} (got {order})"
         raise ValueError(msg)

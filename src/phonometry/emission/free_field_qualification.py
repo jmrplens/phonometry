@@ -2085,7 +2085,7 @@ def check_free_field(
     measurement_radius_m: float | None = None,
     reflecting_plane_absorption_coefficient: float | None = None,
     reflecting_plane_margin_m: float | None = None,
-    paths_in_working_area: bool | None = None,
+    paths_in_working_area: bool | np.bool_ | None = None,
     speed_of_sound: float = 343.0,
 ) -> FreeFieldCheck:
     """Is this room anechoic or hemi-anechoic enough for ISO 3745? (Annex A as amended).
@@ -2126,8 +2126,9 @@ def check_free_field(
     :raises ValueError: for results of different rooms, a frequency given to
         two sources, directionality results that do not align with
         ``results``, an unknown bandwidth, an absorption coefficient outside
-        0 to 1, a margin that is not finite, or a working-area declaration
-        that is not ``True``, ``False`` or ``None``.
+        0 to 1, or a margin that is not finite.
+    :raises TypeError: for a working-area declaration that is not ``True``,
+        ``False`` or ``None`` (a NumPy truth value is one).
     """
     fits = (results,) if isinstance(results, InverseSquareLawResult) else tuple(results)
     directionality = (
@@ -2143,7 +2144,9 @@ def check_free_field(
         measurement_radius_m=measurement_radius_m,
         reflecting_plane_absorption_coefficient=reflecting_plane_absorption_coefficient,
         reflecting_plane_margin_m=reflecting_plane_margin_m,
-        paths_in_working_area=paths_in_working_area,
+        paths_in_working_area=_checked_declaration(
+            paths_in_working_area, "paths_in_working_area"
+        ),
         speed_of_sound=speed_of_sound,
     )
 

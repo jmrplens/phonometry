@@ -527,7 +527,7 @@ class RadiatingPistonResult(OwnsArrays):
         self,
         ax: Axes | None = None,
         *,
-        frequency_index: int = -1,
+        frequency_index: int | np.integer[Any] = -1,
         language: Language = "en",
         **kwargs: Any,
     ) -> Axes:

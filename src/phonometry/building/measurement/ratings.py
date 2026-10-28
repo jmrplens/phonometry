@@ -89,6 +89,7 @@ from ..._internal.validation import (
     check_engine,
     require_band_fraction,
     require_choice,
+    require_count,
     require_equal_shapes,
     require_present,
     require_ranks,
@@ -1167,12 +1168,19 @@ class ImpactImprovementRatingResult(OwnsArrays):
         r"""Reject a rating whose terms or curves do not agree.
 
         :raises ValueError: if the band centres and the improvement differ in
-            length or hold a value that is not finite, or if ``ci_r`` is not
+            length or hold a value that is not finite, if ``ci_delta`` or
+            ``ci_r`` is not a whole number of decibels, or if ``ci_r`` is not
             :math:`C_\mathrm{I,r,0} - C_{\mathrm{I},\Delta}`.
-        :raises TypeError: if ``ci_delta`` or ``ci_r`` is not a single number.
+        :raises TypeError: if ``ci_delta`` or ``ci_r`` is a flag, a text or an
+            array where a whole number goes.
         """
-        require_scalar(self.ci_delta, "ci_delta")
-        require_scalar(self.ci_r, "ci_r")
+        # Each term held as the int require_count returns, a NumPy one too.
+        object.__setattr__(
+            self, "ci_delta", require_count(self.ci_delta, "ci_delta", at_least=None)
+        )
+        object.__setattr__(
+            self, "ci_r", require_count(self.ci_r, "ci_r", at_least=None)
+        )
         require_ranks(self, frequencies=1, improvement=1)
         require_same_length(self, "frequencies", "improvement")
         _require_finite_curves(self, "frequencies", "improvement")

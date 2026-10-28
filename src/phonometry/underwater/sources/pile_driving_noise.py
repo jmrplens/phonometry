@@ -122,7 +122,7 @@ def cumulative_sel(single_sels: ArrayLike) -> float:
     return float(10.0 * np.log10(np.sum(10.0 ** (sels / 10.0))))
 
 
-def cumulative_sel_identical(sel_ss: float, n_strikes: int) -> float:
+def cumulative_sel_identical(sel_ss: float, n_strikes: int | np.integer[Any]) -> float:
     r"""Cumulative SEL of ``n_strikes`` identical strikes:
     :math:`\mathrm{SEL}_{\mathrm{ss}} + 10 \log_{10} N`.
 
@@ -131,18 +131,11 @@ def cumulative_sel_identical(sel_ss: float, n_strikes: int) -> float:
     :return: Cumulative SEL, in dB re 1 µPa²·s.
     :raises ValueError: If ``n_strikes`` is not a whole number
         :math:`\ge 1`.
-    :raises TypeError: if ``n_strikes`` or ``sel_ss`` is not a single number.
+    :raises TypeError: if ``sel_ss`` is not a single number, or ``n_strikes``
+        is a flag, a text or an array where a count goes.
     """
     require_scalar(sel_ss, "sel_ss")
-    require_scalar(n_strikes, "n_strikes")
-    n_float = float(n_strikes)
-    if not n_float.is_integer():
-        msg = "'n_strikes' must be a whole number of strikes."
-        raise ValueError(msg)
-    n = int(n_float)
-    if n < 1:
-        msg = "'n_strikes' must be at least 1."
-        raise ValueError(msg)
+    n = require_count(n_strikes, "n_strikes")
     if not np.isfinite(sel_ss):
         msg = "'sel_ss' must be finite."
         raise ValueError(msg)

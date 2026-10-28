@@ -1036,7 +1036,7 @@ vertical_directivity(
     psi: float,
     *,
     frequencies: ArrayLike = (50.0, 63.0, 80.0, 100.0, 125.0, 160.0, 200.0, 250.0, 315.0, 400.0, 500.0, 630.0, 800.0, 1000.0, 1250.0, 1600.0, 2000.0, 2500.0, 3150.0, 4000.0, 5000.0, 6300.0, 8000.0, 10000.0),
-    height: int = 1,
+    height: int | np.integer[Any] = 1,
     aerodynamic: bool = False,
     edition: DirectivityEdition = ...,
 ) -> NDArray[np.float64]
@@ -1069,7 +1069,7 @@ other source.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the angle is not finite or the height is not 1 or 2. |
-| TypeError | if `height` or `psi` is not a single number. |
+| TypeError | if `psi` is not a single number, or `height` is a flag, a text or an array where a source height index goes. |
 
 ## WavelengthSpectrum
 

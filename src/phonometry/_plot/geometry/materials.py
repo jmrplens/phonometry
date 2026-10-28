@@ -22,6 +22,7 @@ from typing import TYPE_CHECKING, Any, Literal
 import numpy as np
 
 from ..._internal.validation import (
+    require_count,
     require_non_negative,
     require_positive,
     require_scalar,
@@ -513,7 +514,7 @@ def plot_qrd_geometry(
     well_width: float,
     *,
     ax: Axes | None = None,
-    n_repetitions: int = 1,
+    n_repetitions: int | np.integer[Any] = 1,
     fin_width: float | None = None,
     language: Language = "en",
     **kwargs: Any,
@@ -535,12 +536,13 @@ def plot_qrd_geometry(
     :param kwargs: Forwarded to the base-slab rectangle.
     :return: The axes.
     :raises ValueError: for an empty or non-1-D depth sequence, a depth that
-        is not finite and non-negative, a non-positive well width, fewer than
-        one period, or a negative fin width.
-    :raises TypeError: if ``fin_width``, ``n_repetitions`` or ``well_width`` is not a
-        single number.
+        is not finite and non-negative, a non-positive well width, a number of
+        periods that is not a whole number from 1, or a negative fin width.
+    :raises TypeError: if ``fin_width`` or ``well_width`` is not a single
+        number, or ``n_repetitions`` is a flag, a text or an array where a
+        count goes.
     """
-    require_scalar(n_repetitions, "n_repetitions")
+    n_repetitions = require_count(n_repetitions, "n_repetitions")
     _check_language(language)
     d = np.asarray(depths, dtype=np.float64)
     if d.ndim != 1 or d.size == 0:
@@ -560,9 +562,6 @@ def plot_qrd_geometry(
         msg = "'depths' must be non-negative."
         raise ValueError(msg)
     require_positive(well_width, "well_width")
-    if n_repetitions < 1:
-        msg = "'n_repetitions' must be >= 1."
-        raise ValueError(msg)
     fin = (
         well_width / 12.0
         if fin_width is None

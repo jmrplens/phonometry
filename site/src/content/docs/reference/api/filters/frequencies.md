@@ -76,7 +76,7 @@ reaches `limits[1]`.
 ## normalized_frequencies
 
 ```python
-normalized_frequencies(fraction: int) -> list[float]
+normalized_frequencies(fraction: int | np.integer[Any]) -> list[float]
 ```
 
 Standardized IEC center frequencies.
@@ -93,4 +93,5 @@ Standardized IEC center frequencies.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `fraction` is not a single number. |
+| ValueError | for a `fraction` other than 1 and 3. |
+| TypeError | if `fraction` is a flag, a text or an array where a whole number goes. |

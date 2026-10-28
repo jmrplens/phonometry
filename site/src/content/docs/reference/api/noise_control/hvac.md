@@ -168,7 +168,10 @@ has to be reduced accordingly.
 ## blade_passing_frequency
 
 ```python
-blade_passing_frequency(rotational_speed_rpm: float, n_blades: int) -> float
+blade_passing_frequency(
+    rotational_speed_rpm: float,
+    n_blades: int | np.integer[Any],
+) -> float
 ```
 
 Blade passing frequency (Long Eq. 13.4).
@@ -188,8 +191,8 @@ $f_{bp} = \mathrm{rpm} \times \mathrm{blades} / 60$.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If `n_blades` is not a positive integer. |
-| TypeError | if `n_blades` or `rotational_speed_rpm` is not a single number. |
+| ValueError | If `n_blades` is not a whole number from 1, or the speed is not positive. |
+| TypeError | if `rotational_speed_rpm` is not a single number, or `n_blades` is a flag, a text or an array where a count goes. |
 
 ## diffuser_sound_power
 
@@ -201,7 +204,7 @@ diffuser_sound_power(
     pressure_drop_pa: float,
     *,
     shape: Literal['rectangular', 'round'] = 'rectangular',
-    n_devices: int = 1,
+    n_devices: int | np.integer[Any] = 1,
 ) -> HVACSpectrumResult
 ```
 
@@ -265,8 +268,8 @@ which is what `n_devices` applies.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If a dimension is not positive, `n_devices` is not a positive integer or `shape` is unknown. |
-| TypeError | if `shape` is not a text, or `face_area`, `n_devices`, `pressure_drop_pa` or `volume_flow` is not a single number. |
+| ValueError | If a dimension is not positive, `n_devices` is not a whole number from 1 or `shape` is unknown. |
+| TypeError | if `shape` is not a text, `face_area`, `pressure_drop_pa` or `volume_flow` is not a single number, or `n_devices` is a flag, a text or an array where a count goes. |
 
 ## elbow_insertion_loss
 
@@ -523,7 +526,7 @@ fan_sound_power(
     assembly: Literal['rr', 't', 'am'],
     fan_speed_rpm: float,
     specific_sound_power_level: float | None = ...,
-    n_blades: int | None = ...,
+    n_blades: int | np.integer[Any] | None = ...,
     relative_flow: float = ...,
     frequencies: ArrayLike | None = ...,
 ) -> HVACSpectrumResult
@@ -1313,7 +1316,7 @@ VDI 2081 treats the two as separate elements of the chain.
 silencer_self_noise(
     frequencies: ArrayLike | None,
     airway_velocity: float,
-    n_passages: int,
+    n_passages: int | np.integer[Any],
     height_m: float,
     *,
     model: Literal['ashrae', 'vdi2081'] = 'ashrae',
@@ -1366,8 +1369,8 @@ correction because the face size enters through `N` and `H`.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If `n_passages` is not a positive integer. |
-| TypeError | if `model` is not a text, or `airway_velocity`, `airway_width`, `approach_area`, `height_m`, `n_passages` or `pressure_drop_pa` is not a single number. |
+| ValueError | If `n_passages` is not a whole number from 1. |
+| TypeError | if `model` is not a text, `airway_velocity`, `airway_width`, `approach_area`, `height_m` or `pressure_drop_pa` is not a single number, or `n_passages` is a flag, a text or an array where a count goes. |
 
 ## SPECTRAL_CORRECTION
 
@@ -1380,7 +1383,7 @@ split_loss(
     main_area: float,
     branch_areas: ArrayLike,
     *,
-    branch: int = 0,
+    branch: int | np.integer[Any] = 0,
     model: Literal['ashrae', 'vdi2081'] = 'ashrae',
 ) -> float
 ```
@@ -1435,8 +1438,8 @@ records.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If the areas are not positive or `branch` is out of range. |
-| TypeError | if `model` is not a text, or `branch` or `main_area` is not a single number. |
+| ValueError | If the areas are not positive or `branch` is not a whole number in range. |
+| TypeError | if `model` is not a text, `main_area` is not a single number, or `branch` is a flag, a text or an array where an index goes. |
 
 ## splitter_silencer_insertion_loss
 

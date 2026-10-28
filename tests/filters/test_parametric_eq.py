@@ -596,7 +596,9 @@ def test_response_grid_validation() -> None:
     eq = ph.filters.ParametricEQ(
         FS, ph.filters.EQSection(filter_type="peaking", f0=1000.0, gain_db=3.0)
     )
-    with pytest.raises(ValueError, match=r"'n_points' must be at least"):
+    with pytest.raises(
+        ValueError, match=r"'n_points' must be a whole number, at least 2"
+    ):
         eq.response(n_points=1)
     with pytest.raises(ValueError, match=r"Need 0 < f_min < f_max <= fs/2"):
         eq.response(f_min=0.0)

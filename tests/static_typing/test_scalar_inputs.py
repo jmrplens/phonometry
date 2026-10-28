@@ -62,10 +62,10 @@ def test_a_numpy_integer_is_a_band_fraction() -> None:
 
 
 def test_a_numpy_integer_is_a_filter_bandwidth() -> None:
-    """The bank keeps the plain number a numpy integer holds."""
+    """The bank keeps the plain int a numpy integer holds, as it keeps an int."""
     bank = filters.OctaveFilterBank(48000.0, fraction=np.int64(3))
     assert bank.fraction == 3
-    assert type(bank.fraction) is float
+    assert type(bank.fraction) is int
 
 
 def test_a_numpy_truth_value_is_a_flag() -> None:

@@ -369,8 +369,7 @@ def _weighted_record(samples: np.ndarray, fs: float, *, weighted: bool) -> np.nd
     same length as the record the caller handed in.
 
     :param samples: The record, float64.
-    :param fs: Sample rate, in Hz. Rounded for the network, which is
-        designed at an integer rate.
+    :param fs: Sample rate, in Hz, at which the network is designed.
     :param weighted: Whether the ITU-R BS.468-4 network is in the path.
     :return: The record to rectify, with the padding still on it when
         weighted.
@@ -379,7 +378,7 @@ def _weighted_record(samples: np.ndarray, fs: float, *, weighted: bool) -> np.nd
         return samples
     pad = np.zeros(int(round(_WEIGHTING_TAIL_SECONDS * fs)))
     padded = np.concatenate([samples, pad])
-    return np.asarray(weighting_filter(padded, round(fs), "468"), dtype=np.float64)
+    return np.asarray(weighting_filter(padded, fs, "468"), dtype=np.float64)
 
 
 def _detector_trace(

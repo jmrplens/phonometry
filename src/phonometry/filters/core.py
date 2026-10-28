@@ -21,6 +21,7 @@ from .._internal.utils import (
 from .._internal.validation import (
     is_scalar,
     require_choice,
+    require_count,
     require_positive,
     require_present,
     require_real,
@@ -505,15 +506,11 @@ def _validate_bank_design(
     """
     require_scalar(fraction, "fraction")
     require_scalar(fs, "fs")
-    require_scalar(order, "order")
     if fs <= 0:
         msg = "Sample rate 'fs' must be positive."
         raise ValueError(msg)
     if fraction <= 0:
         msg = "Bandwidth 'fraction' must be positive."
-        raise ValueError(msg)
-    if order <= 0:
-        msg = "Filter 'order' must be positive."
         raise ValueError(msg)
     if limits is None:
         limits = [12, 20000]
@@ -620,7 +617,7 @@ class OctaveFilterBank:
         self,
         fs: float,
         fraction: float | np.integer[Any] = 1,
-        order: int = 6,
+        order: int | np.integer[Any] = 6,
         limits: RealValues | None = None,
         *,
         design: FilterDesign = _DEFAULT_DESIGN,
@@ -651,15 +648,20 @@ class OctaveFilterBank:
             between calls, and how that state starts (:class:`BlockProcessing`).
         :param response_plot: Whether to show or save the filter response plot
             drawn while designing the bank (:class:`ResponsePlot`).
-        :raises TypeError: if ``fraction``, ``fs`` or ``order`` is not a single number.
+        :raises ValueError: for a sample rate or a bandwidth that is not
+            positive, an ``order`` that is not a whole number from 1, or
+            frequency limits or a design the bank cannot be built with.
+        :raises TypeError: if ``fraction`` or ``fs`` is not a single number, or
+            ``order`` is a flag, a text or an array where a count goes.
         """
+        order = require_count(order, "order")
         limits = _validate_bank_design(
             fs, fraction, order, limits, design, block_processing
         )
-        # A NumPy integer is read as the number it holds, so the bank keeps
-        # the plain number every reader of it expects.
+        # A NumPy integer is read as the int it holds, so the bank keeps the
+        # plain number an int argument leaves there.
         if isinstance(fraction, np.integer):
-            fraction = float(fraction)
+            fraction = int(fraction)
 
         self.fs = fs
         self.fraction = fraction
@@ -1144,7 +1146,7 @@ def octave_filter(
     x: Signal | ArrayLike,
     fs: float | None = None,
     fraction: float | np.integer[Any] = 1,
-    order: int = 6,
+    order: int | np.integer[Any] = 6,
     limits: RealValues | None = None,
     *,
     sigbands: bool = False,

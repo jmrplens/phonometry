@@ -375,7 +375,7 @@ MIN_MULTI_JUNCTION_KIJ = -5.0
 ## multi_junction_adjustment
 
 ```python
-multi_junction_adjustment(n_junctions: int) -> float
+multi_junction_adjustment(n_junctions: int | np.integer[Any]) -> float
 ```
 
 Vibration reduction index adjustment `dK` (EN 12354-5, clause F.1).
@@ -399,8 +399,8 @@ junctions and 6 dB for three or more, with the resulting `Kij` floored at
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | for fewer than one junction. |
-| TypeError | if `n_junctions` is not a single number. |
+| ValueError | for a number of junctions that is not a whole number from 1. |
+| TypeError | if `n_junctions` is a flag, a text or an array where a count goes. |
 
 ## REFERENCE_AREA_M2
 

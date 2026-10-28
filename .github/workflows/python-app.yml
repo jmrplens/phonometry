@@ -1133,7 +1133,9 @@ jobs:
   # whose item type takes no sequence of numbers, on an overload head that
   # takes such a parameter narrower, and on any public parameter that holds
   # list, dict or set. It holds a count, a band fraction or a flag to the
-  # numpy scalar its validator takes, a mapping keyed by float to one keyed
+  # numpy scalar its validator or a scalar check takes, through the helpers
+  # and the record constructors it is handed to, a field a caller-built
+  # record stores to its constructor, a mapping keyed by float to one keyed
   # by int beside it, and fs and the other scalar quantities of the
   # vocabulary to one family of numbers. The files gpu_parity.py
   # fingerprints are left out as a whole, read from its _COVERED. It reads

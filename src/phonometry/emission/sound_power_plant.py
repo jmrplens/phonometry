@@ -1355,8 +1355,8 @@ def plant_measurement_contour(
     contour_m: ArrayLike,
     *,
     characteristic_height_m: float,
-    n_positions: int | None = None,
-    omitted_positions: Sequence[int] = (),
+    n_positions: int | np.integer[Any] | None = None,
+    omitted_positions: Sequence[int | np.integer[Any]] = (),
 ) -> PlantMeasurementContour:
     r"""Lay the measurement positions on a contour round the plant area, 9.1.
 
@@ -1381,15 +1381,25 @@ def plant_measurement_contour(
         measured; needs ``n_positions``, since the indices refer to it.
     :return: A :class:`PlantMeasurementContour`.
     :raises ValueError: for polygons that do not form a contour round the plant
-        area, or omitted positions without a layout to refer to.
+        area, a layout of fewer than three positions, an omitted position that
+        is not a whole number from 0, or omitted positions without a layout to
+        refer to.
+    :raises TypeError: if ``n_positions`` or an omitted position is a flag, a
+        text or an array where a count goes.
     """
-    omitted = tuple(omitted_positions)
+    # The record validates the layout again; read here, a NumPy integer is
+    # the int the record stores.
+    omitted = tuple(
+        require_count(i, "omitted_positions", at_least=0) for i in omitted_positions
+    )
     if n_positions is not None:
         return PlantMeasurementContour(
             plant_outline_m=np.asarray(plant_outline_m, dtype=np.float64),
             contour_m=np.asarray(contour_m, dtype=np.float64),
             characteristic_height_m=characteristic_height_m,
-            n_positions=n_positions,
+            n_positions=require_count(
+                n_positions, "n_positions", at_least=_MIN_POSITIONS
+            ),
             omitted_positions=omitted,
         )
     if omitted:

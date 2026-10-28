@@ -338,7 +338,7 @@ whose upper edge lies below the Nyquist wavenumber.
 | Name | Description |
 | :--- | :--- |
 | `roughness_um` | The roughness record, in micrometres, at equal intervals, with joints, welds and defects already edited out. |
-| `sample_spacing_m` | The sampling interval, in metres; 5.5 asks for 1 mm or less, and the filter bank needs a whole number of samples per metre. |
+| `sample_spacing_m` | The sampling interval, in metres; 5.5 asks for 1 mm or less. |
 | `spike_removal` | Whether to apply 7.2 first. |
 | `curvature_processing` | Whether to apply 7.3 next. |
 
@@ -348,7 +348,7 @@ whose upper edge lies below the Nyquist wavenumber.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | For a sampling interval above 1 mm or that is not a whole number of samples per metre, or a record shorter than 5 m (7.4.3 NOTE 1: 1 m left once 2 m are discarded at either end). |
+| ValueError | For a sampling interval above 1 mm, or a record shorter than 5 m (7.4.3 NOTE 1: 1 m left once 2 m are discarded at either end). |
 | TypeError | if `sample_spacing_m` is not a single number, or `roughness_um` holds a text or a value that is not a real number. |
 
 ## redistributed_band_energies
@@ -490,7 +490,7 @@ reads is exactly what a record goes through.
 
 | Name | Description |
 | :--- | :--- |
-| `sample_spacing_m` | The sampling interval of the records, in metres; 5.5 asks for 1 mm or less, and the bank needs a whole number of samples per metre. |
+| `sample_spacing_m` | The sampling interval of the records, in metres; 5.5 asks for 1 mm or less. |
 | `longest_wavelength_m` | The longest band the bank holds, by its nominal wavelength, in metres; 0,5 m by default, where the Annex B listing stops (`wl_max`). The bank runs from that band to the shortest whose upper edge lies below the Nyquist wavenumber. |
 
 **Returns:** The filter bank.
@@ -499,7 +499,7 @@ reads is exactly what a record goes through.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | For a sampling interval above 1 mm or that is not a whole number of samples per metre, or a longest wavelength that leaves no band above the Nyquist band. |
+| ValueError | For a sampling interval above 1 mm, or a longest wavelength that leaves no band above the Nyquist band. |
 | TypeError | if `longest_wavelength_m` or `sample_spacing_m` is not a single number. |
 
 ## roughness_measurement_lines

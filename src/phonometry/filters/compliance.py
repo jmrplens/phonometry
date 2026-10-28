@@ -1107,14 +1107,16 @@ def verify_filter_class(
         and sampling rate it was measured through, so it can redraw the
         relative attenuation and render an accredited ``.report()`` fiche
         without keeping a reference to the (possibly stateful) bank.
+    :raises ValueError: for an ``n_points`` that is not a whole number of at
+        least 16, a ``points_per_bandwidth`` below its floor, or an unknown
+        edition.
     :raises TypeError: if ``n_points`` or ``points_per_bandwidth`` is a flag, a text or
         an array where a count goes.
     """
-    require_scalar(n_points, "n_points")
+    n_points = require_count(n_points, "n_points", at_least=None)
     if n_points < _MIN_GRID_POINTS:
         msg = "'n_points' must be at least 16."
         raise ValueError(msg)
-    n_points = require_count(n_points, "n_points", at_least=None)
     points_per_bandwidth = require_count(
         points_per_bandwidth, "points_per_bandwidth", at_least=_MIN_POINTS_PER_BANDWIDTH
     )

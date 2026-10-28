@@ -2158,6 +2158,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `Signal` built at 44100.5 Hz reached the header and failed there with
   `struct.error: required argument is not an integer`.
 
+- **A count, an order, an index or a class number refuses a fraction and a
+  bool by name.** 43 of them were checked only as one number, so a fraction
+  such as `2.5` ran (`filters.OctaveFilterBank(order=2.5)`,
+  `room.mls_signal(10.5)`, `building.reduce_by_independent_measurements(u,
+  2.5)`) and failed later or gave a result for a count that does not exist,
+  and `True` ran as 1. They are read by the shared whole-number check, which
+  takes `3.0` and `np.int64(3)` as 3 and raises `ValueError: 'order' must be
+  a whole number, at least 1, got 2.5` or a `TypeError` for a flag or a text;
+  the records among them keep the `int` the check returns.
+  `emission.sound_intensity` reads its band fraction as every other band
+  fraction is read, so `fraction=1.0` is a `TypeError` as `True` is.
+  `filters.verify_filter_class` raises a `ValueError` for a fractional
+  `n_points`, where a `TypeError` from the slicing came before, and runs with
+  a whole float such as `4096.0`.
+
 - **The type check reads the conformance scripts against the oracle tables
   they compare with, and every place that gives the command runs the same
   one.** The conformance scripts import their oracle tables from `tests/`,
@@ -3484,6 +3499,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- **`vibration.evaluate_train_passage`, `signals.resample_signal` handed a
+  Signal and the EN 15610 Method B bank of `environment` run at a fractional
+  rate.** They refused one on the grounds that the filter bank needed a whole
+  number of samples per second (or per metre), which it does not: a passage
+  at 2048.5 Hz, a Signal resampled to 48000.5 Hz (which keeps that rate) and
+  a roughness record sampled every 0.3 mm are read. The functions that hand
+  their rate to a filter, `electroacoustics.weighted_thd`,
+  `electroacoustics.check_limiting_test_signal`,
+  `electroacoustics.swept_sine_distortion`,
+  `environment.sound_pressure_level_history`,
+  `environment.impulsive_sound_adjustment`, `environment.binaural_indicators`,
+  `environment.pass_by_measurement` and `broadcast.quasi_peak_meter`, hand it
+  on as it is, where they rounded it to a whole number first.
+
 - **A count, a band fraction and a flag take the NumPy scalar their validator
   takes, a mapping of band values takes integer keys, and a sample rate is a
   `float` wherever any positive rate runs.** 231 counts, band fractions and
@@ -3493,12 +3522,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   and the `np.True_` of a comparison; they take `int | np.integer[Any]`,
   `BandFraction | np.integer[Any]` and `bool | np.bool_`, and so do the
   `fraction` of `filters.OctaveFilterBank` and `filters.octave_filter`
-  (`float | np.integer[Any]`) and the `fraction` of the `room` functions that
-  hand it to them. A whole float such as `3.0`, which `require_count` takes
-  too, stays a leniency the annotation does not state. The 12 mappings of
-  values by band typed `Mapping[float, float]` refused the `{125: 40.0}` a
-  caller writes: `building.weighted_rating`, `building.weighted_impact_rating`,
-  `building.weighted_impact_improvement`,
+  (`float | np.integer[Any]`, the bank keeping the `int` a NumPy integer
+  holds, as it keeps an `int`) and the `fraction` of the `room` functions
+  that hand it to them. The 43 counts, orders, indices and class numbers that
+  were checked only as numbers (`room.mls_signal`, `room.golay_pair`,
+  `filters.linkwitz_riley`, `filters.normalized_frequencies`,
+  `noise_control.blade_passing_frequency`, `metrology.monte_carlo`,
+  `underwater.cumulative_sel_identical` and their kin, and the `order` of
+  `filters.OctaveFilterBank`) take the NumPy integer too, the counts that
+  `emission.plant_measurement_contour` and `emission.check_free_field` hand to
+  the record they build among them, and `emission.sound_intensity` takes its
+  band fraction as `BandFraction | np.integer[Any] | None`. A whole float such
+  as `3.0`, which `require_count` takes too, stays a leniency the annotation
+  does not state. The 11 mappings of band values keyed by `float` refused the
+  `{125: 40.0}` a caller writes: `building.weighted_rating`,
+  `building.weighted_impact_rating`, `building.weighted_impact_improvement`,
   `building.impact_improvement_adaptation_term`,
   `aircraft.verify_aircraft_noise_system`,
   `environment.check_small_roughness_deviations`,
@@ -3507,7 +3545,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `TrackDecayRate.plot` take a mapping keyed by `int` or by `float`, and
   `vibration.verify_signal_burst_response` one keyed by burst length with or
   without the continuous row's `None`. `Signal.fs` reads as the `float` it
-  holds, where a type checker read an `int`, and the 41 rates that run at any
+  holds, where a type checker read an `int`, and the 40 rates that run at any
   positive value and were `int` (`filters.OctaveFilterBank`,
   `filters.WeightingFilter`, `filters.TimeWeighting`, `signals.laeq` and the
   other levels of a signal, `room.impulse_response`, `speech.stipa` and their
@@ -3516,8 +3554,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `signals.resample_signal` returns is the rate the next function takes.
   The rates that need a whole number of samples per second stay
   `int | np.integer[Any]`: the test signals of `electroacoustics`,
-  `room.image_source_rir`, `psychoacoustics.loudness_zwicker` and the two
-  functions that hand their rate to it, and `speech.stoi`; `io.write`, which
+  `electroacoustics.field_strength_meter`, `room.image_source_rir`,
+  `psychoacoustics.loudness_zwicker` and the two functions that hand their
+  rate to it, and `speech.stoi`; `io.write`, which
   every Signal reaches, takes `float | np.integer[Any]` and refuses a
   fraction when the call runs. `metrology.uncertainty_propagation` takes a
   model that returns one number (a Python or a NumPy one) and
@@ -3527,9 +3566,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   fraction store the `int` their validator returns, so their `fraction` is a
   `BandFraction` and a NumPy integer given to one reads back as an `int`.
   `scripts/check_parameter_annotations.py` holds each of them: a parameter
-  or a record field that reaches such a validator or check, or a public
-  function that takes the NumPy scalar, through the helpers it is handed to,
-  admits it; a mapping keyed by `float`, or by a union, stands beside one
+  or a record field that reaches such a validator, a scalar check of one
+  whole number or an `isinstance` check, or a public function that takes the
+  NumPy scalar, through the helpers and the record constructors it is handed
+  to, admits it, and a record a caller builds that stores the value its check
+  returns admits it in its constructor; a mapping keyed by `float`, or by a
+  union, stands beside one
   keyed by each key a caller writes; and the scalar quantities of the
   vocabulary (`fs`, `fraction`, `volume`, `coverage`, `confidence`,
   `energy_fraction`) keep one family of numbers across the API, each

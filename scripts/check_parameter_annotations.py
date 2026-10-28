@@ -60,15 +60,24 @@ extends, an explicit ``__init__`` or ``__call__`` included):
   np.integer[Any]``, ``BandFraction | np.integer[Any]``); one an
   ``isinstance`` check lets ``np.bool_`` through admits ``np.bool_``
   (``bool | np.bool_``). It is followed as a conversion is, a validation one
-  item at a time holding each item type to it. A whole float such as
-  ``3.0``, which ``require_count`` also takes, stays a leniency the
-  annotation does not state;
+  item at a time holding each item type to it. A parameter annotated a
+  whole number (``int``, ``Sequence[int]``) that reaches one of the shared
+  scalar checks (``require_scalar``, ``require_positive`` and their kin,
+  :data:`COUNTED`), which take a numpy integer as they take an int, admits
+  it too. A whole float such as ``3.0``, which ``require_count`` also takes,
+  stays a leniency the annotation does not state;
 * the same holds for the fields of a public record that its
   ``__post_init__`` (or a method it calls on ``self``, or ``super()``'s)
-  validates: by attribute, by ``getattr``, in a loop over field names or
-  handed by name to a method that reads it with ``getattr``. A field the
-  record stores a value of its own in holds what it stores (the int a
-  validator returns) and keeps that annotation;
+  validates: by attribute, by ``getattr``, in a loop over field names (a
+  name the loop skips with ``continue`` left out) or handed by name to a
+  method that reads it with ``getattr``; and a value handed to a record's
+  generated ``__init__``, by keyword or by position in field order, is
+  followed there as ``self.<field>``. A field a result record stores a value
+  of its own in holds what it stores (the int a validator returns) and keeps
+  that annotation; a record a caller builds (taken by a public function, the
+  results ``scripts/check_parameter_units.py`` lists as handed on left out)
+  that stores one takes the numpy scalar in its constructor, a
+  ``TYPE_CHECKING`` ``__init__``, or is listed in :data:`CONSTRUCTOR_EXEMPT`;
 * a mapping a parameter takes is keyed by what a typed caller's ``dict``
   matches: ``Mapping`` is invariant in its key, so one keyed by ``float``
   stands beside one keyed by ``int`` in the same union (``BandMapping``),
@@ -105,7 +114,10 @@ record's own contract governs, and is not read by the array part.
 
 :data:`EXEMPT` is the escape hatch of the array part, keyed by file,
 qualified function and parameter, each with its reason; an entry that
-covers nothing fails the check too, as one of :data:`FAMILY_EXEMPT` does.
+covers nothing fails the check too, as one of :data:`FAMILY_EXEMPT` or
+:data:`CONSTRUCTOR_EXEMPT` does. An ``isinstance`` check whose branch only
+raises, after any assignments that build its message, keeps out what it
+names.
 The files ``scripts/gpu_parity.py`` fingerprints are exempt as a whole,
 read from its ``_COVERED`` so that the list cannot drift: an annotation
 edit there moves the fingerprint the GPU parity lock holds, and their
@@ -121,6 +133,7 @@ from __future__ import annotations
 
 import argparse
 import ast
+import functools
 import pathlib
 import sys
 from collections import deque
@@ -138,6 +151,16 @@ SOURCE = ROOT / "src" / "phonometry"
 
 #: The script whose ``_COVERED`` names the files the GPU parity lock holds.
 GPU_PARITY = ROOT / "scripts" / "gpu_parity.py"
+
+#: The script whose ``RECORD_AXIS_EXEMPT`` and ``HANDED_ON_RESULTS`` name the
+#: results one public function hands whole to another.
+UNITS_GUARD = ROOT / "scripts" / "check_parameter_units.py"
+
+#: The tables of that script that name a handed-on result.
+_HANDED_ON_TABLES = frozenset({"RECORD_AXIS_EXEMPT", "HANDED_ON_RESULTS"})
+
+#: A key of those tables: the module and the qualified name of the record.
+_HANDED_ON_KEY = 2
 
 #: Why the GPU-parity files are exempt as a whole.
 GPU_PARITY_REASON = (
@@ -163,6 +186,57 @@ EXEMPT: dict[tuple[str, str, str], str] = {
         "a list or a tuple of operation labels, named so that one text, "
         "which is a Sequence[str] too, stays a type error; list is "
         "invariant only in its item, and a label is str"
+    ),
+}
+
+
+def _built_and_stored(held: str) -> str:
+    return (
+        f"a caller builds the record, which stores the {held} its check returns, "
+        "so the field holds that; the numpy scalar the check takes is admitted "
+        "by a TYPE_CHECKING __init__, written with those of the other "
+        "caller-built records"
+    )
+
+
+#: Fields of caller-built records that store the value their check returns,
+#: whose constructor does not say yet that it takes the numpy scalar, keyed by
+#: file, record and field, each with the reason.
+CONSTRUCTOR_EXEMPT: dict[tuple[str, str, str], str] = {
+    **{
+        (
+            "src/phonometry/metrology/sound_level_meter.py",
+            "SoundLevelMeterFeatures",
+            flag,
+        ): (_built_and_stored("bool"))
+        for flag in (
+            "c_weighting",
+            "z_weighting",
+            "f_time_weighting",
+            "s_time_weighting",
+            "time_averaged",
+            "sound_exposure_level",
+            "c_weighted_peak",
+        )
+    },
+    (
+        "src/phonometry/metrology/sound_level_meter.py",
+        "SoundLevelMeterFeatures",
+        "n_level_ranges",
+    ): _built_and_stored("int"),
+    (
+        "src/phonometry/aircraft/flight_performance.py",
+        "PerformanceAircraft",
+        "n_engines",
+    ): (_built_and_stored("int")),
+    ("src/phonometry/simulation/compute.py", "Compute", "device_index"): (
+        _built_and_stored("int")
+    ),
+    ("src/phonometry/simulation/compute.py", "Compute", "fallback"): (
+        _built_and_stored("bool")
+    ),
+    ("src/phonometry/simulation/video.py", "AnimationFrame", "size"): (
+        _built_and_stored("pair of ints")
     ),
 }
 
@@ -373,6 +447,16 @@ class Target:
     #: the parameter it is handed to with one of them: ``ArrayLike`` for the
     #: array part, the numpy scalar for a scalar part.
     typed: frozenset[str] = frozenset()
+    #: The numpy scalar the parameter then admits, as :data:`_ADMITS` keys
+    #: it, when it is not named by the kind itself.
+    scalar: str = ""
+    #: Whether only a parameter annotated a whole number is held to it.
+    whole_only: bool = False
+
+    @property
+    def admitted(self) -> str:
+        """The numpy scalar a parameter that reaches the end of a route admits."""
+        return self.scalar or self.kind
 
 
 #: The array part: a conversion of any array-like.
@@ -404,8 +488,36 @@ INTEGER = Target(
 #: A flag an ``isinstance`` check lets ``np.bool_`` through for.
 FLAG = Target("flag", {}, accepted=_NUMPY_BOOLS, typed=_NUMPY_BOOLS)
 
+#: The shared scalar guards of the package: each reads its value as one
+#: number, and takes a numpy integer as it takes an int.
+_SCALAR_GUARDS: dict[str, tuple[int | None, str | None]] = {
+    f"_internal.validation.{name}": (0, "value")
+    for name in (
+        "require_scalar",
+        "require_real",
+        "require_positive",
+        "require_finite",
+        "require_non_negative",
+        "require_above_absolute_zero",
+        "require_fraction",
+    )
+}
+
+#: A whole number a scalar guard reads, with no count validator on its way:
+#: an order, an index or a count the body takes the numpy integer of as it
+#: takes an int. A real number the same guard reads is not held to it: a
+#: ``float`` parameter takes the ``np.float64`` numpy code hands a real over
+#: as, which is a ``float``.
+COUNTED = Target(
+    "count",
+    _SCALAR_GUARDS,
+    relative=True,
+    scalar="integer",
+    whole_only=True,
+)
+
 #: The scalar parts of the rule.
-SCALAR_TARGETS = (INTEGER, FLAG)
+SCALAR_TARGETS = (INTEGER, FLAG, COUNTED)
 
 #: What each scalar kind's annotation must name to admit the numpy scalar.
 _ADMITS: dict[str, frozenset[str]] = {
@@ -449,11 +561,44 @@ class Finding:
     #: invariant container), ``"integer"`` or ``"flag"`` (a numpy scalar),
     #: ``"key"`` (a mapping's key) or ``"name"`` (a quantity's family).
     part: str = "array"
+    #: Whether it is a field a caller-built record stores the validated value
+    #: in, which its constructor, not its field, is to admit.
+    constructor: bool = False
 
     @property
     def key(self) -> tuple[str, str, str]:
         """The file, the qualified function and the parameter."""
         return self.path, self.function, self.parameter
+
+
+@functools.cache
+def handed_on_results(script: pathlib.Path = UNITS_GUARD) -> frozenset[str]:
+    """The results one public function hands whole to another, by dotted name.
+
+    Read from the keys of the tables of *script* that list them, so that the
+    two checks class a record the same way: a result a caller does not build
+    is no input record, whatever function takes it.
+    """
+    tree = ast.parse(script.read_text(encoding="utf-8"))
+    found: set[str] = set()
+    for node in tree.body:
+        assigned = overloads._assigned(node)
+        if not (
+            assigned is not None
+            and assigned[0] in _HANDED_ON_TABLES
+            and isinstance(assigned[1], ast.Dict)
+        ):
+            continue
+        for key in assigned[1].keys:
+            parts = key.elts if isinstance(key, ast.Tuple) else []
+            texts = [
+                part.value
+                for part in parts
+                if isinstance(part, ast.Constant) and isinstance(part.value, str)
+            ]
+            if len(texts) == len(parts) == _HANDED_ON_KEY:
+                found.add(".".join(texts))
+    return frozenset(found)
 
 
 def gpu_parity_files(script: pathlib.Path = GPU_PARITY) -> tuple[str, ...]:
@@ -597,6 +742,28 @@ class Annotations:
                 for where, member in self.members(module, node, bounds)
                 if not _is_none(member)
             )
+        )
+
+    def may_hold_scalars(
+        self, module: str, node: ast.expr | None, bounds: dict[str, ast.expr]
+    ) -> bool:
+        """Whether an annotation leaves room for one number, or for one in each item.
+
+        What a scalar part follows a value into: a parameter or a field that
+        may be one number, or a sequence whose items may each be one, which a
+        body validates one item at a time (``for i in omitted: require_count(i,
+        ...)``).
+        """
+        if self.may_hold_a_number(module, node, bounds):
+            return True
+        return any(
+            self.resolve(where, member) in _CONTAINERS
+            and any(
+                self.may_hold_a_number(where, item, {})
+                for item in _items(member)
+                if not _is_ellipsis(item)
+            )
+            for where, member in self.members(module, node, bounds)
         )
 
     def admits_scalar(
@@ -1121,6 +1288,7 @@ class Reading:
             if isinstance(loop, ast.For | ast.AsyncFor | ast.comprehension)
             and isinstance(loop.target, ast.Name)
             and field in _field_names(loop.iter, self.texts)
+            and not _passed_over(loop, loop.target.id, field)
         }
 
 
@@ -1187,6 +1355,45 @@ def _bound(
     return list(_scoped(node, names, Reading(name, texts, split)))
 
 
+def _passed_over(
+    loop: ast.For | ast.AsyncFor | ast.comprehension, target: str, field: str
+) -> bool:
+    """Whether a loop over field names skips *field* before it reads it.
+
+    ``for name in _FEATURES: if value is None or name == "n_level_ranges":
+    continue`` reads every feature but that one: an ``if`` of the loop's body
+    whose branch is ``continue`` and whose test, or one alternative of an
+    ``or``, compares the loop's name to the field's.
+    """
+    if isinstance(loop, ast.comprehension):
+        return False
+    for statement in loop.body:
+        if not (
+            isinstance(statement, ast.If)
+            and len(statement.body) == 1
+            and isinstance(statement.body[0], ast.Continue)
+        ):
+            continue
+        test = statement.test
+        tests = (
+            test.values
+            if isinstance(test, ast.BoolOp) and isinstance(test.op, ast.Or)
+            else [test]
+        )
+        if any(
+            isinstance(alternative, ast.Compare)
+            and isinstance(alternative.left, ast.Name)
+            and alternative.left.id == target
+            and len(alternative.ops) == 1
+            and isinstance(alternative.ops[0], ast.Eq)
+            and isinstance(alternative.comparators[0], ast.Constant)
+            and alternative.comparators[0].value == field
+            for alternative in tests
+        ):
+            return True
+    return False
+
+
 def _field_names(
     node: ast.expr, texts: Callable[[ast.expr], tuple[str, ...]]
 ) -> tuple[str, ...]:
@@ -1224,9 +1431,14 @@ def _is_static(node: ast.FunctionDef | ast.AsyncFunctionDef) -> bool:
 class Reader:
     """Follows a parameter from a public function to where its body admits it."""
 
-    def __init__(self, package: overloads.Package) -> None:
+    def __init__(
+        self, package: overloads.Package, handed_on: frozenset[str] | None = None
+    ) -> None:
         self.package = package
         self.annotations = Annotations(package)
+        #: The results one public function hands whole to another: no input
+        #: records, though a public function takes them.
+        self.handed_on = handed_on if handed_on is not None else handed_on_results()
         #: The package's own top-level name, which names its validators.
         self.root = min(package.trees, key=len).split(".")[0] if package.trees else ""
         self._binding: dict[tuple[int, str, bool], list[tuple[ast.Call, Bound]]] = {}
@@ -1238,6 +1450,8 @@ class Reader:
         self._active: set[tuple[str, str, str, str]] = set()
         self._cut = False
         self._public: frozenset[str] | None = None
+        self._public_records: frozenset[str] | None = None
+        self._inputs: frozenset[str] | None = None
 
     def _bounds(self, function: overloads.Function) -> dict[str, ast.expr]:
         owner = (
@@ -1346,7 +1560,11 @@ class Reader:
             return target, False
         if target in self.annotations.classes:
             constructor = self._method(target, "__init__")
-            return (constructor, True) if constructor is not None else None
+            if constructor is not None:
+                return constructor, True
+            if record_fields(self.package, self.annotations, target):
+                return target, True
+            return None
         if target in self.package.functions:
             callee = self.package.functions[target]
             node = callee.implementation
@@ -1562,9 +1780,14 @@ class Reader:
                     if where is None or where in positions or keyword in keywords:
                         yield _ending(reached, target), of_item, 0
                     continue
-                for how, deeper, hops in self._handed(
-                    reached, positions, keywords, bound=bound_self, target=target
-                ):
+                handed = (
+                    self._constructed(reached, positions, keywords, target)
+                    if reached in self.annotations.classes
+                    else self._handed(
+                        reached, positions, keywords, bound=bound_self, target=target
+                    )
+                )
+                for how, deeper, hops in handed:
                     if not (of_item and deeper):
                         yield how, of_item or deeper, hops
             yield from self._handed_by_name(function, call, name, target)
@@ -1671,6 +1894,107 @@ class Reader:
                     hops + 1,
                 )
 
+    @property
+    def public_record_names(self) -> frozenset[str]:
+        """The dotted names of the public records of the package."""
+        if self._public_records is None:
+            self._public_records = frozenset(
+                public_records(self.package, self.annotations)
+            )
+        return self._public_records
+
+    @property
+    def input_records(self) -> frozenset[str]:
+        """The public records a caller builds, by dotted name.
+
+        A record a public function takes (a parameter annotation names it, in
+        a union, a sequence or a mapping too), or one such a record holds in a
+        field, as ``scripts/check_parameter_units.py`` reads them; a result one
+        function hands whole to another (:func:`handed_on_results`) is none,
+        nor are the records it holds.
+        """
+        if self._inputs is None:
+            taken: set[str] = set()
+            for function in public_functions(self.package):
+                method = function.owner is not None
+                for definition in function.definitions:
+                    for parameter in _arguments(definition, method=method):
+                        taken |= self._records_named(
+                            function.module, parameter.annotation
+                        )
+            inputs = {record for record in taken if record not in self.handed_on}
+            queue = list(inputs)
+            while queue:
+                fields = record_fields(self.package, self.annotations, queue.pop())
+                for field in fields.values():
+                    for named in self._records_named(field.module, field.annotation):
+                        if named not in inputs and named not in self.handed_on:
+                            inputs.add(named)
+                            queue.append(named)
+            self._inputs = frozenset(inputs) & self.public_record_names
+        return self._inputs
+
+    def _records_named(self, module: str, node: ast.expr | None) -> set[str]:
+        """The classes of the package an annotation names, at the top or inside."""
+        found: set[str] = set()
+        stack = self.annotations.members(module, node)
+        seen = 0
+        while stack and seen < _MEMBERS_READ:
+            seen += 1
+            where, member = stack.pop()
+            dotted = self.annotations.resolve(where, member)
+            if dotted is not None and dotted in self.annotations.classes:
+                found.add(dotted)
+            for item in _items(member):
+                for inner in item.elts if isinstance(item, ast.List) else [item]:
+                    stack.extend(self.annotations.members(where, inner))
+        return found
+
+    def _constructed(
+        self,
+        record: str,
+        positions: list[int],
+        keywords: list[str],
+        target: Target,
+    ) -> Iterator[tuple[str, bool, int]]:
+        """What a record built with its generated ``__init__`` does with a value.
+
+        The argument fills the field of its keyword, or of its position in
+        the order the fields are declared (a keyword-only field takes no
+        position), and the record's ``__post_init__`` reads that field as
+        ``self.<field>``: a count handed to a record that validates it is
+        followed there as it is into a function.
+        """
+        fields = record_fields(self.package, self.annotations, record)
+        positional = [field for field in fields.values() if field.positional]
+        received = [
+            positional[index].name for index in positions if index < len(positional)
+        ]
+        received.extend(keyword for keyword in keywords if keyword in fields)
+        dotted = self._method(record, "__post_init__")
+        post_init = self.package.functions[dotted] if dotted is not None else None
+        shown = record.rpartition(".")[2]
+        annotations = self.annotations
+        for name in dict.fromkeys(received):
+            field = fields[name]
+            named = annotations.names(field.module, field.annotation, {}, target.typed)
+            if named is not None and (
+                target is CONVERSION or record in self.public_record_names
+            ):
+                yield f"handed to {shown}({name}: {named})", False, 1
+                continue
+            if target is CONVERSION:
+                if not annotations.may_hold_numbers(field.module, field.annotation, {}):
+                    continue
+            elif not annotations.may_hold_scalars(field.module, field.annotation, {}):
+                continue
+            if post_init is None:
+                continue
+            for deeper, of_item, hops in self._known_routes(
+                post_init, f"self.{name}", target
+            ):
+                yield f"handed to {shown}({name}), {deeper}", of_item, hops + 1
+
     def _handed(
         self,
         reached: str,
@@ -1704,7 +2028,7 @@ class Reader:
             if target is CONVERSION:
                 if not annotations.may_hold_numbers(callee.module, annotation, bounds):
                     continue
-            elif not annotations.may_hold_a_number(callee.module, annotation, bounds):
+            elif not annotations.may_hold_scalars(callee.module, annotation, bounds):
                 continue
             for deeper, of_item, hops in self._known_routes(callee, parameter, target):
                 yield (
@@ -1728,19 +2052,30 @@ def _refusals(node: ast.FunctionDef | ast.AsyncFunctionDef) -> frozenset[int]:
     A call an ``if`` tests as it stands, not negated, whose branch raises
     (``if isinstance(x, bool | np.bool_): raise TypeError``) refuses what it
     names; one tested under ``not`` (``if not isinstance(x, (int,
-    np.integer)): raise``) admits it, as does any other use.
+    np.integer)): raise``) admits it, as does any other use. The branch
+    raises whether the ``raise`` comes first or after the assignments that
+    build its message, the house form (``msg = ...`` then ``raise
+    TypeError(msg)``).
     """
     refusing: set[int] = set()
     for child in ast.walk(node):
-        if (
-            isinstance(child, ast.If)
-            and child.body
-            and isinstance(child.body[0], ast.Raise)
-        ):
+        if isinstance(child, ast.If) and _raises(child.body):
             refusing.update(
                 id(call) for call, negated in _tested(child.test) if not negated
             )
     return frozenset(refusing)
+
+
+def _raises(body: list[ast.stmt]) -> bool:
+    """Whether a branch only raises: a ``raise``, after any assignments."""
+    return (
+        bool(body)
+        and isinstance(body[-1], ast.Raise)
+        and all(
+            isinstance(statement, ast.Assign | ast.AnnAssign | ast.AugAssign)
+            for statement in body[:-1]
+        )
+    )
 
 
 def _tested(
@@ -1836,10 +2171,19 @@ def _arguments(
     return every
 
 
-def findings_in(files: Sequence[pathlib.Path], root: pathlib.Path) -> list[Finding]:
-    """Every public parameter annotated narrower than what its body accepts."""
+def findings_in(
+    files: Sequence[pathlib.Path],
+    root: pathlib.Path,
+    *,
+    handed_on: frozenset[str] | None = None,
+) -> list[Finding]:
+    """Every public parameter annotated narrower than what its body accepts.
+
+    *handed_on* names the results one public function hands whole to another,
+    read from ``scripts/check_parameter_units.py`` when it is not given.
+    """
     package = overloads.Package(files, root)
-    reader = Reader(package)
+    reader = Reader(package, handed_on)
     found: list[Finding] = []
     for function in public_functions(package):
         path = repository_path(package.paths[function.module], root)
@@ -2079,18 +2423,41 @@ def _scalar_problems(
     path: str,
     *,
     owner: str | None = None,
+    constructor: bool = False,
 ) -> list[Finding]:
-    """The scalar findings of one parameter or field, read against its definitions."""
+    """The scalar findings of one parameter or field, read against its definitions.
+
+    With *constructor*, a field a caller-built record stores the validated
+    value in, read against the parameter of its constructor.
+    """
     annotations = reader.annotations
     shown = owner if owner is not None else function.qualname
     field = name.removeprefix("self.")
+    built = (
+        f"; {shown} is built by its caller and stores the value it validates, "
+        "so its constructor takes the numpy scalar (a TYPE_CHECKING __init__)"
+        if constructor
+        else ""
+    )
     found: list[Finding] = []
     for target in SCALAR_TARGETS:
-        kind = target.kind
+        kind = target.admitted
         numpy_name = _SCALAR_NAMES[kind]
+        held = definitions
+        if target.whole_only:
+            # A count a validator already holds is reported once, from there.
+            if any(finding.part == kind for finding in found):
+                continue
+            held = [
+                (definition, written, own)
+                for definition, written, own in definitions
+                if _whole(annotations, module, written, own)
+            ]
+            if not held:
+                continue
         how = reader.conversion(function, name, target=target)
         if how is not None:
-            for definition, written, own in definitions:
+            for definition, written, own in held:
                 if annotations.admits_scalar(
                     kind, module, written, own
                 ) or not annotations.may_hold_a_number(module, written, own):
@@ -2102,15 +2469,16 @@ def _scalar_problems(
                         shown,
                         field,
                         f"annotated {_shown(written)}, which refuses {numpy_name}, "
-                        f"while {how}",
+                        f"while {how}{built}",
                         part=kind,
+                        constructor=constructor,
                     )
                 )
                 break
         how = reader.conversion(function, name, item=True, target=target)
         if how is None:
             continue
-        for definition, written, own in definitions:
+        for definition, written, own in held:
             items = annotations.items_refusing(kind, module, written, own)
             if not items:
                 continue
@@ -2121,8 +2489,9 @@ def _scalar_problems(
                     shown,
                     field,
                     f"annotated {_shown(written)}, whose items ({', '.join(items)}) "
-                    f"refuse {numpy_name}, while an item {how}",
+                    f"refuse {numpy_name}, while an item {how}{built}",
                     part=kind,
+                    constructor=constructor,
                 )
             )
             break
@@ -2131,6 +2500,33 @@ def _scalar_problems(
 
 def _shown(annotation: ast.expr | None) -> str:
     return ast.unparse(annotation) if annotation is not None else "nothing"
+
+
+def _whole(
+    annotations: Annotations,
+    module: str,
+    written: ast.expr | None,
+    own: dict[str, ast.expr],
+) -> bool:
+    """Whether an annotation is a whole number, or a sequence of them.
+
+    What :data:`COUNTED` holds: a count, an order or an index annotated
+    ``int`` (``int | None``, ``Sequence[int]``), not a real number a scalar
+    guard reads too.
+    """
+    if written is None:
+        return False
+    if family(annotations, module, written, own) == "whole":
+        return True
+    return any(
+        annotations.resolve(where, member) in _CONTAINERS
+        and any(
+            family(annotations, where, item, {}) == "whole"
+            for item in _items(member)
+            if not _is_ellipsis(item)
+        )
+        for where, member in annotations.members(module, written, own)
+    )
 
 
 #: The containers whose key a typed caller's ``dict`` must match exactly.
@@ -2256,6 +2652,9 @@ def _key_findings(
 #: The decorator that makes a class a record with generated fields.
 _DATACLASS = frozenset({"dataclasses.dataclass"})
 
+#: The sentinel after which a record's fields are keyword-only.
+_KW_ONLY = frozenset({"dataclasses.KW_ONLY"})
+
 #: The annotations that make a class attribute something other than a field.
 _NOT_FIELDS = frozenset(
     {"typing.ClassVar", "typing_extensions.ClassVar", "dataclasses.InitVar"}
@@ -2273,6 +2672,9 @@ class Field:
     line: int
     name: str
     annotation: ast.expr
+    #: Whether the generated ``__init__`` takes it by position too: not a
+    #: field of a ``kw_only`` record, after ``KW_ONLY`` or ``field(kw_only=True)``.
+    positional: bool = True
 
 
 def _is_dataclass(package: overloads.Package, module: str, node: ast.ClassDef) -> bool:
@@ -2287,16 +2689,39 @@ def _field_default_off(
     node: ast.AnnAssign, package: overloads.Package, module: str
 ) -> bool:
     """Whether a field is left out of ``__init__`` (``field(init=False)``)."""
+    return _field_option(node, package, module, "init") is False
+
+
+def _field_option(
+    node: ast.AnnAssign, package: overloads.Package, module: str, option: str
+) -> object:
+    """The value a field's ``field(...)`` gives an option, ``None`` when it gives none."""
     value = node.value
-    return (
+    if not (
         isinstance(value, ast.Call)
         and package.resolve(module, value.func) == "dataclasses.field"
+    ):
+        return None
+    for keyword in value.keywords:
+        if keyword.arg == option and isinstance(keyword.value, ast.Constant):
+            return keyword.value.value
+    return None
+
+
+def _keyword_only_record(
+    package: overloads.Package, module: str, node: ast.ClassDef
+) -> bool:
+    """Whether a record's decorator makes every field keyword-only (``kw_only=True``)."""
+    return any(
+        isinstance(decorator, ast.Call)
+        and package.resolve(module, decorator.func) in _DATACLASS
         and any(
-            keyword.arg == "init"
+            keyword.arg == "kw_only"
             and isinstance(keyword.value, ast.Constant)
-            and keyword.value.value is False
-            for keyword in value.keywords
+            and keyword.value.value is True
+            for keyword in decorator.keywords
         )
+        for decorator in node.decorator_list
     )
 
 
@@ -2315,6 +2740,7 @@ def record_fields(
             fields.update(record_fields(package, annotations, target, depth + 1))
     if not _is_dataclass(package, module, node):
         return fields
+    keyword_only = _keyword_only_record(package, module, node)
     for child in node.body:
         if not (
             isinstance(child, ast.AnnAssign)
@@ -2323,14 +2749,23 @@ def record_fields(
         ):
             continue
         written = child.annotation
+        if package.resolve(module, written) in _KW_ONLY:
+            keyword_only = True
+            continue
         base = written.value if isinstance(written, ast.Subscript) else written
         if package.resolve(module, base) in _NOT_FIELDS:
             continue
         if _field_default_off(child, package, module):
             fields.pop(child.target.id, None)
             continue
+        own = _field_option(child, package, module, "kw_only")
         fields[child.target.id] = Field(
-            record, module, child.lineno, child.target.id, written
+            record,
+            module,
+            child.lineno,
+            child.target.id,
+            written,
+            positional=not (keyword_only if own is None else own),
         )
     return fields
 
@@ -2400,10 +2835,16 @@ def _field_findings(reader: Reader, root: pathlib.Path) -> list[Finding]:
     A field a validator takes a numpy integer for, or an ``isinstance``
     check lets ``np.bool_`` through for, and that the record keeps as it was
     given, holds that numpy scalar: its annotation names it. A field the
-    ``__post_init__`` stores a value of its own in holds what it stores.
+    ``__post_init__`` stores a value of its own in holds what it stores (the
+    int a validator returns) and keeps that annotation; when the record is
+    one a caller builds (:attr:`Reader.input_records`), what the caller hands
+    over is typed by its constructor instead, a ``TYPE_CHECKING``
+    ``__init__`` whose parameter admits the numpy scalar. A result's stored
+    field is the library's own business.
     """
     package = reader.package
     annotations = reader.annotations
+    inputs = reader.input_records
     found: list[Finding] = []
     for record in public_records(package, annotations):
         dotted = reader._method(record, "__post_init__")
@@ -2414,22 +2855,59 @@ def _field_findings(reader: Reader, root: pathlib.Path) -> list[Finding]:
         if node is None:
             continue
         stored = reader.stored_fields(post_init)
+        stub = _constructor_stub(annotations, record) if record in inputs else None
+        given = overloads._parameters(stub) if stub is not None else {}
         for field in record_fields(package, annotations, record).values():
-            if field.name in stored:
+            constructor = field.name in stored
+            if constructor and record not in inputs:
                 continue
-            path = repository_path(package.paths[field.module], root)
+            definition: ast.AST | _Line = _Line(field.line)
+            written: ast.expr | None = field.annotation
+            if constructor and field.name in given and stub is not None:
+                definition, written = stub, given[field.name].annotation
             found.extend(
                 _scalar_problems(
                     reader,
                     post_init,
                     field.module,
                     f"self.{field.name}",
-                    [(_Line(field.line), field.annotation, {})],
-                    path,
+                    [(definition, written, {})],
+                    repository_path(package.paths[field.module], root),
                     owner=record.removeprefix(f"{field.module}."),
+                    constructor=constructor,
                 )
             )
     return found
+
+
+def _constructor_stub(
+    annotations: Annotations, record: str
+) -> ast.FunctionDef | ast.AsyncFunctionDef | None:
+    """The ``__init__`` a record declares under ``if TYPE_CHECKING:``, if it declares one.
+
+    A caller-built record that converts or normalises a field says what its
+    constructor takes there, while its generated ``__init__`` runs.
+    """
+    found = annotations.classes.get(record)
+    if found is None:
+        return None
+    for child in found[1].body:
+        if not (isinstance(child, ast.If) and _is_type_checking(child.test)):
+            continue
+        for inner in child.body:
+            if (
+                isinstance(inner, ast.FunctionDef | ast.AsyncFunctionDef)
+                and inner.name == "__init__"
+            ):
+                return inner
+    return None
+
+
+def _is_type_checking(node: ast.expr) -> bool:
+    """Whether a test reads ``TYPE_CHECKING``, as a name or as ``typing.TYPE_CHECKING``."""
+    return (isinstance(node, ast.Name) and node.id == "TYPE_CHECKING") or (
+        isinstance(node, ast.Attribute) and node.attr == "TYPE_CHECKING"
+    )
 
 
 @dataclass(frozen=True)
@@ -2794,12 +3272,20 @@ def judged(
     named, stale_named = checked(
         [f for f in findings if f.part == "name"], FAMILY_EXEMPT
     )
-    rest = [f for f in findings if f.part not in {"array", "name"}]
-    every = sorted(
-        [*found, *named, *rest], key=lambda item: (item.path, item.line, item.parameter)
+    built, stale_built = checked(
+        [f for f in findings if f.constructor], CONSTRUCTOR_EXEMPT
     )
-    return every, [("EXEMPT", key) for key in stale] + [
-        ("FAMILY_EXEMPT", key) for key in stale_named
+    rest = [
+        f for f in findings if f.part not in {"array", "name"} and not f.constructor
+    ]
+    every = sorted(
+        [*found, *named, *built, *rest],
+        key=lambda item: (item.path, item.line, item.parameter),
+    )
+    return every, [
+        *(("EXEMPT", key) for key in stale),
+        *(("FAMILY_EXEMPT", key) for key in stale_named),
+        *(("CONSTRUCTOR_EXEMPT", key) for key in stale_built),
     ]
 
 
@@ -2849,7 +3335,9 @@ def main(argv: Sequence[str] | None = None) -> int:
             "np.integer[Any], a flag with bool | np.bool_; a mapping keyed by "
             "float beside one keyed by int (BandMapping); a sample rate as the "
             "float every 'fs' of the API is. A parameter narrower on purpose "
-            "goes in EXEMPT, a quantity of another family in FAMILY_EXEMPT, at "
+            "goes in EXEMPT, a quantity of another family in FAMILY_EXEMPT, a "
+            "field a caller-built record stores is admitted by its constructor "
+            "(a TYPE_CHECKING __init__) or goes in CONSTRUCTOR_EXEMPT, at "
             "the top of scripts/check_parameter_annotations.py with its reason."
         )
     for table, key in stale:

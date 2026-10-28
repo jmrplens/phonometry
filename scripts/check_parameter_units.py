@@ -2660,6 +2660,24 @@ RECORD_AXIS_EXEMPT: dict[tuple[str, str], str] = {
     ): _handed_on("check_coherence"),
 }
 
+#: The other results one public function returns and another takes whole,
+#: keyed by ``(module, qualified name)``, with the reason. They are no input
+#: records: a caller reads their fields by name and does not build them, so
+#: the record rules here pass them over, and so does the scalar part of
+#: ``scripts/check_parameter_annotations.py``, which holds a field such a
+#: result stores to the value it stores. One that a public function no longer
+#: takes, or none returns, is stale.
+HANDED_ON_RESULTS: dict[tuple[str, str], str] = {
+    (
+        "phonometry.emission.free_field_qualification",
+        "FreeFieldCheck",
+    ): _handed_on("sound_power_anechoic and reference_source_calibration"),
+    (
+        "phonometry.emission.sound_power_plant",
+        "PlantMeasurementContour",
+    ): _handed_on("check_plant_measurement"),
+}
+
 
 #: How deep an alias of an alias is followed.
 _ALIAS_DEPTH = 3
@@ -2721,8 +2739,8 @@ def _taken_as_arguments() -> str:
     A record a function takes brings in the records its own fields name: a
     caller builds those too (the wavelength spectra a ``RollingStock`` holds),
     so their field annotations join the text, until no new record is named.
-    A result of :data:`RECORD_AXIS_EXEMPT` brings in nothing: a caller does
-    not write it, nor the records it holds.
+    A result of :data:`RECORD_AXIS_EXEMPT` or :data:`HANDED_ON_RESULTS`
+    brings in nothing: a caller does not write it, nor the records it holds.
     """
     annotations: list[str] = []
     for _, target in _public_function_targets():
@@ -2737,11 +2755,39 @@ def _taken_as_arguments() -> str:
             if name in walked or not re.search(rf"\b{re.escape(name)}\b", text):
                 continue
             walked.add(name)
-            if (record.__module__, record.__qualname__) in RECORD_AXIS_EXEMPT:
+            key = (record.__module__, record.__qualname__)
+            if key in RECORD_AXIS_EXEMPT or key in HANDED_ON_RESULTS:
                 continue
             text += "\n" + "\n".join(_annotations_of(record))
             grown = True
     return text
+
+
+def stale_handed_on_results() -> list[tuple[str, str]]:
+    """The entries of :data:`HANDED_ON_RESULTS` that hand nothing on any more.
+
+    A result is handed on while a public function takes it (a parameter
+    annotation names it) and a public callable returns it (a return
+    annotation names it); an entry whose record lacks either is stale.
+    """
+    taken: list[str] = []
+    returned: list[str] = []
+    for _, target in _public_function_targets():
+        taken.extend(_annotations_of(target))
+        try:
+            returns = inspect.signature(target).return_annotation
+        except (TypeError, ValueError):
+            continue
+        returned.append(str(returns))
+    takes, returns_text = "\n".join(taken), "\n".join(returned)
+    return [
+        key
+        for key in HANDED_ON_RESULTS
+        if not (
+            re.search(rf"\b{re.escape(key[1])}\b", takes)
+            and re.search(rf"\b{re.escape(key[1])}\b", returns_text)
+        )
+    ]
 
 
 def positional_record_axes() -> tuple[
@@ -2767,7 +2813,7 @@ def positional_record_axes() -> tuple[
             if not (inspect.isclass(obj) and dataclasses.is_dataclass(obj)):
                 continue
             key = (obj.__module__, obj.__qualname__)
-            if key in seen:
+            if key in seen or key in HANDED_ON_RESULTS:
                 continue
             seen.add(key)
             if not re.search(rf"\b{re.escape(obj.__name__)}\b", taken):
@@ -2820,7 +2866,8 @@ def positional_records() -> tuple[
     public dataclass another public function takes, or one such a record
     holds. A caller builds it field by field, so every field is written by
     name (``@dataclass(kw_only=True)``); a result one function hands whole to
-    another is passed over (:data:`RECORD_AXIS_EXEMPT`), and a record that
+    another is passed over (:data:`RECORD_AXIS_EXEMPT`,
+    :data:`HANDED_ON_RESULTS`), and a record that
     keeps a positional field says why in :data:`RECORD_POSITIONAL_EXEMPT`.
     """
     taken = _taken_as_arguments()
@@ -2833,7 +2880,7 @@ def positional_records() -> tuple[
             if not (inspect.isclass(obj) and dataclasses.is_dataclass(obj)):
                 continue
             key = (obj.__module__, obj.__qualname__)
-            if key in seen or key in RECORD_AXIS_EXEMPT:
+            if key in seen or key in RECORD_AXIS_EXEMPT or key in HANDED_ON_RESULTS:
                 continue
             seen.add(key)
             if not re.search(rf"\b{re.escape(obj.__name__)}\b", taken):
@@ -3662,6 +3709,7 @@ def main() -> int:
     records, stale_records = positional_record_axes()
     by_position, stale_by_position = positional_records()
     stale_keys = [
+        *stale_handed_on_results(),
         *stale,
         *stale_spellings,
         *stale_scales,

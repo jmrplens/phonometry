@@ -4,11 +4,13 @@
 The rate of these functions was annotated ``int`` while any positive number
 ran, so the ``float`` rate ``signals.resample_signal`` returns, or the one a
 Signal holds, was a type error the call did not raise. Each is called here at
-48000.5 Hz, the rate its annotation now says it takes; the functions that
-need a whole number of samples per second (``io.write``, the test-signal
-generators, ``loudness_zwicker`` and the functions that resample by an
-integer ratio) keep ``int | np.integer[Any]`` and refuse it, and
-``scripts/check_parameter_annotations.py`` lists them with their reason.
+48000.5 Hz, the rate its annotation now says it takes. The functions that
+need a whole number of samples per second (the test-signal generators,
+``loudness_zwicker`` and the functions that resample by an integer ratio)
+keep ``int | np.integer[Any]`` and refuse it, and
+``scripts/check_parameter_annotations.py`` lists them with their reason;
+``io.write`` takes ``float | np.integer[Any] | None``, since every Signal
+reaches it, and refuses a fraction when the call runs.
 """
 
 from __future__ import annotations
@@ -153,3 +155,51 @@ def test_a_whole_number_rate_refuses_a_fraction() -> None:
             fs=FS,  # type: ignore[arg-type]
             max_order=2,
         )
+
+
+def test_a_resampled_signal_keeps_its_fractional_rate() -> None:
+    """A Signal resamples to a fractional rate and carries it, as an array does."""
+    resampled = signals.resample_signal(io.Signal(_X, 2.0 * FS), fs_new=FS)
+    assert resampled.fs == FS
+    assert isinstance(resampled.signal, io.Signal)
+    assert resampled.signal.fs == FS
+
+
+def _spy(monkeypatch: pytest.MonkeyPatch, module: object, name: str) -> list[float]:
+    """The rates the function *name* of *module* is called with."""
+    seen: list[float] = []
+    original = getattr(module, name)
+
+    def spy(*args: object, **kwargs: object) -> object:
+        seen.append(float(args[1]))  # type: ignore[arg-type]
+        return original(*args, **kwargs)
+
+    monkeypatch.setattr(module, name, spy)
+    return seen
+
+
+def test_a_fractional_rate_reaches_the_weighting_unrounded(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The weighted residual of a THD is filtered at the record's own rate."""
+    from phonometry.filters import weighting
+
+    seen = _spy(monkeypatch, weighting, "weighting_filter")
+    tone = np.sin(2.0 * np.pi * 1000.0 * np.arange(48000) / FS)
+    electroacoustics.weighted_thd(
+        tone + 0.01 * tone**2, FS, fundamental=1000.0, weighting="A"
+    )
+    assert seen == [FS]
+
+
+@pytest.mark.filterwarnings("ignore")
+def test_a_fractional_rate_reaches_the_band_analysis_unrounded(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The one-third octaves of a limiting test signal run at its own rate."""
+    from phonometry.filters import core
+
+    seen = _spy(monkeypatch, core, "octave_filter")
+    noise = np.clip(np.random.default_rng(3).standard_normal(96000), -2.0, 2.0)
+    electroacoustics.check_limiting_test_signal(noise, FS)
+    assert seen == [FS]

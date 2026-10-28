@@ -6,12 +6,12 @@ from __future__ import annotations
 import warnings
 from dataclasses import dataclass
 from functools import lru_cache
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
 from .._internal.frozen import OwnsArrays, read_only
-from .._internal.validation import require_positive, require_scalar
+from .._internal.validation import require_count, require_positive
 from ._warnings import FilterBankWarning
 
 if TYPE_CHECKING:
@@ -313,14 +313,16 @@ def _format_nominal_freq(f: float) -> str:
     return f"{f:g}"
 
 
-def normalized_frequencies(fraction: int) -> list[float]:
+def normalized_frequencies(fraction: int | np.integer[Any]) -> list[float]:
     """Standardized IEC center frequencies.
 
     :param fraction: 1 or 3 (Octave or 1/3 Octave).
     :return: List of standard frequencies.
-    :raises TypeError: if ``fraction`` is not a single number.
+    :raises ValueError: for a ``fraction`` other than 1 and 3.
+    :raises TypeError: if ``fraction`` is a flag, a text or an array where a
+        whole number goes.
     """
-    require_scalar(fraction, "fraction")
+    fraction = require_count(fraction, "fraction")
     predefined = {
         1: [16, 31.5, 63, 125, 250, 500, 1000, 2000, 4000, 8000, 16000],
         3: [

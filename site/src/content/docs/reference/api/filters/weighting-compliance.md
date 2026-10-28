@@ -151,7 +151,7 @@ over the standard's full frequency range.
 
 ```python
 weighting_class_limits(
-    weighting_class: int,
+    weighting_class: int | np.integer[Any],
     *,
     edition: Literal['2013', '1979'] = '2013',
 ) -> WeightingClassLimits
@@ -181,8 +181,8 @@ footnote makes one mask govern every weighting characteristic, B included.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | if the edition is unknown or does not define the requested class. |
-| TypeError | if `weighting_class` is not a single number. |
+| ValueError | if the edition is unknown or does not define the requested class, or `weighting_class` is not a whole number. |
+| TypeError | if `weighting_class` is a flag, a text or an array where a class goes. |
 
 ## WeightingClassLimits
 

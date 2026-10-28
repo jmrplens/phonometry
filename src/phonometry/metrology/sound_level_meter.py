@@ -165,7 +165,6 @@ from .._internal.validation import (
     is_class_designation,
     require_count,
     require_real,
-    require_scalar,
 )
 from .conformance import ConformanceVerification, verify_conformance
 
@@ -2046,9 +2045,14 @@ class SoundLevelMeterPeriodicVerification(RichDisplay):
             has besides the reference one, or sound exposure level toneburst
             responses from a meter declared to neither measure sound
             exposure level nor display time-averaged sound level (18.2).
-        :raises TypeError: if ``meter_class`` is not a single number.
+            A ``meter_class`` that is not a whole number is refused too.
+        :raises TypeError: if ``meter_class`` is a flag, a text or an array
+            where a class goes.
         """
-        require_scalar(self.meter_class, "meter_class")
+        # Held as the int require_count returns, a NumPy integer included.
+        object.__setattr__(
+            self, "meter_class", require_count(self.meter_class, "meter_class")
+        )
         declared = self.features
         if self.meter_class == 1 and declared.c_weighting is False:
             msg = (

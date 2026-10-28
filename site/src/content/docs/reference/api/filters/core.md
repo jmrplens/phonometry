@@ -80,8 +80,8 @@ octave_filter(
     x: Signal | ArrayLike,
     fs: float | None = None,
     fraction: float | np.integer[Any] = 1,
-    order: int = 6,
-    limits: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any] | None = None,
+    order: int | np.integer[Any] = 6,
+    limits: Sequence[float] | NDArray[Any] | None = None,
     *,
     sigbands: bool = False,
     detrend: bool = True,
@@ -126,8 +126,8 @@ Multichannel support: If x is 2D (channels, samples), each channel is filtered.
 OctaveFilterBank(
     fs: float,
     fraction: float | np.integer[Any] = 1,
-    order: int = 6,
-    limits: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any] | None = None,
+    order: int | np.integer[Any] = 6,
+    limits: Sequence[float] | NDArray[Any] | None = None,
     *,
     design: FilterDesign = ...,
     calibration: LevelCalibration = ...,
@@ -158,7 +158,8 @@ Initialize the Octave Filter Bank.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `fraction`, `fs` or `order` is not a single number. |
+| ValueError | for a sample rate or a bandwidth that is not positive, an `order` that is not a whole number from 1, or frequency limits or a design the bank cannot be built with. |
+| TypeError | if `fraction` or `fs` is not a single number, or `order` is a flag, a text or an array where a count goes. |
 
 ### OctaveFilterBank.filter()
 

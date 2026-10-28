@@ -1220,7 +1220,7 @@ def check_limiting_test_signal(
     # The bank adds bands from the one holding the lower limit until a band's
     # upper edge passes the upper limit, so the two centres select exactly
     # the bands wanted.
-    analysis = octave_filter(x, int(rate), fraction=3, limits=[bands[0], bands[-1]])
+    analysis = octave_filter(x, rate, fraction=3, limits=[bands[0], bands[-1]])
     if analysis.levels is None:  # pragma: no cover - the bank always returns levels
         msg = "The one-third-octave analysis returned no band levels."
         raise RuntimeError(msg)

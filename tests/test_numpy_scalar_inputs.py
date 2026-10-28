@@ -61,10 +61,12 @@ def test_a_capillary_tube_keeps_the_count_it_is_given() -> None:
     assert tubes.n_tubes == 2
 
 
-def test_the_filter_bank_reads_a_numpy_bandwidth_as_a_float() -> None:
+def test_the_filter_bank_reads_a_numpy_bandwidth_as_the_int_it_holds() -> None:
     bank = filters.OctaveFilterBank(48000.0, fraction=np.int64(3))
-    assert bank.fraction == 3.0
-    assert type(bank.fraction) is float
+    assert bank.fraction == 3
+    assert type(bank.fraction) is int
+    assert "fraction=3," in repr(bank) or "fraction=3)" in repr(bank)
+    assert type(filters.OctaveFilterBank(48000.0, fraction=3).fraction) is int
 
 
 def test_io_write_refuses_a_signal_at_a_fractional_rate(

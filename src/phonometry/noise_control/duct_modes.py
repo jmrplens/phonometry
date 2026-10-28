@@ -46,11 +46,11 @@ import numpy as np
 
 from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
+    require_count,
     require_non_negative,
     require_positive,
     require_ranks,
     require_same_length,
-    require_scalar,
 )
 from .._internal.warnings import PhonometryWarning
 
@@ -208,7 +208,7 @@ def circular_duct_cut_on(
     *,
     flow_velocity: float = 0.0,
     speed_of_sound: float = _C_AIR,
-    n_modes: int = 6,
+    n_modes: int | np.integer[Any] = 6,
 ) -> DuctModeResult:
     r"""Cut-on frequencies of the higher-order modes of a circular duct.
 
@@ -235,11 +235,12 @@ def circular_duct_cut_on(
     :param n_modes: How many higher-order modes to return, 1 to 12.
     :return: A :class:`DuctModeResult`.
     :raises ValueError: For a non-positive diameter, a sonic or supersonic
-        flow, or an ``n_modes`` outside 1 to 12.
-    :raises TypeError: if ``diameter_m``, ``flow_velocity``, ``n_modes`` or
-        ``speed_of_sound`` is not a single number.
+        flow, or an ``n_modes`` that is not a whole number from 1 to 12.
+    :raises TypeError: if ``diameter_m``, ``flow_velocity`` or
+        ``speed_of_sound`` is not a single number, or ``n_modes`` is a flag, a
+        text or an array where a count goes.
     """
-    require_scalar(n_modes, "n_modes")
+    n_modes = require_count(n_modes, "n_modes", at_least=None)
     d = require_positive(diameter_m, "diameter_m")
     mach, beta = _mach(flow_velocity, speed_of_sound)
     if not 1 <= n_modes <= len(_CIRCULAR_EIGENVALUES):
@@ -267,7 +268,7 @@ def rectangular_duct_cut_on(
     *,
     flow_velocity: float = 0.0,
     speed_of_sound: float = _C_AIR,
-    n_modes: int = 3,
+    n_modes: int | np.integer[Any] = 3,
 ) -> DuctModeResult:
     r"""Cut-on frequencies of the higher-order modes of a rectangular duct.
 
@@ -292,11 +293,12 @@ def rectangular_duct_cut_on(
     :param n_modes: How many higher-order modes to return (at least 1).
     :return: A :class:`DuctModeResult`.
     :raises ValueError: For non-positive dimensions, a sonic or supersonic
-        flow, or a non-positive ``n_modes``.
-    :raises TypeError: if ``flow_velocity``, ``height_m``, ``n_modes``,
-        ``speed_of_sound`` or ``width_m`` is not a single number.
+        flow, or an ``n_modes`` that is not a whole number from 1.
+    :raises TypeError: if ``flow_velocity``, ``height_m``, ``speed_of_sound``
+        or ``width_m`` is not a single number, or ``n_modes`` is a flag, a text
+        or an array where a count goes.
     """
-    require_scalar(n_modes, "n_modes")
+    n_modes = require_count(n_modes, "n_modes", at_least=None)
     a = require_positive(width_m, "width_m")
     b = require_positive(height_m, "height_m")
     mach, beta = _mach(flow_velocity, speed_of_sound)

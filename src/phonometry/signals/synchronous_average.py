@@ -266,10 +266,16 @@ class SynchronousAverageResult(OwnsArrays):
             comb response with its frequency axis, any of the five carries
             an axis it should not, the waveform is a Signal at a rate other
             than :attr:`fs`, or the period grid is not ``round(fs * T)``
-            samples long.
-        :raises TypeError: if ``samples_per_period`` is not a single number.
+            samples long, or ``samples_per_period`` is not a whole number.
+        :raises TypeError: if ``samples_per_period`` is a flag, a text or an
+            array where a count goes.
         """
-        require_scalar(self.samples_per_period, "samples_per_period")
+        # Held as the int require_count returns, a NumPy integer included.
+        object.__setattr__(
+            self,
+            "samples_per_period",
+            require_count(self.samples_per_period, "samples_per_period"),
+        )
         require_ranks(
             self,
             period_waveform=1,

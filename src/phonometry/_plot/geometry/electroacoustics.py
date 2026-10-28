@@ -18,9 +18,9 @@ from typing import TYPE_CHECKING, Any, overload
 import numpy as np
 
 from ..._internal.validation import (
+    require_count,
     require_equal_shapes,
     require_positive,
-    require_scalar,
 )
 from ..common import (
     _C_EDGE,
@@ -196,7 +196,7 @@ def plot_piston_result_geometry(
     result: RadiatingPistonResult,
     ax: Axes | None = None,
     *,
-    frequency_index: int = -1,
+    frequency_index: int | np.integer[Any] = -1,
     language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
@@ -206,9 +206,12 @@ def plot_piston_result_geometry(
     directivity, the lobe of the selected frequency is overlaid with its
     ``ka`` in the legend.
 
-    :raises TypeError: if ``frequency_index`` is not a single number.
+    :raises ValueError: for a ``frequency_index`` that is not a whole number,
+        or that indexes no computed frequency.
+    :raises TypeError: if ``frequency_index`` is a flag, a text or an array
+        where an index goes.
     """
-    require_scalar(frequency_index, "frequency_index")
+    frequency_index = require_count(frequency_index, "frequency_index", at_least=None)
     angles_rad = None
     lobe = None
     label = None

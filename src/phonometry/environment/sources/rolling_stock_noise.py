@@ -677,12 +677,12 @@ def pass_by_measurement(
     from ...filters.weighting import time_weighting, weighting_filter
 
     weighted = np.asarray(
-        weighting_filter(samples, round(rate), weighting="A"), dtype=np.float64
+        weighting_filter(samples, rate, weighting="A"), dtype=np.float64
     )
     window = min(weighted.size, max(1, round(_F_TIME_CONSTANT_S * rate)))
     warm_start = float(np.mean(weighted[:window] ** 2))
     mean_square = np.asarray(
-        time_weighting(weighted, round(rate), mode="fast", initial_state=warm_start),
+        time_weighting(weighted, rate, mode="fast", initial_state=warm_start),
         dtype=np.float64,
     )
     floor = np.finfo(np.float64).tiny

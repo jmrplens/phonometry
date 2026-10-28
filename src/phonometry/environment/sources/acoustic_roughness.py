@@ -693,17 +693,9 @@ def acoustic_roughness_spectrum(
     )
 
 
-def _samples_per_metre(spacing: float) -> int:
-    """The sampling rate of a record, which the filter bank needs whole."""
-    rate = round(1.0 / spacing)
-    if rate < 1 or not math.isclose(rate, 1.0 / spacing, rel_tol=_TOLERANCE):
-        msg = (
-            f"'sample_spacing_m' is {spacing:g} m, which is not a whole number of "
-            "samples per metre; the one-third octave filter bank of Method B runs "
-            "at a whole number of them."
-        )
-        raise ValueError(msg)
-    return int(rate)
+def _samples_per_metre(spacing: float) -> float:
+    """The sampling rate of a record, in samples per metre: the bank's rate."""
+    return 1.0 / spacing
 
 
 def roughness_filter_bank(
@@ -735,16 +727,14 @@ def roughness_filter_bank(
     reads is exactly what a record goes through.
 
     :param sample_spacing_m: The sampling interval of the records, in metres;
-        5.5 asks for 1 mm or less, and the bank needs a whole number of
-        samples per metre.
+        5.5 asks for 1 mm or less.
     :param longest_wavelength_m: The longest band the bank holds, by its
         nominal wavelength, in metres; 0,5 m by default, where the Annex B
         listing stops (``wl_max``). The bank runs from that band to the
         shortest whose upper edge lies below the Nyquist wavenumber.
     :return: The filter bank.
-    :raises ValueError: For a sampling interval above 1 mm or that is not a
-        whole number of samples per metre, or a longest wavelength that leaves
-        no band above the Nyquist band.
+    :raises ValueError: For a sampling interval above 1 mm, or a longest
+        wavelength that leaves no band above the Nyquist band.
     :raises TypeError: if ``longest_wavelength_m`` or ``sample_spacing_m`` is not a
         single number.
     """
@@ -838,8 +828,7 @@ def filtered_roughness_spectrum(
     :param roughness_um: The roughness record, in micrometres, at equal
         intervals, with joints, welds and defects already edited out.
     :param sample_spacing_m: The sampling interval, in metres; 5.5 asks for
-        1 mm or less, and the filter bank needs a whole number of samples per
-        metre.
+        1 mm or less.
     :param spike_removal: Whether to apply 7.2 first.
     :param curvature_processing: Whether to apply 7.3 next.
     :return: The spectrum, longest wavelength first, with the length
@@ -848,8 +837,7 @@ def filtered_roughness_spectrum(
         analysed in total (7.4.3), which
         :func:`~phonometry.environment.sources.rolling_stock_noise.check_reference_track`
         judges on their average.
-    :raises ValueError: For a sampling interval above 1 mm or that is not a
-        whole number of samples per metre, or a record shorter than 5 m
+    :raises ValueError: For a sampling interval above 1 mm, or a record shorter than 5 m
         (7.4.3 NOTE 1: 1 m left once 2 m are discarded at either end).
     :raises TypeError: if ``sample_spacing_m`` is not a single number, or
         ``roughness_um`` holds a text or a value that is not a real number.

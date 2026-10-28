@@ -190,7 +190,10 @@ values may be scalars or equal-length arrays.
 ### FacadeElement.tau()
 
 ```python
-FacadeElement.tau(total_area: float, n_bands: int) -> np.ndarray
+FacadeElement.tau(
+    total_area: float,
+    n_bands: int | np.integer[Any],
+) -> np.ndarray
 ```
 
 Transmission factor `τ` of this element for the whole façade area.
@@ -199,7 +202,8 @@ Transmission factor `τ` of this element for the whole façade area.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `n_bands` or `total_area` is not a single number. |
+| ValueError | for a `total_area` that is not positive, an `n_bands` that is not a whole number from 1, or an element whose area is not positive or whose bands are not `n_bands`. |
+| TypeError | if `total_area` is not a single number, or `n_bands` is a flag, a text or an array where a count goes. |
 
 ## FacadePredictionResult
 

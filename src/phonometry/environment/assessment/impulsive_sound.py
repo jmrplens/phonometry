@@ -745,15 +745,13 @@ def sound_pressure_level_history(
         msg = "'x' must not be empty."
         raise ValueError(msg)
 
-    weighted = np.asarray(
-        weighting_filter(x, round(fs), weighting="A"), dtype=np.float64
-    )
+    weighted = np.asarray(weighting_filter(x, fs, weighting="A"), dtype=np.float64)
     # Warm-start the F integrator at the first window's mean square so a steady
     # interval does not show a spurious onset from the processing start-up.
     window = min(weighted.size, max(1, round(_TIME_WEIGHTING_F_TAU * fs)))
     warm_start = float(np.mean(weighted[:window] ** 2))
     mean_square = np.asarray(
-        time_weighting(weighted, round(fs), mode="fast", initial_state=warm_start),
+        time_weighting(weighted, fs, mode="fast", initial_state=warm_start),
         dtype=np.float64,
     )
 
@@ -782,9 +780,7 @@ def _equivalent_level(
     """A-weighted equivalent continuous level ``LAeq`` of the interval, in dB."""
     from ...filters.weighting import weighting_filter
 
-    weighted = np.asarray(
-        weighting_filter(signal, round(fs), weighting="A"), dtype=np.float64
-    )
+    weighted = np.asarray(weighting_filter(signal, fs, weighting="A"), dtype=np.float64)
     mean_square = float(np.mean(weighted**2))
     floor = np.finfo(np.float64).tiny
     return (

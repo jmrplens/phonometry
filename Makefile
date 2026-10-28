@@ -387,12 +387,15 @@ return-overloads:
 # validator taking a numpy integer (require_count, require_band_fraction,
 # an isinstance check that lets one through) or np.bool_, or a public
 # function that takes one, admits np.integer[Any] or np.bool_, a record field
-# kept as given included; a mapping keyed by float stands beside one keyed by
-# int; and fs, fraction and the other scalar quantities of the vocabulary
-# keep one family of numbers across the API, each exception in
-# FAMILY_EXEMPT with its reason. On the tree before that part it found 231
-# counts, band fractions and flags, 12 mappings and 41 sample rates. Stdlib
-# only.
+# kept as given included, and so does a whole number a scalar check such as
+# require_scalar reads; a value handed to a record's generated constructor is
+# followed into its __post_init__, and a field a caller-built record stores
+# is admitted by its constructor or listed in CONSTRUCTOR_EXEMPT; a mapping
+# keyed by float stands beside one keyed by int; and fs, fraction and the
+# other scalar quantities of the vocabulary keep one family of numbers across
+# the API, each exception in FAMILY_EXEMPT with its reason. On the tree before
+# that part it found 231 counts, band fractions and flags, 43 counts a scalar
+# check read as one number, 11 mappings and 40 sample rates. Stdlib only.
 parameter-annotations:
 	$(PYTHON) scripts/check_parameter_annotations.py
 

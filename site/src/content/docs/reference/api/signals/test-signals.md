@@ -202,7 +202,7 @@ default.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If the inputs or parameters are invalid, if the rate ratio is not rational within `max_denominator`, or if `x` is a Signal and `fs_new` is not a whole number of hertz, which is the only kind of rate a Signal carries. |
+| ValueError | If the inputs or parameters are invalid, or if the rate ratio is not rational within `max_denominator`. |
 | TypeError | if `stopband_attenuation` or `transition_width` is not a single number, or `max_denominator` is a flag, a text or an array where a count goes. |
 
 ## ResampledSignalResult

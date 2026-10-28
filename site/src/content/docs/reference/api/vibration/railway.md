@@ -245,7 +245,7 @@ severity DIN 4150-2 reads, and the third-octave levels of Figure 6.
 | Name | Description |
 | :--- | :--- |
 | `velocity_mm_s` | The velocity of the passage as the transducer gives it, in millimetres per second (1-D). |
-| `fs` | Sampling frequency, in hertz: an integer, for the third-octave bank, and high enough to carry the 315 Hz range. |
+| `fs` | Sampling frequency, in hertz, high enough to carry the 315 Hz range. |
 | `t2_s` | $T_2$, the passage itself, `(start, end)` in seconds. Clause 5 b) reads it off the record, from about a quarter of the most frequent maxima back down to the same amplitude, which is a judgement about the record, so it is asked for rather than guessed. |
 | `t1_s` | $T_1$; `None` (default) centres four seconds on the largest amplitude inside $T_2$, or all of $T_2$ when that is shorter. An explicit one may not be longer than $T_2$. |
 | `t3_s` | $T_3$; `None` (default) takes the whole record. |

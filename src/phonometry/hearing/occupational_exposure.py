@@ -58,6 +58,7 @@ from .._internal.levels_math import energy_mean
 from .._internal.validation import (
     check_engine,
     require_choice,
+    require_count,
     require_finite_array,
     require_positive,
     require_scalar,
@@ -208,7 +209,7 @@ _C4_TABLE: tuple[tuple[float, ...], ...] = (
 _C4_ADVISORY_THRESHOLD: float = 3.5
 
 
-def table_c4_contribution(n_samples: int, u1: float) -> float:
+def table_c4_contribution(n_samples: int | np.integer[Any], u1: float) -> float:
     r"""Uncertainty contribution :math:`c_1 u_1` (dB) from Table C.4
     (job/full-day sampling).
 
@@ -221,13 +222,13 @@ def table_c4_contribution(n_samples: int, u1: float) -> float:
     :param n_samples: Number of job/full-day samples ``N`` (>= 2).
     :param u1: Standard uncertainty of the samples, dB (>= 0).
     :return: The contribution :math:`c_1 u_1` in dB.
-    :raises TypeError: if ``n_samples`` or ``u1`` is not a single number.
+    :raises ValueError: for an ``n_samples`` that is not a whole number from 2
+        (Table C.4 needs a spread), or a negative ``u1``.
+    :raises TypeError: if ``u1`` is not a single number, or ``n_samples`` is a
+        flag, a text or an array where a count goes.
     """
-    require_scalar(n_samples, "n_samples")
+    n_samples = require_count(n_samples, "n_samples", at_least=_MIN_SAMPLES_FOR_SPREAD)
     require_scalar(u1, "u1")
-    if n_samples < _MIN_SAMPLES_FOR_SPREAD:
-        msg = "Table C.4 needs at least 2 samples."
-        raise ValueError(msg)
     if u1 < 0:
         msg = "'u1' must be non-negative."
         raise ValueError(msg)
@@ -249,19 +250,18 @@ def table_c4_contribution(n_samples: int, u1: float) -> float:
     return float(np.interp(n_clamped, n_axis, per_row))
 
 
-def min_cumulative_duration_hours(n_workers: int) -> float:
+def min_cumulative_duration_hours(n_workers: int | np.integer[Any]) -> float:
     """Minimum cumulative measurement duration (h) for a homogeneous exposure group (Table 1).
 
     :param n_workers: Number of workers ``n_G`` in the homogeneous exposure group.
     :return: The minimum cumulative measurement duration in hours. For
         ``n_G > 40`` the standard advises splitting the group; the returned 17 h
         is the tabulated fallback.
-    :raises TypeError: if ``n_workers`` is not a single number.
+    :raises ValueError: for an ``n_workers`` that is not a whole number from 1.
+    :raises TypeError: if ``n_workers`` is a flag, a text or an array where a
+        count goes.
     """
-    require_scalar(n_workers, "n_workers")
-    if n_workers < 1:
-        msg = "'n_workers' must be a positive integer."
-        raise ValueError(msg)
+    n_workers = require_count(n_workers, "n_workers")
     if n_workers <= _TABLE1_SMALL_GROUP_MAX:
         return 5.0
     if n_workers <= _TABLE1_MEDIUM_GROUP_MAX:
@@ -884,7 +884,7 @@ def job_based_exposure(
     effective_duration_hours: float,
     instrument: InstrumentClass = "personal_exposimeter",
     u3: float = _U3_DEFAULT,
-    n_workers: int | None = None,
+    n_workers: int | np.integer[Any] | None = None,
     *,
     sample_duration_hours: float | None = None,
     warn: bool = True,
@@ -909,9 +909,14 @@ def job_based_exposure(
         Table 1 cumulative-duration check.
     :param warn: Emit :class:`OccupationalExposureWarning` for the Table C.4 / Table 1 advisories.
     :return: An :class:`ExposureResult`.
+    :raises ValueError: for a ``sample_duration_hours`` that is not positive,
+        or an ``n_workers`` that is not a whole number from 1.
     :raises TypeError: if ``effective_duration_hours``, ``sample_duration_hours`` or
-        ``u3`` is not a single number.
+        ``u3`` is not a single number, or ``n_workers`` is a flag, a text or an
+        array where a count goes.
     """
+    if n_workers is not None:
+        n_workers = require_count(n_workers, "n_workers")
     require_scalar(sample_duration_hours, "sample_duration_hours")
     if sample_duration_hours is not None and sample_duration_hours <= 0.0:
         msg = "'sample_duration_hours' must be positive."

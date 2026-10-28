@@ -259,7 +259,7 @@ def test_the_default_model_is_still_the_ashrae_one() -> None:
             {"specific_sound_power_level": 0.0},
             r"'specific_sound_power_level' must be positive",
         ),
-        ({"n_blades": 0}, r"'n_blades' must be positive"),
+        ({"n_blades": 0}, r"'n_blades' must be a whole number"),
     ],
 )
 def test_the_vdi_model_refuses_what_is_not_a_fan(

@@ -50,7 +50,7 @@ circular_duct_cut_on(
     *,
     flow_velocity: float = 0.0,
     speed_of_sound: float = 343.0,
-    n_modes: int = 6,
+    n_modes: int | np.integer[Any] = 6,
 ) -> DuctModeResult
 ```
 
@@ -88,8 +88,8 @@ tabulated by Norton, so `n_modes` cannot exceed twelve.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | For a non-positive diameter, a sonic or supersonic flow, or an `n_modes` outside 1 to 12. |
-| TypeError | if `diameter_m`, `flow_velocity`, `n_modes` or `speed_of_sound` is not a single number. |
+| ValueError | For a non-positive diameter, a sonic or supersonic flow, or an `n_modes` that is not a whole number from 1 to 12. |
+| TypeError | if `diameter_m`, `flow_velocity` or `speed_of_sound` is not a single number, or `n_modes` is a flag, a text or an array where a count goes. |
 
 ## DuctModeResult
 
@@ -211,7 +211,7 @@ rectangular_duct_cut_on(
     *,
     flow_velocity: float = 0.0,
     speed_of_sound: float = 343.0,
-    n_modes: int = 3,
+    n_modes: int | np.integer[Any] = 3,
 ) -> DuctModeResult
 ```
 
@@ -245,5 +245,5 @@ wavelength across the wider side.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | For non-positive dimensions, a sonic or supersonic flow, or a non-positive `n_modes`. |
-| TypeError | if `flow_velocity`, `height_m`, `n_modes`, `speed_of_sound` or `width_m` is not a single number. |
+| ValueError | For non-positive dimensions, a sonic or supersonic flow, or an `n_modes` that is not a whole number from 1. |
+| TypeError | if `flow_velocity`, `height_m`, `speed_of_sound` or `width_m` is not a single number, or `n_modes` is a flag, a text or an array where a count goes. |

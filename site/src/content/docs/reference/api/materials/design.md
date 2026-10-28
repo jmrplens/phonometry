@@ -153,7 +153,7 @@ plot_qrd_geometry(
     well_width: float,
     *,
     ax: Axes | None = None,
-    n_repetitions: int = 1,
+    n_repetitions: int | np.integer[Any] = 1,
     fin_width: float | None = None,
     language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
@@ -185,8 +185,8 @@ sequence.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | for an empty or non-1-D depth sequence, a depth that is not finite and non-negative, a non-positive well width, fewer than one period, or a negative fin width. |
-| TypeError | if `fin_width`, `n_repetitions` or `well_width` is not a single number. |
+| ValueError | for an empty or non-1-D depth sequence, a depth that is not finite and non-negative, a non-positive well width, a number of periods that is not a whole number from 1, or a negative fin width. |
+| TypeError | if `fin_width` or `well_width` is not a single number, or `n_repetitions` is a flag, a text or an array where a count goes. |
 
 ## predict_diffuser_polar_response
 

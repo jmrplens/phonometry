@@ -1335,21 +1335,18 @@ class SpecialRoomSoundPowerResult(OwnsArrays):
         are not the ones the standard has.
 
         :raises ValueError: if ``method`` is unknown, ``coverage_factor`` is not
-            positive, a count is below one, or a per-band array disagrees with
-            the rest.
-        :raises TypeError: if ``method`` is not a text, or ``coverage_factor``,
-            ``n_microphone_positions`` or ``n_source_positions`` is not a single number.
+            positive, a count is not a whole number from one, or a per-band
+            array disagrees with the rest.
+        :raises TypeError: if ``method`` is not a text, ``coverage_factor`` is
+            not a single number, or ``n_microphone_positions`` or
+            ``n_source_positions`` is a flag, a text or an array where a count
+            goes.
         """
-        require_scalar(self.n_microphone_positions, "n_microphone_positions")
-        require_scalar(self.n_source_positions, "n_source_positions")
+        # Each count held as the int require_count returns, a NumPy one too.
+        for name in ("n_microphone_positions", "n_source_positions"):
+            object.__setattr__(self, name, require_count(getattr(self, name), name))
         require_choice(self.method, "method", ("direct", "comparison"))
         require_positive(self.coverage_factor, "coverage_factor")
-        if self.n_microphone_positions < 1 or self.n_source_positions < 1:
-            msg = (
-                "SpecialRoomSoundPowerResult: 'n_microphone_positions' and "
-                "'n_source_positions' must be at least 1."
-            )
-            raise ValueError(msg)
         bands = (
             "frequencies",
             "sound_power_level",

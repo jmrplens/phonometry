@@ -29,7 +29,7 @@ def test_octave_filter_bank_invalid_init() -> None:
     with pytest.raises(ValueError, match="fraction' must be positive"):
         filters.OctaveFilterBank(fs=48000, fraction=-1)
 
-    with pytest.raises(ValueError, match="order' must be positive"):
+    with pytest.raises(ValueError, match="'order' must be a whole number"):
         filters.OctaveFilterBank(fs=48000, order=0)
 
     with pytest.raises(ValueError, match="list of two frequencies"):

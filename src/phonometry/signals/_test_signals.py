@@ -71,7 +71,6 @@ from ..io._resolve import (
     require_signal_rate,
     resolve_fs,
 )
-from ..io._signal import Signal
 from .spectra import _positive
 
 if TYPE_CHECKING:
@@ -79,6 +78,7 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
+    from ..io._signal import Signal
 
 
 __all__ = [
@@ -641,10 +641,8 @@ def resample_signal(
     :param max_denominator: Largest denominator accepted for the rational
         rate ratio.
     :return: A :class:`ResampledSignalResult`.
-    :raises ValueError: If the inputs or parameters are invalid, if the
-        rate ratio is not rational within ``max_denominator``, or if ``x`` is
-        a Signal and ``fs_new`` is not a whole number of hertz, which is the
-        only kind of rate a Signal carries.
+    :raises ValueError: If the inputs or parameters are invalid, or if the
+        rate ratio is not rational within ``max_denominator``.
     :raises TypeError: if ``stopband_attenuation`` or ``transition_width`` is not a
         single number, or ``max_denominator`` is a flag, a text or an array where a
         count goes.
@@ -669,13 +667,6 @@ def resample_signal(
     if max_den < 1:
         msg = "'max_denominator' must be a positive integer."
         raise ValueError(msg)
-    if isinstance(x, Signal) and not float(fs_new_v).is_integer():
-        msg = (
-            f"'fs_new' must be a whole number of hertz to resample a Signal, "
-            f"whose rate is one; got {fs_new_v!r}. Pass the samples as an "
-            "array to resample to a fractional rate."
-        )
-        raise ValueError(msg)
 
     ratio = Fraction(fs_new_v / fs_v).limit_denominator(max_den)
     up, down = ratio.numerator, ratio.denominator
@@ -688,7 +679,7 @@ def resample_signal(
 
     if up == down:  # Same rate: nothing to do, and nothing to filter.
         return ResampledSignalResult(
-            signal=like_input(x, xa, round(fs_new_v)),
+            signal=like_input(x, xa, fs_new_v),
             fs=fs_new_v,
             original_fs=fs_v,
             up=1,
@@ -724,7 +715,7 @@ def resample_signal(
         sp_signal.resample_poly(xa, up, down, window=taps), dtype=np.float64
     )
     return ResampledSignalResult(
-        signal=like_input(x, resampled, round(fs_new_v)),
+        signal=like_input(x, resampled, fs_new_v),
         fs=fs_new_v,
         original_fs=fs_v,
         up=up,

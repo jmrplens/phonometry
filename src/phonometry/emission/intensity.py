@@ -72,7 +72,7 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
-    from .._internal.types import RealValues
+    from .._internal.types import BandFraction, RealValues
 
 from .._internal.boundary import settled, settled_net_share
 from .._internal.frozen import OwnsArrays
@@ -81,6 +81,7 @@ from .._internal.types import answer_form, as_float_if_reduced, one_value
 from .._internal.utils import _typesignal
 from .._internal.validation import (
     require_axis_count,
+    require_band_fraction,
     require_equal_counts,
     require_equal_shapes,
     require_finite_array,
@@ -664,11 +665,8 @@ def _validate_probe_medium(fs: float, spacing: float, rho: float, c: float) -> N
         raise ValueError(msg)
 
 
-def _validate_band_options(fraction: int | None, limits: RealValues | None) -> None:
-    """Reject an unsupported band fraction or an ill-ordered frequency range."""
-    if fraction is not None and fraction not in (1, 3):
-        msg = "'fraction' must be None, 1 (octave) or 3 (one-third octave)."
-        raise ValueError(msg)
+def _validate_band_limits(limits: RealValues | None) -> None:
+    """Reject an ill-ordered frequency range."""
     # NaN fails every comparison, so finiteness is tested explicitly: a NaN
     # limit would otherwise pass and silently select no band at all.
     if limits is not None and (
@@ -690,7 +688,7 @@ def sound_intensity(
     spacing_m: float,
     density: float = 1.204,
     speed_of_sound: float = 343.0,
-    fraction: int | None = None,
+    fraction: BandFraction | np.integer[Any] | None = None,
     limits: RealValues | None = None,
     bias_correct: bool = False,
 ) -> IntensityResult:
@@ -764,15 +762,18 @@ def sound_intensity(
         per-band ``bias_correction`` factor (same clamped definition) is
         reported either way.
     :return: :class:`IntensityResult`.
+    :raises ValueError: for a ``fraction`` other than 1 and 3, or ``limits``
+        that are not two ascending positive frequencies.
     :raises TypeError: if ``density``, ``fs``, ``spacing_m`` or ``speed_of_sound`` is
-        not a single number.
+        not a single number, or ``fraction`` is not an integer.
     """
     fs = resolve_pair_fs(p1, p2, fs, names=("p1", "p2"))
     x1 = apply_calibration(p1, _typesignal(p1, name="p1"))
     x2 = apply_calibration(p2, _typesignal(p2, name="p2"))
     _validate_probe_signals(x1, x2)
     _validate_probe_medium(fs, spacing_m, density, speed_of_sound)
-    _validate_band_options(fraction, limits)
+    fraction = None if fraction is None else require_band_fraction(fraction, "fraction")
+    _validate_band_limits(limits)
     if x1.size < _MIN_SAMPLES:
         msg = f"Signals too short for a spectral estimate: {x1.size} samples."
         raise ValueError(msg)

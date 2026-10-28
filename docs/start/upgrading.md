@@ -1279,21 +1279,29 @@ at any positive rate takes a `float`: the rate one function returns is the
 rate the next one takes. The functions that need a whole number of samples
 per second keep refusing a fractional one: `io.write`, which writes the rate
 into the file's header, the test signals of `electroacoustics`,
-`room.image_source_rir`, `psychoacoustics.loudness_zwicker`,
-`psychoacoustics.sharpness_din`,
+`electroacoustics.field_strength_meter`, `room.image_source_rir`,
+`psychoacoustics.loudness_zwicker`, `psychoacoustics.sharpness_din`,
 `psychoacoustics.psychoacoustic_annoyance_from_signal` and `speech.stoi`.
+`vibration.evaluate_train_passage`, `signals.resample_signal` handed a Signal
+and the Method B bank of `environment` refused a fractional rate as well, on
+the grounds that the filter bank needed a whole one, which it does not: they
+run at any rate.
 
 | 3.3.0 or 4.0.0rc1 | 4.0 |
 | --- | --- |
 | `psychoacoustics.loudness_zwicker(x, sig.fs)` type checked, `sig.fs` read as an `int` | hand over the Signal, `loudness_zwicker(sig)`, or `int(sig.fs)` |
 | `io.write(path, io.Signal(x, 44100.5))` failed inside the header with `struct.error` | it raises `ValueError` naming `fs`, as `fs=44100.5` does |
+| `filters.OctaveFilterBank(fs, order=2.5)`, `room.mls_signal(10.5)` and the other counts checked only as one number ran with a fraction or a bool | a fraction raises `ValueError: 'order' must be a whole number`, a bool a `TypeError`; pass the whole number |
+| `emission.sound_intensity(p1, p2, fs, spacing_m=d, fraction=1.0)` ran | it raises `TypeError`, as every band fraction does; pass `1` or `3` |
 
 A count, a band fraction or a flag takes the NumPy integer or truth value
 its validator takes (`int | np.integer[Any]`, `BandFraction |
 np.integer[Any]`, `bool | np.bool_`), and values by band take a mapping keyed
-by integers (`{125: 40.0}`) as they take one keyed by floats, so nothing that
-ran is refused. A result record that validates a count or a band fraction
-holds the `int` it reads, where it kept a NumPy integer as it was given.
+by integers (`{125: 40.0}`) as they take one keyed by floats. A count that
+was checked only as one number is read by the same whole-number check, so a
+fraction or a bool it used to take is refused, as in the rows above. A result
+record that validates a count or a band fraction holds the `int` it reads,
+where it kept a NumPy integer as it was given.
 
 ## Verdicts are result objects, not dictionaries
 
@@ -1566,7 +1574,7 @@ next to a loose `fs`. They now keep the type the input arrived as:
 | --- | --- |
 | `envelope(...).signal` | at the input's rate |
 | `time_synchronous_average(...).period_waveform` | at the input's rate |
-| `resample_signal(...).signal` | at `fs_new`, which then has to be a whole number of hertz |
+| `resample_signal(...).signal` | at `fs_new` |
 | `align_impulse_responses(...).aligned`, `.reference` | each one if its own input was |
 | `underwater.pile_strike_metrics(...).pressure` | at the input's rate |
 

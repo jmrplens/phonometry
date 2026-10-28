@@ -125,7 +125,7 @@ check_free_field(
     measurement_radius_m: float | None = None,
     reflecting_plane_absorption_coefficient: float | None = None,
     reflecting_plane_margin_m: float | None = None,
-    paths_in_working_area: bool | None = None,
+    paths_in_working_area: bool | np.bool_ | None = None,
     speed_of_sound: float = 343.0,
 ) -> FreeFieldCheck
 ```
@@ -160,7 +160,8 @@ allows, "in conformity" but not "in full conformity".
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | for results of different rooms, a frequency given to two sources, directionality results that do not align with `results`, an unknown bandwidth, an absorption coefficient outside 0 to 1, a margin that is not finite, or a working-area declaration that is not `True`, `False` or `None`. |
+| ValueError | for results of different rooms, a frequency given to two sources, directionality results that do not align with `results`, an unknown bandwidth, an absorption coefficient outside 0 to 1, or a margin that is not finite. |
+| TypeError | for a working-area declaration that is not `True`, `False` or `None` (a NumPy truth value is one). |
 
 ## directionality_positions
 

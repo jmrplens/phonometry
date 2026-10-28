@@ -418,7 +418,7 @@ def _deconvolve_farina(
 
     from ..room._impulse_response import inverse_filter
 
-    inv = inverse_filter(int(fs), f1, f2, duration_s, fade=fade)
+    inv = inverse_filter(fs, f1, f2, duration_s, fade=fade)
     conv = sp_signal.fftconvolve(rec, inv)
     return np.asarray(np.roll(conv, -(inv.size - 1)), dtype=np.float64)
 

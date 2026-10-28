@@ -51,6 +51,7 @@ from .._internal.frozen import OwnsArrays
 from .._internal.types import RealScalar
 from .._internal.validation import (
     require_axis_count,
+    require_count,
     require_equal_counts,
     require_non_negative,
     require_ranks,
@@ -740,7 +741,7 @@ def _sample(q: Quantity, size: int, rng: np.random.Generator) -> np.ndarray:
 def monte_carlo(
     model: VectorModel,
     quantities: Sequence[Quantity],
-    n_trials: int = 1_000_000,
+    n_trials: int | np.integer[Any] = 1_000_000,
     coverage: float = 0.95,
     seed: int | None = None,
     *,
@@ -771,12 +772,14 @@ def monte_carlo(
         float per trial) so :meth:`MonteCarloResult.plot` can draw the
         output-distribution histogram.
     :return: A :class:`MonteCarloResult`.
-    :raises ValueError: for no inputs, fewer than 2 trials or bad coverage,
-        or when the model returns a non-finite output for any trial.
-    :raises TypeError: if ``coverage`` or ``n_trials`` is not a single number.
+    :raises ValueError: for no inputs, a number of trials that is not a whole
+        number from 2, bad coverage, or when the model returns a non-finite
+        output for any trial.
+    :raises TypeError: if ``coverage`` is not a single number, or ``n_trials``
+        is a flag, a text or an array where a count goes.
     """
     require_scalar(coverage, "coverage")
-    require_scalar(n_trials, "n_trials")
+    n_trials = require_count(n_trials, "n_trials", at_least=None)
     if len(quantities) == 0:
         msg = "at least one input quantity is required."
         raise ValueError(msg)

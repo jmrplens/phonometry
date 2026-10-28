@@ -97,6 +97,7 @@ from scipy import signal
 from .._internal.frozen import OwnsArrays
 from .._internal.utils import _sos_initial_state, _sos_state_mismatch
 from .._internal.validation import (
+    require_count,
     require_positive,
     require_scalar,
 )
@@ -1154,13 +1155,17 @@ class TimeWeighting:
 
 @overload
 def linkwitz_riley(
-    x: Signal, fs: float | None = ..., *, frequency: float, order: int = ...
+    x: Signal,
+    fs: float | None = ...,
+    *,
+    frequency: float,
+    order: int | np.integer[Any] = ...,
 ) -> tuple[Signal, Signal]: ...
 
 
 @overload
 def linkwitz_riley(
-    x: ArrayLike, fs: float, *, frequency: float, order: int = ...
+    x: ArrayLike, fs: float, *, frequency: float, order: int | np.integer[Any] = ...
 ) -> tuple[np.ndarray, np.ndarray]: ...
 
 
@@ -1169,7 +1174,7 @@ def linkwitz_riley(
     fs: float | None = None,
     *,
     frequency: float,
-    order: int = 4,
+    order: int | np.integer[Any] = 4,
 ) -> tuple[Signal, Signal] | tuple[np.ndarray, np.ndarray]:
     """Linkwitz-Riley crossover filter (Butterworth squared).
     Splits signal into low and high bands with flat sum response.
@@ -1185,10 +1190,13 @@ def linkwitz_riley(
         signature that lies about what the call needs.
     :param order: Total order (must be even, typically 2 or 4).
     :return: (low_pass_signal, high_pass_signal)
-    :raises TypeError: if ``frequency``, ``fs`` or ``order`` is not a single number.
+    :raises ValueError: for a sample rate that is not positive, or an
+        ``order`` that is not a positive even whole number.
+    :raises TypeError: if ``frequency`` or ``fs`` is not a single number, or
+        ``order`` is a flag, a text or an array where an order goes.
     """
     require_scalar(fs, "fs")
-    require_scalar(order, "order")
+    order = require_count(order, "order", at_least=None)
     fs = resolve_fs(x, fs)
     x_proc = resolve_samples(x)
     if fs <= 0:

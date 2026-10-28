@@ -463,10 +463,15 @@ def test_the_stretches_nest_and_stay_inside_the_record() -> None:
         im.evaluate_train_passage(record, FS_HZ, t2_s=(8.0, 12.0), t1_s=(13.0, 15.0))
 
 
-def test_the_bank_needs_an_integer_rate() -> None:
+def test_a_fractional_rate_runs() -> None:
+    """The third-octave bank takes any rate, so a passage at 2048,5 Hz is read."""
     record = _passage()
-    with pytest.raises(ValueError, match="integer sampling frequency"):
-        im.evaluate_train_passage(record, 2048.5, t2_s=(8.0, 20.0))
+    passage = im.evaluate_train_passage(record, 2048.5, t2_s=(8.0, 20.0))
+    whole = im.evaluate_train_passage(record, 2048.0, t2_s=(8.0, 20.0))
+    assert passage.fs == 2048.5
+    assert math.isfinite(passage.kbf_max)
+    assert passage.kbf_max == pytest.approx(whole.kbf_max, rel=0.05)
+    np.testing.assert_allclose(passage.band_max_levels, whole.band_max_levels, atol=0.5)
 
 
 def test_a_silent_record_has_no_event_level() -> None:

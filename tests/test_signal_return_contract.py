@@ -513,16 +513,16 @@ def test_a_result_field_keeps_the_type_a_bare_array_gave_it(
         assert getattr(uncalibrated, field).calibration_factor is None
 
 
-def test_a_signal_is_resampled_only_to_a_whole_number_of_hertz() -> None:
-    """A Signal's rate is an integer, so a fractional target has no Signal to be.
+def test_a_signal_is_resampled_to_a_fractional_rate_as_an_array_is() -> None:
+    """A Signal's rate is a float, so a fractional target is a Signal at that rate.
 
-    The bare array still goes to any rational rate, as it always did.
+    The bare array goes to the same rational rate and stays a bare array.
     """
     from phonometry.signals import resample_signal
 
-    record = Signal(_RECORD, FS)
-    with pytest.raises(ValueError, match=r"whole number of hertz"):
-        resample_signal(record, fs_new=FS / 7)
+    resampled = resample_signal(Signal(_RECORD, FS), fs_new=FS / 7).signal
+    assert isinstance(resampled, Signal)
+    assert resampled.fs == FS / 7
     assert isinstance(resample_signal(_RECORD, FS, fs_new=FS / 7).signal, np.ndarray)
 
 

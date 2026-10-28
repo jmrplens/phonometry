@@ -127,7 +127,7 @@ the heuristic's noise-floor false positives).
 ## golay_pair
 
 ```python
-golay_pair(order: int) -> tuple[np.ndarray, np.ndarray]
+golay_pair(order: int | np.integer[Any]) -> tuple[np.ndarray, np.ndarray]
 ```
 
 Generate a complementary Golay pair of length `2**order`.
@@ -363,7 +363,7 @@ a definitive aliasing diagnosis.
 ## mls_signal
 
 ```python
-mls_signal(order: int) -> np.ndarray
+mls_signal(order: int | np.integer[Any]) -> np.ndarray
 ```
 
 Generate a maximum-length sequence (MLS) of the given order.
@@ -385,7 +385,8 @@ autocorrelation is a near-perfect periodic delta
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `order` is not a single number. |
+| ValueError | if `order` is not a whole number from 2 to 20. |
+| TypeError | if `order` is a flag, a text or an array where an order goes. |
 
 ## plot_excitation
 

@@ -121,7 +121,7 @@ unpacked by position (GUM clause 6, Annex G).
 monte_carlo(
     model: Callable[..., ArrayLike],
     quantities: Sequence[Quantity],
-    n_trials: int = 1000000,
+    n_trials: int | np.integer[Any] = 1000000,
     coverage: float = 0.95,
     seed: int | None = None,
     *,
@@ -159,8 +159,8 @@ probabilistically symmetric one (not the 5.3.4 shortest interval).
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | for no inputs, fewer than 2 trials or bad coverage, or when the model returns a non-finite output for any trial. |
-| TypeError | if `coverage` or `n_trials` is not a single number. |
+| ValueError | for no inputs, a number of trials that is not a whole number from 2, bad coverage, or when the model returns a non-finite output for any trial. |
+| TypeError | if `coverage` is not a single number, or `n_trials` is a flag, a text or an array where a count goes. |
 
 ## MonteCarloResult
 

@@ -66,7 +66,9 @@ def test_cumulative_sel_rejects_empty() -> None:
 
 
 def test_cumulative_sel_identical_rejects_zero_strikes() -> None:
-    with pytest.raises(ValueError, match="'n_strikes' must be at least"):
+    with pytest.raises(
+        ValueError, match="'n_strikes' must be a whole number, at least"
+    ):
         underwater.cumulative_sel_identical(180.0, 0)
 
 

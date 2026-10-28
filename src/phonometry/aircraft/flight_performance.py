@@ -47,7 +47,11 @@ from typing import TYPE_CHECKING, Any, Literal
 import numpy as np
 
 from .._internal.display import RichDisplay
-from .._internal.validation import require_finite_fields, require_scalar
+from .._internal.validation import (
+    require_count,
+    require_finite_fields,
+    require_scalar,
+)
 from .._internal.warnings import PhonometryWarning
 
 if TYPE_CHECKING:
@@ -679,18 +683,16 @@ class PerformanceAircraft(RichDisplay):
         aircraft table, and the step that needs a rating is where the absence
         can be reported against the rating it was looking for.
 
-        :raises ValueError: if the engine count is below one, or a weight or
-            thrust is not finite and positive.
-        :raises TypeError: if ``n_engines`` is not a single number.
+        :raises ValueError: if the engine count is not a whole number from one,
+            or a weight or thrust is not finite and positive.
+        :raises TypeError: if ``n_engines`` is a flag, a text or an array where
+            a count goes.
         """
-        require_scalar(self.n_engines, "n_engines")
+        # Held as the int require_count returns, a NumPy integer included.
+        object.__setattr__(
+            self, "n_engines", require_count(self.n_engines, "n_engines")
+        )
         require_finite_fields(self, "max_static_thrust_lb", "max_landing_weight_lb")
-        if self.n_engines < 1:
-            msg = (
-                "PerformanceAircraft: 'n_engines' must be at least 1; got "
-                f"{self.n_engines!r}."
-            )
-            raise ValueError(msg)
         for name in ("max_static_thrust_lb", "max_landing_weight_lb"):
             if getattr(self, name) <= 0.0:
                 msg = (

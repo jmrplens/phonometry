@@ -232,7 +232,7 @@ def test_invalid_inputs_raise() -> None:
     ):
         v.daily_dose_multi([1.0, 2.0], [1.0], [1.0, 2.0])
     with pytest.raises(
-        ValueError, match="'exposure_duration_years' must be a positive integer"
+        ValueError, match="'exposure_duration_years' must be a whole number"
     ):
         v.injury_risk(1.0, start_age=20, exposure_duration_years=0, days_per_year=120)
     with pytest.raises(ValueError, match="'sex' must be"):

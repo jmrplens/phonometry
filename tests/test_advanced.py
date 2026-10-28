@@ -91,7 +91,7 @@ def test_invalid_inputs() -> None:
         filters.octave_filter(x, fs, fraction=0)
 
     # Invalid order
-    with pytest.raises(ValueError, match="Filter 'order' must be positive"):
+    with pytest.raises(ValueError, match="'order' must be a whole number"):
         filters.octave_filter(x, fs, order=-1)
 
     # Invalid filter_type

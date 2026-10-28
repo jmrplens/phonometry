@@ -419,5 +419,7 @@ def test_clause_f1_kij_floor() -> None:
 
 
 def test_multi_junction_adjustment_rejects_zero_junctions() -> None:
-    with pytest.raises(ValueError, match=r"'n_junctions' must be at least"):
+    with pytest.raises(
+        ValueError, match=r"'n_junctions' must be a whole number, at least 1"
+    ):
         building.multi_junction_adjustment(0)

@@ -1316,20 +1316,29 @@ que un comprobador de tipos lee `sig.fs` como un `float`, donde leía un
 siguiente. Las funciones que necesitan un número entero de muestras por
 segundo siguen rechazando una fraccionaria: `io.write`, que escribe la
 frecuencia en la cabecera del archivo, las señales de prueba de
-`electroacoustics`, `room.image_source_rir`,
-`psychoacoustics.loudness_zwicker`, `psychoacoustics.sharpness_din`,
+`electroacoustics`, `electroacoustics.field_strength_meter`,
+`room.image_source_rir`, `psychoacoustics.loudness_zwicker`,
+`psychoacoustics.sharpness_din`,
 `psychoacoustics.psychoacoustic_annoyance_from_signal` y `speech.stoi`.
+`vibration.evaluate_train_passage`, `signals.resample_signal` con una Signal
+y el banco del método B de `environment` también rechazaban una frecuencia
+fraccionaria, con el argumento de que el banco de filtros necesitaba una
+entera, y no la necesita: funcionan a cualquier frecuencia.
 
 | 3.3.0 o 4.0.0rc1 | 4.0 |
 | --- | --- |
 | `psychoacoustics.loudness_zwicker(x, sig.fs)` pasaba la comprobación de tipos, con `sig.fs` leída como un `int` | se entrega la Signal, `loudness_zwicker(sig)`, o `int(sig.fs)` |
 | `io.write(path, io.Signal(x, 44100.5))` fallaba dentro de la cabecera con `struct.error` | lanza `ValueError` nombrando `fs`, como lo hace `fs=44100.5` |
+| `filters.OctaveFilterBank(fs, order=2.5)`, `room.mls_signal(10.5)` y los demás recuentos que solo se comprobaban como un número funcionaban con una fracción o un booleano | una fracción lanza `ValueError: 'order' must be a whole number`, un booleano un `TypeError`; se pasa el número entero |
+| `emission.sound_intensity(p1, p2, fs, spacing_m=d, fraction=1.0)` funcionaba | lanza `TypeError`, como toda fracción de banda; se pasa `1` o `3` |
 
 Un recuento, una fracción de banda o un indicador admiten el entero o el
 valor de verdad de NumPy que admite su validador (`int | np.integer[Any]`,
 `BandFraction | np.integer[Any]`, `bool | np.bool_`), y los valores por
 banda admiten un mapeo con claves enteras (`{125: 40.0}`) igual que uno con
-claves de coma flotante, así que no se rechaza nada que funcionara. Un
+claves de coma flotante. Un recuento que solo se comprobaba como un número
+pasa por la misma comprobación de número entero, así que se rechaza la
+fracción o el booleano que antes admitía, como en las filas de arriba. Un
 registro de resultado que valida un recuento o una fracción de banda guarda
 el `int` que lee, donde guardaba el entero de NumPy tal como se le dio.
 
@@ -1611,7 +1620,7 @@ conservan el tipo con el que llegó la entrada:
 | --- | --- |
 | `envelope(...).signal` | a la frecuencia de muestreo de la entrada |
 | `time_synchronous_average(...).period_waveform` | a la frecuencia de muestreo de la entrada |
-| `resample_signal(...).signal` | a `fs_new`, que entonces tiene que ser un número entero de hercios |
+| `resample_signal(...).signal` | a `fs_new` |
 | `align_impulse_responses(...).aligned`, `.reference` | cada uno si su propia entrada lo era |
 | `underwater.pile_strike_metrics(...).pressure` | a la frecuencia de muestreo de la entrada |
 

@@ -381,21 +381,19 @@ class HardWalledSoundPowerResult(OwnsArrays):
         long is silently dropped, so the lengths are pinned here.
 
         :raises ValueError: if ``quantity`` is neither ``'power'`` nor
-            ``'energy'``, ``coverage_factor`` is not positive, a count is below
-            one, or any per-band array disagrees with the rest.
-        :raises TypeError: if ``quantity`` is not a text, or ``coverage_factor``,
-            ``n_microphone_positions`` or ``n_source_positions`` is not a single number.
+            ``'energy'``, ``coverage_factor`` is not positive, a count is not a
+            whole number from one, or any per-band array disagrees with the
+            rest.
+        :raises TypeError: if ``quantity`` is not a text, ``coverage_factor`` is
+            not a single number, or ``n_microphone_positions`` or
+            ``n_source_positions`` is a flag, a text or an array where a count
+            goes.
         """
-        require_scalar(self.n_microphone_positions, "n_microphone_positions")
-        require_scalar(self.n_source_positions, "n_source_positions")
+        # Each count held as the int require_count returns, a NumPy one too.
+        for name in ("n_microphone_positions", "n_source_positions"):
+            object.__setattr__(self, name, require_count(getattr(self, name), name))
         require_choice(self.quantity, "quantity", ("power", "energy"))
         require_positive(self.coverage_factor, "coverage_factor")
-        if self.n_microphone_positions < 1 or self.n_source_positions < 1:
-            msg = (
-                "HardWalledSoundPowerResult: 'n_microphone_positions' and "
-                "'n_source_positions' must be at least 1."
-            )
-            raise ValueError(msg)
         bands = (
             "frequencies",
             "sound_power_level",
@@ -1142,13 +1140,20 @@ class HardWalledRoomCheck(OwnsArrays):
         """Reject a check whose per-band arrays disagree or name no Table 3 band.
 
         :raises ValueError: if the two per-band arrays differ in length or
-            rank, a band lies outside 125 Hz to 8 kHz, fewer than two
-            orientations are recorded, or the room or the box is not
+            rank, a band lies outside 125 Hz to 8 kHz, the orientations recorded
+            are not a whole number from two, or the room or the box is not
             positive.
-        :raises TypeError: if ``largest_box_dimension_m``, ``n_orientations``,
-            ``reference_box_volume_m3`` or ``volume`` is not a single number.
+        :raises TypeError: if ``largest_box_dimension_m``,
+            ``reference_box_volume_m3`` or ``volume`` is not a single number, or
+            ``n_orientations`` is a flag, a text or an array where a count goes.
         """
-        require_scalar(self.n_orientations, "n_orientations")
+        # Held as the int require_count returns; two orientations are the
+        # fewest values the step below can work with.
+        object.__setattr__(
+            self,
+            "n_orientations",
+            require_count(self.n_orientations, "n_orientations", at_least=2),
+        )
         require_ranks(self, frequencies=1, level_range_db=1)
         require_same_length(self, "frequencies", "level_range_db")
         if any(round(float(f)) not in _SIGMA_R0_DB for f in self.frequencies):
@@ -1156,10 +1161,6 @@ class HardWalledRoomCheck(OwnsArrays):
                 "HardWalledRoomCheck: 'frequencies' must lie in 125 Hz to 8 kHz, "
                 f"the bands of Table 3 ({_STANDARD})."
             )
-            raise ValueError(msg)
-        # The fewest values the step below can work with, not a quantity.
-        if self.n_orientations < 2:  # noqa: PLR2004
-            msg = "HardWalledRoomCheck: 'n_orientations' must be at least 2."
             raise ValueError(msg)
         require_positive(self.volume, "volume")
         require_positive(self.reference_box_volume_m3, "reference_box_volume_m3")

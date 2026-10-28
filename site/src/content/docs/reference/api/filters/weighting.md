@@ -97,7 +97,7 @@ linkwitz_riley(
     fs: float | None = ...,
     *,
     frequency: float,
-    order: int = ...,
+    order: int | np.integer[Any] = ...,
 ) -> tuple[Signal, Signal]
 
 linkwitz_riley(
@@ -105,7 +105,7 @@ linkwitz_riley(
     fs: float,
     *,
     frequency: float,
-    order: int = ...,
+    order: int | np.integer[Any] = ...,
 ) -> tuple[np.ndarray, np.ndarray]
 ```
 
@@ -127,7 +127,8 @@ Splits signal into low and high bands with flat sum response.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `frequency`, `fs` or `order` is not a single number. |
+| ValueError | for a sample rate that is not positive, or an `order` that is not a positive even whole number. |
+| TypeError | if `frequency` or `fs` is not a single number, or `order` is a flag, a text or an array where an order goes. |
 
 ## time_weighting
 

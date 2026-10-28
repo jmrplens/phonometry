@@ -725,13 +725,13 @@ def test_a_band_fraction_alias_imported_from_another_module_is_read_through(
     ]
 
 
-def test_a_flag_an_isinstance_check_lets_through_admits_np_bool(
+def test_a_flag_an_isinstance_check_lets_through_admits_np_bool_and_a_refusal_keeps_it_out(
     tmp_path: pathlib.Path,
 ) -> None:
     refused = _refused(
         tmp_path,
         api="""
-        __all__ = ["accepts", "accepts_typed", "refuses", "real"]
+        __all__ = ["accepts", "accepts_typed", "refuses", "refuses_styled", "real"]
 
         def accepts(small_room: bool) -> bool:
             if not isinstance(small_room, (bool, np.bool_)):
@@ -747,6 +747,12 @@ def test_a_flag_an_isinstance_check_lets_through_admits_np_bool(
             if isinstance(count, (bool, np.bool_)):
                 raise TypeError("count")
             return count
+
+        def refuses_styled(timeout_s: float = 1.0) -> float:
+            if isinstance(timeout_s, bool | np.bool_):
+                msg = f"'timeout_s' must be a number of seconds, got {timeout_s!r}."
+                raise TypeError(msg)
+            return float(timeout_s)
 
         def real(overlap: float) -> float:
             if not isinstance(overlap, (int, float, np.integer, np.floating)):
@@ -906,6 +912,204 @@ def test_a_record_field_kept_as_given_is_held_and_one_stored_is_not(
     assert refused["Meter(indicated)"] == [
         "annotated bool | None, which refuses np.bool_, while read in "
         "Meter._hold(), isinstance(..., np.bool_) admits it"
+    ]
+
+
+_RECORDS = """
+from dataclasses import dataclass
+
+from ._internal.validation import require_count
+
+__all__ = ["Device", "Typed", "Handed", "Result", "run", "summary"]
+
+@dataclass(frozen=True, kw_only=True)
+class Device:
+    fallback: bool = True
+    index: int = 0
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.fallback, bool | np.bool_):
+            msg = f"'fallback' must be a bool, got {self.fallback!r}."
+            raise TypeError(msg)
+        object.__setattr__(self, "fallback", bool(self.fallback))
+        object.__setattr__(self, "index", require_count(self.index, "index", at_least=0))
+
+@dataclass(frozen=True, kw_only=True)
+class Typed:
+    fallback: bool = True
+
+    if TYPE_CHECKING:
+        def __init__(self, *, fallback: bool | np.bool_ = True) -> None: ...
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.fallback, bool | np.bool_):
+            raise TypeError("fallback")
+        object.__setattr__(self, "fallback", bool(self.fallback))
+
+@dataclass(frozen=True, kw_only=True)
+class Handed:
+    index: int = 0
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "index", require_count(self.index, "index"))
+
+@dataclass(frozen=True, kw_only=True)
+class Result:
+    index: int = 0
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "index", require_count(self.index, "index"))
+
+def run(device: Device | None = None, typed: Typed | None = None) -> Handed:
+    return Handed()
+
+def summary(handed: Sequence[Handed]) -> Result:
+    return Result()
+"""
+
+
+def test_a_field_a_caller_built_record_stores_is_held_through_its_constructor(
+    tmp_path: pathlib.Path,
+) -> None:
+    root = _package(tmp_path, **{"_internal.validation": _VALIDATION, "api": _RECORDS})
+    files = sorted(root.rglob("*.py"))
+    found = cpa.findings_in(files, root, handed_on=frozenset({"pkg.api.Handed"}))
+    assert sorted((f.function, f.parameter, f.constructor) for f in found) == [
+        ("Device", "fallback", True),
+        ("Device", "index", True),
+    ]
+    assert found[0].problem.endswith(
+        "Device is built by its caller and stores the value it validates, so its "
+        "constructor takes the numpy scalar (a TYPE_CHECKING __init__)"
+    )
+    # Handed on whole from run() to summary(), Handed is a result too.
+    unclassed = cpa.findings_in(files, root, handed_on=frozenset())
+    assert sorted((f.function, f.parameter) for f in unclassed) == [
+        ("Device", "fallback"),
+        ("Device", "index"),
+        ("Handed", "index"),
+    ]
+
+
+def test_a_whole_number_a_scalar_check_reads_admits_a_numpy_integer(
+    tmp_path: pathlib.Path,
+) -> None:
+    refused = _refused(
+        tmp_path,
+        **{
+            "_internal.validation": _VALIDATION
+            + """
+def require_scalar(value: object, name: str) -> None:
+    raise NotImplementedError
+
+def require_positive(value: float, name: str) -> float:
+    raise NotImplementedError
+""",
+            "api": """
+            from ._internal.validation import (
+                require_count,
+                require_positive,
+                require_scalar,
+            )
+
+            __all__ = ["blades", "orders", "gain", "counted", "typed"]
+
+            def blades(rpm: float, n_blades: int) -> float:
+                require_scalar(n_blades, "n_blades")
+                if n_blades <= 0 or not float(n_blades).is_integer():
+                    msg = "'n_blades' must be a positive integer."
+                    raise ValueError(msg)
+                return rpm * n_blades
+
+            def orders(n: Sequence[int]) -> float:
+                return sum(require_positive(i, "n") for i in n)
+
+            def gain(level_db: float) -> float:
+                return require_positive(level_db, "level_db")
+
+            def counted(n_blades: int) -> int:
+                require_scalar(n_blades, "n_blades")
+                return require_count(n_blades, "n_blades")
+
+            def typed(n_blades: int | np.integer[Any]) -> float:
+                require_scalar(n_blades, "n_blades")
+                return float(n_blades)
+            """,
+        },
+    )
+    assert sorted(refused) == ["blades(n_blades)", "counted(n_blades)", "orders(n)"]
+    assert refused["blades(n_blades)"] == [
+        "annotated int, which refuses np.integer[Any], while require_scalar() takes it"
+    ]
+    # Reported once, from the count validator, not again from the scalar check.
+    assert refused["counted(n_blades)"] == [
+        "annotated int, which refuses np.integer[Any], while require_count() takes it"
+    ]
+    assert refused["orders(n)"] == [
+        "annotated Sequence[int], whose items (int) refuse np.integer[Any], while "
+        "an item require_positive() takes it"
+    ]
+
+
+def test_a_count_and_its_items_handed_to_a_generated_constructor_are_followed(
+    tmp_path: pathlib.Path,
+) -> None:
+    refused = _refused(
+        tmp_path,
+        **{
+            "_internal.validation": _VALIDATION,
+            "api": """
+            from dataclasses import KW_ONLY, dataclass
+
+            from ._internal.validation import require_count
+
+            __all__ = ["contour", "contour_by_position", "contour_typed", "Layout"]
+
+            @dataclass(frozen=True)
+            class Layout:
+                height_m: float
+                n_positions: int
+                omitted: tuple[int, ...] = ()
+                _: KW_ONLY
+                label: int = 0
+
+                def __post_init__(self) -> None:
+                    object.__setattr__(
+                        self, "n_positions", require_count(self.n_positions, "n")
+                    )
+                    object.__setattr__(
+                        self,
+                        "omitted",
+                        tuple(require_count(i, "omitted") for i in self.omitted),
+                    )
+
+            def contour(n_positions: int, omitted: Sequence[int] = ()) -> Layout:
+                kept = tuple(omitted)
+                return Layout(height_m=1.0, n_positions=n_positions, omitted=kept)
+
+            def contour_by_position(n_positions: int, label: int = 0) -> Layout:
+                return Layout(1.0, n_positions, label=label)
+
+            def contour_typed(
+                n_positions: int | np.integer[Any],
+                omitted: Sequence[int | np.integer[Any]] = (),
+            ) -> Layout:
+                return Layout(1.0, int(n_positions), tuple(map(int, omitted)))
+            """,
+        },
+    )
+    assert sorted(refused) == [
+        "contour(n_positions)",
+        "contour(omitted)",
+        "contour_by_position(n_positions)",
+    ]
+    assert refused["contour(n_positions)"] == [
+        "annotated int, which refuses np.integer[Any], while handed to "
+        "Layout(n_positions), require_count() takes it"
+    ]
+    assert refused["contour(omitted)"] == [
+        "annotated Sequence[int], whose items (int) refuse np.integer[Any], while "
+        "an item handed to Layout(omitted), require_count() takes it"
     ]
 
 

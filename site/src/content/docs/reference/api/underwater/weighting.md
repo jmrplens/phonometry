@@ -236,7 +236,7 @@ weighted_exposure(
     frequencies_hz: ArrayLike,
     guidance: Literal['nmfs-2024', 'nmfs-2018', 'southall-2019'] = 'nmfs-2024',
     impulsive: bool = True,
-    n_events: int = 1,
+    n_events: int | np.integer[Any] = 1,
     peak_spl: float | None = None,
 ) -> WeightedExposureResult
 ```
@@ -271,7 +271,7 @@ dual-metric rule requires.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If an input is invalid. |
-| TypeError | if `n_events` or `peak_spl` is not a single number. |
+| TypeError | if `peak_spl` is not a single number, or `n_events` is a flag, a text or an array where a count goes. |
 
 ## WeightedExposureResult
 

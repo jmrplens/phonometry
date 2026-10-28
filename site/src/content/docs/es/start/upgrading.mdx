@@ -2582,6 +2582,10 @@ que no es texto. El arreglo es escribir la opción tal como la enumera su
 | `noise_control.LiquidTrim(coefficient=)` | guardaba cualquier valor, rechazado más tarde o nunca | rechazado al construirse |
 | `noise_control.ValveTrim(coefficient=)` | guardaba cualquier valor, rechazado más tarde o nunca | rechazado al construirse |
 | `phonometry.ReportMetadata(tube_shape=)` | `ValueError` para cualquier valor que no conocía, texto o no | `ValueError` para un texto que no ofrece, `TypeError` para un valor que no es texto |
+| `simulation.ElasticBoundaries(sides=)`, `simulation.FDTDBoundaries(sides=)` | guardaba cualquier valor; la ejecución que contenía el registro rechazaba un lado o un nombre desconocido con `ValueError`, fuera texto o no | `ValueError` para un lado o un nombre que no ofrece, `TypeError` para uno que no es texto, al construirse |
+| `simulation.ElasticRecording(probe_fields=, snapshot_field=)` | `ValueError` para cualquier campo que no conociera, fuera texto o no | `ValueError` para un texto que no ofrece, `TypeError` para un campo que no es texto |
+| `simulation.ForceSource(direction=)` | `ValueError` para cualquier dirección que no conociera, fuera texto o no | `ValueError` para un texto distinto de `"x"` y `"y"`, `TypeError` para un valor que no es texto |
+| `simulation.PlaneWaveSource(direction=)` | guardaba cualquier valor; `FDTD2D.add_source` y la ejecución que lo contenía rechazaban uno que no conocían | rechazado al construirse |
 | `vibration.GuideValues(time_of_day=, edition=)` | guardaba cualquier valor, rechazado más tarde o nunca | rechazado al construirse |
 | `vibration.FaultLine(family=)` | guardaba cualquier valor, rechazado más tarde o nunca | rechazado al construirse |
 
@@ -2607,6 +2611,8 @@ texto, o con un error ajeno:
 | `io.write_catalogue(delimiter=, decimal=)` junto a un documento JSON | `ValueError` para todo lo que no fuera el dialecto por defecto, texto o no | `TypeError` para un valor que no es texto |
 | `underwater.gaussian_beams(absorption=)` | `AttributeError` para un valor que no es texto ni un `VolumeAbsorption` | `TypeError` |
 | `filters.FilterPeriodicVerification.clause()` | `KeyError` para cualquier nombre que no se hubiera medido | `ValueError` para un texto que no nombra ninguna de las cinco cláusulas, `TypeError` para un valor que no es texto; `KeyError` para una cláusula que no se midió |
+| `simulation.FDTD2D(absorbing_sides=, edge_impedance=)`, `simulation.ElasticFDTD2D(absorbing_sides=, free_sides=)` | `ValueError` para cualquier lado que no conociera, fuera texto o no, con un mensaje que listaba los lados desconocidos | `ValueError` para un texto que no es un lado, `TypeError` para un lado que no es texto, con el mensaje que lanza toda opción (`'free_sides' must be one of ('left', 'right', 'top', 'bottom'); got 'north'.`) |
+| `simulation.FDTD2D.add_plane_wave(direction=)`, `simulation.ElasticFDTD2D.collocated(field)`, `simulation.FDTDResult.plot(kind=)`, `simulation.ElasticFDTDResult.plot(kind=)` | `ValueError` para cualquier valor que no conociera, fuera texto o no | `ValueError` para un texto que no ofrece, `TypeError` para un valor que no es texto |
 
 Cada clave de un diccionario y cada elemento de una secuencia se comprueba uno
 a uno: `environment.assess_activity` ignoraba un periodo que no conocía junto
@@ -2630,6 +2636,20 @@ rechazan el que no ofrecen, como el resto de los gráficos. Quien indexa con
 tipos una tabla publicada con un `str` libre (una variable `str` en
 `room.TABLE_A1` o en `hearing.EARPHONES`) necesita ahora el `Literal` por el
 que está indexada; los valores no cambian.
+
+El grosor de la esponja de `simulation.FDTDBoundaries` y
+`simulation.ElasticBoundaries` se guarda como el número entero de celdas que
+nombra y se comprueba al construir el registro: un valor que no es un número
+lanza `TypeError` y una fracción `ValueError`, cuando antes se guardaba tal
+cual y solo lo leía una ejecución con un lado absorbente
+(`FDTDBoundaries(sides="rigid", absorbing_layer_cells=2.5)` se construía y se
+ejecutaba). La `shape` de `simulation.FDTDRun` y `simulation.ElasticRun` se
+guarda como un par de enteros siempre que se da, también si es una lista, y
+una mal formada se rechaza al construir la ejecución aunque acompañe a un
+mapa, cuando antes se guardaba tal cual y solo se leía con una velocidad
+escalar. Un entero de `numpy` se admite dondequiera que estos registros y los
+motores admiten un recuento, y listas anidadas dondequiera que admiten un
+mapa.
 
 ## Un registro que construye quien llama guarda lo que dicen sus campos
 

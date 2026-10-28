@@ -2414,16 +2414,6 @@ def test_a_record_holding_a_read_only_mapping_travels() -> None:
     assert missing == []
 
 
-#: Protocols of the package that declare a settable member on purpose, keyed by
-#: file and protocol, each with the reason.
-PROTOCOL_ATTRIBUTE_EXEMPT: dict[tuple[str, str], str] = {
-    ("simulation/fdtd.py", "_PressureEngine"): (
-        "a private engine contract in a file scripts/gpu_parity.py fingerprints, "
-        "whose _backend is assigned by the engine that holds it"
-    ),
-}
-
-
 def _is_protocol(node: ast.AST) -> bool:
     return isinstance(node, ast.ClassDef) and any(
         (isinstance(base, ast.Name) and base.id == "Protocol")
@@ -2456,13 +2446,9 @@ def test_a_protocol_declares_its_data_members_as_properties() -> None:
         f"{path}:{node.name}.{child.target.id}"
         for path, node in _protocols()
         for child in node.body
-        if isinstance(child, ast.AnnAssign)
-        and isinstance(child.target, ast.Name)
-        and (path, node.name) not in PROTOCOL_ATTRIBUTE_EXEMPT
+        if isinstance(child, ast.AnnAssign) and isinstance(child.target, ast.Name)
     )
     assert offenders == []
-    protocols = {(path, node.name) for path, node in _protocols()}
-    assert set(PROTOCOL_ATTRIBUTE_EXEMPT) <= protocols, "stale exemption"
 
 
 def _is_type_checking(test: ast.expr) -> bool:

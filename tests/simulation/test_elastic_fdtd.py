@@ -591,7 +591,7 @@ def test_energy_is_conserved_in_a_closed_domain() -> None:
         ({"c_p": 6000.0, "c_s": 3000.0, "shape": (1, 10)}, "at least 2 x 2"),
         (
             {"c_p": 6000.0, "c_s": 3000.0, "shape": (10, 10), "free_sides": "north"},
-            "unknown free sides",
+            "'free_sides' must be one of",
         ),
         (
             {
@@ -636,7 +636,7 @@ def test_source_validation() -> None:
     sim = ElasticFDTD2D(
         6000.0, 3000.0, 0.01, rho=2700.0, shape=(20, 20), obstacle_mask=mask
     )
-    with pytest.raises(ValueError, match="direction must be"):
+    with pytest.raises(ValueError, match="'direction' must be one of"):
         ForceSource(ix=1, iy=1, direction="z", waveform=lambda t: 0.0)
     # Built up front so each raises block holds a single throwing call.
     explosion_off_grid = ExplosionSource(ix=20, iy=1, waveform=lambda t: 0.0)
@@ -686,18 +686,6 @@ def test_a_whole_float_cell_index_is_held_as_an_int_and_steps(kind: str) -> None
             r"probe .* lies outside the grid",
         ),
         (
-            {"boundaries": ElasticBoundaries(sides={"north": "free"})},
-            "unknown boundary sides",
-        ),
-        (
-            {"boundaries": ElasticBoundaries(sides="anechoic")},
-            r"boundary for side .* must be one of",
-        ),
-        (
-            {"boundaries": ElasticBoundaries(sides={"left": "open"})},
-            r"boundary for side .* must be one of",
-        ),
-        (
             {
                 "boundaries": ElasticBoundaries(
                     sides="absorbing", absorbing_layer_cells=0
@@ -725,12 +713,59 @@ def test_simulation_rejects_invalid_arguments(
 
 
 @pytest.mark.parametrize(
+    ("sides", "error", "match"),
+    [
+        ({"north": "free"}, ValueError, r"'sides' must be one of \('left'"),
+        ("anechoic", ValueError, r"'sides' must be one of \('rigid'"),
+        ({"left": "open"}, ValueError, r"'sides\['left'\]' must be one of"),
+        ({"Left": "free"}, ValueError, r"'sides' must be one of \('left'"),
+        ({"left": "Free"}, ValueError, r"'sides\['left'\]' must be one of"),
+        ({0: "free"}, TypeError, r"'sides' must be one of .*, a text"),
+        ({"left": None}, TypeError, r"'sides\['left'\]' must be one of .*, a text"),
+        (5, TypeError, r"'sides' must be one of .*, a text"),
+    ],
+)
+def test_the_boundaries_refuse_an_unknown_side_when_they_are_built(
+    sides: object, error: type[Exception], match: str
+) -> None:
+    """A side or a termination is checked as written where the record is built.
+
+    It was read only by the run that held the record, so a misspelt side
+    reached a run before anything refused it, and a side that is not a text
+    was refused with ``ValueError``.
+    """
+    with pytest.raises(error, match=match):
+        ElasticBoundaries(sides=sides)  # type: ignore[arg-type]
+
+
+@pytest.mark.parametrize(
+    ("cells", "error", "match"),
+    [
+        (2.5, ValueError, "'absorbing_layer_cells' must be a whole number"),
+        ("20", TypeError, "absorbing_layer_cells"),
+        (True, TypeError, "absorbing_layer_cells"),
+    ],
+)
+def test_the_boundaries_refuse_a_thickness_that_is_no_count_when_they_are_built(
+    cells: object, error: type[Exception], match: str
+) -> None:
+    with pytest.raises(error, match=match):
+        ElasticBoundaries(sides="rigid", absorbing_layer_cells=cells)  # type: ignore[arg-type]
+
+
+def test_the_boundaries_hold_a_numpy_count_as_an_int() -> None:
+    boundaries = ElasticBoundaries(sides="absorbing", absorbing_layer_cells=np.int64(4))
+    assert type(boundaries.absorbing_layer_cells) is int
+    assert boundaries.absorbing_layer_cells == 4
+
+
+@pytest.mark.parametrize(
     ("kwargs", "match"),
     [
         ({"probe_fields": ()}, "probe_fields must not be empty"),
-        ({"probe_fields": ("vz",)}, "unknown probe fields"),
+        ({"probe_fields": ("vz",)}, "'probe_fields' must be one of"),
         ({"probe_fields": ("vy", "vy")}, "must not repeat"),
-        ({"snapshot_field": "txx"}, "snapshot_field must be one of"),
+        ({"snapshot_field": "txx"}, "'snapshot_field' must be one of"),
         ({"snapshot_every": 0}, "'snapshot_every' must be a whole number, at least 1"),
         ({"snapshot_every": -1}, "'snapshot_every' must be a whole number, at least 1"),
         ({"snapshot_every": 2.5}, "'snapshot_every' must be a whole number"),
@@ -754,7 +789,7 @@ def test_an_elastic_recording_holds_tuples_and_plain_counts() -> None:
     recording = ElasticRecording(
         probes=[(np.int64(3), 4.0)],  # type: ignore[list-item]
         probe_fields=fields,
-        snapshot_every=np.int64(5),  # type: ignore[arg-type]
+        snapshot_every=np.int64(5),
         snapshot_decimation=2.0,  # type: ignore[arg-type]
     )
     fields.append("vx")
@@ -906,7 +941,7 @@ def test_orthogonal_free_sides_pin_both_corner_stresses() -> None:
 
 def test_collocated_rejects_unknown_field() -> None:
     sim = ElasticFDTD2D(6000.0, 3000.0, 0.01, rho=2700.0, shape=(10, 10))
-    with pytest.raises(ValueError, match=r"\bfield must be one of"):
+    with pytest.raises(ValueError, match=r"'field' must be one of"):
         sim.collocated("txy")
 
 
@@ -971,7 +1006,9 @@ def test_plot_localizes_labels(small_result: ElasticFDTDResult) -> None:
 
 def test_plot_rejects_unknown_kind_and_missing_snapshots() -> None:
     res = _small_run(recording=replace(_SMALL_RECORDING, snapshot_every=None))
-    with pytest.raises(ValueError, match=r"kind must be 'probes'"):
+    with pytest.raises(
+        ValueError, match=r"'kind' must be one of \('probes', 'snapshot'\)"
+    ):
         res.plot(kind="field")
     with pytest.raises(
         ValueError,
@@ -1037,7 +1074,7 @@ def test_the_engine_names_its_absorbing_layer_as_the_run_does() -> None:
     assert sim.free_sides == ("top",)
     assert not hasattr(sim, "sponge_width")
     assert not hasattr(sim, "sponge_sides")
-    with pytest.raises(ValueError, match="unknown absorbing sides"):
+    with pytest.raises(ValueError, match="'absorbing_sides' must be one of"):
         ElasticFDTD2D(
             6000.0,
             3000.0,

@@ -116,9 +116,7 @@ on ``self``, stores a value of its own in it (``object.__setattr__(self,
 setter handed the name). Otherwise a list given to an array field is kept as
 a list, an array given to a tuple field as an array, and the record holds what
 its annotation says it does not, a list a caller can still append to inside a
-frozen record. :data:`KEPT_EXEMPT` is that part's escape hatch; the files
-``scripts/gpu_parity.py`` fingerprints are counted apart, as the parameter
-check counts them.
+frozen record. :data:`KEPT_EXEMPT` is that part's escape hatch.
 
 A private helper is held to the rule whatever its callers pass today: the
 next caller may hand it the caller's array. The analysis reads names, not
@@ -2979,31 +2977,25 @@ def _names_target(
     return isinstance(node, ast.Constant) and node.value == target[1]
 
 
-def containers_kept_as_given(root: pathlib.Path = SOURCE) -> tuple[list[Finding], int]:
+def containers_kept_as_given(root: pathlib.Path = SOURCE) -> list[Finding]:
     """The fields of records a caller builds that keep a fixed container as given.
 
     The fifth part: a field annotated as an array, a ``tuple``, a ``list`` or
     a set that the record does not convert. The records and their fields are
     read as ``scripts/check_parameter_annotations.py`` reads them, aliases
-    spelt out. Returns the findings and how many fields of the GPU-parity
-    files were left out.
+    spelt out.
     """
     import check_parameter_annotations as constructors
     import check_return_overloads as overloads
 
     package = overloads.Package(python_files([], root), root)
     reader = constructors.Reader(package)
-    gpu_files = set(constructors.gpu_parity_files())
     found: list[Finding] = []
-    held = 0
     for record in sorted(constructors.built_records(reader)):
         module = reader.annotations.classes[record][0]
         path = constructors.repository_path(package.paths[module], root)
         name = record.rpartition(".")[2]
         for kept_field, fixed in constructors.kept_as_given(reader, record):
-            if path in gpu_files:
-                held += 1
-                continue
             found.append(
                 Finding(
                     path,
@@ -3014,7 +3006,7 @@ def containers_kept_as_given(root: pathlib.Path = SOURCE) -> tuple[list[Finding]
                     (),
                 )
             )
-    return found, held
+    return found
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -3038,15 +3030,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
     found, stale = exempted(findings_in(files, root, tree=tree), EXEMPT)
     unproved = handovers_in(files, root, tree=tree)
-    containers, held = containers_kept_as_given(root)
-    kept, stale_kept = exempted(containers, KEPT_EXEMPT)
-    if held:
-        print(
-            f"{held} field(s) of the GPU-parity files are left out: an edit to a "
-            "file scripts/gpu_parity.py fingerprints invalidates gpu-parity.lock, "
-            "so those records are converted in one batch of their own, with the "
-            "GPU run that records the lock again."
-        )
+    kept, stale_kept = exempted(containers_kept_as_given(root), KEPT_EXEMPT)
     if not (
         found or stale or unequipped or stale_records or unproved or kept or stale_kept
     ):

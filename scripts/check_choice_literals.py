@@ -2818,55 +2818,6 @@ def _cleaned_up_parameters(
 # text, and a choice that is not checked on every path
 # ---------------------------------------------------------------------------
 
-#: The script whose ``_COVERED`` names the files the GPU parity lock holds.
-GPU_PARITY_SCRIPT = pathlib.Path(__file__).resolve().parent / "gpu_parity.py"
-
-#: Why the modules of those files are exempt as a whole.
-GPU_PARITY_REASON = (
-    "GPU-parity batch: an edit to a file scripts/gpu_parity.py fingerprints "
-    "invalidates gpu-parity.lock, so the choices of those files are typed and "
-    "checked in one batch of their own, with the GPU run that records the "
-    "lock again"
-)
-
-
-def gpu_parity_modules(
-    script: pathlib.Path = GPU_PARITY_SCRIPT,
-) -> MappingProxyType[str, str]:
-    """The package modules the GPU parity lock holds, each with the reason.
-
-    Read from ``_COVERED`` in the source of *script*, so the exemption follows
-    the files the lock fingerprints and cannot drift from them; each entry is
-    a path joined onto the repository root with ``/``, and the ones under
-    ``src/`` are modules of the package.
-    """
-    if not script.is_file():
-        return MappingProxyType({})
-    tree = ast.parse(script.read_text(encoding="utf-8"), filename=str(script))
-    paths: list[str] = []
-    for node in tree.body:
-        if isinstance(node, ast.Assign) and any(
-            isinstance(target, ast.Name) and target.id == "_COVERED"
-            for target in node.targets
-        ):
-            paths = [
-                element.right.value
-                for element in getattr(node.value, "elts", [])
-                if isinstance(element, ast.BinOp)
-                and isinstance(element.right, ast.Constant)
-                and isinstance(element.right.value, str)
-            ]
-    modules: dict[str, str] = {}
-    for path in paths:
-        parts = pathlib.PurePosixPath(path).with_suffix("").parts
-        if parts[:1] == ("src",) and len(parts) > 1:
-            modules[".".join(parts[1:])] = GPU_PARITY_REASON
-    return MappingProxyType(modules)
-
-
-#: The modules of the files the GPU parity lock holds, keyed by module.
-GPU_PARITY = gpu_parity_modules()
-
 #: A published table keyed by text, or a tuple of texts, whose keys equal a
 #: vocabulary of the package by coincidence, keyed by ``(module, name)``, with
 #: the reason. An entry that matches nothing fails.
@@ -3190,7 +3141,7 @@ def vocabulary_tables() -> Iterator[Choice]:
             ):
                 continue
             home, annotation = _home_of_constant(module, name, value)
-            if (home, name) in seen or home in GPU_PARITY:
+            if (home, name) in seen:
                 continue
             seen.add((home, name))
             for path, texts in _keyed_by_text(
@@ -3650,7 +3601,7 @@ def constant_fields() -> Iterator[Choice]:
     held to it. This is rule A21 for a record.
     """
     for home, qualname, target in _targets():
-        if home in GPU_PARITY or not inspect.isclass(target):
+        if not inspect.isclass(target):
             continue
         if not dataclasses.is_dataclass(target) or issubclass(target, CatalogueRow):
             continue
@@ -4417,8 +4368,6 @@ def unchecked_choices() -> Iterator[Choice]:
     """
     inputs = _input_records()
     for home, qualname, obj in _targets():
-        if home in GPU_PARITY:
-            continue
         if inspect.isclass(obj):
             if (
                 not dataclasses.is_dataclass(obj)

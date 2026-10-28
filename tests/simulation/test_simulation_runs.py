@@ -15,7 +15,7 @@ import copy
 import dataclasses
 import pickle
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 import pytest
@@ -37,6 +37,9 @@ if TYPE_CHECKING:
     from collections.abc import Callable
 
 _PULSE = GaussianPulse(ix=4, iy=4, half_width_s=4e-5)
+
+#: Which engine a test builds a run for.
+Engine = Literal["acoustic", "elastic"]
 
 
 def _acoustic(**changes: Any) -> FDTDRun:
@@ -76,12 +79,6 @@ def _elastic(**changes: Any) -> ElasticRun:
             {"boundaries": FDTDBoundaries(sides="absorbing", absorbing_layer_cells=0)},
             ValueError,
             "absorbing_layer_cells must be >= 1",
-        ),
-        (
-            _acoustic,
-            {"boundaries": FDTDBoundaries(sides="rigid", absorbing_layer_cells="20")},
-            TypeError,
-            "'absorbing_layer_cells' must be one number, not a text",
         ),
         (
             _acoustic,
@@ -457,3 +454,49 @@ def test_a_simulation_function_takes_its_own_run_only() -> None:
         fdtd_simulation(elastic)  # type: ignore[arg-type]
     with pytest.raises(TypeError, match="'run' must be an ElasticRun, got FDTDRun"):
         elastic_fdtd_simulation(acoustic)  # type: ignore[arg-type]
+
+
+def _over_a_map(engine: Engine, shape: object) -> FDTDRun | ElasticRun:
+    """A run whose speed is a map, with *shape* beside it."""
+    if engine == "acoustic":
+        return FDTDRun(
+            c=np.full((8, 8), 343.0),
+            dx=0.01,
+            duration_s=1e-4,
+            sources=[_PULSE],
+            shape=shape,  # type: ignore[arg-type]
+        )
+    return ElasticRun(
+        c_p=np.full((8, 8), 4000.0),
+        c_s=2300.0,
+        dx=0.01,
+        duration_s=1e-4,
+        sources=[ExplosionSource(ix=4, iy=4, waveform=_PULSE.value)],
+        rho=2500.0,
+        shape=shape,  # type: ignore[arg-type]
+    )
+
+
+@pytest.mark.parametrize("engine", ["acoustic", "elastic"])
+def test_a_run_holds_the_shape_it_is_given_as_a_pair_of_ints(engine: Engine) -> None:
+    """A list or NumPy counts read back as the tuple of ints the grid is.
+
+    With a map, the shape was not read and the run kept whatever it was
+    handed, a list a caller could still append to included.
+    """
+    by_speed = (_acoustic if engine == "acoustic" else _elastic)(shape=[np.int64(8), 8])
+    by_map = _over_a_map(engine, [np.int64(8), 8])
+    for run in (by_speed, by_map):
+        assert run.shape == (8, 8)
+        assert [type(n) for n in run.shape] == [int, int]
+
+
+@pytest.mark.parametrize("engine", ["acoustic", "elastic"])
+@pytest.mark.parametrize(
+    ("shape", "error"), [((8, 8, 1), ValueError), ((8, 0), ValueError), (8, TypeError)]
+)
+def test_a_run_refuses_a_malformed_shape_beside_a_map_too(
+    engine: Engine, shape: object, error: type[Exception]
+) -> None:
+    with pytest.raises(error, match="shape must be a pair of positive integers"):
+        _over_a_map(engine, shape)

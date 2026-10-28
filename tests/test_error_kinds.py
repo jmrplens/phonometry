@@ -1942,51 +1942,10 @@ def undocumented_type_errors(
     return found
 
 
-#: The script whose ``_COVERED`` names the files the GPU parity lock holds.
-_GPU_PARITY = SRC.parent.parent / "scripts" / "gpu_parity.py"
-
-
-@functools.cache
-def _gpu_parity_files() -> frozenset[str]:
-    """The package files the GPU parity lock holds, relative to ``SRC``.
-
-    An edit to one of them invalidates ``gpu-parity.lock``, so their
-    docstrings move in one batch with the GPU run that records the lock
-    again, and the rule exempts them by location until then. Read from
-    ``_COVERED`` of ``scripts/gpu_parity.py``, so the exemption follows the
-    lock and cannot drift from it.
-    """
-    tree = ast.parse(_GPU_PARITY.read_text(encoding="utf-8"))
-    paths: list[str] = []
-    for node in tree.body:
-        if isinstance(node, ast.Assign) and any(
-            isinstance(target, ast.Name) and target.id == "_COVERED"
-            for target in node.targets
-        ):
-            paths = [
-                element.right.value
-                for element in getattr(node.value, "elts", [])
-                if isinstance(element, ast.BinOp)
-                and isinstance(element.right, ast.Constant)
-                and isinstance(element.right.value, str)
-            ]
-    prefix = "src/phonometry/"
-    return frozenset(path[len(prefix) :] for path in paths if path.startswith(prefix))
-
-
-def test_the_gpu_parity_files_are_read_from_the_lock() -> None:
-    assert _gpu_parity_files() == {
-        "simulation/fdtd.py",
-        "simulation/elastic_fdtd.py",
-        "simulation/_backends.py",
-    }
-
-
 def test_a_public_function_that_raises_type_error_documents_it() -> None:
     found = [
         f"{file.relative_to(SRC).as_posix()}:{where}"
         for file in sorted(SRC.rglob("*.py"))
-        if file.relative_to(SRC).as_posix() not in _gpu_parity_files()
         for where in undocumented_type_errors(
             file.read_text(encoding="utf-8"), module=_module_name(file)
         )

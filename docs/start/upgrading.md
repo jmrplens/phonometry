@@ -2508,6 +2508,10 @@ write the option as its `Literal` lists it where the record is built.
 | `noise_control.LiquidTrim(coefficient=)` | stored any value, refused later or not at all | refused when built |
 | `noise_control.ValveTrim(coefficient=)` | stored any value, refused later or not at all | refused when built |
 | `phonometry.ReportMetadata(tube_shape=)` | `ValueError` for any value it did not know, text or not | `ValueError` for a text it does not offer, `TypeError` for a value that is not text |
+| `simulation.ElasticBoundaries(sides=)`, `simulation.FDTDBoundaries(sides=)` | stored any value; the run that held the record refused an unknown side or name with `ValueError`, text or not | `ValueError` for a side or a name it does not offer, `TypeError` for one that is not text, when built |
+| `simulation.ElasticRecording(probe_fields=, snapshot_field=)` | `ValueError` for any field it did not know, text or not | `ValueError` for a text it does not offer, `TypeError` for a field that is not text |
+| `simulation.ForceSource(direction=)` | `ValueError` for any direction it did not know, text or not | `ValueError` for a text other than `"x"` and `"y"`, `TypeError` for a value that is not text |
+| `simulation.PlaneWaveSource(direction=)` | stored any value; `FDTD2D.add_source` and the run that held it refused one it did not know | refused when built |
 | `vibration.GuideValues(time_of_day=, edition=)` | stored any value, refused later or not at all | refused when built |
 | `vibration.FaultLine(family=)` | stored any value, refused later or not at all | refused when built |
 
@@ -2533,6 +2537,8 @@ error:
 | `io.write_catalogue(delimiter=, decimal=)` beside a JSON document | `ValueError` for anything but the default dialect, text or not | `TypeError` for a value that is not text |
 | `underwater.gaussian_beams(absorption=)` | `AttributeError` for a value that is neither text nor a `VolumeAbsorption` | `TypeError` |
 | `filters.FilterPeriodicVerification.clause()` | `KeyError` for any name it had not measured | `ValueError` for a text that names none of the five clauses, `TypeError` for a value that is not text; `KeyError` for a clause that was not measured |
+| `simulation.FDTD2D(absorbing_sides=, edge_impedance=)`, `simulation.ElasticFDTD2D(absorbing_sides=, free_sides=)` | `ValueError` for any side it did not know, text or not, its message listing the unknown sides | `ValueError` for a text that is not a side, `TypeError` for a side that is not text, its message the one every choice raises (`'free_sides' must be one of ('left', 'right', 'top', 'bottom'); got 'north'.`) |
+| `simulation.FDTD2D.add_plane_wave(direction=)`, `simulation.ElasticFDTD2D.collocated(field)`, `simulation.FDTDResult.plot(kind=)`, `simulation.ElasticFDTDResult.plot(kind=)` | `ValueError` for any value it did not know, text or not | `ValueError` for a text it does not offer, `TypeError` for a value that is not text |
 
 A key of a mapping and an item of a sequence is checked one by one:
 `environment.assess_activity` ignored a period key it did not know beside one
@@ -2553,6 +2559,18 @@ took any `language` and now refuse one they do not offer, as every other plot
 does. A typed caller that indexes a published table with a free `str` (a
 `str` variable into `room.TABLE_A1` or `hearing.EARPHONES`) needs the
 `Literal` the table is keyed by now; the values did not move.
+
+The sponge thickness of `simulation.FDTDBoundaries` and
+`simulation.ElasticBoundaries` is held as the whole number of cells it names
+and checked when the record is built: a value that is not a number raises
+`TypeError` and a fraction `ValueError`, where it was stored as given and read
+only by a run with an absorbing side (`FDTDBoundaries(sides="rigid",
+absorbing_layer_cells=2.5)` was built and run). The `shape` of
+`simulation.FDTDRun` and `simulation.ElasticRun` is held as a pair of ints
+whenever it is given, a list included, and a malformed one is refused when
+the run is built beside a map too, where it was kept as given and read only
+for a scalar speed. A `numpy` integer is taken wherever these records and the
+engines take a count, and nested lists wherever they take a map.
 
 ## A record a caller builds holds what its fields say
 

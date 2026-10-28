@@ -68,17 +68,9 @@ def reader() -> cpa.Reader:
     return cpa.Reader(package)
 
 
-def _in_gpu_files(reader: cpa.Reader, record: str) -> bool:
-    module = reader.annotations.classes[record][0]
-    path = cpa.repository_path(reader.package.paths[module], _SOURCE)
-    return path in set(cpa.gpu_parity_files())
-
-
 def test_every_record_says_what_its_constructor_takes(reader: cpa.Reader) -> None:
     problems: dict[str, list[str]] = {}
     for record in cpa.public_records(reader.package, reader.annotations):
-        if _in_gpu_files(reader, record):
-            continue
         found = cpa.constructor_problems(reader, record)
         if found:
             problems[record] = found

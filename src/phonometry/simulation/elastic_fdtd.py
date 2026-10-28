@@ -111,12 +111,15 @@ from . import _backends, _observer
 from .compute import _local_request, _requested
 from .fdtd import (
     _DEFAULT_SPONGE_REFLECTION,
+    _PLOT_KINDS,
     _SIDES,
     Field2D,
+    GridShape,
     Side,
     _cleared,
     _expected_arrays,
     _finite,
+    _grid_shape,
     _held_map,
     _hold_cells,
     _integer,
@@ -143,7 +146,7 @@ from .fdtd import (
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from numpy.typing import NDArray
+    from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
     from ._backends import DeviceArray
@@ -222,6 +225,17 @@ class ExplosionSource(RichDisplay):
     waveform: Callable[[float], float]
     amplitude: float = 1.0
 
+    if TYPE_CHECKING:
+
+        def __init__(
+            self,
+            *,
+            ix: int | np.integer[Any],
+            iy: int | np.integer[Any],
+            waveform: Callable[[float], float],
+            amplitude: float = 1.0,
+        ) -> None: ...
+
     def __post_init__(self) -> None:
         """Hold whole cell indices and reject a non-finite ``amplitude`` gain.
 
@@ -264,18 +278,29 @@ class ForceSource(RichDisplay):
     waveform: Callable[[float], float]
     amplitude: float = 1.0
 
+    if TYPE_CHECKING:
+
+        def __init__(
+            self,
+            *,
+            ix: int | np.integer[Any],
+            iy: int | np.integer[Any],
+            direction: ForceDirection,
+            waveform: Callable[[float], float],
+            amplitude: float = 1.0,
+        ) -> None: ...
+
     def __post_init__(self) -> None:
         """Hold the cell indices as ints and check the gain and the direction.
 
-        :raises TypeError: if ``ix`` or ``iy`` is not a number.
+        :raises TypeError: if ``ix`` or ``iy`` is not a number, or
+            ``direction`` is not a text.
         :raises ValueError: if ``ix`` or ``iy`` is not whole, ``amplitude`` is
             not finite, or ``direction`` is not ``"x"`` or ``"y"``.
         """
         _hold_cells(self, "ix", "iy")
         _finite("amplitude", self.amplitude)
-        if self.direction not in _DIRECTIONS:
-            msg = "direction must be 'x' or 'y'"
-            raise ValueError(msg)
+        require_choice(self.direction, "direction", _DIRECTIONS)
 
 
 ElasticSource = ExplosionSource | ForceSource
@@ -530,9 +555,7 @@ def scholte_speed(
     return sol.c_s * float(np.sqrt(root))
 
 
-def _resolve_speed_map(
-    name: str, value: float | Field2D, shape: tuple[int, int] | None
-) -> Field2D:
+def _resolve_speed_map(name: str, value: ArrayLike, shape: GridShape | None) -> Field2D:
     """Broadcast/validate a wave-speed spec into a finite 2D map."""
     if np.isscalar(value):
         if shape is None:
@@ -551,23 +574,21 @@ def _resolve_speed_map(
 def _resolve_free_sides(
     free_sides: Side | Iterable[Side] | None,
 ) -> tuple[Side, ...]:
-    """Normalise the free-surface side spec into a validated tuple."""
+    """Normalise the free-surface side spec into a validated tuple.
+
+    :raises TypeError: for a side that is not a text.
+    :raises ValueError: for a side that is not ``"left"``, ``"right"``,
+        ``"top"`` or ``"bottom"``.
+    """
     if free_sides is None:
         return ()
-    if isinstance(free_sides, str):
-        # A bare string would iterate per character; treat it as one side.
-        sides: tuple[Side, ...] = (free_sides,)
-    else:
-        sides = tuple(free_sides)
-    unknown = set(sides) - set(_SIDES)
-    if unknown:
-        msg = f"unknown free sides: {sorted(unknown)}"
-        raise ValueError(msg)
-    return sides
+    # A bare string would iterate per character; treat it as one side.
+    given = (free_sides,) if isinstance(free_sides, str) else free_sides
+    return tuple(require_choice(side, "free_sides", _SIDES) for side in given)
 
 
 def _elastic_grid(
-    c_p: float | Field2D, shape: tuple[int, int] | None, cfl: float, dx: float
+    c_p: ArrayLike, shape: GridShape | None, cfl: float, dx: float
 ) -> tuple[Field2D, float, float]:
     """The P-wave speed map, the grid spacing and the time step, checked on the host.
 
@@ -584,7 +605,7 @@ def _elastic_grid(
     return cp_map, dx, _time_step(cfl, dx, float(cp_map.max()))
 
 
-def _checked_shear_speed(c_s: float | Field2D, cp_map: Field2D) -> Field2D:
+def _checked_shear_speed(c_s: ArrayLike, cp_map: Field2D) -> Field2D:
     """The S-wave speed map on the grid of *cp_map*, checked against it."""
     ny, nx = cp_map.shape
     cs_map = _resolve_speed_map("c_s", c_s, (ny, nx))
@@ -606,7 +627,7 @@ def _checked_shear_speed(c_s: float | Field2D, cp_map: Field2D) -> Field2D:
     return cs_map
 
 
-def _checked_density(rho: float | Field2D, ny: int, nx: int) -> Field2D:
+def _checked_density(rho: ArrayLike, ny: int, nx: int) -> Field2D:
     """The density map on the ``(ny, nx)`` grid, strictly positive."""
     rho_map = (
         np.full((ny, nx), float(np.real(rho)), dtype=np.float64)
@@ -643,19 +664,19 @@ class _ElasticMedium:
 
 
 def _elastic_medium(
-    c_p: float | Field2D,
-    c_s: float | Field2D,
+    c_p: ArrayLike,
+    c_s: ArrayLike,
     dx: float,
     *,
-    rho: float | Field2D,
+    rho: ArrayLike,
     cfl: float,
-    absorbing_layer_cells: int,
+    absorbing_layer_cells: int | np.integer[Any],
     absorbing_sides: Side | Iterable[Side] | None,
     absorbing_layer_reflection: float,
-    damping: float | NDArray[np.float64],
-    shape: tuple[int, int] | None,
+    damping: ArrayLike,
+    shape: GridShape | None,
     free_sides: Side | Iterable[Side] | None,
-    obstacle_mask: NDArray[np.bool_] | None,
+    obstacle_mask: ArrayLike | None,
 ) -> _ElasticMedium:
     """Check every argument of :class:`ElasticFDTD2D` that describes the medium.
 
@@ -817,10 +838,12 @@ class ElasticFDTD2D:
         follows :func:`use`, then ``PHONOMETRY_COMPUTE``, then NumPy.
     :raises TypeError: if ``cfl`` or ``absorbing_layer_reflection`` is not a single
         number, ``absorbing_layer_cells`` is a flag, a text or an array where a
-        count goes, or ``compute`` is neither a :class:`Compute` nor ``None``.
-    :raises ValueError: for an argument out of its range, and for a ``compute``
-        that names a host: an engine steps in this process, and only
-        :func:`elastic_fdtd_simulation` runs on a node.
+        count goes, a side of ``absorbing_sides`` or ``free_sides`` is not a
+        text, or ``compute`` is neither a :class:`Compute` nor ``None``.
+    :raises ValueError: for an argument out of its range, a side that is not
+        ``"left"``, ``"right"``, ``"top"`` or ``"bottom"``, and for a
+        ``compute`` that names a host: an engine steps in this process, and
+        only :func:`elastic_fdtd_simulation` runs on a node.
     :raises ComputeImportError: when the library of the device ``compute``
         asks for is not installed or does not import.
     :raises ComputeDeviceError: when that device is not present, or fails a
@@ -830,19 +853,19 @@ class ElasticFDTD2D:
 
     def __init__(
         self,
-        c_p: float | Field2D,
-        c_s: float | Field2D,
+        c_p: ArrayLike,
+        c_s: ArrayLike,
         dx: float,
         *,
-        rho: float | Field2D,
+        rho: ArrayLike,
         cfl: float = 0.6,
-        absorbing_layer_cells: int = 0,
+        absorbing_layer_cells: int | np.integer[Any] = 0,
         absorbing_sides: Side | Iterable[Side] | None = None,
         absorbing_layer_reflection: float = _DEFAULT_SPONGE_REFLECTION,
-        damping: float | NDArray[np.float64] = 0.0,
-        shape: tuple[int, int] | None = None,
+        damping: ArrayLike = 0.0,
+        shape: GridShape | None = None,
         free_sides: Side | Iterable[Side] | None = None,
-        obstacle_mask: NDArray[np.bool_] | None = None,
+        obstacle_mask: ArrayLike | None = None,
         compute: Compute | None = None,
     ) -> None:
         medium = _elastic_medium(
@@ -943,7 +966,7 @@ class ElasticFDTD2D:
     @classmethod
     def from_regions(
         cls,
-        shape: tuple[int, int],
+        shape: GridShape,
         dx: float,
         *,
         background: Material | CatalogueRow | tuple[float, float, float],
@@ -1373,12 +1396,12 @@ class ElasticFDTD2D:
         positions. The result is on the engine's device, where the fields
         live: a NumPy array by default, the backend's own array on another
         device; :meth:`numpy_field` gives NumPy copies of the stored fields.
+
+        :raises TypeError: if ``field`` is not a text.
+        :raises ValueError: if ``field`` is not ``"p"``, ``"vx"`` or ``"vy"``.
         """
-        if field == "p":
+        if require_choice(field, "field", _FIELD_NAMES) == "p":
             return self.p
-        if field not in _FIELD_NAMES:
-            msg = f"field must be one of {_FIELD_NAMES}"
-            raise ValueError(msg)
         ny, nx = self.txx.shape
         with self._backend.context():
             out = self._backend.zeros((ny, nx))
@@ -1393,10 +1416,10 @@ class ElasticFDTD2D:
 
     def run(
         self,
-        n_steps: int,
+        n_steps: int | np.integer[Any],
         *,
-        snapshot_every: int | None = None,
-        snapshot_decimation: int = 1,
+        snapshot_every: int | np.integer[Any] | None = None,
+        snapshot_decimation: int | np.integer[Any] = 1,
     ) -> NDArray[np.floating]:
         """Advance ``n_steps`` steps, optionally recording pressure frames.
 
@@ -1568,8 +1591,9 @@ class ElasticFDTDResult(OwnsArrays):
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to the underlying ``plot``/``imshow``.
         :return: The axes.
-        :raises TypeError: for ``color_limit`` with ``kind="snapshot"``, which
-            the field drawn sets (``vmin`` and ``vmax`` reach ``imshow``).
+        :raises TypeError: for a ``kind`` that is not a text, or
+            ``color_limit`` with ``kind="snapshot"``, which the field drawn
+            sets (``vmin`` and ``vmax`` reach ``imshow``).
         :raises ValueError: for a ``kind`` other than ``"probes"`` and
             ``"snapshot"``, a ``language`` other than ``"en"`` and ``"es"``,
             or a snapshot asked of a result that holds none.
@@ -1577,18 +1601,15 @@ class ElasticFDTDResult(OwnsArrays):
         from .._i18n import check_language
 
         check_language(language)
-        if kind == "probes":
+        if require_choice(kind, "kind", _PLOT_KINDS) == "probes":
             from .._plot.simulation import plot_elastic_probes
 
             return plot_elastic_probes(self, ax=ax, language=language, **kwargs)
-        if kind == "snapshot":
-            from .._plot.simulation import plot_elastic_snapshot
+        from .._plot.simulation import plot_elastic_snapshot
 
-            return plot_elastic_snapshot(
-                self, ax=ax, frame=frame, language=language, **kwargs
-            )
-        msg = "kind must be 'probes' or 'snapshot'"
-        raise ValueError(msg)
+        return plot_elastic_snapshot(
+            self, ax=ax, frame=frame, language=language, **kwargs
+        )
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -1611,7 +1632,8 @@ class ElasticRecording(RichDisplay):
     :param snapshot_decimation: Keep every this many cells along each axis
         in a snapshot (default 1, every cell); the result records it.
     :raises TypeError: for a probe that is not a pair or has an index that is
-        not a number, a ``snapshot_every`` that is a flag, a text, an array or
+        not a number, a field of ``probe_fields`` or a ``snapshot_field`` that
+        is not a text, a ``snapshot_every`` that is a flag, a text, an array or
         anything else that is neither a number nor ``None``, or a
         ``snapshot_decimation`` that is a flag, a text, an array or anything
         else that is not a number.
@@ -1629,6 +1651,19 @@ class ElasticRecording(RichDisplay):
     snapshot_field: Field = "p"
     snapshot_decimation: int = 1
 
+    if TYPE_CHECKING:
+
+        def __init__(
+            self,
+            *,
+            probes: Sequence[Sequence[int | np.integer[Any]]]
+            | NDArray[np.integer[Any]] = (),
+            probe_fields: Sequence[Field] = ("vy",),
+            snapshot_every: int | np.integer[Any] | None = None,
+            snapshot_field: Field = "p",
+            snapshot_decimation: int | np.integer[Any] = 1,
+        ) -> None: ...
+
     def __post_init__(self) -> None:
         """Refuse a malformed probe, field or count when the record is built.
 
@@ -1637,9 +1672,7 @@ class ElasticRecording(RichDisplay):
         grid exists.
         """
         fields = _resolve_probe_fields(self.probe_fields)
-        if self.snapshot_field not in _FIELD_NAMES:
-            msg = f"snapshot_field must be one of {_FIELD_NAMES}"
-            raise ValueError(msg)
+        require_choice(self.snapshot_field, "snapshot_field", _FIELD_NAMES)
         every, decimation = _snapshot_options(
             self.snapshot_every, self.snapshot_decimation
         )
@@ -1664,19 +1697,50 @@ class ElasticBoundaries(RichDisplay):
         of those. A mapping is held as a read-only copy, so a change to the
         caller's dictionary afterwards does not reach the record.
     :param absorbing_layer_cells: Sponge-layer thickness for absorbing sides,
-        in cells.
+        in cells, held as the whole number it names.
+    :raises TypeError: for ``sides`` that are neither a name nor a mapping,
+        a side or a termination of ``sides`` that is not a text, or an
+        ``absorbing_layer_cells`` that is a flag, a text, an array or anything
+        else that is not a number.
+    :raises ValueError: for a side that is not ``"left"``, ``"right"``,
+        ``"top"`` or ``"bottom"``, a termination that is not ``"rigid"``,
+        ``"absorbing"`` or ``"free"``, or an ``absorbing_layer_cells`` that is
+        not a whole number.
     """
 
     sides: ElasticBoundary | Mapping[Side, ElasticBoundary] = "rigid"
     absorbing_layer_cells: int = 20
 
-    def __post_init__(self) -> None:
-        """Hold a mapping of sides as a read-only copy of its own.
+    if TYPE_CHECKING:
 
-        The sides are checked where a run reads them, not here.
+        def __init__(
+            self,
+            *,
+            sides: ElasticBoundary | Mapping[Side, ElasticBoundary] = "rigid",
+            absorbing_layer_cells: int | np.integer[Any] = 20,
+        ) -> None: ...
+
+    def __post_init__(self) -> None:
+        """Refuse an unknown side or termination, and hold the sides and the thickness.
+
+        A mapping of sides is held as a read-only copy of its own, and the
+        thickness as the whole number of cells it names; whether the
+        thickness fits the grid is checked where a run reads it, the first
+        place a grid exists.
         """
         if isinstance(self.sides, Mapping):
+            for side, value in self.sides.items():
+                require_choice(side, "sides", _SIDES)
+                require_choice(value, f"sides[{side!r}]", _BOUNDARY_NAMES)
             object.__setattr__(self, "sides", MappingProxyType(dict(self.sides)))
+        else:
+            require_choice(self.sides, "sides", _BOUNDARY_NAMES)
+        require_scalar(self.absorbing_layer_cells, "absorbing_layer_cells")
+        object.__setattr__(
+            self,
+            "absorbing_layer_cells",
+            _integer("absorbing_layer_cells", self.absorbing_layer_cells),
+        )
 
     def __reduce__(self) -> tuple[Any, tuple[type, dict[str, Any]]]:
         """Rebuild from the fields: a read-only mapping of sides does not pickle."""
@@ -1747,10 +1811,12 @@ class ElasticRun(OwnsArrays):
         field or an ``(ny, nx)`` map.
     :raises TypeError: If an argument is of the wrong type, among them a
         ``cfl`` or ``dx`` that is not one number, a ``recording`` that is
-        neither an :class:`ElasticRecording` nor ``None``, or ``boundaries``
-        that are neither an :class:`ElasticBoundaries` nor ``None``.
-    :raises ValueError: If an argument is out of its range, or a source, a
-        probe or the obstacle does not fit the grid.
+        neither an :class:`ElasticRecording` nor ``None``, ``boundaries``
+        that are neither an :class:`ElasticBoundaries` nor ``None``, or a
+        ``shape`` that is not a pair or holds a count that is not a number.
+    :raises ValueError: If an argument is out of its range, a ``shape`` is
+        not two whole numbers of one cell or more, or a source, a probe or
+        the obstacle does not fit the grid.
     """
 
     c_p: float | Field2D
@@ -1766,16 +1832,39 @@ class ElasticRun(OwnsArrays):
     obstacle_mask: NDArray[np.bool_] | None = None
     damping: float | Field2D = 0.0
 
+    if TYPE_CHECKING:
+
+        def __init__(
+            self,
+            *,
+            c_p: ArrayLike,
+            c_s: ArrayLike,
+            dx: float,
+            duration_s: float,
+            sources: Sequence[ElasticSource],
+            rho: ArrayLike,
+            shape: GridShape | None = None,
+            cfl: float = 0.6,
+            recording: ElasticRecording | None = None,
+            boundaries: ElasticBoundaries | None = None,
+            obstacle_mask: ArrayLike | None = None,
+            damping: ArrayLike = 0.0,
+        ) -> None: ...
+
     def __post_init__(self) -> None:
-        """Hold the sources and the maps so they cannot change, then check every argument."""
+        """Hold the sources and the maps so they cannot change, then check every argument.
+
+        A ``shape`` is held as the pair of whole numbers it names, whether
+        the grid is read from it (a scalar ``c_p``) or from the map.
+        """
         object.__setattr__(self, "sources", tuple(self.sources))
+        if self.shape is not None:
+            object.__setattr__(self, "shape", _grid_shape(self.shape))
         for name in ("c_p", "c_s", "rho", "damping"):
             object.__setattr__(self, name, _held_map(getattr(self, name)))
         object.__setattr__(self, "obstacle_mask", _held_map(self.obstacle_mask, None))
-        checks = self._checked
-        if self.shape is not None and np.isscalar(self.c_p):
-            # Read only for a scalar c_p: held as the grid it was built on.
-            object.__setattr__(self, "shape", checks.grid)
+        # Every argument is checked once, here, and what the checks found is kept.
+        _ = self._checked
 
     @cached_property
     def _checked(self) -> _ElasticChecks:
@@ -1890,26 +1979,18 @@ def _elastic_expected(run: ElasticRun, dtype: str) -> Expected:
 def _parse_elastic_boundaries(
     boundaries: ElasticBoundary | Mapping[Side, ElasticBoundary],
 ) -> tuple[tuple[Side, ...], tuple[Side, ...]]:
-    """Split the boundary spec into absorbing sides and free sides."""
-    spec: dict[Side, str]
-    if isinstance(boundaries, str):
-        spec = dict.fromkeys(_SIDES, boundaries)
-    else:
-        unknown = set(boundaries) - set(_SIDES)
-        if unknown:
-            msg = f"unknown boundary sides: {sorted(unknown)}"
-            raise ValueError(msg)
-        spec = {side: boundaries.get(side, "rigid") for side in _SIDES}
+    """Split the boundary spec into absorbing sides and free sides.
+
+    The :class:`ElasticBoundaries` the spec comes from checked its sides and
+    their names when it was built.
+    """
+    spec: Mapping[Side, ElasticBoundary] = (
+        dict.fromkeys(_SIDES, boundaries) if isinstance(boundaries, str) else boundaries
+    )
     absorbing: list[Side] = []
     free: list[Side] = []
     for side in _SIDES:
-        value = spec[side]
-        if value not in _BOUNDARY_NAMES:
-            msg = (
-                f"boundary for side {side!r} must be one of "
-                f"{_BOUNDARY_NAMES}, got {value!r}"
-            )
-            raise ValueError(msg)
+        value = spec.get(side, "rigid")
         if value == "absorbing":
             absorbing.append(side)
         elif value == "free":
@@ -1918,14 +1999,17 @@ def _parse_elastic_boundaries(
 
 
 def _resolve_probe_fields(probe_fields: Sequence[Field]) -> tuple[Field, ...]:
-    """Validate the probe-field spec into a non-empty unique tuple."""
-    fields = tuple(probe_fields)
+    """Validate the probe-field spec into a non-empty unique tuple.
+
+    :raises TypeError: for a field that is not a text.
+    :raises ValueError: for no field, a repeated field, or a field that is
+        not ``"p"``, ``"vx"`` or ``"vy"``.
+    """
+    fields = tuple(
+        require_choice(field, "probe_fields", _FIELD_NAMES) for field in probe_fields
+    )
     if not fields:
         msg = "probe_fields must not be empty"
-        raise ValueError(msg)
-    unknown = set(fields) - set(_FIELD_NAMES)
-    if unknown:
-        msg = f"unknown probe fields: {sorted(unknown)}"
         raise ValueError(msg)
     if len(set(fields)) != len(fields):
         msg = "probe_fields must not repeat a field"
@@ -2132,7 +2216,7 @@ def _validated_absorbing_layer(
     """Validate the absorbing-layer thickness; 0 when no side absorbs."""
     if not absorbing_sides:
         return 0
-    cells = _integer("absorbing_layer_cells", boundaries.absorbing_layer_cells)
+    cells = boundaries.absorbing_layer_cells
     if cells < 1:
         msg = "absorbing_layer_cells must be >= 1"
         raise ValueError(msg)

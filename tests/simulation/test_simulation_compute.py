@@ -527,7 +527,7 @@ def test_an_engine_under_a_host_from_the_environment_asks_for_compute_explicitly
             {"absorbing_layer_cells": 9},
             "absorbing_layer_cells must be fewer",
         ),
-        (_elastic_engine, {"free_sides": "middle"}, "unknown free sides"),
+        (_elastic_engine, {"free_sides": "middle"}, "'free_sides' must be one of"),
     ],
 )
 def test_an_engine_checks_its_arguments_before_it_refuses_the_host(

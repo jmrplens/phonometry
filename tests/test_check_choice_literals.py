@@ -1859,30 +1859,6 @@ def test_a_value_handed_back_by_a_function_typed_with_a_literal_is_closed() -> N
     assert sources[3] == ccl._OPEN_SOURCE
 
 
-def test_the_gpu_parity_exemption_is_read_from_the_files_the_lock_holds(
-    tmp_path: pathlib.Path,
-) -> None:
-    """The modules exempt as the GPU-parity batch are the ``src/`` files of
-    ``_COVERED`` in ``scripts/gpu_parity.py``, so the list follows the lock.
-    """
-    script = tmp_path / "gpu_parity.py"
-    script.write_text(
-        "_COVERED = (\n"
-        '    _ROOT / "src/phonometry/simulation/engine.py",\n'
-        '    _ROOT / "scripts/scenarios.py",\n'
-        ")\n",
-        encoding="utf-8",
-    )
-    assert dict(ccl.gpu_parity_modules(script)) == {
-        "phonometry.simulation.engine": ccl.GPU_PARITY_REASON
-    }
-    assert set(ccl.GPU_PARITY) == {
-        "phonometry.simulation.fdtd",
-        "phonometry.simulation.elastic_fdtd",
-        "phonometry.simulation._backends",
-    }
-
-
 def test_a_stale_open_table_entry_fails(monkeypatch: pytest.MonkeyPatch) -> None:
     """An exemption for a table the walk no longer flags cannot outlive its reason."""
     key = ("phonometry.nowhere", "GONE")

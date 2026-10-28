@@ -63,10 +63,10 @@ edge, and second-order convergence under grid refinement.
 ```python
 ContourProbe(
     engine: FDTD2D,
-    ix0: int,
-    ix1: int,
-    iy0: int,
-    iy1: int,
+    ix0: int | np.integer[Any],
+    ix1: int | np.integer[Any],
+    iy0: int | np.integer[Any],
+    iy1: int | np.integer[Any],
     frequencies: ArrayLike,
 )
 ```
@@ -153,8 +153,8 @@ Clear the running sums (call once the field is steady).
 ```python
 CWSource(
     *,
-    ix: int,
-    iy: int,
+    ix: int | np.integer[Any],
+    iy: int | np.integer[Any],
     frequency: float,
     amplitude: float = 1.0,
     ramp_cycles: float = 3.0,
@@ -188,18 +188,18 @@ Source waveform at time `t` (seconds).
 
 ```python
 FDTD2D(
-    c: float | NDArray[np.float64],
+    c: ArrayLike,
     dx: float,
     *,
-    rho: float | NDArray[np.float64] = 1.2,
+    rho: ArrayLike = 1.2,
     cfl: float = 0.6,
-    absorbing_layer_cells: int = 0,
+    absorbing_layer_cells: int | np.integer[Any] = 0,
     absorbing_sides: Literal['left', 'right', 'top', 'bottom'] | Iterable[Literal['left', 'right', 'top', 'bottom']] | None = None,
     absorbing_layer_reflection: float = 0.0001,
-    damping: float | NDArray[np.float64] = 0.0,
-    shape: tuple[int, int] | None = None,
-    edge_impedance: Mapping[Literal['left', 'right', 'top', 'bottom'], float | NDArray[np.float64]] | None = None,
-    obstacle_mask: NDArray[np.bool_] | None = None,
+    damping: ArrayLike = 0.0,
+    shape: Sequence[int | np.integer[Any]] | None = None,
+    edge_impedance: Mapping[Literal['left', 'right', 'top', 'bottom'], ArrayLike] | None = None,
+    obstacle_mask: ArrayLike | None = None,
     compute: Compute | None = None,
 )
 ```
@@ -236,8 +236,8 @@ sides into absorbing or locally reacting boundaries. Sources are soft
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `cfl`, `dx` or `absorbing_layer_reflection` is not a single number, `absorbing_layer_cells` is a flag, a text or an array where a count goes, or `compute` is neither a [`Compute`](/phonometry/reference/api/simulation/compute/#compute) nor `None`. |
-| ValueError | for an argument out of its range, and for a `compute` that names a host: an engine steps in this process, and only [`fdtd_simulation`](/phonometry/reference/api/simulation/fdtd/#fdtd_simulation) runs on a node. |
+| TypeError | if `cfl`, `dx` or `absorbing_layer_reflection` is not a single number, `absorbing_layer_cells` is a flag, a text or an array where a count goes, `shape` is not a pair or holds a count that is not a number, a side of `absorbing_sides` or `edge_impedance` is not a text, or `compute` is neither a [`Compute`](/phonometry/reference/api/simulation/compute/#compute) nor `None`. |
+| ValueError | for an argument out of its range, a side that is not `"left"`, `"right"`, `"top"` or `"bottom"`, and for a `compute` that names a host: an engine steps in this process, and only [`fdtd_simulation`](/phonometry/reference/api/simulation/fdtd/#fdtd_simulation) runs on a node. |
 | ComputeImportError | when the library of the device `compute` asks for is not installed or does not import. |
 | ComputeDeviceError | when that device is not present, or fails a first small computation; with `fallback=True` the engine warns with [`ComputeFallbackWarning`](/phonometry/reference/api/simulation/compute/#computefallbackwarning) and steps on NumPy instead. |
 
@@ -245,10 +245,10 @@ sides into absorbing or locally reacting boundaries. Sources are soft
 
 ```python
 FDTD2D.add_contour_probe(
-    ix0: int,
-    ix1: int,
-    iy0: int,
-    iy1: int,
+    ix0: int | np.integer[Any],
+    ix1: int | np.integer[Any],
+    iy0: int | np.integer[Any],
+    iy1: int | np.integer[Any],
     *,
     frequencies: ArrayLike,
 ) -> ContourProbe
@@ -334,7 +334,7 @@ cells), as a physical incident wave would be.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For an unknown direction, a non-positive or non-finite `half_width_m`/`wavelength_m`, or a non-finite `center_m`/`amplitude`. |
-| TypeError | if `amplitude`, `center_m`, `wavelength_m` or `half_width_m` is not a single number. |
+| TypeError | if `direction` is not a text, or `amplitude`, `center_m`, `wavelength_m` or `half_width_m` is not a single number. |
 
 ### FDTD2D.add_source()
 
@@ -426,10 +426,10 @@ Where this engine steps: device, dtype and library versions.
 
 ```python
 FDTD2D.run(
-    n_steps: int,
+    n_steps: int | np.integer[Any],
     *,
-    snapshot_every: int | None = None,
-    snapshot_decimation: int = 1,
+    snapshot_every: int | np.integer[Any] | None = None,
+    snapshot_decimation: int | np.integer[Any] = 1,
 ) -> NDArray[np.floating]
 ```
 
@@ -524,8 +524,8 @@ spreading rather than the 3D spherical $1/r$.
 ```python
 FDTDBoundaries(
     *,
-    sides: Literal['rigid', 'absorbing'] | Mapping[Literal['left', 'right', 'top', 'bottom'], Literal['rigid', 'absorbing'] | float | NDArray[np.float64]] = 'rigid',
-    absorbing_layer_cells: int = 20,
+    sides: Literal['rigid', 'absorbing'] | Mapping[Literal['left', 'right', 'top', 'bottom'], Literal['rigid', 'absorbing'] | float | Sequence[float] | NDArray[np.floating[Any]]] = 'rigid',
+    absorbing_layer_cells: int | np.integer[Any] = 20,
 )
 ```
 
@@ -539,16 +539,23 @@ is why it travels with the sides rather than beside them.
 | Name | Description |
 | :--- | :--- |
 | `sides` | `"rigid"` (default), `"absorbing"`, or a mapping from side name (`left`/`right`/`top`/`bottom`) to `"rigid"`, `"absorbing"`, or a real specific impedance [Pa s/m] (scalar or per-edge-cell 1D array, Eqs. 4.33-4.35); a side the mapping leaves out is rigid. A mapping is held as a read-only copy, and an impedance profile given as a list as a read-only array of the record's own, so a change to the caller's dictionary or list afterwards does not reach the record. |
-| `absorbing_layer_cells` | Sponge-layer thickness for absorbing sides, in cells. |
+| `absorbing_layer_cells` | Sponge-layer thickness for absorbing sides, in cells, held as the whole number it names. |
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | for `sides` that are neither a name nor a mapping, a side of `sides` that is not a text, or an `absorbing_layer_cells` that is a flag, a text, an array or anything else that is not a number. |
+| ValueError | for a side that is not `"left"`, `"right"`, `"top"` or `"bottom"`, a termination name that is not `"rigid"` or `"absorbing"`, or an `absorbing_layer_cells` that is not a whole number. |
 
 ## FDTDRecording
 
 ```python
 FDTDRecording(
     *,
-    probes: Sequence[tuple[int, int]] = (),
-    snapshot_every: int | None = None,
-    snapshot_decimation: int = 1,
+    probes: Sequence[Sequence[int | np.integer[Any]]] | NDArray[np.integer[Any]] = (),
+    snapshot_every: int | np.integer[Any] | None = None,
+    snapshot_decimation: int | np.integer[Any] = 1,
 )
 ```
 
@@ -645,7 +652,7 @@ Plot the probe histories or one recorded field snapshot.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | for `color_limit` with `kind="snapshot"`, which the field drawn sets (`vmin` and `vmax` reach `imshow`). |
+| TypeError | for a `kind` that is not a text, or `color_limit` with `kind="snapshot"`, which the field drawn sets (`vmin` and `vmax` reach `imshow`). |
 | ValueError | for a `kind` other than `"probes"` and `"snapshot"`, a `language` other than `"en"` and `"es"`, or a snapshot asked of a result that holds none. |
 
 ### FDTDResult.size
@@ -659,17 +666,17 @@ Domain size `(lx, ly)` [m].
 ```python
 FDTDRun(
     *,
-    c: float | NDArray[np.float64],
+    c: ArrayLike,
     dx: float,
     duration_s: float,
     sources: Sequence[GaussianPulse | CWSource | SignalSource | PlaneWaveSource],
-    shape: tuple[int, int] | None = None,
-    rho: float | NDArray[np.float64] = 1.2,
+    shape: Sequence[int | np.integer[Any]] | None = None,
+    rho: ArrayLike = 1.2,
     cfl: float = 0.6,
     recording: FDTDRecording | None = None,
     boundaries: FDTDBoundaries | None = None,
-    obstacle_mask: NDArray[np.bool_] | None = None,
-    damping: float | NDArray[np.float64] = 0.0,
+    obstacle_mask: ArrayLike | None = None,
+    damping: ArrayLike = 0.0,
 )
 ```
 
@@ -704,16 +711,16 @@ changes afterwards reaches a checked run.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | If an argument is of the wrong type: a `duration_s`, `cfl` or `dx` that is not one number, a `recording` that is neither an [`FDTDRecording`](/phonometry/reference/api/simulation/fdtd/#fdtdrecording) nor `None`, `boundaries` that are neither an [`FDTDBoundaries`](/phonometry/reference/api/simulation/fdtd/#fdtdboundaries) nor `None`, an `absorbing_layer_cells` of the boundaries that is not a number, a `shape` that is not a pair, a complex medium, or an `obstacle_mask` that is not boolean. |
-| ValueError | If an argument is out of its range, a side of the boundaries is unknown or terminated by an unknown name, or a source, a probe or the obstacle does not fit the grid. |
+| TypeError | If an argument is of the wrong type: a `duration_s`, `cfl` or `dx` that is not one number, a `recording` that is neither an [`FDTDRecording`](/phonometry/reference/api/simulation/fdtd/#fdtdrecording) nor `None`, `boundaries` that are neither an [`FDTDBoundaries`](/phonometry/reference/api/simulation/fdtd/#fdtdboundaries) nor `None`, a `shape` that is not a pair or holds a count that is not a number, a complex medium, or an `obstacle_mask` that is not boolean. |
+| ValueError | If an argument is out of its range, a `shape` is not two whole numbers of one cell or more, or a source, a probe or the obstacle does not fit the grid. |
 
 ## GaussianPulse
 
 ```python
 GaussianPulse(
     *,
-    ix: int,
-    iy: int,
+    ix: int | np.integer[Any],
+    iy: int | np.integer[Any],
     half_width_s: float,
     t0: float | None = None,
     amplitude: float = 1.0,
@@ -751,7 +758,7 @@ PlaneWaveSource(
     *,
     direction: Literal['down', 'up', 'left', 'right'],
     waveform: Callable[[float], float],
-    offset: int = 0,
+    offset: int | np.integer[Any] = 0,
     amplitude: float = 1.0,
 )
 ```
@@ -785,9 +792,9 @@ inside the sponge layer when one is configured on that side).
 ```python
 SignalSource(
     *,
-    ix: int,
-    iy: int,
-    samples: NDArray[np.float64],
+    ix: int | np.integer[Any],
+    iy: int | np.integer[Any],
+    samples: ArrayLike,
     fs: float,
     amplitude: float = 1.0,
 )

@@ -4099,9 +4099,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   through `Final`, with `OPEN_TABLES` for the ones that match by coincidence
   (rule A21); and a record field typed `str` that the package fills only with
   fixed texts, followed back through the return annotation of the function
-  that hands them over. The GPU-parity engines, the files
-  `scripts/gpu_parity.py` fingerprints, keep their vocabularies as they are
-  until they are retyped together.
+  that hands them over.
 
 - **A record a caller builds holds what its fields say, and its constructor
   says what it takes.** A record kept a list, a tuple or an array of the
@@ -4220,6 +4218,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   or `dict` at any depth of its annotation and through an alias of either,
   a protocol member that is not a property, and a module `__getattr__` a
   type checker can see.
+
+- **The FDTD engines and the records they run take what runs, and a
+  misspelt side is refused where it is written.** `simulation.FDTD2D` and
+  `simulation.ElasticFDTD2D` take their maps (`c`, `rho`, `damping`, `c_p`,
+  `c_s`, `obstacle_mask` and an impedance profile of `edge_impedance`) as
+  any array-like, nested lists included, their `shape` as a tuple or a list
+  of two whole numbers, and every count (`absorbing_layer_cells`, the
+  `n_steps`, `snapshot_every` and `snapshot_decimation` of `run()`, the
+  bounds of `add_contour_probe`) as a NumPy integer too, as they did when the
+  call ran. `simulation.FDTDRun`, `simulation.ElasticRun`, the six sources,
+  the two recordings and the two boundaries declare the constructor a type
+  checker reads, which takes the same: `FDTDRun(c=[[343.0, ...], ...])`,
+  `GaussianPulse(ix=np.int64(4), ...)` and a float32 map type-check, and the
+  fields keep the types they hold (a map is any float array, since a float32
+  map is held as given). `simulation.FDTDBoundaries` and
+  `simulation.ElasticBoundaries` check their sides and the names that
+  terminate them when they are built, and hold the sponge thickness as the
+  whole number of cells it names, refused there when it is no count, where a
+  run that held them refused a misspelt side, and read the thickness only
+  when a side absorbed; `simulation.PlaneWaveSource` checks its direction
+  when it is built. The sides of `absorbing_sides`, `free_sides` and
+  `edge_impedance`, the fields of an `ElasticRecording`, the direction of a
+  `ForceSource` and of `FDTD2D.add_plane_wave`, the field of
+  `ElasticFDTD2D.collocated` and the `kind` of both results' `.plot()` are
+  checked as written: a value that is not a text raises `TypeError`, where it
+  raised `ValueError`, and the message is the one every choice raises. A run
+  holds a `shape` it is given as a pair of ints, a list included, and
+  refuses a malformed one beside a map too. What the engines compute did not
+  move: `engine-digests.json` is unchanged, and a new CuPy proof is recorded
+  in `gpu-parity.lock`. The checks of the parameters, of the records a
+  caller builds, of the choices and of the documented `TypeError` no longer
+  leave the files `scripts/gpu_parity.py` fingerprints out, and
+  `scripts/check_parameter_annotations.py` follows a field handed by its name
+  together with its record (`_hold_cells(self, "ix", "iy")`), which it read
+  as never validated.
 
 - **A parameter whose name carries its unit and that has a default is written
   by name.** `signals.noise_signal(fs, duration_s=2.0)`,

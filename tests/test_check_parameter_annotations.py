@@ -32,6 +32,7 @@ if _SCRIPTS not in sys.path:
 
 import ast_scan
 import check_parameter_annotations as cpa
+import check_return_overloads as overloads
 
 _IMPORTS = """
 from __future__ import annotations
@@ -579,41 +580,6 @@ def test_an_exemption_covers_only_the_parameter_it_names(
     assert stale == [(path, "write", "gone")]
 
 
-def test_the_gpu_parity_files_are_those_the_lock_holds() -> None:
-    import gpu_parity
-
-    assert cpa.gpu_parity_files() == tuple(
-        path.relative_to(ast_scan.ROOT).as_posix() for path in gpu_parity._COVERED
-    )
-
-
-def test_the_gpu_parity_files_are_held_back_in_a_copy_of_the_package(
-    tmp_path: pathlib.Path,
-) -> None:
-    root = _package(
-        tmp_path,
-        **{
-            "simulation.fdtd": """
-            __all__ = ["FDTD2D"]
-
-            class FDTD2D:
-                def __init__(self, c: float | np.ndarray) -> None:
-                    self.c = np.asarray(c)
-            """,
-            "api": """
-            __all__ = ["level"]
-
-            def level(x: np.ndarray) -> float:
-                return float(np.sum(np.asarray(x)))
-            """,
-        },
-    )
-    every = cpa.findings_in(sorted(root.rglob("*.py")), root)
-    kept, held = cpa.held_for_gpu(every, cpa.gpu_parity_files())
-    assert [finding.function for finding in kept] == ["level"]
-    assert [finding.function for finding in held] == ["FDTD2D.__init__"]
-
-
 def test_the_script_reports_and_fails(
     tmp_path: pathlib.Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
@@ -636,8 +602,7 @@ def test_the_script_reports_and_fails(
 def test_the_package_keeps_the_rule() -> None:
     """The tree today, with its exemptions, and none of them stale."""
     every = cpa.findings_in(ast_scan.python_files([], cpa.SOURCE), cpa.SOURCE)
-    kept, _held = cpa.held_for_gpu(every, cpa.gpu_parity_files())
-    found, stale = cpa.judged(kept)
+    found, stale = cpa.judged(every)
     assert not found, "\n".join(
         f"{f.path}:{f.line}: {f.function}({f.parameter}): {f.problem}" for f in found
     )
@@ -1039,6 +1004,90 @@ def test_a_field_a_caller_built_record_stores_is_held_through_its_constructor(
     ]
 
 
+_HELD_BY_NAME = """
+from dataclasses import dataclass
+
+from ._internal.validation import require_count
+
+__all__ = ["Pulse", "Line", "Typed", "run"]
+
+Cells = int
+
+def _hold(record: object, *names: str) -> None:
+    for name in names:
+        object.__setattr__(record, name, require_count(getattr(record, name), name))
+
+def _hold_one(record: object, name: str) -> None:
+    object.__setattr__(record, name, require_count(getattr(record, name), name))
+
+@dataclass(frozen=True, kw_only=True)
+class Pulse:
+    ix: int
+    iy: int
+    width: float = 1.0
+
+    def __post_init__(self) -> None:
+        _hold(self, "ix",
+              "iy")
+
+@dataclass(frozen=True, kw_only=True)
+class Line:
+    offset: Cells = 0
+
+    def __post_init__(self) -> None:
+        _hold_one(self, "offset")
+
+@dataclass(frozen=True, kw_only=True)
+class Typed:
+    ix: int
+
+    if TYPE_CHECKING:
+        def __init__(self, *, ix: int | np.integer[Any]) -> None: ...
+
+    def __post_init__(self) -> None:
+        _hold(self, "ix")
+
+def run(sources: Sequence[Pulse | Line | Typed]) -> None:
+    return None
+"""
+
+
+def test_a_field_handed_by_name_with_the_record_is_followed_and_stored(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``_hold(self, "ix", "iy")`` validates and stores each field it is named.
+
+    The record and the names go to a function of the package, which reads
+    ``getattr(record, name)`` for each name of its vararg (or the one its
+    parameter holds) and stores what the validator returns: the fields are
+    validated by ``require_count`` and stored, so the constructor of a record
+    a caller builds takes the numpy integer.
+    """
+    root = _package(
+        tmp_path, **{"_internal.validation": _VALIDATION, "api": _HELD_BY_NAME}
+    )
+    reader = cpa.Reader(
+        overloads.Package(sorted(root.rglob("*.py")), root), handed_on=frozenset()
+    )
+    assert cpa.converted_fields(reader, "pkg.api.Pulse") == {"ix", "iy"}
+    assert cpa.converted_fields(reader, "pkg.api.Line") == {"offset"}
+    found = cpa.findings_in(sorted(root.rglob("*.py")), root, handed_on=frozenset())
+    assert sorted((f.function, f.parameter, f.constructor) for f in found) == [
+        ("Line", "offset", True),
+        ("Pulse", "ix", True),
+        ("Pulse", "iy", True),
+    ]
+    by_key = {(f.function, f.parameter): f.problem for f in found}
+    assert by_key["Pulse", "ix"].startswith(
+        "annotated int, which refuses np.integer[Any], while handed by name to "
+        "_hold(names), require_count() takes it"
+    )
+    assert by_key["Line", "offset"].startswith(
+        "annotated Cells, which refuses np.integer[Any], while handed by name to "
+        "_hold_one(name), require_count() takes it"
+    )
+
+
 def test_a_whole_number_a_scalar_check_reads_admits_a_numpy_integer(
     tmp_path: pathlib.Path,
 ) -> None:
@@ -1292,26 +1341,3 @@ def test_a_sample_rate_keeps_one_family_across_the_api(
     kept, stale = cpa.checked(findings, exempt)
     assert [f.function for f in kept] == ["level_whole"]
     assert stale == [(path, "Gone", "fs")]
-
-
-def test_the_scalar_parts_hold_back_the_gpu_parity_files_too(
-    tmp_path: pathlib.Path,
-) -> None:
-    root = _package(
-        tmp_path,
-        **{
-            "_internal.validation": _VALIDATION,
-            "simulation.fdtd": """
-            from .._internal.validation import require_count
-
-            __all__ = ["run"]
-
-            def run(n_steps: int) -> int:
-                return require_count(n_steps, "n_steps")
-            """,
-        },
-    )
-    every = cpa.findings_in(sorted(root.rglob("*.py")), root)
-    kept, held = cpa.held_for_gpu(every, cpa.gpu_parity_files())
-    assert kept == []
-    assert [(f.function, f.part) for f in held] == [("run", "integer")]

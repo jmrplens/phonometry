@@ -117,14 +117,9 @@ qualified function and parameter, each with its reason; an entry that
 covers nothing fails the check too, as one of :data:`FAMILY_EXEMPT` or
 :data:`CONSTRUCTOR_EXEMPT` does. An ``isinstance`` check whose branch only
 raises, after any assignments that build its message, keeps out what it
-names.
-The files ``scripts/gpu_parity.py`` fingerprints are exempt as a whole,
-read from its ``_COVERED`` so that the list cannot drift: an annotation
-edit there moves the fingerprint the GPU parity lock holds, and their
-parameters are typed in one batch with a GPU run of their own; the report
-counts what they hold back. A copy of the package read elsewhere (the
-scratch tree a defect is put into to see the check fail) names its files
-as the repository does, so the exemptions read it the same way.
+names. A copy of the package read elsewhere (the scratch tree a defect
+is put into to see the check fail) names its files as the repository does,
+so the exemptions read it the same way.
 
 Static and dependency-free, so it runs on its own.
 """
@@ -150,9 +145,6 @@ if TYPE_CHECKING:
 #: Where the package lives; the default when no path is given.
 SOURCE = ROOT / "src" / "phonometry"
 
-#: The script whose ``_COVERED`` names the files the GPU parity lock holds.
-GPU_PARITY = ROOT / "scripts" / "gpu_parity.py"
-
 #: The script whose ``RECORD_AXIS_EXEMPT`` and ``HANDED_ON_RESULTS`` name the
 #: results one public function hands whole to another.
 UNITS_GUARD = ROOT / "scripts" / "check_parameter_units.py"
@@ -162,13 +154,6 @@ _HANDED_ON_TABLES = frozenset({"RECORD_AXIS_EXEMPT", "HANDED_ON_RESULTS"})
 
 #: A key of those tables: the module and the qualified name of the record.
 _HANDED_ON_KEY = 2
-
-#: Why the GPU-parity files are exempt as a whole.
-GPU_PARITY_REASON = (
-    "an edit to a file scripts/gpu_parity.py fingerprints invalidates "
-    "gpu-parity.lock, so the parameters of those files are typed in one "
-    "batch of their own, with the GPU run that records the lock again"
-)
 
 #: Public parameters held narrower on purpose, keyed by file, qualified
 #: function and parameter, each with the reason.
@@ -558,32 +543,6 @@ def handed_on_results(script: pathlib.Path = UNITS_GUARD) -> frozenset[str]:
     return frozenset(found)
 
 
-def gpu_parity_files(script: pathlib.Path = GPU_PARITY) -> tuple[str, ...]:
-    """The files the GPU parity lock holds, as ``_COVERED`` of *script* names them.
-
-    Read from the source, so that this script needs neither numpy nor the
-    package that ``gpu_parity.py`` imports; each entry is a path joined
-    onto the repository root with ``/``.
-    """
-    if not script.is_file():
-        return ()
-    tree = ast.parse(script.read_text(encoding="utf-8"), filename=str(script))
-    for node in tree.body:
-        assigned = overloads._assigned(node)
-        if assigned is None or assigned[0] != "_COVERED":
-            continue
-        if not isinstance(assigned[1], ast.Tuple | ast.List):
-            break
-        return tuple(
-            element.right.value
-            for element in assigned[1].elts
-            if isinstance(element, ast.BinOp)
-            and isinstance(element.right, ast.Constant)
-            and isinstance(element.right.value, str)
-        )
-    return ()
-
-
 def _items(node: ast.expr) -> list[ast.expr]:
     """The arguments of a subscript, one or several."""
     if not isinstance(node, ast.Subscript):
@@ -948,7 +907,11 @@ def _named(node: ast.expr | None) -> str | None:
     """The name an expression reads: a local name, or a field of ``self`` or ``cls``.
 
     ``self.fraction`` and ``getattr(self, "fraction")`` read the field a
-    record's ``__post_init__`` validates, named ``self.fraction``.
+    record's ``__post_init__`` validates, named ``self.fraction``. A field
+    read by a name a local holds, ``getattr(self, name)``, is named
+    ``self.{name}``, and so is one read off any parameter that holds the
+    record (``getattr(record, name)`` in a helper the record is handed to,
+    named ``record.{name}``).
     """
     if isinstance(node, ast.Name):
         return node.id
@@ -964,13 +927,16 @@ def _named(node: ast.expr | None) -> str | None:
         and node.func.id == "getattr"
         and len(node.args) >= _GETATTR
         and isinstance(node.args[0], ast.Name)
-        and node.args[0].id in _OWNERS
     ):
-        field = node.args[1]
-        if isinstance(field, ast.Constant) and isinstance(field.value, str):
-            return f"{node.args[0].id}.{field.value}"
+        holder, field = node.args[0].id, node.args[1]
+        if (
+            holder in _OWNERS
+            and isinstance(field, ast.Constant)
+            and isinstance(field.value, str)
+        ):
+            return f"{holder}.{field.value}"
         if isinstance(field, ast.Name):
-            return _by_name(node.args[0].id, field.id)
+            return _by_name(holder, field.id)
     return None
 
 
@@ -1815,7 +1781,9 @@ class Reader:
         if node is None or depth > _HIERARCHY:
             return frozenset()
         stored = set(self.rebound(function))
+        looping = _loop_names(node, lambda found: self._texts(function.module, found))
         for call in self._calls_of(node):
+            stored |= _handed_stores(self, function, call, looping)
             func = call.func
             if not (
                 isinstance(func, ast.Attribute)
@@ -1842,6 +1810,10 @@ class Reader:
 
         ``self._check_bool("overload_latched", ...)`` hands the field
         ``self.overload_latched`` to a method whose parameter holds its name.
+        A function handed the record itself reads the field off the
+        parameter that holds it, by a name a parameter holds or by each name
+        of a vararg it loops over: ``_hold_cells(self, "ix", "iy")`` reads
+        ``getattr(record, name)`` for each ``name`` of ``names``.
         """
         owner, _, field = name.partition(".")
         if owner not in _OWNERS or not field or field.startswith("{"):
@@ -1868,12 +1840,19 @@ class Reader:
         if node is None:
             return
         positional = _positional(node, bound=bound_self)
+        holder = owner if bound_self else _holder(call, positional, owner)
+        if holder is None:
+            return
         received = [positional[index].arg for index in given if index < len(positional)]
         received.extend(keywords)
+        names = [(parameter, parameter) for parameter in dict.fromkeys(received)]
+        vararg = node.args.vararg
+        if vararg is not None and any(index >= len(positional) for index in given):
+            names.extend((vararg.arg, loop) for loop in _loops_over(node, vararg.arg))
         method = self.package.functions[reached]
-        for parameter in dict.fromkeys(received):
+        for parameter, local in names:
             for deeper, of_item, hops in self._known_routes(
-                method, _by_name(owner, parameter), target
+                method, _by_name(holder, local), target
             ):
                 yield (
                     f"handed by name to {method.qualname}({parameter}), {deeper}",
@@ -2816,6 +2795,105 @@ def _rebound(
 _SETATTR = 3
 
 
+def _holder(call: ast.Call, positional: Sequence[ast.arg], owner: str) -> str | None:
+    """The parameter of a function that a call hands the record to, by name.
+
+    ``_hold_cells(self, "ix", "iy")`` hands ``self`` to the parameter
+    ``record`` of ``_hold_cells(record, *names)``.
+    """
+    for index, value in enumerate(call.args):
+        if isinstance(value, ast.Name) and value.id == owner:
+            return positional[index].arg if index < len(positional) else None
+    return None
+
+
+def _loops_over(node: ast.FunctionDef | ast.AsyncFunctionDef, name: str) -> list[str]:
+    """The loop names a body takes each item of its local *name* in."""
+    return [
+        loop.target.id
+        for loop in ast.walk(node)
+        if isinstance(loop, ast.For | ast.AsyncFor | ast.comprehension)
+        and isinstance(loop.target, ast.Name)
+        and isinstance(loop.iter, ast.Name)
+        and loop.iter.id == name
+    ]
+
+
+def _handed_stores(
+    reader: Reader,
+    function: overloads.Function,
+    call: ast.Call,
+    looping: dict[str, tuple[str, ...]],
+) -> set[str]:
+    """The fields a function handed the record stores in, by the names it is handed.
+
+    ``_hold_cells(self, "ix", "iy")`` hands the record and two field names to
+    a function of the package that stores in each,
+    ``object.__setattr__(record, name, ...)`` in a loop over its vararg: the
+    record stores in ``ix`` and ``iy``. A name the function stores by is a
+    text, a parameter filled by the call, or a loop name over its vararg;
+    *looping* reads the call's own arguments when they are loop names of the
+    caller. A method called on ``self`` is read where it is called.
+    """
+    if not any(
+        isinstance(value, ast.Name) and value.id in _OWNERS for value in call.args
+    ):
+        return set()
+    callee = reader._callee(function, call, ())
+    if callee is None or callee[0] not in reader.package.functions or callee[1]:
+        return set()
+    node = reader.package.functions[callee[0]].implementation
+    if node is None:
+        return set()
+    positional = _positional(node, bound=False)
+    owners = {
+        holder
+        for owner in _OWNERS
+        if (holder := _holder(call, positional, owner)) is not None
+    }
+    vararg = node.args.vararg
+    rest = call.args[len(positional) :]
+    by_vararg = set(_loops_over(node, vararg.arg)) if vararg is not None else set()
+    places = {argument.arg: index for index, argument in enumerate(positional)}
+    stored: set[str] = set()
+    for inner in ast.walk(node):
+        if not (
+            isinstance(inner, ast.Call)
+            and _is_setter(inner.func)
+            and len(inner.args) >= _SETATTR
+            and isinstance(inner.args[0], ast.Name)
+            and inner.args[0].id in owners
+        ):
+            continue
+        field = inner.args[1]
+        handed: list[ast.expr] = []
+        if isinstance(field, ast.Constant) and isinstance(field.value, str):
+            stored.add(field.value)
+        elif isinstance(field, ast.Name) and field.id in by_vararg:
+            handed.extend(rest)
+        elif (
+            isinstance(field, ast.Name)
+            and field.id in places
+            and places[field.id] < len(call.args)
+        ):
+            handed.append(call.args[places[field.id]])
+        for value in handed:
+            named = _field_named(value, looping)
+            if named is not None:
+                stored.update(named)
+    return stored
+
+
+def _is_setter(func: ast.expr) -> bool:
+    """Whether a call is ``object.__setattr__`` or ``setattr``."""
+    return (
+        isinstance(func, ast.Attribute)
+        and func.attr == "__setattr__"
+        and isinstance(func.value, ast.Name)
+        and func.value.id == "object"
+    ) or (isinstance(func, ast.Name) and func.id == "setattr")
+
+
 def _field_findings(reader: Reader, root: pathlib.Path) -> list[Finding]:
     """The fields of public records whose ``__post_init__`` admits a numpy scalar their annotation refuses.
 
@@ -3421,6 +3499,7 @@ def _stores(
             elif isinstance(name, ast.Name) and name.id in positions:
                 setter.add(positions[name.id])
             continue
+        stored |= _handed_stores(reader, function, call, looping)
         func = call.func
         if not (
             isinstance(func, ast.Attribute)
@@ -4054,8 +4133,8 @@ def repository_path(path: str, root: pathlib.Path) -> str:
     The repository's own ``src/phonometry/room/acoustics.py`` keeps its
     name, and the same file of a copy of the package read elsewhere (a
     scratch tree a defect is put into to see the check fail) is given that
-    name too, so that :data:`EXEMPT` and the GPU-parity files key a copy
-    the way they key the package.
+    name too, so that :data:`EXEMPT` and the other tables key a copy the
+    way they key the package.
     """
     absolute = pathlib.Path(path)
     absolute = (absolute if absolute.is_absolute() else ROOT / absolute).resolve()
@@ -4063,16 +4142,6 @@ def repository_path(path: str, root: pathlib.Path) -> str:
         return path
     below = absolute.relative_to(root).as_posix()
     return f"{SOURCE.relative_to(ROOT).as_posix()}/{below}"
-
-
-def held_for_gpu(
-    findings: Sequence[Finding], gpu_files: Iterable[str]
-) -> tuple[list[Finding], list[Finding]]:
-    """The findings outside the GPU-parity files, and those in them."""
-    held_files = set(gpu_files)
-    kept = [finding for finding in findings if finding.path not in held_files]
-    held = [finding for finding in findings if finding.path in held_files]
-    return kept, held
 
 
 def checked(
@@ -4129,14 +4198,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
     arguments = parser.parse_args(argv)
     root = arguments.package.resolve()
-    every = findings_in(python_files([], root), root)
-    kept, held = held_for_gpu(every, gpu_parity_files())
-    found, stale = judged(kept)
-    if held:
-        print(
-            f"{len(held)} parameter(s) of the GPU-parity files are left out: "
-            f"{GPU_PARITY_REASON}."
-        )
+    found, stale = judged(findings_in(python_files([], root), root))
     if not (found or stale):
         print(
             "Every public parameter admits what its body converts and the "

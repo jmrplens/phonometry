@@ -1070,8 +1070,10 @@ def arrays_of(
         pair (angles_deg, relative_db) of two arrays"``).
     :param n_members: How many arrays it holds.
     :return: The members, each a ``float64`` array.
-    :raises TypeError: if *value* is a text or is not a sequence at all.
-    :raises ValueError: if it holds other than *n_members* members.
+    :raises TypeError: if *value* is a text or is not a sequence at all, or
+        *n_members* is not a number.
+    :raises ValueError: if it holds other than *n_members* members, or
+        *n_members* is not a whole number of at least one.
     """
     expected = require_count(n_members, "n_members")
     msg = f"'{name}' must be {members}"
@@ -1126,10 +1128,12 @@ def floats_of(
         (low, high) pair of two numbers"``).
     :param n_members: How many numbers it holds, or ``None`` for any count.
     :return: The numbers, each a ``float``.
-    :raises TypeError: if *value* is a text or is not a sequence at all, or
-        a member is not one number (a text included).
-    :raises ValueError: if it holds other than *n_members* members, or a
-        member is a number too large for a float.
+    :raises TypeError: if *value* is a text or is not a sequence at all, a
+        member is not one number (a text included), or *n_members* is not a
+        number.
+    :raises ValueError: if it holds other than *n_members* members, a
+        member is a number too large for a float, or *n_members* is not a
+        whole number of at least one.
     """
     expected = None if n_members is None else require_count(n_members, "n_members")
     msg = f"'{name}' must be {members}"

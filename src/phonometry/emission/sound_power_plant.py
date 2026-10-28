@@ -1385,8 +1385,8 @@ def plant_measurement_contour(
         area, a layout of fewer than three positions, an omitted position that
         is not a whole number from 0, or omitted positions without a layout to
         refer to.
-    :raises TypeError: if ``n_positions`` or an omitted position is a flag, a
-        text or an array where a count goes.
+    :raises TypeError: if ``n_positions`` or an item of ``omitted_positions`` is a
+        flag, a text or an array where a count goes.
     """
     # The record validates the layout again; read here, a NumPy integer is
     # the int the record stores.

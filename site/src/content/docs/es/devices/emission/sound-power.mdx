@@ -77,6 +77,8 @@ declaración de emisión sonora ISO 4871 que imprime una hoja de característica
   description="La misma fuente en una cámara anecoica y en una cámara reverberante produce presiones de micrófono distintas, y las fórmulas de campo libre y campo difuso convergen al mismo nivel de potencia acústica L_W."
 />
 
+<span id="elegir-un-metodo"></span>
+
 ## Elegir un método
 
 Todas proporcionan la misma magnitud para una fuente que funciona de forma
@@ -117,7 +119,7 @@ sala construida para que su tiempo de reverberación siga una curva prescrita.
 Su pariente in situ, la ISO 3747, tiene su propia guía,
 [Potencia acústica in situ por comparación](/phonometry/es/devices/emission/sound-power-in-situ/):
 la fórmula de comparación de la
-[página de ISO 3741](/phonometry/es/devices/emission/sound-power-reverberation/#2-el-método-de-comparación-ec-21)
+[página de ISO 3741](/phonometry/es/devices/emission/sound-power-reverberation/#2-el-metodo-de-comparacion-ec-21)
 aplicada a la sala en la que trabaja la máquina en lugar de a una cámara
 cualificada, con el ruido de fondo corregido en cada posición de micrófono y
 el grado leído del exceso de nivel de presión acústica. La lámina de abajo
@@ -294,14 +296,14 @@ prensa, un portazo), el descriptor no es $L_W$ sino el **nivel de energía
 acústica $L_J$**, la misma integral de superficie tomada sobre el suceso en vez
 de por segundo, definido en los mismos apartados de la ISO 3741, la ISO 3744 y
 la ISO 3746 y determinado por `sound_energy_pressure` sobre la [superficie
-envolvente](/phonometry/es/devices/emission/sound-power-pressure/#4-nivel-de-energía-acústica-de-una-ráfaga-apartado-83),
+envolvente](/phonometry/es/devices/emission/sound-power-pressure/#4-nivel-de-energia-acustica-de-una-rafaga-apartado-83),
 por `sound_energy_reverberation`, o por `sound_energy_comparison` contra una
 fuente de referencia, en la [cámara
-reverberante](/phonometry/es/devices/emission/sound-power-reverberation/#4-nivel-de-energía-acústica-de-un-suceso-aislado-apartado-92),
+reverberante](/phonometry/es/devices/emission/sound-power-reverberation/#4-nivel-de-energia-acustica-de-un-suceso-aislado-apartado-92),
 por `sound_energy_hard_walled` en la sala de paredes rígidas de ISO 3743-1, en
-[Potencia acústica en salas de ensayo pequeñas](/phonometry/es/devices/emission/sound-power-test-rooms/#ráfagas-el-nivel-de-energía-acústica-ec-15-a-20),
+[Potencia acústica en salas de ensayo pequeñas](/phonometry/es/devices/emission/sound-power-test-rooms/#rafagas-el-nivel-de-energia-acustica-ec-15-a-20),
 y por `sound_energy_in_situ` allí donde la máquina trabaja, en [Potencia
-acústica in situ por comparación](/phonometry/es/devices/emission/sound-power-in-situ/#2-fuentes-impulsivas-el-nivel-de-energía-acústica-ec-13-a-20).
+acústica in situ por comparación](/phonometry/es/devices/emission/sound-power-in-situ/#2-fuentes-impulsivas-el-nivel-de-energia-acustica-ec-13-a-20).
 La prueba práctica: si el nivel
 ponderado A en un micrófono fijo se mueve más de unos pocos decibelios durante
 el tiempo de promediado, la fuente no es estacionaria para estos métodos.
@@ -341,6 +343,8 @@ plt.show()
 ```
 
 </details>
+
+<span id="declarar-la-emision-sonora-iso-4871"></span>
 
 ## Declarar la emisión sonora (ISO 4871)
 
@@ -553,7 +557,7 @@ enuncia, no se deriva.
 - [Teoría](/phonometry/es/reference/theory/environment-transport/): las derivaciones de Waterhouse, $K_1$/$K_2$ y
   $C_1$/$C_2$.
 - Referencia de la API: [`emission.sound_power`](/phonometry/es/reference/api/power/sound-power/), [`emission`: sound power in a reverberation room](/phonometry/es/reference/api/power/sound-power-reverberation/) y [`emission`: sound power by intensity scanning](/phonometry/es/reference/api/power/sound-power-intensity/).
-- Teoría: [Determinación de la potencia acústica](/phonometry/es/reference/theory/environment-transport/#determinación-de-la-potencia-acústica-iso-374437453746-iso-3741-iso-9614-123): las derivaciones de superficie envolvente, cámara reverberante e intensidad que hay detrás de las seis vías acústicas.
+- Teoría: [Determinación de la potencia acústica](/phonometry/es/reference/theory/environment-transport/#determinacion-de-la-potencia-acustica-iso-374437453746-iso-3741-iso-9614-123): las derivaciones de superficie envolvente, cámara reverberante e intensidad que hay detrás de las seis vías acústicas.
 
 </SeeAlso>
 

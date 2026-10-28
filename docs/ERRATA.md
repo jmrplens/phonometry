@@ -2675,8 +2675,7 @@ in the same order.
   f}\,\underline{Z}_{\mathrm{e},12}\,\mathrm{e}^{\mathrm{j}kd_{12}}\,\mathrm{e}^{\alpha
   d_{\mathrm{m}12}}\right)^{1/2}$, which COR1 makes "the final expression for
   the complex free-field sensitivity" in place of "the modulus of the".
-- **The problem:** Formula (8) is the quotient $\underline{M}_{\mathrm{f},1}^2
-  =
+- **The problem:** Formula (8) is the quotient $\underline{M}_{\mathrm{f},1}^2 =
   (\underline{M}_{\mathrm{f},1}\underline{M}_{\mathrm{f},2})(\underline{M}_{\mathrm{f},3}\underline{M}_{\mathrm{f},1})/(\underline{M}_{\mathrm{f},2}\underline{M}_{\mathrm{f},3})$
   of three products of the form (7), and carries
   $(-\mathrm{j})(-\mathrm{j})/(-\mathrm{j}) = -\mathrm{j}$; Formula (9) is

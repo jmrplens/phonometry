@@ -7,8 +7,8 @@ read that as the middle of a sentence: it reads it as a list item, a block
 quote or an ordered list, and it ends the paragraph there. The author sees a
 paragraph; the reader gets two blocks, or worse.
 
-Five checks. The first two are the same defect seen twice, and they are not
-equally visible; the other three are different ones with the same shape, a
+Six checks. The first two are the same defect seen twice, and they are not
+equally visible; the other four are different ones with the same shape, a
 source that looks right and renders wrong.
 
 1. **Unclosed inline maths.** An inline ``$...$`` that wraps onto a block
@@ -30,13 +30,17 @@ source that looks right and renders wrong.
    two languages. A deliberate block quote in this corpus is preceded by a
    blank line, which is why the rule can be this simple.
 
-3. **A same-page link to an accented heading.** Markdown percent-encodes
-   non-ASCII in a URL, so ``[La medición](#la-medición-...)`` ships as
+3. **A link to an accented heading.** Markdown percent-encodes non-ASCII in a
+   URL, so ``[La medición](#la-medición-...)`` ships as
    ``href="#la-medici%C3%B3n-..."`` while the heading keeps its id unencoded.
    A browser resolves it; the accessibility audit compares the raw attribute
    against the ids and reports a dangling anchor, and it only samples 66 URLs,
-   so five of the six the corpus had went unreported. The fix the corpus
-   already used in two places is an ASCII ``<span id=...>`` above the heading.
+   so five of the six the corpus had went unreported. The same holds for a
+   link into another page of the site, ``(/phonometry/es/...#la-medición)``,
+   and a search engine audit of the published site reported 150 of those as
+   broken. The fix the corpus already used is an ASCII ``<span id=...>``
+   above the heading. A link to another site is its own business and is not
+   read.
 
 4. **An opening ``$$`` with the formula on the same line.** Display maths is a
    fence, and like a code fence everything after the opening delimiter is read
@@ -75,6 +79,26 @@ the convention wants, opening and closing.
    breaks until the paragraph ends, at a blank line or at a line that opens
    a block, as they do in MDX. A tag that has its lines to itself is a
    block of its own, and MDX lets it run across blank lines as well.
+
+6. **A wrapped line of nothing but ``=`` or ``-``.** Under a line of text,
+   such a line is not the continuation of a sentence: CommonMark reads it as
+   a setext underline and turns the text above into a heading, ``=`` an h1
+   and ``-`` an h2. A formula wrapped just before its ``=`` did this to the
+   errata page: the list item above became a second h1 of the page, its open
+   ``$`` was cut off by the heading, and every later ``$`` of the item paired
+   with the wrong partner, so its prose rendered as maths and its formulas as
+   raw TeX. GitHub's rendering of the mirror showed the same heading. A real
+   heading is written with ``#`` here, and a thematic break stands after a
+   blank line, so a line like this right under text is always the defect.
+   Inside a display block it is neither: ``=`` alone on a line of a formula
+   written one term per line is maths, and so is the line under it.
+
+Display maths is read the way ``remark-math`` reads it, as a fence of ``$``:
+a run of two or more opens it, with a meta after it that holds no ``$``, and
+only a line of a run as long or longer, with nothing after it, closes it. No
+rule but the fourth reads the opening line, and none reads what follows it
+until the block closes: like code, it is not markdown. Fenced code is not
+read at all, a ``math`` fence included.
 
 The YAML frontmatter at the top of a page is not markdown: it is read as
 data, and Astro blanks it before MDX compiles the body. No rule reads it, so
@@ -120,13 +144,29 @@ _QUOTE = re.compile(r"^>\s*\S")
 #: Text that continues a paragraph rather than starting a block of its own.
 _PROSE = re.compile(r"^\s{0,3}[^\s\-*+>#|<:0-9]")
 
-#: A same-page link whose target carries a character markdown will
-#: percent-encode on the way out.
-_ANCHOR = re.compile(r"\]\(#([^)]+)\)")
+#: A link with a fragment: the address before the ``#``, which is empty on a
+#: same-page link, and the fragment, which is checked for a character markdown
+#: will percent-encode on the way out.
+_ANCHOR = re.compile(r"\]\(([^)\s#]*)#([^)\s]+)\)")
+
+#: An address with a scheme: a link off this site, whose ids are not ours.
+_EXTERNAL = re.compile(r"^[A-Za-z][A-Za-z0-9+.-]*:")
 
 #: An opening display-maths fence with the formula on the same line. The tail
 #: is the fence's meta, so the block does not end where the author thinks.
 _MATH_META = re.compile(r"^[ \t]*\$\$\s*\S")
+
+#: A line of nothing but ``=`` or ``-``: a setext underline when text is above it.
+_SETEXT = re.compile(r"^[ \t]*(?:=+|-+)[ \t]*$")
+
+#: A line that opens display maths, as remark-math reads it: a run of two
+#: ``$`` or more and a meta with no ``$`` in it. A line with another ``$``
+#: after the run opens nothing: it is a paragraph that holds inline maths.
+_DISPLAY_OPEN = re.compile(r"^[ \t]*(\${2,})[^$]*$")
+
+#: A line that may close display maths: a run of ``$`` and nothing after it
+#: but blanks. It closes the block when the run is as long as the opening one.
+_DISPLAY_CLOSE = re.compile(r"^[ \t]*(\${2,})[ \t]*$")
 
 #: The line that opens and closes the YAML frontmatter, and nothing else.
 _FRONTMATTER = "---"
@@ -223,6 +263,31 @@ def _body_start(lines: list[str]) -> int:
     return 0
 
 
+def _display_maths(lines: list[str], code: list[bool]) -> list[str]:
+    """Each line's part in display maths: ``"open"``, ``"maths"`` or ``"prose"``.
+
+    ``"maths"`` is a line of the formula or the line that closes it. A line of
+    code opens nothing, and a block never closed runs to the end of the page,
+    as remark-math has it.
+    """
+    parts: list[str] = []
+    opening = ""
+    for line, is_code in zip(lines, code, strict=True):
+        if opening:
+            closing = _DISPLAY_CLOSE.match(line)
+            if closing and len(closing.group(1)) >= len(opening):
+                opening = ""
+            parts.append("maths")
+            continue
+        found = None if is_code else _DISPLAY_OPEN.match(line)
+        if found is None:
+            parts.append("prose")
+        else:
+            opening = found.group(1)
+            parts.append("open")
+    return parts
+
+
 def _mdx_prose(lines: list[str], start: int) -> list[str]:
     """The lines as MDX reads their prose, everything else blanked.
 
@@ -232,16 +297,14 @@ def _mdx_prose(lines: list[str], start: int) -> list[str]:
     page, since each can run over several lines. Blanking rather than
     dropping keeps every character on its line and column.
     """
-    kept = [""] * start
-    display = False
     body = lines[start:]
-    for line, code in zip(body, code_lines(body), strict=True):
-        if not code and line.strip() == "$$":
-            display = not display
-        elif not (code or display):
-            kept.append(line)
-            continue
-        kept.append("")
+    code = list(code_lines(body))
+    kept = [""] * start + [
+        line if not is_code and part == "prose" else ""
+        for line, is_code, part in zip(
+            body, code, _display_maths(body, code), strict=True
+        )
+    ]
     return _MDX_READING.sub(_as_mdx_reads_it, "\n".join(kept)).split("\n")
 
 
@@ -281,15 +344,16 @@ def _wrapped_quote_problems(where: str, line: str, before: str) -> list[str]:
 
 
 def _anchor_problems(where: str, line: str) -> list[str]:
-    """Rule 3: a same-page link that the href will percent-encode."""
+    """Rule 3: a link into this site that the href will percent-encode."""
     return [
-        f"{where}: the same-page link "
-        f"'#{anchor.group(1)}' will be percent-encoded in the href, and the "
-        f"accessibility audit compares the raw attribute against the ids, so it "
-        f'reads as a dangling anchor. Put <span id="ascii-slug"></span> above '
-        f"the heading and link to that, as the pages that already hit this do."
+        f"{where}: the link "
+        f"'{anchor.group(1)}#{anchor.group(2)}' will be percent-encoded in the href, "
+        f"and crawlers and the accessibility audit compare the raw attribute "
+        f"against the ids, so it reads as a dangling anchor. Put "
+        f'<span id="ascii-slug"></span> above the heading and link to that, as '
+        f"the pages that already hit this do."
         for anchor in _ANCHOR.finditer(line)
-        if not anchor.group(1).isascii()
+        if not anchor.group(2).isascii() and not _EXTERNAL.match(anchor.group(1))
     ]
 
 
@@ -314,6 +378,22 @@ def _math_meta_problems(where: str, line: str) -> list[str]:
     ]
 
 
+def _setext_problems(where: str, line: str, before: str) -> list[str]:
+    """Rule 6: a line of ``=`` or ``-`` that turns the text above into a heading."""
+    if not (_SETEXT.match(line) and before.strip()):
+        return []
+    # A fence line above is code, and the caller does not ask about it; what is
+    # left to tell apart is a heading, a table row, a tag and a rule of its own.
+    if before.lstrip().startswith(("#", "|", "<")) or _SETEXT.match(before):
+        return []
+    level = "an h1" if "=" in line else "an h2"
+    return [
+        f"{where}: a line of only {line.strip()[0]!r} under text is a setext "
+        f"underline, so the text above becomes {level}; rewrap so the line "
+        f"carries text, or leave a blank line before a thematic break"
+    ]
+
+
 def _maths_left_open(line: str, *, open_math: bool) -> bool:
     """Whether an inline ``$`` is still open once this line is read."""
     if not line.strip() or _BLOCK.match(line):
@@ -324,21 +404,34 @@ def _maths_left_open(line: str, *, open_math: bool) -> bool:
 
 
 def _markdown_problems(rel: str, lines: list[str], start: int) -> list[str]:
-    """Rules 1 to 4, which read the page line by line as CommonMark does."""
+    """Rules 1 to 4 and 6, which read the page line by line as CommonMark does.
+
+    Code and display maths are not markdown, so no rule reads them, but the
+    fourth reads the line that opens a display block, which is its business.
+    """
     problems: list[str] = []
     open_math = False
-    code = [False] * start + list(code_lines(lines[start:]))
+    body = lines[start:]
+    code = list(code_lines(body))
+    parts = [""] * start + [
+        "code" if is_code else part
+        for is_code, part in zip(code, _display_maths(body, code), strict=True)
+    ]
     for index in range(start, len(lines)):
         line = lines[index]
-        if code[index]:
+        where = f"{rel}:{index + 1}"
+        if parts[index] == "open":
+            problems.extend(_math_meta_problems(where, line))
+        if parts[index] != "prose":
             open_math = False
             continue
-        where = f"{rel}:{index + 1}"
         before = lines[index - 1] if index else ""
         problems.extend(_cut_maths_problems(where, line, index, open_math=open_math))
         problems.extend(_wrapped_quote_problems(where, line, before))
         problems.extend(_anchor_problems(where, line))
         problems.extend(_math_meta_problems(where, line))
+        if index > start and parts[index - 1] == "prose":
+            problems.extend(_setext_problems(where, line, before))
         open_math = _maths_left_open(line, open_math=open_math)
     return problems
 

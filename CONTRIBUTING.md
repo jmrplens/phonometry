@@ -480,6 +480,20 @@ guides, so run it after changing one. Commit whatever each changes: the
 "Generated API reference up to date" and "llms artifacts up to date" jobs diff
 those paths and fail on any difference.
 
+### 5b. Retired site addresses (auto-generated map)
+
+A page that moves keeps answering at its old address. In `site/`,
+`pnpm run redirects` derives `src/data/redirects.mjs` from the rename history
+of the content tree, and `pnpm run check:redirects` fails the docs job until
+the map is current. The build writes a stub page for every old address, which
+is all GitHub Pages can serve. On docs.jmrp.io the same addresses answer a
+permanent 301 at the edge, from the Cloudflare Bulk Redirects list
+`phonometry_retired`, and that list does not follow the map by itself: when a
+change touches `redirects.mjs`, print the list items with
+`node scripts/cloudflare-redirects.mjs > items.json` and replace the items of
+the list with them, in the dashboard or through the API's list items endpoint.
+The credentials for that stay with the maintainer, never in this repository.
+
 ### 6. Filing an errata entry
 
 `docs/ERRATA.md` records every defect this project claims to have found in a

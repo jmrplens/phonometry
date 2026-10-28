@@ -1331,17 +1331,28 @@ def _heading_text(name: str) -> str:
     return name
 
 
-def _frontmatter(title: str, description: str, label: str) -> str:
-    return "\n".join(
-        [
-            "---",
-            f"title: {json.dumps(title)}",
-            f"description: {json.dumps(description)}",
-            "sidebar:",
-            f"  label: {json.dumps(label)}",
-            "---",
-        ]
-    )
+#: The document title of the top-level page. Starlight titles a page
+#: "<title> | <site title>", and the top level's title is the package name, so
+#: the tab and the search result would read "phonometry | phonometry": the site
+#: name twice and no word on what the page holds. The frontmatter title stays
+#: the package name, which the page heading and the sidebar show; only the
+#: document title is overridden, the way the home page does it
+#: (site/src/content/docs/index.mdx). site/scripts/check-crawl.mjs fails a
+#: title that names the site twice.
+TOP_LEVEL_HEAD_TITLE = "Top-level API | phonometry"
+
+
+def _frontmatter(title: str, description: str, label: str, head_title: str = "") -> str:
+    lines = [
+        "---",
+        f"title: {json.dumps(title)}",
+        f"description: {json.dumps(description)}",
+        "sidebar:",
+        f"  label: {json.dumps(label)}",
+    ]
+    if head_title:
+        lines += ["head:", "  - tag: title", f"    content: {json.dumps(head_title)}"]
+    return "\n".join([*lines, "---"])
 
 
 def _field_table(
@@ -1485,7 +1496,12 @@ def render_module_page(
     # `speakable` selector: a maintenance instruction standing in for what the
     # module actually does.
     out = [
-        _frontmatter(page.title, description, page.label),
+        _frontmatter(
+            page.title,
+            description,
+            page.label,
+            TOP_LEVEL_HEAD_TITLE if page.module == "phonometry" else "",
+        ),
         "",
     ]
     if page.home:

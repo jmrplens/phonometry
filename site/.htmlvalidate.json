@@ -4,6 +4,7 @@
   ],
   "rules": {
     "element-permitted-content": "off",
+    "heading-level": ["error", { "minInitialRank": "any", "allowMultipleH1": false }],
     "no-autoplay": "off",
     "no-deprecated-attr": "off",
     "no-implicit-button-type": "off",

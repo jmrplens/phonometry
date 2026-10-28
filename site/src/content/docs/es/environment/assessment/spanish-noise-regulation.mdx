@@ -173,12 +173,12 @@ Las correcciones del reglamento se parecen a procedimientos de ISO 1996 que la
 biblioteca ya implementa, pero **no son intercambiables**, y por eso este
 módulo implementa las variantes propias del RD en lugar de delegar en aquellas:
 
-- [`tonal_audibility()` / `tonal_adjustment()`](/phonometry/es/environment/assessment/environmental-levels/#ajuste-tonal-método-de-ingeniería-anexo-c-de-iso-1996-22007) son el método de ingeniería del
+- [`tonal_audibility()` / `tonal_adjustment()`](/phonometry/es/environment/assessment/environmental-levels/#ajuste-tonal-metodo-de-ingenieria-anexo-c-de-iso-1996-22007) son el método de ingeniería del
   anexo C de ISO 1996-2, basado en la audibilidad $\Delta L_\mathrm{ta}$ dentro de la
   banda crítica del tono, y devuelven un $K_\mathrm{t}$ **continuo** entre 0 y 6 dB. El
   RD trabaja sobre diferencias entre bandas de tercio de octava y solo produce
   0, 3 o 6 dB.
-- [`assess_tonal_survey()`](/phonometry/es/environment/assessment/environmental-levels/#ajuste-tonal-método-de-ingeniería-anexo-c-de-iso-1996-22007) (método de cribado, anexo K de ISO 1996-2:2017) es
+- [`assess_tonal_survey()`](/phonometry/es/environment/assessment/environmental-levels/#ajuste-tonal-metodo-de-ingenieria-anexo-c-de-iso-1996-22007) (método de cribado, anexo K de ISO 1996-2:2017) es
   el pariente más cercano, porque también parte el espectro en 125 y 400 Hz,
   pero exige que la banda supere a **ambas** vecinas en 15/8/5 dB y solo
   dice qué bandas son prominentes; el RD compara con la **media** de

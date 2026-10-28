@@ -23,6 +23,7 @@ a missing ``frequency``) have a test of their own below.
 
 from __future__ import annotations
 
+import ast
 import functools
 import importlib
 import inspect
@@ -671,3 +672,63 @@ def test_the_modules_of_the_cases_import() -> None:
     for case in CASES:
         module = importlib.import_module(inspect.unwrap(case.function).__module__)
         assert module is not None
+
+
+def _repeated_phrase(text: str, span: int = 7) -> str | None:
+    """A run of ``span`` words of 35 characters or more that ``text`` says twice."""
+    words = text.split()
+    first: dict[str, int] = {}
+    for start in range(len(words) - span + 1):
+        phrase = " ".join(words[start : start + span])
+        if len(phrase) < 35:
+            continue
+        if phrase in first and start - first[phrase] >= span:
+            return phrase
+        first.setdefault(phrase, start)
+    return None
+
+
+def _return_blocks(source: str) -> list[tuple[int, str]]:
+    """``(line, text)`` of every ``:return:`` field of every docstring in ``source``."""
+    blocks: list[tuple[int, str]] = []
+    for node in ast.walk(ast.parse(source)):
+        if not isinstance(
+            node, ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef | ast.Module
+        ):
+            continue
+        doc = ast.get_docstring(node, clean=False)
+        if not doc:
+            continue
+        lines = doc.split("\n")
+        for index, line in enumerate(lines):
+            if not line.strip().startswith((":return:", ":returns:")):
+                continue
+            indent = len(line) - len(line.lstrip())
+            body = [line.strip()]
+            for following in lines[index + 1 :]:
+                if not following.strip():
+                    break
+                if len(following) - len(following.lstrip()) <= indent:
+                    break
+                body.append(following.strip())
+            blocks.append((getattr(node, "lineno", 1), " ".join(body)))
+    return blocks
+
+
+def test_a_return_description_says_its_rule_once() -> None:
+    """A ``:return:`` field states what the function returns once.
+
+    Rewriting a return to state the array rule left the old sentence behind
+    it in three places (``room.mean_absorption``,
+    ``vibration.injury_probability`` and the reverberation time of
+    ``room.enclosed_space_absorption``), so their reference pages gave the
+    formula and the rule twice in two wordings.
+    """
+    package = pathlib.Path(phonometry.__file__).parent
+    repeated = []
+    for path in sorted(package.rglob("*.py")):
+        for line, text in _return_blocks(path.read_text(encoding="utf-8")):
+            phrase = _repeated_phrase(text)
+            if phrase is not None:
+                repeated.append(f"{path.relative_to(package)}:{line}: {phrase!r}")
+    assert not repeated, "\n".join(repeated)

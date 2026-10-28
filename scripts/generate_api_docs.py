@@ -1448,9 +1448,16 @@ def _with_type(
     return rendered
 
 
-#: Longest meta description worth emitting. Past roughly this length search
-#: engines and AI summarizers truncate anyway, and the tail is wasted.
-_MAX_DESCRIPTION = 300
+#: Longest meta description a page emits. Bing's tools flag a description as
+#: too long past a threshold they do not publish (160 characters in their
+#: older guidelines), and Google cuts the snippet mid-sentence wherever it
+#: needs to. site/scripts/check-descriptions.mjs holds every built page to
+#: 160; this leaves a margin under it.
+_MAX_DESCRIPTION = 155
+
+#: Shortest opening sentence that may stand in for a lead paragraph too long
+#: to be the description: below it the sentence says too little on its own.
+_MIN_OPENING_SENTENCE = 70
 
 
 def _page_description(page: ModuleDoc) -> str:
@@ -1474,12 +1481,31 @@ def _page_description(page: ModuleDoc) -> str:
             return "Top-level convenience API of the phonometry package."
         return f"Public API of {page.home or page.module}."
 
-    if len(lead) > _MAX_DESCRIPTION:
-        # Cut on a sentence boundary where there is one in range, so the
-        # description never ends mid-clause.
-        cut = lead.rfind(". ", 0, _MAX_DESCRIPTION)
-        lead = lead[: cut + 1] if cut > 80 else lead[:_MAX_DESCRIPTION].rstrip() + "..."
+    if len(lead) <= _MAX_DESCRIPTION:
+        return lead
+    # A lead too long to show whole gives way to its opening sentence, cut
+    # where the API index cuts its summary. Nothing is ever cut mid-sentence:
+    # when the opening sentence does not fit either, the whole lead comes back
+    # and the run fails on it (_description_problem), because the fix is a
+    # shorter opening sentence in the docstring, which is also the first line
+    # of the page and its summary in the index.
+    opening = _first_sentence(lead)
+    if _MIN_OPENING_SENTENCE <= len(opening) <= _MAX_DESCRIPTION:
+        return opening
     return lead
+
+
+def _description_problem(page: ModuleDoc) -> str | None:
+    """Why ``page`` has no description short enough to emit, or None."""
+    description = _page_description(page)
+    if len(description) <= _MAX_DESCRIPTION:
+        return None
+    opening = len(_first_sentence(description))
+    return (
+        f"{page.module}: the lead paragraph is {len(description)} characters and its "
+        f"opening sentence {opening}; rewrite the opening sentence of the module "
+        f"docstring to {_MIN_OPENING_SENTENCE}-{_MAX_DESCRIPTION} characters"
+    )
 
 
 def render_module_page(
@@ -1771,6 +1797,7 @@ class Report:
     failures: list[str]
     issues: list[str]
     leaked_roles: list[str]
+    long_descriptions: list[str]
 
 
 def generate(content_dir: Path, sidebar_path: Path) -> Report:
@@ -1780,6 +1807,7 @@ def generate(content_dir: Path, sidebar_path: Path) -> Report:
     failures: list[str] = []
 
     leaked: list[str] = []
+    long_descriptions: list[str] = []
 
     if content_dir.exists():
         shutil.rmtree(content_dir)
@@ -1792,6 +1820,8 @@ def generate(content_dir: Path, sidebar_path: Path) -> Report:
         path.parent.mkdir(parents=True, exist_ok=True)
         rendered = render_module_page(page, xref, stats, failures)
         leaked += leaked_roles(page.relpath, rendered)
+        if (problem := _description_problem(page)) is not None:
+            long_descriptions.append(problem)
         path.write_text(rendered, encoding="utf-8", newline="\n")
     sidebar_path.parent.mkdir(parents=True, exist_ok=True)
     sidebar_path.write_text(render_sidebar(pages), encoding="utf-8", newline="\n")
@@ -1803,6 +1833,7 @@ def generate(content_dir: Path, sidebar_path: Path) -> Report:
         failures=failures,
         issues=issues,
         leaked_roles=leaked,
+        long_descriptions=long_descriptions,
     )
 
 
@@ -1819,12 +1850,21 @@ def main() -> int:
         print("Docstrings degraded to verbatim blocks:")
         for failure in report.failures:
             print(f"  - {failure}")
+    status = 0
     if report.leaked_roles:
         print("reST roles this generator does not convert, so they ship as text:")
         for leak in report.leaked_roles:
             print(f"  - {leak}")
-        return 1
-    return 0
+        status = 1
+    if report.long_descriptions:
+        print(
+            f"Pages with no description of {_MAX_DESCRIPTION} characters or fewer "
+            "(the generator never cuts one mid-sentence):"
+        )
+        for problem in report.long_descriptions:
+            print(f"  - {problem}")
+        status = 1
+    return status
 
 
 if __name__ == "__main__":

@@ -1,6 +1,6 @@
 ---
 title: "Los mismos bits en cualquier máquina"
-description: "Por qué la coma flotante deriva entre hosts, qué fija phonometry para que un filtro diseñado sea el mismo filtro byte a byte en cualquier CPU, BLAS o número de hilos, qué separa todavía a las plataformas, y la evidencia medida tras la afirmación."
+description: "Determinismo: por qué deriva la coma flotante, cómo un filtro sigue igual byte a byte en cualquier CPU, BLAS o número de hilos, qué difiere y la evidencia."
 ---
 
 Un filtro de ponderación diseñado por phonometry es el mismo filtro, byte a

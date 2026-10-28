@@ -1,15 +1,15 @@
 ---
 title: "emission: sound power by intensity scanning"
-description: "Sound power level of a noise source by sound-intensity scanning: ISO 9614-2:1996 (engineering, grade 2; survey/control, grade 3) and ISO 9614-3:2002 (precision, grade 1)."
+description: "Sound power level by sound-intensity scanning: ISO 9614-2:1996 (engineering, grade 2; survey/control, grade 3) and ISO 9614-3:2002 (precision, grade 1)."
 sidebar:
   label: "sound_power_intensity"
 ---
 
 Every name on this page is published by `phonometry.emission`: `from phonometry import emission`, then `emission.<name>`.
 
-Sound power level of a noise source by sound-intensity **scanning**:
-ISO 9614-2:1996 (engineering, grade 2; survey/control, grade 3) and
-ISO 9614-3:2002 (precision, grade 1).
+Sound power level by sound-intensity **scanning**: ISO 9614-2:1996
+(engineering, grade 2; survey/control, grade 3) and ISO 9614-3:2002 (precision,
+grade 1).
 
 A probe is swept continuously over each segment of a hypothetical surface that
 encloses the source, reporting the time-averaged signed normal intensity

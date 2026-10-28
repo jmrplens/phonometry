@@ -1,7 +1,7 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
 r"""Sound power and sound energy levels of a small movable source in a
-hard-walled test room, by comparison with a reference sound source:
-ISO 3743-1:2010 (engineering grade 2).
+hard-walled test room, by the comparison method: ISO 3743-1:2010 (engineering
+grade 2).
 
 The room is an ordinary one: nearly empty, with smooth hard walls, no
 surface anywhere absorbing more than 0,20 of the incident power (4.3), at

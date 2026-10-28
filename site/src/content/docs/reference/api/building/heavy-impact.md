@@ -1,13 +1,12 @@
 ---
 title: "building.measurement.heavy_impact"
-description: "Heavy and soft impact sources: rubber ball and bang machine (ISO 16283-2:2020 Annex A, ISO 10140-5:2021 Annex F, JIS A 1418-2:2019, ISO 717-2:2020 Annex D)."
+description: "Heavy and soft impact sources: rubber ball, bang machine (ISO 16283-2:2020 Annex A, ISO 10140-5:2021 Annex F, JIS A 1418-2:2019, ISO 717-2:2020 Annex D)."
 sidebar:
   label: "heavy_impact"
 ---
 
-Heavy and soft impact sources: rubber ball and bang machine
-(ISO 16283-2:2020 Annex A, ISO 10140-5:2021 Annex F, JIS A 1418-2:2019,
-ISO 717-2:2020 Annex D).
+Heavy and soft impact sources: rubber ball, bang machine (ISO 16283-2:2020
+Annex A, ISO 10140-5:2021 Annex F, JIS A 1418-2:2019, ISO 717-2:2020 Annex D).
 
 The ISO tapping machine is a *light* impact source: five 500 g hammers dropped
 from 40 mm produce a short, hard, quasi-stationary excitation whose spectrum

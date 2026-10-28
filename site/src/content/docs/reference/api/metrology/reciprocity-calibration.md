@@ -1,14 +1,14 @@
 ---
 title: "metrology.reciprocity_calibration"
-description: "Primary calibration of laboratory standard microphones by reciprocity: the sensitivities that come out of three pair measurements, and the uncertainty budget that goes with them (IEC 61094-2:2009 clause 5.7 and clause 7, IEC 61094-3:2016 clause 5.7 and clause 7)."
+description: "Primary calibration of laboratory standard microphones by reciprocity, and its uncertainty budget (IEC 61094-2:2009, IEC 61094-3:2016)."
 sidebar:
   label: "reciprocity_calibration"
 ---
 
-Primary calibration of laboratory standard microphones by reciprocity: the
-sensitivities that come out of three pair measurements, and the uncertainty
-budget that goes with them (IEC 61094-2:2009 clause 5.7 and clause 7, IEC
-61094-3:2016 clause 5.7 and clause 7).
+Primary calibration of laboratory standard microphones by reciprocity, and
+its uncertainty budget (IEC 61094-2:2009, IEC 61094-3:2016). The sensitivities
+come out of three pair measurements (clause 5.7 of each part) and the budget
+out of clause 7 of each.
 
 A reciprocity calibration needs no reference microphone. Two microphones are
 coupled acoustically, one drives and the other receives, and the electrical

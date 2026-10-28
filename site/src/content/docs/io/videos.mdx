@@ -1,6 +1,6 @@
 ---
 title: "Writing animations and FDTD runs to video"
-description: "Any matplotlib animation to WebM, MP4 or GIF through ffmpeg. A WebM or MP4 encoder is found by a real trial encode: NVENC, Quick Sync, VAAPI and VideoToolbox first, then the CPU, SVT-AV1 first and never libaom. A GIF is written on the CPU. An acoustic or elastic FDTD run is written straight to a video, here or on a node, without storing its snapshots."
+description: "Any matplotlib animation to WebM, MP4 or GIF through ffmpeg: the encoder found by a trial encode, hardware first, and FDTD runs written straight to video."
 references:
   - type: web
     organization: "FFmpeg project"

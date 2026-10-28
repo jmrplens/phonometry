@@ -1,7 +1,6 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
-r"""Improvement of sound insulation measured in the laboratory: a lining on a
-basic element and a floor covering on a reference floor (ISO 10140-1:2021
-Annexes G and H).
+r"""Laboratory improvement of sound insulation: a lining on a basic element and
+a floor covering on a reference floor (ISO 10140-1:2021 Annexes G and H).
 
 A lining and a floor covering are products that are never sold alone: each is
 added to a wall or a floor, and what the laboratory measures is how much it

@@ -45,12 +45,22 @@
 // and the error page is held to rules 1 and 2 alone.
 //
 // Usage: node scripts/check-crawl.mjs [dist-directory]
-import { existsSync, readFileSync, readdirSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { basePath, siteUrl } from '../src/data/site.mjs';
 import { englishTwin, isApiRoute, isFallbackRoute } from '../src/lib/fallback-routes.mjs';
+import {
+	decode,
+	isErrorPage,
+	isRedirectStub,
+	languageOf,
+	markupOf,
+	reporter,
+	tags,
+	walk,
+} from './shared/dist-pages.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const DIST = process.argv[2] ? resolve(process.argv[2]) : join(here, '..', 'dist');
@@ -58,69 +68,8 @@ const ORIGIN = `${siteUrl}${basePath}`;
 /** Starlight titles a page "<frontmatter title> | <site title>". */
 const SITE_TITLE = 'phonometry';
 const TITLE_DELIMITER = ' | ';
-/** Failures of one kind printed in full before the rest are counted. */
-const SHOWN = 12;
 
-let failures = 0;
-const fail = (message) => {
-	console.error(`FAIL ${message}`);
-	failures += 1;
-};
-const ok = (message) => console.log(`ok   ${message}`);
-
-/** Report a list of findings as one failure, the first few spelled out. */
-function report(findings, what, passed) {
-	if (findings.length === 0) {
-		ok(passed);
-		return;
-	}
-	const shown = findings.slice(0, SHOWN).map((line) => `\n       ${line}`).join('');
-	const more = findings.length > SHOWN ? `\n       ... and ${findings.length - SHOWN} more` : '';
-	fail(`${findings.length} ${what}:${shown}${more}`);
-}
-
-/** The entities Astro writes in attribute values and text, decoded; `&amp;` last. */
-function decode(text) {
-	return text
-		.replace(/&#(\d+);/g, (_, code) => String.fromCodePoint(Number(code)))
-		.replace(/&#x([0-9a-f]+);/gi, (_, code) => String.fromCodePoint(Number.parseInt(code, 16)))
-		.replace(/&quot;/g, '"')
-		.replace(/&#39;/g, "'")
-		.replace(/&lt;/g, '<')
-		.replace(/&gt;/g, '>')
-		.replace(/&amp;/g, '&');
-}
-
-/** The attributes of one start tag, decoded. Astro double-quotes every value. */
-function attributes(tag) {
-	const attrs = {};
-	for (const [, name, value] of tag.matchAll(/\s([\w:-]+)(?:="([^"]*)")?/g)) {
-		attrs[name.toLowerCase()] = value === undefined ? '' : decode(value);
-	}
-	return attrs;
-}
-
-/** Every start tag of one element name in a document, as attribute maps. */
-const tags = (html, name) =>
-	[...html.matchAll(new RegExp(`<${name}\\b[^>]*>`, 'gi'))].map(([tag]) => attributes(tag));
-
-/**
- * The document with the bodies of its scripts, styles and templates blanked:
- * the markup a crawler parses, without the JSON-LD and inline code that only
- * look like it.
- */
-const markupOf = (html) =>
-	html.replace(/<(script|style|template)\b[^>]*>[\s\S]*?<\/\1>/gi, '<$1></$1>');
-
-/** Every route the build wrote, from `x/index.html` to `/x/`, `404.html` to `/404/`. */
-function walk(dir, route = '/', out = new Map()) {
-	for (const entry of readdirSync(dir, { withFileTypes: true })) {
-		if (entry.isDirectory()) walk(join(dir, entry.name), `${route}${entry.name}/`, out);
-		else if (entry.name === 'index.html') out.set(route, join(dir, entry.name));
-		else if (entry.name.endsWith('.html')) out.set(`${route}${entry.name.slice(0, -5)}/`, join(dir, entry.name));
-	}
-	return out;
-}
+const { fail, report, failures } = reporter();
 
 if (!existsSync(DIST)) throw new Error(`no build at ${DIST}: run \`pnpm build\` first`);
 
@@ -131,7 +80,7 @@ const stubs = new Set();
 
 for (const [route, file] of walk(DIST)) {
 	const html = readFileSync(file, 'utf8');
-	if (/http-equiv="refresh"/.test(html)) {
+	if (isRedirectStub(html)) {
 		stubs.add(route);
 		continue;
 	}
@@ -152,8 +101,6 @@ for (const [route, file] of walk(DIST)) {
 }
 
 const slugOf = (route) => route.replace(/^\/|\/$/g, '');
-const languageOf = (route) => (/^\/es(\/|$)/.test(route) ? 'es' : 'en');
-const isErrorPage = (route) => /^\/(es\/)?404\/$/.test(route);
 /** The address a page names as its own: itself, or the English twin of a fallback. */
 const canonicalOf = (route) =>
 	isFallbackRoute(slugOf(route)) ? `${ORIGIN}${englishTwin(route)}` : `${ORIGIN}${route}`;
@@ -363,5 +310,5 @@ report(
 	);
 }
 
-console.log(`\n${failures} failing check(s).`);
-process.exit(failures ? 1 : 0);
+console.log(`\n${failures()} failing check(s).`);
+process.exit(failures() ? 1 : 0);

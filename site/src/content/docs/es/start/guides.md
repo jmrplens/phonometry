@@ -1,6 +1,6 @@
 ---
 title: "Guías"
-description: "Las 168 guías de phonometry, agrupadas en los trece temas que cubre la biblioteca: para qué sirve cada área, las normas que implementa y un resumen de una línea de cada guía que contiene."
+description: "Las 168 guías de phonometry en los trece temas que cubre: para qué sirve cada área, las normas que implementa y un resumen de una línea de cada guía."
 head:
   - tag: script
     attrs:

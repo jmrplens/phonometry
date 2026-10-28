@@ -1,6 +1,6 @@
 ---
 title: "Teoría"
-description: "Dónde viven las deducciones: seis páginas por dominio que devuelven cada método compartido al apartado, la ecuación y la tabla de los que sale, y las áreas cuya teoría se queda junto a la guía que la usa."
+description: "Deducciones por dominio: seis páginas que remiten cada método común a su apartado, ecuación y tabla, y las áreas cuya teoría va en su guía."
 ---
 
 La referencia de teoría reúne las deducciones, las referencias de apartado y las

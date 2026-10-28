@@ -1,6 +1,6 @@
 ---
 title: "emission: sound power in a hard-walled room"
-description: "Sound power and sound energy levels of a small movable source in a hard-walled test room, by comparison with a reference sound source: ISO 3743-1:2010 (engineering grade 2)."
+description: "Sound power and sound energy levels of a small movable source in a hard-walled test room, by the comparison method: ISO 3743-1:2010 (engineering grade 2)."
 sidebar:
   label: "sound_power_hard_walled"
 ---
@@ -8,8 +8,8 @@ sidebar:
 Every name on this page is published by `phonometry.emission`: `from phonometry import emission`, then `emission.<name>`.
 
 Sound power and sound energy levels of a small movable source in a
-hard-walled test room, by comparison with a reference sound source:
-ISO 3743-1:2010 (engineering grade 2).
+hard-walled test room, by the comparison method: ISO 3743-1:2010 (engineering
+grade 2).
 
 The room is an ordinary one: nearly empty, with smooth hard walls, no
 surface anywhere absorbing more than 0,20 of the incident power (4.3), at

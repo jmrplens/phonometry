@@ -1,6 +1,6 @@
 ---
 title: "Theory"
-description: "Where the derivations live: six domain pages that map each shared method back to the clause, equation and table it comes from, and the areas whose theory stays inline with the guide that uses it."
+description: "Derivations by domain: six pages tracing each shared method to its clause, equation and table, and the areas whose theory stays in its guide."
 ---
 
 The theory reference collects the derivations, clause references and design

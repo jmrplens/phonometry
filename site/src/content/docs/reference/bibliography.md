@@ -1,6 +1,6 @@
 ---
 title: "Bibliography"
-description: "Every source behind the guides in one list, grouped by area: the standards with their catalogue records, the books and papers with a verified DOI or publisher link, each with a note and the guides that cite it."
+description: "Every source the guides cite, by area: standards with their catalogue records, books and papers with a verified DOI or publisher link, each with a note."
 ---
 
 Every guide on this site names its sources twice. A chip run under the title

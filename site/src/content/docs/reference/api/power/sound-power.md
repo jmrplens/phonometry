@@ -1,13 +1,13 @@
 ---
 title: "emission.sound_power"
-description: "Sound power level of a noise source from sound pressure measurements over an enveloping measurement surface: ISO 3744:2010 (engineering, accuracy grade 2) and ISO 3746:2010 (survey, accuracy grade 3)."
+description: "Sound power level of a source from sound pressure over an enveloping surface: ISO 3744:2010 (engineering, grade 2) and ISO 3746:2010 (survey, grade 3)."
 sidebar:
   label: "sound_power"
 ---
 
-Sound power level of a noise source from sound pressure measurements over an
-enveloping measurement surface: ISO 3744:2010 (engineering, accuracy grade 2)
-and ISO 3746:2010 (survey, accuracy grade 3).
+Sound power level of a source from sound pressure over an enveloping
+surface: ISO 3744:2010 (engineering, grade 2) and ISO 3746:2010 (survey,
+grade 3).
 
 The source stands on one (or more) reflecting plane(s). Sound pressure levels
 are measured at an array of microphone positions on a hypothetical surface of

@@ -1,15 +1,14 @@
 ---
 title: "building: rainfall sound"
-description: "Sound of rain on roofs, roof windows and rooflights, measured in the laboratory with artificial rain (ISO 10140-1:2021 Annex K, ISO 10140-5:2021 Annexes H and I)."
+description: "Sound of artificial rain on roofs, roof windows and rooflights, measured in the laboratory (ISO 10140-1:2021 Annex K, ISO 10140-5:2021 Annexes H and I)."
 sidebar:
   label: "rainfall_sound"
 ---
 
 Every name on this page is published by `phonometry.building`: `from phonometry import building`, then `building.<name>`.
 
-Sound of rain on roofs, roof windows and rooflights, measured in the
-laboratory with artificial rain (ISO 10140-1:2021 Annex K, ISO 10140-5:2021
-Annexes H and I).
+Sound of artificial rain on roofs, roof windows and rooflights, measured in
+the laboratory (ISO 10140-1:2021 Annex K, ISO 10140-5:2021 Annexes H and I).
 
 Rain is an impact source that falls on the roof rather than a noise that comes
 through it, so ISO 10140-1 measures it as impact sound: a tank with a

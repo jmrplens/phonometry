@@ -1,7 +1,6 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
 r"""Qualification of an anechoic or hemi-anechoic room by the inverse square
-law: ISO 26101:2017, with the criteria of ISO 3745:2012 Annex A as
-Amendment 1:2017 rewrote it.
+law: ISO 26101:2017, with ISO 3745:2012 Annex A as Amendment 1:2017 rewrote it.
 
 A free field is judged by how the level falls away from a small source. Along
 each straight microphone traverse the measured level :math:`L_{pi}` at the

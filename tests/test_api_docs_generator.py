@@ -10,6 +10,7 @@ depends on determinism).
 
 from __future__ import annotations
 
+import dataclasses
 import inspect
 import json
 import pathlib
@@ -774,6 +775,70 @@ def test_every_page_title_fits_the_browser_title() -> None:
     pages, _, _ = gad.build_model()
     long = sorted(p.title for p in pages if len(f"{p.title} | phonometry") > 70)
     assert not long, long
+
+
+def _page_with_lead(lead: str) -> gad.ModuleDoc:
+    """A real module page whose docstring opens with ``lead``."""
+    pages, _, _ = gad.build_model()
+    page = next(p for p in pages if p.module == "phonometry.emission.sound_power")
+    return dataclasses.replace(page, intro=f"{lead}\n\nThe rest of the docstring.")
+
+
+def test_a_lead_that_fits_is_the_description_whole() -> None:
+    lead = "Sound power level of a source over an enveloping surface (ISO 3744:2010)."
+    page = _page_with_lead(lead)
+    assert gad._page_description(page) == lead
+    assert gad._description_problem(page) is None
+
+
+def test_a_long_lead_gives_way_to_its_opening_sentence_never_a_cut() -> None:
+    """The index's sentence rule: no stop inside brackets or before a small word."""
+    opening = (
+        "Sound power level of a source over an enveloping surface (ISO 3744:2010 "
+        "clause 8.2, cf. Annex B) for engineering grade 2."
+    )
+    lead = f"{opening} " + "A second sentence that runs on for a long while. " * 3
+    page = _page_with_lead(lead.strip())
+    assert len(lead) > gad._MAX_DESCRIPTION
+    assert gad._page_description(page) == opening
+    assert gad._description_problem(page) is None
+
+
+@pytest.mark.parametrize(
+    "lead",
+    [
+        # One sentence over the cap: nothing shorter to fall back on.
+        "Sound power level of a source "
+        + "over an enveloping surface " * 6
+        + "(ISO 3744:2010).",
+        # An opening sentence too short to say what the page holds alone.
+        "Sound power (ISO 3744:2010). "
+        + "A second sentence that runs on for a long while. " * 3,
+    ],
+    ids=["one-long-sentence", "short-opening"],
+)
+def test_a_lead_with_no_opening_sentence_that_fits_fails_the_run(lead: str) -> None:
+    """The generator never emits a cut description; it names the module instead."""
+    page = _page_with_lead(lead.strip())
+    description = gad._page_description(page)
+    assert description == lead.strip()
+    assert "..." not in description
+    problem = gad._description_problem(page)
+    assert problem is not None
+    assert problem.startswith("phonometry.emission.sound_power: ")
+
+
+def test_every_api_page_has_a_description_short_enough_to_show_whole() -> None:
+    """site/scripts/check-descriptions.mjs holds the built pages to 160 characters."""
+    pages, _, _ = gad.build_model()
+    problems = [
+        problem for page in pages if (problem := gad._description_problem(page))
+    ]
+    assert problems == []
+    assert all(len(gad._page_description(page)) <= 160 for page in pages)
+    descriptions = [gad._page_description(page) for page in pages]
+    repeated = sorted({d for d in descriptions if descriptions.count(d) > 1})
+    assert repeated == []
 
 
 def test_a_private_page_is_indexed_by_its_domain() -> None:

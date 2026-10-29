@@ -667,7 +667,8 @@ Releases are fully automated from the repository-root `VERSION` file:
    hand on the PR's branch (Actions, Release, Run workflow). A manual run is
    always a rehearsal and no input turns it into a release. It reads the
    version and its CHANGELOG section, waits for the PR's CI, builds the sdist
-   and the wheel, checks both against git, installs the wheel with every extra
+   and the wheel, checks both against git and checks the licence each declares
+   and carries, installs the wheel with every extra
    on Linux, macOS and Windows with each supported Python and runs the
    conformance report on it, writes the SBOM and the release notes, and asks
    PyPI for an upload token with this workflow's identity, which proves the

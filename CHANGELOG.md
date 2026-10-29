@@ -3730,9 +3730,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   The numbers were annotated with numpy's `ArrayLike`, which admits any text,
   so `termination="rigidd"` type-checked and only the call refused it. They
   take an array-like of numbers that admits no text now (a number, a
-  sequence of numbers, a numpy number or array of a number dtype, or anything
-  that converts itself to one), so a type checker refuses the misspelling as
-  the call does; nothing changes at run time.
+  sequence of numbers, a numpy number or array of a number or truth-value
+  dtype, or anything that converts itself to one), so a type checker refuses
+  the misspelling as the call does; nothing changes at run time. A type
+  checker refuses there too what `ArrayLike` admitted of an array typed with
+  a dtype that is no number or truth value (`np.object_`, `np.generic`,
+  `np.datetime64`, `np.timedelta64`) and of a buffer such as `memoryview`;
+  the call still converts an object array of numbers.
   `scripts/check_parameter_annotations.py` fails on a `Literal` choice beside
   an alternative that takes any text, and rule A59 of the contributor guide
   states it.

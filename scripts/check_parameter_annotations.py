@@ -122,12 +122,14 @@ extends, an explicit ``__init__`` or ``__call__`` included):
   stand side by side in one union of a parameter, an overload head, a
   public record's field or the constructor it declares, at the top or
   inside a container: numpy's ``ArrayLike`` admits any ``str`` and any
-  ``bytes``, and so do ``str``, anything and a sequence of texts (a text is
-  a sequence of texts), so ``termination: Literal["rigid", "free"] |
-  ArrayLike`` took ``"rigidd"`` as numbers and only the call refused it. A
-  choice beside numbers takes :data:`NUMERIC_ARRAY_LIKE`, the package's
-  array-like of numbers, which is ``ArrayLike`` without its texts and is
-  read as ``ArrayLike`` is by every other part of the rule;
+  ``bytes``, and so do ``str``, ``LiteralString``, numpy's ``DTypeLike``,
+  anything, a sequence of texts (a text is a sequence of texts) and a type
+  parameter bound to one of them or to nothing, so ``termination:
+  Literal["rigid", "free"] | ArrayLike`` took ``"rigidd"`` as numbers and
+  only the call refused it. A choice beside numbers takes
+  :data:`NUMERIC_ARRAY_LIKE`, the package's array-like of numbers, which is
+  ``ArrayLike`` without its texts and without arrays typed with another
+  dtype, and is read as ``ArrayLike`` is by every other part of the rule;
 * a parameter whose annotation holds ``list``, ``dict`` or ``set``
   anywhere, at the top or inside (``Mapping[str, dict[str, str]]``),
   fails whatever the body does, on the implementation and on every head:
@@ -265,12 +267,19 @@ _TEXT_CONTAINERS = frozenset(
     }
 )
 
-#: The annotations that take any text as they stand: ``str`` and the
-#: protocols every text satisfies, besides ``ArrayLike`` (numpy's admits a
-#: ``str`` and a ``bytes``) and anything.
+#: The annotations that take any text as they stand, besides ``ArrayLike``
+#: (numpy's admits a ``str`` and a ``bytes``) and anything: ``str``, the
+#: ``LiteralString`` every text written in the source is, numpy's
+#: ``DTypeLike`` (it admits any ``str``, read as the name of a dtype) by the
+#: spellings ``ArrayLike`` has, and the protocols every text satisfies.
 _TEXT_WHOLES = frozenset(
     {
         "builtins.str",
+        "typing.LiteralString",
+        "typing_extensions.LiteralString",
+        "numpy.typing.DTypeLike",
+        "numpy._typing.DTypeLike",
+        "numpy._typing._dtype_like.DTypeLike",
         "typing.Hashable",
         "typing.Sized",
         "collections.abc.Hashable",
@@ -279,10 +288,11 @@ _TEXT_WHOLES = frozenset(
 )
 
 #: The package's array-like of numbers, by its name below the package:
-#: numpy's ``ArrayLike`` without its texts. The classes its members name (the
-#: protocols of a nested sequence and of an object that converts itself) are
-#: read as ``ArrayLike`` is wherever an array-like of numbers is asked for,
-#: and never where a text is: a window's ``("kaiser", 8.6)`` is no number.
+#: numpy's ``ArrayLike`` without its texts and without arrays typed with
+#: another dtype. The classes its members name (the protocols of a nested
+#: sequence and of an object that converts itself) are read as ``ArrayLike``
+#: is wherever an array-like of numbers is asked for, and never where a text
+#: is: a window's ``("kaiser", 8.6)`` is no number.
 NUMERIC_ARRAY_LIKE = "_internal.types.NumericArrayLike"
 
 #: The containers whose element type is invariant, by every spelling.
@@ -1061,13 +1071,22 @@ class Annotations:
                     stack.extend(self.members(where, inner))
         return sorted(set(found))
 
-    def admits_any_text(self, module: str, member: ast.expr, depth: int = 0) -> bool:
+    def admits_any_text(
+        self,
+        module: str,
+        member: ast.expr,
+        bounds: dict[str, ast.expr] | None = None,
+        depth: int = 0,
+    ) -> bool:
         """Whether one member of an annotation takes any text a caller writes.
 
         ``ArrayLike`` (numpy's admits a ``str`` and a ``bytes``), anything,
-        ``str`` and the protocols a text satisfies, or a sequence, an
-        iterable or a collection whose items take one, since a text is a
-        sequence of texts. The package's array-like of numbers takes none.
+        ``str``, ``LiteralString``, numpy's ``DTypeLike`` and the protocols
+        a text satisfies, or a sequence, an iterable or a collection whose
+        items take one, since a text is a sequence of texts. A type
+        parameter of the items is read as *bounds* gives it, as one at the
+        top already is by :meth:`members`. The package's array-like of
+        numbers takes none.
         """
         dotted = self.resolve(module, member)
         if dotted in _ARRAY_LIKE | _ANYTHING | _TEXT_WHOLES:
@@ -1076,9 +1095,11 @@ class Annotations:
             return False
         items = [item for item in _items(member) if not _is_ellipsis(item)]
         return not items or any(
-            self.admits_any_text(where, inner, depth + 1)
+            self.admits_any_text(
+                where, inner, bounds if where == module else None, depth + 1
+            )
             for item in items
-            for where, inner in self.members(module, item)
+            for where, inner in self.members(module, item, bounds)
         )
 
     def swallowed_choices(
@@ -1088,10 +1109,12 @@ class Annotations:
 
         Every union of the annotation is read, at the top and inside a
         container or a mapping (``Sequence[Literal["a"] | ArrayLike]``), its
-        aliases spelt out. A ``Literal`` of texts beside ``ArrayLike``,
-        ``str``, anything or a sequence of texts offers nothing a misspelt
-        choice is refused by: the other alternative takes it. Each comes as
-        the ``Literal`` and the alternative, as written.
+        aliases spelt out and each type parameter of *bounds* read as what
+        it stands for, wherever the annotation's own module names it. A
+        ``Literal`` of texts beside ``ArrayLike``, ``str``, ``DTypeLike``,
+        anything or a sequence of texts offers nothing a misspelt choice is
+        refused by: the other alternative takes it. Each comes as the
+        ``Literal`` and the alternative, as written.
         """
         found: list[tuple[str, str]] = []
         stack: list[tuple[str, ast.expr, dict[str, ast.expr]]] = (
@@ -1110,7 +1133,7 @@ class Annotations:
             takers = [
                 ast.unparse(member)
                 for inner, member in members
-                if self.admits_any_text(inner, member)
+                if self.admits_any_text(inner, member, own if inner == where else None)
             ]
             if choices and takers:
                 found.append((choices[0], takers[0]))
@@ -1122,7 +1145,7 @@ class Annotations:
                     continue
                 for item in _items(member):
                     stack.extend(
-                        (inner, each, {})
+                        (inner, each, own if inner == where else {})
                         for each in (
                             item.elts if isinstance(item, ast.List) else [item]
                         )
@@ -1182,6 +1205,24 @@ def _type_bounds(
                 bound = union
             bounds[parameter.name] = bound
     return bounds
+
+
+def _choice_parameters(
+    *nodes: ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef | None,
+) -> dict[str, ast.expr]:
+    """The PEP 695 type parameters of *nodes* as the choice part reads them.
+
+    One with a bound or constraints stands for them, as :func:`_type_bounds`
+    gives them, and one with neither for ``object``: a type checker solves
+    it to ``str`` for a misspelt choice written beside it, so it takes any
+    text.
+    """
+    found: dict[str, ast.expr] = {}
+    for node in nodes:
+        for parameter in getattr(node, "type_params", None) or []:
+            if isinstance(parameter, ast.TypeVar) and parameter.bound is None:
+                found[parameter.name] = ast.Name(id="object", ctx=ast.Load())
+    return {**found, **_type_bounds(*nodes)}
 
 
 def _is_type_parameter(written: ast.expr | None, own: dict[str, ast.expr]) -> bool:
@@ -1787,15 +1828,19 @@ class Reader:
         self._public_records: frozenset[str] | None = None
         self._inputs: frozenset[str] | None = None
 
-    def _bounds(self, function: overloads.Function) -> dict[str, ast.expr]:
-        owner = (
+    def owner(self, function: overloads.Function) -> ast.ClassDef | None:
+        """The class a method is written in, ``None`` for a function."""
+        found = (
             self.annotations.classes.get(
                 f"{function.module}.{function.owner.split('.')[-1]}"
             )
             if function.owner
             else None
         )
-        return _type_bounds(function.implementation, owner[1] if owner else None)
+        return found[1] if found else None
+
+    def _bounds(self, function: overloads.Function) -> dict[str, ast.expr]:
+        return _type_bounds(function.implementation, self.owner(function))
 
     def _method(self, owner: str, name: str, depth: int = 0) -> str | None:
         """A method a class defines or takes from a class of the package it extends."""
@@ -2719,11 +2764,14 @@ def _choice_findings(
     """The parameters that set a ``Literal`` choice beside an alternative that takes any text.
 
     Each definition a caller can reach is read, the implementation and every
-    overload head: a head is what a type checker matches a call against.
+    overload head: a head is what a type checker matches a call against. A
+    type parameter of the definition or of its class is read as
+    :func:`_choice_parameters` gives it.
     """
     found: list[Finding] = []
+    owner = reader.owner(function)
     for node in function.definitions:
-        own = {**bounds, **_type_bounds(node)}
+        own = {**bounds, **_choice_parameters(owner), **_choice_parameters(node)}
         for parameter in _arguments(node, method=method):
             for choice, taker in reader.annotations.swallowed_choices(
                 function.module, parameter.annotation, own
@@ -2746,18 +2794,23 @@ def _record_choice_findings(reader: Reader, root: pathlib.Path) -> list[Finding]
 
     A record's generated ``__init__`` takes each field as annotated, and a
     ``TYPE_CHECKING`` ``__init__`` is what a type checker reads instead: a
-    ``Literal`` beside an alternative that takes any text is read in both.
+    ``Literal`` beside an alternative that takes any text is read in both,
+    each type parameter of the class that writes it read as
+    :func:`_choice_parameters` gives it.
     """
     package = reader.package
     annotations = reader.annotations
     found: list[Finding] = []
     for record in public_records(package, annotations):
-        module = annotations.classes[record][0]
+        module, node = annotations.classes[record]
         path = repository_path(package.paths[module], root)
         shown = record.removeprefix(f"{module}.")
         for field in record_fields(package, annotations, record).values():
+            written_in = annotations.classes.get(field.record)
             for choice, taker in annotations.swallowed_choices(
-                field.module, field.annotation, {}
+                field.module,
+                field.annotation,
+                _choice_parameters(written_in[1] if written_in else None),
             ):
                 found.append(
                     Finding(
@@ -2774,7 +2827,7 @@ def _record_choice_findings(reader: Reader, root: pathlib.Path) -> list[Finding]
             continue
         for parameter in _arguments(stub, method=True):
             for choice, taker in annotations.swallowed_choices(
-                module, parameter.annotation, {}
+                module, parameter.annotation, _choice_parameters(node, stub)
             ):
                 found.append(
                     Finding(
@@ -5327,7 +5380,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             "arguments; a window SciPy reads as a name or a "
             "tuple of a name and its parameters; a Literal choice beside "
             "numbers with NumericArrayLike (src/phonometry/_internal/types.py), "
-            "never ArrayLike, str or a sequence of texts, which take any text; "
+            "never ArrayLike, str, DTypeLike or a sequence of texts, which take "
+            "any text; "
             "a sample rate as the "
             "float every 'fs' of the API is. A parameter narrower on purpose "
             "goes in EXEMPT, a quantity of another family in FAMILY_EXEMPT, a "

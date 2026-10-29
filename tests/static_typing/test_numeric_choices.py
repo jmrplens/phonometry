@@ -9,11 +9,12 @@ and the ``termination`` of ``materials.layered_absorber`` and of
 ArrayLike``, and numpy's ``ArrayLike`` admits any ``str``, so
 ``termination="rigidd"`` type-checked as numbers and only the call refused it.
 Beside the ``Literal`` they take the package's array-like of numbers now,
-which is ``ArrayLike`` without its texts. Every call below runs; each refused
-one carries the code mypy refuses it with, and CI type checks every file in
-this directory with unused ignores reported, so a refusal that goes fails the
-build. ``scripts/check_parameter_annotations.py`` holds every public
-parameter to the rule.
+which is ``ArrayLike`` without its texts and without arrays typed with another
+dtype. Every call below runs; each refused one carries the code mypy refuses
+it with, and CI type checks every file in this directory with unused ignores
+reported, so a refusal that goes fails the build.
+``scripts/check_parameter_annotations.py`` holds every public parameter to the
+rule.
 """
 
 from __future__ import annotations
@@ -63,7 +64,7 @@ def _numbers(values: NumericArrayLike) -> NDArray[np.complex128]:
     return np.asarray(values, dtype=np.complex128)
 
 
-def test_the_array_like_of_numbers_takes_every_form_numpy_converts() -> None:
+def test_the_array_like_of_numbers_takes_the_listed_forms_of_numbers() -> None:
     """A number, a numpy number, nested sequences, arrays and what converts itself."""
     integers: NDArray[np.int64] = np.arange(3, dtype=np.int64)
     flags: NDArray[np.bool_] = np.ones(3, dtype=np.bool_)
@@ -105,6 +106,29 @@ def test_the_array_like_of_numbers_refuses_every_text() -> None:
         _numbers(texts)  # type: ignore[arg-type]
     with pytest.raises(ValueError, match="malformed string"):
         _numbers(words)  # type: ignore[arg-type]
+
+
+def test_the_array_like_of_numbers_refuses_an_array_typed_with_another_dtype() -> None:
+    """An object, generic, date or duration array, or a buffer, is typed as no numbers.
+
+    ``ArrayLike`` admitted each of them, and numpy converts each of them all
+    the same, an object array of numbers among them: a leniency the type
+    does not state. The type of an object array says nothing of what it
+    holds, and ``NDArray[np.generic]`` cannot be admitted without an array
+    of texts, whose dtype is one.
+    """
+    objects: NDArray[np.object_] = np.array([1.0, 2.0], dtype=object)
+    generic: NDArray[np.generic] = np.zeros(2)
+    dates: NDArray[np.datetime64] = np.array(["2026-10-29"], dtype="datetime64[D]")
+    durations: NDArray[np.timedelta64] = np.array([1], dtype="timedelta64[s]")
+    converted = [
+        _numbers(objects),  # type: ignore[arg-type]
+        _numbers(generic),  # type: ignore[arg-type]
+        _numbers(dates),  # type: ignore[arg-type]
+        _numbers(durations),  # type: ignore[arg-type]
+        _numbers(memoryview(b"ab")),  # type: ignore[arg-type]
+    ]
+    assert [form.shape for form in converted] == [(2,), (2,), (1,), (1,), (2,)]
 
 
 def test_a_time_weighting_starts_from_a_choice_or_numbers() -> None:

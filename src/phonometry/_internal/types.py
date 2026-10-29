@@ -28,7 +28,9 @@ class SupportsNumericArray(Protocol):
 
     A numpy array of a number or truth-value dtype, a numpy scalar, or an
     object of another library that converts itself so. An array of texts
-    does not.
+    does not, nor does one typed with another dtype: an object array, whose
+    type says nothing of what it holds, an array of dates or durations, and
+    one typed ``NDArray[np.generic]``, which an array of texts is.
     """
 
     def __array__(self) -> np.ndarray[Any, np.dtype[np.number[Any] | np.bool_]]: ...
@@ -56,15 +58,18 @@ class NestedSequence[T](Protocol):
     def index(self, value: Any, /) -> int: ...  # noqa: ANN401
 
 
-#: What ``np.asarray`` converts to an array of numbers: a number (a ``bool``,
-#: an ``int``, a ``float`` or a ``complex``), a sequence of numbers at any
-#: depth, a numpy number or array of a number dtype, anything else whose
-#: ``__array__`` gives one, and a sequence of such arrays. It is numpy's
-#: ``ArrayLike`` without its texts: ``ArrayLike`` admits any ``str`` and any
-#: ``bytes``, so beside a ``Literal`` of choices (``termination:
-#: TerminationName | ArrayLike``) it took a misspelt choice as numbers, which
-#: only the call refused. Beside a ``Literal`` this alias stands for the
-#: numbers, and a text that is not one of the choices is a type error.
+#: The forms of numbers ``np.asarray`` converts to an array of numbers: a
+#: number (a ``bool``, an ``int``, a ``float`` or a ``complex``), a sequence
+#: of numbers at any depth, a numpy number or array of a number or
+#: truth-value dtype, anything else whose ``__array__`` gives one, and a
+#: sequence of such arrays. It is numpy's ``ArrayLike`` without its texts,
+#: and without the arrays typed with another dtype (object, ``np.generic``,
+#: dates, durations) and the buffers ``ArrayLike`` admits: ``ArrayLike``
+#: admits any ``str`` and any ``bytes``, so beside a ``Literal`` of choices
+#: (``termination: TerminationName | ArrayLike``) it took a misspelt choice
+#: as numbers, which only the call refused. Beside a ``Literal`` this alias
+#: stands for the numbers, and a text that is not one of the choices is a
+#: type error.
 NumericArrayLike = (
     complex
     | NestedSequence[complex]

@@ -1848,12 +1848,15 @@ def test_a_choice_beside_an_alternative_that_takes_any_text_is_refused(
 ) -> None:
     """``ArrayLike`` admits any ``str``, so a misspelt choice beside it type-checks.
 
-    A ``Literal`` of texts is refused beside ``ArrayLike``, ``str`` or a
-    sequence of texts, at the top or inside a container, written or behind
-    an alias of an alias, on an overload head, in a record's field and in
-    the constructor a record declares. Beside the package's array-like of
-    numbers, beside a pair or as a mapping's key, and as integer choices, it
-    passes, and so does a private helper.
+    A ``Literal`` of texts is refused beside ``ArrayLike``, ``str``,
+    ``LiteralString``, numpy's ``DTypeLike``, a sequence of texts or a type
+    parameter that takes a text (one bound to ``str``, or one with no bound,
+    which a type checker solves to ``str``), at the top or inside a
+    container, written or behind an alias of an alias, on an overload head,
+    in a record's field, a generic record's included, and in the constructor
+    a record declares. Beside the package's array-like of numbers, beside a
+    pair, beside a type parameter bound to a number or as a mapping's key,
+    and as integer choices, it passes, and so does a private helper.
     """
     refused = _refused(
         tmp_path,
@@ -1862,7 +1865,9 @@ def test_a_choice_beside_an_alternative_that_takes_any_text_is_refused(
             "_internal.types": _NUMERIC_TYPES,
             "api": """
             from dataclasses import dataclass
-            from typing import Literal
+            from typing import Literal, LiteralString
+
+            from numpy.typing import DTypeLike
 
             from ._internal.types import NumericArrayLike
 
@@ -1873,7 +1878,8 @@ def test_a_choice_beside_an_alternative_that_takes_any_text_is_refused(
             __all__ = [
                 "written", "aliased", "banded", "nested", "texts", "text",
                 "headed", "Ground", "Built", "numeric", "paired", "keyed",
-                "whole",
+                "whole", "dtyped", "spelt_text", "bound", "bound_inside",
+                "bound_items", "open_parameter", "Held", "bound_numbers",
             ]
 
             def written(termination: Literal["rigid", "free"] | ArrayLike) -> None: ...
@@ -1918,6 +1924,24 @@ def test_a_choice_beside_an_alternative_that_takes_any_text_is_refused(
 
             def whole(fraction: Literal[1, 3] | ArrayLike) -> None: ...
 
+            def dtyped(dtype: Literal["auto"] | DTypeLike = "auto") -> None: ...
+
+            def spelt_text(name: Termination | LiteralString) -> None: ...
+
+            def bound[T: str](state: Termination | T) -> None: ...
+
+            def bound_inside[T: (str, bytes)](terms: Sequence[Termination | T]) -> None: ...
+
+            def bound_items[T: str](labels: Literal["auto"] | Sequence[T]) -> None: ...
+
+            def open_parameter[T](state: Termination | T) -> T: ...
+
+            @dataclass(frozen=True)
+            class Held[T: str]:
+                resistivity: Literal["G", "H"] | T
+
+            def bound_numbers[T: float](state: Termination | T) -> None: ...
+
             def _helper(termination: Termination | ArrayLike) -> None: ...
             """,
         },
@@ -1925,10 +1949,17 @@ def test_a_choice_beside_an_alternative_that_takes_any_text_is_refused(
     assert sorted(refused) == [
         "Built.__init__(resistivity)",
         "Ground(resistivity)",
+        "Held(resistivity)",
         "aliased(termination)",
         "banded(values)",
+        "bound(state)",
+        "bound_inside(terms)",
+        "bound_items(labels)",
+        "dtyped(dtype)",
         "headed(state)",
         "nested(terms)",
+        "open_parameter(state)",
+        "spelt_text(name)",
         "text(name)",
         "texts(labels)",
         "written(termination)",

@@ -53,7 +53,7 @@ def _air(shape: tuple[int, int]) -> NDArray[np.float64]:
 
 
 def _sponge(m: ModuleType, kw: dict[str, Any]) -> Engine:
-    sim = m.FDTD2D(_air((48, 64)), 0.01, absorbing_layer_cells=8, **kw)
+    sim = m.FDTD2D(c=_air((48, 64)), dx=0.01, absorbing_layer_cells=8, **kw)
     sim.add_source(m.GaussianPulse(ix=20, iy=24, half_width_s=4e-5))
     return sim
 
@@ -61,7 +61,7 @@ def _sponge(m: ModuleType, kw: dict[str, Any]) -> Engine:
 def _impedance(m: ModuleType, kw: dict[str, Any]) -> Engine:
     z = np.linspace(300.0, 900.0, 48)
     sim = m.FDTD2D(
-        343.0, 0.01, shape=(48, 64), edge_impedance={"left": z, "top": 413.0}, **kw
+        c=343.0, dx=0.01, shape=(48, 64), edge_impedance={"left": z, "top": 413.0}, **kw
     )
     sim.add_source(m.CWSource(ix=12, iy=14, frequency=2500.0))
     return sim
@@ -73,7 +73,7 @@ def _obstacle_damping(m: ModuleType, kw: dict[str, Any]) -> Engine:
     damping = np.zeros((48, 64))
     damping[38:, :] = 400.0
     sim = m.FDTD2D(
-        _air((48, 64)), 0.01, rho=1.21, obstacle_mask=mask, damping=damping, **kw
+        c=_air((48, 64)), dx=0.01, rho=1.21, obstacle_mask=mask, damping=damping, **kw
     )
     samples = np.sin(np.linspace(0.0, 30.0, 400))
     sim.add_source(m.SignalSource(ix=12, iy=28, samples=samples, fs=192000.0))
@@ -82,8 +82,8 @@ def _obstacle_damping(m: ModuleType, kw: dict[str, Any]) -> Engine:
 
 def _plane_wave(m: ModuleType, kw: dict[str, Any]) -> Engine:
     sim = m.FDTD2D(
-        343.0,
-        0.01,
+        c=343.0,
+        dx=0.01,
         shape=(64, 48),
         absorbing_layer_cells=10,
         absorbing_sides=("top", "bottom"),
@@ -96,7 +96,7 @@ def _plane_wave(m: ModuleType, kw: dict[str, Any]) -> Engine:
 
 
 def _contour(m: ModuleType, kw: dict[str, Any]) -> Engine:
-    sim = m.FDTD2D(343.0, 0.01, shape=(48, 48), absorbing_layer_cells=8, **kw)
+    sim = m.FDTD2D(c=343.0, dx=0.01, shape=(48, 48), absorbing_layer_cells=8, **kw)
     sim.add_source(m.CWSource(ix=24, iy=24, frequency=3000.0))
     sim.add_contour_probe(14, 33, 14, 33, frequencies=[3000.0, 1500.0])
     return sim
@@ -109,9 +109,9 @@ def _elastic_layers(m: ModuleType, kw: dict[str, Any]) -> Engine:
     rho = np.full((ny, nx), 1000.0)
     c_p[12:, :], c_s[12:, :], rho[12:, :] = 4000.0, 2300.0, 2500.0
     sim = m.ElasticFDTD2D(
-        c_p,
-        c_s,
-        0.01,
+        c_p=c_p,
+        c_s=c_s,
+        dx=0.01,
         rho=rho,
         absorbing_layer_cells=8,
         absorbing_sides=("left", "right", "bottom"),
@@ -130,9 +130,9 @@ def _elastic_force_obstacle(m: ModuleType, kw: dict[str, Any]) -> Engine:
     mask = np.zeros((ny, nx), dtype=bool)
     mask[15:20, 15:20] = True
     sim = m.ElasticFDTD2D(
-        5000.0,
-        3000.0,
-        0.01,
+        c_p=5000.0,
+        c_s=3000.0,
+        dx=0.01,
         rho=7800.0,
         shape=(ny, nx),
         obstacle_mask=mask,

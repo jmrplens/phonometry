@@ -573,7 +573,7 @@ sigma = np.zeros((3, nx))
 c[:, -d_cells:] = 0.6 * c0                # the sample: slower,
 rho[:, -d_cells:] = 3.0 * rho0            # denser and lossy
 sigma[:, -d_cells:] = 600.0
-sim = FDTD2D(c, dx, rho=rho, damping=sigma,
+sim = FDTD2D(c=c, dx=dx, rho=rho, damping=sigma,
              edge_impedance={"left": rho0 * c0})   # anechoic source end
 sim.add_plane_wave("right", center_m=0.35, half_width_m=0.05)
 mics = (219, 229)                         # the ISO microphone pair

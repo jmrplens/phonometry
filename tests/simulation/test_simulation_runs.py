@@ -477,7 +477,7 @@ def test_the_acoustic_engine_refuses_an_impedance_that_is_no_real_number(
     value: object,
 ) -> None:
     with pytest.raises(TypeError, match="impedance for side 'left' must be a real"):
-        FDTD2D(np.full((8, 8), 343.0), 0.01, edge_impedance={"left": value})  # type: ignore[dict-item]
+        FDTD2D(c=np.full((8, 8), 343.0), dx=0.01, edge_impedance={"left": value})  # type: ignore[dict-item]
 
 
 def test_no_boundaries_is_rigid_on_all_four_sides() -> None:
@@ -600,20 +600,26 @@ def test_a_shape_beside_a_map_names_the_map_s_grid(engine: Engine) -> None:
         _over_a_map(engine, (4, 8))
     if engine == "acoustic":
         with pytest.raises(ValueError, match=match):
-            FDTD2D(np.full((8, 8), 343.0), 0.01, shape=(4, 8))
+            FDTD2D(c=np.full((8, 8), 343.0), dx=0.01, shape=(4, 8))
         with pytest.raises(TypeError, match="shape must be a pair"):
-            FDTD2D(np.full((8, 8), 343.0), 0.01, shape="garbage")  # type: ignore[arg-type]
-        assert FDTD2D(np.full((8, 8), 343.0), 0.01, shape=[8, np.int64(8)]).c.shape == (
+            FDTD2D(c=np.full((8, 8), 343.0), dx=0.01, shape="garbage")  # type: ignore[arg-type]
+        assert FDTD2D(
+            c=np.full((8, 8), 343.0), dx=0.01, shape=[8, np.int64(8)]
+        ).c.shape == (
             8,
             8,
         )
         return
     with pytest.raises(ValueError, match=match):
-        ElasticFDTD2D(np.full((8, 8), 4000.0), 2300.0, 0.01, rho=2500.0, shape=(4, 8))
+        ElasticFDTD2D(
+            c_p=np.full((8, 8), 4000.0), c_s=2300.0, dx=0.01, rho=2500.0, shape=(4, 8)
+        )
     with pytest.raises(TypeError, match="shape must be a pair"):
-        ElasticFDTD2D(np.full((8, 8), 4000.0), 2300.0, 0.01, rho=2500.0, shape="xx")  # type: ignore[arg-type]
+        ElasticFDTD2D(
+            c_p=np.full((8, 8), 4000.0), c_s=2300.0, dx=0.01, rho=2500.0, shape="xx"
+        )  # type: ignore[arg-type]
     assert ElasticFDTD2D(
-        4000.0, 2300.0, 0.01, rho=2500.0, shape=[np.int64(8), 8]
+        c_p=4000.0, c_s=2300.0, dx=0.01, rho=2500.0, shape=[np.int64(8), 8]
     ).c_p.shape == (8, 8)
 
 

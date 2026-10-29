@@ -606,6 +606,7 @@ posición:
 | `noise_control.LiquidPipe(d, t, rho, c, rho_air, c_air)` | `LiquidPipe(internal_diameter_m=d, wall_thickness_m=t, density=rho, speed_of_sound=c, air_density=rho_air, air_sound_speed=c_air)` |
 | `underwater.FluidSeabed(rho, c, rho_water)` | `FluidSeabed(density=rho, speed_of_sound=c, water_density=rho_water)` |
 | `io.Signal(data, fs, cal)` | `io.Signal(data, fs, calibration_factor=cal)`, y `channel_labels`, `provenance` y `source` por su nombre |
+| `simulation.FDTD2D(c, dx, ...)` (3.3.0) y `simulation.ElasticFDTD2D(c_p, c_s, dx, rho=..., ...)` (4.0.0rc1) | `FDTD2D(c=c, dx=dx, ...)` y `ElasticFDTD2D(c_p=c_p, c_s=c_s, dx=dx, rho=..., ...)`: todos los argumentos por su nombre, como toman los suyos `FDTDRun` y `ElasticRun`. `FDTD2D(0.01, 343.0, shape=...)`, con la velocidad y el paso de malla intercambiados, construía un motor de celdas de 343 m y un paso de tiempo de unas cuatro horas |
 
 Un parámetro cuyo nombre lleva su unidad y que tiene valor por defecto se
 escribe también por su nombre. `noise_signal(fs, 2.0)` se lee como dos

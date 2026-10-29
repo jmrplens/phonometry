@@ -189,9 +189,9 @@ Source waveform at time `t` (seconds).
 
 ```python
 FDTD2D(
+    *,
     c: ArrayLike,
     dx: float,
-    *,
     rho: ArrayLike = 1.2,
     cfl: float = 0.6,
     absorbing_layer_cells: int | np.integer[Any] = 0,

@@ -74,7 +74,7 @@ take it as `compute=`:
 
 ```py
 gpu = simulation.Compute(device="cupy")
-sim = simulation.FDTD2D(343.0, 0.01, shape=(200, 300), compute=gpu)
+sim = simulation.FDTD2D(c=343.0, dx=0.01, shape=(200, 300), compute=gpu)
 run = simulation.FDTDRun(
     c=343.0, dx=0.01, duration_s=2.0e-3, shape=(200, 300),
     sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
@@ -313,7 +313,7 @@ device, so make it inside `with cupy.cuda.Device(i):` with `i` the engine's
 index.
 
 ```python
-sim = simulation.FDTD2D(343.0, 0.01, shape=(100, 150), compute=simulation.Compute(dtype="float32"))
+sim = simulation.FDTD2D(c=343.0, dx=0.01, shape=(100, 150), compute=simulation.Compute(dtype="float32"))
 sim.add_source(simulation.GaussianPulse(ix=30, iy=50, half_width_s=3.0e-4))
 frames = sim.run(200, snapshot_every=50, snapshot_decimation=2)
 field = sim.numpy_field("p")

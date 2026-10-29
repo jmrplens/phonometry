@@ -99,7 +99,7 @@ def _ntff_monopole() -> tuple[Any, complex, float]:
 
     c, dx, f = 343.0, 0.005, 2000.0
     k = 2.0 * np.pi * f / c
-    sim = ph.simulation.FDTD2D(c, dx, shape=(300, 300), absorbing_layer_cells=40)
+    sim = ph.simulation.FDTD2D(c=c, dx=dx, shape=(300, 300), absorbing_layer_cells=40)
     sim.add_source(ph.simulation.CWSource(ix=150, iy=150, frequency=f, ramp_cycles=4.0))
     probe = sim.add_contour_probe(90, 210, 90, 210, frequencies=[f])
     sim.run(round(4.5e-3 / sim.dt))

@@ -90,8 +90,8 @@ def _meshed_metadiffuser_ntff_levels() -> tuple[Any, Any]:
     # cfl 0.9 trims the step count; at 340 cells per wavelength the
     # numerical dispersion is negligible at any stable Courant number.
     sim = FDTD2D(
-        343.0,
-        dx,
+        c=343.0,
+        dx=dx,
         shape=(ny, nx),
         absorbing_layer_cells=sponge,
         cfl=0.9,
@@ -257,8 +257,8 @@ def _meta_pair(
     every = 33
     sims = [
         FDTD2D(
-            c0,
-            dx,
+            c=c0,
+            dx=dx,
             rho=rho,
             shape=(_META_NY, _META_NX),
             absorbing_layer_cells=200,

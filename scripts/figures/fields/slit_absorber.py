@@ -209,8 +209,8 @@ def _slit_absorber_fields(
             rho_map[sl] = rho_e * scale
             sig_map[sl] = sig_e
         sim = FDTD2D(
-            c_map,
-            dx,
+            c=c_map,
+            dx=dx,
             rho=rho_map,
             damping=sig_map,
             cfl=0.95,

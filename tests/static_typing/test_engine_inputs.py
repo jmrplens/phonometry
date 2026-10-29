@@ -14,6 +14,7 @@ public parameter to the rule; this file holds the forms a caller writes.
 
 from __future__ import annotations
 
+import inspect
 import math
 from typing import TYPE_CHECKING
 
@@ -71,8 +72,8 @@ def test_a_run_takes_its_maps_as_nested_lists() -> None:
 
 def test_an_engine_takes_its_maps_as_nested_lists() -> None:
     sim = FDTD2D(
-        [[343.0] * _NX] * _NY,
-        0.01,
+        c=[[343.0] * _NX] * _NY,
+        dx=0.01,
         rho=[[1.2] * _NX] * _NY,
         damping=[[0.0] * _NX] * _NY,
         edge_impedance={"left": [413.0] * _NY},
@@ -80,13 +81,33 @@ def test_an_engine_takes_its_maps_as_nested_lists() -> None:
     )
     assert sim.c.shape == (_NY, _NX)
     elastic = ElasticFDTD2D(
-        [[4000.0] * _NX] * _NY,
-        [[2300.0] * _NX] * _NY,
-        0.01,
+        c_p=[[4000.0] * _NX] * _NY,
+        c_s=[[2300.0] * _NX] * _NY,
+        dx=0.01,
         rho=[[2700.0] * _NX] * _NY,
         free_sides=("top", "bottom"),
     )
     assert elastic.free_sides == ("top", "bottom")
+
+
+def test_an_engine_takes_its_medium_by_name_only() -> None:
+    """A wave speed and a grid spacing given by position are refused, by mypy too.
+
+    ``FDTD2D(0.01, 343.0, shape=...)``, the speed and the spacing swapped,
+    built an engine whose time step was hours long, and
+    ``ElasticFDTD2D(4000.0, 0.01, 2300.0, ...)`` one whose shear speed was the
+    spacing and whose cells were 2300 m wide. The runs that wrap the engines
+    take every field by name, and so do the engines.
+    """
+    with pytest.raises(TypeError, match="positional argument"):
+        FDTD2D(0.01, 343.0, shape=(_NY, _NX))  # type: ignore[call-arg]
+    with pytest.raises(TypeError, match="positional argument"):
+        ElasticFDTD2D(  # type: ignore[call-arg]
+            4000.0, 0.01, 2300.0, rho=2700.0, shape=(_NY, _NX)
+        )
+    for built in (FDTD2D, ElasticFDTD2D, FDTDRun, ElasticRun):
+        kinds = {p.kind for p in inspect.signature(built).parameters.values()}
+        assert kinds == {inspect.Parameter.KEYWORD_ONLY}, built.__name__
 
 
 def test_a_float32_map_is_held_as_given() -> None:
@@ -133,7 +154,7 @@ def test_a_numpy_integer_is_a_cell_index_and_a_count() -> None:
         boundaries=boundaries,
     )
     assert run.shape == (_NY, _NX)
-    sim = FDTD2D(343.0, 0.01, shape=shape, absorbing_layer_cells=np.int64(2))
+    sim = FDTD2D(c=343.0, dx=0.01, shape=shape, absorbing_layer_cells=np.int64(2))
     sim.add_contour_probe(
         np.int64(4), np.int64(6), np.int64(4), np.int64(6), frequencies=[1000.0]
     )
@@ -185,9 +206,9 @@ def test_a_misspelt_side_is_a_type_error_and_refused_when_built() -> None:
         ElasticBoundaries(sides={"left": "open"})  # type: ignore[dict-item]
     with pytest.raises(ValueError, match="'free_sides' must be one of"):
         ElasticFDTD2D(
-            4000.0,
-            2300.0,
-            0.01,
+            c_p=4000.0,
+            c_s=2300.0,
+            dx=0.01,
             rho=2700.0,
             shape=(_NY, _NX),
             free_sides="middle",  # type: ignore[arg-type]
@@ -201,7 +222,7 @@ def test_the_geometry_preview_takes_the_cells_a_recording_takes() -> None:
     pytest.importorskip("matplotlib")
     import matplotlib.pyplot as plt
 
-    sim = FDTD2D(343.0, 0.01, shape=(_NY, _NX))
+    sim = FDTD2D(c=343.0, dx=0.01, shape=(_NY, _NX))
     cells = np.array([[3, 4], [5, 6]], dtype=np.int64)
     for probes in (
         [(np.int64(3), np.int64(4))],
@@ -219,7 +240,9 @@ def test_a_shape_is_any_sequence_of_two_counts_or_an_integer_array() -> None:
     pulse = GaussianPulse(ix=2, iy=2, half_width_s=4e-5)
     run = FDTDRun(c=343.0, dx=0.01, duration_s=1e-4, sources=[pulse], shape=counts)
     assert run.shape == (_NY, _NX)
-    sim = ElasticFDTD2D(4000.0, 2300.0, 0.01, rho=2500.0, shape=range(_NY, _NY + 2))
+    sim = ElasticFDTD2D(
+        c_p=4000.0, c_s=2300.0, dx=0.01, rho=2500.0, shape=range(_NY, _NY + 2)
+    )
     assert sim.c_p.shape == (_NY, _NY + 1)
     regions = ElasticFDTD2D.from_regions(
         counts, 0.01, background=(4000.0, 2300.0, 2500.0)

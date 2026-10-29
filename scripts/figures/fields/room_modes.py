@@ -69,7 +69,7 @@ def _room_mode_fields(
     p_all, r_all = [], []
     times = np.zeros(0)
     for f in (f_mode, f_off):
-        sim = FDTD2D(c0, dx, shape=(ny, nx), damping=6.9077 / t60, compute=compute)
+        sim = FDTD2D(c=c0, dx=dx, shape=(ny, nx), damping=6.9077 / t60, compute=compute)
         sim.add_source(CWSource(ix=25, iy=25, frequency=f, ramp_cycles=2.0))
         xp = sim._backend.xp
         # Running mean square with a two-period time constant: the pattern

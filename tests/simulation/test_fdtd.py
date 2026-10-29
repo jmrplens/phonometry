@@ -174,8 +174,8 @@ def _measure_edge_reflection(z_over_rhoc: float) -> float:
     """Plane-pulse reflection coefficient of the right impedance edge."""
     nx, dx = 1200, 0.01
     sim = FDTD2D(
-        C0,
-        dx,
+        c=C0,
+        dx=dx,
         rho=RHO0,
         shape=(3, nx),
         edge_impedance={"right": z_over_rhoc * RHO0 * C0},
@@ -213,8 +213,8 @@ def test_matched_impedance_edge_is_anechoic() -> None:
 
 def test_impedance_edge_dissipates_energy() -> None:
     sim = FDTD2D(
-        C0,
-        0.02,
+        c=C0,
+        dx=0.02,
         rho=RHO0,
         shape=(60, 60),
         edge_impedance={"left": RHO0 * C0, "top": 2.0 * RHO0 * C0},
@@ -237,7 +237,7 @@ def _measured_mode_frequency(nx: int, length: float = 1.0) -> tuple[float, float
     ``sin(w dt / 2) = S sin(k dx / 2)`` with ``S = c dt / dx``.
     """
     dx = length / nx
-    sim = FDTD2D(C0, dx, shape=(3, nx))
+    sim = FDTD2D(c=C0, dx=dx, shape=(3, nx))
     k = np.pi / length
     x = (np.arange(nx) + 0.5) * dx
     sim.p[:] = np.cos(k * x)[None, :]
@@ -284,12 +284,12 @@ def test_grid_refinement_converges_at_second_order() -> None:
 def test_signal_source_reproduces_gaussian_pulse() -> None:
     # A SignalSource fed with the sampled Gaussian waveform at the
     # simulation rate reproduces the GaussianPulse run.
-    sim_a = FDTD2D(C0, 0.05, shape=(40, 50))
+    sim_a = FDTD2D(c=C0, dx=0.05, shape=(40, 50))
     pulse = GaussianPulse(ix=20, iy=20, half_width_s=8 * sim_a.dt)
     sim_a.add_source(pulse)
     sim_a.run(200)
 
-    sim_b = FDTD2D(C0, 0.05, shape=(40, 50))
+    sim_b = FDTD2D(c=C0, dx=0.05, shape=(40, 50))
     t = np.arange(1, 202) * sim_b.dt
     sim_b.add_source(
         SignalSource(
@@ -397,12 +397,12 @@ def test_obstacle_mask_validation() -> None:
     open_source = GaussianPulse(ix=1, iy=1, half_width_s=1e-4)
     masked_probe = FDTDRecording(probes=[(5, 5)])
     with pytest.raises(ValueError, match="match the grid shape"):
-        FDTD2D(C0, 0.05, shape=(10, 12), obstacle_mask=mask)
+        FDTD2D(c=C0, dx=0.05, shape=(10, 12), obstacle_mask=mask)
     with pytest.raises(TypeError, match=r"obstacle_mask must be a boolean array"):
-        FDTD2D(C0, 0.05, shape=(10, 10), obstacle_mask=float_mask)
+        FDTD2D(c=C0, dx=0.05, shape=(10, 10), obstacle_mask=float_mask)
     with pytest.raises(ValueError, match=r"obstacle_mask must leave open cells"):
-        FDTD2D(C0, 0.05, shape=(10, 10), obstacle_mask=full_mask)
-    sim = FDTD2D(C0, 0.05, shape=(10, 10), obstacle_mask=mask)
+        FDTD2D(c=C0, dx=0.05, shape=(10, 10), obstacle_mask=full_mask)
+    sim = FDTD2D(c=C0, dx=0.05, shape=(10, 10), obstacle_mask=mask)
     with pytest.raises(ValueError, match="source position lies inside an obstacle"):
         sim.add_source(masked_source)
     with pytest.raises(ValueError, match=r"probe .* lies inside an obstacle"):
@@ -481,7 +481,7 @@ def test_edge_impedance_validation(
     match: str,
 ) -> None:
     with pytest.raises(ValueError, match=match):
-        FDTD2D(C0, 0.05, shape=(30, 30), edge_impedance=impedance)
+        FDTD2D(c=C0, dx=0.05, shape=(30, 30), edge_impedance=impedance)
 
 
 @pytest.mark.parametrize(
@@ -511,8 +511,8 @@ def test_side_cannot_be_absorbing_and_impedance() -> None:
         match=r"side 'left' cannot be both absorbing and an impedance boundary",
     ):
         FDTD2D(
-            C0,
-            0.05,
+            c=C0,
+            dx=0.05,
             shape=(30, 30),
             absorbing_layer_cells=5,
             absorbing_sides="left",
@@ -798,8 +798,8 @@ def test_non_integral_counts_and_coordinates_are_rejected() -> None:
     with pytest.raises(
         ValueError, match="'absorbing_layer_cells' must be a whole number"
     ):
-        FDTD2D(C0, 0.05, shape=(20, 20), absorbing_layer_cells=2.5)  # type: ignore[arg-type]
-    sim = FDTD2D(C0, 0.05, shape=(20, 20))
+        FDTD2D(c=C0, dx=0.05, shape=(20, 20), absorbing_layer_cells=2.5)  # type: ignore[arg-type]
+    sim = FDTD2D(c=C0, dx=0.05, shape=(20, 20))
     with pytest.raises(ValueError, match="'ix' must be a whole number"):
         GaussianPulse(ix=2.5, iy=3, half_width_s=1e-4)  # type: ignore[arg-type]
     with pytest.raises(ValueError, match="'n_steps' must be a whole number"):
@@ -832,7 +832,7 @@ def test_a_whole_float_cell_index_is_held_as_an_int_and_steps(index: int) -> Non
     source = _whole_float_sources()[index]
     assert type(source.ix) is int  # type: ignore[attr-defined]
     assert type(source.iy) is int  # type: ignore[attr-defined]
-    sim = FDTD2D(C0, 0.05, shape=(20, 20))
+    sim = FDTD2D(c=C0, dx=0.05, shape=(20, 20))
     sim.add_source(source)  # type: ignore[arg-type]
     sim.run(2)
     assert np.any(np.asarray(sim.p) != 0.0)
@@ -847,7 +847,7 @@ def test_a_whole_float_plane_wave_offset_is_held_as_an_int_and_steps() -> None:
         offset=1.0,  # type: ignore[arg-type]
     )
     assert type(plane.offset) is int
-    sim = FDTD2D(C0, 0.05, shape=(20, 20))
+    sim = FDTD2D(c=C0, dx=0.05, shape=(20, 20))
     sim.add_source(plane)
     sim.run(2)
     assert np.any(np.asarray(sim.p) != 0.0)
@@ -993,7 +993,7 @@ def test_the_simulation_keeps_a_medium_of_its_own() -> None:
 
 def test_the_snapshot_counts_of_run_are_taken_by_name() -> None:
     """``run(4, 2)`` read the 2 as a cadence; the records take both counts by name."""
-    sim = FDTD2D(C0, 0.05, shape=(12, 12))
+    sim = FDTD2D(c=C0, dx=0.05, shape=(12, 12))
     with pytest.raises(TypeError, match="positional argument"):
         sim.run(4, 2)  # type: ignore[misc]
     assert sim.n == 0
@@ -1010,13 +1010,13 @@ def test_the_engine_refuses_the_old_names_of_its_absorbing_layer(
     old: str, value: object
 ) -> None:
     with pytest.raises(TypeError, match=old):
-        FDTD2D(C0, 0.05, shape=(12, 12), **{old: value})
+        FDTD2D(c=C0, dx=0.05, shape=(12, 12), **{old: value})
 
 
 def test_the_engine_names_its_absorbing_layer_as_the_run_does() -> None:
     sim = FDTD2D(
-        C0,
-        0.05,
+        c=C0,
+        dx=0.05,
         shape=(20, 20),
         absorbing_layer_cells=4,
         absorbing_sides=("left", "top"),
@@ -1027,7 +1027,7 @@ def test_the_engine_names_its_absorbing_layer_as_the_run_does() -> None:
     assert not hasattr(sim, "sponge_width")
     assert not hasattr(sim, "sponge_sides")
     # No layer by default, and no side absorbs without one.
-    plain = FDTD2D(C0, 0.05, shape=(20, 20), absorbing_sides="left")
+    plain = FDTD2D(c=C0, dx=0.05, shape=(20, 20), absorbing_sides="left")
     assert plain.absorbing_layer_cells == 0
     assert plain.absorbing_sides == ()
 
@@ -1058,4 +1058,4 @@ def test_the_absorbing_layer_is_refused_in_its_own_words(
     kwargs: dict[str, object], error: type[Exception], match: str
 ) -> None:
     with pytest.raises(error, match=match):
-        FDTD2D(C0, 0.05, shape=(10, 10), **kwargs)  # type: ignore[arg-type]
+        FDTD2D(c=C0, dx=0.05, shape=(10, 10), **kwargs)  # type: ignore[arg-type]

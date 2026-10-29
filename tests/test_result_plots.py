@@ -1406,14 +1406,14 @@ def _obstacle_domain() -> object:
 
     mask = np.zeros((20, 20), dtype=bool)
     mask[8:12, 8:12] = True
-    return FDTD2D(343.0, 0.05, shape=(20, 20), obstacle_mask=mask)
+    return FDTD2D(c=343.0, dx=0.05, shape=(20, 20), obstacle_mask=mask)
 
 
 def _open_domain() -> object:
     """A domain with no obstacle, whose figure still sits on the grid."""
     from phonometry.simulation import FDTD2D
 
-    return FDTD2D(343.0, 0.05, shape=(20, 20))
+    return FDTD2D(c=343.0, dx=0.05, shape=(20, 20))
 
 
 def _snapshot_plot(result: FDTDResult | ElasticFDTDResult) -> object:

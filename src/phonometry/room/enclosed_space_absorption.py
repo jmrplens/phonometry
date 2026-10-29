@@ -30,14 +30,14 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Literal, overload
+from typing import TYPE_CHECKING, Any, Literal, cast, overload
 
 import numpy as np
 
 from .._internal.frozen import OwnsArrays, read_only
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping, Sequence
+    from collections.abc import Iterable, Mapping, Sequence
 
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
@@ -236,9 +236,17 @@ def equivalent_absorption_area(
             raise ValueError(msg)
         total = total + obj.sum(axis=0)
     # The objects are summed, so one object's entry decides the band axis
-    # they bring: a value each, or a row of bands each.
+    # they bring: a value each, or a row of bands each. The entry is read from
+    # the objects as given, not from their float copy, so a single value that
+    # is a zero-dimensional array keeps that form.
+    if not obj.size:
+        entry: tuple[ArrayLike, ...] = ()
+    elif np.ndim(objects) == 0:
+        entry = (objects,)
+    else:
+        entry = (next(iter(cast("Iterable[ArrayLike]", objects))),)
     return as_float_or_array(
-        total, like=(*(alpha for _, alpha in surfaces), air_area, *obj[:1])
+        total, like=(*(alpha for _, alpha in surfaces), air_area, *entry)
     )
 
 

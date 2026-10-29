@@ -554,6 +554,40 @@ def test_the_passage_average_is_keyed_on_axis() -> None:
     per_band = vibration.passage_average_level(levels, axis=0)
     assert isinstance(per_band, np.ndarray)
     assert per_band.shape == (2,)
+    # One dimension averaged over its axis leaves a zero-dimensional array, as
+    # the head for a given axis says, not a float.
+    reduced = vibration.passage_average_level([60.0, 70.0], axis=0)
+    assert isinstance(reduced, np.ndarray)
+    assert reduced.ndim == 0
+
+
+def test_only_the_route_k2_reads_decides_its_shape() -> None:
+    """``absorption_area`` wins over the pairs, and ``T`` over ``alpha``.
+
+    The input of a route that is not read never reaches the result, so an
+    array handed to it leaves the number the route read gave.
+    """
+    by_area = emission.environmental_correction(20.0, absorption_area=50.0)
+    unread_t = emission.environmental_correction(
+        20.0, absorption_area=50.0, reverberation_time=[1.0, 2.0], volume=100.0
+    )
+    assert type(unread_t) is float
+    assert unread_t == by_area
+    by_t = emission.environmental_correction(20.0, reverberation_time=1.0, volume=100.0)
+    unread_alpha = emission.environmental_correction(
+        20.0,
+        reverberation_time=1.0,
+        volume=100.0,
+        mean_absorption_coefficient=[0.2, 0.3],
+        room_surface=150.0,
+    )
+    assert type(unread_alpha) is float
+    assert unread_alpha == by_t
+    per_band = emission.environmental_correction(
+        20.0, absorption_area=[50.0, 60.0], reverberation_time=1.0, volume=100.0
+    )
+    assert isinstance(per_band, np.ndarray)
+    assert per_band.shape == (2,)
 
 
 def test_the_reverberation_index_is_keyed_on_weighted() -> None:

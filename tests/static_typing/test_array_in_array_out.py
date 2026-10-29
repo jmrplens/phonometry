@@ -77,6 +77,26 @@ def test_the_first_array_among_several_arguments_decides() -> None:
     )
 
 
+def test_a_route_that_is_not_read_does_not_decide() -> None:
+    """``absorption_area`` wins over the room pairs, so their arrays say nothing.
+
+    A per-band reverberation time beside an ``absorption_area`` is never read:
+    the head for it alone does not match, and the call reads as the union.
+    """
+    assert_type(
+        emission.environmental_correction(
+            20.0, reverberation_time=[1.0, 2.0], volume=100.0
+        ),
+        NDArray[np.float64],
+    )
+    assert_type(
+        emission.environmental_correction(
+            20.0, absorption_area=50.0, reverberation_time=[1.0, 2.0], volume=100.0
+        ),
+        float | NDArray[np.float64],
+    )
+
+
 def test_a_grade_is_a_letter_or_an_array_of_them() -> None:
     """The zone graders follow the same rule with a ``Literal`` for one grade."""
     assert_type(vibration.evaluation_zone(2.5, _ZONES), Literal["A", "B", "C", "D"])

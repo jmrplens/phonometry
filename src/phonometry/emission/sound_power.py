@@ -731,10 +731,10 @@ def environmental_correction[V: RealValues, A2: ArrayLike, A3: ArrayLike](
 
 
 @overload
-def environmental_correction[S1: RealScalar, V: RealValues, A3: ArrayLike](
+def environmental_correction[V: RealValues, A3: ArrayLike](
     surface_area: float,
     *,
-    absorption_area: S1 | None = None,
+    absorption_area: None = None,
     reverberation_time: V,
     volume: float | None = None,
     mean_absorption_coefficient: A3 | None = None,
@@ -743,11 +743,11 @@ def environmental_correction[S1: RealScalar, V: RealValues, A3: ArrayLike](
 
 
 @overload
-def environmental_correction[S1: RealScalar, S2: RealScalar, V: RealValues](
+def environmental_correction[V: RealValues](
     surface_area: float,
     *,
-    absorption_area: S1 | None = None,
-    reverberation_time: S2 | None = None,
+    absorption_area: None = None,
+    reverberation_time: None = None,
     volume: float | None = None,
     mean_absorption_coefficient: V,
     room_surface: float | None = None,
@@ -788,9 +788,14 @@ def environmental_correction(
     supplying only one member of a pair raises :class:`ValueError` rather than
     silently falling back to the free-field result.
 
+    The routes are tried in that order, and the first one given is the one
+    read: ``absorption_area`` wins over the two pairs, and the reverberation
+    time over the mean absorption coefficient.
+
     The room absorption is frequency dependent (``T``, ``alpha`` and hence ``A``
-    vary with the band). Passing ``absorption_area``, ``reverberation_time`` or
-    ``mean_absorption_coefficient`` as a per-band array returns ``K2`` per band
+    vary with the band). Passing the input of the route read
+    (``absorption_area``, ``reverberation_time`` or
+    ``mean_absorption_coefficient``) as a per-band array returns ``K2`` per band
     with that shape; scalar inputs return a scalar, unchanged.
 
     :param surface_area: Measurement surface area ``S``, in square metres.
@@ -802,27 +807,36 @@ def environmental_correction(
     :param mean_absorption_coefficient: ``alpha`` in (0, 1], scalar or per band,
         with ``room_surface`` (Eq. A.7).
     :param room_surface: Room boundary area ``Sv`` (m^2), with ``alpha``.
-    :return: ``K2`` in decibels, ``0.0`` without room data; a ``float`` when the room
-        data given are all numbers; an array of their broadcast shape when one is a
-        sequence or an array, a zero-dimensional one included.
+    :return: ``K2`` in decibels, ``0.0`` without room data; a ``float`` when the input
+        of the route read is a number; an array of its shape when it is a sequence or
+        an array, a zero-dimensional one included. The input of a route that is not
+        read does not shape the result.
     :raises TypeError: if ``room_surface``, ``surface_area`` or ``volume`` is not a
         single number.
     """
     surface_area = require_positive(surface_area, "surface_area")
-    given = (absorption_area, reverberation_time, mean_absorption_coefficient)
     area = absorption_area
+    read = absorption_area
     if area is None:
         area = _room_absorption_area(
             reverberation_time, volume, mean_absorption_coefficient, room_surface
         )
         if area is None:
             return 0.0  # no room data at all: the field is treated as free
+        # Both pairs are whole by now, and the reverberation time comes first.
+        read = (
+            reverberation_time
+            if reverberation_time is not None
+            else mean_absorption_coefficient
+        )
     a = np.asarray(area, dtype=np.float64)
     if np.any(a <= 0.0):
         msg = "absorption_area must be positive."
         raise ValueError(msg)
     k2 = 10.0 * np.log10(1.0 + 4.0 * surface_area / a)
-    return as_float_or_array(k2, like=given)
+    # Only the input of the route read shapes the result: an array handed to a
+    # route that is not read never reaches it.
+    return as_float_or_array(k2, like=(read,))
 
 
 def _hemisphere_position_table(

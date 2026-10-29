@@ -43,4 +43,4 @@ overrides:
 # package.json, because it is the one place the dependency and the override
 # can both read the same specifier from.
 catalog:
-  katex: ^0.19.0
+  katex: ^0.19.1

@@ -93,7 +93,7 @@ reciprocity_uncertainty_budget(
 ) -> ReciprocityUncertaintyBudget
 
 reciprocity_uncertainty_budget(
-    standard_uncertainties_db: Mapping[Literal['series_impedance', 'voltage_ratio', 'cross_talk', 'noise', 'distortion', 'frequency', 'receiver_ground_shield', 'transmitter_ground_shield', 'coupler_length', 'coupler_diameter', 'coupler_volume', 'coupler_surface_area', 'leakage', 'capillary_tube_dimensions', 'static_pressure', 'temperature', 'relative_humidity', 'front_cavity_depth', 'front_cavity_volume', 'equivalent_volume', 'resonance_frequency', 'loss_factor', 'diaphragm_compliance', 'diaphragm_mass', 'diaphragm_resistance', 'front_cavity_thread', 'polarizing_voltage', 'heat_conduction_theory', 'excess_volume', 'viscosity_losses', 'radial_wave_motion', 'rounding', 'repeatability', 'static_pressure_corrections', 'temperature_corrections'], ArrayLike] | Mapping[Literal['series_impedance', 'voltage_ratio', 'cross_talk', 'noise', 'distortion', 'reflections', 'frequency', 'receiver_shield', 'transmitter_shield', 'distance', 'static_pressure', 'temperature', 'relative_humidity', 'standing_waves', 'air_attenuation', 'acoustic_centers', 'polarizing_voltage', 'plane_wave_deviation', 'mathematical_manipulations', 'rounding', 'repeatability', 'static_pressure_corrections', 'temperature_corrections'], ArrayLike],
+    standard_uncertainties_db: Mapping[Literal['series_impedance', 'voltage_ratio', 'cross_talk', 'noise', 'distortion', 'frequency', 'static_pressure', 'temperature', 'relative_humidity', 'polarizing_voltage', 'rounding', 'repeatability', 'static_pressure_corrections', 'temperature_corrections'], ArrayLike],
     *,
     frequencies: ArrayLike,
     field: Literal['pressure', 'free'],
@@ -128,7 +128,7 @@ freedom passes its own.
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | The frequencies, in Hz, increasing. |
-| `standard_uncertainties_db` | The components, keyed by name, each a standard uncertainty in dB, one value or one per frequency. |
+| `standard_uncertainties_db` | The components, keyed by name, each a standard uncertainty in dB, one value or one per frequency. A type checker pairs the keys with `field`: those of IEC 61094-2 Table 1 with `"pressure"`, those of IEC 61094-3 Table 1 with `"free"`, and only the ones both tables list with a field held in a variable. |
 | `field` | `"pressure"` (default) or `"free"`. |
 | `additional_uncertainties_db` | Further components, by name, in the same form (Default: none). |
 | `coverage_factor` | $k$ (Default: 2). |

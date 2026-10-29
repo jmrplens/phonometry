@@ -3862,8 +3862,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   burst length `vibration.verify_signal_burst_response` reads and
   `vibration.signal_burst_indications` returns, and some sixty more. A
   call that passes a variable typed `str` there now needs the variable typed
-  by the vocabulary, or the value written in place. The published tables
-  these vocabularies key (`SPB_*`, `IEC62585_TABLE_I1`, the IEC 61094 tables
+  by the vocabulary, or the value written in place. The two budgets pair the
+  components with their `field`: a mapping typed by the components of one
+  table goes with that table's field and no other, and a field held in a
+  variable that may be either takes the components both tables list. The
+  published tables these vocabularies key (`SPB_*`, `IEC62585_TABLE_I1`, the IEC 61094 tables
   of the comparison and reciprocity budgets, the IEC 60268-7 letter tables,
   `REFERENCE_TRACK_DECAY_LIMITS_DB_PER_M`, `TRACK_DECAY_DIRECTIONS`,
   `PROVENANCE_KINDS` and the rest, 24 in all) are keyed by the same aliases,

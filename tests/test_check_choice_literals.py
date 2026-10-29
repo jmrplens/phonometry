@@ -755,11 +755,19 @@ def test_every_vocabulary_offers_what_its_table_holds() -> None:
             comparison.ComparisonComponent,
             {*comparison.IEC61094_5_TABLE_D1, *comparison.IEC61094_8_TABLE_2},
         ),
+        (
+            comparison.SharedComparisonComponent,
+            set(comparison.IEC61094_5_TABLE_D1) & set(comparison.IEC61094_8_TABLE_2),
+        ),
         (reciprocity.PressureReciprocityComponent, reciprocity.IEC61094_2_TABLE_1),
         (reciprocity.FreeFieldReciprocityComponent, reciprocity.IEC61094_3_TABLE_1),
         (
             reciprocity.ReciprocityComponent,
             {*reciprocity.IEC61094_2_TABLE_1, *reciprocity.IEC61094_3_TABLE_1},
+        ),
+        (
+            reciprocity.SharedReciprocityComponent,
+            set(reciprocity.IEC61094_2_TABLE_1) & set(reciprocity.IEC61094_3_TABLE_1),
         ),
         (enclosure_insulation.SoundPowerStandard, power),
         (enclosure_insulation.SoundPressureStandard, pressure),

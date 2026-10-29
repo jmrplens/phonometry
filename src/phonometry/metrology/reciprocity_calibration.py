@@ -489,6 +489,26 @@ ReciprocityComponent = Literal[
     PressureReciprocityComponent, FreeFieldReciprocityComponent
 ]
 
+#: A component both Tables 1 list, in the order of IEC 61094-2: the keys a
+#: budget takes whichever its field, so the only ones a type checker can
+#: accept when the field is held in a variable that may be either.
+SharedReciprocityComponent = Literal[
+    "series_impedance",
+    "voltage_ratio",
+    "cross_talk",
+    "noise",
+    "distortion",
+    "frequency",
+    "static_pressure",
+    "temperature",
+    "relative_humidity",
+    "polarizing_voltage",
+    "rounding",
+    "repeatability",
+    "static_pressure_corrections",
+    "temperature_corrections",
+]
+
 
 def _rows[K: str](
     group: str, *rows: tuple[K, str, tuple[str, ...]]
@@ -830,8 +850,7 @@ def reciprocity_uncertainty_budget(
 
 @overload
 def reciprocity_uncertainty_budget(
-    standard_uncertainties_db: Mapping[PressureReciprocityComponent, ArrayLike]
-    | Mapping[FreeFieldReciprocityComponent, ArrayLike],
+    standard_uncertainties_db: Mapping[SharedReciprocityComponent, ArrayLike],
     *,
     frequencies: ArrayLike,
     field: CalibrationField,
@@ -842,7 +861,8 @@ def reciprocity_uncertainty_budget(
 
 def reciprocity_uncertainty_budget(
     standard_uncertainties_db: Mapping[PressureReciprocityComponent, ArrayLike]
-    | Mapping[FreeFieldReciprocityComponent, ArrayLike],
+    | Mapping[FreeFieldReciprocityComponent, ArrayLike]
+    | Mapping[SharedReciprocityComponent, ArrayLike],
     *,
     frequencies: ArrayLike,
     field: CalibrationField = "pressure",
@@ -872,7 +892,10 @@ def reciprocity_uncertainty_budget(
 
     :param frequencies: The frequencies, in Hz, increasing.
     :param standard_uncertainties_db: The components, keyed by name, each a
-        standard uncertainty in dB, one value or one per frequency.
+        standard uncertainty in dB, one value or one per frequency. A type
+        checker pairs the keys with ``field``: those of IEC 61094-2 Table 1 with
+        ``"pressure"``, those of IEC 61094-3 Table 1 with ``"free"``, and only
+        the ones both tables list with a field held in a variable.
     :param field: ``"pressure"`` (default) or ``"free"``.
     :param additional_uncertainties_db: Further components, by name, in the same
         form (Default: none).

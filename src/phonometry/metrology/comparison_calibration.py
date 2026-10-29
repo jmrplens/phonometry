@@ -608,6 +608,18 @@ FreeFieldComparisonComponent = Literal[
 #: A component of either table, the keys a budget of either field may take.
 ComparisonComponent = Literal[PressureComparisonComponent, FreeFieldComparisonComponent]
 
+#: A component both tables list, in the order of Table D.1: the keys a budget
+#: takes whichever its field, so the only ones a type checker can accept when
+#: the field is held in a variable that may be either.
+SharedComparisonComponent = Literal[
+    "reference",
+    "capacitance",
+    "non_linearity",
+    "polarizing_voltage",
+    "repeatability",
+    "rounding",
+]
+
 #: IEC 61094-5:2016 Table D.1, "Example uncertainty budget", for a
 #: simultaneous calibration of a low-sensitivity WS2P microphone against an
 #: LS2P reference in the coupler of Figure A.1, at 2 kHz. Keyed by the name
@@ -2636,8 +2648,7 @@ def comparison_uncertainty_budget(
 
 @overload
 def comparison_uncertainty_budget(
-    standard_uncertainties_db: Mapping[PressureComparisonComponent, float | Quantity]
-    | Mapping[FreeFieldComparisonComponent, float | Quantity],
+    standard_uncertainties_db: Mapping[SharedComparisonComponent, float | Quantity],
     *,
     frequency_hz: float,
     field: CalibrationField,
@@ -2648,7 +2659,8 @@ def comparison_uncertainty_budget(
 
 def comparison_uncertainty_budget(
     standard_uncertainties_db: Mapping[PressureComparisonComponent, float | Quantity]
-    | Mapping[FreeFieldComparisonComponent, float | Quantity],
+    | Mapping[FreeFieldComparisonComponent, float | Quantity]
+    | Mapping[SharedComparisonComponent, float | Quantity],
     *,
     frequency_hz: float,
     field: CalibrationField = "pressure",
@@ -2680,6 +2692,9 @@ def comparison_uncertainty_budget(
 
     :param standard_uncertainties_db: The components, keyed by name, each a
         standard uncertainty in dB or a :class:`~phonometry.metrology.Quantity`.
+        A type checker pairs the keys with ``field``: those of Table D.1 with
+        ``"pressure"``, those of Table 2 with ``"free"``, and only the ones both
+        tables list with a field held in a variable.
     :param frequency_hz: The frequency the budget is for, in Hz.
     :param field: ``"pressure"`` (Table D.1, default) or ``"free"``
         (Table 2).

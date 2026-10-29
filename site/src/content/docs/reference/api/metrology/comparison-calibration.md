@@ -300,7 +300,7 @@ comparison_uncertainty_budget(
 ) -> ComparisonUncertaintyBudget
 
 comparison_uncertainty_budget(
-    standard_uncertainties_db: Mapping[Literal['reference', 'capacitance', 'non_linearity', 'impedance', 'polarizing_voltage', 'repeatability', 'drift', 'rounding'], float | Quantity] | Mapping[Literal['reference', 'source_stability', 'positioning', 'alignment', 'free_field', 'non_plane_wave', 'environment', 'polarizing_voltage', 'capacitance', 'non_linearity', 'rounding', 'repeatability'], float | Quantity],
+    standard_uncertainties_db: Mapping[Literal['reference', 'capacitance', 'non_linearity', 'polarizing_voltage', 'repeatability', 'rounding'], float | Quantity],
     *,
     frequency_hz: float,
     field: Literal['pressure', 'free'],
@@ -336,7 +336,7 @@ components (an erratum; see `docs/ERRATA.md`).
 
 | Name | Description |
 | :--- | :--- |
-| `standard_uncertainties_db` | The components, keyed by name, each a standard uncertainty in dB or a [`Quantity`](/phonometry/reference/api/metrology/uncertainty/#quantity). |
+| `standard_uncertainties_db` | The components, keyed by name, each a standard uncertainty in dB or a [`Quantity`](/phonometry/reference/api/metrology/uncertainty/#quantity). A type checker pairs the keys with `field`: those of Table D.1 with `"pressure"`, those of Table 2 with `"free"`, and only the ones both tables list with a field held in a variable. |
 | `frequency_hz` | The frequency the budget is for, in Hz. |
 | `field` | `"pressure"` (Table D.1, default) or `"free"` (Table 2). |
 | `additional_components` | Further components, as named [`Quantity`](/phonometry/reference/api/metrology/uncertainty/#quantity) objects (Default: none). |

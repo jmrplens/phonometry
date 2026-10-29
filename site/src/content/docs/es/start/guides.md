@@ -12,7 +12,6 @@ head:
         "@id": "https://docs.jmrp.io/phonometry/es/start/guides/#areas",
         "name": "Áreas de la documentación de phonometry",
         "description": "Las trece áreas documentadas de las guías de phonometry, cada una con las normas que implementa.",
-        "inLanguage": "es",
         "numberOfItems": 13,
         "itemListOrder": "https://schema.org/ItemListUnordered",
         "itemListElement": [

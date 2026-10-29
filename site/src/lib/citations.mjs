@@ -47,6 +47,27 @@ function people(authors) {
 }
 
 /**
+ * What a journal article is part of: its issue, inside its volume, inside the
+ * journal, as far as the reference names them.
+ *
+ * schema.org defines `volumeNumber` on PublicationVolume and `issueNumber` on
+ * PublicationIssue, not on the article, and a consumer that reads the
+ * vocabulary drops them anywhere else (site/scripts/check-schema-vocabulary.mjs
+ * fails on it). So the article names the innermost of the three it can, and
+ * each names the next through its own `isPartOf`.
+ */
+function container(ref) {
+  let part = { '@type': 'Periodical', name: ref.journal };
+  if (ref.volume) {
+    part = { '@type': 'PublicationVolume', volumeNumber: String(ref.volume), isPartOf: part };
+  }
+  if (ref.issue) {
+    part = { '@type': 'PublicationIssue', issueNumber: String(ref.issue), isPartOf: part };
+  }
+  return part;
+}
+
+/**
  * Full schema.org node for one reference.
  *
  * There is no schema.org type for a technical standard. `CreativeWork` with an
@@ -95,9 +116,7 @@ export function referenceNode(ref, bibliographyUrl) {
         ...common,
         '@type': 'ScholarlyArticle',
         author: people(ref.authors),
-        isPartOf: { '@type': 'Periodical', name: ref.journal },
-        ...(ref.volume ? { volumeNumber: String(ref.volume) } : {}),
-        ...(ref.issue ? { issueNumber: String(ref.issue) } : {}),
+        isPartOf: container(ref),
         ...(ref.pages ? { pagination: ref.pages } : {}),
       };
     case 'report':

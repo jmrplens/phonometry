@@ -227,11 +227,12 @@ jobs:
         # character too many or compared two descriptions as written rather
         # than as read would stay green here for good. A check's tests hand it
         # builds of a few pages that have the defect, and the routes it skips,
-        # and assert its exit status; check-descriptions.mjs and
-        # check-structured-data.mjs have them, and the first-publication dates
-        # and the check of a page's processes are tested the same way, on small
-        # repositories and small sites. Node's own test runner and no
-        # dependencies, so it runs before the install.
+        # and assert its exit status; check-descriptions.mjs,
+        # check-structured-data.mjs and check-schema-vocabulary.mjs have them,
+        # and the first-publication dates and the check of a page's processes
+        # are tested the same way, on small repositories and small sites.
+        # Node's own test runner and no dependencies, so it runs before the
+        # install.
         run: pnpm run test:scripts
         working-directory: site
       - name: Check the pages start no process of their own
@@ -347,6 +348,18 @@ jobs:
         # the two locales, and every check in this job stayed green for the
         # twelve days it took to notice.
         run: pnpm run check:structured-data
+        working-directory: site
+      - name: Check the structured data against the schema.org vocabulary
+        # The step above proves each graph parses and joins; it does not ask
+        # whether schema.org allows a property on the type that carries it.
+        # The guides hub's ItemList carried inLanguage, every journal article
+        # in the bibliography carried volumeNumber and issueNumber, and the
+        # 536 API pages carried codeRepository and programmingLanguage, none
+        # of them in its property's domain, with this whole job green. This
+        # reads every graph against a pinned schema.org release, offline, and
+        # fails on a property or type schema.org does not define, a property
+        # outside its domain and a value outside its range.
+        run: pnpm run check:schema-vocabulary
         working-directory: site
       - name: Check what a search engine reads on every page
         # The title, the one h1, the canonical and hreflang links, the sitemap

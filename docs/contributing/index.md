@@ -32,7 +32,7 @@ Each rule on a page has the same parts:
 - [Docstrings and comments](docstrings.md) (D, C): the module docstring and the document it names, function and class docstrings, the mathematics they carry, comments in the code, and how long a module grows. D rules cover docstrings and modules, C rules cover comments.
 - [Numbers and data](numerics.md) (X): comparing computed values, validating what a caller passes, the arrays a result keeps, units, references and precision, the data the package publishes, and the fields an FDTD engine steps.
 - [Tests](tests.md) (T): where a test lives, where an expected value comes from, how a test waits on an error or a warning, the data the repository keeps, guards and their exemptions, conformance rows, the workflows under `.github/`, and what the pytest configuration may import.
-- [Documentation and figures](docs-and-figures.md) (F): the guides, their Spanish twins and the `docs/` mirror, code fences, figures and the `.plot()` code that draws them, records in a notebook, the catalogues pages, the errata register, the frames of a clip and the device its field steps on, the install commands a page prints, the description of each page and its size, and the processes a page may start.
+- [Documentation and figures](docs-and-figures.md) (F): the guides, their Spanish twins and the `docs/` mirror, code fences, figures and the `.plot()` code that draws them, records in a notebook, the catalogues pages, the errata register, the frames of a clip and the device its field steps on, the install commands a page prints, the description of each page and its size, the processes a page may start and the schema.org vocabulary of its structured data.
 - [Prose, commits and pull requests](prose.md) (P): the language of each surface, the characters a text may hold, citing a page, the CHANGELOG, commit messages and pull request text.
 
 ## Rules
@@ -315,6 +315,7 @@ Each rule on a page has the same parts:
 | [F68](docs-and-figures.md#f68) | Close the figure a plot made when it raises, through `closes_its_figures` | `tests/test_plot_errors.py` |
 | [F69](docs-and-figures.md#f69) | Leave the site build printing no warning | `site/scripts/check-build-output.mjs`, `CI: Check the build printed no warning`, `site/scripts/check-build-output.test.mjs`, `CI: Test the build checks on small builds made to fail them` |
 | [F70](docs-and-figures.md#f70) | Link a standard's catalogue page by the number its catalogue gives the edition the page cites | `scripts/check_catalogue_links.py`, `make catalogue-links`, `CI: Every catalogue link opens the document beside it`, `tests/test_check_catalogue_links.py` |
+| [F71](docs-and-figures.md#f71) | Give a JSON-LD property only to a type schema.org allows it on, and only a value of a type it allows | `site/scripts/check-schema-vocabulary.mjs`, `CI: Check the structured data against the schema.org vocabulary`, `site/scripts/check-schema-vocabulary.test.mjs`, `CI: Test the build checks on small builds made to fail them` |
 
 ### Prose, commits and pull requests
 

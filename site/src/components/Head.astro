@@ -193,12 +193,14 @@ const article =
         ...(articleSection ? { articleSection } : {}),
         ...(hubMainEntity ? { mainEntity: hubMainEntity } : {}),
         ...(isGuide ? { learningResourceType: 'Guide' } : {}),
+        // The language and the repository are the software's, said once on
+        // the node `about` names: schema.org defines programmingLanguage and
+        // codeRepository on SoftwareSourceCode, not on an APIReference
+        // (site/scripts/check-schema-vocabulary.mjs fails on them here).
         ...(isApiPage
           ? {
               programmingModel: 'Library API',
               executableLibraryName: 'phonometry',
-              programmingLanguage: { '@type': 'ComputerLanguage', name: 'Python' },
-              codeRepository: 'https://github.com/jmrplens/phonometry',
             }
           : {}),
         // The two language versions are one work, not two pages competing for

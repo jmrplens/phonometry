@@ -206,7 +206,7 @@ $\bar{\alpha} = A / S$.
 | :--- | :--- |
 | `surfaces` | Sequence of `(area, absorption_coefficient)` pairs; each coefficient a scalar or a per-band array. |
 
-**Returns:** The mean absorption $\sum_i S_i \alpha_i / \sum_i S_i$; a `float` when the coefficients are all numbers, otherwise a per-band array, a zero-dimensional one when one of them is a zero-dimensional array.
+**Returns:** The mean absorption $\sum_i S_i \alpha_i / \sum_i S_i$; a `float` when the coefficients are all numbers, a zero-dimensional array when each is one value and one of them is a zero-dimensional array, otherwise a per-band array.
 
 **Raises**
 

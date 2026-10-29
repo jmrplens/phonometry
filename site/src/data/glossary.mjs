@@ -33,7 +33,14 @@
  * continuous sound pressure level", with the symbol, LAeq, as its
  * `alternateName` and `termCode`. The glossary used to name every term by its
  * symbol alone, which is what a reader holding the symbol types and not what
- * one asking for the quantity does.
+ * one asking for the quantity does. Every definition carries its quantity's
+ * name, most of them as their opening words, so the name a search result
+ * shows is one the reader then finds on the card.
+ *
+ * An entry named rather than symbolised has no code, and its alternate name is
+ * its `alias`, when it declares one: "PML" for the perfectly matched layer.
+ * The label is not used for that, because a label can say what is not an
+ * alias at all ("Cepstrum and quefrency" names two concepts).
  *
  * Per term:
  *   id          stable anchor, unique across the glossary
@@ -42,6 +49,8 @@
  *   name        `{ en, es }`, for those entries, instead of `symbol`
  *   quantity    `{ en, es }`, the name of the quantity or concept the entry
  *               defines, in words and without maths
+ *   alias       for a named entry, another name it goes by: a string, a list,
+ *               or `{ en, es }` of either
  *   qualifier   `{ en, es }`, what tells apart two entries sharing a symbol
  *   unit        a string, or `{ en, es }` when the unit is a translated word
  *   standard    the designation that defines the quantity, or `{ en, es }`
@@ -58,6 +67,7 @@
  * @property {string} [symbol]
  * @property {Localized} [name]
  * @property {Localized} quantity
+ * @property {string | string[] | { en: string | string[], es: string | string[] }} [alias]
  * @property {Localized} [qualifier]
  * @property {string | Localized} [unit]
  * @property {string | Localized} standard
@@ -289,8 +299,8 @@ export const glossary = [
         },
         guide: "devices/emission/sound-power",
         definition: {
-          en: "The declared noise emission of a machine: either the dual-number form, the measured $L_{WA}$ and its uncertainty $K_{WA}$ stated separately, or the single-number form $L_{WAd} = L_{WA} + K_{WA}$, both rounded to the nearest whole decibel. The declared value is an upper limit a verification measurement is unlikely to exceed, not a best estimate, so it is never the number to feed into a propagation calculation.",
-          es: "La emisión sonora declarada de una máquina: o bien la forma de dos números, el $L_{WA}$ medido y su incertidumbre $K_{WA}$ indicados por separado, o bien la forma de un número $L_{WAd} = L_{WA} + K_{WA}$, ambas redondeadas al decibelio entero más próximo. El valor declarado es un límite superior que una medida de verificación difícilmente superará, no una mejor estimación, así que nunca es el número que debe entrar en un cálculo de propagación.",
+          en: "Declared noise emission value of a machine: either the dual-number form, the measured $L_{WA}$ and its uncertainty $K_{WA}$ stated separately, or the single-number form $L_{WAd} = L_{WA} + K_{WA}$, both rounded to the nearest whole decibel. The declared value is an upper limit a verification measurement is unlikely to exceed, not a best estimate, so it is never the number to feed into a propagation calculation.",
+          es: "Valor de emisión sonora declarado de una máquina: o bien la forma de dos números, el $L_{WA}$ medido y su incertidumbre $K_{WA}$ indicados por separado, o bien la forma de un número $L_{WAd} = L_{WA} + K_{WA}$, ambas redondeadas al decibelio entero más próximo. El valor declarado es un límite superior que una medida de verificación difícilmente superará, no una mejor estimación, así que nunca es el número que debe entrar en un cálculo de propagación.",
         },
       },
       {
@@ -464,8 +474,8 @@ export const glossary = [
         },
         guide: "perception/hearing/occupational-exposure",
         definition: {
-          en: "A-weighted equivalent continuous level of a task, a job sample or a full day, the building block $L_\\mathrm{EX,8h}$ is assembled from.",
-          es: "Nivel continuo equivalente ponderado A de una tarea, de una muestra del puesto o de una jornada completa, el ladrillo con el que se construye el $L_\\mathrm{EX,8h}$.",
+          en: "A-weighted equivalent continuous sound pressure level in occupational exposure: the level of a task, a job sample or a full day, the building block $L_\\mathrm{EX,8h}$ is assembled from.",
+          es: "Nivel de presión acústica continuo equivalente ponderado A en la exposición laboral: el nivel de una tarea, de una muestra del puesto o de una jornada completa, el ladrillo con el que se construye el $L_\\mathrm{EX,8h}$.",
         },
       },
       {
@@ -538,8 +548,8 @@ export const glossary = [
         },
         guide: "environment/assessment/spanish-noise-regulation",
         definition: {
-          en: "The three character penalties added to $L_{\\mathrm{Aeq},T}$: $K_\\mathrm{t}$ for emergent tonal components, read from an unweighted one-third-octave spectrum against the arithmetic mean of the two adjacent bands; $K_\\mathrm{f}$ for low-frequency content, from $L_\\mathrm{Ceq} - L_\\mathrm{Aeq}$; and $K_\\mathrm{i}$ for impulsive content, from $L_\\mathrm{AIeq} - L_\\mathrm{Aeq}$. They are stepped, not continuous, so a spectrum just short of a threshold scores nothing.",
-          es: "Las tres penalizaciones por carácter que se suman al $L_{\\mathrm{Aeq},T}$: $K_\\mathrm{t}$ por componentes tonales emergentes, leída en un espectro de tercio de octava sin ponderar frente a la media aritmética de las dos bandas contiguas; $K_\\mathrm{f}$ por contenido de baja frecuencia, a partir de $L_\\mathrm{Ceq} - L_\\mathrm{Aeq}$; y $K_\\mathrm{i}$ por contenido impulsivo, a partir de $L_\\mathrm{AIeq} - L_\\mathrm{Aeq}$. Son escalonadas y no continuas, así que un espectro que se queda algo por debajo de un umbral no puntúa nada.",
+          en: "Tonal, low-frequency and impulsive character penalties, the three added to $L_{\\mathrm{Aeq},T}$: $K_\\mathrm{t}$ for emergent tonal components, read from an unweighted one-third-octave spectrum against the arithmetic mean of the two adjacent bands; $K_\\mathrm{f}$ for low-frequency content, from $L_\\mathrm{Ceq} - L_\\mathrm{Aeq}$; and $K_\\mathrm{i}$ for impulsive content, from $L_\\mathrm{AIeq} - L_\\mathrm{Aeq}$. Each is stepped at 0, 3 or 6 dB rather than continuous: a difference below the lower of the two thresholds that apply to it (for $K_\\mathrm{t}$, those of its band's range) scores nothing, and one just short of the upper still scores 3 dB, not 6 dB.",
+          es: "Penalizaciones por componentes tonales, de baja frecuencia e impulsivas, las tres que se suman al $L_{\\mathrm{Aeq},T}$: $K_\\mathrm{t}$ por componentes tonales emergentes, leída en un espectro de tercio de octava sin ponderar frente a la media aritmética de las dos bandas contiguas; $K_\\mathrm{f}$ por contenido de baja frecuencia, a partir de $L_\\mathrm{Ceq} - L_\\mathrm{Aeq}$; y $K_\\mathrm{i}$ por contenido impulsivo, a partir de $L_\\mathrm{AIeq} - L_\\mathrm{Aeq}$. Cada una es escalonada, de 0, 3 o 6 dB, y no continua: una diferencia por debajo del menor de los dos umbrales que le corresponden (para $K_\\mathrm{t}$, los del intervalo de su banda) no puntúa nada, y una que se queda algo por debajo del mayor sigue puntuando 3 dB, no 6 dB.",
         },
       },
     ],
@@ -767,8 +777,8 @@ export const glossary = [
         },
         guide: "signals/levels/weighting",
         definition: {
-          en: "The normative frequency weightings: the ear-response curves applied before integration, Z being the flat reference.",
-          es: "Las ponderaciones frecuenciales normativas: las curvas de respuesta del oído que se aplican antes de integrar, siendo Z la referencia plana.",
+          en: "Frequency weightings A, C and Z: the normative ear-response curves applied before integration, Z being the flat reference.",
+          es: "Ponderaciones frecuenciales A, C y Z: las curvas normativas de respuesta del oído que se aplican antes de integrar, siendo Z la referencia plana.",
         },
       },
       {
@@ -786,8 +796,8 @@ export const glossary = [
         },
         guide: "signals/levels/special-weightings",
         definition: {
-          en: "Infrasound weighting, defined by its poles and zeros for the 0.25 Hz to 315 Hz range.",
-          es: "Ponderación para infrasonido, definida por sus polos y ceros en el intervalo de 0,25 Hz a 315 Hz.",
+          en: "G frequency weighting: the infrasound weighting, defined by its poles and zeros for the 0.25 Hz to 315 Hz range.",
+          es: "Ponderación frecuencial G: la ponderación para infrasonido, definida por sus polos y ceros en el intervalo de 0,25 Hz a 315 Hz.",
         },
       },
       {
@@ -805,8 +815,8 @@ export const glossary = [
         },
         guide: "signals/levels/special-weightings",
         definition: {
-          en: "Historical mid-level weighting, withdrawn from the current meter standard.",
-          es: "Ponderación histórica para niveles medios, retirada de la norma vigente de sonómetros.",
+          en: "B frequency weighting: a historical mid-level weighting, withdrawn from the current meter standard.",
+          es: "Ponderación frecuencial B: una ponderación histórica para niveles medios, retirada de la norma vigente de sonómetros.",
         },
       },
       {
@@ -823,8 +833,8 @@ export const glossary = [
         },
         guide: "signals/levels/special-weightings",
         definition: {
-          en: "Historical aircraft-noise weighting, derived from the 40-noy perceived-noisiness contour.",
-          es: "Ponderación histórica para ruido de aeronaves, derivada de la curva de ruidosidad percibida de 40 noys.",
+          en: "D frequency weighting: a historical aircraft-noise weighting, derived from the 40-noy perceived-noisiness contour.",
+          es: "Ponderación frecuencial D: una ponderación histórica para ruido de aeronaves, derivada de la curva de ruidosidad percibida de 40 noys.",
         },
       },
       {
@@ -842,8 +852,8 @@ export const glossary = [
         },
         guide: "signals/levels/special-weightings",
         definition: {
-          en: "Weighting for audible sound measured in the presence of ultrasound.",
-          es: "Ponderación para el sonido audible medido en presencia de ultrasonido.",
+          en: "AU frequency weighting: the weighting for audible sound measured in the presence of ultrasound.",
+          es: "Ponderación frecuencial AU: la ponderación para el sonido audible medido en presencia de ultrasonido.",
         },
       },
       {
@@ -860,8 +870,8 @@ export const glossary = [
         standard: "IEC 61672-1:2013",
         guide: "signals/levels/time-weighting",
         definition: {
-          en: "Fast, Slow and Impulse exponential time weightings: the detector ballistics that produce a displayed level.",
-          es: "Ponderaciones temporales exponenciales Fast, Slow e Impulse: las balísticas del detector que producen el nivel mostrado.",
+          en: "Fast, Slow and Impulse time weightings: the exponential detector ballistics that produce a displayed level.",
+          es: "Ponderaciones temporales Fast, Slow e Impulse: las balísticas exponenciales del detector que producen el nivel mostrado.",
         },
       },
       {
@@ -871,8 +881,8 @@ export const glossary = [
           es: "Clase de prestaciones (0, 1, 2)",
         },
         quantity: {
-          en: "Performance class",
-          es: "Clase de prestaciones",
+          en: "Performance class of a filter or an instrument",
+          es: "Clase de prestaciones de un filtro o de un instrumento",
         },
         unit: {
           en: "dB (tolerance)",
@@ -904,13 +914,17 @@ export const glossary = [
         },
         guide: "devices/broadcast/program-loudness",
         definition: {
-          en: "K-weighting: the programme-loudness curve, a two-stage pre-filter that models the high-frequency boost a spherical head gives and then applies the revised low-frequency B-curve high-pass. It is applied per channel before the channel mean squares are summed and gated, and the LKFS designation records it.",
-          es: "Ponderación K: la curva de sonoridad de programa, un prefiltro de dos etapas que modela el realce en alta frecuencia que produce una cabeza esférica y aplica después el paso alto de la curva B revisada en baja frecuencia. Se aplica canal a canal antes de sumar y aplicar la puerta a los valores cuadráticos medios, y la designación LKFS lo recoge.",
+          en: "K frequency weighting: the programme-loudness curve, a two-stage pre-filter that models the high-frequency boost a spherical head gives and then applies the revised low-frequency B-curve high-pass. It is applied per channel before the channel mean squares are summed and gated, and the LKFS designation records it.",
+          es: "Ponderación frecuencial K: la curva de sonoridad de programa, un prefiltro de dos etapas que modela el realce en alta frecuencia que produce una cabeza esférica y aplica después el paso alto de la curva B revisada en baja frecuencia. Se aplica canal a canal antes de sumar y aplicar la puerta a los valores cuadráticos medios, y la designación LKFS lo recoge.",
         },
       },
       {
         id: "itu-r-468",
         name: {
+          en: "ITU-R BS.468-4 weighting",
+          es: "Ponderación UIT-R BS.468-4",
+        },
+        alias: {
           en: "ITU-R BS.468-4 weighting",
           es: "Ponderación UIT-R BS.468-4",
         },
@@ -929,8 +943,8 @@ export const glossary = [
         },
         guide: "devices/electroacoustics/electroacoustics",
         definition: {
-          en: "The broadcast noise weighting: zero at 1 kHz, peaking at $+12{,}2$ dB at 6,3 kHz and falling to $-29{,}9$ dB at 31,5 Hz, shaped to how audible a noise is rather than how loud a tone is. The Recommendation pairs it with a quasi-peak detector and quotes results as dB(468); AES17 reuses the same curve with an r.m.s. detector, which is a different number from the same filter.",
-          es: "La ponderación de ruido para radiodifusión: cero en 1 kHz, con máximo de $+12{,}2$ dB a 6,3 kHz y caída hasta $-29{,}9$ dB a 31,5 Hz, con la forma de lo audible que resulta un ruido y no de lo sonoro que resulta un tono. La Recomendación la combina con un detector de cuasipico y expresa el resultado en dB(468); la AES17 reutiliza la misma curva con un detector eficaz, lo que da otro número con el mismo filtro.",
+          en: "ITU-R BS.468-4 noise weighting: the broadcast weighting, zero at 1 kHz, peaking at $+12{,}2$ dB at 6,3 kHz and falling to $-29{,}9$ dB at 31,5 Hz, shaped to how audible a noise is rather than how loud a tone is. The Recommendation pairs it with a quasi-peak detector and quotes results as dB(468); AES17 reuses the same curve with an r.m.s. detector, which is a different number from the same filter.",
+          es: "Ponderación de ruido UIT-R BS.468-4: la ponderación de radiodifusión, cero en 1 kHz, con máximo de $+12{,}2$ dB a 6,3 kHz y caída hasta $-29{,}9$ dB a 31,5 Hz, con la forma de lo audible que resulta un ruido y no de lo sonoro que resulta un tono. La Recomendación la combina con un detector de cuasipico y expresa el resultado en dB(468); la AES17 reutiliza la misma curva con un detector eficaz, lo que da otro número con el mismo filtro.",
         },
       },
       {
@@ -955,7 +969,7 @@ export const glossary = [
         },
         guide: "vibration/human/human-vibration",
         definition: {
-          en: "The whole-body frequency weightings, one parameter row each of the same four-stage filter: $W_\\mathrm{k}$ for the vertical axis and $W_\\mathrm{d}$ for the two horizontal ones in health and comfort, with $W_\\mathrm{b}$, $W_\\mathrm{c}$, $W_\\mathrm{e}$, $W_\\mathrm{f}$, $W_\\mathrm{j}$ and $W_\\mathrm{m}$ for ride comfort, the seat back, rotational axes, motion sickness and the head. The weighted acceleration $a_\\mathrm{w}$ is what comes out of them; the standard that names the curve is not the one that says where to apply it.",
+          en: "Whole-body vibration frequency weightings, one parameter row each of the same four-stage filter: $W_\\mathrm{k}$ for the vertical axis and $W_\\mathrm{d}$ for the two horizontal ones in health and comfort, with $W_\\mathrm{b}$, $W_\\mathrm{c}$, $W_\\mathrm{e}$, $W_\\mathrm{f}$, $W_\\mathrm{j}$ and $W_\\mathrm{m}$ for ride comfort, the seat back, rotational axes, motion sickness and the head. The weighted acceleration $a_\\mathrm{w}$ is what comes out of them; the standard that names the curve is not the one that says where to apply it.",
           es: "Las ponderaciones en frecuencia para cuerpo entero, cada una una fila de parámetros del mismo filtro de cuatro etapas: $W_\\mathrm{k}$ para el eje vertical y $W_\\mathrm{d}$ para los dos horizontales en salud y confort, con $W_\\mathrm{b}$, $W_\\mathrm{c}$, $W_\\mathrm{e}$, $W_\\mathrm{f}$, $W_\\mathrm{j}$ y $W_\\mathrm{m}$ para el confort de marcha, el respaldo, los ejes de rotación, el mareo por movimiento y la cabeza. De ellas sale la aceleración ponderada $a_\\mathrm{w}$; la norma que define la curva no es la que dice dónde aplicarla.",
         },
       },
@@ -981,7 +995,7 @@ export const glossary = [
         },
         guide: "vibration/human/human-vibration",
         definition: {
-          en: "The hand-arm frequency weighting: one curve, band-limited from 8 Hz to 1 kHz, applied to each of the three axes before they are combined into the vibration total value. Unlike the whole-body case there is no axis multiplier, so the three weighted values enter the total on equal terms.",
+          en: "Hand-arm vibration frequency weighting: one curve, band-limited from 8 Hz to 1 kHz, applied to each of the three axes before they are combined into the vibration total value. Unlike the whole-body case there is no axis multiplier, so the three weighted values enter the total on equal terms.",
           es: "La ponderación en frecuencia para vibración mano-brazo: una sola curva, limitada en banda de 8 Hz a 1 kHz, aplicada a cada uno de los tres ejes antes de combinarlos en el valor total de vibración. A diferencia del caso de cuerpo entero no hay multiplicador por eje, así que los tres valores ponderados entran en el total en igualdad de condiciones.",
         },
       },
@@ -1131,8 +1145,8 @@ export const glossary = [
         },
         guide: "devices/electroacoustics/electroacoustics",
         definition: {
-          en: "The two averaged estimates of a frequency response function: $H_1 = G_{xy}/G_{xx}$, unbiased when the noise is on the output, and $H_2 = G_{yy}/G_{yx}$, unbiased when it is on the input. Their ratio is exactly the ordinary coherence, so they agree only where the measurement is clean, and the gap between them is a measure of how far it is not.",
-          es: "Las dos estimaciones promediadas de una función de respuesta en frecuencia: $H_1 = G_{xy}/G_{xx}$, insesgada cuando el ruido está en la salida, y $H_2 = G_{yy}/G_{yx}$, insesgada cuando está en la entrada. Su cociente es exactamente la coherencia ordinaria, así que coinciden solo donde la medida está limpia, y la distancia entre ambas mide cuánto no lo está.",
+          en: "Frequency response function estimators: two averaged estimates of the response, $H_1 = G_{xy}/G_{xx}$, unbiased when the noise is on the output, and $H_2 = G_{yy}/G_{yx}$, unbiased when it is on the input. Their ratio is exactly the ordinary coherence, so they agree only where the measurement is clean, and the gap between them is a measure of how far it is not.",
+          es: "Estimadores de la función de respuesta en frecuencia: dos estimaciones promediadas de la respuesta, $H_1 = G_{xy}/G_{xx}$, insesgada cuando el ruido está en la salida, y $H_2 = G_{yy}/G_{yx}$, insesgada cuando está en la entrada. Su cociente es exactamente la coherencia ordinaria, así que coinciden solo donde la medida está limpia, y la distancia entre ambas mide cuánto no lo está.",
         },
       },
       {
@@ -1234,8 +1248,8 @@ export const glossary = [
         },
         guide: "buildings/rooms/room-acoustics",
         definition: {
-          en: "Reverberation time extrapolated to a 60 dB decay from a least-squares fit over −5 dB to −25 dB of the Schroeder curve.",
-          es: "Tiempo de reverberación extrapolado a una caída de 60 dB desde un ajuste por mínimos cuadrados entre −5 dB y −25 dB de la curva de Schroeder.",
+          en: "Reverberation time over a 20 dB evaluation range: the time a 60 dB decay would take, extrapolated from a least-squares fit over −5 dB to −25 dB of the Schroeder curve.",
+          es: "Tiempo de reverberación en un intervalo de evaluación de 20 dB: el tiempo que tardaría una caída de 60 dB, extrapolado desde un ajuste por mínimos cuadrados entre −5 dB y −25 dB de la curva de Schroeder.",
         },
       },
       {
@@ -1253,8 +1267,8 @@ export const glossary = [
         },
         guide: "buildings/rooms/room-acoustics",
         definition: {
-          en: "Reverberation time extrapolated to a 60 dB decay from a least-squares fit over −5 dB to −35 dB of the Schroeder curve, the usual choice when the decay range allows it.",
-          es: "Tiempo de reverberación extrapolado a una caída de 60 dB desde un ajuste por mínimos cuadrados entre −5 dB y −35 dB de la curva de Schroeder, la opción habitual cuando el margen de caída lo permite.",
+          en: "Reverberation time over a 30 dB evaluation range: the time a 60 dB decay would take, extrapolated from a least-squares fit over −5 dB to −35 dB of the Schroeder curve. It is the usual choice when the decay range allows it.",
+          es: "Tiempo de reverberación en un intervalo de evaluación de 30 dB: el tiempo que tardaría una caída de 60 dB, extrapolado desde un ajuste por mínimos cuadrados entre −5 dB y −35 dB de la curva de Schroeder. Es la opción habitual cuando el margen de caída lo permite.",
         },
       },
       {
@@ -1340,8 +1354,8 @@ export const glossary = [
         },
         guide: "buildings/rooms/room-acoustics",
         definition: {
-          en: "Definition, or Deutlichkeit: the fraction of the total energy arriving in the first 50 ms.",
-          es: "Definición, o Deutlichkeit: la fracción de la energía total que llega en los primeros 50 ms.",
+          en: "Definition (Deutlichkeit): the fraction of the total energy arriving in the first 50 ms.",
+          es: "Definición (Deutlichkeit): la fracción de la energía total que llega en los primeros 50 ms.",
         },
       },
       {
@@ -1391,7 +1405,7 @@ export const glossary = [
         symbol: "NC",
         quantity: {
           en: "Noise criteria rating",
-          es: "Valoración Noise Criteria",
+          es: "Índice Noise Criteria",
         },
         unit: {
           en: "dB (index)",
@@ -1405,7 +1419,7 @@ export const glossary = [
         guide: "buildings/rooms/room-noise",
         definition: {
           en: "Noise criteria rating of a background spectrum: the speech interference level selects the curve, and the tangency method rates the spectrum when a band exceeds it.",
-          es: "Índice de ruido de sala de un espectro de fondo: el nivel de interferencia con la palabra elige la curva, y el método de tangencia valora el espectro cuando alguna banda la supera.",
+          es: "Índice Noise Criteria de un espectro de fondo: el nivel de interferencia con la palabra elige la curva, y el método de tangencia valora el espectro cuando alguna banda la supera.",
         },
       },
       {
@@ -1432,7 +1446,7 @@ export const glossary = [
         symbol: "RC",
         quantity: {
           en: "Room criteria Mark II rating",
-          es: "Valoración Room Criteria Mark II",
+          es: "Índice Room Criteria Mark II",
         },
         unit: {
           en: "dB (index)",
@@ -1446,7 +1460,7 @@ export const glossary = [
         guide: "buildings/rooms/room-noise",
         definition: {
           en: "Room criteria Mark II rating: the average of the 500, 1000 and 2000 Hz levels, with a rumble, hiss or neutral spectral tag.",
-          es: "Índice RC Mark II: la media de los niveles de 500, 1000 y 2000 Hz, con una etiqueta espectral de retumbo, siseo o neutro.",
+          es: "Índice Room Criteria Mark II: la media de los niveles de 500, 1000 y 2000 Hz, con una etiqueta espectral de retumbo, siseo o neutro.",
         },
       },
       {
@@ -1454,7 +1468,7 @@ export const glossary = [
         symbol: "NR",
         quantity: {
           en: "Noise rating",
-          es: "Valoración Noise Rating",
+          es: "Índice Noise Rating",
         },
         qualifier: {
           en: "curve family",
@@ -1471,7 +1485,7 @@ export const glossary = [
         guide: "buildings/rooms/room-noise",
         definition: {
           en: "Noise rating, the European counterpart curve family of NC. Discussed for comparison and deliberately not implemented. Not the NR of the noise-control guides, which is a level drop.",
-          es: "Noise Rating, la familia de curvas europea equivalente a NC. Se comenta a efectos de comparación y no se implementa deliberadamente. No es el NR de las guías de control de ruido, que es una caída de nivel.",
+          es: "Índice Noise Rating, el de la familia de curvas europea equivalente a NC. Se comenta a efectos de comparación y no se implementa deliberadamente. No es el NR de las guías de control de ruido, que es una caída de nivel.",
         },
       },
       {
@@ -1832,8 +1846,8 @@ export const glossary = [
         },
         guide: "buildings/design/panel-sound-insulation",
         definition: {
-          en: "Transmission loss: the airborne insulation of a partition predicted from its physical properties, ten times the base-10 logarithm of the reciprocal transmission factor, the same quantity as $R$ in a prediction context.",
-          es: "Pérdidas por transmisión: el aislamiento a ruido aéreo de un elemento separador predicho a partir de sus propiedades físicas, diez veces el logaritmo decimal del inverso del factor de transmisión, la misma magnitud que $R$ en un contexto de predicción.",
+          en: "Transmission loss of a partition: its airborne insulation predicted from its physical properties, ten times the base-10 logarithm of the reciprocal transmission factor, the same quantity as $R$ in a prediction context.",
+          es: "Pérdidas por transmisión de un elemento separador: su aislamiento a ruido aéreo predicho a partir de sus propiedades físicas, diez veces el logaritmo decimal del inverso del factor de transmisión, la misma magnitud que $R$ en un contexto de predicción.",
         },
       },
       {
@@ -1910,7 +1924,7 @@ export const glossary = [
         id: "r-w-r-w-d-nt-w",
         symbol: "$R_\\mathrm{w}$, $R'_\\mathrm{w}$, $D_{\\mathrm{n}T,\\mathrm{w}}$",
         quantity: {
-          en: "Weighted airborne sound insulation ratings",
+          en: "Weighted single-number ratings of airborne sound insulation",
           es: "Índices globales ponderados de aislamiento a ruido aéreo",
         },
         unit: "dB",
@@ -2051,8 +2065,8 @@ export const glossary = [
         },
         guide: "buildings/design/insulation-prediction",
         definition: {
-          en: "Weighted improvement of airborne insulation contributed by a lining or additional layer, added to the element rating in the prediction.",
-          es: "Mejora ponderada del aislamiento a ruido aéreo que aporta un trasdosado o una capa adicional, que se suma al índice del elemento en la predicción.",
+          en: "Weighted sound reduction index improvement: the gain in airborne insulation a lining or additional layer contributes, added to the element rating in the prediction.",
+          es: "Mejora ponderada del índice de reducción acústica: la ganancia de aislamiento a ruido aéreo que aporta un trasdosado o una capa adicional, que se suma al índice del elemento en la predicción.",
         },
       },
       {
@@ -2145,8 +2159,8 @@ export const glossary = [
         standard: "ISO 717-1:2020",
         guide: "buildings/insulation/facade-insulation",
         definition: {
-          en: "The weighted facade rating: $D_{2\\mathrm{m,n}T}$ measured with a loudspeaker put through the ISO 717-1 reference-curve procedure. The `ls` subscript is not decoration (it records that the source was a loudspeaker at 45 degrees rather than real road traffic), and a facade rated with one source is not interchangeable with the same facade rated with the other.",
-          es: "El índice global de fachada: el $D_{2\\mathrm{m,n}T}$ medido con altavoz pasado por el procedimiento de curva de referencia de la ISO 717-1. El subíndice `ls` no es decorativo: indica que la fuente fue un altavoz a 45 grados y no tráfico rodado real, y una fachada calificada con una fuente no es intercambiable con esa misma fachada calificada con la otra.",
+          en: "Weighted standardized facade level difference, loudspeaker method: $D_{2\\mathrm{m,n}T}$ measured with a loudspeaker and put through the ISO 717-1 reference-curve procedure. The `ls` subscript is not decoration (it records that the source was a loudspeaker at 45 degrees rather than real road traffic), and a facade rated with one source is not interchangeable with the same facade rated with the other.",
+          es: "Diferencia de niveles estandarizada ponderada en fachada, método del altavoz: el $D_{2\\mathrm{m,n}T}$ medido con altavoz y pasado por el procedimiento de curva de referencia de la ISO 717-1. El subíndice `ls` no es decorativo: indica que la fuente fue un altavoz a 45 grados y no tráfico rodado real, y una fachada calificada con una fuente no es intercambiable con esa misma fachada calificada con la otra.",
         },
       },
       {
@@ -2161,8 +2175,8 @@ export const glossary = [
         clause: "3.12",
         guide: "buildings/insulation/facade-insulation",
         definition: {
-          en: "Apparent sound reduction index of a facade element under loudspeaker sound at 45 degrees: the level difference corrected by the specimen area over the receiving-room absorption area, with a further $-1{,}5$ dB that carries the single-angle geometry. It is apparent, so flanking and any other component of the facade are inside the number.",
-          es: "Índice de reducción acústica aparente de un elemento de fachada con altavoz a 45 grados: la diferencia de niveles corregida por el área del elemento frente al área de absorción del recinto receptor, con un término adicional de $-1{,}5$ dB que recoge la geometría de ángulo único. Es aparente, así que las transmisiones por flancos y cualquier otro componente de la fachada quedan dentro del número.",
+          en: "Apparent sound reduction index of a facade element, loudspeaker at 45 degrees: the level difference corrected by the specimen area over the receiving-room absorption area, with a further $-1{,}5$ dB that carries the single-angle geometry. It is apparent, so flanking and any other component of the facade are inside the number.",
+          es: "Índice de reducción acústica aparente de un elemento de fachada, altavoz a 45 grados: la diferencia de niveles corregida por el área del elemento frente al área de absorción del recinto receptor, con un término adicional de $-1{,}5$ dB que recoge la geometría de ángulo único. Es aparente, así que las transmisiones por flancos y cualquier otro componente de la fachada quedan dentro del número.",
         },
       },
       {
@@ -2178,13 +2192,13 @@ export const glossary = [
           es: "CTE DB-HR",
         },
         clause: {
-          en: "Annex A, Formulae (A.5) and (A.6)",
-          es: "Anejo A, fórmulas (A.5) y (A.6)",
+          en: "Annex A, Formulae (A.17) and (A.18)",
+          es: "Anejo A, fórmulas (A.17) y (A.18)",
         },
         guide: "buildings/insulation/spanish-building-code",
         definition: {
-          en: "Global airborne index: the A-weighted level a partition transmits when it is excited by a normalised spectrum (pink noise for $R_\\mathrm{A}$, road traffic for $R_\\mathrm{A,tr}$), summed energetically over eighteen one-third-octave bands from 100 Hz to 5 kHz. It is a close relative of $R_\\mathrm{w} + C$ and $R_\\mathrm{w} + C_\\mathrm{tr}$ but is computed directly, not by shifting a reference curve, and it uses two bands the ISO 717-1 range does not.",
-          es: "Índice global de reducción acústica: el nivel ponderado A que transmite un elemento cuando se excita con un espectro normalizado (ruido rosa para $R_\\mathrm{A}$ y tráfico rodado para $R_\\mathrm{A,tr}$) sumado energéticamente en dieciocho bandas de tercio de octava de 100 Hz a 5 kHz. Es pariente cercano de $R_\\mathrm{w} + C$ y $R_\\mathrm{w} + C_\\mathrm{tr}$, pero se calcula directamente y no desplazando una curva de referencia, y utiliza dos bandas que el intervalo de la ISO 717-1 no incluye.",
+          en: "A-weighted global sound reduction index: the single rating, in dBA, of a partition's sound reduction index $R$ for a normalised A-weighted incident spectrum (pink noise for $R_\\mathrm{A}$, road traffic for $R_\\mathrm{A,tr}$), computed as minus ten times the base-10 logarithm of the energy sum, over eighteen one-third-octave bands from 100 Hz to 5 kHz, of the spectrum's level less $R$ in each band. It is a close relative of $R_\\mathrm{w} + C$ and $R_\\mathrm{w} + C_\\mathrm{tr}$ but is computed directly, not by shifting a reference curve, and it uses two bands the ISO 717-1 range does not.",
+          es: "Índice global de reducción acústica, ponderado A: la valoración global, en dBA, del índice de reducción acústica $R$ de un elemento para un espectro incidente normalizado y ponderado A (ruido rosa para $R_\\mathrm{A}$ y tráfico rodado para $R_\\mathrm{A,tr}$), calculada como menos diez veces el logaritmo decimal de la suma energética, en dieciocho bandas de tercio de octava de 100 Hz a 5 kHz, del nivel del espectro menos $R$ en cada banda. Es pariente cercano de $R_\\mathrm{w} + C$ y $R_\\mathrm{w} + C_\\mathrm{tr}$, pero se calcula directamente y no desplazando una curva de referencia, y utiliza dos bandas que el intervalo de la ISO 717-1 no incluye.",
         },
       },
       {
@@ -2200,8 +2214,8 @@ export const glossary = [
           es: "CTE DB-HR",
         },
         clause: {
-          en: "Annex A, Formulae (A.5) and (A.6); requirements in clause 2",
-          es: "Anejo A, fórmulas (A.5) y (A.6); exigencias del capítulo 2",
+          en: "Annex A, Formulae (A.6) and (A.7); requirements in clause 2",
+          es: "Anejo A, fórmulas (A.6) y (A.7); exigencias del capítulo 2",
         },
         guide: "buildings/insulation/spanish-building-code",
         definition: {
@@ -2347,6 +2361,10 @@ export const glossary = [
       {
         id: "absorption-class",
         name: {
+          en: "Absorption class",
+          es: "Clase de absorción",
+        },
+        alias: {
           en: "Absorption class",
           es: "Clase de absorción",
         },
@@ -2584,8 +2602,8 @@ export const glossary = [
         },
         guide: "materials/absorbers/porous-absorbers",
         definition: {
-          en: "The two pore sizes the Johnson-Champoux-Allard model needs: $\\Lambda$ weights the pore surface by the squared flow velocity, so it is set by the narrow constrictions where the viscous losses happen, and $\\Lambda'$ is the plain surface-to-volume length that governs the thermal exchange with the frame. $\\Lambda'$ is normally the larger, and the two are equal only for identical straight cylindrical pores.",
-          es: "Los dos tamaños de poro que necesita el modelo de Johnson-Champoux-Allard: $\\Lambda$ pondera la superficie del poro por el cuadrado de la velocidad del flujo, así que lo fijan los estrechamientos donde se producen las pérdidas viscosas, y $\\Lambda'$ es la longitud superficie-volumen sin ponderar que gobierna el intercambio térmico con el esqueleto. $\\Lambda'$ suele ser la mayor, y ambas coinciden solo con poros cilíndricos rectos idénticos.",
+          en: "Viscous and thermal characteristic lengths, the two pore sizes the Johnson-Champoux-Allard model needs: $\\Lambda$ weights the pore surface by the squared flow velocity, so it is set by the narrow constrictions where the viscous losses happen, and $\\Lambda'$ is the plain surface-to-volume length that governs the thermal exchange with the frame. $\\Lambda'$ is normally the larger, and the two are equal only for identical straight cylindrical pores.",
+          es: "Longitudes características viscosa y térmica, los dos tamaños de poro que necesita el modelo de Johnson-Champoux-Allard: $\\Lambda$ pondera la superficie del poro por el cuadrado de la velocidad del flujo, así que lo fijan los estrechamientos donde se producen las pérdidas viscosas, y $\\Lambda'$ es la longitud superficie-volumen sin ponderar que gobierna el intercambio térmico con el esqueleto. $\\Lambda'$ suele ser la mayor, y ambas coinciden solo con poros cilíndricos rectos idénticos.",
         },
       },
       {
@@ -2733,8 +2751,8 @@ export const glossary = [
         clause: "3.17",
         guide: "vibration/structural/transfer-stiffness",
         definition: {
-          en: "Level of the dynamic transfer stiffness, referred to 1 N/m.",
-          es: "Nivel de la rigidez dinámica de transferencia, referido a 1 N/m.",
+          en: "Dynamic transfer stiffness level: the dynamic transfer stiffness expressed as a level, referred to 1 N/m.",
+          es: "Nivel de rigidez dinámica de transferencia: la rigidez dinámica de transferencia expresada como nivel, referido a 1 N/m.",
         },
       },
       {
@@ -2949,8 +2967,8 @@ export const glossary = [
         },
         guide: "devices/emission/vibration-sound-power",
         definition: {
-          en: "Radiation factor, or radiation efficiency, of a vibrating machine surface: the airborne power radiated per unit mean-square velocity and area.",
-          es: "Factor de radiación, o eficiencia de radiación, de la superficie vibrante de una máquina: la potencia aérea radiada por unidad de velocidad cuadrática media y de área.",
+          en: "Radiation factor of a vibrating machine surface, also called its radiation efficiency: the airborne power radiated divided by the product of the characteristic impedance of air, the radiating area and the mean-square velocity.",
+          es: "Factor de radiación de la superficie vibrante de una máquina, también llamado eficiencia de radiación: la potencia aérea radiada dividida por el producto de la impedancia característica del aire, el área radiante y la velocidad cuadrática media.",
         },
       },
       {
@@ -3375,8 +3393,8 @@ export const glossary = [
         },
         guide: "perception/psychoacoustics/advanced-loudness",
         definition: {
-          en: "The two smoothed loudness time series of the Moore-Glasberg-Schlittenlacher model: short-term loudness is the loudness of a brief segment (a syllable, a single note, typically up to 500 ms), and long-term loudness that of a longer one, a whole sentence or musical phrase, typically up to 5 s. The loudness of a sound lasting two or three seconds is predicted by the maximum of the long-term series, not by its average.",
-          es: "Las dos series temporales suavizadas de sonoridad del modelo de Moore-Glasberg-Schlittenlacher: la sonoridad a corto plazo es la de un segmento breve (una sílaba, una nota, típicamente hasta 500 ms), y la de largo plazo la de uno más extenso, una frase completa o un fraseo musical, típicamente hasta 5 s. La sonoridad de un sonido de dos o tres segundos se predice con el máximo de la serie a largo plazo, no con su promedio.",
+          en: "Short-term and long-term loudness, the two smoothed loudness time series of the Moore-Glasberg-Schlittenlacher model: short-term loudness is the loudness of a brief segment (a syllable, a single note, typically up to 500 ms), and long-term loudness that of a longer one, a whole sentence or musical phrase, typically up to 5 s. The loudness of a sound lasting two or three seconds is predicted by the maximum of the long-term series, not by its average.",
+          es: "Sonoridad a corto y a largo plazo, las dos series temporales suavizadas de sonoridad del modelo de Moore-Glasberg-Schlittenlacher: la sonoridad a corto plazo es la de un segmento breve (una sílaba, una nota, típicamente hasta 500 ms), y la de largo plazo la de uno más extenso, una frase completa o un fraseo musical, típicamente hasta 5 s. La sonoridad de un sonido de dos o tres segundos se predice con el máximo de la serie a largo plazo, no con su promedio.",
         },
       },
     ],
@@ -3729,6 +3747,10 @@ export const glossary = [
           en: "ANP database",
           es: "Base de datos ANP",
         },
+        alias: {
+          en: "ANP database",
+          es: "Base de datos ANP",
+        },
         quantity: {
           en: "Aircraft Noise and Performance database",
           es: "Base de datos de ruido y prestaciones de aeronaves",
@@ -4051,6 +4073,10 @@ export const glossary = [
           en: "TTS onset",
           es: "Umbral de TTS",
         },
+        alias: {
+          en: "TTS onset",
+          es: "Umbral de TTS",
+        },
         quantity: {
           en: "Onset of temporary threshold shift",
           es: "Umbral de desplazamiento temporal del umbral auditivo",
@@ -4075,6 +4101,10 @@ export const glossary = [
         name: {
           en: "AUD INJ onset (PTS onset)",
           es: "Umbral de AUD INJ (umbral de PTS)",
+        },
+        alias: {
+          en: ["AUD INJ onset", "PTS onset"],
+          es: ["Umbral de AUD INJ", "Umbral de PTS"],
         },
         quantity: {
           en: "Onset of auditory injury",
@@ -4189,6 +4219,7 @@ export const glossary = [
           en: "PML (perfectly matched layer)",
           es: "PML (capa perfectamente acoplada)",
         },
+        alias: "PML",
         quantity: {
           en: "Perfectly matched layer",
           es: "Capa perfectamente acoplada",

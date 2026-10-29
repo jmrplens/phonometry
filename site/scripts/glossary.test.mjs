@@ -12,8 +12,23 @@
 // Each read correctly under its neighbour and named nothing in the
 // structured data.
 //
+// Leaning on the card above can also happen in the middle of a sentence:
+// "Everything else in this group is a ratio of these", "Table B.3 of the same
+// standard", "read off the same regression line". Six definitions did, and
+// the phrases they used are held here wherever they stand.
+//
 // The DefinedTerm is named by the entry's `quantity`, which every entry
-// carries in both languages; it used to be named by its symbol alone.
+// carries in both languages; it used to be named by its symbol alone. Every
+// definition carries that name, so the name a search result shows is one the
+// reader then finds on the card: 27 definitions in each language did not, and
+// "G frequency weighting" was named over a card that said "Infrasound
+// weighting".
+//
+// A quantity that is a reduction, a difference or a loss is defined as that,
+// not as a level: RA, the A-weighted global sound reduction index of DB-HR,
+// was defined as "the A-weighted level a partition transmits", the opposite
+// quantity (51.4 dBA for the index of the guide's worked example, -51.4 dBA
+// for the level it transmits under the normalised spectrum).
 //
 // These tests read the data the page and the structured data are both built
 // from, so they fail before a build does. check-structured-data.mjs holds the
@@ -40,15 +55,33 @@ const BACK_REFERENCE = {
 };
 
 /**
- * The places a definition opens: its first words and, when it opens with a
- * name and a colon, the first words after the colon, which is where "the same
- * construction" hid behind "Day-night level:".
+ * Phrases that lean on another entry wherever they stand in a definition: the
+ * group or the family the card sits in, left unnamed, "the same standard"
+ * another card names, the card above. A family the definition names, "the
+ * junction family", is not leaning on anything. Each one is a phrase a definition of this glossary
+ * used; "the same" on its own is not on the list, because a definition says
+ * "the same mean-square pressure" or "the same four-stage filter" of itself.
+ */
+const LEANING_PHRASE = {
+	en: /\b(?:this group|the whole group|the (?:whole )?family(?! of)|everything else in|the same standard|the same regression line|the modulation form|the (?:card|entry) above)\b/i,
+	es: /(?<![\p{L}\p{N}])(?:este grupo|todo el grupo|toda la familia(?! de)|todo lo demás de|la misma norma|la misma recta de regresión|la forma por modulación|la (?:tarjeta|entrada) anterior)(?![\p{L}\p{N}])/iu,
+};
+
+/**
+ * The places a definition opens: its first words and, when its first sentence
+ * opens with a name followed by a colon or a comma, the first words after
+ * them, which is where "the same construction" hid behind "Day-night level:".
+ * Only the first sentence is split: a later one that opens "The same clause"
+ * is speaking of the entry's own standard.
  */
 function openings(definition) {
-	const colon = definition.indexOf(': ');
 	const sentence = definition.search(/[.!?]\s/);
-	const lead = colon > 0 && (sentence < 0 || colon < sentence);
-	return lead ? [definition, definition.slice(colon + 2)] : [definition];
+	const leads = [];
+	for (const separator of [': ', ', ']) {
+		const at = definition.indexOf(separator);
+		if (at > 0 && (sentence < 0 || at < sentence)) leads.push(definition.slice(at + separator.length));
+	}
+	return [definition, ...leads];
 }
 
 test('the openings a definition is read at include the words after its name', () => {
@@ -56,7 +89,12 @@ test('the openings a definition is read at include the words after its name', ()
 		'Day-night level: the same construction.',
 		'the same construction.',
 	]);
+	assert.deepEqual(openings('Day-night level, the same construction.'), [
+		'Day-night level, the same construction.',
+		'the same construction.',
+	]);
 	assert.deepEqual(openings('The same integral. It is: plain.'), ['The same integral. It is: plain.']);
+	assert.deepEqual(openings('Spread over a band. The same clause, then.'), ['Spread over a band. The same clause, then.']);
 });
 
 test('the back-reference patterns recognise the openings the glossary used to have', () => {
@@ -82,6 +120,43 @@ test('the back-reference patterns recognise the openings the glossary used to ha
 	assert.doesNotMatch('el nivel del sonido estacionario que transporta la misma presión', BACK_REFERENCE.es);
 });
 
+test('the leaning phrases recognise the six the glossary used to have, and not a definition speaking of itself', () => {
+	const old = {
+		en: [
+			'Everything else in this group is a ratio of these',
+			'It is the quantity the whole group is a logarithm of',
+			'displacement response per unit force, the pivot the whole family converts through.',
+			'Table B.3 of the same standard gives 0,005 for concrete',
+			'read off the same regression line rather than measured at that distance',
+			'Its test signal and its products are both different from the modulation form',
+		],
+		es: [
+			'Todo lo demás de este grupo es un cociente de estas magnitudes',
+			'Es la magnitud de la que es logaritmo todo el grupo',
+			'el pivote por el que convierte toda la familia.',
+			'la tabla B.3 de la misma norma da 0,005 para el hormigón',
+			'leído sobre la misma recta de regresión y no medido a esa distancia',
+			'Tanto su señal de ensayo como sus productos difieren de la forma por modulación',
+		],
+	};
+	for (const lang of LANGUAGES) {
+		for (const phrase of old[lang]) assert.match(phrase, LEANING_PHRASE[lang], `${lang}: ${phrase}`);
+	}
+	for (const phrase of [
+		'one parameter row each of the same four-stage filter',
+		'the transmission loss is the same logarithm',
+		'AES17 reuses the same curve with an r.m.s. detector',
+		'The same clause gives the tolerance',
+		'Noise rating, the European counterpart curve family of NC.',
+		'the single number the difference-frequency family reports',
+		'the wave-approach quantity the junction family bottoms out in',
+	]) {
+		assert.doesNotMatch(phrase, LEANING_PHRASE.en, phrase);
+	}
+	assert.doesNotMatch('El mismo apartado da la tolerancia', LEANING_PHRASE.es);
+	assert.doesNotMatch('en la que se apoya toda la familia de uniones', LEANING_PHRASE.es);
+});
+
 test('no definition opens by pointing at another entry, in either language', () => {
 	const leaning = [];
 	for (const term of TERMS) {
@@ -92,6 +167,48 @@ test('no definition opens by pointing at another entry, in either language', () 
 		}
 	}
 	assert.deepEqual(leaning, [], `definitions that lean on another entry:\n${leaning.join('\n')}`);
+});
+
+test('no definition leans on its group, its family or the card above, wherever it says so', () => {
+	const leaning = [];
+	for (const term of TERMS) {
+		for (const lang of LANGUAGES) {
+			const found = LEANING_PHRASE[lang].exec(term.definition[lang]);
+			if (found) leaning.push(`${term.id} (${lang}): "${found[0]}"`);
+		}
+	}
+	assert.deepEqual(leaning, [], `definitions that lean on another entry:\n${leaning.join('\n')}`);
+});
+
+test('every definition carries the name of its quantity, in either language', () => {
+	const unnamed = [];
+	for (const term of TERMS) {
+		for (const lang of LANGUAGES) {
+			const name = term.quantity?.[lang];
+			if (typeof name === 'string' && !term.definition[lang].toLowerCase().includes(name.toLowerCase())) {
+				unnamed.push(`${term.id} (${lang}): ${JSON.stringify(name)} is not in "${term.definition[lang].slice(0, 60)}"`);
+			}
+		}
+	}
+	assert.deepEqual(unnamed, [], `definitions that never say what they define:\n${unnamed.join('\n')}`);
+});
+
+test('an alias belongs to an entry named rather than symbolised, and is another name than its quantity', () => {
+	const wrong = [];
+	for (const term of TERMS.filter((entry) => entry.alias !== undefined)) {
+		if (term.symbol !== undefined) wrong.push(`${term.id}: has a symbol, which is its alternate name already`);
+		for (const lang of LANGUAGES) {
+			const declared = typeof term.alias === 'object' && !Array.isArray(term.alias) ? term.alias[lang] : term.alias;
+			for (const alias of [declared].flat()) {
+				if (typeof alias !== 'string' || alias.trim() === '' || alias !== alias.trim() || alias.includes('$')) {
+					wrong.push(`${term.id} (${lang}): ${JSON.stringify(alias)} is not a name in words`);
+				} else if (alias.toLowerCase() === term.quantity[lang].toLowerCase()) {
+					wrong.push(`${term.id} (${lang}): ${JSON.stringify(alias)} is its quantity`);
+				}
+			}
+		}
+	}
+	assert.deepEqual(wrong, [], wrong.join('\n'));
 });
 
 test('every entry names its quantity in both languages, in words', () => {
@@ -120,4 +237,44 @@ test('no two entries share a quantity name in one language', () => {
 		}
 		assert.deepEqual(shared, [], `${lang}: ${shared.join('; ')}`);
 	}
+});
+
+/**
+ * The quantities that are a reduction, a difference, an insulation, a loss,
+ * an attenuation or an improvement, by the words of their names.
+ */
+const REDUCTION = {
+	en: /\b(?:reduction|difference|insulation|loss|attenuation|improvement)\b/i,
+	es: /(?:reducci[oó]n|diferencia|aislamiento|p[eé]rdida|atenuaci[oó]n|mejora)/iu,
+};
+
+/** A sentence that opens on a level: "the A-weighted level", "el nivel". */
+const ONE_LEVEL = { en: /^the\s+(?:[\p{L}\p{N}'’-]+\s+){0,3}level\b/iu, es: /^(?:el|un)\s+nivel\b/iu };
+
+/** The words that make a sentence about levels one about their difference. */
+const DIFFERENCE = { en: /\b(?:minus|difference|logarithm|less)\b/i, es: /(?:menos|diferencia|logaritmo)/iu };
+
+/** The first sentence of a definition after the name it opens with. */
+function firstSentenceAfterName(definition) {
+	const colon = definition.indexOf(': ');
+	const body = colon > 0 ? definition.slice(colon + 2) : definition;
+	const end = body.search(/[.!?](?:\s|$)/);
+	return end < 0 ? body : body.slice(0, end);
+}
+
+test('a reduction, a level difference, a loss or an attenuation is not defined as one level, in either language', () => {
+	const wrong = [];
+	let read = 0;
+	for (const term of TERMS) {
+		for (const language of LANGUAGES) {
+			if (!REDUCTION[language].test(term.quantity[language])) continue;
+			read += 1;
+			const first = firstSentenceAfterName(term.definition[language]);
+			if (ONE_LEVEL[language].test(first) && !DIFFERENCE[language].test(first)) {
+				wrong.push(`${term.id} (${language}): ${first.slice(0, 60)}`);
+			}
+		}
+	}
+	assert.ok(read > 0, 'no quantity of this kind was read');
+	assert.deepEqual(wrong, []);
 });

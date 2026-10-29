@@ -769,9 +769,9 @@ Load an EASA ANP database (aircraft, NPD curves and default profiles).
 
 | Exception | When |
 | :--- | :--- |
-| FileNotFoundError | If a required table is missing. |
+| FileNotFoundError | If a required table is missing, or the file of a table the export carries is gone when it is read (a link to nothing). |
 | NotADirectoryError | If *path* is not a directory. |
-| ValueError | If two files match one table, a table is a named pipe, a device, a socket or a directory rather than a regular file (refused before it is opened), holds more than 32 MiB or is not UTF-8 text, or a cell that holds a number is not a finite one (`nan`, `inf`, `1e999`) or no number at all, naming the table, the line and the column. |
+| ValueError | If two files match one table, a table is a named pipe, a device, a socket or a directory rather than a regular file (refused before it is opened), holds more than 32 MiB or is not UTF-8 text, a cell that holds a number is not a finite one (`nan`, `inf`, `1e999`) or no number at all, or a count (a stage length, a point or step number, a number of engines) is not a whole one, naming the table, the line and the column. |
 
 ## SpectralClass
 

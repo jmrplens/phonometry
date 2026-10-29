@@ -164,11 +164,12 @@ _COL_STAGE_LENGTH = "Stage Length"
 _COL_DISTANCE_FT = "Distance (ft)"
 _COL_THRUST_RATING = "Thrust Rating"
 _COL_OP_TYPE = "Op Type"
+_COL_ENGINES = "Number Of Engines"
 #: The aircraft table's numbers, read when an aircraft is asked for and
 #: checked when the table is read, so that a cell no number can be read from is
 #: refused at the load with its place, not at the first question about it.
 _AIRCRAFT_NUMBERS = (
-    "Number Of Engines",
+    _COL_ENGINES,
     "Max Sea Level Static Thrust (lb)",
     "Max Gross Landing Weight (lb)",
 )
@@ -268,6 +269,63 @@ def _number(row: Mapping[str, str], column: str) -> float:
     return value
 
 
+def _whole(row: Mapping[str, str], column: str, value: float) -> int:
+    """*value*, read from the cell of *row* at *column*, as the whole number it counts.
+
+    A point, a step and an engine are counted, and ``int()`` would take
+    ``1.5`` for ``1`` and say nothing: a point read so would land on its
+    neighbour's place in the profile, a step would be flown out of its order.
+
+    :raises ValueError: for a fraction, naming the table, the line and the
+        column.
+    """
+    if not value.is_integer():
+        msg = (
+            f"{_cell_place(row, column)}: {escaped(row[column])!r} is not a whole "
+            "number, and the column counts in whole numbers"
+        )
+        raise ValueError(msg)
+    return int(value)
+
+
+def _whole_cell(row: Mapping[str, str], column: str) -> int:
+    """The cell of *row* at *column* as a whole number, or its refusal.
+
+    :raises KeyError: for a table without the column.
+    :raises ValueError: for a cell that holds no finite number, or a fraction,
+        naming the table, the line and the column.
+    """
+    return _whole(row, column, _number(row, column))
+
+
+def _stage_cell(row: Mapping[str, str]) -> str:
+    """The stage length of *row*, as the label its table is keyed by.
+
+    The cell is a trip-distance bin or the ``"M"`` of a maximum-weight
+    procedure. A label is kept as written, in capitals, as :func:`_stage_label`
+    keeps the caller's; a number is read through :func:`_number`, so that a
+    ``nan``, an ``inf`` or a ``1e999`` is refused with its place, and a number
+    between two bins is refused too, where it would key a profile no caller
+    can name.
+
+    :raises ValueError: for a number that is not finite or falls between two
+        bins, naming the table, the line and the column.
+    """
+    text = row[_COL_STAGE_LENGTH].strip()
+    try:
+        float(text)
+    except ValueError:
+        return text.upper()
+    value = _number(row, _COL_STAGE_LENGTH)
+    if not value.is_integer():
+        msg = (
+            f"{_cell_place(row, _COL_STAGE_LENGTH)}: {escaped(text)!r} falls "
+            "between two ANP bins"
+        )
+        raise ValueError(msg)
+    return str(int(value))
+
+
 def _header_number(table: _Table, column: str, text: str) -> float:
     """The number a column heading carries (``L_200ft``, ``L_50Hz``), finite.
 
@@ -331,16 +389,16 @@ def _checked_text(path: Path) -> str:
         raise ValueError(msg) from None
 
 
-def _pick(name: str, tables: Mapping[str, Traversable]) -> _Table:
-    """Resolve one logical ANP table by a case-insensitive filename keyword.
+def _match(name: str, tables: Mapping[str, Traversable]) -> str | None:
+    """The file of one logical ANP table, by a case-insensitive filename keyword.
 
     Accepts both the archive naming (``ANP2.3_NPD_data.csv``) and the curated
-    subset naming (``NPD_data.csv``). Only the table it resolves is read, so
-    a file in the directory that no keyword names is never opened.
+    subset naming (``NPD_data.csv``). Nothing is read: the name alone says
+    whether the export carries the table, so that a table the export does
+    carry and that cannot be read is never taken for one it leaves out.
 
-    :raises ValueError: for a keyword two files match, and for what
-        :func:`_table_text` refuses.
-    :raises FileNotFoundError: for a keyword no file matches.
+    :return: The file's name, or ``None`` when no file matches.
+    :raises ValueError: for a keyword two files match.
     """
     matches = [f for f in tables if name in f.lower()]
     if len(matches) > 1:
@@ -349,10 +407,25 @@ def _pick(name: str, tables: Mapping[str, Traversable]) -> _Table:
             f"file per table in the export directory."
         )
         raise ValueError(msg)
-    if not matches:
+    return matches[0] if matches else None
+
+
+def _pick(name: str, tables: Mapping[str, Traversable]) -> _Table:
+    """Read the logical ANP table *name* an export must carry.
+
+    Only the table :func:`_match` resolves is read, so a file in the directory
+    that no keyword names is never opened.
+
+    :raises ValueError: for a keyword two files match, and for what
+        :func:`_table_text` refuses.
+    :raises FileNotFoundError: for a keyword no file matches, and for a
+        matching file that is gone when it is read (a link to nothing).
+    """
+    found = _match(name, tables)
+    if found is None:
         msg = f"no ANP table matching {name!r} found (looked in: {sorted(tables)})."
         raise FileNotFoundError(msg)
-    return _Table(matches[0], _table_text(tables[matches[0]]))
+    return _Table(found, _table_text(tables[found]))
 
 
 def _select_profile_id(
@@ -955,7 +1028,7 @@ class ANPDatabase:
             aircraft_id=aircraft_id,
             description=m.get("Description", ""),
             engine_type=m.get("Engine Type", ""),
-            n_engines=int(float(m.get("Number Of Engines", "0") or 0)),
+            n_engines=int(float(m.get(_COL_ENGINES, "0") or 0)),
             weight_class=m.get("Weight Class", ""),
             mounting=_MOUNTING.get(lat, "wing"),
             npd_id=m.get("NPD_ID", ""),
@@ -1221,7 +1294,7 @@ class ANPDatabase:
             raise ValueError(msg)
         return PerformanceAircraft(
             aircraft_id=aircraft_id,
-            n_engines=int(float(meta.get("Number Of Engines", "0") or 0)),
+            n_engines=int(float(meta.get(_COL_ENGINES, "0") or 0)),
             max_static_thrust_lb=float(
                 meta.get("Max Sea Level Static Thrust (lb)", "0") or 0.0
             ),
@@ -1749,12 +1822,15 @@ def _parse_aircraft(table: _Table) -> dict[str, _Row]:
 
     The rows are kept as they are, since :class:`ANPAircraft` reads them when it
     is asked for; the cells of :data:`_AIRCRAFT_NUMBERS` are checked here, so a
-    cell that is no finite number is refused at the load with its place.
+    cell that is no finite number, or a number of engines that is no whole
+    one, is refused at the load with its place.
     """
     rows = _rows(table)
     for row in rows:
         for column in _AIRCRAFT_NUMBERS:
-            _optional(row, column, absent_is_blank=True)
+            value = _optional(row, column, absent_is_blank=True)
+            if column == _COL_ENGINES and value is not None:
+                _whole(row, column, value)
     return {row["ACFT_ID"]: row for row in rows}
 
 
@@ -1819,9 +1895,9 @@ def _parse_profiles(
             # aeroplane would report no fixed-point profile at all.
             _file_operation_code(row[_COL_OP_TYPE]),
             row["Profile_ID"],
-            int(_number(row, _COL_STAGE_LENGTH)),
+            _whole_cell(row, _COL_STAGE_LENGTH),
         )
-        point = int(_number(row, "Point Number"))
+        point = _whole_cell(row, "Point Number")
         x = _number(row, _COL_DISTANCE_FT) * _FT_M
         z = _number(row, "Altitude AFE (ft)") * _FT_M
         speed = _number(row, "TAS (kt)") * _KT_MS
@@ -1942,9 +2018,7 @@ def _parse_weights_table(rows: list[_Row], out: _PerformanceTables) -> None:
     here: B7 flies the 90 % of maximum landing weight of folio B-31 instead.
     """
     for row in rows:
-        out.weights[(row["ACFT_ID"], _stage_label(row[_COL_STAGE_LENGTH]))] = _number(
-            row, "Weight (lb)"
-        )
+        out.weights[(row["ACFT_ID"], _stage_cell(row))] = _number(row, "Weight (lb)")
 
 
 def _parse_departure_step_table(rows: list[_Row], out: _PerformanceTables) -> None:
@@ -1960,7 +2034,7 @@ def _parse_departure_step_table(rows: list[_Row], out: _PerformanceTables) -> No
         dkey = (
             row["ACFT_ID"],
             row["Profile_ID"],
-            _stage_label(row[_COL_STAGE_LENGTH]),
+            _stage_cell(row),
         )
         step = DepartureStep(
             step_type=row["Step Type"],
@@ -1972,7 +2046,7 @@ def _parse_departure_step_table(rows: list[_Row], out: _PerformanceTables) -> No
             energy_share_percent=_optional(row, "Accel Percentage (%)"),
             distance_ft=_optional(row, _COL_DISTANCE_FT, absent_is_blank=True),
         )
-        grouped.setdefault(dkey, []).append((int(_number(row, "Step Number")), step))
+        grouped.setdefault(dkey, []).append((_whole_cell(row, "Step Number"), step))
     for dkey, steps in grouped.items():
         steps.sort(key=lambda e: e[0])
         out.departure_steps[dkey] = tuple(step for _n, step in steps)
@@ -1999,9 +2073,7 @@ def _parse_approach_step_table(rows: list[_Row], out: _PerformanceTables) -> Non
             distance_ft=_optional(row, _COL_DISTANCE_FT),
             start_thrust_percent=_optional(row, "Start Thrust"),
         )
-        by_profile.setdefault(akey, []).append(
-            (int(_number(row, "Step Number")), astep)
-        )
+        by_profile.setdefault(akey, []).append((_whole_cell(row, "Step Number"), astep))
     for akey, asteps in by_profile.items():
         asteps.sort(key=lambda e: e[0])
         out.approach_steps[akey] = tuple(step for _n, step in asteps)
@@ -2054,11 +2126,21 @@ def _parse_spectral_classes(table: _Table) -> dict[str, SpectralClass]:
 
 
 def _optional_table(name: str, tables: Mapping[str, Traversable]) -> _Table | None:
-    """One logical table by filename keyword, or ``None`` when the export omits it."""
-    try:
-        return _pick(name, tables)
-    except FileNotFoundError:
+    """One logical table by filename keyword, or ``None`` when the export omits it.
+
+    Whether the export carries the table is decided by its name alone, and a
+    table it carries is read as a required one is: a file of the table's name
+    that cannot be read (a link to nothing, a pipe) is refused, never taken for
+    a table the export leaves out.
+
+    :raises ValueError: for a keyword two files match, and for what
+        :func:`_table_text` refuses.
+    :raises FileNotFoundError: for a matching file that is gone when it is read.
+    """
+    found = _match(name, tables)
+    if found is None:
         return None
+    return _Table(found, _table_text(tables[found]))
 
 
 def load_anp_database(path: Path | str | None = None) -> ANPDatabase:
@@ -2076,14 +2158,17 @@ def load_anp_database(path: Path | str | None = None) -> ANPDatabase:
         Every table is read from a regular file of at most 32 MiB, and every
         number in it is a finite one.
     :return: An :class:`ANPDatabase`.
-    :raises FileNotFoundError: If a required table is missing.
+    :raises FileNotFoundError: If a required table is missing, or the file of
+        a table the export carries is gone when it is read (a link to
+        nothing).
     :raises NotADirectoryError: If *path* is not a directory.
     :raises ValueError: If two files match one table, a table is a named
         pipe, a device, a socket or a directory rather than a regular file
         (refused before it is opened), holds more than 32 MiB or is not UTF-8
-        text, or a cell that holds a number is not a finite one (``nan``,
-        ``inf``, ``1e999``) or no number at all, naming the table, the line
-        and the column.
+        text, a cell that holds a number is not a finite one (``nan``,
+        ``inf``, ``1e999``) or no number at all, or a count (a stage length,
+        a point or step number, a number of engines) is not a whole one,
+        naming the table, the line and the column.
     """
     tables = _read_tables(path)
     aircraft = _parse_aircraft(_pick("aircraft", tables))

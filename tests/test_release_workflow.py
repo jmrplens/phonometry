@@ -12,7 +12,8 @@ any run failing until the day of a release:
   nothing else, and no workflow reads a stored PyPI token any more;
 - no job is granted a token by default;
 - neither phonometry nor the PyOctaveBand stub is uploaded from a commit on
-  which Python CI did not succeed, and the wait for that run has the time it
+  which Python CI did not succeed: the upload waits for that run, nothing on
+  the way lets it go ahead after the wait failed, and the wait has the time it
   allows itself;
 - the built wheel is verified on the same platforms and Python versions the
   test suite runs on.
@@ -44,6 +45,18 @@ _CI_WAIT = "Require a green Python CI on this commit"
 #: Where the wait sets the time it gives Python CI to finish, in seconds.
 _FINISH_DEADLINE = re.compile(r"finish_deadline=\$\(\( SECONDS \+ (\d+) \)\)")
 
+#: The condition the wait runs under in each workflow: the release skips it for
+#: a version already tagged, which publishes nothing, and the stub always runs it.
+_CI_WAIT_CONDITION = {
+    "release.yml": "steps.version.outputs.skip != 'true'",
+    "publish-stub.yml": None,
+}
+
+#: A status function in a job's ``if``. Without one a job runs only when every
+#: job it needs succeeded; with ``always()``, ``!cancelled()``, ``failure()`` or
+#: ``success() || ...`` it can run after one of them failed.
+_STATUS_FUNCTION = re.compile(r"\b(?:always|success|failure|cancelled)\s*\(")
+
 
 def _load(name: str) -> dict[str, Any]:
     return yaml.safe_load((_WORKFLOWS / name).read_text(encoding="utf-8"))
@@ -72,6 +85,25 @@ def _upstream(workflow: dict[str, Any], job: str) -> set[str]:
     return direct.union(*(_upstream(workflow, other) for other in direct))
 
 
+def _uploaders(workflow: dict[str, Any]) -> set[str]:
+    """The jobs that upload to PyPI."""
+    return {
+        job
+        for job, step in _steps(workflow)
+        if step.get("uses", "").startswith("pypa/gh-action-pypi-publish")
+    }
+
+
+def _between(workflow: dict[str, Any], first: str, last: str) -> set[str]:
+    """Every job on a chain of ``needs`` from *first* to *last*, both included."""
+    return {
+        job
+        for job in workflow["jobs"]
+        if (job == first or first in _upstream(workflow, job))
+        and (job == last or job in _upstream(workflow, last))
+    }
+
+
 def _ci_wait(workflow: dict[str, Any]) -> tuple[str, dict[str, Any]]:
     """The job that waits for Python CI, and the step that does the waiting."""
     found = [
@@ -97,11 +129,7 @@ def test_the_stub_is_published_only_after_the_wait_for_ci() -> None:
     assert not any("uses" in other for other in stub["jobs"][job]["steps"]), (
         "the wait reads the API, not the checkout, and runs no action"
     )
-    uploading = [
-        name
-        for name, other in _steps(stub)
-        if other.get("uses", "").startswith("pypa/gh-action-pypi-publish")
-    ]
+    uploading = _uploaders(stub)
     assert uploading
     for name in uploading:
         assert job in _upstream(stub, name), f"{name} does not wait for {job}"
@@ -109,6 +137,40 @@ def test_the_stub_is_published_only_after_the_wait_for_ci() -> None:
     _, released = _ci_wait(_load("release.yml"))
     assert step["run"] == released["run"]
     assert step["env"] == released["env"]
+
+
+@pytest.mark.parametrize("name", ["release.yml", "publish-stub.yml"])
+def test_nothing_lets_the_upload_go_ahead_after_the_wait_for_ci_failed(
+    name: str,
+) -> None:
+    """A failed wait stops every job between it and the upload.
+
+    The ``needs`` alone do not say so. A step whose ``if`` is false does not
+    run, a step or a job marked ``continue-on-error`` counts as passed when it
+    fails, and a job whose ``if`` calls a status function runs after a job it
+    needs failed. Each is one line, and with any of them the wait is still
+    there, still the release's word for word, and nothing waits for it.
+    """
+    workflow = _load(name)
+    job, step = _ci_wait(workflow)
+    assert "continue-on-error" not in step, f"{name}: the wait may fail and pass"
+    assert step.get("if") == _CI_WAIT_CONDITION[name], (
+        f"{name}: the wait runs under {step.get('if')!r}"
+    )
+    uploaders = _uploaders(workflow)
+    assert uploaders, f"{name} no longer uploads through trusted publishing"
+    for uploader in uploaders:
+        assert job in _upstream(workflow, uploader), f"{uploader} does not wait"
+        for between in sorted(_between(workflow, job, uploader)):
+            settings = workflow["jobs"][between]
+            assert "continue-on-error" not in settings, (
+                f"{name}: {between} lets {uploader} run after it failed"
+            )
+            condition = str(settings.get("if", ""))
+            assert not _STATUS_FUNCTION.search(condition), (
+                f"{name}: {between} runs under {condition!r}, which does not "
+                f"stop at a failed {job}"
+            )
 
 
 @pytest.mark.parametrize("name", ["release.yml", "publish-stub.yml"])
@@ -174,11 +236,7 @@ def test_no_job_inherits_a_token(name: str) -> None:
 @pytest.mark.parametrize("name", ["release.yml", "publish-stub.yml"])
 def test_the_upload_holds_nothing_but_its_oidc_token(name: str) -> None:
     workflow = _load(name)
-    uploading = {
-        job
-        for job, step in _steps(workflow)
-        if step.get("uses", "").startswith("pypa/gh-action-pypi-publish")
-    }
+    uploading = _uploaders(workflow)
     assert uploading, f"{name} no longer uploads through trusted publishing"
     for job in uploading:
         assert workflow["jobs"][job]["permissions"] == {"id-token": "write"}

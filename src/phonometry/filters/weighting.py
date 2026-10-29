@@ -147,6 +147,24 @@ except ImportError:  # pragma: no cover - depends on install extras
     _numba_jit = None  # type: ignore[assignment, unused-ignore]
 
 
+def _require_design_flag(value: object) -> bool:
+    """``high_accuracy`` as the ``bool`` it holds, refused when it is not a truth value.
+
+    ``None`` used to select the default; read as a truth value now it would
+    quietly pick the plain design instead. :func:`weighting_filter` asks this
+    before its design cache does, since ``1`` is equal to ``True`` as a key.
+
+    :param value: The caller's choice of design.
+    :return: The choice as a ``bool``.
+    :raises TypeError: for a value that is not ``True`` or ``False``, a numpy
+        truth value included.
+    """
+    if not isinstance(value, bool | np.bool_):
+        msg = f"'high_accuracy' must be True or False; got {type(value).__name__}."
+        raise TypeError(msg)
+    return bool(value)
+
+
 def _require_str(value: object, name: str) -> str:
     """Require *value* to be a string before any case folding touches it.
 
@@ -633,14 +651,7 @@ class WeightingFilter:
         if fs <= 0:
             raise ValueError(_FS_POSITIVE)
         _require_str(weighting, "weighting")
-        if not isinstance(high_accuracy, bool | np.bool_):
-            # ``None`` used to select the default; read as a truth value now
-            # it would quietly pick the plain design instead.
-            msg = (
-                "'high_accuracy' must be True or False; got "
-                f"{type(high_accuracy).__name__}."
-            )
-            raise TypeError(msg)
+        high_accuracy = _require_design_flag(high_accuracy)
         self.fs = fs
         self.weighting = weighting.upper()
         self.stateful = stateful
@@ -758,7 +769,7 @@ def _runtime_frequency_response(
 
 @lru_cache(maxsize=32)
 def _cached_weighting_filter(
-    fs: int, curve: Weighting, *, high_accuracy: bool
+    fs: float, curve: Weighting, *, high_accuracy: bool
 ) -> WeightingFilter:
     """Reuse the (immutable, non-stateful) weighting-filter object.
 
@@ -932,9 +943,13 @@ def weighting_filter(
     :return: The weighted record. A bare array in gives a bare array back; a
         :class:`~phonometry.io.Signal` gives a Signal, whose samples are
         already in pascals and whose factor therefore reads 1.0.
+    :raises TypeError: if ``high_accuracy`` is not ``True`` or ``False``,
+        ``fs`` is not one number, or ``weighting`` is not a text.
     """
     fs = resolve_fs(x, fs)
-    wf = _cached_weighting_filter(fs, weighting, high_accuracy=high_accuracy)
+    wf = _cached_weighting_filter(
+        fs, weighting, high_accuracy=_require_design_flag(high_accuracy)
+    )
     # The object form wraps for itself now, so hand it the caller's input
     # rather than the resolved samples: doing both would wrap twice.
     return wf.filter(x)

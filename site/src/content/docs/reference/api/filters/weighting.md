@@ -351,6 +351,12 @@ Apply a frequency weighting to a signal.
 
 **Returns:** The weighted record. A bare array in gives a bare array back; a [`Signal`](/phonometry/reference/api/io/io/#signal) gives a Signal, whose samples are already in pascals and whose factor therefore reads 1.0.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `high_accuracy` is not `True` or `False`, `fs` is not one number, or `weighting` is not a text. |
+
 ## WeightingFilter
 
 ```python

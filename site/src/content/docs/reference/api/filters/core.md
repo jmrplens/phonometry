@@ -120,6 +120,13 @@ Multichannel support: If x is 2D (channels, samples), each channel is filtered.
 
 **Returns:** An [`OctaveFilterResult`](/phonometry/reference/api/filters/core/#octavefilterresult) carrying the band `levels`, their `frequencies` and, when `sigbands` asked for them, the per-band `bands`. With *nominal=True* the frequencies are IEC 61260-1 labels instead of floats.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `fraction` or `fs` is not a single number, `order` is a flag, a text or an array where a count goes, or `limits` is not a pair of numbers. |
+| ValueError | for a bare array with no `fs`, a sample rate or a bandwidth that is not positive, an `order` that is not a whole number from 1, or frequency limits or a design the bank cannot be built with. |
+
 ## OctaveFilterBank
 
 ```python

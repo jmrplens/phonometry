@@ -1124,7 +1124,7 @@ def _decimate(x: np.ndarray, factor: int) -> np.ndarray:
 
 @lru_cache(maxsize=32)
 def _cached_filter_bank(
-    fs: int,
+    fs: float,
     fraction: float | np.integer[Any],
     order: int,
     limits: tuple[float, ...] | None,
@@ -1199,6 +1199,13 @@ def octave_filter(
         their ``frequencies`` and, when ``sigbands`` asked for them, the
         per-band ``bands``. With *nominal=True* the frequencies are
         IEC 61260-1 labels instead of floats.
+    :raises TypeError: if ``fraction`` or ``fs`` is not a single number,
+        ``order`` is a flag, a text or an array where a count goes, or
+        ``limits`` is not a pair of numbers.
+    :raises ValueError: for a bare array with no ``fs``, a sample rate or a
+        bandwidth that is not positive, an ``order`` that is not a whole
+        number from 1, or frequency limits or a design the bank cannot be
+        built with.
     """
     fs = resolve_fs(x, fs)
     # Both branches see the same already-checked pair: without this, a
@@ -1206,6 +1213,10 @@ def octave_filter(
     # one branch and in the constructor's len() on the other, with two
     # different stdlib messages and neither naming 'limits'.
     limits = _resolve_limits(limits)
+    # Checked before the cache is asked: True is equal to 1 as a key, so a
+    # bank designed for order=1 would answer order=True without the
+    # constructor's refusal ever running.
+    order = require_count(order, "order")
     if response_plot.show or response_plot.file:
         # Plotting has side effects: bypass the cache.
         filter_bank = OctaveFilterBank(

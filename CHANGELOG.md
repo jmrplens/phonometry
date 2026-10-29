@@ -2173,6 +2173,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `n_points`, where a `TypeError` from the slicing came before, and runs with
   a whole float such as `4096.0`.
 
+- **`filters.octave_filter` and `filters.weighting_filter` refuse an
+  `order` or a `high_accuracy` of the wrong type whatever ran before.** Both reuse the design of an earlier
+  call with equal options, and `True` is equal to `1` as a key of that
+  store: after `octave_filter(x, fs, order=1)`, `order=True` was answered
+  from it without the refusal the bank's constructor gives, and after
+  `weighting_filter(x, fs, high_accuracy=True)`, `high_accuracy=1` was. Each
+  is now checked before the store is asked.
+
 - **The type check reads the conformance scripts against the oracle tables
   they compare with, and every place that gives the command runs the same
   one.** The conformance scripts import their oracle tables from `tests/`,

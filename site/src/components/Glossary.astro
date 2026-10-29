@@ -85,6 +85,7 @@ const terms = glossary.flatMap((group) =>
 			...term,
 			group,
 			label: term.symbol ?? localized(term.name) ?? term.id,
+			quantityText: localized(term.quantity) as string,
 			unitText: localized(term.unit),
 			standardText: localized(term.standard),
 			clauseText: localized(term.clause),
@@ -112,19 +113,31 @@ const termCode = (label: string) => plain(label);
  * delimiters, so `$L_{Aeq}$` is the "LAeq" a search engine can match against a
  * query, and a definition carrying `$\mathrm{THD}_F$` reads as "THDF" rather
  * than as the TeX that produced it.
+ *
+ * A command stands for a character or a word, and it is replaced by that
+ * rather than dropped: a Greek letter by the letter, `\le` by "≤", `\log` by
+ * "log". Dropping them, as this did, left nine terms whose whole symbol is a
+ * Greek letter with an empty name in the structured data, and read
+ * "$K_{2\mathrm{A}} \le 4$ dB" as "K2A  4 dB". A command missing from the
+ * tables still disappears, so a new one belongs in `TEX_WORDS`.
  */
 function plain(source: string): string {
 	return source
 		.replace(/\\(?:text|mathrm|mathit|mathbf|operatorname)\{([^}]*)\}/g, '$1')
-		.replace(/\\[a-zA-Z]+/g, '')
+		.replace(/\\([a-zA-Z]+)/g, (_match, name: string) => GREEK[name] ?? TEX_WORDS[name] ?? '')
 		.replace(/[$\\{}_^]/g, '');
 }
 
+/** The commands other than Greek letters that the glossary writes, as text. */
+const TEX_WORDS: Record<string, string> = {
+	le: '≤', ge: '≥', cdot: '·', times: '×', pm: '±', approx: '≈', sqrt: '√',
+	log: 'log', lg: 'lg', ln: 'ln', exp: 'exp', sin: 'sin', cos: 'cos',
+};
+
 /**
- * The character a reader is actually holding. `plain()` drops a Greek command
- * along with the rest of the TeX, which is right for a search index and wrong
- * for a symbol index: someone scanning for the sigma on a datasheet has to find
- * a row that says sigma. This keeps the letter and drops everything else.
+ * The character a reader is actually holding. Someone scanning for the sigma
+ * on a datasheet has to find a row that says sigma, so the symbol index and
+ * the structured data keep the letter and drop the rest of the TeX.
  */
 const GREEK: Record<string, string> = {
 	alpha: 'α', beta: 'β', gamma: 'γ', delta: 'δ', Delta: 'Δ', epsilon: 'ε',
@@ -165,8 +178,22 @@ const jsonld = {
 	name: lang === 'es' ? 'Glosario acústico de phonometry' : 'phonometry acoustic glossary',
 	url: `${SITE}${LOCALE}/reference/glossary/`,
 	inLanguage: lang,
+	// A term is named by its quantity, the words a reader asking about it uses,
+	// and the symbol rides along as the alternate name and the code. Named by
+	// the symbol alone, as every symbolised entry used to be, the node for
+	// LAeq never said "A-weighted equivalent continuous sound pressure level".
+	// An entry labelled by a term rather than a symbol has no code, and keeps
+	// its label as the alternate name only where the label says more than the
+	// quantity does ("PML (perfectly matched layer)").
+	//
+	// The guide stays an inline node, named and with its address, so a reader
+	// of this page alone still learns where the quantity is computed; its `@id`
+	// is the article node that page itself publishes, which is what lets a
+	// consumer that has read both join them.
 	hasDefinedTerm: terms.map((term) => {
-		const code = termCode(term.label);
+		const code = term.symbol ? termCode(term.symbol) : undefined;
+		const label = plain(term.label);
+		const alternate = code ?? (label !== term.quantityText ? label : undefined);
 		const where = [term.standardText, term.clauseText]
 			.filter((value): value is string => Boolean(value))
 			.map(plain)
@@ -174,15 +201,26 @@ const jsonld = {
 		const unit = term.unitText
 			? ` ${lang === 'es' ? 'Unidad' : 'Unit'}: ${plain(term.unitText)}.`
 			: '';
+		const guideUrl = term.path ? `${SITE}${term.path}` : undefined;
 		return {
 			'@type': 'DefinedTerm',
 			'@id': `${SITE}${LOCALE}/reference/glossary/#${term.id}`,
-			name: code,
-			termCode: code,
+			name: term.quantityText,
+			// Present whenever the entry has a symbol, even if it came out empty, so
+			// that check-structured-data.mjs sees a symbol `plain()` could not read.
+			...(alternate === undefined ? {} : { alternateName: alternate }),
+			...(code === undefined ? {} : { termCode: code }),
 			description: `${plain(term.definitionText)}${unit} ${lang === 'es' ? 'Definida en' : 'Defined in'}: ${where}.`,
 			inDefinedTermSet: { '@id': `${SITE}${LOCALE}/reference/glossary/#glossary` },
-			...(term.path && term.guideTitle
-				? { subjectOf: { '@type': 'TechArticle', name: term.guideTitle, url: `${SITE}${term.path}` } }
+			...(guideUrl && term.guideTitle
+				? {
+						subjectOf: {
+							'@type': 'TechArticle',
+							'@id': `${guideUrl}#article`,
+							name: term.guideTitle,
+							url: guideUrl,
+						},
+					}
 				: {}),
 		};
 	}),

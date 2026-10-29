@@ -14,18 +14,34 @@
  * stored as `{ en, es }`: the definition always; the unit when the unit is a
  * word ("dimensionless"); the clause, because "clause" is "apartado"; the
  * designation when it carries translated prose ("no governing standard", an
- * author list joined by "and"); and the two entries whose name is a term
- * rather than a symbol.
+ * author list joined by "and"); the quantity's name; and the entries whose
+ * label is a term rather than a symbol.
  *
  * The guide is a locale-free slug and the link's text is the title of that
  * page as the site has it, read at build time. The old tables carried that
  * title by hand, in both languages, and had gone stale.
+ *
+ * Every definition is read on its own, not only after the card above it: the
+ * same string is the `description` of a `DefinedTerm`, and a search engine or
+ * an assistant quotes that node with no neighbour beside it. Four definitions
+ * used to open with "The same integral", "The same extrapolation" and the
+ * like, which in the structured data pointed at nothing. So a definition names
+ * its own quantity and never leans on the entry before it or on its group,
+ * which `scripts/glossary.test.mjs` holds for the openings it can recognise.
+ *
+ * The quantity is what the `DefinedTerm` is named: "A-weighted equivalent
+ * continuous sound pressure level", with the symbol, LAeq, as its
+ * `alternateName` and `termCode`. The glossary used to name every term by its
+ * symbol alone, which is what a reader holding the symbol types and not what
+ * one asking for the quantity does.
  *
  * Per term:
  *   id          stable anchor, unique across the glossary
  *   symbol      the notation, inline maths in `$...$`; omitted when the entry
  *               is named rather than symbolised
  *   name        `{ en, es }`, for those entries, instead of `symbol`
+ *   quantity    `{ en, es }`, the name of the quantity or concept the entry
+ *               defines, in words and without maths
  *   qualifier   `{ en, es }`, what tells apart two entries sharing a symbol
  *   unit        a string, or `{ en, es }` when the unit is a translated word
  *   standard    the designation that defines the quantity, or `{ en, es }`
@@ -41,6 +57,7 @@
  * @property {string} id
  * @property {string} [symbol]
  * @property {Localized} [name]
+ * @property {Localized} quantity
  * @property {Localized} [qualifier]
  * @property {string | Localized} [unit]
  * @property {string | Localized} standard
@@ -68,6 +85,10 @@ export const glossary = [
       {
         id: "l-p",
         symbol: "$L_p$",
+        quantity: {
+          en: "Sound pressure level",
+          es: "Nivel de presión acústica",
+        },
         unit: "dB re 20 µPa",
         standard: "IEC 61672-1:2013",
         guide: "signals/metrology/calibration",
@@ -79,6 +100,10 @@ export const glossary = [
       {
         id: "l-eq",
         symbol: "$L_\\mathrm{eq}$",
+        quantity: {
+          en: "Equivalent continuous sound pressure level",
+          es: "Nivel de presión acústica continuo equivalente",
+        },
         unit: "dB re 20 µPa",
         standard: "IEC 61672-1:2013",
         guide: "signals/levels/levels",
@@ -90,17 +115,25 @@ export const glossary = [
       {
         id: "l-aeq",
         symbol: "$L_\\mathrm{Aeq}$",
+        quantity: {
+          en: "A-weighted equivalent continuous sound pressure level",
+          es: "Nivel de presión acústica continuo equivalente ponderado A",
+        },
         unit: "dB re 20 µPa",
         standard: "IEC 61672-1:2013",
         guide: "signals/levels/levels",
         definition: {
-          en: "The same integral applied to the A-weighted signal, the default descriptor of environmental and occupational noise.",
-          es: "La misma integral aplicada a la señal ponderada A, el descriptor por defecto del ruido ambiental y laboral.",
+          en: "A-weighted equivalent continuous sound pressure level: the level of the steady sound that carries the same mean-square A-weighted sound pressure over the interval, the default descriptor of environmental and occupational noise.",
+          es: "Nivel de presión acústica continuo equivalente ponderado A: el nivel del sonido estacionario que transporta la misma presión acústica cuadrática media ponderada A durante el intervalo, el descriptor por defecto del ruido ambiental y laboral.",
         },
       },
       {
         id: "l-ae-sel",
         symbol: "$L_{\\mathrm{A}E}$, SEL",
+        quantity: {
+          en: "Sound exposure level",
+          es: "Nivel de exposición sonora",
+        },
         unit: "dB re (20 µPa)²·s",
         standard: "IEC 61672-1:2013",
         clause: {
@@ -116,6 +149,10 @@ export const glossary = [
       {
         id: "l-cpeak",
         symbol: "$L_\\mathrm{Cpeak}$",
+        quantity: {
+          en: "C-weighted peak sound level",
+          es: "Nivel de pico ponderado C",
+        },
         unit: "dB re 20 µPa",
         standard: "IEC 61672-1:2013",
         clause: {
@@ -131,6 +168,10 @@ export const glossary = [
       {
         id: "l-n-l-10-l-50-l-90",
         symbol: "$L_N$ ($L_{10}$, $L_{50}$, $L_{90}$)",
+        quantity: {
+          en: "Percentile level",
+          es: "Nivel percentil",
+        },
         unit: "dB re 20 µPa",
         standard: {
           en: "ISO 1996-2:2017 (Annex I uses $L_{90}$ as the residual level)",
@@ -145,6 +186,10 @@ export const glossary = [
       {
         id: "l-w-swl",
         symbol: "$L_W$, SWL",
+        quantity: {
+          en: "Sound power level",
+          es: "Nivel de potencia acústica",
+        },
         unit: "dB re 1 pW",
         standard: "ISO 3745:2012",
         clause: {
@@ -160,6 +205,10 @@ export const glossary = [
       {
         id: "l-i",
         symbol: "$L_I$",
+        quantity: {
+          en: "Sound intensity level",
+          es: "Nivel de intensidad acústica",
+        },
         unit: "dB re 1 pW/m²",
         standard: "IEC 61043:1993",
         guide: "devices/emission/intensity",
@@ -171,6 +220,10 @@ export const glossary = [
       {
         id: "l-p---l-i",
         symbol: "$L_p - L_I$",
+        quantity: {
+          en: "Pressure-intensity index",
+          es: "Índice presión-intensidad",
+        },
         unit: "dB",
         standard: "ISO 9614-1:1993",
         clause: {
@@ -186,6 +239,10 @@ export const glossary = [
       {
         id: "k-1",
         symbol: "$K_1$",
+        quantity: {
+          en: "Background noise correction",
+          es: "Corrección por ruido de fondo",
+        },
         unit: "dB",
         standard: "ISO 3744:2010",
         clause: {
@@ -201,6 +258,10 @@ export const glossary = [
       {
         id: "k-2",
         symbol: "$K_2$",
+        quantity: {
+          en: "Environmental correction",
+          es: "Corrección ambiental",
+        },
         unit: "dB",
         standard: "ISO 3744:2010",
         clause: {
@@ -216,6 +277,10 @@ export const glossary = [
       {
         id: "l-wad-k-wa",
         symbol: "$L_{WAd}$, $K_{WA}$",
+        quantity: {
+          en: "Declared noise emission value",
+          es: "Valor de emisión sonora declarado",
+        },
         unit: "dB re 1 pW",
         standard: "ISO 4871:1996",
         clause: {
@@ -231,6 +296,10 @@ export const glossary = [
       {
         id: "l-wa",
         symbol: "$L_{WA}$",
+        quantity: {
+          en: "Apparent sound power level",
+          es: "Nivel de potencia acústica aparente",
+        },
         qualifier: {
           en: "apparent, wind turbine",
           es: "aparente, aerogenerador",
@@ -262,6 +331,10 @@ export const glossary = [
       {
         id: "l-den",
         symbol: "$L_\\mathrm{den}$",
+        quantity: {
+          en: "Day-evening-night level",
+          es: "Nivel día-tarde-noche",
+        },
         unit: "dB re 20 µPa",
         standard: "ISO 1996-1:2016",
         clause: "3.6.4",
@@ -274,18 +347,26 @@ export const glossary = [
       {
         id: "l-dn",
         symbol: "$L_\\mathrm{dn}$",
+        quantity: {
+          en: "Day-night level",
+          es: "Nivel día-noche",
+        },
         unit: "dB re 20 µPa",
         standard: "ISO 1996-1:2016",
         clause: "3.6.5",
         guide: "environment/assessment/environmental-levels",
         definition: {
-          en: "Day-night level: the same construction with the 10 dB night penalty only.",
-          es: "Nivel día-noche: la misma construcción solo con la penalización de 10 dB nocturna.",
+          en: "Day-night level: the energy mean of the day and the night periods with 10 dB added to the night, and no evening period.",
+          es: "Nivel día-noche: la media energética de los periodos de día y de noche con 10 dB añadidos a la noche, sin periodo de tarde.",
         },
       },
       {
         id: "l-r",
         symbol: "$L_\\mathrm{r}$",
+        quantity: {
+          en: "Rating level",
+          es: "Nivel de evaluación",
+        },
         unit: "dB re 20 µPa",
         standard: "ISO 1996-1:2016",
         clause: {
@@ -301,6 +382,10 @@ export const glossary = [
       {
         id: "l-ar-t",
         symbol: "$L_{\\mathrm{Ar},T}$",
+        quantity: {
+          en: "Rating level of an impulsive source",
+          es: "Nivel de evaluación de una fuente impulsiva",
+        },
         unit: "dB re 20 µPa",
         standard: "NT ACOU 112:2002",
         clause: {
@@ -316,6 +401,10 @@ export const glossary = [
       {
         id: "k-i",
         symbol: "$K_\\mathrm{I}$",
+        quantity: {
+          en: "Impulse adjustment",
+          es: "Ajuste por impulsos",
+        },
         unit: "dB",
         standard: "NT ACOU 112:2002",
         clause: {
@@ -331,6 +420,10 @@ export const glossary = [
       {
         id: "e",
         symbol: "$E$",
+        quantity: {
+          en: "Sound exposure",
+          es: "Exposición sonora",
+        },
         unit: "Pa²h",
         standard: "IEC 61252:1993",
         clause: "3.1",
@@ -343,6 +436,10 @@ export const glossary = [
       {
         id: "l-ex-8h-l-ep-d",
         symbol: "$L_\\mathrm{EX,8h}$, $L_\\mathrm{EP,d}$",
+        quantity: {
+          en: "Daily noise exposure level",
+          es: "Nivel de exposición diaria al ruido",
+        },
         unit: "dB re 20 µPa",
         standard: "IEC 61252:1993",
         clause: "3.3",
@@ -355,6 +452,10 @@ export const glossary = [
       {
         id: "l-p-a-eqt",
         symbol: "$L_{p,\\mathrm{A,eq}T}$",
+        quantity: {
+          en: "A-weighted equivalent continuous sound pressure level in occupational exposure",
+          es: "Nivel de presión acústica continuo equivalente ponderado A en la exposición laboral",
+        },
         unit: "dB re 20 µPa",
         standard: "ISO 9612:2009",
         clause: {
@@ -370,6 +471,10 @@ export const glossary = [
       {
         id: "nipts",
         symbol: "NIPTS",
+        quantity: {
+          en: "Noise-induced permanent threshold shift",
+          es: "Desplazamiento permanente del umbral inducido por ruido",
+        },
         unit: "dB",
         standard: "ISO 1999:2013",
         guide: "perception/hearing/noise-induced-hearing-loss",
@@ -381,6 +486,10 @@ export const glossary = [
       {
         id: "htlan",
         symbol: "HTLAN",
+        quantity: {
+          en: "Hearing threshold level associated with age and noise",
+          es: "Nivel de umbral auditivo asociado a la edad y al ruido",
+        },
         unit: "dB",
         standard: "ISO 1999:2013",
         guide: "perception/hearing/noise-induced-hearing-loss",
@@ -392,6 +501,10 @@ export const glossary = [
       {
         id: "l-keq",
         symbol: "$L_{\\mathrm{Keq},T}$",
+        quantity: {
+          en: "Corrected equivalent level",
+          es: "Nivel corregido equivalente",
+        },
         unit: "dB re 20 µPa",
         standard: {
           en: "RD 1367/2007 (Spain)",
@@ -410,6 +523,10 @@ export const glossary = [
       {
         id: "k-t-k-f-k-i",
         symbol: "$K_\\mathrm{t}$, $K_\\mathrm{f}$, $K_\\mathrm{i}$",
+        quantity: {
+          en: "Tonal, low-frequency and impulsive character penalties",
+          es: "Penalizaciones por componentes tonales, de baja frecuencia e impulsivas",
+        },
         unit: "dB",
         standard: {
           en: "RD 1367/2007 (Spain)",
@@ -437,6 +554,10 @@ export const glossary = [
       {
         id: "a-3",
         symbol: "$A$",
+        quantity: {
+          en: "Total octave-band attenuation",
+          es: "Atenuación total por banda de octava",
+        },
         qualifier: {
           en: "octave-band attenuation",
           es: "atenuación por banda de octava",
@@ -456,6 +577,10 @@ export const glossary = [
       {
         id: "a-div",
         symbol: "$A_\\mathrm{div}$",
+        quantity: {
+          en: "Geometrical divergence",
+          es: "Divergencia geométrica",
+        },
         unit: "dB",
         standard: "ISO 9613-2:1996",
         clause: {
@@ -471,6 +596,10 @@ export const glossary = [
       {
         id: "a-atm",
         symbol: "$A_\\mathrm{atm}$",
+        quantity: {
+          en: "Atmospheric absorption",
+          es: "Absorción atmosférica",
+        },
         unit: "dB",
         standard: "ISO 9613-2:1996",
         clause: {
@@ -486,6 +615,10 @@ export const glossary = [
       {
         id: "alpha-atm",
         symbol: "$\\alpha$",
+        quantity: {
+          en: "Atmospheric attenuation coefficient",
+          es: "Coeficiente de atenuación atmosférica",
+        },
         qualifier: {
           en: "atmospheric",
           es: "atmosférico",
@@ -508,6 +641,10 @@ export const glossary = [
       {
         id: "a-gr",
         symbol: "$A_\\mathrm{gr}$",
+        quantity: {
+          en: "Ground effect",
+          es: "Efecto del terreno",
+        },
         unit: "dB",
         standard: "ISO 9613-2:1996",
         clause: {
@@ -523,6 +660,10 @@ export const glossary = [
       {
         id: "a-bar",
         symbol: "$A_\\mathrm{bar}$",
+        quantity: {
+          en: "Barrier attenuation",
+          es: "Atenuación por pantalla",
+        },
         unit: "dB",
         standard: "ISO 9613-2:1996",
         clause: {
@@ -538,6 +679,10 @@ export const glossary = [
       {
         id: "c-met",
         symbol: "$C_\\mathrm{met}$",
+        quantity: {
+          en: "Meteorological correction",
+          es: "Corrección meteorológica",
+        },
         unit: "dB",
         standard: "ISO 9613-2:1996",
         clause: {
@@ -553,6 +698,10 @@ export const glossary = [
       {
         id: "d-c",
         symbol: "$D_\\mathrm{c}$",
+        quantity: {
+          en: "Directivity correction",
+          es: "Corrección por directividad",
+        },
         unit: "dB",
         standard: "ISO 9613-2:1996",
         clause: {
@@ -568,6 +717,10 @@ export const glossary = [
       {
         id: "fresnel-n",
         symbol: "$N$",
+        quantity: {
+          en: "Fresnel number",
+          es: "Número de Fresnel",
+        },
         qualifier: {
           en: "Fresnel number",
           es: "número de Fresnel",
@@ -602,6 +755,10 @@ export const glossary = [
       {
         id: "a-c-z",
         symbol: "A, C, Z",
+        quantity: {
+          en: "Frequency weightings A, C and Z",
+          es: "Ponderaciones frecuenciales A, C y Z",
+        },
         unit: "dB",
         standard: "IEC 61672-1:2013",
         clause: {
@@ -617,6 +774,10 @@ export const glossary = [
       {
         id: "g",
         symbol: "G",
+        quantity: {
+          en: "G frequency weighting",
+          es: "Ponderación frecuencial G",
+        },
         unit: "dB",
         standard: "ISO 7196:1995",
         clause: {
@@ -632,6 +793,10 @@ export const glossary = [
       {
         id: "b",
         symbol: "B",
+        quantity: {
+          en: "B frequency weighting",
+          es: "Ponderación frecuencial B",
+        },
         unit: "dB",
         standard: "ANSI S1.4-1983",
         clause: {
@@ -647,6 +812,10 @@ export const glossary = [
       {
         id: "d",
         symbol: "D",
+        quantity: {
+          en: "D frequency weighting",
+          es: "Ponderación frecuencial D",
+        },
         unit: "dB",
         standard: {
           en: "IEC 537:1976 (withdrawn)",
@@ -661,6 +830,10 @@ export const glossary = [
       {
         id: "au",
         symbol: "AU",
+        quantity: {
+          en: "AU frequency weighting",
+          es: "Ponderación frecuencial AU",
+        },
         unit: "dB",
         standard: "IEC 61012:1990",
         clause: {
@@ -676,6 +849,10 @@ export const glossary = [
       {
         id: "f-s-i",
         symbol: "F, S, I",
+        quantity: {
+          en: "Fast, Slow and Impulse time weightings",
+          es: "Ponderaciones temporales Fast, Slow e Impulse",
+        },
         unit: {
           en: "s (time constant)",
           es: "s (constante de tiempo)",
@@ -692,6 +869,10 @@ export const glossary = [
         name: {
           en: "Performance class (0, 1, 2)",
           es: "Clase de prestaciones (0, 1, 2)",
+        },
+        quantity: {
+          en: "Performance class",
+          es: "Clase de prestaciones",
         },
         unit: {
           en: "dB (tolerance)",
@@ -711,6 +892,10 @@ export const glossary = [
       {
         id: "k-weighting",
         symbol: "K",
+        quantity: {
+          en: "K frequency weighting",
+          es: "Ponderación frecuencial K",
+        },
         unit: "dB",
         standard: "ITU-R BS.1770-5",
         clause: {
@@ -728,6 +913,10 @@ export const glossary = [
         name: {
           en: "ITU-R BS.468-4 weighting",
           es: "Ponderación UIT-R BS.468-4",
+        },
+        quantity: {
+          en: "ITU-R BS.468-4 noise weighting",
+          es: "Ponderación de ruido UIT-R BS.468-4",
         },
         unit: "dB",
         standard: {
@@ -747,6 +936,10 @@ export const glossary = [
       {
         id: "w-wholebody",
         symbol: "$W_\\mathrm{b}$, $W_\\mathrm{c}$, $W_\\mathrm{d}$, $W_\\mathrm{e}$, $W_\\mathrm{f}$, $W_\\mathrm{j}$, $W_\\mathrm{k}$, $W_\\mathrm{m}$",
+        quantity: {
+          en: "Whole-body vibration frequency weightings",
+          es: "Ponderaciones en frecuencia para cuerpo entero",
+        },
         qualifier: {
           en: "whole-body",
           es: "cuerpo entero",
@@ -769,6 +962,10 @@ export const glossary = [
       {
         id: "w-h",
         symbol: "$W_\\mathrm{h}$",
+        quantity: {
+          en: "Hand-arm vibration frequency weighting",
+          es: "Ponderación en frecuencia para vibración mano-brazo",
+        },
         qualifier: {
           en: "hand-arm",
           es: "mano-brazo",
@@ -800,6 +997,10 @@ export const glossary = [
       {
         id: "g-xx",
         symbol: "$G_{xx}$, $G_{xy}$",
+        quantity: {
+          en: "One-sided auto- and cross-spectral density",
+          es: "Densidad espectral unilateral, propia y cruzada",
+        },
         unit: {
           en: "(unit of $x$)²/Hz",
           es: "(unidad de $x$)²/Hz",
@@ -814,13 +1015,17 @@ export const glossary = [
         },
         guide: "signals/spectra/spectral-analysis",
         definition: {
-          en: "One-sided auto- and cross-spectral density: mean-square content per hertz, so the power in a band is the integral over it and not the height of a line. Everything else in this group is a ratio of these: the coherences, the two frequency-response estimators and the coherent output spectrum.",
-          es: "Densidad espectral unilateral, propia y cruzada: contenido cuadrático medio por hercio, de modo que la potencia de una banda es la integral sobre ella y no la altura de una línea. Todo lo demás de este grupo es un cociente de estas magnitudes: las coherencias, los dos estimadores de respuesta en frecuencia y el espectro de salida coherente.",
+          en: "One-sided auto- and cross-spectral density: mean-square content per hertz, so the power in a band is the integral over it and not the height of a line. The coherences, the two frequency-response estimators and the coherent output spectrum are all ratios of these densities.",
+          es: "Densidad espectral unilateral, propia y cruzada: contenido cuadrático medio por hercio, de modo que la potencia de una banda es la integral sobre ella y no la altura de una línea. Las coherencias, los dos estimadores de respuesta en frecuencia y el espectro de salida coherente son todos cocientes de estas densidades.",
         },
       },
       {
         id: "gamma2",
         symbol: "$\\gamma^2_{iy}$",
+        quantity: {
+          en: "Ordinary coherence",
+          es: "Coherencia ordinaria",
+        },
         qualifier: {
           en: "ordinary coherence",
           es: "coherencia ordinaria",
@@ -846,6 +1051,10 @@ export const glossary = [
       {
         id: "gamma2-multiple",
         symbol: "$\\gamma^2_{y:x}$",
+        quantity: {
+          en: "Multiple coherence",
+          es: "Coherencia múltiple",
+        },
         qualifier: {
           en: "multiple coherence",
           es: "coherencia múltiple",
@@ -871,6 +1080,10 @@ export const glossary = [
       {
         id: "gamma2-partial",
         symbol: "$\\gamma^2_{iy\\cdot(i-1)!}$",
+        quantity: {
+          en: "Partial coherence",
+          es: "Coherencia parcial",
+        },
         qualifier: {
           en: "partial coherence",
           es: "coherencia parcial",
@@ -896,6 +1109,10 @@ export const glossary = [
       {
         id: "h-2",
         symbol: "$H_1$, $H_2$",
+        quantity: {
+          en: "Frequency response function estimators",
+          es: "Estimadores de la función de respuesta en frecuencia",
+        },
         qualifier: {
           en: "FRF estimators",
           es: "estimadores de FRF",
@@ -921,6 +1138,10 @@ export const glossary = [
       {
         id: "enbw",
         symbol: "ENBW",
+        quantity: {
+          en: "Equivalent noise bandwidth",
+          es: "Ancho de banda equivalente de ruido",
+        },
         unit: {
           en: "bins (or Hz)",
           es: "líneas (o Hz)",
@@ -945,6 +1166,10 @@ export const glossary = [
           en: "Cepstrum and quefrency",
           es: "Cepstrum y quefrencia",
         },
+        quantity: {
+          en: "Cepstrum",
+          es: "Cepstrum",
+        },
         unit: {
           en: "quefrency in s",
           es: "quefrencia en s",
@@ -966,6 +1191,10 @@ export const glossary = [
       {
         id: "crest-factor",
         name: {
+          en: "Crest factor",
+          es: "Factor de cresta",
+        },
+        quantity: {
           en: "Crest factor",
           es: "Factor de cresta",
         },
@@ -993,6 +1222,10 @@ export const glossary = [
       {
         id: "t-20",
         symbol: "$T_{20}$",
+        quantity: {
+          en: "Reverberation time over a 20 dB evaluation range",
+          es: "Tiempo de reverberación en un intervalo de evaluación de 20 dB",
+        },
         unit: "s",
         standard: "ISO 3382-2:2008",
         clause: {
@@ -1008,6 +1241,10 @@ export const glossary = [
       {
         id: "t-30",
         symbol: "$T_{30}$",
+        quantity: {
+          en: "Reverberation time over a 30 dB evaluation range",
+          es: "Tiempo de reverberación en un intervalo de evaluación de 30 dB",
+        },
         unit: "s",
         standard: "ISO 3382-2:2008",
         clause: {
@@ -1016,13 +1253,17 @@ export const glossary = [
         },
         guide: "buildings/rooms/room-acoustics",
         definition: {
-          en: "The same extrapolation from a fit over −5 dB to −35 dB, the usual choice when the decay range allows it.",
-          es: "La misma extrapolación desde un ajuste entre −5 dB y −35 dB, la opción habitual cuando el margen de caída lo permite.",
+          en: "Reverberation time extrapolated to a 60 dB decay from a least-squares fit over −5 dB to −35 dB of the Schroeder curve, the usual choice when the decay range allows it.",
+          es: "Tiempo de reverberación extrapolado a una caída de 60 dB desde un ajuste por mínimos cuadrados entre −5 dB y −35 dB de la curva de Schroeder, la opción habitual cuando el margen de caída lo permite.",
         },
       },
       {
         id: "t-60-rt",
         symbol: "$T_{60}$, RT",
+        quantity: {
+          en: "Reverberation time",
+          es: "Tiempo de reverberación",
+        },
         unit: "s",
         standard: "ISO 3382-1:2009",
         guide: "buildings/rooms/room-acoustics",
@@ -1034,6 +1275,10 @@ export const glossary = [
       {
         id: "edt",
         symbol: "EDT",
+        quantity: {
+          en: "Early decay time",
+          es: "Tiempo de caída inicial",
+        },
         unit: "s",
         standard: {
           en: "ISO 3382-1:2009 (just-noticeable difference in Table A.1)",
@@ -1041,13 +1286,17 @@ export const glossary = [
         },
         guide: "buildings/rooms/room-acoustics",
         definition: {
-          en: "Early decay time: the same slope taken over the first 10 dB of decay, which tracks perceived reverberance rather than the tail.",
-          es: "Tiempo de caída inicial: la misma pendiente tomada sobre los primeros 10 dB de caída, que sigue la reverberancia percibida y no la cola.",
+          en: "Early decay time: the decay over the first 10 dB of the Schroeder curve, extrapolated to 60 dB, which tracks perceived reverberance rather than the tail.",
+          es: "Tiempo de caída inicial: la caída en los primeros 10 dB de la curva de Schroeder, extrapolada a 60 dB, que sigue la reverberancia percibida y no la cola.",
         },
       },
       {
         id: "c-50",
         symbol: "$C_{50}$",
+        quantity: {
+          en: "Clarity for speech",
+          es: "Claridad para la palabra",
+        },
         unit: "dB",
         standard: "ISO 3382-1:2009",
         guide: "buildings/rooms/room-acoustics",
@@ -1059,6 +1308,10 @@ export const glossary = [
       {
         id: "c-80",
         symbol: "$C_{80}$",
+        quantity: {
+          en: "Clarity for music",
+          es: "Claridad para la música",
+        },
         unit: "dB",
         standard: {
           en: "ISO 3382-1:2009 (just-noticeable difference in Table A.1)",
@@ -1066,13 +1319,17 @@ export const glossary = [
         },
         guide: "buildings/rooms/room-acoustics",
         definition: {
-          en: "Clarity for music: the same ratio with the boundary at 80 ms.",
-          es: "Claridad para la música: la misma relación con la frontera en 80 ms.",
+          en: "Clarity for music: the energy ratio between the first 80 ms of the impulse response and everything after it.",
+          es: "Claridad para la música: la relación energética entre los primeros 80 ms de la respuesta al impulso y todo lo que viene después.",
         },
       },
       {
         id: "d-50",
         symbol: "$D_{50}$",
+        quantity: {
+          en: "Definition (Deutlichkeit)",
+          es: "Definición (Deutlichkeit)",
+        },
         unit: {
           en: "dimensionless",
           es: "adimensional",
@@ -1090,6 +1347,10 @@ export const glossary = [
       {
         id: "t-s",
         symbol: "$T_\\mathrm{S}$",
+        quantity: {
+          en: "Centre time",
+          es: "Tiempo central",
+        },
         qualifier: {
           en: "centre time",
           es: "tiempo central",
@@ -1109,6 +1370,10 @@ export const glossary = [
       {
         id: "a",
         symbol: "$A$",
+        quantity: {
+          en: "Equivalent sound absorption area",
+          es: "Área de absorción acústica equivalente",
+        },
         unit: "m²",
         standard: "ISO 354:2003",
         clause: {
@@ -1124,6 +1389,10 @@ export const glossary = [
       {
         id: "nc",
         symbol: "NC",
+        quantity: {
+          en: "Noise criteria rating",
+          es: "Valoración Noise Criteria",
+        },
         unit: {
           en: "dB (index)",
           es: "dB (índice)",
@@ -1142,6 +1411,10 @@ export const glossary = [
       {
         id: "sil",
         symbol: "SIL",
+        quantity: {
+          en: "Speech interference level",
+          es: "Nivel de interferencia con la palabra",
+        },
         unit: "dB",
         standard: "ANSI/ASA S12.2-2019",
         clause: {
@@ -1157,6 +1430,10 @@ export const glossary = [
       {
         id: "rc",
         symbol: "RC",
+        quantity: {
+          en: "Room criteria Mark II rating",
+          es: "Valoración Room Criteria Mark II",
+        },
         unit: {
           en: "dB (index)",
           es: "dB (índice)",
@@ -1175,6 +1452,10 @@ export const glossary = [
       {
         id: "nr",
         symbol: "NR",
+        quantity: {
+          en: "Noise rating",
+          es: "Valoración Noise Rating",
+        },
         qualifier: {
           en: "curve family",
           es: "familia de curvas",
@@ -1196,6 +1477,10 @@ export const glossary = [
       {
         id: "d-2-s",
         symbol: "$D_{2,\\mathrm{S}}$",
+        quantity: {
+          en: "Spatial decay rate of speech",
+          es: "Tasa de decaimiento espacial del habla",
+        },
         unit: "dB",
         standard: "ISO 3382-3:2012",
         clause: "3.2",
@@ -1208,18 +1493,26 @@ export const glossary = [
       {
         id: "l-p-a-s-4m",
         symbol: "$L_{p,\\mathrm{A,S},4\\,\\mathrm{m}}$",
+        quantity: {
+          en: "A-weighted speech level at 4 m",
+          es: "Nivel de habla ponderado A a 4 m",
+        },
         unit: "dB",
         standard: "ISO 3382-3:2012",
         clause: "3.3",
         guide: "buildings/rooms/open-plan-acoustics",
         definition: {
-          en: "A-weighted speech level at 4 m: the nominal level of normal speech four metres from the talker, read off the same regression line rather than measured at that distance. It fixes the absolute height of the decay curve that $D_{2,\\mathrm{S}}$ only gives the slope of, which is why the two are always reported together.",
-          es: "Nivel de habla ponderado A a 4 m: el nivel nominal del habla normal a cuatro metros del hablante, leído sobre la misma recta de regresión y no medido a esa distancia. Fija la altura absoluta de la curva de decaimiento de la que $D_{2,\\mathrm{S}}$ solo da la pendiente, y por eso ambos se informan siempre juntos.",
+          en: "A-weighted speech level at 4 m: the nominal level of normal speech four metres from the talker, read off the regression of level against the logarithm of distance that also gives $D_{2,\\mathrm{S}}$, rather than measured at that distance. It fixes the absolute height of the decay curve that $D_{2,\\mathrm{S}}$ only gives the slope of, which is why the two are always reported together.",
+          es: "Nivel de habla ponderado A a 4 m: el nivel nominal del habla normal a cuatro metros del hablante, leído sobre la regresión del nivel frente al logaritmo de la distancia que da también $D_{2,\\mathrm{S}}$, y no medido a esa distancia. Fija la altura absoluta de la curva de decaimiento de la que $D_{2,\\mathrm{S}}$ solo da la pendiente, y por eso ambos se informan siempre juntos.",
         },
       },
       {
         id: "r-d",
         symbol: "$r_\\mathrm{D}$",
+        quantity: {
+          en: "Distraction distance",
+          es: "Distancia de distracción",
+        },
         unit: "m",
         standard: "ISO 3382-3:2012",
         clause: "3.6",
@@ -1232,6 +1525,10 @@ export const glossary = [
       {
         id: "r-p",
         symbol: "$r_\\mathrm{P}$",
+        quantity: {
+          en: "Privacy distance",
+          es: "Distancia de privacidad",
+        },
         unit: "m",
         standard: "ISO 3382-3:2012",
         clause: "3.7",
@@ -1253,6 +1550,10 @@ export const glossary = [
       {
         id: "m-f",
         symbol: "$m(F)$",
+        quantity: {
+          en: "Modulation transfer function",
+          es: "Función de transferencia de modulación",
+        },
         unit: {
           en: "dimensionless",
           es: "adimensional",
@@ -1267,6 +1568,10 @@ export const glossary = [
       {
         id: "sti",
         symbol: "STI",
+        quantity: {
+          en: "Speech transmission index",
+          es: "Índice de transmisión del habla",
+        },
         unit: {
           en: "dimensionless",
           es: "adimensional",
@@ -1284,6 +1589,10 @@ export const glossary = [
       {
         id: "stipa",
         symbol: "STIPA",
+        quantity: {
+          en: "Speech transmission index for public address systems",
+          es: "Índice de transmisión del habla para sistemas de megafonía",
+        },
         unit: {
           en: "dimensionless",
           es: "adimensional",
@@ -1295,13 +1604,17 @@ export const glossary = [
         },
         guide: "perception/speech/speech-transmission",
         definition: {
-          en: "The direct STI measurement, made by playing a standardised two-modulation-per-band test signal through the real chain.",
-          es: "La medida directa del STI, reproduciendo una señal de prueba normalizada con dos modulaciones por banda a través de la cadena real.",
+          en: "Speech transmission index for public address systems: the direct STI measurement, made by playing a standardised two-modulation-per-band test signal through the real chain.",
+          es: "Índice de transmisión del habla para sistemas de megafonía: la medida directa del STI, reproduciendo una señal de prueba normalizada con dos modulaciones por banda a través de la cadena real.",
         },
       },
       {
         id: "sii",
         symbol: "SII",
+        quantity: {
+          en: "Speech intelligibility index",
+          es: "Índice de inteligibilidad del habla",
+        },
         unit: {
           en: "dimensionless",
           es: "adimensional",
@@ -1320,6 +1633,10 @@ export const glossary = [
       {
         id: "stoi",
         symbol: "STOI",
+        quantity: {
+          en: "Short-time objective intelligibility",
+          es: "Inteligibilidad objetiva de corta duración",
+        },
         unit: {
           en: "dimensionless",
           es: "adimensional",
@@ -1338,6 +1655,10 @@ export const glossary = [
       {
         id: "estoi",
         symbol: "ESTOI",
+        quantity: {
+          en: "Extended short-time objective intelligibility",
+          es: "Inteligibilidad objetiva de corta duración extendida",
+        },
         unit: {
           en: "dimensionless",
           es: "adimensional",
@@ -1352,8 +1673,8 @@ export const glossary = [
         },
         guide: "perception/speech/objective-intelligibility",
         definition: {
-          en: "The extended measure, row- and column-normalised so that it tracks modulated maskers.",
-          es: "La versión extendida, normalizada por filas y por columnas para que siga a los enmascarantes modulados.",
+          en: "Extended short-time objective intelligibility: an extension of STOI that correlates clean and degraded speech over short-time spectrogram segments normalised by rows and then by columns, so that it tracks modulated maskers.",
+          es: "Inteligibilidad objetiva de corta duración extendida: una extensión del STOI que correlaciona el habla limpia y la degradada sobre segmentos de espectrograma de corta duración normalizados por filas y después por columnas, para que siga a los enmascarantes modulados.",
         },
       },
     ],
@@ -1368,6 +1689,10 @@ export const glossary = [
       {
         id: "nr-2",
         symbol: "NR",
+        quantity: {
+          en: "Noise reduction",
+          es: "Reducción de ruido",
+        },
         qualifier: {
           en: "level drop",
           es: "caída de nivel",
@@ -1386,6 +1711,10 @@ export const glossary = [
       {
         id: "d-2",
         symbol: "$D$",
+        quantity: {
+          en: "Level difference",
+          es: "Diferencia de niveles",
+        },
         unit: "dB",
         standard: "ISO 16283-1:2014",
         clause: {
@@ -1401,6 +1730,10 @@ export const glossary = [
       {
         id: "d-nt",
         symbol: "$D_{\\mathrm{n}T}$",
+        quantity: {
+          en: "Standardized level difference",
+          es: "Diferencia de niveles estandarizada",
+        },
         unit: "dB",
         standard: "ISO 16283-1:2014",
         clause: {
@@ -1416,6 +1749,10 @@ export const glossary = [
       {
         id: "d-n",
         symbol: "$D_\\mathrm{n}$",
+        quantity: {
+          en: "Normalized level difference",
+          es: "Diferencia de niveles normalizada",
+        },
         unit: "dB",
         standard: "ISO 10052:2021",
         guide: "buildings/insulation/insulation-survey",
@@ -1427,6 +1764,10 @@ export const glossary = [
       {
         id: "d-n-e",
         symbol: "$D_\\mathrm{n,e}$",
+        quantity: {
+          en: "Element-normalized level difference",
+          es: "Diferencia de niveles normalizada de elemento",
+        },
         unit: "dB",
         standard: "EN 12354-3:2000",
         guide: "buildings/design/insulation-prediction",
@@ -1438,6 +1779,10 @@ export const glossary = [
       {
         id: "r",
         symbol: "$R$",
+        quantity: {
+          en: "Sound reduction index",
+          es: "Índice de reducción acústica",
+        },
         unit: "dB",
         standard: "ISO 10140-2:2010",
         guide: "buildings/insulation/insulation-lab",
@@ -1449,6 +1794,10 @@ export const glossary = [
       {
         id: "r-2",
         symbol: "$R'$",
+        quantity: {
+          en: "Apparent sound reduction index",
+          es: "Índice de reducción acústica aparente",
+        },
         unit: "dB",
         standard: "ISO 16283-1:2014",
         clause: {
@@ -1457,13 +1806,17 @@ export const glossary = [
         },
         guide: "buildings/insulation/insulation-field",
         definition: {
-          en: "Apparent sound reduction index: the same construction measured in the building, so it includes every flanking path. The prime is the lab-versus-field marker.",
-          es: "Índice de reducción acústica aparente: la misma construcción medida en el edificio, así que incluye todas las trayectorias por flancos. La prima es la marca que distingue el laboratorio del campo.",
+          en: "Apparent sound reduction index: the level difference corrected by the partition area over the receiving-room absorption area, measured in the building, so it includes every flanking path. The prime is the lab-versus-field marker.",
+          es: "Índice de reducción acústica aparente: la diferencia de niveles corregida por el área de la partición partido por el área de absorción del recinto receptor, medida en el edificio, así que incluye todas las trayectorias por flancos. La prima es la marca que distingue el laboratorio del campo.",
         },
       },
       {
         id: "tl",
         symbol: "TL",
+        quantity: {
+          en: "Transmission loss of a partition",
+          es: "Pérdidas por transmisión de un elemento separador",
+        },
         qualifier: {
           en: "panel",
           es: "panel",
@@ -1486,6 +1839,10 @@ export const glossary = [
       {
         id: "tl-2",
         symbol: "TL",
+        quantity: {
+          en: "Transmission loss of a duct element",
+          es: "Pérdidas por transmisión de un elemento de conducto",
+        },
         qualifier: {
           en: "duct element",
           es: "elemento de conducto",
@@ -1508,6 +1865,10 @@ export const glossary = [
       {
         id: "il",
         symbol: "IL",
+        quantity: {
+          en: "Insertion loss",
+          es: "Pérdida por inserción",
+        },
         unit: "dB",
         standard: {
           en: "Bies, Hansen and Howard (2017)",
@@ -1526,6 +1887,10 @@ export const glossary = [
       {
         id: "tau",
         symbol: "$\\tau$",
+        quantity: {
+          en: "Transmission factor",
+          es: "Factor de transmisión",
+        },
         unit: {
           en: "dimensionless",
           es: "adimensional",
@@ -1537,35 +1902,47 @@ export const glossary = [
         },
         guide: "buildings/design/detailed-prediction",
         definition: {
-          en: "Transmission factor, or transmission coefficient: the fraction of the incident sound power a partition passes on. It is the quantity the whole group is a logarithm of, since $R = -10\\log_{10}\\tau$ and the transmission loss is the same logarithm; a $\\tau$ of $10^{-5}$ is a 50 dB partition. Transmission factors of parallel paths add, which is why a prediction sums the direct, flanking and indirect airborne factors and only then takes the logarithm.",
-          es: "Factor de transmisión, o coeficiente de transmisión: la fracción de la potencia acústica incidente que deja pasar un elemento separador. Es la magnitud de la que es logaritmo todo el grupo, ya que $R = -10\\log_{10}\\tau$ y las pérdidas por transmisión son ese mismo logaritmo; un $\\tau$ de $10^{-5}$ es un separador de 50 dB. Los factores de transmisión de caminos en paralelo se suman, y por eso una predicción suma los factores directo, por flancos e indirecto por vía aérea y solo después toma el logaritmo.",
+          en: "Transmission factor, or transmission coefficient: the fraction of the incident sound power a partition passes on. Every sound reduction index and transmission loss is a logarithm of it, since $R = -10\\log_{10}\\tau$ and the transmission loss is the same logarithm; a $\\tau$ of $10^{-5}$ is a 50 dB partition. Transmission factors of parallel paths add, which is why a prediction sums the direct, flanking and indirect airborne factors and only then takes the logarithm.",
+          es: "Factor de transmisión, o coeficiente de transmisión: la fracción de la potencia acústica incidente que deja pasar un elemento separador. Todo índice de reducción acústica y toda pérdida por transmisión son un logaritmo suyo, ya que $R = -10\\log_{10}\\tau$ y las pérdidas por transmisión son ese mismo logaritmo; un $\\tau$ de $10^{-5}$ es un separador de 50 dB. Los factores de transmisión de caminos en paralelo se suman, y por eso una predicción suma los factores directo, por flancos e indirecto por vía aérea y solo después toma el logaritmo.",
         },
       },
       {
         id: "r-w-r-w-d-nt-w",
         symbol: "$R_\\mathrm{w}$, $R'_\\mathrm{w}$, $D_{\\mathrm{n}T,\\mathrm{w}}$",
+        quantity: {
+          en: "Weighted airborne sound insulation ratings",
+          es: "Índices globales ponderados de aislamiento a ruido aéreo",
+        },
         unit: "dB",
         standard: "ISO 717-1:2020",
         guide: "buildings/insulation/insulation-ratings",
         definition: {
-          en: "The weighted single-number ratings: a fixed reference curve is shifted toward the measured spectrum until the unfavourable deviations reach their allowed sum, and the shifted curve is read at 500 Hz.",
-          es: "Los índices globales ponderados: una curva de referencia fija se desplaza hacia el espectro medido hasta que las desviaciones desfavorables alcanzan su suma admisible, y la curva desplazada se lee en 500 Hz.",
+          en: "The weighted single-number ratings of airborne sound insulation: a fixed reference curve is shifted toward the measured spectrum until the unfavourable deviations reach their allowed sum, and the shifted curve is read at 500 Hz.",
+          es: "Los índices globales ponderados de aislamiento a ruido aéreo: una curva de referencia fija se desplaza hacia el espectro medido hasta que las desviaciones desfavorables alcanzan su suma admisible, y la curva desplazada se lee en 500 Hz.",
         },
       },
       {
         id: "d-n-e-w",
         symbol: "$D_\\mathrm{n,e,w}$",
+        quantity: {
+          en: "Weighted element-normalized level difference",
+          es: "Diferencia de niveles normalizada de elemento ponderada",
+        },
         unit: "dB",
         standard: "ISO 717-1:2020",
         guide: "buildings/design/insulation-prediction",
         definition: {
-          en: "The same reference-curve rating applied to the element-normalized level difference.",
-          es: "El mismo índice global de curva de referencia aplicado a la diferencia de niveles normalizada de elemento.",
+          en: "Weighted element-normalized level difference: the single-number rating of the element-normalized level difference $D_\\mathrm{n,e}$, read at 500 Hz off the ISO 717-1 reference curve once it has been shifted toward the measured spectrum until the unfavourable deviations reach their allowed sum.",
+          es: "Diferencia de niveles normalizada de elemento ponderada: el índice global de la diferencia de niveles normalizada de elemento $D_\\mathrm{n,e}$, leído en 500 Hz sobre la curva de referencia de la ISO 717-1 una vez desplazada hacia el espectro medido hasta que las desviaciones desfavorables alcanzan su suma admisible.",
         },
       },
       {
         id: "c-c-tr",
         symbol: "$C$, $C_\\mathrm{tr}$",
+        quantity: {
+          en: "Spectrum adaptation terms",
+          es: "Términos de adaptación espectral",
+        },
         unit: "dB",
         standard: "ISO 717-1:2020",
         clause: {
@@ -1581,6 +1958,10 @@ export const glossary = [
       {
         id: "l-n",
         symbol: "$L_\\mathrm{n}$",
+        quantity: {
+          en: "Normalized impact sound pressure level",
+          es: "Nivel de presión acústica de impactos normalizado",
+        },
         unit: "dB re 20 µPa",
         standard: "ISO 10140-3:2010",
         guide: "buildings/insulation/insulation-lab",
@@ -1592,6 +1973,10 @@ export const glossary = [
       {
         id: "l-nt",
         symbol: "$L'_{\\mathrm{n}T}$",
+        quantity: {
+          en: "Standardized impact sound pressure level",
+          es: "Nivel de presión acústica de impactos estandarizado",
+        },
         unit: "dB re 20 µPa",
         standard: "ISO 16283-2:2015",
         guide: "buildings/insulation/insulation-field",
@@ -1603,17 +1988,25 @@ export const glossary = [
       {
         id: "l-n-w-l-nt-w",
         symbol: "$L_\\mathrm{n,w}$, $L'_{\\mathrm{n}T,\\mathrm{w}}$",
+        quantity: {
+          en: "Weighted impact sound pressure levels",
+          es: "Niveles globales de presión acústica de impactos",
+        },
         unit: "dB",
         standard: "ISO 717-2:2020",
         guide: "buildings/insulation/insulation-ratings",
         definition: {
-          en: "The weighted impact ratings. The reference curve is shifted the same way, but an unfavourable deviation is now one where the measurement exceeds the reference.",
-          es: "Los índices globales de impactos. La curva de referencia se desplaza igual, pero ahora una desviación desfavorable es aquella en la que la medida supera a la referencia.",
+          en: "Weighted impact sound pressure levels: the single-number ratings of the normalized and the standardized impact sound pressure levels, read at 500 Hz off a reference curve shifted toward the measured spectrum until the unfavourable deviations reach their allowed sum. Unlike the airborne ratings, an unfavourable deviation is one where the measurement exceeds the reference.",
+          es: "Niveles globales de presión acústica de impactos: los índices globales de los niveles de presión acústica de impactos normalizado y estandarizado, leídos en 500 Hz sobre una curva de referencia desplazada hacia el espectro medido hasta que las desviaciones desfavorables alcanzan su suma admisible. A diferencia de los índices a ruido aéreo, una desviación desfavorable es aquella en la que la medida supera a la referencia.",
         },
       },
       {
         id: "c-i",
         symbol: "$C_\\mathrm{I}$",
+        quantity: {
+          en: "Impact spectrum adaptation term",
+          es: "Término de adaptación espectral de impactos",
+        },
         unit: "dB",
         standard: {
           en: "ISO 717-2:2020 (enlarged range in A.2.1 NOTE)",
@@ -1628,6 +2021,10 @@ export const glossary = [
       {
         id: "delta-l-w",
         symbol: "$\\Delta L_\\mathrm{w}$",
+        quantity: {
+          en: "Weighted reduction of impact sound pressure level",
+          es: "Reducción ponderada del nivel de presión acústica de impactos",
+        },
         unit: "dB",
         standard: {
           en: "ISO 717-2:2020 (measurement in ISO 16251-1:2014, Formulae (3) and (4))",
@@ -1642,6 +2039,10 @@ export const glossary = [
       {
         id: "delta-r-w",
         symbol: "$\\Delta R_\\mathrm{w}$",
+        quantity: {
+          en: "Weighted sound reduction index improvement",
+          es: "Mejora ponderada del índice de reducción acústica",
+        },
         unit: "dB",
         standard: "EN 12354-1:2000",
         clause: {
@@ -1657,6 +2058,10 @@ export const glossary = [
       {
         id: "k-ij",
         symbol: "$K_{ij}$",
+        quantity: {
+          en: "Vibration reduction index",
+          es: "Índice de reducción vibratoria",
+        },
         unit: "dB",
         standard: "ISO 10848-1:2006",
         clause: {
@@ -1672,6 +2077,10 @@ export const glossary = [
       {
         id: "f-c",
         symbol: "$f_\\mathrm{c}$",
+        quantity: {
+          en: "Critical frequency",
+          es: "Frecuencia crítica",
+        },
         unit: "Hz",
         standard: {
           en: "Bies, Hansen and Howard (2017)",
@@ -1690,6 +2099,10 @@ export const glossary = [
       {
         id: "sigma",
         symbol: "$\\sigma$",
+        quantity: {
+          en: "Radiation efficiency of a plate",
+          es: "Eficiencia de radiación de una placa",
+        },
         unit: {
           en: "dimensionless",
           es: "adimensional",
@@ -1708,6 +2121,10 @@ export const glossary = [
       {
         id: "d-2m-nt",
         symbol: "$D_{2\\mathrm{m,n}T}$",
+        quantity: {
+          en: "Standardized facade level difference",
+          es: "Diferencia de niveles estandarizada en fachada",
+        },
         unit: "dB",
         standard: "ISO 16283-3:2016",
         clause: "3.15",
@@ -1720,6 +2137,10 @@ export const glossary = [
       {
         id: "d-ls-2m-nt-w",
         symbol: "$D_{\\mathrm{ls},2\\mathrm{m,n}T,\\mathrm{w}}$",
+        quantity: {
+          en: "Weighted standardized facade level difference, loudspeaker method",
+          es: "Diferencia de niveles estandarizada ponderada en fachada, método del altavoz",
+        },
         unit: "dB",
         standard: "ISO 717-1:2020",
         guide: "buildings/insulation/facade-insulation",
@@ -1731,6 +2152,10 @@ export const glossary = [
       {
         id: "r-45",
         symbol: "$R'_{45°}$",
+        quantity: {
+          en: "Apparent sound reduction index of a facade element, loudspeaker at 45 degrees",
+          es: "Índice de reducción acústica aparente de un elemento de fachada, altavoz a 45 grados",
+        },
         unit: "dB",
         standard: "ISO 16283-3:2016",
         clause: "3.12",
@@ -1743,6 +2168,10 @@ export const glossary = [
       {
         id: "r-a",
         symbol: "$R_\\mathrm{A}$, $R_\\mathrm{A,tr}$",
+        quantity: {
+          en: "A-weighted global sound reduction index",
+          es: "Índice global de reducción acústica, ponderado A",
+        },
         unit: "dBA",
         standard: {
           en: "CTE DB-HR",
@@ -1761,6 +2190,10 @@ export const glossary = [
       {
         id: "d-nt-a",
         symbol: "$D_{\\mathrm{n}T,\\mathrm{A}}$, $D_{2\\mathrm{m,n}T,\\mathrm{Atr}}$",
+        quantity: {
+          en: "A-weighted standardized level difference",
+          es: "Diferencia de niveles estandarizada, ponderada A",
+        },
         unit: "dBA",
         standard: {
           en: "CTE DB-HR",
@@ -1772,13 +2205,17 @@ export const glossary = [
         },
         guide: "buildings/insulation/spanish-building-code",
         definition: {
-          en: "The same global index applied to a standardized level difference: between two rooms ($D_{\\mathrm{n}T,\\mathrm{A}}$, pink noise) and between the outside and a protected room ($D_{2\\mathrm{m,n}T,\\mathrm{Atr}}$, road traffic or aircraft). These are the quantities the DB-HR requirement tables are written against, so a project is checked in them and not in the ISO 717-1 ratings.",
-          es: "El mismo índice global aplicado a una diferencia de niveles estandarizada: entre dos recintos ($D_{\\mathrm{n}T,\\mathrm{A}}$, ruido rosa) y entre el exterior y un recinto protegido ($D_{2\\mathrm{m,n}T,\\mathrm{Atr}}$, tráfico rodado o aeronaves). Son las magnitudes en las que están escritas las tablas de exigencias del DB-HR, de modo que un proyecto se comprueba en ellas y no en los índices de la ISO 717-1.",
+          en: "A-weighted standardized level difference: the standardized level difference weighted with a normalised source spectrum and summed energetically over the eighteen one-third-octave bands from 100 Hz to 5 kHz, between two rooms ($D_{\\mathrm{n}T,\\mathrm{A}}$, pink noise) and between the outside and a protected room ($D_{2\\mathrm{m,n}T,\\mathrm{Atr}}$, road traffic or aircraft). These are the quantities the DB-HR requirement tables are written against, so a project is checked in them and not in the ISO 717-1 ratings.",
+          es: "Diferencia de niveles estandarizada, ponderada A: la diferencia de niveles estandarizada ponderada con un espectro normalizado de la fuente y sumada energéticamente en las dieciocho bandas de tercio de octava de 100 Hz a 5 kHz, entre dos recintos ($D_{\\mathrm{n}T,\\mathrm{A}}$, ruido rosa) y entre el exterior y un recinto protegido ($D_{2\\mathrm{m,n}T,\\mathrm{Atr}}$, tráfico rodado o aeronaves). Son las magnitudes en las que están escritas las tablas de exigencias del DB-HR, de modo que un proyecto se comprueba en ellas y no en los índices de la ISO 717-1.",
         },
       },
       {
         id: "r-i",
         symbol: "$R_I$",
+        quantity: {
+          en: "Intensity sound reduction index",
+          es: "Índice de reducción acústica por intensidad",
+        },
         unit: "dB",
         standard: "ISO 15186-1:2000",
         clause: {
@@ -1794,6 +2231,10 @@ export const glossary = [
       {
         id: "d-i-n-e",
         symbol: "$D_{I,\\mathrm{n,e}}$",
+        quantity: {
+          en: "Intensity element-normalized level difference",
+          es: "Diferencia de niveles normalizada de elemento por intensidad",
+        },
         unit: "dB",
         standard: "ISO 15186-2:2003",
         clause: {
@@ -1818,6 +2259,10 @@ export const glossary = [
       {
         id: "alpha",
         symbol: "$\\alpha$",
+        quantity: {
+          en: "Sound absorption coefficient at normal incidence",
+          es: "Coeficiente de absorción acústica a incidencia normal",
+        },
         unit: {
           en: "dimensionless",
           es: "adimensional",
@@ -1836,6 +2281,10 @@ export const glossary = [
       {
         id: "alpha-s",
         symbol: "$\\alpha_\\mathrm{s}$",
+        quantity: {
+          en: "Random-incidence sound absorption coefficient",
+          es: "Coeficiente de absorción acústica a incidencia aleatoria",
+        },
         unit: {
           en: "dimensionless",
           es: "adimensional",
@@ -1854,6 +2303,10 @@ export const glossary = [
       {
         id: "alpha-p",
         symbol: "$\\alpha_\\mathrm{p}$",
+        quantity: {
+          en: "Practical sound absorption coefficient",
+          es: "Coeficiente de absorción acústica práctico",
+        },
         unit: {
           en: "dimensionless",
           es: "adimensional",
@@ -1872,6 +2325,10 @@ export const glossary = [
       {
         id: "alpha-w",
         symbol: "$\\alpha_\\mathrm{w}$",
+        quantity: {
+          en: "Weighted sound absorption coefficient",
+          es: "Coeficiente de absorción acústica ponderado",
+        },
         unit: {
           en: "dimensionless",
           es: "adimensional",
@@ -1893,6 +2350,10 @@ export const glossary = [
           en: "Absorption class",
           es: "Clase de absorción",
         },
+        quantity: {
+          en: "Sound absorption class",
+          es: "Clase de absorción acústica",
+        },
         unit: {
           en: "class letter",
           es: "letra de clase",
@@ -1904,13 +2365,17 @@ export const glossary = [
         },
         guide: "materials/absorbers/absorption-measurement",
         definition: {
-          en: "The A to E letter class the weighted coefficient maps to, or \"not classified\".",
-          es: "La clase, de la A a la E, a la que se asigna el coeficiente ponderado, o «sin clasificar».",
+          en: "Sound absorption class: the A to E letter class the weighted sound absorption coefficient $\\alpha_\\mathrm{w}$ maps to, or \"not classified\".",
+          es: "Clase de absorción acústica: la clase, de la A a la E, a la que se asigna el coeficiente de absorción acústica ponderado $\\alpha_\\mathrm{w}$, o «sin clasificar».",
         },
       },
       {
         id: "r-3",
         symbol: "$R$",
+        quantity: {
+          en: "Airflow resistance",
+          es: "Resistencia al flujo de aire",
+        },
         unit: "Pa·s/m³",
         standard: "ISO 9053-1:2018",
         clause: {
@@ -1926,6 +2391,10 @@ export const glossary = [
       {
         id: "r-s",
         symbol: "$R_\\mathrm{s}$",
+        quantity: {
+          en: "Specific airflow resistance",
+          es: "Resistencia específica al flujo de aire",
+        },
         unit: "Pa·s/m",
         standard: "ISO 9053-1:2018",
         clause: {
@@ -1941,6 +2410,10 @@ export const glossary = [
       {
         id: "sigma-2",
         symbol: "$\\sigma$",
+        quantity: {
+          en: "Airflow resistivity",
+          es: "Resistividad al flujo de aire",
+        },
         unit: "Pa·s/m²",
         standard: "ISO 9053-1:2018",
         clause: {
@@ -1956,6 +2429,10 @@ export const glossary = [
       {
         id: "z",
         symbol: "$Z$",
+        quantity: {
+          en: "Surface impedance",
+          es: "Impedancia superficial",
+        },
         unit: "Pa·s/m",
         standard: "ISO 10534-2:1998",
         clause: {
@@ -1971,6 +2448,10 @@ export const glossary = [
       {
         id: "s",
         symbol: "$s$",
+        quantity: {
+          en: "Scattering coefficient",
+          es: "Coeficiente de dispersión",
+        },
         unit: {
           en: "dimensionless",
           es: "adimensional",
@@ -1989,6 +2470,10 @@ export const glossary = [
       {
         id: "d-3",
         symbol: "$d$",
+        quantity: {
+          en: "Diffusion coefficient",
+          es: "Coeficiente de difusión",
+        },
         unit: {
           en: "dimensionless",
           es: "adimensional",
@@ -2007,6 +2492,10 @@ export const glossary = [
       {
         id: "s-2",
         symbol: "$s'$",
+        quantity: {
+          en: "Dynamic stiffness per unit area",
+          es: "Rigidez dinámica por unidad de superficie",
+        },
         unit: "MN/m³",
         standard: "EN 29052-1:1992 (ISO 9052-1:1989)",
         clause: {
@@ -2022,6 +2511,10 @@ export const glossary = [
       {
         id: "phi",
         symbol: "$\\phi$",
+        quantity: {
+          en: "Open porosity",
+          es: "Porosidad abierta",
+        },
         qualifier: {
           en: "porosity",
           es: "porosidad",
@@ -2047,6 +2540,10 @@ export const glossary = [
       {
         id: "alpha-infty",
         symbol: "$\\alpha_\\infty$",
+        quantity: {
+          en: "Tortuosity",
+          es: "Tortuosidad",
+        },
         qualifier: {
           en: "tortuosity",
           es: "tortuosidad",
@@ -2072,6 +2569,10 @@ export const glossary = [
       {
         id: "lambda-visc-therm",
         symbol: "$\\Lambda$, $\\Lambda'$",
+        quantity: {
+          en: "Viscous and thermal characteristic lengths",
+          es: "Longitudes características viscosa y térmica",
+        },
         unit: "m",
         standard: {
           en: "Allard and Atalla (2009)",
@@ -2090,6 +2591,10 @@ export const glossary = [
       {
         id: "z-c-k",
         symbol: "$Z_\\mathrm{c}$, $k$",
+        quantity: {
+          en: "Characteristic impedance and complex wavenumber",
+          es: "Impedancia característica y número de onda complejo",
+        },
         unit: {
           en: "Pa·s/m and 1/m",
           es: "Pa·s/m y 1/m",
@@ -2120,6 +2625,10 @@ export const glossary = [
       {
         id: "y",
         symbol: "$Y$",
+        quantity: {
+          en: "Mobility",
+          es: "Movilidad",
+        },
         unit: "m/(N·s)",
         standard: "ISO 7626-1:2011",
         clause: {
@@ -2135,6 +2644,10 @@ export const glossary = [
       {
         id: "z-2",
         symbol: "$Z$",
+        quantity: {
+          en: "Mechanical impedance",
+          es: "Impedancia mecánica",
+        },
         unit: "N·s/m",
         standard: "ISO 7626-1:2011",
         clause: {
@@ -2150,6 +2663,10 @@ export const glossary = [
       {
         id: "h",
         symbol: "$H$",
+        quantity: {
+          en: "Receptance",
+          es: "Receptancia",
+        },
         qualifier: {
           en: "receptance",
           es: "receptancia",
@@ -2162,13 +2679,17 @@ export const glossary = [
         },
         guide: "vibration/structural/mechanical-mobility",
         definition: {
-          en: "Receptance, or dynamic compliance: displacement response per unit force, the pivot the whole family converts through.",
-          es: "Receptancia, o flexibilidad dinámica: respuesta en desplazamiento por unidad de fuerza, el pivote por el que convierte toda la familia.",
+          en: "Receptance, or dynamic compliance: displacement response per unit force, the pivot through which mobility, impedance, accelerance and their reciprocals convert into one another.",
+          es: "Receptancia, o flexibilidad dinámica: respuesta en desplazamiento por unidad de fuerza, el pivote a través del cual se convierten entre sí la movilidad, la impedancia, la acelerancia y sus recíprocas.",
         },
       },
       {
         id: "a-2",
         symbol: "$A$",
+        quantity: {
+          en: "Accelerance",
+          es: "Acelerancia",
+        },
         unit: "1/kg",
         standard: "ISO 7626-1:2011",
         clause: {
@@ -2184,6 +2705,10 @@ export const glossary = [
       {
         id: "k-21",
         symbol: "$k_{21}$",
+        quantity: {
+          en: "Dynamic transfer stiffness",
+          es: "Rigidez dinámica de transferencia",
+        },
         unit: "N/m",
         standard: "ISO 10846-1:2008",
         clause: "3.7",
@@ -2196,6 +2721,10 @@ export const glossary = [
       {
         id: "l-k",
         symbol: "$L_k$",
+        quantity: {
+          en: "Dynamic transfer stiffness level",
+          es: "Nivel de rigidez dinámica de transferencia",
+        },
         unit: "dB re 1 N/m",
         standard: {
           en: "ISO 10846-2:2008 and ISO 10846-3:2002",
@@ -2211,6 +2740,10 @@ export const glossary = [
       {
         id: "eta",
         symbol: "$\\eta$",
+        quantity: {
+          en: "Loss factor of a resilient element",
+          es: "Factor de pérdidas de un elemento resiliente",
+        },
         qualifier: {
           en: "resilient element",
           es: "elemento resiliente",
@@ -2230,6 +2763,10 @@ export const glossary = [
       {
         id: "eta-int",
         symbol: "$\\eta_\\mathrm{int}$",
+        quantity: {
+          en: "Internal loss factor",
+          es: "Factor de pérdidas interno",
+        },
         qualifier: {
           en: "internal",
           es: "interno",
@@ -2245,13 +2782,17 @@ export const glossary = [
         },
         guide: "buildings/design/detailed-prediction",
         definition: {
-          en: "Internal loss factor of a building element: the fraction of its vibrational energy dissipated per radian inside the material itself, before anything is radiated or leaves through the junctions. It is an input to the prediction, not a measured output: Table B.3 of the same standard gives 0,005 for concrete and about 0,01 for most masonry.",
-          es: "Factor de pérdidas interno de un elemento constructivo: la fracción de su energía vibratoria que se disipa por radián dentro del propio material, antes de radiarse o de escapar por las uniones. Es un dato de entrada de la predicción, no un resultado medido: la tabla B.3 de la misma norma da 0,005 para el hormigón y en torno a 0,01 para la mayoría de las fábricas.",
+          en: "Internal loss factor of a building element: the fraction of its vibrational energy dissipated per radian inside the material itself, before anything is radiated or leaves through the junctions. It is an input to the prediction, not a measured output: Table B.3 of ISO 12354-1 gives 0,005 for concrete and about 0,01 for most masonry.",
+          es: "Factor de pérdidas interno de un elemento constructivo: la fracción de su energía vibratoria que se disipa por radián dentro del propio material, antes de radiarse o de escapar por las uniones. Es un dato de entrada de la predicción, no un resultado medido: la tabla B.3 de la ISO 12354-1 da 0,005 para el hormigón y en torno a 0,01 para la mayoría de las fábricas.",
         },
       },
       {
         id: "eta-tot",
         symbol: "$\\eta_\\mathrm{tot}$",
+        quantity: {
+          en: "Total loss factor",
+          es: "Factor de pérdidas total",
+        },
         qualifier: {
           en: "total, in situ",
           es: "total, in situ",
@@ -2274,6 +2815,10 @@ export const glossary = [
       {
         id: "a-w",
         symbol: "$a_\\mathrm{w}$",
+        quantity: {
+          en: "Frequency-weighted acceleration",
+          es: "Aceleración ponderada en frecuencia",
+        },
         unit: "m/s²",
         standard: "ISO 2631-1:1997",
         clause: {
@@ -2289,6 +2834,10 @@ export const glossary = [
       {
         id: "a-8",
         symbol: "$A(8)$",
+        quantity: {
+          en: "Daily vibration exposure",
+          es: "Exposición diaria a vibración",
+        },
         unit: "m/s²",
         standard: "ISO 5349-1:2001",
         clause: {
@@ -2304,6 +2853,10 @@ export const glossary = [
       {
         id: "vdv",
         symbol: "VDV",
+        quantity: {
+          en: "Vibration dose value",
+          es: "Valor de dosis de vibración",
+        },
         unit: {
           en: "m/s^1.75",
           es: "m/s^1,75",
@@ -2322,6 +2875,10 @@ export const glossary = [
       {
         id: "mtvv",
         symbol: "MTVV",
+        quantity: {
+          en: "Maximum transient vibration value",
+          es: "Valor máximo de vibración transitoria",
+        },
         unit: "m/s²",
         standard: "ISO 2631-1:1997",
         clause: {
@@ -2337,6 +2894,10 @@ export const glossary = [
       {
         id: "r-4",
         symbol: "$R$",
+        quantity: {
+          en: "Cumulative stress variable",
+          es: "Variable de tensión acumulada",
+        },
         unit: {
           en: "dimensionless",
           es: "adimensional",
@@ -2355,6 +2916,10 @@ export const glossary = [
       {
         id: "l-v",
         symbol: "$L_v$",
+        quantity: {
+          en: "Velocity level",
+          es: "Nivel de velocidad",
+        },
         unit: "dB re 50 nm/s",
         standard: "ISO/TS 7849-1:2009",
         clause: {
@@ -2370,6 +2935,10 @@ export const glossary = [
       {
         id: "varepsilon",
         symbol: "$\\varepsilon$",
+        quantity: {
+          en: "Radiation factor of a vibrating machine surface",
+          es: "Factor de radiación de la superficie vibrante de una máquina",
+        },
         unit: {
           en: "dimensionless",
           es: "adimensional",
@@ -2387,6 +2956,10 @@ export const glossary = [
       {
         id: "l-ws",
         symbol: "$L_\\mathrm{Ws}$",
+        quantity: {
+          en: "Structure-borne sound power level",
+          es: "Nivel de potencia acústica estructural",
+        },
         unit: "dB re 1 pW",
         standard: "UNE-EN 15657:2018",
         clause: {
@@ -2402,6 +2975,10 @@ export const glossary = [
       {
         id: "eta-ij",
         symbol: "$\\eta_{ij}$",
+        quantity: {
+          en: "Coupling loss factor",
+          es: "Factor de pérdidas por acoplamiento",
+        },
         unit: {
           en: "dimensionless",
           es: "adimensional",
@@ -2420,6 +2997,10 @@ export const glossary = [
       {
         id: "tau-ij",
         symbol: "$\\tau_{ij}$",
+        quantity: {
+          en: "Junction transmission coefficient",
+          es: "Coeficiente de transmisión en la unión",
+        },
         qualifier: {
           en: "junction",
           es: "unión",
@@ -2451,6 +3032,10 @@ export const glossary = [
       {
         id: "n",
         symbol: "$N$",
+        quantity: {
+          en: "Loudness",
+          es: "Sonoridad",
+        },
         unit: {
           en: "sone",
           es: "sonio",
@@ -2469,6 +3054,10 @@ export const glossary = [
       {
         id: "n-2",
         symbol: "$N'$",
+        quantity: {
+          en: "Specific loudness",
+          es: "Sonoridad específica",
+        },
         unit: {
           en: "sone/Bark",
           es: "sonio/Bark",
@@ -2486,6 +3075,10 @@ export const glossary = [
       {
         id: "l-n-2",
         symbol: "$L_\\mathrm{N}$",
+        quantity: {
+          en: "Loudness level",
+          es: "Nivel de sonoridad",
+        },
         unit: {
           en: "phon",
           es: "fonio",
@@ -2504,6 +3097,10 @@ export const glossary = [
       {
         id: "s-3",
         symbol: "$S$",
+        quantity: {
+          en: "Sharpness",
+          es: "Agudeza",
+        },
         unit: "acum",
         standard: "DIN 45692:2009-08",
         clause: {
@@ -2519,6 +3116,10 @@ export const glossary = [
       {
         id: "r-5",
         symbol: "$R$",
+        quantity: {
+          en: "Roughness",
+          es: "Aspereza",
+        },
         unit: "asper",
         standard: "ECMA-418-2:2025",
         clause: {
@@ -2534,6 +3135,10 @@ export const glossary = [
       {
         id: "f",
         symbol: "$F$",
+        quantity: {
+          en: "Fluctuation strength",
+          es: "Intensidad de fluctuación",
+        },
         unit: "vacil",
         standard: "ECMA-418-2:2025",
         clause: {
@@ -2549,6 +3154,10 @@ export const glossary = [
       {
         id: "t",
         symbol: "$T$",
+        quantity: {
+          en: "Tonality",
+          es: "Tonalidad",
+        },
         unit: "tu",
         standard: "ECMA-418-2:2025",
         clause: {
@@ -2564,6 +3173,10 @@ export const glossary = [
       {
         id: "tnr",
         symbol: "TNR",
+        quantity: {
+          en: "Tone-to-noise ratio",
+          es: "Relación tono-ruido",
+        },
         unit: "dB",
         standard: "ECMA-418-1:2024",
         clause: {
@@ -2579,6 +3192,10 @@ export const glossary = [
       {
         id: "pr",
         symbol: "PR",
+        quantity: {
+          en: "Prominence ratio",
+          es: "Relación de prominencia",
+        },
         unit: "dB",
         standard: "ECMA-418-1:2024",
         clause: {
@@ -2594,6 +3211,10 @@ export const glossary = [
       {
         id: "delta-l",
         symbol: "$\\Delta L$",
+        quantity: {
+          en: "Audibility of a tone in noise",
+          es: "Audibilidad de un tono en ruido",
+        },
         unit: "dB",
         standard: "ISO/PAS 20065:2016",
         clause: {
@@ -2609,6 +3230,10 @@ export const glossary = [
       {
         id: "pa",
         symbol: "PA",
+        quantity: {
+          en: "Psychoacoustic annoyance",
+          es: "Molestia psicoacústica",
+        },
         unit: {
           en: "dimensionless",
           es: "adimensional",
@@ -2633,6 +3258,10 @@ export const glossary = [
           en: "Critical band",
           es: "Banda crítica",
         },
+        quantity: {
+          en: "Critical band",
+          es: "Banda crítica",
+        },
         unit: "Hz",
         standard: {
           en: "Fastl and Zwicker (2007)",
@@ -2651,6 +3280,10 @@ export const glossary = [
       {
         id: "z-bark",
         symbol: "$z$",
+        quantity: {
+          en: "Critical-band rate",
+          es: "Tasa de banda crítica",
+        },
         qualifier: {
           en: "critical-band rate",
           es: "tasa de banda crítica",
@@ -2673,6 +3306,10 @@ export const glossary = [
       {
         id: "erb-cam",
         symbol: "$ERB_N$",
+        quantity: {
+          en: "Equivalent rectangular bandwidth of the auditory filter",
+          es: "Ancho de banda rectangular equivalente del filtro auditivo",
+        },
         qualifier: {
           en: "Cam scale",
           es: "escala Cam",
@@ -2695,6 +3332,10 @@ export const glossary = [
       {
         id: "n-5",
         symbol: "$N_5$",
+        quantity: {
+          en: "Percentile loudness",
+          es: "Sonoridad percentil",
+        },
         unit: {
           en: "sone",
           es: "sone",
@@ -2716,6 +3357,10 @@ export const glossary = [
       {
         id: "short-long-term-loudness",
         name: {
+          en: "Short-term and long-term loudness",
+          es: "Sonoridad a corto y a largo plazo",
+        },
+        quantity: {
           en: "Short-term and long-term loudness",
           es: "Sonoridad a corto y a largo plazo",
         },
@@ -2746,6 +3391,10 @@ export const glossary = [
       {
         id: "thd",
         symbol: "THD",
+        quantity: {
+          en: "Total harmonic distortion",
+          es: "Distorsión armónica total",
+        },
         unit: {
           en: "% or dB",
           es: "% o dB",
@@ -2763,6 +3412,10 @@ export const glossary = [
       {
         id: "thd-n",
         symbol: "THD+N",
+        quantity: {
+          en: "Total harmonic distortion plus noise",
+          es: "Distorsión armónica total más ruido",
+        },
         unit: {
           en: "% or dB",
           es: "% o dB",
@@ -2781,6 +3434,10 @@ export const glossary = [
       {
         id: "sinad",
         symbol: "SINAD",
+        quantity: {
+          en: "Signal to noise and distortion ratio",
+          es: "Relación entre señal y ruido más distorsión",
+        },
         unit: "dB",
         standard: "AES17-2015",
         clause: {
@@ -2796,6 +3453,10 @@ export const glossary = [
       {
         id: "imd",
         symbol: "IMD, $d_{m,n}$",
+        quantity: {
+          en: "Modulation intermodulation distortion",
+          es: "Distorsión de intermodulación por modulación",
+        },
         qualifier: {
           en: "modulation",
           es: "por modulación",
@@ -2812,6 +3473,10 @@ export const glossary = [
       {
         id: "imd-2",
         symbol: "$d_{d,n}$",
+        quantity: {
+          en: "Difference-frequency intermodulation distortion",
+          es: "Distorsión de intermodulación por frecuencia diferencia",
+        },
         qualifier: {
           en: "difference frequency",
           es: "por frecuencia diferencia",
@@ -2821,13 +3486,17 @@ export const glossary = [
         clause: "14.12.8",
         guide: "devices/electroacoustics/electroacoustics",
         definition: {
-          en: "Difference-frequency intermodulation distortion: the products two closely spaced high-frequency tones of equal amplitude create at their difference and its multiples, referred to the fundamentals. Its test signal and its products are both different from the modulation form, so the two numbers are not comparable.",
-          es: "Distorsión de intermodulación por frecuencia diferencia: los productos que dos tonos de alta frecuencia próximos y de igual amplitud generan en su diferencia y en los múltiplos de esta, referidos a los fundamentales. Tanto su señal de ensayo como sus productos difieren de la forma por modulación, así que ambos números no son comparables.",
+          en: "Difference-frequency intermodulation distortion: the products two closely spaced high-frequency tones of equal amplitude create at their difference and its multiples, referred to the fundamentals. Its test signal and its products both differ from those of modulation intermodulation distortion, so the two numbers are not comparable.",
+          es: "Distorsión de intermodulación por frecuencia diferencia: los productos que dos tonos de alta frecuencia próximos y de igual amplitud generan en su diferencia y en los múltiplos de esta, referidos a los fundamentales. Tanto su señal de ensayo como sus productos difieren de los de la distorsión de intermodulación por modulación, así que ambos números no son comparables.",
         },
       },
       {
         id: "tdfd",
         symbol: "TDFD",
+        quantity: {
+          en: "Total difference-frequency distortion",
+          es: "Distorsión total por frecuencia diferencia",
+        },
         unit: "%",
         standard: "IEC 60268-3:2013",
         clause: "14.12.10",
@@ -2840,6 +3509,10 @@ export const glossary = [
       {
         id: "h-3",
         symbol: "$H_n$",
+        quantity: {
+          en: "Harmonic transfer function",
+          es: "Función de transferencia armónica",
+        },
         qualifier: {
           en: "harmonic order $n$",
           es: "armónico de orden $n$",
@@ -2865,6 +3538,10 @@ export const glossary = [
       {
         id: "dim",
         symbol: "DIM",
+        quantity: {
+          en: "Dynamic intermodulation distortion",
+          es: "Distorsión de intermodulación dinámica",
+        },
         unit: "%",
         standard: "IEC 60268-3:2013",
         clause: "14.12.9",
@@ -2877,6 +3554,10 @@ export const glossary = [
       {
         id: "l-k-lufs",
         symbol: "$L_\\mathrm{K}$, LUFS",
+        quantity: {
+          en: "Programme loudness",
+          es: "Sonoridad de programa",
+        },
         unit: "LUFS",
         standard: "ITU-R BS.1770-5",
         clause: {
@@ -2892,6 +3573,10 @@ export const glossary = [
       {
         id: "lra",
         symbol: "LRA",
+        quantity: {
+          en: "Loudness range",
+          es: "Rango de sonoridad",
+        },
         unit: "LU",
         standard: "EBU Tech 3342",
         guide: "devices/broadcast/program-loudness",
@@ -2903,6 +3588,10 @@ export const glossary = [
       {
         id: "dbtp",
         symbol: "dBTP",
+        quantity: {
+          en: "True peak level",
+          es: "Nivel de pico verdadero",
+        },
         unit: "dBTP",
         standard: "ITU-R BS.1770-5",
         clause: {
@@ -2927,6 +3616,10 @@ export const glossary = [
       {
         id: "pnl",
         symbol: "PNL",
+        quantity: {
+          en: "Perceived noise level",
+          es: "Nivel de ruido percibido",
+        },
         unit: "PNdB",
         standard: {
           en: "ICAO Annex 16, Vol. I",
@@ -2945,6 +3638,10 @@ export const glossary = [
       {
         id: "pnlt",
         symbol: "PNLT",
+        quantity: {
+          en: "Tone-corrected perceived noise level",
+          es: "Nivel de ruido percibido corregido por tonos",
+        },
         unit: "TPNdB",
         standard: {
           en: "ICAO Annex 16, Vol. I",
@@ -2963,6 +3660,10 @@ export const glossary = [
       {
         id: "epnl",
         symbol: "EPNL",
+        quantity: {
+          en: "Effective perceived noise level",
+          es: "Nivel efectivo de ruido percibido",
+        },
         unit: "EPNdB",
         standard: {
           en: "ICAO Annex 16, Vol. I",
@@ -2981,6 +3682,10 @@ export const glossary = [
       {
         id: "pnltm",
         symbol: "PNLTM",
+        quantity: {
+          en: "Maximum tone-corrected perceived noise level",
+          es: "Nivel máximo de ruido percibido corregido por tonos",
+        },
         unit: "TPNdB",
         standard: {
           en: "ICAO Annex 16, Vol. I",
@@ -2999,6 +3704,10 @@ export const glossary = [
       {
         id: "npd",
         symbol: "NPD",
+        quantity: {
+          en: "Noise-power-distance table",
+          es: "Tabla ruido-potencia-distancia",
+        },
         unit: "dB",
         standard: {
           en: "ECAC Doc 29, 4th ed., Volume 2",
@@ -3020,6 +3729,10 @@ export const glossary = [
           en: "ANP database",
           es: "Base de datos ANP",
         },
+        quantity: {
+          en: "Aircraft Noise and Performance database",
+          es: "Base de datos de ruido y prestaciones de aeronaves",
+        },
         standard: {
           en: "ECAC Doc 29, 4th ed., Volume 2",
           es: "ECAC Doc 29, 4.ª ed., Volumen 2",
@@ -3037,6 +3750,10 @@ export const glossary = [
       {
         id: "slant-distance",
         symbol: "$d_p$",
+        quantity: {
+          en: "Slant distance",
+          es: "Distancia oblicua",
+        },
         unit: "m",
         standard: {
           en: "ECAC Doc 29, 4th ed., Volume 2",
@@ -3055,6 +3772,10 @@ export const glossary = [
       {
         id: "l-amax",
         symbol: "$L_\\mathrm{Amax}$",
+        quantity: {
+          en: "Maximum A-weighted level of a single event",
+          es: "Nivel máximo ponderado A de un suceso",
+        },
         unit: "dB re 20 µPa",
         standard: {
           en: "ECAC Doc 29, 4th ed., Volume 2",
@@ -3082,6 +3803,10 @@ export const glossary = [
       {
         id: "l-p-2",
         symbol: "$L_p$",
+        quantity: {
+          en: "Underwater sound pressure level",
+          es: "Nivel de presión acústica submarina",
+        },
         qualifier: {
           en: "underwater",
           es: "submarino",
@@ -3100,6 +3825,10 @@ export const glossary = [
       {
         id: "sel",
         symbol: "SEL",
+        quantity: {
+          en: "Underwater sound exposure level",
+          es: "Nivel de exposición sonora submarina",
+        },
         qualifier: {
           en: "underwater",
           es: "submarino",
@@ -3115,6 +3844,10 @@ export const glossary = [
       {
         id: "l-rn",
         symbol: "$L_\\mathrm{RN}$",
+        quantity: {
+          en: "Radiated noise level of a ship",
+          es: "Nivel de ruido radiado por un buque",
+        },
         unit: "dB re 1 µPa·m",
         standard: "ISO 17208-1:2016",
         guide: "underwater/underwater-acoustics",
@@ -3126,6 +3859,10 @@ export const glossary = [
       {
         id: "l-s",
         symbol: "$L_\\mathrm{s}$",
+        quantity: {
+          en: "Equivalent monopole source level",
+          es: "Nivel de fuente monopolar equivalente",
+        },
         unit: "dB re 1 µPa·m",
         standard: "ISO 17208-2:2019",
         clause: {
@@ -3141,6 +3878,10 @@ export const glossary = [
       {
         id: "tl-3",
         symbol: "PL, $N_\\mathrm{PL}$",
+        quantity: {
+          en: "Propagation loss",
+          es: "Pérdida de propagación",
+        },
         qualifier: {
           en: "underwater",
           es: "submarino",
@@ -3157,6 +3898,10 @@ export const glossary = [
       {
         id: "sl",
         symbol: "SL, $L_\\mathrm{S}$",
+        quantity: {
+          en: "Source level",
+          es: "Nivel de fuente",
+        },
         unit: "dB re 1 µPa²m²",
         standard: "ISO 18405:2017",
         clause: "3.3.2.1",
@@ -3169,6 +3914,10 @@ export const glossary = [
       {
         id: "nl",
         symbol: "NL, $L_\\mathrm{N}$",
+        quantity: {
+          en: "Sonar noise level",
+          es: "Nivel de ruido del sonar",
+        },
         unit: "dB re 1 µPa",
         standard: "ISO 18405:2017",
         clause: "3.6.2.5",
@@ -3181,6 +3930,10 @@ export const glossary = [
       {
         id: "di",
         symbol: "DI",
+        quantity: {
+          en: "Directivity index of a receiving array",
+          es: "Índice de directividad de una agrupación receptora",
+        },
         qualifier: {
           en: "receiving array",
           es: "agrupación receptora",
@@ -3200,6 +3953,10 @@ export const glossary = [
       {
         id: "dt",
         symbol: "DT",
+        quantity: {
+          en: "Detection threshold",
+          es: "Umbral de detección",
+        },
         unit: "dB",
         standard: "ISO 18405:2017",
         clause: "3.6.2.1",
@@ -3212,6 +3969,10 @@ export const glossary = [
       {
         id: "ts",
         symbol: "TS, $N_\\mathrm{TS}$",
+        quantity: {
+          en: "Target strength",
+          es: "Índice de blanco",
+        },
         unit: "dB re 1 m²/sr",
         standard: "ISO 18405:2017",
         clause: "3.6.2.8",
@@ -3224,6 +3985,10 @@ export const glossary = [
       {
         id: "se",
         symbol: "SE, $\\Delta L_\\mathrm{SE}$",
+        quantity: {
+          en: "Signal excess",
+          es: "Exceso de señal",
+        },
         unit: "dB",
         standard: "ISO 18405:2017",
         clause: "3.6.2.2",
@@ -3236,6 +4001,10 @@ export const glossary = [
       {
         id: "fom",
         symbol: "FOM",
+        quantity: {
+          en: "Figure of merit",
+          es: "Figura de mérito",
+        },
         unit: {
           en: "dB (re 1 m² as a propagation factor)",
           es: "dB (re 1 m² como factor de propagación)",
@@ -3257,6 +4026,10 @@ export const glossary = [
       {
         id: "w-f",
         symbol: "$W(f)$",
+        quantity: {
+          en: "Auditory weighting function",
+          es: "Función de ponderación auditiva",
+        },
         unit: "dB",
         standard: {
           en: "NMFS (2024) v3.0",
@@ -3277,6 +4050,10 @@ export const glossary = [
         name: {
           en: "TTS onset",
           es: "Umbral de TTS",
+        },
+        quantity: {
+          en: "Onset of temporary threshold shift",
+          es: "Umbral de desplazamiento temporal del umbral auditivo",
         },
         unit: "dB",
         standard: {
@@ -3299,6 +4076,10 @@ export const glossary = [
           en: "AUD INJ onset (PTS onset)",
           es: "Umbral de AUD INJ (umbral de PTS)",
         },
+        quantity: {
+          en: "Onset of auditory injury",
+          es: "Umbral de lesión auditiva",
+        },
         unit: "dB",
         standard: {
           en: "NMFS (2024) v3.0",
@@ -3317,6 +4098,10 @@ export const glossary = [
       {
         id: "sel-cum",
         symbol: "$\\mathrm{SEL}_\\mathrm{cum}$",
+        quantity: {
+          en: "Cumulative sound exposure level",
+          es: "Nivel de exposición sonora acumulada",
+        },
         unit: "dB re 1 µPa²·s",
         standard: {
           en: "NMFS (2024) v3.0",
@@ -3344,6 +4129,10 @@ export const glossary = [
       {
         id: "courant-number",
         symbol: "$C_N$",
+        quantity: {
+          en: "Courant number",
+          es: "Número de Courant",
+        },
         qualifier: {
           en: "the cfl argument",
           es: "el argumento cfl",
@@ -3372,6 +4161,10 @@ export const glossary = [
           en: "Numerical dispersion",
           es: "Dispersión numérica",
         },
+        quantity: {
+          en: "Numerical dispersion",
+          es: "Dispersión numérica",
+        },
         unit: {
           en: "% (speed error)",
           es: "% (error de velocidad)",
@@ -3395,6 +4188,10 @@ export const glossary = [
         name: {
           en: "PML (perfectly matched layer)",
           es: "PML (capa perfectamente acoplada)",
+        },
+        quantity: {
+          en: "Perfectly matched layer",
+          es: "Capa perfectamente acoplada",
         },
         standard: {
           en: "Attenborough and Van Renterghem (2021)",
@@ -3422,6 +4219,10 @@ export const glossary = [
       {
         id: "u-y",
         symbol: "$u(y)$",
+        quantity: {
+          en: "Combined standard uncertainty",
+          es: "Incertidumbre típica combinada",
+        },
         unit: {
           en: "unit of the result",
           es: "unidad del resultado",
@@ -3440,6 +4241,10 @@ export const glossary = [
       {
         id: "u",
         symbol: "$U$",
+        quantity: {
+          en: "Expanded uncertainty",
+          es: "Incertidumbre expandida",
+        },
         unit: {
           en: "unit of the result",
           es: "unidad del resultado",
@@ -3458,6 +4263,10 @@ export const glossary = [
       {
         id: "sigma-r",
         symbol: "$\\sigma_\\mathrm{R}$",
+        quantity: {
+          en: "Reproducibility standard deviation",
+          es: "Desviación típica de reproducibilidad",
+        },
         unit: "dB",
         standard: "ISO 12999-1:2020",
         clause: {

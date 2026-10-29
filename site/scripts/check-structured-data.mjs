@@ -756,6 +756,8 @@ const seen = {
 	datasetUnshown: 0,
 	corrected: 0,
 	history: 0,
+	glossaries: 0,
+	definedTerms: 0,
 };
 
 /** The About pages found in each language, and how many of them are typed AboutPage. */
@@ -763,6 +765,17 @@ const about = { en: { found: 0, typed: 0 }, es: { found: 0, typed: 0 } };
 
 /** Each language's name, as an ok line writes it. */
 const LANGUAGE = { en: 'English', es: 'Spanish' };
+
+/**
+ * Every article node `@id` the build defines, whichever page defines it, so a
+ * reference from another page can be resolved once every page has been read.
+ */
+const articleIds = new Set();
+
+/** The glossary's references to the guides that compute each term, resolved after the walk. */
+const glossarySubjects = [];
+/** How many of the glossary's checks failed, so its summary line is only printed when none did. */
+let glossaryDefects = 0;
 
 /** Every route the navigation tree lists (src/data/topics.mjs). */
 const LISTED = new Set(knownSlugs());
@@ -945,6 +958,71 @@ for (const file of files) {
 		}
 	}
 
+	// The glossary publishes one DefinedTerm per quantity, and each is quoted
+	// on its own. It used to be named by its symbol alone, the same string as
+	// its termCode, so the node for LAeq never said "A-weighted equivalent
+	// continuous sound pressure level"; and the guide it points at named no
+	// `@id`, so nothing joined it to the article that guide publishes.
+	if (slug === 'reference/glossary') {
+		seen.glossaries += 1;
+		const set = nodeOfType(nodes, 'DefinedTermSet');
+		const terms = set?.hasDefinedTerm ?? [];
+		if (terms.length === 0) {
+			fail(`${route}: the glossary publishes no DefinedTerm`);
+			glossaryDefects += 1;
+		}
+		seen.definedTerms += terms.length;
+		const unnamed = [];
+		const blankCode = [];
+		const gapped = [];
+		const namedByCode = [];
+		const repeated = [];
+		const unjoined = [];
+		for (const term of terms) {
+			const label = term['@id']?.split('#').pop() ?? '(no @id)';
+			if (typeof term.name !== 'string' || term.name.trim() === '') unnamed.push(label);
+			else if (term.name === term.termCode) namedByCode.push(term.termCode);
+			else if (term.name === term.alternateName) repeated.push(label);
+			const blank = (value) => value !== undefined && String(value).trim() === '';
+			if (blank(term.termCode) || blank(term.alternateName)) blankCode.push(label);
+			// A command the maths-to-text step does not know leaves a hole where
+			// it stood: two spaces, or a space before the punctuation after it.
+			const hole = /\s{2}|\s[,.;:)]|\(\s/.exec(String(term.description ?? ''));
+			if (hole) gapped.push(`${label} ("${term.description.slice(Math.max(0, hole.index - 12), hole.index + 8)}")`);
+			const subject = term.subjectOf;
+			if (subject === undefined) continue;
+			if (!isOnThisSite(subject.url) || subject['@id'] !== `${subject.url}#article`) {
+				unjoined.push(`${label} (${JSON.stringify(subject['@id'])})`);
+			} else {
+				glossarySubjects.push({ route, term: label, target: subject['@id'] });
+			}
+		}
+		const sample = (list) => `${list.slice(0, 5).join(', ')}${list.length > 5 ? ', ...' : ''}`;
+		glossaryDefects += [unnamed, blankCode, gapped, namedByCode, repeated, unjoined].filter((list) => list.length > 0).length;
+		if (unnamed.length > 0) fail(`${route}: ${unnamed.length} DefinedTerm(s) have no name: ${sample(unnamed)}`);
+		if (blankCode.length > 0) {
+			fail(`${route}: ${blankCode.length} DefinedTerm(s) carry an empty termCode or alternateName: ${sample(blankCode)}`);
+		}
+		if (gapped.length > 0) {
+			fail(`${route}: ${gapped.length} DefinedTerm description(s) have a hole where a symbol was dropped: ${sample(gapped)}`);
+		}
+		if (namedByCode.length > 0) {
+			fail(
+				`${route}: ${namedByCode.length} of ${terms.length} DefinedTerms are named by their termCode ` +
+					`instead of the quantity: ${sample(namedByCode)}`,
+			);
+		}
+		if (repeated.length > 0) {
+			fail(`${route}: ${repeated.length} DefinedTerm(s) repeat their name as alternateName: ${sample(repeated)}`);
+		}
+		if (unjoined.length > 0) {
+			fail(
+				`${route}: ${unjoined.length} of ${terms.length} DefinedTerms point at their guide with an @id ` +
+					`that is not the guide's own article node: ${sample(unjoined)}`,
+			);
+		}
+	}
+
 	// The error page is not an article and must not be indexed as one, which is
 	// the whole reason Head.astro special-cases it.
 	if (is404) {
@@ -988,6 +1066,7 @@ for (const file of files) {
 		fail(`${route}: article @id is ${article['@id']}, not ${canonical}#article`);
 	}
 	if (article.url !== canonical) fail(`${route}: article url is ${article.url}, not ${canonical}`);
+	articleIds.add(article['@id']);
 	if (article.inLanguage !== lang) {
 		fail(`${route}: article inLanguage is ${JSON.stringify(article.inLanguage)}, not ${lang}`);
 	}
@@ -1771,6 +1850,23 @@ if (about.en.found !== 1 || about.es.found !== 1) {
 	);
 } else if (about.en.typed === 1 && about.es.typed === 1) {
 	ok('the About page in English and its Spanish twin are both typed AboutPage');
+}
+
+// A glossary term's guide is another page, so its article node can only be
+// looked for once every page has been read.
+const unresolved = glossarySubjects.filter((subject) => !articleIds.has(subject.target));
+if (unresolved.length > 0) {
+	fail(`${unresolved.length} glossary term(s) point at an article node no page of the build defines:`);
+	for (const subject of unresolved.slice(0, 5)) {
+		console.error(`     ${subject.route}#${subject.term} -> ${subject.target}`);
+	}
+}
+if (seen.glossaries !== 2) fail(`found ${seen.glossaries} glossary pages, not the English one and its Spanish twin`);
+else if (glossaryDefects === 0 && unresolved.length === 0) {
+	ok(
+		`checked the ${seen.definedTerms} DefinedTerms of the glossary in both languages: named by their quantity, ` +
+			`and ${glossarySubjects.length} joined to the article node of the guide that computes them`,
+	);
 }
 
 ok(`parsed ${seen.blocks} ld+json blocks across ${seen.pages} pages (${seen.redirects} redirect stubs skipped)`);

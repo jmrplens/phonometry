@@ -161,7 +161,7 @@ def nominal_frequencies(
     g = 10 ** (3 / 10)
     fr = 1000
 
-    x = _initindex(limits[0], fr, g, fraction)
+    x = _initindex(float(limits[0]), fr, g, fraction)
     freq_list = [_ratio(g, x, fraction) * fr]
 
     while freq_list[-1] * _bandedge(g, fraction) < limits[1]:

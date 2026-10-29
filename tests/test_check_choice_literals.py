@@ -1265,10 +1265,21 @@ def _checked_behind_its_own_test(mode: _Pace | None) -> _Pace | None:
 
 
 def _verdict_of(
-    function: Callable[..., object], name: str, *, collection: bool = False
+    function: Callable[..., object],
+    name: str,
+    *,
+    collection: bool = False,
+    options: Iterable[str] = (),
 ) -> str | None:
     return ccl._verdict(
-        ccl._checks_of(function, name, field=False, collection=collection, depth=0)
+        ccl._checks_of(
+            function,
+            name,
+            field=False,
+            collection=collection,
+            depth=0,
+            options=frozenset(options),
+        )
     )
 
 
@@ -1364,6 +1375,129 @@ def test_a_return_before_the_check_leaves_a_path_unchecked() -> None:
         _verdict_of(_items_checked_after_an_inner_loop, "paces", collection=True)
         is None
     )
+
+
+def _checked_behind_a_test_of_its_text(mode: str) -> str:
+    if mode == "fast":
+        require_choice(mode, "mode", _PACES)
+    return mode
+
+
+def _checked_behind_a_test_of_its_form_and_more(
+    mode: _Pace | None, *, strict: bool
+) -> _Pace | None:
+    if strict and mode is not None:
+        require_choice(mode, "mode", _PACES)
+    return mode
+
+
+def _checked_after_a_misspelling_returns(mode: str) -> str:
+    if mode == "typo":
+        return "fast"
+    require_choice(mode, "mode", _PACES)
+    return mode
+
+
+def _checked_after_an_empty_text_returns(mode: str) -> str:
+    if not mode:
+        return "fast"
+    require_choice(mode, "mode", _PACES)
+    return mode
+
+
+def _checked_after_a_text_matched_returns(mode: str) -> str:
+    match mode:
+        case "typo":
+            return "fast"
+    require_choice(mode, "mode", _PACES)
+    return mode
+
+
+def _checked_after_a_listed_option_returns(mode: _Pace) -> int:
+    if mode == "fast":
+        return 0
+    require_choice(mode, "mode", ("slow",))
+    return 1
+
+
+def _checked_but_for_a_listed_option(mode: _Pace) -> _Pace:
+    if mode != "fast":
+        require_choice(mode, "mode", _PACES)
+    return mode
+
+
+def _checked_in_the_else_of_a_listed_option(mode: _Pace) -> int:
+    if mode == "fast":
+        column = 0
+    else:
+        column = 1
+        require_choice(mode, "mode", _PACES)
+    return column
+
+
+def _checked_after_listed_options_return(mode: _Pace) -> int:
+    if mode in ("fast", "slow"):
+        return 0
+    require_choice(mode, "mode", _PACES)
+    return 1
+
+
+def _checked_after_none_is_matched(mode: _Pace | None) -> _Pace | None:
+    match mode:
+        case None:
+            return None
+    require_choice(mode, "mode", _PACES)
+    return mode
+
+
+def _items_checked_after_an_empty_collection_returns(paces: Sequence[_Pace]) -> None:
+    if not paces:
+        return
+    for pace in paces:
+        require_choice(pace, "paces", _PACES)
+
+
+def test_only_a_test_of_its_form_or_of_a_listed_option_keeps_every_path() -> None:
+    """A check behind a test of the text, or one a misspelling can return
+    before, leaves a misspelling unchecked on the other path: ``if mode ==
+    "fast": require_choice(...)``, ``if mode == "typo": return``, ``if not
+    mode: return`` (an empty text is not an option), ``case "typo": return``
+    and ``if strict and mode is not None`` (a test that asks something
+    besides the form). A test of the form (``is None``, the emptiness of a
+    collection, ``case None``) keeps every path, and so does one that skips
+    the check only for an option the ``Literal`` lists (``if method ==
+    "vdi2081": return ...``), in either branch.
+    """
+    some_paths = "checked on some paths only, so a misspelling passes on the others"
+    paces = frozenset(_PACES)
+    for leaky in (
+        _checked_behind_a_test_of_its_text,
+        _checked_behind_a_test_of_its_form_and_more,
+        _checked_after_a_misspelling_returns,
+        _checked_after_an_empty_text_returns,
+        _checked_after_a_text_matched_returns,
+    ):
+        assert _verdict_of(leaky, "mode", options=paces) == some_paths, leaky
+    for tight in (
+        _checked_after_a_listed_option_returns,
+        _checked_but_for_a_listed_option,
+        _checked_in_the_else_of_a_listed_option,
+        _checked_after_listed_options_return,
+        _checked_after_none_is_matched,
+    ):
+        assert _verdict_of(tight, "mode", options=paces) is None, tight
+    assert (
+        _verdict_of(
+            _items_checked_after_an_empty_collection_returns,
+            "paces",
+            collection=True,
+            options=paces,
+        )
+        is None
+    )
+    # An option is known only from the Literal: without it, the return
+    # before the check is a path a misspelling could take.
+    assert _verdict_of(_checked_after_a_listed_option_returns, "mode") == some_paths
 
 
 def _rows_once_each(paces: Sequence[_Pace]) -> tuple[_Pace, ...]:

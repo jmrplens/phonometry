@@ -3713,12 +3713,6 @@ def constant_fields() -> Iterator[Choice]:
                 )
 
 
-#: The statements a check of a choice may sit inside without leaving a path on
-#: which the choice goes unchecked: a test that is about the choice itself
-#: (``if text is not None``, ``if isinstance(text, str)``, ``for item in
-#: texts``) runs the check whenever the choice is there to check.
-
-
 def _parents(tree: ast.AST) -> dict[ast.AST, ast.AST]:
     return {
         child: node for node in ast.walk(tree) for child in ast.iter_child_nodes(node)
@@ -3729,21 +3723,171 @@ def _mentions(node: ast.AST, is_raw: Callable[[ast.expr], bool]) -> bool:
     return any(isinstance(part, ast.expr) and is_raw(part) for part in ast.walk(node))
 
 
-def _branches_away(
-    holder: ast.AST, child: ast.AST, is_raw: Callable[[ast.expr], bool]
-) -> bool:
-    """Whether *holder* runs *child* on some paths only, for a reason that is
-    not the choice itself.
+def _is_none(node: ast.expr) -> bool:
+    return isinstance(node, ast.Constant) and node.value is None
+
+
+def _never(node: ast.expr) -> bool:
+    """No expression: a single choice has no emptiness to ask about."""
+    return False
+
+
+class _Subject(NamedTuple):
+    """What the path checks know of a choice: the expressions that hold it
+    (*raw*), the one that is the whole of a collection of choices, whose
+    emptiness says only that there is nothing to check (*whole*), and the
+    options its ``Literal`` lists (*listed*).
     """
-    if isinstance(holder, ast.If | ast.IfExp) and child is not holder.test:
-        return not _mentions(holder.test, is_raw)
+
+    raw: Callable[[ast.expr], bool]
+    whole: Callable[[ast.expr], bool]
+    listed: frozenset[str]
+
+
+def _asks_its_form(test: ast.expr, subject: _Subject) -> bool:
+    """Whether *test* is about the choice itself and asks only what form it
+    takes, never which text it holds.
+
+    A check of a choice may sit behind such a test without leaving a path on
+    which the choice goes unchecked: ``if text is not None``, ``if
+    isinstance(text, str)``, ``if not texts`` (of a collection, which holds
+    nothing to check when it is empty) run the check whenever there is a text
+    to check, and ``not``, ``and`` and ``or`` of such tests do too. A test of
+    the text (``mode == "fast"``, ``mode in _QUICK``, ``not mode``) sends
+    other texts, a misspelling included, down the other path, and a test that
+    also asks something else (``strict and text is not None``) takes the path
+    for a reason that is not the choice; neither is about its form.
+    """
+    if isinstance(test, ast.BoolOp):
+        return all(_asks_its_form(value, subject) for value in test.values)
+    if isinstance(test, ast.UnaryOp) and isinstance(test.op, ast.Not):
+        return _asks_its_form(test.operand, subject)
+    if subject.whole(test):
+        return True
+    if isinstance(test, ast.Compare):
+        sides = [test.left, *test.comparators]
+        return (
+            len(test.ops) == 1
+            and isinstance(test.ops[0], ast.Is | ast.IsNot)
+            and any(subject.raw(side) for side in sides)
+            and any(_is_none(side) for side in sides)
+        )
+    return (
+        isinstance(test, ast.Call)
+        and isinstance(test.func, ast.Name)
+        and test.func.id == "isinstance"
+        and len(test.args) == 2
+        and subject.raw(test.args[0])
+    )
+
+
+def _texts_of(node: ast.expr) -> frozenset[str]:
+    """The texts a string, or a tuple, list or set of strings, writes out;
+    empty for anything else.
+    """
+    if isinstance(node, ast.Constant) and isinstance(node.value, str):
+        return frozenset({node.value})
+    if isinstance(node, ast.Tuple | ast.List | ast.Set):
+        texts = [
+            item.value
+            for item in node.elts
+            if isinstance(item, ast.Constant) and isinstance(item.value, str)
+        ]
+        if len(texts) == len(node.elts):
+            return frozenset(texts)
+    return frozenset()
+
+
+def _implies_listed(test: ast.expr, subject: _Subject, *, truth: bool) -> bool:
+    """Whether *test* coming out *truth* means the choice holds one of the
+    options its ``Literal`` lists.
+
+    ``if radiation == "unknown": return ...`` before the check leaves the
+    function only for ``"unknown"``, an option, so no misspelling leaves
+    with it; ``if mode == "typo": return`` and ``if mode != "fast": return``
+    let a text the ``Literal`` does not list leave unchecked.
+    """
+    if not subject.listed:
+        return False
+    if isinstance(test, ast.UnaryOp) and isinstance(test.op, ast.Not):
+        return _implies_listed(test.operand, subject, truth=not truth)
+    if isinstance(test, ast.BoolOp):
+        parts = [_implies_listed(value, subject, truth=truth) for value in test.values]
+        # An ``and`` that holds, or an ``or`` that fails, holds every part.
+        every_part = isinstance(test.op, ast.And) == truth
+        return any(parts) if every_part else all(parts)
+    if not (isinstance(test, ast.Compare) and len(test.ops) == 1):
+        return False
+    operator, left, right = test.ops[0], test.left, test.comparators[0]
+    if isinstance(operator, ast.Eq | ast.NotEq):
+        if subject.raw(left):
+            texts = _texts_of(right) if isinstance(right, ast.Constant) else frozenset()
+        elif subject.raw(right):
+            texts = _texts_of(left) if isinstance(left, ast.Constant) else frozenset()
+        else:
+            return False
+        positive = isinstance(operator, ast.Eq) == truth
+    elif isinstance(operator, ast.In | ast.NotIn) and subject.raw(left):
+        texts = _texts_of(right)
+        positive = isinstance(operator, ast.In) == truth
+    else:
+        return False
+    return positive and bool(texts) and texts <= subject.listed
+
+
+def _matches_its_form(match: ast.Match, subject: _Subject) -> bool:
+    """Whether a ``match`` on the choice tells its cases apart by form only:
+    ``None``, a class pattern or a capture, never a text, and no guard that
+    asks anything else.
+    """
+
+    def form(pattern: ast.pattern) -> bool:
+        if isinstance(pattern, ast.MatchOr):
+            return all(form(option) for option in pattern.patterns)
+        if isinstance(pattern, ast.MatchAs):
+            return pattern.pattern is None or form(pattern.pattern)
+        return isinstance(pattern, ast.MatchClass) or (
+            isinstance(pattern, ast.MatchSingleton) and pattern.value is None
+        )
+
+    return subject.raw(match.subject) and all(
+        form(case.pattern)
+        and (case.guard is None or _asks_its_form(case.guard, subject))
+        for case in match.cases
+    )
+
+
+def _taken_safely(test: ast.expr, subject: _Subject, *, truth: bool) -> bool:
+    """Whether the paths on which *test* comes out *truth* hold no text the
+    choice's check would refuse: the test asks only the choice's form
+    (:func:`_asks_its_form`), or coming out *truth* means the choice holds a
+    listed option (:func:`_implies_listed`).
+    """
+    return _asks_its_form(test, subject) or _implies_listed(test, subject, truth=truth)
+
+
+def _branches_away(holder: ast.AST, child: ast.AST, subject: _Subject) -> bool:
+    """Whether *holder* runs *child* on some paths only, and a path that skips
+    it may hold a text the check would refuse (:func:`_taken_safely`).
+    """
+    if isinstance(holder, ast.If) and child is not holder.test:
+        # The paths that skip a statement of the body are those on which the
+        # test fails, and those that skip one of the else block pass it.
+        return not _taken_safely(holder.test, subject, truth=child not in holder.body)
+    if isinstance(holder, ast.IfExp) and child is not holder.test:
+        return not _taken_safely(holder.test, subject, truth=child is not holder.body)
     if isinstance(holder, ast.While):
         return child is not holder.test
     if isinstance(holder, ast.BoolOp) and child in holder.values:
+        # An ``and`` skips the rest at the first part that fails, an ``or``
+        # at the first that holds.
+        skipped_at = isinstance(holder.op, ast.Or)
         before = holder.values[: holder.values.index(child)]
-        return bool(before) and not any(_mentions(value, is_raw) for value in before)
+        return not all(
+            _taken_safely(value, subject, truth=skipped_at) for value in before
+        )
     if isinstance(holder, ast.For | ast.AsyncFor) and child is not holder.iter:
-        return not _mentions(holder.iter, is_raw)
+        return not _mentions(holder.iter, subject.raw)
     if isinstance(holder, ast.Try):
         return child in holder.orelse
     return isinstance(
@@ -3760,15 +3904,15 @@ def _branches_away(
 def _on_some_path_only(
     node: ast.AST,
     parents: dict[ast.AST, ast.AST],
-    is_raw: Callable[[ast.expr], bool],
+    subject: _Subject,
     root: ast.AST,
 ) -> bool:
     """Whether *node* runs on some paths through *root* and not on others,
-    for a reason that is not the choice itself.
+    and a path that skips it may hold a text its check would refuse.
     """
     child, holder = node, parents.get(node)
     while holder is not None and holder is not root:
-        if _branches_away(holder, child, is_raw):
+        if _branches_away(holder, child, subject):
             return True
         child, holder = holder, parents.get(holder)
     return False
@@ -3806,21 +3950,29 @@ def _behind_a_test_of(
     node: ast.AST,
     statement: ast.AST,
     parents: dict[ast.AST, ast.AST],
-    is_raw: Callable[[ast.expr], bool],
+    subject: _Subject,
 ) -> bool:
     """Whether *node*, inside *statement*, runs only behind a test of the
-    choice itself (``if text is None: return``).
+    choice that lets no text its check would refuse through: one of its form
+    (``if text is None: return``) or one that holds only for a listed option
+    (``if method == "vdi2081": return ...``), :func:`_taken_safely`.
     """
     child, holder = node, parents.get(node)
     while holder is not None:
         if (
             isinstance(holder, ast.If | ast.IfExp | ast.While)
             and child is not holder.test
-            and _mentions(holder.test, is_raw)
+            and _taken_safely(
+                holder.test,
+                subject,
+                truth=child is holder.body
+                if isinstance(holder, ast.IfExp)
+                else child in holder.body,
+            )
         ) or (
             isinstance(holder, ast.Match)
             and child is not holder.subject
-            and _mentions(holder.subject, is_raw)
+            and _matches_its_form(holder, subject)
         ):
             return True
         if holder is statement:
@@ -3856,18 +4008,19 @@ def _ends_a_path(
 def _left_before(
     node: ast.AST,
     parents: dict[ast.AST, ast.AST],
-    is_raw: Callable[[ast.expr], bool],
+    subject: _Subject,
     root: ast.AST,
     checked: Callable[[ast.AST], bool],
 ) -> bool:
-    """Whether a path through *root* can leave it before *node* runs, for a
-    reason that is not the choice itself.
+    """Whether a path through *root* can leave it before *node* runs with a
+    text the check would refuse.
 
     A ``return`` in a statement before *node*, in *node*'s block or any block
     around it, ends the paths that take it; so does a ``continue`` or a
-    ``break`` of a loop *node* sits in. One behind a test of the choice
-    (``if text is None: return``), or one a check of the choice runs before
-    (*checked*), leaves no choice unchecked.
+    ``break`` of a loop *node* sits in. One behind a test of the choice that
+    lets no such text through (``if text is None: return``, ``if method ==
+    "vdi2081": return ...``, :func:`_behind_a_test_of`), or one a check of
+    the choice runs before (*checked*), leaves no choice unchecked.
     """
     child, holder = node, parents.get(node)
     while holder is not None and child is not root:
@@ -3875,7 +4028,7 @@ def _left_before(
             for inner in _own_nodes(statement):
                 if (
                     _ends_a_path(inner, statement, parents)
-                    and not _behind_a_test_of(inner, statement, parents, is_raw)
+                    and not _behind_a_test_of(inner, statement, parents, subject)
                     and not checked(inner)
                 ):
                     return True
@@ -4006,9 +4159,14 @@ def _checks_of(
     field: bool,
     collection: bool,
     depth: int,
+    options: frozenset[str] = frozenset(),
 ) -> tuple[_Check, ...]:
     """The checks a choice reaches in *function*, received as parameter (or,
     with *field*, read as ``self.<name>``) *name*.
+
+    *options* are the texts the choice's ``Literal`` lists: a path that skips
+    the check only when the choice holds one of them leaves no misspelling
+    unchecked (:func:`_implies_listed`).
     """
     tree = _parsed(function)
     if tree is None:
@@ -4022,6 +4180,7 @@ def _checks_of(
     def is_raw(node: ast.expr) -> bool:
         return target(node) or (isinstance(node, ast.Name) and node.id in items)
 
+    subject = _Subject(is_raw, target if collection else _never, options)
     root = tree.body[0] if isinstance(tree, ast.Module) and tree.body else tree
     parents = _parents(tree)
     # Each place the choice meets a check, with the checks it meets there.
@@ -4047,7 +4206,12 @@ def _checks_of(
         if field and _reads_own_field(node, callee, namespace):
             inner.extend(
                 _checks_of(
-                    callee, name, field=True, collection=collection, depth=depth + 1
+                    callee,
+                    name,
+                    field=True,
+                    collection=collection,
+                    depth=depth + 1,
+                    options=options,
                 )
             )
         record = _record_constructor(callee)
@@ -4066,6 +4230,7 @@ def _checks_of(
                             field=True,
                             collection=collection and (target(value) or keys_kept),
                             depth=depth + 1,
+                            options=options,
                         )
                     )
             else:
@@ -4076,6 +4241,7 @@ def _checks_of(
                         field=False,
                         collection=collection and (target(value) or keys_kept),
                         depth=depth + 1,
+                        options=options,
                     )
                 )
         if inner:
@@ -4089,15 +4255,15 @@ def _checks_of(
     def checked(leaving: ast.AST) -> bool:
         """Whether a check of the choice runs before *leaving* on its path."""
         return any(
-            _contains(leaving, node) or _runs_before(node, leaving, parents, is_raw)
+            _contains(leaving, node) or _runs_before(node, leaving, parents, subject)
             for node in validated
         )
 
     found: list[_Check] = []
     for node, checks in sites:
         here = not (
-            _on_some_path_only(node, parents, is_raw, root)
-            or _left_before(node, parents, is_raw, root, checked)
+            _on_some_path_only(node, parents, subject, root)
+            or _left_before(node, parents, subject, root, checked)
         )
         found.extend(
             _Check(here and check.every_path, check.validator) for check in checks
@@ -4113,7 +4279,7 @@ def _runs_before(
     node: ast.AST,
     later: ast.AST,
     parents: dict[ast.AST, ast.AST],
-    is_raw: Callable[[ast.expr], bool],
+    subject: _Subject,
 ) -> bool:
     """Whether *node* runs on every path that reaches *later*: it sits, on
     every path through its statement, in a statement before *later*'s, in
@@ -4123,7 +4289,7 @@ def _runs_before(
     while holder is not None and not isinstance(child, _SCOPES):
         for statement in _block_before(holder, child):
             if _contains(statement, node) and not _on_some_path_only(
-                node, parents, is_raw, holder
+                node, parents, subject, holder
             ):
                 return True
         child, holder = holder, parents.get(holder)
@@ -4203,9 +4369,12 @@ def unchecked_choices() -> Iterator[Choice]:
     to: a choice compared with ``==`` takes a misspelling down the ``else``
     branch, one checked only beside another argument passes a misspelling when
     that argument is absent, and one checked with ``if text not in OPTIONS``
-    refuses a number with ``ValueError``. A check behind a test of the choice
-    itself (``if text is not None``, ``if isinstance(text, str)``) runs
-    whenever there is a choice to check. This is rule A45.
+    refuses a number with ``ValueError``. A check behind a test of the
+    choice's form (``if text is not None``, ``if isinstance(text, str)``)
+    runs whenever there is a choice to check, and a path that skips it only
+    for an option the ``Literal`` lists (``if method == "vdi2081": return``)
+    lets no misspelling past; a test of the text (``if mode == "fast"``)
+    does (:func:`_taken_safely`). This is rule A45.
     """
     inputs = _input_records()
     for home, qualname, obj in _targets():
@@ -4226,7 +4395,12 @@ def unchecked_choices() -> Iterator[Choice]:
                     continue
                 checks = (
                     _checks_of(
-                        check, field.name, field=True, collection=collection, depth=0
+                        check,
+                        field.name,
+                        field=True,
+                        collection=collection,
+                        depth=0,
+                        options=_literal_options(read),
                     )
                     if check is not None
                     else ()
@@ -4250,7 +4424,12 @@ def unchecked_choices() -> Iterator[Choice]:
                 continue
             verdict = _verdict(
                 _checks_of(
-                    obj, parameter.name, field=False, collection=collection, depth=0
+                    obj,
+                    parameter.name,
+                    field=False,
+                    collection=collection,
+                    depth=0,
+                    options=_literal_options(read),
                 )
             )
             if verdict is not None:

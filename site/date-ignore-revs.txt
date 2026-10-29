@@ -1,0 +1,19 @@
+# Commits that do not move the modified date of the pages they changed.
+#
+# A page's date (the footer, `dateModified` in its structured data and its
+# `<lastmod>` in the sitemap) is the last commit that changed its content.
+# src/lib/content-dates.mjs already passes over a commit that changed nothing
+# but the `title`, `description` or `sidebar` keys of a page's frontmatter.
+# This list is for the mechanical sweeps that rule cannot see: a commit that
+# rewrote the same kind of line on hundreds of pages without changing what any
+# of them says. The commit that created a page counts even when it is listed.
+#
+# One full 40-character SHA per line, as it is on main (a squash merge gets a
+# new one, so a sweep is listed after it merges), then a comment saying what
+# it swept. The build fails on a line that is not a full SHA and on a commit
+# that changed no page.
+
+# The meta descriptions cut to 160 characters, and with them the lead sentence
+# of every API page and the summary column of the API index, which repeat the
+# same docstring line.
+790a168ca03b29801f7904d222441646fce62a29

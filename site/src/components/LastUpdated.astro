@@ -9,10 +9,11 @@
  * gone; the date it carried that nothing else showed moved here, next to the
  * update it belongs with.
  *
- * The dates themselves come from where they always did: the first commit that
- * added the file (src/lib/page-dates.mjs) and Starlight's own `lastUpdated`
- * route data. A page published and last touched on the same day shows one
- * date, not the same date twice.
+ * The first date is the commit that added the file (src/lib/page-dates.mjs);
+ * the second is the route's `lastUpdated`, which src/routeData.ts sets to the
+ * day the page's content last changed (src/lib/content-dates.mjs), the date
+ * the structured data and the sitemap give it too. A page published and last
+ * changed on the same day shows one date, not the same date twice.
  */
 import { firstPublished } from '../lib/page-dates.mjs';
 

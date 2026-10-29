@@ -132,10 +132,12 @@ const isBibliography = slug === 'reference/bibliography';
 
 const bibliographyUrl = `${SITE}${BASE}${lang === 'es' ? '/es' : ''}/reference/bibliography/`;
 
-// Dates: `dateModified` is the last commit that touched the page, which is what
-// Starlight already computes. `datePublished` is the commit that ADDED it. They
-// used to be the same value, which claimed every page was published on the day
-// it was last edited.
+// Dates: `dateModified` is the day the page's content last changed, which
+// src/routeData.ts sets as the route's `lastUpdated` from
+// src/lib/content-dates.mjs, so it is the day the footer shows and the
+// sitemap's <lastmod> carries. `datePublished` is the commit that ADDED the
+// page. They used to be the same value, which claimed every page was published
+// on the day it was last edited.
 const modified =
   route?.lastUpdated instanceof Date ? route.lastUpdated.toISOString().slice(0, 10) : undefined;
 const published = firstPublished(route?.entry?.filePath ?? '') ?? modified;

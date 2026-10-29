@@ -1,9 +1,20 @@
 import { defineRouteMiddleware, type StarlightRouteData } from '@astrojs/starlight/route-data';
 import { getCollection, type CollectionEntry } from 'astro:content';
+import { loadContentDates } from './lib/content-dates.mjs';
 import { englishTwin, isApiRoute, isFallbackRoute } from './lib/fallback-routes.mjs';
 import { hasMarkdownCopy, markdownCopyPath, routeOf } from './lib/page-markdown.mjs';
 
 const BASE = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
+
+/**
+ * The date each page's content last changed (src/lib/content-dates.mjs), read
+ * from the history once for the whole build. It replaces Starlight's
+ * `lastUpdated`, the last commit that touched the file whatever it changed, so
+ * the footer (LastUpdated.astro) and `dateModified` (Head.astro) show the date
+ * add-sitemap-lastmod.mjs writes into the sitemap. The build runs from the
+ * site root, which is where the dates are read from.
+ */
+const contentDates = await loadContentDates();
 
 /**
  * The routes `scripts/emit-page-markdown.mjs` publishes a markdown copy for:
@@ -133,6 +144,15 @@ export const onRequest = defineRouteMiddleware(({ locals, url }) => {
   starlightRoute.markdownCopy = published.has(route)
     ? markdownCopyPath(route, BASE)
     : undefined;
+
+  // The date the page's content last changed, for every page with a source
+  // file. Starlight's own 404 entry names a `404.md` that does not exist, and
+  // keeps no date. A Spanish API page is served from its English entry, so it
+  // carries the English page's date.
+  const entry = starlightRoute.entry;
+  if (entry?.filePath && entry.id !== '404') {
+    starlightRoute.lastUpdated = contentDates.dateOf(entry.filePath);
+  }
 
   // The API reference is generated from the package docstrings, so its pages
   // have no hand-editable source: an "Edit page" link there would invite web

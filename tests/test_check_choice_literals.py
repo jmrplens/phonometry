@@ -1768,7 +1768,7 @@ class _KeysSkipAPace:
     def __post_init__(self) -> None:
         if isinstance(self.sides, Mapping):
             for side, value in self.sides.items():
-                if side == "fast":
+                if side in {"fast", "slow"}:
                     continue
                 require_choice(side, "sides", _TWO_SIDES)
                 if isinstance(value, str):

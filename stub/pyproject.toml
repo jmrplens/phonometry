@@ -14,7 +14,8 @@ readme = "README.md"
 # metadata as License-Expression and License-File and puts the text beside it
 # in the wheel and the sdist. The file is a copy of the repository's LICENSE,
 # because a licence file has to sit under the project it is declared in. PEP
-# 639 forbids a licence classifier next to an expression, so there is none.
+# 639 deprecates licence classifiers and lets a build backend refuse one
+# beside an expression; setuptools refuses it, so there is none.
 license = "MIT"
 license-files = ["LICENSE"]
 requires-python = ">=3.13"

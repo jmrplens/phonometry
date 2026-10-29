@@ -940,7 +940,7 @@ class OctaveFilterBank:
             zero_phase=zero_phase,
         )
         # sigbands=True always fills the band list
-        bands = cast("list[np.ndarray]", bands_opt)
+        bands = cast(list[np.ndarray], bands_opt)
 
         starts = np.arange(0, n_samples - win + 1, hop)
         times = (starts + win / 2) / self.fs
@@ -1051,7 +1051,7 @@ class OctaveFilterBank:
             )
 
         # sosfilt supports axis=-1 by default
-        return cast("np.ndarray", y)
+        return cast(np.ndarray, y)
 
     def _calculate_level(self, y: np.ndarray, mode: Mode) -> NDArray[np.float64]:
         """Calculate the level (RMS or Peak) in dB."""
@@ -1096,7 +1096,7 @@ def _decimate_and_filter(x: np.ndarray, sos: np.ndarray, factor: int) -> np.ndar
     :param factor: The band's decimation factor (1 filters at full rate).
     :return: The band output at the decimated rate.
     """
-    return cast("np.ndarray", signal.sosfilt(sos, _decimate(x, factor), axis=-1))
+    return cast(np.ndarray, signal.sosfilt(sos, _decimate(x, factor), axis=-1))
 
 
 def _decimate(x: np.ndarray, factor: int) -> np.ndarray:
@@ -1109,7 +1109,7 @@ def _decimate(x: np.ndarray, factor: int) -> np.ndarray:
     if factor == 1:
         return x
     return cast(
-        "np.ndarray",
+        np.ndarray,
         signal.resample_poly(x, 1, factor, axis=-1, window=_multirate_lowpass(factor)),
     )
 

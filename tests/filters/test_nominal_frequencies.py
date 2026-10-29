@@ -150,6 +150,9 @@ def test_the_band_set_refuses_one_string_for_its_labels() -> None:
     upper = [1412.5, 2818.4]
     with pytest.raises(TypeError, match="'labels' must hold one label per band"):
         filters.FractionalOctaveBands(centres, lower, upper, "1k")  # type: ignore[arg-type]
+    # A bytearray is one text too, not one label per character code.
+    with pytest.raises(TypeError, match="'labels' must hold one label per band"):
+        filters.FractionalOctaveBands(centres, lower, upper, bytearray(b"1k"))  # type: ignore[arg-type]
 
 
 # --- OctaveFilterBank band-set attributes ---

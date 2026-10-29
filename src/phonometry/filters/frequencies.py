@@ -77,7 +77,7 @@ class FractionalOctaveBands(OwnsArrays):
         :raises TypeError: if ``labels`` is one string rather than one label
             per band, which would otherwise be split into its characters.
         """
-        if isinstance(self.labels, (str, bytes)):
+        if isinstance(self.labels, (str, bytes, bytearray)):
             msg = (
                 "FractionalOctaveBands: 'labels' must hold one label per band, "
                 f"not a single string; got {self.labels!r}."

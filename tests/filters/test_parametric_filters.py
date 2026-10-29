@@ -250,6 +250,27 @@ def test_time_weighting_refuses_a_starting_state_written_as_text(state: object) 
         filters.time_weighting(two_channels, 48000, initial_state=state)  # type: ignore[call-overload]
 
 
+@pytest.mark.parametrize(
+    "state",
+    [np.complex128(0.5 + 0.1j), [0.5 + 0.1j, 0.5], np.array(0.5 + 0j)],
+    ids=["numpy-complex", "complex-in-a-list", "zero-dimensional-complex"],
+)
+def test_time_weighting_refuses_a_complex_starting_state(state: object) -> None:
+    """numpy kept the real part of a complex state, with a ``ComplexWarning``."""
+    two_channels = np.ones((2, 10))
+    with pytest.raises(TypeError, match="'initial_state' must be real, not complex"):
+        filters.time_weighting(two_channels, 48000, initial_state=state)  # type: ignore[call-overload]
+
+
+def test_time_weighting_names_a_ragged_starting_state() -> None:
+    """A nesting with no shape is a wrong value, as for a layered termination."""
+    two_channels = np.ones((2, 10))
+    with pytest.raises(
+        ValueError, match="'initial_state' must be numbers of one shape"
+    ):
+        filters.time_weighting(two_channels, 48000, initial_state=[[0.5], [0.5, 0.5]])
+
+
 def test_time_weighting_fast() -> None:
     r"""Verify Fast (125ms) time weighting response to a step.
 

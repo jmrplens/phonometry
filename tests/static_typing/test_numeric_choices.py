@@ -16,7 +16,10 @@ reported, so a refusal that goes fails the build.
 ``scripts/check_parameter_annotations.py`` holds every public parameter to the
 rule. The ``coefficients`` of ``materials.delany_bazley`` take the same
 array-like of numbers beside their presets: they were annotated a ``tuple`` of
-floats while the call took a list or an array of the eight numbers as well.
+floats while the call took a list or an array of the eight numbers as well,
+and so does the ``speech_spectrum`` of ``speech.speech_intelligibility_index``
+beside its four vocal efforts: it was annotated ``ArrayLike`` alone, which
+stated no choice at all.
 """
 
 from __future__ import annotations
@@ -26,7 +29,7 @@ from typing import TYPE_CHECKING
 import numpy as np
 import pytest
 
-from phonometry import aircraft, filters, materials
+from phonometry import aircraft, filters, materials, speech
 
 if TYPE_CHECKING:
     from numpy.typing import DTypeLike, NDArray
@@ -219,3 +222,12 @@ def test_delany_bazley_takes_a_preset_or_its_eight_numbers() -> None:
         assert medium.characteristic_impedance.shape == (3,)
     with pytest.raises(ValueError, match="'coefficients' must be one of"):
         materials.delany_bazley(_BANDS, 20000.0, coefficients="garai")  # type: ignore[arg-type]
+
+
+def test_a_speech_spectrum_is_a_vocal_effort_or_its_levels() -> None:
+    """A vocal effort, or one level per band, in any form of numbers."""
+    levels: NDArray[np.float64] = np.full(18, 60.0)
+    for spectrum in ("normal", "shout", [60.0] * 18, tuple([60] * 18), levels):
+        assert 0.0 <= speech.speech_intelligibility_index(spectrum).sii <= 1.0
+    with pytest.raises(ValueError, match="'speech_spectrum' must be one of"):
+        speech.speech_intelligibility_index("Normal")  # type: ignore[arg-type]

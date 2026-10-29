@@ -495,7 +495,7 @@ def _microphone_labels(
         than the number of determinations.
     """
     require_scalar(determinations, "determinations")
-    if isinstance(microphones, (str, bytes)):
+    if isinstance(microphones, (str, bytes, bytearray)):
         msg = (
             "'microphones' must hold one label per determination, not a single string."
         )

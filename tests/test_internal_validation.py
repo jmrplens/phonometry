@@ -583,3 +583,45 @@ def test_a_member_of_a_sequence_of_arrays_holds_numbers(
     """A member was converted by numpy, which parsed a text and dropped an imaginary part."""
     with pytest.raises(TypeError, match=message):
         arrays_of(members, "polar", "a pair (angles_deg, relative_db) of two arrays", 2)
+
+
+#: What iterating reads as members a caller did not mean: the codes of the
+#: characters of a ``bytearray``, the keys of a mapping, and the members of a
+#: set in no order.
+_NO_SEQUENCES = {
+    "bytearray": bytearray(b"ab"),
+    "mapping": {0: [1.0], 1: [2.0]},
+    "set": frozenset({1.0, 2.0}),
+}
+
+
+@pytest.mark.parametrize("value", _NO_SEQUENCES.values(), ids=_NO_SEQUENCES.keys())
+def test_a_sequence_of_arrays_is_refused_whole_when_it_is_none(value: object) -> None:
+    """A ``bytearray`` was read as one array per byte code, a mapping as its keys."""
+    with pytest.raises(TypeError, match=r"'polar' must be a pair .*, not "):
+        arrays_of(value, "polar", "a pair (angles_deg, relative_db) of two arrays", 2)
+
+
+@pytest.mark.parametrize("value", _NO_SEQUENCES.values(), ids=_NO_SEQUENCES.keys())
+def test_a_sequence_of_numbers_is_refused_whole_when_it_is_none(value: object) -> None:
+    """``{i: 1.0 for i in range(8)}`` gave its keys 0 to 7 as the coefficients."""
+    with pytest.raises(TypeError, match=r"'coefficients' must be eight numbers, not "):
+        floats_of(value, "coefficients", "eight numbers")
+
+
+@pytest.mark.parametrize(
+    "value",
+    [np.complex128(2.0 + 1.0j), np.complex64(2.0), np.array(2.0 + 1.0j), 2.0 + 1.0j],
+    ids=["complex128", "complex64-real-valued", "zero-dimensional", "python"],
+)
+@pytest.mark.filterwarnings("error")
+def test_one_number_is_refused_when_it_is_complex_of_any_kind(value: object) -> None:
+    """``float()`` refuses a Python complex but keeps the real part of a numpy one.
+
+    It did so with no more than a ``ComplexWarning``, and the guard returned
+    the real part as the number.
+    """
+    with pytest.raises(TypeError, match="'x' must be real"):
+        require_real(value, "'x' must be real")
+    with pytest.raises(TypeError, match="'x' must be a number"):
+        require_positive(value, "x")  # type: ignore[arg-type]

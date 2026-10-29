@@ -1565,17 +1565,30 @@ def test_event_validation() -> None:
 
 @pytest.mark.parametrize(
     "resistivity",
-    [b"G", np.bytes_(b"G"), None, 1.0 + 1.0j, ["G"], ["20000"], np.array("20000")],
+    [
+        b"G",
+        np.bytes_(b"G"),
+        None,
+        1.0 + 1.0j,
+        np.complex128(2.0e4 + 5.0e3j),
+        np.complex64(2.0e4),
+        ["G"],
+        ["20000"],
+        np.array("20000"),
+    ],
     ids=[
         "bytes",
         "numpy-bytes",
         "none",
         "complex",
+        "numpy-complex",
+        "numpy-complex-real-valued",
         "letter-in-a-list",
         "number-as-text-in-a-list",
         "number-as-text-array",
     ],
 )
+@pytest.mark.filterwarnings("error")
 def test_a_ground_refuses_a_flow_resistivity_that_is_no_number_when_built(
     resistivity: object,
 ) -> None:
@@ -1583,7 +1596,9 @@ def test_a_ground_refuses_a_flow_resistivity_that_is_no_number_when_built(
 
     The record used to store a ``bytes``, ``None`` or a complex value as
     given and leave it to the event that read it, which failed with an error
-    that named nothing, and it read ``["20000"]`` as 20000 Pa s/m2.
+    that named nothing, and it read ``["20000"]`` as 20000 Pa s/m2. A numpy
+    complex scalar passed the scalar guard as its real part, with no more
+    than a ``ComplexWarning``, and was stored as given.
     """
     with pytest.raises(TypeError, match="'flow_resistivity'"):
         RotorcraftGround(flow_resistivity=resistivity)  # type: ignore[arg-type]
@@ -1606,6 +1621,9 @@ def test_a_ground_refuses_text_among_its_elevations_when_built() -> None:
     axes = (["0", "100"], [0.0, 100.0], [[0.0, 0.0], [0.0, 0.0]])
     with pytest.raises(TypeError, match="'terrain' must be numbers, not text"):
         RotorcraftGround(terrain=axes)
+    # A bytearray was read as one axis per byte code.
+    with pytest.raises(TypeError, match="'terrain' must be .*, not bytearray"):
+        RotorcraftGround(terrain=bytearray(b"abc"))  # type: ignore[arg-type]
 
 
 def test_a_ground_holds_the_flow_resistivity_it_was_given() -> None:

@@ -9,7 +9,7 @@ through these helpers; existing modules migrate as they are touched.
 from __future__ import annotations
 
 import math
-from collections.abc import Iterable
+from collections.abc import Iterable, Mapping, Set
 from typing import TYPE_CHECKING, Any, TypeGuard, cast
 
 import numpy as np
@@ -17,7 +17,7 @@ import numpy as np
 from .frozen import owned_members
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping, Sequence
+    from collections.abc import Sequence
 
     from numpy.typing import ArrayLike, NDArray
 
@@ -222,14 +222,17 @@ def require_real(value: object, msg: str) -> float:
     number or any other object :func:`float` cannot take is the wrong type,
     and is refused with :class:`TypeError`; a number too large for a float
     is a value of the right type, and is refused with :class:`ValueError`.
-    :func:`float` refuses a Python ``complex`` and reads a NumPy one as its
-    real part (:func:`holds_complex`), so both are refused here before it.
+    A complex value is refused whatever its kind: :func:`float` refuses a
+    Python ``complex``, but takes the real part of a numpy one
+    (``np.complex128``, ``np.complex64``, a zero-dimensional complex array)
+    with no more than a ``ComplexWarning`` (:func:`holds_complex`), and the
+    value passed as the number it is not.
 
     :param value: The caller's value, of any type.
     :param msg: The refusal, worded by the guard that owns the parameter.
     :return: ``float(value)``.
     :raises TypeError: with *msg*, for an array of any shape, a text, a
-        complex number, or anything whose type :func:`float` refuses.
+        complex value, or anything whose type :func:`float` refuses.
     :raises ValueError: with *msg*, for a number :func:`float` cannot hold.
     """
     if not is_scalar(value) or holds_text(value) or holds_complex(value):
@@ -1191,6 +1194,38 @@ def require_1d_signal(x: ArrayLike, name: str) -> np.ndarray:
     return arr
 
 
+def _members_of(
+    value: object, msg: str, *, owned: bool = False
+) -> Sequence[object]:
+    """The members of a sequence a record takes as one field, refused whole when it is none.
+
+    Iterating gives something of many objects that are no sequence of
+    members: a ``bytearray`` gives the codes of its characters, as a
+    ``bytes`` does, a mapping gives its keys and a set its members in no
+    order. Each is refused whole, as a text is (see :func:`holds_text`),
+    rather than read as the members it gives.
+
+    :param value: The caller's value, of any type.
+    :param msg: The start of the refusal, worded by the caller.
+    :param owned: Read the members through
+        :func:`~phonometry._internal.frozen.owned_members`, for a record that
+        seals the arrays it holds: an array a deque or a generator holds is
+        copied, so the record never seals one of the caller's.
+    :return: The members, in order.
+    :raises TypeError: for a text in any form, a mapping, a set, or a value
+        that is not a sequence at all.
+    """
+    refusal = f"{msg}, not {type(value).__name__}."
+    if holds_text(value) or isinstance(value, bytearray | Mapping | Set):
+        raise TypeError(refusal)
+    try:
+        if owned:
+            return owned_members(cast("Iterable[object]", value))
+        return list(cast("Iterable[object]", value))
+    except TypeError:
+        raise TypeError(refusal) from None
+
+
 def arrays_of(
     value: object, name: str, members: str, n_members: int
 ) -> tuple[NDArray[np.float64], ...]:
@@ -1219,30 +1254,24 @@ def arrays_of(
         pair (angles_deg, relative_db) of two arrays"``).
     :param n_members: How many arrays it holds.
     :return: The members, each a ``float64`` array.
-    :raises TypeError: if *value* is a text or is not a sequence at all, a
-        member holds a complex number, a text or anything that is not a
-        number, or *n_members* is not a number.
+    :raises TypeError: if *value* is a text in any form (a ``bytearray``
+        included), a mapping, a set or not a sequence at all, a member holds
+        a complex number, a text or anything that is not a number, or
+        *n_members* is not a number.
     :raises ValueError: if it holds other than *n_members* members, a member
         is a ragged nesting, or *n_members* is not a whole number of at least
         one.
     """
     expected = require_count(n_members, "n_members")
     msg = f"'{name}' must be {members}"
-    if isinstance(value, str | bytes):
-        msg += f", not {type(value).__name__}."
-        raise TypeError(msg)
-    try:
-        items = owned_members(cast("Iterable[ArrayLike]", value))
-    except TypeError:
-        msg += f", not {type(value).__name__}."
-        raise TypeError(msg) from None
+    items = _members_of(value, msg, owned=True)
     if len(items) != expected:
         msg += f", not {len(items)} of them."
         raise ValueError(msg)
     for item in items:
         refuse_complex(item, f"{msg} of real numbers, not complex ones.")
         refuse_text(item, f"{msg} of numbers, not text.")
-    return tuple(_as_float64(item, name) for item in items)
+    return tuple(_as_float64(cast("ArrayLike", item), name) for item in items)
 
 
 def pair_of_arrays(
@@ -1257,9 +1286,9 @@ def pair_of_arrays(
     :param members: What the two members are, as the message spells them
         (``"(angles_deg, relative_db)"``).
     :return: The two members, each a ``float64`` array.
-    :raises TypeError: if *value* is a text or is not a sequence at all, or
-        a member holds a text, a complex value or anything that is not a
-        number.
+    :raises TypeError: if *value* is a text in any form, a mapping, a set or
+        not a sequence at all, or a member holds a text, a complex value or
+        anything that is not a number.
     :raises ValueError: if it holds other than two members, or a member is
         a ragged nesting.
     """
@@ -1278,6 +1307,9 @@ def floats_of(
     are unpacked here, once, when the record is built, and each refusal
     names the field. A text is refused whatever it reads as, as
     :func:`holds_text` has it, and so is a member that is not one number.
+    A ``bytearray``, a mapping and a set are refused whole: iterating them
+    gives the codes of the characters, the keys, and the members in no
+    order, none of them the numbers a caller meant.
 
     :param value: The sequence.
     :param name: The field's name, for the message.
@@ -1285,23 +1317,17 @@ def floats_of(
         (low, high) pair of two numbers"``).
     :param n_members: How many numbers it holds, or ``None`` for any count.
     :return: The numbers, each a ``float``.
-    :raises TypeError: if *value* is a text or is not a sequence at all, a
-        member is not one number (a text or a complex number included), or
-        *n_members* is not a number.
+    :raises TypeError: if *value* is a text in any form (a ``bytearray``
+        included), a mapping, a set or not a sequence at all, a member is not
+        one number (a text or a complex value included), or *n_members* is
+        not a number.
     :raises ValueError: if it holds other than *n_members* members, a
         member is a number too large for a float, or *n_members* is not a
         whole number of at least one.
     """
     expected = None if n_members is None else require_count(n_members, "n_members")
     msg = f"'{name}' must be {members}"
-    if holds_text(value):
-        msg += f", not {type(value).__name__}."
-        raise TypeError(msg)
-    try:
-        items = list(cast("Iterable[object]", value))
-    except TypeError:
-        msg += f", not {type(value).__name__}."
-        raise TypeError(msg) from None
+    items = _members_of(value, msg)
     if expected is not None and len(items) != expected:
         msg += f", not {len(items)} of them."
         raise ValueError(msg)
@@ -1321,8 +1347,8 @@ def pair_of_floats(value: object, name: str, members: str) -> tuple[float, float
     :param members: What the two members are, as the message spells them
         (``"(low, high)"``).
     :return: The two numbers.
-    :raises TypeError: if *value* is a text or is not a sequence at all, or
-        a member is not one number.
+    :raises TypeError: if *value* is a text in any form, a mapping, a set or
+        not a sequence at all, or a member is not one number.
     :raises ValueError: if it holds other than two members.
     """
     first, second = floats_of(value, name, f"a pair {members} of two numbers", 2)

@@ -465,6 +465,14 @@ def test_an_odd_record_reaches_the_nyquist_frequency_itself() -> None:
             "band_hz",
         ),
         (
+            lambda f, x: vibration.single_mode_fit(
+                frequencies=np.linspace(1.0, 100.0, 100),
+                frf=np.ones(100),
+                band_hz=cast("Any", bytearray([30, 50])),
+            ),
+            "band_hz",
+        ),
+        (
             lambda f, x: vibration.check_coherence(
                 vibration.impact_mobility(f, x, FS),
                 frequency_range_hz=(10.0, 400.0),
@@ -485,6 +493,7 @@ def test_an_odd_record_reaches_the_nyquist_frequency_itself() -> None:
         "one-number-range",
         "bare-number-range",
         "one-number-band",
+        "bytearray-band",
         "bare-band",
         "triple",
     ],
@@ -497,11 +506,13 @@ def test_a_malformed_pair_is_refused_by_name(
     """A one-number range, a bare number or a bare band says which argument.
 
     A number where a pair belongs, or a pair where a list of pairs does, is
-    the wrong type; a sequence of the wrong length is the right type with a
-    wrong value.
+    the wrong type, and so is a ``bytearray``, which was read as the codes
+    of its characters (``bytearray([30, 50])`` as the band 30 Hz to 50 Hz); a
+    sequence of the wrong length is the right type with a wrong value.
     """
     case = request.node.callspec.id
-    refusal = TypeError if case in {"bare-number-range", "bare-band"} else ValueError
+    wrong_type = {"bare-number-range", "bytearray-band", "bare-band"}
+    refusal = TypeError if case in wrong_type else ValueError
     force, response = _sdof_impact(0.1)
     with pytest.raises(refusal, match=f"'{name}' must be a"):
         call(force, response)

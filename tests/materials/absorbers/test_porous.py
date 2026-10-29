@@ -167,16 +167,35 @@ class TestDelanyBazley:
 
     @pytest.mark.parametrize(
         "coefficients",
-        [b"12345678", ["0.0571"] * 8, np.array(["0.0571"] * 8), None, [None] * 8],
-        ids=["bytes", "texts", "array-of-text", "none", "nones"],
+        [
+            b"12345678",
+            bytearray(b"12345678"),
+            ["0.0571"] * 8,
+            np.array(["0.0571"] * 8),
+            None,
+            [None] * 8,
+            dict.fromkeys(range(8), 0.0571),
+            set(range(8)),
+        ],
+        ids=[
+            "bytes",
+            "bytearray",
+            "texts",
+            "array-of-text",
+            "none",
+            "nones",
+            "mapping",
+            "set",
+        ],
     )
     def test_refuses_coefficients_that_are_no_numbers(
         self, coefficients: object
     ) -> None:
         """A text that is not a preset name is no coefficient, whatever it reads as.
 
-        ``b"12345678"`` was taken as the codes of its eight characters and
-        ``["0.0571"] * 8`` as eight numbers.
+        ``b"12345678"`` was taken as the codes of its eight characters,
+        ``["0.0571"] * 8`` as eight numbers, a mapping as its keys and a set
+        as its members in no order.
         """
         with pytest.raises(TypeError, match="'coefficients'"):
             delany_bazley(np.array([100.0]), 10000.0, coefficients=coefficients)  # type: ignore[arg-type]

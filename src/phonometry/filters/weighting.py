@@ -973,7 +973,10 @@ def _prepare_time_weighting_initial_state(
 
     A text that is not a ``str`` (a ``bytes``, a text in a sequence or an
     array) is refused before the numbers are read, so a state written as
-    ``["0.5"]`` is a :class:`TypeError` and not the number it reads as.
+    ``["0.5"]`` is a :class:`TypeError` and not the number it reads as, and
+    so is a complex state, whose imaginary part the conversion would drop.
+    A ragged nesting, which has no shape, is a :class:`ValueError`, as it is
+    for the termination of a layered absorber.
     """
     invalid_initial_state_message = (
         "'initial_state' must be None, 'zero', 'first', a number or an array "
@@ -993,11 +996,19 @@ def _prepare_time_weighting_initial_state(
 
     refuse_text_beside_choice(initial_state, "initial_state", _INITIAL_STATES)
     try:
-        state = np.asarray(initial_state, dtype=x_sq.dtype)
+        given = np.asarray(initial_state)
+    except ValueError:
+        msg = "'initial_state' must be numbers of one shape, not a ragged nesting."
+        raise ValueError(msg) from None
+    if given.dtype.kind == "c":
+        msg = "'initial_state' must be real, not complex."
+        raise TypeError(msg)
+    try:
+        state = given.astype(x_sq.dtype)
     except (TypeError, ValueError):
-        # numpy refuses an object with TypeError and an unconvertible string
-        # array with ValueError; neither message names the parameter or the
-        # accepted forms, so both become the module's own TypeError.
+        # What is left is an object array that holds no number: numpy refuses
+        # an object with TypeError and a sequence inside one with ValueError,
+        # and neither message names the parameter or the accepted forms.
         raise TypeError(invalid_initial_state_message) from None
     if state.shape == ():
         return np.full(state_shape, state.item(), dtype=x_sq.dtype)
@@ -1083,8 +1094,11 @@ def time_weighting(
         everywhere it was used and adds the rate and a level plot. It is not
         a Signal, because a mean square is not a pressure record.
     :raises TypeError: if ``fs`` is not a single number, ``mode`` is not a
-        text, or ``initial_state`` is neither ``None``, a text nor numbers (a
-        ``bytes``, a text among numbers).
+        text, or ``initial_state`` is neither ``None``, a text nor real
+        numbers (a ``bytes``, a text among numbers, a complex value).
+    :raises ValueError: if ``fs`` is not positive, or ``initial_state`` names
+        no starting state, is a ragged nesting or does not broadcast to the
+        input shape without the time axis.
     """
     require_scalar(fs, "fs")
     fs = resolve_fs(x, fs)

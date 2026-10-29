@@ -1651,7 +1651,7 @@ def _pair(value: object, name: str) -> tuple[float, float]:
     msg = (
         f"'{name}' must be a pair of numbers (f_low, f_high), in hertz; got {value!r}."
     )
-    if isinstance(value, (str, bytes)) or not isinstance(value, Iterable):
+    if isinstance(value, (str, bytes, bytearray)) or not isinstance(value, Iterable):
         raise TypeError(msg)
     try:
         low, high = (require_real(edge, msg) for edge in value)
@@ -2443,7 +2443,9 @@ def _exclusions(exclude_hz: object) -> list[tuple[float, float]]:
         "'exclude_hz' must be a sequence of (f_low, f_high) pairs, such as "
         f"[(40.0, 50.0)]; got {exclude_hz!r}."
     )
-    if isinstance(exclude_hz, (str, bytes)) or not isinstance(exclude_hz, Iterable):
+    if isinstance(exclude_hz, (str, bytes, bytearray)) or not isinstance(
+        exclude_hz, Iterable
+    ):
         raise TypeError(msg)
     bands = list(exclude_hz)
     if any(isinstance(band, (int, float, np.number)) for band in bands):

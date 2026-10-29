@@ -23,12 +23,21 @@ sequence of them, at the top or inside a container or a mapping, is a choice
 beside numbers. Each one found has a call in :data:`CALLS`, and each call a
 parameter the walk finds, so one published later is walked as soon as it
 exists and a call that outlives its parameter fails.
+
+The walk sees a choice only where the annotation states it, so a second one
+reads the bodies. A public parameter or record field whose annotation names
+numbers and no choice, but whose body, or a function of the package it is
+handed to, reads a ``str`` of it as something other than numbers, is a choice
+beside numbers its annotation hides (``speech.speech_intelligibility_index``
+read a vocal effort from a ``speech_spectrum`` annotated ``ArrayLike``), and
+fails until the annotation states it, where the walk then finds it.
 """
 
 from __future__ import annotations
 
 import ast
 import dataclasses
+import functools
 import inspect
 import pathlib
 import sys
@@ -44,7 +53,7 @@ if _SCRIPTS not in sys.path:
 
 import check_choice_literals as ccl
 
-from phonometry import aircraft, building, filters, materials, room, simulation
+from phonometry import aircraft, building, filters, materials, room, simulation, speech
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterator
@@ -216,6 +225,167 @@ def choices_beside_numbers() -> frozenset[Member]:
     return frozenset(found)
 
 
+#: The module of the shared guards. A parameter is handed to them to be
+#: refused or tested, never read as a choice, so they are not followed.
+_GUARDS = "phonometry._internal.validation"
+
+
+def _names_text(node: ast.expr) -> bool:
+    """Whether the type an ``isinstance`` test names is ``str``, alone or among others."""
+    if isinstance(node, ast.Tuple):
+        return any(_names_text(item) for item in node.elts)
+    return any(
+        isinstance(member, ast.Name) and member.id == "str" for member in _union(node)
+    )
+
+
+def _text_branches(tree: ast.AST) -> Iterator[ast.expr]:
+    """What each ``isinstance(<value>, str)`` that reads a text as a choice tests.
+
+    A test that refuses the text, as the test of an ``if`` whose body ends in
+    a ``raise``, or excludes it, under a ``not``, reads no choice.
+    """
+    passed: set[int] = set()
+    for node in ast.walk(tree):
+        if (
+            isinstance(node, ast.If)
+            and node.body
+            and isinstance(node.body[-1], ast.Raise)
+        ):
+            passed.update(id(inner) for inner in ast.walk(node.test))
+        elif isinstance(node, ast.UnaryOp) and isinstance(node.op, ast.Not):
+            passed.update(id(inner) for inner in ast.walk(node.operand))
+    for node in ast.walk(tree):
+        if (
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Name)
+            and node.func.id == "isinstance"
+            and len(node.args) == 2
+            and _names_text(node.args[1])
+            and id(node) not in passed
+        ):
+            yield node.args[0]
+
+
+class _Body(NamedTuple):
+    """What the body census reads of one function: its tree, its branches on a text, and its calls."""
+
+    tree: ast.AST
+    branches: tuple[ast.expr, ...]
+    calls: tuple[tuple[object, dict[str, ast.expr]], ...]
+
+
+@functools.cache
+def _body(function: object) -> _Body | None:
+    """The tree of *function*, what its branches on a text test, and what it hands each function of the package it calls.
+
+    Read once per function, however many parameters are followed through it.
+    """
+    tree = ccl._parsed(function)
+    if tree is None:
+        return None
+    module = getattr(function, "__module__", "") or ""
+    namespace = ccl._namespace(function, tree, module)
+    spread = ccl._spread_dicts(tree)
+    calls: list[tuple[object, dict[str, ast.expr]]] = []
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Call):
+            continue
+        callee = ccl._callee(node, namespace, module)
+        if callee is not None and callee.__module__ != _GUARDS:
+            calls.append((callee, ccl._arguments(node, callee, spread)))
+    return _Body(tree, tuple(_text_branches(tree)), tuple(calls))
+
+
+#: What :func:`reads_a_text_as_a_choice` found for a function and the name of
+#: a parameter, so each is followed once. A pair being followed reads ``None``
+#: until it is done, which ends a cycle of calls.
+_READS: dict[tuple[object, str], str | None] = {}
+
+
+def reads_a_text_as_a_choice(
+    function: object,
+    name: str,
+    *,
+    target: Callable[[ast.expr], bool] | None = None,
+) -> str | None:
+    """Where *function*, or a function it hands parameter *name* to, reads a ``str`` of it.
+
+    The parameter is followed as the choice guard follows it, through the
+    locals bound from it and into each function of the package it is handed
+    to, the shared guards left out. *target* reads the value some other way
+    than by its name: ``self.<field>`` in a ``__post_init__``.
+    """
+    key = (function, name)
+    if target is None and key in _READS:
+        return _READS[key]
+    if target is None:
+        _READS[key] = None
+    found: str | None = None
+    body = _body(function)
+    if body is not None and (body.branches or body.calls):
+        matches = ccl._following(body.tree, target or ccl._the_name(name))
+        if any(matches(tested) for tested in body.branches):
+            found = f"{getattr(function, '__qualname__', function)}({name})"
+        for callee, handed in () if found else body.calls:
+            received = next(
+                (parameter for parameter, value in handed.items() if matches(value)),
+                None,
+            )
+            found = (
+                None if received is None else reads_a_text_as_a_choice(callee, received)
+            )
+            if found is not None:
+                break
+    if target is None:
+        _READS[key] = found
+    return found
+
+
+def _numbers_and_no_choice(node: ast.expr | None) -> bool:
+    """Whether an annotation names numbers at its top and sets no choice beside them."""
+    return (
+        node is not None
+        and not sets_a_choice_beside_numbers(node)
+        and any(_is_numbers(member) for member in _union(node))
+    )
+
+
+def unstated_choices() -> list[tuple[str, str, str, str]]:
+    """``(module, owner, parameter, where)`` of each choice beside numbers no annotation states.
+
+    A public parameter or record field whose annotation names numbers and
+    sets no choice beside them, and whose body, or a function of the package
+    it is handed to, reads a ``str`` of it as a choice.
+    """
+    found: list[tuple[str, str, str, str]] = []
+    for module, qualname, target in ccl._targets():
+        owner_name, _, method = qualname.rpartition(".")
+        if method == "__init__":
+            record = getattr(sys.modules[module], owner_name.split(".")[0], None)
+            if inspect.isclass(record) and dataclasses.is_dataclass(record):
+                continue
+        if inspect.isclass(target) and dataclasses.is_dataclass(target):
+            check = vars(target).get("__post_init__")
+            for field in dataclasses.fields(target):
+                node = _read(field.type, ccl._field_module(target, field.name))
+                if check is None or not _numbers_and_no_choice(node):
+                    continue
+                where = reads_a_text_as_a_choice(
+                    check, field.name, target=ccl._field_of_self(field.name)
+                )
+                if where is not None:
+                    found.append((module, qualname, field.name, where))
+            continue
+        for name, annotation, home in _annotated(module, target):
+            if not _numbers_and_no_choice(_read(annotation, home)):
+                continue
+            where = reads_a_text_as_a_choice(target, name)
+            if where is not None:
+                found.append((module, qualname, name, where))
+    return sorted(found)
+
+
 _BANDS = np.array([500.0, 1000.0])
 _LAYERS = [materials.AirLayer(thickness_m=0.05)]
 _SAMPLES = np.random.default_rng(7).standard_normal(480)
@@ -289,6 +459,10 @@ def _shaped_sweep(value: object) -> object:
     return room.shaped_sweep_signal(8000.0, 100.0, 1000.0, 0.25, target=value)  # type: ignore[arg-type]
 
 
+def _speech_index(value: object) -> object:
+    return speech.speech_intelligibility_index(value)  # type: ignore[arg-type]
+
+
 def _fdtd_boundaries(value: object) -> object:
     return simulation.FDTDBoundaries(sides={"left": value})  # type: ignore[dict-item]
 
@@ -346,6 +520,10 @@ CALLS: dict[tuple[str, str, str], tuple[Callable[[object], object], str]] = {
         _fdtd_boundaries,
         "side 'left'",
     ),
+    ("phonometry.speech.sii", "speech_intelligibility_index", "speech_spectrum"): (
+        _speech_index,
+        "'speech_spectrum'",
+    ),
 }
 
 #: What a caller writes where a choice's numbers go that is no number: a
@@ -387,6 +565,25 @@ def test_every_choice_beside_numbers_is_walked() -> None:
     found = {_key(member) for member in _FOUND}
     assert sorted(found - CALLS.keys()) == [], "a choice beside numbers has no call"
     assert sorted(CALLS.keys() - found) == [], "a call names no choice beside numbers"
+
+
+def test_no_body_reads_a_choice_its_annotation_does_not_state() -> None:
+    """A ``str`` read as a choice beside numbers is stated in the annotation."""
+    assert unstated_choices() == []
+
+
+def test_the_body_census_reads_a_choice_and_passes_over_a_refusal() -> None:
+    """A branch on a text is a choice; a refusal of one, or its exclusion, is none."""
+
+    def branches(source: str) -> int:
+        return sum(1 for _ in _text_branches(ast.parse(source)))
+
+    assert branches("x = load(v) if isinstance(v, str) else asarray(v)") == 1
+    assert branches("if isinstance(v, str):\n    v = table[v]") == 1
+    assert (
+        branches("if isinstance(v, (str, bytes)) or n != 1:\n    raise TypeError") == 0
+    )
+    assert branches("ok = isinstance(v, Sequence) and not isinstance(v, str)") == 0
 
 
 def test_every_exemption_is_a_probe_a_member_takes() -> None:

@@ -541,6 +541,22 @@ def test_a_type_parameter_reads_as_its_bound() -> None:
     assert re.search(r"frequency: [SVA]\b", rendered) is None, rendered
 
 
+def test_a_bound_leaves_a_literal_member_of_the_same_spelling_alone() -> None:
+    """``Literal['A']`` is a choice the function accepts, not the type ``A``.
+
+    A head with ``[A: ArrayLike]`` and a ``weighting: Literal['A', 'C']``
+    must print the choices as written: only the names outside quotes are the
+    type parameter. The alias expansion skips quoted text for the same reason.
+    """
+    bounds = {"A": "ArrayLike", "S": "float"}
+    assert (
+        gad._format_annotation("Literal['A', 'C'] | A", None, bounds)
+        == "Literal['A', 'C'] | ArrayLike"
+    )
+    assert gad._format_annotation('Literal["S"]', None, bounds) == 'Literal["S"]'
+    assert gad._format_annotation("S", None, bounds) == "float"
+
+
 def test_plain_function_still_renders_one_form() -> None:
     """Nothing changes for the functions that declare no overloads."""
     from phonometry.signals.levels import leq

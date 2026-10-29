@@ -807,6 +807,20 @@ def expand_unpublished_aliases(text: str, module_name: str, depth: int = 0) -> s
             return alias_name
         return expand_unpublished_aliases(definition, home, depth + 1)
 
+    return _substitute_names(text, substitute)
+
+
+def _substitute_names(text: str, substitute: Callable[[re.Match[str]], str]) -> str:
+    """Rewrite each name of an annotation, leaving its quoted strings as written.
+
+    A ``Literal`` member is a value the function accepts, not a name: in
+    ``Literal['A'] | A`` only the second ``A`` is a type, and rewriting the
+    first would document a choice the function refuses.
+
+    :param text: The annotation.
+    :param substitute: What a matched name becomes.
+    :return: The annotation with every name outside quotes substituted.
+    """
     pieces = _QUOTED_RE.split(text)
     # Odd indices are the quoted strings the split kept; leave them as written.
     return "".join(
@@ -963,8 +977,8 @@ def _format_annotation(
     else:
         text = inspect.formatannotation(annotation)
     if bounds:
-        text = _ANNOTATION_NAME_RE.sub(
-            lambda match: bounds.get(match.group(0), match.group(0)), text
+        text = _substitute_names(
+            text, lambda match: bounds.get(match.group(0), match.group(0))
         )
     return expand_unpublished_aliases(text, module) if module else text
 

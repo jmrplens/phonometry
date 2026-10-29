@@ -20,6 +20,7 @@
  * of an index is to be read quickly.
  */
 import { reportsByArea, reportsByAreaEs } from '../data/reports.mjs';
+import { COPY, areaName as nameIn, sortedAreas } from '../data/report-index-copy.mjs';
 
 interface Props {
 	/** Locale of the page it is rendered on. */
@@ -29,37 +30,13 @@ const { lang = 'en' } = Astro.props;
 
 const RAW = 'https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports';
 
-/** What each documentation area is called, in each language. */
-const AREAS: Record<string, { en: string; es: string }> = {
-	aircraft: { en: 'Aircraft noise', es: 'Ruido de aeronaves' },
-	buildings: { en: 'Buildings and rooms', es: 'Edificios y salas' },
-	devices: { en: 'Devices and noise control', es: 'Dispositivos y control de ruido' },
-	environment: { en: 'Environment and transport', es: 'Medio ambiente y transporte' },
-	materials: { en: 'Materials and surfaces', es: 'Materiales y superficies' },
-	perception: { en: 'Hearing and perception', es: 'Audición y percepción' },
-	signals: { en: 'Signal analysis', es: 'Análisis de señal' },
-	vibration: { en: 'Vibration', es: 'Vibración' },
-	underwater: { en: 'Underwater acoustics', es: 'Acústica submarina' },
-	simulation: { en: 'Simulation', es: 'Simulación' },
-	fluids: { en: 'The medium', es: 'El medio' },
-	solids: { en: 'Elastic solids', es: 'Sólidos elásticos' },
-};
-
-/*
- * One area holds a single fiche (aircraft noise, today), and a count written
- * without a singular reads "1 fiches" there in English and "1 fichas" in
- * Spanish. Both are published prose, so both get the singular.
- */
-const copy = {
-	en: { source: 'Shown in', count: (n: number) => `${n} ${n === 1 ? 'fiche' : 'fiches'}` },
-	es: { source: 'Se muestra en', count: (n: number) => `${n} ${n === 1 ? 'ficha' : 'fichas'}` },
-}[lang];
+// The area names and the counted noun live in report-index-copy.mjs, which
+// the Markdown copy of this page reads as well.
+const copy = COPY[lang];
 
 const groups = lang === 'es' ? reportsByAreaEs : reportsByArea;
-const areaName = (key: string) => AREAS[key]?.[lang] ?? key;
-const entries = Object.entries(groups).sort(([a], [b]) =>
-	areaName(a).localeCompare(areaName(b), lang),
-);
+const areaName = (key: string) => nameIn(key, lang);
+const entries = sortedAreas(groups, lang);
 ---
 
 <div class="fiches not-content">

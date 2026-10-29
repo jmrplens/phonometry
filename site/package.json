@@ -36,6 +36,7 @@
     "preview": "astro preview",
     "redirects": "node scripts/generate-redirects.mjs",
     "redirects:cloudflare": "node scripts/cloudflare-redirects.mjs",
+    "test:agent-md": "node --test 'src/lib/agent-md/test/**/*.test.mjs'",
     "test:scripts": "node --test 'scripts/**/*.test.mjs'"
   },
   "dependencies": {
@@ -58,7 +59,13 @@
     "lighthouse": "^13.6.0",
     "pa11y-ci": "^5.0.0",
     "puppeteer": "25.16.0",
+    "remark-directive": "^4.0.0",
+    "remark-frontmatter": "^5.0.0",
+    "remark-gfm": "^4.0.1",
+    "remark-mdx": "^3.1.1",
+    "remark-parse": "^11.0.0",
     "typescript": "^6.0.3",
+    "unified": "^11.0.5",
     "yaml": "^2.9.1"
   }
 }

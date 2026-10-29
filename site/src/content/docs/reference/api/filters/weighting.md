@@ -165,7 +165,8 @@ Apply time weighting to a signal (Exponential averaging).
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `fs` is not a single number, `mode` is not a text, or `initial_state` is neither `None`, a text nor numbers (a `bytes`, a text among numbers). |
+| TypeError | if `fs` is not a single number, `mode` is not a text, or `initial_state` is neither `None`, a text nor real numbers (a `bytes`, a text among numbers, a complex value). |
+| ValueError | if `fs` is not positive, or `initial_state` names no starting state, is a ragged nesting or does not broadcast to the input shape without the time axis. |
 
 ## TimeWeightedEnvelope
 

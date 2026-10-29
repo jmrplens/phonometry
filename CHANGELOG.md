@@ -3740,46 +3740,67 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   states it.
 
 - **A choice beside numbers refuses, by name, a text where its numbers go.**
-  Seven public parameters take one of a few words or numbers and read a
-  `str` as the word: the `flow_resistivity` of `aircraft.RotorcraftGround`
-  and of `aircraft.terrain_screening_adjustment`, the `initial_state` of
+  Twelve public parameters take one of a few words or numbers and read a
+  `str` as the word. In eight of them anything else went to the numbers, so
+  a text in another form was parsed, or refused with an error that named
+  nothing: the `flow_resistivity` of `aircraft.RotorcraftGround` and of
+  `aircraft.terrain_screening_adjustment`, the `initial_state` of
   `filters.time_weighting`, the `termination` of
   `materials.layered_absorber` and of `materials.diffuse_field_absorption`,
-  the `coefficients` of `materials.delany_bazley` and the `target` of
-  `room.shaped_sweep_signal`. Anything else went to the numbers, so a text
-  in another form was parsed, or refused with an error that named nothing:
+  the `coefficients` of `materials.delany_bazley`, the `target` of
+  `room.shaped_sweep_signal` and the `speech_spectrum` of
+  `speech.speech_intelligibility_index`.
   `layered_absorber(termination=["400", "400"])` closed the stack with an
   impedance of 400 Pa s/m, `delany_bazley(coefficients=b"12345678")` took
   the codes of the eight characters as C1 to C8 and
   `coefficients=["0.0571"] * 8` the numbers they read as,
   `time_weighting(initial_state=["0.5", "0.5"])` started two channels from
   0.5, `shaped_sweep_signal(target=(["100", "1000"], ["0", "-3"]))` was
-  synthesized, `RotorcraftGround` stored a `bytes`, `None`, a complex value
-  or any other object as given and read `["20000"]` as 20000 Pa s/m², and
-  `terrain_screening_adjustment` answered a `bytes` with numpy's
-  `ValueError` and `None` as a resistivity that is not finite. Each refuses
-  a `bytes`, a `bytearray`, and a sequence or an array that holds a text,
-  with `TypeError` naming the parameter and its options, whatever the text
-  reads as; `None` where it is no option and an object that is no number
-  are a `TypeError` naming the parameter as well, and a `target` of three
-  arrays, whose third was left unread, is a `ValueError`. `RotorcraftGround`
-  refuses them when it is built, and so a single flow resistivity that is
-  not positive and finite, a single ground elevation that is not finite and
-  a text among the elevations or the axes of `terrain`, which an event
-  refused later or not at all. The `coefficients` of `delany_bazley` are
-  annotated as numbers beside the presets, so the list or the array of the
-  eight that the call always took type-checks. A pair of arrays a record
-  holds (the `terrain` axes of `RotorcraftGround`, the curves of
-  `electroacoustics.LoudspeakerDirectivity`,
+  synthesized, `speech_intelligibility_index(["60"] * 18)` read eighteen
+  levels of 60 dB and `b"normal"` failed with a `ValueError` that named
+  nothing, `RotorcraftGround` stored a `bytes`, `None`, a complex value or
+  any other object as given and read `["20000"]` as 20000 Pa s/m², and
+  `terrain_screening_adjustment` answered a `bytes` with the `ValueError` of
+  `float()` and `None` as a resistivity that is not finite. Each refuses a
+  `bytes`, a `bytearray`, and a sequence or an array that holds a text, with
+  `TypeError` naming the parameter and its options, whatever the text reads
+  as; `None` where it is no option and an object that is no number are a
+  `TypeError` naming the parameter as well, and a `target` of three arrays,
+  whose third was left unread, is a `ValueError`. A misspelt vocal effort
+  names `speech_spectrum` rather than a `vocal_effort` the function does not
+  take, and the noise spectrum, threshold and band importance of the speech
+  index refuse a text or a complex value among their numbers by name.
+  `RotorcraftGround` refuses them when it is built, and so a single flow
+  resistivity that is not positive and finite, a single ground elevation
+  that is not finite and a text among the elevations or the axes of
+  `terrain`, which an event refused later or not at all. The `coefficients`
+  of `delany_bazley` are annotated as numbers beside the presets, so the
+  list or the array of the eight that the call always took type-checks, and
+  `speech_spectrum` is annotated as a vocal effort or numbers. A sequence of
+  arrays a record holds (the three terrain axes of `RotorcraftGround`, the
+  curve pairs of `electroacoustics.LoudspeakerDirectivity`,
   `electroacoustics.MicrophoneDirectivity`,
   `electroacoustics.MicrophoneNoise` and
   `electroacoustics.MicrophoneOverload`) refuses a text or a complex value
   among its numbers by name, where numpy parsed the one and dropped the
-  imaginary part of the other. A `str`, a number and an array of numbers
-  work as before. `tests/test_choices_beside_numbers.py` finds every choice
-  beside numbers from its annotation and calls each with a text in every
-  other form, `None` and an object; rule A59 of the contributor guide states
-  it.
+  imaginary part of the other. A `bytearray`, a mapping and a set given
+  whole for such a sequence, or for the coefficients, are refused too,
+  where they were read as the codes of the characters, the keys and the
+  members in no order, and so is a `bytearray` given whole where a pair, a
+  list of labels or a list of indices belongs (the band edges of the
+  electroacoustic results, `band_hz=` of `vibration.single_mode_fit`, the
+  `labels` of `filters.FractionalOctaveBands`, the `microphones` of the IEC
+  61094-8 corrections and `excluded=` of `building.loudest_corner`). One
+  number given as a numpy complex scalar (`np.complex128`, `np.complex64`),
+  which the shared guards read as its real part with no more than a
+  `ComplexWarning`, is a `TypeError` as a Python `complex` was, and so is a
+  complex `initial_state`; a ragged one is a `ValueError`, as a ragged
+  `termination` is. A `str`, a number and an array of numbers work as
+  before. `tests/test_choices_beside_numbers.py` finds every choice beside
+  numbers from its annotation and calls each with a text in every other
+  form, `None` and an object, and reads every body for a `str` taken as a
+  choice that no annotation states; rule A59 of the contributor guide
+  states it.
 
 - **A function of a number or an array of them returns an array for an array,
   a zero-dimensional one included, and says so in its signature.** Ninety

@@ -285,25 +285,7 @@ def ship_source_spectrum(
         ``frequencies`` holds a text or a value that is not a real number, or ``model``
         or ``vessel_class`` is not a text.
     """
-    require_choice(
-        vessel_class,
-        "vessel_class",
-        (
-            "bulker",
-            "containership",
-            "cruise",
-            "dredger",
-            "fishing",
-            "government/research",
-            "naval",
-            "other",
-            "passenger",
-            "recreational",
-            "tanker",
-            "tug",
-            "vehicle carrier",
-        ),
-    )
+    require_choice(vessel_class, "vessel_class", VESSEL_CLASSES)
     f = _clean_frequencies(frequencies)
     key = require_choice(model, "model", _MODELS)
     used_class: VesselClass | None = None

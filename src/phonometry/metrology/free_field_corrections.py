@@ -1631,6 +1631,28 @@ def _repeatability_dof(value: float) -> float:
     return dof
 
 
+def _require_table_i1_components(
+    stated_uncertainties_db: Mapping[TableI1Descriptor, float],
+) -> None:
+    """Check that the stated uncertainties are keyed by the 15 components of
+    IEC 62585 Table I.1, each key as written.
+
+    :raises TypeError: for a key that is not a text.
+    :raises ValueError: for a key the table does not list, or a component
+        left out.
+    """
+    expected = tuple(IEC62585_TABLE_I1)
+    for key in stated_uncertainties_db:
+        require_choice(key, "stated_uncertainties_db", expected)
+    missing = [key for key in expected if key not in stated_uncertainties_db]
+    if missing:
+        msg = (
+            "'stated_uncertainties_db' must hold the 15 components of IEC 62585 Table I.1, keyed "
+            f"'a1' to 'a15'; missing {missing}."
+        )
+        raise ValueError(msg)
+
+
 def correction_uncertainty_budget(
     stated_uncertainties_db: Mapping[TableI1Descriptor, float],
     *,
@@ -1694,20 +1716,7 @@ def correction_uncertainty_budget(
         ``static_pressure_kpa`` is not a single number, or a key of
         ``stated_uncertainties_db`` is not a text.
     """
-    expected = tuple(IEC62585_TABLE_I1)
-    given = tuple(stated_uncertainties_db)
-    missing = [key for key in expected if key not in stated_uncertainties_db]
-    extra = [
-        key for key in given if isinstance(key, str) and key not in IEC62585_TABLE_I1
-    ]
-    if missing or extra:
-        msg = (
-            "'stated_uncertainties_db' must hold the 15 components of IEC 62585 Table I.1, keyed "
-            f"'a1' to 'a15'; missing {missing}, unknown {extra}."
-        )
-        raise ValueError(msg)
-    for key in given:
-        require_choice(key, "stated_uncertainties_db", tuple(IEC62585_TABLE_I1))
+    _require_table_i1_components(stated_uncertainties_db)
     frequency = require_positive(frequency_hz, "frequency_hz")
     dof = _repeatability_dof(repeatability_dof)
     quantities: list[Quantity] = []

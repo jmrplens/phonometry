@@ -170,7 +170,7 @@ from .._internal.validation import (
 from .conformance import ConformanceVerification, verify_conformance
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Mapping, Sequence
+    from collections.abc import Callable, Iterable, Mapping, Sequence
 
     from matplotlib.axes import Axes
 
@@ -1123,6 +1123,20 @@ def _other_ranges_held(rows: Mapping[RangeReading, Sequence[float]]) -> int:
     return len(rows["17.4"]) - _REFERENCE_RANGE_READINGS
 
 
+def _require_keys(
+    table: Iterable[object] | None, name: str, options: tuple[str, ...]
+) -> None:
+    """Check each key of a table of :class:`SoundLevelMeterPeriodicMeasurements`
+    as written, when the table is given.
+
+    :raises TypeError: for a key that is not a text.
+    :raises ValueError: for a text that is not one of *options*.
+    """
+    if table is not None:
+        for key in table:
+            require_choice(key, name, options)
+
+
 @dataclass(frozen=True, kw_only=True)
 class SoundLevelMeterPeriodicMeasurements(RichDisplay):
     r"""What a laboratory measured in the periodic tests of IEC 61672-3:2013.
@@ -1317,67 +1331,64 @@ class SoundLevelMeterPeriodicMeasurements(RichDisplay):
             ``weighting_at_1khz_deviations_db`` or
             ``weighting_at_1khz_uncertainties_db`` is not a text.
         """
-        if self.electrical_self_noise_levels is not None:
-            for weighting in self.electrical_self_noise_levels:
-                require_choice(
-                    weighting, "electrical_self_noise_levels", ("A", "C", "Z")
-                )
-        if self.electrical_weighting_deviations_db is not None:
-            for weighting in self.electrical_weighting_deviations_db:
-                require_choice(
-                    weighting, "electrical_weighting_deviations_db", ("A", "C", "Z")
-                )
-        if self.electrical_weighting_uncertainties_db is not None:
-            for weighting in self.electrical_weighting_uncertainties_db:
-                require_choice(
-                    weighting, "electrical_weighting_uncertainties_db", ("A", "C", "Z")
-                )
-        if (
-            self.electrical_weighting_uncertainties_without_correction_data_db
-            is not None
-        ):
-            for (
-                weighting
-            ) in self.electrical_weighting_uncertainties_without_correction_data_db:
-                require_choice(
-                    weighting,
-                    "electrical_weighting_uncertainties_without_correction_data_db",
-                    ("A", "C", "Z"),
-                )
-        if self.weighting_at_1khz_deviations_db is not None:
-            for versus_a in self.weighting_at_1khz_deviations_db:
-                require_choice(versus_a, "weighting_at_1khz_deviations_db", ("C", "Z"))
-        if self.weighting_at_1khz_uncertainties_db is not None:
-            for versus_a in self.weighting_at_1khz_uncertainties_db:
-                require_choice(
-                    versus_a, "weighting_at_1khz_uncertainties_db", ("C", "Z")
-                )
-        if self.time_weighting_at_1khz_deviations_db is not None:
-            for display in self.time_weighting_at_1khz_deviations_db:
-                require_choice(
-                    display, "time_weighting_at_1khz_deviations_db", ("S", "eq")
-                )
-        if self.time_weighting_at_1khz_uncertainties_db is not None:
-            for display in self.time_weighting_at_1khz_uncertainties_db:
-                require_choice(
-                    display, "time_weighting_at_1khz_uncertainties_db", ("S", "eq")
-                )
-        if self.range_linearity_deviations_db is not None:
-            for reading in self.range_linearity_deviations_db:
-                require_choice(
-                    reading, "range_linearity_deviations_db", ("17.3", "17.4")
-                )
-        if self.range_linearity_uncertainties_db is not None:
-            for reading in self.range_linearity_uncertainties_db:
-                require_choice(
-                    reading, "range_linearity_uncertainties_db", ("17.3", "17.4")
-                )
-        if self.toneburst_responses_db is not None:
-            for response in self.toneburst_responses_db:
-                require_choice(response, "toneburst_responses_db", ("F", "S", "E"))
-        if self.toneburst_uncertainties_db is not None:
-            for response in self.toneburst_uncertainties_db:
-                require_choice(response, "toneburst_uncertainties_db", ("F", "S", "E"))
+        _require_keys(
+            self.electrical_self_noise_levels,
+            "electrical_self_noise_levels",
+            _WEIGHTINGS,
+        )
+        _require_keys(
+            self.electrical_weighting_deviations_db,
+            "electrical_weighting_deviations_db",
+            _WEIGHTINGS,
+        )
+        _require_keys(
+            self.electrical_weighting_uncertainties_db,
+            "electrical_weighting_uncertainties_db",
+            _WEIGHTINGS,
+        )
+        _require_keys(
+            self.electrical_weighting_uncertainties_without_correction_data_db,
+            "electrical_weighting_uncertainties_without_correction_data_db",
+            _WEIGHTINGS,
+        )
+        _require_keys(
+            self.weighting_at_1khz_deviations_db,
+            "weighting_at_1khz_deviations_db",
+            _WEIGHTINGS_VS_A,
+        )
+        _require_keys(
+            self.weighting_at_1khz_uncertainties_db,
+            "weighting_at_1khz_uncertainties_db",
+            _WEIGHTINGS_VS_A,
+        )
+        _require_keys(
+            self.time_weighting_at_1khz_deviations_db,
+            "time_weighting_at_1khz_deviations_db",
+            _TIME_WEIGHTINGS_VS_F,
+        )
+        _require_keys(
+            self.time_weighting_at_1khz_uncertainties_db,
+            "time_weighting_at_1khz_uncertainties_db",
+            _TIME_WEIGHTINGS_VS_F,
+        )
+        _require_keys(
+            self.range_linearity_deviations_db,
+            "range_linearity_deviations_db",
+            _RANGE_READINGS,
+        )
+        _require_keys(
+            self.range_linearity_uncertainties_db,
+            "range_linearity_uncertainties_db",
+            _RANGE_READINGS,
+        )
+        _require_keys(
+            self.toneburst_responses_db, "toneburst_responses_db", _TONEBURST_KEYS
+        )
+        _require_keys(
+            self.toneburst_uncertainties_db,
+            "toneburst_uncertainties_db",
+            _TONEBURST_KEYS,
+        )
         self._freeze_environment()
         self._freeze_scalars()
         self._freeze_rows()

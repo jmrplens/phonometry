@@ -248,6 +248,7 @@ VIBROTACTILE_HEARING_LEVELS: Mapping[float, float] = MappingProxyType(
 )
 
 _PRESENTATIONS: tuple[Presentation, ...] = get_args(Presentation)
+_EARPHONES: tuple[Earphone, ...] = get_args(Earphone)
 _CONDUCTIONS: tuple[Presentation, ...] = ("air", "bone")
 #: The NOTEs to Tables 2 and 4 and footnote a to ISO 8253-2 Table 2: the two
 #: threshold shifts the limits are written for, and what the larger one adds.
@@ -499,8 +500,8 @@ def ambient_noise_limits(
         ``lowest_test_frequency_hz`` is not a single number, or ``earphone`` or
         ``presentation`` is not a text.
     """
-    require_choice(presentation, "presentation", ("air", "bone", "sound field"))
-    require_choice(earphone, "earphone", ("supra-aural", "ER-3A", "HDA 200"))
+    require_choice(presentation, "presentation", _PRESENTATIONS)
+    require_choice(earphone, "earphone", _EARPHONES)
     require_scalar(allowed_threshold_shift_db, "allowed_threshold_shift_db")
     require_scalar(lowest_test_frequency_hz, "lowest_test_frequency_hz")
     table, _bands = _table_for(presentation)
@@ -814,8 +815,8 @@ def check_audiometric_ambient_noise(
         bands.
     :raises TypeError: if ``presentation`` or ``earphone`` is not a text.
     """
-    require_choice(presentation, "presentation", ("air", "bone", "sound field"))
-    require_choice(earphone, "earphone", ("supra-aural", "ER-3A", "HDA 200"))
+    require_choice(presentation, "presentation", _PRESENTATIONS)
+    require_choice(earphone, "earphone", _EARPHONES)
     _table, bands = _table_for(presentation)
     # Validates the tester's choices against the tables before anything else.
     ambient_noise_limits(

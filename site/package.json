@@ -16,6 +16,7 @@
     "check:page-size": "node scripts/check-page-size.mjs",
     "check:redirects": "node scripts/check-redirects.mjs",
     "check:render-spawns": "node scripts/check-render-spawns.mjs",
+    "check:schema-vocabulary": "node scripts/check-schema-vocabulary.mjs",
     "check:search": "node scripts/check-search-designation.mjs",
     "check:sidebar": "node scripts/with-preview.mjs -- node scripts/check-sidebar.mjs",
     "check:social-card-titles": "node scripts/check-social-card-titles.mjs",

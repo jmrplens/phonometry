@@ -32,7 +32,7 @@ Each rule on a page has the same parts:
 - [Docstrings and comments](docstrings.md) (D, C): the module docstring and the document it names, function and class docstrings, the mathematics they carry, comments in the code, and how long a module grows. D rules cover docstrings and modules, C rules cover comments.
 - [Numbers and data](numerics.md) (X): comparing computed values, validating what a caller passes, the arrays a result keeps, units, references and precision, the data the package publishes, and the fields an FDTD engine steps.
 - [Tests](tests.md) (T): where a test lives, where an expected value comes from, how a test waits on an error or a warning, the data the repository keeps, guards and their exemptions, conformance rows, the workflows under `.github/`, and what the pytest configuration may import.
-- [Documentation and figures](docs-and-figures.md) (F): the guides, their Spanish twins and the `docs/` mirror, code fences, figures and the `.plot()` code that draws them, records in a notebook, the catalogues pages, the errata register, the frames of a clip and the device its field steps on, the install commands a page prints, the description of each page and its size, and the processes a page may start.
+- [Documentation and figures](docs-and-figures.md) (F): the guides, their Spanish twins and the `docs/` mirror, code fences, figures and the `.plot()` code that draws them, records in a notebook, the catalogues pages, the errata register, the frames of a clip and the device its field steps on, the install commands a page prints, the description of each page and its size, the processes a page may start and the schema.org vocabulary of its structured data.
 - [Prose, commits and pull requests](prose.md) (P): the language of each surface, the characters a text may hold, citing a page, the CHANGELOG, commit messages and pull request text.
 
 ## Rules
@@ -304,6 +304,7 @@ Each rule on a page has the same parts:
 | [F65](docs-and-figures.md#f65) | Read a page's inline code spans through `scripts/markdown_spans.py`, never with a pattern of your own | `scripts/check_span_readers.py`, `make span-readers`, `CI: Every script reads an inline code span the one way`, `tests/test_check_span_readers.py` |
 | [F66](docs-and-figures.md#f66) | Start a process from the site's source once per build, never once per page | `site/scripts/check-render-spawns.mjs`, `CI: Check the pages start no process of their own`, `site/scripts/check-render-spawns.test.mjs`, `site/scripts/page-dates.test.mjs`, `CI: Test the build checks on small builds made to fail them` |
 | [F67](docs-and-figures.md#f67) | Write beside a print what it writes: its values first, in their order | `scripts/check_doc_snippets.py`, `make snippets`, `CI: Documentation snippets run`, `tests/test_check_doc_snippets.py` |
+| [F68](docs-and-figures.md#f68) | Give a JSON-LD property only to a type schema.org allows it on, and only a value of a type it allows | `site/scripts/check-schema-vocabulary.mjs`, `CI: Check the structured data against the schema.org vocabulary`, `site/scripts/check-schema-vocabulary.test.mjs`, `CI: Test the build checks on small builds made to fail them` |
 
 ### Prose, commits and pull requests
 

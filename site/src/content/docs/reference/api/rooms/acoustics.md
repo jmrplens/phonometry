@@ -134,7 +134,7 @@ filter_bandwidth(
 ) -> float
 
 filter_bandwidth(
-    center: Sequence[float] | NDArray[Any],
+    center: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
     fraction: int = 1,
 ) -> NDArray[np.float64]
 
@@ -207,7 +207,7 @@ min_reliable_reverberation_time(
 ) -> float
 
 min_reliable_reverberation_time(
-    bandwidth: Sequence[float] | NDArray[Any],
+    bandwidth: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
     detector_time: float = 0.0,
 ) -> NDArray[np.float64]
 

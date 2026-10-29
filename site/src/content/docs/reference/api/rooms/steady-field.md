@@ -89,7 +89,7 @@ critical_distance(
 ) -> float
 
 critical_distance(
-    room_constant: Sequence[float] | NDArray[Any],
+    room_constant: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
     *,
     directivity: ArrayLike = ...,
 ) -> NDArray[np.float64]
@@ -97,7 +97,7 @@ critical_distance(
 critical_distance(
     room_constant: float | np.floating[Any] | np.integer[Any],
     *,
-    directivity: Sequence[float] | NDArray[Any],
+    directivity: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
 ) -> NDArray[np.float64]
 
 critical_distance(
@@ -114,14 +114,14 @@ critical_distance(
 
 critical_distance(
     *,
-    absorption_area: Sequence[float] | NDArray[Any],
+    absorption_area: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
     directivity: ArrayLike = ...,
 ) -> NDArray[np.float64]
 
 critical_distance(
     *,
     absorption_area: float | np.floating[Any] | np.integer[Any],
-    directivity: Sequence[float] | NDArray[Any],
+    directivity: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
 ) -> NDArray[np.float64]
 
 critical_distance(
@@ -171,7 +171,7 @@ room_constant(
 
 room_constant(
     surface_area: float,
-    mean_absorption: Sequence[float] | NDArray[Any],
+    mean_absorption: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
 ) -> NDArray[np.float64]
 
 room_constant(
@@ -210,7 +210,7 @@ sabine_absorption_area(
 
 sabine_absorption_area(
     volume: float,
-    reverberation_time: Sequence[float] | NDArray[Any],
+    reverberation_time: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
     *,
     speed_of_sound: float = 343.0,
 ) -> NDArray[np.float64]
@@ -263,7 +263,7 @@ schroeder_frequency(
 ) -> float
 
 schroeder_frequency(
-    reverberation_time: Sequence[float] | NDArray[Any],
+    reverberation_time: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
     volume: float,
 ) -> NDArray[np.float64]
 

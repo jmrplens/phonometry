@@ -79,7 +79,7 @@ apparent_dynamic_stiffness(
 ) -> float
 
 apparent_dynamic_stiffness(
-    resonant_frequency_hz: Sequence[float] | NDArray[Any],
+    resonant_frequency_hz: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
     total_mass_per_area_kg_m2: float,
 ) -> NDArray[np.float64]
 
@@ -219,7 +219,7 @@ enclosed_gas_stiffness(
 ) -> float
 
 enclosed_gas_stiffness(
-    thickness_m: Sequence[float] | NDArray[Any],
+    thickness_m: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
     porosity: float,
     *,
     static_pressure_pa: float = 100000.0,
@@ -361,7 +361,7 @@ natural_frequency(
 ) -> float
 
 natural_frequency(
-    dynamic_stiffness_n_m3: Sequence[float] | NDArray[Any],
+    dynamic_stiffness_n_m3: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
     mass_per_area_kg_m2: float,
 ) -> NDArray[np.float64]
 

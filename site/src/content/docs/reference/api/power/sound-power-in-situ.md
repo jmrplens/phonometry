@@ -96,21 +96,21 @@ excess_sound_pressure_level(
 ) -> float
 
 excess_sound_pressure_level(
-    level: Sequence[float] | NDArray[Any],
+    level: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
     reference_sound_power_levels: ArrayLike,
     distance: ArrayLike,
 ) -> NDArray[np.float64]
 
 excess_sound_pressure_level(
     level: float | np.floating[Any] | np.integer[Any],
-    reference_sound_power_levels: Sequence[float] | NDArray[Any],
+    reference_sound_power_levels: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
     distance: ArrayLike,
 ) -> NDArray[np.float64]
 
 excess_sound_pressure_level(
     level: float | np.floating[Any] | np.integer[Any],
     reference_sound_power_levels: float | np.floating[Any] | np.integer[Any],
-    distance: Sequence[float] | NDArray[Any],
+    distance: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
 ) -> NDArray[np.float64]
 
 excess_sound_pressure_level(

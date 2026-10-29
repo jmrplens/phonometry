@@ -192,7 +192,7 @@ injury_probability(
 ) -> float
 
 injury_probability(
-    risk: Sequence[float] | NDArray[Any],
+    risk: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
     *,
     sex: Literal['male', 'female'] = 'male',
 ) -> NDArray[np.float64]

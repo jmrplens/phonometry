@@ -198,7 +198,7 @@ precision_uncertainty(
 ) -> float
 
 precision_uncertainty(
-    sigma_r0: Sequence[float] | NDArray[Any],
+    sigma_r0: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
     sigma_omc_db: float = 0.0,
     coverage_factor: float = 2.0,
 ) -> NDArray[np.float64]

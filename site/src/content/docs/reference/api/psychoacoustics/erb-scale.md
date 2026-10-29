@@ -74,7 +74,7 @@ cam_from_frequency(
 ) -> float
 
 cam_from_frequency(
-    frequency: Sequence[float] | NDArray[Any],
+    frequency: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
 ) -> NDArray[np.float64]
 
 cam_from_frequency(frequency: ArrayLike) -> float | NDArray[np.float64]
@@ -103,7 +103,7 @@ erb_bandwidth(
 ) -> float
 
 erb_bandwidth(
-    frequency: Sequence[float] | NDArray[Any],
+    frequency: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
 ) -> NDArray[np.float64]
 
 erb_bandwidth(frequency: ArrayLike) -> float | NDArray[np.float64]
@@ -145,7 +145,7 @@ ERB_C2_PER_HZ = 0.004368
 frequency_from_cam(cam: float | np.floating[Any] | np.integer[Any]) -> float
 
 frequency_from_cam(
-    cam: Sequence[float] | NDArray[Any],
+    cam: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
 ) -> NDArray[np.float64]
 
 frequency_from_cam(cam: ArrayLike) -> float | NDArray[np.float64]

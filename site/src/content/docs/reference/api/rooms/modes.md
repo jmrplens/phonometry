@@ -82,7 +82,7 @@ room_modal_density(
 room_modal_density(
     dimensions: ArrayLike,
     *,
-    frequency: Sequence[float] | NDArray[Any],
+    frequency: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
     speed_of_sound: float = 343.0,
 ) -> NDArray[np.float64]
 
@@ -133,7 +133,7 @@ room_mode_count(
 room_mode_count(
     dimensions: ArrayLike,
     *,
-    frequency: Sequence[float] | NDArray[Any],
+    frequency: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
     speed_of_sound: float = 343.0,
 ) -> NDArray[np.float64]
 
@@ -287,7 +287,7 @@ RoomModesResult.density(
 ) -> float
 
 RoomModesResult.density(
-    frequency: Sequence[float] | NDArray[Any],
+    frequency: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
 ) -> NDArray[np.float64]
 
 RoomModesResult.density(frequency: ArrayLike) -> float | NDArray[np.float64]

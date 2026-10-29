@@ -55,13 +55,13 @@ channel_weight(
 ) -> float
 
 channel_weight(
-    azimuth: Sequence[float] | NDArray[Any],
+    azimuth: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
     elevation: ArrayLike = ...,
 ) -> NDArray[np.float64]
 
 channel_weight(
     azimuth: float | np.floating[Any] | np.integer[Any],
-    elevation: Sequence[float] | NDArray[Any],
+    elevation: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
 ) -> NDArray[np.float64]
 
 channel_weight(

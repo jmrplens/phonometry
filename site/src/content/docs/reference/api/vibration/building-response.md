@@ -280,7 +280,7 @@ height_fundamental_frequency(
 ) -> float
 
 height_fundamental_frequency(
-    height_m: Sequence[float] | NDArray[Any],
+    height_m: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
 ) -> NDArray[np.float64]
 
 height_fundamental_frequency(

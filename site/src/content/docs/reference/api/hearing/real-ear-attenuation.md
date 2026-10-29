@@ -289,7 +289,7 @@ min_significant_difference(
 ) -> float
 
 min_significant_difference(
-    expanded_uncertainty_db: Sequence[float] | NDArray[Any],
+    expanded_uncertainty_db: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
 ) -> NDArray[np.float64]
 
 min_significant_difference(

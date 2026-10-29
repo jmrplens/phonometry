@@ -119,7 +119,7 @@ bending_stress(
 ) -> float
 
 bending_stress(
-    peak_velocity_m_s: Sequence[float] | NDArray[Any],
+    peak_velocity_m_s: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
     *,
     dynamic_modulus_pa: float,
     density: float,
@@ -341,7 +341,7 @@ guideline_velocity(
 
 guideline_velocity(
     building_class: Literal['commercial', 'residential', 'sensitive'],
-    frequency: Sequence[float] | NDArray[Any],
+    frequency: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
     *,
     location: Literal['foundation', 'top_floor'] = 'foundation',
     duration: Literal['short_term', 'long_term'] = 'short_term',

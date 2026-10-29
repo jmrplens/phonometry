@@ -307,7 +307,7 @@ free_field_reference_level(
 ) -> float
 
 free_field_reference_level(
-    level: Sequence[float] | NDArray[Any],
+    level: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
     distance: float,
 ) -> NDArray[np.float64]
 
@@ -764,7 +764,7 @@ min_receiver_positions(
 ) -> float
 
 min_receiver_positions(
-    seats: Sequence[float] | NDArray[Any],
+    seats: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
 ) -> NDArray[np.float64]
 
 min_receiver_positions(seats: ArrayLike) -> float | NDArray[np.float64]
@@ -927,13 +927,13 @@ reverberation_room_reference_level(
 ) -> float
 
 reverberation_room_reference_level(
-    reverberation_room_level: Sequence[float] | NDArray[Any],
+    reverberation_room_level: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
     absorption_area: ArrayLike,
 ) -> NDArray[np.float64]
 
 reverberation_room_reference_level(
     reverberation_room_level: float | np.floating[Any] | np.integer[Any],
-    absorption_area: Sequence[float] | NDArray[Any],
+    absorption_area: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
 ) -> NDArray[np.float64]
 
 reverberation_room_reference_level(
@@ -1159,13 +1159,13 @@ sound_strength_from_power(
 ) -> float
 
 sound_strength_from_power(
-    pressure_level: Sequence[float] | NDArray[Any],
+    pressure_level: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
     power_level: ArrayLike,
 ) -> NDArray[np.float64]
 
 sound_strength_from_power(
     pressure_level: float | np.floating[Any] | np.integer[Any],
-    power_level: Sequence[float] | NDArray[Any],
+    power_level: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
 ) -> NDArray[np.float64]
 
 sound_strength_from_power(

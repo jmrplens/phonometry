@@ -87,13 +87,13 @@ piston_directivity(
 ) -> float
 
 piston_directivity(
-    ka: Sequence[float] | NDArray[Any],
+    ka: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
     theta: ArrayLike,
 ) -> NDArray[np.float64]
 
 piston_directivity(
     ka: float | np.floating[Any] | np.integer[Any],
-    theta: Sequence[float] | NDArray[Any],
+    theta: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
 ) -> NDArray[np.float64]
 
 piston_directivity(
@@ -150,7 +150,9 @@ the first zero of `J1` ($ka \sin\theta = 3.8317$).
 ```python
 piston_reactance(x: float | np.floating[Any] | np.integer[Any]) -> float
 
-piston_reactance(x: Sequence[float] | NDArray[Any]) -> NDArray[np.float64]
+piston_reactance(
+    x: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+) -> NDArray[np.float64]
 
 piston_reactance(x: ArrayLike) -> float | NDArray[np.float64]
 ```
@@ -176,7 +178,9 @@ at high `x`.
 ```python
 piston_resistance(x: float | np.floating[Any] | np.integer[Any]) -> float
 
-piston_resistance(x: Sequence[float] | NDArray[Any]) -> NDArray[np.float64]
+piston_resistance(
+    x: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+) -> NDArray[np.float64]
 
 piston_resistance(x: ArrayLike) -> float | NDArray[np.float64]
 ```

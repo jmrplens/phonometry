@@ -42,7 +42,7 @@ air_absorption_area(
 ) -> float
 
 air_absorption_area(
-    m: Sequence[float] | NDArray[Any],
+    m: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
     volume: float,
     object_fraction: float = 0.0,
 ) -> NDArray[np.float64]
@@ -184,7 +184,7 @@ reverberation_time(
 ) -> float
 
 reverberation_time(
-    absorption_area: Sequence[float] | NDArray[Any],
+    absorption_area: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
     volume: float,
     *,
     object_fraction: float = 0.0,

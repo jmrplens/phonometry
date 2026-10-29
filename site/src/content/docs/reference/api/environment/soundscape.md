@@ -120,7 +120,7 @@ method_a_scale_values(
 ) -> float
 
 method_a_scale_values(
-    positions: Sequence[float] | NDArray[Any],
+    positions: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
     *,
     part: int,
 ) -> NDArray[np.float64]
@@ -205,7 +205,7 @@ method_b_scale_values(
 ) -> float
 
 method_b_scale_values(
-    marked_fraction: Sequence[float] | NDArray[Any],
+    marked_fraction: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
 ) -> NDArray[np.float64]
 
 method_b_scale_values(

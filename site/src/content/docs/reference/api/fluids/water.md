@@ -198,7 +198,7 @@ sea_water_sound_speed(
 ) -> float
 
 sea_water_sound_speed(
-    temperature_c: Sequence[float] | NDArray[Any],
+    temperature_c: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
     salinity_psu: ArrayLike,
     depth_m: ArrayLike,
     *,
@@ -208,7 +208,7 @@ sea_water_sound_speed(
 
 sea_water_sound_speed(
     temperature_c: float | np.floating[Any] | np.integer[Any],
-    salinity_psu: Sequence[float] | NDArray[Any],
+    salinity_psu: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
     depth_m: ArrayLike,
     *,
     model: Literal['unesco', 'del_grosso', 'mackenzie', 'medwin'] = 'unesco',
@@ -218,7 +218,7 @@ sea_water_sound_speed(
 sea_water_sound_speed(
     temperature_c: float | np.floating[Any] | np.integer[Any],
     salinity_psu: float | np.floating[Any] | np.integer[Any],
-    depth_m: Sequence[float] | NDArray[Any],
+    depth_m: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
     *,
     model: Literal['unesco', 'del_grosso', 'mackenzie', 'medwin'] = 'unesco',
     latitude_deg: float = 45.0,

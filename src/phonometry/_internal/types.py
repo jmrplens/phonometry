@@ -31,10 +31,18 @@ Real = NDArray[np.float64]
 #: returns a Python ``float`` for it.
 RealScalar = float | np.floating[Any] | np.integer[Any]
 
-#: Several real numbers: a sequence of them, or a numpy array of any shape, a
-#: zero-dimensional one included. A function that takes a number or an array
-#: of them returns an array for it.
-RealValues = Sequence[float] | NDArray[Any]
+#: Several real numbers: a sequence of them, Python or numpy ones (a list of
+#: ``np.float32`` is no ``Sequence[float]`` to a type checker), or a numpy
+#: array of any shape, a zero-dimensional one included. A function that takes
+#: a number or an array of them returns an array for it. A list that mixes
+#: Python and numpy numbers is no ``ArrayLike`` to numpy's own stubs, so it
+#: is left out here too and reads as the union.
+RealValues = (
+    Sequence[float]
+    | Sequence[np.floating[Any]]
+    | Sequence[np.integer[Any]]
+    | NDArray[Any]
+)
 
 #: The band set of a spectrum, as every public ``fraction`` writes it: 1 for
 #: octaves, 3 for one-third octaves (the denominator ``b`` of the IEC 61260-1

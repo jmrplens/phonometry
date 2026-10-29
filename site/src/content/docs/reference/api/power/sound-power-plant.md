@@ -381,7 +381,7 @@ plant_background_correction(
 ) -> float
 
 plant_background_correction(
-    level_difference: Sequence[float] | NDArray[Any],
+    level_difference: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
 ) -> NDArray[np.float64]
 
 plant_background_correction(

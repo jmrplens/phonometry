@@ -92,7 +92,7 @@ absorption_per_table(
 ) -> float
 
 absorption_per_table(
-    distance: Sequence[float] | NDArray[Any],
+    distance: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
     speech_to_noise: float,
     *,
     directivity: float = 2.0,
@@ -185,7 +185,7 @@ crowd_noise_level(
 ) -> float
 
 crowd_noise_level(
-    talkers: Sequence[float] | NDArray[Any],
+    talkers: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
     absorption_area: ArrayLike,
     *,
     sound_power_level: float = 70.0,
@@ -193,7 +193,7 @@ crowd_noise_level(
 
 crowd_noise_level(
     talkers: float | np.floating[Any] | np.integer[Any],
-    absorption_area: Sequence[float] | NDArray[Any],
+    absorption_area: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
     *,
     sound_power_level: float = 70.0,
 ) -> NDArray[np.float64]
@@ -307,7 +307,7 @@ speech_direct_level(
 ) -> float
 
 speech_direct_level(
-    distance: Sequence[float] | NDArray[Any],
+    distance: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
     *,
     sound_power_level: float = 70.0,
     directivity: float = 2.0,
@@ -353,7 +353,7 @@ speech_to_noise_ratio(
 ) -> float
 
 speech_to_noise_ratio(
-    distance: Sequence[float] | NDArray[Any],
+    distance: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
     absorption_per_table: ArrayLike,
     *,
     directivity: float = 2.0,
@@ -361,7 +361,7 @@ speech_to_noise_ratio(
 
 speech_to_noise_ratio(
     distance: float | np.floating[Any] | np.integer[Any],
-    absorption_per_table: Sequence[float] | NDArray[Any],
+    absorption_per_table: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
     *,
     directivity: float = 2.0,
 ) -> NDArray[np.float64]

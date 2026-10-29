@@ -137,7 +137,7 @@ environmental_correction(
 environmental_correction(
     surface_area: float,
     *,
-    absorption_area: Sequence[float] | NDArray[Any],
+    absorption_area: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
     reverberation_time: ArrayLike | None = None,
     volume: float | None = None,
     mean_absorption_coefficient: ArrayLike | None = None,
@@ -148,7 +148,7 @@ environmental_correction(
     surface_area: float,
     *,
     absorption_area: None = None,
-    reverberation_time: Sequence[float] | NDArray[Any],
+    reverberation_time: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
     volume: float | None = None,
     mean_absorption_coefficient: ArrayLike | None = None,
     room_surface: float | None = None,
@@ -160,7 +160,7 @@ environmental_correction(
     absorption_area: None = None,
     reverberation_time: None = None,
     volume: float | None = None,
-    mean_absorption_coefficient: Sequence[float] | NDArray[Any],
+    mean_absorption_coefficient: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
     room_surface: float | None = None,
 ) -> NDArray[np.float64]
 

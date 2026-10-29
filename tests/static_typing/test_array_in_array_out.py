@@ -52,6 +52,8 @@ def test_arrays_read_as_an_array() -> None:
     assert_type(room.room_constant(100.0, _ANY_SHAPE), NDArray[np.float64])
     assert_type(room.room_constant(100.0, np.array(0.2)), NDArray[np.float64])
     assert_type(room.room_constant(100.0, np.array([0.2, 0.3])), NDArray[np.float64])
+    assert_type(room.room_constant(100.0, [np.float32(0.2)]), NDArray[np.float64])
+    assert_type(room.schroeder_frequency([np.int64(1)], 100.0), NDArray[np.float64])
 
 
 def test_what_mypy_cannot_shape_reads_as_the_union() -> None:

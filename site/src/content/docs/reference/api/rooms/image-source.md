@@ -271,7 +271,7 @@ reflection_density(
 ) -> float
 
 reflection_density(
-    time: Sequence[float] | NDArray[Any],
+    time: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
     volume: float,
     *,
     speed_of_sound: float = 343.0,

@@ -180,13 +180,13 @@ background_level_increase(
 ) -> float
 
 background_level_increase(
-    measured_level: Sequence[float] | NDArray[Any],
+    measured_level: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
     background_level: ArrayLike,
 ) -> NDArray[np.float64]
 
 background_level_increase(
     measured_level: float | np.floating[Any] | np.integer[Any],
-    background_level: Sequence[float] | NDArray[Any],
+    background_level: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
 ) -> NDArray[np.float64]
 
 background_level_increase(

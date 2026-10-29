@@ -28,10 +28,12 @@ ones included, because a public method returns what its renderer returns:
 * a return annotation that is a union of a single value (``float``,
   ``int``, ``complex``, ``bool``, ``str``, a numpy scalar or a ``Literal``)
   with a numpy array is allowed on an implementation only when overloads
-  stand before it, and on an overload head only when the function's other
-  heads say both cases apart, one returning the single value alone and one
-  the array alone, so that the union head is the one left for the inputs
-  whose shape a type checker cannot know;
+  stand before it that return the value and the array between them, and on
+  an overload head only when the function's other heads say both cases
+  apart, one returning the single value alone and one the array alone, so
+  that the union head is the one left for the inputs whose shape a type
+  checker cannot know (mypy's ``overload-cannot-match`` keeps it behind the
+  heads it would otherwise shadow);
 * a function that reaches a polar axes, by making one (``projection="polar"``
   in a call or in a ``subplot_kw`` mapping, ``polar=True``, or either of them
   computed, which may be polar), by calling a
@@ -1061,8 +1063,16 @@ def tells_a_value_from_an_array(package: Package, function: Function) -> bool:
 def _scalar_findings(package: Package, function: Function, path: str) -> list[Finding]:
     """A single value or an array, where an overload should say which.
 
-    The union is the implementation's, and the last-resort head's when the
-    other heads tell the two cases apart; anywhere else it is a finding.
+    The union is the implementation's, and a last-resort head's when the
+    other heads tell the two cases apart; anywhere else it is a finding. An
+    implementation that returns the union needs heads that return each case
+    between them: a type checker reads only the heads, so heads that never
+    return the array refuse every caller who hands one in. Where the
+    last-resort head stands among the heads is left to mypy: ahead of the
+    heads it would shadow, it is an ``overload-cannot-match`` error, and a
+    function overloaded on two routes (``critical_distance`` takes
+    ``room_constant`` or ``absorption_area``) has one such head per route,
+    so it is not always the last.
     """
     module = function.module
     shapes = [package.values(module, head.returns) for head in function.heads]
@@ -1082,17 +1092,30 @@ def _scalar_findings(package: Package, function: Function, path: str) -> list[Fi
                 )
             )
     implementation = function.implementation
-    if implementation is None or implementation.returns is None or function.heads:
+    if implementation is None or implementation.returns is None:
         return found
     single, several = package.values(module, implementation.returns)
-    if single and several:
+    if not (single and several):
+        return found
+    returns = ast.unparse(implementation.returns)
+    if not function.heads:
         found.append(
             Finding(
                 path,
                 implementation.lineno,
                 function.qualname,
-                f"returns {ast.unparse(implementation.returns)}, and no overload "
-                "says which argument decides between the value and the array",
+                f"returns {returns}, and no overload says which argument "
+                "decides between the value and the array",
+            )
+        )
+    elif not (any(value for value, _ in shapes) and any(array for _, array in shapes)):
+        missing = "the array" if any(value for value, _ in shapes) else "the value"
+        found.append(
+            Finding(
+                path,
+                implementation.lineno,
+                function.qualname,
+                f"returns {returns}, and no overload head returns {missing}",
             )
         )
     return found

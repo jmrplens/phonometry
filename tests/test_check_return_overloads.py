@@ -829,6 +829,43 @@ def test_heads_that_leave_one_case_unsaid_are_refused(
     )
 
 
+@pytest.mark.parametrize(
+    ("heads", "missing"),
+    [
+        (
+            """
+            @overload
+            def level[S: float](x: S) -> float: ...
+            """,
+            "the array",
+        ),
+        (
+            """
+            @overload
+            def level[V: list[float]](x: V) -> NDArray[np.float64]: ...
+            """,
+            "the value",
+        ),
+    ],
+)
+def test_heads_that_never_return_one_case_leave_the_union_refused(
+    tmp_path: pathlib.Path, heads: str, missing: str
+) -> None:
+    """A type checker reads only the heads: a float head alone refuses every array."""
+    refused = _refused(
+        tmp_path,
+        levels=textwrap.dedent(heads)
+        + """
+def level(x: object) -> float | NDArray[np.float64]:
+    raise NotImplementedError
+""",
+    )
+    assert refused == {
+        "level": f"returns float | NDArray[np.float64], and no overload head "
+        f"returns {missing}"
+    }
+
+
 def test_heads_overloaded_on_something_else_still_need_both_cases(
     tmp_path: pathlib.Path,
 ) -> None:

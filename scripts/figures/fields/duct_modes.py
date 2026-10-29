@@ -117,8 +117,8 @@ def _duct_cut_on_fields() -> tuple[Any, Any, Any, Any, Any, tuple[float, float]]
     times = np.zeros(0)
     for f in _DUCT_FREQS:
         sim = FDTD2D(
-            c0,
-            dx,
+            c=c0,
+            dx=dx,
             shape=(ny, nx),
             absorbing_layer_cells=_DUCT_SPONGE,
             absorbing_sides=("right",),

@@ -757,7 +757,7 @@ def test_the_engines_name_their_methods_and_lengths_as_the_runs_do() -> None:
 
 def test_the_contour_probe_counts_its_samples_by_n_samples() -> None:
     """``ContourProbe.samples`` read as the sample values; it was a count."""
-    engine = ph.simulation.FDTD2D(343.0, 0.05, shape=(12, 12))
+    engine = ph.simulation.FDTD2D(c=343.0, dx=0.05, shape=(12, 12))
     probe = engine.add_contour_probe(3, 8, 3, 8, frequencies=[500.0])
     assert not hasattr(probe, "samples")
     assert probe.n_samples == 0

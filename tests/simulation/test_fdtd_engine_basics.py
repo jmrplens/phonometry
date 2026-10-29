@@ -19,7 +19,7 @@ from phonometry.simulation.fdtd import FDTD2D, CWSource, GaussianPulse
 def _pulse_box(absorbing_layer_cells: int) -> FDTD2D:
     """A homogeneous box with a centred Gaussian pulse (odd grid)."""
     sim = FDTD2D(
-        343.0, 0.05, shape=(81, 101), absorbing_layer_cells=absorbing_layer_cells
+        c=343.0, dx=0.05, shape=(81, 101), absorbing_layer_cells=absorbing_layer_cells
     )
     sim.add_source(GaussianPulse(ix=50, iy=40, half_width_s=6 * sim.dt))
     return sim
@@ -57,7 +57,7 @@ def test_heterogeneous_speed_refracts_faster() -> None:
     ny, nx = 81, 161
     c = np.full((ny, nx), 200.0)
     c[:, nx // 2 :] = 400.0
-    sim = FDTD2D(c, 0.05)
+    sim = FDTD2D(c=c, dx=0.05)
     sim.add_source(GaussianPulse(ix=nx // 2, iy=ny // 2, half_width_s=6 * sim.dt))
     sim.run(150)
     row = np.abs(sim.p[ny // 2])
@@ -69,7 +69,7 @@ def test_heterogeneous_speed_refracts_faster() -> None:
 
 def test_scalar_c_requires_shape() -> None:
     with pytest.raises(ValueError, match="shape is required"):
-        FDTD2D(343.0, 0.05)
+        FDTD2D(c=343.0, dx=0.05)
 
 
 @pytest.mark.parametrize(
@@ -119,7 +119,7 @@ def test_constructor_rejects_invalid_arguments(
     c = full.pop("c")
     dx = full.pop("dx")
     with pytest.raises(ValueError, match=match):
-        FDTD2D(c, dx, **full)  # type: ignore[arg-type]
+        FDTD2D(c=c, dx=dx, **full)  # type: ignore[arg-type]
 
 
 @pytest.mark.parametrize(
@@ -142,18 +142,22 @@ def test_constructor_rejects_arguments_of_the_wrong_type(
     c = full.pop("c")
     dx = full.pop("dx")
     with pytest.raises(TypeError, match=match):
-        FDTD2D(c, dx, **full)  # type: ignore[arg-type]
+        FDTD2D(c=c, dx=dx, **full)  # type: ignore[arg-type]
 
 
 def test_a_whole_float_grid_shape_is_taken_as_its_counts() -> None:
-    sim = FDTD2D(343.0, 0.05, shape=(10.0, 12))  # type: ignore[arg-type]
+    sim = FDTD2D(c=343.0, dx=0.05, shape=(10.0, 12))  # type: ignore[arg-type]
     assert sim.c.shape == (10, 12)
 
 
 def test_absorbing_sides_accepts_a_bare_string() -> None:
     # A single side name must mean that side, not its individual characters.
     sim = FDTD2D(
-        343.0, 0.05, shape=(20, 20), absorbing_layer_cells=5, absorbing_sides="left"
+        c=343.0,
+        dx=0.05,
+        shape=(20, 20),
+        absorbing_layer_cells=5,
+        absorbing_sides="left",
     )
     assert float(sim._decay_p[10, 0]) < 1.0  # left edge absorbs
     assert float(sim._decay_p[10, -1]) == 1.0  # right edge stays rigid
@@ -211,6 +215,6 @@ def test_run_rejects_invalid_recording_controls(
     kwargs: dict[str, int],
     match: str,
 ) -> None:
-    sim = FDTD2D(343.0, 0.05, shape=(10, 10))
+    sim = FDTD2D(c=343.0, dx=0.05, shape=(10, 10))
     with pytest.raises(ValueError, match=match):
         sim.run(**kwargs)

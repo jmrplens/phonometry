@@ -1489,9 +1489,9 @@ class FDTD2D:
 
     def __init__(
         self,
+        *,
         c: ArrayLike,
         dx: float,
-        *,
         rho: ArrayLike = 1.2,
         cfl: float = 0.6,
         absorbing_layer_cells: int | np.integer[Any] = 0,
@@ -2565,8 +2565,8 @@ def _acoustic_engine(run: FDTDRun, compute: Compute | None) -> FDTD2D:
     """
     checks = run._checked
     sim = FDTD2D(
-        run.c,
-        run.dx,
+        c=run.c,
+        dx=run.dx,
         rho=run.rho,
         cfl=run.cfl,
         absorbing_layer_cells=checks.absorbing_layer_cells,

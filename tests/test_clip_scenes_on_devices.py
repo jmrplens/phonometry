@@ -1142,10 +1142,10 @@ def test_every_engine_a_figure_builds_is_told_where_to_step(path: pathlib.Path) 
 def test_an_engine_built_without_a_placement_is_seen() -> None:
     source = """
 def poster(cp, cs, dx):
-    a = FDTD2D(343.0, 0.01, shape=(3, 8)).dt
-    b = fdtd2d.FDTD2D(343.0, 0.01, shape=(3, 8))
-    c = simulation.ElasticFDTD2D(cp, cs, dx)
-    d = FDTD2D(343.0, 0.01, shape=(3, 8), compute=Compute()).dt
+    a = FDTD2D(c=343.0, dx=0.01, shape=(3, 8)).dt
+    b = fdtd2d.FDTD2D(c=343.0, dx=0.01, shape=(3, 8))
+    c = simulation.ElasticFDTD2D(c_p=cp, c_s=cs, dx=dx)
+    d = FDTD2D(c=343.0, dx=0.01, shape=(3, 8), compute=Compute()).dt
     e = simulation.fdtd_simulation(run)
     f = simulation.fdtd_simulation(run, compute=Compute())
     g = simulation.write_elastic_fdtd_animation("x.webm", elastic_run)

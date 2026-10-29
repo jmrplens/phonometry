@@ -68,8 +68,8 @@ def engines(monkeypatch: pytest.MonkeyPatch) -> list[ElasticFDTD2D]:
     """Every elastic engine a writer builds, in order (they are built in elastic_fdtd._elastic_engine)."""
     built: list[ElasticFDTD2D] = []
 
-    def counted(*args: Any, **kwargs: Any) -> ElasticFDTD2D:
-        sim = ElasticFDTD2D(*args, **kwargs)
+    def counted(**kwargs: Any) -> ElasticFDTD2D:
+        sim = ElasticFDTD2D(**kwargs)
         built.append(sim)
         return sim
 
@@ -230,7 +230,9 @@ def test_a_field_that_never_leaves_the_sources_has_nothing_to_scale_by(
     # One step: the engine has written only the cells the sources drive, a
     # force of either direction included, so the first pass finds nothing.
     fake = fake_ffmpeg.install(tmp_path, monkeypatch)
-    one_step = ElasticFDTD2D(4000.0, 2300.0, 0.01, rho=2500.0, shape=(30, 40)).dt
+    one_step = ElasticFDTD2D(
+        c_p=4000.0, c_s=2300.0, dx=0.01, rho=2500.0, shape=(30, 40)
+    ).dt
     recording = ElasticRecording(snapshot_every=1, snapshot_field=field)
     sources = [
         ExplosionSource(ix=20, iy=15, waveform=_PULSE.value),

@@ -204,7 +204,12 @@ def _radiation_efficiency_fields() -> tuple[Any, Any, Any, Any, Any]:
         c_s[r0 : r0 + _RE_PLATE_ROWS] = _EL_CS * _EC_CB_TUNE
         rho[r0 : r0 + _RE_PLATE_ROWS] = _EL_RHO
         sim = simulation.ElasticFDTD2D(
-            c_p, c_s, dx, rho=rho, absorbing_layer_cells=_RE_SPONGE, compute=compute
+            c_p=c_p,
+            c_s=c_s,
+            dx=dx,
+            rho=rho,
+            absorbing_layer_cells=_RE_SPONGE,
+            compute=compute,
         )
         backend = sim._backend
         xp = backend.xp

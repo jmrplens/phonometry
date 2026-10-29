@@ -653,8 +653,8 @@ def test_fdtd_domain_preview() -> None:
     mask = np.zeros((40, 60), dtype=bool)
     mask[15:25, 28:31] = True
     sim = FDTD2D(
-        343.0,
-        0.05,
+        c=343.0,
+        dx=0.05,
         shape=(40, 60),
         absorbing_layer_cells=6,
         absorbing_sides=("left", "right"),
@@ -671,7 +671,7 @@ def test_fdtd_domain_preview() -> None:
     with pytest.raises(ValueError, match=r"probes must hold \(ix, iy\) index pairs"):
         sim.plot_geometry(probes=np.zeros((2, 3), dtype=int))
     # A plain rigid box keeps the record empty and still draws.
-    plain = FDTD2D(343.0, 0.05, shape=(10, 10))
+    plain = FDTD2D(c=343.0, dx=0.05, shape=(10, 10))
     assert plain.absorbing_sides == ()
     assert plain.edge_impedance == {}
     assert plain.plot_geometry() is not None
@@ -699,7 +699,7 @@ def test_fdtd_domain_preview_refuses_a_probe_the_run_would_refuse(
 
     mask = np.zeros((40, 60), dtype=bool)
     mask[15:25, 28:31] = True
-    sim = FDTD2D(343.0, 0.05, shape=(40, 60), obstacle_mask=mask)
+    sim = FDTD2D(c=343.0, dx=0.05, shape=(40, 60), obstacle_mask=mask)
     with pytest.raises(ValueError, match=match):
         sim.plot_geometry(probes=[probe])  # type: ignore[list-item]
 
@@ -723,7 +723,7 @@ def test_fdtd_domain_preview_places_the_probes_where_the_run_records_them() -> N
         recording=recording,
     )
     result = fdtd_simulation(run)
-    sim = FDTD2D(343.0, 0.05, shape=(12, 20))
+    sim = FDTD2D(c=343.0, dx=0.05, shape=(12, 20))
     ax = sim.plot_geometry(probes=run.recording.probes)
     np.testing.assert_array_equal(_probe_markers(ax), result.probe_positions)
 

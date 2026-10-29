@@ -299,7 +299,7 @@ def test_a_record_held_in_a_field_is_a_folded_table_of_its_own(
 def _fdtd() -> object:
     from phonometry import simulation
 
-    sim = simulation.FDTD2D(343.0, 0.02, shape=(100, 100))
+    sim = simulation.FDTD2D(c=343.0, dx=0.02, shape=(100, 100))
     return simulation.fdtd_simulation(
         simulation.FDTDRun(
             c=343.0,

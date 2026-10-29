@@ -145,8 +145,8 @@ def _dispersion_fields() -> tuple[Any, ...]:
         x = (np.arange(n_x) + 0.5) * dx
         ramp = np.clip((x - n_vis * dx) / _DISP_LOSSY, 0.0, 1.0) ** 2
         sim = FDTD2D(
-            _DISP_C,
-            dx,
+            c=_DISP_C,
+            dx=dx,
             shape=(3, n_x),
             damping=np.tile(_DISP_SIGMA * ramp, (3, 1)),
             edge_impedance={"left": 1.2 * _DISP_C, "right": 1.2 * _DISP_C},

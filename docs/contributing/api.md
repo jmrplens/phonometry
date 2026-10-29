@@ -1647,24 +1647,30 @@ def closing_impedance(termination: Literal["rigid", "free"] | NumericArrayLike =
 <a id="a60"></a>
 ### A60. Open a file a caller or the environment names only through the shared check of what the name holds
 
-**Why.** A name a caller hands a reader, or one the environment does, can hold something other than a file. A named pipe no one writes to keeps an open waiting for a writer that never comes: `io.read` on one hung at the open of its sniffer, `load_anp_database` on a directory holding one hung at its `read_text`, and the hosts file of the remote runs, whose name `PHONOMETRY_HOSTS_FILE` gives, hung at its `read_bytes`. A device such as `/dev/zero` keeps a read going without end, and a directory raised the `IsADirectoryError` of whichever open met it first. `src/phonometry/_internal/json_input.py` holds the one check: `open_regular` and `read_at_most` look at the name, refuse anything but a regular file before it is opened, open it without waiting and ask the open file again, so that a pipe put in its place in between is refused too, and `read_at_most` reads no more than the limit it is given; `not_regular_at` says what is at a name that a reader of another library (SciPy, python-soundfile) is about to open itself. Each reader turns what they find into its own `ValueError`, naming the file and what it holds.
+**Why.** A name a caller hands a reader, or one the environment does, can hold something other than a file. A named pipe no one writes to keeps an open waiting for a writer that never comes: `io.read` on one hung at the open of its sniffer, `load_anp_database` on a directory holding one hung at its `read_text`, and the hosts file of the remote runs, whose name `PHONOMETRY_HOSTS_FILE` gives, hung at its `read_bytes`. A device such as `/dev/zero` keeps a read going without end, and a directory raised the `IsADirectoryError` of whichever open met it first. `src/phonometry/_internal/json_input.py` holds the one check: `open_regular` and `read_at_most` look at the name, refuse anything but a regular file before it is opened, open it without waiting and ask the open file again, so that a pipe put in its place in between is refused too, and `read_at_most` reads no more than the limit it is given; `not_regular_at` says what is at a name that a reader of another library (SciPy, python-soundfile) is about to open itself. Each reader turns what they find into its own `ValueError`, naming the file through `escaped`, so that a name that is not UTF-8 or holds a control character prints as its escapes, and saying what it holds.
 
 **Do**
 
 ```python
 from pathlib import Path
 
-from phonometry._internal.json_input import NotRegularError, TooLargeError, read_at_most
+from phonometry._internal.json_input import (
+    NotRegularError,
+    TooLargeError,
+    escaped,
+    read_at_most,
+)
 
 
 def read_table(path: Path) -> str:
+    named = escaped(str(path))  # a name that is not UTF-8 prints as its escapes
     try:
         raw = read_at_most(path, 1024 * 1024)
     except NotRegularError as exc:
-        msg = f"{path}: is {exc.kind}, and a table is read only from a regular file"
+        msg = f"{named}: is {exc.kind}, and a table is read only from a regular file"
         raise ValueError(msg) from None
     except TooLargeError:
-        msg = f"{path}: a table is at most 1 MiB"
+        msg = f"{named}: a table is at most 1 MiB"
         raise ValueError(msg) from None
     return raw.decode("utf-8")
 ```
@@ -1680,4 +1686,4 @@ def describe(path: Path) -> object:
 
 **Enforced by:** `scripts/check_regular_file_reads.py`, `make regular-file-reads`, `CI: Every reader asks what a name holds before it opens it`, `tests/test_check_regular_file_reads.py::test_the_library_reads_every_name_through_the_check`, `tests/io/test_io_regular_files.py`, `tests/aircraft/test_anp_tables_read.py`
 
-**Exceptions.** A read of the library's own files, which no caller names (a published table through `importlib.resources`, the `VERSION` file of a source checkout, the bootstrap module the client sends a node), is listed in `EXEMPT` of `scripts/check_regular_file_reads.py`, keyed by file and function with the reason; an entry that covers nothing fails. A mode that writes (`"wb"`, `"xb"`, `"ab"`, `"r+b"`) is a writer's and is not read here: a writer that keeps a file at a name puts it there through `write_beside`, as the sidecar and catalogue writers do. The check reads the order of the calls in the source, not the paths a function can take, and a `.open()` given its mode through a name is not read; the tests of each reader, which put a pipe, a link to a device and a directory at the name and want the refusal within seconds, are what prove it refuses.
+**Exceptions.** A read of the library's own files, which no caller names (a published table through `importlib.resources`, the `VERSION` file of a source checkout, the bootstrap module the client sends a node, the video a node's encoder wrote in the scratch directory of the run), is listed in `EXEMPT` of `scripts/check_regular_file_reads.py`, keyed by file and function with the reason; an entry that covers nothing fails. A mode that writes (`"wb"`, `"xb"`, `"ab"`, `"r+b"`) is a writer's and is not read here, and this rule holds no writer: `io.write`, the target of `io.convert` and the figure and report writers open the name they are given as Python opens it, so a pipe there waits for a reader and a directory raises `IsADirectoryError`. The sidecar and catalogue writers are the ones that write beside the name through `write_beside` and rename the file into place, which never opens the name for writing. The check names a call by what the module's imports and assignments bind it to, and reads the order of the calls in the source, not the paths a function can take; a `.open()` given its mode through a name, and a reader reached through `getattr()` or a `functools.partial`, are not read. The tests of each reader, which put a pipe, a link to a device and a directory at the name and want the refusal within seconds, are what prove it refuses.

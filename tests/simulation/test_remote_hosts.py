@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import os
 import re
 import sys
 from pathlib import Path
@@ -324,3 +325,30 @@ def test_a_hosts_file_past_one_mebibyte_is_refused_before_it_is_read(
     )
     with pytest.raises(ValueError, match=f"^{re.escape(refusal)}$"):
         hosts.load_host("nas")
+
+
+def test_a_hosts_file_name_that_is_not_utf8_is_named_by_its_escapes(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The name went into the message as Python holds it, a lone surrogate no UTF-8 stream writes."""
+    path = tmp_path / os.fsdecode(b"h\xffosts.toml")
+    try:
+        path.mkdir()
+    except (OSError, UnicodeEncodeError):
+        pytest.skip("this file system takes only names that are text")
+    monkeypatch.setenv(hosts.HOSTS_FILE_VAR, str(path))
+    with pytest.raises(ValueError, match="the hosts file is a directory") as caught:
+        hosts.load_host("nas")
+    message = str(caught.value)
+    message.encode("utf-8")
+    assert message == (
+        f"{tmp_path}{os.sep}h\\udcffosts.toml: the hosts file is a directory, and it "
+        "is read only from a regular file"
+    )
+    path.rmdir()
+    path.write_text("[hosts", encoding="utf-8")
+    with pytest.raises(
+        ValueError, match=r"h\\udcffosts\.toml: not a TOML file"
+    ) as caught:
+        hosts.load_host("nas")
+    str(caught.value).encode("utf-8")

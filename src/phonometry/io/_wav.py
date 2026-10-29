@@ -54,6 +54,7 @@ import numpy as np
 from scipy.io import wavfile
 
 from .._internal.display import RichDisplay
+from .._internal.json_input import escaped
 from ._audio_file import open_audio, require_regular_audio
 from ._chunks import (
     WAVE_FORMAT_IEEE_FLOAT,
@@ -216,7 +217,7 @@ def read_wav(
     fmt = parsed.fmt
     if fmt.resolved_tag not in (WAVE_FORMAT_PCM, WAVE_FORMAT_IEEE_FLOAT):
         msg = (
-            f"{path}: {fmt.format_name} is not linear PCM/float; "
+            f"{escaped(str(path))}: {fmt.format_name} is not linear PCM/float; "
             "read it through the [audio] backend"
         )
         raise ValueError(msg)
@@ -228,7 +229,7 @@ def read_wav(
     actual = Path(path).stat().st_size
     if actual < payload_end:
         msg = (
-            f"{path}: data chunk claims {parsed.data_size} bytes "
+            f"{escaped(str(path))}: data chunk claims {parsed.data_size} bytes "
             f"({parsed.frames} frames) but the file ends "
             f"{payload_end - actual} bytes short; refusing to read a "
             "truncated recording as if it were complete"

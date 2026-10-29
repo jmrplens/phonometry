@@ -12,6 +12,7 @@ behind them, each of which asks again before its own open.
 
 from __future__ import annotations
 
+import os
 import sys
 from typing import TYPE_CHECKING
 
@@ -34,7 +35,6 @@ from phonometry.io import (
 )
 
 if TYPE_CHECKING:
-    import os
     from collections.abc import Callable
     from pathlib import Path
 
@@ -181,3 +181,21 @@ def test_the_shared_open_hands_back_the_file_at_its_start(tmp_path: Path) -> Non
         assert handle.read() == b"RIFF....WAVE"
     with pytest.raises(FileNotFoundError):
         json_input.open_regular(tmp_path / "missing.bin")
+
+
+def test_a_file_name_that_is_not_utf8_is_named_by_its_escapes(tmp_path: Path) -> None:
+    """Each refusal named the file as Python holds it, which no UTF-8 stream writes."""
+    path = tmp_path / os.fsdecode(b"\xff-noise.bin")
+    try:
+        path.write_bytes(b"\x00\x01\x02\x03 not audio at all")
+    except (OSError, UnicodeEncodeError):
+        pytest.skip("this file system takes only names that are text")
+    for reader in (read, info):
+        with pytest.raises(ValueError, match="not a recognised audio file") as caught:
+            reader(path)
+        message = str(caught.value)
+        message.encode("utf-8")
+        assert (
+            message
+            == f"{tmp_path}{os.sep}\\udcff-noise.bin: not a recognised audio file"
+        )

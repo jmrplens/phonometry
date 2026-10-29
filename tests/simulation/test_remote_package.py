@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import os
 import re
 import tomllib
 from pathlib import Path
@@ -181,6 +182,21 @@ def test_a_file_no_node_would_take_is_refused_here_by_name(tmp_path: Path) -> No
         ValueError, match="'phonometry/draft copy.py' cannot travel to a node"
     ):
         package.package_from(root)
+
+
+def test_a_file_name_that_is_not_utf8_is_named_by_its_escapes(tmp_path: Path) -> None:
+    """The refusal named the file as Python holds it, which no UTF-8 stream writes."""
+    root = tmp_path / "phonometry"
+    _tree(root, {"__init__.py": b""})
+    try:
+        (root / os.fsdecode(b"\xff.py")).write_bytes(b"")
+    except (OSError, UnicodeEncodeError):
+        pytest.skip("this file system takes only names that are text")
+    with pytest.raises(ValueError, match="cannot travel to a node") as caught:
+        package.package_from(root)
+    message = str(caught.value)
+    message.encode("utf-8")
+    assert message.endswith(f"rename or remove {root}{os.sep}\\udcff.py")
 
 
 def test_a_directory_of_another_name_is_not_the_package_a_node_runs(

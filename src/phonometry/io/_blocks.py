@@ -47,6 +47,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from .._internal.json_input import escaped
 from .._internal.validation import require_count, require_scalar
 from ._audio_file import open_audio, require_regular_audio
 from ._backends import _import_soundfile, _sniff, _warn_lossy, info, soundfile_stamp
@@ -130,7 +131,7 @@ def _iter_wav_blocks(
             raw = fh.read(n * fmt.block_align)
             if len(raw) < n * fmt.block_align:
                 msg = (
-                    f"{path}: data chunk ends {n * fmt.block_align - len(raw)} "
+                    f"{escaped(str(path))}: data chunk ends {n * fmt.block_align - len(raw)} "
                     f"bytes short of frame {start + n}"
                 )
                 raise ValueError(msg)

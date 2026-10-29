@@ -42,6 +42,7 @@ from typing import TYPE_CHECKING, NamedTuple
 
 import numpy as np
 
+from .._internal.json_input import escaped
 from .._internal.warnings import PhonometryWarning
 from ._audio_file import open_audio, require_regular_audio
 from ._chunks import (
@@ -143,7 +144,7 @@ def _sniff(path: str | Path) -> str | None:
         and head[1] & _MPEG_SYNC_BYTE_2_MASK == _MPEG_SYNC_BYTE_2_MASK
     ):
         return "MPEG audio (MP3)"
-    msg = f"{path}: not a recognised audio file"
+    msg = f"{escaped(str(path))}: not a recognised audio file"
     raise ValueError(msg)
 
 
@@ -165,7 +166,7 @@ def _import_soundfile(format_name: str) -> ModuleType:
 def _warn_lossy(format_name: str, path: str | Path) -> None:
     """Emit the metrology warning for a lossy source."""
     warnings.warn(
-        f"{path}: {format_name} is a lossy format; the decoder reconstructs "
+        f"{escaped(str(path))}: {format_name} is a lossy format; the decoder reconstructs "
         "an approximation of the recorded waveform, so levels computed from "
         "it are not metrologically defensible. Use the linear PCM recording "
         "for analysis; lossy copies are for listening.",

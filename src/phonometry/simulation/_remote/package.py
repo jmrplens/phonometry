@@ -23,6 +23,7 @@ from pathlib import Path
 from types import MappingProxyType
 from typing import TYPE_CHECKING
 
+from ..._internal.json_input import escaped
 from .bootstrap import PackageDigest, is_safe_path
 
 if TYPE_CHECKING:
@@ -121,10 +122,10 @@ def package_from(root: Path) -> Package:
         rather than by the node once the package is on its way.
     """
     if not (root / "__init__.py").is_file():
-        msg = f"{root / '__init__.py'} does not exist: {root} is not a package"
+        msg = f"{escaped(str(root / '__init__.py'))} does not exist: {escaped(str(root))} is not a package"
         raise FileNotFoundError(msg)
     if root.name != _NAME:
-        msg = f"{root} is not named {_NAME!r}: a node runs that package only"
+        msg = f"{escaped(str(root))} is not named {_NAME!r}: a node runs that package only"
         raise ValueError(msg)
     chosen: set[Path] = set()
     for directory in _package_directories(root):
@@ -141,7 +142,7 @@ def package_from(root: Path) -> Package:
         if not is_safe_path(name):
             msg = (
                 f"{name!r} cannot travel to a node: a package path holds only letters, "
-                f"digits, '.', '_' and '-'; rename or remove {path}"
+                f"digits, '.', '_' and '-'; rename or remove {escaped(str(path))}"
             )
             raise ValueError(msg)
     files = tuple((name, path.read_bytes()) for name, path in named)

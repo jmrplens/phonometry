@@ -51,6 +51,7 @@ from typing import TYPE_CHECKING, Any, Final, cast, get_args
 import numpy as np
 
 from .._internal.display import RichDisplay
+from .._internal.json_input import escaped
 from .._internal.validation import require_choice, require_positive, require_scalar
 from ._video_encoders import (
     CONTAINER_CODECS,
@@ -557,7 +558,7 @@ class _FramePipe:
             # A thread that cannot start leaves ffmpeg running with nobody to
             # read it: it is stopped and its pipes closed.
             self.abort()
-            msg = f"could not start {self._ffmpeg.path} to write {self._request.path}: {exc}"
+            msg = f"could not start {escaped(str(self._ffmpeg.path))} to write {escaped(str(self._request.path))}: {exc}"
             raise VideoEncoderError(msg) from exc
         except BaseException:
             # So does an interrupt between the two, which reaches the caller
@@ -649,7 +650,7 @@ class _FramePipe:
         """Hand one frame's pixels to ffmpeg, once it is the size of the first."""
         if frame.nbytes != self._frame_bytes:
             msg = (
-                f"frame {self._frames} of {self._request.path.name} has "
+                f"frame {self._frames} of {escaped(str(self._request.path.name))} has "
                 f"{frame.nbytes} bytes where the first had {self._frame_bytes}"
             )
             raise VideoEncoderError(msg)
@@ -715,7 +716,7 @@ class _FramePipe:
         # does not know is refused without a word of the encoder.
         encoder = f" with the encoder {self.encoder_name}" if self.encoder_name else ""
         return VideoEncoderError(
-            f"{reason} while writing {self._request.path}{encoder}; ffmpeg said:\n{said}"
+            f"{reason} while writing {escaped(str(self._request.path))}{encoder}; ffmpeg said:\n{said}"
         )
 
 
@@ -800,7 +801,7 @@ def settle(partial: Path, path: Path) -> None:
         partial.replace(path)
     except OSError as exc:
         msg = (
-            f"the video is finished but could not take the place of {path} ({exc}); "
+            f"the video is finished but could not take the place of {escaped(str(path))} ({exc}); "
             f"it is at {partial}"
         )
         raise VideoEncoderError(msg) from exc
@@ -814,7 +815,9 @@ def disk_failure(path: Path, exc: OSError) -> VideoEncoderError:
     not ask for that file and may not know it exists.
     """
     reason = exc.strerror or str(exc)
-    return VideoEncoderError(f"could not write the video for {path}: {reason}")
+    return VideoEncoderError(
+        f"could not write the video for {escaped(str(path))}: {reason}"
+    )
 
 
 def require_writable(request: VideoRequest) -> None:

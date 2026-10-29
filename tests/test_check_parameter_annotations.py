@@ -915,6 +915,54 @@ def test_a_record_field_kept_as_given_is_held_and_one_stored_is_not(
     ]
 
 
+def test_a_field_is_read_scope_by_scope(tmp_path: pathlib.Path) -> None:
+    """A field read by name in a comprehension or a closure is the field; one a nested scope rebinds is not.
+
+    ``getattr(self, name)`` in a comprehension over field names reads each of
+    them, as a ``for`` loop does, and a nested function that reads ``self``
+    from the body around it reads the record. A nested function whose own
+    ``self`` is another value, and a comprehension that takes ``name`` for
+    itself, read something else under the same spelling.
+    """
+    refused = _refused(
+        tmp_path,
+        **{
+            "_internal.validation": _VALIDATION,
+            "api": """
+            from dataclasses import dataclass
+
+            from ._internal.validation import require_count
+
+            __all__ = ["Counts"]
+
+            _ROWS = ("n_rows",)
+
+            @dataclass(frozen=True)
+            class Counts:
+                n_rows: int
+                n_cols: int
+                n_spare: int = 0
+                n_other: int = 0
+
+                def __post_init__(self) -> None:
+                    [require_count(getattr(self, name), name) for name in _ROWS]
+
+                    def _cols() -> int:
+                        return require_count(self.n_cols, "n_cols")
+
+                    def _spare(self: Counts) -> int:
+                        return require_count(self.n_spare, "n_spare")
+
+                    for name in ("n_other",):
+                        [require_count(getattr(self, name), name) for name in ("x",)]
+                    _cols()
+                    _spare(self)
+            """,
+        },
+    )
+    assert sorted(refused) == ["Counts(n_cols)", "Counts(n_rows)"]
+
+
 _RECORDS = """
 from dataclasses import dataclass
 

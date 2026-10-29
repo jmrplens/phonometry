@@ -8,7 +8,8 @@ This directory ships the **full EASA/EUROCONTROL Aircraft Noise and Performance
 
 - EASA ANP database, archive **version 2.3** (released 14 October 2020), the
   semicolon-delimited CSV export (`archive_anp_v2.3.zip`).
-- Public source: <https://www.aircraftnoisemodel.org/> (EASA / EUROCONTROL).
+- Public source: EASA's ANP data page,
+  <https://www.easa.europa.eu/en/domains/environment/policy-support-and-research/aircraft-noise-and-performance-anp-data>.
 
 The data was developed by the aircraft manufacturers and collaboratively
 reviewed by the US DOT Volpe Center, US FAA, EASA and EUROCONTROL.
@@ -53,10 +54,8 @@ The tables are reproduced under EASA's copyright notice
 (<https://www.easa.europa.eu/en/copyright-disclaimer>), which reads:
 "Reproduction is authorised, provided the source is acknowledged, save where
 otherwise stated." EASA publishes the archive of version 2.3 as a direct
-download on its ANP data page
-(<https://www.easa.europa.eu/en/domains/environment/policy-support-and-research/aircraft-noise-and-performance-anp-data>),
-and the archive states no terms of its own, so that notice is the one that
-applies.
+download on its ANP data page, the public source above, and the archive states
+no terms of its own, so that notice is the one that applies.
 
 The source is acknowledged as the notice asks: the tables are the
 EASA/EUROCONTROL Aircraft Noise and Performance (ANP) database, archive

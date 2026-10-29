@@ -9,12 +9,10 @@ while the resolved ``phonometry`` still exports the names the last release
 under the old name exported, and a major release is exactly where those go, so
 the requirement has to be capped below the next major.
 
-The same files carry the licence. PEP 639 writes the SPDX expression into the
-metadata as ``License-Expression`` and each licence file as ``License-File``,
-and puts the file itself under ``.dist-info/licenses/`` in the wheel and at the
-root of the sdist. PyOctaveBand 2.2.0 shipped neither: a licence classifier
-and no text, in a package whose licence asks that its text travel with every
-copy.
+The same files carry the licence: ``License-Expression`` and ``License-File``
+in the metadata, and the text where PEP 639 puts it. PyOctaveBand 2.2.0
+shipped neither, only a licence classifier. ``built_license.py`` reads the
+files and checks the licence, as it does for phonometry's own release.
 
 ``tests/test_transition_stub.py`` asserts the cap in ``stub/pyproject.toml`` and
 that ``stub/LICENSE`` is the repository's ``LICENSE``. This asserts both in the
@@ -37,11 +35,9 @@ from __future__ import annotations
 import argparse
 import pathlib
 import sys
-import tarfile
-import zipfile
-from email import message_from_string
 from typing import TYPE_CHECKING
 
+from built_license import Built, license_problems
 from packaging.requirements import Requirement
 from packaging.version import Version
 
@@ -69,74 +65,9 @@ _LATEST_SUPPORTED_LINE = Version("3.99.0")
 #: The SPDX expression the stub declares: the project's own licence.
 _LICENSE_EXPRESSION = "MIT"
 
-#: The licence files the stub declares, by the path PEP 639 records.
+#: The licence files the stub declares, by the path PEP 639 records. Each has
+#: to carry the text of the repository's file of the same name.
 _LICENSE_FILES = ("LICENSE",)
-
-#: The text each of them has to carry: the project's, at the repository root.
-_PROJECT_LICENSE = _ROOT / "LICENSE"
-
-
-class _Built:
-    """One built file: its metadata, and its licence files where PEP 639 puts them.
-
-    A ``License-File`` path is relative to the root of the sdist, and to
-    ``.dist-info/licenses/`` in the wheel.
-    """
-
-    def __init__(self, path: pathlib.Path) -> None:
-        self.label = path.name
-        self._path = path
-        self._wheel = path.suffix == ".whl"
-        self.metadata, self._root = (
-            self._read_wheel() if self._wheel else self._read_sdist()
-        )
-
-    def _read_wheel(self) -> tuple[Message, str]:
-        with zipfile.ZipFile(self._path) as archive:
-            names = [
-                name
-                for name in archive.namelist()
-                if name.endswith(".dist-info/METADATA")
-            ]
-            if len(names) != 1:
-                msg = f"{self.label}: expected one METADATA, found {names}"
-                raise SystemExit(msg)
-            metadata = message_from_string(archive.read(names[0]).decode("utf-8"))
-        return metadata, names[0].removesuffix("METADATA") + "licenses/"
-
-    def _read_sdist(self) -> tuple[Message, str]:
-        with tarfile.open(self._path) as archive:
-            names = [name for name in archive.getnames() if name.endswith("/PKG-INFO")]
-            # The top-level PKG-INFO, not one belonging to a vendored tree.
-            names = [name for name in names if name.count("/") == 1]
-            if len(names) != 1:
-                msg = f"{self.label}: expected one PKG-INFO, found {names}"
-                raise SystemExit(msg)
-            handle = archive.extractfile(names[0])
-            if handle is None:
-                msg = f"{self.label}: {names[0]} is not a regular file"
-                raise SystemExit(msg)
-            metadata = message_from_string(handle.read().decode("utf-8"))
-        return metadata, names[0].removesuffix("PKG-INFO")
-
-    def where(self, licence_file: str) -> str:
-        """The member a ``License-File`` path names in this file."""
-        return self._root + licence_file
-
-    def licence_text(self, licence_file: str) -> bytes | None:
-        """The bytes of the licence file *licence_file* names, or ``None``."""
-        member = self.where(licence_file)
-        if self._wheel:
-            with zipfile.ZipFile(self._path) as archive:
-                if member not in archive.namelist():
-                    return None
-                return archive.read(member)
-        with tarfile.open(self._path) as archive:
-            try:
-                handle = archive.extractfile(member)
-            except KeyError:
-                return None
-            return None if handle is None else handle.read()
 
 
 def _phonometry_requirement(metadata: Message, label: str) -> Requirement:
@@ -182,43 +113,6 @@ def _problems(requirement: Requirement, label: str) -> list[str]:
     return found
 
 
-def _licence_problems(built: _Built, project_licence: bytes) -> list[str]:
-    """What is wrong with the licence one built file declares and carries."""
-    label = built.label
-    found: list[str] = []
-    expressions = [
-        str(value) for value in built.metadata.get_all("License-Expression", [])
-    ]
-    if expressions != [_LICENSE_EXPRESSION]:
-        found.append(
-            f"{label}: License-Expression is {expressions or 'missing'}, expected "
-            f"'{_LICENSE_EXPRESSION}'. Declare license = \"{_LICENSE_EXPRESSION}\" "
-            f"in stub/pyproject.toml."
-        )
-    declared = [str(value) for value in built.metadata.get_all("License-File", [])]
-    if declared != list(_LICENSE_FILES):
-        found.append(
-            f"{label}: License-File is {declared or 'missing'}, expected "
-            f"{list(_LICENSE_FILES)}. Declare license-files = "
-            f"{list(_LICENSE_FILES)} in stub/pyproject.toml, beside a copy of "
-            f"the repository's LICENSE."
-        )
-    for licence_file in _LICENSE_FILES:
-        text = built.licence_text(licence_file)
-        if text is None:
-            found.append(
-                f"{label}: {built.where(licence_file)} is missing. The licence "
-                f"asks that its text be included in every copy, and this file "
-                f"would go out without it."
-            )
-        elif text != project_licence:
-            found.append(
-                f"{label}: {built.where(licence_file)} is not the repository's "
-                f"LICENSE; copy it into stub/ again."
-            )
-    return found
-
-
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=(__doc__ or "").splitlines()[0])
     parser.add_argument(
@@ -233,11 +127,14 @@ def main(argv: list[str] | None = None) -> int:
     if not artifacts:
         msg = f"no built artifacts in {dist}; run 'python -m build stub/' first"
         raise SystemExit(msg)
-    project_licence = _PROJECT_LICENSE.read_bytes()
+    license_files = {name: (_ROOT / name).read_bytes() for name in _LICENSE_FILES}
 
     problems: list[str] = []
     for artifact in artifacts:
-        built = _Built(artifact)
+        try:
+            built = Built(artifact)
+        except ValueError as error:
+            raise SystemExit(str(error)) from None
         requirement = _phonometry_requirement(built.metadata, built.label)
         print(f"{built.label}: Requires-Dist: {requirement}")
         problems.extend(_problems(requirement, built.label))
@@ -245,7 +142,14 @@ def main(argv: list[str] | None = None) -> int:
             f"{built.label}: License-Expression: "
             f"{built.metadata.get('License-Expression', 'missing')}"
         )
-        problems.extend(_licence_problems(built, project_licence))
+        problems.extend(
+            license_problems(
+                built,
+                expression=_LICENSE_EXPRESSION,
+                files=license_files,
+                config="stub/pyproject.toml",
+            )
+        )
 
     for problem in problems:
         print(f"::error::{problem}", file=sys.stderr)

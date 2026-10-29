@@ -2253,7 +2253,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   licence text. `scripts/check_stub_metadata.py` refuses a built stub without
   either, in CI and in `publish-stub.yml` right before the upload, and
   `publish-stub.yml` uploads only from a commit on which Python CI succeeded,
-  the check `release.yml` makes before it publishes phonometry.
+  the check `release.yml` makes before it publishes phonometry. The release
+  of phonometry reads the same two fields and the same file out of its own
+  wheel and sdist before it uploads them, which it did not do before.
 
 - **A record that holds a read-only mapping pickles and deep-copies.**
   `MappingProxyType` can be neither pickled nor deep-copied, and 48 of the

@@ -10,9 +10,10 @@ clean today; these tests fix what it must catch, on small packages written
 for the purpose (a multiline call into a helper, an alias of the narrow
 union, an alias imported from another module, an overload head, a vararg
 converted one argument at a time, a loop over a literal of parameters, a
-sequence converted item by item), and what it must let through (a pair of
-limits, a scalar validator, a private helper, a sequence whose items take a
-sequence of numbers).
+sequence converted item by item, a closure), and what it must let through
+(a pair of limits, a scalar validator, a private helper, a sequence whose
+items take a sequence of numbers, a name a nested function, lambda or
+comprehension binds for itself).
 """
 
 from __future__ import annotations
@@ -409,6 +410,79 @@ def test_an_item_converted_alone_asks_its_item_type_for_a_sequence(
         "annotated tuple[np.ndarray, np.ndarray], whose items (np.ndarray) take no "
         "sequence of numbers, and an item handed to _signal(x: ArrayLike) converts "
         "any array-like"
+    ]
+
+
+def test_a_name_a_nested_scope_binds_for_itself_is_not_the_parameter(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A nested function, lambda or comprehension that rebinds the name holds another value.
+
+    Its conversion is not the parameter's. A closure that reads the
+    parameter, or a name assigned it, converts the parameter itself, and so
+    does a method of a class defined in the body, which reads the scope
+    around the class and not the class's own names; a comprehension that
+    loops over the parameter under its own name takes one item at a time.
+    """
+    refused = _refused(
+        tmp_path,
+        api="""
+        __all__ = [
+            "by_def", "by_lambda", "by_loop", "by_local", "by_class",
+            "closure", "closure_copy", "items",
+        ]
+
+        def by_def(levels: Sequence[float]) -> float:
+            def peak(levels: Sequence[float]) -> float:
+                return float(np.max(np.asarray(levels)))
+            return sum(levels) + peak([1.0])
+
+        def by_lambda(levels: Sequence[float]) -> float:
+            peak = lambda levels: float(np.max(np.asarray(levels)))
+            return sum(levels) + peak([1.0])
+
+        def by_loop(levels: Sequence[float], rows: Sequence[float]) -> float:
+            return sum(levels) + sum(float(np.sum(np.asarray(levels))) for levels in rows)
+
+        def by_local(levels: Sequence[float]) -> float:
+            def peak() -> float:
+                levels = [1.0, 2.0]
+                return float(np.max(np.asarray(levels)))
+            return sum(levels) + peak()
+
+        def by_class(levels: Sequence[float]) -> float:
+            class Peak:
+                levels = (1.0,)
+
+                def value(self) -> float:
+                    return float(np.max(np.asarray(levels)))
+            return Peak().value()
+
+        def closure(levels: Sequence[float]) -> float:
+            def peak() -> float:
+                return float(np.max(np.asarray(levels)))
+            return peak()
+
+        def closure_copy(levels: Sequence[float]) -> float:
+            def peak() -> float:
+                values = levels
+                return float(np.max(np.asarray(values)))
+            return peak()
+
+        def items(rows: Sequence[tuple[float, float]]) -> list[float]:
+            return [float(np.sum(np.asarray(rows))) for rows in rows]
+        """,
+    )
+    assert sorted(refused) == [
+        "by_class(levels)",
+        "closure(levels)",
+        "closure_copy(levels)",
+        "items(rows)",
+    ]
+    assert refused["items(rows)"] == [
+        "annotated Sequence[tuple[float, float]], whose items (tuple[float, float]) "
+        "take no sequence of numbers, and an item np.asarray() converts any "
+        "array-like"
     ]
 
 

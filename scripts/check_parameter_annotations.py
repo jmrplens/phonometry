@@ -31,12 +31,16 @@ extends, an explicit ``__init__`` or ``__call__`` included):
   a copy of it (``list(levels)``), the name a loop over a literal of
   parameters takes each of them in (``for values in (fpi, delta)``), and,
   for a vararg, whose annotation types each argument, the name a loop over
-  it takes each argument in (``for i, m in enumerate(matrices)``). A
-  function whose parameter is annotated a single number, a text or a record
-  says it takes no array, and is not followed. A ``tuple`` of a fixed length
-  at the top of the annotation (``tuple[float, float]``, a pair of limits)
-  is a record of numbers whose arity the annotation states, not an array
-  input;
+  it takes each argument in (``for i, m in enumerate(matrices)``). Names
+  are read scope by scope: a nested function, lambda or comprehension that
+  binds the parameter's name for itself (its own parameter, an assignment,
+  a loop variable) holds another value under it, which is not followed,
+  while one that reads the name from the body around it, a closure, reads
+  the parameter. A function whose parameter is annotated a single number, a
+  text or a record says it takes no array, and is not followed. A ``tuple``
+  of a fixed length at the top of the annotation (``tuple[float, float]``,
+  a pair of limits) is a record of numbers whose arity the annotation
+  states, not an array input;
 * a parameter the body converts item by item (``for item in contributions:
   np.asarray(item)``) need not take ``ArrayLike``, but the item type of each
   sequence it is annotated takes what numpy converts of one item: a number,
@@ -83,6 +87,7 @@ import argparse
 import ast
 import pathlib
 import sys
+from collections import deque
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
@@ -239,6 +244,20 @@ _ORDERS = frozenset({"sorted", "reversed", "iter", "list", "tuple"})
 
 #: The names a loop over ``enumerate(xs)`` unpacks: the index and the item.
 _INDEXED = 2
+
+#: The comprehensions, each a scope of its own for the names its loops take.
+_COMPREHENSIONS = (ast.ListComp, ast.SetComp, ast.DictComp, ast.GeneratorExp)
+
+#: What opens a scope of its own: a name it binds (a parameter, an
+#: assignment, a loop variable) is another variable than the enclosing
+#: body's name of the same spelling.
+_SCOPES = (
+    ast.FunctionDef,
+    ast.AsyncFunctionDef,
+    ast.Lambda,
+    ast.ClassDef,
+    *_COMPREHENSIONS,
+)
 
 
 @dataclass(frozen=True)
@@ -608,16 +627,109 @@ def _taken(
         yield target.id, _ITERATED[kind]
 
 
-def _bound(
-    node: ast.FunctionDef | ast.AsyncFunctionDef, name: str, *, vararg: bool
-) -> Bound:
-    """The local names a body binds to parameter *name*, as it stands or item by item."""
-    names: dict[str, set[str]] = {"whole": set(), "pack": set(), "item": set()}
-    names["pack" if vararg else "whole"].add(name)
+def _enclosing_parts(scope: ast.AST) -> list[ast.AST]:
+    """What a nested scope evaluates where it is written, outside its own scope.
+
+    A function's decorators and default values, a class's decorators and
+    bases, and the iterable of a comprehension's first loop.
+    """
+    if isinstance(scope, ast.FunctionDef | ast.AsyncFunctionDef | ast.Lambda):
+        decorators = [] if isinstance(scope, ast.Lambda) else scope.decorator_list
+        defaults = [value for value in scope.args.kw_defaults if value is not None]
+        return [*decorators, *scope.args.defaults, *defaults]
+    if isinstance(scope, ast.ClassDef):
+        return [*scope.decorator_list, *scope.bases, *scope.keywords]
+    if isinstance(scope, _COMPREHENSIONS):
+        return [scope.generators[0].iter]
+    return []
+
+
+def _own_parts(scope: ast.AST) -> list[ast.AST]:
+    """What a scope evaluates in itself: a body, or a comprehension's result, tests and later loops."""
+    if isinstance(scope, ast.Lambda):
+        return [scope.body]
+    if isinstance(scope, ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef):
+        return list(scope.body)
+    if isinstance(scope, _COMPREHENSIONS):
+        first, *later = scope.generators
+        results = (
+            [scope.key, scope.value] if isinstance(scope, ast.DictComp) else [scope.elt]
+        )
+        return [*results, *first.ifs, *later]
+    return []
+
+
+def _scope_nodes(scope: ast.AST) -> tuple[list[ast.AST], list[ast.AST]]:
+    """The nodes a scope evaluates itself, in ``ast.walk`` order, and the scopes nested in it."""
+    own: list[ast.AST] = []
+    nested: list[ast.AST] = []
+    todo = deque(_own_parts(scope))
+    while todo:
+        node = todo.popleft()
+        if isinstance(node, _SCOPES):
+            nested.append(node)
+            todo.extend(_enclosing_parts(node))
+            continue
+        own.append(node)
+        todo.extend(ast.iter_child_nodes(node))
+    return own, nested
+
+
+def _rebound(
+    scope: ast.AST, own: list[ast.AST], nested: list[ast.AST]
+) -> frozenset[str]:
+    """The names a nested scope binds for itself, which hide the enclosing body's.
+
+    A function's or a lambda's parameters and the names its body assigns,
+    loops over, imports or defines, less those it declares ``nonlocal`` or
+    ``global``; a class body's own names; the names a comprehension's
+    loops take.
+    """
+    if isinstance(scope, _COMPREHENSIONS):
+        return frozenset(
+            node.id
+            for loop in scope.generators
+            for node in ast.walk(loop.target)
+            if isinstance(node, ast.Name)
+        )
+    names: set[str] = set()
+    if isinstance(scope, ast.FunctionDef | ast.AsyncFunctionDef | ast.Lambda):
+        arguments = scope.args
+        names.update(
+            argument.arg
+            for argument in (
+                *arguments.posonlyargs,
+                *arguments.args,
+                *arguments.kwonlyargs,
+                arguments.vararg,
+                arguments.kwarg,
+            )
+            if argument is not None
+        )
+    declared: set[str] = set()
+    for node in own:
+        if isinstance(node, ast.Name) and isinstance(node.ctx, ast.Store | ast.Del):
+            names.add(node.id)
+        elif isinstance(node, ast.alias):
+            names.add((node.asname or node.name).split(".")[0])
+        elif isinstance(node, ast.ExceptHandler) and node.name:
+            names.add(node.name)
+        elif isinstance(node, ast.Global | ast.Nonlocal):
+            declared.update(node.names)
+    names.update(
+        inner.name
+        for inner in nested
+        if isinstance(inner, ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef)
+    )
+    return frozenset(names - declared)
+
+
+def _close(own: list[ast.AST], names: dict[str, set[str]]) -> None:
+    """Add to *names* every local name the nodes of one scope bind to the parameter."""
     changed = True
     while changed:
         changed = False
-        for child in ast.walk(node):
+        for child in own:
             if isinstance(child, ast.Assign):
                 found = [
                     pair
@@ -634,11 +746,52 @@ def _bound(
                 if local not in names[kind]:
                     names[kind].add(local)
                     changed = True
-    return Bound(
+
+
+def _scoped(
+    scope: ast.AST,
+    names: dict[str, set[str]],
+    outside: dict[str, set[str]] | None = None,
+) -> Iterator[tuple[ast.Call, Bound]]:
+    """Each call of a scope and of its nested scopes, with the names bound to the parameter there.
+
+    A name a nested scope binds for itself (a parameter of a nested
+    function or lambda, a name its body assigns, a comprehension's loop
+    variable) is another variable there than the enclosing body's name of
+    the same spelling, and is not the parameter; a name it reads from the
+    enclosing body, a closure, is. The scopes nested in a class body read
+    the scope around the class (*outside*), not the class's own names.
+    """
+    own, nested = _scope_nodes(scope)
+    _close(own, names)
+    bound = Bound(
         whole=frozenset(names["whole"]),
         pack=frozenset(names["pack"]),
         item=frozenset(names["item"]),
     )
+    for node in own:
+        if isinstance(node, ast.Call):
+            yield node, bound
+    around = (
+        outside if isinstance(scope, ast.ClassDef) and outside is not None else names
+    )
+    for inner in nested:
+        hidden = _rebound(inner, *_scope_nodes(inner))
+        seeds = {kind: values - hidden for kind, values in around.items()}
+        if isinstance(inner, _COMPREHENSIONS):
+            first = inner.generators[0]
+            for local, kind in _taken(first.target, first.iter, names):
+                seeds[kind].add(local)
+        yield from _scoped(inner, seeds, names)
+
+
+def _bound(
+    node: ast.FunctionDef | ast.AsyncFunctionDef, name: str, *, vararg: bool
+) -> Iterator[tuple[ast.Call, Bound]]:
+    """Each call of a body, with the local names bound to parameter *name* where it is made."""
+    names: dict[str, set[str]] = {"whole": set(), "pack": set(), "item": set()}
+    names["pack" if vararg else "whole"].add(name)
+    return _scoped(node, names)
 
 
 def _holds(node: ast.expr, names: frozenset[str]) -> bool:
@@ -764,10 +917,7 @@ class Reader:
         if node is None or depth > DEPTH:
             return
         vararg = node.args.vararg is not None and node.args.vararg.arg == name
-        bound = _bound(node, name, vararg=vararg)
-        for call in ast.walk(node):
-            if not isinstance(call, ast.Call):
-                continue
+        for call, bound in _bound(node, name, vararg=vararg):
             for names, of_item in (
                 (bound.whole | bound.pack, False),
                 (bound.item, True),

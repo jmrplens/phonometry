@@ -568,6 +568,29 @@ def test_a_stale_open_entry_fails(monkeypatch: pytest.MonkeyPatch) -> None:
     assert stale == [key]
 
 
+def test_a_class_written_into_between_two_methods_is_still_read_whole() -> None:
+    """The methods of a class are read off its namespace as it was at the start.
+
+    Reading a class's annotations on Python 3.14 stores them in its namespace,
+    and what the walk does with one method may read them before the next; a
+    namespace that grows while its methods are handed out must neither stop
+    the walk nor change it.
+    """
+
+    class _Grows:
+        def first(self, mode: str) -> str:
+            return mode
+
+        def second(self, mode: str) -> str:
+            return mode
+
+    names = []
+    for name, _ in ccl._public_methods(_Grows):
+        names.append(name)
+        setattr(_Grows, f"added_after_{name}", lambda self: None)
+    assert names == ["first", "second"]
+
+
 def test_every_public_choice_of_the_package_is_a_literal() -> None:
     """The package passes: no closed choice is typed ``str``, no entry is stale."""
     found, stale = ccl.offenders()

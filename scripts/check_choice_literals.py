@@ -1471,9 +1471,15 @@ def _public_methods(cls: type) -> Iterator[tuple[str, object]]:
 
     A catalogue row's constructor takes its cells, which the catalogue
     contract holds to str (:data:`CATALOGUE_ROW`), so it is passed over.
+
+    The namespace is read once, before the first method is handed out: what
+    the caller does with a method may write into it, as reading the class's
+    annotations does on Python 3.14 (``__annotate_func__`` and
+    ``__annotations_cache__``), and a live view would then fail with
+    ``RuntimeError: dictionary changed size during iteration``.
     """
     row = issubclass(cls, CatalogueRow)
-    for attribute, member in vars(cls).items():
+    for attribute, member in tuple(vars(cls).items()):
         if attribute == "__init__" and row:
             continue
         if attribute.startswith("_") and attribute != "__init__":

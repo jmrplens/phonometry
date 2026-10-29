@@ -307,10 +307,9 @@ def mean_absorption(surfaces: Sequence[Surface]) -> float | NDArray[np.float64]:
     :param surfaces: Sequence of ``(area, absorption_coefficient)`` pairs; each
         coefficient a scalar or a per-band array.
     :return: The mean absorption :math:`\sum_i S_i \alpha_i / \sum_i S_i`; a ``float``
-        when the coefficients are all numbers, otherwise a per-band array, a
-        zero-dimensional one when one of them is a zero-dimensional array.
-        :math:`\sum_i S_i \alpha_i / \sum_i S_i`; a float for
-        scalar coefficients, otherwise a per-band array.
+        when the coefficients are all numbers, a zero-dimensional array when each
+        is one value and one of them is a zero-dimensional array, otherwise a
+        per-band array.
     """
     total_area, absorption_area, _ = _accumulate_surfaces(surfaces)
     return as_float_or_array(absorption_area / total_area, like=_coefficients(surfaces))
@@ -349,8 +348,8 @@ def sabine_reverberation_time(
     :param speed_of_sound: Speed of sound ``c0``, m/s (default
         343 m/s, dry air at 20 °C, giving the factor ``0.161``).
     :return: The reverberation time ``T``, s; a ``float`` when the coefficients and the
-        air attenuation are all numbers, otherwise a per-band array, a zero-dimensional
-        one when one of them is a zero-dimensional array.
+        air attenuation are all numbers, a zero-dimensional array when each is one
+        value and one of them is a zero-dimensional array, otherwise a per-band array.
     :raises TypeError: if ``speed_of_sound`` or ``volume`` is not a single number.
     """
     volume = require_positive(volume, "volume")
@@ -390,8 +389,8 @@ def eyring_reverberation_time(
     :param air_attenuation_per_m: Air power-attenuation coefficient ``m`` (1/m).
     :param speed_of_sound: Speed of sound ``c0``, m/s.
     :return: The reverberation time ``T``, s; a ``float`` when the coefficients and the
-        air attenuation are all numbers, otherwise a per-band array, a zero-dimensional
-        one when one of them is a zero-dimensional array.
+        air attenuation are all numbers, a zero-dimensional array when each is one
+        value and one of them is a zero-dimensional array, otherwise a per-band array.
     :raises TypeError: if ``speed_of_sound`` or ``volume`` is not a single number.
     """
     volume = require_positive(volume, "volume")
@@ -434,8 +433,8 @@ def millington_sette_reverberation_time(
     :param air_attenuation_per_m: Air power-attenuation coefficient ``m`` (1/m).
     :param speed_of_sound: Speed of sound ``c0``, m/s.
     :return: The reverberation time ``T``, s; a ``float`` when the coefficients and the
-        air attenuation are all numbers, otherwise a per-band array, a zero-dimensional
-        one when one of them is a zero-dimensional array.
+        air attenuation are all numbers, a zero-dimensional array when each is one
+        value and one of them is a zero-dimensional array, otherwise a per-band array.
     :raises TypeError: if ``speed_of_sound`` or ``volume`` is not a single number.
     """
     volume = require_positive(volume, "volume")
@@ -551,8 +550,9 @@ def fitzroy_reverberation_time(
     :param air_attenuation_per_m: Air power-attenuation coefficient ``m`` (1/m).
     :param speed_of_sound: Speed of sound ``c0``, m/s.
     :return: The reverberation time ``T``, s; a ``float`` when the three absorptions and
-        the air attenuation are all numbers, otherwise a per-band array, a
-        zero-dimensional one when one of them is a zero-dimensional array.
+        the air attenuation are all numbers, a zero-dimensional array when each is
+        one value and one of them is a zero-dimensional array, otherwise a per-band
+        array.
     :raises TypeError: if ``speed_of_sound`` is not a single number.
     """
     weights, times = _axial_eyring_times(
@@ -587,8 +587,9 @@ def arau_puchades_reverberation_time(
     :param air_attenuation_per_m: Air power-attenuation coefficient ``m`` (1/m).
     :param speed_of_sound: Speed of sound ``c0``, m/s.
     :return: The reverberation time ``T``, s; a ``float`` when the three absorptions and
-        the air attenuation are all numbers, otherwise a per-band array, a
-        zero-dimensional one when one of them is a zero-dimensional array.
+        the air attenuation are all numbers, a zero-dimensional array when each is
+        one value and one of them is a zero-dimensional array, otherwise a per-band
+        array.
     :raises TypeError: if ``speed_of_sound`` is not a single number.
     """
     weights, times = _axial_eyring_times(

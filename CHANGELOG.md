@@ -3485,11 +3485,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `fluids.sea_water_sound_speed` and `vibration.evaluation_zone` returned a
   `float` (or a grade) for a zero-dimensional array, most of them annotated
   `float | ndarray` with no overload, so a typed caller narrowed a value its
-  own argument had already fixed. They return a `float` now only when every
-  argument that decides the shape is a number, a Python or a numpy one, and an
-  array as soon as one of them is a sequence or an array: `np.array(0.2)`
-  gives a zero-dimensional array, and a one-element list a one-element array,
-  where the ISO 11200 functions returned a `float` for any one-element input:
+  own argument had already fixed. They return a `float` (or a grade) now only
+  when every argument that decides the shape is a number, a Python or a numpy
+  one, and an array as soon as one of them is a sequence or an array:
+  `np.array(0.2)` gives a zero-dimensional array, and a one-element list a
+  one-element array, where the ISO 11200 functions returned a `float` for any
+  one-element input:
   `emission.local_environmental_correction`,
   `emission.environmental_ratio_from_k2`,
   `emission.environmental_ratio_from_absorption`, and the

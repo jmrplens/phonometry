@@ -688,6 +688,18 @@ def test_the_background_increase_is_formula_d_1() -> None:
     np.testing.assert_allclose(bands, [bands[0], bands[0]])
 
 
+def test_the_background_is_measured_in_the_bands_of_the_level() -> None:
+    """D.4.2 corrects band by band, so one broadband background does not spread.
+
+    A single background under a spectrum would subtract a level of one
+    bandwidth from levels of another; it is refused by name, not broadcast.
+    """
+    with pytest.raises(
+        ValueError, match="'measured_level' and 'background_level' need one value"
+    ):
+        background_level_increase([60.0, 70.0], 50.0)
+
+
 @pytest.mark.parametrize(
     ("measured_db", "background_db"),
     [(60.0, 57.0), (64.4, 61.4), (66.9, 63.9)],

@@ -213,7 +213,7 @@ Probability of lumbar injury $P(R)$ (Annex C, Formula C.5).
 | `risk` | The stress variable $R$ (see [`injury_risk`](/phonometry/reference/api/vibration/multiple-shock/#injury_risk)); scalar or array-like. |
 | `sex` | `"male"` or `"female"` (sets the Weibull coefficients). |
 
-**Returns:** The injury probability $P = 1 - \exp(-(R/\alpha)^\beta)$ in 0-1; a `float` for a number; an array for a sequence or an array, a zero-dimensional one included. Negative $R$ gives 0. $P = 1 - \exp(-(R/\alpha)^\beta)$ in 0-1; a float for a scalar input, otherwise an array. Negative $R$ gives 0.
+**Returns:** The injury probability $P = 1 - \exp(-(R/\alpha)^\beta)$ in 0-1; a `float` for a number; an array for a sequence or an array, a zero-dimensional one included. Negative $R$ gives 0.
 
 **Raises**
 

@@ -1169,9 +1169,10 @@ def background_level_increase(
     :param measured_level: :math:`L_\mathrm{meas}`, the level measured with
         the unit, in dB; one value or one per band.
     :param background_level: :math:`L_\mathrm{bg}`, the background alone,
-        in dB.
+        in dB, in the same bands as ``measured_level``: one value or one per
+        band.
     :return: :math:`\Delta L`, in dB; a ``float`` when the two levels are numbers; an
-        array of their broadcast shape when one is a sequence or an array, a
+        array of one value per band when one is a sequence or an array, a
         zero-dimensional one included.
     :raises ValueError: For levels that are not finite, of different lengths,
         or no more than 3 dB above the background.

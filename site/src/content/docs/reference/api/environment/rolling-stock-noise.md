@@ -211,9 +211,9 @@ spectrum.
 | Name | Description |
 | :--- | :--- |
 | `measured_level` | $L_\mathrm{meas}$, the level measured with the unit, in dB; one value or one per band. |
-| `background_level` | $L_\mathrm{bg}$, the background alone, in dB. |
+| `background_level` | $L_\mathrm{bg}$, the background alone, in dB, in the same bands as `measured_level`: one value or one per band. |
 
-**Returns:** $\Delta L$, in dB; a `float` when the two levels are numbers; an array of their broadcast shape when one is a sequence or an array, a zero-dimensional one included.
+**Returns:** $\Delta L$, in dB; a `float` when the two levels are numbers; an array of one value per band when one is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

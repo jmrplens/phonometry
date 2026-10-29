@@ -97,7 +97,7 @@ $\ln(1 - \alpha_i)$, so each must be below 1.
 | `air_attenuation_per_m` | Air power-attenuation coefficient `m` (1/m). |
 | `speed_of_sound` | Speed of sound `c0`, m/s. |
 
-**Returns:** The reverberation time `T`, s; a `float` when the three absorptions and the air attenuation are all numbers, otherwise a per-band array, a zero-dimensional one when one of them is a zero-dimensional array.
+**Returns:** The reverberation time `T`, s; a `float` when the three absorptions and the air attenuation are all numbers, a zero-dimensional array when each is one value and one of them is a zero-dimensional array, otherwise a per-band array.
 
 **Raises**
 
@@ -141,7 +141,7 @@ coefficient stays within the shared unit-error ceiling of 2.
 | `air_attenuation_per_m` | Air power-attenuation coefficient `m` (1/m). |
 | `speed_of_sound` | Speed of sound `c0`, m/s. |
 
-**Returns:** The reverberation time `T`, s; a `float` when the coefficients and the air attenuation are all numbers, otherwise a per-band array, a zero-dimensional one when one of them is a zero-dimensional array.
+**Returns:** The reverberation time `T`, s; a `float` when the coefficients and the air attenuation are all numbers, a zero-dimensional array when each is one value and one of them is a zero-dimensional array, otherwise a per-band array.
 
 **Raises**
 
@@ -181,7 +181,7 @@ must be below 1.
 | `air_attenuation_per_m` | Air power-attenuation coefficient `m` (1/m). |
 | `speed_of_sound` | Speed of sound `c0`, m/s. |
 
-**Returns:** The reverberation time `T`, s; a `float` when the three absorptions and the air attenuation are all numbers, otherwise a per-band array, a zero-dimensional one when one of them is a zero-dimensional array.
+**Returns:** The reverberation time `T`, s; a `float` when the three absorptions and the air attenuation are all numbers, a zero-dimensional array when each is one value and one of them is a zero-dimensional array, otherwise a per-band array.
 
 **Raises**
 
@@ -206,7 +206,7 @@ $\bar{\alpha} = A / S$.
 | :--- | :--- |
 | `surfaces` | Sequence of `(area, absorption_coefficient)` pairs; each coefficient a scalar or a per-band array. |
 
-**Returns:** The mean absorption $\sum_i S_i \alpha_i / \sum_i S_i$; a `float` when the coefficients are all numbers, otherwise a per-band array, a zero-dimensional one when one of them is a zero-dimensional array. $\sum_i S_i \alpha_i / \sum_i S_i$; a float for scalar coefficients, otherwise a per-band array.
+**Returns:** The mean absorption $\sum_i S_i \alpha_i / \sum_i S_i$; a `float` when the coefficients are all numbers, a zero-dimensional array when each is one value and one of them is a zero-dimensional array, otherwise a per-band array.
 
 ## millington_sette_reverberation_time
 
@@ -244,7 +244,7 @@ this model's domain (use Sabine, or Eyring while the mean stays below 1).
 | `air_attenuation_per_m` | Air power-attenuation coefficient `m` (1/m). |
 | `speed_of_sound` | Speed of sound `c0`, m/s. |
 
-**Returns:** The reverberation time `T`, s; a `float` when the coefficients and the air attenuation are all numbers, otherwise a per-band array, a zero-dimensional one when one of them is a zero-dimensional array.
+**Returns:** The reverberation time `T`, s; a `float` when the coefficients and the air attenuation are all numbers, a zero-dimensional array when each is one value and one of them is a zero-dimensional array, otherwise a per-band array.
 
 **Raises**
 
@@ -421,7 +421,7 @@ error (a percentage passed instead of a fraction).
 | `air_attenuation_per_m` | Air power attenuation coefficient `m`, in reciprocal metres (ISO 354 8.1.2.1, $m = \alpha / (10 \lg \mathrm{e})$), scalar or per-band; see [`air_power_attenuation_per_m`](/phonometry/reference/api/environment/air-absorption/#air_power_attenuation_per_m). Default `0` (air absorption neglected). |
 | `speed_of_sound` | Speed of sound `c0`, m/s (default 343 m/s, dry air at 20 °C, giving the factor `0.161`). |
 
-**Returns:** The reverberation time `T`, s; a `float` when the coefficients and the air attenuation are all numbers, otherwise a per-band array, a zero-dimensional one when one of them is a zero-dimensional array.
+**Returns:** The reverberation time `T`, s; a `float` when the coefficients and the air attenuation are all numbers, a zero-dimensional array when each is one value and one of them is a zero-dimensional array, otherwise a per-band array.
 
 **Raises**
 

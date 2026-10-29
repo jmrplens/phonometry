@@ -487,8 +487,6 @@ def injury_probability(
     :return: The injury probability :math:`P = 1 - \exp(-(R/\alpha)^\beta)` in 0-1; a
         ``float`` for a number; an array for a sequence or an array, a zero-dimensional
         one included. Negative :math:`R` gives 0.
-        :math:`P = 1 - \exp(-(R/\alpha)^\beta)` in 0-1; a float for a
-        scalar input, otherwise an array. Negative :math:`R` gives 0.
     :raises TypeError: if ``sex`` is not a text.
     """
     require_choice(sex, "sex", _SEXES)

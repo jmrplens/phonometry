@@ -182,7 +182,6 @@ def air_absorption_area(
     :return: The air absorption area :math:`A_{\text{air}} = 4 m V (1 - \psi)`, m2; a
         ``float`` for a number; an array for a sequence or an array, a zero-dimensional
         one included.
-        :math:`A_{\text{air}} = 4 m V (1 - \psi)`, m2.
     :raises TypeError: if ``object_fraction`` or ``volume`` is not a single number.
     """
     volume = require_positive(volume, "volume")
@@ -213,9 +212,9 @@ def equivalent_absorption_area(
     :param air_area: Air absorption area ``Aair``, m2 (see
         :func:`air_absorption_area`); scalar or per-band.
     :return: The total equivalent absorption area ``A``, m2; a ``float`` when the
-        coefficients, an object's entry and ``air_area`` are all numbers, otherwise a
-        per-band array, a zero-dimensional one when one of them is a zero-dimensional
-        array.
+        coefficients, an object's entry and ``air_area`` are all numbers, a
+        zero-dimensional array when each is one value and one of them is a
+        zero-dimensional array, otherwise a per-band array.
     """
     total = np.asarray(air_area, dtype=np.float64)
     if np.any(total < 0.0):
@@ -295,7 +294,6 @@ def reverberation_time(
     :return: The reverberation time :math:`T = \frac{55.3}{c_0} \frac{V (1 - \psi)}{A}`,
         s; a ``float`` for a number; an array for a sequence or an array, a
         zero-dimensional one included.
-        :math:`T = \frac{55.3}{c_0} \frac{V (1 - \psi)}{A}`, s.
     :raises ValueError: if ``absorption_area`` is not positive and finite.
     :raises TypeError: if ``object_fraction``, ``speed_of_sound`` or ``volume`` is not a
         single number.

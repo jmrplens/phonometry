@@ -1288,13 +1288,14 @@ cuando todos los argumentos que deciden la forma de su resultado son números,
 de Python o de NumPy, y un array en cuanto uno de ellos es una secuencia o un
 array, donde la 3.3.0 y la 4.0.0rc1 devolvían un `float` para un array de
 dimensión cero. Noventa funciones y métodos públicos siguen la regla, entre
-ellos `room.room_constant`, `room.critical_distance`,
-`fluids.sea_water_sound_speed` y `vibration.evaluation_zone`:
+ellos `room.room_constant`, `room.critical_distance` y
+`fluids.sea_water_sound_speed`, y `vibration.evaluation_zone` la sigue con la
+letra de una zona donde las demás dan un `float`:
 
 | 3.3.0 o 4.0.0rc1 | 4.0 |
 | --- | --- |
 | `room.room_constant(100.0, np.array(0.2))` devolvía el `float` `25.0` | devuelve `array(25.)`; `float(...)` o `.item()` da el número |
-| `emission.local_environmental_correction([0.5])` devolvía un `float` para cualquier entrada de un elemento, igual que `emission.environmental_ratio_from_k2`, `emission.environmental_ratio_from_absorption`, y el campo `background_margin_db` y la propiedad `correction` del `WorkstationBackgroundCorrection` que devuelve `emission.background_noise_correction_at_workstation` | cada uno da un array de un elemento; para un número, se entrega `0.5` |
+| `emission.local_environmental_correction([0.5])` devolvía un `float` para cualquier entrada de un elemento, igual que `emission.environmental_ratio_from_k2`, `emission.environmental_ratio_from_absorption`, y el campo `background_margin_db` y la propiedad `correction` del `WorkstationBackgroundCorrection` que devuelve `emission.background_noise_correction_at_workstation` | cada uno da un array de un elemento; para obtener un número, se pasa `0.5` y no `[0.5]` |
 | `electroacoustics.piston_resistance(1.0)` devolvía un `numpy.float64`, igual que `piston_reactance` y `piston_directivity` | devuelve un `float` de Python, sin `.shape` ni `.dtype` |
 
 Sesenta y seis de ellos reciben sobrecargas tipadas, así que un comprobador

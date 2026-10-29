@@ -308,7 +308,7 @@ enclosure_sound_power_insulation(
     frequencies: ArrayLike | None = None,
     a_weighted_without: float | None = None,
     a_weighted_with: float | None = None,
-    base_standard: Literal['ISO 3741', 'ISO 3742', 'ISO 3743-1', 'ISO 3743-2', 'ISO 3744', 'ISO 3746', 'ISO 3747', 'ISO 9614-1', 'ISO 9614-2'] = 'ISO 3744',
+    base_standard: Literal['ISO 3741', 'ISO 3742', 'ISO 3743-2', 'ISO 3743-1', 'ISO 3744', 'ISO 3746', 'ISO 3747', 'ISO 9614-1', 'ISO 9614-2'] = 'ISO 3744',
     condition: Literal['laboratory', 'in-situ'] = 'laboratory',
     source_kind: Literal['actual', 'reciprocity', 'artificial'] = 'actual',
     fraction: Literal[1, 3] | np.integer[Any] = 3,

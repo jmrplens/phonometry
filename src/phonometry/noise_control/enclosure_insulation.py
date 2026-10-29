@@ -197,18 +197,20 @@ _ISO_11201: Final = "ISO 11201"
 _ISO_11202: Final = "ISO 11202"
 _ISO_11204: Final = "ISO 11204"
 
-#: A base standard Table 1 of either part determines a sound power by.
-SoundPowerStandard = Literal[
-    "ISO 3741",
-    "ISO 3742",
+#: A base standard Table 1 of part 2 determines a sound power by in situ,
+#: each a row of Table C.1 too.
+_InSituPowerStandard = Literal[
     "ISO 3743-1",
-    "ISO 3743-2",
     "ISO 3744",
     "ISO 3746",
     "ISO 3747",
     "ISO 9614-1",
     "ISO 9614-2",
 ]
+
+#: A base standard Table 1 of either part determines a sound power by: the
+#: three only part 1 lists, then those of part 2.
+SoundPowerStandard = Literal["ISO 3741", "ISO 3742", "ISO 3743-2", _InSituPowerStandard]
 
 #: A base standard Table 1 of either part determines a sound pressure level by.
 SoundPressureStandard = Literal["ISO 11201", "ISO 11202", "ISO 11204"]
@@ -231,17 +233,7 @@ _SOUND_PRESSURE_STANDARDS: tuple[SoundPressureStandard, ...] = (
 )
 
 #: A base standard of Table C.1 of part 2, by its designation.
-TestEnvironmentStandard = Literal[
-    "ISO 3743-1",
-    "ISO 3744",
-    "ISO 3746",
-    "ISO 3747",
-    "ISO 9614-1",
-    "ISO 9614-2",
-    "ISO 11201",
-    "ISO 11202",
-    "ISO 11204",
-]
+TestEnvironmentStandard = Literal[_InSituPowerStandard, SoundPressureStandard]
 
 #: Table C.1 of part 2: what each base standard asks of the room, as the
 #: largest environmental correction ``K2`` it tolerates and the smallest
@@ -749,7 +741,7 @@ def enclosure_reciprocity_insulation(
         a_weighted_without=None,
         a_weighted_with=None,
         quantity="reciprocity",
-        base_standard="ISO 3741",
+        base_standard=_ISO_3741,
         condition="laboratory",
         source_kind="reciprocity",
         fraction=fraction,

@@ -213,7 +213,7 @@ How many bursts the printed duration holds at the repeat time.
 ```python
 signal_burst_indications(
     application: Literal['hand-arm', 'whole-body', 'low-frequency-whole-body'],
-    name: Literal[Literal['Wb', 'Wc', 'Wd', 'We', 'Wf', 'Wh', 'Wj', 'Wk', 'Wm'], 'band-limiting'],
+    name: Literal['Wb', 'Wc', 'Wd', 'We', 'Wf', 'Wh', 'Wj', 'Wk', 'Wm', 'band-limiting'],
     n_cycles: int | None,
     *,
     fs: float | None = None,
@@ -257,7 +257,7 @@ the linear and the exponential average of Annex D.
 ```python
 SignalBurstVerification(
     application: Literal['hand-arm', 'whole-body', 'low-frequency-whole-body'],
-    weighting: Literal[Literal['Wb', 'Wc', 'Wd', 'We', 'Wf', 'Wh', 'Wj', 'Wk', 'Wm'], 'band-limiting'],
+    weighting: Literal['Wb', 'Wc', 'Wd', 'We', 'Wf', 'Wh', 'Wj', 'Wk', 'Wm', 'band-limiting'],
     amplitude_m_s2: float,
     cycle_counts: tuple[int | None, ...],
     quantities: tuple[Literal['rms', 'vdv', 'mtvv_linear', 'mtvv_exponential', 'msdv'], ...],
@@ -354,7 +354,7 @@ The largest deviation in magnitude, signed as it was measured.
 ```python
 verify_signal_burst_response(
     application: Literal['hand-arm', 'whole-body', 'low-frequency-whole-body'],
-    name: Literal[Literal['Wb', 'Wc', 'Wd', 'We', 'Wf', 'Wh', 'Wj', 'Wk', 'Wm'], 'band-limiting'],
+    name: Literal['Wb', 'Wc', 'Wd', 'We', 'Wf', 'Wh', 'Wj', 'Wk', 'Wm', 'band-limiting'],
     measured: Mapping[int, Mapping[Literal['rms', 'vdv', 'mtvv_linear', 'mtvv_exponential', 'msdv'], float]] | Mapping[int | None, Mapping[Literal['rms', 'vdv', 'mtvv_linear', 'mtvv_exponential', 'msdv'], float]] | Mapping[None, Mapping[Literal['rms', 'vdv', 'mtvv_linear', 'mtvv_exponential', 'msdv'], float]],
     *,
     amplitude_m_s2: float = 1.0,

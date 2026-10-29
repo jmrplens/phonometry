@@ -741,19 +741,41 @@ def _assigned(node: ast.stmt) -> list[tuple[str, ast.expr]]:
     return []
 
 
-def _imported_constants(
-    node: ast.ImportFrom, package: str, depth: int
-) -> list[tuple[str, ast.expr]]:
-    """The constants a ``from ... import`` of the package brings in, by the
-    name the importing module gives them.
+def _import_source(node: ast.ImportFrom, package: str) -> str | None:
+    """The module of the package a ``from ... import`` reads, or None for one
+    outside the package or a relative import that resolves to nothing.
     """
     try:
         source = importlib.util.resolve_name(
             "." * node.level + (node.module or ""), package
         )
     except ValueError:
-        return []
-    if not source.startswith("phonometry"):
+        return None
+    return source if source.startswith("phonometry") else None
+
+
+def _parsed_module(module_name: str) -> tuple[ModuleType, ast.Module, str] | None:
+    """The imported module *module_name*, its parsed source and its package,
+    or None when it is not imported or its source cannot be read.
+    """
+    module = sys.modules.get(module_name)
+    if module is None:
+        return None
+    try:
+        tree = ast.parse(inspect.getsource(module))
+    except (OSError, TypeError, SyntaxError):
+        return None
+    return module, tree, module.__package__ or module_name.rpartition(".")[0]
+
+
+def _imported_constants(
+    node: ast.ImportFrom, package: str, depth: int
+) -> list[tuple[str, ast.expr]]:
+    """The constants a ``from ... import`` of the package brings in, by the
+    name the importing module gives them.
+    """
+    source = _import_source(node, package)
+    if source is None:
         return []
     imported = _constants_of(source, depth + 1)
     return [
@@ -778,14 +800,10 @@ def _module_statements(body: list[ast.stmt]) -> Iterator[ast.stmt]:
 
 @functools.cache
 def _constants_of(module_name: str, depth: int = 0) -> MappingProxyType[str, ast.expr]:
-    module = sys.modules.get(module_name)
-    if module is None:
+    parsed = _parsed_module(module_name)
+    if parsed is None:
         return MappingProxyType({})
-    try:
-        tree = ast.parse(inspect.getsource(module))
-    except (OSError, TypeError, SyntaxError):
-        return MappingProxyType({})
-    package = module.__package__ or module_name.rpartition(".")[0]
+    module, tree, package = parsed
     found: dict[str, ast.expr] = {}
     for node in _module_statements(tree.body):
         if isinstance(node, ast.ImportFrom):
@@ -1572,29 +1590,21 @@ def _imports_of(module_name: str) -> MappingProxyType[str, tuple[str, str]]:
     A name the module also assigns is its own, as :func:`_constants_of` reads
     it, and is left out.
     """
-    module = sys.modules.get(module_name)
-    if module is None:
+    parsed = _parsed_module(module_name)
+    if parsed is None:
         return MappingProxyType({})
-    try:
-        tree = ast.parse(inspect.getsource(module))
-    except (OSError, TypeError, SyntaxError):
-        return MappingProxyType({})
-    package = module.__package__ or module_name.rpartition(".")[0]
+    _, tree, package = parsed
     imports: dict[str, tuple[str, str]] = {}
     assigned: set[str] = set()
     for node in _module_statements(tree.body):
         if not isinstance(node, ast.ImportFrom):
             assigned.update(name for name, _ in _assigned(node))
             continue
-        try:
-            source = importlib.util.resolve_name(
-                "." * node.level + (node.module or ""), package
-            )
-        except ValueError:
+        source = _import_source(node, package)
+        if source is None:
             continue
-        if source.startswith("phonometry"):
-            for alias in node.names:
-                imports.setdefault(alias.asname or alias.name, (source, alias.name))
+        for alias in node.names:
+            imports.setdefault(alias.asname or alias.name, (source, alias.name))
     return MappingProxyType(
         {name: where for name, where in imports.items() if name not in assigned}
     )

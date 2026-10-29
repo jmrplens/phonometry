@@ -34,12 +34,16 @@ from __future__ import annotations
 
 import warnings
 from dataclasses import replace
-from pathlib import Path
+
+# Imported to run, not only to type: typing.get_type_hints resolves the path
+# parameter of read and info in this module's namespace.
+from pathlib import Path  # noqa: TC003
 from typing import TYPE_CHECKING, NamedTuple
 
 import numpy as np
 
 from .._internal.warnings import PhonometryWarning
+from ._audio_file import open_audio, require_regular_audio
 from ._chunks import (
     _WAVE_FORM_TYPE,
     WAVE_FORMAT_IEEE_FLOAT,
@@ -124,7 +128,7 @@ def _sniff(path: str | Path) -> str | None:
 
     :raises ValueError: If the leading bytes match no known audio format.
     """
-    with Path(path).open("rb") as fh:
+    with open_audio(path) as fh:
         head = fh.read(12)
     if head[:4] in _WAV_FOURCC and head[8:12] == _WAVE_FORM_TYPE:
         return None
@@ -207,6 +211,7 @@ def soundfile_stamp(
     :param chunks: The walked chunks of a compressed WAV, or ``None``.
     :return: The stamp both readers attach to what they decode.
     """
+    require_regular_audio(path)
     file_info = sf.info(str(path))
     lossy = _soundfile_lossy(str(file_info.subtype))
     if chunks is not None:
@@ -243,6 +248,7 @@ def _read_soundfile(
     stamp = soundfile_stamp(sf, path, format_name, chunks)
     if stamp.source.lossy:
         _warn_lossy(f"{format_name} ({stamp.source.format_name})", path)
+    require_regular_audio(path)
     data, fs = sf.read(str(path), dtype="float64", always_2d=True)
     return Signal(
         data=np.ascontiguousarray(data.T),
@@ -292,12 +298,16 @@ def read(path: str | Path, *, calibration_factor: float | None = None) -> Signal
         sidecar's factor when a sidecar exists, and otherwise leaves the
         signal in digital full-scale units.
     :return: The signal with its metadata.
-    :raises ValueError: If the file matches no known audio format, or a
-        sidecar exists but is invalid or gives a count of channel labels
-        that is not the file's count of channels, each naming the sidecar.
+    :raises ValueError: If *path* names a pipe, a device, a socket or a
+        directory rather than a regular file (refused before it is opened,
+        since opening a pipe waits for a writer and reading a device never
+        ends), the file matches no known audio format, or a sidecar exists
+        but is invalid or gives a count of channel labels that is not the
+        file's count of channels, each naming the sidecar.
     :raises ImportError: If the format needs the ``[audio]`` extra and it
         is not installed.
     """
+    require_regular_audio(path)
     sidecar = read_sidecar(path)
     if sidecar is not None and calibration_factor is None:
         calibration_factor = sidecar.calibration_factor
@@ -337,10 +347,13 @@ def info(path: str | Path) -> AudioFileInfo:
 
     :param path: The file to describe.
     :return: The file's description.
-    :raises ValueError: If the file matches no known audio format.
+    :raises ValueError: If *path* names a pipe, a device, a socket or a
+        directory rather than a regular file (refused before it is opened),
+        or the file matches no known audio format.
     :raises ImportError: If the container needs the ``[audio]`` extra and
         it is not installed.
     """
+    require_regular_audio(path)
     format_name = _sniff(path)
     if format_name is None:
         return wav_info(path)

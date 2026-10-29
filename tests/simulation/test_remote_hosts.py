@@ -3,10 +3,12 @@
 
 from __future__ import annotations
 
+import re
 import sys
 from pathlib import Path
 
 import pytest
+from special_files import SPECIAL_KINDS, make_special, raised_within
 
 from phonometry.simulation._remote import hosts
 
@@ -148,6 +150,18 @@ def test_a_missing_file_is_a_missing_key_that_names_the_file(hosts_at: Path) -> 
             "'ssh' must be a destination",
             id="ssh with a C1 control",
         ),
+        # A mark that reorders text: a message would show one destination and
+        # ssh would go to another.
+        pytest.param(
+            _DOCKER.replace("root@192.168.0.40", "root@\\u202e04.0.861.291"),
+            "'ssh' must be a destination",
+            id="ssh with a right-to-left override",
+        ),
+        pytest.param(
+            _DOCKER.replace("root@192.168.0.40", "root@192.168.0.40\\u2066"),
+            "'ssh' must be a destination",
+            id="ssh with an isolate",
+        ),
         pytest.param(
             _DOCKER.replace('"docker"', '"podman"'),
             "'runner' must be 'docker' or 'python'",
@@ -245,7 +259,11 @@ def test_a_malformed_file_is_a_value_error_that_names_it(
 @pytest.mark.parametrize(
     ("kind", "error", "match"),
     [
-        ("a directory", ValueError, "the hosts file cannot be read"),
+        (
+            "a directory",
+            ValueError,
+            "the hosts file is a directory, and it is read only from a regular file",
+        ),
         # A path whose middle component is a file names no file there, on
         # every system: the KeyError of no hosts file at all.
         ("under a file", KeyError, "does not exist"),
@@ -276,3 +294,33 @@ def test_an_image_entry_on_a_python_node_names_where_it_belongs(hosts_at: Path) 
     hosts_at.write_text(_PYTHON + 'image = "phonometry-node:gpu"\n', encoding="utf-8")
     with pytest.raises(ValueError, match="'image' belongs to runner = \"docker\""):
         hosts.load_host("lab")
+
+
+@pytest.mark.parametrize("kind", SPECIAL_KINDS)
+def test_a_hosts_file_that_is_no_regular_file_is_refused_before_it_is_opened(
+    hosts_at: Path, kind: str
+) -> None:
+    """A pipe at the name kept the read waiting for a writer, a device without end."""
+    what = make_special(kind, hosts_at)
+    error = raised_within(
+        lambda: hosts.load_host("nas"), pipe=hosts_at if kind == "pipe" else None
+    )
+    assert isinstance(error, ValueError)
+    assert str(error) == (
+        f"{hosts_at}: the hosts file is {what}, and it is read only from a regular file"
+    )
+
+
+def test_a_hosts_file_past_one_mebibyte_is_refused_before_it_is_read(
+    hosts_at: Path,
+) -> None:
+    hosts_at.write_text(_DOCKER, encoding="utf-8")
+    with hosts_at.open("r+b") as handle:
+        # A sparse file: the size is refused before a byte of it is read.
+        handle.truncate(1024 * 1024 + 1)
+    refusal = (
+        f"{hosts_at}: the hosts file is 1048577 bytes, and a hosts file is at most "
+        "1048576 bytes (1 MiB)"
+    )
+    with pytest.raises(ValueError, match=f"^{re.escape(refusal)}$"):
+        hosts.load_host("nas")

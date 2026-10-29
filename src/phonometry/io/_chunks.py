@@ -63,13 +63,14 @@ from __future__ import annotations
 import os
 import struct
 from dataclasses import dataclass
-from pathlib import Path
 from typing import TYPE_CHECKING, Literal
 
 from .._internal.display import RichDisplay
 from .._internal.validation import require_scalar
+from ._audio_file import open_audio
 
 if TYPE_CHECKING:
+    from pathlib import Path
     from typing import BinaryIO
 
 #: RIFF format tags (``wFormatTag`` in ``fmt``, from Microsoft ``mmreg.h``).
@@ -741,7 +742,7 @@ def parse_wav_chunks(path: str | Path) -> WavChunks:
     data_offset: int | None = None
     data_size: int | None = None
 
-    with Path(path).open("rb") as fh:
+    with open_audio(path) as fh:
         file_size = os.fstat(fh.fileno()).st_size
         container = _read_wave_header(fh, path)
         while True:

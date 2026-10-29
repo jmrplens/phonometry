@@ -57,6 +57,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from .._internal.validation import require_choice
+from ._audio_file import require_regular_audio
 from ._backends import _FLAC_NAME, _import_soundfile, _sniff, info
 from ._blocks import read_blocks
 from ._chunks import (
@@ -131,6 +132,7 @@ def _source_traits(
             kind, bits = "decoded", 0
         return kind, bits, chunks.bext, fmt.fs, fmt.channels, chunks.frames
     sf = _import_soundfile(format_name)
+    require_regular_audio(path)
     file_info = sf.info(str(path))
     kind, bits = _SF_SUBTYPE_TRAITS.get(str(file_info.subtype), ("decoded", 0))
     bext = read_flac_bext(path) if format_name == _FLAC_NAME else None
@@ -300,7 +302,9 @@ def convert(
     :param block_size: Frames per streamed block; the memory ceiling.
     :return: :func:`phonometry.io.info` of the written file.
     :raises ValueError: For a lossy or unknown target suffix, source and
-        destination naming the same file, a FLAC target that cannot hold
+        destination naming the same file, a source that is a pipe, a
+        device, a socket or a directory rather than a regular file (refused
+        before it is opened), a FLAC target that cannot hold
         the source without an explicit ``subtype``, an invalid
         ``block_size``, a sidecar beside the source that
         :func:`~phonometry.io.read_sidecar` refuses or whose labels do not
@@ -317,6 +321,7 @@ def convert(
         )
     source, target = Path(src), Path(dst)
     _check_conversion_paths(src, dst)
+    require_regular_audio(source)
 
     flac = target.suffix.lower() == ".flac"
     kind, bits, bext, fs, channels, frames = _source_traits(source)

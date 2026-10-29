@@ -990,6 +990,29 @@ jobs:
     - name: Check that no raises, warns or deprecated_call block holds a second call
       run: python scripts/check_raises_blocks.py
 
+  # A name a caller or the environment hands a reader can hold a named pipe,
+  # a device or a directory, and a pipe kept the audio readers, the ANP tables
+  # and the hosts file of the remote runs waiting at the open for a writer
+  # that never came. Every reader in src opens a file through the shared
+  # check of _internal/json_input.py, or asks it before a reader of another
+  # library opens the name itself; this fails on a read that does neither.
+  # Static and dependency-free, so it runs on its own.
+  regular-file-reads:
+    name: Every reader asks what a name holds before it opens it
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+    - uses: actions/checkout@v7
+      with:
+        persist-credentials: false
+    - name: Set up Python 3.13
+      uses: actions/setup-python@v7
+      with:
+        python-version: "3.13"
+    - name: Check that every read of a file a caller names goes through the shared check
+      run: python scripts/check_regular_file_reads.py
+
   # A level is a ratio to a reference value, and ISO 1683 fixes one per
   # quantity. The package publishes them once, as
   # phonometry.metrology.REFERENCE_VALUES; before that the same 20 µPa

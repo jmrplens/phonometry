@@ -254,7 +254,7 @@ Docker image of section 3 holds both.
 | an argument of the run | `TypeError` or `ValueError` | when the run is built, as for a run here |
 | a run that cannot travel: a source whose waveform is a callable other than the `.value` of a `GaussianPulse`, `CWSource` or `SignalSource`, or a whole number outside the range of an int64 | `TypeError`, naming the source or the field | when the function is called, before the hosts file is read |
 | a host the file does not name, or no hosts file | `KeyError` | before ssh starts |
-| a hosts file that cannot be read or is not TOML, or a malformed entry | `ValueError`, naming the file | before ssh starts |
+| a hosts file that is a named pipe, a device or a directory, holds more than 1 MiB, cannot be read or is not TOML, or a malformed entry | `ValueError`, naming the file | before ssh starts |
 | no ssh client on `PATH`, even on Windows with one in the working directory, Pyodide, a package that cannot be read from disk or holds a file no node would write, or a job too long for the header a node reads (a run of several thousand point sources) | `ComputeRemoteError` | before ssh starts |
 | anything that fails in the connection or on the node | `ComputeRemoteError` | when it fails |
 

@@ -54,6 +54,7 @@ import numpy as np
 from scipy.io import wavfile
 
 from .._internal.display import RichDisplay
+from ._audio_file import open_audio, require_regular_audio
 from ._chunks import (
     WAVE_FORMAT_IEEE_FLOAT,
     WAVE_FORMAT_PCM,
@@ -205,9 +206,11 @@ def read_wav(
         signal, when known. Never invented: without one the signal stays in
         full-scale units and says so.
     :return: The signal with its metadata.
-    :raises ValueError: If the file's codec is not linear PCM/float (those
-        files go through the ``[audio]`` backend, which decodes them), or
-        the file ends before the ``data`` payload its header declares.
+    :raises ValueError: If *path* names a pipe, a device, a socket or a
+        directory rather than a regular file, the file's codec is not linear
+        PCM/float (those files go through the ``[audio]`` backend, which
+        decodes them), or the file ends before the ``data`` payload its
+        header declares.
     """
     parsed = parse_wav_chunks(path) if chunks is None else chunks
     fmt = parsed.fmt
@@ -217,6 +220,10 @@ def read_wav(
             "read it through the [audio] backend"
         )
         raise ValueError(msg)
+    # Asked before the size is read, which a pipe gives as zero, and before
+    # SciPy opens the name itself: it memory-maps the file only when it opens
+    # it, and a file object would turn the map off.
+    require_regular_audio(path)
     payload_end = parsed.data_offset + parsed.data_size
     actual = Path(path).stat().st_size
     if actual < payload_end:
@@ -234,7 +241,7 @@ def read_wav(
         # the block reader's linear decoder instead.
         from ._blocks import _decode_linear_frames
 
-        with Path(path).open("rb") as fh:
+        with open_audio(path) as fh:
             fh.seek(parsed.data_offset)
             raw_bytes = fh.read(parsed.frames * fmt.block_align)
         data = np.atleast_2d(_decode_linear_frames(raw_bytes, fmt))

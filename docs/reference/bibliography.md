@@ -132,7 +132,7 @@ it; the list grows as guides gain their References sections.
   Cited by [Swept-sine distortion and phase utilities](../devices/electroacoustics/swept-sine-distortion.md).
 - Müller, S., & Massarani, P. (2001). Transfer-function measurement with
   sweeps. *Journal of the Audio Engineering Society*, 49(6), 443-471.
-  [AES E-Library record](https://www.aes.org/e-lib/browse.cfm?elib=10189).
+  [AES E-Library record](https://aes.org/publications/elibrary-page/?id=10189).
   The sweep-measurement monograph behind the practice notes: inverse
   filters, fades and distortion rejection.
   Cited by [Swept-sine distortion and phase utilities](../devices/electroacoustics/swept-sine-distortion.md).

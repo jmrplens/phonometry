@@ -1170,7 +1170,7 @@ built on these envelopes, and [Why phonometry](https://docs.jmrp.io/phonometry/s
   Table 4 toneburst responses the ballistics are verified against in CI.
 - American National Standards Institute. (1983). *Specification for sound
   level meters* (ANSI S1.4-1983).
-  [ANSI webstore](https://webstore.ansi.org/standards/asa/ansiasas11983).
+  [ANSI webstore](https://webstore.ansi.org/standards/asa/ansis11983r20064a1985).
   The classic analog meter specification: the FAST/SLOW dynamic
   characteristics the F and S constants descend from, and the IMPULSE
   characteristic (35 ms rise, slow decay) that IEC 61672-1 no longer

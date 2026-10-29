@@ -870,9 +870,9 @@ fitted. The conformity evidence is real and it is published, in
 
 ## References
 
-- International Telecommunication Union. (2002). *Measurement of
+- International Telecommunication Union. (1986). *Measurement of
   audio-frequency noise voltage level in sound broadcasting* (Recommendation
-  ITU-R BS.468-4). [ITU-R publication](https://www.itu.int/rec/R-REC-BS.468).
+  ITU-R BS.468-4). [ITU-R publication](https://www.itu.int/rec/R-REC-BS.468/en).
   The weighting network of clause 1 and the quasi-peak detector of clause 2.
 - International Electrotechnical Commission. (1985). *Sound system equipment -
   Part 1: General* (IEC 60268-1:1985), Appendix A, with Amendment 1:1988. The

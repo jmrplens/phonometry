@@ -17577,9 +17577,9 @@ fitted. The conformity evidence is real and it is published, in
 
 ## References
 
-- International Telecommunication Union. (2002). *Measurement of
+- International Telecommunication Union. (1986). *Measurement of
   audio-frequency noise voltage level in sound broadcasting* (Recommendation
-  ITU-R BS.468-4). [ITU-R publication](https://www.itu.int/rec/R-REC-BS.468).
+  ITU-R BS.468-4). [ITU-R publication](https://www.itu.int/rec/R-REC-BS.468/en).
   The weighting network of clause 1 and the quasi-peak detector of clause 2.
 - International Electrotechnical Commission. (1985). *Sound system equipment -
   Part 1: General* (IEC 60268-1:1985), Appendix A, with Amendment 1:1988. The
@@ -55584,7 +55584,7 @@ it; the list grows as guides gain their References sections.
   Cited by [Swept-sine distortion and phase utilities](https://docs.jmrp.io/phonometry/devices/electroacoustics/swept-sine-distortion/).
 - Müller, S., & Massarani, P. (2001). Transfer-function measurement with
   sweeps. *Journal of the Audio Engineering Society*, 49(6), 443-471.
-  [AES E-Library record](https://www.aes.org/e-lib/browse.cfm?elib=10189).
+  [AES E-Library record](https://aes.org/publications/elibrary-page/?id=10189).
   The sweep-measurement monograph behind the practice notes: inverse
   filters, fades and distortion rejection.
   Cited by [Swept-sine distortion and phase utilities](https://docs.jmrp.io/phonometry/devices/electroacoustics/swept-sine-distortion/).
@@ -63723,7 +63723,7 @@ built on these envelopes, and [Why phonometry](https://docs.jmrp.io/phonometry/s
   Table 4 toneburst responses the ballistics are verified against in CI.
 - American National Standards Institute. (1983). *Specification for sound
   level meters* (ANSI S1.4-1983).
-  [ANSI webstore](https://webstore.ansi.org/standards/asa/ansiasas11983).
+  [ANSI webstore](https://webstore.ansi.org/standards/asa/ansis11983r20064a1985).
   The classic analog meter specification: the FAST/SLOW dynamic
   characteristics the F and S constants descend from, and the IMPULSE
   characteristic (35 ms rise, slow decay) that IEC 61672-1 no longer

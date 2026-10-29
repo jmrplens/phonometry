@@ -290,6 +290,24 @@ echando carreras entre ellos:
   publicadas, y una respuesta al impulso simulada pasa por el mismo análisis
   de `room_parameters` (EDT, T20, T30, C50, C80, D50, Ts, por bandas, con los
   indicadores de validez del rango de decaimiento de ISO 3382) que una medida.
+- **pyfar** y **pyrato** están construidos para la investigación en
+  acústica. pyfar tiene clases propias para datos de audio, filtros,
+  coordenadas y orientaciones, con funciones para leer, escribir, procesar,
+  generar y representar señales de audio; su documentación indica que su
+  banco de filtros de fracción de octava cumple IEC 61260-1:2014 a partir del
+  orden 5 en bandas de octava y del orden 6 en tercios de octava, y que sus
+  filtros de ponderación A y C aproximan los de IEC 61672-1. pyrato se apoya
+  en pyfar para la acústica de salas: curvas de decaimiento por integración
+  inversa de Schroeder con las compensaciones de ruido de Lundeby y de Chu,
+  los parámetros de ISO 3382 (tiempo de reverberación, claridad, definición,
+  tiempo central, fuerza sonora y las medidas de energía lateral), el índice
+  de transmisión del habla por el método indirecto de IEC 60268-16:2020 y las
+  estimaciones de Sabine y Eyring. phonometry cubre los mismos parámetros de
+  ISO 3382-1, añade la correlación cruzada interaural y el soporte de
+  escenario de esa norma y el método directo STIPA de IEC 60268-16, y somete
+  ambas normas a su informe de conformidad. No tiene las compensaciones de
+  ruido de Lundeby ni de Chu, y a un proyecto ya construido sobre las clases
+  de audio de pyfar le encaja de forma natural pyrato.
 
 Si tu trabajo necesita números que puedas defender frente a la tabla de
 tolerancias de una norma, ya sea para informes de medición, evaluaciones

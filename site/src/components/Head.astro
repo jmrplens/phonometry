@@ -164,6 +164,11 @@ const published = firstPublished(route?.entry?.filePath ?? '') ?? modified;
 const isHub =
   slug === 'start/guides' || slug === 'reference' || slug === 'reference/api';
 
+// The About page says who maintains the library, on what record, and how its
+// numbers are made, and schema.org has a page type for exactly that. It is
+// dual-typed like the hubs, so the TechArticle reading keeps what it had.
+const isAboutPage = slug === 'start/about';
+
 const articleType = isApiPage
   ? 'APIReference'
   : isGuide
@@ -172,7 +177,9 @@ const articleType = isApiPage
       ? ['CollectionPage', 'TechArticle']
       : isCatalogueOverview
         ? ['TechArticle', 'DataCatalog']
-        : 'TechArticle';
+        : isAboutPage
+          ? ['AboutPage', 'TechArticle']
+          : 'TechArticle';
 
 // Every published catalogue is a Dataset of the page that renders it, and
 // the overview of the catalogues is the DataCatalog that lists them

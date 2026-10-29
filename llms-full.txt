@@ -37710,7 +37710,12 @@ section 2.5 of Annex II, and it is not ISO 9613-2: the two differ in the ground
 model, in the diffraction treatment and in the way favourable and homogeneous
 conditions are combined. Chaining a CNOSSOS emission onto the ISO 9613-2
 propagation of this library is a legitimate engineering estimate, but it is not
-the normative CNOSSOS chain and must not be reported as one.
+the normative CNOSSOS chain and must not be reported as one. If that
+normative chain over a whole map is what you need,
+[NoiseModelling](https://github.com/Universite-Gustave-Eiffel/NoiseModelling)
+is an open tool built for it: a free Java library, not a Python package,
+that computes environmental noise maps with the CNOSSOS-EU road and rail
+emission and propagation methods on H2GIS and PostGIS spatial databases.
 
 For the A-weighted total, use the octave-band weighting the Directive itself
 prints in 2.5.5 as amended, rather than recomputing it:
@@ -74851,6 +74856,19 @@ octave-band levels and sound level meter quantities I could defend against a
 tolerance table, so I built them once, properly, instead of re-deriving them
 per project.
 
+## History
+
+I published the code on GitHub in June 2020 as PyOctaveBand, an octave-band
+and fractional-octave-band filter for signals in the time domain. Its first
+release on PyPI, PyOctaveBand 1.0.1, came in January 2026. In July 2026,
+with release 3.0.0, the library took the name phonometry. PyOctaveBand stays
+on PyPI as a shim over phonometry, and acoustic-toolbox, the community
+successor to python-acoustics, depends on it. Every release of the library
+since 2.0.0, published that same July, is archived on Zenodo under one
+concept DOI, the one given below under Cite this software. A paper
+describing the library has been submitted to the Journal of Open Source
+Software, where it is still pending.
+
 ## How the library is built
 
 The method is the whole point of the project, and it is deliberately narrow.
@@ -79771,6 +79789,23 @@ place them is by what each is built for rather than by racing them:
   to published closed forms, and a simulated impulse response goes through
   the same `room_parameters` analysis (EDT, T20, T30, C50, C80, D50, Ts, per
   band, with the ISO 3382 decay-range validity flags) as a measured one.
+- **pyfar** and **pyrato** are built for acoustics research. pyfar has its
+  own classes for audio data, filters, coordinates and orientations, with
+  functions to read, write, process, generate and plot audio signals; its
+  documentation states that its fractional-octave filter bank meets
+  IEC 61260-1:2014 from filter order 5 for octave bands and from order 6 for
+  one-third-octave bands, and that its A and C weighting filters approximate
+  IEC 61672-1. pyrato builds on pyfar for room acoustics: energy decay curves
+  by Schroeder backward integration with the Lundeby and Chu noise
+  compensations, the ISO 3382 parameters (reverberation time, clarity,
+  definition, centre time, strength and the lateral energy measures), the
+  speech transmission index by the indirect method of IEC 60268-16:2020, and
+  the Sabine and Eyring estimates. phonometry covers the same ISO 3382-1
+  parameters, adds the interaural cross-correlation and stage support of that
+  standard and the direct STIPA method of IEC 60268-16, and holds both
+  standards to its conformance report. It has no Lundeby or Chu noise
+  compensation, and a project already built on pyfar's audio classes will
+  find pyrato the natural fit.
 
 If your work needs numbers you can defend against a standard's tolerance
 table, whether for measurement reports, environmental assessments or

@@ -190,21 +190,33 @@ const socialImage = {
 // Single-sourced version: read from the package, never duplicated here.
 const version = readFileSync(new URL('../VERSION', import.meta.url), 'utf8').trim();
 
-// Freshness signals for the SoftwareApplication node. `datePublished` is the
-// first public release (v1.0.0) and is intentionally fixed. To avoid stamping
-// a false "modified today" on every rebuild, `dateModified` tracks the last
-// repository change (HEAD commit date), falling back to build time only when
-// git history is unavailable.
+// The software's history, for the SoftwareApplication node. `dateCreated` is
+// the repository's first commit, in June 2020, when the code was published as
+// PyOctaveBand; `datePublished` is the first release, v1.0.0 on GitHub on
+// 2026-01-06, the day PyOctaveBand 1.0.1 reached PyPI. Both are fixed.
+//
+// `dateModified` is the last commit that changed the library itself, under
+// src/. It used to be the commit at HEAD, so a dependency bump of this site
+// announced a new library. The path is absolute because git reads a pathspec
+// from the directory it runs in, and the build runs in site/, whose own src/ is
+// this site's source. There is no fallback date: a build with no history to read
+// stops here rather than publish one it made up, and check-structured-data.mjs
+// reads the same commit to hold the built pages to it.
+const dateCreated = '2020-06-29';
 const datePublished = '2026-01-06';
-const dateModified = (() => {
-  try {
-    return execFileSync('git', ['log', '-1', '--format=%cI'], { encoding: 'utf8' })
-      .trim()
-      .slice(0, 10);
-  } catch {
-    return new Date().toISOString().slice(0, 10);
-  }
-})();
+const dateModified = execFileSync(
+  'git',
+  ['log', '-1', '--format=%cI', '--', fileURLToPath(new URL('../src/', import.meta.url))],
+  { encoding: 'utf8' },
+)
+  .trim()
+  .slice(0, 10);
+if (!/^\d{4}-\d{2}-\d{2}$/.test(dateModified)) {
+  throw new Error(
+    '[dates] git names no commit under src/, so the date the library last changed is unknown. ' +
+      'The build needs the repository history (a checkout with fetch-depth 0).',
+  );
+}
 
 const softwareRequirements = 'Python >= 3.12 with NumPy and SciPy (matplotlib and numba optional).';
 
@@ -405,8 +417,12 @@ const jsonLd = JSON.stringify({
         propertyID: 'DOI',
         value: doi,
       },
+      dateCreated,
       datePublished,
       dateModified,
+      // What changed in each version, and where to read how to use it.
+      releaseNotes: `${repositoryUrl}/releases`,
+      softwareHelp: { '@id': websiteId },
       softwareRequirements,
       // Derived from the nine documented areas in src/data/scope.mjs. The
       // hand-written versions of these three fields described the filter bank
@@ -429,7 +445,14 @@ const jsonLd = JSON.stringify({
       // node states one consistent set instead of a partial one per document.
       creator: { '@id': authorId },
       maintainer: { '@id': authorId },
-      sameAs: ['https://pypi.org/project/phonometry/', doiUrl, `${fullUrl}/`],
+      // The package of the former name is listed too: it is where the
+      // project's first releases are, and it installs phonometry today.
+      sameAs: [
+        'https://pypi.org/project/phonometry/',
+        'https://pypi.org/project/PyOctaveBand/',
+        doiUrl,
+        `${fullUrl}/`,
+      ],
     },
     {
       '@type': 'SoftwareSourceCode',
@@ -439,7 +462,11 @@ const jsonLd = JSON.stringify({
       programmingLanguage: 'Python',
       runtimePlatform: 'Windows, Linux, macOS',
       license: 'https://opensource.org/license/MIT',
+      dateCreated,
       isPartOf: { '@id': softwareId },
+      // The application this code builds, which schema.org names from the
+      // code's side with its own property.
+      targetProduct: { '@id': softwareId },
       author: { '@id': authorId },
       // Same three agents jmrp.io/projects/ emits for this @id, so the merged
       // node states one consistent set instead of a partial one per document.

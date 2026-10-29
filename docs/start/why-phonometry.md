@@ -262,6 +262,23 @@ place them is by what each is built for rather than by racing them:
   to published closed forms, and a simulated impulse response goes through
   the same `room_parameters` analysis (EDT, T20, T30, C50, C80, D50, Ts, per
   band, with the ISO 3382 decay-range validity flags) as a measured one.
+- **pyfar** and **pyrato** are built for acoustics research. pyfar has its
+  own classes for audio data, filters, coordinates and orientations, with
+  functions to read, write, process, generate and plot audio signals; its
+  documentation states that its fractional-octave filter bank meets
+  IEC 61260-1:2014 from filter order 5 for octave bands and from order 6 for
+  one-third-octave bands, and that its A and C weighting filters approximate
+  IEC 61672-1. pyrato builds on pyfar for room acoustics: energy decay curves
+  by Schroeder backward integration with the Lundeby and Chu noise
+  compensations, the ISO 3382 parameters (reverberation time, clarity,
+  definition, centre time, strength and the lateral energy measures), the
+  speech transmission index by the indirect method of IEC 60268-16:2020, and
+  the Sabine and Eyring estimates. phonometry covers the same ISO 3382-1
+  parameters, adds the interaural cross-correlation and stage support of that
+  standard and the direct STIPA method of IEC 60268-16, and holds both
+  standards to its conformance report. It has no Lundeby or Chu noise
+  compensation, and a project already built on pyfar's audio classes will
+  find pyrato the natural fit.
 
 If your work needs numbers you can defend against a standard's tolerance
 table, whether for measurement reports, environmental assessments or

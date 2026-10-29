@@ -533,7 +533,12 @@ section 2.5 of Annex II, and it is not ISO 9613-2: the two differ in the ground
 model, in the diffraction treatment and in the way favourable and homogeneous
 conditions are combined. Chaining a CNOSSOS emission onto the ISO 9613-2
 propagation of this library is a legitimate engineering estimate, but it is not
-the normative CNOSSOS chain and must not be reported as one.
+the normative CNOSSOS chain and must not be reported as one. If that
+normative chain over a whole map is what you need,
+[NoiseModelling](https://github.com/Universite-Gustave-Eiffel/NoiseModelling)
+is an open tool built for it: a free Java library, not a Python package,
+that computes environmental noise maps with the CNOSSOS-EU road and rail
+emission and propagation methods on H2GIS and PostGIS spatial databases.
 
 For the A-weighted total, use the octave-band weighting the Directive itself
 prints in 2.5.5 as amended, rather than recomputing it:

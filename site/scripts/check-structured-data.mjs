@@ -21,7 +21,14 @@
 // what the page emits. A check that read Head.astro's idea of the answer would
 // have agreed with the defect.
 //
+// Two things the built HTML cannot answer on its own are read from git: the
+// SoftwareApplication's `dateCreated` is the repository's first commit, and its
+// `dateModified` is the last commit that changed the library under src/. The
+// graph used to take the date of the commit at HEAD, so a dependency bump of
+// the documentation site announced a library that had not moved.
+//
 // Usage: node scripts/check-structured-data.mjs [dist-directory] [content-directory]
+import { execFileSync } from 'node:child_process';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { dirname, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -42,6 +49,47 @@ const DIST = process.argv[2] ? resolve(process.argv[2]) : join(here, '..', 'dist
 // directory is for the tests of this check, which write pages of their own.
 const CONTENT = process.argv[3] ? resolve(process.argv[3]) : join(here, '..', 'src', 'content', 'docs');
 const ORIGIN = `${siteUrl}${basePath}`;
+
+const REPOSITORY_ROOT = join(here, '..', '..');
+
+/**
+ * The calendar date of the last commit `git log` lists, as `YYYY-MM-DD`.
+ *
+ * The date is the committer's own, as `%cI` prints it, which is how
+ * astro.config.mjs reads it too: a UTC date compared with a local one would
+ * disagree on every commit made late in the evening.
+ *
+ * @param {string[]} args Arguments after `git -C <repository root> log`.
+ * @param {string} what What the date is, for the error a missing history raises.
+ * @returns {string} The date; a history that names no commit throws instead.
+ */
+const commitDate = (args, what) => {
+	const printed = execFileSync('git', ['-C', REPOSITORY_ROOT, 'log', '--format=%cI', ...args], {
+		encoding: 'utf8',
+	})
+		.trim()
+		.split('\n')
+		.at(-1);
+	if (!/^\d{4}-\d{2}-\d{2}T/.test(printed ?? '')) {
+		throw new Error(`git names no commit for ${what}: this check needs the repository history`);
+	}
+	return printed.slice(0, 10);
+};
+
+// A shallow clone has a first commit of its own, the oldest one it fetched, and
+// would hold the graph to that date instead of the repository's.
+if (
+	execFileSync('git', ['-C', REPOSITORY_ROOT, 'rev-parse', '--is-shallow-repository'], {
+		encoding: 'utf8',
+	}).trim() === 'true'
+) {
+	throw new Error('the repository is a shallow clone: this check needs its whole history (fetch-depth 0)');
+}
+
+/** The repository's first commit: the day the code was first published, as PyOctaveBand. */
+const FIRST_COMMIT = commitDate(['--max-parents=0', 'HEAD'], 'the first commit');
+/** The last commit that changed the library itself, which is what the software's `dateModified` claims. */
+const LIBRARY_MODIFIED = commitDate(['-1', '--', 'src'], 'the last change under src/');
 
 /**
  * Whether `url` addresses a page of this site.
@@ -178,6 +226,70 @@ const SITE_NODES = ['Person', 'WebSite', 'SoftwareApplication', 'SoftwareSourceC
  * budget or by trimming the source, instead of shipping on every page unseen.
  */
 const SITE_BLOCK_BUDGET = 25_000;
+
+/** `sameAs` as an array, whichever of the two shapes a node uses. */
+const sameAsOf = (node) => (Array.isArray(node.sameAs) ? node.sameAs : [node.sameAs].filter(Boolean));
+
+/**
+ * What the software's own nodes get wrong about its history, one sentence per
+ * defect, so the same defect on every page is reported once.
+ *
+ * Each expected value comes from somewhere other than astro.config.mjs: the
+ * dates from git, the release notes from the node's own repository, the help
+ * from the WebSite node the page defines, the old name's package page from
+ * the node's own `alternateName`. A check that read the config's idea of the
+ * answer would agree with whatever the config says.
+ *
+ * @param {object[]} nodes Every node of one page's graph.
+ * @returns {string[]} The defects, empty when the history is whole.
+ */
+function softwareDefects(nodes) {
+	const app = nodeOfType(nodes, 'SoftwareApplication');
+	const code = nodeOfType(nodes, 'SoftwareSourceCode');
+	const site = nodeOfType(nodes, 'WebSite');
+	if (!app || !code || !site) return []; // reported as a missing node already
+	const defects = [];
+	if (app.dateCreated !== FIRST_COMMIT) {
+		defects.push(
+			`SoftwareApplication dateCreated is ${JSON.stringify(app.dateCreated)}, ` +
+				`not ${FIRST_COMMIT}, the date of the repository's first commit`,
+		);
+	}
+	if (app.dateModified !== LIBRARY_MODIFIED) {
+		defects.push(
+			`SoftwareApplication dateModified is ${JSON.stringify(app.dateModified)}, ` +
+				`not ${LIBRARY_MODIFIED}, the date of the last commit under src/`,
+		);
+	}
+	const releases = `${String(app.codeRepository ?? '').replace(/\/$/, '')}/releases`;
+	if (app.releaseNotes !== releases) {
+		defects.push(`SoftwareApplication releaseNotes is ${JSON.stringify(app.releaseNotes)}, not ${releases}`);
+	}
+	if (app.softwareHelp?.['@id'] !== site['@id']) {
+		defects.push(
+			`SoftwareApplication softwareHelp is ${JSON.stringify(app.softwareHelp)}, ` +
+				`not the WebSite node ${site['@id']}`,
+		);
+	}
+	if (typeof app.alternateName !== 'string' || !app.alternateName) {
+		defects.push('SoftwareApplication names no alternateName, the former name its first releases carry');
+	} else {
+		const formerPackage = `https://pypi.org/project/${app.alternateName}/`;
+		if (!sameAsOf(app).includes(formerPackage)) {
+			defects.push(`SoftwareApplication sameAs leaves out ${formerPackage}, the package of its former name`);
+		}
+	}
+	if (code.targetProduct?.['@id'] !== app['@id']) {
+		defects.push(
+			`SoftwareSourceCode targetProduct is ${JSON.stringify(code.targetProduct)}, ` +
+				`not the SoftwareApplication ${app['@id']}`,
+		);
+	}
+	return defects;
+}
+
+/** Each defect of the software's nodes, with the number of pages that carry it. */
+const siteNodeDefects = new Map();
 
 /** Every JSON-LD block of a document, whatever else the script tag carries. */
 const LD_JSON = /<script[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/g;
@@ -462,6 +574,7 @@ const seen = {
 	datasetShown: 0,
 	datasetUnshown: 0,
 	corrected: 0,
+	about: 0,
 };
 
 /** Every route the navigation tree lists (src/data/topics.mjs). */
@@ -610,6 +723,20 @@ for (const file of files) {
 
 	for (const type of SITE_NODES) {
 		if (!nodeOfType(nodes, type)) fail(`${route}: no ${type} node`);
+	}
+
+	for (const defect of softwareDefects(nodes)) {
+		siteNodeDefects.set(defect, (siteNodeDefects.get(defect) ?? 0) + 1);
+	}
+
+	// The About page says who maintains the library and how its numbers are
+	// made, and schema.org has a type for exactly that page.
+	if (slug === 'start/about') {
+		seen.about += 1;
+		const typed = nodes.some(
+			(node) => node['@id'] === `${canonical}#article` && typesOf(node).includes('AboutPage'),
+		);
+		if (!typed) fail(`${route}: the About page's article node is not typed AboutPage`);
 	}
 
 	// The error page is not an article and must not be indexed as one, which is
@@ -1414,6 +1541,18 @@ if (errataAgree && seen.corrected > 0) {
 		}
 	}
 }
+
+// Every page carries the same site-wide nodes, so a defect in them is on every
+// page at once: reported once, with the number of pages it was found on.
+for (const [defect, pages] of siteNodeDefects) fail(`${defect} (on ${pages} pages)`);
+if (siteNodeDefects.size === 0) {
+	ok(
+		`the software's nodes on all ${seen.pages} pages give its history: created ${FIRST_COMMIT}, ` +
+			`library last changed ${LIBRARY_MODIFIED}, release notes, help and its former package`,
+	);
+}
+if (seen.about === 2) ok('checked the About page in both languages for the AboutPage type');
+else fail(`found ${seen.about} About pages, not the English one and its Spanish twin`);
 
 ok(`parsed ${seen.blocks} ld+json blocks across ${seen.pages} pages (${seen.redirects} redirect stubs skipped)`);
 ok(`checked ${seen.guides} guide pages for the learning-resource type and ${seen.api} API pages for APIReference`);

@@ -413,7 +413,7 @@ sound_intensity(
     density: float = 1.204,
     speed_of_sound: float = 343.0,
     fraction: Literal[1, 3] | np.integer[Any] | None = None,
-    limits: Sequence[float] | NDArray[Any] | None = None,
+    limits: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any] | None = None,
     bias_correct: bool = False,
 ) -> IntensityResult
 ```

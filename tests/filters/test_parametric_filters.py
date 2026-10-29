@@ -223,15 +223,31 @@ def test_time_weighting_class_rejects_non_string_mode() -> None:
 def test_time_weighting_rejects_non_numeric_initial_state() -> None:
     """A dict used to get numpy's float() message, which names nothing."""
     x = np.ones(10)
-    with pytest.raises(TypeError, match="initial_state must be None"):
+    with pytest.raises(TypeError, match="'initial_state' must be None"):
         filters.time_weighting(x, 48000, mode="fast", initial_state={"a": 1})  # type: ignore[arg-type]
 
 
 def test_time_weighting_rejects_unconvertible_initial_state_array() -> None:
-    """A string array used to get numpy's ValueError, which names nothing."""
+    """A text among the numbers is refused as text, before numpy reads it."""
     x = np.ones(10)
-    with pytest.raises(TypeError, match="initial_state must be None"):
+    with pytest.raises(TypeError, match=r"'initial_state' must be one of .* not text"):
         filters.time_weighting(x, 48000, mode="fast", initial_state=["invalid"])  # type: ignore[arg-type]
+
+
+@pytest.mark.parametrize(
+    "state",
+    [["0.5", "0.5"], np.array("0.5"), [b"0.5", b"0.5"], b"zero", bytearray(b"zero")],
+    ids=["texts", "zero-dimensional-text", "bytes-in-a-list", "bytes", "bytearray"],
+)
+def test_time_weighting_refuses_a_starting_state_written_as_text(state: object) -> None:
+    """A state is numbers, and a text among them is none, whatever it reads as.
+
+    ``["0.5", "0.5"]`` started two channels from 0.5 and ``np.array("0.5")``
+    one; a name is a ``str``, so ``b"zero"`` is no name either.
+    """
+    two_channels = np.ones((2, 10))
+    with pytest.raises(TypeError, match="'initial_state'"):
+        filters.time_weighting(two_channels, 48000, initial_state=state)  # type: ignore[call-overload]
 
 
 def test_time_weighting_fast() -> None:
@@ -340,7 +356,7 @@ def test_time_weighting_initial_state_invalid() -> None:
     two_channels = np.ones((2, 10))
     mismatched_state = np.ones(3)
     with pytest.raises(
-        ValueError, match=r"initial_state must be scalar or broadcastable"
+        ValueError, match=r"'initial_state' must be one number or broadcastable"
     ):
         filters.time_weighting(
             two_channels, fs, mode="fast", initial_state=mismatched_state
@@ -350,7 +366,7 @@ def test_time_weighting_initial_state_invalid() -> None:
 def test_time_weighting_initial_state_first_rejects_empty_input() -> None:
     """Verify initial_state='first' requires at least one sample."""
     empty = np.array([])
-    with pytest.raises(ValueError, match=r"initial_state must be None"):
+    with pytest.raises(ValueError, match=r"'initial_state' must be None"):
         filters.time_weighting(empty, 1000, mode="fast", initial_state="first")
 
 

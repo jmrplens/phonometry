@@ -97,6 +97,7 @@ from scipy import signal
 from .._internal.frozen import OwnsArrays
 from .._internal.utils import _sos_initial_state, _sos_state_mismatch
 from .._internal.validation import (
+    refuse_text_beside_choice,
     require_choice,
     require_count,
     require_positive,
@@ -121,6 +122,9 @@ if TYPE_CHECKING:
 Mode = Literal["fast", "slow", "impulse"]
 #: How a time weighting starts: from rest, or settled on the first sample.
 InitialState = Literal["zero", "first"]
+
+#: The two named starting states of :func:`time_weighting`.
+_INITIAL_STATES: tuple[InitialState, ...] = ("zero", "first")
 
 #: The three time weightings: F and S of IEC 61672-1:2013, and I of the
 #: withdrawn IEC 60651.
@@ -965,9 +969,15 @@ def _prepare_time_weighting_initial_state(
     x_sq: np.ndarray,
     initial_state: InitialState | NumericArrayLike | None,
 ) -> np.ndarray:
-    """Return the previous output state ``y[-1]`` for time weighting."""
+    """Return the previous output state ``y[-1]`` for time weighting.
+
+    A text that is not a ``str`` (a ``bytes``, a text in a sequence or an
+    array) is refused before the numbers are read, so a state written as
+    ``["0.5"]`` is a :class:`TypeError` and not the number it reads as.
+    """
     invalid_initial_state_message = (
-        "initial_state must be None, 'zero', 'first', a scalar, or an array"
+        "'initial_state' must be None, 'zero', 'first', a number or an array "
+        "of numbers."
     )
     state_shape = x_sq.shape[:-1]
 
@@ -975,12 +985,13 @@ def _prepare_time_weighting_initial_state(
         return np.zeros(state_shape, dtype=x_sq.dtype)
 
     if isinstance(initial_state, str):
-        if require_choice(initial_state, "initial_state", ("zero", "first")) == "zero":
+        if require_choice(initial_state, "initial_state", _INITIAL_STATES) == "zero":
             return np.zeros(state_shape, dtype=x_sq.dtype)
         if x_sq.shape[-1] == 0:
             raise ValueError(invalid_initial_state_message)
         return np.asarray(np.take(x_sq, 0, axis=-1), dtype=x_sq.dtype).copy()
 
+    refuse_text_beside_choice(initial_state, "initial_state", _INITIAL_STATES)
     try:
         state = np.asarray(initial_state, dtype=x_sq.dtype)
     except (TypeError, ValueError):
@@ -994,7 +1005,10 @@ def _prepare_time_weighting_initial_state(
     try:
         return np.broadcast_to(state, state_shape).astype(x_sq.dtype, copy=True)
     except ValueError as exc:
-        msg = "initial_state must be scalar or broadcastable to the input shape without the time axis"
+        msg = (
+            "'initial_state' must be one number or broadcastable to the input "
+            "shape without the time axis."
+        )
         raise ValueError(msg) from exc
 
 
@@ -1068,8 +1082,9 @@ def time_weighting(
         :class:`TimeWeightedEnvelope`, which stands in for that array
         everywhere it was used and adds the rate and a level plot. It is not
         a Signal, because a mean square is not a pressure record.
-    :raises TypeError: if ``fs`` is not a single number, or ``initial_state`` or
-        ``mode`` is not a text.
+    :raises TypeError: if ``fs`` is not a single number, ``mode`` is not a
+        text, or ``initial_state`` is neither ``None``, a text nor numbers (a
+        ``bytes``, a text among numbers).
     """
     require_scalar(fs, "fs")
     fs = resolve_fs(x, fs)

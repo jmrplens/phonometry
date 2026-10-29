@@ -196,7 +196,7 @@ delany_bazley(
     frequency: ArrayLike,
     flow_resistivity_pa_s_m2: float,
     *,
-    coefficients: Literal['delany_bazley', 'garai_pompoli', 'dunn_davern', 'wu'] | tuple[float, ...] = 'delany_bazley',
+    coefficients: Literal['delany_bazley', 'garai_pompoli', 'dunn_davern', 'wu'] | complex | NestedSequence[complex] | SupportsNumericArray | NestedSequence[SupportsNumericArray] = 'delany_bazley',
     fluid: Fluid = ...,
 ) -> PorousMediumResult
 ```
@@ -218,7 +218,7 @@ are still returned.
 | :--- | :--- |
 | `frequency` | Frequency `f`, in hertz (scalar or array). |
 | `flow_resistivity_pa_s_m2` | Airflow resistivity `sigma`, in Pa s/m2. |
-| `coefficients` | Preset name from [`DELANY_BAZLEY_COEFFICIENTS`](/phonometry/reference/api/materials/porous/#delany_bazley_coefficients) (`"delany_bazley"` rockwool/fibreglass default, `"garai_pompoli"` polyester, `"dunn_davern"` / `"wu"` foams) or an explicit `(C1..C8)` tuple. |
+| `coefficients` | Preset name from [`DELANY_BAZLEY_COEFFICIENTS`](/phonometry/reference/api/materials/porous/#delany_bazley_coefficients) (`"delany_bazley"` rockwool/fibreglass default, `"garai_pompoli"` polyester, `"dunn_davern"` / `"wu"` foams) or the eight coefficients `(C1..C8)` as a sequence or an array of numbers. |
 | `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`ABSORBER_AIR`](/phonometry/reference/api/materials/porous/#absorber_air), dry air at 20 degC at textbook values). Pass a computed one, such as `fluids.air(temperature_c=30.0, relative_humidity_percent=70.0)`, to work in the air of the room. |
 
 **Returns:** A [`PorousMediumResult`](/phonometry/reference/api/materials/porous/#porousmediumresult).
@@ -227,7 +227,7 @@ are still returned.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `flow_resistivity_pa_s_m2` is not a single number, or `frequency` holds a text or a value that is not a real number, or `coefficients` is not a text. |
+| TypeError | if `flow_resistivity_pa_s_m2` is not a single number, `frequency` holds a text or a value that is not a real number, or `coefficients` is neither a preset name nor a sequence of numbers (a `bytes`, `None`, a text among the numbers). |
 
 ## DELANY_BAZLEY_COEFFICIENTS
 

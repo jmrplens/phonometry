@@ -170,6 +170,33 @@ def test_shaped_sweep_deconvolves_a_known_system() -> None:
 # --------------------------------------------------------------------------
 # Validation
 # --------------------------------------------------------------------------
+@pytest.mark.parametrize(
+    "target",
+    [
+        b"pink",
+        (["100", "1000"], ["0", "-3"]),
+        np.array([["100", "1000"], ["0", "-3"]]),
+        None,
+    ],
+    ids=["bytes", "texts", "array-of-text", "none"],
+)
+def test_rejects_a_target_that_is_no_name_or_pair_of_numbers(target: object) -> None:
+    """A text among the numbers of the pair is no number, whatever it reads as.
+
+    ``(["100", "1000"], ["0", "-3"])`` was parsed into a target, and
+    ``b"pink"`` and ``None`` failed with an error that named nothing.
+    """
+    with pytest.raises(TypeError, match="'target'"):
+        room.shaped_sweep_signal(FS, 50.0, 5000.0, 1.0, target=target)  # type: ignore[arg-type]
+
+
+def test_rejects_a_target_of_three_arrays() -> None:
+    """A third array was left unread; a pair is two."""
+    target = ([100.0, 1000.0], [0.0, -3.0], [1.0, 1.0])
+    with pytest.raises(ValueError, match="'target' must be .* not 3 of them"):
+        room.shaped_sweep_signal(FS, 50.0, 5000.0, 1.0, target=target)  # type: ignore[arg-type]
+
+
 def test_rejects_bad_inputs() -> None:
     with pytest.raises(ValueError, match=r"f1 must be positive"):
         room.shaped_sweep_signal(FS, 0.0, 5000.0, 1.0)
@@ -191,7 +218,7 @@ def test_rejects_bad_inputs() -> None:
     with pytest.raises(ValueError, match=r"'frequencies'.*'magnitude_db'.*same shape"):
         room.shaped_sweep_signal(FS, 50.0, 5000.0, 1.0, target=mismatched)
     too_short = (np.array([100.0]), np.array([0.0]))
-    with pytest.raises(ValueError, match=r"array target.*at least 2 points"):
+    with pytest.raises(ValueError, match=r"'target' must be a .*at least 2 points"):
         room.shaped_sweep_signal(FS, 50.0, 5000.0, 1.0, target=too_short)
     decreasing = (np.array([200.0, 100.0]), np.array([0.0, 0.0]))
     with pytest.raises(

@@ -3730,14 +3730,56 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   take an array-like of numbers that admits no text now (a number, a
   sequence of numbers, a numpy number or array of a number or truth-value
   dtype, or anything that converts itself to one), so a type checker refuses
-  the misspelling as the call does; nothing changes at run time. A type
-  checker refuses there too what `ArrayLike` admitted of an array typed with
+  the misspelling as the call does. A type checker refuses there too what
+  `ArrayLike` admitted of an array typed with
   a dtype that is no number or truth value (`np.object_`, `np.generic`,
   `np.datetime64`, `np.timedelta64`) and of a buffer such as `memoryview`;
   the call still converts an object array of numbers.
   `scripts/check_parameter_annotations.py` fails on a `Literal` choice beside
   an alternative that takes any text, and rule A59 of the contributor guide
   states it.
+
+- **A choice beside numbers refuses, by name, a text where its numbers go.**
+  Seven public parameters take one of a few words or numbers and read a
+  `str` as the word: the `flow_resistivity` of `aircraft.RotorcraftGround`
+  and of `aircraft.terrain_screening_adjustment`, the `initial_state` of
+  `filters.time_weighting`, the `termination` of
+  `materials.layered_absorber` and of `materials.diffuse_field_absorption`,
+  the `coefficients` of `materials.delany_bazley` and the `target` of
+  `room.shaped_sweep_signal`. Anything else went to the numbers, so a text
+  in another form was parsed, or refused with an error that named nothing:
+  `layered_absorber(termination=["400", "400"])` closed the stack with an
+  impedance of 400 Pa s/m, `delany_bazley(coefficients=b"12345678")` took
+  the codes of the eight characters as C1 to C8 and
+  `coefficients=["0.0571"] * 8` the numbers they read as,
+  `time_weighting(initial_state=["0.5", "0.5"])` started two channels from
+  0.5, `shaped_sweep_signal(target=(["100", "1000"], ["0", "-3"]))` was
+  synthesized, `RotorcraftGround` stored a `bytes`, `None`, a complex value
+  or any other object as given and read `["20000"]` as 20000 Pa s/m², and
+  `terrain_screening_adjustment` answered a `bytes` with numpy's
+  `ValueError` and `None` as a resistivity that is not finite. Each refuses
+  a `bytes`, a `bytearray`, and a sequence or an array that holds a text,
+  with `TypeError` naming the parameter and its options, whatever the text
+  reads as; `None` where it is no option and an object that is no number
+  are a `TypeError` naming the parameter as well, and a `target` of three
+  arrays, whose third was left unread, is a `ValueError`. `RotorcraftGround`
+  refuses them when it is built, and so a single flow resistivity that is
+  not positive and finite, a single ground elevation that is not finite and
+  a text among the elevations or the axes of `terrain`, which an event
+  refused later or not at all. The `coefficients` of `delany_bazley` are
+  annotated as numbers beside the presets, so the list or the array of the
+  eight that the call always took type-checks. A pair of arrays a record
+  holds (the `terrain` axes of `RotorcraftGround`, the curves of
+  `electroacoustics.LoudspeakerDirectivity`,
+  `electroacoustics.MicrophoneDirectivity`,
+  `electroacoustics.MicrophoneNoise` and
+  `electroacoustics.MicrophoneOverload`) refuses a text or a complex value
+  among its numbers by name, where numpy parsed the one and dropped the
+  imaginary part of the other. A `str`, a number and an array of numbers
+  work as before. `tests/test_choices_beside_numbers.py` finds every choice
+  beside numbers from its annotation and calls each with a text in every
+  other form, `None` and an object; rule A59 of the contributor guide states
+  it.
 
 - **A function of a number or an array of them returns an array for an array,
   a zero-dimensional one included, and says so in its signature.** Ninety
@@ -4103,6 +4145,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `io.write_catalogue(delimiter=, decimal=)` beside a JSON document and
   `building.single_number_uncertainty(situation=)` with `upper_limit=True`
   refuse a value that is not text with `TypeError` instead of `ValueError`.
+  `aircraft.RotorcraftGround` refuses, when it is built, a flow resistivity
+  that is neither a class letter nor numbers, as it refuses a letter it
+  does not know.
   `materials.layered_absorber`, `materials.diffuse_field_absorption`,
   `environment.road_source_power` and the Delany-Bazley preset check their
   choice once, where they start. Twelve plots of the hearing protectors, the
@@ -4876,7 +4921,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   parameter. A text is the wrong type wherever a number belongs, whatever it
   reads as: `"20"` and `"fifty"` are both `TypeError`, given alone or in an
   array, where a scalar guard used to parse the first into a number and an
-  array guard to parse a column of them. A count that is not whole or is too
+  array guard to parse a column of them, and so are a `bytes` and a text in
+  a sequence or an array where a choice beside numbers takes its numbers. A
+  count that is not whole or is too
   small, an empty description, a choice that names none of the options and a
   value out of range stay `ValueError`. A sequence where one measurement
   belongs is a `TypeError` too, a one-element sequence included: the ISO 7235

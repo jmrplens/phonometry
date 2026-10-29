@@ -165,6 +165,22 @@ class TestDelanyBazley:
         ):
             delany_bazley(f, -1.0)
 
+    @pytest.mark.parametrize(
+        "coefficients",
+        [b"12345678", ["0.0571"] * 8, np.array(["0.0571"] * 8), None, [None] * 8],
+        ids=["bytes", "texts", "array-of-text", "none", "nones"],
+    )
+    def test_refuses_coefficients_that_are_no_numbers(
+        self, coefficients: object
+    ) -> None:
+        """A text that is not a preset name is no coefficient, whatever it reads as.
+
+        ``b"12345678"`` was taken as the codes of its eight characters and
+        ``["0.0571"] * 8`` as eight numbers.
+        """
+        with pytest.raises(TypeError, match="'coefficients'"):
+            delany_bazley(np.array([100.0]), 10000.0, coefficients=coefficients)  # type: ignore[arg-type]
+
 
 # ---------------------------------------------------------------------------
 # Miki
@@ -817,6 +833,34 @@ class TestResonantSheets:
             ValueError, match=r"'angle_rad' must satisfy 0 <= angle < pi/2"
         ):
             layered_absorber(f, layers, angle_rad=np.pi / 2.0 - 1e-9)
+
+    @pytest.mark.parametrize(
+        "termination",
+        [["400", "400"], np.array("400"), b"rigid", ["rigid"], None, object()],
+        ids=[
+            "texts",
+            "zero-dimensional-text",
+            "bytes",
+            "name-in-a-list",
+            "none",
+            "object",
+        ],
+    )
+    def test_termination_that_is_no_name_or_impedance_is_refused(
+        self, termination: object
+    ) -> None:
+        """A text that is not a ``str`` is no termination, whatever it reads as.
+
+        ``["400", "400"]`` was parsed into the impedance of ``[400.0, 400.0]``
+        and ``None`` read as ``nan``; both, and a name in a list, are refused
+        with the parameter's name, by the diffuse-field integral as well.
+        """
+        f = np.array([500.0, 1000.0])
+        layers = [AirLayer(thickness_m=0.05)]
+        with pytest.raises(TypeError, match="'termination'"):
+            layered_absorber(f, layers, termination=termination)  # type: ignore[arg-type]
+        with pytest.raises(TypeError, match="'termination'"):
+            diffuse_field_absorption(f, layers, termination=termination)  # type: ignore[arg-type]
 
     def test_termination_array_length_mismatch_rejected(self) -> None:
         f = np.array([500.0, 1000.0])

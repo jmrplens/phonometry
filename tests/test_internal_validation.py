@@ -32,11 +32,13 @@ if TYPE_CHECKING:
     from collections.abc import Callable
 
 from phonometry._internal.validation import (
+    arrays_of,
     check_engine,
     floats_of,
     indices_of,
     is_integer,
     pair_of_arrays,
+    refuse_text_beside_choice,
     require_1d_signal,
     require_above_absolute_zero,
     require_above_absolute_zero_array,
@@ -536,3 +538,48 @@ def test_indices_are_integers_in_a_sequence_or_a_one_dimensional_integer_array()
     for bad in (np.array(1), np.array([[0, 1]]), np.array([1.0]), np.array([True])):
         with pytest.raises(TypeError, match="'rows' must be integer indices"):
             indices_of(bad, "rows")
+
+
+@pytest.mark.parametrize(
+    "value",
+    [b"rigid", np.bytes_(b"rigid"), bytearray(b"rigid"), ["400"], np.array("400")],
+    ids=[
+        "bytes",
+        "numpy-bytes",
+        "bytearray",
+        "text-in-a-list",
+        "zero-dimensional-text",
+    ],
+)
+def test_a_text_beside_a_choice_is_refused_naming_the_options(value: object) -> None:
+    """A text that is not a ``str`` is neither the choice nor its numbers."""
+    with pytest.raises(
+        TypeError, match=r"'termination' must be one of \('rigid', 'free'\)"
+    ):
+        refuse_text_beside_choice(value, "termination", ("rigid", "free"))
+
+
+@pytest.mark.parametrize(
+    "value",
+    [400.0, 400 + 10j, [400.0, 410.0], np.ones(3), None, object()],
+    ids=["number", "complex", "numbers", "array", "none", "object"],
+)
+def test_what_holds_no_text_is_left_to_the_numbers(value: object) -> None:
+    """Numbers pass, and so does what is no text: the conversion that follows refuses it."""
+    refuse_text_beside_choice(value, "termination", ("rigid", "free"))
+
+
+@pytest.mark.parametrize(
+    ("members", "message"),
+    [
+        ((["0", "1"], [0.0, 1.0]), "'polar' must be numbers, not text"),
+        (([1j, 2j], [0.0, 1.0]), "'polar' must be real, not complex"),
+    ],
+    ids=["text", "complex"],
+)
+def test_a_member_of_a_sequence_of_arrays_holds_numbers(
+    members: tuple[object, object], message: str
+) -> None:
+    """A member was converted by numpy, which parsed a text and dropped an imaginary part."""
+    with pytest.raises(TypeError, match=message):
+        arrays_of(members, "polar", "a pair (angles_deg, relative_db) of two arrays", 2)

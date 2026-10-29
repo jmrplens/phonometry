@@ -182,6 +182,31 @@ def refuse_complex(value: object, msg: str) -> None:
             return
     if found:
         raise TypeError(msg)
+def refuse_text_beside_choice(
+    value: object, name: str, options: tuple[str, ...]
+) -> None:
+    """Refuse a text that would reach the numbers of a choice beside numbers.
+
+    A parameter that takes one of a few words or numbers reads a ``str`` as
+    the choice and anything else as the numbers. A ``bytes`` or a
+    ``bytearray`` (``b"rigid"``), or a text inside a sequence or an array
+    (``["400"]``, ``np.array("400")``), is no ``str``, and so it reached the
+    conversion of the numbers, which parses it (``np.asarray(["400"],
+    dtype=complex)`` is ``400+0j``), reads a ``bytearray`` as the codes of
+    its characters, or fails with an error that names no parameter. It is
+    the wrong type whatever it reads as, so it is refused before the numbers
+    are read; a ``str`` is the choice, and is checked as one by the caller.
+
+    :param value: The caller's value, one that is not a ``str``.
+    :param name: The parameter's name, for the message.
+    :param options: The words the parameter offers.
+    :raises TypeError: if *value* is a ``bytes`` or a ``bytearray``, or a
+        sequence or an array that holds a text.
+    """
+    msg = f"'{name}' must be one of {options} as a str, or numbers, not text."
+    if isinstance(value, bytearray):
+        raise TypeError(msg)
+    refuse_text(value, msg)
 
 
 def require_real(value: object, msg: str) -> float:
@@ -1184,7 +1209,9 @@ def arrays_of(
     column of a data frame, a ``memoryview``), comes back as itself when it
     is ``float64`` already, and one a
     deque or a generator holds is copied. A member that is no array, a list
-    of numbers, is converted into a new one.
+    of numbers, is converted into a new one. A member is converted as
+    :func:`_as_float64` converts, so a text among its numbers is refused,
+    whatever it reads as, and not parsed into one.
 
     :param value: The sequence.
     :param name: The field's name, for the message.
@@ -1193,10 +1220,11 @@ def arrays_of(
     :param n_members: How many arrays it holds.
     :return: The members, each a ``float64`` array.
     :raises TypeError: if *value* is a text or is not a sequence at all, a
-        member holds a complex number or a text, or *n_members* is not a
-        number.
-    :raises ValueError: if it holds other than *n_members* members, or
-        *n_members* is not a whole number of at least one.
+        member holds a complex number, a text or anything that is not a
+        number, or *n_members* is not a number.
+    :raises ValueError: if it holds other than *n_members* members, a member
+        is a ragged nesting, or *n_members* is not a whole number of at least
+        one.
     """
     expected = require_count(n_members, "n_members")
     msg = f"'{name}' must be {members}"
@@ -1214,7 +1242,7 @@ def arrays_of(
     for item in items:
         refuse_complex(item, f"{msg} of real numbers, not complex ones.")
         refuse_text(item, f"{msg} of numbers, not text.")
-    return tuple(np.asarray(item, dtype=np.float64) for item in items)
+    return tuple(_as_float64(item, name) for item in items)
 
 
 def pair_of_arrays(
@@ -1229,9 +1257,11 @@ def pair_of_arrays(
     :param members: What the two members are, as the message spells them
         (``"(angles_deg, relative_db)"``).
     :return: The two members, each a ``float64`` array.
-    :raises TypeError: if *value* is a text or is not a sequence at all,
-        or a member holds a complex number or a text.
-    :raises ValueError: if it holds other than two members.
+    :raises TypeError: if *value* is a text or is not a sequence at all, or
+        a member holds a text, a complex value or anything that is not a
+        number.
+    :raises ValueError: if it holds other than two members, or a member is
+        a ragged nesting.
     """
     first, second = arrays_of(value, name, f"a pair {members} of two arrays", 2)
     return first, second

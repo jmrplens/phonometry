@@ -1557,11 +1557,65 @@ def test_event_validation() -> None:
         rotorcraft_event_level(
             hems, [50.0], [0.0], t, pos, (0.0, 0.0), level_offset=[1.0, 2.0, 3.0]
         )
-    nan_elevation_ground = RotorcraftGround(ground_elevation=np.nan)
+    # A ground elevation that is not finite is refused where the ground is
+    # built, before any event reads it.
     with pytest.raises(ValueError, match=r"'ground_elevation' must be finite"):
-        rotorcraft_event_level(
-            hems, [50.0], [0.0], t, pos, (0.0, 0.0), ground=nan_elevation_ground
-        )
+        RotorcraftGround(ground_elevation=np.nan)
+
+
+@pytest.mark.parametrize(
+    "resistivity",
+    [b"G", np.bytes_(b"G"), None, 1.0 + 1.0j, ["G"], ["20000"], np.array("20000")],
+    ids=[
+        "bytes",
+        "numpy-bytes",
+        "none",
+        "complex",
+        "letter-in-a-list",
+        "number-as-text-in-a-list",
+        "number-as-text-array",
+    ],
+)
+def test_a_ground_refuses_a_flow_resistivity_that_is_no_number_when_built(
+    resistivity: object,
+) -> None:
+    """A class letter is a ``str``; anything else is numbers, and a text is none.
+
+    The record used to store a ``bytes``, ``None`` or a complex value as
+    given and leave it to the event that read it, which failed with an error
+    that named nothing, and it read ``["20000"]`` as 20000 Pa s/m2.
+    """
+    with pytest.raises(TypeError, match="'flow_resistivity'"):
+        RotorcraftGround(flow_resistivity=resistivity)  # type: ignore[arg-type]
+
+
+@pytest.mark.parametrize("resistivity", [np.nan, 0.0, -2.0e4])
+def test_a_ground_refuses_a_flow_resistivity_that_is_not_positive_when_built(
+    resistivity: float,
+) -> None:
+    with pytest.raises(ValueError, match="'flow_resistivity' must be positive"):
+        RotorcraftGround(flow_resistivity=resistivity)
+
+
+def test_a_ground_refuses_text_among_its_elevations_when_built() -> None:
+    """An elevation per receiver and the axes of an elevation model are numbers."""
+    with pytest.raises(TypeError, match="'ground_elevation'"):
+        RotorcraftGround(ground_elevation="0")  # type: ignore[arg-type]
+    with pytest.raises(TypeError, match="'ground_elevation' must be numbers, not text"):
+        RotorcraftGround(ground_elevation=["0", "1"])
+    axes = (["0", "100"], [0.0, 100.0], [[0.0, 0.0], [0.0, 0.0]])
+    with pytest.raises(TypeError, match="'terrain' must be numbers, not text"):
+        RotorcraftGround(terrain=axes)
+
+
+def test_a_ground_holds_the_flow_resistivity_it_was_given() -> None:
+    """A letter, one number or numbers per point, as before."""
+    assert RotorcraftGround(flow_resistivity="G").flow_resistivity == "G"
+    assert RotorcraftGround(flow_resistivity=2.0e4).flow_resistivity == 2.0e4
+    held = RotorcraftGround(flow_resistivity=[2.0e4, 3.0e4]).flow_resistivity
+    assert isinstance(held, np.ndarray)
+    assert held.dtype == np.float64
+    assert not held.flags.writeable
 
 
 def test_event_history_and_spectrum_must_line_up() -> None:

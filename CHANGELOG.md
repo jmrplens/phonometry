@@ -4154,8 +4154,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   constructor a type checker reads, inside `if TYPE_CHECKING:` in its body:
   a field converted from any array-like takes `ArrayLike` there and keeps
   the type it holds, so `WavelengthSpectrum(levels=[1.0, 2.0])`
-  type-checks and `spectrum.levels` reads as the array it is. The API
-  reference shows that constructor. Four results that held a `dict` a caller
+  type-checks and `spectrum.levels` reads as the array it is; a curve held
+  as a pair of arrays, an elevation model's axes and the risk thresholds of
+  a multiple-shock result take the numpy array of them as well
+  (`MicrophoneDirectivity(polar=np.vstack((angles, levels)))`). The three
+  periodic-test measurement records, of 14, 19 and 38 fields, declare their
+  constructor's keywords as the keys of a `TypedDict`
+  (`**measurements: Unpack[...]`), which a type checker reads keyword by
+  keyword. The API reference shows that constructor. Four results that held a `dict` a caller
   could edit hold a read-only mapping instead:
   `building.FacadePredictionResult.element_r`,
   `environment.RailwayEmissionResult.components`,
@@ -4176,8 +4182,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   builds that is annotated as an array, a tuple, a list, a set or a mapping
   and that nothing converts; `tests/test_record_constructors.py` fails a
   record that converts such a field and declares no constructor, a declared
-  constructor out of step with its fields, and a record a guide builds by
-  hand that is not read as one a caller builds; and
+  constructor out of step with its fields, of more than 13 parameters, or
+  taking an open sequence of numbers or arrays without the array of them,
+  and a record a guide builds by hand that is not read as one a caller
+  builds; and
   `tests/test_record_conversions.py` gives every converted field a list,
   and every tuple field an array, and wants them back converted.
 

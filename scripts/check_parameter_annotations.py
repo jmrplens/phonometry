@@ -3254,6 +3254,69 @@ def takes_a_sequence(
     )
 
 
+def holds_numeric_items(
+    annotations: Annotations, module: str, node: ast.expr | None
+) -> bool:
+    """Whether a field holds a container of numbers or of arrays, and nothing else but ``None``.
+
+    ``tuple[float, float, float]`` and ``tuple[NDArray[np.float64],
+    NDArray[np.float64]]`` do: a conversion that builds either reads its
+    argument item by item, and an array is a sequence of its rows to it,
+    so the constructor takes one. ``tuple[Resonator, ...]`` does not.
+    """
+    found = False
+    for where, member in annotations.members(module, node):
+        if isinstance(member, ast.Constant) and member.value is None:
+            continue
+        if annotations.resolve(where, member) not in _CONTAINERS:
+            return False
+        items = [item for item in _items(member) if not _is_ellipsis(item)]
+        if not items or not all(
+            annotations._number_or_numbers(inner, part, depth=1)
+            for item in items
+            for inner, part in annotations.members(where, item)
+        ):
+            return False
+        found = True
+    return found
+
+
+#: The open sequences a constructor parameter may take: any sequence,
+#: iterable or collection of the items, which a numpy array of them is at run
+#: time and is not to a type checker. A parameter that names its containers
+#: instead (``tuple[int, int] | list[int]``) says it refuses the others.
+_OPEN_SEQUENCES = frozenset(
+    {
+        "typing.Sequence",
+        "typing.Iterable",
+        "typing.Collection",
+        "collections.abc.Sequence",
+        "collections.abc.Iterable",
+        "collections.abc.Collection",
+    }
+)
+
+
+def open_without_an_array(
+    annotations: Annotations, module: str, node: ast.expr | None
+) -> bool:
+    """Whether a constructor parameter takes an open sequence and no numpy array.
+
+    ``Sequence[ArrayLike]`` and ``Sequence[float]`` do: they claim every
+    sequence of the items and refuse, to a type checker, the array whose
+    rows the conversion reads as well. ``ArrayLike``, an array type or
+    anything beside it takes the array; named containers claim no more than
+    they take.
+    """
+    members = [
+        annotations.resolve(where, member)
+        for where, member in annotations.members(module, node)
+    ]
+    return any(dotted in _OPEN_SEQUENCES for dotted in members) and not any(
+        dotted in _ARRAY_LIKE | _ANYTHING | overloads._ARRAYS for dotted in members
+    )
+
+
 def _setattr_name(call: ast.Call) -> ast.expr | None:
     """The field name ``object.__setattr__(self, name, ...)`` or ``setattr(self, ...)`` stores in."""
     func = call.func
@@ -3564,7 +3627,9 @@ def constructor_problems(
     container of a fixed kind, or as a sequence of numbers, declares the
     constructor a type checker reads, a ``TYPE_CHECKING`` ``__init__`` that
     takes the sequence the conversion takes (``ArrayLike``, or an open
-    sequence of the items). Any record that declares one keeps it in step
+    sequence of the items, beside an array where the items are numbers or
+    arrays, which is a sequence of them too). Any record that declares one
+    keeps it in step
     with its fields: the same names, in the same order, each keyword-only
     exactly when the field is, each with the field's default (``...`` for
     one a factory makes), and a parameter for a field it does not convert
@@ -3648,11 +3713,19 @@ def constructor_problems(
                 f"to {shown} in the stub"
             )
         if field in needs:
+            taken = ast.unparse(argument.annotation) if argument.annotation else "?"
             if not takes_a_sequence(annotations, module, argument.annotation):
                 problems.append(
-                    f"{field.name} is converted, and the stub takes "
-                    f"{ast.unparse(argument.annotation) if argument.annotation else '?'}"
+                    f"{field.name} is converted, and the stub takes {taken}"
                     ", which is no ArrayLike nor an open sequence"
+                )
+            elif holds_numeric_items(
+                annotations, field.module, field.annotation
+            ) and open_without_an_array(annotations, module, argument.annotation):
+                problems.append(
+                    f"{field.name} is converted from numbers or arrays, and the "
+                    f"stub takes {taken}, an open sequence that refuses the "
+                    "numpy array of them"
                 )
         elif not _widens(annotations, field, module, argument):
             problems.append(

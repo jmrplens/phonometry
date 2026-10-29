@@ -86,8 +86,6 @@ from ...hearing.threshold import SEXES as _SEXES
 from ...io._resolve import SignalInput, resolve_fs, resolve_samples
 
 if TYPE_CHECKING:
-    from collections.abc import Sequence
-
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
@@ -551,7 +549,7 @@ class MultipleShockResult(OwnsArrays):
             exposure_duration_years: int,
             days_per_year: float,
             peaks: ArrayLike,
-            risk_thresholds: Sequence[float],
+            risk_thresholds: RealValues,
         ) -> None: ...
 
     def __post_init__(self) -> None:

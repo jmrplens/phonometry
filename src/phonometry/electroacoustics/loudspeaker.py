@@ -69,14 +69,12 @@ from .._internal.validation import (
 from ..metrology.reference_values import REFERENCE_VALUES
 
 if TYPE_CHECKING:
-    from collections.abc import Sequence
-
     from matplotlib.axes import Axes
     from matplotlib.projections.polar import PolarAxes
     from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
-    from .._internal.types import ReportEngine
+    from .._internal.types import ArrayRows, ReportEngine
     from .._report.metadata import ReportMetadata
     from .piston import RadiatingPistonResult
     from .swept_sine import SweptSineDistortionResult
@@ -305,7 +303,7 @@ class LoudspeakerDirectivity(OwnsArrays):
             self,
             *,
             piston: RadiatingPistonResult | None = None,
-            polar: Sequence[ArrayLike] | None = None,
+            polar: ArrayRows | None = None,
             frequency: float | None = None,
             index: float | None = None,
         ) -> None: ...

@@ -87,14 +87,12 @@ from .loudspeaker import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import Sequence
-
     from matplotlib.axes import Axes
     from matplotlib.projections.polar import PolarAxes
     from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
-    from .._internal.types import ReportEngine
+    from .._internal.types import ArrayRows, ReportEngine
     from .._report.metadata import ReportMetadata
 
 NoiseWeighting = Literal["A", "468"]
@@ -302,7 +300,7 @@ class MicrophoneDirectivity(OwnsArrays):
         def __init__(
             self,
             *,
-            polar: Sequence[ArrayLike] | None = None,
+            polar: ArrayRows | None = None,
             frequency: float | None = None,
             index: float | None = None,
         ) -> None: ...
@@ -366,7 +364,7 @@ class MicrophoneNoise(OwnsArrays):
             voltage_v: float | None = None,
             equivalent_level: float | None = None,
             weighting: NoiseWeighting = "A",
-            spectrum: Sequence[ArrayLike] | None = None,
+            spectrum: ArrayRows | None = None,
         ) -> None: ...
 
     def __post_init__(self) -> None:
@@ -422,7 +420,7 @@ class MicrophoneOverload(OwnsArrays):
         def __init__(
             self,
             *,
-            distortion: Sequence[ArrayLike] | None = None,
+            distortion: ArrayRows | None = None,
             thd_percent: float = 1.0,
             spl: float | None = None,
         ) -> None: ...

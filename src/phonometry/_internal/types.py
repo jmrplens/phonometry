@@ -41,6 +41,13 @@ RealValues = (
     | NDArray[Any]
 )
 
+#: A fixed count of arrays a record holds as one field, a curve's ``(x, y)``
+#: or the ``(x, y, z)`` axes of an elevation model: a sequence of them, each
+#: any array-like (a tuple of an array and a list), or one array whose rows
+#: they are (``np.vstack((x, y))``), which is no ``Sequence`` to a type
+#: checker and so is named beside it.
+ArrayRows = Sequence[ArrayLike] | NDArray[Any]
+
 #: Values keyed by a band centre frequency in hertz (or by another number a
 #: caller writes as an ``int`` as often as a ``float``, an angle in degrees),
 #: ``{125: 40.0, ...}`` or ``{125.0: 40.0, ...}``. ``Mapping`` is invariant in

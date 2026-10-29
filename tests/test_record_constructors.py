@@ -16,7 +16,8 @@ a field annotated as a container of a fixed kind or as a sequence of
 numbers declares the constructor, and every declared constructor keeps step
 with its fields, name for name, keyword-only exactly where the field is,
 with the field's default, a converted field taking ``ArrayLike`` or an open
-sequence and every other one taking all its field's annotation names. A
+sequence (of numbers or arrays, beside the numpy array of them) and every
+other one taking all its field's annotation names. A
 constructor of more keywords than a function takes (the 13 of Sonar's rule
 S107) takes them as the keys of a ``TypedDict``, ``**measurements:
 Unpack[Keywords]``, each key read as the keyword it stands for. The first
@@ -570,6 +571,67 @@ def test_a_keyword_dictionary_the_reading_cannot_find_is_refused(
         "its TYPE_CHECKING __init__ takes **bands: ArrayLike, which is no Unpack "
         "of a TypedDict written in the record's module"
     )
+
+
+def test_a_pair_of_arrays_takes_one_array_of_two_rows_too(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A stub that takes an open sequence of numbers or arrays takes their array too.
+
+    A field of arrays or of numbers (``tuple[NDArray, NDArray]``, three
+    floats) built from any sequence of them is built from an array of them,
+    which ``Sequence[ArrayLike]`` alone refuses to a type checker; a stub
+    that names its containers (``tuple[int, int] | list[int]``) claims no
+    more than it takes, and a field of other objects is no array's rows.
+    """
+    source = (
+        _TAKER
+        + """
+
+class Resonator:
+    pass
+
+
+@dataclass(frozen=True, kw_only=True)
+class Spectrum:
+    levels: tuple[NDArray[np.float64], NDArray[np.float64]]
+    thresholds: tuple[float, float, float] = (1.0, 2.0, 3.0)
+    resonators: tuple[Resonator, ...] = ()
+
+    if TYPE_CHECKING:
+
+        def __init__(
+            self,
+            *,
+            levels: LEVELS,
+            thresholds: THRESHOLDS = (1.0, 2.0, 3.0),
+            resonators: Sequence[Resonator] = (),
+        ) -> None: ...
+
+    def __post_init__(self) -> None:
+        first, second = (np.asarray(item, dtype=float) for item in self.levels)
+        object.__setattr__(self, "levels", (first, second))
+        object.__setattr__(self, "thresholds", tuple(map(float, self.thresholds)))
+        object.__setattr__(self, "resonators", tuple(self.resonators))
+"""
+    )
+    narrow = source.replace("LEVELS", "Sequence[ArrayLike]").replace(
+        "THRESHOLDS", "Sequence[float]"
+    )
+    reader = _reader(tmp_path, narrow)
+    assert cpa.constructor_problems(reader, "pkg.api.Spectrum") == [
+        "levels is converted from numbers or arrays, and the stub takes "
+        "Sequence[ArrayLike], an open sequence that refuses the numpy array of "
+        "them",
+        "thresholds is converted from numbers or arrays, and the stub takes "
+        "Sequence[float], an open sequence that refuses the numpy array of them",
+    ]
+    (tmp_path / "wide").mkdir()
+    wide = source.replace("LEVELS", "Sequence[ArrayLike] | NDArray[Any]").replace(
+        "THRESHOLDS", "tuple[float, float, float] | list[float]"
+    )
+    reader = _reader(tmp_path / "wide", wide)
+    assert cpa.constructor_problems(reader, "pkg.api.Spectrum") == []
 
 
 def test_a_mapping_field_nothing_wraps_is_kept_as_given(

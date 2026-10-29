@@ -339,7 +339,7 @@ MultipleShockResult(
     exposure_duration_years: int,
     days_per_year: float,
     peaks: ArrayLike,
-    risk_thresholds: Sequence[float],
+    risk_thresholds: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
 )
 ```
 

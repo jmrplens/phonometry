@@ -87,6 +87,7 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
+    from .._internal.types import ArrayRows
 
 EventMetric = Literal["exposure", "maximum"]
 
@@ -1398,7 +1399,7 @@ class RotorcraftGround(OwnsArrays):
             receiver_height_m: float = 1.2,
             ground_elevation: ArrayLike = 0.0,
             flow_resistivity: GroundClass | ArrayLike = "G",
-            terrain: Sequence[ArrayLike] | None = None,
+            terrain: ArrayRows | None = None,
             terrain_resolution: float | None = None,
         ) -> None: ...
 

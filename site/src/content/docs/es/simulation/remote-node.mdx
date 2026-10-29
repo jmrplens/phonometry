@@ -282,7 +282,7 @@ ejecuta allí. La imagen de Docker de la sección 3 lleva las dos.
 | un argumento de la ejecución | `TypeError` o `ValueError` | al construir la ejecución, igual que para una ejecución aquí |
 | una ejecución que no puede viajar: una fuente cuya forma de onda es un invocable distinto del `.value` de un `GaussianPulse`, `CWSource` o `SignalSource`, o un número entero fuera del rango de un int64 | `TypeError`, nombrando la fuente o el campo | al llamar a la función, antes de leer el fichero de hosts |
 | un host que el fichero no nombra, o ningún fichero de hosts | `KeyError` | antes de que arranque ssh |
-| un fichero de hosts que no se puede leer o no es TOML, o una entrada mal formada | `ValueError`, nombrando el fichero | antes de que arranque ssh |
+| un fichero de hosts que es una tubería con nombre, un dispositivo o un directorio, ocupa más de 1 MiB, no se puede leer o no es TOML, o una entrada mal formada | `ValueError`, nombrando el fichero | antes de que arranque ssh |
 | ningún cliente ssh en el `PATH`, aunque en Windows haya uno en el directorio de trabajo, Pyodide, un paquete que no se puede leer del disco o que contiene un fichero que ningún nodo escribiría, o un trabajo demasiado largo para la cabecera que lee un nodo (una ejecución de varios miles de fuentes puntuales) | `ComputeRemoteError` | antes de que arranque ssh |
 | cualquier cosa que falle en la conexión o en el nodo | `ComputeRemoteError` | cuando falla |
 

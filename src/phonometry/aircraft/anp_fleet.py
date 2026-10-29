@@ -40,13 +40,21 @@ database v2.3 (2020) and the ECAC Doc 29 4th ed. Vol 2 NPD/profile conventions.
 from __future__ import annotations
 
 import csv
+import math
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal, NamedTuple, cast
 
 import numpy as np
 
 from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, read_only, read_only_copy
+from .._internal.json_input import (
+    NotRegularError,
+    TooLargeError,
+    escaped,
+    read_at_most,
+)
 from .._internal.validation import (
     require_axis_count,
     require_choice,
@@ -79,7 +87,7 @@ from .flight_performance import (
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Mapping, Sequence
-    from pathlib import Path
+    from importlib.resources.abc import Traversable
 
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
@@ -156,6 +164,20 @@ _COL_STAGE_LENGTH = "Stage Length"
 _COL_DISTANCE_FT = "Distance (ft)"
 _COL_THRUST_RATING = "Thrust Rating"
 _COL_OP_TYPE = "Op Type"
+#: The aircraft table's numbers, read when an aircraft is asked for and
+#: checked when the table is read, so that a cell no number can be read from is
+#: refused at the load with its place, not at the first question about it.
+_AIRCRAFT_NUMBERS = (
+    "Number Of Engines",
+    "Max Sea Level Static Thrust (lb)",
+    "Max Gross Landing Weight (lb)",
+)
+#: The most bytes one table of a caller's export may hold: 32 MiB, some 68 times
+#: the largest table of the EASA ANP database v2.3, its departure procedural
+#: steps at 491,047 bytes (9,379 lines); the tables of version 9 hold fewer rows.
+#: The bound keeps a file at a table's name that grows while it is read, or a
+#: device behind a name, from being read without end.
+_MAX_TABLE_BYTES = 32 * 1024 * 1024
 
 
 def _operation_code(operation: object) -> OperationCode:
@@ -176,19 +198,149 @@ def _file_operation_code(text: str) -> OperationCode:
     return _FILE_OPERATION[key]
 
 
-def _rows(text: str) -> list[dict[str, str]]:
-    """Parse a semicolon-delimited ANP CSV table into a list of row mappings."""
-    reader = csv.DictReader(text.splitlines(), delimiter=";")
+class _Table(NamedTuple):
+    """One table of an ANP export: the name of its file and its text."""
+
+    name: str
+    text: str
+
+
+class _Row(dict[str, str]):
+    """One row of an ANP table, its cells by column, and where it was read.
+
+    :ivar table: The name of the table's file.
+    :ivar line: The line of the file the row ends on.
+    """
+
+    __slots__ = ("line", "table")
+
+    def __init__(self, cells: Mapping[str, str], table: str, line: int) -> None:
+        super().__init__(cells)
+        self.table = table
+        self.line = line
+
+
+def _rows(table: _Table) -> list[_Row]:
+    """Parse a semicolon-delimited ANP CSV table into rows that know their place."""
+    reader = csv.DictReader(table.text.splitlines(), delimiter=";")
     return [
-        {(k or "").strip(): (v or "").strip() for k, v in row.items()} for row in reader
+        _Row(
+            {(k or "").strip(): (v or "").strip() for k, v in row.items()},
+            table.name,
+            reader.line_num,
+        )
+        for row in reader
     ]
 
 
-def _pick(name: str, tables: Mapping[str, str]) -> str:
+def _cell_place(row: Mapping[str, str], column: str) -> str:
+    """Where a cell of *row* is, as a refusal names it."""
+    if isinstance(row, _Row):
+        return f"ANP table {escaped(row.table)!r}, line {row.line}, column {column!r}"
+    return f"ANP column {column!r}"
+
+
+def _number(row: Mapping[str, str], column: str) -> float:
+    """The cell of *row* at *column* as a finite number, or its refusal.
+
+    A cell Python reads as ``nan`` or ``inf`` (spelt so, or a number too large
+    for a float, such as ``1e999``) is refused with the table, the line and the
+    column, as is a cell that holds no number: a non-finite level or distance
+    would pass through the interpolation of every NPD curve and every profile
+    built on it, and come out of an event level as NaN with nothing to say
+    where it came from.
+
+    :raises KeyError: for a table without the column.
+    :raises ValueError: for a cell that holds no finite number.
+    """
+    text = row[column]
+    try:
+        value = float(text)
+    except ValueError:
+        msg = f"{_cell_place(row, column)}: {escaped(text)!r} is not a number"
+        raise ValueError(msg) from None
+    if not math.isfinite(value):
+        msg = (
+            f"{_cell_place(row, column)}: {escaped(text)!r} is not a finite "
+            "number, and an ANP table holds finite numbers only"
+        )
+        raise ValueError(msg)
+    return value
+
+
+def _header_number(table: _Table, column: str, text: str) -> float:
+    """The number a column heading carries (``L_200ft``, ``L_50Hz``), finite.
+
+    :raises ValueError: for a heading whose number is not one, or not finite.
+    """
+    return _number(_Row({column: text}, table.name, 1), column)
+
+
+def _table_text(source: Traversable) -> str:
+    """The text of the table *source*, a caller's file or one of the package.
+
+    A file the caller's directory holds is read as :func:`_checked_text`
+    reads it. A table of the package's own is read as the package gives it;
+    on a file system that is the same check, and inside a zip archive it is a
+    member of the archive no caller names.
+
+    :raises ValueError: for what :func:`_checked_text` refuses.
+    """
+    if isinstance(source, Path):
+        return _checked_text(source)
+    return source.read_text(encoding="utf-8-sig")
+
+
+def _checked_text(path: Path) -> str:
+    """The text of the table at *path*, a regular file of a bounded size.
+
+    Read through :func:`~phonometry._internal.json_input.read_at_most`: a
+    pipe, a device, a socket or a directory at the name is refused before it
+    is opened, since opening a pipe waits for a writer and reading a device
+    never ends, and a file past :data:`_MAX_TABLE_BYTES` before more than one
+    byte past it is read. A leading byte-order mark, which exported ANP tables
+    may carry, is left out.
+
+    :raises ValueError: for either, and for a file that is not UTF-8 text,
+        naming the table.
+    :raises OSError: as the file system raises it, untouched.
+    """
+    named = f"ANP table {escaped(str(path))}"
+    try:
+        raw = read_at_most(path, _MAX_TABLE_BYTES)
+    except NotRegularError as exc:
+        msg = (
+            f"{named}: is {exc.kind}, and an ANP table is read only from a regular file"
+        )
+        raise ValueError(msg) from None
+    except TooLargeError as exc:
+        held = (
+            f"is {exc.size} bytes"
+            if exc.size is not None
+            else f"runs past {_MAX_TABLE_BYTES} bytes"
+        )
+        msg = (
+            f"{named}: {held}, and an ANP table is at most {_MAX_TABLE_BYTES} bytes "
+            "(32 MiB)"
+        )
+        raise ValueError(msg) from None
+    try:
+        return raw.decode("utf-8-sig")
+    except UnicodeDecodeError as exc:
+        msg = f"{named}: is not UTF-8 text (byte {exc.start})"
+        raise ValueError(msg) from None
+
+
+def _pick(name: str, tables: Mapping[str, Traversable]) -> _Table:
     """Resolve one logical ANP table by a case-insensitive filename keyword.
 
     Accepts both the archive naming (``ANP2.3_NPD_data.csv``) and the curated
-    subset naming (``NPD_data.csv``).
+    subset naming (``NPD_data.csv``). Only the table it resolves is read, so
+    a file in the directory that no keyword names is never opened.
+
+    :raises ValueError: for a keyword two files match, and for what
+        :func:`_table_text` refuses.
+    :raises FileNotFoundError: for a keyword no file matches.
     """
     matches = [f for f in tables if name in f.lower()]
     if len(matches) > 1:
@@ -200,7 +352,7 @@ def _pick(name: str, tables: Mapping[str, str]) -> str:
     if not matches:
         msg = f"no ANP table matching {name!r} found (looked in: {sorted(tables)})."
         raise FileNotFoundError(msg)
-    return tables[matches[0]]
+    return _Table(matches[0], _table_text(tables[matches[0]]))
 
 
 def _select_profile_id(
@@ -264,25 +416,32 @@ def _stage_label(stage_length: int | str) -> str:
     return str(int(number))
 
 
-def _optional(value: str) -> float | None:
-    """One ANP cell as a number, or ``None`` for the blank the table leaves.
+def _optional(
+    row: Mapping[str, str], column: str, *, absent_is_blank: bool = False
+) -> float | None:
+    """One ANP cell as a finite number, or ``None`` for the blank the table leaves.
 
     A blank is a quantity the row does not define (the take-off ground-roll
     coefficient of a flap setting no take-off uses, the rate of climb of a step
     that is not an Accelerate), and the performance model refuses a zero
     standing in for one, so the distinction survives the read.
+
+    :param absent_is_blank: Whether a table without the column reads as blank
+        in every row, for a column some exports leave out.
+    :raises KeyError: for a table without the column, unless *absent_is_blank*.
+    :raises ValueError: for a cell that is neither blank nor a finite number.
     """
-    text = value.strip()
-    return float(text) if text else None
+    text = row.get(column, "") if absent_is_blank else row[column]
+    return _number(row, column) if text.strip() else None
 
 
-def _distances_m(header: Iterable[str]) -> NDArray[np.float64]:
+def _distances_m(table: _Table, header: Iterable[str]) -> NDArray[np.float64]:
     """Slant distances (metres) parsed from the ``L_<ft>ft`` NPD column headers."""
     dist_ft: list[float] = []
     for col in header:
         c = col.strip()
         if c.startswith("L_") and c.endswith("ft"):
-            dist_ft.append(float(c[2:-2]))
+            dist_ft.append(_header_number(table, c, c[2:-2]))
     if len(dist_ft) < _MIN_NPD_DISTANCES:
         msg = "NPD table has fewer than two 'L_<ft>ft' distance columns."
         raise ValueError(msg)
@@ -1559,21 +1718,22 @@ def _npd_air(
     return _NPDAir(atmosphere, float(relative_humidity_percent), route)
 
 
-def _read_tables(path: Path | str | None) -> dict[str, str]:
-    """Return ``{filename: text}`` for the bundled subset or a user directory."""
+def _read_tables(path: Path | str | None) -> dict[str, Traversable]:
+    """Return ``{filename: table}`` for the bundled database or a user directory.
+
+    Nothing is read here: :func:`_pick` reads the table it resolves, so a file
+    of the directory that names no table is never opened.
+    """
     if path is None:
         from importlib.resources import files
 
         root = files("phonometry.aircraft.data.anp")
-        out: dict[str, str] = {}
-        for entry in root.iterdir():
-            if entry.name.lower().endswith(".csv"):
-                # utf-8-sig tolerates a leading BOM in exported ANP CSVs.
-                out[entry.name] = entry.read_text(encoding="utf-8-sig")
-        return out
-    import pathlib
-
-    directory = pathlib.Path(path)
+        return {
+            entry.name: entry
+            for entry in root.iterdir()
+            if entry.name.lower().endswith(".csv")
+        }
+    directory = Path(path)
     if not directory.is_dir():
         msg = f"ANP database path {path!r} is not a directory."
         raise NotADirectoryError(msg)
@@ -1581,22 +1741,36 @@ def _read_tables(path: Path | str | None) -> dict[str, str]:
     if not files_found:
         msg = f"no .csv ANP tables found in {path!r}."
         raise FileNotFoundError(msg)
-    return {f.name: f.read_text(encoding="utf-8-sig") for f in files_found}
+    return {f.name: f for f in files_found}
+
+
+def _parse_aircraft(table: _Table) -> dict[str, _Row]:
+    """The aircraft table by identifier, its numbers checked as it is read.
+
+    The rows are kept as they are, since :class:`ANPAircraft` reads them when it
+    is asked for; the cells of :data:`_AIRCRAFT_NUMBERS` are checked here, so a
+    cell that is no finite number is refused at the load with its place.
+    """
+    rows = _rows(table)
+    for row in rows:
+        for column in _AIRCRAFT_NUMBERS:
+            _optional(row, column, absent_is_blank=True)
+    return {row["ACFT_ID"]: row for row in rows}
 
 
 def _parse_npd(
-    text: str,
+    table: _Table,
 ) -> tuple[
     dict[tuple[str, str, str], tuple[NDArray[np.float64], NDArray[np.float64]]],
     NDArray[np.float64],
 ]:
     """Parse the NPD table into ``{(npd_id, metric, op): (powers, levels)}``."""
-    rows = _rows(text)
+    rows = _rows(table)
     if not rows:
         msg = "empty NPD table."
         raise ValueError(msg)
     level_cols = [c for c in rows[0] if c.startswith("L_") and c.endswith("ft")]
-    distances = _distances_m(rows[0].keys())
+    distances = _distances_m(table, rows[0].keys())
     grouped: dict[tuple[str, str, str], list[tuple[float, list[float]]]] = {}
     key: tuple[str, str, str]
     for row in rows:
@@ -1604,8 +1778,8 @@ def _parse_npd(
         if metric not in _METRICS:
             continue
         key = (row["NPD_ID"], metric, row["Op Mode"])
-        power = float(row["Power Setting"])
-        levels = [float(row[c]) for c in level_cols]
+        power = _number(row, "Power Setting")
+        levels = [_number(row, c) for c in level_cols]
         grouped.setdefault(key, []).append((power, levels))
     npd: dict[
         tuple[str, str, str], tuple[NDArray[np.float64], NDArray[np.float64]]
@@ -1621,7 +1795,7 @@ def _parse_npd(
 
 
 def _parse_profiles(
-    text: str,
+    table: _Table,
 ) -> dict[tuple[str, str, str, int], NDArray[np.float64]]:
     """Parse fixed-point profiles into ``{(acft, op, profile_id, stage): path}``.
 
@@ -1633,7 +1807,7 @@ def _parse_profiles(
     within each profile; a violation means rows from distinct profiles collided
     (or the CSV is malformed), so it raises instead of silently interleaving.
     """
-    rows = _rows(text)
+    rows = _rows(table)
     grouped: dict[tuple[str, str, str, int], list[tuple[int, list[float]]]] = {}
     key: tuple[str, str, str, int]
     for row in rows:
@@ -1645,13 +1819,13 @@ def _parse_profiles(
             # aeroplane would report no fixed-point profile at all.
             _file_operation_code(row[_COL_OP_TYPE]),
             row["Profile_ID"],
-            int(float(row[_COL_STAGE_LENGTH])),
+            int(_number(row, _COL_STAGE_LENGTH)),
         )
-        point = int(float(row["Point Number"]))
-        x = float(row[_COL_DISTANCE_FT]) * _FT_M
-        z = float(row["Altitude AFE (ft)"]) * _FT_M
-        speed = float(row["TAS (kt)"]) * _KT_MS
-        power = float(row["Power Setting"])
+        point = int(_number(row, "Point Number"))
+        x = _number(row, _COL_DISTANCE_FT) * _FT_M
+        z = _number(row, "Altitude AFE (ft)") * _FT_M
+        speed = _number(row, "TAS (kt)") * _KT_MS
+        power = _number(row, "Power Setting")
         grouped.setdefault(key, []).append((point, [x, 0.0, z, power, speed]))
     profiles: dict[tuple[str, str, str, int], NDArray[np.float64]] = {}
     for key, pts in grouped.items():
@@ -1672,7 +1846,7 @@ def _parse_profiles(
     return profiles
 
 
-def _parse_performance(tables: Mapping[str, str]) -> _PerformanceTables:
+def _parse_performance(tables: Mapping[str, Traversable]) -> _PerformanceTables:
     """Parse the five performance tables an export carries, skipping any absent.
 
     These are optional: an export limited to NPD curves and fixed-point
@@ -1681,24 +1855,22 @@ def _parse_performance(tables: Mapping[str, str]) -> _PerformanceTables:
     load failure that stops an NPD-only export from being read at all.
     """
     out = _PerformanceTables()
-    if (text := _optional_table("jet_engine", tables)) is not None:
-        _parse_jet_engine_table(_rows(text), out)
-    if (text := _optional_table("propeller_engine", tables)) is not None:
-        _parse_propeller_engine_table(_rows(text), out)
-    if (text := _optional_table("aerodynamic", tables)) is not None:
-        _parse_aerodynamic_table(_rows(text), out)
-    if (text := _optional_table("weights", tables)) is not None:
-        _parse_weights_table(_rows(text), out)
-    if (text := _optional_table("departure_procedural", tables)) is not None:
-        _parse_departure_step_table(_rows(text), out)
-    if (text := _optional_table("approach_procedural", tables)) is not None:
-        _parse_approach_step_table(_rows(text), out)
+    if (table := _optional_table("jet_engine", tables)) is not None:
+        _parse_jet_engine_table(_rows(table), out)
+    if (table := _optional_table("propeller_engine", tables)) is not None:
+        _parse_propeller_engine_table(_rows(table), out)
+    if (table := _optional_table("aerodynamic", tables)) is not None:
+        _parse_aerodynamic_table(_rows(table), out)
+    if (table := _optional_table("weights", tables)) is not None:
+        _parse_weights_table(_rows(table), out)
+    if (table := _optional_table("departure_procedural", tables)) is not None:
+        _parse_departure_step_table(_rows(table), out)
+    if (table := _optional_table("approach_procedural", tables)) is not None:
+        _parse_approach_step_table(_rows(table), out)
     return out
 
 
-def _parse_jet_engine_table(
-    rows: list[dict[str, str]], out: _PerformanceTables
-) -> None:
+def _parse_jet_engine_table(rows: list[_Row], out: _PerformanceTables) -> None:
     """Collect the Eq. B-9 thrust polynomial, by aircraft and thrust rating.
 
     One row per aeroplane and rating, carrying the ``E``, ``F``, ``Ga``, ``Gb``
@@ -1709,18 +1881,16 @@ def _parse_jet_engine_table(
     for row in rows:
         out.jet.setdefault(row["ACFT_ID"], {})[row[_COL_THRUST_RATING]] = (
             JetEngineCoefficients(
-                e=float(row["E"]),
-                f=float(row["F"]),
-                ga=float(row["Ga"]),
-                gb=float(row["Gb"]),
-                h=float(row["H"]),
+                e=_number(row, "E"),
+                f=_number(row, "F"),
+                ga=_number(row, "Ga"),
+                gb=_number(row, "Gb"),
+                h=_number(row, "H"),
             )
         )
 
 
-def _parse_propeller_engine_table(
-    rows: list[dict[str, str]], out: _PerformanceTables
-) -> None:
+def _parse_propeller_engine_table(rows: list[_Row], out: _PerformanceTables) -> None:
     """Collect the Eq. B-12 propeller pair, by aircraft and thrust rating.
 
     The efficiency ``eta`` and installed net propulsive power ``Pp`` that
@@ -1730,15 +1900,13 @@ def _parse_propeller_engine_table(
     for row in rows:
         out.propeller.setdefault(row["ACFT_ID"], {})[row[_COL_THRUST_RATING]] = (
             PropellerEngineCoefficients(
-                efficiency=float(row["Propeller Efficiency"]),
-                power_hp=float(row["Installed Net Propulsive Power (hp)"]),
+                efficiency=_number(row, "Propeller Efficiency"),
+                power_hp=_number(row, "Installed Net Propulsive Power (hp)"),
             )
         )
 
 
-def _parse_aerodynamic_table(
-    rows: list[dict[str, str]], out: _PerformanceTables
-) -> None:
+def _parse_aerodynamic_table(rows: list[_Row], out: _PerformanceTables) -> None:
     """Collect each flap configuration's ``R``, ``B`` and speed coefficient.
 
     Keyed by operation and flap identifier: ``R`` is the drag ratio every force
@@ -1756,17 +1924,17 @@ def _parse_aerodynamic_table(
         op = _file_operation_code(row[_COL_OP_TYPE])
         # The take-off speed coefficient C and the landing one D live in
         # separate columns, and a row fills whichever its operation flies.
-        speed = _optional(row["C"] if op == _DEPARTURE else row["D"])
+        speed = _optional(row, "C" if op == _DEPARTURE else "D")
         out.aerodynamic.setdefault(row["ACFT_ID"], {})[(op, row["Flap_ID"])] = (
             AerodynamicCoefficients(
-                drag_ratio=float(row["R"]),
-                ground_roll_coefficient=_optional(row["B"]),
+                drag_ratio=_number(row, "R"),
+                ground_roll_coefficient=_optional(row, "B"),
                 speed_coefficient=speed,
             )
         )
 
 
-def _parse_weights_table(rows: list[dict[str, str]], out: _PerformanceTables) -> None:
+def _parse_weights_table(rows: list[_Row], out: _PerformanceTables) -> None:
     """Collect the departure weight of each aircraft and stage length, lb.
 
     ``W`` of Eq. B-4, which every thrust balance of Appendix B is corrected
@@ -1774,14 +1942,12 @@ def _parse_weights_table(rows: list[dict[str, str]], out: _PerformanceTables) ->
     here: B7 flies the 90 % of maximum landing weight of folio B-31 instead.
     """
     for row in rows:
-        out.weights[(row["ACFT_ID"], _stage_label(row[_COL_STAGE_LENGTH]))] = float(
-            row["Weight (lb)"]
+        out.weights[(row["ACFT_ID"], _stage_label(row[_COL_STAGE_LENGTH]))] = _number(
+            row, "Weight (lb)"
         )
 
 
-def _parse_departure_step_table(
-    rows: list[dict[str, str]], out: _PerformanceTables
-) -> None:
+def _parse_departure_step_table(rows: list[_Row], out: _PerformanceTables) -> None:
     """Collect the departure procedures of B6.1, in step-number order.
 
     Keyed by aircraft, profile identifier and stage length, since a departure
@@ -1800,21 +1966,19 @@ def _parse_departure_step_table(
             step_type=row["Step Type"],
             thrust_rating=row[_COL_THRUST_RATING],
             flap_id=row["Flap_ID"],
-            end_altitude_ft=_optional(row["End Point Altitude (ft)"]),
-            rate_of_climb_ft_per_min=_optional(row["Rate Of Climb (ft/min)"]),
-            end_calibrated_airspeed_kt=_optional(row["End Point CAS (kt)"]),
-            energy_share_percent=_optional(row["Accel Percentage (%)"]),
-            distance_ft=_optional(row.get(_COL_DISTANCE_FT, "")),
+            end_altitude_ft=_optional(row, "End Point Altitude (ft)"),
+            rate_of_climb_ft_per_min=_optional(row, "Rate Of Climb (ft/min)"),
+            end_calibrated_airspeed_kt=_optional(row, "End Point CAS (kt)"),
+            energy_share_percent=_optional(row, "Accel Percentage (%)"),
+            distance_ft=_optional(row, _COL_DISTANCE_FT, absent_is_blank=True),
         )
-        grouped.setdefault(dkey, []).append((int(float(row["Step Number"])), step))
+        grouped.setdefault(dkey, []).append((int(_number(row, "Step Number")), step))
     for dkey, steps in grouped.items():
         steps.sort(key=lambda e: e[0])
         out.departure_steps[dkey] = tuple(step for _n, step in steps)
 
 
-def _parse_approach_step_table(
-    rows: list[dict[str, str]], out: _PerformanceTables
-) -> None:
+def _parse_approach_step_table(rows: list[_Row], out: _PerformanceTables) -> None:
     """Collect the approach procedures of B7.1, in step-number order.
 
     Keyed by aircraft and profile identifier alone, with no stage length: an
@@ -1828,27 +1992,29 @@ def _parse_approach_step_table(
         astep = ApproachStep(
             step_type=row["Step Type"],
             flap_id=row["Flap_ID"],
-            start_altitude_ft=_optional(row["Start Altitude(ft)"]),
-            start_calibrated_airspeed_kt=_optional(row["Start CAS (kt)"]),
-            descent_angle_deg=_optional(row["Descent Angle (deg)"]),
-            touchdown_roll_ft=_optional(row["Touchdown Roll (ft)"]),
-            distance_ft=_optional(row[_COL_DISTANCE_FT]),
-            start_thrust_percent=_optional(row["Start Thrust"]),
+            start_altitude_ft=_optional(row, "Start Altitude(ft)"),
+            start_calibrated_airspeed_kt=_optional(row, "Start CAS (kt)"),
+            descent_angle_deg=_optional(row, "Descent Angle (deg)"),
+            touchdown_roll_ft=_optional(row, "Touchdown Roll (ft)"),
+            distance_ft=_optional(row, _COL_DISTANCE_FT),
+            start_thrust_percent=_optional(row, "Start Thrust"),
         )
-        by_profile.setdefault(akey, []).append((int(float(row["Step Number"])), astep))
+        by_profile.setdefault(akey, []).append(
+            (int(_number(row, "Step Number")), astep)
+        )
     for akey, asteps in by_profile.items():
         asteps.sort(key=lambda e: e[0])
         out.approach_steps[akey] = tuple(step for _n, step in asteps)
 
 
-def _spectral_frequencies(header: Iterable[str]) -> NDArray[np.float64]:
+def _spectral_frequencies(table: _Table, header: Iterable[str]) -> NDArray[np.float64]:
     """Band centre frequencies (Hz) parsed from the ``L_<f>Hz`` column headers.
 
     :raises ValueError: unless they are the 24 one-third-octave bands from
         50 Hz to 10 kHz that G4.3 of Doc 29 Vol. 2 describes.
     """
     found = [
-        float(c.strip()[2:-2])
+        _header_number(table, c.strip(), c.strip()[2:-2])
         for c in header
         if c.strip().startswith("L_") and c.strip().endswith("Hz")
     ]
@@ -1864,17 +2030,17 @@ def _spectral_frequencies(header: Iterable[str]) -> NDArray[np.float64]:
     return frequencies
 
 
-def _parse_spectral_classes(text: str) -> dict[str, SpectralClass]:
+def _parse_spectral_classes(table: _Table) -> dict[str, SpectralClass]:
     """Parse the spectral-class table into ``{class_id: SpectralClass}``."""
-    rows = _rows(text)
+    rows = _rows(table)
     if not rows:
         return {}
-    frequencies = _spectral_frequencies(rows[0].keys())
+    frequencies = _spectral_frequencies(table, rows[0].keys())
     frequencies.flags.writeable = False  # shared by every class
     columns = [c for c in rows[0] if c.startswith("L_") and c.endswith("Hz")]
     out: dict[str, SpectralClass] = {}
     for row in rows:
-        levels = np.asarray([float(row[c]) for c in columns], dtype=np.float64)
+        levels = np.asarray([_number(row, c) for c in columns], dtype=np.float64)
         levels.flags.writeable = False
         class_id = row["Spectral Class ID"]
         out[class_id] = SpectralClass(
@@ -1887,7 +2053,7 @@ def _parse_spectral_classes(text: str) -> dict[str, SpectralClass]:
     return out
 
 
-def _optional_table(name: str, tables: Mapping[str, str]) -> str | None:
+def _optional_table(name: str, tables: Mapping[str, Traversable]) -> _Table | None:
     """One logical table by filename keyword, or ``None`` when the export omits it."""
     try:
         return _pick(name, tables)
@@ -1907,12 +2073,20 @@ def load_anp_database(path: Path | str | None = None) -> ANPDatabase:
         recalculate the NPD curves for another atmosphere). If ``None``
         (default), loads the full EASA ANP database v2.3 shipped with the
         package (see ``aircraft/data/anp/PROVENANCE.md``).
+        Every table is read from a regular file of at most 32 MiB, and every
+        number in it is a finite one.
     :return: An :class:`ANPDatabase`.
     :raises FileNotFoundError: If a required table is missing.
+    :raises NotADirectoryError: If *path* is not a directory.
+    :raises ValueError: If two files match one table, a table is a named
+        pipe, a device, a socket or a directory rather than a regular file
+        (refused before it is opened), holds more than 32 MiB or is not UTF-8
+        text, or a cell that holds a number is not a finite one (``nan``,
+        ``inf``, ``1e999``) or no number at all, naming the table, the line
+        and the column.
     """
     tables = _read_tables(path)
-    aircraft_rows = _rows(_pick("aircraft", tables))
-    aircraft = {row["ACFT_ID"]: row for row in aircraft_rows}
+    aircraft = _parse_aircraft(_pick("aircraft", tables))
     npd, distances = _parse_npd(_pick("npd", tables))
     profiles = _parse_profiles(_pick("fixed_point", tables))
     spectral = _optional_table("spectral", tables)

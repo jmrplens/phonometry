@@ -37,7 +37,11 @@ at 16 bits, a `bext` chunk written field by field, and never a silent
 normalization. [`convert`](/phonometry/reference/api/io/io/#convert) moves a measurement between lossless
 containers with samples, provenance and sidecar intact, and the calibration
 travels in a versioned JSON sidecar ([`CalibrationSidecar`](/phonometry/reference/api/io/io/#calibrationsidecar)) next to the
-audio, where the audio formats themselves have no field for it.
+audio, where the audio formats themselves have no field for it. Every reader
+here refuses a name that holds no regular file, a named pipe, a device, a
+socket or a directory, with a `ValueError` that says which, before it
+opens it: opening a pipe waits for a writer that may never come, and reading a
+device may never end.
 
 [`write_video`](/phonometry/reference/api/io/io/#write_video) writes any matplotlib animation to WebM, MP4 or GIF
 through ffmpeg, the program matplotlib already knows where to find: every
@@ -1127,7 +1131,7 @@ original) so tools that only read PCM can open it.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | For a lossy or unknown target suffix, source and destination naming the same file, a FLAC target that cannot hold the source without an explicit `subtype`, an invalid `block_size`, a sidecar beside the source that [`read_sidecar`](/phonometry/reference/api/io/io/#read_sidecar) refuses or whose labels do not give one to each channel of the source, or a pipe, a device, a socket or a directory at the sidecar's name beside the destination; a sidecar is refused before a sample is written. |
+| ValueError | For a lossy or unknown target suffix, source and destination naming the same file, a source that is a pipe, a device, a socket or a directory rather than a regular file (refused before it is opened), a FLAC target that cannot hold the source without an explicit `subtype`, an invalid `block_size`, a sidecar beside the source that [`read_sidecar`](/phonometry/reference/api/io/io/#read_sidecar) refuses or whose labels do not give one to each channel of the source, or a pipe, a device, a socket or a directory at the sidecar's name beside the destination; a sidecar is refused before a sample is written. |
 | ImportError | If source or target needs the `[audio]` extra and it is not installed. |
 | TypeError | if `subtype` is not a text. |
 
@@ -1183,7 +1187,7 @@ the `lossy` field carries the fact instead.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If the file matches no known audio format. |
+| ValueError | If *path* names a pipe, a device, a socket or a directory rather than a regular file (refused before it is opened), or the file matches no known audio format. |
 | ImportError | If the container needs the `[audio]` extra and it is not installed. |
 
 ## LossyCompressionWarning
@@ -1384,7 +1388,7 @@ derived from the file's channel mask.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If the file matches no known audio format, or a sidecar exists but is invalid or gives a count of channel labels that is not the file's count of channels, each naming the sidecar. |
+| ValueError | If *path* names a pipe, a device, a socket or a directory rather than a regular file (refused before it is opened, since opening a pipe waits for a writer and reading a device never ends), the file matches no known audio format, or a sidecar exists but is invalid or gives a count of channel labels that is not the file's count of channels, each naming the sidecar. |
 | ImportError | If the format needs the `[audio]` extra and it is not installed. |
 
 ## read_blocks
@@ -1429,7 +1433,7 @@ the per-backend mechanics and the exact overlap rule.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If the geometry is invalid, `calibration_factor` is not a positive finite number, the file matches no known audio format, or a sidecar exists but is invalid or gives a count of channel labels that is not the file's count of channels (all at the call), or the data chunk is shorter than its header claims (at the block that reaches the end of it). |
+| ValueError | If the geometry is invalid, `calibration_factor` is not a positive finite number, *path* names a pipe, a device, a socket or a directory rather than a regular file (refused before it is opened), the file matches no known audio format, or a sidecar exists but is invalid or gives a count of channel labels that is not the file's count of channels (all at the call), or the data chunk is shorter than its header claims (at the block that reaches the end of it). |
 | ImportError | If the format needs the `[audio]` extra and it is not installed. |
 | TypeError | if `calibration_factor` is not a single number, or `block_size` or `overlap` is a flag, a text or an array where a count goes. |
 

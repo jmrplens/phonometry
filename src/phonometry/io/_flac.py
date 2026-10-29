@@ -34,6 +34,7 @@ import shutil
 import struct
 from pathlib import Path
 
+from ._audio_file import open_audio
 from ._chunks import _BEXT_CHUNK, BroadcastMetadata, _parse_bext
 
 #: The FLAC stream marker (RFC 9639 section 8): the four bytes every
@@ -66,7 +67,7 @@ def read_flac_bext(path: str | Path) -> BroadcastMetadata | None:
     no block carries a ``bext`` chunk: an ordinary FLAC, or one whose
     foreign metadata is some other chunk.
     """
-    with Path(path).open("rb") as fh:
+    with open_audio(path) as fh:
         if fh.read(4) != _FLAC_MAGIC:
             msg = f"{path}: not a FLAC file"
             raise ValueError(msg)
@@ -127,7 +128,7 @@ def embed_flac_bext(path: str | Path, bext_payload: bytes) -> None:
         raise ValueError(msg)
     source = Path(path)
     staging = source.with_name(source.name + ".phonometry-tmp")
-    with source.open("rb") as src, staging.open("wb") as dst:
+    with open_audio(source) as src, staging.open("wb") as dst:
         magic = src.read(4)
         if magic != _FLAC_MAGIC:
             msg = f"{path}: not a FLAC file"

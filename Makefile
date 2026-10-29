@@ -297,6 +297,16 @@ dead-constants:
 raises-blocks:
 	$(PYTHON) scripts/check_raises_blocks.py
 
+# A name a caller or the environment hands a reader can hold a named pipe, a
+# device or a directory: opening a pipe waits for a writer that may never come,
+# and reading a device never ends. Every reader in src opens a file through
+# the shared check of _internal/json_input.py, or asks it before a reader of
+# another library opens the name itself; this fails on a read that does
+# neither. Run on the tree before the readers were moved onto the check it
+# found fifteen. Stdlib only.
+regular-file-reads:
+	$(PYTHON) scripts/check_regular_file_reads.py
+
 # Every level is a ratio to an ISO 1683 reference value, and the package
 # publishes them once, in phonometry.metrology.REFERENCE_VALUES. This
 # fails on a reference value in src that is typed out again instead of read
@@ -902,7 +912,7 @@ check: lint security test
 	llms pypi-readme api-docs site-reports conformance install-hooks test test-perf gpu-parity node-image engine-digests coverage check \
 	snippets snippets-static claims subscripts euler-number docstring-math language-forwarding \
 	fence-names fence-readers decimal-comma spanish-accents figure-decimal-point figure-legends figure-tick-clearance \
-	figure-text-clearance figure-minus-sign control-characters hazards dead-constants raises-blocks reference-values \
+	figure-text-clearance figure-minus-sign control-characters hazards dead-constants raises-blocks regular-file-reads reference-values \
 	boundary-comparisons array-aliasing record-display return-overloads parameter-annotations \
 	conformance-rows conformance-vocabulary parameter-units identifier-spelling choice-literals frozen-constants published-sources \
 	solid-agreement shared-sources catalogue-data catalogue-schema published-catalogues

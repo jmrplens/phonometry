@@ -39,12 +39,16 @@ left over are only ones already delivered (``remaining <= overlap``).
 from __future__ import annotations
 
 import math
-from pathlib import Path
+
+# Imported to run, not only to type: typing.get_type_hints resolves the path
+# parameter of read_blocks in this module's namespace.
+from pathlib import Path  # noqa: TC003
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
 from .._internal.validation import require_count, require_scalar
+from ._audio_file import open_audio, require_regular_audio
 from ._backends import _import_soundfile, _sniff, _warn_lossy, info, soundfile_stamp
 from ._chunks import (
     WAVE_FORMAT_IEEE_FLOAT,
@@ -118,7 +122,7 @@ def _iter_wav_blocks(
     step = block_size - overlap
     origin = linear_wav_origin(path, chunks)
     labels = channel_labels if channel_labels is not None else fmt.channel_labels()
-    with Path(path).open("rb") as fh:
+    with open_audio(path) as fh:
         start = 0
         while total - start > overlap or start == 0 and total > 0:
             n = min(block_size, total - start)
@@ -157,6 +161,7 @@ def _iter_soundfile_blocks(
     if stamp.source.lossy:
         _warn_lossy(f"{format_name} ({stamp.source.format_name})", path)
     labels = channel_labels if channel_labels is not None else stamp.channel_labels
+    require_regular_audio(path)
     for block in sf.blocks(
         str(path),
         blocksize=block_size,
@@ -225,11 +230,13 @@ def read_blocks(
         otherwise leaves the blocks in digital full-scale units.
     :return: An iterator of Signal blocks.
     :raises ValueError: If the geometry is invalid, ``calibration_factor`` is
-        not a positive finite number, the file matches no known audio
-        format, or a sidecar exists but is invalid or gives a count of
-        channel labels that is not the file's count of channels (all at the
-        call), or the data chunk is shorter than its header claims (at the
-        block that reaches the end of it).
+        not a positive finite number, *path* names a pipe, a device, a
+        socket or a directory rather than a regular file (refused before it
+        is opened), the file matches no known audio format, or a sidecar
+        exists but is invalid or gives a count of channel labels that is not
+        the file's count of channels (all at the call), or the data chunk is
+        shorter than its header claims (at the block that reaches the end of
+        it).
     :raises ImportError: If the format needs the ``[audio]`` extra and it
         is not installed.
     :raises TypeError: if ``calibration_factor`` is not a single number, or
@@ -260,6 +267,7 @@ def read_blocks(
             f"got {calibration_factor}"
         )
         raise ValueError(msg)
+    require_regular_audio(path)
     sidecar = read_sidecar(path)
     if sidecar is not None and calibration_factor is None:
         calibration_factor = sidecar.calibration_factor

@@ -1470,7 +1470,10 @@ def test_a_union_split_across_heads_of_different_calls_offers_no_context(
 
     ``split("a", {None: {"rms": 1.0}})`` runs and matches no head; the heads
     of ``covered`` that take ``Kind`` offer both mappings to every call,
-    and its narrower head beside them changes nothing.
+    and its narrower head beside them changes nothing. In ``half`` the two
+    heads of ``"a"`` offer both mappings, but ``half("b", {None: ...})``
+    still matches no head: one group of heads that offers them all does not
+    excuse another that does not.
     """
     refused = _refused(
         tmp_path,
@@ -1481,7 +1484,7 @@ def test_a_union_split_across_heads_of_different_calls_offers_no_context(
         Kind = Literal["a", "b"]
         Columns = Mapping[Literal["rms", "vdv"], float]
 
-        __all__ = ["split", "covered"]
+        __all__ = ["split", "covered", "half"]
 
         @overload
         def split(kind: Literal["a"], measured: Mapping[int, Columns]) -> float: ...
@@ -1504,16 +1507,34 @@ def test_a_union_split_across_heads_of_different_calls_offers_no_context(
             kind: Kind, measured: Mapping[int, Columns] | Mapping[None, Columns]
         ) -> float:
             return 0.0
+
+        @overload
+        def half(kind: Literal["a"], measured: Mapping[int, Columns]) -> float: ...
+        @overload
+        def half(kind: Literal["a"], measured: Mapping[None, Columns]) -> float: ...
+        @overload
+        def half(kind: Literal["b"], measured: Mapping[int, Columns]) -> float: ...
+        def half(
+            kind: Kind, measured: Mapping[int, Columns] | Mapping[None, Columns]
+        ) -> float:
+            return 0.0
         """,
     )
     assert refused == {
+        "half(measured)": [
+            "takes Mapping[int, Columns] | Mapping[None, Columns], and the "
+            "overload heads that take each of them alone take different calls "
+            "but for it, so a dict written in a call one of them takes is read "
+            "against that head's mapping, never against the others: offer each "
+            "mapping alone in heads that take the same other arguments"
+        ],
         "split(measured)": [
             "takes Mapping[int, Columns] | Mapping[None, Columns], and the "
             "overload heads that take each of them alone take different calls "
             "but for it, so a dict written in a call one of them takes is read "
             "against that head's mapping, never against the others: offer each "
             "mapping alone in heads that take the same other arguments"
-        ]
+        ],
     }
 
 

@@ -3707,15 +3707,16 @@ def _unsplit(
     """Why the heads of a function do not offer each mapping of a union alone, with the part.
 
     Every mapping of the union is the one mapping of a head (part
-    ``"context"``), and for one of those heads, each mapping is the one
+    ``"context"``), and for every one of those heads, each mapping is the one
     mapping of a head that takes every call it takes but for parameter
     *name* (:func:`_call_shape`; part ``"pairing"``): a head whose other
     parameters are narrower, a ``Literal`` choice of its own for instance,
     is not reached by a call another head takes, so its mapping is no
-    context for a ``dict`` written in that call. A head narrower than such a
-    set, beside it, is left as it stands. Heads that pair each mapping with
-    a value of another parameter on purpose are listed in
-    :data:`PAIRED_MAPPINGS`.
+    context for a ``dict`` written in that call. A head narrower than a set
+    that offers every mapping to its calls passes through that set; a head
+    whose calls no head offers some mapping to is refused, even when another
+    group of heads offers them all. Heads that pair each mapping with a value
+    of another parameter on purpose are listed in :data:`PAIRED_MAPPINGS`.
     """
     module = function.module
     heads: list[tuple[str, _CallShape]] = []
@@ -3732,7 +3733,7 @@ def _unsplit(
             "against none of them: a Literal key is read as a str and nested "
             "mappings of two key types as object, and a call that runs is refused"
         )
-    if any(
+    if all(
         all(
             any(sole == arm and call.takes(first) for sole, call in heads)
             for arm in arms

@@ -89,6 +89,7 @@ from ..._internal.boundary import settled
 from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
+    require_aliased_choice,
     require_choice,
     require_count,
     require_equal_shapes,
@@ -98,7 +99,7 @@ from ..._internal.validation import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable, Mapping, Sequence
+    from collections.abc import Mapping, Sequence
 
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
@@ -366,21 +367,6 @@ def _positive(value: float, name: str) -> float:
         msg = f"'{name}' must be a positive, finite number."
         raise ValueError(msg)
     return scalar
-
-
-def _resolved(
-    value: object, name: str, canonical: Iterable[str], aliases: Mapping[str, str]
-) -> str:
-    """The canonical spelling of an option a caller names, as written.
-
-    *canonical* are the options the table prints and *aliases* the other
-    spellings the ``Literal`` lists on purpose; an alias of an option the
-    table does not hold is no option here.
-    """
-    known = sorted(set(canonical))
-    offered = (*known, *(alias for alias, to in aliases.items() if to in known))
-    named = require_choice(value, name, offered)
-    return aliases.get(named, named)
 
 
 def _check_period(period: object) -> EvaluationPeriod:
@@ -926,7 +912,7 @@ def _limits[K](
 
 def _area_key(area_type: object, table: Mapping[str, Any]) -> str:
     """The row of a table an acoustic area type names, as written."""
-    return _resolved(area_type, "area_type", table, _AREA_ALIASES)
+    return require_aliased_choice(area_type, "area_type", table, _AREA_ALIASES)
 
 
 def outdoor_quality_objectives(
@@ -974,8 +960,12 @@ def _indoor_key(
     building_use: object, room_type: object, table: Mapping[tuple[str, str], Any]
 ) -> tuple[str, str]:
     """The row of a table a (building use, room type) pair names, as written."""
-    use = _resolved(building_use, "building_use", {u for u, _ in table}, _USE_ALIASES)
-    room = _resolved(room_type, "room_type", {r for _, r in table}, _ROOM_ALIASES)
+    use = require_aliased_choice(
+        building_use, "building_use", {u for u, _ in table}, _USE_ALIASES
+    )
+    room = require_aliased_choice(
+        room_type, "room_type", {r for _, r in table}, _ROOM_ALIASES
+    )
     if (use, room) not in table:
         msg = (
             "Unknown (building_use, room_type) combination "
@@ -1035,7 +1025,9 @@ def vibration_quality_objective(building_use: BuildingUse) -> float:
     :raises ValueError: For an unknown building use.
     :raises TypeError: if ``building_use`` is not a text.
     """
-    use = _resolved(building_use, "building_use", _VIBRATION_OBJECTIVES, _USE_ALIASES)
+    use = require_aliased_choice(
+        building_use, "building_use", _VIBRATION_OBJECTIVES, _USE_ALIASES
+    )
     return _VIBRATION_OBJECTIVES[use]
 
 

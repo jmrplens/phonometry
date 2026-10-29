@@ -80,7 +80,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Final, Literal
 
 import numpy as np
 
@@ -88,6 +88,7 @@ from ..._internal.boundary import round_half_up
 from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
+    require_aliased_choice,
     require_choice,
     require_equal_shapes,
     require_ranks,
@@ -96,7 +97,7 @@ from ..._internal.validation import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable, Mapping, Sequence
+    from collections.abc import Mapping, Sequence
 
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
@@ -374,21 +375,6 @@ def _round_half_up(value: float, decimals: int = 0) -> float:
     a half in decimal and a last bit under it in binary still rounds up.
     """
     return float(round_half_up(value, decimals))
-
-
-def _resolved(
-    value: object, name: str, canonical: Iterable[str], aliases: Mapping[str, str]
-) -> str:
-    """The canonical spelling of an option a caller names, as written.
-
-    *canonical* are the options the table prints and *aliases* the other
-    spellings the ``Literal`` lists on purpose; an alias of an option the
-    table does not hold is no option here.
-    """
-    known = sorted(set(canonical))
-    offered = (*known, *(alias for alias, to in aliases.items() if to in known))
-    named = require_choice(value, name, offered)
-    return aliases.get(named, named)
 
 
 # --------------------------------------------------------------------------- #
@@ -941,10 +927,10 @@ def db_hr_facade_requirement(
         ``dominant_noise`` or ``room_type`` is not a text.
     """
     value = _finite(ld, "ld")
-    use = _resolved(
+    use = require_aliased_choice(
         building_use, "building_use", {u for u, _ in _FACADE_ROWS}, _USE_ALIASES
     )
-    room = _resolved(
+    room = require_aliased_choice(
         room_type, "room_type", {r for _, r in _FACADE_ROWS}, _ROOM_ALIASES
     )
     if (use, room) not in _FACADE_ROWS:
@@ -991,8 +977,8 @@ def db_hr_facade_requirement(
 
 
 #: Quantity symbols of DB-HR, spelled as the code spells them.
-_DNT_A = "DnT,A"
-_D2M_NT_ATR = "D2m,nT,Atr"
+_DNT_A: Final = "DnT,A"
+_D2M_NT_ATR: Final = "D2m,nT,Atr"
 #: The clause that governs a habitable room against installations or activity.
 _CLAUSE_HABITABLE_SERVICES = "CTE DB-HR 2.1.1 b) iii"
 
@@ -1161,7 +1147,7 @@ _PARTY_WALL_ROUTES: dict[str, tuple[float, str]] = {
 
 
 def db_hr_party_wall_requirement(
-    quantity: Literal["D2m,nT,Atr", "DnT,A"] = "D2m,nT,Atr",
+    quantity: Literal["D2m,nT,Atr", "DnT,A"] = _D2M_NT_ATR,
 ) -> DBHRRequirement:
     """Airborne requirement on a party wall between two buildings (DB-HR 2.1.1 c).
 
@@ -1300,7 +1286,7 @@ def db_hr_reverberation_requirement(
     :raises ValueError: For an unknown room use.
     :raises TypeError: if ``room_use`` is not a text.
     """
-    key = _resolved(
+    key = require_aliased_choice(
         room_use, "room_use", ("classroom", "restaurant", "common_area"), _USE_OF_ROOM
     )
     if key == "common_area":

@@ -11,7 +11,10 @@ opening the name with ``Path(path).open("rb")``, the hosts file read with
 a file's description with nothing before it. So are the shapes the gate must
 let through: a writer's modes, a method of another object called ``open``, and
 a reader of another library that a check of the library comes before, however
-many helpers deep the check is.
+many helpers deep the check is. And so are the shapes the gate first missed: a
+file object opened by its name with ``io.FileIO``, a reader imported under its
+own name or another, or bound to another by an assignment, and a copy of
+``shutil``, which reads its source by its name.
 """
 
 from __future__ import annotations
@@ -202,6 +205,109 @@ def test_a_soundfile_opened_to_write_is_no_read(tmp_path: pathlib.Path) -> None:
                 return handle.read()
         """,
     ) == [("read", _FOREIGN)]
+
+
+def test_a_file_object_opened_by_its_name_is_an_open_of_its_own(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``io.FileIO`` opens the name as ``open`` does, and a pipe there waits as long."""
+    assert _found(
+        tmp_path,
+        """
+        import io
+        from io import FileIO
+
+        def through_io(path):
+            return io.BufferedReader(io.FileIO(path, "rb"))
+
+        def imported(path):
+            return FileIO(path)
+
+        def written(path):
+            return io.FileIO(path, "wb")
+        """,
+    ) == [("through_io", _OWN), ("imported", _OWN)]
+
+
+def test_a_reader_is_known_by_what_its_module_binds_it_to(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A reader imported by its name, or under another, opens the name all the same."""
+    assert _found(
+        tmp_path,
+        """
+        import soundfile
+        import soundfile as snd
+        from numpy import load
+        from scipy.io.wavfile import read as wav_read
+
+        def by_name(path):
+            return wav_read(path)
+
+        def by_alias(path):
+            return snd.info(str(path))
+
+        def by_assignment(path):
+            stream = soundfile
+            return stream.read(str(path))
+
+        def bare(path):
+            return load(path)
+
+        def checked(path):
+            require_regular(path)
+            return wav_read(path)
+        """,
+    ) == [
+        ("by_name", _FOREIGN),
+        ("by_alias", _FOREIGN),
+        ("by_assignment", _FOREIGN),
+        ("bare", _FOREIGN),
+    ]
+
+
+def test_a_copy_reads_its_source_by_its_name(tmp_path: pathlib.Path) -> None:
+    """shutil opens the source itself: a pipe there keeps the copy waiting."""
+    assert _found(
+        tmp_path,
+        """
+        import shutil
+        from shutil import copy2 as keep
+
+        def copied(path, target):
+            shutil.copyfile(path, target)
+            shutil.copy(path, target)
+
+        def kept(path, target):
+            keep(path, target)
+
+        def checked(path, target):
+            require_regular(path)
+            shutil.copyfile(path, target)
+        """,
+    ) == [("copied", _FOREIGN), ("copied", _FOREIGN), ("kept", _FOREIGN)]
+
+
+def test_an_open_imported_from_another_module_is_that_module_s(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``open`` bound by an import is that module's reader, not the built-in."""
+    assert _found(
+        tmp_path,
+        """
+        from gzip import open as gz_open
+        from io import open
+
+        def archive(path):
+            return gz_open(path)
+
+        def through_io(path):
+            return open(path, "rb")
+
+        def written(path):
+            return gz_open(path, "wb")
+        """,
+    ) == [("archive", _FOREIGN), ("through_io", _OWN)]
 
 
 def test_a_check_counts_through_helpers_that_hand_it_their_first_parameter(

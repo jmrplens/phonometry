@@ -14,31 +14,42 @@ reader of another library is about to open itself.
 This reads every module under ``src/phonometry`` but the shared one and
 reports two shapes:
 
-- **An open of its own**: ``open()``, ``io.open()`` or ``os.open()``, a
-  ``.open()`` with no mode or a mode that reads without writing (``"rb"``,
-  ``"r"``), and ``.read_bytes()`` and ``.read_text()``. A reader opens a
-  file through the shared check instead; a mode that writes (``"wb"``,
-  ``"xb"``, ``"ab"``, ``"r+b"``) is a writer's, and a ``.open()`` whose
-  first argument is not a text is no file's.
+- **An open of its own**: ``open()``, ``io.open()``, ``io.FileIO()`` or
+  ``os.open()``, a ``.open()`` with no mode or a mode that reads without
+  writing (``"rb"``, ``"r"``), and ``.read_bytes()`` and ``.read_text()``. A
+  reader opens a file through the shared check instead; a mode that writes
+  (``"wb"``, ``"xb"``, ``"ab"``, ``"r+b"``) is a writer's, and a ``.open()``
+  whose first argument is not a text is no file's.
 - **A reader of another library that opens the name itself**: SciPy's
   ``wavfile.read``, python-soundfile's ``read``, ``info``, ``blocks`` and
   ``SoundFile``, NumPy's ``load``, ``loadtxt``, ``genfromtxt``, ``fromfile``
-  and ``memmap``, and the ``open`` of ``wave``, ``aifc``, ``gzip``, ``bz2``,
-  ``lzma``, ``tarfile``, ``codecs`` and Pillow's ``Image``, and
-  ``zipfile.ZipFile``, each unless its mode writes. Each must follow, in the same
-  function, a call of a check on the same name: one of the three shared
-  functions, or a function of the library whose first parameter it hands to
-  one of them (found by following such calls until no new one turns up, so
-  ``require_regular_audio(path)`` counts, and so does a reader that calls it
-  on its own first parameter). The name is compared as written, once
-  ``str()``, ``Path()`` and ``os.fspath()`` around it are taken off.
+  and ``memmap``, the ``open`` of ``wave``, ``aifc``, ``gzip``, ``bz2``,
+  ``lzma``, ``tarfile``, ``codecs`` and Pillow's ``Image``,
+  ``zipfile.ZipFile``, each unless its mode writes, and the ``copyfile``,
+  ``copy`` and ``copy2`` of ``shutil``, which read their source by its name.
+  Each must follow, in the same function, a call of a check on the same name:
+  one of the three shared functions, or a function of the library whose first
+  parameter it hands to one of them (found by following such calls until no
+  new one turns up, so ``require_regular_audio(path)`` counts, and so does a
+  reader that calls it on its own first parameter). The name is compared as
+  written, once ``str()``, ``Path()`` and ``os.fspath()`` around it are taken
+  off.
+
+A call is named by what its module imports: ``import soundfile as snd``,
+``from scipy.io.wavfile import read as wav_read`` and ``from io import
+FileIO`` are followed, and so is a name bound to a module or a reader by an
+assignment (``snd = soundfile``) anywhere in the module. A name nothing binds
+is taken at its word, with the spellings the library uses (``sf`` for
+python-soundfile, ``np`` for NumPy, ``wavfile`` for SciPy's module, ``Image``
+for Pillow's), so that a module handed in as a parameter is read too.
 
 The order is read from the source, not from the paths the function can take:
 a check inside one branch of an ``if`` and a read after the ``if`` pass. A
-``.open()`` given its mode through a name is not read either. The check is
-there to keep the readers on the shared route, and the tests of each reader
-(a pipe, a device and a directory at the name, each refused within seconds)
-are what prove they refuse.
+``.open()`` given its mode through a name is not read either, nor is a reader
+reached through ``getattr()`` or a ``functools.partial``. The check is there
+to keep the readers on the shared route, and the tests of each reader (a pipe,
+a device and a directory at the name, each refused within seconds) are what
+prove they refuse.
 
 A read of the library's own files, which no caller names (the package's data
 through ``importlib.resources``, its own modules), goes in :data:`EXEMPT`,
@@ -58,7 +69,7 @@ from ast_scan import ROOT, exempted, python_files, relative
 
 if TYPE_CHECKING:
     import pathlib
-    from collections.abc import Iterator, Sequence
+    from collections.abc import Iterator, Mapping, Sequence
 
 #: The library this reads, the default when no path is given.
 SOURCE = ROOT / "src" / "phonometry"
@@ -70,43 +81,63 @@ OWNER = ("phonometry", "_internal", "json_input.py")
 #: The shared functions that look at what a name holds before it is read.
 CHECKS = frozenset({"not_regular_at", "open_regular", "read_at_most"})
 
-#: The readers of other libraries that open a name themselves, by the name the
-#: library is imported as and the function.
+#: The readers of other libraries that open a name themselves, by the module
+#: that holds them and their name.
 FOREIGN_READERS = frozenset(
     {
-        ("wavfile", "read"),
-        ("sf", "read"),
-        ("sf", "info"),
-        ("sf", "blocks"),
-        ("sf", "SoundFile"),
-        ("soundfile", "read"),
-        ("soundfile", "info"),
-        ("soundfile", "blocks"),
-        ("soundfile", "SoundFile"),
-        ("np", "load"),
-        ("np", "loadtxt"),
-        ("np", "genfromtxt"),
-        ("np", "fromfile"),
-        ("np", "memmap"),
-        ("numpy", "load"),
-        ("numpy", "loadtxt"),
-        ("numpy", "genfromtxt"),
-        ("numpy", "fromfile"),
-        ("numpy", "memmap"),
-        ("wave", "open"),
-        ("aifc", "open"),
-        ("gzip", "open"),
-        ("bz2", "open"),
-        ("lzma", "open"),
-        ("tarfile", "open"),
-        ("zipfile", "ZipFile"),
-        ("codecs", "open"),
-        ("Image", "open"),
+        "scipy.io.wavfile.read",
+        "soundfile.read",
+        "soundfile.info",
+        "soundfile.blocks",
+        "soundfile.SoundFile",
+        "numpy.load",
+        "numpy.loadtxt",
+        "numpy.genfromtxt",
+        "numpy.fromfile",
+        "numpy.memmap",
+        "wave.open",
+        "aifc.open",
+        "gzip.open",
+        "bz2.open",
+        "lzma.open",
+        "tarfile.open",
+        "zipfile.ZipFile",
+        "codecs.open",
+        "PIL.Image.open",
+        "shutil.copyfile",
+        "shutil.copy",
+        "shutil.copy2",
     }
 )
+#: The opens of Python's own, by the module that holds them, with the position
+#: of the mode among their arguments; ``os.open`` takes flags, and counts
+#: whatever they are.
+OWN_OPENS = {
+    "builtins.open": 1,
+    "io.open": 1,
+    "_io.open": 1,
+    "io.FileIO": 1,
+    "_io.FileIO": 1,
+    "os.open": None,
+}
 #: The readers of :data:`FOREIGN_READERS` that write when their mode says so,
 #: and the position of the mode among their arguments.
-_MODE_POSITION = {"SoundFile": 1, "open": 1, "ZipFile": 1}
+_MODE_POSITION = {
+    reader: 1
+    for reader in FOREIGN_READERS
+    if reader.endswith((".open", ".SoundFile", ".ZipFile"))
+}
+#: The modules the library names by a short spelling, for a name no import of
+#: the module binds: a module handed in as a parameter, or bound by a call
+#: (``sf = _import_soundfile(...)``).
+_SPELLINGS = {
+    "sf": "soundfile",
+    "np": "numpy",
+    "wavfile": "scipy.io.wavfile",
+    "Image": "PIL.Image",
+    "FileIO": "io.FileIO",
+    "open": "builtins.open",
+}
 #: The calls taken off a name before two names are compared.
 _WRAPPERS = frozenset({"str", "Path", "PurePath", "fspath"})
 #: The methods that read a whole file by its name.
@@ -133,6 +164,10 @@ EXEMPT: dict[tuple[str, str], str] = {
     ("src/phonometry/simulation/_remote/package.py", "package_from"): (
         "the files of the imported phonometry package itself, each taken only "
         "when is_file() finds a regular file there"
+    ),
+    ("src/phonometry/simulation/_video_job.py", "_ScratchVideo.__init__"): (
+        "the video the node's own encoder wrote, in the scratch directory the "
+        "node made for the run; no caller names it"
     ),
     ("src/phonometry/simulation/video.py", "_node_video"): (
         "_PartialFile.open, a method of the library's own that creates the "
@@ -226,16 +261,97 @@ def _reads_only(mode: ast.expr | None) -> bool:
     return True
 
 
-def _own_open(call: ast.Call) -> bool:
+def _dotted(node: ast.expr) -> list[str] | None:
+    """``["a", "b", "f"]`` for ``a.b.f``, or ``None`` when no name starts it."""
+    parts: list[str] = []
+    while isinstance(node, ast.Attribute):
+        parts.append(node.attr)
+        node = node.value
+    if not isinstance(node, ast.Name):
+        return None
+    parts.append(node.id)
+    return parts[::-1]
+
+
+def _resolved(parts: Sequence[str], aliases: Mapping[str, str]) -> str:
+    """A dotted name with its first part replaced by what it is bound to."""
+    head = aliases.get(parts[0]) or _SPELLINGS.get(parts[0], parts[0])
+    return ".".join([head, *parts[1:]])
+
+
+def _imported(node: ast.Import | ast.ImportFrom) -> dict[str, str]:
+    """The names one import binds, each with the dotted name it stands for.
+
+    ``import a.b`` binds ``a``, ``import a.b as c`` binds ``c`` to ``a.b``,
+    ``from a import f as g`` binds ``g`` to ``a.f``. A relative import binds
+    names of the library itself, which no reader of another library is.
+    """
+    if isinstance(node, ast.ImportFrom):
+        if node.level or not node.module:
+            return {}
+        return {
+            alias.asname or alias.name: f"{node.module}.{alias.name}"
+            for alias in node.names
+        }
+    bound: dict[str, str] = {}
+    for alias in node.names:
+        head = alias.name.split(".", 1)[0]
+        bound[alias.asname or head] = alias.name if alias.asname else head
+    return bound
+
+
+def aliases_of(tree: ast.AST) -> dict[str, str]:
+    """What each name of a module the imports and assignments bind stands for.
+
+    The imports as :func:`_imported` reads them; then a name bound by an
+    assignment to a dotted name (``snd = soundfile``, ``reader = sf.read``)
+    stands for what that name stands for, the assignments taken in the order
+    of the source.
+    """
+    aliases: dict[str, str] = {}
+    assignments: list[tuple[str, list[str], tuple[int, int]]] = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import | ast.ImportFrom):
+            aliases.update(_imported(node))
+        elif (
+            isinstance(node, ast.Assign)
+            and len(node.targets) == 1
+            and isinstance(target := node.targets[0], ast.Name)
+            and (parts := _dotted(node.value)) is not None
+        ):
+            assignments.append((target.id, parts, (node.lineno, node.col_offset)))
+    for name, parts, _place in sorted(assignments, key=lambda bound: bound[2]):
+        aliases[name] = _resolved(parts, aliases)
+    return aliases
+
+
+def _names(call: ast.Call, aliases: Mapping[str, str]) -> set[str]:
+    """What *call* calls, by the module that holds it, as far as it can be told.
+
+    The whole dotted name, resolved through *aliases*, and, for a method of
+    something no name starts (``self.sf.read``), the module the last name
+    before the method is spelt as.
+    """
+    names: set[str] = set()
+    parts = _dotted(call.func)
+    if parts is not None:
+        names.add(_resolved(parts, aliases))
+    receiver = _receiver(call)
+    callee = _callee(call)
+    if receiver is not None and callee is not None:
+        names.add(_resolved([receiver, callee], aliases))
+    return names
+
+
+def _own_open(call: ast.Call, aliases: Mapping[str, str]) -> bool:
     """Whether *call* opens or reads a file by its name, by itself."""
     callee = _callee(call)
-    receiver = _receiver(call)
-    if isinstance(call.func, ast.Name) and callee == "open":
-        return _reads_only(_mode(call, 1))
-    if callee == "open" and receiver == "io":
-        return _reads_only(_mode(call, 1))
-    if callee == "open" and receiver == "os":
-        return True
+    names = _names(call, aliases)
+    for name, position in OWN_OPENS.items():
+        if name in names:
+            return position is None or _reads_only(_mode(call, position))
+    if not names.isdisjoint(FOREIGN_READERS):
+        return False
     if callee in _WHOLE_FILE_READS and isinstance(call.func, ast.Attribute):
         return True
     if callee == "open" and isinstance(call.func, ast.Attribute):
@@ -252,13 +368,12 @@ def _own_open(call: ast.Call) -> bool:
     return False
 
 
-def _foreign_read(call: ast.Call) -> bool:
+def _foreign_read(call: ast.Call, aliases: Mapping[str, str]) -> bool:
     """Whether *call* is a reader of another library that opens a name itself."""
-    callee = _callee(call)
-    receiver = _receiver(call)
-    if callee is None or (receiver, callee) not in FOREIGN_READERS:
+    found = _names(call, aliases) & FOREIGN_READERS
+    if not found:
         return False
-    position = _MODE_POSITION.get(callee)
+    position = _MODE_POSITION.get(min(found))
     return position is None or _reads_only(_mode(call, position))
 
 
@@ -304,12 +419,15 @@ class _Scope:
     name: str
     node: ast.AST
     calls: list[ast.Call]
+    aliases: Mapping[str, str]
 
 
 def _scopes(path: pathlib.Path, tree: ast.AST) -> list[_Scope]:
     """Every function of *tree*, and the module, each with its own calls."""
+    aliases = aliases_of(tree)
     return [
-        _Scope(path, name, node, _own_calls(node)) for name, node in _functions(tree)
+        _Scope(path, name, node, _own_calls(node), aliases)
+        for name, node in _functions(tree)
     ]
 
 
@@ -384,9 +502,11 @@ def scan(scope: _Scope, checks: frozenset[str]) -> list[Finding]:
     """Every read of a file by its name in *scope* that skips the shared check."""
     findings: list[Finding] = []
     for call in scope.calls:
-        if _own_open(call):
+        if _own_open(call, scope.aliases):
             shape = "an open of its own; read through open_regular or read_at_most"
-        elif _foreign_read(call) and not _checked_before(scope.calls, call, checks):
+        elif _foreign_read(call, scope.aliases) and not _checked_before(
+            scope.calls, call, checks
+        ):
             shape = (
                 "a reader of another library with no check of the name before it; "
                 "ask not_regular_at, or a check of the library, first"

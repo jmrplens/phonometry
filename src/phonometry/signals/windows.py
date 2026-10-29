@@ -40,6 +40,7 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     from .._i18n import Language
+    from .._internal.types import TwoPanels
 
 __all__ = [
     "WindowMetricsResult",
@@ -145,14 +146,14 @@ class WindowMetricsResult(OwnsArrays):
     @overload
     def plot(
         self, ax: None = None, *, language: Language = "en", **kwargs: Any
-    ) -> tuple[Axes, Axes]: ...
+    ) -> TwoPanels: ...
 
     @overload
     def plot(self, ax: Axes, *, language: Language = "en", **kwargs: Any) -> Axes: ...
 
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
-    ) -> Axes | tuple[Axes, Axes]:
+    ) -> Axes | TwoPanels:
         """Plot the window shape and its spectrum with the metrics marked.
 
         :param language: Label language, ``"en"`` (default) or ``"es"``.

@@ -86,6 +86,7 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     from .._i18n import Language
+    from .._internal.types import TwoPanels
     from ..io._signal import Signal
 
 Kind = Literal["power", "real", "complex"]
@@ -407,14 +408,14 @@ class LifterResult(OwnsArrays):
     @overload
     def plot(
         self, ax: None = None, *, language: Language = "en", **kwargs: Any
-    ) -> tuple[Axes, Axes]: ...
+    ) -> TwoPanels: ...
 
     @overload
     def plot(self, ax: Axes, *, language: Language = "en", **kwargs: Any) -> Axes: ...
 
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
-    ) -> Axes | tuple[Axes, Axes]:
+    ) -> Axes | TwoPanels:
         """Plot the cepstrum with the cutoff and the two log spectra.
 
         With ``ax`` given, only the spectrum panel is drawn on it.

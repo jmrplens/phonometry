@@ -60,6 +60,7 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
     from ..._i18n import Language
+    from ..._internal.types import TwoPanels
     from ...io._signal import Signal
 
 from ..._internal.frozen import OwnsArrays
@@ -276,14 +277,14 @@ class EcmaRoughness(OwnsArrays):
     @overload
     def plot(
         self, ax: None = None, *, language: Language = "en", **kwargs: Any
-    ) -> tuple[Axes, Axes]: ...
+    ) -> TwoPanels: ...
 
     @overload
     def plot(self, ax: Axes, *, language: Language = "en", **kwargs: Any) -> Axes: ...
 
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
-    ) -> Axes | tuple[Axes, Axes]:
+    ) -> Axes | TwoPanels:
         """Plot the roughness result (see :mod:`phonometry._plot.psychoacoustics`).
 
         Draws the time-dependent roughness R(l50) and a specific-roughness

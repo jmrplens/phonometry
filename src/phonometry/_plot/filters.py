@@ -15,6 +15,7 @@ if TYPE_CHECKING:
     from matplotlib.transforms import Transform
 
     from .._i18n import Language
+    from .._internal.types import TwoPanels
     from ..filters.compliance import FilterComplianceResult
     from ..filters.core import OctaveFilterResult, OctaveSpectrogramResult
     from ..filters.equalizer import EQResponseResult
@@ -947,7 +948,7 @@ def plot_parametric_eq(
     language: Language = "en",
     show_sections: bool = True,
     **kwargs: Any,
-) -> tuple[Axes, Axes]: ...
+) -> TwoPanels: ...
 
 
 @overload
@@ -968,7 +969,7 @@ def plot_parametric_eq(
     language: Language = "en",
     show_sections: bool = True,
     **kwargs: Any,
-) -> Axes | tuple[Axes, Axes]:
+) -> Axes | TwoPanels:
     """Magnitude and phase response of a parametric-EQ cascade.
 
     With ``ax`` given, only the magnitude panel is drawn on it.

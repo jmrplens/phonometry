@@ -38,6 +38,7 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
+    from .._internal.types import TwoPanels
     from ..room._crowd_noise import CrowdNoiseResult
     from ..room._impulse_response import ImpulseResponseResult, ShapedSweepResult
     from ..room.acoustics import DecayCurve, RoomAcousticsResult
@@ -317,7 +318,7 @@ def plot_room_acoustics(
     ax: None = None,
     language: Language = "en",
     **kwargs: Any,
-) -> tuple[Axes, Axes]: ...
+) -> TwoPanels: ...
 
 
 @overload
@@ -331,7 +332,7 @@ def plot_room_acoustics(
     ax: Axes | None = None,
     language: Language = "en",
     **kwargs: Any,
-) -> Axes | tuple[Axes, Axes]:
+) -> Axes | TwoPanels:
     """Per-band decay times (EDT/T20/T30) and clarity (C50/C80).
 
     The first panel shows the three decay times as grouped bars per band,
@@ -435,7 +436,7 @@ def plot_sound_strength(
     ax: None = None,
     language: Language = "en",
     **kwargs: Any,
-) -> tuple[Axes, Axes]: ...
+) -> TwoPanels: ...
 
 
 @overload
@@ -449,7 +450,7 @@ def plot_sound_strength(
     ax: Axes | None = None,
     language: Language = "en",
     **kwargs: Any,
-) -> Axes | tuple[Axes, Axes]:
+) -> Axes | TwoPanels:
     """Per-band sound strength G against the Table A.1 typical range.
 
     The first panel draws G band by band over the -2 dB to +10 dB range
@@ -844,7 +845,7 @@ def plot_impulse_response(
     ax: None = None,
     language: Language = "en",
     **kwargs: Any,
-) -> tuple[Axes, Axes]: ...
+) -> TwoPanels: ...
 
 
 @overload
@@ -858,7 +859,7 @@ def plot_impulse_response(
     ax: Axes | None = None,
     language: Language = "en",
     **kwargs: Any,
-) -> Axes | tuple[Axes, Axes]:
+) -> Axes | TwoPanels:
     """Impulse-response waveform and its log-magnitude / Schroeder decay.
 
     Two stacked panels: the (peak-normalised) time-domain waveform on top and,
@@ -1231,7 +1232,7 @@ def plot_excitation(
     ax: None = None,
     language: Language = "en",
     **kwargs: Any,
-) -> tuple[Axes, Axes]: ...
+) -> TwoPanels: ...
 
 
 @overload
@@ -1254,7 +1255,7 @@ def plot_excitation(
     ax: Axes | None = None,
     language: Language = "en",
     **kwargs: Any,
-) -> Axes | tuple[Axes, Axes]:
+) -> Axes | TwoPanels:
     """Plot an ISO 18233 excitation signal (sweep or MLS).
 
     A documented helper for the raw arrays returned by
@@ -1548,7 +1549,7 @@ def plot_steady_field(
 @overload
 def plot_shaped_sweep(
     result: ShapedSweepResult, ax: None = None, language: Language = "en", **kwargs: Any
-) -> tuple[Axes, Axes]: ...
+) -> TwoPanels: ...
 
 
 @overload
@@ -1562,7 +1563,7 @@ def plot_shaped_sweep(
     ax: Axes | None = None,
     language: Language = "en",
     **kwargs: Any,
-) -> Axes | tuple[Axes, Axes]:
+) -> Axes | TwoPanels:
     """Shaped-sweep waveform and its Welch spectrum against the target.
 
     Two stacked panels: the time-domain waveform on top and, below it, the
@@ -1665,7 +1666,7 @@ def plot_shaped_sweep(
 @overload
 def plot_room_modes(
     result: RoomModesResult, ax: None = None, language: Language = "en", **kwargs: Any
-) -> tuple[Axes, Axes]: ...
+) -> TwoPanels: ...
 
 
 @overload
@@ -1679,7 +1680,7 @@ def plot_room_modes(
     ax: Axes | None = None,
     language: Language = "en",
     **kwargs: Any,
-) -> Axes | tuple[Axes, Axes]:
+) -> Axes | TwoPanels:
     """Mode ladder by kind and modal density of a rectangular room.
 
     The upper panel stems every enumerated eigenfrequency (Long Equation
@@ -1698,7 +1699,7 @@ def plot_room_modes(
     """
     from .._i18n import format_number, localize_axes
 
-    column: tuple[Axes, Axes] | None = None
+    column: TwoPanels | None = None
     if ax is None:
         column = _new_axes_column(2, sharex=True, gridspec_kw={"height_ratios": [2, 1]})
         panels: tuple[Axes, ...] = column

@@ -46,6 +46,7 @@ if TYPE_CHECKING:
     from matplotlib.typing import ColorType, LegendLocType
 
     from .._i18n import Language
+    from .._internal.types import ThreePanels, TwoPanels
     from ..emission._sound_power_anechoic import PrecisionSoundPowerResult
     from ..emission._sound_power_in_duct import InDuctSoundPowerResult
     from ..emission._sound_power_intensity import (
@@ -647,11 +648,11 @@ def _polar_axes(ax: Axes | None, *, purpose: str = "") -> PolarAxes:
 
 
 @overload
-def _new_axes_column(n: Literal[2], **kwargs: Any) -> tuple[Axes, Axes]: ...
+def _new_axes_column(n: Literal[2], **kwargs: Any) -> TwoPanels: ...
 
 
 @overload
-def _new_axes_column(n: Literal[3], **kwargs: Any) -> tuple[Axes, Axes, Axes]: ...
+def _new_axes_column(n: Literal[3], **kwargs: Any) -> ThreePanels: ...
 
 
 def _new_axes_column(n: Literal[2, 3], **kwargs: Any) -> tuple[Axes, ...]:

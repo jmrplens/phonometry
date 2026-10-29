@@ -12,6 +12,7 @@ if TYPE_CHECKING:
     from matplotlib.typing import ColorType
 
     from .._i18n import Language
+    from .._internal.types import ThreePanels, TwoPanels
     from ..signals._cepstrum import (
         CepstrumResult,
         EchoDetectionResult,
@@ -360,7 +361,7 @@ def plot_cross_spectral_density(
     *,
     language: Language = "en",
     **kwargs: Any,
-) -> tuple[Axes, Axes, Axes]: ...
+) -> ThreePanels: ...
 
 
 @overload
@@ -379,7 +380,7 @@ def plot_cross_spectral_density(
     *,
     language: Language = "en",
     **kwargs: Any,
-) -> Axes | tuple[Axes, Axes, Axes]:
+) -> Axes | ThreePanels:
     """Cross-spectrum magnitude, phase (with ±σ band) and coherence.
 
     With ``ax`` given, only the magnitude panel is drawn on it.
@@ -454,7 +455,7 @@ def plot_coherent_output_spectrum(
     *,
     language: Language = "en",
     **kwargs: Any,
-) -> tuple[Axes, Axes]: ...
+) -> TwoPanels: ...
 
 
 @overload
@@ -473,7 +474,7 @@ def plot_coherent_output_spectrum(
     *,
     language: Language = "en",
     **kwargs: Any,
-) -> Axes | tuple[Axes, Axes]:
+) -> Axes | TwoPanels:
     """Output, coherent and noise spectra plus the spectral SNR.
 
     With ``ax`` given, only the spectra panel is drawn on it.
@@ -632,7 +633,7 @@ def plot_miso_coherence(
     *,
     language: Language = "en",
     **kwargs: Any,
-) -> tuple[Axes, Axes]: ...
+) -> TwoPanels: ...
 
 
 @overload
@@ -647,7 +648,7 @@ def plot_miso_coherence(
     *,
     language: Language = "en",
     **kwargs: Any,
-) -> Axes | tuple[Axes, Axes]:
+) -> Axes | TwoPanels:
     """Per-input coherent output spectra and the multiple/partial coherences.
 
     The upper panel decomposes the measured output autospectrum into the
@@ -933,7 +934,7 @@ def plot_aligned_impulse_response(
 @overload
 def plot_envelope(
     result: EnvelopeResult, ax: None = None, *, language: Language = "en", **kwargs: Any
-) -> tuple[Axes, Axes]: ...
+) -> TwoPanels: ...
 
 
 @overload
@@ -948,7 +949,7 @@ def plot_envelope(
     *,
     language: Language = "en",
     **kwargs: Any,
-) -> Axes | tuple[Axes, Axes]:
+) -> Axes | TwoPanels:
     """Signal with its Hilbert envelope, plus the instantaneous frequency.
 
     With ``ax`` given, only the signal/envelope panel is drawn on it.
@@ -1009,7 +1010,7 @@ def plot_phase_decomposition(
     *,
     language: Language = "en",
     **kwargs: Any,
-) -> tuple[Axes, Axes, Axes]: ...
+) -> ThreePanels: ...
 
 
 @overload
@@ -1028,7 +1029,7 @@ def plot_phase_decomposition(
     *,
     language: Language = "en",
     **kwargs: Any,
-) -> Axes | tuple[Axes, Axes, Axes]:
+) -> Axes | ThreePanels:
     """Magnitude, phase decomposition and group delay of a response.
 
     Three stacked panels: ``|H|`` in dB, the measured / minimum / excess
@@ -1312,7 +1313,7 @@ def plot_window_metrics(
     *,
     language: Language = "en",
     **kwargs: Any,
-) -> tuple[Axes, Axes]: ...
+) -> TwoPanels: ...
 
 
 @overload
@@ -1327,7 +1328,7 @@ def plot_window_metrics(
     *,
     language: Language = "en",
     **kwargs: Any,
-) -> Axes | tuple[Axes, Axes]:
+) -> Axes | TwoPanels:
     """Window shape and spectrum with the Harris figures of merit marked.
 
     With ``ax`` given, only the spectrum panel is drawn on it.
@@ -1402,7 +1403,7 @@ def plot_window_metrics(
 @overload
 def plot_lifter(
     result: LifterResult, ax: None = None, *, language: Language = "en", **kwargs: Any
-) -> tuple[Axes, Axes]: ...
+) -> TwoPanels: ...
 
 
 @overload
@@ -1417,7 +1418,7 @@ def plot_lifter(
     *,
     language: Language = "en",
     **kwargs: Any,
-) -> Axes | tuple[Axes, Axes]:
+) -> Axes | TwoPanels:
     """Real cepstrum with the lifter cutoff, plus the split log spectrum.
 
     With ``ax`` given, only the spectrum panel is drawn on it.
@@ -1554,7 +1555,7 @@ def plot_envelope_spectrum(
     *,
     language: Language = "en",
     **kwargs: Any,
-) -> tuple[Axes, Axes]: ...
+) -> TwoPanels: ...
 
 
 @overload
@@ -1573,7 +1574,7 @@ def plot_envelope_spectrum(
     *,
     language: Language = "en",
     **kwargs: Any,
-) -> Axes | tuple[Axes, Axes]:
+) -> Axes | TwoPanels:
     """Detected envelope over time and its amplitude spectrum.
 
     With ``ax`` given, only the spectrum panel is drawn on it.
@@ -1706,7 +1707,7 @@ def plot_synchronous_average(
     *,
     language: Language = "en",
     **kwargs: Any,
-) -> tuple[Axes, Axes]: ...
+) -> TwoPanels: ...
 
 
 @overload
@@ -1725,7 +1726,7 @@ def plot_synchronous_average(
     *,
     language: Language = "en",
     **kwargs: Any,
-) -> Axes | tuple[Axes, Axes]:
+) -> Axes | TwoPanels:
     """Averaged periodic waveform and the synchronous-averaging comb filter.
 
     With ``ax`` given, only the averaged-waveform panel is drawn on it.

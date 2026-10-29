@@ -83,6 +83,7 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
+    from .._internal.types import TwoPanels
     from ..io._signal import Signal
 
 Symbol = Literal["G", "EDT", "C80", "D50", "Ts", "J_LF", "J_LFC", "L_J"]
@@ -617,14 +618,14 @@ class SoundStrengthResult(OwnsArrays):
     @overload
     def plot(
         self, ax: None = None, *, language: Language = "en", **kwargs: Any
-    ) -> tuple[Axes, Axes]: ...
+    ) -> TwoPanels: ...
 
     @overload
     def plot(self, ax: Axes, *, language: Language = "en", **kwargs: Any) -> Axes: ...
 
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
-    ) -> Axes | tuple[Axes, Axes]:
+    ) -> Axes | TwoPanels:
         """Plot the per-band sound strength against the Table A.1 range.
 
         With ``ax`` given, only the strength panel is drawn on it; otherwise a

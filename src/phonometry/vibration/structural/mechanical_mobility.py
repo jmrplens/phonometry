@@ -83,7 +83,7 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
 
     from ..._i18n import Language
-    from ..._internal.types import ReportEngine
+    from ..._internal.types import ReportEngine, TwoPanels
     from ..._report.metadata import ReportMetadata
 
 
@@ -415,14 +415,14 @@ class RigidMassCalibrationResult(OwnsArrays):
     @overload
     def plot(
         self, ax: None = None, *, language: Language = "en", **kwargs: Any
-    ) -> tuple[Axes, Axes]: ...
+    ) -> TwoPanels: ...
 
     @overload
     def plot(self, ax: Axes, *, language: Language = "en", **kwargs: Any) -> Axes: ...
 
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
-    ) -> Axes | tuple[Axes, Axes]:
+    ) -> Axes | TwoPanels:
         """Plot the rigid-mass calibration check (ISO 7626-2, 7.5.2).
 
         The measured FRF magnitude against the known rigid-mass line with its

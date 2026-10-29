@@ -58,6 +58,7 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
+    from .._internal.types import TwoPanels
     from ..vibration.human.exposure import (
         DailyVibrationExposure,
         WeightedSpectrum,
@@ -847,7 +848,7 @@ def plot_rigid_mass_calibration(
     *,
     language: Language = "en",
     **kwargs: Any,
-) -> tuple[Axes, Axes]: ...
+) -> TwoPanels: ...
 
 
 @overload
@@ -866,7 +867,7 @@ def plot_rigid_mass_calibration(
     *,
     language: Language = "en",
     **kwargs: Any,
-) -> Axes | tuple[Axes, Axes]:
+) -> Axes | TwoPanels:
     """Rigid-mass operational calibration check (ISO 7626-2, 7.5.2).
 
     The single-concept calibration-check figure: the measured driving-point
@@ -3304,7 +3305,7 @@ def plot_impact_mobility(
     *,
     language: Language = "en",
     **kwargs: Any,
-) -> tuple[Axes, Axes]: ...
+) -> TwoPanels: ...
 
 
 @overload
@@ -3319,7 +3320,7 @@ def plot_impact_mobility(
     *,
     language: Language = "en",
     **kwargs: Any,
-) -> Axes | tuple[Axes, Axes]:
+) -> Axes | TwoPanels:
     """Averaged impact mobility ``|Y(f)|`` and its coherence (ISO 7626-5, 8.6).
 
     With ``ax`` only the magnitude is drawn on it; otherwise a two-panel
@@ -3530,7 +3531,7 @@ def plot_exponential_window_correction(
 @overload
 def plot_double_hit_check(
     result: DoubleHitCheck, ax: None = None, *, language: Language = "en", **kwargs: Any
-) -> tuple[Axes, Axes]: ...
+) -> TwoPanels: ...
 
 
 @overload
@@ -3545,7 +3546,7 @@ def plot_double_hit_check(
     *,
     language: Language = "en",
     **kwargs: Any,
-) -> Axes | tuple[Axes, Axes]:
+) -> Axes | TwoPanels:
     """The force record with its impacts, and its energy spectral density (6.4).
 
     :param result: A
@@ -3997,7 +3998,7 @@ def plot_channel_match(
     *,
     language: Language = "en",
     **kwargs: Any,
-) -> tuple[Axes, Axes]: ...
+) -> TwoPanels: ...
 
 
 @overload
@@ -4016,7 +4017,7 @@ def plot_channel_match(
     *,
     language: Language = "en",
     **kwargs: Any,
-) -> Axes | tuple[Axes, Axes]:
+) -> Axes | TwoPanels:
     """Channel-to-channel magnitude and phase deviations against 8.1.
 
     :param result: A

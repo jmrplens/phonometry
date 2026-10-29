@@ -31,6 +31,7 @@ import builtins
 import functools
 import inspect
 import itertools
+import pathlib
 import sys
 import typing
 from typing import TYPE_CHECKING, Any
@@ -271,6 +272,12 @@ from result_factories import (
 
 import phonometry as ph
 from phonometry._plot import common as _plotting
+
+_SCRIPTS = str(pathlib.Path(__file__).resolve().parents[1] / "scripts")
+if _SCRIPTS not in sys.path:
+    sys.path.insert(0, _SCRIPTS)
+
+import generate_api_docs as gad
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -1568,9 +1575,16 @@ _DECIDED_PLOT_HELPERS: dict[str, Callable[..., object]] = {
     ),
 }
 
-#: What a head's return annotation promises, read off its text: one axes, a
-#: polar one, a column of ``n`` axes, or one or two as the data decide.
+#: What a head's return annotation promises, read off its text as the API
+#: reference prints it (an alias such as ``TwoPanels`` spelled out): one axes,
+#: a polar one, a column of ``n`` axes, or one or two as the data decide.
 _A_COLUMN = "tuple[Axes"
+
+
+def _promised(head: Callable[..., object]) -> str:
+    """The return annotation of ``head``, its unpublished aliases spelled out."""
+    written = str(inspect.signature(head).return_annotation)
+    return gad.expand_unpublished_aliases(written, head.__module__)
 
 
 def _decided(function: Callable[..., object]) -> bool:
@@ -1579,13 +1593,8 @@ def _decided(function: Callable[..., object]) -> bool:
     Overloads whose heads all return the same type (the "both or neither"
     heads of a geometry helper) decide nothing about the return.
     """
-    returns = {
-        str(inspect.signature(head).return_annotation)
-        for head in typing.get_overloads(function)
-    }
-    return len(returns) > 1 or "PolarAxes" in str(
-        inspect.signature(function).return_annotation
-    )
+    returns = {_promised(head) for head in typing.get_overloads(function)}
+    return len(returns) > 1 or "PolarAxes" in _promised(function)
 
 
 @functools.cache
@@ -1697,7 +1706,7 @@ def _honours_its_heads(
     """Every head of ``function`` holds for every call it admits on ``draw``."""
     heads = typing.get_overloads(function) or [function]
     for head in heads:
-        promised = str(inspect.signature(head).return_annotation)
+        promised = _promised(head)
         for keywords, projection in _calls(head):
             given = None if projection is None else _fresh_axes(projection)
             arguments = dict(keywords) if given is None else {**keywords, "ax": given}

@@ -30,6 +30,7 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike
 
     from .._i18n import Language
+    from .._internal.types import TwoPanels
     from ..underwater.bioacoustics.audiograms import AudiogramResult
     from ..underwater.bioacoustics.weighting import (
         AuditoryWeightingResult,
@@ -236,7 +237,7 @@ def plot_pile_strike(
     *,
     language: Language = "en",
     **kwargs: Any,
-) -> tuple[Axes, Axes]: ...
+) -> TwoPanels: ...
 
 
 @overload
@@ -251,7 +252,7 @@ def plot_pile_strike(
     *,
     language: Language = "en",
     **kwargs: Any,
-) -> Axes | tuple[Axes, Axes]:
+) -> Axes | TwoPanels:
     """Pile-strike pressure waveform and its cumulative energy.
 
     Two stacked panels: the pressure waveform with the peak marked on top, and

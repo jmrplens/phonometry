@@ -94,6 +94,7 @@ if TYPE_CHECKING:
     from numpy.typing import DTypeLike
 
     from .._i18n import Language
+    from .._internal.types import TwoPanels
     from ..io._signal import Signal
 
 #: Warn from mls_impulse_response when the recovered IR still carries more than
@@ -206,14 +207,14 @@ class ImpulseResponseResult(OwnsArrays):
     @overload
     def plot(
         self, ax: None = None, *, language: Language = "en", **kwargs: Any
-    ) -> tuple[Axes, Axes]: ...
+    ) -> TwoPanels: ...
 
     @overload
     def plot(self, ax: Axes, *, language: Language = "en", **kwargs: Any) -> Axes: ...
 
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
-    ) -> Axes | tuple[Axes, Axes]:
+    ) -> Axes | TwoPanels:
         """Plot the impulse response: waveform and log-magnitude decay.
 
         Draws the (normalised) time-domain waveform and, below it, the
@@ -945,14 +946,14 @@ class ShapedSweepResult(OwnsArrays):
     @overload
     def plot(
         self, ax: None = None, *, language: Language = "en", **kwargs: Any
-    ) -> tuple[Axes, Axes]: ...
+    ) -> TwoPanels: ...
 
     @overload
     def plot(self, ax: Axes, *, language: Language = "en", **kwargs: Any) -> Axes: ...
 
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
-    ) -> Axes | tuple[Axes, Axes]:
+    ) -> Axes | TwoPanels:
         """Plot the sweep waveform and its spectrum against the target.
 
         Two stacked panels: the time-domain waveform, and the sweep's Welch

@@ -30,6 +30,7 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
     from .._i18n import Language
+    from .._internal.types import TwoPanels
     from ..psychoacoustics.loudness.contours import (
         EqualLoudnessContours,
         LoudnessContour,
@@ -152,7 +153,7 @@ def plot_zwicker_loudness(
     *,
     language: Language = "en",
     **kwargs: Any,
-) -> Axes | tuple[Axes, Axes]: ...
+) -> Axes | TwoPanels: ...
 
 
 @overload
@@ -167,7 +168,7 @@ def plot_zwicker_loudness(
     *,
     language: Language = "en",
     **kwargs: Any,
-) -> Axes | tuple[Axes, Axes]:
+) -> Axes | TwoPanels:
     """Specific loudness N'(z) over the Bark scale (ISO 532-1).
 
     When the result carries the time-varying loudness trace
@@ -288,7 +289,7 @@ def plot_zwicker_loudness_time(
 @overload
 def plot_ecma_loudness(
     result: EcmaLoudness, ax: None = None, *, language: Language = "en", **kwargs: Any
-) -> tuple[Axes, Axes]: ...
+) -> TwoPanels: ...
 
 
 @overload
@@ -303,7 +304,7 @@ def plot_ecma_loudness(
     *,
     language: Language = "en",
     **kwargs: Any,
-) -> Axes | tuple[Axes, Axes]:
+) -> Axes | TwoPanels:
     """Average specific loudness N'(z) and time-dependent loudness N(l).
 
     When ``ax`` is ``None`` a two-panel figure is drawn (specific loudness
@@ -470,7 +471,7 @@ def plot_moore_glasberg_time_loudness(
 @overload
 def plot_ecma_tonality(
     result: EcmaTonality, ax: None = None, *, language: Language = "en", **kwargs: Any
-) -> tuple[Axes, Axes]: ...
+) -> TwoPanels: ...
 
 
 @overload
@@ -485,7 +486,7 @@ def plot_ecma_tonality(
     *,
     language: Language = "en",
     **kwargs: Any,
-) -> Axes | tuple[Axes, Axes]:
+) -> Axes | TwoPanels:
     """Average specific tonality T'(z) and time-dependent tonality T(l).
 
     When ``ax`` is ``None`` a two-panel figure is drawn (specific tonality over
@@ -566,7 +567,7 @@ def _plot_hms_time_and_heatmap(
     heat_label: str,
     kwargs: dict[str, Any],
     language: Language = "en",
-) -> tuple[Axes, Axes]: ...
+) -> TwoPanels: ...
 
 
 @overload
@@ -597,7 +598,7 @@ def _plot_hms_time_and_heatmap(
     heat_label: str,
     kwargs: dict[str, Any],
     language: Language = "en",
-) -> Axes | tuple[Axes, Axes]:
+) -> Axes | TwoPanels:
     """Shared renderer for the HMS time-trace + specific-value heatmaps.
 
     Used by the ECMA-418-2 roughness and fluctuation-strength results: when
@@ -645,7 +646,7 @@ def _plot_hms_time_and_heatmap(
 @overload
 def plot_ecma_roughness(
     result: EcmaRoughness, ax: None = None, *, language: Language = "en", **kwargs: Any
-) -> tuple[Axes, Axes]: ...
+) -> TwoPanels: ...
 
 
 @overload
@@ -660,7 +661,7 @@ def plot_ecma_roughness(
     *,
     language: Language = "en",
     **kwargs: Any,
-) -> Axes | tuple[Axes, Axes]:
+) -> Axes | TwoPanels:
     """Time-dependent roughness R(l50) and a specific-roughness heatmap.
 
     When ``ax`` is ``None`` a two-panel figure is drawn (roughness vs time and
@@ -703,7 +704,7 @@ def plot_ecma_fluctuation_strength(
     *,
     language: Language = "en",
     **kwargs: Any,
-) -> tuple[Axes, Axes]: ...
+) -> TwoPanels: ...
 
 
 @overload
@@ -722,7 +723,7 @@ def plot_ecma_fluctuation_strength(
     *,
     language: Language = "en",
     **kwargs: Any,
-) -> Axes | tuple[Axes, Axes]:
+) -> Axes | TwoPanels:
     """Time-dependent fluctuation strength F(l50) and a specific heatmap.
 
     When ``ax`` is ``None`` a two-panel figure is drawn (fluctuation strength

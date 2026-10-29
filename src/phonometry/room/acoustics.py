@@ -69,7 +69,7 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike
 
     from .._i18n import Language
-    from .._internal.types import ReportEngine
+    from .._internal.types import ReportEngine, TwoPanels
     from .._report.metadata import ReportMetadata
     from ..io._signal import Signal
 
@@ -246,14 +246,14 @@ class RoomAcousticsResult(OwnsArrays):
     @overload
     def plot(
         self, ax: None = None, *, language: Language = "en", **kwargs: Any
-    ) -> tuple[Axes, Axes]: ...
+    ) -> TwoPanels: ...
 
     @overload
     def plot(self, ax: Axes, *, language: Language = "en", **kwargs: Any) -> Axes: ...
 
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
-    ) -> Axes | tuple[Axes, Axes]:
+    ) -> Axes | TwoPanels:
         """Plot per-band decay times (EDT/T20/T30) and clarity (C50/C80).
 
         Invalid bands are hatched and greyed. With ``ax`` given, only the

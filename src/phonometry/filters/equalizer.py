@@ -80,6 +80,7 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     from .._i18n import Language
+    from .._internal.types import TwoPanels
     from ..io._signal import Signal
 
 __all__ = [
@@ -503,7 +504,7 @@ class EQResponseResult(OwnsArrays):
         language: Language = "en",
         show_sections: bool = True,
         **kwargs: Any,
-    ) -> tuple[Axes, Axes]: ...
+    ) -> TwoPanels: ...
 
     @overload
     def plot(
@@ -522,7 +523,7 @@ class EQResponseResult(OwnsArrays):
         language: Language = "en",
         show_sections: bool = True,
         **kwargs: Any,
-    ) -> Axes | tuple[Axes, Axes]:
+    ) -> Axes | TwoPanels:
         """Plot the cascade magnitude and phase response.
 
         With ``ax`` given, only the magnitude panel is drawn on it.

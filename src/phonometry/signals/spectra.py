@@ -83,6 +83,7 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     from .._i18n import Language
+    from .._internal.types import ThreePanels, TwoPanels
     from ..io._signal import Signal
 
 Scaling = Literal["density", "spectrum"]
@@ -686,14 +687,14 @@ class CrossSpectralDensityResult(OwnsArrays):
     @overload
     def plot(
         self, ax: None = None, *, language: Language = "en", **kwargs: Any
-    ) -> tuple[Axes, Axes, Axes]: ...
+    ) -> ThreePanels: ...
 
     @overload
     def plot(self, ax: Axes, *, language: Language = "en", **kwargs: Any) -> Axes: ...
 
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
-    ) -> Axes | tuple[Axes, Axes, Axes]:
+    ) -> Axes | ThreePanels:
         """Plot the magnitude, phase (with ±σ band) and coherence.
 
         :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -923,14 +924,14 @@ class CoherentOutputSpectrumResult(OwnsArrays):
     @overload
     def plot(
         self, ax: None = None, *, language: Language = "en", **kwargs: Any
-    ) -> tuple[Axes, Axes]: ...
+    ) -> TwoPanels: ...
 
     @overload
     def plot(self, ax: Axes, *, language: Language = "en", **kwargs: Any) -> Axes: ...
 
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
-    ) -> Axes | tuple[Axes, Axes]:
+    ) -> Axes | TwoPanels:
         """Plot the output/coherent/noise spectra and the spectral SNR.
 
         :param language: Label language, ``"en"`` (default) or ``"es"``.

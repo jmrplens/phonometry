@@ -41,6 +41,7 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
     from ..._i18n import Language
+    from ..._internal.types import TwoPanels
     from ...io._signal import Signal
 
 from ..._internal.frozen import OwnsArrays
@@ -160,14 +161,14 @@ class EcmaTonality(OwnsArrays):
     @overload
     def plot(
         self, ax: None = None, *, language: Language = "en", **kwargs: Any
-    ) -> tuple[Axes, Axes]: ...
+    ) -> TwoPanels: ...
 
     @overload
     def plot(self, ax: Axes, *, language: Language = "en", **kwargs: Any) -> Axes: ...
 
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
-    ) -> Axes | tuple[Axes, Axes]:
+    ) -> Axes | TwoPanels:
         """Plot the average specific tonality T'(z) (see :mod:`phonometry._plot.psychoacoustics`).
 
         Adds a tonality-vs-time panel. Requires matplotlib

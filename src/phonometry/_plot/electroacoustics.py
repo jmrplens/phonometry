@@ -31,6 +31,7 @@ if TYPE_CHECKING:
     from matplotlib.projections.polar import PolarAxes
 
     from .._i18n import Language
+    from .._internal.types import ThreePanels, TwoPanels
     from ..electroacoustics.distortion import HarmonicDistortionResult
     from ..electroacoustics.frequency_response import (
         CoherenceResult,
@@ -350,7 +351,7 @@ def plot_frequency_response(
     *,
     language: Language = "en",
     **kwargs: Any,
-) -> tuple[Axes, Axes, Axes]: ...
+) -> ThreePanels: ...
 
 
 @overload
@@ -369,7 +370,7 @@ def plot_frequency_response(
     *,
     language: Language = "en",
     **kwargs: Any,
-) -> Axes | tuple[Axes, Axes, Axes]:
+) -> Axes | ThreePanels:
     """Bode magnitude / phase and coherence of an estimated frequency response.
 
     Three stacked panels: the magnitude in dB, the phase in degrees and the
@@ -436,7 +437,7 @@ def plot_swept_sine_distortion(
     *,
     language: Language = "en",
     **kwargs: Any,
-) -> tuple[Axes, Axes]: ...
+) -> TwoPanels: ...
 
 
 @overload
@@ -455,7 +456,7 @@ def plot_swept_sine_distortion(
     *,
     language: Language = "en",
     **kwargs: Any,
-) -> Axes | tuple[Axes, Axes]:
+) -> Axes | TwoPanels:
     """Harmonic frequency responses and THD(f) of a swept-sine measurement.
 
     Two stacked panels: the magnitudes of ``H1..HN`` in dB against their own

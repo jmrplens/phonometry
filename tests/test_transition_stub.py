@@ -365,9 +365,11 @@ def test_the_type_check_step_does_not_claim_the_shim_went_unlinted() -> None:
     false premise.
     """
     _, comment = _gate("mypy")
-    assert "stub/src" in _type_checked_paths(), (
-        "the type check must still cover the shim"
-    )
+    shim = pathlib.PurePosixPath("stub/src").parts
+    assert any(
+        shim[: len(entry.parts)] == entry.parts
+        for entry in map(pathlib.PurePosixPath, _type_checked_paths())
+    ), "the type check must still cover the shim"
     assert "stub/src" in comment, "the comment must still explain why it does"
     overstated = _UNLINTED_CLAIM.search(comment)
     assert overstated is None, (

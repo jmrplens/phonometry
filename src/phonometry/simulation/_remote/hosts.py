@@ -36,6 +36,7 @@ from ..._internal.json_input import (
     UNSAFE,
     NotRegularError,
     TooLargeError,
+    escaped,
     read_at_most,
 )
 
@@ -101,16 +102,20 @@ def load_host(name: str) -> HostEntry:
         its ``hosts`` is not a table, or the entry is malformed.
     """
     path = hosts_file()
+    # The name as every message prints it: a name the environment gives may
+    # hold bytes that are not UTF-8, which Python keeps as lone surrogates and
+    # no UTF-8 stream can write, and the marks that reorder text.
+    named = escaped(str(path))
     try:
         raw = read_at_most(path, _MAX_BYTES)
     # A path under a file names no file there: Windows reports it as missing,
     # POSIX as a component that is not a directory, and both mean no file.
     except (FileNotFoundError, NotADirectoryError):
-        msg = f"no host {name!r}: the hosts file {path} does not exist"
+        msg = f"no host {name!r}: the hosts file {named} does not exist"
         raise KeyError(msg) from None
     except NotRegularError as exc:
         msg = (
-            f"{path}: the hosts file is {exc.kind}, and it is read only from a "
+            f"{named}: the hosts file is {exc.kind}, and it is read only from a "
             "regular file"
         )
         raise ValueError(msg) from None
@@ -121,12 +126,12 @@ def load_host(name: str) -> HostEntry:
             else f"runs past {_MAX_BYTES} bytes"
         )
         msg = (
-            f"{path}: the hosts file {held}, and a hosts file is at most "
+            f"{named}: the hosts file {held}, and a hosts file is at most "
             f"{_MAX_BYTES} bytes (1 MiB)"
         )
         raise ValueError(msg) from None
     except OSError as exc:
-        msg = f"{path}: the hosts file cannot be read: {exc.strerror or exc}"
+        msg = f"{named}: the hosts file cannot be read: {exc.strerror or exc}"
         raise ValueError(msg) from None
     try:
         # utf-8-sig: Windows Notepad saves UTF-8 with a byte-order mark.
@@ -135,17 +140,17 @@ def load_host(name: str) -> HostEntry:
     # of an integer longer than 4300 digits; RecursionError a value nested
     # deeper than the interpreter's limit.
     except (ValueError, RecursionError) as exc:
-        msg = f"{path}: not a TOML file: {exc}"
+        msg = f"{named}: not a TOML file: {exc}"
         raise ValueError(msg) from None
     table = document.get("hosts", {})
     if not isinstance(table, dict):
-        msg = f"{path}: 'hosts' must be a table of [hosts.<name>] entries"
+        msg = f"{named}: 'hosts' must be a table of [hosts.<name>] entries"
         raise ValueError(msg)
     if name not in table:
-        named = ", ".join(sorted(table)) or "none"
-        msg = f"no host {name!r} in {path}; it names {named}"
+        listed = ", ".join(sorted(table)) or "none"
+        msg = f"no host {name!r} in {named}; it names {listed}"
         raise KeyError(msg)
-    return _entry(f"{path}: [hosts.{name}]", name, table[name])
+    return _entry(f"{named}: [hosts.{name}]", name, table[name])
 
 
 def _entry(where: str, name: str, table: object) -> HostEntry:

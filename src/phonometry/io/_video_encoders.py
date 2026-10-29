@@ -37,6 +37,7 @@ from pathlib import Path
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Final, Literal
 
+from .._internal.json_input import escaped
 from .._internal.programs import past_the_working_directory
 from ._video_quality import ENCODER_QUALITY, GIF_PALETTE, Quality
 
@@ -275,13 +276,11 @@ def _listed(path: str, flag: str) -> bytes:
     try:
         done = _run([path, "-hide_banner", flag])
     except (OSError, subprocess.TimeoutExpired) as exc:
-        msg = f"{path} did not run: {exc}"
+        msg = f"{escaped(str(path))} did not run: {exc}"
         raise VideoEncoderError(msg) from exc
     if done.returncode:
         said = _tail(done.stderr) or "nothing on stderr"
-        msg = (
-            f"{path} did not run: {said} ({flag} exited with status {done.returncode})"
-        )
+        msg = f"{escaped(str(path))} did not run: {said} ({flag} exited with status {done.returncode})"
         raise VideoEncoderError(msg)
     return done.stdout
 
@@ -300,7 +299,7 @@ def describe(path: str) -> FFmpeg:
     try:
         status = Path(path).stat()
     except OSError as exc:
-        msg = f"{path} did not run: {exc}"
+        msg = f"{escaped(str(path))} did not run: {exc}"
         raise VideoEncoderError(msg) from exc
     key = (path, status.st_mtime_ns, status.st_size)
     with _LOCK:

@@ -1637,20 +1637,28 @@ def _require_table_i1_components(
     """Check that the stated uncertainties are keyed by the 15 components of
     IEC 62585 Table I.1, each key as written.
 
+    A component left out and a text the table does not list are named
+    together; a key that is not a text is refused once both are in order.
+
     :raises TypeError: for a key that is not a text.
     :raises ValueError: for a key the table does not list, or a component
         left out.
     """
     expected = tuple(IEC62585_TABLE_I1)
-    for key in stated_uncertainties_db:
-        require_choice(key, "stated_uncertainties_db", expected)
     missing = [key for key in expected if key not in stated_uncertainties_db]
-    if missing:
+    extra = [
+        key
+        for key in stated_uncertainties_db
+        if isinstance(key, str) and key not in IEC62585_TABLE_I1
+    ]
+    if missing or extra:
         msg = (
             "'stated_uncertainties_db' must hold the 15 components of IEC 62585 Table I.1, keyed "
-            f"'a1' to 'a15'; missing {missing}."
+            f"'a1' to 'a15'; missing {missing}, unknown {extra}."
         )
         raise ValueError(msg)
+    for key in stated_uncertainties_db:
+        require_choice(key, "stated_uncertainties_db", expected)
 
 
 def correction_uncertainty_budget(

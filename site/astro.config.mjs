@@ -192,16 +192,20 @@ const version = readFileSync(new URL('../VERSION', import.meta.url), 'utf8').tri
 
 // The software's history, for the SoftwareApplication node. `dateCreated` is
 // the repository's first commit, in June 2020, when the code was published as
-// PyOctaveBand; `datePublished` is the first release, v1.0.0 on GitHub on
-// 2026-01-06, the day PyOctaveBand 1.0.1 reached PyPI. Both are fixed.
+// PyOctave, a name that became PyOctaveBand that July; `datePublished` is the
+// first release, v1.0.0 on GitHub on 2026-01-06, the day PyOctaveBand 1.0.1
+// reached PyPI. Both are fixed.
 //
 // `dateModified` is the last commit that changed the library itself, under
 // src/. It used to be the commit at HEAD, so a dependency bump of this site
 // announced a new library. The path is absolute because git reads a pathspec
 // from the directory it runs in, and the build runs in site/, whose own src/ is
-// this site's source. There is no fallback date: a build with no history to read
-// stops here rather than publish one it made up, and check-structured-data.mjs
-// reads the same commit to hold the built pages to it.
+// this site's source. There is no fallback date: a build with no git history at
+// all stops here rather than publish one it made up. A shallow clone still
+// names a commit, the oldest one it fetched, and would date the library from
+// it; that build is caught by check-structured-data.mjs, which refuses a
+// shallow clone, reads the same commit to hold the built pages to it, and runs
+// before the site deploys.
 const dateCreated = '2020-06-29';
 const datePublished = '2026-01-06';
 const dateModified = execFileSync(

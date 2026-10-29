@@ -86,7 +86,7 @@ if (
 	throw new Error('the repository is a shallow clone: this check needs its whole history (fetch-depth 0)');
 }
 
-/** The repository's first commit: the day the code was first published, as PyOctaveBand. */
+/** The repository's first commit: the day the code was first published, as PyOctave. */
 const FIRST_COMMIT = commitDate(['--max-parents=0', 'HEAD'], 'the first commit');
 /** The last commit that changed the library itself, which is what the software's `dateModified` claims. */
 const LIBRARY_MODIFIED = commitDate(['-1', '--', 'src'], 'the last change under src/');
@@ -252,6 +252,12 @@ function softwareDefects(nodes) {
 	if (app.dateCreated !== FIRST_COMMIT) {
 		defects.push(
 			`SoftwareApplication dateCreated is ${JSON.stringify(app.dateCreated)}, ` +
+				`not ${FIRST_COMMIT}, the date of the repository's first commit`,
+		);
+	}
+	if (code.dateCreated !== FIRST_COMMIT) {
+		defects.push(
+			`SoftwareSourceCode dateCreated is ${JSON.stringify(code.dateCreated)}, ` +
 				`not ${FIRST_COMMIT}, the date of the repository's first commit`,
 		);
 	}

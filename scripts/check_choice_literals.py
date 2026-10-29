@@ -68,7 +68,8 @@ string in any function of the record's module closes it as well.
 An annotation is read through the type aliases of the module that writes it
 (:func:`expanded`), the ones under ``if TYPE_CHECKING:`` and the imported
 ones included, so ``free_sides: _FreeSides | None`` with ``_FreeSides =
-Iterable[str]`` is a collection of any strings.
+Iterable[str]`` is a collection of any strings. An imported alias is spelled
+out in the module that writes it, through that module's own aliases.
 
 A string a caller writes below the top level of a collection or a mapping
 (the columns of ``Mapping[int, Mapping[str, float]]``, the items of
@@ -1564,15 +1565,59 @@ def _reads_as_type(node: ast.expr) -> bool:
 
 
 @functools.cache
-def _type_aliases(module_name: str) -> MappingProxyType[str, str]:
-    """The type aliases *module_name* defines or imports, as their definition reads."""
+def _imports_of(module_name: str) -> MappingProxyType[str, tuple[str, str]]:
+    """What *module_name* imports from the package, by the name it gives each:
+    the module imported from and the name there.
+
+    A name the module also assigns is its own, as :func:`_constants_of` reads
+    it, and is left out.
+    """
+    module = sys.modules.get(module_name)
+    if module is None:
+        return MappingProxyType({})
+    try:
+        tree = ast.parse(inspect.getsource(module))
+    except (OSError, TypeError, SyntaxError):
+        return MappingProxyType({})
+    package = module.__package__ or module_name.rpartition(".")[0]
+    imports: dict[str, tuple[str, str]] = {}
+    assigned: set[str] = set()
+    for node in _module_statements(tree.body):
+        if not isinstance(node, ast.ImportFrom):
+            assigned.update(name for name, _ in _assigned(node))
+            continue
+        try:
+            source = importlib.util.resolve_name(
+                "." * node.level + (node.module or ""), package
+            )
+        except ValueError:
+            continue
+        if source.startswith("phonometry"):
+            for alias in node.names:
+                imports.setdefault(alias.asname or alias.name, (source, alias.name))
     return MappingProxyType(
-        {
-            name: ast.unparse(value)
-            for name, value in _constants_of(module_name).items()
-            if _reads_as_type(value)
-        }
+        {name: where for name, where in imports.items() if name not in assigned}
     )
+
+
+@functools.cache
+def _type_aliases(module_name: str) -> MappingProxyType[str, tuple[str, str]]:
+    """The type aliases *module_name* defines or imports, each with the module
+    that writes it and its definition there.
+
+    An imported alias is read where it is written: ``B = A | None`` imported
+    alone names the ``A`` of its own module, which the importing module may
+    not hold.
+    """
+    imports = _imports_of(module_name)
+    aliases: dict[str, tuple[str, str]] = {}
+    for name, value in _constants_of(module_name).items():
+        if not _reads_as_type(value):
+            continue
+        where = imports.get(name)
+        home = _type_aliases(where[0]).get(where[1]) if where else None
+        aliases[name] = home or (module_name, ast.unparse(value))
+    return MappingProxyType(aliases)
 
 
 def expanded(annotation: str, module_name: str, depth: int = 0) -> str:
@@ -1581,7 +1626,9 @@ def expanded(annotation: str, module_name: str, depth: int = 0) -> str:
     ``free_sides: _FreeSides | None`` with ``_FreeSides = Iterable[str]`` in
     the module takes any strings as surely as ``Iterable[str] | None``: the
     guard reads what the alias stands for, not its name. A ``Literal`` alias
-    becomes its ``Literal[...]``, which stays a closed choice.
+    becomes its ``Literal[...]``, which stays a closed choice. An alias
+    imported from another module of the package is spelled out there, through
+    the aliases of that module.
     """
     if depth > _ALIAS_DEPTH:
         return annotation
@@ -1591,9 +1638,10 @@ def expanded(annotation: str, module_name: str, depth: int = 0) -> str:
         name = match.group(0)
         if name not in aliases:
             return name
+        home, definition = aliases[name]
         # No parentheses: a union is read the same inside a union or a
         # subscript, and a member in parentheses would hide its own members.
-        return expanded(aliases[name], module_name, depth + 1)
+        return expanded(definition, home, depth + 1)
 
     pieces = _QUOTED_TEXT.split(annotation)
     # Odd indices are the quoted strings the split kept; they stay as written.

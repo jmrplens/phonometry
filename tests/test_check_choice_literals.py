@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import ast
 import enum
+import importlib.util
 import inspect
 import pathlib
 import sys
@@ -378,6 +379,40 @@ def test_an_alias_is_read_as_what_it_stands_for() -> None:
     assert ccl.takes_any_strings(read)
     assert ccl._is_literal(ccl.expanded("Sequence[_Side]", __name__))
     assert ccl.expanded("Literal['_FreeSides']", __name__) == "Literal['_FreeSides']"
+
+
+def test_an_imported_alias_is_read_where_it_is_written(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """``NamesOrNone = _Names | None`` imported alone names the ``_Names`` of
+    its own module, which the importing module does not hold; read where it is
+    written, it takes any strings all the same.
+    """
+    sources = {
+        "_alias_home": (
+            "from collections.abc import Iterable\n\n"
+            "_Names = Iterable[str]\n"
+            "NamesOrNone = _Names | None\n"
+        ),
+        "_alias_user": (
+            "from ._alias_home import NamesOrNone\n\n\n"
+            "def pick(names: NamesOrNone = None) -> None:\n"
+            "    del names\n"
+        ),
+    }
+    for stem, text in sources.items():
+        path = tmp_path / f"{stem}.py"
+        path.write_text(text, encoding="utf-8")
+        name = f"phonometry.{stem}"
+        spec = importlib.util.spec_from_file_location(name, path)
+        assert spec is not None
+        assert spec.loader is not None
+        module = importlib.util.module_from_spec(spec)
+        monkeypatch.setitem(sys.modules, name, module)
+        spec.loader.exec_module(module)
+    read = ccl.expanded("NamesOrNone", "phonometry._alias_user")
+    assert read == "Iterable[str] | None"
+    assert ccl.takes_any_strings(read)
 
 
 def test_a_table_imported_from_a_sibling_module_is_followed() -> None:

@@ -685,8 +685,12 @@ Releases are fully automated from the repository-root `VERSION` file:
 Never push tags manually; the workflow is idempotent (an existing tag is
 skipped). The trusted publisher is configured on pypi.org, in the project's
 publishing settings: owner `jmrplens`, repository `phonometry`, workflow
-`release.yml`, no environment. The PyOctaveBand bridge is published the same
-way from `publish-stub.yml`.
+`release.yml`, no environment. The PyOctaveBand bridge is published by hand
+from `publish-stub.yml` (Actions, Publish PyOctaveBand transition stub, Run
+workflow on `main`), through its own trusted publisher, which names that
+workflow. It waits for Python CI on the commit as the release does, checks the
+pin and the licence of the built files with `scripts/check_stub_metadata.py`,
+and only then uploads.
 
 ## 🚀 How to Contribute
 

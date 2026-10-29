@@ -49,9 +49,26 @@ is verifiable against the published tables.
 
 ## Licence / redistribution
 
-The ANP database is published by EASA/EUROCONTROL free of charge for aircraft
-noise and performance modelling and is redistributed here on that basis, for
-reference and non-commercial use. It is not sold and carries no commercial
-benefit; the authoritative and complete dataset remains the one published at the
-source above. Point `load_anp_database(path=...)` at a directory of another
-release to use different data.
+The tables are reproduced under EASA's copyright notice
+(<https://www.easa.europa.eu/en/copyright-disclaimer>), which reads:
+"Reproduction is authorised, provided the source is acknowledged, save where
+otherwise stated." EASA publishes the archive of version 2.3 as a direct
+download on its ANP data page
+(<https://www.easa.europa.eu/en/domains/environment/policy-support-and-research/aircraft-noise-and-performance-anp-data>),
+and the archive states no terms of its own, so that notice is the one that
+applies.
+
+The source is acknowledged as the notice asks: the tables are the
+EASA/EUROCONTROL Aircraft Noise and Performance (ANP) database, archive
+version 2.3, developed by the aircraft manufacturers and reviewed by the US DOT
+Volpe Center, the US FAA, EASA and EUROCONTROL, as set out under Source above.
+Anyone who passes the tables on keeps that acknowledgement with them. The
+authoritative and complete dataset remains the one EASA publishes.
+
+phonometry's MIT licence covers phonometry's own code and documentation, not
+these tables, which keep EASA's terms. Earlier versions of this note said the
+tables were redistributed "for reference and non-commercial use"; that
+described why they were bundled and added no condition to EASA's notice.
+
+Point `load_anp_database(path=...)` at a directory of another release to use
+different data.

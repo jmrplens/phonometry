@@ -11,6 +11,9 @@ any run failing until the day of a release:
 - the only identity that can upload is an OIDC token in a job that holds
   nothing else, and no workflow reads a stored PyPI token any more;
 - no job is granted a token by default;
+- neither phonometry nor the PyOctaveBand stub is uploaded from a commit on
+  which Python CI did not succeed, and the wait for that run has the time it
+  allows itself;
 - the built wheel is verified on the same platforms and Python versions the
   test suite runs on.
 """
@@ -18,6 +21,7 @@ any run failing until the day of a release:
 from __future__ import annotations
 
 import pathlib
+import re
 from typing import Any
 
 import pytest
@@ -33,6 +37,12 @@ _PUBLISHING_ACTIONS = (
 )
 _PUBLISHING_COMMANDS = ("gh release create", "gh workflow run")
 _GUARD = "env.REHEARSAL != 'true'"
+
+#: The step that waits for Python CI on the commit being published.
+_CI_WAIT = "Require a green Python CI on this commit"
+
+#: Where the wait sets the time it gives Python CI to finish, in seconds.
+_FINISH_DEADLINE = re.compile(r"finish_deadline=\$\(\( SECONDS \+ (\d+) \)\)")
 
 
 def _load(name: str) -> dict[str, Any]:
@@ -52,6 +62,70 @@ def _publishes(step: dict[str, Any]) -> bool:
     run = step.get("run", "")
     return uses.startswith(_PUBLISHING_ACTIONS) or any(
         command in run for command in _PUBLISHING_COMMANDS
+    )
+
+
+def _upstream(workflow: dict[str, Any], job: str) -> set[str]:
+    """Every job *job* waits for, directly or through another."""
+    needs = workflow["jobs"][job].get("needs", [])
+    direct = {needs} if isinstance(needs, str) else set(needs)
+    return direct.union(*(_upstream(workflow, other) for other in direct))
+
+
+def _ci_wait(workflow: dict[str, Any]) -> tuple[str, dict[str, Any]]:
+    """The job that waits for Python CI, and the step that does the waiting."""
+    found = [
+        (job, step) for job, step in _steps(workflow) if step.get("name") == _CI_WAIT
+    ]
+    assert len(found) == 1, f"expected one step named {_CI_WAIT!r}, found {len(found)}"
+    return found[0]
+
+
+def test_the_stub_is_published_only_after_the_wait_for_ci() -> None:
+    """The stub waits for Python CI before anything is built, as the release does.
+
+    A version number cannot be uploaded twice, and the stub's build job holds
+    ten minutes and no Actions permission, which is why the wait is a job of
+    its own that the build needs. The step is the release's own, so a later
+    change to how long it waits, or to what it accepts, reaches both or fails
+    here.
+    """
+    stub = _load("publish-stub.yml")
+    job, step = _ci_wait(stub)
+    assert job == "preflight"
+    assert stub["jobs"][job]["permissions"] == {"actions": "read"}
+    assert not any("uses" in other for other in stub["jobs"][job]["steps"]), (
+        "the wait reads the API, not the checkout, and runs no action"
+    )
+    uploading = [
+        name
+        for name, other in _steps(stub)
+        if other.get("uses", "").startswith("pypa/gh-action-pypi-publish")
+    ]
+    assert uploading
+    for name in uploading:
+        assert job in _upstream(stub, name), f"{name} does not wait for {job}"
+    assert job in _upstream(stub, "build"), "the build runs before CI has passed"
+    _, released = _ci_wait(_load("release.yml"))
+    assert step["run"] == released["run"]
+    assert step["env"] == released["env"]
+
+
+@pytest.mark.parametrize("name", ["release.yml", "publish-stub.yml"])
+def test_the_wait_for_ci_ends_before_its_job_is_killed(name: str) -> None:
+    """The job's ceiling lies above the wait's own deadline.
+
+    Below it, the runner kills the job mid-wait with a cancellation that names
+    no cause, where the wait would have said what it was still waiting on.
+    """
+    workflow = _load(name)
+    job, step = _ci_wait(workflow)
+    deadline = _FINISH_DEADLINE.search(step["run"])
+    assert deadline is not None, f"{name}: the wait no longer sets finish_deadline"
+    timeout_seconds = 60 * int(workflow["jobs"][job]["timeout-minutes"])
+    assert timeout_seconds > int(deadline.group(1)), (
+        f"{name}: {job} is killed after {timeout_seconds} s, before the wait "
+        f"gives up at {deadline.group(1)} s"
     )
 
 

@@ -56,6 +56,8 @@ _STUB = _ROOT / "stub"
 _SHIM = _STUB / "src" / "pyoctaveband" / "__init__.py"
 _README = _STUB / "README.md"
 _PYPROJECT = _STUB / "pyproject.toml"
+_STUB_LICENSE = _STUB / "LICENSE"
+_LICENSE = _ROOT / "LICENSE"
 _WORKFLOW = _ROOT / ".github" / "workflows" / "python-app.yml"
 _ROOT_PYPROJECT = _ROOT / "pyproject.toml"
 _GUIDE = _ROOT / "docs" / "start" / "upgrading.md"
@@ -192,6 +194,24 @@ def test_readme_names_the_warning_class_the_shim_actually_raises() -> None:
 def test_stub_readme_is_the_published_long_description() -> None:
     """What makes the assertion above load-bearing rather than decorative."""
     assert _stub_project()["readme"] == "README.md"
+
+
+def test_the_stub_declares_and_carries_the_project_licence() -> None:
+    """The stub ships the licence text, and that text is the project's.
+
+    PEP 639 resolves a ``License-File`` path inside the project that declares
+    it, so the stub cannot name the repository's ``LICENSE`` one directory up
+    and carries a copy instead. A copy goes stale without a sound when the
+    original changes (a new year on the copyright line), and the check of the
+    built files only says so in the stub's CI job, far from the edit that
+    caused it.
+    """
+    project = _stub_project()
+    assert project["license"] == "MIT"
+    assert project["license-files"] == ["LICENSE"]
+    assert _STUB_LICENSE.read_bytes() == _LICENSE.read_bytes(), (
+        "stub/LICENSE is not the repository's LICENSE; copy it again"
+    )
 
 
 def test_shim_reexports_every_name_phonometry_publishes() -> None:

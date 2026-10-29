@@ -7,9 +7,10 @@
 //
 // - the guides hub's ItemList carried `inLanguage`, which schema.org defines
 //   on CreativeWork, Event and a few others, and an ItemList is none of them;
-// - every journal article in the bibliography carried `volumeNumber` and
-//   `issueNumber`, which belong to PublicationVolume and PublicationIssue,
-//   not to the ScholarlyArticle that held them;
+// - the journal articles in the bibliography carried `volumeNumber` and
+//   `issueNumber`, as far as their reference named them, and those belong to
+//   PublicationVolume and PublicationIssue, not to the ScholarlyArticle that
+//   held them;
 // - every API page carried `codeRepository` and `programmingLanguage`, which
 //   belong to SoftwareSourceCode, not to an APIReference.
 //
@@ -27,7 +28,10 @@
 //   its reason, and an exception that no page uses any more;
 // - a node value whose types, and their supertypes, are all outside the
 //   property's `rangeIncludes`. A bare `{"@id"}` reference is resolved to the
-//   types its node has on the same page, else anywhere in the build.
+//   types its node has on the same page, else anywhere in the build;
+// - a node with properties and no `@type`. One that only adds properties to
+//   a node typed elsewhere, by its `@id`, is held to that node's types, on
+//   the same page first, then anywhere in the build.
 //
 // Two shapes are accepted on purpose, as the Schema Markup Validator accepts
 // them: a literal (text, a number, a date or an `@value` object) stands for
@@ -37,6 +41,15 @@
 // Reported and not failed: a property schema.org has superseded, which it
 // still defines, and a reference to an `@id` no page of the build types,
 // which check-structured-data.mjs holds for the joins a page must make.
+//
+// The Person node is jmrp.io's: the build fetches it from jmrp.io's main
+// branch and splices it in as published, so a change made there reaches
+// this site's next build with nothing changed here. On that node, and on
+// every node nested in it, a value outside its range still fails, as it
+// does in jmrp.io's own check, but the other findings are reported and do
+// not fail, so that change cannot stop this site from deploying. A node is
+// another site's when the top-level node it sits in has an `@id` that is
+// neither a page of this site nor this project's repository (OWN_ORIGINS).
 //
 // It is ported from the check jmrp.io runs on its own build, against the same
 // release. That one fails on a range and only warns on a domain; all three
@@ -163,21 +176,41 @@ export function jsonLdBlocks(html) {
 }
 
 /**
- * Calls `fn` on every object node under `value`, depth first, with the
- * property the node is the value of (undefined at the top).
+ * @typedef {{via: string | undefined, owner: string | null,
+ *   parent: Record<string, unknown> | undefined}} Position Where a node sits:
+ *   the property it is the value of (undefined at the top), the `@id` of the
+ *   top-level node it sits in (null when that node has none, so this page
+ *   wrote it), and the node it is the value of.
+ */
+
+/**
+ * Calls `fn` on every object node under `value`, depth first, with where it
+ * sits. Each member of a `@graph` is a top-level node, and so is the block
+ * itself when it has no `@graph`; `@context` is not data and is not entered.
  *
  * @param {unknown} value A parsed block, or any part of one.
- * @param {(node: Record<string, unknown>, via: string | undefined) => void} fn
- *   The visitor.
- * @param {string} [via] The property `value` is the value of.
+ * @param {(node: Record<string, unknown>, position: Position) => void} fn The
+ *   visitor.
+ * @param {Position} [position] Where `value` sits; omitted at the top.
  * @returns {void}
  */
-function visit(value, fn, via) {
+function visit(value, fn, position) {
 	if (Array.isArray(value)) {
-		for (const item of value) visit(item, fn, via);
-	} else if (value && typeof value === 'object') {
-		fn(value, via);
-		for (const [key, child] of Object.entries(value)) visit(child, fn, key.startsWith('@') ? via : key);
+		for (const item of value) visit(item, fn, position);
+		return;
+	}
+	if (!value || typeof value !== 'object') return;
+	const here = position ?? {
+		via: undefined,
+		owner: typeof value['@id'] === 'string' ? value['@id'] : null,
+		parent: undefined,
+	};
+	fn(value, here);
+	for (const [key, child] of Object.entries(value)) {
+		if (key === '@context') continue;
+		if (key === '@graph') visit(child, fn);
+		else if (key.startsWith('@')) visit(child, fn, here);
+		else visit(child, fn, { via: key, owner: here.owner, parent: value });
 	}
 }
 
@@ -242,12 +275,28 @@ function valueTypes(item, pageIds, siteIds) {
 }
 
 /**
- * Holds the properties of one typed node to the vocabulary.
+ * Adds a finding of a failing kind, or, on a node another site publishes,
+ * reports it under `elsewhere` with what it would have been.
+ *
+ * @param {object} ctx The page, the findings, and whether the node is
+ *   another site's.
+ * @param {keyof typeof ELSEWHERE} kind The failing kind.
+ * @param {string} key The finding.
+ * @returns {void}
+ */
+function flag(ctx, kind, key) {
+	if (ctx.elsewhere) note(ctx.found.elsewhere, `${ELSEWHERE[kind]}: ${key}`, ctx.file);
+	else note(ctx.found[kind], key, ctx.file);
+}
+
+/**
+ * Holds the properties of one node to the vocabulary, as a node of `own`.
  *
  * @param {Record<string, unknown>} node The node.
- * @param {string[]} own Its types.
+ * @param {string[]} own Its types, or those its `@id` has elsewhere.
  * @param {string | undefined} via The property the node is the value of.
- * @param {object} ctx The lookups, the page, and the findings to add to.
+ * @param {object} ctx The lookups, the page, the findings to add to, and
+ *   whether the node is another site's.
  * @returns {number} How many properties were held to the vocabulary.
  */
 function checkNode(node, own, via, ctx) {
@@ -255,13 +304,12 @@ function checkNode(node, own, via, ctx) {
 	const where = own.join('+');
 	const isRole = own.some((t) => vocabulary.isA(t, 'Role'));
 	let checked = 0;
-	for (const t of own) if (!vocabulary.knowsType(t)) note(found.unknownType, `@type ${t}`, file);
 	for (const [key, value] of Object.entries(node)) {
 		if (key.startsWith('@')) continue;
 		const label = `${where}.${key}`;
 		const property = vocabulary.property(key);
 		if (!property) {
-			note(found.unknownProperty, label, file);
+			flag(ctx, 'unknownProperty', label);
 			continue;
 		}
 		checked += 1;
@@ -275,7 +323,7 @@ function checkNode(node, own, via, ctx) {
 			own.every((t) => domain.every((d) => !vocabulary.isA(t, d)))
 		) {
 			if (DOMAIN_EXCEPTIONS.has(label)) note(found.excepted, label, file);
-			else note(found.outsideDomain, `${label} (domain ${domain.join('|')})`, file);
+			else flag(ctx, 'outsideDomain', `${label} (domain ${domain.join('|')})`);
 		}
 		if (supersededBy) note(found.superseded, `${label} -> ${supersededBy.join('|')}`, file);
 		checkValues(label, value, property.range, ctx);
@@ -322,6 +370,10 @@ export const FAILING = {
 		'value(s) whose type is outside their property rangeIncludes',
 		'every node value has a type in its property range',
 	],
+	untypedNode: [
+		'node(s) with properties and no @type, of their own or through their @id',
+		'every node with properties has a type, of its own or through its @id',
+	],
 	unusedException: ['domain exception(s) no page uses any more', 'every domain exception is still used'],
 };
 
@@ -329,16 +381,47 @@ export const FAILING = {
 export const REPORTED = {
 	superseded: 'a property schema.org has superseded and still defines',
 	unresolvedReference: 'a reference to an @id of this site that no page types',
-};
-
-/** Whether an `@id` names a node of this site rather than of another one. */
-const isOnThisSite = (id) => {
-	const origin = `${siteUrl}${basePath}`;
-	return id === origin || id.startsWith(`${origin}/`) || id.startsWith(`${origin}#`);
+	elsewhere: 'a finding on a node another site publishes, which does not fail here',
 };
 
 /**
- * Holds every typed node of every page to the vocabulary.
+ * The failing kinds reported rather than failed on a node another site
+ * publishes, each with how its report names it. A value outside its range
+ * is not among them: it fails wherever it is.
+ */
+const ELSEWHERE = {
+	unknownType: 'a type schema.org does not define',
+	unknownProperty: 'a property schema.org does not define',
+	outsideDomain: 'outside its domain',
+	untypedNode: 'no type',
+};
+
+/**
+ * Where this project mints `@id`s: the pages of the site, and the
+ * repository, whose `#software` and `#source-code` nodes astro.config.mjs
+ * writes.
+ */
+const OWN_ORIGINS = [`${siteUrl}${basePath}`, 'https://github.com/jmrplens/phonometry'];
+
+/** Whether an `@id` is one this project mints rather than another site's. */
+const isOwnId = (id) =>
+	OWN_ORIGINS.some((origin) => id === origin || id.startsWith(`${origin}/`) || id.startsWith(`${origin}#`));
+
+/**
+ * `Type.property`, naming the property a node is the value of, for a node
+ * that has no type to name itself by.
+ *
+ * @param {Position} position Where the node sits.
+ * @returns {string} The label.
+ */
+function slot(position) {
+	const { via, parent } = position;
+	if (!parent) return 'a top-level node';
+	return `${typesOf(parent).join('+') || 'an untyped node'}.${via}`;
+}
+
+/**
+ * Holds every node of every page to the vocabulary.
  *
  * @param {Page[]} pages Every page's parsed JSON-LD.
  * @param {ReturnType<typeof createVocabulary>} vocabulary The lookups.
@@ -355,10 +438,36 @@ export function checkVocabulary(pages, vocabulary) {
 	);
 	let checked = 0;
 	for (const page of pages) {
-		const ctx = { vocabulary, pageIds: typedIds(page.blocks), siteIds, file: page.file, found };
-		visit(page.blocks, (node, via) => {
+		const pageIds = typedIds(page.blocks);
+		visit(page.blocks, (node, position) => {
+			const ctx = {
+				vocabulary,
+				pageIds,
+				siteIds,
+				file: page.file,
+				found,
+				elsewhere: position.owner !== null && !isOwnId(position.owner),
+			};
 			const own = typesOf(node);
-			if (own.length > 0) checked += checkNode(node, own, via, ctx);
+			for (const t of own) if (!vocabulary.knowsType(t)) flag(ctx, 'unknownType', `@type ${t}`);
+			if (own.length > 0) {
+				checked += checkNode(node, own, position.via, ctx);
+				return;
+			}
+			const properties = Object.keys(node).filter((key) => !key.startsWith('@'));
+			if (properties.length === 0) return;
+			// A node with properties and no type of its own adds them to the
+			// node its @id names, so it is held to that node's types.
+			const id = typeof node['@id'] === 'string' ? node['@id'] : undefined;
+			const named = id === undefined ? undefined : (pageIds.get(id) ?? siteIds.get(id));
+			if (named) {
+				checked += checkNode(node, [...named], position.via, ctx);
+			} else if (id !== undefined && !isOwnId(id)) {
+				// Another site types that node; this build cannot see how.
+				note(found.unresolvedReference, `${slot(position)} -> ${id}`, page.file);
+			} else {
+				flag(ctx, 'untypedNode', `${slot(position)} = ${id ?? 'a node'} {${properties.join(', ')}}`);
+			}
 		});
 	}
 	for (const label of DOMAIN_EXCEPTIONS.keys()) {
@@ -435,12 +544,13 @@ function main(argv) {
 		ok(`${key} is outside its domain on ${pagesCount(files.length)}, on purpose: ${DOMAIN_EXCEPTIONS.get(key)}`);
 	}
 	for (const finding of findings.superseded) console.log(`note ${REPORTED.superseded}: ${line(finding)}`);
+	for (const finding of findings.elsewhere) console.log(`note ${REPORTED.elsewhere}: ${line(finding)}`);
 	// The Person node is jmrp.io's, and names the other projects it owns by
 	// their own sites' @ids, which no page of this build types; those are not
 	// this site's to resolve, and are counted rather than listed.
 	const target = ({ key }) => key.slice(key.indexOf(' -> ') + 4);
 	const [onSite, elsewhere] = [true, false].map((wanted) =>
-		findings.unresolvedReference.filter((finding) => isOnThisSite(target(finding)) === wanted),
+		findings.unresolvedReference.filter((finding) => isOwnId(target(finding)) === wanted),
 	);
 	for (const finding of onSite) console.log(`note ${REPORTED.unresolvedReference}: ${line(finding)}`);
 	if (elsewhere.length > 0) {

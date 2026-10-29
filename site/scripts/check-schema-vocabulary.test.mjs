@@ -4,12 +4,13 @@
 // The real build only ever hands the check the structured data that passes
 // it, so a check that stopped resolving a reference, lost a superclass or
 // learned to accept a property outside its domain would stay green there for
-// good. The two defects that prompted it are replayed here and must fail,
-// their corrected shapes must pass, and each rule (supertypes, references,
-// literals, roles, the exceptions) has a case of its own. The cases run on
-// the committed vocabulary, so a regenerated file that lost a relation the
-// site relies on fails here too, and the command itself is run on builds of
-// one page to read its exit status.
+// good. The defects that prompted it are replayed here and must fail, their
+// corrected shapes must pass, and each rule (supertypes, references, untyped
+// nodes, literals, roles, the exceptions, the nodes another site publishes)
+// has a case of its own. The cases run on the committed vocabulary, so a
+// regenerated file that lost a relation the site relies on fails here too,
+// and the command itself is run on builds of one page to read its exit
+// status.
 //
 // Usage: node --test 'scripts/**/*.test.mjs'
 import assert from 'node:assert/strict';
@@ -22,6 +23,7 @@ import { fileURLToPath } from 'node:url';
 
 import {
 	DOMAIN_EXCEPTIONS,
+	FAILING,
 	checkVocabulary,
 	createVocabulary,
 	jsonLdBlocks,
@@ -32,6 +34,7 @@ import { VOCABULARY_PATH, compactVocabulary, serializeVocabulary } from './gener
 const CHECK = join(dirname(fileURLToPath(import.meta.url)), 'check-schema-vocabulary.mjs');
 const vocabulary = loadVocabulary();
 const ORIGIN = 'https://docs.jmrp.io/phonometry';
+const PERSON_ID = 'https://jmrp.io/#person';
 
 /**
  * The software node as the site publishes it, carrying the two properties
@@ -55,11 +58,15 @@ const onePage = (graph, file = '/page/') => ({
 /** The keys of every failing finding, by kind, leaving out the empty kinds. */
 function failuresOf(...pages) {
 	const { findings } = checkVocabulary(pages, vocabulary);
-	const failing = ['unknownType', 'unknownProperty', 'outsideDomain', 'outOfRange', 'unusedException'];
 	return Object.fromEntries(
-		failing.filter((kind) => findings[kind].length > 0).map((kind) => [kind, findings[kind].map((f) => f.key)]),
+		Object.keys(FAILING)
+			.filter((kind) => findings[kind].length > 0)
+			.map((kind) => [kind, findings[kind].map((f) => f.key)]),
 	);
 }
+
+/** The keys of one reported kind of finding. */
+const reported = (kind, ...pages) => checkVocabulary(pages, vocabulary).findings[kind].map((f) => f.key);
 
 test('the committed vocabulary is schema.org, with the relations the site relies on', () => {
 	assert.match(vocabulary.release, /^\d+\.\d+$/);
@@ -72,10 +79,21 @@ test('the committed vocabulary is schema.org, with the relations the site relies
 	assert.equal(vocabulary.property('notAProperty'), undefined);
 });
 
-test('the committed vocabulary is exactly what the generator writes, so nobody edited it by hand', () => {
+test("the committed vocabulary is in the generator's format: keys sorted, one term per line, each list sorted", () => {
 	const text = readFileSync(VOCABULARY_PATH, 'utf8');
 	const { release, source, sha256, classes, properties } = JSON.parse(text);
 	assert.equal(serializeVocabulary({ release, source, sha256 }, { classes, properties }), text);
+	// The generator sorts every list by code point and a term appears once in
+	// it; the round trip above keeps a list in whatever order it is written.
+	const sortedOnce = (list) => list.every((name, i) => i === 0 || list[i - 1] < name);
+	for (const [name, superclasses] of Object.entries(classes)) {
+		assert.ok(sortedOnce(superclasses), `classes.${name}: ${superclasses}`);
+	}
+	for (const [name, { range, domain, supersededBy = [] }] of Object.entries(properties)) {
+		for (const [field, list] of Object.entries({ range, domain, supersededBy })) {
+			assert.ok(sortedOnce(list), `properties.${name}.${field}: ${list}`);
+		}
+	}
 });
 
 test('inLanguage on an ItemList fails: the guides hub shipped it', () => {
@@ -249,6 +267,84 @@ test('a reference to no typed node is reported, not failed', () => {
 		checkVocabulary([page], vocabulary).findings.unresolvedReference.map((f) => f.key),
 		[`CollectionPage.hasPart -> ${ORIGIN}/nowhere/`],
 	);
+});
+
+test('a node with no type of its own is held to the types its @id has, and fails on what they do not take', () => {
+	const website = { '@type': 'WebSite', '@id': `${ORIGIN}/#website`, name: 'phonometry' };
+	const article = (isPartOf) => ({ '@type': 'TechArticle', '@id': `${ORIGIN}/start/guides/#article`, isPartOf });
+	assert.deepEqual(
+		failuresOf(onePage([website, article({ '@id': website['@id'], dateModifed: 'x', volumeNumber: '3' })])),
+		{
+			unknownProperty: ['WebSite.dateModifed'],
+			outsideDomain: ['WebSite.volumeNumber (domain PublicationVolume)'],
+		},
+	);
+	assert.deepEqual(failuresOf(onePage([website, article({ '@id': website['@id'], name: 'phonometry' })])), {});
+	assert.deepEqual(
+		failuresOf(onePage([website], '/x/'), onePage([article({ '@id': website['@id'], volumeNumber: '3' })], '/y/')),
+		{ outsideDomain: ['WebSite.volumeNumber (domain PublicationVolume)'] },
+	);
+});
+
+test("a node with properties and no type anywhere fails, unless its @id is another site's", () => {
+	const holding = (isPartOf) => onePage([{ '@type': 'TechArticle', isPartOf }]);
+	assert.deepEqual(failuresOf(holding({ name: 'A journal' })), {
+		untypedNode: ['TechArticle.isPartOf = a node {name}'],
+	});
+	assert.deepEqual(failuresOf(holding({ '@id': `${ORIGIN}/nowhere/#x`, name: 'A journal' })), {
+		untypedNode: [`TechArticle.isPartOf = ${ORIGIN}/nowhere/#x {name}`],
+	});
+	const elsewhere = holding({ '@id': 'https://example.org/#journal', name: 'A journal' });
+	assert.deepEqual(failuresOf(elsewhere), {});
+	assert.deepEqual(reported('unresolvedReference', elsewhere), ['TechArticle.isPartOf -> https://example.org/#journal']);
+	// A @context is not data, whatever terms it defines.
+	const context = {
+		file: '/page/',
+		blocks: [{ '@context': { '@vocab': 'https://schema.org/', ex: 'https://example.org/' }, '@graph': [SOFTWARE] }],
+	};
+	assert.deepEqual(failuresOf(context), {});
+});
+
+test('on the node another site publishes, and every node in it, only a range fails; the rest is reported', () => {
+	const person = (extra) => ({
+		'@type': 'Person',
+		'@id': PERSON_ID,
+		name: 'A maintainer',
+		inLanguage: 'en',
+		dateModifed: '2026-10-29',
+		alumniOf: { '@type': ['EducationalOrganization', 'CollegeOrUniversityy'], name: 'A university' },
+		owns: { '@type': 'SoftwareApplication', '@id': `${ORIGIN}/#owned`, volumeNumber: '3' },
+		knowsAbout: { '@id': `${ORIGIN}/#nothing`, name: 'A topic' },
+		...extra,
+	});
+	const page = onePage([person({})]);
+	assert.deepEqual(failuresOf(page), {});
+	assert.deepEqual(reported('elsewhere', page), [
+		'a property schema.org does not define: Person.dateModifed',
+		'a type schema.org does not define: @type CollegeOrUniversityy',
+		`no type: Person.knowsAbout = ${ORIGIN}/#nothing {name}`,
+		'outside its domain: Person.inLanguage (domain BroadcastService|CommunicateAction|CreativeWork|Event|LinkRole|PronounceableText|WriteAction)',
+		'outside its domain: SoftwareApplication.volumeNumber (domain PublicationVolume)',
+	]);
+	assert.deepEqual(failuresOf(onePage([person({ alumniOf: { '@type': 'Place', name: 'A city' } })])), {
+		outOfRange: ['Person.alumniOf = Place (range EducationalOrganization|Organization)'],
+	});
+});
+
+test("the project's own nodes fail, whatever @id the nodes nested in them carry", () => {
+	const software = {
+		...SOFTWARE,
+		volumeNumber: '3',
+		about: { '@type': 'Thing', '@id': 'http://www.wikidata.org/entity/Q193040', issueNumber: '1' },
+	};
+	const page = { file: '/page/', blocks: [{ '@context': 'https://schema.org', '@graph': [software] }] };
+	assert.deepEqual(failuresOf(page), {
+		outsideDomain: [
+			'SoftwareApplication.volumeNumber (domain PublicationVolume)',
+			'Thing.issueNumber (domain PublicationIssue)',
+		],
+	});
+	assert.deepEqual(reported('elsewhere', page), []);
 });
 
 test('a literal stands for Text in any range, and is still held to the domain', () => {

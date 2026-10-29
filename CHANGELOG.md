@@ -4241,7 +4241,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   the thickness only when a side absorbed. `FDTDBoundaries` holds each
   impedance as the float, or the read-only float64 profile, a run reads, an
   integer profile and a float32 scalar included, and refuses one that is no
-  real number with `TypeError` when it is built, as
+  real number with `TypeError` when it is built, a flag among the numbers of
+  a profile included (NumPy reads `[True, 415.0]` as two floats), as
   `FDTD2D(edge_impedance=...)` now does: a flag ran as an impedance of 1 Pa
   s/m, and `None` was refused only by the run, as an impedance that is not
   finite. `simulation.PlaneWaveSource` checks its direction when it is built.
@@ -4253,14 +4254,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   is the one every choice raises; `ElasticRecording(probe_fields="vy")`
   records that one field, where the name was read a letter at a time. Both
   engines and both runs read a `shape` whenever it is given: held as a pair of
-  ints, a list included, refused when malformed, and refused with `ValueError`
-  beside a map whose grid it does not name, where an engine ignored it and a
-  run held it; `ElasticFDTD2D.from_regions` reads its `shape` the same way,
-  where a third count was dropped. What the engines compute did not move:
-  `engine-digests.json` is unchanged, and a new CuPy proof is recorded in
-  `gpu-parity.lock`. The checks of the parameters, of the records a caller
-  builds, of the choices and of the documented `TypeError` no longer leave the
-  files `scripts/gpu_parity.py` fingerprints out.
+  ints from any sequence of the two counts or a one-dimensional integer array,
+  where only a tuple or a list was taken, refused when malformed, and refused
+  with `ValueError` beside a map whose grid it does not name, where an engine
+  ignored it and a run held it; `ElasticFDTD2D.from_regions` reads its `shape`
+  the same way, where a third count was dropped. What the engines compute did
+  not move: `engine-digests.json` is unchanged, and a new CuPy proof is
+  recorded in `gpu-parity.lock`. The checks of the parameters, of the records
+  a caller builds, of the choices and of the documented `TypeError` no longer
+  leave the files `scripts/gpu_parity.py` fingerprints out.
   `scripts/check_parameter_annotations.py` follows a field handed by its name
   together with its record (`_hold_cells(self, "ix", "iy")`), which it read as
   never validated, and the items and elements a body unpacks or indexes (`ny,

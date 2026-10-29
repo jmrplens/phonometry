@@ -111,8 +111,9 @@ __all__ = [
 Field2D = NDArray[np.floating[Any]]
 
 #: A grid shape ``(ny, nx)``: two whole numbers of cells, a NumPy integer
-#: included, as a tuple or a list.
-GridShape = Sequence[int | np.integer[Any]]
+#: included, as any sequence of the two (a tuple, a list, an array's
+#: ``shape``) or as a one-dimensional integer array of them.
+GridShape = Sequence[int | np.integer[Any]] | NDArray[np.integer[Any]]
 
 #: A side of the rectangular domain, by name.
 Side = Literal["left", "right", "top", "bottom"]
@@ -641,18 +642,21 @@ def _validated_obstacle(
 def _grid_shape(shape: object) -> tuple[int, int]:
     """The ``(ny, nx)`` grid a scalar sound speed is spread over.
 
-    A value that is not a pair, or a cell count that is not a number, is the
-    wrong type; a pair of another length, or a count that is not a whole
-    number of one cell or more, is a wrong value. A whole float is kept as
-    the count it names.
+    Any sequence of the two counts is read, and a one-dimensional array as
+    the sequence of its items. A value that is not a sequence, a text, or a
+    cell count that is not a number, is the wrong type; a sequence of another
+    length, or a count that is not a whole number of one cell or more, is a
+    wrong value. A whole float is kept as the count it names.
 
-    :raises TypeError: for a value that is not a tuple or a list, or a count
-        that is not a number.
+    :raises TypeError: for a value that is neither a sequence nor a
+        one-dimensional array, a text, or a count that is not a number.
     :raises ValueError: for a sequence of another length than two, or a count
         that is not a whole number of at least one.
     """
     msg = f"shape must be a pair of positive integers (ny, nx); got {shape!r}"
-    if not isinstance(shape, (tuple, list)):
+    if isinstance(shape, np.ndarray) and shape.ndim == 1:
+        shape = shape.tolist()
+    if not isinstance(shape, Sequence) or isinstance(shape, str | bytes):
         raise TypeError(msg)
     # The length of a fixed-size argument, not a quantity.
     if len(shape) != 2:  # noqa: PLR2004
@@ -770,6 +774,9 @@ def _impedance_numbers(side: str, value: object) -> NDArray[Any]:
             raise ValueError(msg) from None
     if read is not None and read.dtype == np.object_:
         read = _real_objects(side, read)
+    elif read is not None and _holds_a_flag(value, read):
+        # ``[True, 415.0]`` reads as the floats ``[1.0, 415.0]``.
+        read = None
     if read is None or read.dtype.kind not in _REAL_KINDS:
         msg = (
             f"impedance for side {side!r} must be a real number [Pa s/m] or an "
@@ -777,6 +784,19 @@ def _impedance_numbers(side: str, value: object) -> NDArray[Any]:
         )
         raise TypeError(msg)
     return read
+
+
+def _holds_a_flag(value: object, read: NDArray[Any]) -> bool:
+    """Whether a profile written as items holds a flag NumPy read as a number.
+
+    NumPy reads ``[True, 415.0]`` as the floats ``[1.0, 415.0]``, so the
+    items are read as they were written, before NumPy chose one type for
+    them. An array holds one type, which :func:`_impedance_numbers` reads.
+    """
+    if isinstance(value, np.ndarray) or read.ndim == 0:
+        return False
+    items = np.asarray(value, dtype=object).ravel().tolist()
+    return any(isinstance(item, bool | np.bool_) for item in items)
 
 
 def _real_objects(side: str, read: NDArray[np.object_]) -> NDArray[np.float64] | None:

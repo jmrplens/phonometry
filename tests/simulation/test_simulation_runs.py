@@ -440,13 +440,27 @@ def test_acoustic_boundaries_hold_each_impedance_as_the_run_reads_it() -> None:
     assert np.array_equal(fdtd_simulation(run).times, fdtd_simulation(reference).times)
 
 
-@pytest.mark.parametrize("value", [None, True, np.True_, object(), 1 + 2j, [415, None]])
+@pytest.mark.parametrize(
+    "value",
+    [
+        None,
+        True,
+        np.True_,
+        object(),
+        1 + 2j,
+        [415, None],
+        [True, 415.0],
+        (415.0, np.True_),
+        [[True], [415.0]],
+    ],
+)
 def test_acoustic_boundaries_refuse_an_impedance_that_is_no_real_number(
     value: object,
 ) -> None:
     """A flag ran as an impedance of 1 Pa s/m and ``None`` was refused only
     by the run, as an impedance that is not finite: each is refused when the
-    record is built, as the type it is.
+    record is built, as the type it is, a flag among the numbers of a profile
+    too, which NumPy reads as ``1.0`` beside them.
     """
     with pytest.raises(TypeError, match="impedance for side 'left' must be a real"):
         FDTDBoundaries(sides={"left": value})  # type: ignore[dict-item]
@@ -458,7 +472,7 @@ def test_acoustic_boundaries_refuse_an_impedance_no_float_holds(value: object) -
         FDTDBoundaries(sides={"left": value})  # type: ignore[dict-item]
 
 
-@pytest.mark.parametrize("value", [None, True, "415"])
+@pytest.mark.parametrize("value", [None, True, "415", [True] + [415.0] * 7])
 def test_the_acoustic_engine_refuses_an_impedance_that_is_no_real_number(
     value: object,
 ) -> None:
@@ -543,7 +557,30 @@ def test_a_run_holds_the_shape_it_is_given_as_a_pair_of_ints(engine: Engine) -> 
 
 @pytest.mark.parametrize("engine", ["acoustic", "elastic"])
 @pytest.mark.parametrize(
-    ("shape", "error"), [((8, 8, 1), ValueError), ((8, 0), ValueError), (8, TypeError)]
+    "shape", [range(8, 10), np.array([8, 9]), np.array([8, 9], dtype=np.int32)]
+)
+def test_a_shape_is_any_sequence_of_two_counts_or_an_array_of_them(
+    engine: Engine, shape: object
+) -> None:
+    """The annotation took any sequence and the run a tuple or a list only:
+    ``range(8, 10)`` passed mypy and raised ``TypeError``. Any sequence of the
+    two counts is read now, and a one-dimensional integer array as its items.
+    """
+    run = (_acoustic if engine == "acoustic" else _elastic)(shape=shape)
+    assert run.shape == (8, 9)
+    assert [type(n) for n in run.shape] == [int, int]
+
+
+@pytest.mark.parametrize("engine", ["acoustic", "elastic"])
+@pytest.mark.parametrize(
+    ("shape", "error"),
+    [
+        ((8, 8, 1), ValueError),
+        ((8, 0), ValueError),
+        (8, TypeError),
+        ("xx", TypeError),
+        (np.array([[8, 8]]), TypeError),
+    ],
 )
 def test_a_run_refuses_a_malformed_shape_beside_a_map_too(
     engine: Engine, shape: object, error: type[Exception]

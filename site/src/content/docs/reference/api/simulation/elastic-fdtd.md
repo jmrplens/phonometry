@@ -192,7 +192,7 @@ ElasticFDTD2D(
     absorbing_sides: Literal['left', 'right', 'top', 'bottom'] | Iterable[Literal['left', 'right', 'top', 'bottom']] | None = None,
     absorbing_layer_reflection: float = 0.0001,
     damping: ArrayLike = 0.0,
-    shape: Sequence[int | np.integer[Any]] | None = None,
+    shape: Sequence[int | np.integer[Any]] | NDArray[np.integer[Any]] | None = None,
     free_sides: Literal['left', 'right', 'top', 'bottom'] | Iterable[Literal['left', 'right', 'top', 'bottom']] | None = None,
     obstacle_mask: ArrayLike | None = None,
     compute: Compute | None = None,
@@ -303,7 +303,7 @@ contribute nothing.
 
 ```python
 ElasticFDTD2D.from_regions(
-    shape: Sequence[int | np.integer[Any]],
+    shape: Sequence[int | np.integer[Any]] | NDArray[np.integer[Any]],
     dx: float,
     *,
     background: Material | CatalogueRow | tuple[float, float, float],
@@ -570,7 +570,7 @@ ElasticRun(
     duration_s: float,
     sources: Sequence[ExplosionSource | ForceSource],
     rho: ArrayLike,
-    shape: Sequence[int | np.integer[Any]] | None = None,
+    shape: Sequence[int | np.integer[Any]] | NDArray[np.integer[Any]] | None = None,
     cfl: float = 0.6,
     recording: ElasticRecording | None = None,
     boundaries: ElasticBoundaries | None = None,

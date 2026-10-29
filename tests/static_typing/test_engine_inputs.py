@@ -213,6 +213,20 @@ def test_the_geometry_preview_takes_the_cells_a_recording_takes() -> None:
         plt.close("all")
 
 
+def test_a_shape_is_any_sequence_of_two_counts_or_an_integer_array() -> None:
+    """A range and an integer array of the two counts, as numpy code holds a grid."""
+    counts: NDArray[np.int64] = np.array([_NY, _NX], dtype=np.int64)
+    pulse = GaussianPulse(ix=2, iy=2, half_width_s=4e-5)
+    run = FDTDRun(c=343.0, dx=0.01, duration_s=1e-4, sources=[pulse], shape=counts)
+    assert run.shape == (_NY, _NX)
+    sim = ElasticFDTD2D(4000.0, 2300.0, 0.01, rho=2500.0, shape=range(_NY, _NY + 2))
+    assert sim.c_p.shape == (_NY, _NY + 1)
+    regions = ElasticFDTD2D.from_regions(
+        counts, 0.01, background=(4000.0, 2300.0, 2500.0)
+    )
+    assert regions.c_p.shape == (_NY, _NX)
+
+
 def test_an_impedance_of_any_real_type_is_held_as_the_run_reads_it() -> None:
     """An integer profile, a float32 scalar and a NumPy integer all ran."""
     boundaries = FDTDBoundaries(

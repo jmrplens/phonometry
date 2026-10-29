@@ -2583,7 +2583,7 @@ que no es texto. El arreglo es escribir la opción tal como la enumera su
 | `noise_control.ValveTrim(coefficient=)` | guardaba cualquier valor, rechazado más tarde o nunca | rechazado al construirse |
 | `phonometry.ReportMetadata(tube_shape=)` | `ValueError` para cualquier valor que no conocía, texto o no | `ValueError` para un texto que no ofrece, `TypeError` para un valor que no es texto |
 | `simulation.ElasticBoundaries(sides=)` | guardaba cualquier valor; la ejecución que contenía el registro rechazaba un lado o un nombre desconocido con `ValueError`, fuera texto o no | `ValueError` para un lado o un nombre que no ofrece, `TypeError` para uno que no es texto, al construirse |
-| `simulation.FDTDBoundaries(sides=)` | guardaba cualquier valor; la ejecución que contenía el registro rechazaba un lado o un nombre desconocido con `ValueError`, fuera texto o no, ejecutaba un booleano como una impedancia de 1 Pa s/m y rechazaba `None` como una impedancia que no es finita | `ValueError` para un lado o un nombre que no ofrece, `TypeError` para un lado que no es texto y para una terminación que no es un nombre ni un número real ni un array de ellos (un booleano, `None`), al construirse; una impedancia se guarda como un float, y un perfil como un array float64 de solo lectura |
+| `simulation.FDTDBoundaries(sides=)` | guardaba cualquier valor; la ejecución que contenía el registro rechazaba un lado o un nombre desconocido con `ValueError`, fuera texto o no, ejecutaba un booleano como una impedancia de 1 Pa s/m y rechazaba `None` como una impedancia que no es finita | `ValueError` para un lado o un nombre que no ofrece, `TypeError` para un lado que no es texto y para una terminación que no es un nombre ni un número real ni un array de ellos (un booleano, `None`, un booleano entre los números de un perfil), al construirse; una impedancia se guarda como un float, y un perfil como un array float64 de solo lectura |
 | `simulation.ElasticRecording(probe_fields=, snapshot_field=)` | `ValueError` para cualquier campo que no conociera, fuera texto o no; `probe_fields="vy"` se leía letra a letra y rechazaba `"v"` | `ValueError` para un texto que no ofrece, `TypeError` para un campo que no es texto; un solo nombre registra ese campo |
 | `simulation.ForceSource(direction=)` | `ValueError` para cualquier dirección que no conociera, fuera texto o no | `ValueError` para un texto distinto de `"x"` y `"y"`, `TypeError` para un valor que no es texto |
 | `simulation.PlaneWaveSource(direction=)` | guardaba cualquier valor; `FDTD2D.add_source` y la ejecución que lo contenía rechazaban uno que no conocían | rechazado al construirse |
@@ -2614,7 +2614,7 @@ texto, o con un error ajeno:
 | `filters.FilterPeriodicVerification.clause()` | `KeyError` para cualquier nombre que no se hubiera medido | `ValueError` para un texto que no nombra ninguna de las cinco cláusulas, `TypeError` para un valor que no es texto; `KeyError` para una cláusula que no se midió |
 | `simulation.FDTD2D(absorbing_sides=, edge_impedance=)`, `simulation.ElasticFDTD2D(absorbing_sides=, free_sides=)` | `ValueError` para cualquier lado que no conociera, fuera texto o no, con un mensaje que listaba los lados desconocidos | `ValueError` para un texto que no es un lado, `TypeError` para un lado que no es texto, con el mensaje que lanza toda opción (`'free_sides' must be one of ('left', 'right', 'top', 'bottom'); got 'north'.`) |
 | `simulation.FDTD2D.add_plane_wave(direction=)`, `simulation.ElasticFDTD2D.collocated(field)`, `simulation.FDTDResult.plot(kind=)`, `simulation.ElasticFDTDResult.plot(kind=)` | `ValueError` para cualquier valor que no conociera, fuera texto o no | `ValueError` para un texto que no ofrece, `TypeError` para un valor que no es texto |
-| `simulation.FDTD2D(edge_impedance=)` con una impedancia que no es un número real | un booleano se ejecutaba como una impedancia de 1 Pa s/m, `None` lanzaba `ValueError` como una impedancia que no es finita, un texto `ValueError` desde la conversión a float | `TypeError` |
+| `simulation.FDTD2D(edge_impedance=)` con una impedancia que no es un número real | un booleano, solo o entre los números de un perfil, se ejecutaba como una impedancia de 1 Pa s/m, `None` lanzaba `ValueError` como una impedancia que no es finita, un texto `ValueError` desde la conversión a float | `TypeError` |
 
 Cada clave de un diccionario y cada elemento de una secuencia se comprueba uno
 a uno: `environment.assess_activity` ignoraba un periodo que no conocía junto
@@ -2647,8 +2647,10 @@ cual y solo lo leía una ejecución con un lado absorbente
 (`FDTDBoundaries(sides="rigid", absorbing_layer_cells=2.5)` se construía y se
 ejecutaba). La `shape` que se da a `simulation.FDTD2D`,
 `simulation.ElasticFDTD2D`, `simulation.FDTDRun` o `simulation.ElasticRun` se
-lee siempre que se da: una ejecución la guarda como un par de enteros, también
-si es una lista, una mal formada se rechaza aunque acompañe a un mapa, y una
+lee siempre que se da: una ejecución la guarda como un par de enteros, desde
+cualquier secuencia de los dos recuentos (también una lista o un `range`) o un
+array de enteros de una dimensión, cuando antes solo admitía una tupla o una
+lista, una mal formada se rechaza aunque acompañe a un mapa, y una
 que nombra una malla distinta de la del mapa lanza `ValueError` (`shape (4, 8)
 does not match the c map, whose shape is (8, 8)`), cuando antes un motor
 ignoraba la `shape` que acompañaba a un mapa y una ejecución la guardaba tal

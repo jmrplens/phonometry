@@ -632,7 +632,7 @@ RotorcraftGround(
     *,
     receiver_height_m: float = 1.2,
     ground_elevation: ArrayLike = 0.0,
-    flow_resistivity: Literal['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'] | ArrayLike = 'G',
+    flow_resistivity: Literal['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'] | complex | NestedSequence[complex] | SupportsNumericArray | NestedSequence[SupportsNumericArray] = 'G',
     terrain: Sequence[ArrayLike] | NDArray[Any] | None = None,
     terrain_resolution: float | None = None,
 )

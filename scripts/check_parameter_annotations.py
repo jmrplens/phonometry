@@ -74,7 +74,10 @@ extends, an explicit ``__init__`` or ``__call__`` included):
   :data:`_WINDOW_READERS`), followed through the helpers it is handed to as
   a conversion is, takes a tuple of the window's name and its parameters
   (``("kaiser", 8.6)``, ``("general_cosine", weights)``) as it takes the
-  name: ``str | tuple[ArrayLike, ...]``;
+  name: ``str | tuple[ArrayLike, ...]``. A tuple of the annotation takes a
+  text first and, after it, any count of items that each take a number and
+  a sequence of numbers, so ``tuple[float, ...]`` and ``tuple[str, float]``
+  refuse a window SciPy reads;
 * the same holds for the fields of a public record that its
   ``__post_init__`` (or a method it calls on ``self``, or ``super()``'s)
   validates: by attribute, by ``getattr``, in a loop over field names (a
@@ -102,9 +105,13 @@ extends, an explicit ``__init__`` or ``__call__`` included):
   when that type holds one mapping, and otherwise on its own, a ``Literal``
   key as a ``str`` and nested mappings of two key types as ``object``, so a
   call that runs is refused. Each of those mappings is offered alone in an
-  overload head, the implementation keeping the union; a head that takes
-  two of them, and a union of them below the top of a parameter or in the
-  field of a public record, where no head can split it, fail;
+  overload head, the implementation keeping the union, and the heads that
+  offer them take the same other arguments, so that a call one of them
+  takes reaches a head for every mapping; heads that pair each mapping with
+  a value of another parameter on purpose, the run refusing it beside the
+  others, are listed in :data:`PAIRED_MAPPINGS` with the reason. A head that
+  takes two of them, and a union of them below the top of a parameter or in
+  the field of a public record, where no head can split it, fail;
 * the scalar quantities of the vocabulary (:data:`NAME_FAMILIES`: a sample
   rate ``fs``, ``volume``, ``coverage``, ``confidence``,
   ``energy_fraction``, ``fraction``) keep one family of numbers across the
@@ -147,12 +154,13 @@ record's own contract governs, and is not read by the array part.
 
 :data:`EXEMPT` is the escape hatch of the array part, keyed by file,
 qualified function and parameter, each with its reason; an entry that
-covers nothing fails the check too, as one of :data:`FAMILY_EXEMPT` or
-:data:`CONSTRUCTOR_EXEMPT` does. An ``isinstance`` check whose branch only
-raises, after any assignments that build its message, keeps out what it
-names. A copy of the package read elsewhere (the scratch tree a defect
-is put into to see the check fail) names its files as the repository does,
-so the exemptions read it the same way.
+covers nothing fails the check too, as one of :data:`FAMILY_EXEMPT`,
+:data:`CONSTRUCTOR_EXEMPT` or :data:`PAIRED_MAPPINGS` does. An
+``isinstance`` check whose branch only raises, after any assignments that
+build its message, keeps out what it names. A copy of the package read
+elsewhere (the scratch tree a defect is put into to see the check fail)
+names its files as the repository does, so the exemptions read it the
+same way.
 
 Static and dependency-free, so it runs on its own.
 """
@@ -221,6 +229,38 @@ EXEMPT: dict[tuple[str, str, str], str] = {
 #: file, record and field, each with the reason. Every such record declares
 #: its constructor (a ``TYPE_CHECKING`` ``__init__``), so none is listed.
 CONSTRUCTOR_EXEMPT: dict[tuple[str, str, str], str] = {}
+
+#: Mapping parameters whose overload heads pair each mapping of a union with
+#: a value of another parameter on purpose, keyed by file, qualified function
+#: and parameter, each with the reason. The pairing part asks the heads that
+#: offer each mapping alone to take the same other arguments, so that a call
+#: one of them takes reaches a head for every mapping; a function whose run
+#: refuses a mapping beside a value of another parameter offers it beside
+#: that value only, and is listed here.
+PAIRED_MAPPINGS: dict[tuple[str, str, str], str] = {
+    (
+        "src/phonometry/metrology/comparison_calibration.py",
+        "comparison_uncertainty_budget",
+        "standard_uncertainties_db",
+    ): (
+        "the components of IEC 61094-5 Table D.1 go with field='pressure' and "
+        "those of IEC 61094-8 Table 2 with field='free', and the run refuses a "
+        "component of the other table with ValueError; a field held in a "
+        "variable that may be either takes the components both tables list "
+        "(SharedComparisonComponent), the only ones right for both"
+    ),
+    (
+        "src/phonometry/metrology/reciprocity_calibration.py",
+        "reciprocity_uncertainty_budget",
+        "standard_uncertainties_db",
+    ): (
+        "the components of Table 1 of IEC 61094-2 go with field='pressure' "
+        "and those of Table 1 of IEC 61094-3 with field='free', and the run "
+        "refuses a component of the other table with ValueError; a field held "
+        "in a variable that may be either takes the components both tables "
+        "list (SharedReciprocityComponent), the only ones right for both"
+    ),
+}
 
 #: How many calls deep a parameter handed on is followed.
 DEPTH = 6
@@ -337,6 +377,21 @@ _CONTAINERS = frozenset(
 
 #: The fixed-length tuple, by both spellings.
 _TUPLES = frozenset({"builtins.tuple", "typing.Tuple"})
+
+#: What takes a ``float``, such as the beta of a Kaiser window, by every
+#: spelling: a ``float`` itself, a ``complex``, which takes one too, and the
+#: abstract numbers and protocol a ``float`` is.
+_FLOATS = frozenset(
+    {
+        "builtins.float",
+        "builtins.complex",
+        "numbers.Number",
+        "numbers.Complex",
+        "numbers.Real",
+        "typing.SupportsFloat",
+        "typing_extensions.SupportsFloat",
+    }
+)
 
 #: The numbers a sequence of numbers holds: the scalars of the return
 #: gate, without the text and the ``Literal`` choices.
@@ -619,7 +674,8 @@ class Finding:
     #: The part of the rule it breaks: ``"array"`` (a conversion, or an
     #: invariant container), ``"integer"`` or ``"flag"`` (a numpy scalar),
     #: ``"key"`` (a mapping's key), ``"context"`` (a union of mappings a
-    #: written ``dict`` is not read against), ``"window"`` (a window SciPy
+    #: written ``dict`` is not read against), ``"pairing"`` (the heads that
+    #: offer each of them take different calls), ``"window"`` (a window SciPy
     #: reads), ``"choice"`` (a ``Literal`` beside an alternative that takes
     #: any text) or ``"name"`` (a quantity's family).
     part: str = "array"
@@ -849,16 +905,109 @@ class Annotations:
     def admits_window(
         self, module: str, node: ast.expr | None, bounds: dict[str, ast.expr]
     ) -> bool:
-        """Whether an annotation lets a window's ``(name, parameters)`` tuple through.
+        """Whether an annotation lets every window's ``(name, parameters)`` tuple through.
 
-        A ``tuple``, ``ArrayLike`` (a tuple of a text and numbers is one) or
-        anything; no annotation at all admits it too.
+        ``ArrayLike`` (a tuple of a text and numbers is one) or anything; or a
+        ``tuple`` that takes a name and any count of parameters after it
+        (:meth:`_takes_every_window`). No annotation at all admits it too.
         """
         if node is None:
             return True
         return any(
-            self.resolve(where, member) in _TUPLES | _ARRAY_LIKE | _ANYTHING
+            dotted in _ARRAY_LIKE | _ANYTHING
+            or (dotted in _TUPLES and self._takes_every_window(where, member))
             for where, member in self.members(module, node, bounds)
+            if (dotted := self.resolve(where, member)) is not None
+        )
+
+    def _takes_every_window(self, module: str, node: ast.expr) -> bool:
+        """Whether a ``tuple`` takes a window's name and as many parameters as it has.
+
+        A window is given as its name and its parameters, one for
+        ``("kaiser", 8.6)``, two for ``("general_gaussian", 1.5, 7.0)``, and
+        a sequence of weights for ``("general_cosine", [0.5, 0.5])``: the
+        first item takes a text, every item after it a number and a sequence
+        of numbers (:meth:`_takes_a_parameter`), and the count is open. A bare
+        ``tuple``, ``tuple[ArrayLike, ...]`` and ``tuple[str,
+        *tuple[ArrayLike, ...]]`` take every window; ``tuple[float, ...]``,
+        whose first item refuses the name, ``tuple[str, float]``, which takes
+        one parameter and no more, and ``tuple[str, *tuple[float, ...]]``,
+        which refuses the weights, do not.
+        """
+        slots = self._tuple_slots(module, node)
+        if slots is None:
+            return True
+        if not any(variadic for _, _, variadic in slots):
+            return False
+        (where, first, variadic), *rest = slots
+        parameters = slots if variadic else rest
+        return self._takes_a_name(where, first) and all(
+            self._takes_a_parameter(at, item) for at, item, _ in parameters
+        )
+
+    def _tuple_slots(
+        self, module: str, node: ast.expr, depth: int = 0
+    ) -> list[tuple[str, ast.expr | None, bool]] | None:
+        """The items of a ``tuple`` annotation, each with where it is written and whether it repeats.
+
+        ``None`` for a bare ``tuple``, which takes any items. ``tuple[X,
+        ...]`` is one item that repeats. An item unpacked from another tuple
+        (``*tuple[X, ...]``, ``Unpack[tuple[X, ...]]``, through an alias)
+        gives that tuple's items, and one unpacked from what is no tuple,
+        such as a ``TypeVarTuple``, an item of any type, ``None``, that
+        repeats.
+        """
+        if not isinstance(node, ast.Subscript):
+            return None
+        items = _items(node)
+        if items and _is_ellipsis(items[-1]):
+            return [(module, items[0], True)]
+        slots: list[tuple[str, ast.expr | None, bool]] = []
+        for item in items:
+            if isinstance(item, ast.Starred):
+                inner: ast.expr | None = item.value
+            elif self.resolve(module, item) in _UNPACK:
+                inner = next(iter(_items(item)), None)
+            else:
+                slots.append((module, item, False))
+                continue
+            members = [] if inner is None else self.members(module, inner)
+            if (
+                len(members) == 1
+                and depth < _NESTING
+                and self.resolve(*members[0]) in _TUPLES
+            ):
+                unpacked = self._tuple_slots(*members[0], depth + 1)
+                slots.extend(
+                    [(members[0][0], None, True)] if unpacked is None else unpacked
+                )
+            else:
+                slots.append((module, None, True))
+        return slots
+
+    def _takes_a_name(self, module: str, item: ast.expr | None) -> bool:
+        """Whether an item of a tuple takes the name of any window."""
+        return item is None or any(
+            self.admits_any_text(where, member)
+            for where, member in self.members(module, item)
+        )
+
+    def _takes_a_parameter(self, module: str, item: ast.expr | None) -> bool:
+        """Whether an item of a tuple takes any parameter of a window.
+
+        A number such as a Kaiser beta and the sequence of weights of
+        ``general_cosine``: an array-like, of numbers or not, or anything,
+        takes both; otherwise a member must take a ``float`` and another a
+        sequence of numbers of any length.
+        """
+        if item is None:
+            return True
+        members = self.members(module, item)
+        dotted = {self.resolve(where, member) for where, member in members}
+        if dotted & (self.array_like | _ANYTHING):
+            return True
+        return bool(dotted & _FLOATS) and any(
+            self._open_numbers(where, member) for where, member in members
         )
 
     def admits_scalar(
@@ -3554,16 +3703,19 @@ def _unsplit(
     name: str,
     arms: tuple[str, ...],
     bounds: dict[str, ast.expr],
-) -> str | None:
-    """Why the heads of a function do not offer each mapping of a union alone.
+) -> tuple[str, str] | None:
+    """Why the heads of a function do not offer each mapping of a union alone, with the part.
 
-    Every mapping of the union is the one mapping of a head, and for one of
-    those heads, each mapping is the one mapping of a head that takes every
-    call it takes but for parameter *name* (:func:`_call_shape`): a head
-    whose other parameters are narrower, a ``Literal`` choice of its own for
-    instance, is not reached by a call another head takes, so its mapping is
-    no context for a ``dict`` written in that call. A head narrower than
-    such a set, beside it, is left as it stands.
+    Every mapping of the union is the one mapping of a head (part
+    ``"context"``), and for one of those heads, each mapping is the one
+    mapping of a head that takes every call it takes but for parameter
+    *name* (:func:`_call_shape`; part ``"pairing"``): a head whose other
+    parameters are narrower, a ``Literal`` choice of its own for instance,
+    is not reached by a call another head takes, so its mapping is no
+    context for a ``dict`` written in that call. A head narrower than such a
+    set, beside it, is left as it stands. Heads that pair each mapping with
+    a value of another parameter on purpose are listed in
+    :data:`PAIRED_MAPPINGS`.
     """
     module = function.module
     heads: list[tuple[str, _CallShape]] = []
@@ -3574,7 +3726,7 @@ def _unsplit(
     shown = " | ".join(arms)
     missing = [arm for arm in arms if arm not in {sole for sole, _ in heads}]
     if missing:
-        return (
+        return "context", (
             f"takes {shown} with no overload head that takes "
             f"{' or '.join(missing)} alone, so a dict written in the call is read "
             "against none of them: a Literal key is read as a str and nested "
@@ -3588,7 +3740,7 @@ def _unsplit(
         for _, first in heads
     ):
         return None
-    return (
+    return "pairing", (
         f"takes {shown}, and the overload heads that take each of them alone "
         "take different calls but for it, so a dict written in a call one of "
         "them takes is read against that head's mapping, never against the "
@@ -3625,6 +3777,7 @@ def _context_findings(
                 annotations, module, parameter.annotation, own
             ):
                 shown = " | ".join(arms)
+                part = "context"
                 if depth > 0:
                     problem = (
                         f"holds {shown} inside, where no overload can give a dict "
@@ -3641,7 +3794,7 @@ def _context_findings(
                     )
                     if unsplit is None:
                         continue
-                    problem = unsplit
+                    part, problem = unsplit
                 found.append(
                     Finding(
                         path,
@@ -3649,7 +3802,7 @@ def _context_findings(
                         function.qualname,
                         parameter.arg,
                         problem,
-                        part="context",
+                        part=part,
                     )
                 )
     return found
@@ -4062,7 +4215,8 @@ def _constructor_stub(
 #: which a type checker reads key by key as it reads keyword parameters.
 MOST_PARAMETERS = 13
 
-#: ``Unpack``, which types a ``**`` parameter as the keys of a ``TypedDict``.
+#: ``Unpack``, which types a ``**`` parameter as the keys of a ``TypedDict``
+#: and gives the items of one tuple to another (``Unpack[tuple[X, ...]]``).
 _UNPACK = frozenset({"typing.Unpack", "typing_extensions.Unpack"})
 
 #: ``TypedDict``, the base of the dictionary a constructor takes its keywords as.
@@ -5309,9 +5463,10 @@ def judged(
     """The findings no exemption covers, and each exemption that covers none.
 
     :data:`EXEMPT` covers the array part, :data:`FAMILY_EXEMPT` the
-    quantities kept in another family; the numpy-scalar and mapping-key
-    parts have no exemption. A stale exemption comes with the table that
-    lists it.
+    quantities kept in another family, :data:`PAIRED_MAPPINGS` the heads
+    that pair each mapping with a value of another parameter; the
+    numpy-scalar, mapping-key and context parts have no exemption. A stale
+    exemption comes with the table that lists it.
     """
     found, stale = checked([f for f in findings if f.part == "array"], EXEMPT)
     named, stale_named = checked(
@@ -5320,17 +5475,23 @@ def judged(
     built, stale_built = checked(
         [f for f in findings if f.constructor], CONSTRUCTOR_EXEMPT
     )
+    paired, stale_paired = checked(
+        [f for f in findings if f.part == "pairing"], PAIRED_MAPPINGS
+    )
     rest = [
-        f for f in findings if f.part not in {"array", "name"} and not f.constructor
+        f
+        for f in findings
+        if f.part not in {"array", "name", "pairing"} and not f.constructor
     ]
     every = sorted(
-        [*found, *named, *built, *rest],
+        [*found, *named, *built, *paired, *rest],
         key=lambda item: (item.path, item.line, item.parameter),
     )
     return every, [
         *(("EXEMPT", key) for key in stale),
         *(("FAMILY_EXEMPT", key) for key in stale_named),
         *(("CONSTRUCTOR_EXEMPT", key) for key in stale_built),
+        *(("PAIRED_MAPPINGS", key) for key in stale_paired),
     ]
 
 
@@ -5377,17 +5538,18 @@ def main(argv: Sequence[str] | None = None) -> int:
             "float beside one keyed by int (BandMapping), and each mapping of a "
             "union a dict written in the call needs as its context in an "
             "overload head of its own, the heads taking the same other "
-            "arguments; a window SciPy reads as a name or a "
-            "tuple of a name and its parameters; a Literal choice beside "
-            "numbers with NumericArrayLike (src/phonometry/_internal/types.py), "
-            "never ArrayLike, str, DTypeLike or a sequence of texts, which take "
-            "any text; "
-            "a sample rate as the "
-            "float every 'fs' of the API is. A parameter narrower on purpose "
-            "goes in EXEMPT, a quantity of another family in FAMILY_EXEMPT, a "
-            "field a caller-built record stores is admitted by its constructor "
-            "(a TYPE_CHECKING __init__) or goes in CONSTRUCTOR_EXEMPT, at "
-            "the top of scripts/check_parameter_annotations.py with its reason."
+            "arguments; a window SciPy reads as a name or a tuple of a name "
+            "and any count of its parameters; a Literal choice beside numbers "
+            "with NumericArrayLike (src/phonometry/_internal/types.py), never "
+            "ArrayLike, str, DTypeLike or a sequence of texts, which take any "
+            "text; a sample rate as the float every 'fs' of the API is. A "
+            "parameter narrower on purpose goes in EXEMPT, a quantity of "
+            "another family in FAMILY_EXEMPT, a field a caller-built record "
+            "stores is admitted by its constructor (a TYPE_CHECKING __init__) "
+            "or goes in CONSTRUCTOR_EXEMPT, and a mapping whose heads pair it "
+            "with a value of another parameter that the run refuses it beside "
+            "goes in PAIRED_MAPPINGS, at the top of "
+            "scripts/check_parameter_annotations.py with its reason."
         )
     for table, key in stale:
         print(f"::error::{table} lists {key}, which needs no exemption any more")

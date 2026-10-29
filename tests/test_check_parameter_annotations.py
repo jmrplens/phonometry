@@ -1474,7 +1474,7 @@ def test_a_union_split_across_heads_of_different_calls_offers_no_context(
     """
     refused = _refused(
         tmp_path,
-        part="context",
+        part="pairing",
         api="""
         from typing import Literal
 
@@ -1515,6 +1515,84 @@ def test_a_union_split_across_heads_of_different_calls_offers_no_context(
             "mapping alone in heads that take the same other arguments"
         ]
     }
+
+
+def test_heads_that_pair_each_mapping_with_another_parameter_are_listed(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A run that refuses a mapping beside a value of another parameter.
+
+    ``budget`` takes the components of one table with ``field="pressure"``,
+    those of the other with ``field="free"`` and those both list with a
+    field held in a variable, as the IEC 61094 budgets do: its heads take
+    different calls on purpose, which only :data:`PAIRED_MAPPINGS` can say.
+    Listed, it passes; the listing excuses no mapping that no head offers
+    alone (``unsplit``), and an entry that covers no pairing is stale.
+    """
+    root = _package(
+        tmp_path,
+        api="""
+        from typing import Literal
+
+        Field = Literal["pressure", "free"]
+        Pressure = Literal["impedance", "reference"]
+        Free = Literal["positioning", "reference"]
+        Shared = Literal["reference"]
+
+        __all__ = ["budget", "unsplit"]
+
+        @overload
+        def budget(
+            parts: Mapping[Pressure, float], field: Literal["pressure"] = "pressure"
+        ) -> float: ...
+        @overload
+        def budget(parts: Mapping[Free, float], field: Literal["free"]) -> float: ...
+        @overload
+        def budget(parts: Mapping[Shared, float], field: Field) -> float: ...
+        def budget(
+            parts: Mapping[Pressure, float]
+            | Mapping[Free, float]
+            | Mapping[Shared, float],
+            field: Field = "pressure",
+        ) -> float:
+            return 0.0
+
+        @overload
+        def unsplit(
+            parts: Mapping[Pressure, float], field: Literal["pressure"] = "pressure"
+        ) -> float: ...
+        @overload
+        def unsplit(parts: Mapping[Shared, float], field: Field) -> float: ...
+        def unsplit(
+            parts: Mapping[Pressure, float]
+            | Mapping[Free, float]
+            | Mapping[Shared, float],
+            field: Field = "pressure",
+        ) -> float:
+            return 0.0
+        """,
+    )
+    findings = cpa.findings_in(sorted(root.rglob("*.py")), root)
+    assert sorted((f.function, f.part) for f in findings) == [
+        ("budget", "pairing"),
+        ("unsplit", "context"),
+    ]
+    path = findings[0].path
+    monkeypatch.setattr(
+        cpa,
+        "PAIRED_MAPPINGS",
+        {
+            (path, "budget", "parts"): "each table's components go with its field",
+            (path, "unsplit", "parts"): "a mapping no head offers alone",
+            (path, "gone", "parts"): "a function that no longer exists",
+        },
+    )
+    found, stale = cpa.judged(findings)
+    assert [(f.function, f.part) for f in found] == [("unsplit", "context")]
+    assert [key for table, key in stale if table == "PAIRED_MAPPINGS"] == [
+        (path, "gone", "parts"),
+        (path, "unsplit", "parts"),
+    ]
 
 
 def test_a_union_of_mappings_offers_a_written_dict_one_head_at_a_time(
@@ -1705,6 +1783,89 @@ def test_a_window_scipy_reads_takes_a_name_and_its_parameters(
         "welch() takes it"
     ]
     assert refused["taper(window)"][0].startswith("annotated Taper, which refuses")
+
+
+def test_a_window_tuple_takes_a_name_and_any_count_of_parameters(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A tuple of the annotation takes every window SciPy reads.
+
+    ``("kaiser", 8.6)``, ``("general_gaussian", 1.5, 7.0)`` and
+    ``("general_cosine", [0.5, 0.5])``: a text first, then any count of
+    numbers or sequences of numbers. A tuple of floats refuses the name, one
+    of a fixed length refuses a second parameter, one of a name and floats
+    or integers refuses the weights; a bare tuple, one of ``ArrayLike`` or
+    anything, a name unpacked beside them, or items that take a text, a
+    float and a sequence of numbers take every window.
+    """
+    refused = _refused(
+        tmp_path,
+        part="window",
+        api="""
+        from typing import Unpack
+
+        from scipy import signal as sp_signal
+
+        Parameters = tuple[ArrayLike, ...]
+
+        __all__ = [
+            "floats", "pair", "named", "scalars", "counts", "empty", "bare",
+            "spec", "unpacked", "aliased", "spelt", "anything", "spread",
+        ]
+
+        def floats(window: str | tuple[float, ...]) -> float:
+            return float(sp_signal.get_window(window, 8)[0])
+
+        def pair(window: str | tuple[str, float]) -> float:
+            return float(sp_signal.get_window(window, 8)[0])
+
+        def named(window: str | tuple[str]) -> float:
+            return float(sp_signal.get_window(window, 8)[0])
+
+        def scalars(window: str | tuple[str, *tuple[float, ...]]) -> float:
+            return float(sp_signal.get_window(window, 8)[0])
+
+        def counts(window: str | tuple[str, Unpack[tuple[int, ...]]]) -> float:
+            return float(sp_signal.get_window(window, 8)[0])
+
+        def empty(window: str | tuple[()]) -> float:
+            return float(sp_signal.get_window(window, 8)[0])
+
+        def bare(window: str | tuple) -> float:  # type: ignore[type-arg]
+            return float(sp_signal.get_window(window, 8)[0])
+
+        def spec(window: str | tuple[ArrayLike, ...]) -> float:
+            return float(sp_signal.get_window(window, 8)[0])
+
+        def unpacked(window: str | tuple[str, *tuple[ArrayLike, ...]]) -> float:
+            return float(sp_signal.get_window(window, 8)[0])
+
+        def aliased(window: str | tuple[str, Unpack[Parameters]]) -> float:
+            return float(sp_signal.get_window(window, 8)[0])
+
+        def spelt(window: str | tuple[str | float | Sequence[float], ...]) -> float:
+            return float(sp_signal.get_window(window, 8)[0])
+
+        def anything(window: str | tuple[Any, ...]) -> float:
+            return float(sp_signal.get_window(window, 8)[0])
+
+        def spread[*Ts](window: str | tuple[str, *Ts]) -> float:
+            return float(sp_signal.get_window(window, 8)[0])
+        """,
+    )
+    assert sorted(refused) == [
+        "counts(window)",
+        "empty(window)",
+        "floats(window)",
+        "named(window)",
+        "pair(window)",
+        "scalars(window)",
+    ]
+    assert refused["floats(window)"] == [
+        "annotated str | tuple[float, ...], which refuses a window given as a "
+        "tuple of its name and parameters, such as ('kaiser', 8.6), while "
+        "get_window() takes it"
+    ]
 
 
 def test_every_window_reader_of_scipy_is_listed() -> None:

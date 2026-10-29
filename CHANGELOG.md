@@ -3711,16 +3711,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   that type holds one mapping: with a union of several it reads the `dict`
   on its own, a column name as a `str` and two inner mappings with keys of
   two types as `object`. So `vibration.verify_signal_burst_response("whole-body",
-  "Wk", {16: {"rms": 0.115}})` was refused, and so were a directional response
-  with one band read at 22.5 degrees in `aircraft.verify_aircraft_noise_system`
-  and a budget written in the call to `metrology.comparison_uncertainty_budget`
-  or `metrology.reciprocity_uncertainty_budget` with the field held in a
-  variable; each mapping of those unions is now taken by an overload of its
-  own. `scripts/check_parameter_annotations.py` fails on a parameter that
-  reaches a window reader of SciPy and refuses the tuple, followed through
-  the helpers it is handed to, and on a union of mappings a written `dict`
-  needs one at a time that no overload splits; rule A58 of the contributor
-  guide states both.
+  "Wk", {16: {"rms": 0.115}})` was refused, and so was a directional response
+  with one band read at 22.5 degrees in `aircraft.verify_aircraft_noise_system`;
+  each mapping of those unions is now taken by an overload of its own.
+  `scripts/check_parameter_annotations.py` fails on a parameter that reaches
+  a window reader of SciPy and refuses a tuple of a window's name and any
+  count of its parameters, followed through the helpers it is handed to, and
+  on a union of mappings a written `dict` needs one at a time that no
+  overload splits; rule A58 of the contributor guide states both.
 
 - **A misspelt choice beside numbers is a type error.** The `initial_state`
   of `filters.time_weighting`, the `flow_resistivity` of

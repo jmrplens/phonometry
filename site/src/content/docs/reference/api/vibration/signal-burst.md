@@ -355,7 +355,23 @@ The largest deviation in magnitude, signed as it was measured.
 verify_signal_burst_response(
     application: Literal['hand-arm', 'whole-body', 'low-frequency-whole-body'],
     name: Literal['Wb', 'Wc', 'Wd', 'We', 'Wf', 'Wh', 'Wj', 'Wk', 'Wm', 'band-limiting'],
-    measured: Mapping[int, Mapping[Literal['rms', 'vdv', 'mtvv_linear', 'mtvv_exponential', 'msdv'], float]] | Mapping[int | None, Mapping[Literal['rms', 'vdv', 'mtvv_linear', 'mtvv_exponential', 'msdv'], float]] | Mapping[None, Mapping[Literal['rms', 'vdv', 'mtvv_linear', 'mtvv_exponential', 'msdv'], float]],
+    measured: Mapping[int, Mapping[Literal['rms', 'vdv', 'mtvv_linear', 'mtvv_exponential', 'msdv'], float]],
+    *,
+    amplitude_m_s2: float = 1.0,
+) -> SignalBurstVerification
+
+verify_signal_burst_response(
+    application: Literal['hand-arm', 'whole-body', 'low-frequency-whole-body'],
+    name: Literal['Wb', 'Wc', 'Wd', 'We', 'Wf', 'Wh', 'Wj', 'Wk', 'Wm', 'band-limiting'],
+    measured: Mapping[None, Mapping[Literal['rms', 'vdv', 'mtvv_linear', 'mtvv_exponential', 'msdv'], float]],
+    *,
+    amplitude_m_s2: float = 1.0,
+) -> SignalBurstVerification
+
+verify_signal_burst_response(
+    application: Literal['hand-arm', 'whole-body', 'low-frequency-whole-body'],
+    name: Literal['Wb', 'Wc', 'Wd', 'We', 'Wf', 'Wh', 'Wj', 'Wk', 'Wm', 'band-limiting'],
+    measured: Mapping[int | None, Mapping[Literal['rms', 'vdv', 'mtvv_linear', 'mtvv_exponential', 'msdv'], float]],
     *,
     amplitude_m_s2: float = 1.0,
 ) -> SignalBurstVerification

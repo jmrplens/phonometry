@@ -133,6 +133,7 @@ from __future__ import annotations
 
 import argparse
 import ast
+import copy
 import functools
 import pathlib
 import sys
@@ -2866,10 +2867,10 @@ def _field_findings(reader: Reader, root: pathlib.Path) -> list[Finding]:
     return found
 
 
-def _constructor_stub(
+def _declared_constructor(
     annotations: Annotations, record: str
 ) -> ast.FunctionDef | ast.AsyncFunctionDef | None:
-    """The ``__init__`` a record declares under ``if TYPE_CHECKING:``, if it declares one.
+    """The ``__init__`` a record declares under ``if TYPE_CHECKING:``, as written, if it declares one.
 
     A caller-built record that converts or normalises a field says what its
     constructor takes there, while its generated ``__init__`` runs.
@@ -2887,6 +2888,193 @@ def _constructor_stub(
             ):
                 return inner
     return None
+
+
+def _constructor_stub(
+    annotations: Annotations, record: str
+) -> ast.FunctionDef | ast.AsyncFunctionDef | None:
+    """The ``__init__`` a record declares for the type checker, its keywords spelt out.
+
+    :func:`_declared_constructor` read through :func:`_spelt_out`, so a
+    reader of the parameters reads a constructor that takes its keywords as
+    a ``TypedDict`` as it reads one that lists them.
+    """
+    declared = _declared_constructor(annotations, record)
+    if declared is None:
+        return None
+    return _spelt_out(annotations, record, declared)
+
+
+#: The most parameters a function takes besides ``self``: the limit of
+#: Sonar's rule S107. A constructor that takes more keywords than that
+#: declares them as the keys of a ``TypedDict`` it takes whole,
+#: ``def __init__(self, **measurements: Unpack[Keywords]) -> None: ...``,
+#: which a type checker reads key by key as it reads keyword parameters.
+MOST_PARAMETERS = 13
+
+#: ``Unpack``, which types a ``**`` parameter as the keys of a ``TypedDict``.
+_UNPACK = frozenset({"typing.Unpack", "typing_extensions.Unpack"})
+
+#: ``TypedDict``, the base of the dictionary a constructor takes its keywords as.
+_TYPED_DICT = frozenset({"typing.TypedDict", "typing_extensions.TypedDict"})
+
+#: The wrappers that say whether a caller may leave a key of a ``TypedDict`` out.
+_NOT_REQUIRED = frozenset({"typing.NotRequired", "typing_extensions.NotRequired"})
+_REQUIRED = frozenset({"typing.Required", "typing_extensions.Required"})
+
+
+@dataclass(frozen=True)
+class _Key:
+    """A key of the ``TypedDict`` a constructor takes its keywords as."""
+
+    name: str
+    #: The key's annotation, without the ``NotRequired`` or ``Required`` around it.
+    annotation: ast.expr
+    #: Whether a caller may leave the key out.
+    optional: bool
+
+
+def _keys(
+    annotations: Annotations,
+    module: str,
+    stub: ast.FunctionDef | ast.AsyncFunctionDef,
+) -> list[_Key] | None:
+    """The keys of the ``TypedDict`` a stub takes as ``**keywords: Unpack[Keywords]``, in order.
+
+    ``None`` when the stub's ``**`` parameter is no ``Unpack`` of a
+    ``TypedDict`` written in the record's own module, whose annotations are
+    then read in that module, as the stub's are. A key a caller may leave
+    out is one of a ``total=False`` dictionary not marked ``Required``, or
+    one marked ``NotRequired``.
+    """
+    kwarg = stub.args.kwarg
+    if kwarg is None or not isinstance(kwarg.annotation, ast.Subscript):
+        return None
+    if annotations.resolve(module, kwarg.annotation) not in _UNPACK:
+        return None
+    dotted = annotations.package.resolve(module, kwarg.annotation.slice)
+    found = annotations.classes.get(dotted) if dotted is not None else None
+    if found is None or found[0] != module:
+        return None
+    node = found[1]
+    if not any(annotations.resolve(module, base) in _TYPED_DICT for base in node.bases):
+        return None
+    total = not any(
+        keyword.arg == "total"
+        and isinstance(keyword.value, ast.Constant)
+        and keyword.value.value is False
+        for keyword in node.keywords
+    )
+    keys: list[_Key] = []
+    for child in node.body:
+        if not (
+            isinstance(child, ast.AnnAssign) and isinstance(child.target, ast.Name)
+        ):
+            continue
+        annotation, optional = child.annotation, not total
+        if isinstance(annotation, ast.Subscript):
+            wrapper = annotations.resolve(module, annotation)
+            if wrapper in _NOT_REQUIRED | _REQUIRED:
+                annotation, optional = annotation.slice, wrapper in _NOT_REQUIRED
+        keys.append(_Key(child.target.id, annotation, optional))
+    return keys
+
+
+def _spelt_out(
+    annotations: Annotations,
+    record: str,
+    stub: ast.FunctionDef | ast.AsyncFunctionDef,
+) -> ast.FunctionDef | ast.AsyncFunctionDef:
+    """A stub whose ``**`` parameter unpacks a ``TypedDict``, with each key a keyword parameter.
+
+    Each key follows the stub's own keyword-only parameters, with its
+    annotation and the default its field has (none for a field without
+    one), so the stub reads as the list of keywords a type checker reads
+    it as. Whether a caller may leave a key out against whether its field
+    has a default is :func:`_keyword_problems`' to hold. A stub that
+    unpacks no ``TypedDict`` comes back as it is.
+    """
+    module = annotations.classes[record][0]
+    keys = _keys(annotations, module, stub)
+    if keys is None:
+        return stub
+    written = _field_defaults(annotations.package, annotations, record)
+    defaults: list[ast.expr | None] = []
+    for key in keys:
+        text = written.get(key.name)
+        if text is None:
+            defaults.append(None)
+        elif text == "...":
+            defaults.append(ast.Constant(Ellipsis))
+        else:
+            defaults.append(ast.parse(text, mode="eval").body)
+    arguments = copy.copy(stub.args)
+    arguments.kwonlyargs = [
+        *stub.args.kwonlyargs,
+        *(ast.arg(key.name, key.annotation) for key in keys),
+    ]
+    arguments.kw_defaults = [*stub.args.kw_defaults, *defaults]
+    arguments.kwarg = None
+    spelt = copy.copy(stub)
+    spelt.args = arguments
+    return spelt
+
+
+def _keyword_problems(
+    annotations: Annotations,
+    record: str,
+    stub: ast.FunctionDef | ast.AsyncFunctionDef,
+) -> list[str]:
+    """What is wrong with how a declared constructor takes its parameters.
+
+    More than :data:`MOST_PARAMETERS` besides ``self`` is a list too long
+    for one signature, which goes into a ``TypedDict`` instead; a ``**``
+    parameter is an ``Unpack`` of one written in the record's module, and
+    a caller may leave a key of it out exactly when the key's field has a
+    default.
+    """
+    arguments = stub.args
+    taken = [
+        *arguments.posonlyargs,
+        *arguments.args,
+        *([arguments.vararg] if arguments.vararg else []),
+        *arguments.kwonlyargs,
+        *([arguments.kwarg] if arguments.kwarg else []),
+    ]
+    problems: list[str] = []
+    count = len(taken) - 1
+    if count > MOST_PARAMETERS:
+        problems.append(
+            f"its TYPE_CHECKING __init__ takes {count} parameters besides self, "
+            f"more than the {MOST_PARAMETERS} a function takes (Sonar S107): it "
+            "takes them as the keys of a TypedDict, **keywords: Unpack[...]"
+        )
+    if arguments.kwarg is None:
+        return problems
+    module = annotations.classes[record][0]
+    keys = _keys(annotations, module, stub)
+    if keys is None:
+        written = arguments.kwarg.annotation
+        problems.append(
+            f"its TYPE_CHECKING __init__ takes **{arguments.kwarg.arg}: "
+            f"{ast.unparse(written) if written is not None else '?'}, which is no "
+            "Unpack of a TypedDict written in the record's module"
+        )
+        return problems
+    defaults = _field_defaults(annotations.package, annotations, record)
+    for key in keys:
+        default = defaults.get(key.name)
+        if key.optional and default is None and key.name in defaults:
+            problems.append(
+                f"{key.name} is a key a caller may leave out, and its field has "
+                "no default"
+            )
+        elif not key.optional and default is not None:
+            problems.append(
+                f"{key.name} is a key a caller must give, and its field defaults "
+                f"to {default}"
+            )
+    return problems
 
 
 def _is_type_checking(node: ast.expr) -> bool:
@@ -3380,13 +3568,16 @@ def constructor_problems(
     with its fields: the same names, in the same order, each keyword-only
     exactly when the field is, each with the field's default (``...`` for
     one a factory makes), and a parameter for a field it does not convert
-    takes every value the field's annotation names.
+    takes every value the field's annotation names. A constructor of more
+    than :data:`MOST_PARAMETERS` keywords takes them as the keys of a
+    ``TypedDict`` (:func:`_keyword_problems`), each read as the keyword it
+    stands for (:func:`_spelt_out`).
     """
     annotations = reader.annotations
     package = reader.package
     module = annotations.classes[record][0]
     fields = record_fields(package, annotations, record)
-    stub = _constructor_stub(annotations, record)
+    declaration = _declared_constructor(annotations, record)
     converted = converted_fields(reader, record)
     problems: list[str] = []
     needs = [
@@ -3399,7 +3590,7 @@ def constructor_problems(
             or annotations.several_numbers(field.module, field.annotation, {})
         )
     ]
-    if stub is None:
+    if declaration is None:
         if (
             needs
             and record in built_records(reader)
@@ -3411,6 +3602,8 @@ def constructor_problems(
                 + " and declares no TYPE_CHECKING __init__ that says what it takes"
             )
         return problems
+    problems.extend(_keyword_problems(annotations, record, declaration))
+    stub = _spelt_out(annotations, record, declaration)
     parameters = [*stub.args.posonlyargs, *stub.args.args]
     if not parameters or parameters[0].arg not in _OWNERS:
         return ["its TYPE_CHECKING __init__ takes no self"]
@@ -3439,7 +3632,8 @@ def constructor_problems(
     names = [argument.arg for argument, _ in declared]
     if names != list(fields):
         return [
-            f"its TYPE_CHECKING __init__ takes {names}, its fields are {list(fields)}"
+            *problems,
+            f"its TYPE_CHECKING __init__ takes {names}, its fields are {list(fields)}",
         ]
     written = _field_defaults(package, annotations, record)
     for (argument, by_position), field in zip(declared, fields.values(), strict=True):

@@ -16,9 +16,12 @@ a field annotated as a container of a fixed kind or as a sequence of
 numbers declares the constructor, and every declared constructor keeps step
 with its fields, name for name, keyword-only exactly where the field is,
 with the field's default, a converted field taking ``ArrayLike`` or an open
-sequence and every other one taking all its field's annotation names. The
-first test holds the package to that; the others fix what the reading must
-catch on small packages written for the purpose.
+sequence and every other one taking all its field's annotation names. A
+constructor of more keywords than a function takes (the 13 of Sonar's rule
+S107) takes them as the keys of a ``TypedDict``, ``**measurements:
+Unpack[Keywords]``, each key read as the keyword it stands for. The first
+test holds the package to that; the others fix what the reading must catch
+on small packages written for the purpose.
 """
 
 from __future__ import annotations
@@ -412,6 +415,161 @@ class Spectrum:
 """,
     )
     assert cpa.constructor_problems(reader, "pkg.api.Spectrum") == []
+
+
+_FOURTEEN = [f"band_{index}" for index in range(14)]
+
+
+def _many_fields(
+    stub: str, keywords: str = "", required: frozenset[str] = frozenset()
+) -> str:
+    """A record of fourteen converted fields, with *stub* in its body and *keywords* above it.
+
+    Every field defaults to an empty tuple but the *required* ones.
+    """
+    fields = "".join(
+        f"    {name}: tuple[float, ...]{'' if name in required else ' = ()'}\n"
+        for name in _FOURTEEN
+    )
+    return (
+        _TAKER.replace("Spectrum", "Bands").replace(
+            "spectrum.levels", "spectrum.band_0"
+        )
+        + "\n\n"
+        + textwrap.dedent(keywords)
+        + "\n\n@dataclass(frozen=True, kw_only=True)\nclass Bands:\n"
+        + fields
+        + "\n"
+        + textwrap.indent(textwrap.dedent(stub), "    ")
+        + """
+    def __post_init__(self) -> None:
+        for each in fields(self):
+            object.__setattr__(self, each.name, tuple(getattr(self, each.name)))
+"""
+    )
+
+
+def test_a_stub_of_more_parameters_than_a_function_takes_is_refused(
+    tmp_path: pathlib.Path,
+) -> None:
+    """Fourteen keywords listed one by one are a signature Sonar's S107 refuses."""
+    listed = "".join(f"            {name}: ArrayLike = (),\n" for name in _FOURTEEN)
+    reader = _reader(
+        tmp_path,
+        _many_fields(
+            "if TYPE_CHECKING:\n\n"
+            "    def __init__(\n        self,\n        *,\n"
+            + listed.replace("            ", "        ")
+            + "    ) -> None: ...\n"
+        ),
+    )
+    assert cpa.constructor_problems(reader, "pkg.api.Bands") == [
+        "its TYPE_CHECKING __init__ takes 14 parameters besides self, more than "
+        "the 13 a function takes (Sonar S107): it takes them as the keys of a "
+        "TypedDict, **keywords: Unpack[...]"
+    ]
+
+
+_KEYWORDS = """
+if TYPE_CHECKING:
+    from typing import NotRequired, TypedDict, Unpack
+
+    class BandsKeywords(TypedDict, total=False):
+{keys}
+"""
+
+
+def _keywords(keys: list[str]) -> str:
+    return _KEYWORDS.format(keys="".join(f"        {key}\n" for key in keys))
+
+
+_TAKES_THE_KEYWORDS = """
+if TYPE_CHECKING:
+
+    def __init__(self, **bands: Unpack[BandsKeywords]) -> None: ...
+"""
+
+
+def test_a_stub_that_takes_its_keywords_as_a_typed_dict_passes(
+    tmp_path: pathlib.Path,
+) -> None:
+    """Each key reads as the keyword it stands for, with its field's default."""
+    reader = _reader(
+        tmp_path,
+        _many_fields(
+            _TAKES_THE_KEYWORDS,
+            _keywords([f"{name}: ArrayLike" for name in _FOURTEEN]),
+        ),
+    )
+    assert cpa.constructor_problems(reader, "pkg.api.Bands") == []
+    stub = cpa._constructor_stub(reader.annotations, "pkg.api.Bands")
+    assert stub is not None
+    assert stub.args.kwarg is None
+    assert [argument.arg for argument in stub.args.kwonlyargs] == _FOURTEEN
+    assert {ast.unparse(default) for default in stub.args.kw_defaults if default} == {
+        "()"
+    }
+
+
+def test_a_typed_dict_out_of_step_with_its_fields_is_refused(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A key dropped, a key too narrow, and a key left optional or required against its field."""
+    keys = [f"{name}: ArrayLike" for name in _FOURTEEN[:-1]]
+    keys[2] = f"{_FOURTEEN[2]}: Required[ArrayLike]"
+    reader = _reader(
+        tmp_path,
+        _many_fields(
+            _TAKES_THE_KEYWORDS,
+            _keywords(keys).replace("NotRequired,", "NotRequired, Required,"),
+        ),
+    )
+    assert cpa.constructor_problems(reader, "pkg.api.Bands") == [
+        f"{_FOURTEEN[2]} is a key a caller must give, and its field defaults to ()",
+        f"its TYPE_CHECKING __init__ takes {_FOURTEEN[:-1]}, its fields are "
+        f"{_FOURTEEN}",
+    ]
+    keys = [f"{name}: ArrayLike" for name in _FOURTEEN]
+    keys[1] = f"{_FOURTEEN[1]}: tuple[int, ...]"
+    (tmp_path / "narrow").mkdir()
+    reader = _reader(
+        tmp_path / "narrow",
+        _many_fields(_TAKES_THE_KEYWORDS, _keywords(keys)),
+    )
+    assert cpa.constructor_problems(reader, "pkg.api.Bands") == [
+        f"{_FOURTEEN[1]} is converted, and the stub takes tuple[int, ...], which is "
+        "no ArrayLike nor an open sequence"
+    ]
+    (tmp_path / "required").mkdir()
+    reader = _reader(
+        tmp_path / "required",
+        _many_fields(
+            _TAKES_THE_KEYWORDS,
+            _keywords([f"{name}: ArrayLike" for name in _FOURTEEN]),
+            required=frozenset({_FOURTEEN[0]}),
+        ),
+    )
+    assert cpa.constructor_problems(reader, "pkg.api.Bands") == [
+        f"{_FOURTEEN[0]} is a key a caller may leave out, and its field has no default"
+    ]
+
+
+def test_a_keyword_dictionary_the_reading_cannot_find_is_refused(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A ``**`` parameter that unpacks no ``TypedDict`` of the module says nothing of the keys."""
+    reader = _reader(
+        tmp_path,
+        _many_fields(
+            "if TYPE_CHECKING:\n\n"
+            "    def __init__(self, **bands: ArrayLike) -> None: ...\n"
+        ),
+    )
+    problems = cpa.constructor_problems(reader, "pkg.api.Bands")
+    assert problems[0] == (
+        "its TYPE_CHECKING __init__ takes **bands: ArrayLike, which is no Unpack "
+        "of a TypedDict written in the record's module"
+    )
 
 
 def test_a_mapping_field_nothing_wraps_is_kept_as_given(

@@ -115,6 +115,7 @@ from .compliance import _map_breakpoint
 
 if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
+    from typing import TypedDict, Unpack
 
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
@@ -329,6 +330,33 @@ def _rows(
     return tuple(tuple(float(v) for v in row) for row in arr)
 
 
+if TYPE_CHECKING:
+
+    class _FilterPeriodicKeywords(TypedDict, total=False):
+        """What :class:`FilterPeriodicMeasurements` takes, one key per field.
+
+        Each result arrives as any array-like and is held as a tuple. Fourteen
+        keywords are more than the thirteen parameters a function may take, so
+        the constructor takes them as the keys of this dictionary; a caller
+        leaves out any of them, as every field defaults to ``None``.
+        """
+
+        midband_attenuations: ArrayLike | None
+        midband_uncertainties_db: ArrayLike | None
+        bandwidth_deviations_db: ArrayLike | None
+        bandwidth_uncertainties_db: ArrayLike | None
+        set_midband_frequencies_hz: ArrayLike | None
+        linearity_deviations_db: ArrayLike | None
+        linearity_levels_below_upper: ArrayLike | None
+        linearity_uncertainties_db: ArrayLike | None
+        linearity_midband_frequencies_hz: ArrayLike | None
+        range_linearity_deviations_db: ArrayLike | None
+        range_linearity_uncertainties_db: ArrayLike | None
+        relative_attenuations: ArrayLike | None
+        relative_attenuation_uncertainties_db: ArrayLike | None
+        tested_midband_frequencies_hz: ArrayLike | None
+
+
 @dataclass(frozen=True, kw_only=True)
 class FilterPeriodicMeasurements(RichDisplay):
     r"""What a laboratory measured in the periodic tests of IEC 61260-3:2016.
@@ -392,24 +420,7 @@ class FilterPeriodicMeasurements(RichDisplay):
 
     if TYPE_CHECKING:
 
-        def __init__(
-            self,
-            *,
-            midband_attenuations: ArrayLike | None = None,
-            midband_uncertainties_db: ArrayLike | None = None,
-            bandwidth_deviations_db: ArrayLike | None = None,
-            bandwidth_uncertainties_db: ArrayLike | None = None,
-            set_midband_frequencies_hz: ArrayLike | None = None,
-            linearity_deviations_db: ArrayLike | None = None,
-            linearity_levels_below_upper: ArrayLike | None = None,
-            linearity_uncertainties_db: ArrayLike | None = None,
-            linearity_midband_frequencies_hz: ArrayLike | None = None,
-            range_linearity_deviations_db: ArrayLike | None = None,
-            range_linearity_uncertainties_db: ArrayLike | None = None,
-            relative_attenuations: ArrayLike | None = None,
-            relative_attenuation_uncertainties_db: ArrayLike | None = None,
-            tested_midband_frequencies_hz: ArrayLike | None = None,
-        ) -> None: ...
+        def __init__(self, **measurements: Unpack[_FilterPeriodicKeywords]) -> None: ...
 
     def __post_init__(self) -> None:
         """Freeze every sequence and refuse results the rule cannot be read on.

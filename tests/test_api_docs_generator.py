@@ -607,7 +607,9 @@ def _stub_parameters(cls: type) -> list[str]:
     name, its annotation as written with each unpublished alias spelled out,
     the default as written (``...`` for one a factory makes), a module
     constant written as its value, as every signature on the page shows a
-    default, and a bare ``*`` before the first keyword-only one.
+    default, and a bare ``*`` before the first keyword-only one. The keys of
+    a ``TypedDict`` the stub unpacks (:func:`_unpacked_keywords`) follow as
+    the keyword-only parameters they stand for.
     """
     stub = gad.constructor_stub(cls)
     assert stub is not None
@@ -632,15 +634,56 @@ def _stub_parameters(cls: type) -> list[str]:
             text += " = " + ast.unparse(default)
         return text
 
+    keywords = _unpacked_keywords(cls, stub)
     for argument, default in list(zip(positional, defaults, strict=True))[1:]:
         written.append(one(argument, default))
-    if arguments.kwonlyargs:
+    if arguments.kwonlyargs or keywords:
         written.append("*")
     for argument, default in zip(
         arguments.kwonlyargs, arguments.kw_defaults, strict=True
     ):
         written.append(one(argument, default))
+    for argument, default in keywords:
+        written.append(one(argument, default))
     return written
+
+
+def _unpacked_keywords(
+    cls: type, stub: ast.FunctionDef
+) -> list[tuple[ast.arg, ast.expr | None]]:
+    """The keys of the ``TypedDict`` a stub takes as ``**keywords: Unpack[Keywords]``.
+
+    Read from the module's source: each key of the dictionary, in order, its
+    annotation without a ``NotRequired`` around it, and the default its
+    field writes in the record's own body, none for a field without one.
+    """
+    kwarg = stub.args.kwarg
+    if kwarg is None or not isinstance(kwarg.annotation, ast.Subscript):
+        return []
+    target = kwarg.annotation.slice
+    assert isinstance(target, ast.Name), ast.unparse(kwarg.annotation)
+    tree = ast.parse(inspect.getsource(sys.modules[cls.__module__]))
+    classes = {
+        node.name: node for node in ast.walk(tree) if isinstance(node, ast.ClassDef)
+    }
+    fields = {
+        child.target.id: child.value
+        for child in classes[cls.__name__].body
+        if isinstance(child, ast.AnnAssign) and isinstance(child.target, ast.Name)
+    }
+    keys: list[tuple[ast.arg, ast.expr | None]] = []
+    for child in classes[target.id].body:
+        if isinstance(child, ast.AnnAssign) and isinstance(child.target, ast.Name):
+            annotation = child.annotation
+            if (
+                isinstance(annotation, ast.Subscript)
+                and isinstance(annotation.value, ast.Name)
+                and annotation.value.id in {"NotRequired", "Required"}
+            ):
+                annotation = annotation.slice
+            name = child.target.id
+            keys.append((ast.arg(name, annotation), fields.get(name)))
+    return keys
 
 
 def test_a_record_built_by_hand_is_published_with_what_its_constructor_takes() -> None:
@@ -653,7 +696,12 @@ def test_a_record_built_by_hand_is_published_with_what_its_constructor_takes() -
     """
     stubbed = _stubbed_classes()
     names = {name for name, _ in stubbed}
-    assert {"TransferMatrix", "LowFrequencyProcedure", "Signal"} <= names, names
+    assert {
+        "TransferMatrix",
+        "LowFrequencyProcedure",
+        "Signal",
+        "SoundLevelMeterPeriodicMeasurements",
+    } <= names, names
     for name, cls in stubbed:
         rendered = gad.format_signature(name, cls, omit_return=True)
         assert _rendered_parameters(rendered) == _stub_parameters(cls), name

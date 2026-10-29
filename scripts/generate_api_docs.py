@@ -976,6 +976,46 @@ def constructor_stub(cls: type) -> ast.FunctionDef | None:
     return None
 
 
+def _keywords_class(cls: type, stub: ast.FunctionDef) -> ast.ClassDef | None:
+    """The ``TypedDict`` a stub takes its keywords as, ``**keywords: Unpack[Keywords]``.
+
+    A record of more keywords than a signature lists (the 13 of Sonar's
+    rule S107) declares them as the keys of a ``TypedDict`` written in its
+    module, mostly under ``if TYPE_CHECKING:``; ``None`` when the stub's
+    ``**`` parameter unpacks none.
+    """
+    kwarg = stub.args.kwarg
+    if kwarg is None or not isinstance(kwarg.annotation, ast.Subscript):
+        return None
+    wrapper, target = kwarg.annotation.value, kwarg.annotation.slice
+    unpacks = (isinstance(wrapper, ast.Name) and wrapper.id == "Unpack") or (
+        isinstance(wrapper, ast.Attribute) and wrapper.attr == "Unpack"
+    )
+    tree = _module_tree(cls.__module__)
+    if not (unpacks and isinstance(target, ast.Name)) or tree is None:
+        return None
+    pending: list[ast.stmt] = list(tree.body)
+    while pending:
+        statement = pending.pop(0)
+        if isinstance(statement, ast.If):
+            pending[:0] = [*statement.body, *statement.orelse]
+        elif isinstance(statement, ast.ClassDef) and statement.name == target.id:
+            return statement
+    return None
+
+
+def _keyword_annotation(node: ast.expr) -> ast.expr:
+    """A key's annotation without the ``NotRequired`` or ``Required`` around it."""
+    if isinstance(node, ast.Subscript):
+        wrapper = node.value
+        name = wrapper.id if isinstance(wrapper, ast.Name) else None
+        if isinstance(wrapper, ast.Attribute):
+            name = wrapper.attr
+        if name in {"NotRequired", "Required"}:
+            return node.slice
+    return node
+
+
 def _stub_default(node: ast.expr | None, runtime: inspect.Parameter | None) -> object:
     """The default a stub parameter shows: the literal it writes, else the running one.
 
@@ -997,7 +1037,10 @@ def stub_signature(cls: type, stub: ast.FunctionDef) -> inspect.Signature:
     """The signature a class's ``TYPE_CHECKING`` ``__init__`` declares, ``self`` dropped.
 
     Each annotation is the stub's text, as the source writes it; the page
-    expands an unpublished alias in it as it does in any other signature.
+    expands an unpublished alias in it as it does in any other signature. A
+    stub that takes its keywords as a ``TypedDict`` (:func:`_keywords_class`)
+    shows each key as the keyword-only parameter it is, with the default its
+    field has, as the running constructor takes it.
     """
     try:
         running = dict(inspect.signature(cls).parameters)
@@ -1042,7 +1085,21 @@ def stub_signature(cls: type, stub: ast.FunctionDef) -> inspect.Signature:
             inspect.Parameter.KEYWORD_ONLY,
             _stub_default(default, running.get(argument.arg)),
         )
-    if arguments.kwarg is not None:
+    keywords = _keywords_class(cls, stub)
+    if keywords is not None:
+        for child in keywords.body:
+            if not (
+                isinstance(child, ast.AnnAssign) and isinstance(child.target, ast.Name)
+            ):
+                continue
+            key = child.target.id
+            runtime = running.get(key)
+            add(
+                ast.arg(key, _keyword_annotation(child.annotation)),
+                inspect.Parameter.KEYWORD_ONLY,
+                runtime.default if runtime is not None else inspect.Parameter.empty,
+            )
+    elif arguments.kwarg is not None:
         add(arguments.kwarg, inspect.Parameter.VAR_KEYWORD, inspect.Parameter.empty)
     return inspect.Signature(parameters)
 

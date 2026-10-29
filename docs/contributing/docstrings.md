@@ -156,7 +156,7 @@ def effective_density(frequencies, *, fluid):
 <a id="d6"></a>
 ### D6. Keep a docstring's field list unbroken: no prose between two fields
 
-**Why.** Sphinx ends the list at the first line that is neither a field nor its indented continuation, so the parameters after the break vanish from the generated table and the prose is printed after **Returns**. `unlined_rectangular_duct_attenuation` lost `:param wrapped:` that way.
+**Why.** Sphinx ends the list at the first line that is neither a field nor its indented continuation, so the parameters after the break vanish from the generated table and the prose is printed after **Returns**. `unlined_rectangular_duct_attenuation` lost `:param wrapped:` that way. A field written into the middle of another field's sentence cuts it the same way: `weighting_filter` once printed its return text up to "a bare array back; a" and the rest inside its `TypeError`.
 
 **Do**
 
@@ -183,7 +183,7 @@ def duct_attenuation(frequencies, *, wrapped=False):
     """
 ```
 
-**Enforced by:** `tests/test_package_architecture.py::test_no_docstring_breaks_its_own_field_list`
+**Enforced by:** `tests/test_package_architecture.py::test_no_docstring_breaks_its_own_field_list`, `tests/test_package_architecture.py::test_no_docstring_field_is_cut_in_two`
 
 <a id="d7"></a>
 ### D7. State the unit of every numeric parameter, field and return, as the source prints it

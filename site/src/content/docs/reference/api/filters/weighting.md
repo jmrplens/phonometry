@@ -349,13 +349,7 @@ Apply a frequency weighting to a signal.
 | `weighting` | 'A', 'C' (IEC 61672-1), 'B' (ANSI S1.4-1983, historical), 'D' (withdrawn IEC 537 aircraft-noise weighting), 'G' (ISO 7196 infrasound), 'AU' (IEC 61012), '468' (ITU-R BS.468-4 psophometric noise weighting) or 'Z' (bypass). |
 | `high_accuracy` | Design the filter by fitting the analog prototype at *fs* (default True), rather than by the plain bilinear transform, which warps frequency and loses class 1 below 44.1 kHz. See [`WeightingFilter.__init__`](/phonometry/reference/api/filters/weighting/#weightingfilter) for what each design costs. The '468' curve requires the fitted design and refuses False. |
 
-**Returns:** The weighted record. A bare array in gives a bare array back; a
-
-**Raises**
-
-| Exception | When |
-| :--- | :--- |
-| TypeError | if `weighting` is not a text. [`Signal`](/phonometry/reference/api/io/io/#signal) gives a Signal, whose samples are already in pascals and whose factor therefore reads 1.0. |
+**Returns:** The weighted record. A bare array in gives a bare array back; a [`Signal`](/phonometry/reference/api/io/io/#signal) gives a Signal, whose samples are already in pascals and whose factor therefore reads 1.0.
 
 **Raises**
 

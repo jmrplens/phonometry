@@ -987,7 +987,7 @@ class OctaveFilterBank:
         :param num_channels: Number of channels.
         :param sigbands: If True, return filtered bands.
         :param mode: 'rms' or 'peak'.
-        :param calculate_level: If True, calculate SPL
+        :param calculate_level: If True, calculate SPL.
         :param zero_phase: If True, use forward-backward filtering.
         :return: A tuple containing (SPL_array, Optional_List_of_filtered_signals).
         """

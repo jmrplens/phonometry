@@ -941,7 +941,6 @@ def weighting_filter(
         :meth:`WeightingFilter.__init__` for what each design costs. The '468'
         curve requires the fitted design and refuses False.
     :return: The weighted record. A bare array in gives a bare array back; a
-    :raises TypeError: if ``weighting`` is not a text.
         :class:`~phonometry.io.Signal` gives a Signal, whose samples are
         already in pascals and whose factor therefore reads 1.0.
     :raises TypeError: if ``high_accuracy`` is not ``True`` or ``False``,

@@ -149,7 +149,7 @@ Each rule on a page has the same parts:
 | [D3](docstrings.md#d3) | Say in the docstring which reading is the library's where the standard prints none | review |
 | [D4](docstrings.md#d4) | Write docstring fields as a Sphinx field list: `:param`, `:return`, `:raises`, `:warns`, `:ivar` | review |
 | [D5](docstrings.md#d5) | Document only the parameters the signature has | `tests/test_package_architecture.py::test_no_docstring_documents_a_parameter_that_is_gone` |
-| [D6](docstrings.md#d6) | Keep a docstring's field list unbroken: no prose between two fields | `tests/test_package_architecture.py::test_no_docstring_breaks_its_own_field_list` |
+| [D6](docstrings.md#d6) | Keep a docstring's field list unbroken: no prose between two fields | `tests/test_package_architecture.py::test_no_docstring_breaks_its_own_field_list`, `tests/test_package_architecture.py::test_no_docstring_field_is_cut_in_two` |
 | [D7](docstrings.md#d7) | State the unit of every numeric parameter, field and return, as the source prints it | review |
 | [D8](docstrings.md#d8) | Open a docstring with a noun phrase, on the line of its opening quotes | `ruff D212`, review |
 | [D9](docstrings.md#d9) | Never open a judgment's summary with another judgment family's verb | `tests/test_package_architecture.py::test_a_judgement_summary_does_not_open_with_another_family_verb` |

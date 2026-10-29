@@ -35,16 +35,117 @@ function slug(value) {
 /**
  * Stable fragment identifier for one reference entry.
  *
- * Standards key on their designation, which is globally unique and stable
- * across editions ("IEC 61672-1:2013"). Everything else keys on type, first
- * author or organization, and year, which is what an APA short cite uses and
- * is stable enough for the same work cited from several pages.
+ * Standards key on their designation, which names one edition of one document
+ * ("IEC 61672-1:2013"). A work with a DOI keys on the DOI, which is what names
+ * it everywhere else. Anything else keys on type, first author or
+ * organization, year and title.
+ *
+ * The author and year alone, which an APA short cite uses, are not a key: one
+ * author publishes two papers in a year, and one organization issues several
+ * reports. Keyed that way, two papers by Jiménez in 2017 were one `@id`, and
+ * three ECAC reports of 2026 were another. A report number does not separate
+ * them either: two volumes of ECAC Doc 29 carry the same one, and the Spanish
+ * pages translate it ("5.ª ed."), which would part the two languages' `@id`s.
+ * A DOI and a title are written the same in both.
  */
 export function referenceId(ref, bibliographyUrl) {
   if (ref.type === 'standard') return `${bibliographyUrl}#std-${slug(ref.designation)}`;
-  const who = ref.authors?.[0] ?? ref.organization ?? ref.title;
-  const surname = String(who).split(',')[0];
-  return `${bibliographyUrl}#${ref.type}-${slug(surname)}-${slug(ref.year ?? 'nd')}`;
+  if (ref.doi) return `${bibliographyUrl}#doi-${slug(ref.doi)}`;
+  return `${bibliographyUrl}#${withoutDoi(ref)}`;
+}
+
+/** The fragment a work that is not a standard takes when it carries no DOI. */
+function withoutDoi(ref) {
+  const who = ref.authors?.[0] ?? ref.organization;
+  const parts = [ref.type, ...(who ? [String(who).split(',')[0]] : []), ref.year ?? 'nd', ref.title];
+  return parts.map(slug).join('-');
+}
+
+/**
+ * Fields of a reference that are about the page citing the work, not the
+ * work: what it anchors there, whether the page marks it, whether the page
+ * implements it.
+ */
+const PAGE_FIELDS = new Set(['note', 'primary', 'implemented']);
+
+/**
+ * Every work one language's pages cite, once each, by `@id`.
+ *
+ * A page describes each work it cites in its own frontmatter, and many pages
+ * cite the same work. The bibliography page used to keep the first
+ * description it read while every other page named the work by its own, so
+ * one standard had two catalogue addresses on two pages and one book a DOI on
+ * fifteen pages and none on two. This refuses that: every reference to one
+ * `@id` says the same of the work, field for field, so the short node a page
+ * names a work with (`referenceStub`) is the bibliography's whichever page it
+ * is read on. The `note`, `primary` and `implemented` fields are the page's
+ * and may differ.
+ *
+ * It refuses two `@id`s for one DOI as well, and the case that makes them: a
+ * work given its DOI on one page and not on another, which keys on the DOI
+ * there and on its title here, and so would never be compared above.
+ *
+ * @param {Iterable<{id: string, references?: object[]}>} pages The content
+ *   entries of one language.
+ * @param {string} bibliographyUrl Absolute URL of that language's bibliography.
+ * @returns {Map<string, object>} Each `@id` to the first reference to it, the
+ *   one whose `note` the bibliography prints.
+ * @throws {Error} Listing every `@id` described two ways, every DOI under two
+ *   `@id`s and every work cited with its DOI on one page and without it on
+ *   another.
+ */
+export function citedWorks(pages, bibliographyUrl) {
+  const works = new Map();
+  const doiIds = new Map();
+  const doiOf = new Map();
+  const withoutDoiOn = [];
+  for (const page of pages) {
+    for (const ref of page.references ?? []) {
+      const id = referenceId(ref, bibliographyUrl);
+      if (!works.has(id)) works.set(id, []);
+      works.get(id).push({ page: page.id, ref });
+      if (ref.doi) {
+        const key = ref.doi.toLowerCase();
+        if (!doiIds.has(key)) doiIds.set(key, new Set());
+        doiIds.get(key).add(id);
+      }
+      if (ref.type === 'standard') continue;
+      if (ref.doi) doiOf.set(withoutDoi(ref), ref.doi);
+      else withoutDoiOn.push({ page: page.id, ref });
+    }
+  }
+
+  const problems = [];
+  const at = (id) => id.slice(bibliographyUrl.length);
+  const listed = (on) => `${on.slice(0, 2).join(', ')}${on.length > 2 ? ` and ${on.length - 2} more` : ''}`;
+  for (const [id, citing] of works) {
+    const fields = new Set(citing.flatMap(({ ref }) => Object.keys(ref)));
+    for (const field of [...fields].filter((key) => !PAGE_FIELDS.has(key)).sort()) {
+      const pagesBy = new Map();
+      for (const { page, ref } of citing) {
+        const value = ref[field] === undefined ? '(none)' : JSON.stringify(ref[field]);
+        if (!pagesBy.has(value)) pagesBy.set(value, []);
+        pagesBy.get(value).push(page);
+      }
+      if (pagesBy.size < 2) continue;
+      problems.push(`${at(id)} ${field}: ${[...pagesBy].map(([value, on]) => `${value} on ${listed(on)}`).join('; ')}`);
+    }
+  }
+  for (const [doi, ids] of doiIds) {
+    if (ids.size > 1) problems.push(`DOI ${doi} names ${ids.size} works: ${[...ids].map(at).join(', ')}`);
+  }
+  for (const { page, ref } of withoutDoiOn) {
+    const doi = doiOf.get(withoutDoi(ref));
+    if (doi) problems.push(`#${withoutDoi(ref)} doi: (none) on ${page}; ${JSON.stringify(doi)} elsewhere`);
+  }
+  if (problems.length > 0) {
+    throw new Error(
+      `the pages' references describe works cited under ${bibliographyUrl} two ways, in ` +
+        `${problems.length} place(s); write each work the same on every page that cites it:\n  ` +
+        problems.join('\n  '),
+    );
+  }
+  return new Map([...works].map(([id, [first]]) => [id, first.ref]));
 }
 
 /**
@@ -267,8 +368,12 @@ export function referenceNode(ref, bibliographyUrl, { bodiesUrl = bibliographyUr
  * What a page says of a work at its first reference: enough to name it on that
  * page alone.
  *
- * The fields are the full node's, picked rather than rebuilt, so the two can
- * never describe one `@id` differently: a JSON-LD processor that reads both
+ * The fields are picked from the full node of the page's own reference rather
+ * than rebuilt, so the stub and that node agree. The bibliography builds its
+ * node from another page's reference to the same work, and the two agree
+ * because `citedWorks` fails the build when two references to one `@id`
+ * differ; check:structured-data compares every named stub with the
+ * bibliography's node on the built pages. A JSON-LD processor that reads both
  * the page and the bibliography merges them into one node.
  */
 const STUB_FIELDS = ['@id', '@type', 'name', 'identifier', 'reportNumber', 'url', 'sameAs'];
@@ -286,15 +391,15 @@ const numbersOf = (designation) => (String(designation).match(/\d+/g) ?? []).joi
  * The English `@id`s of every standard the Spanish pages cite.
  *
  * A Spanish standard is the same work as its English one, and its node says so
- * with `sameAs`. The two `@id`s usually differ only by the locale, but a
- * designation that carries an edition note is translated with the page
- * ("ECMA-418-2, 4.ª ed." against "ECMA-418-2, 4th ed."), and then the slugs
- * differ too. A Spanish page cites the works of its English twin in the same
- * order, so each standard is paired with the one at its position on the twin,
- * and the pair counts only when both designations carry the same numbers in
- * the same order, which a translated edition note keeps and a list that fell
- * out of step does not. A standard with the same designation on any English
- * page is that work as well.
+ * with `sameAs`. The two `@id`s usually differ only by the locale, but some
+ * designations are translated with the page: an edition note ("ECMA-418-2,
+ * 4.ª ed." against "ECMA-418-2, 4th ed."), "Recomendación UIT-R",
+ * "texto consolidado", "retirada", and the slugs differ too. A Spanish page
+ * cites the works of its English twin in the same order, so each standard is
+ * paired with the one at its position on the twin, and the pair counts only
+ * when both designations carry the same numbers in the same order, which a
+ * translation keeps and a list that fell out of step does not. A standard with
+ * the same designation on any English page is that work as well.
  *
  * @param {Iterable<{id: string, references?: object[]}>} pages Every content
  *   entry, both languages; a Spanish entry's id starts with `es/`.

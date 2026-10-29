@@ -21,8 +21,8 @@ import { firstPublished } from '../lib/page-dates.mjs';
 import { isoDay } from '../lib/date-rules.mjs';
 import {
   citationsFor,
+  citedWorks,
   englishStandardIds,
-  referenceId,
   referenceNode,
   standardsBody,
 } from '../lib/citations.mjs';
@@ -242,7 +242,6 @@ const article =
 // nodes are emitted once per language, with the standards bodies they cite.
 let bibliographyNodes: unknown[] = [];
 if (isBibliography) {
-  const seen = new Map<string, unknown>();
   const bodies = new Map<string, unknown>();
   const docs: CollectionEntry<'docs'>[] = await getCollection('docs');
   const pages = docs.map((entry) => ({
@@ -253,30 +252,27 @@ if (isBibliography) {
   // bibliographies read as one set of works in two languages.
   const twins =
     lang === 'es' ? englishStandardIds(pages, bibliographyUrl, englishBibliographyUrl) : new Map();
-  for (const page of pages) {
-    // Harvest only this locale's pages. The `@id`s are per-locale (they hang
-    // off this page's URL), and the `note` that becomes each node's
-    // `description` is written in the page's own language, so mixing the two
-    // locales puts Spanish prose on the English entities.
-    const isSpanish = page.id === 'es' || page.id.startsWith('es/');
-    if (isSpanish !== (lang === 'es')) continue;
-    for (const ref of page.references) {
-      const id = referenceId(ref, bibliographyUrl);
-      if (seen.has(id)) continue;
-      seen.set(
-        id,
-        referenceNode(ref, bibliographyUrl, {
-          bodiesUrl: englishBibliographyUrl,
-          translationOf: twins.get(id) ?? [],
-        }),
-      );
-      // The body is defined on the English bibliography's address in both
-      // languages: one identity for ISO, not one per page that names it.
-      const body = standardsBody(ref, englishBibliographyUrl);
-      if (body && !bodies.has(body['@id'])) bodies.set(body['@id'], body);
-    }
-  }
-  bibliographyNodes = [...bodies.values(), ...seen.values()];
+  // Only this locale's pages. The `@id`s are per-locale (they hang off this
+  // page's URL), and the `note` that becomes each node's `description` is
+  // written in the page's own language, so mixing the two locales puts
+  // Spanish prose on the English entities. `citedWorks` fails the build when
+  // two of those pages describe one work differently, which is what lets
+  // every other page name a work from its own references and still say what
+  // this page says.
+  const ownLanguage = pages.filter(
+    (page) => (page.id === 'es' || page.id.startsWith('es/')) === (lang === 'es'),
+  );
+  const works = [...citedWorks(ownLanguage, bibliographyUrl)].map(([id, ref]) => {
+    // The body is defined on the English bibliography's address in both
+    // languages: one identity for ISO, not one per page that names it.
+    const body = standardsBody(ref, englishBibliographyUrl);
+    if (body && !bodies.has(body['@id'])) bodies.set(body['@id'], body);
+    return referenceNode(ref, bibliographyUrl, {
+      bodiesUrl: englishBibliographyUrl,
+      translationOf: twins.get(id) ?? [],
+    });
+  });
+  bibliographyNodes = [...bodies.values(), ...works];
 }
 
 // The home page is the one route with no article node, which left it as the

@@ -3,9 +3,10 @@
 //
 // The built site only ever shows this code the references the guides happen to
 // cite today, so a page that cited one work twice, or one standard from a body
-// with no identity, or a Spanish edition note that no English slug matches,
-// would build green whatever the code did with it. Each test here hands the
-// functions such a list and reads what comes back.
+// with no identity, or a Spanish edition note that no English slug matches, or
+// two pages that describe one work two ways, would build green whatever the
+// code did with it. Each test here hands the functions such a list and reads
+// what comes back.
 //
 // Usage: node --test 'scripts/**/*.test.mjs'
 import assert from 'node:assert/strict';
@@ -13,7 +14,9 @@ import { test } from 'node:test';
 
 import {
   citationsFor,
+  citedWorks,
   englishStandardIds,
+  referenceId,
   referenceNode,
   referenceStub,
   standardsBody,
@@ -162,4 +165,69 @@ test('a Spanish standard with a DOI keeps it beside its English address', () => 
   });
   assert.deepEqual(node.sameAs, ['https://doi.org/10.1000/iso7', `${EN}#std-iso-7-2007`]);
   assert.equal(node.identifier, 'ISO 7:2007');
+});
+
+test('two works by one author in one year, or by one body, are two @ids', () => {
+  // Two papers by one author in 2017: the DOI keys each.
+  const iridescent = { ...paper, year: 2017, title: 'Iridescent perfect absorption', doi: '10.3390/app7060618' };
+  const metadiffusers = { ...paper, year: 2017, title: 'Metadiffusers', doi: '10.1038/s41598-017-05710-5' };
+  assert.equal(referenceId(iridescent, EN), `${EN}#doi-10-3390-app7060618`);
+  assert.notEqual(referenceId(iridescent, EN), referenceId(metadiffusers, EN));
+
+  // Two volumes of one report series carry one number; with no DOI, the title
+  // keys them, and it reads the same in both languages where the number does not.
+  const volume = (n, number) => ({
+    type: 'report',
+    organization: 'European Civil Aviation Conference',
+    year: 2026,
+    number,
+    title: `Report on standard method of computing noise contours around civil airports, Volume ${n}`,
+  });
+  assert.notEqual(referenceId(volume(2, 'Doc 29, 5th ed.'), EN), referenceId(volume(3, 'Doc 29, 5th ed.'), EN));
+  assert.equal(
+    referenceId(volume(3, 'Doc 29, 5th ed.'), EN).slice(EN.length),
+    referenceId(volume(3, 'Doc 29, 5.ª ed.'), ES).slice(ES.length),
+  );
+  assert.equal(
+    referenceId(volume(3, 'Doc 29, 5th ed.'), EN),
+    `${EN}#report-european-civil-aviation-conference-2026-report-on-standard-method-of-computing-noise-` +
+      'contours-around-civil-airports-volume-3',
+  );
+});
+
+test('the works a language cites, one reference each, refused when two pages describe one two ways', () => {
+  const pages = [
+    { id: 'a', references: [iso('ISO 1:2000', { note: 'Clause 4.' }), book] },
+    // The note, primary and implemented fields belong to the page.
+    { id: 'b', references: [iso('ISO 1:2000', { note: 'Annex A.', primary: true }), book] },
+  ];
+  const works = citedWorks(pages, EN);
+  assert.deepEqual([...works.keys()], [`${EN}#std-iso-1-2000`, referenceId(book, EN)]);
+  assert.equal(works.get(`${EN}#std-iso-1-2000`).note, 'Clause 4.');
+
+  // One standard, two catalogue addresses.
+  const twoUrls = [...pages, { id: 'c', references: [iso('ISO 1:2000', { url: 'https://www.iso.org/standard/2.html' })] }];
+  assert.throws(
+    () => citedWorks(twoUrls, EN),
+    /two ways, in 1 place\(s\)[^]*#std-iso-1-2000 url: "https:\/\/www\.iso\.org\/standard\/1\.html" on a, b; "https:\/\/www\.iso\.org\/standard\/2\.html" on c/,
+  );
+
+  // One standard with a URL on one page and none on another.
+  const noUrl = [...pages, { id: 'c', references: [iso('ISO 1:2000', { url: undefined })] }];
+  assert.throws(() => citedWorks(noUrl, EN), /#std-iso-1-2000 url: [^;]+ on a, b; \(none\) on c/);
+
+  // One book with its DOI on one page and without it on another: two @ids,
+  // which nothing would compare.
+  const withDoi = { ...book, doi: '10.1000/book' };
+  assert.throws(
+    () => citedWorks([{ id: 'a', references: [withDoi] }, { id: 'b', references: [book] }], EN),
+    /#book-roe-1999-a-book doi: \(none\) on b; "10\.1000\/book" elsewhere/,
+  );
+
+  // One DOI on two standards' designations.
+  const gum = (designation) => iso(designation, { doi: '10.59161/JCGM100-2008E' });
+  assert.throws(
+    () => citedWorks([{ id: 'a', references: [gum('JCGM 100:2008, la GUM'), gum('JCGM 100:2008, the GUM')] }], EN),
+    /DOI 10\.59161\/jcgm100-2008e names 2 works/,
+  );
 });

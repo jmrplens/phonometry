@@ -169,11 +169,38 @@ const LD_JSON = /<script[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/scri
  * address and are not works.
  */
 const isCitedWork = (id) =>
-	typeof id === 'string' && /\/reference\/bibliography\/#(?:std|book|article|report|web)-/.test(id);
+	typeof id === 'string' && /\/reference\/bibliography\/#(?:std|doi|book|article|report|web)-/.test(id);
+
+/**
+ * The types src/lib/citations.mjs gives a cited work. A stub typed anything
+ * else, an Organization say, is not naming a work, whatever its name says.
+ */
+const WORK_TYPES = new Set(['CreativeWork', 'Book', 'ScholarlyArticle', 'Report', 'WebPage']);
 
 /** Whether a reference to a work says what the work is, not only where it is defined. */
 const isNamed = (item) =>
-	typeof item?.name === 'string' && item.name.trim() !== '' && item['@type'] !== undefined;
+	typeof item?.name === 'string' &&
+	item.name.trim() !== '' &&
+	item['@type'] !== undefined &&
+	typesOf(item).every((type) => WORK_TYPES.has(type));
+
+/**
+ * The fields a page's stub shares with the bibliography's node for the same
+ * work (src/lib/citations.mjs, `STUB_FIELDS`), compared value for value.
+ * `sameAs` is compared apart: the Spanish bibliography adds the English node
+ * to it, which a page's stub does not carry.
+ */
+const STUB_FIELDS = ['@type', 'name', 'identifier', 'reportNumber', 'url'];
+
+/** A value as JSON with its keys in order, so two equal nodes compare equal. */
+const canonical = (value) =>
+	value === undefined
+		? 'undefined'
+		: JSON.stringify(value, (_, v) =>
+				v && typeof v === 'object' && !Array.isArray(v)
+					? Object.fromEntries(Object.entries(v).sort(([a], [b]) => a.localeCompare(b)))
+					: v,
+			);
 
 /** Every object under `value` that refers to a cited work, in document order. */
 function citedWorkReferences(value, out = []) {
@@ -193,6 +220,20 @@ function citedWorkReferences(value, out = []) {
 const BODY_PREFIX = `${ORIGIN}/reference/bibliography/#org-`;
 /** Where the English bibliography defines each standard. */
 const ENGLISH_STANDARD_PREFIX = `${ORIGIN}/reference/bibliography/#std-`;
+/**
+ * The bodies that publish no texts of their own: the Spanish state issuers,
+ * whose texts the Boletín Oficial del Estado prints and each of those
+ * references links (src/lib/citations.mjs, STANDARDS_BODIES). Every other body
+ * a standard names carries its official site.
+ */
+const BODIES_WITHOUT_SITE = new Set(
+	['es-ministerio-de-la-presidencia', 'es-ministerio-de-fomento', 'es-jefatura-del-estado'].map(
+		(id) => `${BODY_PREFIX}${id}`,
+	),
+);
+
+/** The numbers of a designation, in order: what a translation of it leaves alone. */
+const numbersOf = (designation) => (String(designation ?? '').match(/\d+/g) ?? []).join(' ');
 
 const files = walk(DIST).sort();
 if (files.length === 0) throw new Error(`no HTML under ${DIST}: build the site first`);
@@ -233,6 +274,8 @@ const platformLists = new Map();
 const unnamedBasis = [];
 /** Pages that point at a cited work nothing on the page names, with the count. */
 const unnamedCited = [];
+/** Every reference to a cited work that says more than its `@id`, with its page. */
+const stubs = [];
 /** What each language's bibliography page defines, for the check across the two. */
 const bibliographies = new Map();
 
@@ -405,6 +448,9 @@ for (const file of files) {
 	// `citation`, has to resolve to a work named somewhere on the same page.
 	const references = citedWorkReferences(article);
 	if (references.length > 0) seen.citing += 1;
+	for (const item of references) {
+		if (Object.keys(item).some((key) => key !== '@id')) stubs.push({ route, item });
+	}
 	const namedHere = new Set(references.filter(isNamed).map((item) => item['@id']));
 	const firstInBasis = new Set();
 	let bareBasis = 0;
@@ -431,6 +477,7 @@ for (const file of files) {
 		const byId = new Map(nodes.filter((node) => node['@id']).map((node) => [node['@id'], node]));
 		const standards = nodes.filter((node) => node.genre === 'Technical standard');
 		const anonymous = new Map();
+		const siteless = new Set();
 		for (const standard of standards) {
 			const id = standard.publisher?.['@id'];
 			const body = typeof id === 'string' ? byId.get(id) : undefined;
@@ -444,6 +491,10 @@ for (const file of files) {
 			if (!identified) {
 				const name = standard.publisher?.name ?? id ?? '(no publisher)';
 				anonymous.set(name, (anonymous.get(name) ?? 0) + 1);
+			} else if (!BODIES_WITHOUT_SITE.has(id) && !/^https:\/\/\S+$/.test(String(body.url ?? ''))) {
+				// One identity per body is half of it; the other half is where the
+				// body lives, which is what tells two bodies of one name apart.
+				siteless.add(id);
 			}
 		}
 		if (anonymous.size > 0) {
@@ -455,7 +506,20 @@ for (const file of files) {
 		} else {
 			ok(`${route}: each of the ${standards.length} standards names its publisher by the body's one identity`);
 		}
-		bibliographies.set(lang, { route, defined, standards });
+		if (siteless.size > 0) {
+			fail(
+				`${route}: ${siteless.size} of the bodies its standards name carry no https url of their official ` +
+					'site: ' +
+					[...siteless].map((id) => id.slice(BODY_PREFIX.length)).join(', '),
+			);
+		} else if (standards.length > 0) {
+			const bodies = new Set(standards.map((standard) => standard.publisher?.['@id']));
+			ok(
+				`${route}: each of the ${bodies.size} bodies its standards name carries its official site, save ` +
+					'the Spanish state issuers whose texts the BOE prints',
+			);
+		}
+		bibliographies.set(lang, { route, defined, standards, byId });
 	}
 
 	// The two locales are one work. English pages point forward to their
@@ -648,12 +712,22 @@ if (unnamedCited.length > 0) {
 	} else {
 		const untied = [];
 		const dangling = [];
+		const mismatched = [];
 		for (const standard of es.standards) {
 			const targets = [standard.sameAs ?? []]
 				.flat()
 				.filter((url) => typeof url === 'string' && url.startsWith(ENGLISH_STANDARD_PREFIX));
 			if (targets.length === 0) untied.push(standard.identifier);
-			else dangling.push(...targets.filter((url) => !en.defined.has(url)));
+			for (const url of targets) {
+				const target = en.byId.get(url);
+				if (!target) dangling.push(url);
+				// The pairing is read off the built nodes, not off citations.mjs: a
+				// translated designation keeps its numbers, in their order, and a
+				// Spanish standard naming another English one does not.
+				else if (numbersOf(target.identifier) !== numbersOf(standard.identifier)) {
+					mismatched.push(`${standard.identifier} as ${target.identifier}`);
+				}
+			}
 		}
 		if (untied.length > 0) {
 			fail(
@@ -667,11 +741,61 @@ if (unnamedCited.length > 0) {
 					`(first: ${dangling.slice(0, 3).join(', ')})`,
 			);
 		}
-		if (untied.length === 0 && dangling.length === 0) {
+		if (mismatched.length > 0) {
+			fail(
+				`${es.route}: ${mismatched.length} standards name as the same work an English standard whose ` +
+					`designation carries other numbers (first: ${mismatched.slice(0, 3).join('; ')})`,
+			);
+		}
+		if (untied.length === 0 && dangling.length === 0 && mismatched.length === 0) {
 			ok(
 				`each of the ${es.standards.length} Spanish standards names the English node it is, among the ` +
-					`${en.standards.length} the English bibliography defines`,
+					`${en.standards.length} the English bibliography defines, with the same numbers in its designation`,
 			);
+		}
+
+		// A page names a work from its own references and the bibliography from
+		// whichever page it read first, so the two could say different things
+		// of one @id: two catalogue addresses for one standard, one paper's
+		// title on another's identifier. citations.mjs refuses to build that;
+		// this is the same promise read off what was built.
+		const differing = new Map();
+		const fieldCounts = new Map();
+		const FIELD_ORDER = [...STUB_FIELDS, 'sameAs', '(defined on no bibliography)'];
+		for (const { route, item } of stubs) {
+			const lang = item['@id'].startsWith(`${ORIGIN}/es/`) ? 'es' : 'en';
+			const node = bibliographies.get(lang).byId.get(item['@id']);
+			const wrong = node
+				? STUB_FIELDS.filter((field) => canonical(item[field]) !== canonical(node[field]))
+				: ['(defined on no bibliography)'];
+			const known = new Set([node?.sameAs ?? []].flat());
+			if (node && [item.sameAs ?? []].flat().some((value) => !known.has(value))) wrong.push('sameAs');
+			if (wrong.length === 0) continue;
+			if (!differing.has(item['@id'])) differing.set(item['@id'], { routes: [], fields: new Set() });
+			const entry = differing.get(item['@id']);
+			entry.routes.push(route);
+			for (const field of wrong) {
+				if (!entry.fields.has(field)) fieldCounts.set(field, (fieldCounts.get(field) ?? 0) + 1);
+				entry.fields.add(field);
+			}
+		}
+		if (stubs.length === 0) {
+			fail('no page names a cited work: the citation markup changed under this check');
+		} else if (differing.size > 0) {
+			const pages = new Set([...differing.values()].flatMap(({ routes }) => routes));
+			fail(
+				`${differing.size} work(s) are named on ${pages.size} page(s) other than as the bibliography ` +
+					`defines them: ${[...fieldCounts]
+						.sort(([a], [b]) => FIELD_ORDER.indexOf(a) - FIELD_ORDER.indexOf(b))
+						.map(([field, n]) => `${field} on ${n}`)
+						.join(', ')}`,
+			);
+			const first = [...differing]
+				.slice(0, 3)
+				.map(([id, { routes, fields }]) => `${routes[0]} ${id.slice(id.indexOf('#'))} (${[...fields].join(', ')})`);
+			console.error(`     first: ${first.join('; ')}`);
+		} else {
+			ok(`each of the ${stubs.length} stubs that name a work on a page says what the bibliography says of it`);
 		}
 	}
 }

@@ -9,9 +9,9 @@ they are touched.
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
+from collections.abc import Iterator, Mapping, Sequence
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, Protocol
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
@@ -21,6 +21,56 @@ if TYPE_CHECKING:
 
 #: Real-valued float64 array alias shared across the library.
 Real = NDArray[np.float64]
+
+
+class SupportsNumericArray(Protocol):
+    """Anything whose ``__array__`` gives an array of numbers.
+
+    A numpy array of a number or truth-value dtype, a numpy scalar, or an
+    object of another library that converts itself so. An array of texts
+    does not.
+    """
+
+    def __array__(self) -> np.ndarray[Any, np.dtype[np.number[Any] | np.bool_]]: ...
+
+
+class NestedSequence[T](Protocol):
+    """A sequence of ``T``, or of such sequences, at any depth.
+
+    What ``Sequence`` reads, but for membership: a list, a tuple and a
+    range are asked about any object, a ``str`` only about a text and
+    ``bytes`` only about bytes or an integer, so neither text is a nested
+    sequence of anything; a mapping, which has no ``count`` or ``index``,
+    is none either. numpy reads its own array-likes the same way.
+    """
+
+    def __len__(self, /) -> int: ...
+    def __getitem__(self, index: int, /) -> T | NestedSequence[T]: ...
+    def __contains__(self, value: object, /) -> bool: ...
+    def __iter__(self, /) -> Iterator[T | NestedSequence[T]]: ...
+    def __reversed__(self, /) -> Iterator[T | NestedSequence[T]]: ...
+    # A list of numbers counts only a number: typed object, the method would
+    # refuse every typed list, as numpy's own nested sequence says.
+    def count(self, value: Any, /) -> int: ...  # noqa: ANN401
+    # The same holds for the position of an item.
+    def index(self, value: Any, /) -> int: ...  # noqa: ANN401
+
+
+#: What ``np.asarray`` converts to an array of numbers: a number (a ``bool``,
+#: an ``int``, a ``float`` or a ``complex``), a sequence of numbers at any
+#: depth, a numpy number or array of a number dtype, anything else whose
+#: ``__array__`` gives one, and a sequence of such arrays. It is numpy's
+#: ``ArrayLike`` without its texts: ``ArrayLike`` admits any ``str`` and any
+#: ``bytes``, so beside a ``Literal`` of choices (``termination:
+#: TerminationName | ArrayLike``) it took a misspelt choice as numbers, which
+#: only the call refused. Beside a ``Literal`` this alias stands for the
+#: numbers, and a text that is not one of the choices is a type error.
+NumericArrayLike = (
+    complex
+    | NestedSequence[complex]
+    | SupportsNumericArray
+    | NestedSequence[SupportsNumericArray]
+)
 
 #: One real number, as a function that takes a number or an array of them is
 #: handed it: a Python ``float`` or ``int``, or a numpy one (``np.float32``

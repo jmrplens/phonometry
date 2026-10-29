@@ -118,6 +118,16 @@ extends, an explicit ``__init__`` or ``__call__`` included):
   that is a head that tells the shape of its argument apart (rule A57),
   beside a last head that takes ``ArrayLike``; a head that a ``None``
   selects takes no number;
+* a ``Literal`` of texts and an alternative that takes any text never
+  stand side by side in one union of a parameter, an overload head, a
+  public record's field or the constructor it declares, at the top or
+  inside a container: numpy's ``ArrayLike`` admits any ``str`` and any
+  ``bytes``, and so do ``str``, anything and a sequence of texts (a text is
+  a sequence of texts), so ``termination: Literal["rigid", "free"] |
+  ArrayLike`` took ``"rigidd"`` as numbers and only the call refused it. A
+  choice beside numbers takes :data:`NUMERIC_ARRAY_LIKE`, the package's
+  array-like of numbers, which is ``ArrayLike`` without its texts and is
+  read as ``ArrayLike`` is by every other part of the rule;
 * a parameter whose annotation holds ``list``, ``dict`` or ``set``
   anywhere, at the top or inside (``Mapping[str, dict[str, str]]``),
   fails whatever the body does, on the implementation and on every head:
@@ -235,6 +245,45 @@ _ARRAY_LIKE = frozenset(
 
 #: Annotations that admit anything, an array-like among it.
 _ANYTHING = frozenset({"typing.Any", "typing_extensions.Any", "builtins.object"})
+
+#: What a ``str`` is by itself, whatever is asked of its items: a text is a
+#: sequence, an iterable, a collection, a container and a reversible of
+#: texts. One of these whose items take a text takes any text
+#: (``Sequence[str]``, ``Iterable[ArrayLike]``, a bare ``Sequence``).
+_TEXT_CONTAINERS = frozenset(
+    {
+        "typing.Sequence",
+        "typing.Iterable",
+        "typing.Collection",
+        "typing.Container",
+        "typing.Reversible",
+        "collections.abc.Sequence",
+        "collections.abc.Iterable",
+        "collections.abc.Collection",
+        "collections.abc.Container",
+        "collections.abc.Reversible",
+    }
+)
+
+#: The annotations that take any text as they stand: ``str`` and the
+#: protocols every text satisfies, besides ``ArrayLike`` (numpy's admits a
+#: ``str`` and a ``bytes``) and anything.
+_TEXT_WHOLES = frozenset(
+    {
+        "builtins.str",
+        "typing.Hashable",
+        "typing.Sized",
+        "collections.abc.Hashable",
+        "collections.abc.Sized",
+    }
+)
+
+#: The package's array-like of numbers, by its name below the package:
+#: numpy's ``ArrayLike`` without its texts. The classes its members name (the
+#: protocols of a nested sequence and of an object that converts itself) are
+#: read as ``ArrayLike`` is wherever an array-like of numbers is asked for,
+#: and never where a text is: a window's ``("kaiser", 8.6)`` is no number.
+NUMERIC_ARRAY_LIKE = "_internal.types.NumericArrayLike"
 
 #: The containers whose element type is invariant, by every spelling.
 _INVARIANT = frozenset(
@@ -561,7 +610,8 @@ class Finding:
     #: invariant container), ``"integer"`` or ``"flag"`` (a numpy scalar),
     #: ``"key"`` (a mapping's key), ``"context"`` (a union of mappings a
     #: written ``dict`` is not read against), ``"window"`` (a window SciPy
-    #: reads) or ``"name"`` (a quantity's family).
+    #: reads), ``"choice"`` (a ``Literal`` beside an alternative that takes
+    #: any text) or ``"name"`` (a quantity's family).
     part: str = "array"
     #: Whether it is a field a caller-built record stores the validated value
     #: in, which its constructor, not its field, is to admit.
@@ -622,6 +672,27 @@ class Annotations:
             for node in overloads._statements(tree.body):
                 if isinstance(node, ast.ClassDef):
                     self.classes[f"{module}.{node.name}"] = (module, node)
+        #: The classes the members of :data:`NUMERIC_ARRAY_LIKE` name, by their
+        #: dotted names: what an array-like of numbers is made of.
+        self.numeric = self._numeric_classes()
+
+    def _numeric_classes(self) -> frozenset[str]:
+        root = (
+            min(self.package.trees, key=len).split(".")[0] if self.package.trees else ""
+        )
+        alias = self.package.aliases.get(f"{root}.{NUMERIC_ARRAY_LIKE}")
+        if alias is None:
+            return frozenset()
+        return frozenset(
+            dotted
+            for where, member in self.package.members(*alias)
+            if (dotted := self.resolve(where, member)) in self.classes
+        )
+
+    @property
+    def array_like(self) -> frozenset[str]:
+        """What takes any array-like of numbers: ``ArrayLike`` and the package's own."""
+        return _ARRAY_LIKE | self.numeric
 
     def members(
         self,
@@ -651,9 +722,12 @@ class Annotations:
     def admits_array_like(
         self, module: str, node: ast.expr | None, bounds: dict[str, ast.expr]
     ) -> bool:
-        """Whether an annotation lets any array-like through: ``ArrayLike``, or anything."""
+        """Whether an annotation lets any array-like of numbers through.
+
+        ``ArrayLike``, :data:`NUMERIC_ARRAY_LIKE`, or anything.
+        """
         return any(
-            self.resolve(where, member) in _ARRAY_LIKE | _ANYTHING
+            self.resolve(where, member) in self.array_like | _ANYTHING
             for where, member in self.members(module, node, bounds)
         )
 
@@ -664,18 +738,25 @@ class Annotations:
         bounds: dict[str, ast.expr],
         wanted: frozenset[str],
     ) -> str | None:
-        """The member of an annotation that is one of *wanted*, as written, if one is."""
+        """The member of an annotation that is one of *wanted*, as written, if one is.
+
+        A member of the package's array-like of numbers is named by the alias,
+        which is what the annotation writes.
+        """
         for where, member in self.members(module, node, bounds):
-            if self.resolve(where, member) in wanted:
+            dotted = self.resolve(where, member)
+            if dotted in wanted:
+                if dotted in self.numeric:
+                    return NUMERIC_ARRAY_LIKE.rpartition(".")[2]
                 return ast.unparse(member)
         return None
 
     def names_array_like(
         self, module: str, node: ast.expr | None, bounds: dict[str, ast.expr]
     ) -> bool:
-        """Whether an annotation says ``ArrayLike``: what the function converts."""
+        """Whether an annotation says ``ArrayLike``, or the package's array-like of numbers."""
         return any(
-            self.resolve(where, member) in _ARRAY_LIKE
+            self.resolve(where, member) in self.array_like
             for where, member in self.members(module, node, bounds)
         )
 
@@ -781,13 +862,13 @@ class Annotations:
 
         ``np.integer[Any]`` (or a protocol every numpy integer satisfies,
         ``SupportsIndex``) for an integer, ``np.bool_`` for a flag; or
-        ``ArrayLike`` or anything, which take every numpy scalar. No
-        annotation at all admits it too.
+        ``ArrayLike``, the package's array-like of numbers or anything, which
+        take every numpy scalar. No annotation at all admits it too.
         """
         if node is None:
             return True
         return any(
-            self.resolve(where, member) in _ADMITS[kind] | _ARRAY_LIKE | _ANYTHING
+            self.resolve(where, member) in _ADMITS[kind] | self.array_like | _ANYTHING
             for where, member in self.members(module, node, bounds)
         )
 
@@ -879,7 +960,7 @@ class Annotations:
         an array input; inside a sequence it is a row of one.
         """
         dotted = self.resolve(module, node)
-        if dotted in overloads._ARRAYS:
+        if dotted in overloads._ARRAYS or dotted in self.numeric:
             return True
         if dotted not in _CONTAINERS or depth > _NESTING:
             return False
@@ -895,6 +976,14 @@ class Annotations:
     def _number_or_numbers(self, module: str, node: ast.expr, *, depth: int) -> bool:
         dotted = self.resolve(module, node)
         return dotted in _NUMBERS or self._holds_numbers(module, node, depth=depth)
+
+    def numbers(self, module: str, node: ast.expr) -> bool:
+        """Whether a member is what an array-like of numbers takes.
+
+        A number (a numpy one included), an array, or a container of numbers
+        at any depth: what :data:`NUMERIC_ARRAY_LIKE` admits of a member.
+        """
+        return self._number_or_numbers(module, node, depth=0)
 
     def narrow_items(
         self, module: str, node: ast.expr | None, bounds: dict[str, ast.expr]
@@ -924,7 +1013,8 @@ class Annotations:
     def _takes_an_item(self, module: str, item: ast.expr) -> bool:
         members = self.members(module, item)
         if any(
-            self.resolve(where, m) in _ARRAY_LIKE | _ANYTHING for where, m in members
+            self.resolve(where, m) in self.array_like | _ANYTHING
+            for where, m in members
         ):
             return True
         if not any(self._holds_numbers(where, m, depth=0) for where, m in members):
@@ -971,6 +1061,74 @@ class Annotations:
                     stack.extend(self.members(where, inner))
         return sorted(set(found))
 
+    def admits_any_text(self, module: str, member: ast.expr, depth: int = 0) -> bool:
+        """Whether one member of an annotation takes any text a caller writes.
+
+        ``ArrayLike`` (numpy's admits a ``str`` and a ``bytes``), anything,
+        ``str`` and the protocols a text satisfies, or a sequence, an
+        iterable or a collection whose items take one, since a text is a
+        sequence of texts. The package's array-like of numbers takes none.
+        """
+        dotted = self.resolve(module, member)
+        if dotted in _ARRAY_LIKE | _ANYTHING | _TEXT_WHOLES:
+            return True
+        if dotted not in _TEXT_CONTAINERS or depth > _NESTING:
+            return False
+        items = [item for item in _items(member) if not _is_ellipsis(item)]
+        return not items or any(
+            self.admits_any_text(where, inner, depth + 1)
+            for item in items
+            for where, inner in self.members(module, item)
+        )
+
+    def swallowed_choices(
+        self, module: str, node: ast.expr | None, bounds: dict[str, ast.expr]
+    ) -> list[tuple[str, str]]:
+        """The ``Literal`` choices an annotation sets beside an alternative that takes any text.
+
+        Every union of the annotation is read, at the top and inside a
+        container or a mapping (``Sequence[Literal["a"] | ArrayLike]``), its
+        aliases spelt out. A ``Literal`` of texts beside ``ArrayLike``,
+        ``str``, anything or a sequence of texts offers nothing a misspelt
+        choice is refused by: the other alternative takes it. Each comes as
+        the ``Literal`` and the alternative, as written.
+        """
+        found: list[tuple[str, str]] = []
+        stack: list[tuple[str, ast.expr, dict[str, ast.expr]]] = (
+            [] if node is None else [(module, node, bounds)]
+        )
+        seen = 0
+        while stack and seen < _MEMBERS_READ:
+            seen += 1
+            where, union, own = stack.pop()
+            members = self.members(where, union, own)
+            choices = [
+                ast.unparse(member)
+                for inner, member in members
+                if self.resolve(inner, member) in _LITERALS and _offers_texts(member)
+            ]
+            takers = [
+                ast.unparse(member)
+                for inner, member in members
+                if self.admits_any_text(inner, member)
+            ]
+            if choices and takers:
+                found.append((choices[0], takers[0]))
+            for inner, member in members:
+                dotted = self.resolve(inner, member)
+                if dotted in _LITERALS or (
+                    dotted is not None and dotted.partition(".")[0] == "numpy"
+                ):
+                    continue
+                for item in _items(member):
+                    stack.extend(
+                        (inner, each, {})
+                        for each in (
+                            item.elts if isinstance(item, ast.List) else [item]
+                        )
+                    )
+        return found
+
     def invariant(
         self, module: str, node: ast.expr | None, bounds: dict[str, ast.expr]
     ) -> list[str]:
@@ -992,6 +1150,14 @@ class Annotations:
 
 def _is_none(node: ast.expr) -> bool:
     return isinstance(node, ast.Constant) and node.value is None
+
+
+def _offers_texts(literal: ast.expr) -> bool:
+    """Whether a ``Literal`` lists a text among its choices (a ``str`` or a ``bytes``)."""
+    return any(
+        isinstance(value, ast.Constant) and isinstance(value.value, str | bytes)
+        for value in _items(literal)
+    )
 
 
 def _is_ellipsis(node: ast.expr) -> bool:
@@ -1679,6 +1845,16 @@ class Reader:
                     return method
         return None
 
+    def _typed(self, target: Target) -> frozenset[str]:
+        """The annotations of a callee's parameter that end a route of *target*.
+
+        The array part ends at ``ArrayLike`` and at the package's own
+        array-like of numbers alike: both say the callee converts.
+        """
+        if target is CONVERSION:
+            return target.typed | self.annotations.numeric
+        return target.typed
+
     def _ends(self, target: Target) -> dict[str, tuple[int | None, str | None]]:
         """The calls that end a route of *target*, by their dotted name."""
         if not target.relative:
@@ -2169,7 +2345,9 @@ class Reader:
         annotations = self.annotations
         for name in dict.fromkeys(received):
             field = fields[name]
-            named = annotations.names(field.module, field.annotation, {}, target.typed)
+            named = annotations.names(
+                field.module, field.annotation, {}, self._typed(target)
+            )
             if named is not None and (
                 target is CONVERSION or record in self.public_record_names
             ):
@@ -2211,7 +2389,9 @@ class Reader:
         annotations = self.annotations
         for parameter in dict.fromkeys(received):
             annotation = parameters[parameter].annotation
-            named = annotations.names(callee.module, annotation, bounds, target.typed)
+            named = annotations.names(
+                callee.module, annotation, bounds, self._typed(target)
+            )
             if named is not None and (
                 target is CONVERSION or reached in self.public_names
             ):
@@ -2403,8 +2583,10 @@ def findings_in(
                 _key_findings(reader, function, definition, path, bounds, method=method)
             )
         found.extend(_context_findings(reader, function, path, bounds, method=method))
+        found.extend(_choice_findings(reader, function, path, bounds, method=method))
     found.extend(_field_findings(reader, root))
     found.extend(_field_context_findings(reader, root))
+    found.extend(_record_choice_findings(reader, root))
     found.extend(_name_findings(reader, root))
     return sorted(set(found), key=lambda item: (item.path, item.line, item.parameter))
 
@@ -2516,6 +2698,95 @@ def _unconverted(
             f"sequence of numbers, and an item {how} converts any array-like"
         )
     return None
+
+
+#: What a finding of the choice part says, after the ``Literal`` and the
+#: alternative that swallows it.
+_SWALLOWED = (
+    "which takes any text, so a misspelt choice type-checks as that "
+    "alternative and only the call refuses it"
+)
+
+
+def _choice_findings(
+    reader: Reader,
+    function: overloads.Function,
+    path: str,
+    bounds: dict[str, ast.expr],
+    *,
+    method: bool,
+) -> list[Finding]:
+    """The parameters that set a ``Literal`` choice beside an alternative that takes any text.
+
+    Each definition a caller can reach is read, the implementation and every
+    overload head: a head is what a type checker matches a call against.
+    """
+    found: list[Finding] = []
+    for node in function.definitions:
+        own = {**bounds, **_type_bounds(node)}
+        for parameter in _arguments(node, method=method):
+            for choice, taker in reader.annotations.swallowed_choices(
+                function.module, parameter.annotation, own
+            ):
+                found.append(
+                    Finding(
+                        path,
+                        node.lineno,
+                        function.qualname,
+                        parameter.arg,
+                        f"sets {choice} beside {taker}, {_SWALLOWED}",
+                        part="choice",
+                    )
+                )
+    return found
+
+
+def _record_choice_findings(reader: Reader, root: pathlib.Path) -> list[Finding]:
+    """The fields of public records, and their declared constructors, that swallow a choice.
+
+    A record's generated ``__init__`` takes each field as annotated, and a
+    ``TYPE_CHECKING`` ``__init__`` is what a type checker reads instead: a
+    ``Literal`` beside an alternative that takes any text is read in both.
+    """
+    package = reader.package
+    annotations = reader.annotations
+    found: list[Finding] = []
+    for record in public_records(package, annotations):
+        module = annotations.classes[record][0]
+        path = repository_path(package.paths[module], root)
+        shown = record.removeprefix(f"{module}.")
+        for field in record_fields(package, annotations, record).values():
+            for choice, taker in annotations.swallowed_choices(
+                field.module, field.annotation, {}
+            ):
+                found.append(
+                    Finding(
+                        repository_path(package.paths[field.module], root),
+                        field.line,
+                        record.removeprefix(f"{field.module}."),
+                        field.name,
+                        f"sets {choice} beside {taker}, {_SWALLOWED}",
+                        part="choice",
+                    )
+                )
+        stub = _constructor_stub(annotations, record)
+        if stub is None:
+            continue
+        for parameter in _arguments(stub, method=True):
+            for choice, taker in annotations.swallowed_choices(
+                module, parameter.annotation, {}
+            ):
+                found.append(
+                    Finding(
+                        path,
+                        stub.lineno,
+                        f"{shown}.__init__",
+                        parameter.arg,
+                        f"sets {choice} beside {taker}, {_SWALLOWED}",
+                        part="choice",
+                    )
+                )
+    return found
 
 
 def _invariant_findings(
@@ -4075,7 +4346,7 @@ def takes_a_sequence(
 ) -> bool:
     """Whether a constructor parameter takes the sequence a conversion takes."""
     return node is None or any(
-        annotations.resolve(where, member) in _TAKES_A_SEQUENCE
+        annotations.resolve(where, member) in _TAKES_A_SEQUENCE | annotations.numeric
         for where, member in annotations.members(module, node)
     )
 
@@ -4463,11 +4734,16 @@ def _covers_member(
     """Whether one member of a parameter's annotation takes one member of a field's.
 
     The same member as written; ``ArrayLike`` or anything, which take any
-    value; or the same generic whose every argument takes the field's
-    (``Mapping[K, ArrayLike]`` takes a ``Mapping[K, Sequence[float]]``).
+    value; the package's array-like of numbers, which takes a number, an
+    array and a sequence of numbers; or the same generic whose every argument
+    takes the field's (``Mapping[K, ArrayLike]`` takes a ``Mapping[K,
+    Sequence[float]]``).
     """
     (field_module, field_member), (taken_module, taken_member) = field, taken
-    if annotations.resolve(taken_module, taken_member) in _ARRAY_LIKE | _ANYTHING:
+    taker = annotations.resolve(taken_module, taken_member)
+    if taker in _ARRAY_LIKE | _ANYTHING:
+        return True
+    if taker in annotations.numeric and annotations.numbers(field_module, field_member):
         return True
     if ast.unparse(field_member) == ast.unparse(taken_member):
         return True
@@ -4849,7 +5125,7 @@ def family(
         if isinstance(member, ast.Constant) and member.value is None:
             continue
         dotted = annotations.resolve(where, member)
-        if dotted in overloads._ARRAYS | _ARRAY_LIKE | _CONTAINERS:
+        if dotted in overloads._ARRAYS | annotations.array_like | _CONTAINERS:
             kinds.add("array")
         elif dotted in _REALS:
             kinds.add("real")
@@ -5026,8 +5302,9 @@ def main(argv: Sequence[str] | None = None) -> int:
             "numpy scalar its body validates, none holds an invariant list, "
             "dict or set or a mapping a narrower key cannot match, each "
             "mapping a written dict is read against is offered alone, every "
-            "window takes its parameters, and every quantity of the vocabulary "
-            "keeps its family of numbers."
+            "window takes its parameters, no choice stands beside a type that "
+            "takes any text, and every quantity of the vocabulary keeps its "
+            "family of numbers."
         )
         return 0
     if found:
@@ -5048,7 +5325,10 @@ def main(argv: Sequence[str] | None = None) -> int:
             "union a dict written in the call needs as its context in an "
             "overload head of its own, the heads taking the same other "
             "arguments; a window SciPy reads as a name or a "
-            "tuple of a name and its parameters; a sample rate as the "
+            "tuple of a name and its parameters; a Literal choice beside "
+            "numbers with NumericArrayLike (src/phonometry/_internal/types.py), "
+            "never ArrayLike, str or a sequence of texts, which take any text; "
+            "a sample rate as the "
             "float every 'fs' of the API is. A parameter narrower on purpose "
             "goes in EXEMPT, a quantity of another family in FAMILY_EXEMPT, a "
             "field a caller-built record stores is admitted by its constructor "

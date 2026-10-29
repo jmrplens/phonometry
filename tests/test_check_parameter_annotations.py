@@ -1816,3 +1816,194 @@ def test_a_sample_rate_keeps_one_family_across_the_api(
     kept, stale = cpa.checked(findings, exempt)
     assert [f.function for f in kept] == ["level_whole"]
     assert stale == [(path, "Gone", "fs")]
+
+
+_NUMERIC_TYPES = """
+from collections.abc import Iterator
+from typing import Protocol
+
+
+class SupportsNumericArray(Protocol):
+    def __array__(self) -> np.ndarray[Any, np.dtype[np.number[Any] | np.bool_]]: ...
+
+
+class NestedSequence[T](Protocol):
+    def __len__(self, /) -> int: ...
+    def __getitem__(self, index: int, /) -> T | NestedSequence[T]: ...
+    def __contains__(self, value: object, /) -> bool: ...
+    def __iter__(self, /) -> Iterator[T | NestedSequence[T]]: ...
+
+
+NumericArrayLike = (
+    complex
+    | NestedSequence[complex]
+    | SupportsNumericArray
+    | NestedSequence[SupportsNumericArray]
+)
+"""
+
+
+def test_a_choice_beside_an_alternative_that_takes_any_text_is_refused(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``ArrayLike`` admits any ``str``, so a misspelt choice beside it type-checks.
+
+    A ``Literal`` of texts is refused beside ``ArrayLike``, ``str`` or a
+    sequence of texts, at the top or inside a container, written or behind
+    an alias of an alias, on an overload head, in a record's field and in
+    the constructor a record declares. Beside the package's array-like of
+    numbers, beside a pair or as a mapping's key, and as integer choices, it
+    passes, and so does a private helper.
+    """
+    refused = _refused(
+        tmp_path,
+        part="choice",
+        **{
+            "_internal.types": _NUMERIC_TYPES,
+            "api": """
+            from dataclasses import dataclass
+            from typing import Literal
+
+            from ._internal.types import NumericArrayLike
+
+            Termination = Literal["rigid", "free"]
+            Spelt = Termination | ArrayLike
+            Values = Mapping[str, float] | ArrayLike
+
+            __all__ = [
+                "written", "aliased", "banded", "nested", "texts", "text",
+                "headed", "Ground", "Built", "numeric", "paired", "keyed",
+                "whole",
+            ]
+
+            def written(termination: Literal["rigid", "free"] | ArrayLike) -> None: ...
+
+            def aliased(termination: Spelt = "rigid") -> None: ...
+
+            def banded(values: Literal["auto"] | Values) -> None: ...
+
+            def nested(terms: Sequence[Termination | ArrayLike]) -> None: ...
+
+            def texts(labels: Literal["auto"] | Sequence[str]) -> None: ...
+
+            def text(name: Termination | str | None = None) -> None: ...
+
+            @overload
+            def headed(x: ArrayLike, state: Termination | ArrayLike) -> None: ...
+            @overload
+            def headed(x: None, state: Termination | NumericArrayLike) -> None: ...
+            def headed(
+                x: ArrayLike | None, state: Termination | NumericArrayLike
+            ) -> None: ...
+
+            @dataclass(frozen=True)
+            class Ground:
+                resistivity: Literal["G", "H"] | ArrayLike = "G"
+
+            @dataclass(frozen=True, kw_only=True)
+            class Built:
+                resistivity: float | Literal["G", "H"] | NDArray[np.float64] = "G"
+
+                if TYPE_CHECKING:
+
+                    def __init__(
+                        self, *, resistivity: Literal["G", "H"] | ArrayLike = "G"
+                    ) -> None: ...
+
+            def numeric(termination: Termination | NumericArrayLike) -> None: ...
+
+            def paired(window: Termination | tuple[ArrayLike, ArrayLike]) -> None: ...
+
+            def keyed(by_side: Mapping[Termination, ArrayLike]) -> None: ...
+
+            def whole(fraction: Literal[1, 3] | ArrayLike) -> None: ...
+
+            def _helper(termination: Termination | ArrayLike) -> None: ...
+            """,
+        },
+    )
+    assert sorted(refused) == [
+        "Built.__init__(resistivity)",
+        "Ground(resistivity)",
+        "aliased(termination)",
+        "banded(values)",
+        "headed(state)",
+        "nested(terms)",
+        "text(name)",
+        "texts(labels)",
+        "written(termination)",
+    ]
+    assert refused["written(termination)"] == [
+        "sets Literal['rigid', 'free'] beside ArrayLike, which takes any text, so "
+        "a misspelt choice type-checks as that alternative and only the call "
+        "refuses it"
+    ]
+    assert refused["texts(labels)"][0].startswith(
+        "sets Literal['auto'] beside Sequence[str]"
+    )
+    assert len(refused["headed(state)"]) == 1
+
+
+def test_the_array_like_of_numbers_is_read_as_one(tmp_path: pathlib.Path) -> None:
+    """The package's array-like of numbers converts, as ``ArrayLike`` does.
+
+    A parameter handed to a helper that takes it ends its route there, a
+    record whose constructor takes it for a converted field says what that
+    constructor takes, and the live package names the two classes the alias
+    is made of, so renaming one or the alias cannot silently turn it off.
+    """
+    root = _package(
+        tmp_path,
+        **{
+            "_internal.types": _NUMERIC_TYPES,
+            "api": """
+            from dataclasses import dataclass
+            from typing import Literal
+
+            from ._internal.types import NumericArrayLike
+
+            __all__ = ["level", "Ground"]
+
+            def _state(state: Literal["zero"] | NumericArrayLike) -> float:
+                return 0.0 if isinstance(state, str) else float(np.sum(state))
+
+            def level(state: list[float]) -> float:
+                return _state(state)
+
+            @dataclass(frozen=True, kw_only=True)
+            class Ground:
+                resistivity: float | Literal["G"] | NDArray[np.float64] = "G"
+
+                if TYPE_CHECKING:
+
+                    def __init__(
+                        self, *, resistivity: Literal["G"] | NumericArrayLike = "G"
+                    ) -> None: ...
+
+                def __post_init__(self) -> None:
+                    if not isinstance(self.resistivity, str):
+                        held = np.asarray(self.resistivity, dtype=np.float64)
+                        object.__setattr__(self, "resistivity", held)
+            """,
+        },
+    )
+    package = overloads.Package(sorted(root.rglob("*.py")), root)
+    reader = cpa.Reader(package, frozenset())
+    assert reader.annotations.numeric == {
+        "pkg._internal.types.NestedSequence",
+        "pkg._internal.types.SupportsNumericArray",
+    }
+    findings = cpa.findings_in(sorted(root.rglob("*.py")), root, handed_on=frozenset())
+    assert {(f.function, f.parameter) for f in findings} == {("level", "state")}
+    assert any(
+        "handed to _state(state: NumericArrayLike) converts" in f.problem
+        for f in findings
+    ), [f.problem for f in findings]
+    assert cpa.constructor_problems(reader, "pkg.api.Ground") == []
+    live = cpa.Reader(
+        overloads.Package(ast_scan.python_files([], cpa.SOURCE), cpa.SOURCE)
+    )
+    assert live.annotations.numeric == {
+        "phonometry._internal.types.NestedSequence",
+        "phonometry._internal.types.SupportsNumericArray",
+    }

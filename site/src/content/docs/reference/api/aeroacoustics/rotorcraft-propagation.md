@@ -391,7 +391,7 @@ terrain_screening_adjustment(
     heights_m: ArrayLike,
     *,
     frequencies: ArrayLike,
-    flow_resistivity: Literal['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'] | ArrayLike = 'G',
+    flow_resistivity: Literal['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'] | complex | NestedSequence[complex] | SupportsNumericArray | NestedSequence[SupportsNumericArray] = 'G',
 ) -> TerrainScreeningResult
 ```
 

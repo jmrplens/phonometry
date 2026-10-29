@@ -64,7 +64,7 @@ diffuse_field_absorption(
     *,
     angle_limit_rad: float = 1.5707963267948966,
     n_quadrature_points: int | np.integer[Any] = 64,
-    termination: Literal['rigid', 'free'] | ArrayLike = 'rigid',
+    termination: Literal['rigid', 'free'] | complex | NestedSequence[complex] | SupportsNumericArray | NestedSequence[SupportsNumericArray] = 'rigid',
     fluid: Fluid = ...,
 ) -> DiffuseFieldAbsorptionResult
 ```
@@ -143,7 +143,7 @@ layered_absorber(
     layers: Sequence[AirLayer | PorousLayer | PerforatedPlateLayer | MicroperforatedPlateLayer | MembraneLayer | PoroelasticLayer],
     *,
     angle_rad: float = 0.0,
-    termination: Literal['rigid', 'free'] | ArrayLike = 'rigid',
+    termination: Literal['rigid', 'free'] | complex | NestedSequence[complex] | SupportsNumericArray | NestedSequence[SupportsNumericArray] = 'rigid',
     fluid: Fluid = ...,
 ) -> LayeredAbsorberResult
 ```

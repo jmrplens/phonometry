@@ -76,7 +76,7 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
-    from .._internal.types import GroundClass
+    from .._internal.types import GroundClass, NumericArrayLike
 
 __all__ = [
     "MeanGroundPlaneResult",
@@ -753,7 +753,7 @@ def terrain_screening_adjustment(
     heights_m: ArrayLike,
     *,
     frequencies: ArrayLike,
-    flow_resistivity: GroundClass | ArrayLike = "G",
+    flow_resistivity: GroundClass | NumericArrayLike = "G",
 ) -> TerrainScreeningResult:
     r"""Ground effect and terrain screening over a vertical section (§A.4.4-A.4.5).
 

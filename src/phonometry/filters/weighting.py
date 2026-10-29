@@ -116,6 +116,7 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike, DTypeLike
 
     from .._i18n import Language
+    from .._internal.types import NumericArrayLike
 
 Mode = Literal["fast", "slow", "impulse"]
 #: How a time weighting starts: from rest, or settled on the first sample.
@@ -962,7 +963,7 @@ def weighting_filter(
 
 def _prepare_time_weighting_initial_state(
     x_sq: np.ndarray,
-    initial_state: InitialState | ArrayLike | None,
+    initial_state: InitialState | NumericArrayLike | None,
 ) -> np.ndarray:
     """Return the previous output state ``y[-1]`` for time weighting."""
     invalid_initial_state_message = (
@@ -1030,7 +1031,7 @@ def time_weighting(
     x: Signal,
     fs: float | None = ...,
     mode: Mode = ...,
-    initial_state: InitialState | ArrayLike | None = ...,
+    initial_state: InitialState | NumericArrayLike | None = ...,
 ) -> TimeWeightedEnvelope: ...
 
 
@@ -1039,7 +1040,7 @@ def time_weighting(
     x: ArrayLike,
     fs: float,
     mode: Mode = ...,
-    initial_state: InitialState | ArrayLike | None = ...,
+    initial_state: InitialState | NumericArrayLike | None = ...,
 ) -> np.ndarray: ...
 
 
@@ -1047,7 +1048,7 @@ def time_weighting(
     x: Signal | ArrayLike,
     fs: float | None = None,
     mode: Mode = "fast",
-    initial_state: InitialState | ArrayLike | None = None,
+    initial_state: InitialState | NumericArrayLike | None = None,
 ) -> TimeWeightedEnvelope | np.ndarray:
     """Apply time weighting to a signal (Exponential averaging).
 

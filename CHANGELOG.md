@@ -3722,6 +3722,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   needs one at a time that no overload splits; rule A58 of the contributor
   guide states both.
 
+- **A misspelt choice beside numbers is a type error.** The `initial_state`
+  of `filters.time_weighting`, the `flow_resistivity` of
+  `aircraft.terrain_screening_adjustment` and of `aircraft.RotorcraftGround`,
+  and the `termination` of `materials.layered_absorber` and of
+  `materials.diffuse_field_absorption` take one of a few words or numbers.
+  The numbers were annotated with numpy's `ArrayLike`, which admits any text,
+  so `termination="rigidd"` type-checked and only the call refused it. They
+  take an array-like of numbers that admits no text now (a number, a
+  sequence of numbers, a numpy number or array of a number dtype, or anything
+  that converts itself to one), so a type checker refuses the misspelling as
+  the call does; nothing changes at run time.
+  `scripts/check_parameter_annotations.py` fails on a `Literal` choice beside
+  an alternative that takes any text, and rule A59 of the contributor guide
+  states it.
+
 - **A function of a number or an array of them returns an array for an array,
   a zero-dimensional one included, and says so in its signature.** Ninety
   public functions and methods such as `room.room_constant`,

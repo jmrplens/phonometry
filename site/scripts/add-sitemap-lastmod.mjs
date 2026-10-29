@@ -16,12 +16,17 @@
 // read the sitemap that 87 pages had changed on every deploy. A URL with no
 // source now fails the build, listed with the rest, and so does any git
 // failure while the dates are read: a sitemap that cannot be dated is not
-// published with guessed dates.
+// published with guessed dates. So does a build with no sitemap to stamp:
+// the shards are the ones sitemap-index.xml lists, and the step used to look
+// for them by a file name of its own, warn when it found none and pass, which
+// a renamed shard would have turned into a sitemap with no dates at all.
+// check-crawl.mjs then holds every URL of the sitemap to its page's
+// `dateModified` and footer.
 //
 // Usage: node scripts/add-sitemap-lastmod.mjs [site root]   (default: this
 // script's site, which is how `postbuild` runs it; the tests hand it a site
 // of their own)
-import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { basePath, siteUrl } from "../src/data/site.mjs";
@@ -57,19 +62,22 @@ function sourceFileFor(url) {
 	return null;
 }
 
-if (!existsSync(distDir)) {
-	console.warn("[sitemap-lastmod] dist/ not found; nothing to stamp");
-	process.exit(0);
-}
+const fail = (message) => {
+	console.error(`[sitemap-lastmod] FAIL ${message}`);
+	process.exit(1);
+};
 
-// Match sitemap.xml and sitemap-<n>.xml, but never the sitemap index.
-const sitemaps = readdirSync(distDir)
-	.filter((f) => /^sitemap(-\d+)?\.xml$/.test(f) && f !== "sitemap-index.xml")
-	.map((f) => join(distDir, f));
-if (sitemaps.length === 0) {
-	console.warn("[sitemap-lastmod] no child sitemap found; nothing to stamp");
-	process.exit(0);
-}
+// The shards are the files the index lists, on this site's origin.
+const index = join(distDir, "sitemap-index.xml");
+if (!existsSync(index)) fail(`${index} does not exist: no sitemap to stamp.`);
+const sitemaps = [...readFileSync(index, "utf8").matchAll(/<loc>([^<]+)<\/loc>/g)].map(([, loc]) => {
+	const prefix = `${siteUrl}${basePath}/`;
+	if (!loc.startsWith(prefix)) fail(`the sitemap index lists ${loc}, outside ${prefix}.`);
+	const file = join(distDir, loc.slice(prefix.length));
+	if (!existsSync(file)) fail(`the sitemap index lists ${loc}, which the build did not write.`);
+	return file;
+});
+if (sitemaps.length === 0) fail(`${index} lists no sitemap: nothing would carry a date.`);
 
 // Every <url> block that has no <lastmod> yet, matched whole so that a run
 // over a sitemap already stamped leaves it as it is.
@@ -122,7 +130,8 @@ for (const [file, xml] of xmls) {
 		writeFileSync(file, out);
 		console.log(
 			`[sitemap-lastmod] stamped ${changed} URLs in ${file.replace(distDir, "dist")} ` +
-				`(${dates.pages} pages dated, ${dates.blobs} page versions read in ${dates.rounds} round(s))`,
+				`(${dates.pages} pages dated, ${dates.blobs} page versions read in ${dates.rounds} round(s), ` +
+				`${dates.raised} of the ${dates.sourced} built from other files dated by them)`,
 		);
 	}
 }

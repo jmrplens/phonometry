@@ -12,7 +12,10 @@
  * So `datePublished` comes from the commit that added the file, and a rename
  * carries that date to the file's new path. All of it is read in one pass over
  * the docs tree, on the first page that asks, and every page after that is
- * answered from the map.
+ * answered from the map. The day is the commit's day in UTC, as the modified
+ * date's is (src/lib/content-dates.mjs): on the day its committer wrote, a page
+ * committed after midnight in a later time zone would be published the day
+ * after the day it says it last changed.
  *
  * It used to be one `git log --follow` per page, and that was wrong twice. It
  * was slow: a synchronous process per page stops the event loop, so the build's
@@ -34,6 +37,8 @@
 import { execFileSync } from 'node:child_process';
 import { realpathSync } from 'node:fs';
 import { isAbsolute, relative, resolve, sep } from 'node:path';
+
+import { isoDay } from './content-dates.mjs';
 
 /** Where the docs collection lives, from the repository's root. */
 const DOCS_TREE = 'site/src/content/docs';
@@ -59,7 +64,7 @@ function older(current, candidate) {
 
 /**
  * The add each path goes back to, from `git log -z --name-status` written
- * oldest first: `C <time> <date>` for a commit, then a status and its paths,
+ * oldest first: `C <time>` for a commit, then a status and its paths,
  * every field ended by a NUL so that no file name needs quoting.
  *
  * @param {string} log
@@ -74,8 +79,8 @@ function addsIn(log) {
     // the next field.
     const field = fields[i].trimStart();
     if (field.startsWith('C ')) {
-      const [, time, stamp] = field.split(' ');
-      commit = { time: Number(time), date: stamp.slice(0, 10) };
+      const time = Number(field.slice(2));
+      commit = { time, date: isoDay(new Date(time * 1000)) };
     } else if (field === 'A') {
       // A file resurrected after a delete has several adds; the oldest is the
       // publication date.
@@ -149,7 +154,7 @@ function readHistory() {
       '-l0',
       '--name-status',
       '-z',
-      '--format=C %ct %cI',
+      '--format=C %ct',
       '--',
       DOCS_TREE,
     );
@@ -180,7 +185,7 @@ let history;
  * @param {string} filePath Absolute path to the content file, or relative to
  *   the working directory: `route.entry.filePath` is relative to the site's
  *   root, which is where a build runs.
- * @returns {string|undefined} ISO-8601 date (`YYYY-MM-DD`), or undefined when
+ * @returns {string|undefined} The UTC day (`YYYY-MM-DD`), or undefined when
  *   the file is untracked or outside the docs tree, git is unavailable, or the
  *   checkout is shallow.
  */

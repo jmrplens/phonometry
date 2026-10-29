@@ -1,0 +1,117 @@
+{
+  "_comment": [
+    "The pages whose text is built from data outside their own file, and that data.",
+    "src/lib/content-dates.mjs dates a page by the last commit that changed its content;",
+    "a page listed here is also dated by the newest commit to each of its sources, so a",
+    "count, a table or a report it renders moves its date the day it changes.",
+    "Paths are from the repository root, and one ending in / is a directory.",
+    "In \"sources\", every commit that changed a file counts, except that a directory of",
+    "the content tree stands for its pages, each dated by the page rule. \"counts\" names",
+    "each number of files a page shows after the src/data/repo-stats.mjs export that",
+    "computes it, with the git pathspecs of those files, and only a commit that changed",
+    "how many there are moves the page. The build fails on a page or a source HEAD does",
+    "not have, and site/scripts/content-dates.test.mjs fails on a page that imports data,",
+    "or a component built from it, without an entry here, and on a count whose files are",
+    "not the ones repo-stats.mjs counts. Keys beginning with an underscore are notes."
+  ],
+  "entries": [
+    {
+      "_why": "The landing page states the conformance counts, the release, the catalogue rows and how many guides, API pages and fiches there are. The counts are those the summary banner prints, which make conformance draws from the report and CI holds to it; the report itself also changes with every value and name in it, which the landing page does not show.",
+      "pages": ["site/src/content/docs/index.mdx", "site/src/content/docs/es/index.mdx"],
+      "sources": [
+        ".github/badges/conformance-summary.svg",
+        "VERSION",
+        "site/src/data/home.ts",
+        "site/src/components/home/",
+        "site/src/generated/catalogues.mjs"
+      ],
+      "counts": {
+        "guides": [
+          "site/src/content/docs/aircraft/",
+          "site/src/content/docs/buildings/",
+          "site/src/content/docs/devices/",
+          "site/src/content/docs/environment/",
+          "site/src/content/docs/materials/",
+          "site/src/content/docs/perception/",
+          "site/src/content/docs/signals/",
+          "site/src/content/docs/simulation/",
+          "site/src/content/docs/underwater/",
+          "site/src/content/docs/vibration/",
+          ":(exclude,glob)site/src/content/docs/**/index.*"
+        ],
+        "apiPages": [
+          "site/src/content/docs/reference/api/",
+          ":(exclude,glob)site/src/content/docs/**/index.*"
+        ],
+        "fiches": [":(glob).github/reports/*.pdf"]
+      }
+    },
+    {
+      "_why": "The conformance report is the report itself, rendered.",
+      "pages": [
+        "site/src/content/docs/reference/conformance.mdx",
+        "site/src/content/docs/es/reference/conformance.mdx"
+      ],
+      "sources": ["docs/conformance.json", "site/src/components/Conformance.astro"]
+    },
+    {
+      "_why": "These guides quote the conformance counts, as the summary banner prints them.",
+      "pages": [
+        "site/src/content/docs/start/getting-started.mdx",
+        "site/src/content/docs/es/start/getting-started.mdx",
+        "site/src/content/docs/signals/metrology/compliance-verification.mdx",
+        "site/src/content/docs/es/signals/metrology/compliance-verification.mdx"
+      ],
+      "sources": [".github/badges/conformance-summary.svg"]
+    },
+    {
+      "_why": "This guide quotes the conformance counts and the number of errata entries.",
+      "pages": [
+        "site/src/content/docs/start/why-phonometry.mdx",
+        "site/src/content/docs/es/start/why-phonometry.mdx"
+      ],
+      "sources": [".github/badges/conformance-summary.svg", "docs/ERRATA.md"]
+    },
+    {
+      "_why": "The glossary is its data module, rendered.",
+      "pages": [
+        "site/src/content/docs/reference/glossary.mdx",
+        "site/src/content/docs/es/reference/glossary.mdx"
+      ],
+      "sources": ["site/src/data/glossary.mjs", "site/src/components/Glossary.astro"]
+    },
+    {
+      "_why": "The index of fiches lists every fiche the repository ships.",
+      "pages": [
+        "site/src/content/docs/reference/reports.mdx",
+        "site/src/content/docs/es/reference/reports.mdx"
+      ],
+      "sources": ["site/src/data/reports.mjs", "site/src/components/ReportIndex.astro"],
+      "counts": { "fiches": [":(glob).github/reports/*.pdf"] }
+    },
+    {
+      "_why": "Each catalogue page renders its tables from the generated catalogue data.",
+      "pages": ["site/src/content/docs/reference/catalogues/"],
+      "sources": ["site/src/generated/catalogues.mjs", "site/src/components/Catalogues.astro"]
+    },
+    {
+      "_why": "The Spanish catalogue pages render the same tables with their Spanish text.",
+      "pages": ["site/src/content/docs/es/reference/catalogues/"],
+      "sources": [
+        "site/src/generated/catalogues.mjs",
+        "site/src/components/Catalogues.astro",
+        "site/src/data/catalogue-es.json"
+      ]
+    },
+    {
+      "_why": "The errata index lists every entry of every family page.",
+      "pages": ["site/src/content/docs/reference/errata/index.mdx"],
+      "sources": ["site/src/content/docs/reference/errata/"]
+    },
+    {
+      "_why": "The Spanish errata index lists every entry of every Spanish family page.",
+      "pages": ["site/src/content/docs/es/reference/errata/index.mdx"],
+      "sources": ["site/src/content/docs/es/reference/errata/"]
+    }
+  ]
+}

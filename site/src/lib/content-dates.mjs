@@ -23,6 +23,20 @@
  * The commit that created a page always counts, listed or not: no page is
  * older than its first version.
  *
+ * Some pages are built from data outside their own file: the landing page
+ * states the conformance counts and the release, the conformance report
+ * renders `docs/conformance.json`, a catalogue page renders its table.
+ * Their file can stand still while what a reader sees changes, so
+ * `site/date-sources.json` lists them with the files they are built from,
+ * and such a page is dated by the newest of its own date and theirs. Every
+ * commit to a source counts, since a source is data rather than a page with
+ * frontmatter; a source inside the content tree stands for the pages there,
+ * each dated by the rule above; and a count of files, which is all some
+ * pages show of a directory, moves only with a commit that changed how many
+ * there are. The build fails on a page or a source that HEAD does not have,
+ * and site/scripts/content-dates.test.mjs fails on a page that imports data
+ * or a component built from it without being listed.
+ *
  * How it is read. The docs job checks out with `filter: blob:none`: every
  * commit and tree, no historical blob. A `git log -p` over the content tree
  * would fetch the old blobs on demand, a request per commit, and its output
@@ -35,11 +49,10 @@
  * in one request per round: a page is dated by its newest change most of the
  * time, and a page whose newest changes were frontmatter-only asks for twice
  * as many pairs in each round that follows, so a run of n such commits costs
- * about log2(n) requests. On the history as it stood when this was written
- * that was 7 rounds and about 2500 page versions, under ten seconds from a
- * blobless clone of GitHub. Every git call streams its output, and any
- * failure throws: a build that cannot read the dates stops instead of
- * publishing guesses.
+ * about log2(n) requests. The sources are read from trees alone too: their
+ * dates need no blob. Every git call streams its output, and any failure
+ * throws: a build that cannot read the dates stops instead of publishing
+ * guesses.
  */
 import { spawn } from 'node:child_process';
 import { existsSync, readFileSync, statSync } from 'node:fs';
@@ -50,6 +63,9 @@ export const CONTENT_DIR = 'src/content/docs';
 
 /** The commits that move no date, relative to the site root. */
 export const IGNORE_REVS = 'date-ignore-revs.txt';
+
+/** The pages built from data outside their file, and that data; relative to the site root. */
+export const DATE_SOURCES = 'date-sources.json';
 
 /** The frontmatter keys whose changes move no date. */
 export const DATELESS_KEYS = Object.freeze(['title', 'description', 'sidebar']);
@@ -224,12 +240,81 @@ export function readIgnoreRevs(file) {
 }
 
 /**
- * The history of the content tree from trees alone: each commit, newest first,
- * with the files it changed and their old and new blob ids.
+ * The entries of `site/date-sources.json`: each names pages (`pages`), the
+ * files they are built from (`sources`) and the sets of files they count
+ * (`counts`, each a list of git pathspecs under the name of the number the
+ * page shows). Paths are from the repository root, as git names them, and
+ * one ending in `/` is a directory. Keys that begin with an underscore are
+ * notes. No file means no page has sources.
  *
+ * @param {string} file
+ * @returns {Array<{ pages: string[], sources: string[], counts: Record<string, string[]> }>}
+ */
+export function readDateSources(file) {
+  if (!existsSync(file)) return [];
+  let data;
+  try {
+    data = JSON.parse(readFileSync(file, 'utf8'));
+  } catch (error) {
+    throw new Error(`${file}: ${error.message}`);
+  }
+  if (!Array.isArray(data?.entries)) throw new Error(`${file}: no "entries" list.`);
+  return data.entries.map((entry, index) => {
+    const where = `${file}, entry ${index + 1}`;
+    const unknown = Object.keys(entry ?? {}).filter(
+      (key) => !key.startsWith('_') && !['pages', 'sources', 'counts'].includes(key),
+    );
+    if (unknown.length > 0) throw new Error(`${where}: unknown key(s) ${unknown.join(', ')}.`);
+    const paths = (value, key, { magic = false } = {}) => {
+      const list = value ?? [];
+      const bad = Array.isArray(list)
+        ? list.filter(
+            (path) =>
+              typeof path !== 'string' ||
+              path === '' ||
+              path.startsWith('/') ||
+              path.split('/').includes('..') ||
+              (!magic && path.startsWith(':')),
+          )
+        : [list];
+      if (bad.length > 0) {
+        throw new Error(
+          `${where}: "${key}" takes paths from the repository root` +
+            `${magic ? ' or git pathspecs' : ''}, not ${JSON.stringify(bad[0])}.`,
+        );
+      }
+      return list;
+    };
+    const pages = paths(entry.pages, 'pages');
+    const sources = paths(entry.sources, 'sources');
+    const counted = entry.counts ?? {};
+    if (typeof counted !== 'object' || Array.isArray(counted) || counted === null) {
+      throw new Error(`${where}: "counts" maps the name of each number to its pathspecs.`);
+    }
+    const counts = Object.fromEntries(
+      Object.entries(counted).map(([name, set]) => {
+        const specs = paths(set, `counts.${name}`, { magic: true });
+        if (specs.length === 0) throw new Error(`${where}: no pathspec for the count ${name}.`);
+        return [name, specs];
+      }),
+    );
+    if (pages.length === 0) throw new Error(`${where} names no page.`);
+    if (sources.length === 0 && Object.keys(counts).length === 0) {
+      throw new Error(`${where} names no source.`);
+    }
+    return { pages, sources, counts };
+  });
+}
+
+/**
+ * The history of some paths from trees alone: each commit, newest first, with
+ * the files it changed under them and their old and new blob ids.
+ *
+ * @param {string} repo
+ * @param {string[]} pathspecs
  * @returns {Promise<Array<{ sha: string, date: Date, changes: Array<{ status: string, from: string, to: string, path: string }> }>>}
  */
-async function readHistory(repo, pathspec) {
+async function readHistory(repo, pathspecs) {
   const commits = [];
   let meta = null; // The raw line waiting for its path.
   let expectDate = false;
@@ -264,7 +349,7 @@ async function readHistory(repo, pathspec) {
       '--no-renames',
       '-z',
       '--',
-      pathspec,
+      ...pathspecs,
     ],
     { onData: (chunk) => fields.push(chunk) },
   );
@@ -360,7 +445,7 @@ async function readBlobs(repo, oids) {
  * @returns {Promise<{ dates: Map<string, Date>, rounds: number, blobs: number }>}
  */
 async function resolveDates({ repo, pathspec, ignore, pages }) {
-  const history = await readHistory(repo, pathspec);
+  const history = await readHistory(repo, [pathspec]);
 
   const touched = new Set(history.map((commit) => commit.sha));
   const stale = [...ignore].filter((sha) => !touched.has(sha));
@@ -467,6 +552,115 @@ async function resolveDates({ repo, pathspec, ignore, pages }) {
   return { dates, rounds, blobs: texts.size };
 }
 
+/**
+ * The files of HEAD that some pathspecs match, matched the way `git log`
+ * matches them: a diff from the empty tree. (`git ls-files` reads the index,
+ * and lets a file through that an excluded glob of every `index.*` at any
+ * depth names.)
+ *
+ * @param {string} repo
+ * @param {string[]} pathspecs
+ * @returns {Promise<string[]>}
+ */
+export async function filesAtHead(repo, pathspecs) {
+  const empty = (await gitText(repo, ['hash-object', '-t', 'tree', '--stdin'], { input: '' })).trim();
+  const files = [];
+  const listing = nulFields((path) => path && files.push(path));
+  await git(repo, ['diff-tree', '-r', '-z', '--name-only', '--no-renames', empty, 'HEAD', '--', ...pathspecs], {
+    onData: (chunk) => listing.push(chunk),
+  });
+  listing.end();
+  return files;
+}
+
+/** Whether a path from site/date-sources.json names `path`: the file, or a directory holding it. */
+const names = (spec, path) => (spec.endsWith('/') ? path.startsWith(spec) : path === spec);
+
+/** The later of two dates, either of which may be missing. */
+const later = (a, b) => (a === undefined || (b !== undefined && b > a) ? b : a);
+
+/**
+ * Move the date of each page `site/date-sources.json` lists to the newest
+ * change of what it is built from, when that is later than its own.
+ *
+ * @param {{ repo: string, pathspec: string, pages: string[], dates: Map<string, Date>, entries: ReturnType<typeof readDateSources> }} options
+ * @returns {Promise<{ sourced: number, raised: number }>} How many pages have
+ *   sources, and how many of them a source dates.
+ */
+async function applySources({ repo, pathspec, pages, dates, entries }) {
+  const content = `${pathspec}/`;
+  const stale = (what) =>
+    new Error(`${DATE_SOURCES} names ${what}, which HEAD does not have: a file moved or renamed?`);
+  for (const spec of entries.flatMap((entry) => entry.pages)) {
+    if (!spec.startsWith(content)) {
+      throw new Error(`${DATE_SOURCES} names ${spec} as a page, and pages are under ${content}.`);
+    }
+    if (!pages.some((page) => names(spec, page))) throw stale(`the page(s) ${spec}`);
+  }
+
+  /** Source path, or counted set as JSON -> the date it last changed. */
+  const newest = new Map();
+
+  // A source inside the content tree stands for its pages, each dated by the
+  // page rule, as they stood before any of them was moved by a source here.
+  const walked = new Map(dates);
+  const sources = [...new Set(entries.flatMap((entry) => entry.sources))];
+  for (const spec of sources.filter((spec) => spec.startsWith(content))) {
+    const under = pages.filter((page) => names(spec, page));
+    if (under.length === 0) throw stale(`the source ${spec}`);
+    newest.set(spec, under.map((page) => walked.get(page)).reduce(later, undefined));
+  }
+
+  // Any other source is data: every commit that changed it counts, and its
+  // history is read from trees alone.
+  const files = sources.filter((spec) => !spec.startsWith(content));
+  if (files.length > 0) {
+    const tracked = await filesAtHead(repo, files);
+    const missing = files.find((spec) => !tracked.some((path) => names(spec, path)));
+    if (missing !== undefined) throw stale(`the source ${missing}`);
+    for (const commit of await readHistory(repo, files)) {
+      for (const { path } of commit.changes) {
+        for (const spec of files) if (!newest.has(spec) && names(spec, path)) newest.set(spec, commit.date);
+      }
+      if (newest.size === sources.length) break;
+    }
+  }
+
+  // A count moves only with a commit that added or deleted more files than
+  // the other: a move inside the set, or an edit, leaves the number shown.
+  const sets = new Map(
+    entries.flatMap((entry) => Object.values(entry.counts)).map((set) => [JSON.stringify(set), set]),
+  );
+  for (const [key, set] of sets) {
+    if ((await filesAtHead(repo, set)).length === 0) throw stale(`the counted files ${set.join(' ')}`);
+    for (const commit of await readHistory(repo, set)) {
+      const added = commit.changes.filter((change) => change.status === 'A').length;
+      const deleted = commit.changes.filter((change) => change.status === 'D').length;
+      if (added !== deleted) {
+        newest.set(key, commit.date);
+        break;
+      }
+    }
+  }
+
+  const sourced = new Set();
+  const raised = new Set();
+  for (const entry of entries) {
+    const when = [
+      ...entry.sources.map((spec) => newest.get(spec)),
+      ...Object.values(entry.counts).map((set) => newest.get(JSON.stringify(set))),
+    ].reduce(later, undefined);
+    for (const page of pages.filter((path) => entry.pages.some((spec) => names(spec, path)))) {
+      sourced.add(page);
+      if (when !== undefined && when > dates.get(page)) {
+        dates.set(page, when);
+        raised.add(page);
+      }
+    }
+  }
+  return { sourced: sourced.size, raised: raised.size };
+}
+
 /** Memoised per site root: the build asks once per page. */
 const loaded = new Map();
 
@@ -474,14 +668,17 @@ const loaded = new Map();
  * The dates of every page of a site, read once.
  *
  * @param {{ siteRoot?: string }} [options] The directory holding
- *   `src/content/docs` and `date-ignore-revs.txt`; the build runs from it.
+ *   `src/content/docs`, `date-ignore-revs.txt` and `date-sources.json`; the
+ *   build runs from it.
  * @returns {Promise<{
  *   dateOf: (filePath: string) => Date,
- *   pages: number, rounds: number, blobs: number,
+ *   pages: number, rounds: number, blobs: number, sourced: number, raised: number,
  * }>} `dateOf` takes a content file's path, absolute or relative to the site
  *   root, and returns the date its content last changed. A file git has never
  *   seen (a page being written, not committed yet) is dated by the file
  *   itself; a committed one without a date, or a path that is no page, throws.
+ *   `sourced` counts the pages date-sources.json lists and `raised` those of
+ *   them a source dates.
  */
 export function loadContentDates({ siteRoot = process.cwd() } = {}) {
   const root = resolve(siteRoot);
@@ -494,7 +691,16 @@ async function readContentDates(siteRoot) {
   if (!existsSync(contentDir)) {
     throw new Error(`content dates: ${contentDir} does not exist; run the build from the site root.`);
   }
-  const repo = (await gitText(siteRoot, ['rev-parse', '--show-toplevel'])).trim();
+  let repo;
+  try {
+    repo = (await gitText(siteRoot, ['rev-parse', '--show-toplevel'])).trim();
+  } catch (error) {
+    throw new Error(
+      `content dates: ${siteRoot} is not in a git clone, and the date each page last changed ` +
+        'is read from its history. Build the site from a clone with its full history (a ' +
+        `blobless one is fine), not from an archive. ${error.message}`,
+    );
+  }
   if ((await gitText(repo, ['rev-parse', '--is-shallow-repository'])).trim() === 'true') {
     throw new Error(
       'content dates: this clone is shallow, so every page would be dated by its oldest ' +
@@ -504,6 +710,7 @@ async function readContentDates(siteRoot) {
   }
   const pathspec = relative(repo, contentDir).split(sep).join('/');
   const ignore = readIgnoreRevs(join(siteRoot, IGNORE_REVS));
+  const entries = readDateSources(join(siteRoot, DATE_SOURCES));
 
   const pages = [];
   const listing = nulFields((path) => path && pages.push(path));
@@ -517,11 +724,14 @@ async function readContentDates(siteRoot) {
   const committed = new Set(pages);
 
   const { dates, rounds, blobs } = await resolveDates({ repo, pathspec, ignore, pages });
+  const { sourced, raised } = await applySources({ repo, pathspec, pages, dates, entries });
 
   return {
     pages: dates.size,
     rounds,
     blobs,
+    sourced,
+    raised,
     dateOf(filePath) {
       const absolute = isAbsolute(filePath) ? filePath : join(siteRoot, filePath);
       const key = relative(repo, absolute).split(sep).join('/');

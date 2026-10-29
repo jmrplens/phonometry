@@ -109,11 +109,10 @@ jobs:
           # served by the same remote, which is why this stays correct rather
           # than merely fast. The modified dates need the old versions of the
           # pages whose newest commits may have changed only their title,
-          # description or sidebar entry, and fetch exactly those, a batch at
-          # a time (about 1 400 files in 7 requests, ten seconds). Rename
-          # detection in page-dates.mjs and check:redirects demands those of
-          # the pages edited in the commit that moved them, about 1 500 files
-          # and 6 MiB, fetched once and on demand. A fetch that fails stops
+          # description or sidebar entry, and fetch exactly those, a batch of
+          # them to each request. Rename detection in page-dates.mjs and
+          # check:redirects demands those of the pages edited in the commit
+          # that moved them, fetched once and on demand. A fetch that fails stops
           # the build in content-dates.mjs or page-dates.mjs, and
           # check:structured-data fails on a build where that history was
           # missing.
@@ -237,13 +236,16 @@ jobs:
         # builds of a few pages that have the defect, and the routes it skips,
         # and assert its exit status; check-descriptions.mjs,
         # check-structured-data.mjs and check-schema-vocabulary.mjs have them,
-        # and the first-publication dates and the check of a page's processes
-        # are tested the same way, on small repositories and small sites. The
+        # check-crawl.mjs has them for the page dates it compares, and the
+        # first-publication dates and the check of a page's processes are
+        # tested the same way, on small repositories and small sites. The
         # modified dates have theirs on git histories made for each case: a
-        # description-only commit that must not move a date, a git failure
-        # that must fail the build rather than leave the dates empty, and the
-        # sitemap stamp that must fail on a URL with no source. Node's own
-        # test runner and no dependencies, so it runs before the install.
+        # description-only commit that must not move a date, a data file that
+        # must move the date of the page built from it, a git failure that
+        # must fail the build rather than leave the dates empty, and the
+        # sitemap stamp that must fail on a URL with no source or a build with
+        # no sitemap. Node's own test runner and no dependencies, so it runs
+        # before the install.
         run: pnpm run test:scripts
         working-directory: site
       - name: Check the pages start no process of their own
@@ -383,7 +385,9 @@ jobs:
         # their own while carrying the English text, ten pages shared a title,
         # the errata page had two h1 elements and the Spanish header linked an
         # address that redirects, with this whole job green. This reads the
-        # build the way a crawler does, with no browser and no server.
+        # build the way a crawler does, with no browser and no server, and
+        # holds each sitemap date to the one the page's structured data and
+        # footer give.
         run: pnpm run check:crawl
         working-directory: site
       - name: Check every page has a short meta description of its own

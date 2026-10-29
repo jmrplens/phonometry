@@ -15,6 +15,7 @@ import { spawnSync } from 'node:child_process';
 import {
 	mkdirSync,
 	mkdtempSync,
+	readdirSync,
 	readFileSync,
 	renameSync,
 	rmSync,
@@ -22,20 +23,27 @@ import {
 	writeFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { dirname, join } from 'node:path';
+import { dirname, join, relative, resolve } from 'node:path';
 import { test } from 'node:test';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import { basePath, siteUrl } from '../src/data/site.mjs';
 import {
+	DATE_SOURCES,
 	DATELESS_KEYS,
+	filesAtHead,
 	frontmatterOnly,
 	isoDay,
 	loadContentDates,
+	readDateSources,
 	readIgnoreRevs,
 } from '../src/lib/content-dates.mjs';
 
-const STAMP = join(dirname(fileURLToPath(import.meta.url)), 'add-sitemap-lastmod.mjs');
+const HERE = dirname(fileURLToPath(import.meta.url));
+const STAMP = join(HERE, 'add-sitemap-lastmod.mjs');
+const PAGE_DATES = join(HERE, '..', 'src', 'lib', 'page-dates.mjs');
+/** This site, for the tests that read the real tree. */
+const SITE = resolve(HERE, '..');
 
 /** Git as the tests run it: no user or system configuration, no signing. */
 function gitEnv(home) {
@@ -52,7 +60,7 @@ function gitEnv(home) {
 
 /**
  * A repository with a site in `site/`, whose `commit(day)` dates each commit
- * at noon UTC on 2026-01-<day>.
+ * at noon UTC on 2026-01-<day>, or at the moment a date string names.
  */
 function repository(t) {
 	const root = mkdtempSync(join(tmpdir(), 'content-dates-'));
@@ -83,16 +91,26 @@ function repository(t) {
 			mkdirSync(dirname(join(docs, path)), { recursive: true });
 			writeFileSync(join(docs, path), text);
 		},
+		/** Write any file, `path` relative to the repository. */
+		writeFile(path, text) {
+			mkdirSync(dirname(join(work, path)), { recursive: true });
+			writeFileSync(join(work, path), text);
+		},
+		/** Write `site/date-sources.json` with these entries. */
+		sources(...entries) {
+			writeFileSync(join(site, 'date-sources.json'), JSON.stringify({ entries }, null, 2));
+		},
 		move(from, to) {
 			mkdirSync(dirname(join(docs, to)), { recursive: true });
 			renameSync(join(docs, from), join(docs, to));
 		},
-		/** Commit everything, dated `day`; returns the commit's SHA. */
+		/** Commit everything, dated `day` (or at a date string); returns the commit's SHA. */
 		commit(day, message = `day ${day}`) {
 			git('add', '--all');
+			const when = typeof day === 'string' ? day : at(day);
 			const ran = spawnSync('git', ['commit', '-q', '-m', message], {
 				cwd: work,
-				env: { ...env, GIT_AUTHOR_DATE: at(day), GIT_COMMITTER_DATE: at(day) },
+				env: { ...env, GIT_AUTHOR_DATE: when, GIT_COMMITTER_DATE: when },
 				encoding: 'utf8',
 			});
 			assert.equal(ran.status, 0, ran.stderr);
@@ -268,7 +286,10 @@ test('a git failure fails instead of leaving the dates empty', async (t) => {
 	// temporary directory, so this is a site with no history at all.
 	process.env.GIT_CEILING_DIRECTORIES = root;
 	t.after(() => delete process.env.GIT_CEILING_DIRECTORIES);
-	await assert.rejects(loadContentDates({ siteRoot: site }), /git rev-parse --show-toplevel failed/);
+	await assert.rejects(
+		loadContentDates({ siteRoot: site }),
+		/is not in a git clone.*Build the site from a clone with its full history.*not from an archive.*git rev-parse --show-toplevel failed/s,
+	);
 });
 
 test('a shallow clone fails instead of dating every page by its oldest fetched commit', async (t) => {
@@ -313,12 +334,264 @@ test('a blobless clone fetches the page versions it needs in batches, never one 
 	const oldA = repo.git('rev-parse', 'HEAD~2:site/src/content/docs/a.mdx');
 	assert.ok(missing(oldA), 'the clone starts without the first version of a.mdx');
 
-	// The dates read the old versions with lazy fetching switched off, so they
-	// come from the batched fetch or not at all.
+	// Each fetch from the promisor remote, batched or lazy, leaves one pack
+	// marked `.promisor`. The dates read the old versions with lazy fetching
+	// switched off, so they come from one fetch per round or not at all; a
+	// read that let git fetch each missing version on demand, or that fetched
+	// them one per request, would leave a pack per version instead. Each round
+	// of this history has a version to fetch: the first the two versions
+	// before the description-only commit, the second the first a.mdx.
+	const packs = () =>
+		readdirSync(join(clone, '.git', 'objects', 'pack')).filter((name) => name.endsWith('.promisor')).length;
+	const before = packs();
 	const dates = await loadContentDates({ siteRoot: join(clone, 'site') });
 	assert.equal(day(dates, 'a.mdx'), '2026-01-02');
 	assert.equal(day(dates, 'b.mdx'), '2026-01-01');
 	assert.ok(!missing(oldA), 'the version that decided the date was fetched');
+	assert.equal(dates.rounds, 2);
+	assert.equal(packs() - before, dates.rounds, 'one fetch per round, and no version fetched alone');
+});
+
+// --- Pages built from other files ----------------------------------------
+
+test('a page is dated by a source that its description-only commit also changed', async (t) => {
+	const repo = repository(t);
+	repo.write('a.mdx', page());
+	repo.write('b.mdx', page());
+	repo.writeFile('site/src/data/table.json', '[1]\n');
+	repo.commit(1);
+	// The page's own change is to its description; what it shows changed in
+	// the table it renders, in the same commit.
+	repo.write('a.mdx', page({ description: 'Now with two rows.' }));
+	repo.write('b.mdx', page({ description: 'Now with two rows.' }));
+	repo.writeFile('site/src/data/table.json', '[1, 2]\n');
+	repo.commit(2);
+	repo.sources({ pages: ['site/src/content/docs/a.mdx'], sources: ['site/src/data/table.json'] });
+	const dates = await repo.dates();
+	assert.equal(day(dates, 'a.mdx'), '2026-01-02', 'the page that renders the table');
+	assert.equal(day(dates, 'b.mdx'), '2026-01-01', 'a page that does not');
+	assert.equal(dates.sourced, 1);
+	assert.equal(dates.raised, 1);
+});
+
+test('a later commit that changed only a source moves the page, and an earlier one does not', async (t) => {
+	const repo = repository(t);
+	repo.write('a.mdx', page());
+	repo.write('b.mdx', page());
+	repo.writeFile('site/src/components/Table.astro', '<table />\n');
+	repo.commit(1);
+	repo.write('a.mdx', page({ body: 'Rewritten.\n' }));
+	repo.write('b.mdx', page({ body: 'Rewritten.\n' }));
+	repo.commit(2);
+	repo.writeFile('site/src/components/Table.astro', '<table class="wide" />\n');
+	repo.commit(3);
+	repo.write('b.mdx', page({ body: 'Rewritten again.\n' }));
+	repo.commit(4);
+	repo.sources({
+		pages: ['site/src/content/docs/a.mdx', 'site/src/content/docs/b.mdx'],
+		sources: ['site/src/components/'],
+	});
+	const dates = await repo.dates();
+	assert.equal(day(dates, 'a.mdx'), '2026-01-03', 'the component changed after the page');
+	assert.equal(day(dates, 'b.mdx'), '2026-01-04', 'the page changed after the component');
+});
+
+test('a count moves the page only with a commit that changed how many files there are', async (t) => {
+	const repo = repository(t);
+	repo.write('a.mdx', page());
+	repo.writeFile('site/fiches/one.pdf', 'one\n');
+	repo.writeFile('site/fiches/one.txt', 'not counted\n');
+	repo.commit(1);
+	repo.writeFile('site/fiches/two.pdf', 'two\n');
+	repo.commit(2, 'a fiche more: the count changes');
+	repo.writeFile('site/fiches/one.pdf', 'one, redrawn\n');
+	repo.commit(3, 'a fiche redrawn: the count stays');
+	repo.git('mv', 'site/fiches/two.pdf', 'site/fiches/deux.pdf');
+	repo.commit(4, 'a fiche renamed: the count stays');
+	repo.writeFile('site/fiches/three.txt', 'not counted either\n');
+	repo.commit(5, 'a file that is not counted');
+	repo.sources({ pages: ['site/src/content/docs/a.mdx'], counts: { fiches: [':(glob)site/fiches/*.pdf'] } });
+	const dates = await repo.dates();
+	assert.equal(day(dates, 'a.mdx'), '2026-01-02');
+});
+
+test('a directory of the content tree stands for its pages, each dated by the page rule', async (t) => {
+	const repo = repository(t);
+	repo.write('errata/index.mdx', page({ title: 'Errata' }));
+	repo.write('errata/iso-1.md', page({ title: 'ISO 1' }));
+	repo.write('errata/iso-2.md', page({ title: 'ISO 2' }));
+	repo.commit(1);
+	repo.write('errata/iso-2.md', page({ title: 'ISO 2', body: 'A new entry.\n' }));
+	repo.commit(2);
+	repo.write('errata/iso-1.md', page({ title: 'ISO 1', description: 'Cut to 160 characters.' }));
+	repo.commit(3);
+	repo.sources({
+		pages: ['site/src/content/docs/errata/index.mdx'],
+		sources: ['site/src/content/docs/errata/'],
+	});
+	const dates = await repo.dates();
+	assert.equal(day(dates, 'errata/index.mdx'), '2026-01-02', 'the newest entry, not the newest description');
+	assert.equal(day(dates, 'errata/iso-1.md'), '2026-01-01', 'a listed page is no source of the others');
+});
+
+test('a page, a source or a count that HEAD does not have fails the build', async (t) => {
+	const cases = [
+		[{ pages: ['site/src/content/docs/gone.mdx'], sources: ['site/src/data/table.json'] }, /the page\(s\) site\/src\/content\/docs\/gone\.mdx, which HEAD does not have/],
+		[{ pages: ['site/src/content/docs/a.mdx'], sources: ['site/src/data/renamed.json'] }, /the source site\/src\/data\/renamed\.json, which HEAD does not have/],
+		[{ pages: ['site/src/content/docs/a.mdx'], counts: { fiches: [':(glob)site/fiches/*.pdf'] } }, /the counted files :\(glob\)site\/fiches\/\*\.pdf, which HEAD does not have/],
+		[{ pages: ['site/src/data/table.json'], sources: ['site/src/data/table.json'] }, /as a page, and pages are under site\/src\/content\/docs\//],
+	];
+	for (const [entry, message] of cases) {
+		const repo = repository(t);
+		repo.write('a.mdx', page());
+		repo.writeFile('site/src/data/table.json', '[1]\n');
+		repo.commit(1);
+		repo.sources(entry);
+		await assert.rejects(repo.dates(), message);
+	}
+});
+
+test('date-sources.json takes paths from the repository root, and an entry with pages and sources', (t) => {
+	const root = mkdtempSync(join(tmpdir(), 'content-dates-'));
+	t.after(() => rmSync(root, { recursive: true, force: true }));
+	const file = join(root, DATE_SOURCES);
+	const read = (data) => {
+		writeFileSync(file, typeof data === 'string' ? data : JSON.stringify(data));
+		return () => readDateSources(file);
+	};
+	const pages = ['site/src/content/docs/a.mdx'];
+	assert.deepEqual(readDateSources(join(root, 'none.json')), [], 'no file, no sources');
+	assert.deepEqual(read({ _comment: 'a note', entries: [{ _why: 'a note', pages, sources: ['docs/a.json'] }] })(), [
+		{ pages, sources: ['docs/a.json'], counts: {} },
+	]);
+	assert.throws(read('{ not json'), /date-sources\.json: /);
+	assert.throws(read({ pages }), /no "entries" list/);
+	assert.throws(read({ entries: [{ pages, sources: ['a'], source: ['b'] }] }), /entry 1: unknown key\(s\) source/);
+	assert.throws(read({ entries: [{ pages, sources: ['../outside.json'] }] }), /"sources" takes paths from the repository root, not "\.\.\/outside\.json"/);
+	assert.throws(read({ entries: [{ pages, sources: [':(glob)*.json'] }] }), /"sources" takes paths/);
+	assert.throws(read({ entries: [{ pages, counts: [['a/']] }] }), /"counts" maps the name of each number/);
+	assert.throws(read({ entries: [{ pages, counts: { fiches: [] } }] }), /no pathspec for the count fiches/);
+	assert.throws(read({ entries: [{ pages }] }), /entry 1 names no source/);
+	assert.throws(read({ entries: [{ sources: ['a.json'] }] }), /entry 1 names no page/);
+});
+
+test('the day a page was published is its first commit\'s day in UTC, as the day it changed is', async (t) => {
+	const repo = repository(t);
+	repo.write('late.mdx', page());
+	// Half past midnight in Madrid in summer is still the evening before in UTC.
+	repo.commit('2026-07-02T00:30:00+02:00');
+	const ran = spawnSync(
+		process.execPath,
+		[
+			'--input-type=module',
+			'-e',
+			`import { firstPublished } from ${JSON.stringify(pathToFileURL(PAGE_DATES).href)};` +
+				`console.log(firstPublished('src/content/docs/late.mdx'));`,
+		],
+		{ cwd: repo.site, env: repo.env, encoding: 'utf8' },
+	);
+	assert.equal(ran.status, 0, ran.stderr);
+	assert.equal(ran.stdout.trim(), '2026-07-01');
+	assert.equal(day(await repo.dates(), 'late.mdx'), '2026-07-01');
+});
+
+// --- The site's own list of pages built from other files -----------------
+
+/** Modules that hold no text a page shows: the site's address and the icon shapes. */
+const NOT_CONTENT = new Set(['src/data/site.mjs', 'src/data/icons.mjs']);
+const IMPORT = /^\s*import\s[^;]*?from\s+['"]([^'"]+)['"]/gm;
+
+/**
+ * Why a module puts data from outside a page into it, or null: it is a data
+ * module, it reads the content collection, or it imports one that does.
+ */
+function dataBehind(file, seen = new Map()) {
+	if (seen.has(file)) return seen.get(file);
+	seen.set(file, null);
+	const rel = relative(SITE, file).split('\\').join('/');
+	let why = null;
+	if (/^src\/(data|generated)\//.test(rel)) why = NOT_CONTENT.has(rel) ? null : rel;
+	else if (/\.(astro|mjs|ts)$/.test(file)) {
+		let text = '';
+		try {
+			text = readFileSync(file, 'utf8');
+		} catch {
+			// A package or a virtual module: not this site's data.
+		}
+		if (/\b(getCollection|getEntry)\s*\(/.test(text)) why = `${rel} reads the content collection`;
+		for (const [, spec] of text.matchAll(IMPORT)) {
+			if (why || !spec.startsWith('.')) continue;
+			const behind = dataBehind(resolveImport(file, spec), seen);
+			if (behind) why = `${rel} imports ${behind}`;
+		}
+	}
+	seen.set(file, why);
+	return why;
+}
+
+/** An import specifier as the file it names, extension supplied as Vite would. */
+function resolveImport(from, spec) {
+	const target = resolve(dirname(from), spec);
+	for (const candidate of [target, `${target}.ts`, `${target}.mjs`]) {
+		try {
+			readFileSync(candidate);
+			return candidate;
+		} catch {
+			// Try the next spelling.
+		}
+	}
+	return target;
+}
+
+/** Every page of the site, as repository paths. */
+function sitePages(dir = join(SITE, 'src', 'content', 'docs'), out = []) {
+	for (const entry of readdirSync(dir, { withFileTypes: true })) {
+		const path = join(dir, entry.name);
+		if (entry.isDirectory()) sitePages(path, out);
+		else if (/\.mdx?$/.test(entry.name)) out.push(path);
+	}
+	return out;
+}
+
+const REPO = resolve(SITE, '..');
+const repoPath = (file) => relative(REPO, file).split('\\').join('/');
+
+test('every page that renders data from outside its file is listed in date-sources.json, and no other', () => {
+	const entries = readDateSources(join(SITE, DATE_SOURCES));
+	const listed = (path) => entries.some((entry) => entry.pages.some((spec) => (spec.endsWith('/') ? path.startsWith(spec) : path === spec)));
+	const unlisted = [];
+	const needless = [];
+	let built = 0;
+	for (const file of sitePages()) {
+		const text = readFileSync(file, 'utf8');
+		let why = null;
+		for (const [, spec] of text.matchAll(IMPORT)) {
+			if (!why && spec.startsWith('.')) why = dataBehind(resolveImport(file, spec));
+		}
+		if (why) built += 1;
+		if (why && !listed(repoPath(file))) unlisted.push(`${repoPath(file)}: ${why}`);
+		if (!why && listed(repoPath(file))) needless.push(repoPath(file));
+	}
+	assert.ok(built > 0, 'the scan found no page built from data, so it is not looking');
+	assert.deepEqual(unlisted, [], `${DATE_SOURCES} has to say what these pages are built from`);
+	assert.deepEqual(needless, [], `${DATE_SOURCES} lists pages that render no data from outside their file`);
+});
+
+test('each count in date-sources.json covers the files repo-stats.mjs counts for the same number', async (t) => {
+	const stats = await import(pathToFileURL(join(SITE, 'src', 'data', 'repo-stats.mjs')).href);
+	const counts = readDateSources(join(SITE, DATE_SOURCES)).flatMap((entry) => Object.entries(entry.counts));
+	assert.ok(counts.length > 0, 'the landing page counts guides, API pages and fiches');
+	for (const [name, set] of counts) {
+		assert.equal(typeof stats[name], 'number', `${name} is no number src/data/repo-stats.mjs exports`);
+		// The comparison is at HEAD, which is what the dates read; a file added
+		// or deleted and not committed yet would make it meaningless.
+		const dirty = spawnSync('git', ['status', '--porcelain', '--', ...set], { cwd: REPO, encoding: 'utf8' });
+		if (dirty.stdout.trim() !== '') {
+			t.diagnostic(`${name}: uncommitted changes under its files, not compared`);
+			continue;
+		}
+		assert.equal((await filesAtHead(REPO, set)).length, stats[name], `${name}: ${set.join(' ')}`);
+	}
 });
 
 // --- The sitemap, stamped the way the build does it ----------------------
@@ -328,6 +601,11 @@ function stamp(repo, routes) {
 	const dist = join(repo.site, 'dist');
 	mkdirSync(dist, { recursive: true });
 	const urls = routes.map((route) => `<url><loc>${siteUrl}${basePath}/${route}</loc></url>`).join('');
+	writeFileSync(
+		join(dist, 'sitemap-index.xml'),
+		`<?xml version="1.0" encoding="UTF-8"?><sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">` +
+			`<sitemap><loc>${siteUrl}${basePath}/sitemap-0.xml</loc></sitemap></sitemapindex>`,
+	);
 	writeFileSync(
 		join(dist, 'sitemap-0.xml'),
 		`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls}</urlset>`,
@@ -380,4 +658,30 @@ test('a sitemap that cannot be dated fails the build instead of taking guessed d
 	assert.equal(ran.status, 1);
 	assert.match(ran.err, /FAIL the page dates cannot be read/);
 	assert.equal(ran.lastmod('guide/'), undefined);
+});
+
+test('a build with no sitemap to stamp fails instead of publishing one without dates', async (t) => {
+	const repo = repository(t);
+	repo.write('guide.mdx', page());
+	repo.commit(1);
+	const dist = join(repo.site, 'dist');
+	mkdirSync(dist, { recursive: true });
+	const run = () => spawnSync(process.execPath, [STAMP, repo.site], { env: repo.env, encoding: 'utf8' });
+
+	let ran = run();
+	assert.equal(ran.status, 1);
+	assert.match(ran.stderr, /FAIL .*sitemap-index\.xml does not exist/);
+
+	writeFileSync(join(dist, 'sitemap-index.xml'), '<sitemapindex></sitemapindex>');
+	ran = run();
+	assert.equal(ran.status, 1);
+	assert.match(ran.stderr, /FAIL .*lists no sitemap/);
+
+	writeFileSync(
+		join(dist, 'sitemap-index.xml'),
+		`<sitemapindex><sitemap><loc>${siteUrl}${basePath}/sitemap-renamed.xml</loc></sitemap></sitemapindex>`,
+	);
+	ran = run();
+	assert.equal(ran.status, 1);
+	assert.match(ran.stderr, /FAIL the sitemap index lists .*sitemap-renamed\.xml, which the build did not write/);
 });

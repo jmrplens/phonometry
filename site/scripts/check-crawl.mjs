@@ -39,7 +39,16 @@
 // 6. no link to a page that was not built, and no fragment that names no id
 //    on its target page as it is written in the href. Browsers also try the
 //    percent-decoded form, but crawlers and the accessibility audit compare
-//    the attribute as written.
+//    the attribute as written;
+// 7. a <lastmod> on every URL of the sitemap, the same day the page gives as
+//    its `dateModified` in its structured data and as the last date of its
+//    footer, and a `datePublished` no later than it. The three are written in
+//    three places from one date (src/lib/content-dates.mjs): the sitemap
+//    stamp, Head.astro and LastUpdated.astro, the last two through the
+//    `lastUpdated` src/routeData.ts sets. Without that override Starlight
+//    sets its own, the last commit that touched the file, and nothing else
+//    would notice; nor would anything notice a stamp that found no sitemap
+//    to write into.
 //
 // The redirect stubs are not pages and are only read to know where they are,
 // and the error page is held to rules 1 and 2 alone.
@@ -71,6 +80,23 @@ const TITLE_DELIMITER = ' | ';
 
 const { fail, report, failures } = reporter();
 
+/** Every JSON-LD block of a document, whatever else the script tag carries. */
+const LD_JSON = /<script[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/g;
+
+/** The nodes of a page's structured data; a block that does not parse gives none. */
+function graphOf(html) {
+	const nodes = [];
+	for (const [, body] of html.matchAll(LD_JSON)) {
+		try {
+			const doc = JSON.parse(body);
+			nodes.push(...(Array.isArray(doc['@graph']) ? doc['@graph'] : [doc]));
+		} catch {
+			// check-structured-data.mjs reports a block that is not JSON.
+		}
+	}
+	return nodes;
+}
+
 if (!existsSync(DIST)) throw new Error(`no build at ${DIST}: run \`pnpm build\` first`);
 
 /** route -> what the checks below need from that page. */
@@ -97,6 +123,13 @@ for (const [route, file] of walk(DIST)) {
 			.map((anchor) => anchor.href)
 			.filter((href) => href !== undefined && href !== ''),
 		ids,
+		graph: graphOf(html),
+		// LastUpdated.astro writes the day the page was published and then the
+		// day it last changed, or the one day when they are the same, at the
+		// foot of the page: the last dates in its markup.
+		times: tags(markup, 'time')
+			.map((time) => time.datetime)
+			.filter((datetime) => datetime !== undefined),
 	});
 }
 
@@ -204,6 +237,8 @@ report(
 	} else {
 		const wrong = [];
 		const listed = new Set();
+		/** [loc, lastmod, page] of every canonical page the sitemap lists. */
+		const dated = [];
 		const shards = [...readFileSync(index, 'utf8').matchAll(/<loc>([^<]+)<\/loc>/g)].map(([, loc]) => loc);
 		for (const shard of shards) {
 			const file = join(DIST, shard.slice(ORIGIN.length));
@@ -223,6 +258,9 @@ report(
 				} else if (canonicalOf(route) !== loc) {
 					wrong.push(`${loc} names ${canonicalOf(route)} as canonical`);
 				}
+				if (pages.has(route) && !isErrorPage(route) && canonicalOf(route) === loc) {
+					dated.push([loc, /<lastmod>([^<]*)<\/lastmod>/.exec(block)?.[1], pages.get(route)]);
+				}
 				const alternates = [...block.matchAll(/<xhtml:link[^>]*href="([^"]+)"/g)].map(([, href]) => decode(href));
 				if (isApiRoute(slugOf(route)) && alternates.length > 0) {
 					wrong.push(`${loc} lists language alternates: ${alternates.join(' ')}`);
@@ -241,6 +279,30 @@ report(
 			wrong,
 			'problem(s) in the sitemap',
 			`the sitemap lists the ${listed.size} canonical pages once each, and no fallback route or error page`,
+		);
+
+		// --- 7. Dates ---------------------------------------------------------
+		const disagree = [];
+		for (const [loc, lastmod, page] of dated) {
+			const own = page.graph.find((node) => node['@id'] === `${loc}#article` || node['@id'] === `${loc}#webpage`);
+			const modified = own?.dateModified;
+			const footer = page.times.at(-1)?.slice(0, 10);
+			if (!/^\d{4}-\d{2}-\d{2}$/.test(lastmod ?? '')) {
+				disagree.push(`${loc}: <lastmod> ${JSON.stringify(lastmod ?? null)}, not a day`);
+			} else if (modified !== lastmod || footer !== lastmod) {
+				disagree.push(
+					`${loc}: <lastmod> ${lastmod}, dateModified ${modified ?? 'none'}, footer ${footer ?? 'none'}`,
+				);
+			}
+			if (own?.datePublished !== undefined && modified !== undefined && own.datePublished > modified) {
+				disagree.push(`${loc}: datePublished ${own.datePublished} is after dateModified ${modified}`);
+			}
+		}
+		report(
+			disagree,
+			'page(s) whose dates disagree',
+			`the ${dated.length} pages of the sitemap give one modified date in its <lastmod>, ` +
+				`their dateModified and their footer, and none was published after it`,
 		);
 	}
 }

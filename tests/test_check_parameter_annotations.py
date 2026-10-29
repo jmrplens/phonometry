@@ -376,8 +376,7 @@ def test_an_item_converted_alone_asks_its_item_type_for_a_sequence(
 
         def budget(
             contributions: (
-                Sequence[float | Sequence[float] | NDArray[np.floating[Any]]]
-                | NDArray[np.floating[Any]]
+                Sequence[float | Sequence[float] | NDArray[Any]] | NDArray[Any]
             ),
         ) -> float:
             items = list(contributions)

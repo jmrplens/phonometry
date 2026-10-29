@@ -618,10 +618,7 @@ def uncertainty_propagation(
 
 
 def combined_standard_uncertainty(
-    contributions: (
-        Sequence[float | Sequence[float] | NDArray[np.floating[Any]]]
-        | NDArray[np.floating[Any]]
-    ),
+    contributions: Sequence[float | Sequence[float] | NDArray[Any]] | NDArray[Any],
 ) -> float:
     r"""Combined standard uncertainty of independent contributions, root-sum-square.
 

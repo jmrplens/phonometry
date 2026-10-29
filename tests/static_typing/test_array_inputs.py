@@ -88,6 +88,24 @@ def test_a_nested_list_is_a_four_pole_matrix_and_an_uncertainty_pair() -> None:
     assert math.isclose(stacked, pairs)
 
 
+def test_integer_arrays_are_contributions_as_float_arrays_are() -> None:
+    """The body reads each value with ``float`` and each pair with ``np.asarray``.
+
+    So an integer array of products, of pairs read row by row, and a list
+    of integer pairs are contributions as their float forms are.
+    """
+    products: NDArray[np.int64] = np.array([3, 4], dtype=np.int64)
+    rows: NDArray[np.int64] = np.array([[3, 1], [4, 1]], dtype=np.int64)
+    pairs = [np.array([3, 1], dtype=np.int64), np.array([4, 1], dtype=np.int64)]
+    from_products = metrology.combined_standard_uncertainty(products)
+    from_rows = metrology.combined_standard_uncertainty(rows)
+    from_pairs = metrology.combined_standard_uncertainty(pairs)
+    assert_type(from_products, float)
+    assert math.isclose(from_products, 5.0)
+    assert math.isclose(from_rows, 5.0)
+    assert math.isclose(from_pairs, 5.0)
+
+
 def test_records_from_a_generator_and_codes_as_lists_are_inputs() -> None:
     """A generator of records is an input set; a Golay pair may hold lists."""
     rng = np.random.default_rng(7)

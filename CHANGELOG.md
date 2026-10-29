@@ -3494,7 +3494,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   them; `noise_control.cascade` takes each four-pole matrix, and
   `room.golay_impulse_response` each code of its pair, as any array-like,
   and `metrology.combined_standard_uncertainty` takes a pair as a tuple, a
-  list or an array. A sequence of records or texts is a `Sequence`
+  list or an array, and an integer array as it takes a float one. A
+  sequence of records or texts is a `Sequence`
   (`materials.layered_absorber` and `materials.diffuse_field_absorption`
   `layers`, `noise_control.duct_path` `elements`,
   `noise_control.combine_duct_paths` `paths`,

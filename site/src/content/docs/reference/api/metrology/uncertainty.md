@@ -40,7 +40,7 @@ path of 6.4.8 for non-independent quantities is not implemented -- use
 
 ```python
 combined_standard_uncertainty(
-    contributions: Sequence[float | Sequence[float] | NDArray[np.floating[Any]]] | NDArray[np.floating[Any]],
+    contributions: Sequence[float | Sequence[float] | NDArray[Any]] | NDArray[Any],
 ) -> float
 ```
 

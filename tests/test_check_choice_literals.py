@@ -1114,6 +1114,89 @@ def test_a_check_against_options_the_literal_does_not_list_is_refused() -> None:
     assert _cleaned(_checked_before_the_fold, "mode", options=_PACES) == []
 
 
+def _refused_against_more(mode: _Pace) -> str:
+    if mode not in ("fast", "slow", "quick"):
+        raise ValueError(mode)
+    return mode.lower()
+
+
+def _sides_held_to_more(sides: Sequence[_Side]) -> set[str]:
+    if not set(sides) <= {"left", "right", "top"}:
+        raise ValueError(sides)
+    return {side.upper() for side in sides}
+
+
+def _keys_held_to_more(levels: Mapping[_Side, float]) -> set[str]:
+    extra = set(levels) - {"left", "right", "top"}
+    if extra:
+        raise ValueError(sorted(extra))
+    return {side.upper() for side in levels}
+
+
+def test_a_membership_test_against_options_the_literal_does_not_list_is_refused() -> (
+    None
+):
+    """``if mode not in ("fast", "slow", "quick"): raise`` reads the text as
+    written and still takes ``"quick"``; so do a subset test and a leftover
+    refused as a whole against a set wider than the ``Literal``.
+    """
+    sides = ("left", "right")
+    assert _cleaned(_refused_against_more, "mode", options=_PACES) == [
+        "options wider than the Literal ('quick',)"
+    ]
+    assert _cleaned(_sides_held_to_more, "sides", options=sides, collection=True) == [
+        "options wider than the Literal ('top',)"
+    ]
+    assert _cleaned(_keys_held_to_more, "levels", options=sides, collection=True) == [
+        "options wider than the Literal ('top',)"
+    ]
+    assert _cleaned(_refused_before_the_fold, "mode", options=_PACES) == []
+    assert (
+        _cleaned(_keys_checked_as_a_whole, "levels", options=sides, collection=True)
+        == []
+    )
+
+
+#: The options of two kinds of record, one row each, as a shared helper picks
+#: the row of the record it is handed.
+_ROWS_BY_KIND = {"pace": ("fast", "slow"), "gait": ("walk", "run")}
+
+#: The same table, with a row for the pace that also takes a spelling of its own.
+_WIDER_ROWS = {"pace": ("fast", "slow", "quick"), "gait": ("walk", "run")}
+
+
+def _refused_against_a_picked_row(mode: _Pace, kind: str) -> str:
+    paces = _ROWS_BY_KIND[kind]
+    if mode not in paces:
+        raise ValueError(mode)
+    return mode.lower()
+
+
+def _refused_against_a_wider_row(mode: _Pace, kind: str) -> str:
+    if mode not in _WIDER_ROWS[kind]:
+        raise ValueError(mode)
+    return mode.lower()
+
+
+def test_a_check_against_a_row_picked_at_run_time_is_held_to_the_closest_row() -> None:
+    """``_ROWS_BY_KIND[kind]`` is one row of the table, and the row of the
+    ``Literal``'s own options takes nothing more; a table none of whose rows
+    is the ``Literal``'s alone lets through what the closest row adds.
+    """
+    assert _cleaned(_refused_against_a_picked_row, "mode", options=_PACES) == []
+    assert _cleaned(_refused_against_a_wider_row, "mode", options=_PACES) == [
+        "options wider than the Literal ('quick',)"
+    ]
+
+
+def test_an_escape_in_a_literal_option_is_the_character_it_spells() -> None:
+    """An escape written in a ``Literal`` option is the character it spells,
+    a tab and not a backslash and a ``t``, so ``write_catalogue``'s tab
+    delimiter is one of the options its check holds it to.
+    """
+    assert ccl._literal_options('Literal[",", ";", "\\t"]') == {",", ";", "\t"}
+
+
 class _PrivateBase:
     """A base the package would not export, with a public method."""
 

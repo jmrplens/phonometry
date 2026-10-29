@@ -84,9 +84,14 @@ a union holding one, or a collection or mapping of one) fails when the code
 folds its case, strips its spaces, replaces its separators, makes a text of
 any value with ``str()`` or maps an alias the ``Literal`` does not list,
 before it checks the text as the caller wrote it with ``require_choice`` (or
-``if text not in OPTIONS: raise``). The text is followed into every function
-it is handed to, six calls deep, and a record field from its
-``__post_init__`` into every function of its module that reads it.
+``if text not in OPTIONS: raise``). A check as written holds the text to the
+``Literal`` only when the options it is held against are ones the
+``Literal`` lists, so a ``require_choice``, a membership test or a subset
+test against a wider set fails too; against one row of a table picked when
+the code runs, it is held to the row closest to the ``Literal``. The text is
+followed into every function it is handed to, six calls deep, and a record
+field from its ``__post_init__`` into every function of its module that
+reads it.
 """
 
 from __future__ import annotations
@@ -2130,65 +2135,138 @@ def _raises(body: list[ast.stmt]) -> bool:
 
 def _unlisted_items(
     tree: ast.AST, is_raw: Callable[[ast.expr], bool], constants: dict[str, ast.expr]
-) -> set[str]:
-    """The locals bound to what a collection holds beyond a set of strings.
+) -> dict[str, ast.expr]:
+    """The locals bound to what a collection holds beyond a set of strings,
+    each with the options it is taken against.
 
     ``extra = set(levels) - set(OPTIONS)`` or ``set(levels).difference(OPTIONS)``:
     a collection whose leftover is refused is checked as written, as a whole.
     """
-    names: set[str] = set()
+    names: dict[str, ast.expr] = {}
     for node in ast.walk(tree):
         if not isinstance(node, ast.Assign):
             continue
         value = node.value
-        leftover = (
+        against: ast.expr | None = None
+        if (
             isinstance(value, ast.BinOp)
             and isinstance(value.op, ast.Sub)
             and is_raw(_held(value.left))
-            and bool(strings_of(value.right, constants))
-        ) or (
+        ):
+            against = value.right
+        elif (
             isinstance(value, ast.Call)
             and isinstance(value.func, ast.Attribute)
             and value.func.attr == "difference"
             and bool(value.args)
             and is_raw(_held(value.func.value))
-            and bool(strings_of(value.args[0], constants))
-        )
-        if leftover:
+        ):
+            against = value.args[0]
+        if against is not None and strings_of(against, constants):
             names.update(
-                target.id for target in node.targets if isinstance(target, ast.Name)
+                (target.id, against)
+                for target in node.targets
+                if isinstance(target, ast.Name)
             )
     return names
+
+
+class _Refusal(NamedTuple):
+    """A test that refuses the text as written: where it starts and ends, and
+    the options it lets through.
+    """
+
+    start: tuple[int, int]
+    end: tuple[int, int]
+    against: ast.expr
 
 
 def _refused_unless_listed(
     node: ast.If,
     is_raw: Callable[[ast.expr], bool],
     constants: dict[str, ast.expr],
-    unlisted: set[str],
-) -> list[tuple[int, int]]:
-    """Where a test that refuses the text as written ends.
+    unlisted: dict[str, ast.expr],
+) -> list[_Refusal]:
+    """The tests of *node* that refuse the text as written.
 
     ``if text not in OPTIONS: raise ...``; for a collection, ``if not
     set(levels) <= OPTIONS: raise ...`` or ``if extra: raise ...`` with
     ``extra`` bound to what it holds beyond the options (:func:`_unlisted_items`).
+    Each comes with the options it is held against, which the caller holds
+    to the ``Literal`` (:func:`_wider_than_the_literal`).
     """
     if not _raises(node.body):
         return []
-    ends: list[tuple[int, int]] = []
+    found: list[_Refusal] = []
     for part in ast.walk(node.test):
         if isinstance(part, ast.Name) and part.id in unlisted:
-            ends.append(_end(node.test))
+            found.append(
+                _Refusal(_start(node.test), _end(node.test), unlisted[part.id])
+            )
         if not isinstance(part, ast.Compare):
             continue
-        operator, right = part.ops[0], part.comparators[0]
-        if (
-            is_raw(part.left)
-            and isinstance(operator, ast.NotIn)
-            and strings_of(right, constants)
-        ) or _subset_evidence(part.left, operator, right, is_raw, constants):
-            ends.append(_end(part))
-    return ends
+        left, operator, right = part.left, part.ops[0], part.comparators[0]
+        if is_raw(left) and isinstance(operator, ast.NotIn):
+            if strings_of(right, constants):
+                found.append(_Refusal(_start(part), _end(part), right))
+        elif _subset_evidence(left, operator, right, is_raw, constants):
+            options = right if isinstance(operator, ast.LtE | ast.Lt) else left
+            found.append(_Refusal(_start(part), _end(part), options))
+    return found
+
+
+def _strings_picked(
+    node: ast.expr | None, constants: Mapping[str, ast.expr]
+) -> list[tuple[str, ...]]:
+    """Each set of strings *node* may hold when the code runs.
+
+    One set for a set written out (:func:`strings_of`); one per branch of a
+    conditional expression, and one per table of a table of tables picked by
+    a key the code works out (``_FIELD_QUANTITIES[type(result)]``), where
+    :func:`strings_of` reads them all together.
+    """
+    for _ in range(_STRINGS_DEPTH):
+        if isinstance(node, ast.Name) and node.id in constants:
+            node = constants[node.id]
+        elif isinstance(node, ast.Call) and node.args:
+            node = node.args[0]
+        else:
+            break
+    if isinstance(node, ast.IfExp):
+        branches = [
+            *_strings_picked(node.body, constants),
+            *_strings_picked(node.orelse, constants),
+        ]
+        if branches:
+            return branches
+    if isinstance(node, ast.Subscript):
+        table = _dict_display(node.value, constants, 0)
+        rows = [strings_of(value, constants) for value in table.values] if table else []
+        if rows and all(rows):
+            return rows
+    held = strings_of(node, constants)
+    return [held] if held else []
+
+
+def _wider_than_the_literal(
+    against: ast.expr | None,
+    constants: Mapping[str, ast.expr],
+    options: frozenset[str],
+) -> tuple[str, ...]:
+    """The strings a check of the text as written lets through that the
+    ``Literal``'s *options* do not list, none when the options are unknown.
+
+    A check against one of several sets picked when the code runs
+    (:func:`_strings_picked`) lets through what the closest of them holds
+    beyond the options: none, when one of them lists only options.
+    """
+    if not options:
+        return ()
+    extras = [
+        tuple(sorted(set(held) - options))
+        for held in _strings_picked(against, constants)
+    ]
+    return min(extras, key=len, default=())
 
 
 def _cleans_up_first(reading: _Reading) -> list[str]:
@@ -2257,12 +2335,17 @@ def _spelling(  # noqa: PLR0913
         collection=collection,
         depth=depth,
     )
-    unlisted = _unlisted_items(tree, is_raw, constants) if collection else set()
+    unlisted = _unlisted_items(tree, is_raw, constants) if collection else {}
     folds: list[tuple[tuple[int, int], str]] = []
     checks: list[tuple[int, int]] = []
     for node in ast.walk(tree):
         if isinstance(node, ast.If):
-            checks.extend(_refused_unless_listed(node, is_raw, constants, unlisted))
+            for refusal in _refused_unless_listed(node, is_raw, constants, unlisted):
+                checks.append(refusal.end)
+                wider = _wider_than_the_literal(refusal.against, constants, options)
+                if wider:
+                    label = f"options wider than the Literal {wider}"
+                    folds.append((refusal.start, label))
         elif isinstance(node, ast.Call):
             _read_call(node, reader, folds, checks)
     return _Reading(tuple(folds), tuple(checks))
@@ -2297,16 +2380,14 @@ def _beyond_the_literal(node: ast.Call, reader: _Reader) -> tuple[str, ...]:
     ``require_choice(text, "quantity", (*_SINGLE, *_ALIASES))`` reads the text
     as the caller wrote it, and still takes an alias of the table's own that
     no option spells: the check holds the text to the ``Literal`` only when
-    its options are among the ones the ``Literal`` lists.
+    its options are among the ones the ``Literal`` lists. A membership or
+    subset test is held the same way (:func:`_refused_unless_listed`).
     """
-    if not reader.options:
-        return ()
     argument = node.args[2] if len(node.args) > 2 else None
     for keyword in node.keywords:
         if keyword.arg == "options":
             argument = keyword.value
-    held = strings_of(argument, reader.constants)
-    return tuple(sorted(set(held) - reader.options))
+    return _wider_than_the_literal(argument, reader.constants, reader.options)
 
 
 def _read_handed_on(
@@ -2365,9 +2446,20 @@ def _received(
 
 def _literal_options(annotation: str) -> frozenset[str]:
     """The options the ``Literal`` of an annotation, read through its
-    aliases (:func:`expanded`), lists: every quoted text in it.
+    aliases (:func:`expanded`), lists: every quoted text in it, read as the
+    string it spells, so an escape written in the annotation is the
+    character it stands for (a tab, not a backslash and a ``t``).
     """
-    return frozenset(text[1:-1] for text in _QUOTED_TEXT.findall(annotation))
+    return frozenset(_spelled(text) for text in _QUOTED_TEXT.findall(annotation))
+
+
+def _spelled(quoted: str) -> str:
+    """The string a quoted text of an annotation spells, escapes read."""
+    try:
+        text = ast.literal_eval(quoted)
+    except (SyntaxError, ValueError):
+        return quoted[1:-1]
+    return text if isinstance(text, str) else quoted[1:-1]
 
 
 def _literal_shape(annotation: str) -> tuple[bool, bool]:

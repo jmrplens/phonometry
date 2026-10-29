@@ -14,12 +14,18 @@
 // for, so the graph is assembled here instead of hoping it is reassembled
 // downstream.
 import Default from '@astrojs/starlight/components/Head.astro';
-import { getCollection } from 'astro:content';
+import { getCollection, type CollectionEntry } from 'astro:content';
 import { breadcrumbsFor } from '../lib/breadcrumbs.mjs';
 import { topicForSlug } from '../data/topics.mjs';
 import { firstPublished } from '../lib/page-dates.mjs';
 import { isoDay } from '../lib/date-rules.mjs';
-import { citationsFor, referenceId, referenceNode } from '../lib/citations.mjs';
+import {
+  citationsFor,
+  englishStandardIds,
+  referenceId,
+  referenceNode,
+  standardsBody,
+} from '../lib/citations.mjs';
 import { pageStandardTokens } from '../lib/standard-search.mjs';
 import { prose } from '../lib/markdown-fences.mjs';
 import { personId as PERSON_ID, siteUrl } from '../data/site.mjs';
@@ -132,6 +138,7 @@ const articleSection = topic?.label[lang];
 const isBibliography = slug === 'reference/bibliography';
 
 const bibliographyUrl = `${SITE}${BASE}${lang === 'es' ? '/es' : ''}/reference/bibliography/`;
+const englishBibliographyUrl = `${SITE}${BASE}/reference/bibliography/`;
 
 // Dates: `dateModified` is the day the page's content last changed, which
 // src/routeData.ts sets as the route's `lastUpdated` from
@@ -171,6 +178,11 @@ const proseBody = prose(rawBody)
   .replace(/^import\s.+$/gm, ' ')
   .replace(/<\/?[A-Za-z][^>]*>/g, ' ');
 const wordCount = proseBody.split(/\s+/).filter(Boolean).length;
+
+// The works the page cites (src/lib/citations.mjs). `governingWorks` is a
+// convenience name schema.org has no property for: those works go into
+// `about`, beside the software.
+const { governingWorks, ...cited } = citationsFor({ references: data.references, bibliographyUrl });
 
 const article =
   isHome || is404
@@ -217,40 +229,54 @@ const article =
         author: { '@id': PERSON_ID },
         publisher: { '@id': PERSON_ID },
         isPartOf: { '@id': WEBSITE_ID },
-        about: { '@id': SOFTWARE_ID },
-        ...citationsFor({ references: data.references, bibliographyUrl }),
+        // `isBasedOn` and `citation`, in that order, then `about`: each work is
+        // named where it is first referenced and pointed at after, so the
+        // standards the page is based on are named where a reader looks for
+        // them, and `about` lists the same ones beside the software.
+        ...cited,
+        about: governingWorks ? [{ '@id': SOFTWARE_ID }, ...governingWorks] : { '@id': SOFTWARE_ID },
       };
 
-// `citationsFor` returns `governingWorks` as a convenience name; schema.org has
-// no such property, so fold it away and keep `about` pointing at the software
-// plus the standards the page actually implements.
-if (article && 'governingWorks' in article) {
-  const governing = (article as Record<string, unknown>).governingWorks as unknown[];
-  delete (article as Record<string, unknown>).governingWorks;
-  (article as Record<string, unknown>).about = [{ '@id': SOFTWARE_ID }, ...governing];
-}
-
-// The bibliography page is where every cited work is defined. Other pages
-// reference those `@id`s; here the full nodes are emitted once, so the
-// references resolve to something instead of dangling.
+// The bibliography page is where every cited work is defined in full. Other
+// pages name each work once, briefly, and point at its `@id`; here the full
+// nodes are emitted once per language, with the standards bodies they cite.
 let bibliographyNodes: unknown[] = [];
 if (isBibliography) {
   const seen = new Map<string, unknown>();
-  const docs = await getCollection('docs');
-  for (const entry of docs) {
+  const bodies = new Map<string, unknown>();
+  const docs: CollectionEntry<'docs'>[] = await getCollection('docs');
+  const pages = docs.map((entry) => ({
+    id: entry.id,
+    references: (entry.data as { references?: ReferenceEntry[] }).references ?? [],
+  }));
+  // A Spanish standard names the English node it is (`sameAs`), so the two
+  // bibliographies read as one set of works in two languages.
+  const twins =
+    lang === 'es' ? englishStandardIds(pages, bibliographyUrl, englishBibliographyUrl) : new Map();
+  for (const page of pages) {
     // Harvest only this locale's pages. The `@id`s are per-locale (they hang
     // off this page's URL), and the `note` that becomes each node's
     // `description` is written in the page's own language, so mixing the two
     // locales puts Spanish prose on the English entities.
-    const isSpanish = entry.id === 'es' || entry.id.startsWith('es/');
+    const isSpanish = page.id === 'es' || page.id.startsWith('es/');
     if (isSpanish !== (lang === 'es')) continue;
-    const refs = (entry.data as { references?: ReferenceEntry[] }).references ?? [];
-    for (const ref of refs) {
+    for (const ref of page.references) {
       const id = referenceId(ref, bibliographyUrl);
-      if (!seen.has(id)) seen.set(id, referenceNode(ref, bibliographyUrl));
+      if (seen.has(id)) continue;
+      seen.set(
+        id,
+        referenceNode(ref, bibliographyUrl, {
+          bodiesUrl: englishBibliographyUrl,
+          translationOf: twins.get(id) ?? [],
+        }),
+      );
+      // The body is defined on the English bibliography's address in both
+      // languages: one identity for ISO, not one per page that names it.
+      const body = standardsBody(ref, englishBibliographyUrl);
+      if (body && !bodies.has(body['@id'])) bodies.set(body['@id'], body);
     }
   }
-  bibliographyNodes = [...seen.values()];
+  bibliographyNodes = [...bodies.values(), ...seen.values()];
 }
 
 // The home page is the one route with no article node, which left it as the

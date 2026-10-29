@@ -162,6 +162,38 @@ const SITE_NODES = ['Person', 'WebSite', 'SoftwareApplication', 'SoftwareSourceC
 /** Every JSON-LD block of a document, whatever else the script tag carries. */
 const LD_JSON = /<script[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/g;
 
+/**
+ * Whether an `@id` is a work a page cites: a standard, book, paper, report or
+ * web page defined on a bibliography page (src/lib/citations.mjs). The
+ * bibliography's own article and the standards bodies hang off the same
+ * address and are not works.
+ */
+const isCitedWork = (id) =>
+	typeof id === 'string' && /\/reference\/bibliography\/#(?:std|book|article|report|web)-/.test(id);
+
+/** Whether a reference to a work says what the work is, not only where it is defined. */
+const isNamed = (item) =>
+	typeof item?.name === 'string' && item.name.trim() !== '' && item['@type'] !== undefined;
+
+/** Every object under `value` that refers to a cited work, in document order. */
+function citedWorkReferences(value, out = []) {
+	if (Array.isArray(value)) {
+		for (const item of value) citedWorkReferences(item, out);
+	} else if (value && typeof value === 'object') {
+		if (isCitedWork(value['@id'])) out.push(value);
+		for (const child of Object.values(value)) citedWorkReferences(child, out);
+	}
+	return out;
+}
+
+/**
+ * Where every standards body is defined, once for both languages: the English
+ * bibliography, whichever page names the body.
+ */
+const BODY_PREFIX = `${ORIGIN}/reference/bibliography/#org-`;
+/** Where the English bibliography defines each standard. */
+const ENGLISH_STANDARD_PREFIX = `${ORIGIN}/reference/bibliography/#std-`;
+
 const files = walk(DIST).sort();
 if (files.length === 0) throw new Error(`no HTML under ${DIST}: build the site first`);
 
@@ -177,6 +209,9 @@ const seen = {
 	unlisted: 0,
 	articles: 0,
 	edited: 0,
+	basedOn: 0,
+	cited: 0,
+	citing: 0,
 };
 
 /** Every route the navigation tree lists (src/data/topics.mjs). */
@@ -194,6 +229,12 @@ const missingSection = [];
 const wrongSection = [];
 /** Each distinct `operatingSystem` of the software node, as JSON, and the pages that carry it. */
 const platformLists = new Map();
+/** Pages whose `isBasedOn` points at a work without naming it, with the count. */
+const unnamedBasis = [];
+/** Pages that point at a cited work nothing on the page names, with the count. */
+const unnamedCited = [];
+/** What each language's bibliography page defines, for the check across the two. */
+const bibliographies = new Map();
 
 for (const file of files) {
 	const html = readFileSync(join(DIST, file), 'utf8');
@@ -339,9 +380,8 @@ for (const file of files) {
 	// resolves to nothing on the page that makes it is the failure the single
 	// `@graph` in Head.astro exists to prevent: a plain JSON-LD processor
 	// expands each script as its own document, and there the target is a node
-	// with no properties at all. (`about` also cites the bibliography, whose
-	// nodes are defined on the bibliography page, so only its first entry, the
-	// software, is answerable here.)
+	// with no properties at all. (`about` goes on to name the works the page
+	// implements, which the check of cited works below holds to the same.)
 	const defined = new Set(ids);
 	const joins = {
 		author: article.author,
@@ -354,6 +394,68 @@ for (const file of files) {
 		if (target && !defined.has(target)) {
 			fail(`${route}: article ${key} points at ${target}, which no node on the page defines`);
 		}
+	}
+
+	// The works the page cites, named on the page. They used to be bare `@id`s
+	// into the bibliography, which defines them on a page of its own: the
+	// reader this markup is for takes one document at a time, and there the
+	// standard a guide is based on was an address with nothing at it. The first
+	// reference to a work in `isBasedOn` says what it is, with its type and
+	// name; a later one may point back. Every other reference, in `about` and
+	// `citation`, has to resolve to a work named somewhere on the same page.
+	const references = citedWorkReferences(article);
+	if (references.length > 0) seen.citing += 1;
+	const namedHere = new Set(references.filter(isNamed).map((item) => item['@id']));
+	const firstInBasis = new Set();
+	let bareBasis = 0;
+	for (const item of [article.isBasedOn ?? []].flat()) {
+		const id = item?.['@id'];
+		if (!isCitedWork(id) || firstInBasis.has(id)) continue;
+		firstInBasis.add(id);
+		seen.basedOn += 1;
+		if (!isNamed(item)) bareBasis += 1;
+	}
+	if (bareBasis > 0) unnamedBasis.push([route, bareBasis]);
+	const works = new Set(references.map((item) => item['@id']));
+	seen.cited += works.size;
+	const unnamed = [...works].filter((id) => !namedHere.has(id));
+	if (unnamed.length > 0) unnamedCited.push([route, unnamed.length]);
+
+	// The bibliography page defines every work in full, and names each
+	// standard's publisher by the one identity the body has on the English
+	// bibliography, in both languages. A body written out as an anonymous
+	// Organization in every node that named it was 146 unrelated ISOs on the
+	// English page alone. The check across the two languages runs after the
+	// loop, once both pages have been read.
+	if (slug === 'reference/bibliography') {
+		const byId = new Map(nodes.filter((node) => node['@id']).map((node) => [node['@id'], node]));
+		const standards = nodes.filter((node) => node.genre === 'Technical standard');
+		const anonymous = new Map();
+		for (const standard of standards) {
+			const id = standard.publisher?.['@id'];
+			const body = typeof id === 'string' ? byId.get(id) : undefined;
+			const identified =
+				typeof id === 'string' &&
+				id.startsWith(BODY_PREFIX) &&
+				body !== undefined &&
+				typesOf(body).includes('Organization') &&
+				typeof body.name === 'string' &&
+				body.name !== '';
+			if (!identified) {
+				const name = standard.publisher?.name ?? id ?? '(no publisher)';
+				anonymous.set(name, (anonymous.get(name) ?? 0) + 1);
+			}
+		}
+		if (anonymous.size > 0) {
+			const count = [...anonymous.values()].reduce((sum, n) => sum + n, 0);
+			fail(
+				`${route}: ${count} of ${standards.length} standards name a publisher with no identity of its own ` +
+					`under ${BODY_PREFIX}: ${[...anonymous].map(([name, n]) => `${name} (${n})`).join(', ')}`,
+			);
+		} else {
+			ok(`${route}: each of the ${standards.length} standards names its publisher by the body's one identity`);
+		}
+		bibliographies.set(lang, { route, defined, standards });
 	}
 
 	// The two locales are one work. English pages point forward to their
@@ -501,6 +603,77 @@ if (seen.edited < seen.articles * EDITED_FLOOR) {
 	fail(`${editedLine}: src/lib/page-dates.mjs read no history, from a shallow checkout or a failed git log`);
 } else {
 	ok(editedLine);
+}
+
+/** The first few routes of a list of [route, count] pairs, with the counts. */
+const firstOf = (pairs) => pairs.slice(0, 3).map(([route, n]) => `${route} (${n})`).join(', ');
+const total = (pairs) => pairs.reduce((sum, [, n]) => sum + n, 0);
+
+if (unnamedBasis.length > 0) {
+	fail(
+		`${unnamedBasis.length} page(s) give ${total(unnamedBasis)} work(s) they are based on as a bare @id: ` +
+			'the first reference to each work in isBasedOn has to carry its @type and name',
+	);
+	console.error(`     first: ${firstOf(unnamedBasis)}`);
+} else if (seen.basedOn === 0) {
+	// A check that found nothing to read would pass everything.
+	fail('no page says what it is based on: the citation properties changed under this check');
+} else {
+	ok(`every one of the ${seen.basedOn} works pages are based on is named at its first reference in isBasedOn`);
+}
+if (unnamedCited.length > 0) {
+	fail(
+		`${unnamedCited.length} page(s) point at ${total(unnamedCited)} cited work(s) that nothing on the page names`,
+	);
+	console.error(`     first: ${firstOf(unnamedCited)}`);
+} else {
+	ok(`every one of the ${seen.cited} works ${seen.citing} pages cite is named on the page that cites it`);
+}
+
+// The two bibliographies define one set of works in two languages. A Spanish
+// standard says which English node it is with `sameAs`, and that node has to
+// exist: an edition note is translated with the page ("4.ª ed.", "4th ed."),
+// so the two `@id`s are not always the locale apart, and a guessed address
+// would point at nothing.
+{
+	const en = bibliographies.get('en');
+	const es = bibliographies.get('es');
+	if (!en || !es) {
+		fail(`the bibliography page was not found in ${en ? 'Spanish' : 'English'}: build the site first`);
+	} else if (en.standards.length === 0 || es.standards.length === 0) {
+		fail(
+			`the bibliography defines ${en.standards.length} standards in English and ${es.standards.length} in ` +
+				'Spanish: the standard nodes changed under this check',
+		);
+	} else {
+		const untied = [];
+		const dangling = [];
+		for (const standard of es.standards) {
+			const targets = [standard.sameAs ?? []]
+				.flat()
+				.filter((url) => typeof url === 'string' && url.startsWith(ENGLISH_STANDARD_PREFIX));
+			if (targets.length === 0) untied.push(standard.identifier);
+			else dangling.push(...targets.filter((url) => !en.defined.has(url)));
+		}
+		if (untied.length > 0) {
+			fail(
+				`${es.route}: ${untied.length} of ${es.standards.length} standards name no English node as the same ` +
+					`work (first: ${untied.slice(0, 3).join('; ')})`,
+			);
+		}
+		if (dangling.length > 0) {
+			fail(
+				`${es.route}: ${dangling.length} sameAs point at English standards ${en.route} does not define ` +
+					`(first: ${dangling.slice(0, 3).join(', ')})`,
+			);
+		}
+		if (untied.length === 0 && dangling.length === 0) {
+			ok(
+				`each of the ${es.standards.length} Spanish standards names the English node it is, among the ` +
+					`${en.standards.length} the English bibliography defines`,
+			);
+		}
+	}
 }
 
 ok(`parsed ${seen.blocks} ld+json blocks across ${seen.pages} pages (${seen.redirects} redirect stubs skipped)`);

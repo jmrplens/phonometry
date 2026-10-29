@@ -28,22 +28,47 @@ if TYPE_CHECKING:
 
 #: The three tables an export must carry, as the package names them.
 _REQUIRED = ("Aircraft.csv", "NPD_data.csv", "Default_fixed_point_profiles.csv")
+#: The tables an export may leave out, as the package names them.
+_OPTIONAL = (
+    "Aerodynamic_coefficients.csv",
+    "Default_approach_procedural_steps.csv",
+    "Default_departure_procedural_steps.csv",
+    "Default_weights.csv",
+    "Jet_engine_coefficients.csv",
+    "Propeller_engine_coefficients.csv",
+    "Spectral_classes.csv",
+)
 #: The first SEL row of the bundled NPD table, line 14 of the file.
 _SEL_ROW = "2CF650;SEL;A;10000.0;99.9;95.0;91.4;87.5;81.3;74.6;69.7;64.2;57.7;50.7"
 
 
-def _export(root: Path, **replaced: str) -> Path:
+def _export(root: Path, *extra: str, **replaced: str) -> Path:
     """The three tables of the bundled database in *root*, any of them replaced.
 
+    :param extra: Further tables of the bundled database to copy, by file name.
     :param replaced: Text for a table, keyed by its file name with the dots
         and the dashes turned into underscores (``NPD_data_csv``).
     """
     source = files("phonometry.aircraft.data.anp")
-    for name in _REQUIRED:
+    for name in (*_REQUIRED, *extra):
         key = name.replace(".", "_")
         text = replaced.get(key, source.joinpath(name).read_text(encoding="utf-8"))
         (root / name).write_text(text, encoding="utf-8")
     return root
+
+
+def _bundled(name: str) -> str:
+    """The text of the bundled table *name*."""
+    return files("phonometry.aircraft.data.anp").joinpath(name).read_text()
+
+
+def _first_row_with(name: str, old: str, new: str) -> str:
+    """The bundled table *name* with *old* replaced by *new* in its first row."""
+    text = _bundled(name)
+    first = text.splitlines()[1]
+    broken = first.replace(old, new, 1)
+    assert broken != first
+    return text.replace(first, broken, 1)
 
 
 def _npd_with(cell: str) -> str:
@@ -187,3 +212,98 @@ def test_the_bundled_database_reads_as_it_did(tmp_path: Path) -> None:
     curves = from_directory.npd_curves("727200", "arrival", "SEL")
     expected = from_package.npd_curves("727200", "arrival", "SEL")
     assert (curves.levels == expected.levels).all()
+
+
+@pytest.mark.skipif(
+    sys.platform == "win32", reason="a symbolic link asks for a privilege there"
+)
+@pytest.mark.parametrize("name", _OPTIONAL)
+def test_an_optional_table_that_cannot_be_read_is_not_taken_for_one_left_out(
+    name: str, tmp_path: Path
+) -> None:
+    """A link to nothing at an optional table's name loaded as if the table were absent."""
+    root = _export(tmp_path)
+    (root / name).symlink_to(tmp_path / "gone" / name)
+    with pytest.raises(FileNotFoundError, match=re.escape(name)):
+        load_anp_database(root)
+
+
+#: The first data row of each table whose stage length is a bin or ``"M"``,
+#: as the cell is spelt there and with a fresh cell in its place.
+_STAGE_ROWS = {
+    "Default_weights.csv": (";1;15500", ";{};15500"),
+    "Default_departure_procedural_steps.csv": (";DEFAULT;1;1;", ";DEFAULT;{};1;"),
+}
+
+
+@pytest.mark.parametrize("name", sorted(_STAGE_ROWS))
+@pytest.mark.parametrize(
+    ("cell", "refusal"),
+    [
+        ("nan", "is not a finite number, and an ANP table holds finite numbers only"),
+        ("inf", "is not a finite number, and an ANP table holds finite numbers only"),
+        ("1e999", "is not a finite number, and an ANP table holds finite numbers only"),
+        ("1.5", "falls between two ANP bins"),
+    ],
+)
+def test_a_stage_length_that_names_no_bin_is_refused_with_its_place(
+    name: str, cell: str, refusal: str, tmp_path: Path
+) -> None:
+    """It was refused as the caller's stage_length, naming no table, line or column."""
+    old, new = _STAGE_ROWS[name]
+    root = _export(
+        tmp_path,
+        name,
+        **{name.replace(".", "_"): _first_row_with(name, old, new.format(cell))},
+    )
+    expected = f"ANP table {name!r}, line 2, column 'Stage Length': {cell!r} {refusal}"
+    with pytest.raises(ValueError, match=f"^{re.escape(expected)}$"):
+        load_anp_database(root)
+
+
+#: A count of each table that ``int()`` took whole, the first data row of the
+#: table as it is spelt there, and as it is spelt with a fraction in its place.
+_COUNTS = [
+    (
+        "Default_fixed_point_profiles.csv",
+        "Stage Length",
+        ";DEFAULT;1;1;",
+        ";DEFAULT;1.5;1;",
+    ),
+    (
+        "Default_fixed_point_profiles.csv",
+        "Point Number",
+        ";DEFAULT;1;1;",
+        ";DEFAULT;1;1.5;",
+    ),
+    (
+        "Default_departure_procedural_steps.csv",
+        "Step Number",
+        ";DEFAULT;1;1;",
+        ";DEFAULT;1;1.5;",
+    ),
+    (
+        "Default_approach_procedural_steps.csv",
+        "Step Number",
+        ";DEFAULT;1;",
+        ";DEFAULT;1.5;",
+    ),
+    ("Aircraft.csv", "Number Of Engines", ";Turboprop;2;", ";Turboprop;1.5;"),
+]
+
+
+@pytest.mark.parametrize(("name", "column", "old", "new"), _COUNTS)
+def test_a_count_that_is_no_whole_number_is_refused_with_its_place(
+    name: str, column: str, old: str, new: str, tmp_path: Path
+) -> None:
+    """int() took 1.5 for 1 and said nothing: a point or a step moved, an engine was lost."""
+    extra = () if name in _REQUIRED else (name,)
+    root = _export(
+        tmp_path, *extra, **{name.replace(".", "_"): _first_row_with(name, old, new)}
+    )
+    expected = (
+        f"ANP table {name!r}, line 2, column {column!r}: '1.5' is not a whole "
+        "number, and the column counts in whole numbers"
+    )
+    with pytest.raises(ValueError, match=f"^{re.escape(expected)}$"):
+        load_anp_database(root)

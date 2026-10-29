@@ -32,8 +32,10 @@ carries about four fifths of the sound energy of the 89.0 dB event.
 `load_anp_database()` with no argument reads the copy shipped with the package.
 Point it at a directory to read any other ANP CSV export instead. It
 reads only the tables it needs, each from a regular file of 32 MiB at most,
-and refuses a cell that holds no finite number (`nan`, `inf`, `1e999`)
-with the table, the line and the column, before anything is computed from it.
+and refuses a cell that holds no finite number (`nan`, `inf`, `1e999`), or a
+count (a stage length, a point or step number, a number of engines) that is
+no whole one, with the table, the line and the column, before anything is
+computed from it.
 
 ```python
 from phonometry import aircraft

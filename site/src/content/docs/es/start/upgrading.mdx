@@ -2761,10 +2761,9 @@ print(matrix.t11.shape, matrix.t11.dtype, complex(matrix.t11))
 
 Un nombre que se le pasa a un lector puede guardar algo que no es un fichero.
 Una tubería con nombre en la que nadie escribe dejaba `io.read` esperando en
-su primera apertura a un escritor que no llegaba nunca, y lo mismo el fichero
-de hosts de las ejecuciones remotas y las tablas de una exportación ANP; un
-enlace a `/dev/zero` mantenía una lectura sin fin, y un directorio lanzaba lo
-que lanzara su primera apertura. En la 4.0 cada lector mira el nombre antes de
+su primera apertura a un escritor que no llegaba nunca, y lo mismo las tablas
+de una exportación ANP; un enlace a `/dev/zero` mantenía una lectura sin fin,
+y un directorio lanzaba lo que lanzara su primera apertura. En la 4.0 cada lector mira el nombre antes de
 abrirlo y lanza un `ValueError` que nombra el fichero y lo que guarda. Una
 llamada que capturaba `OSError` para un directorio captura ahora `ValueError`;
 un nombre sin nada detrás sigue lanzando `FileNotFoundError`, y un enlace a un
@@ -2779,10 +2778,7 @@ fichero regular se sigue leyendo.
 | una tabla ANP de más de 32 MiB | se leía entera | `ValueError`, antes de leer un byte |
 | una celda ANP con `nan`, `inf`, `-Infinity` o `1e999`, una cabecera como `L_infft`, o una celda que no guarda ningún número | una celda no finita se tomaba tal cual y salía como NaN en cada nivel de evento; una celda sin número lanzaba el `ValueError` de Python, que no nombraba ni la tabla ni la línea | `ValueError` que nombra la tabla, la línea y la columna |
 | una tabla ANP que no es UTF-8 | `UnicodeDecodeError`, sin nombrar el fichero | `ValueError` que nombra la tabla y el byte |
-| un fichero de hosts (`PHONOMETRY_HOSTS_FILE` o la ubicación por defecto) que es una tubería con nombre o un dispositivo | la llamada esperaba o leía sin fin | `ValueError`, `"<ruta>: the hosts file is ..., and it is read only from a regular file"` |
-| un fichero de hosts que es un directorio, u ocupa más de 1 MiB | `ValueError` diciendo que no se podía leer; se leía entero | `ValueError` que nombra lo que es; `ValueError` que nombra su tamaño |
-| un destino `ssh` del fichero de hosts con una marca que reordena el texto (U+202A a U+202E, U+2066 a U+2069) | se tomaba tal cual | `ValueError`, como un carácter de control |
-| texto que envía un nodo remoto con una de esas marcas o un sustituto suelto | se mostraba tal cual, en el error, el registro o el aviso | se escribe como su escape (`\u202e`, `\ud800`); una procedencia del nodo que guarda uno lanza `ComputeRemoteError` |
+| un recuento ANP (una longitud de etapa, un número de punto o de paso, un número de motores) de `1.5` | se tomaba como `1`; una longitud de etapa de los pesos o de los pasos de despegue, escrita así o `nan`, lanzaba el `ValueError` de un argumento `stage_length`, que no nombraba ninguna tabla | `ValueError` que nombra la tabla, la línea y la columna |
 
 ```python
 import tempfile

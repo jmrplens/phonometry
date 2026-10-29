@@ -1171,9 +1171,9 @@ print(matrix.t11.shape, matrix.t11.dtype, complex(matrix.t11))
 
 A name handed to a reader can hold something other than a file. A named pipe
 no one writes to kept `io.read` waiting at its first open for a writer that
-never came, and the hosts file of the remote runs and the tables of an ANP
-export the same way; a link to `/dev/zero` kept a read going, and a directory
-raised whatever its first open raised. In 4.0 each reader looks at the name
+never came, and the tables of an ANP export the same way; a link to
+`/dev/zero` kept a read going, and a directory raised whatever its first open
+raised. In 4.0 each reader looks at the name
 before it opens it and raises a `ValueError` that names the file and what it
 holds. A call that caught `OSError` for a directory catches `ValueError` now;
 a name with nothing at it still raises `FileNotFoundError`, and a link to a
@@ -1188,10 +1188,7 @@ regular file is still read.
 | an ANP table of more than 32 MiB | read whole | `ValueError`, before a byte of it is read |
 | an ANP cell of `nan`, `inf`, `-Infinity` or `1e999`, a heading such as `L_infft`, or a cell that holds no number | a non-finite cell was taken as it was and came out of every event level as NaN; a cell with no number raised Python's own `ValueError`, which named neither the table nor the line | `ValueError` naming the table, the line and the column |
 | an ANP table that is not UTF-8 | `UnicodeDecodeError`, naming no file | `ValueError` naming the table and the byte |
-| a hosts file (`PHONOMETRY_HOSTS_FILE` or the default location) that is a named pipe or a device | the call waited, or read without end | `ValueError`, `"<path>: the hosts file is ..., and it is read only from a regular file"` |
-| a hosts file that is a directory, or holds more than 1 MiB | `ValueError` saying it could not be read; read whole | `ValueError` naming what it is; `ValueError` naming its size |
-| an `ssh` destination in the hosts file holding a mark that reorders text (U+202A to U+202E, U+2066 to U+2069) | taken as it was | `ValueError`, as a control character is |
-| text a remote node sends holding such a mark or a lone surrogate | shown as it was, in the error, the log or the warning | written as its escape (`\u202e`, `\ud800`); a node's provenance holding one raises `ComputeRemoteError` |
+| an ANP count (a stage length, a point or step number, a number of engines) of `1.5` | taken as `1`; a stage length of the weights or the departure steps, so written or `nan`, raised the `ValueError` of a `stage_length` argument, which named no table | `ValueError` naming the table, the line and the column |
 
 ```python
 import tempfile

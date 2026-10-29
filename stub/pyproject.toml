@@ -4,16 +4,22 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "PyOctaveBand"
-version = "2.2.0"
+version = "2.2.1"
 authors = [
   { name="José Manuel Requena Plens", email="mail@jmrp.io" },
 ]
 description = "PyOctaveBand is now phonometry. This transition package installs phonometry and keeps 'import pyoctaveband' working."
 readme = "README.md"
+# The SPDX expression and the file it names, which PEP 639 writes into the
+# metadata as License-Expression and License-File and puts the text beside it
+# in the wheel and the sdist. The file is a copy of the repository's LICENSE,
+# because a licence file has to sit under the project it is declared in. PEP
+# 639 forbids a licence classifier next to an expression, so there is none.
+license = "MIT"
+license-files = ["LICENSE"]
 requires-python = ">=3.13"
 classifiers = [
     "Development Status :: 7 - Inactive",
-    "License :: OSI Approved :: MIT License",
 ]
 dependencies = [
     # Capped below the next major on purpose. This package exists to keep

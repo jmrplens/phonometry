@@ -2238,6 +2238,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   gases and the fluid states and nonlinearity parameters books print, where
   its API page read "fluids domain of phonometry (see module docstrings)".
 
+- **The bundled EASA ANP tables carry EASA's terms and no condition of ours,
+  and the PyOctaveBand bridge ships its licence.**
+  `aircraft/data/anp/PROVENANCE.md` said the ANP tables in the wheel were
+  redistributed "for reference and non-commercial use", which read as a
+  condition on part of a package the MIT licence lets anyone use
+  commercially. It now quotes the notice they are reproduced under, EASA's
+  "Reproduction is authorised, provided the source is acknowledged, save where
+  otherwise stated", and keeps the acknowledgement; the README and the About
+  page say that data bundled from a third party keeps its source's terms. The
+  PyOctaveBand transition package moves to 2.2.1, its pin still below
+  phonometry 4, and declares `License-Expression: MIT` and carries `LICENSE`
+  in the wheel and the sdist, where 2.2.0 had a licence classifier and no
+  licence text. `scripts/check_stub_metadata.py` refuses a built stub without
+  either, in CI and in `publish-stub.yml` right before the upload, and
+  `publish-stub.yml` uploads only from a commit on which Python CI succeeded,
+  the check `release.yml` makes before it publishes phonometry.
+
 - **A record that holds a read-only mapping pickles and deep-copies.**
   `MappingProxyType` can be neither pickled nor deep-copied, and 48 of the
   records the test suite builds held one and failed both with `TypeError:

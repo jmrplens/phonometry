@@ -4,8 +4,10 @@ name: Publish PyOctaveBand transition stub
 # has to change. It goes through PyPI's trusted publisher for the PyOctaveBand
 # project (owner jmrplens, repository phonometry, workflow publish-stub.yml, no
 # environment), so no API token is stored, and PyPI attaches a PEP 740
-# attestation to each file. The build job holds no token; the publish job
-# holds nothing but its OIDC identity.
+# attestation to each file. Nothing goes out from a commit Python CI has not
+# passed: the preflight waits for that run, as the release of phonometry does.
+# The preflight can read the Actions API and nothing else, the build job holds
+# no token, and the publish job holds nothing but its OIDC identity.
 
 on:
   workflow_dispatch:
@@ -13,8 +15,73 @@ on:
 permissions: {}
 
 jobs:
+  preflight:
+    name: Preflight
+    runs-on: ubuntu-latest
+    # A job of its own because the wait outlasts the build job's ten minutes
+    # by far. Fifty, above the wait's own forty-five, so the message the wait
+    # writes is the one a reader gets. The ceiling is not redundant: the loop
+    # tests its deadline between iterations, so a `gh` call that hangs on a
+    # stalled connection never reaches the test.
+    timeout-minutes: 50
+    permissions:
+      actions: read # the conclusion of the CI run on this commit
+    steps:
+      - name: Require a green Python CI on this commit
+        # A version number cannot be uploaded twice, so the stub goes out only
+        # from a commit on which all of Python CI succeeded, the job that
+        # builds the stub and checks its metadata included. `needs:` cannot
+        # cross workflow files, so the job asks the API, and the step is the
+        # one release.yml runs, kept identical by
+        # tests/test_release_workflow.py. It reads no file of the checkout,
+        # so the job checks nothing out.
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          appear_deadline=$(( SECONDS + 300 ))
+          finish_deadline=$(( SECONDS + 2700 ))
+          while :; do
+            # A failed call leaves the substitution empty rather than killing
+            # the step (a here-string discards its exit status), so name that
+            # state and let the deadline say what it was waiting on.
+            read -r status conclusion <<<"$(gh run list \
+              --repo "$GITHUB_REPOSITORY" --commit "$GITHUB_SHA" \
+              --workflow python-app.yml --limit 1 \
+              --json status,conclusion \
+              --jq '.[0] | "\(.status // "missing") \(.conclusion // "none")"')"
+            if [ -z "$status" ]; then
+              status=unreachable
+              echo "::warning::gh run list failed; retrying."
+            fi
+            case "$status" in
+              completed)
+                if [ "$conclusion" = success ]; then
+                  echo "Python CI succeeded on $GITHUB_SHA."
+                  break
+                fi
+                echo "::error::Python CI concluded '$conclusion' on $GITHUB_SHA. Not releasing."
+                exit 1
+                ;;
+              missing)
+                if [ "$SECONDS" -ge "$appear_deadline" ]; then
+                  echo "::error::No Python CI run for $GITHUB_SHA after five minutes. Not releasing."
+                  exit 1
+                fi
+                ;;
+              *)
+                if [ "$SECONDS" -ge "$finish_deadline" ]; then
+                  echo "::error::Python CI still '$status' on $GITHUB_SHA after 45 minutes. Not releasing."
+                  exit 1
+                fi
+                ;;
+            esac
+            sleep 30
+          done
+
   build:
     name: Build the stub
+    needs: preflight
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
@@ -31,6 +98,7 @@ jobs:
           python -m pip install -r requirements-release.txt
           python -m build stub/
           python -m twine check --strict stub/dist/*
+          python scripts/check_stub_metadata.py
       - uses: actions/upload-artifact@v7
         with:
           name: stub-dist

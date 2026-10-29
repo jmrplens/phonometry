@@ -74029,11 +74029,15 @@ block above, and adjust the version and year to the release you used.
 phonometry is released under the
 [MIT licence](https://github.com/jmrplens/phonometry/blob/main/LICENSE), so it
 can be used in commercial and academic work, modified and redistributed, as
-long as the copyright notice and the licence text travel with it. The software
-comes without warranty: it is verified against the standards it implements, as
-described above, but **it is not a calibrated instrument and it carries no
-accreditation**. Deciding whether a result is fit for a purpose stays with the
-person using it.
+long as the copyright notice and the licence text travel with it. Data bundled
+from a third party keeps its source's terms: the EASA Aircraft Noise and
+Performance (ANP) tables, for one, are reproduced under EASA's notice that
+authorises reproduction provided the source is acknowledged, as their
+[provenance note](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/aircraft/data/anp/PROVENANCE.md)
+records. The software comes without warranty: it is verified against the
+standards it implements, as described above, but **it is not a calibrated
+instrument and it carries no accreditation**. Deciding whether a result is fit
+for a purpose stays with the person using it.
 
 Concretely, for the laboratories and consultancies this is mostly written for:
 the library computes and documents, it does not measure, so **traceability

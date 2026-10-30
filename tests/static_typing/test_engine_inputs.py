@@ -99,9 +99,13 @@ def test_an_engine_takes_its_medium_by_name_only() -> None:
     spacing and whose cells were 2300 m wide. The runs that wrap the engines
     take every field by name, and so do the engines.
     """
-    with pytest.raises(TypeError, match="positional argument"):
+    with pytest.raises(
+        TypeError, match=r"FDTD2D\.__init__\(\) takes 1 positional argument"
+    ):
         FDTD2D(0.01, 343.0, shape=(_NY, _NX))  # type: ignore[call-arg]
-    with pytest.raises(TypeError, match="positional argument"):
+    with pytest.raises(
+        TypeError, match=r"ElasticFDTD2D\.__init__\(\) takes 1 positional argument"
+    ):
         ElasticFDTD2D(  # type: ignore[call-arg]
             4000.0, 0.01, 2300.0, rho=2700.0, shape=(_NY, _NX)
         )

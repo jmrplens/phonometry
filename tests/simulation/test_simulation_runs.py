@@ -616,8 +616,12 @@ def test_a_shape_beside_a_map_names_the_map_s_grid(engine: Engine) -> None:
         )
     with pytest.raises(TypeError, match="shape must be a pair"):
         ElasticFDTD2D(
-            c_p=np.full((8, 8), 4000.0), c_s=2300.0, dx=0.01, rho=2500.0, shape="xx"
-        )  # type: ignore[arg-type]
+            c_p=np.full((8, 8), 4000.0),
+            c_s=2300.0,
+            dx=0.01,
+            rho=2500.0,
+            shape="xx",  # type: ignore[arg-type]
+        )
     assert ElasticFDTD2D(
         c_p=4000.0, c_s=2300.0, dx=0.01, rho=2500.0, shape=[np.int64(8), 8]
     ).c_p.shape == (8, 8)

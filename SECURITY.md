@@ -4,9 +4,13 @@
 
 phonometry is a scientific Python library. It computes acoustic, vibration and
 psychoacoustic quantities from arrays and files you hand it, inside your own
-process. It runs no service, opens no socket, holds no credentials, and never
-executes code derived from what you pass it: it calls its own code and its
-declared dependencies, nothing else. That shapes what a vulnerability can be
+process. It runs no service, holds no credentials, and never executes code
+derived from what you pass it: it calls its own code and its declared
+dependencies, nothing else. It opens no socket of its own, and it starts
+another program only when you ask for what needs one: a simulation you send to
+a remote node runs your own `ssh` client against a host your hosts file names,
+and writing a video runs `ffmpeg`, each by its full path and with every
+argument checked before it starts. That shapes what a vulnerability can be
 here, so this policy is written for this library rather than copied from a
 generic template.
 
@@ -21,6 +25,10 @@ version from `main`, and the remedy for any older version is to upgrade.
 | Earlier 4.x releases, and the 4.0.0rc1 pre-release | Upgrade to the latest 4.x |
 | 3.x | No: upgrade to the latest 4.x |
 | 2.x and earlier, including `PyOctaveBand` | No |
+
+3.x stops receiving security updates the day 4.0.0 is published. Bug and
+conformance fixes follow the same rule: they reach the latest release through
+the next one, and no other release receives them.
 
 Staying on the latest 4.x is cheap by design. After 4.0.0, a name that a
 release renames keeps working, with a `DeprecationWarning` that names its
@@ -94,9 +102,12 @@ quiet.
   crafted file causes anything worse than a clean exception, for example
   unbounded memory growth, a path that escapes the directory it was given, or an
   attempt to execute what was read, that is a vulnerability.
-- **Deserialisation.** The library deliberately never unpickles, evaluates or
-  imports anything derived from input. A code path that does is a defect worth
-  reporting even without a working exploit.
+- **Deserialisation.** The library deliberately never unpickles or evaluates
+  anything derived from input, and imports no module that input names except
+  its own: a warning a remote node relays names its class, which is imported
+  only from phonometry's own modules and otherwise looked up only among the
+  modules your process has already imported. A code path that goes further is
+  a defect worth reporting even without a working exploit.
 - **Supply chain.** Anything that can place code into a published artefact: the
   release workflow, the contents of the built wheel or sdist, package data
   reaching outside the package, or a dependency declaration that resolves

@@ -8,10 +8,13 @@ import { join } from 'node:path';
 import { before, describe, test } from 'node:test';
 
 import { conformanceMarkdown } from '../../../components/Conformance.md.mjs';
-import { reports, reportsByAreaEs } from '../../../data/reports.mjs';
+import { glossary } from '../../../data/glossary.mjs';
 import { en, es } from '../../../data/home.ts';
+import { reports, reportsByAreaEs } from '../../../data/reports.mjs';
+import { catalogueSlugs } from '../../../data/topics.mjs';
+import { catalogues } from '../../../generated/catalogues.mjs';
 import { loadRegistry } from '../registry.mjs';
-import { REPO_DIR } from '../render.mjs';
+import { CONTENT_DIR, REPO_DIR } from '../render.mjs';
 import { render } from './helpers.mjs';
 
 const FIGURES = 'https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images';
@@ -278,5 +281,127 @@ describe('Home', () => {
       issues.map((issue) => issue.kind),
       ['expression', 'writer'],
     );
+  });
+});
+
+describe('Catalogues', () => {
+  test('every row and column of the catalogue, its unit in the heading and the source last', () => {
+    const { markdown, issues } = write('<Catalogues catalogue="solids" lang="en" />\n');
+    assert.deepEqual(issues, []);
+    const rows = markdown.split('\n').filter((one) => one.startsWith('| ') && !one.startsWith('| --- '));
+    assert.equal(rows.length, catalogues.solids.rows.length + 1, 'a header and one line per row');
+    assert.match(rows[0], /^\| Material \| Density \(kg\/m³\) \| Young's modulus \(GPa\) \|.* \| Source \|$/u);
+    const cells = (one) => one.slice(2, -2).split(' | ');
+    assert.equal(cells(rows[0]).length, catalogues.solids.columns.length + 2);
+    for (const one of rows) assert.equal(cells(one).length, cells(rows[0]).length, one.slice(0, 60));
+  });
+
+  test('a cell that is not a plain printed number says what it is, and the legend says what each word means', () => {
+    const { markdown } = write('<Catalogues catalogue="solids" lang="en" />\n');
+    assert.match(markdown, /^Each value is the number its page prints, unless a word in brackets after it says what else it is:$/mu);
+    assert.match(markdown, /^- \*\*derived\*\*: worked out by this library$/mu);
+    assert.match(markdown, /\| 400 to 800 \(range\)\[\^solids-\d+\] \|/u);
+    // Only the kinds the table holds: the solids carry no converted cell.
+    assert.doesNotMatch(markdown, /\*\*converted\*\*/u);
+    const damping = write('<Catalogues catalogue="damping" lang="en" />\n').markdown;
+    assert.match(damping, /\| -3,889 \(converted from 25 °F\) \|/u);
+    assert.match(damping, /^- \*\*converted\*\*: converted from the page's figure$/mu);
+  });
+
+  test('every note is a footnote written once and referenced where the page shows it', () => {
+    const { markdown } = write('<Catalogues catalogue="solids" lang="en" />\n');
+    const defined = [...markdown.matchAll(/^\[\^(solids-\d+)\]: \S/gmu)].map((match) => match[1]);
+    const referenced = new Set([...markdown.matchAll(/\[\^(solids-\d+)\](?!:)/gu)].map((match) => match[1]));
+    assert.ok(defined.length > 0);
+    assert.equal(new Set(defined).size, defined.length, 'each note once');
+    assert.deepEqual([...referenced].sort(), [...defined].sort());
+    const notes = new Set(
+      catalogues.solids.rows.flatMap((row) => [row.note, ...row.cells.map((one) => one.note)]).filter(Boolean),
+    );
+    assert.equal(defined.length, notes.size);
+  });
+
+  test('the Spanish table reads the Spanish words, a fluid its conditions and what fixes it', () => {
+    const { markdown, issues } = write('<Catalogues catalogue="fluids" lang="es" />\n', { lang: 'es' });
+    assert.deepEqual(issues, []);
+    assert.match(markdown, /^\| Estado \| Condiciones \| Velocidad del sonido \(m\/s\) \|.* \| Qué lo fija \|$/mu);
+    assert.match(markdown, /^\| Aire \| 20 °C, 101 325 Pa \| 343 \|/mu);
+    const solids = write('<Catalogues catalogue="solids" lang="es" />\n', { lang: 'es' }).markdown;
+    assert.match(solids, /\| 400 a 800 \(intervalo\)\[\^solids-\d+\] \|/u);
+    assert.match(solids, /^- \*\*calculado\*\*: calculado por esta biblioteca$/mu);
+  });
+
+  test('transcribed text cannot turn into markup', () => {
+    const { markdown } = write('<Catalogues catalogue="transmissionLoss" lang="en" />\n');
+    assert.ok(markdown.includes(String.raw`200 mm CMU\*`));
+    assert.doesNotMatch(markdown.replaceAll(String.raw`\*`, ''), /(?<![*\\])\*(?!\*)[^*\n|]+\*/u);
+  });
+
+  test('a catalogue the generator does not write is reported', () => {
+    const { markdown, issues } = write('<Catalogues catalogue="gasses" lang="en" />\n');
+    assert.equal(markdown, '\n');
+    assert.match(issues[0].message, /catalogue="gasses" is not a catalogue/u);
+  });
+});
+
+describe('CatalogueIndex', () => {
+  test('every catalogue page, in the sidebar order, with its row count and description', () => {
+    const { markdown, issues } = write('<CatalogueIndex lang="en" />\n');
+    assert.deepEqual(issues, []);
+    const items = markdown.trim().split('\n');
+    assert.equal(items.length, catalogueSlugs.length);
+    assert.match(items[0], /^- \[Solids\]\(https:\/\/docs\.jmrp\.io\/phonometry\/reference\/catalogues\/solids\/\) \(\d+ rows\): \S/u);
+    assert.ok(items[0].includes(`(${catalogues.solids.rows.length} rows)`));
+  });
+
+  test('the Spanish list links the Spanish pages and counts in filas', () => {
+    const { markdown } = write('<CatalogueIndex lang="es" />\n', { lang: 'es' });
+    assert.match(markdown, /^- \[Sólidos\]\(https:\/\/docs\.jmrp\.io\/phonometry\/es\/reference\/catalogues\/solids\/\) \(\d+ filas\): \S/mu);
+  });
+});
+
+describe('Glossary', () => {
+  const terms = glossary.flatMap((group) => group.terms);
+
+  test('every group under its heading and every term once, with its guide linked by title', () => {
+    const { markdown, issues } = write('<Glossary lang="en" />\n');
+    assert.deepEqual(issues, []);
+    assert.equal(markdown.match(/^## /gmu).length, glossary.length);
+    assert.equal(markdown.match(/^- \*\*/gmu).length, terms.length);
+    assert.match(markdown, /^- \*\*\$L_p\$\*\*: Sound pressure level: .* Unit: dB re 20 µPa\. Defined in: IEC 61672-1:2013\. Guide: \[[^\]]+\]\(https:\/\/docs\.jmrp\.io\/phonometry\/signals\/metrology\/calibration\/\)\.$/mu);
+  });
+
+  test('the TeX of a definition reaches the copy as written, bars included', () => {
+    const { markdown } = write('<Glossary lang="en" />\n');
+    assert.ok(markdown.includes('$|G_{xy}|^2/(G_{xx}G_{yy})$'));
+    assert.doesNotMatch(markdown, /\\\|/u);
+  });
+
+  test('the Spanish glossary uses the Spanish words and guides', () => {
+    const { markdown } = write('<Glossary lang="es" />\n', { lang: 'es' });
+    assert.match(markdown, /Unidad: dB re 20 µPa\. Definida en: IEC 61672-1:2013\. Guía: \[[^\]]+\]\(https:\/\/docs\.jmrp\.io\/phonometry\/es\//u);
+  });
+});
+
+describe('ErrataFamily', () => {
+  test('the family linked to its page with every entry heading as the family page writes it', () => {
+    const { markdown, issues } = write('<ErrataFamily slug="iso-8041" name="ISO 8041" />\n');
+    assert.deepEqual(issues, []);
+    const page = readFileSync(join(CONTENT_DIR, 'reference', 'errata', 'iso-8041.md'), 'utf8');
+    const headings = [...page.matchAll(/^## (.+)$/gmu)].map((match) => match[1]);
+    assert.ok(markdown.startsWith(`### [ISO 8041](https://docs.jmrp.io/phonometry/reference/errata/iso-8041/) (${headings.length} entries)\n\n`));
+    for (const heading of headings) assert.ok(markdown.includes(`\n- ${heading}`), heading);
+    assert.ok(markdown.includes('for `Wf`'), 'code in a heading stays code');
+  });
+
+  test('the Spanish index lists the Spanish family page', () => {
+    const { markdown } = write('<ErrataFamily slug="iso-717" name="ISO 717" />\n', { lang: 'es' });
+    assert.match(markdown, /^### \[ISO 717\]\(https:\/\/docs\.jmrp\.io\/phonometry\/es\/reference\/errata\/iso-717\/\) \(\d+ entradas?\)$/mu);
+  });
+
+  test('a family without a page is reported', () => {
+    const { markdown, issues } = write('<ErrataFamily slug="iso-0" name="ISO 0" />\n');
+    assert.equal(markdown, '\n');
+    assert.match(issues[0].message, /lists "iso-0", but there is no page reference\/errata\/iso-0\.md/u);
   });
 });

@@ -51,9 +51,12 @@ import { dirname, relative, resolve, sep } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import { basePath, siteUrl } from '../../data/site.mjs';
+import { codeLines } from '../markdown-fences.mjs';
+import { MARKER } from '../bibliography-entries.mjs';
 import { absolutizeRootLinks } from './links.mjs';
 import { line, table } from './markdown-table.mjs';
 import { frontmatterOf, isMdx, parse } from './processor.mjs';
+import { rewrittenSource } from './rewrites.mjs';
 
 /** @typedef {import('./types.mjs').MdNode} MdNode */
 /** @typedef {import('./types.mjs').EstreeNode} EstreeNode */
@@ -252,18 +255,14 @@ function dedent(text, column) {
  * @returns {string}
  */
 function collapseBlankRuns(text) {
+  const lines = text.split('\n');
+  const code = codeLines(lines);
+  /** @type {string[]} */
   const out = [];
-  /** @type {string | null} */
-  let fence = null;
-  for (const one of text.split('\n')) {
-    const marker = /^\s*(`{3,}|~{3,})/u.exec(one)?.[1];
-    if (marker) {
-      if (fence === null) fence = marker;
-      else if (marker[0] === fence[0] && marker.length >= fence.length && one.trim() === marker) fence = null;
-    }
-    if (fence === null && one.trim() === '' && out.length > 0 && out.at(-1).trim() === '') continue;
+  lines.forEach((one, at) => {
+    if (!code[at] && one.trim() === '' && out.length > 0 && out.at(-1)?.trim() === '') return;
     out.push(one);
-  }
+  });
   return out.join('\n');
 }
 
@@ -558,13 +557,20 @@ function createRenderer(source, options, mode) {
 
   /**
    * Raw HTML in a `.md` page: a comment is dropped, anything else is kept as
-   * written and reported, because no rule covers it.
+   * written and reported, because no rule covers it. A comment that marks
+   * where a plugin writes a list, `<!-- bibliography: <area> -->`, is dropped
+   * and reported: the page shows a list there, and a marker that reaches the
+   * renderer is one no rule of ./rewrites.mjs wrote.
    *
    * @param {MdNode} node
    * @returns {string}
    */
   function renderHtml(node) {
     const value = node.value ?? '';
+    if (MARKER.test(value.trim())) {
+      report('html', node, `a bibliography marker no rule wrote, where the page shows a list: ${line(value).slice(0, 60)}`);
+      return '';
+    }
     if (/^\s*<!--[\s\S]*-->\s*$/u.test(value)) return '';
     report('html', node, `raw HTML in a Markdown page has no rule: ${line(value).slice(0, 60)}`);
     return value;
@@ -795,10 +801,22 @@ function createRenderer(source, options, mode) {
     ctx,
     /**
      * @param {MdNode} tree
+     * @param {(block: string) => string} [eachBlock]  Applied to what each
+     *   top-level node is written as, before the blocks are joined.
      * @returns {string}
      */
-    renderRoot(tree) {
-      return collapseBlankRuns(renderChildren(tree)).trim();
+    renderRoot(tree, eachBlock) {
+      const children = tree.children ?? [];
+      const inline = children.length > 0 && children.every((child) => INLINE_TYPES.has(child.type));
+      if (!eachBlock || inline) {
+        const whole = renderChildren(tree);
+        return collapseBlankRuns(eachBlock ? eachBlock(whole) : whole).trim();
+      }
+      const blocks = children
+        .map((child) => renderNode(child, { dedented: false }))
+        .filter((part) => part.trim() !== '')
+        .map(eachBlock);
+      return collapseBlankRuns(blocks.join('\n\n')).trim();
     },
   };
 }
@@ -831,8 +849,14 @@ export function renderTree(tree, source, options) {
     frontmatter: frontmatterOf(tree),
     ...options,
   };
-  const body = createRenderer(source, full, { fragment: false }).renderRoot(tree);
-  return `${absolutizeRootLinks(body, SITE.origin)}\n`;
+  // Links are made absolute block by block: no link crosses from one
+  // top-level block into the next, and a block that holds none (the
+  // conformance report's hundreds of kilobytes of tables) is then never
+  // parsed again for links (links.mjs says why that matters).
+  const body = createRenderer(source, full, { fragment: false }).renderRoot(tree, (block) =>
+    absolutizeRootLinks(block, SITE.origin),
+  );
+  return `${body}\n`;
 }
 
 /**
@@ -928,16 +952,21 @@ export async function loadScope(tree, { file, registry, issues }) {
  * Reads, parses and writes one content file.
  *
  * @param {string} file  Absolute path of a page under `src/content/docs`.
- * @param {{ registry: Map<string, ComponentMarkdown>, flavour?: 'agent' | 'github', issues?: RenderIssue[] }} options
+ * @param {{ registry: Map<string, ComponentMarkdown>, flavour?: 'agent' | 'github', issues?: RenderIssue[], lang?: 'en' | 'es' }} options
+ *   `lang` defaults to the language of the file's place under the content
+ *   directory; a check that reads another directory passes it.
  * @returns {Promise<{ markdown: string, frontmatter: Record<string, unknown>, issues: RenderIssue[], tree: MdNode }>}
  * @throws {Error}  When the file does not parse, as the site build would.
  */
-export async function renderFile(file, { registry, flavour = 'agent', issues = [] }) {
-  const source = await readFile(file, 'utf8');
+export async function renderFile(file, { registry, flavour = 'agent', issues = [], lang = langOf(file) }) {
+  // What a Markdown plugin of the site writes into the page before Astro
+  // renders it is written into the source first (./rewrites.mjs): the
+  // bibliography's lists, which its source holds only as markers.
+  const source = await rewrittenSource(file, await readFile(file, 'utf8'), { lang });
   const mdx = isMdx(file);
   const tree = parse(source, { mdx });
   const scope = mdx ? await loadScope(tree, { file, registry, issues }) : new Map();
   const frontmatter = frontmatterOf(tree);
-  const markdown = renderTree(tree, source, { registry, flavour, scope, issues, frontmatter, lang: langOf(file) });
+  const markdown = renderTree(tree, source, { registry, flavour, scope, issues, frontmatter, lang });
   return { markdown, frontmatter, issues, tree };
 }

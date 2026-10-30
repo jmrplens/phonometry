@@ -22,6 +22,20 @@ import { parse } from './processor.mjs';
 const LINK_TYPES = new Set(['link', 'image', 'definition']);
 
 /**
+ * What every root-relative destination is preceded by: the `](` of an inline
+ * link or image, or the `]:` of a definition, then optional spacing with at
+ * most one line break, an optional `<`, and a single `/`.
+ *
+ * A copy without it holds no link to rewrite, and is returned without being
+ * parsed. That is not only quicker: the GFM table extension resolves every
+ * table of a document through one list of edits that it searches from the
+ * start for each new one, so its cost grows with the square of the document's
+ * table rows. The conformance report, all tables and no root-relative link,
+ * cost more to parse for nothing than every other page together.
+ */
+const ROOT_DESTINATION = /\](?:\(|:)[ \t]*(?:\r?\n[ \t]*)?<?\/(?!\/)/u;
+
+/**
  * @param {string} text
  * @returns {string}
  */
@@ -38,6 +52,7 @@ const escapeRegExp = (text) => text.replaceAll(/[.*+?^${}()|[\]\\]/gu, String.ra
 export function absolutizeRootLinks(markdown, origin) {
   let root = origin;
   while (root.endsWith('/')) root = root.slice(0, -1);
+  if (!ROOT_DESTINATION.test(markdown)) return markdown;
   const tree = parse(markdown, { mdx: false });
   /** @type {number[]} */
   const inserts = [];

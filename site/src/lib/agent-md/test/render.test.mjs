@@ -258,6 +258,18 @@ describe('links', () => {
     );
   });
 
+  test('a destination after spacing, a line break or an angle bracket is still found', () => {
+    // A copy with no `](/` or `]: /` in it is not parsed for links at all,
+    // so every form a root-relative destination can take has to show that
+    // pair, or the link would be skipped as if there were none.
+    const source = '[a]( /phonometry/a/) and [b](</phonometry/b/>) and [c](\n  /phonometry/c/).\n\n[d]:\n  /phonometry/d/\n';
+    const { markdown } = render(source, { mdx: false });
+    for (const name of ['a', 'b', 'c', 'd']) assert.ok(markdown.includes(`https://docs.jmrp.io/phonometry/${name}/`), name);
+    assert.doesNotMatch(markdown, /[(<\s]\/phonometry\//u);
+    const none = '| a | b |\n| --- | --- |\n| [x](https://example.org/) | `](/` in code |\n';
+    assert.equal(render(none, { mdx: false }).markdown, none);
+  });
+
   test('the site address builds absolute URLs from any of the forms writers hold', () => {
     assert.equal(SITE.url('/phonometry/start/'), 'https://docs.jmrp.io/phonometry/start/');
     assert.equal(SITE.url('/reference/conformance/'), 'https://docs.jmrp.io/phonometry/reference/conformance/');

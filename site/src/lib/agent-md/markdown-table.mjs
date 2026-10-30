@@ -14,6 +14,7 @@
  *
  * @module
  */
+import { codeLines } from '../markdown-fences.mjs';
 
 /** @typedef {string | number | boolean | null | undefined} CellValue */
 
@@ -58,6 +59,26 @@ export function table(head, body) {
  */
 export function line(value) {
   return (value ?? '').replaceAll(/\s+/gu, ' ').trim();
+}
+
+/**
+ * Data that is plain text, not Markdown, made safe to print as Markdown: on
+ * one line, with the characters that would turn part of it into something
+ * else escaped. A transcribed table prints `200 mm CMU*` and `~0,65 to
+ * 0,68`; written raw, two asterisks in one cell would italicize the words
+ * between them, two tildes would strike them through, a `$` would open
+ * maths, a backtick code and a `<` before a letter a tag.
+ *
+ * Strings a page or a data module holds as Markdown (with TeX in `$...$`, as
+ * the glossary does) must not go through this: their markup is meant.
+ *
+ * @param {string | undefined | null} value
+ * @returns {string}
+ */
+export function plainText(value) {
+  return line(value)
+    .replaceAll(/([\\`*~$])/gu, String.raw`\$1`)
+    .replaceAll(/<(?=[A-Za-z/!?])/gu, String.raw`\<`);
 }
 
 /**
@@ -107,7 +128,9 @@ export function listItem(lead, body) {
       .split('\n')
       .map((one) => (one.trim() === '' ? '' : `  ${one}`))
       .join('\n');
-  if (/^(?:[-*+] |\d+[.)] |`{3,}|~{3,}|\$\$|\||#{1,6} |>)/u.test(blocks)) {
+  const opensBlock =
+    /^(?:[-*+] |\d+[.)] |\$\$|\||#{1,6} |>)/u.test(blocks) || codeLines([blocks.split('\n')[0]])[0];
+  if (opensBlock) {
     return `- ${lead}\n\n${indent(blocks)}`;
   }
   const [first, ...rest] = blocks.split('\n');

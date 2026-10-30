@@ -210,6 +210,21 @@ EXEMPT: dict[tuple[str, str], str] = {
         "see the digest keep the line as the page's text; it reads no fence "
         "itself"
     ),
+    ("site/src/lib/agent-md/test/primitives.test.mjs", "<script>"): (
+        "fixtures: the pages these tests hand the Markdown renderer carry "
+        "fences, because what they check is that the copy keeps each fence "
+        "and its body byte for byte; nothing in them reads a fence"
+    ),
+    ("site/src/lib/agent-md/test/render.test.mjs", "<script>"): (
+        "fixtures: the pages these tests hand the Markdown renderer carry "
+        "fences, because what they check is that the copy keeps each fence "
+        "and its body byte for byte; nothing in them reads a fence"
+    ),
+    ("site/src/lib/agent-md/test/writers.test.mjs", "<script>"): (
+        "fixtures: the pages these tests hand the Markdown renderer carry "
+        "fences, because what they check is that the copy keeps each fence "
+        "and its body byte for byte; nothing in them reads a fence"
+    ),
 }
 
 #: The strings the name read at a node stands for.

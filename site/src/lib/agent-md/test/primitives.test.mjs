@@ -8,7 +8,7 @@ import { tmpdir } from 'node:os';
 import { basename, join } from 'node:path';
 import { describe, test } from 'node:test';
 
-import { bracketText, cell, htmlAttribute, line, listItem, table } from '../markdown-table.mjs';
+import { bracketText, cell, htmlAttribute, line, listItem, plainText, table } from '../markdown-table.mjs';
 import { frontmatterOf, isMdx, parse } from '../processor.mjs';
 import { buildRegistry, COMPONENTS_DIR, loadRegistry, writerFiles } from '../registry.mjs';
 import { markdownFor } from '../types.mjs';
@@ -53,6 +53,14 @@ describe('table and list primitives', () => {
     assert.equal(bracketText('a [b] | c\nd'), String.raw`a \[b\] \| c d`);
     assert.equal(htmlAttribute('say "a" & <b>'), 'say &quot;a&quot; &amp; &lt;b&gt;');
     assert.equal(line('  a\n\tb  '), 'a b');
+  });
+
+  test('plain text from a data module cannot turn into markup', () => {
+    assert.equal(plainText('A* and B*'), String.raw`A\* and B\*`);
+    assert.equal(plainText('~0,65 to ~0,68'), String.raw`\~0,65 to \~0,68`);
+    assert.equal(plainText('$5, `x`, a\\b'), String.raw`\$5, \`x\`, a\\b`);
+    assert.equal(plainText('<b>bold</b> and < 0,001'), String.raw`\<b>bold\</b> and < 0,001`);
+    assert.equal(plainText('Z_m\n of 1220'), 'Z_m of 1220');
   });
 
   test('a list item keeps a multi-block body inside the item', () => {

@@ -22,10 +22,11 @@
  * English page's; a second copy of 400 kB of English rows would say nothing
  * the first does not.
  */
-import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
+import { inlineSpans } from '../../scripts/shared/markdown-spans.mjs';
 import { REPO_DIR } from '../lib/agent-md/render.mjs';
+import { readCommittedText } from '../lib/line-ends.mjs';
 import { markdownFor } from '../lib/agent-md/types.mjs';
 
 /** Character references the generator writes, and what they stand for. */
@@ -69,9 +70,17 @@ export function conformanceMarkdown(text, report = () => {}) {
     .replaceAll(/<\/?sub>/gu, '')
     .replaceAll(/<b>([\s\S]*?)<\/b>/gu, '**$1**');
   const leftover = new Set();
-  // A tag outside code spans that this transform did not consume.
-  for (const segment of body.split(/(`+[^`]*`+)/u)) {
-    if (segment.startsWith('`')) continue;
+  // A tag outside code spans that this transform did not consume. The spans
+  // are read as the page reads them (scripts/shared/markdown-spans.mjs, rule
+  // F65), so a backtick a span holds or escapes ends no span here either.
+  let at = 0;
+  const outside = [];
+  for (const [start, end] of inlineSpans(body)) {
+    outside.push(body.slice(at, start));
+    at = end;
+  }
+  outside.push(body.slice(at));
+  for (const segment of outside) {
     for (const [, name] of segment.matchAll(/<\/?([a-zA-Z][a-zA-Z0-9]*)\b/gu)) {
       if (!KNOWN_TAGS.has(name.toLowerCase())) leftover.add(name);
     }
@@ -99,7 +108,7 @@ export default markdownFor({
     if (lang === 'es') {
       return `${POINTER.es}${ctx.site.url('/reference/conformance/index.md')}.`;
     }
-    const text = readFileSync(join(REPO_DIR, 'docs', 'CONFORMANCE.md'), 'utf8');
+    const text = readCommittedText(join(REPO_DIR, 'docs', 'CONFORMANCE.md'));
     return conformanceMarkdown(text, (message) => ctx.issue(node, message));
   },
 });

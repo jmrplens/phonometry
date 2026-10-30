@@ -50,9 +50,13 @@ const element = (name, props) => ({
   children: [],
 });
 
-/** A fenced block whose fence no line of the code can close. */
+/**
+ * A fenced block whose fence no line of the code can close: its backticks
+ * outnumber the longest run of them anywhere in the code, as `codeSpan` sizes
+ * an inline span.
+ */
 const fence = (code, lang) => {
-  const longest = Math.max(2, ...(code.match(/^`{3,}/gmu) ?? []).map((run) => run.length));
+  const longest = Math.max(2, ...(code.match(/`+/gu) ?? []).map((run) => run.length));
   const marks = '`'.repeat(longest + 1);
   return `${marks}${lang}\n${code.replace(/\n+$/u, '')}\n${marks}`;
 };

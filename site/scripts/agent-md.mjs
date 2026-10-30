@@ -20,26 +20,13 @@
 //       Prints one page: `signals/filters/filter-banks`,
 //       `es/signals/filters/filter-banks`, or `` / `es` for the two homes.
 //       Issues go to stderr, and any issue makes the exit status 1.
-import { existsSync, readdirSync } from 'node:fs';
+import { existsSync } from 'node:fs';
 import { join, relative, sep } from 'node:path';
 import process from 'node:process';
 
+import { pageFiles } from '../src/lib/agent-md/content.mjs';
 import { CONTENT_DIR, renderFile } from '../src/lib/agent-md/render.mjs';
 import { loadRegistry } from '../src/lib/agent-md/registry.mjs';
-
-/** Every page file under the content directory, sorted. */
-function pageFiles(dir = CONTENT_DIR) {
-  const found = [];
-  const walk = (current) => {
-    for (const entry of readdirSync(current, { withFileTypes: true })) {
-      const path = join(current, entry.name);
-      if (entry.isDirectory()) walk(path);
-      else if (/\.mdx?$/u.test(entry.name)) found.push(path);
-    }
-  };
-  walk(dir);
-  return found.sort();
-}
 
 /** A content path as the census prints it. */
 const shown = (file) => relative(CONTENT_DIR, file).split(sep).join('/');

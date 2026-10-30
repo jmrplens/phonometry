@@ -8,10 +8,12 @@
  *
  * Every number in `stats` and every claim in `honest` is taken from the
  * repository, not written by hand from memory:
- *   checks/domains/designations/sources   conformance-stats.mjs, parsed from
- *                              docs/CONFORMANCE.md at build time
- *   guides/apiPages/figures/fiches/version   repo-stats.mjs, counted from the
- *                              tree at build time (definitions in that module)
+ *   checks/domains/designations/sources
+ *       conformance-stats.mjs, read from the counts of docs/conformance.json
+ *       at build time
+ *   guides/apiPages/figures/fiches/version
+ *       repo-stats.mjs, counted from the tree at build time (definitions in
+ *       that module)
  *
  * All of these used to be typed out here by hand, and every hand-written copy
  * fell a release behind. They are imported now, so there is exactly one place

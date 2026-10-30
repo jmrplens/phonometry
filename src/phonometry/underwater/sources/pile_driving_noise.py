@@ -4,16 +4,16 @@ r"""Radiated underwater sound from percussive pile driving (ISO 18406:2017).
 Percussive pile driving radiates a train of impulsive acoustic pulses, one per
 hammer strike. ISO 18406 characterises them with:
 
-* :func:`single_strike_sel` -- the single-strike sound exposure level
+* :func:`single_strike_sel`: the single-strike sound exposure level
   ``SEL_ss`` of one pulse (Formulae 3-4), reusing the 1 µPa²·s reference.
-* :func:`cumulative_sel` / :func:`cumulative_sel_identical` -- the cumulative
+* :func:`cumulative_sel` / :func:`cumulative_sel_identical`: the cumulative
   sound exposure level over N strikes (Formulae 8-9); for N identical strikes
   :math:`\mathrm{SEL}_{\mathrm{cum}} =
   \mathrm{SEL}_{\mathrm{ss}} + 10 \log_{10} N`.
-* :func:`pile_strike_metrics` -- a :class:`PileStrikeResult` bundling the
+* :func:`pile_strike_metrics`: a :class:`PileStrikeResult` bundling the
   single-strike SEL, the peak sound pressure level, the SPL/Leq and the
   90 %-energy pulse duration for one recorded strike, with a ``.plot()``.
-* :func:`strike_sel_spectrum` -- the same single-strike SEL resolved into
+* :func:`strike_sel_spectrum`: the same single-strike SEL resolved into
   fractional-octave bands (ISO 18406 6.4.2.2), the input a marine-mammal
   assessment needs: feed it to
   :func:`~phonometry.underwater.bioacoustics.weighting.weighted_exposure` to
@@ -105,7 +105,7 @@ def cumulative_sel(single_sels: ArrayLike) -> float:
     Formulae 8-9).
 
     :math:`\mathrm{SEL}_{\mathrm{cum}} =
-    10 \log_{10} \sum_n 10^{\mathrm{SEL}_n/10}` -- the energy sum of the per-strike
+    10 \log_{10} \sum_n 10^{\mathrm{SEL}_n/10}`, the energy sum of the per-strike
     single-strike SELs.
 
     :param single_sels: Per-strike single-strike SELs, in dB re 1 µPa²·s.
@@ -230,7 +230,7 @@ def _peak_level(pressure: NDArray[np.float64]) -> float:
     wrong in a guard: what a guard has to tell apart is a level that restates
     its trace from one that contradicts it, and an exception raised about the
     trace answers neither. A silent trace peaks at ``-inf``, the level of zero
-    pressure -- the same neutral value :attr:`StrikeSELSpectrum.band_sel`
+    pressure, the same neutral value :attr:`StrikeSELSpectrum.band_sel`
     carries for a band that holds no energy, so the two guards in this module
     treat an undetermined level the same way.
 
@@ -362,9 +362,9 @@ class StrikeSELSpectrum(OwnsArrays):
 
     :ivar frequencies: Nominal band centre frequencies, in Hz.
     :ivar band_sel: Per-band single-strike SEL, in dB re 1 µPa²·s. A band that
-        contains no discrete-spectrum bin -- which happens whenever the band is
+        contains no discrete-spectrum bin (which happens whenever the band is
         narrower than the FFT bin spacing ``fs/n``, i.e. in the lowest bands of
-        a short record -- holds no energy at all and is reported as ``-inf``,
+        a short record) holds no energy at all and is reported as ``-inf``,
         the level of zero exposure. That is the neutral element of an energy
         sum, so such bands pass straight through
         :func:`~phonometry.underwater.bioacoustics.weighting.weighted_exposure`
@@ -388,8 +388,8 @@ class StrikeSELSpectrum(OwnsArrays):
     def __post_init__(self) -> None:
         r"""Reject a band spectrum whose levels do not match its band centres.
 
-        The two arrays state one measurement twice over -- a nominal centre
-        frequency, and the exposure the band at that frequency carries -- and
+        The two arrays state one measurement twice over (a nominal centre
+        frequency, and the exposure the band at that frequency carries), and
         only position pairs them. :attr:`total_sel` is then a stored number
         claiming to be the energy sum of exactly those bands, which no reader
         can re-derive: a ``band_sel`` longer than ``frequencies`` keeps a
@@ -411,8 +411,8 @@ class StrikeSELSpectrum(OwnsArrays):
         thousands of dB and is simply a different number. The figure rules a
         dashed line across the axes at ``total_sel`` and labels it
         :math:`\mathrm{SEL}_{\mathrm{ss}}`, so a total kept from another
-        column -- a mitigated spectrum substituted through
-        :func:`dataclasses.replace` is exactly that -- is drawn as a broadband
+        column (a mitigated spectrum substituted through
+        :func:`dataclasses.replace` is exactly that) is drawn as a broadband
         level the bands beneath it never reach.
 
         A band at ``-inf`` is admitted, and only ``-inf``: it is the level of

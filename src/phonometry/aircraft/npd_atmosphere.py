@@ -18,12 +18,12 @@ the NPD, the unweighted reference spectrum at 1 000 ft, in three steps:
    levels is the increment :math:`\Delta L(d_i)` (Eq. D-4), added to the
    ``Lmax`` and ``LE`` NPD levels alike.
 
-* :data:`AIR1845_ATTENUATION_DB_PER_100M` -- Table D-1.
-* :func:`npd_atmosphere_increment` -- the increment at each NPD distance, as an
+* :data:`AIR1845_ATTENUATION_DB_PER_100M`: Table D-1.
+* :func:`npd_atmosphere_increment`: the increment at each NPD distance, as an
   :class:`NPDAtmosphereIncrement` with ``.plot()`` (the increment against
   distance) and ``.plot_attenuation()`` (the attenuation of the two
   atmospheres against frequency).
-* :func:`revise_npd_curves` -- an
+* :func:`revise_npd_curves`: an
   :class:`~phonometry.aircraft.anp_fleet.ANPNPDCurves` revised by that
   increment, as a :class:`RevisedNPDCurves` with ``.plot()``; its ``revised``
   curves feed :func:`~phonometry.aircraft.airport_noise.event_level` and

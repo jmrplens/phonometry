@@ -7,7 +7,7 @@ sidebar:
 
 Synthetic room impulse response by the image-source method (rectangular room).
 
-A rigid-walled (or absorbing) rectangular room -- a *shoebox* -- reflects a
+A rigid-walled (or absorbing) rectangular room, a *shoebox*, reflects a
 point source in its six walls. Each reflection is equivalent to the free-field
 sound of a mirror image of the source, so the room impulse response (RIR) is
 the sum of the direct sound and one delayed, attenuated pulse per image

@@ -424,7 +424,7 @@ class SoundPowerResult(OwnsArrays):
         band. The one producer, :func:`sound_power_pressure`, now requires
         finite pressure levels and computes a finite ``K1`` (clamped at the
         criterion) and ``K2`` from them, so a NaN band can only be written in
-        by hand -- and nothing downstream would refuse it: the spectrum
+        by hand, and nothing downstream would refuse it: the spectrum
         figure passes the bands through ``nan_to_num`` and would draw the NaN
         as a fabricated 0 dB bar in the ordinary colour, while the A-weighted
         total quietly vanishes from the title. This determination carries no

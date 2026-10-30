@@ -491,7 +491,7 @@ class MISOCoherenceResult(OwnsArrays):
         (``boolean index did not match indexed array along axis 0; size of
         axis is 257 but size of corresponding boolean axis is 256``), naming
         neither the field nor the result, on the short array and the long one
-        alike -- but only for the arrays it draws. :attr:`ordinary_coherence`,
+        alike, but only for the arrays it draws. :attr:`ordinary_coherence`,
         :attr:`multiple_coherence_random_error` and
         :attr:`coherent_output_random_error` are on no panel, so a mismatch
         there reaches the reader untouched: a random error quoted per band

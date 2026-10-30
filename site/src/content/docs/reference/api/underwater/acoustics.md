@@ -12,12 +12,12 @@ airborne acoustics) and a reference sound exposure of **1 µPa²·s**. This modu
 realises the ISO 18405 terminology as the shared level primitives used by the
 ship-radiated-noise and pile-driving modules:
 
-* [`sound_pressure_level`](/phonometry/reference/api/underwater/acoustics/#sound_pressure_level) -- the mean-square sound pressure level,
+* [`sound_pressure_level`](/phonometry/reference/api/underwater/acoustics/#sound_pressure_level): the mean-square sound pressure level,
   $\mathrm{SPL} = 10 \log_{10}(\langle p^2 \rangle / p_0^2)$ dB re 1 µPa.
-* [`sound_exposure_level`](/phonometry/reference/api/underwater/acoustics/#sound_exposure_level) -- the time-integrated exposure level,
+* [`sound_exposure_level`](/phonometry/reference/api/underwater/acoustics/#sound_exposure_level): the time-integrated exposure level,
   $\mathrm{SEL} = 10 \log_{10}\!\left( \int p^2 \, dt / E_0 \right)$ dB re
   1 µPa²·s.
-* [`peak_sound_pressure_level`](/phonometry/reference/api/underwater/acoustics/#peak_sound_pressure_level) -- the zero-to-peak level
+* [`peak_sound_pressure_level`](/phonometry/reference/api/underwater/acoustics/#peak_sound_pressure_level): the zero-to-peak level
   $20 \log_{10}(\max \lvert p \rvert / p_0)$ dB re 1 µPa.
 
 [`underwater_to_in_air_spl`](/phonometry/reference/api/underwater/acoustics/#underwater_to_in_air_spl) / [`in_air_to_underwater_spl`](/phonometry/reference/api/underwater/acoustics/#in_air_to_underwater_spl) convert a
@@ -178,7 +178,7 @@ Re-reference an underwater SPL (re 1 µPa) to the in-air 20 µPa
 reference.
 
 Subtracts $20 \log_{10}(20) \approx 26.02$ dB. This is a
-**reference-pressure change only** -- it is not the in-water/in-air
+**reference-pressure change only**: it is not the in-water/in-air
 intensity equivalence, which also involves the media characteristic
 impedances.
 

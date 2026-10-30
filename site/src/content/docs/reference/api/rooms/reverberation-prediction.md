@@ -15,23 +15,23 @@ exponential energy decay, `T` is the time for the level to fall by 60 dB.
 Five models are provided, in order of increasing account of a non-uniform
 absorption distribution:
 
-* **Sabine** -- the original diffuse-field estimate,
+* **Sabine**: the original diffuse-field estimate,
   $T = k V / (A + 4 m V)$
   with the total equivalent absorption area
   $A = \sum_i S_i \alpha_i$ and the
   air term $4 m V$. Exact only for low, uniform absorption.
-* **Eyring** (Norris-Eyring) -- replaces `A` by
+* **Eyring** (Norris-Eyring): replaces `A` by
   $-S \ln(1 - \bar{\alpha})$ with
   the mean absorption $\bar{\alpha} = A / S$ over the total surface
   `S`; correct in the strong-absorption limit where Sabine overestimates
   `T`.
-* **Millington-Sette** -- $-\sum_i S_i \ln(1 - \alpha_i)$ sums the
+* **Millington-Sette**: $-\sum_i S_i \ln(1 - \alpha_i)$ sums the
   Eyring term
   per surface, so a single perfectly absorbing surface drives `T` to zero.
-* **Fitzroy** -- an *area-weighted arithmetic* mean of three axial Eyring
+* **Fitzroy**: an *area-weighted arithmetic* mean of three axial Eyring
   reverberation times, one per pair of opposing walls; captures rooms with the
   absorption concentrated on one axis (e.g. a carpeted, otherwise hard room).
-* **Arau-Puchades** -- an *area-weighted geometric* mean of the same three
+* **Arau-Puchades**: an *area-weighted geometric* mean of the same three
   axial Eyring times (Arau-Puchades, *Acustica* 65 (1988) 163):
   $T = \prod_i T_i^{S_i / S}$. Recommended by its author over Fitzroy
   for anisotropic rooms.
@@ -61,7 +61,7 @@ and Arau-Puchades need each *mean* entering $\ln(1 - \alpha)$ below 1.
 The Fitzroy and Arau-Puchades models require a rectangular (shoebox) room and
 take the room `dimensions` together with the mean absorption of each of the
 three wall pairs. All five reduce to Eyring for a uniform absorption
-distribution, and Eyring reduces to Sabine as the absorption tends to zero --
+distribution, and Eyring reduces to Sabine as the absorption tends to zero:
 the identities the conformance suite anchors on, absent a machine-readable
 worked example in the source texts.
 
@@ -79,7 +79,7 @@ arau_puchades_reverberation_time(
 ) -> float | NDArray[np.float64]
 ```
 
-Arau-Puchades reverberation time -- area-weighted geometric mean of axial times.
+Arau-Puchades reverberation time, the area-weighted geometric mean of axial times.
 
 $T = \prod_i T_i^{S_i / S}$ with $T_i$ the Eyring time of the
 wall pair perpendicular to axis `i` (Arau-Puchades, *Acustica* 65
@@ -161,7 +161,7 @@ fitzroy_reverberation_time(
 ) -> float | NDArray[np.float64]
 ```
 
-Fitzroy reverberation time -- area-weighted arithmetic mean of axial times.
+Fitzroy reverberation time, the area-weighted arithmetic mean of axial times.
 
 $T = \sum_i (S_i / S)\, T_i$ with $T_i$ the Eyring time of
 the wall pair

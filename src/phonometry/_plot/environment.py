@@ -951,9 +951,9 @@ def plot_atmospheric_pe(
     The field is drawn as a single raster image (``imshow``): per-cell vector
     quads are avoided so the figure stays light and free of moire (the repo's
     pcolormesh-in-SVG policy).  The default diverging colormap follows the
-    axes background so the centre of the scale blends into the page --
-    ``RdBu_r`` on a light background, the black-centred
-    ``phonometry_field_dark`` on a dark one -- and ``cmap`` overrides it.
+    axes background so the centre of the scale blends into the page
+    (``RdBu_r`` on a light background, the black-centred
+    ``phonometry_field_dark`` on a dark one), and ``cmap`` overrides it.
 
     :param result: An
         :class:`~phonometry.environment.propagation.refraction.AtmosphericPEResult`.

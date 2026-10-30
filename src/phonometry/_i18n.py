@@ -98,7 +98,7 @@ def fmt_minus(value: float, spec: str = "") -> str:
     """Format ``value`` with ``spec``, signing it with the typographic minus.
 
     For the readings that are built with an explicit format spec rather than
-    through :func:`format_number` -- a ``"+.1f"`` correction that must show its
+    through :func:`format_number`: a ``"+.1f"`` correction that must show its
     sign, a ``":g"`` that must not show trailing zeros.
 
     Only the leading sign is rewritten. The hyphen inside the number's own text

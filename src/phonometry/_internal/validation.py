@@ -1065,7 +1065,7 @@ def require_finite_fields(owner: object, *fields: str) -> None:
     ``float64`` to run the check would drop the imaginary part on the way in,
     so a transfer stiffness whose damping term came back ``NaN`` beside an
     intact real part passed the guard untouched, and the phase quantities
-    computed from it -- a magnitude, a loss factor -- carried the ``NaN``
+    computed from it (a magnitude, a loss factor) carried the ``NaN``
     onward as though it had been measured. ``np.isfinite`` already reads a
     complex number as finite only when both components are, so the cast is
     made only for the fields that are not complex to begin with.

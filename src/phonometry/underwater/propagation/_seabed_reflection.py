@@ -14,14 +14,14 @@ interface), the angle of incidence from the normal is
    R = \frac{\rho_2 c_2 \sin\varphi - \rho_1 c_1 \cos\theta_2}
    {\rho_2 c_2 \sin\varphi + \rho_1 c_1 \cos\theta_2}
 
-* :func:`critical_angle` -- the critical grazing angle
+* :func:`critical_angle`: the critical grazing angle
   :math:`\varphi_\mathrm{c} = \arccos(c_1/c_2)` (only when ``c2 > c1``); below it the
   wave is totally reflected (:math:`\lvert R \rvert = 1`).
-* :func:`reflection_coefficient` -- the complex ``R`` per grazing angle.
-* :func:`seabed_reflection` -- the complex ``R``, its magnitude ``|R|`` and the
+* :func:`reflection_coefficient`: the complex ``R`` per grazing angle.
+* :func:`seabed_reflection`: the complex ``R``, its magnitude ``|R|`` and the
   bottom loss bundled with the interface parameters into a
   :class:`SeabedReflection` whose ``.plot()`` draws ``|R|`` versus grazing angle.
-* :func:`bottom_reflection_loss` -- the bottom loss
+* :func:`bottom_reflection_loss`: the bottom loss
   :math:`\mathrm{BL} = -20 \log_{10} \lvert R \rvert` (dB), returned as a
   :class:`BottomLossResult` with a ``.plot()``.
 
@@ -156,7 +156,7 @@ class BottomLossResult(OwnsArrays):
         ``ax.plot(grazing_angle, reflection_loss)``, so a disagreement
         between those two stops the figure with matplotlib's own complaint,
         ``x and y must have same first dimension, but have shapes (5,) and
-        (91,)`` -- shapes only, neither field named, and the reader is left to
+        (91,)``: shapes only, neither field named, and the reader is left to
         work out which of the two was short. ``reflection_coefficient`` is
         never read by the figure at all, so a short one is drawn straight past
         in silence: the picture comes out complete over 91 angles while the
@@ -167,8 +167,8 @@ class BottomLossResult(OwnsArrays):
         with no complaint anywhere.
 
         The ranks are pinned because a count cannot see an extra axis. A
-        ``reflection_loss`` of shape ``(91, 2)`` -- two sediments stacked, or
-        ``(angle, value)`` pairs kept in one array -- has 91 on its first axis
+        ``reflection_loss`` of shape ``(91, 2)`` (two sediments stacked, or
+        ``(angle, value)`` pairs kept in one array) has 91 on its first axis
         like everything else, passes the length check, and reaches matplotlib,
         which quietly draws both columns: the figure comes back with two
         curves and the legend row ``Bottom loss`` printed twice.
@@ -297,8 +297,8 @@ class SeabedReflection(OwnsArrays):
         both ways round, and either way the message names shapes rather than
         fields). The other two never reach the figure, and that is where the
         silence is: a ``bottom_loss`` of 5 entries beside 91 angles draws a
-        complete ``|R|`` curve over all 91, and the loss in decibels -- the
-        quantity a sonar budget actually spends -- is wrong and unmentioned.
+        complete ``|R|`` curve over all 91, and the loss in decibels, the
+        quantity a sonar budget actually spends, is wrong and unmentioned.
 
         The ranks are pinned because a count passes an extra axis through. A
         ``magnitude`` of shape ``(91, 2)`` counts 91 on its first axis exactly

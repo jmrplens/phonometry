@@ -10,15 +10,15 @@ Radiated underwater sound from percussive pile driving (ISO 18406:2017).
 Percussive pile driving radiates a train of impulsive acoustic pulses, one per
 hammer strike. ISO 18406 characterises them with:
 
-* [`single_strike_sel`](/phonometry/reference/api/underwater/pile-driving-noise/#single_strike_sel) -- the single-strike sound exposure level
+* [`single_strike_sel`](/phonometry/reference/api/underwater/pile-driving-noise/#single_strike_sel): the single-strike sound exposure level
   `SEL_ss` of one pulse (Formulae 3-4), reusing the 1 µPa²·s reference.
-* [`cumulative_sel`](/phonometry/reference/api/underwater/pile-driving-noise/#cumulative_sel) / [`cumulative_sel_identical`](/phonometry/reference/api/underwater/pile-driving-noise/#cumulative_sel_identical) -- the cumulative
+* [`cumulative_sel`](/phonometry/reference/api/underwater/pile-driving-noise/#cumulative_sel) / [`cumulative_sel_identical`](/phonometry/reference/api/underwater/pile-driving-noise/#cumulative_sel_identical): the cumulative
   sound exposure level over N strikes (Formulae 8-9); for N identical strikes
   $\mathrm{SEL}_{\mathrm{cum}} = \mathrm{SEL}_{\mathrm{ss}} + 10 \log_{10} N$.
-* [`pile_strike_metrics`](/phonometry/reference/api/underwater/pile-driving-noise/#pile_strike_metrics) -- a [`PileStrikeResult`](/phonometry/reference/api/underwater/pile-driving-noise/#pilestrikeresult) bundling the
+* [`pile_strike_metrics`](/phonometry/reference/api/underwater/pile-driving-noise/#pile_strike_metrics): a [`PileStrikeResult`](/phonometry/reference/api/underwater/pile-driving-noise/#pilestrikeresult) bundling the
   single-strike SEL, the peak sound pressure level, the SPL/Leq and the
   90 %-energy pulse duration for one recorded strike, with a `.plot()`.
-* [`strike_sel_spectrum`](/phonometry/reference/api/underwater/pile-driving-noise/#strike_sel_spectrum) -- the same single-strike SEL resolved into
+* [`strike_sel_spectrum`](/phonometry/reference/api/underwater/pile-driving-noise/#strike_sel_spectrum): the same single-strike SEL resolved into
   fractional-octave bands (ISO 18406 6.4.2.2), the input a marine-mammal
   assessment needs: feed it to
   [`weighted_exposure`](/phonometry/reference/api/underwater/weighting/#weighted_exposure) to
@@ -36,7 +36,7 @@ cumulative_sel(single_sels: ArrayLike) -> float
 Cumulative sound exposure level over N strikes (ISO 18406
 Formulae 8-9).
 
-$\mathrm{SEL}_{\mathrm{cum}} = 10 \log_{10} \sum_n 10^{\mathrm{SEL}_n/10}$ -- the energy sum of the per-strike
+$\mathrm{SEL}_{\mathrm{cum}} = 10 \log_{10} \sum_n 10^{\mathrm{SEL}_n/10}$, the energy sum of the per-strike
 single-strike SELs.
 
 **Parameters**
@@ -249,7 +249,7 @@ Single-strike sound exposure level resolved into fractional-octave bands.
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | Nominal band centre frequencies, in Hz. |
-| `band_sel` | Per-band single-strike SEL, in dB re 1 µPa²·s. A band that contains no discrete-spectrum bin -- which happens whenever the band is narrower than the FFT bin spacing `fs/n`, i.e. in the lowest bands of a short record -- holds no energy at all and is reported as `-inf`, the level of zero exposure. That is the neutral element of an energy sum, so such bands pass straight through [`weighted_exposure`](/phonometry/reference/api/underwater/weighting/#weighted_exposure) without contributing. |
+| `band_sel` | Per-band single-strike SEL, in dB re 1 µPa²·s. A band that contains no discrete-spectrum bin (which happens whenever the band is narrower than the FFT bin spacing `fs/n`, i.e. in the lowest bands of a short record) holds no energy at all and is reported as `-inf`, the level of zero exposure. That is the neutral element of an energy sum, so such bands pass straight through [`weighted_exposure`](/phonometry/reference/api/underwater/weighting/#weighted_exposure) without contributing. |
 | `total_sel` | Energy sum of `band_sel` over the covered bands, in dB re 1 µPa²·s. |
 | `broadband_sel` | The broadband single-strike SEL of the whole record, in dB re 1 µPa²·s (equal to `total_sel` when the bands span the signal's whole occupied spectrum). |
 | `fraction` | Bandwidth fraction (1 for octaves, 3 for one-third octaves). |

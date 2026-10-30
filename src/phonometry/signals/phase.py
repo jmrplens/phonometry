@@ -6,9 +6,9 @@ of the frequency response form a Hilbert-transform pair (Bendat & Piersol,
 *Random Data*, 4th ed., 2010, Sec. 13.1.4; Oppenheim & Schafer,
 *Discrete-Time Signal Processing*, Ch. 12): the phase is fully determined
 by :math:`\lvert H(f) \rvert`. This module computes that **minimum
-phase** with the real cepstrum -- fold the inverse transform of
+phase** with the real cepstrum (fold the inverse transform of
 :math:`\ln \lvert H \rvert` onto positive
-quefrencies and transform back -- and derives the standard decomposition
+quefrencies and transform back) and derives the standard decomposition
 of a measured response,
 
 .. math::
@@ -36,7 +36,7 @@ DC or Nyquist, e.g. a band-pass) are not minimum-phase-representable:
 bins below a relative floor are clipped, and the reconstruction is only
 accurate away from them. On a strictly minimum-phase response (all poles
 and zeros inside the unit circle) sampled on an adequate grid the
-reconstruction matches the true phase to better than ``1e-12`` rad -- the
+reconstruction matches the true phase to better than ``1e-12`` rad, the
 tolerance the biquad oracle pins in the tests; near-circle zeros on
 coarse grids degrade it and are what ``oversample`` mitigates.
 """
@@ -160,8 +160,8 @@ def min_phase(
     :param oversample: Cepstral anti-aliasing factor: the magnitude is
         resampled onto a grid this many times denser (exact trigonometric
         interpolation) before the log and the cepstrum (default 8). Raise
-        it if the magnitude has very sharp features -- near-circle zeros,
-        deep notches -- relative to the grid.
+        it if the magnitude has very sharp features (near-circle zeros,
+        deep notches) relative to the grid.
     :return: Complex minimum-phase response on the same bins (same
         magnitude, reconstructed phase).
     :raises ValueError: If the inputs are invalid.
@@ -198,7 +198,7 @@ def group_delay(
     differences (one-sided at the grid ends). The estimate is exact for a
     linear phase and accurate to :math:`O(df^2)` otherwise; the unwrapping
     requires the response to be sampled densely enough that the phase
-    advances less than :math:`\pi` per bin -- a pure delay of ``D`` samples
+    advances less than :math:`\pi` per bin: a pure delay of ``D`` samples
     needs fewer than ``response.size`` of them, i.e. the underlying
     impulse response must fit the record the grid implies.
 
@@ -298,7 +298,7 @@ class PhaseDecompositionResult(OwnsArrays):
         :meth:`plot`, which drops DC by comparing :attr:`frequencies` against
         zero and applies that one mask to every curve. A field of another
         length stops there, in either direction, with numpy's ``IndexError``
-        about a boolean index and two axis sizes -- the two numbers swap
+        about a boolean index and two axis sizes; the two numbers swap
         round according to which field is at fault, and the message names
         neither the field nor the result it came from.
         :attr:`min_phase_response` has no reader at all: the figure never
@@ -306,7 +306,7 @@ class PhaseDecompositionResult(OwnsArrays):
         anywhere and travels out whole. It is the one field of the eight a
         caller transforms back to a record, and ``irfft`` of 256 bins is a
         perfectly ordinary 510-sample answer where the 257 bins of the
-        decomposition meant 512 -- a record two samples short of the one it
+        decomposition meant 512: a record two samples short of the one it
         claims to be the minimum-phase version of.
 
         The rank half is the silent one throughout. A field of shape
@@ -389,7 +389,7 @@ def phase_decomposition(
     delays quantify both in seconds.
 
     :param response: One-sided complex response, uniformly sampled from DC
-        to Nyquist inclusive (``rfft`` layout) -- e.g.
+        to Nyquist inclusive (``rfft`` layout), e.g.
         ``numpy.fft.rfft(ir)`` of a measured impulse response.
     :param fs: Sample rate of the underlying record, in Hz.
     :param oversample: Cepstral anti-aliasing factor (default 8).

@@ -7,14 +7,14 @@ filter on every machine was taking each transcendental from :mod:`math` one
 element at a time: numpy's ``log`` is dispatched on what the CPU offers and
 its AVX512 kernels do not agree to the last bit with the ones a machine
 without AVX512 runs, while the C library's scalar ``log`` does not move. The
-price was the Python loop. ``log`` runs inside the fit -- once per grid point
+price was the Python loop. ``log`` runs inside the fit (once per grid point
 per factor per Levenberg-Marquardt step, three quarters of a million calls
-per design -- and paying interpreter overhead on every one of them multiplied
+per design), and paying interpreter overhead on every one of them multiplied
 the cost of a design by about four.
 
 This module removes the loop without touching a single output bit. It spells
-the C library's own ``log`` -- the table-driven routine from ARM's
-optimized-routines, which glibc has shipped as ``__ieee754_log`` since 2.28 --
+the C library's own ``log`` (the table-driven routine from ARM's
+optimized-routines, which glibc has shipped as ``__ieee754_log`` since 2.28)
 in numpy array arithmetic restricted to operations IEEE 754 pins exactly:
 addition, subtraction, multiplication, comparisons, and integer bit work.
 Nothing here is dispatched on a vector unit's taste; every operation is
@@ -31,8 +31,8 @@ replacement:
   once.
 * The multiply-adds the compiler fused on its own in the near-one
   polynomial (``x`` within :math:`[1 - 2^{-4}, 1 + 0x1.09p{-4}]`). The four
-  sites observed to move the result -- found by searching the space of
-  contraction choices against the shipped binary's own answers -- are
+  sites observed to move the result (found by searching the space of
+  contraction choices against the shipped binary's own answers) are
   emulated exactly by :func:`_fused_multiply_add`; the remaining sites agree
   as plain pairs on every input thrown at them.
 * The table lookups, which are numpy takes.
@@ -48,13 +48,13 @@ exactly.
 What "without touching a single output bit" rests on, measured on this
 project's own corpus rather than asserted: over the 91 658 333 distinct
 values the weighting fit feeds its logarithm across 133 (curve, rate)
-designs, this function and glibc's ``log`` return identical bit patterns --
-zero exceptions, and that is the fact the shipped designs stand on. Beyond
+designs, this function and glibc's ``log`` return identical bit patterns,
+with zero exceptions, and that is the fact the shipped designs stand on. Beyond
 the corpus the agreement is statistical rather than structural. The compiled
 binary carries multiply-adds the compiler fused on its own, which this
 module spells as plain pairs where they were never observed to matter, and
-an adversarial search of the band just outside the near-one window -- where
-the logarithm is smallest and the final rounding tightest -- found about one
+an adversarial search of the band just outside the near-one window, where
+the logarithm is smallest and the final rounding tightest, found about one
 input in thirty million whose true logarithm falls almost exactly between
 two doubles and the two implementations part by that last ulp: the first
 found is ``0x1.1fa63fbb5acd3p+0``, whose true logarithm sits 0.491 ulp from
@@ -74,7 +74,7 @@ and musl's round a handful of inputs to the other neighbour, never further
 are floating-point neighbours wherever they part). The elementwise loop this
 module replaces therefore returned *different designs on macOS than on
 Linux*, silently. This function returns its own bits everywhere, so the
-designs are now identical across platforms as well as across CPUs -- on a
+designs are now identical across platforms as well as across CPUs: on a
 non-glibc platform they moved by that last ulp once, to the values every
 other platform already shipped.
 """
@@ -477,8 +477,8 @@ def _fused_multiply_add(
 
     The error-free-transformation emulation: the product and the first sum
     are made exact, and the two roundings that remain land on the fused
-    result. Not correctly rounded for *every* triple -- a doubly-tied case
-    can land one ulp off the true fused answer -- but exact on the domains of
+    result. Not correctly rounded for *every* triple (a doubly-tied case
+    can land one ulp off the true fused answer), but exact on the domains of
     this module's call sites: verified bit for bit against :func:`math.fma`
     over eighty million draws covering them and a general
     :math:`[-1, 1]^3` sweep, with zero mismatches; the sites' operands are
@@ -535,8 +535,8 @@ def _near_one_path(x: np.ndarray) -> np.ndarray:
     A degree-twelve polynomial in ``r = x - 1`` (exact by Sterbenz), with the
     ``r + B[0] r^2`` head carried in split precision exactly as the C routine
     writes it. The four multiply-adds the compiler fused in the shipped
-    binary -- the three lowest links of the polynomial's head chain and the
-    join of the polynomial onto the split head -- are emulated exactly; the
+    binary (the three lowest links of the polynomial's head chain and the
+    join of the polynomial onto the split head) are emulated exactly; the
     remaining multiply-adds round the same bits fused or not, established
     over sixty million draws of the window and every corpus input that lands
     in it.

@@ -1,7 +1,7 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
 r"""Synthetic room impulse response by the image-source method (rectangular room).
 
-A rigid-walled (or absorbing) rectangular room -- a *shoebox* -- reflects a
+A rigid-walled (or absorbing) rectangular room, a *shoebox*, reflects a
 point source in its six walls. Each reflection is equivalent to the free-field
 sound of a mirror image of the source, so the room impulse response (RIR) is
 the sum of the direct sound and one delayed, attenuated pulse per image
@@ -257,11 +257,11 @@ class ImageSourceResult(OwnsArrays):
         five arrays read side by side at the same index, with the plan-view
         lattice reading ``image_positions`` against the same ``orders``. A
         table of two lengths stops that drawing call with a bare numpy
-        complaint -- ``boolean index did not match indexed array along axis 0;
+        complaint (``boolean index did not match indexed array along axis 0;
         size of axis is 24 but size of corresponding boolean axis is 25``
         where the mask comes from another array, ``index 25 is out of bounds
         for axis 0 with size 25`` where the envelope is sorted by another
-        array's order -- naming neither the field that slipped nor the result
+        array's order), naming neither the field that slipped nor the result
         it came from, one short and one long alike. :attr:`direct_time` says
         nothing at all: it locates the nearest image in ``distances`` and
         returns whatever ``times`` holds at that position, so a ``times`` one
@@ -295,8 +295,8 @@ class ImageSourceResult(OwnsArrays):
         first, since the response is sampled from it, and its own shape then
         says which of its axes carries the images; holding it in turn to the
         response's number of axes is what bounds it, since a third axis on the
-        exact table clears every count it meets -- its bands still line up
-        along axis 0 and its images along axis 1 -- and reaches the
+        exact table clears every count it meets (its bands still line up
+        along axis 0 and its images along axis 1) and reaches the
         reflectogram as an amplitude per image that is really a pair, where
         masking it by reflection order is numpy's complaint above.
 
@@ -305,9 +305,9 @@ class ImageSourceResult(OwnsArrays):
         ``frequencies`` labels the bands without any reader in this library
         reading it back, so a label list of the wrong length surfaces only in
         the caller's own table: pairing the labels with the rows of ``ir``
-        drops the band that has no label -- three rows printed for a four-band
-        response, the 2 kHz energy gone with nothing to say it was ever there
-        -- while a label too many leaves that same table looking complete and
+        drops the band that has no label (three rows printed for a four-band
+        response, the 2 kHz energy gone with nothing to say it was ever there),
+        while a label too many leaves that same table looking complete and
         raises ``index 4 is out of bounds for axis 0 with size 4`` only if the
         rows are taken by label instead. A scalar passed for ``frequencies``
         reaches the result as a nought-dimensional array naming the single

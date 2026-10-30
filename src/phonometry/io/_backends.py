@@ -2,8 +2,8 @@
 r"""Backend dispatch: base install for the WAV family, ``[audio]`` for the rest.
 
 The base install (NumPy + SciPy) reads every *linear* WAV a measurement
-chain produces -- PCM at any depth, IEEE float, EXTENSIBLE, BWF metadata,
-RF64/BW64 -- which is where essentially all metrology-grade audio lives
+chain produces (PCM at any depth, IEEE float, EXTENSIBLE, BWF metadata,
+RF64/BW64), which is where essentially all metrology-grade audio lives
 (see :mod:`phonometry.io._wav`). Everything else goes through
 python-soundfile (libsndfile), installed as the optional ``[audio]`` extra:
 FLAC, AIFF, Ogg Vorbis, Opus, MP3, and the compressed WAV codecs (ADPCM,
@@ -23,7 +23,7 @@ signal's source metadata, so the fact survives past the warning.
 
 soundfile decodes to ``(frames, channels)`` float64, already scaled by the
 libsndfile convention (:math:`\div 2^{B-1}`), consistent with the base
-reader's scaling -- and, like there, any fixed scaling choice cancels out
+reader's scaling. As there, any fixed scaling choice cancels out
 of calibrated results because the calibrator tone is read through the same
 path. When a compressed *WAV* goes through soundfile, the chunk walker
 still contributes what libsndfile does not expose: the ``bext`` provenance
@@ -260,9 +260,9 @@ def read(path: str | Path, *, calibration_factor: float | None = None) -> Signal
     The samples come back float64, at the file's native rate, in the
     library's ``(channels, samples)`` order, scaled by :math:`2^{B-1}` for
     integer sources (exact in binary floating point, and any fixed scaling
-    cancels out of calibrated results -- see :mod:`phonometry.io._wav`).
+    cancels out of calibrated results; see :mod:`phonometry.io._wav`).
     Nothing else is done to them: no resampling, no normalisation, no
-    channel mixing -- each of which would silently change the level or the
+    channel mixing, each of which would silently change the level or the
     timing that a measurement depends on, and each of which is a documented
     default somewhere in the ecosystem (librosa resamples to 22050 Hz and
     mixes to mono; python-acoustics normalised on load).
@@ -280,7 +280,7 @@ def read(path: str | Path, *, calibration_factor: float | None = None) -> Signal
     A calibration sidecar beside the file
     (:mod:`phonometry.io._sidecar`) is applied automatically: its
     ``calibration_factor`` fills in when the argument here is ``None``
-    (the explicit argument always wins -- the caller knows more than a
+    (the explicit argument always wins: the caller knows more than a
     file on disk), and its curated ``channel_labels`` replace labels
     derived from the file's channel mask.
 
@@ -327,9 +327,9 @@ def info(path: str | Path) -> AudioFileInfo:
     """Describe an audio file without reading its samples.
 
     For the WAV family this is a single pass over the chunk headers on the
-    base install, whatever the codec inside -- format, rate, channels,
+    base install, whatever the codec inside (format, rate, channels,
     frames and duration, valid bits, lossy flag, EXTENSIBLE channel mask
-    and labels, ``bext`` provenance, ``iXML`` presence and cue markers --
+    and labels, ``bext`` provenance, ``iXML`` presence and cue markers),
     with a cost independent of file size. Other containers are described
     through the ``[audio]`` extra's header reader. ``info`` never warns
     about lossy content (inspecting a file is not measuring from it);

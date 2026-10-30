@@ -450,8 +450,8 @@ class IntensityInstrumentComplianceResult(OwnsArrays):
         """Reject a spectrum the verdict cannot be read from.
 
         The device tag is pinned to the three Table 2 column groups. Two
-        readers dispatch on it -- the fiche's basis strip and the plot's
-        title -- and an unrecognised tag would send them apart: a bare
+        readers dispatch on it (the fiche's basis strip and the plot's
+        title), and an unrecognised tag would send them apart: a bare
         ``KeyError`` from one, a silently wrong "complete instrument" label
         from the other.
 

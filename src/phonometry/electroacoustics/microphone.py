@@ -562,8 +562,8 @@ class MicrophoneCharacteristics(OwnsArrays):
         against its own abscissa, and every panel reads the pair positionally:
         the ``n``-th response level belongs to the ``n``-th frequency, the
         ``n``-th polar level to the ``n``-th angle of incidence. Nothing
-        reconciles a disagreement on the way there -- every panel hands the
-        pair straight to matplotlib -- so a member one entry short, or one
+        reconciles a disagreement on the way there (every panel hands the
+        pair straight to matplotlib), so a member one entry short, or one
         entry long, raises ``x and y must have same first dimension`` from
         inside the drawing code, naming neither the field nor the result and
         only once that curve is asked for by :meth:`plot` or by the fiche. By
@@ -588,9 +588,9 @@ class MicrophoneCharacteristics(OwnsArrays):
         :func:`_as_curve` and the pattern through :func:`_resolve_polar`,
         and each already refuses a non-finite value. A NaN written into the
         free-field frequency axis after the fact stops the sheet inside
-        matplotlib with ``Axis limits cannot be NaN or Inf`` -- the response
+        matplotlib with ``Axis limits cannot be NaN or Inf`` (the response
         panel is scaled by the decades that axis spans, and a NaN makes the
-        span unmeasurable -- naming neither the field nor this result; a NaN
+        span unmeasurable), naming neither the field nor this result; a NaN
         level is quieter, leaving a gap in the drawn response that reads as a
         frequency never measured.
 

@@ -1,18 +1,19 @@
 ---
 title: "fluids"
-description: "fluids domain of phonometry (see module docstrings)."
+description: "The media sound travels through: humid air by IEC 61094-2 Annex F, sea water, ideal gases, and the fluid states and nonlinearity parameters books print."
 sidebar:
   label: "fluids"
 ---
 
-fluids domain of phonometry (see module docstrings).
+The media sound travels through: humid air by IEC 61094-2 Annex F, sea water,
+ideal gases, and the fluid states and nonlinearity parameters books print.
 
-The state of the medium a sound travels through, computed from the conditions
-that were measured rather than assumed. Every other package may import this one
-without an architecture edge, the way they import `phonometry.filters`,
-`phonometry.signals` and `phonometry.metrology`: a medium is not a
-domain of application but something every domain needs, and eleven identical
-edges would record nothing.
+Each state is computed from the conditions that were measured rather than
+assumed, or read from the page that prints it. Every other package may import
+this one without an architecture edge, the way they import
+`phonometry.filters`, `phonometry.signals` and
+`phonometry.metrology`: a medium is not a domain of application but
+something every domain needs, and eleven identical edges would record nothing.
 
 What lives here is the *physics* of a fluid. A simplified formula a measurement
 standard prints inside its own procedure stays in that standard's module, where

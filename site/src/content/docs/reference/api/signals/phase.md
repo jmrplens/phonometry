@@ -12,9 +12,9 @@ of the frequency response form a Hilbert-transform pair (Bendat & Piersol,
 *Random Data*, 4th ed., 2010, Sec. 13.1.4; Oppenheim & Schafer,
 *Discrete-Time Signal Processing*, Ch. 12): the phase is fully determined
 by $\lvert H(f) \rvert$. This module computes that **minimum
-phase** with the real cepstrum -- fold the inverse transform of
+phase** with the real cepstrum (fold the inverse transform of
 $\ln \lvert H \rvert$ onto positive
-quefrencies and transform back -- and derives the standard decomposition
+quefrencies and transform back) and derives the standard decomposition
 of a measured response,
 
 $$
@@ -40,7 +40,7 @@ DC or Nyquist, e.g. a band-pass) are not minimum-phase-representable:
 bins below a relative floor are clipped, and the reconstruction is only
 accurate away from them. On a strictly minimum-phase response (all poles
 and zeros inside the unit circle) sampled on an adequate grid the
-reconstruction matches the true phase to better than `1e-12` rad -- the
+reconstruction matches the true phase to better than `1e-12` rad, the
 tolerance the biquad oracle pins in the tests; near-circle zeros on
 coarse grids degrade it and are what `oversample` mitigates.
 
@@ -95,7 +95,7 @@ The phase is unwrapped and differentiated with second-order central
 differences (one-sided at the grid ends). The estimate is exact for a
 linear phase and accurate to $O(df^2)$ otherwise; the unwrapping
 requires the response to be sampled densely enough that the phase
-advances less than $\pi$ per bin -- a pure delay of `D` samples
+advances less than $\pi$ per bin: a pure delay of `D` samples
 needs fewer than `response.size` of them, i.e. the underlying
 impulse response must fit the record the grid implies.
 
@@ -142,7 +142,7 @@ ignored: passing a plain magnitude array works.
 | Name | Description |
 | :--- | :--- |
 | `response` | One-sided response (or magnitude), uniformly sampled from DC to Nyquist inclusive (`rfft` layout). |
-| `oversample` | Cepstral anti-aliasing factor: the magnitude is resampled onto a grid this many times denser (exact trigonometric interpolation) before the log and the cepstrum (default 8). Raise it if the magnitude has very sharp features -- near-circle zeros, deep notches -- relative to the grid. |
+| `oversample` | Cepstral anti-aliasing factor: the magnitude is resampled onto a grid this many times denser (exact trigonometric interpolation) before the log and the cepstrum (default 8). Raise it if the magnitude has very sharp features (near-circle zeros, deep notches) relative to the grid. |
 
 **Returns:** Complex minimum-phase response on the same bins (same magnitude, reconstructed phase).
 
@@ -182,7 +182,7 @@ delays quantify both in seconds.
 
 | Name | Description |
 | :--- | :--- |
-| `response` | One-sided complex response, uniformly sampled from DC to Nyquist inclusive (`rfft` layout) -- e.g. `numpy.fft.rfft(ir)` of a measured impulse response. |
+| `response` | One-sided complex response, uniformly sampled from DC to Nyquist inclusive (`rfft` layout), e.g. `numpy.fft.rfft(ir)` of a measured impulse response. |
 | `fs` | Sample rate of the underlying record, in Hz. |
 | `oversample` | Cepstral anti-aliasing factor (default 8). |
 

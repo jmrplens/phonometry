@@ -241,7 +241,7 @@ can be verified against the filter itself.
 | `filter_taps` | Anti-alias FIR taps (unit passband gain; the polyphase engine applies the `up` interpolation gain), designed at the intermediate rate `original_fs * up`. A single `1.0` tap when the ratio is 1 (no filtering). |
 | `passband_edge_hz` | Passband edge of the design, in Hz. |
 | `stopband_edge_hz` | Stopband edge of the design (the smaller of the two Nyquist frequencies), in Hz. |
-| `stopband_attenuation` | Designed stopband attenuation, in dB (also the passband ripple bound: the Kaiser window method holds the ripple of both bands within the same $\delta = 10^{-A/20}$, though -- unlike a true equiripple design -- its ripple decays away from the band edges rather than staying at the bound). |
+| `stopband_attenuation` | Designed stopband attenuation, in dB (also the passband ripple bound: the Kaiser window method holds the ripple of both bands within the same $\delta = 10^{-A/20}$, though, unlike a true equiripple design, its ripple decays away from the band edges rather than staying at the bound). |
 | `transition_width` | Transition-band width as a fraction of the smaller Nyquist frequency. |
 
 ### ResampledSignalResult.n_taps

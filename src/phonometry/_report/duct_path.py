@@ -6,16 +6,16 @@ one-page duct-path calculation sheet in the layout the published procedures
 use:
 
 * AHRI Standard 885, *Procedure for Estimating Occupied Space Sound Levels in
-  the Application of Air Terminals and Air Outlets*, Table 8 -- one row per
+  the Application of Air Terminals and Air Outlets*, Table 8: one row per
   physical element, each carrying a short worksheet code and a plain-language
   name, with the octave bands across the columns, attenuations entered as
   negative numbers and summed down the column, regenerated (self) noise given
   its own positive row and combined logarithmically, and a single cumulative
   received-level row at the foot rather than a subtotal after every row;
-* Long, *Architectural Acoustics* 2nd ed., Table 14.9 -- the same sheet for a
+* Long, *Architectural Acoustics* 2nd ed., Table 14.9: the same sheet for a
   supply and a return path, closing with the criterion curve printed under the
   received spectrum;
-* AHRI 885 Figure 10 / ANSI/ASA S12.2-2019 -- the received spectrum plotted
+* AHRI 885 Figure 10 / ANSI/ASA S12.2-2019: the received spectrum plotted
   against the criterion curve, which is how a duct-path sheet makes its
   pass/fail visible.
 

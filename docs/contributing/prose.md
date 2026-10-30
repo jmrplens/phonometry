@@ -123,23 +123,25 @@ a new catalogue row note committed in English only
 <a id="p6"></a>
 ### P6. Write no em dash anywhere
 
-**Why.** It is not how the maintainer writes: a clause that would hang off one is its own sentence, a parenthesis, a colon or a comma. The guard reads everything a reader sees under the project's name: the `docs/` mirror, the site's pages and data modules, the CHANGELOG, the READMEs, CONTRIBUTING, the docstrings the API reference is generated from, and the text the figure and diagram generators draw. This page writes the dash as `<U+2014>`, never the character.
+**Why.** It is not how the maintainer writes: a clause that would hang off one is its own sentence, a parenthesis, a colon or a comma. The guard reads everything a reader sees under the project's name: the `docs/` mirror, the site's pages and data modules, the CHANGELOG, the READMEs, CONTRIBUTING, the docstrings the API reference is generated from, and the text the figure and diagram generators draw. The double hyphen is the same dash spelt in ASCII, and it is refused too: Astro's smartypants publishes `--` in the text of a page as the em dash, so a docstring bullet written ``:func:`x` -- text`` reached the API reference as one in 92 list items and nearly five hundred other docstring lines, and `help()` shows it as the double hyphen it is. This page writes the dash as `<U+2014>`, never the character.
 
 **Do**
 
 ```text
 The level is energy-averaged: each band is summed in power, then converted back.
+* :func:`npd_level`: the interpolated event level, linear in power.
 ```
 
 **Don't**
 
 ```text
 The level is energy-averaged <U+2014> each band is summed in power.
+* :func:`npd_level` -- the interpolated event level, linear in power.
 ```
 
 **Enforced by:** `scripts/check_em_dashes.py`, `CI: Markdown renders the way it reads`, review
 
-**Exceptions.** What is not prose keeps its dash, by position, with no exemption table: a standard's title reproduced as printed (in a frontmatter `title:`, an italic span, a bibliographic entry, a quotation, or a line reading `<U+2014> Part 3:`), fenced and inline code, a string a test compares with, and a dash that fills a whole table cell or a whole slash-separated item of one (the empty-cell mark of the fiches). Outside the guard's roots (commit messages, pull requests, tests and the other scripts) the rule holds by review.
+**Exceptions.** What is not prose keeps its dash, by position, with no exemption table: a standard's title reproduced as printed (in a frontmatter `title:`, an italic span, a bibliographic entry, a quotation, or a line reading `<U+2014> Part 3:`), fenced and inline code, a string a test compares with, and a dash that fills a whole table cell or a whole slash-separated item of one (the empty-cell mark of the fiches). A double hyphen is code in the same places, and also in a docstring's literal block after `::`, the body of a `.. math::` or `.. code-block::` directive, a doctest, a link destination or URL (a heading's slug may carry `--`), an HTML comment, an `href`, `src`, `style`, `id` or `class` value (`var(--sl-color-accent)`) and a line that is only a rule. In a string that is not a page or a docstring only the spaced form ` -- ` is a dash, so an option of a command line (`--keep`) and a console banner (`--- Generating ---`) stand; a comment is published nowhere and keeps its double hyphens, and so does the docstring of a figure or diagram generator, which publishes only what it draws. Outside the guard's roots (commit messages, pull requests, tests and the other scripts) the rule holds by review.
 
 <a id="p7"></a>
 ### P7. Use no control character but tab and newline in a tracked text file

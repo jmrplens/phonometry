@@ -22,14 +22,14 @@ has its minimum at the weighted threshold $T_\mathrm{w} = K + C$. Only the
 parameter table changes between guidance versions, so the version is explicit
 in the API and is carried on every result object:
 
-* `"nmfs-2024"` -- NOAA Fisheries, *Updated Technical Guidance*, version 3.0
+* `"nmfs-2024"`: NOAA Fisheries, *Updated Technical Guidance*, version 3.0
   (October 2024), Table 5 and Table ES3. **The default**: it supersedes the
   2018 revision, uses $b = 5$ for every group, renames the groups to
   the Southall scheme (LF/HF/VHF cetaceans, PW/OW in water, PA/OA in air) and
   replaces "PTS onset" with "auditory injury (AUD INJ) onset".
-* `"nmfs-2018"` -- the 2018 revision, version 2.0, Table 3 and Table ES3.
+* `"nmfs-2018"`: the 2018 revision, version 2.0, Table 3 and Table ES3.
   Still cited by assessments already in flight.
-* `"southall-2019"` -- Southall et al., *Aquatic Mammals* 45(2), Tables 5, 6
+* `"southall-2019"`: Southall et al., *Aquatic Mammals* 45(2), Tables 5, 6
   and 7, the peer-reviewed criteria; adds sirenians (SI) and both in-air
   carnivore groups. Numerically identical to NMFS 2018 on the five shared
   groups.
@@ -318,7 +318,7 @@ Weighted exposure of a spectrum against a hearing group's criteria.
 | `sel_margin` | `cumulative_sel - injury_sel`, in dB (`None` when the criterion is not published); positive means the criterion is exceeded. |
 | `tts_margin` | `cumulative_sel - tts_sel`, in dB (or `None`). |
 | `peak_margin` | `peak_spl - injury_peak_spl`, in dB (or `None`). |
-| `tts_peak_margin` | `peak_spl - tts_peak_spl`, in dB (or `None`) -- the peak-SPL half of the dual metric on the TTS side, which can trip `exceeds_tts` on its own. |
+| `tts_peak_margin` | `peak_spl - tts_peak_spl`, in dB (or `None`): the peak-SPL half of the dual metric on the TTS side, which can trip `exceeds_tts` on its own. |
 | `guidance` | The guidance version. |
 | `group` | Hearing-group code. |
 | `impulsive` | Whether the impulsive criteria were compared against. |

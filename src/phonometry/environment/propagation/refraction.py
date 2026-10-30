@@ -11,13 +11,13 @@ Attenborough & Van Renterghem, *Predicting Outdoor Sound* (2e, CRC, 2021,
 Ch. 11), and it is the refracting-atmosphere counterpart of the range-independent
 ocean solvers in :mod:`phonometry.underwater.propagation.numerical`:
 
-* :func:`atmospheric_ray_paths` -- geometrical acoustics. Integrates Snell's law
+* :func:`atmospheric_ray_paths`: geometrical acoustics. Integrates Snell's law
   for sound rays (Salomons Eq. (4.3)) with a fixed-step Runge-Kutta scheme,
   returning the curved ray paths, their turning points, travel times and ground
   reflections. It shares its ray core with the ocean ``ray_trace``: the
   atmospheric version reflects at the ground (:math:`z = 0`) instead of the sea
   surface and marches an upward-open half space.
-* :func:`atmospheric_parabolic_equation` -- the Green's Function Parabolic
+* :func:`atmospheric_parabolic_equation`: the Green's Function Parabolic
   Equation (GFPE, Salomons Appendix H). Marches the one-way wave equation in
   range with the split-step Fourier algorithm (the same range-marching family
   as the ocean ``parabolic_equation``), a Gaussian starter (Salomons

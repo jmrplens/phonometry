@@ -532,7 +532,7 @@ class ResampledSignalResult(OwnsArrays):
         (also the passband ripple bound: the Kaiser window method holds
         the ripple of both bands within the same
         :math:`\delta = 10^{-A/20}`,
-        though -- unlike a true equiripple design -- its ripple decays
+        though, unlike a true equiripple design, its ripple decays
         away from the band edges rather than staying at the bound).
     :ivar transition_width: Transition-band width as a fraction of the
         smaller Nyquist frequency.
@@ -563,7 +563,7 @@ class ResampledSignalResult(OwnsArrays):
         What both must be is flat, and each is silent in its own way.
         :attr:`n_taps` reports ``filter_taps.size``, so a bank of designs
         stacked side by side is counted as one impulse response of the whole
-        length -- 1262 taps reported for a 631-tap design -- and that is the
+        length (1262 taps reported for a 631-tap design), and that is the
         number a caller reads. The figure never gets far enough to print it:
         ``scipy.signal.freqz`` stops on the second axis, reporting two shapes
         it could not broadcast and naming neither the field nor the result

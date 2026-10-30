@@ -88,7 +88,7 @@ coupling_term(
 
 Coupling term `D_C` for a point excitation (EN 12354-5, Formula 19b/19e).
 
-$D_\mathrm{C} = 10 \log_{10}\left( |Y_\mathrm{s} + Y_i + Y_k|^2 / (|Y_\mathrm{s}| \operatorname{Re}\{Y_i\}) \right)$ -- the loss between
+$D_\mathrm{C} = 10 \log_{10}\left( |Y_\mathrm{s} + Y_i + Y_k|^2 / (|Y_\mathrm{s}| \operatorname{Re}\{Y_i\}) \right)$, the loss between
 the characteristic and the injected structure-borne power. `Y_k` is the
 transfer mobility of an elastic support (Formula 19e; 0 for a rigid
 connection, Formula 19b).

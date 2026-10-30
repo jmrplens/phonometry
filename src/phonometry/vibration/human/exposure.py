@@ -1264,9 +1264,9 @@ class ExposureAssessment(RichDisplay):
     def __post_init__(self) -> None:
         """Reject an assessment whose kind or metric tag is unknown or unpaired.
 
-        The fiche routes through ``kind`` twice -- the basis line names the
+        The fiche routes through ``kind`` twice (the basis line names the
         applied ISO standard by it and the operations table heads its
-        magnitude column with the per-kind symbol -- and through ``metric``
+        magnitude column with the per-kind symbol) and through ``metric``
         for the exposure unit. An unpinned tag used to render a complete
         page with an empty standard name and the whole-body symbol over
         hand-arm data.
@@ -1276,7 +1276,7 @@ class ExposureAssessment(RichDisplay):
         ``kind="hav"`` with ``metric="vdv"`` names a quantity the Directive
         does not define. Assessed alone, that pair used to render a fiche
         headed by the hand-arm ISO standard whose every threshold, zone and
-        verdict came from the whole-body VDV values -- a hand-arm ``A(8)`` of
+        verdict came from the whole-body VDV values: a hand-arm ``A(8)`` of
         3,5 m/s2, well into the action zone above the 2,5 m/s2 EAV, printed
         "below the exposure action value" and passed against 21 m/s^1,75.
 

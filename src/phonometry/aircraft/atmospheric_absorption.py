@@ -6,7 +6,7 @@ one-third-octave-band spectra, and correcting a measured flyover to reference
 atmospheric conditions requires the band attenuation over the propagation path.
 Two SAE practices give it.
 
-* :func:`band_attenuation_arp5534` -- SAE ARP 5534, the current practice. Its
+* :func:`band_attenuation_arp5534`: SAE ARP 5534, the current practice. Its
   pure-tone coefficient (Eqs. 1-6) is the ISO 9613-1 one, Eqs. 1-3 repeating
   :func:`~phonometry.environment.propagation.air_absorption.air_attenuation`
   term for term, except for the saturation vapour pressure: Eqs. 5-6 write it
@@ -17,7 +17,7 @@ Two SAE practices give it.
   consistent with the ISO/ANSI Exact Method well beyond the 50 dB limit of the
   older Approximate Method. The result is an :class:`AircraftBandAttenuation`
   with a ``.plot()``.
-* :func:`attenuation_arp866a` -- SAE ARP 866A (1975), the legacy practice that
+* :func:`attenuation_arp866a`: SAE ARP 866A (1975), the legacy practice that
   ECAC Doc 29 Vol. 2 Appendix D still offers for recalculating NPD data, in the
   form ISO 3891:1978 Annex A gives it: an attenuation coefficient per band, in
   decibels per 100 m, independent of pressure and of path length, evaluated at
@@ -26,10 +26,11 @@ Two SAE practices give it.
 
 Sources (clean-room, implemented from the documents): SAE ARP 5534 (2021),
 *Application of Pure-Tone Atmospheric Absorption Losses to One-Third-Octave-Band
-Data*, Eqs. 1-10; ISO 3891:1978, *Acoustics -- Procedure for describing aircraft
-noise heard on the ground*, Annex A (A.1, A.2, Tables 1 and 2), which transcribes
-SAE ARP 866A. Both are checked against ECAC Doc 29 5th ed. Vol. 2 Appendix D,
-Tables D-3b and D-3c, and ARP 866A against ISO 3891 Table 10 as well.
+Data*, Eqs. 1-10; ISO 3891:1978,
+"Acoustics — Procedure for describing aircraft noise heard on the ground",
+Annex A (A.1, A.2, Tables 1 and 2), which transcribes SAE ARP 866A. Both are
+checked against ECAC Doc 29 5th ed. Vol. 2 Appendix D, Tables D-3b and D-3c,
+and ARP 866A against ISO 3891 Table 10 as well.
 """
 
 from __future__ import annotations

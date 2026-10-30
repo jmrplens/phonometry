@@ -4,7 +4,7 @@ r"""Carrying the ``bext`` provenance chunk inside a FLAC file.
 FLAC is the one compressed format a measurement archive can defend
 (lossless by construction, RFC 9639), but its metadata model has no
 broadcast extension: converting a BWF to FLAC with any generic tool drops
-the originator, the sample-accurate timecode and the coding history --
+the originator, the sample-accurate timecode and the coding history,
 exactly the fields that make the file a measurement record rather than
 audio. The FLAC reference implementation solved the general problem long
 ago: ``flac --keep-foreign-metadata`` stores each foreign RIFF chunk in
@@ -17,9 +17,9 @@ recognises as carrying foreign RIFF metadata, and a WAV-to-FLAC-to-WAV
 trip through phonometry preserves the provenance whole.
 
 The FLAC container layout involved (RFC 9639 section 8): the ``fLaC``
-magic, then a chain of metadata blocks -- each headed by one byte (bit 7:
+magic, then a chain of metadata blocks, each headed by one byte (bit 7:
 last-block flag, bits 6-0: type, APPLICATION = 2) and a 24-bit big-endian
-length -- with STREAMINFO mandatory first, and the audio frames after the
+length, with STREAMINFO mandatory first, and the audio frames after the
 block whose last-flag is set. libsndfile writes no APPLICATION blocks and
 python-soundfile exposes none, so the block is inserted here by rewriting
 the metadata chain (clear the old last-flag, append the new block, set
@@ -63,7 +63,7 @@ def read_flac_bext(path: str | Path) -> BroadcastMetadata | None:
 
     Walks the metadata chain reading only the block headers and the
     APPLICATION payloads (never the audio frames); returns ``None`` when
-    no block carries a ``bext`` chunk -- an ordinary FLAC, or one whose
+    no block carries a ``bext`` chunk: an ordinary FLAC, or one whose
     foreign metadata is some other chunk.
     """
     with Path(path).open("rb") as fh:
@@ -99,8 +99,8 @@ def read_flac_bext(path: str | Path) -> BroadcastMetadata | None:
 def embed_flac_bext(path: str | Path, bext_payload: bytes) -> None:
     """Insert the ``bext`` chunk into a finished FLAC file's metadata.
 
-    Rewrites the metadata chain -- STREAMINFO and friends copied as they
-    are, the old last-block flag cleared -- and appends one APPLICATION
+    Rewrites the metadata chain (STREAMINFO and friends copied as they
+    are, the old last-block flag cleared) and appends one APPLICATION
     block in the ``flac --keep-foreign-metadata`` convention: application
     ID ``riff``, then the verbatim RIFF chunk (``bext`` fourcc, 32-bit
     little-endian size, payload, alignment pad byte if the payload is

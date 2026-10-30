@@ -495,9 +495,9 @@ class QuasiPeakResult(OwnsArrays):
         The reading is not an independent number: clause 2's reading rule
         makes it the largest excursion of the needle, so a stored value that
         is not the maximum of :attr:`trace` is a measurement disagreeing with
-        the graph beneath it. Nothing downstream recomputes it -- the plot
+        the graph beneath it. Nothing downstream recomputes it (the plot
         draws the trace and annotates the stored scalar, and the level is
-        derived from the scalar alone -- so the disagreement would print as a
+        derived from the scalar alone), so the disagreement would print as a
         marker sitting off the curve, with no error anywhere.
 
         :raises ValueError: if the trace is not a series, if the reading is
@@ -527,7 +527,7 @@ class QuasiPeakResult(OwnsArrays):
         The one place that answers whether the level may be called
         **dBqps**, which clause 3 defines only against the 0.775 V of
         clause 2.6. Anything else is named by its own reference instead,
-        because BS.468-4 gives no other scale a name -- a quasi-peak sound
+        because BS.468-4 gives no other scale a name: a quasi-peak sound
         pressure level read against 20 uPa is a perfectly good number and is
         not dBqps.
 

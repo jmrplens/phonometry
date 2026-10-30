@@ -4,12 +4,12 @@ r"""Ocean ambient-noise spectrum levels (Wenz framework).
 Deep-water ambient-noise **spectrum levels** (dB re 1 µPa²/Hz) from the two
 physically grounded components of the Wenz curves:
 
-* :func:`wind_noise_spectrum` -- wind / sea-surface (Knudsen) noise via Wenz's
+* :func:`wind_noise_spectrum`: wind / sea-surface (Knudsen) noise via Wenz's
   "rule of fives",
   :math:`\mathrm{NL} = 51.02 - (5/3) \cdot 10 (\log_{10} f - \log_{10}(U/5))`
   (``f`` in kHz, ``U`` in knots; the historical 25 dB anchor is re 20 µPa and
   becomes :math:`25 + 20 \log_{10}(20)` re 1 µPa), valid over roughly 500 Hz-5 kHz.
-* :func:`thermal_noise_spectrum` -- the molecular thermal-noise limit (Mellen
+* :func:`thermal_noise_spectrum`: the molecular thermal-noise limit (Mellen
   1952), :math:`\langle p^2(f) \rangle = 4 \pi k T \rho f^2 / c` (Pa²/Hz),
   dominant above ~50 kHz.
 
@@ -21,7 +21,7 @@ The low-frequency turbulence band and a built-in distant-shipping model are out
 of scope: Wenz (1962) and Carey & Evans note these bands are strongly variable
 and shipping-dependent, with no single fixed analytic parametrisation; a shipping
 spectrum may be supplied by the caller. Source: Carey & Evans, *Ocean Ambient
-Noise* (2011) -- the rule of fives (p. 2) and the thermal-noise derivation
+Noise* (2011): the rule of fives (p. 2) and the thermal-noise derivation
 (Appendix F).
 """
 
@@ -163,9 +163,9 @@ class AmbientNoiseResult(OwnsArrays):
     def __post_init__(self) -> None:
         """Reject a spectrum whose components do not run over its frequencies.
 
-        A Wenz chart is read by where its curves meet -- the frequency at
+        A Wenz chart is read by where its curves meet (the frequency at
         which the wind curve gives way to the thermal floor is taken straight
-        off the picture -- and the composite level drawn above them is stated
+        off the picture), and the composite level drawn above them is stated
         to be the energy sum of exactly the components drawn beneath it.
         Nothing in the result records which frequency an entry belongs to
         except its position, so a component of another length was summed over

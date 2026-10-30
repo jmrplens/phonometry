@@ -25,8 +25,8 @@ above 1.00 are set to 1.00. The five rating bands are 250, 500, 1000, 2000 and
 **Weighted absorption (Clause 4.2).** The fixed reference curve of Figure 1
 (``{250: 0.80, 500: 1.00, 1000: 1.00, 2000: 1.00, 4000: 0.90}``) is shifted
 downwards, towards the measured ``alpha_p``, in steps of 0,05 until the sum
-of the unfavourable deviations -- taken only where the measured value lies
-below the shifted curve, with magnitude ``curve - measured`` -- is not more
+of the unfavourable deviations (taken only where the measured value lies
+below the shifted curve, with magnitude ``curve - measured``) is not more
 than 0,10. ``alpha_w`` is the shifted-curve value read at 500 Hz, i.e.
 ``1.00 - shift``.
 
@@ -244,7 +244,7 @@ def _unfavourable_deviation_sum(
     of absorption coefficients in steps of 0,05 and rounds nothing afterwards:
     the grid comes from the practical coefficients of Clause 4.1 and from the
     step of the shift itself, so the whole-decibel rounding of the ISO 717
-    unfavourable sum has no counterpart here, and neither has an energy sum --
+    unfavourable sum has no counterpart here, and neither has an energy sum:
     these are coefficients, not levels.
 
     :param shifted_reference: The reference curve of Figure 1 after the shift.
@@ -301,9 +301,9 @@ class AbsorptionRatingResult(OwnsArrays):
     def __post_init__(self) -> None:
         """Reject a rating whose curves do not run over their own bands.
 
-        The evaluation table of the fiche prints one row per octave -- the
+        The evaluation table of the fiche prints one row per octave (the
         band, its practical coefficient, the shifted reference there and the
-        unfavourable deviation between them -- and totals that last column
+        unfavourable deviation between them) and totals that last column
         beneath the rows, against the 0,10 budget of Clause 4.2. No total is
         ever taken over curves of different lengths: the fiche refuses them on
         a guard of its own, and :meth:`plot` stops inside matplotlib before it

@@ -400,8 +400,8 @@ def _check_section_stability(
     In exact arithmetic every cookbook section with :math:`\alpha > 0` is
     stable, but at the extremes (a very wide ``bw`` or ``f0`` within a few
     ppm of DC or the Nyquist frequency) the rounded coefficients can land
-    exactly on the stability-triangle boundary -- e.g. ``a2 == -1.0``, a
-    pole pair on the unit circle -- and the filter would ring forever
+    exactly on the stability-triangle boundary (e.g. ``a2 == -1.0``, a
+    pole pair on the unit circle), and the filter would ring forever
     without any arithmetic error to flag it.
     """
     require_scalar(a1, "a1")

@@ -18,7 +18,7 @@ Analysis (HSA):
   downsampling to 1500 Hz (Clause 9.1.2, Formula 119);
 * the envelope-dependent analysis windows with quieter-period detection
   (Clause 9.1.3, Formula 120);
-* the HSA of the windowed envelopes -- a least-squares fit of window-kernel
+* the HSA of the windowed envelopes: a least-squares fit of window-kernel
   spectral line pairs to the k = 0..48 DFT bins (Clause 9.1.4,
   Formulae 121-142);
 * the identification of prominent spectral line pairs from the local maxima
@@ -39,7 +39,7 @@ Analysis (HSA):
   representative 90th-percentile single value F (Clause 9.1.14).
 
 The API is monaural: the quadratic-mean binaural combination of
-Formula (170) (Clause 9.1.15) is not implemented -- analyse each channel
+Formula (170) (Clause 9.1.15) is not implemented: analyse each channel
 separately.
 
 The calibration constant ``c_F`` of Formula (163) is the standard's tabulated
@@ -249,7 +249,7 @@ class EcmaFluctuationStrength(OwnsArrays):
         The heatmap fails far more quietly. A caller who supplies an ``ax``
         gets only the time trace, so a specific-fluctuation table or a
         ``bark`` of the wrong length is drawn nowhere and ``plot`` returns as
-        if all were well -- and that is true of the short direction and the
+        if all were well, and that is true of the short direction and the
         long one alike. Even the full figure lets one shape through: a table
         one entry short on *both* axes is exactly the shape ``pcolormesh``
         expects once ``shading="auto"`` reads the two axes as cell corners, so

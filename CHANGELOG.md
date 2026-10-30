@@ -2215,6 +2215,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **The API reference and `help()` show no double hyphen where a sentence
+  wanted a colon, and the `fluids` package says what it holds.** Docstrings
+  spelt a dash as `--`, which `help()` prints as it is and the site published
+  as an em dash: 586 lines in 116 modules, 92 of them list items such as
+  ``:func:`x` -- text``. Each now reads as a colon, a comma, a parenthesis or a
+  sentence of its own, as the sentence needs. `scripts/check_em_dashes.py`
+  refuses the double hyphen in a docstring and in the prose of every page,
+  outside code, link destinations and HTML comments, and the spaced form in any
+  other published string, so it cannot come back (rule P6). The `fluids`
+  package opens with a sentence naming humid air by IEC 61094-2 Annex F, sea
+  water, ideal gases and the fluid states and nonlinearity parameters books
+  print, where its API page read "fluids domain of phonometry (see module
+  docstrings)".
+
 - **A record that holds a read-only mapping pickles and deep-copies.**
   `MappingProxyType` can be neither pickled nor deep-copied, and 48 of the
   records the test suite builds held one and failed both with `TypeError:
@@ -10599,9 +10613,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   come to cost about 260. The loop was the price of determinism: numpy's `log`
   is dispatched on what the CPU offers and its AVX512 kernels disagree with
   the rest in the last bit, so every transcendental on the design path was
-  taken from `math` one element at a time, and `log` -- the one that runs
+  taken from `math` one element at a time, and `log` (the one that runs
   inside the Levenberg-Marquardt iteration, three quarters of a million calls
-  per design -- carried almost all of the cost. The new module spells the C
+  per design) carried almost all of the cost. The new module spells the C
   library's own `log`, the table-driven routine from ARM's optimized-routines
   that glibc ships, in numpy operations IEEE 754 pins exactly: plain
   arithmetic, integer bit work and table takes, with the routine's fused
@@ -14523,7 +14537,7 @@ the whole of the migration.
   vector total `a_hv` for hand-arm, the Part B dominant-axis value for
   whole-body (not the ISO 2631-1 Eq. (10) vector total `a_v`).
 - `metrology.envelope_spectrum`: optional `band=(low, high)` zero-phase
-  band-pass pre-filter ahead of the envelope detector -- the band-pass
+  band-pass pre-filter ahead of the envelope detector: the band-pass
   front end of Bendat & Piersol Figure 13.11 and the classical
   bearing-envelope chain; the band travels with the result. The
   amplitude-calibration docs now state the on-bin condition and the

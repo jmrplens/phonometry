@@ -700,7 +700,7 @@ class BarrierInsertionLoss(OwnsArrays):
         The loss must also cover at least one frequency. Three length-0 axes
         agree with each other and pass every count above, and the sheet then
         asks matplotlib to log-scale an axis with nothing on it, which comes
-        back as "Data cannot be log-scaled because all values are <= 0" --
+        back as "Data cannot be log-scaled because all values are <= 0",
         a complaint about values, from a result that has none.
 
         Every value must also be finite. The one producer,

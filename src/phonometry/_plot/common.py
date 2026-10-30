@@ -150,9 +150,9 @@ def _register_field_dark_cmap() -> None:
         out(x) = clip(berlin(x) - w(x) * berlin(0.5), 0, 1)
 
     with the weight ``w(x)`` falling linearly from 1 at the centre to 0 at
-    60 % amplitude.  Zero maps to true black -- the field blends into a dark
+    60 % amplitude.  Zero maps to true black (the field blends into a dark
     background exactly as the white centre of ``RdBu_r`` blends into a light
-    one -- while low-amplitude *differences* keep their size (a
+    one), while low-amplitude *differences* keep their size (a
     multiplicative fade toward black would crush them into invisibility).
     """
     import matplotlib as mpl
@@ -180,8 +180,8 @@ def page_is_dark(ax: Axes | None) -> bool:
     Through :func:`relative_luminance`, which linearises the sRGB channels
     before weighting them, and against a threshold derived from that same
     scale (:data:`_DARK_BACKGROUND_LUMINANCE_MAX`). Applying the weights to
-    the gamma-encoded channels instead -- Rec. 709 luma, which is what stood
-    here -- and comparing against a flat 0.5 answers a slightly different
+    the gamma-encoded channels instead (Rec. 709 luma, which is what stood
+    here) and comparing against a flat 0.5 answers a slightly different
     question with a threshold picked for the look of it. The two agree on
     every page in the corpus and disagree on about a seventh of the sRGB
     cube; where they part, this one is right by construction. A mid grey is
@@ -404,8 +404,8 @@ def theme_fill(
         ax.fill_between(f, lower, upper, color=theme_fill(_C_PRIMARY, ax))
 
     Pass a saturated hue: a colour already close to the page (a pale tint, or
-    white over white) has nowhere to move, and the strongest available wash --
-    the hue itself -- is returned instead.
+    white over white) has nowhere to move, and the strongest available wash,
+    the hue itself, is returned instead.
 
     :param color: Base hue, any matplotlib colour specification.
     :param ax: Axes whose patch colour is the page; ``None`` reads the current
@@ -437,8 +437,8 @@ def theme_fill_alpha(
     computation as :func:`theme_fill` read as an opacity instead of a colour.
     Prefer :func:`theme_fill`: an opaque wash survives the fiche PDF pipeline
     and never dulls what it covers.  Use this only where fills genuinely have
-    to blend -- overlapping directivity lobes, nested uncertainty bands, a
-    wash over a hand-drawn polar grid -- and the alternative would be hiding
+    to blend (overlapping directivity lobes, nested uncertainty bands, a
+    wash over a hand-drawn polar grid) and the alternative would be hiding
     one artist behind another.
 
     :param color: Base hue, any matplotlib colour specification.
@@ -506,15 +506,15 @@ def theme_line(
     mistake: ``alpha`` is not a dimming knob, it is a mix with whatever is
     behind.  A companion curve drawn at ``alpha=0.55`` of a hue composites
     *towards the page*, so one call reads as a soft tint of the hue on the
-    white page and lands within a couple of levels of the near-black one --
+    white page and lands within a couple of levels of the near-black one:
     the ISO 3745 microphone hemisphere shipped invisible exactly that way.  A
     stroke has no area for hue to register either, so what is left on a dark
     page is nothing at all.
 
     ``quiet`` is the emphasis the author wanted, on the scale the ``alpha`` it
     replaces used: 0 is the page and 1 is the hue at full strength.  The
-    colour returned is that mix made opaque -- identical on the light page,
-    where the mix was legible all along -- *raised* towards the hue on any
+    colour returned is that mix made opaque: identical on the light page,
+    where the mix was legible all along, and *raised* towards the hue on any
     page where it would not clear ``ratio``.  So the light theme keeps the
     tint it had, the dark theme gets a colour that can be seen, and the
     hierarchy the author drew (this line is quieter than that one) survives

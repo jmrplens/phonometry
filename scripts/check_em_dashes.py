@@ -26,7 +26,32 @@ What is NOT prose keeps its dash, and every exemption below says why:
   a sentence. The glossary cards, the home page's text and the Spanish
   catalogue notes are prose in the site's data modules and are read as such.
 - **Two bare dashes** in a table row separator or a horizontal rule are
-  hyphens, not em dashes; only U+2014 is looked for.
+  hyphens, not em dashes.
+
+The dash also has an ASCII spelling, the double hyphen, and the guard refuses
+that too. Astro's smartypants turns ``--`` in the text of a page into an em
+dash, so a docstring that joins two clauses with `` -- `` reaches the API
+reference as the very character this guard refuses, and ``help()`` shows it as
+the double hyphen it is. It is looked for where it is published:
+
+- **A page and a docstring** are refused any run of two hyphens or more in
+  their prose, spaced or not, because that is what smartypants converts. What
+  is not prose keeps it: fenced and inline code, a literal block after ``::``,
+  the body of a ``.. math::`` or ``.. code-block::`` directive, a doctest, a
+  link destination, a URL, an HTML comment, the value of an ``href``, ``src``,
+  ``style``, ``id`` or ``class`` attribute (``var(--sl-color-accent)``), and a
+  line that is only a rule: a docstring's heading underline, a table's
+  separator row, a horizontal rule, a frontmatter fence. A run that fills a
+  whole table cell, or a whole slash-separated item of one, is the empty-cell
+  mark, as the em dash is.
+- **Any other string of a module, and the site's data modules**, are refused
+  a double hyphen that stands between spaces (`` -- ``), the one form that is
+  a dash there and not an option of a command line (``--keep``) or a
+  decrement.
+- **A comment** is published nowhere, neither on the site nor by ``help()``,
+  and keeps its double hyphens, the section rules (``# -- names ---``) among
+  them. So does the docstring of a figure or diagram generator, which
+  publishes only what it draws.
 
 Exit status 0 when the prose is clean, 1 otherwise, naming every file and line.
 """
@@ -41,8 +66,12 @@ import pathlib
 import re
 import sys
 import tokenize
+from typing import TYPE_CHECKING
 
 from markdown_fences import code_lines
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 EM_DASH = "—"
 
@@ -343,6 +372,313 @@ def scan(path: pathlib.Path) -> list[int]:
     return reader(path.read_text(encoding="utf-8"))
 
 
+#: Two hyphens or more in a row, the run smartypants publishes as an em dash.
+_DOUBLE_HYPHEN = re.compile(r"-{2,}")
+#: Two hyphens, no more, with a space or the end of a line on either side: a
+#: dash in a string that may also hold an option of a command line
+#: (``--keep``), the separator of one (``"--"``, quotes and all) or the rule of
+#: a console banner (``--- Generating ---``).
+_SPACED_DOUBLE_HYPHEN = re.compile(r"(?<![^\s])--(?![^\s])")
+#: A line that is only a rule, as written: a docstring's heading underline, a
+#: table's separator row, a horizontal rule or a frontmatter fence. It holds
+#: nothing but the characters a rule is drawn with, and a pipe or a run of
+#: three of them, so a line that is only a dash (``--``) is not one.
+_RULE_LINE = re.compile(r"^[\s\-=~^+*_#|:]*(?:\||([\-=~^+*_#])\1\1)[\s\-=~^+*_#|:]*$")
+#: A run of hyphens that fills a whole table cell, or a whole slash-separated
+#: item of one: the empty-cell mark, as the em dash is.
+_HYPHEN_PLACEHOLDER = re.compile(r"(?:^|(?<=/))\s*-{2,}\s*(?=/|$)")
+#: An HTML comment, which the page does not show.
+_HTML_COMMENT = re.compile(r"<!--.*?-->", re.DOTALL)
+#: A link destination, a reference definition's target and a URL, which are
+#: addresses: a heading's anchor keeps the double hyphen its slug was given.
+_ADDRESSES = (
+    re.compile(r"\]\([^)\s]*(?:\s+\"[^\"]*\")?\)"),
+    re.compile(r"^\s*\[[^\]]+\]:\s*\S+", re.MULTILINE),
+    re.compile(r"<[a-z]+://[^>\s]*>"),
+    re.compile(r"[a-z]+://[^\s)>\]]+"),
+)
+#: An attribute whose value is an address or a style, not text a reader sees.
+_ADDRESS_ATTRIBUTE = re.compile(
+    r"\b(?:href|src|style|id|class|className)=(?:\"[^\"]*\"|'[^']*'|\{[^}]*\})"
+)
+#: A run of backticks, which opens or closes a code span of a page.
+_BACKTICK_RUN = re.compile(r"`+")
+#: An inline literal, a role or an interpreted span of a docstring, across the
+#: lines of a paragraph if it wraps: ``x``, :func:`x` or `x`.
+_DOCSTRING_CODE_SPAN = re.compile(r"``(?:[^`]|`(?!`))+``|(?::[\w:+-]+:)?`[^`]+`")
+#: A directive whose body is code or mathematics, not prose.
+_CODE_DIRECTIVE = re.compile(
+    r"^\s*\.\.\s+(?:code-block|code|sourcecode|math|doctest|testcode|"
+    r"parsed-literal|highlight|literalinclude)::"
+)
+#: Any other explicit markup line (``.. note::``): its body is prose.
+_EXPLICIT_MARKUP = re.compile(r"^\s*\.\.\s")
+#: The prompt that opens a doctest; its continuation and output lines follow
+#: it up to the next blank line.
+_DOCTEST_PROMPT = re.compile(r"^\s*>>>(?:\s|$)")
+
+
+def _blank_out(match: re.Match[str]) -> str:
+    """The matched text as blanks, its line ends kept so that lines still count."""
+    return re.sub(r"[^\n]", " ", match.group())
+
+
+def _blank_code_spans(text: str) -> str:
+    """The text of a page with every code span blanked (CommonMark 6.1).
+
+    A span opens on a run of backticks and closes on the next run of the same
+    length; a run that no later run matches opens nothing. Read run by run
+    rather than with one pattern, because a pattern that has to find the
+    matching run backtracks over everything between.
+    """
+    runs = list(_BACKTICK_RUN.finditer(text))
+    pieces: list[str] = []
+    done = 0
+    index = 0
+    while index < len(runs):
+        opening = runs[index]
+        width = len(opening.group())
+        closing = next(
+            (k for k in range(index + 1, len(runs)) if len(runs[k].group()) == width),
+            None,
+        )
+        if closing is None:
+            index += 1
+            continue
+        end = runs[closing].end()
+        pieces.append(text[done : opening.start()])
+        pieces.append(re.sub(r"[^\n]", " ", text[opening.start() : end]))
+        done = end
+        index = closing + 1
+    pieces.append(text[done:])
+    return "".join(pieces)
+
+
+def _blank_docstring_code_spans(text: str) -> str:
+    """The text of a docstring with every inline literal, role and interpreted span blanked."""
+    return _DOCSTRING_CODE_SPAN.sub(_blank_out, text)
+
+
+def _mask_paragraphs(lines: list[str], blank: Callable[[str], str]) -> list[str]:
+    """The lines with every code span blanked, a span that wraps included.
+
+    A span wraps with the paragraph that carries it, so the lines are joined a
+    paragraph at a time, blank line to blank line, before the spans are
+    blanked; a line already blanked out (code) closes a paragraph too.
+    """
+    masked = list(lines)
+    start = 0
+    for index in range(len(lines) + 1):
+        if index < len(lines) and lines[index].strip():
+            continue
+        if index > start:
+            joined = blank("\n".join(lines[start:index]))
+            masked[start:index] = joined.split("\n")
+        start = index + 1
+    return masked
+
+
+def _double_hyphen_lines(written: list[str], masked: list[str]) -> list[int]:
+    """The 0-based indexes of the lines that keep a double hyphen in prose.
+
+    :param written: The lines as written, which say whether a line is a rule:
+        once its code is blanked, a bullet that names a function reads as one.
+    :param masked: The same lines with everything that is not prose blanked.
+    """
+    hits: list[int] = []
+    for index, (source, line) in enumerate(zip(written, masked, strict=True)):
+        if _RULE_LINE.match(source):
+            continue
+        if _TABLE_ROW.match(line):
+            line = "|".join(
+                _HYPHEN_PLACEHOLDER.sub("", cell) for cell in line.split("|")
+            )
+        if _DOUBLE_HYPHEN.search(line):
+            hits.append(index)
+    return hits
+
+
+def markdown_double_hyphen_hits(text: str) -> list[int]:
+    """The 1-based lines of a page whose prose spells a dash as ``--``.
+
+    Smartypants converts any run of two hyphens in the text of a page, spaced
+    or not, so any such run is looked for, once the code, the addresses, the
+    HTML comments, the address and style attributes and the rules are out.
+    """
+    written = text.split("\n")
+    text = "\n".join(
+        "" if code else line
+        for line, code in zip(written, code_lines(written), strict=True)
+    )
+    text = _HTML_COMMENT.sub(_blank_out, text)
+    for address in _ADDRESSES:
+        text = address.sub(_blank_out, text)
+    text = _ADDRESS_ATTRIBUTE.sub(_blank_out, text)
+    masked = _mask_paragraphs(text.split("\n"), _blank_code_spans)
+    return [index + 1 for index in _double_hyphen_lines(written, masked)]
+
+
+def _opens_code_block(line: str) -> bool:
+    """Whether the lines indented under this one are code.
+
+    A code or math directive opens one, and so does a paragraph that ends in
+    ``::``; any other directive (``.. note::``) opens a body of prose.
+    """
+    if _CODE_DIRECTIVE.match(line):
+        return True
+    return line.rstrip().endswith("::") and not _EXPLICIT_MARKUP.match(line)
+
+
+def _docstring_prose(lines: list[str]) -> list[str]:
+    """The lines of a docstring with every line that is code blanked.
+
+    A literal block runs from the line after a paragraph that ends in ``::``,
+    and a code or math directive's body from the line after the directive, to
+    the first line indented no deeper than the line that opened it; a doctest
+    runs from its prompt to the next blank line. A note's body is prose.
+    """
+    prose: list[str] = []
+    block_indent: int | None = None
+    doctest = False
+    for line in lines:
+        indent = len(line) - len(line.lstrip())
+        in_block = block_indent is not None and (
+            not line.strip() or indent > block_indent
+        )
+        doctest = (doctest and bool(line.strip())) or bool(_DOCTEST_PROMPT.match(line))
+        code = in_block or doctest or bool(_CODE_DIRECTIVE.match(line))
+        prose.append("" if code else line)
+        if not in_block:
+            block_indent = indent if _opens_code_block(line) else None
+    return prose
+
+
+def _docstring_ranges(tree: ast.AST) -> list[tuple[int, int, int, int]]:
+    """Where each docstring sits: first line, first column, last line, last column.
+
+    A docstring is any string that stands as a statement of its own: the one
+    that opens a module, a class or a function, and the one under an
+    assignment that documents the name.
+    """
+    return [
+        (node.lineno, node.col_offset, node.end_lineno, node.end_col_offset)
+        for node in ast.walk(tree)
+        if isinstance(node, ast.Expr)
+        and isinstance(node.value, ast.Constant)
+        and isinstance(node.value.value, str)
+        and node.end_lineno is not None
+        and node.end_col_offset is not None
+    ]
+
+
+def python_double_hyphen_hits(text: str, *, docstrings: bool = True) -> list[int]:
+    """The 1-based lines of a module whose docstrings or strings spell a dash as ``--``.
+
+    A docstring of the package is published by the API reference, through
+    smartypants, and is read as a page is: any run of two hyphens in its
+    prose. Any other string is read for the spaced form only, which is a dash
+    wherever it stands; a comment is not published and is not read.
+
+    :param docstrings: Whether the module's docstrings are published. Those
+        of the figure and diagram generators are not: what those modules
+        publish is the text they draw, which their other strings hold.
+    """
+    try:
+        tree = ast.parse(text)
+    except SyntaxError:
+        return [
+            number
+            for number, line in enumerate(text.splitlines(), start=1)
+            if _SPACED_DOUBLE_HYPHEN.search(line)
+        ]
+    ranges = _docstring_ranges(tree)
+    hits = _string_hits(
+        text, {n for first, _, last, _ in ranges for n in range(first, last + 1)}
+    )
+    if docstrings:
+        source = text.splitlines()
+        for first, first_col, last, last_col in ranges:
+            hits.update(_docstring_hits(source, first, first_col, last, last_col))
+    return sorted(hits)
+
+
+def _docstring_hits(
+    source: list[str], first: int, first_col: int, last: int, last_col: int
+) -> list[int]:
+    """The 1-based lines of one docstring whose prose holds a double hyphen."""
+    lines = source[first - 1 : last]
+    lines[-1] = lines[-1][:last_col]
+    lines[0] = " " * first_col + lines[0][first_col:]
+    masked = _mask_paragraphs(_docstring_prose(lines), _blank_docstring_code_spans)
+    return [first + index for index in _double_hyphen_lines(lines, masked)]
+
+
+def _string_hits(text: str, docstring_lines: set[int]) -> set[int]:
+    """The 1-based lines of the strings that are not docstrings holding `` -- ``."""
+    hits: set[int] = set()
+    kinds = (tokenize.STRING, getattr(tokenize, "FSTRING_MIDDLE", -1))
+    for token in tokenize.generate_tokens(io.StringIO(text).readline):
+        if token.type not in kinds or token.start[0] in docstring_lines:
+            continue
+        masked = _blank_docstring_code_spans(token.string)
+        hits.update(
+            token.start[0] + offset
+            for offset, line in enumerate(masked.split("\n"))
+            if _SPACED_DOUBLE_HYPHEN.search(line)
+        )
+    return hits
+
+
+def data_double_hyphen_hits(text: str) -> list[int]:
+    """The 1-based lines of a data module whose text spells a dash as `` -- ``.
+
+    A comment is not published, as for the em dash; the spaced form is the one
+    looked for, since a module's code may hold a decrement or a custom
+    property (``var(--sl-color-accent)``).
+    """
+    return [
+        number
+        for number, line in enumerate(text.splitlines(), start=1)
+        if not line.lstrip().startswith(("//", "*", "/*"))
+        and _SPACED_DOUBLE_HYPHEN.search(line)
+    ]
+
+
+def json_double_hyphen_hits(text: str) -> list[int]:
+    """The 1-based lines of a JSON data file whose strings spell a dash as `` -- ``."""
+    hits: list[int] = []
+    for number, line in enumerate(text.splitlines(), start=1):
+        for literal in _JSON_STRING.findall(line):
+            if _SPACED_DOUBLE_HYPHEN.search(literal):
+                hits.append(number)
+                break
+    return hits
+
+
+#: The package, whose docstrings the API reference is generated from.
+_PACKAGE = pathlib.Path(__file__).resolve().parent.parent / "src" / "phonometry"
+
+#: The suffixes the double-hyphen reading covers, each with its reader. A
+#: module is read by :func:`scan_double_hyphens`, which knows where it sits.
+_DOUBLE_HYPHEN_READERS = {
+    ".md": markdown_double_hyphen_hits,
+    ".mdx": markdown_double_hyphen_hits,
+    ".mjs": data_double_hyphen_hits,
+    ".ts": data_double_hyphen_hits,
+    ".json": json_double_hyphen_hits,
+}
+
+
+def scan_double_hyphens(path: pathlib.Path) -> list[int]:
+    """The lines of one file whose prose spells a dash as a double hyphen."""
+    text = path.read_text(encoding="utf-8") if path.suffix in _READERS else ""
+    if path.suffix == ".py":
+        published = path.resolve().is_relative_to(_PACKAGE)
+        return python_double_hyphen_hits(text, docstrings=published)
+    reader = _DOUBLE_HYPHEN_READERS.get(path.suffix)
+    return reader(text) if reader is not None else []
+
+
 #: Local working notes under docs/, gitignored and never published.
 _UNPUBLISHED = ("docs/superpowers",)
 
@@ -373,24 +709,29 @@ def main() -> int:
     total = 0
     files = 0
     for path in iter_files(tuple(args.paths)):
-        lines = scan(path)
-        if not lines:
+        dashes = scan(path)
+        hyphens = scan_double_hyphens(path)
+        if not dashes and not hyphens:
             continue
         files += 1
-        total += len(lines)
+        total += len(dashes) + len(hyphens)
         if args.count:
-            print(f"{path}: {len(lines)}")
-        else:
-            for number in lines:
-                print(f"{path}:{number}: em dash in published prose")
+            print(f"{path}: {len(dashes) + len(hyphens)}")
+            continue
+        found = [(number, "em dash") for number in dashes]
+        found += [
+            (number, "double hyphen, published as an em dash") for number in hyphens
+        ]
+        for number, what in sorted(found):
+            print(f"{path}:{number}: {what} in published prose")
     if total:
         print(
-            f"{total} em dash(es) in the published prose of {files} file(s); "
+            f"{total} dash(es) in the published prose of {files} file(s); "
             "rewrite each as a sentence, a parenthesis, a colon or a comma.",
             file=sys.stderr,
         )
         return 1
-    print("No em dash in the published prose.")
+    print("No em dash and no double hyphen in the published prose.")
     return 0
 
 

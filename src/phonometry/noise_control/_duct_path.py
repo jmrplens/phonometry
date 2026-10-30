@@ -220,7 +220,7 @@ class DuctPathResult(OwnsArrays):
         finite attenuations from a finite source and energy-sums a possibly
         ``-inf`` self-noise floor, which stays finite; ``combine_duct_paths``
         energy-sums finite received spectra), so a non-finite band can only be
-        planted by hand -- and it would silently poison the rating and crash
+        planted by hand, and it would silently poison the rating and crash
         the verdict's rounding with an error naming nothing.
 
         :raises ValueError: if any spectrum disagrees with ``frequencies``,

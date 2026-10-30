@@ -12,15 +12,15 @@ regimes, each with its own power law. The boundaries between them follow from
 the seabed reflectivity alone, which makes the set an inexpensive analytic
 reference for any numerical propagation model:
 
-* **spherical spreading** -- $F = 1/r^2$ ($20 \log_{10} r$), while the
+* **spherical spreading**: $F = 1/r^2$ ($20 \log_{10} r$), while the
   sound has not yet felt the boundaries;
-* **cylindrical spreading** -- $F = 2\psi_\mathrm{c}/(r H)$ ($10 \log_{10} r$),
+* **cylindrical spreading**: $F = 2\psi_\mathrm{c}/(r H)$ ($10 \log_{10} r$),
   once the energy is confined to a cylinder of height `H` and only rays
   within the critical angle $\psi_\mathrm{c}$ survive;
-* **mode stripping** -- $F = (\pi/(\eta H))^{1/2} \, r^{-3/2}$
+* **mode stripping**: $F = (\pi/(\eta H))^{1/2} \, r^{-3/2}$
   ($15 \log_{10} r$), once the accumulated reflection loss has eroded the
   steep paths;
-* **single mode** -- an exponential decay dominated by the lowest-order mode.
+* **single mode**: an exponential decay dominated by the lowest-order mode.
 
 Everything here is implemented clean-room from Ainslie, *Principles of Sonar
 Performance Modelling* (Springer 2010), §9.1.1.2 (printed pp. 452-458):
@@ -32,17 +32,17 @@ spreading for a point source in free water.
 
 The regime formulae are energy-flux (incoherent) results: they describe the
 range-averaged field, not its modal interference. That is exactly what makes
-them a usable cross-check for [`phonometry.underwater.propagation.numerical`](/phonometry/reference/api/underwater/numerical/)
--- the range average of a normal-mode or parabolic-equation field over many
+them a usable cross-check for [`phonometry.underwater.propagation.numerical`](/phonometry/reference/api/underwater/numerical/):
+the range average of a normal-mode or parabolic-equation field over many
 interference cycles converges on the cylindrical-spreading law, with
 $\psi_\mathrm{c} = \pi/2$ for a totally reflecting (pressure-release) bottom.
 
 :::note
 Ainslie's Equation (9.57) for the mode-stripping/single-mode transition is
 printed as $r_{\mathrm{MS}} \approx k^2 H_\mathrm{e}^3/(9\eta)$. Carrying out
-the derivation the accompanying text prescribes -- "equating
-$\theta_n$ and $\theta_{\mathrm{eff}}$ with $n = 3/2$"
--- with the two equations exactly as they are printed, namely
+the derivation the accompanying text prescribes ("equating
+$\theta_n$ and $\theta_{\mathrm{eff}}$ with $n = 3/2$")
+with the two equations exactly as they are printed, namely
 $\theta_{\mathrm{eff}} = (\pi H/(4 \eta r))^{1/2}$ (Equation 9.47,
 with the **true** water depth `H`) and $\theta_n = n\pi/(k H_\mathrm{e})$
 (Equation 9.56, with the **effective** depth `He`), gives
@@ -198,7 +198,7 @@ waveguide_cutoff_frequency(
 Shallow-water waveguide cut-off frequency `fc` (Ainslie Eq. 9.60),
 in Hz.
 
-$f_\mathrm{c} = (\pi - \rho_{\mathrm{sed}}/\rho_\mathrm{w}) / (2 \pi \sin \psi_\mathrm{c}) \cdot c_\mathrm{w}/H$ -- below it no mode is cut on
+$f_\mathrm{c} = (\pi - \rho_{\mathrm{sed}}/\rho_\mathrm{w}) / (2 \pi \sin \psi_\mathrm{c}) \cdot c_\mathrm{w}/H$: below it no mode is cut on
 and ducted propagation does not occur.
 
 **Parameters**

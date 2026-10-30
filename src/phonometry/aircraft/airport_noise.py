@@ -8,10 +8,10 @@ infinite path, tabulated over a grid of engine power settings and slant
 distances at reference conditions. Placing an aircraft's noise at a receiver
 starts by reading a level from this table for an arbitrary power and distance.
 
-* :func:`npd_level` -- the interpolated event level ``L(P, d)``, linear in power
+* :func:`npd_level`: the interpolated event level ``L(P, d)``, linear in power
   and log-linear in distance (Eqs. 4-3/4-4), with extrapolation beyond the
   tabulated envelope.
-* :func:`npd_curve` -- the level over a distance sweep at one power, returned as
+* :func:`npd_curve`: the level over a distance sweep at one power, returned as
   an :class:`NPDLevelResult` with a ``.plot()``.
 
 The single-event stage segments a flight path and adjusts the NPD baseline per
@@ -690,7 +690,7 @@ class FlightSegmentState(OwnsArrays):
         there is, not just for the one it is eventually passed with. The event
         entry points do compare each field against the path they were handed,
         but one at a time and only there, so the first field they happen to
-        validate is the one blamed -- and a bundle built once and reused across
+        validate is the one blamed, and a bundle built once and reused across
         several paths is re-reported against each of them in turn. Checking
         here names the two fields that disagree, at the point where they were
         put together.

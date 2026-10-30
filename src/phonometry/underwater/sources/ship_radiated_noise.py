@@ -5,11 +5,11 @@ A surface ship measured in deep water is characterised by its **radiated noise
 level** and then by an **equivalent monopole source level** referred to a point
 source below the sea surface:
 
-* :func:`radiated_noise_level` --
+* :func:`radiated_noise_level`:
   :math:`L_{\mathrm{RN}} = 20 \log_{10}(p_{\mathrm{rms}}/p_0) + 20 \log_{10}(r/r_0)`
   dB re 1 µPa·m (ISO 17208-1), the level of the product of the far-field RMS
   pressure and the source distance.
-* :func:`monopole_source_level` -- converts ``LRN`` to the source level
+* :func:`monopole_source_level`: converts ``LRN`` to the source level
   :math:`L_\mathrm{s} = L_{\mathrm{RN}} + \Delta L` with the Lloyd's-mirror surface
   correction :math:`\Delta L` of ISO 17208-2 Formula 3, for a nominal source
   depth :math:`d_\mathrm{s} = 0.7 D` (Formula 1).
@@ -72,7 +72,7 @@ _UNCERTAINTY_MID_BAND_MAX_HZ = 16000.0
 def radiated_noise_level(rms_pressure_pa: float, distance: float) -> float:
     r"""Radiated noise level ``LRN`` (ISO 17208-1), dB re 1 µPa·m.
 
-    :math:`L_{\mathrm{RN}} = 20 \log_{10}(p_{\mathrm{rms}}/p_0) + 20 \log_{10}(r/r_0)` --
+    :math:`L_{\mathrm{RN}} = 20 \log_{10}(p_{\mathrm{rms}}/p_0) + 20 \log_{10}(r/r_0)`,
     the level of the product of the far-field RMS sound pressure and the
     source distance, referred to 1 µPa·m.
 
@@ -184,7 +184,7 @@ class ShipSourceLevelResult(OwnsArrays):
         radiated noise level plus the Lloyd's-mirror correction evaluated at
         that band's own frequency, and it is reported per one-third-octave
         band with the expanded uncertainty its frequency selects
-        (:func:`source_level_uncertainty` -- 5 dB, 3 dB or 4 dB by band).
+        (:func:`source_level_uncertainty`: 5 dB, 3 dB or 4 dB by band).
         Only position ties the three curves to :attr:`frequencies`, so a
         curve of another length reports each level against a frequency other
         than the one it was computed at, and quotes it with the uncertainty

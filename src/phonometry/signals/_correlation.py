@@ -987,7 +987,7 @@ class AlignedImpulseResponseResult(OwnsArrays):
         """Reject a pair of impulse responses that are not comparable.
 
         The point of the result is that the two records can now be read
-        sample against sample -- averaged into an ensemble, subtracted,
+        sample against sample: averaged into an ensemble, subtracted,
         overlaid. :meth:`plot` does exactly that, building one time axis from
         :attr:`reference` and drawing both traces on it. Two records of
         different lengths were never comparable in the first place, and

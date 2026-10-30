@@ -488,7 +488,7 @@ def _band_heading(band: int, *, spanish: bool = False) -> str:
 BAND_QUANTITIES: dict[str, tuple[str, str]] = {
     "absorption_coefficient": ("Absorption coefficient", "Coeficiente de absorción"),
     "absorption_area": ("Equivalent absorption area", "Área de absorción equivalente"),
-    "transmission_loss": ("Transmission loss", "Pérdidas por transmisión"),
+    "transmission_loss": ("Transmission loss", "Pérdida por transmisión"),
     "air_attenuation": (
         "Air attenuation coefficient",
         "Coeficiente de atenuación del aire",

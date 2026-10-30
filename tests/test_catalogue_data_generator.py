@@ -840,3 +840,32 @@ def test_a_band_column_of_a_quantity_nobody_named_stops_the_generator() -> None:
         gcd.UnnamedBandQuantityError, match="loudness specific_loudness_125"
     ):
         gcd.name_band_quantities(document)
+
+
+def test_every_band_quantity_is_named_as_the_pages_of_its_language_name_it() -> None:
+    """A dataset names its quantity in the words the site already uses for it.
+
+    A name coined in the generator would reach the structured data as a second
+    term for one quantity, as "Pérdidas por transmisión" did beside the
+    "pérdida por transmisión" the Spanish pages write.
+    """
+    docs = pathlib.Path(__file__).resolve().parent.parent / "site/src/content/docs"
+    spanish = docs / "es"
+    pages = {
+        "en": " ".join(
+            page.read_text(encoding="utf-8")
+            for page in docs.rglob("*.mdx")
+            if spanish not in page.parents
+        ).casefold(),
+        "es": " ".join(
+            page.read_text(encoding="utf-8") for page in spanish.rglob("*.mdx")
+        ).casefold(),
+    }
+
+    unused = [
+        f"{lang}: {name}"
+        for names in gcd.BAND_QUANTITIES.values()
+        for lang, name in zip(("en", "es"), names, strict=True)
+        if name.casefold() not in pages[lang]
+    ]
+    assert unused == []

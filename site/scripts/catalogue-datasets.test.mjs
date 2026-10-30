@@ -260,8 +260,8 @@ test('the band columns of one quantity are one variable, named by the quantity, 
 
 test('a band column alone says its band, and a change of unit starts another variable', () => {
   const columns = [
-    band('transmission_loss', 125, 'Transmission loss', 'Pérdidas por transmisión', 'dB'),
-    band('transmission_loss', 250, 'Transmission loss', 'Pérdidas por transmisión', 'cB'),
+    band('transmission_loss', 125, 'Transmission loss', 'Pérdida por transmisión', 'dB'),
+    band('transmission_loss', 250, 'Transmission loss', 'Pérdida por transmisión', 'cB'),
   ];
   assert.deepEqual(variablesMeasured(columns, 'en'), [
     { '@type': 'PropertyValue', name: 'Transmission loss', description: 'In the 125 Hz band', unitText: 'dB' },

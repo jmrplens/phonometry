@@ -95809,7 +95809,7 @@ export const catalogues = {
         "headingEs": "63 Hz",
         "unit": "dB",
         "quantity": "Transmission loss",
-        "quantityEs": "Pérdidas por transmisión"
+        "quantityEs": "Pérdida por transmisión"
       },
       {
         "field": "transmission_loss_125",
@@ -95817,7 +95817,7 @@ export const catalogues = {
         "headingEs": "125 Hz",
         "unit": "dB",
         "quantity": "Transmission loss",
-        "quantityEs": "Pérdidas por transmisión"
+        "quantityEs": "Pérdida por transmisión"
       },
       {
         "field": "transmission_loss_250",
@@ -95825,7 +95825,7 @@ export const catalogues = {
         "headingEs": "250 Hz",
         "unit": "dB",
         "quantity": "Transmission loss",
-        "quantityEs": "Pérdidas por transmisión"
+        "quantityEs": "Pérdida por transmisión"
       },
       {
         "field": "transmission_loss_500",
@@ -95833,7 +95833,7 @@ export const catalogues = {
         "headingEs": "500 Hz",
         "unit": "dB",
         "quantity": "Transmission loss",
-        "quantityEs": "Pérdidas por transmisión"
+        "quantityEs": "Pérdida por transmisión"
       },
       {
         "field": "transmission_loss_1000",
@@ -95841,7 +95841,7 @@ export const catalogues = {
         "headingEs": "1 kHz",
         "unit": "dB",
         "quantity": "Transmission loss",
-        "quantityEs": "Pérdidas por transmisión"
+        "quantityEs": "Pérdida por transmisión"
       },
       {
         "field": "transmission_loss_2000",
@@ -95849,7 +95849,7 @@ export const catalogues = {
         "headingEs": "2 kHz",
         "unit": "dB",
         "quantity": "Transmission loss",
-        "quantityEs": "Pérdidas por transmisión"
+        "quantityEs": "Pérdida por transmisión"
       },
       {
         "field": "transmission_loss_4000",
@@ -95857,7 +95857,7 @@ export const catalogues = {
         "headingEs": "4 kHz",
         "unit": "dB",
         "quantity": "Transmission loss",
-        "quantityEs": "Pérdidas por transmisión"
+        "quantityEs": "Pérdida por transmisión"
       },
       {
         "field": "transmission_loss_8000",
@@ -95865,7 +95865,7 @@ export const catalogues = {
         "headingEs": "8 kHz",
         "unit": "dB",
         "quantity": "Transmission loss",
-        "quantityEs": "Pérdidas por transmisión"
+        "quantityEs": "Pérdida por transmisión"
       }
     ],
     "rows": [
@@ -120903,7 +120903,7 @@ export const catalogues = {
         "headingEs": "63 Hz",
         "unit": "dB",
         "quantity": "Transmission loss",
-        "quantityEs": "Pérdidas por transmisión"
+        "quantityEs": "Pérdida por transmisión"
       },
       {
         "field": "transmission_loss_125",
@@ -120911,7 +120911,7 @@ export const catalogues = {
         "headingEs": "125 Hz",
         "unit": "dB",
         "quantity": "Transmission loss",
-        "quantityEs": "Pérdidas por transmisión"
+        "quantityEs": "Pérdida por transmisión"
       },
       {
         "field": "transmission_loss_250",
@@ -120919,7 +120919,7 @@ export const catalogues = {
         "headingEs": "250 Hz",
         "unit": "dB",
         "quantity": "Transmission loss",
-        "quantityEs": "Pérdidas por transmisión"
+        "quantityEs": "Pérdida por transmisión"
       },
       {
         "field": "transmission_loss_500",
@@ -120927,7 +120927,7 @@ export const catalogues = {
         "headingEs": "500 Hz",
         "unit": "dB",
         "quantity": "Transmission loss",
-        "quantityEs": "Pérdidas por transmisión"
+        "quantityEs": "Pérdida por transmisión"
       },
       {
         "field": "transmission_loss_1000",
@@ -120935,7 +120935,7 @@ export const catalogues = {
         "headingEs": "1 kHz",
         "unit": "dB",
         "quantity": "Transmission loss",
-        "quantityEs": "Pérdidas por transmisión"
+        "quantityEs": "Pérdida por transmisión"
       },
       {
         "field": "transmission_loss_2000",
@@ -120943,7 +120943,7 @@ export const catalogues = {
         "headingEs": "2 kHz",
         "unit": "dB",
         "quantity": "Transmission loss",
-        "quantityEs": "Pérdidas por transmisión"
+        "quantityEs": "Pérdida por transmisión"
       },
       {
         "field": "transmission_loss_4000",
@@ -120951,7 +120951,7 @@ export const catalogues = {
         "headingEs": "4 kHz",
         "unit": "dB",
         "quantity": "Transmission loss",
-        "quantityEs": "Pérdidas por transmisión"
+        "quantityEs": "Pérdida por transmisión"
       },
       {
         "field": "transmission_loss_8000",
@@ -120959,7 +120959,7 @@ export const catalogues = {
         "headingEs": "8 kHz",
         "unit": "dB",
         "quantity": "Transmission loss",
-        "quantityEs": "Pérdidas por transmisión"
+        "quantityEs": "Pérdida por transmisión"
       }
     ],
     "rows": [

@@ -58,9 +58,10 @@ const BACK_REFERENCE = {
  * Phrases that lean on another entry wherever they stand in a definition: the
  * group or the family the card sits in, left unnamed, "the same standard"
  * another card names, the card above. A family the definition names, "the
- * junction family", is not leaning on anything. Each one is a phrase a definition of this glossary
- * used; "the same" on its own is not on the list, because a definition says
- * "the same mean-square pressure" or "the same four-stage filter" of itself.
+ * junction family", is not leaning on anything. Each one is a phrase a
+ * definition of this glossary used; "the same" on its own is not on the list,
+ * because a definition says "the same mean-square pressure" or "the same
+ * four-stage filter" of itself.
  */
 const LEANING_PHRASE = {
 	en: /\b(?:this group|the whole group|the (?:whole )?family(?! of)|everything else in|the same standard|the same regression line|the modulation form|the (?:card|entry) above)\b/i,

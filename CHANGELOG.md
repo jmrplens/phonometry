@@ -2881,12 +2881,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   kept the arrays it was handed, and editing them afterwards edited the
   record. Every one of the 428 public records that can hold an array now
   inherits one private base that replaces each array it is built with, also
-  inside a tuple, a list, any mapping or an array of objects, by a
+  inside a tuple, a list, any mapping or an array of objects, and the
+  memory of any other object NumPy reads as an array (a column of a data
+  frame, a `memoryview`), by a
   read-only C-ordered copy of its own before the class's own checks run,
   whoever builds it (only the few arrays the library allocates for its
   largest results are sealed and kept instead, as the next entry says);
   the caller's array keeps its
-  `writeable` flag. A mapping that holds an array
+  `writeable` flag. Such an object counts as the array it stands for: a
+  record no longer keeps the caller's object, and its memory, in a field it
+  only checked, and one with no length, which a result's checks refused as
+  a single number, is now taken like the same array given bare. A mapping
+  that holds an array
   comes back as a plain `dict` (a `MappingProxyType` as one), never as the
   caller's own container. A record held whole inside another is left as it
   is and answers for its own arrays, and an `io.Signal` is no exception: the
@@ -4160,8 +4166,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   a multiple-shock result take the numpy array of them as well
   (`MicrophoneDirectivity(polar=np.vstack((angles, levels)))`), and
   whatever sequence holds those arrays (an array of objects, a deque, a
-  generator, a column of a data frame), the record holds read-only copies
-  of its own and leaves the caller's arrays writeable. The three
+  generator), the record holds read-only copies of its own and leaves the
+  caller's arrays writeable. The three
   periodic-test measurement records, of 14, 19 and 38 fields, declare their
   constructor's keywords as the keys of a `TypedDict`
   (`**measurements: Unpack[...]`), which a type checker reads keyword by

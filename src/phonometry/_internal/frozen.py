@@ -14,7 +14,10 @@ was given shares memory with the caller, and changing the caller's array
 afterwards changes the result. Every public record that can hold an array
 therefore inherits :class:`OwnsArrays`, which replaces each array the record
 is built with by a read-only copy of its own, whoever builds it: a function
-of the library or a caller writing the record by hand. An object that is not
+of the library or a caller writing the record by hand. Any other object
+numpy reads as an array (a column of a data frame, a labelled array, a
+``memoryview``) counts as the array it stands for, since ``np.asarray`` of it
+is the caller's own memory. An object that is not
 such a record (a plain class, a private record) keeps an array it was handed
 through :func:`read_only_copy`. ``scripts/check_array_aliasing.py`` holds the
 package to both.
@@ -31,7 +34,7 @@ from __future__ import annotations
 import dataclasses
 import functools
 import weakref
-from collections.abc import Mapping
+from collections.abc import Buffer, Mapping
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, cast, overload
 
@@ -91,6 +94,13 @@ def read_only_copy(
     An array of objects is copied member by member as well, as a record
     copies one: a copy of it alone would hold the caller's own arrays.
 
+    Any other object numpy reads as an array (:func:`_stands_for_an_array`)
+    is read as ``np.asarray`` reads it, and what comes back is copied:
+    ``np.array`` would pass an ``__array__`` ``copy=True``, which an
+    implementation older than NumPy 2 does not take (NumPy warns) and a
+    careless one ignores, handing back the array it holds, which would then
+    be sealed.
+
     :param array: The array, or anything ``np.array`` reads as one, that an
         object keeps from its arguments.
     :param dtype: The type to copy into; the array's own when omitted.
@@ -98,6 +108,8 @@ def read_only_copy(
     """
     if array is None:
         return None
+    if _stands_for_an_array(array):
+        array = np.asarray(array, dtype=dtype)
     copied = np.array(array, dtype=dtype)
     if copied.dtype == object:
         return _owned_objects(copied, always=True)
@@ -110,9 +122,10 @@ def owned_members(value: Iterable[Any]) -> tuple[Any, ...]:
     For the ``__post_init__`` of a record that inherits :class:`OwnsArrays`,
     on one of its fields. A tuple, a list or an array the record was given
     is one it went through when it copied its arrays, so each array it
-    holds is the record's own already and comes back as it is. Any other
-    sequence (a deque, a generator) the record could not go through, so each
-    array in it is still the caller's and is copied here, read-only: a
+    holds, and each array-like (read as the array it stands for), is the
+    record's own already and comes back as it is. Any other sequence (a
+    deque, a generator) the record could not go through, so each array or
+    array-like in it is still the caller's and is copied here, read-only: a
     record that keeps it, or seals it, never keeps or seals an array of the
     caller's.
 
@@ -214,12 +227,50 @@ def _sealed(array: np.ndarray) -> bool:
     return True
 
 
+#: The attributes through which numpy reads an object as an array, each
+#: looked up on the object as numpy looks it up; the buffer protocol is the
+#: fourth way in.
+_ARRAY_PROTOCOLS = ("__array__", "__array_interface__", "__array_struct__")
+
+#: The types of the values a record holds most, none of which is an array
+#: or holds one, so a field of one is passed by at once. The type is
+#: matched exactly: a subclass of one may read as an array, and goes the
+#: long way.
+_PLAIN_TYPES = frozenset({type(None), bool, int, float, complex, str, bytes})
+
+
+def _stands_for_an_array(value: object) -> bool:
+    """Whether numpy reads *value* as an array, other than an ndarray itself.
+
+    A column of a data frame, a labelled array or a tensor (through
+    ``__array__``), an object that publishes its memory (through
+    ``__array_interface__`` or ``__array_struct__``), a ``memoryview``, an
+    ``array.array`` or a ``bytearray`` (the buffer protocol):
+    ``np.asarray`` of one is the caller's own memory, and of a column whose
+    ``__array__`` hands back the array it holds, the caller's very array. A
+    hook that sealed what ``np.asarray`` gave it sealed the caller's array,
+    and a hook that only checked the object left the record holding it, and
+    the caller's memory with it. ``bytes`` is a single text to numpy and
+    never changes, a NumPy scalar is a number, never shared, and a record of
+    the library (an :class:`~phonometry.io.Signal` included) is composition
+    and answers for its own arrays; none of them counts.
+    """
+    if isinstance(value, np.ndarray | np.generic | bytes | RichDisplay):
+        return False
+    return isinstance(value, Buffer) or any(
+        hasattr(value, name) for name in _ARRAY_PROTOCOLS
+    )
+
+
 def _owned(value: object, *, always: bool) -> object:
     """*value* with every array in it replaced by a read-only copy of its own.
 
     An array, and an array inside a tuple, a list, any mapping or an array
     of objects (to any depth), is copied; with *always* false only an array
-    somebody can still write into is. The copy is C-ordered whatever the
+    somebody can still write into is. Any other object numpy reads as an
+    array (:func:`_stands_for_an_array`) is read as ``np.asarray`` reads it,
+    the way the class's own hook would, and what comes back is copied,
+    always: nothing tells whether the caller still holds it. The copy is C-ordered whatever the
     layout it was made from, so a record holds the same layout however it
     was built. The
     container is rebuilt around the copies only when something in it was
@@ -232,12 +283,16 @@ def _owned(value: object, *, always: bool) -> object:
     and the record answers for its own arrays. An array passed through
     :func:`handed_over` is the one exception: it is sealed, not copied.
     """
+    if type(value) in _PLAIN_TYPES:
+        return value
     if isinstance(value, np.ndarray):
         return _owned_array(value, always=always)
     if isinstance(value, tuple | list):
         return _owned_sequence(value, always=always)
     if isinstance(value, Mapping):
         return _owned_mapping(value, always=always)
+    if _stands_for_an_array(value):
+        return _owned_array(np.asarray(value), always=True)
     return value
 
 
@@ -333,8 +388,9 @@ def _take_ownership(
     """Copy the record's arrays, run its own ``__post_init__``, then seal.
 
     Before the class's own ``__post_init__`` runs, every array an init field
-    holds is replaced by a read-only copy (or, handed over, sealed as it
-    is), so the class validates and normalises the record's own arrays:
+    holds, and every array-like numpy reads as one, is replaced by a
+    read-only copy (or, handed over, sealed as it is), so the class
+    validates and normalises the record's own arrays:
     ``np.asarray(self.levels)`` is that copy, and ``read_only`` on it
     touches nobody else's array. After,
     every field is looked at once more, and an array somebody can still
@@ -378,9 +434,10 @@ class OwnsArrays(RichDisplay):
     Inherited by every public record of the library that can hold an array.
     Whoever builds the record, a function of the library or a caller writing
     ``SomeResult(levels=levels, ...)`` by hand, each array it is given
-    (also inside a tuple, a list, a mapping or an array of objects) is
-    replaced by a copy that refuses in-place writes, before the class's own
-    ``__post_init__`` runs;
+    (also inside a tuple, a list, a mapping or an array of objects), and
+    each other object numpy reads as an array (a column of a data frame, a
+    ``memoryview``), is replaced by a copy that refuses in-place writes,
+    before the class's own ``__post_init__`` runs;
     only an array a function of the library builds for it and passes
     through :func:`handed_over` is sealed and kept instead.
     The caller's array is never flagged, and nothing the caller does to it

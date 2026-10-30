@@ -34,6 +34,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 import pytest
 import result_factories
+from array_likes import ARRAY_LIKES
 
 import phonometry as ph
 from phonometry._internal.catalogue import BandedRow, CatalogueRow
@@ -42,7 +43,7 @@ from phonometry.io._sidecar import CalibrationSidecar
 if TYPE_CHECKING:
     from collections.abc import Callable
 
-    from numpy.typing import ArrayLike, DTypeLike
+    from numpy.typing import ArrayLike
 
 _SCRIPTS = str(pathlib.Path(__file__).resolve().parent.parent / "scripts")
 if _SCRIPTS not in sys.path:
@@ -644,6 +645,80 @@ def test_a_list_given_to_a_converted_field_is_held_converted(
     assert kept == []
 
 
+def _arrays_held(value: object, seen: set[int] | None = None) -> list[np.ndarray]:
+    """Every array *value* holds, in containers, mappings and records, at any depth."""
+    seen = set() if seen is None else seen
+    if id(value) in seen:
+        return []
+    seen.add(id(value))
+    if isinstance(value, np.ndarray):
+        if value.dtype != object:
+            return [value]
+        members: list[object] = list(value.flat)
+    elif isinstance(value, Mapping):
+        members = list(value.values())
+    elif isinstance(value, tuple | list):
+        members = list(value)
+    elif dataclasses.is_dataclass(value) and not isinstance(value, type):
+        members = [
+            getattr(value, each.name)
+            for each in dataclasses.fields(value)
+            if hasattr(value, each.name)
+        ]
+    else:
+        return []
+    return [array for member in members for array in _arrays_held(member, seen)]
+
+
+@pytest.mark.parametrize("kind", sorted(ARRAY_LIKES))
+def test_a_record_given_an_array_like_holds_a_copy_of_its_own(
+    records: list[object], kind: str
+) -> None:
+    """Every array field, given an object numpy reads as the caller's memory.
+
+    The record held the object as it came, and its own ``__post_init__``
+    either read it through ``np.asarray`` and sealed what came back, for a
+    column the caller's very array, so the caller's next write raised; or
+    only checked it, and kept the caller's object and its memory; or
+    refused it as a single number, where the same array given bare was
+    taken. A record now reads it as the array it stands for, a copy of its
+    own, held as an array.
+    """
+    make = ARRAY_LIKES[kind]
+    found = []
+    for record in records:
+        for each in dataclasses.fields(record):  # type: ignore[arg-type]
+            stored = getattr(record, each.name)
+            if not (
+                each.init
+                and isinstance(stored, np.ndarray)
+                and stored.ndim
+                and stored.dtype != object
+            ):
+                continue
+            mine = np.array(stored)
+            given = make(mine)
+            where = f"{type(record).__name__}.{each.name}"
+            try:
+                with warnings.catch_warnings():
+                    warnings.simplefilter("ignore")
+                    warnings.filterwarnings(
+                        "error", message=".*__array__", category=DeprecationWarning
+                    )
+                    rebuilt = dataclasses.replace(record, **{each.name: given})  # type: ignore[type-var]
+            except (TypeError, ValueError, DeprecationWarning) as error:
+                found.append(f"{where}: refused it ({type(error).__name__}: {error})")
+                continue
+            kept = getattr(rebuilt, each.name)
+            if not mine.flags.writeable:
+                found.append(f"{where}: sealed the caller's array")
+            elif not isinstance(kept, np.ndarray):
+                found.append(f"{where}: keeps the caller's {type(kept).__name__}")
+            elif any(np.shares_memory(held, mine) for held in _arrays_held(rebuilt)):
+                found.append(f"{where}: holds the caller's array")
+    assert found == []
+
+
 def _pickled(value: object) -> object:
     """*value* through ``pickle``, there and back."""
     # The bytes are the ones made on this line, never read from elsewhere.
@@ -820,30 +895,23 @@ def test_a_pair_is_refused_when_the_record_is_built(
     assert not first.flags.writeable
 
 
-class _Column:
-    """An array-like of the caller's that hands numpy the array it holds.
-
-    A column of a data frame or a labelled array does the same: ``np.asarray``
-    of it is the caller's own array, and only a copy asked for is a copy.
-    """
-
-    def __init__(self, array: np.ndarray) -> None:
-        self.array = array
-
-    def __array__(
-        self, dtype: DTypeLike | None = None, *, copy: bool | None = None
-    ) -> np.ndarray:
-        if copy:
-            return np.array(self.array, dtype=dtype)
-        return np.asarray(self.array, dtype=dtype)
-
-
 def _objects(members: list[np.ndarray]) -> np.ndarray:
     """An array of objects holding *members* as they are, one per element."""
     held = np.empty(len(members), dtype=object)
     for index, member in enumerate(members):
         held[index] = member
     return held
+
+
+def _wrapped_in(
+    make: Callable[[np.ndarray], object],
+) -> Callable[[list[np.ndarray]], object]:
+    """A holder that hands each array over inside an array-like *make* builds."""
+
+    def hold(members: list[np.ndarray]) -> object:
+        return tuple(make(member) for member in members)
+
+    return hold
 
 
 #: Every kind of sequence a record of a fixed count of arrays takes them in.
@@ -853,7 +921,7 @@ _HOLDERS: dict[str, Callable[[list[np.ndarray]], object]] = {
     "array of objects": _objects,
     "deque": collections.deque,
     "generator": lambda members: iter(members),
-    "array-likes": lambda members: tuple(_Column(member) for member in members),
+    **{f"each in {kind}": _wrapped_in(make) for kind, make in ARRAY_LIKES.items()},
 }
 
 
@@ -901,9 +969,9 @@ def test_a_record_of_a_fixed_count_of_arrays_never_seals_the_caller_s(
 
     The record seals the arrays it holds, so each has to be its own: an
     array of objects was copied one level down only, its arrays still the
-    caller's, a deque or a generator not at all, and an array-like handed
-    numpy the caller's array; the record sealed the caller's arrays, and a
-    later write by the caller raised.
+    caller's, a deque or a generator not at all, and a column handed numpy
+    the caller's array; the record sealed the caller's arrays, and a later
+    write by the caller raised.
     """
     mine = given()
     record = build(_HOLDERS[holder](mine))

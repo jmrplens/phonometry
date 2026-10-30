@@ -1067,11 +1067,11 @@ def arrays_of(
     the members are read through
     :func:`~phonometry._internal.frozen.owned_members`: an array the record
     copied (in a tuple, a list or an array, an array of objects member by
-    member) comes back as itself when it is ``float64`` already, and one a
-    deque or a generator holds is copied. A member that is no array is
-    converted into a new one, never through ``np.asarray``, which hands back
-    the caller's own array for an array-like that holds one (a column of a
-    data frame).
+    member), or read out of any other object numpy reads as an array (a
+    column of a data frame, a ``memoryview``), comes back as itself when it
+    is ``float64`` already, and one a
+    deque or a generator holds is copied. A member that is no array, a list
+    of numbers, is converted into a new one.
 
     :param value: The sequence.
     :param name: The field's name, for the message.
@@ -1097,12 +1097,7 @@ def arrays_of(
     if len(items) != expected:
         msg += f", not {len(items)} of them."
         raise ValueError(msg)
-    return tuple(
-        np.asarray(item, dtype=np.float64)
-        if isinstance(item, np.ndarray)
-        else np.array(item, dtype=np.float64)
-        for item in items
-    )
+    return tuple(np.asarray(item, dtype=np.float64) for item in items)
 
 
 def pair_of_arrays(

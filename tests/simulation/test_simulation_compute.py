@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 import pytest
 
+import phonometry
 from phonometry.simulation import (
     FDTD2D,
     Compute,
@@ -88,6 +89,20 @@ def test_a_run_records_where_it_ran() -> None:
     assert res.provenance.dtype == "float64"
     assert res.provenance.numpy_version == np.__version__
     assert res.snapshot_decimation == 1
+
+
+@pytest.mark.parametrize(
+    "simulate",
+    [
+        lambda: _acoustic(FDTDRecording(probes=[(5, 5)])),
+        lambda: _elastic(ElasticRecording(probes=[(5, 5)])),
+    ],
+    ids=["fdtd_simulation", "elastic_fdtd_simulation"],
+)
+def test_a_run_records_the_phonometry_that_ran_it(
+    simulate: Callable[[], FDTDResult | ElasticFDTDResult],
+) -> None:
+    assert simulate().provenance.phonometry_version == phonometry.__version__
 
 
 def test_snapshots_are_decimated_and_checked_against_the_grid() -> None:

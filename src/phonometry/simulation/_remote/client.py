@@ -49,7 +49,12 @@ from typing import IO, TYPE_CHECKING, Any, Literal, cast, overload
 import numpy as np
 
 from .._backends import _PACKAGE_PREFIX
-from ..compute import ComputeFallbackWarning, ComputeRemoteError, RunProvenance
+from ..compute import (
+    ComputeFallbackWarning,
+    ComputeRemoteError,
+    RunProvenance,
+    _package_version,
+)
 from . import bootstrap, command, hosts, wire
 from .package import FLOORS, PYTHON_FLOOR, installed_package
 
@@ -675,7 +680,11 @@ def _check_arrays(
 def _provenance(
     session: Session, header: Mapping[str, object], request: Compute, digest: str
 ) -> RunProvenance:
-    """The node's provenance, checked, with this run's host, index and package."""
+    """The node's provenance, checked, with this run's host, index and package.
+
+    The version it records is the one the job was sent with, this process's
+    own: the node ran this package, and from its cache it can name no other.
+    """
     fields = session.field(header, "provenance", dict)
     names = {f.name for f in dataclasses.fields(RunProvenance)}
     if set(fields) != names:
@@ -694,6 +703,9 @@ def _provenance(
         raise session.failure(msg) from None
     if ran.host is not None or ran.package_sha256 is not None:
         msg = "the node's provenance names a host or a package, which only the client sets"
+        raise session.failure(msg)
+    if ran.phonometry_version != _package_version():
+        msg = f"the node reports a run of phonometry {_cut(ran.phonometry_version)}; the job sent phonometry {_package_version()}"
         raise session.failure(msg)
     if (ran.device, ran.dtype) != (request.device, request.dtype):
         msg = f"the node reports a run on {ran.device} in {ran.dtype}; the request was {request.device} in {request.dtype}"
@@ -957,6 +969,7 @@ def run_remote(
             "type": "job",
             "function": function,
             "compute": placement,
+            "phonometry_version": _package_version(),
             "arguments": tree,
         }
         _check_job_size(host, job, buffers)

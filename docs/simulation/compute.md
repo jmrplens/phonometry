@@ -261,6 +261,7 @@ engine reports the same record as `sim.provenance`:
 | Field | What it holds |
 |---|---|
 | `device`, `device_index`, `dtype` | the placement the fields stepped on, after any fallback |
+| `phonometry_version` | the version of the phonometry that ran the steps; on a node, the client's own, whose package the node runs |
 | `numpy_version` | NumPy's version where the run stepped |
 | `array_library` | the array library and its version (`"cupy 14.2.0"`, `"torch 2.14.1"`), `None` for NumPy |
 | `cuda_runtime` | the CUDA runtime the array library uses (`"13.2"`), `None` off a CUDA device |
@@ -285,8 +286,9 @@ on_gpu = simulation.fdtd_simulation(run, compute=simulation.Compute(device="cupy
 print(on_gpu.provenance)
 # On the machine of the proof in section 6:
 # RunProvenance(host=None, device='cupy', device_index=0, dtype='float64',
-#     numpy_version='2.5.4', array_library='cupy 14.2.0', cuda_runtime='13.2',
-#     cuda_driver_api='13.3', gpu='NVIDIA GeForce RTX 4060', package_sha256=None)
+#     phonometry_version='4.0.0', numpy_version='2.5.4',
+#     array_library='cupy 14.2.0', cuda_runtime='13.2', cuda_driver_api='13.3',
+#     gpu='NVIDIA GeForce RTX 4060', package_sha256=None)
 ```
 
 An engine's fields live on its device. `sim.p`, `sim.vx` and `sim.vy` of an

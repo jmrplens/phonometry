@@ -622,7 +622,7 @@ def combined_stage_level(*levels: float) -> float: ...
 
 **Enforced by:** review
 
-**Exceptions.** `noise_control.cascade(*matrices)`, `vibration.combine_fault_lines(*results)` and `io.catalogue_schema(*row_types)` stay variadic.
+**Exceptions.** `noise_control.cascade(*matrices)`, `vibration.combine_fault_lines(*results)` and `io.catalogue_schema(*row_types)` stay variadic. `io.Signal.pipe(func, *args, **kwargs)` takes no values of one kind at all: it hands the arguments of another function on to it, as the `pipe` of pandas does.
 
 <a id="a26"></a>
 ### A26. Make `axis` keyword-only

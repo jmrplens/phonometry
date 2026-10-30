@@ -1162,6 +1162,7 @@ def _built_by_hand() -> dict[str, tuple[Callable[[np.ndarray], object], str]]:
                     device="cpu",
                     device_index=0,
                     dtype="float64",
+                    phonometry_version="4.0.0",
                     numpy_version=np.__version__,
                     array_library=None,
                     cuda_runtime=None,

@@ -1552,7 +1552,9 @@ fields, after the others: `snapshot_decimation`, every how many cells a
 snapshot keeps along each axis (1 for every cell, as before), and
 `provenance`, the `simulation.RunProvenance` of where the run stepped. A
 result built by hand passes both, and leaving one out raises `TypeError`
-naming it; the results the simulation functions return carry both already.
+naming it; the results the simulation functions return carry both already. A
+`RunProvenance` built by hand passes every field, `phonometry_version`, the
+version of the phonometry that ran the steps, among them.
 
 `filters.WeightingFilter(..., high_accuracy=None)` used to select the
 default. `high_accuracy` is a plain `bool` now, `True` by default, and `None`

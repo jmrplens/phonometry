@@ -28,8 +28,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   process, to prove it; with `fallback=True` it warns with
   `ComputeFallbackWarning` at the caller's line instead and steps on NumPy.
   `FDTDResult.provenance`, `ElasticFDTDResult.provenance` and the engines'
-  `.provenance` are a `RunProvenance`: the device, the dtype, the NumPy and
-  array library versions, the CUDA runtime and the GPU's name. A result
+  `.provenance` are a `RunProvenance`: the device, the dtype, the phonometry,
+  NumPy and array library versions, the CUDA runtime and the GPU's name. A result
   refuses a provenance that is not one, and a `RunProvenance` refuses fields
   no run could have written. On another
   device the engines' fields, `ElasticFDTD2D.p` and `collocated()` included,
@@ -2189,6 +2189,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   tone at 0 dB SPL whose basis loudness clears it. A test holds the field to
   the printed ear filter, auditory filters, nonlinearity and threshold in
   quiet worked by hand for steady tones.
+
+- **A run records the phonometry that ran it.**
+  `simulation.RunProvenance.phonometry_version`, a required field beside
+  `numpy_version`, holds the `phonometry.__version__` of the package that
+  stepped the fields. A node runs the client's package from its cache, where
+  neither installed metadata nor the source tree's `VERSION` file names it,
+  so the job carries the client's version, the node records that one without
+  reading a version of its own, and the client refuses a record that names
+  another. A `RunProvenance` built by hand passes it, and `None` or a number
+  is refused with `TypeError` naming the field.
+
+- **`io.Signal.pipe(func, *args, **kwargs)` writes a chain of steps in the
+  order it runs.** It calls `func(sig, *args, **kwargs)` and returns what
+  that returns, so the functions of the library, which take the `Signal`
+  first and hand a new one back, chain without nesting:
+  `sig.pick(0).pipe(filters.weighting_filter, weighting="A").crop(10.0, 30.0).pipe(signals.leq)`.
+  It is the `pipe` of pandas, asked for in Discussion #588. `func` is
+  positional only, so the function may take a keyword of that name, a type
+  checker reads the arguments and the result from `func` itself, and a
+  `func` that cannot be called is refused with `TypeError`. The audio-files
+  guide shows it beside `pick` and `crop`.
 
 ### Fixed
 

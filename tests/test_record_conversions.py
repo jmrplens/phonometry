@@ -20,6 +20,7 @@ that holds a read-only mapping travels as plain dictionaries
 
 from __future__ import annotations
 
+import collections
 import copy
 import dataclasses
 import inspect
@@ -41,7 +42,7 @@ from phonometry.io._sidecar import CalibrationSidecar
 if TYPE_CHECKING:
     from collections.abc import Callable
 
-    from numpy.typing import ArrayLike
+    from numpy.typing import ArrayLike, DTypeLike
 
 _SCRIPTS = str(pathlib.Path(__file__).resolve().parent.parent / "scripts")
 if _SCRIPTS not in sys.path:
@@ -817,6 +818,104 @@ def test_a_pair_is_refused_when_the_record_is_built(
     assert first.tolist() == [100.0, 1000.0]
     assert second.tolist() == [0.0, -3.0]
     assert not first.flags.writeable
+
+
+class _Column:
+    """An array-like of the caller's that hands numpy the array it holds.
+
+    A column of a data frame or a labelled array does the same: ``np.asarray``
+    of it is the caller's own array, and only a copy asked for is a copy.
+    """
+
+    def __init__(self, array: np.ndarray) -> None:
+        self.array = array
+
+    def __array__(
+        self, dtype: DTypeLike | None = None, *, copy: bool | None = None
+    ) -> np.ndarray:
+        if copy:
+            return np.array(self.array, dtype=dtype)
+        return np.asarray(self.array, dtype=dtype)
+
+
+def _objects(members: list[np.ndarray]) -> np.ndarray:
+    """An array of objects holding *members* as they are, one per element."""
+    held = np.empty(len(members), dtype=object)
+    for index, member in enumerate(members):
+        held[index] = member
+    return held
+
+
+#: Every kind of sequence a record of a fixed count of arrays takes them in.
+_HOLDERS: dict[str, Callable[[list[np.ndarray]], object]] = {
+    "tuple": tuple,
+    "list": list,
+    "array of objects": _objects,
+    "deque": collections.deque,
+    "generator": lambda members: iter(members),
+    "array-likes": lambda members: tuple(_Column(member) for member in members),
+}
+
+
+def _curve() -> list[np.ndarray]:
+    return [np.array([0.0, 90.0, 180.0]), np.array([0.0, -3.0, -12.0])]
+
+
+def _elevation_model() -> list[np.ndarray]:
+    return [np.array([0.0, 10.0, 20.0]), np.array([0.0, 10.0]), np.zeros((2, 3))]
+
+
+#: The records that hold a fixed count of arrays as one field, each with the
+#: field and the arrays a caller gives it.
+_HELD_ARRAYS: tuple[
+    tuple[str, Callable[[Any], object], Callable[[], list[np.ndarray]]], ...
+] = (
+    *((name, build, _curve) for name, build in _PAIRS),
+    (
+        "terrain",
+        lambda axes: ph.aircraft.RotorcraftGround(terrain=axes),
+        _elevation_model,
+    ),
+)
+
+
+@pytest.mark.parametrize("holder", sorted(_HOLDERS))
+@pytest.mark.parametrize(
+    ("name", "build", "given"),
+    _HELD_ARRAYS,
+    ids=[
+        "LoudspeakerDirectivity",
+        "MicrophoneDirectivity",
+        "MicrophoneNoise",
+        "MicrophoneOverload",
+        "RotorcraftGround",
+    ],
+)
+def test_a_record_of_a_fixed_count_of_arrays_never_seals_the_caller_s(
+    name: str,
+    build: Callable[[Any], object],
+    given: Callable[[], list[np.ndarray]],
+    holder: str,
+) -> None:
+    """Whatever sequence holds them, the caller's arrays stay the caller's.
+
+    The record seals the arrays it holds, so each has to be its own: an
+    array of objects was copied one level down only, its arrays still the
+    caller's, a deque or a generator not at all, and an array-like handed
+    numpy the caller's array; the record sealed the caller's arrays, and a
+    later write by the caller raised.
+    """
+    mine = given()
+    record = build(_HOLDERS[holder](mine))
+    kept = getattr(record, name)
+    assert len(kept) == len(mine)
+    for held, array in zip(kept, mine, strict=True):
+        assert array.flags.writeable
+        assert not np.shares_memory(held, array)
+        assert not held.flags.writeable
+        np.testing.assert_array_equal(held, array)
+        array[...] = 7.0
+        assert not np.any(held == 7.0)
 
 
 def _road_surface(speed_range: ArrayLike) -> object:

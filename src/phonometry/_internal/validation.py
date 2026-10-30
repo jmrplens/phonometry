@@ -13,6 +13,8 @@ from typing import TYPE_CHECKING, cast
 
 import numpy as np
 
+from .frozen import owned_members
+
 if TYPE_CHECKING:
     from collections.abc import Iterable, Mapping, Sequence
 
@@ -1057,12 +1059,19 @@ def arrays_of(
     """The members of a sequence of a fixed count of arrays, each as ``float64``.
 
     A record that takes a curve as a pair (``(angles_deg, relative_db)``) or
-    a grid as its axes (``(x, y, z)``) takes it as a tuple, a list or an
-    array of rows, and holds it as that many arrays, so it is unpacked here,
-    once, when the record is built. Nothing is copied: a member that is a
-    ``float64`` array already comes back as itself, so the caller is a
-    record that inherits ``OwnsArrays``, whose arrays are its own copies by
-    then, and seals them with ``read_only``.
+    a grid as its axes (``(x, y, z)``) takes it as any sequence of them (a
+    tuple, a list, an array of rows or of objects, a deque) and holds it as
+    that many arrays, so it is unpacked here, once, when the record is
+    built. The caller is a record that inherits ``OwnsArrays`` and seals
+    each member with ``read_only``, so each has to be the record's own, and
+    the members are read through
+    :func:`~phonometry._internal.frozen.owned_members`: an array the record
+    copied (in a tuple, a list or an array, an array of objects member by
+    member) comes back as itself when it is ``float64`` already, and one a
+    deque or a generator holds is copied. A member that is no array is
+    converted into a new one, never through ``np.asarray``, which hands back
+    the caller's own array for an array-like that holds one (a column of a
+    data frame).
 
     :param value: The sequence.
     :param name: The field's name, for the message.
@@ -1081,14 +1090,19 @@ def arrays_of(
         msg += f", not {type(value).__name__}."
         raise TypeError(msg)
     try:
-        items = list(cast("Iterable[ArrayLike]", value))
+        items = owned_members(cast("Iterable[ArrayLike]", value))
     except TypeError:
         msg += f", not {type(value).__name__}."
         raise TypeError(msg) from None
     if len(items) != expected:
         msg += f", not {len(items)} of them."
         raise ValueError(msg)
-    return tuple(np.asarray(item, dtype=np.float64) for item in items)
+    return tuple(
+        np.asarray(item, dtype=np.float64)
+        if isinstance(item, np.ndarray)
+        else np.array(item, dtype=np.float64)
+        for item in items
+    )
 
 
 def pair_of_arrays(

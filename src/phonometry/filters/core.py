@@ -12,7 +12,7 @@ import numpy as np
 from scipy import signal
 
 from .._internal.display import RichDisplay
-from .._internal.frozen import OwnsArrays, read_only
+from .._internal.frozen import OwnsArrays, owned_members, read_only
 from .._internal.utils import (
     _ZI_NDIM_MULTICHANNEL,
     _downsamplingfactor,
@@ -162,10 +162,10 @@ class OctaveFilterResult(OwnsArrays):
     bands: tuple[Signal, ...] | tuple[np.ndarray, ...] | None = None
 
     def __post_init__(self) -> None:
-        """Hold the band centres and the waveforms as tuples."""
+        """Hold the band centres and the waveforms as tuples, every array its own."""
         object.__setattr__(self, "frequencies", tuple(self.frequencies))
         if self.bands is not None:
-            object.__setattr__(self, "bands", tuple(self.bands))
+            object.__setattr__(self, "bands", owned_members(self.bands))
 
     def require_levels(self) -> np.ndarray:
         """The band levels, or a clear error when the call asked for none.

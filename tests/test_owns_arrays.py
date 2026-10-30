@@ -17,9 +17,10 @@ from __future__ import annotations
 import contextlib
 import dataclasses
 import importlib
+import pickle
 import pkgutil
 import tracemalloc
-from collections import ChainMap, OrderedDict, defaultdict
+from collections import ChainMap, OrderedDict, defaultdict, deque
 from collections.abc import Iterator, Mapping
 from types import MappingProxyType
 from typing import TYPE_CHECKING, NamedTuple
@@ -244,6 +245,107 @@ def test_a_mapping_with_no_array_comes_back_as_it_went_in() -> None:
         named=_Pair(np.zeros(1), 0.0),
     )
     assert record.columns is given
+
+
+def _objects(*members: object) -> np.ndarray:
+    """An array of objects holding *members* as they are, one per element."""
+    held = np.empty(len(members), dtype=object)
+    for index, member in enumerate(members):
+        held[index] = member
+    return held
+
+
+def test_arrays_inside_an_array_of_objects_are_copied() -> None:
+    """Copying an array of objects copies its references, so each array in it is copied too.
+
+    The record's copy of the outer array held the caller's own arrays: the
+    caller's writes reached the record, and a hook that sealed a member
+    sealed the caller's array.
+    """
+    first, second = _writeable([1.0, 2.0]), _writeable([3.0, 4.0, 5.0])
+    given = _objects(first, second, "label").reshape(3, 1)
+    record = _Plain(levels=given)
+    assert record.levels.shape == (3, 1)
+    assert not record.levels.flags.writeable
+    for kept, mine in zip(record.levels[:2, 0], (first, second), strict=True):
+        assert not np.shares_memory(kept, mine)
+        assert not kept.flags.writeable
+        assert mine.flags.writeable
+    assert record.levels[2, 0] == "label"
+    first[0] = 99.0
+    assert record.levels[0, 0][0] == 1.0
+    assert given[0, 0] is first
+
+
+def _sealed_by_the_caller(values: list[float]) -> np.ndarray:
+    array = _writeable(values)
+    array.flags.writeable = False
+    return array
+
+
+@pytest.mark.parametrize(
+    "holder",
+    [deque, iter],
+    ids=["deque", "generator"],
+)
+def test_the_arrays_a_record_takes_out_of_any_sequence_are_its_own(
+    holder: Callable[[list[np.ndarray]], object],
+) -> None:
+    """A deque or a generator is no container the record goes through when it copies.
+
+    So a record that holds the members of one as a tuple copies each array
+    itself. Kept as it came, a writeable array was only copied by the check
+    after the hook, and a read-only one of the caller's, whose flag the
+    caller can set back, stayed the caller's.
+    """
+    writeable = _writeable([1.0, 2.0])
+    sealed = _sealed_by_the_caller([3.0, 4.0])
+    record = phonometry.filters.OctaveFilterResult(
+        levels=None,
+        frequencies=(500.0, 1000.0),
+        bands=holder([writeable, sealed]),  # type: ignore[arg-type]
+    )
+    assert isinstance(record.bands, tuple)
+    for kept, mine in zip(record.bands, (writeable, sealed), strict=True):
+        assert isinstance(kept, np.ndarray)
+        assert not np.shares_memory(kept, mine)
+        assert not kept.flags.writeable
+    assert writeable.flags.writeable
+    sealed.flags.writeable = True
+    sealed[0] = 99.0
+    assert record.bands[1][0] == 3.0
+
+
+def test_owned_members_hands_back_what_the_record_copied_as_it_is() -> None:
+    """A tuple's, a list's or an array's members are the record's copies by then."""
+    mine = _writeable([1.0, 2.0])
+    assert frozen.owned_members((mine, 1.0))[0] is mine
+    assert frozen.owned_members([mine])[0] is mine
+    grid = _writeable([1.0, 2.0, 3.0, 4.0]).reshape(2, 2)
+    assert np.shares_memory(frozen.owned_members(grid)[0], grid)
+    assert frozen.owned_members(deque([mine]))[0] is not mine
+    assert frozen.owned_members(deque(["a", 1.0])) == ("a", 1.0)
+
+
+def test_a_read_only_copy_of_an_array_of_objects_holds_copies_of_its_arrays() -> None:
+    """The copy a plain class keeps shares no array with the caller either."""
+    mine = _writeable([1.0, 2.0])
+    kept = frozen.read_only_copy(_objects(mine, "label"))
+    assert not kept.flags.writeable
+    assert not np.shares_memory(kept[0], mine)
+    assert not kept[0].flags.writeable
+    assert kept[1] == "label"
+    assert mine.flags.writeable
+
+
+def test_an_array_of_objects_comes_back_from_pickle_with_its_arrays_sealed() -> None:
+    """``pickle`` hands every array back writeable, the ones an array of objects holds too."""
+    record = _Plain(levels=_objects(_writeable([1.0]), _writeable([2.0, 3.0])))
+    # The bytes are the ones made on this line, never read from elsewhere.
+    back = pickle.loads(pickle.dumps(record))  # noqa: S301
+    assert not back.levels.flags.writeable
+    for member in back.levels:
+        assert not member.flags.writeable
 
 
 def test_every_copy_is_c_ordered_whatever_it_was_made_from() -> None:

@@ -2178,8 +2178,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   hands every array back writeable, so 313 of the 325 records the test suite
   pickles that hold read-only arrays came back holding arrays a caller could
   write into. A record that copies its arrays seals them again when it is
-  restored, inside a tuple, a list or a mapping too, and
-  `tests/test_record_conversions.py` compares every value, dtype, shape and
+  restored, inside a tuple, a list, a mapping or an array of objects too,
+  and `tests/test_record_conversions.py` compares every value, dtype, shape and
   read-only flag of each record that travels with the one that left, where
   it compared only the type.
 
@@ -2881,10 +2881,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   kept the arrays it was handed, and editing them afterwards edited the
   record. Every one of the 428 public records that can hold an array now
   inherits one private base that replaces each array it is built with, also
-  inside a tuple, a list or any mapping, by a read-only C-ordered copy of
-  its own before the class's own checks run, whoever builds it (only the
-  few arrays the library allocates for its largest results are sealed and
-  kept instead, as the next entry says); the caller's array keeps its
+  inside a tuple, a list, any mapping or an array of objects, by a
+  read-only C-ordered copy of its own before the class's own checks run,
+  whoever builds it (only the few arrays the library allocates for its
+  largest results are sealed and kept instead, as the next entry says);
+  the caller's array keeps its
   `writeable` flag. A mapping that holds an array
   comes back as a plain `dict` (a `MappingProxyType` as one), never as the
   caller's own container. A record held whole inside another is left as it
@@ -4157,7 +4158,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   type-checks and `spectrum.levels` reads as the array it is; a curve held
   as a pair of arrays, an elevation model's axes and the risk thresholds of
   a multiple-shock result take the numpy array of them as well
-  (`MicrophoneDirectivity(polar=np.vstack((angles, levels)))`). The three
+  (`MicrophoneDirectivity(polar=np.vstack((angles, levels)))`), and
+  whatever sequence holds those arrays (an array of objects, a deque, a
+  generator, a column of a data frame), the record holds read-only copies
+  of its own and leaves the caller's arrays writeable. The three
   periodic-test measurement records, of 14, 19 and 38 fields, declare their
   constructor's keywords as the keys of a `TypedDict`
   (`**measurements: Unpack[...]`), which a type checker reads keyword by

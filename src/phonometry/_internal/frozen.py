@@ -33,7 +33,7 @@ import functools
 import weakref
 from collections.abc import Mapping
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, overload
+from typing import TYPE_CHECKING, Any, cast, overload
 
 import numpy as np
 
@@ -88,6 +88,9 @@ def read_only_copy(
     not: a plain class that keeps an array to hand out later, a private
     record.
 
+    An array of objects is copied member by member as well, as a record
+    copies one: a copy of it alone would hold the caller's own arrays.
+
     :param array: The array, or anything ``np.array`` reads as one, that an
         object keeps from its arguments.
     :param dtype: The type to copy into; the array's own when omitted.
@@ -95,7 +98,32 @@ def read_only_copy(
     """
     if array is None:
         return None
-    return read_only(np.array(array, dtype=dtype))
+    copied = np.array(array, dtype=dtype)
+    if copied.dtype == object:
+        return _owned_objects(copied, always=True)
+    return read_only(copied)
+
+
+def owned_members(value: Iterable[Any]) -> tuple[Any, ...]:
+    """The members of a sequence a record holds, as a tuple, every array its own.
+
+    For the ``__post_init__`` of a record that inherits :class:`OwnsArrays`,
+    on one of its fields. A tuple, a list or an array the record was given
+    is one it went through when it copied its arrays, so each array it
+    holds is the record's own already and comes back as it is. Any other
+    sequence (a deque, a generator) the record could not go through, so each
+    array in it is still the caller's and is copied here, read-only: a
+    record that keeps it, or seals it, never keeps or seals an array of the
+    caller's.
+
+    :param value: The field's value, any iterable.
+    :return: Its members, as a tuple.
+    :raises TypeError: if *value* is not iterable.
+    """
+    if isinstance(value, tuple | list | np.ndarray):
+        return tuple(value)
+    # A plain tuple comes back from _owned as a plain tuple.
+    return cast("tuple[Any, ...]", _owned(tuple(value), always=True))
 
 
 #: The arrays a function of the library has handed to the record it is
@@ -189,10 +217,11 @@ def _sealed(array: np.ndarray) -> bool:
 def _owned(value: object, *, always: bool) -> object:
     """*value* with every array in it replaced by a read-only copy of its own.
 
-    An array, and an array inside a tuple, a list or any mapping (to any
-    depth), is copied; with *always* false only an array somebody can still
-    write into is. The copy is C-ordered whatever the layout it was made
-    from, so a record holds the same layout however it was built. The
+    An array, and an array inside a tuple, a list, any mapping or an array
+    of objects (to any depth), is copied; with *always* false only an array
+    somebody can still write into is. The copy is C-ordered whatever the
+    layout it was made from, so a record holds the same layout however it
+    was built. The
     container is rebuilt around the copies only when something in it was
     copied, so a tuple of numbers or of records is handed back as it came: a
     named tuple as its own class, a
@@ -220,9 +249,37 @@ def _owned_array(value: np.ndarray, *, always: bool) -> np.ndarray:
     adopted = _adopted(value)
     if adopted is not None:
         return adopted
+    if value.dtype == object:
+        return _owned_objects(value, always=always)
     if always or not _sealed(value):
         return read_only(np.array(value, order="C"))
     return value
+
+
+def _owned_objects(value: np.ndarray, *, always: bool) -> np.ndarray:
+    """An array of objects, with every array it holds owned as a tuple's is.
+
+    Copying an array of objects copies its references, not the objects, so
+    the copy would still hold the caller's own arrays: a write by the caller
+    would reach the record, and a hook that sealed a member would seal the
+    caller's array. Each member goes through :func:`_owned` instead, and the
+    array is rebuilt, C-ordered and read-only, around what comes back; with
+    *always* false it is kept as it is when it is sealed and none of its
+    members was copied.
+    """
+    members = [_owned(member, always=always) for member in value.flat]
+    if (
+        not always
+        and _sealed(value)
+        and all(new is old for new, old in zip(members, value.flat, strict=True))
+    ):
+        return value
+    held = np.empty(value.shape, dtype=object)
+    # One element at a time: an array assigned to a slice would be spread
+    # over it instead of held whole.
+    for index, member in zip(np.ndindex(value.shape), members, strict=True):
+        held[index] = member
+    return read_only(held)
 
 
 def _owned_sequence(
@@ -321,8 +378,9 @@ class OwnsArrays(RichDisplay):
     Inherited by every public record of the library that can hold an array.
     Whoever builds the record, a function of the library or a caller writing
     ``SomeResult(levels=levels, ...)`` by hand, each array it is given
-    (also inside a tuple, a list or a mapping) is replaced by a copy that
-    refuses in-place writes, before the class's own ``__post_init__`` runs;
+    (also inside a tuple, a list, a mapping or an array of objects) is
+    replaced by a copy that refuses in-place writes, before the class's own
+    ``__post_init__`` runs;
     only an array a function of the library builds for it and passes
     through :func:`handed_over` is sealed and kept instead.
     The caller's array is never flagged, and nothing the caller does to it
@@ -374,7 +432,8 @@ class OwnsArrays(RichDisplay):
         without running ``__post_init__``, and NumPy hands every array back
         writeable, so a record that came back from a process pool or a cache
         held arrays anyone could write into. Each array is sealed again here,
-        inside a tuple, a list or a mapping too, as the constructor seals it;
+        inside a tuple, a list, a mapping or an array of objects too, as the
+        constructor seals it;
         a record held in a field answers for its own arrays, as it does when
         the record is built.
 

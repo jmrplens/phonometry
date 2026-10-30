@@ -512,7 +512,6 @@ _DEFAULT_RESPONSE_PLOT = ResponsePlot()
 def _validate_bank_design(
     fs: float,
     fraction: float | np.integer[Any],
-    order: int,
     limits: RealValues | None,
     design: FilterDesign,
     block_processing: BlockProcessing,
@@ -666,9 +665,7 @@ class OctaveFilterBank:
             ``order`` is a flag, a text or an array where a count goes.
         """
         order = require_count(order, "order")
-        limits = _validate_bank_design(
-            fs, fraction, order, limits, design, block_processing
-        )
+        limits = _validate_bank_design(fs, fraction, limits, design, block_processing)
         # A NumPy integer is read as the int it holds, so the bank keeps the
         # plain number an int argument leaves there.
         if isinstance(fraction, np.integer):

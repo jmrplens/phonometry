@@ -380,21 +380,22 @@ def render_program_loudness_report(
             flow.append(grid_table(header_pairs))
     flow.append(Spacer(1, 8))
 
-    flow.append(fiche_paragraph(t("Compliance summary", language), caption_style))
-    flow.append(
-        compliance_table(
-            _compliance_rows(result, target, tolerance_lu, language),
-            language=language,
+    flow.extend(
+        (
+            fiche_paragraph(t("Compliance summary", language), caption_style),
+            compliance_table(
+                _compliance_rows(result, target, tolerance_lu, language),
+                language=language,
+            ),
+            Spacer(1, 8),
         )
     )
-    flow.append(Spacer(1, 8))
 
     # Full-width, landscape loudness-vs-time plot (self-scaling axis).
     plot_drawing = render_figure_drawing(
         result.plot, 174 * mm, y_top=None, figsize=(9.2, 4.2), language=language
     )
-    flow.append(plot_drawing)
-    flow.append(Spacer(1, 8))
+    flow.extend((plot_drawing, Spacer(1, 8)))
 
     flow.append(result_box(_statement(result, language), styles, accent))
     text, passed = _verdict(result, target, tolerance, language)

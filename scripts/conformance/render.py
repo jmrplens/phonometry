@@ -189,27 +189,25 @@ def _numerical_validation_section(
     # failing row, exactly like those groups do.
     opened = "" if filters_ok else " open"
     lines: list[str] = []
-    lines.append(f"<details{opened}>")
-    lines.append(
-        "<summary><b>Numerical validation - filters &amp; "
-        "weightings</b>: class showcase (IEC 61260-1 · IEC 61672-1 · "
-        "ISO 7196)</summary>"
+    lines.extend(
+        (
+            f"<details{opened}>",
+            "<summary><b>Numerical validation - filters &amp; "
+            "weightings</b>: class showcase (IEC 61260-1 · IEC 61672-1 · "
+            "ISO 7196)</summary>",
+            "",
+            "**IEC 61260-1:2014 class per filter architecture** (order 6, "
+            "one-third-octave, 100 Hz-10 kHz, fs = 48 kHz). For each architecture "
+            "the table shows, at its *binding* band, the measured relative "
+            "attenuation and the class-1 limit it must clear, so the number and "
+            "the range it must sit in are both visible. A positive margin means "
+            "the acceptance limits are met with that much room.",
+            "",
+            "| Architecture | Class verdict | Binding band | Measured rel. atten. "
+            "| Class-1 limit | Margin cl.1 | Margin cl.2 |",
+            "|:---|:---:|:---:|:---:|:---:|:---:|:---:|",
+        )
     )
-    lines.append("")
-    lines.append(
-        "**IEC 61260-1:2014 class per filter architecture** (order 6, "
-        "one-third-octave, 100 Hz-10 kHz, fs = 48 kHz). For each architecture "
-        "the table shows, at its *binding* band, the measured relative "
-        "attenuation and the class-1 limit it must clear, so the number and "
-        "the range it must sit in are both visible. A positive margin means "
-        "the acceptance limits are met with that much room."
-    )
-    lines.append("")
-    lines.append(
-        "| Architecture | Class verdict | Binding band | Measured rel. atten. "
-        "| Class-1 limit | Margin cl.1 | Margin cl.2 |"
-    )
-    lines.append("|:---|:---:|:---:|:---:|:---:|:---:|:---:|")
     for row in _panel(document, "filter-class")["rows"]:
         bind = row["binding"]
         comparator = "&le;" if bind["side"] == "ceil" else "&ge;"
@@ -219,30 +217,28 @@ def _numerical_validation_section(
             f"| {bind['measured']:+.2f} dB | {comparator} {bind['limit']:+.2f} dB "
             f"| {row['margin_class1']:+.3f} dB | {row['margin_class2']:+.3f} dB |"
         )
-    lines.append("")
-    lines.append(
-        "Only **Butterworth** (the library default) and **Chebyshev-II** are "
-        "class-compliant architectures. Chebyshev-I and elliptic trade the "
-        "mask for passband ripple, and Bessel for a maximally-flat group delay "
-        "(soft rolloff); they cannot satisfy the IEC 61260-1 Class 1/2 "
-        "attenuation mask by construction, so they are labelled *By design* - "
-        "this is expected, not a failure or regression."
+    lines.extend(
+        (
+            "",
+            "Only **Butterworth** (the library default) and **Chebyshev-II** are "
+            "class-compliant architectures. Chebyshev-I and elliptic trade the "
+            "mask for passband ripple, and Bessel for a maximally-flat group delay "
+            "(soft rolloff); they cannot satisfy the IEC 61260-1 Class 1/2 "
+            "attenuation mask by construction, so they are labelled *By design* - "
+            "this is expected, not a failure or regression.",
+            "",
+            "**Frequency-weighting conformance** (A/C: IEC 61672-1 Table 3; "
+            "G: ISO 7196 A.3). The *max deviation from nominal* is informational "
+            "(it falls at a frequency extreme where the tolerance is widest and "
+            "asymmetric); compliance is judged at the *binding* frequency - the "
+            "one with the least headroom - where the deviation, the applicable "
+            "tolerance band and the headroom are shown together.",
+            "",
+            "| Curve | fs | Max dev. from nominal (info) | Binding freq "
+            "| Deviation there | Tolerance band | Headroom |",
+            "|:---|:---:|:---:|:---:|:---:|:---:|:---:|",
+        )
     )
-    lines.append("")
-    lines.append(
-        "**Frequency-weighting conformance** (A/C: IEC 61672-1 Table 3; "
-        "G: ISO 7196 A.3). The *max deviation from nominal* is informational "
-        "(it falls at a frequency extreme where the tolerance is widest and "
-        "asymmetric); compliance is judged at the *binding* frequency - the "
-        "one with the least headroom - where the deviation, the applicable "
-        "tolerance band and the headroom are shown together."
-    )
-    lines.append("")
-    lines.append(
-        "| Curve | fs | Max dev. from nominal (info) | Binding freq "
-        "| Deviation there | Tolerance band | Headroom |"
-    )
-    lines.append("|:---|:---:|:---:|:---:|:---:|:---:|:---:|")
     for row in _panel(document, "weighting-deviation")["rows"]:
         worst, bind = row["worst"], row["binding"]
         band = f"[{bind['lower']:+.2f}, {bind['upper']:+.2f}] dB"
@@ -417,26 +413,26 @@ def render_markdown(document: Mapping[str, Any] | None = None) -> tuple[str, int
     )
     if filters_ok:
         summary += " - filters class 1 - weightings within IEC 61672-1 class 1"
-    out.append(f"{summary}." if not failing else f"{summary} - **{failing} failing**.")
-    out.append("")
-    out.append(
-        "<sub><b>&#916;</b> is the difference between the computed value and "
-        "the one the standard publishes. <b>Used</b> is how much of that "
-        "clause's published tolerance the difference consumes: 100 % means it "
-        "sits exactly on the limit, 5 % means it uses a twentieth of the "
-        "allowance, and a dash means the clause states no two-sided tolerance "
-        "for the quantity, so there is no budget to spend. It is reported and "
-        "never used to decide a verdict, which is settled at full precision "
-        "before any rounding.</sub>"
+    out.extend(
+        (
+            f"{summary}." if not failing else f"{summary} - **{failing} failing**.",
+            "",
+            "<sub><b>&#916;</b> is the difference between the computed value and "
+            "the one the standard publishes. <b>Used</b> is how much of that "
+            "clause's published tolerance the difference consumes: 100 % means it "
+            "sits exactly on the limit, 5 % means it uses a twentieth of the "
+            "allowance, and a dash means the clause states no two-sided tolerance "
+            "for the quantity, so there is no budget to spend. It is reported and "
+            "never used to decide a verdict, which is settled at full precision "
+            "before any rounding.</sub>",
+            "",
+            "<sub>Each row pins a standard clause to its expected normative value "
+            "and the value the library computes. Every section below is "
+            "collapsible and stays collapsed while all of its rows pass; a "
+            "section with any failing row opens automatically.</sub>",
+            "",
+        )
     )
-    out.append("")
-    out.append(
-        "<sub>Each row pins a standard clause to its expected normative value "
-        "and the value the library computes. Every section below is "
-        "collapsible and stays collapsed while all of its rows pass; a "
-        "section with any failing row opens automatically.</sub>"
-    )
-    out.append("")
     marked = _marked(source)
     out.append(_verdict_legend(marked))
     out.append("")
@@ -463,16 +459,16 @@ def render_markdown(document: Mapping[str, Any] | None = None) -> tuple[str, int
         domain_html = domain["title"].replace("&", "&amp;")
         out.append(f"<details{opened}>")
         tail = f" - <b>{failing_d} failing</b>" if failing_d else ""
-        out.append(
-            f"<summary><b>{domain_html}</b>: {pct:.0f}% "
-            f"({passed_d}/{total_d}){tail}</summary>"
+        out.extend(
+            (
+                f"<summary><b>{domain_html}</b>: {pct:.0f}% "
+                f"({passed_d}/{total_d}){tail}</summary>",
+                "",
+                "| Standard | Quantity | Expected (norm) | Computed | &#916; | Used | "
+                "Status |",
+                "|:---|:---|:---|:---|:---|:---:|:---:|",
+            )
         )
-        out.append("")
-        out.append(
-            "| Standard | Quantity | Expected (norm) | Computed | &#916; | Used | "
-            "Status |"
-        )
-        out.append("|:---|:---|:---|:---|:---|:---:|:---:|")
         out.extend(
             f"| {_cell(check['reference']['cite'])} | {_cell(check['quantity'])} "
             f"| {_cell(expected_text(check))} | {_cell(computed_text(check))} "
@@ -480,9 +476,7 @@ def render_markdown(document: Mapping[str, Any] | None = None) -> tuple[str, int
             f"| {_status(check['verdict'])} |"
             for check in rows
         )
-        out.append("")
-        out.append("</details>")
-        out.append("")
+        out.extend(("", "</details>", ""))
 
     # One definition per mark, at the foot of the document. A link reference
     # resolves document-wide in CommonMark, which is what lets a row spend 16

@@ -537,8 +537,7 @@ def render_iso717_report(
     plot_drawing = render_figure_drawing(
         result.plot, 116 * mm, y_top=y_top, expand_step=10.0, language=language
     )
-    flow.append(two_panel_body(left_cell, plot_drawing))
-    flow.append(Spacer(1, 8))
+    flow.extend((two_panel_body(left_cell, plot_drawing), Spacer(1, 8)))
 
     # Boxed single-number result, optional verdict row, footer.
     flow.append(

@@ -232,29 +232,34 @@ def render_annex16_epnl_report(
         if header_pairs:
             flow.append(Spacer(1, 3))
             flow.append(grid_table(header_pairs))
-    flow.append(
-        fiche_paragraph(
-            t(
-                "Reference conditions: 25 &#176;C (ISA + 10 &#176;C), 70% relative humidity, 1013.25 hPa sea-level pressure, zero wind (ICAO Annex 16 Vol I Part II, 3.6.1.5).",
-                language,
+    flow.extend(
+        (
+            fiche_paragraph(
+                t(
+                    "Reference conditions: 25 &#176;C (ISA + 10 &#176;C), 70% relative humidity, 1013.25 hPa sea-level pressure, zero wind (ICAO Annex 16 Vol I Part II, 3.6.1.5).",
+                    language,
+                ),
+                muted_strip_style,
             ),
-            muted_strip_style,
+            Spacer(1, 8),
         )
     )
-    flow.append(Spacer(1, 8))
 
-    flow.append(fiche_paragraph(t("Intermediate quantities", language), caption_style))
-    flow.append(
-        metrics_table(_metric_rows(result, language), col_widths=[48 * mm, 26 * mm])
+    flow.extend(
+        (
+            fiche_paragraph(t("Intermediate quantities", language), caption_style),
+            metrics_table(
+                _metric_rows(result, language), col_widths=[48 * mm, 26 * mm]
+            ),
+            Spacer(1, 8),
+        )
     )
-    flow.append(Spacer(1, 8))
 
     # Full-width, landscape PNLT-vs-time plot (self-scaling axis).
     plot_drawing = render_figure_drawing(
         result.plot, 174 * mm, y_top=None, figsize=(9.2, 4.2), language=language
     )
-    flow.append(plot_drawing)
-    flow.append(Spacer(1, 8))
+    flow.extend((plot_drawing, Spacer(1, 8)))
 
     flow.append(result_box(_statement(result, language), styles, accent))
 
@@ -264,10 +269,14 @@ def render_annex16_epnl_report(
         else None
     )
     if limit is not None:
-        flow.append(Spacer(1, 6))
-        flow.append(fiche_paragraph(t("Certification limit", language), caption_style))
-        flow.append(
-            compliance_table(_verdict_rows(result, limit, language), language=language)
+        flow.extend(
+            (
+                Spacer(1, 6),
+                fiche_paragraph(t("Certification limit", language), caption_style),
+                compliance_table(
+                    _verdict_rows(result, limit, language), language=language
+                ),
+            )
         )
 
     flow.extend(footer_flow(metadata, language))

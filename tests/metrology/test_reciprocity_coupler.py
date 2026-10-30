@@ -124,7 +124,7 @@ def test_full_solution_reproduces_every_entry_of_table_a1() -> None:
 def test_approximation_is_accurate_where_the_annex_says() -> None:
     """Formula (A.2): modulus to 0,01 % for 0,125 < R < 8 and X > 5."""
     for x, row in ref.IEC61094_2_TABLE_A1.items():
-        if not x > 5.0:
+        if x <= 5.0:
             continue
         for ratio, (real, imag) in zip(
             ref.IEC61094_2_TABLE_A1_RATIOS, row, strict=True

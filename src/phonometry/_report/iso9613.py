@@ -401,23 +401,23 @@ def render_outdoor_attenuation_report(
         flow.append(grid_table(header_pairs))
     flow.append(Spacer(1, 8))
 
-    flow.append(fiche_paragraph(t("Attenuation breakdown", language), caption_style))
-    flow.append(
-        _attenuation_table(
-            result=result, levels=levels, verbose=verbose, language=language
+    flow.extend(
+        (
+            fiche_paragraph(t("Attenuation breakdown", language), caption_style),
+            _attenuation_table(
+                result=result, levels=levels, verbose=verbose, language=language
+            ),
+            Spacer(1, 8),
+            render_figure_drawing(
+                result.plot,
+                174 * mm,
+                y_top=None,
+                figsize=(9.2, 3.1),
+                language=language,
+            ),
+            Spacer(1, 8),
         )
     )
-    flow.append(Spacer(1, 8))
-    flow.append(
-        render_figure_drawing(
-            result.plot,
-            174 * mm,
-            y_top=None,
-            figsize=(9.2, 3.1),
-            language=language,
-        )
-    )
-    flow.append(Spacer(1, 8))
 
     if levels is not None:
         la_dw = _a_weighted_level(levels.receiver_level, levels.ck)

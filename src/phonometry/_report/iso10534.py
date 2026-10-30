@@ -50,7 +50,7 @@ from ._layout import (
     document_styles,
     fmt_meta,
     footer_flow,
-    grid_table,
+    opening_flow,
     render_figure_drawing,
     result_box,
     two_panel_body,
@@ -322,8 +322,6 @@ def render_iso10534_report(
     try:
         from reportlab.lib import colors
         from reportlab.platypus import Spacer
-
-        from ._layout import fiche_paragraph
     except ImportError as exc:
         raise ImportError(_REPORTLAB_HINT) from exc
     accent = colors.HexColor(_ACCENT_HEX)
@@ -350,26 +348,24 @@ def render_iso10534_report(
     styles, title_style, basis_style, caption_style = document_styles(accent)
     title = t("Impedance-tube sound absorption and impedance", language)
 
-    flow: list[Any] = [
-        fiche_paragraph(title, title_style),
-        fiche_paragraph(_basis_line(metadata, language), basis_style),
-    ]
-
-    header_pairs = _metadata_pairs(result, metadata, language)
-    if header_pairs:
-        flow.append(Spacer(1, 3))
-        flow.append(grid_table(header_pairs))
-    flow.append(Spacer(1, 8))
-
-    flow.append(
-        _body(
-            result=result,
-            verbose=verbose,
-            caption_style=caption_style,
-            language=language,
+    flow = opening_flow(
+        title,
+        _basis_line(metadata, language),
+        _metadata_pairs(result, metadata, language),
+        title_style=title_style,
+        basis_style=basis_style,
+    )
+    flow.extend(
+        (
+            _body(
+                result=result,
+                verbose=verbose,
+                caption_style=caption_style,
+                language=language,
+            ),
+            Spacer(1, 8),
         )
     )
-    flow.append(Spacer(1, 8))
 
     # ISO 10534-2 is a characterisation: a headline label, no single-number
     # rating and no pass/fail verdict.

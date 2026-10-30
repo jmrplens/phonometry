@@ -279,22 +279,22 @@ def render_iso532_report(
                 result, ax=ax, language=language, **kwargs
             )
 
-        flow.append(
-            fiche_paragraph(
-                t("Loudness versus time N(t) (clause 6.4)", language),
-                caption_style,
+        flow.extend(
+            (
+                fiche_paragraph(
+                    t("Loudness versus time N(t) (clause 6.4)", language),
+                    caption_style,
+                ),
+                render_figure_drawing(
+                    _time_plot,
+                    174 * mm,
+                    y_top=None,
+                    figsize=(9.2, 3.4),
+                    language=language,
+                ),
+                Spacer(1, 8),
             )
         )
-        flow.append(
-            render_figure_drawing(
-                _time_plot,
-                174 * mm,
-                y_top=None,
-                figsize=(9.2, 3.4),
-                language=language,
-            )
-        )
-        flow.append(Spacer(1, 8))
 
     flow.append(result_box(_statement(result, language), styles, accent))
     if metadata is not None and metadata.requirement is not None:

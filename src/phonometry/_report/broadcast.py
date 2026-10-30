@@ -33,7 +33,7 @@ from __future__ import annotations
 
 import html
 import math
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Literal
 
 from .._internal.validation import require_choice
 from ._i18n import decimal_comma, format_number, t
@@ -46,7 +46,7 @@ from ._layout import (
     display_round,
     document_styles,
     footer_flow,
-    grid_table,
+    opening_flow,
     render_figure_drawing,
     result_box,
     verdict_flow,
@@ -368,17 +368,14 @@ def render_program_loudness_report(
         else _DEFAULT_TARGET_LUFS
     )
 
-    flow: list[Any] = [
-        fiche_paragraph(title, title_style),
-        fiche_paragraph(basis, basis_style),
-    ]
-
-    if metadata is not None and not metadata.is_empty():
-        header_pairs = _metadata_pairs(metadata, language)
-        if header_pairs:
-            flow.append(Spacer(1, 3))
-            flow.append(grid_table(header_pairs))
-    flow.append(Spacer(1, 8))
+    header_pairs = (
+        _metadata_pairs(metadata, language)
+        if metadata is not None and not metadata.is_empty()
+        else []
+    )
+    flow = opening_flow(
+        title, basis, header_pairs, title_style=title_style, basis_style=basis_style
+    )
 
     flow.extend(
         (

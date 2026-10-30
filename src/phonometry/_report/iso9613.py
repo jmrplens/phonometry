@@ -47,8 +47,8 @@ from ._layout import (
     display_round,
     document_styles,
     footer_flow,
-    grid_table,
     measurement_basis_style,
+    opening_flow,
     render_figure_drawing,
     result_box,
     stacked_table,
@@ -390,16 +390,11 @@ def render_outdoor_attenuation_report(
         "prediction, not a measurement.",
         language,
     )
-    flow: list[Any] = [
-        fiche_paragraph(title, title_style),
-        fiche_paragraph(basis, basis_style),
-    ]
 
     header_pairs = _attenuation_metadata_pairs(result, metadata, language)
-    if header_pairs:
-        flow.append(Spacer(1, 3))
-        flow.append(grid_table(header_pairs))
-    flow.append(Spacer(1, 8))
+    flow = opening_flow(
+        title, basis, header_pairs, title_style=title_style, basis_style=basis_style
+    )
 
     flow.extend(
         (
@@ -607,16 +602,11 @@ def render_barrier_insertion_loss_report(
         "prediction, not a measurement.",
         language,
     ).format(model=model)
-    flow: list[Any] = [
-        fiche_paragraph(title, title_style),
-        fiche_paragraph(basis, basis_style),
-    ]
 
     header_pairs = _barrier_metadata_pairs(result, metadata, language)
-    if header_pairs:
-        flow.append(Spacer(1, 3))
-        flow.append(grid_table(header_pairs))
-    flow.append(Spacer(1, 8))
+    flow = opening_flow(
+        title, basis, header_pairs, title_style=title_style, basis_style=basis_style
+    )
 
     left_cell = [
         fiche_paragraph(t("Insertion loss per band", language), caption_style),

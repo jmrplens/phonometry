@@ -38,8 +38,8 @@ from ._layout import (
     escaped_pairs,
     fmt_meta,
     footer_flow,
-    grid_table,
     measurement_basis_style,
+    opening_flow,
     render_figure_drawing,
     result_box,
     verdict_flow,
@@ -508,17 +508,18 @@ def render_sound_power_fiche(
 
     styles, title_style, basis_style, caption_style = document_styles(accent)
 
-    flow: list[Any] = [
-        fiche_paragraph(copy.title, title_style),
-        fiche_paragraph(copy.basis, basis_style),
-    ]
-
-    if metadata is not None and not metadata.is_empty():
-        header_pairs = metadata_pairs(metadata, language)
-        if header_pairs:
-            flow.append(Spacer(1, 3))
-            flow.append(grid_table(header_pairs))
-    flow.append(Spacer(1, 8))
+    header_pairs = (
+        metadata_pairs(metadata, language)
+        if metadata is not None and not metadata.is_empty()
+        else []
+    )
+    flow = opening_flow(
+        copy.title,
+        copy.basis,
+        header_pairs,
+        title_style=title_style,
+        basis_style=basis_style,
+    )
 
     flow.extend(
         (fiche_paragraph(copy.caption, caption_style), value_table, Spacer(1, 8))

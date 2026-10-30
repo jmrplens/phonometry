@@ -55,7 +55,7 @@ from ._layout import (
     document_styles,
     escaped_pairs,
     footer_flow,
-    grid_table,
+    opening_flow,
     render_figure_drawing,
     result_box,
     stacked_table,
@@ -423,25 +423,24 @@ def render_iso2631_5_report(
     styles, title_style, basis_style, caption_style = document_styles(accent)
     title = t("Whole-body multiple-shock health risk", language)
 
-    flow: list[Any] = [
-        fiche_paragraph(title, title_style),
-        fiche_paragraph(
-            t(
-                "Assessment of adverse health effects from whole-body vibration "
-                "containing multiple shocks per ISO 2631-5:2018 (Clause 5 spinal "
-                "response and Annex C risk model).",
-                language,
-            ),
-            basis_style,
-        ),
-    ]
-
     # The identity metadata (if any) and the always-present exposure scenario
     # share one header grid, so the sheet stays on a single page.
     header_pairs = _metadata_pairs(metadata, language) + _scenario_pairs(
         result, language
     )
-    flow.extend((Spacer(1, 3), grid_table(header_pairs), Spacer(1, 6)))
+    flow = opening_flow(
+        title,
+        t(
+            "Assessment of adverse health effects from whole-body vibration "
+            "containing multiple shocks per ISO 2631-5:2018 (Clause 5 spinal "
+            "response and Annex C risk model).",
+            language,
+        ),
+        header_pairs,
+        title_style=title_style,
+        basis_style=basis_style,
+        gap=6,
+    )
 
     flow.extend(
         (

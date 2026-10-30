@@ -45,8 +45,8 @@ from ._layout import (
     document_styles,
     fmt_num,
     footer_flow,
-    grid_table,
     measurement_basis_style,
+    opening_flow,
     render_figure_drawing,
     result_box,
     two_panel_body,
@@ -420,27 +420,27 @@ def render_duct_path_report(
     accent = colors.HexColor(_ACCENT_HEX)
     styles, title_style, basis_style, caption_style = document_styles(accent)
 
-    flow: list[Any] = [
-        fiche_paragraph(t("Duct-borne noise path calculation", language), title_style),
-        fiche_paragraph(
-            t(
-                "Octave-band sound level in an occupied space from an air "
-                "distribution system, estimated element by element along the "
-                "duct path (AHRI Standard 885; Long, Architectural Acoustics "
-                "2nd ed., Chapters 13-14). Room criterion per "
-                "ANSI/ASA S12.2-2019. This is a prediction from design data, "
-                "not a measurement.",
-                language,
-            ),
-            basis_style,
+    header_pairs = (
+        metadata_pairs(metadata, language)
+        if metadata is not None and not metadata.is_empty()
+        else []
+    )
+    flow = opening_flow(
+        t("Duct-borne noise path calculation", language),
+        t(
+            "Octave-band sound level in an occupied space from an air "
+            "distribution system, estimated element by element along the "
+            "duct path (AHRI Standard 885; Long, Architectural Acoustics "
+            "2nd ed., Chapters 13-14). Room criterion per "
+            "ANSI/ASA S12.2-2019. This is a prediction from design data, "
+            "not a measurement.",
+            language,
         ),
-    ]
-    if metadata is not None and not metadata.is_empty():
-        header_pairs = metadata_pairs(metadata, language)
-        if header_pairs:
-            flow.append(Spacer(1, 3))
-            flow.append(grid_table(header_pairs))
-    flow.append(Spacer(1, 7))
+        header_pairs,
+        title_style=title_style,
+        basis_style=basis_style,
+        gap=7,
+    )
 
     rows = _visible_rows(rows=result.table(), verbose=verbose)
     table, _count = _sheet_table(

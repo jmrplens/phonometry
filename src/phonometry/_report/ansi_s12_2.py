@@ -58,7 +58,7 @@ from ._layout import (
     escaped_pairs,
     fmt_meta,
     footer_flow,
-    grid_table,
+    opening_flow,
     render_figure_drawing,
     result_box,
     two_panel_body,
@@ -499,8 +499,6 @@ def _render_room_noise[R: NCResult | RCResult](
         from reportlab.lib import colors
         from reportlab.lib.units import mm
         from reportlab.platypus import Spacer
-
-        from ._layout import fiche_paragraph
     except ImportError as exc:
         raise ImportError(_REPORTLAB_HINT) from exc
     accent = colors.HexColor(_ACCENT_HEX)
@@ -519,17 +517,14 @@ def _render_room_noise[R: NCResult | RCResult](
     else:
         basis = t(basis_template, language)
 
-    flow: list[Any] = [
-        fiche_paragraph(title, title_style),
-        fiche_paragraph(basis, basis_style),
-    ]
-
-    if metadata is not None and not metadata.is_empty():
-        header_pairs = _metadata_pairs(metadata, language)
-        if header_pairs:
-            flow.append(Spacer(1, 3))
-            flow.append(grid_table(header_pairs))
-    flow.append(Spacer(1, 8))
+    header_pairs = (
+        _metadata_pairs(metadata, language)
+        if metadata is not None and not metadata.is_empty()
+        else []
+    )
+    flow = opening_flow(
+        title, basis, header_pairs, title_style=title_style, basis_style=basis_style
+    )
 
     left_cell, (left_width, plot_width) = left_builder(
         result, verbose=verbose, caption_style=caption_style, language=language

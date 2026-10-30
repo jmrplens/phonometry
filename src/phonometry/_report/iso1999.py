@@ -49,7 +49,7 @@ from ._layout import (
     document_styles,
     fmt_num,
     footer_flow,
-    grid_table,
+    opening_flow,
     render_figure_drawing,
     result_box,
     stacked_table,
@@ -304,16 +304,10 @@ def render_nipts_report(
         language,
     )
 
-    flow: list[Any] = [
-        fiche_paragraph(title, title_style),
-        fiche_paragraph(basis, basis_style),
-    ]
-
     header_pairs = _nipts_metadata_pairs(metadata, language)
-    if header_pairs:
-        flow.append(Spacer(1, 3))
-        flow.append(grid_table(header_pairs))
-    flow.append(Spacer(1, 8))
+    flow = opening_flow(
+        title, basis, header_pairs, title_style=title_style, basis_style=basis_style
+    )
 
     left_cell = [
         fiche_paragraph(t("Threshold shift by frequency", language), caption_style),
@@ -490,16 +484,10 @@ def render_htlan_report(
         language,
     )
 
-    flow: list[Any] = [
-        fiche_paragraph(title, title_style),
-        fiche_paragraph(basis, basis_style),
-    ]
-
     header_pairs = _nipts_metadata_pairs(metadata, language)
-    if header_pairs:
-        flow.append(Spacer(1, 3))
-        flow.append(grid_table(header_pairs))
-    flow.append(Spacer(1, 8))
+    flow = opening_flow(
+        title, basis, header_pairs, title_style=title_style, basis_style=basis_style
+    )
 
     left_cell = [
         fiche_paragraph(t("Threshold level by frequency", language), caption_style),

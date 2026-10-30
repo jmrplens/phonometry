@@ -1,5 +1,5 @@
 {
-  "schema": 2,
+  "schema": 3,
   "library": "4.0.0rc1",
   "generator": "scripts/conformance_report.py",
   "counts": {
@@ -7,7 +7,7 @@
     "passing": 1897,
     "failing": 0,
     "domains": 111,
-    "standards": 523,
+    "citation_groups": 523,
     "citations": 1343,
     "designations": 227,
     "sources": 125

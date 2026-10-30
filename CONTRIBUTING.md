@@ -442,12 +442,13 @@ a reference table), regenerate and commit it:
 make conformance   # writes docs/CONFORMANCE.md, then the counts quoted from it
 ```
 
-The header line of that report (`N/N conformance checks pass across D domains
-and S standards`) is the only place those three integers are authoritative.
-Nothing else states them by hand:
+The `counts` of `docs/conformance.json`, which the report's header line
+prints (`N/N conformance checks pass across D domains, against G normative
+designations and F further published sources`), are the only place those
+integers are authoritative. Nothing else states them by hand:
 
 - the Astro pages import them from `site/src/data/conformance-stats.mjs`, which
-  parses the header at build time;
+  reads that document at build time;
 - everything with no build step to interpolate through (`.zenodo.json`, the
   plain-markdown mirror under `docs/`, the READMEs at the root and the one the
   PyOctaveBand stub publishes, the landing-page meta descriptions and the
@@ -455,7 +456,15 @@ Nothing else states them by hand:
   of `make conformance`, which is
   `scripts/check_conformance_claims.py --write`. It replaces only the digits of
   a recognised claim, so unrelated numbers and the surrounding prose are left
-  alone.
+  alone, and it reads a claim line by line, so a count stays on the line of
+  its noun.
+
+The same script refuses a count of standards beside conformance wording,
+anywhere it reads and in the generated files (`docs/CONFORMANCE.md`, the llms
+files and the banner). `counts.citation_groups`, the citation strings cut at
+their first colon or " Annex", was once published as that count; the claim
+states the normative designations and the further published sources the
+citations name.
 
 Run `make conformance` and commit whatever it changes
 ([F6](docs/contributing/docs-and-figures.md#f6)). The read-only `python scripts/check_conformance_claims.py` is the CI

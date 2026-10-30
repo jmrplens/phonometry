@@ -280,8 +280,11 @@ def test_the_readme_quotes_the_counts_the_report_gives() -> None:
     4.0.0rc1, long after the report had moved on, because the writer that keeps
     every other quoted count current did not read this page. PyPI freezes a
     long description at upload, so a count stale on the day the stub goes out
-    stays published. The three are read the way that writer reads them, so a
-    count wrapped away from its phrase fails here instead of going unread.
+    stays published. The four are read the way that writer reads them, so a
+    count wrapped away from its phrase fails here instead of going unread. The
+    standards are not among them: that figure counted citation groups, and the
+    page states the normative designations and the further published sources
+    the citations name.
     """
     assert _README in ccc.sources(), "the claims writer does not read the stub's page"
     expected = ccc.expected_counts()
@@ -290,10 +293,17 @@ def test_the_readme_quotes_the_counts_the_report_gives() -> None:
         for line in _README.read_text(encoding="utf-8").splitlines()
         for claim in ccc.claims_in(line)
     ]
-    assert {claim.field for claim in claims} == {"total", "domains", "standards"}, (
-        "stub/README.md must state the checks, the domains and the standards in "
-        "the report's own wording, each phrase on one line"
+    assert {claim.field for claim in claims} == {
+        "total",
+        "domains",
+        "designations",
+        "sources",
+    }, (
+        "stub/README.md must state the checks, the domains, the normative "
+        "designations and the further published sources in the report's own "
+        "wording, each phrase on one line"
     )
+    assert not ccc.refused_in(_README.read_text(encoding="utf-8"))
     stale = [
         f"{claim.phrase!r} (report: {expected[claim.field]})"
         for claim in claims

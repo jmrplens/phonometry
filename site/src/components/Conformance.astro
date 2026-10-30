@@ -216,7 +216,10 @@ const t =
 				bannerCaption: 'comprobaciones de conformidad superadas',
 				bannerFailing: (n: number) => `, ${n} sin superar`,
 				bannerDomains: (n: number) => `${n} ${n === 1 ? 'dominio' : 'dominios'}`,
-				bannerStandards: (n: number) => `${n} ${n === 1 ? 'norma' : 'normas'}`,
+				bannerDesignations: (n: number) =>
+					`${n} ${n === 1 ? 'designación normativa' : 'designaciones normativas'}`,
+				bannerSources: (n: number) =>
+					`${n} ${n === 1 ? 'fuente publicada adicional' : 'fuentes publicadas adicionales'}`,
 				legend: 'Marcas de veredicto',
 				legendNote:
 					'Cada marca acompaña a la palabra que tiene al lado, nunca la sustituye, y las siluetas se distinguen tanto como los colores, así que quien no separe los tonos las sigue diferenciando.',
@@ -266,7 +269,10 @@ const t =
 				bannerCaption: 'conformance checks pass',
 				bannerFailing: (n: number) => `, ${n} failing`,
 				bannerDomains: (n: number) => `${n} ${n === 1 ? 'domain' : 'domains'}`,
-				bannerStandards: (n: number) => `${n} ${n === 1 ? 'standard' : 'standards'}`,
+				bannerDesignations: (n: number) =>
+					`${n} ${n === 1 ? 'normative designation' : 'normative designations'}`,
+				bannerSources: (n: number) =>
+					`${n} ${n === 1 ? 'further published source' : 'further published sources'}`,
 				legend: 'Verdict marks',
 				legendNote:
 					'Each mark accompanies the word beside it and never replaces it, and the silhouettes differ as much as the colours do, so a reader who cannot separate the hues can still tell them apart.',
@@ -376,7 +382,7 @@ const passedShare = counts.checks ? (100 * counts.passing) / counts.checks : 100
 			</span>
 		</p>
 		<p class="banner-stats">
-			{t.bannerDomains(counts.domains)} · {t.bannerStandards(counts.standards)}
+			{t.bannerDomains(counts.domains)} · {t.bannerDesignations(counts.designations)} · {t.bannerSources(counts.sources)}
 		</p>
 		<div class="banner-bar" aria-hidden="true">
 			<span class="bar-pass" style={`width:${passedShare}%`}></span>

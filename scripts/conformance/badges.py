@@ -74,7 +74,7 @@ from typing import TYPE_CHECKING, Any
 import svg_text
 
 from .artifact import load
-from .marks import BANNER, MARKS, RAW_PATH, banner_alt, dark_variant, plural
+from .marks import BANNER, MARKS, RAW_PATH, banner_alt, banner_stats, dark_variant
 from .registry import _ROOT, Verdict
 
 if TYPE_CHECKING:
@@ -319,21 +319,26 @@ def render_marks() -> dict[str, str]:
 
 
 # --- banner ------------------------------------------------------------------
-# Drawn in a ten-times integer coordinate space: the viewBox is 7200x840 while
-# the element is 720x84, so every coordinate written is a whole number at a
+# Drawn in a ten-times integer coordinate space: the viewBox is 7200x1000 while
+# the element is 720x100, so every coordinate written is a whole number at a
 # tenth of a pixel. That is finer than any renderer resolves and it removes the
 # last place a float could be formatted differently on two machines, at about a
 # third of the bytes of the same drawing at full precision.
 _SCALE = 10
 _BANNER_W = 720.0
-_BANNER_H = 84.0
+_BANNER_H = 100.0
 _PAD = 22.0
 _HEADLINE_SIZE = 30.0
 _CAPTION_SIZE = 13.0
 _STAT_FIGURE_SIZE = 14.0
 _STAT_WORD_SIZE = 12.5
+#: The headline and its caption sit on the first baseline and the counts on
+#: the second, under them, with the bar below both: the order the site's card
+#: sets them in. The counts used to share the headline's line at its right
+#: end, which three counts and their nouns no longer fit beside the caption.
 _BASELINE = 42.0
-_BAR_Y = 59.0
+_STATS_BASELINE = 63.0
+_BAR_Y = 75.0
 _BAR_H = 7.0
 _RUN_GAP = 6.0
 #: Track left showing between the passing and the failing segment, and the
@@ -357,19 +362,30 @@ def _u(pixels: float) -> str:
     return _units(pixels * _SCALE)
 
 
-def _run(text: str, font: pathlib.Path, size: float, colour: str, x: float) -> str:
+def _run(
+    text: str,
+    font: pathlib.Path,
+    size: float,
+    colour: str,
+    x: float,
+    baseline: float = _BASELINE,
+) -> str:
     """One left-to-right run of set text, as a filled ``<path>``."""
-    origin = (x * _SCALE, _BASELINE * _SCALE)
+    origin = (x * _SCALE, baseline * _SCALE)
     data = svg_text.path_data(text, font, size * _SCALE, origin, _units)
     return f'<path fill="{colour}" d="{data}"/>'
 
 
-def _runs(pieces: Sequence[tuple[str, pathlib.Path, float, str]], x: float) -> str:
+def _runs(
+    pieces: Sequence[tuple[str, pathlib.Path, float, str]],
+    x: float,
+    baseline: float = _BASELINE,
+) -> str:
     """Several runs set one after another from ``x``, separated by a gap."""
     out: list[str] = []
     cursor = x
     for text, font, size, colour in pieces:
-        out.append(_run(text, font, size, colour, cursor))
+        out.append(_run(text, font, size, colour, cursor, baseline))
         cursor += svg_text.ink_width(text, font, size) + _RUN_GAP
     return "".join(out)
 
@@ -437,14 +453,12 @@ def render_banner(counts: Mapping[str, Any], palette: Palette) -> str:
     if failing:
         caption = f"conformance checks pass, {failing} failing"
 
-    domains, standards = counts["domains"], counts["standards"]
-    stats: tuple[tuple[str, pathlib.Path, float, str], ...] = (
-        (str(domains), _FONT_DISPLAY, _STAT_FIGURE_SIZE, palette.ink),
-        (plural(domains, "domain"), _FONT_REGULAR, _STAT_WORD_SIZE, palette.muted),
-        ("·", _FONT_REGULAR, _STAT_WORD_SIZE, palette.muted),
-        (str(standards), _FONT_DISPLAY, _STAT_FIGURE_SIZE, palette.ink),
-        (plural(standards, "standard"), _FONT_REGULAR, _STAT_WORD_SIZE, palette.muted),
-    )
+    stats: list[tuple[str, pathlib.Path, float, str]] = []
+    for count, noun in banner_stats(counts):
+        if stats:
+            stats.append(("·", _FONT_REGULAR, _STAT_WORD_SIZE, palette.muted))
+        stats.append((str(count), _FONT_DISPLAY, _STAT_FIGURE_SIZE, palette.ink))
+        stats.append((noun, _FONT_REGULAR, _STAT_WORD_SIZE, palette.muted))
 
     headline_width = svg_text.ink_width(headline, _FONT_DISPLAY, _HEADLINE_SIZE)
     body = (
@@ -459,7 +473,7 @@ def render_banner(counts: Mapping[str, Any], palette: Palette) -> str:
             palette.muted,
             _PAD + headline_width + 10.0,
         )
-        + _runs(stats, _BANNER_W - _PAD - _runs_width(stats))
+        + _runs(stats, _PAD, _STATS_BASELINE)
         + _bar(passed, total, palette)
     )
     return _svg(

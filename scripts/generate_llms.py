@@ -185,18 +185,26 @@ def _python_floor() -> str:
     return match.group(1)
 
 
-def _conformance_counts() -> tuple[int, int, int]:
-    """Checks, domains and standards, read from the conformance artefact.
+def _conformance_counts() -> tuple[int, int, int, int]:
+    """Checks, domains, normative designations and further published sources.
 
-    These three integers used to be recovered by matching a regular expression
-    against the report's headline sentence, which is how an English sentence
-    became a wire format that three files parsed independently. They are fields
-    now.
+    Read from the conformance artefact. These integers used to be recovered by
+    matching a regular expression against the report's headline sentence,
+    which is how an English sentence became a wire format that three files
+    parsed independently. They are fields now. The citation groups are not
+    among them: they count citation strings, a book cited at seven clauses
+    being seven of them, and the summary stated that figure as a count of
+    standards.
     """
     source = DOCS / "conformance.json"
     try:
         counts = json.loads(source.read_text(encoding="utf-8"))["counts"]
-        return int(counts["checks"]), int(counts["domains"]), int(counts["standards"])
+        return (
+            int(counts["checks"]),
+            int(counts["domains"]),
+            int(counts["designations"]),
+            int(counts["sources"]),
+        )
     except (OSError, ValueError, KeyError) as error:
         msg = (
             f"docs/conformance.json: cannot read the conformance counts "
@@ -622,7 +630,7 @@ def _shard_label(slug: str) -> str:
 
 def _summary(version: str) -> list[str]:
     """The header every artifact opens with."""
-    checks, domains, standards = _conformance_counts()
+    checks, domains, designations, sources = _conformance_counts()
     return [
         "# phonometry",
         "",
@@ -632,7 +640,9 @@ def _summary(version: str) -> list[str]:
             "vibration, environmental and transport noise, underwater acoustics, "
             "electroacoustics and wave simulation, with every metric implemented "
             f"from the text of its governing standard and {checks} numerical "
-            f"conformance checks against {standards} standards enforced in CI."
+            "conformance checks enforced in CI, against "
+            f"{designations} normative designations and {sources} further "
+            "published sources."
         ),
         "",
         (

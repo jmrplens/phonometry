@@ -90,10 +90,10 @@ FIXTURE = {
         "passing": 4,
         "failing": 3,
         "domains": 2,
-        "standards": 5,
+        "citation_groups": 9,
         "citations": 5,
         "designations": 5,
-        "sources": 0,
+        "sources": 3,
     }
 }
 
@@ -223,7 +223,8 @@ def test_the_banner_reads_its_counts_and_never_carries_its_own() -> None:
     """Rendered on a document whose counts are nothing like the real ones."""
     alt = cb.banner_alt(FIXTURE["counts"])
     assert alt == (
-        "4 of 7 conformance checks pass, 3 failing, across 2 domains and 5 standards"
+        "4 of 7 conformance checks pass, 3 failing, across 2 domains, against "
+        "5 normative designations and 3 further published sources"
     )
     svg = cb.render_banner(FIXTURE["counts"], cb.LIGHT)
     # Our own output
@@ -244,10 +245,50 @@ def test_the_committed_banner_states_the_committed_counts() -> None:
 
 
 def test_a_singular_count_is_not_captioned_in_the_plural() -> None:
-    one = {"checks": 1, "passing": 1, "domains": 1, "standards": 1}
+    one = {"checks": 1, "passing": 1, "domains": 1, "designations": 1, "sources": 1}
     assert cb.banner_alt(one) == (
-        "All 1 conformance checks pass, across 1 domain and 1 standard"
+        "All 1 conformance checks pass, across 1 domain, against 1 normative "
+        "designation and 1 further published source"
     )
+
+
+def test_the_banner_never_counts_standards() -> None:
+    """The citation groups stay in the artefact and out of the banner.
+
+    The banner gave the citation groups as its count of standards: citation
+    strings cut at their first colon or " Annex", so a book cited at seven
+    clauses counted seven times. It now states the normative designations and the
+    further published sources the citations name, and a count of standards in
+    its words fails the claims check as well as this test.
+    """
+    counts = FIXTURE["counts"]
+    alt = cb.banner_alt(counts)
+    assert "standard" not in alt
+    assert str(counts["citation_groups"]) not in alt
+    stats = cb.banner_stats(counts)
+    assert [count for count, _ in stats] == [2, 5, 3]
+    assert not [noun for _, noun in stats if "standard" in noun]
+
+
+def test_the_counts_row_fits_inside_the_card() -> None:
+    """Three counts and their nouns, with four digits each, fit on their row.
+
+    The row used to share the headline's line at its right end, where two
+    counts fitted and three, with their longer nouns, ran into the caption.
+    """
+    from conformance import badges as drawing
+
+    wide = {"domains": 9999, "designations": 9999, "sources": 9999}
+    pieces = [
+        piece
+        for count, noun in cb.banner_stats(wide)
+        for piece in (
+            (str(count), drawing._FONT_DISPLAY, drawing._STAT_FIGURE_SIZE, "#000000"),
+            (noun, drawing._FONT_REGULAR, drawing._STAT_WORD_SIZE, "#000000"),
+            ("·", drawing._FONT_REGULAR, drawing._STAT_WORD_SIZE, "#000000"),
+        )
+    ][:-1]
+    assert drawing._runs_width(pieces) <= drawing._BANNER_W - 2 * drawing._PAD
 
 
 def test_the_bar_shows_a_failing_share_only_when_something_fails() -> None:

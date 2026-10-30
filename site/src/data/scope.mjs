@@ -15,7 +15,7 @@
  * structured data, with nothing to keep in step by hand.
  */
 import { en } from './home.ts';
-import { domains, standards, totalChecks } from './conformance-stats.mjs';
+import { designations, domains, sources, totalChecks } from './conformance-stats.mjs';
 
 /**
  * One `featureList` entry per documented area: the area, what it does, and the
@@ -31,7 +31,7 @@ export const featureList = en.coverage.areas.map(
  * The scope sentence, with the conformance counts interpolated so it cannot
  * fall behind the report.
  *
- * `src/content/docs/index.mdx` carries the same sentence as its frontmatter
+ * `src/content/docs/index.mdx` states the same counts in its frontmatter
  * `description`, because Starlight frontmatter is static and cannot import.
  * `scripts/check_conformance_claims.py` fails the build if the counts in that
  * copy drift from the report, which is the part that actually went wrong
@@ -41,17 +41,24 @@ export const siteDescription =
   'Acoustic measurement toolkit for Python covering sound level metrology, ' +
   'psychoacoustics, rooms and buildings, vibration, environment and transport, ' +
   'underwater acoustics, electroacoustics and wave simulation, with ' +
-  `${totalChecks} conformance checks against ${standards} IEC, ISO, EN, ANSI, ` +
-  'ECMA, DIN, ITU, EBU, SAE, ICAO and ECAC standards.';
+  `${totalChecks} conformance checks against ${designations} normative ` +
+  `designations and ${sources} further published sources.`;
 
-/** The shorter form, for the `SoftwareApplication` node. */
+/**
+ * The shorter form, for the `SoftwareApplication` node.
+ *
+ * jmrp.io describes the same node, under the same `@id`, in its own
+ * structured data, and its CI fails when the two descriptions differ: the
+ * wording here and the one in that site's projects data change together.
+ */
 export const softwareDescription =
   'Acoustic measurement, analysis and prediction for Python: sound level ' +
   'metrology, psychoacoustics, room and building acoustics, materials, ' +
   'vibration, environmental and transport noise, underwater acoustics, ' +
   'electroacoustics and wave simulation, with ' +
-  `${totalChecks} CI-enforced conformance checks across ${domains} domains ` +
-  `and ${standards} standards.`;
+  `${totalChecks} CI-enforced conformance checks across ${domains} domains, ` +
+  `against ${designations} normative designations and ${sources} further ` +
+  'published sources.';
 
 /**
  * Search keywords: the nine area names plus every designation implemented,

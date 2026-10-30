@@ -388,7 +388,10 @@ jobs:
         # a header held line by line to the page and the sitemap (canonical,
         # language, translation, release, publication day, Updated: date,
         # licence, summary), a body that is there, with every row of a
-        # catalogue's tables, and a text a Markdown reader can use.
+        # catalogue's tables, and a text a Markdown reader can use. The llms
+        # files the build wrote carry every English guide, catalogue and
+        # errata family once in llms-full.txt and in exactly one shard, as
+        # its copy reads, and llms.txt links every shard file and no other.
         run: pnpm run check:markdown-twins
         working-directory: site
       - name: Check the Python examples the llms files restate

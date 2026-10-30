@@ -513,13 +513,18 @@ jobs:
         run: node scripts/indexnow-diff.mjs diff --live --out "$RUNNER_TEMP/indexnow/urls.json"
         working-directory: site
       - name: Hand the list of changed pages to the IndexNow job
+        # The deploy publishes the manifest before the IndexNow job submits,
+        # and the next run compares with it, so a failed IndexNow job loses
+        # its pages unless they change again. Re-running that job submits
+        # them: it downloads this list, kept a week so the re-run still
+        # works after a weekend.
         if: github.event_name != 'pull_request'
         uses: actions/upload-artifact@v7
         with:
           name: indexnow-urls
           path: ${{ runner.temp }}/indexnow/urls.json
           if-no-files-found: error
-          retention-days: 1
+          retention-days: 7
       # Only the branch that publishes needs the tarball. A pull request has
       # already got what it came for once the checks above have run.
       - uses: actions/upload-pages-artifact@v5
@@ -553,7 +558,9 @@ jobs:
       # The URLs come from the build this run deployed, through the list its
       # last steps wrote (site/scripts/indexnow-diff.mjs). This job used to
       # read the sitemap from the live site a moment after the deploy, where
-      # the edge could still be serving the copy of the deploy before.
+      # the edge could still be serving the copy of the deploy before. When
+      # it fails, re-run it: the next deploy compares with the manifest this
+      # one published and does not send these pages again.
       - name: Fetch the list of changed pages the build wrote
         uses: actions/download-artifact@v8
         with:

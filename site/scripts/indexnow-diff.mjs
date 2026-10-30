@@ -31,9 +31,14 @@
 // the landing pages state the release in their text, and the sitemap dates
 // them by it, so they are reported.
 //
-// A run that a newer push cancels after it deployed and before it submitted
-// leaves its pages to the sitemap's <lastmod>: the next run compares with
-// the manifest that run deployed.
+// The manifest goes live with the deploy, before the IndexNow job submits,
+// and the next run compares with it. So the pages of a run whose IndexNow job
+// does not submit are not sent by any later run unless they change again:
+// - a job that fails (the key file unreachable, a refused request): re-run
+//   that job from the run's page on GitHub, which downloads the same list
+//   (kept seven days) and submits it;
+// - a run that a newer push cancels after it deployed and before it
+//   submitted: its pages are left to the sitemap's <lastmod>.
 //
 // Usage:
 //   node scripts/indexnow-diff.mjs manifest [dist]

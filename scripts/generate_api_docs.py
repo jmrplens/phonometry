@@ -18,7 +18,8 @@ The docstring dialect handled here is the repo's reST field-list style:
 ``:param:``/``:type:``/``:return:``/``:rtype:``/``:raises:``/``:warns:``/
 ``:ivar:``/``:vartype:`` fields, ``:class:``/``:func:``/etc. cross-reference
 roles, ````literal```` double-backtick spans, ``.. note::`` directives,
-``::`` literal blocks and math (the ``:math:`` role and the ``.. math::``
+``::`` literal blocks, code directives and doctests (all three fenced as
+code) and math (the ``:math:`` role and the ``.. math::``
 directive, emitted as ``$...$``/``$$...$$`` for the site's KaTeX pipeline;
 blank lines inside one directive separate equations, as in Sphinx). A
 docstring that does not parse cleanly is degraded to a verbatim block and
@@ -101,6 +102,19 @@ _MATH_ROLE_RE = re.compile(r":math:`([^`]+)`")
 #: A rendered inline-math span, once the role has become ``$...$``.
 _INLINE_MATH_RE = re.compile(r"\$[^$]+\$")
 _DIRECTIVE_RE = re.compile(r"^\s*\.\. \w+::")
+#: A directive whose body is code, and the language it names. The body is
+#: fenced as written, so the page shows it as code and its prose checks step
+#: over it, as they step over it in the docstring.
+_CODE_DIRECTIVE_RE = re.compile(
+    r"^(\s*)\.\. (code-block|code|sourcecode|doctest|testcode|parsed-literal)::"
+    r"[ \t]*(\S*)"
+)
+#: The language of a code directive that names none.
+_CODE_DIRECTIVE_LANGUAGE = {"doctest": "python", "testcode": "python"}
+#: An option at the head of a directive's body (``:linenos:``), not code.
+_DIRECTIVE_OPTION_RE = re.compile(r"^:[\w-]+:")
+#: The prompt that opens a doctest, whose run lasts to the next blank line.
+_DOCTEST_RE = re.compile(r"^(\s*)>>>(?:\s|$)")
 #: Any reST role that survived rendering. ``ROLE_RE`` and ``_MATH_ROLE_RE``
 #: consume the ones this generator understands, so whatever still matches is a
 #: role no converter claims and it reaches the published page as literal text.
@@ -297,11 +311,68 @@ def _dedent_block(lines: list[str]) -> list[str]:
     return [line[cut:] if line.strip() else "" for line in lines]
 
 
+def _fenced(block: list[str], language: str, pad: str, code: list[str]) -> list[str]:
+    """The lines that stand for one fenced block, whose fence goes in ``code``.
+
+    The fence keeps the indentation of the line that opened it, so a block
+    nested in a list item stays in the item, as a ``$$`` block does.
+    """
+    body = [f"{pad}{line}" if line else "" for line in block]
+    code.append("\n".join([f"{pad}```{language}", *body, f"{pad}```"]))
+    return ["", f"\x00CODE{len(code) - 1}\x00", ""]
+
+
+def _code_directive(
+    lines: list[str], start: int, code: list[str]
+) -> tuple[int, list[str]] | None:
+    """A code directive at ``lines[start]`` as a fenced block, or None.
+
+    Returns the index just past its body and the lines that stand for it. The
+    options at the head of the body (``:linenos:``) are not code and go.
+    """
+    match = _CODE_DIRECTIVE_RE.match(lines[start])
+    if match is None:
+        return None
+    indent = len(match.group(1))
+    end = _consume_indented(lines, start + 1, indent)
+    block = _dedent_block(lines[start + 1 : end])
+    while block and not block[0].strip():
+        block.pop(0)
+    while block and _DIRECTIVE_OPTION_RE.match(block[0]):
+        block.pop(0)
+    while block and not block[0].strip():
+        block.pop(0)
+    while block and not block[-1].strip():
+        block.pop()
+    language = match.group(3) or _CODE_DIRECTIVE_LANGUAGE.get(match.group(2), "text")
+    return end, _fenced(block, language, " " * indent, code)
+
+
+def _doctest_run(
+    lines: list[str], start: int, code: list[str]
+) -> tuple[int, list[str]] | None:
+    """A doctest opening at ``lines[start]`` as a fenced block, or None.
+
+    The run lasts from the prompt to the next blank line, the session's
+    continuation and output lines included, as doctest reads it.
+    """
+    match = _DOCTEST_RE.match(lines[start])
+    if match is None:
+        return None
+    end = start
+    while end < len(lines) and lines[end].strip():
+        end += 1
+    indent = len(match.group(1))
+    block = _dedent_block(lines[start:end])
+    return end, _fenced(block, "python", " " * indent, code)
+
+
 def rest_blocks_to_markdown(text: str, code: list[str]) -> str:
     """Convert reST block constructs to Markdown structure.
 
     ``.. note::`` directives become Starlight ``:::note`` asides, ``::``
-    literal blocks become fenced code blocks and ``.. math::`` directives
+    literal blocks, code directives (``.. code-block::`` and its kin) and
+    doctests become fenced code blocks and ``.. math::`` directives
     become ``$$`` display-math blocks (one per blank-line-separated equation,
     the Sphinx convention). Fenced code and math are stored in ``code`` and
     replaced by placeholders so the inline pass (roles, escaping) cannot
@@ -312,6 +383,11 @@ def rest_blocks_to_markdown(text: str, code: list[str]) -> str:
     i = 0
     while i < len(lines):
         line = lines[i]
+        fenced = _code_directive(lines, i, code) or _doctest_run(lines, i, code)
+        if fenced is not None:
+            i, rendered = fenced
+            out.extend(rendered)
+            continue
         math = _MATH_DIRECTIVE_RE.match(line)
         if math:
             indent = len(math.group(1))

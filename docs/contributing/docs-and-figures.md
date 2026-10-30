@@ -29,25 +29,29 @@ the English page fixed now, the Spanish twin and the docs/ mirror later
 **Exceptions.** The docs/ mirror may carry fewer examples, but what it carries follows the same fence rules. The contributor guide (`docs/contributing/`) is repository-only: no site page, no Spanish twin. `check-i18n-parity.mjs` proves each English page has a twin at the same path, not that a change reached both.
 
 <a id="f2"></a>
-### F2. Write the docs mirror without frontmatter, and its figures as absolute `<picture>` links
+### F2. Give every component a page uses a Markdown writer beside it
 
-**Why.** GitHub resolves nothing else: the mirror carries no frontmatter and no Astro component, and a figure is a plain `<picture>` with raw.githubusercontent.com URLs, where the site writes `<ThemeImage>`.
+**Why.** `site/src/lib/agent-md/` writes a page as Markdown from its source, for the copy an agent reads: prose, tables, TeX and code keep their bytes, and each component is replaced by what its writer returns. A component with no writer would reach the copy as nothing, which is how the copies cut from the source by regular expressions lost every figure and table a component drew; and a prop the writer does not read is lost with it, as were the See also links fourteen guides passed to `SeeAlso` as a prop it never declared, which published an empty panel.
 
 **Do**
 
-```markdown
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/workroom_spatial_decay_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/workroom_spatial_decay.svg" alt="The sound distribution value against distance" width="88%"></picture>
+```text
+site/src/components/Catalogues.astro      the component
+site/src/components/Catalogues.md.mjs     its writer: markdownFor({ tag, props, toMarkdown }),
+                                          opening with a comment that says what it keeps
+                                          and what it drops on purpose
 ```
 
 **Don't**
 
-```markdown
-<ThemeImage src="workroom_spatial_decay.svg" alt="The sound distribution value against distance" />
+```text
+a new component imported by a guide with no <Name>.md.mjs beside it, or a prop
+passed to a component whose writer does not list it in props
 ```
 
-**Enforced by:** review
+**Enforced by:** `site/scripts/check-markdown-writers.mjs`, `CI: Check every component a page uses has a Markdown writer`, `site/src/lib/agent-md/test/check-markdown-writers.test.mjs`, `CI: Test the Markdown writers on small pages made to fail them`
 
-**Exceptions.** The docs/ mirror page keeps a hand-written references section (the site renders them from the frontmatter).
+**Exceptions.** A component that shows nothing a reader of the copy could use (a filter over a table the copy already writes, a script that reroutes old links) still has a writer, one that returns `""` and says why in its opening comment, so the rule needs no list of exceptions. The layout's own components (`References`) are not imported by a page and have none. The guide pages under docs/ are written by hand, and they carry what GitHub resolves: no frontmatter, no component, a figure as a `<picture>` with raw.githubusercontent.com URLs (the form `ThemeImage.md.mjs` writes for GitHub), and a hand-written references section, since the site renders them from the frontmatter.
 
 <a id="f3"></a>
 ### F3. Link every new guide from `docs/README.md`

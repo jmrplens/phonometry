@@ -246,7 +246,7 @@ Each rule on a page has the same parts:
 | Rule | Statement | Enforced by |
 |---|---|---|
 | [F1](docs-and-figures.md#f1) | Change a guide's English page, Spanish twin and docs/ mirror together | `site/scripts/check-i18n-parity.mjs`, review |
-| [F2](docs-and-figures.md#f2) | Write the docs mirror without frontmatter, and its figures as absolute `<picture>` links | review |
+| [F2](docs-and-figures.md#f2) | Give every component a page uses a Markdown writer beside it | `site/scripts/check-markdown-writers.mjs`, `CI: Check every component a page uses has a Markdown writer`, `site/src/lib/agent-md/test/check-markdown-writers.test.mjs`, `CI: Test the Markdown writers on small pages made to fail them` |
 | [F3](docs-and-figures.md#f3) | Link every new guide from `docs/README.md` | `scripts/mirror_overviews.py`, `scripts/generate_llms.py` |
 | [F4](docs-and-figures.md#f4) | Register a new guide in `topics.mjs` and the guides index, counted in figures and words | `site/scripts/check-guides-index.mjs`, `CI: Site builds and validates` |
 | [F5](docs-and-figures.md#f5) | Never edit a generated file by hand; change its source and regenerate it | `scripts/mirror_overviews.py`, `scripts/check_conformance_artifact.py`, `make conformance`, `CI: Conformance report up to date`, `CI: llms artifacts up to date` |

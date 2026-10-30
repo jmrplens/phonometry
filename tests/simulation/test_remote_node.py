@@ -17,11 +17,15 @@ import warnings
 from types import MappingProxyType, SimpleNamespace
 from typing import IO, TYPE_CHECKING, Any
 
+import fake_ffmpeg
 import numpy as np
 import pytest
 
 import phonometry
+from phonometry.io import VideoOptions
 from phonometry.simulation import (
+    AnimationFrame,
+    Compute,
     ComputeFallbackWarning,
     ElasticRecording,
     ElasticRun,
@@ -204,18 +208,68 @@ def test_a_node_records_the_version_the_job_was_sent_with() -> None:
     assert header["provenance"]["phonometry_version"] == _SENT_VERSION  # type: ignore[index]
 
 
+class _Gone(types.ModuleType):
+    """A ``phonometry._version`` as a node has it: its version cannot be read."""
+
+    def __getattr__(self, name: str) -> object:
+        if name == "__version__":
+            msg = "the node read a version of its own"
+            raise ImportError(msg)
+        raise AttributeError(name)
+
+
+#: An elastic run with snapshots, which an elastic video draws.
+_ELASTIC_FILMED = ElasticRun(
+    c_p=4000.0,
+    c_s=2300.0,
+    dx=0.01,
+    duration_s=5e-4,
+    rho=2500.0,
+    shape=(20, 24),
+    sources=[
+        ExplosionSource(
+            ix=12, iy=10, waveform=GaussianPulse(ix=0, iy=0, half_width_s=2e-5).value
+        )
+    ],
+    recording=ElasticRecording(probes=[(4, 4)], snapshot_every=60),
+)
+#: The arguments of a job of each function a node runs, but its placement.
+_EVERY_JOB: dict[str, dict[str, Any]] = {
+    "fdtd_simulation": {"run": _ACOUSTIC},
+    "elastic_fdtd_simulation": {"run": _ELASTIC_FILMED},
+    "write_fdtd_animation": {
+        "run": _ACOUSTIC,
+        "frame": AnimationFrame(size=(480, 246), color_limit=1.0),
+        "video": VideoOptions(),
+        "container": "webm",
+    },
+    "write_elastic_fdtd_animation": {
+        "run": _ELASTIC_FILMED,
+        "frame": AnimationFrame(size=(480, 246), color_limit=1e-6),
+        "video": VideoOptions(),
+        "container": "gif",
+    },
+}
+
+
+@pytest.mark.parametrize("name", sorted(node.FUNCTIONS))
 def test_a_node_never_reads_a_version_of_its_own(
-    monkeypatch: pytest.MonkeyPatch,
+    name: str, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     # A node runs the package it was sent from its cache, where neither
     # installed metadata nor the source tree's VERSION file names it: a read
-    # of phonometry.__version__ there fails, as this stand-in does.
-    monkeypatch.setitem(sys.modules, "phonometry._version", types.ModuleType("gone"))
-    with pytest.raises(ImportError, match="__version__"):
-        fdtd_simulation(_ACOUSTIC)
-    code, frames = _serve(
-        _job("fdtd_simulation", {"run": _ACOUSTIC}, version=_SENT_VERSION)
-    )
+    # of phonometry.__version__ there fails, as this stand-in does. Each
+    # function reads one when run outside a job, so each is held here.
+    arguments = _EVERY_JOB[name]
+    if name.startswith("write_"):
+        pytest.importorskip("matplotlib")
+        fake_ffmpeg.install(tmp_path, monkeypatch)
+    function, _ = node.FUNCTIONS[name]
+    here = Compute()
+    monkeypatch.setitem(sys.modules, "phonometry._version", _Gone("gone"))
+    with pytest.raises(ImportError, match="the node read a version of its own"):
+        function(**arguments, compute=here)
+    code, frames = _serve(_job(name, arguments, version=_SENT_VERSION))
     ((header, _),) = frames
     assert (code, header["type"]) == (0, "result"), header.get("message")
     assert header["provenance"]["phonometry_version"] == _SENT_VERSION  # type: ignore[index]

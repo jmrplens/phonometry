@@ -204,11 +204,6 @@ EXEMPT: dict[tuple[str, str], str] = {
         "fenced example, written out as a page writes it, to see the copy keep "
         "the example's lines; it reads no fence itself"
     ),
-    ("site/scripts/page-markdown.test.mjs", "<script>"): (
-        "a test of which pages publish a Markdown copy hands it a page that "
-        "writes a data component in a fenced example, written out as a page "
-        "writes it, to see the page keep its copy; it reads no fence itself"
-    ),
     ("site/scripts/indexnow-diff.test.mjs", "<script>"): (
         "a test of what IndexNow is sent hands it a Markdown copy that prints a "
         "release line in a fenced example, written out as a copy writes it, to "
@@ -220,6 +215,12 @@ EXEMPT: dict[tuple[str, str], str] = {
         "fence whose body holds what would be a leak outside it, because what "
         "they check is that code is never read as one; nothing in them reads "
         "a fence"
+    ),
+    ("site/src/lib/agent-md/test/source-copies.test.mjs", "<script>"): (
+        "fixtures: the page and the copy these tests hand the check of the "
+        "copies against the sources carry a fence, because what they check is "
+        "that a line of the page's code lost from the copy is found; nothing "
+        "in them reads a fence"
     ),
     ("site/src/lib/agent-md/test/primitives.test.mjs", "<script>"): (
         "fixtures: the pages these tests hand the Markdown renderer carry "

@@ -413,7 +413,7 @@ export function citationMarkdown(ref, lang) {
  * @param {string} written What follows `# ` on the line.
  * @returns {string | undefined}
  */
-function headingText(written) {
+export function headingText(written) {
   const content = written.replace(/(^|[ \t])#+[ \t]*$/, '$1').trim();
   let text = '';
   for (let at = 0; at < content.length; at += 1) {
@@ -477,7 +477,7 @@ export const COPY_FORMS = Object.freeze({
     noun: ['catalogue', 'catalogues'],
     listed: true,
     pattern: (site) =>
-      new RegExp(String.raw`^- \[${BRACKETED}\]\(${literal(site)}/(?:es/)?reference/catalogues/[\w-]+/\): \S`, 'gm'),
+      new RegExp(String.raw`^- \[${BRACKETED}\]\(${literal(site)}/(?:es/)?reference/catalogues/[\w-]+/\)`, 'gm'),
   },
 });
 
@@ -513,18 +513,23 @@ export const COPY_FORMS = Object.freeze({
  *   site: string,
  *   catalogues?: number,
  *   firstLine?: number,
+ *   forms?: boolean,
  * }} page
  *   The page's source with its frontmatter out, its kind, its title and the
  *   works it cites, the heading of its References section, the address of the
  *   site with its base path (`https://docs.jmrp.io/phonometry`), how many
  *   catalogues a list of them holds in the page's language, and the number of
- *   the page's line `source` opens on, for the messages.
+ *   the page's line `source` opens on, for the messages. With no `title` the
+ *   copy's first line is not read (a check that holds the title to the built
+ *   page reads it), and with `forms: false` the figures, clips, fiches and
+ *   catalogues are not counted (a landing page writes them through its own
+ *   component, whose writer is tested apart).
  * @returns {string[]}
  */
-export function copyDefects(copy, { source, kind, title, references = [], heading, site, catalogues = 0, firstLine = 1 }) {
+export function copyDefects(copy, { source, kind, title, references = [], heading, site, catalogues = 0, firstLine = 1, forms = true }) {
   const defects = [];
   const first = copy.slice(0, copy.indexOf('\n') === -1 ? copy.length : copy.indexOf('\n'));
-  if (!first.startsWith('# ') || headingText(first.slice(2)) !== oneLine(title)) {
+  if (title !== undefined && (!first.startsWith('# ') || headingText(first.slice(2)) !== oneLine(title))) {
     defects.push(`it opens with ${JSON.stringify(first)}, not with the page's title`);
   }
   const parts = pageParts(copy, { kind: 'md' });
@@ -558,7 +563,7 @@ export function copyDefects(copy, { source, kind, title, references = [], headin
       }
     }
     const rendered = pageMarkup(source, { kind });
-    for (const [component, { noun, pattern, listed = false }] of Object.entries(COPY_FORMS)) {
+    for (const [component, { noun, pattern, listed = false }] of forms ? Object.entries(COPY_FORMS) : []) {
       const tags = (rendered.match(new RegExp(String.raw`<${component}\b`, 'g')) ?? []).length;
       if (listed && tags === 0) continue;
       const expected = tags * (listed ? catalogues : 1);

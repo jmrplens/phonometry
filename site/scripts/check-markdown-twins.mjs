@@ -26,14 +26,31 @@
 // class that matches no page fails too, so the table cannot rot into a list of
 // exemptions for pages that no longer exist.
 //
+// THE HEADER IS HELD TO THE PAGE, NOT TO THE MODULES ITS WRITER READS. The
+// copy's title is the page's <title> without the site's name; `Canonical:`,
+// `Language:`, `Summary:` and `Published:` are the page's canonical link, its
+// language, its meta description and the `datePublished` of the node that
+// declares the copy; `Updated:` is the sitemap's <lastmod>; `Alternate:` is
+// the copy of the page its hreflang link names; `Verified:` stands exactly
+// where the page states its conformance checks; `License:` stands on every
+// page but a catalogue. Only the release lines are read from the release:
+// `Version:` names the VERSION being built, and every key of
+// `releaseHeaderKeys` and `Author:` are there.
+//
+// THE BODY HAS TO BE THERE. A copy of a page that owes one has text between its
+// header and its references, and a catalogue's copy has as many table rows as
+// the page's tables have rows in their bodies: a copy that lost the data is
+// the defect the copies cut out of the source had.
+//
 // THE TEXT RULES ARE READ ON THE PARSED COPY, NOT ON ITS RAW TEXT. Outside
 // code, inline code and maths, a copy may hold no raw HTML (a component's tag
-// or an HTML comment the source carried), no `{name}` an MDX expression left
-// behind, no `:::` of an aside and no link that starts with `/`. Read on the
-// raw text, the same rules would fail on what the copies keep on purpose: the
-// TeX of 642 pages, `$L_\mathrm{Ceq} - L_\mathrm{Aeq}$`, sits between braces,
-// and an API page prints `(EAV\<=value\<ELV)`, where the backslash makes the
-// `<` text. A copy is parsed as an agent's Markdown reader parses it
+// or an HTML comment the source carried), no `{name}`, `{a.b}` or `{f(...)}`
+// an MDX expression left behind (in the text or in an image's alt text), no
+// `:::` of an aside and no link that starts with `/`. Read on the raw text,
+// the same rules would fail on what the copies keep on purpose: the TeX of
+// 642 pages, `$L_\mathrm{Ceq} - L_\mathrm{Aeq}$`, sits between braces, and
+// an API page prints `(EAV\<=value\<ELV)`, where the backslash makes the `<`
+// text. A copy is parsed as an agent's Markdown reader parses it
 // (CommonMark, GitHub tables and maths), one top-level section at a time,
 // because the table parser's cost grows with the square of the rows in one
 // document and the conformance report's copy holds a hundred tables.
@@ -49,13 +66,20 @@ import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 import remarkParse from 'remark-parse';
 import { unified } from 'unified';
+import { parse as parseYaml } from 'yaml';
 
-import { basePath, siteUrl } from '../src/data/site.mjs';
+import { version } from '../src/data/repo-stats.mjs';
+import { basePath, siteTitle, siteUrl } from '../src/data/site.mjs';
+import { catalogueSlugs } from '../src/data/topics.mjs';
 import { fileOfRoute } from '../src/lib/agent-md/content.mjs';
+import { REFERENCES_HEADING } from '../src/lib/agent-md/page.mjs';
 import { CONTENT_DIR } from '../src/lib/agent-md/render.mjs';
+import { rewrittenSource } from '../src/lib/agent-md/rewrites.mjs';
+import { readCommittedText } from '../src/lib/line-ends.mjs';
 import { codeLines } from '../src/lib/markdown-fences.mjs';
-import { VERIFIED_BY_ATTRIBUTE } from '../src/lib/page-markdown.mjs';
-import { isRedirectStub, markupOf, tags, walk } from './shared/dist-pages.mjs';
+import { VERIFIED_BY_ATTRIBUTE, releaseHeaderKeys } from '../src/lib/page-markdown.mjs';
+import { decode, isRedirectStub, markupOf, tags, walk } from './shared/dist-pages.mjs';
+import { copyDefects, frontmatterSource, headingText, stripFrontmatter } from './shared/page-twin.mjs';
 
 /** The section of the API reference, in English and served under /es/. */
 const API = /^\/reference\/api\//u;
@@ -159,6 +183,10 @@ export const REMEDIES = Object.freeze({
   header:
     'The header is written by src/lib/agent-md/header.mjs from the page and from the modules ' +
     'that publish each value on the site; fix the value at its source.',
+  body:
+    'The body is written from the page source by src/lib/agent-md/render.mjs and the writer ' +
+    'beside each component; `node scripts/agent-md.mjs --page <route>` prints one copy, to ' +
+    'compare with the page.',
   text:
     'Something reached the copy that a reader of Markdown cannot use: a component or raw HTML ' +
     'with no writer or rule (src/lib/agent-md/render.mjs), an MDX expression, an aside, a link ' +
@@ -172,16 +200,37 @@ const READER = unified().use(remarkParse).use(remarkGfm).use(remarkMath).freeze(
 /** A destination that resolves wherever the copy is read: a scheme, `//` or only a fragment. */
 const WHOLE_DESTINATION = /^(?:[a-z][a-z0-9+.-]*:|\/\/|#)/iu;
 
-/** A `{name}` or `{a.b}` an MDX expression left behind; `Re{Y}` (prose notation) is not one. */
-const EXPRESSION = /(?<![\w$\\])\{\s*[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*)*\s*\}/u;
+/**
+ * The opening of an expression an MDX page left behind: `{name}`, `{a.b}`,
+ * `{f(x)}`, `{a?.b}`, `{list[0]}`. A brace a page escaped (`\{`) and prose
+ * notation such as `Re{Y}` are not one.
+ */
+const EXPRESSION = /(?<![\w$\\])\{\s*[A-Za-z_$][\w$]*\s*[.(?[}]/u;
 
 /**
- * The rule-breaking nodes of a copy, read one top-level section at a time.
+ * The expression a piece of text holds, from its `{` to the brace that closes
+ * it (at most 60 characters), or nothing.
+ *
+ * @param {string} value
+ * @returns {string | undefined}
+ */
+function expressionIn(value) {
+  const found = EXPRESSION.exec(value);
+  if (!found) return undefined;
+  const close = value.indexOf('}', found.index);
+  return value.slice(found.index, close === -1 ? found.index + 60 : Math.min(close + 1, found.index + 60));
+}
+
+/**
+ * A copy cut into its top-level sections and parsed as a reader parses it, one
+ * section at a time: the table parser's cost grows with the square of the rows
+ * in one document.
  *
  * @param {string} text  The copy.
- * @returns {string[]}  `line N: what`, in reading order.
+ * @returns {Generator<{ offset: number, chunk: string, tree: import('mdast').Root }>}
+ *   `offset` is the line the section starts at, counting from 0.
  */
-export function textProblems(text) {
+function* sections(text) {
   const lines = text.split('\n');
   const inCode = codeLines(lines);
   /** @type {number[]} */
@@ -190,12 +239,69 @@ export function textProblems(text) {
     if (!inCode[i] && /^#{1,2} /u.test(lines[i])) starts.push(i);
   }
   starts.push(lines.length);
+  for (let s = 0; s + 1 < starts.length; s += 1) {
+    const chunk = lines.slice(starts[s], starts[s + 1]).join('\n');
+    yield { offset: starts[s], chunk, tree: READER.parse(chunk) };
+  }
+}
+
+/**
+ * The data rows of a copy's tables: every row of every table but its header.
+ *
+ * @param {string} text  The copy.
+ * @returns {number}
+ */
+export function dataRows(text) {
+  let rows = 0;
+  const visit = (node) => {
+    if (node.type === 'table') rows += Math.max(0, (node.children?.length ?? 0) - 1);
+    for (const child of node.children ?? []) visit(child);
+  };
+  for (const { tree } of sections(text)) visit(tree);
+  return rows;
+}
+
+/**
+ * The rows in the bodies of a page's tables, as the page shows them.
+ *
+ * @param {string} html
+ * @returns {number}
+ */
+export function rowsOnPage(html) {
+  let rows = 0;
+  for (const [, body] of markupOf(html).matchAll(/<tbody\b[^>]*>([\s\S]*?)<\/tbody>/gu)) {
+    rows += body.match(/<tr\b/gu)?.length ?? 0;
+  }
+  return rows;
+}
+
+/**
+ * The text of a copy between the header's closing `---` and the References
+ * section the copy ends with.
+ *
+ * @param {string} text  The copy.
+ * @param {'en' | 'es'} lang
+ * @returns {string}  Trimmed; `''` when there is none, or no header to end.
+ */
+export function bodyOf(text, lang) {
+  const lines = text.split('\n');
+  const end = lines.indexOf('---');
+  if (end === -1) return '';
+  const rest = lines.slice(end + 1);
+  const references = rest.lastIndexOf(`## ${REFERENCES_HEADING[lang]}`);
+  return (references === -1 ? rest : rest.slice(0, references)).join('\n').trim();
+}
+
+/**
+ * The rule-breaking nodes of a copy, read one top-level section at a time.
+ *
+ * @param {string} text  The copy.
+ * @returns {string[]}  `line N: what`, in reading order.
+ */
+export function textProblems(text) {
   /** @type {string[]} */
   const problems = [];
-  for (let s = 0; s + 1 < starts.length; s += 1) {
-    const offset = starts[s];
-    const chunk = lines.slice(offset, starts[s + 1]).join('\n');
-    const tree = READER.parse(chunk);
+  for (const { offset, chunk, tree } of sections(text)) {
     // Code, inline code and TeX are `code`, `inlineCode`, `math` and
     // `inlineMath` nodes, which no rule below reads: their braces and `<` are
     // content.
@@ -213,8 +319,8 @@ export function textProblems(text) {
         // Read as written, where `\{` is still escaped: the parsed value has
         // lost the backslash a page writes to print a brace.
         const value = chunk.slice(node.position?.start.offset ?? 0, node.position?.end.offset ?? 0);
-        const leaked = EXPRESSION.exec(value);
-        if (leaked) problems.push(`${at}: an MDX expression, ${JSON.stringify(leaked[0])}`);
+        const leaked = expressionIn(value);
+        if (leaked) problems.push(`${at}: an MDX expression, ${JSON.stringify(leaked)}`);
         if (/(?:^|\n):::/u.test(value)) problems.push(`${at}: the ::: of an aside`);
       } else if (['link', 'image', 'definition'].includes(node.type)) {
         const url = String(node.url ?? '');
@@ -226,6 +332,8 @@ export function textProblems(text) {
           // conformance report's to its data) resolves to nothing there.
           problems.push(`${at}: a link that resolves only beside the file its text came from, ${JSON.stringify(url)}`);
         }
+        const inAlt = node.type === 'image' ? expressionIn(String(node.alt ?? '')) : undefined;
+        if (inAlt) problems.push(`${at}: an MDX expression in alt text, ${JSON.stringify(inAlt)}`);
       }
       for (const child of node.children ?? []) visit(child);
     };
@@ -337,10 +445,11 @@ function sitemapDates(dist) {
  * Runs every rule on a build.
  *
  * @param {string} dist
- * @param {{ contentDir?: string }} [options]
+ * @param {{ contentDir?: string, classes?: typeof PAGE_CLASSES }} [options]  `classes`
+ *   replaces the table of page classes, for a test of the table's own rules.
  * @returns {{ findings: Map<keyof typeof REMEDIES, string[]>, stats: { pages: number, copies: number, classes: Record<string, number> } }}
  */
-export function checkMarkdownTwins(dist, { contentDir = CONTENT_DIR } = {}) {
+export function checkMarkdownTwins(dist, { contentDir = CONTENT_DIR, classes = PAGE_CLASSES } = {}) {
   /** @type {Map<keyof typeof REMEDIES, string[]>} */
   const findings = new Map(Object.keys(REMEDIES).map((kind) => [/** @type {keyof typeof REMEDIES} */ (kind), []]));
   const add = (kind, message) => findings.get(kind)?.push(message);
@@ -364,9 +473,9 @@ export function checkMarkdownTwins(dist, { contentDir = CONTENT_DIR } = {}) {
   }
 
   /** @type {Record<string, number>} */
-  const counted = Object.fromEntries(PAGE_CLASSES.map((one) => [one.id, 0]));
+  const counted = Object.fromEntries(classes.map((one) => [one.id, 0]));
   for (const page of [...pages.values()].sort((a, b) => a.route.localeCompare(b.route))) {
-    const hits = PAGE_CLASSES.filter((one) => one.matches(page));
+    const hits = classes.filter((one) => one.matches(page));
     if (hits.length !== 1) {
       add(
         'class',
@@ -378,7 +487,7 @@ export function checkMarkdownTwins(dist, { contentDir = CONTENT_DIR } = {}) {
     }
     const [pageClass] = hits;
     counted[pageClass.id] += 1;
-    checkPage(page, pageClass.twin, { dist, copies, dates, add });
+    checkPage(page, pageClass, { dist, copies, dates, add });
   }
   for (const [id, count] of Object.entries(counted)) {
     if (count === 0) add('class', `the page class "${id}" matches no page of the build: remove it`);
@@ -390,19 +499,24 @@ export function checkMarkdownTwins(dist, { contentDir = CONTENT_DIR } = {}) {
  * The rules one page and its copy are held to.
  *
  * @param {BuiltPage} page
- * @param {'required' | 'forbidden' | 'english'} owes
+ * @param {(typeof PAGE_CLASSES)[number]} pageClass
  * @param {{ dist: string, copies: Set<string>, dates: Map<string, string>, add: (kind: keyof typeof REMEDIES, message: string) => void }} context
  */
-function checkPage(page, owes, { dist, copies, dates, add }) {
+function checkPage(page, pageClass, { dist, copies, dates, add }) {
   const { route, html } = page;
+  const owes = pageClass.twin;
   const copy = copyOf(route);
   const announced = tags(html, 'link')
     .filter((link) => (link.rel ?? '').split(/\s+/u).includes('alternate') && (link.type ?? '').startsWith('text/markdown'))
     .map((link) => routeOfAddress(link.href ?? ''));
-  const encodings = [...jsonLdNodes(html)]
-    .map((node) => /** @type {Record<string, unknown> | undefined} */ (node.encoding))
-    .filter((encoding) => encoding && encoding.encodingFormat === 'text/markdown')
-    .map((encoding) => routeOfAddress(String(encoding?.contentUrl ?? '')));
+  // The structured-data nodes that declare a copy, each with the address it gives.
+  const carriers = [...jsonLdNodes(html)].filter((node) => {
+    const encoding = /** @type {Record<string, unknown> | undefined} */ (node.encoding);
+    return Boolean(encoding) && encoding?.encodingFormat === 'text/markdown';
+  });
+  const encodings = carriers.map((node) =>
+    routeOfAddress(String(/** @type {Record<string, unknown>} */ (node.encoding).contentUrl ?? '')),
+  );
 
   if (owes !== 'required') {
     if (copies.has(copy)) add('copy', `${route} has a copy at ${copy}, and pages of its kind have none of their own`);
@@ -431,21 +545,49 @@ function checkPage(page, owes, { dist, copies, dates, add }) {
   }
 
   const text = readFileSync(join(dist, copy), 'utf8');
-  if (!/^# \S/u.test(text)) add('header', `${copy} does not open with its title as a "# " heading`);
+  const lang = /^\/es(\/|$)/u.test(route) ? 'es' : 'en';
+  if (/^# \S/u.test(text)) {
+    // The page's <title> is "<title> | <site>", or the whole title on a page
+    // that sets its own (the landing pages).
+    const pageTitle = decode(/<title>([^<]*)<\/title>/u.exec(html)?.[1] ?? '');
+    const suffix = ` | ${siteTitle}`;
+    const title = pageTitle.endsWith(suffix) ? pageTitle.slice(0, -suffix.length) : pageTitle;
+    // The copy writes the title so that Markdown prints it as the page does,
+    // a mark escaped (src/lib/agent-md/markdown-table.mjs, titleMarkdown), so
+    // the heading is read as Markdown reads it.
+    const heading = text.slice(2, text.indexOf('\n') === -1 ? undefined : text.indexOf('\n'));
+    if (headingText(heading) !== title) add('header', `${copy} is titled "${heading}", and the page's <title> names it "${title}"`);
+  } else {
+    add('header', `${copy} does not open with its title as a "# " heading`);
+  }
   const fields = headerOf(text);
   if (!fields) {
     add('header', `${copy} has no header`);
   } else {
+    /** What the copy states on one line: `says "Key: value"`, or that it has no such line. */
+    const said = (key) => (fields.has(key) ? `says "${key}: ${fields.get(key)}"` : `has no "${key}:" line`);
     const canonical = tags(html, 'link').find((link) => link.rel === 'canonical')?.href;
     if (fields.get('Canonical') !== canonical) {
-      add('header', `${copy} says "Canonical: ${fields.get('Canonical') ?? ''}", and the page's canonical is ${canonical}`);
+      add('header', `${copy} ${said('Canonical')}, and the page's canonical is ${canonical}`);
     }
-    const lang = /^\/es(\/|$)/u.test(route) ? 'es' : 'en';
-    if (fields.get('Language') !== lang) add('header', `${copy} says "Language: ${fields.get('Language') ?? ''}", not ${lang}`);
+    if (fields.get('Language') !== lang) add('header', `${copy} ${said('Language')}, not ${lang}`);
+    for (const key of [...releaseHeaderKeys, 'Author']) {
+      if (!fields.has(key)) add('header', `${copy} has no "${key}:" line`);
+    }
+    if (fields.has('Version') && fields.get('Version') !== `phonometry ${version}`) {
+      add('header', `${copy} says "Version: ${fields.get('Version')}", and the build is of phonometry ${version}`);
+    }
+    const carrier = carriers[0];
+    if (carrier) {
+      const datePublished = typeof carrier.datePublished === 'string' ? carrier.datePublished.slice(0, 10) : undefined;
+      if (fields.get('Published') !== datePublished) {
+        add('header', `${copy} ${said('Published')}, and the page's structured data gives ${datePublished ?? 'no datePublished'}`);
+      }
+    }
     const lastmod = dates.get(route);
     if (!lastmod) add('header', `${route} has a copy and no <lastmod> in the sitemap: nothing dates it`);
     else if (fields.get('Updated') !== lastmod) {
-      add('header', `${copy} says "Updated: ${fields.get('Updated') ?? ''}", and the sitemap dates the page ${lastmod}`);
+      add('header', `${copy} ${said('Updated')}, and the sitemap dates the page ${lastmod}`);
     }
     const other = tags(html, 'link').find(
       (link) => link.rel === 'alternate' && link.hreflang && link.hreflang !== 'x-default' && link.hreflang !== lang,
@@ -466,6 +608,21 @@ function checkPage(page, owes, { dist, copies, dates, add }) {
           : `${copy} has a "Verified:" line, and ${route} states no conformance check`,
       );
     }
+    // A catalogue transcribes published tables and carries no licence of its own.
+    const licensed = pageClass.id !== 'catalogue';
+    if (fields.has('License') !== licensed) {
+      add('header', licensed ? `${copy} has no "License:" line` : `${copy} has a "License:" line, and a catalogue carries no licence of its own`);
+    }
+    const description = tags(html, 'meta').find((meta) => meta.name === 'description')?.content;
+    if (fields.get('Summary') !== description) {
+      add('header', `${copy} ${said('Summary')}, and the page's description is ${description === undefined ? 'none' : JSON.stringify(description)}`);
+    }
+    if (!bodyOf(text, lang)) add('body', `${copy} has nothing between its header and its references`);
+  }
+  if (pageClass.id === 'catalogue') {
+    const inCopy = dataRows(text);
+    const onPage = rowsOnPage(html);
+    if (inCopy !== onPage) add('body', `${copy} holds ${inCopy} table row(s), and ${route} shows ${onPage}`);
   }
   for (const problem of textProblems(text)) add('text', `${copy} ${problem}`);
 }
@@ -473,7 +630,69 @@ function checkPage(page, owes, { dist, copies, dates, add }) {
 /** The ok/FAIL lines of one group of findings, the first few spelled out. */
 const SHOWN = 12;
 
-function main() {
+/**
+ * What a copy lost of the page's own source, read from the source and the
+ * copy as built (scripts/shared/page-twin.mjs, `copyDefects`): a line of the
+ * page's code, an entry or a DOI of its references, and a figure, a clip, a
+ * fiche or a catalogue the page renders. The source is read as the site's
+ * Markdown plugins write it (src/lib/agent-md/rewrites.mjs), so the
+ * bibliography is held to its lists. And the bibliography's copy lists one
+ * entry for each entry its built page lists (`data-cited-by`), which no copy
+ * of its source can show.
+ *
+ * @param {string} dist
+ * @param {{ contentDir?: string, routes?: readonly string[] }} [options]  The
+ *   routes to read, every copy of the build by default.
+ * @returns {Promise<string[]>}
+ */
+export async function checkCopiesAgainstSources(dist, { contentDir = CONTENT_DIR, routes } = {}) {
+  const found = [];
+  const site = `${siteUrl}${basePath}`;
+  const catalogues = { en: 0, es: 0 };
+  const listed = routes ?? markdownFiles(dist).filter((copy) => copy.endsWith('/index.md')).map((copy) => copy.slice(0, -'index.md'.length));
+  for (const route of listed) {
+    const id = route.replace(/^\/|\/$/gu, '');
+    const file = fileOfRoute(id, contentDir);
+    const copyFile = join(dist, ...id.split('/').filter(Boolean), 'index.md');
+    if (file === undefined || !existsSync(copyFile)) continue;
+    const lang = id === 'es' || id.startsWith('es/') ? 'es' : 'en';
+    const text = readCommittedText(file);
+    const asWritten = stripFrontmatter(text);
+    const firstLine = text.slice(0, text.length - asWritten.length).split('\n').length;
+    const frontmatter = /** @type {Record<string, unknown>} */ (parseYaml(frontmatterSource(text)) ?? {});
+    catalogues[lang] ||= catalogueSlugs.length;
+    const source = await rewrittenSource(file, asWritten, { lang });
+    const copy = readFileSync(copyFile, 'utf8');
+    for (const defect of copyDefects(copy, {
+      source,
+      kind: file.endsWith('.mdx') ? 'mdx' : 'md',
+      title: undefined,
+      references: /** @type {{ doi?: string }[]} */ (Array.isArray(frontmatter.references) ? frontmatter.references : []),
+      heading: REFERENCES_HEADING[lang],
+      site,
+      catalogues: catalogues[lang],
+      firstLine,
+      forms: !HOMES.has(route),
+    })) {
+      found.push(`${route}: ${defect}`);
+    }
+  }
+  for (const route of ['/reference/bibliography/', '/es/reference/bibliography/']) {
+    const html = join(dist, ...route.split('/').filter(Boolean), 'index.html');
+    const copyFile = join(dist, ...route.split('/').filter(Boolean), 'index.md');
+    if (!existsSync(html) || !existsSync(copyFile)) continue;
+    const works = (readFileSync(html, 'utf8').match(/<span data-cited-by\b/gu) ?? []).length;
+    const lead = route.startsWith('/es/') ? 'Citado por' : 'Cited by';
+    const entries = readFileSync(copyFile, 'utf8')
+      .split('\n- ')
+      .slice(1)
+      .filter((entry) => entry.includes(`${lead} [`)).length;
+    if (entries !== works) found.push(`${route}: its copy lists ${entries} of the ${works} works the page lists`);
+  }
+  return found;
+}
+
+async function main() {
   const here = dirname(fileURLToPath(import.meta.url));
   const dist = resolve(process.argv[2] ?? join(here, '..', 'dist'));
   if (!existsSync(dist) || !statSync(dist).isDirectory() || !existsSync(join(dist, 'index.html'))) {
@@ -484,6 +703,7 @@ function main() {
   let result;
   try {
     result = checkMarkdownTwins(dist);
+    result.findings.get('body')?.push(...(await checkCopiesAgainstSources(dist)));
   } catch (error) {
     console.error(`[markdown-twins] could not run: ${error instanceof Error ? error.message : error}`);
     process.exitCode = 2;
@@ -495,6 +715,7 @@ function main() {
     copy: 'missing, extra or misplaced copy(ies)',
     announce: 'page(s) announcing a copy other than their own',
     header: 'copy header(s) that disagree with their page',
+    body: 'copy(ies) that carry less than their page',
     text: 'place(s) in the copies a Markdown reader cannot use',
   };
   let failed = 0;

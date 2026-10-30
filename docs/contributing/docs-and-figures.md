@@ -1816,18 +1816,30 @@ build prints "LaTeX-incompatible input and strict mode is set to 'warn'"
 **Do**
 
 ```text
-site/src/content/docs/<route>.mdx    the page, which the copy is written from
-dist/<route>/index.md                # <title>, the header (Canonical, Language,
-                                     Alternate, Version, Install, Author,
-                                     Published, Updated, Standards, License,
-                                     Summary), the body, ## References
+site/src/content/docs/<route>.mdx  the page, which the copy is written from
+dist/<route>/index.md              the copy, each part held to the page:
+  # <title>                        the page's <title> without " | phonometry"
+  Canonical:, Language:            its canonical link, its language
+  Alternate:                       the copy of its hreflang translation
+  Version:, Install:, Author:      present; Version: the release being built
+  Published:                       the datePublished of the node that
+                                   declares the copy
+  Updated:                         the sitemap's <lastmod>
+  Standards:                       documents separated by "; "
+  Verified:                        exactly where it states its checks
+  License:                         on every page but a catalogue
+  Summary:                         its meta description
+  the body                         never empty; a catalogue's tables with
+                                   every row the page's tables show
+  ## References                    the entries the page prints
 ```
 
 **Don't**
 
 ```text
-a kind of page that publishes no copy, a copy written or edited by hand, or a
-copy whose Updated: line gives another day than the sitemap's <lastmod>
+a kind of page that publishes no copy, a copy written or edited by hand, a
+header line that says something the page does not (a day other than the
+sitemap's <lastmod>), or a copy that lost the body or a row of its tables
 ```
 
 **Enforced by:** `site/scripts/check-markdown-twins.mjs`, `CI: Check every page's Markdown copy carries what the page carries`, `site/src/lib/agent-md/test/check-markdown-twins.test.mjs`, `CI: Test the Markdown writers on small pages made to fail them`

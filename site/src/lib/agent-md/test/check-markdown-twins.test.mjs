@@ -19,6 +19,7 @@ import { describe, test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 
 import { PAGE_CLASSES, REMEDIES, checkMarkdownTwins, headerOf, textProblems } from '../../../../scripts/check-markdown-twins.mjs';
+import { version } from '../../../data/repo-stats.mjs';
 import { VERIFIED_BY_ATTRIBUTE } from '../../page-markdown.mjs';
 
 const CHECK = fileURLToPath(new URL('../../../../scripts/check-markdown-twins.mjs', import.meta.url));
@@ -26,20 +27,31 @@ const ORIGIN = 'https://docs.jmrp.io';
 const BASE = '/phonometry';
 const SITE = `${ORIGIN}${BASE}`;
 const UPDATED = '2026-10-20';
+const PUBLISHED = '2026-01-06';
+const SUMMARY = 'A page &amp; its copy.';
+const HOMES = new Set(['/', '/es/']);
 
 /**
- * A built page as the build writes one: its canonical, its hreflang pair, the
- * head link to its copy and the encoding of its structured data.
+ * A built page as the build writes one: its title, description, canonical,
+ * hreflang pair, the head link to its copy and the encoding of its structured
+ * data, on a node that gives the day the page was first published.
  *
  * @param {string} route
- * @param {{ lang?: string, copy?: string | null, encoding?: string | null, other?: string, canonical?: string, body?: string }} [options]
+ * @param {{ lang?: string, copy?: string | null, encoding?: string | null, other?: string, canonical?: string, body?: string, title?: string, published?: string | null }} [options]
  *   `copy` and `encoding` are routes of the copy (null for none); `other` is
- *   the route of the page in the other language.
+ *   the route of the page in the other language; `title` is the whole
+ *   `<title>`.
  */
-function page(route, { lang = route.startsWith('/es/') || route === '/es/' ? 'es' : 'en', copy = `${route}index.md`, encoding = copy, other, canonical = route, body = '' } = {}) {
-  const graph = { '@context': 'https://schema.org', '@graph': [{ '@type': 'TechArticle', ...(encoding ? { encoding: { '@type': 'MediaObject', encodingFormat: 'text/markdown', contentUrl: `${SITE}${encoding}` } } : {}) }] };
+function page(route, { lang = route.startsWith('/es/') || route === '/es/' ? 'es' : 'en', copy = `${route}index.md`, encoding = copy, other, canonical = route, body = '', title = HOMES.has(route) ? `Page ${route}` : `Page ${route} | phonometry`, published = PUBLISHED } = {}) {
+  const node = {
+    '@type': HOMES.has(route) ? 'WebPage' : 'TechArticle',
+    ...(published ? { datePublished: published } : {}),
+    ...(encoding ? { encoding: { '@type': 'MediaObject', encodingFormat: 'text/markdown', contentUrl: `${SITE}${encoding}` } } : {}),
+  };
+  const graph = { '@context': 'https://schema.org', '@graph': [node] };
   return [
-    `<!DOCTYPE html><html lang="${lang}"><head><meta charset="utf-8"><title>${route}</title>`,
+    `<!DOCTYPE html><html lang="${lang}"><head><meta charset="utf-8"><title>${title}</title>`,
+    `<meta name="description" content="${SUMMARY}">`,
     `<link rel="canonical" href="${SITE}${canonical}"/>`,
     ...(other
       ? [
@@ -56,12 +68,13 @@ function page(route, { lang = route.startsWith('/es/') || route === '/es/' ? 'es
 }
 
 /**
- * A copy as src/lib/agent-md/page.mjs writes one.
+ * A copy as src/lib/agent-md/page.mjs writes one. A line given as `null` is
+ * left out.
  *
  * @param {string} route
- * @param {{ lang?: string, title?: string, other?: string, updated?: string, verified?: boolean, body?: string }} [options]
+ * @param {{ lang?: string, title?: string, other?: string, updated?: string, verified?: boolean, body?: string, published?: string | null, license?: boolean, summary?: string, release?: string | null, install?: string | null, author?: string | null }} [options]
  */
-function copy(route, { lang = route.startsWith('/es/') || route === '/es/' ? 'es' : 'en', title = `Page ${route}`, other, updated = UPDATED, verified = false, body = 'The body.' } = {}) {
+function copy(route, { lang = route.startsWith('/es/') || route === '/es/' ? 'es' : 'en', title = `Page ${route}`, other, updated = UPDATED, verified = false, body = 'The body.', published = PUBLISHED, license = true, summary = 'A page & its copy.', release = `phonometry ${version}`, install = 'pip install "phonometry[full]"', author = 'José Manuel Requena Plens (https://orcid.org/0000-0003-1250-6212)' } = {}) {
   return [
     `# ${title}`,
     '',
@@ -70,14 +83,14 @@ function copy(route, { lang = route.startsWith('/es/') || route === '/es/' ? 'es
     `Canonical: ${SITE}${route}`,
     `Language: ${lang}`,
     ...(other ? [`Alternate: ${SITE}${other}index.md`] : []),
-    'Version: phonometry 4.0.0',
-    'Install: pip install "phonometry[full]"',
-    'Author: José Manuel Requena Plens (https://orcid.org/0000-0003-1250-6212)',
-    'Published: 2026-01-06',
+    ...(release ? [`Version: ${release}`] : []),
+    ...(install ? [`Install: ${install}`] : []),
+    ...(author ? [`Author: ${author}`] : []),
+    ...(published ? [`Published: ${published}`] : []),
     `Updated: ${updated}`,
     ...(verified ? [`Verified: 3 conformance checks (IEC 61260-1:2014) ${SITE}/reference/conformance/#filters`] : []),
-    'License: MIT (https://github.com/jmrplens/phonometry/blob/main/LICENSE)',
-    'Summary: A page.',
+    ...(license ? ['License: MIT (https://github.com/jmrplens/phonometry/blob/main/LICENSE)'] : []),
+    `Summary: ${summary}`,
     '',
     '---',
     '',
@@ -85,6 +98,10 @@ function copy(route, { lang = route.startsWith('/es/') || route === '/es/' ? 'es
     '',
   ].join('\n');
 }
+
+/** The two rows of the catalogue fixture, as the page draws them and as its copy writes them. */
+const CATALOGUE_TABLE = '<table><thead><tr><th>Material</th><th>E (GPa)</th></tr></thead><tbody><tr><td>Steel</td><td>210</td></tr><tr><td>Lead</td><td>16</td></tr></tbody></table>';
+const CATALOGUE_ROWS = ['| Material | E (GPa) |', '| --- | --- |', '| Steel | 210 |', '| Lead | 16 |'];
 
 /** A page that only sends a retired address on. */
 const STUB = `<!DOCTYPE html><title>Redirecting</title><meta http-equiv="refresh" content="0;url=${BASE}/a/">`;
@@ -111,8 +128,8 @@ function site() {
       copy: '/reference/api/m/index.md',
       canonical: '/reference/api/m/',
     }),
-    'reference/catalogues/solids/index.html': page('/reference/catalogues/solids/'),
-    'reference/catalogues/solids/index.md': copy('/reference/catalogues/solids/'),
+    'reference/catalogues/solids/index.html': page('/reference/catalogues/solids/', { body: CATALOGUE_TABLE }),
+    'reference/catalogues/solids/index.md': copy('/reference/catalogues/solids/', { license: false, body: CATALOGUE_ROWS.join('\n') }),
     'reference/errata/iso/index.html': page('/reference/errata/iso/'),
     'reference/errata/iso/index.md': copy('/reference/errata/iso/'),
     'old/index.html': STUB,
@@ -142,8 +159,9 @@ function site() {
  *
  * @param {import('node:test').TestContext} t
  * @param {(files: Record<string, string | undefined>) => void} [change]
+ * @param {typeof PAGE_CLASSES} [classes]  The table of page classes, when not the check's own.
  */
-function check(t, change = () => {}) {
+function check(t, change = () => {}, classes = PAGE_CLASSES) {
   const root = mkdtempSync(join(tmpdir(), 'check-markdown-twins-'));
   t.after(() => rmSync(root, { recursive: true, force: true }));
   const { dist, content } = site();
@@ -155,7 +173,7 @@ function check(t, change = () => {}) {
       writeFileSync(join(root, dir, path), text);
     }
   }
-  const result = checkMarkdownTwins(join(root, 'dist'), { contentDir: join(root, 'content') });
+  const result = checkMarkdownTwins(join(root, 'dist'), { contentDir: join(root, 'content'), classes });
   /** @type {string[]} */
   const found = [];
   for (const [kind, list] of result.findings) for (const message of list) found.push(`${kind}: ${message}`);
@@ -219,11 +237,62 @@ describe('the copies the old cut-and-paste left short', () => {
     assert.match(found[0], /^text: \/a\/index\.md line \d+: an MDX expression, "\{totalChecks\}"$/u);
   });
 
-  test('the landing page with no copy', (t) => {
+  test('a leaked call, member call or expression in an image\'s alt text', () => {
+    const body = [
+      'The library passes {totalChecks.toLocaleString()} checks.',
+      '',
+      'A label {t(\'x\')} and {item?.name} and {rows[0]}.',
+      '',
+      '![{totalChecks}](https://docs.jmrp.io/phonometry/media/x.svg)',
+    ].join('\n');
+    const problems = textProblems(copy('/a/', { body }));
+    assert.deepEqual(
+      problems.map((one) => one.replace(/^line \d+: /u, '')),
+      [
+        'an MDX expression, "{totalChecks.toLocaleString()}"',
+        'an MDX expression, "{t(\'x\')}"',
+        'an MDX expression in alt text, "{totalChecks}"',
+      ],
+    );
+  });
+
+  test('the landing page with no copy, which its Spanish copy names', (t) => {
     const { found } = check(t, (files) => {
       files['index.md'] = undefined;
     });
-    assert.ok(found.includes('copy: / has no copy (expected /index.md)'), found.join('\n'));
+    assert.deepEqual(found, [
+      'copy: / has no copy (expected /index.md)',
+      'header: /es/index.md names /index.md as its copy in the other language, which was not built',
+    ]);
+  });
+
+  test('a copy that keeps its title and lead line and lost the header block', (t) => {
+    const { found } = check(t, (files) => {
+      const [title, blank, lead] = copy('/a/', { other: '/es/a/' }).split('\n');
+      files['a/index.md'] = [title, blank, lead, '', 'The body.', ''].join('\n');
+    });
+    assert.deepEqual(found, ['header: /a/index.md has no header']);
+  });
+
+  test('a copy with nothing between its header and its references', (t) => {
+    const empty = check(t, (files) => {
+      files['a/index.md'] = copy('/a/', { other: '/es/a/', body: '' });
+    });
+    assert.deepEqual(empty.found, ['body: /a/index.md has nothing between its header and its references']);
+    const referencesOnly = check(t, (files) => {
+      files['es/a/index.md'] = copy('/es/a/', { other: '/a/', body: '## Referencias\n\n- **ISO (2014).** *Una norma*.' });
+    });
+    assert.deepEqual(referencesOnly.found, ['body: /es/a/index.md has nothing between its header and its references']);
+  });
+
+  test('a catalogue copy short of a row the page shows', (t) => {
+    const { found } = check(t, (files) => {
+      files['reference/catalogues/solids/index.md'] = copy('/reference/catalogues/solids/', {
+        license: false,
+        body: CATALOGUE_ROWS.slice(0, -1).join('\n'),
+      });
+    });
+    assert.deepEqual(found, ['body: /reference/catalogues/solids/index.md holds 1 table row(s), and /reference/catalogues/solids/ shows 2']);
   });
 
   test('a link that only resolves on the site', (t) => {
@@ -293,6 +362,27 @@ describe('the copy and what the page says of it', () => {
     );
   });
 
+  test('a Spanish API page whose English copy was not built', (t) => {
+    const { found } = check(t, (files) => {
+      files['reference/api/m/index.md'] = undefined;
+    });
+    assert.deepEqual(found.sort(), [
+      'copy: /es/reference/api/m/ shows the English page, whose copy /reference/api/m/index.md was not built',
+      'copy: /reference/api/m/ has no copy (expected /reference/api/m/index.md)',
+    ]);
+  });
+
+  test('the error page declaring a copy in its structured data, and a redirect stub announcing one', (t) => {
+    const { found } = check(t, (files) => {
+      files['404.html'] = page('/404/', { copy: null, encoding: '/404/index.md' });
+      files['old/index.html'] = `${STUB}<link rel="alternate" type="text/markdown" href="${BASE}/old/index.md">`;
+    });
+    assert.deepEqual(found, [
+      'announce: /404/ declares /404/index.md in its structured data, not none',
+      'announce: /old/ announces /old/index.md in its head, not none',
+    ]);
+  });
+
   test('a redirect stub with a copy, a copy beside no page, and a .md that is no copy', (t) => {
     const { found } = check(t, (files) => {
       files['old/index.md'] = copy('/old/');
@@ -353,6 +443,76 @@ describe('the header and the page', () => {
     assert.deepEqual(both.found, []);
   });
 
+  test('a title other than the page\'s, the landing pages\' whole <title> included', (t) => {
+    const { found } = check(t, (files) => {
+      files['a/index.md'] = copy('/a/', { other: '/es/a/', title: 'Page /a/ | phonometry' });
+      files['es/index.md'] = copy('/es/', { other: '/', title: 'Page' });
+    });
+    assert.deepEqual(found, [
+      'header: /a/index.md is titled "Page /a/ | phonometry", and the page\'s <title> names it "Page /a/"',
+      'header: /es/index.md is titled "Page", and the page\'s <title> names it "Page /es/"',
+    ]);
+  });
+
+  test('a title that holds a mark, escaped in the copy as Markdown reads it, and one that is not', (t) => {
+    const marked = 'a*wS = SEAT por a*wP, Notes #';
+    const written = (title) => (files) => {
+      files['a/index.html'] = page('/a/', { other: '/es/a/', title: `${marked} | phonometry` });
+      files['a/index.md'] = copy('/a/', { other: '/es/a/', title });
+    };
+    assert.deepEqual(check(t, written(String.raw`a\*wS = SEAT por a\*wP, Notes \#`)).found, []);
+    for (const title of [marked, String.raw`a\*wS = SEAT por a*wP, Notes \#`]) {
+      assert.deepEqual(check(t, written(title)).found, [
+        `header: /a/index.md is titled "${title}", and the page's <title> names it "${marked}"`,
+      ]);
+    }
+  });
+
+  test('a publication day other than the structured data\'s, or none where it gives one', (t) => {
+    const { found } = check(t, (files) => {
+      files['a/index.md'] = copy('/a/', { other: '/es/a/', published: '2026-01-07' });
+      files['es/a/index.md'] = copy('/es/a/', { other: '/a/', published: null });
+      files['index.html'] = page('/', { other: '/es/', published: null });
+    });
+    assert.deepEqual(found, [
+      'header: /index.md says "Published: 2026-01-06", and the page\'s structured data gives no datePublished',
+      `header: /a/index.md says "Published: 2026-01-07", and the page's structured data gives ${PUBLISHED}`,
+      `header: /es/a/index.md has no "Published:" line, and the page's structured data gives ${PUBLISHED}`,
+    ]);
+  });
+
+  test('a summary other than the page\'s description', (t) => {
+    const { found } = check(t, (files) => {
+      files['a/index.md'] = copy('/a/', { other: '/es/a/', summary: 'A page &amp; its copy.' });
+    });
+    assert.deepEqual(found, ['header: /a/index.md says "Summary: A page &amp; its copy.", and the page\'s description is "A page & its copy."']);
+  });
+
+  test('a licence line on every page but a catalogue', (t) => {
+    const { found } = check(t, (files) => {
+      files['a/index.md'] = copy('/a/', { other: '/es/a/', license: false });
+      files['reference/catalogues/solids/index.md'] = copy('/reference/catalogues/solids/', { body: CATALOGUE_ROWS.join('\n') });
+    });
+    assert.deepEqual(found, [
+      'header: /a/index.md has no "License:" line',
+      'header: /reference/catalogues/solids/index.md has a "License:" line, and a catalogue carries no licence of its own',
+    ]);
+  });
+
+  test('the release lines and the author, the version being the one built', (t) => {
+    const { found } = check(t, (files) => {
+      files['a/index.md'] = copy('/a/', { other: '/es/a/', install: null, author: null });
+      files['es/a/index.md'] = copy('/es/a/', { other: '/a/', release: 'phonometry 0.0.1' });
+      files['reference/api/m/index.md'] = copy('/reference/api/m/', { release: null });
+    });
+    assert.deepEqual(found, [
+      'header: /a/index.md has no "Install:" line',
+      'header: /a/index.md has no "Author:" line',
+      `header: /es/a/index.md says "Version: phonometry 0.0.1", and the build is of phonometry ${version}`,
+      'header: /reference/api/m/index.md has no "Version:" line',
+    ]);
+  });
+
   test('a page the sitemap does not date', (t) => {
     const { found } = check(t, (files) => {
       files['sitemap-0.xml'] = (files['sitemap-0.xml'] ?? '').replace(`<lastmod>${UPDATED}</lastmod>`, '');
@@ -374,6 +534,20 @@ describe('the table of page classes', () => {
       files['tools/index.html'] = page('/tools/', { copy: null });
     });
     assert.deepEqual(found, ['class: /tools/ matches no page class']);
+  });
+
+  test('two classes that claim the same page', (t) => {
+    const overlapping = {
+      id: 'first-guide',
+      twin: /** @type {const} */ ('required'),
+      reason: 'A class written to claim a page another class already claims.',
+      matches: (/** @type {{ route: string }} */ one) => one.route === '/a/',
+    };
+    const { found } = check(t, () => {}, [...PAGE_CLASSES, overlapping]);
+    assert.deepEqual(found, [
+      'class: /a/ matches guide and first-guide: the classes must not overlap',
+      'class: the page class "first-guide" matches no page of the build: remove it',
+    ]);
   });
 
   test('a class no page of the build matches any more', (t) => {

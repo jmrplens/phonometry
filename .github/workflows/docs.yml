@@ -326,11 +326,13 @@ jobs:
         # whose opening comment does not say what it keeps and what it drops.
         run: pnpm run check:markdown-writers
         working-directory: site
-      # The postbuild writes each page's Markdown copy and stops the build on
-      # a copy written from a page's source that misses its title, a line of
-      # its code, a count it prints, an absolute link, a figure, clip or fiche
-      # it renders, a catalogue it lists or a work it cites
-      # (scripts/shared/page-twin.mjs, copyDefects).
+      # Every page's Markdown copy is written before the build
+      # (scripts/agent-md.mjs --public, package.json prebuild), and the check
+      # of the copies after it fails one that misses its title, a line of its
+      # code, an absolute link, a figure, clip or fiche it renders, a catalogue
+      # it lists, a work or a DOI it cites, or an entry of the bibliography
+      # (scripts/check-markdown-twins.mjs, through copyDefects of
+      # scripts/shared/page-twin.mjs).
       - name: Build site
         # The build's output is kept for the step after this one, which reads
         # it for warnings. bash, so that pipefail hands a failed build its exit
@@ -369,9 +371,11 @@ jobs:
         # for the two landing pages, and leaked {expressions}, ::: asides,
         # HTML comments and links that only resolve on the site. This reads
         # the build: every page in exactly one class of what it owes, every
-        # copy announced by its page's head and structured data, a header
-        # whose canonical, language, translation and Updated: date agree with
-        # the page and the sitemap, and a text a Markdown reader can use.
+        # copy announced by its page's head and structured data, a title and
+        # a header held line by line to the page and the sitemap (canonical,
+        # language, translation, release, publication day, Updated: date,
+        # licence, summary), a body that is there, with every row of a
+        # catalogue's tables, and a text a Markdown reader can use.
         run: pnpm run check:markdown-twins
         working-directory: site
 

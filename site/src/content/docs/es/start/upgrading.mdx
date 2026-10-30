@@ -2763,11 +2763,12 @@ Un nombre que se le pasa a un lector puede guardar algo que no es un fichero.
 Una tubería con nombre en la que nadie escribe dejaba `io.read` esperando en
 su primera apertura a un escritor que no llegaba nunca, y lo mismo las tablas
 de una exportación ANP; un enlace a `/dev/zero` mantenía una lectura sin fin,
-y un directorio lanzaba lo que lanzara su primera apertura. En la 4.0 cada lector mira el nombre antes de
-abrirlo y lanza un `ValueError` que nombra el fichero y lo que guarda. Una
-llamada que capturaba `OSError` para un directorio captura ahora `ValueError`;
-un nombre sin nada detrás sigue lanzando `FileNotFoundError`, y un enlace a un
-fichero regular se sigue leyendo.
+y un directorio lanzaba lo que lanzara su primera apertura. En la 4.0 cada
+lector mira el nombre antes de abrirlo y lanza un `ValueError` que nombra el
+fichero y lo que guarda. Una llamada que capturaba `OSError` para un
+directorio captura ahora `ValueError`; un nombre sin nada detrás sigue
+lanzando `FileNotFoundError`, y un enlace a un fichero regular se sigue
+leyendo.
 
 | Se pasa | 3.3.0 o 4.0.0rc1 | 4.0 |
 | --- | --- | --- |

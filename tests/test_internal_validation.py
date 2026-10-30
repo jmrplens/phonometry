@@ -572,8 +572,11 @@ def test_what_holds_no_text_is_left_to_the_numbers(value: object) -> None:
 @pytest.mark.parametrize(
     ("members", "message"),
     [
-        ((["0", "1"], [0.0, 1.0]), "'polar' must be numbers, not text"),
-        (([1j, 2j], [0.0, 1.0]), "'polar' must be real, not complex"),
+        ((["0", "1"], [0.0, 1.0]), "'polar' must be a pair .* of numbers, not text"),
+        (
+            ([1j, 2j], [0.0, 1.0]),
+            "'polar' must be a pair .* of real numbers, not complex",
+        ),
     ],
     ids=["text", "complex"],
 )

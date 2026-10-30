@@ -182,6 +182,8 @@ def refuse_complex(value: object, msg: str) -> None:
             return
     if found:
         raise TypeError(msg)
+
+
 def refuse_text_beside_choice(
     value: object, name: str, options: tuple[str, ...]
 ) -> None:
@@ -1194,9 +1196,7 @@ def require_1d_signal(x: ArrayLike, name: str) -> np.ndarray:
     return arr
 
 
-def _members_of(
-    value: object, msg: str, *, owned: bool = False
-) -> Sequence[object]:
+def _members_of(value: object, msg: str, *, owned: bool = False) -> Sequence[object]:
     """The members of a sequence a record takes as one field, refused whole when it is none.
 
     Iterating gives something of many objects that are no sequence of

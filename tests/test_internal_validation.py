@@ -34,6 +34,8 @@ if TYPE_CHECKING:
 from phonometry._internal.validation import (
     check_engine,
     floats_of,
+    indices_of,
+    is_integer,
     pair_of_arrays,
     require_1d_signal,
     require_above_absolute_zero,
@@ -502,3 +504,35 @@ def test_a_count_is_a_whole_number_and_nothing_else() -> None:
             ValueError, match="'storeys' must be a whole number, at least 1"
         ):
             require_count(bad, "storeys")
+
+
+def test_an_integer_is_one_by_its_type() -> None:
+    """``int()`` takes a fraction, a flag and a text as an integer; the test
+    of one takes a Python or NumPy integer only.
+    """
+    for good in (0, -3, np.int8(2), np.uint64(7)):
+        assert is_integer(good)
+    for bad in (True, np.True_, 1.0, 1.5, "1", b"1", None, np.array(1), [1]):
+        assert not is_integer(bad)
+
+
+def test_indices_are_integers_in_a_sequence_or_a_one_dimensional_integer_array() -> (
+    None
+):
+    """Each index is an integer by its type, in the order given; a text is
+    not a sequence of its letters, and an array is one-dimensional and of an
+    integer dtype.
+    """
+    assert indices_of([2, np.int64(0)], "rows") == (2, 0)
+    assert indices_of(range(3), "rows") == (0, 1, 2)
+    assert indices_of(np.array([1, 0], dtype=np.uint8), "rows") == (1, 0)
+    assert indices_of((), "rows") == ()
+    for bad in ([0.5], [1.0], [True], ["1"], [np.array(1)], [None]):
+        with pytest.raises(TypeError, match="'rows' must hold integer indices"):
+            indices_of(bad, "rows")
+    for bad in ("01", b"01", 3, None):
+        with pytest.raises(TypeError, match="'rows' must be a sequence of integer"):
+            indices_of(bad, "rows")
+    for bad in (np.array(1), np.array([[0, 1]]), np.array([1.0]), np.array([True])):
+        with pytest.raises(TypeError, match="'rows' must be integer indices"):
+            indices_of(bad, "rows")

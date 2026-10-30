@@ -62,7 +62,7 @@ miso_coherence(
     output: Signal | ArrayLike,
     fs: float | None = None,
     *,
-    order: Sequence[int] | None = None,
+    order: Sequence[int | np.integer[Any]] | NDArray[np.integer[Any]] | None = None,
     window: str = 'hann',
     nperseg: int | np.integer[Any] | None = None,
     overlap: float = 0.5,
@@ -113,7 +113,7 @@ ordering the inputs by descending ordinary coherence with the output.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs or parameters are invalid. |
-| TypeError | if `scaling` is not a text. |
+| TypeError | if `scaling` is not a text, or `order` is a text or holds an index that is not an integer. |
 
 ## MISOCoherenceResult
 

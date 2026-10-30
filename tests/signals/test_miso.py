@@ -522,6 +522,28 @@ def test_rejects_bad_order() -> None:
         ph.signals.miso_coherence([x1, x2], y, FS, order=(0, 0))
 
 
+@pytest.mark.parametrize(
+    "order",
+    [
+        pytest.param((0.5, 1.7), id="fractions"),
+        pytest.param((0.0, 1.0), id="whole floats"),
+        pytest.param((True, False), id="flags"),
+        pytest.param(("1", "0"), id="texts"),
+        pytest.param("10", id="one text"),
+        pytest.param(np.array([0.0, 1.0]), id="float array"),
+    ],
+)
+def test_rejects_an_order_that_is_no_integers(order: object) -> None:
+    """An input index is an integer by its type: ``int()`` read each of these as
+    a permutation of ``range(2)`` and conditioned the inputs in it.
+    """
+    x1 = _white(180, n=1 << 14)
+    x2 = _white(181, n=1 << 14)
+    y = x1 + x2
+    with pytest.raises(TypeError, match=r"'order'"):
+        ph.signals.miso_coherence([x1, x2], y, FS, order=order)  # type: ignore[arg-type]
+
+
 def test_accepts_2d_input_array() -> None:
     x1 = _white(190, n=1 << 16)
     x2 = _white(191, n=1 << 16)

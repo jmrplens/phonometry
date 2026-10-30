@@ -9,14 +9,15 @@ through these helpers; existing modules migrate as they are touched.
 from __future__ import annotations
 
 import math
-from typing import TYPE_CHECKING, cast
+from collections.abc import Iterable
+from typing import TYPE_CHECKING, Any, TypeGuard, cast
 
 import numpy as np
 
 from .frozen import owned_members
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable, Mapping, Sequence
+    from collections.abc import Mapping, Sequence
 
     from numpy.typing import ArrayLike, NDArray
 
@@ -1052,9 +1053,59 @@ def is_class_designation(value: object, expected: Sequence[int]) -> bool:
     :param expected: The classes the edition or standard defines.
     :return: ``True`` when *value* designates one of *expected*.
     """
-    if isinstance(value, bool) or not isinstance(value, (int, np.integer)):
-        return False
-    return int(value) in expected
+    return is_integer(value) and int(value) in expected
+
+
+def is_integer(value: object) -> TypeGuard[int | np.integer[Any]]:
+    """Whether *value* is an integer by its type: an ``int`` or a NumPy
+    integer, never a bool.
+
+    ``int()`` is not this test: it takes ``1.5`` as 1, ``True`` as 1 and
+    ``"1"`` as 1, so a value that reads an index, a designation or a count
+    through it takes each of them as the integer it was never given.
+
+    :param value: The value to test, of any type.
+    :return: Whether *value* is a Python or NumPy integer and not a bool.
+    """
+    return isinstance(value, int | np.integer) and not isinstance(value, bool)
+
+
+def indices_of(value: object, name: str) -> tuple[int, ...]:
+    """The indices a sequence of integers, or an integer array of one
+    dimension, holds, in their order.
+
+    An index picks an item by its place, so each is an integer by its type
+    (:func:`is_integer`); a fraction, a whole float, a flag or a text that
+    spells one is refused rather than read through ``int()``, and a text is
+    never read as a sequence of its letters.
+
+    :param value: A sequence (a list, a tuple, a range) or any other
+        iterable of Python or NumPy integers, or a one-dimensional array of
+        an integer dtype.
+    :param name: Parameter name used in the error message.
+    :return: The indices, as Python integers.
+    :raises TypeError: for a text, bytes, an array that has other than one
+        dimension or is not of an integer dtype, a value that holds no
+        items, or an item that is not an integer.
+    """
+    if isinstance(value, np.ndarray):
+        if value.ndim != 1 or not np.issubdtype(value.dtype, np.integer):
+            msg = (
+                f"'{name}' must be integer indices; an array of them is one-"
+                f"dimensional and of an integer dtype, got {value.ndim} "
+                f"dimensions of {value.dtype}."
+            )
+            raise TypeError(msg)
+        return tuple(int(item) for item in value)
+    if isinstance(value, str | bytes) or not isinstance(value, Iterable):
+        msg = f"'{name}' must be a sequence of integer indices, got {value!r}."
+        raise TypeError(msg)
+    items = tuple(value)
+    for item in items:
+        if not is_integer(item):
+            msg = f"'{name}' must hold integer indices, got {item!r}."
+            raise TypeError(msg)
+    return tuple(int(item) for item in items)
 
 
 def require_per_band(

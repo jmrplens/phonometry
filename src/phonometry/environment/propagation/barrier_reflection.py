@@ -110,6 +110,7 @@ from scipy.optimize import minimize_scalar
 
 from ..._internal.frozen import OwnsArrays, read_only
 from ..._internal.validation import (
+    indices_of,
     require_axis_rank,
     require_choice,
     require_finite_fields,
@@ -1470,7 +1471,8 @@ def reflection_index(
     speed_of_sound: float,
     window_length_s: float | ArrayLike = ADRIENNE_SHORT_LENGTH_S,
     low_band_window_length_s: float | ArrayLike = ADRIENNE_STANDARD_LENGTH_S,
-    low_band_microphones: Sequence[int] = REFLECTION_LOW_BAND_MICROPHONES,
+    low_band_microphones: Sequence[int | np.integer[Any]]
+    | NDArray[np.integer[Any]] = REFLECTION_LOW_BAND_MICROPHONES,
     directivity_corrections: ArrayLike | None = None,
     lowest_band_hz: float = 200.0,
 ) -> ReflectionIndexResult:
@@ -1521,7 +1523,9 @@ def reflection_index(
     :raises ValueError: If the records are not shaped as above, the rate is
         missing or disagrees, a window does not fit its record, or a
         parameter is out of range.
-    :raises TypeError: if ``speed_of_sound`` is not a single number.
+    :raises TypeError: if ``speed_of_sound`` is not a single number, or
+        ``low_band_microphones`` is a text or holds a microphone that is not
+        an integer.
     :warns BarrierReflectionWarning: For an :math:`R_\mathrm{sub}` below 10 dB, a
         gain factor more than 20 % from 1, or a sample rate below 44 kHz.
     """
@@ -1540,7 +1544,7 @@ def reflection_index(
         raise ValueError(msg)
     high = _per_microphone(window_length_s, "window_length_s")
     low = _per_microphone(low_band_window_length_s, "low_band_window_length_s")
-    low_mics = sorted({int(k) for k in low_band_microphones})
+    low_mics = sorted(set(indices_of(low_band_microphones, "low_band_microphones")))
     if not low_mics or low_mics[0] < 1 or low_mics[-1] > _MICROPHONES:
         msg = "'low_band_microphones' must name microphones between 1 and 9."
         raise ValueError(msg)

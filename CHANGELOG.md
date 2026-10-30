@@ -4275,12 +4275,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   model held as arrays refuses a member of texts. `io.Signal.pick` takes a
   list or an integer array of NumPy channel indices, as it took one alone,
   and an integer array of no dimension as the one index it holds, where it
-  raised `TypeError`; an impedance profile of `FDTDBoundaries` takes NumPy
-  numbers, for a type checker as when the call ran. What the engines compute did
-  not move: `engine-digests.json` is unchanged, and a new CuPy proof is
-  recorded in `gpu-parity.lock`. The checks of the parameters, of the records
-  a caller builds, of the choices and of the documented `TypeError` no longer
-  leave the files `scripts/gpu_parity.py` fingerprints out.
+  raised `TypeError`, and refuses with `TypeError` a channel that is no
+  integer (a flag, a float, a fraction, a text, an array of another dtype),
+  where `int()` took `[1.5]` as channel 1 and `"01"` as channels 0 and 1; the
+  `order` of `signals.miso_coherence` and the `low_band_microphones` of
+  `environment.reflection_index` refuse one the same way, where `int()` read
+  `(0.5, 1.7)` as the order `(0, 1)` and `"12"` as microphones 1 and 2, and
+  take NumPy integers and an integer array of them for a type checker too, as
+  they did when the call ran. An impedance profile of `FDTDBoundaries` takes
+  NumPy numbers, for a type checker as when the call ran. What the engines
+  compute did not move: `engine-digests.json` is unchanged, and a new CuPy
+  proof is recorded in `gpu-parity.lock`. The checks of the parameters, of the
+  records a caller builds, of the choices and of the documented `TypeError` no
+  longer leave the files `scripts/gpu_parity.py` fingerprints out.
   `scripts/check_parameter_annotations.py` follows a field handed by its name
   together with its record (`_hold_cells(self, "ix", "iy")`), which it read as
   never validated, and the items and elements a body unpacks or indexes (`ny,
@@ -4289,9 +4296,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   arrays `np.asarray` converts and which now takes `tuple[ArrayLike,
   ArrayLike]`; `scripts/check_choice_literals.py` holds each part of a choice
   of several parts (the single name, each key and each value of `Boundary |
-  Mapping[Side, Boundary | float]`) to a check of its own; and a record that
-  stores a field back as it was given, or wrapped in `MappingProxyType`
-  without a copy, no longer counts as converting it.
+  Mapping[Side, Boundary | float]`) to a check of its own, and reads a test
+  of a choice's form by the way it comes out and the part it holds, so `if
+  mode is not None: return`, `if isinstance(mode, str): return`, `case str():
+  return` and `if isinstance(sides, Mapping): return` before the check of the
+  keys leave a path unchecked, where any test of the form kept every path;
+  and a record that stores a field back as it was given, or wrapped in
+  `MappingProxyType` without a copy, no longer counts as converting it.
 
 - **A parameter whose name carries its unit and that has a default is written
   by name.** `signals.noise_signal(fs, duration_s=2.0)`,

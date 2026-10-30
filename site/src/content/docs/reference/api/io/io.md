@@ -1667,6 +1667,7 @@ under test and stay a measurement.
 | Exception | When |
 | :--- | :--- |
 | IndexError | If a channel is out of range. |
+| TypeError | If a channel is not an integer (a flag, a float, a fraction or a text), or *channels* is a text, or an array of two dimensions or more or of a dtype that is not an integer one. |
 
 ### Signal.plot()
 

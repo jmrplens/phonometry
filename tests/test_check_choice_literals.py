@@ -22,25 +22,21 @@ import pathlib
 import sys
 import textwrap
 import typing
-from collections.abc import Callable, Iterable, Mapping
+from collections.abc import Callable, Iterable, Mapping, Sequence
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Literal
+from typing import Literal
 
 _SCRIPTS = str(pathlib.Path(__file__).resolve().parent.parent / "scripts")
 if _SCRIPTS not in sys.path:
     sys.path.insert(0, _SCRIPTS)
 
 import check_choice_literals as ccl
+import pytest
 
 from phonometry._internal.frozen import OwnsArrays
 from phonometry._internal.validation import require_choice
 from phonometry.filters.weighting import time_weighting
-
-if TYPE_CHECKING:
-    from collections.abc import Sequence
-
-    import pytest
 
 
 def _tree(function: object) -> ast.AST:
@@ -1811,15 +1807,22 @@ def test_every_part_of_a_choice_of_several_parts_is_checked() -> None:
     skipped = verdict(_KeysSkipAPace)
     assert skipped is not None
     assert skipped.startswith("each item or key: ")
-    # The rule before parts: one check anywhere was enough for all three.
-    for record in (_KeysUnchecked, _ValuesUnchecked, _SingleUnchecked):
+    # Read whole, the value meets no one check on every path, since the test
+    # of its form sends each part down a path of its own: the whole reading
+    # tells none of the four apart, so a choice of several parts is read
+    # part by part, and only the record that checks every part passes.
+    some_paths = "checked on some paths only, so a misspelling passes on the others"
+    for record in (_Terminations, _KeysUnchecked, _ValuesUnchecked, _SingleUnchecked):
         check = ccl._post_init(record)
         assert check is not None
         assert (
             ccl._verdict(
                 ccl._checks_of(check, "sides", field=True, collection=True, depth=0)
             )
-            is None
+            == some_paths
+        )
+        assert ccl._choice_verdict(check, "sides", _TERMINATIONS, field=True) == (
+            verdict(record)
         )
 
 
@@ -1939,6 +1942,154 @@ def test_a_return_on_a_single_choice_skips_no_key() -> None:
     skipped = ccl._part_verdict(skipping, "sides", _TERMINATIONS, field=True)
     assert skipped is not None
     assert skipped.startswith("each item or key: ")
+
+
+@dataclass(frozen=True)
+class _MappingLeavesBeforeItsKeys:
+    """A record that returns a mapping before the loop that checks its keys."""
+
+    sides: _Pace | Mapping[_Side, _Pace | float]
+
+    def __post_init__(self) -> None:
+        if isinstance(self.sides, Mapping):
+            for value in self.sides.values():
+                if isinstance(value, str):
+                    require_choice(value, "sides", _PACES)
+            return
+        require_choice(self.sides, "sides", _PACES)
+        for side in self.sides:
+            require_choice(side, "sides", _TWO_SIDES)
+
+
+def test_a_test_of_the_form_keeps_the_paths_of_the_parts_it_holds() -> None:
+    """``if isinstance(sides, Mapping): return`` leaves with no single pace,
+    so the pace's check after it runs on every path that holds one, but it
+    leaves with every key of the mapping, which the loop after it never
+    reads; each part is held to the forms that hold it, the keys to the
+    mapping.
+    """
+    check = ccl._post_init(_MappingLeavesBeforeItsKeys)
+    assert check is not None
+    assert ccl._part_verdict(check, "sides", _TERMINATIONS, field=True) == (
+        "each item or key: checked on some paths only, so a misspelling passes "
+        "on the others"
+    )
+    with pytest.raises(ValueError, match="'sides' must be one of"):
+        _MappingLeavesBeforeItsKeys(sides="fsat")  # type: ignore[arg-type]
+    # The misspelt side the guard names is built.
+    misspelt = _MappingLeavesBeforeItsKeys(sides={"lfet": 1.0})  # type: ignore[dict-item]
+    assert "lfet" in misspelt.sides
+    assert ccl._forms(_TERMINATIONS, ccl._WHOLE, collection=True) == (str,)
+    assert ccl._forms(_TERMINATIONS, ccl._ITEMS, collection=True) == (Mapping,)
+    assert ccl._forms(_TERMINATIONS, ccl._VALUES, collection=True) == (Mapping,)
+    assert ccl._forms(_ONE_OR_SEVERAL_PACES, None, collection=True) == (
+        str,
+        Sequence,
+    )
+
+
+def test_every_origin_of_a_collection_has_the_class_a_test_of_the_form_reads() -> None:
+    """Each origin the guard reads as a collection or a mapping stands for a
+    class an ``isinstance`` test is held to, so a new one cannot fall back to
+    a form no test tells apart unnoticed.
+    """
+    assert set(ccl._ORIGINS) == ccl._COLLECTIONS | ccl._MAPPINGS
+
+
+def _leaves_with_its_text(mode: _Pace | None) -> _Pace | None:
+    if mode is not None:
+        return mode
+    require_choice(mode, "mode", _PACES)
+    return None
+
+
+def _leaves_on_a_text(mode: _Pace | float) -> _Pace | float:
+    if isinstance(mode, str):
+        return mode
+    require_choice(mode, "mode", _PACES)
+    return mode
+
+
+def _checked_only_when_none(mode: _Pace | None) -> _Pace | None:
+    if mode is None:
+        require_choice(mode, "mode", _PACES)
+    return mode
+
+
+def _leaves_on_a_matched_text(mode: _Pace | None) -> _Pace | None:
+    match mode:
+        case str():
+            return mode
+    require_choice(mode, "mode", _PACES)
+    return mode
+
+
+def _leaves_when_it_holds_items(paces: Sequence[_Pace]) -> Sequence[_Pace]:
+    if paces:
+        return paces
+    for pace in paces:
+        require_choice(pace, "paces", _PACES)
+    return paces
+
+
+def _leaves_on_a_number(mode: _Pace | float) -> float:
+    if isinstance(mode, float):
+        return mode
+    require_choice(mode, "mode", _PACES)
+    return 0.0
+
+
+def _leaves_on_anything_but_a_text(mode: _Pace | float) -> _Pace | float:
+    if not isinstance(mode, str):
+        return mode
+    require_choice(mode, "mode", _PACES)
+    return mode
+
+
+def _checked_when_a_text(mode: _Pace | float) -> _Pace | float:
+    if isinstance(mode, str):
+        require_choice(mode, "mode", _PACES)
+    return mode
+
+
+def _leaves_on_a_matched_number(mode: _Pace | float) -> _Pace | float:
+    match mode:
+        case float() | None:
+            return mode
+    require_choice(mode, "mode", _PACES)
+    return mode
+
+
+def test_a_test_of_the_form_keeps_only_the_paths_that_hold_nothing() -> None:
+    """The way a test of the form comes out decides: ``if mode is None:
+    return`` and ``if not isinstance(mode, str): return`` leave with no text,
+    while ``if mode is not None: return``, ``if isinstance(mode, str):
+    return``, ``case str(): return`` and ``if paces: return`` leave with what
+    the check reads, and ``if mode is None: require_choice(...)`` checks
+    only the paths that hold no text.
+    """
+    some_paths = "checked on some paths only, so a misspelling passes on the others"
+    paces = frozenset(_PACES)
+    for leaky in (
+        _leaves_with_its_text,
+        _leaves_on_a_text,
+        _checked_only_when_none,
+        _leaves_on_a_matched_text,
+    ):
+        assert _verdict_of(leaky, "mode", options=paces) == some_paths, leaky
+    assert (
+        _verdict_of(_leaves_when_it_holds_items, "paces", collection=True) == some_paths
+    )
+    for tight in (
+        _checked_after_its_own_early_return,
+        _checked_behind_its_own_test,
+        _leaves_on_a_number,
+        _leaves_on_anything_but_a_text,
+        _checked_when_a_text,
+        _leaves_on_a_matched_number,
+        _checked_after_none_is_matched,
+    ):
+        assert _verdict_of(tight, "mode", options=paces) is None, tight
 
 
 def _spreads_annotated(x: list[float], mode: str) -> object:

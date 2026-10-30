@@ -61,6 +61,7 @@ import numpy as np
 
 from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
+    indices_of,
     require_equal_counts,
     require_ranks,
     require_same_length,
@@ -201,11 +202,13 @@ def _validate_inputs(
     return xs, ya
 
 
-def _validate_order(order: Sequence[int] | None, q: int) -> tuple[int, ...]:
+def _validate_order(
+    order: Sequence[int | np.integer[Any]] | NDArray[np.integer[Any]] | None, q: int
+) -> tuple[int, ...]:
     """Validate the conditioning order, a permutation of ``range(q)``."""
     if order is None:
         return tuple(range(q))
-    perm = tuple(int(i) for i in order)
+    perm = indices_of(order, "order")
     if sorted(perm) != list(range(q)):
         msg = f"'order' must be a permutation of range({q})."
         raise ValueError(msg)
@@ -592,7 +595,7 @@ def miso_coherence(
     output: Signal | ArrayLike,
     fs: float | None = None,
     *,
-    order: Sequence[int] | None = None,
+    order: Sequence[int | np.integer[Any]] | NDArray[np.integer[Any]] | None = None,
     window: str = "hann",
     nperseg: int | np.integer[Any] | None = None,
     overlap: float = _DEFAULT_OVERLAP,
@@ -643,7 +646,8 @@ def miso_coherence(
     :param scaling: ``'density'`` (units²/Hz) or ``'spectrum'`` (units²).
     :return: A :class:`MISOCoherenceResult`.
     :raises ValueError: If the inputs or parameters are invalid.
-    :raises TypeError: if ``scaling`` is not a text.
+    :raises TypeError: if ``scaling`` is not a text, or ``order`` is a text or
+        holds an index that is not an integer.
     """
     records = _records(inputs)
     xs, ya = _validate_inputs(records, output)

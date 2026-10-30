@@ -24,7 +24,8 @@ registry never reached the index. Each entry now lands on the page of the
 document family it is about (:func:`family_of`): ``ISO 3743-1:2010`` and
 ``ISO 3743-2:2018`` on ``/reference/errata/iso-3743/``, a book on a page named
 after its authors. ``/reference/errata/`` keeps its hand-written introduction
-and the registry's own, and lists every family with every entry in it (through
+and what only the registry's own says (:func:`index_preamble`), and lists
+every family with every entry in it (through
 ``src/components/ErrataFamily.astro``, which reads the anchors off the family
 pages as the build renders them); a link written against the old single page,
 ``/reference/errata/#<entry>``, still lands on the entry, because the index
@@ -56,7 +57,12 @@ a work a family corrects has no entry there in either language, or more than
 one, naming each: a standards family corrects the editions its headings print
 (:data:`DESIGNATED_AS` holds the ones the registry spells otherwise than the
 guides), any other family the works its :data:`SOURCES` row lists.
-``--list-unmatched`` prints that list and writes nothing.
+``--list-unmatched`` prints that list and writes nothing. Each family page
+names its works in a ``corrects`` field, by the fragment of each one's ``@id``
+on the bibliography of its language, and the site names them in the page's
+structured data as what the page is about (``site/src/lib/citations.mjs``,
+``correctedWorks``); not in ``references``, which would rank an errata page
+with the guides written to the documents it corrects.
 
 Stdlib only. Regenerate with ``make site-reports``.
 """
@@ -70,6 +76,7 @@ import pathlib
 import posixpath
 import re
 import sys
+import unicodedata
 from typing import TYPE_CHECKING, Literal
 
 from markdown_spans import drop_inline_spans_by_block, lines_read_whole
@@ -191,6 +198,14 @@ class Edition:
     #: Pattern matching the first source line to keep (the registry's own
     #: introduction, which explains how to read every entry).
     start: re.Pattern[str]
+    #: The paragraphs of the registry's introduction the index leaves out,
+    #: because the index's own introduction says them: each by the words the
+    #: paragraph opens with, and the words the index says it in. The index
+    #: printed both introductions, one after the other, and said twice that a
+    #: defect listed is not a defect of the method. A paragraph stays left out
+    #: only while the index's introduction still carries those words
+    #: (:func:`index_preamble`).
+    said_on_index: tuple[tuple[str, str], ...] = ()
 
     @property
     def folder(self) -> str:
@@ -216,11 +231,37 @@ EDITIONS: tuple[Edition, ...] = (
         lang="en",
         source=DOCS / "ERRATA.md",
         start=re.compile(r"^During the clean-room implementation"),
+        said_on_index=(
+            (
+                "During the clean-room implementation",
+                "Implementing a standard clean-room",
+            ),
+            ("The registry covers every kind", "covers every kind of published source"),
+            ("Entries describe the specific printed", "never a defect of the *method*"),
+        ),
     ),
     Edition(
         lang="es",
         source=DOCS / "ERRATA.es.md",
         start=re.compile(r"^Durante la implementación en sala limpia"),
+        said_on_index=(
+            (
+                "Durante la implementación en sala limpia",
+                "Implementar una norma en sala limpia",
+            ),
+            (
+                "El registro cubre todos los tipos",
+                "todos los tipos de fuente publicada",
+            ),
+            (
+                "Las entradas describen las ediciones",
+                "nunca es un defecto del *método*",
+            ),
+            (
+                "Esta edición española traduce",
+                "La redacción autoritativa es la inglesa",
+            ),
+        ),
     ),
 )
 
@@ -1076,7 +1117,12 @@ def page_intro(page: FamilyPage, lang: Lang) -> str:
     )
 
 
-def render_family(page: FamilyPage, edition: Edition, registry: Registry) -> str:
+def render_family(
+    page: FamilyPage,
+    edition: Edition,
+    registry: Registry,
+    corrects: Sequence[str] = (),
+) -> str:
     """The whole text of one family page.
 
     :param page: The family.
@@ -1085,6 +1131,11 @@ def render_family(page: FamilyPage, edition: Edition, registry: Registry) -> str
     :type edition: Edition
     :param registry: That language's registry.
     :type registry: Registry
+    :param corrects: The bibliography's fragment identifiers of the works the
+        family corrects, in that language (:func:`corrected_fragments`). They
+        become the page's ``corrects`` field, which the site's structured data
+        reads to say what the page is about.
+    :type corrects: Sequence[str]
     :return: The page, newline-terminated.
     :rtype: str
     """
@@ -1095,11 +1146,15 @@ def render_family(page: FamilyPage, edition: Edition, registry: Registry) -> str
     search = f"searchTitle: {_yaml(ranked_by)}\n" if ranked_by is not None else ""
     if weight is not None:
         search += f"searchWeight: {weight}\n"
+    corrected = "".join(f"  - {_yaml(fragment)}\n" for fragment in corrects)
+    if corrected:
+        corrected = f"corrects:\n{corrected}"
     return (
         "---\n"
         f"title: {_yaml(page_title(page, lang))}\n"
         f"description: {_yaml(page_description(page, lang))}\n"
         f"{search}"
+        f"{corrected}"
         "---\n\n"
         f"{PAGE_MARKER.format(source=edition.source.name)}\n\n"
         f"{page_intro(page, lang)}\n\n"
@@ -1185,15 +1240,77 @@ def _attribute(text: str) -> str:
     return f'"{text}"'
 
 
+def _words(text: str) -> str:
+    """The text with every run of whitespace one space, as a reader sees it."""
+    return " ".join(text.split())
+
+
+def index_preamble(edition: Edition, registry: Registry, introduction: str) -> str:
+    """The registry's introduction as the index transplants it.
+
+    The index opens with an introduction of its own, written for a reader of
+    the site, and the registry's opens ``docs/ERRATA.md`` for a reader on
+    GitHub. Transplanted whole below the index's, it said again what the
+    index had just said: what the registry is, what it covers, and that a
+    defect listed is not a defect of the method. So the paragraphs the index
+    says itself (:attr:`Edition.said_on_index`) are left out, and what is
+    transplanted is what only the registry says: the status of an entry, how
+    each claim is checked against the printed page, which are what every
+    family page sends its reader to, and anything added to it later.
+
+    :param edition: The language.
+    :type edition: Edition
+    :param registry: That language's registry.
+    :type registry: Registry
+    :param introduction: The index's own introduction, above the marker.
+    :type introduction: str
+    :return: The paragraphs of the registry's introduction the index keeps.
+    :rtype: str
+    :raises SystemExit: If a paragraph left out is no longer in the registry
+        under the words it is listed by, or the index no longer says it.
+    """
+    paragraphs = [part for part in re.split(r"\n[ \t]*\n", registry.preamble) if part]
+    kept = []
+    left_out = set()
+    for paragraph in paragraphs:
+        said = [
+            opening
+            for opening, _ in edition.said_on_index
+            if paragraph.startswith(opening)
+        ]
+        if said:
+            left_out.update(said)
+        else:
+            kept.append(paragraph)
+    for opening, words in edition.said_on_index:
+        if opening not in left_out:
+            sys.exit(
+                f"docs/{edition.source.name}: no paragraph of the registry's "
+                f"introduction opens with {opening!r}, which Edition.said_on_index "
+                "in scripts/generate_site_reports.py leaves out of the index. "
+                "Name the paragraph by its new opening words, or drop the line."
+            )
+        if _words(words) not in _words(introduction):
+            sys.exit(
+                f"site/src/content/docs/{edition.index}: the introduction above "
+                f"the marker no longer says {words!r}, and the registry's "
+                f"paragraph opening {opening!r} is left out of the index because "
+                "it did. Say it again there, or drop the line from "
+                "Edition.said_on_index so the paragraph is transplanted."
+            )
+    return "\n\n".join(kept)
+
+
 def render_index_body(
-    edition: Edition, registry: Registry, pages: Sequence[FamilyPage]
+    edition: Edition, preamble: str, pages: Sequence[FamilyPage]
 ) -> str:
     """The generated part of the index page: introduction, then every family.
 
     :param edition: The language to render.
     :type edition: Edition
-    :param registry: That language's registry.
-    :type registry: Registry
+    :param preamble: What the index transplants of the registry's
+        introduction (:func:`index_preamble`).
+    :type preamble: str
     :param pages: Every family, in index order.
     :type pages: Sequence[FamilyPage]
     :return: The body, without the markers.
@@ -1207,7 +1324,7 @@ def render_index_body(
         f"import ErrataFamily from '{components}/ErrataFamily.astro';",
         f"import ErrataRouter from '{components}/ErrataRouter.astro';",
         "",
-        _mdx_safe(registry.preamble, where=f"docs/{edition.source.name}"),
+        _mdx_safe(preamble, where=f"docs/{edition.source.name}"),
     ]
     for group in ("standards", "other", "not-errata"):
         members = [page for page in pages if page.family.group == group]
@@ -1247,7 +1364,9 @@ def render_index(
     # Split on the marker's stable prefix so a reworded marker still matches.
     prefix = kept.split("{/* BEGIN GENERATED BODY", 1)[0].rstrip()
     marker = BEGIN.format(source=f"docs/{edition.source.name}")
-    body = render_index_body(edition, registry, pages)
+    introduction = prefix.split("\n---\n", 1)[-1]
+    preamble = index_preamble(edition, registry, introduction)
+    body = render_index_body(edition, preamble, pages)
     return f"{prefix}\n\n{marker}\n\n{body}\n\n{END}\n"
 
 
@@ -1537,6 +1656,80 @@ def _work_key(ref: Mapping[str, object]) -> tuple[object, ...]:
     return (ref.get("type"), who, ref.get("year"), ref.get("title"))
 
 
+def _id_slug(value: object) -> str:
+    """A value as the site writes it into an ``@id`` (``slug`` in citations.mjs).
+
+    Lower case, accents dropped, every run of anything but a letter or a digit
+    one hyphen, none at either end.
+    """
+    text = unicodedata.normalize("NFD", str(value).lower())
+    text = re.sub(r"[\u0300-\u036f]", "", text)
+    return re.sub(r"[^a-z0-9]+", "-", text).strip("-")
+
+
+def reference_fragment(ref: Mapping[str, object]) -> str:
+    """The fragment of the bibliography's ``@id`` for one reference.
+
+    The same as ``referenceId`` in ``site/src/lib/citations.mjs``: a standard
+    by its designation (``std-iso-3743-1-2010``), a work with a DOI by the DOI
+    (``doi-10-1121-1-423870``), anything else by its type, the surname of its
+    first author or its organization, its year and its title. The site stops
+    the build on a fragment its bibliography does not define, so the two
+    cannot drift apart in silence.
+
+    :param ref: One entry of a page's ``references``.
+    :type ref: Mapping[str, object]
+    :return: The fragment, without its ``#``.
+    :rtype: str
+    """
+    if ref.get("type") == "standard":
+        return f"std-{_id_slug(ref.get('designation'))}"
+    if ref.get("doi"):
+        return f"doi-{_id_slug(ref['doi'])}"
+    authors = ref.get("authors")
+    who = (
+        authors[0] if isinstance(authors, list) and authors else ref.get("organization")
+    )
+    year = ref.get("year")
+    parts = [
+        ref.get("type"),
+        *([str(who).split(",")[0]] if who else []),
+        "nd" if year is None else year,
+        ref.get("title"),
+    ]
+    return "-".join(_id_slug(part) for part in parts)
+
+
+def corrected_fragments(
+    page: FamilyPage, lang: Lang, bibliography: Sequence[Mapping[str, object]]
+) -> tuple[str, ...]:
+    """The bibliography's fragments of the works a family page corrects.
+
+    :param page: A family page.
+    :type page: FamilyPage
+    :param lang: The language of the page.
+    :type lang: Lang
+    :param bibliography: :func:`read_bibliography` of that language.
+    :type bibliography: Sequence[Mapping[str, object]]
+    :return: One fragment per corrected work (:func:`corrected_works`), in the
+        order the registry names them; none for the page of properties that
+        are not errata.
+    :rtype: tuple[str, ...]
+    :raises SystemExit: If the bibliography does not name a corrected work
+        exactly once (``--list-unmatched`` lists them all).
+    """
+    fragments = []
+    for work in corrected_works(page):
+        found = {_work_key(ref): ref for ref in bibliography if work.matches(ref, lang)}
+        if len(found) != 1:
+            sys.exit(
+                f"{Unmatched(page.family.slug, lang, work, len(found))}; run "
+                "`python scripts/generate_site_reports.py --list-unmatched`."
+            )
+        fragments.append(reference_fragment(next(iter(found.values()))))
+    return tuple(dict.fromkeys(fragments))
+
+
 @dataclasses.dataclass(frozen=True)
 class Unmatched:
     """A work a family corrects that the bibliography of a language does not name once."""
@@ -1593,18 +1786,22 @@ def unmatched_works(
     return out
 
 
-def check_bibliography(pages: Sequence[FamilyPage]) -> list[Unmatched]:
+def check_bibliography(
+    pages: Sequence[FamilyPage],
+    bibliographies: Mapping[Lang, Sequence[Mapping[str, object]]] | None = None,
+) -> list[Unmatched]:
     """The corrected works the site's bibliography is missing, read off the pages.
 
     :param pages: The family pages.
     :type pages: Sequence[FamilyPage]
+    :param bibliographies: :func:`read_bibliography` of each language, read
+        off the site when not given.
+    :type bibliographies: Mapping[Lang, Sequence[Mapping[str, object]]] | None
     :return: :func:`unmatched_works` on the site as it is.
     :rtype: list[Unmatched]
     """
-    bibliographies: dict[Lang, list[dict[str, object]]] = {
-        "en": read_bibliography("en"),
-        "es": read_bibliography("es"),
-    }
+    if bibliographies is None:
+        bibliographies = {lang: read_bibliography(lang) for lang in ("en", "es")}
     return unmatched_works(pages, bibliographies)
 
 
@@ -1646,9 +1843,14 @@ def family_pages() -> list[FamilyPage]:
     return plan_families([heading for heading, _ in registry.entries])
 
 
-def rendered_pages() -> dict[pathlib.Path, str]:
+def rendered_pages(
+    bibliographies: Mapping[Lang, Sequence[Mapping[str, object]]] | None = None,
+) -> dict[pathlib.Path, str]:
     """Every errata page this script owns, path to full text.
 
+    :param bibliographies: :func:`read_bibliography` of each language, read
+        off the site when not given.
+    :type bibliographies: Mapping[Lang, Sequence[Mapping[str, object]]] | None
     :return: The index pages and every family page, both languages.
     :rtype: dict[pathlib.Path, str]
     """
@@ -1657,13 +1859,18 @@ def rendered_pages() -> dict[pathlib.Path, str]:
     headings = [heading for heading, _ in registries["en"].entries]
     pages = plan_families(headings)
     check_page_metadata(pages)
+    if bibliographies is None:
+        bibliographies = {lang: read_bibliography(lang) for lang in ("en", "es")}
     out: dict[pathlib.Path, str] = {}
     for edition in EDITIONS:
         registry = registries[edition.lang]
         out[CONTENT / edition.index] = render_index(edition, registry, pages)
         for page in pages:
             path = CONTENT / edition.folder / f"{page.family.slug}.md"
-            out[path] = render_family(page, edition, registry)
+            corrects = corrected_fragments(
+                page, edition.lang, bibliographies[edition.lang]
+            )
+            out[path] = render_family(page, edition, registry, corrects)
     return out
 
 
@@ -1713,7 +1920,11 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
 
-    unmatched = check_bibliography(family_pages())
+    bibliographies: dict[Lang, list[dict[str, object]]] = {
+        "en": read_bibliography("en"),
+        "es": read_bibliography("es"),
+    }
+    unmatched = check_bibliography(family_pages(), bibliographies)
     if args.list_unmatched:
         for line in unmatched:
             print(line)
@@ -1733,7 +1944,7 @@ def main(argv: list[str] | None = None) -> int:
             print(f"  {line}", file=sys.stderr)
         return 1
 
-    pages = rendered_pages()
+    pages = rendered_pages(bibliographies)
     stale: list[str] = []
     for path, text in pages.items():
         if path.is_file() and path.read_text(encoding="utf8") == text:

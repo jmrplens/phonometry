@@ -2,6 +2,8 @@
 title: "Errata in Ver & Beranek (2006)"
 description: "Errata in Ver & Beranek (2006): 4 defects in the printed text, with the evidence and what phonometry does about each."
 searchTitle: ""
+corrects:
+  - "doi-10-1002-9780470172568"
 ---
 
 <!-- Generated from docs/ERRATA.md by scripts/generate_site_reports.py (`make site-reports`). Edit the source document, never this page. -->

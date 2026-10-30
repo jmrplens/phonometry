@@ -22,6 +22,20 @@ const text = lang === 'es' ? 'Creado y mantenido por' : 'Created and maintained 
 const projectsUrl = lang === 'es' ? 'https://jmrp.io/es/projects/' : 'https://jmrp.io/projects/';
 const projectsText = lang === 'es' ? 'Todos los proyectos' : 'All projects';
 
+// What changed in each release, and what has changed since the last one. The
+// site is built from the main branch, so a page can describe what no release
+// carries yet; the changelog's Unreleased section says what that is. The
+// release notes are the changelog's section of each version, which the release
+// workflow publishes with it (scripts/release_notes.py).
+const releaseNotes = {
+	href: 'https://github.com/jmrplens/phonometry/releases',
+	text: lang === 'es' ? 'Notas de versión' : 'Release notes',
+};
+const changelog = {
+	href: 'https://github.com/jmrplens/phonometry/blob/main/CHANGELOG.md',
+	text: lang === 'es' ? 'Registro de cambios' : 'Changelog',
+};
+
 // Icon links carry their name in `aria-label` and in `title`, since the mark
 // itself says nothing to a screen reader and nothing to a reader who does not
 // recognise it. The repository and the package are works, so neither takes
@@ -47,6 +61,8 @@ const marks = [
 			))
 		}
 		<a class="orcid" href="https://orcid.org/0000-0003-1250-6212" rel="me">ORCID</a>
+		<a class="release" href={releaseNotes.href}>{releaseNotes.text}</a>
+		<a class="release" href={changelog.href}>{changelog.text}</a>
 		<a class="projects" href={projectsUrl}>{projectsText}</a>
 	</span>
 </div>
@@ -99,6 +115,7 @@ const marks = [
 		font-size: var(--sl-text-2xs);
 		letter-spacing: 0.08em;
 	}
+	.release,
 	.projects,
 	.orcid {
 		text-decoration: none;

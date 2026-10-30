@@ -2,6 +2,8 @@
 title: "Erratas de Bies, Hansen & Howard (2017)"
 description: "Erratas de Bies, Hansen & Howard (2017): 4 defectos del texto impreso, con la evidencia y lo que hace phonometry con cada uno."
 searchTitle: ""
+corrects:
+  - "doi-10-1201-9781351228152"
 ---
 
 <!-- Generated from docs/ERRATA.es.md by scripts/generate_site_reports.py (`make site-reports`). Edit the source document, never this page. -->

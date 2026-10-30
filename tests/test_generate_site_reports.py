@@ -481,6 +481,101 @@ def test_an_empty_introduction_is_mdx_safe() -> None:
 
 
 # ---------------------------------------------------------------------------
+# The index: its own introduction, then what only the registry's says.
+# ---------------------------------------------------------------------------
+
+
+def _index_text(lang: str) -> str:
+    """The index page of one language as the generator writes it, as a reader reads it."""
+    edition = next(e for e in generate_site_reports.EDITIONS if e.lang == lang)
+    pages = generate_site_reports.rendered_pages()
+    text = pages[generate_site_reports.CONTENT / edition.index]
+    return " ".join(text.replace("*", "").split()).lower()
+
+
+@pytest.mark.parametrize(
+    ("lang", "claim"),
+    [
+        ("en", "a defect of the method"),
+        ("en", "clean-room"),
+        ("en", "covers every kind of published source"),
+        ("en", "the authoritative one"),
+        ("en", "same entries in the same order"),
+        ("es", "un defecto del método"),
+        ("es", "sala limpia"),
+        ("es", "todos los tipos de fuente publicada"),
+        ("es", "la redacción autoritativa es la inglesa"),
+        ("es", "mismas entradas"),
+    ],
+)
+def test_the_index_says_each_thing_of_its_introduction_once(
+    lang: str, claim: str
+) -> None:
+    """The index's introduction and the registry's are not printed one after the other.
+
+    Both used to be: the index opened with its own introduction, written for
+    the site, and the generator transplanted the registry's below it, so the
+    page said twice that the registry comes from a clean-room implementation
+    and that a defect listed is not a defect of the method, and the Spanish
+    page twice that the English wording is the authoritative one and that the
+    two editions hold the same entries in the same order.
+    """
+    assert _index_text(lang).count(claim) == 1
+
+
+def test_the_index_keeps_what_only_the_registry_says() -> None:
+    """The status legend and the evidence rule, which every family page points to."""
+    english, spanish = _index_text("en"), _index_text("es")
+    assert "status legend: unreported" in english
+    assert "verified against the page as printed" in english
+    assert "a spanish edition of this registry" in english
+    assert "leyenda de estados: sin notificar" in spanish
+    assert "contra la página tal como está impresa" in spanish
+
+
+def _edition(said: tuple[tuple[str, str], ...]) -> generate_site_reports.Edition:
+    return generate_site_reports.Edition(
+        lang="en",
+        source=generate_site_reports.DOCS / "ERRATA.md",
+        start=generate_site_reports.EDITIONS[0].start,
+        said_on_index=said,
+    )
+
+
+_PREAMBLE = generate_site_reports.Registry(
+    preamble=(
+        "The registry records each case.\nIt is long.\n\n"
+        "Status legend: unreported.\n\n"
+        "A new paragraph nobody listed."
+    ),
+    entries=(),
+)
+
+
+def test_only_a_paragraph_the_index_says_is_left_out() -> None:
+    """A paragraph is left out while the index says it; one added later is kept."""
+    edition = _edition((("The registry records", "records each case"),))
+    kept = generate_site_reports.index_preamble(
+        edition, _PREAMBLE, "The index\nrecords each case, wrapped."
+    )
+    assert kept == "Status legend: unreported.\n\nA new paragraph nobody listed."
+
+
+def test_a_paragraph_listed_by_words_it_no_longer_opens_with_stops_the_run() -> None:
+    """A reworded paragraph would be transplanted again in silence."""
+    edition = _edition((("The register records", "records each case"),))
+    with pytest.raises(SystemExit, match="no paragraph of the registry's introduction"):
+        generate_site_reports.index_preamble(edition, _PREAMBLE, "records each case")
+
+
+def test_a_paragraph_the_index_no_longer_says_stops_the_run() -> None:
+    """Left out while the index said it, the paragraph would be said nowhere."""
+    edition = _edition((("The registry records", "records each case"),))
+    with pytest.raises(SystemExit, match="no longer says 'records each case'"):
+        generate_site_reports.index_preamble(edition, _PREAMBLE, "says something else")
+
+
+# ---------------------------------------------------------------------------
 # The works a family corrects, in the site's bibliography.
 # ---------------------------------------------------------------------------
 
@@ -689,12 +784,99 @@ def test_list_unmatched_prints_the_works_and_fails(
         0,
     )
     monkeypatch.setattr(
-        generate_site_reports, "check_bibliography", lambda pages: [missing]
+        generate_site_reports,
+        "check_bibliography",
+        lambda pages, bibliographies=None: [missing],
     )
     assert generate_site_reports.main(["--list-unmatched"]) == 1
     out = capsys.readouterr().out
     assert "randi (en): report by Breeding (1996) has no bibliography entry" in out
     assert generate_site_reports.main(["--check"]) == 1
     assert "randi (en)" in capsys.readouterr().err
-    monkeypatch.setattr(generate_site_reports, "check_bibliography", lambda pages: [])
+    monkeypatch.setattr(
+        generate_site_reports,
+        "check_bibliography",
+        lambda pages, bibliographies=None: [],
+    )
     assert generate_site_reports.main(["--list-unmatched"]) == 0
+
+
+@pytest.mark.parametrize(
+    ("ref", "fragment"),
+    [
+        (_iso("ISO 3743-1:2010"), "std-iso-3743-1-2010"),
+        (
+            {"type": "standard", "designation": "Recomendación UIT-R BS.468-4"},
+            "std-recomendacion-uit-r-bs-468-4",
+        ),
+        (
+            {"type": "book", "doi": "10.1002/9780470747339", "title": "Propagation"},
+            "doi-10-1002-9780470747339",
+        ),
+        (
+            {
+                "type": "book",
+                "authors": ["Harris, C. M."],
+                "year": 1995,
+                "title": "Manual de medidas acústicas y control del ruido",
+            },
+            "book-harris-1995-manual-de-medidas-acusticas-y-control-del-ruido",
+        ),
+        (
+            {
+                "type": "report",
+                "organization": "National Marine Fisheries Service",
+                "year": 2024,
+                "title": "Technical guidance (version 3.0)",
+            },
+            "report-national-marine-fisheries-service-2024-technical-guidance-version-3-0",
+        ),
+        ({"type": "web", "title": "A page"}, "web-nd-a-page"),
+    ],
+)
+def test_a_fragment_is_the_one_the_site_gives_the_work(
+    ref: dict[str, object], fragment: str
+) -> None:
+    """The fragment is ``referenceId``'s in ``site/src/lib/citations.mjs``.
+
+    The site stops the build on a fragment its bibliography does not define,
+    which holds the two to each other on every page; these pin the cases that
+    differ: a translated designation with an accent, a DOI, a first author
+    written with initials, an organization, a work with no year.
+    """
+    assert generate_site_reports.reference_fragment(ref) == fragment
+
+
+def _frontmatter(text: str) -> dict[str, object]:
+    loaded = yaml.safe_load(text.split("---\n")[1])
+    assert isinstance(loaded, dict)
+    return loaded
+
+
+def test_every_family_page_names_the_works_it_corrects() -> None:
+    """Each family page carries ``corrects``, the works its entries correct.
+
+    The site names them in the page's structured data, so a search engine
+    reads an errata page as about the documents it corrects; and only there,
+    not in ``references``, which would rank it with the guides.
+    """
+    bibliographies: dict[generate_site_reports.Lang, list[dict[str, object]]] = {
+        "en": generate_site_reports.read_bibliography("en"),
+        "es": generate_site_reports.read_bibliography("es"),
+    }
+    rendered = generate_site_reports.rendered_pages(bibliographies)
+    pages = generate_site_reports.family_pages()
+    for edition in generate_site_reports.EDITIONS:
+        for page in pages:
+            path = (
+                generate_site_reports.CONTENT
+                / edition.folder
+                / f"{page.family.slug}.md"
+            )
+            front = _frontmatter(rendered[path])
+            expected = generate_site_reports.corrected_fragments(
+                page, edition.lang, bibliographies[edition.lang]
+            )
+            assert front.get("corrects", []) == list(expected), path.name
+            assert bool(expected) == (page.family.group != "not-errata"), path.name
+            assert "references" not in front, path.name

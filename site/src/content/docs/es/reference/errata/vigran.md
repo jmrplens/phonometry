@@ -2,6 +2,8 @@
 title: "Erratas de Vigran (2008)"
 description: "Erratas de Vigran (2008): 3 defectos del texto impreso, con la evidencia y lo que hace phonometry con cada uno."
 searchTitle: ""
+corrects:
+  - "doi-10-1201-9781482266016"
 ---
 
 <!-- Generated from docs/ERRATA.es.md by scripts/generate_site_reports.py (`make site-reports`). Edit the source document, never this page. -->

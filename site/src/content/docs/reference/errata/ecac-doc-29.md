@@ -2,6 +2,8 @@
 title: "Errata in ECAC Doc 29"
 description: "Errata in ECAC Doc 29: 5 defects in the printed text, with the evidence and what phonometry does about each."
 searchTitle: ""
+corrects:
+  - "report-european-civil-aviation-conference-2026-report-on-standard-method-of-computing-noise-contours-around-civil-airports-volume-2-technical-guide"
 ---
 
 <!-- Generated from docs/ERRATA.md by scripts/generate_site_reports.py (`make site-reports`). Edit the source document, never this page. -->

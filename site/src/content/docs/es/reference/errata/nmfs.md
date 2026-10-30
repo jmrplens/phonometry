@@ -2,6 +2,8 @@
 title: "Erratas de NMFS (2024)"
 description: "Erratas de NMFS (2024): 1 defecto del texto impreso, con la evidencia y lo que hace phonometry al respecto."
 searchTitle: ""
+corrects:
+  - "report-national-marine-fisheries-service-2024-2024-update-to-technical-guidance-for-assessing-the-effects-of-anthropogenic-sound-on-marine-mammal-hearing-version-3-0"
 ---
 
 <!-- Generated from docs/ERRATA.es.md by scripts/generate_site_reports.py (`make site-reports`). Edit the source document, never this page. -->

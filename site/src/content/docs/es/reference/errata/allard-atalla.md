@@ -2,6 +2,8 @@
 title: "Erratas de Allard & Atalla (2009)"
 description: "Erratas de Allard & Atalla (2009): 8 defectos del texto impreso, con la evidencia y lo que hace phonometry con cada uno."
 searchTitle: ""
+corrects:
+  - "doi-10-1002-9780470747339"
 ---
 
 <!-- Generated from docs/ERRATA.es.md by scripts/generate_site_reports.py (`make site-reports`). Edit the source document, never this page. -->

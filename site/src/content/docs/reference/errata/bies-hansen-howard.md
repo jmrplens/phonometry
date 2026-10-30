@@ -2,6 +2,8 @@
 title: "Errata in Bies, Hansen & Howard (2017)"
 description: "Errata in Bies, Hansen & Howard (2017): 4 defects in the printed text, with the evidence and what phonometry does about each."
 searchTitle: ""
+corrects:
+  - "doi-10-1201-9781351228152"
 ---
 
 <!-- Generated from docs/ERRATA.md by scripts/generate_site_reports.py (`make site-reports`). Edit the source document, never this page. -->

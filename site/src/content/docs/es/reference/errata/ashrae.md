@@ -2,6 +2,8 @@
 title: "Erratas de ASHRAE (2019)"
 description: "Erratas de ASHRAE (2019): 1 defecto del texto impreso, con la evidencia y lo que hace phonometry al respecto."
 searchTitle: ""
+corrects:
+  - "report-american-society-of-heating-2019-ashrae-handbook-hvac-applications-edicion-si-capitulo-49-noise-and-vibration-control"
 ---
 
 <!-- Generated from docs/ERRATA.es.md by scripts/generate_site_reports.py (`make site-reports`). Edit the source document, never this page. -->

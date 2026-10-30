@@ -2,6 +2,8 @@
 title: "Erratas de la Directiva (UE) 2015/996"
 description: "Erratas de la Directiva (UE) 2015/996: 6 defectos del texto impreso, con la evidencia y lo que hace phonometry con cada uno."
 searchTitle: ""
+corrects:
+  - "std-directive-eu-2015-996"
 ---
 
 <!-- Generated from docs/ERRATA.es.md by scripts/generate_site_reports.py (`make site-reports`). Edit the source document, never this page. -->

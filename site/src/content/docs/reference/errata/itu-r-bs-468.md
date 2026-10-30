@@ -2,6 +2,8 @@
 title: "Errata in ITU-R BS.468"
 description: "Errata in ITU-R BS.468: 1 defect in the printed text, with the evidence and what phonometry does about it."
 searchTitle: ""
+corrects:
+  - "std-recommendation-itu-r-bs-468-4"
 ---
 
 <!-- Generated from docs/ERRATA.md by scripts/generate_site_reports.py (`make site-reports`). Edit the source document, never this page. -->

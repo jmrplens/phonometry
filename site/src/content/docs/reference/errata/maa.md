@@ -2,6 +2,8 @@
 title: "Errata in Maa (1998)"
 description: "Errata in Maa (1998): 1 defect in the printed text, with the evidence and what phonometry does about it."
 searchTitle: ""
+corrects:
+  - "doi-10-1121-1-423870"
 ---
 
 <!-- Generated from docs/ERRATA.md by scripts/generate_site_reports.py (`make site-reports`). Edit the source document, never this page. -->

@@ -2,6 +2,8 @@
 title: "Errata in Rossing (2014)"
 description: "Errata in Rossing (2014): 6 defects in the printed text, with the evidence and what phonometry does about each."
 searchTitle: ""
+corrects:
+  - "doi-10-1007-978-1-4939-0755-7"
 ---
 
 <!-- Generated from docs/ERRATA.md by scripts/generate_site_reports.py (`make site-reports`). Edit the source document, never this page. -->

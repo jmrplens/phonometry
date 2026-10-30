@@ -2,6 +2,8 @@
 title: "Erratas del Real Decreto 1367/2007"
 description: "Erratas del Real Decreto 1367/2007: 1 defecto del texto impreso, con la evidencia y lo que hace phonometry al respecto."
 searchTitle: ""
+corrects:
+  - "std-rd-1367-2007-boe-a-2007-18397-texto-consolidado"
 ---
 
 <!-- Generated from docs/ERRATA.es.md by scripts/generate_site_reports.py (`make site-reports`). Edit the source document, never this page. -->

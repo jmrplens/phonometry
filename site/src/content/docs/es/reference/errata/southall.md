@@ -2,6 +2,8 @@
 title: "Erratas de Southall et al. (2019)"
 description: "Erratas de Southall et al. (2019): 1 defecto del texto impreso, con la evidencia y lo que hace phonometry al respecto."
 searchTitle: ""
+corrects:
+  - "doi-10-1578-am-45-2-2019-125"
 ---
 
 <!-- Generated from docs/ERRATA.es.md by scripts/generate_site_reports.py (`make site-reports`). Edit the source document, never this page. -->

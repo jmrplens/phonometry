@@ -670,7 +670,10 @@ its Spanish twin and its docs/ mirror. Where the registry spells a cited
 document otherwise than the guides and the two are one text, add the
 spelling to `DESIGNATED_AS` instead; an adoption whose defects may be its
 own, a translation above all, is cited under its own designation
-([F59](docs/contributing/docs-and-figures.md#f59)).
+([F59](docs/contributing/docs-and-figures.md#f59)). The generator writes
+those works into each page's `corrects` field, and the site names them in the
+page's structured data as what the page is about, beside the software; a work
+the bibliography of the page's language does not define stops the site build.
 
 A second script is a contributor tool rather than a gate:
 

@@ -10,12 +10,19 @@ sources themselves: a worked example that contradicts its own normative
 clause, a constant with a digit dropped in typesetting, a cross-reference that
 points at the wrong equation.
 
-This is the registry of those findings. Each entry names the printed
-edition and the exact location, quotes what the document says, shows why it
-cannot be right, gives the independent evidence, and states which reading the
-library implements and which regression test pins it. A defect listed here is
-never a defect of the *method*: in every case the intended reading could be
-established from the document itself or from physics.
+This is the registry of those findings. It covers every kind of published
+source the library implements from: standards (ISO, IEC, EN), guidance
+documents and technical reports (EASA, ECAC, NRL), textbooks and journal
+papers. Non-normative sources are marked as such in their entry.
+
+Each entry names the printed edition and the exact location, quotes what the
+document says, shows why it cannot be right, gives the independent evidence,
+and states which reading the library implements. Where that reading changes a
+number the library reports, the entry names the check or regression test that
+pins it; where the defect is a label, a cross-reference or a table the library
+never reads, the entry records that no change was required. A defect listed
+here is never a defect of the *method*: in every case the intended reading
+could be established from the document itself or from physics.
 
 Read it alongside the [conformance report](/phonometry/reference/conformance/),
 which shows the numbers the library computes; the registry explains the
@@ -36,26 +43,6 @@ the two cannot disagree.
 
 import ErrataFamily from '../../../../components/ErrataFamily.astro';
 import ErrataRouter from '../../../../components/ErrataRouter.astro';
-
-During the clean-room implementation of this library, every formula, constant
-and worked example is re-derived and recomputed independently from the source
-documents. That process occasionally surfaces defects in the sources
-themselves: misprints, worked examples that contradict their own normative
-text, and ambiguous wording. This file records each confirmed case with the
-evidence, what the library does about it, and whether it has been reported.
-
-The registry covers every kind of published source the library implements
-from: standards (ISO, IEC, EN), guidance documents and technical reports
-(EASA, ECAC, NRL), textbooks and journal papers. Non-normative sources are
-marked as such in their entry.
-
-Entries describe the specific printed editions cited. A defect listed here is
-not a defect of the method; in every case the intended reading could be
-established from the document itself or from physics, and the library
-implements that reading. Where the reading changes a number the library
-reports, the entry names the check or test that pins it; where the defect is a
-label, a cross-reference or a table the library never reads, the entry records
-that no change was required.
 
 Status legend: **unreported** (recorded here only) / **reported** (submitted
 to the issuing body, with date and reference).

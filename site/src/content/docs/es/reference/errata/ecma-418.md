@@ -2,6 +2,9 @@
 title: "Erratas de ECMA-418"
 description: "Erratas de ECMA-418: 8 defectos del texto impreso, con la evidencia y lo que hace phonometry con cada uno."
 searchTitle: ""
+corrects:
+  - "std-ecma-418-1-2024-3-ed"
+  - "std-ecma-418-2-2025"
 ---
 
 <!-- Generated from docs/ERRATA.es.md by scripts/generate_site_reports.py (`make site-reports`). Edit the source document, never this page. -->

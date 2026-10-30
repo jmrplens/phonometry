@@ -2,6 +2,8 @@
 title: "Errata in Long (2014)"
 description: "Errata in Long (2014): 4 defects in the printed text, with the evidence and what phonometry does about each."
 searchTitle: ""
+corrects:
+  - "doi-10-1016-c2012-0-03257-5"
 ---
 
 <!-- Generated from docs/ERRATA.md by scripts/generate_site_reports.py (`make site-reports`). Edit the source document, never this page. -->

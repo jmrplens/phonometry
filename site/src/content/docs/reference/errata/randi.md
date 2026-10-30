@@ -2,6 +2,8 @@
 title: "Errata in RANDI 3.1 Physics Description"
 description: "Errata in RANDI 3.1 Physics Description: 1 defect in the printed text, with the evidence and what phonometry does about it."
 searchTitle: ""
+corrects:
+  - "report-breeding-1996-research-ambient-noise-directionality-randi-3-1-physics-description"
 ---
 
 <!-- Generated from docs/ERRATA.md by scripts/generate_site_reports.py (`make site-reports`). Edit the source document, never this page. -->

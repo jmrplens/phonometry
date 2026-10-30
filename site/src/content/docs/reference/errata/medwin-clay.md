@@ -2,6 +2,8 @@
 title: "Errata in Medwin & Clay (1998)"
 description: "Errata in Medwin & Clay (1998): 2 defects in the printed text, with the evidence and what phonometry does about each."
 searchTitle: ""
+corrects:
+  - "book-medwin-1998-fundamentals-of-acoustical-oceanography"
 ---
 
 <!-- Generated from docs/ERRATA.md by scripts/generate_site_reports.py (`make site-reports`). Edit the source document, never this page. -->

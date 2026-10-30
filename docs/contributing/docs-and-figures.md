@@ -1401,7 +1401,7 @@ ISO 9613-1 prints a = 2.2560 × 10⁻⁵ m⁻¹ (`a = 2.256e-5`)
 <a id="f59"></a>
 ### F59. Add or remove an errata entry in docs/ERRATA.md and docs/ERRATA.es.md together
 
-**Why.** The Spanish register is translated entry for entry, and the evidence pages are generated from both. Each page names the documents it corrects by their bibliography entry, so the generator stops on a document no page cites (`--list-unmatched` lists them).
+**Why.** The Spanish register is translated entry for entry, and the evidence pages are generated from both. Each page names the documents it corrects by their bibliography entry, in its `corrects` field and in its structured data, where they are what the page is about beside the software; so the generator stops on a document no page cites (`--list-unmatched` lists them), and the site build on one its bibliography does not define. Until they did, each of the 95 family pages per language was about phonometry alone for a search engine.
 
 **Do**
 
@@ -1415,9 +1415,9 @@ One commit adds the entry to docs/ERRATA.md and its translation, same position, 
 A commit that adds the English entry and leaves the Spanish register for later.
 ```
 
-**Enforced by:** `make site-reports`, `CI: Generated evidence pages up to date`
+**Enforced by:** `make site-reports`, `CI: Generated evidence pages up to date`, `tests/test_generate_site_reports.py::test_every_family_page_names_the_works_it_corrects`, `tests/test_generate_site_reports.py::test_the_index_says_each_thing_of_its_introduction_once`, `site/scripts/check-structured-data.mjs`, `CI: Check the structured data every page publishes`
 
-**Exceptions.** A document no guide implements goes in the references of the bibliography page itself. Where the registry writes a cited document otherwise than the guides do, its spelling goes in `DESIGNATED_AS` in `scripts/generate_site_reports.py`, never a second entry, and only for the same text: one amendment written two ways, or an identical-text adoption whose defect the registry shows in the original. A translation or any other adoption whose errata may be its own is cited under its own designation, in an entry of its own, marked `implemented: false` when the guide implements the original. A book or a paper's family names its works in its `SOURCES` row.
+**Exceptions.** A document no guide implements goes in the references of the bibliography page itself. Where the registry writes a cited document otherwise than the guides do, its spelling goes in `DESIGNATED_AS` in `scripts/generate_site_reports.py`, never a second entry, and only for the same text: one amendment written two ways, or an identical-text adoption whose defect the registry shows in the original. A translation or any other adoption whose errata may be its own is cited under its own designation, in an entry of its own, marked `implemented: false` when the guide implements the original. A book or a paper's family names its works in its `SOURCES` row. The generator writes `corrects`, never `references`, on an errata page: references would also make its chips and its search tokens and rank it with the guides written to the document. The registry's index opens with an introduction of its own, so the generator transplants only the paragraphs of the registry's introduction the index does not say (`said_on_index` in the generator, each by its opening words and the words the index says it in); a paragraph added to the registry's introduction reaches the index, and the run stops when the index no longer says one it leaves out.
 
 ## Clip frames
 

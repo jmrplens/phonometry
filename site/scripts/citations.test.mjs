@@ -15,6 +15,7 @@ import { test } from 'node:test';
 import {
   citationsFor,
   citedWorks,
+  correctedWorks,
   englishStandardIds,
   referenceId,
   referenceNode,
@@ -362,4 +363,32 @@ test('two works sharing a base designation and a year pass only when listed with
     () => citedWorks(apart, EN, { separateStandards: listed }),
     /lists "ICAO Annex 16, Vol\. I", "ICAO Annex 16, Vol\. II" as separate works, and no two of them share a base and a year any more/,
   );
+});
+
+test('an errata page names each work it corrects as the bibliography of its language describes it', () => {
+  const pages = [
+    { id: 'signals/levels', references: [iso('ISO 1:2000', { note: 'What the guide implements.', primary: true }), paper] },
+    { id: 'es/signals/levels', references: [iso('ISO 1:2000', { note: 'Lo que implementa la guía.' })] },
+  ];
+  const english = citedWorks(pages.filter((page) => !page.id.startsWith('es/')), EN);
+  const named = correctedWorks(['std-iso-1-2000', referenceId(paper, EN).split('#')[1]], english, EN);
+  assert.deepEqual(named, [referenceStub(pages[0].references[0], EN), referenceStub(paper, EN)]);
+  // A stub names the work and says nothing of the page that cites it.
+  assert.equal(named[0].description, undefined);
+  assert.equal(named[0]['@id'], `${EN}#std-iso-1-2000`);
+
+  const spanish = citedWorks(pages.filter((page) => page.id.startsWith('es/')), ES);
+  assert.equal(correctedWorks(['std-iso-1-2000'], spanish, ES)[0]['@id'], `${ES}#std-iso-1-2000`);
+  assert.deepEqual(correctedWorks([], english, EN), []);
+});
+
+test('an errata page that corrects a work the bibliography does not define stops the build, naming it', () => {
+  const english = citedWorks([{ id: 'signals/levels', references: [iso('ISO 1:2000')] }], EN);
+  assert.throws(
+    () => correctedWorks(['std-iso-1-2000', 'std-iso-9-1999', 'doi-10-1000-none'], english, EN),
+    /corrects 2 work\(s\) the bibliography at .* does not define: std-iso-9-1999, doi-10-1000-none/,
+  );
+  // Each language's bibliography is a set of works of its own: a work only
+  // English pages cite is not on the Spanish one.
+  assert.throws(() => correctedWorks(['std-iso-1-2000'], citedWorks([], ES), ES), /does not define: std-iso-1-2000/);
 });

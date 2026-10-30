@@ -28,7 +28,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 import pytest
-from llms_dump import CONTENT_ROOT, Dump, site_dump
+from llms_dump import CONTENT_ROOT, FULL_TEXT_KINDS, Dump, page_kind, site_dump
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
@@ -39,6 +39,11 @@ import yaml
 
 if TYPE_CHECKING:
     from guard_caches import FreshCaches
+
+#: The kind of each route, as site/src/lib/page-markdown.mjs ``pageKind`` gives
+#: it; site/src/lib/agent-md/test/dump.test.mjs holds ``pageKind`` to the same
+#: table.
+PAGE_KINDS = ROOT / "site" / "src" / "lib" / "agent-md" / "test" / "page-kinds.json"
 
 
 def _shard_of_links(line: str) -> str:
@@ -625,3 +630,23 @@ def test_the_build_writes_what_the_site_publishes_and_retires_stale_shards(
     assert (tmp_path / "llms.txt").read_text(encoding="utf-8") == (
         public / "llms.txt"
     ).read_text(encoding="utf-8")
+
+
+def test_the_test_dumps_give_every_route_the_kind_the_site_gives_it() -> None:
+    """The fake dumps class each route as ``agent-md.mjs --dump`` would.
+
+    ``tests/llms_dump.py`` ports ``pageKind`` to Python to write dumps with no
+    Node, and a port drifts: a route the site came to class otherwise would
+    still be carried, or left out, by every dump these tests read. The site's
+    function and this port answer to one table.
+    """
+    data = json.loads(PAGE_KINDS.read_text(encoding="utf-8"))
+    table: dict[str, str] = data["routes"]
+    assert set(table.values()) == llms.KINDS
+    assert set(data["fullTextKinds"]) == FULL_TEXT_KINDS
+    wrong = {
+        route: (page_kind(route), kind)
+        for route, kind in table.items()
+        if page_kind(route) != kind
+    }
+    assert not wrong, f"page_kind disagrees with the site (got, wanted): {wrong}"

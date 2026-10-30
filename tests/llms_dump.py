@@ -41,7 +41,12 @@ _FRONTMATTER = re.compile(r"^---\r?\n(.*?)\r?\n---(?:\r?\n|$)", re.DOTALL)
 
 
 def page_kind(route: str) -> str:
-    """The kind of a route, as site/src/lib/page-markdown.mjs ``pageKind`` says."""
+    """The kind of a route, as site/src/lib/page-markdown.mjs ``pageKind`` says.
+
+    A port, held with ``pageKind`` itself to one table of routes and kinds
+    (site/src/lib/agent-md/test/page-kinds.json) by
+    tests/test_generate_llms.py and site/src/lib/agent-md/test/dump.test.mjs.
+    """
     english = "" if route == "es" else route.removeprefix("es/")
     if english == "":
         return "home"

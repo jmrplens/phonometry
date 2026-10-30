@@ -1,0 +1,28 @@
+{
+  "about": "The kind of page each route is, as src/lib/page-markdown.mjs pageKind says. The Python port that writes test dumps (tests/llms_dump.py page_kind) is held to the same table, by src/lib/agent-md/test/dump.test.mjs and by tests/test_generate_llms.py. Routes are written as routes.json writes them: no slashes around them. fullTextKinds are the kinds whose copies a dump holds (FULL_TEXT_KINDS in both).",
+  "fullTextKinds": ["guide", "catalogue", "errata-family"],
+  "routes": {
+    "": "home",
+    "es": "home",
+    "reference": "guide",
+    "reference/api": "api",
+    "reference/api/filters": "api",
+    "reference/api/filters/octave": "api",
+    "es/reference/api/filters": "api",
+    "reference/apis": "guide",
+    "reference/catalogues": "guide",
+    "reference/catalogues/solids": "catalogue",
+    "es/reference/catalogues/solids": "catalogue",
+    "reference/catalogues/solids/notes": "guide",
+    "reference/errata": "guide",
+    "reference/errata/iec": "errata-family",
+    "es/reference/errata/iec": "errata-family",
+    "reference/errata/iec/notes": "guide",
+    "reference/conformance": "guide",
+    "reference/glossary": "guide",
+    "start/upgrading": "guide",
+    "signals/levels/levels": "guide",
+    "es/signals/levels/levels": "guide",
+    "estimation/levels": "guide"
+  }
+}

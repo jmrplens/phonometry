@@ -26,11 +26,15 @@
 //       standards it implements and the path of its copy, and under
 //       <dir>/<route>/index.md the copy of every page whose whole text the
 //       llms files carry (`FULL_TEXT_KINDS`: the guides, the catalogues and
-//       the errata families, in English). The directory is emptied first, and
-//       a directory that holds anything but a previous dump is refused.
+//       the errata families, in English). The directory is emptied first, so
+//       one that holds anything but an earlier dump (its routes.json and the
+//       copies it lists, at whatever depth) is refused before a page is
+//       rendered.
 //       `--undated` leaves out the two dated header lines, `Published:` and
 //       `Updated:`, which llms.txt does not state and which cost a question to
-//       git per page: `make llms` writes llms.txt alone and passes it.
+//       git per page: `make llms` writes llms.txt alone and passes it. It is
+//       refused with `--public`, since the copies the site publishes state
+//       their dates.
 //       With `--public` in the same run, both are written from one rendering,
 //       so the llms files the build publishes carry the copies byte for byte
 //       (package.json `prebuild`).
@@ -45,7 +49,7 @@
 //       Prints one page's copy: `signals/filters/filter-banks`,
 //       `es/signals/filters/filter-banks`, or `` / `es` for the two homes.
 //       Issues go to stderr, and any issue makes the exit status 1.
-import { existsSync, mkdirSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { dirname, join, relative, resolve, sep } from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
@@ -78,7 +82,7 @@ async function pageDates() {
 }
 
 /** The name of the file of a dump that lists its routes. */
-const ROUTES_FILE = 'routes.json';
+export const ROUTES_FILE = 'routes.json';
 
 /**
  * Whether a route is English: the English tree is the site's root, and the
@@ -95,9 +99,10 @@ const isEnglish = (route) => route !== 'es' && !route.startsWith('es/');
  * @param {string} route
  * @param {string | null} copy  The copy's path in the dump, or nothing for a
  *   page whose text the llms files do not carry.
+ * @param {string} contentDir
  */
-function routeEntry(file, route, copy) {
-  const { data } = readEntry(file);
+function routeEntry(file, route, copy, contentDir) {
+  const { data } = readEntry(file, contentDir);
   const references = /** @type {import('../src/lib/reference-chips.ts').Reference[] | undefined} */ (data.references);
   return {
     route,
@@ -110,41 +115,85 @@ function routeEntry(file, route, copy) {
 }
 
 /**
- * Empties a dump directory before a run writes it, and refuses one that holds
- * anything but a previous dump: the run deletes what is there.
+ * Why a directory cannot take a dump, or nothing when it can: a run empties
+ * the directory before it writes, so it takes only a new directory, an empty
+ * one, or one that holds an earlier dump and nothing else, which is its
+ * routes.json and the copies that routes.json lists: every file below it, at
+ * any depth, is one of those.
+ * Asked before a page is rendered, so a refused directory costs nothing.
  *
  * @param {string} dir
- * @returns {boolean}  False when the directory is refused.
+ * @returns {string | undefined}
  */
-function clearDump(dir) {
-  if (!existsSync(dir)) return true;
-  const entries = readdirSync(dir);
-  if (entries.length > 0 && !entries.includes(ROUTES_FILE)) {
-    console.error(`[agent-md] --dump ${dir} holds files and no ${ROUTES_FILE}: not a dump this command wrote, so it is left alone. Name an empty or new directory.`);
-    return false;
+export function dumpRefusal(dir) {
+  if (!existsSync(dir)) return undefined;
+  const leave = 'so it is left alone. Name an empty or new directory, or one a dump was written to.';
+  if (!statSync(dir).isDirectory()) return `--dump ${dir} is a file, not a directory, ${leave}`;
+  const entries = readdirSync(dir, { withFileTypes: true });
+  if (entries.length === 0) return undefined;
+  const listing = join(dir, ROUTES_FILE);
+  if (!entries.some((entry) => entry.name === ROUTES_FILE && entry.isFile())) {
+    return `--dump ${dir} holds files and no ${ROUTES_FILE}, so it is not a dump this command wrote, ${leave}`;
   }
-  rmSync(dir, { recursive: true, force: true });
-  return true;
+  let copies;
+  try {
+    const { pages } = JSON.parse(readFileSync(listing, 'utf8'));
+    copies = new Set(pages.filter((page) => typeof page.copy === 'string').map((page) => page.copy));
+  } catch (error) {
+    return `--dump ${dir} holds a ${ROUTES_FILE} this command cannot read (${error.message}), ${leave}`;
+  }
+  // Every file below the directory, at any depth, is one the listing names: a
+  // folder that a route writes into can still hold a file no route wrote, and
+  // the dump is removed whole before it is written again.
+  /** @type {string[]} */
+  const foreign = [];
+  const walk = (current, prefix) => {
+    for (const entry of readdirSync(current, { withFileTypes: true })) {
+      const path = prefix ? `${prefix}/${entry.name}` : entry.name;
+      if (entry.isDirectory()) walk(join(current, entry.name), path);
+      else if (path !== ROUTES_FILE && !copies.has(path)) foreign.push(path);
+    }
+  };
+  walk(dir, '');
+  foreign.sort();
+  if (foreign.length > 0) {
+    return `--dump ${dir} holds ${foreign.join(', ')}, which no route of its ${ROUTES_FILE} writes, so it is more than an earlier dump, ${leave}`;
+  }
+  return undefined;
 }
 
 /**
  * Writes every page's copy under `publicOut`, and the English pages the llms
  * files carry, with routes.json, under `dumpDir`; either may be left out.
  *
- * @param {{ publicOut?: string, dumpDir?: string, undated?: boolean }} options
+ * @param {{
+ *   publicOut?: string,
+ *   dumpDir?: string,
+ *   undated?: boolean,
+ *   contentDir?: string,
+ *   dates?: import('../src/lib/agent-md/page.mjs').PageDates,
+ * }} options  `contentDir` is the content collection the pages are read
+ *   from (the site's own by default); `dates` the dates the headers state,
+ *   which by default are asked of git, and which `undated` leaves out.
  * @returns {Promise<number>}  The exit status.
  */
-async function write({ publicOut, dumpDir, undated = false }) {
+export async function writePages({ publicOut, dumpDir, undated = false, contentDir = CONTENT_DIR, dates: given }) {
+  const refusal = dumpDir && dumpRefusal(dumpDir);
+  if (refusal) {
+    console.error(`[agent-md] ${refusal}`);
+    return 2;
+  }
   const registry = await loadRegistry();
-  const all = pageFiles();
-  const routeOfFile = (file) => routeOf(relative(CONTENT_DIR, file).split(sep).join('/'));
+  const all = pageFiles(contentDir);
+  const routeOfFile = (file) => routeOf(relative(contentDir, file).split(sep).join('/'));
+  const shownFile = (file) => relative(contentDir, file).split(sep).join('/');
   const carried = (route) => isEnglish(route) && FULL_TEXT_KINDS.includes(pageKind(route));
   // A dump alone renders only the pages it carries; the copies for public/
   // need every page, and a run that writes both renders each page once.
   const files = publicOut ? all : all.filter((file) => carried(routeOfFile(file)));
-  const dates = undated ? undefined : await pageDates();
+  const dates = undated ? undefined : (given ?? (await pageDates()));
   // What each page's "Verified by" line states, from the join the line is drawn by.
-  const verified = verifiedProvider();
+  const verified = verifiedProvider(contentDir);
   /** @type {Map<string, string>} */
   const copies = new Map();
   /** @type {Map<string, string>} */
@@ -152,10 +201,10 @@ async function write({ publicOut, dumpDir, undated = false }) {
   /** @type {string[]} */
   const problems = [];
   for (const file of files) {
-    const { route, markdown, issues } = await pageMarkdown(file, { registry, dates, verified });
+    const { route, markdown, issues } = await pageMarkdown(file, { registry, dates, contentDir, verified });
     if (!hasMarkdownCopy(route)) continue;
     for (const issue of issues) {
-      problems.push(`  ${shown(file)}${issue.line ? `:${issue.line}` : ''}  [${issue.kind}] ${issue.message}`);
+      problems.push(`  ${shownFile(file)}${issue.line ? `:${issue.line}` : ''}  [${issue.kind}] ${issue.message}`);
     }
     if (publicOut) copies.set(join(publicOut, route, 'index.md'), markdown);
     if (dumpDir && carried(route)) dumped.set(route, markdown);
@@ -175,7 +224,14 @@ async function write({ publicOut, dumpDir, undated = false }) {
     for (const path of foreign) console.error(`  ${path}`);
     return 2;
   }
-  if (dumpDir && !clearDump(dumpDir)) return 2;
+  // Asked again before the directory is emptied, since it can have changed
+  // while the pages were rendered.
+  const late = dumpDir && dumpRefusal(dumpDir);
+  if (late) {
+    console.error(`[agent-md] ${late}`);
+    return 2;
+  }
+  if (dumpDir) rmSync(dumpDir, { recursive: true, force: true });
   if (publicOut) {
     mkdirSync(publicOut, { recursive: true });
     removeWrittenCopies(publicOut);
@@ -196,7 +252,7 @@ async function write({ publicOut, dumpDir, undated = false }) {
         mkdirSync(dirname(target), { recursive: true });
         writeFileSync(target, dumped.get(route), 'utf8');
       }
-      routes.push(routeEntry(file, route, copy));
+      routes.push(routeEntry(file, route, copy, contentDir));
     }
     routes.sort((a, b) => (a.route < b.route ? -1 : a.route > b.route ? 1 : 0));
     mkdirSync(dumpDir, { recursive: true });
@@ -298,40 +354,54 @@ async function page(route, flavour) {
   return issues.length > 0 ? 1 : 0;
 }
 
-const args = process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url) ? process.argv.slice(2) : null;
-const option = (name) => {
-  const at = args.indexOf(name);
-  return at === -1 ? undefined : args[at + 1];
-};
-if (args === null) {
-  // Imported, by a test: nothing runs.
-} else if (args.includes('--public') || args.includes('--dump')) {
-  const dump = option('--dump');
-  if (args.includes('--dump') && !dump) {
-    console.error('--dump needs a directory');
-    process.exit(2);
+/**
+ * Runs the command line.
+ *
+ * @param {readonly string[]} args
+ * @returns {Promise<number>}  The exit status.
+ */
+async function main(args) {
+  // The value an option takes, or nothing when the option is absent or the
+  // word after it is another option: `--dump --undated` names no directory.
+  const option = (name) => {
+    const at = args.indexOf(name);
+    const value = at === -1 ? undefined : args[at + 1];
+    return value === undefined || value.startsWith('--') ? undefined : value;
+  };
+  if (args.includes('--public') || args.includes('--dump')) {
+    const dump = option('--dump');
+    if (args.includes('--dump') && !dump) {
+      console.error('--dump needs a directory');
+      return 2;
+    }
+    if (args.includes('--undated') && args.includes('--public')) {
+      console.error('--undated is for a dump alone: the copies the site publishes state their dates');
+      return 2;
+    }
+    return writePages({
+      publicOut: args.includes('--public') ? resolve(option('--out') ?? join(SITE_DIR, 'public')) : undefined,
+      dumpDir: dump ? resolve(dump) : undefined,
+      undated: args.includes('--undated'),
+    });
   }
-  if (args.includes('--undated') && args.includes('--public')) {
-    console.error('--undated is for a dump alone: the copies the site publishes state their dates');
-    process.exit(2);
+  if (args.includes('--census')) {
+    await census();
+    return 0;
   }
-  process.exitCode = await write({
-    publicOut: args.includes('--public') ? resolve(option('--out') ?? join(SITE_DIR, 'public')) : undefined,
-    dumpDir: dump ? resolve(dump) : undefined,
-    undated: args.includes('--undated'),
-  });
-} else if (args.includes('--census')) {
-  await census();
-} else if (args.includes('--page')) {
-  const flavour = option('--flavour') ?? 'agent';
-  if (flavour !== 'agent' && flavour !== 'github') {
-    console.error(`--flavour is agent or github, not ${flavour}`);
-    process.exit(2);
+  if (args.includes('--page')) {
+    const flavour = option('--flavour') ?? 'agent';
+    if (flavour !== 'agent' && flavour !== 'github') {
+      console.error(`--flavour is agent or github, not ${flavour}`);
+      return 2;
+    }
+    return page(option('--page') ?? '', flavour);
   }
-  process.exitCode = await page(option('--page') ?? '', flavour);
-} else {
   console.error(
     'usage: node scripts/agent-md.mjs [--public [--out <dir>]] [--dump <dir> [--undated]] | --census | --page <route> [--flavour agent|github]',
   );
-  process.exitCode = 2;
+  return 2;
+}
+
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  process.exitCode = await main(process.argv.slice(2));
 }

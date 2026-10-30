@@ -29,6 +29,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 from llms_dump import CONTENT_ROOT, FULL_TEXT_KINDS, Dump, page_kind, site_dump
+from packaging.version import Version
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
@@ -195,7 +196,10 @@ _UNDESCRIBED = {
 
 
 @pytest.mark.whole_tree
-def test_every_page_line_says_what_the_page_is_about() -> None:
+def test_every_page_line_says_what_the_page_is_about(
+    site: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(llms, "PAGES", site)
     section = ""
     described: set[str] = set()
     for line in (ROOT / "llms.txt").read_text(encoding="utf-8").splitlines():
@@ -211,7 +215,9 @@ def test_every_page_line_says_what_the_page_is_about() -> None:
         route = found.group(1)
         assert line[found.end() :].startswith(llms._description(route)), (section, line)
         described.add(route)
-    assert {route for _, route in llms._routes()} <= described
+    # The errata families are listed with their entry counts under their own
+    # heading (see the test of the errata lines); every guide says what it is.
+    assert {r for r in llms._routes() if llms._page(r).kind == "guide"} <= described
 
 
 def test_an_errata_line_counts_the_entries_the_register_files_under_its_page(
@@ -306,6 +312,9 @@ def test_the_index_is_held_to_its_budget() -> None:
         llms._check_index_budget("x" * (llms.LLMS_TXT_LIMIT_BYTES + 1))
     committed = (ROOT / "llms.txt").read_bytes()
     assert len(committed) <= llms.LLMS_TXT_LIMIT_BYTES
+
+
+_NODE = shutil.which("node")
 
 
 def test_the_copies_sentence_names_the_pages_the_site_does_not_translate(
@@ -483,6 +492,7 @@ def site(tmp_path_factory: pytest.TempPathFactory) -> Path:
     return root
 
 
+@pytest.mark.whole_tree
 def test_every_page_the_llms_files_carry_is_in_exactly_one_shard(
     site: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -515,6 +525,7 @@ def test_every_page_the_llms_files_carry_is_in_exactly_one_shard(
     assert {pages[route].kind for route in errata[1:]} == {"errata-family"}
 
 
+@pytest.mark.whole_tree
 def test_a_page_left_out_of_every_shard_or_put_in_two_is_refused(
     site: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -531,6 +542,7 @@ def test_a_page_left_out_of_every_shard_or_put_in_two_is_refused(
         llms._check_every_page_in_one_shard(twice)
 
 
+@pytest.mark.whole_tree
 def test_llms_full_carries_every_page_whole_after_the_index(
     site: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -549,6 +561,7 @@ def test_llms_full_carries_every_page_whole_after_the_index(
     )
 
 
+@pytest.mark.whole_tree
 def test_a_dump_older_than_the_site_is_refused(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, site: Path
 ) -> None:
@@ -590,6 +603,7 @@ def test_a_missing_dump_or_a_text_that_is_no_copy_is_refused(
     assert copy.rest == "The body."
 
 
+@pytest.mark.whole_tree
 def test_the_build_writes_what_the_site_publishes_and_retires_stale_shards(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, site: Path
 ) -> None:
@@ -650,3 +664,29 @@ def test_the_test_dumps_give_every_route_the_kind_the_site_gives_it() -> None:
         if page_kind(route) != kind
     }
     assert not wrong, f"page_kind disagrees with the site (got, wanted): {wrong}"
+
+
+_PRE_RELEASES = json.loads(
+    (ROOT / "site" / "src" / "data" / "pep440-pre-releases.json").read_text(
+        encoding="utf-8"
+    )
+)["cases"]
+
+
+@pytest.mark.parametrize(("version", "pre"), sorted(_PRE_RELEASES.items()))
+def test_a_version_is_a_pre_release_as_pep_440_and_packaging_say(
+    *, version: str, pre: bool
+) -> None:
+    """The table the site is tested on, and packaging's reading of PEP 440."""
+    assert llms._is_pre_release(version) is pre
+    assert Version(version).is_prerelease is pre
+
+
+def test_the_index_says_a_pre_release_is_not_on_pypi_yet_and_nothing_at_the_stamp() -> (
+    None
+):
+    said = "phonometry 4.0.0rc1 is a pre-release and is not on PyPI yet."
+    assert said in llms._summary("4.0.0rc1")
+    final = "\n".join(llms._summary("4.0.0"))
+    assert "not on PyPI" not in final
+    assert "pre-release" not in final

@@ -27,8 +27,12 @@ on:
       - ".github/brand/**"
       - "scripts/generate_llms.py"
       # generate_llms.py reads where a page's code fences open and close
-      # through this module, and cuts a shard by them.
+      # through this module, and cuts a shard by them; it reads the errata
+      # register and a page's markup through the other three.
       - "scripts/markdown_fences.py"
+      - "scripts/markdown_spans.py"
+      - "scripts/generate_site_reports.py"
+      - "scripts/ast_scan.py"
       # The other scripts the job runs: the overview and glossary mirror
       # checks before the build, and the static check of the examples the
       # llms files restate after it. A change to one that breaks the job has
@@ -38,6 +42,7 @@ on:
       - "scripts/mirror_overviews.py"
       - "scripts/mirror_glossary.py"
       - "scripts/check_doc_snippets.py"
+      - "scripts/check_conformance_claims.py"
       # The release commit and the package's own table.
       # site/src/data/citation.mjs reads CHANGELOG.md, CITATION.cff and
       # .zenodo.json from the repository root, and
@@ -76,9 +81,13 @@ on:
       - ".github/brand/**"
       - "scripts/generate_llms.py"
       - "scripts/markdown_fences.py"
+      - "scripts/markdown_spans.py"
+      - "scripts/generate_site_reports.py"
+      - "scripts/ast_scan.py"
       - "scripts/mirror_overviews.py"
       - "scripts/mirror_glossary.py"
       - "scripts/check_doc_snippets.py"
+      - "scripts/check_conformance_claims.py"
       - "VERSION"
       - "pyproject.toml"
       - "CHANGELOG.md"
@@ -429,6 +438,12 @@ jobs:
         # themselves run in Python CI (doc-snippets); this reads the copies for
         # the shadowed import that check refuses, without running them.
         run: python3 scripts/check_doc_snippets.py --static --restated site/dist
+      - name: Check the files the build restates the pages in state no count of standards
+        # The llms shards, llms-full.txt and every page's Markdown copy exist
+        # only in the build, so the refusal of a count of standards that the
+        # conformance job runs on a checkout cannot see them; this reads them
+        # where the build wrote them.
+        run: python3 scripts/check_conformance_claims.py --generated site/dist
 
       # Every page, component and script of the site type-checked in strict
       # mode. A catalogue row read through a field its table does not carry,

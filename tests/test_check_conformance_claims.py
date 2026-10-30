@@ -858,3 +858,55 @@ def test_the_retired_figure_is_published_nowhere() -> None:
             for lineno, phrase in ccc.figures_in(text, figures)
         ]
     assert found == []
+
+
+@pytest.mark.parametrize(
+    "relative",
+    ["llms/llms-signals.txt", "llms-full.txt", "signals/levels/index.md"],
+)
+def test_a_count_of_standards_in_a_file_the_site_build_writes_is_refused(
+    corpus: pathlib.Path,
+    tmp_path: pathlib.Path,
+    capsys: pytest.CaptureFixture[str],
+    relative: str,
+) -> None:
+    """The llms shards, llms-full.txt and the copies are written by the build.
+
+    A checkout holds none of them, so the refusal reads them where a build
+    put them (``--generated site/dist``, a step of the docs workflow after the
+    build): a generator that wrote a count of standards again would publish
+    it there and nowhere a checkout shows.
+    """
+    assert _run(corpus, "--write") == 0
+    capsys.readouterr()
+    dist = tmp_path / "dist"
+    _write(dist / "llms.txt", "# phonometry\n")
+    _write(
+        dist / relative,
+        f"It runs {TOTAL} conformance checks across {CITATION_GROUPS} standards.\n",
+    )
+    assert _run(corpus, "--generated", str(dist)) == 1
+    errors = capsys.readouterr().err
+    assert f"dist/{relative}:" in errors
+    assert f"counts standards in '{CITATION_GROUPS} standards'" in errors
+    _write(dist / relative, f"It runs {TOTAL} conformance checks.\n")
+    assert _run(corpus, "--generated", str(dist)) == 0
+
+
+def test_the_header_of_a_copy_is_not_read_as_prose(
+    corpus: pathlib.Path, tmp_path: pathlib.Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """A copy's header is fields, one per line.
+
+    A date ending in 12 above ``Standards:`` is no count of twelve standards.
+    """
+    assert _run(corpus, "--write") == 0
+    capsys.readouterr()
+    dist = tmp_path / "dist"
+    _write(dist / "llms.txt", "# phonometry\n")
+    _write(
+        dist / "signals" / "levels" / "index.md",
+        "# Levels\n\nUpdated: 2026-11-12\nStandards: IEC 61672-1:2013\n"
+        "Verified: 42 conformance checks (IEC 61672-1:2013)\n\n---\n\nThe body.\n",
+    )
+    assert _run(corpus, "--generated", str(dist)) == 0, capsys.readouterr().err

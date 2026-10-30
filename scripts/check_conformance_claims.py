@@ -210,10 +210,16 @@ _SENTENCE_END = re.compile(r"[.!?](?=\s)|\n[ \t]*\r?\n|</?p>")
 
 #: Generated files the count rewriting leaves alone and the refusal reads, as
 #: paths and as ``(directory, glob)`` pairs: the report's own headline, the
-#: agent files and the banner's words. A generator that wrote a count of
+#: agent index and the banner's words. A generator that wrote a count of
 #: standards again would publish it in one of them.
-GENERATED = ("docs/CONFORMANCE.md", "llms.txt", "llms-full.txt")
-GENERATED_GLOBS = (("site/public/llms", "*.txt"), (".github/badges", "*.svg"))
+GENERATED = ("docs/CONFORMANCE.md", "llms.txt")
+GENERATED_GLOBS = ((".github/badges", "*.svg"),)
+
+#: What a site build writes that a checkout does not hold, below the build's
+#: directory: the llms files and every page's Markdown copy, which restate the
+#: pages. ``--generated`` reads them there, after the build.
+BUILT = ("llms.txt", "llms-full.txt")
+BUILT_GLOBS = (("llms", "*.txt"), (".", "**/index.md"))
 
 #: Files whose counts are generated or quoted from a fixed historical context.
 EXCLUDED_NAMES = (
@@ -605,6 +611,62 @@ def generated_sources(root: pathlib.Path = ROOT) -> list[pathlib.Path]:
     return [path for path in found if path.is_file()]
 
 
+def built_sources(dist: pathlib.Path) -> list[pathlib.Path]:
+    """The files of a site build :func:`refusals` reads with ``--generated``.
+
+    :param dist: The build's directory, ``site/dist``.
+    :return: The ones that exist, in a stable order.
+    """
+    found = [dist / name for name in BUILT]
+    for directory, pattern in BUILT_GLOBS:
+        found += sorted((dist / directory).glob(pattern))
+    return [path for path in found if path.is_file()]
+
+
+def refused_in_build(
+    root: pathlib.Path, dist: pathlib.Path, expected: Mapping[str, int]
+) -> list[str]:
+    """Every count of standards a site build wrote into the files it restates.
+
+    :param root: Repository root, whose report the citation groups are read from.
+    :param dist: The build's directory.
+    :param expected: The authoritative counts, to name the replacement in.
+    :return: One printable diagnostic per refused phrase.
+    """
+    groups = citation_groups(root)
+    return [
+        f"{dist.name}/{path.relative_to(dist).as_posix()}:{lineno}: counts standards "
+        f"in {phrase!r}; that figure counted citation groups, so state the split "
+        f"the report makes: {replacement.format_map(expected)!r}"
+        for path in built_sources(dist)
+        for lineno, phrase, replacement in refused_in(
+            _without_header(_read(path)), groups
+        )
+    ]
+
+
+#: A field of a Markdown copy's header (``site/src/lib/agent-md/header.mjs``),
+#: ``Key: value`` on a line of its own, in a copy and in each copy the llms
+#: files carry.
+_HEADER_FIELD = re.compile(
+    r"^(?:Canonical|Language|Alternate|Version|Install|Pre-release|Author|"
+    r"Published|Updated|Standards|Verified|License|Summary): ",
+    re.MULTILINE,
+)
+
+
+def _without_header(text: str) -> str:
+    """A build's text with every header field of a copy blanked, lines kept.
+
+    A header is fields, not prose: a date that ends in digits above
+    ``Standards:``, read with the next line as the refusal reads wrapped
+    prose, is no count of standards.
+    """
+    return "\n".join(
+        "" if _HEADER_FIELD.match(line) else line for line in text.split("\n")
+    )
+
+
 def refusals(root: pathlib.Path, expected: Mapping[str, int]) -> list[str]:
     """Every count of standards published beside conformance wording.
 
@@ -710,8 +772,20 @@ def main(argv: Sequence[str] | None = None) -> int:
         default=ROOT,
         help="repository root to operate on (default: this checkout)",
     )
+    parser.add_argument(
+        "--generated",
+        type=pathlib.Path,
+        metavar="DIR",
+        help=(
+            "read instead the files a site build wrote into DIR (site/dist): "
+            "the llms files and every page's Markdown copy, which a checkout "
+            "does not hold, for a count of standards"
+        ),
+    )
     args = parser.parse_args(argv)
     root: pathlib.Path = args.root.resolve()
+    if args.generated is not None:
+        return _run_built(root=root, dist=args.generated.resolve())
 
     # Every failure that means "the CLAIMS table or the report format needs
     # attention" surfaces as a ValueError: a report whose headline no longer
@@ -723,6 +797,26 @@ def main(argv: Sequence[str] | None = None) -> int:
     except ValueError as error:
         print(error, file=sys.stderr)
         return 1
+
+
+def _run_built(*, root: pathlib.Path, dist: pathlib.Path) -> int:
+    """Body of :func:`main` with ``--generated``: the refusal on a build."""
+    files = built_sources(dist)
+    if not (dist / "llms.txt").is_file():
+        print(
+            f"{dist} holds no site build (no llms.txt): build the site first.",
+            file=sys.stderr,
+        )
+        return 2
+    problems = refused_in_build(root, dist, expected_counts(root))
+    for problem in problems:
+        print(problem, file=sys.stderr)
+    if problems:
+        return 1
+    print(
+        f"The {len(files)} files the build wrote into {dist.name}/ state no count of standards."
+    )
+    return 0
 
 
 def _run(*, writing: bool, root: pathlib.Path) -> int:

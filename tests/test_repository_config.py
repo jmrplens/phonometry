@@ -2708,3 +2708,21 @@ def test_no_config_file_takes_the_place_of_pyproject() -> None:
     """
     present = [name for name in _MYPY_SHADOWING_CONFIGS if (_ROOT / name).exists()]
     assert not present, f"{present} would replace [tool.mypy] in pyproject.toml"
+
+
+@pytest.mark.git_checkout
+def test_no_llms_file_the_site_build_writes_is_tracked() -> None:
+    """The shards and llms-full.txt are written by the build, with dated headers.
+
+    ``.gitignore`` does not untrack a file already committed: a shard left in
+    the index would be deleted from the working tree by every build
+    (``generate_llms.py --build`` removes a shard the run did not write) while
+    CI stayed green. Only the dateless ``llms.txt`` at the root is committed.
+    """
+    tracked = _tracked(
+        "site/public/llms",
+        "site/public/llms-full.txt",
+        "site/public/llms.txt",
+        "llms-full.txt",
+    )
+    assert tracked == [], tracked

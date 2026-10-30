@@ -395,6 +395,13 @@ jobs:
     runs-on: ubuntu-26.04
     permissions:
       contents: read
+    env:
+      # The install runs puppeteer's own install script, which downloads
+      # Chrome and its headless shell for the site's accessibility audits.
+      # This job only parses the pages, so it skips the download; the site
+      # workflow asks for the browser in a step of its own, and `make
+      # site-deps` on a contributor's machine still fetches it.
+      PUPPETEER_SKIP_DOWNLOAD: "true"
     steps:
     - uses: actions/checkout@v7
       with:
@@ -413,10 +420,22 @@ jobs:
         corepack enable
         pnpm --version
       working-directory: site
-    - name: Install the site's dependencies
-      run: pnpm install --frozen-lockfile
+      env:
+        # corepack fetches the pnpm site/package.json pins and says so first;
+        # the pin is the decision, so the announcement adds nothing to the log.
+        COREPACK_ENABLE_DOWNLOAD_PROMPT: "0"
+    - name: Resolve pnpm store path
+      run: echo "PNPM_STORE=$(pnpm store path --silent)" >> "$GITHUB_ENV"
       working-directory: site
+    - name: Cache pnpm store
+      uses: actions/cache@v6
+      with:
+        path: ${{ env.PNPM_STORE }}
+        key: pnpm-store-${{ runner.os }}-${{ hashFiles('site/pnpm-lock.yaml') }}
+        restore-keys: pnpm-store-${{ runner.os }}-
     - name: Regenerate the llms artifacts
+      # `make llms` installs the site's dependencies first (`make site-deps`),
+      # from the store restored above.
       run: make llms
     - name: Fail if the committed artifacts are stale
       run: |

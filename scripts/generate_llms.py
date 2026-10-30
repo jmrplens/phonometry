@@ -962,6 +962,42 @@ def _shard_label(slug: str) -> str:
     return slug.replace("-", " ").capitalize()
 
 
+#: A PEP 440 version, with the two segments that make it a pre-release named:
+#: an alpha, beta or release candidate in any spelling PEP 440 normalises, and
+#: a development release. The same reading as ``isPreRelease`` of
+#: ``site/src/lib/pep440.mjs`` and packaging's ``Version.is_prerelease``;
+#: ``site/src/data/pep440-pre-releases.json`` is the table all three are
+#: tested on.
+_PEP440 = re.compile(
+    r"^v?\d+(?:\.\d+)*(?P<pre>[-_.]?(?:a|b|c|rc|alpha|beta|pre|preview)[-_.]?\d*)?"
+    r"(?:-\d+|[-_.]?(?:post|rev|r)[-_.]?\d*)?(?P<dev>[-_.]?dev[-_.]?\d*)?"
+    r"(?:\+[a-z0-9]+(?:[-_.][a-z0-9]+)*)?$",
+    re.IGNORECASE,
+)
+
+
+def _is_pre_release(version: str) -> bool:
+    """Whether *version* is a pre-release by PEP 440, which pip installs only when asked."""
+    parsed = _PEP440.match(version.strip())
+    if parsed is None:
+        msg = f"generate_llms.py: VERSION {version!r} is not a PEP 440 version"
+        raise SystemExit(msg)
+    return parsed.group("pre") is not None or parsed.group("dev") is not None
+
+
+def _pre_release_lines(version: str) -> list[str]:
+    """The paragraph that says a pre-release is not on PyPI yet, or nothing.
+
+    The install lines below install the last release PyPI has, so while
+    VERSION is a pre-release the index says the version it documents is not
+    there yet. It names no version PyPI serves, so it cannot go stale, and it
+    goes by itself at the stamp.
+    """
+    if not _is_pre_release(version):
+        return []
+    return [f"phonometry {version} is a pre-release and is not on PyPI yet.", ""]
+
+
 def _summary(version: str) -> list[str]:
     """The header every artifact opens with."""
     checks, domains, designations, sources = _conformance_counts()
@@ -997,6 +1033,7 @@ def _summary(version: str) -> list[str]:
             "to this library."
         ),
         "",
+        *_pre_release_lines(version),
         "Install:",
         "",
         "```bash",

@@ -825,10 +825,18 @@ def _assemble_loudness(
     max_band = np.max(n_tonal + n_noise, axis=1)  # per block l
     e_block = _E_A / (max_band + _EPS) + _E_B
     e_block = e_block[:, None]
-    spec = (n_tonal**e_block + (_W_N * n_noise) ** e_block) ** (
-        1.0 / e_block
-    )  # Formula 113
-    spec = np.nan_to_num(spec, nan=0.0)
+    # Formula 113, (a^e + b^e)^(1/e) with a = N'_tonal and b = w_n N'_noise,
+    # evaluated as max(a, b) (1 + (min(a, b) / max(a, b))^e)^(1/e), the same
+    # number. Near the threshold in quiet e passes a hundred and a^e falls
+    # below the smallest double, so the printed arrangement would return
+    # zero where the formula's value is at least max(a, b); the ratio is at
+    # most one, so its power can neither overflow nor take the sum to zero.
+    tonal = n_tonal
+    noise = _W_N * n_noise
+    larger = np.maximum(tonal, noise)
+    smaller = np.minimum(tonal, noise)
+    ratio = np.divide(smaller, larger, out=np.zeros_like(larger), where=larger > 0.0)
+    spec = larger * (1.0 + ratio**e_block) ** (1.0 / e_block)  # Formula 113
 
     n_blocks = spec.shape[0]
     l_end = _last_evaluated_block(n_samples, n_blocks)

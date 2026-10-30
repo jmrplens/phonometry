@@ -2185,8 +2185,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   prints Formula 26 without a time index, names no segmentation and says
   nothing of how blocks combine, so the value per block, the Table 4
   segmentation and the any-block rule are the library's reading. `loudness`
-  stays the N of Formula 117, which reads zero for a 1 kHz tone at 0 dB SPL
-  whose basis loudness clears the criterion. A test holds the field to
+  stays the N of Formula 117, which stays below the criterion for a 1 kHz
+  tone at 0 dB SPL whose basis loudness clears it. A test holds the field to
   the printed ear filter, auditory filters, nonlinearity and threshold in
   quiet worked by hand for steady tones.
 

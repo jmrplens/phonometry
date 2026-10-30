@@ -564,8 +564,8 @@ $l_\text{end}$ contienen el relleno de ceros cuyos resultados elimina el
 apartado 6.2.6, donde un sonido cortado de golpe deja resonando los filtros
 auditivos. Compara con él ese total, no `loudness`, que es la $N$ de la
 fórmula (117), ensamblada a partir de la sonoridad tonal y de ruido del
-apartado 8. Un tono en el límite de la audición puede dejar $N$ en cero
-mientras su sonoridad básica supera el criterio:
+apartado 8. Un tono en el límite de la audición puede dejar $N$ por debajo del
+criterio mientras su sonoridad básica lo supera:
 
 ```python
 # `np`, `fs`, `t` y `psychoacoustics` vienen del fragmento de arriba.
@@ -576,7 +576,7 @@ faint = psychoacoustics.loudness_ecma(quiet, fs, field="free")
 # N_basis(l) de los bloques que contienen la señal, l = 0 a l_end (fórmula 40).
 n_basis = faint.basis_loudness_vs_time[: faint.last_evaluated_block + 1]
 audible = n_basis > psychoacoustics.AUDIBILITY_THRESHOLD_SONE_HMS
-print(f"N = {faint.loudness:.4f} sone_HMS")           # 0.0000 sone_HMS: la N de la fórmula 117
+print(f"N = {faint.loudness:.4f} sone_HMS")           # 0.0034 sone_HMS: la N de la fórmula 117
 print(f"max N_basis = {n_basis.max():.4f} sone_HMS")  # 0.0118 sone_HMS
 print(audible.any())   # True: supera el criterio en un bloque, la lectura de la biblioteca
 ```

@@ -1155,8 +1155,24 @@ def test_the_markdown_headline_states_the_recorded_counts(committed: dict) -> No
     counts = committed["counts"]
     assert (
         f"**{counts['passing']}/{counts['checks']} conformance checks pass** "
-        f"across {counts['domains']} domains and {counts['standards']} standards"
+        f"across {counts['domains']} domains, against {counts['designations']} "
+        f"normative designations and {counts['sources']} further published sources"
     ) in markdown
+
+
+def test_the_markdown_headline_counts_no_standards(committed: dict) -> None:
+    """The headline states the split the citations make, never a standards count.
+
+    It printed the citation groups, which count a book cited at seven clauses
+    seven times, as a count of standards. The citation groups stay in the artefact under a name that
+    says what they count, and the headline never reads them.
+    """
+    markdown, _, _ = cr.render_markdown(committed)
+    headline = next(
+        line for line in markdown.splitlines() if "conformance checks pass" in line
+    )
+    assert not re.search(r"\d+\s+standards\b", headline), headline
+    assert str(committed["counts"]["citation_groups"]) not in headline
 
 
 def test_the_markdown_is_a_pure_function_of_the_artefact(committed: dict) -> None:
@@ -1180,7 +1196,7 @@ def test_the_committed_markdown_is_what_the_artefact_renders(committed: dict) ->
 #: renderer is a pure function of the artefact, so it can be exercised on this
 #: instead of only end to end on 554 rows.
 FIXTURE = {
-    "schema": 2,
+    "schema": 3,
     "library": "0.0.0",
     "generator": "test",
     "counts": {
@@ -1188,7 +1204,7 @@ FIXTURE = {
         "passing": 3,
         "failing": 0,
         "domains": 1,
-        "standards": 2,
+        "citation_groups": 2,
         "citations": 3,
         "designations": 2,
         "sources": 0,
@@ -1391,7 +1407,8 @@ def test_the_renderer_works_on_a_three_check_document() -> None:
     markdown, passed, total = cr.render_markdown(FIXTURE)
     assert (passed, total) == (3, 3)
     assert (
-        "**3/3 conformance checks pass** across 1 domains and 2 standards" in markdown
+        "**3/3 conformance checks pass** across 1 domains, against 2 normative "
+        "designations and 0 further published sources" in markdown
     )
     assert "| 1.02 dB |" in markdown  # the scalar's computed value
     assert "| headroom 0.9 dB |" in markdown  # the mask's headroom, derived

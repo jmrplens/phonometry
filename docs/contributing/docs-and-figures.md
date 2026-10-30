@@ -116,7 +116,7 @@ edit docs/<area>/index.md or docs/conformance.json directly
 <a id="f6"></a>
 ### F6. Never type a conformance count in prose; `make conformance` writes it
 
-**Why.** Pages that typed the counts fell a release behind (the landing page said 427 checks while Why phonometry said 371; the READMEs said 'more than 250 standards' against 365), and PyPI freezes a long description at upload. The check and the writer read one list of patterns, so a count in a matching sentence is rewritten in place.
+**Why.** Pages that typed the counts fell a release behind (the landing page said 427 checks while Why phonometry said 371; the READMEs put the standards at 'more than 250' against 365), and PyPI freezes a long description at upload. The check and the writer read one list of patterns, so a count in a matching sentence is rewritten in place. They read it line by line, so a count wrapped away from its noun is reported rather than left to go stale. And a count of standards is refused outright: the figure once published as one counted citation groups, a book cited at seven clauses seven times, so the claim names the normative designations and the further published sources instead.
 
 **Do**
 
@@ -133,7 +133,7 @@ Edit docs/CONFORMANCE.md, or type "1897 conformance checks" into a guide or .zen
 
 **Enforced by:** `scripts/check_conformance_claims.py`, `make conformance`, `CI: Conformance report up to date`
 
-**Exceptions.** Site page bodies import the counts from `site/src/data/conformance-stats.mjs` at build time. A new place a count is quoted needs a pattern in `CLAIMS` of the script and nothing else. Generated and historical files (`docs/CONFORMANCE.md`, `CHANGELOG.md`, `docs/ERRATA.md`) are excluded.
+**Exceptions.** Site page bodies import the counts from `site/src/data/conformance-stats.mjs` at build time. A new place a count is quoted needs a pattern in `CLAIMS` of the script and nothing else. Generated and historical files (`docs/CONFORMANCE.md`, `CHANGELOG.md`, `docs/ERRATA.md`) are excluded from the rewriting; the refusal of a count of standards still reads `docs/CONFORMANCE.md`, the llms files and the banner, and leaves only the historical two alone.
 
 <a id="f7"></a>
 ### F7. Put a site page's references in its frontmatter, never under a hand-written heading

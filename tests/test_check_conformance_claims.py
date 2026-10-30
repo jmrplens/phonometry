@@ -27,6 +27,7 @@ import json
 import pathlib
 import sys
 
+import child_process
 import pytest
 
 _SCRIPTS = str(pathlib.Path(__file__).resolve().parent.parent / "scripts")
@@ -36,9 +37,11 @@ if _SCRIPTS not in sys.path:
 import check_conformance_claims as ccc
 
 #: What the generated artefact says: the authoritative counts.
-TOTAL, DOMAINS, STANDARDS = 501, 55, 338
+TOTAL, DOMAINS, DESIGNATIONS, SOURCES = 501, 55, 107, 84
 #: What the prose still says, one release behind, everywhere.
-OLD_TOTAL, OLD_DOMAINS, OLD_STANDARDS = 462, 53, 303
+OLD_TOTAL, OLD_DOMAINS, OLD_DESIGNATIONS, OLD_SOURCES = 462, 53, 99, 71
+#: The citation groups, which no sentence may state as a count of standards.
+CITATION_GROUPS = 338
 
 #: A miniature artefact carrying only what the writer reads out of it.
 REPORT = (
@@ -49,22 +52,33 @@ REPORT = (
                 "passing": TOTAL,
                 "failing": 0,
                 "domains": DOMAINS,
-                "standards": STANDARDS,
-                "citations": STANDARDS,
-                "designations": 107,
-                "sources": 84,
+                "citation_groups": CITATION_GROUPS,
+                "citations": CITATION_GROUPS,
+                "designations": DESIGNATIONS,
+                "sources": SOURCES,
             }
         }
     )
     + "\n"
 )
 
+#: The claim as the corpus words it, with the stale counts.
+OLD_SPLIT = (
+    f"across {OLD_DOMAINS} domains, against {OLD_DESIGNATIONS} normative "
+    f"designations and {OLD_SOURCES} further published sources"
+)
+#: The same claim once the writer has brought it into line.
+SPLIT = (
+    f"across {DOMAINS} domains, against {DESIGNATIONS} normative designations "
+    f"and {SOURCES} further published sources"
+)
+
 #: Sentences using the stale counts for something that is not a conformance
 #: count. They must survive the rewrite verbatim.
 DECOY_LINES = (
-    f"The campaign ran for {OLD_STANDARDS} operating days at "
+    f"The campaign ran for {OLD_DESIGNATIONS} operating days at "
     f"{OLD_DOMAINS} sites, over {OLD_TOTAL} measurement positions.\n"
-    f"Annex {OLD_DOMAINS} of ISO {OLD_STANDARDS}-2 lists {OLD_TOTAL} rows.\n"
+    f"Annex {OLD_DOMAINS} of ISO {OLD_SOURCES}-2 lists {OLD_TOTAL} rows.\n"
 )
 
 
@@ -88,40 +102,41 @@ def corpus(tmp_path: pathlib.Path) -> pathlib.Path:
     # description, which PyPI freezes at upload.
     _write(
         root / "README.md",
-        f"The report runs {OLD_TOTAL} conformance checks across {OLD_DOMAINS} "
-        f"domains and {OLD_STANDARDS} standards, each pinning a value.\n" + DECOY_LINES,
+        f"The report runs {OLD_TOTAL} conformance checks {OLD_SPLIT}, each "
+        "pinning a value.\n" + DECOY_LINES,
     )
     _write(
         root / "README_PYPI.md",
-        f"The report runs {OLD_TOTAL} conformance checks across {OLD_DOMAINS} "
-        f"domains and {OLD_STANDARDS} standards, each pinning a value.\n",
+        f"The report runs {OLD_TOTAL} conformance checks {OLD_SPLIT}, each "
+        "pinning a value.\n",
     )
     # The other page PyPI freezes at upload: the transition stub's, which
     # sells the project on the same counts.
     _write(
         root / "stub" / "README.md",
-        f"The package now runs {OLD_TOTAL} conformance checks across "
-        f"{OLD_DOMAINS} domains and {OLD_STANDARDS} standards.\n" + DECOY_LINES,
+        f"The package now runs {OLD_TOTAL} conformance checks {OLD_SPLIT}.\n"
+        + DECOY_LINES,
     )
     _write(
         root / "docs" / "start" / "getting-started.md",
         f"- [Conformance report](CONFORMANCE.md): the value of all "
         f"{OLD_TOTAL} checks\n"
-        f"The suite runs {OLD_TOTAL} numerical conformance checks across "
-        f"{OLD_DOMAINS} domains and {OLD_STANDARDS} standards, one for each of "
-        f"the {OLD_TOTAL} rows of Annex {OLD_DOMAINS}.\n" + DECOY_LINES,
+        f"The suite runs {OLD_TOTAL} numerical conformance checks {OLD_SPLIT}, "
+        f"one for each of the {OLD_TOTAL} rows of Annex {OLD_DOMAINS}.\n" + DECOY_LINES,
     )
     _write(
         root / "site" / "src" / "content" / "docs" / "index.mdx",
         f'description: "Toolkit: {OLD_TOTAL} conformance checks against '
-        f'{OLD_STANDARDS} standards, measured over {OLD_DOMAINS} weeks."\n',
+        f"{OLD_DESIGNATIONS} normative designations and {OLD_SOURCES} further "
+        f'published sources, measured over {OLD_DOMAINS} weeks."\n',
     )
     _write(
         root / "site" / "src" / "content" / "docs" / "es" / "index.mdx",
         f'description: "Kit: {OLD_TOTAL} comprobaciones de conformidad frente '
-        f'a {OLD_STANDARDS} normas."\n'
+        f"a {OLD_DESIGNATIONS} designaciones normativas y {OLD_SOURCES} fuentes "
+        'publicadas adicionales."\n'
         f"La batería ejecuta {OLD_TOTAL} comprobaciones numéricas de "
-        f"conformidad en {OLD_DOMAINS} dominios y {OLD_STANDARDS} normas, y "
+        f"conformidad sobre {OLD_DOMAINS} dominios, y "
         f"las {OLD_TOTAL} comprobaciones se publican.\n",
     )
     _write(
@@ -129,9 +144,8 @@ def corpus(tmp_path: pathlib.Path) -> pathlib.Path:
         json.dumps(
             {
                 "description": (
-                    f"{OLD_TOTAL} numerical conformance checks across "
-                    f"{OLD_DOMAINS} domains against {OLD_STANDARDS} IEC, ISO "
-                    f"and EN standards, among them ISO {OLD_STANDARDS}-2, "
+                    f"{OLD_TOTAL} numerical conformance checks {OLD_SPLIT}, "
+                    f"among them ISO {OLD_DESIGNATIONS}-2, "
                     f"IEC 616{OLD_DOMAINS}-1 and ITU-R BS.{OLD_TOTAL}."
                 )
             },
@@ -141,8 +155,12 @@ def corpus(tmp_path: pathlib.Path) -> pathlib.Path:
     )
     # Excluded by name and by directory: the report itself, the changelog, the
     # errata registry and the gitignored scratch space all quote historical
-    # counts on purpose.
-    _write(root / "CHANGELOG.md", f"- {OLD_TOTAL} conformance checks in 1.0.\n")
+    # counts on purpose, the changelog the old count of standards among them.
+    _write(
+        root / "CHANGELOG.md",
+        f"- {OLD_TOTAL} conformance checks across {OLD_DOMAINS} domains and "
+        f"{CITATION_GROUPS} standards in 1.0.\n",
+    )
     _write(root / "docs" / "ERRATA.md", f"- covered by {OLD_TOTAL} checks.\n")
     _write(
         root / "docs" / "superpowers" / "notes.md",
@@ -180,7 +198,10 @@ def test_check_reports_every_stale_claim(
         assert quoted in errors
     assert f"claims {OLD_TOTAL} total, report says {TOTAL}" in errors
     assert f"claims {OLD_DOMAINS} domains, report says {DOMAINS}" in errors
-    assert f"claims {OLD_STANDARDS} standards, report says {STANDARDS}" in errors
+    assert (
+        f"claims {OLD_DESIGNATIONS} designations, report says {DESIGNATIONS}" in errors
+    )
+    assert f"claims {OLD_SOURCES} sources, report says {SOURCES}" in errors
 
 
 def test_write_moves_every_quoted_count(
@@ -192,35 +213,33 @@ def test_write_moves_every_quoted_count(
 
     for readme in ("README.md", "README_PYPI.md", "stub/README.md"):
         text = (corpus / readme).read_text(encoding="utf8")
-        assert (
-            f"{TOTAL} conformance checks across {DOMAINS} domains and "
-            f"{STANDARDS} standards" in text
-        ), f"{readme} was not brought into line"
+        assert f"{TOTAL} conformance checks {SPLIT}" in text, (
+            f"{readme} was not brought into line"
+        )
 
     started = (corpus / "docs" / "start" / "getting-started.md").read_text(
         encoding="utf8"
     )
     assert f"all {TOTAL} checks" in started
-    assert (
-        f"{TOTAL} numerical conformance checks across {DOMAINS} domains and "
-        f"{STANDARDS} standards" in started
-    )
+    assert f"{TOTAL} numerical conformance checks {SPLIT}" in started
 
     english = (corpus / "site/src/content/docs/index.mdx").read_text(encoding="utf8")
-    assert f"{TOTAL} conformance checks against {STANDARDS} standards" in english
+    assert (
+        f"{TOTAL} conformance checks against {DESIGNATIONS} normative designations "
+        f"and {SOURCES} further published sources" in english
+    )
 
     spanish = (corpus / "site/src/content/docs/es/index.mdx").read_text(encoding="utf8")
     assert (
-        f"{TOTAL} comprobaciones de conformidad frente a {STANDARDS} normas" in spanish
+        f"{TOTAL} comprobaciones de conformidad frente a {DESIGNATIONS} "
+        f"designaciones normativas y {SOURCES} fuentes publicadas adicionales"
+        in spanish
     )
-    assert f"en {DOMAINS} dominios y {STANDARDS} normas" in spanish
+    assert f"sobre {DOMAINS} dominios" in spanish
     assert f"las {TOTAL} comprobaciones" in spanish
 
     zenodo = json.loads((corpus / ".zenodo.json").read_text(encoding="utf8"))
-    assert (
-        f"{TOTAL} numerical conformance checks across {DOMAINS} domains "
-        f"against {STANDARDS} IEC" in zenodo["description"]
-    )
+    assert f"{TOTAL} numerical conformance checks {SPLIT}" in zenodo["description"]
 
     # And the corpus now passes the read-only gate.
     assert _run(corpus) == 0
@@ -250,7 +269,7 @@ def test_write_leaves_the_decoys_alone(corpus: pathlib.Path) -> None:
 
     zenodo = json.loads((corpus / ".zenodo.json").read_text(encoding="utf8"))
     for designation in (
-        f"ISO {OLD_STANDARDS}-2",
+        f"ISO {OLD_DESIGNATIONS}-2",
         f"IEC 616{OLD_DOMAINS}-1",
         f"ITU-R BS.{OLD_TOTAL}",
     ):
@@ -303,17 +322,22 @@ def test_a_crlf_file_stays_crlf(tmp_path: pathlib.Path) -> None:
 
 def test_line_endings_and_surrounding_prose_are_preserved() -> None:
     """Only the digits move: indentation, quoting and CRLF stay put."""
-    expected = {"total": TOTAL, "domains": DOMAINS, "standards": STANDARDS}
+    expected = {
+        "total": TOTAL,
+        "domains": DOMAINS,
+        "designations": DESIGNATIONS,
+        "sources": SOURCES,
+    }
     line = (
         f'  description: "…; {OLD_TOTAL} conformance checks against '
-        f'{OLD_STANDARDS} standards."\r\n'
+        f'{OLD_DESIGNATIONS} normative designations."\r\n'
     )
     corrected, fixed = ccc.rewrite_line(line, expected)
     assert corrected == (
         f'  description: "…; {TOTAL} conformance checks against '
-        f'{STANDARDS} standards."\r\n'
+        f'{DESIGNATIONS} normative designations."\r\n'
     )
-    assert [claim.field for claim in fixed] == ["total", "standards"]
+    assert [claim.field for claim in fixed] == ["total", "designations"]
 
 
 def test_a_claim_read_two_ways_is_rejected(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -325,7 +349,7 @@ def test_a_claim_read_two_ways_is_rejected(monkeypatch: pytest.MonkeyPatch) -> N
         "CLAIMS",
         (
             (re.compile(r"(\d+)\s+conformance checks"), "total"),
-            (re.compile(r"(\d+)\s+conformance checks"), "standards"),
+            (re.compile(r"(\d+)\s+conformance checks"), "designations"),
         ),
     )
     with pytest.raises(ValueError, match="ambiguous conformance claim"):
@@ -345,7 +369,7 @@ def test_an_ambiguous_pattern_pair_reports_instead_of_crashing(
         "CLAIMS",
         (
             (re.compile(r"(\d+)\s+conformance checks"), "total"),
-            (re.compile(r"(\d+)\s+conformance checks"), "standards"),
+            (re.compile(r"(\d+)\s+conformance checks"), "designations"),
         ),
     )
     assert _run(corpus, "--write") == 1
@@ -383,3 +407,212 @@ def test_the_real_corpus_needs_no_rewriting() -> None:
         corrected, fixed = ccc.rewrite_text(text, expected)
         assert not fixed, f"{path} quotes a stale count: {fixed}"
         assert corrected == text
+
+
+# --------------------------------------------------------------------------
+# A count of standards is refused, wherever it is published
+# --------------------------------------------------------------------------
+
+#: What the refusal names in place of a count of standards, in each language.
+ENGLISH_SPLIT = (
+    f"{DESIGNATIONS} normative designations and {SOURCES} further published sources"
+)
+SPANISH_SPLIT = (
+    f"{DESIGNATIONS} designaciones normativas y {SOURCES} fuentes publicadas "
+    "adicionales"
+)
+
+
+@pytest.mark.parametrize(
+    ("relative", "text", "phrase", "replacement"),
+    [
+        pytest.param(
+            "README.md",
+            f"runs {TOTAL} conformance checks across {DOMAINS} domains and "
+            f"{CITATION_GROUPS} standards, each pinning a value.\n",
+            f"{CITATION_GROUPS} standards",
+            ENGLISH_SPLIT,
+            id="the README sentence it used to be",
+        ),
+        pytest.param(
+            ".zenodo.json",
+            json.dumps(
+                {
+                    "description": (
+                        f"{TOTAL} numerical conformance checks across {DOMAINS} "
+                        f"domains against {CITATION_GROUPS} IEC, ISO, EN, ANSI, "
+                        "ITU-R and VDI standards, each pinning a clause."
+                    )
+                }
+            )
+            + "\n",
+            f"{CITATION_GROUPS} IEC, ISO, EN, ANSI, ITU-R and VDI standards",
+            ENGLISH_SPLIT,
+            id="a list of bodies between the count and its noun",
+        ),
+        pytest.param(
+            "docs/start/index.md",
+            f"It runs {TOTAL} numerical conformance checks across {DOMAINS} "
+            f"domains against {CITATION_GROUPS} referenced standards.\n",
+            f"{CITATION_GROUPS} referenced standards",
+            ENGLISH_SPLIT,
+            id="a word that says how the standards were counted",
+        ),
+        pytest.param(
+            "site/src/content/docs/es/index.mdx",
+            f'description: "Kit: {TOTAL} comprobaciones de conformidad frente a '
+            f'{CITATION_GROUPS} normas."\n',
+            f"{CITATION_GROUPS} normas",
+            SPANISH_SPLIT,
+            id="the Spanish landing description",
+        ),
+        pytest.param(
+            "docs/start/why-phonometry.md",
+            f"today the suite runs {TOTAL} numerical conformance checks across\n"
+            f"{DOMAINS} domains and {CITATION_GROUPS}\nstandards, covering "
+            "psychoacoustics.\n",
+            f"{CITATION_GROUPS} standards",
+            ENGLISH_SPLIT,
+            id="a count wrapped away from its noun",
+        ),
+        pytest.param(
+            "docs/CONFORMANCE.md",
+            f"**{TOTAL}/{TOTAL} conformance checks pass** across {DOMAINS} "
+            f"domains and {CITATION_GROUPS} standards - filters class 1.\n",
+            f"{CITATION_GROUPS} standards",
+            ENGLISH_SPLIT,
+            id="the generated report, which the writer leaves alone",
+        ),
+        pytest.param(
+            "llms.txt",
+            f"> Acoustics, with {TOTAL} numerical conformance checks against "
+            f"{CITATION_GROUPS} standards enforced in CI.\n",
+            f"{CITATION_GROUPS} standards",
+            ENGLISH_SPLIT,
+            id="the agent file",
+        ),
+        pytest.param(
+            ".github/badges/conformance-summary.svg",
+            f'<svg aria-label="All {TOTAL} conformance checks pass, across '
+            f'{DOMAINS} domains and {CITATION_GROUPS} standards"/>\n',
+            f"{CITATION_GROUPS} standards",
+            ENGLISH_SPLIT,
+            id="the banner's words",
+        ),
+    ],
+)
+def test_a_count_of_standards_is_refused_with_the_wording_that_replaces_it(
+    corpus: pathlib.Path,
+    capsys: pytest.CaptureFixture[str],
+    relative: str,
+    text: str,
+    phrase: str,
+    replacement: str,
+) -> None:
+    """The published figure counted citation groups, and it cannot come back.
+
+    A citation group is the citation string up to its first colon or
+    " Annex", so a book cited at seven clauses was seven standards: the
+    project published 523 of them while its citations named 227 normative
+    designations and 125 further published sources. No rewrite of digits
+    mends the wording, so the writer fails on it too.
+    """
+    assert _run(corpus, "--write") == 0
+    capsys.readouterr()
+    _write(corpus / relative, text)
+    for args in ((), ("--write",)):
+        assert _run(corpus, *args) == 1
+        errors = capsys.readouterr().err
+        assert f"{relative}:" in errors
+        assert f"counts standards in {phrase!r}" in errors
+        assert repr(replacement) in errors
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        pytest.param(
+            "The ISO 3740 series has 7 standards for the sound power of a machine.\n",
+            id="a count of standards for another reason",
+        ),
+        pytest.param(
+            f"The suite runs {TOTAL} conformance checks. Twice the Table 1 "
+            "standard deviation bounds the result.\n",
+            id="the singular in a conformance sentence",
+        ),
+        pytest.param(
+            "### La regla de conformidad del IEC TC 29\n\n"
+            "Las normas de instrumentos de la IEC escritas desde 2013.\n",
+            id="a heading that ends in a number, then a paragraph",
+        ),
+    ],
+)
+def test_a_sentence_that_counts_no_conformance_claim_is_left_alone(
+    corpus: pathlib.Path, text: str
+) -> None:
+    """The refusal reads a count of standards only beside conformance wording."""
+    assert _run(corpus, "--write") == 0
+    _write(corpus / "docs" / "guide.md", text)
+    assert ccc.refused_in(text) == []
+    assert _run(corpus) == 0
+
+
+def test_the_changelog_keeps_its_history(corpus: pathlib.Path) -> None:
+    """The changelog says what was published, the old count of standards too."""
+    assert _run(corpus, "--write") == 0
+    changelog = (corpus / "CHANGELOG.md").read_text(encoding="utf8")
+    assert f"{CITATION_GROUPS} standards" in changelog
+    assert _run(corpus) == 0
+
+
+def test_a_claim_wrapped_away_from_its_noun_is_reported(
+    corpus: pathlib.Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """The check reads a claim line by line, so a wrapped one would go unread.
+
+    It would then go stale as silently as a count typed by hand, which is the
+    defect the whole script exists to end.
+    """
+    assert _run(corpus, "--write") == 0
+    capsys.readouterr()
+    _write(
+        corpus / "docs" / "start" / "why-phonometry.md",
+        f"The suite runs {OLD_TOTAL} conformance checks across {DOMAINS} "
+        f"domains, against {DESIGNATIONS} normative\ndesignations and "
+        f"{SOURCES} further published sources.\n",
+    )
+    assert _run(corpus) == 1
+    errors = capsys.readouterr().err
+    assert "docs/start/why-phonometry.md:1:" in errors
+    assert f"'{DESIGNATIONS} normative designations' wraps a count" in errors
+
+
+def test_the_real_corpus_counts_no_standards() -> None:
+    """Nothing the project publishes states a count of standards, or wraps one."""
+    assert ccc.refusals(ccc.ROOT, ccc.expected_counts()) == []
+    assert ccc.wrapped(ccc.ROOT) == []
+
+
+def test_the_retired_figure_is_published_nowhere() -> None:
+    """The release gate: no tracked file states 523 as a count of standards.
+
+    PyPI freezes the 4.0.0 long description at upload, and its badge and
+    report links are pinned to the tag, so the figure is checked over the
+    whole tree and not only over the files the refusal reads.
+    """
+    found = child_process.run(
+        [
+            "git",
+            "-C",
+            str(ccc.ROOT),
+            "grep",
+            "-n",
+            "-I",
+            "-E",
+            "(^|[^0-9])523[[:space:]]+(standard|norma)",
+        ],
+        capture_output=True,
+        check=False,
+        timeout=120,
+    )
+    assert found.returncode == 1, found.stdout.decode()

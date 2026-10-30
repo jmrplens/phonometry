@@ -19,7 +19,7 @@
 
 ## Numerical conformance report
 
-**1897/1897 conformance checks pass** across 111 domains and 523 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+**1897/1897 conformance checks pass** across 111 domains, against 227 normative designations and 125 further published sources - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub><b>&#916;</b> is the difference between the computed value and the one the standard publishes. <b>Used</b> is how much of that clause's published tolerance the difference consumes: 100 % means it sits exactly on the limit, 5 % means it uses a twentieth of the allowance, and a dash means the clause states no two-sided tolerance for the quantity, so there is no budget to spend. It is reported and never used to decide a verdict, which is settled at full precision before any rounding.</sub>
 

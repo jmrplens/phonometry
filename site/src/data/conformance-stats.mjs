@@ -67,17 +67,16 @@ export const totalChecks = counts.checks;
 /** Distinct domains the checks are grouped into. */
 export const domains = counts.domains;
 /**
- * Distinct standards the checks reference, counted as the report has always
- * counted them: by citation group, the citation string up to its first colon
- * or " Annex". This is the number the landing page, both READMEs, `llms.txt`
- * and `.zenodo.json` publish.
- */
-export const standards = counts.standards;
-/**
- * Distinct normative *documents*, from the split citation: every document a
- * citation names, wherever in it the citation names it. Smaller than
- * `standards`, because seven clauses of one standard are one document here and
- * seven "standards" there.
+ * Distinct normative documents the checks cite, from the split citation:
+ * every document a citation names, wherever in it the citation names it.
+ * With `sources`, the figure every page, both READMEs, `llms.txt` and
+ * `.zenodo.json` publish.
+ *
+ * There is no `standards` export, on purpose. The report used to publish its
+ * citation groups under that name, the citation string up to its first colon
+ * or " Annex", which counts a book cited at seven clauses seven times; the
+ * artefact now calls that figure `citation_groups`, and a page that still
+ * imports `standards` from here fails the build instead of printing it.
  */
 export const designations = counts.designations;
 /**
@@ -118,7 +117,6 @@ export default {
   passingChecks,
   totalChecks,
   domains,
-  standards,
   designations,
   sources,
   checksRatio,

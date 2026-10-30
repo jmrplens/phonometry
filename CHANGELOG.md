@@ -6466,6 +6466,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   budget of the underwater propagation solvers guide says "balance de sonar"
   too, the word its figure already used.
 
+- **The conformance claim counts normative designations and further published
+  sources.** The README and the PyPI page, the Zenodo description, the
+  PyOctaveBand page, the banner, the report's headline, `llms.txt` and the
+  site gave 523 as the count of standards. That figure counted citation
+  groups, the citation string up to its first colon or " Annex", so a book
+  cited at seven clauses was seven standards. Every one of them now states the split the citations
+  make, 227 normative designations and 125 further published sources, read
+  from `docs/conformance.json`, whose `counts.standards` is
+  `counts.citation_groups` (schema 3) so that no reader prints it as
+  standards again. `scripts/check_conformance_claims.py` refuses a count of
+  standards in a sentence that speaks of conformance, checks or domains, in
+  the prose it rewrites and in the report, the llms files and the banner it
+  does not, and it reports a count wrapped away from its noun, which it could
+  neither check nor rewrite. The banner states its three counts on a row of
+  their own, under the headline.
+
 ### Removed
 
 - **`filters.compliance` no longer serves the weighting transcriptions by

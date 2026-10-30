@@ -238,7 +238,7 @@ const conformanceCheck = z
 
 export const conformanceSchema = z.object({
   /** Bumped only on a shape change a reader cannot ignore. */
-  schema: z.literal(2),
+  schema: z.literal(3),
   library: z.string().min(1),
   generator: z.string().min(1),
   counts: z.object({
@@ -246,12 +246,16 @@ export const conformanceSchema = z.object({
     passing: z.number().int(),
     failing: z.number().int(),
     domains: z.number().int(),
-    /** Citation groups, the figure the project publishes. */
-    standards: z.number().int(),
+    /**
+     * Citation strings cut at their first colon or " Annex". Kept for the
+     * record and never published: it counts a book cited at seven clauses
+     * seven times, and it was published as a count of standards.
+     */
+    citation_groups: z.number().int(),
     citations: z.number().int(),
-    /** Distinct normative documents named anywhere in a citation. */
+    /** Distinct normative documents named anywhere in a citation; the claim states it. */
     designations: z.number().int(),
-    /** Distinct further cited works, named anywhere in a citation. */
+    /** Distinct further cited works, named anywhere in a citation; the claim states it. */
     sources: z.number().int(),
   }),
   /** The closed unit vocabulary every row's `unit` must come from. */

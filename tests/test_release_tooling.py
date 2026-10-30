@@ -567,10 +567,10 @@ def test_what_setuptools_packs_beside_the_package_is_checked_out_with_lf(
 ) -> None:
     """setuptools adds the readme and the top-level tests to the sdist by default.
 
-    A clone made with ``core.autocrlf`` on, on Linux and macOS as on Windows,
-    would give each of them CRLF, and a rebuild from it would pack bytes PyPI
-    does not hold, unless the repository's ``.gitattributes`` pins them to LF
-    as it pins the package.
+    A clone made with ``core.autocrlf`` on, which writes CRLF on Linux and
+    macOS too, would give each of them CRLF, and a rebuild from it would pack
+    bytes PyPI does not hold, unless the repository's ``.gitattributes`` pins
+    them to LF as it pins the package.
     """
     tests = sorted(f"tests/{path.name}" for path in (_ROOT / "tests").glob("test*.py"))
     carried = [

@@ -27,9 +27,9 @@ published:
   PyOctaveBand bridge, whose 2.2.0 shipped a licence classifier and no text;
 - every file of the sdist that git tracks is one ``.gitattributes`` checks out
   with LF whatever the cloner's ``core.autocrlf`` or ``core.eol``. A clone
-  made with ``core.autocrlf`` on, on Linux and macOS as on Windows, writes
-  CRLF into any other text file, and a release rebuilt from it, as
-  SECURITY.md describes, would pack bytes PyPI does not hold.
+  made with ``core.autocrlf`` on writes CRLF into any other text file, on
+  Linux and macOS too, and a release rebuilt from it, as SECURITY.md
+  describes, would pack bytes PyPI does not hold.
 """
 
 from __future__ import annotations

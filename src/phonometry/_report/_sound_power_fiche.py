@@ -520,22 +520,24 @@ def render_sound_power_fiche(
             flow.append(grid_table(header_pairs))
     flow.append(Spacer(1, 8))
 
-    flow.append(fiche_paragraph(copy.caption, caption_style))
-    flow.append(value_table)
-    flow.append(Spacer(1, 8))
+    flow.extend(
+        (fiche_paragraph(copy.caption, caption_style), value_table, Spacer(1, 8))
+    )
 
-    # Landscape sound-power spectrum drawn by the result's own single-panel
-    # plot(ax=...); the band axis carries nominal labels (not base-ten log).
-    flow.append(
-        render_figure_drawing(
-            result.plot,
-            174 * mm,
-            y_top=None,
-            figsize=figsize,
-            language=language,
+    flow.extend(
+        (
+            # Landscape sound-power spectrum drawn by the result's own single-panel
+            # plot(ax=...); the band axis carries nominal labels (not base-ten log).
+            render_figure_drawing(
+                result.plot,
+                174 * mm,
+                y_top=None,
+                figsize=figsize,
+                language=language,
+            ),
+            Spacer(1, 8),
         )
     )
-    flow.append(Spacer(1, 8))
 
     flow.append(result_box(copy.statement, styles, accent, copy.extended))
     # A caller may supply its own verdict (its quantity symbol and sign rule);

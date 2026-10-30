@@ -492,10 +492,14 @@ def render_vibration_reduction_report(
     plot_drawing = render_figure_drawing(
         result.plot, 116 * mm, y_top=None, figsize=(6.4, 5.8), language=language
     )
-    flow.append(
-        two_panel_body(left_cell, plot_drawing, left_width_mm=58.0, plot_width_mm=116.0)
+    flow.extend(
+        (
+            two_panel_body(
+                left_cell, plot_drawing, left_width_mm=58.0, plot_width_mm=116.0
+            ),
+            Spacer(1, 8),
+        )
     )
-    flow.append(Spacer(1, 8))
 
     flow.append(
         _kij_result_box(

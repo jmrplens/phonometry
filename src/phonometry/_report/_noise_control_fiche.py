@@ -212,26 +212,30 @@ def render_noise_control_fiche(
     plot_drawing = render_figure_drawing(
         result.plot, figure_width_mm * mm, y_top=None, language=language
     )
-    flow.append(
-        two_panel_body(
-            left_cell,
-            plot_drawing,
-            left_width_mm=left_width_mm,
-            plot_width_mm=plot_width_mm,
+    flow.extend(
+        (
+            two_panel_body(
+                left_cell,
+                plot_drawing,
+                left_width_mm=left_width_mm,
+                plot_width_mm=plot_width_mm,
+            ),
+            Spacer(1, 8),
         )
     )
-    flow.append(Spacer(1, 8))
 
-    flow.append(result_box(statement, styles, accent, extended))
-    flow.append(
-        fiche_paragraph(
-            prediction_statement,
-            ParagraphStyle(
-                "noise_control_prediction",
-                parent=styles["Normal"],
-                fontSize=8.5,
-                textColor=colors.HexColor(_MUTED_HEX),
-                spaceBefore=4,
+    flow.extend(
+        (
+            result_box(statement, styles, accent, extended),
+            fiche_paragraph(
+                prediction_statement,
+                ParagraphStyle(
+                    "noise_control_prediction",
+                    parent=styles["Normal"],
+                    fontSize=8.5,
+                    textColor=colors.HexColor(_MUTED_HEX),
+                    spaceBefore=4,
+                ),
             ),
         )
     )

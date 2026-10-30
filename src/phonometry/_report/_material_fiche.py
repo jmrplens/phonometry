@@ -176,8 +176,7 @@ def render_material_fiche(
     plot_drawing = render_figure_drawing(
         plot_fn, 116 * mm, y_top=None, language=language
     )
-    flow.append(two_panel_body(left_cell, plot_drawing))
-    flow.append(Spacer(1, 8))
+    flow.extend((two_panel_body(left_cell, plot_drawing), Spacer(1, 8)))
 
     flow.append(
         result_box(content.statement, styles, accent, extended=content.extended)

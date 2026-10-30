@@ -42,7 +42,6 @@ _CLASS_0_GREATEST_MINIMUM_DB = 75.0
 def _filter_class_check(
     arch: Literal["butter", "cheby1", "cheby2", "ellip", "bessel"],
     fraction: float,
-    label: str,
 ) -> Outcome:
     res = _filter_class(arch, fraction)
     margin = res.min_margin1
@@ -62,7 +61,7 @@ def _filter_class_check(
     "Octave-band filter class (butterworth, fs=48 kHz)",
 )
 def _chk_butter_octave() -> Outcome:
-    return _filter_class_check("butter", 1, "octave")
+    return _filter_class_check("butter", 1)
 
 
 @register(
@@ -71,7 +70,7 @@ def _chk_butter_octave() -> Outcome:
     "One-third-octave filter class (butterworth, fs=48 kHz)",
 )
 def _chk_butter_third() -> Outcome:
-    return _filter_class_check("butter", 3, "third")
+    return _filter_class_check("butter", 3)
 
 
 @register(

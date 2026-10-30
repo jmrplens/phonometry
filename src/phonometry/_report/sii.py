@@ -331,15 +331,17 @@ def render_sii_report(
     plot_drawing = render_figure_drawing(
         result.plot, plot_pt * mm, y_top=1.0, expand_step=None, language=language
     )
-    flow.append(
-        two_panel_body(
-            left_cell,
-            plot_drawing,
-            left_width_mm=left_width_mm,
-            plot_width_mm=plot_width_mm,
+    flow.extend(
+        (
+            two_panel_body(
+                left_cell,
+                plot_drawing,
+                left_width_mm=left_width_mm,
+                plot_width_mm=plot_width_mm,
+            ),
+            Spacer(1, 8),
         )
     )
-    flow.append(Spacer(1, 8))
 
     flow.append(result_box(_statement(result, language), styles, accent))
     if metadata is not None and metadata.requirement is not None:

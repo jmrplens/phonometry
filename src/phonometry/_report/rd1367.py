@@ -429,13 +429,21 @@ def render_activity_report(
         flow.append(grid_table(header_pairs))
     flow.append(Spacer(1, 6))
 
-    flow.append(fiche_paragraph(t("Noise phases", language), caption_style))
-    flow.append(_phase_table(result=result, verbose=verbose, language=language))
-    flow.append(Spacer(1, 6))
+    flow.extend(
+        (
+            fiche_paragraph(t("Noise phases", language), caption_style),
+            _phase_table(result=result, verbose=verbose, language=language),
+            Spacer(1, 6),
+        )
+    )
 
-    flow.append(fiche_paragraph(t("Assessment by period", language), caption_style))
-    flow.append(_results_table(result, language))
-    flow.append(Spacer(1, 6))
+    flow.extend(
+        (
+            fiche_paragraph(t("Assessment by period", language), caption_style),
+            _results_table(result, language),
+            Spacer(1, 6),
+        )
+    )
 
     def _assessment_plot(
         ax: Axes | None = None, language: Language = "en", **kwargs: Any

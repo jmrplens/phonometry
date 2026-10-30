@@ -595,13 +595,17 @@ def render_iso3382_report(
             flow.append(grid_table(header_pairs))
     flow.append(Spacer(1, gap))
 
-    # Full-width per-band parameter table, then the landscape decay-time plot
-    # drawn by the result's own single-panel plot(ax=...).
-    flow.append(
-        fiche_paragraph(_fraction_label(result.frequencies, language), caption_style)
+    flow.extend(
+        (
+            # Full-width per-band parameter table, then the landscape decay-time plot
+            # drawn by the result's own single-panel plot(ax=...).
+            fiche_paragraph(
+                _fraction_label(result.frequencies, language), caption_style
+            ),
+            _parameter_table(result, language),
+            Spacer(1, gap),
+        )
     )
-    flow.append(_parameter_table(result, language))
-    flow.append(Spacer(1, gap))
     plot_drawing = render_figure_drawing(
         result.plot,
         174 * mm,

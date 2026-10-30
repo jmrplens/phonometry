@@ -278,11 +278,15 @@ def render_iso3382_3_report(
             flow.append(grid_table(header_pairs))
     flow.append(Spacer(1, 8))
 
-    flow.append(fiche_paragraph(t("Single-number quantities", language), caption_style))
-    flow.append(
-        metrics_table(_metric_rows(result, language), col_widths=[62 * mm, 26 * mm])
+    flow.extend(
+        (
+            fiche_paragraph(t("Single-number quantities", language), caption_style),
+            metrics_table(
+                _metric_rows(result, language), col_widths=[62 * mm, 26 * mm]
+            ),
+            Spacer(1, 8),
+        )
     )
-    flow.append(Spacer(1, 8))
 
     # Full-width, landscape spatial-decay plot (self-scaling level axis). The
     # regression line is defined only when D2,S / Lp,A,S,4m are finite (at least

@@ -273,8 +273,7 @@ def render_sti_report(
     plot_drawing = render_figure_drawing(
         result.plot, 116 * mm, y_top=1.0, expand_step=None, language=language
     )
-    flow.append(two_panel_body(left_cell, plot_drawing))
-    flow.append(Spacer(1, 8))
+    flow.extend((two_panel_body(left_cell, plot_drawing), Spacer(1, 8)))
 
     flow.append(
         result_box(

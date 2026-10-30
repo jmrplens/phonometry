@@ -57,7 +57,7 @@ from ._layout import (
     fmt_meta,
     fmt_num,
     footer_flow,
-    grid_table,
+    opening_flow,
     render_figure_drawing,
     result_box,
     two_panel_body,
@@ -367,26 +367,24 @@ def render_iso16251_report(
     styles, title_style, basis_style, caption_style = document_styles(accent)
     title = t("Floor-covering impact sound improvement", language)
 
-    flow: list[Any] = [
-        fiche_paragraph(title, title_style),
-        fiche_paragraph(_basis_line(metadata, language), basis_style),
-    ]
-
-    header_pairs = _metadata_pairs(result, metadata, language)
-    if header_pairs:
-        flow.append(Spacer(1, 3))
-        flow.append(grid_table(header_pairs))
-    flow.append(Spacer(1, 8))
-
-    flow.append(
-        _body(
-            result=result,
-            verbose=verbose,
-            caption_style=caption_style,
-            language=language,
+    flow = opening_flow(
+        title,
+        _basis_line(metadata, language),
+        _metadata_pairs(result, metadata, language),
+        title_style=title_style,
+        basis_style=basis_style,
+    )
+    flow.extend(
+        (
+            _body(
+                result=result,
+                verbose=verbose,
+                caption_style=caption_style,
+                language=language,
+            ),
+            Spacer(1, 8),
         )
     )
-    flow.append(Spacer(1, 8))
 
     flow.append(result_box(_box_statement(result, language), styles, accent))
     statement_style = ParagraphStyle(

@@ -39,13 +39,17 @@ ECMA418_2_LOUDNESS_C_N = 0.0211964
 # yields 1 tu_HMS (c_T adjustable within 0.25 %).
 ECMA418_2_TONALITY_1KHZ_40DB_TU = 1.0
 ECMA418_2_TONALITY_C_T = 2.8758615
-# Decision thresholds the standard states as verbatim constants: a signal is
-# audible when its total basis loudness exceeds 0.01 sone_HMS (Clause 5.1.9,
-# dz = 0.5 sum of Formula 25); a tonality is prominent when the single value
-# T exceeds 0.4 tu_HMS (Clause 6.3); a roughness is prominent when the single
-# value R exceeds 0.2 asper (Clause 7.2). Annexes A/B/C are graphical only,
-# so beyond the three calibration points these thresholds are the standard's
-# only further numeric anchors.
+# Decision criteria the standard states as verbatim constants, each read on
+# its printed page: a signal is audible when its total basis loudness exceeds
+# 0.01 sone_HMS (Clause 5.1.9, PDF page 23, folio 13; the total is the
+# specific basis loudness of Formula 25 summed with dz = 0.5, Formula 26 on
+# folio 14); a tonality is prominent when the specific tonality T'(z_tonal)
+# at a local maximum, or for a non-stationary sound the single value T,
+# exceeds 0.4 tu_HMS (Clause 6.3, PDF page 34, folio 24); a roughness is
+# prominent when the single value R exceeds 0.2 asper (Clause 7.2, PDF page
+# 46, folio 36). Annexes A/B/C are graphical only, so beyond the three
+# calibration points these criteria are the standard's only further numeric
+# anchors.
 ECMA418_2_AUDIBILITY_THRESHOLD_SONE = 0.01
 ECMA418_2_PROMINENT_TONALITY_TU = 0.4
 ECMA418_2_PROMINENT_ROUGHNESS_ASPER = 0.2
@@ -62,7 +66,7 @@ ECMA418_2_ROUGHNESS_C_R = 0.0180685
 # c_F = 0.003840572 (not reverse-fit) the chain reproduces this anchor to
 # 0.9931 vacil_HMS for a 5 s signal (0.9957 at 8 s, converged 0.9958 by 12 s).
 # A fluctuation strength is prominent when the single value F exceeds
-# 0.2 vacil_HMS (Clause 9.2).
+# 0.2 vacil_HMS (Clause 9.2, PDF page 61, folio 51).
 ECMA418_2_FLUCTUATION_1KHZ_4HZ_60DB_VACIL = 1.0
 ECMA418_2_FLUCTUATION_C_F = 0.003840572
 ECMA418_2_PROMINENT_FLUCTUATION_VACIL = 0.2

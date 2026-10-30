@@ -19,7 +19,7 @@
 
 ## Numerical conformance report
 
-**1893/1893 conformance checks pass** across 111 domains and 523 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+**1897/1897 conformance checks pass** across 111 domains and 523 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub><b>&#916;</b> is the difference between the computed value and the one the standard publishes. <b>Used</b> is how much of that clause's published tolerance the difference consumes: 100 % means it sits exactly on the limit, 5 % means it uses a twentieth of the allowance, and a dash means the clause states no two-sided tolerance for the quantity, so there is no budget to spend. It is reported and never used to decide a verdict, which is settled at full precision before any rounding.</sub>
 
@@ -477,7 +477,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary><b>Psychoacoustics</b>: 100% (14/14)</summary>
+<summary><b>Psychoacoustics</b>: 100% (18/18)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Used | Status |
 |:---|:---|:---|:---|:---|:---:|:---:|
@@ -495,6 +495,10 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ISO 532-2:2017 Clause 3.17 / Annex B.1 | Moore-Glasberg loudness of a 1 kHz / 40 dB tone (C=0.0617) | 1 sone (+/-0.01 sone) | 1.0001 sone | 0.0001 sone | 1 % | ![Pass][cv-pass] Pass |
 | ISO 532-3:2023 Annex C.1 | Moore-Glasberg-Schlittenlacher peak LTL, steady 1 kHz / 40 dB | 1 sone (+/-0.02 sone) | 0.9996 sone | -0.0004 sone | 2 % | ![Pass][cv-pass] Pass |
 | ECMA-418-2:2025 Clause 9 | HMS fluctuation strength of a 1 kHz / 4 Hz / m=1 / overall 60 dB tone (c_F=0.003840572) | 1 vacil_HMS (+/-0.01 vacil_HMS) | 0.9931 vacil_HMS | -0.0069 vacil_HMS | 69 % | ![Pass][cv-pass] Pass |
+| ECMA-418-2:2025 Clause 5.1.9 | Audibility criterion on the total basis loudness (0.01 sone_HMS) | 0.01 sone_HMS | 0.01 sone_HMS (psychoacoustics.AUDIBILITY_THRESHOLD_SONE_HMS) | exact | 0 % | ![Pass][cv-pass] Pass |
+| ECMA-418-2:2025 Clause 6.3 | Prominent tonality criterion (0.4 tu_HMS) | 0.4 tu_HMS | 0.4 tu_HMS (psychoacoustics.PROMINENT_TONALITY_TU_HMS) | exact | 0 % | ![Pass][cv-pass] Pass |
+| ECMA-418-2:2025 Clause 7.2 | Prominent roughness criterion (0.2 asper) | 0.2 asper | 0.2 asper (psychoacoustics.PROMINENT_ROUGHNESS_ASPER) | exact | 0 % | ![Pass][cv-pass] Pass |
+| ECMA-418-2:2025 Clause 9.2 | Prominent fluctuation strength criterion (0.2 vacil_HMS) | 0.2 vacil_HMS | 0.2 vacil_HMS (psychoacoustics.PROMINENT_FLUCTUATION_STRENGTH_VACIL_HMS) | exact | 0 % | ![Pass][cv-pass] Pass |
 
 </details>
 

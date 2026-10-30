@@ -539,6 +539,16 @@ Devuelve un `EcmaLoudness`: `loudness` ($N$, sone_HMS), `specific_loudness`
 ($N'(z)$, 53 bandas), `bark`, `frequencies`, `times`, `loudness_vs_time`
 ($N(l)$ a 187,5 Hz), `field`.
 
+**¿Es audible el sonido?** El apartado 5.1.9 considera audible una señal
+cuando su sonoridad básica total supera 0,01 sone_HMS, el
+`psychoacoustics.AUDIBILITY_THRESHOLD_SONE_HMS` que publica el paquete. Ese
+total es la sonoridad básica específica $N'_\text{basis}$ de la fórmula (25),
+la salida de la etapa auditiva antes de separar lo tonal del ruido, sumada en
+las 53 bandas con $\Delta z = 0,5$ (fórmula 26). Ninguna función aplica el
+criterio y ningún resultado lleva ese total: `loudness` es la $N$ de la
+fórmula (117), ensamblada a partir de la sonoridad tonal y de ruido del
+apartado 8, que no es la suma que lee el criterio.
+
 ## Qué cubre esta guía
 
 <Scope>
@@ -558,7 +568,9 @@ ensamblaje de sonoridad del apartado 8, mediante `loudness_ecma()`.
 <ScopeClaim status="not-covered" label="No cubierto">
 La combinación binaural de ECMA-418-2 (Fórmula 118, apartado 8.1.5) no está
 implementada: `loudness_ecma()` es monaural, así que analiza cada canal por
-separado. El apartado 5 de ISO 532-3 exige remuestrear la entrada a 32 kHz
+separado. El criterio de audibilidad del apartado 5.1.9 se publica como
+constante y ninguna función lo aplica, y la sonoridad básica total que lee no
+se devuelve. El apartado 5 de ISO 532-3 exige remuestrear la entrada a 32 kHz
 antes del análisis FFT deslizante. Esta implementación procesa en cambio a la
 frecuencia de muestreo nativa, una desviación documentada que se mantiene
 dentro de la incertidumbre expandida de la norma. Remuestrea a 32 kHz primero

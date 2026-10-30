@@ -3,12 +3,12 @@
   "library": "4.0.0rc1",
   "generator": "scripts/conformance_report.py",
   "counts": {
-    "checks": 1893,
-    "passing": 1893,
+    "checks": 1897,
+    "passing": 1897,
     "failing": 0,
     "domains": 111,
     "standards": 523,
-    "citations": 1339,
+    "citations": 1343,
     "designations": 227,
     "sources": 125
   },
@@ -151,8 +151,8 @@
     {
       "id": "psychoacoustics",
       "title": "Psychoacoustics",
-      "checks": 14,
-      "passing": 14
+      "checks": 18,
+      "passing": 18
     },
     {
       "id": "speech-transmission-iec-60268-16",
@@ -8144,6 +8144,162 @@
         "value": -0.0069
       },
       "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "psychoacoustics/ecma-418-2-2025-clause-5-1-9/audibility-criterion-on-the-total-basis-loudness-0-01-sone-hms",
+      "domain": "psychoacoustics",
+      "reference": {
+        "cite": "ECMA-418-2:2025 Clause 5.1.9",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ECMA-418-2",
+            "edition": "2025",
+            "clause": "Clause 5.1.9"
+          }
+        ]
+      },
+      "quantity": "Audibility criterion on the total basis loudness (0.01 sone_HMS)",
+      "kind": "record",
+      "expected": {
+        "label": "0.01 sone_HMS",
+        "record": {
+          "AUDIBILITY_THRESHOLD_SONE_HMS": 0.01
+        }
+      },
+      "computed": {
+        "label": "0.01 sone_HMS (psychoacoustics.AUDIBILITY_THRESHOLD_SONE_HMS)",
+        "record": {
+          "AUDIBILITY_THRESHOLD_SONE_HMS": 0.01
+        }
+      },
+      "unit": "sone_HMS",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "psychoacoustics/ecma-418-2-2025-clause-6-3/prominent-tonality-criterion-0-4-tu-hms",
+      "domain": "psychoacoustics",
+      "reference": {
+        "cite": "ECMA-418-2:2025 Clause 6.3",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ECMA-418-2",
+            "edition": "2025",
+            "clause": "Clause 6.3"
+          }
+        ]
+      },
+      "quantity": "Prominent tonality criterion (0.4 tu_HMS)",
+      "kind": "record",
+      "expected": {
+        "label": "0.4 tu_HMS",
+        "record": {
+          "PROMINENT_TONALITY_TU_HMS": 0.4
+        }
+      },
+      "computed": {
+        "label": "0.4 tu_HMS (psychoacoustics.PROMINENT_TONALITY_TU_HMS)",
+        "record": {
+          "PROMINENT_TONALITY_TU_HMS": 0.4
+        }
+      },
+      "unit": "tu_HMS",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "psychoacoustics/ecma-418-2-2025-clause-7-2/prominent-roughness-criterion-0-2-asper",
+      "domain": "psychoacoustics",
+      "reference": {
+        "cite": "ECMA-418-2:2025 Clause 7.2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ECMA-418-2",
+            "edition": "2025",
+            "clause": "Clause 7.2"
+          }
+        ]
+      },
+      "quantity": "Prominent roughness criterion (0.2 asper)",
+      "kind": "record",
+      "expected": {
+        "label": "0.2 asper",
+        "record": {
+          "PROMINENT_ROUGHNESS_ASPER": 0.2
+        }
+      },
+      "computed": {
+        "label": "0.2 asper (psychoacoustics.PROMINENT_ROUGHNESS_ASPER)",
+        "record": {
+          "PROMINENT_ROUGHNESS_ASPER": 0.2
+        }
+      },
+      "unit": "asper",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "psychoacoustics/ecma-418-2-2025-clause-9-2/prominent-fluctuation-strength-criterion-0-2-vacil-hms",
+      "domain": "psychoacoustics",
+      "reference": {
+        "cite": "ECMA-418-2:2025 Clause 9.2",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ECMA-418-2",
+            "edition": "2025",
+            "clause": "Clause 9.2"
+          }
+        ]
+      },
+      "quantity": "Prominent fluctuation strength criterion (0.2 vacil_HMS)",
+      "kind": "record",
+      "expected": {
+        "label": "0.2 vacil_HMS",
+        "record": {
+          "PROMINENT_FLUCTUATION_STRENGTH_VACIL_HMS": 0.2
+        }
+      },
+      "computed": {
+        "label": "0.2 vacil_HMS (psychoacoustics.PROMINENT_FLUCTUATION_STRENGTH_VACIL_HMS)",
+        "record": {
+          "PROMINENT_FLUCTUATION_STRENGTH_VACIL_HMS": 0.2
+        }
+      },
+      "unit": "vacil_HMS",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
       "verdict": "pass"
     },
     {

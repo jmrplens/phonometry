@@ -2150,6 +2150,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   rain set-ups of ISO 10140-1 Annexes G, H, J and K. Every distance and limit
   a diagram shows is the one its clause prints.
 
+- **The four decision criteria of ECMA-418-2 are published.**
+  `psychoacoustics.AUDIBILITY_THRESHOLD_SONE_HMS` (0.01 sone_HMS, clause
+  5.1.9), `psychoacoustics.PROMINENT_TONALITY_TU_HMS` (0.4 tu_HMS, clause
+  6.3), `psychoacoustics.PROMINENT_ROUGHNESS_ASPER` (0.2 asper, clause 7.2)
+  and `psychoacoustics.PROMINENT_FLUCTUATION_STRENGTH_VACIL_HMS`
+  (0.2 vacil_HMS, clause 9.2) hold the numbers the standard prints, each held
+  to its printed page by a test and by a conformance row. No function applies
+  them: a result is compared with them, as the sound-quality and loudness
+  guides show, and no result carries the total basis loudness of Formula 26
+  that the audibility criterion reads. The fluctuation criterion keeps the
+  `_HMS` of its unit, because the package also publishes the Osses
+  fluctuation strength in plain vacil; 4.0.0rc1 had it, without that suffix,
+  as `PROMINENT_FLUCTUATION_STRENGTH_VACIL` of
+  `psychoacoustics.quality.fluctuation_strength_ecma`.
+  `scripts/check_parameter_units.py` reads `_sone_hms`, `_tu_hms`, `_asper`
+  and `_vacil_hms` as the units they are.
+
 ### Fixed
 
 - **A record that holds a read-only mapping pickles and deep-copies.**
@@ -6508,11 +6525,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   of `environment.assessment.impulsive_sound`,
   `vibration.human.multiple_shock`, `building.prediction.detailed_model` and
   the rest are private, each applied by the function that reads it or taken
-  as the default of a parameter. No function applies the ECMA-418-2
-  thresholds that are private now, the 0.01 sone_HMS audibility criterion of
-  its loudness and the prominence thresholds of its tonality (0.4 tu_HMS),
-  roughness (0.2 asper) and fluctuation strength (0.2 vacil_HMS). The
-  migration guide gives each with its clause, to compare a result against.
+  as the default of a parameter. The ECMA-418-2 criteria those modules held,
+  the 0.01 sone_HMS audibility criterion of its loudness and the prominence
+  criteria of its tonality (0.4 tu_HMS), roughness (0.2 asper) and
+  fluctuation strength (0.2 vacil_HMS), are published by `psychoacoustics`
+  instead (see Added), and no function applies them.
   The constant `electroacoustics.piston.J1_FIRST_ZERO` and
   `noise_control.duct_modes.PLANE_WAVE_EIGENVALUE`, which nothing read, are
   gone. The migration guide lists every name and what to write instead.

@@ -107,8 +107,9 @@ _MIN_INTERP_BLOCKS = 2  # fewest block-time knots pchip can interpolate (7.1.7)
 # Calibration constant c_R (Formula 104, tabulated; adjustable +/- 0.25 %).
 _C_R = 0.0180685
 
-#: Prominence criterion (Clause 7.2): a signal has a prominent roughness when
-#: the single value R (Clause 7.1.10) exceeds this value, in asper.
+#: Prominence criterion of Clause 7.2 (PDF page 46, folio 36), in asper: a
+#: signal has a prominent roughness when the single value R (Clause 7.1.10)
+#: exceeds it. Published by the package; no function applies it.
 PROMINENT_ROUGHNESS_ASPER = 0.2
 _A_THRESHOLD = 0.074376  # low-rate amplitude gate (Clause 7.1.5.4)
 

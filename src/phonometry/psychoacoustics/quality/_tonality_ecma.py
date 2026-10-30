@@ -75,8 +75,12 @@ _C_T = 2.8758615
 _F_LOW_MIN_HZ = 16.0  # Formula 56 precondition: f_L > 16 Hz
 _F_HIGH_MAX_HZ = 20000.0  # Formula 57 precondition: f_H < 20 kHz
 
-#: Prominence criterion (Clause 6.3): a signal has a prominent tonality when
-#: the single value T (Formula 63) exceeds this value, in tu_HMS.
+#: Prominence criterion of Clause 6.3 (PDF page 34, folio 24), in tu_HMS: a
+#: tonal component of a stationary sound is prominent when the specific
+#: tonality T'(z_tonal) exceeds it at a local maximum whose frequency
+#: f_ton,z(z_tonal) lies in [F(z_tonal - 1), F(z_tonal + 1)], and a
+#: non-stationary sound contains prominent tonalities when the single value T
+#: (Formula 63) exceeds it. Published by the package; no function applies it.
 PROMINENT_TONALITY_TU_HMS = 0.4
 
 # Averaging gate (Clause 6.2.9/6.2.11) and transient discard (Clause 6.2.9).

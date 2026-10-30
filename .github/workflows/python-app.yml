@@ -1872,12 +1872,13 @@ jobs:
     # SonarCloud counts as new code everything since the version changed, and
     # a scan that names no version leaves it "not provided" for ever: every
     # analysis from the first one on carried that, so the new-code period never
-    # moved and every smell ever written counted as new. VERSION is the version
-    # the tree will be released as, so each release opens a new period. The
-    # value is held to the PEP 440 form release.yml holds it to before the
-    # scanner reads it, and it reaches the scan as an input, never through a
-    # shell.
-    - name: Read the version the tree will be released as
+    # moved and every smell ever written counted as new. VERSION names the last
+    # release and changes only in a release commit, so the analysis of each
+    # release commit records a new version and opens a new period. The value
+    # is held to the PEP 440 form release.yml holds it to before the scanner
+    # reads it (tests/test_repository_config.py holds the two patterns equal),
+    # and it reaches the scan as an input, never through a shell.
+    - name: Read the version in VERSION (the last release until a release commit bumps it)
       id: version
       run: |
         version=$(tr -d ' \n' < VERSION)

@@ -3629,16 +3629,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   last changed, never moved: every finding ever written counted as new, and
   the gate on main had failed since 6 September on findings months old. The
   scan now reads `VERSION`, held to the PEP 440 form the release workflow
-  holds it to, and passes it as `sonar.projectVersion`, so each release opens
-  a new period; `tests/test_repository_config.py` runs the step that reads it.
-  The findings went first: the fiche builders and the conformance report add
-  consecutive items with one `extend` instead of runs of `append` (the
-  impedance-tube and floor-covering fiches, which opened with the same twenty
-  lines, now share them), the airflow-resistivity guards of
-  `materials.installed_dynamic_stiffness` and `materials.ResilientLayer` ask
-  `is_positive` instead of inverting a comparison, still refusing NaN and
-  taking an infinite resistivity, and five private helpers lose a parameter
-  they never read. Sonar reads the clause
+  holds it to, and passes it as `sonar.projectVersion`; `VERSION` changes only
+  in a release commit, so each release opens a new period.
+  `tests/test_repository_config.py` runs the step that reads it and holds its
+  pattern equal to the release workflow's. The findings went first: the fiche
+  builders and the conformance report add consecutive items with one `extend`
+  instead of runs of `append` (and the fiches that opened with the same title,
+  basis line, header grid and gap now take them from one helper), the
+  airflow-resistivity guards of `materials.installed_dynamic_stiffness` and
+  `materials.ResilientLayer` ask `is_positive` instead of inverting a
+  comparison, still refusing NaN and taking an infinite resistivity, and five
+  private helpers lose a parameter they never read. Sonar reads the clause
   number 5.9.4.2 of IEC 60942 in the calibrator rules as an IP address; the
   clause stays as printed and that finding stays open.
 

@@ -274,7 +274,7 @@ def _sonar_steps() -> tuple[dict[str, object], dict[str, object], int, int]:
     return steps[read[0]], steps[scan[0]], read[0], scan[0]
 
 
-def test_the_sonar_scan_is_told_the_version_the_tree_will_be_released_as() -> None:
+def test_the_sonar_scan_is_told_the_version_in_VERSION() -> None:
     """The scan names the project version, so a release opens a new-code period.
 
     SonarCloud counts as new code everything written since the project version
@@ -293,6 +293,33 @@ def test_the_sonar_scan_is_told_the_version_the_tree_will_be_released_as() -> No
     assert given.get("args") == _SONAR_VERSION_ARGS
     properties = (_ROOT / "sonar-project.properties").read_text(encoding="utf-8")
     assert not re.search(r"^\s*sonar\.projectVersion\s*=", properties, re.MULTILINE)
+
+
+def _version_patterns(script: str) -> list[str]:
+    """The regexes a workflow script hands to ``grep -Eq``, in order."""
+    return re.findall(r"grep -Eq '([^']+)'", script)
+
+
+def test_the_version_step_holds_version_to_the_pattern_the_release_holds_it_to() -> (
+    None
+):
+    """The scan and the release accept the same versions, written once each.
+
+    The PEP 440 normal form is written out in two workflows: the release reads
+    VERSION into the artefact names, the scan into the project version. If one
+    copy is edited and the other is not, the scan can record a version the
+    release refuses, or refuse one the release publishes, and the comment above
+    the step goes false without a sound.
+    """
+    read, _, _, _ = _sonar_steps()
+    release = (_ROOT / ".github" / "workflows" / "release.yml").read_text(
+        encoding="utf-8"
+    )
+    scan_patterns = _version_patterns(str(read["run"]))
+    release_patterns = _version_patterns(release)
+    assert len(scan_patterns) == 1, f"the version step has {len(scan_patterns)} regexes"
+    assert release_patterns, "release.yml checks VERSION with no grep -Eq"
+    assert scan_patterns[0] == release_patterns[0]
 
 
 @pytest.mark.skipif(

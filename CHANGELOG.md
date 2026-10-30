@@ -3790,13 +3790,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   list of labels or a list of indices belongs (the band edges of the
   electroacoustic results, `band_hz=` of `vibration.single_mode_fit`, the
   `labels` of `filters.FractionalOctaveBands`, the `microphones` of the IEC
-  61094-8 corrections and `excluded=` of `building.loudest_corner`). One
-  number given as a numpy complex scalar (`np.complex128`, `np.complex64`),
-  which the shared guards read as its real part with no more than a
-  `ComplexWarning`, is a `TypeError` as a Python `complex` was, and so is a
-  complex `initial_state`; a ragged one is a `ValueError`, as a ragged
-  `termination` is. A `str`, a number and an array of numbers work as
-  before. `tests/test_choices_beside_numbers.py` finds every choice beside
+  61094-8 corrections and `excluded=` of `building.loudest_corner`). A
+  complex `initial_state`, read as its real part with no more than a
+  `ComplexWarning`, is a `TypeError`, and a ragged one is a `ValueError`, as
+  a ragged `termination` is. A `str`, a number and an array of numbers work
+  as before. `tests/test_choices_beside_numbers.py` finds every choice beside
   numbers from its annotation and calls each with a text in every other
   form, `None` and an object, and reads every body for a `str` taken as a
   choice that no annotation states; rule A59 of the contributor guide

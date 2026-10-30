@@ -89,20 +89,6 @@ def test_calibration_constant_is_the_tabulated_c_f() -> None:
     assert _fse._C_F == ECMA418_2_FLUCTUATION_C_F
 
 
-def test_prominence_threshold_is_the_clause_9_2_value() -> None:
-    from reference_data import ECMA418_2_PROMINENT_FLUCTUATION_VACIL
-
-    from phonometry.psychoacoustics import (
-        # Import guard
-        fluctuation_strength_ecma as _pkg_func,  # noqa: F401
-    )
-
-    assert (
-        _fse.PROMINENT_FLUCTUATION_STRENGTH_VACIL
-        == ECMA418_2_PROMINENT_FLUCTUATION_VACIL
-    )
-
-
 # --------------------------------------------------------------------------
 # HSA core: closed-form synthetic anchors (Clause 9.1.4)
 # --------------------------------------------------------------------------

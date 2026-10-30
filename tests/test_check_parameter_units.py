@@ -149,6 +149,10 @@ def test_a_table_or_a_truth_value_is_not(value: object) -> None:
         "DEFAULT_STABILITY_MARGIN_DB",
         "ISO7235_COVERAGE_FACTOR",
         "DEFAULT_CO2_MOLE_FRACTION",
+        "AUDIBILITY_THRESHOLD_SONE_HMS",
+        "PROMINENT_TONALITY_TU_HMS",
+        "PROMINENT_ROUGHNESS_ASPER",
+        "PROMINENT_FLUCTUATION_STRENGTH_VACIL_HMS",
     ],
 )
 def test_a_lone_number_names_its_unit_or_says_it_has_none(name: str) -> None:
@@ -156,7 +160,16 @@ def test_a_lone_number_names_its_unit_or_says_it_has_none(name: str) -> None:
 
 
 @pytest.mark.parametrize(
-    "name", ["TAPPING_IMPACT_RATE", "HAV_EAV_A8", "NO_TONE_AUDIBILITY"]
+    "name",
+    [
+        "TAPPING_IMPACT_RATE",
+        "HAV_EAV_A8",
+        "NO_TONE_AUDIBILITY",
+        "PROMINENT_ROUGHNESS",
+        # The hearing model's unit is vacil_HMS; the bare vacil is Osses'.
+        "PROMINENT_FLUCTUATION_STRENGTH_VACIL",
+        "PROMINENT_TONALITY_HMS",
+    ],
 )
 def test_a_lone_number_with_a_bare_name_does_not(name: str) -> None:
     assert not cpu.constant_declares_its_unit(name)

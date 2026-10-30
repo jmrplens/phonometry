@@ -355,6 +355,16 @@ Returns an `EcmaLoudness`: `loudness` ($N$, sone_HMS), `specific_loudness`
 ($N'(z)$, 53 bands), `bark`, `frequencies`, `times`, `loudness_vs_time`
 ($N(l)$ at 187.5 Hz), `field`.
 
+**Is the sound audible?** Clause 5.1.9 calls a signal audible when its total
+basis loudness exceeds 0.01 sone_HMS, the
+`psychoacoustics.AUDIBILITY_THRESHOLD_SONE_HMS` the package publishes. That
+total is the specific basis loudness $N'_\text{basis}$ of Formula (25), the
+output of the front-end before any tonal or noise split, summed over the 53
+bands with $\Delta z = 0.5$ (Formula 26). No function applies the criterion,
+and no result carries that total: `loudness` is the $N$ of Formula (117),
+assembled from the tonal and noise loudness of Clause 8, which is not the
+sum the criterion reads.
+
 ## Quick answers
 
 ### Which loudness model should I choose: Zwicker, Moore-Glasberg or Sottek?

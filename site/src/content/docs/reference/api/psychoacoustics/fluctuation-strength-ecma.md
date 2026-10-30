@@ -185,3 +185,11 @@ A 1 kHz carrier 100 %-amplitude-modulated at 4 Hz with an overall level
 of 60 dB SPL yields 1 vacil_HMS (Clause 9 calibration; reproduced to
 0.9958 vacil_HMS with the tabulated c_F of Formula (163) once the 90th
 percentile settles, by a 12 s signal).
+
+## PROMINENT_FLUCTUATION_STRENGTH_VACIL_HMS
+
+*Constant* (`float`).
+
+```python
+PROMINENT_FLUCTUATION_STRENGTH_VACIL_HMS = 0.2
+```

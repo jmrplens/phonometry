@@ -105,6 +105,14 @@ Plot the roughness result (see `phonometry._plot.psychoacoustics`).
 Draws the time-dependent roughness R(l50) and a specific-roughness
 heatmap. Requires matplotlib (`pip install "phonometry[plot]"`).
 
+## PROMINENT_ROUGHNESS_ASPER
+
+*Constant* (`float`).
+
+```python
+PROMINENT_ROUGHNESS_ASPER = 0.2
+```
+
 ## roughness_ecma
 
 ```python

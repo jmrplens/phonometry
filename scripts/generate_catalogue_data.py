@@ -476,6 +476,36 @@ def _band_heading(band: int, *, spanish: bool = False) -> str:
     return heading.replace(".", ",") if spanish else heading
 
 
+#: The quantity a band column holds, in English and in Spanish, keyed by its
+#: field less the band and the unit after it (``absorption_area`` for
+#: ``absorption_area_125_m2``). A band column is headed by its band alone,
+#: because the page says in prose what the bands are of; a description of the
+#: catalogue read anywhere else, the dataset each catalogue page publishes in
+#: its structured data, has to name the quantity, and this is where it is
+#: named. A band column whose field is not here stops the generator
+#: (:func:`name_band_quantities`), so a new banded table cannot reach the page
+#: as a list of frequencies with nothing measured at them.
+BAND_QUANTITIES: dict[str, tuple[str, str]] = {
+    "absorption_coefficient": ("Absorption coefficient", "Coeficiente de absorción"),
+    "absorption_area": ("Equivalent absorption area", "Área de absorción equivalente"),
+    "transmission_loss": ("Transmission loss", "Pérdidas por transmisión"),
+    "air_attenuation": (
+        "Air attenuation coefficient",
+        "Coeficiente de atenuación del aire",
+    ),
+    "scattering_coefficient": ("Scattering coefficient", "Coeficiente de dispersión"),
+    "diffusion_coefficient": ("Diffusion coefficient", "Coeficiente de difusión"),
+}
+
+#: A heading that is a band and nothing else, as :func:`_band_heading` writes
+#: it in either language.
+_BAND_HEADING = re.compile(r"\d+(?:[.,]\d+)? k?Hz")
+
+#: A band column's field: the quantity, the band's centre frequency in hertz,
+#: and the unit, when the field carries one.
+_BAND_FIELD = re.compile(r"(?P<quantity>[a-z_]+?)_\d+(?:_[a-z0-9]+)*")
+
+
 #: One column per octave band. The heading is the band itself, in both
 #: languages, because a frequency does not translate.
 ABSORPTION_COLUMNS = tuple(
@@ -1534,6 +1564,41 @@ def refuse_field_names(document: dict[str, Any]) -> None:
         raise FieldNameInProseError(msg)
 
 
+class UnnamedBandQuantityError(Exception):
+    """A band column whose quantity :data:`BAND_QUANTITIES` does not name."""
+
+
+def name_band_quantities(document: dict[str, Any]) -> None:
+    """Give every band column the quantity it holds, in both languages.
+
+    A column headed by a band alone (``125 Hz``) gains ``quantity`` and
+    ``quantityEs`` from :data:`BAND_QUANTITIES`; any other column is left as
+    it is, its heading already being the quantity.
+
+    :param document: What :func:`render` is about to write, changed in place.
+    :raises UnnamedBandQuantityError: Naming every catalogue and field whose
+        band column holds a quantity :data:`BAND_QUANTITIES` does not name.
+    """
+    unnamed: list[str] = []
+    for table_name, table in document.items():
+        for column in table["columns"]:
+            if not _BAND_HEADING.fullmatch(column["heading"]):
+                continue
+            match = _BAND_FIELD.fullmatch(column["field"])
+            names = BAND_QUANTITIES.get(match["quantity"]) if match else None
+            if names is None:
+                unnamed.append(f"{table_name} {column['field']}")
+                continue
+            column["quantity"], column["quantityEs"] = names
+    if unnamed:
+        msg = (
+            "band columns hold a quantity BAND_QUANTITIES does not name, so the "
+            "dataset of their catalogue would list frequencies with nothing "
+            "measured at them:\n  " + "\n  ".join(unnamed)
+        )
+        raise UnnamedBandQuantityError(msg)
+
+
 def _spanish() -> dict[str, str]:
     """What :data:`SPANISH` holds, or nothing when it is not there yet."""
     if not SPANISH.is_file():
@@ -1547,6 +1612,8 @@ def render() -> str:
 
     :return: Its whole text, ending in a newline.
     :raises MissingSpanishError: When the Spanish page would print English.
+    :raises UnnamedBandQuantityError: When a band column holds a quantity
+        :data:`BAND_QUANTITIES` does not name.
     """
     solid_styles = styles(PUBLISHED_SOLIDS, SOLID_COLUMNS)
     porous_styles = styles(PUBLISHED_POROUS_MATERIALS, POROUS_COLUMNS)
@@ -1637,6 +1704,7 @@ def render() -> str:
         "fluids": {"columns": fluid_columns, "rows": fluid_rows},
         "airAttenuation": transcribed(air_conditions(), AIR_ATTENUATION_COLUMNS),
     }
+    name_band_quantities(document)
     in_spanish(document, _spanish())
     refuse_field_names(document)
     body = json.dumps(document, ensure_ascii=False, indent=2, sort_keys=False)
@@ -1717,6 +1785,10 @@ def render_types() -> str:
         "\theading: string;\n"
         "\theadingEs: string;\n"
         "\tunit: string;\n"
+        "\t/** The quantity a column headed by its band alone holds. */\n"
+        "\tquantity?: string;\n"
+        "\t/** The same quantity, in Spanish. */\n"
+        "\tquantityEs?: string;\n"
         "}\n"
         "\n"
         "/**\n"
@@ -1787,7 +1859,7 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     try:
         fresh = render()
-    except FieldNameInProseError as error:
+    except (FieldNameInProseError, UnnamedBandQuantityError) as error:
         print(error, file=sys.stderr)
         return 1
     except MissingSpanishError as error:

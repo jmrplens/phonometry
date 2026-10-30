@@ -14,7 +14,9 @@ reads as empty with the reason beside it.
 from __future__ import annotations
 
 import dataclasses
+import json
 import pathlib
+import re
 import sys
 from collections.abc import Mapping
 from typing import Any
@@ -715,8 +717,6 @@ def test_a_translation_no_row_prints_stops_the_generator() -> None:
 
 def test_the_committed_spanish_has_no_em_dash() -> None:
     """The same rule as every other published sentence."""
-    import json
-
     spanish = json.loads(gcd.SPANISH.read_text(encoding="utf-8"))
 
     assert [text for text in spanish.values() if "—" in text] == []
@@ -748,3 +748,95 @@ def test_a_field_name_in_a_note_stops_the_generator() -> None:
     cells.append({"kind": "unquantified", "text": "see plate_longitudinal_speed_m_s"})
     with pytest.raises(gcd.FieldNameInProseError, match="plate_longitudinal_speed_m_s"):
         gcd.refuse_field_names(document)
+
+
+# --- The quantity of a band column ------------------------------------------
+
+
+def _rendered() -> dict[str, Any]:
+    """The document :func:`gcd.render` writes, read back from its text."""
+    text = gcd.render()
+    body = text[text.index("{") : text.rindex("}") + 1]
+    document: dict[str, Any] = json.loads(body)
+    return document
+
+
+def test_every_band_column_names_the_quantity_it_holds() -> None:
+    """A column headed "125 Hz" says nothing of what was measured at 125 Hz.
+
+    The page says it in prose above the table; the dataset each catalogue page
+    publishes in its structured data lists its variables from these columns,
+    and there "125 Hz" alone would be a frequency with nothing measured at it.
+    """
+    # A band heading as the page writes one, in either language.
+    band = re.compile(r"\d+(?:[.,]\d+)? k?Hz")
+    columns = [
+        (name, column)
+        for name, table in _rendered().items()
+        for column in table["columns"]
+    ]
+    banded = [
+        (name, column) for name, column in columns if band.fullmatch(column["heading"])
+    ]
+
+    assert {name for name, _ in banded} == {
+        "absorption",
+        "absorptionAreas",
+        "transmissionLoss",
+        "ductTransmissionLoss",
+        "airAttenuation",
+        "scattering",
+        "diffusion",
+        "predictedScattering",
+    }
+    unnamed = [
+        f"{name} {column['field']}"
+        for name, column in banded
+        if not column.get("quantity") or not column.get("quantityEs")
+    ]
+    assert unnamed == []
+    # The quantity is a band column's alone: any other heading is its quantity.
+    assert [
+        f"{name} {column['field']}"
+        for name, column in columns
+        if "quantity" in column and not band.fullmatch(column["heading"])
+    ] == []
+
+
+def test_a_band_column_is_named_by_its_field_whatever_unit_follows_the_band() -> None:
+    """``absorption_area_125_m2`` holds an area, not an absorption."""
+    document = {
+        "absorptionAreas": {
+            "columns": [
+                {"field": "absorption_area_125_m2", "heading": "125 Hz"},
+                {"field": "air_attenuation_1000_np_m", "heading": "1 kHz"},
+                {"field": "scattering_coefficient_1250", "heading": "1,25 kHz"},
+                {"field": "thickness_mm", "heading": "Thickness"},
+            ],
+            "rows": [],
+        }
+    }
+    gcd.name_band_quantities(document)
+
+    area, air, scattering, thickness = document["absorptionAreas"]["columns"]
+    assert (area["quantity"], area["quantityEs"]) == (
+        "Equivalent absorption area",
+        "Área de absorción equivalente",
+    )
+    assert air["quantity"] == "Air attenuation coefficient"
+    assert scattering["quantityEs"] == "Coeficiente de dispersión"
+    assert "quantity" not in thickness
+
+
+def test_a_band_column_of_a_quantity_nobody_named_stops_the_generator() -> None:
+    """A new banded table cannot reach the page as frequencies alone."""
+    document = {
+        "loudness": {
+            "columns": [{"field": "specific_loudness_125", "heading": "125 Hz"}],
+            "rows": [],
+        }
+    }
+    with pytest.raises(
+        gcd.UnnamedBandQuantityError, match="loudness specific_loudness_125"
+    ):
+        gcd.name_band_quantities(document)

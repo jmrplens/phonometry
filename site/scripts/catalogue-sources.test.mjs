@@ -17,6 +17,7 @@ import { fileURLToPath } from 'node:url';
 
 import { catalogueSlugs } from '../src/data/topics.mjs';
 import { catalogues } from '../src/generated/catalogues.mjs';
+import { catalogueSections } from '../src/lib/catalogue-datasets.mjs';
 import {
   catalogueSourceProblems,
   isCataloguePage,
@@ -275,9 +276,6 @@ test('the reader of the pages follows the one way they write references, and sto
   }
 });
 
-/** The catalogues a page renders, read off its source as catalogue-pages.ts does. */
-const KEYS = /<Catalogues\s+catalogue="(\w+)"/g;
-
 test('every catalogue page of both languages names the work behind every table it prints', async () => {
   const problems = [];
   let claimed = 0;
@@ -285,7 +283,8 @@ test('every catalogue page of both languages names the work behind every table i
     for (const slug of catalogueSlugs) {
       const file = path.join(contentDir, `${prefix}${slug}.mdx`);
       const text = await readFile(file, 'utf8');
-      const keys = [...text.matchAll(KEYS)].map(([, key]) => key);
+      // The catalogues it renders, read off its source as catalogue-pages.ts does.
+      const keys = catalogueSections(text).map(({ key }) => key);
       assert.ok(keys.length > 0, `${file} renders no catalogue`);
       const references = readReferences(text, file);
       const tables = printedTables(keys.map((key) => catalogues[key]));

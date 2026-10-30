@@ -166,9 +166,13 @@ for (const [route, list] of cited) {
 
   // The works the structured data says the page is about and based on. The
   // first `about` is the software, defined site-wide rather than in the
-  // bibliography.
+  // bibliography. A catalogue's Dataset is not the page: its `isBasedOn`
+  // names the works its rows were read from (src/lib/catalogue-datasets.mjs),
+  // and a catalogue page reads rows off a standard's table without being
+  // written to the standard, which is what `implemented: false` says there.
   const works = definedWorks.get(route.startsWith('/es/') ? 'es' : 'en');
   for (const node of graphObjects(html, route)) {
+    if ([node['@type']].flat().includes('Dataset')) continue;
     for (const key of ['isBasedOn', 'about']) {
       for (const item of [node[key] ?? []].flat()) {
         const id = item?.['@id'];

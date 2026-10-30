@@ -676,7 +676,10 @@ Releases are fully automated from the repository-root `VERSION` file:
    identity, which proves the trusted publisher is configured, without
    uploading anything, and rebuilds the commit on macOS and compares the
    files with the ones the run built. The job summary shows the notes the
-   release will carry.
+   release will carry. The build and the rebuild on macOS are not new to a
+   rehearsal: Python CI makes them on every pull request, so a change to
+   `requirements-release.txt` or to what the sdist carries that breaks them
+   shows on that pull request.
 3. When the PR merges to `main`, the same workflow runs for real: it uploads
    to PyPI through trusted publishing (no token is stored; PyPI attaches a
    signed PEP 740 attestation to each file), creates the GitHub Release with
@@ -687,7 +690,10 @@ Releases are fully automated from the repository-root `VERSION` file:
    tells anyone to and compares the files with PyPI's. The rebuild runs after
    the upload, so a failure there does not stop the release: it says the
    release cannot be rebuilt to the same bytes, which is a defect to fix in
-   the next one. Zenodo registers the DOI from the release webhook.
+   the next one. The mirror is dispatched from a job of its own, which the
+   rebuild does not wait for: if the dispatch fails, re-running the failed
+   jobs runs it again alone. Zenodo registers the DOI from the release
+   webhook.
    `SECURITY.md` says how anyone can verify and rebuild the files.
 
 Never push tags manually; the workflow is idempotent (an existing tag is

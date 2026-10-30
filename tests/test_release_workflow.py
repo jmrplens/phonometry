@@ -19,13 +19,21 @@ any run failing until the day of a release:
   test suite runs on;
 - every file the GitHub Release carries has build provenance, and the
   checksum file is named for its version, as SECURITY.md says;
-- every package uploaded to PyPI is built with the setuptools
-  ``requirements-release.txt`` pins, and the release builds twice and holds
-  the second build to the checksum file of the first;
+- every build of either package, the ones uploaded to PyPI and the ones CI
+  makes on a pull request, uses the setuptools ``requirements-release.txt``
+  pins, and the release builds twice and holds the second build to the
+  checksum file of the first;
+- every pull request builds the release the same way, twice on Linux, and
+  once more on macOS against the checksum file of the Linux build, so a
+  bump of the pins or a difference between the two systems shows before a
+  release depends on it;
 - after a release, a job on another operating system rebuilds the tag the
   way SECURITY.md tells anyone to and compares it with PyPI, holding no
   token; in a rehearsal it rebuilds the commit and compares it with the run's
-  own files, which publishes nothing.
+  own files, which publishes nothing;
+- the GitLab mirror is dispatched from a job of its own, the only one that
+  can dispatch a workflow, so a failed dispatch neither fails the GitHub
+  Release job nor keeps the rebuild from running.
 """
 
 from __future__ import annotations
@@ -289,6 +297,47 @@ def test_the_mirror_is_dispatched_rather_than_triggered_by_another_run() -> None
     ]
 
 
+def test_a_failed_dispatch_of_the_mirror_leaves_the_release_and_the_rebuild_alone() -> (
+    None
+):
+    """The dispatch runs in a job of its own, after the release, and nothing waits for it.
+
+    Inside the GitHub Release job, a failed dispatch failed that job after the
+    tag and the release existed, the rebuild that needs it was skipped, and
+    running the failed jobs again could not bring the rebuild back, since the
+    release step then refuses a tag that already has a release.
+    """
+    release = _load("release.yml")
+    jobs = release["jobs"]
+    dispatching = {
+        job for job, step in _steps(release) if "gh workflow run" in step.get("run", "")
+    }
+    assert dispatching == {"mirror"}
+    assert jobs["mirror"]["permissions"] == {"actions": "write"}
+    assert jobs["mirror"]["if"] == "github.event_name != 'workflow_dispatch'"
+    assert "github-release" in _upstream(release, "mirror")
+    writers = sorted(
+        job
+        for job, settings in jobs.items()
+        if settings["permissions"].get("actions") == "write"
+    )
+    assert writers == ["mirror"], "only the mirror's job may dispatch a workflow"
+    waiting = sorted(job for job in jobs if "mirror" in _upstream(release, job))
+    assert waiting == [], f"{waiting} would not run after a failed dispatch"
+    steps = jobs["github-release"]["steps"]
+    creates = next(
+        index
+        for index, step in enumerate(steps)
+        if "gh release create" in step.get("run", "")
+    )
+    after = [
+        step.get("name", step.get("uses"))
+        for step in steps[creates + 1 :]
+        if step.get("if") != "env.REHEARSAL == 'true'"
+    ]
+    assert after == [], f"a release runs {after} after the release exists"
+
+
 # ==========================================================================
 # Provenance for every file, and a build anyone can repeat
 # ==========================================================================
@@ -374,29 +423,38 @@ def test_the_checksum_file_is_named_for_its_version_where_it_is_written_and_read
         assert "SHA256SUMS" not in path.read_text(encoding="utf-8"), path.name
 
 
-@pytest.mark.parametrize("name", ["release.yml", "publish-stub.yml"])
-def test_every_upload_is_built_with_the_pinned_back_end(name: str) -> None:
+#: A command that builds a distribution of phonometry or of the bridge.
+_BUILDS = re.compile(r"-m build\b|\bpip wheel\b|scripts/build_release\.py")
+#: Installing the pinned release tooling, from the checkout or from a clone.
+_INSTALLS_PINS = re.compile(r"-m pip install -r \S*requirements-release\.txt")
+
+
+@pytest.mark.parametrize("name", ["release.yml", "publish-stub.yml", "python-app.yml"])
+def test_every_build_uses_the_pinned_back_end(name: str) -> None:
     """The setuptools of ``requirements-release.txt``, not the newest of the day.
 
-    ``python -m build`` makes an environment of its own and installs whatever
-    setuptools is newest into it, so two builds of one commit a week apart
-    could differ; a build of either package that reaches PyPI uses the
-    pinned one in place, through ``--no-isolation`` directly or through
-    ``scripts/build_release.py``.
+    ``python -m build`` and ``pip wheel`` make an environment of their own and
+    install whatever setuptools is newest into it, so two builds of one commit
+    a week apart could differ; every build of either package, the ones that
+    reach PyPI and the ones CI makes on a pull request, uses the pinned one in
+    place, through ``--no-isolation`` directly or through
+    ``scripts/build_release.py``. On a pull request a bump of the pins that
+    breaks a build then fails where it can still be fixed.
     """
     workflow = _load(name)
-    uploaders = _uploaders(workflow)
-    builders = [
-        job
-        for job in sorted(set().union(*(_upstream(workflow, u) for u in uploaders)))
-        if "python -m build" in _job_runs(workflow, job)
-        or "scripts/build_release.py" in _job_runs(workflow, job)
-    ]
-    assert builders, f"{name}: no job upstream of the upload builds anything"
+    builders = sorted(
+        job for job in workflow["jobs"] if _BUILDS.search(_job_runs(workflow, job))
+    )
+    assert builders, f"{name}: no job builds anything"
+    for uploader in _uploaders(workflow):
+        assert set(builders) & _upstream(workflow, uploader), (
+            f"{name}: nothing upstream of {uploader} builds what it uploads"
+        )
     for job in builders:
         runs = _job_runs(workflow, job)
-        assert "-m pip install -r requirements-release.txt" in runs, job
-        commands = re.findall(r"python -m build\b[^\n]*", runs)
+        assert _INSTALLS_PINS.search(runs), f"{name}: {job} builds without the pins"
+        assert not re.search(r"\bpip wheel\b", runs), f"{name}: {job} runs pip wheel"
+        commands = re.findall(r"-m build\b[^\n]*", runs)
         assert all("--no-isolation" in command for command in commands), commands
 
 
@@ -443,6 +501,7 @@ def test_the_rebuild_runs_after_the_release_holding_no_token() -> None:
     assert release["jobs"]["build"]["runs-on"] != rebuild["runs-on"]
     assert rebuild["permissions"] == {}
     assert {"publish", "github-release"} <= _upstream(release, "rebuild")
+    assert "mirror" not in _upstream(release, "rebuild")
     assert "continue-on-error" not in rebuild
     assert not any(_publishes(step) for step in rebuild["steps"])
     assert _python_of(release, "rebuild") == _python_of(release, "build")
@@ -493,3 +552,66 @@ def test_the_rebuild_follows_the_recipe_security_md_gives() -> None:
         assert fragment in recipe, f"SECURITY.md no longer says {fragment!r}"
         assert fragment in job, f"the rebuild job no longer runs {fragment!r}"
     assert f"python{_python_of(release, 'build')} -m venv" in recipe
+
+
+def test_every_pull_request_builds_the_release_twice_and_on_macos() -> None:
+    """What the release builds, built on a pull request the same way.
+
+    A bump of ``setuptools`` or ``build`` that breaks the build or lets the
+    machine into the files, and a new file setuptools packs without
+    ``eol=lf``, fail on the pull request rather than in a rehearsal or in
+    the release; the rebuild on macOS, held to the Linux build's checksum
+    file, shows a difference between the two systems before anything is
+    published.
+    """
+    ci = _load("python-app.yml")
+    triggers = ci.get("on", ci.get(True))
+    assert "pull_request" in triggers
+    linux, macos = ci["jobs"]["release-build"], ci["jobs"]["release-rebuild-macos"]
+    release = _load("release.yml")
+    assert linux["runs-on"] == release["jobs"]["build"]["runs-on"]
+    assert macos["runs-on"] == release["jobs"]["rebuild"]["runs-on"]
+    for job in ("release-build", "release-rebuild-macos"):
+        settings = ci["jobs"][job]
+        assert "if" not in settings, f"{job} does not run on every pull request"
+        assert "continue-on-error" not in settings
+        assert settings["permissions"] == {"contents": "read"}
+        assert _python_of(ci, job) == _python_of(release, "build")
+    assert "release-build" in _upstream(ci, "release-rebuild-macos")
+
+    runs = [step.get("run", "") for step in linux["steps"]]
+    builds = [run for run in runs if "scripts/build_release.py" in run]
+    assert len(builds) == 2, builds
+    assert "--check" not in builds[0]
+    assert re.search(
+        r'--check "\$RUNNER_TEMP/\S*phonometry-\$VERSION\.sha256"', builds[1]
+    )
+    written = "\n".join(run for run in runs if "sha256sum" in run)
+    assert re.search(r'> "\$RUNNER_TEMP/\S*phonometry-\$VERSION\.sha256"', written), (
+        "the checksum file is written in the checkout, which the build refuses"
+    )
+    assert "scripts/check_release_artifacts.py dist --version" in "\n".join(runs)
+    uploaded = [
+        step["with"]
+        for step in linux["steps"]
+        if step.get("uses", "").startswith("actions/upload-artifact@")
+    ]
+    downloaded = [
+        step["with"]
+        for step in macos["steps"]
+        if step.get("uses", "").startswith("actions/download-artifact@")
+    ]
+    assert len(uploaded) == len(downloaded) == 1
+    assert uploaded[0]["name"] == downloaded[0]["name"]
+    assert uploaded[0]["path"].startswith("${{ runner.temp }}")
+    assert downloaded[0]["path"].startswith("${{ runner.temp }}")
+    rebuilt = [
+        step["run"]
+        for step in macos["steps"]
+        if "scripts/build_release.py" in step.get("run", "")
+    ]
+    assert len(rebuilt) == 1
+    assert re.search(
+        r'--check "\$RUNNER_TEMP/\S*phonometry-\$VERSION\.sha256"',
+        re.sub(r"\\\n\s*", "", rebuilt[0]),
+    )

@@ -368,3 +368,192 @@ def test_a_json_string_is_read_for_the_spaced_dash(tmp_path: pathlib.Path) -> No
         encoding="utf-8",
     )
     assert ced.scan_double_hyphens(notes) == [3]
+
+
+# The single spaced hyphen after a list item's head: the same bullet spelt with
+# one hyphen. It is read in that one place, where it cannot be a minus; 35
+# list items of eight modules carried it, and five API pages showed the two
+# bullet forms side by side.
+
+
+def test_a_docstring_list_item_joined_by_a_spaced_hyphen_is_refused() -> None:
+    text = (
+        '"""Entry points.\n'
+        "\n"
+        "* :func:`noise_signal` - Gaussian noise.\n"
+        "* ``peaking`` - the bell of a parametric EQ.\n"
+        "* ``lowshelf`` / ``highshelf`` - shelving filters.\n"
+        "* **ISO 2631-1:1997** - whole-body vibration.\n"
+        "* ``'gcc'`` (Knapp & Carter) - the generalized correlation.\n"
+        "1. ``first`` -\n"
+        "   the text on the next line.\n"
+        '"""\n'
+    )
+    assert ced.python_bullet_hyphen_hits(text) == [3, 4, 5, 6, 7, 8]
+
+
+def test_a_spaced_hyphen_that_is_not_after_the_head_is_not_read() -> None:
+    """A minus inside a role, a hyphen in the text and a bullet with a colon stand."""
+    text = (
+        '"""Thresholds.\n'
+        "\n"
+        "* :math:`445.2 F^{-0.05401} - 344.3` for :math:`0.5 \\\\le F < 11.3`,\n"
+        "* ``q``: the quality factor, :math:`1 - x` at most,\n"
+        "* ``bw``-based spacing,\n"
+        "The ``x`` - y line is not a list item.\n"
+        "\n"
+        "Run it as::\n"
+        "\n"
+        "    * ``x`` - shown as code\n"
+        '"""\n'
+    )
+    assert ced.python_bullet_hyphen_hits(text) == []
+
+
+def test_a_page_list_item_joined_by_a_spaced_hyphen_is_refused() -> None:
+    text = (
+        "* [noise_signal](/reference/api/signals/) - Gaussian noise.\n"
+        "- `peaking` - the bell.\n"
+        "* **ISO 8041-1:2017** - the master definition.\n"
+        "* `q`: the quality factor.\n"
+        "\n"
+        "```text\n"
+        "* `x` - shown as code\n"
+        "```\n"
+    )
+    assert ced.markdown_bullet_hyphen_hits(text) == [1, 2, 3]
+
+
+def test_only_the_package_docstrings_and_the_pages_are_read_for_the_bullet(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    package = tmp_path / "src" / "phonometry"
+    package.mkdir(parents=True)
+    monkeypatch.setattr(ced, "_PACKAGE", package)
+    text = '"""Entry points.\n\n* ``x`` - the level.\n"""\n'
+    inside = package / "zwicker.py"
+    outside = tmp_path / "figure.py"
+    page = tmp_path / "page.md"
+    inside.write_text(text, encoding="utf-8")
+    outside.write_text(text, encoding="utf-8")
+    page.write_text("* `x` - the level.\n", encoding="utf-8")
+    assert ced.scan_bullet_hyphens(inside) == [3]
+    assert ced.scan_bullet_hyphens(outside) == []
+    assert ced.scan_bullet_hyphens(page) == [1]
+    assert ced.findings(inside) == [
+        (3, "spaced hyphen as a dash after a list item's head")
+    ]
+
+
+# Math on a page: remark-math takes ``$...$`` and a ``$$`` block before
+# smartypants sees the text, so a double hyphen there is TeX, as it is in the
+# ``:math:`` role the API generator turns into it.
+
+
+def test_math_on_a_page_keeps_its_double_hyphen() -> None:
+    text = (
+        "The term $c^{--}$ here.\n"
+        "\n"
+        "$$\n"
+        "a -- b\n"
+        "$$\n"
+        "\n"
+        "It costs \\$5 -- or \\$6, which is prose.\n"
+    )
+    assert ced.markdown_double_hyphen_hits(text) == [7]
+
+
+def test_a_docstring_and_its_page_read_the_same() -> None:
+    """One docstring, read as written and as the API generator publishes it.
+
+    A construct the docstring reader exempts as code has to reach the page
+    as code, or a contributor who followed the rule gets a red on the page
+    that no change to the docstring can clear.
+    """
+    import generate_api_docs as gad
+
+    cases = {
+        "literal block": ("Run it as::\n\n    make audit -- --only\n", False),
+        "code directive": (
+            ".. code-block:: bash\n   :linenos:\n\n   python x.py --count -- y\n",
+            False,
+        ),
+        "doctest": (">>> run('--count')\n'--'\n", False),
+        "math directive": (".. math::\n\n   a -- b\n", False),
+        "math role": ("The term :math:`c^{--}` here.\n", False),
+        "prose": ("The level rises -- and falls.\n", True),
+        "note": (".. note::\n   The level rises -- and falls.\n", True),
+    }
+    for name, (body, refused) in cases.items():
+        docstring = "Summary.\n\n" + body
+        in_docstring = bool(ced.python_double_hyphen_hits(f'"""{docstring}"""\n'))
+        page = gad.render_prose(docstring, {}, gad.RoleStats())
+        on_page = bool(ced.markdown_double_hyphen_hits(page))
+        assert (in_docstring, on_page) == (refused, refused), name
+    bullet = "Summary.\n\n* ``peaking`` - the bell.\n"
+    page = gad.render_prose(bullet, {}, gad.RoleStats())
+    assert ced.python_bullet_hyphen_hits(f'"""{bullet}"""\n') == [3]
+    assert ced.markdown_bullet_hyphen_hits(page) == [3]
+
+
+# The other spellings of the character: an entity on a page or in a string,
+# an escape in a string literal. Each publishes the em dash itself.
+
+
+def test_an_entity_of_the_dash_on_a_page_is_the_dash() -> None:
+    text = (
+        "The level rises &mdash; and falls.\n"
+        "The level rises &#8212; and falls.\n"
+        "The level rises &#x2014; and falls.\n"
+        "Written as `&mdash;` in code.\n"
+    )
+    assert ced.markdown_hits(text) == [1, 2, 3]
+
+
+def test_an_escape_in_the_frontmatter_is_the_dash() -> None:
+    """YAML decodes the escape in a double-quoted value; the body shows it as written."""
+    text = (
+        "---\n"
+        'title: "Acoustics \\u2014 Part 2: rooms"\n'
+        'description: "The level rises \\u2014 and falls."\n'
+        "---\n"
+        "Written as \\u2014 in the body.\n"
+    )
+    assert ced.markdown_hits(text) == [3]
+
+
+def test_an_escape_or_entity_in_a_python_string_is_the_dash() -> None:
+    text = (
+        'ESCAPE = "the level rises \\u2014 and falls"\n'
+        'NAMED = "the level rises \\N{EM DASH} and falls"\n'
+        'LONG = "the level rises \\U00002014 and falls"\n'
+        'ENTITY = "the level rises &mdash; and falls"\n'
+        'RAW = r"\\u2014 stays six characters"\n'
+        'EMPTY = "&#8212;"\n'
+        'FORMATTED = f"the level {x} \\u2014 falls"\n'
+        'RAW_FORMATTED = rf"\\u2014 {x} stays"\n'
+    )
+    assert ced.python_hits(text) == [1, 2, 3, 4, 7]
+
+
+def test_an_escape_in_a_json_string_or_a_data_module_is_the_dash(
+    tmp_path: pathlib.Path,
+) -> None:
+    notes = tmp_path / "catalogue-es.json"
+    notes.write_text(
+        "{\n"
+        '  "note": "la tabla \\u2014 sin cifra",\n'
+        '  "empty": "\\u2014",\n'
+        '  "html": "la tabla &mdash; sin cifra"\n'
+        "}\n",
+        encoding="utf-8",
+    )
+    assert ced.scan(notes) == [2, 4]
+    home = tmp_path / "home.ts"
+    home.write_text(
+        "// A comment keeps it \\u2014 nobody reads it.\n"
+        "export const NOTE = 'One call \\u2014 and the figure is drawn.';\n"
+        "export const WIDE = 'One call \\u{2014} and the figure is drawn.';\n",
+        encoding="utf-8",
+    )
+    assert ced.scan(home) == [2, 3]

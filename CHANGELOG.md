@@ -2220,14 +2220,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   spelt a dash as `--`, which `help()` prints as it is and the site published
   as an em dash: 586 lines in 116 modules, 92 of them list items such as
   ``:func:`x` -- text``. Each now reads as a colon, a comma, a parenthesis or a
-  sentence of its own, as the sentence needs. `scripts/check_em_dashes.py`
-  refuses the double hyphen in a docstring and in the prose of every page,
-  outside code, link destinations and HTML comments, and the spaced form in any
-  other published string, so it cannot come back (rule P6). The `fluids`
-  package opens with a sentence naming humid air by IEC 61094-2 Annex F, sea
-  water, ideal gases and the fluid states and nonlinearity parameters books
-  print, where its API page read "fluids domain of phonometry (see module
-  docstrings)".
+  sentence of its own, as the sentence needs. Another 35 list items in 8
+  modules joined their head to their text with a single spaced hyphen
+  (``:func:`x` - text``), and they take the colon too; the envelope page no
+  longer shows a stray list item where a wrapped line of its docstring opened
+  on such a hyphen. `scripts/check_em_dashes.py` refuses the double hyphen in
+  a docstring and in the prose of every page, outside code, math, link
+  destinations and HTML comments, the spaced form in any other published
+  string, and the spaced single hyphen after a list item's head, so none can
+  come back (rule P6); it also reads the entities and the escapes of the em
+  dash (`&mdash;`, `\u2014`) as the character they publish. The API reference
+  fences a code directive's body and a doctest as code, as the check reads
+  them in the docstring. The `fluids` package opens with a sentence naming
+  humid air by IEC 61094-2 Annex F, sea water, ideal gases and the fluid
+  states and nonlinearity parameters books print, where its API page read
+  "fluids domain of phonometry (see module docstrings)".
 
 - **A record that holds a read-only mapping pickles and deep-copies.**
   `MappingProxyType` can be neither pickled nor deep-copied, and 48 of the

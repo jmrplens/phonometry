@@ -250,6 +250,37 @@ def test_math_directive_keeps_one_environment_in_one_block() -> None:
     assert out.count("\\begin{aligned}") == out.count("\\end{aligned}") == 1
 
 
+def test_code_directive_and_doctest_become_fenced_code() -> None:
+    # Shown raw, ``.. code-block:: bash`` and a ``>>>`` session read as prose
+    # (the prompt even as a nested blockquote), and the prose checks of the
+    # page then read their option flags as dashes the docstring never wrote.
+    text = (
+        "Run it as\n"
+        "\n"
+        ".. code-block:: bash\n"
+        "   :linenos:\n"
+        "\n"
+        "   python x.py --count -- y\n"
+        "\n"
+        ">>> run('--count')\n"
+        "'--'\n"
+        "\n"
+        "* An item\n"
+        "\n"
+        "  .. code::\n"
+        "\n"
+        "     a --b\n"
+    )
+    out = gad.render_prose(text, {}, gad.RoleStats())
+    assert "```bash\npython x.py --count -- y\n```" in out
+    assert "```python\n>>> run('--count')\n'--'\n```" in out
+    # Nested in a list item, the fence keeps the item's indent; a directive
+    # that names no language is text.
+    assert "  ```text\n  a --b\n  ```" in out
+    assert ".. code" not in out
+    assert ":linenos:" not in out
+
+
 # ---------------------------------------------------------------------------
 # Full generation
 # ---------------------------------------------------------------------------

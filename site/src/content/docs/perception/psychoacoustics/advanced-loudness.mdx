@@ -521,17 +521,37 @@ plt.show()
 
 Returns an `EcmaLoudness`: `loudness` ($N$, sone_HMS), `specific_loudness`
 ($N'(z)$, 53 bands), `bark`, `frequencies`, `times`, `loudness_vs_time`
-($N(l)$ at 187.5 Hz), `field`.
+($N(l)$ at 187.5 Hz), `basis_loudness_vs_time_sone_hms` ($N_\text{basis}(l)$
+at the same `times`), `field`.
 
 **Is the sound audible?** Clause 5.1.9 calls a signal audible when its total
 basis loudness exceeds 0.01 sone_HMS, the
 `psychoacoustics.AUDIBILITY_THRESHOLD_SONE_HMS` the package publishes. That
-total is the specific basis loudness $N'_\text{basis}$ of Formula (25), the
-output of the front-end before any tonal or noise split, summed over the 53
-bands with $\Delta z = 0.5$ (Formula 26). No function applies the criterion,
-and no result carries that total: `loudness` is the $N$ of Formula (117),
-assembled from the tonal and noise loudness of Clause 8, which is not the
-sum the criterion reads.
+total, $N_\text{basis}$ of Formula (26), is the specific basis loudness
+$N'_\text{basis}$ of Formula (25), the output of the front-end before any
+tonal or noise split, summed over the 53 bands with $\Delta z = 0.5$.
+`loudness_ecma()` returns it block by block as
+`basis_loudness_vs_time_sone_hms`, on the 187.5 Hz grid of `times`: each band
+is computed at its own block size and resampled to that grid, as Clause 6.2.6
+resamples the tonal and noise loudness. The standard prints Formula (26)
+without a time index, so one value per block is this library's reading. No
+function applies the criterion: compare that field with it, not `loudness`,
+which is the $N$ of Formula (117), assembled from the tonal and noise
+loudness of Clause 8. A tone at the edge of hearing can leave $N$ at zero
+while its basis loudness clears the criterion:
+
+```python
+# `np`, `fs`, `t` and `psychoacoustics` come from the snippet above.
+# A 1 kHz tone at 0 dB SPL, at the edge of hearing.
+quiet = np.sqrt(2) * 2e-5 * 10 ** (0 / 20) * np.sin(2 * np.pi * 1000 * t)
+faint = psychoacoustics.loudness_ecma(quiet, fs, field="free")
+
+n_basis = faint.basis_loudness_vs_time_sone_hms   # N_basis(l), one per block of faint.times
+audible = n_basis > psychoacoustics.AUDIBILITY_THRESHOLD_SONE_HMS
+print(f"N = {faint.loudness:.4f} sone_HMS")        # 0.0000 sone_HMS: N of Formula 117
+print(f"max N_basis = {n_basis.max():.4f} sone_HMS")  # 0.0118 sone_HMS
+print(audible.any())                               # True: audible (clause 5.1.9)
+```
 
 ## What this guide covers
 
@@ -545,15 +565,17 @@ pattern of clause 7 and the binaural inhibition of clause 8, via
 variants. ISO 532-3:2023 (Moore-Glasberg-Schlittenlacher): the short-term
 loudness of clause 7.8, the long-term loudness of clause 7.9 and its peak
 $N_\text{max}$, via `loudness_moore_glasberg_time()`. ECMA-418-2:2025 (Sottek
-Hearing Model): the loudness assembly of Clause 8, via `loudness_ecma()`.
+Hearing Model): the loudness assembly of Clause 8, and the total basis
+loudness of Formula 26 that the audibility criterion of Clause 5.1.9 reads,
+via `loudness_ecma()`.
 </ScopeClaim>
 
 <ScopeClaim status="not-covered" label="Not covered">
 ECMA-418-2's binaural combination (Formula 118, Clause 8.1.5) is not
 implemented: `loudness_ecma()` is monaural, so analyse each ear channel
 separately. The audibility criterion of Clause 5.1.9 is published as a
-constant and applied by no function, and the total basis loudness it reads
-is not returned. ISO 532-3 Clause 5 prescribes resampling the input to 32 kHz
+constant and applied by no function: compare the total basis loudness with
+it. ISO 532-3 Clause 5 prescribes resampling the input to 32 kHz
 before the running FFT analysis. This implementation processes at the native
 sampling rate instead, a documented deviation that stays inside the standard's
 expanded uncertainty. Resample to 32 kHz first if strict clause-by-clause

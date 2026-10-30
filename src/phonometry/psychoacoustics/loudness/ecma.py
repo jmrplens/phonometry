@@ -10,7 +10,9 @@ Clean-room implementation of the loudness signal chain of ECMA-418-2:2025:
   half-wave rectification (5.1.6), block RMS (5.1.7), the compressive
   nonlinearity that maps sound pressure to specific loudness (5.1.8,
   Formula 23, Table 2) and the threshold in quiet (5.1.9, Table 3),
-  yielding the specific basis loudness ``N'_basis(l, z)`` (Formula 25);
+  yielding the specific basis loudness ``N'_basis(l, z)`` (Formula 25)
+  and, summed over the bands, the total basis loudness ``N_basis(l)``
+  (Formula 26) that the audibility criterion of Clause 5.1.9 reads;
 * the autocorrelation-based split into tonal and noise specific loudness
   with the full Clause 6.2.3 band averaging, including the
   cross-block-size-group ACF recomputation (Clause 6.2.2-6.2.7,
@@ -93,7 +95,8 @@ _N_FADE = 240  # 5 ms fade-in, n_fadein = 0.005 * 48000 (Formula 1)
 #: sone_HMS: a signal is considered audible when its total basis loudness, the
 #: specific basis loudness of Formula (25) summed over the 53 bands with
 #: dz = 0.5 (Formula 26), exceeds it. Published by the package; no function
-#: applies it, and no result carries that total.
+#: applies it: a result's ``basis_loudness_vs_time_sone_hms`` is compared
+#: with it.
 AUDIBILITY_THRESHOLD_SONE_HMS = 0.01
 
 # Auditory filter bank (Clause 5.1.4)
@@ -101,7 +104,8 @@ _DF0 = 81.9289  # delta f at f = 0 [Hz] (below Formula 10)
 _C = 0.1618  # scaling constant c (below Formula 10)
 _K = 5  # auditory filter order (footnote 5)
 _E_K5 = np.array([0.0, 1.0, 11.0, 11.0, 1.0])  # e_i for k = 5 (below Formula 15)
-_Z = np.arange(0.5, 26.5 + 0.25, 0.5)  # critical-band-rate scale, 0.5..26.5
+_DZ = 0.5  # critical-band-rate step dz (Clause 5.1.4; Formulae 26 and 116)
+_Z = np.arange(0.5, 26.5 + _DZ / 2, _DZ)  # critical-band-rate scale, 0.5..26.5
 _CBF = _Z.size  # number of critical band filters = 53
 
 # Band-dependent segmentation (Clause 5.1.5, Table 4): breakpoints on the
@@ -274,6 +278,23 @@ class EcmaLoudness(OwnsArrays):
     ``frequencies`` the band centre frequencies F(z).  ``times`` and
     ``loudness_vs_time`` hold the time-dependent loudness N(l) at 187,5 Hz
     (Formula 116).  ``field`` records the assumed sound field.
+
+    ``basis_loudness_vs_time_sone_hms`` is the total basis loudness
+    N_basis(l) in sone_HMS (Formula 26) at the same ``times``, the quantity
+    the audibility criterion of Clause 5.1.9 reads: the signal is audible in
+    a block where it exceeds :data:`AUDIBILITY_THRESHOLD_SONE_HMS`
+    (0,01 sone_HMS). It is the specific basis loudness N'_basis(l, z) of
+    Formula (25), the front-end's output before the tonal and noise split,
+    which each band computes at its own block size (Clause 5.1.5.1,
+    Table 4); every band is resampled by linear interpolation onto the
+    common 187,5 Hz grid of the 1024-sample blocks (Clause 6.2.6, Table 6),
+    the grid the tonal and noise loudness are resampled to, and the 53 bands
+    are summed with dz = 0,5. Formula (26) is printed without a time index,
+    which Clause 5.1.7 drops because every block is processed alike, so a
+    value per block of that grid is the library's reading. No block is
+    discarded: the 0 <= l <= 56 transient blocks that Formulae (115) and
+    (117) leave out, and the blocks after l_end of Formula (40), are kept,
+    as ``loudness_vs_time`` keeps them.
     """
 
     loudness: float
@@ -282,6 +303,7 @@ class EcmaLoudness(OwnsArrays):
     frequencies: np.ndarray
     times: np.ndarray
     loudness_vs_time: np.ndarray
+    basis_loudness_vs_time_sone_hms: np.ndarray
     field: Literal["free", "diffuse"]
 
     def __post_init__(self) -> None:
@@ -290,12 +312,14 @@ class EcmaLoudness(OwnsArrays):
         Two axes run through this result, and each is read by pairing arrays
         index for index: the average specific loudness against the
         critical-band-rate scale of the 53 auditory bands, and the
-        time-dependent loudness against its block times. Where the chart draws
-        such a pair a mismatch does stop it, but from inside matplotlib, about
-        a first dimension, whenever someone next plots; ``frequencies``
-        it never draws, so a band axis that disagrees there is caught by
-        nobody and F(z) is reported for a band other than the one whose
-        loudness stands beside it.
+        time-dependent loudness and the total basis loudness against their
+        block times. Where the chart draws such a pair a mismatch does stop
+        it, but from inside matplotlib, about a first dimension, whenever
+        someone next plots; ``frequencies`` and the total basis loudness it
+        never draws, so a band axis that disagrees there is caught by nobody
+        and F(z) is reported for a band other than the one whose loudness
+        stands beside it, and a basis loudness one block off is compared
+        with the audibility criterion at the wrong time.
 
         The two axes are checked apart because nothing relates them: the band
         count is fixed by the standard, whereas the number of 187,5 Hz blocks
@@ -312,6 +336,7 @@ class EcmaLoudness(OwnsArrays):
             frequencies=1,
             times=1,
             loudness_vs_time=1,
+            basis_loudness_vs_time_sone_hms=1,
         )
         require_same_length(
             self,
@@ -320,7 +345,13 @@ class EcmaLoudness(OwnsArrays):
             "frequencies",
             axis="auditory band",
         )
-        require_same_length(self, "times", "loudness_vs_time", axis="time block")
+        require_same_length(
+            self,
+            "times",
+            "loudness_vs_time",
+            "basis_loudness_vs_time_sone_hms",
+            axis="time block",
+        )
 
     @overload
     def plot(
@@ -443,6 +474,25 @@ def _segment_bs(p_band: np.ndarray, block_size: int, n_new: int) -> np.ndarray:
     return np.asarray(p_band[idx], dtype=np.float64)
 
 
+def _band_basis_loudness(
+    p_band: np.ndarray, band: int, block_size: int, n_new: int
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Rectified blocks of one band and their specific basis loudness (Formulae 18-25).
+
+    Segments the band-pass signal of ``band`` at ``block_size`` (Formulae
+    18-20), half-wave rectifies it (Formula 21), forms the block RMS
+    (Formula 22) and from it the specific basis loudness N'_basis(l, z)
+    (Formulae 23-25). Returns ``(rect, energy, basis)``: the rectified blocks,
+    their squares (``rect**2``) and N'_basis(l, z) per block, at the band's
+    own block rate.
+    """
+    seg = _segment_bs(p_band, block_size, n_new)
+    rect = np.where(seg > 0.0, seg, 0.0)  # Formula 21
+    energy = rect**2  # shared by Formula 22 and the ACF normalization
+    rms = np.sqrt((2.0 / block_size) * np.sum(energy, axis=1))  # Formula 22
+    return rect, energy, _specific_basis_loudness(rms, band)  # Formulae 23-25
+
+
 def _specific_basis_loudness(rms: np.ndarray, band: int) -> np.ndarray:
     """Specific basis loudness from block RMS values (Clause 5.1.8-5.1.9).
 
@@ -515,11 +565,7 @@ def _scaled_acf_at(
     cached = cache.get(key)
     if cached is not None:
         return cached
-    seg = _segment_bs(p_bands[band], block_size, n_new)
-    rect = np.where(seg > 0.0, seg, 0.0)  # Formula 21
-    energy = rect**2  # shared by Formula 22 and the ACF normalization
-    rms = np.sqrt((2.0 / block_size) * np.sum(energy, axis=1))  # Formula 22
-    basis = _specific_basis_loudness(rms, band)  # Formulae 23-25
+    rect, energy, basis = _band_basis_loudness(p_bands[band], band, block_size, n_new)
     acf = _band_acf(rect, block_size, energy)  # Formulae 27-29
     scaled = np.asarray(acf * basis[:, None], dtype=np.float64)  # Formula 30
     cache[key] = scaled
@@ -618,7 +664,7 @@ def _tonal_estimate(
 
 
 def _resample_common(values: np.ndarray, band: int, n_common: int) -> np.ndarray:
-    """Linearly resample a band time series onto the common grid (Formula 40)."""
+    """Linearly resample a band time series onto the common grid (Clause 6.2.6, Table 6)."""
     factor = int(_INTERP[band])
     positions = np.arange(values.size) * factor
     return np.asarray(
@@ -644,16 +690,19 @@ def _lowpass_time(x: np.ndarray) -> np.ndarray:
 
 def _tonal_noise_split(
     x: np.ndarray, field: str
-) -> tuple[np.ndarray, np.ndarray, np.ndarray, int, int]:
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, int, int, np.ndarray]:
     """Clause 5 front-end + Clause 6.2 tonal/noise split on the common grid.
 
     Runs the shared auditory front-end (Clause 5), the full Clause 6.2.3
     band/block averaging and the noise reduction (Formulae 41-48), tracking
     the tonal frequency f_ton(l, z) of Formulae 38-39 along the way. Returns
-    ``(N'_tonal(l, z), N'_noise(l, z), f_ton(l, z), n_common, n_samples)``.
-    This single path feeds both the loudness metric (Clause 8.1.1 builds on
-    the Clause 6.2 outputs, Formulae 47/48) and the tonality metric, so the
-    two report the same underlying N'_tonal for the same signal.
+    ``(N'_tonal(l, z), N'_noise(l, z), f_ton(l, z), n_common, n_samples,
+    N'_basis(l, z))``, the last being the specific basis loudness of
+    Formula (25) of each band at its own block size, resampled onto the same
+    common grid. This single path feeds both the loudness metric (Clause
+    8.1.1 builds on the Clause 6.2 outputs, Formulae 47/48; Formula 26 sums
+    N'_basis) and the tonality metric, so the two report the same underlying
+    N'_tonal for the same signal.
     """
     padded, n_samples, n_new = _preprocess(x)
     p_om = signal.sosfilt(_ear_filter_sos(field), padded)
@@ -669,11 +718,19 @@ def _tonal_noise_split(
     n_tonal = np.zeros((n_common, _CBF))
     n_signal = np.zeros((n_common, _CBF))
     f_ton = np.zeros((n_common, _CBF))
+    # N'_basis(l, z) of Formula (25), before any band or block averaging: each
+    # band at its own block size (Table 4), resampled like every other
+    # time-dependent variable of Clause 6.2.6.
+    n_basis = np.zeros((n_common, _CBF))
     for band in range(_CBF):
         tonal_b, signal_b, fton_b = _tonal_estimate(averaged[band], band)
         n_tonal[:, band] = _resample_common(tonal_b, band, n_common)
         n_signal[:, band] = _resample_common(signal_b, band, n_common)
         f_ton[:, band] = _resample_common(fton_b, band, n_common)
+        _, _, basis_b = _band_basis_loudness(
+            p_bands[band], band, int(_S_B[band]), n_new
+        )
+        n_basis[:, band] = _resample_common(basis_b, band, n_common)
 
     # Noise reduction (Formulae 42-48).
     snr_hat = n_tonal / (n_signal - n_tonal + _EPS)  # Formula 42
@@ -687,7 +744,7 @@ def _tonal_noise_split(
     # marginally below the gated N'_tonal, so the clamp is kept as a benign,
     # documented deviation that only removes sub-EPS negative noise loudness.
     n_noise_final = np.maximum(n_signal_lp - n_tonal_final, 0.0)  # Formula 48
-    return n_tonal_final, n_noise_final, f_ton, n_common, n_samples
+    return n_tonal_final, n_noise_final, f_ton, n_common, n_samples, n_basis
 
 
 # --------------------------------------------------------------------------
@@ -721,7 +778,7 @@ def _assemble_loudness(
     # Average specific loudness N'(z) (Formula 115).
     n_spec = (np.mean(kept**_E_AVG, axis=0)) ** (1.0 / _E_AVG)
     # Time-dependent loudness N(l) (Formula 116), dz = 0.5.
-    n_time = np.sum(spec, axis=1) * 0.5
+    n_time = np.sum(spec, axis=1) * _DZ
     kept_time = n_time[keep]
     if kept_time.size == 0:
         kept_time = n_time
@@ -750,8 +807,10 @@ def loudness_ecma(
     :param field: ``"free"`` (default) or ``"diffuse"`` sound field, selecting
         the outer/middle-ear filter of Clause 5.1.3.
     :return: An :class:`EcmaLoudness` with the single loudness value N
-        (Formula 117), the average specific loudness N'(z) (Formula 115) and
-        the time-dependent loudness N(l) (Formula 116).
+        (Formula 117), the average specific loudness N'(z) (Formula 115), the
+        time-dependent loudness N(l) (Formula 116) and the total basis
+        loudness N_basis(l) (Formula 26) the audibility criterion of Clause
+        5.1.9 reads.
     :raises TypeError: if ``fs`` is not a single number, or ``field`` is not a text.
 
     The 1 kHz / 40 dB SPL sinusoid defines 1 sone_HMS via the calibration
@@ -776,7 +835,7 @@ def loudness_ecma(
     if fs != _FS:
         samples = signal.resample(samples, max(1, round(samples.size * _FS / fs)))
 
-    n_tonal, n_noise, _, _, n_samples = _tonal_noise_split(samples, field)
+    n_tonal, n_noise, _, _, n_samples, n_basis = _tonal_noise_split(samples, field)
     n_single, n_spec, n_time, time = _assemble_loudness(n_tonal, n_noise, n_samples)
     return EcmaLoudness(
         loudness=n_single,
@@ -785,5 +844,6 @@ def loudness_ecma(
         frequencies=_F_CENTRE,
         times=time,
         loudness_vs_time=n_time,
+        basis_loudness_vs_time_sone_hms=np.sum(n_basis, axis=1) * _DZ,  # F. 26
         field=field,
     )

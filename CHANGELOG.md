@@ -6471,16 +6471,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   PyOctaveBand page, the banner, the report's headline, `llms.txt` and the
   site gave 523 as the count of standards. That figure counted citation
   groups, the citation string up to its first colon or " Annex", so a book
-  cited at seven clauses was seven standards. Every one of them now states the split the citations
-  make, 227 normative designations and 125 further published sources, read
-  from `docs/conformance.json`, whose `counts.standards` is
-  `counts.citation_groups` (schema 3) so that no reader prints it as
-  standards again. `scripts/check_conformance_claims.py` refuses a count of
-  standards in a sentence that speaks of conformance, checks or domains, in
-  the prose it rewrites and in the report, the llms files and the banner it
-  does not, and it reports a count wrapped away from its noun, which it could
-  neither check nor rewrite. The banner states its three counts on a row of
-  their own, under the headline.
+  cited at seven clauses was seven standards. Every one of them now states
+  the split the citations make, 227 normative designations and 125 further
+  published sources, read from `docs/conformance.json`, whose
+  `counts.standards` is `counts.citation_groups` (schema 3) so that no reader
+  prints it as standards again; the site withholds that count from every
+  page and its content schema does not name it.
+  `scripts/check_conformance_claims.py` refuses a count of standards in a
+  sentence that speaks of conformance, checks or domains, and the
+  citation-group count as a count of standards in any sentence, in bold,
+  in an HTML tag, before a no-break space or with a capital as much as plain,
+  in the prose it rewrites and in the report, the llms files and the banner
+  it does not. It reports a count wrapped away from its noun, which it could
+  neither check nor rewrite, and it reads a count of domains only in the
+  claim's own "across N domains, against", so a page that draws a signal
+  across two domains is left as it is. The banner states its three counts
+  on a row of their own, under the headline.
 
 ### Removed
 

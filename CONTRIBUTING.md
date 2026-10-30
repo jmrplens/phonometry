@@ -464,7 +464,10 @@ anywhere it reads and in the generated files (`docs/CONFORMANCE.md`, the llms
 files and the banner). `counts.citation_groups`, the citation strings cut at
 their first colon or " Annex", was once published as that count; the claim
 states the normative designations and the further published sources the
-citations name.
+citations name. That figure is refused as a count of standards in any
+sentence, in bold or before a no-break space as much as plain, and the site
+withholds it from every page: `site/src/data/conformance-stats.mjs` drops it
+and the content schema does not name it.
 
 Run `make conformance` and commit whatever it changes
 ([F6](docs/contributing/docs-and-figures.md#f6)). The read-only `python scripts/check_conformance_claims.py` is the CI

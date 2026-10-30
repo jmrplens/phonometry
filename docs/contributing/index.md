@@ -356,7 +356,7 @@ These rules are held by review alone, or a check covers only part of them, and a
 - [N34](naming.md#n34): refuse a module-level `Literal` or `TypeAlias` assignment whose name is not PascalCase.
 - [A4](api.md#a4): scan `docs/`, the site guides, `scripts/figures`, `scripts/conformance` and `tests` for `from phonometry.<path> import <name>` where the name is not a module, and for imports through a private module path.
 - [A11](api.md#a11): refuse an absolute `phonometry` import inside `src/phonometry`.
-- [A14](api.md#a14): diff the public names of the last release tag against the branch and require a row in the two pages of the migration guide for every name gone.
+- [A14](api.md#a14): diff the public names of v3.3.0 and v4.0.0rc1 against v4.0.0 and require a row in the two pages of the migration guide for every name gone; a name of v4.0.0 gets no row, and the branch must still have it, deprecated under [A16](api.md#a16).
 - [A15](api.md#a15): search the docs, the site guides and `scripts/` for every name `tests/test_removed_names.py` pins as gone.
 - [A16](api.md#a16): after 4.0, require every `DeprecationWarning` to carry a message naming the version it was deprecated in, the version it goes in and the replacement.
 - [A25](api.md#a25): refuse a variadic public function outside an exemption table with reasons (`cascade`, `combine_fault_lines`, `catalogue_schema`, and `Signal.pipe`, which forwards the arguments of another function).

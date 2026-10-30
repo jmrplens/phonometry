@@ -13,7 +13,9 @@
  * The keys stay in English in both languages, because they are a schema a
  * program reads; the values and the sentence above them are in the page's
  * language. A line whose value is unknown is left out rather than printed
- * empty, so a key present always means a value present.
+ * empty, so a key present always means a value present. A line that lists
+ * documents separates them with `; `, since a designation can hold a comma of
+ * its own (`JCGM 100:2008, the GUM`).
  *
  * Every value comes from the module that already publishes it on the site:
  * the version and the install line from src/data/repo-stats.mjs, the dates
@@ -65,11 +67,24 @@ export const INDEX_URL = `${siteUrl}${basePath}/llms.txt`;
 /** The licence line every page but a catalogue carries. */
 export const LICENSE = `MIT (${repositoryUrl}/blob/main/LICENSE)`;
 
+/**
+ * The words the sentence under every copy's title opens with, per language:
+ * what tells a copy from any other `index.md` (scripts/agent-md.mjs removes
+ * only files that open this way).
+ */
+export const LEAD_OPENING = Object.freeze({
+  en: 'One page of the phonometry documentation',
+  es: 'Una página de la documentación de phonometry',
+});
+
 /** The sentence under the title that says what the reader is holding, per language. */
 const LEAD = Object.freeze({
-  en: `One page of the phonometry documentation, as Markdown. Index: ${INDEX_URL}`,
-  es: `Una página de la documentación de phonometry, en Markdown. Índice: ${INDEX_URL}`,
+  en: `${LEAD_OPENING.en}, as Markdown. Index: ${INDEX_URL}`,
+  es: `${LEAD_OPENING.es}, en Markdown. Índice: ${INDEX_URL}`,
 });
+
+/** Between the documents of a line that lists several. */
+export const LIST_SEPARATOR = '; ';
 
 /**
  * The value of each release line, keyed by the names `releaseHeaderKeys`
@@ -106,7 +121,7 @@ function releaseLines(release) {
  */
 function verifiedValue(verified, lang) {
   const what = lang === 'es' ? 'comprobaciones de conformidad' : 'conformance checks';
-  const against = verified.designations.length ? ` (${verified.designations.join(', ')})` : '';
+  const against = verified.designations.length ? ` (${verified.designations.join(LIST_SEPARATOR)})` : '';
   return `${verified.checks} ${what}${against} ${verified.url}`;
 }
 
@@ -127,7 +142,7 @@ export function header(fields) {
     ['Author', fields.author ? `${fields.author.name} (${fields.author.orcid})` : undefined],
     ['Published', fields.published],
     ['Updated', fields.updated],
-    ['Standards', fields.standards?.length ? fields.standards.join(', ') : undefined],
+    ['Standards', fields.standards?.length ? fields.standards.join(LIST_SEPARATOR) : undefined],
     ['Verified', fields.verified ? verifiedValue(fields.verified, fields.lang) : undefined],
     ['License', fields.license === false ? undefined : LICENSE],
     ['Summary', fields.summary],

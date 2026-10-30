@@ -25,7 +25,7 @@
 import { readFileSync } from 'node:fs';
 import { join, relative, sep } from 'node:path';
 
-import { author } from '../../data/site.mjs';
+import { author, siteTitle } from '../../data/site.mjs';
 import { catalogueSlugs } from '../../data/topics.mjs';
 import { installCommand, version } from '../../data/repo-stats.mjs';
 import { implementedStandards } from '../reference-chips.ts';
@@ -51,7 +51,7 @@ import { CONTENT_DIR, SITE, SITE_DIR, renderFile } from './render.mjs';
  */
 
 /** The heading of the References section, as the site's own strings word it. */
-const REFERENCES_HEADING = Object.freeze(
+export const REFERENCES_HEADING = Object.freeze(
   Object.fromEntries(
     ['en', 'es'].map((lang) => {
       const strings = JSON.parse(readFileSync(join(SITE_DIR, 'src', 'content', 'i18n', `${lang}.json`), 'utf8'));
@@ -104,7 +104,9 @@ export function referencesMarkdown(references, lang) {
 
 /**
  * The title a page's head carries: an explicit `<title>` override (the
- * landing pages have one) or the frontmatter title.
+ * landing pages have one) or the frontmatter title. The site's name, which
+ * Starlight appends to every other title and which an override that wants it
+ * spells out (`Top-level API | phonometry`), is no part of the page's title.
  *
  * @param {Record<string, unknown>} frontmatter
  * @returns {string}
@@ -112,7 +114,9 @@ export function referencesMarkdown(references, lang) {
 export function titleOf(frontmatter) {
   const head = Array.isArray(frontmatter.head) ? frontmatter.head : [];
   const override = head.find((entry) => entry?.tag === 'title' && typeof entry.content === 'string');
-  return line(String(override?.content ?? frontmatter.title ?? ''));
+  const title = line(String(override?.content ?? frontmatter.title ?? ''));
+  const suffix = ` | ${siteTitle}`;
+  return title.endsWith(suffix) ? title.slice(0, -suffix.length) : title;
 }
 
 /**

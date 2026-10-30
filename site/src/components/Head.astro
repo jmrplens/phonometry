@@ -419,6 +419,7 @@ const homePage =
           '@type': 'SpeakableSpecification',
           cssSelector: ['h1', '.hero .tagline'],
         },
+        ...(published ? { datePublished: published } : {}),
         ...(modified ? { dateModified: modified } : {}),
         ...(markdownEncoding ? { encoding: markdownEncoding } : {}),
         isPartOf: { '@id': WEBSITE_ID },

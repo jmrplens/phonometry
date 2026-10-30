@@ -18,6 +18,13 @@ export const basePath = '/phonometry';
  */
 export const personId = 'https://jmrp.io/#person';
 
+/**
+ * The site's name, which Starlight puts after every page title in the head
+ * (`Filter Banks | phonometry`) and which a page's Markdown copy leaves out of
+ * its `# ` title.
+ */
+export const siteTitle = 'phonometry';
+
 /** Where the source, the issues and the licence live. */
 export const repositoryUrl = 'https://github.com/jmrplens/phonometry';
 

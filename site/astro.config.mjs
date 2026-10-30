@@ -16,7 +16,7 @@ import { topics } from './src/data/topics.mjs';
 import { doi, doiUrl } from './src/data/citation.mjs';
 import { redirects } from './src/data/redirects.mjs';
 import { packagesNotListedIn } from './src/lib/bundled-packages.mjs';
-import { author, basePath, repositoryUrl, siteUrl } from './src/data/site.mjs';
+import { author, basePath, repositoryUrl, siteTitle, siteUrl } from './src/data/site.mjs';
 import { isoDay } from './src/lib/date-rules.mjs';
 import { isFallbackRoute } from './src/lib/fallback-routes.mjs';
 import { isOurMedia, mediaUrl, REMOTE_PREFIXES } from './src/lib/media.mjs';
@@ -593,7 +593,7 @@ export default defineConfig({
   },
   integrations: [
     starlight({
-      title: 'phonometry',
+      title: siteTitle,
       routeMiddleware: './src/routeData.ts',
       plugins: [
         starlightLinksValidator({

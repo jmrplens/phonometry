@@ -14,10 +14,11 @@
 //   node scripts/agent-md.mjs --public [--out <dir>]
 //       Writes every page's copy to <dir>/<route>/index.md (default public/,
 //       which the build publishes beside the pages; package.json `prebuild`
-//       runs it), the two landing pages included, after removing every
-//       index.md a previous run left there. Any issue the renderer records
-//       fails the run before a file is written, so no page publishes a copy
-//       that lost part of it.
+//       runs it), the two landing pages included, after removing the copies a
+//       previous run left there: the index.md files that open as a copy does
+//       (src/lib/agent-md/copies.mjs), never another file of that name. Any
+//       issue the renderer records fails the run before a file is written, so
+//       no page publishes a copy that lost part of it.
 //   node scripts/agent-md.mjs --census
 //       Parses and writes every page under src/content/docs, then reports
 //       which components the pages use and whether each has a writer, the raw
@@ -29,12 +30,13 @@
 //       Prints one page's copy: `signals/filters/filter-banks`,
 //       `es/signals/filters/filter-banks`, or `` / `es` for the two homes.
 //       Issues go to stderr, and any issue makes the exit status 1.
-import { mkdirSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join, relative, resolve, sep } from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 
 import { fileOfRoute, pageFiles } from '../src/lib/agent-md/content.mjs';
+import { handwrittenTargets, removeWrittenCopies } from '../src/lib/agent-md/copies.mjs';
 import { pageMarkdown } from '../src/lib/agent-md/page.mjs';
 import { CONTENT_DIR, SITE_DIR, renderFile } from '../src/lib/agent-md/render.mjs';
 import { loadRegistry } from '../src/lib/agent-md/registry.mjs';
@@ -57,26 +59,6 @@ const shown = (file) => relative(CONTENT_DIR, file).split(sep).join('/');
 async function pageDates() {
   const dates = await loadContentDates({ siteRoot: SITE_DIR });
   return { dateOf: dates.dateOf, publishedOf: firstPublished };
-}
-
-/**
- * Every `index.md` under a directory: the copies a previous run wrote.
- *
- * @param {string} dir
- * @returns {string[]}
- */
-function writtenCopies(dir) {
-  /** @type {string[]} */
-  const found = [];
-  const walk = (current) => {
-    for (const entry of readdirSync(current, { withFileTypes: true })) {
-      const path = join(current, entry.name);
-      if (entry.isDirectory()) walk(path);
-      else if (entry.name === 'index.md') found.push(path);
-    }
-  };
-  walk(dir);
-  return found;
 }
 
 /**
@@ -109,9 +91,16 @@ async function publish(out) {
     console.error('  Run `pnpm run check:markdown-writers` for the remedy of each kind.');
     return 1;
   }
+  // A file at a copy's place that no run wrote (docs/ holds 42 index.md files
+  // written by hand) is neither removed nor written over: the run stops first.
+  const foreign = handwrittenTargets(copies.keys());
+  if (foreign.length > 0) {
+    console.error(`[agent-md] FAIL ${foreign.length} file(s) where a copy goes were not written by a run; nothing was removed or written:`);
+    for (const path of foreign) console.error(`  ${path}`);
+    return 2;
+  }
   mkdirSync(out, { recursive: true });
-  const stale = writtenCopies(out);
-  for (const file of stale) rmSync(file);
+  removeWrittenCopies(out);
   for (const [target, markdown] of copies) {
     mkdirSync(dirname(target), { recursive: true });
     writeFileSync(target, markdown, 'utf8');

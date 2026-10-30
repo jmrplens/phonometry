@@ -53,7 +53,7 @@ describe('the header', () => {
         'Author: José Manuel Requena Plens (https://orcid.org/0000-0003-1250-6212)',
         'Published: 2026-01-06',
         'Updated: 2026-10-20',
-        'Standards: IEC 61260-1:2014, ANSI S1.11-2004',
+        'Standards: IEC 61260-1:2014; ANSI S1.11-2004',
         `License: ${LICENSE}`,
         'Summary: Fractional-octave band mathematics and the octave_filter parameters.',
         '',
@@ -80,6 +80,13 @@ describe('the header', () => {
 
   test('a catalogue carries no licence of its own', () => {
     assert.doesNotMatch(header({ ...FULL, license: false }), /^License:/mu);
+  });
+
+  test('lists its documents with "; " between them, since a designation can hold a comma of its own', () => {
+    const standards = ['JCGM 100:2008, the GUM', 'JCGM 101:2008'];
+    assert.match(header({ ...FULL, standards }), /^Standards: JCGM 100:2008, the GUM; JCGM 101:2008$/mu);
+    const verified = { checks: 7, designations: standards, url: `${SITE}/reference/conformance/#uncertainty` };
+    assert.match(header({ ...FULL, verified }), /^Verified: 7 conformance checks \(JCGM 100:2008, the GUM; JCGM 101:2008\) /mu);
   });
 
   test('a description that wraps is one line', () => {
@@ -193,6 +200,10 @@ describe('a page', () => {
       assert.match(html, /^<h1\b[^]*<\/h1>$/u, `${title}: one heading`);
       assert.equal((html.match(/<h1\b/gu) ?? []).length, 1, `${title}: one heading`);
     }
+  });
+
+  test('leaves out the site\'s name an override spells out, as Starlight adds it to every other title', () => {
+    assert.equal(titleOf({ title: 'phonometry', head: [{ tag: 'title', content: 'Top-level API | phonometry' }] }), 'Top-level API');
   });
 
   test('has its counterpart in the other language, the two landing pages each other\'s', () => {

@@ -48,10 +48,13 @@ figure was ``counts.citation_groups``, citation strings cut at their first
 colon or " Annex", so a book cited at seven clauses was seven standards, and
 the citations named 227 normative designations and 125 further published
 sources. :data:`FORBIDDEN` refuses a count of standards (``normas``) in any
-sentence that speaks of conformance, checks or domains, in the prose this
-script rewrites and in the generated files it does not (the report's own
-headline, the agent files and the banner's words), and names the wording
-that replaces it.
+sentence that speaks of conformance, checks or domains, and the citation-group
+count as a count of standards in any sentence at all, in the prose this script
+rewrites and in the generated files it does not (the report's own headline,
+the agent files and the banner's words), and names the wording that replaces
+it. It reads through the emphasis, the inline tags and the hard spaces a count
+can be written with, so a count in bold, before a no-break space or with a
+capital on its noun is read as a plain one.
 
 Run with ``python scripts/check_conformance_claims.py``; CI runs it alongside
 the conformance regeneration gate.
@@ -61,6 +64,7 @@ from __future__ import annotations
 
 import argparse
 import dataclasses
+import html
 import json
 import pathlib
 import re
@@ -68,7 +72,7 @@ import sys
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping, Sequence
+    from collections.abc import Collection, Mapping, Sequence
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 
@@ -93,10 +97,12 @@ FIELDS = {
 #: with the same span. Adding a place a count is quoted means adding a pattern
 #: here and nothing else.
 #:
-#: Every pattern is anchored to conformance wording. A bare "N domains" would
-#: match any sentence in the corpus that happens to count domains for an
-#: unrelated reason, so the domain count is only read where the claim's own
-#: "across N domains" ("sobre N dominios", "en N dominios") phrasing writes it.
+#: Every pattern is anchored to conformance wording. A bare "across N domains"
+#: would match any sentence in the corpus that draws a signal across two
+#: domains, time and frequency, and the writer would set it to the report's
+#: count; so the domain count is only read where the claim itself goes on to
+#: the documents it was checked against, "across N domains, against" ("sobre N
+#: dominios, frente a"), which is how every surface writes it.
 #: The designations and the further sources are read by their nouns, which
 #: nothing else in the corpus counts. That covers the landing-page meta
 #: descriptions too: Starlight frontmatter is static YAML, parsed before MDX
@@ -107,8 +113,8 @@ CLAIMS: tuple[tuple[re.Pattern[str], str], ...] = (
     (re.compile(r"\ball\s+(\d+)\s+checks\b"), "total"),
     (re.compile(r"(\d+)\s+comprobaciones(?:\s+numéricas)?\s+de conformidad"), "total"),
     (re.compile(r"\blas\s+(\d+)\s+comprobaciones\b"), "total"),
-    (re.compile(r"\bacross\s+(\d+)\s+domains\b"), "domains"),
-    (re.compile(r"\b(?:en|sobre)\s+(\d+)\s+dominios\b"), "domains"),
+    (re.compile(r"\bacross\s+(\d+)\s+domains,\s+against\b"), "domains"),
+    (re.compile(r"\bsobre\s+(\d+)\s+dominios,\s+frente\s+a\b"), "domains"),
     (re.compile(r"(\d+)\s+normative designations\b"), "designations"),
     (re.compile(r"(\d+)\s+further published sources\b"), "sources"),
     (re.compile(r"(\d+)\s+designaciones normativas\b"), "designations"),
@@ -128,31 +134,43 @@ WRAPPED: tuple[tuple[re.Pattern[str], str], ...] = tuple(
 #: noun, a blank line may not, since what follows it is another paragraph.
 _GAP = r"(?:[ \t]+|[ \t]*\n[ \t]*)"
 
-#: What may stand between a count and its noun: a list of issuing bodies, "N
-#: IEC, ISO, EN, ANSI and VDI standards", or a word that says how the standards
-#: were counted, "N referenced standards". A body is written in capitals, which
-#: keeps a sentence that opens with "Las normas" after a heading ending in a
-#: number out of the match.
-_BODIES = (
-    r"(?:(?:[A-Z][A-Z0-9/.-]+|and|y|referenced|cited|implemented|distinct"
-    rf"|referenciadas|citadas|implementadas|distintas)(?:,{_GAP}?|{_GAP}))*"
+#: Words that say how the standards were counted, "N referenced standards",
+#: or what kind they are, "N published international standards". Read in any
+#: case, since a title capitalises them.
+_QUALIFIERS = (
+    "and|y|referenced|cited|implemented|distinct|published|international"
+    "|normative|acoustics?|referenciadas|citadas|implementadas|distintas"
+    "|publicadas|internacionales"
 )
 
+#: What may stand between a count and its noun: a list of issuing bodies, "N
+#: IEC, ISO, EN, ANSI and VDI standards", or the words of :data:`_QUALIFIERS`.
+#: A body is written in capitals, which keeps a sentence that opens with "Las
+#: normas" after a heading ending in a number out of the match.
+_BODIES = rf"(?:(?:[A-Z][A-Z0-9/.-]+|(?i:{_QUALIFIERS}))(?:,{_GAP}?|{_GAP}))*"
+
 #: A count of standards, in each language, mapped to the wording that replaces
-#: it. Matched across line breaks, because prose wraps between a count and its
-#: noun. Refused only inside a sentence :data:`CONFORMANCE_WORDING` finds,
-#: so a page that counts the parts of a series for another reason is left alone.
+#: it. The count is group 1. Matched across line breaks, because prose wraps
+#: between a count and its noun, and in any case, because a title writes
+#: "Standards". Refused inside a sentence :data:`CONFORMANCE_WORDING` finds, so
+#: a page that counts the parts of a series for another reason is left alone,
+#: and wherever the count is the report's citation groups, a figure specific
+#: enough to need no wording around it.
 FORBIDDEN: tuple[tuple[re.Pattern[str], str], ...] = (
     (
-        re.compile(rf"\b\d+{_GAP}{_BODIES}standards\b"),
+        re.compile(rf"\b(\d+){_GAP}{_BODIES}(?i:standards)\b"),
         "{designations} normative designations and {sources} further published sources",
     ),
     (
-        re.compile(rf"\b\d+{_GAP}{_BODIES}normas\b"),
+        re.compile(rf"\b(\d+){_GAP}{_BODIES}(?i:normas)\b"),
         "{designations} designaciones normativas y {sources} fuentes publicadas "
         "adicionales",
     ),
 )
+
+#: The nouns of :data:`FORBIDDEN`, looked for first: a text without either has
+#: no count of standards, and most files the refusal reads have neither.
+_NOUN = re.compile(r"standards|normas", re.IGNORECASE)
 
 #: What makes a count of standards a conformance claim: the sentence it sits
 #: in speaks of conformance, of checks or of domains.
@@ -160,6 +178,26 @@ CONFORMANCE_WORDING = re.compile(
     r"conformance|conformidad|\bchecks?\b|\bcomprobaci|\bdomains?\b|\bdominios?\b",
     re.IGNORECASE,
 )
+
+#: Emphasis and code marks of Markdown that can sit inside a count of standards
+#: without changing what it says, "**N** standards". An underscore is emphasis
+#: only at the edge of a word; inside one it is part of a name.
+_MARKS = re.compile(r"[*`]+|(?<![0-9A-Za-z])_+|_+(?![0-9A-Za-z])")
+
+#: An HTML tag, its name in group 1. Only the inline ones of
+#: :data:`_INLINE_TAGS` are taken out, "<strong>N</strong> standards"; a
+#: paragraph tag ends a sentence and stays.
+_TAG = re.compile(r"</?([A-Za-z]+)\b[^>\n]*>")
+_INLINE_TAGS = frozenset(
+    {"a", "abbr", "b", "code", "em", "i", "mark", "span", "strong"}
+)
+
+#: Spaces that do not break. Each is read as one plain space, written as a
+#: character, as an HTML entity, "N&nbsp;standards", or as a JSON escape, so a
+#: count is still read beside its noun.
+_HARD_SPACES = frozenset("\u00a0\u2007\u2009\u202f")
+_PLAIN_SPACES = dict.fromkeys(map(ord, _HARD_SPACES), " ")
+_ESCAPE = re.compile(r"&(?:nbsp|#\d+|#[xX][0-9a-fA-F]+);|\\u[0-9a-fA-F]{4}")
 
 #: Where a sentence ends: a full stop, a question or exclamation mark before
 #: white space, a blank line, or a paragraph tag of the HTML the Zenodo
@@ -218,6 +256,50 @@ def expected_counts(root: pathlib.Path = ROOT) -> dict[str, int]:
     :raises ValueError: If the artefact is missing, unreadable, or no longer
         carries one of the fields the claims are checked against.
     """
+    counts = _counts(root)
+    missing = sorted(set(FIELDS) - set(counts))
+    if missing:
+        msg = (
+            f"{_label(report_path(root), root)}: counts is missing "
+            f"{', '.join(missing)}. The artefact schema changed; update FIELDS here."
+        )
+        raise ValueError(msg)
+    return {name: counts[field] for field, name in FIELDS.items()}
+
+
+def citation_groups(root: pathlib.Path = ROOT) -> int:
+    """The report's count of citation groups, the figure once published as standards.
+
+    Read apart from :func:`expected_counts`, whose names a :data:`CLAIMS`
+    pattern may quote: no sentence may quote this one, and the refusal reads
+    it only to refuse it.
+
+    :param root: Repository root to read the artefact from.
+    :return: ``counts.citation_groups`` of the artefact.
+    :raises ValueError: If the artefact is missing, unreadable, or no longer
+        carries the field.
+    """
+    counts = _counts(root)
+    if "citation_groups" not in counts:
+        msg = (
+            f"{_label(report_path(root), root)}: counts is missing "
+            "citation_groups. The artefact schema changed; update this script."
+        )
+        raise ValueError(msg)
+    return counts["citation_groups"]
+
+
+def _counts(root: pathlib.Path) -> dict[str, int]:
+    """The whole-number fields of the artefact's ``counts``.
+
+    A field that is not a whole number is left out, so a caller that needs it
+    reports it missing.
+
+    :param root: Repository root to read the artefact from.
+    :return: Each field name mapped to its count.
+    :raises ValueError: If the artefact is missing or unreadable, or carries
+        no ``counts`` object.
+    """
     report = report_path(root)
     try:
         counts = json.loads(_read(report))["counts"]
@@ -227,14 +309,14 @@ def expected_counts(root: pathlib.Path = ROOT) -> dict[str, int]:
             f"({error}). Regenerate the artefact with `make conformance`."
         )
         raise ValueError(msg) from error
-    missing = sorted(set(FIELDS) - set(counts))
-    if missing:
-        msg = (
-            f"{_label(report, root)}: counts is missing {', '.join(missing)}. "
-            "The artefact schema changed; update FIELDS here."
-        )
+    if not isinstance(counts, dict):
+        msg = f"{_label(report, root)}: counts is not an object."
         raise ValueError(msg)
-    return {name: int(counts[field]) for field, name in FIELDS.items()}
+    return {
+        str(name): value
+        for name, value in counts.items()
+        if isinstance(value, int) and not isinstance(value, bool)
+    }
 
 
 def sources(root: pathlib.Path = ROOT) -> list[pathlib.Path]:
@@ -366,21 +448,100 @@ def rewrite_text(
     return "".join(out), fixed
 
 
-def refused_in(text: str) -> list[tuple[int, str, str]]:
+def plain_text(text: str) -> str:
+    """``text`` as the refusal reads it: no markup, every hard space a space.
+
+    Deletes the :data:`_MARKS` and the inline :data:`_TAG` and reads each of
+    the :data:`_HARD_SPACES`, however it is written, as one space. It touches
+    no line break, so a line number counted in the result is a line number of
+    ``text``.
+
+    :param text: A whole file.
+    :return: The text with the markup a count of standards could hide behind
+        taken out.
+    """
+    spaced = _ESCAPE.sub(_space_if_hard, text.translate(_PLAIN_SPACES))
+    untagged = _TAG.sub(_drop_if_inline, spaced)
+    return _MARKS.sub("", untagged)
+
+
+def _space_if_hard(escape: re.Match[str]) -> str:
+    """One space for an escaped hard space; any other escape as it was."""
+    written = escape.group(0)
+    if written.startswith("\\"):
+        character = chr(int(written.removeprefix("\\u"), 16))
+    else:
+        character = html.unescape(written)
+    return " " if character in _HARD_SPACES else written
+
+
+def _drop_if_inline(tag: re.Match[str]) -> str:
+    """Nothing for an inline tag; any other tag as it was."""
+    return "" if tag.group(1).lower() in _INLINE_TAGS else tag.group(0)
+
+
+def _counts_of_standards(text: str) -> list[tuple[int, int, str, str, str]]:
+    """Every count of standards in ``text``, refused or not.
+
+    :param text: A whole file.
+    :return: ``(line number, count, phrase, replacement template, sentence)``
+        for each one, read from :func:`plain_text`.
+    """
+    if not _NOUN.search(text):
+        return []
+    plain = plain_text(text)
+    found: list[tuple[int, int, str, str, str]] = []
+    for pattern, replacement in FORBIDDEN:
+        for match in pattern.finditer(plain):
+            lineno = plain.count("\n", 0, match.start()) + 1
+            phrase = " ".join(match.group(0).split())
+            sentence = _sentence(plain, *match.span())
+            found.append((lineno, int(match.group(1)), phrase, replacement, sentence))
+    return found
+
+
+def refused_in(
+    text: str, citation_groups: int | None = None
+) -> list[tuple[int, str, str]]:
     """Every count of standards a text states as a conformance claim.
+
+    Or as the citation-group figure, in a sentence of any wording.
 
     :param text: A whole file, so that a count wrapped away from its noun, or
         from the conformance wording of its sentence, is still read.
+    :param citation_groups: The report's count of citation groups. A count of
+        standards equal to it is refused whatever its sentence says.
     :return: ``(line number, phrase, replacement template)`` for each one, in
         the order they appear; the template names the report fields it needs.
     """
-    found: list[tuple[int, str, str]] = []
-    for pattern, replacement in FORBIDDEN:
-        for match in pattern.finditer(text):
-            if CONFORMANCE_WORDING.search(_sentence(text, *match.span())):
-                lineno = text.count("\n", 0, match.start()) + 1
-                found.append((lineno, " ".join(match.group(0).split()), replacement))
-    return sorted(found)
+    return sorted(
+        {
+            (lineno, phrase, replacement)
+            for lineno, count, phrase, replacement, sentence in _counts_of_standards(
+                text
+            )
+            if count == citation_groups or CONFORMANCE_WORDING.search(sentence)
+        }
+    )
+
+
+def figures_in(text: str, figures: Collection[int]) -> list[tuple[int, str]]:
+    """Every count of standards in a text that states one of ``figures``.
+
+    The context-free half of :func:`refused_in`, for a figure that is wrong
+    as a count of standards wherever it stands.
+
+    :param text: A whole file.
+    :param figures: The counts to find.
+    :return: ``(line number, phrase)`` for each one, in the order they appear.
+    """
+    return sorted(
+        {
+            (lineno, phrase)
+            for lineno, count, phrase, _, _ in _counts_of_standards(text)
+            if count in figures
+        }
+    )
 
 
 def _sentence(text: str, start: int, end: int) -> str:
@@ -436,17 +597,21 @@ def generated_sources(root: pathlib.Path = ROOT) -> list[pathlib.Path]:
 def refusals(root: pathlib.Path, expected: Mapping[str, int]) -> list[str]:
     """Every count of standards published beside conformance wording.
 
+    And every count of standards that states the report's citation groups,
+    whatever its sentence says.
+
     :param root: Repository root to read.
     :param expected: The authoritative counts, to name the replacement in.
     :return: One printable diagnostic per refused phrase.
     """
+    groups = citation_groups(root)
     problems: list[str] = []
     for path in [*sources(root), *generated_sources(root)]:
         problems += [
             f"{_label(path, root)}:{lineno}: counts standards in {phrase!r}; "
             "that figure counted citation groups, so state the split the "
             f"report makes: {replacement.format_map(expected)!r}"
-            for lineno, phrase, replacement in refused_in(_read(path))
+            for lineno, phrase, replacement in refused_in(_read(path), groups)
         ]
     return problems
 

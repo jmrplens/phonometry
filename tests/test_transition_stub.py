@@ -303,7 +303,9 @@ def test_the_readme_quotes_the_counts_the_report_gives() -> None:
         "designations and the further published sources in the report's own "
         "wording, each phrase on one line"
     )
-    assert not ccc.refused_in(_README.read_text(encoding="utf-8"))
+    assert not ccc.refused_in(
+        _README.read_text(encoding="utf-8"), ccc.citation_groups()
+    )
     stale = [
         f"{claim.phrase!r} (report: {expected[claim.field]})"
         for claim in claims

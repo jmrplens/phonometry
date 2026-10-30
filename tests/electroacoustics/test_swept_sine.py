@@ -327,8 +327,13 @@ def test_validation_errors() -> None:
         )
     with pytest.raises(ValueError, match="'method' must be one of"):
         ph.electroacoustics.swept_sine_distortion(
-            rec, FS, f1=F1, f2=F2, duration_s=SECONDS, method="nope"
-        )  # type: ignore[arg-type]
+            rec,
+            FS,
+            f1=F1,
+            f2=F2,
+            duration_s=SECONDS,
+            method="nope",  # type: ignore[arg-type]
+        )
     with pytest.raises(ValueError, match=r"'n_harmonics' must be at least"):
         ph.electroacoustics.swept_sine_distortion(
             rec, FS, f1=F1, f2=F2, duration_s=SECONDS, n_harmonics=1

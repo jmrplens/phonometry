@@ -254,9 +254,9 @@ def test_impedance_is_a_scalar_or_one_value_per_frequency() -> None:
 
 def test_unknown_ground_model_raises() -> None:
     with pytest.raises(ValueError, match="'model' must be one of"):
-        environment.ground_effect(
+        environment.ground_effect(  # type: ignore[call-overload]
             _BANDS, 1.0, 1.0, 20.0, flow_resistivity_pa_s_m2=2e5, model="jca"
-        )  # type: ignore[arg-type]
+        )
 
 
 # --------------------------------------------------------------------------- #
@@ -551,8 +551,14 @@ def test_barrier_rejects_bad_geometry() -> None:
         )
     with pytest.raises(ValueError, match=r"'method' must be one of .*; got 'utd'"):
         environment.barrier_insertion_loss(
-            _BANDS, 1.0, 50.0, 4.0, 100.0, 1.5, method="utd"
-        )  # type: ignore[arg-type]
+            _BANDS,
+            1.0,
+            50.0,
+            4.0,
+            100.0,
+            1.5,
+            method="utd",  # type: ignore[arg-type]
+        )
     with pytest.raises(
         ValueError,
         match=r"'receiver_distance' must exceed 'barrier_distance \+ thickness_m'",

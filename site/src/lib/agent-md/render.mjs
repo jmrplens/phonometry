@@ -37,11 +37,12 @@
  *    frontmatter, by nothing.
  *
  * WHAT IS NEVER SILENT. An element with no writer and no rule, a prop the
- * writer does not declare, an expression that is neither a literal nor an
- * allow-listed name, an aside type Starlight does not have: each still
- * renders (an unknown element as its children, never its own syntax), and
- * each is recorded as an issue. The coverage check fails on any issue, so the
- * fail-safe is unreachable for anything a page actually uses.
+ * writer does not declare, a spread of props or attributes, an expression
+ * that is neither a literal nor an allow-listed name (in text, in a prop, or
+ * in an attribute of raw HTML), an aside type Starlight does not have: each
+ * still renders (an unknown element as its children, never its own syntax),
+ * and each is recorded as an issue. The coverage check fails on any issue, so
+ * the fail-safe is unreachable for anything a page actually uses.
  *
  * @module
  */
@@ -59,6 +60,7 @@ import { frontmatterOf, isMdx, parse } from './processor.mjs';
 import { rewrittenSource } from './rewrites.mjs';
 
 /** @typedef {import('./types.mjs').MdNode} MdNode */
+/** @typedef {import('./types.mjs').MdAttribute} MdAttribute */
 /** @typedef {import('./types.mjs').EstreeNode} EstreeNode */
 /** @typedef {import('./types.mjs').RenderIssue} RenderIssue */
 /** @typedef {import('./types.mjs').ComponentMarkdown} ComponentMarkdown */
@@ -378,8 +380,21 @@ function createRenderer(source, options, mode) {
     (node.attributes ?? []).find((one) => one.type === 'mdxJsxAttribute' && one.name === name);
 
   /**
-   * An attribute's value: a string as written, `true` for a bare attribute,
-   * or what its expression reads as.
+   * What one attribute reads as: a string as written, `true` for a bare
+   * attribute, or the value of its expression.
+   *
+   * @param {MdAttribute} one
+   * @returns {unknown}  The value, or UNREAD.
+   */
+  const readAttribute = (one) => {
+    const { value } = one;
+    if (value === null || value === undefined) return true;
+    if (typeof value === 'string') return value;
+    return evaluate(soleExpression(value.data?.estree), scope);
+  };
+
+  /**
+   * The value of the attribute called `name`.
    *
    * @param {MdNode} node
    * @param {string} name
@@ -387,11 +402,7 @@ function createRenderer(source, options, mode) {
    */
   const attributeValue = (node, name) => {
     const found = attribute(node, name);
-    if (!found) return undefined;
-    const { value } = found;
-    if (value === null || value === undefined) return true;
-    if (typeof value === 'string') return value;
-    return evaluate(soleExpression(value.data?.estree), scope);
+    return found ? readAttribute(found) : undefined;
   };
 
   /** @type {MarkdownContext} */
@@ -577,28 +588,33 @@ function createRenderer(source, options, mode) {
   }
 
   /**
-   * Checks every attribute of a component against what its writer declares,
-   * and that every expression in one can be read.
+   * Checks every attribute of an element: a spread cannot be read at all, a
+   * component's prop must be one its writer declares, and an expression must
+   * be a literal or an allow-listed name.
+   *
+   * Components and raw HTML go through this one walk. Raw HTML used to skip
+   * it: `<a href={x}>` reached the `a` rule with an href it could not read,
+   * which the rule took for an absent one, so the link was dropped and
+   * nothing was recorded.
    *
    * @param {MdNode} node
-   * @param {ComponentMarkdown} spec
+   * @param {{ tag: string, reader: string, props?: readonly string[] }} owner
+   *   What writes the element: a component's writer, with the props it
+   *   declares, or the rules of this file for raw HTML, which may carry any
+   *   attribute.
    */
-  function checkProps(node, spec) {
+  function checkAttributes(node, { tag, reader, props }) {
     for (const one of node.attributes ?? []) {
       if (one.type !== 'mdxJsxAttribute') {
-        report('prop', node, `<${spec.tag}> spreads props, which ${spec.tag}.md.mjs cannot read`);
+        report('prop', node, `<${tag}> spreads ${props ? 'props' : 'attributes'}, which ${reader} cannot read`);
         continue;
       }
-      if (!spec.props.includes(one.name ?? '')) {
-        report('prop', node, `<${spec.tag}> passes "${one.name}", which ${spec.tag}.md.mjs does not declare`);
+      if (props && !props.includes(one.name ?? '')) {
+        report('prop', node, `<${tag}> passes "${one.name}", which ${reader} does not declare`);
         continue;
       }
-      if (attributeValue(node, one.name ?? '') === UNREAD) {
-        report(
-          'expression',
-          node,
-          `<${spec.tag} ${one.name}={...}> is neither a literal nor a value imported from ${DATA_MODULES.join(' or ')}`,
-        );
+      if (readAttribute(one) === UNREAD) {
+        report('expression', node, `<${tag} ${one.name}={...}> is neither a literal nor a value imported from ${DATA_MODULES.join(' or ')}`);
       }
     }
   }
@@ -731,7 +747,7 @@ function createRenderer(source, options, mode) {
     if (!name) return renderChildren(node);
     const spec = registry.get(name);
     if (spec) {
-      checkProps(node, spec);
+      checkAttributes(node, { tag: spec.tag, reader: `${spec.tag}.md.mjs`, props: spec.props });
       try {
         const written = spec.toMarkdown(node, ctx);
         if (typeof written === 'string') return written;
@@ -746,6 +762,7 @@ function createRenderer(source, options, mode) {
       report('component', node, `<${name}> has no Markdown writer: add ${name}.md.mjs beside the component`);
       return renderChildren(node);
     }
+    checkAttributes(node, { tag: name, reader: 'agent-md/render.mjs' });
     const rule = Object.hasOwn(HTML_RULES, name) ? HTML_RULES[name] : undefined;
     if (rule) {
       const written = rule(node);

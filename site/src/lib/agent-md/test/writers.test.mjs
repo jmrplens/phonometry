@@ -77,10 +77,28 @@ describe('Scope and ScopeClaim', () => {
   });
 });
 
-test('SeeAlso is its authored heading and links', () => {
-  const { markdown, issues } = write('<SeeAlso>\n\n## See also\n\n- [A guide](/phonometry/a/): why.\n\n</SeeAlso>\n');
-  assert.equal(markdown, `## See also\n\n- [A guide](${SITE}/a/): why.\n`);
-  assert.deepEqual(issues, []);
+describe('SeeAlso', () => {
+  test('is its authored heading and links', () => {
+    const { markdown, issues } = write('<SeeAlso>\n\n## See also\n\n- [A guide](/phonometry/a/): why.\n\n</SeeAlso>\n');
+    assert.equal(markdown, `## See also\n\n- [A guide](${SITE}/a/): why.\n`);
+    assert.deepEqual(issues, []);
+    const spanish = write('<SeeAlso>\n\n## Véase también\n\n- [Una guía](/phonometry/es/a/).\n\n</SeeAlso>\n', { lang: 'es' });
+    assert.deepEqual(spanish.issues, []);
+  });
+
+  test('a panel headed otherwise is reported at its heading, the landmark it names being left without one', () => {
+    // Three Spanish guides headed theirs "Ver también": the page looked the
+    // same, and the landmark pointed at an id no element carried.
+    const { markdown, issues } = write('<SeeAlso>\n\n## Ver también\n\n- [Una guía](/phonometry/es/a/).\n\n</SeeAlso>\n', { lang: 'es' });
+    assert.ok(markdown.startsWith('## Ver también\n'), 'the panel is still written whole');
+    assert.equal(issues.length, 1);
+    assert.equal(issues[0].kind, 'writer');
+    assert.equal(issues[0].line, 3);
+    assert.match(issues[0].message, /opens with "## Ver también", not "## Véase también": SeeAlso\.astro names its landmark/u);
+    assert.match(write('<SeeAlso>\n\n## See also\n\n- x\n\n</SeeAlso>\n', { lang: 'es' }).issues[0].message, /"## See also", not "## Véase también"/u);
+    assert.match(write('<SeeAlso>\n\n### See also\n\n- x\n\n</SeeAlso>\n').issues[0].message, /"### See also", not "## See also"/u);
+    assert.match(write('<SeeAlso>\n\n- [A guide](/phonometry/a/).\n\n</SeeAlso>\n').issues[0].message, /opens with no heading, not "## See also"/u);
+  });
 });
 
 describe('ThemeImage', () => {

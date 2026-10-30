@@ -319,8 +319,9 @@ jobs:
         # fourteen guides that passed their See also links as a prop SeeAlso
         # never declared published an empty panel. This reads every page as
         # the copy does and fails on a component, a prop or an expression no
-        # writer can write, raw HTML or an aside with no rule, and a writer no
-        # page uses or whose opening comment does not say what it drops.
+        # writer can write (an expression in an attribute of raw HTML too),
+        # raw HTML or an aside with no rule, and a writer no page uses or
+        # whose opening comment does not say what it keeps and what it drops.
         run: pnpm run check:markdown-writers
         working-directory: site
       # The postbuild writes each page's Markdown copy and stops the build on

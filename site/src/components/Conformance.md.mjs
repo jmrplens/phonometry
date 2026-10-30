@@ -1,26 +1,29 @@
 /**
  * Conformance: the report's rows, as the plain table of record.
  *
- * English: the body of docs/CONFORMANCE.md, which scripts/conformance/render.py
- * writes from the same docs/conformance.json the component renders, so the
- * copy and the page read one document. Its collapsible sections become
- * sections of the copy: each `<details>` turns into an `## <summary>` heading,
- * because a reader without a viewport reads every section whole, and because a
- * heading is where a long copy can be cut into parts (the report runs to
- * several hundred kilobytes). The small print loses its `<sub>`, `<b>` turns
- * bold, the verdict marks (`![Pass][cv-pass]`) are dropped together with the
- * image references they point to, because every mark travels beside its
- * verdict in words, and the character references the generator writes
- * (`&#916;`, `&ge;`, `&amp;`) are written as the characters they stand for.
- * The generator's header comment, addressed to contributors, is dropped. Any
- * other HTML tag in the file is reported: the generator would have grown a
- * construct this writer does not know.
+ * Kept, on the English page: every section and every row of the report, in
+ * the report's order, with every verdict in words. They are the body of
+ * docs/CONFORMANCE.md, which scripts/conformance/render.py writes from the
+ * same docs/conformance.json the component renders, so the copy and the page
+ * read one document. Its collapsible sections become sections of the copy:
+ * each `<details>` turns into an `## <summary>` heading, because a reader
+ * without a viewport reads every section whole, and because a heading is
+ * where a long copy can be cut into parts (the report runs to several hundred
+ * kilobytes). The small print loses its `<sub>`, `<b>` turns bold, and the
+ * character references the generator writes (`&#916;`, `&ge;`, `&amp;`) are
+ * written as the characters they stand for. Any other HTML tag in the file is
+ * reported: the generator would have grown a construct this writer does not
+ * know.
  *
- * Spanish: one paragraph pointing to the English copy. The page translates
- * the column headings and verdicts but not the designations, clauses,
- * quantities and units, and it says itself that the plain-text rows are the
- * English page's; a second copy of 400 kB of English rows would say nothing
- * the first does not.
+ * Dropped: the verdict marks (`![Pass][cv-pass]`), together with the image
+ * references they point to, because every mark travels beside its verdict in
+ * words; and the generator's header comment, addressed to contributors.
+ *
+ * Spanish: one paragraph pointing to the English copy, and the rows dropped.
+ * The page translates the column headings and verdicts but not the
+ * designations, clauses, quantities and units, and it says itself that the
+ * plain-text rows are the English page's; a second copy of 400 kB of English
+ * rows would say nothing the first does not.
  */
 import { join } from 'node:path';
 

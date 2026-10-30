@@ -18,12 +18,12 @@ import { checkMarkdownWriters, isParseError, openingProblem } from '../../../../
 import { pageFiles } from '../content.mjs';
 import { parse } from '../processor.mjs';
 import { writerFiles, WRITER_SUFFIX } from '../registry.mjs';
-import { CONTENT_DIR, SITE_DIR } from '../render.mjs';
+import { CONTENT_DIR, DATA_MODULES, SITE_DIR } from '../render.mjs';
 
 const TYPES = new URL('../types.mjs', import.meta.url).href;
 
 /** A writer file with the opening comment every writer carries. */
-const writer = (tag, { props = [], comment = `${tag}: kept whole, as its children.` } = {}) =>
+const writer = (tag, { props = [], comment = `${tag}: kept whole, as its children. Dropped: nothing.` } = {}) =>
   [
     '/**',
     ` * ${comment}`,
@@ -105,6 +105,32 @@ describe('what the check refuses', () => {
     assert.deepEqual(result.failures, []);
   });
 
+  test('an expression or a spread in an attribute of raw HTML, with a rule or without one', async (t) => {
+    // `<a href={x}>` used to be written as its text alone: the HTML rule read
+    // the unreadable href as absent, and nothing was recorded.
+    const result = await check(t, {
+      'a.mdx': [
+        `${BOX}<Box />`,
+        '',
+        'A link with an expression: <a href={someVar}>see here</a>.',
+        '',
+        '<div {...props}>Spread.</div>',
+        '',
+        '<marquee title={x}>Moving.</marquee>',
+        '',
+      ].join('\n'),
+    });
+    assert.deepEqual(listed(result), ['expression a.mdx:5', 'expression a.mdx:9', 'html a.mdx:9', 'prop a.mdx:7']);
+    const messages = result.failures.map((failure) => failure.message);
+    assert.ok(messages.includes(`<a href={...}> is neither a literal nor a value imported from ${DATA_MODULES.join(' or ')}`), messages.join('\n'));
+    assert.ok(messages.includes('<div> spreads attributes, which agent-md/render.mjs cannot read'), messages.join('\n'));
+  });
+
+  test('a literal in an attribute of raw HTML passes', async (t) => {
+    const result = await check(t, { 'a.mdx': `${BOX}<Box />\n\nSee <a href={'/phonometry/a/'}>the guide</a> and <span id="old" />.\n` });
+    assert.deepEqual(result.failures, []);
+  });
+
   test('raw HTML with no rule, and an aside Starlight does not draw', async (t) => {
     const result = await check(t, { 'a.mdx': `${BOX}<Box />\n\n<marquee>Moving.</marquee>\n\n:::warning\nCareful.\n:::\n` });
     assert.deepEqual(listed(result), ['directive a.mdx:7', 'html a.mdx:5']);
@@ -129,7 +155,7 @@ describe('what the check refuses', () => {
   test('a writer that throws or returns no string', async (t) => {
     const broken = [
       '/**',
-      ' * Box: kept whole, until it throws.',
+      ' * Box: kept whole, until it throws. Dropped: nothing.',
       ' */',
       `import { markdownFor } from '${TYPES}';`,
       "export default markdownFor({ tag: 'Box', props: [], toMarkdown: () => { throw new Error('no data'); } });",
@@ -165,12 +191,21 @@ test('a syntax error is told apart from a module that failed to load', () => {
 });
 
 describe('the opening comment', () => {
-  test('names its component and says what it keeps or drops', () => {
-    assert.equal(openingProblem('/**\n * Box: kept whole.\n */\n', 'Box'), undefined);
-    assert.equal(openingProblem('/**\n * Box: dropped on purpose.\n */\n', 'Box'), undefined);
+  test('names its component and says what it keeps and what it drops', () => {
+    assert.equal(openingProblem('/**\n * Box: kept whole.\n *\n * Dropped: the frame it draws.\n */\n', 'Box'), undefined);
     assert.match(openingProblem('/**\n * Other: kept whole.\n */\n', 'Box'), /about Other, not Box/u);
-    assert.match(openingProblem('/**\n * Box: a box.\n */\nconst kept = 1;\n', 'Box'), /does not say what it keeps or drops/u);
     assert.match(openingProblem('// Box: kept whole.\n', 'Box'), /does not open with/u);
+  });
+
+  test('one statement is not enough: what is kept, or what is dropped, alone fails', () => {
+    assert.match(openingProblem('/**\n * Box: kept whole.\n */\n', 'Box'), /does not say what it drops \(/u);
+    assert.match(openingProblem('/**\n * Box: a box.\n *\n * Dropped: its frame.\n */\n', 'Box'), /does not say what it keeps \(/u);
+    assert.match(openingProblem('/**\n * Box: a box.\n */\nconst kept = 1; // dropped\n', 'Box'), /does not say what it keeps or what it drops/u);
+  });
+
+  test('a writer that writes nothing says so in its first line, and that is the whole statement', () => {
+    assert.equal(openingProblem('/**\n * Box: dropped on purpose.\n *\n * It is a picker.\n */\n', 'Box'), undefined);
+    assert.match(openingProblem('/**\n * Box: dropped on purpose, mostly.\n */\n', 'Box'), /does not say what it keeps \(one that writes nothing opens with 'Box: dropped on purpose\.'\)/u);
   });
 });
 

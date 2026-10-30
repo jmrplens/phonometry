@@ -15,9 +15,12 @@
 //   the source by regular expressions lost every figure and table a
 //   component drew);
 // - a prop the writer does not declare (the 14 guides that passed their See
-//   also links as a `links` prop SeeAlso never had published an empty panel);
+//   also links as a `links` prop SeeAlso never had published an empty panel),
+//   and a spread of props or attributes, which nothing can read;
 // - an expression that is neither a literal nor a name imported from an
-//   allow-listed data module (`{totalChecks}` without its import);
+//   allow-listed data module, in the text, in a prop or in an attribute of
+//   raw HTML (`{totalChecks}` without its import; `<a href={x}>`, whose link
+//   was dropped);
 // - raw HTML with no rule, and an aside Starlight does not draw;
 // - a writer that throws or returns something other than a string;
 // - a page that does not parse as the site's MDX pipeline reads it, or whose
@@ -30,7 +33,10 @@
 //   one that uses it);
 // - a writer opens with a comment that names its component and says what it
 //   keeps and what it drops on purpose, so a reader of the copy who misses
-//   something on the page can find out whether that was meant.
+//   something on the page can find out whether that was meant. Both are
+//   asked for: a comment that only lists what is kept leaves the reader
+//   guessing about the rest. A writer that writes nothing says so in its
+//   first line, `<Name>: dropped on purpose.`, and why below it.
 //
 // Its tests live under src/lib/agent-md/test/ (`pnpm run test:agent-md`),
 // because they import the parser, and `test:scripts` stays free of
@@ -55,16 +61,16 @@ import { markdownPlugins, PLUGIN_REWRITES } from '../src/lib/agent-md/rewrites.m
 export const REMEDIES = {
   component:
     'add <Name>.md.mjs beside <Name>.astro, default-exporting markdownFor({ tag, props, toMarkdown }) from src/lib/agent-md/types.mjs',
-  prop: "declare the prop in the writer's props and write what it carries, or stop passing it",
+  prop: "declare the prop in the writer's props and write what it carries, or stop passing it; write a spread out as the props or attributes it stands for",
   expression: `write the value as a literal, or import it from ${DATA_MODULES.join(' or ')}`,
   html: 'write it as Markdown, or give the tag a rule in HTML_RULES in src/lib/agent-md/render.mjs',
   directive: 'use an aside Starlight draws: note, tip, caution or danger',
-  writer: 'fix the writer: it threw, returned something other than a string, or reported what it could not write',
+  writer: 'fix what the message names: a writer that threw or returned something other than a string, or what the writer found wrong on the page',
   parse: 'the page does not parse as the site build reads it; fix the syntax at that line',
   import: 'a data module the page imports failed to load, as it would in the site build; the message says what it could not read',
   stale: 'no page uses the component: delete its writer (and the component, if nothing else renders it)',
   opening:
-    "open the writer with a /** ... */ comment whose first line is '<Name>: ...' and which says what it keeps and what it drops on purpose",
+    "open the writer with a /** ... */ comment whose first line is '<Name>: ...' and which says what it keeps and what it drops on purpose; a writer that writes nothing opens with '<Name>: dropped on purpose.' and says why",
 };
 
 /**
@@ -81,11 +87,15 @@ export const isParseError = (error) =>
 /** Where a parse error happened when it gives no line of its own: `(3:1-3:15)` in its reason. */
 const PLACE = /\((\d+):\d+(?:-\d+:\d+)?\)/u;
 
-/** The first line of a writer's opening comment: `/**`, then ` * <Name>: `. */
-const OPENING = /^\/\*\*\n \* ([A-Z][A-Za-z0-9]*): \S/u;
+/** The first line of a writer's opening comment: `/**`, then ` * <Name>: ...`. */
+const OPENING = /^\/\*\*\n \* ([A-Z][A-Za-z0-9]*): (\S[^\n]*)/u;
 
-/** What the opening comment has to talk about. */
-const KEEPS_OR_DROPS = /\b(?:kept|keeps|dropped|drops)\b/iu;
+/** The first line of a writer that writes nothing, after its name: the whole statement. */
+const DROPPED_WHOLE = 'dropped on purpose.';
+
+/** The two things every other opening comment says. */
+const KEEPS = /\b(?:kept|keeps)\b/iu;
+const DROPS = /\b(?:dropped|drops)\b/iu;
 
 /**
  * Why a writer's opening comment does not do its job, if it does not.
@@ -98,9 +108,11 @@ export function openingProblem(source, tag) {
   const opening = OPENING.exec(source);
   if (!opening) return 'does not open with a /** ... */ comment whose first line names its component';
   if (opening[1] !== tag) return `opens with a comment about ${opening[1]}, not ${tag}`;
-  const end = source.indexOf('*/');
-  if (!KEEPS_OR_DROPS.test(source.slice(0, end))) return 'opens with a comment that does not say what it keeps or drops';
-  return undefined;
+  if (opening[2] === DROPPED_WHOLE) return undefined;
+  const comment = source.slice(0, source.indexOf('*/'));
+  const missing = [KEEPS.test(comment) ? '' : 'what it keeps', DROPS.test(comment) ? '' : 'what it drops'].filter(Boolean);
+  if (missing.length === 0) return undefined;
+  return `opens with a comment that does not say ${missing.join(' or ')} (one that writes nothing opens with '${tag}: ${DROPPED_WHOLE}')`;
 }
 
 /**

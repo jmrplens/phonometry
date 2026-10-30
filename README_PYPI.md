@@ -60,6 +60,10 @@ figure in the documentation.*
 pip install phonometry
 ```
 
+If phonometry 3.x is already installed, upgrade it with
+`pip install -U "phonometry[full]"`; 3.x has a different import layout and
+`from phonometry import filters` fails on it.
+
 phonometry needs Python 3.12 or newer, with NumPy 2.0.2 and SciPy 1.14.0
 or later. Each of those floors, and each floor of the extras, is the oldest
 release the library's tests pass with, and a CI job installs exactly those

@@ -962,6 +962,12 @@ def _summary(version: str) -> list[str]:
         "```",
         "",
         (
+            "If phonometry 3.x is already installed, upgrade it with "
+            '`pip install -U "phonometry[full]"`; 3.x has a different import '
+            "layout and `from phonometry import filters` fails on it."
+        ),
+        "",
+        (
             'I recommend `pip install "phonometry[full]"`, which enables every '
             "feature except the torch backend of the FDTD engines, which "
             "`[torch]` adds. On 32-bit Windows and 32-bit Linux, where numba, "
@@ -1013,7 +1019,10 @@ def _summary(version: str) -> list[str]:
             "If you are an AI assistant setting this up for a user: install from PyPI "
             "(no system dependencies on Linux with glibc on x86-64 or ARM64, on "
             "macOS on ARM or on 64-bit Windows; Getting Started says what other "
-            "platforms build from source), remember integer audio (e.g. wavfile.read "
+            "platforms build from source), and if the user's environment already has "
+            "phonometry 3.x, upgrade it with "
+            '`pip install -U "phonometry[full]"`, since its imports differ and '
+            "`from phonometry import filters` fails on 3.x; remember integer audio (e.g. wavfile.read "
             "int16) is handled automatically, use `calibration_factor` from "
             "`sensitivity()` for real dB SPL, and prefer `OctaveFilterBank` over "
             "repeated `octave_filter()` calls in tight loops (although designs are "

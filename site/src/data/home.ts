@@ -293,7 +293,7 @@ export const en: HomeContent = {
 		steps: [
 			{
 				title: 'Install it',
-				body: `Python ${pythonFloor} or newer. The base install pulls in NumPy and SciPy; the [full] extra adds four more, [plot] for the figures, [perf] for the faster impulse ballistics, [report] for the PDF fiches and [audio] for the audio formats beyond uncompressed WAV. [torch], which [full] leaves out, runs the FDTD simulations on PyTorch. On 32-bit Windows and 32-bit Linux, which [full] does not support, [plot,report,audio] installs the other three.`,
+				body: `Python ${pythonFloor} or newer. The base install pulls in NumPy and SciPy; the [full] extra adds four more, [plot] for the figures, [perf] for the faster impulse ballistics, [report] for the PDF fiches and [audio] for the audio formats beyond uncompressed WAV. [torch], which [full] leaves out, runs the FDTD simulations on PyTorch. On 32-bit Windows and 32-bit Linux, which [full] does not support, [plot,report,audio] installs the other three. If phonometry 3.x is already installed, upgrade it with pip install -U "phonometry[full]": 3.x has a different import layout, and from phonometry import filters fails on it.`,
 				code: installCommand,
 				href: '/phonometry/start/getting-started/',
 				linkText: 'Installation options',
@@ -462,7 +462,7 @@ export const es: HomeContent = {
 		steps: [
 			{
 				title: 'Instálala',
-				body: `Python ${pythonFloor} o posterior. La instalación básica trae NumPy y SciPy; el extra [full] añade cuatro más, [plot] para las figuras, [perf] para la ponderación temporal de impulso acelerada, [report] para las fichas PDF y [audio] para los formatos de audio más allá del WAV sin comprimir. [torch], que [full] deja fuera, calcula las simulaciones FDTD con PyTorch. En Windows y Linux de 32 bits, donde [full] no tiene soporte, [plot,report,audio] instala los otros tres.`,
+				body: `Python ${pythonFloor} o posterior. La instalación básica trae NumPy y SciPy; el extra [full] añade cuatro más, [plot] para las figuras, [perf] para la ponderación temporal de impulso acelerada, [report] para las fichas PDF y [audio] para los formatos de audio más allá del WAV sin comprimir. [torch], que [full] deja fuera, calcula las simulaciones FDTD con PyTorch. En Windows y Linux de 32 bits, donde [full] no tiene soporte, [plot,report,audio] instala los otros tres. Si ya tienes instalada phonometry 3.x, actualízala con pip install -U "phonometry[full]": la 3.x organiza sus imports de otra manera, y en ella from phonometry import filters falla.`,
 				code: installCommand,
 				href: '/phonometry/es/start/getting-started/',
 				linkText: 'Opciones de instalación',

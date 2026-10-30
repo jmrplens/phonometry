@@ -98,26 +98,34 @@ extends, an explicit ``__init__`` or ``__call__`` included):
   ``Literal`` parameter is, and is left as it stands. An overload head is
   read with the keys offered alone by the heads that take every call it
   takes but for that parameter, which is what such a call reaches. A head
-  takes another's calls when each of its parameters takes what the other's
-  does (a ``str`` the text a ``Literal`` lists, a ``float`` an ``int``),
-  each it has besides has a default or a name the other's calls give, and a
-  positional-only one of the other is taken in its place by a positional
-  one;
+  takes another's calls when each call of the other, bound as Python binds
+  it, puts every argument in a parameter of the head that takes it (a
+  ``str`` the text a ``Literal`` lists, a ``float`` an ``int``, a
+  ``Sequence[float]`` a ``list[int]``, the items of a standard container
+  read as a type checker reads them), by place, through ``*args`` or by
+  name (a keyword-only parameter or ``**kwargs`` takes one the other gives
+  by place too), never gives one parameter twice, and leaves out only
+  parameters with a default;
 * a union of two or more mappings, one of whose key or value is not a
   plain number, text or record (a ``Literal``, a mapping, a sequence,
   ``ArrayLike`` or a union), gives a ``dict`` written in the call no type
   context: mypy reads such a display against the type it is passed for only
   when that type holds one mapping, and otherwise on its own, a ``Literal``
   key as a ``str`` and nested mappings of two key types as ``object``, so a
-  call that runs is refused. Each of those mappings is offered alone in an
-  overload head, read alike however it is spelt there (an alias, or what
-  it stands for), the implementation keeping the union, and the heads that
-  offer them take the same other arguments, so that a call one of them
-  takes reaches a head for every mapping; heads that pair each mapping with
-  a value of another parameter on purpose, the run refusing it beside the
-  others, are listed in :data:`PAIRED_MAPPINGS` with the reason. A head that
-  takes two of them, and a union of them below the top of a parameter or in
-  the field of a public record, where no head can split it, fail;
+  call that runs is refused, unless a mapping of the union takes the
+  ``dict`` as it is read on its own (a ``Mapping[str, float]`` beside a
+  ``Mapping[Literal["rms"], float]``). Each of those mappings is offered
+  alone in an overload head, read alike however it is spelt there (an
+  alias, or what it stands for), the implementation keeping the union, and
+  the heads that offer them take the same other arguments, so that a call
+  one of them takes reaches a head for every mapping; heads that pair each
+  mapping with a value of another parameter on purpose, the run refusing
+  it beside the others, are listed in :data:`PAIRED_MAPPINGS` with the
+  reason. A head that takes two of them, and a union of them below the top
+  of a parameter or in the field of a public record built by the
+  constructor ``dataclass`` writes, where no head can split it, fail; a
+  record that declares its own ``__init__``, under ``if TYPE_CHECKING:`` or
+  not, is read through it;
 * the scalar quantities of the vocabulary (:data:`NAME_FAMILIES`: a sample
   rate ``fs``, ``volume``, ``coverage``, ``confidence``,
   ``energy_fraction``, ``fraction``) keep one family of numbers across the
@@ -3155,13 +3163,197 @@ def _wider(member: object) -> frozenset[str]:
     return frozenset()
 
 
+#: The one name each spelling of a standard generic container stands for.
+_ORIGINS: dict[str, str] = {
+    "typing.List": "builtins.list",
+    "typing.Dict": "builtins.dict",
+    "typing.Set": "builtins.set",
+    "typing.FrozenSet": "builtins.frozenset",
+    "typing.Tuple": "builtins.tuple",
+    "typing.Type": "builtins.type",
+    "typing.Sequence": "collections.abc.Sequence",
+    "typing.MutableSequence": "collections.abc.MutableSequence",
+    "typing.Mapping": "collections.abc.Mapping",
+    "typing.MutableMapping": "collections.abc.MutableMapping",
+    "typing.AbstractSet": "collections.abc.Set",
+    "typing.MutableSet": "collections.abc.MutableSet",
+    "typing.Collection": "collections.abc.Collection",
+    "typing.Iterable": "collections.abc.Iterable",
+    "typing.Iterator": "collections.abc.Iterator",
+    "typing.Container": "collections.abc.Container",
+    "typing.Reversible": "collections.abc.Reversible",
+}
+
+#: How a type checker reads each argument of a standard generic container,
+#: by the name :data:`_ORIGINS` gives it: ``True`` covariantly (a
+#: ``Sequence[float]`` takes a ``Sequence[int]``), ``False`` invariantly (a
+#: ``list[float]`` refuses a ``list[int]``, a ``Mapping`` a narrower key). A
+#: ``tuple`` reads each of its items covariantly.
+_VARIANCE: dict[str, tuple[bool, ...]] = {
+    "builtins.list": (False,),
+    "builtins.dict": (False, False),
+    "builtins.set": (False,),
+    "builtins.frozenset": (True,),
+    "builtins.type": (True,),
+    "collections.abc.Sequence": (True,),
+    "collections.abc.MutableSequence": (False,),
+    "collections.abc.Mapping": (False, True),
+    "collections.abc.MutableMapping": (False, False),
+    "collections.abc.Set": (True,),
+    "collections.abc.MutableSet": (False,),
+    "collections.abc.Collection": (True,),
+    "collections.abc.Iterable": (True,),
+    "collections.abc.Iterator": (True,),
+    "collections.abc.Container": (True,),
+    "collections.abc.Reversible": (True,),
+}
+
+#: The standard containers each standard container is, with the arguments
+#: it gives them, by the place of its own: a ``list[T]`` is a
+#: ``MutableSequence[T]``, a ``dict[K, V]`` a ``MutableMapping[K, V]``, a
+#: ``Mapping[K, V]`` a ``Collection[K]``.
+_BASES: dict[str, tuple[tuple[str, tuple[int, ...]], ...]] = {
+    "builtins.list": (("collections.abc.MutableSequence", (0,)),),
+    "builtins.dict": (("collections.abc.MutableMapping", (0, 1)),),
+    "builtins.set": (("collections.abc.MutableSet", (0,)),),
+    "builtins.frozenset": (("collections.abc.Set", (0,)),),
+    "collections.abc.MutableSequence": (("collections.abc.Sequence", (0,)),),
+    "collections.abc.Sequence": (
+        ("collections.abc.Reversible", (0,)),
+        ("collections.abc.Collection", (0,)),
+    ),
+    "collections.abc.MutableMapping": (("collections.abc.Mapping", (0, 1)),),
+    "collections.abc.Mapping": (("collections.abc.Collection", (0,)),),
+    "collections.abc.MutableSet": (("collections.abc.Set", (0,)),),
+    "collections.abc.Set": (("collections.abc.Collection", (0,)),),
+    "collections.abc.Collection": (
+        ("collections.abc.Iterable", (0,)),
+        ("collections.abc.Container", (0,)),
+    ),
+    "collections.abc.Iterator": (("collections.abc.Iterable", (0,)),),
+    "collections.abc.Reversible": (("collections.abc.Iterable", (0,)),),
+}
+
+#: The texts a type checker reads as sequences, with the item each holds.
+_TEXT_SEQUENCES: dict[str, str] = {
+    "builtins.str": "builtins.str",
+    "builtins.bytes": "builtins.int",
+}
+
+#: The :func:`_shape` of the ``...`` that makes a ``tuple`` hold any count of one item.
+_ANY_COUNT = frozenset({("constant", "Ellipsis")})
+
+
+def _origin(name: object) -> object:
+    """The one name a spelling of a standard container stands for, any other name as it is."""
+    return _ORIGINS.get(name, name) if isinstance(name, str) else name
+
+
+def _read_as(member: tuple[object, ...]) -> Iterator[tuple[object, tuple[object, ...]]]:
+    """A member of a shape, and every standard container it is, each with its items.
+
+    A ``tuple`` is a ``Sequence`` of what its items hold, a ``str`` a
+    ``Sequence[str]``, a ``bytes`` a ``Sequence[int]``, and a choice a
+    ``Literal`` lists or a number is also each type it is taken by
+    (:func:`_wider`).
+    """
+    queue: list[tuple[object, tuple[object, ...]]] = [
+        (_origin(member[0]), tuple(member[1]) if isinstance(member[1], tuple) else ())
+    ]
+    queue.extend((wider, ()) for wider in _wider(member))
+    seen: set[tuple[object, tuple[object, ...]]] = set()
+    while queue:
+        name, items = queue.pop()
+        if (name, items) in seen:
+            continue
+        seen.add((name, items))
+        yield name, items
+        if name == "builtins.tuple" and items:
+            held = [item for item in items if item != _ANY_COUNT]
+            if all(isinstance(item, frozenset) for item in held):
+                joined = frozenset().union(
+                    *(item for item in held if isinstance(item, frozenset))
+                )
+                queue.append(("collections.abc.Sequence", (joined,)))
+        if name in _TEXT_SEQUENCES and not items:
+            queue.append(
+                (
+                    "collections.abc.Sequence",
+                    (frozenset({(_TEXT_SEQUENCES[str(name)], ())}),),
+                )
+            )
+        for base, places in _BASES.get(str(name), ()):
+            if items and all(place < len(items) for place in places):
+                queue.append((base, tuple(items[place] for place in places)))
+
+
+def _items_take(
+    origin: object, mine: tuple[object, ...], theirs: tuple[object, ...]
+) -> bool:
+    """Whether the items of one standard container take those of another of the same name.
+
+    A bare container holds anything and is held by anything. A ``tuple`` of
+    any count of one item takes a ``tuple`` whose items it takes each.
+    """
+    if not mine or not theirs:
+        return True
+    if origin == "builtins.tuple":
+        if len(mine) == _SHAPE_MEMBER and mine[1] == _ANY_COUNT:
+            held = (
+                theirs[:1]
+                if len(theirs) == _SHAPE_MEMBER and theirs[1] == _ANY_COUNT
+                else theirs
+            )
+            return all(_shape_takes(mine[0], item) for item in held)
+        return len(mine) == len(theirs) and all(
+            _shape_takes(item, other) for item, other in zip(mine, theirs, strict=True)
+        )
+    variance = _VARIANCE[str(origin)]
+    if not len(mine) == len(theirs) == len(variance):
+        return mine == theirs
+    return all(
+        _shape_takes(item, other) and (covariant or _shape_takes(other, item))
+        for item, other, covariant in zip(mine, theirs, variance, strict=True)
+    )
+
+
+def _member_takes(mine: object, theirs: object) -> bool:
+    """Whether one member of a shape takes every value another does.
+
+    The same member; a type a choice is a value of, or a number promoted to
+    (:func:`_wider`); or a standard container that *theirs* is
+    (:func:`_read_as`), whose items take *theirs*' as the container reads
+    them (:data:`_VARIANCE`).
+    """
+    if mine == theirs:
+        return True
+    if not (
+        isinstance(mine, tuple)
+        and isinstance(theirs, tuple)
+        and len(mine) == len(theirs) == _SHAPE_MEMBER
+    ):
+        return False
+    origin = _origin(mine[0])
+    items = tuple(mine[1]) if isinstance(mine[1], tuple) else ()
+    if not items and origin in _wider(theirs):
+        return True
+    if origin != "builtins.tuple" and origin not in _VARIANCE:
+        return False
+    return any(
+        name == origin and _items_take(origin, items, held)
+        for name, held in _read_as(theirs)
+    )
+
+
 def _shape_takes(mine: object, theirs: object) -> bool:
     """Whether an annotation of shape *mine* takes every value one of shape *theirs* does.
 
     ``None`` (unannotated), the parameter read apart and anything take every
-    value; otherwise each member of *theirs* is a member of *mine*, or a
-    value of one (a ``Literal`` text of a ``str``) or a number promoted to
-    one (an ``int`` to a ``float``).
+    value; otherwise each member of *theirs* is taken by a member of *mine*
+    (:func:`_member_takes`): itself, a type it is a value of (a ``Literal``
+    text of a ``str``) or a number promoted to (an ``int`` of a ``float``),
+    or a standard container it is whose items take its own as a type checker
+    reads them (a ``Sequence[float]`` a ``list[int]``).
     """
     if mine is None or mine == _ASIDE:
         return True
@@ -3171,8 +3363,7 @@ def _shape_takes(mine: object, theirs: object) -> bool:
         return True
     if isinstance(mine, frozenset) and isinstance(theirs, frozenset):
         return all(
-            member in mine or any((wider, ()) in mine for wider in _wider(member))
-            for member in theirs
+            any(_member_takes(member, other) for member in mine) for other in theirs
         )
     return bool(mine == theirs)
 
@@ -3191,20 +3382,15 @@ class _Slot:
     #: Whether a call may leave it out.
     optional: bool
 
-    def takes(self, other: _Slot) -> bool:
-        """Whether this slot takes every argument a call gives *other*.
+    def lands(self, given: _Slot) -> bool:
+        """Whether this parameter takes the argument a call gives *given*.
 
-        A call fills it wherever it fills *other*: they are of one kind and
-        name, or *other* is positional-only, whose place a positional
-        parameter of any name takes.
+        The parameter read apart takes only the argument of the other's,
+        and only it, whatever both are annotated.
         """
-        if (self.kind, self.name) != (other.kind, other.name) and not (
-            self.kind == "positional" and other.kind == "positional only"
-        ):
+        if (self.shape == _ASIDE) != (given.shape == _ASIDE):
             return False
-        if other.optional and not self.optional:
-            return False
-        return _shape_takes(self.shape, other.shape)
+        return _shape_takes(self.shape, given.shape)
 
 
 @dataclass(frozen=True)
@@ -3219,59 +3405,83 @@ class _CallShape:
     def takes(self, other: _CallShape) -> bool:
         """Whether a definition of this shape takes every call *other*'s takes.
 
-        Each parameter takes what the other's does (:meth:`_Slot.takes`);
-        one the other lacks may be left out. A positional parameter of the
-        other past this shape's own is taken by its ``*args``, and, when a
-        call may name it, by its ``**kwargs``. A positional parameter of
-        this shape past the other's is left out by the other's calls, or
-        given by name by a keyword of theirs, and takes what their
-        ``*args`` hold.
+        Each call of the other is read as Python binds it here, for every
+        count of arguments it may give by place (:meth:`_binds`): from the
+        fewest its positional-only parameters ask for to all of them, and
+        past them as far as its ``*args`` reach this shape's ``*args``.
         """
-        shared = min(len(self.positional), len(other.positional))
-        if not all(
-            mine.takes(theirs)
-            for mine, theirs in zip(
-                self.positional[:shared], other.positional[:shared], strict=True
+        fewest = max(
+            (
+                index + 1
+                for index, slot in enumerate(other.positional)
+                if slot.kind == "positional only" and not slot.optional
+            ),
+            default=0,
+        )
+        most = len(other.positional)
+        if other.star is not None:
+            most = max(most, len(self.positional)) + 1
+        return all(self._binds(other, count) for count in range(fewest, most + 1))
+
+    def _named(self, name: str, count: int) -> _Slot | None:
+        """The parameter an argument given by *name* lands in, past *count* given by place.
+
+        A positional parameter of that name already given by place is given
+        twice, and the call fails: ``None``.
+        """
+        for index, slot in enumerate(self.positional):
+            if slot.kind == "positional" and slot.name == name:
+                return slot if index >= count else None
+        for slot in self.keywords:
+            if slot.name == name:
+                return slot
+        return self.double_star
+
+    def _binds(self, other: _CallShape, count: int) -> bool:
+        """Whether this shape takes every call of *other* that gives *count* arguments by place.
+
+        Each argument given by place lands in the parameter of this shape in
+        that place, or in its ``*args``; each of the other's parameters past
+        them that a call may name lands in the parameter of this shape of
+        that name, or in its ``**kwargs``; a parameter of this shape that no
+        such call always fills has a default; and every name the other's
+        ``**kwargs`` take is one this shape takes too, never a parameter it
+        has already filled by place.
+        """
+        for index in range(count):
+            given = (
+                other.positional[index] if index < len(other.positional) else other.star
             )
+            placed = (
+                self.positional[index] if index < len(self.positional) else self.star
+            )
+            if given is None or placed is None or not placed.lands(given):
+                return False
+        named = [
+            slot for slot in other.positional[count:] if slot.kind == "positional"
+        ] + list(other.keywords)
+        for slot in named:
+            target = self._named(slot.name, count)
+            if target is None or not target.lands(slot):
+                return False
+        always = {slot.name for slot in named if not slot.optional}
+        if any(
+            not slot.optional and slot.name not in always
+            for slot in [*self.positional[count:], *self.keywords]
         ):
             return False
-        for theirs in other.positional[shared:]:
-            spills = [self.star, self.double_star] if theirs.name else [self.star]
-            if any(
-                spill is None or not _shape_takes(spill.shape, theirs.shape)
-                for spill in spills
-            ):
-                return False
-        mine = {slot.name: slot for slot in self.keywords}
-        for slot in self.positional[shared:]:
-            if other.star is not None and not _shape_takes(
-                slot.shape, other.star.shape
-            ):
-                return False
-            if slot.kind == "positional":
-                mine.setdefault(
-                    slot.name, _Slot("keyword", slot.name, slot.shape, slot.optional)
-                )
-            elif not slot.optional:
-                return False
-        for mine_star, theirs_star in (
-            (self.star, other.star),
-            (self.double_star, other.double_star),
-        ):
-            if theirs_star is not None and (
-                mine_star is None or not mine_star.takes(theirs_star)
-            ):
-                return False
-        theirs_named = {slot.name: slot for slot in other.keywords}
+        spill = other.double_star
+        if spill is None:
+            return True
+        if self.double_star is None or not self.double_star.lands(spill):
+            return False
+        names = {slot.name for slot in other.positional if slot.kind == "positional"}
+        names.update(slot.name for slot in other.keywords)
         return all(
-            mine[name].takes(slot)
-            if name in mine
-            else self.double_star is not None
-            and _shape_takes(self.double_star.shape, slot.shape)
-            for name, slot in theirs_named.items()
-        ) and all(
-            slot.optional for name, slot in mine.items() if name not in theirs_named
-        )
+            slot.name in names or (index >= count and slot.lands(spill))
+            for index, slot in enumerate(self.positional)
+            if slot.kind == "positional"
+        ) and all(slot.name in names or slot.lands(spill) for slot in self.keywords)
 
 
 def _call_shape(
@@ -3751,6 +3961,148 @@ def _arm_needs_context(annotations: Annotations, module: str, arm: ast.expr) -> 
     return any(_needs_context(annotations, module, item) for item in items)
 
 
+#: The mappings a ``dict`` is, read covariantly in their values: what a
+#: ``dict`` display read on its own is taken by.
+_READ_MAPPINGS = frozenset({"typing.Mapping", "collections.abc.Mapping"})
+
+#: The types a key written as a number of a narrower one is read as: a
+#: ``float`` key written ``125`` is read as an ``int``.
+_WRITTEN_NARROWER = frozenset({"builtins.float", "builtins.complex"})
+
+#: How many items a mapping takes: its key and its value.
+_MAPPING_ITEMS = 2
+
+
+def _written_member(
+    annotations: Annotations, module: str, member: ast.expr, *, key: bool
+) -> set[object] | None:
+    """The types mypy reads the values written for one member of an annotation as, on their own.
+
+    A choice a ``Literal`` lists is read as its type (``"rms"`` as a
+    ``str``), ``None`` and a plain type as themselves, as members of a
+    :func:`_shape`. A type of items (a mapping, a sequence, an array-like)
+    has none, nor, for a *key*, a ``float`` or a ``complex``, which a caller
+    writes as an ``int`` too: ``None``.
+    """
+    if _is_none(member):
+        return {("constant", "None")}
+    dotted = annotations.resolve(module, member)
+    if dotted in _LITERALS:
+        found: set[object] = set()
+        for choice in _items(member):
+            if not (
+                isinstance(choice, ast.Constant) and type(choice.value) in _CHOICE_TYPES
+            ):
+                return None
+            found.add((f"builtins.{type(choice.value).__name__}", ()))
+        return found
+    if (
+        dotted is None
+        or _items(member)
+        or dotted in _CONTEXT_FREE_REFUSED | _ANYTHING
+        or (key and dotted in _WRITTEN_NARROWER)
+    ):
+        return None
+    return {(dotted, ())}
+
+
+def _written_type(
+    annotations: Annotations,
+    members: Iterable[tuple[str, ast.expr]],
+    *,
+    key: bool,
+) -> frozenset[object] | None:
+    """The one type mypy reads every value written for these members as, on its own.
+
+    The members read by :func:`_written_member` must come to one type:
+    values of two (an ``int`` beside ``None`` for a key, a text beside a
+    number) are read as what each display holds, or as what they share,
+    which is no one type.
+    """
+    found: set[object] = set()
+    for where, member in members:
+        one = _written_member(annotations, where, member, key=key)
+        if one is None:
+            return None
+        found |= one
+    return frozenset(found) if len(found) == 1 else None
+
+
+def _written_taken(
+    annotations: Annotations,
+    module: str,
+    node: ast.expr,
+    taker: object,
+    depth: int = 0,
+) -> bool:
+    """Whether every value written for annotation *node*, as mypy reads it on its own, is one *taker* takes.
+
+    *taker* is a :func:`_shape`. A value of one plain type, or of the type
+    of a ``Literal``'s choices, beside ``None`` or not, is read as that type
+    (:func:`_written_type`), which *taker* takes as a parameter would
+    (:func:`_shape_takes`); a ``dict`` written for one mapping is a ``dict``
+    of its key read alone and its values read so in turn, which a
+    ``Mapping`` of *taker* keyed by that key takes. Values of several types
+    are read as what they share, ``object``, which only anything takes.
+    """
+    if isinstance(taker, frozenset) and any(
+        isinstance(member, tuple) and member[0] in _ANYTHING for member in taker
+    ):
+        return True
+    if depth > _NESTING:
+        return False
+    members = list(annotations.members(module, node))
+    present = [(where, member) for where, member in members if not _is_none(member)]
+    if len(present) < len(members) and not _shape_takes(
+        taker, frozenset({("constant", "None")})
+    ):
+        return False
+    if len(present) == 1 and annotations.resolve(*present[0]) in _MAPPINGS:
+        where, mapping = present[0]
+        items = _items(mapping)
+        key = (
+            _written_type(annotations, annotations.members(where, items[0]), key=True)
+            if len(items) == _MAPPING_ITEMS
+            else None
+        )
+        return (
+            key is not None
+            and isinstance(taker, frozenset)
+            and any(
+                isinstance(member, tuple)
+                and member[0] in _READ_MAPPINGS
+                and isinstance(member[1], tuple)
+                and len(member[1]) == _MAPPING_ITEMS
+                and member[1][0] == key
+                and _written_taken(
+                    annotations, where, items[1], member[1][1], depth + 1
+                )
+                for member in taker
+            )
+        )
+    written = _written_type(annotations, present, key=False)
+    return written is not None and _shape_takes(taker, written)
+
+
+def _covered(
+    annotations: Annotations,
+    module: str,
+    arm: ast.expr,
+    arms: Sequence[tuple[str, ast.expr]],
+) -> bool:
+    """Whether a ``dict`` written for mapping *arm*, as mypy reads it on its own, is one a mapping of *arms* takes.
+
+    ``{"rms": 1.0}`` written for ``Mapping[Literal["rms"], float]`` is a
+    ``dict[str, float]``, which a ``Mapping[str, float]`` beside it takes:
+    the call runs and type checks with no head of its own.
+    """
+    return any(
+        annotations.resolve(where, other) in _READ_MAPPINGS
+        and _written_taken(annotations, module, arm, _shape(annotations, where, other))
+        for where, other in arms
+    )
+
+
 def context_unions(
     annotations: Annotations,
     module: str,
@@ -3766,8 +4118,9 @@ def context_unions(
     not a ``float`` one, and nested displays of two key types join to
     ``object``: a call that runs is refused. Each union with two or more
     mappings, one of whose key or value needs the context
-    (:func:`_needs_context`), comes with its depth (0 at the top of the
-    annotation) and its mappings as written, aliases spelt out.
+    (:func:`_needs_context`) and whose ``dict`` read on its own no mapping
+    of the union takes (:func:`_covered`), comes with its depth (0 at the
+    top of the annotation) and its mappings as written, aliases spelt out.
     """
     if node is None or depth > _NESTING:
         return []
@@ -3779,7 +4132,9 @@ def context_unions(
     ]
     found: list[tuple[int, tuple[str, ...]]] = []
     if len(arms) > 1 and any(
-        _arm_needs_context(annotations, where, member) for where, member in arms
+        _arm_needs_context(annotations, where, member)
+        and not _covered(annotations, where, member, arms)
+        for where, member in arms
     ):
         found.append((depth, tuple(ast.unparse(member) for _, member in arms)))
     for where, member in members:
@@ -3940,16 +4295,80 @@ def _context_findings(
     return found
 
 
+def _declares_constructor(
+    package: overloads.Package, annotations: Annotations, record: str
+) -> bool:
+    """Whether a record is built through an ``__init__`` of its own, not the one ``dataclass`` writes.
+
+    One written in its body, under ``if TYPE_CHECKING:`` or not, which
+    ``dataclass`` keeps and a type checker reads, or none at all
+    (``init=False``): the fields are then what the record holds, not what
+    its constructor takes.
+    """
+    found = annotations.classes.get(record)
+    if found is None:
+        return False
+    module, node = found
+    if any(
+        isinstance(child, ast.FunctionDef | ast.AsyncFunctionDef)
+        and child.name == "__init__"
+        for child in overloads._statements(node.body)
+    ):
+        return True
+    return any(
+        isinstance(decorator, ast.Call)
+        and package.resolve(module, decorator.func) in _DATACLASS
+        and any(
+            keyword.arg == "init"
+            and isinstance(keyword.value, ast.Constant)
+            and keyword.value.value is False
+            for keyword in decorator.keywords
+        )
+        for decorator in node.decorator_list
+    )
+
+
 def _field_context_findings(reader: Reader, root: pathlib.Path) -> list[Finding]:
     """The fields of public records that offer a ``dict`` written for them no mapping.
 
     A record's generated ``__init__`` has no overload heads, so a field takes
     at most one mapping that needs a written ``dict``'s context, at any depth.
+    A record built through an ``__init__`` of its own
+    (:func:`_declares_constructor`) is read through it as a public function
+    is, the one it declares under ``if TYPE_CHECKING:`` too, the keys of a
+    ``TypedDict`` it takes its keywords as read as keywords
+    (:func:`_spelt_out`), and its fields are not.
     """
     package = reader.package
     annotations = reader.annotations
     found: list[Finding] = []
     for record in public_records(package, annotations):
+        if _declares_constructor(package, annotations, record):
+            constructor = package.functions.get(f"{record}.__init__")
+            if constructor is not None:
+                implementation = constructor.implementation
+                spelt = overloads.Function(
+                    constructor.module,
+                    constructor.qualname,
+                    constructor.owner,
+                    implementation=None
+                    if implementation is None
+                    else _spelt_out(annotations, record, implementation),
+                    heads=[
+                        _spelt_out(annotations, record, head)
+                        for head in constructor.heads
+                    ],
+                )
+                found.extend(
+                    _context_findings(
+                        reader,
+                        spelt,
+                        repository_path(package.paths[constructor.module], root),
+                        reader._bounds(constructor),
+                        method=True,
+                    )
+                )
+            continue
         for field in record_fields(package, annotations, record).values():
             for _, arms in context_unions(
                 annotations, field.module, field.annotation, {}

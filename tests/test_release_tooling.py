@@ -946,6 +946,13 @@ def test_the_commit_time_stamps_the_build_and_the_checkout_must_be_the_commit(
     assert build_release.checkout_changes(root) == [" M VERSION", "?? stray.py"]
 
 
+#: ``main`` refuses Windows before it reads its arguments, so a test that
+#: drives it past that point runs on the platforms a release rebuilds on.
+_REBUILDS_HERE = pytest.mark.skipif(
+    os.name == "nt", reason="scripts/build_release.py refuses to build on Windows"
+)
+
+
 def _fake_build(
     monkeypatch: pytest.MonkeyPatch, *, changes: list[str]
 ) -> dict[str, str]:
@@ -967,6 +974,7 @@ def _fake_build(
     return {name: hashlib.sha256(name.encode()).hexdigest() for name in names}
 
 
+@_REBUILDS_HERE
 def test_a_rebuild_that_matches_the_checksum_file_passes(
     tmp_path: pathlib.Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -983,6 +991,7 @@ def test_a_rebuild_that_matches_the_checksum_file_passes(
     assert "rebuild to the files phonometry.sha256 lists" in capsys.readouterr().out
 
 
+@_REBUILDS_HERE
 def test_a_rebuild_that_differs_from_pypi_fails(
     tmp_path: pathlib.Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -1000,6 +1009,7 @@ def test_a_rebuild_that_differs_from_pypi_fails(
     )
 
 
+@_REBUILDS_HERE
 def test_a_checkout_that_is_not_its_commit_is_not_built(
     tmp_path: pathlib.Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -1040,6 +1050,7 @@ def test_a_build_on_windows_is_refused_before_anything_else(
     assert "not under /mnt/c" in err
 
 
+@_REBUILDS_HERE
 @pytest.mark.parametrize(
     ("text", "message"),
     [
@@ -1077,6 +1088,7 @@ def test_a_checksum_file_that_cannot_be_used_is_refused_before_the_build(
     assert "Traceback" not in err
 
 
+@_REBUILDS_HERE
 def test_pypi_giving_up_ends_as_an_annotation(
     tmp_path: pathlib.Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -1100,6 +1112,7 @@ def test_pypi_giving_up_ends_as_an_annotation(
     assert "rebuild to the files" not in captured.out
 
 
+@_REBUILDS_HERE
 @pytest.mark.parametrize(
     "error",
     [
@@ -1125,6 +1138,7 @@ def test_a_build_that_fails_or_hangs_ends_as_an_annotation(
     assert err == f"::error::{error}\n"
 
 
+@_REBUILDS_HERE
 def test_an_output_directory_that_is_a_file_ends_as_an_annotation(
     tmp_path: pathlib.Path,
     monkeypatch: pytest.MonkeyPatch,

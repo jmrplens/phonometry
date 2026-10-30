@@ -1601,6 +1601,98 @@ def test_a_dict_comprehension_that_keeps_the_keys_hands_them_on() -> None:
     )
 
 
+def _limits_kept_if_listed(limits: Mapping[_Pace, float]) -> _CheckedPaceLimits:
+    return _CheckedPaceLimits(
+        limits={pace: float(value) for pace, value in limits.items() if pace in _PACES}
+    )
+
+
+def _limits_kept_if_set(limits: Mapping[_Pace, float]) -> _CheckedPaceLimits:
+    return _CheckedPaceLimits(
+        limits={pace: float(value) for pace, value in limits.items() if value}
+    )
+
+
+def _limits_kept_if_set_then_checked(limits: Mapping[_Pace, float]) -> None:
+    kept = {pace: value for pace, value in limits.items() if value}
+    for key in kept:
+        require_choice(key, "limits", _PACES)
+
+
+def _limits_kept_but_one_option(limits: Mapping[_Pace, float]) -> _CheckedPaceLimits:
+    return _CheckedPaceLimits(
+        limits={pace: float(value) for pace, value in limits.items() if pace != "fast"}
+    )
+
+
+def test_a_dict_comprehension_that_drops_keys_hands_on_only_the_kept_ones() -> None:
+    """A filter drops the keys it fails for before any check sees them, so a
+    misspelling the filter drops passes unchecked, handed on or held in a
+    local: ``if pace in _PACES`` drops it silently and ``if value`` drops any
+    key whose value is zero. A filter that drops only an option the
+    ``Literal`` lists (``if pace != "fast"``) drops no misspelling.
+    """
+    never = "never checked, so a misspelling passes"
+    assert _verdict_of(_limits_kept_if_listed, "limits", collection=True) == never
+    assert _verdict_of(_limits_kept_if_set, "limits", collection=True) == never
+    assert (
+        _verdict_of(_limits_kept_if_set_then_checked, "limits", collection=True)
+        == never
+    )
+    assert (
+        _verdict_of(
+            _limits_kept_but_one_option, "limits", collection=True, options=_PACES
+        )
+        is None
+    )
+
+
+def _paces_checked_in_a_comprehension(paces: Sequence[_Pace]) -> list[_Pace]:
+    return [require_choice(pace, "paces", _PACES) for pace in paces]
+
+
+def _paces_checked_where_a_filter_holds(paces: Sequence[_Pace]) -> list[_Pace]:
+    return [require_choice(pace, "paces", _PACES) for pace in paces if pace]
+
+
+def _paces_checked_but_one_option(paces: Sequence[_Pace]) -> list[_Pace]:
+    return [require_choice(pace, "paces", _PACES) for pace in paces if pace != "fast"]
+
+
+def _pace_checked_per_step(pace: _Pace, steps: int) -> list[_Pace]:
+    return [require_choice(pace, "pace", _PACES) for _ in range(steps)]
+
+
+def test_a_check_in_a_comprehension_runs_only_where_its_clauses_let_it() -> None:
+    """A check in the element of a comprehension runs once for each item its
+    filters keep, so a filter that drops a text the ``Literal`` does not list
+    (``if pace`` drops ``""``) leaves it unchecked, as a ``continue`` would; a
+    comprehension over something else than the choice runs it only when that
+    holds an item, as a ``for`` loop does. A comprehension over the choice
+    itself, and a filter that drops only a listed option, leave none.
+    """
+    some_paths = "checked on some paths only, so a misspelling passes on the others"
+    assert (
+        _verdict_of(_paces_checked_in_a_comprehension, "paces", collection=True) is None
+    )
+    assert (
+        _verdict_of(
+            _paces_checked_where_a_filter_holds,
+            "paces",
+            collection=True,
+            options=_PACES,
+        )
+        == some_paths
+    )
+    assert (
+        _verdict_of(
+            _paces_checked_but_one_option, "paces", collection=True, options=_PACES
+        )
+        is None
+    )
+    assert _verdict_of(_pace_checked_per_step, "pace") == some_paths
+
+
 def test_a_stale_unchecked_entry_fails_and_a_needed_one_does_not(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

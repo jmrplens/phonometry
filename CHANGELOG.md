@@ -4023,11 +4023,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   no `language` at all, and now refuse it as every other plot does.
   `scripts/check_choice_literals.py` fails a public `Literal` choice or a
   record field that does not reach a shared validator on every path (a
-  `return` before the check, or a `continue` of the loop that checks each
-  item, leaves a path unchecked), follows it through a copy of its items
-  (`tuple(dict.fromkeys(rows))`, `(x,) if isinstance(x, str) else tuple(x)`,
-  `dict(levels.items())`, a dict comprehension that keeps the keys) and into
-  the record a classmethod builds, and keeps
+  `return` before the check, a `continue` of the loop that checks each item,
+  or a filter of the comprehension that does, leaves a path unchecked),
+  follows it through a copy of its items (`tuple(dict.fromkeys(rows))`,
+  `(x,) if isinstance(x, str) else tuple(x)`, `dict(levels.items())`, a dict
+  comprehension that keeps every key) and into the record a classmethod
+  builds, and keeps
   its exemptions in `UNCHECKED`, where a stale entry fails (rule A45). The
   migration guide lists every record that now refuses at construction and
   every call that now refuses on a path that took any value.

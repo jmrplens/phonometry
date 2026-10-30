@@ -3866,6 +3866,10 @@ def _taken_safely(test: ast.expr, subject: _Subject, *, truth: bool) -> bool:
     return _asks_its_form(test, subject) or _implies_listed(test, subject, truth=truth)
 
 
+#: The expressions that run an element once for each item their loops take.
+_COMPREHENSIONS = (ast.ListComp, ast.SetComp, ast.GeneratorExp, ast.DictComp)
+
+
 def _branches_away(holder: ast.AST, child: ast.AST, subject: _Subject) -> bool:
     """Whether *holder* runs *child* on some paths only, and a path that skips
     it may hold a text the check would refuse (:func:`_taken_safely`).
@@ -3888,6 +3892,16 @@ def _branches_away(holder: ast.AST, child: ast.AST, subject: _Subject) -> bool:
         )
     if isinstance(holder, ast.For | ast.AsyncFor) and child is not holder.iter:
         return not _mentions(holder.iter, subject.raw)
+    if isinstance(holder, _COMPREHENSIONS) and child not in holder.generators:
+        # The element runs once for each item every filter keeps, and only
+        # when each loop has an item: a loop over something else than the
+        # choice may have none, as a ``for`` statement may, and a filter
+        # skips the items it fails for, as a ``continue`` does.
+        return not all(
+            _mentions(loop.iter, subject.raw)
+            and all(_taken_safely(test, subject, truth=False) for test in loop.ifs)
+            for loop in holder.generators
+        )
     if isinstance(holder, ast.Try):
         return child in holder.orelse
     return isinstance(
@@ -4046,12 +4060,20 @@ class _Check(NamedTuple):
     validator: bool
 
 
-def _keeps_keys(value: ast.expr, target: Callable[[ast.expr], bool]) -> bool:
+def _keeps_keys(
+    value: ast.expr,
+    target: Callable[[ast.expr], bool],
+    options: frozenset[str] = frozenset(),
+) -> bool:
     """Whether *value* is a dict comprehension that keeps the target's keys.
 
     ``{side: float_keyed(row) for side, row in limits.items()}`` or ``{side:
     0.0 for side in limits}`` maps each key of ``limits`` to a new value and
-    keeps the key as the caller wrote it.
+    keeps the key as the caller wrote it. A filter drops the keys it fails
+    for before anything reads them, so ``if side in _SIDES`` or ``if row``
+    keeps only some: the comprehension keeps them all only when every filter
+    fails for no key but an option of the ``Literal``'s *options* (``if side
+    != "top"``) or asks only the key's form (:func:`_taken_safely`).
     """
     if not isinstance(value, ast.DictComp) or len(value.generators) != 1:
         return False
@@ -4068,22 +4090,30 @@ def _keeps_keys(value: ast.expr, target: Callable[[ast.expr], bool]) -> bool:
         if not (isinstance(bound, ast.Tuple) and len(bound.elts) == 2):
             return False
         bound = bound.elts[0]
-    return (
+    if not (
         isinstance(bound, ast.Name)
         and isinstance(value.key, ast.Name)
         and value.key.id == bound.id
         and target(_held(source))
-    )
+    ):
+        return False
+    key = _Subject(_the_name(bound.id), _never, options)
+    return all(_taken_safely(test, key, truth=False) for test in loop.ifs)
 
 
-def _carries(value: ast.expr, target: Callable[[ast.expr], bool]) -> bool:
+def _carries(
+    value: ast.expr,
+    target: Callable[[ast.expr], bool],
+    options: frozenset[str] = frozenset(),
+) -> bool:
     """Whether *value* holds the target's items: the target itself, a call
     that only holds its items (``tuple(x)``), the one-item tuple ``(x,)``
     that wraps a single choice of a choice-or-sequence parameter, or a dict
-    comprehension that keeps its keys (:func:`_keeps_keys`).
+    comprehension that keeps its keys (:func:`_keeps_keys`, among the
+    ``Literal``'s *options*).
     """
     value = _held(value)
-    if _keeps_keys(value, target):
+    if _keeps_keys(value, target, options):
         return True
     if (
         isinstance(value, ast.Call)
@@ -4108,13 +4138,16 @@ def _carries(value: ast.expr, target: Callable[[ast.expr], bool]) -> bool:
 
 
 def _with_copies(
-    tree: ast.AST, target: Callable[[ast.expr], bool]
+    tree: ast.AST,
+    target: Callable[[ast.expr], bool],
+    options: frozenset[str] = frozenset(),
 ) -> Callable[[ast.expr], bool]:
     """*target* widened to the locals bound to a copy of its items.
 
     ``rows = tuple(dict.fromkeys(parameters))`` or ``efforts = (effort,) if
     isinstance(effort, str) else tuple(effort)``: a check of each item of
-    the local is a check of each item of the target.
+    the local is a check of each item of the target. *options* are the texts
+    the choice's ``Literal`` lists (:func:`_carries`).
     """
     copies: set[str] = set()
     for node in ast.walk(tree):
@@ -4129,7 +4162,7 @@ def _with_copies(
         branches = (
             [value.body, value.orelse] if isinstance(value, ast.IfExp) else [value]
         )
-        if all(_carries(branch, target) for branch in branches):
+        if all(_carries(branch, target, options) for branch in branches):
             copies.add(bound.id)
 
     def matches(node: ast.expr) -> bool:
@@ -4174,7 +4207,9 @@ def _checks_of(
     module_name = getattr(function, "__module__", "") or ""
     namespace = _namespace(function, tree, module_name)
     spread = _spread_dicts(tree)
-    target = _with_copies(tree, _field_of_self(name) if field else _the_name(name))
+    target = _with_copies(
+        tree, _field_of_self(name) if field else _the_name(name), options
+    )
     items = _item_names(tree, target) if collection else set()
 
     def is_raw(node: ast.expr) -> bool:
@@ -4217,7 +4252,7 @@ def _checks_of(
         record = _record_constructor(callee)
         for parameter, handed in _arguments(node, callee, spread).items():
             value = _held(handed)
-            keys_kept = _keeps_keys(value, target)
+            keys_kept = _keeps_keys(value, target, options)
             if not (is_raw(value) or keys_kept):
                 continue
             if record is not None:
@@ -4374,7 +4409,11 @@ def unchecked_choices() -> Iterator[Choice]:
     runs whenever there is a choice to check, and a path that skips it only
     for an option the ``Literal`` lists (``if method == "vdi2081": return``)
     lets no misspelling past; a test of the text (``if mode == "fast"``)
-    does (:func:`_taken_safely`). This is rule A45.
+    does (:func:`_taken_safely`). The filter of a comprehension is such a
+    test of each item: ``{side: v for side, v in limits.items() if side in
+    SIDES}`` hands on only the keys it keeps, and a check in the element of
+    ``[... for side in sides if side != "both"]`` runs only for the items it
+    keeps. This is rule A45.
     """
     inputs = _input_records()
     for home, qualname, obj in _targets():

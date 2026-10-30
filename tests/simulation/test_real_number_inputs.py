@@ -224,7 +224,7 @@ def _engine_cases() -> Iterator[Case]:
         yield (
             f"FDTD2D(edge_impedance={spelling})",
             lambda value=value: FDTD2D(
-                343.0, 0.01, shape=(_NY, _NX), edge_impedance={"left": value}
+                c=343.0, dx=0.01, shape=(_NY, _NX), edge_impedance={"left": value}
             ),
             "impedance for side 'left' must be a real number",
         )
@@ -284,7 +284,7 @@ def _record_cases() -> Iterator[Case]:
         ),
         (
             "add_plane_wave",
-            lambda **kw: FDTD2D(343.0, 0.01, shape=(_NY, _NX)).add_plane_wave(
+            lambda **kw: FDTD2D(c=343.0, dx=0.01, shape=(_NY, _NX)).add_plane_wave(
                 "right", **kw
             ),
             {"center_m": 0.05, "half_width_m": 0.02},
@@ -394,7 +394,7 @@ def _contour(**changes: object) -> ContourPhasors:
 
 def _probe(frequencies: object = (1000.0,)) -> ContourProbe:
     return ContourProbe(
-        FDTD2D(343.0, 0.01, shape=(_NY, _NX)),
+        FDTD2D(c=343.0, dx=0.01, shape=(_NY, _NX)),
         3,
         10,
         3,
@@ -420,7 +420,9 @@ def _contour_cases() -> Iterator[Case]:
         )
         yield (
             f"add_contour_probe(frequencies={spelling})",
-            lambda value=value: FDTD2D(343.0, 0.01, shape=(_NY, _NX)).add_contour_probe(
+            lambda value=value: FDTD2D(
+                c=343.0, dx=0.01, shape=(_NY, _NX)
+            ).add_contour_probe(
                 3,
                 10,
                 3,

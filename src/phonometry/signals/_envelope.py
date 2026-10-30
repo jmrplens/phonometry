@@ -35,8 +35,8 @@ narrowband.
 The **envelope spectrum** (:func:`envelope_spectrum`) transforms the
 detected envelope itself: Section 13.3 of the book runs a band-pass
 filter and a square-law envelope detector into a DC remover before
-correlating (Figure 13.11), because the spectral content of the envelope
-- not of the signal - is where amplitude modulations show as discrete
+correlating (Figure 13.11), because the spectral content of the envelope,
+not of the signal, is where amplitude modulations show as discrete
 lines. The optional ``band`` argument reproduces the figure's band-pass
 front end (the classical bearing-envelope chain: isolate the resonance
 band, then envelope it). An AM tone with modulation frequency :math:`f_\mathrm{m}`

@@ -319,13 +319,13 @@ def _condition(
     Pivots on the inputs in ``order``, output last. Returns, indexed by the
     *original* input index:
 
-    * ``partial`` - partial coherence :math:`\gamma^2_{iy \cdot (i-1)!}`
+    * ``partial``: partial coherence :math:`\gamma^2_{iy \cdot (i-1)!}`
       (Eq. 7.87, total :math:`G_{yy}` denominator so the values sum to the
       multiple coherence, Eq. 7.116);
-    * ``coherent`` - partial coherent output spectrum :math:`G_{v_i}`
+    * ``coherent``: partial coherent output spectrum :math:`G_{v_i}`
       (Eq. 7.86);
 
-    and, shared, ``noise`` - the residual output autospectrum
+    and, shared, ``noise``: the residual output autospectrum
     :math:`G_{yy \cdot q!}` after all inputs are removed (Eq. 7.121).
     """
     q = len(order)

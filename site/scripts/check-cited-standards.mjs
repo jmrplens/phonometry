@@ -23,18 +23,44 @@
  * defined in full, with its designation or report number. No browser, no
  * server.
  *
- * Usage: node scripts/check-cited-standards.mjs [dist directory]
+ * Usage: node scripts/check-cited-standards.mjs [dist directory] [content directory]
  */
 
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { basePath, siteUrl } from '../src/data/site.mjs';
+import { catalogues } from '../src/generated/catalogues.mjs';
+import { isCataloguePage } from '../src/lib/catalogue-sources.mjs';
 import { readDeclaredDesignations } from './shared/search-index.mjs';
 
 const siteRoot = fileURLToPath(new URL('..', import.meta.url));
 const distDir = path.resolve(process.argv[2] ?? path.join(siteRoot, 'dist'));
-const contentDir = path.join(siteRoot, 'src/content/docs');
+// The pages whose frontmatter is read; another directory is for the tests of
+// this check, which write a page of their own.
+const contentDir = path.resolve(process.argv[3] ?? path.join(siteRoot, 'src/content/docs'));
+
+/**
+ * Whether a node is a catalogue's Dataset on its own catalogue page: the one
+ * node of a page whose works are not the page's.
+ *
+ * A catalogue page reads rows off a standard's table without being written
+ * to the standard, which is what `implemented: false` says there, and the
+ * dataset of those rows names the standard as the work they were read from
+ * (src/lib/catalogue-datasets.mjs). Any other Dataset says what its page is
+ * based on and is held to the page's claims like the page's article.
+ *
+ * @param {Record<string, unknown>} node A node of the page's graph.
+ * @param {string} route The page's route, `/reference/catalogues/fluids/`.
+ * @returns {boolean}
+ */
+function isCatalogueDataset(node, route) {
+  if (![node['@type']].flat().includes('Dataset') || !isCataloguePage(route.replace(/^\/|\/$/g, ''))) return false;
+  const prefix = `${siteUrl}${basePath}${route}#dataset-`;
+  const id = String(node['@id'] ?? '');
+  return id.startsWith(prefix) && Object.hasOwn(catalogues, id.slice(prefix.length));
+}
 
 const failures = [];
 const fail = (message) => failures.push(message);
@@ -166,13 +192,11 @@ for (const [route, list] of cited) {
 
   // The works the structured data says the page is about and based on. The
   // first `about` is the software, defined site-wide rather than in the
-  // bibliography. A catalogue's Dataset is not the page: its `isBasedOn`
-  // names the works its rows were read from (src/lib/catalogue-datasets.mjs),
-  // and a catalogue page reads rows off a standard's table without being
-  // written to the standard, which is what `implemented: false` says there.
+  // bibliography. A catalogue's Dataset is not the page, and its `isBasedOn`
+  // names the works its rows were read from (isCatalogueDataset).
   const works = definedWorks.get(route.startsWith('/es/') ? 'es' : 'en');
   for (const node of graphObjects(html, route)) {
-    if ([node['@type']].flat().includes('Dataset')) continue;
+    if (isCatalogueDataset(node, route)) continue;
     for (const key of ['isBasedOn', 'about']) {
       for (const item of [node[key] ?? []].flat()) {
         const id = item?.['@id'];

@@ -2157,13 +2157,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   and `psychoacoustics.PROMINENT_FLUCTUATION_STRENGTH_VACIL_HMS`
   (0.2 vacil_HMS, clause 9.2) hold the numbers the standard prints, each held
   to its printed page by a test and by a conformance row. No function applies
-  them: a result is compared with them, as the sound-quality and loudness
-  guides show, and no result carries the total basis loudness of Formula 26
-  that the audibility criterion reads. The fluctuation criterion keeps the
-  `_HMS` of its unit, because the package also publishes the Osses
-  fluctuation strength in plain vacil; 4.0.0rc1 had it, without that suffix,
-  as `PROMINENT_FLUCTUATION_STRENGTH_VACIL` of
-  `psychoacoustics.quality.fluctuation_strength_ecma`.
+  them: a result is compared with the three prominence criteria, as the
+  sound-quality guide shows, and no result carries the total basis loudness
+  of Formula 26 that the audibility criterion reads, as the loudness guide
+  says. The fluctuation criterion keeps the `_HMS` of its unit, because the
+  package also publishes the Osses fluctuation strength in plain vacil;
+  3.3.0 and 4.0.0rc1 had it, without that suffix, as
+  `PROMINENT_FLUCTUATION_STRENGTH_VACIL` (of
+  `psychoacoustics.fluctuation_strength_ecma` in 3.3.0, of
+  `psychoacoustics.quality.fluctuation_strength_ecma` in 4.0.0rc1).
   `scripts/check_parameter_units.py` reads `_sone_hms`, `_tu_hms`, `_asper`
   and `_vacil_hms` as the units they are.
 

@@ -96,8 +96,13 @@ extends, an explicit ``__init__`` or ``__call__`` included):
   and one keyed by a union of several members beside one keyed by each
   member. A key of ``Literal`` choices is narrowed by the caller as a
   ``Literal`` parameter is, and is left as it stands. An overload head is
-  read with the keys every head of the function offers alone, which is what
-  a caller sees;
+  read with the keys offered alone by the heads that take every call it
+  takes but for that parameter, which is what such a call reaches. A head
+  takes another's calls when each of its parameters takes what the other's
+  does (a ``str`` the text a ``Literal`` lists, a ``float`` an ``int``),
+  each it has besides has a default or a name the other's calls give, and a
+  positional-only one of the other is taken in its place by a positional
+  one;
 * a union of two or more mappings, one of whose key or value is not a
   plain number, text or record (a ``Literal``, a mapping, a sequence,
   ``ArrayLike`` or a union), gives a ``dict`` written in the call no type
@@ -105,7 +110,8 @@ extends, an explicit ``__init__`` or ``__call__`` included):
   when that type holds one mapping, and otherwise on its own, a ``Literal``
   key as a ``str`` and nested mappings of two key types as ``object``, so a
   call that runs is refused. Each of those mappings is offered alone in an
-  overload head, the implementation keeping the union, and the heads that
+  overload head, read alike however it is spelt there (an alias, or what
+  it stands for), the implementation keeping the union, and the heads that
   offer them take the same other arguments, so that a call one of them
   takes reaches a head for every mapping; heads that pair each mapping with
   a value of another parameter on purpose, the run refusing it beside the
@@ -147,8 +153,9 @@ extends, an explicit ``__init__`` or ``__call__`` included):
 
 Annotations are read through the package's type aliases and the imports
 that bring them in, as ``scripts/check_return_overloads.py`` reads them
-(an alias of an alias, a renamed import, a type parameter's bound), so a
-parameter typed with an alias is held to what the alias stands for. A
+(an alias of an alias, a renamed import, a type parameter's bound, a
+generic alias with the arguments it is given), so a parameter typed with an
+alias is held to what the alias stands for. A
 parameter of a dataclass's generated ``__init__`` is a field, which the
 record's own contract governs, and is not read by the array part.
 
@@ -766,9 +773,13 @@ class Annotations:
         node: ast.expr | None,
         bounds: dict[str, ast.expr] | None = None,
     ) -> list[tuple[str, ast.expr]]:
-        """The members of an annotation, aliases and type parameters expanded."""
+        """The members of an annotation, aliases and type parameters expanded.
+
+        A type parameter given to a generic alias is read as *bounds* gives
+        it there too, whatever module defines the alias.
+        """
         found: list[tuple[str, ast.expr]] = []
-        for where, member in self.package.members(module, node):
+        for where, member in self.package.members(module, node, local=bounds):
             if (
                 bounds
                 and isinstance(member, ast.Name)
@@ -3084,6 +3095,10 @@ def _shape(
         name = dotted if dotted is not None else ast.unparse(member)
         if dotted in _LITERALS:
             for item in _items(member):
+                if isinstance(item, ast.Constant):
+                    # A choice is a value, never a quoted annotation to parse.
+                    found.add(("constant", repr(item.value)))
+                    continue
                 shape = _shape(annotations, where, item, None, depth + 1)
                 found.update(shape if isinstance(shape, frozenset) else {shape})
             continue
@@ -3096,6 +3111,70 @@ def _shape(
 
 #: The shape :func:`_call_shape` gives the parameter it reads apart.
 _ASIDE = "aside"
+
+#: The types a type checker lets an argument of a narrower one stand for:
+#: an ``int`` where a ``float`` or a ``complex`` is asked, a ``float`` where a
+#: ``complex`` is, and a ``bool``, an ``int``, wherever an ``int`` is.
+_PROMOTED: dict[str, frozenset[str]] = {
+    "builtins.bool": frozenset({"builtins.int", "builtins.float", "builtins.complex"}),
+    "builtins.int": frozenset({"builtins.float", "builtins.complex"}),
+    "builtins.float": frozenset({"builtins.complex"}),
+}
+
+#: How many parts a member of a :func:`_shape` has: its name and its items.
+_SHAPE_MEMBER = 2
+
+#: The types that take a choice a ``Literal`` lists, by the type of the choice.
+_CHOICE_TYPES: dict[type, frozenset[str]] = {
+    str: frozenset(
+        {"builtins.str", "typing.LiteralString", "typing_extensions.LiteralString"}
+    ),
+    bytes: frozenset({"builtins.bytes"}),
+    bool: frozenset({"builtins.bool"}) | _PROMOTED["builtins.bool"],
+    int: frozenset({"builtins.int"}) | _PROMOTED["builtins.int"],
+}
+
+
+def _wider(member: object) -> frozenset[str]:
+    """The types besides its own that take every value of one member of a shape.
+
+    A choice a ``Literal`` lists is taken by the type it is a value of
+    (``"a"`` by ``str``), and a number by the types it is promoted to.
+    """
+    if not (isinstance(member, tuple) and len(member) == _SHAPE_MEMBER):
+        return frozenset()
+    name, detail = member
+    if name == "constant" and isinstance(detail, str):
+        try:
+            value = ast.literal_eval(detail)
+        except (ValueError, SyntaxError):
+            return frozenset()
+        return _CHOICE_TYPES.get(type(value), frozenset())
+    if detail == () and isinstance(name, str):
+        return _PROMOTED.get(name, frozenset())
+    return frozenset()
+
+
+def _shape_takes(mine: object, theirs: object) -> bool:
+    """Whether an annotation of shape *mine* takes every value one of shape *theirs* does.
+
+    ``None`` (unannotated), the parameter read apart and anything take every
+    value; otherwise each member of *theirs* is a member of *mine*, or a
+    value of one (a ``Literal`` text of a ``str``) or a number promoted to
+    one (an ``int`` to a ``float``).
+    """
+    if mine is None or mine == _ASIDE:
+        return True
+    if isinstance(mine, frozenset) and any(
+        isinstance(member, tuple) and member[0] in _ANYTHING for member in mine
+    ):
+        return True
+    if isinstance(mine, frozenset) and isinstance(theirs, frozenset):
+        return all(
+            member in mine or any((wider, ()) in mine for wider in _wider(member))
+            for member in theirs
+        )
+    return bool(mine == theirs)
 
 
 @dataclass(frozen=True)
@@ -3113,21 +3192,19 @@ class _Slot:
     optional: bool
 
     def takes(self, other: _Slot) -> bool:
-        """Whether this slot takes every argument a call gives *other*."""
-        if (self.kind, self.name) != (other.kind, other.name):
+        """Whether this slot takes every argument a call gives *other*.
+
+        A call fills it wherever it fills *other*: they are of one kind and
+        name, or *other* is positional-only, whose place a positional
+        parameter of any name takes.
+        """
+        if (self.kind, self.name) != (other.kind, other.name) and not (
+            self.kind == "positional" and other.kind == "positional only"
+        ):
             return False
         if other.optional and not self.optional:
             return False
-        mine, theirs = self.shape, other.shape
-        if mine is None or mine == _ASIDE:
-            return True
-        if isinstance(mine, frozenset) and any(
-            isinstance(member, tuple) and member[0] in _ANYTHING for member in mine
-        ):
-            return True
-        if isinstance(mine, frozenset) and isinstance(theirs, frozenset):
-            return theirs <= mine
-        return bool(mine == theirs)
+        return _shape_takes(self.shape, other.shape)
 
 
 @dataclass(frozen=True)
@@ -3142,14 +3219,41 @@ class _CallShape:
     def takes(self, other: _CallShape) -> bool:
         """Whether a definition of this shape takes every call *other*'s takes.
 
-        Each parameter takes what the other's does, a member of its union
-        for each member of the other's; one the other lacks may be left out.
+        Each parameter takes what the other's does (:meth:`_Slot.takes`);
+        one the other lacks may be left out. A positional parameter of the
+        other past this shape's own is taken by its ``*args``, and, when a
+        call may name it, by its ``**kwargs``. A positional parameter of
+        this shape past the other's is left out by the other's calls, or
+        given by name by a keyword of theirs, and takes what their
+        ``*args`` hold.
         """
-        if len(self.positional) != len(other.positional) or not all(
+        shared = min(len(self.positional), len(other.positional))
+        if not all(
             mine.takes(theirs)
-            for mine, theirs in zip(self.positional, other.positional, strict=True)
+            for mine, theirs in zip(
+                self.positional[:shared], other.positional[:shared], strict=True
+            )
         ):
             return False
+        for theirs in other.positional[shared:]:
+            spills = [self.star, self.double_star] if theirs.name else [self.star]
+            if any(
+                spill is None or not _shape_takes(spill.shape, theirs.shape)
+                for spill in spills
+            ):
+                return False
+        mine = {slot.name: slot for slot in self.keywords}
+        for slot in self.positional[shared:]:
+            if other.star is not None and not _shape_takes(
+                slot.shape, other.star.shape
+            ):
+                return False
+            if slot.kind == "positional":
+                mine.setdefault(
+                    slot.name, _Slot("keyword", slot.name, slot.shape, slot.optional)
+                )
+            elif not slot.optional:
+                return False
         for mine_star, theirs_star in (
             (self.star, other.star),
             (self.double_star, other.double_star),
@@ -3158,11 +3262,16 @@ class _CallShape:
                 mine_star is None or not mine_star.takes(theirs_star)
             ):
                 return False
-        mine = {slot.name: slot for slot in self.keywords}
-        theirs = {slot.name: slot for slot in other.keywords}
+        theirs_named = {slot.name: slot for slot in other.keywords}
         return all(
-            name in mine and mine[name].takes(slot) for name, slot in theirs.items()
-        ) and all(slot.optional for name, slot in mine.items() if name not in theirs)
+            mine[name].takes(slot)
+            if name in mine
+            else self.double_star is not None
+            and _shape_takes(self.double_star.shape, slot.shape)
+            for name, slot in theirs_named.items()
+        ) and all(
+            slot.optional for name, slot in mine.items() if name not in theirs_named
+        )
 
 
 def _call_shape(
@@ -3682,26 +3791,41 @@ def context_unions(
     return list(dict.fromkeys(found))
 
 
+def _mapping_arms(
+    annotations: Annotations,
+    module: str,
+    node: ast.expr | None,
+    bounds: dict[str, ast.expr],
+) -> list[tuple[str, object]]:
+    """The mappings at the top of an annotation, each as written and as its :func:`_shape`.
+
+    The shape reads two mappings alike however they are spelt: an alias
+    beside what it stands for, a name imported under another, the choices
+    of a ``Literal`` in another order.
+    """
+    return [
+        (ast.unparse(member), _shape(annotations, where, member))
+        for where, member in annotations.members(module, node, bounds)
+        if annotations.resolve(where, member) in _MAPPINGS
+    ]
+
+
 def _sole_mapping(
     annotations: Annotations,
     module: str,
     node: ast.expr | None,
     bounds: dict[str, ast.expr],
-) -> str | None:
-    """The one mapping at the top of an annotation, as written, if it holds one."""
-    arms = [
-        member
-        for where, member in annotations.members(module, node, bounds)
-        if annotations.resolve(where, member) in _MAPPINGS
-    ]
-    return ast.unparse(arms[0]) if len(arms) == 1 else None
+) -> object | None:
+    """The :func:`_shape` of the one mapping at the top of an annotation, if it holds one."""
+    arms = _mapping_arms(annotations, module, node, bounds)
+    return arms[0][1] if len(arms) == 1 else None
 
 
 def _unsplit(
     annotations: Annotations,
     function: overloads.Function,
     name: str,
-    arms: tuple[str, ...],
+    arms: Sequence[tuple[str, object]],
     bounds: dict[str, ast.expr],
 ) -> tuple[str, str] | None:
     """Why the heads of a function do not offer each mapping of a union alone, with the part.
@@ -3717,15 +3841,18 @@ def _unsplit(
     whose calls no head offers some mapping to is refused, even when another
     group of heads offers them all. Heads that pair each mapping with a value
     of another parameter on purpose are listed in :data:`PAIRED_MAPPINGS`.
+    *arms* are the union's mappings as written and as their :func:`_shape`,
+    which a head's mapping is matched by.
     """
     module = function.module
-    heads: list[tuple[str, _CallShape]] = []
+    heads: list[tuple[object, _CallShape]] = []
     for head, written, scope in _definitions(function, name, bounds, heads_only=True):
         sole = _sole_mapping(annotations, module, written, scope)
         if sole is not None:
             heads.append((sole, _call_shape(annotations, module, head, name, bounds)))
-    shown = " | ".join(arms)
-    missing = [arm for arm in arms if arm not in {sole for sole, _ in heads}]
+    shown = " | ".join(text for text, _ in arms)
+    offered = [sole for sole, _ in heads]
+    missing = [text for text, shape in arms if shape not in offered]
     if missing:
         return "context", (
             f"takes {shown} with no overload head that takes "
@@ -3735,8 +3862,8 @@ def _unsplit(
         )
     if all(
         all(
-            any(sole == arm and call.takes(first) for sole, call in heads)
-            for arm in arms
+            any(sole == shape and call.takes(first) for sole, call in heads)
+            for _, shape in arms
         )
         for _, first in heads
     ):
@@ -3791,7 +3918,11 @@ def _context_findings(
                     )
                 else:
                     unsplit = _unsplit(
-                        annotations, function, parameter.arg, arms, bounds
+                        annotations,
+                        function,
+                        parameter.arg,
+                        _mapping_arms(annotations, module, parameter.annotation, own),
+                        bounds,
                     )
                     if unsplit is None:
                         continue

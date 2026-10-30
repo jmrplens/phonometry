@@ -153,6 +153,51 @@ def test_an_alias_of_the_column_is_read_through(tmp_path: pathlib.Path) -> None:
     assert sorted(refused) == ["plot_drawn", "plot_pair"]
 
 
+def test_a_generic_alias_is_read_with_the_arguments_it_is_given(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``Many[Axes]`` is a column of axes, whatever module defines ``Many``.
+
+    A generic alias (``type Many[P] = tuple[P, ...]``, or an assignment generic
+    in a module-level ``TypeVar``) stands for its value with each parameter
+    read as the argument a use gives it, in the module that writes the use,
+    so an axes class imported there under another name is still an axes.
+    """
+    refused = _refused(
+        tmp_path,
+        types="""
+        from typing import TypeVar
+
+        T = TypeVar("T")
+
+        type Many[P] = tuple[P, ...]
+        Listed = list[T]
+        type Either[S, A] = S | NDArray[A]
+        """,
+        plots="""
+        from matplotlib.axes import Axes as Panel
+
+        from .types import Either, Listed, Many
+
+        def plot_many(ax: Axes | None = None) -> Axes | Many[Axes]:
+            raise NotImplementedError
+
+        def plot_listed(ax: Axes | None = None) -> Axes | Listed[Axes]:
+            raise NotImplementedError
+
+        def plot_renamed(ax: Panel | None = None) -> Panel | Many[Panel]:
+            raise NotImplementedError
+
+        def level(x: object) -> Either[float, np.float64]:
+            raise NotImplementedError
+
+        def plot_counts(ax: Axes | None = None) -> Axes | Many[int]:
+            raise NotImplementedError
+        """,
+    )
+    assert sorted(refused) == ["level", "plot_listed", "plot_many", "plot_renamed"]
+
+
 def test_an_axes_subclass_is_read_and_an_axes_image_is_not(
     tmp_path: pathlib.Path,
 ) -> None:

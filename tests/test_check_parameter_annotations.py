@@ -1463,6 +1463,204 @@ def test_a_head_is_offered_keys_only_by_heads_that_take_its_other_arguments(
     ]
 
 
+def test_a_head_that_takes_every_call_of_another_offers_it_its_keys(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A head reached by each call of another is that call's context, however it is written.
+
+    A ``str`` takes the text a ``Literal`` lists, a ``float`` an ``int``, an
+    ``int`` a ``bool``; a positional parameter the other head lacks is one
+    its calls leave out when it has a default, or give by the name a
+    keyword of theirs gives; a positional-only one is taken in its place by
+    a positional one of any name; and ``*args`` take what the other's
+    positional parameters past it hold. In each function below the head
+    keyed by ``int`` takes every call of the head keyed by ``float``, so a
+    ``dict[int, float]`` written in one of those calls reaches it. A head
+    keyed by ``int`` narrower than the other (``narrower``, ``unnamed``)
+    does not, and the other is refused.
+    """
+    refused = _refused(
+        tmp_path,
+        part="key",
+        api="""
+        from typing import Literal
+
+        Kind = Literal["a", "b"]
+
+        __all__ = [
+            "texted", "promoted", "flagged", "trailing", "named", "placed",
+            "starred", "narrower", "unnamed",
+        ]
+
+        @overload
+        def texted(kind: str, by_band: Mapping[int, float]) -> float: ...
+        @overload
+        def texted(kind: Literal["a"], by_band: Mapping[float, float]) -> float: ...
+        def texted(
+            kind: str, by_band: Mapping[int, float] | Mapping[float, float]
+        ) -> float:
+            return 0.0
+
+        @overload
+        def promoted(order: float, by_band: Mapping[int, float]) -> float: ...
+        @overload
+        def promoted(order: int, by_band: Mapping[float, float]) -> float: ...
+        def promoted(
+            order: float, by_band: Mapping[int, float] | Mapping[float, float]
+        ) -> float:
+            return 0.0
+
+        @overload
+        def flagged(times: int, by_band: Mapping[int, float]) -> float: ...
+        @overload
+        def flagged(
+            times: Literal[True], by_band: Mapping[float, float]
+        ) -> float: ...
+        def flagged(
+            times: int, by_band: Mapping[int, float] | Mapping[float, float]
+        ) -> float:
+            return 0.0
+
+        @overload
+        def trailing(
+            by_band: Mapping[int, float], kind: Kind, scale: float = 1.0
+        ) -> float: ...
+        @overload
+        def trailing(by_band: Mapping[float, float], kind: Kind) -> float: ...
+        def trailing(
+            by_band: Mapping[int, float] | Mapping[float, float],
+            kind: Kind,
+            scale: float = 1.0,
+        ) -> float:
+            return 0.0
+
+        @overload
+        def named(
+            by_band: Mapping[int, float], kind: Kind, scale: float
+        ) -> float: ...
+        @overload
+        def named(
+            by_band: Mapping[float, float], kind: Kind, *, scale: float
+        ) -> float: ...
+        def named(
+            by_band: Mapping[int, float] | Mapping[float, float],
+            kind: Kind,
+            scale: float = 1.0,
+        ) -> float:
+            return 0.0
+
+        @overload
+        def placed(by_band: Mapping[int, float], kind: Kind) -> float: ...
+        @overload
+        def placed(by_band: Mapping[float, float], other: Kind, /) -> float: ...
+        def placed(
+            by_band: Mapping[int, float] | Mapping[float, float], kind: Kind
+        ) -> float:
+            return 0.0
+
+        @overload
+        def starred(by_band: Mapping[int, float], *kinds: str) -> float: ...
+        @overload
+        def starred(
+            by_band: Mapping[float, float], kind: Literal["a"], /
+        ) -> float: ...
+        def starred(
+            by_band: Mapping[int, float] | Mapping[float, float], *kinds: str
+        ) -> float:
+            return 0.0
+
+        @overload
+        def narrower(kind: Literal["a"], by_band: Mapping[int, float]) -> float: ...
+        @overload
+        def narrower(kind: str, by_band: Mapping[float, float]) -> float: ...
+        def narrower(
+            kind: str, by_band: Mapping[int, float] | Mapping[float, float]
+        ) -> float:
+            return 0.0
+
+        @overload
+        def unnamed(by_band: Mapping[int, float], kind: Kind, /) -> float: ...
+        @overload
+        def unnamed(by_band: Mapping[float, float], kind: Kind) -> float: ...
+        def unnamed(
+            by_band: Mapping[int, float] | Mapping[float, float], kind: Kind
+        ) -> float:
+            return 0.0
+        """,
+    )
+    assert sorted(refused) == ["narrower(by_band)", "unnamed(by_band)"]
+
+
+def test_heads_that_offer_each_mapping_as_its_implementation_spells_it_split_it(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A head's mapping is the implementation's when they read alike, however spelt.
+
+    ``spelt`` writes one inner mapping in full, its choices in another order,
+    where the implementation names it by an alias, and ``renamed`` imports
+    that alias under a name of its own: each mapping of the union is still
+    the one mapping of a head. In ``widened`` a head with a trailing default
+    takes every call of the head that lacks it, so the heads that offer each
+    mapping take the calls of every head.
+    """
+    refused = _refused(
+        tmp_path,
+        columns="""
+        from typing import Literal
+
+        Columns = Mapping[Literal["rms", "vdv"], float]
+        """,
+        api="""
+        from typing import Literal
+
+        from .columns import Columns
+        from .columns import Columns as Readings
+
+        Kind = Literal["a", "b"]
+
+        __all__ = ["spelt", "renamed", "widened"]
+
+        @overload
+        def spelt(
+            kind: Kind, measured: Mapping[int, Mapping[Literal["vdv", "rms"], float]]
+        ) -> float: ...
+        @overload
+        def spelt(kind: Kind, measured: Mapping[None, Columns]) -> float: ...
+        def spelt(
+            kind: Kind, measured: Mapping[int, Columns] | Mapping[None, Columns]
+        ) -> float:
+            return 0.0
+
+        @overload
+        def renamed(kind: Kind, measured: Mapping[int, Readings]) -> float: ...
+        @overload
+        def renamed(kind: Kind, measured: Mapping[None, Readings]) -> float: ...
+        def renamed(
+            kind: Kind, measured: Mapping[int, Columns] | Mapping[None, Columns]
+        ) -> float:
+            return 0.0
+
+        @overload
+        def widened(kind: Kind, measured: Mapping[int, Columns]) -> float: ...
+        @overload
+        def widened(
+            kind: Kind, measured: Mapping[None, Columns], scale: float = 1.0
+        ) -> float: ...
+        @overload
+        def widened(
+            kind: Kind, measured: Mapping[int, Columns], scale: float = 1.0
+        ) -> float: ...
+        def widened(
+            kind: Kind,
+            measured: Mapping[int, Columns] | Mapping[None, Columns],
+            scale: float = 1.0,
+        ) -> float:
+            return 0.0
+        """,
+    )
+    assert refused == {}
+
+
 def test_a_union_split_across_heads_of_different_calls_offers_no_context(
     tmp_path: pathlib.Path,
 ) -> None:
@@ -2155,6 +2353,81 @@ def test_a_choice_beside_an_alternative_that_takes_any_text_is_refused(
         "sets Literal['auto'] beside Sequence[str]"
     )
     assert len(refused["headed(state)"]) == 1
+
+
+def test_a_generic_alias_is_read_with_the_arguments_it_is_given(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``Values[str]`` is a sequence of texts, whatever module defines ``Values``.
+
+    A generic alias, ``type Values[T] = Sequence[T]`` or an assignment generic
+    in a module-level ``TypeVar``, stands for its value with each parameter
+    read as the argument a use gives it, in the module that writes the use:
+    an alias of that module, or a type parameter of the function read as its
+    bound, reaches an alias defined in another one. A bare one holds ``Any``
+    for each parameter, as a type checker reads it. Each such alternative
+    takes any text beside a choice, and an alias given numbers does not.
+    """
+    refused = _refused(
+        tmp_path,
+        part="choice",
+        **{
+            "_internal.shapes": """
+            from typing import TypeVar
+
+            T = TypeVar("T")
+
+            type Many[V] = Sequence[V]
+            Listed = Sequence[T]
+            type Keyed[K, V] = Mapping[K, V] | Sequence[V]
+            """,
+            "api": """
+            from typing import Literal
+
+            from ._internal.shapes import Keyed, Listed, Many
+
+            Termination = Literal["rigid", "free"]
+            Spelt = Termination | ArrayLike
+
+            type Values[T] = Sequence[T]
+
+            __all__ = [
+                "generic", "imported", "old_style", "caller_alias", "through",
+                "ordered", "bare", "numbers", "swapped",
+            ]
+
+            def generic(value: Literal["auto"] | Values[str]) -> None: ...
+
+            def imported(value: Literal["auto"] | Many[str]) -> None: ...
+
+            def old_style(value: Literal["auto"] | Listed[str]) -> None: ...
+
+            def caller_alias(terms: Many[Spelt]) -> None: ...
+
+            def through[T: str](value: Literal["auto"] | Many[T]) -> None: ...
+
+            def ordered(value: Literal["auto"] | Keyed[float, str]) -> None: ...
+
+            def bare(value: Literal["auto"] | Values) -> None: ...
+
+            def numbers(value: Literal["auto"] | Values[float]) -> None: ...
+
+            def swapped(value: Literal["auto"] | Keyed[str, float]) -> None: ...
+            """,
+        },
+    )
+    assert sorted(refused) == [
+        "bare(value)",
+        "caller_alias(terms)",
+        "generic(value)",
+        "imported(value)",
+        "old_style(value)",
+        "ordered(value)",
+        "through(value)",
+    ]
+    assert refused["generic(value)"][0].startswith(
+        "sets Literal['auto'] beside Sequence[str]"
+    )
 
 
 def test_the_array_like_of_numbers_is_read_as_one(tmp_path: pathlib.Path) -> None:

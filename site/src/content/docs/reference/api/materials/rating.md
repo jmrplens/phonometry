@@ -31,8 +31,8 @@ above 1.00 are set to 1.00. The five rating bands are 250, 500, 1000, 2000 and
 **Weighted absorption (Clause 4.2).** The fixed reference curve of Figure 1
 (`{250: 0.80, 500: 1.00, 1000: 1.00, 2000: 1.00, 4000: 0.90}`) is shifted
 downwards, towards the measured `alpha_p`, in steps of 0,05 until the sum
-of the unfavourable deviations -- taken only where the measured value lies
-below the shifted curve, with magnitude `curve - measured` -- is not more
+of the unfavourable deviations (taken only where the measured value lies
+below the shifted curve, with magnitude `curve - measured`) is not more
 than 0,10. `alpha_w` is the shifted-curve value read at 500 Hz, i.e.
 `1.00 - shift`.
 

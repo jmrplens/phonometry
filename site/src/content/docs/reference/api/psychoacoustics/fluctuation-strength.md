@@ -17,10 +17,10 @@ amplitude-modulated at 4 Hz. There is no ISO standard for fluctuation strength.
 
 Two routes are provided:
 
-* [`fluctuation_strength_am_noise`](/phonometry/reference/api/psychoacoustics/fluctuation-strength/#fluctuation_strength_am_noise) -- the closed form (Fastl & Zwicker
+* [`fluctuation_strength_am_noise`](/phonometry/reference/api/psychoacoustics/fluctuation-strength/#fluctuation_strength_am_noise): the closed form (Fastl & Zwicker
   Eq. 10.2) for a sinusoidally amplitude-modulated broadband noise, exact in the
   modulation factor, level and modulation frequency.
-* [`fluctuation_strength`](/phonometry/reference/api/psychoacoustics/fluctuation-strength/#fluctuation_strength) -- the signal model of Osses, García &
+* [`fluctuation_strength`](/phonometry/reference/api/psychoacoustics/fluctuation-strength/#fluctuation_strength): the signal model of Osses, García &
   Kohlrausch (2016), which estimates `F` from an arbitrary calibrated pressure
   signal. It sums specific contributions over 47 auditory filters,
   $F = C_\mathrm{FS} \sum_i (m^*_i)^{p_m} |k_{i-2} k_i|^{p_k} g(z_i)^{p_g}$
@@ -80,12 +80,12 @@ No ISO standard defines fluctuation strength and no numeric oracle
 anchors this signal model. It is implemented clean-room from the Osses
 2016 paper and reproduces the literature reference values (Osses 2016
 Table 1) and the 1-vacil calibration point within a documented
-tolerance -- the reference method itself only agrees qualitatively for
+tolerance; the reference method itself only agrees qualitatively for
 FM tones. For an exact figure on AM broadband noise use
 [`fluctuation_strength_am_noise`](/phonometry/reference/api/psychoacoustics/fluctuation-strength/#fluctuation_strength_am_noise).
 
 **Calibration.** The constant `C_FS` (Eq. 1) is not the paper's literal
-0.2490 -- that was fitted to the paper's own 4096-tap FIR front-end. Here
+0.2490, which was fitted to the paper's own 4096-tap FIR front-end. Here
 it is derived once from the 1-vacil reference stimulus (1 kHz, 60 dB,
 $m = 1$, 4 Hz) run through this implementation's front-end, so
 the reference returns **exactly 1.00 vacil by construction**
@@ -102,7 +102,7 @@ Fastl & Zwicker Fig. 10.5 trend (low-mid plateau, roll-off at 8 kHz);
 the AM broadband-noise 60 dB sweep shows the correct band-pass shape
 (maximum at 4 Hz, monotone tails) but overshoots the absolute
 pass-band level by up to ~3x (the excitation front-end spreads the
-modulated energy across bands). FM-tone accuracy is *not* pursued --
+modulated energy across bands). FM-tone accuracy is *not* pursued:
 the reference method itself overestimates it above 4 Hz.
 :::
 

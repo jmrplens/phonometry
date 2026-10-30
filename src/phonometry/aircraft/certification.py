@@ -6,15 +6,15 @@ is built from a half-second spectral time history (24 one-third-octave bands,
 50 Hz-10 kHz) in five steps, implementing **ICAO Annex 16 Vol. I, Appendix 2**
 (the analytic formulation):
 
-* :func:`perceived_noisiness` -- per-band perceived noisiness ``n`` (noys),
+* :func:`perceived_noisiness`: per-band perceived noisiness ``n`` (noys),
   the analytic piecewise noy law with the Table A2-3 constants.
-* :func:`perceived_noise_level` --
+* :func:`perceived_noise_level`:
   :math:`\mathrm{PNL} = 40 + (10/\log_{10} 2) \cdot \log_{10} N` from the total
   noisiness :math:`N = 0.85 \cdot n_{\mathrm{max}} + 0.15 \cdot \sum n`.
-* :func:`tone_correction` -- the tone-correction factor ``C`` (the slope /
+* :func:`tone_correction`: the tone-correction factor ``C`` (the slope /
   "encircling" method) that penalises spectral irregularities.
-* :func:`effective_perceived_noise_level` -- the end-to-end metric: per-record
-  :math:`\mathrm{PNLT} = \mathrm{PNL} + C`, the maximum ``PNLTM``, the
+* :func:`effective_perceived_noise_level`: the end-to-end metric, from the
+  per-record :math:`\mathrm{PNLT} = \mathrm{PNL} + C`, the maximum ``PNLTM``, the
   10 dB-down integration limits
   and the duration correction, giving
   :math:`\mathrm{EPNL} = \mathrm{PNLTM} + D`.
@@ -693,7 +693,7 @@ class EPNLResult(OwnsArrays):
         ``tone_correction`` is held to the same length for the opposite
         reason: nothing downstream measures it at all. The figure never draws
         it and the fiche never prints it, so a tone-correction history of
-        another length than the records is silent in both directions -- one
+        another length than the records is silent in both directions: one
         short or one long, the figure is drawn and the PDF written without
         complaint, and the field travels on to whoever reads it record by
         record with its corrections against the wrong records.

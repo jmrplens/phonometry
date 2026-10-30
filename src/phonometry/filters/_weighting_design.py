@@ -10,8 +10,8 @@ with :math:`f / f_s` and is what the module this one serves used to hide by
 running the sections at an oversampled rate.
 
 This module removes the warp instead of outrunning it. It searches for an
-analog prototype :math:`\tilde{H}` -- same number of zeros at the origin, same
-count of stable quadratic and linear factors -- whose response *at the warped
+analog prototype :math:`\tilde{H}` (same number of zeros at the origin, same
+count of stable quadratic and linear factors) whose response *at the warped
 frequencies* is the printed prototype's response at the true ones:
 
 .. math::
@@ -39,16 +39,16 @@ output:
   fit did is legible. The corners the standard places low, where the warp is
   negligible, come back where they were printed: at 48 kHz the A weighting's
   double real pole at 20.598997 Hz comes back as a pair at
-  :math:`-20.5981 \pm 0.1871\,\mathrm{j}` Hz -- the same corner to five
-  digits, with a whisker of damping -- beside 107.657 for the printed
+  :math:`-20.5981 \pm 0.1871\,\mathrm{j}` Hz (the same corner to five
+  digits, with a whisker of damping), beside 107.657 for the printed
   107.65265 and 737.269 for 737.86223. The corners near the top of the band
   move much further, and moving them is the whole point: that displacement is
   the warp being cancelled.
 * **The residual is in decibels.** The response enters only as
   :math:`\log |\tilde{H}|^2`, which turns a product of factors into a sum and
   makes the Jacobian one term per factor, bounded and analytic. A relative
-  (voltage-ratio) residual cannot see an error that is far too *small* -- it
-  saturates at -1 -- and a fit driven by one silently abandons the skirts,
+  (voltage-ratio) residual cannot see an error that is far too *small* (it
+  saturates at -1), and a fit driven by one silently abandons the skirts,
   which is exactly where these curves live.
 * **The design is pinned where the rate can reach.** Both the residual and
   the realised cascade are referred to one anchor frequency, and
@@ -64,20 +64,20 @@ output:
   :data:`_GRID_POINTS`-point grid: no convergence test, no random state, no
   clock. That makes the sequence of operations the same everywhere, which is
   not the same thing as making the answer the same, and for a while this
-  routine did not make the answer the same. The reductions inside the fit --
-  the normal equations, their right-hand side, the cost the accept test
-  compares -- were library calls, and a BLAS reassociates a reduction to suit
+  routine did not make the answer the same. The reductions inside the fit
+  (the normal equations, their right-hand side, the cost the accept test
+  compares) were library calls, and a BLAS reassociates a reduction to suit
   the vector registers it finds at run time. Levenberg-Marquardt in a shallow
   valley amplifies whatever that costs in the last bit: measured on the A
   weighting at 48 kHz, two OpenBLAS kernel sets agreed on every accept
   decision for thirty-nine consecutive steps while the costs they were
   comparing drifted from 3e-13 to 1e-4 apart, and the two runs then landed on
-  different filters -- 5e-5 apart in the leading coefficient, 0.002 dB apart
+  different filters: 5e-5 apart in the leading coefficient, 0.002 dB apart
   in response, and 0.0225 pt apart in a plotted curve. So the reductions are
   done here instead, by :func:`_ordered_sum` and :func:`_solve_dense`, in an
   order this module fixes rather than one a library picks, and the two places
-  the path used to hand a *complex* expression to numpy -- the printed curve
-  the fit aims at, and the one read-back that sets the shipped gain -- are
+  the path used to hand a *complex* expression to numpy (the printed curve
+  the fit aims at, and the one read-back that sets the shipped gain) are
   written out in real arithmetic by :func:`_log_distance2` and
   :func:`_cascade_magnitude`, because complex multiplication and complex
   magnitude are dispatched on what the CPU can do in exactly the same way a
@@ -115,7 +115,7 @@ output:
   the printed curve has not produced a filter at all, and the remaining
   entries of :func:`_spare_placements` are tried before the best is kept. That
   branch is on the achieved residual, so it is still deterministic, and no
-  rate this library is used at comes near it -- the loosest first fit in the
+  rate this library is used at comes near it: the loosest first fit in the
   corpus is 3.2 times inside. See :func:`_lawson_fit` for what
   reproducibility that does and does not buy, and :func:`fit_prototype` for
   why the cheaper rule is also the better one.
@@ -303,7 +303,7 @@ def _corner_bounds(
     The ceiling is whichever is lower: that physical limit, or the largest
     corner whose whole cascade of roots can still be multiplied together in
     double precision. The second one is what makes "the design is finite" a
-    proof rather than a measurement -- it holds at any sampling rate and for
+    proof rather than a measurement: it holds at any sampling rate and for
     any number of sections, without anyone having swept for it. The factor of
     two in it is not slack: a quadratic whose roots have split apart carries
     them both in :math:`b_1`, so the largest *root* a corner limit of
@@ -350,9 +350,9 @@ def _anchor_hz(
     it leaves the positive axis at the Nyquist frequency and comes back as the
     alias, or as :math:`\Omega \simeq 0` whenever ``fs`` divides ``reference_frequency_hz``.
     Anchoring on that answer is what used to hand the search an objective with
-    no solution -- at ``fs = 1000`` the B weighting's residual could not fall
+    no solution (at ``fs = 1000`` the B weighting's residual could not fall
     below 424 dB, because the fit was being asked to read 0 dB at dc, where
-    that curve has three zeros -- and the parameters ran to their clamps
+    that curve has three zeros), and the parameters ran to their clamps
     trying. So below that the anchor moves to the geometric mean of the fit
     band: the midpoint of the interval on the log-frequency axis the standard
     states the curve over, always representable, always inside the band, and as
@@ -420,8 +420,8 @@ def _log_mag2(
     Every logarithm of the evaluation is taken in one :func:`_scalar_log`
     call: the squared magnitude of each factor of each group, and
     :math:`\Omega^2` for the zeros at the origin, side by side in one matrix.
-    The call used to be per group -- three or four per evaluation, eight
-    hundred a design -- and the fixed cost of entering the pinned ``log``
+    The call used to be per group (three or four per evaluation, eight
+    hundred a design), and the fixed cost of entering the pinned ``log``
     was most of what it spent. Batching moves no bit: the function is
     elementwise, each group's column span is summed over the same columns in
     the same order, and the group totals join ``total`` in the order the
@@ -551,9 +551,9 @@ def _scalar_log(values: np.ndarray) -> np.ndarray:
     the last machine-dependent step on the path was gone.
 
     For ``log`` the loop then went too, because ``log`` is the one
-    transcendental *inside* the iteration -- once per grid point per factor
+    transcendental *inside* the iteration (once per grid point per factor
     per Levenberg-Marquardt step, three quarters of a million calls per
-    design -- and the interpreter overhead of taking it elementwise had
+    design), and the interpreter overhead of taking it elementwise had
     multiplied the cost of a design by about four.
     :func:`~phonometry.filters._pinned_log.pinned_log` spells the C library's
     own routine in numpy operations IEEE 754 pins exactly, and returns
@@ -796,8 +796,8 @@ def _lawson_fit(
 ) -> np.ndarray:
     """Drive the least-squares fit toward minimax, and keep the best round.
 
-    Lawson's algorithm is not monotone -- a round can overshoot and come back
-    worse -- so the round with the smallest peak residual is what is returned,
+    Lawson's algorithm is not monotone (a round can overshoot and come back
+    worse), so the round with the smallest peak residual is what is returned,
     which makes the routine's output a minimum over a fixed set of candidates
     rather than whatever the last round happened to leave behind.
 
@@ -807,7 +807,7 @@ def _lawson_fit(
     to different kernels give bit-identical coefficients. The last of those is
     the one that is not free, and it is not the libraries' doing: they are
     entitled to reassociate a reduction and to fuse a multiply into an add,
-    and for one release this module let them, in three places -- the BLAS
+    and for one release this module let them, in three places: the BLAS
     reductions replaced by :func:`_ordered_sum` and :func:`_solve_dense`, and
     the two complex expressions replaced by :func:`_log_distance2` and
     :func:`_cascade_magnitude`.
@@ -940,7 +940,7 @@ def _spare_placements(
 ) -> tuple[tuple[float, float], ...]:
     r"""``(first, ratio)`` starts for the spare factors, in the order tried.
 
-    A prototype with fewer finite zeros than poles -- every curve here -- is
+    A prototype with fewer finite zeros than poles (every curve here) is
     padded up to the requested degree, and where those spare factors start
     decides what the search has to undo. ``(2 * fs, 1)`` is the plain bilinear
     design's own answer: each spare is a root at ``2 * fs`` whose bilinear
@@ -960,15 +960,15 @@ def _spare_placements(
     by up to :math:`160\,\mathrm{dB}` per decade. At audio rates that tilt is
     small against the curve's own and the search absorbs it in the first
     steps; three decades lower the start is hundreds of decibels out, and the
-    search answers a start like that by flattening -- pushing every corner
+    search answers a start like that by flattening: pushing every corner
     outside the grid, returning a constant, and stopping there, because a
     constant has no gradient left to leave by. And stacking makes the recovery
     harder than it needs to be: identical factors have identical Jacobian
     columns and move together forever, so the AU prototype's four spare pairs
     are one free factor, not four.
 
-    The fallbacks vary both knobs and nothing else -- the corner the first
-    spare sits on, and the ratio between successive spares -- because those are
+    The fallbacks vary both knobs and nothing else (the corner the first
+    spare sits on, and the ratio between successive spares), because those are
     the two things stacking at ``2 * fs`` gets wrong. Anchoring them on the
     grid's top edge rather than on the rate is what makes the second column
     worth trying: the top of the grid is where the warp does all its work, so
@@ -1228,8 +1228,8 @@ def design_sos(
     that can carry *reference_frequency_hz* the anchor is *reference_frequency_hz*, that level is exactly 0 dB,
     and the response is exactly 0 dB where the standard prints a zero
     tolerance. Below ``2 * reference_frequency_hz`` no sampled signal carries that frequency, so
-    the anchor moves into the band and the printed level there -- which is not
-    0 dB -- is what the cascade is pinned to. The absolute gain is the
+    the anchor moves into the band and the printed level there, which is not
+    0 dB, is what the cascade is pinned to. The absolute gain is the
     standard's either way: a 200 Hz tone reads the same number of decibels at
     ``fs = 903`` as it does at 48 kHz.
 

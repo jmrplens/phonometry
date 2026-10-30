@@ -149,7 +149,7 @@ The exact band-edge point $\Omega = G^{1/2}$ is treated as
 pass-band.
 The 1995 edition's Table 1 prints a dedicated minimum (+2.3/+2.0/
 +1.6 dB) *at* that single frequency, which this convention relaxes to
-the pass-band minimum; the discrepancy has measure zero -- any
+the pass-band minimum; the discrepancy has measure zero: any
 continuous response violating the edge row is caught at
 $\text{edge} + \epsilon$
 by the interpolated stop-band mask. The 2014 edition defines only

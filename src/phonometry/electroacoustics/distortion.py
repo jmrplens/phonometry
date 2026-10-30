@@ -18,7 +18,7 @@ captured signal:
 
 All metrics have an exact analytic oracle: a signal synthesised with known
 harmonic amplitudes reproduces the closed-form ratio. The functions assume
-the tones fall on (or very near) FFT bins -- use coherent sampling (an
+the tones fall on (or very near) FFT bins: use coherent sampling (an
 integer number of periods) or supply a low-leakage window, as audio
 analysers do.
 
@@ -302,7 +302,7 @@ def harmonic_distortion(
 ) -> float:
     r"""nth-order harmonic distortion :math:`d_n` (IEC 60268-3 14.12.5).
 
-    :math:`d_n = a_n / \sqrt{\sum_{k \ge 1} a_k^2}` -- the nth harmonic
+    :math:`d_n = a_n / \sqrt{\sum_{k \ge 1} a_k^2}`, the nth harmonic
     amplitude relative to the total RMS.
 
     :param x: Captured signal (1-D). Accepts a
@@ -452,8 +452,8 @@ def thd_plus_noise(
     per 5.2.8) and the residual RMS is compared with the total RMS:
     :math:`\mathrm{THD{+}N} = V_\text{residual} / V_\text{total}` (a
     ratio, or :math:`20 \log_{10}` of it in dB). Both voltages are measured
-    through the AES17 measurement bandwidth -- a 20 Hz high-pass plus the
-    standard low-pass at ``bandwidth`` (5.2.5 / 6.3.1) -- so DC offsets
+    through the AES17 measurement bandwidth (a 20 Hz high-pass plus the
+    standard low-pass at ``bandwidth``, 5.2.5 / 6.3.1), so DC offsets
     and out-of-band noise do not inflate the result.
 
     :param x: Captured signal (1-D). Accepts a
@@ -631,7 +631,7 @@ def weighted_thd(
     The fundamental is notched out and the residual is frequency-weighted
     before its RMS is compared with the total signal RMS, so the perceptual
     emphasis of the distortion products is accounted for. The default
-    weighting is the network required by the clause -- IEC 60268-1:1985
+    weighting is the network required by the clause: IEC 60268-1:1985
     Appendix A, the ITU-R BS.468-4 curve (peaking +12.2 dB near 6.3 kHz) with
     its standard 0 dB at 1 kHz normalization; ``'A'`` and ``'C'`` (IEC
     61672-1) are kept as explicitly labelled alternatives, not 14.12.11

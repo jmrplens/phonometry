@@ -157,7 +157,7 @@ class ZwickerLoudness(OwnsArrays):
         constructor decimates the 2000 Hz weighted series to 500 Hz and builds
         both from the same ``num_out`` (clause 6.3). Everything that reads them
         reads them as a pair, and only as a pair, so a disagreement is never
-        arithmetic that comes out wrong -- it is a plot that stops or a panel
+        arithmetic that comes out wrong: it is a plot that stops or a panel
         that lies.
 
         Lengths that disagree stop the plot, but badly. Both directions end in
@@ -183,8 +183,8 @@ class ZwickerLoudness(OwnsArrays):
         The stationary result is not affected: it leaves both fields ``None``,
         and an absent optional quantity is passed over rather than counted.
 
-        ``specific`` has no sibling to disagree with -- it is one pattern on
-        the fixed 0.1-Bark grid -- so what is pinned is its rank alone, and
+        ``specific`` has no sibling to disagree with (it is one pattern on
+        the fixed 0.1-Bark grid), so what is pinned is its rank alone, and
         every constructor here already hands in one axis. An extra one is not
         silent, but it is nameless twice over. The Bark axis is built from
         ``specific.size``, which counts elements and not rows, so a pattern of
@@ -192,16 +192,16 @@ class ZwickerLoudness(OwnsArrays):
         ``x and y must have same first dimension, but have shapes (480,) and
         (240, 2)`` from inside ``Axes.plot``: two shapes, neither field, and
         nothing to say the object was already malformed when it was built. A
-        (240, 1) gets one step further -- the line is drawn, and the fill under
+        (240, 1) gets one step further: the line is drawn, and the fill under
         it stops on ``'y1' is not 1-dimensional``, which names a parameter of
         ``fill_between`` rather than anything the caller passed. Both take
         ``.report()`` down with them and write no PDF at all.
 
         The scalar loudness quantities must be finite. No constructor can
-        emit a non-finite one -- both entry points refuse non-finite input,
+        emit a non-finite one (both entry points refuse non-finite input,
         the total/maximum loudness is summed from a finite pattern,
         ``_sone_to_phon`` maps any finite loudness to a finite level, and the
-        percentiles come off a finite trace -- and the fiche prints them
+        percentiles come off a finite trace), and the fiche prints them
         raw: a NaN ``loudness`` dies inside ``display_round`` in a bare
         ``ValueError: cannot convert float NaN to integer`` that names
         neither the field nor the type, while a NaN ``loudness_level``,
@@ -312,7 +312,7 @@ def _filterbank_sos() -> np.ndarray:
 
     Table A.1 lists the reference section; Table A.2 the per-band/per-stage
     deviations and stage gains. The working coefficients are
-    (reference - deviation), with the gains folded into the numerator --
+    (reference - deviation), with the gains folded into the numerator,
     algebraically identical to the reference code's scaling of the
     recursion input.
     Returns shape (28, 3, 6) with rows ``[b0, b1, b2, 1, a1, a2]``.
@@ -940,7 +940,7 @@ def loudness_zwicker(
         filterbank transient; the default 0.0 preserves the whole-signal
         behaviour for synthetic steady signals. Validated always (negative,
         non-finite or whole-signal skips raise :class:`ValueError`) but
-        applied only by the stationary method -- clause 6 has no TimeSkip.
+        applied only by the stationary method: clause 6 has no TimeSkip.
     :return: :class:`ZwickerLoudness`.  Stationary: as in
         :func:`loudness_zwicker_from_spectrum`.  Time-varying:
         ``loudness`` is the maximum loudness Nmax, ``loudness_level`` its

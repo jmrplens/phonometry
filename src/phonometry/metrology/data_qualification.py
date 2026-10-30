@@ -9,7 +9,7 @@ quantitative pillars of that chapter.
 
 **Stationarity** (B&P Sec. 10.3.1.1). The record is divided into ``N`` equal
 intervals, a mean square value (or another moment) is computed for each, and
-the sequence is tested for underlying trends with a *nonparametric* test --
+the sequence is tested for underlying trends with a *nonparametric* test:
 no assumption about the sampling distribution of the values is needed. The
 book's test is the **reverse arrangement test** (Sec. 4.5.2): count the pairs
 :math:`i < j` with :math:`x_i > x_j`. For an ordered sequence of independent
@@ -38,7 +38,7 @@ the geometric moments
 (Eqs. (5.214)-(5.216)) determine every crossing and peak statistic:
 
 * the expected number of zero crossings per unit time (both slopes),
-  :math:`N_0 = (1/\pi)(\sigma_v / \sigma_x)` (Eq. (5.195)) -- equivalently
+  :math:`N_0 = (1/\pi)(\sigma_v / \sigma_x)` (Eq. (5.195)), equivalently
   :math:`2\sqrt{m_2 / m_0}` with the plain frequency moments
   :math:`m_k = \int f^k G \, df`; twice the record's *apparent frequency*;
 * the expected number of crossings of level ``a``,
@@ -191,7 +191,7 @@ def _reverse_arrangement_bounds(n: int, alpha: float) -> tuple[int, int]:
     computed from the normal approximation with the B&P moments and a
     continuity correction. This reproduces every :math:`\alpha = 0.05`
     entry of B&P Table A.6 (``N`` = 10 to 100), e.g. ``(64, 125)`` for
-    :math:`N = 20` -- the book's Examples 4.4 and 10.3.
+    :math:`N = 20`, the book's Examples 4.4 and 10.3.
 
     The normal approximation is kept *deliberately*, for all ``N``: the
     book's table itself follows it. No percentage-point convention on the
@@ -199,7 +199,7 @@ def _reverse_arrangement_bounds(n: int, alpha: float) -> tuple[int, int]:
     (checked digit by digit: e.g. at :math:`N = 40`, :math:`a = 0.975` the
     exact tail jumps from :math:`P(A > 304) = 0.9771` to
     :math:`P(A > 305) = 0.9758`, neither equal to 0.975, and the
-    nearest-tail point would be 306, yet the table prints 305 -- exactly
+    nearest-tail point would be 306, yet the table prints 305: exactly
     where the continuity-corrected normal point 305.39 rounds to;
     :math:`N = 100`, :math:`a = 0.975` behaves the same way).
     Exact-distribution bounds would therefore *disagree* with the
@@ -290,7 +290,7 @@ def _runs_bounds(n1: int, n2: int, alpha: float) -> tuple[int, int]:
     is the largest count with ``P(r <= lower) <= alpha/2`` and ``upper``
     the largest count with ``P(r > upper) <= alpha/2``, so the two-sided
     size never exceeds ``alpha``. For :math:`n_1 = n_2 = 10` at
-    :math:`\alpha = 0.05` this is ``(6, 15)`` -- the classical tabulated
+    :math:`\alpha = 0.05` this is ``(6, 15)``, the classical tabulated
     critical values (reject at 6 or fewer, or 16 or more, runs).
     """
     cdf = np.cumsum(_runs_pmf(n1, n2))
@@ -336,7 +336,7 @@ def _null_trend_mean(
     Restates what the producers store: ``n(n-1)/4`` over the whole sequence
     for reverse arrangements (B&P Eq. (4.54)), and the Wald & Wolfowitz
     ``1 + 2 n_1 n_2 / n`` for runs, counted on the values that differ from
-    *median* -- the classification median, which for a
+    *median*: the classification median, which for a
     :class:`TrendTestResult` is the one it kept and for a
     :class:`StationarityTestResult` is the median of the segment sequence
     :func:`trend_test` took itself. Re-filtering an already filtered
@@ -379,8 +379,8 @@ def _check_null_mean(
     ``mean`` is not an average of the values beside it: it is the mean of
     the *statistic* under the no-trend hypothesis, fixed by the method and
     by how many observations were counted. That makes it a closed function
-    of fields the result already carries, and the one the reader divides by
-    -- ``(statistic - mean) / standard_deviation`` is the standardized departure the whole
+    of fields the result already carries, and the one the reader divides by:
+    ``(statistic - mean) / standard_deviation`` is the standardized departure the whole
     test is read through, and it is computed by the caller, not by any
     renderer here, so a mean that belongs to another sequence is never
     caught downstream. A billionth is allowed so a caller who recomputed
@@ -541,8 +541,8 @@ class TrendTestResult(OwnsArrays):
         :attr:`mean` is pinned for the same reason one step further in: it
         is the null mean of the *statistic*, ``n(n-1)/4`` for reverse
         arrangements, not an average of :attr:`values`, so it is fixed by
-        the count and the method and nothing else. Nothing here reads it --
-        the plot states the count and the bounds -- which is exactly why it
+        the count and the method and nothing else. Nothing here reads it
+        (the plot states the count and the bounds), which is exactly why it
         goes unchecked otherwise: the caller is the reader, standardizing
         the departure as ``(statistic - mean) / standard_deviation``, and a mean belonging
         to another sequence turns an ordinary count into a flat rejection
@@ -681,7 +681,7 @@ def trend_test(
     r"""Nonparametric trend test on a sequence of observations or estimates.
 
     Tests the hypothesis that the sequence holds independent observations
-    of one random variable -- no underlying trend -- without assuming any
+    of one random variable (no underlying trend) without assuming any
     sampling distribution (B&P Sec. 4.5.2). Two classical statistics:
 
     * ``"reverse_arrangements"`` (default): the count ``A`` of pairs
@@ -796,7 +796,7 @@ class StationarityTestResult(OwnsArrays):
         :attr:`mean` follows from the same sequence: it is the null mean of
         the count, not an average of :attr:`segment_values`, and
         :func:`stationarity_test` takes it from the trend test it ran on
-        exactly this array -- for ``"runs"``, on the values that differ from
+        exactly this array: for ``"runs"``, on the values that differ from
         the array's own median, which is the median
         :func:`~phonometry._plot.metrology.plot_stationarity_test` draws.
         So it is recomputable from what is stored, and worth recomputing:
@@ -871,7 +871,7 @@ def stationarity_test(
     ``n_segments`` equal intervals, assumed long enough for the values to
     be independent; (2) compute a mean square value (or another moment)
     for each interval; (3) test the sequence for underlying trends with a
-    nonparametric test -- no knowledge of the record's bandwidth or
+    nonparametric test, with no knowledge of the record's bandwidth or
     sampling distribution required. Nonstationarities that show in the
     mean square value (the usual case: gain drifts, level ramps, machinery
     running up) are detected regardless of the record's spectrum; the
@@ -948,7 +948,7 @@ def _spectral_moments(
 ) -> tuple[float, float, float]:
     r"""Frequency moments ``m0, m2, m4`` of the one-sided Welch autospectrum.
 
-    :math:`m_k = \int f^k G(f) \, df` -- the B&P Eqs. (5.214)-(5.216)
+    :math:`m_k = \int f^k G(f) \, df`, the B&P Eqs. (5.214)-(5.216)
     variances are :math:`\sigma_x^2 = m_0`,
     :math:`\sigma_v^2 = (2\pi)^2 m_2` and
     :math:`\sigma_a^2 = (2\pi)^4 m_4`, so every ``2 pi`` cancels in the
@@ -1067,8 +1067,8 @@ def level_crossing_rate(
     :math:`N_a = N_0 \mathrm{e}^{-a^2/(2\sigma_x^2)}` (Eq. (5.196)), with the
     spectral moments taken from the record's own Welch autospectrum. For
     low-pass white noise of bandwidth ``B`` the expectation is
-    :math:`N_0 = 2B/\sqrt{3}` -- an apparent frequency of ``0.58 B`` (B&P
-    Example 5.12) -- and for bandwidth-limited white noise centred on
+    :math:`N_0 = 2B/\sqrt{3}`, an apparent frequency of ``0.58 B`` (B&P
+    Example 5.12), and for bandwidth-limited white noise centred on
     ``fc``, :math:`N_0 = 2\sqrt{f_\mathrm{c}^2 + B^2/12}` (Example 5.13).
 
     The record mean is removed first (the formulas hold for zero mean
@@ -1184,8 +1184,8 @@ def _check_measured_peak_rate(
 
     The measured rate is a count over a record length, and both are in
     hand: the count is how many entries :attr:`PeakStatisticsResult.
-    peak_values` holds -- every detected maximum is standardized and kept,
-    none are dropped -- and the length is :attr:`~PeakStatisticsResult.
+    peak_values` holds (every detected maximum is standardized and kept,
+    none are dropped), and the length is :attr:`~PeakStatisticsResult.
     duration_s`. The plot draws the empirical exceedance from that same count
     and floors the axis at ``1/n``, so a rate that disagrees with it puts a
     number in the caller's hands that the figure beside it contradicts,
@@ -1250,7 +1250,7 @@ def _check_rice_peak_rate(
     the division needs it. A non-finite ``M`` is not: an amplitude large
     enough to overflow the spectral moments has :func:`peak_statistics`
     emitting :math:`M = \infty` beside :math:`r = 0` (and, further up,
-    ``NaN`` beside 1), and the identity closes over both -- capped, they
+    ``NaN`` beside 1), and the identity closes over both: capped, they
     are exactly what ``min(1, N_0/2M)`` states. Refusing them would refuse
     the producer's own output over an amplitude, which is not this guard's
     business.
@@ -1289,9 +1289,9 @@ class PeakStatisticsResult(OwnsArrays):
     "Positive peaks" are the record's local maxima, positive or negative
     in value (B&P Sec. 5.5.3). For Gaussian records the expected rate of
     maxima is :math:`M = (1/2\pi)(\sigma_a/\sigma_v) = \sqrt{m_4/m_2}`
-    (Eq. (5.211)), and the ratio :math:`r = N_0/(2M)` -- the
+    (Eq. (5.211)), and the ratio :math:`r = N_0/(2M)`, the
     **irregularity factor**, between 0 and 1 by the Schwartz inequality
-    (Eq. (5.220)) -- fixes the standardized peak-height distribution:
+    (Eq. (5.220)), fixes the standardized peak-height distribution:
     Rayleigh at :math:`r = 1` (every cycle carries one maximum), Gaussian
     as :math:`r \to 0` (Sec. 5.5.4).
 
@@ -1324,20 +1324,20 @@ class PeakStatisticsResult(OwnsArrays):
         exceedance ``1 - rank/n``, and spans its Rice curves from the first
         entry to the last: both readings are statements about the sorted
         order :func:`peak_statistics` writes, not about the array as such.
-        An unsorted array is accepted by every count -- nothing changes
-        length -- and publishes a wrong exceedance under the ordinary title,
+        An unsorted array is accepted by every count (nothing changes
+        length) and publishes a wrong exceedance under the ordinary title,
         so the order is pinned here, where the mistake can be named.
 
         Finiteness is pinned first, and not out of tidiness: the order check
         is a comparison, and every comparison against a ``NaN`` is false, so
-        a ``NaN`` is not merely admitted -- it also hides the descent on
+        a ``NaN`` is not merely admitted: it also hides the descent on
         either side of it, which is the one thing this guard exists to catch.
         Two equal infinities differ by a ``NaN`` and read as sorted for the
         same reason. Either one then reaches the curves' span, a ``linspace``
         between the first entry and the last, and the empirical exceedance is
         published against heights that are not heights.
-        :func:`peak_statistics` cannot emit them -- the record is validated
-        finite and ``sigma`` is positive -- so nothing measurable is refused.
+        :func:`peak_statistics` cannot emit them (the record is validated
+        finite and ``sigma`` is positive), so nothing measurable is refused.
 
         The rates beside the heights are pinned too, each against what the
         result already holds: :attr:`peak_rate` against the peaks it counts
@@ -1379,8 +1379,8 @@ class PeakStatisticsResult(OwnsArrays):
 
         B&P Eq. (5.223): the probability that a maximum chosen at random
         exceeds ``z`` record RMS units. :math:`\mathrm{e}^{-z^2/2}` for narrow
-        bandwidth data -- :math:`\mathrm{e}^{-8} = 0.00033` at :math:`z = 4`, B&P
-        Example 5.14 -- and the Gaussian exceedance in the wide
+        bandwidth data (:math:`\mathrm{e}^{-8} = 0.00033` at :math:`z = 4`, B&P
+        Example 5.14) and the Gaussian exceedance in the wide
         bandwidth limit.
 
         :param z: Standardized peak heights (units of the record RMS).

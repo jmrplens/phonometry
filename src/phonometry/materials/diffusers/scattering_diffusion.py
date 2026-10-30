@@ -103,7 +103,7 @@ class DiffusionResult(OwnsArrays):
         a level this measurement legitimately produces: it is the documented
         reading of a receiver with zero scattered energy, whose energy
         :math:`p_i = 10^{L_i/10}` is 0 and which is simply the neutral element
-        of both sums of Formula (5)/(6) --
+        of both sums of Formula (5)/(6):
         :func:`directional_diffusion_coefficient` accepts it and returns an
         ordinary finite coefficient, refusing only the all-``-inf`` response
         that carries no energy at all. So the guard admits ``-inf`` and refuses

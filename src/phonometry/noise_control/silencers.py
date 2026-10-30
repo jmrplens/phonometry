@@ -2,7 +2,7 @@
 r"""Reactive silencers by the four-pole (transmission-matrix) method.
 
 A reactive silencer controls noise by *reflecting* it back to the source with
-impedance discontinuities -- sudden area changes and side branches -- rather
+impedance discontinuities (sudden area changes and side branches) rather
 than by dissipating it in absorptive material. The one-dimensional plane-wave
 theory represents each acoustic element by a 2x2 **transfer (four-pole)
 matrix** relating the sound pressure ``p`` and volume velocity ``S u`` at its
@@ -537,7 +537,7 @@ def _require_finite_dimension(key: str, value: float) -> None:
     reports it as ``False``. A value that is not a number at all never gets
     that far: ``math.isfinite`` raises a ``TypeError`` from inside the
     standard library that names neither the field nor the key it came from,
-    and the string ``"0.3"`` -- a dimension that only looks like one -- is
+    and the string ``"0.3"``, a dimension that only looks like one, is
     the case a caller most plausibly reaches it with. Both leave here as the
     ``ValueError`` that names the entry.
 
@@ -622,9 +622,9 @@ class ReactiveSilencerResult(OwnsArrays):
         any check that only counted.
 
         :attr:`resonances` is left out of the grid: it counts the notable
-        frequencies of the device -- one tuning frequency for a Helmholtz
+        frequencies of the device (one tuning frequency for a Helmholtz
         resonator, the odd quarter-wave multiples that fall inside the range
-        for a branch tube -- and has nothing to do with how finely the
+        for a branch tube) and has nothing to do with how finely the
         response was sampled.
 
         :attr:`geometry` is pinned to the keys

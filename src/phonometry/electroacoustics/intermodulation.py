@@ -4,7 +4,7 @@ r"""Intermodulation distortion of audio equipment (IEC 60268-3 14.12.7-10).
 Where the harmonic metrics of :mod:`phonometry.electroacoustics.distortion`
 drive the equipment with a single tone, these drive it with two (or with a
 sine against a square wave) and read the products that a non-linearity puts
-*between* the excitation frequencies -- the components a harmonic
+*between* the excitation frequencies: the components a harmonic
 measurement cannot see and the ear finds least forgiving, because they are
 inharmonic with the programme:
 
@@ -130,8 +130,8 @@ class ModulationDistortionResult(OwnsArrays):
     def __post_init__(self) -> None:
         """Reject a sideband spectrum whose two halves do not correspond.
 
-        14.12.7 names the products the pair enumerates -- ``f2 ± f1`` and
-        ``f2 ± 2f1`` -- and the correspondence between them is the whole of
+        14.12.7 names the products the pair enumerates (``f2 ± f1`` and
+        ``f2 ± 2f1``), and the correspondence between them is the whole of
         the measurement: the nth amplitude is the amplitude *of* the nth
         frequency, and ``d2`` and ``d3`` are sums over that same enumeration.
         A pair of unequal length has lost it, and the spectrum then states an
@@ -279,9 +279,9 @@ def difference_frequency_distortion(
     14.12.8).
 
     Two equal-amplitude tones :math:`f_1 < f_2` are applied. Per 14.12.8.1
-    the reference voltage is :math:`U_{2,\mathrm{ref}} = 2 U_{2,f_2}` --
+    the reference voltage is :math:`U_{2,\mathrm{ref}} = 2 U_{2,f_2}`,
     realised here as the sum of both measured tone amplitudes, identical
-    for the standard equal-amplitude tones -- and
+    for the standard equal-amplitude tones, and
 
     .. math::
 
@@ -351,9 +351,9 @@ def total_difference_frequency_distortion(
     :math:`f_2 = 3 f_0 - \delta` (the standard values, kept as defaults,
     are :math:`f_1 = 8` kHz, :math:`f_2 = 11.95` kHz, so
     :math:`f_0 = 4` kHz and :math:`\delta = 50` Hz). Only the two in-band
-    products at :math:`f_0 \mp \delta` enter -- the second-order product
+    products at :math:`f_0 \mp \delta` enter (the second-order product
     at :math:`f_2 - f_1` and the third-order product at
-    :math:`2 f_1 - f_2` -- combined in RMS over the arithmetic sum of the
+    :math:`2 f_1 - f_2`), combined in RMS over the arithmetic sum of the
     two tone output amplitudes (14.12.10.2 g):
 
     .. math::
@@ -440,9 +440,9 @@ def dynamic_intermodulation_distortion(
 ) -> float:
     r"""Dynamic intermodulation distortion DIM (IEC 60268-3 14.12.9).
 
-    From the standard test signal -- a ``f_sine`` = 15 kHz sine plus a
+    From the standard test signal (a ``f_sine`` = 15 kHz sine plus a
     low-pass-filtered ``f_square`` = 3.15 kHz square wave in a 1:4 peak
-    ratio -- the DIM is the RMS of the intermodulation products
+    ratio) the DIM is the RMS of the intermodulation products
     :math:`\lvert k \, f_\mathrm{square} \pm f_\mathrm{sine} \rvert` that
     fall below ``f_sine`` (IEC 60268-3 Table 2), relative to the 15 kHz
     sine amplitude.

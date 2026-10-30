@@ -208,3 +208,163 @@ def test_dash_in_a_json_string_is_refused_unless_it_quotes_a_source(
         encoding="utf-8",
     )
     assert ced.scan(notes) == [4]
+
+
+# The double hyphen: the ASCII spelling of the dash, which Astro's smartypants
+# publishes as the em dash itself. The first defect the reading was written
+# against is the docstring bullet ``* :func:`npd_level` -- the level``, which
+# reached the API reference as an em dash in 92 list items and nearly five hundred
+# other docstring lines.
+
+
+def test_a_double_hyphen_in_page_prose_is_refused() -> None:
+    assert ced.markdown_double_hyphen_hits("The level rises -- and falls.\n") == [1]
+
+
+def test_an_unspaced_double_hyphen_is_refused_too() -> None:
+    """Smartypants converts the run whether or not spaces surround it."""
+    assert ced.markdown_double_hyphen_hits("The level rises--and falls.\n") == [1]
+
+
+def test_a_double_hyphen_in_code_is_data() -> None:
+    text = "Run `make audit --only` here.\n```bash\npython x.py --count\n```\n"
+    assert ced.markdown_double_hyphen_hits(text) == []
+
+
+def test_a_code_span_that_wraps_keeps_its_option() -> None:
+    """A code span the paragraph wraps puts the option at the start of a line."""
+    text = "Run `python scripts/generate_graphs.py --animations\n--audit-only` once.\n"
+    assert ced.markdown_double_hyphen_hits(text) == []
+
+
+def test_a_link_fragment_keeps_the_double_hyphen_of_its_slug() -> None:
+    text = (
+        "See [the bands](#octave-band-frequencies-ansi-s111--iec-61260) and\n"
+        "<https://example.org/a--b>, or https://example.org/c--d.\n"
+        "[ref]: https://example.org/e--f\n"
+    )
+    assert ced.markdown_double_hyphen_hits(text) == []
+
+
+def test_an_html_comment_is_not_shown() -> None:
+    text = "<!-- generated,\ndo not edit -->\nThe level rises.\n"
+    assert ced.markdown_double_hyphen_hits(text) == []
+
+
+def test_a_style_attribute_is_not_prose() -> None:
+    text = '<span style="color: var(--sl-color-accent)">a</span>\n'
+    assert ced.markdown_double_hyphen_hits(text) == []
+
+
+def test_rules_and_an_empty_cell_are_not_dashes() -> None:
+    text = "---\ntitle: A page\n---\n\n| a | b |\n|---|---|\n| x | -- |\n\n---\n"
+    assert ced.markdown_double_hyphen_hits(text) == []
+
+
+def test_a_double_hyphen_beside_a_cell_value_is_prose() -> None:
+    assert ced.markdown_double_hyphen_hits("| a | 2 -- 3 |\n") == [1]
+
+
+def test_a_docstring_bullet_with_a_double_hyphen_is_refused() -> None:
+    """The defect the reading was written against, as the module printed it."""
+    text = (
+        '"""Airport noise.\n'
+        "\n"
+        "* :func:`npd_level` -- the interpolated event level ``L(P, d)``.\n"
+        '"""\n'
+    )
+    assert ced.python_double_hyphen_hits(text) == [3]
+
+
+def test_a_docstring_line_that_opens_or_closes_on_the_dash_is_refused() -> None:
+    text = '"""A list of steps\n-- climb, accelerate --\nand coefficients."""\n'
+    assert ced.python_double_hyphen_hits(text) == [2]
+
+
+def test_a_docstring_keeps_the_double_hyphen_of_its_code() -> None:
+    text = (
+        '"""Write with ``flac --keep-foreign-metadata``, :option:`--count` and\n'
+        "``a\n"
+        "--b``.\n"
+        "\n"
+        "Parameters\n"
+        "----------\n"
+        "x : float\n"
+        "    The level.\n"
+        "\n"
+        "Run it as::\n"
+        "\n"
+        "    make audit -- --only\n"
+        "\n"
+        ".. code-block:: bash\n"
+        "\n"
+        "    python x.py --count -- y\n"
+        "\n"
+        ">>> run('--count')\n"
+        "'--'\n"
+        '"""\n'
+    )
+    assert ced.python_double_hyphen_hits(text) == []
+
+
+def test_a_note_is_prose() -> None:
+    """A directive's body is code only for a code or math directive."""
+    text = '"""Summary.\n\n.. note::\n    The level rises -- and falls.\n"""\n'
+    assert ced.python_double_hyphen_hits(text) == [4]
+
+
+def test_any_other_string_is_read_for_the_spaced_dash_only() -> None:
+    text = (
+        "MESSAGE = 'the level rises -- and falls'\n"
+        "ARGV = ['flac', '--keep-foreign-metadata', '--', 'out.flac']\n"
+        "print(f'--- Generating {clip} ---')\n"
+    )
+    assert ced.python_double_hyphen_hits(text) == [1]
+
+
+def test_a_comment_is_not_published() -> None:
+    text = "# -- names -----------------\nx = 1  # the level -- in dB\n"
+    assert ced.python_double_hyphen_hits(text) == []
+
+
+def test_a_generator_docstring_is_not_read_but_its_strings_are() -> None:
+    """A figure script publishes what it draws, not what it documents."""
+    text = '"""Both paths end here -- the pool too."""\nLABEL = "a -- b"\n'
+    assert ced.python_double_hyphen_hits(text, docstrings=False) == [2]
+
+
+def test_only_the_package_docstrings_are_read(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The API reference is generated from the package, and from nothing else."""
+    package = tmp_path / "src" / "phonometry"
+    package.mkdir(parents=True)
+    monkeypatch.setattr(ced, "_PACKAGE", package)
+    text = '"""Drawn here -- or not."""\n'
+    inside = package / "airport_noise.py"
+    outside = tmp_path / "figure.py"
+    inside.write_text(text, encoding="utf-8")
+    outside.write_text(text, encoding="utf-8")
+    assert ced.scan_double_hyphens(inside) == [1]
+    assert ced.scan_double_hyphens(outside) == []
+
+
+def test_a_data_module_is_read_for_the_spaced_dash(tmp_path: pathlib.Path) -> None:
+    page = tmp_path / "home.ts"
+    page.write_text(
+        "// A comment keeps it -- nobody reads it.\n"
+        "export const NOTE = 'One call -- and the figure is drawn.';\n"
+        "export const STYLE = 'color: var(--sl-color-accent)';\n"
+        "for (let i = 9; i > 0; i--) {}\n",
+        encoding="utf-8",
+    )
+    assert ced.scan_double_hyphens(page) == [2]
+
+
+def test_a_json_string_is_read_for_the_spaced_dash(tmp_path: pathlib.Path) -> None:
+    notes = tmp_path / "catalogue-es.json"
+    notes.write_text(
+        '{\n  "empty": "--",\n  "note": "la tabla -- sin cifra"\n}\n',
+        encoding="utf-8",
+    )
+    assert ced.scan_double_hyphens(notes) == [3]

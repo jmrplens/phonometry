@@ -58,16 +58,16 @@ of mass `m`, viscous damping `c` and stiffness `k`, whose receptance is
 $H(\omega) = 1 / (k - \omega^2 m + j \omega c)$ (consistent with the
 ISO 7626-1
 Table 1 / 3.1.2 definitions). At its resonance $\omega_0 = \sqrt{k/m}$
-the driving-point mobility is purely real and equal to $1/c$ -- the
+the driving-point mobility is purely real and equal to $1/c$, the
 mobility peak
 measures the damping. This module is the FRF backbone for the structure-borne
 source and transmission standards (ISO 9611, ISO 10846, EN 15657, EN 12354-5).
 
 **Measured FRFs (ISO 7626-2:2015).** The single-point measurement side is
 covered by the library's spectral estimators: processing of random-excitation
-records per ISO 7626-2, 8.1.3 -- the H1 estimator
-$H = G(\text{response},\text{force}) / G(\text{force},\text{force})$
--- and the ordinary coherence
+records per ISO 7626-2, 8.1.3 (the H1 estimator
+$H = G(\text{response},\text{force}) / G(\text{force},\text{force})$)
+and the ordinary coherence
 $\gamma^2 = |G_{xy}|^2 / (G_{xx} G_{yy})$
 used for its data-quality checks are
 [`phonometry.electroacoustics.frequency_response.transfer_function`](/phonometry/reference/api/electroacoustics/frequency-response/#transfer_function) (with
@@ -115,7 +115,7 @@ the name used here).
 | :--- | :--- |
 | `value` | The (complex) FRF value(s) of kind *source*. |
 | `frequency` | Frequency `f`, in hertz (scalar or array, broadcast with *value*). |
-| `source` | The FRF kind of *value* -- one of `"receptance"`, `"mobility"`, `"accelerance"`, `"dynamic_stiffness"`, `"impedance"` or `"apparent_mass"`. |
+| `source` | The FRF kind of *value*: one of `"receptance"`, `"mobility"`, `"accelerance"`, `"dynamic_stiffness"`, `"impedance"` or `"apparent_mass"`. |
 | `target` | The FRF kind to convert to (same set). |
 
 **Returns:** The FRF value(s) of kind *target*, as a complex array.

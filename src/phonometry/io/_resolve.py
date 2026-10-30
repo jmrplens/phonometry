@@ -22,7 +22,7 @@ The rules, identical everywhere:
   explicit one that disagrees is refused rather than arbitrated, because
   the rate is a fact of the recording and silently trusting either side
   mis-times every filter downstream. A bare array knows nothing about
-  time, so there the argument stays mandatory -- except where the rate is
+  time, so there the argument stays mandatory, except where the rate is
   only a label for the result's time axis and the computation never reads
   it, which is :func:`resolve_optional_fs` and stays callable without
   one.
@@ -40,8 +40,8 @@ The rules, identical everywhere:
   One rule rather than a per-function taxonomy: it is what keeps every
   surface on this contract talking about the same signal, instead of one
   reading pascals and its neighbour digital units. What that buys
-  depends on what the call returns -- a waveform in pascals, a squared
-  envelope in Pa2, a level in dB SPL re 20 uPa -- but the samples that
+  depends on what the call returns (a waveform in pascals, a squared
+  envelope in Pa2, a level in dB SPL re 20 uPa), but the samples that
   enter the computation are the same either way. Bare arrays are
   untouched: they are taken to be in whatever unit they always were.
 - **Exemptions**, taken with ``calibrate=False``, each said out loud in
@@ -177,7 +177,7 @@ def refuse_foreign_rate(x: SignalInput, fs: float, what: str) -> None:
 
     :func:`resolve_fs` tells the caller to pass one rate or the other,
     which is sound advice where there is an ``fs`` argument to drop. On a
-    pre-designed object -- a filter bank, an EQ cascade -- the rate came
+    pre-designed object (a filter bank, an EQ cascade) the rate came
     from the constructor and the call has no argument to arbitrate, so
     the advice would be impossible to follow.
 
@@ -201,7 +201,7 @@ def resolve_calibration(x: SignalInput, calibration_factor: float | None) -> flo
     """Resolve the digital-to-pascal factor by the documented precedence.
 
     For the functions that carry a calibration knob of their own: an
-    explicit argument always wins -- the caller knows more than the
+    explicit argument always wins: the caller knows more than the
     object (a re-calibration after the file was written, a deliberate
     what-if). Otherwise a calibrated :class:`~phonometry.io.Signal`
     supplies the factor it carries. Otherwise 1.0: digital units
@@ -266,7 +266,7 @@ def resolve_samples(
     one channel, ``(channels, samples)`` for several), so a mono Signal
     yields the same result a mono array does. Both forms go through
     :func:`_typesignal`, which is where an input that is not a signal at
-    all -- ``None``, a string, a ragged list, a ``NaN`` sample -- is
+    all (``None``, a string, a ragged list, a ``NaN`` sample) is
     refused by the name this call gives it; only the factor below tells
     the two apart.
 
@@ -447,8 +447,8 @@ def resolve_pair_fs(
     disagree are refused for the same reason a Signal and an explicit
     argument are: nothing here can say which of them is the truth, and
     picking one silently mis-times the result. Either one may be a bare
-    array -- pairing a read measurement with a synthesized reference is
-    the common case -- and then the Signal supplies the rate.
+    array (pairing a read measurement with a synthesized reference is
+    the common case), and then the Signal supplies the rate.
 
     :param x: The first signal argument.
     :param y: The second signal argument.

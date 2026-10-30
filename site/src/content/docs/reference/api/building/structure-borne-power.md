@@ -25,7 +25,7 @@ $$
 
 with the references $f_0 = 1$ Hz, $m_0 = 1$ kg (printed as 1 kg;
 the quantity it normalises is a mass per unit area, so the reference is
-1 kg/m² -- see `docs/ERRATA.md`), $S_0 = 1$ m²;
+1 kg/m², see `docs/ERRATA.md`), $S_0 = 1$ m²;
 the fixed `-60 dB` term is
 $10 \log_{10}(v_0^2 / P_0)$ for the EN 15657 velocity reference
 $v_0 = 10^{-9}$ m/s and $P_0 = 1$ pW. The spatial mean velocity
@@ -312,7 +312,7 @@ spatial_mean_velocity_level(levels: ArrayLike) -> float
 
 Spatial-average velocity level over the plate (EN 15657, Formula 12).
 
-$L_\mathrm{v} = 10 \log_{10}\left( \frac{1}{N} \sum 10^{L_{\mathrm{v},i}/10} \right)$ --
+$L_\mathrm{v} = 10 \log_{10}\left( \frac{1}{N} \sum 10^{L_{\mathrm{v},i}/10} \right)$,
 the energetic average of the
 per-position velocity levels.
 

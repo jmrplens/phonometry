@@ -11,14 +11,14 @@ Every audio function here treats a file as a measurement record rather than
 as material to be played back, which fixes the defaults: the native sample
 rate is kept (no resampling on load), channels are never mixed down, samples
 are never normalized, and integer PCM is scaled by exactly $2^{B-1}$
-into float64 -- a power of two, so the scaling is exact in binary floating
+into float64: a power of two, so the scaling is exact in binary floating
 point, and a constant that cancels out of every calibrated level because the
 calibrator tone is read through the same path (the derivation lives with the
 WAV reader's source).
 
 [`read`](/phonometry/reference/api/io/io/#read) returns a [`Signal`](/phonometry/reference/api/io/io/#signal): the samples as `(channels, samples)`
 float64 together with the sample rate, the calibration, the channel labels,
-the `bext` broadcast provenance (EBU Tech 3285) and the origin record --
+the `bext` broadcast provenance (EBU Tech 3285) and the origin record:
 one immutable object that any `(x, fs, ...)` function of the library
 accepts today via `numpy.asarray`. The base install reads every linear
 WAV a sound level meter or field recorder writes (PCM 16/24/32-bit, IEEE
@@ -27,8 +27,8 @@ extra (python-soundfile, which bundles the LGPL libsndfile) adds FLAC, AIFF,
 Ogg/Opus and MP3, and lossy sources raise [`LossyCompressionWarning`](/phonometry/reference/api/io/io/#lossycompressionwarning)
 because a level computed from a lossy codec is not metrologically defensible.
 
-[`info`](/phonometry/reference/api/io/io/#info) answers from the headers alone -- format, rate, channels, valid
-bits, duration, `bext`, cue points -- without decoding a single sample, so
+[`info`](/phonometry/reference/api/io/io/#info) answers from the headers alone (format, rate, channels, valid
+bits, duration, `bext`, cue points) without decoding a single sample, so
 it is safe on a 12-hour RF64. [`read_blocks`](/phonometry/reference/api/io/io/#read_blocks) streams what [`read`](/phonometry/reference/api/io/io/#read)
 would return, one [`Signal`](/phonometry/reference/api/io/io/#signal) per block, into the library's stateful
 filters. [`write`](/phonometry/reference/api/io/io/#write) produces WAV/BWF (and FLAC with the extra) with exact
@@ -133,7 +133,7 @@ closed as suspect rather than passing as clean (the
 [`phonometry.io.read`](/phonometry/reference/api/io/io/#read) warns when asked to read one.
 `channel_mask`/`channel_labels`, `bext`, `has_ixml` and
 `cue_points` are WAV-family metadata and are `None`/empty for other
-containers -- except `bext`, which a FLAC can also carry in its
+containers, except `bext`, which a FLAC can also carry in its
 APPLICATION `riff` block (see [`phonometry.io._flac`](/phonometry/reference/api/io/io/)).
 
 ## BandedRow
@@ -1163,9 +1163,9 @@ info(path: str | Path) -> AudioFileInfo
 Describe an audio file without reading its samples.
 
 For the WAV family this is a single pass over the chunk headers on the
-base install, whatever the codec inside -- format, rate, channels,
+base install, whatever the codec inside (format, rate, channels,
 frames and duration, valid bits, lossy flag, EXTENSIBLE channel mask
-and labels, `bext` provenance, `iXML` presence and cue markers --
+and labels, `bext` provenance, `iXML` presence and cue markers),
 with a cost independent of file size. Other containers are described
 through the `[audio]` extra's header reader. `info` never warns
 about lossy content (inspecting a file is not measuring from it);
@@ -1347,9 +1347,9 @@ Read an audio file into a [`Signal`](/phonometry/reference/api/io/io/#signal).
 The samples come back float64, at the file's native rate, in the
 library's `(channels, samples)` order, scaled by $2^{B-1}$ for
 integer sources (exact in binary floating point, and any fixed scaling
-cancels out of calibrated results -- see [`phonometry.io._wav`](/phonometry/reference/api/io/io/)).
+cancels out of calibrated results; see [`phonometry.io._wav`](/phonometry/reference/api/io/io/)).
 Nothing else is done to them: no resampling, no normalisation, no
-channel mixing -- each of which would silently change the level or the
+channel mixing, each of which would silently change the level or the
 timing that a measurement depends on, and each of which is a documented
 default somewhere in the ecosystem (librosa resamples to 22050 Hz and
 mixes to mono; python-acoustics normalised on load).
@@ -1367,7 +1367,7 @@ approximation of the waveform is not a measurement.
 A calibration sidecar beside the file
 ([`phonometry.io._sidecar`](/phonometry/reference/api/io/io/)) is applied automatically: its
 `calibration_factor` fills in when the argument here is `None`
-(the explicit argument always wins -- the caller knows more than a
+(the explicit argument always wins: the caller knows more than a
 file on disk), and its curated `channel_labels` replace labels
 derived from the file's channel mask.
 
@@ -1403,7 +1403,7 @@ Stream an audio file as [`Signal`](/phonometry/reference/api/io/io/#signal) bloc
 
 Yields what [`phonometry.io.read`](/phonometry/reference/api/io/io/#read) would return for the same
 file, cut into consecutive pieces of `block_size` frames (the last
-piece may be shorter), while holding only one block in memory -- the
+piece may be shorter), while holding only one block in memory, the
 way an overnight RF64 flows through `BlockProcessing(stateful=True)`
 filters without ever existing as an array. Each block is a `Signal`
 carrying what the whole-file read would carry: the rate, the
@@ -1506,7 +1506,7 @@ read_sidecar(audio_path: str | Path) -> CalibrationSidecar | None
 
 Read an audio file's calibration sidecar, if one exists.
 
-Returns `None` when there is no sidecar -- the common case, never an
+Returns `None` when there is no sidecar: the common case, never an
 error. A file *at the sidecar's reserved name* that is not a valid
 phonometry calibration record raises instead of being ignored: a
 corrupted or foreign file squatting on `*.phonometry.json` beside a
@@ -1560,7 +1560,7 @@ object with nothing promising it will stay reachable that way.
 Returned by [`phonometry.io.read`](/phonometry/reference/api/io/io/#read); can also be constructed directly
 around an array. The object is a drop-in replacement for the bare array:
 it implements `__array__`, so `np.asarray(signal)` yields the
-samples -- 1-D for one channel, `(channels, samples)` for several --
+samples (1-D for one channel, `(channels, samples)` for several),
 and the object can be passed straight to the `(x, fs, ...)` functions
 of the library. Indexing, `len()` and the `size`/`ndim`/`shape`/
 `dtype` attributes forward to that same view, so the object and the
@@ -1570,7 +1570,7 @@ array it stands for never disagree about geometry.
 is stored as one channel); `calibration_factor` is the multiplier
 converting digital full-scale units to pascals, the same convention as
 `signals.levels` (0 dBFS = RMS 1.0), and stays `None` until a
-calibration is actually known -- the object never invents one.
+calibration is actually known: the object never invents one.
 `channel_labels` names each channel (e.g. loudspeaker positions from
 an EXTENSIBLE channel mask); `provenance` carries the `bext`
 broadcast metadata when the file had it; `source` records the file,
@@ -1771,7 +1771,7 @@ The name is deliberately not `SignalSource`, which
 [`SignalSource`](/phonometry/reference/api/simulation/fdtd/#signalsource) already is (an FDTD
 excitation driven by an arbitrary sample sequence). The two could share a
 spelling now that each is reached through its own package, and the reason
-for the distinction is the better one anyway: this is a passive record --
+for the distinction is the better one anyway: this is a passive record,
 an origin, not a source of sound.
 
 `bit_depth` is the *valid* bits per sample (an EXTENSIBLE container
@@ -1869,10 +1869,10 @@ there; see `_write_flac`).
 What this function will never do, each a documented ecosystem default
 that destroys a measurement: normalise (python-acoustics `to_wav`),
 resample, or mix channels. Samples that exceed full scale on an
-integer subtype are saturated and *reported* -- see
+integer subtype are saturated and *reported* (see
 [`ClippingWarning`](/phonometry/reference/api/io/io/#clippingwarning) and the module docstring for the exact
 quantisation math, the +1.0 edge, and why the scaling choice cancels
-out of calibrated results.
+out of calibrated results).
 
 **Parameters**
 
@@ -1882,7 +1882,7 @@ out of calibrated results.
 | `x` | A [`Signal`](/phonometry/reference/api/io/io/#signal), or an array in the library's channel convention (1-D mono, 2-D `(channels, samples)`). Float data is quantised per `subtype`; `int16`/`int32` arrays are written as a bit-exact pass-through of their codes. |
 | `fs` | Sample rate, Hz. Required for bare arrays; forbidden to disagree with a [`Signal`](/phonometry/reference/api/io/io/#signal)'s own rate. A WAV header holds a whole number of samples per second, so a fractional rate, given or a Signal's own, is refused. |
 | `subtype` | Target sample format (see above); `None` picks `FLOAT` for float data and the matching depth for integer data. |
-| `bext` | The broadcast provenance chunk (EBU Tech 3285; see [`phonometry.io._bext`](/phonometry/reference/api/io/io/)). `None` carries the [`Signal`](/phonometry/reference/api/io/io/#signal)'s own provenance when it has one and writes no chunk otherwise; `"loudness"` additionally measures the five R 128 fields with the library's BS.1770 implementation on the samples being written (one extra pass, which is why it is opt-in); a [`BroadcastMetadata`](/phonometry/reference/api/io/io/#broadcastmetadata) is written as given. Every written chunk's CodingHistory is extended -- never replaced -- with phonometry's `A=,F=,W=,M=,T=` line. |
+| `bext` | The broadcast provenance chunk (EBU Tech 3285; see [`phonometry.io._bext`](/phonometry/reference/api/io/io/)). `None` carries the [`Signal`](/phonometry/reference/api/io/io/#signal)'s own provenance when it has one and writes no chunk otherwise; `"loudness"` additionally measures the five R 128 fields with the library's BS.1770 implementation on the samples being written (one extra pass, which is why it is opt-in); a [`BroadcastMetadata`](/phonometry/reference/api/io/io/#broadcastmetadata) is written as given. Every written chunk's CodingHistory is extended, never replaced, with phonometry's `A=,F=,W=,M=,T=` line. |
 | `dither` | `"tpdf"` adds +/-1 LSB triangular-PDF dither before quantising to `PCM_16` (Lipshitz et al. 1992; see the module docstring); `None` (default) quantises plainly. Refused for any other subtype, where it would only add noise. |
 | `rng` | Randomness for the dither noise: a seeded `numpy.random.Generator` (or an int seed) makes the written bytes reproducible, which is what a test or a pinned pipeline needs. `None` (default) draws fresh entropy on every write, and that default is deliberate: dither exists to decorrelate the quantisation error, and repeating one noise pattern across multiple writes would correlate the files with each other, undoing exactly what the dither is for. Refused without `dither`, the only thing it seeds. |
 | `sidecar` | When true, also write the calibration sidecar ([`phonometry.io._sidecar`](/phonometry/reference/api/io/io/)) beside the file, carrying the [`Signal`](/phonometry/reference/api/io/io/#signal)'s `calibration_factor` and channel labels so [`phonometry.io.read`](/phonometry/reference/api/io/io/#read) recovers the absolute level with no argument at all. Requires a calibrated [`Signal`](/phonometry/reference/api/io/io/#signal): a sidecar without a calibration would be a promise with nothing behind it. |

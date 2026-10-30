@@ -12,21 +12,21 @@ Four complementary numerical solvers for the acoustic field in a
 horizontally-stratified ocean waveguide, complementing the closed-form
 propagation loss of [`phonometry.underwater.propagation.closed_form`](/phonometry/reference/api/underwater/closed-form/):
 
-* [`normal_modes`](/phonometry/reference/api/underwater/numerical/#normal_modes) -- the normal-mode expansion. Solves the depth-separated
+* [`normal_modes`](/phonometry/reference/api/underwater/numerical/#normal_modes): the normal-mode expansion. Solves the depth-separated
   Sturm-Liouville eigenvalue problem by finite differences and assembles the
   propagation loss from the propagating modes.
-* [`ray_trace`](/phonometry/reference/api/underwater/numerical/#ray_trace) -- ray tracing. Integrates the ray-trajectory equations
+* [`ray_trace`](/phonometry/reference/api/underwater/numerical/#ray_trace): ray tracing. Integrates the ray-trajectory equations
   through a sound-speed profile (Runge-Kutta), returning the ray paths and the
   travel time accumulated along each of them, and no amplitude.
-* [`gaussian_beams`](/phonometry/reference/api/underwater/numerical/#gaussian_beams) -- Gaussian beam tracing. Hangs a beam on each of those
+* [`gaussian_beams`](/phonometry/reference/api/underwater/numerical/#gaussian_beams): Gaussian beam tracing. Hangs a beam on each of those
   rays and sums them into a propagation-loss field, which is finite at a caustic
   and decays smoothly into a shadow zone where ray theory has nothing to say.
-* [`eigenrays`](/phonometry/reference/api/underwater/numerical/#eigenrays) -- the arrival structure. Takes a traced fan and a receiver
+* [`eigenrays`](/phonometry/reference/api/underwater/numerical/#eigenrays): the arrival structure. Takes a traced fan and a receiver
   and refines, by bisection on fresh traces, the rays that actually connect the
   source to that receiver, each with its travel time, launch and arrival
   angles, boundary-touch counts and classical complex amplitude: the list the
   sonar equation, a channel impulse response and communications work consume.
-* [`parabolic_equation`](/phonometry/reference/api/underwater/numerical/#parabolic_equation) -- the standard (Tappert) parabolic equation, solved
+* [`parabolic_equation`](/phonometry/reference/api/underwater/numerical/#parabolic_equation): the standard (Tappert) parabolic equation, solved
   with the split-step Fourier algorithm, returning the propagation-loss field.
 
 All four are implemented clean-room from Jensen, Kuperman, Porter & Schmidt,
@@ -343,7 +343,7 @@ The limits are worth knowing before the numbers are believed.
 * **Ray theory's own regime** (Sect. 3.4.2): "the wavelength should be
   substantially smaller than any physical scale in the problem". This is
   the limit that bites hardest and the one a plausible-looking answer
-  hides best -- and one earlier version of this paragraph blamed it for an
+  hides best, and one earlier version of this paragraph blamed it for an
   error that was really the beam width's. At 20 Hz in 100 m of water the
   depth is 1.3 wavelengths and two modes propagate; the quarter-depth cap
   this module used to put on $W_0$ left a beam a third of a
@@ -469,7 +469,7 @@ fluid-fluid model here as they are outside `seabed_reflection` itself.
 bottom with the same
 piecewise-linear `depth(r)` polyline [`ray_trace`](/phonometry/reference/api/underwater/numerical/#ray_trace) takes, and it is
 the first range dependence in this module; the sound-speed profile stays
-range independent, deliberately -- see [`ray_trace`](/phonometry/reference/api/underwater/numerical/#ray_trace)'s scope note for
+range independent, deliberately; see [`ray_trace`](/phonometry/reference/api/underwater/numerical/#ray_trace)'s scope note for
 why full $c(r, z)$ is excluded (no exact oracle exists to hold it
 to). Four things follow from the slope, each stated with its cost:
 
@@ -864,7 +864,7 @@ consequence is drawn honestly rather than papered over: a ray steepened
 past the vertical runs backward in range, which a marcher whose
 independent variable is range cannot carry (the same one-way surgery the
 parabolic equation performs), so such a ray is terminated at that bounce
-and its samples are `NaN` from there on -- see
+and its samples are `NaN` from there on; see
 [`RayTraceResult.bathymetry_ranges`](/phonometry/reference/api/underwater/numerical/#raytraceresult). The polyline continues level
 past its last node exactly as `numpy.interp` clamps the sound-speed
 profile; a bathymetric feature narrower than one range step can hide

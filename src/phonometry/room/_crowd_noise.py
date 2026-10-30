@@ -392,8 +392,8 @@ class CrowdNoiseResult(OwnsArrays):
     def __post_init__(self) -> None:
         """Reject a grid that does not span its axes, or a level that lies.
 
-        :attr:`levels` is a surface over two independent axes -- one row per
-        absorption area, one column per occupancy -- and the plot reads it as
+        :attr:`levels` is a surface over two independent axes (one row per
+        absorption area, one column per occupancy), and the plot reads it as
         such, drawing one curve per row against :attr:`talkers` and labelling
         that curve with the area at the same position in
         :attr:`absorption_areas`. The two counts fare differently there. A
@@ -402,7 +402,7 @@ class CrowdNoiseResult(OwnsArrays):
         slipped column count travels further and comes back as matplotlib's
         ``x and y must have same first dimension``, followed by the two bare
         shapes and naming neither the field that disagrees nor the result it
-        came from. An axis on top of the two is not caught at all -- a grid
+        came from. An axis on top of the two is not caught at all: a grid
         shaped ``(areas, talkers, 1)`` draws exactly the curves a correct one
         would. Checking here names the field in every one of those cases, and
         names it at construction, before any reader sees the grid.
@@ -423,9 +423,9 @@ class CrowdNoiseResult(OwnsArrays):
         ``communication_level`` under a legend entry that spells the -6 dB
         out. A variant built with :func:`dataclasses.replace` that moves one
         of those fields alone therefore prints a line captioned for a talker
-        it was never computed for -- ``distance`` reading 3 m over the 1.2 m
+        it was never computed for (``distance`` reading 3 m over the 1.2 m
         level, or a title announcing 85 dB per talker above curves drawn at
-        70 -- and a ``communication_level`` set to the -9 dB privacy bound of
+        70), and a ``communication_level`` set to the -9 dB privacy bound of
         Equation (17.54) is drawn as though it were the communication limit.
         :meth:`speech_to_noise` subtracts the same ``signal_level`` from the
         grid, and Equation (17.52) is independent of the talker's power only
@@ -438,9 +438,9 @@ class CrowdNoiseResult(OwnsArrays):
         producer does not check the talker's power for finiteness, and one
         that is not finite reaches the plot as a title reading "``L_W`` = nan
         dB per talker" over two reference lines at no height at all. Nothing
-        in this model is legitimately undetermined -- every point of the grid
+        in this model is legitimately undetermined (every point of the grid
         is a closed form of finite inputs, and no quantity here is flagged and
-        rendered as an em dash -- so no field is exempt from that.
+        rendered as an em dash), so no field is exempt from that.
 
         The identities allow a billionth of a decibel, so a caller who
         recomputed them along another floating-point path is not refused over

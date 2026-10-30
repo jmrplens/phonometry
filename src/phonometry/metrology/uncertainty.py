@@ -22,10 +22,10 @@ Input quantities are described by :class:`Quantity`; :func:`rectangular`,
 half-width (clause 4.3).
 
 Scope notes: :func:`monte_carlo` runs a **fixed** number of trials and reports
-the probabilistically symmetric interval only -- the adaptive procedure of
+the probabilistically symmetric interval only: the adaptive procedure of
 Supplement 1 clause 7.9 and the shortest coverage interval of 5.3.4 are not
 implemented; its inputs are sampled independently (the multivariate-Gaussian
-path of 6.4.8 for non-independent quantities is not implemented -- use
+path of 6.4.8 for non-independent quantities is not implemented; use
 :func:`uncertainty_propagation` with ``correlation`` for correlated budgets).
 """
 
@@ -141,8 +141,8 @@ class Quantity(RichDisplay):
         The uncertainty must be finite and non-negative: a bare ``< 0.0``
         would pass NaN, which no propagation recovers from:
         it flows through :func:`uncertainty_propagation` into a NaN contribution
-        the budget plot draws as an invisible bar -- indistinguishable from a
-        zero contribution -- under a legend reading ``u_c = nan``.
+        the budget plot draws as an invisible bar, indistinguishable from a
+        zero contribution, under a legend reading ``u_c = nan``.
 
         :raises TypeError: if ``dof`` or ``uncertainty`` is not a single number, or
             ``distribution`` is not a text.
@@ -261,8 +261,8 @@ class UncertaintyResult(OwnsArrays):
         as the tick labels of the bar positions, which matplotlib refuses in
         either direction with a message about a ``FixedLocator`` and two
         counts, naming neither the field nor the budget. The coefficients are
-        read by nobody at all -- nothing downstream compares them with the
-        contributions -- so a budget carrying a sensitivity that no
+        read by nobody at all (nothing downstream compares them with the
+        contributions), so a budget carrying a sensitivity that no
         contribution was computed from is drawn without complaint, under a
         combined-uncertainty line that spans the whole.
 
@@ -273,7 +273,7 @@ class UncertaintyResult(OwnsArrays):
         it the second axis is never noticed at all. Give the *contributions*
         that shape and the count still agrees, but the extra axis travels into
         ``barh``, which refuses it from inside numpy with a message about a
-        shape mismatch between ``'width'`` and ``'y'`` -- ``'width'`` being
+        shape mismatch between ``'width'`` and ``'y'``, ``'width'`` being
         ``barh``'s own argument, not the input quantity that may well be
         called that.
 
@@ -286,8 +286,8 @@ class UncertaintyResult(OwnsArrays):
         :func:`uncertainty_propagation`, which refuses a model that is not finite
         where clause 5.1 evaluates it, so NaN here is never the library's own
         output; unrefused, a NaN contribution reaches the chart as a bar of
-        width NaN -- drawn nowhere, and so indistinguishable from an input
-        that contributes nothing -- beneath a combined-uncertainty line drawn
+        width NaN (drawn nowhere, and so indistinguishable from an input
+        that contributes nothing) beneath a combined-uncertainty line drawn
         nowhere either and a legend reading "u_c = nan". The effective degrees
         of freedom are the documented exception: NaN is their defined value
         for a correlated budget with finite input dof, which is why
@@ -426,8 +426,8 @@ def _sensitivity(
     r"""Central-difference sensitivities :math:`\partial f/\partial x_i`.
 
     Follows GUM 5.1.3. The step is
-    :math:`\max(u(x_i), \sqrt{\epsilon} \lvert x_i \rvert)` -- GUM 5.1.4
-    NOTE 2 itself suggests :math:`dx_i = u(x_i)` -- with a floating-point
+    :math:`\max(u(x_i), \sqrt{\epsilon} \lvert x_i \rvert)` (GUM 5.1.4
+    NOTE 2 itself suggests :math:`dx_i = u(x_i)`) with a floating-point
     guard of a few ULP of
     :math:`x_i` and an absolute floor for all-zero inputs, so a tiny
     uncertainty on a large value can no longer underflow the perturbation
@@ -552,7 +552,7 @@ def uncertainty_propagation(
         the inputs; ``None`` treats them as uncorrelated. With a non-identity
         matrix and finite input dof the effective degrees of freedom are
         ``NaN`` (undefined; the GUM defines no correlated
-        fallback -- Welch-Satterthwaite holds for independent inputs only)
+        fallback: Welch-Satterthwaite holds for independent inputs only)
         and an :class:`UncertaintyWarning` is issued when finite input dof
         would otherwise have been propagated.
     :return: An :class:`UncertaintyResult` with :math:`u_\mathrm{c}(y)`, the

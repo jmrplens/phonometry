@@ -442,22 +442,22 @@ class AtmosphericAttenuation(OwnsArrays):
         from inside the plotter for a coefficient both shorter and longer than
         its frequencies, naming neither field, nor this result, nor which of
         the two shapes is the frequency axis. An extra axis is not reported at
-        all: a coefficient of shape ``(6, 2)`` -- the shape a caller lands on
-        by stacking the coefficients of two atmospheres -- is drawn silently as
+        all: a coefficient of shape ``(6, 2)``, the shape a caller lands on
+        by stacking the coefficients of two atmospheres, is drawn silently as
         two curves over the one frequency axis, with the single set of stored
         conditions printed twice in the legend, once per curve; a
         ``(6, 2)`` frequency array draws the same two curves just as quietly,
         over limits taken from the whole of it.
 
         A pair of nought-dimensional arrays is left alone: there is no axis
-        there to disagree about. The factory never builds one -- it stores a
-        single frequency as a length-one array -- but a direct construction
+        there to disagree about. The factory never builds one (it stores a
+        single frequency as a length-one array), but a direct construction
         from a scalar evaluation does, and a scalar paired with an array is
         still refused as a coefficient that carries no value per frequency.
 
         :raises ValueError: if ``distance`` is negative or non-finite, or if
             the coefficient and the frequency axis do not have one and the same
-            shape -- a different length either way, a scalar against an array,
+            shape: a different length either way, a scalar against an array,
             or an extra axis on one of the two.
         :raises TypeError: if ``distance`` is not a single number.
         """

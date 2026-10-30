@@ -24,12 +24,12 @@ the NPD, the unweighted reference spectrum at 1 000 ft, in three steps:
    levels is the increment $\Delta L(d_i)$ (Eq. D-4), added to the
    `Lmax` and `LE` NPD levels alike.
 
-* [`AIR1845_ATTENUATION_DB_PER_100M`](/phonometry/reference/api/aeroacoustics/npd-atmosphere/#air1845_attenuation_db_per_100m) -- Table D-1.
-* [`npd_atmosphere_increment`](/phonometry/reference/api/aeroacoustics/npd-atmosphere/#npd_atmosphere_increment) -- the increment at each NPD distance, as an
+* [`AIR1845_ATTENUATION_DB_PER_100M`](/phonometry/reference/api/aeroacoustics/npd-atmosphere/#air1845_attenuation_db_per_100m): Table D-1.
+* [`npd_atmosphere_increment`](/phonometry/reference/api/aeroacoustics/npd-atmosphere/#npd_atmosphere_increment): the increment at each NPD distance, as an
   [`NPDAtmosphereIncrement`](/phonometry/reference/api/aeroacoustics/npd-atmosphere/#npdatmosphereincrement) with `.plot()` (the increment against
   distance) and `.plot_attenuation()` (the attenuation of the two
   atmospheres against frequency).
-* [`revise_npd_curves`](/phonometry/reference/api/aeroacoustics/npd-atmosphere/#revise_npd_curves) -- an
+* [`revise_npd_curves`](/phonometry/reference/api/aeroacoustics/npd-atmosphere/#revise_npd_curves): an
   [`ANPNPDCurves`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpnpdcurves) revised by that
   increment, as a [`RevisedNPDCurves`](/phonometry/reference/api/aeroacoustics/npd-atmosphere/#revisednpdcurves) with `.plot()`; its `revised`
   curves feed [`event_level`](/phonometry/reference/api/aeroacoustics/airport-noise/#event_level) and

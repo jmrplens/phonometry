@@ -11,11 +11,11 @@ engine power settings, per operation mode) and default trajectories.
 This module reads the ANP database tables (the semicolon-delimited CSV exports)
 and exposes, for a given aircraft identifier and operation:
 
-* :class:`ANPNPDCurves` -- the NPD curves (``LAmax``/``SEL`` versus distance for
+* :class:`ANPNPDCurves`: the NPD curves (``LAmax``/``SEL`` versus distance for
   each tabulated power), with a ``.plot()``;
-* :class:`ANPProfile` -- the default fixed-point trajectory as a Doc 29 flight
+* :class:`ANPProfile`: the default fixed-point trajectory as a Doc 29 flight
   path ``(N, 5)`` with the takeoff/landing ground-roll masks, with a ``.plot()``;
-* :class:`ANPAircraft` -- the aircraft metadata plus convenience wiring
+* :class:`ANPAircraft`: the aircraft metadata plus convenience wiring
   (:meth:`ANPAircraft.event_level`, :meth:`ANPAircraft.noise_contour`) that feeds
   the NPD curves and the profile straight into the existing Doc 29 functions.
 
@@ -267,9 +267,9 @@ def _stage_label(stage_length: int | str) -> str:
 def _optional(value: str) -> float | None:
     """One ANP cell as a number, or ``None`` for the blank the table leaves.
 
-    A blank is a quantity the row does not define -- the take-off ground-roll
+    A blank is a quantity the row does not define (the take-off ground-roll
     coefficient of a flap setting no take-off uses, the rate of climb of a step
-    that is not an Accelerate -- and the performance model refuses a zero
+    that is not an Accelerate), and the performance model refuses a zero
     standing in for one, so the distinction survives the read.
     """
     text = value.strip()

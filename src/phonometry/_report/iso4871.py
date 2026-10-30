@@ -21,7 +21,7 @@ declaration format of ISO 4871:1996 Annex B:
   upper-boundary note;
 * a verification verdict table when a verification measurement is supplied
   (clause 6.2: verified when ``L_1 <= L_WAd`` for the single-number form, or
-  ``L_1 <= L_WA + K_WA`` -- the separately rounded declared values -- for the
+  ``L_1 <= L_WA + K_WA`` (the separately rounded declared values) for the
   dual-number form); and
 * a footer identity/disclaimer block.
 

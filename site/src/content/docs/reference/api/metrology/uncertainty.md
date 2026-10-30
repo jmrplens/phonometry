@@ -28,10 +28,10 @@ Input quantities are described by [`Quantity`](/phonometry/reference/api/metrolo
 half-width (clause 4.3).
 
 Scope notes: [`monte_carlo`](/phonometry/reference/api/metrology/uncertainty/#monte_carlo) runs a **fixed** number of trials and reports
-the probabilistically symmetric interval only -- the adaptive procedure of
+the probabilistically symmetric interval only: the adaptive procedure of
 Supplement 1 clause 7.9 and the shortest coverage interval of 5.3.4 are not
 implemented; its inputs are sampled independently (the multivariate-Gaussian
-path of 6.4.8 for non-independent quantities is not implemented -- use
+path of 6.4.8 for non-independent quantities is not implemented; use
 [`uncertainty_propagation`](/phonometry/reference/api/metrology/uncertainty/#uncertainty_propagation) with `correlation` for correlated budgets).
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
@@ -303,7 +303,7 @@ Combined standard uncertainty by the GUM law of propagation (clause 5).
 | :--- | :--- |
 | `model` | The measurement function $f(x_1, \ldots, x_N)$ returning `y`. |
 | `quantities` | The input [`Quantity`](/phonometry/reference/api/metrology/uncertainty/#quantity) objects, in the order the model takes its arguments. |
-| `correlation` | Optional `N x N` correlation matrix $r_{ij}$ between the inputs; `None` treats them as uncorrelated. With a non-identity matrix and finite input dof the effective degrees of freedom are `NaN` (undefined; the GUM defines no correlated fallback -- Welch-Satterthwaite holds for independent inputs only) and an [`UncertaintyWarning`](/phonometry/reference/api/metrology/uncertainty/#uncertaintywarning) is issued when finite input dof would otherwise have been propagated. |
+| `correlation` | Optional `N x N` correlation matrix $r_{ij}$ between the inputs; `None` treats them as uncorrelated. With a non-identity matrix and finite input dof the effective degrees of freedom are `NaN` (undefined; the GUM defines no correlated fallback: Welch-Satterthwaite holds for independent inputs only) and an [`UncertaintyWarning`](/phonometry/reference/api/metrology/uncertainty/#uncertaintywarning) is issued when finite input dof would otherwise have been propagated. |
 
 **Returns:** An [`UncertaintyResult`](/phonometry/reference/api/metrology/uncertainty/#uncertaintyresult) with $u_\mathrm{c}(y)$, the sensitivity coefficients, the contributions and the effective degrees of freedom.
 

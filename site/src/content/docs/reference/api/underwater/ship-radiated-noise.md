@@ -11,11 +11,11 @@ A surface ship measured in deep water is characterised by its **radiated noise
 level** and then by an **equivalent monopole source level** referred to a point
 source below the sea surface:
 
-* [`radiated_noise_level`](/phonometry/reference/api/underwater/ship-radiated-noise/#radiated_noise_level) --
+* [`radiated_noise_level`](/phonometry/reference/api/underwater/ship-radiated-noise/#radiated_noise_level):
   $L_{\mathrm{RN}} = 20 \log_{10}(p_{\mathrm{rms}}/p_0) + 20 \log_{10}(r/r_0)$
   dB re 1 µPa·m (ISO 17208-1), the level of the product of the far-field RMS
   pressure and the source distance.
-* [`monopole_source_level`](/phonometry/reference/api/underwater/ship-radiated-noise/#monopole_source_level) -- converts `LRN` to the source level
+* [`monopole_source_level`](/phonometry/reference/api/underwater/ship-radiated-noise/#monopole_source_level): converts `LRN` to the source level
   $L_\mathrm{s} = L_{\mathrm{RN}} + \Delta L$ with the Lloyd's-mirror surface
   correction $\Delta L$ of ISO 17208-2 Formula 3, for a nominal source
   depth $d_\mathrm{s} = 0.7 D$ (Formula 1).
@@ -111,7 +111,7 @@ radiated_noise_level(rms_pressure_pa: float, distance: float) -> float
 
 Radiated noise level `LRN` (ISO 17208-1), dB re 1 µPa·m.
 
-$L_{\mathrm{RN}} = 20 \log_{10}(p_{\mathrm{rms}}/p_0) + 20 \log_{10}(r/r_0)$ --
+$L_{\mathrm{RN}} = 20 \log_{10}(p_{\mathrm{rms}}/p_0) + 20 \log_{10}(r/r_0)$,
 the level of the product of the far-field RMS sound pressure and the
 source distance, referred to 1 µPa·m.
 

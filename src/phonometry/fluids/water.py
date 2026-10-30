@@ -5,13 +5,13 @@ Four coexisting equations for the sound speed ``c`` as a function of
 temperature, salinity and depth or pressure, selectable through
 ``sound_speed_model``:
 
-* ``"unesco"`` -- the UNESCO / Chen & Millero (1977) algorithm, the
+* ``"unesco"``: the UNESCO / Chen & Millero (1977) algorithm, the
   international standard, in the Wong & Zhu (1995) ITS-90 recalculation.
   Default.
-* ``"del_grosso"`` -- the Del Grosso (1974) equation (Wong & Zhu 1995 form),
+* ``"del_grosso"``: the Del Grosso (1974) equation (Wong & Zhu 1995 form),
   a high-accuracy alternative over a narrower domain.
-* ``"mackenzie"`` -- the Mackenzie (1981) nine-term depth-based equation.
-* ``"medwin"`` -- the Medwin (1975) six-term short formula.
+* ``"mackenzie"``: the Mackenzie (1981) nine-term depth-based equation.
+* ``"medwin"``: the Medwin (1975) six-term short formula.
 
 Unlike air, sea water has four competing fits to one quantity rather than one
 model of a substance, which is why this constructor takes a model and

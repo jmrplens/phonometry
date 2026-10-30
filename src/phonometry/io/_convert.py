@@ -2,7 +2,7 @@
 r"""Converting a measurement file without losing what makes it a measurement.
 
 Generic converters treat audio as audio: they resample when convenient,
-normalise when helpful, and drop every chunk they do not recognise --
+normalise when helpful, and drop every chunk they do not recognise,
 which is precisely the originator, the sample-accurate timecode, the
 coding history and the calibration that separate a measurement record
 from a sound. :func:`convert` is the composition of this module's own
@@ -17,8 +17,8 @@ reader and writers under a contract none of those tools offer:
   with the clipping count accumulated across the whole stream and
   reported once.
 * **The provenance travels whole.** The ``bext`` chunk is carried field
-  for field -- into the WAV family natively, into FLAC via the
-  APPLICATION ``riff`` block of :mod:`._flac` -- with its CodingHistory
+  for field (into the WAV family natively, into FLAC via the
+  APPLICATION ``riff`` block of :mod:`._flac`) with its CodingHistory
   extended (never replaced) by one EBU R98 line naming this conversion.
   A calibration sidecar (:mod:`._sidecar`) beside the source is
   validated and copied beside the destination byte for byte. What is
@@ -26,7 +26,7 @@ reader and writers under a contract none of those tools offer:
   EXTENSIBLE channel-mask labels stay behind (the sidecar's curated
   labels are the supported vehicle for channel naming across formats),
   and a lossy *source's* nature is announced by the read-time warning
-  but cannot be stamped into the output container -- keep the original
+  but cannot be stamped into the output container: keep the original
   file; the conversion is a copy of a reconstruction.
 * **Lossy targets do not exist here.** Writing MP3/Ogg/Opus from a
   metrology library is the decided policy this module enforces at the
@@ -45,7 +45,7 @@ depths map to the smallest of PCM_16/24/32 that holds them, float
 sources keep their float width, and decoded lossy sources become FLOAT
 (the decoder hands floats; there are no original codes to preserve).
 FLAC targets hold integers up to 24 bits only, so sources that do not
-fit (float, 32-bit int) require an explicit ``subtype`` -- the caller,
+fit (float, 32-bit int) require an explicit ``subtype``: the caller,
 not the library, accepts that narrowing.
 """
 
@@ -115,7 +115,7 @@ def _source_traits(
 
     Returns ``(kind, bits, bext, fs, channels, frames)`` where ``kind``
     is ``"int"``, ``"float"`` or ``"decoded"`` (a codec whose decoder
-    hands floats with no original integer codes behind them -- the lossy
+    hands floats with no original integer codes behind them, the lossy
     family) and ``bits`` is the container depth (0 where the notion does
     not apply).
     """
@@ -184,7 +184,7 @@ def _quantised_blocks(
     """Stream source blocks quantised for the target, counting every clip.
 
     The clipping count accumulates across the whole file and is reported
-    once at the end -- a warning per block would drown the terminal and
+    once at the end: a warning per block would drown the terminal and
     say less than one total.
     """
     is_float_target = _SUBTYPE_SPEC[subtype][0] != 0x0001

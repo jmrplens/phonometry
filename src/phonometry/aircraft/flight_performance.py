@@ -2,9 +2,9 @@
 """ECAC Doc 29 flight performance: procedural steps into a flight profile.
 
 A published departure or arrival procedure is not a trajectory. It is a list of
-*procedural steps* -- "climb at take-off thrust to 1500 ft", "accelerate to
-210.6 kt at 984.3 ft/min", "descend on a 3 degree slope from 3000 ft at 180 kt"
--- and the aeroplane's own aerodynamic and engine coefficients. **ECAC Doc 29
+*procedural steps* ("climb at take-off thrust to 1500 ft", "accelerate to
+210.6 kt at 984.3 ft/min", "descend on a 3 degree slope from 3000 ft at 180 kt")
+and the aeroplane's own aerodynamic and engine coefficients. **ECAC Doc 29
 5th ed., Volume 2, Appendix B** is the flight-mechanics model that turns the one
 into the other: a *flight profile*, an ordered list of profile points carrying
 distance along the ground track, height above the aerodrome, true airspeed and
@@ -12,14 +12,14 @@ corrected net thrust per engine. Corrected net thrust is what the NPD tables of
 :mod:`phonometry.aircraft.airport_noise` are indexed on, so this model is what
 stands between a published procedure and a noise contour.
 
-* :class:`Aerodrome` -- the aerodrome and its weather, and the five atmosphere
+* :class:`Aerodrome`: the aerodrome and its weather, and the five atmosphere
   ratios of B3 that every equation below reads.
 * :class:`PerformanceAircraft` with :class:`JetEngineCoefficients`,
-  :class:`PropellerEngineCoefficients` and :class:`AerodynamicCoefficients` --
+  :class:`PropellerEngineCoefficients` and :class:`AerodynamicCoefficients`:
   the ANP coefficient tables the equations take their constants from.
-* :class:`DepartureStep` and :class:`ApproachStep` -- one row each of a
+* :class:`DepartureStep` and :class:`ApproachStep`: one row each of a
   published procedure.
-* :func:`departure_profile` and :func:`approach_profile` -- the model, returning
+* :func:`departure_profile` and :func:`approach_profile`: the model, returning
   a :class:`FlightProfile` of :class:`ProfilePoint`.
 
 Units are the standard's and they are English throughout (B2): feet, knots,
@@ -310,7 +310,7 @@ class Aerodrome(RichDisplay):
         the reference cases, the thrust equations and the rest of this package
         use, and converted on the way in.
     :ivar sea_level_pressure_inhg: Aerodrome pressure reduced to sea level
-        ``Papt`` -- the QNH, not the pressure at the field -- in inHg.
+        ``Papt`` (the QNH, not the pressure at the field), in inHg.
     :ivar headwind_kt: Headwind component ``w``, kt; negative for a tailwind.
         Defaults to Doc 29's own modelling default of 8 kt (B4.4).
     :ivar runway_gradient_ratio: Runway gradient ``GR``, positive uphill,
@@ -440,7 +440,7 @@ class Aerodrome(RichDisplay):
         """Pressure altitude ``h`` for *altitude_ft* above MSL, ft (Eq. B-6).
 
         The altitude the standard atmosphere would put this pressure at, which
-        is what Eq. B-9's ``Ga h`` and ``Gb h^2`` terms read -- not the
+        is what Eq. B-9's ``Ga h`` and ``Gb h^2`` terms read, not the
         geometric altitude. The two coincide only at a QNH of exactly 29.92
         inHg; at 30.71 inHg over a sea-level aerodrome the aeroplane sits at
         0 ft and flies at a pressure altitude of -723 ft.
@@ -624,7 +624,7 @@ class AerodynamicCoefficients(RichDisplay):
         """Reject a configuration whose drag ratio is missing or not finite.
 
         ``R`` is the one coefficient every row of the ANP table carries, because
-        every force balance in Appendix B reads it -- the climb angle of
+        every force balance in Appendix B reads it: the climb angle of
         Eq. B-21, the level thrust of Eq. B-30, the approach thrust of Eq. B-40.
         The other two are legitimately absent, so they are optional here and
         refused at the step that needs one, naming that step.
@@ -1035,7 +1035,7 @@ class ApproachStep(RichDisplay):
         own length further along the runway and reading the speed and thrust
         there from the start values of the step that follows (Eq. B-80,
         Eq. B-81). Both parameters are therefore needed on every step of the
-        rollout, including the terminal one that emits no point of its own --
+        rollout, including the terminal one that emits no point of its own,
         which is why a length of zero passes here and a missing one does not.
 
         :raises ValueError: if either the length or the start thrust is missing.
@@ -1139,8 +1139,8 @@ class ProfilePoint(RichDisplay):
         parameters rather than measured, and a ``NaN`` altitude or thrust
         reaches the NPD interpolation as a level rather than as an error.
 
-        Height and true airspeed are refused below zero -- Doc 29 heights are
-        above the aerodrome and its profiles neither dig nor fly backwards --
+        Height and true airspeed are refused below zero (Doc 29 heights are
+        above the aerodrome and its profiles neither dig nor fly backwards),
         while distance is signed on purpose, because an arrival is solved
         backwards from touchdown.
 
@@ -1179,8 +1179,8 @@ class FlightProfile(RichDisplay):
     :ivar points: The profile points, ordered along the ground track.
 
     This is the vertical-plane half of a Doc 29 flight path. Section 3.6 is what
-    turns it into three dimensions -- splitting segments at ground-track nodes,
-    sub-segmenting the rolls and the climb, merging in the ground track -- and
+    turns it into three dimensions (splitting segments at ground-track nodes,
+    sub-segmenting the rolls and the climb, merging in the ground track), and
     none of that happens here.
     """
 
@@ -1197,8 +1197,8 @@ class FlightProfile(RichDisplay):
         noise calculation integrates along it, and the figure joins the points
         in the order it is handed. A pair out of order therefore does not fail,
         it draws and integrates a segment that doubles back, and on an arrival
-        -- solved backwards from touchdown, where a sign error puts the top of
-        the descent on the wrong side of the runway -- that is exactly the bug
+        (solved backwards from touchdown, where a sign error puts the top of
+        the descent on the wrong side of the runway) that is exactly the bug
         this guard is here to catch.
 
         Distances may repeat: a step of zero length is a legitimate degenerate
@@ -1311,7 +1311,7 @@ class _Flight:
 
         The high-temperature value comes from the paired ``HiTemp`` rating when
         the aeroplane has one, and otherwise from Eq. B-11's fallback, which is
-        applied on departures only -- "For approach procedures, high-temperature
+        applied on departures only: "For approach procedures, high-temperature
         thrust estimation is less relevant" (folio B-12).
 
         :raises KeyError: if neither coefficient table carries this rating.
@@ -1944,7 +1944,7 @@ def _transition_point(
     follows the change, so the thrust discontinuity has somewhere to happen.
     Point1's thrust still belongs to the previous rating, so this point is the
     first one at the new one, and it is placed "based on the same flight path
-    gradient of that of the overall segment" -- which is why the whole step has
+    gradient of that of the overall segment", which is why the whole step has
     to be solved before the point inserted at its start can be.
     """
     length_ft = end.distance_ft - start.distance_ft
@@ -2011,8 +2011,8 @@ def departure_profile(
 
     :param aircraft: The aeroplane's coefficient set.
     :param steps: The procedure's steps, in order, starting with a Take-off.
-    :param weight_lb: Take-off weight, lb -- the ANP ``Default_weights`` entry
-        for the stage length being flown.
+    :param weight_lb: Take-off weight, lb (the ANP ``Default_weights`` entry
+        for the stage length being flown).
     :param aerodrome: Aerodrome, weather and runway gradient.
     :param procedure_id: Identifier of the procedure, carried into the result.
     :return: A :class:`FlightProfile` with ``operation="D"``.
@@ -2106,7 +2106,7 @@ def _descent_deceleration_ft_s2(
     Negative when decelerating, which is what makes Eq. B-41 return less thrust
     than level flight at the same speed. It is the kinetic energy the segment
     sheds over the length actually flown, so the denominator is twice the slant
-    length -- which the 5th edition reaches through the height lost rather than
+    length, which the 5th edition reaches through the height lost rather than
     through the ground distance, and which is the same quantity either way.
 
     The ground speeds are the plain ``V - w``. Doc 29 prints them divided by
@@ -2151,7 +2151,7 @@ def _headwind_thrust_correction_lb(
     Doc 29's descent thrust is written for its 8 kt reference wind, and this
     puts back the difference. The sign follows the 5th edition's positive
     descent angle: with less headwind than the reference the correction is
-    negative, and the reference cases confirm it -- a zero-wind approach lands
+    negative, and the reference cases confirm it: a zero-wind approach lands
     at 4724.1 lb where the 8 kt reference gives 4957.3 lb. The 4th edition,
     which took the descent angle negative, added the same expression and so
     corrected the other way.
@@ -2810,7 +2810,7 @@ def _approach_descent_angle_rad(
     """The descent angle the Land step's thrust is computed at (Eq. B-76).
 
     Doc 29 names "the last Descend step preceding the current Land step", which
-    is the last airborne step that carries a descent angle at all -- the final
+    is the last airborne step that carries a descent angle at all: the final
     approach slope, whatever flavour of descending step flies it.
     """
     for step in reversed(steps[:land_index]):

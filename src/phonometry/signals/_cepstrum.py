@@ -7,20 +7,20 @@ sum :math:`\ln X = \ln H + \ln U` (Havelock, Kahle & Cocchi (eds.),
 *Handbook of Signal
 Processing in Acoustics*, Springer 2008: Milner, Ch. 27, Eqs. (22)-(23)),
 components that overlap hopelessly in the spectrum separate cleanly in the
-cepstral domain -- the smooth spectral envelope collapses onto the low
+cepstral domain: the smooth spectral envelope collapses onto the low
 **quefrencies** (the time-like axis of the cepstrum, in seconds) while
 periodic spectral ripple from harmonics, reflections or echoes concentrates
 at the quefrency of its period. Three variants are standard:
 
 * the **power cepstrum**, the inverse transform of the log *power* spectrum
-  :math:`\ln \lvert X \rvert^2` (Milner Fig. 21) -- real, even,
+  :math:`\ln \lvert X \rvert^2` (Milner Fig. 21): real, even,
   phase-blind. (Convention note: Bogert, Healy & Tukey's original 1963
   power cepstrum squares once more,
   :math:`\lvert \operatorname{IDFT}(\ln \lvert X \rvert^2) \rvert^2`; this
   module follows Milner's linear
   :math:`\operatorname{IDFT}(\ln \lvert X \rvert^2)` throughout.);
 * the **real cepstrum**, the inverse transform of
-  :math:`\ln \lvert X \rvert` -- exactly half
+  :math:`\ln \lvert X \rvert`, exactly half
   the power cepstrum, and the quantity whose causal folding yields the
   minimum-phase reconstruction of :func:`phonometry.signals.min_phase`
   (Bendat & Piersol, *Random Data*, 4th ed., Sec. 13.1.4; Tohyama in
@@ -29,7 +29,7 @@ at the quefrency of its period. Three variants are standard:
 * the **complex cepstrum**, the inverse transform of the full complex
   logarithm :math:`\ln \lvert X \rvert + j \arg X` with the phase
   unwrapped (Neelamani in
-  Havelock Ch. 87, Eq. (14)) -- invertible, hence the engine of
+  Havelock Ch. 87, Eq. (14)): invertible, hence the engine of
   homomorphic deconvolution.
 
 **Echoes.** A single reflection :math:`x(t) = s(t) + a s(t - t_0)`
@@ -49,7 +49,7 @@ exactly the echo delay whose height reads out the reflection coefficient.
 :func:`echo_detection` automates that reading on the power cepstrum, where
 the first rahmonic's height is ``a`` itself.
 
-**Liftering** -- filtering in the quefrency domain (Milner Sec. 4.3) --
+**Liftering**, filtering in the quefrency domain (Milner Sec. 4.3),
 splits a log spectrum into its smooth envelope (low quefrencies kept by a
 lowpass lifter) and its fine structure (highpass): the classical route to a
 spectral envelope free of harmonic ripple, or to the ripple alone.
@@ -168,9 +168,9 @@ def _complex_cepstrum(
 ) -> tuple[NDArray[np.float64], int]:
     """Complex cepstrum and the removed linear-phase component.
 
-    The full-grid phase is unwrapped and its linear component removed --
-    the integer number ``r`` of half-turns accumulated at the Nyquist bin,
-    negative for a bulk delay -- so the log spectrum is continuous and
+    The full-grid phase is unwrapped and its linear component removed
+    (the integer number ``r`` of half-turns accumulated at the Nyquist bin,
+    negative for a bulk delay), so the log spectrum is continuous and
     periodic and the inverse DFT converges (Neelamani Eq. (14); the
     removal is restored by :meth:`CepstrumResult.invert`).
     """
@@ -238,9 +238,9 @@ class CepstrumResult(OwnsArrays):
     def invert(self) -> NDArray[np.float64]:
         """Reconstruct the record from a complex cepstrum.
 
-        Applies the forward chain in reverse -- DFT, restore the removed
-        linear phase, exponentiate, inverse DFT (the homomorphic
-        deconvolution round trip of Neelamani Sec. 3.3) -- and returns the
+        Applies the forward chain in reverse (DFT, restore the removed
+        linear phase, exponentiate, inverse DFT: the homomorphic
+        deconvolution round trip of Neelamani Sec. 3.3) and returns the
         zero-padded record, length :attr:`nfft`. Only the complex cepstrum
         keeps the phase, so only it is invertible.
 
@@ -286,9 +286,9 @@ def cepstrum(
     * ``"power"``: inverse DFT of ``ln|X|^2`` (Milner Fig. 21 in Havelock
       Ch. 27). Even, phase-blind; an echo of reflection coefficient ``a``
       at delay ``t0`` shows rahmonics of amplitude
-      ``(-1)^{n+1} a^n / n`` at quefrencies ``n t0`` -- height ``a`` at the
+      ``(-1)^{n+1} a^n / n`` at quefrencies ``n t0``: height ``a`` at the
       delay itself.
-    * ``"real"``: inverse DFT of ``ln|X|`` -- exactly half the power
+    * ``"real"``: inverse DFT of ``ln|X|``, exactly half the power
       cepstrum. Folding it causally is the minimum-phase reconstruction
       (see :func:`phonometry.signals.min_phase`, which shares this module's
       folding core).
@@ -539,7 +539,7 @@ class EchoDetectionResult(OwnsArrays):
     :ivar reflection_coefficient: Signed cepstrum value at the peak sample.
         For a single in-record echo
         :math:`x(t) = s(t) + a s(t - t_0)` the power cepstrum's first
-        rahmonic height is exactly ``a`` -- of either sign -- (the
+        rahmonic height is exactly ``a``, of either sign (the
         :math:`n = 1` term of the :math:`\ln(1 + a \mathrm{e}^{-j \theta})`
         series), so the value estimates the reflection coefficient
         directly, including its polarity. When the true delay falls
@@ -608,7 +608,7 @@ def echo_detection(
     r"""Detect an echo as the largest power-cepstrum peak in a quefrency band.
 
     A reflection :math:`x(t) = s(t) + a s(t - t_0)` leaves a spike of
-    height ``a`` -- positive or negative with the sign of the reflection --
+    height ``a`` (positive or negative with the sign of the reflection)
     at quefrency :math:`t_0` in the power cepstrum (module note; the
     seismic
     reverberation spike trains of Neelamani Sec. 3.3 are the same

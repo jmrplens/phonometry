@@ -3,13 +3,13 @@ r"""Wind-turbine acoustic noise (IEC 61400-11:2012+A1:2018).
 
 Two closed-form quantities of the standard:
 
-* :func:`apparent_sound_power_level` -- the A-weighted apparent sound power
+* :func:`apparent_sound_power_level`: the A-weighted apparent sound power
   level ``L_WA`` referred to the equivalent point source at the rotor centre,
   from the ground-board sound pressure level and the slant distance
   (:func:`slant_distance`),
   :math:`L_{W\mathrm{A}} = L_p - 6 + 10 \cdot \log_{10}(4\pi R_1^2/S_0)` (Formula 26).
-* :func:`wind_turbine_tonality` -- the tonal-audibility chain (Formulae 30-34):
-  the critical bandwidth (Formula 30), the masking-noise level,
+* :func:`wind_turbine_tonality`: the tonal-audibility chain of Formulae 30-34,
+  through the critical bandwidth (Formula 30), the masking-noise level,
   the tonality and the audibility criterion, giving the tonal audibility
   ``ΔL_a`` that decides whether a tone is audible.
 
@@ -304,7 +304,7 @@ class WindTurbineTonalityResult(OwnsArrays):
         :func:`wind_turbine_tonality` validates its spectrum finite and every
         one of these numbers descends from it by an energy sum, a logarithm
         of a positive energy or a subtraction, so no spectrum produces a NaN
-        here -- not even the ``has_identified_tone = False`` fallback, whose
+        here, not even the ``has_identified_tone = False`` fallback, whose
         fields are non-standard but still numbers. One smuggled in through
         :func:`dataclasses.replace` either prints ``Tonality ΔLtn = nan dB``
         in the boxed result beside a confident audibility decision, or dies

@@ -11,9 +11,9 @@ The baffled circular piston is the canonical acoustic radiator: a flat rigid
 disc of radius `a` vibrating with a uniform normal velocity in an otherwise
 rigid infinite plane. It is the model behind a loudspeaker cone in a large
 cabinet, the open end of a duct, and the reference source for the radiation
-efficiency of any finite vibrating surface, so its two results -- the
+efficiency of any finite vibrating surface, so its two results, the
 **radiation impedance** the air presents to the piston and the **directivity**
-of the far field -- are the base of the electroacoustics domain (Beranek &
+of the far field, are the base of the electroacoustics domain (Beranek &
 Mellow, *Acoustics: Sound Fields, Transducers and Vibration* 2nd ed., §4.4;
 Bies, Hansen & Howard, *Engineering Noise Control* 5th ed.).
 
@@ -47,7 +47,7 @@ function, both of order one, evaluated at $x = 2ka$.
   air, equivalent to a layer $8a / 3\pi$ thick over its face.
 * **High frequency** ($ka \gg 1$): $R_1 \to 1$ and
   $X_1 \to 0$, so
-  $Z_\mathrm{r} \to \rho c S$ -- the piston radiates as if into an infinite tube
+  $Z_\mathrm{r} \to \rho c S$: the piston radiates as if into an infinite tube
   and the
   air loads it purely resistively.
 

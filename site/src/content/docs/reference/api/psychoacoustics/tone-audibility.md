@@ -1,13 +1,13 @@
 ---
 title: "psychoacoustics: tone audibility"
-description: "Objective audibility of tones in noise -- engineering method (ISO/PAS 20065:2016)."
+description: "Objective audibility of tones in noise by the engineering method of ISO/PAS 20065:2016."
 sidebar:
   label: "tone_audibility"
 ---
 
 Every name on this page is published by `phonometry.psychoacoustics`: `from phonometry import psychoacoustics`, then `psychoacoustics.<name>`.
 
-Objective audibility of tones in noise -- engineering method (ISO/PAS 20065:2016).
+Objective audibility of tones in noise by the engineering method of ISO/PAS 20065:2016.
 
 ISO/PAS 20065 is the detailed engineering method that ISO 1996-2:2017 defers to
 for the audibility of prominent tones; the simplified 2007/2009 Annex C method
@@ -249,16 +249,16 @@ with $w = 10^{0.1 L}$ over the `K`
 tone-containing lines and the `M` noise lines of the final Formula (6)
 iteration. For an FG group (several tones combined in one critical band,
 Formula (17)) pass the `N` summated *tone levels* as
-`tone_line_levels` -- that reading reproduces the printed Table E.2 FG
-uncertainty (3.21 dB) where a union of the individual tonal lines does
-not -- and the most audible tone's noise lines.
+`tone_line_levels` (that reading reproduces the printed Table E.2 FG
+uncertainty, 3.21 dB, where a union of the individual tonal lines does
+not) and the most audible tone's noise lines.
 $U = k \sigma$ with $k = 1.645$ (90 % bilateral coverage). No
 uncertainty is assumed for the masking index or the line spacing; the
 critical-bandwidth term uses $\sigma_{\Delta f_\mathrm{c}} = \Delta f$
 (Formula (26)). The
 DIN 45681 Annex J reference program computes the same quantity (its
 `LT_Delta`/`Ls_Delta` accumulators), differing only in printing the
-third term without the `df` factor -- both readings agree to well
+third term without the `df` factor; both readings agree to well
 under 0.01 dB on the Annex E example.
 
 Clause 5.4 / Clause 6: if fewer than 12 spectra have been averaged, the

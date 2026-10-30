@@ -17,11 +17,11 @@ engine power settings, per operation mode) and default trajectories.
 This module reads the ANP database tables (the semicolon-delimited CSV exports)
 and exposes, for a given aircraft identifier and operation:
 
-* [`ANPNPDCurves`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpnpdcurves) -- the NPD curves (`LAmax`/`SEL` versus distance for
+* [`ANPNPDCurves`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpnpdcurves): the NPD curves (`LAmax`/`SEL` versus distance for
   each tabulated power), with a `.plot()`;
-* [`ANPProfile`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpprofile) -- the default fixed-point trajectory as a Doc 29 flight
+* [`ANPProfile`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpprofile): the default fixed-point trajectory as a Doc 29 flight
   path `(N, 5)` with the takeoff/landing ground-roll masks, with a `.plot()`;
-* [`ANPAircraft`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpaircraft) -- the aircraft metadata plus convenience wiring
+* [`ANPAircraft`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpaircraft): the aircraft metadata plus convenience wiring
   ([`ANPAircraft.event_level`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpaircraftevent_level), [`ANPAircraft.noise_contour`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpaircraftnoise_contour)) that feeds
   the NPD curves and the profile straight into the existing Doc 29 functions.
 

@@ -78,8 +78,8 @@ Junction         J1    J2     J3
 ===============  ====  =====  =====
 X                1     1      1
 T-junction (1)   2     0.5    0.5
-T-junction (2)   2     2      --
-L                4     1      --
+T-junction (2)   2     2      n/a
+L                4     1      n/a
 ===============  ====  =====  =====
 
 For T-junction (1) plates 1 and 3 are identical; for T-junction (2) plates 2

@@ -20,7 +20,7 @@ frequency with one measurement instead of a tone-by-tone sweep.
 
 Two excitation/deconvolution pairs are implemented:
 
-* **Synchronized swept-sine (Novak et al. 2015)** -- the sweep
+* **Synchronized swept-sine (Novak et al. 2015)**: the sweep
   :math:`x(t) = \sin[2\pi f_1 L \exp(t/L)]` with the rate rounded so
   that :math:`f_1 L` is an integer (Eqs. 47/49). Time-shifting this
   signal by :math:`L \ln(n)` is then *exactly* equivalent to generating
@@ -33,7 +33,7 @@ Two excitation/deconvolution pairs are implemented:
   :func:`synchronized_sweep_signal`; analysed with
   ``method="synchronized"`` (the default).
 
-* **Exponential sweep with the Farina inverse filter** -- the classical
+* **Exponential sweep with the Farina inverse filter**: the classical
   ESS of :func:`phonometry.room.sweep_signal` deconvolved by the time-reversed,
   amplitude-compensated sweep (Farina 2000; ISO 18233:2006 Figure B.2,
   the machinery of :func:`phonometry.room.impulse_response`). The harmonic
@@ -48,7 +48,7 @@ The memoryless polynomial oracle anchors both paths: driving
 Chebyshev identities, :math:`\lvert H_1 \rvert = 1 + 3 a_3/4`,
 :math:`\lvert H_2 \rvert = a_2/2` (phase :math:`-\pi/2`) and
 :math:`\lvert H_3 \rvert = a_3/4` (phase :math:`\pi`), and a THD(f) equal to
-the closed form :math:`\sqrt{(a_2/2)^2 + (a_3/4)^2} / (1 + 3 a_3/4)` -- which
+the closed form :math:`\sqrt{(a_2/2)^2 + (a_3/4)^2} / (1 + 3 a_3/4)`, which
 also matches :func:`phonometry.electroacoustics.thd` measured tone by tone on
 the same system.
 """
@@ -412,7 +412,7 @@ def _deconvolve_farina(
 
     Linear (non-circular) convolution with the time-reversed,
     +6 dB/octave-compensated sweep, rolled so the linear response starts at
-    index 0 and the harmonic advances wrap to the tail -- the same layout
+    index 0 and the harmonic advances wrap to the tail: the same layout
     as the synchronized path.
     """
     from scipy import signal as sp_signal
@@ -557,8 +557,8 @@ def _harmonic_window(
     """Resolve and validate the per-order window length, in samples.
 
     The window (explicit, or the largest power of two that fits) must not
-    exceed the spacing between the two closest arrivals -- orders
-    ``n_orders - 1`` and ``n_orders`` -- or the windows would overlap.
+    exceed the spacing between the two closest arrivals (orders
+    ``n_orders - 1`` and ``n_orders``), or the windows would overlap.
     """
     min_spacing = int(np.floor(delays_samples[-1] - delays_samples[-2]))
     if ir_length is not None:
@@ -699,7 +699,7 @@ def swept_sine_distortion(
         Sec. A.2.3).
     :return: A :class:`SweptSineDistortionResult`.
     :raises ValueError: If the inputs are invalid; if ``ir_length``
-        (explicit or default) cannot fit between the harmonic arrivals --
+        (explicit or default) cannot fit between the harmonic arrivals:
         lengthen the sweep, lower ``n_harmonics`` or pass a shorter
         ``ir_length``; if ``method="farina"`` is asked for orders beyond
         the anticausal span of its linear deconvolution; or if no

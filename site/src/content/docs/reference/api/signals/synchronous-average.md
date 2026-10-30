@@ -58,8 +58,8 @@ that a comb node lands exactly on it, i.e. the smallest `N` with
 $N q$ an integer.
 McFadden's own example, a tone at 32.05 orders, is suppressed by more
 than 100 dB with $N = 20$ (since $20 \cdot 32.05 = 641$)
-yet -- evaluating Eq. 8
-at that order -- by only about 14 dB with the common power-of-two choice
+yet (evaluating Eq. 8
+at that order) by only about 14 dB with the common power-of-two choice
 $N = 32$ ($32 \cdot 32.05 = 1025.6$; the paper makes the
 comparison but does
 not print this figure). Thus the habit of taking a power-of-two number of

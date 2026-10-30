@@ -351,7 +351,7 @@ class Task(RichDisplay):
         Both helpers reject NaN as well: a NaN sample (or duration) would
         pass a bare emptiness/sign check, make ``lex_8h`` NaN, and stop the
         exposure plot inside matplotlib with "Axis limits cannot be NaN or
-        Inf" -- naming neither the task nor the sample that carried it.
+        Inf", naming neither the task nor the sample that carried it.
 
         :raises TypeError: if ``duration_hours`` is not a single number, or ``samples``
             holds a text or a value that is not a real number, or ``instrument`` is not
@@ -421,8 +421,8 @@ class TaskContribution(RichDisplay):
         whose samples and duration are already pinned finite, so a NaN here is
         never the library's own output. The fiche prints the levels through
         the same one-decimal formatter as the daily total, whose
-        ``math.floor`` dies on NaN with "cannot convert float NaN to integer"
-        -- naming neither the field, the class nor the cause.
+        ``math.floor`` dies on NaN with "cannot convert float NaN to integer",
+        naming neither the field, the class nor the cause.
 
         :raises ValueError: if any numeric term is not finite.
         """
@@ -561,7 +561,7 @@ class ExposureResult(RichDisplay):
         per-task contributions, a job-based or full-day result the sampling
         summary (``N``, ``Lp,A,eqTe``, ``T_e`` and the Formula (C.9) budget
         terms). Built bare, the sheet would print the literal string ``None``
-        for ``N`` and a fabricated 0,0 for every budget term -- an accredited
+        for ``N`` and a fabricated 0,0 for every budget term: an accredited
         page stating a zero uncertainty budget nobody measured.
 
         :raises ValueError: for an unknown strategy or instrument tag, a

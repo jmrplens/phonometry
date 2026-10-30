@@ -850,7 +850,7 @@ def plot_flight_profile(
     The two are drawn on twin axes because they are what a Doc 29 profile is
     read for together: the height sets the slant distance to the receiver and
     the thrust picks the NPD curve, and the interesting points of a procedure
-    are where one moves without the other -- a level segment at adapted thrust,
+    are where one moves without the other: a level segment at adapted thrust,
     the 1000 ft transition after a thrust cutback.
 
     :param result: A

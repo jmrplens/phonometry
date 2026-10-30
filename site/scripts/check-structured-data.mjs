@@ -573,6 +573,11 @@ for (const file of files) {
 					fail(`${at}: the dataset has no ${field}`);
 				}
 			}
+			// A page of several catalogues describes them all, so its description
+			// says of one dataset what belongs to another.
+			if (datasets.length > 1 && dataset.description === article.description) {
+				fail(`${at}: the dataset takes the page's description, which speaks of all ${datasets.length} catalogues it renders`);
+			}
 			if (dataset.inLanguage !== lang) {
 				fail(`${at}: the dataset's inLanguage is ${JSON.stringify(dataset.inLanguage)}, not ${lang}`);
 			}

@@ -30,10 +30,13 @@
  *
  * And each catalogue a page renders is a dataset in the page's structured
  * data (src/lib/catalogue-datasets.mjs), named and described by the page: the
- * first by its title and description, every later one by the `##` heading it
- * sits under and the paragraph that opens it. A later catalogue with no
- * heading of its own, or a heading with no paragraph under it, would be a
- * dataset with no name or nothing to say, and stops the build too.
+ * first by its title, and by its description when it is the page's only
+ * catalogue or else by the paragraph that opens the page, every later one by
+ * the `##` heading it sits under and the paragraph that opens it. A first
+ * catalogue of several with no paragraph before it, a later one with no
+ * heading of its own, or a heading with no paragraph under it would be a
+ * dataset with no name, nothing to say, or the page's words about rows it
+ * does not hold, and stops the build too.
  */
 import { getCollection, getEntry, type CollectionEntry } from 'astro:content';
 
@@ -49,7 +52,8 @@ export interface CatalogueDataset {
 	key: keyof typeof catalogues;
 	/** Its name: the page's title, or the heading it sits under. */
 	name: string;
-	/** Its description: the page's, or the paragraph that opens its section. */
+	/** Its description: the page's when it is the page's only catalogue, or else
+	    the paragraph that opens the page or its own section. */
 	description: string;
 }
 
@@ -195,9 +199,10 @@ async function readPages(lang: 'en' | 'es'): Promise<CataloguePage[]> {
 			`[catalogue-pages] the ${lang === 'es' ? 'Spanish' : 'English'} catalogue pages leave a catalogue ` +
 				`without a name or a description for its dataset, in ${datasetProblems.length} place(s):\n  ` +
 				`${datasetProblems.join('\n  ')}\n` +
-				'The first catalogue a page renders takes the page\'s title and description; give every later ' +
-				'one a `##` heading of its own, after the catalogue before it, and open its section with a ' +
-				'paragraph that says what it holds.',
+				'The first catalogue a page renders takes the page\'s title, and its description too unless the ' +
+				'page renders more than one, when the paragraph that opens the page describes it; give every ' +
+				'later one a `##` heading of its own, after the catalogue before it, and open its section with ' +
+				'a paragraph that says what it holds.',
 		);
 	}
 

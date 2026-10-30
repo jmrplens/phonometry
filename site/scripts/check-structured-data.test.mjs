@@ -638,3 +638,15 @@ test("an article whose mainEntity is not its page's datasets fails", (t) => {
 	assert.equal(ran.status, 1);
 	assert.match(ran.err, /\/reference\/catalogues\/solids\/: the article's mainEntity is /);
 });
+
+test("a dataset that takes the page's description on a page of several catalogues fails", (t) => {
+	const built = catalogueBuild();
+	// The page's description speaks of every catalogue the page renders.
+	datasetOf(built, 'en', 'absorption').description = built['en/catalogue'].article.description;
+	const ran = check(t, built);
+	assert.equal(ran.status, 1);
+	assert.match(
+		ran.err,
+		/\/reference\/catalogues\/solids\/ absorption: the dataset takes the page's description, which speaks of all 24 catalogues it renders/,
+	);
+});

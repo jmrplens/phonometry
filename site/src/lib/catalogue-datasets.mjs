@@ -11,10 +11,12 @@
  * What a dataset says comes from what the page already holds, never from a
  * second list kept beside it:
  *
- *   - its name and description are the page's title and description, and on
- *     a page that renders a second catalogue (the absorption areas beside the
- *     absorption coefficients) the second one sits under a `##` heading of its
- *     own, whose text names it and whose opening paragraph describes it;
+ *   - its name is the page's title, and its description the page's own when
+ *     the page renders one catalogue; a page that renders a second one (the
+ *     absorption areas beside the absorption coefficients) describes all it
+ *     holds, so there the first takes the paragraph that opens the page, and
+ *     the second sits under a `##` heading of its own, whose text names it
+ *     and whose opening paragraph describes it;
  *   - its variables are the columns src/generated/catalogues.mjs gives the
  *     table, one per quantity, the band columns of one quantity taken
  *     together under the quantity the generator names for them;
@@ -72,7 +74,9 @@ export function plainText(lines) {
  *
  * A heading counts for a catalogue only when it comes after the catalogue
  * before it, so a catalogue that follows another with no heading between them
- * has none. Fenced code is not read: a `##` inside a fence is not a heading.
+ * has none. The first catalogue's lead is the paragraph that opens the page,
+ * the first one before it whatever heading comes between them. Fenced code is
+ * not read: a `##` inside a fence is not a heading.
  *
  * @param {string} body The page's source, without its frontmatter.
  * @returns {{key: string, heading?: string, lead?: string}[]}
@@ -82,7 +86,8 @@ export function catalogueSections(body) {
   const sections = [];
   let heading;
   let lead;
-  let paragraph;
+  // The page opens the first catalogue's paragraph; after it, only a heading does.
+  let paragraph = [];
   for (const line of lines) {
     const tag = CATALOGUE_TAG.exec(line);
     if (tag) {
@@ -100,8 +105,11 @@ export function catalogueSections(body) {
     const title = SECTION_HEADING.exec(line);
     if (title) {
       heading = plainText([title[1]]);
-      lead = undefined;
-      paragraph = [];
+      // Before the first catalogue, the paragraph that opened the page stays.
+      if (sections.length > 0 || lead === undefined) {
+        lead = undefined;
+        paragraph = [];
+      }
       continue;
     }
     // Only the first paragraph under a heading opens its section.
@@ -120,10 +128,13 @@ export function catalogueSections(body) {
  * one from having either.
  *
  * The first catalogue on a page is what the page is about, and takes the
- * page's own title and description. Every later one is a table the page
- * holds beside it, and has to sit under a `##` heading of its own, after the
- * catalogue before it: the heading names its dataset and the paragraph that
- * opens the section describes it.
+ * page's own title. It takes the page's description too when it is the only
+ * one; a page that renders more describes them all, and what that says of
+ * the others is not this one's, so there the paragraph that opens the page
+ * describes it. Every later one is a table the page holds beside it, and has
+ * to sit under a `##` heading of its own, after the catalogue before it: the
+ * heading names its dataset and the paragraph that opens the section
+ * describes it.
  *
  * @param {object} page
  * @param {string} page.id The page's entry id, which the messages name.
@@ -137,8 +148,16 @@ export function catalogueDatasets({ id, title, description, sections }) {
   const datasets = [];
   const problems = [];
   for (const [i, section] of sections.entries()) {
-    if (i === 0) {
+    if (i === 0 && sections.length === 1) {
       datasets.push({ key: section.key, name: title, description });
+    } else if (i === 0 && !section.lead) {
+      problems.push(
+        `${id} renders ${sections.length} catalogues and opens with no paragraph before the first, ` +
+          `${section.key}, and with the page's description speaking of them all, that paragraph is what ` +
+          'describes its dataset',
+      );
+    } else if (i === 0) {
+      datasets.push({ key: section.key, name: title, description: section.lead });
     } else if (section.heading === undefined) {
       problems.push(
         `${id} renders ${section.key} after another catalogue with no \`##\` heading of its own between ` +

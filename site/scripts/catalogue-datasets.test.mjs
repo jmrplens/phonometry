@@ -63,11 +63,31 @@ const band = (field, hertz, quantity, quantityEs, unit = '') => ({
 // Reading a page
 // ---------------------------------------------------------------------------
 
-test('a page with one catalogue reads one section, with no heading of its own', () => {
+test('a page with one catalogue reads one section, with no heading of its own and the paragraph that opens the page', () => {
   const sections = catalogueSections(
     ['import Catalogues from "x";', '', '<CatalogueFinder lang="en" />', '', 'Prose.', '', '<Catalogues catalogue="solids" lang="en" />'].join('\n'),
   );
-  assert.deepEqual(sections, [{ key: 'solids' }]);
+  assert.deepEqual(sections, [{ key: 'solids', lead: 'Prose.' }]);
+});
+
+test("the first catalogue's lead is the paragraph that opens the page, whatever heading comes before the catalogue", () => {
+  const sections = catalogueSections(
+    [
+      '<CatalogueFinder lang="en" />',
+      '',
+      'What a finish did in a room,',
+      'band by band.',
+      '',
+      'A second paragraph.',
+      '',
+      '## The coefficients',
+      '',
+      'The paragraph under the heading.',
+      '',
+      '<Catalogues catalogue="absorption" lang="en" />',
+    ].join('\n'),
+  );
+  assert.deepEqual(sections, [{ key: 'absorption', heading: 'The coefficients', lead: 'What a finish did in a room, band by band.' }]);
 });
 
 test('a later catalogue takes the heading after the one before it and the paragraph that opens its section', () => {
@@ -75,7 +95,7 @@ test('a later catalogue takes the heading after the one before it and the paragr
     [
       '## Before the first',
       '',
-      'Not the first catalogue\'s paragraph to keep.',
+      'What the first catalogue holds.',
       '',
       '<Catalogues catalogue="absorption" lang="en" />',
       '',
@@ -94,8 +114,9 @@ test('a later catalogue takes the heading after the one before it and the paragr
     heading: 'Absorption areas of people and air',
     lead: 'Bies and Long also print rows that are not coefficients, held in PUBLISHED_ABSORPTION_AREAS and here.',
   });
-  // The first catalogue keeps the heading it sits under, which names nothing.
-  assert.equal(sections[0].heading, 'Before the first');
+  // The first catalogue keeps the heading it sits under, which names nothing,
+  // and the paragraph that opens the page.
+  assert.deepEqual(sections[0], { key: 'absorption', heading: 'Before the first', lead: 'What the first catalogue holds.' });
 });
 
 test('a later catalogue under no heading of its own has none, and a subheading is not a section', () => {
@@ -135,21 +156,40 @@ test('plain text drops the marks a reader does not see and keeps the underscores
 // Naming the datasets
 // ---------------------------------------------------------------------------
 
-test("the first catalogue takes the page's title and description, a later one its heading and paragraph", () => {
+test("a page's only catalogue takes the page's title and description", () => {
+  const { datasets, problems } = catalogueDatasets({
+    id: 'reference/catalogues/solids',
+    title: 'Catalogue of solids',
+    description: 'Elastic constants of solids.',
+    sections: [{ key: 'solids', heading: 'Ignored', lead: 'The paragraph that opens the page.' }],
+  });
+  assert.deepEqual(problems, []);
+  assert.deepEqual(datasets, [{ key: 'solids', name: 'Catalogue of solids', description: 'Elastic constants of solids.' }]);
+});
+
+test("on a page of several catalogues the first takes the page's title and its opening paragraph, not the page's description", () => {
+  // The page's description speaks of everything the page holds, the audiences
+  // and the air as well, which are rows of the second dataset.
+  const description = 'What finishes absorbed, and the absorption area of audiences and air.';
   const { datasets, problems } = catalogueDatasets({
     id: 'reference/catalogues/absorption-coefficients',
     title: 'Catalogue of absorption coefficients',
-    description: 'What finishes absorbed.',
+    description,
     sections: [
-      { key: 'absorption', heading: 'Ignored' },
+      { key: 'absorption', lead: 'What a finish did in a reverberation room, band by band.' },
       { key: 'absorptionAreas', heading: 'Absorption areas of people and air', lead: 'Rows that are not coefficients.' },
     ],
   });
   assert.deepEqual(problems, []);
   assert.deepEqual(datasets, [
-    { key: 'absorption', name: 'Catalogue of absorption coefficients', description: 'What finishes absorbed.' },
+    {
+      key: 'absorption',
+      name: 'Catalogue of absorption coefficients',
+      description: 'What a finish did in a reverberation room, band by band.',
+    },
     { key: 'absorptionAreas', name: 'Absorption areas of people and air', description: 'Rows that are not coefficients.' },
   ]);
+  assert.ok(datasets.every((dataset) => dataset.description !== description));
 });
 
 test('a later catalogue with no heading of its own, or a heading with no paragraph, is named as a problem', () => {
@@ -157,12 +197,24 @@ test('a later catalogue with no heading of its own, or a heading with no paragra
     id: 'es/reference/catalogues/x',
     title: 'T',
     description: 'D',
-    sections: [{ key: 'a' }, { key: 'b' }, { key: 'c', heading: 'C' }],
+    sections: [{ key: 'a', lead: 'L' }, { key: 'b' }, { key: 'c', heading: 'C' }],
   });
   assert.equal(datasets.length, 1);
   assert.equal(problems.length, 2);
   assert.match(problems[0], /es\/reference\/catalogues\/x renders b after another catalogue with no `##` heading/);
   assert.match(problems[1], /`## C` section that holds c opens with no paragraph/);
+});
+
+test('the first of several catalogues with no paragraph before it is named as a problem', () => {
+  const { datasets, problems } = catalogueDatasets({
+    id: 'reference/catalogues/x',
+    title: 'T',
+    description: 'D',
+    sections: [{ key: 'a' }, { key: 'b', heading: 'B', lead: 'L' }],
+  });
+  assert.deepEqual(datasets, [{ key: 'b', name: 'B', description: 'L' }]);
+  assert.equal(problems.length, 1);
+  assert.match(problems[0], /reference\/catalogues\/x renders 2 catalogues and opens with no paragraph before the first, a/);
 });
 
 // ---------------------------------------------------------------------------
@@ -329,6 +381,12 @@ test('every catalogue of both languages is a dataset with a name, a description,
         keys.push(dataset.key);
         assert.ok(dataset.key in catalogues, `${file} renders an unknown catalogue, ${dataset.key}`);
         assert.ok(dataset.name.length > 0 && dataset.description.length >= 50, `${file}: ${dataset.key} says too little`);
+        // A page of several catalogues describes them all, so its description
+        // is no one dataset's.
+        assert.ok(
+          datasets.length === 1 || dataset.description !== page.description,
+          `${file}: ${dataset.key} takes the page's description, which speaks of the other catalogues too`,
+        );
         const catalogue = catalogues[dataset.key];
         assert.ok(variablesMeasured(catalogue.columns, prefix ? 'es' : 'en').length > 0, `${dataset.key} has no column`);
         const read = printedTables([catalogue]).filter((table) => !isLibraryTable(table));

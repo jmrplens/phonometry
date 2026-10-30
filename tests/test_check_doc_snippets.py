@@ -1685,3 +1685,75 @@ def test_a_page_that_writes_bytes_its_streams_cannot_decode_is_still_reported(
     assert check_doc_snippets.check_execution([fails, runs]) == [
         f"{check_doc_snippets._rel(fails)}: bad\ufffd"
     ]
+
+
+def _build(tmp_path: pathlib.Path, files: dict[str, str]) -> pathlib.Path:
+    """A site build holding the given files, by their path in it."""
+    build = tmp_path / "dist"
+    for name, text in files.items():
+        path = build / name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(text, encoding="utf-8")
+    build.mkdir(exist_ok=True)
+    return build
+
+
+_SOUND = "```python\nfrom phonometry import filters\n\nbank = filters.OctaveFilterBank(48000)\n```\n"
+_SHADOWED = "```python\nfrom phonometry import filters\n\nfilters = [1.0, 2.0]\n```\n"
+
+
+def test_the_restated_files_are_the_llms_files_a_build_wrote(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``llms-full.txt`` and the shards under ``llms/``, and nothing else."""
+    build = _build(
+        tmp_path,
+        {
+            "llms-full.txt": _SOUND,
+            "llms.txt": _SOUND,
+            "llms/llms-signals.txt": _SOUND,
+            "llms/notes.md": _SOUND,
+            "signals/index.md": _SOUND,
+        },
+    )
+    assert check_doc_snippets._restated(build) == [
+        build / "llms-full.txt",
+        build / "llms" / "llms-signals.txt",
+    ]
+
+
+@pytest.mark.parametrize("where", ["llms-full.txt", "llms/llms-signals-2.txt"])
+def test_a_shadowed_import_in_a_restated_file_fails_the_run(
+    tmp_path: pathlib.Path, capsys: pytest.CaptureFixture[str], where: str
+) -> None:
+    """The run the site workflow makes on its build reports the rebinding."""
+    files = {
+        "llms-full.txt": _SOUND,
+        "llms/llms-signals-1.txt": _SOUND,
+        where: _SHADOWED,
+    }
+    build = _build(tmp_path, files)
+    assert check_doc_snippets.main(["--static", "--restated", str(build)]) == 1
+    errors = capsys.readouterr().err
+    assert "1 documentation snippet problems" in errors
+    assert (
+        f"{(build / where).as_posix()} block 0: line 3: 'filters = ...' rebinds"
+        in errors
+    )
+
+
+def test_a_build_with_sound_llms_files_passes(
+    tmp_path: pathlib.Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    build = _build(tmp_path, {"llms-full.txt": _SOUND, "llms/llms-signals.txt": _SOUND})
+    assert check_doc_snippets.main(["--static", "--restated", str(build)]) == 0
+    assert "2 blocks over 2 files" in capsys.readouterr().out
+
+
+def test_a_build_with_no_llms_files_is_refused(
+    tmp_path: pathlib.Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """An empty or unbuilt directory is not a pass: there was nothing to read."""
+    build = _build(tmp_path, {"index.html": "<p>A page.</p>\n"})
+    assert check_doc_snippets.main(["--static", "--restated", str(build)]) == 1
+    assert "holds no llms-full.txt and no llms/ shard" in capsys.readouterr().err

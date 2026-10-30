@@ -2069,7 +2069,7 @@ def check_execution(pages: list[pathlib.Path]) -> list[str]:
 def _rel(path: pathlib.Path) -> str:
     try:
         return path.relative_to(_ROOT).as_posix()
-    except ValueError:  # pragma: no cover - paths are always inside the repo
+    except ValueError:  # a build read with --restated can sit anywhere
         return path.as_posix()
 
 
@@ -2155,7 +2155,7 @@ def _runnable(pages: list[pathlib.Path]) -> list[pathlib.Path]:
     )
 
 
-def main() -> int:
+def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--static", action="store_true", help="skip the execution pass")
     parser.add_argument(
@@ -2165,7 +2165,7 @@ def main() -> int:
         help="check only the llms files a site build wrote under BUILD "
         "(llms-full.txt and llms/), statically; fail when there are none",
     )
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     if args.restated is not None:
         restated_only = _restated(args.restated)

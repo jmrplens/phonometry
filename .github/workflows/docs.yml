@@ -29,6 +29,15 @@ on:
       # generate_llms.py reads where a page's code fences open and close
       # through this module, and cuts a shard by them.
       - "scripts/markdown_fences.py"
+      # The other scripts the job runs: the overview and glossary mirror
+      # checks before the build, and the static check of the examples the
+      # llms files restate after it. A change to one that breaks the job has
+      # to fail here, on its own pull request, and not on the next one that
+      # touches site/ (tests/test_repository_config.py holds every script a
+      # step or site/package.json runs, and what each imports, to this list).
+      - "scripts/mirror_overviews.py"
+      - "scripts/mirror_glossary.py"
+      - "scripts/check_doc_snippets.py"
       # The release commit and the package's own table.
       # site/src/data/citation.mjs reads CHANGELOG.md, CITATION.cff and
       # .zenodo.json from the repository root, and
@@ -67,6 +76,9 @@ on:
       - ".github/brand/**"
       - "scripts/generate_llms.py"
       - "scripts/markdown_fences.py"
+      - "scripts/mirror_overviews.py"
+      - "scripts/mirror_glossary.py"
+      - "scripts/check_doc_snippets.py"
       - "VERSION"
       - "pyproject.toml"
       - "CHANGELOG.md"
@@ -312,7 +324,8 @@ jobs:
         # nine-minute build, so that a page in no shard, a shard that cannot be
         # cut to fit one fetch or a mirror that fell behind fails in seconds;
         # the build writes the files it publishes again, from copies with
-        # their dates (package.json `prebuild`).
+        # their dates (package.json `prebuild`), and the step after it holds
+        # its llms.txt to this one.
         run: |
           python3 scripts/mirror_overviews.py --check
           python3 scripts/mirror_glossary.py --check
@@ -376,6 +389,22 @@ jobs:
         # cannot silence is listed in the check with its reason.
         run: node scripts/check-build-output.mjs "$RUNNER_TEMP/site-build.log"
         working-directory: site
+      - name: Check llms.txt names the shard files the build wrote
+        # Before the build, this job wrote llms.txt at the repository root from
+        # a dump of the copies with no dates, the way `make llms` writes the
+        # committed file. The build wrote the one it publishes from copies that
+        # state the day each page was published and last changed. Where a
+        # shard is cut, and so which part files llms.txt links, must not depend
+        # on those dates: a writer whose text grew with them, or a dated header
+        # line the generator does not measure as one, would leave the committed
+        # index linking files the site does not serve, with every other check
+        # green, since each compares a file only with what was written beside
+        # it. The two are compared here on every build.
+        run: |
+          if ! diff -u llms.txt site/dist/llms.txt; then
+            echo "::error::The llms.txt the build publishes differs from the one written from copies without their dates: where a shard is cut depends on the dates, so the committed llms.txt would link part files the site does not serve."
+            exit 1
+          fi
       - name: Check every page's Markdown copy carries what the page carries
         # Every page publishes a copy of itself at <page>/index.md, written
         # from its source before the build (scripts/agent-md.mjs --public),

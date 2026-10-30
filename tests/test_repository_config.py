@@ -17,6 +17,7 @@ from a second copy of the claim.
 
 from __future__ import annotations
 
+import ast
 import builtins
 import io
 import json
@@ -1200,6 +1201,80 @@ def test_the_deploy_takes_the_pages_of_the_build_it_needs() -> None:
         f"the deploy takes {deployed!r}, and the build it needs hands its pages "
         f"on as {uploaded!r}"
     )
+
+
+#: A Python script of the repository named on a command line: ``python3
+#: scripts/x.py`` in a workflow step, ``python3 ../scripts/x.py`` from site/.
+_SCRIPT_RUN = re.compile(r"\bpython3?\s+(?:\.\./)?scripts/([A-Za-z0-9_]+)\.py\b")
+
+
+def _local_imports(script: pathlib.Path) -> set[str]:
+    """The modules of ``scripts/`` a script imports, as sibling modules."""
+    tree = ast.parse(script.read_text(encoding="utf-8"))
+    names: set[str] = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            names.update(alias.name.split(".")[0] for alias in node.names)
+        elif isinstance(node, ast.ImportFrom) and node.module and node.level == 0:
+            names.add(node.module.split(".")[0])
+    return {name for name in names if (script.parent / f"{name}.py").is_file()}
+
+
+def _scripts_the_site_build_runs() -> set[str]:
+    """Every ``scripts/*.py`` the docs workflow runs, and what each imports.
+
+    Read from the ``run:`` steps of docs.yml and the scripts of
+    site/package.json (``prebuild`` runs the llms generator inside ``pnpm
+    build``), then closed over the sibling modules each script imports.
+    """
+    workflow = yaml.safe_load(_DOCS_WORKFLOW.read_text(encoding="utf-8"))
+    commands = [
+        str(step["run"])
+        for job in workflow["jobs"].values()
+        for step in job.get("steps", [])
+        if "run" in step
+    ]
+    package = json.loads((_ROOT / "site" / "package.json").read_text(encoding="utf-8"))
+    commands += [str(command) for command in package["scripts"].values()]
+    pending = {name for command in commands for name in _SCRIPT_RUN.findall(command)}
+    found: set[str] = set()
+    while pending:
+        name = pending.pop()
+        if name in found:
+            continue
+        found.add(name)
+        script = _ROOT / "scripts" / f"{name}.py"
+        assert script.is_file(), (
+            f"docs.yml or site/package.json runs a missing scripts/{name}.py"
+        )
+        pending |= _local_imports(script)
+    return {f"scripts/{name}.py" for name in found}
+
+
+def test_the_docs_workflow_triggers_on_every_script_it_runs() -> None:
+    """A script the site build runs has to be able to trigger that build.
+
+    The docs workflow runs Python scripts of the repository before and after
+    the build (the mirror checks, the llms generator, the static check of the
+    llms files), and ``pnpm build`` runs the llms generator again. A script
+    outside the workflow's paths can be broken by a pull request that never
+    runs the workflow, and the site build then fails on the next pull request
+    that touches site/, which changed nothing at fault. The modules those
+    scripts import from scripts/ are held the same way.
+    """
+    scripts = _scripts_the_site_build_runs()
+    assert "scripts/generate_llms.py" in scripts, (
+        "the site build runs no llms generator; update this test"
+    )
+    assert "scripts/markdown_fences.py" in scripts, (
+        "the imports of the scripts were not followed; update this test"
+    )
+    for event in ("push", "pull_request"):
+        missing = sorted(scripts - _trigger_paths(_DOCS_WORKFLOW, event))
+        assert not missing, (
+            f"docs.yml {event} trigger does not list {missing}, "
+            "so a change to them cannot run the site build that runs them"
+        )
 
 
 def test_the_jit_job_comment_quotes_the_numba_floor_that_is_declared() -> None:

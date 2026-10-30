@@ -53,32 +53,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   on the tree before this change it reports fifteen reads, every one of them
   changed here.
 
-- **Every file a release carries is attested, and a release rebuilds from its
-  tag to the same bytes, which the release checks on a second operating
-  system.** The build provenance covered the wheel and the sdist; it now
-  covers the checksum file and the SBOM as well, so every file of the GitHub
-  Release traces back to the run of `release.yml` that built it, and the
-  checksum file is named for its version, `phonometry-<version>.sha256`. The
-  sdist did not rebuild: setuptools stamped it with the time of the build and
-  the builder's user and group, and two builds of one commit gave two
-  different files; the wheel took the builder's umask into the modes of its
-  modules, so a checkout under umask 002 gave another wheel. The release now
-  builds with `scripts/build_release.py`, which uses the setuptools that
-  `requirements-release.txt` pins (84.2.1) without build isolation, writes the
-  sdist again with the commit's time, no owner and fixed modes, builds the
-  wheel from it under umask 022, and refuses a checkout that differs from its
-  commit and a setuptools plugin of another package. The release builds twice
-  and refuses a difference in either file, and after publishing a job on
-  macOS clones the tag, rebuilds it and compares both files with the ones on
-  PyPI; a rehearsal does the same with the commit and the files of its own
-  run. `SECURITY.md` names the identity that signs a release, with a
-  `gh attestation verify` command that pins it, and gives the commands to
-  rebuild one. `.gitattributes` checks out every file the sdist carries with
-  LF on every platform, so a rebuild on Windows packs the same bytes, and
-  `check_release_artifacts.py` refuses a release whose sdist carries a file
-  it does not cover. The PyOctaveBand bridge is built with the same pinned
-  setuptools, and neither package lists `wheel` among its build requirements
-  any more, since setuptools builds wheels itself.
+- **A release rebuilds from its tag to the same bytes, on Linux and on
+  macOS, and the release checks that it does.** The sdist of 4.0.0rc1 did
+  not rebuild: setuptools stamped it with the time of the build and the
+  builder's user and group, so two builds of one commit gave two different
+  files, and its wheel took the modes of its modules from the builder's
+  umask, so a checkout under umask 002 gave another wheel. A release is now
+  built by `scripts/build_release.py`, which uses the setuptools that
+  `requirements-release.txt` pins (84.2.1) without build isolation, writes
+  the sdist again with the commit's time, no owner and fixed modes, builds
+  the wheel from it under umask 022, and refuses a checkout that differs
+  from its commit, a setuptools plugin of another package, and Windows,
+  where the operating system reaches the bytes of both files through
+  zipfile, the modes of the wheel's modules and the line endings of the
+  files setuptools writes. The release
+  builds twice and refuses a difference in either file before it publishes,
+  and after publishing a job on macOS clones the tag, rebuilds it and
+  compares both files with the ones on PyPI; every pull request and every
+  rehearsal build twice on Linux and once more on macOS and compare the
+  three. `SECURITY.md` gives the commands to rebuild a release.
+  `.gitattributes` checks out every file the sdist carries with LF whatever
+  `core.autocrlf` or `core.eol` the cloner has set, since `core.autocrlf`
+  on writes CRLF on Linux and macOS too, and `check_release_artifacts.py`
+  refuses a release whose sdist carries a file it does not cover. The
+  PyOctaveBand bridge is built with the same pinned setuptools, and neither
+  package lists `wheel` among its build requirements any more, since
+  setuptools builds wheels itself.
 
 ### Added
 
@@ -4771,19 +4771,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   one job that also held write access to the repository, and never installed
   the wheel it uploaded: a data file left out of the package would have
   reached PyPI with every test green, since the tests import from `src`. It
-  now builds the sdist and the wheel once, checks both against the files git
-  tracks, installs the wheel with every extra on Linux, macOS and Windows with
-  Python 3.12, 3.13 and 3.14 and runs the conformance report on it, and only
-  then uploads, through an OIDC identity in a job that holds nothing else.
-  PyPI attaches a PEP 740 attestation, signed with Sigstore, to each file; the
-  GitHub Release carries the wheel, the sdist, a checksum file and a CycloneDX
-  SBOM, with build provenance for each, and its notes are the release's
-  CHANGELOG section instead of a link and a list of pull requests. Running the
-  workflow by hand is a rehearsal from any branch: everything up to the upload,
-  including asking PyPI for a token with the workflow's identity, and nothing
-  published. `SECURITY.md` says how to verify a release. The PyOctaveBand
-  bridge is published the same way, zizmor now audits every workflow in CI,
-  and Dependabot proposes a release three days after it is published.
+  now publishes the sdist and the wheel of one build, which it builds a
+  second time and rebuilds on macOS to compare; it checks both against the
+  files git tracks, installs the wheel with every extra on Linux, macOS and
+  Windows with Python 3.12, 3.13 and 3.14 and runs the conformance report on
+  it, and only then uploads, through an OIDC identity in a job that holds
+  nothing else. PyPI attaches a PEP 740 attestation, signed with Sigstore, to
+  each file; the GitHub Release carries the wheel, the sdist, a checksum file
+  named for the version, `phonometry-<version>.sha256`, and a CycloneDX SBOM,
+  each of the four with build provenance, so every file of the release traces
+  back to the run of `release.yml` that built it, and its notes are the
+  release's CHANGELOG section instead of a link and a list of pull requests.
+  Running the workflow by hand is a rehearsal from any branch: everything up
+  to the upload, including asking PyPI for a token with the workflow's
+  identity, and nothing published. `SECURITY.md` says how to verify a release, with the identity
+  that signs it and a `gh attestation verify` command that pins it. The
+  PyOctaveBand bridge is published the same way, zizmor now audits every
+  workflow in CI, and Dependabot proposes a release three days after it is
+  published.
 
 - **The documentation is published at https://docs.jmrp.io/phonometry/.**
   Every address the project gives for it now names that host instead of

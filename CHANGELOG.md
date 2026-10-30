@@ -2170,19 +2170,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   and `_vacil_hms` as the units they are.
 
 - **The ECMA-418-2 loudness returns the total basis loudness that its
-  audibility criterion reads.** `EcmaLoudness.basis_loudness_vs_time_sone_hms`
-  holds N_basis(l) of Formula 26 in sone_HMS, block by block at the `times`
-  of `loudness_vs_time`: the specific basis loudness of Formula 25, each band
-  at its own block size and resampled to the 187.5 Hz grid of clause 6.2.6,
-  summed over the 53 bands with Δz = 0.5. A block where it exceeds
-  `psychoacoustics.AUDIBILITY_THRESHOLD_SONE_HMS` is audible by clause 5.1.9;
-  the standard prints Formula 26 without a time index, so a value per block
-  is the library's reading. `loudness` stays the N of Formula 117, which reads
-  zero for a 1 kHz tone at 0 dB SPL whose basis loudness clears the
-  criterion. A test holds the field to the printed ear filter, auditory
-  filters, nonlinearity and threshold in quiet worked by hand for steady
-  tones, and the notebook table of a record shows sone_HMS for a field that
-  ends in `_sone_hms`.
+  audibility criterion reads.** `EcmaLoudness.basis_loudness_vs_time` holds
+  N_basis(l) of Formula 26 in sone_HMS, block by block at the `times` of
+  `loudness_vs_time`: the specific basis loudness of Formula 25, each band at
+  the block size of clause 5.1.5.1 and Table 4 and resampled to the 187.5 Hz
+  grid of clause 6.2.6, summed over the 53 bands with Δz = 0.5.
+  `EcmaLoudness.last_evaluated_block` is l_end of Formula 40, the last block
+  that holds the signal. The library compares N_basis with
+  `psychoacoustics.AUDIBILITY_THRESHOLD_SONE_HMS` in every block up to
+  l_end and calls the signal audible when one of them exceeds it, since the
+  blocks after l_end are the zero padding whose results clause 6.2.6 removes,
+  where a tone cut off abruptly can pass the criterion although no block of
+  the tone does. Clause 5.1.9
+  prints Formula 26 without a time index, names no segmentation and says
+  nothing of how blocks combine, so the value per block, the Table 4
+  segmentation and the any-block rule are the library's reading. `loudness`
+  stays the N of Formula 117, which reads zero for a 1 kHz tone at 0 dB SPL
+  whose basis loudness clears the criterion. A test holds the field to
+  the printed ear filter, auditory filters, nonlinearity and threshold in
+  quiet worked by hand for steady tones.
 
 ### Fixed
 

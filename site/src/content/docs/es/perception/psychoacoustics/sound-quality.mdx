@@ -360,20 +360,28 @@ ECMA-418-1 de
 **¿Es audible el sonido?** El cuarto criterio de ECMA-418-2, los 0,01 sone_HMS
 del apartado 5.1.9 que guarda `psychoacoustics.AUDIBILITY_THRESHOLD_SONE_HMS`,
 no lee ninguna de las tres métricas de esta guía: lee la sonoridad básica
-total de la etapa auditiva que comparten, la sonoridad básica específica
-sumada en las 53 bandas (fórmula 26), que `loudness_ecma()` devuelve bloque a
-bloque como `basis_loudness_vs_time_sone_hms`;
+total de la fórmula 26, la sonoridad básica específica sumada en las 53
+bandas, que `loudness_ecma()` devuelve bloque a bloque como
+`basis_loudness_vs_time`, segmentada como prescribe el apartado 5.1.5.1 para
+la tonalidad y la sonoridad (los tamaños de bloque de la tabla 4). La aspereza
+y la intensidad de fluctuación forman una sonoridad básica específica propia,
+con los bloques fijos del apartado 5.1.5.2 y el relleno inicial del apartado
+5.1.2.2, que difiere de esta para un sonido que cambia en el tiempo; el
+apartado 5.1.9 no nombra ninguna segmentación, así que leer el criterio sobre
+aquella en la que se apoya la sonoridad del apartado 8 es una elección de la
+biblioteca.
 [Sonoridad avanzada](/phonometry/es/perception/psychoacoustics/advanced-loudness/)
-muestra cómo se forma. Ninguna función aplica el criterio. El apartado 6.1.1
+muestra cómo se forma el total y por qué la comparación se detiene en
+`last_evaluated_block`. Ninguna función aplica el criterio. El apartado 6.1.1
 añade que el método de tonalidad no necesita una criba de audibilidad previa,
 porque el umbral de audición forma parte del modelo; la comparación responde a
-si el sonido se oye en absoluto.
+si el sonido se oye siquiera.
 
 ```python
 # `x` es el tono de 1 kHz a 40 dB SPL del fragmento de tonalidad de arriba.
 loud = psychoacoustics.loudness_ecma(x, fs, field="free")
-audible = loud.basis_loudness_vs_time_sone_hms > psychoacoustics.AUDIBILITY_THRESHOLD_SONE_HMS
-print(audible.any())   # True: audible (apartado 5.1.9)
+n_basis = loud.basis_loudness_vs_time[: loud.last_evaluated_block + 1]
+print((n_basis > psychoacoustics.AUDIBILITY_THRESHOLD_SONE_HMS).any())   # True: lo supera en un bloque
 ```
 
 ### Parámetros de `tonality_ecma()`

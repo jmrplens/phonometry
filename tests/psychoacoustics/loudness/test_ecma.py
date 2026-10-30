@@ -108,7 +108,7 @@ def test_silence_is_zero() -> None:
     result = psychoacoustics.loudness_ecma(np.zeros(int(FS * 0.6)), FS)
     assert result.loudness == 0.0
     assert np.all(result.specific_loudness == 0.0)
-    assert np.all(result.basis_loudness_vs_time_sone_hms == 0.0)
+    assert np.all(result.basis_loudness_vs_time == 0.0)
 
 
 def test_subthreshold_tone_is_inaudible() -> None:
@@ -118,8 +118,7 @@ def test_subthreshold_tone_is_inaudible() -> None:
     result = psychoacoustics.loudness_ecma(_tone(1000.0, -10.0, seconds=0.6), FS)
     assert result.loudness < 0.01
     assert np.all(
-        result.basis_loudness_vs_time_sone_hms
-        <= psychoacoustics.AUDIBILITY_THRESHOLD_SONE_HMS
+        result.basis_loudness_vs_time <= psychoacoustics.AUDIBILITY_THRESHOLD_SONE_HMS
     )
 
 
@@ -170,26 +169,47 @@ def test_result_structure(ref_1k_40: psychoacoustics.EcmaLoudness) -> None:
     assert ref_1k_40.bark[-1] == pytest.approx(26.5)
     assert ref_1k_40.frequencies.shape == (53,)
     assert ref_1k_40.times.shape == ref_1k_40.loudness_vs_time.shape
-    assert ref_1k_40.times.shape == ref_1k_40.basis_loudness_vs_time_sone_hms.shape
+    assert ref_1k_40.times.shape == ref_1k_40.basis_loudness_vs_time.shape
+    # l_end of Formula 40 for the 1.2 s tone: ceil(57600 / 48000 * 187.5).
+    assert ref_1k_40.last_evaluated_block == 225
+    assert ref_1k_40.last_evaluated_block < ref_1k_40.times.size - 1
     assert ref_1k_40.field == "free"
     # Time-dependent loudness is sampled at 187.5 Hz (Clause 6.2.6).
     dt = np.diff(ref_1k_40.times)
     assert np.allclose(dt, 1.0 / 187.5)
 
 
+@pytest.mark.xdist_group("ecma-loudness-ref")
 def test_a_basis_loudness_that_disagrees_with_its_time_axis_is_refused(
     ref_1k_40: psychoacoustics.EcmaLoudness,
 ) -> None:
     """N_basis(l) is read against ``times`` index for index, so both are one axis."""
     import dataclasses
 
-    trace = ref_1k_40.basis_loudness_vs_time_sone_hms
+    trace = ref_1k_40.basis_loudness_vs_time
     for wrong in (trace[:-1], np.append(trace, trace[-1])):
         with pytest.raises(
             ValueError,
-            match=r"'basis_loudness_vs_time_sone_hms' \(\d+\) must each carry one value",
+            match=r"'basis_loudness_vs_time' \(\d+\) must each carry one value",
         ):
-            dataclasses.replace(ref_1k_40, basis_loudness_vs_time_sone_hms=wrong)
+            dataclasses.replace(ref_1k_40, basis_loudness_vs_time=wrong)
+
+
+@pytest.mark.xdist_group("ecma-loudness-ref")
+def test_a_last_evaluated_block_off_the_time_axis_is_refused(
+    ref_1k_40: psychoacoustics.EcmaLoudness,
+) -> None:
+    """l_end indexes ``times``: one past its end would read the padding too."""
+    import dataclasses
+
+    last = ref_1k_40.times.size - 1
+    kept = dataclasses.replace(ref_1k_40, last_evaluated_block=last)
+    assert kept.last_evaluated_block == last
+    for wrong in (last + 1, -1):
+        with pytest.raises(ValueError, match=r"'last_evaluated_block'"):
+            dataclasses.replace(ref_1k_40, last_evaluated_block=wrong)
+    with pytest.raises(TypeError, match=r"'last_evaluated_block' must be a whole"):
+        dataclasses.replace(ref_1k_40, last_evaluated_block=True)
 
 
 def test_invalid_field() -> None:
@@ -432,10 +452,28 @@ def _steady_state_basis_loudness(
     return sum(specific) * ECMA418_2_DZ, specific
 
 
-def test_the_steady_state_reading_holds_the_printed_tables() -> None:
-    """The closed form runs on all 53 bands of Table 3, at dz = 0.5."""
-    assert len(ECMA418_2_LTQ) == 53
-    assert ECMA418_2_DZ * len(ECMA418_2_LTQ) == pytest.approx(26.5)
+def test_the_front_end_holds_the_printed_tables() -> None:
+    """The code's copies of Tables 1-3 and the Clause 5.1.4 constants are the print's.
+
+    The closed form below reads the tables transcribed apart in
+    ``tests/reference_data``, and this holds the code's own transcription to
+    them, value for value. It is the only check of Table 3 in bands 48 to
+    52: no steady tone the closed-form tests use reaches the threshold in
+    quiet there, so a wrong LTQ in those bands would pass them.
+    """
+    from phonometry.psychoacoustics.loudness import ecma
+
+    assert np.array_equal(ecma._LTQ, ECMA418_2_LTQ)
+    assert np.array_equal(ecma._EAR_FREE, ECMA418_2_EAR_FILTER_FREE_FIELD)
+    assert np.array_equal(ecma._NL_LEVELS, ECMA418_2_NONLINEARITY_LEVELS_DB)
+    assert np.array_equal(ecma._NL_NU, ECMA418_2_NONLINEARITY_EXPONENTS)
+    assert ecma._NL_ALPHA == ECMA418_2_NONLINEARITY_ALPHA
+    assert ecma._DF0 == ECMA418_2_DELTA_F0_HZ
+    assert ecma._C == ECMA418_2_BANDWIDTH_C
+    assert ecma._K == ECMA418_2_FILTER_ORDER
+    assert np.array_equal(ecma._E_K5, ECMA418_2_FILTER_E)
+    assert ecma._DZ == ECMA418_2_DZ
+    assert np.array_equal(ecma._Z, ECMA418_2_DZ * np.arange(1, len(ECMA418_2_LTQ) + 1))
 
 
 @pytest.mark.parametrize(
@@ -483,14 +521,18 @@ def test_total_basis_loudness_of_a_steady_tone_is_formula_26(
     specific = captured[0]
     assert specific.shape == (result.times.size, 53)
     assert np.allclose(specific[steady], expected_specific, rtol=1e-5, atol=1e-12)
-    assert np.allclose(
-        result.basis_loudness_vs_time_sone_hms[steady], expected_total, rtol=1e-6
-    )
+    assert np.allclose(result.basis_loudness_vs_time[steady], expected_total, rtol=1e-6)
     # Formula 26 is the sum over the 53 bands times dz, block by block.
     assert np.array_equal(
-        result.basis_loudness_vs_time_sone_hms,
+        result.basis_loudness_vs_time,
         np.sum(specific, axis=1) * ECMA418_2_DZ,
     )
+    # Every block is kept: the transient blocks 0 to 56 that Formulae 115 and
+    # 117 leave out of N, and the blocks after l_end of Formula 40.
+    l_end = math.ceil(38400 / 48000 * 187.5)
+    assert result.last_evaluated_block == l_end
+    assert result.basis_loudness_vs_time[:57].max() > 0.0
+    assert result.basis_loudness_vs_time[l_end + 1 :].max() > 0.0
 
 
 def test_a_tone_near_threshold_is_read_against_the_audibility_criterion() -> None:
@@ -506,13 +548,34 @@ def test_a_tone_near_threshold_is_read_against_the_audibility_criterion() -> Non
     for level_db, audible in ((0.0, True), (-1.0, False)):
         result = psychoacoustics.loudness_ecma(_tone(1000.0, level_db, seconds=0.8), FS)
         expected, _ = _steady_state_basis_loudness(1000.0, level_db)
-        steady = result.basis_loudness_vs_time_sone_hms[64:137]
+        steady = result.basis_loudness_vs_time[64:137]
         assert (expected > criterion) is audible
         assert steady == pytest.approx(np.full(steady.shape, expected), rel=5e-3)
         assert bool(np.all(steady > criterion)) is audible
-        assert bool(np.any(result.basis_loudness_vs_time_sone_hms > criterion)) is (
-            audible
-        )
+        evaluated = result.basis_loudness_vs_time[: result.last_evaluated_block + 1]
+        assert bool(np.any(evaluated > criterion)) is audible
+
+
+def test_the_blocks_after_l_end_leave_the_audibility_reading() -> None:
+    """A tone cut off mid-cycle is inaudible in every block up to l_end.
+
+    A 63 Hz tone at 36 dB SPL stays under the threshold in quiet in every
+    band, so N_basis is zero in every block that holds it. Cut off abruptly
+    at 48128 samples, a multiple of 256, it leaves the auditory filters
+    ringing in the blocks after l_end of Formula 40, which hold the zero
+    padding Clause 6.2.6 removes; there N_basis passes 0.01 sone_HMS, so a
+    comparison over every block would call the tone audible.
+    """
+    criterion = psychoacoustics.AUDIBILITY_THRESHOLD_SONE_HMS
+    t = np.arange(48128) / FS
+    tone = np.sqrt(2.0) * 2e-5 * 10 ** (36.0 / 20.0) * np.sin(2.0 * np.pi * 63.0 * t)
+    result = psychoacoustics.loudness_ecma(tone, FS)
+    l_end = math.ceil(48128 / 48000 * 187.5)
+    assert result.last_evaluated_block == l_end
+    evaluated = result.basis_loudness_vs_time[: l_end + 1]
+    assert np.all(evaluated == 0.0)
+    assert not bool(np.any(evaluated > criterion))
+    assert result.basis_loudness_vs_time[l_end + 1 :].max() > criterion
 
 
 def test_every_band_starts_on_the_block_that_first_holds_the_sound(
@@ -520,16 +583,19 @@ def test_every_band_starts_on_the_block_that_first_holds_the_sound(
 ) -> None:
     """The bands of every block size line up on the common grid of Clause 6.2.6.
 
-    Block l of a band with block size s_b and hop s_h ends at sample l s_h of
-    the signal (Formulae 18 and 19, block 0 at 0 ms), and Clause 6.2.6 puts it
-    at index l s_h / 256 of the grid, filling the gaps by linear
-    interpolation (Table 6). A sound that starts at a sample n_0 that every
-    hop divides leaves every block that ends by n_0 silent, so in every band
-    N'_basis(l, z) is exactly zero up to l = n_0 / 256 and above zero at the
-    next index, where the first block that holds some of the sound, or the
-    interpolation towards it, begins. The sound is noise at 80 dB SPL with a
-    46.875 Hz tone at 90 dB SPL, which lifts the lowest band, whose threshold
-    in quiet is the highest of Table 3, above it in its first partial block.
+    Block l of a band with block size s_b and hop s_h ends at sample
+    l s_h - 1 of the signal, just before sample l s_h (Formulae 18 and 19,
+    block 0 at 0 ms), and Clause 6.2.6 puts it at index l s_h / 256 of the
+    grid, filling the gaps by linear interpolation (Table 6). A sound that
+    starts at a sample n_0 that every hop divides leaves every block that
+    ends before n_0 silent, so in every band N'_basis(l, z) is exactly zero
+    up to l = n_0 / 256 and above zero at the next index, where the first
+    block that holds some of the sound, or the interpolation towards it,
+    begins. Between that silent block and the next native block of a band
+    the grid holds the straight line between the two, which a hold of either
+    value would break. The sound is noise at 80 dB SPL with a 46.875 Hz tone
+    at 90 dB SPL, which lifts the lowest band, whose threshold in quiet is
+    the highest of Table 3, above it in its first partial block.
     """
     import phonometry.psychoacoustics.loudness.ecma as ecma
 
@@ -553,5 +619,17 @@ def test_every_band_starts_on_the_block_that_first_holds_the_sound(
     last_silent = onset // 256
     assert np.all(specific[: last_silent + 1] == 0.0)
     assert np.all(specific[last_silent + 1] > 0.0)
-    assert np.all(result.basis_loudness_vs_time_sone_hms[: last_silent + 1] == 0.0)
-    assert result.basis_loudness_vs_time_sone_hms[last_silent + 1] > 0.0
+    assert np.all(result.basis_loudness_vs_time[: last_silent + 1] == 0.0)
+    assert result.basis_loudness_vs_time[last_silent + 1] > 0.0
+    # Table 6: the (i - 1) inserted samples lie on the line between the silent
+    # native block at index n_0 / 256 (every factor divides 80) and the next
+    # native block, i indices on.
+    for band in range(53):
+        factor = int(ecma._INTERP[band])
+        if factor > 1:
+            assert np.allclose(
+                specific[last_silent : last_silent + factor + 1, band],
+                np.arange(factor + 1) / factor * specific[last_silent + factor, band],
+                rtol=1e-12,
+                atol=0.0,
+            ), band

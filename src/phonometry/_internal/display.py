@@ -195,9 +195,6 @@ _UNITS: Mapping[str, str] = MappingProxyType(
         "hp": "hp",
         # A ratio.
         "percent": "%",
-        # The loudness of the Sottek Hearing Model, which ECMA-418-2 prints
-        # with the model in its unit; a plain sone is ISO 532's.
-        "sone_hms": "sone_HMS",
     }
 )
 

@@ -353,8 +353,9 @@ plt.show()
 
 Returns an `EcmaLoudness`: `loudness` ($N$, sone_HMS), `specific_loudness`
 ($N'(z)$, 53 bands), `bark`, `frequencies`, `times`, `loudness_vs_time`
-($N(l)$ at 187.5 Hz), `basis_loudness_vs_time_sone_hms` ($N_\text{basis}(l)$
-at the same `times`), `field`.
+($N(l)$ at 187.5 Hz), `basis_loudness_vs_time` ($N_\text{basis}(l)$,
+sone_HMS, at the same `times`), `last_evaluated_block` ($l_\text{end}$ of
+Formula 40), `field`.
 
 **Is the sound audible?** Clause 5.1.9 calls a signal audible when its total
 basis loudness exceeds 0.01 sone_HMS, the
@@ -362,15 +363,22 @@ basis loudness exceeds 0.01 sone_HMS, the
 total, $N_\text{basis}$ of Formula (26), is the specific basis loudness
 $N'_\text{basis}$ of Formula (25), the output of the front-end before any
 tonal or noise split, summed over the 53 bands with $\Delta z = 0.5$.
-`loudness_ecma()` returns it block by block as
-`basis_loudness_vs_time_sone_hms`, on the 187.5 Hz grid of `times`: each band
-is computed at its own block size and resampled to that grid, as Clause 6.2.6
-resamples the tonal and noise loudness. The standard prints Formula (26)
-without a time index, so one value per block is this library's reading. No
-function applies the criterion: compare that field with it, not `loudness`,
-which is the $N$ of Formula (117), assembled from the tonal and noise
-loudness of Clause 8. A tone at the edge of hearing can leave $N$ at zero
-while its basis loudness clears the criterion:
+`loudness_ecma()` returns it block by block as `basis_loudness_vs_time`, on
+the 187.5 Hz grid of `times`: each band is computed at the block size Clause
+5.1.5.1 gives it for loudness (Table 4) and resampled to that grid, as Clause
+6.2.6 resamples the tonal and noise loudness. Clause 5.1.9 prints Formula (26)
+without a time index and names no segmentation, so one value per block of
+this segmentation is this library's reading; roughness and fluctuation
+strength segment by Clause 5.1.5.2 instead, and for a sound that changes in
+time they form a different total. No function applies the criterion. The
+library compares it with every block up to `last_evaluated_block`, the
+$l_\text{end}$ of Formula (40), and calls the sound audible when one of them
+exceeds it, a reading of its own too, since Clause 5.1.9 says neither: the
+blocks after $l_\text{end}$ hold the zero padding whose results Clause 6.2.6
+removes, where a sound cut off abruptly leaves the auditory filters ringing.
+Compare that total, not `loudness`, which is the $N$ of Formula (117),
+assembled from the tonal and noise loudness of Clause 8. A tone at the edge of
+hearing can leave $N$ at zero while its basis loudness clears the criterion:
 
 ```python
 # `np`, `fs`, `t` and `psychoacoustics` come from the snippet above.
@@ -378,11 +386,12 @@ while its basis loudness clears the criterion:
 quiet = np.sqrt(2) * 2e-5 * 10 ** (0 / 20) * np.sin(2 * np.pi * 1000 * t)
 faint = psychoacoustics.loudness_ecma(quiet, fs, field="free")
 
-n_basis = faint.basis_loudness_vs_time_sone_hms   # N_basis(l), one per block of faint.times
+# N_basis(l) of the blocks that hold the signal, l = 0 to l_end (Formula 40).
+n_basis = faint.basis_loudness_vs_time[: faint.last_evaluated_block + 1]
 audible = n_basis > psychoacoustics.AUDIBILITY_THRESHOLD_SONE_HMS
-print(f"N = {faint.loudness:.4f} sone_HMS")        # 0.0000 sone_HMS: N of Formula 117
+print(f"N = {faint.loudness:.4f} sone_HMS")           # 0.0000 sone_HMS: N of Formula 117
 print(f"max N_basis = {n_basis.max():.4f} sone_HMS")  # 0.0118 sone_HMS
-print(audible.any())                               # True: audible (clause 5.1.9)
+print(audible.any())   # True: above the criterion in a block, the library's reading
 ```
 
 ## Quick answers

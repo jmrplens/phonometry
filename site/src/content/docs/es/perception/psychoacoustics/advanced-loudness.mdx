@@ -537,8 +537,9 @@ plt.show()
 
 Devuelve un `EcmaLoudness`: `loudness` ($N$, sone_HMS), `specific_loudness`
 ($N'(z)$, 53 bandas), `bark`, `frequencies`, `times`, `loudness_vs_time`
-($N(l)$ a 187,5 Hz), `basis_loudness_vs_time_sone_hms` ($N_\text{basis}(l)$
-en los mismos `times`), `field`.
+($N(l)$ a 187,5 Hz), `basis_loudness_vs_time` ($N_\text{basis}(l)$,
+sone_HMS, en los mismos `times`), `last_evaluated_block` ($l_\text{end}$ de la
+fórmula 40), `field`.
 
 **¿Es audible el sonido?** El apartado 5.1.9 considera audible una señal
 cuando su sonoridad básica total supera 0,01 sone_HMS, el
@@ -546,16 +547,25 @@ cuando su sonoridad básica total supera 0,01 sone_HMS, el
 total, $N_\text{basis}$ de la fórmula (26), es la sonoridad básica específica
 $N'_\text{basis}$ de la fórmula (25), la salida de la etapa auditiva antes de
 separar lo tonal del ruido, sumada en las 53 bandas con $\Delta z = 0,5$.
-`loudness_ecma()` lo devuelve bloque a bloque como
-`basis_loudness_vs_time_sone_hms`, en la rejilla de 187,5 Hz de `times`: cada
-banda se calcula con su propio tamaño de bloque y se remuestrea a esa
-rejilla, como el apartado 6.2.6 remuestrea la sonoridad tonal y la de ruido.
-La norma imprime la fórmula (26) sin índice de tiempo, así que un valor por
-bloque es la lectura de esta biblioteca. Ninguna función aplica el criterio:
-compara con él ese campo, no `loudness`, que es la $N$ de la fórmula (117),
-ensamblada a partir de la sonoridad tonal y de ruido del apartado 8. Un tono
-en el límite de la audición puede dejar $N$ en cero mientras su sonoridad
-básica supera el criterio:
+`loudness_ecma()` lo devuelve bloque a bloque como `basis_loudness_vs_time`,
+en la rejilla de 187,5 Hz de `times`: cada banda se calcula con el tamaño de
+bloque que el apartado 5.1.5.1 le da para la sonoridad (tabla 4) y se
+remuestrea a esa rejilla, como el apartado 6.2.6 remuestrea la sonoridad tonal
+y la de ruido. El apartado 5.1.9 imprime la fórmula (26) sin índice de tiempo
+y no nombra ninguna segmentación, así que un valor por bloque de esta
+segmentación es la lectura de esta biblioteca; la aspereza y la intensidad de
+fluctuación segmentan en cambio según el apartado 5.1.5.2, y para un sonido
+que cambia en el tiempo forman otro total. Ninguna función aplica el
+criterio. La biblioteca lo compara con cada bloque hasta
+`last_evaluated_block`, el $l_\text{end}$ de la fórmula (40), y da el sonido
+por audible cuando alguno lo supera, también una lectura propia, porque el
+apartado 5.1.9 no dice ninguna de las dos cosas: los bloques posteriores a
+$l_\text{end}$ contienen el relleno de ceros cuyos resultados elimina el
+apartado 6.2.6, donde un sonido cortado de golpe deja resonando los filtros
+auditivos. Compara con él ese total, no `loudness`, que es la $N$ de la
+fórmula (117), ensamblada a partir de la sonoridad tonal y de ruido del
+apartado 8. Un tono en el límite de la audición puede dejar $N$ en cero
+mientras su sonoridad básica supera el criterio:
 
 ```python
 # `np`, `fs`, `t` y `psychoacoustics` vienen del fragmento de arriba.
@@ -563,11 +573,12 @@ básica supera el criterio:
 quiet = np.sqrt(2) * 2e-5 * 10 ** (0 / 20) * np.sin(2 * np.pi * 1000 * t)
 faint = psychoacoustics.loudness_ecma(quiet, fs, field="free")
 
-n_basis = faint.basis_loudness_vs_time_sone_hms   # N_basis(l), uno por bloque de faint.times
+# N_basis(l) de los bloques que contienen la señal, l = 0 a l_end (fórmula 40).
+n_basis = faint.basis_loudness_vs_time[: faint.last_evaluated_block + 1]
 audible = n_basis > psychoacoustics.AUDIBILITY_THRESHOLD_SONE_HMS
-print(f"N = {faint.loudness:.4f} sone_HMS")        # 0.0000 sone_HMS: la N de la fórmula 117
+print(f"N = {faint.loudness:.4f} sone_HMS")           # 0.0000 sone_HMS: la N de la fórmula 117
 print(f"max N_basis = {n_basis.max():.4f} sone_HMS")  # 0.0118 sone_HMS
-print(audible.any())                               # True: audible (apartado 5.1.9)
+print(audible.any())   # True: supera el criterio en un bloque, la lectura de la biblioteca
 ```
 
 ## Qué cubre esta guía
@@ -593,11 +604,12 @@ La combinación binaural de ECMA-418-2 (Fórmula 118, apartado 8.1.5) no está
 implementada: `loudness_ecma()` es monaural, así que analiza cada canal por
 separado. El criterio de audibilidad del apartado 5.1.9 se publica como
 constante y ninguna función lo aplica: compara con él la sonoridad básica
-total. El apartado 5 de ISO 532-3 exige remuestrear la entrada a 32 kHz
-antes del análisis FFT deslizante. Esta implementación procesa en cambio a la
-frecuencia de muestreo nativa, una desviación documentada que se mantiene
-dentro de la incertidumbre expandida de la norma. Remuestrea a 32 kHz primero
-si te importa la conformidad estricta apartado a apartado.
+total, bloque a bloque hasta `last_evaluated_block`. El apartado 5 de
+ISO 532-3 exige remuestrear la entrada a 32 kHz antes del análisis FFT
+deslizante. Esta implementación procesa en cambio a la frecuencia de muestreo
+nativa, una desviación documentada que se mantiene dentro de la incertidumbre
+expandida de la norma. Remuestrea a 32 kHz primero si te importa la
+conformidad estricta apartado a apartado.
 </ScopeClaim>
 </Scope>
 

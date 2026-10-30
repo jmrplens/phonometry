@@ -96,11 +96,16 @@ site/node_modules/
 site/dist/
 site/.astro/
 
-# Published copies of the root-level llms artifacts (llms.txt and
-# llms-full.txt). The prebuild step copies them in from the repo root, which
-# is where the committed originals live. The per-area shards are not ignored:
-# they are committed in site/public/llms/, which this pattern does not reach.
+# The llms files the site publishes: llms.txt, llms-full.txt and the shards
+# under llms/, written into site/public/ before the build by
+# `scripts/generate_llms.py --build` from the Markdown copies of the pages,
+# whose headers carry the dates git gives each page, which no committed file
+# can carry. Only the dateless index, llms.txt at the repository root, is
+# committed (`make llms`); /llms-full.txt is where the old layout kept the
+# full text.
 site/public/llms*.txt
+site/public/llms/
+/llms-full.txt
 stub/dist/
 stub/src/*.egg-info/
 .playwright-mcp/

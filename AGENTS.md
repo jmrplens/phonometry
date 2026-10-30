@@ -28,7 +28,12 @@ source .venv/bin/activate
 pip install -r requirements.txt
 pip install -r requirements-dev.txt
 pip install -e ".[full]"
+(cd site && corepack enable && pnpm install --frozen-lockfile)
 ```
+
+The last line needs Node 24: `make llms` writes `llms.txt` from the site's own
+pages and reads them with the site's packages (`make site-deps` runs that line
+and says what is missing).
 
 ## Before a pull request
 

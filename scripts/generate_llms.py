@@ -10,8 +10,17 @@ as the library grew, so it ended up naming 42 of 221 English pages: whole
 domains the front page advertises (aircraft noise, underwater propagation, FDTD
 simulation, the entire API reference) were invisible to anything reading it,
 and the summary still described a filter bank. The list is derived from the
-documentation tree now, and :func:`_routes` raises if a page cannot be placed,
-so the same drift cannot happen quietly again.
+site now, and a page that cannot be placed stops the run, so the same drift
+cannot happen quietly again.
+
+Every page comes from the site itself. ``site/scripts/agent-md.mjs --dump``
+writes the routes of the English site (``routes.json``: each page's kind,
+title, description and the standards it implements) and the Markdown copy of
+every page these files carry, the same copy the site publishes beside the
+page at ``<page>/index.md``. This script reads that dump (``--pages``) and
+nothing else of the pages: the hand-written mirror under ``docs/``, which
+these files used to be cut from, said less than the site and named its pages
+otherwise.
 
 Three kinds of artifact are produced:
 
@@ -22,43 +31,52 @@ Three kinds of artifact are produced:
     with its row count, where the Markdown copies are, the Spanish tree and
     the API reference as an Optional section. Every English page is linked
     (see :func:`_check_index_covers_the_site`).
+    Committed, and dateless, so that it changes only when the site does
+    (``make llms``).
 ``llms/llms-<area>.txt``
-    One shard per documented area, each small enough to survive a single fetch.
-    ``llms-full.txt`` is roughly 291k tokens, so a client that truncates at a
-    few hundred kilobytes (most of them do) reads the first few metrology
-    guides and nothing else, which is the worst possible sample: it looks like
-    the old narrow library. A shard that holds one page too long for a single
-    fetch travels in numbered parts instead, ``llms-<area>-1.txt``,
-    ``llms-<area>-2.txt`` and so on, cut at the page's own H2 headings (see
-    :func:`_page_parts`).
+    One shard per documented area, each small enough to survive a single fetch,
+    plus one for the conformance report, one set for the errata register and one
+    per published catalogue. ``llms-full.txt`` is several megabytes, so a client
+    that truncates at a few hundred kilobytes (most of them do) reads the first
+    few metrology guides and nothing else, which is the worst possible sample:
+    it looks like the old narrow library. A shard too long for one fetch
+    travels in numbered parts instead, ``llms-<area>-1.txt``,
+    ``llms-<area>-2.txt`` and so on (see :func:`_shard_parts`).
 ``llms-full.txt``
     The complete concatenation, kept for clients that can take it.
 
-The two index-level artifacts live at the repo root and are published to the
-site root by site/scripts/copy-llms.mjs (prebuild). The shards are written
-straight into site/public/llms/, which Astro serves verbatim under
-``/llms/``, so the site root holds exactly the two files the llms.txt
-convention names. Deterministic: regenerate with ``make llms``.
+Each page in a shard and in ``llms-full.txt`` is its Markdown copy, byte for
+byte, header included: the header says where the page lives, for which
+release, by whom, when, and against which standards, so a passage read from a
+shard can be cited and dated. The header carries the dates the page was
+published and last changed, and a committed file cannot carry the date of the
+commit that commits it, so the shards and ``llms-full.txt`` are not committed:
+the site build writes them (``--build``, run by ``site/package.json``
+``prebuild``) into ``site/public/``, which the build publishes, and the check
+of the Markdown copies (``site/scripts/check-markdown-twins.mjs``) holds every
+page they carry to its copy. Where a shard is cut does not depend on the
+dates, so the ``llms.txt`` that ``make llms`` writes from a dump without them
+names the same files the build writes.
 """
 
 from __future__ import annotations
 
+import argparse
+import dataclasses
 import functools
-import itertools
 import json
 import pathlib
-import posixpath
 import re
 import subprocess
 import tomllib
 from typing import TYPE_CHECKING
 
 from generate_site_reports import family_pages
-from markdown_fences import NOT_INLINE_ROLES, code_lines, page_lines
-from markdown_spans import blank_inline_spans_by_block, page_markup
+from markdown_fences import code_lines
+from markdown_spans import page_markup
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping
+    from collections.abc import Iterable, Mapping, Sequence
 
     from generate_site_reports import FamilyPage
 
@@ -114,85 +132,31 @@ def _shown(path: pathlib.Path) -> pathlib.Path:
     return path.relative_to(ROOT) if path.is_relative_to(ROOT) else path
 
 
-@functools.cache
-def _repository_files() -> frozenset[str] | None:
-    """Every file of the repository, kept or new, that git does not ignore, as repo-relative paths.
-
-    What a link of the mirror may name: a file one checkout holds and git
-    ignores (a local plan) is on no other copy of the repository, and an
-    address on GitHub built from it would lead nowhere. A file git keeps
-    counts whether or not this checkout holds it: the docs build checks out
-    a sparse cone of the repository, where src/ and tests/ are in git's
-    index and not on disk, and GitHub serves them all the same. A file git
-    does not keep yet counts only while it is on disk. None where git cannot
-    list them, in a tree with no ``.git`` (a source archive), which holds
-    the repository's files and nothing git ignores, so that the files on
-    disk are the answer there.
-    """
-    listings: list[list[str]] = []
-    for which in (["--cached"], ["--others", "--exclude-standard"]):
-        try:
-            result = subprocess.run(
-                ["git", "ls-files", *which, "-z"],
-                capture_output=True,
-                text=True,
-                encoding="utf-8",
-                cwd=ROOT,
-                check=False,
-            )
-        except FileNotFoundError:
-            return None
-        if result.returncode != 0:
-            return None
-        listings.append([name for name in result.stdout.split("\0") if name])
-    kept, new = listings
-    return frozenset(kept) | {name for name in new if (ROOT / name).is_file()}
-
-
-@functools.cache
-def _repository_folders() -> frozenset[str] | None:
-    """Every folder that holds a file of :func:`_repository_files`, or None as it gives."""
-    files = _repository_files()
-    if files is None:
-        return None
-    return frozenset(
-        str(parent)
-        for name in files
-        for parent in pathlib.PurePosixPath(name).parents
-        if str(parent) != "."
-    )
-
-
-def _kept(path: str) -> str | None:
-    """``"blob"`` for a file of the repository, ``"tree"`` for a folder of it, else None."""
-    if path == ".." or path.startswith("../"):
-        return None
-    files, folders = _repository_files(), _repository_folders()
-    if files is None or folders is None:
-        on_disk = ROOT / path
-        if on_disk.is_file():
-            return "blob"
-        return "tree" if on_disk.is_dir() else None
-    if path in files:
-        return "blob"
-    return "tree" if path in folders else None
-
-
 CONTENT = ROOT / "site" / "src" / "content" / "docs"
-#: Where the per-area shards live. Everything under site/public is served
-#: verbatim at the site root, so these publish at /llms/llms-<area>.txt and
-#: the site root keeps exactly llms.txt and llms-full.txt.
-SHARDS_DIR = ROOT / "site" / "public" / "llms"
+#: Where the site build publishes the llms files from: everything under
+#: site/public is served verbatim at the site root.
+PUBLIC = ROOT / "site" / "public"
+#: Where the per-area shards are written by ``--build``, so they publish at
+#: /llms/llms-<area>.txt and the site root keeps exactly llms.txt and
+#: llms-full.txt.
+SHARDS_DIR = PUBLIC / "llms"
+#: The dump ``site/scripts/agent-md.mjs --dump`` writes, read by default.
+PAGES = ROOT / "build" / "agent-md"
+#: The committed index ``make llms`` writes.
+INDEX = ROOT / "llms.txt"
 SITE_URL = "https://docs.jmrp.io/phonometry"
 REPO_URL = "https://github.com/jmrplens/phonometry"
+
+#: The hand-written table of every public name, which only docs/ holds.
+QUICK_API_TABLE = "docs/reference/api/index.md"
 DOI = "10.5281/zenodo.21215280"
 
 #: Shard budget. Comfortably under the truncation limit of the AI fetch tools
 #: that cap response size, with room for a page to grow. Enforced: main() exits
 #: non-zero if a shard is over it (see :func:`_check_shard_budget`). A shard
 #: exactly at the limit passes; only strictly over fails, both here and in the
-#: message it raises. A shard of a single page over it is cut into parts at the
-#: page's H2 headings rather than refused (see :func:`_page_parts`).
+#: message it raises. A shard over it is cut into parts rather than refused
+#: (see :func:`_shard_parts`).
 SHARD_LIMIT_BYTES = 200_000
 
 #: The budget of ``llms.txt`` itself. It lists every English page with what
@@ -209,8 +173,19 @@ CATALOGUE_DATA = ROOT / "site" / "src" / "generated" / "catalogues.mjs"
 #: The title of the upgrade guide's shard, in its head and in the index.
 UPGRADING_TITLE = "Upgrading from 3.3 to 4.0"
 
-#: The glossary page, which has a shard of its own (see :func:`build_shards`).
+#: The glossary page, which has a shard of its own (see :func:`_shard_plan`).
 GLOSSARY_ROUTE = "reference/glossary"
+
+#: The conformance report, which has a shard of its own: at more than 400 kB
+#: it is cut into parts at its sections, one per domain.
+CONFORMANCE_ROUTE = "reference/conformance"
+
+#: The index of the errata register, which opens the register's shard.
+ERRATA_ROUTE = "reference/errata"
+
+#: The index of the published catalogues, which links one page per catalogue.
+CATALOGUES_ROUTE = "reference/catalogues"
+
 
 #: The bibliography, which has a shard of its own (see :func:`build_shards`).
 BIBLIOGRAPHY_ROUTE = "reference/bibliography"
@@ -257,24 +232,47 @@ START_ROUTES = (
     "start/support",
 )
 
-#: The start page that travels in a shard of its own (see :func:`build_shards`).
+#: The start page that travels in a shard of its own (see :func:`_shard_plan`).
 UPGRADING_ROUTE = "start/upgrading"
 
+#: The kinds of page ``routes.json`` names (site/src/lib/page-markdown.mjs
+#: ``pageKind``).
+KINDS = frozenset({"home", "api", "catalogue", "errata-family", "guide"})
 
-def _content_routes() -> set[str]:
-    """Every English route of the site source, as the docs collection names them.
+#: The header lines of a copy that carry a date read from git. ``make llms``
+#: writes llms.txt from copies without them (``agent-md.mjs --dump
+#: --undated``), so a shard is measured as if both were there, whether they are
+#: or not: the cut, and the file names llms.txt lists, cannot then depend on
+#: what git answered.
+DATED_HEADER_KEYS = ("Published", "Updated")
 
-    A file's route is its path under ``src/content/docs`` without the
-    extension, an ``index`` file standing for its folder and the root one for
-    the landing page (``routeOf`` of ``site/src/lib/page-markdown.mjs``).
-    """
-    routes = set()
-    for path in CONTENT.rglob("*.md*"):
-        relative = path.relative_to(CONTENT).with_suffix("").as_posix()
-        if relative.split("/")[0] == "es":
-            continue
-        routes.add(re.sub(r"(?:^|/)index$", "", relative))
-    return routes
+#: What the dated lines take when they are there: the key, ``: ``, a
+#: ``YYYY-MM-DD`` day and the end of the line.
+DATED_LINES_BYTES = sum(len(f"{key}: 0000-00-00\n") for key in DATED_HEADER_KEYS)
+
+#: A dated header line, as the header writes one.
+_DATED_LINE = re.compile(
+    rf"^(?:{'|'.join(DATED_HEADER_KEYS)}): [0-9]{{4}}-[0-9]{{2}}-[0-9]{{2}}$"
+)
+
+#: What closes every page in a shard and in llms-full.txt: a blank line and a
+#: rule. A page opens with the ``# `` title of its copy and the sentence under
+#: it, which is how site/scripts/check-markdown-twins.mjs finds each page again.
+PAGE_END = "\n\n---\n"
+
+
+@dataclasses.dataclass(frozen=True)
+class Page:
+    """One English route, as ``routes.json`` describes it."""
+
+    route: str
+    kind: str
+    title: str
+    description: str
+    standards: tuple[str, ...]
+    #: The copy's path in the dump, or None for a page these files do not
+    #: carry (the landing page, the API reference).
+    copy: str | None
 
 
 def _source_of(route: str) -> pathlib.Path:
@@ -448,17 +446,123 @@ def _conformance_counts() -> tuple[int, int, int, int]:
         raise SystemExit(msg) from error
 
 
+#: What to run when the dump is missing or older than the site.
+_REDUMP = (
+    "Write it again with `make llms`, or with `node scripts/agent-md.mjs "
+    "--dump ../build/agent-md --undated` from site/."
+)
+
+
 @functools.cache
-def _routes() -> list[tuple[str, str]]:
-    """Every docs/ page as ``(path under docs/, site route)``.
+def _read_dump(pages: pathlib.Path, _stamp: tuple[int, int] | None) -> dict[str, Page]:
+    """Every English route of a dump, by route, as ``routes.json`` lists them.
+
+    Read once per state of ``routes.json`` (*_stamp*, its modification time
+    and size), so a dump written again is read again.
+    """
+    listing = pages / "routes.json"
+    try:
+        entries = json.loads(listing.read_text(encoding="utf-8"))["pages"]
+    except (OSError, ValueError, KeyError, TypeError) as error:
+        msg = (
+            f"generate_llms.py: cannot read the pages at {listing} ({error}). {_REDUMP}"
+        )
+        raise SystemExit(msg) from error
+    found: dict[str, Page] = {}
+    for entry in entries:
+        page = Page(
+            route=str(entry["route"]),
+            kind=str(entry["kind"]),
+            title=str(entry["title"]),
+            description=str(entry["description"]),
+            standards=tuple(str(item) for item in entry["standards"]),
+            copy=None if entry["copy"] is None else str(entry["copy"]),
+        )
+        if page.kind not in KINDS:
+            msg = f"generate_llms.py: {listing} gives {page.route!r} the unknown kind {page.kind!r}"
+            raise SystemExit(msg)
+        found[page.route] = page
+    return found
+
+
+def _dump() -> dict[str, Page]:
+    """The routes of the dump this run reads (:data:`PAGES`)."""
+    try:
+        stat = (PAGES / "routes.json").stat()
+    except OSError:
+        return _read_dump(PAGES, None)
+    return _read_dump(PAGES, (stat.st_mtime_ns, stat.st_size))
+
+
+def _content_routes() -> set[str]:
+    """Every English route of the site source, as the docs collection names them.
+
+    A file's route is its path under ``src/content/docs`` without the
+    extension, an ``index`` file standing for its folder and the root one for
+    the landing page (site/src/lib/page-markdown.mjs ``routeOf``).
+    """
+    routes = set()
+    for path in CONTENT.rglob("*.md*"):
+        relative = path.relative_to(CONTENT).with_suffix("").as_posix()
+        if relative.split("/")[0] == "es":
+            continue
+        routes.add(re.sub(r"(?:^|/)index$", "", relative))
+    return routes
+
+
+def _check_dump_matches_the_tree() -> None:
+    """The dump has every English page of the site source, and no other.
+
+    A dump is written by a separate command, so one left from an earlier
+    checkout would otherwise publish an index of pages that have moved, with
+    the new ones missing and no error anywhere.
+    """
+    dumped = set(_dump())
+    on_disk = _content_routes()
+    missing = sorted(on_disk - dumped)
+    extra = sorted(dumped - on_disk)
+    if missing or extra:
+        parts = []
+        if missing:
+            parts.append(
+                "page(s) of the site the dump does not hold: " + ", ".join(missing)
+            )
+        if extra:
+            parts.append(
+                "route(s) of the dump the site no longer has: " + ", ".join(extra)
+            )
+        msg = (
+            f"generate_llms.py: the dump at {PAGES} is not the site's: "
+            + "; ".join(parts)
+            + f". {_REDUMP}"
+        )
+        raise SystemExit(msg)
+
+
+def _routes() -> list[str]:
+    """Every page whose whole text these files carry, by route, sorted."""
+    return sorted(route for route, page in _dump().items() if page.copy is not None)
+
+
+def _page(route: str) -> Page:
+    """The dump's entry for a route, which must be there."""
+    page = _dump().get(route)
+    if page is None:
+        msg = f"generate_llms.py: the dump at {PAGES} has no page {route!r}. {_REDUMP}"
+        raise SystemExit(msg)
+    return page
+
+
+def _mirror_pages() -> list[str]:
+    """Every page of the hand-written mirror under docs/, as its path there.
 
     The mirror is laid out like the site, so the route is the path: the page
-    at ``docs/signals/filters/filter-banks.md`` is published at
+    at ``docs/signals/filters/filter-banks.md`` mirrors
     ``/signals/filters/filter-banks/``. Raises if a mirror page has no page on
-    the site, which would otherwise vanish from llms.txt silently, exactly how
-    the hand-kept list rotted.
+    the site, which would otherwise keep a page of the GitHub edition that the
+    site no longer has.
     """
-    pages: list[tuple[str, str]] = []
+    pages: list[str] = []
     unmapped: list[str] = []
     for path in sorted(DOCS.rglob("*.md")):
         if path.parent == DOCS and path.stem in NOT_PAGES:
@@ -470,7 +574,7 @@ def _routes() -> list[tuple[str, str]]:
             continue
         # The contributor guide is for the repository's readers (people and
         # coding agents working on phonometry), not the library's: it has no
-        # site page and stays out of llms.txt by design.
+        # site page and stays out of the mirror's checks by design.
         if path.relative_to(DOCS).parts[0] == "contributing":
             continue
         route = path.relative_to(DOCS).with_suffix("").as_posix()
@@ -482,7 +586,7 @@ def _routes() -> list[tuple[str, str]]:
         if not published:
             unmapped.append(route)
             continue
-        pages.append((path.relative_to(DOCS).as_posix(), route))
+        pages.append(path.relative_to(DOCS).as_posix())
     if unmapped:
         raise SystemExit(
             "generate_llms.py: no site page for "
@@ -494,14 +598,11 @@ def _routes() -> list[tuple[str, str]]:
 
 
 def _api_routes() -> list[str]:
-    """Every generated API reference page route, English tree."""
-    api = CONTENT / "reference" / "api"
-    if not api.is_dir():
-        return []
+    """Every generated API reference page route, its index left out."""
     return sorted(
-        path.relative_to(CONTENT).with_suffix("").as_posix()
-        for path in api.rglob("*.md*")
-        if path.stem != "index"
+        route
+        for route, page in _dump().items()
+        if page.kind == "api" and route != "reference/api"
     )
 
 
@@ -524,6 +625,19 @@ def _overview(folder: pathlib.Path) -> pathlib.Path:
     return folder / "index.md"
 
 
+#: A link to a page of the site, in the source (``/phonometry/<route>/``) or in
+#: a copy (``https://docs.jmrp.io/phonometry/<route>/``), capturing the route.
+_SITE_LINK = re.compile(r"/phonometry/([a-z0-9-]+(?:/[a-z0-9-]+)*)/")
+
+
+def _linked(text: str, candidates: Iterable[str]) -> list[str]:
+    """The *candidates* a text links, in the order it first links them."""
+    allowed = set(candidates)
+    return [
+        route for route in dict.fromkeys(_SITE_LINK.findall(text)) if route in allowed
+    ]
+
+
 def _linked_guides(overview: pathlib.Path, guides: set[str], folder: str) -> list[str]:
     """Guide routes an overview links, in order, restricted to its own folder.
 
@@ -534,11 +648,7 @@ def _linked_guides(overview: pathlib.Path, guides: set[str], folder: str) -> lis
     """
     text = overview.read_text(encoding="utf-8") if overview.exists() else ""
     return [
-        route
-        for route in dict.fromkeys(
-            re.findall(r"/phonometry/([a-z0-9-]+(?:/[a-z0-9-]+)*)/", text)
-        )
-        if route in guides and route.rsplit("/", 1)[0] == folder
+        route for route in _linked(text, guides) if route.rsplit("/", 1)[0] == folder
     ]
 
 
@@ -561,13 +671,7 @@ def _subgroups(topic: str) -> list[str]:
         if path.parent != CONTENT / topic
     )
     text = _overview(CONTENT / topic).read_text(encoding="utf-8")
-    mentioned = [
-        folder
-        for folder in dict.fromkeys(
-            re.findall(r"/phonometry/([a-z0-9-]+(?:/[a-z0-9-]+)*)/", text)
-        )
-        if folder in folders
-    ]
+    mentioned = _linked(text, folders)
     return mentioned + [folder for folder in folders if folder not in mentioned]
 
 
@@ -595,13 +699,12 @@ def _area_members() -> dict[str, list[str]]:
     return members
 
 
-#: Manual carve-outs from a folder's own shard, for a folder whose guides are
-#: still over the fetch budget after subgroup splitting. Two folders need one,
-#: both because they have no subgroups of their own to divide by (unlike
-#: ``buildings/rooms`` or ``buildings/design``, which already get a shard each
-#: above). Each split follows a grouping the domain already makes rather than
-#: a cut chosen to fit the budget, so a reader fetching one shard gets a
-#: coherent set of guides and not an arbitrary half.
+#: Manual carve-outs from a folder's own shard, for a folder whose guides
+#: answer different questions a reader would fetch apart. A shard that is only
+#: too long for one fetch is cut into numbered parts by itself (see
+#: :func:`_shard_parts`); a carve-out is a grouping the domain already makes,
+#: so a reader fetching one shard gets a coherent set of guides and not an
+#: arbitrary half, and it stays even where the parts would do.
 #:
 #: ``buildings/insulation`` has twelve guides, and its own overview groups them
 #: by hand (``docs/buildings/insulation/index.md``: "Laboratory.", "Field.",
@@ -830,21 +933,18 @@ def _shard_members() -> dict[str, list[str]]:
     return shards
 
 
-def _page_title(path: pathlib.Path) -> str:
-    for line in path.read_text(encoding="utf-8").splitlines():
-        if line.startswith("# "):
-            return line[2:].strip()
-    return path.stem
+def _page_title(route: str) -> str:
+    """A page's title, as its frontmatter gives it and its tab shows it."""
+    return _page(route).title
 
 
 def _shard_label(slug: str) -> str:
-    """The human name of a shard: the H1 of the overview it opens with.
+    """The human name of a shard: the title of the overview it opens with.
 
     ``slug.capitalize()`` named none of the sections the site shows: it said
     "Signal metrology" where the site says "Calibration and uncertainty" and
     "Buildings rooms" where it says "Room acoustics". The overview's own title
-    is the name a reader of the site would recognise, and the mirror carries it
-    now.
+    is the name a reader of the site recognises.
     """
     labels = dict(AREAS)
     if slug in labels:
@@ -857,9 +957,8 @@ def _shard_label(slug: str) -> str:
     if slug in split_labels:
         return split_labels[slug]
     folder = _shard_folders().get(slug, slug)
-    index = DOCS / folder / "index.md"
-    if index.exists():
-        return _page_title(index)
+    if folder in _dump():
+        return _page_title(folder)
     return slug.replace("-", " ").capitalize()
 
 
@@ -1021,28 +1120,19 @@ def _shard_urls(shard_files: Mapping[str, tuple[str, ...]], slug: str) -> str:
     return ", ".join(_shard_url(name) for name in shard_files.get(slug, (slug,)))
 
 
-@functools.cache
-def _route_files() -> dict[str, str]:
-    """Site route -> its page under docs/."""
-    return {route: name for name, route in _routes()}
-
-
-def _page_entry(route: str) -> str | None:
-    """The index line of one page, or None when it has no mirror page.
+def _site_entry(label: str, route: str) -> str:
+    """The index line of a site page: its label linked, then what it is about.
 
     The line says what the page is about with the page's own meta
     description, so that a reader of the index can choose a page without
     fetching it.
     """
-    name = _route_files().get(route)
-    if name is None:
-        return None
-    return _site_entry(_page_title(DOCS / name), route)
-
-
-def _site_entry(label: str, route: str) -> str:
-    """The index line of a site page: its label linked, then what it is about."""
     return f"- [{label}]({SITE_URL}/{route}/): {_description(route)}"
+
+
+def _page_entry(route: str) -> str:
+    """The index line of one page: its title linked, then what it is about."""
+    return _site_entry(_page_title(route), route)
 
 
 def _start_section() -> list[str]:
@@ -1056,16 +1146,15 @@ def _start_section() -> list[str]:
         _site_entry(_frontmatter_field(_source_of(tasks), "title"), tasks),
     ]
     for route in START_ROUTES:
-        entry = _page_entry(route)
-        if entry is None:
+        if route not in _dump():
             # These are listed by hand, so an unresolvable one is always a
             # bug; the About page went missing this way once, silently.
             msg = (
                 f"generate_llms.py: START_ROUTES names {route}, "
-                "which has no mirror page"
+                "which is not a page of the site"
             )
             raise SystemExit(msg)
-        lines.append(entry)
+        lines.append(_page_entry(route))
     return [
         *lines,
         _site_entry("Guides index", "start/guides"),
@@ -1111,11 +1200,24 @@ def _area_section(
                     + _full_text_links(shard_files.get(group, (group,)))
                 ),
             ]
-        lines += [
-            entry for route in grouped.get(group, []) if (entry := _page_entry(route))
-        ]
+        lines += [_page_entry(route) for route in grouped.get(group, [])]
     lines.append("")
     return lines
+
+
+def _is_reference_page(route: str) -> bool:
+    """A page of the reference section the index lists one by one.
+
+    The API reference is listed by its index alone (each module is in
+    Optional), and the errata families and the catalogues travel in shards of
+    their own, which the Full text section lists.
+    """
+    page = _dump()[route]
+    if route == "reference/api":
+        return True
+    return page.kind == "guide" and (
+        route == "reference" or route.startswith("reference/")
+    )
 
 
 def _reference_section(shard_files: Mapping[str, tuple[str, ...]]) -> list[str]:
@@ -1126,19 +1228,16 @@ def _reference_section(shard_files: Mapping[str, tuple[str, ...]]) -> list[str]:
             "The theory pages travel in their own shard "
             f"({_shard_urls(shard_files, 'theory')}), the glossary in another "
             f"({_shard_urls(shard_files, 'glossary')}), and the rest of the "
-            f"reference in {_shard_urls(shard_files, 'reference')}."
+            f"reference in {_shard_urls(shard_files, 'reference')}. The "
+            "conformance report, the errata register and every published "
+            "catalogue have shards of their own, which the Full text section "
+            "below lists."
         ),
         "",
         _site_entry("Overview", "reference"),
     ]
     lines += [
-        entry
-        for route in sorted(
-            route
-            for route in _route_files()
-            if route.startswith("reference/") and route != "reference/why-phonometry"
-        )
-        if (entry := _page_entry(route))
+        _page_entry(route) for route in sorted(filter(_is_reference_page, _dump()))
     ]
     lines.append("")
     return lines
@@ -1189,10 +1288,6 @@ def _count(number: int, noun: str) -> str:
     if number == 1:
         return f"1 {noun}"
     return f"{number} {noun[:-1]}ies" if noun.endswith("y") else f"{number} {noun}s"
-
-
-#: Where the errata register's pages are, under the site's content.
-ERRATA_ROUTE = "reference/errata"
 
 
 def _errata_families() -> list[FamilyPage]:
@@ -1361,7 +1456,7 @@ def _copies_sentence() -> str:
     return sentence
 
 
-def _topic_shards(shard_slugs: tuple[str, ...]) -> list[str]:
+def _topic_shards(shard_slugs: Iterable[str]) -> list[str]:
     """The shards of the topics, in the order the site lists them.
 
     Grouped by topic, the topic's own shard first, so the list reads like the
@@ -1372,13 +1467,14 @@ def _topic_shards(shard_slugs: tuple[str, ...]) -> list[str]:
     actually built this run: a hand-kept list here published a link to a shard
     that a content move could stop producing.
     """
+    slugs = tuple(shard_slugs)
     folders = _shard_folders()
     ordered: list[str] = []
     for topic, _label in AREAS:
         nav_order = {folder: rank for rank, folder in enumerate(_subgroups(topic))}
-        ordered += [slug for slug in shard_slugs if slug == topic]
+        ordered += [slug for slug in slugs if slug == topic]
         ordered += sorted(
-            (slug for slug in shard_slugs if slug.startswith(f"{topic}-")),
+            (slug for slug in slugs if slug.startswith(f"{topic}-")),
             key=lambda slug: (
                 nav_order.get(folders.get(slug, ""), len(nav_order)),
                 slug,
@@ -1387,42 +1483,23 @@ def _topic_shards(shard_slugs: tuple[str, ...]) -> list[str]:
     return ordered
 
 
-def _full_text_section(shard_files: Mapping[str, tuple[str, ...]]) -> list[str]:
+def _full_text_section(
+    plan: Sequence[tuple[str, str, list[str]]],
+    shard_files: Mapping[str, tuple[str, ...]],
+) -> list[str]:
     intro = "One file per area, each small enough to fetch whole."
     if any(len(files) > 1 for files in shard_files.values()):
         intro += (
-            " A page too long for one fetch travels in numbered parts, cut at "
-            "its own sections."
+            " An area too long for one fetch travels in numbered parts, cut "
+            "between its pages, and a page too long for one at its own sections."
         )
     intro += (
         " `llms-full.txt` is the complete concatenation and is far too large "
         "for a single fetch in most clients."
     )
     lines = ["## Full text", "", intro, ""]
-    lines += _full_text_entries("Start here", shard_files.get("start", ("start",)))
-    # "upgrading" and "theory" are listed by hand, next to "start": none is a
-    # topic, so the walk of the topics below would never place them.
-    for slug, label in (
-        ("upgrading", UPGRADING_TITLE),
-        ("theory", "Theory and reference"),
-    ):
-        if slug in shard_files:
-            lines += _full_text_entries(label, shard_files[slug])
-    topics = _topic_shards(tuple(shard_files))
-    lines += [
-        entry
-        for slug in topics
-        for entry in _full_text_entries(_shard_label(slug), shard_files[slug])
-    ]
-    listed = {"start", "upgrading", "theory", *topics}
-    lines += [
-        entry
-        for slug, files in shard_files.items()
-        if slug not in listed
-        for entry in _full_text_entries(
-            "Other guides" if slug == "other" else _shard_label(slug), files
-        )
-    ]
+    for slug, label, _routes in plan:
+        lines += _full_text_entries(label, shard_files.get(slug, (slug,)))
     lines += [f"- [Everything]({SITE_URL}/llms-full.txt)", ""]
     return lines
 
@@ -1450,6 +1527,13 @@ def _closing_sections() -> list[str]:
         ),
         "",
         f"- [API reference index]({SITE_URL}/reference/api/)",
+        # The curated table of every public name is a file of docs/ written by
+        # hand, no page of the site, so llms-full.txt, which carries the
+        # site's pages, leaves it out; its one line per name is linked here.
+        (
+            f"- [Quick API table on GitHub]({REPO_URL}/blob/main/{QUICK_API_TABLE}): "
+            "every public name with one line on what it is, by subpackage"
+        ),
     ]
     lines += [
         f"- [{route.removeprefix('reference/api/')}]({SITE_URL}/{route}/)"
@@ -1459,10 +1543,14 @@ def _closing_sections() -> list[str]:
     return lines
 
 
-def build_llms_txt(version: str, shard_files: Mapping[str, tuple[str, ...]]) -> str:
+def build_llms_txt(
+    version: str,
+    shard_files: Mapping[str, tuple[str, ...]],
+    plan: Sequence[tuple[str, str, list[str]]] | None = None,
+) -> str:
     """The index, *shard_files* naming the files each shard published.
 
-    A shard in one piece names one file; a page cut into parts names one per
+    A shard in one piece names one file; a shard cut into parts names one per
     part (see :func:`_part_names`), and the index lists every one of them.
     """
     lines = _summary(version)
@@ -1473,158 +1561,114 @@ def build_llms_txt(version: str, shard_files: Mapping[str, tuple[str, ...]]) -> 
     lines += _provenance_section()
     lines += _errata_section()
     lines += _catalogue_section()
-    lines += _full_text_section(shard_files)
+    lines += _full_text_section(_shard_plan() if plan is None else plan, shard_files)
     lines += _closing_sections()
     return "\n".join(lines)
 
 
-#: Where a link's destination is written (CommonMark 0.31.2, 6.3 and 4.7): in an
-#: inline link or image, before its title, bare or in angle brackets; in a
-#: reference definition (a footnote's ``[^1]:`` is none); and in the ``href`` or
-#: ``src`` of a tag. Each is read on the page with its code and maths blanked.
-_LINK_DESTINATIONS = (
-    re.compile(
-        r"\]\(\s*(?:<(?P<angled>[^>\n]*)>|(?P<bare>[^\s()<>]+))"
-        r"(?=\s*(?:\"[^\"\n]*\"|'[^'\n]*'|\([^)\n]*\))?\s*\))"
-    ),
-    re.compile(
-        r"^ {0,3}\[(?!\^)[^\]\n]+\]:[ \t]*(?:<(?P<angled>[^>\n]*)>|(?P<bare>\S+))",
-        re.MULTILINE,
-    ),
-    re.compile(r"""\b(?:href|src)\s*=\s*(?:"(?P<angled>[^"]*)"|'(?P<bare>[^']*)')"""),
-)
-#: A destination that is an address already: a scheme, an anchor of the same
-#: page, or a path from the site's root.
-_ABSOLUTE_DESTINATION = re.compile(r"[A-Za-z][\w+.-]*:|#|/")
-#: The documents at the root of docs/ and the routes that publish them.
-_ROOT_DOCUMENTS = {
-    "docs/README.md": "",
-    "docs/CONFORMANCE.md": "reference/conformance",
-    "docs/ERRATA.md": "reference/errata",
-    "docs/ERRATA.es.md": "es/reference/errata",
-}
+@dataclasses.dataclass(frozen=True)
+class Copy:
+    """A page's Markdown copy, as the llms files carry it.
 
-
-def _prose_of(content: str) -> str:
-    """*content* with its fenced code, its maths and its code spans blanked, line and column kept."""
-    lines = content.split("\n")
-    kept = [
-        " " * len(line) if walked.role in NOT_INLINE_ROLES else line
-        for line, walked in zip(lines, page_lines(lines, kind="md"), strict=True)
-    ]
-    return blank_inline_spans_by_block("\n".join(kept), "`$", kind="md")
-
-
-def _absolutize_links(content: str, md_name: str) -> str:
-    """Rewrite the mirror's relative links to the addresses they lead to.
-
-    The exports are flat text served from the site, so a link relative to
-    the page that holds it would resolve against the export's own address
-    and lead nowhere. Every relative destination, in whatever form a link
-    writes it (:data:`_LINK_DESTINATIONS`), is resolved against the page's
-    folder in the repository: a mirror page the site publishes becomes its
-    route, with the documents at the root of docs/ transplanted into the
-    routes that publish them; a folder whose own page the site publishes
-    becomes that route; any other file or folder of the repository becomes
-    its address on GitHub. A destination outside the repository, or one that
-    names no file of it, stops the run, naming the page and the link. Code
-    and maths are left as written. The pages the site publishes are read once
-    a page has a relative destination, so a page with none asks nothing of
-    the mirror.
+    *head* runs from the ``# `` title through the rule that closes the header;
+    *rest* is everything after it (the body and the References section), and
+    the page as a shard holds it is ``head`` and ``rest`` a blank line apart.
     """
-    here = pathlib.PurePosixPath("docs", md_name).parent
 
-    @functools.cache
-    def published() -> dict[str, str]:
-        return {f"docs/{page}": route for page, route in _routes()} | _ROOT_DOCUMENTS
+    route: str
+    head: str
+    rest: str
 
-    def address(target: str) -> str:
-        parts = re.fullmatch(r"([^?#]*)(\?[^#]*)?(#.*)?", target, re.DOTALL)
-        path, query, anchor = parts.groups(default="") if parts else (target, "", "")
-        resolved = posixpath.normpath(f"{here}/{path}")
-        folder = f"{resolved}/index.md"
-        pages = published()
-        if resolved in pages or folder in pages:
-            route = pages.get(resolved, pages.get(folder, ""))
-            return f"{SITE_URL}/{f'{route}/' if route else ''}{query}{anchor}"
-        kind = _kept(resolved)
-        if kind is not None:
-            return f"{REPO_URL}/{kind}/main/{resolved}{query}{anchor}"
-        msg = f"generate_llms.py: docs/{md_name} links {target}, which names no file of the repository"
+    @property
+    def text(self) -> str:
+        """The page as a shard and llms-full.txt hold it whole."""
+        return f"{self.head}\n\n{self.rest}" if self.rest else self.head
+
+
+def _split_copy(route: str, text: str) -> Copy:
+    """A copy's head and rest, refusing a text that is not a copy.
+
+    A copy opens with its ``# `` title, a blank line, the sentence that says
+    what it is (``> ``), and the header's ``Key: value`` lines, closed by a
+    ``---`` rule; a blank line separates that from the body.
+    """
+    lines = text.removesuffix("\n").split("\n")
+    shaped = (
+        len(lines) >= 4
+        and lines[0].startswith("# ")
+        and lines[1] == ""
+        and lines[2].startswith("> ")
+        and "---" in lines[3:]
+    )
+    if not shaped:
+        msg = (
+            f"generate_llms.py: the dump's copy of {route} does not open as a "
+            f"Markdown copy (a title, the sentence under it and a header). {_REDUMP}"
+        )
         raise SystemExit(msg)
-
-    prose = _prose_of(content)
-    found: dict[tuple[int, int], str] = {}
-    for pattern in _LINK_DESTINATIONS:
-        for match in pattern.finditer(prose):
-            group = "angled" if match.group("angled") is not None else "bare"
-            target = content[match.start(group) : match.end(group)]
-            if not target or _ABSOLUTE_DESTINATION.match(target):
-                continue
-            # Angle brackets around an inline destination go with it: the
-            # address written in their place needs none.
-            bracketed = int(group == "angled" and pattern is _LINK_DESTINATIONS[0])
-            found[match.start(group) - bracketed, match.end(group) + bracketed] = target
-    out = content
-    for (start, end), target in sorted(found.items(), reverse=True):
-        out = f"{out[:start]}{address(target)}{out[end:]}"
-    return out
+    close = lines.index("---", 3)
+    rest = lines[close + 1 :]
+    if rest and rest[0] == "":
+        rest = rest[1:]
+    return Copy(route=route, head="\n".join(lines[: close + 1]), rest="\n".join(rest))
 
 
-def _page_text(md_name: str) -> str:
-    """One page as the artifacts carry it: no index backlink, absolute links."""
-    content = (DOCS / md_name).read_text(encoding="utf-8")
-    # Drop the docs-index backlink line; keep everything else verbatim.
-    content = "\n".join(
-        line
-        for line in content.splitlines()
-        if not line.startswith("← [Documentation index]")
-    ).strip()
-    return _absolutize_links(content, md_name)
+def _copy(route: str) -> Copy:
+    """The copy of a page these files carry, from the dump."""
+    page = _page(route)
+    if page.copy is None:
+        msg = f"generate_llms.py: the dump holds no copy of {route}, which is a {page.kind} page"
+        raise SystemExit(msg)
+    try:
+        text = (PAGES / page.copy).read_text(encoding="utf-8")
+    except OSError as error:
+        msg = f"generate_llms.py: cannot read the copy of {route} ({error}). {_REDUMP}"
+        raise SystemExit(msg) from error
+    return _split_copy(route, text)
 
 
-def _attributed(md_name: str, route: str, content: str) -> str:
-    """Page text ready to concatenate: attribution header, then the text."""
-    # A plain "Source:" line as well as the HTML comment: markdown-to-text
-    # pipelines routinely strip comments, and a passage extracted with its
-    # attribution stripped is a passage that cannot be cited back.
-    header = (
-        f"<!-- source: docs/{md_name} | canonical: {SITE_URL}/{route}/ -->\n"
-        f"Source: {SITE_URL}/{route}/\n"
-    )
-    return f"\n{header}\n{content}\n\n---\n"
+def _measured_head(head: str) -> int:
+    """What a page's head takes in a shard, dated or not (:data:`DATED_LINES_BYTES`)."""
+    undated = [line for line in head.split("\n") if not _DATED_LINE.match(line)]
+    return len("\n".join(undated).encode("utf-8")) + DATED_LINES_BYTES
 
 
-def _body(md_name: str, route: str) -> str:
-    """One page, ready to concatenate: attribution header then verbatim text."""
-    return _attributed(md_name, route, _page_text(md_name))
+def _lines_bytes(lines: Iterable[str]) -> int:
+    """What lines take joined, each counted with the newline after it."""
+    return sum(len(line.encode("utf-8")) + 1 for line in lines)
 
 
-def _shard_head(title: str, note: str) -> list[str]:
-    """The lines every shard file opens with."""
-    return [
-        f"# phonometry: {title}",
-        "",
-        f"Part of {SITE_URL}/llms.txt. {note}",
-        "",
-        "---",
-    ]
+@dataclasses.dataclass(frozen=True)
+class _Unit:
+    """A run of a page's lines that a part of a shard holds whole.
 
+    A page is one unit until it alone outgrows a part; then it is cut before
+    each of its H2 headings, and a section that still outgrows one is cut
+    between the rows of its tables. A part that opens at a unit other than its
+    page's first repeats the page's head, so every page in every part says
+    what it is, and one that opens between two rows repeats the header row and
+    the delimiter row of the table it continues (*repeat*).
+    """
 
-def _shard_text(title: str, pages: list[tuple[str, str]]) -> str:
-    """A shard in one file: its head, then each ``(file, route)`` page in turn."""
-    return "\n".join(
-        [
-            *_shard_head(title, "Full text of the pages in this area."),
-            *(_body(name, route) for name, route in pages),
-        ]
-    )
+    route: str
+    lines: tuple[str, ...]
+    #: Whether the unit opens its page.
+    first: bool
+    #: Where the cut before it falls: between pages, at an H2, between rows.
+    cut: str
+    repeat: tuple[str, ...] = ()
 
 
 #: An ATX H2 heading as CommonMark reads one: up to three spaces of indent, two
 #: hashes, then a space, a tab or the end of the line. Four spaces of indent
 #: make an indented code block, and ``##x`` is a paragraph, not a heading.
 _H2 = re.compile(r" {0,3}##(?:[ \t]|$)")
+
+#: A row of a GitHub table, as the Markdown writers write one.
+_TABLE_ROW = re.compile(r" {0,3}\|")
+
+#: The delimiter row under a table's header row.
+_TABLE_DELIMITER = re.compile(r" {0,3}\|?(?: *:?-+:? *\|)+ *:?-*:? *$")
 
 
 def _is_h2(line: str) -> bool:
@@ -1633,35 +1677,186 @@ def _is_h2(line: str) -> bool:
 
 
 def _sections(content: str) -> list[str]:
-    """A page cut before each of its H2 headings.
+    """A text cut before each of its H2 headings.
 
     A heading is an H2 as CommonMark reads one (``_H2``). A ``## `` line
-    inside a code fence is code, a Python comment for one, and never a cut; ``markdown_fences`` says which lines are code, as it does for
-    every script that reads a page. The first section is whatever comes before
-    the first H2: the page title and its introduction.
+    inside a code fence is code, a Python comment for one, and never a cut;
+    ``markdown_fences`` says which lines are code, as it does for every script
+    that reads a page. The first section is whatever comes before the first
+    H2.
     """
-    lines = content.splitlines()
+    lines = content.split("\n")
     sections: list[list[str]] = [[]]
     for line, code in zip(lines, code_lines(lines, kind="md"), strict=True):
-        if not code and _is_h2(line):
+        if not code and _is_h2(line) and sections[-1]:
             sections.append([])
         sections[-1].append(line)
-    return ["\n".join(part) for part in sections if any(map(str.strip, part))]
+    return ["\n".join(part) for part in sections]
 
 
-def _starts(sizes: list[int], capacity: int) -> list[int]:
-    """Where each part begins when sections fill parts in order up to *capacity*."""
+def _section_units(unit: _Unit) -> list[_Unit]:
+    """A page's unit cut before each of its H2 headings."""
+    pieces = _sections("\n".join(unit.lines))
+    return [
+        _Unit(
+            route=unit.route,
+            lines=tuple(piece.split("\n")),
+            first=unit.first and index == 0,
+            cut=unit.cut if index == 0 else "section",
+            repeat=unit.repeat if index == 0 else (),
+        )
+        for index, piece in enumerate(pieces)
+    ]
+
+
+def _row_units(unit: _Unit) -> list[_Unit]:
+    """A unit cut between the rows of every table in it.
+
+    A row opens a unit of its own unless it is the first row of its table,
+    which stays with the header above it. Each unit opening on a row repeats
+    that table's header row and delimiter row, so a part that opens there
+    still says what its columns are.
+    """
+    lines = unit.lines
+    code = list(code_lines(lines))
+    starts: dict[int, tuple[str, ...]] = {}
+    index = 0
+    while index + 2 < len(lines):
+        header, delimiter = lines[index], lines[index + 1]
+        if (
+            not code[index]
+            and not code[index + 1]
+            and _TABLE_ROW.match(header)
+            and _TABLE_DELIMITER.match(delimiter)
+        ):
+            row = index + 3
+            while row < len(lines) and not code[row] and _TABLE_ROW.match(lines[row]):
+                starts[row] = (header, delimiter)
+                row += 1
+            index = row
+        else:
+            index += 1
+    cuts = [0, *sorted(starts), len(lines)]
+    return [
+        _Unit(
+            route=unit.route,
+            lines=lines[begin:end],
+            first=unit.first and begin == 0,
+            cut=unit.cut if begin == 0 else "row",
+            repeat=unit.repeat if begin == 0 else starts[begin],
+        )
+        for begin, end in zip(cuts, cuts[1:], strict=False)
+        if end > begin
+    ]
+
+
+#: A footnote reference and a footnote definition, as GFM writes them.
+_NOTE_REFERENCE = re.compile(r"\[\^([^\]\s]+)\](?!:)")
+_NOTE_DEFINITION = re.compile(r"^ {0,3}\[\^([^\]\s]+)\]:", re.MULTILINE)
+
+
+def _section_text(copy: Copy, units: Sequence[_Unit]) -> str:
+    """A page as one part holds it: its head, then its run of *units*.
+
+    A run that opens the page and holds no line is a page with nothing after
+    its header, which a shard holds as the head alone, as it holds it whole.
+
+    A part that cites a note the page defines in another part would leave its
+    reader a mark with nothing under it, so it is refused by name: a cut
+    between the rows of a table must not part a row from the note it cites.
+    """
+    lines = [] if units[0].first else [*units[0].repeat]
+    for unit in units:
+        lines += unit.lines
+    if not lines:
+        return copy.head
+    text = "\n".join(lines)
+    defined_here = set(_NOTE_DEFINITION.findall(text))
+    defined_on_page = set(_NOTE_DEFINITION.findall(copy.rest))
+    parted = sorted(
+        (set(_NOTE_REFERENCE.findall(text)) & defined_on_page) - defined_here
+    )
+    if parted:
+        notes = ", ".join(f"[^{label}]" for label in parted)
+        msg = (
+            f"{copy.route}: a part of its shard cites {notes} and another part "
+            "holds the note; cut the page where no row is parted from its note"
+        )
+        raise ValueError(msg)
+    return f"{copy.head}\n\n" + text
+
+
+def _shard_head(title: str, note: str) -> str:
+    """The lines every shard file opens with."""
+    return f"# phonometry: {title}\n\nPart of {SITE_URL}/llms.txt. {note}\n\n---\n"
+
+
+def _shard_file(head: str, sections: Iterable[str]) -> str:
+    """A shard: its head, then each page, each closed by :data:`PAGE_END`."""
+    return head + "".join(f"\n{section}{PAGE_END}" for section in sections)
+
+
+def _cut_note(*, single_page: bool, cuts: Iterable[str]) -> str:
+    """How a shard in parts was cut, in the words of its head."""
+    if single_page:
+        words = {
+            "section": "at its own sections",
+            "row": "between the rows of its tables",
+        }
+    else:
+        words = {
+            "page": "between its pages",
+            "section": "at the sections of a page too long for one",
+            "row": "between the rows of a table too long for one",
+        }
+    used = [
+        words[cut]
+        for cut in ("page", "section", "row")
+        if cut in set(cuts) and cut in words
+    ]
+    if len(used) > 1:
+        return ", ".join(used[:-1]) + " and " + used[-1]
+    return used[0] if used else words[next(iter(words))]
+
+
+def _part_head(
+    *,
+    slug: str,
+    title: str,
+    number: int,
+    count: int,
+    single_page: bool,
+    cuts: Iterable[str],
+) -> str:
+    """The head of one part of a shard cut into *count*."""
+    urls = ", ".join(_shard_url(name) for name in _part_names(slug, count))
+    what = "One page" if single_page else "The pages of this area"
+    note = (
+        f"{what} in {count} parts, cut {_cut_note(single_page=single_page, cuts=cuts)} so that "
+        f"each fits one fetch: {urls}."
+    )
+    return _shard_head(_part_label(title, number, count), note)
+
+
+def _starts(base: Sequence[int], extra: Sequence[int], capacity: int) -> list[int]:
+    """Where each part begins when units fill parts in order up to *capacity*.
+
+    A part costs the units it holds (*base*) and, when it opens in the middle
+    of a page, what that opening repeats (*extra*).
+    """
     starts = [0]
-    used = 0
-    for index, size in enumerate(sizes):
-        if used and used + size > capacity:
+    used = extra[0]
+    for index, size in enumerate(base):
+        if index > starts[-1] and used + size > capacity:
             starts.append(index)
-            used = 0
+            used = extra[index]
         used += size
     return starts
 
 
-def _balanced_starts(sizes: list[int], count: int, capacity: int) -> list[int]:
+def _balanced_starts(
+    base: Sequence[int], extra: Sequence[int], count: int, capacity: int
+) -> list[int]:
     """The cut into at most *count* parts whose largest part is smallest.
 
     Filling each part to the brim before opening the next would leave a stub
@@ -1669,141 +1864,158 @@ def _balanced_starts(sizes: list[int], count: int, capacity: int) -> list[int]:
     the page. The smallest capacity that still needs no more parts is found by
     bisection; it is never above *capacity*, which already needs *count*.
     """
-    low, high = max(sizes), capacity
+    low = max(size + more for size, more in zip(base, extra, strict=True))
+    high = capacity
     while low < high:
         middle = (low + high) // 2
-        if len(_starts(sizes, middle)) <= count:
+        if len(_starts(base, extra, middle)) <= count:
             high = middle
         else:
             low = middle + 1
-    return _starts(sizes, low)
+    return _starts(base, extra, high)
 
 
-def _render_part(
-    *, slug: str, title: str, page: tuple[str, str], number: int, count: int, text: str
-) -> str:
-    """One part of a page cut into *count*: its head, then its sections."""
-    urls = ", ".join(_shard_url(name) for name in _part_names(slug, count))
-    note = (
-        f"One page in {count} parts, cut at its own sections so that each fits "
-        f"one fetch: {urls}."
-    )
-    md_name, route = page
-    return "\n".join(
-        [
-            *_shard_head(_part_label(title, number, count), note),
-            _attributed(md_name, route, text),
-        ]
-    )
+def _unit_name(unit: _Unit) -> str:
+    """What a unit is, for a refusal that has to name it."""
+    first = next((line for line in unit.lines if line.strip()), "")
+    if unit.cut == "row":
+        return f"the table row {first[:80]!r}"
+    if _is_h2(first):
+        return f"its section {first.strip()!r}"
+    return "the text before its first H2"
 
 
-def _oversized_section(
-    *, slug: str, md_name: str, shard_bytes: int, sections: list[str], room: int
-) -> str:
-    """Why a page cannot be cut into parts that fit, naming the culprit.
-
-    The size quoted is the shard's, *shard_bytes*, not the source file's: the
-    head, the attribution and the absolute links the shard adds can take a
-    page whose own file fits the budget over it.
-    """
-    lead = (
-        f"generate_llms.py: docs/{md_name} makes llms-{slug}.txt "
-        f"{shard_bytes:,} bytes, over the {SHARD_LIMIT_BYTES:,} byte budget of "
-        "one fetch, and "
-    )
-    if not any(_is_h2(section) for section in sections):
-        return lead + "it has no H2 heading to cut it at. Divide it under H2 headings."
-    name, largest = max(
-        (
-            (
-                section.splitlines()[0].strip()
-                if _is_h2(section)
-                else "the text before its first H2",
-                len(section.encode("utf-8")),
-            )
-            for section in sections
-        ),
-        key=lambda pair: pair[1],
-    )
+def _oversized(slug: str, unit: _Unit, size: int, room: int) -> str:
+    """Why a shard cannot be cut into parts that fit, naming the culprit."""
     return (
-        lead + f"its section {name!r} alone is {largest:,} bytes, more than the "
-        f"{room:,} a part has room for. Divide that section under H2 headings of "
-        "its own; do not raise SHARD_LIMIT_BYTES."
+        f"generate_llms.py: {unit.route} cannot be cut to fit llms-{slug}.txt: "
+        f"{_unit_name(unit)} alone takes {size:,} bytes, more than the {room:,} "
+        f"a part has room for under the {SHARD_LIMIT_BYTES:,} byte budget of one "
+        "fetch. Divide it under H2 headings of its own; do not raise "
+        "SHARD_LIMIT_BYTES."
     )
 
 
-def _page_parts(
-    slug: str, title: str, page: tuple[str, str], *, shard_bytes: int
-) -> tuple[str, ...]:
-    """A page too long for one fetch, cut at its H2 headings into parts.
+def _shard_parts(slug: str, title: str, routes: Sequence[str]) -> tuple[str, ...]:
+    """A shard's text: one file, or numbered parts when it outgrows one fetch.
 
-    As few parts as fit the budget, as even as the sections allow, each a
-    whole shard of its own: the head names every part, and the page's
-    attribution opens each one, so a passage read from any part can still be
-    cited back. The head grows with the number of parts it lists, so the count
-    is settled first and the room each part leaves for the page follows from
-    it. A section over the budget by itself cannot be placed in any part, and
-    is refused by name rather than cut mid-text; *shard_bytes*, the size of
-    the page as one shard, is the size that refusal quotes.
+    The parts are as few as fit the budget and as even as the cuts allow. A
+    shard of several pages is cut between its pages; a page that alone
+    outgrows a part, there or in a shard of its own, is cut before its H2
+    headings, and a section that still outgrows one between the rows of its
+    tables. Each part is a whole shard: its head names every part, and every
+    page in it opens with its own head, so a passage read from any part can
+    still be cited back. A table row too long by itself is refused by name
+    rather than cut mid-text.
+
+    Where the cuts fall is decided on the pages measured with their dated
+    header lines whether those are there or not (:func:`_measured_head`), so
+    a dump with dates and one without cut every shard at the same places.
     """
-    md_name, route = page
-    sections = _sections(_page_text(md_name))
-    # The newline that joins a section to the next one counts against it.
-    sizes = [len(section.encode("utf-8")) + 1 for section in sections]
+    copies = {route: _copy(route) for route in routes}
+    single = _shard_head(title, "Full text of the pages in this area.")
+    whole = _shard_file(single, (copies[route].text for route in routes))
+    measured = len(single.encode("utf-8")) + sum(
+        2
+        + _measured_head(copies[route].head)
+        + len(PAGE_END)
+        + _lines_bytes(copies[route].rest.split("\n") if copies[route].rest else ())
+        for route in routes
+    )
+    if measured <= SHARD_LIMIT_BYTES:
+        return (whole,)
+
+    units = [
+        _Unit(
+            route=route,
+            lines=tuple(copy.rest.split("\n")) if copy.rest else (),
+            first=True,
+            cut="page",
+        )
+        for route, copy in copies.items()
+    ]
+    overhead = {
+        route: 2 + _measured_head(copy.head) + len(PAGE_END)
+        for route, copy in copies.items()
+    }
+    single_page = len(routes) == 1
+
+    def costs(units: Sequence[_Unit]) -> tuple[list[int], list[int]]:
+        base = [
+            _lines_bytes(unit.lines) + (overhead[unit.route] if unit.first else 0)
+            for unit in units
+        ]
+        extra = [
+            0 if unit.first else overhead[unit.route] + _lines_bytes(unit.repeat)
+            for unit in units
+        ]
+        return base, extra
+
     count = 2
     while True:
-        head = _render_part(
-            slug=slug, title=title, page=page, number=count, count=count, text=""
+        # The longest head a part of this count can have: its number at the
+        # count, and a note naming every kind of cut.
+        head = _part_head(
+            slug=slug,
+            title=title,
+            number=count,
+            count=count,
+            single_page=single_page,
+            cuts=("page", "section", "row"),
         )
         room = SHARD_LIMIT_BYTES - len(head.encode("utf-8"))
-        if len(sections) < 2 or max(sizes) > room:
-            raise SystemExit(
-                _oversized_section(
-                    slug=slug,
-                    md_name=md_name,
-                    shard_bytes=shard_bytes,
-                    sections=sections,
-                    room=room,
-                )
-            )
-        needed = len(_starts(sizes, room))
+        refined: list[_Unit] = []
+        for unit in units:
+            pieces = [unit]
+            for finer in (_section_units, _row_units):
+                base, extra = costs(pieces)
+                if all(
+                    size + more <= room for size, more in zip(base, extra, strict=True)
+                ):
+                    break
+                pieces = [
+                    piece
+                    for whole_unit, size, more in zip(pieces, base, extra, strict=True)
+                    for piece in (
+                        finer(whole_unit) if size + more > room else [whole_unit]
+                    )
+                ]
+            base, extra = costs(pieces)
+            for piece, size, more in zip(pieces, base, extra, strict=True):
+                if size + more > room:
+                    raise SystemExit(_oversized(slug, piece, size + more, room))
+            refined += pieces
+        units = refined
+        base, extra = costs(units)
+        needed = len(_starts(base, extra, room))
         if needed <= count:
             break
         count = needed
-    starts = [*_balanced_starts(sizes, count, room), len(sections)]
-    texts = [
-        "\n".join(sections[begin:end]).strip()
-        for begin, end in itertools.pairwise(starts)
-    ]
-    return tuple(
-        _render_part(
+    starts = [*_balanced_starts(base, extra, count, room), len(units)]
+    count = len(starts) - 1
+    cuts = [units[start].cut for start in starts[1:-1]]
+    parts = []
+    for number, (begin, end) in enumerate(
+        zip(starts, starts[1:], strict=False), start=1
+    ):
+        sections = []
+        run: list[_Unit] = []
+        for unit in units[begin:end]:
+            if run and unit.route != run[0].route:
+                sections.append(_section_text(copies[run[0].route], run))
+                run = []
+            run.append(unit)
+        sections.append(_section_text(copies[run[0].route], run))
+        head = _part_head(
             slug=slug,
             title=title,
-            page=page,
             number=number,
-            count=len(texts),
-            text=text,
+            count=count,
+            single_page=single_page,
+            cuts=cuts,
         )
-        for number, text in enumerate(texts, start=1)
-    )
-
-
-def _shard_parts(
-    slug: str, title: str, pages: list[tuple[str, str]]
-) -> tuple[str, ...]:
-    """A shard's text: one file, or numbered parts for one page over the budget.
-
-    A shard of several pages over the budget stays whole, for
-    :func:`_check_shard_budget` to refuse: those are narrowed by a split that
-    follows a grouping of the domain (see ``MANUAL_SPLITS``), never by a cut
-    chosen for size. A shard of one page has nothing left to narrow, so the
-    page itself is cut, at its own H2 headings.
-    """
-    text = _shard_text(title, pages)
-    shard_bytes = len(text.encode("utf-8"))
-    if len(pages) != 1 or shard_bytes <= SHARD_LIMIT_BYTES:
-        return (text,)
-    return _page_parts(slug, title, pages[0], shard_bytes=shard_bytes)
+        parts.append(_shard_file(head, sections))
+    return tuple(parts)
 
 
 def _published(shards: Mapping[str, tuple[str, ...]]) -> dict[str, str]:
@@ -1825,100 +2037,160 @@ def _published(shards: Mapping[str, tuple[str, ...]]) -> dict[str, str]:
     return files
 
 
-def build_shards() -> dict[str, tuple[str, ...]]:
-    """Shard slug -> its text, in one file or, for one long page, in parts."""
-    pages = dict(_routes())
-    route_to_file = _route_files()
-    shards: dict[str, tuple[str, ...]] = {}
-    emitted: set[str] = set()
+def _index_order(index: str, members: Iterable[str]) -> list[str]:
+    """Pages in the order an index page links them, the rest sorted after."""
+    pool = sorted(members)
+    ordered = _linked(_copy(index).text, pool) if index in _dump() else []
+    return ordered + [route for route in pool if route not in ordered]
 
-    def emit(slug: str, title: str, routes: list[str]) -> None:
-        held = [
-            (route_to_file[route], route) for route in routes if route in route_to_file
-        ]
-        emitted.update(route for _name, route in held)
-        shards[slug] = _shard_parts(slug, title, held)
+
+def _shard_plan() -> list[tuple[str, str, list[str]]]:
+    """Every shard as ``(slug, label, routes)``, in the order the index lists them.
+
+    The order is the reading order: the start pages, the upgrade guide, the
+    theory, the topics as the site lists them, the reference, the glossary,
+    the conformance report, the errata register and the catalogues.
+    llms-full.txt carries the pages in this order too.
+    """
+    carried = _routes()
+    plan: list[tuple[str, str, list[str]]] = []
 
     # Theory used to travel inside the start shard: six mirror pages with
     # eighteen figures pushed llms-start.txt itself over budget. It gets its
     # own shard instead of a cut, since a client after the getting-started
-    # page has no reason to also fetch the physics.
-    theory = sorted(
-        route for route in pages.values() if route.startswith("reference/theory")
-    )
-    start_overview = ["start"] if "start" in route_to_file else []
-    # The migration guide gets the same treatment: one row per 4.0 break, it
-    # alone took llms-start.txt over budget, and a client after the
-    # getting-started page has no reason to fetch every renamed parameter.
-    # When the page alone outgrows the budget it travels in numbered parts
-    # (see _page_parts).
-    start_routes = [route for route in START_ROUTES if route != UPGRADING_ROUTE]
-    emit("start", "start here", [*start_overview, *start_routes])
-    if UPGRADING_ROUTE in route_to_file:
-        emit("upgrading", UPGRADING_TITLE, [UPGRADING_ROUTE])
+    # page has no reason to also fetch the physics. The migration guide gets
+    # the same treatment: one row per 4.0 break, it alone took llms-start.txt
+    # over budget, and a client after the getting-started page has no reason
+    # to fetch every renamed parameter.
+    start = [
+        *(["start"] if "start" in carried else []),
+        *(route for route in START_ROUTES if route != UPGRADING_ROUTE),
+    ]
+    start += [
+        route
+        for route in carried
+        if route.startswith("start/")
+        and route not in start
+        and route != UPGRADING_ROUTE
+    ]
+    plan.append(("start", "Start here", start))
+    if UPGRADING_ROUTE in carried:
+        plan.append(("upgrading", UPGRADING_TITLE, [UPGRADING_ROUTE]))
+    theory = [route for route in carried if route.startswith("reference/theory")]
     if theory:
-        emit("theory", "Theory and reference", theory)
+        plan.append(("theory", "Theory and reference", theory))
 
     manual_split_slugs = {
         slug for splits in MANUAL_SPLITS.values() for slug, _label, _leaves in splits
     }
-    for slug, routes in _shard_members().items():
+    members = _shard_members()
+    topics = _topic_shards(members)
+    for slug in [*topics, *(slug for slug in members if slug not in topics)]:
         overview = _shard_folders().get(slug, slug)
         # A carved-out shard (see MANUAL_SPLITS) has no overview page of its
-        # own; the folder it names already opened its primary shard above.
-        include_overview = overview in route_to_file and slug not in manual_split_slugs
-        emit(
-            slug,
-            _shard_label(slug),
-            ([overview] if include_overview else []) + routes,
-        )
+        # own; the folder it names already opened its primary shard.
+        include_overview = overview in carried and slug not in manual_split_slugs
+        routes = [*([overview] if include_overview else []), *members[slug]]
+        if routes:
+            label = "Other guides" if slug == "other" else _shard_label(slug)
+            plan.append((slug, label, routes))
 
     # The reference pages that are neither theory (its own shard) nor a
-    # topic's: today that is the bibliography, which was indexed in llms.txt
-    # while its text sat in no shard at all.
-    # The API index stays out: llms.txt lists the whole generated reference as
-    # Optional, one page per module, and a shard duplicating that table would
-    # be the largest file in the set saying the least.
-    # The glossary travels on its own. With the bibliography beside it the
-    # reference shard reached the fetch budget, and the two answer different
-    # questions: a client after the definition of a quantity has no use for the
-    # list of sources, nor the other way round.
-    # The bibliography travels on its own too, for the same reason: once it
-    # listed every work the pages cite, each with every page that cites it,
-    # it alone outgrew the budget, and a shard of one page is cut at its own
-    # headings (its areas) into numbered parts, where a shard of several
-    # pages over the budget is refused.
-    reference = sorted(
+    # topic's: the reference overview, the bibliography, the indexes of the
+    # report fiches and the catalogues, and what the build does to stay
+    # reproducible. The glossary travels on its own: with the bibliography
+    # beside it the reference shard reached the fetch budget, and the two
+    # answer different questions. The bibliography does too: once it listed
+    # every work the pages cite, each with every page that cites it, it alone
+    # outgrew the budget, and a shard of one page is cut at its own headings
+    # (its areas) into numbered parts. So does the conformance report, cut at
+    # its domains, and the errata register, its index first and then its
+    # families, cut between them.
+    pages = _dump()
+    own = {GLOSSARY_ROUTE, BIBLIOGRAPHY_ROUTE, CONFORMANCE_ROUTE, ERRATA_ROUTE}
+    reference = [
         route
-        for route in pages.values()
-        if route.startswith("reference/")
-        and not route.startswith(("reference/theory", "reference/api"))
-        and route not in (GLOSSARY_ROUTE, BIBLIOGRAPHY_ROUTE)
-    )
+        for route in carried
+        if (route == "reference" or route.startswith("reference/"))
+        and not route.startswith("reference/theory")
+        and pages[route].kind == "guide"
+        and route not in own
+    ]
     if reference:
-        emit("reference", "Reference", reference)
-    if BIBLIOGRAPHY_ROUTE in route_to_file:
-        emit("bibliography", "Bibliography", [BIBLIOGRAPHY_ROUTE])
-    if GLOSSARY_ROUTE in route_to_file:
-        emit("glossary", "Glossary of quantities", [GLOSSARY_ROUTE])
-
-    # Every mirror page belongs to a shard; a page that falls between the
-    # buckets is how the bibliography went missing. The set compared against is
-    # what emit() actually consumed, not a second prediction of it: predicting
-    # exempted the overview of a subgroup with no guides, which no shard holds.
-    allowed_out = {"reference/api"}
-    dropped = sorted(set(pages.values()) - emitted - allowed_out)
-    if dropped:
-        raise SystemExit(
-            "generate_llms.py: mirror page(s) in no shard: " + ", ".join(dropped)
+        plan.append(("reference", "Reference", reference))
+    if BIBLIOGRAPHY_ROUTE in carried:
+        plan.append(("bibliography", "Bibliography", [BIBLIOGRAPHY_ROUTE]))
+    if GLOSSARY_ROUTE in carried:
+        plan.append(("glossary", "Glossary of quantities", [GLOSSARY_ROUTE]))
+    if CONFORMANCE_ROUTE in carried:
+        plan.append(
+            ("conformance", _page_title(CONFORMANCE_ROUTE), [CONFORMANCE_ROUTE])
         )
-    return shards
+    families = [route for route in carried if pages[route].kind == "errata-family"]
+    if ERRATA_ROUTE in carried or families:
+        plan.append(
+            (
+                "errata",
+                _page_title(ERRATA_ROUTE) if ERRATA_ROUTE in carried else "Errata",
+                [
+                    *([ERRATA_ROUTE] if ERRATA_ROUTE in carried else []),
+                    *_index_order(ERRATA_ROUTE, families),
+                ],
+            )
+        )
+    catalogues = [route for route in carried if pages[route].kind == "catalogue"]
+    plan += [
+        (f"catalogues-{route.rsplit('/', 1)[1]}", _page_title(route), [route])
+        for route in _index_order(CATALOGUES_ROUTE, catalogues)
+    ]
+    return plan
 
 
-def build_llms_full(llms_txt: str) -> str:
-    parts = [llms_txt, "\n---\n"]
-    parts += [_body(name, route) for name, route in _routes()]
-    return "\n".join(parts)
+def _check_every_page_in_one_shard(plan: Sequence[tuple[str, str, list[str]]]) -> None:
+    """Every page these files carry is in exactly one shard.
+
+    A page that falls between the buckets is how the bibliography went
+    missing; one in two shards would be fetched twice and counted twice. The
+    set compared is what the plan holds, not a second prediction of it.
+    """
+    seen: dict[str, str] = {}
+    twice = []
+    for slug, _label, routes in plan:
+        for route in routes:
+            if route in seen:
+                twice.append(f"{route} (llms-{seen[route]} and llms-{slug})")
+            seen[route] = slug
+    dropped = sorted(set(_routes()) - set(seen))
+    strays = sorted(set(seen) - set(_routes()))
+    problems = []
+    if dropped:
+        problems.append("page(s) in no shard: " + ", ".join(dropped))
+    if twice:
+        problems.append("page(s) in two shards: " + ", ".join(twice))
+    if strays:
+        problems.append(
+            "route(s) in a shard and with no copy in the dump: " + ", ".join(strays)
+        )
+    if problems:
+        raise SystemExit("generate_llms.py: " + "; ".join(problems))
+
+
+def build_shards(
+    plan: Sequence[tuple[str, str, list[str]]] | None = None,
+) -> dict[str, tuple[str, ...]]:
+    """Shard slug -> its text, in one file or in parts."""
+    plan = _shard_plan() if plan is None else plan
+    _check_every_page_in_one_shard(plan)
+    return {slug: _shard_parts(slug, label, routes) for slug, label, routes in plan}
+
+
+def build_llms_full(llms_txt: str, plan: Sequence[tuple[str, str, list[str]]]) -> str:
+    """The index, then every page these files carry, whole, in reading order."""
+    return f"{llms_txt}\n---\n" + "".join(
+        f"\n{_copy(route).text}{PAGE_END}"
+        for _slug, _label, routes in plan
+        for route in routes
+    )
 
 
 def _check_readme_covers_the_mirror() -> None:
@@ -1934,7 +2206,7 @@ def _check_readme_covers_the_mirror() -> None:
     readme = (DOCS / "README.md").read_text(encoding="utf-8")
     missing = [
         name
-        for name, _route in _routes()
+        for name in _mirror_pages()
         if not name.endswith("/index.md")
         and not name.startswith("reference/api")
         and f"({name})" not in readme
@@ -1983,10 +2255,9 @@ def _check_shard_budget(sizes: dict[str, int]) -> None:
     llms-buildings-insulation.txt sat over budget for weeks with a green CI: a
     client that truncates at a few hundred kilobytes read a partial shard and
     nothing here ever said so. The budget is not negotiable (see its own
-    docstring); the only fix for an oversized shard is a narrower split, never
-    a higher SHARD_LIMIT_BYTES. A shard of one page does not reach this check
-    over the budget: :func:`_page_parts` has already cut it at its H2
-    headings, or refused the section that does not fit any part.
+    docstring). A shard does not reach this check over the budget:
+    :func:`_shard_parts` has already cut it into parts, or refused the piece
+    that does not fit any part; this holds the files written to that.
     """
     oversized = sorted(
         (slug, size) for slug, size in sizes.items() if size > SHARD_LIMIT_BYTES
@@ -2001,56 +2272,90 @@ def _check_shard_budget(sizes: dict[str, int]) -> None:
     raise SystemExit(
         "generate_llms.py: shard(s) exceed the fetch budget:\n"
         + detail
-        + "\nSplit the area into a narrower shard; do not raise SHARD_LIMIT_BYTES."
+        + "\nCut the shard narrower; do not raise SHARD_LIMIT_BYTES."
     )
 
 
-def main() -> None:
-    _check_areas_cover_the_tree()
-    _check_readme_covers_the_mirror()
-    version = _version()
-    shards = build_shards()
-    files = _published(shards)
-    llms = build_llms_txt(
-        version,
-        {slug: _part_names(slug, len(parts)) for slug, parts in shards.items()},
-    )
-    _check_index_covers_the_site(llms)
-    _check_index_budget(llms)
-    (ROOT / "llms.txt").write_text(llms, encoding="utf-8", newline="\n")
-    (ROOT / "llms-full.txt").write_text(
-        build_llms_full(llms), encoding="utf-8", newline="\n"
-    )
+def _write_build(
+    llms: str, plan: Sequence[tuple[str, str, list[str]]], files: Mapping[str, str]
+) -> None:
+    """Writes what the site publishes: llms.txt, llms-full.txt and every shard.
 
-    # Remove shards this run no longer produces. Regrouping a section renames
-    # its shard, and an orphan left behind would keep serving text that
-    # llms.txt no longer indexes, silently and indefinitely. A page cut into
-    # parts retires its single file the same way, and the parts it no longer
-    # needs. The root-level sweep also retires shards left by the era when
-    # they lived next to llms.txt.
+    Every shard this run does not produce is removed. Regrouping a section
+    renames its shard, and an orphan left behind would keep serving text that
+    llms.txt no longer indexes, silently and indefinitely; a shard cut into
+    parts retires its single file the same way, and the parts it no longer
+    needs. The root-level sweep retires shards left at the site root by an
+    older layout.
+    """
+    PUBLIC.mkdir(parents=True, exist_ok=True)
+    (PUBLIC / "llms.txt").write_text(llms, encoding="utf-8", newline="\n")
+    (PUBLIC / "llms-full.txt").write_text(
+        build_llms_full(llms, plan), encoding="utf-8", newline="\n"
+    )
     SHARDS_DIR.mkdir(parents=True, exist_ok=True)
     keep = {f"llms-{name}.txt" for name in files}
     for path in SHARDS_DIR.glob("llms-*.txt"):
         if path.name not in keep:
             path.unlink()
             print(f"  removed stale shard llms/{path.name}")
-    for path in ROOT.glob("llms-*.txt"):
+    for path in PUBLIC.glob("llms-*.txt"):
         if path.name != "llms-full.txt":
             path.unlink()
             print(f"  removed stale shard {path.name}")
-
-    sizes: dict[str, int] = {}
     for name, text in files.items():
         (SHARDS_DIR / f"llms-{name}.txt").write_text(
             text, encoding="utf-8", newline="\n"
         )
-        sizes[name] = len(text.encode("utf-8"))
 
+
+def main(argv: Sequence[str] | None = None) -> None:
+    # The dump every function reads is chosen once, here, by the command line.
+    global PAGES
+    parser = argparse.ArgumentParser(description=__doc__.split("\n\n", 1)[0])
+    parser.add_argument(
+        "--pages",
+        type=pathlib.Path,
+        default=PAGES,
+        help="the dump site/scripts/agent-md.mjs --dump wrote (default: build/agent-md)",
+    )
+    parser.add_argument(
+        "--build",
+        action="store_true",
+        help="write llms.txt, llms-full.txt and the shards into site/public "
+        "for the site build, instead of llms.txt at the repository root",
+    )
+    args = parser.parse_args(argv)
+    PAGES = args.pages.resolve()
+
+    _check_areas_cover_the_tree()
+    _check_readme_covers_the_mirror()
+    _check_dump_matches_the_tree()
+    version = _version()
+    plan = _shard_plan()
+    shards = build_shards(plan)
+    files = _published(shards)
+    llms = build_llms_txt(
+        version,
+        {slug: _part_names(slug, len(parts)) for slug, parts in shards.items()},
+        plan,
+    )
+    _check_index_covers_the_site(llms)
+    _check_index_budget(llms)
+    if args.build:
+        _write_build(llms, plan, files)
+        where = "site/public"
+    else:
+        INDEX.write_text(llms, encoding="utf-8", newline="\n")
+        where = "llms.txt"
     print(
-        f"llms.txt regenerated (v{version}): {len(_routes())} pages, "
+        f"llms.txt regenerated (v{version}) into {where}: {len(_routes())} pages "
+        f"in {len(shards)} shards ({len(files)} files), "
         f"{len(_api_routes())} API pages listed as optional."
     )
-    _check_shard_budget(sizes)
+    _check_shard_budget(
+        {name: len(text.encode("utf-8")) for name, text in files.items()}
+    )
 
 
 if __name__ == "__main__":

@@ -34,7 +34,7 @@
     "mirror:bibliography": "node scripts/mirror-bibliography.mjs",
     "pa11y": "node scripts/with-preview.mjs -- ./node_modules/.bin/pa11y-ci",
     "postbuild": "node scripts/add-sitemap-lastmod.mjs && node scripts/fix-redirect-stubs.mjs && node scripts/optimize-images.mjs && node scripts/indexnow-diff.mjs manifest",
-    "prebuild": "node scripts/stage-media.mjs && node scripts/copy-llms.mjs && node scripts/agent-md.mjs --public",
+    "prebuild": "node scripts/stage-media.mjs && node scripts/agent-md.mjs --public --dump ../build/agent-md && python3 ../scripts/generate_llms.py --pages ../build/agent-md --build",
     "preview": "astro preview",
     "redirects": "node scripts/generate-redirects.mjs",
     "redirects:cloudflare": "node scripts/cloudflare-redirects.mjs",

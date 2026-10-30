@@ -9,7 +9,7 @@ This page governs what a reader of phonometry sees outside the code: the guides 
 <a id="f1"></a>
 ### F1. Change a guide's English page, Spanish twin and docs/ mirror together
 
-**Why.** `docs/` is the hand-written plain-markdown edition for GitHub and llms.txt, not a generated mirror; a guide edit that touches one copy leaves two readers behind.
+**Why.** `docs/` is the hand-written plain-markdown edition for GitHub, not a generated mirror; a guide edit that touches one copy leaves two readers behind. (The llms files are written from the site pages, not from it.)
 
 **Do**
 

@@ -34,8 +34,9 @@ Regenerated where this change touches them:
       `docs/` and the site frontmatter, so never edit those by hand)
 - [ ] `make api-docs`, with `site/src/content/docs/reference/api/` and
       `site/src/generated/api-sidebar.mjs` committed
-- [ ] `make llms`, with `llms.txt`, `llms-full.txt` and the shards under
-      `site/public/llms/` committed
+- [ ] `make llms`, with `llms.txt` and the overview and glossary mirrors
+      under `docs/` committed (the shards and `llms-full.txt` are written
+      by the site build)
 - [ ] `make figures` (generation, then `scripts/check_figure_contrast.py` and
       `scripts/check_figures.py`), with the regenerated images committed
       (figures come from `scripts/generate_graphs.py`, never by hand)

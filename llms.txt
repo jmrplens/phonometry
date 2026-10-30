@@ -654,6 +654,7 @@ Every page listed here has a Markdown copy beside it at `<page>/index.md`, for e
 The generated API reference, one page per module. Fetch these only when a specific signature is needed; the guides above explain the same functions in context.
 
 - [API reference index](https://docs.jmrp.io/phonometry/reference/api/)
+- [Quick API table on GitHub](https://github.com/jmrplens/phonometry/blob/main/docs/reference/api/index.md): every public name with one line on what it is, by subpackage
 - [aeroacoustics/airport-noise](https://docs.jmrp.io/phonometry/reference/api/aeroacoustics/airport-noise/)
 - [aeroacoustics/anp-fleet](https://docs.jmrp.io/phonometry/reference/api/aeroacoustics/anp-fleet/)
 - [aeroacoustics/atmospheric-absorption](https://docs.jmrp.io/phonometry/reference/api/aeroacoustics/atmospheric-absorption/)

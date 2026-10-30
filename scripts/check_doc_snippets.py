@@ -54,6 +54,8 @@ Usage::
 
     python scripts/check_doc_snippets.py            # all four checks
     python scripts/check_doc_snippets.py --static   # skip the execution and output passes
+    python scripts/check_doc_snippets.py --static --restated site/dist
+        # only the llms files a site build wrote, which restate the guides
 
 Exit status 0 when everything passes, 1 otherwise.
 """
@@ -2077,9 +2079,9 @@ def _published() -> list[pathlib.Path]:
     The README is the PyPI front page, ``llms.txt`` is what an assistant
     reads first and the home page is what a visitor of the site reads first,
     so a broken example there is the most expensive kind. They are not
-    guides, so they get the same checks by a different route: the dumps under
-    ``site/public/llms`` and ``llms-full.txt`` restate guide material and only
-    take the static ones (see :func:`main`).
+    guides, so they get the same checks by a different route: the shards and
+    ``llms-full.txt`` restate guide material and only take the static ones
+    (see :func:`_restated` and :func:`main`).
     """
     published = [
         _ROOT / "README.md",
@@ -2090,12 +2092,16 @@ def _published() -> list[pathlib.Path]:
     return [p for p in published if p.exists()]
 
 
-def _restated() -> list[pathlib.Path]:
-    """Generated dumps that concatenate guide text; static checks only."""
-    out = [
-        _ROOT / "llms-full.txt",
-        *sorted((_ROOT / "site" / "public" / "llms").glob("*.txt")),
-    ]
+def _restated(built: pathlib.Path | None = None) -> list[pathlib.Path]:
+    """The llms files that concatenate guide text; static checks only.
+
+    The site build writes them, from the pages' Markdown copies, into
+    ``site/public`` and publishes them from its output directory; nothing
+    commits them. A checkout that has not built the site has none, and the
+    site workflow reads the ones its build wrote (``--restated site/dist``).
+    """
+    where = _ROOT / "site" / "public" if built is None else built
+    out = [where / "llms-full.txt", *sorted((where / "llms").glob("*.txt"))]
     return [p for p in out if p.exists()]
 
 
@@ -2152,7 +2158,36 @@ def _runnable(pages: list[pathlib.Path]) -> list[pathlib.Path]:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--static", action="store_true", help="skip the execution pass")
+    parser.add_argument(
+        "--restated",
+        type=pathlib.Path,
+        metavar="BUILD",
+        help="check only the llms files a site build wrote under BUILD "
+        "(llms-full.txt and llms/), statically; fail when there are none",
+    )
     args = parser.parse_args()
+
+    if args.restated is not None:
+        restated_only = _restated(args.restated)
+        if not restated_only:
+            print(
+                f"{args.restated} holds no llms-full.txt and no llms/ shard: "
+                "build the site first.",
+                file=sys.stderr,
+            )
+            return 1
+        failures = check_shadowing(restated_only, carry=False)
+        if failures:
+            print(f"{len(failures)} documentation snippet problems:", file=sys.stderr)
+            for failure in failures:
+                print(f"  {failure}", file=sys.stderr)
+            return 1
+        print(
+            "The llms files pass the static checks: "
+            f"{sum(len(_blocks(p)) for p in restated_only)} blocks over "
+            f"{len(restated_only)} files."
+        )
+        return 0
 
     pages, pairs = _pages()
     restated = set(_restated())

@@ -29,7 +29,7 @@ from contextlib import contextmanager
 from contextvars import ContextVar
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Final, Literal, cast, get_args
+from typing import TYPE_CHECKING, Any, ClassVar, Final, Literal, cast, get_args
 
 import numpy as np
 
@@ -38,7 +38,7 @@ from .._internal.validation import require_choice, require_count, require_positi
 from .._internal.warnings import PhonometryWarning
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator
+    from collections.abc import Iterator, Mapping
 
 __all__ = [
     "Compute",
@@ -81,6 +81,10 @@ _RUNS_THERE = MappingProxyType(
         "ElasticFDTD2D": ("ElasticRun", "elastic_fdtd_simulation"),
     }
 )
+#: The unit a record's display gives its fields where the name misleads:
+#: ``device_index`` numbers a GPU, and the display would read the head noun
+#: "index" as a level in decibels.
+_DEVICE_INDEX_UNITS: Mapping[str, str] = MappingProxyType({"device_index": ""})
 
 
 class ComputeImportError(ImportError):
@@ -181,6 +185,8 @@ class Compute(RichDisplay):
         longer than a timer here can wait (``threading.TIMEOUT_MAX``), or a
         fallback asked of ``"cpu"`` on this machine.
     """
+
+    _display_units: ClassVar[Mapping[str, str]] = _DEVICE_INDEX_UNITS
 
     device: Device = "cpu"
     device_index: int = 0
@@ -307,6 +313,8 @@ class RunProvenance(RichDisplay):
         is not a whole number of 0 or more, or a ``package_sha256`` that is
         not 64 lowercase hexadecimal digits.
     """
+
+    _display_units: ClassVar[Mapping[str, str]] = _DEVICE_INDEX_UNITS
 
     host: str | None
     device: Device

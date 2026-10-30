@@ -51,7 +51,7 @@ from ._layout import (
     fmt_meta,
     fmt_num,
     footer_flow,
-    grid_table,
+    opening_flow,
     render_figure_drawing,
     result_box,
     two_panel_body,
@@ -493,19 +493,14 @@ def render_iso717_report(
 
     basis = _basis_line(metadata, rating_part, language)
 
-    flow: list[Any] = [
-        fiche_paragraph(title, title_style),
-        fiche_paragraph(basis, basis_style),
-    ]
-
     # Metadata header block (only the supplied fields).
+    header_pairs: list[tuple[str, str]] = []
     if metadata is not None and not metadata.is_empty():
         identity, conditions = _metadata_pairs(metadata, language)
         header_pairs = identity + conditions
-        if header_pairs:
-            flow.append(Spacer(1, 3))
-            flow.append(grid_table(header_pairs))
-    flow.append(Spacer(1, 8))
+    flow = opening_flow(
+        title, basis, header_pairs, title_style=title_style, basis_style=basis_style
+    )
 
     # Two-panel body: the one-third-octave table on the left (~70 mm), the
     # vector plot on the right filling the rest of the content width.

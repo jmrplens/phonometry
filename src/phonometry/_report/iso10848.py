@@ -57,7 +57,7 @@ from ._layout import (
     build_document,
     document_styles,
     footer_flow,
-    grid_table,
+    opening_flow,
     render_figure_drawing,
     result_box,
     two_panel_body,
@@ -463,18 +463,18 @@ def render_vibration_reduction_report(
 
     styles, title_style, basis_style, caption_style = document_styles(accent)
     title_text = t(_KIJ_TITLE, language)
-    flow: list[Any] = [
-        fiche_paragraph(title_text, title_style),
-        fiche_paragraph(t(_KIJ_BASIS, language), basis_style),
-    ]
 
+    header_pairs: list[tuple[str, str]] = []
     if metadata is not None and not metadata.is_empty():
         identity, conditions = _metadata_pairs(metadata, language)
         header_pairs = identity + conditions
-        if header_pairs:
-            flow.append(Spacer(1, 3))
-            flow.append(grid_table(header_pairs))
-    flow.append(Spacer(1, 8))
+    flow = opening_flow(
+        title_text,
+        t(_KIJ_BASIS, language),
+        header_pairs,
+        title_style=title_style,
+        basis_style=basis_style,
+    )
 
     in_mean, low, high = _kij_mean_membership(frequencies, bracketed, result.fraction)
     caption = t("Vibration reduction index per band", language)

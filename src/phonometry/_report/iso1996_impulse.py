@@ -56,8 +56,8 @@ from ._layout import (
     display_round,
     document_styles,
     footer_flow,
-    grid_table,
     measurement_basis_style,
+    opening_flow,
     render_figure_drawing,
     result_box,
     stacked_table,
@@ -388,16 +388,14 @@ def render_impulse_prominence_report(
         metadata.measurement_standard if metadata is not None else None
     )
 
-    flow: list[Any] = [
-        fiche_paragraph(title, title_style),
-        fiche_paragraph(_basis_line(measurement_standard, language), basis_style),
-    ]
-
     header_pairs = _metadata_pairs(result, metadata, language)
-    if header_pairs:
-        flow.append(Spacer(1, 3))
-        flow.append(grid_table(header_pairs))
-    flow.append(Spacer(1, 8))
+    flow = opening_flow(
+        title,
+        _basis_line(measurement_standard, language),
+        header_pairs,
+        title_style=title_style,
+        basis_style=basis_style,
+    )
 
     flow.extend(
         (

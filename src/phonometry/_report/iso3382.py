@@ -58,8 +58,8 @@ from ._layout import (
     escaped_pairs,
     fmt_meta,
     footer_flow,
-    grid_table,
     measurement_basis_style,
+    opening_flow,
     render_figure_drawing,
     result_box,
     verdict_flow,
@@ -575,11 +575,6 @@ def render_iso3382_report(
             language,
         )
 
-    flow: list[Any] = [
-        fiche_paragraph(title, title_style),
-        fiche_paragraph(basis, basis_style),
-    ]
-
     # A one-third-octave range makes the stacked table tall; shrink the
     # inter-element gaps and the landscape plot so the table + plot still fit
     # one A4 page (an octave range keeps the roomier spacing and a taller plot).
@@ -588,12 +583,19 @@ def render_iso3382_report(
     gap = 3 if compact else 8
     fig_height = 2.0 if compact else 3.9
 
-    if metadata is not None and not metadata.is_empty():
-        header_pairs = _metadata_pairs(metadata, language)
-        if header_pairs:
-            flow.append(Spacer(1, 3))
-            flow.append(grid_table(header_pairs))
-    flow.append(Spacer(1, gap))
+    header_pairs = (
+        _metadata_pairs(metadata, language)
+        if metadata is not None and not metadata.is_empty()
+        else []
+    )
+    flow = opening_flow(
+        title,
+        basis,
+        header_pairs,
+        title_style=title_style,
+        basis_style=basis_style,
+        gap=gap,
+    )
 
     flow.extend(
         (

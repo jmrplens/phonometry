@@ -419,10 +419,13 @@ def opening_flow(
     *,
     title_style: ParagraphStyle,
     basis_style: ParagraphStyle,
+    gap: float = 8,
 ) -> list[Any]:
     """The top of a fiche: its title, its basis line, the header grid when
     there are pairs to show, and the gap before the body.
 
+    ``gap`` is the space in points between the header and the body; a fiche
+    that has to fit a long table on one page asks for less than the usual 8.
     Called only after the renderer has imported reportlab.
     """
     from reportlab.platypus import Spacer
@@ -433,7 +436,7 @@ def opening_flow(
     ]
     if header_pairs:
         flow.extend((Spacer(1, 3), grid_table(header_pairs)))
-    flow.append(Spacer(1, 8))
+    flow.append(Spacer(1, gap))
     return flow
 
 

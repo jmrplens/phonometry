@@ -27,7 +27,7 @@ import { dirname, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { basePath, siteUrl } from '../src/data/site.mjs';
-import { topicForSlug, topicSections } from '../src/data/topics.mjs';
+import { catalogueSlugs, topicForSlug, topicSections, topics } from '../src/data/topics.mjs';
 import { catalogues } from '../src/generated/catalogues.mjs';
 import { knownSlugs } from '../src/lib/breadcrumbs.mjs';
 import { englishTwin, isApiRoute, isFallbackRoute } from '../src/lib/fallback-routes.mjs';
@@ -261,6 +261,51 @@ const numbersOf = (designation) => (String(designation ?? '').match(/\d+/g) ?? [
  * which a catalogue page of each language publishes as a Dataset.
  */
 const CATALOGUE_KEYS = Object.keys(catalogues);
+
+/**
+ * The catalogue pages, by their route in either language: the list
+ * src/data/topics.mjs keeps, which the sidebar, the finder and the build read
+ * too. A route written here as a pattern would stay behind if they moved, and
+ * every check of a dataset below would pass having read nothing.
+ */
+const CATALOGUE_PAGES = new Set(catalogueSlugs);
+
+/**
+ * The overview of the catalogues: the one page their sidebar group in
+ * src/data/topics.mjs holds besides the catalogue pages themselves.
+ *
+ * @param {unknown[]} items A level of the navigation tree.
+ * @returns {string | undefined} The overview's route, without the language.
+ */
+function catalogueOverviewIn(items) {
+	for (const item of items) {
+		if (!Array.isArray(item?.items)) continue;
+		const slugs = item.items.map((entry) => (typeof entry === 'string' ? entry : entry?.slug));
+		if (catalogueSlugs.every((slug) => slugs.includes(slug))) {
+			const others = slugs.filter((slug) => slug !== undefined && !CATALOGUE_PAGES.has(slug));
+			if (others.length !== 1) {
+				throw new Error(
+					`the sidebar group of the catalogue pages in src/data/topics.mjs holds ${others.length} other pages, ` +
+						'and the overview of the catalogues is the one page it holds besides them',
+				);
+			}
+			return others[0];
+		}
+		const found = catalogueOverviewIn(item.items);
+		if (found !== undefined) return found;
+	}
+	return undefined;
+}
+const CATALOGUE_OVERVIEW = catalogueOverviewIn(topics);
+if (CATALOGUE_OVERVIEW === undefined) {
+	throw new Error('no sidebar group of src/data/topics.mjs lists the catalogue pages, so their overview is unknown');
+}
+
+/** The catalogue a node's `@id` names as `#dataset-<key>`, when it is one the generator writes. */
+const datasetKeyOf = (id) => {
+	const key = /#dataset-(\w+)$/.exec(String(id ?? ''))?.[1];
+	return key !== undefined && key in catalogues ? key : undefined;
+};
 
 /** A heading that is a band and nothing else: `125 Hz`, `1,25 kHz`. */
 const BAND_HEADING = /^\d+(?:[.,]\d+)? k?Hz$/;
@@ -540,7 +585,7 @@ for (const file of files) {
 	// from, and claims no licence over rows other works printed. The count
 	// across the pages, every catalogue the generator writes once in each
 	// language, is checked after the loop.
-	if (/^reference\/catalogues\/./.test(slug)) {
+	if (CATALOGUE_PAGES.has(slug)) {
 		cataloguePagesSeen[lang] += 1;
 		const datasets = nodes.filter((node) => typesOf(node).includes('Dataset'));
 		if (datasets.length === 0) fail(`${route}: a catalogue page publishes no Dataset`);
@@ -585,7 +630,7 @@ for (const file of files) {
 			if (claims.length > 0) {
 				fail(`${at}: the dataset claims ${claims.join(', ')} over rows other works printed`);
 			}
-			const overview = `${ORIGIN}${lang === 'es' ? '/es' : ''}/reference/catalogues/#article`;
+			const overview = `${ORIGIN}${lang === 'es' ? '/es' : ''}/${CATALOGUE_OVERVIEW}/#article`;
 			if (dataset.includedInDataCatalog?.['@id'] !== overview) {
 				fail(`${at}: the dataset is included in ${dataset.includedInDataCatalog?.['@id']}, not ${overview}`);
 			}
@@ -619,8 +664,24 @@ for (const file of files) {
 				}
 			}
 		}
+	} else {
+		// Nowhere else does a catalogue's dataset or table appear: a catalogue
+		// page that sits at a route topics.mjs does not list would leave every
+		// check above with nothing to read, and the build green.
+		const strayDatasets = nodes.filter((node) => typesOf(node).includes('Dataset') && datasetKeyOf(node['@id']));
+		const strayTables = CATALOGUE_KEYS.filter((key) => html.includes(`id="catalogue-${key}"`));
+		if (strayDatasets.length > 0 || strayTables.length > 0) {
+			fail(
+				`${route}: publishes ${strayDatasets.length} catalogue dataset(s) and holds ${strayTables.length} catalogue ` +
+					`table(s) (first: ${[...strayDatasets.map((node) => node['@id']), ...strayTables].slice(0, 3).join(', ')}), ` +
+					'and is not a catalogue page of catalogueSlugs in src/data/topics.mjs',
+			);
+		}
 	}
-	if (slug === 'reference/catalogues') {
+	if (slug !== CATALOGUE_OVERVIEW && nodes.some((node) => typesOf(node).includes('DataCatalog'))) {
+		fail(`${route}: publishes a DataCatalog, and is not the overview of the catalogues, ${CATALOGUE_OVERVIEW}`);
+	}
+	if (slug === CATALOGUE_OVERVIEW) {
 		if (!typesOf(article).includes('DataCatalog')) {
 			fail(`${route}: the overview of the catalogues is typed ${JSON.stringify(article['@type'])}, not a DataCatalog`);
 		}
@@ -903,7 +964,9 @@ if (unnamedCited.length > 0) {
 // Every catalogue the generator writes is a Dataset once in each language,
 // and the overview of the catalogues lists exactly those. A build that holds
 // no catalogue page at all (the small builds the tests of this check write)
-// has nothing to count.
+// has nothing to count. It is one that holds none anywhere: the routes are the
+// ones topics.mjs lists, and a catalogue's dataset or table at any other
+// route, or a DataCatalog anywhere but the overview, has failed above.
 for (const lang of ['en', 'es']) {
 	if (cataloguePagesSeen[lang] === 0 && listedDatasets[lang] === undefined) continue;
 	const found = datasetsByLanguage[lang];

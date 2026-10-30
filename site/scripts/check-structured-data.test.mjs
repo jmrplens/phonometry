@@ -509,8 +509,12 @@ const CATALOGUE_PAGE = 'reference/catalogues/solids';
  * language, listed by that language's overview: the pages of `build()` and,
  * per language, the overview and one catalogue page that holds all the
  * datasets with a table for each.
+ *
+ * @param {{pageSlug?: string, overviewSlug?: string}} [at] Where the catalogue
+ *   page and the overview sit, which a test moves to a route topics.mjs does
+ *   not list.
  */
-function catalogueBuild() {
+function catalogueBuild({ pageSlug = CATALOGUE_PAGE, overviewSlug = 'reference/catalogues' } = {}) {
 	const built = build();
 	for (const [lang, url] of [
 		['en', EN],
@@ -518,8 +522,8 @@ function catalogueBuild() {
 	]) {
 		const prefix = lang === 'es' ? '/es' : '';
 		const twin = lang === 'es' ? '' : '/es';
-		const pageUrl = `${ORIGIN}${prefix}/${CATALOGUE_PAGE}/`;
-		const overviewUrl = `${ORIGIN}${prefix}/reference/catalogues/`;
+		const pageUrl = `${ORIGIN}${prefix}/${pageSlug}/`;
+		const overviewUrl = `${ORIGIN}${prefix}/${overviewSlug}/`;
 		const datasets = Object.keys(catalogues).map((key) => ({
 			'@type': 'Dataset',
 			'@id': `${pageUrl}#dataset-${key}`,
@@ -529,12 +533,12 @@ function catalogueBuild() {
 			inLanguage: lang,
 			includedInDataCatalog: { '@type': 'DataCatalog', '@id': `${overviewUrl}#article`, name: 'Catalogues', url: overviewUrl },
 			[lang === 'en' ? 'workTranslation' : 'translationOfWork']: {
-				'@id': `${ORIGIN}${twin}/${CATALOGUE_PAGE}/#dataset-${key}`,
+				'@id': `${ORIGIN}${twin}/${pageSlug}/#dataset-${key}`,
 			},
 			variableMeasured: variablesMeasured(catalogues[key].columns, lang),
 			isBasedOn: [stub(book(url))],
 		}));
-		const catalogue = page(CATALOGUE_PAGE, lang, {
+		const catalogue = page(pageSlug, lang, {
 			mainEntity: datasets.map((node) => ({ '@id': node['@id'] })),
 			citation: [stub(book(url))],
 		});
@@ -543,7 +547,7 @@ function catalogueBuild() {
 			.map((key) => `<section id="catalogue-${key}"></section>`)
 			.join('');
 		built[`${lang}/catalogue`] = catalogue;
-		built[`${lang}/overview`] = page('reference/catalogues', lang, {
+		built[`${lang}/overview`] = page(overviewSlug, lang, {
 			'@type': ['TechArticle', 'DataCatalog'],
 			name: 'Catalogues',
 			dataset: datasets.map((node) => ({ '@type': 'Dataset', '@id': node['@id'], name: node.name, url: node.url })),
@@ -649,4 +653,22 @@ test("a dataset that takes the page's description on a page of several catalogue
 		ran.err,
 		/\/reference\/catalogues\/solids\/ absorption: the dataset takes the page's description, which speaks of all 24 catalogues it renders/,
 	);
+});
+
+test('catalogue pages and an overview at a route topics.mjs does not list fail, rather than leave nothing to check', (t) => {
+	// The catalogue routes moved, and nothing told the check: every dataset
+	// assertion above would read no page, and the count after them none.
+	const ran = check(t, catalogueBuild({ pageSlug: 'reference/tables/solids', overviewSlug: 'reference/tables' }));
+	assert.equal(ran.status, 1);
+	const count = Object.keys(catalogues).length;
+	for (const prefix of ['', '/es']) {
+		assert.match(
+			ran.err,
+			new RegExp(
+				`FAIL ${prefix}/reference/tables/solids/: publishes ${count} catalogue dataset\\(s\\) and holds ${count} catalogue ` +
+					'table\\(s\\) .*and is not a catalogue page of catalogueSlugs',
+			),
+		);
+		assert.match(ran.err, new RegExp(`FAIL ${prefix}/reference/tables/: publishes a DataCatalog, and is not the overview`));
+	}
 });

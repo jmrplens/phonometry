@@ -308,7 +308,8 @@ class MicrophoneDirectivity(OwnsArrays):
     def __post_init__(self) -> None:
         """Hold the pattern as two read-only ``float64`` arrays, whatever pair it was given as.
 
-        :raises TypeError: if ``polar`` is a text or no sequence.
+        :raises TypeError: if ``polar`` is a text or no sequence, or a member
+            holds a complex number or a text.
         :raises ValueError: if ``polar`` holds other than two members.
         """
         if self.polar is not None:
@@ -371,7 +372,8 @@ class MicrophoneNoise(OwnsArrays):
         """Refuse a choice its ``Literal`` does not list, and hold the spectrum read-only.
 
         :raises TypeError: if ``weighting`` is not a text, or ``spectrum`` is a
-            text or no sequence.
+            text or no sequence, or a member of it holds a complex number or a
+            text.
         :raises ValueError: if ``spectrum`` holds other than two members.
         """
         require_choice(self.weighting, "weighting", ("A", "468"))
@@ -428,7 +430,8 @@ class MicrophoneOverload(OwnsArrays):
     def __post_init__(self) -> None:
         """Hold the curve as two read-only ``float64`` arrays, whatever pair it was given as.
 
-        :raises TypeError: if ``distortion`` is a text or no sequence.
+        :raises TypeError: if ``distortion`` is a text or no sequence, or a
+            member holds a complex number or a text.
         :raises ValueError: if ``distortion`` holds other than two members.
         """
         if self.distortion is not None:

@@ -233,7 +233,13 @@ class Signal(RichDisplay):
         """Length in seconds."""
         return self.n_samples / float(self.fs)
 
-    def pick(self, channels: int | np.integer[Any] | Sequence[int]) -> Signal:
+    def pick(
+        self,
+        channels: int
+        | np.integer[Any]
+        | Sequence[int | np.integer[Any]]
+        | NDArray[np.integer[Any]],
+    ) -> Signal:
         """The chosen channels, as a new Signal.
 
         Indexing a Signal yields the samples, which is what makes it a
@@ -242,8 +248,9 @@ class Signal(RichDisplay):
         keeps them, so a multichannel take can be narrowed to the channel
         under test and stay a measurement.
 
-        :param channels: One channel index, or a sequence of them, in the
-            order they should appear in the result.
+        :param channels: One channel index, or a sequence or an integer
+            array of them, Python or NumPy integers, in the order they
+            should appear in the result.
         :return: A :class:`Signal` with those channels, in that order.
         :raises IndexError: If a channel is out of range.
         """

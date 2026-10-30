@@ -72,6 +72,10 @@ from .._internal.frozen import (
     reduce_with_plain_rows,
 )
 from .._internal.validation import (
+    holds_complex,
+    holds_text,
+    refuse_complex,
+    refuse_text,
     require_choice,
     require_count,
     require_equal_counts,
@@ -142,9 +146,29 @@ _REAL_KINDS = "iuf"
 _DEFAULT_SPONGE_REFLECTION = 1e-4
 
 
+def _real_numbers(name: str, value: object, complex_refusal: str | None = None) -> None:
+    """Refuse a number, a sequence or an array that holds a complex number or a text.
+
+    NumPy reads both as real numbers the caller never gave: a complex value
+    as its real part (``np.asarray(z, dtype=np.float64)`` with no more than a
+    ``ComplexWarning``, ``float(np.real(z))`` with none) and a text as the
+    number it spells (``np.asarray([["343"]], dtype=np.float64)``), so a map
+    of a medium, a drive or a list of frequencies is checked for both before
+    it is converted.
+
+    :param complex_refusal: The refusal of a complex value, where the
+        parameter words its own.
+    :raises TypeError: for a complex number or a text, alone or among the
+        numbers of a sequence or an array.
+    """
+    refuse_complex(value, complex_refusal or f"{name} must be real, not complex")
+    refuse_text(value, f"{name} must be numbers, not text")
+
+
 def _positive_finite(name: str, value: float) -> float:
     """Validate that *value* is a strictly positive finite scalar."""
     require_scalar(value, name)
+    refuse_complex(value, f"{name} must be real, not complex")
     out = float(value)
     if not np.isfinite(out) or out <= 0.0:
         msg = f"{name} must be positive and finite"
@@ -155,6 +179,7 @@ def _positive_finite(name: str, value: float) -> float:
 def _finite(name: str, value: float) -> float:
     """Validate that *value* is a finite scalar."""
     require_scalar(value, name)
+    refuse_complex(value, f"{name} must be real, not complex")
     out = float(value)
     if not np.isfinite(out):
         msg = f"{name} must be finite"
@@ -240,7 +265,8 @@ class GaussianPulse(RichDisplay):
         ``half_width_s`` is positive, ``amplitude`` and ``t0`` finite.
 
         :raises TypeError: if ``ix`` or ``iy`` is not a number, or
-            ``amplitude``, ``half_width_s`` or ``t0`` is not a single number.
+            ``amplitude``, ``half_width_s`` or ``t0`` is not a single real
+            number (a text or a complex number among them).
         :raises ValueError: if ``ix`` or ``iy`` is not whole.
         """
         _hold_cells(self, "ix", "iy")
@@ -294,11 +320,12 @@ class CWSource(RichDisplay):
 
         :raises TypeError: if ``ix`` or ``iy`` is not a number, or
             ``amplitude``, ``frequency`` or ``ramp_cycles`` is not a single
-            number.
+            real number (a text or a complex number among them).
         :raises ValueError: if ``ix`` or ``iy`` is not whole.
         """
         _hold_cells(self, "ix", "iy")
         require_scalar(self.ramp_cycles, "ramp_cycles")
+        refuse_complex(self.ramp_cycles, "ramp_cycles must be real, not complex")
         _positive_finite("frequency", self.frequency)
         _finite("amplitude", self.amplitude)
         if not np.isfinite(self.ramp_cycles) or self.ramp_cycles < 0.0:
@@ -358,13 +385,15 @@ class SignalSource(OwnsArrays):
 
         ``fs`` is positive and ``samples`` a finite, non-empty 1D array.
 
-        :raises TypeError: if ``ix`` or ``iy`` is not a number, or
-            ``amplitude`` or ``fs`` is not a single number.
+        :raises TypeError: if ``ix`` or ``iy`` is not a number,
+            ``amplitude`` or ``fs`` is not a single real number, or
+            ``samples`` holds a complex number or a text.
         :raises ValueError: if ``ix`` or ``iy`` is not whole.
         """
         _hold_cells(self, "ix", "iy")
         _positive_finite("fs", self.fs)
         _finite("amplitude", self.amplitude)
+        _real_numbers("samples", self.samples)
         arr = np.asarray(self.samples, dtype=np.float64)
         if arr.ndim != 1:
             msg = "samples must be a 1D array"
@@ -441,7 +470,7 @@ class PlaneWaveSource(RichDisplay):
 
         :raises TypeError: if ``direction`` is not a text, ``waveform`` is not
             callable, ``offset`` is not a number, or ``amplitude`` is not one
-            number.
+            real number.
         :raises ValueError: if ``direction`` is not ``"down"``, ``"up"``,
             ``"left"`` or ``"right"``, ``offset`` is not whole or
             ``amplitude`` is not finite.
@@ -515,6 +544,10 @@ def _validate_sponge_damping(
 ) -> tuple[int, NDArray[np.float64]]:
     """Validate the sponge/damping spec into ``(cells, damping map)``."""
     require_scalar(absorbing_layer_reflection, "absorbing_layer_reflection")
+    refuse_complex(
+        absorbing_layer_reflection,
+        "absorbing_layer_reflection must be real, not complex",
+    )
     require_scalar(absorbing_layer_cells, "absorbing_layer_cells")
     cells = _integer("absorbing_layer_cells", absorbing_layer_cells)
     if cells < 0:
@@ -529,6 +562,7 @@ def _validate_sponge_damping(
     if not 0.0 < absorbing_layer_reflection < 1.0:
         msg = "absorbing_layer_reflection must lie strictly between 0 and 1"
         raise ValueError(msg)
+    _real_numbers("damping", damping)
     damping_map = np.asarray(damping, dtype=np.float64)
     if damping_map.ndim not in (0, 2):
         msg = "damping must be a scalar or an (ny, nx) map"
@@ -698,9 +732,7 @@ def _resolve_c_map(c: ArrayLike, shape: GridShape | None) -> Field2D:
     A ``shape`` is read whenever it is given: it spreads a scalar ``c`` over
     the grid it names, and beside a map it must name the map's grid.
     """
-    if np.iscomplexobj(c):
-        msg = "c must be real; a complex sound speed is not supported"
-        raise TypeError(msg)
+    _real_numbers("c", c, "c must be real; a complex sound speed is not supported")
     grid = _given_grid(shape)
     if np.isscalar(c):
         if grid is None:
@@ -720,9 +752,7 @@ def _resolve_c_map(c: ArrayLike, shape: GridShape | None) -> Field2D:
 
 def _resolve_rho_map(rho: ArrayLike, ny: int, nx: int) -> Field2D:
     """Broadcast/validate the density spec into a positive ``(ny, nx)`` map."""
-    if np.iscomplexobj(rho):
-        msg = "rho must be real; a complex density is not supported"
-        raise TypeError(msg)
+    _real_numbers("rho", rho, "rho must be real; a complex density is not supported")
     rho_map = (
         np.full((ny, nx), float(np.real(rho)), dtype=np.float64)
         if np.isscalar(rho)
@@ -873,9 +903,10 @@ def _validated_impedances(
 def _require_courant(cfl: float) -> None:
     """Refuse a Courant number outside ``(0, 1)``, where the leapfrog is unstable.
 
-    :raises TypeError: if ``cfl`` is not a single number.
+    :raises TypeError: if ``cfl`` is not a single real number.
     """
     require_scalar(cfl, "cfl")
+    refuse_complex(cfl, "cfl must be real, not complex")
     if not np.isfinite(cfl) or not 0.0 < cfl < 1.0:
         msg = (
             "cfl must lie in (0, 1): the leapfrog scheme "
@@ -1149,7 +1180,8 @@ class ContourProbe:
     :ivar normals: Outward unit normals of each sample, same shape.
     :ivar frequencies: The tracked frequencies [Hz].
     :raises TypeError: if ``ix0``, ``ix1``, ``iy0`` or ``iy1`` is a flag, a text or an
-        array where a count goes.
+        array where a count goes, or ``frequencies`` holds a complex number
+        or a text.
     """
 
     def __init__(
@@ -1177,6 +1209,7 @@ class ContourProbe:
                 "open cell on both sides"
             )
             raise ValueError(msg)
+        _real_numbers("frequencies", frequencies)
         freqs = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
         if (
             freqs.ndim != 1
@@ -1336,7 +1369,13 @@ class ContourProbe:
             :func:`~phonometry.simulation.ntff.far_field_from_contour`.
         :raises ValueError: If the frequency is not tracked or nothing has
             been accumulated yet.
+        :raises TypeError: If ``frequency`` is not one real number: an
+            array, a text or a complex number, which a lookup through
+            :func:`float` would read as the number it spells or as its real
+            part.
         """
+        require_scalar(frequency, "frequency")
+        refuse_complex(frequency, "frequency must be real, not complex")
         matches = [
             i for i, f in enumerate(self.frequencies) if np.isclose(f, float(frequency))
         ]
@@ -1427,7 +1466,8 @@ class FDTD2D:
     :param compute: Where the engine steps (:class:`Compute`); ``None``
         follows :func:`use`, then ``PHONOMETRY_COMPUTE``, then NumPy.
     :raises TypeError: if ``cfl``, ``dx`` or ``absorbing_layer_reflection`` is not
-        a single number, ``absorbing_layer_cells`` is a flag, a text or an array
+        a single real number, ``c``, ``rho`` or ``damping`` holds a complex
+        number or a text, ``absorbing_layer_cells`` is a flag, a text or an array
         where a count goes, ``shape`` is not a pair or holds a count that is
         not a number, a side of ``absorbing_sides`` or ``edge_impedance`` is
         not a text, an impedance of ``edge_impedance`` is not a real number or
@@ -1635,7 +1675,7 @@ class FDTD2D:
             ``center_m``/``amplitude``.
         :raises TypeError: if ``direction`` is not a text, or ``amplitude``,
             ``center_m``, ``wavelength_m`` or ``half_width_m`` is not a single
-            number.
+            real number.
         """
         require_choice(direction, "direction", _SIDE_TRAVEL)
         width = require_positive(half_width_m, "half_width_m")
@@ -1780,6 +1820,8 @@ class FDTD2D:
         :return: The registered :class:`ContourProbe`.
         :raises ValueError: For a block without open faces on all sides or
             invalid frequencies.
+        :raises TypeError: For a cell index that is a flag, a text or an
+            array, or ``frequencies`` that hold a complex number or a text.
         """
         probe = ContourProbe(self, ix0, ix1, iy0, iy1, frequencies)
         self._contour_probes.append(probe)
@@ -2225,7 +2267,7 @@ class FDTDBoundaries(OwnsArrays):
                 | float
                 | np.floating[Any]
                 | np.integer[Any]
-                | Sequence[float]
+                | Sequence[float | np.floating[Any] | np.integer[Any]]
                 | NDArray[np.floating[Any] | np.integer[Any]],
             ] = "rigid",
             absorbing_layer_cells: int | np.integer[Any] = 20,
@@ -2342,8 +2384,9 @@ class FDTDRun(OwnsArrays):
         ``cfl`` or ``dx`` that is not one number, a ``recording`` that is
         neither an :class:`FDTDRecording` nor ``None``, ``boundaries`` that
         are neither an :class:`FDTDBoundaries` nor ``None``, a ``shape``
-        that is not a pair or holds a count that is not a number, a complex
-        medium, or an ``obstacle_mask`` that is not boolean.
+        that is not a pair or holds a count that is not a number, a medium
+        (``c``, ``rho``, ``damping``) that holds a complex number or a text,
+        or an ``obstacle_mask`` that is not boolean.
     :raises ValueError: If an argument is out of its range, a ``shape`` is
         not two whole numbers of one cell or more or is given beside a map of
         another shape, or a source, a probe or the obstacle does not fit the
@@ -2417,15 +2460,12 @@ def _held_map(
     number, a text, an array or ``None`` is left as it is. So is a value the
     conversion refuses (an int too large for a float, a number whose float
     divides by zero), which the checks then refuse in their own words and in
-    their own order, and a map that holds complex numbers, which the checks
-    meet as they always did: :class:`FDTDRun`'s ``c`` and ``rho`` refuse it
-    with ``TypeError``; elsewhere a map of Python complex numbers raises
-    ``TypeError`` in the float conversion, and one of NumPy complex numbers
-    loses its imaginary part with a ``ComplexWarning`` and stays the
-    caller's list. Read here as float64, a map of NumPy complex numbers
-    would warn a second time; read as complex, a map of Python complex
-    numbers would turn its refusal into a warning. So only a real-valued map
-    is held.
+    their own order, and a map that holds a complex number or a text, which
+    every check of a medium refuses with ``TypeError`` (``c``, ``rho``,
+    ``c_p``, ``c_s``, ``damping``): read here as float64, NumPy would keep
+    only the real part of a complex number, with no more than a
+    ``ComplexWarning``, and the number a text spells. So only a real-valued
+    map is held.
 
     :param dtype: What the checks read the map as: float64 for a medium,
         ``None`` for the obstacle, whose checks require booleans.
@@ -2433,7 +2473,12 @@ def _held_map(
     if value is None or np.isscalar(value) or isinstance(value, np.ndarray):
         return value
     try:
-        held = None if np.iscomplexobj(value) else np.array(value, dtype=dtype)
+        objects = np.asarray(value, dtype=object)
+        held = (
+            None
+            if holds_complex(objects) or holds_text(objects)
+            else np.array(value, dtype=dtype)
+        )
     except (TypeError, ValueError, ArithmeticError):
         held = None
     return value if held is None else read_only(held)

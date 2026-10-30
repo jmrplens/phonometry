@@ -244,7 +244,7 @@ interfaces converge to the physical traction continuity.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `cfl` or `absorbing_layer_reflection` is not a single number, `absorbing_layer_cells` is a flag, a text or an array where a count goes, `shape` is not a pair or holds a count that is not a number, a side of `absorbing_sides` or `free_sides` is not a text, or `compute` is neither a [`Compute`](/phonometry/reference/api/simulation/compute/#compute) nor `None`. |
+| TypeError | if `cfl`, `dx` or `absorbing_layer_reflection` is not a single real number, `c_p`, `c_s`, `rho` or `damping` holds a complex number or a text, `absorbing_layer_cells` is a flag, a text or an array where a count goes, `shape` is not a pair or holds a count that is not a number, a side of `absorbing_sides` or `free_sides` is not a text, or `compute` is neither a [`Compute`](/phonometry/reference/api/simulation/compute/#compute) nor `None`. |
 | ValueError | for an argument out of its range, a `shape` given beside a map of another shape, a side that is not `"left"`, `"right"`, `"top"` or `"bottom"`, and for a `compute` that names a host: an engine steps in this process, and only [`elastic_fdtd_simulation`](/phonometry/reference/api/simulation/elastic-fdtd/#elastic_fdtd_simulation) runs on a node. |
 | ComputeImportError | when the library of the device `compute` asks for is not installed or does not import. |
 | ComputeDeviceError | when that device is not present, or fails a first small computation; with `fallback=True` the engine warns with [`ComputeFallbackWarning`](/phonometry/reference/api/simulation/compute/#computefallbackwarning) and steps on NumPy instead. |
@@ -347,7 +347,7 @@ or `numpy.s_[120:, :]` for the same thing spelled as a slice.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `shape` is not two whole numbers of two cells or more, a mask does not match `shape` or a material spec is invalid, a catalogue row's refusal among them, or a `compute` keyword names a host: the engine steps in this process. |
-| TypeError | For a `shape` that is not a pair or holds a count that is not a number, a mask array that is not boolean, a catalogue row of a class that lacks any of the bulk longitudinal speed, the transverse speed and the density, or a `compute` keyword that is neither a [`Compute`](/phonometry/reference/api/simulation/compute/#compute) nor `None`. |
+| TypeError | For a `shape` that is not a pair or holds a count that is not a number, a `dx` that is not one real number, a material's speed or density that is a complex number or a text, a mask array that is not boolean, a catalogue row of a class that lacks any of the bulk longitudinal speed, the transverse speed and the density, or a `compute` keyword that is neither a [`Compute`](/phonometry/reference/api/simulation/compute/#compute) nor `None`. |
 | ComputeImportError | When the library of the device a `compute` keyword asks for is not installed or does not import. |
 | ComputeDeviceError | When that device is not present, or fails a first small computation; with `fallback=True` the engine warns with [`ComputeFallbackWarning`](/phonometry/reference/api/simulation/compute/#computefallbackwarning), pointing at the line that called this method, and steps on NumPy instead. |
 
@@ -609,7 +609,7 @@ grid), and nothing the caller changes afterwards reaches a checked run.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | If an argument is of the wrong type, among them a `cfl` or `dx` that is not one number, a `recording` that is neither an [`ElasticRecording`](/phonometry/reference/api/simulation/elastic-fdtd/#elasticrecording) nor `None`, `boundaries` that are neither an [`ElasticBoundaries`](/phonometry/reference/api/simulation/elastic-fdtd/#elasticboundaries) nor `None`, or a `shape` that is not a pair or holds a count that is not a number. |
+| TypeError | If an argument is of the wrong type, among them a `cfl` or `dx` that is not one number, a `recording` that is neither an [`ElasticRecording`](/phonometry/reference/api/simulation/elastic-fdtd/#elasticrecording) nor `None`, `boundaries` that are neither an [`ElasticBoundaries`](/phonometry/reference/api/simulation/elastic-fdtd/#elasticboundaries) nor `None`, a `shape` that is not a pair or holds a count that is not a number, or a medium (`c_p`, `c_s`, `rho`, `damping`) that holds a complex number or a text. |
 | ValueError | If an argument is out of its range, a `shape` is not two whole numbers of one cell or more or is given beside a map of another shape, or a source, a probe or the obstacle does not fit the grid. |
 
 ## ExplosionSource

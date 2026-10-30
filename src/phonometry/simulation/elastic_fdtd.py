@@ -130,6 +130,7 @@ from .fdtd import (
     _positive_map,
     _probe_indices,
     _probe_pairs,
+    _real_numbers,
     _recording_or_empty,
     _require_courant,
     _require_grid_axes,
@@ -241,7 +242,8 @@ class ExplosionSource(RichDisplay):
     def __post_init__(self) -> None:
         """Hold whole cell indices and reject a non-finite ``amplitude`` gain.
 
-        :raises TypeError: if ``ix`` or ``iy`` is not a number.
+        :raises TypeError: if ``ix`` or ``iy`` is not a number, or
+            ``amplitude`` is not one real number.
         :raises ValueError: if ``ix`` or ``iy`` is not whole, or ``amplitude``
             is not finite.
         """
@@ -295,8 +297,9 @@ class ForceSource(RichDisplay):
     def __post_init__(self) -> None:
         """Hold the cell indices as ints and check the gain and the direction.
 
-        :raises TypeError: if ``ix`` or ``iy`` is not a number, or
-            ``direction`` is not a text.
+        :raises TypeError: if ``ix`` or ``iy`` is not a number,
+            ``direction`` is not a text, or ``amplitude`` is not one real
+            number.
         :raises ValueError: if ``ix`` or ``iy`` is not whole, ``amplitude`` is
             not finite, or ``direction`` is not ``"x"`` or ``"y"``.
         """
@@ -468,7 +471,9 @@ def _as_material(name: str, value: object) -> Material:
         return _material_of_row(name, value)
     # The length of a fixed-size argument, not a quantity.
     if isinstance(value, Sequence) and not isinstance(value, str) and len(value) == 3:  # noqa: PLR2004
-        c_p, c_s, rho = (float(np.real(v)) for v in value)
+        # Each number is read by the material's own checks, which refuse a
+        # complex one rather than keep its real part.
+        c_p, c_s, rho = value
         return Material(c_p=c_p, c_s=c_s, rho=rho)
     msg = (
         f"{name} must be a Material, a solid's catalogue row or a "
@@ -558,7 +563,14 @@ def scholte_speed(
 
 
 def _resolve_speed_map(name: str, value: ArrayLike, shape: GridShape | None) -> Field2D:
-    """Broadcast/validate a wave-speed spec into a finite 2D map."""
+    """Broadcast/validate a wave-speed spec into a finite 2D map.
+
+    :raises TypeError: for a speed that holds a complex number or a text,
+        which NumPy would read as its real part or as the number it spells.
+    """
+    _real_numbers(
+        name, value, f"{name} must be real; a complex wave speed is not supported"
+    )
     if np.isscalar(value):
         if shape is None:
             msg = f"shape is required when {name} is a scalar"
@@ -634,7 +646,12 @@ def _checked_shear_speed(c_s: ArrayLike, cp_map: Field2D) -> Field2D:
 
 
 def _checked_density(rho: ArrayLike, ny: int, nx: int) -> Field2D:
-    """The density map on the ``(ny, nx)`` grid, strictly positive."""
+    """The density map on the ``(ny, nx)`` grid, strictly positive.
+
+    :raises TypeError: for a density that holds a complex number or a text,
+        which NumPy would read as its real part or as the number it spells.
+    """
+    _real_numbers("rho", rho, "rho must be real; a complex density is not supported")
     rho_map = (
         np.full((ny, nx), float(np.real(rho)), dtype=np.float64)
         if np.isscalar(rho)
@@ -842,11 +859,13 @@ class ElasticFDTD2D:
         shear-free rigid inclusion, rasterising arbitrary interior geometry.
     :param compute: Where the engine steps (:class:`Compute`); ``None``
         follows :func:`use`, then ``PHONOMETRY_COMPUTE``, then NumPy.
-    :raises TypeError: if ``cfl`` or ``absorbing_layer_reflection`` is not a single
-        number, ``absorbing_layer_cells`` is a flag, a text or an array where a
-        count goes, ``shape`` is not a pair or holds a count that is not a
-        number, a side of ``absorbing_sides`` or ``free_sides`` is not a
-        text, or ``compute`` is neither a :class:`Compute` nor ``None``.
+    :raises TypeError: if ``cfl``, ``dx`` or ``absorbing_layer_reflection`` is not a
+        single real number, ``c_p``, ``c_s``, ``rho`` or ``damping`` holds a
+        complex number or a text, ``absorbing_layer_cells`` is a flag, a text or
+        an array where a count goes, ``shape`` is not a pair or holds a count
+        that is not a number, a side of ``absorbing_sides`` or ``free_sides``
+        is not a text, or ``compute`` is neither a :class:`Compute` nor
+        ``None``.
     :raises ValueError: for an argument out of its range, a ``shape`` given
         beside a map of another shape, a side that is not ``"left"``,
         ``"right"``, ``"top"`` or ``"bottom"``, and for a ``compute`` that
@@ -1023,10 +1042,12 @@ class ElasticFDTD2D:
             ``compute`` keyword names a host: the engine steps in this
             process.
         :raises TypeError: For a ``shape`` that is not a pair or holds a
-            count that is not a number, a mask array that is not boolean, a
-            catalogue row of a class that lacks any of the bulk longitudinal
-            speed, the transverse speed and the density, or a ``compute``
-            keyword that is neither a :class:`Compute` nor ``None``.
+            count that is not a number, a ``dx`` that is not one real number,
+            a material's speed or density that is a complex number or a text,
+            a mask array that is not boolean, a catalogue row of a class that
+            lacks any of the bulk longitudinal speed, the transverse speed and
+            the density, or a ``compute`` keyword that is neither a
+            :class:`Compute` nor ``None``.
         :raises ComputeImportError: When the library of the device a
             ``compute`` keyword asks for is not installed or does not import.
         :raises ComputeDeviceError: When that device is not present, or fails
@@ -1823,8 +1844,10 @@ class ElasticRun(OwnsArrays):
     :raises TypeError: If an argument is of the wrong type, among them a
         ``cfl`` or ``dx`` that is not one number, a ``recording`` that is
         neither an :class:`ElasticRecording` nor ``None``, ``boundaries``
-        that are neither an :class:`ElasticBoundaries` nor ``None``, or a
-        ``shape`` that is not a pair or holds a count that is not a number.
+        that are neither an :class:`ElasticBoundaries` nor ``None``, a
+        ``shape`` that is not a pair or holds a count that is not a number, or
+        a medium (``c_p``, ``c_s``, ``rho``, ``damping``) that holds a complex
+        number or a text.
     :raises ValueError: If an argument is out of its range, a ``shape`` is
         not two whole numbers of one cell or more or is given beside a map of
         another shape, or a source, a probe or the obstacle does not fit the

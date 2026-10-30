@@ -1414,7 +1414,8 @@ class RotorcraftGround(OwnsArrays):
         an event reads it.
 
         :raises TypeError: if ``flow_resistivity`` is not a text, or
-            ``terrain`` is a text or not a sequence at all.
+            ``terrain`` is a text or not a sequence at all, or an axis of it
+            holds a complex number or a text.
         :raises ValueError: if ``flow_resistivity`` is a text that is not a
             class letter, or ``terrain`` holds other than three axes.
         """

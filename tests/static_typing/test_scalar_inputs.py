@@ -57,6 +57,21 @@ def test_a_numpy_integer_is_a_count() -> None:
     assert corner == 0
 
 
+def test_channels_are_numpy_integers_in_a_list_as_one_is_alone() -> None:
+    """``Signal.pick`` takes a list of ``np.int64``, and their array, as it takes one.
+
+    The channels a caller picks come out of NumPy (``np.flatnonzero`` of a
+    mask, ``np.argsort`` of levels): one ``np.int64`` was a channel to mypy,
+    a list of them or their array was not, and each ran.
+    """
+    take = io.Signal(np.zeros((3, 16)), 48000.0)
+    loud: NDArray[np.int64] = np.flatnonzero(np.array([True, False, True]))
+    listed: list[np.int64] = [np.int64(2), np.int64(0)]
+    assert take.pick(loud).n_channels == 2
+    assert take.pick(listed).n_channels == 2
+    assert take.pick(np.int64(1)).n_channels == 1
+
+
 def test_a_numpy_integer_is_a_band_fraction() -> None:
     """``BandFraction | np.integer[Any]``: 1 and 3 as numpy hands them over."""
     loss = building.mass_law_transmission_loss(500.0, 10.0, fraction=np.int64(1))

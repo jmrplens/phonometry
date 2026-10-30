@@ -69,7 +69,12 @@ import numpy as np
 from scipy.special import hankel2
 
 from .._internal.frozen import OwnsArrays, read_only
-from .._internal.validation import require_equal_shapes, require_scalar
+from .._internal.validation import (
+    refuse_complex,
+    refuse_text,
+    require_equal_shapes,
+    require_scalar,
+)
 from ..fluids import Fluid
 
 if TYPE_CHECKING:
@@ -164,10 +169,18 @@ class ContourPhasors(OwnsArrays):
         :raises ValueError: for a non-positive ``frequency`` or ``segment``,
             for arrays that do not share one sample axis in the shapes above,
             or for a non-finite sample.
-        :raises TypeError: if ``frequency`` or ``segment`` is not a single number.
+        :raises TypeError: if ``frequency`` or ``segment`` is not a single real
+            number, ``positions`` or ``normals`` holds a complex number, or
+            an array holds a text.
         """
         require_scalar(self.frequency, "frequency")
         require_scalar(self.segment, "segment")
+        refuse_complex(self.frequency, "frequency must be real, not complex")
+        refuse_complex(self.segment, "segment must be real, not complex")
+        for name in ("positions", "normals"):
+            refuse_complex(getattr(self, name), f"{name} must be real, not complex")
+        for name in ("positions", "normals", "pressure", "normal_velocity"):
+            refuse_text(getattr(self, name), f"{name} must be numbers, not text")
         if not np.isfinite(self.frequency) or self.frequency <= 0.0:
             msg = "frequency must be positive and finite"
             raise ValueError(msg)
@@ -319,13 +332,17 @@ def far_field_from_contour(
     :return: Complex array, one value per angle: the far-field pattern
         ``F(a)`` (units Pa sqrt(m)), or the pressure [Pa] at ``distance``.
     :raises TypeError: For a ``contour`` that is not a
-        :class:`ContourPhasors`, or a ``distance`` that is not one number.
+        :class:`ContourPhasors`, a ``distance`` that is not one real number,
+        or ``angles_deg`` or ``origin`` holding a complex number or a text.
     :raises ValueError: For invalid angles, a non-positive ``distance``, or
         an observation circle that does not clear the contour.
     """
     if not isinstance(contour, ContourPhasors):
         msg = "contour must be a ContourPhasors"
         raise TypeError(msg)
+    for name, value in (("angles_deg", angles_deg), ("origin", origin)):
+        refuse_complex(value, f"{name} must be real, not complex")
+        refuse_text(value, f"{name} must be numbers, not text")
     ang = np.atleast_1d(np.asarray(angles_deg, dtype=np.float64))
     if ang.ndim != 1 or ang.size == 0 or not np.all(np.isfinite(ang)):
         msg = "angles must be a non-empty 1D sequence of finite values in degrees"
@@ -353,6 +370,7 @@ def far_field_from_contour(
             dtype=np.complex128,
         )
     require_scalar(distance, "distance")
+    refuse_complex(distance, "distance must be real, not complex")
     d = float(distance)
     if not np.isfinite(d) or d <= 0.0:
         msg = "distance must be positive and finite"

@@ -110,7 +110,7 @@ float32 with Neumaier's compensated summation.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `ix0`, `ix1`, `iy0` or `iy1` is a flag, a text or an array where a count goes. |
+| TypeError | if `ix0`, `ix1`, `iy0` or `iy1` is a flag, a text or an array where a count goes, or `frequencies` holds a complex number or a text. |
 
 ### ContourProbe.n_samples
 
@@ -139,6 +139,7 @@ The accumulated contour phasors at one tracked frequency.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the frequency is not tracked or nothing has been accumulated yet. |
+| TypeError | If `frequency` is not one real number: an array, a text or a complex number, which a lookup through `float` would read as the number it spells or as its real part. |
 
 ### ContourProbe.reset()
 
@@ -236,7 +237,7 @@ sides into absorbing or locally reacting boundaries. Sources are soft
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `cfl`, `dx` or `absorbing_layer_reflection` is not a single number, `absorbing_layer_cells` is a flag, a text or an array where a count goes, `shape` is not a pair or holds a count that is not a number, a side of `absorbing_sides` or `edge_impedance` is not a text, an impedance of `edge_impedance` is not a real number or an array of them (a flag, `None` or a text among them), or `compute` is neither a [`Compute`](/phonometry/reference/api/simulation/compute/#compute) nor `None`. |
+| TypeError | if `cfl`, `dx` or `absorbing_layer_reflection` is not a single real number, `c`, `rho` or `damping` holds a complex number or a text, `absorbing_layer_cells` is a flag, a text or an array where a count goes, `shape` is not a pair or holds a count that is not a number, a side of `absorbing_sides` or `edge_impedance` is not a text, an impedance of `edge_impedance` is not a real number or an array of them (a flag, `None` or a text among them), or `compute` is neither a [`Compute`](/phonometry/reference/api/simulation/compute/#compute) nor `None`. |
 | ValueError | for an argument out of its range, a `shape` given beside a map of another shape, a side that is not `"left"`, `"right"`, `"top"` or `"bottom"`, and for a `compute` that names a host: an engine steps in this process, and only [`fdtd_simulation`](/phonometry/reference/api/simulation/fdtd/#fdtd_simulation) runs on a node. |
 | ComputeImportError | when the library of the device `compute` asks for is not installed or does not import. |
 | ComputeDeviceError | when that device is not present, or fails a first small computation; with `fallback=True` the engine warns with [`ComputeFallbackWarning`](/phonometry/reference/api/simulation/compute/#computefallbackwarning) and steps on NumPy instead. |
@@ -291,6 +292,7 @@ radiated field itself is the quantity of interest).
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a block without open faces on all sides or invalid frequencies. |
+| TypeError | For a cell index that is a flag, a text or an array, or `frequencies` that hold a complex number or a text. |
 
 ### FDTD2D.add_plane_wave()
 
@@ -334,7 +336,7 @@ cells), as a physical incident wave would be.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For an unknown direction, a non-positive or non-finite `half_width_m`/`wavelength_m`, or a non-finite `center_m`/`amplitude`. |
-| TypeError | if `direction` is not a text, or `amplitude`, `center_m`, `wavelength_m` or `half_width_m` is not a single number. |
+| TypeError | if `direction` is not a text, or `amplitude`, `center_m`, `wavelength_m` or `half_width_m` is not a single real number. |
 
 ### FDTD2D.add_source()
 
@@ -524,7 +526,7 @@ spreading rather than the 3D spherical $1/r$.
 ```python
 FDTDBoundaries(
     *,
-    sides: Literal['rigid', 'absorbing'] | Mapping[Literal['left', 'right', 'top', 'bottom'], Literal['rigid', 'absorbing'] | float | np.floating[Any] | np.integer[Any] | Sequence[float] | NDArray[np.floating[Any] | np.integer[Any]]] = 'rigid',
+    sides: Literal['rigid', 'absorbing'] | Mapping[Literal['left', 'right', 'top', 'bottom'], Literal['rigid', 'absorbing'] | float | np.floating[Any] | np.integer[Any] | Sequence[float | np.floating[Any] | np.integer[Any]] | NDArray[np.floating[Any] | np.integer[Any]]] = 'rigid',
     absorbing_layer_cells: int | np.integer[Any] = 20,
 )
 ```
@@ -711,7 +713,7 @@ changes afterwards reaches a checked run.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | If an argument is of the wrong type: a `duration_s`, `cfl` or `dx` that is not one number, a `recording` that is neither an [`FDTDRecording`](/phonometry/reference/api/simulation/fdtd/#fdtdrecording) nor `None`, `boundaries` that are neither an [`FDTDBoundaries`](/phonometry/reference/api/simulation/fdtd/#fdtdboundaries) nor `None`, a `shape` that is not a pair or holds a count that is not a number, a complex medium, or an `obstacle_mask` that is not boolean. |
+| TypeError | If an argument is of the wrong type: a `duration_s`, `cfl` or `dx` that is not one number, a `recording` that is neither an [`FDTDRecording`](/phonometry/reference/api/simulation/fdtd/#fdtdrecording) nor `None`, `boundaries` that are neither an [`FDTDBoundaries`](/phonometry/reference/api/simulation/fdtd/#fdtdboundaries) nor `None`, a `shape` that is not a pair or holds a count that is not a number, a medium (`c`, `rho`, `damping`) that holds a complex number or a text, or an `obstacle_mask` that is not boolean. |
 | ValueError | If an argument is out of its range, a `shape` is not two whole numbers of one cell or more or is given beside a map of another shape, or a source, a probe or the obstacle does not fit the grid. |
 
 ## GaussianPulse

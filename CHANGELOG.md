@@ -4258,7 +4258,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   where only a tuple or a list was taken, refused when malformed, and refused
   with `ValueError` beside a map whose grid it does not name, where an engine
   ignored it and a run held it; `ElasticFDTD2D.from_regions` reads its `shape`
-  the same way, where a third count was dropped. What the engines compute did
+  the same way, where a third count was dropped. A complex value or a text
+  where a real number belongs is refused with `TypeError` by every real input
+  of both engines and both runs, of the six sources, of `Material` and the
+  `(c_p, c_s, rho)` triples that stand for one, of `FDTD2D.add_plane_wave`, of
+  the contour probe and its `phasors()`, of `ContourPhasors` and of
+  `far_field_from_contour`: the elastic engine stepped the real part of a
+  complex `c_p`, `c_s` or `rho` where the acoustic engine refused a complex `c`
+  or `rho`, every map of both engines took a text as the number it spells
+  (`c="343"`), and a NumPy complex number given to `dx`, `cfl`, a source's
+  frequency or amplitude or a material's speed was read as its real part with
+  no more than a `ComplexWarning`. The scalar guards every module shares read
+  a NumPy complex number that way too, where they refused a Python one, and
+  now refuse both; the array guards read an array of objects that holds one
+  whole, so its imaginary part is checked too, and a curve or an elevation
+  model held as arrays refuses a member of texts. `io.Signal.pick` takes a
+  list or an integer array of NumPy channel indices, as it took one alone,
+  and an impedance profile of `FDTDBoundaries` takes NumPy numbers, for a
+  type checker as when the call ran. What the engines compute did
   not move: `engine-digests.json` is unchanged, and a new CuPy proof is
   recorded in `gpu-parity.lock`. The checks of the parameters, of the records
   a caller builds, of the choices and of the documented `TypeError` no longer

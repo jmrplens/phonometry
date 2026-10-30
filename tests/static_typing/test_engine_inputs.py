@@ -244,6 +244,23 @@ def test_an_impedance_of_any_real_type_is_held_as_the_run_reads_it() -> None:
         FDTDBoundaries(sides={"left": None})  # type: ignore[dict-item]
 
 
+def test_a_profile_written_as_a_list_of_numpy_numbers_is_an_impedance() -> None:
+    """A list of float32 or int64 impedances is a profile of real numbers.
+
+    It ran, as a list of floats does, and a profile typed ``Sequence[float]``
+    refused it: a NumPy float32 or int64 is no ``float`` to a type checker.
+    """
+    float32s: list[np.float32] = [np.float32(415.0)] * _NY
+    int64s: list[np.int64] = [np.int64(415)] * _NX
+    boundaries = FDTDBoundaries(sides={"left": float32s, "top": int64s})
+    sides = boundaries.sides
+    assert not isinstance(sides, str)
+    left = sides["left"]
+    assert isinstance(left, np.ndarray)
+    assert left.dtype == np.float64
+    assert left.tolist() == [415.0] * _NY
+
+
 def test_a_single_probe_field_and_a_sweep_target_of_lists() -> None:
     """A single field name, and a sweep's target spectrum written as lists."""
     from phonometry.room import shaped_sweep_signal

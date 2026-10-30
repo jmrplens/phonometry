@@ -5,8 +5,8 @@ Each one is pinned to the number its clause prints, read on the page and
 kept in ``tests/reference_data/psychoacoustics.py`` with the page it was read
 on: the audibility criterion of Clause 5.1.9 and the prominence criteria of
 Clauses 6.3, 7.2 and 9.2. No function applies them; a caller compares a
-result with them, so the test holds the number, its type and its one
-address.
+result with them, so the test holds the number, its type and where it is
+published.
 """
 
 from __future__ import annotations
@@ -70,3 +70,15 @@ def test_each_criterion_is_published_once_in_its_family(name: str) -> None:
     assert name in family.__all__
     assert name not in other.__all__
     assert getattr(family, name) is getattr(psychoacoustics, name)
+
+
+def test_the_audibility_criterion_keeps_its_4_0_0rc1_address() -> None:
+    # 4.0.0rc1 published it in ``psychoacoustics.loudness.ecma``, and the
+    # migration guide says that address still imports.
+    from phonometry.psychoacoustics.loudness import ecma
+
+    assert "AUDIBILITY_THRESHOLD_SONE_HMS" in ecma.__all__
+    assert (
+        ecma.AUDIBILITY_THRESHOLD_SONE_HMS
+        is psychoacoustics.AUDIBILITY_THRESHOLD_SONE_HMS
+    )

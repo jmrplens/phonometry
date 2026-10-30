@@ -39,6 +39,16 @@ same-block-size neighbours 0.996, and with the full cross-group
 recomputation 0.9845. The block-time smoothing stage and the fade-in/LP
 transient contribute < 0.01 % (the value is signal-length invariant).
 
+ECMA-418-2 prints no value of the total basis loudness N_basis for any
+signal (its Annex A is a figure of equal-loudness contours), so the tests
+hold it to a closed form instead: for a steady free-field tone whose period
+is a whole number of samples, the block RMS of Formula 22 is the RMS of the
+band output exactly, and N'_basis(z) and N_basis follow from the
+steady-state response of the printed ear filter (Formulae 4 and 5, Table 1)
+and auditory filters (Formulae 8-10 and 13-17), the nonlinearity and the
+threshold in quiet (Formulae 23-25, Tables 2 and 3) and the sum of
+Formula 26.
+
 The API is monaural: the quadratic-mean binaural combination of
 Formula (118) (Clause 8.1.5) is not implemented -- analyse each channel
 separately.
@@ -68,6 +78,7 @@ from ..._internal.utils import _typesignal
 from ..._internal.validation import (
     require_1d_signal,
     require_choice,
+    require_count,
     require_ranks,
     require_same_length,
     require_scalar,
@@ -95,8 +106,8 @@ _N_FADE = 240  # 5 ms fade-in, n_fadein = 0.005 * 48000 (Formula 1)
 #: sone_HMS: a signal is considered audible when its total basis loudness, the
 #: specific basis loudness of Formula (25) summed over the 53 bands with
 #: dz = 0.5 (Formula 26), exceeds it. Published by the package; no function
-#: applies it: a result's ``basis_loudness_vs_time_sone_hms`` is compared
-#: with it.
+#: applies it: a result's ``basis_loudness_vs_time`` up to its
+#: ``last_evaluated_block`` is compared with it.
 AUDIBILITY_THRESHOLD_SONE_HMS = 0.01
 
 # Auditory filter bank (Clause 5.1.4)
@@ -279,22 +290,41 @@ class EcmaLoudness(OwnsArrays):
     ``loudness_vs_time`` hold the time-dependent loudness N(l) at 187,5 Hz
     (Formula 116).  ``field`` records the assumed sound field.
 
-    ``basis_loudness_vs_time_sone_hms`` is the total basis loudness
-    N_basis(l) in sone_HMS (Formula 26) at the same ``times``, the quantity
-    the audibility criterion of Clause 5.1.9 reads: the signal is audible in
-    a block where it exceeds :data:`AUDIBILITY_THRESHOLD_SONE_HMS`
-    (0,01 sone_HMS). It is the specific basis loudness N'_basis(l, z) of
-    Formula (25), the front-end's output before the tonal and noise split,
-    which each band computes at its own block size (Clause 5.1.5.1,
-    Table 4); every band is resampled by linear interpolation onto the
-    common 187,5 Hz grid of the 1024-sample blocks (Clause 6.2.6, Table 6),
-    the grid the tonal and noise loudness are resampled to, and the 53 bands
-    are summed with dz = 0,5. Formula (26) is printed without a time index,
-    which Clause 5.1.7 drops because every block is processed alike, so a
-    value per block of that grid is the library's reading. No block is
-    discarded: the 0 <= l <= 56 transient blocks that Formulae (115) and
-    (117) leave out, and the blocks after l_end of Formula (40), are kept,
-    as ``loudness_vs_time`` keeps them.
+    ``basis_loudness_vs_time`` is the total basis loudness N_basis(l) in
+    sone_HMS (Formula 26) at the same ``times``, the quantity Clause 5.1.9
+    compares with its audibility criterion,
+    :data:`AUDIBILITY_THRESHOLD_SONE_HMS` (0,01 sone_HMS). It is the
+    specific basis loudness N'_basis(l, z) of Formula (25), the front-end's
+    output before the tonal and noise split, summed over the 53 bands with
+    dz = 0,5. Each band computes it at its own block size, the segmentation
+    Clause 5.1.5.1 (Table 4) prescribes for tonality and loudness, and is
+    resampled by linear interpolation onto the common 187,5 Hz grid of the
+    1024-sample blocks (Clause 6.2.6, Table 6), the grid the tonal and noise
+    loudness are resampled to.
+
+    Two readings in this are the library's, as Clause 5.1.9 prints neither.
+    Formula (26) is printed without a time index, which Clause 5.1.7 drops
+    because every block is processed alike, so the library gives one value
+    per block of that grid. And Clause 5.1.9 names no segmentation: roughness
+    and fluctuation strength segment with the fixed blocks of Clause 5.1.5.2
+    and pad by Clause 5.1.2.2, so the N_basis they form differs from this one
+    for a sound that changes in time (a 60 ms 1 kHz burst at 3 dB SPL reaches
+    0,021 sone_HMS here and 0,0025 with the 16384-sample blocks of
+    roughness); the library reads it on the Table 4 segmentation that the
+    loudness of Clause 8 is built on.
+
+    ``last_evaluated_block`` is l_end of Formula (40), the index in ``times``
+    of the last block that holds the signal: Clause 6.2.6 removes the results
+    of the zero padding after it, where a signal cut off abruptly leaves the
+    auditory filters ringing. The library compares N_basis with the criterion
+    block by block up to that block and calls the signal audible if it
+    exceeds it in any of them,
+    ``(basis_loudness_vs_time[: last_evaluated_block + 1] > 0.01).any()``;
+    the block-by-block comparison and the any-block rule are the library's
+    reading too, since Clause 5.1.9 says neither how blocks are compared nor
+    how their verdicts combine. No block is dropped from the series: the
+    0 <= l <= 56 transient blocks that Formulae (115) and (117) leave out,
+    and the blocks after l_end, are kept, as ``loudness_vs_time`` keeps them.
     """
 
     loudness: float
@@ -303,7 +333,8 @@ class EcmaLoudness(OwnsArrays):
     frequencies: np.ndarray
     times: np.ndarray
     loudness_vs_time: np.ndarray
-    basis_loudness_vs_time_sone_hms: np.ndarray
+    basis_loudness_vs_time: np.ndarray
+    last_evaluated_block: int
     field: Literal["free", "diffuse"]
 
     def __post_init__(self) -> None:
@@ -324,10 +355,16 @@ class EcmaLoudness(OwnsArrays):
         The two axes are checked apart because nothing relates them: the band
         count is fixed by the standard, whereas the number of 187,5 Hz blocks
         follows the length of the recording, and a 53-block recording is no
-        evidence that either is right.
+        evidence that either is right. ``last_evaluated_block`` indexes the
+        time axis, so it must name one of its blocks: one past the end would
+        let the audibility comparison read every block, the zero padding
+        Formula (40) leaves out included.
 
         :raises ValueError: if the per-band or the per-block quantities
-            disagree among themselves.
+            disagree among themselves, or ``last_evaluated_block`` is not the
+            index of a block of ``times``.
+        :raises TypeError: if ``last_evaluated_block`` is a flag, a text or an
+            array where a whole number goes.
         """
         require_ranks(
             self,
@@ -336,7 +373,7 @@ class EcmaLoudness(OwnsArrays):
             frequencies=1,
             times=1,
             loudness_vs_time=1,
-            basis_loudness_vs_time_sone_hms=1,
+            basis_loudness_vs_time=1,
         )
         require_same_length(
             self,
@@ -349,9 +386,19 @@ class EcmaLoudness(OwnsArrays):
             self,
             "times",
             "loudness_vs_time",
-            "basis_loudness_vs_time_sone_hms",
+            "basis_loudness_vs_time",
             axis="time block",
         )
+        last = require_count(
+            self.last_evaluated_block, "last_evaluated_block", at_least=0
+        )
+        if last >= self.times.size:
+            msg = (
+                f"'last_evaluated_block' ({last}) must be the index of a block "
+                f"of 'times', 0 to {self.times.size - 1}."
+            )
+            raise ValueError(msg)
+        object.__setattr__(self, "last_evaluated_block", last)
 
     @overload
     def plot(
@@ -711,9 +758,13 @@ def _tonal_noise_split(
     averaged = _average_blocks(_average_bands_full(p_bands, n_new))
 
     # Common time grid (Clause 6.2.6): sized from the block count of the
-    # smallest (1024-sample) stage. The larger stages segment up to 7 blocks
-    # past it (their i_start reaches further back into the start padding);
-    # sizing from their count would only append edge-held interpolations.
+    # smallest (1024-sample) stage, n_new / 256 + 1. With i_start = s_b,max -
+    # s_b (Formula 19) and l_last = n_new / s_h (Formula 20), the last block
+    # of every stage ends at the end of p(n) and sits on grid index
+    # l_last * s_h / 256 = n_new / 256 = n_common - 1, so every band spans
+    # exactly [0, n_common - 1] and the interpolation of Table 6 never
+    # extrapolates. Sizing from a larger stage's count times s_h / 256 would
+    # append s_h / 256 - 1 (up to 7) edge-held points.
     n_common = int(averaged[int(np.argmax(_S_B == _S_B_MIN))].shape[0])
     n_tonal = np.zeros((n_common, _CBF))
     n_signal = np.zeros((n_common, _CBF))
@@ -752,6 +803,16 @@ def _tonal_noise_split(
 # --------------------------------------------------------------------------
 
 
+def _last_evaluated_block(n_samples: int, n_blocks: int) -> int:
+    """The last evaluated block l_end of Formula (40), on the common grid.
+
+    ``n_samples`` is the length of the signal at 48 kHz, after any
+    resampling; ``n_blocks`` the length of the common grid, which bounds it
+    for a signal a few samples long.
+    """
+    return min(math.ceil(n_samples / _FS * _R_SD), n_blocks - 1)
+
+
 def _assemble_loudness(
     n_tonal: np.ndarray, n_noise: np.ndarray, n_samples: int
 ) -> tuple[float, np.ndarray, np.ndarray, np.ndarray]:
@@ -770,7 +831,7 @@ def _assemble_loudness(
     spec = np.nan_to_num(spec, nan=0.0)
 
     n_blocks = spec.shape[0]
-    l_end = min(math.ceil(n_samples / _FS * _R_SD), n_blocks - 1)
+    l_end = _last_evaluated_block(n_samples, n_blocks)
     keep = slice(_TRANSIENT_BLOCKS + 1, l_end + 1)
     kept = spec[keep]
     if kept.shape[0] == 0:  # very short signals: fall back to all blocks
@@ -808,9 +869,9 @@ def loudness_ecma(
         the outer/middle-ear filter of Clause 5.1.3.
     :return: An :class:`EcmaLoudness` with the single loudness value N
         (Formula 117), the average specific loudness N'(z) (Formula 115), the
-        time-dependent loudness N(l) (Formula 116) and the total basis
-        loudness N_basis(l) (Formula 26) the audibility criterion of Clause
-        5.1.9 reads.
+        time-dependent loudness N(l) (Formula 116), the total basis loudness
+        N_basis(l) (Formula 26) the audibility criterion of Clause 5.1.9 is
+        compared with, and the last evaluated block l_end (Formula 40).
     :raises TypeError: if ``fs`` is not a single number, or ``field`` is not a text.
 
     The 1 kHz / 40 dB SPL sinusoid defines 1 sone_HMS via the calibration
@@ -844,6 +905,7 @@ def loudness_ecma(
         frequencies=_F_CENTRE,
         times=time,
         loudness_vs_time=n_time,
-        basis_loudness_vs_time_sone_hms=np.sum(n_basis, axis=1) * _DZ,  # F. 26
+        basis_loudness_vs_time=np.sum(n_basis, axis=1) * _DZ,  # Formula 26
+        last_evaluated_block=_last_evaluated_block(n_samples, time.size),
         field=field,
     )

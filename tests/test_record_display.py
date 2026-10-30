@@ -898,7 +898,6 @@ _UNIT_WORDS = frozenset(
         "kg", "lb", "mol",
         "knots", "kt", "kmh", "mph",
         "hp", "ohm", "ma", "percent",
-        "hms", "asper",
     }
 )  # fmt: skip
 

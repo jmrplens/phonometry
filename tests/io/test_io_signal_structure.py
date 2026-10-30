@@ -330,8 +330,17 @@ def test_pipe_passes_a_keyword_named_func_on_to_the_function() -> None:
     assert _stereo().pipe(named, func="mean") == "2 mean"
 
 
-def test_pipe_refuses_what_cannot_be_called_by_name() -> None:
-    """A value where the function belongs is a TypeError that says which."""
+@pytest.mark.parametrize(
+    ("value", "kind"), [(3.0, "float"), ((signals.leq, "x"), "tuple")]
+)
+def test_pipe_refuses_what_cannot_be_called_by_name(value: object, kind: str) -> None:
+    """A value where the function belongs is a TypeError that says which.
+
+    The pair of pandas, a function and the keyword the Signal goes to, is
+    one: the message says where such a function goes instead.
+    """
     stereo = _stereo()
-    with pytest.raises(TypeError, match="'func' must be a function"):
-        stereo.pipe(3.0)  # type: ignore[arg-type]
+    with pytest.raises(
+        TypeError, match=f"'func' must be a function .*, got {kind}; .* in a lambda"
+    ):
+        stereo.pipe(value)  # type: ignore[arg-type]

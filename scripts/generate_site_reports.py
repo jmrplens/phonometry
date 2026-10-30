@@ -24,8 +24,10 @@ registry never reached the index. Each entry now lands on the page of the
 document family it is about (:func:`family_of`): ``ISO 3743-1:2010`` and
 ``ISO 3743-2:2018`` on ``/reference/errata/iso-3743/``, a book on a page named
 after its authors. ``/reference/errata/`` keeps its hand-written introduction
-and what only the registry's own says (:func:`index_preamble`), and lists
-every family with every entry in it (through
+and what only the registry's own says (:func:`index_preamble`, which pins
+by its digest each paragraph of the registry's introduction the index says in
+its own words, so an edit to one stops the run instead of reaching no page),
+and lists every family with every entry in it (through
 ``src/components/ErrataFamily.astro``, which reads the anchors off the family
 pages as the build renders them); a link written against the old single page,
 ``/reference/errata/#<entry>``, still lands on the entry, because the index
@@ -71,6 +73,7 @@ from __future__ import annotations
 
 import argparse
 import dataclasses
+import hashlib
 import json
 import pathlib
 import posixpath
@@ -189,6 +192,26 @@ def body_from(source: pathlib.Path, *, start: re.Pattern[str]) -> str:
 
 
 @dataclasses.dataclass(frozen=True)
+class SaidOnIndex:
+    """A paragraph of the registry's introduction the index says in its own words.
+
+    The index printed both introductions, one after the other, and said twice
+    that a defect listed is not a defect of the method; so the index leaves
+    such a paragraph out (:func:`index_preamble`). Left out, an edit to it
+    would reach no page, so it is pinned as it reads: a change to it stops the
+    run until the index's introduction has been read again against it.
+    """
+
+    #: The words the paragraph opens with, which find it in the registry.
+    opening: str
+    #: :func:`paragraph_digest` of the paragraph as the index's introduction
+    #: was last checked against it.
+    digest: str
+    #: The words the index's introduction says it in.
+    words: str
+
+
+@dataclasses.dataclass(frozen=True)
 class Edition:
     """One language of the registry: where it is read and where it lands."""
 
@@ -199,13 +222,10 @@ class Edition:
     #: introduction, which explains how to read every entry).
     start: re.Pattern[str]
     #: The paragraphs of the registry's introduction the index leaves out,
-    #: because the index's own introduction says them: each by the words the
-    #: paragraph opens with, and the words the index says it in. The index
-    #: printed both introductions, one after the other, and said twice that a
-    #: defect listed is not a defect of the method. A paragraph stays left out
-    #: only while the index's introduction still carries those words
-    #: (:func:`index_preamble`).
-    said_on_index: tuple[tuple[str, str], ...] = ()
+    #: because the index's own introduction says them. One stays left out only
+    #: while it reads as pinned here and the index's introduction still
+    #: carries the words it is said in (:func:`index_preamble`).
+    said_on_index: tuple[SaidOnIndex, ...] = ()
 
     @property
     def folder(self) -> str:
@@ -232,12 +252,21 @@ EDITIONS: tuple[Edition, ...] = (
         source=DOCS / "ERRATA.md",
         start=re.compile(r"^During the clean-room implementation"),
         said_on_index=(
-            (
+            SaidOnIndex(
                 "During the clean-room implementation",
+                "7479672f3147b425cd939952cf3d606c97be80e92ae4a5427ba075235dc4b2f7",
                 "Implementing a standard clean-room",
             ),
-            ("The registry covers every kind", "covers every kind of published source"),
-            ("Entries describe the specific printed", "never a defect of the *method*"),
+            SaidOnIndex(
+                "The registry covers every kind",
+                "393cb37e0af7f571039a044fd2c685b2ac69fddacbc5ab14425939f6eeba3a8f",
+                "covers every kind of published source",
+            ),
+            SaidOnIndex(
+                "Entries describe the specific printed",
+                "8a3926e293102d5c6b26c89d50d54fdd38b7a9e6e0f406ac7e9cd3ee65666d9e",
+                "never a defect of the *method*",
+            ),
         ),
     ),
     Edition(
@@ -245,20 +274,24 @@ EDITIONS: tuple[Edition, ...] = (
         source=DOCS / "ERRATA.es.md",
         start=re.compile(r"^Durante la implementación en sala limpia"),
         said_on_index=(
-            (
+            SaidOnIndex(
                 "Durante la implementación en sala limpia",
+                "11e4e183e11c8cb875302939cb363c6c5fd07ef1a38715bebfc8330768911e3b",
                 "Implementar una norma en sala limpia",
             ),
-            (
+            SaidOnIndex(
                 "El registro cubre todos los tipos",
+                "fccf14e1f5ad30a5a6ed398871d0ee05fe373c5dbae04a83e646420981c0d203",
                 "todos los tipos de fuente publicada",
             ),
-            (
+            SaidOnIndex(
                 "Las entradas describen las ediciones",
+                "dcd88743bd70a4f22d93def8c77ef68852b8788a5bb85f7bddf7d87430af9941",
                 "nunca es un defecto del *método*",
             ),
-            (
+            SaidOnIndex(
                 "Esta edición española traduce",
+                "491ce21e5d75bef713771d6e4e3e07ad9e3c38508f28d7ffa87b886e41c56577",
                 "La redacción autoritativa es la inglesa",
             ),
         ),
@@ -1245,6 +1278,20 @@ def _words(text: str) -> str:
     return " ".join(text.split())
 
 
+def paragraph_digest(paragraph: str) -> str:
+    """The SHA-256 of a paragraph as a reader sees it, in hexadecimal.
+
+    Rewrapping the paragraph leaves it unchanged; any edit to its words, its
+    punctuation or its links changes it.
+
+    :param paragraph: One paragraph of the registry's introduction.
+    :type paragraph: str
+    :return: The 64 hexadecimal digits of the SHA-256 of :func:`_words`.
+    :rtype: str
+    """
+    return hashlib.sha256(_words(paragraph).encode("utf-8")).hexdigest()
+
+
 def index_preamble(edition: Edition, registry: Registry, introduction: str) -> str:
     """The registry's introduction as the index transplants it.
 
@@ -1258,6 +1305,11 @@ def index_preamble(edition: Edition, registry: Registry, introduction: str) -> s
     each claim is checked against the printed page, which are what every
     family page sends its reader to, and anything added to it later.
 
+    A paragraph left out reaches no page, so an edit to it would go nowhere
+    and nothing would say so: the two introductions would disagree in
+    silence. Each one is pinned by its digest, and an edit stops the run until
+    the index's introduction has been read again against the new text.
+
     :param edition: The language.
     :type edition: Edition
     :param registry: That language's registry.
@@ -1267,35 +1319,50 @@ def index_preamble(edition: Edition, registry: Registry, introduction: str) -> s
     :return: The paragraphs of the registry's introduction the index keeps.
     :rtype: str
     :raises SystemExit: If a paragraph left out is no longer in the registry
-        under the words it is listed by, or the index no longer says it.
+        under the words it is listed by, no longer reads as it is pinned, or
+        the index no longer says it.
     """
     paragraphs = [part for part in re.split(r"\n[ \t]*\n", registry.preamble) if part]
     kept = []
     left_out = set()
     for paragraph in paragraphs:
         said = [
-            opening
-            for opening, _ in edition.said_on_index
-            if paragraph.startswith(opening)
+            item
+            for item in edition.said_on_index
+            if _words(paragraph).startswith(_words(item.opening))
         ]
-        if said:
-            left_out.update(said)
-        else:
+        if not said:
             kept.append(paragraph)
-    for opening, words in edition.said_on_index:
-        if opening not in left_out:
+        for item in said:
+            left_out.add(item.opening)
+            digest = paragraph_digest(paragraph)
+            if digest != item.digest:
+                sys.exit(
+                    f"docs/{edition.source.name}: the paragraph of the registry's "
+                    f"introduction opening {item.opening!r} changed. It is left out "
+                    f"of the index because site/src/content/docs/{edition.index} "
+                    "says it in its own words, so the change reaches no page. "
+                    "Read that introduction above the marker again and carry the "
+                    f"change there, then pin the paragraph as it now reads: "
+                    f"{digest!r} in Edition.said_on_index of "
+                    "scripts/generate_site_reports.py. Or drop the line, and the "
+                    "paragraph is transplanted."
+                )
+    for item in edition.said_on_index:
+        if item.opening not in left_out:
             sys.exit(
                 f"docs/{edition.source.name}: no paragraph of the registry's "
-                f"introduction opens with {opening!r}, which Edition.said_on_index "
-                "in scripts/generate_site_reports.py leaves out of the index. "
-                "Name the paragraph by its new opening words, or drop the line."
+                f"introduction opens with {item.opening!r}, which "
+                "Edition.said_on_index in scripts/generate_site_reports.py leaves "
+                "out of the index. Name the paragraph by its new opening words, "
+                "or drop the line."
             )
-        if _words(words) not in _words(introduction):
+        if _words(item.words) not in _words(introduction):
             sys.exit(
                 f"site/src/content/docs/{edition.index}: the introduction above "
-                f"the marker no longer says {words!r}, and the registry's "
-                f"paragraph opening {opening!r} is left out of the index because "
-                "it did. Say it again there, or drop the line from "
+                f"the marker no longer says {item.words!r}, and the registry's "
+                f"paragraph opening {item.opening!r} is left out of the index "
+                "because it did. Say it again there, or drop the line from "
                 "Edition.said_on_index so the paragraph is transplanted."
             )
     return "\n\n".join(kept)

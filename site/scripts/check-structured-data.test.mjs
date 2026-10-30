@@ -10,11 +10,6 @@
 // The software node names its operating systems one per entry, as jmrp.io does
 // for the same `@id`: the site-wide graph is the same on every page, so the
 // check reads it once per distinct value and says on how many pages it stands.
-// A malformed block takes out its own nodes and no others: the software node
-// and the `@id`s of the page's valid blocks are still read, as a consumer reads
-// them, so the count names every page that carries a value. A block that parses
-// to `null`, an array or a bare value is read the same way, and does not stop
-// the check.
 // The same block is held to a byte budget: most of it is the Person spliced
 // from jmrp.io, which grows when jmrp.io changes and never in a diff here.
 //
@@ -28,25 +23,100 @@
 // bibliographies and one guide in each language, every cited work named as the
 // bibliography names it, and as many plain pages besides as a test asks for.
 // It puts one defect into that build, runs the check on it the way CI does, and
-// reads the exit status and the lines it printed. The pages, the site-wide
-// nodes and the writing of the build come from
-// shared/structured-data-fixture.mjs, which every suite of the check shares.
+// reads the exit status and the lines it printed.
 //
 // Usage: node --test 'scripts/**/*.test.mjs'
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { dirname, join } from 'node:path';
 import { test } from 'node:test';
+import { fileURLToPath } from 'node:url';
 
+import { basePath, siteUrl } from '../src/data/site.mjs';
 import { topicForSlug } from '../src/data/topics.mjs';
 import { catalogues } from '../src/generated/catalogues.mjs';
 import { knownSlugs } from '../src/lib/breadcrumbs.mjs';
 import { variablesMeasured } from '../src/lib/catalogue-datasets.mjs';
-import { build as wholeBuild, check, ORIGIN, page, SITE } from './shared/structured-data-fixture.mjs';
 
+const CHECK = join(dirname(fileURLToPath(import.meta.url)), 'check-structured-data.mjs');
+const ORIGIN = `${siteUrl}${basePath}`;
 const EN = `${ORIGIN}/reference/bibliography/`;
 const ES = `${ORIGIN}/es/reference/bibliography/`;
 
 /** A guide the navigation tree lists, so its trail and section are the tree's. */
 const GUIDE = knownSlugs().find((slug) => topicForSlug(slug)?.isDomain && slug.split('/').length === 3);
+
+/** The platforms the software node names when a test does not say otherwise. */
+const PLATFORMS = ['Linux', 'macOS', 'Windows'];
+
+const SITE = {
+	person: `${ORIGIN}/#person`,
+	website: `${ORIGIN}/#website`,
+	software: `${ORIGIN}/#software`,
+	source: `${ORIGIN}/#source`,
+};
+
+/**
+ * The nodes astro.config.mjs puts on every page. `operatingSystem` is what the
+ * software node names; null leaves the property out.
+ */
+const siteNodes = (operatingSystem) => [
+	{ '@type': 'Person', '@id': SITE.person, name: 'A maintainer' },
+	{ '@type': 'WebSite', '@id': SITE.website, name: 'phonometry' },
+	{
+		'@type': 'SoftwareApplication',
+		'@id': SITE.software,
+		name: 'phonometry',
+		...(operatingSystem === null ? {} : { operatingSystem }),
+	},
+	{ '@type': 'SoftwareSourceCode', '@id': SITE.source, name: 'phonometry' },
+];
+
+/**
+ * The article and trail every page carries, for `slug` in `lang`, with the
+ * article's own fields in `extra`. Every page is published on 2026-07-01 and
+ * last edited on 2026-10-01 unless a build says otherwise.
+ */
+function page(slug, lang, extra = {}) {
+	const prefix = lang === 'es' ? '/es' : '';
+	const canonical = `${ORIGIN}${prefix}/${slug}/`;
+	const topic = topicForSlug(slug);
+	const parts = slug.split('/');
+	const crumbs = [`${ORIGIN}${prefix}/`, ...parts.map((_, i) => `${ORIGIN}${prefix}/${parts.slice(0, i + 1).join('/')}/`)];
+	const article = {
+		'@type': topic?.isDomain ? ['TechArticle', 'LearningResource'] : 'TechArticle',
+		'@id': `${canonical}#article`,
+		headline: slug,
+		description: 'A page.',
+		inLanguage: lang,
+		url: canonical,
+		mainEntityOfPage: canonical,
+		image: `${ORIGIN}/og.png`,
+		speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1'] },
+		datePublished: '2026-07-01',
+		dateModified: '2026-10-01',
+		wordCount: 100,
+		...(topic ? { articleSection: topic.label[lang] } : {}),
+		...(topic?.isDomain ? { learningResourceType: 'Guide' } : {}),
+		[lang === 'en' ? 'workTranslation' : 'translationOfWork']: {
+			'@id': `${ORIGIN}${lang === 'en' ? '/es' : ''}/${slug}/#article`,
+		},
+		author: { '@id': SITE.person },
+		publisher: { '@id': SITE.person },
+		isPartOf: { '@id': SITE.website },
+		about: { '@id': SITE.software },
+		...extra,
+	};
+	const trail = {
+		'@type': 'BreadcrumbList',
+		'@id': `${canonical}#breadcrumbs`,
+		itemListElement: crumbs.map((item, i) => ({ '@type': 'ListItem', position: i + 1, name: `crumb ${i}`, item })),
+	};
+	const path = `${prefix.slice(1)}${prefix ? '/' : ''}${slug}/index.html`;
+	return { path, article, nodes: [...siteNodes(PLATFORMS), article, trail] };
+}
 
 const ISO = {
 	'@type': 'Organization',
@@ -106,8 +176,8 @@ const stub = (node) =>
  * software node's `operatingSystem` on each page by the same index; a page
  * past its end names the default platforms.
  */
-function build({ pages = 4, ...options } = {}) {
-	const base = {};
+function build({ pages = 4, dated = pages, published = '2026-07-01', platforms = [] } = {}) {
+	const built = {};
 	for (const [lang, url] of [
 		['en', EN],
 		['es', ES],
@@ -123,15 +193,64 @@ function build({ pages = 4, ...options } = {}) {
 		const bibliography = page('reference/bibliography', lang);
 		// Copies, so a test that takes a field off a body takes it off its own build only.
 		bibliography.nodes.push({ ...ISO }, { ...SPAIN }, ...works);
-		base[`${lang}/bibliography`] = bibliography;
+		built[`${lang}/bibliography`] = bibliography;
 
-		base[`${lang}/guide`] = page(GUIDE, lang, {
+		built[`${lang}/guide`] = page(GUIDE, lang, {
 			isBasedOn: [stub(iso1)],
 			citation: [{ '@id': iso1['@id'] }, stub(iso2), stub(book(url))],
 			about: [{ '@id': SITE.software }, { '@id': iso1['@id'] }],
 		});
 	}
-	return wholeBuild({ pages, ...options, base });
+	for (let i = Object.keys(built).length; i < pages; i += 1) built[`page/${i}`] = page(`page-${i}`, 'en');
+	Object.values(built).forEach(({ article, nodes }, i) => {
+		if (i >= dated) article.datePublished = '2026-10-01';
+		else article.datePublished = published;
+		if (i < platforms.length) {
+			const software = nodes.find((node) => node['@type'] === 'SoftwareApplication');
+			if (platforms[i] === null) delete software.operatingSystem;
+			else software.operatingSystem = platforms[i];
+		}
+	});
+	return built;
+}
+
+/** The types of the nodes astro.config.mjs writes in a block of their own on every page. */
+const SITE_TYPES = new Set(['Person', 'WebSite', 'SoftwareApplication', 'SoftwareSourceCode']);
+
+/**
+ * Write `built` as HTML files, and its `content` (path to text) as the content
+ * tree, run the check on the two, and say how it ended. A build with no
+ * `content` gets an empty tree, so the check holds it to no page of the site's.
+ *
+ * Each page carries two blocks, as the built site does: the site-wide nodes
+ * astro.config.mjs puts on every page, and the page's own graph from
+ * Head.astro. A page's `body`, where a test gives one, is its markup.
+ */
+function check(t, built) {
+	const dist = mkdtempSync(join(tmpdir(), 'check-structured-data-'));
+	const tree = mkdtempSync(join(tmpdir(), 'check-structured-data-content-'));
+	t.after(() => {
+		rmSync(dist, { recursive: true, force: true });
+		rmSync(tree, { recursive: true, force: true });
+	});
+	const { content = {}, ...pages } = built;
+	for (const [path, text] of Object.entries(content)) {
+		mkdirSync(dirname(join(tree, path)), { recursive: true });
+		writeFileSync(join(tree, path), text);
+	}
+	const script = (nodes) =>
+		`<script type="application/ld+json">${JSON.stringify({ '@context': 'https://schema.org', '@graph': nodes })}</script>`;
+	for (const { path, nodes, body = '' } of Object.values(pages)) {
+		const site = nodes.filter((node) => SITE_TYPES.has(node['@type']));
+		const own = nodes.filter((node) => !SITE_TYPES.has(node['@type']));
+		mkdirSync(dirname(join(dist, path)), { recursive: true });
+		writeFileSync(
+			join(dist, path),
+			`<!DOCTYPE html><html><head>${script(site)}${script(own)}</head><body>${body}</body></html>`,
+		);
+	}
+	const ran = spawnSync(process.execPath, [CHECK, dist, tree], { encoding: 'utf8' });
+	return { status: ran.status, out: ran.stdout, err: ran.stderr };
 }
 
 /** The node with `id` among a built page's nodes. */
@@ -188,41 +307,6 @@ test('a software node that names no operating system, or one twice, fails', (t) 
 	assert.match(ran.err, /FAIL 1 page\(s\): the software node's operatingSystem is \[\]/);
 	assert.match(ran.err, /FAIL 1 page\(s\): the software node's operatingSystem is \["Linux","Linux"\]/);
 	assert.match(ran.out, /ok {3}the software node names its 3 operating systems one per entry on 7 pages/);
-});
-
-test('a malformed block on a page leaves the software node of its valid block counted', (t) => {
-	const built = build({ pages: 10, dated: 9, platforms: Array(10).fill('Windows, Linux, macOS') });
-	built['page/4'].blocks = ['{"@context": '];
-	const ran = check(t, built);
-	assert.equal(ran.status, 1);
-	assert.match(ran.err, /FAIL \/page-4\/: an ld\+json block is not valid JSON/);
-	assert.match(ran.err, /FAIL 10 page\(s\): the software node's operatingSystem is "Windows, Linux, macOS"/);
-});
-
-test('a block that parses to no JSON-LD object is reported as one that does not parse', (t) => {
-	// `null` parses, and reading its @context threw, so the check stopped before
-	// it reported the page or tallied any software node.
-	const built = build({ pages: 10, dated: 9, platforms: Array(10).fill('Windows, Linux, macOS') });
-	built['page/4'].blocks = ['null'];
-	built['page/5'].blocks = ['[]'];
-	built['page/6'].blocks = ['5'];
-	const ran = check(t, built);
-	assert.equal(ran.status, 1);
-	for (const page of [4, 5, 6]) {
-		assert.match(ran.err, new RegExp(`FAIL /page-${page}/: an ld\\+json block is not a JSON-LD object`));
-	}
-	assert.match(ran.err, /FAIL 10 page\(s\): the software node's operatingSystem is "Windows, Linux, macOS"/);
-	assert.doesNotMatch(ran.err, /TypeError/);
-});
-
-test('a malformed block on a page leaves two nodes of its valid blocks that share an @id reported', (t) => {
-	const twin = { '@context': 'https://schema.org', '@type': 'Thing', '@id': `${ORIGIN}/#thing` };
-	const built = build({ pages: 10, dated: 9 });
-	built['page/4'].blocks = [twin, twin, '{'];
-	const ran = check(t, built);
-	assert.equal(ran.status, 1);
-	assert.match(ran.err, /FAIL \/page-4\/: an ld\+json block is not valid JSON/);
-	assert.match(ran.err, /FAIL \/page-4\/: .*\/#thing defined more than once/);
 });
 
 test('the fixture names a guide the navigation tree lists', () => {
@@ -475,7 +559,7 @@ function catalogueBuild({ pageSlug = CATALOGUE_PAGE, overviewSlug = 'reference/c
 		// The page shows what its datasets say: the first is named by its
 		// title, every later one by the heading of its section, and each is
 		// described by the paragraph above its table.
-		catalogue.text =
+		catalogue.body =
 			`<h1 id="_top">${datasets[0].name}</h1>` +
 			datasets
 				.map(
@@ -571,7 +655,7 @@ test('a dataset with no date, or another date than its page, fails', (t) => {
 test('a dataset whose url points at no table on its page fails', (t) => {
 	const built = catalogueBuild();
 	const catalogue = built['en/catalogue'];
-	catalogue.text = catalogue.text.replace('<section id="catalogue-plateau"></section>', '');
+	catalogue.body = catalogue.body.replace('<section id="catalogue-plateau"></section>', '');
 	const ran = check(t, built);
 	assert.equal(ran.status, 1);
 	assert.match(ran.err, /plateau: the dataset's url points at #catalogue-plateau, and the page holds no such table/);
@@ -662,7 +746,7 @@ test("a dataset's text is what its page shows, with the typographer's quotes and
 	const built = catalogueBuild();
 	datasetOf(built, 'en', 'gases').description = 'The book\'s rows of gases & "air", in three parts...';
 	const catalogue = built['en/catalogue'];
-	catalogue.text = catalogue.text.replace(
+	catalogue.body = catalogue.body.replace(
 		'<p>The rows of gases.</p>',
 		'<p>The book\u2019s rows of\n<em>gases</em> &#x26; \u201cair\u201d, in three parts\u2026</p>',
 	);
@@ -696,32 +780,128 @@ test('catalogue pages and an overview at a route topics.mjs does not list fail, 
 /** The family page of the fixture, the one page under the errata index that corrects a work. */
 const ERRATA_FAMILY = 'reference/errata/iso-1';
 
+/** A page of the content tree as scripts/generate_site_reports.py writes it, with what it corrects. */
+const errataSource = (title, corrects = []) =>
+	`---\ntitle: "${title}"\n${corrects.length > 0 ? `corrects:\n${corrects.map((fragment) => `  - "${fragment}"\n`).join('')}` : ''}---\n\nThe page.\n`;
+
+/** The `about` of an errata family page in `lang` naming `fragments` of its bibliography, as the build writes it. */
+const aboutNaming = (built, lang, fragments) => {
+	const url = lang === 'es' ? ES : EN;
+	return [{ '@id': SITE.software }, ...fragments.map((fragment) => stub(nodeAt(built, `${lang}/bibliography`, `${url}#${fragment}`)))];
+};
+
 /**
  * A build with the errata registry in both languages: the pages of `build()`
  * and, per language, the registry's index, one family page whose `about` names
  * the standard it corrects beside the software, and the page of properties
- * that are not errata, which corrects nothing.
+ * that are not errata, which corrects nothing; and the content tree the three
+ * are built from, the family page's `corrects` listing that standard.
  */
 function errataBuild() {
 	const built = build();
-	for (const [lang, url] of [
-		['en', EN],
-		['es', ES],
-	]) {
-		const corrected = stub(nodeAt(built, `${lang}/bibliography`, `${url}#std-iso-1-2000`));
+	built.content = {};
+	for (const lang of ['en', 'es']) {
+		const prefix = lang === 'es' ? 'es/' : '';
 		for (const slug of ['reference/errata', ERRATA_FAMILY, 'reference/errata/not-errata']) {
 			built[`${lang}/${slug}`] = page(slug, lang, {
-				about: slug === ERRATA_FAMILY ? [{ '@id': SITE.software }, corrected] : { '@id': SITE.software },
+				about: slug === ERRATA_FAMILY ? aboutNaming(built, lang, ['std-iso-1-2000']) : { '@id': SITE.software },
 			});
 		}
+		built.content[`${prefix}reference/errata/index.mdx`] = errataSource('Errata');
+		built.content[`${prefix}${ERRATA_FAMILY}.md`] = errataSource('Errata in ISO 1', ['std-iso-1-2000']);
+		built.content[`${prefix}reference/errata/not-errata.md`] = errataSource('Not errata');
 	}
 	return built;
 }
 
+/** Take the errata pages of `lang` out of `built`, but those at `keep`. */
+const unbuildErrata = (built, lang, keep = []) => {
+	for (const key of Object.keys(built)) {
+		const slug = key.slice(lang.length + 1);
+		if (key.startsWith(`${lang}/reference/errata`) && !keep.includes(slug)) delete built[key];
+	}
+};
+
 test('a build whose every errata family page names the work it corrects passes', (t) => {
 	const ran = check(t, errataBuild());
 	assert.equal(ran.status, 0, ran.err);
-	assert.match(ran.out, /ok {3}each of the 2 errata family pages names in about the works it corrects, 2 in all/);
+	assert.match(
+		ran.out,
+		/ok {3}each of the 2 errata family pages names in about, in order, the works its corrects lists, 2 in all/,
+	);
+});
+
+test('an errata family page naming fewer works than its corrects lists fails', (t) => {
+	// What a regression that keeps the first work of each page builds: every
+	// page still names a work, and the six editions of ISO 12354 come to one.
+	const built = errataBuild();
+	built.content[`${ERRATA_FAMILY}.md`] = errataSource('Errata in ISO 1', ['std-iso-1-2000', 'std-iso-2-2010']);
+	const ran = check(t, built);
+	assert.equal(ran.status, 1);
+	assert.match(
+		ran.err,
+		new RegExp(
+			'FAIL 1 errata page\\(s\\) name in about other works than their corrects lists, or in another order ' +
+				`\\(first: /reference/errata/iso-1/ names 1 work\\(s\\) and its corrects lists 2; at position 2 it names nothing ` +
+				`where corrects lists ${EN}#std-iso-2-2010\\)`,
+		),
+	);
+	assert.match(ran.err, /FAIL the en errata family pages name 1 work\(s\) in about, and their corrects list 2/);
+});
+
+test('an errata family page naming its works in another order, or one its corrects does not list, fails', (t) => {
+	const built = errataBuild();
+	built.content[`es/${ERRATA_FAMILY}.md`] = errataSource('Errata en ISO 1', ['std-iso-2-2010', 'std-iso-1-2000']);
+	built[`es/${ERRATA_FAMILY}`].article.about = aboutNaming(built, 'es', ['std-iso-1-2000', 'std-iso-2-2010']);
+	built[`en/${ERRATA_FAMILY}`].article.about = aboutNaming(built, 'en', ['std-iso-1-2000', 'std-iso-2-2010']);
+	const ran = check(t, built);
+	assert.equal(ran.status, 1);
+	assert.match(ran.err, /FAIL 2 errata page\(s\) name in about other works than their corrects lists, or in another order/);
+	assert.match(
+		ran.err,
+		new RegExp(
+			`/es/reference/errata/iso-1/ names 2 work\\(s\\) and its corrects lists 2; at position 1 it names ${ES}#std-iso-1-2000 where corrects lists ${ES}#std-iso-2-2010`,
+		),
+	);
+	assert.match(
+		ran.err,
+		new RegExp(
+			`/reference/errata/iso-1/ names 2 work\\(s\\) and its corrects lists 1; at position 2 it names ${EN}#std-iso-2-2010 where corrects lists nothing`,
+		),
+	);
+	assert.match(ran.err, /FAIL the en errata family pages name 2 work\(s\) in about, and their corrects list 1/);
+});
+
+test('an errata page of the content tree the build does not hold, or one built from no page, fails', (t) => {
+	// A family page that stopped being built would leave every count above
+	// agreeing with a build that has one page fewer.
+	const built = errataBuild();
+	built.content['reference/errata/iso-2.md'] = errataSource('Errata in ISO 2', ['std-iso-2-2010']);
+	built['es/reference/errata/iso-3'] = page('reference/errata/iso-3', 'es', { about: aboutNaming(built, 'es', ['std-iso-2-2010']) });
+	const ran = check(t, built);
+	assert.equal(ran.status, 1);
+	assert.match(ran.err, /FAIL the en build holds 2 of the 3 errata pages under .*reference\/errata \(first missing: iso-2\)/);
+	assert.match(ran.err, /FAIL \/es\/reference\/errata\/iso-3\/: an errata page with no page under .*es\/reference\/errata to say what it corrects/);
+});
+
+test('an errata index of the content tree the build does not hold fails', (t) => {
+	const built = errataBuild();
+	unbuildErrata(built, 'es');
+	const ran = check(t, built);
+	assert.equal(ran.status, 1);
+	assert.match(ran.err, /FAIL the es errata index is under .*es\/reference\/errata and the build does not hold it/);
+	assert.match(ran.err, /FAIL the es build holds 0 of the 2 errata pages under .*es\/reference\/errata \(first missing: iso-1, not-errata\)/);
+});
+
+test('a corrects field written in a shape the check cannot read fails', (t) => {
+	// Read as nothing, the field would let the page name no work at all.
+	const built = errataBuild();
+	built.content[`${ERRATA_FAMILY}.md`] = '---\ntitle: "Errata in ISO 1"\ncorrects: ["std-iso-1-2000"]\n---\n';
+	built.content[`es/${ERRATA_FAMILY}.md`] = '---\ntitle: "Errata en ISO 1"\ncorrects:\n  - std-iso-1-2000\n---\n';
+	const ran = check(t, built);
+	assert.equal(ran.status, 1);
+	assert.match(ran.err, /FAIL .*reference\/errata\/iso-1\.md: corrects is written in a shape this check cannot read: corrects: \["std-iso-1-2000"\]/);
+	assert.match(ran.err, /FAIL .*es\/reference\/errata\/iso-1\.md: a line of corrects this check cannot read: - std-iso-1-2000/);
 });
 
 test('an errata family page whose about names the software alone fails', (t) => {
@@ -777,8 +957,7 @@ test('an errata index built without its family pages or the page of properties t
 	// The routes moved under the check: every errata assertion would read
 	// nothing, and the build pass.
 	const built = errataBuild();
-	delete built[`es/${ERRATA_FAMILY}`];
-	delete built['es/reference/errata/not-errata'];
+	unbuildErrata(built, 'es', ['reference/errata']);
 	const ran = check(t, built);
 	assert.equal(ran.status, 1);
 	assert.match(ran.err, /FAIL the es errata index was built with no family page under it/);

@@ -11,9 +11,9 @@ Clean-room Python port of the normative reference implementation given in
 Annex A of ISO 532-1:2017 (program "ISO_532-1", Annex A.4).  Two entry
 points are provided:
 
-* [`loudness_zwicker_from_spectrum`](/phonometry/reference/api/psychoacoustics/zwicker/#loudness_zwicker_from_spectrum) - stationary loudness from 28
+* [`loudness_zwicker_from_spectrum`](/phonometry/reference/api/psychoacoustics/zwicker/#loudness_zwicker_from_spectrum): stationary loudness from 28
   one-third-octave band levels, 25 Hz to 12.5 kHz (clause 5.3 / A.2).
-* [`loudness_zwicker`](/phonometry/reference/api/psychoacoustics/zwicker/#loudness_zwicker) - loudness from a calibrated time signal,
+* [`loudness_zwicker`](/phonometry/reference/api/psychoacoustics/zwicker/#loudness_zwicker): loudness from a calibrated time signal,
   either with the stationary method (clause 5) or the time-varying
   method (clause 6), including the one-third-octave filterbank of
   Annex A (Tables A.1/A.2), the nonlinear temporal decay and the

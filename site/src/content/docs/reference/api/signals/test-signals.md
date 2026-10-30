@@ -13,7 +13,7 @@ The signal toolbox of the metrology domain: deterministic test signals and
 the two sample-rate operations every measurement chain eventually needs,
 with their accuracy stated instead of implied.
 
-* [`noise_signal`](/phonometry/reference/api/signals/test-signals/#noise_signal) - Gaussian noise with an exact power-law spectral
+* [`noise_signal`](/phonometry/reference/api/signals/test-signals/#noise_signal): Gaussian noise with an exact power-law spectral
   slope: white (0 dB/octave), pink (-3.01), red (-6.02, also called
   Brownian), blue (+3.01) and violet (+6.02). The autospectral density
   follows $G_{xx}(f) \propto f^\alpha$ with $\alpha$ = 0,
@@ -32,7 +32,7 @@ with their accuracy stated instead of implied.
   to the requested RMS exactly. With the same `seed` the generator is
   fully deterministic across runs.
 
-* [`tone_burst`](/phonometry/reference/api/signals/test-signals/#tone_burst) - the gated sine burst of IEC 60268-1:1985 (Annex A,
+* [`tone_burst`](/phonometry/reference/api/signals/test-signals/#tone_burst): the gated sine burst of IEC 60268-1:1985 (Annex A,
   Clause A2): the tone starts at a zero crossing and lasts an integral
   number of full periods, either as a single burst or as a repetitive train
   with a stated repetition rate. The result records the rectangular gating
@@ -40,7 +40,7 @@ with their accuracy stated instead of implied.
   dynamic-response tests can state their stimulus instead of hand-rolling
   it.
 
-* [`resample_signal`](/phonometry/reference/api/signals/test-signals/#resample_signal) - polyphase resampling behind an explicit
+* [`resample_signal`](/phonometry/reference/api/signals/test-signals/#resample_signal): polyphase resampling behind an explicit
   anti-alias specification. The lowpass FIR is designed here (Kaiser
   window method) from two numbers the caller controls - the stopband
   attenuation in dB and the transition-band fraction of the target
@@ -48,7 +48,7 @@ with their accuracy stated instead of implied.
   alias rejection of a resampled record is a documented property, not a
   library default.
 
-* [`fractional_delay`](/phonometry/reference/api/signals/test-signals/#fractional_delay) - band-limited delay by an arbitrary
+* [`fractional_delay`](/phonometry/reference/api/signals/test-signals/#fractional_delay): band-limited delay by an arbitrary
   (sub-sample) number of samples via a frequency-domain phase ramp,
   `linear` (zero-padded, for transients and impulse responses; the same
   kernel [`align_impulse_responses`](/phonometry/reference/api/signals/correlation/#align_impulse_responses)

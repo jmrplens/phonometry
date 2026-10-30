@@ -5,12 +5,14 @@
 *.sh text eol=lf
 docker/node/Dockerfile text eol=lf
 
-# The files the sdist and the wheel are built from are checked out with LF
-# on every platform, so a release rebuilt on Windows, where core.autocrlf is
-# usually on, gives the bytes PyPI holds (SECURITY.md, "Rebuilding a
-# release"). setuptools packs README.md and the top-level tests/test*.py
-# beside the package by default. Under src/ git still tells a binary file by
-# its content, so a data file added there one day is left as it is.
+# The files the sdist and the wheel are built from are checked out with the
+# bytes the commit holds, LF, whatever core.autocrlf or core.eol the cloner
+# has set: core.autocrlf=true writes CRLF on Linux and macOS too, and a
+# release rebuilt from such a clone would not give the bytes PyPI holds
+# (SECURITY.md, "Rebuilding a release"). setuptools packs README.md and the
+# top-level tests/test*.py beside the package by default. Under src/ git
+# still tells a binary file by its content, so a data file added there one
+# day is left as it is.
 /pyproject.toml text eol=lf
 /VERSION text eol=lf
 /LICENSE text eol=lf

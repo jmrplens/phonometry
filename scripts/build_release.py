@@ -28,9 +28,17 @@ differ is settled here rather than left to the machine:
   wheel afresh rather than copying its mode, so under a umask of 002 the same
   commit gave a wheel whose modules were group-writable.
 
-What is left to the machine is the zlib that Python is linked against, which
-writes the compressed bytes of both files; the rebuild on macOS is there to
-show that it does not matter.
+A release rebuilds on Linux and macOS, and on Windows only inside WSL, from a
+clone made in WSL's own filesystem rather than under ``/mnt/c``, where the
+files carry no Unix modes of their own and every one of them looks
+executable. Among those platforms, what is left to the machine is the zlib
+that Python is linked against, which writes the compressed bytes of both
+files; the rebuild on macOS is there to show that it does not matter. On
+Windows itself the operating system reaches the bytes whatever is settled
+here: zipfile records the system that wrote each member of the wheel,
+setuptools gives the wheel's modules the mode Windows reports, and it writes
+the sdist's ``PKG-INFO`` and ``setup.cfg`` in text mode, with CRLF. The script
+refuses to run there.
 
 The checkout has to be the commit and nothing else: a modified or untracked
 file would be packed into the build. ``--check`` then compares what was built
@@ -95,6 +103,14 @@ GIT_S = 60.0
 BUILD_S = 900.0
 #: How long one request to PyPI may take [s].
 FETCH_S = 30.0
+#: Why the script does not build on Windows, and where to build instead.
+WINDOWS_REFUSAL = (
+    "a release rebuilds on Linux and macOS, not on Windows, where zipfile, the "
+    "modes setuptools gives the wheel's modules and the line endings of the "
+    "PKG-INFO and setup.cfg it writes depend on the operating system; on "
+    "Windows, rebuild inside WSL from a clone made in WSL's own filesystem, "
+    "not under /mnt/c"
+)
 
 
 def built_names(version: str) -> tuple[str, str]:
@@ -380,8 +396,65 @@ def mismatches(
     return problems
 
 
+def _read_check_file(path: pathlib.Path) -> dict[str, str]:
+    """The digests the checksum file at *path* lists, read before anything is built.
+
+    :raises ValueError: When the file is not text in the format ``sha256sum``
+        writes, or lists no file.
+    :raises OSError: When it cannot be read.
+    """
+    listed = read_checksums(path.read_text(encoding="utf-8"))
+    if not listed:
+        msg = f"the checksum file {path} lists no file"
+        raise ValueError(msg)
+    return listed
+
+
+def _build_and_compare(args: argparse.Namespace) -> int:
+    """What :func:`main` does once the platform and the arguments are settled."""
+    expected = None if args.check is None else _read_check_file(args.check)
+    version = (_ROOT / "VERSION").read_text(encoding="utf-8").strip()
+    problems = foreign_plugins() + [
+        f"the checkout differs from its commit: {line}" for line in checkout_changes()
+    ]
+    for problem in problems:
+        print(f"::error::{problem}", file=sys.stderr)
+    if problems:
+        return 1
+    built = digests(build(args.outdir, version=version, epoch=commit_time()))
+    for name, digest in built.items():
+        print(f"{digest}  {name}")
+    if expected is not None:
+        source = args.check.name
+    elif args.check_pypi:
+        expected = pypi_digests(version)
+        source = "PyPI"
+    else:
+        return 0
+    problems = mismatches(built, expected, source)
+    for problem in problems:
+        print(f"::error::{problem}", file=sys.stderr)
+    if problems:
+        return 1
+    print(f"The sdist and the wheel of {version} rebuild to the files {source} lists.")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
-    """Build the commit's sdist and wheel; print their digests, and compare them if asked."""
+    """Build the commit's sdist and wheel; print their digests, and compare them if asked.
+
+    Every failure the script expects ends as one ``::error::`` line and exit
+    status 1: a platform it does not build on, a checksum file that is missing
+    or malformed (found before anything is built), a checkout or an
+    environment that would change what is packed, a build that fails, hangs
+    or leaves other files, an output directory that is a file, and PyPI still
+    not listing the files after the last attempt.
+    """
+    # First of all, before the arguments are read: on Windows nothing else
+    # the script could say applies.
+    if os.name == "nt":
+        print(f"::error::{WINDOWS_REFUSAL}", file=sys.stderr)
+        return 1
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument(
         "--outdir",
@@ -401,37 +474,15 @@ def main(argv: list[str] | None = None) -> int:
         help="compare both files with the digests PyPI publishes for the version",
     )
     args = parser.parse_args(argv)
-    version = (_ROOT / "VERSION").read_text(encoding="utf-8").strip()
-    problems = foreign_plugins() + [
-        f"the checkout differs from its commit: {line}" for line in checkout_changes()
-    ]
-    for problem in problems:
-        print(f"::error::{problem}", file=sys.stderr)
-    if problems:
-        return 1
-    epoch = commit_time()
     try:
-        built = digests(build(args.outdir, version=version, epoch=epoch))
-    except ValueError as error:
+        return _build_and_compare(args)
+    # A ValueError is a malformed checksum file or a build that left other
+    # files; a RuntimeError, PyPI giving up; an OSError, a file that cannot
+    # be read or an output directory that is a file; a SubprocessError, a
+    # build or a git query that failed or ran out of time.
+    except (ValueError, RuntimeError, OSError, subprocess.SubprocessError) as error:
         print(f"::error::{error}", file=sys.stderr)
         return 1
-    for name, digest in built.items():
-        print(f"{digest}  {name}")
-    if args.check is not None:
-        expected = read_checksums(args.check.read_text(encoding="utf-8"))
-        source = args.check.name
-    elif args.check_pypi:
-        expected = pypi_digests(version)
-        source = "PyPI"
-    else:
-        return 0
-    problems = mismatches(built, expected, source)
-    for problem in problems:
-        print(f"::error::{problem}", file=sys.stderr)
-    if problems:
-        return 1
-    print(f"The sdist and the wheel of {version} rebuild to the files {source} lists.")
-    return 0
 
 
 if __name__ == "__main__":

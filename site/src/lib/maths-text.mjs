@@ -48,7 +48,13 @@ export const GREEK = Object.freeze({
 	psi: 'ψ', Psi: 'Ψ', omega: 'ω', Omega: 'Ω',
 });
 
-/** The Greek characters above, which the symbol index files under a letter of their own. */
+/**
+ * The Greek characters above, which the symbol index files under a letter of
+ * their own. Typed as a set of strings so that any character can be asked
+ * about, not only the ones it holds.
+ *
+ * @type {ReadonlySet<string>}
+ */
 export const GREEK_LETTERS = new Set(Object.values(GREEK));
 
 /** Symbols that are neither letters nor operators. */

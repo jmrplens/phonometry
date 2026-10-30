@@ -4007,8 +4007,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   cells 343 m wide with a time step of about four hours, and
   `ElasticFDTD2D(4000.0, 0.01, 2300.0, ...)` read the spacing as the shear
   speed. `ElasticFDTD2D.from_regions(shape, dx, ...)` keeps its order: a
-  shape and a spacing given the other way round are each refused with a
-  `TypeError` that names them.
+  shape and a spacing given the other way round are refused with a
+  `TypeError` naming `shape`.
 
 - **`FDTD2D.kappa`, `ElasticFDTD2D.mu` and `ElasticFDTD2D.lam` are
   read-only.** They are NumPy copies the engine computed from its medium, as

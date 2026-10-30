@@ -2205,11 +2205,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   that returns, so the functions of the library, which take the `Signal`
   first and hand a new one back, chain without nesting:
   `sig.pick(0).pipe(filters.weighting_filter, weighting="A").crop(10.0, 30.0).pipe(signals.leq)`.
-  It is the `pipe` of pandas, asked for in Discussion #588. `func` is
-  positional only, so the function may take a keyword of that name, a type
-  checker reads the arguments and the result from `func` itself, and a
-  `func` that cannot be called is refused with `TypeError`. The audio-files
-  guide shows it beside `pick` and `crop`.
+  It is the `pipe` of pandas, asked for in Discussion #588, without its
+  `(func, keyword)` form: a function that takes the `Signal` elsewhere than
+  first goes in a `lambda`. `func` is positional only, so the function may
+  take a keyword of that name, a type checker reads the arguments and the
+  result from `func` itself, and a `func` that cannot be called, such a pair
+  among them, is refused with a `TypeError` that points to the `lambda`.
+  The audio-files guide shows it beside `pick` and `crop`.
 
 ### Fixed
 

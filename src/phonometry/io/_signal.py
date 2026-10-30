@@ -348,10 +348,11 @@ class Signal(RichDisplay):
         With ``pipe`` the same chain reads in the order it runs,
         ``take.pick(0).pipe(filters.weighting_filter).crop(10.0, 30.0).pipe(signals.leq)``,
         and the arguments after *func* go to it, by position or by name. It
-        is the ``pipe`` of pandas: nothing is computed here, and what *func*
-        returns comes back as it is, a Signal to chain further or anything
-        else to end the chain. A function that takes the Signal elsewhere
-        than first goes in a ``lambda``.
+        is the ``pipe`` of pandas without its ``(func, keyword)`` form, so a
+        function that takes the Signal elsewhere than first goes in a
+        ``lambda``. Nothing is computed here, and what *func* returns comes
+        back as it is, a Signal to chain further or anything else to end the
+        chain.
 
         :param func: A function that takes the Signal as its first argument.
         :param args: Its further positional arguments.
@@ -362,7 +363,7 @@ class Signal(RichDisplay):
         if not callable(func):
             msg = (
                 "'func' must be a function that takes the Signal first, got "
-                f"{type(func).__name__}"
+                f"{type(func).__name__}; one that takes it elsewhere goes in a lambda"
             )
             raise TypeError(msg)
         return func(self, *args, **kwargs)

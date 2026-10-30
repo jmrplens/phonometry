@@ -264,6 +264,29 @@ test('the live manifest is read over HTTP, and a missing or failing one sends th
 	assert.equal(urlsToSubmit({ [url('/a/')]: 'b'.repeat(64) }, undefined).full, true);
 });
 
+test('the live manifest is fetched past every cache, with the commit SHA as its query', (t) => {
+	const dist = build(t, BASE);
+	manifest(dist);
+	const out = join(mkdtempSync(join(tmpdir(), 'indexnow-live-')), 'urls.json');
+	t.after(() => rmSync(dirname(out), { recursive: true, force: true }));
+	// The script's fetch, swapped before it loads for one that writes down the
+	// URL it was given and answers 404: no network, and no dependency, so the
+	// test still runs before the install.
+	const stub = "globalThis.fetch = async (url) => { process.stderr.write(`fetched ${url}\\n`); return new Response('', { status: 404 }); };";
+	const ran = spawnSync(
+		process.execPath,
+		['--import', `data:text/javascript,${encodeURIComponent(stub)}`, SCRIPT, 'diff', '--dist', dist, '--live', '--out', out],
+		{ encoding: 'utf8', env: { ...process.env, GITHUB_SHA: 'abc123' } },
+	);
+	assert.equal(ran.status, 0, ran.stderr);
+	const live = `${ORIGIN}/indexnow-manifest.json?v=abc123`;
+	assert.deepEqual(ran.stderr.match(/^fetched .*$/gm), [`fetched ${live}`]);
+	assert.ok(ran.stdout.includes(`from ${live}: the live site has none yet (404).`), ran.stdout);
+	const sent = JSON.parse(readFileSync(out, 'utf8'));
+	assert.equal(sent.previous, live);
+	assert.equal(sent.full, true);
+});
+
 test('only the header of a copy loses its release lines, in the shape of today and of a fuller header', () => {
 	const today = copy('/x/', 'Body', ['Version: phonometry 4.0.0', 'Install: pip install phonometry']);
 	assert.equal(withoutReleaseLines(today), copy('/x/', 'Body'));

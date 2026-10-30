@@ -264,8 +264,9 @@ jobs:
         # on the site's own tree. The list IndexNow is sent at deploy has its
         # tests here too, on pairs of builds: one changed page sends that page
         # alone, a new or a removed page is sent as such, a new release number
-        # on every page sends nothing, and no previous manifest sends every
-        # URL. Node's own test runner, after the install: the structured-data
+        # in the header of every Markdown copy sends nothing, no previous
+        # manifest sends every URL, and the live manifest is fetched past the
+        # cache. Node's own test runner, after the install: the structured-data
         # check and the guides' dates read a page's frontmatter with the parser
         # the content collection uses, from @astrojs/markdown-remark.
         run: pnpm run test:scripts

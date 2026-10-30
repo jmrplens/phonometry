@@ -337,7 +337,7 @@ These rules are held by review alone, or a check covers only part of them, and a
 - [A14](api.md#a14): diff the public names of the last release tag against the branch and require a row in the three copies of the migration guide for every name gone.
 - [A15](api.md#a15): search the docs, the site guides and `scripts/` for every name `tests/test_removed_names.py` pins as gone.
 - [A16](api.md#a16): after 4.0, require every `DeprecationWarning` to carry `stacklevel` and a message naming the version it was deprecated in, the version it goes in and the replacement.
-- [A25](api.md#a25): refuse a variadic public function outside an exemption table with reasons (`cascade`, `combine_fault_lines`, `catalogue_schema`).
+- [A25](api.md#a25): refuse a variadic public function outside an exemption table with reasons (`cascade`, `combine_fault_lines`, `catalogue_schema`, and `Signal.pipe`, which forwards the arguments of another function).
 - [A26](api.md#a26): refuse a public parameter named `axis` that is not keyword-only.
 - [A29](api.md#a29): walk every public `report` method: the path first, every other parameter keyword-only, `metadata` and `language` present.
 - [A30](api.md#a30): refuse a public dataclass field or public constructor parameter whose name starts with an underscore.

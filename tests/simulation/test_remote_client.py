@@ -25,6 +25,7 @@ from typing import TYPE_CHECKING
 import numpy as np
 import pytest
 
+import phonometry
 from phonometry.simulation import (
     Compute,
     ComputeFallbackWarning,
@@ -62,6 +63,7 @@ _RUN: dict[str, object] = {
     "device": "cpu",
     "device_index": 0,
     "dtype": "float64",
+    "phonometry_version": phonometry.__version__,
     "numpy_version": np.__version__,
     "array_library": None,
     "cuda_runtime": None,
@@ -457,6 +459,10 @@ def test_a_result_that_is_not_what_the_request_implies_is_refused_before_it_is_r
             "names a host or a package, which only the client sets",
         ),
         ({"gpu": f"RTX {_ESCAPE}"}, "holds control characters"),
+        (
+            {"phonometry_version": "3.3.0"},
+            "reports a run of phonometry 3.3.0; the job sent phonometry ",
+        ),
     ],
 )
 def test_a_provenance_no_run_on_the_node_could_write_is_refused(
@@ -726,6 +732,7 @@ def test_the_job_s_header_is_measured_as_the_frame_writes_it(
         "type": "job",
         "function": "fdtd_simulation",
         "compute": {"device": "cpu", "device_index": 0, "dtype": "float64"},
+        "phonometry_version": phonometry.__version__,
         "arguments": arguments,
         "buffers": [],
     }

@@ -1597,7 +1597,9 @@ una instantánea en cada eje (1 para todas, como antes), y `provenance`, el
 `simulation.RunProvenance` de dónde se calculó la ejecución. Un resultado
 construido a mano pasa los dos, y dejar fuera uno lanza `TypeError`
 nombrándolo; los resultados que devuelven las funciones de simulación ya
-llevan los dos.
+llevan los dos. Un `RunProvenance` construido a mano pasa todos sus campos,
+entre ellos `phonometry_version`, la versión de phonometry que calculó los
+pasos.
 
 `filters.WeightingFilter(..., high_accuracy=None)` seleccionaba el valor por
 defecto. Ahora `high_accuracy` es un `bool` sin más, `True` por defecto, y

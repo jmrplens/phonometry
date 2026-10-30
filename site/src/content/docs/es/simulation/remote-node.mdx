@@ -62,8 +62,11 @@ NumPy por su cuenta, y devuelve las historias de las sondas y las
 instantáneas, que se leen aquí en arrays dimensionados a partir de tu
 petición; una función que escribe vídeo envía los bytes de su vídeo en lugar
 de las instantáneas. `result.provenance.host` nombra el nodo y
-`result.provenance.package_sha256`, el paquete que se ejecutó; el resto de la
-procedencia es la del nodo: su NumPy, su biblioteca de arrays, su GPU.
+`result.provenance.package_sha256`, el paquete que se ejecutó, y
+`result.provenance.phonometry_version` es tu propia versión, que viaja con el
+trabajo: desde su caché el nodo no puede nombrar el paquete que ejecuta. El
+resto de la procedencia es la del nodo: su NumPy, su biblioteca de arrays, su
+GPU.
 
 ## 2. Nombrar un nodo: el fichero de hosts
 

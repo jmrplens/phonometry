@@ -3,7 +3,8 @@
 
 The bootstrap hands the stream here once the package it was sent imports
 from the cache. The job names one of :data:`FUNCTIONS` and carries its
-arguments as data (:mod:`.wire`). The node runs it on the device the client
+arguments as data (:mod:`.wire`) and the client's version, which the run's
+provenance records. The node runs it on the device the client
 asked for, without a fallback (the client decides what a failure means),
 records the warnings it raises, and sends back the arrays the client cannot
 rebuild, then the stream the job returned if any (a video), the run's
@@ -48,7 +49,7 @@ from .._video_job import (
     write_elastic_fdtd_animation_on_node,
     write_fdtd_animation_on_node,
 )
-from ..compute import _ENV_VAR, Compute
+from ..compute import _ENV_VAR, Compute, _running_as
 from ..elastic_fdtd import elastic_fdtd_simulation
 from ..fdtd import fdtd_simulation
 from . import bootstrap, wire
@@ -308,8 +309,12 @@ def _arguments(header: Mapping[str, object], stream: IO[bytes]) -> dict[str, obj
         raise bootstrap.Refused(msg, stage="job") from None
 
 
-def _read_job(stream: IO[bytes]) -> tuple[str, dict[str, object], Compute]:
-    """The function a job names, its arguments and its placement.
+def _read_job(stream: IO[bytes]) -> tuple[str, dict[str, object], Compute, str]:
+    """The function a job names, its arguments, its placement and the client's version.
+
+    The version is the client's ``phonometry.__version__``, which the run's
+    provenance records: the package the node runs is the client's, and from
+    the node's cache nothing else names its version.
 
     :raises Refused: for a frame that is no job, a function the node does
         not run, or a placement or arguments it cannot rebuild.
@@ -325,7 +330,8 @@ def _read_job(stream: IO[bytes]) -> tuple[str, dict[str, object], Compute]:
         msg = f"the node runs {sorted(FUNCTIONS)}, not {name!r:.80}"
         raise bootstrap.Refused(msg, stage="job")
     placement = _placement(header)
-    return name, _arguments(header, stream), placement
+    version = bootstrap.field(header, "phonometry_version", str)
+    return name, _arguments(header, stream), placement, version
 
 
 def serve(stream: IO[bytes], frames: IO[bytes]) -> int:
@@ -341,7 +347,7 @@ def serve(stream: IO[bytes], frames: IO[bytes]) -> int:
         error frame.
     """
     _forget_host()
-    name, arguments, placement = _read_job(stream)
+    name, arguments, placement, version = _read_job(stream)
     function, outputs = FUNCTIONS[name]
     cancelled, finished = threading.Event(), threading.Event()
     _watch_input(stream, cancelled, finished)
@@ -349,6 +355,7 @@ def serve(stream: IO[bytes], frames: IO[bytes]) -> int:
         with (
             warnings.catch_warnings(record=True) as records,
             _observer.observing(_Watcher(cancelled)),
+            _running_as(version),
         ):
             result, sent_after = function(**arguments, compute=placement)
     except _observer.RunCancelled:

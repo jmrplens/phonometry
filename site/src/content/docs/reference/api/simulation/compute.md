@@ -101,6 +101,7 @@ RunProvenance(
     device: Literal['cpu', 'cupy', 'torch:cpu', 'torch:cuda', 'torch:mps'],
     device_index: int,
     dtype: Literal['float64', 'float32'],
+    phonometry_version: str,
     numpy_version: str,
     array_library: str | None,
     cuda_runtime: str | None,
@@ -120,6 +121,7 @@ Where a run actually stepped, recorded by the result.
 | `device` | The device that stepped the fields. |
 | `device_index` | Which GPU, `0` where there is one. |
 | `dtype` | The dtype of the fields. |
+| `phonometry_version` | The version of the phonometry that ran the steps (`phonometry.__version__`); on a node, the client's own, whose package the node runs. |
 | `numpy_version` | NumPy's version where the run stepped. |
 | `array_library` | The array library and its version (`"cupy 14.2.0"`), or `None` for NumPy. |
 | `cuda_runtime` | The CUDA runtime the array library uses, as `"major.minor"` (`"13.2"`), or `None` off a CUDA device. |
@@ -131,7 +133,7 @@ Where a run actually stepped, recorded by the result.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | for a `device` or `dtype` that is not text, a `device_index` that is not a number (a bool is not one), a `numpy_version` that is not text, or a `host`, `array_library`, `cuda_runtime`, `cuda_driver_api`, `gpu` or `package_sha256` that is neither text nor `None`. |
+| TypeError | for a `device` or `dtype` that is not text, a `device_index` that is not a number (a bool is not one), a `phonometry_version` or `numpy_version` that is not text, or a `host`, `array_library`, `cuda_runtime`, `cuda_driver_api`, `gpu` or `package_sha256` that is neither text nor `None`. |
 | ValueError | for an unknown device or dtype, `"torch:mps"` in float64, an index on a device that has one instance, an index that is not a whole number of 0 or more, or a `package_sha256` that is not 64 lowercase hexadecimal digits. |
 
 ## use

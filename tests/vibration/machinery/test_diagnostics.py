@@ -376,8 +376,9 @@ class TestValidation:
     def test_motor_rejects(self, kwargs: dict[str, object], match: str) -> None:
         with pytest.raises(ValueError, match=match):
             induction_motor_frequencies(
-                1750.0, **{"n_poles": 4, "n_rotor_bars": 52, **kwargs}
-            )  # type: ignore[arg-type]
+                1750.0,
+                **{"n_poles": 4, "n_rotor_bars": 52, **kwargs},  # type: ignore[arg-type]
+            )
 
     def test_motor_rejects_supply_below_shaft_rate(self) -> None:
         """A shaft turning at or above synchronous speed is not an induction motor."""

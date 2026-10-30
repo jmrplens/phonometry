@@ -840,6 +840,8 @@ _MISLEADING_NAMES = (
     ("noise_control.valves", "ValveTrim", "efficiency_correction", ""),
     ("room.auditorium", "AuditoriumQuantity", "just_noticeable_difference", ""),
     ("signals._envelope", "EnvelopeSpectrumResult", "mean_level", ""),
+    ("simulation.compute", "Compute", "device_index", ""),
+    ("simulation.compute", "RunProvenance", "device_index", ""),
     ("vibration.structural._impact_mobility", "DoubleHitCheck", "impact_indices", ""),
 )  # fmt: skip
 

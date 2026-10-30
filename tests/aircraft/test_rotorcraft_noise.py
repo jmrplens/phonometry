@@ -1621,8 +1621,9 @@ def test_a_ground_refuses_text_among_its_elevations_when_built() -> None:
     axes = (["0", "100"], [0.0, 100.0], [[0.0, 0.0], [0.0, 0.0]])
     with pytest.raises(TypeError, match="'terrain' must be .* of numbers, not text"):
         RotorcraftGround(terrain=axes)
-    # A bytearray was read as one axis per byte code.
-    with pytest.raises(TypeError, match="'terrain' must be .*, not bytearray"):
+    # A bytearray was read as one axis per byte code; the record holds it as
+    # the bytes it spells, a text, and refuses it as one.
+    with pytest.raises(TypeError, match="'terrain' must be .*, not bytes"):
         RotorcraftGround(terrain=bytearray(b"abc"))  # type: ignore[arg-type]
 
 

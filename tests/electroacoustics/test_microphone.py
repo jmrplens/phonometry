@@ -899,5 +899,6 @@ def test_a_pair_or_a_curve_given_as_a_bytearray_is_refused() -> None:
         match=r"MicrophoneCharacteristics: 'effective_range' must be a \(lo, hi\) pair",
     ):
         dataclasses.replace(result, effective_range=bytearray([45, 255]))
-    with pytest.raises(TypeError, match=r"'spectrum' must be a pair .*, not bytearray"):
+    # The record holds a bytearray as the bytes it spells, a text.
+    with pytest.raises(TypeError, match=r"'spectrum' must be a pair .*, not bytes"):
         electroacoustics.MicrophoneNoise(spectrum=bytearray(b"ab"))  # type: ignore[arg-type]

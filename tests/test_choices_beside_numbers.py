@@ -544,13 +544,7 @@ PROBES: dict[str, object] = {
 
 #: The probes a member takes on purpose, keyed by member and probe, with the
 #: reason. A stale entry fails.
-EXEMPT: dict[tuple[tuple[str, str, str], str], str] = {
-    (("phonometry.simulation.fdtd", "FDTDBoundaries", "sides"), "bytearray"): (
-        "an impedance profile is read by simulation/fdtd.py, which the GPU "
-        "proof fingerprints; a bytearray there is numpy's buffer of byte "
-        "values, the leniency the array-like of numbers does not state"
-    ),
-}
+EXEMPT: dict[tuple[tuple[str, str, str], str], str] = {}
 
 
 def _key(member: Member) -> tuple[str, str, str]:

@@ -252,10 +252,10 @@ def _stands_for_an_array(value: object) -> bool:
     and a hook that only checked the object left the record holding it, and
     the caller's memory with it. ``bytes`` is a single text to numpy and
     never changes, a ``bytearray`` is a text too, which :func:`_owned`
-    copies for the record's checks to refuse where numbers go, a NumPy
-    scalar is a number, never shared, and a record of the library (an
-    :class:`~phonometry.io.Signal` included) is composition and answers for
-    its own arrays; none of them counts.
+    holds as the ``bytes`` it spells, a NumPy scalar is a number, never
+    shared, and a record of the library (an :class:`~phonometry.io.Signal`
+    included) is composition and answers for its own arrays; none of them
+    counts.
     """
     if isinstance(value, np.ndarray | np.generic | bytes | bytearray | RichDisplay):
         return False
@@ -284,15 +284,16 @@ def _owned(value: object, *, always: bool) -> object:
     a record included, is left as it is: a record held whole is composition,
     and the record answers for its own arrays. An array passed through
     :func:`handed_over` is the one exception: it is sealed, not copied. A
-    ``bytearray`` is a text that can change, not the codes of its
-    characters: the record holds a ``bytearray`` of its own, never the
-    caller's, and its checks refuse it as text where numbers go, as they
-    refuse a ``bytes``.
+    ``bytearray`` is a text, as a ``bytes`` is, not the codes of its
+    characters, and a frozen record holds it immutable: as the ``bytes`` it
+    spells, never the caller's ``bytearray``, which can still change, nor an
+    array of ``uint8``. The record's checks refuse it as text where numbers
+    go, as they refuse a ``bytes``.
     """
     if type(value) in _PLAIN_TYPES:
         return value
     if isinstance(value, bytearray):
-        return bytearray(value)
+        return bytes(value)
     if isinstance(value, np.ndarray):
         return _owned_array(value, always=always)
     if isinstance(value, tuple | list):

@@ -441,6 +441,37 @@ def test_a_read_only_copy_of_an_array_like_is_a_copy(kind: str) -> None:
     assert not np.shares_memory(kept, mine)
 
 
+def test_a_bytearray_is_held_as_the_bytes_it_spells() -> None:
+    """A ``bytearray`` is a text, as a ``bytes`` is, and a frozen record holds it immutable.
+
+    In a field that neither refuses nor converts it, and inside a container,
+    it comes back as ``bytes``: never the caller's ``bytearray``, which the
+    caller can still write into, nor an array of the codes of its
+    characters.
+    """
+    label = bytearray(b"abc")
+    member = bytearray(b"de")
+    column = bytearray(b"fg")
+    record = _Plain(levels=_writeable([1.0]), label=label)  # type: ignore[arg-type]
+    held = _Containers(
+        pair=(member, 5.0),  # type: ignore[arg-type]
+        many=[],
+        columns={"c": column},  # type: ignore[dict-item]
+        frozen_columns=MappingProxyType({}),
+        named=_Pair(_writeable([0.0]), 0.5),
+    )
+    for kept, mine in (
+        (record.label, label),
+        (held.pair[0], member),
+        (held.columns["c"], column),
+    ):
+        assert type(kept) is bytes
+        assert kept == bytes(mine)
+        spelt = bytes(mine)
+        mine[0] = ord("x")
+        assert kept == spelt
+
+
 def test_every_copy_is_c_ordered_whatever_it_was_made_from() -> None:
     """A broadcast row and a transposed grid come out C-ordered, values kept."""
     row = _writeable([1.0, 2.0, 3.0])

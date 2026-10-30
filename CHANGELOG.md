@@ -3791,6 +3791,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   electroacoustic results, `band_hz=` of `vibration.single_mode_fit`, the
   `labels` of `filters.FractionalOctaveBands`, the `microphones` of the IEC
   61094-8 corrections and `excluded=` of `building.loudest_corner`). A
+  record holds a `bytearray` it is given as the `bytes` it spells, a text
+  as a `bytes` is, so a later write to the caller's `bytearray` does not
+  reach it and a field of numbers refuses it as text. A
   complex `initial_state`, read as its real part with no more than a
   `ComplexWarning`, is a `TypeError`, and a ragged one is a `ValueError`, as
   a ragged `termination` is. A `str`, a number and an array of numbers work

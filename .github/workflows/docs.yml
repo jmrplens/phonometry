@@ -261,10 +261,13 @@ jobs:
         # is held to the tomllib of the runner's python3 on the whole of
         # pyproject.toml. The Markdown copy of a page with no docs/ mirror is
         # tested on pages made for each case, and the pages that publish none
-        # on the site's own tree. Node's own test runner, after the install:
-        # the structured-data check and the guides' dates read a page's
-        # frontmatter with the parser the content collection uses, from
-        # @astrojs/markdown-remark.
+        # on the site's own tree. The list IndexNow is sent at deploy has its
+        # tests here too, on pairs of builds: one changed page sends that page
+        # alone, a new or a removed page is sent as such, a new release number
+        # on every page sends nothing, and no previous manifest sends every
+        # URL. Node's own test runner, after the install: the structured-data
+        # check and the guides' dates read a page's frontmatter with the parser
+        # the content collection uses, from @astrojs/markdown-remark.
         run: pnpm run test:scripts
         working-directory: site
       - name: Check the pages start no process of their own
@@ -491,6 +494,31 @@ jobs:
         # share one preview.
         run: pnpm run check:visual
         working-directory: site
+      - name: Work out which pages changed since the live deploy
+        # IndexNow is told that a page was added, changed or removed, and the
+        # deploy used to send it every URL of the sitemap after every merge,
+        # the whole site for a typo on one page. The build now publishes
+        # indexnow-manifest.json, a digest of what each page says: its title,
+        # its description, its date and the text of its Markdown copy, less
+        # the header lines that name the release. This step fetches the
+        # manifest the live site carries, past every cache by this commit's
+        # SHA, and lists the pages whose digest changed, the new ones and the
+        # removed ones. A live site with no manifest, or one that cannot be
+        # read, gives the full list, as before. On a pull request it only
+        # prints what a merge would send; on main the list goes to the
+        # IndexNow job. It fails if a step changed the pages after the
+        # manifest was written, which would publish a manifest that does not
+        # describe the site.
+        run: node scripts/indexnow-diff.mjs diff --live --out "$RUNNER_TEMP/indexnow/urls.json"
+        working-directory: site
+      - name: Hand the list of changed pages to the IndexNow job
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-artifact@v7
+        with:
+          name: indexnow-urls
+          path: ${{ runner.temp }}/indexnow/urls.json
+          if-no-files-found: error
+          retention-days: 1
       # Only the branch that publishes needs the tarball. A pull request has
       # already got what it came for once the checks above have run.
       - uses: actions/upload-pages-artifact@v5
@@ -521,7 +549,16 @@ jobs:
     permissions: {}
     timeout-minutes: 10
     steps:
-      - name: Submit sitemap URLs to IndexNow
+      # The URLs come from the build this run deployed, through the list its
+      # last steps wrote (site/scripts/indexnow-diff.mjs). This job used to
+      # read the sitemap from the live site a moment after the deploy, where
+      # the edge could still be serving the copy of the deploy before.
+      - name: Fetch the list of changed pages the build wrote
+        uses: actions/download-artifact@v8
+        with:
+          name: indexnow-urls
+          path: indexnow
+      - name: Submit the changed pages to IndexNow
         env:
           INDEXNOW_KEY: ${{ secrets.INDEXNOW_KEY }}
           PAGE_URL: ${{ needs.deploy.outputs.page_url }}
@@ -531,13 +568,33 @@ jobs:
             echo "::error::INDEXNOW_KEY secret is not set"; exit 1
           fi
           python3 - <<'PY'
-          import json, os, sys, time, urllib.request, xml.etree.ElementTree as ET
+          import json, os, sys, time, urllib.request
           from urllib.parse import urlparse
 
           TIMEOUT = 30
+          # The most URLs the protocol takes in one request.
+          BATCH = 10_000
           key = os.environ["INDEXNOW_KEY"]
           base = os.environ["PAGE_URL"].rstrip("/")
           host = urlparse(base).netloc
+
+          with open("indexnow/urls.json", encoding="utf-8") as handle:
+              listed = json.load(handle)
+          urls = listed["urls"]
+          if listed["full"]:
+              print(f"No previous manifest to compare with, because {listed['reason']}: all {len(urls)} URLs of the sitemap.")
+          else:
+              print(
+                  f"{len(listed['changed'])} changed, {len(listed['new'])} new and "
+                  f"{len(listed['removed'])} removed since the deploy before."
+              )
+          if not urls:
+              print("No page changed: nothing to submit.")
+              sys.exit(0)
+          # IndexNow refuses a request whose URLs are not on its host.
+          outside = [url for url in urls if not url.startswith(f"{base}/")]
+          if outside:
+              sys.exit(f"{len(outside)} URL(s) outside {base}/, the first {outside[0]}: the build and the deploy disagree")
 
           def fetch(url):
               with urllib.request.urlopen(url, timeout=TIMEOUT) as r:
@@ -554,24 +611,17 @@ jobs:
                       sys.exit(f"key file unreachable: {key_url}")
                   time.sleep(2 ** attempt)
 
-          ns = {"sm": "http://www.sitemaps.org/schemas/sitemap/0.9"}
-          index = ET.fromstring(fetch(f"{base}/sitemap-index.xml"))
-          urls = []
-          for shard in index.findall("sm:sitemap/sm:loc", ns):
-              tree = ET.fromstring(fetch(shard.text.strip()))
-              urls += [loc.text.strip() for loc in tree.findall("sm:url/sm:loc", ns)]
-          if not urls:
-              sys.exit("sitemap produced no URLs")
-
-          payload = json.dumps({
-              "host": host, "key": key, "keyLocation": key_url, "urlList": urls,
-          }).encode()
-          req = urllib.request.Request(
-              "https://api.indexnow.org/IndexNow", data=payload,
-              headers={"Content-Type": "application/json; charset=utf-8"},
-          )
-          with urllib.request.urlopen(req, timeout=TIMEOUT) as r:
-              print(f"IndexNow HTTP {r.status} ({len(urls)} URLs submitted)")
-              if r.status not in (200, 202):
-                  sys.exit(f"unexpected status {r.status}: {r.read()[:300]}")
+          for start in range(0, len(urls), BATCH):
+              batch = urls[start:start + BATCH]
+              payload = json.dumps({
+                  "host": host, "key": key, "keyLocation": key_url, "urlList": batch,
+              }).encode()
+              req = urllib.request.Request(
+                  "https://api.indexnow.org/IndexNow", data=payload,
+                  headers={"Content-Type": "application/json; charset=utf-8"},
+              )
+              with urllib.request.urlopen(req, timeout=TIMEOUT) as r:
+                  print(f"IndexNow HTTP {r.status} ({len(batch)} URLs submitted)")
+                  if r.status not in (200, 202):
+                      sys.exit(f"unexpected status {r.status}: {r.read()[:300]}")
           PY

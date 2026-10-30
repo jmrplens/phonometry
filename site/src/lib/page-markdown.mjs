@@ -184,3 +184,43 @@ export const markdownCopyPath = (route, base = '') => `${base}/${route}/index.md
  * by its words, which are the page's language.
  */
 export const VERIFIED_BY_ATTRIBUTE = 'data-verified-by';
+
+/**
+ * The header lines of a copy that name the release rather than the page: the
+ * version it documents and the command that installs it. A copy opens with a
+ * block of `Key: value` lines, and a release changes these two on every page
+ * at once while no page says anything new.
+ *
+ * scripts/indexnow-diff.mjs tells search engines which pages changed by
+ * hashing each copy, and it hashes the copy without these lines, so stamping
+ * a release does not report every page of the site as changed. A header
+ * writer that adds a line naming the release takes its key from this list, so
+ * that the two cannot drift apart.
+ */
+export const releaseHeaderKeys = Object.freeze(['Version', 'Install']);
+
+/** One `Key: value` line of a copy's header. */
+const HEADER_FIELD = /^([A-Z][A-Za-z-]*): /;
+
+/** What may come before the header: blank lines, the title, a quoted line and a comment. */
+const BEFORE_HEADER = /^(?:\s*$|# |>|<!--)/;
+
+/**
+ * A copy's text without its release lines. Only the header is read: the run
+ * of consecutive `Key: value` lines that follows the title, quote and comment
+ * lines a copy opens with. A copy whose first other line is not such a field
+ * has no header, and the same words anywhere in the body, prose or code, are
+ * content and stay.
+ */
+export function withoutReleaseLines(text) {
+  const lines = text.split('\n');
+  let start = 0;
+  while (start < lines.length && BEFORE_HEADER.test(lines[start])) start += 1;
+  if (start === lines.length || !HEADER_FIELD.test(lines[start])) return text;
+  let end = start;
+  while (end < lines.length && HEADER_FIELD.test(lines[end])) end += 1;
+  const header = lines
+    .slice(start, end)
+    .filter((line) => !releaseHeaderKeys.includes(HEADER_FIELD.exec(line)[1]));
+  return [...lines.slice(0, start), ...header, ...lines.slice(end)].join('\n');
+}

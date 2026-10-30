@@ -120,6 +120,31 @@ export function literalText(value) {
 }
 
 /**
+ * A fragment of a line, a part of a citation: {@link literalText} with the
+ * space at its edges kept, since a citation is printed fragment by fragment
+ * and the spaces between fragments are the fragments' own. Each run of the
+ * white space a browser collapses is one space; a no-break space stays.
+ *
+ * @param {string} text
+ * @returns {string}
+ */
+export function fragmentText(text) {
+  return escapeMarks(text.replaceAll(/[ \t\n\v\f\r]+/gu, ' '));
+}
+
+/**
+ * The line a copy opens with: the page's title as a heading, in
+ * {@link literalText}, with a closing run of `#` escaped, which Markdown would
+ * take for the end of the heading's syntax.
+ *
+ * @param {string} title
+ * @returns {string}
+ */
+export function titleMarkdown(title) {
+  return `# ${literalText(title).replace(/(^|[ \t])(#+)$/u, String.raw`$1\$2`)}`;
+}
+
+/**
  * Data that is plain text, not Markdown, made safe to print as Markdown: a
  * table cell or a note of a transcribed table, which prints `200 mm CMU*` and
  * `~0,65 to 0,68`; written raw, two asterisks in one cell would italicize the

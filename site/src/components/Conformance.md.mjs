@@ -11,9 +11,13 @@
  * where a long copy can be cut into parts (the report runs to several hundred
  * kilobytes). The small print loses its `<sub>`, `<b>` turns bold, and the
  * character references the generator writes (`&#916;`, `&ge;`, `&amp;`) are
- * written as the characters they stand for. Any other HTML tag in the file is
- * reported: the generator would have grown a construct this writer does not
- * know.
+ * written as the characters they stand for. A link the file writes relative
+ * to docs/, as it links docs/conformance.json so that a copy read at a commit
+ * links that commit's data, is written as its whole address on GitHub: the
+ * copy is read away from docs/, at the site's address and in the llms files,
+ * where a relative link resolves to nothing the site serves. Any other HTML
+ * tag in the file is reported: the generator would have grown a construct
+ * this writer does not know.
  *
  * Dropped: the verdict marks (`![Pass][cv-pass]`), together with the image
  * references they point to, because every mark travels beside its verdict in
@@ -25,9 +29,11 @@
  * plain-text rows are the English page's; a second copy of 400 kB of English
  * rows would say nothing the first does not.
  */
-import { join } from 'node:path';
+import { join, posix } from 'node:path';
 
 import { inlineSpans } from '../../scripts/shared/markdown-spans.mjs';
+
+import { repositoryUrl } from '../data/site.mjs';
 
 import { line } from '../lib/agent-md/markdown-table.mjs';
 import { REPO_DIR } from '../lib/agent-md/render.mjs';
@@ -55,6 +61,33 @@ function decodeEntities(text) {
   });
 }
 
+/** A destination that resolves anywhere: one with a scheme, a root or only a fragment. */
+const WHOLE = /^(?:[a-z][a-z0-9+.-]*:|\/|#)/iu;
+
+/**
+ * A destination docs/CONFORMANCE.md writes relative to docs/, as its whole
+ * address in the repository; any other destination as written.
+ *
+ * @param {string} destination
+ * @param {(message: string) => void} report  Told about a link that leaves the repository.
+ * @returns {string}
+ */
+function wholeAddress(destination, report) {
+  if (WHOLE.test(destination)) return destination;
+  const path = posix.normalize(posix.join('docs', destination));
+  if (path.startsWith('../')) {
+    report(`docs/CONFORMANCE.md links ${destination}, which resolves outside the repository`);
+    return destination;
+  }
+  return `${repositoryUrl}/blob/main/${path}`;
+}
+
+/** An inline link's destination, after its label. */
+const INLINE_DESTINATION = /\]\(([^)\s]+)\)/gu;
+
+/** A reference definition's destination; a footnote's `[^1]:` is no definition. */
+const DEFINITION = /^( {0,3}\[(?!\^)[^\]\n]+\]:[ \t]*)(\S+)/gmu;
+
 /**
  * docs/CONFORMANCE.md as the body of the conformance page's Markdown copy.
  *
@@ -73,18 +106,23 @@ export function conformanceMarkdown(text, report = () => {}) {
       return `## ${title}`;
     })
     .replaceAll(/<\/?sub>/gu, '')
-    .replaceAll(/<b>([\s\S]*?)<\/b>/gu, '**$1**');
+    .replaceAll(/<b>([\s\S]*?)<\/b>/gu, '**$1**')
+    .replaceAll(DEFINITION, (_match, label, url) => `${label}${wholeAddress(url, report)}`);
   const leftover = new Set();
   // A tag outside code spans that this transform did not consume. The spans
   // are read as the page reads them (scripts/shared/markdown-spans.mjs, rule
   // F65), so a backtick a span holds or escapes ends no span here either.
   let at = 0;
   const outside = [];
+  const pieces = [];
   for (const [start, end] of inlineSpans(body)) {
-    outside.push(body.slice(at, start));
+    outside.push(body.slice(at, start).replaceAll(INLINE_DESTINATION, (_match, url) => `](${wholeAddress(url, report)})`));
+    pieces.push(outside.at(-1), body.slice(start, end));
     at = end;
   }
-  outside.push(body.slice(at));
+  outside.push(body.slice(at).replaceAll(INLINE_DESTINATION, (_match, url) => `](${wholeAddress(url, report)})`));
+  pieces.push(outside.at(-1));
+  body = pieces.join('');
   for (const segment of outside) {
     for (const [, name] of segment.matchAll(/<\/?([a-zA-Z][a-zA-Z0-9]*)\b/gu)) {
       if (!KNOWN_TAGS.has(name.toLowerCase())) leftover.add(name);

@@ -110,3 +110,23 @@ export function pageTitle(id) {
   const title = titles.get(id);
   return typeof title === 'string' ? title : undefined;
 }
+
+/**
+ * The page file of a route, when the content directory has one: `x.mdx`, or
+ * `x/index.mdx` for a section, and `index.mdx` for the landing page (`.md`
+ * as well as `.mdx`).
+ *
+ * @param {string} route  `signals/levels/levels`, `es`, or `` for the landing page.
+ * @param {string} [contentDir]
+ * @returns {string | undefined}  The absolute path, or nothing.
+ */
+export function fileOfRoute(route, contentDir = CONTENT_DIR) {
+  const stems = route ? [route, `${route}/index`] : ['index'];
+  for (const stem of stems) {
+    for (const ext of ['.mdx', '.md']) {
+      const file = join(contentDir, `${stem}${ext}`);
+      if (existsSync(file)) return file;
+    }
+  }
+  return undefined;
+}

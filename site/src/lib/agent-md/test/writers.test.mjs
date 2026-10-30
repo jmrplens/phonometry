@@ -225,6 +225,32 @@ describe('Conformance', () => {
     ]);
   });
 
+  test('a link the report writes relative to docs/ is written as its whole address on GitHub', () => {
+    const reported = [];
+    const text = [
+      '> The data is [`docs/conformance.json`](conformance.json), read with [the guide](../README.md),',
+      '> as [the site](https://docs.jmrp.io/phonometry/) prints it and [below](#levels); `[x](conformance.json)` is code.',
+      '',
+      '[data]: conformance.json',
+      '[^1]: a note, conformance.json',
+      '',
+    ].join('\n');
+    const written = conformanceMarkdown(text, (message) => reported.push(message));
+    assert.equal(
+      written,
+      [
+        '> The data is [`docs/conformance.json`](https://github.com/jmrplens/phonometry/blob/main/docs/conformance.json), read with [the guide](https://github.com/jmrplens/phonometry/blob/main/README.md),',
+        '> as [the site](https://docs.jmrp.io/phonometry/) prints it and [below](#levels); `[x](conformance.json)` is code.',
+        '',
+        '[data]: https://github.com/jmrplens/phonometry/blob/main/docs/conformance.json',
+        '[^1]: a note, conformance.json',
+      ].join('\n'),
+    );
+    assert.deepEqual(reported, []);
+    conformanceMarkdown('[out](../../elsewhere.md)\n', (message) => reported.push(message));
+    assert.deepEqual(reported, ['docs/CONFORMANCE.md links ../../elsewhere.md, which resolves outside the repository']);
+  });
+
   test('the real report becomes one section per collapsible block, with no HTML left', () => {
     const text = readFileSync(join(REPO_DIR, 'docs', 'CONFORMANCE.md'), 'utf8');
     const { markdown, issues } = write('<Conformance lang="en" />\n');
@@ -232,6 +258,8 @@ describe('Conformance', () => {
     const blocks = text.match(/^<details>/gmu).length;
     assert.equal(markdown.match(/^## /gmu).length, blocks + 1);
     assert.doesNotMatch(markdown, /<\/?(details|summary|sub|b)>|\]\[cv-|&#\d+;/u);
+    assert.match(text, /\]\(conformance\.json\)/u, 'the report links its data relative to docs/');
+    assert.doesNotMatch(markdown, /\]\(conformance\.json\)/u);
   });
 
   test('the Spanish page points to the English copy', () => {

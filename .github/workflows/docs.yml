@@ -306,9 +306,11 @@ jobs:
         run: pnpm run check:render-spawns
         working-directory: site
       - name: Test the Markdown writers on small pages made to fail them
-        # The renderer, each component's writer in each language, and the
-        # check below, handed pages that carry each defect it refuses. They
-        # import the parser the site's MDX pipeline loads, and live under
+        # The renderer, each component's writer in each language, the title,
+        # header and references around a page's copy, and the two checks of
+        # the copies (the one below and the one after the build), handed
+        # pages and builds that carry each defect they refuse. They import the
+        # parser the site's MDX pipeline loads, and live under
         # src/lib/agent-md/test/, in a suite of their own.
         run: pnpm run test:agent-md
         working-directory: site
@@ -358,6 +360,19 @@ jobs:
         # process warning, wherever on its line it is printed; the one the site
         # cannot silence is listed in the check with its reason.
         run: node scripts/check-build-output.mjs "$RUNNER_TEMP/site-build.log"
+        working-directory: site
+      - name: Check every page's Markdown copy carries what the page carries
+        # Every page publishes a copy of itself at <page>/index.md, written
+        # from its source before the build (scripts/agent-md.mjs --public),
+        # and an agent reads the page through it. The copies cut from the
+        # source by regular expressions had no title in Spanish, none at all
+        # for the two landing pages, and leaked {expressions}, ::: asides,
+        # HTML comments and links that only resolve on the site. This reads
+        # the build: every page in exactly one class of what it owes, every
+        # copy announced by its page's head and structured data, a header
+        # whose canonical, language, translation and Updated: date agree with
+        # the page and the sitemap, and a text a Markdown reader can use.
+        run: pnpm run check:markdown-twins
         working-directory: site
 
       # Every page, component and script of the site type-checked in strict

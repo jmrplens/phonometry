@@ -15,6 +15,10 @@
 # Structured context for LLMs:
 #   https://docs.jmrp.io/phonometry/llms.txt
 #   https://docs.jmrp.io/phonometry/llms-full.txt
+# and every page as Markdown, beside it at <page>/index.md, the two landing
+# pages included:
+#   https://docs.jmrp.io/phonometry/signals/levels/levels/index.md
+#   https://docs.jmrp.io/phonometry/index.md
 
 User-agent: *
 Allow: /

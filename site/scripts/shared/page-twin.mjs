@@ -256,16 +256,6 @@ const lineStart = (markdown) =>
   );
 
 /**
- * The line a copy written from a page's source opens with: the page's title
- * as a heading, in {@link literalText}, with a closing run of `#` escaped,
- * which Markdown would take for the end of the heading's syntax.
- *
- * @param {string} title The page's title, from its frontmatter.
- * @returns {string}
- */
-export const titleMarkdown = (title) => `# ${literalText(title).replace(/(^|[ \t])(#+)$/, '$1\\$2')}`;
-
-/**
  * One item of the list of catalogues the copy writes for CatalogueIndex: the
  * catalogue's label linked to its page, then what it holds, each read from its
  * frontmatter and written in {@link literalText}.

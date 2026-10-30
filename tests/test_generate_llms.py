@@ -21,7 +21,6 @@ from __future__ import annotations
 
 import json
 import re
-import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -296,67 +295,6 @@ def test_the_index_is_held_to_its_budget() -> None:
     assert len(committed) <= llms.LLMS_TXT_LIMIT_BYTES
 
 
-_NODE = shutil.which("node")
-
-
-@pytest.mark.whole_tree
-@pytest.mark.skipif(_NODE is None, reason="no JavaScript engine to ask the site")
-def test_the_pages_without_a_copy_are_the_ones_the_site_withholds() -> None:
-    """The sentence of the index names the pages the site's own rule withholds."""
-    module = ROOT / "site" / "src" / "lib" / "page-markdown.mjs"
-    script = (
-        f"import {{ withheldRoutes }} from {json.dumps(module.as_uri())};"
-        f"const routes = withheldRoutes({{ contentDir: {json.dumps(str(llms.CONTENT))}, "
-        f"docsDir: {json.dumps(str(llms.DOCS))} }});"
-        "process.stdout.write(JSON.stringify([...routes].sort()));"
-    )
-    ran = subprocess.run(
-        [str(_NODE), "--input-type=module", "-e", script],
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-        timeout=300,
-        check=False,
-    )
-    assert ran.returncode == 0, ran.stderr
-    site = json.loads(ran.stdout)
-    assert sorted(llms._withheld_routes()) == site
-    assert len(site) > 2
-
-
-def test_the_copies_sentence_names_the_withheld_pages_by_kind(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    withheld = {
-        "",
-        "es",
-        "reference/catalogues/solids",
-        "es/reference/catalogues/solids",
-        "reference/catalogues/gases",
-        "es/reference/catalogues/gases",
-        "reference/reports",
-        "es/reference/reports",
-        "es/reference/glossary",
-    }
-    monkeypatch.setattr(llms, "_withheld_routes", lambda: frozenset(withheld))
-    english = {"", "start/getting-started", "reference/reports", "reference/glossary"}
-    monkeypatch.setattr(llms, "_content_routes", lambda: english)
-    monkeypatch.setattr(llms, "_spanish_routes", lambda: set(english))
-    sentence = llms._copies_sentence()
-    assert sentence.startswith(
-        "Every page listed here but the ones named at the end of this section has "
-        f"a Markdown copy beside it at `<page>/index.md`, for example {_SITE}/start/"
-        "getting-started/index.md, and its Spanish twin under `/es/` has one too "
-        "where the page is translated. The 9 pages"
-    )
-    assert sentence.endswith(
-        "The 9 pages that show their data through a component publish none and are read on the "
-        'page itself: the two landing pages, the 2 catalogues and the "Report fiches" page in '
-        'both languages and the Spanish "Glossary" page.'
-    )
-    assert "English only" not in sentence
-
-
 def test_the_copies_sentence_names_the_pages_the_site_does_not_translate(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -366,7 +304,6 @@ def test_the_copies_sentence_names_the_pages_the_site_does_not_translate(
     pages of the API reference have none: their Spanish addresses show the
     English page and point to its copy.
     """
-    monkeypatch.setattr(llms, "_withheld_routes", lambda: frozenset({"", "es"}))
     english = {
         "",
         "start/guides",
@@ -386,6 +323,17 @@ def test_the_copies_sentence_names_the_pages_the_site_does_not_translate(
     assert "The 1 page of the API reference is in English only:" in (
         llms._copies_sentence()
     )
+
+
+def test_the_copies_sentence_says_every_page_has_a_copy(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Every page publishes a copy written from its own source, so none is named as having none."""
+    monkeypatch.setattr(llms, "_content_routes", lambda: {"", "start/guides"})
+    monkeypatch.setattr(llms, "_spanish_routes", lambda: {"", "start/guides"})
+    sentence = llms._copies_sentence()
+    assert sentence.startswith("Every page listed here has a Markdown copy beside it")
+    assert "publish none" not in sentence
 
 
 def test_the_spanish_routes_are_named_without_their_prefix(

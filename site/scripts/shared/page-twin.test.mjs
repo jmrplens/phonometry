@@ -20,8 +20,8 @@ import {
   referencesMarkdown,
   stripFrontmatter,
   stripMdx,
-  titleMarkdown,
 } from './page-twin.mjs';
+import { titleMarkdown } from '../../src/lib/agent-md/markdown-table.mjs';
 import { printed } from './markdown-reader.mjs';
 
 const FENCE = '```';

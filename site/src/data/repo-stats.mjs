@@ -15,6 +15,7 @@
  *
  * Definitions, so the labels these numbers sit under stay honest:
  *   version   first line of `VERSION`, the released version the tag points at
+ *   installCommand  the install line the site recommends, extras quoted (F62)
  *   guides    topic guides under the topic folders of `content/docs/`,
  *             excluding the topic and subgroup overviews (English side; the
  *             translation-parity check keeps Spanish identical)

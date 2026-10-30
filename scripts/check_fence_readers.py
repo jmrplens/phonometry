@@ -215,6 +215,12 @@ EXEMPT: dict[tuple[str, str], str] = {
         "see the digest keep the line as the page's text; it reads no fence "
         "itself"
     ),
+    ("site/src/lib/agent-md/test/check-markdown-twins.test.mjs", "<script>"): (
+        "fixtures: a copy these tests hand the check of the copies carries a "
+        "fence whose body holds what would be a leak outside it, because what "
+        "they check is that code is never read as one; nothing in them reads "
+        "a fence"
+    ),
     ("site/src/lib/agent-md/test/primitives.test.mjs", "<script>"): (
         "fixtures: the pages these tests hand the Markdown renderer carry "
         "fences, because what they check is that the copy keeps each fence "

@@ -1,13 +1,14 @@
 /**
  * Which pages have a published markdown copy, and where it sits.
  *
- * `scripts/emit-page-markdown.mjs` writes one `<route>/index.md` per file in
- * the docs content collection that has a copy. Two places on the page then
- * point readers at it: the `<link rel="alternate" type="text/markdown">` in
- * Head.astro and the page actions menu. Neither may offer a copy the generator
- * did not write, so the rule that decides is stated once here and imported by
- * all three, and by scripts/indexnow-diff.mjs, which reads the copy of every
- * page that has one.
+ * `scripts/agent-md.mjs --public` writes one `<route>/index.md` per file in
+ * the docs content collection, before the build, and the build publishes it
+ * beside the page. Three places on the page then point readers at it: the
+ * `<link rel="alternate" type="text/markdown">` and the `encoding` of the
+ * structured data in Head.astro, and the page actions menu. None of them may
+ * offer a copy the generator did not write, so the rule that decides is
+ * stated once here and imported by all of them, and by
+ * scripts/indexnow-diff.mjs, which reads the copy of every page that has one.
  *
  * The route comes from the content entry's own id, never from the address of
  * the page being viewed. On a multilingual site those differ: Starlight serves
@@ -17,14 +18,10 @@
  * actually rendering, which is the English text the reader has in front of
  * them.
  *
- * Nothing here starts a process: the content tree and docs/ are read from disk
- * as they stand, once, by the first caller that asks.
+ * Nothing here starts a process or reads a page.
  */
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
-import { dirname, join, relative, sep } from 'node:path';
-import { fileURLToPath } from 'node:url';
-
-import { pageMarkup } from '../../scripts/shared/markdown-spans.mjs';
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
 
 /**
  * The route a page is served at, from either a content file's path under
@@ -49,9 +46,9 @@ export const routeOf = (idOrPath) =>
 /**
  * The documents at the root of docs/ that are published at a route of their
  * own: the conformance report and the errata registry, in English, and the
- * Spanish edition of the registry. A copy of one of these routes is the
- * document, because the page renders its rows from data through a component
- * and its own source holds the introduction alone.
+ * Spanish edition of the registry. The GitHub copy of one of these routes is
+ * the document, because the page renders its rows from data through a
+ * component and its own source holds the introduction alone.
  */
 export const TRANSPLANTED = Object.freeze({
   CONFORMANCE: 'reference/conformance',
@@ -63,8 +60,11 @@ export const TRANSPLANTED = Object.freeze({
 const isSpanish = (route) => route === 'es' || route.startsWith('es/');
 
 /**
- * The file under docs/ a route's copy is written from, or `undefined` when the
- * copy is written from the page's own source.
+ * The file under docs/ that is a route's GitHub copy, or `undefined` for a
+ * route with none. The copy the site publishes beside every page is written
+ * from the page's own source (scripts/agent-md.mjs --public); this names the
+ * plain-Markdown edition GitHub serves, which scripts/mirror-bibliography.mjs
+ * writes for the bibliography.
  *
  * The mirror is laid out like the site, so `docs/signals/filters/filter-banks.md`
  * is the copy of `/signals/filters/filter-banks/`, and a section's page is its
@@ -85,96 +85,29 @@ export function mirrorOf(route, docsDir) {
 /**
  * The components that render a page's data rather than wrap its prose: a
  * catalogue's tables, the conformance report's rows, the errata of a document
- * family, the glossary, the index of fiches and the landing page. A copy
- * written from a page's own source takes every component out, so a page that
- * shows one of these would get a copy holding its introduction and none of what
- * it is there to show. Such a page publishes no copy, and its readers are sent
- * to the page itself. A page whose copy comes from docs/ keeps it: the mirror
- * writes the same data as text.
- *
- * scripts/emit-page-markdown.mjs writes out the components that stay
- * (src/components/ThemeImage.astro and Video.astro as a figure and a line,
- * CatalogueIndex.astro as its list) and keeps the children of the ones that
- * wrap prose; scripts/page-markdown.test.mjs holds every component a page
- * imports to one of those readings.
+ * family, the glossary, the index of fiches and the landing page. Each has a
+ * Markdown writer beside it that writes the same data as text into the page's
+ * copy (src/lib/agent-md/), and a page that renders one counts its words apart
+ * in the structured-data check, since its own source holds its introduction
+ * alone (scripts/check-structured-data.mjs).
  */
 export const DATA_COMPONENTS = Object.freeze(['Catalogues', 'Conformance', 'ErrataFamily', 'Glossary', 'Home', 'ReportIndex']);
 
-/** A tag of a data component, as the page renders it. */
-const DATA_TAG = new RegExp(`<(?:${DATA_COMPONENTS.join('|')})\\b`);
-
-/** The pages of a content tree, as paths below it with forward slashes. */
-function pagesUnder(dir, root = dir, out = []) {
-  for (const entry of readdirSync(dir, { withFileTypes: true })) {
-    const path = join(dir, entry.name);
-    if (entry.isDirectory()) pagesUnder(path, root, out);
-    else if (/\.mdx?$/.test(entry.name)) out.push(relative(root, path).split(sep).join('/'));
-  }
-  return out;
-}
+/**
+ * Every page written as a file has a copy, the two landing pages included:
+ * theirs carries the tagline, the readout, the install line and the areas the
+ * landing shows, written by the landing's own writer
+ * (src/components/home/Home.md.mjs). The one route without one is the error
+ * page Starlight synthesises, which has no file and which nobody looks up.
+ */
+export const hasMarkdownCopy = (route) => routeOf(route) !== '404';
 
 /**
- * The routes of a content tree that publish no copy because the page renders
- * one of the {@link DATA_COMPONENTS} and has no copy in docs/ to stand for it:
- * the two landing pages, the catalogues, the indexes of fiches, and the Spanish
- * glossary and conformance report. A tag counts where the page renders it
- * (`pageMarkup`), so a page that only shows how to write one, in a code span or
- * a fence, keeps its copy, and an `.md` page renders no component at all.
- *
- * @param {{ contentDir: string, docsDir: string }} tree
- * @returns {Set<string>}
+ * The address of the copy for a route, under the site's base path: the
+ * landing page's copy sits at the root, `/index.md`, with no empty segment
+ * before it.
  */
-export function withheldRoutes({ contentDir, docsDir }) {
-  const withheld = new Set();
-  for (const path of pagesUnder(contentDir).sort()) {
-    if (!path.endsWith('.mdx')) continue;
-    const route = routeOf(path);
-    if (mirrorOf(route, docsDir) !== undefined) continue;
-    const text = readFileSync(join(contentDir, path), 'utf8');
-    if (!DATA_COMPONENTS.some((name) => text.includes(`<${name}`))) continue;
-    if (DATA_TAG.test(pageMarkup(text, { kind: 'mdx' }))) withheld.add(route);
-  }
-  return withheld;
-}
-
-/**
- * The site's own content tree and docs/, found by walking up from this module
- * and from the directory the build runs in: once Astro bundles this module into
- * `dist/.prerender/chunks/`, a path relative to the module counts from there.
- */
-function siteTree() {
-  const starts = [dirname(fileURLToPath(import.meta.url)), process.cwd()];
-  for (const start of starts) {
-    for (let dir = start; ; dir = dirname(dir)) {
-      const contentDir = join(dir, 'site', 'src', 'content', 'docs');
-      if (existsSync(join(dir, 'VERSION')) && existsSync(contentDir)) {
-        return { contentDir, docsDir: join(dir, 'docs') };
-      }
-      if (dirname(dir) === dir) break;
-    }
-  }
-  throw new Error(`the site's content tree (site/src/content/docs beside VERSION) is not above ${starts.join(' or ')}`);
-}
-
-/** The routes of the site's own tree that publish no copy, read by the first caller. */
-let withheld;
-
-/**
- * Whether a route publishes a markdown copy: every page of the site's tree but
- * those {@link withheldRoutes} names. The two landing pages, the roots of the
- * two locales, are among them: each is a layout of the landing component
- * rather than prose.
- *
- * @param {string} route
- * @returns {boolean}
- */
-export function hasMarkdownCopy(route) {
-  withheld ??= withheldRoutes(siteTree());
-  return !withheld.has(route);
-}
-
-/** The address of the copy for a route, under the site's base path. */
-export const markdownCopyPath = (route, base = '') => `${base}/${route}/index.md`;
+export const markdownCopyPath = (route, base = '') => `${base}/${route ? `${route}/` : ''}index.md`;
 
 /**
  * The attribute the element that states a page's conformance checks carries
@@ -193,9 +126,9 @@ export const VERIFIED_BY_ATTRIBUTE = 'data-verified-by';
  *
  * scripts/indexnow-diff.mjs tells search engines which pages changed by
  * hashing each copy, and it hashes the copy without these lines, so stamping
- * a release does not report every page of the site as changed. A header
- * writer that adds a line naming the release takes its key from this list, so
- * that the two cannot drift apart.
+ * a release does not report every page of the site as changed. The header
+ * writer (src/lib/agent-md/header.mjs) writes its release lines from this
+ * list and has no list of its own, so that the two cannot drift apart.
  */
 export const releaseHeaderKeys = Object.freeze(['Version', 'Install']);
 

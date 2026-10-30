@@ -16,7 +16,7 @@ import { topics } from './src/data/topics.mjs';
 import { doi, doiUrl } from './src/data/citation.mjs';
 import { redirects } from './src/data/redirects.mjs';
 import { packagesNotListedIn } from './src/lib/bundled-packages.mjs';
-import { basePath, siteUrl } from './src/data/site.mjs';
+import { author, basePath, repositoryUrl, siteUrl } from './src/data/site.mjs';
 import { isoDay } from './src/lib/date-rules.mjs';
 import { isFallbackRoute } from './src/lib/fallback-routes.mjs';
 import { isOurMedia, mediaUrl, REMOTE_PREFIXES } from './src/lib/media.mjs';
@@ -171,7 +171,6 @@ function rehypeTableAlign() {
 }
 
 const fullUrl = `${siteUrl}${basePath}`;
-const repositoryUrl = 'https://github.com/jmrplens/phonometry';
 
 // The two languages, read by Starlight and by the sitemap's hreflang pairing,
 // which have to agree.
@@ -781,7 +780,7 @@ export default defineConfig({
         { tag: 'meta', attrs: { name: 'twitter:card', content: 'summary_large_image' } },
         { tag: 'meta', attrs: { name: 'twitter:image:alt', content: socialImageAlt } },
         // Author
-        { tag: 'meta', attrs: { name: 'author', content: 'José Manuel Requena Plens' } },
+        { tag: 'meta', attrs: { name: 'author', content: author.name } },
         // Theme color
         { tag: 'meta', attrs: { name: 'theme-color', content: '#0a6f8c' } },
         // rel="me" identity links (canonical list from jmrp.io)
@@ -789,7 +788,7 @@ export default defineConfig({
         { tag: 'link', attrs: { rel: 'me', href: 'https://www.linkedin.com/in/jmrplens' } },
         { tag: 'link', attrs: { rel: 'me', href: 'https://mstdn.jmrp.io/@jmrplens' } },
         { tag: 'link', attrs: { rel: 'me', href: 'https://scholar.google.com/citations?user=9b0kPaUAAAAJ' } },
-        { tag: 'link', attrs: { rel: 'me', href: 'https://orcid.org/0000-0003-1250-6212' } },
+        { tag: 'link', attrs: { rel: 'me', href: author.orcid } },
         { tag: 'link', attrs: { rel: 'me', href: 'https://matrix.to/#/@jmrplens:matrix.jmrp.io' } },
         { tag: 'link', attrs: { rel: 'me', href: 'https://keyoxide.org/0A993B268654DBBA52B7E8D3FCF653391E2C91FC' } },
         { tag: 'link', attrs: { rel: 'me', href: 'https://jmrp.io' } },

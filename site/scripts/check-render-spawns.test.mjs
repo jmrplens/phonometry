@@ -106,6 +106,17 @@ for (const path of [
 	});
 }
 
+test('a test beside the source starts its processes in the test runner, never on a page', (t) => {
+	// The Markdown writers' tests live under src/lib/agent-md/test/ and build
+	// small sites and repositories with git; no page imports a test.
+	const ran = check(t, {
+		...LISTED,
+		'src/lib/agent-md/test/fixtures.test.mjs': `import { spawnSync } from 'node:child_process';\nspawnSync('git');\n`,
+	});
+	assert.equal(ran.status, 0, ran.err);
+	assert.match(ran.out, /read 3 files a page can run; 3 reach for a process/);
+});
+
 test('a module outside the source that a page imports is read as well', (t) => {
 	const ran = check(t, {
 		...LISTED,

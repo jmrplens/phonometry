@@ -1805,3 +1805,31 @@ build prints "LaTeX-incompatible input and strict mode is set to 'warn'"
 **Enforced by:** `site/src/lib/remark-bibliography.mjs`, `CI: Site builds and validates`, `site/scripts/check-structured-data.mjs`, `CI: Check the structured data every page publishes`, `site/scripts/mirror-bibliography.mjs`, `CI: Check the bibliography's GitHub copy is the one its pages write`, `site/scripts/bibliography-entries.test.mjs`, `site/scripts/check-structured-data.test.mjs`, `site/scripts/mirror-bibliography.test.mjs`, `CI: Test the build checks on small builds made to fail them`
 
 **Exceptions.** A work with nothing written of it still gets its entry, with no note, in the section most of the pages that cite it belong to (`BIBLIOGRAPHY_PREFIXES`). The Spanish page reads the record of the English work it is, whatever its own fragment, and a note carries both languages. The page keeps its headings and the prose under them, each section closed by the comment that marks where its list goes, `<!-- bibliography: signal-analysis -->`. The build stops on a record of a work no page cites, a section the page does not mark or marks twice, a citing page with no title, and a list the page writes itself, the Don't above; check:structured-data then holds the built list to the structured data and to the pages that cite each work, each page once, and fails an item of a list no reference wrote. The GitHub copy, `docs/reference/bibliography.md`, is written from the same pages by the same functions (`make bibliography-mirror`, before `make llms`), and the docs workflow fails while it is stale, so a citation that changes the list reaches the site page, its Spanish twin and the copy together ([F1](#f1)) with nothing written in any of them by hand.
+
+## Markdown copies of the pages
+
+<a id="f73"></a>
+### F73. Publish beside every page a Markdown copy that carries what the page carries
+
+**Why.** An agent reads a page through its copy at `<page>/index.md`, which the page's head, its structured data, its page actions and the llms files all point to. The copies cut from the page source by regular expressions fell short of the page where nobody looked: the two landing pages had none, the Spanish copies started without a title, a self-closing component took its data with it, and `{totalChecks}`, `:::` asides, HTML comments, links that only resolve on the site and a link written relative to the file the text was copied from reached the text. A copy is now written from the page source by `site/src/lib/agent-md/` before the build: the title, a header that says where the page lives, in which language, for which release, by whom, when and against which standards, the body, and the references the page prints. The build is then read the way a crawler reads it, and every copy is held to its page.
+
+**Do**
+
+```text
+site/src/content/docs/<route>.mdx    the page, which the copy is written from
+dist/<route>/index.md                # <title>, the header (Canonical, Language,
+                                     Alternate, Version, Install, Author,
+                                     Published, Updated, Standards, License,
+                                     Summary), the body, ## References
+```
+
+**Don't**
+
+```text
+a kind of page that publishes no copy, a copy written or edited by hand, or a
+copy whose Updated: line gives another day than the sitemap's <lastmod>
+```
+
+**Enforced by:** `site/scripts/check-markdown-twins.mjs`, `CI: Check every page's Markdown copy carries what the page carries`, `site/src/lib/agent-md/test/check-markdown-twins.test.mjs`, `CI: Test the Markdown writers on small pages made to fail them`
+
+**Exceptions.** A page with no copy of its own is a class of the check's table, with its reason: the Spanish API pages, which show the English text and name the English copy, the redirect stubs and the error page. A new kind of page is a new class with its reason, never a page left out of the table.

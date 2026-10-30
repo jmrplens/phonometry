@@ -21,7 +21,7 @@ import { fileURLToPath } from 'node:url';
 
 import { parse } from 'yaml';
 
-import { hasMarkdownCopy, releaseHeaderKeys, withheldRoutes, withoutReleaseLines } from '../src/lib/page-markdown.mjs';
+import { hasMarkdownCopy, releaseHeaderKeys, withoutReleaseLines } from '../src/lib/page-markdown.mjs';
 import {
 	DEPLOY_BRANCH,
 	MANIFEST_NAME,
@@ -249,22 +249,20 @@ test('a new title, description or date moves a page whose copy did not change', 
 	}
 });
 
-test('a landing page with no copy is read from its <main>, and its asset links do not move it', (t) => {
+test('the page with no copy is read from its <main>, and its asset links do not move it', (t) => {
 	const landing = (text) => ({ title: 'phonometry', description: 'The library.', lastmod: '2026-10-01', main: `<h1>phonometry</h1><p>${text}</p><script>let x = 1;</script>`, copy: null });
-	const before = { ...BASE, '/': landing('1893 conformance checks') };
+	const before = { ...BASE, '/404/': landing('1893 conformance checks') };
 	const assets = submit(t, before, before, { head: '<link rel="stylesheet" href="/phonometry/_astro/index.C0ffee12.css">' });
 	assert.deepEqual(assets.urls, []);
-	const text = submit(t, before, { ...BASE, '/': landing('1900 conformance checks') });
-	assert.deepEqual(text.urls, [url('/')]);
+	const text = submit(t, before, { ...BASE, '/404/': landing('1900 conformance checks') });
+	assert.deepEqual(text.urls, [url('/404/')]);
 });
 
-test('a page that renders its data through a component is read from its <main>, whatever copy lies beside it', (t) => {
-	// The rule is src/lib/page-markdown.mjs's, on the site's own tree: pages
-	// such as the catalogues publish no copy, and the manifest reads what the
-	// page shows instead, as it does on the landing pages.
-	const tree = { contentDir: join(HERE, '..', 'src', 'content', 'docs'), docsDir: join(HERE, '..', '..', 'docs') };
-	const route = [...withheldRoutes(tree)].find((name) => name !== '' && name !== 'es');
-	assert.ok(route, 'the site has no page besides the landing pages that publishes no copy');
+test('a page with no copy is read from its <main>, whatever copy lies beside it', (t) => {
+	// The rule is src/lib/page-markdown.mjs's: every page written as a file
+	// publishes a copy, and the one route without one, Starlight's 404, is read
+	// from what it shows.
+	const route = '404';
 	assert.equal(hasMarkdownCopy(route), false);
 	const at = `/${route}/`;
 	const data = (row, stray = null) => ({ ...guide(at), main: `<h1>Data</h1><table><tr><td>${row}</td></tr></table>`, copy: stray });
@@ -330,11 +328,9 @@ test("what the frame puts in a page's <main> does not move it, and the page's ow
 	for (const [what, parts] of Object.entries(own)) assert.notEqual(textOf(parts), textOf(), what);
 	assert.match(textOf(), /^Data Data Density 7850 kg\/m3 A term\. Defined in: ISO 1683:2015 A guide The values are those of the sources cited\.$/);
 
-	// The same on a build: the manifest reads a page the site gives no copy
+	// The same on a build: the manifest reads the page the site gives no copy
 	// that way, so a deploy that changed only the frame submits nothing.
-	const tree = { contentDir: join(HERE, '..', 'src', 'content', 'docs'), docsDir: join(HERE, '..', '..', 'docs') };
-	const route = [...withheldRoutes(tree)].find((name) => name !== '' && name !== 'es');
-	const at = `/${route}/`;
+	const at = '/404/';
 	const page = (parts) => ({ ...guide(at), main: framed(parts), copy: null });
 	const before = { ...BASE, [at]: page() };
 	const reframed = { banner: '', anchor: 'Sección titulada «Data»', updated: 'Nov 9, 2026', next: 'Gases', credit: 'All of my projects' };
@@ -357,9 +353,9 @@ test('the build fails on a sitemap it cannot read every page of', (t) => {
 			{ ...BASE, '/x/': { ...guide('/x/'), copy: null } },
 			/https:\S+\/x\/ has a Markdown copy by src\/lib\/page-markdown\.mjs, and the build wrote no \S+index\.md/,
 		],
-		'a landing page with no <main>': [
-			{ ...BASE, '/': { ...guide('/'), copy: null, main: null } },
-			/https:\S+\/phonometry\/ has no Markdown copy by src\/lib\/page-markdown\.mjs and no <main> element/,
+		'the page with no copy and no <main>': [
+			{ ...BASE, '/404/': { ...guide('/404/'), copy: null, main: null } },
+			/https:\S+\/404\/ has no Markdown copy by src\/lib\/page-markdown\.mjs and no <main> element/,
 		],
 	};
 	for (const [name, [pages, message]] of Object.entries(cases)) {

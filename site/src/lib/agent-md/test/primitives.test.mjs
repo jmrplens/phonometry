@@ -55,6 +55,17 @@ describe('table and list primitives', () => {
     assert.equal(line('  a\n\tb  '), 'a b');
   });
 
+  test('flattening folds the spaces a line breaks at, never the no-break spaces a page writes on purpose', () => {
+    // The pages group a number's digits with a narrow no-break space (U+202F)
+    // and tie a value to its unit with a no-break space (U+00A0). JavaScript's
+    // \s matches both, and folding them left a number a line could break
+    // inside, in fourteen errata headings among others.
+    assert.equal(line('6\u202F300 Hz\nand 20\u00A0µPa '), '6\u202F300 Hz and 20\u00A0µPa');
+    assert.equal(cell(' 1\u202F200 | 3\t'), '1\u202F200 \\| 3');
+    assert.equal(bracketText('6\u202F300 Hz'), '6\u202F300 Hz');
+    assert.equal(line('\u00A0kept at both ends\u202F'), '\u00A0kept at both ends\u202F');
+  });
+
   test('plain text from a data module cannot turn into markup', () => {
     assert.equal(plainText('A* and B*'), String.raw`A\* and B\*`);
     assert.equal(plainText('~0,65 to ~0,68'), String.raw`\~0,65 to \~0,68`);

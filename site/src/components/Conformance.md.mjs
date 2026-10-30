@@ -28,6 +28,8 @@
 import { join } from 'node:path';
 
 import { inlineSpans } from '../../scripts/shared/markdown-spans.mjs';
+
+import { line } from '../lib/agent-md/markdown-table.mjs';
 import { REPO_DIR } from '../lib/agent-md/render.mjs';
 import { readCommittedText } from '../lib/line-ends.mjs';
 import { markdownFor } from '../lib/agent-md/types.mjs';
@@ -67,7 +69,7 @@ export function conformanceMarkdown(text, report = () => {}) {
     .replaceAll(/!\[[^\]]*\]\[cv-[a-z-]+\] ?/gu, '')
     .replaceAll(/^<\/?details>[ \t]*$/gmu, '')
     .replaceAll(/^<summary>([\s\S]*?)<\/summary>[ \t]*$/gmu, (_match, inner) => {
-      const title = inner.replaceAll(/<\/?b>/gu, '').replaceAll(/\s+/gu, ' ').trim();
+      const title = line(inner.replaceAll(/<\/?b>/gu, ''));
       return `## ${title}`;
     })
     .replaceAll(/<\/?sub>/gu, '')

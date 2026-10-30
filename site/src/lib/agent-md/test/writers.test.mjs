@@ -3,11 +3,13 @@
 //
 // Usage (from site/, after `pnpm install`): pnpm run test:agent-md
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { before, describe, test } from 'node:test';
 
 import { conformanceMarkdown } from '../../../components/Conformance.md.mjs';
+import { entryHeadings } from '../../../components/ErrataFamily.md.mjs';
+import { termItem } from '../../../components/Glossary.md.mjs';
 import { glossary } from '../../../data/glossary.mjs';
 import { en, es } from '../../../data/home.ts';
 import { reports, reportsByAreaEs } from '../../../data/reports.mjs';
@@ -343,7 +345,8 @@ describe('Catalogues', () => {
     const { markdown, issues } = write('<Catalogues catalogue="fluids" lang="es" />\n', { lang: 'es' });
     assert.deepEqual(issues, []);
     assert.match(markdown, /^\| Estado \| Condiciones \| Velocidad del sonido \(m\/s\) \|.* \| Qué lo fija \|$/mu);
-    assert.match(markdown, /^\| Aire \| 20 °C, 101 325 Pa \| 343 \|/mu);
+    // The page groups the digits with a narrow no-break space, and so does the copy.
+    assert.match(markdown, /^\| Aire \| 20 °C, 101\u202F325 Pa \| 343 \|/mu);
     const solids = write('<Catalogues catalogue="solids" lang="es" />\n', { lang: 'es' }).markdown;
     assert.match(solids, /\| 400 a 800 \(intervalo\)\[\^solids-\d+\] \|/u);
     assert.match(solids, /^- \*\*calculado\*\*: calculado por esta biblioteca$/mu);
@@ -399,6 +402,31 @@ describe('Glossary', () => {
     const { markdown } = write('<Glossary lang="es" />\n', { lang: 'es' });
     assert.match(markdown, /Unidad: dB re 20 µPa\. Definida en: IEC 61672-1:2013\. Guía: \[[^\]]+\]\(https:\/\/docs\.jmrp\.io\/phonometry\/es\//u);
   });
+
+  test('a term is written with what its card shows, never with a field kept for the structured data alone', () => {
+    // A term that also carries the name and aliases its structured data reads,
+    // which the card on the page does not show.
+    const term = {
+      id: 'pml',
+      symbol: 'PML',
+      qualifier: { en: 'absorbing boundary', es: 'contorno absorbente' },
+      quantity: { en: 'Perfectly matched layer', es: 'Capa perfectamente adaptada' },
+      alias: { en: 'Absorbing layer', es: 'Capa absorbente' },
+      unit: { en: 'dimensionless', es: 'adimensional' },
+      standard: 'no governing standard',
+      clause: { en: 'section 3', es: 'apartado 3' },
+      definition: { en: 'A layer that absorbs outgoing waves', es: 'Una capa que absorbe las ondas salientes' },
+    };
+    const guide = { title: 'FDTD [solver]', url: `${SITE}/simulation/fdtd/` };
+    assert.equal(
+      termItem(term, 'en', guide),
+      `- **PML** (absorbing boundary): A layer that absorbs outgoing waves. Unit: dimensionless. Defined in: no governing standard, section 3. Guide: [FDTD \\[solver\\]](${SITE}/simulation/fdtd/).`,
+    );
+    for (const lang of /** @type {const} */ (['en', 'es'])) {
+      const item = termItem(term, lang);
+      assert.doesNotMatch(item, /Perfectly matched|perfectamente adaptada|Absorbing layer|Capa absorbente/u, item);
+    }
+  });
 });
 
 describe('ErrataFamily', () => {
@@ -410,6 +438,24 @@ describe('ErrataFamily', () => {
     assert.ok(markdown.startsWith(`### [ISO 8041](https://docs.jmrp.io/phonometry/reference/errata/iso-8041/) (${headings.length} entries)\n\n`));
     for (const heading of headings) assert.ok(markdown.includes(`\n- ${heading}`), heading);
     assert.ok(markdown.includes('for `Wf`'), 'code in a heading stays code');
+  });
+
+  test('every heading of every family page, in both languages, reaches the index as the page writes it', () => {
+    // Fourteen family pages group a heading's digits with a narrow no-break
+    // space, which the index once wrote as a plain one.
+    let families = 0;
+    for (const [lang, dir] of [
+      ['en', join(CONTENT_DIR, 'reference', 'errata')],
+      ['es', join(CONTENT_DIR, 'es', 'reference', 'errata')],
+    ]) {
+      for (const file of readdirSync(dir).filter((name) => name.endsWith('.md'))) {
+        const page = readFileSync(join(dir, file), 'utf8');
+        const headings = [...page.matchAll(/^## (.+)$/gmu)].map((match) => match[1]);
+        assert.deepEqual(entryHeadings(page), headings, `${lang} ${file}`);
+        families += 1;
+      }
+    }
+    assert.ok(families > 100, `expected the family pages, read ${families}`);
   });
 
   test('the Spanish index lists the Spanish family page', () => {

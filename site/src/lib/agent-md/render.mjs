@@ -425,7 +425,7 @@ function createRenderer(source, options, mode) {
       return value === UNREAD ? undefined : value;
     },
     body: (node) => renderChildren(node),
-    text: (node) => plainText(node).replaceAll(/\s+/gu, ' ').trim(),
+    text: (node) => line(plainText(node)),
     render: (node) => renderNode(node),
     markdown(fragment) {
       let tree;

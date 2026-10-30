@@ -19,16 +19,33 @@ import { codeLines } from '../markdown-fences.mjs';
 /** @typedef {string | number | boolean | null | undefined} CellValue */
 
 /**
+ * The whitespace a line can break at, as Markdown reads it: space, tab and
+ * the line endings.
+ *
+ * Not `\s`, which also matches the no-break spaces the pages write on
+ * purpose: the narrow one that groups a number's digits (U+202F) and the one
+ * that ties a value to its unit (U+00A0). Folded into plain spaces, they left
+ * a number a line could break inside.
+ */
+const SPACES = /[ \t\n\v\f\r]+/gu;
+
+/**
+ * Text on one line: each run of {@link SPACES} becomes one space, and none is
+ * left at either end. The no-break spaces stay where they are, ends included.
+ *
+ * @param {string} text
+ * @returns {string}
+ */
+const flatten = (text) => text.replaceAll(SPACES, ' ').replace(/^ /u, '').replace(/ $/u, '');
+
+/**
  * One table cell: whitespace flattened to single spaces, pipes escaped.
  *
  * @param {CellValue} value
  * @returns {string}
  */
 export function cell(value) {
-  return String(value ?? '')
-    .replaceAll(/\s+/gu, ' ')
-    .replaceAll('|', String.raw`\|`)
-    .trim();
+  return flatten(String(value ?? '')).replaceAll('|', String.raw`\|`);
 }
 
 /**
@@ -58,7 +75,7 @@ export function table(head, body) {
  * @returns {string}
  */
 export function line(value) {
-  return (value ?? '').replaceAll(/\s+/gu, ' ').trim();
+  return flatten(value ?? '');
 }
 
 /**

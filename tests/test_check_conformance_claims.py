@@ -136,8 +136,9 @@ def corpus(tmp_path: pathlib.Path) -> pathlib.Path:
         f"a {OLD_DESIGNATIONS} designaciones normativas y {OLD_SOURCES} fuentes "
         'publicadas adicionales."\n'
         f"La batería ejecuta {OLD_TOTAL} comprobaciones numéricas de "
-        f"conformidad sobre {OLD_DOMAINS} dominios, y "
-        f"las {OLD_TOTAL} comprobaciones se publican.\n",
+        f"conformidad sobre {OLD_DOMAINS} dominios, frente a "
+        f"{OLD_DESIGNATIONS} designaciones normativas y {OLD_SOURCES} fuentes "
+        f"publicadas adicionales, y las {OLD_TOTAL} comprobaciones se publican.\n",
     )
     _write(
         root / ".zenodo.json",
@@ -235,7 +236,7 @@ def test_write_moves_every_quoted_count(
         f"designaciones normativas y {SOURCES} fuentes publicadas adicionales"
         in spanish
     )
-    assert f"sobre {DOMAINS} dominios" in spanish
+    assert f"sobre {DOMAINS} dominios, frente a {DESIGNATIONS}" in spanish
     assert f"las {TOTAL} comprobaciones" in spanish
 
     zenodo = json.loads((corpus / ".zenodo.json").read_text(encoding="utf8"))
@@ -274,6 +275,52 @@ def test_write_leaves_the_decoys_alone(corpus: pathlib.Path) -> None:
         f"ITU-R BS.{OLD_TOTAL}",
     ):
         assert designation in zenodo["description"]
+
+
+#: Sentences that count domains for a reason of their own, with the stale
+#: count. The domain count is read only where the claim goes on to what it was
+#: checked against, so the writer leaves every one of them as it is.
+UNRELATED_DOMAINS = (
+    f"The same signal is drawn across {OLD_DOMAINS} domains, time and frequency.\n"
+    f"La misma señal se representa en {OLD_DOMAINS} dominios, tiempo y "
+    "frecuencia.\n"
+    f"El ruido se reparte sobre {OLD_DOMAINS} dominios distintos.\n"
+)
+
+
+def test_write_leaves_a_count_of_domains_for_another_reason_alone(
+    corpus: pathlib.Path,
+) -> None:
+    """Only the claim's own "across N domains, against" is a count to move.
+
+    A bare "across N domains" or "en N dominios" read every sentence that
+    draws a signal in two domains as a stale claim, and ``--write`` set it to
+    the report's count and passed.
+    """
+    page = corpus / "docs" / "signals" / "time-frequency.md"
+    _write(page, UNRELATED_DOMAINS)
+    assert _run(corpus, "--write") == 0
+    assert page.read_text(encoding="utf8") == UNRELATED_DOMAINS
+    assert _run(corpus) == 0
+
+
+def test_a_count_of_domains_wrapped_in_plain_prose_is_no_wrapped_claim() -> None:
+    """The wrapped reading is anchored to the claim as the line reading is."""
+    assert (
+        ccc.wrapped_in(
+            f"a signal drawn across\n{OLD_DOMAINS} domains, time and frequency.\n"
+        )
+        == []
+    )
+    assert (
+        ccc.wrapped_in(
+            f"una señal sobre\n{OLD_DOMAINS} dominios, tiempo y frecuencia.\n"
+        )
+        == []
+    )
+    assert ccc.wrapped_in(
+        f"checks across\n{OLD_DOMAINS} domains, against {DESIGNATIONS} normative designations"
+    ) == [(1, f"across {OLD_DOMAINS} domains, against")]
 
 
 def test_write_is_idempotent(corpus: pathlib.Path) -> None:
@@ -394,6 +441,28 @@ def test_an_artefact_missing_a_count_names_the_field(
     assert "counts is missing checks" in capsys.readouterr().err
 
 
+def test_an_artefact_without_the_citation_groups_names_the_field(
+    tmp_path: pathlib.Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """The refusal reads the citation groups apart from the claims, and needs them."""
+    counts = json.loads(REPORT)["counts"]
+    del counts["citation_groups"]
+    _write(
+        tmp_path / "docs" / "conformance.json", json.dumps({"counts": counts}) + "\n"
+    )
+    assert _run(tmp_path) == 1
+    assert "counts is missing citation_groups" in capsys.readouterr().err
+
+
+def test_counts_that_are_not_an_object_are_an_error(
+    tmp_path: pathlib.Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """A ``counts`` the artefact writes as anything but an object is refused."""
+    _write(tmp_path / "docs" / "conformance.json", json.dumps({"counts": [1]}) + "\n")
+    assert _run(tmp_path) == 1
+    assert "counts is not an object" in capsys.readouterr().err
+
+
 def test_the_real_corpus_needs_no_rewriting() -> None:
     """The committed tree is already consistent, so the writer is a no-op.
 
@@ -499,6 +568,82 @@ SPANISH_SPLIT = (
             ENGLISH_SPLIT,
             id="the banner's words",
         ),
+        pytest.param(
+            "README.md",
+            f"runs {TOTAL} conformance checks across {DOMAINS} domains and "
+            f"**{CITATION_GROUPS}** standards, each pinning a value.\n",
+            f"{CITATION_GROUPS} standards",
+            ENGLISH_SPLIT,
+            id="a count in bold",
+        ),
+        pytest.param(
+            ".zenodo.json",
+            json.dumps(
+                {
+                    "description": (
+                        f"<p>{TOTAL} conformance checks against "
+                        f"<strong>{CITATION_GROUPS}</strong> standards.</p>"
+                    )
+                }
+            )
+            + "\n",
+            f"{CITATION_GROUPS} standards",
+            ENGLISH_SPLIT,
+            id="a count in an HTML tag",
+        ),
+        pytest.param(
+            "README.md",
+            f"runs {TOTAL} conformance checks across {DOMAINS} domains and "
+            f"{CITATION_GROUPS} published standards, each pinning a value.\n",
+            f"{CITATION_GROUPS} published standards",
+            ENGLISH_SPLIT,
+            id="a word that says what kind of standard",
+        ),
+        pytest.param(
+            "docs/start/index.md",
+            f"# {TOTAL} Conformance Checks against {CITATION_GROUPS} International "
+            "Standards\n",
+            f"{CITATION_GROUPS} International Standards",
+            ENGLISH_SPLIT,
+            id="a noun with a capital",
+        ),
+        pytest.param(
+            ".zenodo.json",
+            json.dumps(
+                {
+                    "description": (
+                        f"<p>{TOTAL} conformance checks against "
+                        f"{CITATION_GROUPS}&nbsp;standards.</p>"
+                    )
+                }
+            )
+            + "\n",
+            f"{CITATION_GROUPS} standards",
+            ENGLISH_SPLIT,
+            id="an HTML no-break space",
+        ),
+        pytest.param(
+            "docs/start/index.md",
+            f"It runs {TOTAL} conformance checks against {CITATION_GROUPS}"
+            "\u00a0standards.\n",
+            f"{CITATION_GROUPS} standards",
+            ENGLISH_SPLIT,
+            id="a no-break space",
+        ),
+        pytest.param(
+            "docs/start/index.md",
+            f"Every value is verified against {CITATION_GROUPS} standards.\n",
+            f"{CITATION_GROUPS} standards",
+            ENGLISH_SPLIT,
+            id="the citation-group figure with no conformance wording",
+        ),
+        pytest.param(
+            "site/src/content/docs/es/index.mdx",
+            f"Cada valor se verifica frente a {CITATION_GROUPS} Normas.\n",
+            f"{CITATION_GROUPS} Normas",
+            SPANISH_SPLIT,
+            id="the citation-group figure in Spanish, with a capital",
+        ),
     ],
 )
 def test_a_count_of_standards_is_refused_with_the_wording_that_replaces_it(
@@ -544,6 +689,10 @@ def test_a_count_of_standards_is_refused_with_the_wording_that_replaces_it(
             "### La regla de conformidad del IEC TC 29\n\n"
             "Las normas de instrumentos de la IEC escritas desde 2013.\n",
             id="a heading that ends in a number, then a paragraph",
+        ),
+        pytest.param(
+            "Every value is verified against 7 standards.\n",
+            id="another count of standards with no conformance wording",
         ),
     ],
 )
@@ -593,26 +742,71 @@ def test_the_real_corpus_counts_no_standards() -> None:
     assert ccc.wrapped(ccc.ROOT) == []
 
 
+def test_markup_moves_no_line() -> None:
+    """The refusal reads through markup and still names the line of the file.
+
+    Markup is deleted and every hard space read as one space, and no line
+    break goes with either, so the line reported is the line to edit.
+    """
+    text = (
+        "A **bold** word and a `code` span.\n"
+        "Two&nbsp;words, <em>one</em> tag.\n"
+        f"It runs {TOTAL} conformance checks against **{CITATION_GROUPS}**&nbsp;"
+        "Standards.\n"
+    )
+    assert ccc.refused_in(text, CITATION_GROUPS) == [
+        (3, f"{CITATION_GROUPS} Standards", ccc.FORBIDDEN[0][1])
+    ]
+
+
+def test_the_citation_group_figure_is_found_in_any_sentence() -> None:
+    """:func:`figures_in` is the half of the refusal that needs no wording."""
+    text = (
+        f"The ISO 3740 series has 7 standards.\nVerified against "
+        f"{CITATION_GROUPS}\nstandards.\n"
+    )
+    assert ccc.figures_in(text, {CITATION_GROUPS}) == [
+        (2, f"{CITATION_GROUPS} standards")
+    ]
+    assert ccc.refused_in(text) == []
+    assert ccc.refused_in(text, CITATION_GROUPS) == [
+        (2, f"{CITATION_GROUPS} standards", ccc.FORBIDDEN[0][1])
+    ]
+
+
+#: The figure every surface gave as its count of standards up to 4.0.0rc1, the
+#: citation groups of the report of that day.
+RETIRED_FIGURE = 523
+
+
 def test_the_retired_figure_is_published_nowhere() -> None:
-    """The release gate: no tracked file states 523 as a count of standards.
+    """The release gate: no tracked file states the figure as a count of standards.
 
     PyPI freezes the 4.0.0 long description at upload, and its badge and
-    report links are pinned to the tag, so the figure is checked over the
-    whole tree and not only over the files the refusal reads.
+    report links are pinned to the tag, so the figure is looked for over every
+    tracked file and not only over the files the refusal reads, through the
+    same markup and hard spaces, in any sentence. The figure is the retired
+    one and the report's citation groups of today, the same number until a
+    citation moves it.
     """
-    found = child_process.run(
-        [
-            "git",
-            "-C",
-            str(ccc.ROOT),
-            "grep",
-            "-n",
-            "-I",
-            "-E",
-            "(^|[^0-9])523[[:space:]]+(standard|norma)",
-        ],
+    listed = child_process.run(
+        ["git", "-C", str(ccc.ROOT), "ls-files", "-z"],
         capture_output=True,
-        check=False,
+        check=True,
         timeout=120,
     )
-    assert found.returncode == 1, found.stdout.decode()
+    figures = {RETIRED_FIGURE, ccc.citation_groups()}
+    found: list[str] = []
+    for name in listed.stdout.decode("utf8").split("\0"):
+        path = ccc.ROOT / name
+        if not name or not path.is_file():
+            continue
+        data = path.read_bytes()
+        if b"\0" in data:
+            continue
+        text = data.decode("utf8", errors="replace")
+        found += [
+            f"{name}:{lineno}: {phrase}"
+            for lineno, phrase in ccc.figures_in(text, figures)
+        ]
+    assert found == []

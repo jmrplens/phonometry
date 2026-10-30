@@ -2682,11 +2682,10 @@ A name handed to a reader can hold something other than a file. A named pipe
 no one writes to kept `io.read` waiting at its first open for a writer that
 never came, and the tables of an ANP export the same way; a link to
 `/dev/zero` kept a read going, and a directory raised whatever its first open
-raised. In 4.0 each reader looks at the name
-before it opens it and raises a `ValueError` that names the file and what it
-holds. A call that caught `OSError` for a directory catches `ValueError` now;
-a name with nothing at it still raises `FileNotFoundError`, and a link to a
-regular file is still read.
+raised. In 4.0 each reader looks at the name before it opens it and raises a
+`ValueError` that names the file and what it holds. A call that caught
+`OSError` for a directory catches `ValueError` now; a name with nothing at it
+still raises `FileNotFoundError`, and a link to a regular file is still read.
 
 | Passed | 3.3.0 or 4.0.0rc1 | 4.0 |
 | --- | --- | --- |

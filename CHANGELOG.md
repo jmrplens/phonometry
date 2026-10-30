@@ -4274,8 +4274,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   whole, so its imaginary part is checked too, and a curve or an elevation
   model held as arrays refuses a member of texts. `io.Signal.pick` takes a
   list or an integer array of NumPy channel indices, as it took one alone,
-  and an impedance profile of `FDTDBoundaries` takes NumPy numbers, for a
-  type checker as when the call ran. What the engines compute did
+  and an integer array of no dimension as the one index it holds, where it
+  raised `TypeError`; an impedance profile of `FDTDBoundaries` takes NumPy
+  numbers, for a type checker as when the call ran. What the engines compute did
   not move: `engine-digests.json` is unchanged, and a new CuPy proof is
   recorded in `gpu-parity.lock`. The checks of the parameters, of the records
   a caller builds, of the choices and of the documented `TypeError` no longer

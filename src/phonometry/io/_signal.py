@@ -250,10 +250,14 @@ class Signal(RichDisplay):
 
         :param channels: One channel index, or a sequence or an integer
             array of them, Python or NumPy integers, in the order they
-            should appear in the result.
+            should appear in the result; an integer array of no dimension
+            is one index.
         :return: A :class:`Signal` with those channels, in that order.
         :raises IndexError: If a channel is out of range.
         """
+        if isinstance(channels, np.ndarray) and channels.ndim == 0:
+            # One index, held as the one item of an array of one dimension.
+            channels = channels.reshape(1)
         wanted = (
             [channels] if isinstance(channels, (int, np.integer)) else list(channels)
         )

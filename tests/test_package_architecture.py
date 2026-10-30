@@ -2601,6 +2601,58 @@ _NUMPY_NUMBER_KINDS = frozenset({"numpy.integer", "numpy.floating"})
 #: The Python numbers a sequence of numbers is written with.
 _PYTHON_NUMBERS = frozenset({"builtins.int", "builtins.float"})
 
+#: The containers a caller writes, each with the annotations that take it:
+#: a list is taken by a ``list`` or a ``Sequence`` and not by a ``tuple``, so
+#: the items of a ``tuple`` branch do not make a list of them a valid
+#: argument, nor those of a ``set`` branch.
+_TAKEN_BY: dict[str, frozenset[str]] = {
+    "list": frozenset(
+        {
+            "builtins.list",
+            "typing.List",
+            "typing.Sequence",
+            "typing.MutableSequence",
+            "typing.Iterable",
+            "typing.Collection",
+            "collections.abc.Sequence",
+            "collections.abc.MutableSequence",
+            "collections.abc.Iterable",
+            "collections.abc.Collection",
+        }
+    ),
+    "tuple": frozenset(
+        {
+            "builtins.tuple",
+            "typing.Tuple",
+            "typing.Sequence",
+            "typing.Iterable",
+            "typing.Collection",
+            "collections.abc.Sequence",
+            "collections.abc.Iterable",
+            "collections.abc.Collection",
+        }
+    ),
+    "set": frozenset(
+        {
+            "builtins.set",
+            "builtins.frozenset",
+            "typing.Set",
+            "typing.FrozenSet",
+            "typing.AbstractSet",
+            "typing.Iterable",
+            "typing.Collection",
+            "collections.abc.Set",
+            "collections.abc.Iterable",
+            "collections.abc.Collection",
+        }
+    ),
+}
+
+
+def test_every_container_is_a_list_a_tuple_or_a_set_to_a_caller() -> None:
+    """Each container the annotations reader knows takes a list, a tuple or a set."""
+    assert set().union(*_TAKEN_BY.values()) == cpa._CONTAINERS
+
 
 def _numbers_left_out_of_sequences(
     annotations: cpa.Annotations,
@@ -2614,9 +2666,11 @@ def _numbers_left_out_of_sequences(
     refuses a list of them, to a type checker, where a body that reads each
     item as a number takes both. The sequences of one union are read
     together (``Sequence[float] | Sequence[np.floating[Any]]`` holds the
-    NumPy float), a nested sequence holds what the sequence around it takes
-    alone (*taken*), and a mapping's values are read as an annotation of
-    their own.
+    NumPy float), as far as they take the same container a caller writes
+    (a ``tuple[np.integer[Any], ...]`` beside ``Sequence[int]`` takes a
+    tuple of NumPy integers and not a list of them, :data:`_TAKEN_BY`), a
+    nested sequence holds what the sequence around it takes alone (*taken*),
+    and a mapping's values are read as an annotation of their own.
     """
     members = annotations.members(module, node)
     alone = taken | (
@@ -2626,6 +2680,7 @@ def _numbers_left_out_of_sequences(
     found: list[str] = []
     items: list[tuple[str, ast.expr]] = []
     written: list[str] = []
+    kinds_of: dict[str, set[str | None]] = {}
     for where, member in members:
         dotted = annotations.resolve(where, member)
         held = [item for item in cpa._items(member) if not cpa._is_ellipsis(item)]
@@ -2634,12 +2689,15 @@ def _numbers_left_out_of_sequences(
         elif dotted in cpa._CONTAINERS:
             items += [(where, item) for item in held]
             written.append(ast.unparse(member))
-    kinds = {
-        annotations.resolve(inner, member)
-        for where, item in items
-        for inner, member in annotations.members(where, item)
-    }
-    if kinds & _PYTHON_NUMBERS and alone - kinds:
+            kinds = {
+                annotations.resolve(inner, number)
+                for item in held
+                for inner, number in annotations.members(where, item)
+            }
+            for container, takers in _TAKEN_BY.items():
+                if dotted in takers:
+                    kinds_of.setdefault(container, set()).update(kinds)
+    if any(kinds & _PYTHON_NUMBERS and alone - kinds for kinds in kinds_of.values()):
         found.append(" | ".join(written))
     for where, item in items:
         found += _numbers_left_out_of_sequences(annotations, where, item, alone)
@@ -2698,7 +2756,10 @@ def test_the_sequence_rule_reads_a_union_whole(tmp_path: Path) -> None:
         "def nested(rows: np.integer[Any] | Sequence[Sequence[int]]) -> None: ...\n"
         "def kept(channels: Index | Sequence[int | np.integer[Any]]) -> None: ...\n"
         "def siblings(values: float | np.floating[Any] | Values) -> None: ...\n"
-        "def plain(values: float | Sequence[float]) -> None: ...\n",
+        "def plain(values: float | Sequence[float]) -> None: ...\n"
+        "def tupled(channels: Index | tuple[np.integer[Any], ...] | Sequence[int]) -> None: ...\n"
+        "def fixed(pair: np.floating[Any] | tuple[float, float]) -> None: ...\n"
+        "def listed(channels: Index | list[np.integer[Any]] | Sequence[int]) -> None: ...\n",
         encoding="utf-8",
     )
     package = return_overloads.Package(sorted(root.rglob("*.py")), root)
@@ -2707,4 +2768,7 @@ def test_the_sequence_rule_reads_a_union_whole(tmp_path: Path) -> None:
         "pkg.api:7: channels: Sequence[int]",
         "pkg.api:8: sides: list[float]",
         "pkg.api:9: rows: Sequence[int]",
+        "pkg.api:13: channels: tuple[np.integer[Any], ...] | Sequence[int]",
+        "pkg.api:14: pair: tuple[float, float]",
+        "pkg.api:15: channels: list[np.integer[Any]] | Sequence[int]",
     ]

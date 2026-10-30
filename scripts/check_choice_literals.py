@@ -905,6 +905,37 @@ def _held(node: ast.expr) -> ast.expr:
     return node
 
 
+class _Binding(NamedTuple):
+    """An assignment that binds a value: its targets, the value, and the
+    annotation it is written with, ``None`` for a plain one.
+    """
+
+    targets: list[ast.expr]
+    value: ast.expr
+    annotation: ast.expr | None
+
+
+def _bindings(tree: ast.AST) -> Iterator[_Binding]:
+    """Every assignment in *tree* that binds a value.
+
+    ``given: tuple[Side, ...] = (side,)`` binds ``given`` to the same value as
+    ``given = (side,)``, so a reader of locals reads both; an annotation
+    with no value (``given: tuple[Side, ...]``) binds nothing.
+    """
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Assign):
+            yield _Binding(node.targets, node.value, None)
+        elif isinstance(node, ast.AnnAssign) and node.value is not None:
+            yield _Binding([node.target], node.value, node.annotation)
+
+
+def _one_name(binding: _Binding) -> str | None:
+    """The name a binding of one plain name binds, else ``None``."""
+    if len(binding.targets) == 1 and isinstance(binding.targets[0], ast.Name):
+        return binding.targets[0].id
+    return None
+
+
 def _following(
     tree: ast.AST, is_target: Callable[[ast.expr], bool]
 ) -> Callable[[ast.expr], bool]:
@@ -1497,14 +1528,11 @@ def _local_imports(tree: ast.AST, module_name: str) -> dict[str, object]:
 def _spread_dicts(tree: ast.AST) -> dict[str, dict[str, ast.expr]]:
     """The dicts of keyword arguments a body builds to spread into a call."""
     found: dict[str, dict[str, ast.expr]] = {}
-    for node in ast.walk(tree):
-        if not (
-            isinstance(node, ast.Assign)
-            and len(node.targets) == 1
-            and isinstance(node.targets[0], ast.Name)
-        ):
+    for binding in _bindings(tree):
+        name = _one_name(binding)
+        if name is None:
             continue
-        value = node.value
+        value = binding.value
         entries: dict[str, ast.expr] = {}
         if isinstance(value, ast.Dict):
             entries = {
@@ -1519,7 +1547,7 @@ def _spread_dicts(tree: ast.AST) -> dict[str, dict[str, ast.expr]]:
                 if keyword.arg is not None
             }
         if entries:
-            found[node.targets[0].id] = entries
+            found[name] = entries
     return found
 
 
@@ -2349,10 +2377,8 @@ def _unlisted_items(
     a collection whose leftover is refused is checked as written, as a whole.
     """
     names: dict[str, ast.expr] = {}
-    for node in ast.walk(tree):
-        if not isinstance(node, ast.Assign):
-            continue
-        value = node.value
+    for binding in _bindings(tree):
+        value = binding.value
         against: ast.expr | None = None
         if (
             isinstance(value, ast.BinOp)
@@ -2371,7 +2397,7 @@ def _unlisted_items(
         if against is not None and strings_of(against, constants):
             names.update(
                 (target.id, against)
-                for target in node.targets
+                for target in binding.targets
                 if isinstance(target, ast.Name)
             )
     return names
@@ -3542,20 +3568,23 @@ def _attribute_source(
         for parameter in _parameters_of(function)
         if parameter.arg == holder.id and parameter.annotation is not None
     ]
-    for node in ast.walk(function):
-        if (
-            isinstance(node, ast.Assign)
-            and any(
-                isinstance(target, ast.Name) and target.id == holder.id
-                for target in node.targets
-            )
-            and isinstance(node.value, ast.Call)
+    for binding in _bindings(function):
+        if not any(
+            isinstance(target, ast.Name) and target.id == holder.id
+            for target in binding.targets
         ):
-            called = getattr(module, _call_name(node.value), None)
+            continue
+        if binding.annotation is not None:
+            # ``held: Record = ...`` names the record it holds.
+            candidates.append(
+                _resolved(ast.unparse(binding.annotation).strip("'\""), module_name)
+            )
+        if isinstance(binding.value, ast.Call):
+            called = getattr(module, _call_name(binding.value), None)
             if inspect.isclass(called):
                 candidates.append(called)
                 continue
-            returned = _returned(node.value, function, module_name)
+            returned = _returned(binding.value, function, module_name)
             if returned is not None:
                 candidates.append(_resolved(returned[0].strip("'\""), returned[1]))
     for candidate in candidates:
@@ -3686,13 +3715,17 @@ def _never(node: ast.expr) -> bool:
 class _Subject(NamedTuple):
     """What the path checks know of a choice: the expressions that hold it
     (*raw*), the one that is the whole of a collection of choices, whose
-    emptiness says only that there is nothing to check (*whole*), and the
-    options its ``Literal`` lists (*listed*).
+    emptiness says only that there is nothing to check (*whole*), the
+    options its ``Literal`` lists (*listed*), and, for the items, keys or
+    values of a choice that is also taken as one text, the expressions that
+    hold the whole value, which hold none of them when they equal a text
+    (*textless*).
     """
 
     raw: Callable[[ast.expr], bool]
     whole: Callable[[ast.expr], bool]
     listed: frozenset[str]
+    textless: Callable[[ast.expr], bool] = _never
 
 
 def _asks_its_form(test: ast.expr, subject: _Subject) -> bool:
@@ -3751,15 +3784,16 @@ def _texts_of(node: ast.expr) -> frozenset[str]:
 
 def _implies_listed(test: ast.expr, subject: _Subject, *, truth: bool) -> bool:
     """Whether *test* coming out *truth* means the choice holds one of the
-    options its ``Literal`` lists.
+    options its ``Literal`` lists, or holds no part to check.
 
     ``if radiation == "unknown": return ...`` before the check leaves the
     function only for ``"unknown"``, an option, so no misspelling leaves
     with it; ``if mode == "typo": return`` and ``if mode != "fast": return``
-    let a text the ``Literal`` does not list leave unchecked.
+    let a text the ``Literal`` does not list leave unchecked. For the keys
+    of ``Pace | Mapping[Side, ...]``, ``if sides == "fast": return`` leaves
+    with a text, which holds no key (*textless*), whether or not the text is
+    a side; ``if side == "fast": continue`` skips a key spelt as a pace.
     """
-    if not subject.listed:
-        return False
     if isinstance(test, ast.UnaryOp) and isinstance(test.op, ast.Not):
         return _implies_listed(test.operand, subject, truth=not truth)
     if isinstance(test, ast.BoolOp):
@@ -3772,18 +3806,25 @@ def _implies_listed(test: ast.expr, subject: _Subject, *, truth: bool) -> bool:
     operator, left, right = test.ops[0], test.left, test.comparators[0]
     if isinstance(operator, ast.Eq | ast.NotEq):
         if subject.raw(left):
+            compared = left
             texts = _texts_of(right) if isinstance(right, ast.Constant) else frozenset()
         elif subject.raw(right):
+            compared = right
             texts = _texts_of(left) if isinstance(left, ast.Constant) else frozenset()
         else:
             return False
         positive = isinstance(operator, ast.Eq) == truth
     elif isinstance(operator, ast.In | ast.NotIn) and subject.raw(left):
+        compared = left
         texts = _texts_of(right)
         positive = isinstance(operator, ast.In) == truth
     else:
         return False
-    return positive and bool(texts) and texts <= subject.listed
+    return (
+        positive
+        and bool(texts)
+        and (texts <= subject.listed or subject.textless(compared))
+    )
 
 
 def _matches_its_form(match: ast.Match, subject: _Subject) -> bool:
@@ -4101,20 +4142,16 @@ def _with_copies(
     the choice's ``Literal`` lists (:func:`_carries`).
     """
     copies: set[str] = set()
-    for node in ast.walk(tree):
-        if isinstance(node, ast.Assign) and len(node.targets) == 1:
-            bound, value = node.targets[0], node.value
-        elif isinstance(node, ast.AnnAssign) and node.value is not None:
-            bound, value = node.target, node.value
-        else:
+    for binding in _bindings(tree):
+        name = _one_name(binding)
+        if name is None:
             continue
-        if not isinstance(bound, ast.Name):
-            continue
+        value = binding.value
         branches = (
             [value.body, value.orelse] if isinstance(value, ast.IfExp) else [value]
         )
         if all(_carries(branch, target, options) for branch in branches):
-            copies.add(bound.id)
+            copies.add(name)
 
     def matches(node: ast.expr) -> bool:
         return target(node) or (isinstance(node, ast.Name) and node.id in copies)
@@ -4130,14 +4167,11 @@ def _wrapping_copies(tree: ast.AST, target: Callable[[ast.expr], bool]) -> set[s
     check of each item of ``given`` checks the single choice too.
     """
     names: set[str] = set()
-    for node in ast.walk(tree):
-        if not (
-            isinstance(node, ast.Assign)
-            and len(node.targets) == 1
-            and isinstance(node.targets[0], ast.Name)
-        ):
+    for binding in _bindings(tree):
+        name = _one_name(binding)
+        if name is None:
             continue
-        value = node.value
+        value = binding.value
         branches = (
             [value.body, value.orelse] if isinstance(value, ast.IfExp) else [value]
         )
@@ -4147,7 +4181,7 @@ def _wrapping_copies(tree: ast.AST, target: Callable[[ast.expr], bool]) -> set[s
             and target(branch.elts[0])
             for branch in map(_held, branches)
         ):
-            names.add(node.targets[0].id)
+            names.add(name)
     return names
 
 
@@ -4323,8 +4357,11 @@ def _checks_of(
         return target(node) or is_raw(node)
 
     # A test of the choice as a whole (``if isinstance(sides, Mapping)``)
-    # tells the paths apart for every part.
-    subject = _Subject(mentions, whole_of, options)
+    # tells the paths apart for every part, and the whole equal to a text
+    # holds no item, key or value.
+    subject = _Subject(
+        mentions, whole_of, options, target if part in {_ITEMS, _VALUES} else _never
+    )
     root = tree.body[0] if isinstance(tree, ast.Module) and tree.body else tree
     parents = _parents(tree)
     # Each place the choice meets a check, with the checks it meets there.
@@ -4363,7 +4400,14 @@ def _checks_of(
         for parameter, handed in _arguments(node, callee, spread).items():
             value = _held(handed)
             keys_kept = _keeps_keys(value, target, options)
-            handed_part = _handed_part(part, value, target, is_raw, keys_kept=keys_kept)
+            handed_part = _handed_part(
+                part,
+                value,
+                target,
+                is_raw,
+                keys_kept=keys_kept,
+                wrapped=whole_of if part == _WHOLE else _never,
+            )
             if handed_part is False:
                 continue
             check = _post_init(record) if record is not None else callee
@@ -4422,18 +4466,24 @@ def _handed_part(
     is_raw: Callable[[ast.expr], bool],
     *,
     keys_kept: bool,
+    wrapped: Callable[[ast.expr], bool] = _never,
 ) -> str | None | bool:
     """Which part of the choice a call hands on, read where it is received.
 
     Without a part, any reading of the choice (``None``); the whole value,
     or a mapping keeping its keys for the keys, hands the same part on; one
-    item, key or value hands the choice itself. ``False`` when the call
+    item, key or value hands the choice itself. A local that holds the
+    single choice as its one item (*wrapped*, ``(paces,) if
+    isinstance(paces, str) else tuple(paces)``) hands it as an item, which
+    the callee checks with the items it is handed. ``False`` when the call
     hands none of it.
     """
     if part is None:
         return None if is_raw(value) or keys_kept else False
     if (target(value) and part != _WHOLE) or (keys_kept and part == _ITEMS):
         return part
+    if wrapped(value):
+        return _ITEMS
     if is_raw(value):
         return _WHOLE
     return False

@@ -1658,7 +1658,7 @@ under test and stay a measurement.
 
 | Name | Description |
 | :--- | :--- |
-| `channels` | One channel index, or a sequence or an integer array of them, Python or NumPy integers, in the order they should appear in the result. |
+| `channels` | One channel index, or a sequence or an integer array of them, Python or NumPy integers, in the order they should appear in the result; an integer array of no dimension is one index. |
 
 **Returns:** A [`Signal`](/phonometry/reference/api/io/io/#signal) with those channels, in that order.
 

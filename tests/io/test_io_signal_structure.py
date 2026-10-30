@@ -58,6 +58,18 @@ def test_pick_takes_the_channels_in_the_order_asked_for() -> None:
     assert np.array_equal(np.asarray(swapped)[0], _stereo().data[1])
 
 
+def test_pick_takes_a_zero_dimensional_integer_array_as_one_channel() -> None:
+    """``np.asarray(np.argmax(levels))`` is an integer array of no dimension:
+    the annotation takes it, and it names one channel as the integer it holds.
+    """
+    stereo = _stereo()
+    one = stereo.pick(np.array(1))
+    assert one.channel_labels == ("right",)
+    assert np.array_equal(np.asarray(one), np.asarray(stereo.pick(1)))
+    with pytest.raises(IndexError, match="out of range"):
+        stereo.pick(np.array(2))
+
+
 def test_pick_refuses_a_channel_that_is_not_there() -> None:
     """An index past the last channel is a mistake, not an empty result."""
     stereo = _stereo()

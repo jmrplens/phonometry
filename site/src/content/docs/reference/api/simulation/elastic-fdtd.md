@@ -610,7 +610,7 @@ grid), and nothing the caller changes afterwards reaches a checked run.
 | Exception | When |
 | :--- | :--- |
 | TypeError | If an argument is of the wrong type, among them a `cfl` or `dx` that is not one number, a `recording` that is neither an [`ElasticRecording`](/phonometry/reference/api/simulation/elastic-fdtd/#elasticrecording) nor `None`, `boundaries` that are neither an [`ElasticBoundaries`](/phonometry/reference/api/simulation/elastic-fdtd/#elasticboundaries) nor `None`, a `shape` that is not a pair or holds a count that is not a number, or a medium (`c_p`, `c_s`, `rho`, `damping`) that holds a complex number or a text. |
-| ValueError | If an argument is out of its range, a `shape` is not two whole numbers of one cell or more or is given beside a map of another shape, or a source, a probe or the obstacle does not fit the grid. |
+| ValueError | If an argument is out of its range, a `shape` is not two whole numbers of two cells or more or is given beside a map of another shape, or a source, a probe or the obstacle does not fit the grid. |
 
 ## ExplosionSource
 

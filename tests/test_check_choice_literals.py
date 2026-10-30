@@ -1844,6 +1844,146 @@ def test_a_single_choice_wrapped_as_one_item_is_checked_with_the_items() -> None
     )
 
 
+#: The annotation of a single pace or a sequence of them.
+_ONE_OR_SEVERAL_PACES = "Literal['fast', 'slow'] | Sequence[Literal['fast', 'slow']]"
+
+
+def _one_or_several_paces_annotated(paces: _Pace | Sequence[_Pace]) -> list[_Pace]:
+    chosen: tuple[_Pace, ...] = (paces,) if isinstance(paces, str) else tuple(paces)
+    return [require_choice(pace, "paces", _PACES) for pace in chosen]
+
+
+def test_a_single_choice_wrapped_in_an_annotated_local_is_checked() -> None:
+    """``chosen: tuple[Pace, ...] = (paces,) if ...`` binds the one-item tuple
+    as ``chosen = (paces,) if ...`` does, so the loop over it checks the
+    single pace too.
+    """
+    assert (
+        ccl._part_verdict(
+            _one_or_several_paces_annotated,
+            "paces",
+            _ONE_OR_SEVERAL_PACES,
+            field=False,
+        )
+        is None
+    )
+
+
+def _each_pace_checked(paces: Iterable[str]) -> list[_Pace]:
+    return [require_choice(pace, "paces", _PACES) for pace in paces]
+
+
+def _one_or_several_paces_handed_on(paces: _Pace | Sequence[_Pace]) -> list[_Pace]:
+    chosen = (paces,) if isinstance(paces, str) else tuple(paces)
+    return _each_pace_checked(chosen)
+
+
+def _one_pace_handed_on_by_letter(paces: _Pace | Sequence[_Pace]) -> list[_Pace]:
+    given = paces if isinstance(paces, str) else paces
+    return _each_pace_checked(given)
+
+
+def test_a_single_choice_wrapped_and_handed_on_is_checked_with_the_items() -> None:
+    """A helper handed ``(paces,) if isinstance(paces, str) else tuple(paces)``
+    checks each item it receives, the single pace among them; handed the
+    pace itself, read letter by letter, it checks no pace.
+    """
+    assert (
+        ccl._part_verdict(
+            _one_or_several_paces_handed_on,
+            "paces",
+            _ONE_OR_SEVERAL_PACES,
+            field=False,
+        )
+        is None
+    )
+    assert (
+        ccl._part_verdict(
+            _one_pace_handed_on_by_letter,
+            "paces",
+            _ONE_OR_SEVERAL_PACES,
+            field=False,
+        )
+        == "the choice itself: never checked, so a misspelling passes"
+    )
+
+
+@dataclass(frozen=True)
+class _ReturnsOnAPace:
+    """A record that leaves early on a single pace, then checks every part."""
+
+    sides: _Pace | Mapping[_Side, _Pace | float]
+
+    def __post_init__(self) -> None:
+        if self.sides == "fast":
+            return
+        if isinstance(self.sides, Mapping):
+            for side, value in self.sides.items():
+                require_choice(side, "sides", _TWO_SIDES)
+                if isinstance(value, str):
+                    require_choice(value, "sides", _PACES)
+        else:
+            require_choice(self.sides, "sides", _PACES)
+
+
+def test_a_return_on_a_single_choice_skips_no_key() -> None:
+    """``if sides == "fast": return`` leaves with a text, which holds no key
+    and no value, so it skips the check of none; a key skipped because it is
+    spelt as a pace is still a misspelt side (:class:`_KeysSkipAPace`).
+    """
+    check = ccl._post_init(_ReturnsOnAPace)
+    assert check is not None
+    assert ccl._part_verdict(check, "sides", _TERMINATIONS, field=True) is None
+    skipping = ccl._post_init(_KeysSkipAPace)
+    assert skipping is not None
+    skipped = ccl._part_verdict(skipping, "sides", _TERMINATIONS, field=True)
+    assert skipped is not None
+    assert skipped.startswith("each item or key: ")
+
+
+def _spreads_annotated(x: list[float], mode: str) -> object:
+    options: dict[str, str] = {"mode": mode}
+    return time_weighting(x, 48000, **options)  # type: ignore[call-overload]
+
+
+def _set_difference_annotated(sides: Sequence[str]) -> None:
+    unknown: set[str] = set(sides) - set(_SIDES)
+    if unknown:
+        raise ValueError(sorted(unknown))
+
+
+def _field_of_an_annotated_local(pace: _Pace) -> str:
+    held: _Checked = _Checked(pace=pace)
+    return held.pace
+
+
+def test_an_annotated_local_is_read_as_a_plain_one() -> None:
+    """``name: T = value`` binds *name* to *value* as ``name = value`` does: a
+    dict spread into a call, what a collection holds beyond its options and a
+    record a field is read off are read through either.
+    """
+    assert ccl.passed_on_evidence(_spreads_annotated, "mode") == [
+        "handed to time_weighting(mode)"
+    ]
+    constants = ccl._module_constants(sys.modules[__name__])
+    for function in (_set_difference, _set_difference_annotated):
+        unlisted = ccl._unlisted_items(
+            _tree(function), ccl._the_name("sides"), constants
+        )
+        assert list(unlisted) == ["unknown"], function.__name__
+    tree = _tree(_field_of_an_annotated_local)
+    assert isinstance(tree, ast.Module)
+    reader = tree.body[0]
+    read = next(
+        node
+        for node in ast.walk(reader)
+        if isinstance(node, ast.Attribute) and node.attr == "pace"
+    )
+    assert ccl._attribute_source(read, reader, __name__) == ccl._Source(
+        "literal", frozenset(_PACES)
+    )
+
+
 def test_a_stale_unchecked_entry_fails_and_a_needed_one_does_not(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

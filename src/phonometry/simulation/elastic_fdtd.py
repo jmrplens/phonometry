@@ -1849,7 +1849,7 @@ class ElasticRun(OwnsArrays):
         a medium (``c_p``, ``c_s``, ``rho``, ``damping``) that holds a complex
         number or a text.
     :raises ValueError: If an argument is out of its range, a ``shape`` is
-        not two whole numbers of one cell or more or is given beside a map of
+        not two whole numbers of two cells or more or is given beside a map of
         another shape, or a source, a probe or the obstacle does not fit the
         grid.
     """

@@ -268,6 +268,15 @@ peak = int(np.argmax(res.specific_tonality))
 print(f"T = {res.tonality:.3f} tu_HMS")                    # 1.000 tu_HMS
 print(f"f_ton = {res.tonal_frequencies[peak]:.0f} Hz")     # 999 Hz
 
+# Clause 6.3 for a stationary sound: T'(z) above 0.4 tu_HMS at a local maximum
+# (the peak is one), with f_ton between F(z - 1) and F(z + 1), two bands
+# either way since the bands are 0.5 Bark_HMS apart.
+prominent = (
+    res.specific_tonality[peak] > psychoacoustics.PROMINENT_TONALITY_TU_HMS
+    and res.frequencies[peak - 2] <= res.tonal_frequencies[peak] <= res.frequencies[peak + 2]
+)
+print(prominent)   # True: a prominent tonal component (clause 6.3)
+
 res.plot()   # average specific tonality T'(z) + time-dependent T(l)
 ```
 
@@ -331,6 +340,25 @@ tonalities when the single value $T$ of Formula (63) exceeds 0.4 tu_HMS. The
 test for one discrete tone against the noise around it is the ECMA-418-1
 tone-to-noise and prominence ratio of
 [Prominent Discrete Tones](/phonometry/perception/psychoacoustics/tone-prominence/).
+
+**Is the sound audible?** The fourth criterion of ECMA-418-2, the 0.01 sone_HMS
+of clause 5.1.9 that `psychoacoustics.AUDIBILITY_THRESHOLD_SONE_HMS` holds,
+reads none of the three metrics of this guide: it reads the total basis
+loudness of the auditory front-end they share, the specific basis loudness
+summed over the 53 bands (Formula 26), which `loudness_ecma()` returns block by
+block as `basis_loudness_vs_time_sone_hms`;
+[Advanced Loudness](/phonometry/perception/psychoacoustics/advanced-loudness/)
+shows how it is formed. No function applies the criterion. Clause 6.1.1 adds
+that the tonality method needs no audibility screening before it, because the
+threshold of hearing is built into the model; the comparison answers whether
+the sound is heard at all.
+
+```python
+# `x` is the 1 kHz tone at 40 dB SPL of the tonality snippet above.
+loud = psychoacoustics.loudness_ecma(x, fs, field="free")
+audible = loud.basis_loudness_vs_time_sone_hms > psychoacoustics.AUDIBILITY_THRESHOLD_SONE_HMS
+print(audible.any())   # True: audible (clause 5.1.9)
+```
 
 ### `tonality_ecma()` parameters
 

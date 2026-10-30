@@ -334,7 +334,7 @@ def tonality_ecma(
         samples = signal.resample(samples, round(samples.size * _FS / fs))
 
     z_lo, z_hi = _band_range(f_low, f_high)
-    n_tonal, n_noise, f_ton, _, n_samples = _tonal_noise_split(samples, field)
+    n_tonal, n_noise, f_ton, _, n_samples, _ = _tonal_noise_split(samples, field)
     t_single, t_spec, f_spec, t_time, f_time, time = _assemble_tonality(
         n_tonal, n_noise, f_ton, n_samples, z_lo, z_hi
     )

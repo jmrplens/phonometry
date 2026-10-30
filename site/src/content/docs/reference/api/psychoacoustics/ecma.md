@@ -16,7 +16,9 @@ Clean-room implementation of the loudness signal chain of ECMA-418-2:2025:
   half-wave rectification (5.1.6), block RMS (5.1.7), the compressive
   nonlinearity that maps sound pressure to specific loudness (5.1.8,
   Formula 23, Table 2) and the threshold in quiet (5.1.9, Table 3),
-  yielding the specific basis loudness `N'_basis(l, z)` (Formula 25);
+  yielding the specific basis loudness `N'_basis(l, z)` (Formula 25)
+  and, summed over the bands, the total basis loudness `N_basis(l)`
+  (Formula 26) that the audibility criterion of Clause 5.1.9 reads;
 * the autocorrelation-based split into tonal and noise specific loudness
   with the full Clause 6.2.3 band averaging, including the
   cross-block-size-group ACF recomputation (Clause 6.2.2-6.2.7,
@@ -67,6 +69,7 @@ EcmaLoudness(
     frequencies: np.ndarray,
     times: np.ndarray,
     loudness_vs_time: np.ndarray,
+    basis_loudness_vs_time_sone_hms: np.ndarray,
     field: Literal['free', 'diffuse'],
 )
 ```
@@ -80,6 +83,23 @@ with `bark` the critical-band-rate scale z (0,5..26,5 Bark_HMS) and
 `frequencies` the band centre frequencies F(z).  `times` and
 `loudness_vs_time` hold the time-dependent loudness N(l) at 187,5 Hz
 (Formula 116).  `field` records the assumed sound field.
+
+`basis_loudness_vs_time_sone_hms` is the total basis loudness
+N_basis(l) in sone_HMS (Formula 26) at the same `times`, the quantity
+the audibility criterion of Clause 5.1.9 reads: the signal is audible in
+a block where it exceeds [`AUDIBILITY_THRESHOLD_SONE_HMS`](/phonometry/reference/api/psychoacoustics/ecma/#audibility_threshold_sone_hms)
+(0,01 sone_HMS). It is the specific basis loudness N'_basis(l, z) of
+Formula (25), the front-end's output before the tonal and noise split,
+which each band computes at its own block size (Clause 5.1.5.1,
+Table 4); every band is resampled by linear interpolation onto the
+common 187,5 Hz grid of the 1024-sample blocks (Clause 6.2.6, Table 6),
+the grid the tonal and noise loudness are resampled to, and the 53 bands
+are summed with dz = 0,5. Formula (26) is printed without a time index,
+which Clause 5.1.7 drops because every block is processed alike, so a
+value per block of that grid is the library's reading. No block is
+discarded: the 0 \<= l \<= 56 transient blocks that Formulae (115) and
+(117) leave out, and the blocks after l_end of Formula (40), are kept,
+as `loudness_vs_time` keeps them.
 
 ### EcmaLoudness.plot()
 
@@ -124,7 +144,7 @@ Psychoacoustic loudness per ECMA-418-2:2025 (Sottek Hearing Model).
 | `fs` | Sampling rate in Hz. Signals not at 48 kHz are resampled (Clause 5.1.1). Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `field` | `"free"` (default) or `"diffuse"` sound field, selecting the outer/middle-ear filter of Clause 5.1.3. |
 
-**Returns:** An [`EcmaLoudness`](/phonometry/reference/api/psychoacoustics/ecma/#ecmaloudness) with the single loudness value N (Formula 117), the average specific loudness N'(z) (Formula 115) and the time-dependent loudness N(l) (Formula 116).
+**Returns:** An [`EcmaLoudness`](/phonometry/reference/api/psychoacoustics/ecma/#ecmaloudness) with the single loudness value N (Formula 117), the average specific loudness N'(z) (Formula 115), the time-dependent loudness N(l) (Formula 116) and the total basis loudness N_basis(l) (Formula 26) the audibility criterion of Clause 5.1.9 reads.
 
 **Raises**
 

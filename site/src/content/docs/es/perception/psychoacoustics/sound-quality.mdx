@@ -282,11 +282,17 @@ print(f"T = {res.tonality:.3f} tu_HMS")                    # 1.000 tu_HMS
 print(f"f_ton = {res.tonal_frequencies[peak]:.0f} Hz")     # 999 Hz
 
 # Apartado 6.3 para un sonido estacionario: T'(z) por encima de 0,4 tu_HMS en un
-# máximo local (el pico lo es), con f_ton entre F(z - 1) y F(z + 1), dos bandas
-# a cada lado porque las bandas distan 0,5 Bark_HMS.
+# máximo local (el pico lo es), con f_ton entre F(z - 1) y F(z + 1), donde F es
+# la frecuencia central de la fórmula 9 a una tasa de banda crítica z en
+# Bark_HMS; está definida para cualquier z, así que la prueba vale también en la
+# primera y la última banda.
+def centre_frequency(z):
+    return 81.9289 / 0.1618 * np.sinh(0.1618 * z)   # fórmula 9, F(z) en Hz
+
+z = res.bark[peak]
 prominent = (
     res.specific_tonality[peak] > psychoacoustics.PROMINENT_TONALITY_TU_HMS
-    and res.frequencies[peak - 2] <= res.tonal_frequencies[peak] <= res.frequencies[peak + 2]
+    and centre_frequency(z - 1) <= res.tonal_frequencies[peak] <= centre_frequency(z + 1)
 )
 print(prominent)   # True: una componente tonal prominente (apartado 6.3)
 

@@ -55,10 +55,21 @@ function findUp(name) {
 
 const ARTIFACT = findUp('conformance.json');
 
-/** The whole conformance document, parsed once per build. */
-export const report = JSON.parse(readFileSync(ARTIFACT, 'utf8'));
+const raw = JSON.parse(readFileSync(ARTIFACT, 'utf8'));
 
-const counts = report.counts;
+/**
+ * The counts a page may state: every count of the artefact but
+ * `citation_groups`, the citation strings cut at their first colon or
+ * " Annex". That figure was once published as a count of standards and
+ * counts a book cited at seven clauses seven times, so it is dropped here,
+ * before any page, component or the content loader can reach it.
+ */
+const counts = Object.fromEntries(
+  Object.entries(raw.counts).filter(([name]) => name !== 'citation_groups'),
+);
+
+/** The whole conformance document, parsed once per build, without that count. */
+export const report = { ...raw, counts };
 
 /** Checks that pass. Equal to `totalChecks` while the report is green. */
 export const passingChecks = counts.passing;

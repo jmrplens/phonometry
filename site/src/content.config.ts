@@ -246,12 +246,15 @@ export const conformanceSchema = z.object({
     passing: z.number().int(),
     failing: z.number().int(),
     domains: z.number().int(),
-    /**
-     * Citation strings cut at their first colon or " Annex". Kept for the
-     * record and never published: it counts a book cited at seven clauses
-     * seven times, and it was published as a count of standards.
+    /*
+     * No `citation_groups`, on purpose. The artefact keeps the citation
+     * strings cut at their first colon or " Annex" for the record, and that
+     * figure was once published as a count of standards: it counts a book
+     * cited at seven clauses seven times. conformance-stats.mjs drops it
+     * before the loader sees the report, and z.object strips a key the schema
+     * does not name, so `counts.citation_groups` is a type error on any page
+     * and undefined at run time.
      */
-    citation_groups: z.number().int(),
     citations: z.number().int(),
     /** Distinct normative documents named anywhere in a citation; the claim states it. */
     designations: z.number().int(),

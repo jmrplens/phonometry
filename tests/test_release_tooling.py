@@ -7,12 +7,14 @@ come from the changelog section and nowhere else, a built file the package is
 missing stops the release, so does a built file that does not declare the
 licence or carry its text, the SBOM names what ``pip install phonometry``
 resolves, and the package the verification imports is the installed wheel.
-The build itself gives the same bytes on every machine and every day: the
-sdist keeps nothing of the builder's clock, user or umask, the wheel is built
-from it, a setuptools plugin of another package or a checkout that is not the
-commit stops it, and a rebuild is compared file by file with the checksum
-file or with PyPI. Every file the sdist carries from the checkout is one a
-checkout anywhere writes with LF.
+The build itself gives the same bytes on every Linux and macOS machine and
+every day, and refuses Windows: the sdist keeps nothing of the builder's
+clock, user or umask, the wheel is built from it, a setuptools plugin of
+another package or a checkout that is not the commit stops it, a rebuild is
+compared file by file with the checksum file or with PyPI, and every failure
+it expects ends as one annotation rather than a traceback. Every file the
+sdist carries from the checkout is one a checkout writes with LF whatever
+the cloner's line-ending settings.
 """
 
 from __future__ import annotations
@@ -24,6 +26,7 @@ import json
 import os
 import pathlib
 import struct
+import subprocess
 import sys
 import tarfile
 import urllib.error
@@ -564,9 +567,10 @@ def test_what_setuptools_packs_beside_the_package_is_checked_out_with_lf(
 ) -> None:
     """setuptools adds the readme and the top-level tests to the sdist by default.
 
-    A Windows checkout with ``core.autocrlf`` on would give each of them CRLF,
-    and a rebuild there would pack bytes PyPI does not hold, unless the
-    repository's ``.gitattributes`` pins them to LF as it pins the package.
+    A clone made with ``core.autocrlf`` on, on Linux and macOS as on Windows,
+    would give each of them CRLF, and a rebuild from it would pack bytes PyPI
+    does not hold, unless the repository's ``.gitattributes`` pins them to LF
+    as it pins the package.
     """
     tests = sorted(f"tests/{path.name}" for path in (_ROOT / "tests").glob("test*.py"))
     carried = [
@@ -1009,3 +1013,129 @@ def test_a_checkout_that_is_not_its_commit_is_not_built(
         "the checkout differs from its commit:  M src/phonometry/__init__.py"
         in capsys.readouterr().err
     )
+
+
+def test_a_build_on_windows_is_refused_before_anything_else(
+    tmp_path: pathlib.Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """zipfile, the wheel's modes and setuptools' text files depend on Windows.
+
+    The refusal comes before the arguments are read, so nothing else runs.
+    """
+
+    def fail(*args: object, **kwargs: object) -> None:
+        pytest.fail("the script went on after refusing Windows")
+
+    for name in ("foreign_plugins", "checkout_changes", "commit_time", "build"):
+        monkeypatch.setattr(build_release, name, fail)
+    monkeypatch.setattr(os, "name", "nt")
+    status = build_release.main(["--outdir", "rebuilt"])
+    monkeypatch.undo()
+    assert status == 1
+    err = capsys.readouterr().err
+    assert err == f"::error::{build_release.WINDOWS_REFUSAL}\n"
+    assert "Linux and macOS" in err
+    assert "not under /mnt/c" in err
+
+
+@pytest.mark.parametrize(
+    ("text", "message"),
+    [
+        (None, "No such file or directory"),
+        ("", "lists no file"),
+        ("not a digest  phonometry-2.0.0.tar.gz\n", "line 1 of the checksum file"),
+        (b"\xff\xfe", "can't decode"),
+    ],
+    ids=["missing", "empty", "malformed", "not-utf-8"],
+)
+def test_a_checksum_file_that_cannot_be_used_is_refused_before_the_build(
+    tmp_path: pathlib.Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    text: str | bytes | None,
+    message: str,
+) -> None:
+    """A missing, empty or malformed checksum file costs no build to find."""
+    _fake_build(monkeypatch, changes=[])
+
+    def build(*args: object, **kwargs: object) -> None:
+        pytest.fail("the script built before reading the checksum file")
+
+    monkeypatch.setattr(build_release, "build", build)
+    sums = tmp_path / "phonometry.sha256"
+    if isinstance(text, str):
+        sums.write_text(text, encoding="utf-8")
+    elif isinstance(text, bytes):
+        sums.write_bytes(text)
+    outdir = tmp_path / "rebuilt"
+    assert build_release.main(["--outdir", str(outdir), "--check", str(sums)]) == 1
+    err = capsys.readouterr().err
+    assert err.startswith("::error::")
+    assert message in err
+    assert "Traceback" not in err
+
+
+def test_pypi_giving_up_ends_as_an_annotation(
+    tmp_path: pathlib.Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """The likeliest failure of the rebuild after a release: PyPI lagging past the last try."""
+    _fake_build(monkeypatch, changes=[])
+
+    def pypi_digests(version: str) -> dict[str, str]:
+        msg = (
+            f"PyPI does not list the sdist and the wheel of {version} after 10 attempts"
+        )
+        raise RuntimeError(msg)
+
+    monkeypatch.setattr(build_release, "pypi_digests", pypi_digests)
+    outdir = str(tmp_path / "rebuilt")
+    assert build_release.main(["--outdir", outdir, "--check-pypi"]) == 1
+    captured = capsys.readouterr()
+    assert "::error::PyPI does not list the sdist and the wheel of" in captured.err
+    assert "after 10 attempts" in captured.err
+    assert "rebuild to the files" not in captured.out
+
+
+@pytest.mark.parametrize(
+    "error",
+    [
+        subprocess.CalledProcessError(1, [sys.executable, "-m", "build"]),
+        subprocess.TimeoutExpired([sys.executable, "-m", "build"], 900.0),
+    ],
+    ids=["failed", "timed-out"],
+)
+def test_a_build_that_fails_or_hangs_ends_as_an_annotation(
+    tmp_path: pathlib.Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    error: subprocess.SubprocessError,
+) -> None:
+    _fake_build(monkeypatch, changes=[])
+
+    def build(*args: object, **kwargs: object) -> None:
+        raise error
+
+    monkeypatch.setattr(build_release, "build", build)
+    assert build_release.main(["--outdir", str(tmp_path / "rebuilt")]) == 1
+    err = capsys.readouterr().err
+    assert err == f"::error::{error}\n"
+
+
+def test_an_output_directory_that_is_a_file_ends_as_an_annotation(
+    tmp_path: pathlib.Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    monkeypatch.setattr(build_release, "foreign_plugins", list)
+    monkeypatch.setattr(build_release, "checkout_changes", list)
+    monkeypatch.setattr(build_release, "commit_time", lambda: _EPOCH)
+    outdir = tmp_path / "rebuilt"
+    outdir.write_bytes(b"")
+    assert build_release.main(["--outdir", str(outdir)]) == 1
+    err = capsys.readouterr().err
+    assert err.startswith("::error::")
+    assert "Not a directory" in err

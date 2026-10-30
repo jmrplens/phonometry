@@ -212,12 +212,13 @@ cannot reach a release unnoticed.
 
 ## Rebuilding a release
 
-A release rebuilds from its tag to the bytes PyPI and the GitHub Release
-hold. The release workflow builds every release twice before it publishes and
-refuses one whose builds differ, and once it has published it clones the tag
-on macOS, rebuilds it as below and compares the files with PyPI's; a
-rehearsal does the same with the commit it builds and its own files. To
-rebuild one yourself, with Python 3.13, which the release builds with:
+Every release from 4.0.0 on rebuilds from its tag to the bytes PyPI and the
+GitHub Release hold, on Linux and on macOS. The release workflow builds every
+release twice before it publishes and refuses one whose builds differ, and
+once it has published it clones the tag on macOS, rebuilds it as below and
+compares the files with PyPI's; a rehearsal does the same with the commit it
+builds and its own files. To rebuild one yourself, with Python 3.13, which the
+release builds with:
 
 ```bash
 git clone --depth 1 --branch v4.0.0 --config core.autocrlf=false \
@@ -237,10 +238,17 @@ publishes for the version; `--check phonometry-4.0.0.sha256` compares them
 with the release's checksum file instead. It refuses a checkout that differs
 from its commit, and an environment in which another package installs a
 setuptools plugin that could change what is packed, which is why the build
-gets a virtual environment of its own. On Windows the interpreter is
-`..\phonometry-build\Scripts\python.exe`; `core.autocrlf=false` keeps the files
+gets a virtual environment of its own. `core.autocrlf=false` keeps the files
 as the commit holds them, and `.gitattributes` checks out every file the sdist
-carries with LF in any case.
+carries with LF whatever `core.autocrlf` or `core.eol` the cloner has set.
+
+The script refuses to build on Windows, where the operating system reaches
+the bytes: zipfile records the system that wrote each member of the wheel,
+setuptools gives the wheel's modules the mode Windows reports, and it writes
+the sdist's `PKG-INFO` and `setup.cfg` with CRLF. On Windows, run the commands
+above inside WSL, from a clone made in WSL's own filesystem (under `~`, not
+under `/mnt/c`, where the files carry no Unix modes and every one of them
+looks executable).
 
 The compressed bytes of both files come from the zlib that Python is linked
 against. The release compares a build on Linux with one on macOS; a Python

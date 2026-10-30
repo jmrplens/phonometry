@@ -25,7 +25,8 @@ name: Release
 #                   every module imported and the conformance report run on it
 #   publish         PyPI through trusted publishing (PEP 740 attestations)
 #   github-release  the tag, the notes, the files with their checksum file and
-#                   SBOM, build provenance for every one, then the GitLab mirror
+#                   SBOM, build provenance for every one
+#   mirror          the GitLab mirror dispatched, once the release exists
 #   rebuild         the tag cloned and built again on macOS, as SECURITY.md
 #                   tells anyone to, and compared with the files on PyPI
 #   confirm         the published version installed back from PyPI
@@ -373,7 +374,6 @@ jobs:
       contents: write # the tag and the release
       id-token: write # Sigstore signing of the attestations
       attestations: write # the attestation store
-      actions: write # dispatching the GitLab mirror
     env:
       VERSION: ${{ needs.preflight.outputs.version }}
       TAG: ${{ needs.preflight.outputs.tag }}
@@ -435,16 +435,6 @@ jobs:
             "${flags[@]}" \
             dist/* extras/*
 
-      # The mirror links the GitLab release to these files. A workflow_run
-      # trigger on this workflow would run the mirror with its secrets in the
-      # context of whatever finished; a dispatch names it, from main, and only
-      # after a release exists.
-      - name: Dispatch the GitLab mirror
-        if: env.REHEARSAL != 'true'
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: gh workflow run gitlab-mirror.yml --repo "$GITHUB_REPOSITORY" --ref main
-
       - name: Describe the rehearsal
         if: env.REHEARSAL == 'true'
         run: |
@@ -458,13 +448,40 @@ jobs:
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 
-  # Anyone can rebuild a release from its tag and get the bytes PyPI holds
-  # (SECURITY.md, "Rebuilding a release"); this job does it the way the page
-  # says, on another operating system than the build's, so a file that
-  # depends on the machine it was built on is found by the release itself
-  # rather than by the first person who checks. It runs after the release
-  # because before it there is no tag to clone and nothing on PyPI to compare
-  # with; a rehearsal has neither, so it fetches the commit the run built and
+  # The mirror links the GitLab release to the files of this one. A
+  # workflow_run trigger on this workflow would run the mirror with its
+  # secrets in the context of whatever finished; a dispatch names it, from
+  # main, and only after a release exists. It is a job of its own so that a
+  # failed dispatch fails here alone: inside the GitHub Release job it failed
+  # that job after the release was made, which kept the rebuild below from
+  # running, and running the failed jobs again could not bring it back,
+  # because the release step then refuses a tag that already has a release.
+  # A rehearsal makes no release and dispatches nothing. The workflow's env
+  # is not available to a job's if, hence the event name.
+  mirror:
+    name: Dispatch the GitLab mirror
+    needs: [preflight, github-release]
+    if: github.event_name != 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      actions: write # dispatching the GitLab mirror
+    steps:
+      - name: Dispatch the GitLab mirror
+        if: env.REHEARSAL != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run gitlab-mirror.yml --repo "$GITHUB_REPOSITORY" --ref main
+
+  # Anyone on Linux or macOS can rebuild a release from its tag and get the
+  # bytes PyPI holds (SECURITY.md, "Rebuilding a release"); this job does it
+  # the way the page says, on another operating system than the build's, so
+  # a file that depends on the machine it was built on is found by the
+  # release itself rather than by the first person who checks. It runs after
+  # the release because before it there is no tag to clone and nothing on
+  # PyPI to compare with, and it needs the release and not the mirror, so a
+  # failed dispatch does not keep it from running. A rehearsal has neither a
+  # tag nor files on PyPI, so it fetches the commit the run built and
   # compares with the checksum file the build job wrote, which proves the
   # recipe and the comparison across operating systems before a release
   # needs them. It holds no token: the clone and PyPI are public.

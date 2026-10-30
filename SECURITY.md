@@ -217,8 +217,8 @@ GitHub Release hold, on Linux and on macOS. The release workflow builds every
 release twice before it publishes and refuses one whose builds differ, and
 once it has published it clones the tag on macOS, rebuilds it as below and
 compares the files with PyPI's; a rehearsal does the same with the commit it
-builds and its own files. To rebuild one yourself, with Python 3.13, which the
-release builds with:
+builds and its own files, and so does every pull request. To rebuild one
+yourself, with Python 3.13, which the release builds with:
 
 ```bash
 git clone --depth 1 --branch v4.0.0 --config core.autocrlf=false \

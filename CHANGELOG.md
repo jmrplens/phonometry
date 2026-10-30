@@ -3641,7 +3641,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   comparison, still refusing NaN and taking an infinite resistivity, and five
   private helpers lose a parameter they never read. Sonar reads the clause
   number 5.9.4.2 of IEC 60942 in the calibrator rules as an IP address; the
-  clause stays as printed and that finding stays open.
+  clause stays as printed, and its line carries `# NOSONAR S1313` with the
+  reason beside it, so the finding is excused in the repository, where
+  review sees it, and never closed in the SonarCloud panel. Rule C5 of the
+  contributor guide says so for any finding the analyzer misreads and no
+  honest rewrite satisfies.
 
 ### Changed
 

@@ -312,7 +312,7 @@ octavefilter = octave_filter  # kept for old callers
 <a id="a14"></a>
 ### A14. Record every shipped name you rename or remove in both pages of the migration guide
 
-**Why.** A caller upgrading from 3.3.0 or 4.0.0rc1 reads the migration guide, not the diff, and the guide maps the shipped name straight to the final one, never through an intermediate name. It is written twice, as the English and the Spanish site page (`site/src/content/docs/start/upgrading.mdx` and its `es/` twin); `make llms` writes its GitHub copy, `docs/start/upgrading.md`, from the English page.
+**Why.** A caller upgrading from 3.3.0 or 4.0.0rc1 reads the migration guide, not the diff, and the guide maps the shipped name straight to the final one, never through an intermediate name. It is written twice, as the English and the Spanish site page (`site/src/content/docs/start/upgrading.mdx` and its `es/` twin); `make llms` writes its GitHub copy, `docs/start/upgrading.md`, from the English page. The guide maps those two releases to 4.0.0, the last release; a name that shipped in 4.0.0 is not renamed outright but follows [A16](#a16).
 
 **Do**
 
@@ -330,7 +330,7 @@ CHANGELOG only: "partial_exposure is now daily_exposure"
 
 **Enforced by:** review
 
-**Exceptions.** A name newer than the last release goes in the CHANGELOG `[Unreleased]` only. `git grep -nw NAME v3.3.0 -- src` and `git grep -nw NAME v4.0.0rc1 -- src` tell whether a name shipped.
+**Exceptions.** A name newer than the last release, v4.0.0, goes in the CHANGELOG `[Unreleased]` only. `git grep -nw NAME v4.0.0 -- src` tells whether a name shipped in 4.0.0, and so follows [A16](#a16); `git grep -nw NAME v3.3.0 -- src` and `git grep -nw NAME v4.0.0rc1 -- src` tell whether it shipped in a release the guide maps from.
 
 <a id="a15"></a>
 ### A15. Move every caller of a renamed name in the same commit

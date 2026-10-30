@@ -53,6 +53,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   on the tree before this change it reports fifteen reads, every one of them
   changed here.
 
+- **Every file a release carries is attested, and a release rebuilds from its
+  tag to the same bytes, which the release checks on a second operating
+  system.** The build provenance covered the wheel and the sdist; it now
+  covers the checksum file and the SBOM as well, so every file of the GitHub
+  Release traces back to the run of `release.yml` that built it, and the
+  checksum file is named for its version, `phonometry-<version>.sha256`. The
+  sdist did not rebuild: setuptools stamped it with the time of the build and
+  the builder's user and group, and two builds of one commit gave two
+  different files; the wheel took the builder's umask into the modes of its
+  modules, so a checkout under umask 002 gave another wheel. The release now
+  builds with `scripts/build_release.py`, which uses the setuptools that
+  `requirements-release.txt` pins (84.2.1) without build isolation, writes the
+  sdist again with the commit's time, no owner and fixed modes, builds the
+  wheel from it under umask 022, and refuses a checkout that differs from its
+  commit and a setuptools plugin of another package. The release builds twice
+  and refuses a difference in either file, and after publishing a job on
+  macOS clones the tag, rebuilds it and compares both files with the ones on
+  PyPI; a rehearsal does the same with the commit and the files of its own
+  run. `SECURITY.md` names the identity that signs a release, with a
+  `gh attestation verify` command that pins it, and gives the commands to
+  rebuild one. `.gitattributes` checks out every file the sdist carries with
+  LF on every platform, so a rebuild on Windows packs the same bytes, and
+  `check_release_artifacts.py` refuses a release whose sdist carries a file
+  it does not cover. The PyOctaveBand bridge is built with the same pinned
+  setuptools, and neither package lists `wheel` among its build requirements
+  any more, since setuptools builds wheels itself.
+
 ### Added
 
 - **The FDTD engines step on an NVIDIA GPU through CuPy, or on PyTorch, from
@@ -4749,7 +4776,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   Python 3.12, 3.13 and 3.14 and runs the conformance report on it, and only
   then uploads, through an OIDC identity in a job that holds nothing else.
   PyPI attaches a PEP 740 attestation, signed with Sigstore, to each file; the
-  GitHub Release carries the wheel, the sdist, `SHA256SUMS` and a CycloneDX
+  GitHub Release carries the wheel, the sdist, a checksum file and a CycloneDX
   SBOM, with build provenance for each, and its notes are the release's
   CHANGELOG section instead of a link and a list of pull requests. Running the
   workflow by hand is a rehearsal from any branch: everything up to the upload,

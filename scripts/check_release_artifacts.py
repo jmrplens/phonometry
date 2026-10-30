@@ -24,7 +24,11 @@ published:
   LICENSE`` in their metadata, and both carry the repository's ``LICENSE``
   where PEP 639 puts it, under ``.dist-info/licenses/`` in the wheel and at the
   root of the sdist. ``built_license.py`` reads it, as it does for the
-  PyOctaveBand bridge, whose 2.2.0 shipped a licence classifier and no text.
+  PyOctaveBand bridge, whose 2.2.0 shipped a licence classifier and no text;
+- every file of the sdist that git tracks is one ``.gitattributes`` checks out
+  with LF on every platform. A Windows checkout with ``core.autocrlf`` on
+  writes CRLF into any other text file, and a release rebuilt from it, as
+  SECURITY.md describes, would pack bytes PyPI does not hold.
 """
 
 from __future__ import annotations
@@ -49,6 +53,9 @@ LICENSE_EXPRESSION = "MIT"
 #: The licence files it declares, by the path PEP 639 records. Each carries the
 #: text of the repository's file of the same name.
 LICENSE_FILES = ("LICENSE",)
+#: How long a git query may take [s]: it takes well under a second, so the
+#: bound only ends a hang.
+_GIT_S = 60.0
 
 
 def tracked_package_files(root: pathlib.Path = _ROOT) -> list[str]:
@@ -61,8 +68,58 @@ def tracked_package_files(root: pathlib.Path = _ROOT) -> list[str]:
         ["git", "-C", str(root), "ls-files", "-z", f"src/{_PACKAGE}"],
         check=True,
         capture_output=True,
+        timeout=_GIT_S,
     ).stdout.decode("utf-8")
     return sorted(path.removeprefix("src/") for path in out.split("\0") if path)
+
+
+def line_ending_problems(
+    sdist: pathlib.Path, version: str, root: pathlib.Path = _ROOT
+) -> list[str]:
+    """The files of the sdist that a checkout could write with CRLF line endings.
+
+    Only the files git tracks are asked about: the ones setuptools writes
+    itself (``PKG-INFO``, ``setup.cfg``, the ``.egg-info``) come from no
+    checkout.
+
+    :param sdist: The built source distribution.
+    :param version: The version being released.
+    :param root: The repository checkout whose ``.gitattributes`` is read.
+    :return: One sentence per tracked file whose ``eol`` attribute is not
+        ``lf``; empty when a checkout anywhere gives every one of them LF.
+    """
+    top = f"{_PACKAGE}-{version}/"
+    with tarfile.open(sdist) as archive:
+        carried = sorted(
+            member.name.removeprefix(top)
+            for member in archive.getmembers()
+            if member.isfile() and member.name.startswith(top)
+        )
+    listed = subprocess.run(  # nosec B603 B607 - fixed git invocation
+        ["git", "-C", str(root), "ls-files", "-z"],
+        check=True,
+        capture_output=True,
+        timeout=_GIT_S,
+    ).stdout.decode("utf-8")
+    tracked = set(listed.split("\0"))
+    checked = [path for path in carried if path in tracked]
+    if not checked:
+        return []
+    answer = subprocess.run(  # nosec B603 B607 - fixed git invocation
+        ["git", "-C", str(root), "check-attr", "--stdin", "-z", "eol"],
+        check=True,
+        capture_output=True,
+        timeout=_GIT_S,
+        input="\0".join(checked).encode("utf-8"),
+    ).stdout.decode("utf-8")
+    fields = answer.split("\0")
+    eol = {fields[i]: fields[i + 2] for i in range(0, len(fields) - 2, 3)}
+    return [
+        f"the sdist carries {path}, which .gitattributes does not check out "
+        "with LF on every platform"
+        for path in checked
+        if eol.get(path) != "lf"
+    ]
 
 
 def _metadata_version(raw: bytes) -> str | None:
@@ -161,12 +218,18 @@ def sdist_problems(sdist: pathlib.Path, version: str, tracked: list[str]) -> lis
     return problems
 
 
-def dist_problems(dist: pathlib.Path, version: str, tracked: list[str]) -> list[str]:
+def dist_problems(
+    dist: pathlib.Path,
+    version: str,
+    tracked: list[str],
+    root: pathlib.Path = _ROOT,
+) -> list[str]:
     """Every problem with the contents of a build's output directory.
 
     :param dist: The directory ``python -m build`` wrote to.
     :param version: The version being released.
     :param tracked: The package files git tracks.
+    :param root: The repository checkout whose ``.gitattributes`` is read.
     :return: The problems found; empty when the directory holds exactly the
         release's sdist and wheel and both are right.
     """
@@ -182,6 +245,7 @@ def dist_problems(dist: pathlib.Path, version: str, tracked: list[str]) -> list[
         problems += wheel_problems(wheel, version, tracked)
     if sdist.is_file():
         problems += sdist_problems(sdist, version, tracked)
+        problems += line_ending_problems(sdist, version, root)
     return problems
 
 
@@ -203,7 +267,7 @@ def main(argv: list[str] | None = None) -> int:
     if problems:
         return 1
     print(
-        f"The sdist and the wheel of {version} carry the {len(tracked)} files git tracks under src/{_PACKAGE}, and nothing else, and declare and carry the {LICENSE_EXPRESSION} licence."
+        f"The sdist and the wheel of {version} carry the {len(tracked)} files git tracks under src/{_PACKAGE}, and nothing else, declare and carry the {LICENSE_EXPRESSION} licence, and every tracked file of the sdist is checked out with LF everywhere."
     )
     return 0
 

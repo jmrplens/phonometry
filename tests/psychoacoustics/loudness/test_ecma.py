@@ -578,6 +578,23 @@ def test_the_blocks_after_l_end_leave_the_audibility_reading() -> None:
     assert result.basis_loudness_vs_time[l_end + 1 :].max() > criterion
 
 
+def test_a_tone_at_the_edge_of_hearing_has_a_loudness() -> None:
+    """Formula 113 gives a 1 kHz tone at 0 dB SPL a loudness above zero.
+
+    There the exponent of Formula 114 passes a hundred, and the power of a
+    specific loudness of a few thousandths falls below the smallest double:
+    evaluated as printed, Formula 113 would read zero, whereas its value is
+    at least the larger of its two terms. The loudness stays below the
+    audibility criterion while N_basis clears it.
+    """
+    criterion = psychoacoustics.AUDIBILITY_THRESHOLD_SONE_HMS
+    result = psychoacoustics.loudness_ecma(_tone(1000.0, 0.0, seconds=0.6), FS)
+    assert result.loudness == pytest.approx(0.00345, rel=2e-2)
+    assert result.loudness < criterion
+    evaluated = result.basis_loudness_vs_time[: result.last_evaluated_block + 1]
+    assert evaluated.max() > criterion
+
+
 def test_every_band_starts_on_the_block_that_first_holds_the_sound(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

@@ -787,7 +787,7 @@ blocks after $l_\text{end}$ hold the zero padding whose results Clause 6.2.6
 removes, where a sound cut off abruptly leaves the auditory filters ringing.
 Compare that total, not `loudness`, which is the $N$ of Formula (117),
 assembled from the tonal and noise loudness of Clause 8. A tone at the edge of
-hearing can leave $N$ at zero while its basis loudness clears the criterion:
+hearing can leave $N$ below the criterion while its basis loudness clears it:
 
 ```python
 # `np`, `fs`, `t` and `psychoacoustics` come from the snippet above.
@@ -798,7 +798,7 @@ faint = psychoacoustics.loudness_ecma(quiet, fs, field="free")
 # N_basis(l) of the blocks that hold the signal, l = 0 to l_end (Formula 40).
 n_basis = faint.basis_loudness_vs_time[: faint.last_evaluated_block + 1]
 audible = n_basis > psychoacoustics.AUDIBILITY_THRESHOLD_SONE_HMS
-print(f"N = {faint.loudness:.4f} sone_HMS")           # 0.0000 sone_HMS: N of Formula 117
+print(f"N = {faint.loudness:.4f} sone_HMS")           # 0.0034 sone_HMS: N of Formula 117
 print(f"max N_basis = {n_basis.max():.4f} sone_HMS")  # 0.0118 sone_HMS
 print(audible.any())   # True: above the criterion in a block, the library's reading
 ```

@@ -21,14 +21,15 @@
 // title, its meta description, the date the sitemap gives it (the last commit
 // that changed its content or the data it is built from, as
 // src/lib/content-dates.mjs dates it) and the text of its Markdown copy, the
-// `index.md` beside it. The two landing pages have no Markdown copy and give
-// the text of their <main> element instead. Nothing in the record depends on
-// when the build ran, so two builds of the same tree publish the same
-// manifest. The header lines of a copy that name the release (`Version:` and
-// `Install:`, listed in src/lib/page-markdown.mjs) are left out, so stamping a
-// release does not report every page as changed; the landing pages state the
-// release in their text, and the sitemap dates them by it, so they are
-// reported.
+// `index.md` beside it. The pages src/lib/page-markdown.mjs gives no Markdown
+// copy, the two landing pages, give the text of their <main> element instead,
+// and a page it gives one that the build did not write fails the build.
+// Nothing in the record depends on when the build ran, so two builds of the
+// same tree publish the same manifest. The header lines of a copy that name
+// the release (`Version:` and `Install:`, listed in src/lib/page-markdown.mjs)
+// are left out, so stamping a release does not report every page as changed;
+// the landing pages state the release in their text, and the sitemap dates
+// them by it, so they are reported.
 //
 // A run that a newer push cancels after it deployed and before it submitted
 // leaves its pages to the sitemap's <lastmod>: the next run compares with
@@ -47,7 +48,7 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { basePath, siteUrl } from '../src/data/site.mjs';
-import { withoutReleaseLines } from '../src/lib/page-markdown.mjs';
+import { hasMarkdownCopy, withoutReleaseLines } from '../src/lib/page-markdown.mjs';
 import { decode, markupOf, tags } from './shared/dist-pages.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -108,27 +109,40 @@ export function mainText(html) {
 	return decode(main[1].replace(/<[^>]*>/g, ' ')).replace(/\s+/g, ' ').trim();
 }
 
+/** The route of a sitemap URL, as src/lib/page-markdown.mjs names routes: no base path and no slash at either end. */
+export const routeOfUrl = (loc) => decodeURIComponent(loc.slice(ORIGIN.length + 1)).replace(/\/$/, '');
+
 /**
  * What one page says, as one string: its title, its meta description, its
  * date and its text. The text is the Markdown copy beside the page without its
- * release lines, or the text of <main> where the page has no copy.
+ * release lines, or, on a page src/lib/page-markdown.mjs gives no copy, the
+ * text of its <main>. Which pages have a copy is that module's rule, not
+ * whatever the build happens to hold: a copy the build should have written and
+ * did not fails here, rather than the page being read another way and
+ * reported as changed on this deploy and again on the one that restores it.
  */
 export function pageRecord(dist, { loc, lastmod }) {
-	const dir = join(dist, ...loc.slice(ORIGIN.length + 1).split('/').filter(Boolean).map(decodeURIComponent));
+	const route = routeOfUrl(loc);
+	const dir = join(dist, ...route.split('/').filter(Boolean));
 	const htmlFile = join(dir, 'index.html');
 	if (!existsSync(htmlFile)) throw new ManifestError(`the sitemap lists ${loc}, and the build wrote no ${htmlFile}.`);
 	const html = readFileSync(htmlFile, 'utf8');
 	const markup = markupOf(html);
 	const title = decode(/<title>([\s\S]*?)<\/title>/i.exec(markup)?.[1] ?? '').trim();
 	const description = (tags(markup, 'meta').find((meta) => meta.name === 'description')?.content ?? '').trim();
-	const copy = join(dir, 'index.md');
 	let text;
-	if (existsSync(copy)) {
+	if (hasMarkdownCopy(route)) {
+		const copy = join(dir, 'index.md');
+		if (!existsSync(copy)) {
+			throw new ManifestError(
+				`${loc} has a Markdown copy by src/lib/page-markdown.mjs, and the build wrote no ${copy}: scripts/emit-page-markdown.mjs runs before the manifest.`,
+			);
+		}
 		text = withoutReleaseLines(readFileSync(copy, 'utf8'));
 	} else {
 		text = mainText(html);
 		if (text === null) {
-			throw new ManifestError(`${loc} has neither a Markdown copy (${copy}) nor a <main> element to read its text from.`);
+			throw new ManifestError(`${loc} has no Markdown copy by src/lib/page-markdown.mjs and no <main> element to read its text from.`);
 		}
 	}
 	return [`Title: ${title}`, `Description: ${description}`, `Modified: ${lastmod}`, '', text].join('\n');

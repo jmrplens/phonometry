@@ -209,7 +209,14 @@ test('a landing page with no copy is read from its <main>, and its asset links d
 test('the build fails on a sitemap it cannot read every page of', (t) => {
 	const cases = {
 		'no <lastmod>': [{ ...BASE, '/signals/levels/': guide('/signals/levels/', { lastmod: '' }) }, /gives https:\S+\/signals\/levels\/ no <lastmod>/],
-		'neither a copy nor a <main>': [{ ...BASE, '/x/': { ...guide('/x/'), copy: null, main: null } }, /has neither a Markdown copy .* nor a <main> element/],
+		'a copy the build should have written and did not': [
+			{ ...BASE, '/x/': { ...guide('/x/'), copy: null } },
+			/https:\S+\/x\/ has a Markdown copy by src\/lib\/page-markdown\.mjs, and the build wrote no \S+index\.md/,
+		],
+		'a landing page with no <main>': [
+			{ ...BASE, '/': { ...guide('/'), copy: null, main: null } },
+			/https:\S+\/phonometry\/ has no Markdown copy by src\/lib\/page-markdown\.mjs and no <main> element/,
+		],
 	};
 	for (const [name, [pages, message]] of Object.entries(cases)) {
 		const ran = run('manifest', build(t, pages));

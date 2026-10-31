@@ -35,6 +35,16 @@ reports two shapes:
   written, once ``str()``, ``Path()`` and ``os.fspath()`` around it are taken
   off.
 
+A check is known by the module that defines it, never by the last part of its
+name alone: a call is followed to the function it reaches through the
+module's imports (relative ones included, and a name a package imports from
+one of its modules), the module's own functions, the functions around it, and
+``self`` or ``cls`` in a method. So ``np.info(path)`` asks nothing of the name
+though the library's ``info`` is a check, and neither does a method of another
+object called ``read_at_most``, or a function of the reader's own module that
+shares a check's name and checks nothing. A call the check cannot follow
+counts as no check.
+
 A call is named by what its module imports: ``import soundfile as snd``,
 ``from scipy.io.wavfile import read as wav_read`` and ``from io import
 FileIO`` are followed, and so is a name bound to a module or a reader by an
@@ -62,7 +72,7 @@ from __future__ import annotations
 import argparse
 import ast
 import sys
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
 from ast_scan import ROOT, exempted, python_files, relative
@@ -80,6 +90,12 @@ OWNER = ("phonometry", "_internal", "json_input.py")
 
 #: The shared functions that look at what a name holds before it is read.
 CHECKS = frozenset({"not_regular_at", "open_regular", "read_at_most"})
+#: The package every module of the library is named from.
+PACKAGE = "phonometry"
+#: The module that holds :data:`CHECKS`, by the name it is imported by.
+SHARED = f"{PACKAGE}._internal.json_input"
+#: :data:`CHECKS` by the module that defines them.
+_SHARED_CHECKS = frozenset(f"{SHARED}.{name}" for name in CHECKS)
 
 #: The readers of other libraries that open a name themselves, by the module
 #: that holds them and their name.
@@ -279,19 +295,41 @@ def _resolved(parts: Sequence[str], aliases: Mapping[str, str]) -> str:
     return ".".join([head, *parts[1:]])
 
 
-def _imported(node: ast.Import | ast.ImportFrom) -> dict[str, str]:
+def _imported_from(node: ast.ImportFrom, package: str) -> str | None:
+    """The module a ``from`` import takes its names from, a relative one resolved.
+
+    *package* is the package of the module that holds the import, empty for a
+    module outside any; ``None`` when the import climbs out of it.
+    """
+    if not node.level:
+        return node.module
+    parts = package.split(".") if package else []
+    up = node.level - 1
+    if up > len(parts):
+        return None
+    base = parts[: len(parts) - up]
+    if node.module:
+        base.extend(node.module.split("."))
+    return ".".join(base) or None
+
+
+def _imported(node: ast.Import | ast.ImportFrom, package: str = "") -> dict[str, str]:
     """The names one import binds, each with the dotted name it stands for.
 
     ``import a.b`` binds ``a``, ``import a.b as c`` binds ``c`` to ``a.b``,
-    ``from a import f as g`` binds ``g`` to ``a.f``. A relative import binds
-    names of the library itself, which no reader of another library is.
+    ``from a import f as g`` binds ``g`` to ``a.f``. A relative import is read
+    from *package*, the package of the module that holds it, so
+    ``from ._audio_file import open_audio`` in ``phonometry.io`` binds
+    ``open_audio`` to ``phonometry.io._audio_file.open_audio``.
     """
     if isinstance(node, ast.ImportFrom):
-        if node.level or not node.module:
+        module = _imported_from(node, package)
+        if module is None:
             return {}
         return {
-            alias.asname or alias.name: f"{node.module}.{alias.name}"
+            alias.asname or alias.name: f"{module}.{alias.name}"
             for alias in node.names
+            if alias.name != "*"
         }
     bound: dict[str, str] = {}
     for alias in node.names:
@@ -300,19 +338,19 @@ def _imported(node: ast.Import | ast.ImportFrom) -> dict[str, str]:
     return bound
 
 
-def aliases_of(tree: ast.AST) -> dict[str, str]:
+def aliases_of(tree: ast.AST, package: str = "") -> dict[str, str]:
     """What each name of a module the imports and assignments bind stands for.
 
-    The imports as :func:`_imported` reads them; then a name bound by an
-    assignment to a dotted name (``snd = soundfile``, ``reader = sf.read``)
-    stands for what that name stands for, the assignments taken in the order
-    of the source.
+    The imports as :func:`_imported` reads them, the relative ones from
+    *package*; then a name bound by an assignment to a dotted name
+    (``snd = soundfile``, ``reader = sf.read``) stands for what that name
+    stands for, the assignments taken in the order of the source.
     """
     aliases: dict[str, str] = {}
     assignments: list[tuple[str, list[str], tuple[int, int]]] = []
     for node in ast.walk(tree):
         if isinstance(node, ast.Import | ast.ImportFrom):
-            aliases.update(_imported(node))
+            aliases.update(_imported(node, package))
         elif (
             isinstance(node, ast.Assign)
             and len(node.targets) == 1
@@ -420,13 +458,163 @@ class _Scope:
     node: ast.AST
     calls: list[ast.Call]
     aliases: Mapping[str, str]
+    #: The dotted name the module is imported by.
+    module: str = ""
+    #: The functions and classes the module defines, by their qualified
+    #: names, ``True`` for a class.
+    defined: Mapping[str, bool] = field(default_factory=dict)
+
+    @property
+    def qualified(self) -> str:
+        """The function by the module that defines it: ``phonometry.io._wav.read_wav``."""
+        return f"{self.module}.{self.name}"
+
+
+def module_name(path: pathlib.Path) -> str:
+    """The dotted name *path* is imported by.
+
+    Read from the last directory called ``phonometry`` above it down, the
+    ``__init__`` of a package left off; a module outside the package is
+    named by its file alone.
+    """
+    parts = path.resolve().with_suffix("").parts
+    tops = [index for index, part in enumerate(parts[:-1]) if part == PACKAGE]
+    named = list(parts[tops[-1] :]) if tops else [parts[-1]]
+    if named[-1] == "__init__" and len(named) > 1:
+        named.pop()
+    return ".".join(named)
+
+
+def _package_of(path: pathlib.Path, module: str) -> str:
+    """The package a relative import of the module at *path* is read from."""
+    if path.name == "__init__.py":
+        return module
+    return module.rpartition(".")[0]
+
+
+def _definitions(tree: ast.AST) -> dict[str, bool]:
+    """Each function and class *tree* defines, by its qualified name, ``True`` for a class."""
+    defined: dict[str, bool] = {}
+
+    def walk(node: ast.AST, scope: str) -> None:
+        for child in ast.iter_child_nodes(node):
+            if isinstance(child, ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef):
+                inner = f"{scope}.{child.name}" if scope else child.name
+                defined[inner] = isinstance(child, ast.ClassDef)
+                walk(child, inner)
+
+    walk(tree, "")
+    return defined
+
+
+def _top_level_imports(tree: ast.Module) -> Iterator[ast.Import | ast.ImportFrom]:
+    """The imports a module makes as it is imported, ``if`` and ``try`` blocks included."""
+    pending: list[ast.stmt] = list(tree.body)
+    while pending:
+        statement = pending.pop()
+        if isinstance(statement, ast.Import | ast.ImportFrom):
+            yield statement
+        elif isinstance(statement, ast.If | ast.Try):
+            pending.extend(statement.body)
+            pending.extend(statement.orelse)
+            if isinstance(statement, ast.Try):
+                pending.extend(statement.finalbody)
+                for handler in statement.handlers:
+                    pending.extend(handler.body)
+
+
+def exports_of(path: pathlib.Path, tree: ast.Module) -> dict[str, str]:
+    """What each name a module imports stands for, by the module's own name.
+
+    ``from ._audio_file import open_audio`` in ``phonometry/io/__init__.py``
+    makes ``phonometry.io.open_audio`` stand for
+    ``phonometry.io._audio_file.open_audio``, so that a module that imports
+    it from the package reaches the function itself.
+    """
+    module = module_name(path)
+    package = _package_of(path, module)
+    return {
+        f"{module}.{name}": target
+        for node in _top_level_imports(tree)
+        for name, target in _imported(node, package).items()
+    }
+
+
+def _canonical(name: str, exports: Mapping[str, str]) -> str:
+    """*name* followed through the imports of :func:`exports_of` to where it is defined."""
+    seen = {name}
+    while True:
+        parts = name.split(".")
+        for end in range(len(parts), 0, -1):
+            head = ".".join(parts[:end])
+            if head in exports:
+                name = ".".join([exports[head], *parts[end:]])
+                break
+        else:
+            return name
+        if name in seen:
+            return name
+        seen.add(name)
+
+
+def _local(name: str, scope: _Scope) -> str | None:
+    """The function or class of the module that *name* is, seen from *scope*.
+
+    Looked up as Python looks a name up: in the function itself, in the
+    functions around it (a class around it is skipped, as Python skips it),
+    then at the top of the module.
+    """
+    parts = [] if scope.name == "<module>" else scope.name.split(".")
+    for end in range(len(parts), -1, -1):
+        prefix = ".".join(parts[:end])
+        if prefix and scope.defined.get(prefix):
+            continue
+        candidate = f"{prefix}.{name}" if prefix else name
+        if candidate in scope.defined:
+            return f"{scope.module}.{candidate}"
+    return None
+
+
+def _owner(scope: _Scope) -> str | None:
+    """The class *scope* is a method of, by its qualified name, or ``None``."""
+    owner = scope.name.rpartition(".")[0]
+    return owner if owner and scope.defined.get(owner) else None
+
+
+def qualified_callee(
+    call: ast.Call, scope: _Scope, exports: Mapping[str, str]
+) -> str | None:
+    """The function *call* reaches, by the module that defines it, or ``None``.
+
+    ``self.f()`` and ``cls.f()`` in a method reach ``f`` of its class; a bare
+    or dotted name is read through the functions of the module and the
+    functions around the call, then through what the module imports, and
+    followed through :func:`exports_of`. A call that starts from anything
+    else (``handle.read_at_most(path)``, ``np.info(path)`` once ``np`` is
+    NumPy) reaches no function of the library.
+    """
+    parts = _dotted(call.func)
+    if parts is None:
+        return None
+    head, rest = parts[0], parts[1:]
+    owner = _owner(scope)
+    if head in {"self", "cls"} and len(rest) == 1 and owner is not None:
+        return f"{scope.module}.{owner}.{rest[0]}"
+    local = _local(head, scope)
+    if local is not None:
+        return ".".join([local, *rest])
+    if head in scope.aliases:
+        return _canonical(".".join([scope.aliases[head], *rest]), exports)
+    return None
 
 
 def _scopes(path: pathlib.Path, tree: ast.AST) -> list[_Scope]:
     """Every function of *tree*, and the module, each with its own calls."""
-    aliases = aliases_of(tree)
+    module = module_name(path)
+    aliases = aliases_of(tree, _package_of(path, module))
+    defined = _definitions(tree)
     return [
-        _Scope(path, name, node, _own_calls(node), aliases)
+        _Scope(path, name, node, _own_calls(node), aliases, module, defined)
         for name, node in _functions(tree)
     ]
 
@@ -441,11 +629,15 @@ def _first_parameter(function: ast.AST) -> str | None:
     return None
 
 
-def checking_functions(scopes: Sequence[_Scope]) -> frozenset[str]:
+def checking_functions(
+    scopes: Sequence[_Scope], exports: Mapping[str, str]
+) -> frozenset[str]:
     """:data:`CHECKS` and every function that hands its first parameter to one.
 
-    Followed until no new function turns up, so a reader that checks its name
-    through a helper counts as a check for its own callers.
+    Each by the module that defines it (:func:`qualified_callee`), followed
+    until no new function turns up, so a reader that checks its name through
+    a helper counts as a check for its own callers, and a function that hands
+    its name to a namesake of a check (``np.info``) does not.
     """
     # Each function with the callees it hands its first parameter to, worked
     # out once; the search below only grows the set of checks.
@@ -459,13 +651,13 @@ def checking_functions(scopes: Sequence[_Scope]) -> frozenset[str]:
         handed = {
             callee
             for call in scope.calls
-            if (callee := _callee(call)) is not None
-            and (argument := _first_argument(call)) is not None
+            if (argument := _first_argument(call)) is not None
             and _subject(argument) == parameter
+            and (callee := qualified_callee(call, scope, exports)) is not None
         }
         if handed:
-            candidates.append((scope.node.name, handed))
-    found = set(CHECKS)
+            candidates.append((scope.qualified, handed))
+    found = set(_SHARED_CHECKS)
     grew = True
     while grew:
         grew = False
@@ -477,35 +669,40 @@ def checking_functions(scopes: Sequence[_Scope]) -> frozenset[str]:
 
 
 def _checked_before(
-    calls: Sequence[ast.Call], read: ast.Call, checks: frozenset[str]
+    scope: _Scope,
+    read: ast.Call,
+    checks: frozenset[str],
+    exports: Mapping[str, str],
 ) -> bool:
-    """Whether a check of the name *read* opens comes before it in the function."""
+    """Whether a check of the name *read* opens comes before it in *scope*."""
     argument = _first_argument(read)
     if argument is None:
         return False
     name = _subject(argument)
     place = (read.lineno, read.col_offset)
-    for call in calls:
+    for call in scope.calls:
         if call is read or (call.lineno, call.col_offset) >= place:
             continue
         checked = _first_argument(call)
         if (
-            _callee(call) in checks
-            and checked is not None
+            checked is not None
             and _subject(checked) == name
+            and qualified_callee(call, scope, exports) in checks
         ):
             return True
     return False
 
 
-def scan(scope: _Scope, checks: frozenset[str]) -> list[Finding]:
+def scan(
+    scope: _Scope, checks: frozenset[str], exports: Mapping[str, str]
+) -> list[Finding]:
     """Every read of a file by its name in *scope* that skips the shared check."""
     findings: list[Finding] = []
     for call in scope.calls:
         if _own_open(call, scope.aliases):
             shape = "an open of its own; read through open_regular or read_at_most"
         elif _foreign_read(call, scope.aliases) and not _checked_before(
-            scope.calls, call, checks
+            scope, call, checks, exports
         ):
             shape = (
                 "a reader of another library with no check of the name before it; "
@@ -524,19 +721,22 @@ def check(files: Sequence[pathlib.Path]) -> tuple[list[Finding], list[tuple[str,
 
     :param files: The modules to read; the shared module is left out.
     """
-    scopes = [
-        scope
+    trees = {
+        path: ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
         for path in files
-        for scope in _scopes(
-            path, ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
-        )
-    ]
-    checks = checking_functions(scopes)
+    }
+    scopes = [scope for path, tree in trees.items() for scope in _scopes(path, tree)]
+    exports = {
+        name: target
+        for path, tree in trees.items()
+        for name, target in exports_of(path, tree).items()
+    }
+    checks = checking_functions(scopes, exports)
     findings = [
         finding
         for scope in scopes
         if scope.path.resolve().parts[-len(OWNER) :] != OWNER
-        for finding in scan(scope, checks)
+        for finding in scan(scope, checks, exports)
     ]
     return exempted(findings, EXEMPT)
 

@@ -80,7 +80,7 @@ from ..._internal.validation import (
 if TYPE_CHECKING:
     from collections.abc import Mapping
 
-    from matplotlib.axes import Axes
+    from matplotlib.projections.polar import PolarAxes
     from numpy.typing import ArrayLike, NDArray
 
     from ..._i18n import Language
@@ -347,21 +347,23 @@ class VectorChangeResult(RichDisplay):
         return float(self.final[0] - self.initial[0])
 
     def plot(
-        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
-    ) -> Axes:
+        self, ax: PolarAxes | None = None, *, language: Language = "en", **kwargs: Any
+    ) -> PolarAxes:
         """Draw the polar diagram of Figure D.1.
 
         The two states as vectors from the origin and the change as the vector
         joining their tips, which is the picture that makes the point.
 
         Requires matplotlib (``pip install "phonometry[plot]"``); returns the
-        :class:`~matplotlib.axes.Axes`.
+        polar axes it drew on.
 
         :param ax: Existing polar axes, or ``None`` to create a figure.
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: ``unit``, the name of the unit the two states were
             given in, and anything forwarded to the change chord; see
             :func:`phonometry._plot.vibration.plot_vector_change`.
+        :return: The polar axes.
+        :raises ValueError: If *ax* is not a polar axes.
         """
         from ..._i18n import check_language
         from ..._plot.vibration import plot_vector_change

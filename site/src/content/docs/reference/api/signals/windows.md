@@ -121,11 +121,18 @@ Equivalent noise bandwidth in Hz for a sample rate `fs`.
 
 ```python
 WindowMetricsResult.plot(
-    ax: Axes | None = None,
+    ax: None = None,
     *,
     language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
-) -> Axes | NDArray[Any]
+) -> tuple[Axes, Axes]
+
+WindowMetricsResult.plot(
+    ax: Axes,
+    *,
+    language: Literal['en', 'es'] = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the window shape and its spectrum with the metrics marked.

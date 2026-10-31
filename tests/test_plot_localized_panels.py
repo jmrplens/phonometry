@@ -104,7 +104,7 @@ def _ship_source_level(language: str) -> Axes:
         frequency=[1000.0, 1250.0, 1600.0, 2000.0, 2500.0],
         draft_m=10.0,
     )
-    return np.atleast_1d(result.plot(language=language))[0]
+    return result.plot(language=language)
 
 
 def test_a_twin_axis_reaches_spanish() -> None:
@@ -150,7 +150,7 @@ def _image_source(language: str) -> Axes:
         max_order=3,
         fs=8000.0,
     )
-    return np.atleast_1d(result.plot(language=language))[0]
+    return result.plot(language=language)
 
 
 def test_a_colorbar_reaches_spanish() -> None:
@@ -197,7 +197,7 @@ def test_a_contour_colorbar_reaches_spanish() -> None:
         x=np.linspace(-1000.0, 9000.0, 14),
         y=np.linspace(-2000.0, 2000.0, 12),
     )
-    figure = np.atleast_1d(result.plot(language="es"))[0].figure
+    figure = result.plot(language="es").figure
     figure.canvas.draw()
     for axes in figure.get_axes()[1:]:
         labels = _decimals(_labels(axes))
@@ -253,5 +253,5 @@ def test_a_pinned_frequency_axis_is_left_to_its_own_helper() -> None:
     result = underwater.monopole_source_level(
         [150.0, 149.0, 148.0, 147.0, 146.0, 145.0], frequency=freqs, draft_m=10.0
     )
-    axes = np.atleast_1d(result.plot(language="es"))[0]
+    axes = result.plot(language="es")
     assert "31,5" in _labels(axes, "x"), _labels(axes, "x")

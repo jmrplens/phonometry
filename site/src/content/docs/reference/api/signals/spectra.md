@@ -175,11 +175,18 @@ $G_{yy} = G_{vv} + G_{nn}$
 
 ```python
 CoherentOutputSpectrumResult.plot(
-    ax: Axes | None = None,
+    ax: None = None,
     *,
     language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
-) -> Axes | NDArray[Any]
+) -> tuple[Axes, Axes]
+
+CoherentOutputSpectrumResult.plot(
+    ax: Axes,
+    *,
+    language: Literal['en', 'es'] = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the output/coherent/noise spectra and the spectral SNR.
@@ -285,11 +292,18 @@ estimate, as Bendat & Piersol recommend for measured data (Section 9.2).
 
 ```python
 CrossSpectralDensityResult.plot(
-    ax: Axes | None = None,
+    ax: None = None,
     *,
     language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
-) -> Axes | NDArray[Any]
+) -> tuple[Axes, Axes, Axes]
+
+CrossSpectralDensityResult.plot(
+    ax: Axes,
+    *,
+    language: Literal['en', 'es'] = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the magnitude, phase (with ±σ band) and coherence.

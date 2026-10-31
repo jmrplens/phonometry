@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any, overload
 
 import numpy as np
 
@@ -17,9 +17,10 @@ from .common import (
     _C_SECONDARY,
     _band_axis,
     _freq_axis,
-    _import_pyplot,
     _new_axes,
+    _new_polar_axes,
     _plot_rating,
+    _polar_axes,
     format_frequency_axis,
     place_legend_clear,
     style_default,
@@ -30,7 +31,8 @@ from .common import (
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike
+    from matplotlib.projections.polar import PolarAxes
+    from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
     from ..materials.absorbers._airflow_resistance import StaticAirflowResult
@@ -357,6 +359,24 @@ def plot_base_plate_scattering(
     return ax
 
 
+@overload
+def plot_diffusion_polar(
+    result: DiffusionResult,
+    ax: None = None,
+    language: Language = "en",
+    **kwargs: Any,
+) -> PolarAxes: ...
+
+
+@overload
+def plot_diffusion_polar(
+    result: DiffusionResult,
+    ax: Axes,
+    language: Language = "en",
+    **kwargs: Any,
+) -> Axes: ...
+
+
 def plot_diffusion_polar(
     result: DiffusionResult,
     ax: Axes | None = None,
@@ -369,11 +389,9 @@ def plot_diffusion_polar(
         exposing ``angles`` (degrees), ``levels`` (dB) and ``coefficient``.
     :param ax: Existing (ideally polar) axes, or ``None`` to create a polar one.
     :param kwargs: Forwarded to the reflected-level curve ``plot`` call.
-    :return: The polar axes.
+    :return: The axes drawn on: a new polar axes without ``ax``, else ``ax``.
     """
-    if ax is None:
-        plt = _import_pyplot()
-        _fig, ax = plt.subplots(subplot_kw={"projection": "polar"})
+    ax = ax if ax is not None else _new_polar_axes()
     angles = np.radians(np.asarray(result.angles_deg, dtype=np.float64))
     levels = np.asarray(result.levels, dtype=np.float64)
     kwargs.setdefault("marker", "o")
@@ -393,7 +411,7 @@ def plot_diffusion_polar(
         f"{format_number(float(result.coefficient), language, decimals=2)} "
         "(ISO 17497-2)"
     )
-    return cast("Axes", ax)
+    return ax
 
 
 def plot_scattering_report(
@@ -511,12 +529,29 @@ def plot_diffusion_report(
     return ax
 
 
+def _face_the_front(ax: PolarAxes, angles_deg: NDArray[np.float64]) -> None:
+    """Put 0° at the top, angles clockwise, and keep to the front half when the data do.
+
+    A polar response measured from -90° to +90° fills the half disc in front
+    of the surface; drawn on the whole disc it would leave the back half empty.
+    """
+    ax.set_theta_zero_location("N")
+    ax.set_theta_direction(-1)
+    if (
+        angles_deg.size
+        and float(np.nanmin(angles_deg)) >= -_POLAR_SEMICIRCLE_DEG
+        and float(np.nanmax(angles_deg)) <= _POLAR_SEMICIRCLE_DEG
+    ):
+        ax.set_thetamin(-90)
+        ax.set_thetamax(90)
+
+
 def plot_diffusion_polar_report(
     result: DiffusionResult,
-    ax: Axes | None = None,
+    ax: PolarAxes | None = None,
     language: Language = "en",
     **kwargs: Any,
-) -> Axes:
+) -> PolarAxes:
     """Polar reflected-level response for the diffusion fiche (opaque fill).
 
     The report-fiche variant of :func:`plot_diffusion_polar`: identical polar
@@ -528,10 +563,9 @@ def plot_diffusion_polar_report(
     :param ax: Existing polar axes, or ``None`` to create one.
     :param kwargs: Forwarded to the reflected-level curve ``plot`` call.
     :return: The polar axes.
+    :raises ValueError: If *ax* is not a polar axes.
     """
-    if ax is None:
-        plt = _import_pyplot()
-        _fig, ax = plt.subplots(subplot_kw={"projection": "polar"})
+    ax = _polar_axes(ax)
     angles_deg = np.asarray(result.angles_deg, dtype=np.float64)
     angles = np.radians(angles_deg)
     levels = np.asarray(result.levels, dtype=np.float64)
@@ -539,22 +573,12 @@ def plot_diffusion_polar_report(
     style_default(kwargs, "color", _C_PRIMARY)
     ax.fill(angles, levels, color=_C_PRIMARY_LIGHT, edgecolor="none", zorder=1)
     ax.plot(angles, levels, **styled(kwargs, ms=4, zorder=3))
-    # The theta-orientation setters live on the polar axes, not the base Axes.
-    polar_ax: Any = ax
-    polar_ax.set_theta_zero_location("N")
-    polar_ax.set_theta_direction(-1)
-    if (
-        angles_deg.size
-        and float(np.nanmin(angles_deg)) >= -_POLAR_SEMICIRCLE_DEG
-        and float(np.nanmax(angles_deg)) <= _POLAR_SEMICIRCLE_DEG
-    ):
-        polar_ax.set_thetamin(-90)
-        polar_ax.set_thetamax(90)
+    _face_the_front(ax, angles_deg)
     ax.set_title(_t(_DIFFUSION_TITLE, language))
     from .._i18n import localize_axes
 
     localize_axes(ax, language)
-    return cast("Axes", ax)
+    return ax
 
 
 def plot_in_situ_absorption(
@@ -1106,10 +1130,10 @@ def plot_diffuse_field_absorption(
 
 def plot_diffuser_polar_response(
     result: DiffuserPolarResponse,
-    ax: Axes | None = None,
+    ax: PolarAxes | None = None,
     language: Language = "en",
     **kwargs: Any,
-) -> Axes:
+) -> PolarAxes:
     """Predicted far-field polar response of a diffuser design.
 
     Semicircular polar plot of the predicted reflected sound-pressure levels
@@ -1121,12 +1145,11 @@ def plot_diffuser_polar_response(
     :param ax: Existing polar axes, or ``None`` to create one.
     :param kwargs: Forwarded to the reflected-level curve ``plot`` call.
     :return: The polar axes.
+    :raises ValueError: If *ax* is not a polar axes.
     """
     from .._i18n import format_number, localize_axes
 
-    if ax is None:
-        plt = _import_pyplot()
-        _fig, ax = plt.subplots(subplot_kw={"projection": "polar"})
+    ax = _polar_axes(ax)
     angles_deg = np.asarray(result.angles_deg, dtype=np.float64)
     angles = np.radians(angles_deg)
     levels = np.asarray(result.levels, dtype=np.float64)
@@ -1140,16 +1163,7 @@ def plot_diffuser_polar_response(
         alpha=theme_fill_alpha(style_get(kwargs, "color", _C_PRIMARY), ax),
     )
     ax.plot(angles, levels, **styled(kwargs, ms=4))
-    polar_ax: Any = ax
-    polar_ax.set_theta_zero_location("N")
-    polar_ax.set_theta_direction(-1)
-    if (
-        angles_deg.size
-        and float(np.nanmin(angles_deg)) >= -_POLAR_SEMICIRCLE_DEG
-        and float(np.nanmax(angles_deg)) <= _POLAR_SEMICIRCLE_DEG
-    ):
-        polar_ax.set_thetamin(-90)
-        polar_ax.set_thetamax(90)
+    _face_the_front(ax, angles_deg)
     freq = format_number(float(result.frequency), language, decimals=0)
     coeff = format_number(float(result.coefficient), language, decimals=2)
     ax.set_title(
@@ -1158,7 +1172,7 @@ def plot_diffuser_polar_response(
         f"{_t('Diffusion coefficient $d$ = ', language)}{coeff}"
     )
     localize_axes(ax, language)
-    return cast("Axes", ax)
+    return ax
 
 
 def plot_transfer_matrix(

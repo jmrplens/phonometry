@@ -137,11 +137,18 @@ Per-strike pile-driving metrics (ISO 18406).
 
 ```python
 PileStrikeResult.plot(
-    ax: Axes | None = None,
+    ax: None = None,
     *,
     language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
-) -> Axes | NDArray[Any]
+) -> tuple[Axes, Axes]
+
+PileStrikeResult.plot(
+    ax: Axes,
+    *,
+    language: Literal['en', 'es'] = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the strike waveform and its cumulative energy.

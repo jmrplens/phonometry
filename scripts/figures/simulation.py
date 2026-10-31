@@ -11,7 +11,7 @@ Everything here is embedded by a page under ``simulation/``.
 from __future__ import annotations
 
 from functools import cache
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -35,6 +35,8 @@ from .theme import (
 )
 
 if TYPE_CHECKING:
+    from matplotlib.projections.polar import PolarAxes
+
     from phonometry.simulation import ElasticFDTDResult
 
 
@@ -65,8 +67,10 @@ def generate_metadiffuser_ntff_polar(output_dir: str) -> None:
         figsize=(10, 6.2),
         subplot_kw={"projection": "polar"},
     )
+    # matplotlib types a projected subplot as Axes; this one is polar.
+    polar = cast("PolarAxes", ax)
     model.plot(
-        ax=ax,
+        ax=polar,
         color=COLOR_PRIMARY,
         marker="",
         linewidth=1.6,
@@ -84,7 +88,6 @@ def generate_metadiffuser_ntff_polar(output_dir: str) -> None:
     ax.set_ylim(-40.0, 2.0)
     # The default theta formatter writes its negative angles with an ASCII
     # hyphen; restate the same grid with the typographic minus.
-    polar: Any = ax
     polar.set_thetagrids(
         np.arange(-90, 91, 30), [f"{_fmt_minus(a, '.0f')}°" for a in range(-90, 91, 30)]
     )

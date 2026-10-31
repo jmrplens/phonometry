@@ -29,12 +29,12 @@ def _white(n: int = 4096) -> np.ndarray:
 
 
 def _titles(obj: object) -> str:
-    axes = obj if isinstance(obj, np.ndarray) else [obj]
+    axes = obj if isinstance(obj, tuple) else [obj]
     return " || ".join(a.get_title() for a in axes)
 
 
 def _labels(obj: object) -> str:
-    axes = obj if isinstance(obj, np.ndarray) else [obj]
+    axes = obj if isinstance(obj, tuple) else [obj]
     parts = []
     for a in axes:
         parts += [a.get_xlabel(), a.get_ylabel()]

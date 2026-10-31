@@ -194,9 +194,17 @@ rated range is given.
 
 ```python
 LoudspeakerCharacteristics.plot(
+    ax: PolarAxes | None = None,
+    *,
+    quantity: Literal['directivity'],
+    language: Literal['en', 'es'] = 'en',
+    **kwargs: Any,
+) -> PolarAxes
+
+LoudspeakerCharacteristics.plot(
     ax: Axes | None = None,
     *,
-    quantity: Literal['response', 'impedance', 'thd', 'directivity'] = 'response',
+    quantity: Literal['response', 'impedance', 'thd'] = 'response',
     language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
@@ -219,13 +227,13 @@ lines), `"thd"` (total harmonic distortion against frequency) and
 | `quantity` | Which characteristic to plot (see above). |
 | `language` | Label language, `"en"` (default) or `"es"`. |
 
-**Returns:** The axes the characteristic was drawn on.
+**Returns:** The axes the characteristic was drawn on, polar for `"directivity"`.
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If `quantity` or `language` is unknown, or the result carries no data for `quantity`. |
+| ValueError | If `quantity` or `language` is unknown, the result carries no data for `quantity`, or `ax` is not a polar axes for `"directivity"`. |
 | ImportError | If matplotlib is not installed (`pip install "phonometry[plot]"`). |
 
 ### LoudspeakerCharacteristics.report()

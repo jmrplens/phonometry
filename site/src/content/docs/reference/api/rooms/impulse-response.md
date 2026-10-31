@@ -242,11 +242,18 @@ forward to `ir`.
 
 ```python
 ImpulseResponseResult.plot(
-    ax: Axes | None = None,
+    ax: None = None,
     *,
     language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
-) -> Axes | np.ndarray
+) -> tuple[Axes, Axes]
+
+ImpulseResponseResult.plot(
+    ax: Axes,
+    *,
+    language: Literal['en', 'es'] = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the impulse response: waveform and log-magnitude decay.
@@ -255,7 +262,7 @@ Draws the (normalised) time-domain waveform and, below it, the
 log-magnitude envelope in dB with a Schroeder energy-decay overlay.
 With `ax` given, only the decay panel is drawn on it. Requires
 matplotlib (`pip install "phonometry[plot]"`); returns the
-`Axes` (or an array of two axes).
+`Axes` it drew on, or the tuple of two without `ax`.
 
 ### ImpulseResponseResult.shape
 
@@ -388,10 +395,20 @@ plot_excitation(
     fs: int,
     *,
     kind: Literal['sweep', 'mls'] = 'sweep',
-    ax: Axes | None = None,
+    ax: None = None,
     language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
-) -> Axes | np.ndarray
+) -> tuple[Axes, Axes]
+
+plot_excitation(
+    x: ArrayLike,
+    fs: int,
+    *,
+    kind: Literal['sweep', 'mls'] = 'sweep',
+    ax: Axes,
+    language: Literal['en', 'es'] = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot an ISO 18233 excitation signal (sweep or MLS).
@@ -413,7 +430,7 @@ bipolar sequence and its (flat) magnitude spectrum.
 | `ax` | Existing axes for the top (time-domain) panel, or `None` for a fresh two-panel figure. |
 | `kwargs` | Forwarded to the time-domain `plot` call. |
 
-**Returns:** The time-domain axes (`ax` given) or the array of two axes.
+**Returns:** The time-domain axes (`ax` given) or the tuple of two axes.
 
 **Raises**
 
@@ -531,11 +548,18 @@ the result, together with the achieved crest factor.
 
 ```python
 ShapedSweepResult.plot(
-    ax: Axes | None = None,
+    ax: None = None,
     *,
     language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
-) -> Axes | np.ndarray
+) -> tuple[Axes, Axes]
+
+ShapedSweepResult.plot(
+    ax: Axes,
+    *,
+    language: Literal['en', 'es'] = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the sweep waveform and its spectrum against the target.

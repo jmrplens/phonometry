@@ -25,7 +25,7 @@ RNG = np.random.default_rng(20260801)
 
 
 def _labels(ax: object) -> str:
-    axes = ax if isinstance(ax, np.ndarray) else [ax]
+    axes = ax if isinstance(ax, tuple) else [ax]
     parts: list[str] = []
     for a in axes:
         parts += [a.get_xlabel(), a.get_ylabel(), a.get_title()]

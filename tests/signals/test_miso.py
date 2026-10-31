@@ -405,7 +405,7 @@ def test_plot_returns_two_panels(language: str) -> None:
     y = _fir(x1, [1.0, 0.3]) + _fir(x2, [0.4, -0.5]) + _white(122, rms=0.3, n=1 << 17)
     res = ph.signals.miso_coherence([x1, x2], y, FS, nperseg=1024)
     axes = res.plot(language=language)
-    assert np.asarray(axes).size == 2
+    assert len(axes) == 2
     plt.close("all")
 
 

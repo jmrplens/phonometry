@@ -143,11 +143,18 @@ Piersol).
 
 ```python
 FrequencyResponseResult.plot(
-    ax: Axes | None = None,
+    ax: None = None,
     *,
     language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
-) -> Axes | NDArray[Any]
+) -> tuple[Axes, Axes, Axes]
+
+FrequencyResponseResult.plot(
+    ax: Axes,
+    *,
+    language: Literal['en', 'es'] = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the Bode magnitude/phase and the coherence.

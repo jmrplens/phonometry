@@ -25,7 +25,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 
@@ -55,6 +55,7 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     from .._i18n import Language
+    from .._internal.types import ThreePanels
     from ..io._signal import Signal
 
 __all__ = [
@@ -214,9 +215,17 @@ class FrequencyResponseResult(OwnsArrays):
             axis="frequency",
         )
 
+    @overload
+    def plot(
+        self, ax: None = None, *, language: Language = "en", **kwargs: Any
+    ) -> ThreePanels: ...
+
+    @overload
+    def plot(self, ax: Axes, *, language: Language = "en", **kwargs: Any) -> Axes: ...
+
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
-    ) -> Axes | NDArray[Any]:
+    ) -> Axes | ThreePanels:
         """Plot the Bode magnitude/phase and the coherence.
 
         :param language: Label language, ``"en"`` (default) or ``"es"``.

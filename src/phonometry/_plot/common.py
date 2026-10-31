@@ -17,14 +17,15 @@ package is missing, mirroring :func:`phonometry.filters.design._showfilter`.
 
 The functions are pure renderers: they never call ``plt.show``; when ``ax``
 is ``None`` they create a fresh figure and axes, and they always *return*
-the :class:`~matplotlib.axes.Axes` (or an array of axes for multi-panel
-figures) so the plot can be composed into a larger layout.
+the :class:`~matplotlib.axes.Axes` (or a tuple of axes, top panel first, for
+a multi-panel figure drawn without ``ax``) so the plot can be composed into a
+larger layout.
 """
 
 from __future__ import annotations
 
 from functools import lru_cache
-from typing import TYPE_CHECKING, Any, Final, cast
+from typing import TYPE_CHECKING, Any, Final, Literal, cast, overload
 
 import numpy as np
 
@@ -40,10 +41,12 @@ if TYPE_CHECKING:
     from matplotlib.legend import Legend
     from matplotlib.lines import Line2D
     from matplotlib.path import Path
+    from matplotlib.projections.polar import PolarAxes
     from matplotlib.transforms import Bbox
     from matplotlib.typing import ColorType, LegendLocType
 
     from .._i18n import Language
+    from .._internal.types import ThreePanels, TwoPanels
     from ..emission._sound_power_anechoic import PrecisionSoundPowerResult
     from ..emission._sound_power_in_duct import InDuctSoundPowerResult
     from ..emission._sound_power_intensity import (
@@ -616,12 +619,47 @@ def _new_axes() -> Axes:
     return cast("Axes", ax)
 
 
-def _new_axes_column(n: int, **kwargs: Any) -> np.ndarray:
-    """Create a stacked column of ``n`` axes and return them as an array."""
+def _new_polar_axes() -> PolarAxes:
+    """Create a single fresh polar figure + axes and return the axes."""
+    plt = _import_pyplot()
+    _fig, ax = plt.subplots(subplot_kw={"projection": "polar"})
+    return cast("PolarAxes", ax)
+
+
+def _polar_axes(ax: Axes | None, *, purpose: str = "") -> PolarAxes:
+    """The polar axes to draw on: ``ax`` when it is polar, a new one for ``None``.
+
+    :param ax: The caller's axes, or ``None`` to create a polar figure.
+    :param purpose: What needs the polar axes, appended to the refusal
+        (``" for the response view"``), for a plot that draws its other views
+        on a cartesian one.
+    :return: ``ax``, typed as the polar axes it is, or a new one.
+    :raises ValueError: If ``ax`` is not a polar axes.
+    """
+    if ax is None:
+        return _new_polar_axes()
+    if getattr(ax, "name", None) != "polar":
+        msg = (
+            "'ax' must be a polar axes (subplot_kw={'projection': 'polar'})"
+            f"{purpose}; pass ax=None to create one."
+        )
+        raise ValueError(msg)
+    return cast("PolarAxes", ax)
+
+
+@overload
+def _new_axes_column(n: Literal[2], **kwargs: Any) -> TwoPanels: ...
+
+
+@overload
+def _new_axes_column(n: Literal[3], **kwargs: Any) -> ThreePanels: ...
+
+
+def _new_axes_column(n: Literal[2, 3], **kwargs: Any) -> tuple[Axes, ...]:
+    """Create a stacked column of ``n`` axes and return them as a tuple, top first."""
     plt = _import_pyplot()
     _fig, axes = plt.subplots(n, 1, **kwargs)
-    result: np.ndarray = np.atleast_1d(axes)
-    return result
+    return tuple(cast("Axes", ax) for ax in np.atleast_1d(axes))
 
 
 #: Matplotlib property aliases, long spelling to short. Since matplotlib 3.3 a

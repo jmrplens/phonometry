@@ -18,6 +18,8 @@ from numpy.typing import NDArray
 if TYPE_CHECKING:
     from collections.abc import Mapping
 
+    from matplotlib.axes import Axes
+
 #: Real-valued float64 array alias shared across the library.
 Real = NDArray[np.float64]
 
@@ -46,6 +48,14 @@ CalibrationField = Literal["pressure", "free"]
 #: The engine a ``report`` entry point draws its fiche with. ``"reportlab"``
 #: is the only one; the parameter is the seam a second engine would come in by.
 ReportEngine = Literal["reportlab"]
+
+#: The two panels of a two-panel figure, top first: what a multi-panel
+#: ``.plot()`` returns when it is handed no axes. The API reference prints it
+#: as its definition.
+type TwoPanels = tuple[Axes, Axes]
+
+#: The three panels of a three-panel figure, top first.
+type ThreePanels = tuple[Axes, Axes, Axes]
 
 #: The two weightings :data:`AOrZWeighting` accepts.
 A_OR_Z_WEIGHTINGS: tuple[AOrZWeighting, ...] = ("A", "Z")

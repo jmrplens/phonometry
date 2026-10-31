@@ -64,7 +64,7 @@ is :func:`phonometry.signals.multitaper.multitaper_psd`.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 
@@ -83,6 +83,7 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     from .._i18n import Language
+    from .._internal.types import ThreePanels, TwoPanels
     from ..io._signal import Signal
 
 Scaling = Literal["density", "spectrum"]
@@ -683,9 +684,17 @@ class CrossSpectralDensityResult(OwnsArrays):
             axis="frequency",
         )
 
+    @overload
+    def plot(
+        self, ax: None = None, *, language: Language = "en", **kwargs: Any
+    ) -> ThreePanels: ...
+
+    @overload
+    def plot(self, ax: Axes, *, language: Language = "en", **kwargs: Any) -> Axes: ...
+
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
-    ) -> Axes | NDArray[Any]:
+    ) -> Axes | ThreePanels:
         """Plot the magnitude, phase (with ±σ band) and coherence.
 
         :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -912,9 +921,17 @@ class CoherentOutputSpectrumResult(OwnsArrays):
             axis="frequency",
         )
 
+    @overload
+    def plot(
+        self, ax: None = None, *, language: Language = "en", **kwargs: Any
+    ) -> TwoPanels: ...
+
+    @overload
+    def plot(self, ax: Axes, *, language: Language = "en", **kwargs: Any) -> Axes: ...
+
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
-    ) -> Axes | NDArray[Any]:
+    ) -> Axes | TwoPanels:
         """Plot the output/coherent/noise spectra and the spectral SNR.
 
         :param language: Label language, ``"en"`` (default) or ``"es"``.

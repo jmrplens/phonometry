@@ -67,7 +67,7 @@ remedy, exactly like the ``oversample`` padding of
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 
@@ -86,6 +86,7 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     from .._i18n import Language
+    from .._internal.types import TwoPanels
     from ..io._signal import Signal
 
 Kind = Literal["power", "real", "complex"]
@@ -404,9 +405,17 @@ class LifterResult(OwnsArrays):
         )
         require_same_length(self, "quefrencies", "cepstrum", axis="quefrency")
 
+    @overload
+    def plot(
+        self, ax: None = None, *, language: Language = "en", **kwargs: Any
+    ) -> TwoPanels: ...
+
+    @overload
+    def plot(self, ax: Axes, *, language: Language = "en", **kwargs: Any) -> Axes: ...
+
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
-    ) -> Axes | NDArray[Any]:
+    ) -> Axes | TwoPanels:
         """Plot the cepstrum with the cutoff and the two log spectra.
 
         With ``ax`` given, only the spectrum panel is drawn on it.

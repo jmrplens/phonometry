@@ -21,7 +21,7 @@ the window as this library actually uses it.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, overload
 
 import numpy as np
 
@@ -40,6 +40,7 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     from .._i18n import Language
+    from .._internal.types import TwoPanels
 
 __all__ = [
     "WindowMetricsResult",
@@ -142,9 +143,17 @@ class WindowMetricsResult(OwnsArrays):
         """
         return self.enbw_bins * _positive(fs, "fs") / self.n
 
+    @overload
+    def plot(
+        self, ax: None = None, *, language: Language = "en", **kwargs: Any
+    ) -> TwoPanels: ...
+
+    @overload
+    def plot(self, ax: Axes, *, language: Language = "en", **kwargs: Any) -> Axes: ...
+
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
-    ) -> Axes | NDArray[Any]:
+    ) -> Axes | TwoPanels:
         """Plot the window shape and its spectrum with the metrics marked.
 
         :param language: Label language, ``"en"`` (default) or ``"es"``.

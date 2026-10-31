@@ -505,8 +505,8 @@ def test_impulse_response_plot_returns_axes() -> None:
     rec, sweep = _synthetic_recording()
     ir = room.impulse_response(rec, sweep, FS)
     axes = ir.plot()
-    assert isinstance(axes, np.ndarray)
-    assert axes.size == 2
+    assert isinstance(axes, tuple)
+    assert len(axes) == 2
     assert all(isinstance(a, Axes) for a in axes)
 
     _, single = mpl.pyplot.subplots()
@@ -523,13 +523,13 @@ def test_plot_excitation_returns_axes() -> None:
 
     sweep = room.sweep_signal(FS, 20.0, 20000.0, 0.5)
     axes = room.plot_excitation(sweep, FS, kind="sweep")
-    assert isinstance(axes, np.ndarray)
-    assert axes.size == 2
+    assert isinstance(axes, tuple)
+    assert len(axes) == 2
 
     mls = room.mls_signal(12).astype(float)
     axes_m = room.plot_excitation(mls, FS, kind="mls")
-    assert isinstance(axes_m, np.ndarray)
-    assert axes_m.size == 2
+    assert isinstance(axes_m, tuple)
+    assert len(axes_m) == 2
     assert all(isinstance(a, Axes) for a in axes_m)
     mpl.pyplot.close("all")
 
@@ -543,7 +543,7 @@ def test_plot_excitation_short_and_empty_guards() -> None:
     # A short sweep must not crash the spectrogram (nperseg capped by length).
     short = room.sweep_signal(FS, 100.0, 4000.0, 0.02)
     axes = room.plot_excitation(short, FS, kind="sweep")
-    assert axes.size == 2
+    assert len(axes) == 2
     plt.close("all")
 
     # Empty inputs raise a clear error rather than a cryptic reduction failure.

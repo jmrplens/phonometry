@@ -41,7 +41,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, overload
 
 import numpy as np
 
@@ -69,7 +69,7 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike
 
     from .._i18n import Language
-    from .._internal.types import ReportEngine
+    from .._internal.types import ReportEngine, TwoPanels
     from .._report.metadata import ReportMetadata
     from ..io._signal import Signal
 
@@ -243,15 +243,23 @@ class RoomAcousticsResult(OwnsArrays):
         )
         return np.isfinite(self.t30) & (self.dynamic_range >= needed)
 
+    @overload
+    def plot(
+        self, ax: None = None, *, language: Language = "en", **kwargs: Any
+    ) -> TwoPanels: ...
+
+    @overload
+    def plot(self, ax: Axes, *, language: Language = "en", **kwargs: Any) -> Axes: ...
+
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
-    ) -> Axes | np.ndarray:
+    ) -> Axes | TwoPanels:
         """Plot per-band decay times (EDT/T20/T30) and clarity (C50/C80).
 
         Invalid bands are hatched and greyed. With ``ax`` given, only the
         decay-times panel is drawn on it. Requires matplotlib
         (``pip install "phonometry[plot]"``); returns the
-        :class:`~matplotlib.axes.Axes` (or array thereof).
+        :class:`~matplotlib.axes.Axes` it drew on, or the tuple of two without ``ax``.
         """
         from .._i18n import check_language
         from .._plot.room import plot_room_acoustics

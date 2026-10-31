@@ -77,11 +77,18 @@ with `bark` the critical-band-rate scale z (0,5..26,5 Bark_HMS) and
 
 ```python
 EcmaLoudness.plot(
-    ax: Axes | None = None,
+    ax: None = None,
     *,
     language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
-) -> Axes | np.ndarray
+) -> tuple[Axes, Axes]
+
+EcmaLoudness.plot(
+    ax: Axes,
+    *,
+    language: Literal['en', 'es'] = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the average specific loudness N'(z) (see `phonometry._plot.psychoacoustics`).

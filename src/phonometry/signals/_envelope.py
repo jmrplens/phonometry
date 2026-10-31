@@ -50,7 +50,7 @@ from __future__ import annotations
 import math
 from dataclasses import KW_ONLY, dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, ClassVar, Literal
+from typing import TYPE_CHECKING, Any, ClassVar, Literal, overload
 
 import numpy as np
 
@@ -72,6 +72,7 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     from .._i18n import Language
+    from .._internal.types import TwoPanels
     from ..io._signal import Signal
 
 Kind = Literal["magnitude", "squared"]
@@ -161,9 +162,17 @@ class EnvelopeResult(OwnsArrays):
         )
         require_signal_rate(self, "signal", self.signal_fs, rate_field="signal_fs")
 
+    @overload
+    def plot(
+        self, ax: None = None, *, language: Language = "en", **kwargs: Any
+    ) -> TwoPanels: ...
+
+    @overload
+    def plot(self, ax: Axes, *, language: Language = "en", **kwargs: Any) -> Axes: ...
+
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
-    ) -> Axes | NDArray[Any]:
+    ) -> Axes | TwoPanels:
         """Plot the signal with its envelope and the instantaneous frequency.
 
         :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -389,9 +398,17 @@ class EnvelopeSpectrumResult(OwnsArrays):
             )
             raise ValueError(msg)
 
+    @overload
+    def plot(
+        self, ax: None = None, *, language: Language = "en", **kwargs: Any
+    ) -> TwoPanels: ...
+
+    @overload
+    def plot(self, ax: Axes, *, language: Language = "en", **kwargs: Any) -> Axes: ...
+
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
-    ) -> Axes | NDArray[Any]:
+    ) -> Axes | TwoPanels:
         """Plot the detected envelope and its amplitude spectrum.
 
         With ``ax`` given, only the spectrum panel is drawn on it.

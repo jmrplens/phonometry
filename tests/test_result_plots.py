@@ -28,8 +28,13 @@ from __future__ import annotations
 
 import ast
 import builtins
+import functools
 import inspect
-from typing import TYPE_CHECKING
+import itertools
+import pathlib
+import sys
+import typing
+from typing import TYPE_CHECKING, Any
 
 import matplotlib as mpl
 
@@ -65,6 +70,7 @@ from result_factories import (
     _channel_match,
     _cnossos_road,
     _coherence_check,
+    _coherent_output_spectrum,
     _comparison_budget,
     _comparison_calibration,
     _comparison_phase,
@@ -75,9 +81,12 @@ from result_factories import (
     _coupler_frequency_response,
     _coupler_parameter_uncertainty,
     _coupler_transfer_impedance,
+    _cross_spectral_density,
     _crosstalk_attenuation,
     _diffuse_absorption,
     _diffuse_field,
+    _diffuser_polar_response,
+    _diffusion,
     _direct_sound_subtraction,
     _directivity_factor,
     _double_hit,
@@ -85,9 +94,16 @@ from result_factories import (
     _driving_point_stiffness,
     _ear_canal_frequency_response,
     _ear_canal_microphone,
+    _ecma_fluctuation_strength,
+    _ecma_loudness,
+    _ecma_roughness,
+    _ecma_tonality,
     _effective_blocking_mass,
     _emergence,
+    _envelope,
+    _envelope_spectrum,
     _environmental_sensitivity_correction,
+    _eq_response,
     _exp_ir,
     _exposure,
     _extended_impact_rating,
@@ -102,6 +118,7 @@ from result_factories import (
     _free_field_correction,
     _free_field_parameter_uncertainty,
     _free_field_region,
+    _frequency_response,
     _gap_width_check,
     _hard_walled_power,
     _hard_walled_room_check,
@@ -114,6 +131,7 @@ from result_factories import (
     _impact_rating,
     _impedance_pressure_ratio,
     _impedance_tube,
+    _impulse_response,
     _in_situ_power,
     _induction_loop_verification,
     _instrument_agreement,
@@ -130,17 +148,21 @@ from result_factories import (
     _lab_lining_improvement,
     _layered_absorber,
     _level_difference_quantiles,
+    _lifter,
     _limiting_test_signal,
     _lining_curing_check,
     _loop_field,
     _loop_impedance,
     _loop_requirement,
+    _loudspeaker,
     _low_frequency,
     _low_frequency_procedure,
     _maximum_output_current,
     _measurement_disturbance,
     _method_a_summary,
     _method_b_summary,
+    _microphone,
+    _miso_coherence,
     _modulation,
     _monte_carlo,
     _neck_loop_characteristics,
@@ -151,6 +173,9 @@ from result_factories import (
     _pass_by_measurement,
     _pass_by_uncertainty,
     _people_assessment,
+    _phase_decomposition,
+    _pile_strike,
+    _piston_directivity,
     _plant_contour,
     _plant_sound_power,
     _pleasantness_eventfulness,
@@ -184,16 +209,19 @@ from result_factories import (
     _response_decay,
     _reverb_energy,
     _reverb_power,
+    _rigid_mass_calibration,
     _rise_speed,
     _rolling_stock_roughness_record,
     _rolling_stock_test,
     _room,
+    _room_modes,
     _roughness_comparability,
     _round_robin_precision,
     _sel_distribution,
     _service_equipment,
     _service_equipment_background,
     _service_equipment_positions,
+    _shaped_sweep,
     _single_mode_fit,
     _single_panel,
     _slit_aperture,
@@ -202,6 +230,7 @@ from result_factories import (
     _sound_calibrator,
     _sound_energy,
     _sound_power,
+    _sound_strength,
     _soundscape_correlation,
     _source_directionality,
     _source_location_plan,
@@ -215,6 +244,8 @@ from result_factories import (
     _statistical_pass_by,
     _stepped_sine_impulse_response,
     _sti,
+    _swept_sine_distortion,
+    _synchronous_average,
     _time_invariance,
     _time_selective_response,
     _tone_search,
@@ -227,22 +258,32 @@ from result_factories import (
     _turbine_power,
     _turbine_surface,
     _varying_background,
+    _vector_change,
     _vibration_meter_reading,
     _vibration_meter_verification,
     _wave_motion_correction,
     _wind_shear,
     _window_correction,
+    _window_metrics,
     _wt_rating,
     _zwicker_stationary,
+    _zwicker_time_varying,
 )
 
 import phonometry as ph
 from phonometry._plot import common as _plotting
 
+_SCRIPTS = str(pathlib.Path(__file__).resolve().parents[1] / "scripts")
+if _SCRIPTS not in sys.path:
+    sys.path.insert(0, _SCRIPTS)
+
+import generate_api_docs as gad
+
 if TYPE_CHECKING:
     from collections.abc import Callable
     from types import ModuleType
 
+    from matplotlib.axes import Axes
     from matplotlib.lines import Line2D
     from matplotlib.patches import Patch
 
@@ -914,7 +955,7 @@ def test_every_plot_forwards_kwargs_to_primary_artist(
 ) -> None:
     res = factory()
     out = res.plot(linewidth=2)
-    ax = out[0] if isinstance(out, np.ndarray) else out
+    ax = out[0] if isinstance(out, tuple) else out
     artists = ax.lines if kind == "line" else ax.patches
     assert artists, f"{name}: no primary {kind} artist drawn"
     assert any(a.get_linewidth() == 2.0 for a in artists), (
@@ -925,7 +966,7 @@ def test_every_plot_forwards_kwargs_to_primary_artist(
     # A user-supplied color must win over the renderer's fixed default rather
     # than raising ``TypeError: got multiple values for keyword 'color'``.
     out = res.plot(color="red")
-    ax = out[0] if isinstance(out, np.ndarray) else out
+    ax = out[0] if isinstance(out, tuple) else out
     artists = ax.lines if kind == "line" else ax.patches
     red = plt.matplotlib.colors.to_rgba("red")
 
@@ -945,7 +986,7 @@ def test_every_plot_forwards_kwargs_to_primary_artist(
     # got `TypeError: got multiple values for keyword argument 'label'`
     # instead of a labelled curve.
     out = res.plot(label="mine")
-    ax = out[0] if isinstance(out, np.ndarray) else out
+    ax = out[0] if isinstance(out, tuple) else out
     # Through the legend, not through the artist: `ax.bar` puts the label on
     # the container it returns rather than on each rectangle, so reading
     # `ax.patches` would miss it on every bar renderer. The legend is what the
@@ -966,7 +1007,7 @@ def test_every_plot_forwards_kwargs_to_primary_artist(
     # such alias, so the bar renderers are held to `lw`, which every artist
     # aliases, and the colour half of the check stays with the line renderers.
     out = res.plot(c="red", lw=2) if kind == "line" else res.plot(lw=2)
-    ax = out[0] if isinstance(out, np.ndarray) else out
+    ax = out[0] if isinstance(out, tuple) else out
     artists = ax.lines if kind == "line" else ax.patches
     assert any(a.get_linewidth() == 2.0 for a in artists), (
         f"{name}: the short spelling of linewidth did not reach the artist"
@@ -982,7 +1023,7 @@ def test_every_plot_forwards_kwargs_to_primary_artist(
     # package, so a caller who stacked a curve got `TypeError: got multiple
     # values for keyword argument 'zorder'` instead of a figure.
     out = res.plot(zorder=7)
-    ax = out[0] if isinstance(out, np.ndarray) else out
+    ax = out[0] if isinstance(out, tuple) else out
     artists = ax.lines if kind == "line" else ax.patches
     assert any(a.get_zorder() == 7 for a in artists), (
         f"{name}: zorder kwarg did not reach the primary artist"
@@ -1455,4 +1496,328 @@ def test_a_keyword_the_renderer_computes_from_the_data_is_refused(
     method = getattr(factory(), draw)
     with pytest.raises(TypeError, match=f"{keyword} cannot be overridden"):
         method(**{keyword: value})
+    plt.close("all")
+
+
+# --------------------------------------------------------------------------
+# A plot returns the type its signature promises for the axes it was handed
+# --------------------------------------------------------------------------
+#: A built result for every public result whose ``.plot()`` returns what an
+#: argument decides (overloaded on ``ax``, or on a ``view`` or a ``quantity``
+#: that chooses a polar axes) or always returns a polar axes, keyed as
+#: :func:`_public_plot_methods` keys it.
+_DECIDED_PLOT_RESULTS: dict[str, Callable[[], Any]] = {
+    "phonometry.electroacoustics.frequency_response.FrequencyResponseResult": (
+        _frequency_response
+    ),
+    "phonometry.electroacoustics.loudspeaker.LoudspeakerCharacteristics": (
+        _loudspeaker
+    ),
+    "phonometry.electroacoustics.microphone.MicrophoneCharacteristics": _microphone,
+    "phonometry.electroacoustics.piston.PistonDirectivity": _piston_directivity,
+    "phonometry.electroacoustics.swept_sine.SweptSineDistortionResult": (
+        _swept_sine_distortion
+    ),
+    "phonometry.filters.equalizer.EQResponseResult": _eq_response,
+    "phonometry.materials.diffusers.design.DiffuserPolarResponse": (
+        _diffuser_polar_response
+    ),
+    "phonometry.materials.diffusers.scattering_diffusion.DiffusionResult": _diffusion,
+    "phonometry.metrology.random_incidence.DirectivityFactor": _directivity_factor,
+    "phonometry.psychoacoustics.loudness.ecma.EcmaLoudness": _ecma_loudness,
+    "phonometry.psychoacoustics.loudness.zwicker.ZwickerLoudness": (
+        _zwicker_time_varying
+    ),
+    "phonometry.psychoacoustics.quality._fluctuation_strength_ecma.EcmaFluctuationStrength": (
+        _ecma_fluctuation_strength
+    ),
+    "phonometry.psychoacoustics.quality._roughness_ecma.EcmaRoughness": (
+        _ecma_roughness
+    ),
+    "phonometry.psychoacoustics.quality._tonality_ecma.EcmaTonality": _ecma_tonality,
+    "phonometry.room._impulse_response.ImpulseResponseResult": _impulse_response,
+    "phonometry.room._impulse_response.ShapedSweepResult": _shaped_sweep,
+    "phonometry.room.acoustics.RoomAcousticsResult": lambda: _room([250, 2000]),
+    "phonometry.room.auditorium.SoundStrengthResult": _sound_strength,
+    "phonometry.room.modes.RoomModesResult": _room_modes,
+    "phonometry.signals._cepstrum.LifterResult": _lifter,
+    "phonometry.signals._envelope.EnvelopeResult": _envelope,
+    "phonometry.signals._envelope.EnvelopeSpectrumResult": _envelope_spectrum,
+    "phonometry.signals.miso.MISOCoherenceResult": _miso_coherence,
+    "phonometry.signals.phase.PhaseDecompositionResult": _phase_decomposition,
+    "phonometry.signals.spectra.CoherentOutputSpectrumResult": (
+        _coherent_output_spectrum
+    ),
+    "phonometry.signals.spectra.CrossSpectralDensityResult": _cross_spectral_density,
+    "phonometry.signals.synchronous_average.SynchronousAverageResult": (
+        _synchronous_average
+    ),
+    "phonometry.signals.windows.WindowMetricsResult": _window_metrics,
+    "phonometry.underwater.sources.pile_driving_noise.PileStrikeResult": _pile_strike,
+    "phonometry.vibration.machinery.evaluation.VectorChangeResult": _vector_change,
+    "phonometry.vibration.structural._impact_mobility.ChannelMatchVerification": (
+        _channel_match
+    ),
+    "phonometry.vibration.structural._impact_mobility.DoubleHitCheck": _double_hit,
+    "phonometry.vibration.structural._impact_mobility.ImpactMobilityResult": (
+        _impact_mobility
+    ),
+    "phonometry.vibration.structural.mechanical_mobility.RigidMassCalibrationResult": (
+        _rigid_mass_calibration
+    ),
+}
+
+#: The public ``plot_`` helpers whose return an argument decides, each called
+#: on a small input of its own with the keywords the test chooses.
+_DECIDED_PLOT_HELPERS: dict[str, Callable[..., object]] = {
+    "plot_excitation": lambda **kwargs: ph.room.plot_excitation(
+        ph.room.sweep_signal(FS, 100.0, 4000.0, 0.1), FS, **kwargs
+    ),
+}
+
+#: What a head's return annotation promises, read off its text as the API
+#: reference prints it (an alias such as ``TwoPanels`` spelled out): one axes,
+#: a polar one, a column of ``n`` axes, or one or two as the data decide.
+_A_COLUMN = "tuple[Axes"
+
+
+def _promised(head: Callable[..., object]) -> str:
+    """The return annotation of ``head``, its unpublished aliases spelled out."""
+    written = str(inspect.signature(head).return_annotation)
+    return gad.expand_unpublished_aliases(written, head.__module__)
+
+
+def _decided(function: Callable[..., object]) -> bool:
+    """Whether an argument decides what a plot returns, or it returns a polar axes.
+
+    Overloads whose heads all return the same type (the "both or neither"
+    heads of a geometry helper) decide nothing about the return.
+    """
+    returns = {_promised(head) for head in typing.get_overloads(function)}
+    return len(returns) > 1 or "PolarAxes" in _promised(function)
+
+
+@functools.cache
+def _decided_methods() -> dict[str, Callable[..., object]]:
+    """Every public ``plot`` whose return an argument decides, or that is polar."""
+    return {
+        owner: method
+        for owner, method in _public_plot_methods().items()
+        if _decided(method)
+    }
+
+
+def _decided_helpers() -> dict[str, Callable[..., object]]:
+    """Every public ``plot_`` helper whose return an argument decides."""
+    return {
+        name: helper
+        for name, helper in _public_plot_helpers().items()
+        if _decided(helper)
+    }
+
+
+def _literal_values(annotation: object, module: str) -> tuple[str, ...] | None:
+    """The options of a ``Literal`` annotation, or of an alias the module defines."""
+    if not isinstance(annotation, str):
+        return None
+    node = ast.parse(annotation, mode="eval").body
+    if isinstance(node, ast.Name):
+        alias = getattr(sys.modules[module], node.id, None)
+        if typing.get_origin(alias) is typing.Literal:
+            return tuple(str(value) for value in typing.get_args(alias))
+        return None
+    if (
+        isinstance(node, ast.Subscript)
+        and isinstance(node.value, ast.Name)
+        and node.value.id == "Literal"
+    ):
+        items = node.slice.elts if isinstance(node.slice, ast.Tuple) else [node.slice]
+        return tuple(str(ast.literal_eval(item)) for item in items)
+    return None
+
+
+def _calls(head: Callable[..., object]) -> list[tuple[dict[str, object], str | None]]:
+    """Every call a head admits: each axes it takes, and each option of its choices.
+
+    The second item names the axes handed in (``"polar"`` or ``"cartesian"``),
+    or is ``None`` when the head takes none and the plot makes its own.
+    """
+    parameters = inspect.signature(head).parameters
+    axes = str(parameters["ax"].annotation)
+    handed: list[str | None] = []
+    if "None" in axes:
+        handed.append(None)
+    if "PolarAxes" in axes:
+        handed.append("polar")
+    elif "Axes" in axes:
+        handed.append("cartesian")
+    choices = [
+        [(name, value) for value in values]
+        for name, parameter in parameters.items()
+        if (values := _literal_values(parameter.annotation, head.__module__))
+        and name != "language"
+    ]
+    return [
+        (dict(picked), projection)
+        for projection in handed
+        for picked in itertools.product(*choices)
+    ]
+
+
+def _fresh_axes(projection: str) -> Axes:
+    _fig, ax = plt.subplots(
+        subplot_kw={"projection": "polar"} if projection == "polar" else None
+    )
+    return ax
+
+
+def _check_return(out: object, promised: str, given: Axes | None, where: str) -> None:
+    """``out`` is what the head's return annotation ``promised`` says it is."""
+    from matplotlib.axes import Axes as MplAxes
+
+    if promised.startswith(_A_COLUMN):
+        panels = promised.count("Axes")
+        assert given is None, f"{where}: a column of axes for a given axes"
+        assert isinstance(out, tuple), f"{where}: {type(out).__name__}, not a tuple"
+        assert len(out) == panels, f"{where}: {len(out)} axes, not {panels}"
+        assert all(isinstance(ax, MplAxes) for ax in out), where
+        assert len({id(ax) for ax in out}) == panels, f"{where}: an axes twice"
+        return
+    if promised == "Axes | tuple[Axes, Axes]":
+        if isinstance(out, tuple):
+            assert given is None, f"{where}: a column of axes for a given axes"
+            assert len(out) == 2, where
+            return
+        assert isinstance(out, MplAxes), where
+    else:
+        assert promised in {"Axes", "PolarAxes"}, f"{where}: unread {promised!r}"
+        assert isinstance(out, MplAxes), f"{where}: {type(out).__name__}, not Axes"
+        polar = out.name == "polar"
+        assert polar == (promised == "PolarAxes"), (
+            f"{where}: {out.name} axes where the head promises {promised}"
+        )
+    if given is not None:
+        assert out is given, f"{where}: not the axes it was handed"
+
+
+def _honours_its_heads(
+    draw: Callable[..., object], function: Callable[..., object], name: str
+) -> None:
+    """Every head of ``function`` holds for every call it admits on ``draw``."""
+    heads = typing.get_overloads(function) or [function]
+    for head in heads:
+        promised = _promised(head)
+        for keywords, projection in _calls(head):
+            given = None if projection is None else _fresh_axes(projection)
+            arguments = dict(keywords) if given is None else {**keywords, "ax": given}
+            out = draw(**arguments)
+            _check_return(out, promised, given, f"{name}({arguments})")
+            plt.close("all")
+
+
+def _choices_covered(function: Callable[..., object], name: str) -> None:
+    """Each option of a choice the heads split is taken by exactly one head.
+
+    A choice every head takes whole (``kind`` of the excitation plot) is no
+    split; one the heads divide (``view``, ``quantity``) has to be divided
+    without a gap and without an option two heads claim.
+    """
+    heads = typing.get_overloads(function)
+    for parameter, spelled in inspect.signature(function).parameters.items():
+        options = _literal_values(spelled.annotation, function.__module__)
+        if parameter == "language" or options is None:
+            continue
+        per_head = [
+            _literal_values(
+                inspect.signature(head).parameters[parameter].annotation,
+                head.__module__,
+            )
+            or ()
+            for head in heads
+        ]
+        if all(sorted(taken) == sorted(options) for taken in per_head):
+            continue
+        taken = sorted(value for values in per_head for value in values)
+        if taken != sorted(options):
+            msg = f"{name}: the heads take {taken} of {parameter} {sorted(options)}"
+            raise AssertionError(msg)
+
+
+def test_every_decided_plot_has_a_built_result() -> None:
+    """A new plot whose return an argument decides gets a result here, or fails.
+
+    The contract below can only hold a plot to its signature when it has a
+    result to draw, so the table of results and the plots the walk finds are
+    the same set.
+    """
+    assert set(_decided_methods()) == set(_DECIDED_PLOT_RESULTS)
+    assert set(_decided_helpers()) == set(_DECIDED_PLOT_HELPERS)
+
+
+@pytest.mark.parametrize("owner", sorted(_DECIDED_PLOT_RESULTS))
+def test_a_plot_returns_what_its_signature_promises(owner: str) -> None:
+    """Without ``ax`` a column of axes, with one that axes, polar where promised.
+
+    A multi-panel ``.plot()`` returned an ndarray of axes without ``ax`` and
+    the axes it was given with one, and its annotation said only "one or the
+    other", so a typed caller narrowed a value the call had already decided.
+    Each overload head now says which, and this calls every head as it is
+    written: with no axes, with an axes of the projection it takes, and with
+    each option of a ``view`` or ``quantity`` it splits on. The runtime value
+    has to be what that head returns: a tuple of exactly its axes, the very
+    axes it was handed, or a polar axes exactly where it says ``PolarAxes``.
+    """
+    method = _decided_methods()[owner]
+    result = _DECIDED_PLOT_RESULTS[owner]()
+    _choices_covered(method, owner)
+    _honours_its_heads(result.plot, method, owner)
+
+
+@pytest.mark.parametrize("name", sorted(_DECIDED_PLOT_HELPERS))
+def test_a_plot_helper_returns_what_its_signature_promises(name: str) -> None:
+    helper = _decided_helpers()[name]
+    _choices_covered(helper, name)
+    _honours_its_heads(_DECIDED_PLOT_HELPERS[name], helper, name)
+
+
+@pytest.mark.parametrize(
+    ("owner", "keywords"),
+    [
+        ("phonometry.electroacoustics.piston.PistonDirectivity", {}),
+        ("phonometry.materials.diffusers.design.DiffuserPolarResponse", {}),
+        ("phonometry.vibration.machinery.evaluation.VectorChangeResult", {}),
+        ("phonometry.metrology.random_incidence.DirectivityFactor", {}),
+        (
+            "phonometry.electroacoustics.loudspeaker.LoudspeakerCharacteristics",
+            {"quantity": "directivity"},
+        ),
+        (
+            "phonometry.electroacoustics.microphone.MicrophoneCharacteristics",
+            {"quantity": "directivity"},
+        ),
+    ],
+)
+def test_a_plot_that_draws_on_a_polar_axes_refuses_a_cartesian_one(
+    owner: str, keywords: dict[str, str]
+) -> None:
+    """The heads say PolarAxes for these; a cartesian axes is refused by name.
+
+    The predicted diffuser response took any axes and failed on the first
+    polar setter with an ``AttributeError``; it now refuses as the other polar
+    plots do, before it draws.
+    """
+    result = _DECIDED_PLOT_RESULTS[owner]()
+    _fig, ax = plt.subplots()
+    with pytest.raises(ValueError, match="'ax' must be a polar axes"):
+        result.plot(ax, **keywords)
+    plt.close("all")
+
+
+def test_the_diffusion_fiche_refuses_a_cartesian_axes() -> None:
+    from phonometry._plot.materials import plot_diffusion_polar_report
+
+    result = _diffusion()
+    _fig, ax = plt.subplots()
+    with pytest.raises(ValueError, match="'ax' must be a polar axes"):
+        plot_diffusion_polar_report(result, ax)  # type: ignore[arg-type]
     plt.close("all")

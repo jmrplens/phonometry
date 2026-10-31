@@ -144,18 +144,26 @@ to state.
 
 ```python
 ZwickerLoudness.plot(
-    ax: Axes | None = None,
+    ax: None = None,
     *,
     language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
-) -> Axes | np.ndarray
+) -> Axes | tuple[Axes, Axes]
+
+ZwickerLoudness.plot(
+    ax: Axes,
+    *,
+    language: Literal['en', 'es'] = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the specific loudness N'(z) over Bark (see `phonometry._plot.psychoacoustics`).
 
 Adds a loudness-vs-time panel when the time-varying trace is
 present.  Requires matplotlib (`pip install "phonometry[plot]"`);
-returns the `Axes` (or array thereof).
+returns the `Axes`, or a tuple of two for a
+time-varying result drawn without `ax`.
 
 ### ZwickerLoudness.report()
 

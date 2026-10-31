@@ -25,7 +25,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, overload
 
 import numpy as np
 
@@ -61,6 +61,7 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     from ..._i18n import Language
+    from ..._internal.types import TwoPanels
     from ...io._signal import Signal
 
 __all__ = [
@@ -342,9 +343,17 @@ class PileStrikeResult(OwnsArrays):
         require_finite_fields(self, "pressure_pa")
         _require_metrics_restate(self)
 
+    @overload
+    def plot(
+        self, ax: None = None, *, language: Language = "en", **kwargs: Any
+    ) -> TwoPanels: ...
+
+    @overload
+    def plot(self, ax: Axes, *, language: Language = "en", **kwargs: Any) -> Axes: ...
+
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
-    ) -> Axes | NDArray[Any]:
+    ) -> Axes | TwoPanels:
         """Plot the strike waveform and its cumulative energy."""
         from ..._i18n import check_language
         from ..._plot.underwater import plot_pile_strike

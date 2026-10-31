@@ -46,7 +46,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 from scipy import signal
@@ -57,6 +57,7 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
     from ..._i18n import Language
+    from ..._internal.types import TwoPanels
     from ...io._signal import Signal
 
 from ..._internal.frozen import OwnsArrays
@@ -316,9 +317,17 @@ class EcmaLoudness(OwnsArrays):
         )
         require_same_length(self, "times", "loudness_vs_time", axis="time block")
 
+    @overload
+    def plot(
+        self, ax: None = None, *, language: Language = "en", **kwargs: Any
+    ) -> TwoPanels: ...
+
+    @overload
+    def plot(self, ax: Axes, *, language: Language = "en", **kwargs: Any) -> Axes: ...
+
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
-    ) -> Axes | np.ndarray:
+    ) -> Axes | TwoPanels:
         """Plot the average specific loudness N'(z) (see :mod:`phonometry._plot.psychoacoustics`).
 
         Adds a loudness-vs-time panel.  Requires matplotlib

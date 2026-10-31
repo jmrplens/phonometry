@@ -63,7 +63,7 @@ so the report never merely repeats a manufacturer number:
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 
@@ -87,6 +87,7 @@ from .loudspeaker import (
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
+    from matplotlib.projections.polar import PolarAxes
     from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
@@ -653,6 +654,26 @@ class MicrophoneCharacteristics(OwnsArrays):
             self, path, metadata=metadata, language=language
         )
 
+    @overload
+    def plot(
+        self,
+        ax: PolarAxes | None = None,
+        *,
+        quantity: Literal["directivity"],
+        language: Language = "en",
+        **kwargs: Any,
+    ) -> PolarAxes: ...
+
+    @overload
+    def plot(
+        self,
+        ax: Axes | None = None,
+        *,
+        quantity: Literal["response", "noise", "distortion"] = "response",
+        language: Language = "en",
+        **kwargs: Any,
+    ) -> Axes: ...
+
     def plot(
         self,
         ax: Axes | None = None,
@@ -675,9 +696,10 @@ class MicrophoneCharacteristics(OwnsArrays):
             polar axes is created for ``"directivity"``).
         :param quantity: Which characteristic to plot (see above).
         :param language: Label language, ``"en"`` (default) or ``"es"``.
-        :return: The axes the characteristic was drawn on.
-        :raises ValueError: If ``quantity`` or ``language`` is unknown, or the
-            result carries no data for ``quantity``.
+        :return: The axes the characteristic was drawn on, polar for ``"directivity"``.
+        :raises ValueError: If ``quantity`` or ``language`` is unknown, the
+            result carries no data for ``quantity``, or ``ax`` is not a polar
+            axes for ``"directivity"``.
         :raises ImportError: If matplotlib is not installed
             (``pip install "phonometry[plot]"``).
         """

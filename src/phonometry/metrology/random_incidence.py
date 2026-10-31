@@ -126,7 +126,7 @@ import math
 import warnings
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 
@@ -147,6 +147,7 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
+    from matplotlib.projections.polar import PolarAxes
     from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
@@ -625,6 +626,26 @@ class DirectivityFactor(OwnsArrays):
         r""":math:`L(\phi) - L_\mathrm{rd}` of each reading, in dB."""
         return self.levels - self.reference_level
 
+    @overload
+    def plot(
+        self,
+        ax: PolarAxes | None = None,
+        *,
+        view: Literal["response"] = "response",
+        language: Language = "en",
+        **kwargs: Any,
+    ) -> PolarAxes: ...
+
+    @overload
+    def plot(
+        self,
+        ax: Axes | None = None,
+        *,
+        view: Literal["weights"],
+        language: Language = "en",
+        **kwargs: Any,
+    ) -> Axes: ...
+
     def plot(
         self,
         ax: Axes | None = None,
@@ -644,7 +665,7 @@ class DirectivityFactor(OwnsArrays):
             the sphere.
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to the curve of the first plane.
-        :return: The axes. Requires matplotlib
+        :return: The axes, polar for the response. Requires matplotlib
             (``pip install "phonometry[plot]"``).
         :raises ValueError: if ``view`` is not one of the two names above, or
             ``ax`` is not polar for the response.

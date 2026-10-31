@@ -260,7 +260,7 @@ class PistonDirectivity(OwnsArrays):
 
     def plot(
         self, ax: PolarAxes | None = None, *, language: Language = "en", **kwargs: Any
-    ) -> Axes:
+    ) -> PolarAxes:
         """Plot the far-field directivity (beam) pattern on a polar axes.
 
         Draws the directivity in dB against the polar angle: one curve per
@@ -273,7 +273,8 @@ class PistonDirectivity(OwnsArrays):
         :param kwargs: Forwarded to the ``Axes.plot`` call when the result
             holds a single ``ka``; ignored for a multi-``ka`` family so one
             user color or label cannot collapse the per-curve styling.
-        :return: The axes.
+        :return: The polar axes.
+        :raises ValueError: If *ax* is not a polar axes.
         """
         from .._i18n import check_language
         from .._plot.electroacoustics import plot_piston_directivity

@@ -208,7 +208,7 @@ PistonDirectivity.plot(
     *,
     language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
-) -> Axes
+) -> PolarAxes
 ```
 
 Plot the far-field directivity (beam) pattern on a polar axes.
@@ -226,7 +226,13 @@ matplotlib (`pip install "phonometry[plot]"`).
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the `Axes.plot` call when the result holds a single `ka`; ignored for a multi-`ka` family so one user color or label cannot collapse the per-curve styling. |
 
-**Returns:** The axes.
+**Returns:** The polar axes.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If *ax* is not a polar axes. |
 
 ## plot_piston_geometry
 

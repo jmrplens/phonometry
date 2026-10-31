@@ -2318,3 +2318,217 @@ def _ear_canal_microphone() -> ph.electroacoustics.EarCanalMicrophoneVerificatio
         open_levels=[60.0, 62.0, 61.0],
         sealed_levels=[38.0, 40.0, 41.0],
     )
+
+
+# --------------------------------------------------------------------------
+# Results whose .plot() returns what an argument decides: a column of panels
+# without ``ax``, the one axes it was handed with one, or a polar axes
+# --------------------------------------------------------------------------
+def _tone(seconds: float = 0.6, level: float = 40.0) -> np.ndarray:
+    """A 1 kHz tone of ``level`` dB SPL, in pascals."""
+    t = np.arange(int(seconds * FS)) / FS
+    amplitude = 20e-6 * 10.0 ** (level / 20.0) * np.sqrt(2.0)
+    tone: np.ndarray = amplitude * np.sin(2.0 * np.pi * 1000.0 * t)
+    return tone
+
+
+def _delayed_pair(n: int = 8192) -> tuple[np.ndarray, np.ndarray]:
+    """White noise and a delayed copy of it with a little noise added."""
+    x = RNG.standard_normal(n)
+    return x, np.roll(x, 17) + 0.1 * RNG.standard_normal(n)
+
+
+def _frequency_response() -> ph.electroacoustics.FrequencyResponseResult:
+    x = RNG.standard_normal(2**15)
+    y = np.convolve(x, np.array([0.5, 0.3, 0.1]), mode="same")
+    return ph.electroacoustics.transfer_function(x, y, FS)
+
+
+def _swept_sine_distortion() -> ph.electroacoustics.SweptSineDistortionResult:
+    f1, f2, seconds = 100.0, 8000.0, 1.0
+    sweep = ph.electroacoustics.synchronized_sweep_signal(FS, f1, f2, seconds)
+    return ph.electroacoustics.swept_sine_distortion(
+        sweep + 0.01 * sweep**2, FS, f1=f1, f2=f2, duration_s=seconds, n_harmonics=3
+    )
+
+
+def _loudspeaker() -> ph.electroacoustics.LoudspeakerCharacteristics:
+    """A two-way box with every optional characteristic, polar response included."""
+    f = np.geomspace(30.0, 24000.0, 200)
+    spl = (
+        87.0
+        - 10.0 * np.log10(1.0 + (50.0 / f) ** 6)
+        - 10.0 * np.log10(1.0 + (f / 16000.0) ** 7)
+    )
+    fz = np.geomspace(20.0, 20000.0, 120)
+    return ph.electroacoustics.loudspeaker_characteristics(
+        frequencies=f,
+        spl=spl,
+        rated_impedance_ohm=8.0,
+        sensitivity_band=(200.0, 4000.0),
+        impedance=(fz, 6.6 + 20.0 * np.exp(-(np.log2(fz / 52.0) ** 2) / 0.12)),
+        distortion=(np.geomspace(50.0, 5000.0, 90), np.full(90, 2.4)),
+        directivity=ph.electroacoustics.LoudspeakerDirectivity(
+            polar=(np.linspace(0.0, 90.0, 46), -np.linspace(0.0, 12.0, 46)),
+            frequency=2000.0,
+        ),
+    )
+
+
+def _microphone() -> ph.electroacoustics.MicrophoneCharacteristics:
+    """A cardioid measurement microphone with every optional characteristic."""
+    f = np.geomspace(20.0, 20000.0, 200)
+    response = -10.0 * np.log10(1.0 + (30.0 / f) ** 4) - 10.0 * np.log10(
+        1.0 + (f / 19000.0) ** 8
+    )
+    angles = np.linspace(0.0, 179.0, 180)
+    spl = np.linspace(100.0, 140.0, 41)
+    return ph.electroacoustics.microphone_characteristics(
+        frequencies=f,
+        response_db=response,
+        sensitivity_mv_per_pa=12.5,
+        tolerance_db=3.0,
+        noise=ph.electroacoustics.MicrophoneNoise(
+            voltage_v=1.25e-6,
+            spectrum=(np.geomspace(20.0, 20000.0, 31), np.full(31, 10.0)),
+        ),
+        overload=ph.electroacoustics.MicrophoneOverload(
+            distortion=(spl, 0.5 * 10.0 ** ((spl - 130.0) * 0.08)), thd_percent=0.5
+        ),
+        directivity=ph.electroacoustics.MicrophoneDirectivity(
+            polar=(angles, 20.0 * np.log10((1.0 + np.cos(np.radians(angles))) / 2.0)),
+            frequency=1000.0,
+        ),
+    )
+
+
+def _piston_directivity() -> ph.electroacoustics.PistonDirectivity:
+    return ph.electroacoustics.piston_directivity_pattern([3.0, 8.0])
+
+
+def _eq_response() -> ph.filters.EQResponseResult:
+    section = ph.filters.EQSection(filter_type="peaking", f0=1000.0, gain_db=6.0, q=1.0)
+    return ph.filters.ParametricEQ(FS, [section]).response()
+
+
+def _diffusion() -> ph.materials.DiffusionResult:
+    return ph.materials.directional_diffusion([-30.0, 0.0, 30.0], [70.0, 72.0, 69.0])
+
+
+def _diffuser_polar_response() -> ph.materials.DiffuserPolarResponse:
+    return ph.materials.predict_diffuser_polar_response(
+        0.1, 2000.0, depths=[0.0, 0.02, 0.08, 0.02, 0.0]
+    )
+
+
+def _ecma_loudness() -> ph.psychoacoustics.EcmaLoudness:
+    return ph.psychoacoustics.loudness_ecma(_tone(), FS)
+
+
+def _ecma_tonality() -> ph.psychoacoustics.EcmaTonality:
+    return ph.psychoacoustics.tonality_ecma(_tone(), FS)
+
+
+def _ecma_roughness() -> ph.psychoacoustics.EcmaRoughness:
+    return ph.psychoacoustics.roughness_ecma(_tone(), FS)
+
+
+def _ecma_fluctuation_strength() -> ph.psychoacoustics.EcmaFluctuationStrength:
+    return ph.psychoacoustics.fluctuation_strength_ecma(_tone(), FS)
+
+
+def _zwicker_time_varying() -> ph.psychoacoustics.ZwickerLoudness:
+    """One second of noise, whose loudness against time adds a second panel."""
+    noise = 0.02 * RNG.standard_normal(FS)
+    return ph.psychoacoustics.loudness_zwicker(noise, FS, stationary=False)
+
+
+def _impulse_response() -> ph.room.ImpulseResponseResult:
+    """The response of a short decaying room to an exponential sweep (ISO 18233)."""
+    sweep = ph.room.sweep_signal(FS, 100.0, 4000.0, 0.2)
+    recorded = np.convolve(sweep, _exp_ir(seconds=0.05, t60=0.03))[: sweep.size]
+    return ph.room.impulse_response(recorded, sweep, FS)
+
+
+def _shaped_sweep() -> ph.room.ShapedSweepResult:
+    return ph.room.shaped_sweep_signal(FS, 100.0, 5000.0, 0.4, target="pink")
+
+
+def _sound_strength() -> ph.room.SoundStrengthResult:
+    ir = _exp_ir()
+    return ph.room.sound_strength(ir, 0.5 * ir, FS)
+
+
+def _room_modes() -> ph.room.RoomModesResult:
+    return ph.room.room_modes(
+        (7.0, 5.0, 3.0), max_frequency=120.0, reverberation_time=0.8
+    )
+
+
+def _lifter() -> ph.signals.LifterResult:
+    return ph.signals.lifter(
+        RNG.standard_normal(4096), FS, cutoff=0.002, mode="highpass"
+    )
+
+
+def _envelope() -> ph.signals.EnvelopeResult:
+    return ph.signals.envelope(RNG.standard_normal(4096), FS)
+
+
+def _envelope_spectrum() -> ph.signals.EnvelopeSpectrumResult:
+    return ph.signals.envelope_spectrum(RNG.standard_normal(4096), FS)
+
+
+def _miso_coherence() -> ph.signals.MISOCoherenceResult:
+    """Two correlated inputs through two short filters, plus output noise."""
+    n = 1 << 15
+    first = RNG.standard_normal(n)
+    second = 0.5 * first + RNG.standard_normal(n)
+    output = (
+        np.convolve(first, [1.0, 0.3])[:n]
+        + np.convolve(second, [0.4, -0.5])[:n]
+        + 0.3 * RNG.standard_normal(n)
+    )
+    return ph.signals.miso_coherence([first, second], output, FS, nperseg=1024)
+
+
+def _phase_decomposition() -> ph.signals.PhaseDecompositionResult:
+    response = np.fft.rfft(np.exp(-np.arange(1024) / 50.0))
+    return ph.signals.phase_decomposition(response, fs=FS)
+
+
+def _coherent_output_spectrum() -> ph.signals.CoherentOutputSpectrumResult:
+    return ph.signals.coherent_output_spectrum(*_delayed_pair(), FS)
+
+
+def _cross_spectral_density() -> ph.signals.CrossSpectralDensityResult:
+    return ph.signals.cross_spectral_density(*_delayed_pair(), FS)
+
+
+def _synchronous_average() -> ph.signals.SynchronousAverageResult:
+    period = 0.01
+    t = np.arange(int(8 * period * FS)) / FS
+    return ph.signals.time_synchronous_average(
+        np.sin(2.0 * np.pi * t / period), FS, period_s=period
+    )
+
+
+def _window_metrics() -> ph.signals.WindowMetricsResult:
+    return ph.signals.window_metrics("hann", 1024)
+
+
+def _pile_strike() -> ph.underwater.PileStrikeResult:
+    t = np.arange(int(0.1 * FS)) / FS
+    pulse = 1e3 * np.exp(-t / 0.005) * np.sin(2.0 * np.pi * 300.0 * t)
+    return ph.underwater.pile_strike_metrics(pulse, FS)
+
+
+def _rigid_mass_calibration() -> ph.vibration.RigidMassCalibrationResult:
+    return ph.vibration.verify_rigid_mass_calibration(
+        [0.100, 0.102, 0.097], frequencies=np.array([20.0, 100.0, 500.0]), mass=10.0
+    )
+
+
+def _vector_change() -> ph.vibration.VectorChangeResult:
+    """The worked case of ISO 20816-1 Annex D, D.2."""
+    return ph.vibration.vibration_vector_change(3.0, 40.0, 2.5, 180.0)

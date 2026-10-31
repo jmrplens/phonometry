@@ -654,7 +654,7 @@ def test_response_rejects_section_curves_with_an_extra_axis() -> None:
 def test_plot_two_panel_and_single_axes() -> None:
     res = ph.filters.ParametricEQ(FS, _three_sections()).response(n_points=128)
     axes = res.plot()
-    assert axes.shape == (2,)
+    assert len(axes) == 2
     assert "Audio EQ Cookbook" in axes[0].get_title()
     assert axes[1].get_ylabel() == "Phase [deg]"
     plt.close("all")

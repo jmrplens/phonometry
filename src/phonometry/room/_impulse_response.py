@@ -94,6 +94,7 @@ if TYPE_CHECKING:
     from numpy.typing import DTypeLike
 
     from .._i18n import Language
+    from .._internal.types import TwoPanels
     from ..io._signal import Signal
 
 #: Warn from mls_impulse_response when the recovered IR still carries more than
@@ -203,16 +204,24 @@ class ImpulseResponseResult(OwnsArrays):
     def dtype(self) -> np.dtype[Any]:
         return self.ir.dtype
 
+    @overload
+    def plot(
+        self, ax: None = None, *, language: Language = "en", **kwargs: Any
+    ) -> TwoPanels: ...
+
+    @overload
+    def plot(self, ax: Axes, *, language: Language = "en", **kwargs: Any) -> Axes: ...
+
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
-    ) -> Axes | np.ndarray:
+    ) -> Axes | TwoPanels:
         """Plot the impulse response: waveform and log-magnitude decay.
 
         Draws the (normalised) time-domain waveform and, below it, the
         log-magnitude envelope in dB with a Schroeder energy-decay overlay.
         With ``ax`` given, only the decay panel is drawn on it. Requires
         matplotlib (``pip install "phonometry[plot]"``); returns the
-        :class:`~matplotlib.axes.Axes` (or an array of two axes).
+        :class:`~matplotlib.axes.Axes` it drew on, or the tuple of two without ``ax``.
         """
         from .._i18n import check_language
         from .._plot.room import plot_impulse_response
@@ -934,9 +943,17 @@ class ShapedSweepResult(OwnsArrays):
         """Number of samples in the sweep."""
         return int(self.signal.size)
 
+    @overload
+    def plot(
+        self, ax: None = None, *, language: Language = "en", **kwargs: Any
+    ) -> TwoPanels: ...
+
+    @overload
+    def plot(self, ax: Axes, *, language: Language = "en", **kwargs: Any) -> Axes: ...
+
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
-    ) -> Axes | np.ndarray:
+    ) -> Axes | TwoPanels:
         """Plot the sweep waveform and its spectrum against the target.
 
         Two stacked panels: the time-domain waveform, and the sweep's Welch

@@ -3478,6 +3478,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- **A multi-panel `.plot()` returns a tuple of axes without `ax`, and every
+  plot whose return an argument decides says so in its signature.**
+  Twenty-seven `.plot()` methods and `room.plot_excitation` drew one panel on
+  a given axes and returned it, and without one made a column of panels and
+  returned a NumPy array of them, annotated `Axes | ndarray`, so a typed
+  caller had to narrow what the call had already fixed. Without `ax` they
+  return a tuple of exactly their axes now, the top panel first: indexing,
+  unpacking and `len()` work as before, and `.shape`, `.flat` and `.ravel()`
+  do not. Each is overloaded on `ax`, so `top, bottom = result.plot()` reads
+  as two `Axes` and `result.plot(ax=ax)` as one; `ZwickerLoudness.plot()`
+  keeps the union without `ax`, where the data decide between one panel and
+  two. The plots that draw on a polar axes return `PolarAxes`: always for
+  `PistonDirectivity`, `VectorChangeResult` and `DiffuserPolarResponse`,
+  without `ax` for `DiffusionResult`, for the `"response"` view of
+  `DirectivityFactor`, and for `quantity="directivity"` of
+  `LoudspeakerCharacteristics` and `MicrophoneCharacteristics`.
+  `DiffuserPolarResponse.plot()` refuses a cartesian axes with a `ValueError`
+  that names `ax`, where matplotlib raised an `AttributeError` halfway through
+  the drawing. `scripts/check_return_overloads.py` (`make return-overloads`,
+  and a CI job) fails on a return that names one axes and several with no
+  overloads, on an overload head that returns such a union, and on a function
+  that reaches a polar axes typed plain `Axes`, `Any`, or panels none of which
+  is `PolarAxes`, reading annotations through the package's aliases and
+  following calls across modules; rule A57 of the contributor guide states it,
+  and the upgrading guide maps the change.
+
 - **The documentation's clips are computed by the public engines and encoded
   by `phonometry.io.write_video`, the road a user has, and all 43 were
   rendered again on it.** Each field steps `phonometry.simulation` on the

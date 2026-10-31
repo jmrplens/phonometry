@@ -91,7 +91,7 @@ import warnings
 from collections.abc import Iterable
 from dataclasses import KW_ONLY, dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, ClassVar, Literal
+from typing import TYPE_CHECKING, Any, ClassVar, Literal, overload
 
 import numpy as np
 
@@ -117,7 +117,7 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
 
     from ..._i18n import Language
-    from ..._internal.types import ReportEngine
+    from ..._internal.types import ReportEngine, TwoPanels
     from ..._report.metadata import ReportMetadata
 
 Kind = Literal["accelerance", "mobility", "receptance"]
@@ -672,9 +672,17 @@ class DoubleHitCheck(OwnsArrays):
         msg = "a DoubleHitCheck has no truth value; read its '.passes' for the verdict"
         raise TypeError(msg)
 
+    @overload
+    def plot(
+        self, ax: None = None, *, language: Language = "en", **kwargs: Any
+    ) -> TwoPanels: ...
+
+    @overload
+    def plot(self, ax: Axes, *, language: Language = "en", **kwargs: Any) -> Axes: ...
+
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
-    ) -> Axes | np.ndarray:
+    ) -> Axes | TwoPanels:
         """Plot the force record with its impacts, and its energy spectral density.
 
         With no ``ax`` a two-panel figure is drawn: the time history with every
@@ -687,7 +695,7 @@ class DoubleHitCheck(OwnsArrays):
         :param ax: Existing axes, or ``None`` to create a figure.
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to the force curve.
-        :return: The axes, or the two-axes array.
+        :return: The axes, or the tuple of two axes.
         """
         from ..._i18n import check_language
         from ..._plot.vibration import plot_double_hit_check
@@ -907,9 +915,17 @@ class ImpactMobilityResult(OwnsArrays):
             exponential_decay_rate_per_s=self.exponential_decay_rate_per_s,
         )
 
+    @overload
+    def plot(
+        self, ax: None = None, *, language: Language = "en", **kwargs: Any
+    ) -> TwoPanels: ...
+
+    @overload
+    def plot(self, ax: Axes, *, language: Language = "en", **kwargs: Any) -> Axes: ...
+
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
-    ) -> Axes | np.ndarray:
+    ) -> Axes | TwoPanels:
         """Plot the averaged mobility and its coherence.
 
         With no ``ax`` a two-panel figure is drawn: ``|Y(f)|`` on log-log axes
@@ -920,7 +936,7 @@ class ImpactMobilityResult(OwnsArrays):
         :param ax: Existing axes, or ``None`` to create a figure.
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to the magnitude curve.
-        :return: The axes, or the two-axes array.
+        :return: The axes, or the tuple of two axes.
         """
         from ..._i18n import check_language
         from ..._plot.vibration import plot_impact_mobility
@@ -2500,9 +2516,17 @@ class ChannelMatchVerification(OwnsArrays):
         )
         raise TypeError(msg)
 
+    @overload
+    def plot(
+        self, ax: None = None, *, language: Language = "en", **kwargs: Any
+    ) -> TwoPanels: ...
+
+    @overload
+    def plot(self, ax: Axes, *, language: Language = "en", **kwargs: Any) -> Axes: ...
+
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
-    ) -> Axes | np.ndarray:
+    ) -> Axes | TwoPanels:
         """Plot the magnitude and phase deviations against their tolerances.
 
         With no ``ax`` a two-panel figure is drawn; with ``ax`` only the
@@ -2513,7 +2537,7 @@ class ChannelMatchVerification(OwnsArrays):
         :param ax: Existing axes, or ``None`` to create a figure.
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to the magnitude-deviation curve.
-        :return: The axes, or the two-axes array.
+        :return: The axes, or the tuple of two axes.
         """
         from ..._i18n import check_language
         from ..._plot.vibration import plot_channel_match

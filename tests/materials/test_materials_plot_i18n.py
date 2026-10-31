@@ -55,14 +55,16 @@ from phonometry.materials.surfaces.road_absorption import (
 if TYPE_CHECKING:
     from collections.abc import Callable
 
+    from matplotlib.axes import Axes
+
 _C0 = 343.0
 _RHO0 = 1.205
 _RC = _RHO0 * _C0
 
 
-def _texts(ax_or_axes: object) -> str:
+def _texts(ax_or_axes: Axes | tuple[Axes, ...]) -> str:
     """Concatenate every axis label, title and legend text for inspection."""
-    axes = np.atleast_1d(ax_or_axes).ravel()
+    axes = ax_or_axes if isinstance(ax_or_axes, tuple) else (ax_or_axes,)
     parts: list[str] = []
     for ax in axes:
         parts += [ax.get_xlabel(), ax.get_ylabel(), ax.get_title()]

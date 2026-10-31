@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, overload
 
 import numpy as np
 
@@ -12,6 +12,7 @@ if TYPE_CHECKING:
     from matplotlib.typing import ColorType
 
     from .._i18n import Language
+    from .._internal.types import ThreePanels, TwoPanels
     from ..signals._cepstrum import (
         CepstrumResult,
         EchoDetectionResult,
@@ -353,13 +354,33 @@ def plot_multitaper_spectral_density(
     )
 
 
+@overload
+def plot_cross_spectral_density(
+    result: CrossSpectralDensityResult,
+    ax: None = None,
+    *,
+    language: Language = "en",
+    **kwargs: Any,
+) -> ThreePanels: ...
+
+
+@overload
+def plot_cross_spectral_density(
+    result: CrossSpectralDensityResult,
+    ax: Axes,
+    *,
+    language: Language = "en",
+    **kwargs: Any,
+) -> Axes: ...
+
+
 def plot_cross_spectral_density(
     result: CrossSpectralDensityResult,
     ax: Axes | None = None,
     *,
     language: Language = "en",
     **kwargs: Any,
-) -> Axes | np.ndarray:
+) -> Axes | ThreePanels:
     """Cross-spectrum magnitude, phase (with ±σ band) and coherence.
 
     With ``ax`` given, only the magnitude panel is drawn on it.
@@ -370,7 +391,7 @@ def plot_cross_spectral_density(
         fresh three-panel figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the magnitude ``plot`` call.
-    :return: The magnitude axes (``ax`` given) or the array of three axes.
+    :return: The magnitude axes (``ax`` given) or the tuple of three axes.
     """
     from .._i18n import localize_axes
 
@@ -427,13 +448,33 @@ def plot_cross_spectral_density(
     return axes
 
 
+@overload
+def plot_coherent_output_spectrum(
+    result: CoherentOutputSpectrumResult,
+    ax: None = None,
+    *,
+    language: Language = "en",
+    **kwargs: Any,
+) -> TwoPanels: ...
+
+
+@overload
+def plot_coherent_output_spectrum(
+    result: CoherentOutputSpectrumResult,
+    ax: Axes,
+    *,
+    language: Language = "en",
+    **kwargs: Any,
+) -> Axes: ...
+
+
 def plot_coherent_output_spectrum(
     result: CoherentOutputSpectrumResult,
     ax: Axes | None = None,
     *,
     language: Language = "en",
     **kwargs: Any,
-) -> Axes | np.ndarray:
+) -> Axes | TwoPanels:
     """Output, coherent and noise spectra plus the spectral SNR.
 
     With ``ax`` given, only the spectra panel is drawn on it.
@@ -444,7 +485,7 @@ def plot_coherent_output_spectrum(
         two-panel figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the coherent-spectrum ``plot`` call.
-    :return: The spectra axes (``ax`` given) or the array of two axes.
+    :return: The spectra axes (``ax`` given) or the tuple of two axes.
     """
     from .._i18n import localize_axes
 
@@ -585,13 +626,29 @@ def _miso_coherence_panel(
     axc.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small", ncol=2)
 
 
+@overload
+def plot_miso_coherence(
+    result: MISOCoherenceResult,
+    ax: None = None,
+    *,
+    language: Language = "en",
+    **kwargs: Any,
+) -> TwoPanels: ...
+
+
+@overload
+def plot_miso_coherence(
+    result: MISOCoherenceResult, ax: Axes, *, language: Language = "en", **kwargs: Any
+) -> Axes: ...
+
+
 def plot_miso_coherence(
     result: MISOCoherenceResult,
     ax: Axes | None = None,
     *,
     language: Language = "en",
     **kwargs: Any,
-) -> Axes | np.ndarray:
+) -> Axes | TwoPanels:
     """Per-input coherent output spectra and the multiple/partial coherences.
 
     The upper panel decomposes the measured output autospectrum into the
@@ -605,7 +662,7 @@ def plot_miso_coherence(
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Ignored (kept for signature parity with the other
         renderers).
-    :return: The spectra axes (``ax`` given) or the array of two axes.
+    :return: The spectra axes (``ax`` given) or the tuple of two axes.
     """
     from .._i18n import localize_axes
 
@@ -874,13 +931,25 @@ def plot_aligned_impulse_response(
     return ax
 
 
+@overload
+def plot_envelope(
+    result: EnvelopeResult, ax: None = None, *, language: Language = "en", **kwargs: Any
+) -> TwoPanels: ...
+
+
+@overload
+def plot_envelope(
+    result: EnvelopeResult, ax: Axes, *, language: Language = "en", **kwargs: Any
+) -> Axes: ...
+
+
 def plot_envelope(
     result: EnvelopeResult,
     ax: Axes | None = None,
     *,
     language: Language = "en",
     **kwargs: Any,
-) -> Axes | np.ndarray:
+) -> Axes | TwoPanels:
     """Signal with its Hilbert envelope, plus the instantaneous frequency.
 
     With ``ax`` given, only the signal/envelope panel is drawn on it.
@@ -890,7 +959,7 @@ def plot_envelope(
         fresh two-panel figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the envelope ``plot`` call.
-    :return: The envelope axes (``ax`` given) or the array of two axes.
+    :return: The envelope axes (``ax`` given) or the tuple of two axes.
     """
     from .._i18n import localize_axes
 
@@ -934,13 +1003,33 @@ def plot_envelope(
     return axes
 
 
+@overload
+def plot_phase_decomposition(
+    result: PhaseDecompositionResult,
+    ax: None = None,
+    *,
+    language: Language = "en",
+    **kwargs: Any,
+) -> ThreePanels: ...
+
+
+@overload
+def plot_phase_decomposition(
+    result: PhaseDecompositionResult,
+    ax: Axes,
+    *,
+    language: Language = "en",
+    **kwargs: Any,
+) -> Axes: ...
+
+
 def plot_phase_decomposition(
     result: PhaseDecompositionResult,
     ax: Axes | None = None,
     *,
     language: Language = "en",
     **kwargs: Any,
-) -> Axes | np.ndarray:
+) -> Axes | ThreePanels:
     """Magnitude, phase decomposition and group delay of a response.
 
     Three stacked panels: ``|H|`` in dB, the measured / minimum / excess
@@ -952,7 +1041,7 @@ def plot_phase_decomposition(
         three-panel figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the measured-phase ``plot`` call.
-    :return: The phase-panel axes (``ax`` given) or the array of three axes.
+    :return: The phase-panel axes (``ax`` given) or the tuple of three axes.
     """
     from .._i18n import localize_axes
 
@@ -1217,13 +1306,29 @@ def plot_cepstrum(
     return ax
 
 
+@overload
+def plot_window_metrics(
+    result: WindowMetricsResult,
+    ax: None = None,
+    *,
+    language: Language = "en",
+    **kwargs: Any,
+) -> TwoPanels: ...
+
+
+@overload
+def plot_window_metrics(
+    result: WindowMetricsResult, ax: Axes, *, language: Language = "en", **kwargs: Any
+) -> Axes: ...
+
+
 def plot_window_metrics(
     result: WindowMetricsResult,
     ax: Axes | None = None,
     *,
     language: Language = "en",
     **kwargs: Any,
-) -> Axes | np.ndarray:
+) -> Axes | TwoPanels:
     """Window shape and spectrum with the Harris figures of merit marked.
 
     With ``ax`` given, only the spectrum panel is drawn on it.
@@ -1234,7 +1339,7 @@ def plot_window_metrics(
         fresh two-panel figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the spectrum ``plot`` call.
-    :return: The spectrum axes (``ax`` given) or the array of two axes.
+    :return: The spectrum axes (``ax`` given) or the tuple of two axes.
     """
     from .._i18n import decimal_comma, fmt_minus, localize_axes
     from ..signals.windows import _WINDOW_OVERSAMPLE, _window_spectrum_db
@@ -1289,8 +1394,22 @@ def plot_window_metrics(
     _spectrum_panel(axes[1])
     for axf in axes:
         localize_axes(axf, language)
-    axes[0].figure.tight_layout()
+    figure = axes[0].get_figure(root=True)
+    if figure is not None:
+        figure.tight_layout()
     return axes
+
+
+@overload
+def plot_lifter(
+    result: LifterResult, ax: None = None, *, language: Language = "en", **kwargs: Any
+) -> TwoPanels: ...
+
+
+@overload
+def plot_lifter(
+    result: LifterResult, ax: Axes, *, language: Language = "en", **kwargs: Any
+) -> Axes: ...
 
 
 def plot_lifter(
@@ -1299,7 +1418,7 @@ def plot_lifter(
     *,
     language: Language = "en",
     **kwargs: Any,
-) -> Axes | np.ndarray:
+) -> Axes | TwoPanels:
     """Real cepstrum with the lifter cutoff, plus the split log spectrum.
 
     With ``ax`` given, only the spectrum panel is drawn on it.
@@ -1309,7 +1428,7 @@ def plot_lifter(
         fresh two-panel figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the liftered-spectrum line.
-    :return: The spectrum axes (``ax`` given) or the array of two axes.
+    :return: The spectrum axes (``ax`` given) or the tuple of two axes.
     """
     from .._i18n import format_number, localize_axes
 
@@ -1429,13 +1548,33 @@ def plot_echo_detection(
     return ax
 
 
+@overload
+def plot_envelope_spectrum(
+    result: EnvelopeSpectrumResult,
+    ax: None = None,
+    *,
+    language: Language = "en",
+    **kwargs: Any,
+) -> TwoPanels: ...
+
+
+@overload
+def plot_envelope_spectrum(
+    result: EnvelopeSpectrumResult,
+    ax: Axes,
+    *,
+    language: Language = "en",
+    **kwargs: Any,
+) -> Axes: ...
+
+
 def plot_envelope_spectrum(
     result: EnvelopeSpectrumResult,
     ax: Axes | None = None,
     *,
     language: Language = "en",
     **kwargs: Any,
-) -> Axes | np.ndarray:
+) -> Axes | TwoPanels:
     """Detected envelope over time and its amplitude spectrum.
 
     With ``ax`` given, only the spectrum panel is drawn on it.
@@ -1446,7 +1585,7 @@ def plot_envelope_spectrum(
         fresh two-panel figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the spectrum line.
-    :return: The spectrum axes (``ax`` given) or the array of two axes.
+    :return: The spectrum axes (``ax`` given) or the tuple of two axes.
     """
     from .._i18n import localize_axes
 
@@ -1561,13 +1700,33 @@ def plot_inverse_filter(
     return ax
 
 
+@overload
+def plot_synchronous_average(
+    result: SynchronousAverageResult,
+    ax: None = None,
+    *,
+    language: Language = "en",
+    **kwargs: Any,
+) -> TwoPanels: ...
+
+
+@overload
+def plot_synchronous_average(
+    result: SynchronousAverageResult,
+    ax: Axes,
+    *,
+    language: Language = "en",
+    **kwargs: Any,
+) -> Axes: ...
+
+
 def plot_synchronous_average(
     result: SynchronousAverageResult,
     ax: Axes | None = None,
     *,
     language: Language = "en",
     **kwargs: Any,
-) -> Axes | np.ndarray:
+) -> Axes | TwoPanels:
     """Averaged periodic waveform and the synchronous-averaging comb filter.
 
     With ``ax`` given, only the averaged-waveform panel is drawn on it.
@@ -1578,7 +1737,7 @@ def plot_synchronous_average(
         two-panel (waveform + comb filter) figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the averaged-waveform line.
-    :return: The waveform axes (``ax`` given) or the array of two axes.
+    :return: The waveform axes (``ax`` given) or the tuple of two axes.
     """
     from .._i18n import localize_axes
 

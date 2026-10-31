@@ -412,7 +412,7 @@ def test_plot_each_quantity_returns_single_axes() -> None:
     plt.close("all")
     for quantity in ("response", "impedance", "thd", "directivity"):
         ax = result.plot(quantity=quantity)
-        assert not isinstance(ax, np.ndarray)
+        assert not isinstance(ax, tuple)
         expected = "polar" if quantity == "directivity" else "rectilinear"
         assert ax.name == expected
         plt.close("all")

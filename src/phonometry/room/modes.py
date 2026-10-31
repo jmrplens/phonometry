@@ -62,7 +62,7 @@ field (:mod:`phonometry.room.steady_field`).
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, overload
 
 import numpy as np
 
@@ -76,6 +76,7 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
+    from .._internal.types import TwoPanels
 
 __all__ = [
     "MODE_KINDS",
@@ -366,9 +367,17 @@ class RoomModesResult(OwnsArrays):
             speed_of_sound=self.speed_of_sound,
         )
 
+    @overload
+    def plot(
+        self, ax: None = None, *, language: Language = "en", **kwargs: Any
+    ) -> TwoPanels: ...
+
+    @overload
+    def plot(self, ax: Axes, *, language: Language = "en", **kwargs: Any) -> Axes: ...
+
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
-    ) -> Axes | np.ndarray:
+    ) -> Axes | TwoPanels:
         """Plot the mode ladder by kind and the modal density.
 
         The upper panel stems every enumerated mode at its frequency, coloured

@@ -178,11 +178,18 @@ each block is shifted onto the grid before it is averaged. Read from
 
 ```python
 SynchronousAverageResult.plot(
-    ax: Axes | None = None,
+    ax: None = None,
     *,
     language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
-) -> Axes | NDArray[Any]
+) -> tuple[Axes, Axes]
+
+SynchronousAverageResult.plot(
+    ax: Axes,
+    *,
+    language: Literal['en', 'es'] = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the averaged waveform and the comb-filter magnitude.

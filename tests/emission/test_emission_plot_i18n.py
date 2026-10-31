@@ -14,7 +14,6 @@ import matplotlib as mpl
 mpl.use("Agg")
 
 import matplotlib.pyplot as plt
-import numpy as np
 import pytest
 
 from phonometry.emission.intensity_compliance import (
@@ -24,7 +23,7 @@ from phonometry.emission.intensity_compliance import (
 
 
 def _labels(obj: object) -> str:
-    axes = obj if isinstance(obj, np.ndarray) else [obj]
+    axes = obj if isinstance(obj, tuple) else [obj]
     parts = []
     for a in axes:
         parts += [a.get_xlabel(), a.get_ylabel()]

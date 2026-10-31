@@ -1176,11 +1176,18 @@ obtained. All three are in decibels and `strength` is exactly
 
 ```python
 SoundStrengthResult.plot(
-    ax: Axes | None = None,
+    ax: None = None,
     *,
     language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
-) -> Axes | np.ndarray
+) -> tuple[Axes, Axes]
+
+SoundStrengthResult.plot(
+    ax: Axes,
+    *,
+    language: Literal['en', 'es'] = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot the per-band sound strength against the Table A.1 range.
@@ -1188,7 +1195,7 @@ Plot the per-band sound strength against the Table A.1 range.
 With `ax` given, only the strength panel is drawn on it; otherwise a
 second panel shows the two levels G is the difference of. Requires
 matplotlib (`pip install "phonometry[plot]"`); returns the
-`Axes` (or an array of two).
+`Axes` it drew on, or the tuple of two without `ax`.
 
 ## source_directivity_limit
 

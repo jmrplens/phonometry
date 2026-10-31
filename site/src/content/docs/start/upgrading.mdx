@@ -1216,6 +1216,36 @@ under the same keys, so the drawing reads like the result:
 | `vibration.plot_plate_geometry(0.8, 0.6, ax)`, `environment.plot_barrier_geometry(ax, source_height=...)` and the other twenty-one public `plot_*` helpers | `plot_plate_geometry(0.8, 0.6, ax=ax)`, `plot_barrier_geometry(ax=ax, source_height_m=...)` |
 | `noise_control.plot_silencer_geometry("expansion chamber", ax, length=0.3, chamber_area=0.04, pipe_area=0.01)` | `plot_silencer_geometry("expansion chamber", {"length": 0.3, "chamber_area": 0.04, "pipe_area": 0.01}, ax=ax)` |
 
+## A multi-panel `.plot()` returns a tuple of axes
+
+A `.plot()` that draws more than one panel returns, without `ax`, a tuple of
+its axes, the top panel first, where 3.3.0 and 4.0.0rc1 returned a NumPy
+array of them. Indexing, unpacking and `len()` work as before; the array's
+own attributes do not:
+
+| 3.3.0 or 4.0.0rc1 | 4.0 |
+| --- | --- |
+| `axes = result.plot()`, then `axes.shape` or `axes.size` | `len(result.plot())` |
+| `result.plot().flat`, `result.plot().ravel()` | the tuple itself: `for ax in result.plot()` |
+| `isinstance(drawn, np.ndarray)`, to tell several panels from one axes | `isinstance(drawn, tuple)` |
+
+With `ax` the plot draws one panel on it and returns that axes, as before.
+Each case is a typed overload now, so a type checker reads
+`top, bottom = result.plot()` as two `Axes` and `result.plot(ax=ax)` as one.
+`ZwickerLoudness.plot()` without `ax` still returns one axes for a stationary
+result and two for a time-varying one, which only the data decide.
+
+The plots that draw on a polar axes say so. `PistonDirectivity`,
+`VectorChangeResult` and `DiffuserPolarResponse` return a `PolarAxes`, and so
+do `DiffusionResult.plot()` without `ax`, `DirectivityFactor.plot()` for its
+`"response"` view, and `LoudspeakerCharacteristics.plot()` and
+`MicrophoneCharacteristics.plot()` for `quantity="directivity"`. Those take a
+`PolarAxes` where they need one; matplotlib types a subplot made with
+`projection="polar"` as plain `Axes`, so a typed caller hands it over as
+`typing.cast(PolarAxes, ax)`. `DiffuserPolarResponse.plot()` refuses a
+cartesian axes with a `ValueError` that names `ax`, as the other polar plots
+do, where it raised an `AttributeError` from matplotlib.
+
 ## Verdicts are result objects, not dictionaries
 
 The three `verify_*` functions of 3.3.0 returned `dict[str, Any]` and now

@@ -1363,6 +1363,14 @@ from .psychoacoustics import ECMA418_1_PROX_850HZ as ECMA418_1_PROX_850HZ
 from .psychoacoustics import (
     ECMA418_2_AUDIBILITY_THRESHOLD_SONE as ECMA418_2_AUDIBILITY_THRESHOLD_SONE,
 )
+from .psychoacoustics import ECMA418_2_BANDWIDTH_C as ECMA418_2_BANDWIDTH_C
+from .psychoacoustics import ECMA418_2_DELTA_F0_HZ as ECMA418_2_DELTA_F0_HZ
+from .psychoacoustics import ECMA418_2_DZ as ECMA418_2_DZ
+from .psychoacoustics import (
+    ECMA418_2_EAR_FILTER_FREE_FIELD as ECMA418_2_EAR_FILTER_FREE_FIELD,
+)
+from .psychoacoustics import ECMA418_2_FILTER_E as ECMA418_2_FILTER_E
+from .psychoacoustics import ECMA418_2_FILTER_ORDER as ECMA418_2_FILTER_ORDER
 from .psychoacoustics import (
     ECMA418_2_FLUCTUATION_1KHZ_4HZ_60DB_VACIL as ECMA418_2_FLUCTUATION_1KHZ_4HZ_60DB_VACIL,
 )
@@ -1371,6 +1379,16 @@ from .psychoacoustics import (
     ECMA418_2_LOUDNESS_1KHZ_40DB_SONE as ECMA418_2_LOUDNESS_1KHZ_40DB_SONE,
 )
 from .psychoacoustics import ECMA418_2_LOUDNESS_C_N as ECMA418_2_LOUDNESS_C_N
+from .psychoacoustics import ECMA418_2_LTQ as ECMA418_2_LTQ
+from .psychoacoustics import (
+    ECMA418_2_NONLINEARITY_ALPHA as ECMA418_2_NONLINEARITY_ALPHA,
+)
+from .psychoacoustics import (
+    ECMA418_2_NONLINEARITY_EXPONENTS as ECMA418_2_NONLINEARITY_EXPONENTS,
+)
+from .psychoacoustics import (
+    ECMA418_2_NONLINEARITY_LEVELS_DB as ECMA418_2_NONLINEARITY_LEVELS_DB,
+)
 from .psychoacoustics import (
     ECMA418_2_PROMINENT_FLUCTUATION_VACIL as ECMA418_2_PROMINENT_FLUCTUATION_VACIL,
 )

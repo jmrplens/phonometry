@@ -77,6 +77,7 @@ from typing import TYPE_CHECKING, Any, Literal, overload
 import numpy as np
 from scipy.io import wavfile
 
+from .._internal.json_input import escaped
 from .._internal.validation import require_choice, require_count, require_scalar
 from .._internal.warnings import PhonometryWarning
 from ._bext import (
@@ -248,7 +249,7 @@ def _warn_clipped(
 ) -> None:
     """Report saturation loudly: count, total, and how far over the top."""
     warnings.warn(
-        f"{path}: {clipped} of {total} samples exceed the full-scale range "
+        f"{escaped(str(path))}: {clipped} of {total} samples exceed the full-scale range "
         f"of {subtype} (signal peak {peak_dbfs:+.2f} dBFS) and were "
         "saturated. Nothing was rescaled: scale the signal before writing "
         "if clipping is not intended.",
@@ -381,7 +382,7 @@ def append_riff_chunk(path: str | Path, chunk_id: bytes, payload: bytes) -> None
     with Path(path).open("r+b") as fh:
         fourcc = fh.read(4)
         if fourcc not in (b"RIFF", b"RF64", b"BW64"):
-            msg = f"{path}: not a RIFF/RF64/BW64 file"
+            msg = f"{escaped(str(path))}: not a RIFF/RF64/BW64 file"
             raise ValueError(msg)
         fh.seek(0, 2)
         if fh.tell() % 2:
@@ -391,7 +392,7 @@ def append_riff_chunk(path: str | Path, chunk_id: bytes, payload: bytes) -> None
         if fourcc == _RIFF_FOURCC:
             if riff_size > _RF64_SIZE_SENTINEL:
                 msg = (
-                    f"{path}: appending {len(payload)} bytes overflows the "
+                    f"{escaped(str(path))}: appending {len(payload)} bytes overflows the "
                     "32-bit RIFF size; the file needed to be RF64"
                 )
                 raise ValueError(msg)
@@ -507,7 +508,7 @@ def _reconcile_streamed_header(
     )
     if len(patched) != header_len:
         msg = (
-            f"{path}: the {written} frames actually streamed move the "
+            f"{escaped(str(path))}: the {written} frames actually streamed move the "
             "header across the RF64 promotion boundary the estimated "
             "count chose; the estimate was too wrong to reconcile"
         )
@@ -582,7 +583,7 @@ def write_wav_stream(
             frames = written
     if written != frames:
         msg = (
-            f"{path}: the block stream carried {written} frames but the "
+            f"{escaped(str(path))}: the block stream carried {written} frames but the "
             f"header promised {frames}; the file is inconsistent"
         )
         raise ValueError(msg)
@@ -613,7 +614,7 @@ def _check_target_suffix(path: str | Path, target: Path) -> None:
     suffix = target.suffix.lower()
     if suffix not in _WAV_SUFFIXES and suffix != ".flac":
         msg = (
-            f"{path}: unsupported target {target.suffix!r}; the writer "
+            f"{escaped(str(path))}: unsupported target {target.suffix!r}; the writer "
             "produces the WAV family (.wav, .wave, .bwf) and, with the "
             "[audio] extra, FLAC. Lossy formats are deliberately not "
             "offered: a metrology library does not export approximations "
@@ -956,7 +957,7 @@ def _write_flac(
     out: np.ndarray
     if implied == "PCM_32":
         msg = (
-            f"{path}: FLAC stores integers up to 24 bits (libsndfile), so "
+            f"{escaped(str(path))}: FLAC stores integers up to 24 bits (libsndfile), so "
             "int32 codes cannot pass through bit-exact. Convert to float64 "
             "and choose subtype='PCM_24' to accept the 8-bit truncation "
             "explicitly."

@@ -63,13 +63,15 @@ from __future__ import annotations
 import os
 import struct
 from dataclasses import dataclass
-from pathlib import Path
 from typing import TYPE_CHECKING, Literal
 
 from .._internal.display import RichDisplay
+from .._internal.json_input import escaped
 from .._internal.validation import require_scalar
+from ._audio_file import open_audio
 
 if TYPE_CHECKING:
+    from pathlib import Path
     from typing import BinaryIO
 
 #: RIFF format tags (``wFormatTag`` in ``fmt``, from Microsoft ``mmreg.h``).
@@ -574,7 +576,7 @@ def _parse_ds64(payload: bytes, path: str | Path) -> Ds64Chunk:
     """Decode the three mandatory 64-bit sizes of a ``ds64`` chunk."""
     if len(payload) < _DS64_FIXED_BYTES:
         msg = (
-            f"{path}: ds64 chunk is {len(payload)} bytes; the "
+            f"{escaped(str(path))}: ds64 chunk is {len(payload)} bytes; the "
             "riffSize, dataSize and sampleCount fields require 24"
         )
         raise ValueError(msg)
@@ -590,7 +592,7 @@ def _parse_fact(payload: bytes, path: str | Path) -> int:
     """Decode the ``fact`` chunk's single uint32 frame count."""
     if len(payload) < _UINT32_BYTES:
         msg = (
-            f"{path}: fact chunk is {len(payload)} bytes; its "
+            f"{escaped(str(path))}: fact chunk is {len(payload)} bytes; its "
             "uint32 frame count requires 4"
         )
         raise ValueError(msg)
@@ -602,7 +604,7 @@ def _read_wave_header(fh: BinaryIO, path: str | Path) -> WavContainer:
     """Check the 12-byte RIFF prelude and name the container it declares."""
     header = fh.read(_RIFF_PRELUDE_BYTES)
     if len(header) < _RIFF_PRELUDE_BYTES or header[8:12] != _WAVE_FORM_TYPE:
-        msg = f"{path}: not a WAVE file"
+        msg = f"{escaped(str(path))}: not a WAVE file"
         raise ValueError(msg)
     fourcc = header[:4]
     containers: dict[bytes, WavContainer] = {
@@ -611,9 +613,7 @@ def _read_wave_header(fh: BinaryIO, path: str | Path) -> WavContainer:
         b"BW64": "BW64",
     }
     if fourcc not in containers:
-        msg = (
-            f"{path}: unknown container fourcc {fourcc!r} (expected RIFF, RF64 or BW64)"
-        )
+        msg = f"{escaped(str(path))}: unknown container fourcc {fourcc!r} (expected RIFF, RF64 or BW64)"
         raise ValueError(msg)
     return containers[fourcc]
 
@@ -635,7 +635,7 @@ def _check_chunk_extent(
     require_scalar(file_size, "file_size")
     if offset + size > file_size:
         msg = (
-            f"{path}: chunk {chunk_id!r} claims {size} bytes but only "
+            f"{escaped(str(path))}: chunk {chunk_id!r} claims {size} bytes but only "
             f"{file_size - offset} remain in the file"
         )
         raise ValueError(msg)
@@ -653,7 +653,7 @@ def _read_chunk_payload(
     payload = fh.read(size)
     if len(payload) < size:
         msg = (
-            f"{path}: chunk {chunk_id!r} claims {size} bytes but the "
+            f"{escaped(str(path))}: chunk {chunk_id!r} claims {size} bytes but the "
             f"file ends after {len(payload)}"
         )
         raise ValueError(msg)
@@ -671,7 +671,7 @@ def _true_data_size(
         return size
     if ds64 is None:
         msg = (
-            f"{path}: RF64 data chunk defers its size to a "
+            f"{escaped(str(path))}: RF64 data chunk defers its size to a "
             "ds64 chunk that never appeared"
         )
         raise ValueError(msg)
@@ -741,7 +741,7 @@ def parse_wav_chunks(path: str | Path) -> WavChunks:
     data_offset: int | None = None
     data_size: int | None = None
 
-    with Path(path).open("rb") as fh:
+    with open_audio(path) as fh:
         file_size = os.fstat(fh.fileno()).st_size
         container = _read_wave_header(fh, path)
         while True:
@@ -776,10 +776,10 @@ def parse_wav_chunks(path: str | Path) -> WavChunks:
             fh.seek(size + size % 2, 1)
 
     if seen.fmt is None:
-        msg = f"{path}: no fmt chunk found"
+        msg = f"{escaped(str(path))}: no fmt chunk found"
         raise ValueError(msg)
     if data_offset is None or data_size is None:
-        msg = f"{path}: no data chunk found"
+        msg = f"{escaped(str(path))}: no data chunk found"
         raise ValueError(msg)
     return WavChunks(
         container=container,

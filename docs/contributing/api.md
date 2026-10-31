@@ -1643,3 +1643,47 @@ def closing_impedance(termination: Literal["rigid", "free"] | NumericArrayLike =
 **Enforced by:** `scripts/check_parameter_annotations.py`, `make parameter-annotations`, `CI: Every public parameter admits what its body converts`, `tests/test_check_parameter_annotations.py::test_a_choice_beside_an_alternative_that_takes_any_text_is_refused`, `tests/test_check_parameter_annotations.py::test_the_array_like_of_numbers_is_read_as_one`, `tests/test_check_parameter_annotations.py::test_the_package_keeps_the_rule`, `tests/test_choices_beside_numbers.py::test_every_choice_beside_numbers_is_walked`, `tests/test_choices_beside_numbers.py::test_a_choice_beside_numbers_refuses_what_is_no_number_by_name`, `tests/test_choices_beside_numbers.py::test_no_body_reads_a_choice_its_annotation_does_not_state`, `mypy`
 
 **Exceptions.** The rule reads every union of a public parameter, of each overload head, of a public record's field and of the constructor a record declares under `TYPE_CHECKING`, at the top and inside a container or a mapping (`Sequence[Literal["a"] | ArrayLike]`), through the package's aliases and the type parameters of the function or record, so an alias that hides `ArrayLike` (`Signal | ArrayLike`, a band mapping beside an array-like) is read as `ArrayLike`. A choice beside a tuple of a fixed length, or the `Literal` key of a mapping whose values are `ArrayLike`, takes no text in its place and passes. A `Literal` of numbers beside numbers is no choice of words and is not read here. A window keeps `str | tuple[ArrayLike, ...]` ([A58](#a58)): its names are open, so it lists no `Literal`. Beside the texts, the alias refuses what `ArrayLike` admitted of an array typed with a dtype that is no number or truth value (`np.object_`, `np.generic`, `np.datetime64`, `np.timedelta64`) and of a buffer such as `memoryview`: the type of an object array says nothing of what it holds, and `NDArray[np.generic]` cannot be admitted without an array of texts, whose dtype is one. The seven parameters convert an object array of numbers all the same, a leniency the type does not state. `tests/static_typing/test_numeric_choices.py` pins the alias to the forms `np.asarray` takes of numbers that it lists, refuses the other dtypes and a buffer, and holds each of the seven parameters to its misspelling, the coefficients of `materials.delany_bazley` and the speech spectrum included. `tests/test_choices_beside_numbers.py` finds every choice beside numbers of the imported package from its annotation, read as this rule reads it, a `Literal` of texts beside a number, an array of numbers or a sequence of them at the top or inside a container or a mapping, and calls each with a text in every form but a `str`, with `None` where it is no option and with an object: each one found has its call in `CALLS`, a call no choice answers to fails, and a probe a choice takes on purpose is keyed in `EXEMPT` with the reason; it holds none, since a record holds a `bytearray` as the `bytes` it spells and an FDTD boundary refuses it as the text it is. The walk sees a choice only where the annotation states it, so the same test reads the bodies as well: a public parameter or record field whose annotation names numbers and sets no choice, but whose body, or a function of the package it is handed to, tests it with `isinstance(..., str)` and reads the text as something other than numbers, fails until the annotation states the choice. A test of a text that ends in a `raise`, or one under a `not`, is a refusal or an exclusion and reads no choice.
+
+<a id="a60"></a>
+### A60. Open a file a caller or the environment names only through the shared check of what the name holds
+
+**Why.** A name a caller hands a reader, or one the environment does, can hold something other than a file. A named pipe no one writes to keeps an open waiting for a writer that never comes: `io.read` on one hung at the open of its sniffer, `load_anp_database` on a directory holding one hung at its `read_text`, and the hosts file of the remote runs, whose name `PHONOMETRY_HOSTS_FILE` gives, hung at its `read_bytes`. A device such as `/dev/zero` keeps a read going without end, and a directory raised the `IsADirectoryError` of whichever open met it first. `src/phonometry/_internal/json_input.py` holds the one check: `open_regular` and `read_at_most` look at the name, refuse anything but a regular file before it is opened, open it without waiting and ask the open file again, so that a pipe put in its place in between is refused too, and `read_at_most` reads no more than the limit it is given; `not_regular_at` says what is at a name that a reader of another library (SciPy, python-soundfile) is about to open itself. Each reader turns what they find into its own `ValueError`, naming the file through `escaped`, so that a name that is not UTF-8 or holds a control character prints as its escapes, and saying what it holds.
+
+**Do**
+
+```python
+from pathlib import Path
+
+from phonometry._internal.json_input import (
+    NotRegularError,
+    TooLargeError,
+    escaped,
+    read_at_most,
+)
+
+
+def read_table(path: Path) -> str:
+    named = escaped(str(path))  # a name that is not UTF-8 prints as its escapes
+    try:
+        raw = read_at_most(path, 1024 * 1024)
+    except NotRegularError as exc:
+        msg = f"{named}: is {exc.kind}, and a table is read only from a regular file"
+        raise ValueError(msg) from None
+    except TooLargeError:
+        msg = f"{named}: a table is at most 1 MiB"
+        raise ValueError(msg) from None
+    return raw.decode("utf-8")
+```
+
+**Don't**
+
+```py
+def read_table(path: Path) -> str:
+    return path.read_text(encoding="utf-8")  # a pipe at the name waits for a writer forever
+def describe(path: Path) -> object:
+    return soundfile.info(str(path))  # nothing asked what the name holds before soundfile opens it
+```
+
+**Enforced by:** `scripts/check_regular_file_reads.py`, `make regular-file-reads`, `CI: Every reader asks what a name holds before it opens it`, `tests/test_check_regular_file_reads.py::test_the_library_reads_every_name_through_the_check`, `tests/io/test_io_regular_files.py`, `tests/aircraft/test_anp_tables_read.py`
+
+**Exceptions.** A read of the library's own files, which no caller names (a published table through `importlib.resources`, the `VERSION` file of a source checkout, the bootstrap module the client sends a node, the video a node's encoder wrote in the scratch directory of the run), is listed in `EXEMPT` of `scripts/check_regular_file_reads.py`, keyed by file and function with the reason; an entry that covers nothing fails. A mode that writes (`"wb"`, `"xb"`, `"ab"`, `"r+b"`) is a writer's and is not read here, and this rule holds no writer: `io.write`, the target of `io.convert` and the figure and report writers open the name they are given as Python opens it, so a pipe there waits for a reader and a directory raises `IsADirectoryError`. The sidecar and catalogue writers are the ones that write beside the name through `write_beside` and rename the file into place, which never opens the name for writing. The check names a call by what the module's imports and assignments bind it to, and knows a check by the module that defines it, so a call that only shares a check's name (`np.info(path)` beside the library's `info`, a method of another object called `read_at_most`) checks nothing; it reads the order of the calls in the source, not the paths a function can take; a `.open()` given its mode through a name, and a reader reached through `getattr()` or a `functools.partial`, are not read. The tests of each reader, which put a pipe, a link to a device and a directory at the name and want the refusal within seconds, are what prove it refuses.

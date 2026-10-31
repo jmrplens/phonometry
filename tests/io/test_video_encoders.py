@@ -178,6 +178,31 @@ def test_windows_runs_the_ffmpeg_on_path_past_one_in_the_working_directory(
     assert str(installed) in record.getMessage()
 
 
+def test_windows_names_the_ffmpeg_it_passes_over_and_runs_by_their_escapes(
+    windows: Path, monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
+) -> None:
+    """The working directory, the program's name and ``PATH`` are the caller's, so are the names."""
+    import matplotlib as mpl
+
+    (windows / "ff\u202empeg.exe").write_bytes(b"")
+    monkeypatch.setitem(mpl.rcParams, "animation.ffmpeg_path", "ff\u202empeg")
+    with pytest.raises(ve.FFmpegNotFoundError) as caught:
+        ve.find_ffmpeg()
+    message = str(caught.value)
+    assert "\u202e" not in message
+    assert f"working directory ({os.curdir}{os.sep}ff\\u202empeg.exe)" in message
+    installed = windows / "else\u202ewhere" / "ff\u202empeg.exe"
+    installed.parent.mkdir()
+    installed.write_bytes(b"")
+    monkeypatch.setenv("PATH", str(installed.parent))
+    with caplog.at_level(logging.INFO, logger="phonometry.io"):
+        assert ve.find_ffmpeg() == str(installed)
+    (record,) = caplog.records
+    logged = record.getMessage()
+    assert "\u202e" not in logged
+    assert f"{windows}{os.sep}else\\u202ewhere{os.sep}ff\\u202empeg.exe" in logged
+
+
 def test_windows_runs_an_ffmpeg_from_a_working_directory_path_lists(
     windows: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -268,6 +293,52 @@ def test_a_version_that_fails_is_reported_and_the_encoders_are_not_listed(
     ):
         ve.describe(str(fake.launcher))
     assert [call["kind"] for call in fake.calls()] == ["version"]
+
+
+def test_what_a_failing_ffmpeg_wrote_is_quoted_with_its_control_characters_escaped(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """ffmpeg's words reach the caller's terminal, so they cannot clear it."""
+    fake = fake_ffmpeg.install(
+        tmp_path,
+        monkeypatch,
+        said={"-version": "\x1b[2Jlibavutil: version broke"},
+        fails=["-version"],
+    )
+    with pytest.raises(ve.VideoEncoderError) as caught:
+        ve.describe(str(fake.launcher))
+    message = str(caught.value)
+    assert "\x1b" not in message
+    assert message.endswith(
+        " did not run: \\x1b[2Jlibavutil: version broke (-version exited with status 1)"
+    )
+
+
+def test_an_ffmpeg_with_no_encoder_for_the_video_is_named_by_its_escapes() -> None:
+    """The path of the ffmpeg is the caller's or ``PATH``'s, and its version line is its own."""
+    ffmpeg = ve.FFmpeg(
+        path="/opt/ff\u202empeg/bin/ffmpeg",
+        version="ffmpeg version 7.1\x1b[2J",
+        encoders=frozenset(),
+    )
+    with pytest.raises(
+        ve.VideoEncoderError, match=r"^encoder='auto' cannot write"
+    ) as caught:
+        ve.choose(
+            ffmpeg,
+            encoder="auto",
+            codec=None,
+            container="webm",
+            width=32,
+            height=32,
+            vaapi_device=ve.DEFAULT_VAAPI_DEVICE,
+        )
+    message = str(caught.value)
+    assert "\u202e" not in message
+    assert "\x1b" not in message
+    assert (
+        "with /opt/ff\\u202empeg/bin/ffmpeg (ffmpeg version 7.1\\x1b[2J); " in message
+    )
 
 
 def test_a_listing_that_fails_is_reported_with_its_own_words(

@@ -2757,6 +2757,44 @@ print(matrix.t11.shape, matrix.t11.dtype, complex(matrix.t11))
 # () complex128 (1+0j)
 ```
 
+## Un lector rechaza un nombre que no guarda un fichero regular
+
+Un nombre que se le pasa a un lector puede guardar algo que no es un fichero.
+Una tubería con nombre en la que nadie escribe dejaba `io.read` esperando en
+su primera apertura a un escritor que no llegaba nunca, y lo mismo las tablas
+de una exportación ANP; un enlace a `/dev/zero` mantenía una lectura sin fin,
+y un directorio lanzaba lo que lanzara su primera apertura. En la 4.0 cada
+lector mira el nombre antes de abrirlo y lanza un `ValueError` que nombra el
+fichero y lo que guarda. Una llamada que capturaba `OSError` para un
+directorio captura ahora `ValueError`; un nombre sin nada detrás sigue
+lanzando `FileNotFoundError`, y un enlace a un fichero regular se sigue
+leyendo.
+
+| Se pasa | 3.3.0 o 4.0.0rc1 | 4.0 |
+| --- | --- | --- |
+| una tubería con nombre a `io.read`, `io.info`, `io.read_blocks` o como origen de `io.convert` | la llamada esperaba en la apertura a un escritor | `ValueError`: `"<ruta>: is a named pipe (FIFO), and audio is read only from a regular file"` |
+| un directorio a esas cuatro | `IsADirectoryError` (`PermissionError` en Windows) | `ValueError`, `"... is a directory, ..."` |
+| un dispositivo a esas cuatro (`/dev/zero`, o un enlace a él) | `ValueError`: no es un fichero de audio reconocido | `ValueError`, `"... is a character device, ..."` |
+| un directorio a `aircraft.load_anp_database` que guarda una tubería, un dispositivo o un directorio con el nombre de una de sus tablas | la llamada esperaba, leía sin fin o lanzaba `IsADirectoryError` | `ValueError`, `"ANP table <ruta>: is ..., and an ANP table is read only from a regular file"`; un fichero cuyo nombre no casa con ninguna clave de tabla ya no se abre |
+| una tabla ANP de más de 32 MiB | se leía entera | `ValueError`, antes de leer un byte |
+| una celda ANP con `nan`, `inf`, `-Infinity` o `1e999`, una cabecera como `L_infft`, o una celda que no guarda ningún número | una celda no finita se tomaba tal cual y salía como NaN en cada nivel de evento; una celda sin número lanzaba el `ValueError` de Python, que no nombraba ni la tabla ni la línea | `ValueError` que nombra la tabla, la línea y la columna |
+| una tabla ANP que no es UTF-8 | `UnicodeDecodeError`, sin nombrar el fichero | `ValueError` que nombra la tabla y el byte |
+| un recuento ANP (una longitud de etapa, un número de punto o de paso, un número de motores) de `1.5` | se tomaba como `1`; una longitud de etapa de los pesos o de los pasos de despegue, escrita así o `nan`, lanzaba el `ValueError` de un argumento `stage_length`, que no nombraba ninguna tabla | `ValueError` que nombra la tabla, la línea y la columna |
+
+```python
+import tempfile
+from pathlib import Path
+
+from phonometry import io
+
+with tempfile.TemporaryDirectory() as folder:
+    try:
+        io.read(Path(folder))
+    except ValueError as refusal:
+        print(str(refusal).split(": ", 1)[1])
+# is a directory, and audio is read only from a regular file
+```
+
 ## Los setenta y ocho nombres que ya no están
 
 Todo lo demás se movió. Estos setenta y ocho no existen en ningún módulo público:

@@ -7,6 +7,52 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Security
+
+- **Every reader of a file a caller or the environment names refuses a named
+  pipe, a device, a socket or a directory before it opens it.** `io.read`,
+  `io.info`, `io.read_blocks` and `io.convert` opened the name they were given
+  straight away: a named pipe no one writes to kept the call waiting at that
+  open for a writer that never came, a link to `/dev/zero` was read as twelve
+  zero bytes and called no audio file, and a directory raised the
+  `IsADirectoryError` of the open. `aircraft.load_anp_database` read every
+  `.csv` of the directory it was given with `read_text`, so a pipe there hung
+  it and a device kept it reading without end. Each now raises a `ValueError`
+  that names the file and what it holds, within the time a look at the name
+  takes. Every open of the package's own goes through `open_regular` of
+  `_internal/json_input.py`, which looks at the name, opens it without waiting
+  and asks the open file again, so that a pipe put in the place of the file in
+  between is refused too; where SciPy or python-soundfile opens the name
+  itself, the same check comes first. The ANP reader reads only the tables a
+  keyword names, each from a file of at most 32 MiB (68 times the largest
+  table of the EASA ANP database v2.3), and refuses a cell that holds no
+  finite number (`nan`, `inf`, `1e999`), or no number at all, with the table,
+  the line and the column, where a `nan` level went into the NPD curve as it
+  was and came out of every event level after it; a count (a stage length, a
+  point or step number, a number of engines) that is no whole number is
+  refused the same way, where `int()` took `1.5` for `1`. The remote runs,
+  new in this release, hold to the same from their first version: the hosts
+  file, which `PHONOMETRY_HOSTS_FILE` may name, is read only from a regular
+  file and only up to 1 MiB, an `ssh` destination in it holding a mark that
+  reorders text (U+202A to U+202E, U+2066 to U+2069) is refused as a control
+  character is, and text a node sends reaches the caller's terminal, log and
+  warnings with those marks and lone surrogates escaped as well as its
+  control characters, a node's provenance holding any of them being refused.
+  A message that names a file a caller or the environment gave (those of the
+  `io` readers and writers, of the video encoder and the partial file it
+  leaves behind, of the ffmpeg and the `ssh` found on `PATH`, of the hosts
+  file and of the package a node is sent), and the log line that names a
+  program found there, writes the name with its control characters, its marks
+  that reorder text and its bytes that are not UTF-8 as escapes, as the
+  catalogue and sidecar readers already did, and what ffmpeg wrote on stderr,
+  which names the file it writes, is quoted the same way, so that the message
+  can always be printed and logged and cannot move the terminal it is printed
+  on.
+  `scripts/check_regular_file_reads.py`, run by `make regular-file-reads` and
+  in CI, fails on a read in `src` that opens a file without the shared check;
+  on the tree before this change it reports fifteen reads, every one of them
+  changed here.
+
 ### Added
 
 - **The FDTD engines step on an NVIDIA GPU through CuPy, or on PyTorch, from

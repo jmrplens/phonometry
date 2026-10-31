@@ -7,57 +7,6 @@ Part of https://docs.jmrp.io/phonometry/llms.txt. One page in 2 parts, cut at it
 <!-- source: docs/start/upgrading.md | canonical: https://docs.jmrp.io/phonometry/start/upgrading/ -->
 Source: https://docs.jmrp.io/phonometry/start/upgrading/
 
-## A record's fields are required
-
-Several records carried fields that defaulted to `None`, so that a result
-built by hand from a few of its numbers would still construct. Every reader
-then had to ask whether the field was there: the fiche refused a bare rating
-only once a report was asked for, and a plot of the geometry raised that the
-result "does not retain its geometry". The fields are required now, and a
-record built without one, or with `None` for one (`dataclasses.replace`
-included), raises `TypeError` naming it.
-
-| Record | Required now |
-| --- | --- |
-| `building.AirborneInsulationResult` | `l1`, `l2`, `t2`, `t0` |
-| `building.ImpactInsulationResult` | `li`, `t2`, `t0` |
-| `building.WeightedRatingResult`, `building.ImpactRatingResult` | `frequencies`, `measured`, `shifted_reference` |
-| `building.ExtendedWeightedRatingResult`, `building.ExtendedImpactRatingResult` | `frequencies`, `measured` |
-| `building.ApertureTransmissionResult` | `depth`, now the fourth field; and `width_m` for a slit or `radius` for a circular aperture |
-| `building.FacadePredictionResult` | `elements`, now the sixth field |
-| `emission.IntensityResult` | `spacing_m`, keyword-only |
-| `environment.BarrierInsertionLoss` | `source_height_m`, `barrier_distance`, `barrier_height_m`, `receiver_distance`, `receiver_height_m`, keyword-only |
-| `psychoacoustics.ZwickerLoudness` | `field` (`"free"` or `"diffuse"`), now the fourth field, before `n5` |
-| `room.OpenPlanResult` | `positions_m`, the distances the metrics were fitted on |
-| `materials.LayeredAbsorberResult` | `layers`, the stack the prediction was solved for |
-| `materials.DiffuserPolarResponse` | `well_width` and `n_repetitions`, keyword-only; `depths` stays optional, because a response predicted from an explicit `reflection` has none |
-| `materials.MetadiffuserResult` | `wells`, `depth_m` and `period_m`, the panel the reflection was solved for, keyword-only |
-| `materials.SlitResonatorAbsorberResult` | `resonators`, `slit_height_m`, `lattice_step_m` and `period_m`, the panel the prediction was solved for, keyword-only |
-| `materials.ImpedanceTubeResult` | `spacing_m` and `x1`, the microphone spacing and the distance from the sample to the farther microphone, which the reduction cannot run without, keyword-only; `diameter_m` stays optional, because it need not be supplied |
-| `materials.InSituAbsorptionResult` | `source_height_m` and `microphone_height_m`, the set-up the absorption was measured with, keyword-only |
-| `vibration.JunctionTransmissionResult` | `thickness1_m` and `thickness2_m`, the plates of the junction, keyword-only |
-| `noise_control.ReactiveSilencerResult` | `plane_wave_limit`, and exactly one of `geometry` (a named device) and `chain` (a `SilencerChain`); `resonances`, `geometry`, `plane_wave_limit` and `chain` are keyword-only |
-
-`simulation.FDTDResult` and `simulation.ElasticFDTDResult` take two more
-fields, after the others: `snapshot_decimation`, every how many cells a
-snapshot keeps along each axis (1 for every cell, as before), and
-`provenance`, the `simulation.RunProvenance` of where the run stepped. A
-result built by hand passes both, and leaving one out raises `TypeError`
-naming it; the results the simulation functions return carry both already. A
-`RunProvenance` built by hand passes every field, `phonometry_version`, the
-version of the phonometry that ran the steps, among them.
-
-`filters.WeightingFilter(..., high_accuracy=None)` used to select the
-default. `high_accuracy` is a plain `bool` now, `True` by default, and `None`
-raises `TypeError` rather than being read as false, which would pick the plain
-design.
-
-`building.CeilingAttenuationResult.rounded` was a field the caller passed in.
-It is read from `measured` now, rounded to the nearest integer as ASTM E413
-clause 5.2 asks (the clause leaves a half open, and the library rounds
-it up), so it cannot disagree with the data;
-leave it out when building the record by hand.
-
 ## Waveforms inside results come back as the `Signal` they came from
 
 A transform handed a `Signal` has returned a `Signal` since the contract was
@@ -1165,6 +1114,42 @@ print(type(spectrum.levels).__name__, spectrum.levels.flags.writeable, spectrum.
 print(matrix.t11.shape, matrix.t11.dtype, complex(matrix.t11))
 # ndarray False [5.0, 4.0]
 # () complex128 (1+0j)
+```
+
+## A reader refuses a name that holds no regular file
+
+A name handed to a reader can hold something other than a file. A named pipe
+no one writes to kept `io.read` waiting at its first open for a writer that
+never came, and the tables of an ANP export the same way; a link to
+`/dev/zero` kept a read going, and a directory raised whatever its first open
+raised. In 4.0 each reader looks at the name before it opens it and raises a
+`ValueError` that names the file and what it holds. A call that caught
+`OSError` for a directory catches `ValueError` now; a name with nothing at it
+still raises `FileNotFoundError`, and a link to a regular file is still read.
+
+| Passed | 3.3.0 or 4.0.0rc1 | 4.0 |
+| --- | --- | --- |
+| a named pipe to `io.read`, `io.info`, `io.read_blocks` or as the source of `io.convert` | the call waited at the open for a writer | `ValueError`: `"<path>: is a named pipe (FIFO), and audio is read only from a regular file"` |
+| a directory to the same four | `IsADirectoryError` (`PermissionError` on Windows) | `ValueError`, `"... is a directory, ..."` |
+| a device to the same four (`/dev/zero`, or a link to it) | `ValueError`: not a recognised audio file | `ValueError`, `"... is a character device, ..."` |
+| a directory to `aircraft.load_anp_database` holding a pipe, a device or a directory under the name of one of its tables | the call waited, read without end, or raised `IsADirectoryError` | `ValueError`, `"ANP table <path>: is ..., and an ANP table is read only from a regular file"`; a file whose name no table keyword matches is no longer opened at all |
+| an ANP table of more than 32 MiB | read whole | `ValueError`, before a byte of it is read |
+| an ANP cell of `nan`, `inf`, `-Infinity` or `1e999`, a heading such as `L_infft`, or a cell that holds no number | a non-finite cell was taken as it was and came out of every event level as NaN; a cell with no number raised Python's own `ValueError`, which named neither the table nor the line | `ValueError` naming the table, the line and the column |
+| an ANP table that is not UTF-8 | `UnicodeDecodeError`, naming no file | `ValueError` naming the table and the byte |
+| an ANP count (a stage length, a point or step number, a number of engines) of `1.5` | taken as `1`; a stage length of the weights or the departure steps, so written or `nan`, raised the `ValueError` of a `stage_length` argument, which named no table | `ValueError` naming the table, the line and the column |
+
+```python
+import tempfile
+from pathlib import Path
+
+from phonometry import io
+
+with tempfile.TemporaryDirectory() as folder:
+    try:
+        io.read(Path(folder))
+    except ValueError as refusal:
+        print(str(refusal).split(": ", 1)[1])
+# is a directory, and audio is read only from a regular file
 ```
 
 ## The seventy-eight names that are gone

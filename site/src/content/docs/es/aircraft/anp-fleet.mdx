@@ -50,6 +50,11 @@ sonora del suceso de 89,0 dB.*
 
 `load_anp_database()` sin argumentos lee la copia que viene con el paquete.
 Apúntalo a un directorio para leer cualquier otra exportación CSV de ANP.
+Lee solo las tablas que necesita, cada una de un fichero regular de 32 MiB
+como mucho, y rechaza una celda que no contiene un número finito (`nan`,
+`inf`, `1e999`), o un recuento (una longitud de etapa, un número de punto o de
+paso, un número de motores) que no es entero, indicando la tabla, la línea y
+la columna, antes de calcular nada con ella.
 
 ```python
 from phonometry import aircraft

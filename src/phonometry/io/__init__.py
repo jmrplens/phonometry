@@ -31,7 +31,11 @@ at 16 bits, a ``bext`` chunk written field by field, and never a silent
 normalization. :func:`convert` moves a measurement between lossless
 containers with samples, provenance and sidecar intact, and the calibration
 travels in a versioned JSON sidecar (:class:`CalibrationSidecar`) next to the
-audio, where the audio formats themselves have no field for it.
+audio, where the audio formats themselves have no field for it. Every reader
+here refuses a name that holds no regular file, a named pipe, a device, a
+socket or a directory, with a :class:`ValueError` that says which, before it
+opens it: opening a pipe waits for a writer that may never come, and reading a
+device may never end.
 
 :func:`write_video` writes any matplotlib animation to WebM, MP4 or GIF
 through ffmpeg, the program matplotlib already knows where to find: every

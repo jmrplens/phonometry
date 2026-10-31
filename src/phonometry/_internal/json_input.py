@@ -11,6 +11,13 @@ decodes to holds no lone surrogate, which a JSON escape can spell and UTF-8
 cannot write. Each reader turns what these find into its own error, with the
 place in the file.
 
+The first of these holds for every file the library reads at a name a caller
+or the environment gives it, whatever the file holds: an audio file, a table
+of an ANP export, the hosts file of the remote runs. Each opens it through
+:func:`open_regular` or :func:`read_at_most`, or, where a reader of another
+library opens the name itself, asks :func:`not_regular_at` first.
+``scripts/check_regular_file_reads.py`` holds the library to it.
+
 A file the library writes back at such a name is written beside it and
 renamed into place, so that the name is never opened for writing: opening a
 pipe for writing waits for a reader, which may never come, and a reader of
@@ -38,6 +45,7 @@ from .validation import require_scalar
 
 if TYPE_CHECKING:
     from pathlib import Path
+    from typing import BinaryIO
 
 #: How deep the brackets of a text may nest for the text to be decoded at all.
 #: A small part of how deep a decoder follows before it gives out, which
@@ -357,6 +365,53 @@ def _open_without_waiting(name: str, flags: int) -> int:
     return os.open(name, flags | _OPEN_FLAGS)
 
 
+def _opened_regular(path: Path) -> tuple[BinaryIO, os.stat_result]:
+    """The regular file *path*, open for reading, and what the open file says of itself.
+
+    The name is looked at first, and anything but a regular file is refused
+    before it is opened. The file is then opened without waiting and asked
+    again what it is, so that a pipe put in its place in between is refused,
+    not waited on; a regular file is read as any other is from there on.
+
+    :raises NotRegularError: for a name that holds anything but a regular file.
+    :raises OSError: as the file system raises it, untouched.
+    """
+    kind = _not_regular(path.stat().st_mode)
+    if kind is not None:
+        raise NotRegularError(kind)
+    with contextlib.ExitStack() as opened:
+        handle = opened.enter_context(open(path, "rb", opener=_open_without_waiting))
+        status = os.fstat(handle.fileno())
+        kind = _not_regular(status.st_mode)
+        if kind is not None:
+            raise NotRegularError(kind)
+        if _NO_WAIT:
+            os.set_blocking(handle.fileno(), True)
+        # Handed to the caller open: the stack closes it only on a refusal.
+        opened.pop_all()
+    return handle, status
+
+
+def open_regular(path: Path) -> BinaryIO:
+    """The regular file *path*, open for reading in binary, or its refusal.
+
+    What every reader of a file a caller names opens it with. A pipe, a
+    device, a socket or a directory at the name (behind a link or not) is
+    refused before it is opened, since opening a pipe waits for a writer and
+    reading a device may never end; the file is then opened without waiting
+    and asked again what it is, so that a pipe put in its place in between is
+    refused rather than waited on. A link to a regular file is followed.
+
+    :param path: The file.
+    :return: The open file, positioned at its start; the caller closes it.
+    :raises NotRegularError: for a name that holds anything but a regular file.
+    :raises OSError: as the file system raises it, untouched:
+        :class:`FileNotFoundError` for a name with nothing at it.
+    """
+    handle, _status = _opened_regular(path)
+    return handle
+
+
 def read_at_most(path: Path, limit: int) -> bytes:
     """The bytes of the regular file *path*, never more than one past *limit*.
 
@@ -379,17 +434,8 @@ def read_at_most(path: Path, limit: int) -> bytes:
     :raises TypeError: if ``limit`` is not a single number.
     """
     require_scalar(limit, "limit")
-    kind = _not_regular(path.stat().st_mode)
-    if kind is not None:
-        raise NotRegularError(kind)
-    with open(path, "rb", opener=_open_without_waiting) as handle:
-        status = os.fstat(handle.fileno())
-        kind = _not_regular(status.st_mode)
-        if kind is not None:
-            raise NotRegularError(kind)
-        if _NO_WAIT:
-            # A regular file, read as any other is read from here on.
-            os.set_blocking(handle.fileno(), True)
+    handle, status = _opened_regular(path)
+    with handle:
         if status.st_size > limit:
             raise TooLargeError(status.st_size)
         raw = handle.read(limit + 1)

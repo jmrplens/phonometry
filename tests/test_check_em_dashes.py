@@ -527,6 +527,70 @@ def test_an_escape_in_the_frontmatter_is_the_dash() -> None:
     assert ced.markdown_hits(text) == [3]
 
 
+def test_an_escape_in_the_frontmatter_is_read_only_where_it_is_decoded() -> None:
+    r"""YAML decodes the escape in a double-quoted value, and nowhere else.
+
+    A single-quoted or a plain value, a block of text and a comment keep the
+    backslash, an escaped backslash is a backslash, and ``\N`` is YAML's
+    next-line character, not Python's named escape. The JSON-LD that a
+    ``content`` block of the head hands a search engine is JSON, which
+    decodes the escape in its strings.
+    """
+    shown = (
+        "---\n"
+        "description: 'Write \\u2014 to get the character.'\n"
+        'summary: Write \\u2014 or "\\u2014" to get it.\n'
+        'note: "Write \\\\u2014 to get it."\n'
+        'aside: "A next line \\N{EM DASH} here."\n'
+        "keywords: ['rises \\u2014 falls', plain \\u2014 item]\n"
+        "# Write \\u2014 to get it.\n"
+        "body: |\n"
+        "  Write \\u2014 to get it.\n"
+        "---\n"
+        "Written as \\u2014 in the body.\n"
+    )
+    assert ced.markdown_hits(shown) == []
+    decoded = (
+        "---\n"
+        'description: "The level rises \\u2014 and falls."\n'
+        'summary: "The level rises \\U00002014 and falls."\n'
+        'lead: "The level rises\n'
+        '  \\u2014 and falls."\n'
+        "head:\n"
+        "  - tag: script\n"
+        "    content: |\n"
+        '      {"description": "The level rises \\u2014 and falls."}\n'
+        "---\n"
+    )
+    assert ced.markdown_hits(decoded) == [2, 3, 5, 9]
+
+
+def test_an_escaped_backslash_or_another_escape_is_not_the_dash(
+    tmp_path: pathlib.Path,
+) -> None:
+    r"""``\\u2014`` is a backslash and five characters, ``\u00002014`` a NUL and four digits.
+
+    The letter of an escape is read as written, and a backslash escapes the
+    character after it, in an f-string and in a data module as in any
+    string Python evaluates.
+    """
+    text = (
+        'A = f"{x} \\\\u2014 stays six characters"\n'
+        'B = f"{x} \\u00002014 is a NUL and four digits"\n'
+        'C = f"{x} \\u2014 is the dash"\n'
+    )
+    assert ced.python_hits(text) == [3]
+    home = tmp_path / "home.ts"
+    home.write_text(
+        "export const A = 'a \\\\u2014 b';\n"
+        "export const B = 'a \\u00002014 b';\n"
+        "export const C = 'a \\U2014 b';\n"
+        "export const D = 'a \\u2014 b';\n",
+        encoding="utf-8",
+    )
+    assert ced.scan(home) == [4]
+
+
 def test_an_escape_or_entity_in_a_python_string_is_the_dash() -> None:
     text = (
         'ESCAPE = "the level rises \\u2014 and falls"\n'

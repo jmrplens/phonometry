@@ -29,12 +29,17 @@ What is NOT prose keeps its dash, and every exemption below says why:
   hyphens, not em dashes.
 
 The character has other spellings that publish it all the same, and each is
-read as the character: the HTML entities ``&mdash;``, ``&#8212;`` and
-``&#x2014;`` in a page and in a string, the escapes ``\u2014``,
-``\U00002014`` and ``\N{EM DASH}`` in a string of a module (whose value is
-what is read, so a raw string keeps its backslash), ``\u2014`` in a JSON
-string, a page's frontmatter and a data module, and ``\u{2014}`` in a data
-module.
+read as the character where it is decoded on its way to a reader: the HTML
+entities ``&mdash;``, ``&#8212;`` and ``&#x2014;`` in a page and in a string,
+the escapes ``\u2014``, ``\U00002014`` and ``\N{EM DASH}`` in a string of a
+module (whose value is what is read, so a raw string keeps its backslash),
+``\u2014`` in a JSON string, ``\u2014`` and ``\u{2014}`` in a data module,
+and ``\u2014`` and ``\U00002014`` in a double-quoted value of a page's
+frontmatter, the one YAML value that decodes an escape, and in the JSON
+strings of the JSON-LD its head carries. A single-quoted or plain value, a
+block of text and a comment of the frontmatter show the escape as written,
+and so does the body of a page. A backslash escapes the character after it
+in each of these languages, so ``\\u2014`` is never the dash.
 
 The dash also has an ASCII spelling, the double hyphen, and the guard refuses
 that too. Astro's smartypants turns ``--`` in the text of a page into an em
@@ -88,6 +93,7 @@ import pathlib
 import re
 import sys
 import tokenize
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from markdown_fences import code_lines
@@ -156,10 +162,16 @@ _REFERENCE_ENTRY = re.compile(r"^\s*(?:-|\d+\.)\s.*\(\d{4}[a-z]?\)")
 #: publish as the character.
 _EM_DASH_ENTITY = re.compile(r"&(?:mdash|#0*8212|#[xX]0*2014);")
 #: The escapes of a string literal that stand for the em dash: ``\u2014``,
-#: Python's ``\U00002014`` and ``\N{EM DASH}``, and JavaScript's ``\u{2014}``.
-_EM_DASH_ESCAPE = re.compile(
-    r"\\(?:u2014|U00002014|N\{em dash\}|u\{0*2014\})", re.IGNORECASE
-)
+#: Python's ``\U00002014`` and ``\N{EM DASH}`` (a name Python reads in any
+#: case), and JavaScript's ``\u{2014}``. The letter of an escape is read as
+#: written: ``\U2014`` is no escape of either language, and ``\u00002014`` is
+#: the NUL character and four digits.
+_EM_DASH_ESCAPE = re.compile(r"\\(?:u2014|U00002014|N\{(?i:em dash)\}|u\{0*2014\})")
+#: The escapes a double-quoted YAML value decodes to the em dash. ``\N`` is
+#: YAML's next-line character there, not a named escape.
+_YAML_EM_DASH_ESCAPE = re.compile(r"\\(?:u2014|U00002014)")
+#: The one escape a JSON string has for the em dash.
+_JSON_EM_DASH_ESCAPE = re.compile(r"\\u2014")
 
 
 def _spells_em_dash(text: str) -> bool:
@@ -174,24 +186,226 @@ def _decode_entities(text: str) -> str:
     return _EM_DASH_ENTITY.sub(EM_DASH, text)
 
 
+def _decode_escapes(text: str, escape: re.Pattern[str] = _EM_DASH_ESCAPE) -> str:
+    r"""The text with each escape of the em dash read as the character.
+
+    The text is read from left to right as a string literal is: a backslash
+    escapes the character after it, so ``\\u2014`` is an escaped backslash
+    and the five characters ``u2014``, never the dash.
+
+    :param escape: The escapes of the em dash in the language the text is
+        written in, matched at a backslash.
+    """
+    pieces: list[str] = []
+    done = 0
+    while (backslash := text.find("\\", done)) >= 0:
+        found = escape.match(text, backslash)
+        if found is None:
+            pieces.append(text[done : backslash + 2])
+            done = backslash + 2
+        else:
+            pieces.extend((text[done:backslash], EM_DASH))
+            done = found.end()
+    pieces.append(text[done:])
+    return "".join(pieces)
+
+
 def _decode_spellings(text: str) -> str:
     """The text with each entity and each escape of the em dash read as the character."""
-    return _EM_DASH_ESCAPE.sub(EM_DASH, _decode_entities(text))
+    return _decode_escapes(_decode_entities(text))
+
+
+def _decode_json_strings(line: str) -> str:
+    """The line with the escape of the em dash read as the character in its JSON strings."""
+    return _JSON_STRING.sub(
+        lambda found: _decode_escapes(found.group(), _JSON_EM_DASH_ESCAPE), line
+    )
+
+
+#: The rest of a double-quoted YAML value, up to its closing quote, and of a
+#: single-quoted one, whose only escape is a doubled quote.
+_YAML_QUOTED_REST = {
+    '"': re.compile(r'(?:[^"\\]|\\.)*"'),
+    "'": re.compile(r"(?:[^']|'')*'"),
+}
+
+
+@dataclass
+class _Node:
+    """Where the reading of one frontmatter line stands."""
+
+    #: The column of the key or the sequence entry the next value belongs to.
+    owner: int
+    #: Whether a node may open here: at the start of a line, after a colon,
+    #: an entry's dash, an opening bracket or a comma of a flow collection.
+    open: bool = True
+    #: The last key read on the line.
+    key: str = ""
+    #: Whether the rest of the line is read already.
+    done: bool = False
+
+
+@dataclass
+class _Frontmatter:
+    r"""A reading of a page's frontmatter, line by line, for its double-quoted values.
+
+    YAML decodes a backslash escape in a double-quoted value only: a
+    single-quoted or a plain value, a block of text (``|``, ``>``) and a
+    comment show ``\u2014`` as the six characters it is. Each line is
+    returned with the escapes decoded where YAML decodes them, and with the
+    JSON strings of a ``content`` block decoded too, since that block is the
+    JSON-LD of the head, which a search engine reads as JSON. What one line
+    leaves open is carried to the next: a quoted value that wraps, a block
+    of text and a plain value that wraps.
+    """
+
+    #: The quote of a value still open at the end of the last line.
+    quote: str = ""
+    #: The column a line of an open block of text is indented past.
+    block: int | None = None
+    #: Whether that block is the JSON-LD of a ``content`` key.
+    json_block: bool = False
+    #: The column a line that wraps an open plain value is indented past.
+    plain: int | None = None
+    #: How deep the line is inside a flow collection (``[...]``, ``{...}``).
+    flow: int = 0
+
+    def decode(self, line: str) -> str:
+        """The line with each escape of the em dash read where YAML decodes it."""
+        indent = len(line) - len(line.lstrip(" "))
+        if self.block is not None:
+            if not line.strip() or indent > self.block:
+                return _decode_json_strings(line) if self.json_block else line
+            self.block = None
+        if self.plain is not None:
+            if not line.strip() or indent > self.plain:
+                return line
+            self.plain = None
+        pieces: list[str] = []
+        at = 0
+        if self.quote:
+            at = self._quoted(line, 0, self.quote, pieces)
+        if at < len(line):
+            self._nodes(line, at, indent, pieces)
+        return "".join(pieces)
+
+    def _quoted(self, line: str, start: int, quote: str, pieces: list[str]) -> int:
+        """Read a quoted value from ``start``, past its opening quote; return where it ends."""
+        found = _YAML_QUOTED_REST[quote].match(line, start)
+        end = found.end() if found is not None else len(line)
+        self.quote = "" if found is not None else quote
+        value = line[start:end]
+        pieces.append(
+            _decode_escapes(value, _YAML_EM_DASH_ESCAPE) if quote == '"' else value
+        )
+        return end
+
+    def _nodes(self, line: str, at: int, indent: int, pieces: list[str]) -> None:
+        """Read the line from ``at`` on, node by node, into ``pieces``."""
+        node = _Node(owner=indent)
+        while at < len(line) and not node.done:
+            found = self._indicator(line, at, node, pieces)
+            at = found if found is not None else self._plain(line, at, node, pieces)
+
+    def _indicator(
+        self, line: str, at: int, node: _Node, pieces: list[str]
+    ) -> int | None:
+        """Read a blank, a comment, a quoted value or an indicator at ``at``.
+
+        Returns where it ends, or None when a plain scalar opens there.
+        """
+        char = line[at]
+        if char in " \t":
+            pieces.append(char)
+            return at + 1
+        if char == "#" and (at == 0 or line[at - 1] in " \t"):
+            pieces.append(line[at:])
+            node.done = True
+            return len(line)
+        if node.open:
+            opened = self._node_start(line, at, node, pieces)
+            if opened is not None:
+                return opened
+        return self._punctuation(line, at, node, pieces)
+
+    def _node_start(
+        self, line: str, at: int, node: _Node, pieces: list[str]
+    ) -> int | None:
+        """Read what may open a node: a quote, a sequence entry or a block of text."""
+        char = line[at]
+        if char in "\"'":
+            pieces.append(char)
+            end = self._quoted(line, at + 1, char, pieces)
+            node.open, node.done = False, bool(self.quote)
+            return end
+        if char in "-?" and line[at + 1 : at + 2] in ("", " ", "\t"):
+            pieces.append(char)
+            node.owner = at
+            return at + 1
+        if char in "|>" and not self.flow:
+            self.block, self.json_block = node.owner, node.key == "content"
+            pieces.append(line[at:])
+            node.done = True
+            return len(line)
+        return None
+
+    def _punctuation(
+        self, line: str, at: int, node: _Node, pieces: list[str]
+    ) -> int | None:
+        """Read a bracket, a comma of a flow collection or the colon of a key."""
+        char = line[at]
+        if char in "[{" or (self.flow and char in "]},"):
+            self.flow += {"[": 1, "{": 1, "]": -1, "}": -1}.get(char, 0)
+            pieces.append(char)
+            node.open = char not in "]}"
+            return at + 1
+        if char == ":" and (line[at + 1 : at + 2] in ("", " ", "\t") or self.flow):
+            pieces.append(char)
+            node.open = True
+            return at + 1
+        return None
+
+    def _plain(self, line: str, at: int, node: _Node, pieces: list[str]) -> int:
+        """Read a plain scalar from ``at``: a key, or a value that may wrap."""
+        end = max(self._plain_end(line, at), at + 1)
+        pieces.append(line[at:end])
+        if line[end : end + 1] == ":":
+            node.key, node.owner = line[at:end].strip(), at
+        elif node.open and not self.flow:
+            self.plain = node.owner
+        node.open = False
+        return end
+
+    def _plain_end(self, line: str, start: int) -> int:
+        """Where a plain scalar that opens at ``start`` ends on this line."""
+        at = start
+        while at < len(line):
+            char = line[at]
+            after = line[at + 1 : at + 2]
+            if char == ":" and (after in ("", " ", "\t") or self.flow):
+                break
+            if char == "#" and line[at - 1] in " \t":
+                break
+            if self.flow and char in ",[]{}":
+                break
+            at += 1
+        return at
 
 
 def _decode_page(text: str) -> str:
     r"""A page with every spelling of the em dash it publishes read as the character.
 
-    The entities are decoded wherever they stand, and the ``\u2014`` escape
-    in the frontmatter only, which is YAML and decodes it in a double-quoted
-    value; in the body of the page a backslash escape is shown as written.
+    The entities are decoded wherever they stand, and an escape in the
+    frontmatter only where YAML decodes it (see :class:`_Frontmatter`); in
+    the body of the page a backslash escape is shown as written.
     """
     lines = _decode_entities(text).split("\n")
     if lines and lines[0].strip() == "---":
+        reader = _Frontmatter()
         for index in range(1, len(lines)):
             if lines[index].strip() == "---":
                 break
-            lines[index] = _EM_DASH_ESCAPE.sub(EM_DASH, lines[index])
+            lines[index] = reader.decode(lines[index])
     return "\n".join(lines)
 
 
@@ -401,7 +615,7 @@ def _token_hits(token: tokenize.TokenInfo, *, raw: bool) -> list[int]:
     if token.type == _FSTRING_MIDDLE:
         middle = _decode_entities(token.string)
         if not raw:
-            middle = _EM_DASH_ESCAPE.sub(EM_DASH, middle)
+            middle = _decode_escapes(middle)
         return [token.start[0]] if EM_DASH in middle else []
     return []
 

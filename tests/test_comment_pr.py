@@ -211,6 +211,24 @@ def test_the_banner_states_this_head_counts_in_words(head: dict) -> None:
     assert f'alt="All {counts["checks"]} conformance checks pass' in body
 
 
+def test_the_headline_states_the_split_and_no_standards(head: dict) -> None:
+    """The sentence under the banner counts what the citations name.
+
+    It gave the citation groups, which count a book cited at seven clauses
+    seven times, as a count of standards, and the split only in brackets
+    after it. It states the split alone.
+    """
+    counts = head["counts"]
+    body = cpr.conformance_section(head, None, SHA)
+    assert (
+        f"**{counts['passing']}/{counts['checks']} checks pass** across "
+        f"{counts['domains']} domains, against {counts['designations']} "
+        f"normative designations and {counts['sources']} further published "
+        "sources."
+    ) in body
+    assert not re.search(r"\d+\s+standards\b", body)
+
+
 def test_a_failing_tree_says_so_on_the_banner_too(head: dict) -> None:
     """The banner is the live part, so it has to be able to carry bad news."""
     broken = _copy(head)

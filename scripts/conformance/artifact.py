@@ -64,8 +64,10 @@ if TYPE_CHECKING:
 #: Bumped only when the shape changes in a way a reader cannot ignore. Two
 #: since a citation carries every document it names rather than the first one,
 #: which also changes what ``counts.designations`` and ``counts.sources``
-#: measure.
-SCHEMA = 2
+#: measure. Three since ``counts.standards`` is ``counts.citation_groups``: the
+#: figure counts citation strings, and under its old name it was published as
+#: a count of standards.
+SCHEMA = 3
 
 #: Where the document is committed. Beside the Markdown it generates, in the
 #: directory the project already declares as the home of its numerical
@@ -439,14 +441,13 @@ def _counts(
     never catch, because a truncated write derives a count that agrees with
     itself.
 
-    ``standards`` is the figure the landing page, both READMEs, ``llms.txt``
-    and ``.zenodo.json`` publish, and it counts *citation groups*: the citation
-    string up to its first colon or " Annex". By that rule seven clause strings
-    of one book are seven standards. ``designations`` and ``sources`` are the
-    honest split the reference parser makes possible - distinct normative
-    documents, and distinct further works - and are reported alongside rather
-    than in place of it, because changing a published claim is the maintainer's
-    call and not a side effect of a refactor.
+    ``designations`` and ``sources`` are the figures the project publishes:
+    distinct normative documents, and distinct further works, as the reference
+    parser splits every citation. ``citation_groups`` counts citation strings
+    cut at their first colon or " Annex", so seven clause strings of one book
+    are seven groups. It was published as a count of *standards* until the
+    claim moved to the split, and it is kept under a name that says what it
+    counts, so that no reader can print it as standards by accident.
 
     Both count every document a citation names, wherever in it the citation
     names it, and not the one it opens with. The rule is lexical and makes no
@@ -471,13 +472,13 @@ def _counts(
         for document in cited
         if document.kind is not ReferenceKind.STANDARD
     }
-    legacy = {check.standard.split(":")[0].split(" Annex")[0] for check, _ in results}
+    groups = {check.standard.split(":")[0].split(" Annex")[0] for check, _ in results}
     return {
         "checks": len(results),
         "passing": passing,
         "failing": len(results) - passing,
         "domains": domains,
-        "standards": len(legacy),
+        "citation_groups": len(groups),
         "citations": len(references),
         "designations": len(designations),
         "sources": len(sources),

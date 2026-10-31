@@ -8,16 +8,18 @@
  *
  * Every number in `stats` and every claim in `honest` is taken from the
  * repository, not written by hand from memory:
- *   checks/domains/standards   conformance-stats.mjs, parsed from
- *                              docs/CONFORMANCE.md at build time
- *   guides/apiPages/figures/fiches/version   repo-stats.mjs, counted from the
- *                              tree at build time (definitions in that module)
+ *   checks/domains/designations/sources
+ *       conformance-stats.mjs, read from the counts of docs/conformance.json
+ *       at build time
+ *   guides/apiPages/figures/fiches/version
+ *       repo-stats.mjs, counted from the tree at build time (definitions in
+ *       that module)
  *
  * All of these used to be typed out here by hand, and every hand-written copy
  * fell a release behind. They are imported now, so there is exactly one place
  * that can be wrong.
  */
-import { domains, passingChecks, standards } from './conformance-stats.mjs';
+import { designations, domains, passingChecks, sources } from './conformance-stats.mjs';
 import { apiPages, catalogueRows, fiches, guides, version } from './repo-stats.mjs';
 
 export interface Stat {
@@ -122,7 +124,7 @@ export const en: HomeContent = {
 	statsLabel: 'The library in four numbers',
 	stats: [
 		{ value: String(passingChecks), label: 'conformance checks passing', href: '/phonometry/reference/conformance/' },
-		{ value: String(standards), label: `standards referenced, across ${domains} test domains`, href: '/phonometry/reference/conformance/' },
+		{ value: String(designations), label: `normative designations and ${sources} further published sources, across ${domains} test domains`, href: '/phonometry/reference/conformance/' },
 		{ value: String(catalogueRows), label: 'published catalogue rows, each naming the source it came from', href: '/phonometry/reference/catalogues/' },
 		{ value: String(fiches), label: 'PDF fiches in the reporting format their standard defines', href: '/phonometry/reference/reports/' },
 	],
@@ -284,7 +286,7 @@ export const es: HomeContent = {
 	statsLabel: 'La biblioteca en cuatro cifras',
 	stats: [
 		{ value: String(passingChecks), label: 'comprobaciones de conformidad superadas', href: '/phonometry/es/reference/conformance/' },
-		{ value: String(standards), label: `normas referenciadas, en ${domains} dominios` },
+		{ value: String(designations), label: `designaciones normativas y ${sources} fuentes publicadas adicionales, sobre ${domains} dominios` },
 		{ value: String(catalogueRows), label: 'filas de catálogo publicadas, cada una con la fuente de la que sale', href: '/phonometry/es/reference/catalogues/' },
 		{ value: String(fiches), label: 'fichas PDF con el formato de informe que define su norma', href: '/phonometry/es/reference/reports/' },
 	],

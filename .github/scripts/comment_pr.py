@@ -63,7 +63,7 @@ ARTIFACT = "docs/conformance.json"
 #: imported: this job has no pip step, and importing that module would pull the
 #: whole scientific stack in behind it. ``tests/test_comment_pr.py`` fails if
 #: the two ever disagree.
-SCHEMA = 2
+SCHEMA = 3
 
 
 def parse_test_results(test_dir: str, ref: str) -> tuple[str, int, int]:
@@ -368,9 +368,9 @@ def conformance_section(
         banner_picture(counts, ref),
         "",
         f"**{counts['passing']}/{counts['checks']} checks pass** across "
-        f"{counts['domains']} domains and {counts['standards']} standards "
-        f"({counts['designations']} normative designations, {counts['sources']} "
-        "further published sources).",
+        f"{counts['domains']} domains, against {counts['designations']} "
+        f"normative designations and {counts['sources']} further published "
+        "sources.",
         "",
         "<sub><b>Used</b> in the tables below is how much of that clause's "
         "published tolerance the deviation consumes: 100 % sits exactly on the "

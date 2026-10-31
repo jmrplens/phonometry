@@ -264,6 +264,18 @@ class TrackDecayRate(OwnsArrays):
     distances: NDArray[np.float64] | None = None
     responses: NDArray[np.float64] | None = None
 
+    if TYPE_CHECKING:
+
+        def __init__(
+            self,
+            *,
+            direction: Direction,
+            frequencies: ArrayLike,
+            decay_rates_db_per_m: ArrayLike,
+            distances: ArrayLike | None = None,
+            responses: ArrayLike | None = None,
+        ) -> None: ...
+
     def __post_init__(self) -> None:
         """Hold every array read-only and check that they agree.
 

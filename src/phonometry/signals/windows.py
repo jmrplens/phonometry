@@ -37,7 +37,7 @@ from .spectra import _positive
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from numpy.typing import NDArray
+    from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
     from .._internal.types import TwoPanels
@@ -95,7 +95,7 @@ class WindowMetricsResult(OwnsArrays):
         lobe, in bins.
     """
 
-    window: str | tuple[Any, ...]
+    window: str | tuple[ArrayLike, ...]
     n: int
     taps: NDArray[np.float64]
     coherent_gain: float
@@ -165,7 +165,7 @@ class WindowMetricsResult(OwnsArrays):
         return plot_window_metrics(self, ax=ax, language=language, **kwargs)
 
 
-def _own_window(window: str | tuple[Any, ...]) -> str | tuple[Any, ...]:
+def _own_window(window: str | tuple[ArrayLike, ...]) -> str | tuple[ArrayLike, ...]:
     """The window specification with no parameter the caller can still edit.
 
     A name, a number or an array is kept as given, and the result makes an
@@ -212,7 +212,7 @@ def _width_3db_bins(level: NDArray[np.float64], oversample: int) -> float:
 
 
 def window_metrics(
-    window: str | tuple[Any, ...],
+    window: str | tuple[ArrayLike, ...],
     n: int | np.integer[Any] = 1024,
 ) -> WindowMetricsResult:
     """Figures of merit of a spectral-analysis taper (Harris 1978).

@@ -58,6 +58,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
+from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
@@ -65,7 +66,7 @@ import numpy as np
 from ...io._resolve import apply_calibration, resolve_fs
 
 if TYPE_CHECKING:
-    from collections.abc import Sequence
+    from collections.abc import Mapping, Sequence
 
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
@@ -73,7 +74,7 @@ if TYPE_CHECKING:
     from ..._i18n import Language
     from ...io._signal import Signal
 
-from ..._internal.frozen import OwnsArrays
+from ..._internal.frozen import OwnsArrays, reduce_with_plain_rows
 from ..._internal.types import as_float_or_array
 from ..._internal.validation import require_ranks, require_same_length, require_scalar
 from ...metrology.reference_values import REFERENCE_VALUES
@@ -388,7 +389,7 @@ class MooreGlasbergTimeVaryingLoudness(OwnsArrays):
     long_term_loudness_level: np.ndarray
     n_max: float
     loudness_level_max: float
-    percentiles: dict[float, float]
+    percentiles: Mapping[float, float]
     field: Literal["free", "diffuse", "eardrum"]
     presentation: Presentation
 
@@ -488,6 +489,13 @@ class MooreGlasbergTimeVaryingLoudness(OwnsArrays):
                 f"to {phon!r}."
             )
             raise ValueError(msg)
+        object.__setattr__(
+            self, "percentiles", MappingProxyType(dict(self.percentiles))
+        )
+
+    def __reduce__(self) -> tuple[Any, tuple[type, dict[str, Any]]]:
+        """Travel with a plain dictionary, which pickles; it is wrapped again on arrival."""
+        return reduce_with_plain_rows(self)
 
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any

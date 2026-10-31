@@ -144,14 +144,24 @@ def test_octave_filter_cached_results_identical() -> None:
     assert f1 == f2
 
 
-def test_octave_filter_freq_list_is_mutation_safe() -> None:
-    """Mutating the returned freq list must not corrupt the cached bank."""
+def test_octave_filter_band_centres_cannot_reach_the_cached_bank() -> None:
+    """The band centres come back as a tuple, which no caller can write into.
+
+    The bank behind ``octave_filter`` is cached and shared between calls, so
+    a band centre written into the result would have reached the next call;
+    a list copied out of the bank stopped that, and a tuple stops it with no
+    copy to forget.
+    """
     phonometry.filters.core._cached_filter_bank.cache_clear()
     x = np.random.default_rng(2).standard_normal(4800)
-    freq1 = phonometry.filters.octave_filter(x, 48000, fraction=1).frequencies
-    freq1[0] = -999.0  # caller mutates the returned list
-    freq2 = phonometry.filters.octave_filter(x, 48000, fraction=1).frequencies
-    assert freq2[0] != -999.0
+    first = phonometry.filters.octave_filter(x, 48000, fraction=1)
+    assert isinstance(first.frequencies, tuple)
+    with pytest.raises(TypeError, match="does not support item assignment"):
+        first.frequencies[0] = -999.0  # type: ignore[index]
+    nominal = phonometry.filters.octave_filter(x, 48000, fraction=1, nominal=True)
+    assert isinstance(nominal.frequencies, tuple)
+    again = phonometry.filters.octave_filter(x, 48000, fraction=1)
+    assert again.frequencies == first.frequencies
     phonometry.filters.core._cached_filter_bank.cache_clear()
 
 

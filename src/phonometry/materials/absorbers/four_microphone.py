@@ -35,7 +35,7 @@ from typing import TYPE_CHECKING, Any, ClassVar, Literal
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
-from ..._internal.frozen import OwnsArrays
+from ..._internal.frozen import OwnsArrays, read_only
 from ..._internal.validation import (
     require_above_absolute_zero_array,
     require_choice,
@@ -437,8 +437,13 @@ class TransferMatrix(OwnsArrays):
     r"""Acoustic transfer matrix ``[[T11, T12], [T21, T22]]`` (ASTM E2611-19).
 
     Relates the pressure and normal particle velocity across a specimen,
-    :math:`[p; u]_{x=0} = T \, [p; u]_{x=d}` (Eq. (16)). Each entry is complex and
-    may be scalar or a per-frequency array of matching shape.
+    :math:`[p; u]_{x=0} = T \, [p; u]_{x=d}` (Eq. (16)). Each entry is given
+    as a number or as a per-frequency array of matching shape (a list, a
+    tuple or any array-like), and is stored as a read-only ``complex128``
+    array: a scalar entry as a 0-d array, which ``complex(m.t11)`` or
+    ``m.t11.item()`` reads back as a number, and a real entry with a zero
+    imaginary part. ``frequencies``, when given, is stored as a read-only
+    ``float64`` array.
 
     The trailing fields retain the measurement context when the matrix comes
     out of :func:`transfer_matrix_two_load` / :func:`transfer_matrix_one_load`
@@ -471,6 +476,41 @@ class TransferMatrix(OwnsArrays):
     shape: Shape | None = None
     frequencies: Real | None = None
     air_characteristic_impedance: float | None = None
+
+    if TYPE_CHECKING:
+
+        def __init__(
+            self,
+            t11: ArrayLike,
+            t12: ArrayLike,
+            t21: ArrayLike,
+            t22: ArrayLike,
+            *,
+            l1: float | None = None,
+            s1: float | None = None,
+            l2: float | None = None,
+            s2: float | None = None,
+            thickness_m: float | None = None,
+            diameter_m: float | None = None,
+            shape: Shape | None = None,
+            frequencies: ArrayLike | None = None,
+            air_characteristic_impedance: float | None = None,
+        ) -> None: ...
+
+    def __post_init__(self) -> None:
+        """Hold each entry as a read-only ``complex128`` array.
+
+        A list kept as given would make every method's arithmetic list
+        arithmetic (``[a, b] * 2`` repeats the list), and a scalar kept as a
+        ``complex`` would make the entries of one matrix differ in kind with
+        how it was built. Converting once here gives every entry one form.
+        """
+        for name in ("t11", "t12", "t21", "t22"):
+            entry = np.asarray(getattr(self, name), dtype=np.complex128)
+            object.__setattr__(self, name, read_only(entry))
+        if self.frequencies is not None:
+            frequencies = np.asarray(self.frequencies, dtype=np.float64)
+            object.__setattr__(self, "frequencies", read_only(frequencies))
 
     def determinant(self) -> Complex:
         r"""Determinant :math:`T_{11} T_{22} - T_{12} T_{21}` (unity for a reciprocal specimen)."""

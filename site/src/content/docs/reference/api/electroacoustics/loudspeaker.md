@@ -285,7 +285,7 @@ sensitivity verdict when a requirement is given, and the footer.
 LoudspeakerDirectivity(
     *,
     piston: RadiatingPistonResult | None = None,
-    polar: tuple[ArrayLike, ArrayLike] | None = None,
+    polar: Sequence[ArrayLike] | NDArray[Any] | None = None,
     frequency: float | None = None,
     index: float | None = None,
 )
@@ -313,7 +313,7 @@ directivity of a radiating piston.
 ```python
 LoudspeakerRatings(
     *,
-    frequency_range: tuple[float, float] | None = None,
+    frequency_range: ArrayLike | None = None,
     noise_power: float | None = None,
     sinusoidal_power: float | None = None,
     resonance_frequency: float | None = None,

@@ -57,6 +57,8 @@ from .._internal.display import RichDisplay
 from .._internal.levels_math import energy_mean
 from .._internal.validation import (
     check_engine,
+    floats_of,
+    pair_of_floats,
     require_choice,
     require_count,
     require_finite_array,
@@ -326,8 +328,25 @@ class Task(RichDisplay):
     label: str | None = None
     instrument: InstrumentClass | None = None
 
+    if TYPE_CHECKING:
+
+        def __init__(
+            self,
+            *,
+            samples: ArrayLike,
+            duration_hours: float,
+            duration_observations_hours: ArrayLike | None = None,
+            duration_range_hours: ArrayLike | None = None,
+            label: str | None = None,
+            instrument: InstrumentClass | None = None,
+        ) -> None: ...
+
     def __post_init__(self) -> None:
-        """Reject empty or non-finite ``samples`` and a bad ``duration_hours``.
+        """Reject empty or non-finite ``samples`` and a bad ``duration_hours``, and hold each sequence as a tuple.
+
+        The samples and the duration observations are held as tuples of
+        floats, and the duration range as a ``(T_min, T_max)`` pair of
+        floats, whatever sequence or array they were given as.
 
         Both helpers reject NaN as well: a NaN sample (or duration) would
         pass a bare emptiness/sign check, make ``lex_8h`` NaN, and stop the
@@ -336,7 +355,11 @@ class Task(RichDisplay):
 
         :raises TypeError: if ``duration_hours`` is not a single number, or ``samples``
             holds a text or a value that is not a real number, or ``instrument`` is not
-            a text.
+            a text, or ``duration_observations_hours`` or ``duration_range_hours``
+            is a number, a text or a sequence with a member that is not one number.
+        :raises ValueError: if ``samples`` is empty or holds a non-finite value,
+            ``duration_hours`` is not positive, or ``duration_range_hours`` holds
+            other than two values.
         """
         if self.instrument is not None:
             require_choice(
@@ -349,6 +372,24 @@ class Task(RichDisplay):
             raise ValueError(msg)
         require_finite_array(self.samples, "samples")
         require_positive(self.duration_hours, "duration_hours")
+        object.__setattr__(self, "samples", _floats(self.samples))
+        if self.duration_observations_hours is not None:
+            observations = floats_of(
+                self.duration_observations_hours,
+                "duration_observations_hours",
+                "a sequence of durations in hours",
+            )
+            object.__setattr__(self, "duration_observations_hours", observations)
+        if self.duration_range_hours is not None:
+            duration_range = pair_of_floats(
+                self.duration_range_hours, "duration_range_hours", "(T_min, T_max)"
+            )
+            object.__setattr__(self, "duration_range_hours", duration_range)
+
+
+def _floats(values: ArrayLike) -> tuple[float, ...]:
+    """A sequence of numbers as a tuple of floats, flattened."""
+    return tuple(float(value) for value in np.ravel(np.asarray(values, dtype=float)))
 
 
 @dataclass(frozen=True)

@@ -925,6 +925,185 @@ def format_signature(
     )
 
 
+def _class_definition(cls: type) -> ast.ClassDef | None:
+    """The ``class`` statement of *cls*, found by its qualified name in its module."""
+    tree = _module_tree(cls.__module__)
+    if tree is None:
+        return None
+    body: list[ast.stmt] = tree.body
+    node: ast.ClassDef | None = None
+    for part in cls.__qualname__.split("."):
+        node = next(
+            (
+                statement
+                for statement in body
+                if isinstance(statement, ast.ClassDef) and statement.name == part
+            ),
+            None,
+        )
+        if node is None:
+            return None
+        body = node.body
+    return node
+
+
+def _reads_type_checking(test: ast.expr) -> bool:
+    """Whether an ``if`` test is ``TYPE_CHECKING``, bare or as ``typing.TYPE_CHECKING``."""
+    return (isinstance(test, ast.Name) and test.id == "TYPE_CHECKING") or (
+        isinstance(test, ast.Attribute) and test.attr == "TYPE_CHECKING"
+    )
+
+
+def constructor_stub(cls: type) -> ast.FunctionDef | None:
+    """The ``__init__`` *cls* declares for the type checker, if it declares one.
+
+    A record a caller builds that converts what it is given (a list into a
+    read-only array, a numpy integer into an ``int``) stores the converted
+    value, so its fields say what it holds; what its constructor takes is
+    said once more, in an ``if TYPE_CHECKING:`` block of the class body,
+    ``def __init__(self, *, levels: ArrayLike, ...) -> None: ...``, which
+    the type checker reads and the running class never defines.
+    """
+    node = _class_definition(cls)
+    if node is None:
+        return None
+    for child in node.body:
+        if not (isinstance(child, ast.If) and _reads_type_checking(child.test)):
+            continue
+        for inner in child.body:
+            if isinstance(inner, ast.FunctionDef) and inner.name == "__init__":
+                return inner
+    return None
+
+
+def _keywords_class(cls: type, stub: ast.FunctionDef) -> ast.ClassDef | None:
+    """The ``TypedDict`` a stub takes its keywords as, ``**keywords: Unpack[Keywords]``.
+
+    A record of more keywords than a signature lists (the 13 of Sonar's
+    rule S107) declares them as the keys of a ``TypedDict`` written in its
+    module, mostly under ``if TYPE_CHECKING:``; ``None`` when the stub's
+    ``**`` parameter unpacks none.
+    """
+    kwarg = stub.args.kwarg
+    if kwarg is None or not isinstance(kwarg.annotation, ast.Subscript):
+        return None
+    wrapper, target = kwarg.annotation.value, kwarg.annotation.slice
+    unpacks = (isinstance(wrapper, ast.Name) and wrapper.id == "Unpack") or (
+        isinstance(wrapper, ast.Attribute) and wrapper.attr == "Unpack"
+    )
+    tree = _module_tree(cls.__module__)
+    if not (unpacks and isinstance(target, ast.Name)) or tree is None:
+        return None
+    pending: list[ast.stmt] = list(tree.body)
+    while pending:
+        statement = pending.pop(0)
+        if isinstance(statement, ast.If):
+            pending[:0] = [*statement.body, *statement.orelse]
+        elif isinstance(statement, ast.ClassDef) and statement.name == target.id:
+            return statement
+    return None
+
+
+def _keyword_annotation(node: ast.expr) -> ast.expr:
+    """A key's annotation without the ``NotRequired`` or ``Required`` around it."""
+    if isinstance(node, ast.Subscript):
+        wrapper = node.value
+        name = wrapper.id if isinstance(wrapper, ast.Name) else None
+        if isinstance(wrapper, ast.Attribute):
+            name = wrapper.attr
+        if name in {"NotRequired", "Required"}:
+            return node.slice
+    return node
+
+
+def _stub_default(node: ast.expr | None, runtime: inspect.Parameter | None) -> object:
+    """The default a stub parameter shows: the literal it writes, else the running one.
+
+    ``...`` is a stub's placeholder (a ``default_factory`` field writes it),
+    and a name (a module constant) is read from the running signature, which
+    is the same object the dataclass holds as the field's default.
+    """
+    if node is None:
+        return inspect.Parameter.empty
+    if isinstance(node, ast.Constant) and node.value is Ellipsis:
+        return Ellipsis
+    try:
+        return ast.literal_eval(node)
+    except ValueError:
+        return runtime.default if runtime is not None else Ellipsis
+
+
+def stub_signature(cls: type, stub: ast.FunctionDef) -> inspect.Signature:
+    """The signature a class's ``TYPE_CHECKING`` ``__init__`` declares, ``self`` dropped.
+
+    Each annotation is the stub's text, as the source writes it; the page
+    expands an unpublished alias in it as it does in any other signature. A
+    stub that takes its keywords as a ``TypedDict`` (:func:`_keywords_class`)
+    shows each key as the keyword-only parameter it is, with the default its
+    field has, as the running constructor takes it.
+    """
+    try:
+        running = dict(inspect.signature(cls).parameters)
+    except (TypeError, ValueError):
+        running = {}
+    arguments = stub.args
+    positional = [*arguments.posonlyargs, *arguments.args]
+    padding: list[ast.expr | None] = [None] * (
+        len(positional) - len(arguments.defaults)
+    )
+    defaults = [*padding, *arguments.defaults]
+    parameters: list[inspect.Parameter] = []
+
+    def add(argument: ast.arg, kind: inspect._ParameterKind, default: object) -> None:
+        annotation = (
+            ast.unparse(argument.annotation)
+            if argument.annotation is not None
+            else inspect.Parameter.empty
+        )
+        parameters.append(
+            inspect.Parameter(
+                argument.arg, kind, default=default, annotation=annotation
+            )
+        )
+
+    for index, (argument, default) in enumerate(zip(positional, defaults, strict=True)):
+        if index == 0:
+            continue
+        kind = (
+            inspect.Parameter.POSITIONAL_ONLY
+            if argument in arguments.posonlyargs
+            else inspect.Parameter.POSITIONAL_OR_KEYWORD
+        )
+        add(argument, kind, _stub_default(default, running.get(argument.arg)))
+    if arguments.vararg is not None:
+        add(arguments.vararg, inspect.Parameter.VAR_POSITIONAL, inspect.Parameter.empty)
+    for argument, default in zip(
+        arguments.kwonlyargs, arguments.kw_defaults, strict=True
+    ):
+        add(
+            argument,
+            inspect.Parameter.KEYWORD_ONLY,
+            _stub_default(default, running.get(argument.arg)),
+        )
+    keywords = _keywords_class(cls, stub)
+    if keywords is not None:
+        for child in keywords.body:
+            if not (
+                isinstance(child, ast.AnnAssign) and isinstance(child.target, ast.Name)
+            ):
+                continue
+            key = child.target.id
+            runtime = running.get(key)
+            add(
+                ast.arg(key, _keyword_annotation(child.annotation)),
+                inspect.Parameter.KEYWORD_ONLY,
+                runtime.default if runtime is not None else inspect.Parameter.empty,
+            )
+    elif arguments.kwarg is not None:
+        add(arguments.kwarg, inspect.Parameter.VAR_KEYWORD, inspect.Parameter.empty)
+    return inspect.Signature(parameters)
+
+
 def _format_one_signature(
     name: str,
     obj: Callable[..., object],
@@ -932,8 +1111,18 @@ def _format_one_signature(
     drop_first: bool = False,
     omit_return: bool = False,
 ) -> str:
-    """Render a single ``name(params) -> ret`` from ``inspect.signature``."""
-    signature = inspect.signature(obj)
+    """Render a single ``name(params) -> ret`` from ``inspect.signature``.
+
+    A class that declares its constructor for the type checker
+    (:func:`constructor_stub`) is rendered from that declaration: it says
+    what a caller may hand over, where the generated ``__init__`` repeats
+    the fields, which say what the record keeps.
+    """
+    signature = (
+        stub_signature(obj, stub)
+        if isinstance(obj, type) and (stub := constructor_stub(obj)) is not None
+        else inspect.signature(obj)
+    )
     module = _defining_module(obj)
     bounds = _type_parameter_bounds(obj, module)
     parameters = list(signature.parameters.values())

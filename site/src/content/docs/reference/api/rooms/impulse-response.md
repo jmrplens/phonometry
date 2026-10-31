@@ -217,7 +217,7 @@ causal part (B.5).
 
 ```python
 ImpulseResponseResult(
-    ir: np.ndarray,
+    ir: ArrayLike,
     fs: float | None,
     method: Literal['spectral', 'farina', 'mls', 'golay'],
 )

@@ -162,7 +162,7 @@ exactly.
 
 ```python
 FilterComplianceResult(
-    band_margins: tuple[Mapping[str, Any], ...],
+    band_margins: tuple[Mapping[str, float | None], ...],
     fraction: int,
     edition: Literal['2014', '1995'],
     sos: tuple[np.ndarray, ...],

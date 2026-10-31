@@ -648,9 +648,9 @@ ANPNPDCurves(
     metric: Literal['SEL', 'LAmax'],
     operation: Literal['A', 'D'],
     power_parameter: str,
-    powers: NDArray[np.float64],
-    distances_m: NDArray[np.float64],
-    levels: NDArray[np.float64],
+    powers: ArrayLike,
+    distances_m: ArrayLike,
+    levels: ArrayLike,
 )
 ```
 

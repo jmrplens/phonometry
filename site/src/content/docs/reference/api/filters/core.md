@@ -275,8 +275,8 @@ The upper band-edge frequency of each band, in hertz (read-only).
 ```python
 OctaveFilterResult(
     levels: np.ndarray | None,
-    frequencies: list[float] | list[str],
-    bands: list[Signal] | list[np.ndarray] | None = None,
+    frequencies: tuple[float, ...] | tuple[str, ...],
+    bands: tuple[Signal, ...] | tuple[np.ndarray, ...] | None = None,
 )
 ```
 
@@ -296,6 +296,11 @@ first two were. They have names now.
 | `levels` | Band levels, in decibels, shaped `(bands,)` for a single-channel input and `(channels, bands)` for a multichannel one. `None` when the call asked for no level. |
 | `frequencies` | One band centre per level: exact midband frequencies, or IEC 61260-1 nominal labels when the call asked for `nominal`. |
 | `bands` | The input split into one waveform per band, in the same order, or `None` when the call did not ask for `sigbands`. They come back in the type they went in as: a [`Signal`](/phonometry/reference/api/io/io/#signal) input gives Signals and a bare array gives arrays. What that Signal says about its units is a separate question, and it answers it itself: a calibrated input yields bands in pascals carrying `calibration_factor=1.0`, meaning the conversion is already done, and an uncalibrated one yields bands in digital units carrying `None`, because the object never invents a calibration. A bank filtering in dBFS, or one carrying a factor of its own, filtered digital units, so its bands are handed back as plain arrays rather than labelled pascals. |
+
+The band centres and the waveforms are tuples, as every other frozen
+result holds a sequence: a list inside a frozen record is one a caller
+could still append to. A record built by hand with lists holds them as
+tuples.
 
 ### OctaveFilterResult.plot()
 
@@ -322,7 +327,7 @@ Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 ### OctaveFilterResult.require_bands()
 
 ```python
-OctaveFilterResult.require_bands() -> list[Signal] | list[np.ndarray]
+OctaveFilterResult.require_bands() -> tuple[Signal, ...] | tuple[np.ndarray, ...]
 ```
 
 The per-band waveforms, or a clear error when none were kept.

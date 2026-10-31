@@ -46,7 +46,8 @@ def test_a_record_naming_a_gpu_is_built_without_touching_one() -> None:
 
 
 def test_a_whole_float_index_is_held_as_an_int() -> None:
-    index = Compute(device="cupy", device_index=2.0).device_index
+    # A whole float is a leniency of the count check the annotation leaves out.
+    index = Compute(device="cupy", device_index=2.0).device_index  # type: ignore[arg-type]
     assert (index, type(index)) == (2, int)
 
 
@@ -88,7 +89,7 @@ def test_a_fallback_that_is_not_a_bool_is_the_wrong_type(kwargs: dict) -> None:
 
 
 def test_a_numpy_bool_fallback_is_held_as_a_bool() -> None:
-    fallback = Compute(device="cupy", fallback=np.True_).fallback  # type: ignore[arg-type]
+    fallback = Compute(device="cupy", fallback=np.True_).fallback
     assert (fallback, type(fallback)) == (True, bool)
 
 

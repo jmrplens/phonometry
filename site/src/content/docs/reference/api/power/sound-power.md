@@ -439,10 +439,10 @@ whether it was measured or estimated from the altitude by Eq. (G.2), and
 ```python
 RoomEnvironment(
     *,
-    absorption_area: float | np.ndarray | None = None,
-    reverberation_time: float | np.ndarray | None = None,
+    absorption_area: ArrayLike | None = None,
+    reverberation_time: ArrayLike | None = None,
     volume: float | None = None,
-    mean_absorption_coefficient: float | np.ndarray | None = None,
+    mean_absorption_coefficient: ArrayLike | None = None,
     room_surface: float | None = None,
 )
 ```

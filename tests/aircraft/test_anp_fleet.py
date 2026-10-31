@@ -658,6 +658,37 @@ def test_performance_aircraft_carries_the_coefficient_tables() -> None:
     assert acft.flap("D", "ZERO").drag_ratio > 0.0
 
 
+def test_performance_aircraft_tables_are_read_only_copies() -> None:
+    """The coefficient tables cannot be edited after the aeroplane was checked.
+
+    The database handed its own per-aircraft dictionaries to the record, so an
+    assignment into one reached every later call; a caller's dictionary stayed
+    the caller's to edit after the record had validated it.
+    """
+    import copy
+    import pickle
+
+    acft = _DB.performance_aircraft("A320-211")
+    rating = next(iter(acft.jet_coefficients))
+    with pytest.raises(TypeError, match="does not support item assignment"):
+        acft.jet_coefficients[rating] = acft.jet_coefficients[rating]  # type: ignore[index]
+    with pytest.raises(TypeError, match="does not support item assignment"):
+        acft.aerodynamic_coefficients[("D", "X")] = acft.flap("D", "ZERO")  # type: ignore[index]
+    assert dict(_DB.performance_aircraft("A320-211").jet_coefficients) == dict(
+        acft.jet_coefficients
+    )
+
+    jets = dict(acft.jet_coefficients)
+    own = dataclasses.replace(acft, jet_coefficients=jets)
+    jets.clear()
+    assert dict(own.jet_coefficients) == dict(acft.jet_coefficients)
+
+    # The bytes are the ones made on this line, never read from elsewhere.
+    for back in (pickle.loads(pickle.dumps(own)), copy.deepcopy(own)):  # noqa: S301
+        assert back == own
+        assert type(back.propeller_coefficients).__name__ == "mappingproxy"
+
+
 def test_procedural_steps_are_returned_in_step_order() -> None:
     steps = _DB.procedural_steps("A320-211", "departure", 1)
     assert steps[0].kind == "takeoff"

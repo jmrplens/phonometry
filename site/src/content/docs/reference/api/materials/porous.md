@@ -323,7 +323,7 @@ FiberResistivityFit(
     k1: float,
     k2: float,
     fiber_diameter_um: float,
-    bulk_density_range_kg_m3: tuple[float, float],
+    bulk_density_range_kg_m3: ArrayLike,
     direction: Literal['lateral', 'longitudinal'],
     source: str,
 )

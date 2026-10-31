@@ -72,7 +72,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from ..._internal.frozen import OwnsArrays
+from ..._internal.frozen import OwnsArrays, read_only
 from ..._internal.validation import (
     require_above_absolute_zero,
     require_same_shape,
@@ -407,8 +407,25 @@ class AtmosphericAttenuation(OwnsArrays):
     static_pressure_kpa: float
     distance: float | None = None
 
+    if TYPE_CHECKING:
+
+        def __init__(
+            self,
+            frequencies: ArrayLike,
+            attenuation_db_per_m: ArrayLike,
+            temperature_c: float,
+            relative_humidity_percent: float,
+            static_pressure_kpa: float,
+            distance: float | None = None,
+        ) -> None: ...
+
     def __post_init__(self) -> None:
-        """Validate the ``distance`` invariant and the curve it belongs to.
+        """Hold the curve read-only, and validate ``distance`` and the curve it belongs to.
+
+        The frequencies and the coefficient are held as the read-only
+        ``float64`` arrays :attr:`total_attenuation` and :meth:`plot` read
+        them as, whatever sequence they were given as, so a list given by
+        hand is arithmetic, not sequence repetition, wherever it is read.
 
         A propagation distance must be finite and non-negative; enforcing it
         here (rather than only in :func:`atmospheric_attenuation`) keeps direct
@@ -444,6 +461,9 @@ class AtmosphericAttenuation(OwnsArrays):
             or an extra axis on one of the two.
         :raises TypeError: if ``distance`` is not a single number.
         """
+        for name in ("frequencies", "attenuation_db_per_m"):
+            curve = np.asarray(getattr(self, name), dtype=np.float64)
+            object.__setattr__(self, name, read_only(curve))
         require_scalar(self.distance, "distance")
         if self.distance is not None and (
             not np.isfinite(self.distance) or self.distance < 0.0
@@ -465,12 +485,7 @@ class AtmosphericAttenuation(OwnsArrays):
         """
         if self.distance is None:
             return None
-        # Coerce before multiplying, as plot() does: the field is annotated as
-        # an array, but the frozen result can be built by hand with a plain
-        # list, and a list times a float is sequence repetition, not
-        # arithmetic.
-        alpha = np.asarray(self.attenuation_db_per_m, dtype=np.float64)
-        return np.asarray(alpha * self.distance, dtype=np.float64)
+        return np.asarray(self.attenuation_db_per_m * self.distance, dtype=np.float64)
 
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any

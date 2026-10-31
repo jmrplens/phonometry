@@ -76,12 +76,13 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum
+from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
 from ..._internal.display import RichDisplay
-from ..._internal.frozen import OwnsArrays
+from ..._internal.frozen import OwnsArrays, read_only, reduce_with_plain_rows
 from ..._internal.validation import (
     require_axis_count,
     require_axis_rank,
@@ -95,7 +96,7 @@ from ..._internal.validation import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import Sequence
+    from collections.abc import Mapping, Sequence
 
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
@@ -1824,6 +1825,20 @@ class WavelengthSpectrum(OwnsArrays):
     wavelengths_mm: NDArray[np.float64]
     levels: NDArray[np.float64]
 
+    if TYPE_CHECKING:
+
+        def __init__(self, *, wavelengths_mm: ArrayLike, levels: ArrayLike) -> None: ...
+
+    def __post_init__(self) -> None:
+        """Hold both arrays read-only as ``float64``, whatever sequence was given.
+
+        A list kept as given would turn the arithmetic of the method on it
+        into list arithmetic and leave the record open to an ``append``.
+        """
+        for name in ("wavelengths_mm", "levels"):
+            values = np.asarray(getattr(self, name), dtype=np.float64)
+            object.__setattr__(self, name, read_only(values))
+
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
@@ -1856,6 +1871,16 @@ class RailSourceSpectra(OwnsArrays):
 
     source_a: NDArray[np.float64]
     source_b: NDArray[np.float64]
+
+    if TYPE_CHECKING:
+
+        def __init__(self, *, source_a: ArrayLike, source_b: ArrayLike) -> None: ...
+
+    def __post_init__(self) -> None:
+        """Hold both spectra read-only as ``float64``, whatever sequence was given."""
+        for name in ("source_a", "source_b"):
+            values = np.asarray(getattr(self, name), dtype=np.float64)
+            object.__setattr__(self, name, read_only(values))
 
 
 def wheel_roughness(
@@ -2477,15 +2502,35 @@ class RollingStock(OwnsArrays):
     n_axles: int
     wheel_roughness: WavelengthSpectrum
     contact_filter: WavelengthSpectrum
-    wheel_transfer: Any
-    superstructure_transfer: Any | None = None
+    wheel_transfer: NDArray[np.float64]
+    superstructure_transfer: NDArray[np.float64] | None = None
     traction: RailSourceSpectra | None = None
     aerodynamic: RailSourceSpectra | None = None
     aerodynamic_alpha: float = _AERODYNAMIC_ALPHA
     tram: bool = False
 
+    if TYPE_CHECKING:
+
+        def __init__(
+            self,
+            *,
+            n_axles: int,
+            wheel_roughness: WavelengthSpectrum,
+            contact_filter: WavelengthSpectrum,
+            wheel_transfer: ArrayLike,
+            superstructure_transfer: ArrayLike | None = None,
+            traction: RailSourceSpectra | None = None,
+            aerodynamic: RailSourceSpectra | None = None,
+            aerodynamic_alpha: float = _AERODYNAMIC_ALPHA,
+            tram: bool = False,
+        ) -> None: ...
+
     def __post_init__(self) -> None:
-        """Refuse a spectrum given as a bare pair rather than its record.
+        """Refuse a spectrum given as a bare pair, and hold each transfer read-only.
+
+        A transfer function given as a list or a tuple of the 24 band values
+        is held as the read-only ``float64`` array the emission sums read it
+        as.
 
         :raises TypeError: if ``wheel_roughness`` or ``contact_filter`` is not
             a :class:`WavelengthSpectrum`, or ``traction`` or ``aerodynamic``
@@ -2495,6 +2540,11 @@ class RollingStock(OwnsArrays):
         _require_record(self, "contact_filter", WavelengthSpectrum)
         _require_record(self, "traction", RailSourceSpectra, optional=True)
         _require_record(self, "aerodynamic", RailSourceSpectra, optional=True)
+        for name in ("wheel_transfer", "superstructure_transfer"):
+            value = getattr(self, name)
+            if value is not None:
+                transfer = np.asarray(value, dtype=np.float64)
+                object.__setattr__(self, name, read_only(transfer))
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -2534,15 +2584,33 @@ class RailwayTrack(OwnsArrays):
     """
 
     rail_roughness: WavelengthSpectrum
-    track_transfer: Any
+    track_transfer: NDArray[np.float64]
     impact_roughness: WavelengthSpectrum | None = None
     joint_density: float = REFERENCE_JOINT_DENSITY_PER_M
-    bridge_transfer: Any | None = None
+    bridge_transfer: NDArray[np.float64] | None = None
     squeal_excess: float = 0.0
     length: float = 100.0
 
+    if TYPE_CHECKING:
+
+        def __init__(
+            self,
+            *,
+            rail_roughness: WavelengthSpectrum,
+            track_transfer: ArrayLike,
+            impact_roughness: WavelengthSpectrum | None = None,
+            joint_density: float = REFERENCE_JOINT_DENSITY_PER_M,
+            bridge_transfer: ArrayLike | None = None,
+            squeal_excess: float = 0.0,
+            length: float = 100.0,
+        ) -> None: ...
+
     def __post_init__(self) -> None:
-        """Refuse a roughness given as a bare pair rather than its record.
+        """Refuse a roughness given as a bare pair, and hold each transfer read-only.
+
+        A transfer function given as a list or a tuple of the 24 band values
+        is held as the read-only ``float64`` array the emission sums read it
+        as.
 
         :raises TypeError: if ``rail_roughness`` is not a
             :class:`WavelengthSpectrum`, or ``impact_roughness`` is neither one
@@ -2550,6 +2618,11 @@ class RailwayTrack(OwnsArrays):
         """
         _require_record(self, "rail_roughness", WavelengthSpectrum)
         _require_record(self, "impact_roughness", WavelengthSpectrum, optional=True)
+        for name in ("track_transfer", "bridge_transfer"):
+            value = getattr(self, name)
+            if value is not None:
+                transfer = np.asarray(value, dtype=np.float64)
+                object.__setattr__(self, name, read_only(transfer))
 
 
 #: The physical sources whose spectra a railway emission keeps apart in
@@ -2580,9 +2653,9 @@ class RailwayEmissionResult(OwnsArrays):
     third_octave_line_power: NDArray[np.float64]
     line_power: NDArray[np.float64]
     total_line_power: NDArray[np.float64]
-    components: dict[RailwaySource, tuple[NDArray[np.float64], NDArray[np.float64]]] = (
-        field(default_factory=dict)
-    )
+    components: Mapping[
+        RailwaySource, tuple[NDArray[np.float64], NDArray[np.float64]]
+    ] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         """Reject an emission whose three axes do not each line up.
@@ -2662,6 +2735,11 @@ class RailwayEmissionResult(OwnsArrays):
                     },
                     _THIRD_OCTAVE_AXIS,
                 )
+        object.__setattr__(self, "components", MappingProxyType(dict(self.components)))
+
+    def __reduce__(self) -> tuple[Any, tuple[type, dict[str, Any]]]:
+        """Travel with plain dictionaries, which pickle; they are wrapped again on arrival."""
+        return reduce_with_plain_rows(self)
 
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any

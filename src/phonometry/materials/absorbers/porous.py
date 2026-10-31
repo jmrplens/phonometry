@@ -80,6 +80,7 @@ from ..._internal.boundary import settled
 from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
+    pair_of_floats,
     require_choice,
     require_non_negative,
     require_positive,
@@ -828,12 +829,33 @@ class FiberResistivityFit(RichDisplay):
     direction: Literal["lateral", "longitudinal"]
     source: str
 
-    def __post_init__(self) -> None:
-        """Refuse a choice its ``Literal`` does not list, when the record is built.
+    if TYPE_CHECKING:
 
-        :raises TypeError: if ``direction`` is not a text.
+        def __init__(
+            self,
+            *,
+            k1: float,
+            k2: float,
+            fiber_diameter_um: float,
+            bulk_density_range_kg_m3: ArrayLike,
+            direction: Literal["lateral", "longitudinal"],
+            source: str,
+        ) -> None: ...
+
+    def __post_init__(self) -> None:
+        """Refuse a choice its ``Literal`` does not list, and hold the range as a pair of floats.
+
+        :raises TypeError: if ``direction`` is not a text, or
+            ``bulk_density_range_kg_m3`` is a number, a text or a pair with a
+            member that is not one number.
+        :raises ValueError: if ``direction`` is not one of its options, or
+            ``bulk_density_range_kg_m3`` holds other than two values.
         """
         require_choice(self.direction, "direction", ("lateral", "longitudinal"))
+        bulk_density_range = pair_of_floats(
+            self.bulk_density_range_kg_m3, "bulk_density_range_kg_m3", "(low, high)"
+        )
+        object.__setattr__(self, "bulk_density_range_kg_m3", bulk_density_range)
 
 
 #: The rock wool of Hopkins Fig. 1.49, measured across two UK manufacturers at

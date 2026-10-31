@@ -46,7 +46,7 @@ from typing import TYPE_CHECKING, Any, Literal, NamedTuple, cast
 import numpy as np
 
 from .._internal.display import RichDisplay
-from .._internal.frozen import OwnsArrays, read_only_copy
+from .._internal.frozen import OwnsArrays, read_only, read_only_copy
 from .._internal.validation import (
     require_axis_count,
     require_choice,
@@ -320,8 +320,26 @@ class ANPNPDCurves(OwnsArrays):
     distances_m: NDArray[np.float64]
     levels: NDArray[np.float64]
 
+    if TYPE_CHECKING:
+
+        def __init__(
+            self,
+            *,
+            aircraft_id: str,
+            npd_id: str,
+            metric: Metric,
+            operation: OperationCode,
+            power_parameter: str,
+            powers: ArrayLike,
+            distances_m: ArrayLike,
+            levels: ArrayLike,
+        ) -> None: ...
+
     def __post_init__(self) -> None:
-        """Reject a curve set whose level table does not match its own two axes.
+        """Hold the three tables read-only, and reject a level table that does not match its axes.
+
+        A table given as a list (a row read from the CSV export) is held as
+        the read-only ``float64`` array every reader of the set reads it as.
 
         The table's axes are what say which power setting and which slant
         distance every level belongs to, and this class is where a CSV export
@@ -342,6 +360,9 @@ class ANPNPDCurves(OwnsArrays):
         """
         require_choice(self.metric, "metric", ("SEL", "LAmax"))
         require_choice(self.operation, "operation", ("A", "D"))
+        for name in ("powers", "distances_m", "levels"):
+            table = np.asarray(getattr(self, name), dtype=np.float64)
+            object.__setattr__(self, name, read_only(table))
         require_ranks(self, powers=1, distances_m=1, levels=2)
         require_same_length(self, "powers", "levels", axis="power setting")
         require_same_length(self, "distances_m", ("levels", 1), axis="slant distance")

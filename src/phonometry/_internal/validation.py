@@ -13,10 +13,12 @@ from typing import TYPE_CHECKING, cast
 
 import numpy as np
 
+from .frozen import owned_members
+
 if TYPE_CHECKING:
     from collections.abc import Iterable, Mapping, Sequence
 
-    from numpy.typing import ArrayLike
+    from numpy.typing import ArrayLike, NDArray
 
     from .types import BandFraction, ReportEngine
 
@@ -1049,3 +1051,131 @@ def require_1d_signal(x: ArrayLike, name: str) -> np.ndarray:
         )
         raise ValueError(msg)
     return arr
+
+
+def arrays_of(
+    value: object, name: str, members: str, n_members: int
+) -> tuple[NDArray[np.float64], ...]:
+    """The members of a sequence of a fixed count of arrays, each as ``float64``.
+
+    A record that takes a curve as a pair (``(angles_deg, relative_db)``) or
+    a grid as its axes (``(x, y, z)``) takes it as any sequence of them (a
+    tuple, a list, an array of rows or of objects, a deque) and holds it as
+    that many arrays, so it is unpacked here, once, when the record is
+    built. The caller is a record that inherits ``OwnsArrays`` and seals
+    each member with ``read_only``, so each has to be the record's own, and
+    the members are read through
+    :func:`~phonometry._internal.frozen.owned_members`: an array the record
+    copied (in a tuple, a list or an array, an array of objects member by
+    member), or read out of any other object numpy reads as an array (a
+    column of a data frame, a ``memoryview``), comes back as itself when it
+    is ``float64`` already, and one a
+    deque or a generator holds is copied. A member that is no array, a list
+    of numbers, is converted into a new one.
+
+    :param value: The sequence.
+    :param name: The field's name, for the message.
+    :param members: What the field holds, as the message spells it (``"a
+        pair (angles_deg, relative_db) of two arrays"``).
+    :param n_members: How many arrays it holds.
+    :return: The members, each a ``float64`` array.
+    :raises TypeError: if *value* is a text or is not a sequence at all, or
+        *n_members* is not a number.
+    :raises ValueError: if it holds other than *n_members* members, or
+        *n_members* is not a whole number of at least one.
+    """
+    expected = require_count(n_members, "n_members")
+    msg = f"'{name}' must be {members}"
+    if isinstance(value, str | bytes):
+        msg += f", not {type(value).__name__}."
+        raise TypeError(msg)
+    try:
+        items = owned_members(cast("Iterable[ArrayLike]", value))
+    except TypeError:
+        msg += f", not {type(value).__name__}."
+        raise TypeError(msg) from None
+    if len(items) != expected:
+        msg += f", not {len(items)} of them."
+        raise ValueError(msg)
+    return tuple(np.asarray(item, dtype=np.float64) for item in items)
+
+
+def pair_of_arrays(
+    value: object, name: str, members: str
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
+    """The two members of a pair, each as a ``float64`` array.
+
+    :func:`arrays_of` with a count of two, typed as the pair it returns.
+
+    :param value: The pair.
+    :param name: The field's name, for the message.
+    :param members: What the two members are, as the message spells them
+        (``"(angles_deg, relative_db)"``).
+    :return: The two members, each a ``float64`` array.
+    :raises TypeError: if *value* is a text or is not a sequence at all.
+    :raises ValueError: if it holds other than two members.
+    """
+    first, second = arrays_of(value, name, f"a pair {members} of two arrays", 2)
+    return first, second
+
+
+def floats_of(
+    value: object, name: str, members: str, n_members: int | None = None
+) -> tuple[float, ...]:
+    """The members of a sequence of numbers, each as a ``float``.
+
+    A record that holds a few numbers as one field (a ``(low, high)`` range,
+    the three risk thresholds of a sex, a set of observations) takes them as
+    a tuple, a list or an array, and holds them as a tuple of floats, so they
+    are unpacked here, once, when the record is built, and each refusal
+    names the field. A text is refused whatever it reads as, as
+    :func:`holds_text` has it, and so is a member that is not one number.
+
+    :param value: The sequence.
+    :param name: The field's name, for the message.
+    :param members: What the field holds, as the message spells it (``"a
+        (low, high) pair of two numbers"``).
+    :param n_members: How many numbers it holds, or ``None`` for any count.
+    :return: The numbers, each a ``float``.
+    :raises TypeError: if *value* is a text or is not a sequence at all, a
+        member is not one number (a text included), or *n_members* is not a
+        number.
+    :raises ValueError: if it holds other than *n_members* members, a
+        member is a number too large for a float, or *n_members* is not a
+        whole number of at least one.
+    """
+    expected = None if n_members is None else require_count(n_members, "n_members")
+    msg = f"'{name}' must be {members}"
+    if holds_text(value):
+        msg += f", not {type(value).__name__}."
+        raise TypeError(msg)
+    try:
+        items = list(cast("Iterable[object]", value))
+    except TypeError:
+        msg += f", not {type(value).__name__}."
+        raise TypeError(msg) from None
+    if expected is not None and len(items) != expected:
+        msg += f", not {len(items)} of them."
+        raise ValueError(msg)
+    return tuple(
+        require_real(item, f"{msg}; one member is {type(item).__name__}.")
+        for item in items
+    )
+
+
+def pair_of_floats(value: object, name: str, members: str) -> tuple[float, float]:
+    """The two members of a pair of numbers, each as a ``float``.
+
+    :func:`floats_of` with a count of two, typed as the pair it returns.
+
+    :param value: The pair.
+    :param name: The field's name, for the message.
+    :param members: What the two members are, as the message spells them
+        (``"(low, high)"``).
+    :return: The two numbers.
+    :raises TypeError: if *value* is a text or is not a sequence at all, or
+        a member is not one number.
+    :raises ValueError: if it holds other than two members.
+    """
+    first, second = floats_of(value, name, f"a pair {members} of two numbers", 2)
+    return first, second

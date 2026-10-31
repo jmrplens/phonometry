@@ -165,11 +165,39 @@ class RoomEnvironment(OwnsArrays):
     :param room_surface: Room boundary area ``Sv`` (m^2), with ``alpha``.
     """
 
-    absorption_area: float | np.ndarray | None = None
-    reverberation_time: float | np.ndarray | None = None
+    absorption_area: float | NDArray[np.float64] | None = None
+    reverberation_time: float | NDArray[np.float64] | None = None
     volume: float | None = None
-    mean_absorption_coefficient: float | np.ndarray | None = None
+    mean_absorption_coefficient: float | NDArray[np.float64] | None = None
     room_surface: float | None = None
+
+    if TYPE_CHECKING:
+
+        def __init__(
+            self,
+            *,
+            absorption_area: ArrayLike | None = None,
+            reverberation_time: ArrayLike | None = None,
+            volume: float | None = None,
+            mean_absorption_coefficient: ArrayLike | None = None,
+            room_surface: float | None = None,
+        ) -> None: ...
+
+    def __post_init__(self) -> None:
+        """Hold a per-band value read-only: one number as given, several as an array.
+
+        A per-band value given as a list is held as the read-only ``float64``
+        array :func:`environmental_correction` reads it as.
+        """
+        for name in (
+            "absorption_area",
+            "reverberation_time",
+            "mean_absorption_coefficient",
+        ):
+            value = getattr(self, name)
+            if value is not None and np.ndim(value) > 0:
+                held = np.asarray(value, dtype=np.float64)
+                object.__setattr__(self, name, read_only(held))
 
 
 # --- ISO 3744:2010 Annex B, normative microphone coordinates (x/r,y/r,z/r) ---

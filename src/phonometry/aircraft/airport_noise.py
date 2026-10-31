@@ -38,7 +38,7 @@ from typing import TYPE_CHECKING, Any, Literal, NamedTuple
 import numpy as np
 
 from .._internal.display import RichDisplay
-from .._internal.frozen import OwnsArrays
+from .._internal.frozen import OwnsArrays, read_only
 from .._internal.validation import (
     require_above_absolute_zero,
     require_choice,
@@ -663,12 +663,27 @@ class FlightSegmentState(OwnsArrays):
     """
 
     _: KW_ONLY
-    ground_roll: NDArray[np.bool_] | list[bool] | None = None
-    landing_roll: NDArray[np.bool_] | list[bool] | None = None
-    bank: NDArray[np.float64] | list[float] | None = None
+    ground_roll: NDArray[np.bool_] | None = None
+    landing_roll: NDArray[np.bool_] | None = None
+    bank: NDArray[np.float64] | None = None
+
+    if TYPE_CHECKING:
+
+        def __init__(
+            self,
+            *,
+            ground_roll: ArrayLike | None = None,
+            landing_roll: ArrayLike | None = None,
+            bank: ArrayLike | None = None,
+        ) -> None: ...
 
     def __post_init__(self) -> None:
-        """Reject a bundle whose fields describe different numbers of segments.
+        """Hold each field read-only, and reject one segment count against another.
+
+        A mask or a bank angle given as a list is held as the read-only array
+        the event entry points read it as (``bool`` for a mask, ``float64``
+        for an angle), so a list kept as given cannot be appended to after
+        the bundle is built.
 
         All three say something about the same segments of one path, so a
         bundle whose fields disagree with each other is wrong for every path
@@ -687,6 +702,16 @@ class FlightSegmentState(OwnsArrays):
 
         :raises ValueError: if two of the fields cover different segment counts.
         """
+        for name, dtype in (
+            ("ground_roll", np.bool_),
+            ("landing_roll", np.bool_),
+            ("bank", np.float64),
+        ):
+            value = getattr(self, name)
+            if value is not None:
+                object.__setattr__(
+                    self, name, read_only(np.asarray(value, dtype=dtype))
+                )
         counts = {
             name: int(np.size(value))
             for name in ("ground_roll", "landing_roll", "bank")
@@ -796,7 +821,7 @@ def _validate_path(
 
 
 def _validate_ground_roll(
-    ground_roll: NDArray[np.bool_] | list[bool] | None,
+    ground_roll: NDArray[np.bool_] | None,
     n_points: int,
 ) -> NDArray[np.bool_] | None:
     """Coerce and validate the ground-roll segment mask (length ``N-1``)."""
@@ -810,7 +835,7 @@ def _validate_ground_roll(
 
 
 def _validate_bank(
-    bank: NDArray[np.float64] | list[float] | None,
+    bank: NDArray[np.float64] | None,
     n_points: int,
 ) -> NDArray[np.float64] | None:
     """Coerce an optional per-segment bank-angle array (length ``N-1``)."""

@@ -119,6 +119,7 @@ from .._internal.catalogue import (
     unit_stem,
 )
 from .._internal.display import RichDisplay
+from .._internal.frozen import reduce_with_plain_rows
 from .._internal.json_input import (
     LONE_SURROGATE,
     UNSAFE,
@@ -395,6 +396,10 @@ class Catalogue[R: CatalogueRow](Mapping[str, R], RichDisplay):
     schema_version: int = CATALOGUE_SCHEMA_VERSION
     file_sha256: str = ""
     header_sha256: str = ""
+
+    def __reduce__(self) -> tuple[Any, tuple[type, dict[str, Any]]]:
+        """Travel with plain dictionaries, which pickle; they are wrapped again on arrival."""
+        return reduce_with_plain_rows(self)
 
     def __post_init__(self) -> None:
         """Freeze what the catalogue holds, and hold its rows to one class.

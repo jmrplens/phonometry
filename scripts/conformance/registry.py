@@ -55,6 +55,8 @@ if TYPE_CHECKING:
     from collections.abc import Callable, Mapping
     from types import ModuleType
 
+    import numpy as np
+
 # The checks do not re-type their expected values: they read the test suite's
 # shared tables (``reference_data``) and its worked-example helpers
 # (``iso12354_building``, ``diffuser_prediction``) straight from ``tests/``,
@@ -201,6 +203,9 @@ class Outcome:
     A check that supplies only the strings still works - four of them live in a
     module this pipeline does not own - and its shape is inferred by
     :func:`_inferred`, which is why ``kind`` and ``deviation`` have defaults.
+    A deviation left out, or given empty, is read back from ``delta``, so
+    every outcome holds one; a verdict given as ``numpy.bool_`` is stored as
+    the ``bool`` it is.
     """
 
     expected: str
@@ -210,11 +215,31 @@ class Outcome:
     kind: Kind = Kind.SCALAR
     unit: str | None = None
     tolerance: Tolerance | None = None
-    deviation: Deviation | None = None
+    deviation: Deviation = field(default_factory=Deviation)
     precision: int = 4
     expected_data: Side = field(default_factory=Side)
     computed_data: Side = field(default_factory=Side)
     binding: Binding | None = None
+
+    if TYPE_CHECKING:
+
+        def __init__(
+            self,
+            expected: str,
+            computed: str,
+            delta: str,
+            # The verdict is the fourth field, taken by position as every check
+            # builds an outcome: the stub repeats the record's own order.
+            passed: bool | np.bool_,  # noqa: FBT001
+            kind: Kind = Kind.SCALAR,
+            unit: str | None = None,
+            tolerance: Tolerance | None = None,
+            deviation: Deviation = ...,
+            precision: int = 4,
+            expected_data: Side = ...,
+            computed_data: Side = ...,
+            binding: Binding | None = None,
+        ) -> None: ...
 
     def __post_init__(self) -> None:
         """Coerce the verdict to a built-in ``bool`` and fill in the shape.
@@ -227,7 +252,7 @@ class Outcome:
         object.__setattr__(self, "passed", bool(self.passed))
         if self.tolerance is None:
             object.__setattr__(self, "kind", _inferred_kind(self.expected, self.delta))
-        if self.deviation is None:
+        if _is_blank(self.deviation):
             object.__setattr__(self, "deviation", _inferred(self.delta))
         if _is_empty(self.expected_data):
             object.__setattr__(self, "expected_data", Side(label=self.expected))
@@ -296,6 +321,11 @@ def _inferred(delta: str) -> Deviation:
         if match is not None:
             return Deviation(value=float(match["value"]), label=delta)
     return Deviation(label=delta)
+
+
+def _is_blank(deviation: Deviation) -> bool:
+    """Whether a deviation carries nothing, so the delta string is all there is."""
+    return deviation.value is None and deviation.label is None
 
 
 def _is_empty(side: Side) -> bool:

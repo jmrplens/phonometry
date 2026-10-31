@@ -133,6 +133,7 @@ from __future__ import annotations
 
 import argparse
 import ast
+import copy
 import functools
 import pathlib
 import sys
@@ -144,7 +145,7 @@ import check_return_overloads as overloads
 from ast_scan import ROOT, python_files
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Iterable, Iterator, Sequence
+    from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
 
 #: Where the package lives; the default when no path is given.
 SOURCE = ROOT / "src" / "phonometry"
@@ -190,55 +191,11 @@ EXEMPT: dict[tuple[str, str, str], str] = {
 }
 
 
-def _built_and_stored(held: str) -> str:
-    return (
-        f"a caller builds the record, which stores the {held} its check returns, "
-        "so the field holds that; the numpy scalar the check takes is admitted "
-        "by a TYPE_CHECKING __init__, written with those of the other "
-        "caller-built records"
-    )
-
-
 #: Fields of caller-built records that store the value their check returns,
 #: whose constructor does not say yet that it takes the numpy scalar, keyed by
-#: file, record and field, each with the reason.
-CONSTRUCTOR_EXEMPT: dict[tuple[str, str, str], str] = {
-    **{
-        (
-            "src/phonometry/metrology/sound_level_meter.py",
-            "SoundLevelMeterFeatures",
-            flag,
-        ): (_built_and_stored("bool"))
-        for flag in (
-            "c_weighting",
-            "z_weighting",
-            "f_time_weighting",
-            "s_time_weighting",
-            "time_averaged",
-            "sound_exposure_level",
-            "c_weighted_peak",
-        )
-    },
-    (
-        "src/phonometry/metrology/sound_level_meter.py",
-        "SoundLevelMeterFeatures",
-        "n_level_ranges",
-    ): _built_and_stored("int"),
-    (
-        "src/phonometry/aircraft/flight_performance.py",
-        "PerformanceAircraft",
-        "n_engines",
-    ): (_built_and_stored("int")),
-    ("src/phonometry/simulation/compute.py", "Compute", "device_index"): (
-        _built_and_stored("int")
-    ),
-    ("src/phonometry/simulation/compute.py", "Compute", "fallback"): (
-        _built_and_stored("bool")
-    ),
-    ("src/phonometry/simulation/video.py", "AnimationFrame", "size"): (
-        _built_and_stored("pair of ints")
-    ),
-}
+#: file, record and field, each with the reason. Every such record declares
+#: its constructor (a ``TYPE_CHECKING`` ``__init__``), so none is listed.
+CONSTRUCTOR_EXEMPT: dict[tuple[str, str, str], str] = {}
 
 #: How many calls deep a parameter handed on is followed.
 DEPTH = 6
@@ -904,6 +861,36 @@ class Annotations:
         return self.resolve(module, node) in _CONTAINERS and self._holds_numbers(
             module, node, depth=0
         )
+
+    def named_within(
+        self, module: str, node: ast.expr | None, wanted: frozenset[str]
+    ) -> list[str]:
+        """The members of an annotation that are one of *wanted*, at the top or inside.
+
+        Aliases are spelt out at every level, so ``Untyped = Any`` is read as
+        ``Any`` and ``Table = Dict[str, float]`` as ``typing.Dict``. The type
+        parameter of a NumPy generic (``NDArray[Any]``, ``np.integer[Any]``)
+        says what the array or the scalar holds, not what the value is, and
+        is read past, as are the choices a ``Literal`` lists, which are
+        values.
+        """
+        found: list[str] = []
+        stack = self.members(module, node)
+        seen = 0
+        while stack and seen < _MEMBERS_READ:
+            seen += 1
+            where, member = stack.pop()
+            dotted = self.resolve(where, member)
+            if dotted in wanted:
+                found.append(ast.unparse(member))
+            if dotted in _LITERALS or (
+                dotted is not None and dotted.partition(".")[0] == "numpy"
+            ):
+                continue
+            for item in _items(member):
+                for inner in item.elts if isinstance(item, ast.List) else [item]:
+                    stack.extend(self.members(where, inner))
+        return sorted(set(found))
 
     def invariant(
         self, module: str, node: ast.expr | None, bounds: dict[str, ast.expr]
@@ -2880,10 +2867,10 @@ def _field_findings(reader: Reader, root: pathlib.Path) -> list[Finding]:
     return found
 
 
-def _constructor_stub(
+def _declared_constructor(
     annotations: Annotations, record: str
 ) -> ast.FunctionDef | ast.AsyncFunctionDef | None:
-    """The ``__init__`` a record declares under ``if TYPE_CHECKING:``, if it declares one.
+    """The ``__init__`` a record declares under ``if TYPE_CHECKING:``, as written, if it declares one.
 
     A caller-built record that converts or normalises a field says what its
     constructor takes there, while its generated ``__init__`` runs.
@@ -2903,11 +2890,850 @@ def _constructor_stub(
     return None
 
 
+def _constructor_stub(
+    annotations: Annotations, record: str
+) -> ast.FunctionDef | ast.AsyncFunctionDef | None:
+    """The ``__init__`` a record declares for the type checker, its keywords spelt out.
+
+    :func:`_declared_constructor` read through :func:`_spelt_out`, so a
+    reader of the parameters reads a constructor that takes its keywords as
+    a ``TypedDict`` as it reads one that lists them.
+    """
+    declared = _declared_constructor(annotations, record)
+    if declared is None:
+        return None
+    return _spelt_out(annotations, record, declared)
+
+
+#: The most parameters a function takes besides ``self``: the limit of
+#: Sonar's rule S107. A constructor that takes more keywords than that
+#: declares them as the keys of a ``TypedDict`` it takes whole,
+#: ``def __init__(self, **measurements: Unpack[Keywords]) -> None: ...``,
+#: which a type checker reads key by key as it reads keyword parameters.
+MOST_PARAMETERS = 13
+
+#: ``Unpack``, which types a ``**`` parameter as the keys of a ``TypedDict``.
+_UNPACK = frozenset({"typing.Unpack", "typing_extensions.Unpack"})
+
+#: ``TypedDict``, the base of the dictionary a constructor takes its keywords as.
+_TYPED_DICT = frozenset({"typing.TypedDict", "typing_extensions.TypedDict"})
+
+#: The wrappers that say whether a caller may leave a key of a ``TypedDict`` out.
+_NOT_REQUIRED = frozenset({"typing.NotRequired", "typing_extensions.NotRequired"})
+_REQUIRED = frozenset({"typing.Required", "typing_extensions.Required"})
+
+
+@dataclass(frozen=True)
+class _Key:
+    """A key of the ``TypedDict`` a constructor takes its keywords as."""
+
+    name: str
+    #: The key's annotation, without the ``NotRequired`` or ``Required`` around it.
+    annotation: ast.expr
+    #: Whether a caller may leave the key out.
+    optional: bool
+
+
+def _keys(
+    annotations: Annotations,
+    module: str,
+    stub: ast.FunctionDef | ast.AsyncFunctionDef,
+) -> list[_Key] | None:
+    """The keys of the ``TypedDict`` a stub takes as ``**keywords: Unpack[Keywords]``, in order.
+
+    ``None`` when the stub's ``**`` parameter is no ``Unpack`` of a
+    ``TypedDict`` written in the record's own module, whose annotations are
+    then read in that module, as the stub's are. A key a caller may leave
+    out is one of a ``total=False`` dictionary not marked ``Required``, or
+    one marked ``NotRequired``.
+    """
+    kwarg = stub.args.kwarg
+    if kwarg is None or not isinstance(kwarg.annotation, ast.Subscript):
+        return None
+    if annotations.resolve(module, kwarg.annotation) not in _UNPACK:
+        return None
+    dotted = annotations.package.resolve(module, kwarg.annotation.slice)
+    found = annotations.classes.get(dotted) if dotted is not None else None
+    if found is None or found[0] != module:
+        return None
+    node = found[1]
+    if not any(annotations.resolve(module, base) in _TYPED_DICT for base in node.bases):
+        return None
+    total = not any(
+        keyword.arg == "total"
+        and isinstance(keyword.value, ast.Constant)
+        and keyword.value.value is False
+        for keyword in node.keywords
+    )
+    keys: list[_Key] = []
+    for child in node.body:
+        if not (
+            isinstance(child, ast.AnnAssign) and isinstance(child.target, ast.Name)
+        ):
+            continue
+        annotation, optional = child.annotation, not total
+        if isinstance(annotation, ast.Subscript):
+            wrapper = annotations.resolve(module, annotation)
+            if wrapper in _NOT_REQUIRED | _REQUIRED:
+                annotation, optional = annotation.slice, wrapper in _NOT_REQUIRED
+        keys.append(_Key(child.target.id, annotation, optional))
+    return keys
+
+
+def _spelt_out(
+    annotations: Annotations,
+    record: str,
+    stub: ast.FunctionDef | ast.AsyncFunctionDef,
+) -> ast.FunctionDef | ast.AsyncFunctionDef:
+    """A stub whose ``**`` parameter unpacks a ``TypedDict``, with each key a keyword parameter.
+
+    Each key follows the stub's own keyword-only parameters, with its
+    annotation and the default its field has (none for a field without
+    one), so the stub reads as the list of keywords a type checker reads
+    it as. Whether a caller may leave a key out against whether its field
+    has a default is :func:`_keyword_problems`' to hold. A stub that
+    unpacks no ``TypedDict`` comes back as it is.
+    """
+    module = annotations.classes[record][0]
+    keys = _keys(annotations, module, stub)
+    if keys is None:
+        return stub
+    written = _field_defaults(annotations.package, annotations, record)
+    defaults: list[ast.expr | None] = []
+    for key in keys:
+        text = written.get(key.name)
+        if text is None:
+            defaults.append(None)
+        elif text == "...":
+            defaults.append(ast.Constant(Ellipsis))
+        else:
+            defaults.append(ast.parse(text, mode="eval").body)
+    arguments = copy.copy(stub.args)
+    arguments.kwonlyargs = [
+        *stub.args.kwonlyargs,
+        *(ast.arg(key.name, key.annotation) for key in keys),
+    ]
+    arguments.kw_defaults = [*stub.args.kw_defaults, *defaults]
+    arguments.kwarg = None
+    spelt = copy.copy(stub)
+    spelt.args = arguments
+    return spelt
+
+
+def _keyword_problems(
+    annotations: Annotations,
+    record: str,
+    stub: ast.FunctionDef | ast.AsyncFunctionDef,
+) -> list[str]:
+    """What is wrong with how a declared constructor takes its parameters.
+
+    More than :data:`MOST_PARAMETERS` besides ``self`` is a list too long
+    for one signature, which goes into a ``TypedDict`` instead; a ``**``
+    parameter is an ``Unpack`` of one written in the record's module, and
+    a caller may leave a key of it out exactly when the key's field has a
+    default.
+    """
+    arguments = stub.args
+    taken = [
+        *arguments.posonlyargs,
+        *arguments.args,
+        *([arguments.vararg] if arguments.vararg else []),
+        *arguments.kwonlyargs,
+        *([arguments.kwarg] if arguments.kwarg else []),
+    ]
+    problems: list[str] = []
+    count = len(taken) - 1
+    if count > MOST_PARAMETERS:
+        problems.append(
+            f"its TYPE_CHECKING __init__ takes {count} parameters besides self, "
+            f"more than the {MOST_PARAMETERS} a function takes (Sonar S107): it "
+            "takes them as the keys of a TypedDict, **keywords: Unpack[...]"
+        )
+    if arguments.kwarg is None:
+        return problems
+    module = annotations.classes[record][0]
+    keys = _keys(annotations, module, stub)
+    if keys is None:
+        written = arguments.kwarg.annotation
+        problems.append(
+            f"its TYPE_CHECKING __init__ takes **{arguments.kwarg.arg}: "
+            f"{ast.unparse(written) if written is not None else '?'}, which is no "
+            "Unpack of a TypedDict written in the record's module"
+        )
+        return problems
+    defaults = _field_defaults(annotations.package, annotations, record)
+    for key in keys:
+        default = defaults.get(key.name)
+        if key.optional and default is None and key.name in defaults:
+            problems.append(
+                f"{key.name} is a key a caller may leave out, and its field has "
+                "no default"
+            )
+        elif not key.optional and default is not None:
+            problems.append(
+                f"{key.name} is a key a caller must give, and its field defaults "
+                f"to {default}"
+            )
+    return problems
+
+
 def _is_type_checking(node: ast.expr) -> bool:
     """Whether a test reads ``TYPE_CHECKING``, as a name or as ``typing.TYPE_CHECKING``."""
     return (isinstance(node, ast.Name) and node.id == "TYPE_CHECKING") or (
         isinstance(node, ast.Attribute) and node.attr == "TYPE_CHECKING"
     )
+
+
+# ---------------------------------------------------------------------------
+# Records a caller builds: what their constructor takes, what they hold
+# ---------------------------------------------------------------------------
+
+#: Records a caller builds that no public function takes as an argument, by
+#: dotted name, each with where its construction is documented. A record a
+#: public function takes is one already (:attr:`Reader.input_records`).
+#: ``tests/test_record_constructors.py`` reads the Python blocks of every
+#: guide and fails a record one builds that is neither.
+CALLER_BUILT: dict[str, str] = {
+    "phonometry.io._sidecar.CalibrationSidecar": (
+        "written beside an audio file by hand as well as by write_sidecar: its "
+        "docstring documents the numbers and the labels it takes"
+    ),
+    "phonometry.environment.propagation.air_absorption.AtmosphericAttenuation": (
+        "the docstring of its __post_init__ documents a curve built directly, "
+        "from a list given by hand as from an array"
+    ),
+    "phonometry.materials.absorbers.four_microphone.TransferMatrix": (
+        "the impedance-tube guide builds one from the four entries of a chain "
+        "matrix, and its docstring documents a scalar entry"
+    ),
+    "phonometry.vibration.structural.transfer_stiffness.TransferStiffnessResult": (
+        "the transfer-stiffness guide builds one from the frequencies and the "
+        "stiffness of the direct method"
+    ),
+    "phonometry.vibration.human.multiple_shock.MultipleShockResult": (
+        "the multiple-shock guide builds one by hand, with its peaks and the "
+        "risk thresholds of a sex"
+    ),
+    "phonometry.room._impulse_response.ImpulseResponseResult": (
+        "the migration guide wraps a measured impulse response in one, to plot "
+        "it as the deconvolution's result"
+    ),
+    "phonometry.building.datasheets.SoundReductionSpectrum": (
+        "the datasheet guide builds one from the third-octave sound reduction "
+        "a manufacturer prints"
+    ),
+    "phonometry.building.datasheets.ImpactImprovementSpectrum": (
+        "the datasheet guide builds one from the improvement a floor covering's "
+        "sheet prints"
+    ),
+    "phonometry.materials.absorbers.datasheets.ThirdOctaveAbsorptionSpectrum": (
+        "the datasheet guide builds one from the absorption coefficients a "
+        "panel's sheet prints"
+    ),
+    "phonometry.electroacoustics.headphones.HeadphoneClassification": (
+        "the headphone guide builds one to read the IEC 60268-7 code of a "
+        "headphone it describes"
+    ),
+    "phonometry.emission.declaration.OperatingModeDeclaration": (
+        "the sound-power guide builds two, one per operating mode of the "
+        "machine it declares"
+    ),
+    "phonometry.emission.declaration.NoiseEmissionDeclaration": (
+        "the sound-power guide builds one from the declarations of its operating modes"
+    ),
+    "phonometry.environment.assessment.soundscape.SoundscapeReport": (
+        "the soundscape guide builds one to report a study by hand"
+    ),
+    "phonometry.environment.assessment.soundscape.SoundscapeParticipants": (
+        "the soundscape guide builds one for the report of a study"
+    ),
+    "phonometry.environment.assessment.soundscape.SoundscapeAcousticEnvironment": (
+        "the soundscape guide builds one for the report of a study"
+    ),
+    "phonometry.environment.assessment.soundscape.SoundscapeDataCollection": (
+        "the soundscape guide builds one for the report of a study"
+    ),
+}
+
+#: What a field may be annotated that holds a container of a fixed kind: an
+#: array, a ``tuple``, a ``list`` or a set. A value of another kind given to a
+#: record that keeps it as given (a list for an array field, an array for a
+#: tuple field) breaks the annotation the reader trusts.
+_FIXED_CONTAINERS = overloads._ARRAYS | frozenset(
+    {
+        "builtins.tuple",
+        "builtins.list",
+        "builtins.frozenset",
+        "builtins.set",
+        "typing.Tuple",
+        "typing.List",
+        "typing.FrozenSet",
+        "typing.Set",
+    }
+)
+
+#: What a constructor parameter may be annotated that takes the sequence a
+#: conversion takes: ``ArrayLike``, anything, or an open sequence, set or
+#: list of items.
+_TAKES_A_SEQUENCE = (
+    _ARRAY_LIKE
+    | _ANYTHING
+    | frozenset(
+        {
+            "builtins.list",
+            "typing.List",
+            "typing.Sequence",
+            "typing.Iterable",
+            "typing.Collection",
+            "typing.AbstractSet",
+            "collections.abc.Sequence",
+            "collections.abc.Iterable",
+            "collections.abc.Collection",
+            "collections.abc.Set",
+        }
+    )
+)
+
+#: A name every field of the record stands for: a field stored through a
+#: loop over a collection the reading cannot list (the record's own fields,
+#: a table built from them).
+_EVERY_FIELD = "*"
+
+#: Records whose constructor need not say what it converts, with the reason:
+#: each of their subclasses is held to it as they are.
+STUB_EXEMPT: dict[str, str] = {
+    "phonometry._internal.catalogue.CatalogueRow": (
+        "a catalogue row is built from a published table or a catalogue file, "
+        "where a set of field names arrives as a JSON list; the row takes the "
+        "list for that reader and holds the frozenset its field names, which "
+        "a caller writing a row by hand passes, so the list is the file "
+        "format's leniency, as a whole float is a count's"
+    ),
+}
+
+
+def fixed_containers(
+    annotations: Annotations, module: str, node: ast.expr | None
+) -> list[str]:
+    """The members of an annotation that are a container of a fixed kind, as written."""
+    return [
+        ast.unparse(member)
+        for where, member in annotations.members(module, node)
+        if annotations.resolve(where, member) in _FIXED_CONTAINERS
+    ]
+
+
+#: What a field may be annotated that holds a table of keys and values: a
+#: mapping, a ``dict``, or a read-only mapping. A ``frozen=True`` record
+#: stops the field from being rebound, not the caller's ``dict`` in it from
+#: being edited after the record checked it, so a record a caller builds
+#: copies it into a read-only mapping.
+_KEYED_CONTAINERS = _MAPPINGS | frozenset(
+    {"builtins.dict", "typing.Dict", "types.MappingProxyType"}
+)
+
+
+def keyed_containers(
+    annotations: Annotations, module: str, node: ast.expr | None
+) -> list[str]:
+    """The members of an annotation that are a mapping, as written."""
+    return [
+        ast.unparse(member)
+        for where, member in annotations.members(module, node)
+        if annotations.resolve(where, member) in _KEYED_CONTAINERS
+    ]
+
+
+def takes_a_sequence(
+    annotations: Annotations, module: str, node: ast.expr | None
+) -> bool:
+    """Whether a constructor parameter takes the sequence a conversion takes."""
+    return node is None or any(
+        annotations.resolve(where, member) in _TAKES_A_SEQUENCE
+        for where, member in annotations.members(module, node)
+    )
+
+
+def holds_numeric_items(
+    annotations: Annotations, module: str, node: ast.expr | None
+) -> bool:
+    """Whether a field holds a container of numbers or of arrays, and nothing else but ``None``.
+
+    ``tuple[float, float, float]`` and ``tuple[NDArray[np.float64],
+    NDArray[np.float64]]`` do: a conversion that builds either reads its
+    argument item by item, and an array is a sequence of its rows to it,
+    so the constructor takes one. ``tuple[Resonator, ...]`` does not.
+    """
+    found = False
+    for where, member in annotations.members(module, node):
+        if isinstance(member, ast.Constant) and member.value is None:
+            continue
+        if annotations.resolve(where, member) not in _CONTAINERS:
+            return False
+        items = [item for item in _items(member) if not _is_ellipsis(item)]
+        if not items or not all(
+            annotations._number_or_numbers(inner, part, depth=1)
+            for item in items
+            for inner, part in annotations.members(where, item)
+        ):
+            return False
+        found = True
+    return found
+
+
+#: The open sequences a constructor parameter may take: any sequence,
+#: iterable or collection of the items, which a numpy array of them is at run
+#: time and is not to a type checker. A parameter that names its containers
+#: instead (``tuple[int, int] | list[int]``) says it refuses the others.
+_OPEN_SEQUENCES = frozenset(
+    {
+        "typing.Sequence",
+        "typing.Iterable",
+        "typing.Collection",
+        "collections.abc.Sequence",
+        "collections.abc.Iterable",
+        "collections.abc.Collection",
+    }
+)
+
+
+def open_without_an_array(
+    annotations: Annotations, module: str, node: ast.expr | None
+) -> bool:
+    """Whether a constructor parameter takes an open sequence and no numpy array.
+
+    ``Sequence[ArrayLike]`` and ``Sequence[float]`` do: they claim every
+    sequence of the items and refuse, to a type checker, the array whose
+    rows the conversion reads as well. ``ArrayLike``, an array type or
+    anything beside it takes the array; named containers claim no more than
+    they take.
+    """
+    members = [
+        annotations.resolve(where, member)
+        for where, member in annotations.members(module, node)
+    ]
+    return any(dotted in _OPEN_SEQUENCES for dotted in members) and not any(
+        dotted in _ARRAY_LIKE | _ANYTHING | overloads._ARRAYS for dotted in members
+    )
+
+
+def _setattr_name(call: ast.Call) -> ast.expr | None:
+    """The field name ``object.__setattr__(self, name, ...)`` or ``setattr(self, ...)`` stores in."""
+    func = call.func
+    setter = (
+        isinstance(func, ast.Attribute)
+        and func.attr == "__setattr__"
+        and isinstance(func.value, ast.Name)
+        and func.value.id == "object"
+    ) or (isinstance(func, ast.Name) and func.id == "setattr")
+    if not (setter and len(call.args) >= _SETATTR):
+        return None
+    owner = call.args[0]
+    if not (isinstance(owner, ast.Name) and owner.id in _OWNERS):
+        return None
+    return call.args[1]
+
+
+def _loop_names(
+    node: ast.FunctionDef | ast.AsyncFunctionDef,
+    texts: Callable[[ast.expr], tuple[str, ...]],
+) -> dict[str, tuple[str, ...]]:
+    """What each loop name of a method takes in turn: field names, or every field."""
+    looping: dict[str, tuple[str, ...]] = {}
+    for loop in ast.walk(node):
+        if not isinstance(loop, ast.For | ast.AsyncFor | ast.comprehension):
+            continue
+        targets = (
+            [loop.target]
+            if isinstance(loop.target, ast.Name)
+            else [
+                element
+                for element in getattr(loop.target, "elts", [])
+                if isinstance(element, ast.Name)
+            ]
+        )
+        names = _field_names(loop.iter, texts)
+        literal = isinstance(loop.iter, ast.Tuple | ast.List | ast.Set)
+        for target in targets:
+            taken = names if names or literal else (_EVERY_FIELD,)
+            looping[target.id] = looping.get(target.id, ()) + taken
+    return looping
+
+
+def _parameter_positions(
+    node: ast.FunctionDef | ast.AsyncFunctionDef,
+) -> dict[str, int]:
+    """The position of each parameter of a method a call fills, ``self`` left out."""
+    every = [*node.args.posonlyargs, *node.args.args]
+    if every and every[0].arg in _OWNERS:
+        every = every[1:]
+    return {argument.arg: index for index, argument in enumerate(every)}
+
+
+def _field_named(
+    node: ast.expr, looping: dict[str, tuple[str, ...]]
+) -> tuple[str, ...] | None:
+    """The field names an argument stands for: a text, or a loop name over field names.
+
+    The ``name`` of a loop name over the record's fields
+    (``for field in fields(self): ... field.name``) stands for every field.
+    """
+    if isinstance(node, ast.Constant) and isinstance(node.value, str):
+        return (node.value,)
+    if isinstance(node, ast.Name) and node.id in looping:
+        return looping[node.id]
+    if (
+        isinstance(node, ast.Attribute)
+        and node.attr == "name"
+        and isinstance(node.value, ast.Name)
+        and _EVERY_FIELD in looping.get(node.value.id, ())
+    ):
+        return (_EVERY_FIELD,)
+    return None
+
+
+def _stores(
+    reader: Reader, function: overloads.Function, depth: int = 0
+) -> tuple[frozenset[str], frozenset[int]]:
+    """The fields a method stores a value of its own in, and the parameters it stores in.
+
+    ``object.__setattr__(self, "n", ...)`` or ``setattr(self, ...)`` by name,
+    or through a loop over field names (every field, when the loop runs
+    over a collection the reading cannot list), and a method of the record
+    it calls on ``self`` or ``super()``, a setter that stores in the field
+    whose name it is handed (``self._set(name, value)``) included. The
+    second set holds the positions of the method's own parameters it stores
+    in by name, which make it such a setter.
+    """
+    node = function.implementation
+    if node is None or depth > _HIERARCHY:
+        return frozenset(), frozenset()
+    looping = _loop_names(node, lambda found: reader._texts(function.module, found))
+    positions = _parameter_positions(node)
+    stored: set[str] = set()
+    setter: set[int] = set()
+    for call in reader._calls_of(node):
+        name = _setattr_name(call)
+        if name is not None:
+            named = _field_named(name, looping)
+            if named is not None:
+                stored.update(named)
+            elif isinstance(name, ast.Name) and name.id in positions:
+                setter.add(positions[name.id])
+            continue
+        func = call.func
+        if not (
+            isinstance(func, ast.Attribute)
+            and (
+                (isinstance(func.value, ast.Name) and func.value.id in _OWNERS)
+                or _is_super(func.value)
+            )
+        ):
+            continue
+        callee = reader._callee(function, call, ())
+        if callee is None or callee[0] not in reader.package.functions:
+            continue
+        inner, handed = _stores(reader, reader.package.functions[callee[0]], depth + 1)
+        stored |= inner
+        for position in handed:
+            if position < len(call.args):
+                named = _field_named(call.args[position], looping)
+                if named is not None:
+                    stored.update(named)
+    return frozenset(stored), frozenset(setter)
+
+
+def converted_fields(reader: Reader, record: str) -> frozenset[str]:
+    """The fields a record's ``__post_init__`` (or a method it calls) stores a value of its own in."""
+    fields = record_fields(reader.package, reader.annotations, record)
+    dotted = reader._method(record, "__post_init__")
+    if dotted is None:
+        return frozenset()
+    stored, _ = _stores(reader, reader.package.functions[dotted])
+    if _EVERY_FIELD in stored:
+        return frozenset(fields)
+    return stored & frozenset(fields)
+
+
+def built_records(reader: Reader) -> frozenset[str]:
+    """The records a caller builds: those a public function takes, and :data:`CALLER_BUILT`."""
+    return reader.input_records | (
+        frozenset(CALLER_BUILT) & frozenset(reader.annotations.classes)
+    )
+
+
+def _bases(
+    annotations: Annotations, package: overloads.Package, record: str
+) -> set[str]:
+    """A record and every class of the package it extends, by dotted name."""
+    found: set[str] = set()
+    stack = [record]
+    while stack:
+        current = stack.pop()
+        if current in found or current not in annotations.classes:
+            continue
+        found.add(current)
+        module, node = annotations.classes[current]
+        for base in node.bases:
+            target = package.resolve(module, base)
+            if target is not None:
+                stack.append(target)
+    return found
+
+
+def stub_exemption(
+    reader: Reader, record: str, exempt: Mapping[str, str] | None = None
+) -> str | None:
+    """The entry of *exempt* (:data:`STUB_EXEMPT`) a record falls under, itself or through a base."""
+    table = STUB_EXEMPT if exempt is None else exempt
+    for base in _bases(reader.annotations, reader.package, record):
+        if base in table:
+            return base
+    return None
+
+
+def kept_as_given(reader: Reader, record: str) -> list[tuple[Field, list[str]]]:
+    """The fields of a record a caller builds that hold a container nothing converts.
+
+    A list given to an array field, or an array to a tuple field, is kept as
+    it was handed: the record then holds what its annotation says it does
+    not, and a frozen record holds a list a caller can still append to. A
+    ``dict`` given to a mapping field is kept as the caller's own, which the
+    caller can still edit after the record checked it.
+    """
+    annotations = reader.annotations
+    converted = converted_fields(reader, record)
+    found: list[tuple[Field, list[str]]] = []
+    for field in record_fields(reader.package, annotations, record).values():
+        if field.name in converted:
+            continue
+        kept = fixed_containers(
+            annotations, field.module, field.annotation
+        ) + keyed_containers(annotations, field.module, field.annotation)
+        if kept:
+            found.append((field, kept))
+    return found
+
+
+def _field_defaults(
+    package: overloads.Package, annotations: Annotations, record: str, depth: int = 0
+) -> dict[str, str | None]:
+    """The default of each field a record's ``__init__`` takes, as a stub writes it.
+
+    ``None`` for a field with no default, ``"..."`` for one a factory makes
+    (``field(default_factory=...)``), the default's source text otherwise.
+    """
+    found = annotations.classes.get(record)
+    if found is None or depth > _HIERARCHY:
+        return {}
+    module, node = found
+    defaults: dict[str, str | None] = {}
+    for base in node.bases:
+        target = package.resolve(module, base)
+        if target is not None and target in annotations.classes:
+            defaults.update(_field_defaults(package, annotations, target, depth + 1))
+    for child in node.body:
+        if not (
+            isinstance(child, ast.AnnAssign) and isinstance(child.target, ast.Name)
+        ):
+            continue
+        value = child.value
+        if value is None:
+            defaults[child.target.id] = None
+        elif isinstance(value, ast.Call) and package.resolve(module, value.func) == (
+            "dataclasses.field"
+        ):
+            options = {keyword.arg: keyword.value for keyword in value.keywords}
+            if "default" in options:
+                defaults[child.target.id] = ast.unparse(options["default"])
+            elif "default_factory" in options:
+                defaults[child.target.id] = "..."
+            else:
+                defaults[child.target.id] = None
+        else:
+            defaults[child.target.id] = ast.unparse(value)
+    return defaults
+
+
+def _covers_member(
+    annotations: Annotations,
+    field: tuple[str, ast.expr],
+    taken: tuple[str, ast.expr],
+) -> bool:
+    """Whether one member of a parameter's annotation takes one member of a field's.
+
+    The same member as written; ``ArrayLike`` or anything, which take any
+    value; or the same generic whose every argument takes the field's
+    (``Mapping[K, ArrayLike]`` takes a ``Mapping[K, Sequence[float]]``).
+    """
+    (field_module, field_member), (taken_module, taken_member) = field, taken
+    if annotations.resolve(taken_module, taken_member) in _ARRAY_LIKE | _ANYTHING:
+        return True
+    if ast.unparse(field_member) == ast.unparse(taken_member):
+        return True
+    if not (
+        isinstance(field_member, ast.Subscript)
+        and isinstance(taken_member, ast.Subscript)
+        and annotations.resolve(field_module, field_member)
+        == annotations.resolve(taken_module, taken_member)
+    ):
+        return False
+    given, takes = _items(field_member), _items(taken_member)
+    return len(given) == len(takes) and all(
+        _covers(annotations, field_module, item, taken_module, other)
+        for item, other in zip(given, takes, strict=True)
+    )
+
+
+def _covers(
+    annotations: Annotations,
+    field_module: str,
+    field_node: ast.expr | None,
+    taken_module: str,
+    taken_node: ast.expr | None,
+) -> bool:
+    """Whether every member of a field's annotation is taken by a member of a parameter's."""
+    if taken_node is None:
+        return True
+    taken = annotations.members(taken_module, taken_node)
+    return all(
+        any(_covers_member(annotations, member, other) for other in taken)
+        for member in annotations.members(field_module, field_node)
+    )
+
+
+def _widens(
+    annotations: Annotations,
+    field: Field,
+    stub_module: str,
+    parameter: ast.arg,
+) -> bool:
+    """Whether a constructor parameter takes every value its field's annotation names.
+
+    Each member of the field's annotation, aliases spelt out on both sides,
+    is a member of the parameter's, or is taken by one (:func:`_covers`).
+    """
+    return _covers(
+        annotations, field.module, field.annotation, stub_module, parameter.annotation
+    )
+
+
+def constructor_problems(
+    reader: Reader, record: str, exempt: Mapping[str, str] | None = None
+) -> list[str]:
+    """What is wrong with the constructor a record declares, or the one it needs.
+
+    A record a caller builds that converts a field it annotates as a
+    container of a fixed kind, or as a sequence of numbers, declares the
+    constructor a type checker reads, a ``TYPE_CHECKING`` ``__init__`` that
+    takes the sequence the conversion takes (``ArrayLike``, or an open
+    sequence of the items, beside an array where the items are numbers or
+    arrays, which is a sequence of them too). Any record that declares one
+    keeps it in step
+    with its fields: the same names, in the same order, each keyword-only
+    exactly when the field is, each with the field's default (``...`` for
+    one a factory makes), and a parameter for a field it does not convert
+    takes every value the field's annotation names. A constructor of more
+    than :data:`MOST_PARAMETERS` keywords takes them as the keys of a
+    ``TypedDict`` (:func:`_keyword_problems`), each read as the keyword it
+    stands for (:func:`_spelt_out`).
+    """
+    annotations = reader.annotations
+    package = reader.package
+    module = annotations.classes[record][0]
+    fields = record_fields(package, annotations, record)
+    declaration = _declared_constructor(annotations, record)
+    converted = converted_fields(reader, record)
+    problems: list[str] = []
+    needs = [
+        field
+        for field in fields.values()
+        if field.name in converted
+        and not annotations.admits_array_like(field.module, field.annotation, {})
+        and (
+            fixed_containers(annotations, field.module, field.annotation)
+            or annotations.several_numbers(field.module, field.annotation, {})
+        )
+    ]
+    if declaration is None:
+        if (
+            needs
+            and record in built_records(reader)
+            and not stub_exemption(reader, record, exempt)
+        ):
+            problems.append(
+                "converts "
+                + ", ".join(field.name for field in needs)
+                + " and declares no TYPE_CHECKING __init__ that says what it takes"
+            )
+        return problems
+    problems.extend(_keyword_problems(annotations, record, declaration))
+    stub = _spelt_out(annotations, record, declaration)
+    parameters = [*stub.args.posonlyargs, *stub.args.args]
+    if not parameters or parameters[0].arg not in _OWNERS:
+        return ["its TYPE_CHECKING __init__ takes no self"]
+    positional = parameters[1:]
+    padding: list[ast.expr | None] = [None] * (
+        len(parameters) - len(stub.args.defaults)
+    )
+    defaults = dict(
+        zip(
+            [argument.arg for argument in parameters],
+            [*padding, *stub.args.defaults],
+            strict=True,
+        )
+    )
+    defaults.update(
+        {
+            argument.arg: default
+            for argument, default in zip(
+                stub.args.kwonlyargs, stub.args.kw_defaults, strict=True
+            )
+        }
+    )
+    declared = [(argument, True) for argument in positional] + [
+        (argument, False) for argument in stub.args.kwonlyargs
+    ]
+    names = [argument.arg for argument, _ in declared]
+    if names != list(fields):
+        return [
+            *problems,
+            f"its TYPE_CHECKING __init__ takes {names}, its fields are {list(fields)}",
+        ]
+    written = _field_defaults(package, annotations, record)
+    for (argument, by_position), field in zip(declared, fields.values(), strict=True):
+        if by_position != field.positional:
+            kind = "by position" if field.positional else "by keyword only"
+            problems.append(f"{field.name} is a field taken {kind}, not so in the stub")
+        default = defaults.get(argument.arg)
+        shown = None if default is None else ast.unparse(default)
+        if shown != written.get(field.name):
+            problems.append(
+                f"{field.name} defaults to {written.get(field.name)} as a field and "
+                f"to {shown} in the stub"
+            )
+        if field in needs:
+            taken = ast.unparse(argument.annotation) if argument.annotation else "?"
+            if not takes_a_sequence(annotations, module, argument.annotation):
+                problems.append(
+                    f"{field.name} is converted, and the stub takes {taken}"
+                    ", which is no ArrayLike nor an open sequence"
+                )
+            elif holds_numeric_items(
+                annotations, field.module, field.annotation
+            ) and open_without_an_array(annotations, module, argument.annotation):
+                problems.append(
+                    f"{field.name} is converted from numbers or arrays, and the "
+                    f"stub takes {taken}, an open sequence that refuses the "
+                    "numpy array of them"
+                )
+        elif not _widens(annotations, field, module, argument):
+            problems.append(
+                f"{field.name} is {ast.unparse(field.annotation)} as a field and the "
+                f"stub takes {ast.unparse(argument.annotation) if argument.annotation else '?'}"
+                ", which does not take all of it"
+            )
+    return problems
 
 
 @dataclass(frozen=True)

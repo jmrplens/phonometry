@@ -59,6 +59,8 @@ import numpy as np
 from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays, reduce_with_plain_rows
 from ..._internal.validation import (
+    floats_of,
+    pair_of_floats,
     require_axis_count,
     require_choice,
     require_equal_counts,
@@ -501,6 +503,23 @@ class RoadEmissionCoefficients(RichDisplay):
     ]
     temperature_coefficient_db_per_k: Mapping[RoadVehicleCode, float]
 
+    if TYPE_CHECKING:
+
+        def __init__(
+            self,
+            *,
+            rolling_a: Mapping[RoadVehicleCode, tuple[float, ...]],
+            rolling_b: Mapping[RoadVehicleCode, tuple[float, ...]],
+            propulsion_a: Mapping[RoadVehicleCode, tuple[float, ...]],
+            propulsion_b: Mapping[RoadVehicleCode, tuple[float, ...]],
+            studded_a: ArrayLike,
+            studded_b: ArrayLike,
+            junction_c: Mapping[
+                RoadVehicleCode, tuple[tuple[float, float], tuple[float, float]]
+            ],
+            temperature_coefficient_db_per_k: Mapping[RoadVehicleCode, float],
+        ) -> None: ...
+
     def __post_init__(self) -> None:
         """Check each category key, and hold every per-category table read-only.
 
@@ -513,7 +532,9 @@ class RoadEmissionCoefficients(RichDisplay):
             Table [2.2.a].
         :raises TypeError: if a key of ``rolling_a``, ``rolling_b``,
             ``propulsion_a``, ``propulsion_b``, ``junction_c`` or
-            ``temperature_coefficient_db_per_k`` is not a text.
+            ``temperature_coefficient_db_per_k`` is not a text, or
+            ``studded_a`` or ``studded_b`` is a number, a text or a sequence
+            with a member that is not one number.
         """
         _require_codes(self.rolling_a, "rolling_a")
         _require_codes(self.rolling_b, "rolling_b")
@@ -527,6 +548,11 @@ class RoadEmissionCoefficients(RichDisplay):
             value = getattr(self, field.name)
             if isinstance(value, Mapping):
                 object.__setattr__(self, field.name, MappingProxyType(dict(value)))
+        for name in ("studded_a", "studded_b"):
+            bands = floats_of(
+                getattr(self, name), name, "a sequence of octave-band coefficients"
+            )
+            object.__setattr__(self, name, bands)
 
     def __reduce__(self) -> tuple[Any, tuple[type, dict[str, Any]]]:
         """Rebuild from plain dictionaries when pickled or deep-copied.
@@ -568,19 +594,53 @@ class RoadSurfaceCoefficients(RichDisplay):
     """
 
     name: str
-    alpha: dict[RoadVehicleCode, tuple[float, ...]]
-    beta: dict[RoadVehicleCode, float]
+    alpha: Mapping[RoadVehicleCode, tuple[float, ...]]
+    beta: Mapping[RoadVehicleCode, float]
     speed_range_kmh: tuple[float, float] | None
 
+    if TYPE_CHECKING:
+
+        def __init__(
+            self,
+            *,
+            name: str,
+            alpha: Mapping[RoadVehicleCode, tuple[float, ...]],
+            beta: Mapping[RoadVehicleCode, float],
+            speed_range_kmh: ArrayLike | None,
+        ) -> None: ...
+
     def __post_init__(self) -> None:
-        """Check each category key of the row.
+        """Check each category key of the row, and hold both tables read-only.
+
+        ``frozen=True`` stops a field from being rebound, not a dictionary in
+        it from being edited, and a caller builds this record to swap in a
+        national surface. The two tables are wrapped as
+        :class:`RoadEmissionCoefficients` wraps its own.
 
         :raises ValueError: if a key of ``alpha`` or ``beta`` is not a code of
-            Table [2.2.a].
-        :raises TypeError: if a key of ``alpha`` or ``beta`` is not a text.
+            Table [2.2.a], or ``speed_range_kmh`` holds other than two values.
+        :raises TypeError: if a key of ``alpha`` or ``beta`` is not a text, or
+            ``speed_range_kmh`` is a number, a text or a pair with a member
+            that is not one number.
         """
         _require_codes(self.alpha, "alpha")
         _require_codes(self.beta, "beta")
+        object.__setattr__(self, "alpha", MappingProxyType(dict(self.alpha)))
+        object.__setattr__(self, "beta", MappingProxyType(dict(self.beta)))
+        if self.speed_range_kmh is not None:
+            speed_range = pair_of_floats(
+                self.speed_range_kmh, "speed_range_kmh", "(v_min, v_max)"
+            )
+            object.__setattr__(self, "speed_range_kmh", speed_range)
+
+    def __reduce__(self) -> tuple[Any, tuple[type, dict[str, Any]]]:
+        """Rebuild from plain dictionaries when pickled or deep-copied.
+
+        A read-only mapping can be neither pickled nor deep-copied, so the
+        row travels as plain dictionaries, by keyword, and
+        :meth:`__post_init__` wraps them again on arrival.
+        """
+        return reduce_with_plain_rows(self)
 
 
 def road_surface_coefficients(

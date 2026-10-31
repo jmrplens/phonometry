@@ -194,8 +194,8 @@ Advisory for ISO 9613-1 inputs outside the tabulated/validity ranges.
 
 ```python
 AtmosphericAttenuation(
-    frequencies: NDArray[np.float64],
-    attenuation_db_per_m: NDArray[np.float64],
+    frequencies: ArrayLike,
+    attenuation_db_per_m: ArrayLike,
     temperature_c: float,
     relative_humidity_percent: float,
     static_pressure_kpa: float,

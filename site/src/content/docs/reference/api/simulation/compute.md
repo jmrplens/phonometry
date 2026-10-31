@@ -33,9 +33,9 @@ name in the hosts file (see the guide on remote nodes); only
 Compute(
     *,
     device: Literal['cpu', 'cupy', 'torch:cpu', 'torch:cuda', 'torch:mps'] = 'cpu',
-    device_index: int = 0,
+    device_index: int | np.integer[Any] = 0,
     dtype: Literal['float64', 'float32'] = 'float64',
-    fallback: bool = False,
+    fallback: bool | np.bool_ = False,
     host: str | None = None,
     timeout_s: float | None = None,
 )

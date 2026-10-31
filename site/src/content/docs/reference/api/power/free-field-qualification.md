@@ -643,12 +643,12 @@ The Table A.1 limit of each frequency, in dB, read from the room.
 ```python
 MicrophoneTraverse(
     *,
-    positions_m: np.ndarray,
-    levels: np.ndarray,
-    monitor_levels: np.ndarray | None = None,
-    background_levels: np.ndarray | None = None,
+    positions_m: ArrayLike,
+    levels: ArrayLike,
+    monitor_levels: ArrayLike | None = None,
+    background_levels: ArrayLike | None = None,
     name: str = '',
-    targets: tuple[Literal['dihedral corner', 'trihedral corner', 'boundary center', 'closest boundary', 'unique features'], ...] = (),
+    targets: Literal['dihedral corner', 'trihedral corner', 'boundary center', 'closest boundary', 'unique features'] | Sequence[Literal['dihedral corner', 'trihedral corner', 'boundary center', 'closest boundary', 'unique features']] = (),
 )
 ```
 

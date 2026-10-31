@@ -142,10 +142,10 @@ the ratio to the direct response enters.
 TrackDecayRate(
     *,
     direction: Literal['vertical', 'lateral'],
-    frequencies: NDArray[np.float64],
-    decay_rates_db_per_m: NDArray[np.float64],
-    distances: NDArray[np.float64] | None = None,
-    responses: NDArray[np.float64] | None = None,
+    frequencies: ArrayLike,
+    decay_rates_db_per_m: ArrayLike,
+    distances: ArrayLike | None = None,
+    responses: ArrayLike | None = None,
 )
 ```
 

@@ -83,6 +83,7 @@ if TYPE_CHECKING:
     from .._internal.types import ReportEngine
     from .._report.metadata import ReportMetadata
     from ..room.noise_criteria import NCResult, RCResult
+    from .hvac import HVACSpectrumResult
 
 #: The dimensions a duct cross section is described by, the keyword arguments
 #: of :func:`~phonometry.noise_control.duct_modes.plane_wave_limit`.
@@ -116,19 +117,20 @@ class DuctElement(OwnsArrays):
         ``"Silencer, 3 ft, standard pressure drop"``.
     :ivar attenuation: Octave-band attenuation as a **positive** loss, dB. A
         scalar is broadcast over the bands; an
-        :class:`~phonometry.noise_control.hvac.HVACSpectrumResult` (or anything
-        exposing ``values``) is accepted directly. ``None`` means no
-        attenuation.
+        :class:`~phonometry.noise_control.hvac.HVACSpectrumResult` is accepted
+        directly, its ``values`` read. ``None`` means no attenuation.
     :ivar self_noise: Octave-band regenerated sound power level of the element,
-        dB re 1 pW, or ``None`` when the element regenerates nothing (the
-        cascade then applies its self-noise floor).
+        dB re 1 pW, as a scalar, per band or an
+        :class:`~phonometry.noise_control.hvac.HVACSpectrumResult`, or ``None``
+        when the element regenerates nothing (the cascade then applies its
+        self-noise floor).
     :ivar code: A short worksheet code for the printed sheet (AHRI 885 style,
         e.g. ``"D1"``, ``"S"``); defaults to the row number.
     """
 
     label: str
-    attenuation: Any = None
-    self_noise: Any = None
+    attenuation: ArrayLike | HVACSpectrumResult | None = None
+    self_noise: ArrayLike | HVACSpectrumResult | None = None
     code: str = ""
 
 

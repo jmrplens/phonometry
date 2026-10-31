@@ -306,9 +306,30 @@ def _own_nodes(roots: Iterable[ast.AST]) -> Iterator[ast.AST]:
         stack.extend(ast.iter_child_nodes(node))
 
 
+def _for_the_type_checker(node: ast.AST) -> bool:
+    """Whether a block runs for the type checker only: ``if TYPE_CHECKING:``."""
+    test = node.test if isinstance(node, ast.If) else None
+    return (isinstance(test, ast.Name) and test.id == "TYPE_CHECKING") or (
+        isinstance(test, ast.Attribute) and test.attr == "TYPE_CHECKING"
+    )
+
+
 def _definitions(body: Iterable[ast.AST]) -> Iterator[_DefinitionNode]:
-    """The functions and classes a body defines, however deep in its blocks."""
+    """The functions and classes a body defines, however deep in its blocks.
+
+    One defined under ``if TYPE_CHECKING:`` is never defined when the code
+    runs (the constructor a record declares for the type checker): it is
+    no definition of the program, and is passed over.
+    """
+    skipped = {
+        id(child)
+        for node in _own_nodes(body)
+        if isinstance(node, ast.If) and _for_the_type_checker(node)
+        for child in node.body
+    }
     for node in _own_nodes(body):
+        if id(node) in skipped:
+            continue
         if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef):
             yield node
 

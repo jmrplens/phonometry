@@ -747,7 +747,7 @@ class WeightingComplianceResult(OwnsArrays):
     :ivar n_sweep_points: Grid frequencies used by the 5.5.7 sweep.
     """
 
-    band_margins: tuple[Mapping[str, Any], ...]
+    band_margins: tuple[Mapping[str, float], ...]
     between_nominals: Mapping[str, float] | None
     weighting: GradedWeighting
     edition: Edition

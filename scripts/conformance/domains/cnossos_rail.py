@@ -53,46 +53,36 @@ def _cnossos_rail_case(case: dict[str, str]) -> RailwayEmissionResult:
         n_axles=int(vehicle["axles"]),
         wheel_roughness=ph.environment.WavelengthSpectrum(
             wavelengths_mm=lam,
-            levels=np.asarray(
-                wavelength[("wheel_roughness", vehicle["wheel_roughness"])]
-            ),
+            levels=wavelength[("wheel_roughness", vehicle["wheel_roughness"])],
         ),
         contact_filter=ph.environment.WavelengthSpectrum(
             wavelengths_mm=lam,
-            levels=np.asarray(
-                wavelength[("contact_filter", vehicle["contact_filter"])]
-            ),
+            levels=wavelength[("contact_filter", vehicle["contact_filter"])],
         ),
         wheel_transfer=frequency[("wheel_transfer", vehicle["wheel_transfer"], "")],
         superstructure_transfer=frequency[
             ("superstructure_transfer", case["superstructure_transfer"], "")
         ],
         traction=ph.environment.RailSourceSpectra(
-            source_a=np.asarray(frequency[(traction, vehicle["traction"], "A")]),
-            source_b=np.asarray(frequency[(traction, vehicle["traction"], "B")]),
+            source_a=frequency[(traction, vehicle["traction"], "A")],
+            source_b=frequency[(traction, vehicle["traction"], "B")],
         ),
         aerodynamic=ph.environment.RailSourceSpectra(
-            source_a=np.asarray(
-                frequency[("aerodynamic", vehicle["aerodynamic"], "A")]
-            ),
-            source_b=np.asarray(
-                frequency[("aerodynamic", vehicle["aerodynamic"], "B")]
-            ),
+            source_a=frequency[("aerodynamic", vehicle["aerodynamic"], "A")],
+            source_b=frequency[("aerodynamic", vehicle["aerodynamic"], "B")],
         ),
         aerodynamic_alpha=float(case["aero_alpha"]),
     )
     track = ph.environment.RailwayTrack(
         rail_roughness=ph.environment.WavelengthSpectrum(
             wavelengths_mm=lam,
-            levels=np.asarray(wavelength[("rail_roughness", case["rail_roughness"])]),
+            levels=wavelength[("rail_roughness", case["rail_roughness"])],
         ),
         track_transfer=frequency[("track_transfer", case["track_transfer"], "")],
         impact_roughness=(
             ph.environment.WavelengthSpectrum(
                 wavelengths_mm=lam,
-                levels=np.asarray(
-                    wavelength[("impact_roughness", case["impact_roughness"])]
-                ),
+                levels=wavelength[("impact_roughness", case["impact_roughness"])],
             )
             if case["impact_roughness"]
             else None

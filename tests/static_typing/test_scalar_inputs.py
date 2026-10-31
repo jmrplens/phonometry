@@ -155,3 +155,26 @@ def test_an_array_model_is_refused_by_the_law_of_propagation() -> None:
         inputs,
     )
     assert np.isclose(result.value, 4.0)
+
+
+def test_a_zero_d_integer_array_is_a_calibration_number() -> None:
+    """A 0-d integer array is the number it holds, for the sidecar and for mypy.
+
+    ``np.array(2, dtype=np.int64)`` is what reading one value back out of an
+    integer array gives; the sidecar holds it as the float it is, and its
+    declared constructor takes an integer array, signed or unsigned, as well
+    as a floating one. Each array is named, with its type, before the call:
+    written in the call, ``np.array(..., dtype=...)`` takes its type from
+    the parameter, which mypy reads as ``NDArray[Any]`` when the parameter is
+    a floating array, so the case would pass however narrow the parameter
+    were.
+    """
+    factor: NDArray[np.int64] = np.array(2, dtype=np.int64)
+    reference: NDArray[np.int32] = np.array(94, dtype=np.int32)
+    frequency: NDArray[np.uint16] = np.array(1000, dtype=np.uint16)
+    sidecar = io.CalibrationSidecar(
+        factor, reference_spl=reference, calibrator_frequency=frequency
+    )
+    assert sidecar.calibration_factor == 2.0
+    assert sidecar.reference_spl == 94.0
+    assert sidecar.calibrator_frequency == 1000.0

@@ -161,6 +161,7 @@ from typing import TYPE_CHECKING, Any, Final, Literal
 import numpy as np
 
 from .._internal.display import RichDisplay
+from .._internal.frozen import reduce_with_plain_rows
 from .._internal.validation import (
     is_class_designation,
     require_choice,
@@ -171,8 +172,10 @@ from .conformance import ConformanceVerification, verify_conformance
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable, Mapping, Sequence
+    from typing import TypedDict, Unpack
 
     from matplotlib.axes import Axes
+    from numpy.typing import ArrayLike
 
     from .._i18n import Language
 
@@ -1137,6 +1140,60 @@ def _require_keys(
             require_choice(key, name, options)
 
 
+if TYPE_CHECKING:
+
+    class _SoundLevelMeterPeriodicKeywords(TypedDict, total=False):
+        """What :class:`SoundLevelMeterPeriodicMeasurements` takes, one key per field.
+
+        Each sequence of results arrives as any array-like, and a table of
+        them as a mapping of array-likes. Thirty-eight keywords are more than
+        the thirteen parameters a function may take, so the constructor takes
+        them as the keys of this dictionary; a caller leaves out any of them,
+        as every field defaults to ``None``.
+        """
+
+        static_pressures_kpa: ArrayLike | None
+        air_temperatures_c: ArrayLike | None
+        relative_humidities_percent: ArrayLike | None
+        calibration_check_initial_level: float | None
+        calibration_check_adjusted_level: float | None
+        microphone_self_noise_level: float | None
+        electrical_self_noise_levels: Mapping[MeterWeighting, float] | None
+        acoustic_weighting_deviations_db: ArrayLike | None
+        acoustic_weighting_uncertainties_db: ArrayLike | None
+        acoustic_weighting_uncertainties_without_correction_data_db: ArrayLike | None
+        electrical_weighting_deviations_db: Mapping[MeterWeighting, ArrayLike] | None
+        electrical_weighting_uncertainties_db: Mapping[MeterWeighting, ArrayLike] | None
+        electrical_weighting_uncertainties_without_correction_data_db: (
+            Mapping[MeterWeighting, ArrayLike] | None
+        )
+        weighting_at_1khz_deviations_db: Mapping[WeightingVersusA, float] | None
+        weighting_at_1khz_uncertainties_db: Mapping[WeightingVersusA, float] | None
+        time_weighting_at_1khz_deviations_db: Mapping[DisplayVersusF, float] | None
+        time_weighting_at_1khz_uncertainties_db: Mapping[DisplayVersusF, float] | None
+        long_term_stability_db: float | None
+        long_term_stability_uncertainty_db: float | None
+        linearity_deviations_db: ArrayLike | None
+        linearity_uncertainties_db: ArrayLike | None
+        linearity_levels: ArrayLike | None
+        linear_operating_range_db: ArrayLike | None
+        linearity_starting_level: float | None
+        linearity_overload_level: float | None
+        linearity_under_range_level: float | None
+        range_linearity_deviations_db: Mapping[RangeReading, ArrayLike] | None
+        range_linearity_uncertainties_db: Mapping[RangeReading, ArrayLike] | None
+        toneburst_responses_db: Mapping[ToneburstResponse, ArrayLike] | None
+        toneburst_uncertainties_db: Mapping[ToneburstResponse, ArrayLike] | None
+        c_peak_differences: ArrayLike | None
+        c_peak_uncertainties_db: ArrayLike | None
+        c_peak_overload_indicated: bool | np.bool_ | None
+        overload_difference: float | None
+        overload_uncertainty_db: float | None
+        overload_latched: bool | np.bool_ | None
+        high_level_stability_db: float | None
+        high_level_stability_uncertainty_db: float | None
+
+
 @dataclass(frozen=True, kw_only=True)
 class SoundLevelMeterPeriodicMeasurements(RichDisplay):
     r"""What a laboratory measured in the periodic tests of IEC 61672-3:2013.
@@ -1304,6 +1361,16 @@ class SoundLevelMeterPeriodicMeasurements(RichDisplay):
     overload_latched: bool | np.bool_ | None = None
     high_level_stability_db: float | None = None
     high_level_stability_uncertainty_db: float | None = None
+
+    if TYPE_CHECKING:
+
+        def __init__(
+            self, **measurements: Unpack[_SoundLevelMeterPeriodicKeywords]
+        ) -> None: ...
+
+    def __reduce__(self) -> tuple[Any, tuple[type, dict[str, Any]]]:
+        """Travel with plain dictionaries, which pickle; they are wrapped again on arrival."""
+        return reduce_with_plain_rows(self)
 
     def __post_init__(self) -> None:
         """Freeze every field and refuse a record the rule cannot be read on.
@@ -1883,6 +1950,21 @@ class SoundLevelMeterFeatures(RichDisplay):
     sound_exposure_level: bool | None = None
     n_level_ranges: int | None = None
     c_weighted_peak: bool | None = None
+
+    if TYPE_CHECKING:
+
+        def __init__(
+            self,
+            *,
+            c_weighting: bool | np.bool_ | None = None,
+            z_weighting: bool | np.bool_ | None = None,
+            f_time_weighting: bool | np.bool_ | None = None,
+            s_time_weighting: bool | np.bool_ | None = None,
+            time_averaged: bool | np.bool_ | None = None,
+            sound_exposure_level: bool | np.bool_ | None = None,
+            n_level_ranges: int | np.integer[Any] | None = None,
+            c_weighted_peak: bool | np.bool_ | None = None,
+        ) -> None: ...
 
     def __post_init__(self) -> None:
         """Hold each answer as ``True``, ``False`` or ``None``, a count as an int.

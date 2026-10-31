@@ -362,8 +362,8 @@ RoadEmissionCoefficients(
     rolling_b: Mapping[Literal['1', '2', '3', '4a', '4b'], tuple[float, ...]],
     propulsion_a: Mapping[Literal['1', '2', '3', '4a', '4b'], tuple[float, ...]],
     propulsion_b: Mapping[Literal['1', '2', '3', '4a', '4b'], tuple[float, ...]],
-    studded_a: tuple[float, ...],
-    studded_b: tuple[float, ...],
+    studded_a: ArrayLike,
+    studded_b: ArrayLike,
     junction_c: Mapping[Literal['1', '2', '3', '4a', '4b'], tuple[tuple[float, float], tuple[float, float]]],
     temperature_coefficient_db_per_k: Mapping[Literal['1', '2', '3', '4a', '4b'], float],
 )
@@ -458,9 +458,9 @@ Road surfaces tabulated in Table F-4 (as replaced by 2021/1226).
 RoadSurfaceCoefficients(
     *,
     name: str,
-    alpha: dict[Literal['1', '2', '3', '4a', '4b'], tuple[float, ...]],
-    beta: dict[Literal['1', '2', '3', '4a', '4b'], float],
-    speed_range_kmh: tuple[float, float] | None,
+    alpha: Mapping[Literal['1', '2', '3', '4a', '4b'], tuple[float, ...]],
+    beta: Mapping[Literal['1', '2', '3', '4a', '4b'], float],
+    speed_range_kmh: ArrayLike | None,
 )
 ```
 

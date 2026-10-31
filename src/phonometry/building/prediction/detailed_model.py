@@ -100,7 +100,7 @@ from typing import TYPE_CHECKING, Any, Literal
 import numpy as np
 
 from ..._internal.display import RichDisplay
-from ..._internal.frozen import OwnsArrays
+from ..._internal.frozen import OwnsArrays, read_only
 from ..._internal.validation import (
     check_engine,
     require_axis_count,
@@ -121,7 +121,7 @@ if TYPE_CHECKING:
     from collections.abc import Sequence
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike
+    from numpy.typing import ArrayLike, NDArray
 
     from ..._i18n import Language
     from ..._internal.types import BandFraction, ReportEngine
@@ -1658,14 +1658,29 @@ class BandPath(OwnsArrays):
 
     label: str
     kind: Literal["Dd", "Ff", "Df", "Fd"]
-    values: np.ndarray
+    values: NDArray[np.float64]
+
+    if TYPE_CHECKING:
+
+        def __init__(
+            self,
+            *,
+            label: str,
+            kind: Literal["Dd", "Ff", "Df", "Fd"],
+            values: ArrayLike,
+        ) -> None: ...
 
     def __post_init__(self) -> None:
-        """Refuse a choice its ``Literal`` does not list, when the record is built.
+        """Refuse a choice its ``Literal`` does not list, and hold the values read-only.
+
+        The values per band are held as the read-only ``float64`` array the
+        path sums read them as, whatever sequence they were given as.
 
         :raises TypeError: if ``kind`` is not a text.
         """
         require_choice(self.kind, "kind", ("Dd", "Ff", "Df", "Fd"))
+        values = np.asarray(self.values, dtype=np.float64)
+        object.__setattr__(self, "values", read_only(values))
 
 
 def _path_matrix(paths: Sequence[BandPath], n_bands: int) -> np.ndarray:

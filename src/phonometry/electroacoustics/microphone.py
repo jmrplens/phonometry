@@ -68,9 +68,10 @@ from typing import TYPE_CHECKING, Any, Literal, overload
 import numpy as np
 
 from .._internal.display import RichDisplay
-from .._internal.frozen import OwnsArrays
+from .._internal.frozen import OwnsArrays, read_only
 from .._internal.validation import (
     check_engine,
+    pair_of_arrays,
     require_choice,
     require_equal_shapes,
     require_finite_fields,
@@ -91,7 +92,7 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
-    from .._internal.types import ReportEngine
+    from .._internal.types import ArrayRows, ReportEngine
     from .._report.metadata import ReportMetadata
 
 NoiseWeighting = Literal["A", "468"]
@@ -290,9 +291,32 @@ class MicrophoneDirectivity(OwnsArrays):
         integral if the pattern reaches the rear.
     """
 
-    polar: tuple[ArrayLike, ArrayLike] | None = None
+    polar: tuple[NDArray[np.float64], NDArray[np.float64]] | None = None
     frequency: float | None = None
     index: float | None = None
+
+    if TYPE_CHECKING:
+
+        def __init__(
+            self,
+            *,
+            polar: ArrayRows | None = None,
+            frequency: float | None = None,
+            index: float | None = None,
+        ) -> None: ...
+
+    def __post_init__(self) -> None:
+        """Hold the pattern as two read-only ``float64`` arrays, whatever pair it was given as.
+
+        :raises TypeError: if ``polar`` is a text or no sequence.
+        :raises ValueError: if ``polar`` holds other than two members.
+        """
+        if self.polar is not None:
+            first, second = pair_of_arrays(
+                self.polar, "polar", "(angles_deg, relative_db)"
+            )
+            pair = (read_only(first), read_only(second))
+            object.__setattr__(self, "polar", pair)
 
 
 #: No directional characteristics supplied: the Clause 13 default.
@@ -330,14 +354,33 @@ class MicrophoneNoise(OwnsArrays):
     voltage_v: float | None = None
     equivalent_level: float | None = None
     weighting: NoiseWeighting = "A"
-    spectrum: tuple[ArrayLike, ArrayLike] | None = None
+    spectrum: tuple[NDArray[np.float64], NDArray[np.float64]] | None = None
+
+    if TYPE_CHECKING:
+
+        def __init__(
+            self,
+            *,
+            voltage_v: float | None = None,
+            equivalent_level: float | None = None,
+            weighting: NoiseWeighting = "A",
+            spectrum: ArrayRows | None = None,
+        ) -> None: ...
 
     def __post_init__(self) -> None:
-        """Refuse a choice its ``Literal`` does not list, when the record is built.
+        """Refuse a choice its ``Literal`` does not list, and hold the spectrum read-only.
 
-        :raises TypeError: if ``weighting`` is not a text.
+        :raises TypeError: if ``weighting`` is not a text, or ``spectrum`` is a
+            text or no sequence.
+        :raises ValueError: if ``spectrum`` holds other than two members.
         """
         require_choice(self.weighting, "weighting", ("A", "468"))
+        if self.spectrum is not None:
+            first, second = pair_of_arrays(
+                self.spectrum, "spectrum", "(frequencies, levels_db)"
+            )
+            pair = (read_only(first), read_only(second))
+            object.__setattr__(self, "spectrum", pair)
 
 
 #: No inherent-noise data supplied, A-weighted: the Clause 17 default.
@@ -368,9 +411,32 @@ class MicrophoneOverload(OwnsArrays):
         omitted it is read from :attr:`distortion` at :attr:`thd_percent`.
     """
 
-    distortion: tuple[ArrayLike, ArrayLike] | None = None
+    distortion: tuple[NDArray[np.float64], NDArray[np.float64]] | None = None
     thd_percent: float = 1.0
     spl: float | None = None
+
+    if TYPE_CHECKING:
+
+        def __init__(
+            self,
+            *,
+            distortion: ArrayRows | None = None,
+            thd_percent: float = 1.0,
+            spl: float | None = None,
+        ) -> None: ...
+
+    def __post_init__(self) -> None:
+        """Hold the curve as two read-only ``float64`` arrays, whatever pair it was given as.
+
+        :raises TypeError: if ``distortion`` is a text or no sequence.
+        :raises ValueError: if ``distortion`` holds other than two members.
+        """
+        if self.distortion is not None:
+            first, second = pair_of_arrays(
+                self.distortion, "distortion", "(spl, thd_percent)"
+            )
+            pair = (read_only(first), read_only(second))
+            object.__setattr__(self, "distortion", pair)
 
 
 #: No distortion curve supplied, at the 1 % limit: the 15.2 default.

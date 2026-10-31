@@ -162,9 +162,9 @@ FacadeElement(
     *,
     name: str,
     area: float | None = None,
-    r: float | Sequence[float] | np.ndarray | None = None,
-    dn_e: float | Sequence[float] | np.ndarray | None = None,
-    insertion_loss: float | Sequence[float] | np.ndarray | None = None,
+    r: ArrayLike | None = None,
+    dn_e: ArrayLike | None = None,
+    insertion_loss: ArrayLike | None = None,
 )
 ```
 
@@ -213,7 +213,7 @@ FacadePredictionResult(
     r_45: np.ndarray,
     r_tr_s: np.ndarray,
     d_2m_nt: np.ndarray,
-    element_r: dict[str, np.ndarray],
+    element_r: Mapping[str, NDArray[np.float64]],
     elements: tuple[FacadeElement, ...],
     r_tr_s_w: int | None = None,
     d_2m_nt_w: int | None = None,

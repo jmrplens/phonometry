@@ -29,7 +29,7 @@ from contextlib import contextmanager
 from contextvars import ContextVar
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Final, Literal, cast, get_args
+from typing import TYPE_CHECKING, Any, Final, Literal, cast, get_args
 
 import numpy as np
 
@@ -188,6 +188,19 @@ class Compute(RichDisplay):
     fallback: bool = False
     host: str | None = None
     timeout_s: float | None = None
+
+    if TYPE_CHECKING:
+
+        def __init__(
+            self,
+            *,
+            device: Device = "cpu",
+            device_index: int | np.integer[Any] = 0,
+            dtype: Dtype = "float64",
+            fallback: bool | np.bool_ = False,
+            host: str | None = None,
+            timeout_s: float | None = None,
+        ) -> None: ...
 
     def __post_init__(self) -> None:
         """Refuse a request that cannot mean anything, before any device is probed."""

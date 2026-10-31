@@ -146,7 +146,7 @@ BandPath(
     *,
     label: str,
     kind: Literal['Dd', 'Ff', 'Df', 'Fd'],
-    values: np.ndarray,
+    values: ArrayLike,
 )
 ```
 

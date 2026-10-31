@@ -67,11 +67,12 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from math import atan, log10, pi
+from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
-from ..._internal.frozen import OwnsArrays
+from ..._internal.frozen import OwnsArrays, read_only, reduce_with_plain_rows
 from ..._internal.validation import (
     require_axis_count,
     require_choice,
@@ -86,10 +87,10 @@ from ..._internal.validation import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import Sequence
+    from collections.abc import Mapping, Sequence
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike
+    from numpy.typing import ArrayLike, NDArray
 
     from ..._i18n import Language
     from ..._internal.types import BandFraction, ReportEngine
@@ -144,12 +145,28 @@ class FacadeElement(OwnsArrays):
 
     name: str
     area: float | None = None
-    r: float | Sequence[float] | np.ndarray | None = None
-    dn_e: float | Sequence[float] | np.ndarray | None = None
-    insertion_loss: float | Sequence[float] | np.ndarray | None = None
+    r: float | NDArray[np.float64] | None = None
+    dn_e: float | NDArray[np.float64] | None = None
+    insertion_loss: float | NDArray[np.float64] | None = None
+
+    if TYPE_CHECKING:
+
+        def __init__(
+            self,
+            *,
+            name: str,
+            area: float | None = None,
+            r: ArrayLike | None = None,
+            dn_e: ArrayLike | None = None,
+            insertion_loss: ArrayLike | None = None,
+        ) -> None: ...
 
     def __post_init__(self) -> None:
         """Reject an element whose area is not a positive, finite number.
+
+        A quantity given per band is held as the read-only ``float64`` array
+        the façade sum reads it as, whatever sequence it was given as; a
+        single number is held as it was given.
 
         The area is the element's weight in the energy sum and its drawn
         share of the elevation; NaN fails every ``<=`` comparison, so an
@@ -162,6 +179,11 @@ class FacadeElement(OwnsArrays):
         """
         if self.area is not None:
             require_positive(self.area, "area")
+        for name in ("r", "dn_e", "insertion_loss"):
+            value = getattr(self, name)
+            if value is not None and np.ndim(value) > 0:
+                held = np.asarray(value, dtype=np.float64)
+                object.__setattr__(self, name, read_only(held))
 
     def _kind(self) -> str:
         given = [
@@ -257,7 +279,7 @@ class FacadePredictionResult(OwnsArrays):
     r_45: np.ndarray
     r_tr_s: np.ndarray
     d_2m_nt: np.ndarray
-    element_r: dict[str, np.ndarray]
+    element_r: Mapping[str, NDArray[np.float64]]
     elements: tuple[FacadeElement, ...]
     r_tr_s_w: int | None = None
     d_2m_nt_w: int | None = None
@@ -308,6 +330,11 @@ class FacadePredictionResult(OwnsArrays):
             {"elements": len(self.elements), "element_r": len(self.element_r)},
             "façade element",
         )
+        object.__setattr__(self, "element_r", MappingProxyType(dict(self.element_r)))
+
+    def __reduce__(self) -> tuple[Any, tuple[type, dict[str, Any]]]:
+        """Travel with plain dictionaries, which pickle; they are wrapped again on arrival."""
+        return reduce_with_plain_rows(self)
 
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any

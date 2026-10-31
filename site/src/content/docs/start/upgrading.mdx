@@ -2555,6 +2555,80 @@ does. A typed caller that indexes a published table with a free `str` (a
 `str` variable into `room.TABLE_A1` or `hearing.EARPHONES`) needs the
 `Literal` the table is keyed by now; the values did not move.
 
+## A record a caller builds holds what its fields say
+
+Before 4.0 a record kept a list, a tuple or an array of the wrong kind exactly
+as it was handed, though its field said it held an array or a tuple:
+`environment.WavelengthSpectrum(levels=[...])` held the list, so
+`spectrum.levels * 2` repeated the list instead of doubling the levels, and
+the frozen record held a list anyone could still append to. In 4.0 a record a
+caller builds converts what it is given and holds what its field says: an
+array field holds a read-only array of its dtype, a tuple field a tuple and a
+pair a pair of numbers, and a single number where a per-band value may be one
+stays the number it was. Code that appended to a list it had handed a record,
+or read a field back expecting the list it gave, reads the array now:
+`record.levels.tolist()` gives the list. A type checker reads the constructor
+each of these records declares for it, so a list type-checks where the
+record converts one.
+
+| Record | Before 4.0 | 4.0 |
+| --- | --- | --- |
+| `aircraft.ANPNPDCurves(powers=, distances_m=, levels=)` | kept a list as given | read-only `float64` arrays |
+| `aircraft.FlightSegmentState(ground_roll=, landing_roll=, bank=)` | kept a list as given | read-only arrays, the masks `bool` and the bank `float64` |
+| `aircraft.FlightConditionInterpolation(triangles=)` | kept a list of rows as given | a read-only integer array |
+| `aircraft.PerformanceAircraft(jet_coefficients=, propeller_coefficients=, aerodynamic_coefficients=)` | kept the dictionaries as given, the database's own included, so a table could be edited after the aeroplane was checked | read-only copies (`dict(aircraft.jet_coefficients)` gives one to edit) |
+| `aircraft.RotorcraftGround(ground_elevation=, flow_resistivity=, terrain=)` | kept a list as given; an elevation model of other than three axes was refused when an event read it | a value per receiver as a read-only `float64` array and the elevation model as its three axes, each a read-only `float64` array; an elevation model of other than three axes refused with `ValueError` when built; one number or a class letter as given |
+| `aircraft.RotorcraftHemisphere(frequencies=, azimuth_deg=, polar_deg=, levels=)` | kept a list as given | read-only `float64` arrays |
+| `aircraft.RotorcraftTrackState(airspeed=, path_angle_deg=, heading=, bank_angle_deg=)` | kept a list as given | a sequence as a read-only `float64` array; one number as given |
+| `building.BandPath(values=)` | kept a list as given | a read-only `float64` array |
+| `building.FacadeElement(r=, dn_e=, insertion_loss=)` | kept a list as given | a value per band as a read-only `float64` array; one number as given |
+| `building.LowFrequencyProcedure(corner_levels=)` | kept the list as given | a read-only `float64` array |
+| `electroacoustics.LoudspeakerDirectivity(polar=)`, `electroacoustics.MicrophoneDirectivity(polar=)`, `electroacoustics.MicrophoneNoise(spectrum=)`, `electroacoustics.MicrophoneOverload(distortion=)` | kept the pair as given, a list included; anything but a pair failed when it was read | a tuple of two read-only `float64` arrays; `TypeError` for a number or a text and `ValueError` for other than two members, when built |
+| `electroacoustics.LoudspeakerRatings(frequency_range=)` | kept the pair as given, checked when it was read | a `(low, high)` pair of floats, checked when built as the other frequency pairs are (`TypeError`, `ValueError`) |
+| `emission.RoomEnvironment(absorption_area=, reverberation_time=, mean_absorption_coefficient=)` | kept a list as given | a value per band as a read-only `float64` array; one number as given |
+| `environment.AtmosphericAttenuation(frequencies, attenuation_db_per_m, ...)` | kept a list as given | read-only `float64` arrays |
+| `environment.WavelengthSpectrum(wavelengths_mm=, levels=)`, `environment.RailSourceSpectra(source_a=, source_b=)` | kept a list as given | read-only `float64` arrays |
+| `environment.RollingStock(wheel_transfer=, superstructure_transfer=)`, `environment.RailwayTrack(track_transfer=, bridge_transfer=)` | kept a list or a tuple as given | read-only `float64` arrays |
+| `environment.RoadEmissionCoefficients(studded_a=, studded_b=)` | kept a list or an array as given | a tuple of floats; `TypeError` for a number, a text or a member that is not one number |
+| `environment.RoadSurfaceCoefficients(speed_range_kmh=, alpha=, beta=)` | kept the pair and the two dictionaries as given, so the tables could be edited after the row was built | a pair of floats (`TypeError` for a number, a text or a member that is not one number, `ValueError` for other than two) and two read-only mappings |
+| `hearing.Task(samples=, duration_observations_hours=, duration_range_hours=)` | kept a list or an array as given | tuples of floats, the range a pair; `TypeError` for a number or a text given as the observations or the range, `ValueError` for a range of other than two values |
+| `io.Signal(channel_labels=)` | kept a list as given; one text of as many letters as channels named a channel per letter | a tuple; `TypeError` for one text |
+| `materials.FiberResistivityFit(bulk_density_range_kg_m3=)` | kept a list as given | a pair of floats; `TypeError` for a number or a text, `ValueError` for other than two values |
+| `materials.MetadiffuserWell(resonators=)` | kept a list as given | a tuple |
+| `materials.TransferMatrix(t11, t12, t21, t22, frequencies=)` | kept each entry as given: a `complex`, a list or a real array | read-only `complex128` arrays: a scalar entry is a 0-d array, no longer a `complex` and no longer hashable (`complex(m.t11)` or `m.t11.item()` gives the number), and a real entry has a zero imaginary part; `frequencies` a read-only `float64` array |
+| `room.ImpulseResponseResult(ir=)` | kept a list as given | a read-only `float64` array |
+| `vibration.MultipleShockResult(peaks=, risk_thresholds=)` | kept a list as given | the peaks a read-only `float64` array and the thresholds a tuple of three floats; `TypeError` for a number or a text and `ValueError` for other than three thresholds |
+| `vibration.TransferStiffnessResult(frequencies=, transfer_stiffness=, transmissibility=)` | kept a list as given | read-only arrays, the frequencies `float64`, the stiffness and the transmissibility `complex128` (a real value with a zero imaginary part) |
+
+Four results that held a `dict` a caller could edit hold a read-only mapping
+instead, as the published tables do, and an assignment into one raises
+`TypeError`: `building.FacadePredictionResult.element_r`,
+`environment.RailwayEmissionResult.components`,
+`noise_control.ReactiveSilencerResult.geometry` and
+`psychoacoustics.MooreGlasbergTimeVaryingLoudness.percentiles`. Code that
+edited one copies it first, with `dict(result.element_r)`. The band centres
+and the band waveforms of the `filters.OctaveFilterResult` that
+`filters.octave_filter` and `OctaveFilterBank.filter` return are tuples where
+they were lists, the lists a caller could still append to:
+`result.frequencies.index(1000.0)` and indexing read as before, and
+`list(result.frequencies)` gives a list to edit. A range or a set of numbers
+given as a text (`"12"`) is refused with a `TypeError` that names the field,
+whatever the text reads as. A record that comes back from `pickle` or
+`copy.deepcopy` holds its arrays read-only, as it held them when it left,
+where they came back writeable: `np.array(record.levels)` gives a copy to
+write into.
+
+```python
+from phonometry import environment, materials
+
+spectrum = environment.WavelengthSpectrum(wavelengths_mm=[2000.0, 1600.0], levels=[5.0, 4.0])
+matrix = materials.TransferMatrix(1.0, 0.0, 0.0, 1.0)
+print(type(spectrum.levels).__name__, spectrum.levels.flags.writeable, spectrum.levels.tolist())
+print(matrix.t11.shape, matrix.t11.dtype, complex(matrix.t11))
+# ndarray False [5.0, 4.0]
+# () complex128 (1+0j)
+```
+
 ## The seventy-eight names that are gone
 
 Everything else moved. These seventy-eight exist in no public module:

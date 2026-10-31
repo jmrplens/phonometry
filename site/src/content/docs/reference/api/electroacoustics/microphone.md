@@ -306,7 +306,7 @@ noise (17), carrying the same weighting.
 ```python
 MicrophoneDirectivity(
     *,
-    polar: tuple[ArrayLike, ArrayLike] | None = None,
+    polar: Sequence[ArrayLike] | NDArray[Any] | None = None,
     frequency: float | None = None,
     index: float | None = None,
 )
@@ -362,7 +362,7 @@ MicrophoneNoise(
     voltage_v: float | None = None,
     equivalent_level: float | None = None,
     weighting: Literal['A', '468'] = 'A',
-    spectrum: tuple[ArrayLike, ArrayLike] | None = None,
+    spectrum: Sequence[ArrayLike] | NDArray[Any] | None = None,
 )
 ```
 
@@ -386,7 +386,7 @@ output voltage, and the band spectrum that voltage was measured over.
 ```python
 MicrophoneOverload(
     *,
-    distortion: tuple[ArrayLike, ArrayLike] | None = None,
+    distortion: Sequence[ArrayLike] | NDArray[Any] | None = None,
     thd_percent: float = 1.0,
     spl: float | None = None,
 )

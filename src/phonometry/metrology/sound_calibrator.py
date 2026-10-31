@@ -94,8 +94,10 @@ from .conformance import ConformanceVerification, verify_conformance
 
 if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
+    from typing import TypedDict, Unpack
 
     from matplotlib.axes import Axes
+    from numpy.typing import ArrayLike
 
     from .._i18n import Language
 
@@ -509,6 +511,39 @@ def _values(value: float | Sequence[float], name: str) -> tuple[float, ...]:
     return tuple(float(v) for v in np.atleast_1d(array))
 
 
+if TYPE_CHECKING:
+
+    class _SoundCalibratorKeywords(TypedDict, total=False):
+        """What :class:`SoundCalibratorMeasurements` takes, one key per field.
+
+        Each deviation and uncertainty arrives as one number or any
+        array-like and is held as a tuple. Nineteen keywords are more than the
+        thirteen parameters a function may take, so the constructor takes them
+        as the keys of this dictionary; a caller leaves out any of them, as
+        every field defaults to ``None``.
+        """
+
+        level_deviation_db: ArrayLike | None
+        level_uncertainty_db: ArrayLike | None
+        static_pressure_correction: ArrayLike | None
+        fluctuation_db: ArrayLike | None
+        fluctuation_uncertainty_db: ArrayLike | None
+        frequency_deviation_percent: ArrayLike | None
+        frequency_uncertainty_percent: ArrayLike | None
+        distortion_percent: ArrayLike | None
+        distortion_uncertainty_percent: ArrayLike | None
+        supply_voltage_deviation_db: ArrayLike | None
+        supply_voltage_uncertainty_db: ArrayLike | None
+        environmental_level_deviation_db: ArrayLike | None
+        environmental_level_uncertainty_db: ArrayLike | None
+        environmental_level_in_band_deviation_db: ArrayLike | None
+        environmental_level_in_band_uncertainty_db: ArrayLike | None
+        environmental_frequency_deviation_percent: ArrayLike | None
+        environmental_frequency_uncertainty_percent: ArrayLike | None
+        field_immunity_deviation_db: ArrayLike | None
+        field_immunity_uncertainty_db: ArrayLike | None
+
+
 @dataclass(frozen=True, kw_only=True)
 class SoundCalibratorMeasurements(RichDisplay):
     """What a laboratory measured on a sound calibrator, for IEC 60942:2017.
@@ -600,6 +635,12 @@ class SoundCalibratorMeasurements(RichDisplay):
     environmental_frequency_uncertainty_percent: float | Sequence[float] | None = None
     field_immunity_deviation_db: float | Sequence[float] | None = None
     field_immunity_uncertainty_db: float | Sequence[float] | None = None
+
+    if TYPE_CHECKING:
+
+        def __init__(
+            self, **measurements: Unpack[_SoundCalibratorKeywords]
+        ) -> None: ...
 
     def __post_init__(self) -> None:
         """Freeze every field into a tuple and check that the pairs match.

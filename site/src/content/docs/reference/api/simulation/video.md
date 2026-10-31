@@ -84,7 +84,7 @@ let it go, which hides no error).
 AnimationFrame(
     *,
     language: Literal['en', 'es'] = 'en',
-    size: tuple[int, int] = (960, 540),
+    size: tuple[int | np.integer[Any], int | np.integer[Any]] | list[int | np.integer[Any]] = (960, 540),
     color_limit: float | None = None,
 )
 ```

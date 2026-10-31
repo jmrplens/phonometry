@@ -23,12 +23,14 @@ from numpy.typing import NDArray
 from phonometry import (
     aircraft,
     broadcast,
+    electroacoustics,
     filters,
     materials,
     metrology,
     noise_control,
     room,
     signals,
+    vibration,
 )
 
 #: Two channels of samples, ``[channels, samples]``, as a nested list.
@@ -53,10 +55,17 @@ def test_integers_and_nested_lists_reach_a_table() -> None:
 
 
 def test_an_integer_array_and_a_list_of_integers_are_signals() -> None:
-    """The array head of an overloaded filter takes any array-like."""
+    """The array head of an overloaded filter takes any array-like.
+
+    The integer array is named, with its type, before the call: written in
+    the call, ``np.zeros(..., dtype=np.int64)`` takes its type from the
+    parameter, which mypy reads as ``NDArray[Any]`` when the parameter is a
+    floating array, so the case would pass however narrow the parameter were.
+    """
     weighted = filters.weighting_filter([0, 1, 0, -1] * 1000, 48000)
     assert_type(weighted, np.ndarray)
-    counted = filters.weighting_filter(np.zeros(4000, dtype=np.int64), 48000)
+    integers: NDArray[np.int64] = np.zeros(4000, dtype=np.int64)
+    counted = filters.weighting_filter(integers, 48000)
     assert_type(counted, np.ndarray)
 
 
@@ -118,3 +127,79 @@ def test_records_from_a_generator_and_codes_as_lists_are_inputs() -> None:
     code_a, code_b = [1.0, 1.0, 1.0, -1.0], [1.0, 1.0, -1.0, 1.0]
     ir = room.golay_impulse_response(code_a * 2, code_b * 2, (code_a, code_b))
     assert_type(ir, room.ImpulseResponseResult)
+
+
+def test_a_curve_given_as_one_array_of_two_rows_is_a_pair() -> None:
+    """A record that holds a curve as two arrays takes them as one two-row array too.
+
+    ``pair_of_arrays`` unpacks a tuple, a list or an array of rows alike;
+    the declared constructor said ``Sequence[ArrayLike]``, which a numpy
+    array is not to mypy, so ``np.vstack((x, y))`` ran and failed the type
+    check. Each array is named, with its type, before the call: written in
+    the call, it would take its type from the parameter.
+    """
+    pattern: NDArray[np.float64] = np.vstack(
+        ([0.0, 90.0, 180.0, 270.0], [0.0, -3.0, -10.0, -3.0])
+    )
+    noise: NDArray[np.float64] = np.vstack(
+        ([100.0, 1000.0, 10000.0], [12.0, 8.0, 10.0])
+    )
+    distortion: NDArray[np.float64] = np.vstack(
+        ([110.0, 120.0, 130.0], [0.1, 0.5, 2.0])
+    )
+    microphone = electroacoustics.MicrophoneDirectivity(polar=pattern)
+    loudspeaker = electroacoustics.LoudspeakerDirectivity(polar=pattern)
+    spectrum = electroacoustics.MicrophoneNoise(spectrum=noise)
+    overload = electroacoustics.MicrophoneOverload(distortion=distortion)
+    for held, given in (
+        (microphone.polar, pattern),
+        (loudspeaker.polar, pattern),
+        (spectrum.spectrum, noise),
+        (overload.distortion, distortion),
+    ):
+        assert held is not None
+        np.testing.assert_array_equal(held[0], given[0])
+        np.testing.assert_array_equal(held[1], given[1])
+
+
+def test_the_axes_of_an_elevation_model_given_as_one_array_are_a_grid() -> None:
+    """The ``(x, y, z)`` of a rotorcraft's terrain arrive in one array too.
+
+    ``z`` is a grid over ``(y, x)``, so the three rows are no rectangular
+    array of floats; an array of three objects holds them, and the record
+    unpacks it as it unpacks a tuple.
+    """
+    x = np.array([0.0, 500.0, 1000.0])
+    y = np.array([0.0, 500.0])
+    axes: NDArray[np.object_] = np.empty(3, dtype=object)
+    axes[0], axes[1], axes[2] = x, y, np.zeros((2, 3))
+    ground = aircraft.RotorcraftGround(terrain=axes)
+    assert ground.terrain is not None
+    np.testing.assert_array_equal(ground.terrain[0], x)
+    assert ground.terrain[2].shape == (2, 3)
+
+
+def test_three_risk_thresholds_given_as_an_array_are_a_triple() -> None:
+    """The thresholds of a multiple-shock result are any three real numbers.
+
+    ``floats_of`` reads a tuple, a list or an array of three; the declared
+    constructor said ``Sequence[float]``, which refused the array and a list
+    of numpy floats for mypy while the call ran. The array is named, with
+    its type, before the call.
+    """
+    peaks: NDArray[np.float64] = np.full(5, 40.0)
+    thresholds: NDArray[np.float64] = np.array([0.72, 1.42, 2.17])
+    result = vibration.MultipleShockResult(
+        sex="male",
+        acceleration_dose=1.0,
+        daily_dose=1.0,
+        compression_dose=0.5,
+        risk=1.22,
+        probability=0.37,
+        start_age=20.0,
+        exposure_duration_years=20,
+        days_per_year=120.0,
+        peaks=peaks,
+        risk_thresholds=thresholds,
+    )
+    assert result.risk_thresholds == (0.72, 1.42, 2.17)

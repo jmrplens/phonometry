@@ -159,7 +159,7 @@ radar tracks (e.g. spline resampling) before differentiating.
 FlightConditionInterpolation(
     *,
     scaling_factor: float = 2.0,
-    triangles: NDArray[np.int_] | list[list[int]] | None = None,
+    triangles: ArrayLike | None = None,
 )
 ```
 
@@ -631,9 +631,9 @@ Plot the A-weighted level time history with its event metrics.
 RotorcraftGround(
     *,
     receiver_height_m: float = 1.2,
-    ground_elevation: float | NDArray[np.float64] | list[float] | list[list[float]] = 0.0,
-    flow_resistivity: float | Literal['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'] | np.floating[Any] | np.integer[Any] | NDArray[np.float64] | list[float] | list[list[float]] = 'G',
-    terrain: tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]] | Sequence[NDArray[np.float64]] | None = None,
+    ground_elevation: ArrayLike = 0.0,
+    flow_resistivity: Literal['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'] | ArrayLike = 'G',
+    terrain: Sequence[ArrayLike] | NDArray[Any] | None = None,
     terrain_resolution: float | None = None,
 )
 ```
@@ -659,10 +659,10 @@ and an optional elevation model replaces the flat plane with real terrain.
 ```python
 RotorcraftHemisphere(
     *,
-    frequencies: NDArray[np.float64],
-    azimuth_deg: NDArray[np.float64],
-    polar_deg: NDArray[np.float64],
-    levels: NDArray[np.float64],
+    frequencies: ArrayLike,
+    azimuth_deg: ArrayLike,
+    polar_deg: ArrayLike,
+    levels: ArrayLike,
     distance_m: float = 60.0,
 )
 ```
@@ -752,10 +752,10 @@ Plot filled noise contours over the ground plane.
 ```python
 RotorcraftTrackState(
     *,
-    airspeed: float | NDArray[np.float64] | list[float] | None = None,
-    path_angle_deg: float | NDArray[np.float64] | list[float] | None = None,
-    heading: float | NDArray[np.float64] | list[float] | None = None,
-    bank_angle_deg: float | NDArray[np.float64] | list[float] | None = None,
+    airspeed: ArrayLike | None = None,
+    path_angle_deg: ArrayLike | None = None,
+    heading: ArrayLike | None = None,
+    bank_angle_deg: ArrayLike | None = None,
 )
 ```
 

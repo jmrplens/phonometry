@@ -66,7 +66,7 @@ from typing import TYPE_CHECKING, Any, Literal, overload
 import numpy as np
 
 from ..._internal.display import RichDisplay
-from ..._internal.frozen import OwnsArrays, read_only
+from ..._internal.frozen import OwnsArrays, read_only, reduce_with_plain_rows
 from ..._internal.levels_math import energy_mean, energy_sum
 from ..._internal.types import A_OR_Z_WEIGHTINGS, AOrZWeighting, as_float_or_array
 from ..._internal.validation import (
@@ -2030,6 +2030,16 @@ class WindTurbineRatingLevel(RichDisplay):
     adjustments: Mapping[TurbineAdjustment, float]
     governing: TurbineAdjustment | None
     rating_level: float
+
+    def __post_init__(self) -> None:
+        """Hold the adjustments read-only, whoever built the rating."""
+        object.__setattr__(
+            self, "adjustments", MappingProxyType(dict(self.adjustments))
+        )
+
+    def __reduce__(self) -> tuple[Any, tuple[type, dict[str, Any]]]:
+        """Travel with plain dictionaries, which pickle; they are wrapped again on arrival."""
+        return reduce_with_plain_rows(self)
 
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any

@@ -140,8 +140,8 @@ Nyquist wavenumber of the sampling.
 ```python
 AcousticRoughnessSpectrum(
     *,
-    wavelengths_m: NDArray[np.float64],
-    levels: NDArray[np.float64],
+    wavelengths_m: ArrayLike,
+    levels: ArrayLike,
     record_length_m: float | None = None,
     n_segments: int | None = None,
     method: Literal['A', 'B'] | None = None,

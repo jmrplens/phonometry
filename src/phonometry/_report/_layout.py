@@ -31,7 +31,7 @@ from .._internal.validation import require_count, require_scalar
 from ._i18n import format_number, t
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
+    from collections.abc import Callable, Sequence
     from contextlib import AbstractContextManager
 
     from numpy.typing import ArrayLike
@@ -482,7 +482,9 @@ def response_decades(frequencies: ArrayLike, where: str) -> float:
 
 
 def _require_column_widths(
-    data: list[list[Any]], col_widths: list[float] | None, where: str
+    data: Sequence[Sequence[Any]],
+    col_widths: float | list[float] | tuple[float, ...] | None,
+    where: str,
 ) -> None:
     """Require a width list to have one entry per column of *data*.
 

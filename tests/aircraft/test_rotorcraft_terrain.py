@@ -415,7 +415,18 @@ def test_event_and_contour_array_argument_validation() -> None:
     mismatched_elevation_ground = aircraft.RotorcraftGround(
         ground_elevation=np.zeros(3)
     )
-    incomplete_dem_ground = aircraft.RotorcraftGround(terrain=(dem[0], dem[1]))
+    # An elevation model of other than three axes is refused where it is
+    # given, not when an event first reads it.
+    with pytest.raises(
+        ValueError, match=r"'terrain' must be an \(x, y, z\) elevation model"
+    ):
+        aircraft.RotorcraftGround(terrain=(dem[0], dem[1]))
+    with pytest.raises(
+        ValueError, match=r"'terrain' must be an \(x, y, z\) .* not 4 of them"
+    ):
+        aircraft.RotorcraftGround(terrain=(*dem, dem[2]))
+    with pytest.raises(TypeError, match="'terrain' must be .* not str"):
+        aircraft.RotorcraftGround(terrain="xyz")
     reversed_dem_ground = aircraft.RotorcraftGround(
         terrain=(dem[0][::-1], dem[1], dem[2])
     )
@@ -453,12 +464,6 @@ def test_event_and_contour_array_argument_validation() -> None:
             x=[0.0, 100.0],
             y=[0.0, 100.0],
             ground=mismatched_elevation_ground,
-        )
-    with pytest.raises(
-        ValueError, match=r"'terrain' must be an \(x, y, z\) elevation model"
-    ):
-        aircraft.rotorcraft_event_level(
-            hems, spd, ang, t, pos, (0.0, 0.0), ground=incomplete_dem_ground
         )
     with pytest.raises(
         ValueError, match=r"'terrain' x and y must be strictly increasing"

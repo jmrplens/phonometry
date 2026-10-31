@@ -146,7 +146,7 @@ import numpy as np
 
 from ..._internal.boundary import round_half_up
 from ..._internal.display import RichDisplay
-from ..._internal.frozen import OwnsArrays, read_only
+from ..._internal.frozen import OwnsArrays, read_only, reduce_with_plain_rows
 from ..._internal.levels_math import energy_mean
 from ..._internal.types import BAND_SET_NAMES
 from ..._internal.validation import (
@@ -428,6 +428,10 @@ class OperatingCondition(RichDisplay):
     parameters: Mapping[str, float] = field(
         default_factory=lambda: MappingProxyType({})
     )
+
+    def __reduce__(self) -> tuple[Any, tuple[type, dict[str, Any]]]:
+        """Travel with plain dictionaries, which pickle; they are wrapped again on arrival."""
+        return reduce_with_plain_rows(self)
 
     def __post_init__(self) -> None:
         """Freeze the parameters, which a caller may hand over as a ``dict``."""
@@ -1217,6 +1221,12 @@ class ServiceEquipmentResult(OwnsArrays):
         if readings.ndim != _PER_POSITION_RANK or readings.shape[1:] != shape:
             msg = "ServiceEquipmentResult: 'reading_levels' must be (readings, bands)."
             raise ValueError(msg)
+        for name in ("ratings", "unrounded_ratings"):
+            object.__setattr__(self, name, MappingProxyType(dict(getattr(self, name))))
+
+    def __reduce__(self) -> tuple[Any, tuple[type, dict[str, Any]]]:
+        """Travel with plain dictionaries, which pickle; they are wrapped again on arrival."""
+        return reduce_with_plain_rows(self)
 
     @property
     def standardizable(self) -> np.ndarray:
@@ -2777,6 +2787,10 @@ class InstrumentAgreementCheck(RichDisplay):
         :return: The largest difference, either way, that agrees, in dB.
         """
         return _INSTRUMENT_AGREEMENT_DB
+
+    def __reduce__(self) -> tuple[Any, tuple[type, dict[str, Any]]]:
+        """Travel with plain dictionaries, which pickle; they are wrapped again on arrival."""
+        return reduce_with_plain_rows(self)
 
     def __post_init__(self) -> None:
         """Freeze the two mappings and reject keys that do not pair up.

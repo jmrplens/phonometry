@@ -238,7 +238,7 @@ Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 MetadiffuserWell(
     *,
     slit_height_m: float,
-    resonators: tuple[HelmholtzResonator, ...],
+    resonators: Sequence[HelmholtzResonator],
 )
 ```
 

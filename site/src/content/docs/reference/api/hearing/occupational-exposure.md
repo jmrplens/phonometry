@@ -335,10 +335,10 @@ uncertainty `u1`. The `u1` axis is anchored at the origin (`u1 = 0` gives
 ```python
 Task(
     *,
-    samples: tuple[float, ...],
+    samples: ArrayLike,
     duration_hours: float,
-    duration_observations_hours: tuple[float, ...] | None = None,
-    duration_range_hours: tuple[float, float] | None = None,
+    duration_observations_hours: ArrayLike | None = None,
+    duration_range_hours: ArrayLike | None = None,
     label: str | None = None,
     instrument: Literal['class1', 'class2', 'personal_exposimeter'] | None = None,
 )

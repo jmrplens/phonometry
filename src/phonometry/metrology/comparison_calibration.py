@@ -216,7 +216,7 @@ from scipy import special
 
 from .._internal.boundary import settled
 from .._internal.display import RichDisplay
-from .._internal.frozen import OwnsArrays, read_only
+from .._internal.frozen import OwnsArrays, read_only, reduce_with_plain_rows
 from .._internal.types import CALIBRATION_FIELDS, CalibrationField
 from .._internal.validation import (
     refuse_text,
@@ -1628,6 +1628,10 @@ class ComparisonCalibration(OwnsArrays):
     reference_sensitivity_phase_deg: NDArray[np.float64] | None = None
     output_phase_differences_deg: NDArray[np.float64] | None = None
     pressure_phase_difference_deg: NDArray[np.float64] | None = None
+
+    def __reduce__(self) -> tuple[Any, tuple[type, dict[str, Any]]]:
+        """Travel with plain dictionaries, which pickle; they are wrapped again on arrival."""
+        return reduce_with_plain_rows(self)
 
     def __post_init__(self) -> None:
         """Refuse columns that disagree or an unknown field or excitation, and

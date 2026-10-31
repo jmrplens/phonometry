@@ -516,7 +516,7 @@ ReactiveSilencerResult(
     kind: Literal['expansion chamber', 'Helmholtz resonator', 'quarter-wave resonator', 'extended-tube chamber', 'element chain'],
     *,
     resonances: np.ndarray | None,
-    geometry: dict[Literal['length', 'chamber_area', 'pipe_area', 'inlet_extension', 'outlet_extension', 'duct_area', 'neck_area', 'neck_length', 'cavity_volume', 'branch_area'], float] | None,
+    geometry: Mapping[Literal['length', 'chamber_area', 'pipe_area', 'inlet_extension', 'outlet_extension', 'duct_area', 'neck_area', 'neck_length', 'cavity_volume', 'branch_area'], float] | None,
     plane_wave_limit: float,
     chain: SilencerChain | None,
 )

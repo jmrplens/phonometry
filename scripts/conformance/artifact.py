@@ -277,7 +277,7 @@ def _check_document(
 ) -> dict[str, Any]:
     """One check, as the document carries it."""
     deviation = outcome.deviation
-    value = None if deviation is None else deviation.value
+    value = deviation.value
     return {
         "id": check_id(check),
         "domain": slug(check.domain),
@@ -301,7 +301,7 @@ def _check_document(
                 if value is None
                 else _rounded(value, deviation_places(outcome.precision))
             ),
-            "label": None if deviation is None else deviation.label,
+            "label": deviation.label,
         },
         "binding": _binding_document(outcome),
         "precision": outcome.precision,

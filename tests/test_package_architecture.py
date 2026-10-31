@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import ast
 import dataclasses
+import functools
 import re
 import subprocess
 import sys
@@ -18,6 +19,14 @@ from pathlib import Path
 from typing import TypeGuard
 
 import pytest
+
+_SCRIPTS = str(Path(__file__).resolve().parent.parent / "scripts")
+if _SCRIPTS not in sys.path:
+    sys.path.insert(0, _SCRIPTS)
+
+import check_parameter_annotations as cpa
+import check_return_overloads as return_overloads
+from ast_scan import python_files
 
 SRC = Path(__file__).resolve().parent.parent / "src" / "phonometry"
 
@@ -2184,3 +2193,416 @@ def test_the_logging_rule_follows_a_logger_from_module_to_module() -> None:
         "x.py:3 calls node_log.error"
     ]
     assert logging_misuse(sources[3], "y.py", shared_loggers=shared) == []
+
+
+# --------------------------------------------------------------------------- #
+# Records: what their fields are typed, and that they travel
+# --------------------------------------------------------------------------- #
+#: Published record fields typed ``Any`` on purpose, keyed by record and
+#: field, each with the reason.
+ANY_FIELD_EXEMPT: dict[tuple[str, str], str] = {}
+
+#: What ``Any`` is, as the reader of the annotations resolves it.
+_ANY = frozenset({"typing.Any", "typing_extensions.Any"})
+
+#: What a ``dict`` is, written bare, generic or through ``typing``.
+_DICT = frozenset({"builtins.dict", "typing.Dict"})
+
+
+def _published_records() -> dict[str, type]:
+    return {
+        name: cls
+        for name, cls in _published_classes().items()
+        if dataclasses.is_dataclass(cls)
+    }
+
+
+@functools.cache
+def _record_reader() -> tuple[return_overloads.Package, cpa.Annotations]:
+    """The package's annotations, as ``scripts/check_parameter_annotations.py`` reads them."""
+    package = return_overloads.Package(python_files([], SRC), SRC)
+    return package, cpa.Annotations(package)
+
+
+def _fields_naming(wanted: frozenset[str]) -> dict[tuple[str, str], list[str]]:
+    """The published record fields whose annotation names one of *wanted*.
+
+    Read from the source through the annotations reader, which spells out an
+    alias at every level (``Untyped = Any``, ``Table = Dict[str, float]``)
+    and reads past the type parameter of a NumPy generic. A published record
+    the reader cannot find fails, rather than being read past.
+    """
+    package, annotations = _record_reader()
+    found: dict[tuple[str, str], list[str]] = {}
+    for name, cls in _published_records().items():
+        dotted = f"{cls.__module__}.{cls.__qualname__}"
+        assert dotted in annotations.classes, f"{name}: not read from the source"
+        for field in cpa.record_fields(package, annotations, dotted).values():
+            named = annotations.named_within(field.module, field.annotation, wanted)
+            if named:
+                found[(name, field.name)] = named
+    return found
+
+
+def test_no_published_field_is_typed_any() -> None:
+    """A field typed ``Any`` tells a reader, and a type checker, nothing (rule A31).
+
+    The type parameter of a numpy generic (``np.integer[Any]``,
+    ``NDArray[Any]``) is not the field's type, and is read past; an alias
+    of ``Any`` is ``Any``.
+    """
+    found = set(_fields_naming(_ANY))
+    assert found - set(ANY_FIELD_EXEMPT) == set()
+    assert set(ANY_FIELD_EXEMPT) - found == set(), "stale ANY_FIELD_EXEMPT entries"
+
+
+def test_no_published_field_is_typed_dict() -> None:
+    """A ``dict`` field is invariant and editable: ``Mapping`` says what it holds.
+
+    A frozen record holds the mapping it was built with read-only, so the
+    field is annotated with the read-only supertype, and a typed caller's
+    ``dict`` of a narrower key or value type is taken. Bare ``dict``,
+    ``dict[...]``, ``typing.Dict`` and an alias of any of them are read
+    alike.
+    """
+    assert _fields_naming(_DICT) == {}
+
+
+def test_the_field_reader_spells_out_aliases(tmp_path: Path) -> None:
+    """An alias of ``Any`` or of ``Dict`` is read as what it stands for."""
+    root = tmp_path / "pkg"
+    root.mkdir()
+    (root / "__init__.py").write_text("", encoding="utf-8")
+    (root / "api.py").write_text(
+        "from dataclasses import dataclass\n"
+        "from typing import Any, Dict, Literal\n"
+        "import numpy as np\n"
+        "from numpy.typing import NDArray\n"
+        "Untyped = Any\n"
+        "Table = Dict[str, float]\n"
+        "@dataclass(frozen=True)\n"
+        "class Record:\n"
+        "    a: Untyped\n"
+        "    b: Table | None\n"
+        "    c: tuple[dict, ...]\n"
+        "    d: NDArray[Any]\n"
+        "    e: Literal['dict', 'Any']\n"
+        "    f: np.integer[Any] | None\n",
+        encoding="utf-8",
+    )
+    package = return_overloads.Package(sorted(root.rglob("*.py")), root)
+    annotations = cpa.Annotations(package)
+    fields = cpa.record_fields(package, annotations, "pkg.api.Record")
+    anything = {
+        name: annotations.named_within(field.module, field.annotation, _ANY)
+        for name, field in fields.items()
+    }
+    dicts = {
+        name: annotations.named_within(field.module, field.annotation, _DICT)
+        for name, field in fields.items()
+    }
+    assert {name for name, named in anything.items() if named} == {"a"}
+    assert {name for name, named in dicts.items() if named} == {"b", "c"}
+
+
+#: The calls of the package that build a read-only mapping.
+_PROXY_MAKERS = frozenset({"MappingProxyType", "frozen_rows", "frozen_row"})
+
+
+def _called_names(node: ast.AST) -> set[str]:
+    names: set[str] = set()
+    for call in ast.walk(node):
+        if isinstance(call, ast.Call):
+            func = call.func
+            if isinstance(func, ast.Name):
+                names.add(func.id)
+            elif isinstance(func, ast.Attribute):
+                names.add(func.attr)
+    return names
+
+
+def _proxy_makers(tree: ast.Module) -> set[str]:
+    """The functions of a module that hand back a read-only mapping, transitively."""
+    makers = set(_PROXY_MAKERS)
+    functions = {
+        node.name: node
+        for node in ast.walk(tree)
+        if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef)
+    }
+    grown = True
+    while grown:
+        grown = False
+        for name, function in functions.items():
+            if name in makers:
+                continue
+            returned = [
+                value
+                for node in ast.walk(function)
+                if isinstance(node, ast.Return) and (value := node.value) is not None
+            ]
+            if any(_called_names(value) & makers for value in returned):
+                makers.add(name)
+                grown = True
+    return makers
+
+
+def _stores_a_read_only_mapping(cls: type) -> bool:
+    """Whether a record's ``__post_init__``, or a method it calls, builds one.
+
+    Read from the source of each class of the package in its hierarchy: a
+    call to ``MappingProxyType``, to ``frozen_rows``/``frozen_row``, or to a
+    function of the class's module that hands one back.
+    """
+    import inspect
+    import textwrap
+
+    for base in cls.__mro__:
+        module = sys.modules.get(base.__module__)
+        if module is None or not base.__module__.startswith("phonometry"):
+            continue
+        if base.__module__ == "phonometry._internal.frozen":
+            continue
+        try:
+            source = textwrap.dedent(inspect.getsource(base))
+            module_tree = ast.parse(inspect.getsource(module))
+        except (OSError, TypeError):
+            continue
+        makers = _proxy_makers(module_tree)
+        tree = ast.parse(source)
+        node = tree.body[0]
+        if not isinstance(node, ast.ClassDef):
+            continue
+        methods = {
+            child.name: child
+            for child in node.body
+            if isinstance(child, ast.FunctionDef)
+        }
+        todo, seen = ["__post_init__"], set()
+        while todo:
+            name = todo.pop()
+            if name in seen or name not in methods:
+                continue
+            seen.add(name)
+            called = _called_names(methods[name])
+            if called & makers:
+                return True
+            todo.extend(called & set(methods))
+    return False
+
+
+def test_a_record_holding_a_read_only_mapping_travels() -> None:
+    """A record that wraps a mapping read-only says how to pickle and copy itself.
+
+    ``MappingProxyType`` can be neither pickled nor deep-copied, so a record
+    holding one fails ``pickle.dumps`` (a process pool, a cache) and
+    ``copy.deepcopy`` unless it travels as plain dictionaries and wraps them
+    again on arrival: ``__reduce__`` returning
+    ``phonometry._internal.frozen.reduce_with_plain_rows(self)``. This reads
+    the source of the record's own module; a proxy a function of another
+    module builds and hands to the record is what
+    ``tests/test_record_conversions.py`` catches, by building every
+    published record that holds a mapping and sending it both ways.
+    """
+    missing = sorted(
+        name
+        for name, cls in _published_records().items()
+        if _stores_a_read_only_mapping(cls)
+        and not any(
+            "__reduce__" in vars(base) for base in cls.__mro__ if base is not object
+        )
+    )
+    assert missing == []
+
+
+#: Protocols of the package that declare a settable member on purpose, keyed by
+#: file and protocol, each with the reason.
+PROTOCOL_ATTRIBUTE_EXEMPT: dict[tuple[str, str], str] = {
+    ("simulation/fdtd.py", "_PressureEngine"): (
+        "a private engine contract in a file scripts/gpu_parity.py fingerprints, "
+        "whose _backend is assigned by the engine that holds it"
+    ),
+}
+
+
+def _is_protocol(node: ast.AST) -> bool:
+    return isinstance(node, ast.ClassDef) and any(
+        (isinstance(base, ast.Name) and base.id == "Protocol")
+        or (isinstance(base, ast.Attribute) and base.attr == "Protocol")
+        for base in node.bases
+    )
+
+
+def _protocols() -> list[tuple[str, ast.ClassDef]]:
+    found: list[tuple[str, ast.ClassDef]] = []
+    for path in _iter_modules():
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        found.extend(
+            (path.relative_to(SRC).as_posix(), node)
+            for node in ast.walk(tree)
+            if isinstance(node, ast.ClassDef) and _is_protocol(node)
+        )
+    return found
+
+
+def test_a_protocol_declares_its_data_members_as_properties() -> None:
+    """A frozen record satisfies a protocol whose members it can only be read for.
+
+    A plain annotated attribute in a protocol is settable, and a frozen
+    dataclass's field is not, so a type checker refuses every frozen result
+    the protocol was written to accept (``enclosure_insertion_loss`` taking a
+    ``SoundReductionResult``). A read-only member is a ``@property``.
+    """
+    offenders = sorted(
+        f"{path}:{node.name}.{child.target.id}"
+        for path, node in _protocols()
+        for child in node.body
+        if isinstance(child, ast.AnnAssign)
+        and isinstance(child.target, ast.Name)
+        and (path, node.name) not in PROTOCOL_ATTRIBUTE_EXEMPT
+    )
+    assert offenders == []
+    protocols = {(path, node.name) for path, node in _protocols()}
+    assert set(PROTOCOL_ATTRIBUTE_EXEMPT) <= protocols, "stale exemption"
+
+
+def _is_type_checking(test: ast.expr) -> bool:
+    return (isinstance(test, ast.Name) and test.id == "TYPE_CHECKING") or (
+        isinstance(test, ast.Attribute) and test.attr == "TYPE_CHECKING"
+    )
+
+
+def _module_getattrs(tree: ast.Module) -> list[tuple[ast.FunctionDef, bool]]:
+    """Each module-level ``__getattr__``, with whether the type checker is kept from it."""
+    found: list[tuple[ast.FunctionDef, bool]] = []
+    for statement in tree.body:
+        if isinstance(statement, ast.FunctionDef) and statement.name == "__getattr__":
+            found.append((statement, False))
+        elif isinstance(statement, ast.If):
+            hidden = (
+                isinstance(statement.test, ast.UnaryOp)
+                and isinstance(statement.test.op, ast.Not)
+                and _is_type_checking(statement.test.operand)
+            )
+            found.extend(
+                (inner, hidden)
+                for inner in statement.body
+                if isinstance(inner, ast.FunctionDef) and inner.name == "__getattr__"
+            )
+    return found
+
+
+def test_a_module_getattr_is_hidden_from_the_type_checker() -> None:
+    """A module ``__getattr__`` sits under ``if not TYPE_CHECKING:``.
+
+    A type checker that sees a module ``__getattr__`` reads every name the
+    module lacks through it, so ``phonometry.stpia`` types as ``object`` and
+    a misspelling stops being an error. Defined for the running interpreter
+    only, it imports lazily as before, and the type checker reads the
+    imports the module declares for it.
+    """
+    offenders = []
+    seen = 0
+    for path in _iter_modules() + [SRC / "__init__.py"]:
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        for node, hidden in _module_getattrs(tree):
+            seen += 1
+            if not hidden:
+                offenders.append(f"{path.relative_to(SRC)}:{node.lineno}")
+    assert offenders == []
+    assert seen, "the root package's lazy __getattr__ is not read any more"
+
+
+def test_the_getattr_rule_reads_a_visible_one() -> None:
+    visible = ast.parse("def __getattr__(name):\n    raise AttributeError(name)\n")
+    hidden = ast.parse(
+        "from typing import TYPE_CHECKING\n"
+        "if not TYPE_CHECKING:\n"
+        "    def __getattr__(name):\n"
+        "        raise AttributeError(name)\n"
+    )
+    assert [flag for _, flag in _module_getattrs(visible)] == [False]
+    assert [flag for _, flag in _module_getattrs(hidden)] == [True]
+
+
+#: The cases mypy checks call by call: each holds an annotation to the forms
+#: a caller writes.
+STATIC_CASES = SRC.parent.parent / "tests" / "static_typing"
+
+#: The NumPy scalar types a dtype written by position names (``np.int64``).
+_SCALAR_TYPE = re.compile(
+    r"(u?int\d*|u?intp|float\d*|complex\d*|bool_?|half|c?single|c?double"
+    r"|c?longdouble|u?byte|u?short|u?intc|u?long|u?longlong)"
+)
+
+
+def _an_array_of_a_written_dtype(node: ast.expr) -> bool:
+    """Whether *node* builds an array whose dtype it writes in place.
+
+    ``np.zeros(4000, dtype=np.int64)``, ``np.array(2, np.int32)`` and
+    ``values.astype(np.int64)`` all qualify.
+    """
+    if not isinstance(node, ast.Call) or not isinstance(node.func, ast.Attribute):
+        return False
+    if node.func.attr == "astype":
+        return True
+    if any(keyword.arg == "dtype" for keyword in node.keywords):
+        return True
+    return (
+        isinstance(node.func.value, ast.Name)
+        and node.func.value.id == "np"
+        and any(
+            isinstance(argument, ast.Attribute)
+            and isinstance(argument.value, ast.Name)
+            and argument.value.id == "np"
+            and _SCALAR_TYPE.fullmatch(argument.attr) is not None
+            for argument in node.args[1:]
+        )
+    )
+
+
+def _arrays_of_a_written_dtype_handed_on(tree: ast.AST) -> list[int]:
+    """The lines where a call takes such an array as written, not by a name."""
+    lines: list[int] = []
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Call):
+            continue
+        for value in [*node.args, *(keyword.value for keyword in node.keywords)]:
+            argument = value.value if isinstance(value, ast.Starred) else value
+            if _an_array_of_a_written_dtype(argument):
+                lines.append(argument.lineno)
+    return sorted(lines)
+
+
+def test_a_static_case_names_an_array_of_a_given_dtype_before_the_call() -> None:
+    """A static case hands on an integer array by a name typed with its dtype.
+
+    Written in the call, ``np.zeros(4000, dtype=np.int64)`` takes its type
+    from the parameter it is handed to: against a floating array mypy picks
+    the overload that returns ``NDArray[Any]``, so the case passed however
+    narrow the parameter was, and could not catch the narrowing it was
+    written for. Named first (``integers: NDArray[np.int64] = ...``), the
+    array keeps its dtype and the case fails when the parameter refuses it.
+    """
+    offenders = [
+        f"{path.relative_to(STATIC_CASES)}:{line}"
+        for path in sorted(STATIC_CASES.glob("*.py"))
+        for line in _arrays_of_a_written_dtype_handed_on(
+            ast.parse(path.read_text(encoding="utf-8"))
+        )
+    ]
+    assert offenders == []
+
+
+def test_the_static_case_rule_reads_an_array_written_in_the_call() -> None:
+    written = ast.parse(
+        "f(np.zeros(4, dtype=np.int64))\n"
+        "f(x, scale=np.array(2, np.int32))\n"
+        "f(*values.astype(np.int64))\n"
+    )
+    named = ast.parse(
+        "integers: NDArray[np.int64] = np.zeros(4, dtype=np.int64)\n"
+        "f(integers)\n"
+        "f(np.zeros(4), np.full(3, 1.0))\n"
+    )
+    assert _arrays_of_a_written_dtype_handed_on(written) == [1, 2, 3]
+    assert _arrays_of_a_written_dtype_handed_on(named) == []

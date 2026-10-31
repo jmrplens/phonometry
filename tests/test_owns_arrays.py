@@ -17,15 +17,18 @@ from __future__ import annotations
 import contextlib
 import dataclasses
 import importlib
+import pickle
 import pkgutil
 import tracemalloc
-from collections import ChainMap, OrderedDict, defaultdict
+import warnings
+from collections import ChainMap, OrderedDict, defaultdict, deque
 from collections.abc import Iterator, Mapping
 from types import MappingProxyType
-from typing import TYPE_CHECKING, NamedTuple
+from typing import TYPE_CHECKING, NamedTuple, cast
 
 import numpy as np
 import pytest
+from array_likes import ARRAY_LIKES
 from numpy.lib.stride_tricks import sliding_window_view
 
 import phonometry
@@ -35,6 +38,8 @@ from phonometry._internal.frozen import OwnsArrays, read_only
 
 if TYPE_CHECKING:
     from collections.abc import Callable
+
+    from numpy.typing import ArrayLike
 
 # ---------------------------------------------------------------------------
 # The mechanism, on records written for the purpose
@@ -75,6 +80,17 @@ class _Validated(OwnsArrays):
             msg = "the hook saw an array the caller can still write into"
             raise AssertionError(msg)
         object.__setattr__(self, "doubled_db", read_only(2.0 * self.levels))
+
+
+@dataclasses.dataclass(frozen=True)
+class _Sealing(OwnsArrays):
+    levels: np.ndarray
+
+    def __post_init__(self) -> None:
+        # What the library's records do: read the field, seal what came back.
+        object.__setattr__(
+            self, "levels", read_only(np.asarray(self.levels, dtype=np.float64))
+        )
 
 
 @dataclasses.dataclass(frozen=True)
@@ -246,6 +262,185 @@ def test_a_mapping_with_no_array_comes_back_as_it_went_in() -> None:
     assert record.columns is given
 
 
+def _objects(*members: object) -> np.ndarray:
+    """An array of objects holding *members* as they are, one per element."""
+    held = np.empty(len(members), dtype=object)
+    for index, member in enumerate(members):
+        held[index] = member
+    return held
+
+
+def test_arrays_inside_an_array_of_objects_are_copied() -> None:
+    """Copying an array of objects copies its references, so each array in it is copied too.
+
+    The record's copy of the outer array held the caller's own arrays: the
+    caller's writes reached the record, and a hook that sealed a member
+    sealed the caller's array.
+    """
+    first, second = _writeable([1.0, 2.0]), _writeable([3.0, 4.0, 5.0])
+    given = _objects(first, second, "label").reshape(3, 1)
+    record = _Plain(levels=given)
+    assert record.levels.shape == (3, 1)
+    assert not record.levels.flags.writeable
+    for kept, mine in zip(record.levels[:2, 0], (first, second), strict=True):
+        assert not np.shares_memory(kept, mine)
+        assert not kept.flags.writeable
+        assert mine.flags.writeable
+    assert record.levels[2, 0] == "label"
+    first[0] = 99.0
+    assert record.levels[0, 0][0] == 1.0
+    assert given[0, 0] is first
+
+
+def _sealed_by_the_caller(values: list[float]) -> np.ndarray:
+    array = _writeable(values)
+    array.flags.writeable = False
+    return array
+
+
+@pytest.mark.parametrize(
+    "holder",
+    [deque, iter],
+    ids=["deque", "generator"],
+)
+def test_the_arrays_a_record_takes_out_of_any_sequence_are_its_own(
+    holder: Callable[[list[np.ndarray]], object],
+) -> None:
+    """A deque or a generator is no container the record goes through when it copies.
+
+    So a record that holds the members of one as a tuple copies each array
+    itself. Kept as it came, a writeable array was only copied by the check
+    after the hook, and a read-only one of the caller's, whose flag the
+    caller can set back, stayed the caller's.
+    """
+    writeable = _writeable([1.0, 2.0])
+    sealed = _sealed_by_the_caller([3.0, 4.0])
+    record = phonometry.filters.OctaveFilterResult(
+        levels=None,
+        frequencies=(500.0, 1000.0),
+        bands=holder([writeable, sealed]),  # type: ignore[arg-type]
+    )
+    assert isinstance(record.bands, tuple)
+    for kept, mine in zip(record.bands, (writeable, sealed), strict=True):
+        assert isinstance(kept, np.ndarray)
+        assert not np.shares_memory(kept, mine)
+        assert not kept.flags.writeable
+    assert writeable.flags.writeable
+    sealed.flags.writeable = True
+    sealed[0] = 99.0
+    assert record.bands[1][0] == 3.0
+
+
+def test_owned_members_hands_back_what_the_record_copied_as_it_is() -> None:
+    """A tuple's, a list's or an array's members are the record's copies by then."""
+    mine = _writeable([1.0, 2.0])
+    assert frozen.owned_members((mine, 1.0))[0] is mine
+    assert frozen.owned_members([mine])[0] is mine
+    grid = _writeable([1.0, 2.0, 3.0, 4.0]).reshape(2, 2)
+    assert np.shares_memory(frozen.owned_members(grid)[0], grid)
+    assert frozen.owned_members(deque([mine]))[0] is not mine
+    assert frozen.owned_members(deque(["a", 1.0])) == ("a", 1.0)
+
+
+def test_a_read_only_copy_of_an_array_of_objects_holds_copies_of_its_arrays() -> None:
+    """The copy a plain class keeps shares no array with the caller either."""
+    mine = _writeable([1.0, 2.0])
+    kept = frozen.read_only_copy(_objects(mine, "label"))
+    assert not kept.flags.writeable
+    assert not np.shares_memory(kept[0], mine)
+    assert not kept[0].flags.writeable
+    assert kept[1] == "label"
+    assert mine.flags.writeable
+
+
+def test_an_array_of_objects_comes_back_from_pickle_with_its_arrays_sealed() -> None:
+    """``pickle`` hands every array back writeable, the ones an array of objects holds too."""
+    record = _Plain(levels=_objects(_writeable([1.0]), _writeable([2.0, 3.0])))
+    # The bytes are the ones made on this line, never read from elsewhere.
+    back = pickle.loads(pickle.dumps(record))  # noqa: S301
+    assert not back.levels.flags.writeable
+    for member in back.levels:
+        assert not member.flags.writeable
+
+
+@pytest.mark.parametrize("kind", sorted(ARRAY_LIKES))
+def test_an_array_like_is_held_as_a_copy_of_the_array_it_stands_for(
+    kind: str,
+) -> None:
+    """Anything numpy reads as an array is read as one and copied before the hook.
+
+    Held as it came, the hook's ``np.asarray`` of a column was the caller's
+    own array, which ``read_only`` then sealed: the caller's next write
+    raised, and the record kept the caller's memory. Of a ``memoryview`` or
+    an object that publishes its memory, it was a new array over the
+    caller's memory, and a hook that only checked the field left the record
+    holding the caller's object.
+    """
+    mine = _writeable([1.0, 2.0, 3.0])
+    seen: list[object] = []
+
+    @dataclasses.dataclass(frozen=True)
+    class Seen(_Sealing):
+        def __post_init__(self) -> None:
+            seen.append(self.levels)
+            super().__post_init__()
+
+    record = Seen(levels=ARRAY_LIKES[kind](mine))  # type: ignore[arg-type]
+    assert isinstance(seen[0], np.ndarray)
+    assert not seen[0].flags.writeable
+    assert mine.flags.writeable
+    assert not np.shares_memory(record.levels, mine)
+    mine[0] = 9.0
+    assert record.levels[0] == 1.0
+
+
+@pytest.mark.parametrize("kind", sorted(ARRAY_LIKES))
+def test_an_array_like_inside_a_container_or_an_init_var_is_copied(
+    kind: str,
+) -> None:
+    """At any depth, and in the argument of an ``InitVar`` handed to the hook."""
+    column = ARRAY_LIKES[kind]
+    a, b, c = _writeable([1.0]), _writeable([2.0]), _writeable([3.0])
+    record = _Containers(
+        pair=(column(a), 5.0),  # type: ignore[arg-type]
+        many=[column(b)],  # type: ignore[list-item]
+        columns={"c": column(c)},  # type: ignore[dict-item]
+        frozen_columns=MappingProxyType({}),
+        named=_Pair(_writeable([0.0]), 0.5),
+    )
+    offset = _writeable([0.5])
+    shifted = _WithInitVar(levels=_writeable([1.0]), offset_db=column(offset))  # type: ignore[arg-type]
+    for kept, mine in (
+        (record.pair[0], a),
+        (record.many[0], b),
+        (record.columns["c"], c),
+        (shifted.shifted_db, offset),
+    ):
+        assert isinstance(kept, np.ndarray)
+        assert not kept.flags.writeable
+        assert mine.flags.writeable
+        assert not np.shares_memory(kept, mine)
+
+
+@pytest.mark.parametrize("kind", sorted(ARRAY_LIKES))
+def test_a_read_only_copy_of_an_array_like_is_a_copy(kind: str) -> None:
+    """``np.array`` hands ``copy=True`` on, which not every ``__array__`` honours.
+
+    One older than the keyword drew a ``DeprecationWarning`` from NumPy, and
+    one that ignores it handed back the caller's array, which was sealed.
+    """
+    mine = _writeable([1.0, 2.0])
+    # An object that publishes its memory is an array to numpy, though
+    # numpy's ArrayLike spells only __array__ and the buffer protocol.
+    given = cast("ArrayLike", ARRAY_LIKES[kind](mine))
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", DeprecationWarning)
+        kept = frozen.read_only_copy(given)
+    assert not kept.flags.writeable
+    assert mine.flags.writeable
+    assert not np.shares_memory(kept, mine)
+
+
 def test_every_copy_is_c_ordered_whatever_it_was_made_from() -> None:
     """A broadcast row and a transposed grid come out C-ordered, values kept."""
     row = _writeable([1.0, 2.0, 3.0])
@@ -375,6 +570,12 @@ def test_none_and_numbers_go_through_untouched() -> None:
     record = Optional()
     assert record.levels is None
     assert record.level == 0.0
+    # A NumPy scalar hands numpy an array too, and stays the number it is.
+    scalar = Optional(level=np.float64(2.0))
+    assert type(scalar.level) is np.float64
+    # Bytes are a buffer, which numpy reads as one text: they stay as they are.
+    raw = Optional(level=b"\x00\x01")  # type: ignore[arg-type]
+    assert raw.level == b"\x00\x01"
 
 
 # ---------------------------------------------------------------------------

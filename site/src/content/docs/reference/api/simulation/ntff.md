@@ -72,10 +72,10 @@ of meshed Schroeder-type diffusers against the library's Fraunhofer model
 ContourPhasors(
     *,
     frequency: float,
-    positions: NDArray[np.float64],
-    normals: NDArray[np.float64],
-    pressure: NDArray[np.complex128],
-    normal_velocity: NDArray[np.complex128],
+    positions: ArrayLike,
+    normals: ArrayLike,
+    pressure: ArrayLike,
+    normal_velocity: ArrayLike,
     segment: float,
 )
 ```

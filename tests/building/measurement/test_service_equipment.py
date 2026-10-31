@@ -1071,13 +1071,15 @@ def test_loudest_corner_needs_a_corner_left() -> None:
         (1, TypeError),
         ("1", TypeError),
         ([[1]], TypeError),
+        (bytearray(b"\x01"), TypeError),
     ],
-    ids=["1.7", "True", "'1'", "-1", "bare 1", "bare '1'", "nested"],
+    ids=["1.7", "True", "'1'", "-1", "bare 1", "bare '1'", "nested", "bytearray"],
 )
 def test_an_excluded_corner_is_named_by_a_whole_index(
     excluded: object, refusal: type[Exception]
 ) -> None:
-    # int() would read 1.7, True and '1' each as corner 1 and leave it out.
+    # int() would read 1.7, True and '1' each as corner 1 and leave it out,
+    # and a bytearray was read as the codes of its characters.
     with pytest.raises(refusal, match="excluded"):
         building.loudest_corner([50.0, 52.0, 51.0, 49.0], excluded=excluded)  # type: ignore[arg-type]
 

@@ -516,7 +516,7 @@ measurement's noise floor (that is its purpose: SNR shaping).
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `amplitude`, `duration_s`, `f1`, `f2`, `fade` or `fs` is not a single number, or `target` is not a text. |
+| TypeError | if `amplitude`, `duration_s`, `f1`, `f2`, `fade` or `fs` is not a single number, or `target` is neither a text nor a pair of arrays of numbers (a `bytes`, `None`, a text among the numbers). |
 
 ## ShapedSweepResult
 

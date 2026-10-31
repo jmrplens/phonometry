@@ -885,3 +885,21 @@ def test_no_code_in_the_library_spells_the_curve_ccir() -> None:
             and id(node) not in docstrings
         )
     assert not offenders, offenders
+
+
+def test_a_pair_or_a_curve_given_as_a_bytearray_is_refused() -> None:
+    """A ``bytearray`` was read as the codes of its characters.
+
+    ``bytearray([45, 255])`` passed as the range ``(45, 255)`` and
+    ``bytearray(b"ab")`` as the noise curve ``(97, 98)``.
+    """
+    result = _example_result()
+    with pytest.raises(
+        TypeError,
+        match=r"MicrophoneCharacteristics: 'effective_range' must be a \(lo, hi\) pair",
+    ):
+        dataclasses.replace(result, effective_range=bytearray([45, 255]))
+    # The record holds a bytearray as the bytes it spells, a text, and names
+    # what the caller gave.
+    with pytest.raises(TypeError, match=r"'spectrum' must be a pair .*, not bytearray"):
+        electroacoustics.MicrophoneNoise(spectrum=bytearray(b"ab"))  # type: ignore[arg-type]

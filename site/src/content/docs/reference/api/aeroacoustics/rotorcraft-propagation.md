@@ -443,7 +443,7 @@ whose diffraction equations follow CNOSSOS-EU.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
-| TypeError | if `flow_resistivity` is not a single number, or `flow_resistivity` or `frequencies` holds a text or a value that is not a real number. |
+| TypeError | if `flow_resistivity` is neither a class letter nor numbers (a `bytes`, `None`, a complex value, a text among numbers), or `frequencies` holds a text or a value that is not a real number. |
 
 ## TerrainScreeningResult
 

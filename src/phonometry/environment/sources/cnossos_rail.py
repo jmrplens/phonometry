@@ -82,7 +82,12 @@ from typing import TYPE_CHECKING, Any, Literal
 import numpy as np
 
 from ..._internal.display import RichDisplay
-from ..._internal.frozen import OwnsArrays, read_only, reduce_with_plain_rows
+from ..._internal.frozen import (
+    OwnsArrays,
+    given_type,
+    read_only,
+    reduce_with_plain_rows,
+)
 from ..._internal.validation import (
     require_axis_count,
     require_axis_rank,
@@ -2471,7 +2476,7 @@ def _require_record(
         accepted = f"a {kind.__name__}" + (" or None" if optional else "")
         msg = (
             f"{type(owner).__name__}.{name} must be {accepted}; got "
-            f"{type(value).__name__}."
+            f"{given_type(value)}."
         )
         raise TypeError(msg)
 

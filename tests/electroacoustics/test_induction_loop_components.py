@@ -614,6 +614,25 @@ def test_neck_loop_takes_the_magnitude_of_a_complex_impedance() -> None:
     assert result.min_impedance_ohm == pytest.approx(5.0)
 
 
+def test_neck_loop_takes_a_complex_impedance_held_as_objects() -> None:
+    """An array of objects that holds a NumPy complex number is a complex impedance.
+
+    Its dtype is no complex one, so the check that asked the dtype read it
+    as real and the array guard refused it as a complex value where a real
+    one belongs, though the same numbers in a list were read as their
+    magnitude.
+    """
+    impedance = np.empty(3, dtype=object)
+    impedance[:] = [np.complex128(3 + 4j), np.complex128(8.0), np.complex128(9.0)]
+    result = ea.neck_loop_characteristics(
+        frequencies=[100.0, 1000.0, 5000.0],
+        field_strength_level=[0.0, 0.0, 0.0],
+        impedance_ohm=impedance,
+        input_voltage_v=1.0,
+    )
+    assert result.min_impedance_ohm == pytest.approx(5.0)
+
+
 def test_neck_loop_types_are_the_draft_ones() -> None:
     assert isinstance(ea.NECK_LOOP_TYPES, MappingProxyType)
     one = ea.NECK_LOOP_TYPES[1]

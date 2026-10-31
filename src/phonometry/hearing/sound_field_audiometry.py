@@ -73,7 +73,7 @@ from typing import TYPE_CHECKING, Any, Final, Literal
 
 import numpy as np
 
-from .._internal.frozen import OwnsArrays, read_only
+from .._internal.frozen import OwnsArrays, given_repr, read_only
 from .._internal.validation import require_choice, require_scalar
 from .threshold import AUDIOMETRIC_FREQUENCIES_HZ as _AUDIOMETRIC_FREQUENCIES
 
@@ -425,7 +425,7 @@ def _variation_limits(standard: str) -> tuple[tuple[float, float], ...]:
         return RANDOM_INCIDENCE_VARIATION_LIMITS
     msg = (
         f"'standard' must be {_SOUND_FIELD_CLAUSE!r} or "
-        f"{_RANDOM_INCIDENCE_CLAUSE!r}; got {standard!r}."
+        f"{_RANDOM_INCIDENCE_CLAUSE!r}; got {given_repr(standard)}."
     )
     raise ValueError(msg)
 

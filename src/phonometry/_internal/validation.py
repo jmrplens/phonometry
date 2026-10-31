@@ -9,16 +9,14 @@ through these helpers; existing modules migrate as they are touched.
 from __future__ import annotations
 
 import math
-from collections.abc import Iterable
+from collections.abc import Iterable, Mapping, Sequence, Set
 from typing import TYPE_CHECKING, Any, TypeGuard, cast
 
 import numpy as np
 
-from .frozen import owned_members
+from .frozen import given_repr, given_type, owned_members
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping, Sequence
-
     from numpy.typing import ArrayLike, NDArray
 
     from .types import BandFraction, ReportEngine
@@ -86,11 +84,14 @@ def holds_text(value: object) -> bool:
     """True when *value* is text, or an array that holds text.
 
     A ``str`` or ``bytes``, a numpy array of a string dtype, or an object
-    array with a ``str`` or ``bytes`` element. Text is the wrong type where a
-    number belongs, whatever it reads as: :func:`float` and ``np.asarray(...,
-    dtype=float)`` parse it, which is what they are for, but a guard is not a
-    parser, and ``math.sqrt("4")`` and ``np.sqrt("4")`` refuse it with
-    :class:`TypeError` as a numerical function does.
+    array with a ``str``, ``bytes`` or ``bytearray`` element. Text is the
+    wrong type where a number belongs, whatever it reads as: :func:`float`
+    and ``np.asarray(..., dtype=float)`` parse it, which is what they are
+    for, but a guard is not a parser, and ``math.sqrt("4")`` and
+    ``np.sqrt("4")`` refuse it with :class:`TypeError` as a numerical
+    function does. An element of an object array is converted by
+    :func:`float`, which parses a ``bytearray`` as it parses a ``bytes``
+    (``float(bytearray(b"94"))`` is ``94.0``), so there it is text too.
 
     :param value: The value to test, of any type.
     :return: Whether *value* is or holds text.
@@ -102,7 +103,9 @@ def holds_text(value: object) -> bool:
     kind = value.dtype.kind
     if kind in "SU":
         return True
-    return kind == "O" and any(isinstance(item, (str, bytes)) for item in value.flat)
+    return kind == "O" and any(
+        isinstance(item, str | bytes | bytearray) for item in value.flat
+    )
 
 
 def refuse_text(value: object, msg: str) -> None:
@@ -184,6 +187,57 @@ def refuse_complex(value: object, msg: str) -> None:
         raise TypeError(msg)
 
 
+def _holds_a_bytearray(value: object) -> bool:
+    """Whether *value* is a ``bytearray``, or holds one at any depth.
+
+    Inside a sequence (a tuple, a list, a deque) or an array of objects, to
+    any depth. :func:`refuse_text` cannot see one there: it reads a
+    sequence as ``np.asarray(value, dtype=object)`` does, and numpy reads a
+    ``bytearray`` inside a sequence as a row of the codes of its
+    characters, numbers, so that ``[bytearray(b"12")]`` is
+    ``[[49, 50]]``. A ``str`` and a ``bytes`` are texts, not sequences of
+    members, and are passed over here.
+    """
+    if isinstance(value, bytearray):
+        return True
+    if isinstance(value, np.ndarray):
+        return value.dtype == object and any(
+            _holds_a_bytearray(member) for member in value.flat
+        )
+    if isinstance(value, Sequence) and not isinstance(value, str | bytes | memoryview):
+        return any(_holds_a_bytearray(member) for member in value)
+    return False
+
+
+def refuse_text_beside_choice(
+    value: object, name: str, options: tuple[str, ...]
+) -> None:
+    """Refuse a text that would reach the numbers of a choice beside numbers.
+
+    A parameter that takes one of a few words or numbers reads a ``str`` as
+    the choice and anything else as the numbers. A ``bytes`` or a
+    ``bytearray`` (``b"rigid"``), or a text inside a sequence or an array
+    (``["400"]``, ``np.array("400")``, ``[bytearray(b"400")]``), is no
+    ``str``, and so it reached the conversion of the numbers, which parses
+    it (``np.asarray(["400"], dtype=complex)`` is ``400+0j``), reads a
+    ``bytearray`` as the codes of its characters, or fails with an error
+    that names no parameter. It is the wrong type whatever it reads as, so
+    it is refused before the numbers are read; a ``str`` is the choice, and
+    is checked as one by the caller.
+
+    :param value: The caller's value, one that is not a ``str``.
+    :param name: The parameter's name, for the message.
+    :param options: The words the parameter offers.
+    :raises TypeError: if *value* is a ``bytes`` or a ``bytearray``, or a
+        sequence or an array that holds a text, a ``bytearray`` at any
+        depth included.
+    """
+    msg = f"'{name}' must be one of {options} as a str, or numbers, not text."
+    if _holds_a_bytearray(value):
+        raise TypeError(msg)
+    refuse_text(value, msg)
+
+
 def require_real(value: object, msg: str) -> float:
     """*value* as a ``float``, or a refusal worded *msg* when it is not one number.
 
@@ -197,14 +251,17 @@ def require_real(value: object, msg: str) -> float:
     number or any other object :func:`float` cannot take is the wrong type,
     and is refused with :class:`TypeError`; a number too large for a float
     is a value of the right type, and is refused with :class:`ValueError`.
-    :func:`float` refuses a Python ``complex`` and reads a NumPy one as its
-    real part (:func:`holds_complex`), so both are refused here before it.
+    A complex value is refused whatever its kind: :func:`float` refuses a
+    Python ``complex``, but takes the real part of a numpy one
+    (``np.complex128``, ``np.complex64``, a zero-dimensional complex array)
+    with no more than a ``ComplexWarning`` (:func:`holds_complex`), and the
+    value passed as the number it is not.
 
     :param value: The caller's value, of any type.
     :param msg: The refusal, worded by the guard that owns the parameter.
     :return: ``float(value)``.
     :raises TypeError: with *msg*, for an array of any shape, a text, a
-        complex number, or anything whose type :func:`float` refuses.
+        complex value, or anything whose type :func:`float` refuses.
     :raises ValueError: with *msg*, for a number :func:`float` cannot hold.
     """
     if not is_scalar(value) or holds_text(value) or holds_complex(value):
@@ -264,7 +321,7 @@ def _one_number(value: object, name: str) -> float:
     :raises ValueError: for a number too large for a float.
     """
     require_scalar(value, name)
-    return require_real(value, f"'{name}' must be a number, got {value!r}.")
+    return require_real(value, f"'{name}' must be a number, got {given_repr(value)}.")
 
 
 def require_positive(value: float, name: str) -> float:
@@ -420,7 +477,7 @@ def require_count(value: object, name: str, *, at_least: int | None = 1) -> int:
     if isinstance(value, bool) or not isinstance(
         value, (int, float, np.integer, np.floating)
     ):
-        msg = f"'{name}' must be a whole number, got {value!r}."
+        msg = f"'{name}' must be a whole number, got {given_repr(value)}."
         raise TypeError(msg)
     floor = -math.inf if at_least is None else at_least
     if isinstance(value, (int, np.integer)):
@@ -428,15 +485,13 @@ def require_count(value: object, name: str, *, at_least: int | None = 1) -> int:
         # would overflow before the bound could name it.
         whole = int(value)
         if whole < floor:
-            msg = (
-                f"'{name}' must be a whole number, at least {at_least}, got {value!r}."
-            )
+            msg = f"'{name}' must be a whole number, at least {at_least}, got {given_repr(value)}."
             raise ValueError(msg)
         return whole
     number = float(value)
     if not math.isfinite(number) or not number.is_integer() or number < floor:
         least = "" if at_least is None else f", at least {at_least}"
-        msg = f"'{name}' must be a whole number{least}, got {value!r}."
+        msg = f"'{name}' must be a whole number{least}, got {given_repr(value)}."
         raise ValueError(msg)
     return int(number)
 
@@ -463,10 +518,10 @@ def require_choice[T](value: object, name: str, options: tuple[T, ...]) -> T:
     if not isinstance(value, str) and all(
         isinstance(option, str) for option in options
     ):
-        msg = f"'{name}' must be one of {options}, a text; got {value!r}."
+        msg = f"'{name}' must be one of {options}, a text; got {given_repr(value)}."
         raise TypeError(msg)
     if value not in options:
-        msg = f"'{name}' must be one of {options}; got {value!r}."
+        msg = f"'{name}' must be one of {options}; got {given_repr(value)}."
         raise ValueError(msg)
     return value
 
@@ -517,7 +572,9 @@ def require_band_fraction(value: object, name: str) -> BandFraction:
         a float.
     :raises ValueError: for an integer other than 1 and 3.
     """
-    msg = f"'{name}' must be 1 (octave) or 3 (one-third octave); got {value!r}."
+    msg = (
+        f"'{name}' must be 1 (octave) or 3 (one-third octave); got {given_repr(value)}."
+    )
     if isinstance(value, bool) or not isinstance(value, int | np.integer):
         raise TypeError(msg)
     if int(value) not in _BAND_FRACTIONS:
@@ -541,11 +598,11 @@ def check_engine(engine: object) -> ReportEngine:
     :raises ValueError: for any text other than ``"reportlab"``.
     """
     if not isinstance(engine, str):
-        msg = f"'engine' must be 'reportlab', a text; got {engine!r}."
+        msg = f"'engine' must be 'reportlab', a text; got {given_repr(engine)}."
         raise TypeError(msg)
     if engine == "reportlab":
         return "reportlab"
-    msg = f"Unknown report engine {engine!r}; only 'reportlab' is supported."
+    msg = f"Unknown report engine {given_repr(engine)}; only 'reportlab' is supported."
     raise ValueError(msg)
 
 
@@ -840,7 +897,7 @@ def require_equal_counts(
     """
     if len(set(counts.values())) <= 1:
         return
-    listed = ", ".join(f"'{label}' ({n})" for label, n in counts.items())
+    listed = ", ".join(f"'{label}' ({given_repr(n)})" for label, n in counts.items())
     msg = f"{owner}: {listed} must each carry one value per {axis}."
     raise ValueError(msg)
 
@@ -1098,12 +1155,14 @@ def indices_of(value: object, name: str) -> tuple[int, ...]:
             raise TypeError(msg)
         return tuple(int(item) for item in value)
     if isinstance(value, str | bytes) or not isinstance(value, Iterable):
-        msg = f"'{name}' must be a sequence of integer indices, got {value!r}."
+        msg = (
+            f"'{name}' must be a sequence of integer indices, got {given_repr(value)}."
+        )
         raise TypeError(msg)
     items = tuple(value)
     for item in items:
         if not is_integer(item):
-            msg = f"'{name}' must hold integer indices, got {item!r}."
+            msg = f"'{name}' must hold integer indices, got {given_repr(item)}."
             raise TypeError(msg)
     return tuple(int(item) for item in items)
 
@@ -1166,6 +1225,36 @@ def require_1d_signal(x: ArrayLike, name: str) -> np.ndarray:
     return arr
 
 
+def _members_of(value: object, msg: str, *, owned: bool = False) -> Sequence[object]:
+    """The members of a sequence a record takes as one field, refused whole when it is none.
+
+    Iterating gives something of many objects that are no sequence of
+    members: a ``bytearray`` gives the codes of its characters, as a
+    ``bytes`` does, a mapping gives its keys and a set its members in no
+    order. Each is refused whole, as a text is (see :func:`holds_text`),
+    rather than read as the members it gives.
+
+    :param value: The caller's value, of any type.
+    :param msg: The start of the refusal, worded by the caller.
+    :param owned: Read the members through
+        :func:`~phonometry._internal.frozen.owned_members`, for a record that
+        seals the arrays it holds: an array a deque or a generator holds is
+        copied, so the record never seals one of the caller's.
+    :return: The members, in order.
+    :raises TypeError: for a text in any form, a mapping, a set, or a value
+        that is not a sequence at all.
+    """
+    refusal = f"{msg}, not {given_type(value)}."
+    if holds_text(value) or isinstance(value, bytearray | Mapping | Set):
+        raise TypeError(refusal)
+    try:
+        if owned:
+            return owned_members(cast("Iterable[object]", value))
+        return list(cast("Iterable[object]", value))
+    except TypeError:
+        raise TypeError(refusal) from None
+
+
 def arrays_of(
     value: object, name: str, members: str, n_members: int
 ) -> tuple[NDArray[np.float64], ...]:
@@ -1184,7 +1273,9 @@ def arrays_of(
     column of a data frame, a ``memoryview``), comes back as itself when it
     is ``float64`` already, and one a
     deque or a generator holds is copied. A member that is no array, a list
-    of numbers, is converted into a new one.
+    of numbers, is converted into a new one. A member is converted as
+    :func:`_as_float64` converts, so a text among its numbers is refused,
+    whatever it reads as, and not parsed into one.
 
     :param value: The sequence.
     :param name: The field's name, for the message.
@@ -1192,29 +1283,24 @@ def arrays_of(
         pair (angles_deg, relative_db) of two arrays"``).
     :param n_members: How many arrays it holds.
     :return: The members, each a ``float64`` array.
-    :raises TypeError: if *value* is a text or is not a sequence at all, a
-        member holds a complex number or a text, or *n_members* is not a
-        number.
-    :raises ValueError: if it holds other than *n_members* members, or
-        *n_members* is not a whole number of at least one.
+    :raises TypeError: if *value* is a text in any form (a ``bytearray``
+        included), a mapping, a set or not a sequence at all, a member holds
+        a complex number, a text or anything that is not a number, or
+        *n_members* is not a number.
+    :raises ValueError: if it holds other than *n_members* members, a member
+        is a ragged nesting, or *n_members* is not a whole number of at least
+        one.
     """
     expected = require_count(n_members, "n_members")
     msg = f"'{name}' must be {members}"
-    if isinstance(value, str | bytes):
-        msg += f", not {type(value).__name__}."
-        raise TypeError(msg)
-    try:
-        items = owned_members(cast("Iterable[ArrayLike]", value))
-    except TypeError:
-        msg += f", not {type(value).__name__}."
-        raise TypeError(msg) from None
+    items = _members_of(value, msg, owned=True)
     if len(items) != expected:
         msg += f", not {len(items)} of them."
         raise ValueError(msg)
     for item in items:
         refuse_complex(item, f"{msg} of real numbers, not complex ones.")
         refuse_text(item, f"{msg} of numbers, not text.")
-    return tuple(np.asarray(item, dtype=np.float64) for item in items)
+    return tuple(_as_float64(cast("ArrayLike", item), name) for item in items)
 
 
 def pair_of_arrays(
@@ -1229,9 +1315,11 @@ def pair_of_arrays(
     :param members: What the two members are, as the message spells them
         (``"(angles_deg, relative_db)"``).
     :return: The two members, each a ``float64`` array.
-    :raises TypeError: if *value* is a text or is not a sequence at all,
-        or a member holds a complex number or a text.
-    :raises ValueError: if it holds other than two members.
+    :raises TypeError: if *value* is a text in any form, a mapping, a set or
+        not a sequence at all, or a member holds a text, a complex value or
+        anything that is not a number.
+    :raises ValueError: if it holds other than two members, or a member is
+        a ragged nesting.
     """
     first, second = arrays_of(value, name, f"a pair {members} of two arrays", 2)
     return first, second
@@ -1248,6 +1336,9 @@ def floats_of(
     are unpacked here, once, when the record is built, and each refusal
     names the field. A text is refused whatever it reads as, as
     :func:`holds_text` has it, and so is a member that is not one number.
+    A ``bytearray``, a mapping and a set are refused whole: iterating them
+    gives the codes of the characters, the keys, and the members in no
+    order, none of them the numbers a caller meant.
 
     :param value: The sequence.
     :param name: The field's name, for the message.
@@ -1255,28 +1346,22 @@ def floats_of(
         (low, high) pair of two numbers"``).
     :param n_members: How many numbers it holds, or ``None`` for any count.
     :return: The numbers, each a ``float``.
-    :raises TypeError: if *value* is a text or is not a sequence at all, a
-        member is not one number (a text or a complex number included), or
-        *n_members* is not a number.
+    :raises TypeError: if *value* is a text in any form (a ``bytearray``
+        included), a mapping, a set or not a sequence at all, a member is not
+        one number (a text or a complex value included), or *n_members* is
+        not a number.
     :raises ValueError: if it holds other than *n_members* members, a
         member is a number too large for a float, or *n_members* is not a
         whole number of at least one.
     """
     expected = None if n_members is None else require_count(n_members, "n_members")
     msg = f"'{name}' must be {members}"
-    if holds_text(value):
-        msg += f", not {type(value).__name__}."
-        raise TypeError(msg)
-    try:
-        items = list(cast("Iterable[object]", value))
-    except TypeError:
-        msg += f", not {type(value).__name__}."
-        raise TypeError(msg) from None
+    items = _members_of(value, msg)
     if expected is not None and len(items) != expected:
         msg += f", not {len(items)} of them."
         raise ValueError(msg)
     return tuple(
-        require_real(item, f"{msg}; one member is {type(item).__name__}.")
+        require_real(item, f"{msg}; one member is {given_type(item)}.")
         for item in items
     )
 
@@ -1291,8 +1376,8 @@ def pair_of_floats(value: object, name: str, members: str) -> tuple[float, float
     :param members: What the two members are, as the message spells them
         (``"(low, high)"``).
     :return: The two numbers.
-    :raises TypeError: if *value* is a text or is not a sequence at all, or
-        a member is not one number.
+    :raises TypeError: if *value* is a text in any form, a mapping, a set or
+        not a sequence at all, or a member is not one number.
     :raises ValueError: if it holds other than two members.
     """
     first, second = floats_of(value, name, f"a pair {members} of two numbers", 2)

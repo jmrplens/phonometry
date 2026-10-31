@@ -156,6 +156,7 @@ from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, read_only
 from .._internal.validation import (
     _as_float64,
+    holds_complex,
     refuse_text,
     require_choice,
     require_count,
@@ -1691,15 +1692,19 @@ def neck_loop_characteristics(
     level = require_finite_array(field_strength_level, "field_strength_level")
     refuse_text(impedance_ohm, "'impedance_ohm' must be numbers, not text.")
     try:
-        complex_input = np.iscomplexobj(impedance_ohm)
+        given = np.asarray(impedance_ohm)
     except TypeError as exc:
         msg = "'impedance_ohm' must be numeric."
         raise TypeError(msg) from exc
     except ValueError as exc:
         msg = "'impedance_ohm' must be numeric."
         raise ValueError(msg) from exc
+    # An array of objects that holds a NumPy complex number is complex too,
+    # though its dtype does not say so, and is read as its magnitude, as a
+    # complex array is, not refused as a complex value a real one replaces.
+    complex_input = holds_complex(given)
     z = require_positive_array(
-        np.abs(np.asarray(impedance_ohm)) if complex_input else impedance_ohm,
+        np.abs(given) if complex_input else impedance_ohm,
         "impedance_ohm",
     )
     if not f.size == level.size == z.size:

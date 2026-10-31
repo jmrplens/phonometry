@@ -3730,13 +3730,89 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   take an array-like of numbers that admits no text now (a number, a
   sequence of numbers, a numpy number or array of a number or truth-value
   dtype, or anything that converts itself to one), so a type checker refuses
-  the misspelling as the call does; nothing changes at run time. A type
-  checker refuses there too what `ArrayLike` admitted of an array typed with
+  the misspelling as the call does. A type checker refuses there too what
+  `ArrayLike` admitted of an array typed with
   a dtype that is no number or truth value (`np.object_`, `np.generic`,
   `np.datetime64`, `np.timedelta64`) and of a buffer such as `memoryview`;
   the call still converts an object array of numbers.
   `scripts/check_parameter_annotations.py` fails on a `Literal` choice beside
   an alternative that takes any text, and rule A59 of the contributor guide
+  states it.
+
+- **A choice beside numbers refuses, by name, a text where its numbers go.**
+  Twelve public parameters take one of a few words or numbers and read a
+  `str` as the word. In eight of them anything else went to the numbers, so
+  a text in another form was parsed, or refused with an error that named
+  nothing: the `flow_resistivity` of `aircraft.RotorcraftGround` and of
+  `aircraft.terrain_screening_adjustment`, the `initial_state` of
+  `filters.time_weighting`, the `termination` of
+  `materials.layered_absorber` and of `materials.diffuse_field_absorption`,
+  the `coefficients` of `materials.delany_bazley`, the `target` of
+  `room.shaped_sweep_signal` and the `speech_spectrum` of
+  `speech.speech_intelligibility_index`.
+  `layered_absorber(termination=["400", "400"])` closed the stack with an
+  impedance of 400 Pa s/m, `delany_bazley(coefficients=b"12345678")` took
+  the codes of the eight characters as C1 to C8 and
+  `coefficients=["0.0571"] * 8` the numbers they read as,
+  `time_weighting(initial_state=["0.5", "0.5"])` started two channels from
+  0.5, `shaped_sweep_signal(target=(["100", "1000"], ["0", "-3"]))` was
+  synthesized, `speech_intelligibility_index(["60"] * 18)` read eighteen
+  levels of 60 dB and `b"normal"` failed with a `ValueError` that named
+  nothing, `RotorcraftGround` stored a `bytes`, `None`, a complex value or
+  any other object as given and read `["20000"]` as 20000 Pa s/m², and
+  `terrain_screening_adjustment` answered a `bytes` with the `ValueError` of
+  `float()` and `None` as a resistivity that is not finite. Each refuses a
+  `bytes`, a `bytearray`, and a sequence or an array that holds a text, a
+  `bytearray` at any depth included, which numpy read as the codes of its
+  characters (`[bytearray(b"12")]` as `[[49, 50]]`), with `TypeError` naming
+  the parameter and its options, whatever the text reads as; `None` where it
+  is no option and an object that is no number are a
+  `TypeError` naming the parameter as well, and a `target` of three arrays,
+  whose third was left unread, is a `ValueError`. A misspelt vocal effort
+  names `speech_spectrum` rather than a `vocal_effort` the function does not
+  take, and the noise spectrum, threshold and band importance of the speech
+  index refuse a text or a complex value among their numbers by name.
+  `RotorcraftGround` refuses them when it is built, and so a single flow
+  resistivity that is not positive and finite, a single ground elevation
+  that is not finite and a text among the elevations or the axes of
+  `terrain`, which an event refused later or not at all. The `coefficients`
+  of `delany_bazley` are annotated as numbers beside the presets, so the
+  list or the array of the eight that the call always took type-checks, and
+  `speech_spectrum` is annotated as a vocal effort or numbers. A sequence of
+  arrays a record holds (the three terrain axes of `RotorcraftGround`, the
+  curve pairs of `electroacoustics.LoudspeakerDirectivity`,
+  `electroacoustics.MicrophoneDirectivity`,
+  `electroacoustics.MicrophoneNoise` and
+  `electroacoustics.MicrophoneOverload`) refuses a text or a complex value
+  among its numbers by name, where numpy parsed the one and dropped the
+  imaginary part of the other. A `bytearray`, a mapping and a set given
+  whole for such a sequence, or for the coefficients, are refused too,
+  where they were read as the codes of the characters, the keys and the
+  members in no order, and so is a `bytearray` given whole where a pair, a
+  list of labels or a list of indices belongs (the band edges of the
+  electroacoustic results, `band_hz=` of `vibration.single_mode_fit`, the
+  `labels` of `filters.FractionalOctaveBands`, the `microphones` of the IEC
+  61094-8 corrections and `excluded=` of `building.loudest_corner`). A
+  record holds a `bytearray` it is given as the `bytes` it spells, a text
+  as a `bytes` is, so a later write to the caller's `bytearray` does not
+  reach it and a field of numbers refuses it as text, and its refusal names
+  and quotes the `bytearray` the caller gave, inside a mapping, a named
+  tuple or an array of objects as inside a tuple or a list. An array of
+  objects that holds a `bytearray` where numbers belong is refused as text
+  by the shared guards, where `float()` parsed it (`bytearray(b"94")` as
+  94.0). A complex `initial_state`, read as its real part with no more than
+  a `ComplexWarning`, is a `TypeError`, an array of objects that holds a
+  NumPy complex number included, and a ragged one is a `ValueError`, as a
+  ragged `termination` is. The scale values and the correlated variables
+  of the ISO/TS 12913 soundscape functions refuse such an array too, and
+  `environment.method_a_scale_values` any complex position, each of which
+  was read as its real part, while
+  `electroacoustics.neck_loop_characteristics` reads it as the magnitudes of
+  a complex impedance, as it reads a complex array, where it refused it. A
+  `str`, a number and an array of numbers work as before. `tests/test_choices_beside_numbers.py` finds every choice beside
+  numbers from its annotation and calls each with a text in every other
+  form, `None` and an object, and reads every body for a `str` taken as a
+  choice that no annotation states; rule A59 of the contributor guide
   states it.
 
 - **A function of a number or an array of them returns an array for an array,
@@ -4103,6 +4179,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `io.write_catalogue(delimiter=, decimal=)` beside a JSON document and
   `building.single_number_uncertainty(situation=)` with `upper_limit=True`
   refuse a value that is not text with `TypeError` instead of `ValueError`.
+  `aircraft.RotorcraftGround` refuses, when it is built, a flow resistivity
+  that is neither a class letter nor numbers, as it refuses a letter it
+  does not know.
   `materials.layered_absorber`, `materials.diffuse_field_absorption`,
   `environment.road_source_power` and the Delany-Bazley preset check their
   choice once, where they start. Twelve plots of the hearing protectors, the
@@ -4876,7 +4955,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   parameter. A text is the wrong type wherever a number belongs, whatever it
   reads as: `"20"` and `"fifty"` are both `TypeError`, given alone or in an
   array, where a scalar guard used to parse the first into a number and an
-  array guard to parse a column of them. A count that is not whole or is too
+  array guard to parse a column of them, and so are a `bytes` and a text in
+  a sequence or an array where a choice beside numbers takes its numbers. A
+  count that is not whole or is too
   small, an empty description, a choice that names none of the options and a
   value out of range stay `ValueError`. A sequence where one measurement
   belongs is a `TypeError` too, a one-element sequence included: the ISO 7235

@@ -54,12 +54,14 @@ from __future__ import annotations
 import math
 from dataclasses import KW_ONLY, dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, ClassVar
+from typing import TYPE_CHECKING, Any, ClassVar, cast
 
 import numpy as np
 
 from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
+    is_scalar,
+    refuse_text_beside_choice,
     require_choice,
     require_equal_shapes,
     require_non_negative,
@@ -105,6 +107,8 @@ _FLOW_RESISTIVITY: dict[str, float] = {
     "G": 20.0e6,  # hard surfaces (asphalt, concrete)
     "H": 200.0e6,  # very hard and dense (dense asphalt, water)
 }
+#: The CNOSSOS-EU ground classes a flow resistivity may be given as, A to H.
+_GROUND_CLASSES = tuple(_FLOW_RESISTIVITY)
 #: Minimum vertex count of a terrain section: two vertices form the single
 #: straight segment the continuous least-squares mean-plane fit (Eq. 36-40) needs.
 _MIN_SECTION_VERTICES = 2
@@ -797,9 +801,9 @@ def terrain_screening_adjustment(
         ``(M−1,)``) averaged per sub-path by Eq. 41.
     :return: A :class:`TerrainScreeningResult`.
     :raises ValueError: If the inputs are invalid.
-    :raises TypeError: if ``flow_resistivity`` is not a single number, or
-        ``flow_resistivity`` or ``frequencies`` holds a text or a value that is not a
-        real number.
+    :raises TypeError: if ``flow_resistivity`` is neither a class letter nor
+        numbers (a ``bytes``, ``None``, a complex value, a text among numbers),
+        or ``frequencies`` holds a text or a value that is not a real number.
     """
     f = require_positive_array(frequencies, "frequencies")
     d, z = _validated_section(distances_m, heights_m)
@@ -850,14 +854,20 @@ def _segment_resistivities(
     flow_resistivity: str | ArrayLike,
     n_segments: int,
 ) -> NDArray[np.float64]:
-    """Per-segment ``σ`` from a scalar, class letter or per-segment array."""
+    """Per-segment ``σ`` from a scalar, class letter or per-segment array.
+
+    A text that is not a ``str`` (a ``bytes``, a text in a sequence or an
+    array) is refused before the numbers are read, and one value goes through
+    the scalar guard whole, so a ``bytes``, ``None`` or a complex value is a
+    :class:`TypeError` naming the parameter rather than what :func:`float`
+    makes of it.
+    """
     if isinstance(flow_resistivity, str):
         return np.full(n_segments, _resolve_flow_resistivity(flow_resistivity))
-    if np.isscalar(flow_resistivity):
-        # unused-ignore: NumPy 2.5.4's stubs narrow isscalar() to float and the
-        # ignore is unnecessary; older stubs leave complex in and need it.
-        sigma = float(flow_resistivity)  # type: ignore[arg-type, unused-ignore]
-        return np.full(n_segments, _resolve_flow_resistivity(sigma))
+    refuse_text_beside_choice(flow_resistivity, "flow_resistivity", _GROUND_CLASSES)
+    if is_scalar(flow_resistivity):
+        sigma = require_positive(cast("float", flow_resistivity), "flow_resistivity")
+        return np.full(n_segments, sigma)
     arr = require_positive_array(flow_resistivity, "flow_resistivity")
     if arr.shape != (n_segments,):
         msg = "Per-segment 'flow_resistivity' must have one value per profile segment."

@@ -262,6 +262,49 @@ def test_screening_per_segment_resistivity_uses_log_mean() -> None:
     assert np.allclose(mixed.adjustment, scalar.adjustment, atol=1e-12)
 
 
+@pytest.mark.parametrize(
+    "resistivity",
+    [
+        b"G",
+        np.bytes_(b"G"),
+        None,
+        1.0 + 1.0j,
+        np.complex128(2.0e4 + 5.0e3j),
+        np.complex64(2.0e4),
+        ["1e5", "1e5"],
+    ],
+    ids=[
+        "bytes",
+        "numpy-bytes",
+        "none",
+        "complex",
+        "numpy-complex",
+        "numpy-complex-real-valued",
+        "texts",
+    ],
+)
+@pytest.mark.filterwarnings("error")
+def test_screening_refuses_a_flow_resistivity_that_is_no_number(
+    resistivity: object,
+) -> None:
+    """The docstring promised a ``TypeError`` that the call did not raise.
+
+    ``float()`` ran before the guard, so a ``bytes`` was its anonymous
+    ``ValueError``, ``None`` became ``nan`` and was refused as not finite,
+    a complex value failed with an error that named nothing, and a numpy
+    complex scalar was read as its real part with a ``ComplexWarning``.
+    """
+    with pytest.raises(TypeError, match="'flow_resistivity'"):
+        aircraft.terrain_screening_adjustment(
+            frequencies=[500.0],
+            source=(0.0, 5.0),
+            receiver=(100.0, 1.2),
+            distances_m=[0.0, 50.0, 100.0],
+            heights_m=[0.0, 0.0, 0.0],
+            flow_resistivity=resistivity,  # type: ignore[arg-type]
+        )
+
+
 def test_screening_validation_and_plot() -> None:
     f = [500.0]
     with pytest.raises(ValueError, match=r"The terrain section must cover"):

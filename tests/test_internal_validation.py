@@ -22,6 +22,7 @@ refused according to a coincidence between its bands.
 from __future__ import annotations
 
 import warnings
+from collections import deque
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
@@ -32,11 +33,14 @@ if TYPE_CHECKING:
     from collections.abc import Callable
 
 from phonometry._internal.validation import (
+    arrays_of,
     check_engine,
     floats_of,
+    holds_text,
     indices_of,
     is_integer,
     pair_of_arrays,
+    refuse_text_beside_choice,
     require_1d_signal,
     require_above_absolute_zero,
     require_above_absolute_zero_array,
@@ -358,6 +362,20 @@ def test_a_scalar_guard_refuses_a_complex_number(
         require_real(complex_number, "no complex here")
 
 
+def test_an_array_of_objects_that_holds_a_bytearray_holds_text() -> None:
+    """A ``bytearray`` element is parsed as a ``bytes`` one is, so it is text.
+
+    numpy converts an element of an array of objects with :func:`float`,
+    and ``float(bytearray(b"94"))`` is ``94.0``: the array guards read the
+    array as ``[94.0, 0.5]``.
+    """
+    objects = _objects(bytearray(b"94"), bytearray(b"0.5"))
+    assert holds_text(objects)
+    with pytest.raises(TypeError, match="'x' must be numbers, not text"):
+        require_finite_array(objects, "x")
+    assert not holds_text(_objects(94.0, 0.5))
+
+
 def test_an_array_of_objects_that_holds_a_complex_number_is_refused() -> None:
     """An object array is read item by item, and a NumPy complex item is refused.
 
@@ -536,3 +554,125 @@ def test_indices_are_integers_in_a_sequence_or_a_one_dimensional_integer_array()
     for bad in (np.array(1), np.array([[0, 1]]), np.array([1.0]), np.array([True])):
         with pytest.raises(TypeError, match="'rows' must be integer indices"):
             indices_of(bad, "rows")
+
+
+def _objects(*members: object) -> np.ndarray:
+    """An array of objects holding *members* as they are, none spread over a row."""
+    held = np.empty(len(members), dtype=object)
+    for index, member in enumerate(members):
+        held[index] = member
+    return held
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        b"rigid",
+        np.bytes_(b"rigid"),
+        bytearray(b"rigid"),
+        ["400"],
+        np.array("400"),
+        [bytearray(b"400")],
+        (400.0, bytearray(b"410")),
+        [[bytearray(b"4")], [bytearray(b"4")]],
+        deque([bytearray(b"400")]),
+        _objects(bytearray(b"400"), 410.0),
+        _objects([bytearray(b"400")]),
+    ],
+    ids=[
+        "bytes",
+        "numpy-bytes",
+        "bytearray",
+        "text-in-a-list",
+        "zero-dimensional-text",
+        "bytearray-in-a-list",
+        "bytearray-in-a-tuple",
+        "bytearray-nested",
+        "bytearray-in-a-deque",
+        "bytearray-in-an-array-of-objects",
+        "bytearray-in-a-list-in-an-array-of-objects",
+    ],
+)
+def test_a_text_beside_a_choice_is_refused_naming_the_options(value: object) -> None:
+    """A text that is not a ``str`` is neither the choice nor its numbers.
+
+    A ``bytearray`` inside a sequence was let through: numpy reads it as a
+    row of the codes of its characters, so ``[bytearray(b"400")]`` reached
+    the numbers as ``[[52, 48, 48]]``, and :func:`float` parses one inside
+    an array of objects as the number it spells.
+    """
+    with pytest.raises(
+        TypeError, match=r"'termination' must be one of \('rigid', 'free'\)"
+    ):
+        refuse_text_beside_choice(value, "termination", ("rigid", "free"))
+
+
+@pytest.mark.parametrize(
+    "value",
+    [400.0, 400 + 10j, [400.0, 410.0], np.ones(3), None, object()],
+    ids=["number", "complex", "numbers", "array", "none", "object"],
+)
+def test_what_holds_no_text_is_left_to_the_numbers(value: object) -> None:
+    """Numbers pass, and so does what is no text: the conversion that follows refuses it."""
+    refuse_text_beside_choice(value, "termination", ("rigid", "free"))
+
+
+@pytest.mark.parametrize(
+    ("members", "message"),
+    [
+        ((["0", "1"], [0.0, 1.0]), "'polar' must be a pair .* of numbers, not text"),
+        (
+            ([1j, 2j], [0.0, 1.0]),
+            "'polar' must be a pair .* of real numbers, not complex",
+        ),
+    ],
+    ids=["text", "complex"],
+)
+def test_a_member_of_a_sequence_of_arrays_holds_numbers(
+    members: tuple[object, object], message: str
+) -> None:
+    """A member was converted by numpy, which parsed a text and dropped an imaginary part."""
+    with pytest.raises(TypeError, match=message):
+        arrays_of(members, "polar", "a pair (angles_deg, relative_db) of two arrays", 2)
+
+
+#: What iterating reads as members a caller did not mean: the codes of the
+#: characters of a ``bytearray``, the keys of a mapping, and the members of a
+#: set in no order.
+_NO_SEQUENCES = {
+    "bytearray": bytearray(b"ab"),
+    "mapping": {0: [1.0], 1: [2.0]},
+    "set": frozenset({1.0, 2.0}),
+}
+
+
+@pytest.mark.parametrize("value", _NO_SEQUENCES.values(), ids=_NO_SEQUENCES.keys())
+def test_a_sequence_of_arrays_is_refused_whole_when_it_is_none(value: object) -> None:
+    """A ``bytearray`` was read as one array per byte code, a mapping as its keys."""
+    with pytest.raises(TypeError, match=r"'polar' must be a pair .*, not "):
+        arrays_of(value, "polar", "a pair (angles_deg, relative_db) of two arrays", 2)
+
+
+@pytest.mark.parametrize("value", _NO_SEQUENCES.values(), ids=_NO_SEQUENCES.keys())
+def test_a_sequence_of_numbers_is_refused_whole_when_it_is_none(value: object) -> None:
+    """``{i: 1.0 for i in range(8)}`` gave its keys 0 to 7 as the coefficients."""
+    with pytest.raises(TypeError, match=r"'coefficients' must be eight numbers, not "):
+        floats_of(value, "coefficients", "eight numbers")
+
+
+@pytest.mark.parametrize(
+    "value",
+    [np.complex128(2.0 + 1.0j), np.complex64(2.0), np.array(2.0 + 1.0j), 2.0 + 1.0j],
+    ids=["complex128", "complex64-real-valued", "zero-dimensional", "python"],
+)
+@pytest.mark.filterwarnings("error")
+def test_one_number_is_refused_when_it_is_complex_of_any_kind(value: object) -> None:
+    """``float()`` refuses a Python complex but keeps the real part of a numpy one.
+
+    It did so with no more than a ``ComplexWarning``, and the guard returned
+    the real part as the number.
+    """
+    with pytest.raises(TypeError, match="'x' must be real"):
+        require_real(value, "'x' must be real")
+    with pytest.raises(TypeError, match="'x' must be a number"):
+        require_positive(value, "x")  # type: ignore[arg-type]

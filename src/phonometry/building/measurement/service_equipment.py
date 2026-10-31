@@ -1739,7 +1739,7 @@ def loudest_corner(
         raise TypeError(msg) from exc
     except ValueError as exc:  # a ragged nesting of lists
         raise ValueError(msg) from exc
-    if isinstance(excluded, (str, bytes)) or rank != 1:
+    if isinstance(excluded, (str, bytes, bytearray)) or rank != 1:
         raise TypeError(msg)
     left = np.ones(levels.size, dtype=bool)
     for value in excluded:

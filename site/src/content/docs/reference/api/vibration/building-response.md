@@ -159,7 +159,7 @@ EMPIRICAL_FREQUENCY_TOLERANCE = 0.5
 estimate_fundamental_frequency(
     model: Literal['stories', 'height', 'height_width', 'slenderness'],
     *,
-    n_stories: int | None = None,
+    n_stories: int | np.integer[Any] | None = None,
     height_m: float | None = None,
     width_m: float | None = None,
     coefficient: float | None = None,
@@ -193,7 +193,7 @@ One prediction, bundled with the coefficient and the error band.
 fundamental_frequency(
     model: Literal['stories', 'height', 'height_width', 'slenderness'],
     *,
-    n_stories: int | None = None,
+    n_stories: int | np.integer[Any] | None = None,
     height_m: float | None = None,
     width_m: float | None = None,
     coefficient: float | None = None,
@@ -224,7 +224,7 @@ reader should not have to remember which.
 fundamental_period(
     model: Literal['stories', 'height', 'height_width', 'slenderness'],
     *,
-    n_stories: int | None = None,
+    n_stories: int | np.integer[Any] | None = None,
     height_m: float | None = None,
     width_m: float | None = None,
     coefficient: float | None = None,

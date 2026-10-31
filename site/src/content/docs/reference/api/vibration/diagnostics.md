@@ -103,7 +103,7 @@ careful choice of `N` and `V` matters for radiated power.
 ```python
 bearing_fault_frequencies(
     speed_rpm: float,
-    n_elements: int,
+    n_elements: int | np.integer[Any],
     element_diameter: float,
     pitch_diameter: float,
     *,
@@ -162,11 +162,11 @@ both are independent of which race turns (Norton's Eqs. 8.8 and 8.14, and
 ```python
 blade_pass_frequencies(
     speed_rpm: float,
-    n_blades: int,
+    n_blades: int | np.integer[Any],
     *,
-    n_harmonics: int = 3,
-    n_vanes: int | None = None,
-    n_lobe_orders: int = 1,
+    n_harmonics: int | np.integer[Any] = 3,
+    n_vanes: int | np.integer[Any] | None = None,
+    n_lobe_orders: int | np.integer[Any] = 1,
 ) -> FaultFrequencyResult
 ```
 
@@ -277,7 +277,10 @@ Predicted frequencies, in hertz, in order.
 ### FaultFrequencyResult.harmonics()
 
 ```python
-FaultFrequencyResult.harmonics(name: str, n_harmonics: int) -> np.ndarray
+FaultFrequencyResult.harmonics(
+    name: str,
+    n_harmonics: int | np.integer[Any],
+) -> np.ndarray
 ```
 
 The first *n_harmonics* integer harmonics of the line called *name*.
@@ -397,10 +400,10 @@ One predicted discrete line of a machine's kinematic signature.
 ```python
 gear_mesh_frequencies(
     speed_rpm: float,
-    n_teeth: int,
+    n_teeth: int | np.integer[Any],
     *,
-    n_harmonics: int = 3,
-    n_sidebands: int = 0,
+    n_harmonics: int | np.integer[Any] = 3,
+    n_sidebands: int | np.integer[Any] = 0,
     sideband_rate: float | None = None,
 ) -> FaultFrequencyResult
 ```
@@ -443,13 +446,13 @@ Only positive sideband frequencies are returned.
 ```python
 induction_motor_frequencies(
     speed_rpm: float,
-    n_poles: int,
-    n_rotor_bars: int,
+    n_poles: int | np.integer[Any],
+    n_rotor_bars: int | np.integer[Any],
     *,
     slip: float = 0.0,
     supply_frequency: float | None = None,
-    n_slot_harmonics: int = 1,
-    n_sidebands: int = 0,
+    n_slot_harmonics: int | np.integer[Any] = 1,
+    n_sidebands: int | np.integer[Any] = 0,
 ) -> FaultFrequencyResult
 ```
 

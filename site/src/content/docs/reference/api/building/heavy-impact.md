@@ -108,7 +108,7 @@ a_weighted_max_impact_level(
     levels: ArrayLike,
     *,
     frequencies: ArrayLike | Sequence[float] | None = None,
-    fraction: Literal[1, 3] | None = None,
+    fraction: Literal[1, 3] | np.integer[Any] | None = None,
 ) -> AWeightedMaxImpactResult
 ```
 
@@ -143,7 +143,7 @@ corrections of Table D.3. The same formula rates `LiA,Fmax`,
 ```python
 AWeightedMaxImpactResult(
     frequencies: np.ndarray,
-    fraction: int,
+    fraction: Literal[1, 3],
     levels: np.ndarray,
     a_weighting: np.ndarray,
     corrected: np.ndarray,

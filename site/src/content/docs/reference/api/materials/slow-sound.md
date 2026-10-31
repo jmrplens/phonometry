@@ -187,7 +187,7 @@ helmholtz_resonator_impedance(
     end_correction: bool = True,
     geometry: Literal['square', 'slit'] = 'square',
     fluid: Fluid = ...,
-    n_sum_terms: int = 40,
+    n_sum_terms: int | np.integer[Any] = 40,
 ) -> NDArray[np.complex128]
 ```
 
@@ -349,7 +349,7 @@ rectangular_duct_properties(
     *,
     side_m: float,
     fluid: Fluid = ...,
-    n_sum_terms: int = 40,
+    n_sum_terms: int | np.integer[Any] = 40,
 ) -> EffectiveFluidProperties
 ```
 

@@ -79,6 +79,7 @@ therefore covers both parts, and a verdict here is a verdict against either.
 from __future__ import annotations
 
 import math
+from collections.abc import Mapping
 from dataclasses import dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Final, Literal
@@ -99,8 +100,6 @@ from .exposure import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping
-
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
 
@@ -127,6 +126,19 @@ BurstApplication = Literal["hand-arm", "whole-body", "low-frequency-whole-body"]
 
 #: A row of Tables 7 to 9: a frequency weighting, or the band-limiting row.
 BurstRow = Literal[WeightingName, "band-limiting"]
+
+#: The indications of one burst length, by printed column name.
+BurstColumns = Mapping[str, float]
+
+#: The indications by burst length, ``None`` for the continuous row.
+#: ``Mapping`` is invariant in its key, so a ``dict[int, ...]`` that leaves
+#: the continuous row out is not a ``Mapping[int | None, ...]``: each key a
+#: caller may write is named.
+BurstIndications = (
+    Mapping[int, BurstColumns]
+    | Mapping[int | None, BurstColumns]
+    | Mapping[None, BurstColumns]
+)
 
 #: The averaging time of the two MTVV columns of Table 8, in seconds. Not
 #: printed in the table: recovered by reproducing it, and the "slow" constant
@@ -841,7 +853,7 @@ class SignalBurstVerification(OwnsArrays):
 def verify_signal_burst_response(
     application: BurstApplication,
     name: BurstRow,
-    measured: Mapping[int | None, Mapping[str, float]],
+    measured: BurstIndications,
     *,
     amplitude_m_s2: float = 1.0,
 ) -> SignalBurstVerification:
@@ -889,18 +901,20 @@ def verify_signal_burst_response(
         msg = "'measured' must report at least one burst length."
         raise ValueError(msg)
 
-    for n_cycles in measured:
+    # One reading of the three shapes a caller's keys may take.
+    readings: dict[int | None, BurstColumns] = dict(measured.items())
+    for n_cycles in readings:
         _require_cycles(test, n_cycles)
     cycle_counts = tuple(
-        n_cycles for n_cycles in (*test.cycle_counts, None) if n_cycles in measured
+        n_cycles for n_cycles in (*test.cycle_counts, None) if n_cycles in readings
     )
     printed_columns = tuple(SIGNAL_BURST_RESPONSE[test.application, row, None])
     first = cycle_counts[0]
     quantities = tuple(
-        quantity for quantity in printed_columns if quantity in measured[first]
+        quantity for quantity in printed_columns if quantity in readings[first]
     )
     for n_cycles in cycle_counts:
-        reported = tuple(measured[n_cycles])
+        reported = tuple(readings[n_cycles])
         unknown = [column for column in reported if column not in printed_columns]
         if unknown:
             msg = (
@@ -925,7 +939,7 @@ def verify_signal_burst_response(
 
     values = np.array(
         [
-            [float(measured[n_cycles][q]) for q in quantities]
+            [float(readings[n_cycles][q]) for q in quantities]
             for n_cycles in cycle_counts
         ],
         dtype=np.float64,

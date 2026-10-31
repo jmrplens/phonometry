@@ -120,7 +120,7 @@ _MIN_SAMPLES_PER_PERIOD = 2
 def comb_filter_response(
     frequencies: ArrayLike,
     period_s: float,
-    n_averages: int,
+    n_averages: int | np.integer[Any],
 ) -> NDArray[np.float64]:
     r"""Magnitude of the N-period synchronous-averaging comb filter.
 
@@ -266,10 +266,16 @@ class SynchronousAverageResult(OwnsArrays):
             comb response with its frequency axis, any of the five carries
             an axis it should not, the waveform is a Signal at a rate other
             than :attr:`fs`, or the period grid is not ``round(fs * T)``
-            samples long.
-        :raises TypeError: if ``samples_per_period`` is not a single number.
+            samples long, or ``samples_per_period`` is not a whole number.
+        :raises TypeError: if ``samples_per_period`` is a flag, a text or an
+            array where a count goes.
         """
-        require_scalar(self.samples_per_period, "samples_per_period")
+        # Held as the int require_count returns, a NumPy integer included.
+        object.__setattr__(
+            self,
+            "samples_per_period",
+            require_count(self.samples_per_period, "samples_per_period"),
+        )
         require_ranks(
             self,
             period_waveform=1,
@@ -348,7 +354,7 @@ def _samples_per_period(fs: float, period_s: float) -> tuple[float, int]:
 
 
 def _resolve_n_averages(
-    n_averages: int | None, length: int, samples: float, m_int: int
+    n_averages: int | np.integer[Any] | None, length: int, samples: float, m_int: int
 ) -> int:
     """Number of whole periods to average, validated against the record."""
     available = int(np.floor((length - m_int) / samples)) + 1
@@ -405,8 +411,8 @@ def time_synchronous_average(
     fs: float | None = None,
     *,
     period_s: float,
-    n_averages: int | None = None,
-    n_harmonics: int = 8,
+    n_averages: int | np.integer[Any] | None = None,
+    n_harmonics: int | np.integer[Any] = 8,
 ) -> SynchronousAverageResult:
     r"""Extract a periodic waveform of known period by time domain averaging.
 

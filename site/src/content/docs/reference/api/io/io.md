@@ -1099,7 +1099,7 @@ convert(
     dst: str | Path,
     *,
     subtype: str | None = None,
-    block_size: int = 1048576,
+    block_size: int | np.integer[Any] = 1048576,
 ) -> AudioFileInfo
 ```
 
@@ -1391,9 +1391,9 @@ derived from the file's channel mask.
 ```python
 read_blocks(
     path: str | Path,
-    block_size: int,
+    block_size: int | np.integer[Any],
     *,
-    overlap: int = 0,
+    overlap: int | np.integer[Any] = 0,
     calibration_factor: float | None = None,
 ) -> Iterator[Signal]
 ```
@@ -1539,7 +1539,7 @@ The sidecar filename of an audio file (see the module docstring).
 ```python
 Signal(
     data: NDArray[np.float64],
-    fs: int,
+    fs: float,
     *,
     calibration_factor: float | None = None,
     channel_labels: tuple[str, ...] | None = None,
@@ -1639,7 +1639,7 @@ Samples per channel (frames).
 ### Signal.pick()
 
 ```python
-Signal.pick(channels: int | Sequence[int]) -> Signal
+Signal.pick(channels: int | np.integer[Any] | Sequence[int]) -> Signal
 ```
 
 The chosen channels, as a new Signal.
@@ -1781,7 +1781,7 @@ checked when the path is known, still before anything starts.
 write(
     path: str | Path,
     x: Signal | ArrayLike,
-    fs: int | None = ...,
+    fs: float | np.integer[Any] | None = ...,
     *,
     subtype: Literal['PCM_16', 'PCM_24', 'PCM_32', 'FLOAT', 'DOUBLE'] | None = ...,
     bext: BroadcastMetadata | Literal['loudness'] | None = ...,
@@ -1793,7 +1793,7 @@ write(
 write(
     path: str | Path,
     x: Signal | ArrayLike,
-    fs: int | None = ...,
+    fs: float | np.integer[Any] | None = ...,
     *,
     subtype: Literal['PCM_16', 'PCM_24', 'PCM_32', 'FLOAT', 'DOUBLE'] | None = ...,
     bext: BroadcastMetadata | Literal['loudness'] | None = ...,
@@ -1828,7 +1828,7 @@ out of calibrated results.
 | :--- | :--- |
 | `path` | Destination file; the suffix picks the container: the WAV family (`.wav`, `.wave`, `.bwf`) on the base install, `.flac` with the `[audio]` extra. Lossy suffixes are refused by decided policy. |
 | `x` | A [`Signal`](/phonometry/reference/api/io/io/#signal), or an array in the library's channel convention (1-D mono, 2-D `(channels, samples)`). Float data is quantised per `subtype`; `int16`/`int32` arrays are written as a bit-exact pass-through of their codes. |
-| `fs` | Sample rate, Hz. Required for bare arrays; forbidden to disagree with a [`Signal`](/phonometry/reference/api/io/io/#signal)'s own rate. |
+| `fs` | Sample rate, Hz. Required for bare arrays; forbidden to disagree with a [`Signal`](/phonometry/reference/api/io/io/#signal)'s own rate. A WAV header holds a whole number of samples per second, so a fractional rate, given or a Signal's own, is refused. |
 | `subtype` | Target sample format (see above); `None` picks `FLOAT` for float data and the matching depth for integer data. |
 | `bext` | The broadcast provenance chunk (EBU Tech 3285; see [`phonometry.io._bext`](/phonometry/reference/api/io/io/)). `None` carries the [`Signal`](/phonometry/reference/api/io/io/#signal)'s own provenance when it has one and writes no chunk otherwise; `"loudness"` additionally measures the five R 128 fields with the library's BS.1770 implementation on the samples being written (one extra pass, which is why it is opt-in); a [`BroadcastMetadata`](/phonometry/reference/api/io/io/#broadcastmetadata) is written as given. Every written chunk's CodingHistory is extended -- never replaced -- with phonometry's `A=,F=,W=,M=,T=` line. |
 | `dither` | `"tpdf"` adds +/-1 LSB triangular-PDF dither before quantising to `PCM_16` (Lipshitz et al. 1992; see the module docstring); `None` (default) quantises plainly. Refused for any other subtype, where it would only add noise. |
@@ -1839,7 +1839,7 @@ out of calibrated results.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | For an unknown suffix or subtype, a missing or conflicting `fs`, a dither request outside `PCM_16`, an `rng` without a `dither` for it to seed, bext metadata that violates Tech 3285 (oversize field, version too old for a carried UMID or loudness), a sidecar request without a calibrated [`Signal`](/phonometry/reference/api/io/io/#signal), one whose calibration or channel labels no sidecar holds or whose sidecar would pass the 1 MiB a reader takes, or one with a pipe, a device, a socket or a directory at the sidecar's name, refused before the audio is written. |
+| ValueError | For an unknown suffix or subtype, a missing or conflicting `fs` or one that is not a whole number (given or the [`Signal`](/phonometry/reference/api/io/io/#signal)'s own), a dither request outside `PCM_16`, an `rng` without a `dither` for it to seed, bext metadata that violates Tech 3285 (oversize field, version too old for a carried UMID or loudness), a sidecar request without a calibrated [`Signal`](/phonometry/reference/api/io/io/#signal), one whose calibration or channel labels no sidecar holds or whose sidecar would pass the 1 MiB a reader takes, or one with a pipe, a device, a socket or a directory at the sidecar's name, refused before the audio is written. |
 | TypeError | if `fs` is a flag, a text or an array where a count goes. |
 
 ## write_catalogue

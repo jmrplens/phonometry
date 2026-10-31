@@ -56,7 +56,10 @@ single-strike SELs.
 ## cumulative_sel_identical
 
 ```python
-cumulative_sel_identical(sel_ss: float, n_strikes: int) -> float
+cumulative_sel_identical(
+    sel_ss: float,
+    n_strikes: int | np.integer[Any],
+) -> float
 ```
 
 Cumulative SEL of `n_strikes` identical strikes:
@@ -76,7 +79,7 @@ $\mathrm{SEL}_{\mathrm{ss}} + 10 \log_{10} N$.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `n_strikes` is not a whole number $\ge 1$. |
-| TypeError | if `n_strikes` or `sel_ss` is not a single number. |
+| TypeError | if `sel_ss` is not a single number, or `n_strikes` is a flag, a text or an array where a count goes. |
 
 ## pile_strike_metrics
 
@@ -189,7 +192,7 @@ strike_sel_spectrum(
     pressure_pa: Signal | ArrayLike,
     fs: float | None = None,
     *,
-    fraction: int = 3,
+    fraction: int | np.integer[Any] = 3,
     limits: tuple[float, float] = (10.0, 20000.0),
 ) -> StrikeSELSpectrum
 ```

@@ -100,7 +100,7 @@ import numpy as np
 
 from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays, read_only
-from ..._internal.types import as_float_or_array
+from ..._internal.types import as_float_or_array, float_keyed
 from ..._internal.validation import (
     require_1d_signal,
     require_choice,
@@ -132,7 +132,7 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
     from numpy.typing import ArrayLike, NDArray
 
     from ..._i18n import Language
-    from ..._internal.types import RealScalar, RealValues
+    from ..._internal.types import BandMapping, RealScalar, RealValues
     from ...metrology.uncertainty import Quantity
 
 __all__ = [
@@ -677,12 +677,12 @@ def pass_by_measurement(
     from ...filters.weighting import time_weighting, weighting_filter
 
     weighted = np.asarray(
-        weighting_filter(samples, round(rate), weighting="A"), dtype=np.float64
+        weighting_filter(samples, rate, weighting="A"), dtype=np.float64
     )
     window = min(weighted.size, max(1, round(_F_TIME_CONSTANT_S * rate)))
     warm_start = float(np.mean(weighted[:window] ** 2))
     mean_square = np.asarray(
-        time_weighting(weighted, round(rate), mode="fast", initial_state=warm_start),
+        time_weighting(weighted, rate, mode="fast", initial_state=warm_start),
         dtype=np.float64,
     )
     floor = np.finfo(np.float64).tiny
@@ -1485,7 +1485,7 @@ def check_small_roughness_deviations(
     *,
     frequencies: ArrayLike,
     speed_kmh: float,
-    limit_db: Mapping[float, float] = REFERENCE_TRACK_ROUGHNESS_LIMIT_DB,
+    limit_db: BandMapping = REFERENCE_TRACK_ROUGHNESS_LIMIT_DB,
 ) -> SmallRoughnessDeviation:
     r"""May a track whose roughness exceeds the limit still be used? Annex C.
 
@@ -1932,7 +1932,7 @@ def _bands_named_twice(
 
 
 def _frozen_roughness_limit(
-    limit_db: Mapping[float, float], name: str = "roughness_limit_db"
+    limit_db: BandMapping, name: str = "roughness_limit_db"
 ) -> Mapping[float, float]:
     """A read-only copy of a roughness limit, nominal wavelength to level.
 
@@ -2264,10 +2264,10 @@ def check_reference_track(
     curve_radius_m: float | None = None,
     track_gradient_ratio: float | None = None,
     small_deviations: SmallRoughnessDeviation | None = None,
-    roughness_limit_db: Mapping[float, float] = REFERENCE_TRACK_ROUGHNESS_LIMIT_DB,
-    decay_limits_db_per_m: Mapping[
-        str, Mapping[float, float]
-    ] = REFERENCE_TRACK_DECAY_LIMITS_DB_PER_M,
+    roughness_limit_db: BandMapping = REFERENCE_TRACK_ROUGHNESS_LIMIT_DB,
+    decay_limits_db_per_m: Mapping[str, BandMapping] = (
+        REFERENCE_TRACK_DECAY_LIMITS_DB_PER_M
+    ),
 ) -> ReferenceTrackCheck:
     """Is this track a reference track for a constant-speed type test? 6.2.
 
@@ -2334,7 +2334,10 @@ def check_reference_track(
         roughness=tuple(roughness),
         decay_rates=tuple(decay_rates),
         roughness_limit_db=roughness_limit,
-        decay_limits_db_per_m=decay_limits_db_per_m,
+        decay_limits_db_per_m={
+            direction: float_keyed(limits)
+            for direction, limits in decay_limits_db_per_m.items()
+        },
         small_deviations=small_deviations if through_annex_c else None,
         curve_radius_m=curve_radius_m,
         track_gradient_ratio=track_gradient_ratio,

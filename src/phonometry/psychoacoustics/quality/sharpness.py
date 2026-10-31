@@ -14,7 +14,7 @@ at, 1.00 acum (~0.96 Aures / ~1.02 von Bismarck through this front-end).
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -166,7 +166,7 @@ def sharpness_din_from_specific(
 
 def sharpness_din(
     x: Signal | ArrayLike,
-    fs: int | None = None,
+    fs: int | np.integer[Any] | None = None,
     field: Literal["free", "diffuse"] = "free",
     method: Literal["din", "aures", "bismarck"] = "din",
     *,

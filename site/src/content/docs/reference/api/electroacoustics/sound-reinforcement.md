@@ -141,7 +141,7 @@ feedback_stability(
     level_loudspeaker_at_listener: float,
     *,
     microphone_directivity: float = 0.0,
-    n_open_microphones: int = 1,
+    n_open_microphones: int | np.integer[Any] = 1,
     stability_margin: float = 10.0,
 ) -> FeedbackStabilityResult
 ```
@@ -246,7 +246,9 @@ marked. Requires matplotlib (`pip install "phonometry[plot]"`).
 ## open_microphone_correction
 
 ```python
-open_microphone_correction(n_open_microphones: int) -> float
+open_microphone_correction(
+    n_open_microphones: int | np.integer[Any],
+) -> float
 ```
 
 Number-of-open-microphones correction (Long Equation (18.23)).

@@ -67,7 +67,12 @@ from scipy import signal
 from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays
 from .._internal.utils import _sos_initial_state, _sos_state_mismatch
-from .._internal.validation import require_ranks, require_same_length, require_scalar
+from .._internal.validation import (
+    require_count,
+    require_ranks,
+    require_same_length,
+    require_scalar,
+)
 from ..io._resolve import (
     like_input,
     refuse_foreign_rate,
@@ -620,7 +625,7 @@ class ParametricEQ:
 
     def response(
         self,
-        n_points: int = 2048,
+        n_points: int | np.integer[Any] = 2048,
         *,
         f_min: float = 10.0,
         f_max: float | None = None,
@@ -632,15 +637,14 @@ class ParametricEQ:
         :param f_max: Highest frequency, in Hz (default: Nyquist).
         :return: An :class:`EQResponseResult` (carries the SOS cascade and
             plots the magnitude/phase response).
-        :raises TypeError: if ``f_max``, ``f_min`` or ``n_points`` is not a single
-            number.
+        :raises ValueError: for an ``n_points`` that is not a whole number from
+            2, or frequency limits outside ``0 < f_min < f_max <= fs / 2``.
+        :raises TypeError: if ``f_max`` or ``f_min`` is not a single number, or
+            ``n_points`` is a flag, a text or an array where a count goes.
         """
         require_scalar(f_max, "f_max")
         require_scalar(f_min, "f_min")
-        require_scalar(n_points, "n_points")
-        if n_points < _MIN_RESPONSE_POINTS:
-            msg = "'n_points' must be at least 2."
-            raise ValueError(msg)
+        n_points = require_count(n_points, "n_points", at_least=_MIN_RESPONSE_POINTS)
         nyquist = self.fs / 2
         if f_max is None:
             f_max = nyquist

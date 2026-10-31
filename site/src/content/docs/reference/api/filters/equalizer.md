@@ -241,7 +241,7 @@ Apply the EQ cascade to a signal.
 
 ```python
 ParametricEQ.response(
-    n_points: int = 2048,
+    n_points: int | np.integer[Any] = 2048,
     *,
     f_min: float = 10.0,
     f_max: float | None = None,
@@ -264,4 +264,5 @@ Evaluate the cascade frequency response on a log-spaced grid.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `f_max`, `f_min` or `n_points` is not a single number. |
+| ValueError | for an `n_points` that is not a whole number from 2, or frequency limits outside `0 < f_min < f_max <= fs / 2`. |
+| TypeError | if `f_max` or `f_min` is not a single number, or `n_points` is a flag, a text or an array where a count goes. |

@@ -512,7 +512,7 @@ class WeightingClassLimits(OwnsArrays):
 
 
 def weighting_class_limits(
-    weighting_class: int, *, edition: Edition = "2013"
+    weighting_class: int | np.integer[Any], *, edition: Edition = "2013"
 ) -> WeightingClassLimits:
     """Acceptance limits of one performance class of a weighting standard.
 
@@ -534,10 +534,11 @@ def weighting_class_limits(
         deviation limits in dB, as a :class:`WeightingClassLimits`. A lower
         limit of ``-inf`` means only the upper limit applies.
     :raises ValueError: if the edition is unknown or does not define the
-        requested class.
-    :raises TypeError: if ``weighting_class`` is not a single number.
+        requested class, or ``weighting_class`` is not a whole number.
+    :raises TypeError: if ``weighting_class`` is a flag, a text or an array
+        where a class goes.
     """
-    require_scalar(weighting_class, "weighting_class")
+    weighting_class = require_count(weighting_class, "weighting_class", at_least=None)
     spec = _edition_spec(edition)
     if weighting_class not in spec["classes"]:
         msg = (
@@ -673,7 +674,7 @@ def _between_nominals_sweep(
     wf: WeightingFilter,
     freqs_exact: np.ndarray,
     masks: dict[int, tuple[np.ndarray, np.ndarray]],
-    n_sweep_points: int,
+    n_sweep_points: int | np.integer[Any],
 ) -> dict[str, float]:
     """Subclause 5.5.7 sweep between adjacent exact nominal frequencies.
 
@@ -907,7 +908,10 @@ def _margin_classes(band: Mapping[str, Any]) -> list[int]:
 
 
 def verify_weighting_class(
-    wf: WeightingFilter, *, n_sweep_points: int = 4096, edition: Edition = "2013"
+    wf: WeightingFilter,
+    *,
+    n_sweep_points: int | np.integer[Any] = 4096,
+    edition: Edition = "2013",
 ) -> WeightingComplianceResult:
     r"""Verify a frequency-weighting filter against its standard's tolerances.
 

@@ -479,7 +479,7 @@ def _refine_peak(
     return position
 
 
-def _validate_refinement(interpolation: str, upsample: int) -> int:
+def _validate_refinement(interpolation: str, upsample: int | np.integer[Any]) -> int:
     if interpolation not in ("parabolic", "none"):
         msg = "'interpolation' must be 'parabolic' or 'none'."
         raise ValueError(msg)
@@ -693,7 +693,7 @@ def _gcc_curve(
     fs: float,
     weighting: str,
     window: str,
-    nperseg: int | None,
+    nperseg: int | np.integer[Any] | None,
     overlap: float,
     max_delay: float | None,
 ) -> tuple[NDArray[np.float64], NDArray[np.float64], int]:
@@ -737,11 +737,11 @@ def time_delay(
     method: _Method = "gcc",
     weighting: _Weighting = "phat",
     window: str = "hann",
-    nperseg: int | None = None,
+    nperseg: int | np.integer[Any] | None = None,
     overlap: float = 0.5,
     max_delay: float | None = None,
     interpolation: _Interpolation = "parabolic",
-    upsample: int = 1,
+    upsample: int | np.integer[Any] = 1,
     signal_bandwidth: float | None = None,
 ) -> TimeDelayResult:
     r"""Time delay of ``y`` relative to ``x`` (TDE).
@@ -892,7 +892,7 @@ def impulse_response_delay(
     *,
     reference: Signal | ArrayLike | None = None,
     interpolation: _Interpolation = "parabolic",
-    upsample: int = 8,
+    upsample: int | np.integer[Any] = 8,
 ) -> float:
     r"""Sub-sample delay of an impulse response, in seconds.
 
@@ -1024,7 +1024,7 @@ def align_impulse_responses(
     fs: float | None = None,
     *,
     interpolation: _Interpolation = "parabolic",
-    upsample: int = 8,
+    upsample: int | np.integer[Any] = 8,
 ) -> AlignedImpulseResponseResult:
     """Align an impulse response onto a reference by its estimated delay.
 

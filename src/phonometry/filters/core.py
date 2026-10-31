@@ -21,6 +21,7 @@ from .._internal.utils import (
 from .._internal.validation import (
     is_scalar,
     require_choice,
+    require_count,
     require_positive,
     require_present,
     require_real,
@@ -364,7 +365,7 @@ class OctaveSpectrogramResult(OwnsArrays):
         self,
         ax: Axes | None = None,
         *,
-        channel: int | None = None,
+        channel: int | np.integer[Any] | None = None,
         language: Language = "en",
         **kwargs: Any,
     ) -> Axes:
@@ -490,8 +491,8 @@ _DEFAULT_RESPONSE_PLOT = ResponsePlot()
 
 
 def _validate_bank_design(
-    fs: int,
-    fraction: float,
+    fs: float,
+    fraction: float | np.integer[Any],
     order: int,
     limits: RealValues | None,
     design: FilterDesign,
@@ -505,15 +506,11 @@ def _validate_bank_design(
     """
     require_scalar(fraction, "fraction")
     require_scalar(fs, "fs")
-    require_scalar(order, "order")
     if fs <= 0:
         msg = "Sample rate 'fs' must be positive."
         raise ValueError(msg)
     if fraction <= 0:
         msg = "Bandwidth 'fraction' must be positive."
-        raise ValueError(msg)
-    if order <= 0:
-        msg = "Filter 'order' must be positive."
         raise ValueError(msg)
     if limits is None:
         limits = [12, 20000]
@@ -618,9 +615,9 @@ class OctaveFilterBank:
 
     def __init__(
         self,
-        fs: int,
-        fraction: float = 1,
-        order: int = 6,
+        fs: float,
+        fraction: float | np.integer[Any] = 1,
+        order: int | np.integer[Any] = 6,
         limits: RealValues | None = None,
         *,
         design: FilterDesign = _DEFAULT_DESIGN,
@@ -651,11 +648,20 @@ class OctaveFilterBank:
             between calls, and how that state starts (:class:`BlockProcessing`).
         :param response_plot: Whether to show or save the filter response plot
             drawn while designing the bank (:class:`ResponsePlot`).
-        :raises TypeError: if ``fraction``, ``fs`` or ``order`` is not a single number.
+        :raises ValueError: for a sample rate or a bandwidth that is not
+            positive, an ``order`` that is not a whole number from 1, or
+            frequency limits or a design the bank cannot be built with.
+        :raises TypeError: if ``fraction`` or ``fs`` is not a single number, or
+            ``order`` is a flag, a text or an array where a count goes.
         """
+        order = require_count(order, "order")
         limits = _validate_bank_design(
             fs, fraction, order, limits, design, block_processing
         )
+        # A NumPy integer is read as the int it holds, so the bank keeps the
+        # plain number an int argument leaves there.
+        if isinstance(fraction, np.integer):
+            fraction = int(fraction)
 
         self.fs = fs
         self.fraction = fraction
@@ -1118,8 +1124,8 @@ def _decimate(x: np.ndarray, factor: int) -> np.ndarray:
 
 @lru_cache(maxsize=32)
 def _cached_filter_bank(
-    fs: int,
-    fraction: float,
+    fs: float,
+    fraction: float | np.integer[Any],
     order: int,
     limits: tuple[float, ...] | None,
     design: FilterDesign,
@@ -1138,9 +1144,9 @@ def _cached_filter_bank(
 
 def octave_filter(
     x: Signal | ArrayLike,
-    fs: int | None = None,
-    fraction: float = 1,
-    order: int = 6,
+    fs: float | None = None,
+    fraction: float | np.integer[Any] = 1,
+    order: int | np.integer[Any] = 6,
     limits: RealValues | None = None,
     *,
     sigbands: bool = False,
@@ -1193,6 +1199,13 @@ def octave_filter(
         their ``frequencies`` and, when ``sigbands`` asked for them, the
         per-band ``bands``. With *nominal=True* the frequencies are
         IEC 61260-1 labels instead of floats.
+    :raises TypeError: if ``fraction`` or ``fs`` is not a single number,
+        ``order`` is a flag, a text or an array where a count goes, or
+        ``limits`` is not a pair of numbers.
+    :raises ValueError: for a bare array with no ``fs``, a sample rate or a
+        bandwidth that is not positive, an ``order`` that is not a whole
+        number from 1, or frequency limits or a design the bank cannot be
+        built with.
     """
     fs = resolve_fs(x, fs)
     # Both branches see the same already-checked pair: without this, a
@@ -1200,6 +1213,10 @@ def octave_filter(
     # one branch and in the constructor's len() on the other, with two
     # different stdlib messages and neither naming 'limits'.
     limits = _resolve_limits(limits)
+    # Checked before the cache is asked: True is equal to 1 as a key, so a
+    # bank designed for order=1 would answer order=True without the
+    # constructor's refusal ever running.
+    order = require_count(order, "order")
     if response_plot.show or response_plot.file:
         # Plotting has side effects: bypass the cache.
         filter_bank = OctaveFilterBank(

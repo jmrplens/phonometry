@@ -80,7 +80,7 @@ level_crossing_rate(
     fs: float | None = None,
     *,
     levels: ArrayLike | None = None,
-    nperseg: int | None = None,
+    nperseg: int | np.integer[Any] | None = None,
 ) -> LevelCrossingResult
 ```
 
@@ -186,7 +186,7 @@ peak_statistics(
     x: Signal | ArrayLike,
     fs: float | None = None,
     *,
-    nperseg: int | None = None,
+    nperseg: int | np.integer[Any] | None = None,
 ) -> PeakStatisticsResult
 ```
 
@@ -328,7 +328,7 @@ stationarity_test(
     x: Signal | ArrayLike,
     fs: float | None = None,
     *,
-    n_segments: int = 20,
+    n_segments: int | np.integer[Any] = 20,
     statistic: Literal['mean_square', 'rms', 'mean', 'variance'] = 'mean_square',
     method: Literal['reverse_arrangements', 'runs'] = 'reverse_arrangements',
     alpha: float = 0.05,

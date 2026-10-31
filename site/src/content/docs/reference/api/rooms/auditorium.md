@@ -223,11 +223,11 @@ EARLY_ENERGY_LIMIT_S = 0.08
 early_lateral_energy_fraction(
     ir: Signal | ArrayLike,
     lateral_ir: Signal | ArrayLike,
-    fs: int | None = None,
+    fs: float | None = None,
     *,
     weighting: Literal['squared', 'cosine'] = 'squared',
     limits: tuple[float, float] | None = (125.0, 4000.0),
-    fraction: int = 1,
+    fraction: int | np.integer[Any] = 1,
 ) -> LateralEnergyResult
 ```
 
@@ -429,11 +429,11 @@ IACC_SEARCH_S = 0.001
 interaural_cross_correlation(
     left: Signal | ArrayLike,
     right: Signal | ArrayLike,
-    fs: int | None = None,
+    fs: float | None = None,
     *,
     window: tuple[float, float | None] = (0.0, None),
     limits: tuple[float, float] | None = (125.0, 4000.0),
-    fraction: int = 1,
+    fraction: int | np.integer[Any] = 1,
 ) -> InterauralCorrelationResult
 ```
 
@@ -577,11 +577,11 @@ late_lateral_sound_level(
     ir: Signal | ArrayLike,
     lateral_ir: Signal | ArrayLike,
     reference_ir: Signal | ArrayLike | None = None,
-    fs: int | None = None,
+    fs: float | None = None,
     *,
     reference_level: ArrayLike | None = None,
     limits: tuple[float, float] | None = (125.0, 4000.0),
-    fraction: int = 1,
+    fraction: int | np.integer[Any] = 1,
 ) -> LateLateralResult
 ```
 
@@ -1036,18 +1036,18 @@ table.
 ```python
 sound_pressure_exposure_level(
     ir: Signal | ArrayLike,
-    fs: int | None = None,
+    fs: float | None = None,
     *,
     limits: None,
-    fraction: int = 1,
+    fraction: int | np.integer[Any] = 1,
 ) -> float
 
 sound_pressure_exposure_level(
     ir: Signal | ArrayLike,
-    fs: int | None = None,
+    fs: float | None = None,
     *,
     limits: tuple[float, float] = (125.0, 4000.0),
-    fraction: int = 1,
+    fraction: int | np.integer[Any] = 1,
 ) -> NDArray[np.float64]
 ```
 
@@ -1099,11 +1099,11 @@ $L_{pE,10}$.
 sound_strength(
     ir: Signal | ArrayLike,
     reference_ir: Signal | ArrayLike | None = None,
-    fs: int | None = None,
+    fs: float | None = None,
     *,
     reference_level: ArrayLike | None = None,
     limits: tuple[float, float] | None = (125.0, 4000.0),
-    fraction: int = 1,
+    fraction: int | np.integer[Any] = 1,
 ) -> SoundStrengthResult
 ```
 
@@ -1289,10 +1289,10 @@ STAGE_DIRECT_WINDOW_S = (0.0, 0.01)
 ```python
 stage_support(
     ir: Signal | ArrayLike,
-    fs: int | None = None,
+    fs: float | None = None,
     *,
     limits: tuple[float, float] | None = (250.0, 2000.0),
-    fraction: int = 1,
+    fraction: int | np.integer[Any] = 1,
 ) -> StageSupportResult
 ```
 

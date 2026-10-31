@@ -38,7 +38,7 @@ multitaper_psd(
     fs: float | None = None,
     *,
     time_half_bandwidth: float = 4.0,
-    n_tapers: int | None = None,
+    n_tapers: int | np.integer[Any] | None = None,
     adaptive: bool = True,
     scaling: Literal['density', 'spectrum'] = 'density',
     confidence: float = 0.95,

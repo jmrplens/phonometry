@@ -57,7 +57,7 @@ from __future__ import annotations
 
 import warnings
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Literal, cast
+from typing import TYPE_CHECKING, Any, Literal, cast
 
 import numpy as np
 
@@ -251,7 +251,7 @@ def _check_grade(grade: str) -> Grade:
 
 def _single_event_mean(
     levels: ArrayLike,
-    n_events: int | None,
+    n_events: int | np.integer[Any] | None,
     *,
     name: str,
     stacklevel: int,

@@ -74,6 +74,7 @@ import numpy as np
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     require_axis_count,
+    require_count,
     require_equal_counts,
     require_equal_shapes,
     require_positive,
@@ -172,12 +173,16 @@ class FacadeElement(OwnsArrays):
             raise ValueError(msg)
         return given[0]
 
-    def tau(self, total_area: float, n_bands: int) -> np.ndarray:
+    def tau(self, total_area: float, n_bands: int | np.integer[Any]) -> np.ndarray:
         """Transmission factor ``τ`` of this element for the whole façade area.
 
-        :raises TypeError: if ``n_bands`` or ``total_area`` is not a single number.
+        :raises ValueError: for a ``total_area`` that is not positive, an
+            ``n_bands`` that is not a whole number from 1, or an element whose
+            area is not positive or whose bands are not ``n_bands``.
+        :raises TypeError: if ``total_area`` is not a single number, or
+            ``n_bands`` is a flag, a text or an array where a count goes.
         """
-        require_scalar(n_bands, "n_bands")
+        n_bands = require_count(n_bands, "n_bands")
         require_scalar(total_area, "total_area")
         if total_area <= 0:
             msg = "'total_area' (façade area S) must be positive."
@@ -468,7 +473,7 @@ def _apparent_reduction(
 
 
 def _single_number(
-    values: np.ndarray, fraction: BandFraction | None
+    values: np.ndarray, fraction: BandFraction | np.integer[Any] | None
 ) -> tuple[int, int] | None:
     """(rating, Ctr) via ISO 717-1 for 5 octave or 16 third-octave bands."""
     from ..measurement.ratings import weighted_rating
@@ -485,7 +490,7 @@ def facade_sound_reduction(
     area: float,
     volume: float,
     delta_l_fs: float = 0.0,
-    fraction: BandFraction | None = None,
+    fraction: BandFraction | np.integer[Any] | None = None,
     frequencies: ArrayLike | None = None,
 ) -> FacadePredictionResult:
     """Predict façade airborne sound insulation ``D2m,nT`` (EN 12354-3:2000).

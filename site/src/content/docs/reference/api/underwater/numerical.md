@@ -157,8 +157,8 @@ eigenrays(
     receiver_range: float,
     receiver_depth: float,
     bottom: Literal['pressure-release', 'rigid'] | FluidSeabed = 'pressure-release',
-    max_n_arrivals: int = 64,
-    n_steps: int | None = None,
+    max_n_arrivals: int | np.integer[Any] = 64,
+    n_steps: int | np.integer[Any] | None = None,
 ) -> EigenrayResult
 ```
 
@@ -309,7 +309,7 @@ gaussian_beams(
     max_range: float = 10000.0,
     ranges_m: ArrayLike | None = None,
     receiver_depths_m: ArrayLike | None = None,
-    n_depth_points: int = 200,
+    n_depth_points: int | np.integer[Any] = 200,
     fan: BeamFan | None = None,
     range_step: float = 25.0,
     bottom: Literal['pressure-release', 'rigid'] | FluidSeabed = 'pressure-release',
@@ -641,7 +641,7 @@ normal_modes(
     ranges_m: ArrayLike | None = None,
     density: float = 1000.0,
     bottom: Literal['pressure-release', 'rigid'] = 'pressure-release',
-    n_depth_points: int | None = None,
+    n_depth_points: int | np.integer[Any] | None = None,
 ) -> NormalModeResult
 ```
 
@@ -748,7 +748,7 @@ parabolic_equation(
     source_depth: float,
     max_range: float = 10000.0,
     range_step: float = 10.0,
-    n_depth_points: int = 1024,
+    n_depth_points: int | np.integer[Any] = 1024,
 ) -> ParabolicEquationResult
 ```
 
@@ -837,7 +837,7 @@ ray_trace(
     source_depth: float,
     launch_angles_deg: ArrayLike,
     max_range: float = 10000.0,
-    n_steps: int = 2000,
+    n_steps: int | np.integer[Any] = 2000,
     bathymetry: tuple[ArrayLike, ArrayLike] | None = None,
 ) -> RayTraceResult
 ```

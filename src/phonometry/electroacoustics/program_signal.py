@@ -344,7 +344,7 @@ def _table_density_db(frequencies: NDArray[np.float64]) -> NDArray[np.float64]:
 
 
 def simulated_program_signal(
-    fs: int,
+    fs: int | np.integer[Any],
     duration_s: float,
     *,
     rms: float = 1.0,

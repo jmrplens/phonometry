@@ -97,6 +97,7 @@ from scipy import signal
 from .._internal.frozen import OwnsArrays
 from .._internal.utils import _sos_initial_state, _sos_state_mismatch
 from .._internal.validation import (
+    require_count,
     require_positive,
     require_scalar,
 )
@@ -144,6 +145,24 @@ except ImportError:  # pragma: no cover - depends on install extras
     # unused-ignore: with numba absent its import is Any and the ignore is
     # unnecessary; with numba installed the assignment needs it.
     _numba_jit = None  # type: ignore[assignment, unused-ignore]
+
+
+def _require_design_flag(value: object) -> bool:
+    """``high_accuracy`` as the ``bool`` it holds, refused when it is not a truth value.
+
+    ``None`` used to select the default; read as a truth value now it would
+    quietly pick the plain design instead. :func:`weighting_filter` asks this
+    before its design cache does, since ``1`` is equal to ``True`` as a key.
+
+    :param value: The caller's choice of design.
+    :return: The choice as a ``bool``.
+    :raises TypeError: for a value that is not ``True`` or ``False``, a numpy
+        truth value included.
+    """
+    if not isinstance(value, bool | np.bool_):
+        msg = f"'high_accuracy' must be True or False; got {type(value).__name__}."
+        raise TypeError(msg)
+    return bool(value)
 
 
 def _require_str(value: object, name: str) -> str:
@@ -517,7 +536,9 @@ def _cached_weighting_sos(curve: str, fs: int, *, high_accuracy: bool) -> np.nda
     return shared
 
 
-def _weighting_sos(curve: str, fs: int, *, high_accuracy: bool) -> np.ndarray:
+def _weighting_sos(
+    curve: str, fs: float, *, high_accuracy: bool | np.bool_
+) -> np.ndarray:
     """Second-order sections of *curve* at *fs*, cached on the three inputs.
 
     Two designs live here, and ``high_accuracy`` picks between them:
@@ -569,12 +590,12 @@ class WeightingFilter:
 
     def __init__(
         self,
-        fs: int,
+        fs: float,
         weighting: Weighting = "A",
         *,
         stateful: bool = False,
         steady_ic: bool = False,
-        high_accuracy: bool = True,
+        high_accuracy: bool | np.bool_ = True,
     ) -> None:
         """Initialize the weighting filter.
 
@@ -630,14 +651,7 @@ class WeightingFilter:
         if fs <= 0:
             raise ValueError(_FS_POSITIVE)
         _require_str(weighting, "weighting")
-        if not isinstance(high_accuracy, bool | np.bool_):
-            # ``None`` used to select the default; read as a truth value now
-            # it would quietly pick the plain design instead.
-            msg = (
-                "'high_accuracy' must be True or False; got "
-                f"{type(high_accuracy).__name__}."
-            )
-            raise TypeError(msg)
+        high_accuracy = _require_design_flag(high_accuracy)
         self.fs = fs
         self.weighting = weighting.upper()
         self.stateful = stateful
@@ -755,7 +769,7 @@ def _runtime_frequency_response(
 
 @lru_cache(maxsize=32)
 def _cached_weighting_filter(
-    fs: int, curve: Weighting, *, high_accuracy: bool
+    fs: float, curve: Weighting, *, high_accuracy: bool
 ) -> WeightingFilter:
     """Reuse the (immutable, non-stateful) weighting-filter object.
 
@@ -771,7 +785,7 @@ def _cached_weighting_filter(
 def _as_envelope(
     x: Signal | ArrayLike,
     mean_square: np.ndarray,
-    fs: int,
+    fs: float,
     mode: Mode,
 ) -> TimeWeightedEnvelope | np.ndarray:
     """Wrap the envelope for a Signal input, leave a bare array alone.
@@ -817,7 +831,7 @@ class TimeWeightedEnvelope(OwnsArrays):
     """
 
     mean_square: np.ndarray
-    fs: int
+    fs: float
     mode: Mode
     _: KW_ONLY
     calibrated: bool
@@ -884,29 +898,29 @@ class TimeWeightedEnvelope(OwnsArrays):
 @overload
 def weighting_filter(
     x: Signal,
-    fs: int | None = ...,
+    fs: float | None = ...,
     weighting: Weighting = ...,
     *,
-    high_accuracy: bool = ...,
+    high_accuracy: bool | np.bool_ = ...,
 ) -> Signal: ...
 
 
 @overload
 def weighting_filter(
     x: ArrayLike,
-    fs: int,
+    fs: float,
     weighting: Weighting = ...,
     *,
-    high_accuracy: bool = ...,
+    high_accuracy: bool | np.bool_ = ...,
 ) -> np.ndarray: ...
 
 
 def weighting_filter(
     x: Signal | ArrayLike,
-    fs: int | None = None,
+    fs: float | None = None,
     weighting: Weighting = "A",
     *,
-    high_accuracy: bool = True,
+    high_accuracy: bool | np.bool_ = True,
 ) -> Signal | np.ndarray:
     """Apply a frequency weighting to a signal.
 
@@ -929,9 +943,13 @@ def weighting_filter(
     :return: The weighted record. A bare array in gives a bare array back; a
         :class:`~phonometry.io.Signal` gives a Signal, whose samples are
         already in pascals and whose factor therefore reads 1.0.
+    :raises TypeError: if ``high_accuracy`` is not ``True`` or ``False``,
+        ``fs`` is not one number, or ``weighting`` is not a text.
     """
     fs = resolve_fs(x, fs)
-    wf = _cached_weighting_filter(fs, weighting, high_accuracy=high_accuracy)
+    wf = _cached_weighting_filter(
+        fs, weighting, high_accuracy=_require_design_flag(high_accuracy)
+    )
     # The object form wraps for itself now, so hand it the caller's input
     # rather than the resolved samples: doing both would wrap twice.
     return wf.filter(x)
@@ -1008,7 +1026,7 @@ else:  # pragma: no cover - exercised only without numba installed
 @overload
 def time_weighting(
     x: Signal,
-    fs: int | None = ...,
+    fs: float | None = ...,
     mode: Mode = ...,
     initial_state: InitialState | ArrayLike | None = ...,
 ) -> TimeWeightedEnvelope: ...
@@ -1017,7 +1035,7 @@ def time_weighting(
 @overload
 def time_weighting(
     x: ArrayLike,
-    fs: int,
+    fs: float,
     mode: Mode = ...,
     initial_state: InitialState | ArrayLike | None = ...,
 ) -> np.ndarray: ...
@@ -1025,7 +1043,7 @@ def time_weighting(
 
 def time_weighting(
     x: Signal | ArrayLike,
-    fs: int | None = None,
+    fs: float | None = None,
     mode: Mode = "fast",
     initial_state: InitialState | ArrayLike | None = None,
 ) -> TimeWeightedEnvelope | np.ndarray:
@@ -1101,7 +1119,7 @@ class TimeWeighting:
     across blocks, so concatenated block outputs equal a single continuous call.
     """
 
-    def __init__(self, fs: int, mode: Mode = "fast") -> None:
+    def __init__(self, fs: float, mode: Mode = "fast") -> None:
         """:param fs: Sample rate in Hz.
         :param mode: 'fast' (125 ms), 'slow' (1000 ms) or 'impulse' (35 ms / 1.5 s).
         :raises TypeError: if ``fs`` is not a single number.
@@ -1152,22 +1170,26 @@ class TimeWeighting:
 
 @overload
 def linkwitz_riley(
-    x: Signal, fs: int | None = ..., *, frequency: float, order: int = ...
+    x: Signal,
+    fs: float | None = ...,
+    *,
+    frequency: float,
+    order: int | np.integer[Any] = ...,
 ) -> tuple[Signal, Signal]: ...
 
 
 @overload
 def linkwitz_riley(
-    x: ArrayLike, fs: int, *, frequency: float, order: int = ...
+    x: ArrayLike, fs: float, *, frequency: float, order: int | np.integer[Any] = ...
 ) -> tuple[np.ndarray, np.ndarray]: ...
 
 
 def linkwitz_riley(
     x: Signal | ArrayLike,
-    fs: int | None = None,
+    fs: float | None = None,
     *,
     frequency: float,
-    order: int = 4,
+    order: int | np.integer[Any] = 4,
 ) -> tuple[Signal, Signal] | tuple[np.ndarray, np.ndarray]:
     """Linkwitz-Riley crossover filter (Butterworth squared).
     Splits signal into low and high bands with flat sum response.
@@ -1183,10 +1205,13 @@ def linkwitz_riley(
         signature that lies about what the call needs.
     :param order: Total order (must be even, typically 2 or 4).
     :return: (low_pass_signal, high_pass_signal)
-    :raises TypeError: if ``frequency``, ``fs`` or ``order`` is not a single number.
+    :raises ValueError: for a sample rate that is not positive, or an
+        ``order`` that is not a positive even whole number.
+    :raises TypeError: if ``frequency`` or ``fs`` is not a single number, or
+        ``order`` is a flag, a text or an array where an order goes.
     """
     require_scalar(fs, "fs")
-    require_scalar(order, "order")
+    order = require_count(order, "order", at_least=None)
     fs = resolve_fs(x, fs)
     x_proc = resolve_samples(x)
     if fs <= 0:

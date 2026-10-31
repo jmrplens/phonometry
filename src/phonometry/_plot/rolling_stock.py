@@ -14,6 +14,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from .._internal.types import float_keyed
 from .common import (
     _C_MUTED,
     _C_PRIMARY,
@@ -34,6 +35,7 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
     from .._i18n import Language
+    from .._internal.types import BandMapping
     from ..environment.sources.acoustic_roughness import AcousticRoughnessSpectrum
     from ..environment.sources.rolling_stock_noise import (
         AdjacentVehicleNeutrality,
@@ -183,7 +185,7 @@ def plot_roughness_spectrum(
     spectrum: AcousticRoughnessSpectrum,
     ax: Axes | None = None,
     *,
-    limit_db: Mapping[float, float] | None = None,
+    limit_db: BandMapping | None = None,
     language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
@@ -214,7 +216,7 @@ def plot_roughness_spectrum(
         ),
     )
     if limit_db is not None:
-        _draw_roughness_limit(ax, limit_db, language)
+        _draw_roughness_limit(ax, float_keyed(limit_db), language)
         wavelengths += [float(w) for w in limit_db]
     _roughness_axis(ax, wavelengths, language)
     ax.set_title(_t("EN 15610 acoustic rail roughness", language))
@@ -310,7 +312,7 @@ def plot_track_decay_rate(
     rates: TrackDecayRate,
     ax: Axes | None = None,
     *,
-    limit_db_per_m: Mapping[float, float] | None = None,
+    limit_db_per_m: BandMapping | None = None,
     language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
@@ -341,7 +343,11 @@ def plot_track_decay_rate(
     )
     if limit_db_per_m is not None:
         _draw_decay_limit(
-            ax, limit_db_per_m, positions, _t("Lower limit", language), _C_REFERENCE
+            ax,
+            float_keyed(limit_db_per_m),
+            positions,
+            _t("Lower limit", language),
+            _C_REFERENCE,
         )
     _decay_axis(ax, positions, language)
     ax.set_title(_t(f"EN 15461 {rates.direction} track decay rate", language))

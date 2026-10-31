@@ -65,6 +65,7 @@ import numpy as np
 from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
+    require_count,
     require_equal_shapes,
     require_finite_fields,
     require_ranks,
@@ -1075,7 +1076,7 @@ def weighted_exposure(
     frequencies_hz: ArrayLike,
     guidance: Guidance = "nmfs-2024",
     impulsive: bool = True,
-    n_events: int = 1,
+    n_events: int | np.integer[Any] = 1,
     peak_spl: float | None = None,
 ) -> WeightedExposureResult:
     r"""Weight a band spectrum, accumulate it and compare it with the
@@ -1108,7 +1109,8 @@ def weighted_exposure(
         metric.
     :return: A :class:`WeightedExposureResult`.
     :raises ValueError: If an input is invalid.
-    :raises TypeError: if ``n_events`` or ``peak_spl`` is not a single number.
+    :raises TypeError: if ``peak_spl`` is not a single number, or ``n_events``
+        is a flag, a text or an array where a count goes.
     """
     f = _positive_frequencies(frequencies_hz, "frequencies_hz")
     sel = np.array(band_sel, dtype=np.float64, copy=True, ndmin=1)
@@ -1120,12 +1122,7 @@ def weighted_exposure(
     if np.any(np.isnan(sel)) or np.any(sel == np.inf):
         msg = "'band_sel' must be finite, or -inf for a band with no energy."
         raise ValueError(msg)
-    require_scalar(n_events, "n_events")
-    n_float = float(n_events)
-    if not n_float.is_integer() or int(n_float) < 1:
-        msg = "'n_events' must be a whole number of events, at least 1."
-        raise ValueError(msg)
-    n = int(n_float)
+    n = require_count(n_events, "n_events")
 
     weights = auditory_weighting(f, group, guidance=guidance)
     weighted_bands = sel + weights.weighting

@@ -592,7 +592,7 @@ sound_energy_hard_walled(
     reference_sound_power_levels: ArrayLike | ReferenceSourceCalibration,
     *,
     frequencies: ArrayLike,
-    n_events: int | None = None,
+    n_events: int | np.integer[Any] | None = None,
     background_levels: ArrayLike | None = None,
     integration_time: float | None = None,
     reference_background_levels: ArrayLike | None = None,

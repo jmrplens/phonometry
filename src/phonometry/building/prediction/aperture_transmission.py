@@ -62,12 +62,12 @@ from scipy.special import j1, struve
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     require_choice,
+    require_count,
     require_equal_counts,
     require_positive,
     require_present,
     require_ranks,
     require_same_length,
-    require_scalar,
 )
 
 if TYPE_CHECKING:
@@ -312,7 +312,7 @@ def slit_resonance_frequencies(
     depth: float,
     width_m: float,
     *,
-    n_orders: int = 3,
+    n_orders: int | np.integer[Any] = 3,
     speed_of_sound: float = _SPEED_OF_SOUND,
 ) -> np.ndarray:
     r"""Slit resonance frequencies :math:`d + 2e = z\lambda/2` (Hopkins
@@ -327,20 +327,18 @@ def slit_resonance_frequencies(
     :param n_orders: Number of resonance orders ``z = 1..n_orders`` (>= 1).
     :param speed_of_sound: Speed of sound in air ``c0`` (Default: 343 m/s).
     :return: The resonance frequencies (Hz), one per order.
-    :raises ValueError: for a non-positive input, ``n_orders < 1``, or a slit so
-        wide relative to its depth that the effective depth :math:`d + 2e` is
-        non-positive (no resonance exists; ``width_m`` must be much less than the
-        wavelength).
-    :raises TypeError: if ``depth``, ``n_orders``, ``speed_of_sound`` or ``width_m`` is
-        not a single number.
+    :raises ValueError: for a non-positive input, an ``n_orders`` that is not a
+        whole number from 1, or a slit so wide relative to its depth that the
+        effective depth :math:`d + 2e` is non-positive (no resonance exists;
+        ``width_m`` must be much less than the wavelength).
+    :raises TypeError: if ``depth``, ``speed_of_sound`` or ``width_m`` is not a
+        single number, or ``n_orders`` is a flag, a text or an array where a
+        count goes.
     """
-    require_scalar(n_orders, "n_orders")
+    n_orders = require_count(n_orders, "n_orders")
     d = require_positive(depth, "depth")
     w = require_positive(width_m, "width_m")
     c0 = require_positive(speed_of_sound, "speed_of_sound")
-    if n_orders < 1:
-        msg = "'n_orders' must be at least 1."
-        raise ValueError(msg)
     out = np.empty(n_orders, dtype=np.float64)
     for i in range(n_orders):
         z = i + 1

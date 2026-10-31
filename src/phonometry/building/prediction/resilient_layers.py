@@ -456,7 +456,7 @@ def force_pulse(
 
 
 def short_pulse_mean_square_force(
-    frequencies: ArrayLike, *, fraction: BandFraction = 3
+    frequencies: ArrayLike, *, fraction: BandFraction | np.integer[Any] = 3
 ) -> np.ndarray:
     r"""Band mean-square force of a short impact
     :math:`F_\mathrm{rms}^{2} = 3.9 B` (Eq. 3.92).
@@ -520,7 +520,7 @@ class TappingForceResult(OwnsArrays):
     impedance: float
     lower_limit: float
     upper_limit: float
-    fraction: int = 3
+    fraction: BandFraction = 3
     mass: float = TAPPING_HAMMER_MASS_KG
 
     def __post_init__(self) -> None:
@@ -571,6 +571,9 @@ class TappingForceResult(OwnsArrays):
         m = require_positive(self.mass, "mass")
         lower = require_positive(self.lower_limit, "lower_limit")
         factor = _band_factor(self.fraction)
+        object.__setattr__(
+            self, "fraction", require_band_fraction(self.fraction, "fraction")
+        )
         expected = (
             (
                 "cut_off_frequency",
@@ -654,7 +657,7 @@ def tapping_force_spectrum(
     mass: float = TAPPING_HAMMER_MASS_KG,
     impact_rate: float = TAPPING_IMPACT_RATE_HZ,
     impact_velocity: float | None = None,
-    fraction: BandFraction = 3,
+    fraction: BandFraction | np.integer[Any] = 3,
 ) -> TappingForceResult:
     r"""Force spectrum of the ISO tapping machine on a floor (Hopkins 3.6.3.1).
 
@@ -718,7 +721,7 @@ def tapping_force_spectrum(
         impedance=z,
         lower_limit=float(m * v0 * fi),
         upper_limit=float(2.0 * m * v0 * fi),
-        fraction=fraction,
+        fraction=require_band_fraction(fraction, "fraction"),
         mass=m,
     )
 
@@ -865,7 +868,7 @@ def covering_improvement(
     *,
     mass: float = TAPPING_HAMMER_MASS_KG,
     impact_rate: float = TAPPING_IMPACT_RATE_HZ,
-    fraction: BandFraction = 3,
+    fraction: BandFraction | np.integer[Any] = 3,
 ) -> CoveringImprovementResult:
     r"""Improvement of impact sound insulation by a soft covering (Eq. 4.114).
 

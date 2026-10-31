@@ -38,7 +38,7 @@ def sensitivity(
     reference_signal: Signal,
     target_spl: float = ...,
     reference_pressure_pa: float = ...,
-    fs: int | None = ...,
+    fs: float | None = ...,
     *,
     validate: bool = ...,
     max_fluctuation_db: float | None = ...,
@@ -54,7 +54,7 @@ def sensitivity(
     target_spl: float = ...,
     reference_pressure_pa: float = ...,
     *,
-    fs: int,
+    fs: float,
     validate: bool = ...,
     max_fluctuation_db: float | None = ...,
     frequency: float = ...,
@@ -68,7 +68,7 @@ def sensitivity(
     reference_signal: SignalInput,
     target_spl: float,
     reference_pressure_pa: float,
-    fs: int,
+    fs: float,
     *,
     validate: bool = ...,
     max_fluctuation_db: float | None = ...,
@@ -83,7 +83,7 @@ def sensitivity(
     reference_signal: SignalInput,
     target_spl: float = ...,
     reference_pressure_pa: float = ...,
-    fs: int | None = ...,
+    fs: float | None = ...,
     *,
     validate: bool = ...,
     max_fluctuation_db: float | None = ...,
@@ -97,7 +97,7 @@ def sensitivity(
     reference_signal: SignalInput,
     target_spl: float = 94.0,
     reference_pressure_pa: float = _P0,
-    fs: int | None = None,
+    fs: float | None = None,
     *,
     validate: bool = True,
     max_fluctuation_db: float | None = None,
@@ -199,7 +199,7 @@ def sensitivity(
 
 
 def _validate_reference_stability(
-    signal_arr: np.ndarray, fs: int, max_fluctuation_db: float
+    signal_arr: np.ndarray, fs: float, max_fluctuation_db: float
 ) -> None:
     """Warn if the F-weighted level of the recording fluctuates too much."""
     from ..filters.weighting import time_weighting
@@ -236,7 +236,7 @@ def _validate_reference_stability(
         )
 
 
-def _narrowband_tone_rms(signal_arr: np.ndarray, fs: int, frequency: float) -> float:
+def _narrowband_tone_rms(signal_arr: np.ndarray, fs: float, frequency: float) -> float:
     r"""RMS amplitude of the calibration tone via coherent detection.
 
     A Hann-windowed single-frequency (Goertzel) detector locked to the tone

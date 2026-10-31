@@ -735,7 +735,7 @@ def uncertain_value(
 def prediction_input_uncertainty(
     sigma_reproducibility: float,
     sigma_product: float,
-    n: int,
+    n: int | np.integer[Any],
 ) -> float:
     r"""The prediction input uncertainty ``u_input`` (Formula A.1).
 
@@ -768,7 +768,7 @@ def prediction_input_uncertainty(
     return sqrt((sigma_reproducibility**2 + sigma_product**2) / n + sigma_product**2)
 
 
-def reduce_by_independent_measurements(u: float, m: int) -> float:
+def reduce_by_independent_measurements(u: float, m: int | np.integer[Any]) -> float:
     r"""Reduce a standard uncertainty by ``m`` independent measurements (Formula A.7).
 
     :math:`u_{\mathrm{reduced}} = u / \sqrt{m}`: measurements by different
@@ -777,14 +777,13 @@ def reduce_by_independent_measurements(u: float, m: int) -> float:
 
     :param u: Standard uncertainty of a single measurement, in dB (non-negative).
     :param m: Number of independent measurements (:math:`m \ge 1`).
-    :raises ValueError: Non-positive ``m`` or negative ``u``.
-    :raises TypeError: if ``m`` or ``u`` is not a single number.
+    :raises ValueError: an ``m`` that is not a whole number from 1, or a
+        negative ``u``.
+    :raises TypeError: if ``u`` is not a single number, or ``m`` is a flag, a
+        text or an array where a count goes.
     """
-    require_scalar(m, "m")
+    m = require_count(m, "m")
     require_scalar(u, "u")
-    if m < 1:
-        msg = "m must be a positive integer."
-        raise ValueError(msg)
     if u < 0:
         msg = "Standard uncertainty u must be non-negative."
         raise ValueError(msg)

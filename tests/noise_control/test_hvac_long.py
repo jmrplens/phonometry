@@ -133,13 +133,13 @@ def test_fan_sound_power_validation(kwargs: dict[str, object], match: str) -> No
 
 
 def test_blade_passing_frequency_validation() -> None:
-    with pytest.raises(ValueError, match=r"'n_blades' must be a positive integer"):
+    with pytest.raises(ValueError, match=r"'n_blades' must be a whole number"):
         hvac.blade_passing_frequency(1200.0, 0)
 
 
 def test_blade_passing_frequency_fractional_blades_raises() -> None:
     # 2.5 blades used to slip past the sign check and return 50 Hz.
-    with pytest.raises(ValueError, match="'n_blades' must be a positive integer"):
+    with pytest.raises(ValueError, match="'n_blades' must be a whole number"):
         hvac.blade_passing_frequency(1200.0, 2.5)  # type: ignore[arg-type]
 
 
@@ -419,13 +419,13 @@ def test_silencer_self_noise_velocity_exponent() -> None:
 
 
 def test_silencer_self_noise_requires_passages() -> None:
-    with pytest.raises(ValueError, match=r"'n_passages' must be a positive integer"):
+    with pytest.raises(ValueError, match=r"'n_passages' must be a whole number"):
         hvac.silencer_self_noise(None, 10.0, 0, 0.9)
 
 
 def test_silencer_self_noise_fractional_passages_raises() -> None:
     # 2.5 passages used to slip past the sign check into 10 lg N.
-    with pytest.raises(ValueError, match="'n_passages' must be a positive integer"):
+    with pytest.raises(ValueError, match="'n_passages' must be a whole number"):
         hvac.silencer_self_noise(None, 10.0, 2.5, 0.9)  # type: ignore[arg-type]
 
 
@@ -602,8 +602,8 @@ def test_diffuser_sound_power_counts_identical_devices() -> None:
         ({"volume_flow": 0.0}, r"'volume_flow' must be positive"),
         ({"pressure_drop_pa": -1.0}, r"'pressure_drop_pa' must be positive"),
         ({"shape": "slot"}, r"'shape' must be one of"),
-        ({"n_devices": 0}, r"'n_devices' must be a positive integer"),
-        ({"n_devices": 1.5}, "'n_devices' must be a positive integer"),
+        ({"n_devices": 0}, r"'n_devices' must be a whole number"),
+        ({"n_devices": 1.5}, "'n_devices' must be a whole number"),
     ],
 )
 def test_diffuser_sound_power_validation(kwargs: dict[str, object], match: str) -> None:

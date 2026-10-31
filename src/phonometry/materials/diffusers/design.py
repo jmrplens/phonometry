@@ -124,7 +124,7 @@ def _positive_scalar(value: float, name: str) -> float:
     return v
 
 
-def _prime_generator(prime: int) -> int:
+def _prime_generator(prime: int | np.integer[Any]) -> int:
     """Return ``prime`` as an odd prime >= 3 or raise ``ValueError``."""
     require_scalar(prime, "prime")
     n = require_count(prime, "prime", at_least=None)
@@ -145,7 +145,7 @@ def _prime_generator(prime: int) -> int:
 # ---------------------------------------------------------------------------
 # Quadratic residue diffuser geometry (Cox and D'Antonio, Eqs. (10.2)/(10.3)).
 # ---------------------------------------------------------------------------
-def quadratic_residue_sequence(prime: int) -> Real:
+def quadratic_residue_sequence(prime: int | np.integer[Any]) -> Real:
     r"""Quadratic residue sequence ``s_n`` (Cox and D'Antonio, Eq. (10.2)).
 
     :math:`s_n = n^2 \bmod N` for :math:`n = 0, 1, \ldots, N - 1`, the least
@@ -165,7 +165,7 @@ def quadratic_residue_sequence(prime: int) -> Real:
 
 
 def qrd_well_depths(
-    prime: int,
+    prime: int | np.integer[Any],
     design_frequency: float,
     *,
     speed_of_sound: float = _C_DEFAULT,
@@ -374,7 +374,7 @@ def _prepare_geometry(
     frequency: float,
     angles_deg: ArrayLike,
     source_angle_deg: float,
-    n_repetitions: int,
+    n_repetitions: int | np.integer[Any],
     speed_of_sound: float,
 ) -> tuple[float, float, Real, float, int, float]:
     """Validate the shared geometry arguments and return them normalised."""
@@ -409,7 +409,7 @@ def predict_diffuser_polar_response(
     depths: ArrayLike,
     angles_deg: ArrayLike = ...,
     source_angle_deg: float = ...,
-    n_repetitions: int = ...,
+    n_repetitions: int | np.integer[Any] = ...,
     speed_of_sound: float = ...,
     include_aperture: bool = ...,
     include_obliquity: bool = ...,
@@ -424,7 +424,7 @@ def predict_diffuser_polar_response(
     reflection: ArrayLike,
     angles_deg: ArrayLike = ...,
     source_angle_deg: float = ...,
-    n_repetitions: int = ...,
+    n_repetitions: int | np.integer[Any] = ...,
     speed_of_sound: float = ...,
     include_aperture: bool = ...,
     include_obliquity: bool = ...,
@@ -439,7 +439,7 @@ def predict_diffuser_polar_response(
     reflection: ArrayLike | None = None,
     angles_deg: ArrayLike = DEFAULT_POLAR_ANGLES_DEG,
     source_angle_deg: float = 0.0,
-    n_repetitions: int = 1,
+    n_repetitions: int | np.integer[Any] = 1,
     speed_of_sound: float = _C_DEFAULT,
     include_aperture: bool = True,
     include_obliquity: bool = True,
@@ -524,7 +524,7 @@ def predicted_diffusion_spectrum(
     reflection_of: None = None,
     angles_deg: ArrayLike = DEFAULT_POLAR_ANGLES_DEG,
     source_angle_deg: float = 0.0,
-    n_repetitions: int = 1,
+    n_repetitions: int | np.integer[Any] = 1,
     speed_of_sound: float = _C_DEFAULT,
     include_aperture: bool = True,
     include_obliquity: bool = True,

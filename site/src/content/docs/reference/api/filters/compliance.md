@@ -440,9 +440,9 @@ more in the 1995 edition. Empty for a bank with no bands.
 verify_filter_class(
     bank: OctaveFilterBank,
     *,
-    n_points: int = 32768,
+    n_points: int | np.integer[Any] = 32768,
     edition: Literal['2014', '1995'] = '2014',
-    points_per_bandwidth: int = 24,
+    points_per_bandwidth: int | np.integer[Any] = 24,
 ) -> FilterComplianceResult
 ```
 
@@ -495,4 +495,5 @@ requirement on its own.
 
 | Exception | When |
 | :--- | :--- |
+| ValueError | for an `n_points` that is not a whole number of at least 16, a `points_per_bandwidth` below its floor, or an unknown edition. |
 | TypeError | if `n_points` or `points_per_bandwidth` is a flag, a text or an array where a count goes. |

@@ -48,9 +48,9 @@ from a straight line.
 ```python
 decay_curve(
     ir: Signal | ArrayLike,
-    fs: int | None = None,
+    fs: float | None = None,
     band: float | None = None,
-    fraction: int = 1,
+    fraction: int | np.integer[Any] = 1,
     *,
     zero_phase: bool = False,
 ) -> DecayCurve
@@ -313,9 +313,9 @@ larger absolute uncertainty and a smaller relative one.
 ```python
 room_parameters(
     ir: Signal | ArrayLike,
-    fs: int | None = None,
+    fs: float | None = None,
     limits: tuple[float, float] | None = (125.0, 4000.0),
-    fraction: int = 1,
+    fraction: int | np.integer[Any] = 1,
     *,
     zero_phase: bool = False,
 ) -> RoomAcousticsResult

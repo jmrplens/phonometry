@@ -504,7 +504,7 @@ class FieldStrengthReading(OwnsArrays):
 
 
 def field_strength_meter(
-    x: ArrayLike, fs: int, *, weighting: Weighting = "Z"
+    x: ArrayLike, fs: int | np.integer[Any], *, weighting: Weighting = "Z"
 ) -> FieldStrengthReading:
     """Read a magnetic field strength record like the true-RMS meter of 6.1.3.
 
@@ -603,7 +603,11 @@ def _band_limited_noise(fs: int, n: int, rms: float, seed: int | None) -> np.nda
 
 
 def loop_test_noise(
-    fs: int, duration_s: float, *, rms: float = 1.0, seed: int | None = None
+    fs: int | np.integer[Any],
+    duration_s: float,
+    *,
+    rms: float = 1.0,
+    seed: int | None = None,
 ) -> np.ndarray:
     r"""The pink noise test signal of IEC 60118-4:2014 6.4.
 
@@ -658,11 +662,11 @@ def _nearer_zero(x: np.ndarray, k: int) -> int:
 
 
 def combi_signal(
-    fs: int,
+    fs: int | np.integer[Any],
     *,
     sine_s: float = _COMBI_MIN_SINE_S,
     noise_s: float = _COMBI_MIN_NOISE_S,
-    n_cycles: int = 1,
+    n_cycles: int | np.integer[Any] = 1,
     seed: int | None = None,
 ) -> np.ndarray:
     r"""The combi signal of IEC 60118-4:2014 6.6 and Table 2.

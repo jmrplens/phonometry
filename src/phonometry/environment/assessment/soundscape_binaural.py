@@ -485,13 +485,12 @@ def _sound_pressure_levels(
     pressure: NDArray[np.float64], fs: float
 ) -> list[BinauralMetric]:
     """``LAeq,T``, ``LCeq,T``, ``LAF5,T`` and ``LAF95,T`` of each ear."""
-    rate = int(round(fs))
-    a_eq = np.atleast_1d(laeq(pressure, rate, calibration_factor=1.0))
+    a_eq = np.atleast_1d(laeq(pressure, fs, calibration_factor=1.0))
     c_eq = np.atleast_1d(
-        leq(weighting_filter(pressure, rate, "C"), calibration_factor=1.0)
+        leq(weighting_filter(pressure, fs, "C"), calibration_factor=1.0)
     )
     percentiles = ln_levels(
-        pressure, rate, n=(5, 95), mode="fast", weighting="A", calibration_factor=1.0
+        pressure, fs, n=(5, 95), mode="fast", weighting="A", calibration_factor=1.0
     )
     l5 = np.atleast_1d(percentiles[5])
     l95 = np.atleast_1d(percentiles[95])

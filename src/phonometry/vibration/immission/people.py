@@ -551,7 +551,7 @@ def _interpolated(low: float, high: float, days: int) -> float:
 
 
 def construction_guide_values(
-    duration_days: int,
+    duration_days: int | np.integer[Any],
     *,
     stage: Literal["I", "II", "III"] = "I",
     area: Area = "residential",

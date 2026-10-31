@@ -739,7 +739,7 @@ exact_frequencies(
     lowest_hz: float,
     highest_hz: float,
     *,
-    fraction: int = 12,
+    fraction: int | np.integer[Any] = 12,
 ) -> NDArray[np.float64]
 ```
 
@@ -899,7 +899,7 @@ judge. Zero for a single microphone.
 max_expanded_uncertainty(
     frequencies: ArrayLike,
     *,
-    clause: int,
+    clause: int | np.integer[Any],
 ) -> NDArray[np.float64]
 ```
 
@@ -1030,7 +1030,7 @@ verify_correction_uncertainty(
     expanded_uncertainty_db: ArrayLike,
     *,
     frequencies: ArrayLike,
-    clause: int,
+    clause: int | np.integer[Any],
     correction: ArrayLike | None = None,
     coverage_factor: ArrayLike | None = None,
     correction_range_db: ArrayLike | None = None,

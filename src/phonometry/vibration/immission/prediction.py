@@ -60,7 +60,7 @@ from __future__ import annotations
 
 import math
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -433,7 +433,9 @@ def soil_building_natural_frequency(stiffness: float, *, mass: float) -> float:
     return math.sqrt(stiffness / mass) / (2.0 * math.pi)
 
 
-def soil_building_frequency_guide(n_stories: int) -> tuple[float, float]:
+def soil_building_frequency_guide(
+    n_stories: int | np.integer[Any],
+) -> tuple[float, float]:
     """The natural frequency Clause 4.3 gives a building on medium ground.
 
     About 15 Hz for one or two storeys, 8 Hz to 12 Hz for two to six, under
@@ -600,7 +602,7 @@ def impact_peak_velocity_mm_s(
 
 
 def track_excitation_frequency(
-    train_speed_m_s: float, *, spacing_m: float, n_harmonics: int = 1
+    train_speed_m_s: float, *, spacing_m: float, n_harmonics: int | np.integer[Any] = 1
 ) -> NDArray[np.float64]:
     r"""The frequencies a repeating feature of the track excites, Clause 5.3.2.
 

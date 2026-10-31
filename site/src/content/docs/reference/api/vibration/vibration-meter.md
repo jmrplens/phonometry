@@ -76,7 +76,7 @@ assess_short_term_vibration(
     fs: float,
     *,
     building_class: Literal['commercial', 'residential', 'sensitive'],
-    n_taps: int | None = None,
+    n_taps: int | np.integer[Any] | None = None,
 ) -> AssessmentVelocity
 ```
 
@@ -116,7 +116,7 @@ assessment_velocity(
     fs: float,
     *,
     building_class: Literal['commercial', 'residential', 'sensitive'],
-    n_taps: int | None = None,
+    n_taps: int | np.integer[Any] | None = None,
 ) -> NDArray[np.float64]
 ```
 
@@ -186,7 +186,7 @@ assessment_weighting_taps(
     fs: float,
     *,
     building_class: Literal['commercial', 'residential', 'sensitive'],
-    n_taps: int | None = None,
+    n_taps: int | np.integer[Any] | None = None,
 ) -> NDArray[np.float64]
 ```
 

@@ -9,18 +9,15 @@ they are touched.
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
-from numpy.typing import NDArray
+from numpy.typing import ArrayLike, NDArray
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping
-
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike
 
 #: Real-valued float64 array alias shared across the library.
 Real = NDArray[np.float64]
@@ -43,6 +40,31 @@ RealValues = (
     | Sequence[np.integer[Any]]
     | NDArray[Any]
 )
+
+#: Values keyed by a band centre frequency in hertz (or by another number a
+#: caller writes as an ``int`` as often as a ``float``, an angle in degrees),
+#: ``{125: 40.0, ...}`` or ``{125.0: 40.0, ...}``. ``Mapping`` is invariant in
+#: its key, so a mapping keyed by ``float`` alone refuses a ``dict[int,
+#: float]``: both are named.
+BandMapping = Mapping[int, float] | Mapping[float, float]
+
+#: Values by band, as a :data:`BandMapping` of band centre to value or in
+#: band order as any array-like.
+BandValues = BandMapping | ArrayLike
+
+
+def float_keyed[V](mapping: Mapping[int, V] | Mapping[float, V]) -> dict[float, V]:
+    """The entries of a mapping keyed by a number, each key read as a ``float``.
+
+    ``{125: 40.0}`` and ``{125.0: 40.0}`` name the same band; a reader that
+    looks a band up by its centre as a ``float`` finds it in either once the
+    keys are read this way.
+
+    :param mapping: Values keyed by an ``int`` or a ``float``.
+    :return: A new dictionary keyed by ``float``, in the mapping's order.
+    """
+    return {float(key): value for key, value in mapping.items()}
+
 
 #: The band set of a spectrum, as every public ``fraction`` writes it: 1 for
 #: octaves, 3 for one-third octaves (the denominator ``b`` of the IEC 61260-1

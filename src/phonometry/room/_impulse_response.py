@@ -73,6 +73,7 @@ from scipy import signal
 from .._internal.frozen import OwnsArrays
 from .._internal.utils import _typesignal
 from .._internal.validation import (
+    require_count,
     require_equal_shapes,
     require_ranks,
     require_same_length,
@@ -169,7 +170,7 @@ class ImpulseResponseResult(OwnsArrays):
     """
 
     ir: np.ndarray
-    fs: int | None
+    fs: float | None
     method: str
 
     def __array__(
@@ -231,7 +232,7 @@ class ImpulseResponseResult(OwnsArrays):
 
 
 def sweep_signal(
-    fs: int,
+    fs: float,
     f1: float,
     f2: float,
     duration_s: float,
@@ -319,7 +320,7 @@ def _apply_fade(x: np.ndarray, fade: float) -> np.ndarray:
 
 
 def inverse_filter(
-    fs: int,
+    fs: float,
     f1: float,
     f2: float,
     duration_s: float,
@@ -383,7 +384,7 @@ def inverse_filter(
 def _farina_deconvolve(
     rec: np.ndarray,
     ref: np.ndarray,
-    fs: int,
+    fs: float,
     f_range: tuple[float, float] | None,
 ) -> np.ndarray:
     """Farina inverse-filter deconvolution (ISO 18233:2006, Figure B.2).
@@ -427,7 +428,7 @@ def _farina_deconvolve(
 def impulse_response(
     recorded: Signal | ArrayLike,
     reference: Signal | ArrayLike,
-    fs: int | None = None,
+    fs: float | None = None,
     *,
     method: Literal["farina"],
     f_range: tuple[float, float],
@@ -441,7 +442,7 @@ def impulse_response(
 def impulse_response(
     recorded: Signal | ArrayLike,
     reference: Signal | ArrayLike,
-    fs: int | None = None,
+    fs: float | None = None,
     *,
     method: Literal["spectral", "farina"] = ...,
     f_range: tuple[float, float] | None = ...,
@@ -454,7 +455,7 @@ def impulse_response(
 def impulse_response(
     recorded: Signal | ArrayLike,
     reference: Signal | ArrayLike,
-    fs: int | None = None,
+    fs: float | None = None,
     *,
     method: Literal["spectral", "farina"] = "spectral",
     f_range: tuple[float, float] | None = None,
@@ -555,7 +556,7 @@ def impulse_response(
     return ImpulseResponseResult(ir=np.asarray(ir), fs=fs, method=method)
 
 
-def mls_signal(order: int) -> np.ndarray:
+def mls_signal(order: int | np.integer[Any]) -> np.ndarray:
     """Generate a maximum-length sequence (MLS) of the given order.
 
     A Fibonacci LFSR with primitive-polynomial feedback taps produces a
@@ -566,9 +567,11 @@ def mls_signal(order: int) -> np.ndarray:
     :param order: Register length ``N`` (2 to 20). The sequence length is
         ``2**order - 1``.
     :return: The bipolar MLS samples (values in ``{-1.0, +1.0}``).
-    :raises TypeError: if ``order`` is not a single number.
+    :raises ValueError: if ``order`` is not a whole number from 2 to 20.
+    :raises TypeError: if ``order`` is a flag, a text or an array where an
+        order goes.
     """
-    require_scalar(order, "order")
+    order = require_count(order, "order", at_least=None)
     if order not in _MLS_TAPS:
         msg = f"order must be one of {sorted(_MLS_TAPS)} (got {order})"
         raise ValueError(msg)
@@ -595,7 +598,7 @@ def mls_impulse_response(
     mls: Signal | ArrayLike,
     *,
     length: int | None = None,
-    fs: int | None = None,
+    fs: float | None = None,
 ) -> ImpulseResponseResult:
     """Recover an impulse response from a periodic MLS excitation.
 
@@ -715,7 +718,7 @@ _GOLAY_MAX_ORDER = 22
 _SHAPED_EDGE_OCTAVES = 1.0 / 6.0
 
 
-def golay_pair(order: int) -> tuple[np.ndarray, np.ndarray]:
+def golay_pair(order: int | np.integer[Any]) -> tuple[np.ndarray, np.ndarray]:
     r"""Generate a complementary Golay pair of length ``2**order``.
 
     Built with the append recursion of Golay (1961): starting from
@@ -732,7 +735,7 @@ def golay_pair(order: int) -> tuple[np.ndarray, np.ndarray]:
     :return: The pair ``(a, b)`` as bipolar float arrays (values ``+1/-1``).
     :raises TypeError: if ``order`` is not a single number.
     """
-    require_scalar(order, "order")
+    order = require_count(order, "order", at_least=None)
     if not 1 <= order <= _GOLAY_MAX_ORDER:
         msg = f"order must be between 1 and {_GOLAY_MAX_ORDER} (got {order})"
         raise ValueError(msg)
@@ -749,7 +752,7 @@ def golay_impulse_response(
     pair: tuple[ArrayLike, ArrayLike],
     *,
     length: int | None = None,
-    fs: int | None = None,
+    fs: float | None = None,
 ) -> ImpulseResponseResult:
     r"""Recover an impulse response from a complementary Golay-pair excitation.
 
@@ -1053,7 +1056,7 @@ def _band_edge_taper(
 
 
 def shaped_sweep_signal(
-    fs: int,
+    fs: float,
     f1: float,
     f2: float,
     duration_s: float,

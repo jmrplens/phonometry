@@ -15,7 +15,7 @@ signatures are unchanged -- a plain array with an explicit ``fs`` and
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -116,7 +116,7 @@ def leq(
 
 def laeq(
     x: Signal | ArrayLike,
-    fs: int | None = None,
+    fs: float | None = None,
     *,
     calibration_factor: float | None = None,
     dbfs: bool = False,
@@ -147,7 +147,7 @@ def laeq(
 
 def ln_levels(
     x: Signal | ArrayLike,
-    fs: int | None = None,
+    fs: float | None = None,
     n: Sequence[int] = (10, 50, 90),
     mode: Literal["fast", "slow", "impulse"] = "fast",
     weighting: Weighting = "Z",
@@ -215,11 +215,11 @@ def ln_levels(
 
 def lc_peak(
     x: Signal | ArrayLike,
-    fs: int | None = None,
+    fs: float | None = None,
     *,
     calibration_factor: float | None = None,
     dbfs: bool = False,
-    oversample: int = 8,
+    oversample: int | np.integer[Any] = 8,
 ) -> float | NDArray[np.float64]:
     """C-weighted peak sound level, LCpeak (IEC 61672-1:2013, subclause 5.13).
 
@@ -270,7 +270,7 @@ def lc_peak(
 
 def sel(
     x: Signal | ArrayLike,
-    fs: int | None = None,
+    fs: float | None = None,
     weighting: Weighting = "Z",
     *,
     calibration_factor: float | None = None,
@@ -318,7 +318,7 @@ def sel(
 
 def sound_exposure(
     x: Signal | ArrayLike,
-    fs: int | None = None,
+    fs: float | None = None,
     *,
     duration_hours: float | None = None,
     calibration_factor: float | None = None,
@@ -363,7 +363,7 @@ def sound_exposure(
 
 def lex_8h(
     x: Signal | ArrayLike,
-    fs: int | None = None,
+    fs: float | None = None,
     *,
     duration_hours: float | None = None,
     calibration_factor: float | None = None,

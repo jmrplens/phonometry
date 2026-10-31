@@ -925,7 +925,7 @@ The four pressure ratios that cut Clause 5.2 into five regimes.
 ```python
 stage_level_correction(
     last_stage_level: float,
-    n_stages: int,
+    n_stages: int | np.integer[Any],
     inlet_pressure_pa: float,
     stagnation_pressure_pa: float,
 ) -> float
@@ -1026,7 +1026,7 @@ the external level of 5.6, which are common to every regime.
 valve_style_modifier(
     passage_area: float,
     wetted_perimeter: float,
-    n_passages: int,
+    n_passages: int | np.integer[Any],
 ) -> float
 ```
 

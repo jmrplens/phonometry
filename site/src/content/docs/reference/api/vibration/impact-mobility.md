@@ -206,7 +206,7 @@ check_coherence(
     frequency_range_hz: tuple[float, float],
     exclude_hz: Sequence[tuple[float, float]] = (),
     min_coherence: float = 0.9,
-    min_n_records: int = 5,
+    min_n_records: int | np.integer[Any] = 5,
 ) -> CoherenceCheck
 ```
 
@@ -718,7 +718,7 @@ Plot the density in dB re its highest bin against frequency.
 
 ```python
 exponential_decay_rate(
-    n_samples: int,
+    n_samples: int | np.integer[Any],
     fs: float,
     *,
     final_value: float,
@@ -755,7 +755,7 @@ $a = -\ln(w_\mathrm{end}) f_s / (N - 1)$ and
 
 ```python
 exponential_window(
-    n_samples: int,
+    n_samples: int | np.integer[Any],
     fs: float,
     *,
     decay_rate_per_s: float,
@@ -910,7 +910,7 @@ The damping the window added to each mode, $a/\omega_r$.
 
 ```python
 force_window(
-    n_samples: int,
+    n_samples: int | np.integer[Any],
     fs: float,
     *,
     width_s: float,

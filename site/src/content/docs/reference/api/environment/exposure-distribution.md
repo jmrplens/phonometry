@@ -201,7 +201,7 @@ sel_distribution(
     probabilities: ArrayLike,
     *,
     sigma_db: float = 5.0,
-    n_subclasses: int = 10,
+    n_subclasses: int | np.integer[Any] = 10,
 ) -> SELDistribution
 ```
 

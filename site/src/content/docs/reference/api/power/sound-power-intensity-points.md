@@ -161,7 +161,7 @@ determination_standard_deviation(
     grade: Literal['precision', 'engineering', 'survey'],
     frequency: float | None = None,
     *,
-    fraction: Literal[1, 3] = 3,
+    fraction: Literal[1, 3] | np.integer[Any] = 3,
 ) -> float
 ```
 
@@ -207,7 +207,7 @@ DiscretePointIntensityResult(
     f3: np.ndarray | None,
     f4: np.ndarray | None,
     pressure_residual_index: np.ndarray | None,
-    fraction: int,
+    fraction: Literal[1, 3],
     grade: str,
 )
 ```
@@ -613,7 +613,7 @@ position_count_factor(
     grade: Literal['precision', 'engineering', 'survey'],
     frequency: float | None = None,
     *,
-    fraction: Literal[1, 3] = 3,
+    fraction: Literal[1, 3] | np.integer[Any] = 3,
 ) -> float
 ```
 
@@ -657,7 +657,7 @@ sound_power_intensity_points(
     pressure_residual_index: float | ArrayLike | None = None,
     temporal_intensity: ArrayLike | None = None,
     frequencies: ArrayLike | None = None,
-    fraction: Literal[1, 3] = 3,
+    fraction: Literal[1, 3] | np.integer[Any] = 3,
     grade: Literal['precision', 'engineering', 'survey'] = 'engineering',
 ) -> DiscretePointIntensityResult
 ```

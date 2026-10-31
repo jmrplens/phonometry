@@ -213,7 +213,7 @@ def _width_3db_bins(level: NDArray[np.float64], oversample: int) -> float:
 
 def window_metrics(
     window: str | tuple[Any, ...],
-    n: int = 1024,
+    n: int | np.integer[Any] = 1024,
 ) -> WindowMetricsResult:
     """Figures of merit of a spectral-analysis taper (Harris 1978).
 

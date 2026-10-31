@@ -197,21 +197,21 @@ adaptation term the input covered. Requires matplotlib
 
 ```python
 impact_improvement_adaptation_term(
-    delta_l: Mapping[float, float] | ArrayLike,
+    delta_l: Mapping[int, float] | Mapping[float, float] | ArrayLike,
     *,
     reference_floor: Literal['heavyweight', 'lightweight_1', 'lightweight_2', 'lightweight_3'] = ...,
     one_decimal: Literal[False] = ...,
 ) -> int
 
 impact_improvement_adaptation_term(
-    delta_l: Mapping[float, float] | ArrayLike,
+    delta_l: Mapping[int, float] | Mapping[float, float] | ArrayLike,
     *,
     reference_floor: Literal['heavyweight', 'lightweight_1', 'lightweight_2', 'lightweight_3'] = ...,
     one_decimal: Literal[True],
 ) -> float
 
 impact_improvement_adaptation_term(
-    delta_l: Mapping[float, float] | ArrayLike,
+    delta_l: Mapping[int, float] | Mapping[float, float] | ArrayLike,
     *,
     reference_floor: Literal['heavyweight', 'lightweight_1', 'lightweight_2', 'lightweight_3'] = ...,
     one_decimal: bool = ...,
@@ -482,21 +482,21 @@ the `Axes`.
 
 ```python
 weighted_impact_improvement(
-    delta_l: Mapping[float, float] | ArrayLike,
+    delta_l: Mapping[int, float] | Mapping[float, float] | ArrayLike,
     *,
     reference_floor: Literal['heavyweight', 'lightweight_1', 'lightweight_2', 'lightweight_3'] = ...,
     one_decimal: Literal[False] = ...,
 ) -> int
 
 weighted_impact_improvement(
-    delta_l: Mapping[float, float] | ArrayLike,
+    delta_l: Mapping[int, float] | Mapping[float, float] | ArrayLike,
     *,
     reference_floor: Literal['heavyweight', 'lightweight_1', 'lightweight_2', 'lightweight_3'] = ...,
     one_decimal: Literal[True],
 ) -> float
 
 weighted_impact_improvement(
-    delta_l: Mapping[float, float] | ArrayLike,
+    delta_l: Mapping[int, float] | Mapping[float, float] | ArrayLike,
     *,
     reference_floor: Literal['heavyweight', 'lightweight_1', 'lightweight_2', 'lightweight_3'] = ...,
     one_decimal: bool = ...,
@@ -543,8 +543,8 @@ the heavyweight floor, as A.2.2 prints.
 
 ```python
 weighted_impact_rating(
-    values_by_band: Mapping[float, float] | ArrayLike,
-    fraction: Literal[1, 3] | None = None,
+    values_by_band: Mapping[int, float] | Mapping[float, float] | ArrayLike,
+    fraction: Literal[1, 3] | np.integer[Any] | None = None,
 ) -> ImpactRatingResult
 ```
 
@@ -630,8 +630,8 @@ as printed in A.2.2).
 
 ```python
 weighted_rating(
-    values_by_band: Mapping[float, float] | ArrayLike,
-    fraction: Literal[1, 3] | None = None,
+    values_by_band: Mapping[int, float] | Mapping[float, float] | ArrayLike,
+    fraction: Literal[1, 3] | np.integer[Any] | None = None,
 ) -> WeightedRatingResult
 ```
 

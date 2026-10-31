@@ -391,7 +391,9 @@ def _warn_if_coarse(largest: float, stacklevel: int) -> None:
         )
 
 
-def adjustment_factors(step_deg: float, *, n_planes: int = 2) -> NDArray[np.float64]:
+def adjustment_factors(
+    step_deg: float, *, n_planes: int | np.integer[Any] = 2
+) -> NDArray[np.float64]:
     r"""Adjustment factors :math:`K(\phi)` for one plane of measurements
     (IEC 61183:1994, Formulas (6), (7), (A.1) and (A.2)).
 
@@ -441,7 +443,9 @@ def adjustment_factors(step_deg: float, *, n_planes: int = 2) -> NDArray[np.floa
     return read_only(_weights(half_steps, count))
 
 
-def largest_element_fraction(step_deg: float, *, n_planes: int = 2) -> float:
+def largest_element_fraction(
+    step_deg: float, *, n_planes: int | np.integer[Any] = 2
+) -> float:
     r"""The largest element a set of incidence angles divides the sphere into,
     as a fraction of its surface (IEC 61183:1994, A.1.6 and A.1.7).
 

@@ -94,18 +94,18 @@ each of them used to be a documented limitation of this module:
 ```python
 linkwitz_riley(
     x: Signal,
-    fs: int | None = ...,
+    fs: float | None = ...,
     *,
     frequency: float,
-    order: int = ...,
+    order: int | np.integer[Any] = ...,
 ) -> tuple[Signal, Signal]
 
 linkwitz_riley(
     x: ArrayLike,
-    fs: int,
+    fs: float,
     *,
     frequency: float,
-    order: int = ...,
+    order: int | np.integer[Any] = ...,
 ) -> tuple[np.ndarray, np.ndarray]
 ```
 
@@ -127,21 +127,22 @@ Splits signal into low and high bands with flat sum response.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `frequency`, `fs` or `order` is not a single number. |
+| ValueError | for a sample rate that is not positive, or an `order` that is not a positive even whole number. |
+| TypeError | if `frequency` or `fs` is not a single number, or `order` is a flag, a text or an array where an order goes. |
 
 ## time_weighting
 
 ```python
 time_weighting(
     x: Signal,
-    fs: int | None = ...,
+    fs: float | None = ...,
     mode: Literal['fast', 'slow', 'impulse'] = ...,
     initial_state: Literal['zero', 'first'] | ArrayLike | None = ...,
 ) -> TimeWeightedEnvelope
 
 time_weighting(
     x: ArrayLike,
-    fs: int,
+    fs: float,
     mode: Literal['fast', 'slow', 'impulse'] = ...,
     initial_state: Literal['zero', 'first'] | ArrayLike | None = ...,
 ) -> np.ndarray
@@ -171,7 +172,7 @@ Apply time weighting to a signal (Exponential averaging).
 ```python
 TimeWeightedEnvelope(
     mean_square: np.ndarray,
-    fs: int,
+    fs: float,
     mode: Literal['fast', 'slow', 'impulse'],
     *,
     calibrated: bool,
@@ -256,7 +257,7 @@ Sample times, in seconds from the start of the record.
 ## TimeWeighting
 
 ```python
-TimeWeighting(fs: int, mode: Literal['fast', 'slow', 'impulse'] = 'fast')
+TimeWeighting(fs: float, mode: Literal['fast', 'slow', 'impulse'] = 'fast')
 ```
 
 Stateful time weighting for block processing.
@@ -322,18 +323,18 @@ Forget the carried state (the next block starts from rest).
 ```python
 weighting_filter(
     x: Signal,
-    fs: int | None = ...,
+    fs: float | None = ...,
     weighting: Literal['A', 'C', 'B', 'D', 'G', 'AU', '468', 'Z'] = ...,
     *,
-    high_accuracy: bool = ...,
+    high_accuracy: bool | np.bool_ = ...,
 ) -> Signal
 
 weighting_filter(
     x: ArrayLike,
-    fs: int,
+    fs: float,
     weighting: Literal['A', 'C', 'B', 'D', 'G', 'AU', '468', 'Z'] = ...,
     *,
-    high_accuracy: bool = ...,
+    high_accuracy: bool | np.bool_ = ...,
 ) -> np.ndarray
 ```
 
@@ -350,16 +351,22 @@ Apply a frequency weighting to a signal.
 
 **Returns:** The weighted record. A bare array in gives a bare array back; a [`Signal`](/phonometry/reference/api/io/io/#signal) gives a Signal, whose samples are already in pascals and whose factor therefore reads 1.0.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `high_accuracy` is not `True` or `False`, `fs` is not one number, or `weighting` is not a text. |
+
 ## WeightingFilter
 
 ```python
 WeightingFilter(
-    fs: int,
+    fs: float,
     weighting: Literal['A', 'C', 'B', 'D', 'G', 'AU', '468', 'Z'] = 'A',
     *,
     stateful: bool = False,
     steady_ic: bool = False,
-    high_accuracy: bool = True,
+    high_accuracy: bool | np.bool_ = True,
 )
 ```
 

@@ -1604,3 +1604,13 @@ def test_an_exemption_silences_its_function_and_goes_stale_without_it(
 def test_the_tree_passes(capsys: pytest.CaptureFixture[str]) -> None:
     status = caa.main([])
     assert status == 0, capsys.readouterr().out
+
+
+def test_a_numpy_scalar_class_written_with_its_argument_is_one_number() -> None:
+    """``np.integer[Any]`` is a count numpy code hands over, not the ``Any`` of an array."""
+    assert not caa.holds_array("int | np.integer[Any]")
+    assert not caa.holds_array("float | np.floating[Any] | None")
+    assert not caa.holds_array("BandFraction | numpy.integer[Any]")
+    assert caa.holds_array("np.ndarray | np.integer[Any]")
+    assert caa.holds_array("Mapping[str, Any]")
+    assert caa.holds_array("Any")

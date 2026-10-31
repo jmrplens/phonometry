@@ -417,11 +417,13 @@ def passage_average_level(levels: ArrayLike, *, axis: None = None) -> float: ...
 
 
 @overload
-def passage_average_level(levels: ArrayLike, *, axis: int) -> NDArray[np.float64]: ...
+def passage_average_level(
+    levels: ArrayLike, *, axis: int | np.integer[Any]
+) -> NDArray[np.float64]: ...
 
 
 def passage_average_level(
-    levels: ArrayLike, *, axis: int | None = None
+    levels: ArrayLike, *, axis: int | np.integer[Any] | None = None
 ) -> float | NDArray[np.float64]:
     r"""The energy average of levels over repeated passages (Clause 9), in dB.
 
@@ -466,7 +468,7 @@ class AmplitudeDistribution(OwnsArrays):
 
 
 def amplitude_distribution(
-    velocity_mm_s: ArrayLike, *, n_bins: int = 101
+    velocity_mm_s: ArrayLike, *, n_bins: int | np.integer[Any] = 101
 ) -> AmplitudeDistribution:
     """The amplitude distribution of a stretch of velocity (Clause 6.3).
 
@@ -880,18 +882,12 @@ def _band_running_rms(
     """The third octaves of Clause 7.2 and the running r.m.s. in each."""
     from ...filters import FilterBankWarning, OctaveFilterBank
 
-    rate = round(fs)
-    if not math.isclose(rate, fs, rel_tol=0.0, abs_tol=1e-9):
-        msg = (
-            f"the third-octave bank needs an integer sampling frequency; got {fs!r} Hz."
-        )
-        raise ValueError(msg)
     with warnings.catch_warnings():
         # A band the rate cannot carry is dropped by the bank with a warning,
         # and the check below turns that into the error it is here.
         warnings.simplefilter("ignore", FilterBankWarning)
         bank = OctaveFilterBank(
-            rate, fraction=3, limits=[PASSAGE_BANDS_HZ[0], upper_band_hz]
+            fs, fraction=3, limits=[PASSAGE_BANDS_HZ[0], upper_band_hz]
         )
     if not math.isclose(float(bank.labels[-1]), upper_band_hz):
         msg = (
@@ -959,8 +955,8 @@ def evaluate_train_passage(
 
     :param velocity_mm_s: The velocity of the passage as the transducer gives
         it, in millimetres per second (1-D).
-    :param fs: Sampling frequency, in hertz: an integer, for the
-        third-octave bank, and high enough to carry the 315 Hz range.
+    :param fs: Sampling frequency, in hertz, high enough to carry the 315 Hz
+        range.
     :param t2_s: :math:`T_2`, the passage itself, ``(start, end)`` in seconds.
         Clause 5 b) reads it off the record, from about a quarter of the most
         frequent maxima back down to the same amplitude, which is a judgement

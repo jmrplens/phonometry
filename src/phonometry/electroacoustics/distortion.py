@@ -295,7 +295,7 @@ def harmonic_distortion(
     fs: float | None = None,
     *,
     fundamental: float,
-    order: int,
+    order: int | np.integer[Any],
     n_harmonics: int = _DEFAULT_N_HARMONICS,
     window: str = "hann",
 ) -> float:
@@ -678,7 +678,7 @@ def weighted_thd(
     else:
         from ..filters.weighting import weighting_filter
 
-        weighted = weighting_filter(residual, int(fs_v), weighting=weighting)
+        weighted = weighting_filter(residual, fs_v, weighting=weighting)
         weighted_rms = float(np.sqrt(np.mean(weighted[sl] ** 2)))
     return float(weighted_rms / total_rms)
 

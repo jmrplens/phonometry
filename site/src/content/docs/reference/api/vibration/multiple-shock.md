@@ -228,7 +228,7 @@ injury_risk(
     daily_compression: float,
     *,
     start_age: float,
-    exposure_duration_years: int,
+    exposure_duration_years: int | np.integer[Any],
     days_per_year: float,
     sex: Literal['male', 'female'] = 'male',
     mz: float | None = None,
@@ -257,8 +257,8 @@ weighted by the reducing ultimate strength of the ageing spine.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | if `exposure_duration_years` is not positive or the spine strength is exhausted ($S_\mathrm{u} - S_\text{stat} \le 0$) within the exposure period. |
-| TypeError | if `sex` is not a text, or `daily_compression`, `days_per_year`, `exposure_duration_years` or `start_age` is not a single number. |
+| ValueError | if `exposure_duration_years` is not a whole number from 1 or the spine strength is exhausted ($S_\mathrm{u} - S_\text{stat} \le 0$) within the exposure period. |
+| TypeError | if `sex` is not a text, `daily_compression`, `days_per_year` or `start_age` is not a single number, or `exposure_duration_years` is a flag, a text or an array where a count of years goes. |
 
 ## multiple_shock_assessment
 
@@ -268,7 +268,7 @@ multiple_shock_assessment(
     fs: float | None = None,
     *,
     start_age: float,
-    exposure_duration_years: int,
+    exposure_duration_years: int | np.integer[Any],
     days_per_year: float,
     exposure_time: float,
     measurement_time: float,
@@ -281,7 +281,7 @@ multiple_shock_assessment(
     fs: float | None = None,
     *,
     start_age: float,
-    exposure_duration_years: int,
+    exposure_duration_years: int | np.integer[Any],
     days_per_year: float,
     sex: Literal['male', 'female'] = ...,
     mz: float | None = ...,
@@ -322,7 +322,8 @@ horizontal whole-body exposure use the ISO 2631-1 metrics in this domain
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `sex` is not a text. |
+| ValueError | if only one of `exposure_time` and `measurement_time` is given, or `exposure_duration_years` is not a whole number from 1. |
+| TypeError | if `sex` is not a text, or `exposure_duration_years` is a flag, a text or an array where a count of years goes. |
 
 ## MultipleShockResult
 

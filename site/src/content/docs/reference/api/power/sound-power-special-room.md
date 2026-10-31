@@ -467,7 +467,7 @@ special_room_source_locations(
     levels: ArrayLike,
     *,
     frequencies: ArrayLike,
-    n_microphone_positions: int = 6,
+    n_microphone_positions: int | np.integer[Any] = 6,
     a_weighted_levels: ArrayLike | None = None,
 ) -> SourceLocationPlan
 ```

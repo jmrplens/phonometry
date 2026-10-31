@@ -446,6 +446,7 @@ class RCResult(OwnsArrays):
                 f"the curve by that whole number); got {self.rating!r}."
             )
             raise TypeError(msg)
+        object.__setattr__(self, "rating", int(self.rating))
         # Read as a plain text: the type admits no RV, a caller's value may.
         classification: str = self.classification
         if classification == "RV":

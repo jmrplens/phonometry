@@ -1755,6 +1755,21 @@ def test_the_tree_writes_every_input_record_axis_by_name() -> None:
     assert cpu.positional_record_axes() == ([], [])
 
 
+def test_a_handed_on_result_no_function_takes_or_returns_is_stale(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    gone = ("phonometry.room.stub", "RecordGone")
+    # Returned by room_criterion, taken by no public function.
+    returned_only = ("phonometry.room.noise_criteria", "RCResult")
+    monkeypatch.setitem(cpu.HANDED_ON_RESULTS, gone, "a reason")
+    monkeypatch.setitem(cpu.HANDED_ON_RESULTS, returned_only, "a reason")
+    assert cpu.stale_handed_on_results() == [gone, returned_only]
+
+
+def test_every_handed_on_result_is_taken_and_returned() -> None:
+    assert cpu.stale_handed_on_results() == []
+
+
 @pytest.mark.parametrize(
     "build",
     [

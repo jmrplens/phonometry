@@ -254,7 +254,9 @@ def _time_ratio(situ: ArrayLike, laboratory: ArrayLike) -> np.ndarray:
 
 
 def _rating_slice(
-    frequencies: np.ndarray, values: np.ndarray, fraction: BandFraction
+    frequencies: np.ndarray,
+    values: np.ndarray,
+    fraction: BandFraction | np.integer[Any],
 ) -> np.ndarray | None:
     """Return the ISO 717 rating range of *values*, or ``None`` if incomplete."""
     wanted = _RATING_BANDS[require_band_fraction(fraction, "fraction")]
@@ -437,7 +439,7 @@ def calculated_sound_reduction_index(
     total_loss_factor: ArrayLike,
     radiation_factor: ArrayLike,
     forced_radiation_factor: ArrayLike,
-    fraction: BandFraction = 3,
+    fraction: BandFraction | np.integer[Any] = 3,
     resonant_only: bool = False,
     density: float | None = None,
     longitudinal_velocity: float | None = None,
@@ -1103,7 +1105,7 @@ def reciprocity_impact_level(
     sound_reduction_index: ArrayLike,
     *,
     frequencies: ArrayLike,
-    fraction: BandFraction = 3,
+    fraction: BandFraction | np.integer[Any] = 3,
 ) -> np.ndarray:
     r"""Impact level of a homogeneous floor by reciprocity (Part 2, B.3/B.4).
 
@@ -1548,7 +1550,7 @@ def in_situ_element(
     element: HomogeneousElement,
     frequencies: ArrayLike,
     *,
-    fraction: BandFraction = 3,
+    fraction: BandFraction | np.integer[Any] = 3,
     resonant_only: bool = False,
     fluid: Fluid = EN12354_AIR,
 ) -> InSituElementResult:
@@ -1998,7 +2000,7 @@ def detailed_airborne_prediction(
     direct_index: ArrayLike,
     flanking_paths: Sequence[BandPath] = (),
     direct_label: str = "Dd",
-    fraction: BandFraction = 3,
+    fraction: BandFraction | np.integer[Any] = 3,
 ) -> DetailedAirborneResult:
     r"""Combine direct and flanking paths into ``R'`` per band (F. 1 to 4).
 
@@ -2051,7 +2053,7 @@ def detailed_impact_prediction(
     direct_level: ArrayLike | None = None,
     flanking_paths: Sequence[BandPath] = (),
     direct_label: str = "Dd",
-    fraction: BandFraction = 3,
+    fraction: BandFraction | np.integer[Any] = 3,
 ) -> DetailedImpactResult:
     r"""Combine direct and flanking paths into ``L'n`` per band (Part 2, (1)).
 

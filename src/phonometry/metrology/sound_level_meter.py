@@ -165,7 +165,6 @@ from .._internal.validation import (
     is_class_designation,
     require_count,
     require_real,
-    require_scalar,
 )
 from .conformance import ConformanceVerification, verify_conformance
 
@@ -205,7 +204,7 @@ _CLASSES = (1, 2)
 
 
 def _limits_for(
-    meter_class: int,
+    meter_class: int | np.integer[Any],
     class_1: tuple[float, float],
     class_2: tuple[float, float],
 ) -> tuple[float, float]:
@@ -243,7 +242,7 @@ class ToneburstReference(RichDisplay):
     class_1_limits_db: tuple[float, float]
     class_2_limits_db: tuple[float, float]
 
-    def limits_db(self, meter_class: int) -> tuple[float, float]:
+    def limits_db(self, meter_class: int | np.integer[Any]) -> tuple[float, float]:
         """The ``(lower, upper)`` acceptance limits for a class, in decibels.
 
         :param meter_class: 1 or 2.
@@ -277,7 +276,7 @@ class PeakReference(RichDisplay):
     class_1_limits_db: tuple[float, float]
     class_2_limits_db: tuple[float, float]
 
-    def limits_db(self, meter_class: int) -> tuple[float, float]:
+    def limits_db(self, meter_class: int | np.integer[Any]) -> tuple[float, float]:
         """The ``(lower, upper)`` acceptance limits for a class, in decibels.
 
         :param meter_class: 1 or 2.
@@ -1246,10 +1245,10 @@ class SoundLevelMeterPeriodicMeasurements(RichDisplay):
     toneburst_uncertainties_db: Mapping[str, Sequence[float]] | None = None
     c_peak_differences: Sequence[float] | None = None
     c_peak_uncertainties_db: Sequence[float] | None = None
-    c_peak_overload_indicated: bool | None = None
+    c_peak_overload_indicated: bool | np.bool_ | None = None
     overload_difference: float | None = None
     overload_uncertainty_db: float | None = None
-    overload_latched: bool | None = None
+    overload_latched: bool | np.bool_ | None = None
     high_level_stability_db: float | None = None
     high_level_stability_uncertainty_db: float | None = None
 
@@ -2046,9 +2045,14 @@ class SoundLevelMeterPeriodicVerification(RichDisplay):
             has besides the reference one, or sound exposure level toneburst
             responses from a meter declared to neither measure sound
             exposure level nor display time-averaged sound level (18.2).
-        :raises TypeError: if ``meter_class`` is not a single number.
+            A ``meter_class`` that is not a whole number is refused too.
+        :raises TypeError: if ``meter_class`` is a flag, a text or an array
+            where a class goes.
         """
-        require_scalar(self.meter_class, "meter_class")
+        # Held as the int require_count returns, a NumPy integer included.
+        object.__setattr__(
+            self, "meter_class", require_count(self.meter_class, "meter_class")
+        )
         declared = self.features
         if self.meter_class == 1 and declared.c_weighting is False:
             msg = (
@@ -3357,13 +3361,16 @@ def _sequence_requirement(
     return _simple(name, labels, values, spread, limit, checks=checks)
 
 
-def _held_checks(*checks: tuple[str, bool | None]) -> tuple[tuple[str, bool], ...]:
+def _held_checks(
+    *checks: tuple[str, bool | np.bool_ | None],
+) -> tuple[tuple[str, bool], ...]:
     """``(check, held)`` for each yes/no check the record answers.
 
     :param checks: ``(check, held)`` pairs, ``held`` ``None`` for a check the
-        record does not answer, which is left out.
+        record does not answer, which is left out; a NumPy truth value is read
+        as the ``bool`` it holds.
     """
-    return tuple((name, held) for name, held in checks if held is not None)
+    return tuple((name, bool(held)) for name, held in checks if held is not None)
 
 
 def _linear_range_clear(m: SoundLevelMeterPeriodicMeasurements) -> bool | None:
@@ -3430,7 +3437,7 @@ _TIME_WEIGHTING_VS_F_LABELS = MappingProxyType({"S": "LAS - LAF", "eq": "LAeq - 
 
 
 def verify_sound_level_meter_periodic(
-    meter_class: int,
+    meter_class: int | np.integer[Any],
     measurements: SoundLevelMeterPeriodicMeasurements,
     *,
     pattern_approval_public: bool = False,

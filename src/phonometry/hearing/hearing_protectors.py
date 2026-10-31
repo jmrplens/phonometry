@@ -211,7 +211,7 @@ _HML_HIGH_SPAN = 4.0
 _HML_LOW_SPAN = 8.0
 
 
-def _alpha_for(performance: int) -> float:
+def _alpha_for(performance: int | np.integer[Any]) -> float:
     """The Table 1 constant for a protection performance, or a refusal.
 
     Whole numbers only, and no coercion: ``int(84.5)`` is 84, so truncating
@@ -325,7 +325,7 @@ class AssumedProtectionResult(OwnsArrays):
 def assumed_protection_value(
     attenuation: ArrayLike,
     *,
-    performance: int = 84,
+    performance: int | np.integer[Any] = 84,
     frequencies: ArrayLike | None = None,
 ) -> AssumedProtectionResult:
     r"""Assumed protection values of a hearing protector (Formula (1)).
@@ -633,7 +633,9 @@ class HMLRatingResult(OwnsArrays):
         return plot_hml_rating(self, ax=ax, language=language, **kwargs)
 
 
-def hml_rating(attenuation: ArrayLike, *, performance: int = 84) -> HMLRatingResult:
+def hml_rating(
+    attenuation: ArrayLike, *, performance: int | np.integer[Any] = 84
+) -> HMLRatingResult:
     r"""The ``H``, ``M`` and ``L`` values of a protector (Formulas (3) to (15)).
 
     Clause 7.2 fits the protector against the eight reference noises of
@@ -831,7 +833,9 @@ class SNRRatingResult(OwnsArrays):
         return plot_snr_rating(self, ax=ax, language=language, **kwargs)
 
 
-def snr_rating(attenuation: ArrayLike, *, performance: int = 84) -> SNRRatingResult:
+def snr_rating(
+    attenuation: ArrayLike, *, performance: int | np.integer[Any] = 84
+) -> SNRRatingResult:
     r"""The single number rating of a protector (Formulas (19) to (22)).
 
     One reference noise instead of eight, and one number instead of three:

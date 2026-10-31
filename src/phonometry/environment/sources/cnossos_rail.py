@@ -85,6 +85,7 @@ from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     require_axis_count,
     require_axis_rank,
+    require_count,
     require_equal_counts,
     require_equal_shapes,
     require_ranks,
@@ -2350,7 +2351,7 @@ def vertical_directivity(
     psi: float,
     *,
     frequencies: ArrayLike = RAILWAY_THIRD_OCTAVE_BANDS_HZ,
-    height: int = 1,
+    height: int | np.integer[Any] = 1,
     aerodynamic: bool = False,
     edition: DirectivityEdition = DirectivityEdition.CURRENT,
 ) -> NDArray[np.float64]:
@@ -2372,9 +2373,10 @@ def vertical_directivity(
     :param edition: Which text of (2.3.16) to evaluate.
     :return: The correction, in dB, one value per band.
     :raises ValueError: If the angle is not finite or the height is not 1 or 2.
-    :raises TypeError: if ``height`` or ``psi`` is not a single number.
+    :raises TypeError: if ``psi`` is not a single number, or ``height`` is a
+        flag, a text or an array where a source height index goes.
     """
-    require_scalar(height, "height")
+    height = require_count(height, "height")
     angle = np.radians(_finite(psi, "psi"))
     freqs = np.asarray(frequencies, dtype=np.float64)
     if height not in (1, 2):

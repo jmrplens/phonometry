@@ -554,7 +554,9 @@ than it Formula (2) does not hold.
 ## soil_building_frequency_guide
 
 ```python
-soil_building_frequency_guide(n_stories: int) -> tuple[float, float]
+soil_building_frequency_guide(
+    n_stories: int | np.integer[Any],
+) -> tuple[float, float]
 ```
 
 The natural frequency Clause 4.3 gives a building on medium ground.
@@ -622,7 +624,7 @@ track_excitation_frequency(
     train_speed_m_s: float,
     *,
     spacing_m: float,
-    n_harmonics: int = 1,
+    n_harmonics: int | np.integer[Any] = 1,
 ) -> NDArray[np.float64]
 ```
 

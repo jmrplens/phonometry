@@ -245,7 +245,7 @@ deviation of `nx` repeated measurements stays below these values.
 prediction_input_uncertainty(
     sigma_reproducibility: float,
     sigma_product: float,
-    n: int,
+    n: int | np.integer[Any],
 ) -> float
 ```
 
@@ -277,7 +277,10 @@ reproducibility standard deviation with the product-homogeneity scatter over
 ## reduce_by_independent_measurements
 
 ```python
-reduce_by_independent_measurements(u: float, m: int) -> float
+reduce_by_independent_measurements(
+    u: float,
+    m: int | np.integer[Any],
+) -> float
 ```
 
 Reduce a standard uncertainty by `m` independent measurements (Formula A.7).
@@ -297,8 +300,8 @@ equipment lower the in-situ uncertainty.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | Non-positive `m` or negative `u`. |
-| TypeError | if `m` or `u` is not a single number. |
+| ValueError | an `m` that is not a whole number from 1, or a negative `u`. |
+| TypeError | if `u` is not a single number, or `m` is a flag, a text or an array where a count goes. |
 
 ## RequirementConformity
 

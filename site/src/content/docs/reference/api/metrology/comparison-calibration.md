@@ -2484,7 +2484,7 @@ verify_jig_or_coupler(
     calibration: ComparisonCalibration,
     validation: ComparisonCalibration | ReciprocityCalibration,
     *,
-    microphone: int | None = None,
+    microphone: int | np.integer[Any] | None = None,
     shared_standard_uncertainty_db: ArrayLike = 0.0,
 ) -> JigCouplerVerification
 ```

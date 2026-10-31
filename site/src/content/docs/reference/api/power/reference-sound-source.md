@@ -256,7 +256,7 @@ reference_source_reproducibility(
     *,
     environment: Literal['hemi-anechoic', 'reverberation-room'],
     arrangement: Literal['paths', 'fixed'] | None = None,
-    fraction: Literal[1, 3] = 3,
+    fraction: Literal[1, 3] | np.integer[Any] = 3,
 ) -> np.ndarray
 ```
 
@@ -588,7 +588,7 @@ A-weighted sound power level over `a_weighted_range_hz` (5.3).
 ReferenceSourceCalibration.sound_power_level_at(
     frequencies: ArrayLike,
     *,
-    fraction: Literal[1, 3] = 3,
+    fraction: Literal[1, 3] | np.integer[Any] = 3,
     temperature_c: float | None = None,
     static_pressure_kpa: float | None = None,
 ) -> np.ndarray

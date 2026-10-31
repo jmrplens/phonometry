@@ -561,7 +561,9 @@ def test_aerodynamic_coefficients_refuse_a_non_finite_drag_ratio() -> None:
 
 
 def test_performance_aircraft_refuses_an_engineless_aeroplane() -> None:
-    with pytest.raises(ValueError, match=r"PerformanceAircraft: 'n_engines'"):
+    with pytest.raises(
+        ValueError, match=r"'n_engines' must be a whole number, at least 1"
+    ):
         PerformanceAircraft(
             aircraft_id="JETW",
             n_engines=0,

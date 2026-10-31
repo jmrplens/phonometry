@@ -40,7 +40,7 @@ from __future__ import annotations
 
 import math
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -195,9 +195,9 @@ def _sidecar_labels(
 
 def read_blocks(
     path: str | Path,
-    block_size: int,
+    block_size: int | np.integer[Any],
     *,
-    overlap: int = 0,
+    overlap: int | np.integer[Any] = 0,
     calibration_factor: float | None = None,
 ) -> Iterator[Signal]:
     """Stream an audio file as :class:`~phonometry.io.Signal` blocks.

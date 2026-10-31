@@ -377,6 +377,7 @@ class HeadphoneClassification(RichDisplay):
         if n_channels > _MAX_CHANNELS:
             msg = f"'n_channels' must be 1 to {_MAX_CHANNELS}, one digit of the code."
             raise ValueError(msg)
+        object.__setattr__(self, "n_channels", n_channels)
 
     @property
     def code(self) -> str:
@@ -1172,7 +1173,7 @@ class LimitingTestSignalCheck(RichDisplay):
 
 
 def check_limiting_test_signal(
-    x: Signal | ArrayLike, fs: int | None = None
+    x: Signal | ArrayLike, fs: float | None = None
 ) -> LimitingTestSignalCheck:
     """Is this the clipped programme signal IEC 60268-7 8.3.2.2 b) asks for?
 
@@ -1219,7 +1220,7 @@ def check_limiting_test_signal(
     # The bank adds bands from the one holding the lower limit until a band's
     # upper edge passes the upper limit, so the two centres select exactly
     # the bands wanted.
-    analysis = octave_filter(x, int(rate), fraction=3, limits=[bands[0], bands[-1]])
+    analysis = octave_filter(x, rate, fraction=3, limits=[bands[0], bands[-1]])
     if analysis.levels is None:  # pragma: no cover - the bank always returns levels
         msg = "The one-third-octave analysis returned no band levels."
         raise RuntimeError(msg)
@@ -2039,7 +2040,7 @@ def verify_ear_canal_microphone(
 # ---------------------------------------------------------------------------
 
 
-def _time_axis(fs: int, duration_s: float) -> NDArray[np.float64]:
+def _time_axis(fs: int | np.integer[Any], duration_s: float) -> NDArray[np.float64]:
     """Sample instants of a record of ``duration_s`` at ``fs``."""
     rate = require_count(fs, "fs")
     duration = require_positive(duration_s, "duration_s")
@@ -2051,7 +2052,7 @@ def _time_axis(fs: int, duration_s: float) -> NDArray[np.float64]:
 
 
 def headphone_modulation_signal(
-    fs: int, duration_s: float, *, rated_source_emf_v: float
+    fs: int | np.integer[Any], duration_s: float, *, rated_source_emf_v: float
 ) -> NDArray[np.float64]:
     r"""The modulation distortion test signal of IEC 60268-7 8.7.3.
 
@@ -2087,7 +2088,11 @@ def headphone_modulation_signal(
 
 
 def headphone_difference_frequency_signal(
-    fs: int, duration_s: float, *, upper_frequency_hz: float, rated_source_emf_v: float
+    fs: int | np.integer[Any],
+    duration_s: float,
+    *,
+    upper_frequency_hz: float,
+    rated_source_emf_v: float,
 ) -> NDArray[np.float64]:
     """The difference-frequency distortion test signal of IEC 60268-7 8.7.4.
 

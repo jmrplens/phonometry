@@ -94,11 +94,11 @@ from ..._internal.validation import (
     check_engine,
     require_band_fraction,
     require_choice,
+    require_count,
     require_non_negative,
     require_positive,
     require_ranks,
     require_same_length,
-    require_scalar,
 )
 from ...metrology.reference_values import REFERENCE_VALUES
 from .resilient_layers import TAPPING_HAMMER_MASS_KG
@@ -727,7 +727,7 @@ def tapping_machine_force_level() -> np.ndarray:
 
 
 def tapping_machine_force_level_estimate(
-    frequency: ArrayLike, *, fraction: BandFraction = 1
+    frequency: ArrayLike, *, fraction: BandFraction | np.integer[Any] = 1
 ) -> np.ndarray:
     r"""Closed form printed under Table F.1 for the tapping machine force level.
 
@@ -849,7 +849,7 @@ _MULTI_JUNCTION_ADJUSTMENT: dict[int, float] = {1: 0.0, 2: 4.0, 3: 6.0}
 MIN_MULTI_JUNCTION_KIJ: float = -5.0
 
 
-def multi_junction_adjustment(n_junctions: int) -> float:
+def multi_junction_adjustment(n_junctions: int | np.integer[Any]) -> float:
     r"""Vibration reduction index adjustment ``dK`` (EN 12354-5, clause F.1).
 
     When the receiving room is more than one junction away from the equipment,
@@ -861,13 +861,12 @@ def multi_junction_adjustment(n_junctions: int) -> float:
 
     :param n_junctions: Number of junctions the transmission path crosses (>= 1).
     :return: The adjustment ``dK``, in dB (0,0 for a single junction).
-    :raises ValueError: for fewer than one junction.
-    :raises TypeError: if ``n_junctions`` is not a single number.
+    :raises ValueError: for a number of junctions that is not a whole number
+        from 1.
+    :raises TypeError: if ``n_junctions`` is a flag, a text or an array where a
+        count goes.
     """
-    require_scalar(n_junctions, "n_junctions")
-    if n_junctions < 1:
-        msg = "'n_junctions' must be at least 1."
-        raise ValueError(msg)
+    n_junctions = require_count(n_junctions, "n_junctions")
     return _MULTI_JUNCTION_ADJUSTMENT[min(n_junctions, 3)]
 
 

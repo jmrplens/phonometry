@@ -939,7 +939,7 @@ $10^{-6}$ of this and calls it sound.
 
 ```python
 multihole_incipient_cavitation_ratio(
-    n_passages: int,
+    n_passages: int | np.integer[Any],
     hole_diameter_m: float,
     pressure_recovery: float,
 ) -> float
@@ -1314,7 +1314,7 @@ diameter of Equation (4) stands for that size.
 ## uniform_passage_style_modifier
 
 ```python
-uniform_passage_style_modifier(n_passages: int) -> float
+uniform_passage_style_modifier(n_passages: int | np.integer[Any]) -> float
 ```
 
 Equation (29): the style modifier of a last stage full of openings.

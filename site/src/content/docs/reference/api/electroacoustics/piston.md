@@ -425,7 +425,7 @@ Requires matplotlib (`pip install "phonometry[plot]"`).
 RadiatingPistonResult.plot_geometry(
     ax: Axes | None = None,
     *,
-    frequency_index: int = -1,
+    frequency_index: int | np.integer[Any] = -1,
     language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes

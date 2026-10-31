@@ -151,7 +151,7 @@ regularized_inverse_filter(
     regularization_outside: float = 1.0,
     transition_octaves: float = 0.3333333333333333,
     n_fft: int | None = None,
-    delay: int | None = None,
+    delay: int | np.integer[Any] | None = None,
 ) -> InverseFilterResult
 ```
 

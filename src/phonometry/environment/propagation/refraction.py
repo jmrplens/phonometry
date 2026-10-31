@@ -206,7 +206,7 @@ def log_linear_sound_speed_profile(
     ground_speed_of_sound: float = 340.0,
     roughness_length: float = 0.1,
     max_height_m: float = 100.0,
-    n_points: int = 128,
+    n_points: int | np.integer[Any] = 128,
 ) -> EffectiveSoundSpeedProfile:
     r"""Logarithmic effective sound-speed profile (surface layer).
 
@@ -477,7 +477,7 @@ def atmospheric_ray_paths(
     source_height_m: float,
     launch_angles_deg: ArrayLike,
     max_range: float = 1000.0,
-    n_steps: int = 2000,
+    n_steps: int | np.integer[Any] = 2000,
 ) -> AtmosphericRayResult:
     r"""Trace sound rays through a refracting atmosphere over a ground surface.
 

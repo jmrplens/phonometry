@@ -134,7 +134,7 @@ def _fold_causal(cepstrum: NDArray[np.float64]) -> NDArray[np.float64]:
     return folded
 
 
-def _validate_nfft(n: int, nfft: int | None) -> int:
+def _validate_nfft(n: int, nfft: int | np.integer[Any] | None) -> int:
     require_scalar(n, "n")
     if nfft is None:
         return n if n % 2 == 0 else n + 1
@@ -278,7 +278,7 @@ def cepstrum(
     fs: float | None = None,
     *,
     kind: Kind = "power",
-    nfft: int | None = None,
+    nfft: int | np.integer[Any] | None = None,
 ) -> CepstrumResult:
     """Cepstrum of a record: power, real or complex.
 
@@ -435,7 +435,7 @@ def lifter(
     *,
     cutoff: float,
     mode: Mode = "lowpass",
-    nfft: int | None = None,
+    nfft: int | np.integer[Any] | None = None,
 ) -> LifterResult:
     """Lifter a record's log spectrum: keep quefrencies below or above a cutoff.
 
@@ -604,7 +604,7 @@ def echo_detection(
     *,
     min_quefrency: float | None = None,
     max_quefrency: float | None = None,
-    nfft: int | None = None,
+    nfft: int | np.integer[Any] | None = None,
 ) -> EchoDetectionResult:
     r"""Detect an echo as the largest power-cepstrum peak in a quefrency band.
 

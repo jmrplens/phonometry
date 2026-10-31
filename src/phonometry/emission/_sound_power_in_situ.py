@@ -822,7 +822,9 @@ class _Comparison:
     coverage_factor: float
 
 
-def _event_shape(arr: np.ndarray, n_events: int | None) -> tuple[bool, int, int, int]:
+def _event_shape(
+    arr: np.ndarray, n_events: int | np.integer[Any] | None
+) -> tuple[bool, int, int, int]:
     """Read the two forms of clause 8.4 off the array, and refuse the mixture.
 
     Measured one event at a time the array is ``(positions, N, bands)`` and
@@ -842,8 +844,8 @@ def _event_shape(arr: np.ndarray, n_events: int | None) -> tuple[bool, int, int,
                 "pass it only with a 2D (positions, bands) measurement."
             )
             raise ValueError(msg)
-        n_positions, n_events, n_bands = arr.shape
-        return True, n_positions, n_events, n_bands
+        n_positions, counted, n_bands = arr.shape
+        return True, n_positions, counted, n_bands
     if n_events is None:
         msg = (
             "'n_events' must be given, the number N of events the 2D "
@@ -1106,7 +1108,7 @@ def sound_energy_in_situ(
     reference_sound_power_levels: ArrayLike | ReferenceSourceCalibration,
     *,
     frequencies: ArrayLike,
-    n_events: int | None = None,
+    n_events: int | np.integer[Any] | None = None,
     background_levels: ArrayLike | None = None,
     reference_background_levels: ArrayLike | None = None,
     integration_time: float | None = None,

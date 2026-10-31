@@ -54,7 +54,6 @@ from phonometry import (
     environment,
     hearing,
     materials,
-    noise_control,
     psychoacoustics,
     room,
     underwater,
@@ -608,12 +607,6 @@ _PUBLIC_CALLS: list[tuple[str, Callable[[object], object], float, str]] = [
         lambda v: vibration.machinery.assess_operational_change(v, 4.5),
         3.0,
         "change",
-    ),
-    (
-        "noise_control.blade_passing_frequency",
-        lambda v: noise_control.blade_passing_frequency(1450.0, v),
-        12,
-        "n_blades",
     ),
     (
         "building.low_frequency_procedure_applies",

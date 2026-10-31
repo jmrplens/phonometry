@@ -66,7 +66,7 @@ import math
 import warnings
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -417,7 +417,7 @@ def incipient_cavitation_ratio(
 
 
 def multihole_incipient_cavitation_ratio(
-    n_passages: int, hole_diameter_m: float, pressure_recovery: float
+    n_passages: int | np.integer[Any], hole_diameter_m: float, pressure_recovery: float
 ) -> float:
     r"""Equation (3b): the same threshold for a multihole trim.
 
@@ -1898,7 +1898,7 @@ def last_stage_differential(
     return float(min(p1n - p2, threshold * (p1n - pv)))
 
 
-def uniform_passage_style_modifier(n_passages: int) -> float:
+def uniform_passage_style_modifier(n_passages: int | np.integer[Any]) -> float:
     r"""Equation (29): the style modifier of a last stage full of openings.
 
     .. math::

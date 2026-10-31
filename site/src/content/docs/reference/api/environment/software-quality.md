@@ -257,7 +257,7 @@ CERTIFIED_RESULT_TOLERANCE_DB = 0.05
 ```python
 contour_sample_chainages_m(
     total_length_m: float,
-    sample_size: int,
+    sample_size: int | np.integer[Any],
 ) -> NDArray[np.float64]
 ```
 
@@ -461,7 +461,7 @@ RANKING_POSITIONS = {20: (2, 19), 21: (2, 20), 22: (2, 21), 23: (2, 22), 24: (2,
 ## ranking_positions
 
 ```python
-ranking_positions(sample_size: int) -> tuple[int, int]
+ranking_positions(sample_size: int | np.integer[Any]) -> tuple[int, int]
 ```
 
 Ranking positions of the 0,1- and 0,9-quantiles (ISO 17534-1 C.4).
@@ -658,8 +658,8 @@ sample are defined, only less representative of the map.
 
 ```python
 uniform_sample_indices(
-    n_points: int,
-    sample_size: int,
+    n_points: int | np.integer[Any],
+    sample_size: int | np.integer[Any],
     *,
     horizontal_clearances_m: ArrayLike | None = None,
 ) -> NDArray[np.intp]

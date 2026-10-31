@@ -277,7 +277,9 @@ def residual_index_limits(
     return ResidualIndexLimits(frequencies=freqs, class_1=class1, class_2=class2)
 
 
-def instrument_class_from_components(probe_class: int, processor_class: int) -> int:
+def instrument_class_from_components(
+    probe_class: int | np.integer[Any], processor_class: int | np.integer[Any]
+) -> int:
     """Class of an instrument assembled from a separate probe and processor.
 
     IEC 61043:1993 clause 8: when a probe and a processor are supplied
@@ -576,7 +578,9 @@ class IntensityInstrumentComplianceResult(OwnsArrays):
         """
         return 2 if self.overall_class is None else self.overall_class
 
-    def binding_margin(self, device_class: int | None = None) -> float:
+    def binding_margin(
+        self, device_class: int | np.integer[Any] | None = None
+    ) -> float:
         """Smallest per-band margin to a class, in dB (the binding margin).
 
         :param device_class: 1 or 2; ``None`` (default) uses
@@ -595,7 +599,9 @@ class IntensityInstrumentComplianceResult(OwnsArrays):
             raise ValueError(msg)
         return min(float(band[f"margin_class{cls}_db"]) for band in self.bands)
 
-    def failing_bands(self, device_class: int | None = None) -> list[float]:
+    def failing_bands(
+        self, device_class: int | np.integer[Any] | None = None
+    ) -> list[float]:
         """Nominal centre frequencies of the bands that miss a class, in Hz.
 
         :param device_class: 1 or 2; ``None`` (default) uses

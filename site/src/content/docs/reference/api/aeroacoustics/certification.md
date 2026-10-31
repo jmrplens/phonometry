@@ -307,7 +307,11 @@ The analytic piecewise noy law, using the Table A2-3 constants:
 ## tone_correction
 
 ```python
-tone_correction(spl: ArrayLike, *, start_band: int = 2) -> float
+tone_correction(
+    spl: ArrayLike,
+    *,
+    start_band: int | np.integer[Any] = 2,
+) -> float
 ```
 
 Tone-correction factor `C` for a spectrum (ICAO Annex 16 App. 2 §4.3).

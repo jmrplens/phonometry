@@ -66,7 +66,7 @@ Clause, formula and table numbers refer to ISO 4869-2:2018(E).
 assumed_protection_value(
     attenuation: ArrayLike,
     *,
-    performance: int = 84,
+    performance: int | np.integer[Any] = 84,
     frequencies: ArrayLike | None = None,
 ) -> AssumedProtectionResult
 ```
@@ -219,7 +219,7 @@ $L'_{p,\mathrm{A}x}$.
 hml_rating(
     attenuation: ArrayLike,
     *,
-    performance: int = 84,
+    performance: int | np.integer[Any] = 84,
 ) -> HMLRatingResult
 ```
 
@@ -549,7 +549,7 @@ integer.
 snr_rating(
     attenuation: ArrayLike,
     *,
-    performance: int = 84,
+    performance: int | np.integer[Any] = 84,
 ) -> SNRRatingResult
 ```
 

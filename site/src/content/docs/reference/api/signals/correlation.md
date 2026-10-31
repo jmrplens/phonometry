@@ -64,7 +64,7 @@ align_impulse_responses(
     fs: float | None = None,
     *,
     interpolation: Literal['parabolic', 'none'] = 'parabolic',
-    upsample: int = 8,
+    upsample: int | np.integer[Any] = 8,
 ) -> AlignedImpulseResponseResult
 ```
 
@@ -337,7 +337,7 @@ impulse_response_delay(
     *,
     reference: Signal | ArrayLike | None = None,
     interpolation: Literal['parabolic', 'none'] = 'parabolic',
-    upsample: int = 8,
+    upsample: int | np.integer[Any] = 8,
 ) -> float
 ```
 
@@ -388,11 +388,11 @@ time_delay(
     method: Literal['gcc', 'direct', 'phase'] = 'gcc',
     weighting: Literal['none', 'roth', 'scot', 'phat', 'ml'] = 'phat',
     window: str = 'hann',
-    nperseg: int | None = None,
+    nperseg: int | np.integer[Any] | None = None,
     overlap: float = 0.5,
     max_delay: float | None = None,
     interpolation: Literal['parabolic', 'none'] = 'parabolic',
-    upsample: int = 1,
+    upsample: int | np.integer[Any] = 1,
     signal_bandwidth: float | None = None,
 ) -> TimeDelayResult
 ```

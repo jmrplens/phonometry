@@ -189,7 +189,7 @@ The floor $4{,}343 / x_\mathrm{max}$ of Formula 2, in dB/m; `None` without the g
 TrackDecayRate.plot(
     ax: Axes | None = None,
     *,
-    limit_db_per_m: Mapping[float, float] | None = None,
+    limit_db_per_m: Mapping[int, float] | Mapping[float, float] | None = None,
     language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes

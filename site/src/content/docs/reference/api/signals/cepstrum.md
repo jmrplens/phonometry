@@ -80,7 +80,7 @@ cepstrum(
     fs: float | None = None,
     *,
     kind: Literal['power', 'real', 'complex'] = 'power',
-    nfft: int | None = None,
+    nfft: int | np.integer[Any] | None = None,
 ) -> CepstrumResult
 ```
 
@@ -201,7 +201,7 @@ echo_detection(
     *,
     min_quefrency: float | None = None,
     max_quefrency: float | None = None,
-    nfft: int | None = None,
+    nfft: int | np.integer[Any] | None = None,
 ) -> EchoDetectionResult
 ```
 
@@ -301,7 +301,7 @@ lifter(
     *,
     cutoff: float,
     mode: Literal['lowpass', 'highpass'] = 'lowpass',
-    nfft: int | None = None,
+    nfft: int | np.integer[Any] | None = None,
 ) -> LifterResult
 ```
 

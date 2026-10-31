@@ -95,6 +95,7 @@ from .._internal.types import as_float_or_array
 from .._internal.validation import (
     check_engine,
     require_choice,
+    require_count,
     require_non_negative,
     require_positive,
     require_ranks,
@@ -1348,7 +1349,9 @@ def flow_noise_bend(
 # ---------------------------------------------------------------------------
 # Fan sound power (Long Chapter 13)
 # ---------------------------------------------------------------------------
-def blade_passing_frequency(rotational_speed_rpm: float, n_blades: int) -> float:
+def blade_passing_frequency(
+    rotational_speed_rpm: float, n_blades: int | np.integer[Any]
+) -> float:
     r"""Blade passing frequency (Long Eq. 13.4).
 
     :math:`f_{bp} = \mathrm{rpm} \times \mathrm{blades} / 60`.
@@ -1356,16 +1359,14 @@ def blade_passing_frequency(rotational_speed_rpm: float, n_blades: int) -> float
     :param rotational_speed_rpm: Fan speed, revolutions per minute.
     :param n_blades: Number of impeller blades.
     :return: The blade passing frequency, Hz.
-    :raises ValueError: If ``n_blades`` is not a positive integer.
-    :raises TypeError: if ``n_blades`` or ``rotational_speed_rpm`` is not a single
-        number.
+    :raises ValueError: If ``n_blades`` is not a whole number from 1, or the
+        speed is not positive.
+    :raises TypeError: if ``rotational_speed_rpm`` is not a single number, or
+        ``n_blades`` is a flag, a text or an array where a count goes.
     """
     rpm = require_positive(rotational_speed_rpm, "rotational_speed_rpm")
-    require_scalar(n_blades, "n_blades")
-    if n_blades <= 0 or not float(n_blades).is_integer():
-        msg = "'n_blades' must be a positive integer."
-        raise ValueError(msg)
-    return rpm * float(n_blades) / 60.0
+    blades = require_count(n_blades, "n_blades")
+    return rpm * blades / 60.0
 
 
 class HVACWarning(PhonometryWarning):
@@ -1429,7 +1430,7 @@ def _vdi2081_fan_spectrum(
     fan_total_pressure_pa: float,
     fan_speed_rpm: float,
     specific_sound_power_level: float | None,
-    n_blades: int | None,
+    n_blades: int | np.integer[Any] | None,
     relative_flow: float,
 ) -> NDArray[np.float64]:
     """The VDI 2081 Part 1 Section 4.3 octave spectrum, dB re 1e-12 W.
@@ -1474,7 +1475,7 @@ def _vdi2081_fan_spectrum(
 
     spectrum = overall + shape + off_duty
     if n_blades is not None:
-        blades = require_positive(n_blades, "n_blades")
+        blades = require_count(n_blades, "n_blades")
         passing = speed * blades / 60.0
         nearest = int(np.argmin(np.abs(np.log2(passing / bands))))
         spectrum[nearest] += blade_allowance
@@ -1503,7 +1504,7 @@ def fan_sound_power(
     assembly: Assembly,
     fan_speed_rpm: float,
     specific_sound_power_level: float | None = ...,
-    n_blades: int | None = ...,
+    n_blades: int | np.integer[Any] | None = ...,
     relative_flow: float = ...,
     frequencies: ArrayLike | None = ...,
 ) -> HVACSpectrumResult: ...
@@ -1523,7 +1524,7 @@ def fan_sound_power(
     assembly: Assembly | None = None,
     fan_speed_rpm: float | None = None,
     specific_sound_power_level: float | None = None,
-    n_blades: int | None = None,
+    n_blades: int | np.integer[Any] | None = None,
     relative_flow: float = 1.0,
     frequencies: ArrayLike | None = None,
 ) -> HVACSpectrumResult:
@@ -2403,7 +2404,7 @@ def split_loss(
     main_area: float,
     branch_areas: ArrayLike,
     *,
-    branch: int = 0,
+    branch: int | np.integer[Any] = 0,
     model: Model = "ashrae",
 ) -> float:
     r"""Power split loss into one branch of a duct division (Long Eq. 14.17).
@@ -2450,12 +2451,12 @@ def split_loss(
     :param model: ``"ashrae"`` (default, Long Eq. 14.17, reflection included)
         or ``"vdi2081"`` (Equation (35), the area split alone).
     :return: The split loss, dB (positive).
-    :raises ValueError: If the areas are not positive or ``branch`` is out of
-        range.
-    :raises TypeError: if ``model`` is not a text, or ``branch`` or ``main_area`` is not
-        a single number.
+    :raises ValueError: If the areas are not positive or ``branch`` is not a
+        whole number in range.
+    :raises TypeError: if ``model`` is not a text, ``main_area`` is not a single
+        number, or ``branch`` is a flag, a text or an array where an index goes.
     """
-    require_scalar(branch, "branch")
+    branch = require_count(branch, "branch", at_least=None)
     s_m = require_positive(main_area, "main_area")
     areas = np.atleast_1d(np.asarray(branch_areas, dtype=np.float64))
     if areas.ndim != 1 or areas.size == 0:
@@ -2618,7 +2619,7 @@ def splitter_silencer_insertion_loss(
 def silencer_self_noise(
     frequencies: ArrayLike | None,
     airway_velocity: float,
-    n_passages: int,
+    n_passages: int | np.integer[Any],
     height_m: float,
     *,
     model: Model = "ashrae",
@@ -2657,7 +2658,7 @@ def silencer_self_noise(
     :param height_m: Silencer height ``H`` (or circumference, if round), m.
     :return: An :class:`HVACSpectrumResult` of the band sound power level,
         dB re 1e-12 W.
-    :raises ValueError: If ``n_passages`` is not a positive integer.
+    :raises ValueError: If ``n_passages`` is not a whole number from 1.
     :param model: ``"ashrae"`` (default, Long Eq. 14.31) or ``"vdi2081"``
         (Section 7.2.4.2).
     :param pressure_drop_pa: **VDI 2081 only.** Total pressure drop across the
@@ -2670,9 +2671,10 @@ def silencer_self_noise(
         which the guideline's own worked example computes as ``2 s``, the
         parallel-plate limit, rather than as ``4 A / P``; ``docs/ERRATA.md``
         records the difference.
-    :raises TypeError: if ``model`` is not a text, or ``airway_velocity``,
-        ``airway_width``, ``approach_area``, ``height_m``, ``n_passages`` or
-        ``pressure_drop_pa`` is not a single number.
+    :raises TypeError: if ``model`` is not a text, ``airway_velocity``,
+        ``airway_width``, ``approach_area``, ``height_m`` or
+        ``pressure_drop_pa`` is not a single number, or ``n_passages`` is a
+        flag, a text or an array where a count goes.
     """
     if require_choice(model, "model", ("ashrae", "vdi2081")) == "vdi2081":
         missing = [
@@ -2708,10 +2710,7 @@ def silencer_self_noise(
         )
     f, idx = _octave_slots(frequencies)
     v = require_positive(airway_velocity, "airway_velocity")
-    require_scalar(n_passages, "n_passages")
-    if n_passages <= 0 or not float(n_passages).is_integer():
-        msg = "'n_passages' must be a positive integer."
-        raise ValueError(msg)
+    n_passages = require_count(n_passages, "n_passages")
     h_mm = require_positive(height_m, "height_m") * 1000.0
     overall = (
         55.0 * np.log10(v)
@@ -2739,7 +2738,7 @@ def diffuser_sound_power(
     pressure_drop_pa: float,
     *,
     shape: Shape = "rectangular",
-    n_devices: int = 1,
+    n_devices: int | np.integer[Any] = 1,
 ) -> HVACSpectrumResult:
     r"""Regenerated (self) noise of a grille, register or diffuser.
 
@@ -2794,19 +2793,17 @@ def diffuser_sound_power(
     :return: An :class:`HVACSpectrumResult` of the band sound power level,
         dB re 1e-12 W.
     :raises ValueError: If a dimension is not positive, ``n_devices`` is not a
-        positive integer or ``shape`` is unknown.
-    :raises TypeError: if ``shape`` is not a text, or ``face_area``, ``n_devices``,
-        ``pressure_drop_pa`` or ``volume_flow`` is not a single number.
+        whole number from 1 or ``shape`` is unknown.
+    :raises TypeError: if ``shape`` is not a text, ``face_area``,
+        ``pressure_drop_pa`` or ``volume_flow`` is not a single number, or
+        ``n_devices`` is a flag, a text or an array where a count goes.
     """
     f = _OCTAVE_BANDS if frequencies is None else _frequencies(frequencies)
     area_ft2 = require_positive(face_area, "face_area") / _M_PER_FT**2
     flow_cfm = require_positive(volume_flow, "volume_flow") / _M3S_PER_CFM
     drop_in_wg = require_positive(pressure_drop_pa, "pressure_drop_pa") / _PA_PER_IN_WG
     profile = require_choice(shape, "shape", ("rectangular", "round"))
-    require_scalar(n_devices, "n_devices")
-    if n_devices <= 0 or not float(n_devices).is_integer():
-        msg = "'n_devices' must be a positive integer."
-        raise ValueError(msg)
+    n_devices = require_count(n_devices, "n_devices")
     # Eq. 13.28: Long prints "ft/min" under U_\mathrm{G} but defines it in the same
     # breath as Q / (60 S_\mathrm{G}), which is ft/s, the unit Eq. 13.27 declares and
     # the only one for which the 334.9 constant is the velocity-pressure

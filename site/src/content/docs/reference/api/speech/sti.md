@@ -108,7 +108,7 @@ from the result itself and is the safe route.
 ```python
 sti_from_impulse_response(
     ir: Signal | ArrayLike,
-    fs: int | None,
+    fs: float | None,
     snr: None,
     levels: ArrayLike,
     ambient: ArrayLike,
@@ -116,7 +116,7 @@ sti_from_impulse_response(
 
 sti_from_impulse_response(
     ir: Signal | ArrayLike,
-    fs: int | None = ...,
+    fs: float | None = ...,
     snr: None = ...,
     *,
     levels: ArrayLike,
@@ -125,7 +125,7 @@ sti_from_impulse_response(
 
 sti_from_impulse_response(
     ir: Signal | ArrayLike,
-    fs: int | None = ...,
+    fs: float | None = ...,
     snr: ArrayLike | None = ...,
     levels: ArrayLike | None = ...,
 ) -> STIResult
@@ -188,7 +188,7 @@ STI itself stays within ~0.001.
 ```python
 stipa(
     x: Signal | ArrayLike,
-    fs: int | None,
+    fs: float | None,
     reference: Signal | ArrayLike | None,
     levels: ArrayLike,
     ambient: ArrayLike,
@@ -196,7 +196,7 @@ stipa(
 
 stipa(
     x: Signal | ArrayLike,
-    fs: int | None = ...,
+    fs: float | None = ...,
     reference: Signal | ArrayLike | None = ...,
     *,
     levels: ArrayLike,
@@ -205,7 +205,7 @@ stipa(
 
 stipa(
     x: Signal | ArrayLike,
-    fs: int | None = ...,
+    fs: float | None = ...,
     reference: Signal | ArrayLike | None = ...,
     levels: ArrayLike | None = ...,
 ) -> STIResult
@@ -255,7 +255,7 @@ biased low (an ideal loopback gives STI ~0.956 at 5 s vs ~0.998 at 18 s).
 
 ```python
 stipa_signal(
-    fs: int,
+    fs: float,
     *,
     duration_s: float = 18.0,
     level: float | None = None,

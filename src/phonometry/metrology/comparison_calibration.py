@@ -222,6 +222,7 @@ from .._internal.validation import (
     refuse_text,
     require_above_absolute_zero,
     require_choice,
+    require_count,
     require_finite_array,
     require_non_negative,
     require_positive,
@@ -2925,7 +2926,7 @@ class JigCouplerVerification(OwnsArrays):
 
 def _validation_columns(
     validation: ComparisonCalibration | ReciprocityCalibration,
-    microphone: int | None,
+    microphone: int | np.integer[Any] | None,
 ) -> tuple[
     Literal["comparison", "reciprocity"], NDArray[np.float64], NDArray[np.float64]
 ]:
@@ -2935,9 +2936,11 @@ def _validation_columns(
         calibration without the microphone that was compared or a comparison
         given one, a microphone the reciprocity calibration does not hold, or
         a validation without an expanded uncertainty.
-    :raises TypeError: for anything but the two calibrations.
+    :raises TypeError: for anything but the two calibrations, or a
+        ``microphone`` that is a flag, a text or an array where an index goes.
     """
-    require_scalar(microphone, "microphone")
+    if microphone is not None:
+        microphone = require_count(microphone, "microphone", at_least=None)
     from .reciprocity_calibration import ReciprocityCalibration
 
     kind: Literal["comparison", "reciprocity"]
@@ -2983,7 +2986,7 @@ def verify_jig_or_coupler(
     calibration: ComparisonCalibration,
     validation: ComparisonCalibration | ReciprocityCalibration,
     *,
-    microphone: int | None = None,
+    microphone: int | np.integer[Any] | None = None,
     shared_standard_uncertainty_db: ArrayLike = 0.0,
 ) -> JigCouplerVerification:
     r"""Does a jig or coupler give the same calibration as another way of

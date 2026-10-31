@@ -78,9 +78,9 @@ How the energy in a band becomes a level reading.
 ```python
 octave_filter(
     x: Signal | ArrayLike,
-    fs: int | None = None,
-    fraction: float = 1,
-    order: int = 6,
+    fs: float | None = None,
+    fraction: float | np.integer[Any] = 1,
+    order: int | np.integer[Any] = 6,
     limits: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any] | None = None,
     *,
     sigbands: bool = False,
@@ -120,13 +120,20 @@ Multichannel support: If x is 2D (channels, samples), each channel is filtered.
 
 **Returns:** An [`OctaveFilterResult`](/phonometry/reference/api/filters/core/#octavefilterresult) carrying the band `levels`, their `frequencies` and, when `sigbands` asked for them, the per-band `bands`. With *nominal=True* the frequencies are IEC 61260-1 labels instead of floats.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `fraction` or `fs` is not a single number, `order` is a flag, a text or an array where a count goes, or `limits` is not a pair of numbers. |
+| ValueError | for a bare array with no `fs`, a sample rate or a bandwidth that is not positive, an `order` that is not a whole number from 1, or frequency limits or a design the bank cannot be built with. |
+
 ## OctaveFilterBank
 
 ```python
 OctaveFilterBank(
-    fs: int,
-    fraction: float = 1,
-    order: int = 6,
+    fs: float,
+    fraction: float | np.integer[Any] = 1,
+    order: int | np.integer[Any] = 6,
     limits: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any] | None = None,
     *,
     design: FilterDesign = ...,
@@ -158,7 +165,8 @@ Initialize the Octave Filter Bank.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `fraction`, `fs` or `order` is not a single number. |
+| ValueError | for a sample rate or a bandwidth that is not positive, an `order` that is not a whole number from 1, or frequency limits or a design the bank cannot be built with. |
+| TypeError | if `fraction` or `fs` is not a single number, or `order` is a flag, a text or an array where a count goes. |
 
 ### OctaveFilterBank.filter()
 
@@ -379,7 +387,7 @@ tuple, so it cannot be unpacked by position: read `.levels`,
 OctaveSpectrogramResult.plot(
     ax: Axes | None = None,
     *,
-    channel: int | None = None,
+    channel: int | np.integer[Any] | None = None,
     language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes

@@ -331,7 +331,7 @@ class RoomAcousticsResult(OwnsArrays):
 
 
 def _schroeder(
-    p2: np.ndarray, fs: int
+    p2: np.ndarray, fs: float
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, float, int, float]:
     r"""Backward-integrated decay curve (ISO 3382-1, 5.3.3, Eq. (1)-(3)).
 
@@ -381,7 +381,7 @@ def _fit_decay_time(
     return -60.0 / slope
 
 
-def _band_parameters(x: np.ndarray, fs: int) -> tuple[float, ...]:
+def _band_parameters(x: np.ndarray, fs: float) -> tuple[float, ...]:
     """All ISO 3382 parameters for one band signal.
 
     :return: ``(edt, t20, t30, c50, c80, d50, ts, dynamic_range)``.
@@ -477,9 +477,9 @@ class DecayCurve(OwnsArrays):
 
 def decay_curve(
     ir: Signal | ArrayLike,
-    fs: int | None = None,
+    fs: float | None = None,
     band: float | None = None,
-    fraction: int = 1,
+    fraction: int | np.integer[Any] = 1,
     *,
     zero_phase: bool = False,
 ) -> DecayCurve:
@@ -566,9 +566,9 @@ def decay_curve(
 
 def room_parameters(
     ir: Signal | ArrayLike,
-    fs: int | None = None,
+    fs: float | None = None,
     limits: tuple[float, float] | None = _DEFAULT_BANDS,
-    fraction: int = 1,
+    fraction: int | np.integer[Any] = 1,
     *,
     zero_phase: bool = False,
 ) -> RoomAcousticsResult:

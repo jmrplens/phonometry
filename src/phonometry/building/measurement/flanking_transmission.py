@@ -383,7 +383,7 @@ class VibrationReductionResult(OwnsArrays):
     frequencies: np.ndarray | None
     k_ij: np.ndarray
     modal_overlap: np.ndarray | None = None
-    fraction: int | None = None
+    fraction: BandFraction | None = None
 
     def __post_init__(self) -> None:
         """Reject a junction whose per-band columns do not share a band set.
@@ -409,7 +409,9 @@ class VibrationReductionResult(OwnsArrays):
         require_ranks(self, frequencies=1, k_ij=1, modal_overlap=1)
         require_same_length(self, "frequencies", "k_ij", "modal_overlap")
         if self.fraction is not None:
-            require_band_fraction(self.fraction, "fraction")
+            object.__setattr__(
+                self, "fraction", require_band_fraction(self.fraction, "fraction")
+            )
 
     @property
     def bracketed(self) -> np.ndarray | None:
@@ -809,7 +811,7 @@ class FlankingLevelDifferenceResult(OwnsArrays):
         engine: ReportEngine = "reportlab",
         verbose: bool = False,
         language: Language = "en",
-        part: int = 2,
+        part: int | np.integer[Any] = 2,
     ) -> str:
         """Render a normalized flanking level difference ``Dn,f`` fiche to a PDF.
 
@@ -893,7 +895,7 @@ class FlankingImpactLevelResult(OwnsArrays):
         engine: ReportEngine = "reportlab",
         verbose: bool = False,
         language: Language = "en",
-        part: int = 2,
+        part: int | np.integer[Any] = 2,
     ) -> str:
         """Render a normalized flanking impact level ``Ln,f`` fiche to a PDF.
 
@@ -951,7 +953,7 @@ def normalized_flanking_level_difference(
     absorption_area: ArrayLike,
     *,
     reference_area: float = _REFERENCE_ABSORPTION_AREA,
-    fraction: BandFraction | None = None,
+    fraction: BandFraction | np.integer[Any] | None = None,
 ) -> FlankingLevelDifferenceResult:
     r"""Normalized flanking level difference ``Dn,f`` (airborne, Formula (4)).
 
@@ -994,7 +996,7 @@ def normalized_flanking_impact_level(
     absorption_area: ArrayLike,
     *,
     reference_area: float = _REFERENCE_ABSORPTION_AREA,
-    fraction: BandFraction | None = None,
+    fraction: BandFraction | np.integer[Any] | None = None,
 ) -> FlankingImpactLevelResult:
     r"""Normalized flanking impact level ``Ln,f`` (Formula (5)).
 
@@ -1031,7 +1033,7 @@ def normalized_flanking_impact_level(
 
 
 def _maybe_rating(
-    values: np.ndarray, fraction: BandFraction | None
+    values: np.ndarray, fraction: BandFraction | np.integer[Any] | None
 ) -> WeightedRatingResult | None:
     """Form the ISO 717-1 rating when the band count is 16 or 5, else ``None``."""
     if values.size in (16, 5):

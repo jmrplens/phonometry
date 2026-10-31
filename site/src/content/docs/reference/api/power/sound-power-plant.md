@@ -419,7 +419,7 @@ binary, is the 6 dB it is, and 64,1 - 55,6 dB the 8,5 dB that rounds up.
 plant_characteristic_height_m(
     source_heights_m: ArrayLike,
     *,
-    n_low_sources: int = 0,
+    n_low_sources: int | np.integer[Any] = 0,
 ) -> float
 ```
 
@@ -486,8 +486,8 @@ plant_measurement_contour(
     contour_m: ArrayLike,
     *,
     characteristic_height_m: float,
-    n_positions: int | None = None,
-    omitted_positions: Sequence[int] = (),
+    n_positions: int | np.integer[Any] | None = None,
+    omitted_positions: Sequence[int | np.integer[Any]] = (),
 ) -> PlantMeasurementContour
 ```
 
@@ -520,7 +520,8 @@ the plan and found wanting is how the procedure starts (9.1.2.3, NOTE 6).
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | for polygons that do not form a contour round the plant area, or omitted positions without a layout to refer to. |
+| ValueError | for polygons that do not form a contour round the plant area, a layout of fewer than three positions, an omitted position that is not a whole number from 0, or omitted positions without a layout to refer to. |
+| TypeError | if `n_positions` or an omitted position is a flag, a text or an array where a count goes. |
 
 ## plant_method_uncertainty
 

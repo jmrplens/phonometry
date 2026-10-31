@@ -167,7 +167,7 @@ def _refuse_unused(model: str, **given: object) -> None:
 def fundamental_period(
     model: PeriodModel,
     *,
-    n_stories: int | None = None,
+    n_stories: int | np.integer[Any] | None = None,
     height_m: float | None = None,
     width_m: float | None = None,
     coefficient: float | None = None,
@@ -233,7 +233,7 @@ def fundamental_period(
 def fundamental_frequency(
     model: PeriodModel,
     *,
-    n_stories: int | None = None,
+    n_stories: int | np.integer[Any] | None = None,
     height_m: float | None = None,
     width_m: float | None = None,
     coefficient: float | None = None,
@@ -365,7 +365,7 @@ class BuildingFrequencyEstimate(RichDisplay):
 def estimate_fundamental_frequency(
     model: PeriodModel,
     *,
-    n_stories: int | None = None,
+    n_stories: int | np.integer[Any] | None = None,
     height_m: float | None = None,
     width_m: float | None = None,
     coefficient: float | None = None,

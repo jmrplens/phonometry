@@ -1226,7 +1226,7 @@ def plot_open_plan(
 @overload
 def plot_excitation(
     x: ArrayLike,
-    fs: int,
+    fs: float,
     *,
     kind: Literal["sweep", "mls"] = "sweep",
     ax: None = None,
@@ -1238,7 +1238,7 @@ def plot_excitation(
 @overload
 def plot_excitation(
     x: ArrayLike,
-    fs: int,
+    fs: float,
     *,
     kind: Literal["sweep", "mls"] = "sweep",
     ax: Axes,
@@ -1249,7 +1249,7 @@ def plot_excitation(
 
 def plot_excitation(
     x: ArrayLike,
-    fs: int,
+    fs: float,
     *,
     kind: Literal["sweep", "mls"] = "sweep",
     ax: Axes | None = None,
@@ -1584,7 +1584,7 @@ def plot_shaped_sweep(
     x = np.asarray(result.signal, dtype=np.float64)
     fs = float(result.fs)
     f1, f2 = result.f_range
-    time, xlabel = _time_axis(x.size, int(fs), language=language)
+    time, xlabel = _time_axis(x.size, fs, language=language)
     color = style_pop(kwargs, "color", _C_PRIMARY)
 
     # Welch magnitude of the sweep and the synthesis target, both in dB

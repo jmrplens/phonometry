@@ -575,9 +575,7 @@ def test_the_result_does_not_alias_the_caller_arrays() -> None:
 
 @pytest.mark.parametrize("n_events", [0, 1.5, -3])
 def test_invalid_event_count_raises(n_events: float) -> None:
-    with pytest.raises(
-        ValueError, match=r"'n_events' must be a whole number of events"
-    ):
+    with pytest.raises(ValueError, match=r"'n_events' must be a whole number"):
         weighted_exposure(
             [170.0],
             "LF",

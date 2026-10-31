@@ -124,7 +124,7 @@ and 282,15°, and the two are recorded in `docs/ERRATA.md`.
 adjustment_factors(
     step_deg: float,
     *,
-    n_planes: int = 2,
+    n_planes: int | np.integer[Any] = 2,
 ) -> NDArray[np.float64]
 ```
 
@@ -604,7 +604,11 @@ unpacked by position.
 ## largest_element_fraction
 
 ```python
-largest_element_fraction(step_deg: float, *, n_planes: int = 2) -> float
+largest_element_fraction(
+    step_deg: float,
+    *,
+    n_planes: int | np.integer[Any] = 2,
+) -> float
 ```
 
 The largest element a set of incidence angles divides the sphere into,

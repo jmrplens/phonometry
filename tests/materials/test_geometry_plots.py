@@ -222,7 +222,9 @@ def test_qrd_geometry_validation() -> None:
         m.plot_qrd_geometry([-0.01], 0.12)
     with pytest.raises(ValueError, match=r"'well_width' must be positive"):
         m.plot_qrd_geometry([0.05], 0.0)
-    with pytest.raises(ValueError, match=r"'n_repetitions' must be >="):
+    with pytest.raises(
+        ValueError, match=r"'n_repetitions' must be a whole number, at least 1"
+    ):
         m.plot_qrd_geometry([0.05], 0.12, n_repetitions=0)
 
 

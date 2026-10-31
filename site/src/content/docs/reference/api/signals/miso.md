@@ -64,7 +64,7 @@ miso_coherence(
     *,
     order: Sequence[int] | None = None,
     window: str = 'hann',
-    nperseg: int | None = None,
+    nperseg: int | np.integer[Any] | None = None,
     overlap: float = 0.5,
     scaling: Literal['density', 'spectrum'] = 'density',
 ) -> MISOCoherenceResult

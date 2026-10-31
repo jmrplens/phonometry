@@ -153,3 +153,30 @@ def test_octave_filter_freq_list_is_mutation_safe() -> None:
     freq2 = phonometry.filters.octave_filter(x, 48000, fraction=1).frequencies
     assert freq2[0] != -999.0
     phonometry.filters.core._cached_filter_bank.cache_clear()
+
+
+def test_an_order_is_refused_after_an_equal_one_filled_the_design_cache() -> None:
+    """``True`` is equal to ``1`` as a cache key, so the refusal is asked first.
+
+    A bank designed for ``order=1`` used to answer ``order=True`` from the
+    cache, without the constructor's refusal ever running: whether a flag
+    was refused depended on the calls made before it.
+    """
+    phonometry.filters.core._cached_filter_bank.cache_clear()
+    x = np.random.default_rng(3).standard_normal(4800)
+    phonometry.filters.octave_filter(x, 48000, order=1)
+    with pytest.raises(TypeError, match="'order' must be a whole number, got True"):
+        phonometry.filters.octave_filter(x, 48000, order=True)
+    phonometry.filters.core._cached_filter_bank.cache_clear()
+
+
+def test_a_flag_is_refused_after_an_equal_one_filled_the_design_cache() -> None:
+    """``1`` is equal to ``True`` as a cache key, so ``weighting_filter`` asks first."""
+    phonometry.filters.weighting._cached_weighting_filter.cache_clear()
+    x = np.random.default_rng(4).standard_normal(4800)
+    phonometry.filters.weighting_filter(x, 48000, "A", high_accuracy=True)
+    with pytest.raises(
+        TypeError, match="'high_accuracy' must be True or False; got int"
+    ):
+        phonometry.filters.weighting_filter(x, 48000, "A", high_accuracy=1)  # type: ignore[call-overload]
+    phonometry.filters.weighting._cached_weighting_filter.cache_clear()

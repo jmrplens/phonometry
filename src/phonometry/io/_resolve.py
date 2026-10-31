@@ -57,7 +57,7 @@ The rules, identical everywhere:
 from __future__ import annotations
 
 import math
-from typing import overload
+from typing import Any, overload
 
 import numpy as np
 from numpy.typing import ArrayLike
@@ -76,15 +76,33 @@ from ._signal import Signal
 #: the parameter (rule A42 of the contributor guide).
 SignalInput = Signal | ArrayLike
 
-# The rate type parameter below is value-restricted to ``(int, float)``
-# rather than bound to ``float`` so that a module typing its rate as ``int``
-# gets an ``int`` back: a plain ``-> float`` would leak a float into every
-# ``int``-typed sample count downstream, and a pair of ``int`` / ``float``
-# overloads overlap (``int`` is assignable to ``float``) with return types
-# mypy rejects as incompatible.
+#: A sample rate as a caller hands it over: any positive number for most
+#: functions, and for the few that need a whole number of samples per second
+#: (a WAV header holds an integer; some resample by an integer ratio) a NumPy
+#: integer too, which ``require_count`` takes.
+Rate = float | np.integer[Any]
+
+# A rate is resolved to what it was given: a ``float`` for a ``float`` (an
+# ``int`` among them, which a type checker reads as one), and the same with a
+# NumPy integer for a function that also takes one. A Signal's own rate is a
+# ``float`` either way. The first head is the one a function of any positive
+# rate reads; the second, which it returns a subtype of, the one a function
+# of a whole-number rate reads before it checks the number.
 
 
-def resolve_optional_fs[Rate: (int, float)](
+@overload
+def resolve_optional_fs(
+    x: SignalInput, fs: float | None, *, rate: str = "fs"
+) -> float | None: ...
+
+
+@overload
+def resolve_optional_fs(
+    x: SignalInput, fs: Rate | None, *, rate: str = "fs"
+) -> Rate | None: ...
+
+
+def resolve_optional_fs(
     x: SignalInput,
     fs: Rate | None,
     *,
@@ -118,7 +136,19 @@ def resolve_optional_fs[Rate: (int, float)](
     return fs
 
 
-def resolve_fs[Rate: (int, float)](
+@overload
+def resolve_fs(
+    x: SignalInput, fs: float | None, *, name: str = "x", rate: str = "fs"
+) -> float: ...
+
+
+@overload
+def resolve_fs(
+    x: SignalInput, fs: Rate | None, *, name: str = "x", rate: str = "fs"
+) -> Rate: ...
+
+
+def resolve_fs(
     x: SignalInput,
     fs: Rate | None,
     *,
@@ -282,17 +312,17 @@ def apply_calibration(
 
 
 @overload
-def like_input(x: Signal, samples: np.ndarray, fs: int | None = ...) -> Signal: ...
+def like_input(x: Signal, samples: np.ndarray, fs: float | None = ...) -> Signal: ...
 
 
 @overload
 def like_input(
-    x: ArrayLike, samples: np.ndarray, fs: int | None = ...
+    x: ArrayLike, samples: np.ndarray, fs: float | None = ...
 ) -> np.ndarray: ...
 
 
 def like_input(
-    x: SignalInput, samples: np.ndarray, fs: int | None = None
+    x: SignalInput, samples: np.ndarray, fs: float | None = None
 ) -> Signal | np.ndarray:
     """Hand the samples back as a Signal when they arrived as one.
 
@@ -381,7 +411,29 @@ def _agreed_pair(x: SignalInput, y: SignalInput, names: tuple[str, str]) -> Sign
     return x if isinstance(x, Signal) else y
 
 
-def resolve_pair_fs[Rate: (int, float)](
+@overload
+def resolve_pair_fs(
+    x: SignalInput,
+    y: SignalInput,
+    fs: float | None,
+    *,
+    names: tuple[str, str] = ("x", "y"),
+    rate: str = "fs",
+) -> float: ...
+
+
+@overload
+def resolve_pair_fs(
+    x: SignalInput,
+    y: SignalInput,
+    fs: Rate | None,
+    *,
+    names: tuple[str, str] = ("x", "y"),
+    rate: str = "fs",
+) -> Rate: ...
+
+
+def resolve_pair_fs(
     x: SignalInput,
     y: SignalInput,
     fs: Rate | None,
@@ -410,7 +462,29 @@ def resolve_pair_fs[Rate: (int, float)](
     return resolve_fs(known, fs, name=names[0], rate=rate)
 
 
-def resolve_optional_pair_fs[Rate: (int, float)](
+@overload
+def resolve_optional_pair_fs(
+    x: SignalInput,
+    y: SignalInput,
+    fs: float | None,
+    *,
+    names: tuple[str, str] = ("x", "y"),
+    rate: str = "fs",
+) -> float | None: ...
+
+
+@overload
+def resolve_optional_pair_fs(
+    x: SignalInput,
+    y: SignalInput,
+    fs: Rate | None,
+    *,
+    names: tuple[str, str] = ("x", "y"),
+    rate: str = "fs",
+) -> Rate | None: ...
+
+
+def resolve_optional_pair_fs(
     x: SignalInput,
     y: SignalInput,
     fs: Rate | None,

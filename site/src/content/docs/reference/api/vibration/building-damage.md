@@ -515,7 +515,7 @@ STORY_FREQUENCY_NUMERATOR_HZ = 10.0
 ## story_fundamental_frequency
 
 ```python
-story_fundamental_frequency(n_stories: int) -> float
+story_fundamental_frequency(n_stories: int | np.integer[Any]) -> float
 ```
 
 The rough lowest horizontal natural frequency of a building.

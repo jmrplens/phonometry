@@ -599,7 +599,7 @@ def right_angle_transmission_coefficient(
 
 def point_connection_coupling_loss_factor(
     frequency: ArrayLike,
-    n_connections: int,
+    n_connections: int | np.integer[Any],
     *,
     thickness1_m: float,
     thickness2_m: float,

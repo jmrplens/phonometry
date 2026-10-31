@@ -407,12 +407,12 @@ intensity axis through both; default is the classic 12 mm spacer.
 sound_intensity(
     p1: Signal | ArrayLike,
     p2: Signal | ArrayLike,
-    fs: int | None = None,
+    fs: float | None = None,
     *,
     spacing_m: float,
     density: float = 1.204,
     speed_of_sound: float = 343.0,
-    fraction: int | None = None,
+    fraction: Literal[1, 3] | np.integer[Any] | None = None,
     limits: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any] | None = None,
     bias_correct: bool = False,
 ) -> IntensityResult
@@ -472,7 +472,8 @@ by the factor $\sin(k \Delta r)/(k \Delta r)$ (IEC 61043:1993,
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `density`, `fs`, `spacing_m` or `speed_of_sound` is not a single number. |
+| ValueError | for a `fraction` other than 1 and 3, or `limits` that are not two ascending positive frequencies. |
+| TypeError | if `density`, `fs`, `spacing_m` or `speed_of_sound` is not a single number, or `fraction` is not an integer. |
 
 ## temporal_variability_indicator
 

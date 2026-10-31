@@ -72,6 +72,7 @@ from ..._internal.validation import (
     check_engine,
     require_1d_signal,
     require_choice,
+    require_count,
     require_equal_shapes,
     require_positive,
     require_ranks,
@@ -407,7 +408,7 @@ def injury_risk(
     daily_compression: float,
     *,
     start_age: float,
-    exposure_duration_years: int,
+    exposure_duration_years: int | np.integer[Any],
     days_per_year: float,
     sex: Literal["male", "female"] = "male",
     mz: float | None = None,
@@ -428,20 +429,21 @@ def injury_risk(
         :math:`S_\text{stat} = m_\mathrm{z} \cdot 9.81`; defaults to the
         sex-specific value.
     :return: The stress variable :math:`R`.
-    :raises ValueError: if ``exposure_duration_years`` is not positive or the spine strength
-        is exhausted (:math:`S_\mathrm{u} - S_\text{stat} \le 0`) within the
-        exposure period.
-    :raises TypeError: if ``sex`` is not a text, or ``daily_compression``,
-        ``days_per_year``, ``exposure_duration_years`` or ``start_age`` is not a single
-        number.
+    :raises ValueError: if ``exposure_duration_years`` is not a whole number
+        from 1 or the spine strength is exhausted
+        (:math:`S_\mathrm{u} - S_\text{stat} \le 0`) within the exposure
+        period.
+    :raises TypeError: if ``sex`` is not a text, ``daily_compression``,
+        ``days_per_year`` or ``start_age`` is not a single number, or
+        ``exposure_duration_years`` is a flag, a text or an array where a count
+        of years goes.
     """
     require_scalar(daily_compression, "daily_compression")
     require_scalar(start_age, "start_age")
-    require_scalar(exposure_duration_years, "exposure_duration_years")
+    exposure_duration_years = require_count(
+        exposure_duration_years, "exposure_duration_years"
+    )
     require_choice(sex, "sex", _SEXES)
-    if exposure_duration_years <= 0:
-        msg = "'exposure_duration_years' must be a positive integer."
-        raise ValueError(msg)
     days_per_year = require_positive(days_per_year, "days_per_year")
     mz = _mz_for_sex(sex) if mz is None else mz
     s_stat = static_stress(mz)
@@ -649,7 +651,7 @@ def multiple_shock_assessment(
     fs: float | None = None,
     *,
     start_age: float,
-    exposure_duration_years: int,
+    exposure_duration_years: int | np.integer[Any],
     days_per_year: float,
     exposure_time: float,
     measurement_time: float,
@@ -664,7 +666,7 @@ def multiple_shock_assessment(
     fs: float | None = None,
     *,
     start_age: float,
-    exposure_duration_years: int,
+    exposure_duration_years: int | np.integer[Any],
     days_per_year: float,
     sex: Literal["male", "female"] = ...,
     mz: float | None = ...,
@@ -676,7 +678,7 @@ def multiple_shock_assessment(
     fs: float | None = None,
     *,
     start_age: float,
-    exposure_duration_years: int,
+    exposure_duration_years: int | np.integer[Any],
     days_per_year: float,
     exposure_time: float | None = None,
     measurement_time: float | None = None,
@@ -719,9 +721,14 @@ def multiple_shock_assessment(
     :param mz: Stress conversion :math:`m_\mathrm{z}` (MPa per m/s2); defaults to
         the sex-specific value.
     :return: The :class:`MultipleShockResult`.
-    :raises TypeError: if ``sex`` is not a text.
+    :raises ValueError: if only one of ``exposure_time`` and
+        ``measurement_time`` is given, or ``exposure_duration_years`` is not a
+        whole number from 1.
+    :raises TypeError: if ``sex`` is not a text, or ``exposure_duration_years``
+        is a flag, a text or an array where a count of years goes.
     """
     require_choice(sex, "sex", _SEXES)
+    years = require_count(exposure_duration_years, "exposure_duration_years")
     if (exposure_time is None) != (measurement_time is None):
         msg = (
             "provide both exposure_time and measurement_time to scale to a "
@@ -739,7 +746,7 @@ def multiple_shock_assessment(
     r = injury_risk(
         sd,
         start_age=start_age,
-        exposure_duration_years=exposure_duration_years,
+        exposure_duration_years=years,
         days_per_year=days_per_year,
         sex=sex,
         mz=mz,
@@ -753,7 +760,7 @@ def multiple_shock_assessment(
         risk=r,
         probability=prob,
         start_age=start_age,
-        exposure_duration_years=exposure_duration_years,
+        exposure_duration_years=years,
         days_per_year=days_per_year,
         peaks=peaks,
         risk_thresholds=_risk_thresholds(sex),

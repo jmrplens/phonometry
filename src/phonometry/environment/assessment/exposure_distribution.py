@@ -696,7 +696,7 @@ def sel_distribution(
     probabilities: ArrayLike,
     *,
     sigma_db: float = _TYPICAL_SIGMA_DB,
-    n_subclasses: int = _ANNEX_A_SUBCLASSES,
+    n_subclasses: int | np.integer[Any] = _ANNEX_A_SUBCLASSES,
 ) -> SELDistribution:
     r"""Statistical distribution of the single-event sound exposure level
     (ISO 13474:2009, clause 5).

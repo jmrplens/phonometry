@@ -235,7 +235,7 @@ job_based_exposure(
     effective_duration_hours: float,
     instrument: Literal['class1', 'class2', 'personal_exposimeter'] = 'personal_exposimeter',
     u3: float = 1.0,
-    n_workers: int | None = None,
+    n_workers: int | np.integer[Any] | None = None,
     *,
     sample_duration_hours: float | None = None,
     warn: bool = True,
@@ -268,12 +268,13 @@ $c_2 = c_3 = 1$.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `effective_duration_hours`, `sample_duration_hours` or `u3` is not a single number. |
+| ValueError | for a `sample_duration_hours` that is not positive, or an `n_workers` that is not a whole number from 1. |
+| TypeError | if `effective_duration_hours`, `sample_duration_hours` or `u3` is not a single number, or `n_workers` is a flag, a text or an array where a count goes. |
 
 ## min_cumulative_duration_hours
 
 ```python
-min_cumulative_duration_hours(n_workers: int) -> float
+min_cumulative_duration_hours(n_workers: int | np.integer[Any]) -> float
 ```
 
 Minimum cumulative measurement duration (h) for a homogeneous exposure group (Table 1).
@@ -290,7 +291,8 @@ Minimum cumulative measurement duration (h) for a homogeneous exposure group (Ta
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `n_workers` is not a single number. |
+| ValueError | for an `n_workers` that is not a whole number from 1. |
+| TypeError | if `n_workers` is a flag, a text or an array where a count goes. |
 
 ## OccupationalExposureWarning
 
@@ -299,7 +301,7 @@ Advisory raised when an ISO 9612 sampling rule recommends more measurements.
 ## table_c4_contribution
 
 ```python
-table_c4_contribution(n_samples: int, u1: float) -> float
+table_c4_contribution(n_samples: int | np.integer[Any], u1: float) -> float
 ```
 
 Uncertainty contribution $c_1 u_1$ (dB) from Table C.4
@@ -324,7 +326,8 @@ uncertainty `u1`. The `u1` axis is anchored at the origin (`u1 = 0` gives
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `n_samples` or `u1` is not a single number. |
+| ValueError | for an `n_samples` that is not a whole number from 2 (Table C.4 needs a spread), or a negative `u1`. |
+| TypeError | if `u1` is not a single number, or `n_samples` is a flag, a text or an array where a count goes. |
 
 ## Task
 

@@ -252,10 +252,11 @@ def test_the_bank_holds_the_bands_the_annex_b_listing_filters() -> None:
     np.testing.assert_allclose(nominal, listing, rtol=0.01)
 
 
-def test_the_bank_needs_a_whole_number_of_samples_per_metre() -> None:
-    """0,3 mm is 3 333,3 samples per metre, which the bank cannot run at."""
-    with pytest.raises(ValueError, match="whole number of samples per metre"):
-        roughness_filter_bank(sample_spacing_m=3.0e-4)
+def test_the_bank_runs_at_a_fractional_number_of_samples_per_metre() -> None:
+    """0,3 mm is 3 333,3 samples per metre, and the bank runs at that rate."""
+    bank = roughness_filter_bank(sample_spacing_m=3.0e-4)
+    assert bank.fs == pytest.approx(1.0 / 3.0e-4, rel=1e-12)
+    assert bank.n_bands > 0
 
 
 def test_the_bank_refuses_a_sampling_interval_over_a_millimetre() -> None:
@@ -437,10 +438,11 @@ def test_the_record_is_processed_as_7_1_asks() -> None:
     np.testing.assert_allclose(direct.levels, by_hand.levels, atol=1e-9)
 
 
-def test_the_record_needs_a_whole_number_of_samples_per_metre() -> None:
-    record = np.zeros(20000)
-    with pytest.raises(ValueError, match="whole number of samples per metre"):
-        filtered_roughness_spectrum(record, sample_spacing_m=3.0e-4)
+def test_a_record_at_a_fractional_number_of_samples_per_metre_is_analysed() -> None:
+    rng = np.random.default_rng(7)
+    record = rng.standard_normal(20000)
+    spectrum = filtered_roughness_spectrum(record, sample_spacing_m=3.0e-4)
+    assert np.all(np.isfinite(spectrum.levels))
 
 
 # ---------------------------------------------------------------------------

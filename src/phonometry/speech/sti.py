@@ -338,7 +338,7 @@ def _masking_amdb(level: np.ndarray | float) -> np.ndarray:
     )
 
 
-def _octave_bank(fs: int) -> OctaveFilterBank:
+def _octave_bank(fs: float) -> OctaveFilterBank:
     """Octave filter bank for the 7 STI bands (IEC 61260-1 class 0/1)."""
     bank = OctaveFilterBank(fs=fs, fraction=1, order=6, limits=list(_BAND_LIMITS))
     if bank.n_bands != _NUM_BANDS:
@@ -689,7 +689,7 @@ def sti_adjusted_for_levels(
 @overload
 def sti_from_impulse_response(
     ir: Signal | ArrayLike,
-    fs: int | None,
+    fs: float | None,
     snr: None,
     levels: ArrayLike,
     ambient: ArrayLike,
@@ -699,7 +699,7 @@ def sti_from_impulse_response(
 @overload
 def sti_from_impulse_response(
     ir: Signal | ArrayLike,
-    fs: int | None = ...,
+    fs: float | None = ...,
     snr: None = ...,
     *,
     levels: ArrayLike,
@@ -710,7 +710,7 @@ def sti_from_impulse_response(
 @overload
 def sti_from_impulse_response(
     ir: Signal | ArrayLike,
-    fs: int | None = ...,
+    fs: float | None = ...,
     snr: ArrayLike | None = ...,
     levels: ArrayLike | None = ...,
 ) -> STIResult: ...
@@ -718,7 +718,7 @@ def sti_from_impulse_response(
 
 def sti_from_impulse_response(
     ir: Signal | ArrayLike,
-    fs: int | None = None,
+    fs: float | None = None,
     snr: ArrayLike | None = None,
     levels: ArrayLike | None = None,
     ambient: ArrayLike | None = None,
@@ -816,7 +816,7 @@ def sti_from_impulse_response(
     return _sti_from_mtf(mtf, snr=snr, level=levels, ambient=ambient)
 
 
-def _intensity_envelopes(x: np.ndarray, fs: int) -> np.ndarray:
+def _intensity_envelopes(x: np.ndarray, fs: float) -> np.ndarray:
     """Octave-band intensity envelopes I_k(t) = x_k^2(t) low-passed at
     ~100 Hz (Ed.4 A.5.2 = Ed.5), shape (7, n).
 
@@ -840,7 +840,7 @@ def _intensity_envelopes(x: np.ndarray, fs: int) -> np.ndarray:
     return env
 
 
-def _stipa_modulation_depths(env: np.ndarray, fs: int) -> np.ndarray:
+def _stipa_modulation_depths(env: np.ndarray, fs: float) -> np.ndarray:
     r"""Modulation depths :math:`mdr_{k,f_m}` of the intensity envelopes at
     the two Table B.1 frequencies of each band, over an integer number of
     periods (Ed.4 A.5.2):
@@ -895,7 +895,7 @@ def _stipa_modulation_depths(env: np.ndarray, fs: int) -> np.ndarray:
 @overload
 def stipa(
     x: Signal | ArrayLike,
-    fs: int | None,
+    fs: float | None,
     reference: Signal | ArrayLike | None,
     levels: ArrayLike,
     ambient: ArrayLike,
@@ -905,7 +905,7 @@ def stipa(
 @overload
 def stipa(
     x: Signal | ArrayLike,
-    fs: int | None = ...,
+    fs: float | None = ...,
     reference: Signal | ArrayLike | None = ...,
     *,
     levels: ArrayLike,
@@ -916,7 +916,7 @@ def stipa(
 @overload
 def stipa(
     x: Signal | ArrayLike,
-    fs: int | None = ...,
+    fs: float | None = ...,
     reference: Signal | ArrayLike | None = ...,
     levels: ArrayLike | None = ...,
 ) -> STIResult: ...
@@ -924,7 +924,7 @@ def stipa(
 
 def stipa(
     x: Signal | ArrayLike,
-    fs: int | None = None,
+    fs: float | None = None,
     reference: Signal | ArrayLike | None = None,
     levels: ArrayLike | None = None,
     ambient: ArrayLike | None = None,
@@ -1039,7 +1039,7 @@ def _pink_noise(n: int, rng: np.random.Generator) -> np.ndarray:
 
 
 def stipa_signal(
-    fs: int,
+    fs: float,
     *,
     duration_s: float = 18.0,
     level: float | None = None,

@@ -52,7 +52,7 @@ coarse grids degrade it and are what `oversample` mitigates.
 excess_phase(
     response: ArrayLike,
     *,
-    oversample: int = 8,
+    oversample: int | np.integer[Any] = 8,
 ) -> NDArray[np.float64]
 ```
 
@@ -121,7 +121,7 @@ impulse response must fit the record the grid implies.
 min_phase(
     response: ArrayLike,
     *,
-    oversample: int = 8,
+    oversample: int | np.integer[Any] = 8,
 ) -> NDArray[np.complex128]
 ```
 
@@ -166,7 +166,7 @@ phase_decomposition(
     response: ArrayLike,
     fs: float,
     *,
-    oversample: int = 8,
+    oversample: int | np.integer[Any] = 8,
 ) -> PhaseDecompositionResult
 ```
 

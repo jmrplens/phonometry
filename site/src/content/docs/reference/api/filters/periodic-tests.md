@@ -423,7 +423,7 @@ The results whose uncertainty exceeds the maximum permitted (5.3).
 
 ```python
 verify_filter_periodic(
-    filter_class: int,
+    filter_class: int | np.integer[Any],
     measurements: FilterPeriodicMeasurements,
     *,
     fraction: float,

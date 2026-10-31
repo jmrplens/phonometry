@@ -81,11 +81,11 @@ from .._internal.levels_math import energy_mean, energy_sum
 from .._internal.validation import (
     require_band_fraction,
     require_choice,
+    require_count,
     require_finite,
     require_finite_array,
     require_finite_matrix,
     require_positive,
-    require_scalar,
 )
 from .._internal.warnings import PhonometryWarning
 from ..emission._shared import _a_weighting_corrections
@@ -361,7 +361,7 @@ class CabinInsulationResult(OwnsArrays):
     a_weighted_insulation: float | None
     internal_noise_level: float | None
     method: Method
-    fraction: int
+    fraction: BandFraction
 
     def __post_init__(self) -> None:
         """Reject a method the standard does not describe, or a number it does not give.
@@ -376,7 +376,9 @@ class CabinInsulationResult(OwnsArrays):
         :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a
             float), or ``method`` is not a text.
         """
-        require_band_fraction(self.fraction, "fraction")
+        object.__setattr__(
+            self, "fraction", require_band_fraction(self.fraction, "fraction")
+        )
         how = require_choice(self.method, "method", _METHODS)
         if self.a_weighted_insulation is not None and how != _ACTUAL_NOISE:
             msg = (
@@ -493,11 +495,18 @@ class SourcePositionCheck(RichDisplay):
         :raises ValueError: For fewer than
             :data:`MIN_SOURCE_POSITIONS_IN_SITU` positions or a spread that is
             negative or not finite.
-        :raises TypeError: if ``max_octave_spread_db`` or ``n_positions_used`` is not a
-            single number.
+            A count that is not a whole number is refused too.
+        :raises TypeError: if ``max_octave_spread_db`` is not a single number, or
+            ``n_positions_used`` is a flag, a text or an array where a count
+            goes.
         """
-        require_scalar(self.n_positions_used, "n_positions_used")
-        if int(self.n_positions_used) < MIN_SOURCE_POSITIONS_IN_SITU:
+        # Held as the int require_count returns, a NumPy integer included.
+        object.__setattr__(
+            self,
+            "n_positions_used",
+            require_count(self.n_positions_used, "n_positions_used", at_least=None),
+        )
+        if self.n_positions_used < MIN_SOURCE_POSITIONS_IN_SITU:
             msg = (
                 "SourcePositionCheck: 'n_positions_used' must be at least "
                 f"{MIN_SOURCE_POSITIONS_IN_SITU}, where 7.2.1 starts."
@@ -717,7 +726,7 @@ def cabin_insulation(
     *,
     frequencies: ArrayLike | None = None,
     method: CabinMethod = "laboratory",
-    fraction: BandFraction = 3,
+    fraction: BandFraction | np.integer[Any] = 3,
     room_background_levels: ArrayLike | None = None,
     cabin_background_levels: ArrayLike | None = None,
     a_weighted_room_level: float | None = None,
@@ -829,7 +838,7 @@ def weighted_cabin_insulation(
     insulation: ArrayLike,
     *,
     method: CabinMethod = "laboratory",
-    fraction: BandFraction = 3,
+    fraction: BandFraction | np.integer[Any] = 3,
 ) -> WeightedCabinInsulation:
     r"""The single-number rating of a cabin, clause 8.
 

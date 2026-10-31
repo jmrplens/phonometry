@@ -245,7 +245,7 @@ slit_resonance_frequencies(
     depth: float,
     width_m: float,
     *,
-    n_orders: int = 3,
+    n_orders: int | np.integer[Any] = 3,
     speed_of_sound: float = 343.0,
 ) -> np.ndarray
 ```
@@ -272,8 +272,8 @@ because the end correction `e` depends weakly on frequency.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | for a non-positive input, `n_orders < 1`, or a slit so wide relative to its depth that the effective depth $d + 2e$ is non-positive (no resonance exists; `width_m` must be much less than the wavelength). |
-| TypeError | if `depth`, `n_orders`, `speed_of_sound` or `width_m` is not a single number. |
+| ValueError | for a non-positive input, an `n_orders` that is not a whole number from 1, or a slit so wide relative to its depth that the effective depth $d + 2e$ is non-positive (no resonance exists; `width_m` must be much less than the wavelength). |
+| TypeError | if `depth`, `speed_of_sound` or `width_m` is not a single number, or `n_orders` is a flag, a text or an array where a count goes. |
 
 ## slit_transmission_coefficient
 

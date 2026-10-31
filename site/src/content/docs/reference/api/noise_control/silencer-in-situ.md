@@ -260,7 +260,7 @@ in_situ_insertion_loss(
     area_with_m2: ArrayLike,
     frequencies: ArrayLike | None = None,
     field_correction_difference: ArrayLike = 0.0,
-    case: int | None = None,
+    case: int | np.integer[Any] | None = None,
 ) -> SilencerInSituResult
 ```
 
@@ -320,7 +320,7 @@ in_situ_transmission_loss(
     receiver_area_m2: ArrayLike,
     frequencies: ArrayLike | None = None,
     field_correction_difference: ArrayLike = 0.0,
-    case: int | None = None,
+    case: int | np.integer[Any] | None = None,
 ) -> SilencerInSituResult
 ```
 
@@ -400,7 +400,7 @@ which run they are.
 ## installation_case
 
 ```python
-installation_case(number: int) -> InstallationCase
+installation_case(number: int | np.integer[Any]) -> InstallationCase
 ```
 
 One installation of Figure 1, with the area rules clause 9 gives it.

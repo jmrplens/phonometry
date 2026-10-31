@@ -97,6 +97,7 @@ from scipy import signal
 from .._internal.frozen import OwnsArrays
 from .._internal.utils import _sos_initial_state, _sos_state_mismatch
 from .._internal.validation import (
+    holds_complex,
     refuse_text_beside_choice,
     require_choice,
     require_count,
@@ -974,7 +975,9 @@ def _prepare_time_weighting_initial_state(
     A text that is not a ``str`` (a ``bytes``, a text in a sequence or an
     array) is refused before the numbers are read, so a state written as
     ``["0.5"]`` is a :class:`TypeError` and not the number it reads as, and
-    so is a complex state, whose imaginary part the conversion would drop.
+    so is a complex state, whose imaginary part the conversion would drop:
+    an array of objects that holds a NumPy complex number included, which
+    has no complex dtype to ask for (:func:`holds_complex`).
     A ragged nesting, which has no shape, is a :class:`ValueError`, as it is
     for the termination of a layered absorber.
     """
@@ -1000,7 +1003,7 @@ def _prepare_time_weighting_initial_state(
     except ValueError:
         msg = "'initial_state' must be numbers of one shape, not a ragged nesting."
         raise ValueError(msg) from None
-    if given.dtype.kind == "c":
+    if holds_complex(given):
         msg = "'initial_state' must be real, not complex."
         raise TypeError(msg)
     try:

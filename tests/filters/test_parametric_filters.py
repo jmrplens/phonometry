@@ -260,11 +260,31 @@ def _objects(*members: object) -> np.ndarray:
 
 @pytest.mark.parametrize(
     "state",
-    [np.complex128(0.5 + 0.1j), [0.5 + 0.1j, 0.5], np.array(0.5 + 0j)],
-    ids=["numpy-complex", "complex-in-a-list", "zero-dimensional-complex"],
+    [
+        np.complex128(0.5 + 0.1j),
+        [0.5 + 0.1j, 0.5],
+        np.array(0.5 + 0j),
+        _objects(np.complex128(0.5 + 0.1j), np.complex128(0.5)),
+        _objects(np.complex64(0.5 + 0.1j), 0.5),
+        _objects(0.5 + 0.1j, 0.5),
+    ],
+    ids=[
+        "numpy-complex",
+        "complex-in-a-list",
+        "zero-dimensional-complex",
+        "numpy-complex-in-an-array-of-objects",
+        "complex64-in-an-array-of-objects",
+        "complex-in-an-array-of-objects",
+    ],
 )
+@pytest.mark.filterwarnings("error::numpy.exceptions.ComplexWarning")
 def test_time_weighting_refuses_a_complex_starting_state(state: object) -> None:
-    """numpy kept the real part of a complex state, with a ``ComplexWarning``."""
+    """numpy kept the real part of a complex state, with a ``ComplexWarning``.
+
+    An array of objects has no complex dtype to ask for, and numpy read a
+    NumPy complex number held in one as its real part too: two channels
+    started from 0.5, the 0.1j dropped.
+    """
     two_channels = np.ones((2, 10))
     with pytest.raises(TypeError, match="'initial_state' must be real, not complex"):
         filters.time_weighting(two_channels, 48000, initial_state=state)  # type: ignore[call-overload]

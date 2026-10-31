@@ -18,9 +18,9 @@ it; this module builds a column out of them.
 
 ```python
 sound_speed_profile(
-    depths: NDArray[np.float64] | list[float],
-    temperatures_c: NDArray[np.float64] | list[float] | float,
-    salinities: NDArray[np.float64] | list[float] | float,
+    depths: ArrayLike,
+    temperatures_c: ArrayLike,
+    salinities: ArrayLike,
     *,
     model: Literal['unesco', 'del_grosso', 'mackenzie', 'medwin'] = 'unesco',
     latitude: float = 45.0,

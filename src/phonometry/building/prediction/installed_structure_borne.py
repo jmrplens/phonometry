@@ -79,7 +79,7 @@ from typing import TYPE_CHECKING, Any, Literal
 import numpy as np
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping
+    from collections.abc import Mapping, Sequence
 
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
@@ -1171,7 +1171,7 @@ _REQUIRED_PATH_KEYS = (
 _PER_BAND_PATH_KEYS = ("adjustment_term", "flanking_reduction_index")
 
 
-def _widest_band_count(n_bands: int, paths: list[dict[str, Any]]) -> int:
+def _widest_band_count(n_bands: int, paths: Sequence[Mapping[str, Any]]) -> int:
     """Widen *n_bands* to the longest per-band term any path carries.
 
     Also checks that every path carries the required keys, naming the path and
@@ -1192,7 +1192,7 @@ def _widest_band_count(n_bands: int, paths: list[dict[str, Any]]) -> int:
 
 
 def _path_pressure_levels(
-    lw_inst: np.ndarray, paths: list[dict[str, Any]], n_bands: int
+    lw_inst: np.ndarray, paths: Sequence[Mapping[str, Any]], n_bands: int
 ) -> np.ndarray:
     """One row of per-band ``L_n,s`` per transmission path, broadcast to *n_bands*.
 
@@ -1226,7 +1226,7 @@ def _path_pressure_levels(
 def installed_source_prediction(
     characteristic_power_level: ArrayLike,
     coupling_term: ArrayLike,
-    paths: list[dict[str, Any]],
+    paths: Sequence[Mapping[str, Any]],
     *,
     frequencies: ArrayLike | None = None,
 ) -> InstalledSourceResult:

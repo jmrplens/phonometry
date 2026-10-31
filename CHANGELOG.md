@@ -3478,6 +3478,54 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- **A public parameter that converts its argument takes any array-like, and
+  one that reads a sequence or a mapping says so.** 559 public parameters of
+  313 functions and methods were annotated narrower than what their body
+  takes: 534 handed their argument, or each of its items, to `np.asarray`
+  or to a helper that does, while their annotation said `list[float]`,
+  `NDArray[np.float64]`, `Sequence[float] | np.ndarray` or a sequence of
+  fixed pairs, and 25 held a `list` or a `dict` their body only reads. A
+  typed caller's tuple, list of integers, integer array or nested
+  `[channels, samples]` list ran and was a type error, and `list[float]`
+  refused a `list[int]` besides, `list` being invariant. They take
+  `ArrayLike` now, `Signal | ArrayLike` where a Signal is taken too (the
+  `SignalInput` alias), so `broadcast.true_peak_level` takes the
+  two-channel list it documents, and so does every overload head that names
+  them; `noise_control.cascade` takes each four-pole matrix, and
+  `room.golay_impulse_response` each code of its pair, as any array-like,
+  and `metrology.combined_standard_uncertainty` takes a pair as a tuple, a
+  list or an array, and an integer array as it takes a float one. A
+  sequence of records or texts is a `Sequence`
+  (`materials.layered_absorber` and `materials.diffuse_field_absorption`
+  `layers`, `noise_control.duct_path` `elements`,
+  `noise_control.combine_duct_paths` `paths`,
+  `environment.road_source_power` and `environment.railway_source_power`
+  `traffic`, `building.joint_gap_series` `results`,
+  `building.installed_source_prediction` `paths`), a mapping a `Mapping`
+  (`noise_control.duct_path` `section`, `aircraft.ANPDatabase` `aircraft`),
+  and a pair of frequency limits a sequence or an array of the two
+  (`filters.octave_filter`, `filters.OctaveFilterBank`,
+  `filters.nominal_frequencies` and `emission.sound_intensity` `limits`;
+  `emission.sound_intensity` refused an array with numpy's own error, and
+  reads it now). Nothing a call took before is refused:
+  `signals.miso_coherence` takes its records from any iterable, a
+  generator or a dict view among them, and reads an array that is not a
+  sequence of records as its rows, so that a 1-D array, which is one
+  record, and a bare number, which is none, are refused for the records
+  they lack with a `ValueError` that names `inputs` (a number raised
+  Python's own `TypeError` before). Of the 559, the 9 of the files the GPU parity lock
+  holds wait for the run that records it again, and two label lists keep
+  their containers: `io.write_sidecar` `channel_labels` and
+  `vibration.daily_vibration_exposure` `labels` stay `tuple[str, ...] |
+  list[str]`, so that one text stays a type error.
+  `scripts/check_parameter_annotations.py` fails on a public parameter
+  whose body converts what its annotation refuses, followed through the
+  helpers it is handed to, the local names and copies bound to it and the
+  loops over a vararg or a literal of parameters, on one converted item by
+  item whose item type takes no sequence of numbers, and on any that holds
+  a `list`, a `dict` or a `set`; rule A58 of the contributor guide states
+  it.
+
 - **A function of a number or an array of them returns an array for an array,
   a zero-dimensional one included, and says so in its signature.** Ninety
   public functions and methods such as `room.room_constant`,

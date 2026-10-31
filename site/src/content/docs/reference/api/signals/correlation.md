@@ -59,8 +59,8 @@ consistent bin by bin.
 
 ```python
 align_impulse_responses(
-    ir: Signal | NDArray[np.float64] | list[float],
-    reference: Signal | NDArray[np.float64] | list[float],
+    ir: Signal | ArrayLike,
+    reference: Signal | ArrayLike,
     fs: float | None = None,
     *,
     interpolation: Literal['parabolic', 'none'] = 'parabolic',
@@ -146,8 +146,8 @@ Plot the reference and the aligned impulse response.
 
 ```python
 correlation(
-    x: Signal | NDArray[np.float64] | list[float],
-    y: Signal | NDArray[np.float64] | list[float] | None = None,
+    x: Signal | ArrayLike,
+    y: Signal | ArrayLike | None = None,
     fs: float | None = None,
     *,
     normalization: Literal['biased', 'unbiased', 'coefficient'] = 'unbiased',
@@ -332,10 +332,10 @@ return `inf`.
 
 ```python
 impulse_response_delay(
-    ir: Signal | NDArray[np.float64] | list[float],
+    ir: Signal | ArrayLike,
     fs: float | None = None,
     *,
-    reference: Signal | NDArray[np.float64] | list[float] | None = None,
+    reference: Signal | ArrayLike | None = None,
     interpolation: Literal['parabolic', 'none'] = 'parabolic',
     upsample: int = 8,
 ) -> float
@@ -381,8 +381,8 @@ default `upsample=8`).
 
 ```python
 time_delay(
-    x: Signal | NDArray[np.float64] | list[float],
-    y: Signal | NDArray[np.float64] | list[float],
+    x: Signal | ArrayLike,
+    y: Signal | ArrayLike,
     fs: float | None = None,
     *,
     method: Literal['gcc', 'direct', 'phase'] = 'gcc',

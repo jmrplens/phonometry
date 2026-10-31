@@ -95,6 +95,8 @@ from .ratings import (
 )
 
 if TYPE_CHECKING:
+    from collections.abc import Sequence
+
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
@@ -1071,8 +1073,7 @@ class JointGapSeries(OwnsArrays):
 
 def joint_gap_series(
     gap_widths_mm: ArrayLike,
-    results: tuple[LaboratoryJointInsulationResult, ...]
-    | list[LaboratoryJointInsulationResult],
+    results: Sequence[LaboratoryJointInsulationResult],
     *,
     nominal_gap_mm: float = _DEFAULT_NOMINAL_GAP_MM,
     min_gap_mm: float | None = None,

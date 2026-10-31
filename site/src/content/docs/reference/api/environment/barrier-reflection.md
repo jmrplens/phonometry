@@ -397,8 +397,8 @@ REFLECTION_GRID_SPACING_M = 0.4
 
 ```python
 reflection_index(
-    in_front_irs: Signal | Sequence[float] | np.ndarray | Sequence[Signal | Sequence[float] | np.ndarray],
-    free_field_irs: Signal | Sequence[float] | np.ndarray | Sequence[Signal | Sequence[float] | np.ndarray],
+    in_front_irs: Signal | ArrayLike | Sequence[Signal | ArrayLike],
+    free_field_irs: Signal | ArrayLike | Sequence[Signal | ArrayLike],
     fs: float | None = None,
     *,
     speed_of_sound: float,
@@ -903,8 +903,8 @@ Draw $U_j$ band by band with the $U$ of $DL_{RI}$.
 
 ```python
 source_directivity_corrections(
-    microphone_irs: Signal | Sequence[float] | np.ndarray,
-    specular_irs: Signal | Sequence[float] | np.ndarray,
+    microphone_irs: Signal | ArrayLike,
+    specular_irs: Signal | ArrayLike,
     fs: float | None = None,
     *,
     window_length_s: float | ArrayLike = 0.006,
@@ -944,8 +944,8 @@ placed on its own record's peak (5.5.6).
 
 ```python
 subtract_direct_sound(
-    in_front_ir: Signal | Sequence[float] | np.ndarray,
-    free_field_ir: Signal | Sequence[float] | np.ndarray,
+    in_front_ir: Signal | ArrayLike,
+    free_field_ir: Signal | ArrayLike,
     fs: float | None = None,
 ) -> DirectSoundSubtraction
 ```

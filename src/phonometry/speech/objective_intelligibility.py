@@ -56,7 +56,7 @@ from ..io._resolve import apply_calibration, resolve_pair_fs
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from numpy.typing import NDArray
+    from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
     from ..io._signal import Signal
@@ -278,8 +278,8 @@ def _resample_to_internal(sig: NDArray[np.float64], fs: int) -> NDArray[np.float
 
 
 def _validate_pair(
-    clean: Signal | list[float] | np.ndarray,
-    degraded: Signal | list[float] | np.ndarray,
+    clean: Signal | ArrayLike,
+    degraded: Signal | ArrayLike,
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """Validate and return the clean/degraded 1-D float arrays."""
     x = np.asarray(clean, dtype=np.float64)
@@ -325,8 +325,8 @@ def _row_col_normalize(seg: NDArray[np.float64]) -> NDArray[np.float64]:
 
 
 def stoi(
-    clean: Signal | list[float] | np.ndarray,
-    degraded: Signal | list[float] | np.ndarray,
+    clean: Signal | ArrayLike,
+    degraded: Signal | ArrayLike,
     fs: int | None = None,
     *,
     extended: bool = False,

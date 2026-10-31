@@ -99,7 +99,7 @@ DEFAULT_CHANNEL_WEIGHTS = {1: (1.0,), 2: (1.0, 1.0), 5: (1.0, 1.0, 1.0, 1.41, 1.
 
 ```python
 integrated_loudness(
-    x: Signal | Sequence[float] | np.ndarray,
+    x: Signal | ArrayLike,
     fs: float | None = None,
     weights: ArrayLike | None = None,
 ) -> float
@@ -128,10 +128,7 @@ normalises to -23.0 LUFS.
 ## k_weighting
 
 ```python
-k_weighting(
-    x: Signal | Sequence[float] | np.ndarray,
-    fs: float | None = None,
-) -> np.ndarray
+k_weighting(x: Signal | ArrayLike, fs: float | None = None) -> np.ndarray
 ```
 
 Apply the two-stage K-weighting pre-filter (BS.1770-5 Annex 1).
@@ -317,7 +314,7 @@ distribution, following the Tech 3342 reference implementation.
 
 ```python
 program_loudness(
-    x: Signal | Sequence[float] | np.ndarray,
+    x: Signal | ArrayLike,
     fs: float | None = None,
     weights: ArrayLike | None = None,
     *,
@@ -475,7 +472,7 @@ PASS/FAIL verdict row and a footer with the fixed disclaimer.
 
 ```python
 true_peak_level(
-    x: Signal | Sequence[float] | np.ndarray,
+    x: Signal | ArrayLike,
     fs: float | None = None,
     oversample: int | None = None,
 ) -> float | NDArray[np.float64]

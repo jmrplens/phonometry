@@ -265,8 +265,8 @@ cosine is unity and `Kr,theta` collapses to `Kr` (Clause 4.1).
 
 ```python
 in_situ_absorption_coefficient(
-    incident_ir: Signal | Sequence[float] | np.ndarray,
-    reflected_ir: Signal | Sequence[float] | np.ndarray,
+    incident_ir: Signal | ArrayLike,
+    reflected_ir: Signal | ArrayLike,
     *,
     source_height_m: float = 1.25,
     microphone_height_m: float = 0.25,
@@ -324,8 +324,8 @@ $1 / K_\mathrm{r}$ factor
 
 ```python
 in_situ_absorption_spectrum(
-    incident_ir: Signal | Sequence[float] | np.ndarray,
-    reflected_ir: Signal | Sequence[float] | np.ndarray,
+    incident_ir: Signal | ArrayLike,
+    reflected_ir: Signal | ArrayLike,
     fs: float | None = None,
     *,
     source_height_m: float = 1.25,
@@ -374,8 +374,8 @@ in a plottable [`InSituAbsorptionResult`](/phonometry/reference/api/materials/ro
 
 ```python
 in_situ_reflection_factor(
-    incident_ir: Signal | Sequence[float] | np.ndarray,
-    reflected_ir: Signal | Sequence[float] | np.ndarray,
+    incident_ir: Signal | ArrayLike,
+    reflected_ir: Signal | ArrayLike,
     *,
     source_height_m: float = 1.25,
     microphone_height_m: float = 0.25,
@@ -705,8 +705,8 @@ with the sampled radius of the standard 5 ms window.
 
 ```python
 power_reflection_coefficient(
-    incident_ir: Signal | Sequence[float] | np.ndarray,
-    reflected_ir: Signal | Sequence[float] | np.ndarray,
+    incident_ir: Signal | ArrayLike,
+    reflected_ir: Signal | ArrayLike,
     *,
     source_height_m: float = 1.25,
     microphone_height_m: float = 0.25,

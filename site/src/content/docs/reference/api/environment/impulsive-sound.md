@@ -333,7 +333,7 @@ A supplied level rise does not qualify as an impulse (clause 4.5).
 
 ```python
 impulsive_sound_adjustment(
-    x: Signal | Sequence[float] | np.ndarray,
+    x: Signal | ArrayLike,
     fs: float | None = None,
     *,
     dt: float = 0.02,
@@ -571,7 +571,7 @@ $$
 
 ```python
 sound_pressure_level_history(
-    x: Signal | Sequence[float] | np.ndarray,
+    x: Signal | ArrayLike,
     fs: float | None = None,
     *,
     dt: float = 0.02,

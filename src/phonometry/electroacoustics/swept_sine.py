@@ -71,7 +71,7 @@ from ..io._resolve import apply_calibration, resolve_fs
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from numpy.typing import NDArray
+    from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
     from .._internal.types import TwoPanels
@@ -516,7 +516,7 @@ def _default_ir_length(min_spacing: int) -> int:
 
 
 def _validated_recording(
-    recorded: Signal | NDArray[np.float64] | list[float],
+    recorded: Signal | ArrayLike,
 ) -> NDArray[np.float64]:
     rec = np.asarray(recorded, dtype=np.float64)
     if rec.ndim != 1:
@@ -629,7 +629,7 @@ def _check_farina_span(
 
 
 def swept_sine_distortion(
-    recorded: Signal | NDArray[np.float64] | list[float],
+    recorded: Signal | ArrayLike,
     fs: float | None = None,
     *,
     f1: float,

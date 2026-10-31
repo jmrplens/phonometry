@@ -79,7 +79,7 @@ from .closed_form import (
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from numpy.typing import NDArray
+    from numpy.typing import ArrayLike, NDArray
 
     from ..._i18n import Language
     from ..._internal.rays import RayDerivative, RayMarch
@@ -174,8 +174,8 @@ _MIN_PE_DEPTH_POINTS = 16
 
 
 def _clean_profile(
-    depths: NDArray[np.float64] | list[float],
-    speeds_of_sound: NDArray[np.float64] | list[float],
+    depths: ArrayLike,
+    speeds_of_sound: ArrayLike,
     owner: str,
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """One validated sound-speed profile out of the two node arrays.
@@ -213,10 +213,7 @@ def _clean_profile(
 
 
 def _clean_bathymetry(
-    bathymetry: tuple[
-        NDArray[np.float64] | list[float], NDArray[np.float64] | list[float]
-    ]
-    | None,
+    bathymetry: tuple[ArrayLike, ArrayLike] | None,
     z_prof: NDArray[np.float64],
     owner: str,
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]] | None:
@@ -527,12 +524,12 @@ def _propagating_band(
 
 def normal_modes(
     frequency_hz: float,
-    depths: NDArray[np.float64] | list[float],
-    speeds_of_sound: NDArray[np.float64] | list[float],
+    depths: ArrayLike,
+    speeds_of_sound: ArrayLike,
     *,
     source_depth: float,
     receiver_depth: float,
-    ranges_m: NDArray[np.float64] | list[float] | None = None,
+    ranges_m: ArrayLike | None = None,
     density: float = 1000.0,
     bottom: Literal["pressure-release", "rigid"] = "pressure-release",
     n_depth_points: int | None = None,
@@ -862,17 +859,14 @@ class RayTraceResult(OwnsArrays):
 
 
 def ray_trace(
-    depths: NDArray[np.float64] | list[float],
-    speeds_of_sound: NDArray[np.float64] | list[float],
+    depths: ArrayLike,
+    speeds_of_sound: ArrayLike,
     *,
     source_depth: float,
-    launch_angles_deg: NDArray[np.float64] | list[float],
+    launch_angles_deg: ArrayLike,
     max_range: float = 10_000.0,
     n_steps: int = 2000,
-    bathymetry: tuple[
-        NDArray[np.float64] | list[float], NDArray[np.float64] | list[float]
-    ]
-    | None = None,
+    bathymetry: tuple[ArrayLike, ArrayLike] | None = None,
 ) -> RayTraceResult:
     r"""Trace acoustic rays through a range-independent sound-speed profile.
 
@@ -2846,7 +2840,7 @@ def _check_source_on_kink(
 
 
 def _beam_range_grid(
-    ranges_m: NDArray[np.float64] | list[float] | None,
+    ranges_m: ArrayLike | None,
     *,
     n_steps: int,
     dr: float,
@@ -2876,7 +2870,7 @@ def _beam_range_grid(
 
 
 def _beam_receiver_grid(
-    receiver_depths_m: NDArray[np.float64] | list[float] | None,
+    receiver_depths_m: ArrayLike | None,
     *,
     n_depth_points: int,
     water_depth: float,
@@ -3094,22 +3088,19 @@ def _retire_stopped_beams(
 
 def gaussian_beams(
     frequency_hz: float,
-    depths: NDArray[np.float64] | list[float],
-    speeds_of_sound: NDArray[np.float64] | list[float],
+    depths: ArrayLike,
+    speeds_of_sound: ArrayLike,
     *,
     source_depth: float,
     max_range: float = 10_000.0,
-    ranges_m: NDArray[np.float64] | list[float] | None = None,
-    receiver_depths_m: NDArray[np.float64] | list[float] | None = None,
+    ranges_m: ArrayLike | None = None,
+    receiver_depths_m: ArrayLike | None = None,
     n_depth_points: int = 200,
     fan: BeamFan | None = None,
     range_step: float = 25.0,
     bottom: BottomType | FluidSeabed = "pressure-release",
     absorption: AbsorptionModel | VolumeAbsorption | None = None,
-    bathymetry: tuple[
-        NDArray[np.float64] | list[float], NDArray[np.float64] | list[float]
-    ]
-    | None = None,
+    bathymetry: tuple[ArrayLike, ArrayLike] | None = None,
 ) -> GaussianBeamResult:
     r"""Propagation-loss field from Gaussian beam tracing.
 
@@ -3701,8 +3692,8 @@ class ParabolicEquationResult(OwnsArrays):
 
 def parabolic_equation(
     frequency_hz: float,
-    depths: NDArray[np.float64] | list[float],
-    speeds_of_sound: NDArray[np.float64] | list[float],
+    depths: ArrayLike,
+    speeds_of_sound: ArrayLike,
     *,
     source_depth: float,
     max_range: float = 10_000.0,

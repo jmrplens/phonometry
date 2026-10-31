@@ -102,11 +102,11 @@ $L_\mathrm{d} > F_2$ (criterion 1, Annex B equation (B.1)).
 
 ```python
 field_indicators(
-    pressure_levels: list[float] | np.ndarray,
-    normal_intensity: list[float] | np.ndarray,
+    pressure_levels: ArrayLike,
+    normal_intensity: ArrayLike,
     *,
-    frequencies: list[float] | np.ndarray | None = None,
-    temporal_intensity: list[float] | np.ndarray | None = None,
+    frequencies: ArrayLike | None = None,
+    temporal_intensity: ArrayLike | None = None,
 ) -> FieldIndicators
 ```
 
@@ -213,7 +213,7 @@ the limit is not flagged.
 FieldIndicators.plot(
     ax: Axes | None = None,
     *,
-    dynamic_capability: float | np.ndarray | None = None,
+    dynamic_capability: ArrayLike | None = None,
     language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
@@ -405,15 +405,15 @@ intensity axis through both; default is the classic 12 mm spacer.
 
 ```python
 sound_intensity(
-    p1: Signal | Sequence[float] | np.ndarray,
-    p2: Signal | Sequence[float] | np.ndarray,
+    p1: Signal | ArrayLike,
+    p2: Signal | ArrayLike,
     fs: int | None = None,
     *,
     spacing_m: float,
     density: float = 1.204,
     speed_of_sound: float = 343.0,
     fraction: int | None = None,
-    limits: list[float] | None = None,
+    limits: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any] | None = None,
     bias_correct: bool = False,
 ) -> IntensityResult
 ```
@@ -463,7 +463,7 @@ by the factor $\sin(k \Delta r)/(k \Delta r)$ (IEC 61043:1993,
 | `density` | Air density, in kg/m^3. Default 1.204 (20 degC). |
 | `speed_of_sound` | Speed of sound, in m/s. Default 343.0. |
 | `fraction` | `None` (broadband only), 1 (octave bands) or 3 (one-third octave bands). |
-| `limits` | [f_min, f_max] band limits in Hz (default [12, 20000], as in [`phonometry.filters.nominal_frequencies`](/phonometry/reference/api/filters/frequencies/#nominal_frequencies)). |
+| `limits` | [f_min, f_max] band limits in Hz, a sequence or an array of the two (default [12, 20000], as in [`phonometry.filters.nominal_frequencies`](/phonometry/reference/api/filters/frequencies/#nominal_frequencies)). |
 | `bias_correct` | If True, apply the per-bin finite-difference correction $(k \Delta r)/\sin(k \Delta r)$ (IEC 61043:1993, 7.3) to the intensity spectral density before summing the band and broadband totals, so the totals no longer under-read as the frequency approaches `max_valid_frequency`. The reciprocal diverges as $k \Delta r \to \pi$ (the first spatial-aliasing null at $c/(2 \Delta r)$, inside the default band range for close spacings), so it is applied only over the probe's usable range (up to $k \Delta r = \pi/2$) and held constant beyond, keeping the totals bounded instead of letting a few near-null bins dominate them. Default False keeps the exact legacy totals; the per-band `bias_correction` factor (same clamped definition) is reported either way. |
 
 **Returns:** [`IntensityResult`](/phonometry/reference/api/power/intensity/#intensityresult).
@@ -478,7 +478,7 @@ by the factor $\sin(k \Delta r)/(k \Delta r)$ (IEC 61043:1993,
 
 ```python
 temporal_variability_indicator(
-    short_time_intensity: list[float] | np.ndarray,
+    short_time_intensity: ArrayLike,
 ) -> float | NDArray[np.float64]
 ```
 

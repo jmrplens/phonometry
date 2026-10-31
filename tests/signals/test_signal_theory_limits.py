@@ -121,8 +121,7 @@ def test_multichannel_mismatched_lengths() -> None:
     # itself and a foreign message was the lesser evil. The resolver now
     # refuses it, and names the parameter that carried it.
     with pytest.raises(ValueError, match=r"'x' must be numeric"):
-        # type ignore because list of lists of floats is technically not what we hint, but what user might pass
-        filters.octave_filter(x, fs)  # type: ignore[arg-type]
+        filters.octave_filter(x, fs)
 
 
 def test_sos_stability_at_low_freq_high_fs() -> None:

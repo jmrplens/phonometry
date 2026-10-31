@@ -90,7 +90,7 @@ the requested band.
 ### InverseFilterResult.apply()
 
 ```python
-InverseFilterResult.apply(x: list[float] | np.ndarray) -> np.ndarray
+InverseFilterResult.apply(x: ArrayLike) -> np.ndarray
 ```
 
 Equalize a signal with the inverse filter.
@@ -143,7 +143,7 @@ Number of samples in the inverse filter.
 
 ```python
 regularized_inverse_filter(
-    response: Signal | Sequence[float] | np.ndarray | TimedResponse,
+    response: Signal | ArrayLike | TimedResponse,
     fs: float | None = None,
     *,
     f_range: tuple[float, float],

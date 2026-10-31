@@ -74,6 +74,8 @@ from ._criterion import (
 )
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping, Sequence
+
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
@@ -464,7 +466,7 @@ class DuctPathResult(OwnsArrays):
 
 def duct_path(
     source_level: ArrayLike,
-    elements: list[DuctElement] | tuple[DuctElement, ...],
+    elements: Sequence[DuctElement],
     *,
     frequencies: ArrayLike,
     room_effect: ArrayLike | None = None,
@@ -472,7 +474,7 @@ def duct_path(
     criterion: CriterionFamily = "NC",
     target: float | None = None,
     self_noise_floor: float | None = DEFAULT_SELF_NOISE_FLOOR,
-    section: dict[str, float] | None = None,
+    section: Mapping[str, float] | None = None,
     flow_velocity: float = 0.0,
     speed_of_sound: float = 343.0,
     label: str = "Duct path",
@@ -583,7 +585,7 @@ def duct_path(
 
 
 def combine_duct_paths(
-    paths: list[DuctPathResult] | tuple[DuctPathResult, ...],
+    paths: Sequence[DuctPathResult],
     *,
     criterion: str | None = None,
     target: float | None = None,

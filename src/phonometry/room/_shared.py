@@ -25,7 +25,7 @@ from ..filters.core import OctaveFilterBank
 from ..io._resolve import apply_calibration
 
 if TYPE_CHECKING:
-    from numpy.typing import NDArray
+    from numpy.typing import ArrayLike, NDArray
 
     from ..io._signal import Signal
 
@@ -42,9 +42,7 @@ ONSET_DB = 20.0
 NOISE_TAIL_FRACTION = 0.1
 
 
-def validate_ir(
-    ir: Signal | list[float] | NDArray[np.float64], fs: int
-) -> NDArray[np.float64]:
+def validate_ir(ir: Signal | ArrayLike, fs: int) -> NDArray[np.float64]:
     """Accept a one-dimensional, non-silent impulse response, calibrated.
 
     :param ir: The impulse response, as an array or a

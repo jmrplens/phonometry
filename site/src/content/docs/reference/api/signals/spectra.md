@@ -67,8 +67,8 @@ is [`phonometry.signals.multitaper.multitaper_psd`](/phonometry/reference/api/si
 
 ```python
 coherent_output_spectrum(
-    x: Signal | NDArray[np.float64] | list[float],
-    y: Signal | NDArray[np.float64] | list[float],
+    x: Signal | ArrayLike,
+    y: Signal | ArrayLike,
     fs: float | None = None,
     *,
     window: str = 'hann',
@@ -201,8 +201,8 @@ Plot the output/coherent/noise spectra and the spectral SNR.
 
 ```python
 cross_spectral_density(
-    x: Signal | NDArray[np.float64] | list[float],
-    y: Signal | NDArray[np.float64] | list[float],
+    x: Signal | ArrayLike,
+    y: Signal | ArrayLike,
     fs: float | None = None,
     *,
     window: str = 'hann',
@@ -318,9 +318,9 @@ Plot the magnitude, phase (with ±σ band) and coherence.
 
 ```python
 fractional_octave_smoothing(
-    values: NDArray[np.float64] | list[float],
+    values: ArrayLike,
     *,
-    frequencies: NDArray[np.float64] | list[float],
+    frequencies: ArrayLike,
     fraction: float = 3.0,
     domain: Literal['power', 'amplitude', 'db'] = 'power',
 ) -> NDArray[np.float64]
@@ -365,7 +365,7 @@ are copied unchanged.
 
 ```python
 power_spectral_density(
-    x: Signal | NDArray[np.float64] | list[float],
+    x: Signal | ArrayLike,
     fs: float | None = None,
     *,
     window: str = 'hann',

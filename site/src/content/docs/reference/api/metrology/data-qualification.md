@@ -76,10 +76,10 @@ expectations.
 
 ```python
 level_crossing_rate(
-    x: Signal | NDArray[np.float64] | list[float],
+    x: Signal | ArrayLike,
     fs: float | None = None,
     *,
-    levels: NDArray[np.float64] | list[float] | None = None,
+    levels: ArrayLike | None = None,
     nperseg: int | None = None,
 ) -> LevelCrossingResult
 ```
@@ -183,7 +183,7 @@ Plot measured crossing rates against the Rice curve.
 
 ```python
 peak_statistics(
-    x: Signal | NDArray[np.float64] | list[float],
+    x: Signal | ArrayLike,
     fs: float | None = None,
     *,
     nperseg: int | None = None,
@@ -266,9 +266,7 @@ as $r \to 0$ (Sec. 5.5.4).
 ### PeakStatisticsResult.peak_density()
 
 ```python
-PeakStatisticsResult.peak_density(
-    z: NDArray[np.float64] | list[float] | float,
-) -> NDArray[np.float64]
+PeakStatisticsResult.peak_density(z: ArrayLike) -> NDArray[np.float64]
 ```
 
 Peak probability density `w(z)` (B&P Eq. (5.217)).
@@ -284,9 +282,7 @@ Peak probability density `w(z)` (B&P Eq. (5.217)).
 ### PeakStatisticsResult.peak_exceedance()
 
 ```python
-PeakStatisticsResult.peak_exceedance(
-    z: NDArray[np.float64] | list[float] | float,
-) -> NDArray[np.float64]
+PeakStatisticsResult.peak_exceedance(z: ArrayLike) -> NDArray[np.float64]
 ```
 
 $P[\text{peak} > z]$ at the record's irregularity
@@ -329,7 +325,7 @@ Plot the empirical peak exceedance against the Rice curves.
 
 ```python
 stationarity_test(
-    x: Signal | NDArray[np.float64] | list[float],
+    x: Signal | ArrayLike,
     fs: float | None = None,
     *,
     n_segments: int = 20,
@@ -461,7 +457,7 @@ Whether the count falls inside the acceptance region, `lower < trend_statistic <
 
 ```python
 trend_test(
-    values: NDArray[np.float64] | list[float],
+    values: ArrayLike,
     *,
     method: Literal['reverse_arrangements', 'runs'] = 'reverse_arrangements',
     alpha: float = 0.05,
@@ -494,7 +490,7 @@ non-monotonic clustering.
 
 | Name | Description |
 | :--- | :--- |
-| `values` | Sequence of observations or parameter estimates (e.g. segment mean square values), at least 10. |
+| `values` | Observations or parameter estimates (e.g. segment mean square values), at least 10, as a sequence or an array. |
 | `method` | `"reverse_arrangements"` (default) or `"runs"`. |
 | `alpha` | Two-sided significance level (default 0.05, the level tabulated by B&P). |
 

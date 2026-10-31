@@ -99,6 +99,7 @@ if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
 
     from matplotlib.axes import Axes
+    from numpy.typing import ArrayLike
 
     from ..._i18n import Language
 
@@ -482,10 +483,10 @@ def _match_bands(frequencies: np.ndarray) -> np.ndarray:
 
 
 def db_hr_global_index(
-    band_values: Sequence[float] | np.ndarray,
+    band_values: ArrayLike,
     spectrum: Spectrum = "pink",
     *,
-    frequencies: Sequence[float] | np.ndarray | None = None,
+    frequencies: ArrayLike | None = None,
     name: str | None = None,
 ) -> DBHRGlobalIndexResult:
     r"""A-weighted global insulation index per DB-HR Annex A.
@@ -565,9 +566,9 @@ def db_hr_global_index(
 
 
 def ra(
-    reduction_index: Sequence[float] | np.ndarray,
+    reduction_index: ArrayLike,
     *,
-    frequencies: Sequence[float] | np.ndarray | None = None,
+    frequencies: ArrayLike | None = None,
 ) -> DBHRGlobalIndexResult:
     """A-weighted global sound reduction index ``RA`` for pink noise.
 
@@ -581,9 +582,9 @@ def ra(
 
 
 def ra_tr(
-    reduction_index: Sequence[float] | np.ndarray,
+    reduction_index: ArrayLike,
     *,
-    frequencies: Sequence[float] | np.ndarray | None = None,
+    frequencies: ArrayLike | None = None,
 ) -> DBHRGlobalIndexResult:
     """A-weighted global sound reduction index ``RA,tr`` for road-traffic noise.
 
@@ -597,9 +598,9 @@ def ra_tr(
 
 
 def dnt_a(
-    level_difference: Sequence[float] | np.ndarray,
+    level_difference: ArrayLike,
     *,
-    frequencies: Sequence[float] | np.ndarray | None = None,
+    frequencies: ArrayLike | None = None,
 ) -> DBHRGlobalIndexResult:
     """A-weighted standardized level difference ``DnT,A`` (Formula (A.7)).
 
@@ -613,9 +614,9 @@ def dnt_a(
 
 
 def d2m_nt_a(
-    level_difference: Sequence[float] | np.ndarray,
+    level_difference: ArrayLike,
     *,
-    frequencies: Sequence[float] | np.ndarray | None = None,
+    frequencies: ArrayLike | None = None,
     spectrum: Literal["pink", "railway"] = "pink",
 ) -> DBHRGlobalIndexResult:
     """A-weighted facade level difference ``D2m,nT,A`` (Formula (A.5)).
@@ -652,9 +653,9 @@ def d2m_nt_a(
 
 
 def d2m_nt_atr(
-    level_difference: Sequence[float] | np.ndarray,
+    level_difference: ArrayLike,
     *,
-    frequencies: Sequence[float] | np.ndarray | None = None,
+    frequencies: ArrayLike | None = None,
     spectrum: Literal["traffic", "aircraft"] = "traffic",
 ) -> DBHRGlobalIndexResult:
     """A-weighted facade level difference ``D2m,nT,Atr`` (Formula (A.6)).

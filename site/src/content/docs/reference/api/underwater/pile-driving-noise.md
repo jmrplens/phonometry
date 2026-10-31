@@ -30,7 +30,7 @@ hammer strike. ISO 18406 characterises them with:
 ## cumulative_sel
 
 ```python
-cumulative_sel(single_sels: NDArray[np.float64] | list[float]) -> float
+cumulative_sel(single_sels: ArrayLike) -> float
 ```
 
 Cumulative sound exposure level over N strikes (ISO 18406
@@ -82,7 +82,7 @@ $\mathrm{SEL}_{\mathrm{ss}} + 10 \log_{10} N$.
 
 ```python
 pile_strike_metrics(
-    pressure_pa: Signal | Sequence[float] | np.ndarray,
+    pressure_pa: Signal | ArrayLike,
     fs: float | None = None,
 ) -> PileStrikeResult
 ```
@@ -157,7 +157,7 @@ Plot the strike waveform and its cumulative energy.
 
 ```python
 single_strike_sel(
-    pressure_pa: Signal | Sequence[float] | np.ndarray,
+    pressure_pa: Signal | ArrayLike,
     fs: float | None = None,
 ) -> float
 ```
@@ -186,7 +186,7 @@ pulse, in dB re 1 µPa²·s.
 
 ```python
 strike_sel_spectrum(
-    pressure_pa: Signal | Sequence[float] | np.ndarray,
+    pressure_pa: Signal | ArrayLike,
     fs: float | None = None,
     *,
     fraction: int = 3,

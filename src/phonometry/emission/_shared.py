@@ -72,6 +72,8 @@ from .._internal.warnings import PhonometryWarning
 if TYPE_CHECKING:
     from collections.abc import Mapping
 
+    from numpy.typing import ArrayLike
+
     from .._internal.types import BandFraction
 
 _S0 = 1.0  #: Reference area, in square metres (ISO 3744, 8.2.5).
@@ -248,7 +250,7 @@ def _check_grade(grade: str) -> Grade:
 
 
 def _single_event_mean(
-    levels: np.ndarray,
+    levels: ArrayLike,
     n_events: int | None,
     *,
     name: str,
@@ -320,7 +322,7 @@ def _single_event_mean(
 
 
 def _background_exposure(
-    background_levels: np.ndarray, integration_time: float | None
+    background_levels: ArrayLike, integration_time: float | None
 ) -> np.ndarray:
     r"""The background's single event time-integrated level over ``T``.
 

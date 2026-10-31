@@ -221,8 +221,8 @@ EARLY_ENERGY_LIMIT_S = 0.08
 
 ```python
 early_lateral_energy_fraction(
-    ir: Signal | list[float] | NDArray[np.float64],
-    lateral_ir: Signal | list[float] | NDArray[np.float64],
+    ir: Signal | ArrayLike,
+    lateral_ir: Signal | ArrayLike,
     fs: int | None = None,
     *,
     weighting: Literal['squared', 'cosine'] = 'squared',
@@ -427,8 +427,8 @@ IACC_SEARCH_S = 0.001
 
 ```python
 interaural_cross_correlation(
-    left: Signal | list[float] | NDArray[np.float64],
-    right: Signal | list[float] | NDArray[np.float64],
+    left: Signal | ArrayLike,
+    right: Signal | ArrayLike,
     fs: int | None = None,
     *,
     window: tuple[float, float | None] = (0.0, None),
@@ -574,9 +574,9 @@ LATE_LATERAL_AVERAGE_BANDS_HZ = (125.0, 250.0, 500.0, 1000.0)
 
 ```python
 late_lateral_sound_level(
-    ir: Signal | list[float] | NDArray[np.float64],
-    lateral_ir: Signal | list[float] | NDArray[np.float64],
-    reference_ir: Signal | list[float] | NDArray[np.float64] | None = None,
+    ir: Signal | ArrayLike,
+    lateral_ir: Signal | ArrayLike,
+    reference_ir: Signal | ArrayLike | None = None,
     fs: int | None = None,
     *,
     reference_level: ArrayLike | None = None,
@@ -1035,7 +1035,7 @@ table.
 
 ```python
 sound_pressure_exposure_level(
-    ir: Signal | list[float] | NDArray[np.float64],
+    ir: Signal | ArrayLike,
     fs: int | None = None,
     *,
     limits: None,
@@ -1043,7 +1043,7 @@ sound_pressure_exposure_level(
 ) -> float
 
 sound_pressure_exposure_level(
-    ir: Signal | list[float] | NDArray[np.float64],
+    ir: Signal | ArrayLike,
     fs: int | None = None,
     *,
     limits: tuple[float, float] = (125.0, 4000.0),
@@ -1097,8 +1097,8 @@ $L_{pE,10}$.
 
 ```python
 sound_strength(
-    ir: Signal | list[float] | NDArray[np.float64],
-    reference_ir: Signal | list[float] | NDArray[np.float64] | None = None,
+    ir: Signal | ArrayLike,
+    reference_ir: Signal | ArrayLike | None = None,
     fs: int | None = None,
     *,
     reference_level: ArrayLike | None = None,
@@ -1288,7 +1288,7 @@ STAGE_DIRECT_WINDOW_S = (0.0, 0.01)
 
 ```python
 stage_support(
-    ir: Signal | list[float] | NDArray[np.float64],
+    ir: Signal | ArrayLike,
     fs: int | None = None,
     *,
     limits: tuple[float, float] | None = (250.0, 2000.0),

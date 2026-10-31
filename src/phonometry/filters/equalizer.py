@@ -77,7 +77,7 @@ from ..io._resolve import (
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from numpy.typing import NDArray
+    from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
     from .._internal.types import TwoPanels
@@ -592,7 +592,7 @@ class ParametricEQ:
             self.zi = np.array([])
             self._steady_ic = steady_ic
 
-    def filter(self, x: Signal | list[float] | np.ndarray) -> Signal | np.ndarray:
+    def filter(self, x: Signal | ArrayLike) -> Signal | np.ndarray:
         """Apply the EQ cascade to a signal.
 
         :param x: Input signal (1D or 2D ``[channels, samples]``), or a
@@ -683,7 +683,7 @@ def parametric_eq(
 
 @overload
 def parametric_eq(
-    x: list[float] | np.ndarray,
+    x: ArrayLike,
     fs: float,
     *,
     sections: EQSection | Sequence[EQSection],
@@ -691,7 +691,7 @@ def parametric_eq(
 
 
 def parametric_eq(
-    x: Signal | list[float] | np.ndarray,
+    x: Signal | ArrayLike,
     fs: float | None = None,
     *,
     sections: EQSection | Sequence[EQSection],

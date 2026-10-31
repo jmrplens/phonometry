@@ -138,6 +138,7 @@ if TYPE_CHECKING:
     from collections.abc import Iterator, Mapping
 
     from matplotlib.axes import Axes
+    from numpy.typing import ArrayLike
 
     from .._i18n import Language
     from .._internal.types import ReportEngine
@@ -301,7 +302,7 @@ def _map_breakpoint(exponent: float, fraction: float) -> float:
 
 
 def class_limits(
-    fraction: float, filter_class: int, omega: np.ndarray, *, edition: Edition = "2014"
+    fraction: float, filter_class: int, omega: ArrayLike, *, edition: Edition = "2014"
 ) -> tuple[np.ndarray, np.ndarray]:
     r"""Acceptance limits on relative attenuation at normalized frequencies.
 

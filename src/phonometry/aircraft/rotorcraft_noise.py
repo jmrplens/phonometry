@@ -79,7 +79,7 @@ if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
 
     from matplotlib.axes import Axes
-    from numpy.typing import NDArray
+    from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
 
@@ -420,10 +420,10 @@ def _ring_levels(
 
 
 def hover_ring_hemisphere(
-    bearings: NDArray[np.float64] | list[float],
-    levels: NDArray[np.float64] | list[list[float]],
+    bearings: ArrayLike,
+    levels: ArrayLike,
     *,
-    frequencies: NDArray[np.float64] | list[float],
+    frequencies: ArrayLike,
     distance_m: float = 70.0,
     azimuth_step: float = 10.0,
     polar_step: float = 10.0,
@@ -591,13 +591,13 @@ def hover_derived_hemisphere(
 
 
 def flight_condition_weights(
-    airspeeds: NDArray[np.float64] | list[float],
-    path_angles_deg: NDArray[np.float64] | list[float],
+    airspeeds: ArrayLike,
+    path_angles_deg: ArrayLike,
     airspeed: float,
     path_angle_deg: float,
     *,
     scaling_factor: float = 2.0,
-    triangles: NDArray[np.int_] | list[list[int]] | None = None,
+    triangles: ArrayLike | None = None,
 ) -> list[tuple[int, float]]:
     r"""Hemisphere blending weights for a flight condition (Eq. 3-10).
 
@@ -695,7 +695,7 @@ def _enveloping_simplex(
     pts: NDArray[np.float64],
     q: NDArray[np.float64],
     n: int,
-    triangles: NDArray[np.int_] | list[list[int]] | None,
+    triangles: ArrayLike | None,
 ) -> NDArray[np.intp] | None:
     """The triangle of ``pts`` (given or Delaunay) enveloping ``q``, or ``None``."""
     if triangles is not None:
@@ -716,7 +716,7 @@ def _simplex_from_table(
     pts: NDArray[np.float64],
     q: NDArray[np.float64],
     n: int,
-    triangles: NDArray[np.int_] | list[list[int]],
+    triangles: ArrayLike,
 ) -> NDArray[np.intp] | None:
     """The first triangle of a lookup table enveloping ``q``, or ``None``."""
     require_scalar(n, "n")
@@ -746,15 +746,15 @@ def _simplex_from_table(
 
 def interpolated_source_level(
     hemispheres: Sequence[RotorcraftHemisphere],
-    airspeeds: NDArray[np.float64] | list[float],
-    path_angles_deg: NDArray[np.float64] | list[float],
+    airspeeds: ArrayLike,
+    path_angles_deg: ArrayLike,
     airspeed: float,
     path_angle_deg: float,
     azimuth_deg: float,
     polar_deg: float,
     *,
     scaling_factor: float = 2.0,
-    triangles: NDArray[np.int_] | list[list[int]] | None = None,
+    triangles: ArrayLike | None = None,
 ) -> NDArray[np.float64]:
     """Source level at a flight condition between hemispheres (Eq. 8/10 over Eq. 13).
 
@@ -794,7 +794,7 @@ def interpolated_source_level(
 
 def _common_frequencies(
     hemispheres: Sequence[RotorcraftHemisphere],
-    airspeeds: NDArray[np.float64] | list[float],
+    airspeeds: ArrayLike,
 ) -> NDArray[np.float64]:
     """The shared band grid of a hemisphere set (validated)."""
     if len(hemispheres) == 0:
@@ -909,8 +909,8 @@ class FlightPathKinematics(OwnsArrays):
 
 
 def flight_path_kinematics(
-    times: NDArray[np.float64] | list[float],
-    positions: NDArray[np.float64] | list[list[float]],
+    times: ArrayLike,
+    positions: ArrayLike,
     *,
     gravity: float = _G0,
 ) -> FlightPathKinematics:
@@ -1233,7 +1233,7 @@ class RotorcraftNoiseContourResult(OwnsArrays):
 
 
 def _per_point(
-    value: float | NDArray[np.float64] | list[float] | None,
+    value: ArrayLike | None,
     n: int,
     name: str,
 ) -> NDArray[np.float64] | None:
@@ -1253,8 +1253,8 @@ def _per_point(
 
 
 def _validated_track(
-    times: NDArray[np.float64] | list[float],
-    positions: NDArray[np.float64] | list[list[float]],
+    times: ArrayLike,
+    positions: ArrayLike,
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """The validated ``(times, positions)`` track arrays."""
     t = np.asarray(times, dtype=np.float64)
@@ -1506,12 +1506,12 @@ class _EventSetup:
 
 def _event_setup(
     hemispheres: Sequence[RotorcraftHemisphere],
-    airspeeds: NDArray[np.float64] | list[float],
-    path_angles_deg: NDArray[np.float64] | list[float],
-    times: NDArray[np.float64] | list[float],
-    positions: NDArray[np.float64] | list[list[float]],
+    airspeeds: ArrayLike,
+    path_angles_deg: ArrayLike,
+    times: ArrayLike,
+    positions: ArrayLike,
     *,
-    level_offset: float | NDArray[np.float64] | list[float],
+    level_offset: ArrayLike,
     atmosphere: RotorcraftAtmosphere,
     ground: RotorcraftGround,
     track_state: RotorcraftTrackState,
@@ -1944,13 +1944,13 @@ def _resolved_track_state(
 
 def rotorcraft_event_level(
     hemispheres: Sequence[RotorcraftHemisphere],
-    airspeeds: NDArray[np.float64] | list[float],
-    path_angles_deg: NDArray[np.float64] | list[float],
-    times: NDArray[np.float64] | list[float],
-    positions: NDArray[np.float64] | list[list[float]],
-    receiver: tuple[float, float] | NDArray[np.float64] | list[float],
+    airspeeds: ArrayLike,
+    path_angles_deg: ArrayLike,
+    times: ArrayLike,
+    positions: ArrayLike,
+    receiver: ArrayLike,
     *,
-    level_offset: float | NDArray[np.float64] | list[float] = 0.0,
+    level_offset: ArrayLike = 0.0,
     atmosphere: RotorcraftAtmosphere = _ICAO_ATMOSPHERE,
     ground: RotorcraftGround = _FLAT_GROUND,
     track_state: RotorcraftTrackState = _DERIVED_TRACK_STATE,
@@ -2081,15 +2081,15 @@ def _track_emission_geometry(
 
 def rotorcraft_noise_contour(
     hemispheres: Sequence[RotorcraftHemisphere],
-    airspeeds: NDArray[np.float64] | list[float],
-    path_angles_deg: NDArray[np.float64] | list[float],
-    times: NDArray[np.float64] | list[float],
-    positions: NDArray[np.float64] | list[list[float]],
+    airspeeds: ArrayLike,
+    path_angles_deg: ArrayLike,
+    times: ArrayLike,
+    positions: ArrayLike,
     *,
-    x: NDArray[np.float64] | list[float],
-    y: NDArray[np.float64] | list[float],
+    x: ArrayLike,
+    y: ArrayLike,
     metric: EventMetric = "exposure",
-    level_offset: float | NDArray[np.float64] | list[float] = 0.0,
+    level_offset: ArrayLike = 0.0,
     atmosphere: RotorcraftAtmosphere = _ICAO_ATMOSPHERE,
     ground: RotorcraftGround = _FLAT_GROUND,
     track_state: RotorcraftTrackState = _DERIVED_TRACK_STATE,

@@ -52,6 +52,8 @@ from ._layout import fmt_num
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
+    from numpy.typing import ArrayLike
+
     from .._i18n import Language
     from ..building.measurement.intensity_insulation import (
         IntensityElementNormalizedResult,
@@ -91,8 +93,8 @@ _N_OCTAVE_BANDS = 5
 
 
 def _qualification_columns(
-    fpi: Sequence[float] | np.ndarray | None,
-    residual_index: Sequence[float] | np.ndarray | None,
+    fpi: ArrayLike | None,
+    residual_index: ArrayLike | None,
     n_bands: int,
 ) -> list[Column]:
     """The optional Clause 8 i) columns: ``FpI`` and ``δpI0`` per band.
@@ -168,8 +170,8 @@ def render_iso15186_report(
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
     language: Language = "en",
-    fpi: Sequence[float] | np.ndarray | None = None,
-    residual_index: Sequence[float] | np.ndarray | None = None,
+    fpi: ArrayLike | None = None,
+    residual_index: ArrayLike | None = None,
 ) -> str:
     """Render an ISO 15186-1 intensity sound-insulation test report to a PDF.
 
@@ -185,9 +187,10 @@ def render_iso15186_report(
     :param verbose: When ``True`` and the modified index ``RI,M`` is present,
         the left table annexes ``RI,M`` beside the reported ``RI``.
     :param language: ``"en"`` (default) or ``"es"``.
-    :param fpi: Optional per-band ``FpI`` (Clause 8 i), annexed as a column.
-    :param residual_index: Optional per-band ``δpI0`` (Clause 8 i), annexed
-        as a column.
+    :param fpi: Optional per-band ``FpI`` (Clause 8 i), one value per band as
+        a sequence or an array, annexed as a column.
+    :param residual_index: Optional per-band ``δpI0`` (Clause 8 i), one value
+        per band as a sequence or an array, annexed as a column.
     :return: The written ``path`` as a :class:`str`.
     :raises ValueError: If ``fpi`` / ``residual_index`` do not match the band
         count.
@@ -311,8 +314,8 @@ def render_iso15186_element_report(
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
     language: Language = "en",
-    fpi: Sequence[float] | np.ndarray | None = None,
-    residual_index: Sequence[float] | np.ndarray | None = None,
+    fpi: ArrayLike | None = None,
+    residual_index: ArrayLike | None = None,
 ) -> str:
     """Render an ISO 15186-1 element-normalized insulation report to a PDF.
 
@@ -328,10 +331,11 @@ def render_iso15186_element_report(
         per band (the ``DI,n,e`` value, the shifted reference and the
         unfavourable deviation) instead of the two-column form.
     :param language: ``"en"`` (default) or ``"es"``.
-    :param fpi: Optional per-band ``FpI`` (Clause 8 i), annexed as a column
-        of the two-column form.
-    :param residual_index: Optional per-band ``δpI0`` (Clause 8 i), annexed
-        as a column of the two-column form.
+    :param fpi: Optional per-band ``FpI`` (Clause 8 i), one value per band as
+        a sequence or an array, annexed as a column of the two-column form.
+    :param residual_index: Optional per-band ``δpI0`` (Clause 8 i), one value
+        per band as a sequence or an array, annexed as a column of the
+        two-column form.
     :return: The written ``path`` as a :class:`str`.
     :raises ValueError: If ``fpi`` / ``residual_index`` do not match the band
         count.

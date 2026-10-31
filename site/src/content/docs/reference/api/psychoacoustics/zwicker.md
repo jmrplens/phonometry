@@ -28,7 +28,7 @@ A.9 of the standard digit for digit.
 
 ```python
 loudness_zwicker(
-    x: Signal | list[float] | np.ndarray,
+    x: Signal | ArrayLike,
     fs: int | None = None,
     field: Literal['free', 'diffuse'] = 'free',
     *,
@@ -89,7 +89,7 @@ with `ref` scaled to +-1 full scale as well.
 
 ```python
 loudness_zwicker_from_spectrum(
-    levels: list[float] | np.ndarray,
+    levels: ArrayLike,
     field: Literal['free', 'diffuse'] = 'free',
 ) -> ZwickerLoudness
 ```

@@ -60,7 +60,7 @@ only; see [`underwater_to_in_air_spl`](/phonometry/reference/api/underwater/acou
 
 ```python
 peak_sound_pressure_level(
-    pressure_pa: Signal | Sequence[float] | np.ndarray,
+    pressure_pa: Signal | ArrayLike,
     *,
     reference: float = 1e-06,
 ) -> float
@@ -91,7 +91,7 @@ $L_{p,\mathrm{pk}} = 20 \log_{10}(\max \lvert p \rvert / p_0)$ dB re
 
 ```python
 sound_exposure_level(
-    pressure_pa: Signal | Sequence[float] | np.ndarray,
+    pressure_pa: Signal | ArrayLike,
     fs: float | None = None,
     *,
     reference: float = 1e-12,
@@ -125,7 +125,7 @@ record.
 
 ```python
 sound_pressure_level(
-    pressure_pa: Signal | Sequence[float] | np.ndarray,
+    pressure_pa: Signal | ArrayLike,
     *,
     reference: float = 1e-06,
 ) -> float

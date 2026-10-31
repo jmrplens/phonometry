@@ -119,7 +119,7 @@ network applied to the whole signal against a design-goal response, live in
 class_limits(
     fraction: float,
     filter_class: int,
-    omega: np.ndarray,
+    omega: ArrayLike,
     *,
     edition: Literal['2014', '1995'] = '2014',
 ) -> tuple[np.ndarray, np.ndarray]

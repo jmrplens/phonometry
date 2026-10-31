@@ -58,7 +58,7 @@ square) - consistent with the `'spectrum'` scaling of the Welch module.
 
 ```python
 spectrogram(
-    x: Signal | NDArray[np.float64] | list[float],
+    x: Signal | ArrayLike,
     fs: float | None = None,
     *,
     window: str = 'hann',
@@ -174,7 +174,7 @@ Plot the spectrogram in dB over the time-frequency plane.
 
 ```python
 zoom_fft(
-    x: Signal | NDArray[np.float64] | list[float],
+    x: Signal | ArrayLike,
     fs: float | None = None,
     *,
     f_min: float,

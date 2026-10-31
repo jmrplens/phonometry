@@ -39,7 +39,7 @@ are built on the spectrum, notch and weighting helpers of this module.
 
 ```python
 harmonic_analysis(
-    x: Signal | NDArray[np.float64] | list[float],
+    x: Signal | ArrayLike,
     fs: float | None = None,
     fundamental: float | None = None,
     *,
@@ -80,7 +80,7 @@ conventions), THD+N and SINAD into a plottable result.
 
 ```python
 harmonic_distortion(
-    x: Signal | NDArray[np.float64] | list[float],
+    x: Signal | ArrayLike,
     fs: float | None = None,
     *,
     fundamental: float,
@@ -166,7 +166,7 @@ Plot the magnitude spectrum with the harmonics marked.
 
 ```python
 sinad(
-    x: Signal | NDArray[np.float64] | list[float],
+    x: Signal | ArrayLike,
     fs: float | None = None,
     fundamental: float | None = None,
     *,
@@ -209,7 +209,7 @@ measurement (same notch, same measurement bandwidth).
 
 ```python
 thd(
-    x: Signal | NDArray[np.float64] | list[float],
+    x: Signal | ArrayLike,
     fs: float | None = None,
     fundamental: float | None = None,
     *,
@@ -263,7 +263,7 @@ datasheets; the two agree to first order for small distortion.
 
 ```python
 thd_plus_noise(
-    x: Signal | NDArray[np.float64] | list[float],
+    x: Signal | ArrayLike,
     fs: float | None = None,
     fundamental: float | None = None,
     *,
@@ -310,7 +310,7 @@ and out-of-band noise do not inflate the result.
 
 ```python
 weighted_thd(
-    x: Signal | NDArray[np.float64] | list[float],
+    x: Signal | ArrayLike,
     fs: float | None = None,
     fundamental: float | None = None,
     *,

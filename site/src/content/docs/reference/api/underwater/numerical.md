@@ -302,19 +302,19 @@ sound-speed profile, so it is not repeated here.
 ```python
 gaussian_beams(
     frequency_hz: float,
-    depths: NDArray[np.float64] | list[float],
-    speeds_of_sound: NDArray[np.float64] | list[float],
+    depths: ArrayLike,
+    speeds_of_sound: ArrayLike,
     *,
     source_depth: float,
     max_range: float = 10000.0,
-    ranges_m: NDArray[np.float64] | list[float] | None = None,
-    receiver_depths_m: NDArray[np.float64] | list[float] | None = None,
+    ranges_m: ArrayLike | None = None,
+    receiver_depths_m: ArrayLike | None = None,
     n_depth_points: int = 200,
     fan: BeamFan | None = None,
     range_step: float = 25.0,
     bottom: Literal['pressure-release', 'rigid'] | FluidSeabed = 'pressure-release',
     absorption: Literal['francois-garrison', 'ainslie-mccolm', 'thorp'] | VolumeAbsorption | None = None,
-    bathymetry: tuple[NDArray[np.float64] | list[float], NDArray[np.float64] | list[float]] | None = None,
+    bathymetry: tuple[ArrayLike, ArrayLike] | None = None,
 ) -> GaussianBeamResult
 ```
 
@@ -633,12 +633,12 @@ Plot the propagation-loss field (depth increasing downward).
 ```python
 normal_modes(
     frequency_hz: float,
-    depths: NDArray[np.float64] | list[float],
-    speeds_of_sound: NDArray[np.float64] | list[float],
+    depths: ArrayLike,
+    speeds_of_sound: ArrayLike,
     *,
     source_depth: float,
     receiver_depth: float,
-    ranges_m: NDArray[np.float64] | list[float] | None = None,
+    ranges_m: ArrayLike | None = None,
     density: float = 1000.0,
     bottom: Literal['pressure-release', 'rigid'] = 'pressure-release',
     n_depth_points: int | None = None,
@@ -742,8 +742,8 @@ water column.
 ```python
 parabolic_equation(
     frequency_hz: float,
-    depths: NDArray[np.float64] | list[float],
-    speeds_of_sound: NDArray[np.float64] | list[float],
+    depths: ArrayLike,
+    speeds_of_sound: ArrayLike,
     *,
     source_depth: float,
     max_range: float = 10000.0,
@@ -831,14 +831,14 @@ Plot the propagation-loss field (depth increasing downward).
 
 ```python
 ray_trace(
-    depths: NDArray[np.float64] | list[float],
-    speeds_of_sound: NDArray[np.float64] | list[float],
+    depths: ArrayLike,
+    speeds_of_sound: ArrayLike,
     *,
     source_depth: float,
-    launch_angles_deg: NDArray[np.float64] | list[float],
+    launch_angles_deg: ArrayLike,
     max_range: float = 10000.0,
     n_steps: int = 2000,
-    bathymetry: tuple[NDArray[np.float64] | list[float], NDArray[np.float64] | list[float]] | None = None,
+    bathymetry: tuple[ArrayLike, ArrayLike] | None = None,
 ) -> RayTraceResult
 ```
 

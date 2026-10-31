@@ -70,7 +70,7 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
-    from numpy.typing import NDArray
+    from numpy.typing import ArrayLike, NDArray
 
     from ..._i18n import Language
 
@@ -655,7 +655,7 @@ def _to_db(factor: NDArray[np.float64]) -> NDArray[np.float64]:
 
 
 def weston_propagation_loss(
-    range_m: NDArray[np.float64] | list[float] | float,
+    range_m: ArrayLike,
     frequency_hz: float,
     water_depth: float,
     *,

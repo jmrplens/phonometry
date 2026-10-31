@@ -52,7 +52,7 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
-    from numpy.typing import NDArray
+    from numpy.typing import ArrayLike, NDArray
 
     from ..._i18n import Language
 
@@ -244,7 +244,7 @@ class AudiogramResult(OwnsArrays):
 
 
 def _frequency_khz(
-    frequency_hz: NDArray[np.float64] | list[float] | float,
+    frequency_hz: ArrayLike,
 ) -> NDArray[np.float64]:
     f = np.atleast_1d(np.asarray(frequency_hz, dtype=np.float64))
     if f.size == 0 or not np.all(np.isfinite(f)):
@@ -277,7 +277,7 @@ def _bundle(
 
 
 def group_audiogram(
-    frequency_hz: NDArray[np.float64] | list[float] | float,
+    frequency_hz: ArrayLike,
     group: AudiogramGroup,
     *,
     normalized: bool = False,
@@ -312,7 +312,7 @@ def group_audiogram(
 
 
 def orca_audiogram(
-    frequency_hz: NDArray[np.float64] | list[float] | float,
+    frequency_hz: ArrayLike,
 ) -> AudiogramResult:
     r"""Killer-whale hearing threshold (Ainslie 2010, Equation 11.159).
 

@@ -47,7 +47,7 @@ from a straight line.
 
 ```python
 decay_curve(
-    ir: Signal | list[float] | np.ndarray,
+    ir: Signal | ArrayLike,
     fs: int | None = None,
     band: float | None = None,
     fraction: int = 1,
@@ -312,7 +312,7 @@ larger absolute uncertainty and a smaller relative one.
 
 ```python
 room_parameters(
-    ir: Signal | list[float] | np.ndarray,
+    ir: Signal | ArrayLike,
     fs: int | None = None,
     limits: tuple[float, float] | None = (125.0, 4000.0),
     fraction: int = 1,

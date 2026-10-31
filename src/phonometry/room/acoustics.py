@@ -476,7 +476,7 @@ class DecayCurve(OwnsArrays):
 
 
 def decay_curve(
-    ir: Signal | list[float] | np.ndarray,
+    ir: Signal | ArrayLike,
     fs: int | None = None,
     band: float | None = None,
     fraction: int = 1,
@@ -565,7 +565,7 @@ def decay_curve(
 
 
 def room_parameters(
-    ir: Signal | list[float] | np.ndarray,
+    ir: Signal | ArrayLike,
     fs: int | None = None,
     limits: tuple[float, float] | None = _DEFAULT_BANDS,
     fraction: int = 1,

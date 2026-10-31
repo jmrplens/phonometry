@@ -9,12 +9,18 @@ Physics anchors:
 - Field indicators from ISO 9614-1:1993 Annex A, equations (A.3)-(A.9).
 """
 
+from __future__ import annotations
+
 import math
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 import pytest
 
 from phonometry import emission
+
+if TYPE_CHECKING:
+    from numpy.typing import NDArray
 
 FS = 48000
 SPACING = 0.012  # 12 mm microphone separation
@@ -269,6 +275,27 @@ def test_octave_fraction_and_limits() -> None:
     assert res.frequencies is not None
     assert res.frequencies[0] >= 63.0 / np.sqrt(2.0)
     assert res.frequencies[-1] <= 4000.0 * np.sqrt(2.0)
+
+
+@pytest.mark.parametrize(
+    "limits",
+    [np.array([63.0, 4000.0]), np.array([63, 4000]), (63.0, 4000.0)],
+    ids=["float array", "integer array", "tuple"],
+)
+def test_a_pair_of_limits_may_be_an_array_or_a_tuple(
+    limits: tuple[float, float] | NDArray[Any],
+) -> None:
+    """The band limits are read by index: an array of two bands as a list does."""
+    p1, p2 = _plane_wave_pair(delay_s=SPACING / C)
+    options: dict[str, Any] = {"spacing_m": SPACING, "density": RHO, "fraction": 1}
+    listed = emission.sound_intensity(p1, p2, FS, limits=[63.0, 4000.0], **options)
+    paired = emission.sound_intensity(p1, p2, FS, limits=limits, **options)
+    assert paired.frequencies is not None
+    assert listed.frequencies is not None
+    np.testing.assert_array_equal(paired.frequencies, listed.frequencies)
+    assert paired.intensity is not None
+    assert listed.intensity is not None
+    np.testing.assert_array_equal(paired.intensity, listed.intensity)
 
 
 def test_validation_errors() -> None:

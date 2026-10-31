@@ -77,11 +77,11 @@ How the energy in a band becomes a level reading.
 
 ```python
 octave_filter(
-    x: Signal | list[float] | np.ndarray,
+    x: Signal | ArrayLike,
     fs: int | None = None,
     fraction: float = 1,
     order: int = 6,
-    limits: list[float] | None = None,
+    limits: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any] | None = None,
     *,
     sigbands: bool = False,
     detrend: bool = True,
@@ -109,7 +109,7 @@ Multichannel support: If x is 2D (channels, samples), each channel is filtered.
 | `fs` | Sample rate in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `fraction` | Bandwidth 'b'. Examples: 1/3-octave b=3, 1-octave b=1, 2/3-octave b=1.5. Default: 1. |
 | `order` | Order of the filter. Default: 6. |
-| `limits` | Minimum and maximum limit frequencies [f_min, f_max]. Default [12, 20000]. |
+| `limits` | Minimum and maximum limit frequencies [f_min, f_max], a sequence or an array of the two. Default [12, 20000]. |
 | `sigbands` | If True, also return the signal in the time domain divided into bands. |
 | `detrend` | If True, remove DC offset before filtering. Default: True. |
 | `mode` | 'rms' or 'peak'. Default: 'rms'. |
@@ -127,7 +127,7 @@ OctaveFilterBank(
     fs: int,
     fraction: float = 1,
     order: int = 6,
-    limits: list[float] | None = None,
+    limits: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any] | None = None,
     *,
     design: FilterDesign = ...,
     calibration: LevelCalibration = ...,
@@ -148,7 +148,7 @@ Initialize the Octave Filter Bank.
 | `fs` | Sample rate in Hz. |
 | `fraction` | Bandwidth fraction (e.g., 1 for octave, 3 for 1/3 octave). |
 | `order` | Filter order. |
-| `limits` | Frequency limits [f_min, f_max]. |
+| `limits` | Frequency limits [f_min, f_max], a sequence or an array of the two. |
 | `design` | How the band filters are designed: family, ripple, stopband attenuation and multirate decimation ([`FilterDesign`](/phonometry/reference/api/filters/core/#filterdesign)). Only `butter` meets the class 1 mask of IEC 61260-1:2014 Table 1 with the default parameters (`cheby2` also does once `attenuation` >= 70 dB); `cheby1`/`ellip`/`bessel` fail on passband ripple or roll-off regardless of parameters. The octave and one-third-octave banks are class 1 on every requirement, decimated or filtered at the full rate (`FilterDesign(resample=False)`). |
 | `calibration` | How band energy becomes a level: calibration factor and dBFS switch ([`LevelCalibration`](/phonometry/reference/api/filters/core/#levelcalibration)). |
 | `block_processing` | Whether the bank carries its filter state between calls, and how that state starts ([`BlockProcessing`](/phonometry/reference/api/filters/core/#blockprocessing)). |
@@ -164,7 +164,7 @@ Initialize the Octave Filter Bank.
 
 ```python
 OctaveFilterBank.filter(
-    x: Signal | list[float] | np.ndarray,
+    x: Signal | ArrayLike,
     *,
     sigbands: bool = False,
     mode: Literal['rms', 'peak'] = 'rms',
@@ -219,7 +219,7 @@ How many bands the bank holds.
 
 ```python
 OctaveFilterBank.spectrogram(
-    x: Signal | list[float] | np.ndarray,
+    x: Signal | ArrayLike,
     window_time: float = 0.125,
     overlap: float = 0.5,
     mode: Literal['rms', 'peak'] = 'rms',

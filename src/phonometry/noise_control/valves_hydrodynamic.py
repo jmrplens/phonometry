@@ -89,8 +89,6 @@ from .valves import (
 )
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
-    from collections.abc import Sequence
-
     from numpy.typing import ArrayLike, NDArray
 
 Coefficient = Literal["Cv", "Kv"]
@@ -1715,7 +1713,7 @@ def stage_conditions(
     inlet_pressure_pa: float,
     outlet_pressure_pa: float,
     vapor_pressure_pa: float,
-    stage_coefficients: Sequence[float],
+    stage_coefficients: ArrayLike,
     flow_coefficient: float,
 ) -> tuple[StageConditions, ...]:
     r"""Equations (23a) to (24b) and (26): the differential, stage by stage.

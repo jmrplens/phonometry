@@ -52,7 +52,7 @@ from ..signals.spectra import (
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from numpy.typing import NDArray
+    from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
     from .._internal.types import ThreePanels
@@ -67,8 +67,8 @@ __all__ = [
 
 
 def _validate_pair(
-    x: Signal | NDArray[np.float64] | list[float],
-    y: Signal | NDArray[np.float64] | list[float],
+    x: Signal | ArrayLike,
+    y: Signal | ArrayLike,
     owner: str,
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """Validate the input/output record pair of *owner*.
@@ -238,8 +238,8 @@ class FrequencyResponseResult(OwnsArrays):
 
 
 def transfer_function(
-    x: Signal | NDArray[np.float64] | list[float],
-    y: Signal | NDArray[np.float64] | list[float],
+    x: Signal | ArrayLike,
+    y: Signal | ArrayLike,
     fs: float | None = None,
     *,
     estimator: Literal["H1", "H2"] = "H1",
@@ -348,8 +348,8 @@ class CoherenceResult(OwnsArrays):
 
 
 def coherence(
-    x: Signal | NDArray[np.float64] | list[float],
-    y: Signal | NDArray[np.float64] | list[float],
+    x: Signal | ArrayLike,
+    y: Signal | ArrayLike,
     fs: float | None = None,
     *,
     nperseg: int | None = None,

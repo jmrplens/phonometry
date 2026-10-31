@@ -441,7 +441,7 @@ The smallest radius of curvature the test track may have, 6.2.2.
 
 ```python
 pass_by_measurement(
-    x: Signal | Sequence[float] | np.ndarray,
+    x: Signal | ArrayLike,
     fs: float | None = None,
     *,
     start_s: float,

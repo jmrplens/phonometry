@@ -127,7 +127,7 @@ _MIN_SIGNAL_SAMPLES = 64
 
 
 def _validate_signal(
-    x: Signal | NDArray[np.float64] | list[float],
+    x: Signal | ArrayLike,
     *,
     calibrate: bool = True,
 ) -> NDArray[np.float64]:
@@ -220,7 +220,7 @@ def _harmonic_amplitudes(
 # Harmonic distortion (IEC 60268-3 14.12.2-3 / 14.12.5, AES17 6.3)
 # --------------------------------------------------------------------------- #
 def thd(
-    x: Signal | NDArray[np.float64] | list[float],
+    x: Signal | ArrayLike,
     fs: float | None = None,
     fundamental: float | None = None,
     *,
@@ -291,7 +291,7 @@ def thd(
 
 
 def harmonic_distortion(
-    x: Signal | NDArray[np.float64] | list[float],
+    x: Signal | ArrayLike,
     fs: float | None = None,
     *,
     fundamental: float,
@@ -434,7 +434,7 @@ def _aes17_rms_pair(
 
 
 def thd_plus_noise(
-    x: Signal | NDArray[np.float64] | list[float],
+    x: Signal | ArrayLike,
     fs: float | None = None,
     fundamental: float | None = None,
     *,
@@ -499,7 +499,7 @@ def thd_plus_noise(
 
 
 def sinad(
-    x: Signal | NDArray[np.float64] | list[float],
+    x: Signal | ArrayLike,
     fs: float | None = None,
     fundamental: float | None = None,
     *,
@@ -614,7 +614,7 @@ def _weighted_rms_468(x: NDArray[np.float64], fs: float) -> float:
 
 
 def weighted_thd(
-    x: Signal | NDArray[np.float64] | list[float],
+    x: Signal | ArrayLike,
     fs: float | None = None,
     fundamental: float | None = None,
     *,
@@ -746,7 +746,7 @@ class HarmonicDistortionResult(OwnsArrays):
 
 
 def harmonic_analysis(
-    x: Signal | NDArray[np.float64] | list[float],
+    x: Signal | ArrayLike,
     fs: float | None = None,
     fundamental: float | None = None,
     *,

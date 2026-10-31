@@ -1,6 +1,10 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
 """Tests for IEC 61260-1 nominal frequency helpers and opt-in nominal label support."""
 
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any
+
 import numpy as np
 import pytest
 
@@ -13,6 +17,11 @@ from phonometry.filters.frequencies import (
     _nominal_freq_for_band,
     nominal_frequencies,
 )
+
+if TYPE_CHECKING:
+    from collections.abc import Sequence
+
+    from numpy.typing import NDArray
 
 # --- nominal_frequencies ---
 
@@ -248,3 +257,24 @@ def test_infer_band_fraction_octave_third_and_single() -> None:
         == 1
     )
     assert _infer_band_fraction(np.array([500.0])) == 1
+
+
+@pytest.mark.parametrize(
+    "limits",
+    [np.array([100.0, 4000.0]), np.array([100, 4000]), (100.0, 4000.0)],
+    ids=["float array", "integer array", "tuple"],
+)
+def test_a_pair_of_limits_may_be_an_array_or_a_tuple(
+    limits: Sequence[float] | NDArray[Any],
+) -> None:
+    """A pair read by index is the same pair as an array, a tuple or a list."""
+    expected = filters.nominal_frequencies(1, [100.0, 4000.0]).frequencies
+    np.testing.assert_array_equal(
+        filters.nominal_frequencies(1, limits).frequencies, expected
+    )
+    bank = filters.OctaveFilterBank(48000, fraction=1, limits=limits)
+    assert bank.limits == [100.0, 4000.0]
+    signal = np.random.default_rng(0).standard_normal(4800)
+    listed = filters.octave_filter(signal, 48000, fraction=1, limits=[100.0, 4000.0])
+    paired = filters.octave_filter(signal, 48000, fraction=1, limits=limits)
+    np.testing.assert_array_equal(paired.frequencies, listed.frequencies)

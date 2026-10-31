@@ -83,7 +83,7 @@ from .spectra import _positive, _validate_signal
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from numpy.typing import NDArray
+    from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
     from .._internal.types import TwoPanels
@@ -274,7 +274,7 @@ class CepstrumResult(OwnsArrays):
 
 
 def cepstrum(
-    x: Signal | NDArray[np.float64] | list[float],
+    x: Signal | ArrayLike,
     fs: float | None = None,
     *,
     kind: Kind = "power",
@@ -430,7 +430,7 @@ class LifterResult(OwnsArrays):
 
 
 def lifter(
-    x: Signal | NDArray[np.float64] | list[float],
+    x: Signal | ArrayLike,
     fs: float | None = None,
     *,
     cutoff: float,
@@ -599,7 +599,7 @@ class EchoDetectionResult(OwnsArrays):
 
 
 def echo_detection(
-    x: Signal | NDArray[np.float64] | list[float],
+    x: Signal | ArrayLike,
     fs: float | None = None,
     *,
     min_quefrency: float | None = None,

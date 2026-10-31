@@ -40,7 +40,7 @@ path of 6.4.8 for non-independent quantities is not implemented -- use
 
 ```python
 combined_standard_uncertainty(
-    contributions: Sequence[float] | Sequence[tuple[float, float]] | np.ndarray,
+    contributions: Sequence[float | Sequence[float] | NDArray[Any]] | NDArray[Any],
 ) -> float
 ```
 
@@ -62,7 +62,7 @@ freedom.
 
 | Name | Description |
 | :--- | :--- |
-| `contributions` | Either the products $c_j u_j$, one per contribution, in the unit of the result (decibels for a level), or `(u_j, c_j)` pairs whose product is formed here, with `u_j` non-negative. Independent inputs are assumed, so there is no covariance term. |
+| `contributions` | Either the products $c_j u_j$, one per contribution, in the unit of the result (decibels for a level), or `(u_j, c_j)` pairs whose product is formed here (each a tuple, a list or an array of the two), with `u_j` non-negative; the two may be mixed, and an array of pairs is read row by row. Independent inputs are assumed, so there is no covariance term. |
 
 **Returns:** $u_\mathrm{c}$, in the unit of the contributions.
 

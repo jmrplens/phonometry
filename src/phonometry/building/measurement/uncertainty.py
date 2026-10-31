@@ -63,9 +63,10 @@ from ..._internal.validation import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping, Sequence
+    from collections.abc import Mapping
 
     from matplotlib.axes import Axes
+    from numpy.typing import ArrayLike
 
     from ..._i18n import Language
 
@@ -791,8 +792,8 @@ def reduce_by_independent_measurements(u: float, m: int) -> float:
 
 
 def single_number_uncertainty_uncorrelated(
-    band_uncertainties: Sequence[float] | np.ndarray,
-    reference_differences: Sequence[float] | np.ndarray,
+    band_uncertainties: ArrayLike,
+    reference_differences: ArrayLike,
 ) -> float:
     r"""Uncorrelated single-number uncertainty from band uncertainties (Formula B.2).
 

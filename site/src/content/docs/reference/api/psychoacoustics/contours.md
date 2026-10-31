@@ -49,7 +49,7 @@ contour therefore stops at 4 kHz.
 equal_loudness_contours(
     phons: Sequence[float] = (20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0),
     *,
-    frequencies: Sequence[float] | np.ndarray | None = None,
+    frequencies: ArrayLike | None = None,
 ) -> EqualLoudnessContours
 ```
 

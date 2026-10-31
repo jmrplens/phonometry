@@ -91,7 +91,7 @@ class ImpulseResponseWarning(PhonometryWarning):
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from numpy.typing import DTypeLike
+    from numpy.typing import ArrayLike, DTypeLike
 
     from .._i18n import Language
     from .._internal.types import TwoPanels
@@ -425,8 +425,8 @@ def _farina_deconvolve(
 
 @overload
 def impulse_response(
-    recorded: Signal | list[float] | np.ndarray,
-    reference: Signal | list[float] | np.ndarray,
+    recorded: Signal | ArrayLike,
+    reference: Signal | ArrayLike,
     fs: int | None = None,
     *,
     method: Literal["farina"],
@@ -439,8 +439,8 @@ def impulse_response(
 
 @overload
 def impulse_response(
-    recorded: Signal | list[float] | np.ndarray,
-    reference: Signal | list[float] | np.ndarray,
+    recorded: Signal | ArrayLike,
+    reference: Signal | ArrayLike,
     fs: int | None = None,
     *,
     method: Literal["spectral", "farina"] = ...,
@@ -452,8 +452,8 @@ def impulse_response(
 
 
 def impulse_response(
-    recorded: Signal | list[float] | np.ndarray,
-    reference: Signal | list[float] | np.ndarray,
+    recorded: Signal | ArrayLike,
+    reference: Signal | ArrayLike,
     fs: int | None = None,
     *,
     method: Literal["spectral", "farina"] = "spectral",
@@ -591,8 +591,8 @@ def mls_signal(order: int) -> np.ndarray:
 
 
 def mls_impulse_response(
-    recorded: Signal | list[float] | np.ndarray,
-    mls: Signal | list[float] | np.ndarray,
+    recorded: Signal | ArrayLike,
+    mls: Signal | ArrayLike,
     *,
     length: int | None = None,
     fs: int | None = None,
@@ -744,9 +744,9 @@ def golay_pair(order: int) -> tuple[np.ndarray, np.ndarray]:
 
 
 def golay_impulse_response(
-    recorded_a: Signal | list[float] | np.ndarray,
-    recorded_b: Signal | list[float] | np.ndarray,
-    pair: tuple[np.ndarray, np.ndarray],
+    recorded_a: Signal | ArrayLike,
+    recorded_b: Signal | ArrayLike,
+    pair: tuple[ArrayLike, ArrayLike],
     *,
     length: int | None = None,
     fs: int | None = None,
@@ -782,7 +782,8 @@ def golay_impulse_response(
         samples, so the recovered impulse response comes out in pascals per
         unit of excitation; two Signals recorded at different rates are
         refused rather than arbitrated.
-    :param pair: The complementary pair ``(a, b)`` from :func:`golay_pair`.
+    :param pair: The complementary pair ``(a, b)`` from :func:`golay_pair`,
+        each code an array or a sequence of numbers.
     :param length: Number of IR samples to return. Defaults to ``L``;
         longer requests are periodic extensions.
     :param fs: Optional sample rate in Hz, stored on the result so that

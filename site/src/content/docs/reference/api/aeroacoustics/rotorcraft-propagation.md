@@ -60,7 +60,7 @@ the ARP verification cases.
 
 ```python
 atmospheric_adjustment(
-    frequencies: NDArray[np.float64] | list[float],
+    frequencies: ArrayLike,
     distance_m: float,
     *,
     temperature_c: float = 25.0,
@@ -124,7 +124,7 @@ advisory warning propagates, since `α` is large and extrapolated.
 
 ```python
 diffraction_attenuation(
-    frequencies: NDArray[np.float64] | list[float],
+    frequencies: ArrayLike,
     path_difference: float,
     *,
     edge_height_m: float,
@@ -178,7 +178,7 @@ $c = 346.1$ m/s.
 
 ```python
 ground_effect_adjustment(
-    frequencies: NDArray[np.float64] | list[float],
+    frequencies: ArrayLike,
     source_height_m: float,
     receiver_height_m: float,
     horizontal_distance_m: float,
@@ -217,10 +217,7 @@ $\Delta L_\mathrm{g} = 10 \cdot \log_{10}\{1 + (r_1/r_2)^2 \lvert Q \rvert^2 + 2
 ## mean_flow_resistivity
 
 ```python
-mean_flow_resistivity(
-    lengths: NDArray[np.float64] | list[float],
-    resistivities: NDArray[np.float64] | list[float],
-) -> float
+mean_flow_resistivity(lengths: ArrayLike, resistivities: ArrayLike) -> float
 ```
 
 Logarithmic mean flow resistivity along a path (guidance Eq. 41).
@@ -250,8 +247,8 @@ $\bar{\sigma} = 10^{\sum d_i \cdot \log_{10}(\sigma_i) / \sum d_i}$.
 
 ```python
 mean_ground_plane(
-    distances_m: NDArray[np.float64] | list[float],
-    heights_m: NDArray[np.float64] | list[float],
+    distances_m: ArrayLike,
+    heights_m: ArrayLike,
 ) -> MeanGroundPlaneResult
 ```
 
@@ -326,9 +323,7 @@ flat-ground equations (§A.4.4).
 ### MeanGroundPlaneResult.height()
 
 ```python
-MeanGroundPlaneResult.height(
-    distance_m: float | NDArray[np.float64],
-) -> NDArray[np.float64]
+MeanGroundPlaneResult.height(distance_m: ArrayLike) -> NDArray[np.float64]
 ```
 
 The plane height $a\,d + b$ at `distance_m`, in metres.
@@ -392,11 +387,11 @@ adjustment is $\Delta L_\mathrm{s} = -20 \cdot \log_{10}(r/r_\mathrm{h})$.
 terrain_screening_adjustment(
     source: tuple[float, float],
     receiver: tuple[float, float],
-    distances_m: NDArray[np.float64] | list[float],
-    heights_m: NDArray[np.float64] | list[float],
+    distances_m: ArrayLike,
+    heights_m: ArrayLike,
     *,
-    frequencies: NDArray[np.float64] | list[float],
-    flow_resistivity: float | Literal['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'] | NDArray[np.float64] | list[float] = 'G',
+    frequencies: ArrayLike,
+    flow_resistivity: Literal['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'] | ArrayLike = 'G',
 ) -> TerrainScreeningResult
 ```
 

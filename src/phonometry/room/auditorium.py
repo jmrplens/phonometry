@@ -308,7 +308,7 @@ def _warn_cut_short(name: str) -> None:
 
 
 def _band_exposure_levels(
-    ir: Signal | list[float] | NDArray[np.float64],
+    ir: Signal | ArrayLike,
     fs: int,
     limits: tuple[float, float] | None,
     fraction: int,
@@ -339,7 +339,7 @@ def _band_exposure_levels(
 
 @overload
 def sound_pressure_exposure_level(
-    ir: Signal | list[float] | NDArray[np.float64],
+    ir: Signal | ArrayLike,
     fs: int | None = None,
     *,
     limits: None,
@@ -349,7 +349,7 @@ def sound_pressure_exposure_level(
 
 @overload
 def sound_pressure_exposure_level(
-    ir: Signal | list[float] | NDArray[np.float64],
+    ir: Signal | ArrayLike,
     fs: int | None = None,
     *,
     limits: tuple[float, float] = _DEFAULT_BANDS,
@@ -358,7 +358,7 @@ def sound_pressure_exposure_level(
 
 
 def sound_pressure_exposure_level(
-    ir: Signal | list[float] | NDArray[np.float64],
+    ir: Signal | ArrayLike,
     fs: int | None = None,
     *,
     limits: tuple[float, float] | None = _DEFAULT_BANDS,
@@ -731,8 +731,8 @@ class SoundStrengthResult(OwnsArrays):
 
 
 def sound_strength(
-    ir: Signal | list[float] | NDArray[np.float64],
-    reference_ir: Signal | list[float] | NDArray[np.float64] | None = None,
+    ir: Signal | ArrayLike,
+    reference_ir: Signal | ArrayLike | None = None,
     fs: int | None = None,
     *,
     reference_level: ArrayLike | None = None,
@@ -920,8 +920,8 @@ class LateralEnergyResult(OwnsArrays):
 
 
 def early_lateral_energy_fraction(
-    ir: Signal | list[float] | NDArray[np.float64],
-    lateral_ir: Signal | list[float] | NDArray[np.float64],
+    ir: Signal | ArrayLike,
+    lateral_ir: Signal | ArrayLike,
     fs: int | None = None,
     *,
     weighting: Literal["squared", "cosine"] = "squared",
@@ -1059,9 +1059,9 @@ class LateLateralResult(OwnsArrays):
 
 
 def late_lateral_sound_level(
-    ir: Signal | list[float] | NDArray[np.float64],
-    lateral_ir: Signal | list[float] | NDArray[np.float64],
-    reference_ir: Signal | list[float] | NDArray[np.float64] | None = None,
+    ir: Signal | ArrayLike,
+    lateral_ir: Signal | ArrayLike,
+    reference_ir: Signal | ArrayLike | None = None,
     fs: int | None = None,
     *,
     reference_level: ArrayLike | None = None,
@@ -1257,8 +1257,8 @@ class InterauralCorrelationResult(OwnsArrays):
 
 
 def interaural_cross_correlation(
-    left: Signal | list[float] | NDArray[np.float64],
-    right: Signal | list[float] | NDArray[np.float64],
+    left: Signal | ArrayLike,
+    right: Signal | ArrayLike,
     fs: int | None = None,
     *,
     window: tuple[float, float | None] = (0.0, None),
@@ -1497,7 +1497,7 @@ class StageSupportResult(OwnsArrays):
 
 
 def stage_support(
-    ir: Signal | list[float] | NDArray[np.float64],
+    ir: Signal | ArrayLike,
     fs: int | None = None,
     *,
     limits: tuple[float, float] | None = (250.0, 2000.0),

@@ -82,13 +82,13 @@ supplied.
 
 ```python
 adaptation_term_kc(
-    frequencies: Sequence[float] | np.ndarray,
+    frequencies: ArrayLike,
     *,
     boundary_area: float,
     volume: float,
 ) -> np.ndarray
 
-adaptation_term_kc(frequencies: Sequence[float] | np.ndarray) -> np.ndarray
+adaptation_term_kc(frequencies: ArrayLike) -> np.ndarray
 ```
 
 Adaptation term `Kc` per ISO 15186-1:2000, Annex B.
@@ -127,8 +127,8 @@ $R_{I,\mathrm{M}} = R_I + K_\mathrm{c}$ (Clause 3.10). Two forms are available:
 
 ```python
 intensity_element_normalized_difference(
-    lp1: Sequence[float] | np.ndarray,
-    l_in: Sequence[float] | np.ndarray,
+    lp1: ArrayLike,
+    l_in: ArrayLike,
     *,
     measurement_area: float,
     n: int = 1,
@@ -192,12 +192,12 @@ function implements the corrected per-unit form and warns when
 
 ```python
 intensity_sound_reduction(
-    lp1: Sequence[float] | np.ndarray,
-    l_in: Sequence[float] | np.ndarray,
+    lp1: ArrayLike,
+    l_in: ArrayLike,
     *,
     measurement_area: float,
     area: float,
-    kc: Sequence[float] | np.ndarray | None = None,
+    kc: ArrayLike | None = None,
 ) -> IntensityReductionResult
 ```
 
@@ -295,8 +295,8 @@ IntensityElementNormalizedResult.report(
     engine: Literal['reportlab'] = 'reportlab',
     verbose: bool = False,
     language: Literal['en', 'es'] = 'en',
-    fpi: Sequence[float] | np.ndarray | None = None,
-    residual_index: Sequence[float] | np.ndarray | None = None,
+    fpi: ArrayLike | None = None,
+    residual_index: ArrayLike | None = None,
 ) -> str
 ```
 
@@ -340,8 +340,8 @@ PASS/FAIL verdict; the element insulation passes at or above the target.
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | When `True`, the left table shows the ISO 717 evaluation per band (the `DI,n,e` value, the shifted reference and the unfavourable deviation) instead of the two-column form. |
 | `language` | Fiche language: `"en"` (default, English) or `"es"` (Spanish, with a comma decimal separator). |
-| `fpi` | Optional per-band surface pressure-intensity indicator `FpI` (Clause 8 i requires it as a function of frequency); annexed as a table column when supplied. |
-| `residual_index` | Optional per-band pressure-residual intensity index `δpI0` of the probe and analyser (Clause 8 i); annexed as a table column when supplied. |
+| `fpi` | Optional per-band surface pressure-intensity indicator `FpI` (Clause 8 i requires it as a function of frequency), one value per band as a sequence or an array; annexed as a table column when supplied. |
+| `residual_index` | Optional per-band pressure-residual intensity index `δpI0` of the probe and analyser (Clause 8 i), one value per band as a sequence or an array; annexed as a table column when supplied. |
 
 **Returns:** The written `path` as a `str`.
 
@@ -407,8 +407,8 @@ IntensityReductionResult.report(
     engine: Literal['reportlab'] = 'reportlab',
     verbose: bool = False,
     language: Literal['en', 'es'] = 'en',
-    fpi: Sequence[float] | np.ndarray | None = None,
-    residual_index: Sequence[float] | np.ndarray | None = None,
+    fpi: ArrayLike | None = None,
+    residual_index: ArrayLike | None = None,
 ) -> str
 ```
 
@@ -450,8 +450,8 @@ and name the measurement standard in `measurement_standard`
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | When `True` and the Kc-modified index `RI,M` is available, the table annexes `RI,M` beside the reported `RI`. |
 | `language` | Fiche language: `"en"` (default, English) or `"es"` (Spanish, with a comma decimal separator). |
-| `fpi` | Optional per-band surface pressure-intensity indicator `FpI` (Clause 8 i requires it as a function of frequency); annexed as a table column when supplied. |
-| `residual_index` | Optional per-band pressure-residual intensity index `δpI0` of the probe and analyser (Clause 8 i); annexed as a table column when supplied. |
+| `fpi` | Optional per-band surface pressure-intensity indicator `FpI` (Clause 8 i requires it as a function of frequency), one value per band as a sequence or an array; annexed as a table column when supplied. |
+| `residual_index` | Optional per-band pressure-residual intensity index `δpI0` of the probe and analyser (Clause 8 i), one value per band as a sequence or an array; annexed as a table column when supplied. |
 
 **Returns:** The written `path` as a `str`.
 
@@ -466,7 +466,7 @@ and name the measurement standard in `measurement_standard`
 
 ```python
 limp_panel_reduction_index(
-    frequencies: Sequence[float] | np.ndarray,
+    frequencies: ArrayLike,
     *,
     surface_mass: float,
     area: float,
@@ -544,13 +544,13 @@ that range and nowhere else.
 
 ```python
 low_frequency_element_normalized_difference(
-    lp_surface: Sequence[float] | np.ndarray,
-    l_in: Sequence[float] | np.ndarray,
+    lp_surface: ArrayLike,
+    l_in: ArrayLike,
     *,
     measurement_area: float,
     n_elements: int = 1,
-    l_p: Sequence[float] | np.ndarray | None = None,
-    frequencies: Sequence[float] | np.ndarray | None = None,
+    l_p: ArrayLike | None = None,
+    frequencies: ArrayLike | None = None,
     absorbing_specimen_surface: bool = False,
 ) -> LowFrequencyElementResult
 ```
@@ -597,13 +597,13 @@ disagree on the page, and this is the one that agrees with the physics.
 
 ```python
 low_frequency_intensity_reduction(
-    lp_surface: Sequence[float] | np.ndarray,
-    l_in: Sequence[float] | np.ndarray,
+    lp_surface: ArrayLike,
+    l_in: ArrayLike,
     *,
     measurement_area: float,
     area: float,
-    l_p: Sequence[float] | np.ndarray | None = None,
-    frequencies: Sequence[float] | np.ndarray | None = None,
+    l_p: ArrayLike | None = None,
+    frequencies: ArrayLike | None = None,
     absorbing_specimen_surface: bool = False,
 ) -> LowFrequencyIntensityResult
 ```
@@ -821,8 +821,8 @@ indicator itself is `None`.
 
 ```python
 subarea_intensity_level(
-    l_in: Sequence[Sequence[float]] | np.ndarray,
-    measurement_area: Sequence[float] | np.ndarray,
+    l_in: ArrayLike,
+    measurement_area: ArrayLike,
 ) -> SubareaIntensityLevel
 ```
 
@@ -884,8 +884,8 @@ unpacked by position.
 
 ```python
 surface_pressure_intensity_indicator(
-    lp: Sequence[float] | np.ndarray,
-    l_in: Sequence[float] | np.ndarray,
+    lp: ArrayLike,
+    l_in: ArrayLike,
 ) -> np.ndarray
 ```
 

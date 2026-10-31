@@ -25,6 +25,8 @@ few percent.
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import matplotlib as mpl
 
 mpl.use("Agg")
@@ -35,7 +37,11 @@ import pytest
 from scipy import signal as sp_signal
 
 import phonometry as ph
+from phonometry.io import Signal
 from phonometry.signals.miso import _condition, _ordinary_coherences
+
+if TYPE_CHECKING:
+    from collections.abc import Callable, Iterable
 
 FS = 8192.0
 N = 1 << 19
@@ -430,6 +436,71 @@ def test_rejects_single_input() -> None:
     y = x1.copy()
     with pytest.raises(ValueError, match=r"'inputs' must hold at least two"):
         ph.signals.miso_coherence([x1], y, FS)
+
+
+@pytest.mark.parametrize("records", ["one array", "a number"])
+def test_rejects_one_array_or_a_number_as_the_records(records: str) -> None:
+    """A 1-D array is one record and a number none: both fall short of two.
+
+    numpy reads either as an array whose rows are the records, so the
+    refusal names the count, as it does for a one-element list.
+    """
+    x1 = _white(141, n=1 << 14)
+    y = x1.copy()
+    inputs = x1 if records == "one array" else 0.5
+    with pytest.raises(
+        ValueError, match=r"^'inputs' must hold at least two input records\.$"
+    ):
+        ph.signals.miso_coherence(inputs, y, FS)
+
+
+def _generator(a: np.ndarray, b: np.ndarray) -> Iterable[np.ndarray]:
+    return (record for record in (a, b))
+
+
+def _dict_values(a: np.ndarray, b: np.ndarray) -> Iterable[np.ndarray]:
+    return {"first": a, "second": b}.values()
+
+
+def _map(a: np.ndarray, b: np.ndarray) -> Iterable[np.ndarray]:
+    return map(np.asarray, (a, b))
+
+
+@pytest.mark.parametrize("iterable", [_generator, _dict_values, _map])
+def test_takes_the_records_from_any_iterable(
+    iterable: Callable[[np.ndarray, np.ndarray], Iterable[np.ndarray]],
+) -> None:
+    """A generator, a dict view or a map of records reads as their list does."""
+    x1 = _white(143, n=1 << 15)
+    x2 = _white(144, n=1 << 15)
+    y = x1 + 0.5 * x2 + _white(145, rms=0.3, n=1 << 15)
+    expected = ph.signals.miso_coherence([x1, x2], y, FS, nperseg=1024)
+    res = ph.signals.miso_coherence(iterable(x1, x2), y, FS, nperseg=1024)
+    assert res.n_inputs == 2
+    np.testing.assert_array_equal(res.multiple_coherence, expected.multiple_coherence)
+    np.testing.assert_array_equal(res.partial_coherence, expected.partial_coherence)
+
+
+def test_reads_the_rate_of_signals_handed_in_a_generator() -> None:
+    """The Signals of a generator give the rate: it is read once, then checked."""
+    x1 = _white(146, n=1 << 14)
+    x2 = _white(147, n=1 << 14)
+    y = x1 + x2
+    records = (record for record in (Signal(x1, int(FS)), Signal(x2, int(FS))))
+    res = ph.signals.miso_coherence(records, y, nperseg=1024)
+    assert res.frequencies[1] == pytest.approx(FS / 1024)
+
+
+def test_refuses_signals_at_two_rates_handed_in_a_generator() -> None:
+    """A generator is read once, so the second pass still sees both Signals."""
+    x1 = _white(148, n=1 << 14)
+    x2 = _white(149, n=1 << 14)
+    y = x1 + x2
+    records = (record for record in (Signal(x1, int(FS)), Signal(x2, int(FS) // 2)))
+    with pytest.raises(
+        ValueError, match=r"'inputs' holds Signals recorded at different rates"
+    ):
+        ph.signals.miso_coherence(records, y)
 
 
 def test_rejects_mismatched_length() -> None:

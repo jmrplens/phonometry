@@ -192,7 +192,7 @@ def test_service_equipment_scalar_measurements_raises_cleanly() -> None:
         ValueError,
         match=r"'measurements' must give exactly three measurement positions",
     ):
-        building.survey_service_equipment_level(35.0, 3.0)  # type: ignore[arg-type]
+        building.survey_service_equipment_level(35.0, 3.0)
 
 
 # ---------------------------------------------------------------------------

@@ -94,7 +94,7 @@ if TYPE_CHECKING:
     from collections.abc import Iterable
     from typing import BinaryIO
 
-    from numpy.typing import NDArray
+    from numpy.typing import ArrayLike, NDArray
 
 
 class ClippingWarning(PhonometryWarning):
@@ -144,7 +144,7 @@ _RIFF_FOURCC = b"RIFF"
 
 
 def _resolve_input(
-    x: Signal | NDArray[np.generic] | list[float],
+    x: Signal | ArrayLike,
     fs: int | None,
 ) -> tuple[np.ndarray, int]:
     """Normalise the input to ``(channels, samples)`` plus a sample rate.
@@ -434,7 +434,7 @@ def _check_dither(dither: str | None, subtype: str) -> None:
 
 
 def _resolve_bext(
-    x: Signal | NDArray[np.generic] | list[float],
+    x: Signal | ArrayLike,
     bext: BroadcastMetadata | str | None,
     data: np.ndarray,
     fs: int,
@@ -628,9 +628,7 @@ def _check_target_suffix(path: str | Path, target: Path) -> None:
         raise ValueError(msg)
 
 
-def _sidecar_request(
-    x: Signal | NDArray[np.generic] | list[float], *, sidecar: bool
-) -> bytes | None:
+def _sidecar_request(x: Signal | ArrayLike, *, sidecar: bool) -> bytes | None:
     """The bytes of the sidecar requested, or ``None`` when none is.
 
     A Signal without a calibration has nothing for a sidecar to carry, and one
@@ -715,7 +713,7 @@ def _write_through_scipy(
 @overload
 def write(
     path: str | Path,
-    x: Signal | NDArray[np.generic] | list[float],
+    x: Signal | ArrayLike,
     fs: int | None = ...,
     *,
     subtype: Subtype | None = ...,
@@ -729,7 +727,7 @@ def write(
 @overload
 def write(
     path: str | Path,
-    x: Signal | NDArray[np.generic] | list[float],
+    x: Signal | ArrayLike,
     fs: int | None = ...,
     *,
     subtype: Subtype | None = ...,
@@ -740,7 +738,7 @@ def write(
 
 def write(
     path: str | Path,
-    x: Signal | NDArray[np.generic] | list[float],
+    x: Signal | ArrayLike,
     fs: int | None = None,
     *,
     subtype: Subtype | None = None,
@@ -929,7 +927,7 @@ def _flac_quantised_codes(
 
 def _write_flac(
     path: str | Path,
-    x: Signal | NDArray[np.generic] | list[float],
+    x: Signal | ArrayLike,
     data: np.ndarray,
     fs: int,
     subtype: str | None,

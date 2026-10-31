@@ -70,7 +70,7 @@ if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import ArrayLike
 
     from ..._i18n import Language
     from ..._internal.types import Real
@@ -419,7 +419,7 @@ def _porous_layer_term(
 
 
 def _layer_terms(
-    layers: list[Layer] | tuple[Layer, ...],
+    layers: Sequence[Layer],
     f: Real,
     *,
     k0: Real,
@@ -456,10 +456,7 @@ def _layer_terms(
 
 
 def _termination_admittance(
-    termination: TerminationName
-    | complex
-    | Sequence[complex]
-    | NDArray[np.number[Any]],
+    termination: TerminationName | ArrayLike,
     f: Real,
     *,
     cos_t: float,
@@ -483,10 +480,7 @@ def _termination_admittance(
 
 
 def _termination_impedance(
-    termination: TerminationName
-    | complex
-    | Sequence[complex]
-    | NDArray[np.number[Any]],
+    termination: TerminationName | ArrayLike,
     f: Real,
     *,
     cos_t: float,
@@ -647,7 +641,7 @@ def _split_fluid_run(
 
 
 def _stack_blocks(
-    layers: list[Layer] | tuple[Layer, ...],
+    layers: Sequence[Layer],
     f: Real,
     *,
     k0: Real,
@@ -716,13 +710,10 @@ def _stack_blocks(
 
 def layered_absorber(
     frequency: ArrayLike,
-    layers: list[Layer] | tuple[Layer, ...],
+    layers: Sequence[Layer],
     *,
     angle_rad: float = 0.0,
-    termination: TerminationName
-    | complex
-    | Sequence[complex]
-    | NDArray[np.number[Any]] = "rigid",
+    termination: TerminationName | ArrayLike = "rigid",
     fluid: Fluid = ABSORBER_AIR,
 ) -> LayeredAbsorberResult:
     r"""Transfer-matrix prediction of a layered absorber at one angle.
@@ -844,14 +835,11 @@ def layered_absorber(
 
 def diffuse_field_absorption(
     frequency: ArrayLike,
-    layers: list[Layer] | tuple[Layer, ...],
+    layers: Sequence[Layer],
     *,
     angle_limit_rad: float = np.pi / 2.0,
     n_quadrature_points: int = 64,
-    termination: TerminationName
-    | complex
-    | Sequence[complex]
-    | NDArray[np.number[Any]] = "rigid",
+    termination: TerminationName | ArrayLike = "rigid",
     fluid: Fluid = ABSORBER_AIR,
 ) -> DiffuseFieldAbsorptionResult:
     r"""Random-incidence absorption by the Paris integral (Mechel Sect. D.5).

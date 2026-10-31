@@ -101,6 +101,7 @@ if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
 
     from matplotlib.axes import Axes
+    from numpy.typing import ArrayLike
 
     from ..._i18n import Language
     from ..._report.metadata import ReportMetadata
@@ -540,7 +541,7 @@ def _band_tonal_corrections(
 
 
 def tonal_correction(
-    levels: Sequence[float] | np.ndarray, *, frequencies: Sequence[float] | np.ndarray
+    levels: ArrayLike, *, frequencies: ArrayLike
 ) -> TonalCorrectionResult:
     r"""Tonal correction ``Kt`` from a one-third-octave spectrum (Annex IV A.3.3).
 
@@ -807,9 +808,9 @@ def evaluation_period_level(
 
 
 def long_term_corrected_level(
-    daily_levels: Sequence[float] | np.ndarray,
+    daily_levels: ArrayLike,
     *,
-    weights: Sequence[float] | np.ndarray | None = None,
+    weights: ArrayLike | None = None,
 ) -> float:
     r"""Long-term index ``LK,x`` from the daily period levels (Annex I A.2 d).
 

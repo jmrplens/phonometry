@@ -123,11 +123,13 @@ def spherical_spreading_loss(distance_m):
 **Do**
 
 ```python
+from numpy.typing import ArrayLike
+
 from phonometry import fluids
 
 
 def effective_density(
-    frequencies: list[float], *, fluid: fluids.Fluid
+    frequencies: ArrayLike, *, fluid: fluids.Fluid
 ) -> list[complex]:
     """Effective density of a rigid-frame porous layer, in kg/m3.
 
@@ -159,7 +161,7 @@ def effective_density(frequencies, *, fluid):
 **Do**
 
 ```python
-def duct_attenuation(frequencies: list[float], *, wrapped: bool = False) -> list[float]:
+def duct_attenuation(frequencies: ArrayLike, *, wrapped: bool = False) -> list[float]:
     """Attenuation of an unlined rectangular duct, in dB.
 
     :param frequencies: Octave-band centers, in Hz.
@@ -224,7 +226,7 @@ def mean_free_path(volume, surface_area):
 **Do**
 
 ```python
-def band_levels(x: list[float], fs: float) -> list[float]:
+def band_levels(x: ArrayLike, fs: float) -> list[float]:
     """Band levels of ``x``, in dB, one per octave.
 
     :param x: The time signal, in Pa.
@@ -314,7 +316,7 @@ class RoomCheck:
 **Do**
 
 ```python
-def band_energy_mean(levels: list[float], *, fraction: int = 3) -> float:
+def band_energy_mean(levels: ArrayLike, *, fraction: int = 3) -> float:
     """Energy mean of band levels, in dB.
 
     :param levels: Band levels, in dB.
@@ -347,7 +349,7 @@ def band_energy_mean(levels, *, fraction=3):
 **Do**
 
 ```python
-def room_criterion_rating(levels: list[float]) -> str:
+def room_criterion_rating(levels: ArrayLike) -> str:
     """Room criterion rating of an octave-band spectrum.
 
     :param levels: Octave-band sound pressure levels, in dB.
@@ -425,7 +427,7 @@ def pressure_level(pressure_pa):
 **Do**
 
 ```python
-def largest_deviation(deviations: list[float]) -> float:
+def largest_deviation(deviations: ArrayLike) -> float:
     r"""The largest deviation :math:`|dL_n|_{\max}`, in dB."""
 ```
 
@@ -510,7 +512,7 @@ L_\mathrm{v,i}    (UNE-EN 15657:2018 Formula (12) as printed)
 **Do**
 
 ```python
-def impact_level(position_levels: list[float]) -> float:
+def impact_level(position_levels: ArrayLike) -> float:
     r"""The impact level :math:`L_\mathrm{i} = 10 \lg(\frac{1}{n} \sum_j 10^{L_j/10})`, in dB."""
 ```
 

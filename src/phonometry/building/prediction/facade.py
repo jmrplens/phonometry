@@ -87,6 +87,7 @@ if TYPE_CHECKING:
     from collections.abc import Sequence
 
     from matplotlib.axes import Axes
+    from numpy.typing import ArrayLike
 
     from ..._i18n import Language
     from ..._internal.types import BandFraction, ReportEngine
@@ -111,7 +112,7 @@ _S0 = 1.0
 _T0 = 0.5
 
 
-def _as_array(value: float | Sequence[float] | np.ndarray, name: str) -> np.ndarray:
+def _as_array(value: ArrayLike, name: str) -> np.ndarray:
     """Return *value* as a 1-D float array, raising on non-finite entries."""
     arr = np.atleast_1d(np.asarray(value, dtype=np.float64))
     if not np.all(np.isfinite(arr)):
@@ -485,7 +486,7 @@ def facade_sound_reduction(
     volume: float,
     delta_l_fs: float = 0.0,
     fraction: BandFraction | None = None,
-    frequencies: Sequence[float] | None = None,
+    frequencies: ArrayLike | None = None,
 ) -> FacadePredictionResult:
     """Predict façade airborne sound insulation ``D2m,nT`` (EN 12354-3:2000).
 
@@ -517,10 +518,11 @@ def facade_sound_reduction(
     r_prime, element_r = _apparent_reduction(
         elements, float(area), "facade_sound_reduction"
     )
-    if frequencies is not None:
+    bands = None if frequencies is None else np.asarray(frequencies, dtype=np.float64)
+    if bands is not None:
         require_equal_counts(
             "facade_sound_reduction",
-            {"frequencies": len(frequencies), "r_prime": r_prime.size},
+            {"frequencies": bands.size, "r_prime": r_prime.size},
         )
     r_45 = r_prime + 1.0
     r_tr_s = r_prime
@@ -537,9 +539,7 @@ def facade_sound_reduction(
         r_tr_s_w=None if r_tr is None else r_tr[0],
         d_2m_nt_w=None if d_num is None else d_num[0],
         c_tr=None if r_tr is None else r_tr[1],
-        frequencies=None
-        if frequencies is None
-        else np.asarray(frequencies, dtype=np.float64),
+        frequencies=bands,
         elements=tuple(elements),
     )
 
@@ -547,11 +547,11 @@ def facade_sound_reduction(
 def radiated_sound_power(
     elements: Sequence[FacadeElement],
     *,
-    lp_in: float | Sequence[float] | np.ndarray,
+    lp_in: ArrayLike,
     area: float,
     c_d: float = -6.0,
     r_prime_cap: float | None = None,
-    octave_bands: Sequence[int] | None = None,
+    octave_bands: ArrayLike | None = None,
 ) -> RadiatedPowerResult:
     r"""Predict the sound power radiated outside by a segment (EN 12354-4).
 
@@ -586,24 +586,24 @@ def radiated_sound_power(
     require_equal_counts(
         "radiated_sound_power", {"lp_in": lp.size, "r_prime": r_prime.size}
     )
-    if octave_bands is not None:
+    bands = None if octave_bands is None else np.asarray(octave_bands, dtype=np.float64)
+    if bands is not None:
         require_equal_counts(
             "radiated_sound_power",
-            {"octave_bands": len(octave_bands), "r_prime": r_prime.size},
+            {"octave_bands": bands.size, "r_prime": r_prime.size},
         )
     l_w = lp + float(c_d) - r_prime + 10.0 * log10(float(area) / _S0)
 
     l_w_dba: float | None = None
-    if octave_bands is not None:
+    if bands is not None:
         try:
-            a_weights = np.array([_A_WEIGHT_OCTAVE[int(f)] for f in octave_bands])
+            a_weights = np.array([_A_WEIGHT_OCTAVE[int(f)] for f in bands])
         except KeyError:
             a_weights = None  # unknown band centre; skip the A-weighted number
         if a_weights is not None:
             l_w_dba = float(10.0 * np.log10(np.sum(10.0 ** ((l_w + a_weights) / 10.0))))
-    freqs = None if octave_bands is None else np.asarray(octave_bands, dtype=np.float64)
     return RadiatedPowerResult(
-        l_w=l_w, r_prime=r_prime, l_w_dba=l_w_dba, frequencies=freqs
+        l_w=l_w, r_prime=r_prime, l_w_dba=l_w_dba, frequencies=bands
     )
 
 
@@ -745,8 +745,8 @@ def facade_shape_level_difference(
 
 
 def outdoor_level(
-    l_w: float | Sequence[float],
-    attenuation: float | Sequence[float],
+    l_w: ArrayLike,
+    attenuation: ArrayLike,
 ) -> float:
     r"""Exterior level from one or more radiating sides (EN 12354-4 Formula E.1).
 

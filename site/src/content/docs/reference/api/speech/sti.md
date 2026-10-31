@@ -34,12 +34,12 @@ what those pages add beside this procedure is unknown here.
 
 ```python
 sti_adjusted_for_levels(
-    mtf: np.ndarray,
+    mtf: ArrayLike,
     *,
-    measured_levels: Sequence[float] | np.ndarray,
-    measured_ambient: Sequence[float] | np.ndarray | None = None,
-    operational_levels: Sequence[float] | np.ndarray,
-    operational_ambient: Sequence[float] | np.ndarray | None = None,
+    measured_levels: ArrayLike,
+    measured_ambient: ArrayLike | None = None,
+    operational_levels: ArrayLike,
+    operational_ambient: ArrayLike | None = None,
 ) -> STIResult
 ```
 
@@ -107,27 +107,27 @@ from the result itself and is the safe route.
 
 ```python
 sti_from_impulse_response(
-    ir: Signal | list[float] | np.ndarray,
+    ir: Signal | ArrayLike,
     fs: int | None,
     snr: None,
-    levels: Sequence[float] | np.ndarray,
-    ambient: Sequence[float] | np.ndarray,
+    levels: ArrayLike,
+    ambient: ArrayLike,
 ) -> STIResult
 
 sti_from_impulse_response(
-    ir: Signal | list[float] | np.ndarray,
+    ir: Signal | ArrayLike,
     fs: int | None = ...,
     snr: None = ...,
     *,
-    levels: Sequence[float] | np.ndarray,
-    ambient: Sequence[float] | np.ndarray,
+    levels: ArrayLike,
+    ambient: ArrayLike,
 ) -> STIResult
 
 sti_from_impulse_response(
-    ir: Signal | list[float] | np.ndarray,
+    ir: Signal | ArrayLike,
     fs: int | None = ...,
-    snr: float | Sequence[float] | np.ndarray | None = ...,
-    levels: Sequence[float] | np.ndarray | None = ...,
+    snr: ArrayLike | None = ...,
+    levels: ArrayLike | None = ...,
 ) -> STIResult
 ```
 
@@ -187,27 +187,27 @@ STI itself stays within ~0.001.
 
 ```python
 stipa(
-    x: Signal | list[float] | np.ndarray,
+    x: Signal | ArrayLike,
     fs: int | None,
-    reference: Signal | list[float] | np.ndarray | None,
-    levels: Sequence[float] | np.ndarray,
-    ambient: Sequence[float] | np.ndarray,
+    reference: Signal | ArrayLike | None,
+    levels: ArrayLike,
+    ambient: ArrayLike,
 ) -> STIResult
 
 stipa(
-    x: Signal | list[float] | np.ndarray,
+    x: Signal | ArrayLike,
     fs: int | None = ...,
-    reference: Signal | list[float] | np.ndarray | None = ...,
+    reference: Signal | ArrayLike | None = ...,
     *,
-    levels: Sequence[float] | np.ndarray,
-    ambient: Sequence[float] | np.ndarray,
+    levels: ArrayLike,
+    ambient: ArrayLike,
 ) -> STIResult
 
 stipa(
-    x: Signal | list[float] | np.ndarray,
+    x: Signal | ArrayLike,
     fs: int | None = ...,
-    reference: Signal | list[float] | np.ndarray | None = ...,
-    levels: Sequence[float] | np.ndarray | None = ...,
+    reference: Signal | ArrayLike | None = ...,
+    levels: ArrayLike | None = ...,
 ) -> STIResult
 ```
 
@@ -324,8 +324,8 @@ be moved to another speech and occupancy-noise condition.
 ```python
 STIResult.adjusted_for_levels(
     *,
-    operational_levels: Sequence[float] | np.ndarray,
-    operational_ambient: Sequence[float] | np.ndarray | None = None,
+    operational_levels: ArrayLike,
+    operational_ambient: ArrayLike | None = None,
 ) -> STIResult
 ```
 

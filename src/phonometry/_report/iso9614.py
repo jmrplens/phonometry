@@ -80,8 +80,7 @@ from ._sound_power_fiche import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import Sequence
-
+    from numpy.typing import ArrayLike
     from reportlab.platypus import Table
 
     from .._i18n import Language
@@ -656,7 +655,7 @@ def _normalization_offset(result: PrecisionIntensityResult) -> float:
 
 
 def _dynamic_capability(
-    residual_index: float | Sequence[float] | np.ndarray | None,
+    residual_index: ArrayLike | None,
 ) -> np.ndarray | None:
     """``Ld = delta_pI0 - K`` with the fixed precision ``K``, or ``None``."""
     if residual_index is None:
@@ -667,7 +666,7 @@ def _dynamic_capability(
 def _precision_model_strip(
     result: PrecisionIntensityResult,
     indicators: PrecisionFieldIndicators | None,
-    residual_index: float | Sequence[float] | np.ndarray | None,
+    residual_index: ArrayLike | None,
     language: Language = "en",
 ) -> str:
     """The partial-power / normalization / field-indicator line of the strip."""
@@ -853,7 +852,7 @@ def render_precision_intensity_report(
     language: Language = "en",
     indicators: PrecisionFieldIndicators | None = None,
     criteria: PrecisionCriteria | None = None,
-    residual_index: float | Sequence[float] | np.ndarray | None = None,
+    residual_index: ArrayLike | None = None,
 ) -> str:
     """Render an ISO 9614-3 precision sound-power fiche to a PDF at ``path``.
 

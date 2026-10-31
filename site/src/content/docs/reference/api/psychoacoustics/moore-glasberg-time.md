@@ -65,7 +65,7 @@ required.
 
 ```python
 loudness_moore_glasberg_time(
-    x: Signal | Sequence[float] | np.ndarray,
+    x: Signal | ArrayLike,
     fs: float | None = None,
     *,
     field: Literal['free', 'diffuse', 'eardrum'] = 'free',

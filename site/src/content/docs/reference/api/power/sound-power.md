@@ -85,8 +85,8 @@ altitude or below 10 degrees C (clauses 8.2.5 and 8.3.6).
 
 ```python
 background_noise_correction(
-    source_levels: np.ndarray,
-    background_levels: np.ndarray,
+    source_levels: ArrayLike,
+    background_levels: ArrayLike,
     grade: Literal['engineering', 'survey'] = 'engineering',
 ) -> np.ndarray
 ```
@@ -221,7 +221,7 @@ with that shape; scalar inputs return a scalar, unchanged.
 
 ```python
 mean_single_event_level(
-    levels: np.ndarray,
+    levels: ArrayLike,
     *,
     n_events: int | None = None,
 ) -> np.ndarray
@@ -474,7 +474,7 @@ per band with that shape.
 
 ```python
 sound_energy_pressure(
-    levels_positions: np.ndarray,
+    levels_positions: ArrayLike,
     surface: Literal['hemisphere', 'box'],
     *,
     radius: float | None = None,
@@ -482,9 +482,9 @@ sound_energy_pressure(
     distance: float | None = None,
     n_reflecting_planes: int = 1,
     n_events: int | None = None,
-    background_levels: np.ndarray | None = None,
+    background_levels: ArrayLike | None = None,
     integration_time: float | None = None,
-    frequencies: np.ndarray | None = None,
+    frequencies: ArrayLike | None = None,
     room: RoomEnvironment | None = None,
     grade: Literal['engineering', 'survey'] = 'engineering',
     sigma_omc_db: float = 0.0,
@@ -561,15 +561,15 @@ The level holds for the meteorological conditions of the test; above
 
 ```python
 sound_power_pressure(
-    levels_positions: np.ndarray,
+    levels_positions: ArrayLike,
     surface: Literal['hemisphere', 'box'],
     *,
     radius: float | None = None,
     dimensions: tuple[float, float, float] | None = None,
     distance: float | None = None,
     n_reflecting_planes: int = 1,
-    background_levels: np.ndarray | None = None,
-    frequencies: np.ndarray | None = None,
+    background_levels: ArrayLike | None = None,
+    frequencies: ArrayLike | None = None,
     room: RoomEnvironment | None = None,
     grade: Literal['engineering', 'survey'] = 'engineering',
     sigma_omc_db: float = 0.0,

@@ -98,9 +98,8 @@ from .laboratory_insulation import LaboratoryInsulationWarning
 from .ratings import WeightedRatingResult, weighted_rating
 
 if TYPE_CHECKING:
-    from collections.abc import Sequence
-
     from matplotlib.axes import Axes
+    from numpy.typing import ArrayLike
 
     from ..._i18n import Language
     from ..._internal.types import ReportEngine
@@ -279,8 +278,8 @@ class IntensityReductionResult(OwnsArrays):
         engine: ReportEngine = "reportlab",
         verbose: bool = False,
         language: Language = "en",
-        fpi: Sequence[float] | np.ndarray | None = None,
-        residual_index: Sequence[float] | np.ndarray | None = None,
+        fpi: ArrayLike | None = None,
+        residual_index: ArrayLike | None = None,
     ) -> str:
         """Render an ISO 15186-1 intensity sound-insulation report to a PDF.
 
@@ -321,11 +320,13 @@ class IntensityReductionResult(OwnsArrays):
         :param language: Fiche language: ``"en"`` (default, English) or
             ``"es"`` (Spanish, with a comma decimal separator).
         :param fpi: Optional per-band surface pressure-intensity indicator
-            ``FpI`` (Clause 8 i requires it as a function of frequency);
-            annexed as a table column when supplied.
+            ``FpI`` (Clause 8 i requires it as a function of frequency), one
+            value per band as a sequence or an array; annexed as a table
+            column when supplied.
         :param residual_index: Optional per-band pressure-residual intensity
-            index ``δpI0`` of the probe and analyser (Clause 8 i); annexed as
-            a table column when supplied.
+            index ``δpI0`` of the probe and analyser (Clause 8 i), one value
+            per band as a sequence or an array; annexed as a table column
+            when supplied.
         :return: The written ``path`` as a :class:`str`.
         :raises ValueError: If ``engine`` is unknown, ``language`` is not one
             of the supported values, the result carries no single-number
@@ -406,8 +407,8 @@ class IntensityElementNormalizedResult(OwnsArrays):
         engine: ReportEngine = "reportlab",
         verbose: bool = False,
         language: Language = "en",
-        fpi: Sequence[float] | np.ndarray | None = None,
-        residual_index: Sequence[float] | np.ndarray | None = None,
+        fpi: ArrayLike | None = None,
+        residual_index: ArrayLike | None = None,
     ) -> str:
         """Render an ISO 15186-1 element-normalized insulation report to a PDF.
 
@@ -451,11 +452,13 @@ class IntensityElementNormalizedResult(OwnsArrays):
         :param language: Fiche language: ``"en"`` (default, English) or
             ``"es"`` (Spanish, with a comma decimal separator).
         :param fpi: Optional per-band surface pressure-intensity indicator
-            ``FpI`` (Clause 8 i requires it as a function of frequency);
-            annexed as a table column when supplied.
+            ``FpI`` (Clause 8 i requires it as a function of frequency), one
+            value per band as a sequence or an array; annexed as a table
+            column when supplied.
         :param residual_index: Optional per-band pressure-residual intensity
-            index ``δpI0`` of the probe and analyser (Clause 8 i); annexed as
-            a table column when supplied.
+            index ``δpI0`` of the probe and analyser (Clause 8 i), one value
+            per band as a sequence or an array; annexed as a table column
+            when supplied.
         :return: The written ``path`` as a :class:`str`.
         :raises ValueError: If ``engine`` is unknown, ``language`` is not one
             of the supported values, the result carries no single-number
@@ -500,7 +503,7 @@ def _positive_area(value: float, name: str) -> float:
 
 @overload
 def adaptation_term_kc(
-    frequencies: Sequence[float] | np.ndarray,
+    frequencies: ArrayLike,
     *,
     boundary_area: float,
     volume: float,
@@ -508,11 +511,11 @@ def adaptation_term_kc(
 
 
 @overload
-def adaptation_term_kc(frequencies: Sequence[float] | np.ndarray) -> np.ndarray: ...
+def adaptation_term_kc(frequencies: ArrayLike) -> np.ndarray: ...
 
 
 def adaptation_term_kc(
-    frequencies: Sequence[float] | np.ndarray,
+    frequencies: ArrayLike,
     *,
     boundary_area: float | None = None,
     volume: float | None = None,
@@ -567,8 +570,8 @@ def adaptation_term_kc(
 
 
 def surface_pressure_intensity_indicator(
-    lp: Sequence[float] | np.ndarray,
-    l_in: Sequence[float] | np.ndarray,
+    lp: ArrayLike,
+    l_in: ArrayLike,
 ) -> np.ndarray:
     r"""Surface pressure-intensity indicator ``FpI`` (ISO 15186-1, Formula (10)).
 
@@ -620,8 +623,8 @@ class SubareaIntensityLevel(OwnsArrays):
 
 
 def subarea_intensity_level(
-    l_in: Sequence[Sequence[float]] | np.ndarray,
-    measurement_area: Sequence[float] | np.ndarray,
+    l_in: ArrayLike,
+    measurement_area: ArrayLike,
 ) -> SubareaIntensityLevel:
     r"""Combine per-subarea intensity levels (ISO 15186-1, Formulas (11)-(12)).
 
@@ -697,12 +700,12 @@ def subarea_intensity_level(
 
 
 def intensity_sound_reduction(
-    lp1: Sequence[float] | np.ndarray,
-    l_in: Sequence[float] | np.ndarray,
+    lp1: ArrayLike,
+    l_in: ArrayLike,
     *,
     measurement_area: float,
     area: float,
-    kc: Sequence[float] | np.ndarray | None = None,
+    kc: ArrayLike | None = None,
 ) -> IntensityReductionResult:
     r"""Intensity sound reduction index per ISO 15186-1:2000 (Formula (7)).
 
@@ -783,8 +786,8 @@ def intensity_sound_reduction(
 
 
 def intensity_element_normalized_difference(
-    lp1: Sequence[float] | np.ndarray,
-    l_in: Sequence[float] | np.ndarray,
+    lp1: ArrayLike,
+    l_in: ArrayLike,
     *,
     measurement_area: float,
     n: int = 1,
@@ -909,7 +912,7 @@ _ANNEX_A_MIN_AREA = 1.0
 
 
 def limp_panel_reduction_index(
-    frequencies: Sequence[float] | np.ndarray,
+    frequencies: ArrayLike,
     *,
     surface_mass: float,
     area: float,
@@ -1069,7 +1072,7 @@ def _low_frequency_limit(*, absorbing_specimen_surface: bool) -> float:
 
 
 def _low_frequency_qualification(
-    l_p: Sequence[float] | np.ndarray | None,
+    l_p: ArrayLike | None,
     l_in: np.ndarray,
     *,
     owner: str,
@@ -1091,7 +1094,7 @@ def _low_frequency_qualification(
 
 
 def _check_low_frequency_bands(
-    frequencies: Sequence[float] | np.ndarray | None,
+    frequencies: ArrayLike | None,
     band_count: int,
     *,
     owner: str,
@@ -1242,13 +1245,13 @@ class LowFrequencyIntensityResult(OwnsArrays):
 
 
 def low_frequency_intensity_reduction(
-    lp_surface: Sequence[float] | np.ndarray,
-    l_in: Sequence[float] | np.ndarray,
+    lp_surface: ArrayLike,
+    l_in: ArrayLike,
     *,
     measurement_area: float,
     area: float,
-    l_p: Sequence[float] | np.ndarray | None = None,
-    frequencies: Sequence[float] | np.ndarray | None = None,
+    l_p: ArrayLike | None = None,
+    frequencies: ArrayLike | None = None,
     absorbing_specimen_surface: bool = False,
 ) -> LowFrequencyIntensityResult:
     r"""Intensity sound reduction index at low frequencies (ISO 15186-3:2002).
@@ -1445,13 +1448,13 @@ class LowFrequencyElementResult(OwnsArrays):
 
 
 def low_frequency_element_normalized_difference(
-    lp_surface: Sequence[float] | np.ndarray,
-    l_in: Sequence[float] | np.ndarray,
+    lp_surface: ArrayLike,
+    l_in: ArrayLike,
     *,
     measurement_area: float,
     n_elements: int = 1,
-    l_p: Sequence[float] | np.ndarray | None = None,
-    frequencies: Sequence[float] | np.ndarray | None = None,
+    l_p: ArrayLike | None = None,
+    frequencies: ArrayLike | None = None,
     absorbing_specimen_surface: bool = False,
 ) -> LowFrequencyElementResult:
     r"""Element normalized level difference at low frequencies (ISO 15186-3).

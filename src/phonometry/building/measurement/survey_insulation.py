@@ -89,9 +89,8 @@ from .ratings import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import Sequence
-
     from matplotlib.axes import Axes
+    from numpy.typing import ArrayLike
 
     from ..._i18n import Language
     from ..._internal.types import ReportEngine
@@ -228,9 +227,7 @@ _TABLE3: dict[int, dict[str, tuple[float, float, float, float, float, float]]] =
 }
 
 
-def _finite_bands(
-    values: float | Sequence[float] | np.ndarray, name: str
-) -> np.ndarray:
+def _finite_bands(values: ArrayLike, name: str) -> np.ndarray:
     """Return ``values`` as a finite float array, or raise."""
     a = np.asarray(values, dtype=np.float64)
     if not np.all(np.isfinite(a)):
@@ -264,9 +261,7 @@ def _rate_impact(values: np.ndarray) -> ImpactRatingResult | None:
     return weighted_impact_rating(values) if values.size in (16, 5) else None
 
 
-def reverberation_index(
-    t: Sequence[float] | np.ndarray, *, t0: float = _T0
-) -> np.ndarray:
+def reverberation_index(t: ArrayLike, *, t0: float = _T0) -> np.ndarray:
     r"""Reverberation index :math:`k = 10 \log_{10}(T/T_0)` (ISO 10052, Cl. 3.3).
 
     :param t: Receiving-room reverberation time per band, in seconds.
@@ -731,7 +726,7 @@ class SurveyServiceEquipmentResult(OwnsArrays):
     l_xy_n: np.ndarray | None
 
 
-def _validate_index(k: Sequence[float] | np.ndarray, n_bands: int) -> np.ndarray:
+def _validate_index(k: ArrayLike, n_bands: int) -> np.ndarray:
     """Coerce the reverberation index to a finite per-band array."""
     kk = _finite_bands(k, "reverberation_index")
     if kk.shape != (n_bands,):
@@ -745,9 +740,9 @@ def _validate_index(k: Sequence[float] | np.ndarray, n_bands: int) -> np.ndarray
 
 @overload
 def survey_airborne_insulation(
-    l1: Sequence[float] | np.ndarray,
-    l2: Sequence[float] | np.ndarray,
-    reverberation_index: Sequence[float] | np.ndarray,
+    l1: ArrayLike,
+    l2: ArrayLike,
+    reverberation_index: ArrayLike,
     *,
     volume: float,
     area: float,
@@ -756,18 +751,18 @@ def survey_airborne_insulation(
 
 @overload
 def survey_airborne_insulation(
-    l1: Sequence[float] | np.ndarray,
-    l2: Sequence[float] | np.ndarray,
-    reverberation_index: Sequence[float] | np.ndarray,
+    l1: ArrayLike,
+    l2: ArrayLike,
+    reverberation_index: ArrayLike,
     *,
     volume: float = ...,
 ) -> SurveyAirborneResult: ...
 
 
 def survey_airborne_insulation(
-    l1: Sequence[float] | np.ndarray,
-    l2: Sequence[float] | np.ndarray,
-    reverberation_index: Sequence[float] | np.ndarray,
+    l1: ArrayLike,
+    l2: ArrayLike,
+    reverberation_index: ArrayLike,
     *,
     volume: float | None = None,
     area: float | None = None,
@@ -838,8 +833,8 @@ def survey_airborne_insulation(
 
 
 def survey_impact_insulation(
-    li: Sequence[float] | np.ndarray,
-    reverberation_index: Sequence[float] | np.ndarray,
+    li: ArrayLike,
+    reverberation_index: ArrayLike,
     *,
     volume: float | None = None,
 ) -> SurveyImpactResult:
@@ -874,9 +869,9 @@ def survey_impact_insulation(
 
 
 def survey_facade_insulation(
-    l1_2m: Sequence[float] | np.ndarray,
-    l2: Sequence[float] | np.ndarray,
-    reverberation_index: Sequence[float] | np.ndarray,
+    l1_2m: ArrayLike,
+    l2: ArrayLike,
+    reverberation_index: ArrayLike,
     *,
     volume: float | None = None,
 ) -> SurveyFacadeResult:
@@ -921,8 +916,8 @@ def survey_facade_insulation(
 
 
 def survey_service_equipment_level(
-    measurements: Sequence[float] | np.ndarray,
-    reverberation_index: float | Sequence[float] | np.ndarray,
+    measurements: ArrayLike,
+    reverberation_index: ArrayLike,
     *,
     volume: float | None = None,
 ) -> SurveyServiceEquipmentResult:

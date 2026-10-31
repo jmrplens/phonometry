@@ -104,7 +104,7 @@ they describe the plane-wave mode alone and a measurement will show the rest.
 ## cascade
 
 ```python
-cascade(*matrices: NDArray[np.complex128]) -> NDArray[np.complex128]
+cascade(*matrices: ArrayLike) -> NDArray[np.complex128]
 ```
 
 Cascade element four-pole matrices from inlet to outlet.
@@ -117,7 +117,7 @@ outlet), broadcast over the frequency axis.
 
 | Name | Description |
 | :--- | :--- |
-| `matrices` | One or more `(n_freq, 2, 2)` arrays sharing `n_freq`. |
+| `matrices` | One or more `(n_freq, 2, 2)` four-pole matrices sharing `n_freq`, each an array or a nested sequence numpy converts. |
 
 **Returns:** The compound `(n_freq, 2, 2)` array.
 

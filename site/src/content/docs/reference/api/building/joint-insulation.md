@@ -228,7 +228,7 @@ Whether no two readings differ by more than 0,3 mm.
 ```python
 joint_gap_series(
     gap_widths_mm: ArrayLike,
-    results: tuple[LaboratoryJointInsulationResult, ...] | list[LaboratoryJointInsulationResult],
+    results: Sequence[LaboratoryJointInsulationResult],
     *,
     nominal_gap_mm: float = 5.0,
     min_gap_mm: float | None = None,

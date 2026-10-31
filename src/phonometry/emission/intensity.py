@@ -69,9 +69,10 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
-    from numpy.typing import NDArray
+    from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
+    from .._internal.types import RealValues
 
 from .._internal.boundary import settled, settled_net_share
 from .._internal.frozen import OwnsArrays
@@ -547,7 +548,7 @@ class FieldIndicators(OwnsArrays):
         self,
         ax: Axes | None = None,
         *,
-        dynamic_capability: float | np.ndarray | None = None,
+        dynamic_capability: ArrayLike | None = None,
         language: Language = "en",
         **kwargs: Any,
     ) -> Axes:
@@ -663,7 +664,7 @@ def _validate_probe_medium(fs: int, spacing: float, rho: float, c: float) -> Non
         raise ValueError(msg)
 
 
-def _validate_band_options(fraction: int | None, limits: list[float] | None) -> None:
+def _validate_band_options(fraction: int | None, limits: RealValues | None) -> None:
     """Reject an unsupported band fraction or an ill-ordered frequency range."""
     if fraction is not None and fraction not in (1, 3):
         msg = "'fraction' must be None, 1 (octave) or 3 (one-third octave)."
@@ -690,7 +691,7 @@ def sound_intensity(
     density: float = 1.204,
     speed_of_sound: float = 343.0,
     fraction: int | None = None,
-    limits: list[float] | None = None,
+    limits: RealValues | None = None,
     bias_correct: bool = False,
 ) -> IntensityResult:
     r"""Sound intensity from a two-microphone (p-p) probe (IEC 61043:1993).
@@ -744,8 +745,9 @@ def sound_intensity(
     :param speed_of_sound: Speed of sound, in m/s. Default 343.0.
     :param fraction: ``None`` (broadband only), 1 (octave bands) or
         3 (one-third octave bands).
-    :param limits: [f_min, f_max] band limits in Hz (default
-        [12, 20000], as in :func:`phonometry.filters.nominal_frequencies`).
+    :param limits: [f_min, f_max] band limits in Hz, a sequence or an array
+        of the two (default [12, 20000], as in
+        :func:`phonometry.filters.nominal_frequencies`).
     :param bias_correct: If True, apply the per-bin finite-difference
         correction :math:`(k \Delta r)/\sin(k \Delta r)` (IEC 61043:1993,
         7.3) to the
@@ -815,7 +817,9 @@ def sound_intensity(
 
     if fraction is not None:
         band_limits = (
-            [float(limits[0]), float(limits[1])] if limits else [12.0, 20000.0]
+            [float(limits[0]), float(limits[1])]
+            if limits is not None
+            else [12.0, 20000.0]
         )
         frequency, intensity, band_msp = _band_integrals(
             fpos, i_density, p_density, df, fraction, band_limits, fs
@@ -912,7 +916,7 @@ def _coefficient_of_variation(
 
 
 def temporal_variability_indicator(
-    short_time_intensity: list[float] | np.ndarray,
+    short_time_intensity: ArrayLike,
 ) -> float | NDArray[np.float64]:
     r"""ISO 9614-1:1993 temporal variability indicator F1 (equation (A.1)).
 
@@ -1016,7 +1020,7 @@ def _temporal_indicator_for(
 
 @overload
 def _temporal_indicator_for(
-    temporal_intensity: list[float] | np.ndarray | None,
+    temporal_intensity: ArrayLike | None,
     n_bands: int,
     *,
     scalar_surface: bool,
@@ -1024,7 +1028,7 @@ def _temporal_indicator_for(
 
 
 def _temporal_indicator_for(
-    temporal_intensity: list[float] | np.ndarray | None,
+    temporal_intensity: ArrayLike | None,
     n_bands: int,
     *,
     scalar_surface: bool,
@@ -1062,11 +1066,11 @@ def _temporal_indicator_for(
 
 
 def field_indicators(
-    pressure_levels: list[float] | np.ndarray,
-    normal_intensity: list[float] | np.ndarray,
+    pressure_levels: ArrayLike,
+    normal_intensity: ArrayLike,
     *,
-    frequencies: list[float] | np.ndarray | None = None,
-    temporal_intensity: list[float] | np.ndarray | None = None,
+    frequencies: ArrayLike | None = None,
+    temporal_intensity: ArrayLike | None = None,
 ) -> FieldIndicators:
     r"""ISO 9614-1:1993 Annex A field indicators F1 to F4.
 

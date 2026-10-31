@@ -72,7 +72,7 @@ Junction types `k` of Table F-3 for the speed-variation correction.
 
 ```python
 line_source_segment_power(
-    line_power: NDArray[np.float64] | list[float] | float,
+    line_power: ArrayLike,
     length: float,
 ) -> NDArray[np.float64]
 ```
@@ -234,7 +234,7 @@ ROAD_SOURCE_HEIGHT_M = 0.05
 
 ```python
 road_source_power(
-    traffic: RoadTraffic | list[RoadTraffic] | tuple[RoadTraffic, ...],
+    traffic: RoadTraffic | Sequence[RoadTraffic],
     *,
     surface: RoadSurface | Literal['reference road surface', '1-layer ZOAB', '2-layer ZOAB', '2-layer ZOAB (fine)', 'SMA-NL5', 'SMA-NL8', 'brushed down concrete', 'optimised brushed down concrete', 'fine broomed concrete', 'worked surface', 'hard elements in herringbone', 'hard elements not in herringbone', 'quiet hard elements', 'thin layer A', 'thin layer B'] | RoadSurfaceCoefficients = ...,
     temperature_c: float = 20.0,

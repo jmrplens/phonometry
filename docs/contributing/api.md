@@ -223,7 +223,10 @@ from ..room.modes import RoomModesResult  # at module level in src/phonometry/_p
 **Do**
 
 ```python
-def draw(levels: list[float]) -> None:
+from numpy.typing import ArrayLike
+
+
+def draw(levels: ArrayLike) -> None:
     import matplotlib.pyplot as plt
 
     _, ax = plt.subplots()
@@ -470,17 +473,18 @@ ax.grid(True)
 **Do**
 
 ```python
+from collections.abc import Sequence
 from typing import Literal, overload
 
 
 @overload
-def rating(levels: list[float], *, weighted: Literal[True]) -> float: ...
+def rating(levels: Sequence[float], *, weighted: Literal[True]) -> float: ...
 @overload
-def rating(levels: list[float], *, weighted: Literal[False] = ...) -> list[float]: ...
+def rating(levels: Sequence[float], *, weighted: Literal[False] = ...) -> list[float]: ...
 @overload
-def rating(levels: list[float], *, weighted: bool) -> float | list[float]: ...
-def rating(levels: list[float], *, weighted: bool = False) -> float | list[float]:
-    return sum(levels) if weighted else levels
+def rating(levels: Sequence[float], *, weighted: bool) -> float | list[float]: ...
+def rating(levels: Sequence[float], *, weighted: bool = False) -> float | list[float]:
+    return sum(levels) if weighted else list(levels)
 ```
 
 **Don't**
@@ -1158,7 +1162,7 @@ raise TypeError("thickness_mm must be a number")  # while parsing a user's file
 **Do**
 
 ```python
-def total(frequencies: list[float]) -> float:
+def total(frequencies: Sequence[float]) -> float:
     if not frequencies:
         msg = "'frequencies' must hold at least one band"
         raise ValueError(msg)
@@ -1186,13 +1190,14 @@ def total(frequencies):
 
 ```python
 import math
+from collections.abc import Sequence
 
 
-def require_finite_levels(levels: list[float]) -> list[float]:
+def require_finite_levels(levels: Sequence[float]) -> list[float]:
     if not all(math.isfinite(level) for level in levels):
         msg = "'levels' must be finite"
         raise ValueError(msg)
-    return levels
+    return list(levels)
 ```
 
 **Don't**
@@ -1500,3 +1505,47 @@ def doubled(level: ArrayLike) -> float | np.ndarray:  # and narrows what it hand
 **Enforced by:** `scripts/check_return_overloads.py`, `make return-overloads`, `CI: Every return an argument decides is overloaded on it`, `tests/test_check_return_overloads.py::test_the_package_keeps_the_rule`, `tests/test_result_plots.py::test_a_plot_returns_what_its_signature_promises`, `tests/test_result_plots.py::test_every_decided_plot_has_a_built_result`, `tests/test_scalar_or_array_returns.py::test_every_function_of_a_number_or_an_array_has_a_case`
 
 **Exceptions.** A return the data decide rather than an argument keeps its union on that one head, with its reason in `EXEMPT` of `scripts/check_return_overloads.py`, keyed by the parameters that tell the head from its siblings (`ZwickerLoudness.plot (overload ax: None)`), so that the other heads are still held to the rule: `ZwickerLoudness.plot` without `ax` draws a second panel only for a time-varying result. A private helper that takes the projection from a table row it is handed rather than from an argument of its own is exempt the same way. Of the functions of a number or an array, the exempt ones keep the union with their reason: one that reduces an axis (`signals.leq`, `room.directivity_energy_average`, and `signals.ln_levels`, whose dictionary holds such a level for each percentile), where the rank of the input decides whether one number is left, which `as_float_if_reduced` applies; one whose shape comes from values inside a tuple or a record (`room.sabine_reverberation_time` and its surfaces); a property, which has no argument to overload on; and one where four or more arguments broadcast (`room.steady_state_spl`), whose heads would number more than the union says. Each of them still applies the rule at run time.
+
+<a id="a58"></a>
+### A58. Annotate a parameter with every type its validation accepts
+
+**Why.** 559 public parameters of 313 functions and methods were annotated narrower than what their body takes. 534 handed the value, or each of its items, to `np.asarray`, or to a helper that does, so a tuple, a `list[int]`, an integer array or a nested `[channels, samples]` list ran; and each was annotated `list[float]`, `NDArray[np.float64]`, `Sequence[float] | np.ndarray` or a sequence of fixed pairs, so a typed caller's code that ran was a type error. The other 25 held a `list` or a `dict` that their body only reads. `list` adds a trap of its own: it is invariant, so a `list[int]` is not a `list[float]`, and the 2-D list that `broadcast.true_peak_level` documents for a multichannel signal was refused by the `SignalInput` alias. A parameter the body converts takes `ArrayLike`, numpy's type for what `np.asarray` converts (`Signal | ArrayLike` where a Signal is taken too, the `SignalInput` alias of `io/_resolve.py`); a sequence of records or texts takes `Sequence[...]`, and a mapping `Mapping[...]`, which say what the body reads and take a tuple or a read-only mapping as well.
+
+**Do**
+
+```python
+from collections.abc import Mapping, Sequence
+
+import numpy as np
+from numpy.typing import ArrayLike
+
+
+def band_mean(levels: ArrayLike) -> float:
+    return float(np.mean(np.asarray(levels, dtype=np.float64)))
+
+
+def section_area(section: Mapping[str, float]) -> float:
+    return section["width"] * section["height"]
+
+
+def surface_names(surfaces: Sequence[str]) -> str:
+    return ", ".join(surfaces)
+
+
+band_mean([60, 62]), band_mean((60.0, 61.5)), band_mean(np.array([60, 62]))
+```
+
+**Don't**
+
+```py
+def band_mean(levels: list[float]) -> float:  # refuses a list[int], a tuple and an array
+    ...
+def band_mean(levels: NDArray[np.float64]) -> float:  # refuses the list np.asarray takes
+    ...
+def section_area(section: dict[str, float]) -> float:  # refuses a read-only mapping
+    ...
+```
+
+**Enforced by:** `scripts/check_parameter_annotations.py`, `make parameter-annotations`, `CI: Every public parameter admits what its body converts`, `tests/test_check_parameter_annotations.py::test_the_package_keeps_the_rule`, `mypy`
+
+**Exceptions.** The rule reads the parameters of public functions and methods, an explicit `__init__` or `__call__` included, and of each overload head: a head that takes the parameter takes `ArrayLike` too, unless it takes it as a type parameter, as the heads of [A57](#a57) do beside a last head that takes `ArrayLike`. A field of a dataclass is the record's own annotation, not a parameter, and is not read here. A body that converts a parameter one item at a time (`for item in contributions: np.asarray(item)`) holds each item type to the rule instead: it takes a number, a sequence of numbers or `ArrayLike`, as `metrology.combined_standard_uncertainty` takes `Sequence[float | Sequence[float] | NDArray[Any]]`, with an array of any dtype, integers included, and the annotation of a vararg types each argument, so `noise_control.cascade(*matrices: ArrayLike)`. A `tuple` of a fixed length (`tuple[float, float]` for the band `limits` of `room.sound_strength`) states its arity and stays; a pair read by index that callers write as a list, the `limits` of `filters.octave_filter`, is a sequence or an array of the two (`RealValues`, a sequence of Python or numpy numbers or an array), since an array of two numbers is read by index as well. Labels that must refuse one text, which is a `Sequence[str]` too, name the two containers the function takes (`tuple[str, ...] | list[str]`) with the reason in `EXEMPT` of `scripts/check_parameter_annotations.py`, keyed by file, function and parameter. The files `scripts/gpu_parity.py` fingerprints are exempt as a whole, read from its `_COVERED`: an annotation there moves the fingerprint `gpu-parity.lock` holds, so their parameters are typed in a batch of their own with the GPU run that records the lock again. `ArrayLike` admits a `str` as well, which none of these functions takes: a text where numbers belong is refused when the call runs ([A42](#a42)), not by the annotation.

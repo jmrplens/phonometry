@@ -50,7 +50,7 @@ from .._internal.validation import (
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from numpy.typing import NDArray
+    from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
 
@@ -350,9 +350,9 @@ def start_of_roll_directivity(
 
 
 def _clean_table(
-    powers: NDArray[np.float64] | list[float],
-    distances_m: NDArray[np.float64] | list[float],
-    levels: NDArray[np.float64] | list[list[float]],
+    powers: ArrayLike,
+    distances_m: ArrayLike,
+    levels: ArrayLike,
 ) -> tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]]:
     p = np.asarray(powers, dtype=np.float64).ravel()
     d = np.asarray(distances_m, dtype=np.float64).ravel()
@@ -443,11 +443,11 @@ class NPDLevelResult(OwnsArrays):
 
 
 def npd_level(
-    powers: NDArray[np.float64] | list[float],
-    distances_m: NDArray[np.float64] | list[float],
-    levels: NDArray[np.float64] | list[list[float]],
+    powers: ArrayLike,
+    distances_m: ArrayLike,
+    levels: ArrayLike,
     power: float,
-    distance_m: NDArray[np.float64] | list[float] | float,
+    distance_m: ArrayLike,
 ) -> NDArray[np.float64]:
     """Interpolated NPD event level ``L(P, d)`` (ECAC Doc 29 §4.2, Eqs. 4-3/4-4).
 
@@ -488,12 +488,12 @@ def npd_level(
 
 
 def npd_curve(
-    powers: NDArray[np.float64] | list[float],
-    distances_m: NDArray[np.float64] | list[float],
-    levels: NDArray[np.float64] | list[list[float]],
+    powers: ArrayLike,
+    distances_m: ArrayLike,
+    levels: ArrayLike,
     power: float,
     *,
-    query_distances_m: NDArray[np.float64] | list[float] | None = None,
+    query_distances_m: ArrayLike | None = None,
 ) -> NPDLevelResult:
     """NPD event level over a distance sweep at one power setting.
 
@@ -776,7 +776,7 @@ class FlyoverResult(OwnsArrays):
 
 
 def _validate_path(
-    path: NDArray[np.float64] | list[list[float]],
+    path: ArrayLike,
 ) -> NDArray[np.float64]:
     """Coerce and validate a flight path to a finite ``(N, 5)`` array."""
     pts = np.asarray(path, dtype=np.float64)
@@ -1400,12 +1400,12 @@ def _grid_event_levels(
 
 
 def event_level(
-    path: NDArray[np.float64] | list[list[float]],
-    observer: NDArray[np.float64] | list[float],
-    powers: NDArray[np.float64] | list[float],
-    distances_m: NDArray[np.float64] | list[float],
-    exposure_levels: NDArray[np.float64] | list[list[float]],
-    max_levels: NDArray[np.float64] | list[list[float]],
+    path: ArrayLike,
+    observer: ArrayLike,
+    powers: ArrayLike,
+    distances_m: ArrayLike,
+    exposure_levels: ArrayLike,
+    max_levels: ArrayLike,
     *,
     reference_speed_m_s: float = _VREF_MS,
     mounting: Mounting = "wing",
@@ -1529,14 +1529,14 @@ class NoiseContourResult(OwnsArrays):
 
 
 def noise_contour(
-    path: NDArray[np.float64] | list[list[float]],
-    powers: NDArray[np.float64] | list[float],
-    distances_m: NDArray[np.float64] | list[float],
-    exposure_levels: NDArray[np.float64] | list[list[float]],
-    max_levels: NDArray[np.float64] | list[list[float]],
+    path: ArrayLike,
+    powers: ArrayLike,
+    distances_m: ArrayLike,
+    exposure_levels: ArrayLike,
+    max_levels: ArrayLike,
     *,
-    x: NDArray[np.float64] | list[float],
-    y: NDArray[np.float64] | list[float],
+    x: ArrayLike,
+    y: ArrayLike,
     reference_speed_m_s: float = _VREF_MS,
     mounting: Mounting = "wing",
     metric: EventMetric = "exposure",

@@ -105,10 +105,10 @@ state alike (clause 9.2).
 
 ```python
 precision_field_indicators(
-    segment_intensity: np.ndarray,
-    segment_pressure_levels: np.ndarray,
+    segment_intensity: ArrayLike,
+    segment_pressure_levels: ArrayLike,
     *,
-    time_window_intensity: np.ndarray | None = None,
+    time_window_intensity: ArrayLike | None = None,
 ) -> PrecisionFieldIndicators
 ```
 
@@ -160,13 +160,13 @@ returned.
 precision_qualification(
     indicators: PrecisionFieldIndicators,
     *,
-    scan_intensity_level_1: np.ndarray | None = None,
-    scan_intensity_level_2: np.ndarray | None = None,
-    pressure_residual_index: float | np.ndarray | None = None,
-    field_nonuniformity_1: np.ndarray | None = None,
-    field_nonuniformity_2: np.ndarray | None = None,
-    frequencies: np.ndarray | None = None,
-    repeatability_limit: float | np.ndarray | None = None,
+    scan_intensity_level_1: ArrayLike | None = None,
+    scan_intensity_level_2: ArrayLike | None = None,
+    pressure_residual_index: ArrayLike | None = None,
+    field_nonuniformity_1: ArrayLike | None = None,
+    field_nonuniformity_2: ArrayLike | None = None,
+    frequencies: ArrayLike | None = None,
+    repeatability_limit: ArrayLike | None = None,
 ) -> PrecisionCriteria
 ```
 
@@ -390,7 +390,7 @@ PrecisionIntensityResult.report(
     language: Literal['en', 'es'] = 'en',
     indicators: PrecisionFieldIndicators | None = None,
     criteria: PrecisionCriteria | None = None,
-    residual_index: float | Sequence[float] | np.ndarray | None = None,
+    residual_index: ArrayLike | None = None,
 ) -> str
 ```
 
@@ -478,16 +478,16 @@ The A-weighted total over the applicable bands, in dB.
 
 ```python
 sound_power_intensity(
-    normal_intensity: np.ndarray,
-    areas: np.ndarray,
+    normal_intensity: ArrayLike,
+    areas: ArrayLike,
     *,
-    normal_intensity_2: np.ndarray | None = None,
-    pressure_levels: np.ndarray | None = None,
-    pressure_residual_index: float | np.ndarray | None = None,
-    frequencies: np.ndarray | None = None,
+    normal_intensity_2: ArrayLike | None = None,
+    pressure_levels: ArrayLike | None = None,
+    pressure_residual_index: ArrayLike | None = None,
+    frequencies: ArrayLike | None = None,
     fraction: Literal[1, 3] = 3,
     grade: Literal['engineering', 'survey'] = 'engineering',
-    repeatability_limit: float | np.ndarray | None = None,
+    repeatability_limit: ArrayLike | None = None,
 ) -> SoundPowerIntensityResult
 ```
 
@@ -541,10 +541,10 @@ screening.
 
 ```python
 sound_power_intensity_precision(
-    partial_intensity: np.ndarray,
-    areas: np.ndarray,
+    partial_intensity: ArrayLike,
+    areas: ArrayLike,
     *,
-    frequencies: np.ndarray | None = None,
+    frequencies: ArrayLike | None = None,
     temperature_c: float = 23.0,
     static_pressure_pa: float = 101325.0,
 ) -> PrecisionIntensityResult

@@ -465,7 +465,7 @@ RAILWAY_SOURCE_HEIGHTS_M = (0.5, 4.0)
 
 ```python
 railway_source_power(
-    traffic: RailwayVehicle | list[RailwayVehicle] | tuple[RailwayVehicle, ...],
+    traffic: RailwayVehicle | Sequence[RailwayVehicle],
     track: RailwayTrack,
     *,
     psi: float = 0.0,

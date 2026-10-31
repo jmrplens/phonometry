@@ -100,7 +100,7 @@ Adds a loudness-vs-time panel.  Requires matplotlib
 
 ```python
 loudness_ecma(
-    x: Signal | np.ndarray,
+    x: Signal | ArrayLike,
     fs: float | None = None,
     field: Literal['free', 'diffuse'] = 'free',
 ) -> EcmaLoudness

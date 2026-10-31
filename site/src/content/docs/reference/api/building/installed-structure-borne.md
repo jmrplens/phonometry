@@ -216,7 +216,7 @@ mobility instead of `Y_inf,i` yields the characteristic level
 installed_source_prediction(
     characteristic_power_level: ArrayLike,
     coupling_term: ArrayLike,
-    paths: list[dict[str, Any]],
+    paths: Sequence[Mapping[str, Any]],
     *,
     frequencies: ArrayLike | None = None,
 ) -> InstalledSourceResult

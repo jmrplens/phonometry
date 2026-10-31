@@ -224,7 +224,7 @@ of 8.3.4 with the level of the whole signal
 
 ```python
 check_limiting_test_signal(
-    x: Signal | NDArray[np.float64] | list[float],
+    x: Signal | ArrayLike,
     fs: int | None = None,
 ) -> LimitingTestSignalCheck
 ```

@@ -30,7 +30,7 @@ sensitivity(
 ) -> float
 
 sensitivity(
-    reference_signal: Signal | Sequence[float] | np.ndarray,
+    reference_signal: Signal | ArrayLike,
     target_spl: float = ...,
     reference_pressure_pa: float = ...,
     *,
@@ -43,7 +43,7 @@ sensitivity(
 ) -> float
 
 sensitivity(
-    reference_signal: Signal | Sequence[float] | np.ndarray,
+    reference_signal: Signal | ArrayLike,
     target_spl: float,
     reference_pressure_pa: float,
     fs: int,
@@ -56,7 +56,7 @@ sensitivity(
 ) -> float
 
 sensitivity(
-    reference_signal: Signal | Sequence[float] | np.ndarray,
+    reference_signal: Signal | ArrayLike,
     target_spl: float = ...,
     reference_pressure_pa: float = ...,
     fs: int | None = ...,

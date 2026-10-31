@@ -68,7 +68,7 @@ if TYPE_CHECKING:
     from collections.abc import Sequence
 
     from matplotlib.axes import Axes
-    from numpy.typing import NDArray
+    from numpy.typing import ArrayLike, NDArray
 
     from ..._i18n import Language
     from ...io._signal import Signal
@@ -729,7 +729,7 @@ def _run_ear(
 
 
 def _as_two_channels(
-    signal: Signal | Sequence[float] | np.ndarray, presentation: str
+    signal: Signal | ArrayLike, presentation: str
 ) -> tuple[np.ndarray, np.ndarray | None]:
     """Split the input into left and (optional) right calibrated pressure signals."""
     array = apply_calibration(signal, np.asarray(signal, dtype=np.float64))
@@ -769,7 +769,7 @@ def _percentiles(trace: np.ndarray, fractions: Sequence[float]) -> dict[float, f
 
 
 def loudness_moore_glasberg_time(
-    x: Signal | Sequence[float] | np.ndarray,
+    x: Signal | ArrayLike,
     fs: float | None = None,
     *,
     field: Literal["free", "diffuse", "eardrum"] = "free",

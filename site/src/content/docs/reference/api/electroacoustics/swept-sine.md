@@ -64,7 +64,7 @@ the same system.
 
 ```python
 swept_sine_distortion(
-    recorded: Signal | NDArray[np.float64] | list[float],
+    recorded: Signal | ArrayLike,
     fs: float | None = None,
     *,
     f1: float,

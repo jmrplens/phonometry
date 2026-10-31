@@ -58,7 +58,7 @@ from ..acoustics import (
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from numpy.typing import NDArray
+    from numpy.typing import ArrayLike, NDArray
 
     from ..._i18n import Language
     from ..._internal.types import TwoPanels
@@ -100,7 +100,7 @@ def single_strike_sel(pressure_pa: SignalInput, fs: float | None = None) -> floa
     return sound_exposure_level(pressure_pa, fs)
 
 
-def cumulative_sel(single_sels: NDArray[np.float64] | list[float]) -> float:
+def cumulative_sel(single_sels: ArrayLike) -> float:
     r"""Cumulative sound exposure level over N strikes (ISO 18406
     Formulae 8-9).
 

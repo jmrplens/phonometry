@@ -223,7 +223,7 @@ from 30 % to 90 %. Its Tables 3 to 12 print the formula from -10 °C to
 
 ```python
 band_attenuation_arp5534(
-    frequencies: NDArray[np.float64] | list[float],
+    frequencies: ArrayLike,
     path_length_m: float,
     *,
     temperature_c: float = 25.0,

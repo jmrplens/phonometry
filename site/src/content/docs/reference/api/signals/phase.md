@@ -50,7 +50,7 @@ coarse grids degrade it and are what `oversample` mitigates.
 
 ```python
 excess_phase(
-    response: NDArray[np.complex128] | list[float],
+    response: ArrayLike,
     *,
     oversample: int = 8,
 ) -> NDArray[np.float64]
@@ -86,10 +86,7 @@ stable causal inverse filter.
 ## group_delay
 
 ```python
-group_delay(
-    response: NDArray[np.complex128] | list[float],
-    fs: float,
-) -> NDArray[np.float64]
+group_delay(response: ArrayLike, fs: float) -> NDArray[np.float64]
 ```
 
 Group delay $\tau_\mathrm{g}(f) = -(1/2\pi) \, d\phi/df$ of a response.
@@ -122,7 +119,7 @@ impulse response must fit the record the grid implies.
 
 ```python
 min_phase(
-    response: NDArray[np.complex128] | NDArray[np.float64] | list[float],
+    response: ArrayLike,
     *,
     oversample: int = 8,
 ) -> NDArray[np.complex128]
@@ -166,7 +163,7 @@ not reliable (see the module docstring).
 
 ```python
 phase_decomposition(
-    response: NDArray[np.complex128] | list[float],
+    response: ArrayLike,
     fs: float,
     *,
     oversample: int = 8,

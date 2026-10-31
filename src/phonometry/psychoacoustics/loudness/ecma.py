@@ -599,27 +599,30 @@ def _scaled_acf_at(
     band: int,
     block_size: int,
     n_new: int,
-    cache: dict[tuple[int, int], np.ndarray],
+    cache: dict[tuple[int, int], tuple[np.ndarray, np.ndarray]],
 ) -> np.ndarray:
     """Scaled ACF phi'_z(m) of ``band`` computed at ``block_size`` (Formulae 22-30).
 
     Segments the band-pass signal at ``block_size``, half-wave rectifies
     (Formula 21), forms the block RMS (Formula 22) and specific basis loudness
     (Formula 25), the unbiased normalized ACF (Formulae 27-29) and scales it by
-    the basis loudness (Formula 30). Cached by ``(band, block_size)``.
+    the basis loudness (Formula 30). Cached by ``(band, block_size)``, with the
+    N'_basis(l, z) of the same blocks beside it, which Formula 26 reads back.
     """
     key = (band, block_size)
     cached = cache.get(key)
     if cached is not None:
-        return cached
+        return cached[0]
     rect, energy, basis = _band_basis_loudness(p_bands[band], band, block_size, n_new)
     acf = _band_acf(rect, block_size, energy)  # Formulae 27-29
     scaled = np.asarray(acf * basis[:, None], dtype=np.float64)  # Formula 30
-    cache[key] = scaled
+    cache[key] = (scaled, basis)
     return scaled
 
 
-def _average_bands_full(p_bands: list[np.ndarray], n_new: int) -> list[np.ndarray]:
+def _average_bands_full(
+    p_bands: list[np.ndarray], n_new: int
+) -> tuple[list[np.ndarray], list[np.ndarray]]:
     """Full Clause 6.2.3 band averaging with cross-group recomputation.
 
     For each target band z (block size B = s_b(z), reach = min(N_B, z, 52-z)),
@@ -628,8 +631,13 @@ def _average_bands_full(p_bands: list[np.ndarray], n_new: int) -> list[np.ndarra
     that natively belong to a different block-size group. The result stays on
     band z's native time grid. Shared by the loudness and tonality metrics
     (Clause 8.1.1 builds loudness on the same Clause 6.2 outputs).
+
+    Returns ``(averaged, basis)``: the averaged scaled ACF of every band, and
+    every band's specific basis loudness N'_basis(l, z) of Formula (25) at its
+    own block size (Table 4), formed on the way for Formula 30, so Formula 26
+    sums it without segmenting the band a second time.
     """
-    cache: dict[tuple[int, int], np.ndarray] = {}
+    cache: dict[tuple[int, int], tuple[np.ndarray, np.ndarray]] = {}
     out: list[np.ndarray] = []
     for band in range(_CBF):
         block_size = int(_S_B[band])
@@ -656,7 +664,10 @@ def _average_bands_full(p_bands: list[np.ndarray], n_new: int) -> list[np.ndarra
         for off in range(-reach + 1, reach + 1):
             acc += _scaled_acf_at(p_bands, band + off, block_size, n_new, cache)
         out.append(acc / float(2 * reach + 1))
-    return out
+    # The loop above formed every band at its own block size first, so each
+    # of these keys is in the cache.
+    basis = [cache[(band, int(_S_B[band]))][1] for band in range(_CBF)]
+    return out, basis
 
 
 def _average_blocks(averaged: list[np.ndarray]) -> list[np.ndarray]:
@@ -755,7 +766,8 @@ def _tonal_noise_split(
     p_om = signal.sosfilt(_ear_filter_sos(field), padded)
     p_bands = [_auditory_bandpass(p_om, band) for band in range(_CBF)]
 
-    averaged = _average_blocks(_average_bands_full(p_bands, n_new))
+    band_averaged, basis_native = _average_bands_full(p_bands, n_new)
+    averaged = _average_blocks(band_averaged)
 
     # Common time grid (Clause 6.2.6): sized from the block count of the
     # smallest (1024-sample) stage, n_new / 256 + 1. With i_start = s_b,max -
@@ -770,18 +782,16 @@ def _tonal_noise_split(
     n_signal = np.zeros((n_common, _CBF))
     f_ton = np.zeros((n_common, _CBF))
     # N'_basis(l, z) of Formula (25), before any band or block averaging: each
-    # band at its own block size (Table 4), resampled like every other
-    # time-dependent variable of Clause 6.2.6.
+    # band at its own block size (Table 4), as the band averaging formed it
+    # for Formula 30, resampled like every other time-dependent variable of
+    # Clause 6.2.6.
     n_basis = np.zeros((n_common, _CBF))
     for band in range(_CBF):
         tonal_b, signal_b, fton_b = _tonal_estimate(averaged[band], band)
         n_tonal[:, band] = _resample_common(tonal_b, band, n_common)
         n_signal[:, band] = _resample_common(signal_b, band, n_common)
         f_ton[:, band] = _resample_common(fton_b, band, n_common)
-        _, _, basis_b = _band_basis_loudness(
-            p_bands[band], band, int(_S_B[band]), n_new
-        )
-        n_basis[:, band] = _resample_common(basis_b, band, n_common)
+        n_basis[:, band] = _resample_common(basis_native[band], band, n_common)
 
     # Noise reduction (Formulae 42-48).
     snr_hat = n_tonal / (n_signal - n_tonal + _EPS)  # Formula 42

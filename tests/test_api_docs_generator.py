@@ -281,6 +281,56 @@ def test_code_directive_and_doctest_become_fenced_code() -> None:
     assert ":linenos:" not in out
 
 
+def test_a_fence_shown_inside_a_code_example_does_not_close_it() -> None:
+    # A three-backtick fence around an example that shows a fenced snippet of
+    # its own closes on the snippet's first marker, and the rest of the
+    # example reaches the page as its text, option flags and all.
+    from markdown_fences import fences
+
+    text = (
+        "Write the page as\n"
+        "\n"
+        ".. code-block:: markdown\n"
+        "\n"
+        "   ```bash\n"
+        "   python x.py --count\n"
+        "   ```\n"
+        "\n"
+        "or as::\n"
+        "\n"
+        "    ````\n"
+        "    make audit -- --only\n"
+        "    ````\n"
+        "\n"
+        ">>> print('```')\n"
+        "```\n"
+    )
+    out = gad.render_prose(text, {}, gad.RoleStats())
+    blocks = list(fences(out))
+    assert [block.info for block in blocks] == ["markdown", "text", "python"]
+    assert blocks[0].body == "```bash\npython x.py --count\n```\n"
+    assert blocks[1].body == "````\nmake audit -- --only\n````\n"
+    assert blocks[2].body == ">>> print('```')\n```\n"
+    # A docstring with nothing of the kind keeps the three backticks.
+    plain = gad.render_prose(".. code-block:: bash\n\n   ls\n", {}, gad.RoleStats())
+    assert "```bash\nls\n```" in plain
+    assert "````" not in plain
+
+
+def test_a_docstring_published_verbatim_keeps_its_own_fence_inside() -> None:
+    # A docstring the parser cannot read goes out whole in one text block; a
+    # fence it shows would close that block early.
+    from markdown_fences import fences
+
+    doc = "Shows a fence.\n\n```\nmake audit -- --only\n```\n\n:frobnicate: x"
+    failures: list[str] = []
+    out = "\n".join(
+        gad._render_docbody("phonometry.x.f", doc, {}, gad.RoleStats(), failures)
+    )
+    assert failures
+    assert [(block.info, block.body) for block in fences(out)] == [("text", f"{doc}\n")]
+
+
 # ---------------------------------------------------------------------------
 # Full generation
 # ---------------------------------------------------------------------------

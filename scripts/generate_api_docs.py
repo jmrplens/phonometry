@@ -115,6 +115,8 @@ _CODE_DIRECTIVE_LANGUAGE = {"doctest": "python", "testcode": "python"}
 _DIRECTIVE_OPTION_RE = re.compile(r"^:[\w-]+:")
 #: The prompt that opens a doctest, whose run lasts to the next blank line.
 _DOCTEST_RE = re.compile(r"^(\s*)>>>(?:\s|$)")
+#: A run of backticks: on a line of its own, it closes a fence as long as it.
+_BACKTICK_RUN_RE = re.compile(r"`+")
 #: Any reST role that survived rendering. ``ROLE_RE`` and ``_MATH_ROLE_RE``
 #: consume the ones this generator understands, so whatever still matches is a
 #: role no converter claims and it reaches the published page as literal text.
@@ -311,14 +313,35 @@ def _dedent_block(lines: list[str]) -> list[str]:
     return [line[cut:] if line.strip() else "" for line in lines]
 
 
+def _fence(block: list[str], language: str, pad: str = "") -> list[str]:
+    """One fenced block of ``block``, its marker longer than any run of backticks in it.
+
+    A line of the body that is a run of backticks as long as the marker
+    closes the block there (CommonMark 0.31.2, 4.5), and the rest of the body
+    reaches the page as its text: a ``.. code-block:: markdown`` that shows a
+    fenced snippet would publish the lines after the snippet's first marker
+    as prose. So the marker takes three backticks, or one more than the
+    longest run the body holds.
+
+    :param pad: The indentation of the line that opened the block, which the
+        fence keeps, so a block nested in a list item stays in the item.
+    """
+    longest = max(
+        (len(run) for line in block for run in _BACKTICK_RUN_RE.findall(line)),
+        default=0,
+    )
+    marker = "`" * max(3, longest + 1)
+    body = [f"{pad}{line}" if line else "" for line in block]
+    return [f"{pad}{marker}{language}", *body, f"{pad}{marker}"]
+
+
 def _fenced(block: list[str], language: str, pad: str, code: list[str]) -> list[str]:
     """The lines that stand for one fenced block, whose fence goes in ``code``.
 
     The fence keeps the indentation of the line that opened it, so a block
     nested in a list item stays in the item, as a ``$$`` block does.
     """
-    body = [f"{pad}{line}" if line else "" for line in block]
-    code.append("\n".join([f"{pad}```{language}", *body, f"{pad}```"]))
+    code.append("\n".join(_fence(block, language, pad)))
     return ["", f"\x00CODE{len(code) - 1}\x00", ""]
 
 
@@ -432,10 +455,7 @@ def rest_blocks_to_markdown(text: str, code: list[str]) -> str:
             lead = stripped[:-2].rstrip()
             if lead:
                 out.append(f"{lead}:")
-            fence = "\n".join(["```text", *block, "```"])
-            token = f"\x00CODE{len(code)}\x00"
-            code.append(fence)
-            out.extend(["", token, ""])
+            out.extend(_fenced(block, "text", "", code))
             i = end
             continue
         out.append(line)
@@ -1801,7 +1821,7 @@ def _render_docbody(
     parsed = parse_docstring(doc)
     if parsed.issues:
         failures.append(f"{owner}: {'; '.join(parsed.issues)}")
-        return ["```text", doc, "```", ""]
+        return [*_fence(doc.split("\n"), "text"), ""]
 
     out: list[str] = []
     if parsed.description:

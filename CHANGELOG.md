@@ -2230,11 +2230,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   string, and the spaced single hyphen after a list item's head, so none can
   come back (rule P6); it also reads the entities and the escapes of the em
   dash (`&mdash;`, `\u2014`) as the character they publish. The API reference
-  fences a code directive's body and a doctest as code, as the check reads
-  them in the docstring. The `fluids` package opens with a sentence naming
-  humid air by IEC 61094-2 Annex F, sea water, ideal gases and the fluid
-  states and nonlinearity parameters books print, where its API page read
-  "fluids domain of phonometry (see module docstrings)".
+  fences a code directive's body and a doctest as code, under a fence longer
+  than any run of backticks the example shows, as the check reads them in the
+  docstring. The `fluids` package opens with a sentence naming humid air by
+  IEC 61094-2 Annex F, sea water, ideal gases and the fluid states and
+  nonlinearity parameters books print, where its API page read "fluids domain
+  of phonometry (see module docstrings)".
 
 - **A record that holds a read-only mapping pickles and deep-copies.**
   `MappingProxyType` can be neither pickled nor deep-copied, and 48 of the

@@ -78,7 +78,7 @@ A choice is checked as written: a text it does not offer is a `ValueError` and a
 
 | Page | Summary |
 | :--- | :--- |
-| [`fluids`](/phonometry/reference/api/fluids/fluids/) | fluids domain of phonometry (see module docstrings). |
+| [`fluids`](/phonometry/reference/api/fluids/fluids/) | The media sound travels through: humid air by IEC 61094-2 Annex F, sea water, ideal gases, and the fluid states and nonlinearity parameters books print. |
 | [`fluids`: humid air](/phonometry/reference/api/fluids/air/) | Humid air (IEC 61094-2:2009, Annex F). |
 | [`fluids.gas`](/phonometry/reference/api/fluids/gas/) | An ideal gas from the two numbers a gas table prints. |
 | [`fluids.water`](/phonometry/reference/api/fluids/water/) | Sea water: its speed of sound, and its density. |
@@ -116,7 +116,7 @@ A choice is checked as written: a text it does not offer is a `ValueError` and a
 | [`psychoacoustics`: roughness (Sottek model)](/phonometry/reference/api/psychoacoustics/roughness-ecma/) | Psychoacoustic roughness per ECMA-418-2:2025 (4th ed., Sottek Hearing Model). |
 | [`psychoacoustics.quality.tonality`](/phonometry/reference/api/psychoacoustics/tonality/) | Prominent discrete tone assessment per ECMA-418-1:2024 (3rd edition). |
 | [`psychoacoustics`: tonality (Sottek model)](/phonometry/reference/api/psychoacoustics/tonality-ecma/) | Psychoacoustic tonality per ECMA-418-2:2025 (4th ed., Sottek Hearing Model). |
-| [`psychoacoustics`: tone audibility](/phonometry/reference/api/psychoacoustics/tone-audibility/) | Objective audibility of tones in noise -- engineering method (ISO/PAS 20065:2016). |
+| [`psychoacoustics`: tone audibility](/phonometry/reference/api/psychoacoustics/tone-audibility/) | Objective audibility of tones in noise by the engineering method of ISO/PAS 20065:2016. |
 | [`psychoacoustics`: fluctuation strength](/phonometry/reference/api/psychoacoustics/fluctuation-strength/) | Fluctuation strength after Fastl & Zwicker / Osses et al. |
 | [`psychoacoustics`: fluctuation strength (Sottek model)](/phonometry/reference/api/psychoacoustics/fluctuation-strength-ecma/) | Psychoacoustic fluctuation strength per ECMA-418-2:2025 (4th ed., Clause 9). |
 | [`psychoacoustics.quality.annoyance`](/phonometry/reference/api/psychoacoustics/annoyance/) | Psychoacoustic annoyance (PA) after Fastl & Zwicker. |

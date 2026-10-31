@@ -21,14 +21,14 @@ $$
 R = \frac{\rho_2 c_2 \sin\varphi - \rho_1 c_1 \cos\theta_2} {\rho_2 c_2 \sin\varphi + \rho_1 c_1 \cos\theta_2}
 $$
 
-* [`critical_angle`](/phonometry/reference/api/underwater/seabed-reflection/#critical_angle) -- the critical grazing angle
+* [`critical_angle`](/phonometry/reference/api/underwater/seabed-reflection/#critical_angle): the critical grazing angle
   $\varphi_\mathrm{c} = \arccos(c_1/c_2)$ (only when `c2 > c1`); below it the
   wave is totally reflected ($\lvert R \rvert = 1$).
-* [`reflection_coefficient`](/phonometry/reference/api/underwater/seabed-reflection/#reflection_coefficient) -- the complex `R` per grazing angle.
-* [`seabed_reflection`](/phonometry/reference/api/underwater/seabed-reflection/#seabed_reflection) -- the complex `R`, its magnitude `|R|` and the
+* [`reflection_coefficient`](/phonometry/reference/api/underwater/seabed-reflection/#reflection_coefficient): the complex `R` per grazing angle.
+* [`seabed_reflection`](/phonometry/reference/api/underwater/seabed-reflection/#seabed_reflection): the complex `R`, its magnitude `|R|` and the
   bottom loss bundled with the interface parameters into a
   [`SeabedReflection`](/phonometry/reference/api/underwater/seabed-reflection/#seabedreflection) whose `.plot()` draws `|R|` versus grazing angle.
-* [`bottom_reflection_loss`](/phonometry/reference/api/underwater/seabed-reflection/#bottom_reflection_loss) -- the bottom loss
+* [`bottom_reflection_loss`](/phonometry/reference/api/underwater/seabed-reflection/#bottom_reflection_loss): the bottom loss
   $\mathrm{BL} = -20 \log_{10} \lvert R \rvert$ (dB), returned as a
   [`BottomLossResult`](/phonometry/reference/api/underwater/seabed-reflection/#bottomlossresult) with a `.plot()`.
 

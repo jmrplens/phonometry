@@ -1,9 +1,9 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
 r"""Regularized spectral inversion with frequency-dependent regularization.
 
-Inverting a measured transfer function -- to equalize a measurement
+Inverting a measured transfer function (to equalize a measurement
 loudspeaker, flatten a microphone response or post-process an acquired
-impulse response -- cannot be a plain reciprocal :math:`1/H(f)`: wherever
+impulse response) cannot be a plain reciprocal :math:`1/H(f)`: wherever
 the
 system radiates little energy (outside its passband, in deep notches) the
 reciprocal explodes and the inverse filter amplifies nothing but noise.
@@ -99,8 +99,8 @@ def _require_band_flatness(result: InverseFilterResult) -> None:
     The flatness is closed over what the result already stores. The equalized
     magnitude is the elementwise product of
     :attr:`~InverseFilterResult.response_spectrum` and
-    :attr:`~InverseFilterResult.spectrum` -- the modeling delay carried in the
-    latter is a unit-modulus factor and cannot move a magnitude -- and the band
+    :attr:`~InverseFilterResult.spectrum` (the modeling delay carried in the
+    latter is a unit-modulus factor and cannot move a magnitude), and the band
     it is worst over is the part of
     :attr:`~InverseFilterResult.frequencies` inside
     :attr:`~InverseFilterResult.f_range`. :meth:`InverseFilterResult.plot`
@@ -109,8 +109,8 @@ def _require_band_flatness(result: InverseFilterResult) -> None:
     on a genuine one, can title a figure with a ripple its own curve never
     shows.
 
-    A band the inversion cannot fill -- an equalized magnitude that touches
-    zero at some bin, where the measured response has a null -- is infinitely
+    A band the inversion cannot fill (an equalized magnitude that touches
+    zero at some bin, where the measured response has a null) is infinitely
     far from 0 dB, and the design reports ``inf`` for it. That value is a
     reading, not a defect: it is kept, and :func:`math.isclose` accepts it
     against itself.
@@ -184,7 +184,7 @@ class InverseFilterResult(OwnsArrays):
         band, peak-normalized as
         :math:`20 \log_{10}(\max \lvert H_{\mathrm{inv}} \rvert \cdot
         \text{peak}_h)` where ``peak_h`` is the peak of
-        :math:`\lvert H \rvert` -- the achieved out-of-band boost
+        :math:`\lvert H \rvert`, the achieved out-of-band boost
         the regularization allowed where the measurement carries no signal.
     """
 
@@ -206,9 +206,9 @@ class InverseFilterResult(OwnsArrays):
         one frequency each, but only three of the four are read by anything
         that would object. :meth:`plot` forms the equalized magnitude
         :math:`\lvert H \, H_{\mathrm{inv}} \rvert` as an elementwise
-        product of :attr:`response_spectrum` and :attr:`spectrum` -- which
+        product of :attr:`response_spectrum` and :attr:`spectrum` (which
         numpy is content to broadcast from a single bin across the whole
-        grid -- and then masks each magnitude with the positive-frequency
+        grid) and then masks each magnitude with the positive-frequency
         mask taken from :attr:`frequencies`, one line before it draws. So
         numpy is what refuses the mismatch today, and it refuses it out
         loud: an ``IndexError`` about two axis sizes where the mask meets a
@@ -234,8 +234,8 @@ class InverseFilterResult(OwnsArrays):
 
         Of the two reported decibel figures only :attr:`flatness_db` is pinned,
         by :func:`_require_band_flatness`, because only it is closed over the
-        fields stored here. :attr:`max_gain_db` is the achieved gain -- not the
-        :math:`1/(2\sqrt{\epsilon})` ceiling -- but it is the largest gain over
+        fields stored here. :attr:`max_gain_db` is the achieved gain, not the
+        :math:`1/(2\sqrt{\epsilon})` ceiling, but it is the largest gain over
         the band padded by ``transition_octaves``, and that padding is a design
         argument the result does not keep. Two genuine designs can therefore
         agree in every field above, profile included, and still report a
@@ -445,7 +445,7 @@ def regularized_inverse_filter(
     with :math:`\epsilon(f)` small across :math:`[f_1, f_2]` and large
     outside, so the filter equalizes the response to unity in-band while
     the out-of-band gain stays bounded by
-    :math:`1/(2\sqrt{\epsilon_{\mathrm{outside}}})` -- the behaviour
+    :math:`1/(2\sqrt{\epsilon_{\mathrm{outside}}})`, the behaviour
     Mueller & Massarani (JAES 49(6), 2001, Secs. 3.1/4.5) obtain by
     band-passing the plain inverse. A modeling delay of ``delay`` samples
     (default half the FFT block) shifts the generally anticausal inverse of
@@ -456,8 +456,8 @@ def regularized_inverse_filter(
     :math:`\lvert H \rvert^2` (like the scalar ``regularization`` of
     :func:`phonometry.room.impulse_response`, which this generalises): in-band
     the equalized magnitude deviates from unity by at most
-    ``regularization_inside * max|H|**2 / min|H|**2`` -- the analytic residue
-    :math:`\epsilon/(\lvert H \rvert^2 + \epsilon)` -- and the achieved figure
+    ``regularization_inside * max|H|**2 / min|H|**2`` (the analytic residue
+    :math:`\epsilon/(\lvert H \rvert^2 + \epsilon)`), and the achieved figure
     is reported as :attr:`InverseFilterResult.flatness_db`.
 
     Use the result's :meth:`InverseFilterResult.apply` to equalize

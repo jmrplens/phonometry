@@ -283,7 +283,7 @@ The name of the scale `level` is on.
 The one place that answers whether the level may be called
 **dBqps**, which clause 3 defines only against the 0.775 V of
 clause 2.6. Anything else is named by its own reference instead,
-because BS.468-4 gives no other scale a name -- a quasi-peak sound
+because BS.468-4 gives no other scale a name: a quasi-peak sound
 pressure level read against 20 uPa is a perfectly good number and is
 not dBqps.
 

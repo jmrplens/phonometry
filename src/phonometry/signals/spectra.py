@@ -271,8 +271,8 @@ def _segment_statistics(
 
     Returns ``(n_segments, n_averages, resolution_bandwidth)``:
 
-    * ``n_segments`` - raw number of (possibly overlapped) segments averaged;
-    * ``n_averages`` - effective number of *independent* averages
+    * ``n_segments``: raw number of (possibly overlapped) segments averaged;
+    * ``n_averages``: effective number of *independent* averages
       :math:`n_\mathrm{d}`.
       Bendat & Piersol's error formulas assume :math:`n_\mathrm{d}` distinct
       records
@@ -286,7 +286,7 @@ def _segment_statistics(
       :math:`n_\mathrm{d} = k / \left( 1 + 2 \sum_j (1 - j/k)
       \rho^2(j D) \right)`. Without overlap
       this reduces to :math:`n_\mathrm{d} = k` exactly.
-    * ``resolution_bandwidth`` - the effective noise bandwidth of the
+    * ``resolution_bandwidth``: the effective noise bandwidth of the
       tapered segment,
       :math:`B_\mathrm{e} = f_\mathrm{s} \sum w^2 / \left( \sum w \right)^2`, the
       tapered-window analog

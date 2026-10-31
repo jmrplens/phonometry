@@ -2670,9 +2670,9 @@ class RailwayEmissionResult(OwnsArrays):
         :attr:`line_power` with the source height that names it, a value with
         the band it is quoted at, a component spectrum with the 1/3-octave
         grid it was resampled onto. None of that pairing is checked where it
-        happens -- the chart lays its two marker lines over the octave bars by
+        happens (the chart lays its two marker lines over the octave bars by
         row order, and the source breakdown is read band by band against
-        :attr:`third_octave_frequencies` -- so an axis one entry out does not
+        :attr:`third_octave_frequencies`), so an axis one entry out does not
         announce itself. It attributes the noise to the wrong band, or to the
         wrong one of the two source heights, and the level it reports there is
         an ordinary number in an ordinary place.

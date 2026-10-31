@@ -5,9 +5,9 @@ The baffled circular piston is the canonical acoustic radiator: a flat rigid
 disc of radius ``a`` vibrating with a uniform normal velocity in an otherwise
 rigid infinite plane. It is the model behind a loudspeaker cone in a large
 cabinet, the open end of a duct, and the reference source for the radiation
-efficiency of any finite vibrating surface, so its two results -- the
+efficiency of any finite vibrating surface, so its two results, the
 **radiation impedance** the air presents to the piston and the **directivity**
-of the far field -- are the base of the electroacoustics domain (Beranek &
+of the far field, are the base of the electroacoustics domain (Beranek &
 Mellow, *Acoustics: Sound Fields, Transducers and Vibration* 2nd ed., §4.4;
 Bies, Hansen & Howard, *Engineering Noise Control* 5th ed.).
 
@@ -43,7 +43,7 @@ function, both of order one, evaluated at :math:`x = 2ka`.
   air, equivalent to a layer :math:`8a / 3\pi` thick over its face.
 * **High frequency** (:math:`ka \gg 1`): :math:`R_1 \to 1` and
   :math:`X_1 \to 0`, so
-  :math:`Z_\mathrm{r} \to \rho c S` -- the piston radiates as if into an infinite tube
+  :math:`Z_\mathrm{r} \to \rho c S`: the piston radiates as if into an infinite tube
   and the
   air loads it purely resistively.
 
@@ -296,7 +296,7 @@ class PistonDirectivity(OwnsArrays):
         with ``x and y must have same first dimension``. Both come from inside
         the drawing code and name no field. A matrix one row too many is the
         silent one: the loop stops at the last ``ka``, so the extra pattern is
-        never drawn -- no curve, no legend entry and no complaint.
+        never drawn: no curve, no legend entry and no complaint.
 
         :raises ValueError: if the pattern matrix disagrees with either grid.
         """

@@ -473,7 +473,7 @@ def _require_unfavourable_sum(
     The sum of unfavourable deviations is not a number kept beside the
     curves; it *is* those curves, added up. ISO 717-1 Clause 4.4 counts a
     band as unfavourable where the measurement falls below the shifted
-    reference and ISO 717-2 Clause 4.3 where it rises above it -- the one
+    reference and ISO 717-2 Clause 4.3 where it rises above it: the one
     structural difference between the two parts, which is why the sign
     arrives as *impact* rather than being read off a field. Neither part
     rounds the deviations any further: Table C.1 of each 2020 edition prints
@@ -572,14 +572,14 @@ class WeightedRatingResult(OwnsArrays):
         neither the field nor the type it came from.
 
         The curves must also be finite. No constructor can emit a non-finite
-        band -- :func:`weighted_rating` refuses non-finite input, the centres
+        band (:func:`weighted_rating` refuses non-finite input, the centres
         come from the Table 1 band sets and the shifted reference is the
-        Table 3 curve plus an integer shift -- and the fiche reads them raw:
+        Table 3 curve plus an integer shift), and the fiche reads them raw:
         a NaN centre dies in a bare ``ValueError: cannot convert float NaN to
         integer`` from ``round`` inside the band table, while a NaN measured
         value prints a literal ``nan`` cell and, in the verbose Annex C
         table, an em dash in the deviation column whose defined meaning is
-        "deviation below 0,05 dB" -- asserting no unfavourable deviation for
+        "deviation below 0,05 dB", asserting no unfavourable deviation for
         a band that was never determined.
 
         Last, ``unfavorable_sum`` must be the sum those same two curves
@@ -702,7 +702,7 @@ class ImpactRatingResult(OwnsArrays):
         """Reject a rating whose three band curves do not line up.
 
         Shading the bands where the measurement rises *above* the shifted
-        reference -- the sign opposite to airborne -- is a comparison of one
+        reference (the sign opposite to airborne) is a comparison of one
         curve against the other, band for band, and :meth:`plot` makes it
         without first asking whether the two run over the same bands. The
         band centres carry as much: ISO 717-2 Clause 4.4 makes the fiche
@@ -1341,7 +1341,7 @@ class ExtendedImpactRatingResult(OwnsArrays):
 
         The band centres are the record of which bands ``CI,50-2500`` was
         summed over, and the plot reads them a second time to mark which part
-        of ``measured`` lies outside the core 100-3150 Hz set -- shading that
+        of ``measured`` lies outside the core 100-3150 Hz set, shading that
         span from the ends of the centres before it has looked at the curve
         at all. Centres that are not this curve's own axis therefore mis-mark
         the enlarged range first and fail second, in matplotlib's words

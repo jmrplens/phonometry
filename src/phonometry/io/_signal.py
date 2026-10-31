@@ -10,7 +10,7 @@ following the library's result-object pattern (a frozen dataclass with
 rather than subclassing :class:`numpy.ndarray`: NumPy's own subclassing guide
 warns that functions may return the base class and *forget* the attached
 attributes, and for metrological metadata a silently dropped ``fs`` or
-calibration is a wrong result that looks right -- ``x[::2]`` keeping ``fs``
+calibration is a wrong result that looks right: ``x[::2]`` keeping ``fs``
 intact is an automatic time-calibration bug. With composition, a NumPy
 operation returns a plain array and the loss of metadata is visible in the
 type, while every existing ``(x, fs)`` function accepts the object today via
@@ -57,7 +57,7 @@ class SignalOrigin(RichDisplay):
     :class:`~phonometry.simulation.SignalSource` already is (an FDTD
     excitation driven by an arbitrary sample sequence). The two could share a
     spelling now that each is reached through its own package, and the reason
-    for the distinction is the better one anyway: this is a passive record --
+    for the distinction is the better one anyway: this is a passive record,
     an origin, not a source of sound.
 
     ``bit_depth`` is the *valid* bits per sample (an EXTENSIBLE container
@@ -89,7 +89,7 @@ class Signal(RichDisplay):
     Returned by :func:`phonometry.io.read`; can also be constructed directly
     around an array. The object is a drop-in replacement for the bare array:
     it implements :meth:`__array__`, so ``np.asarray(signal)`` yields the
-    samples -- 1-D for one channel, ``(channels, samples)`` for several --
+    samples (1-D for one channel, ``(channels, samples)`` for several),
     and the object can be passed straight to the ``(x, fs, ...)`` functions
     of the library. Indexing, ``len()`` and the ``size``/``ndim``/``shape``/
     ``dtype`` attributes forward to that same view, so the object and the
@@ -99,7 +99,7 @@ class Signal(RichDisplay):
     is stored as one channel); ``calibration_factor`` is the multiplier
     converting digital full-scale units to pascals, the same convention as
     ``signals.levels`` (0 dBFS = RMS 1.0), and stays ``None`` until a
-    calibration is actually known -- the object never invents one.
+    calibration is actually known: the object never invents one.
     ``channel_labels`` names each channel (e.g. loudspeaker positions from
     an EXTENSIBLE channel mask); ``provenance`` carries the ``bext``
     broadcast metadata when the file had it; ``source`` records the file,

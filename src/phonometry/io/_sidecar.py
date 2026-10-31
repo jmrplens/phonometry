@@ -5,7 +5,7 @@ No audio container carries a microphone calibration. The equipment survey
 behind this module found the same pattern everywhere: sound level meters
 export linear WAV and keep the sensitivity in a proprietary companion
 (NTi's report text, Svantek's .svl/.svt), and ``bext`` has no calibration
-field -- its loudness values are EBU R 128 *programme* loudness, and
+field: its loudness values are EBU R 128 *programme* loudness, and
 pressing them into service as a sensitivity would corrupt both meanings.
 Seismology met the identical problem decades ago and settled it with a
 standardised sidecar (the StationXML inventory beside the miniSEED
@@ -55,9 +55,9 @@ Key                     Meaning
 ======================  ======================================================
 
 :func:`phonometry.io.read` looks for the sidecar automatically and applies
-its calibration when the caller did not pass one explicitly -- the
+its calibration when the caller did not pass one explicitly (the
 explicit argument always wins, because the person at the keyboard knows
-more than a file on disk -- so the pair "WAV + sidecar" behaves as a
+more than a file on disk), so the pair "WAV + sidecar" behaves as a
 calibrated measurement with no ceremony at the call site.
 """
 
@@ -717,7 +717,7 @@ def sidecar_bytes(audio_path: str | Path, channels: int) -> bytes | None:
 def read_sidecar(audio_path: str | Path) -> CalibrationSidecar | None:
     """Read an audio file's calibration sidecar, if one exists.
 
-    Returns ``None`` when there is no sidecar -- the common case, never an
+    Returns ``None`` when there is no sidecar: the common case, never an
     error. A file *at the sidecar's reserved name* that is not a valid
     phonometry calibration record raises instead of being ignored: a
     corrupted or foreign file squatting on ``*.phonometry.json`` beside a

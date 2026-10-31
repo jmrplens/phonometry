@@ -9,23 +9,23 @@ exponential energy decay, ``T`` is the time for the level to fall by 60 dB.
 Five models are provided, in order of increasing account of a non-uniform
 absorption distribution:
 
-* **Sabine** -- the original diffuse-field estimate,
+* **Sabine**: the original diffuse-field estimate,
   :math:`T = k V / (A + 4 m V)`
   with the total equivalent absorption area
   :math:`A = \sum_i S_i \alpha_i` and the
   air term :math:`4 m V`. Exact only for low, uniform absorption.
-* **Eyring** (Norris-Eyring) -- replaces ``A`` by
+* **Eyring** (Norris-Eyring): replaces ``A`` by
   :math:`-S \ln(1 - \bar{\alpha})` with
   the mean absorption :math:`\bar{\alpha} = A / S` over the total surface
   ``S``; correct in the strong-absorption limit where Sabine overestimates
   ``T``.
-* **Millington-Sette** -- :math:`-\sum_i S_i \ln(1 - \alpha_i)` sums the
+* **Millington-Sette**: :math:`-\sum_i S_i \ln(1 - \alpha_i)` sums the
   Eyring term
   per surface, so a single perfectly absorbing surface drives ``T`` to zero.
-* **Fitzroy** -- an *area-weighted arithmetic* mean of three axial Eyring
+* **Fitzroy**: an *area-weighted arithmetic* mean of three axial Eyring
   reverberation times, one per pair of opposing walls; captures rooms with the
   absorption concentrated on one axis (e.g. a carpeted, otherwise hard room).
-* **Arau-Puchades** -- an *area-weighted geometric* mean of the same three
+* **Arau-Puchades**: an *area-weighted geometric* mean of the same three
   axial Eyring times (Arau-Puchades, *Acustica* 65 (1988) 163):
   :math:`T = \prod_i T_i^{S_i / S}`. Recommended by its author over Fitzroy
   for anisotropic rooms.
@@ -55,7 +55,7 @@ and Arau-Puchades need each *mean* entering :math:`\ln(1 - \alpha)` below 1.
 The Fitzroy and Arau-Puchades models require a rectangular (shoebox) room and
 take the room ``dimensions`` together with the mean absorption of each of the
 three wall pairs. All five reduce to Eyring for a uniform absorption
-distribution, and Eyring reduces to Sabine as the absorption tends to zero --
+distribution, and Eyring reduces to Sabine as the absorption tends to zero:
 the identities the conformance suite anchors on, absent a machine-readable
 worked example in the source texts.
 """
@@ -536,7 +536,7 @@ def fitzroy_reverberation_time(
     air_attenuation_per_m: ArrayLike = 0.0,
     speed_of_sound: float = _SPEED_OF_SOUND_M_S,
 ) -> float | NDArray[np.float64]:
-    r"""Fitzroy reverberation time -- area-weighted arithmetic mean of axial times.
+    r"""Fitzroy reverberation time, the area-weighted arithmetic mean of axial times.
 
     :math:`T = \sum_i (S_i / S)\, T_i` with :math:`T_i` the Eyring time of
     the wall pair
@@ -576,7 +576,7 @@ def arau_puchades_reverberation_time(
     air_attenuation_per_m: ArrayLike = 0.0,
     speed_of_sound: float = _SPEED_OF_SOUND_M_S,
 ) -> float | NDArray[np.float64]:
-    r"""Arau-Puchades reverberation time -- area-weighted geometric mean of axial times.
+    r"""Arau-Puchades reverberation time, the area-weighted geometric mean of axial times.
 
     :math:`T = \prod_i T_i^{S_i / S}` with :math:`T_i` the Eyring time of the
     wall pair perpendicular to axis ``i`` (Arau-Puchades, *Acustica* 65
@@ -649,9 +649,9 @@ class ReverberationModelResult(OwnsArrays):
         index 5 is out of bounds for axis 0 with size 5`` from inside the row
         loop, naming no field at all. One entry long is quieter: the table
         stops at the last frequency and the extra value simply never appears
-        -- a seventh Arau-Puchades time appended to a six-band prediction
+        (a seventh Arau-Puchades time appended to a six-band prediction
         leaves a table that ends at the 4000 Hz row looking exactly as it
-        would have -- and the fiche fails only afterwards, when it draws the
+        would have), and the fiche fails only afterwards, when it draws the
         same figure the plot would have drawn.
 
         The extra axis is the silent one. A curve of shape ``(bands, 1)``

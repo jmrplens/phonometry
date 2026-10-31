@@ -50,7 +50,7 @@ threshold in quiet (Formulae 23-25, Tables 2 and 3) and the sum of
 Formula 26.
 
 The API is monaural: the quadratic-mean binaural combination of
-Formula (118) (Clause 8.1.5) is not implemented -- analyse each channel
+Formula (118) (Clause 8.1.5) is not implemented: analyse each channel
 separately.
 """
 
@@ -627,7 +627,7 @@ def _average_bands_full(
 
     For each target band z (block size B = s_b(z), reach = min(N_B, z, 52-z)),
     the neighbouring bands are re-segmented and re-correlated **at block size
-    B** so the average is over identical block sizes -- including neighbours
+    B** so the average is over identical block sizes, including neighbours
     that natively belong to a different block-size group. The result stays on
     band z's native time grid. Shared by the loudness and tonality metrics
     (Clause 8.1.1 builds loudness on the same Clause 6.2 outputs).

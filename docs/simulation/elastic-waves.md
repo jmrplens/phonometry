@@ -57,9 +57,9 @@ as one `ElasticBoundaries` (the sides and the sponge thickness). Like the
 acoustic `FDTDRecording`, the recording refuses a malformed probe, field or
 count when it is built. The Courant bound depends only on the fastest
 $c_\mathrm{P}$ in the map (Virieux Eqs. 6-7), while the resolution rule
-uses the slowest wave speed anywhere in the domain -- the slowest
+uses the slowest wave speed anywhere in the domain (the slowest
 non-zero $c_\mathrm{S}$ of the solid cells or, if a
-fluid region carries a still slower $c_\mathrm{P}$, that fluid speed:
+fluid region carries a still slower $c_\mathrm{P}$, that fluid speed):
 $\Delta x \le c_\text{min} / (10 f)$ (in a wholly solid map the S wavelength is always
 the shortest; in mixed domains the fluid P wavelength can be shorter, as
 in water at 1480 m/s over a 2000 m/s-shear sediment).
@@ -518,8 +518,8 @@ stepping cost.
 ### What grid resolution does an elastic simulation need?
 
 Resolve at least 10 cells per shortest wavelength using the slowest wave
-speed in the domain -- the slowest non-zero shear speed or a slower fluid
-sound speed if one is present -- $\Delta x \le c_\text{min} / (10 f)$.
+speed in the domain (the slowest non-zero shear speed or a slower fluid
+sound speed if one is present): $\Delta x \le c_\text{min} / (10 f)$.
 Allow 15-20 cells per wavelength along free
 surfaces (the stress-imaging boundary is the most dispersive part of the
 scheme), and at least 15 points per wavelength when an interface wave has

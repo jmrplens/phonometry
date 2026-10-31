@@ -502,9 +502,9 @@ class LoudspeakerCharacteristics(OwnsArrays):
     def __post_init__(self) -> None:
         """Reject a data sheet whose curves do not each pair up.
 
-        The fiche draws four curves the standard treats separately -- the
+        The fiche draws four curves the standard treats separately (the
         on-axis response of Clause 21, the impedance modulus of 16.2, the
-        distortion against frequency of 24.1 and the polar pattern of 23.1 --
+        distortion against frequency of 24.1 and the polar pattern of 23.1),
         and each is a pair of arrays that has to line up point for point.
         Each pair is checked on its own and never against another, because
         the four are measured on grids of their own choosing: a data sheet
@@ -520,7 +520,7 @@ class LoudspeakerCharacteristics(OwnsArrays):
         result was assembled.
 
         The three ``(lo, hi)`` band edges are left out of every length group
-        -- they state the ends of a range rather than run along one -- and are
+        (they state the ends of a range rather than run along one) and are
         pinned apart as pairs: the fiche unpacks each positionally into its
         range text, so a tuple that is not exactly an ordered pair of finite
         frequencies surfaces as a ``TypeError`` about a helper's keyword

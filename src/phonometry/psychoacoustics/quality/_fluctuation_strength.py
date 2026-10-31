@@ -9,10 +9,10 @@ amplitude-modulated at 4 Hz. There is no ISO standard for fluctuation strength.
 
 Two routes are provided:
 
-* :func:`fluctuation_strength_am_noise` -- the closed form (Fastl & Zwicker
+* :func:`fluctuation_strength_am_noise`: the closed form (Fastl & Zwicker
   Eq. 10.2) for a sinusoidally amplitude-modulated broadband noise, exact in the
   modulation factor, level and modulation frequency.
-* :func:`fluctuation_strength` -- the signal model of Osses, García &
+* :func:`fluctuation_strength`: the signal model of Osses, García &
   Kohlrausch (2016), which estimates ``F`` from an arbitrary calibrated pressure
   signal. It sums specific contributions over 47 auditory filters,
   :math:`F = C_\mathrm{FS} \sum_i (m^*_i)^{p_m} |k_{i-2} k_i|^{p_k} g(z_i)^{p_g}`
@@ -252,7 +252,7 @@ class FluctuationStrengthResult(OwnsArrays):
         every count: a ``specific`` of shape ``(47, 2)`` carries 47 filters on
         its first axis and ``plot`` draws it as one line per column without a
         word. It is the ``fill_between`` underneath that stops, reporting that
-        ``'y1'`` is not 1-dimensional -- matplotlib's own parameter name, not
+        ``'y1'`` is not 1-dimensional: matplotlib's own parameter name, not
         the field that carried the extra axis.
 
         Neither mismatch touches the overall ``F``, which is a scalar of its
@@ -433,11 +433,11 @@ def _analyze(
     r"""Un-calibrated Osses 2016 sum (:math:`C_\mathrm{FS} = 1`) of a model-rate
     signal.
 
-    Runs the full front-end -- ear transmission, 47-band excitation filter bank
-    (:func:`_band_envelopes`), generalised modulation depth ``m*``
-    (:func:`_modulation_depth`), neighbour cross-covariance ``k``
-    (:func:`_neighbour_covariance`) and the weighted sum of Eq. (1) without the
-    ``C_FS`` scale -- over 2 s frames with 50 % overlap. Returns the per-frame
+    Runs the full front-end over 2 s frames with 50 % overlap: ear
+    transmission, 47-band excitation filter bank (:func:`_band_envelopes`),
+    generalised modulation depth ``m*`` (:func:`_modulation_depth`), neighbour
+    cross-covariance ``k`` (:func:`_neighbour_covariance`) and the weighted sum
+    of Eq. (1) without the ``C_FS`` scale. Returns the per-frame
     raw sums, the frame-averaged raw specific pattern and the Bark axis. The
     public :func:`fluctuation_strength` multiplies these by :func:`_c_fs`;
     keeping the scale out here lets the calibration be derived from this same
@@ -536,12 +536,12 @@ def fluctuation_strength(
         anchors this signal model. It is implemented clean-room from the Osses
         2016 paper and reproduces the literature reference values (Osses 2016
         Table 1) and the 1-vacil calibration point within a documented
-        tolerance -- the reference method itself only agrees qualitatively for
+        tolerance; the reference method itself only agrees qualitatively for
         FM tones. For an exact figure on AM broadband noise use
         :func:`fluctuation_strength_am_noise`.
 
         **Calibration.** The constant ``C_FS`` (Eq. 1) is not the paper's literal
-        0.2490 -- that was fitted to the paper's own 4096-tap FIR front-end. Here
+        0.2490, which was fitted to the paper's own 4096-tap FIR front-end. Here
         it is derived once from the 1-vacil reference stimulus (1 kHz, 60 dB,
         :math:`m = 1`, 4 Hz) run through this implementation's front-end, so
         the reference returns **exactly 1.00 vacil by construction**
@@ -558,7 +558,7 @@ def fluctuation_strength(
         the AM broadband-noise 60 dB sweep shows the correct band-pass shape
         (maximum at 4 Hz, monotone tails) but overshoots the absolute
         pass-band level by up to ~3x (the excitation front-end spreads the
-        modulated energy across bands). FM-tone accuracy is *not* pursued --
+        modulated energy across bands). FM-tone accuracy is *not* pursued:
         the reference method itself overestimates it above 4 Hz.
 
     :param x: Calibrated sound-pressure signal (1-D), in Pa.

@@ -8,9 +8,9 @@ sidebar:
 ECAC Doc 29 flight performance: procedural steps into a flight profile.
 
 A published departure or arrival procedure is not a trajectory. It is a list of
-*procedural steps* -- "climb at take-off thrust to 1500 ft", "accelerate to
-210.6 kt at 984.3 ft/min", "descend on a 3 degree slope from 3000 ft at 180 kt"
--- and the aeroplane's own aerodynamic and engine coefficients. **ECAC Doc 29
+*procedural steps* ("climb at take-off thrust to 1500 ft", "accelerate to
+210.6 kt at 984.3 ft/min", "descend on a 3 degree slope from 3000 ft at 180 kt")
+and the aeroplane's own aerodynamic and engine coefficients. **ECAC Doc 29
 5th ed., Volume 2, Appendix B** is the flight-mechanics model that turns the one
 into the other: a *flight profile*, an ordered list of profile points carrying
 distance along the ground track, height above the aerodrome, true airspeed and
@@ -18,14 +18,14 @@ corrected net thrust per engine. Corrected net thrust is what the NPD tables of
 [`phonometry.aircraft.airport_noise`](/phonometry/reference/api/aeroacoustics/airport-noise/) are indexed on, so this model is what
 stands between a published procedure and a noise contour.
 
-* [`Aerodrome`](/phonometry/reference/api/aeroacoustics/flight-performance/#aerodrome) -- the aerodrome and its weather, and the five atmosphere
+* [`Aerodrome`](/phonometry/reference/api/aeroacoustics/flight-performance/#aerodrome): the aerodrome and its weather, and the five atmosphere
   ratios of B3 that every equation below reads.
 * [`PerformanceAircraft`](/phonometry/reference/api/aeroacoustics/flight-performance/#performanceaircraft) with [`JetEngineCoefficients`](/phonometry/reference/api/aeroacoustics/flight-performance/#jetenginecoefficients),
-  [`PropellerEngineCoefficients`](/phonometry/reference/api/aeroacoustics/flight-performance/#propellerenginecoefficients) and [`AerodynamicCoefficients`](/phonometry/reference/api/aeroacoustics/flight-performance/#aerodynamiccoefficients) --
+  [`PropellerEngineCoefficients`](/phonometry/reference/api/aeroacoustics/flight-performance/#propellerenginecoefficients) and [`AerodynamicCoefficients`](/phonometry/reference/api/aeroacoustics/flight-performance/#aerodynamiccoefficients):
   the ANP coefficient tables the equations take their constants from.
-* [`DepartureStep`](/phonometry/reference/api/aeroacoustics/flight-performance/#departurestep) and [`ApproachStep`](/phonometry/reference/api/aeroacoustics/flight-performance/#approachstep) -- one row each of a
+* [`DepartureStep`](/phonometry/reference/api/aeroacoustics/flight-performance/#departurestep) and [`ApproachStep`](/phonometry/reference/api/aeroacoustics/flight-performance/#approachstep): one row each of a
   published procedure.
-* [`departure_profile`](/phonometry/reference/api/aeroacoustics/flight-performance/#departure_profile) and [`approach_profile`](/phonometry/reference/api/aeroacoustics/flight-performance/#approach_profile) -- the model, returning
+* [`departure_profile`](/phonometry/reference/api/aeroacoustics/flight-performance/#departure_profile) and [`approach_profile`](/phonometry/reference/api/aeroacoustics/flight-performance/#approach_profile): the model, returning
   a [`FlightProfile`](/phonometry/reference/api/aeroacoustics/flight-performance/#flightprofile) of [`ProfilePoint`](/phonometry/reference/api/aeroacoustics/flight-performance/#profilepoint).
 
 Units are the standard's and they are English throughout (B2): feet, knots,
@@ -69,7 +69,7 @@ one of them.
 | :--- | :--- |
 | `elevation_ft` | Aerodrome elevation above mean sea level `Eapt`, ft. |
 | `temperature_c` | Air temperature at the aerodrome `Tapt`, in degC. Doc 29 writes it in degF; it is taken in degC here because that is what the reference cases, the thrust equations and the rest of this package use, and converted on the way in. |
-| `sea_level_pressure_inhg` | Aerodrome pressure reduced to sea level `Papt` -- the QNH, not the pressure at the field -- in inHg. |
+| `sea_level_pressure_inhg` | Aerodrome pressure reduced to sea level `Papt` (the QNH, not the pressure at the field), in inHg. |
 | `headwind_kt` | Headwind component `w`, kt; negative for a tailwind. Defaults to Doc 29's own modelling default of 8 kt (B4.4). |
 | `runway_gradient_ratio` | Runway gradient `GR`, positive uphill, dimensionless: the rise over the run between the two runway ends. |
 
@@ -110,7 +110,7 @@ Aerodrome.pressure_altitude_ft(altitude_ft: float) -> float
 Pressure altitude `h` for *altitude_ft* above MSL, ft (Eq. B-6).
 
 The altitude the standard atmosphere would put this pressure at, which
-is what Eq. B-9's `Ga h` and `Gb h^2` terms read -- not the
+is what Eq. B-9's `Ga h` and `Gb h^2` terms read, not the
 geometric altitude. The two coincide only at a QNH of exactly 29.92
 inHg; at 30.71 inHg over a sea-level aerodrome the aeroplane sits at
 0 ft and flies at a pressure altitude of -723 ft.
@@ -307,7 +307,7 @@ by an inserted transition point (B6.1.6).
 | :--- | :--- |
 | `aircraft` | The aeroplane's coefficient set. |
 | `steps` | The procedure's steps, in order, starting with a Take-off. |
-| `weight_lb` | Take-off weight, lb -- the ANP `Default_weights` entry for the stage length being flown. |
+| `weight_lb` | Take-off weight, lb (the ANP `Default_weights` entry for the stage length being flown). |
 | `aerodrome` | Aerodrome, weather and runway gradient. |
 | `procedure_id` | Identifier of the procedure, carried into the result. |
 
@@ -405,8 +405,8 @@ A flight profile: the fixed-point trajectory a procedure flies (B1).
 | `points` | The profile points, ordered along the ground track. |
 
 This is the vertical-plane half of a Doc 29 flight path. Section 3.6 is what
-turns it into three dimensions -- splitting segments at ground-track nodes,
-sub-segmenting the rolls and the climb, merging in the ground track -- and
+turns it into three dimensions (splitting segments at ground-track nodes,
+sub-segmenting the rolls and the climb, merging in the ground track), and
 none of that happens here.
 
 ### FlightProfile.altitude_ft

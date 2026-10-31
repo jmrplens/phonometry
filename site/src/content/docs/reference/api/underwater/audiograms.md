@@ -9,7 +9,7 @@ Marine-mammal hearing thresholds (group audiograms and the orca audiogram).
 
 Two independent published descriptions of how well a marine mammal hears:
 
-* [`group_audiogram`](/phonometry/reference/api/underwater/audiograms/#group_audiogram) -- the **group audiogram** of Southall et al. (2019),
+* [`group_audiogram`](/phonometry/reference/api/underwater/audiograms/#group_audiogram): the **group audiogram** of Southall et al. (2019),
   a four-parameter band-pass fit (their Equation 1, after Finneran 2016)
 
   $$
@@ -18,7 +18,7 @@ Two independent published descriptions of how well a marine mammal hears:
 
   with the group parameters of their Table 2 (absolute thresholds) and Table 3
   (normalised to 0 dB at best sensitivity).
-* [`orca_audiogram`](/phonometry/reference/api/underwater/audiograms/#orca_audiogram) -- the killer-whale (*Orcinus orca*) audiogram of
+* [`orca_audiogram`](/phonometry/reference/api/underwater/audiograms/#orca_audiogram): the killer-whale (*Orcinus orca*) audiogram of
   Wensveen & Van Roij (2007) as printed in Ainslie, *Principles of Sonar
   Performance Modelling* (Springer 2010), Equation (11.159), a **three-branch**
   power law over 0.5 to 80 kHz fitted to the measurements of Hall & Johnson
@@ -213,7 +213,7 @@ A three-branch fit in $F = f/(1~\text{kHz})$, valid over 0.5 to
 * $2.792 F^{0.7537} - 2.064$ for $46.2 \le F \le 80$.
 
 The published check points are the minimum, 39.0 dB re 1 µPa at 22.6 kHz
-(second branch), and 51.2 dB re 1 µPa at 50 kHz -- the latter **needs the
+(second branch), and 51.2 dB re 1 µPa at 50 kHz; the latter **needs the
 third branch**; evaluating the second one there returns 50.5 dB instead.
 
 **Parameters**

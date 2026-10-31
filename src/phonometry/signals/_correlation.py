@@ -271,13 +271,13 @@ def correlation(
 
     Normalizations:
 
-    * ``'biased'`` - the raw lag sums divided by ``N``; tapers toward the
+    * ``'biased'``: the raw lag sums divided by ``N``; tapers toward the
       record ends and stays bounded by
       :math:`[\hat{R}_{xx}(0) \hat{R}_{yy}(0)]^{1/2}`;
-    * ``'unbiased'`` - divided by :math:`N - \lvert r \rvert`
+    * ``'unbiased'``: divided by :math:`N - \lvert r \rvert`
       (Eq. 11.96), an unbiased estimate of :math:`R_{xy}(\tau)` whose
       variance grows toward the ends;
-    * ``'coefficient'`` - the correlation coefficient function
+    * ``'coefficient'``: the correlation coefficient function
       :math:`\hat{\rho}_{xy}(\tau)
       = \hat{C}_{xy}(\tau)/(\sigma_x \sigma_y) \in [-1, 1]` over the
       mean-removed records (Eq. 5.16).
@@ -753,10 +753,10 @@ def time_delay(
     Three estimators of the delay :math:`\tau_0` in the two-sensor model
     :math:`y(t) = \alpha x(t - \tau_0) + n(t)` (B&P Section 5.1.4):
 
-    * ``'direct'`` - the peak of the full-record correlation coefficient
+    * ``'direct'``: the peak of the full-record correlation coefficient
       function (Eq. 5.21);
-    * ``'gcc'`` - the peak of the generalized cross-correlation of
-      Knapp & Carter (1976): the Welch-averaged cross-spectrum (shared
+    * ``'gcc'``: the peak of the generalized cross-correlation of
+      Knapp & Carter (1976), in which the Welch-averaged cross-spectrum (shared
       core with :func:`~phonometry.signals.spectra.cross_spectral_density`)
       is weighted by :math:`\psi(f)` before the inverse transform.
       Weightings (Table I): ``'none'`` (plain correlator), ``'roth'``
@@ -777,7 +777,7 @@ def time_delay(
       :math:`\lvert \gamma \rvert^2 \ne 1` existence condition (enforced
       here). The delay must
       fit within half a segment; raise ``nperseg`` for long delays.
-    * ``'phase'`` - the :math:`\lvert \hat{G}_{xy} \rvert`-weighted
+    * ``'phase'``: the :math:`\lvert \hat{G}_{xy} \rvert`-weighted
       least-squares slope of the
       cross-spectrum phase (Eq. 5.101b); accurate for clean, moderate
       delays where the unwrapped phase is unambiguous, and independent of
@@ -987,7 +987,7 @@ class AlignedImpulseResponseResult(OwnsArrays):
         """Reject a pair of impulse responses that are not comparable.
 
         The point of the result is that the two records can now be read
-        sample against sample -- averaged into an ensemble, subtracted,
+        sample against sample: averaged into an ensemble, subtracted,
         overlaid. :meth:`plot` does exactly that, building one time axis from
         :attr:`reference` and drawing both traces on it. Two records of
         different lengths were never comparable in the first place, and

@@ -3,8 +3,8 @@ r"""Writing the ``bext`` broadcast extension chunk (EBU Tech 3285 v2, 2011).
 
 No maintained Python package writes ``bext`` (wavinfo only reads it;
 python-soundfile does not expose libsndfile's ``SFC_SET_BROADCAST_INFO``),
-so the chunk that carries a recording's provenance -- originator,
-sample-accurate midnight timecode, coding history, R 128 loudness -- is
+so the chunk that carries a recording's provenance (originator,
+sample-accurate midnight timecode, coding history, R 128 loudness) is
 serialised here, field by field at the offsets of the Tech 3285 table
 transcribed in :class:`~phonometry.io._chunks.BroadcastMetadata`. The
 serialiser is the exact inverse of that reader: what one writes the other
@@ -17,10 +17,10 @@ Conventions the serialiser enforces, each from the Tech 3285 text:
   loudness fields from version 2; below those versions the bytes are
   reserved space that "shall be set to zero". Metadata that carries a
   UMID or loudness under a version too old to hold them is refused
-  loudly -- writing the bytes anyway would produce a chunk that lies
+  loudly: writing the bytes anyway would produce a chunk that lies
   about itself, and zeroing them would silently discard data.
 * **Loudness encoding.** Each field is the int16 of 100 x value rounded
-  to the nearest integer with ties away from zero -- the ``integer part
+  to the nearest integer with ties away from zero, the ``integer part
   of (x + sgn(x) x 0.5)`` definition of Tech 3285 2.4, whose worked
   examples carry -22.645 as F727h and 12.765 as 04FDh. (Python's
   ``round`` would land both of those ties one code away: it rounds
@@ -41,7 +41,7 @@ Conventions the serialiser enforces, each from the Tech 3285 text:
   the ``A=<algorithm>,F=<rate>,W=<bits>,M=<mode>,T=<free text>`` grammar,
   each writer *appending* its line under those of every writer before
   it. :func:`extend_coding_history` implements exactly that append, and
-  the write path runs every chunk through it -- including a chunk read
+  the write path runs every chunk through it, including a chunk read
   from another recorder's file, whose history therefore survives intact
   with phonometry's line beneath it. The ``M=`` parameter only exists in
   R98 for ``mono``/``stereo``/``dual-mono``/``joint-stereo``; for other
@@ -51,7 +51,7 @@ Conventions the serialiser enforces, each from the Tech 3285 text:
   version, stamps the origination date and time, and leaves
   ``OriginatorReference`` empty: EBU R99's USID wants country and
   organisation codes this library cannot know, and an invented unique ID
-  is worse than an absent one. ``TimeReference`` stays zero -- it means
+  is worse than an absent one. ``TimeReference`` stays zero: it means
   "first sample at midnight", and pretending to know the capture instant
   of a signal that was never captured would be false provenance.
 
@@ -226,8 +226,8 @@ def fresh_metadata() -> BroadcastMetadata:
     """A version 2 chunk for a file that has no provenance to carry.
 
     Stamps the library as Originator with the origination instant, and
-    deliberately claims nothing else -- see the module docstring for why
-    OriginatorReference stays empty and TimeReference zero.
+    deliberately claims nothing else (see the module docstring for why
+    OriginatorReference stays empty and TimeReference zero).
     """
     from .._version import __version__
 
@@ -260,7 +260,7 @@ def with_measured_loudness(
     Runs the library's own ITU-R BS.1770 / EBU R 128 implementation
     (:func:`phonometry.broadcast.program_loudness`) over the full-scale
     data: integrated loudness (LUFS), loudness range (LU), maximum true
-    peak (dBTP) and the momentary/short-term maxima (LUFS) -- measured
+    peak (dBTP) and the momentary/short-term maxima (LUFS), measured
     values, not copied ones. The version is raised to 2, where the fields
     exist. The serialiser later quantises each to the chunk's hundredth
     resolution; the returned metadata keeps the unquantised measurement.

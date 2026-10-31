@@ -123,23 +123,27 @@ a new catalogue row note committed in English only
 <a id="p6"></a>
 ### P6. Write no em dash anywhere
 
-**Why.** It is not how the maintainer writes: a clause that would hang off one is its own sentence, a parenthesis, a colon or a comma. The guard reads everything a reader sees under the project's name: the `docs/` mirror, the site's pages and data modules, the CHANGELOG, the READMEs, CONTRIBUTING, the docstrings the API reference is generated from, and the text the figure and diagram generators draw. This page writes the dash as `<U+2014>`, never the character.
+**Why.** It is not how the maintainer writes: a clause that would hang off one is its own sentence, a parenthesis, a colon or a comma. The guard reads everything a reader sees under the project's name: the `docs/` mirror, the site's pages and data modules, the CHANGELOG, the READMEs, CONTRIBUTING, the docstrings the API reference is generated from, and the text the figure and diagram generators draw. The double hyphen is the same dash spelt in ASCII, and it is refused too: Astro's smartypants publishes `--` in the text of a page as the em dash, so a docstring bullet written ``:func:`x` -- text`` reached the API reference as one in 92 list items and nearly five hundred other docstring lines, and `help()` shows it as the double hyphen it is. A list item's head is joined to its text by a colon, so a single hyphen between spaces is refused there too (``:func:`x` - text``), the one place where it cannot be a minus. The entities `&mdash;`, `&#8212;` and `&#x2014;` and the escapes `\u2014` and `\N{EM DASH}` publish the character itself, and are read as it wherever they are decoded: in a string of a module, a data module or a JSON file, and in a double-quoted value of a page's frontmatter, the one YAML value that decodes an escape. A single-quoted or plain value, a block of text and an escaped backslash (`\\u2014`) show it as written, and are not read. This page writes the dash as `<U+2014>`, never the character.
 
 **Do**
 
 ```text
 The level is energy-averaged: each band is summed in power, then converted back.
+* :func:`npd_level`: the interpolated event level, linear in power.
+* ``peaking``: the bell of a parametric EQ.
 ```
 
 **Don't**
 
 ```text
 The level is energy-averaged <U+2014> each band is summed in power.
+* :func:`npd_level` -- the interpolated event level, linear in power.
+* ``peaking`` - the bell of a parametric EQ.
 ```
 
 **Enforced by:** `scripts/check_em_dashes.py`, `CI: Markdown renders the way it reads`, review
 
-**Exceptions.** What is not prose keeps its dash, by position, with no exemption table: a standard's title reproduced as printed (in a frontmatter `title:`, an italic span, a bibliographic entry, a quotation, or a line reading `<U+2014> Part 3:`), fenced and inline code, a string a test compares with, and a dash that fills a whole table cell or a whole slash-separated item of one (the empty-cell mark of the fiches). Outside the guard's roots (commit messages, pull requests, tests and the other scripts) the rule holds by review.
+**Exceptions.** What is not prose keeps its dash, by position, with no exemption table: a standard's title reproduced as printed (in a frontmatter `title:`, an italic span, a bibliographic entry, a quotation, or a line reading `<U+2014> Part 3:`), fenced and inline code, a string a test compares with, and a dash that fills a whole table cell or a whole slash-separated item of one (the empty-cell mark of the fiches). A double hyphen is code in the same places, and also in a docstring's literal block after `::`, the body of a `.. math::` or `.. code-block::` directive, a doctest, math on a page (`$...$` and a `$$` block), a link destination or URL (a heading's slug may carry `--`), an HTML comment, an `href`, `src`, `style`, `id` or `class` value (`var(--sl-color-accent)`) and a line that is only a rule. In a string that is not a page or a docstring only the spaced form ` -- ` is a dash, so an option of a command line (`--keep`) and a console banner (`--- Generating ---`) stand; a comment is published nowhere and keeps its double hyphens, and so does the docstring of a figure or diagram generator, which publishes only what it draws. A docstring and the API page made from it read the same, because the generator publishes a code directive's body and a doctest as fenced code, under a fence longer than any run of backticks the example shows, and the math as `$` and `$$` spans. Away from a list item's head, a single hyphen between spaces is also a minus (`32,3 - 26,3 dB`), and there the rule holds by review. Outside the guard's roots (commit messages, pull requests, tests and the other scripts) the rule holds by review.
 
 <a id="p7"></a>
 ### P7. Use no control character but tab and newline in a tracked text file

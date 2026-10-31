@@ -349,9 +349,9 @@ class ReverberationResult(OwnsArrays):
         is the one that goes wrong in silence: the plot drawn beside the table
         opens only ``reverberation_time``, so an area spectrum one entry too
         long slides the whole A column down a band, leaves its last value off
-        the end of the table, and has the boxed mid-frequency descriptor --
-        picked by looking the 500 Hz and 1000 Hz bands up in ``frequencies``
-        and reading ``A`` at the index found there -- label the mean of two
+        the end of the table, and has the boxed mid-frequency descriptor
+        (picked by looking the 500 Hz and 1000 Hz bands up in ``frequencies``
+        and reading ``A`` at the index found there) label the mean of two
         lower bands "A (500-1000 Hz)", with nothing raised. A
         ``reverberation_time`` one entry too long is stopped by that same
         plot, as matplotlib's complaint that x and y have different first

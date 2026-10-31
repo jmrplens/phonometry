@@ -26,7 +26,7 @@ Analysis (HSA):
   downsampling to 1500 Hz (Clause 9.1.2, Formula 119);
 * the envelope-dependent analysis windows with quieter-period detection
   (Clause 9.1.3, Formula 120);
-* the HSA of the windowed envelopes -- a least-squares fit of window-kernel
+* the HSA of the windowed envelopes: a least-squares fit of window-kernel
   spectral line pairs to the k = 0..48 DFT bins (Clause 9.1.4,
   Formulae 121-142);
 * the identification of prominent spectral line pairs from the local maxima
@@ -47,7 +47,7 @@ Analysis (HSA):
   representative 90th-percentile single value F (Clause 9.1.14).
 
 The API is monaural: the quadratic-mean binaural combination of
-Formula (170) (Clause 9.1.15) is not implemented -- analyse each channel
+Formula (170) (Clause 9.1.15) is not implemented: analyse each channel
 separately.
 
 The calibration constant `c_F` of Formula (163) is the standard's tabulated

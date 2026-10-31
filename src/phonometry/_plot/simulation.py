@@ -804,9 +804,9 @@ def plot_fdtd_snapshot(
     The field is rendered as a single raster image (``imshow``, symmetric
     diverging scale); rigid obstacle cells are drawn in grey and the source
     and probe cells are marked.  The default colormap follows the axes
-    background so zero pressure blends into the page -- ``RdBu_r`` on a
+    background so zero pressure blends into the page (``RdBu_r`` on a
     light background, the black-centred ``phonometry_field_dark`` on a dark
-    one -- and ``cmap`` overrides it. A snapshot recorded with
+    one), and ``cmap`` overrides it. A snapshot recorded with
     ``snapshot_decimation`` d draws each sample over the d by d block of
     cells it was taken from, and the axes still end at the domain's edges:
     when d > 1 their limits are fixed there, which turns autoscaling off for

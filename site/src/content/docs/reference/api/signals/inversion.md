@@ -7,9 +7,9 @@ sidebar:
 
 Regularized spectral inversion with frequency-dependent regularization.
 
-Inverting a measured transfer function -- to equalize a measurement
+Inverting a measured transfer function (to equalize a measurement
 loudspeaker, flatten a microphone response or post-process an acquired
-impulse response -- cannot be a plain reciprocal $1/H(f)$: wherever
+impulse response) cannot be a plain reciprocal $1/H(f)$: wherever
 the
 system radiates little energy (outside its passband, in deep notches) the
 reciprocal explodes and the inverse filter amplifies nothing but noise.
@@ -85,7 +85,7 @@ the requested band.
 | `delay` | Modeling delay of the filter, in samples. |
 | `fs` | Sample rate, in Hz. |
 | `flatness_db` | Largest deviation of the equalized magnitude $20 \log_{10} \lvert H \, H_{\mathrm{inv}} \rvert$ from 0 dB inside $[f_1, f_2]$. |
-| `max_gain_db` | Largest filter gain *outside* the transition-padded band, peak-normalized as $20 \log_{10}(\max \lvert H_{\mathrm{inv}} \rvert \cdot \text{peak}_h)$ where `peak_h` is the peak of $\lvert H \rvert$ -- the achieved out-of-band boost the regularization allowed where the measurement carries no signal. |
+| `max_gain_db` | Largest filter gain *outside* the transition-padded band, peak-normalized as $20 \log_{10}(\max \lvert H_{\mathrm{inv}} \rvert \cdot \text{peak}_h)$ where `peak_h` is the peak of $\lvert H \rvert$, the achieved out-of-band boost the regularization allowed where the measurement carries no signal. |
 
 ### InverseFilterResult.apply()
 
@@ -167,7 +167,7 @@ $$
 with $\epsilon(f)$ small across $[f_1, f_2]$ and large
 outside, so the filter equalizes the response to unity in-band while
 the out-of-band gain stays bounded by
-$1/(2\sqrt{\epsilon_{\mathrm{outside}}})$ -- the behaviour
+$1/(2\sqrt{\epsilon_{\mathrm{outside}}})$, the behaviour
 Mueller & Massarani (JAES 49(6), 2001, Secs. 3.1/4.5) obtain by
 band-passing the plain inverse. A modeling delay of `delay` samples
 (default half the FFT block) shifts the generally anticausal inverse of
@@ -178,8 +178,8 @@ Both regularization levels are *relative* to the peak of
 $\lvert H \rvert^2$ (like the scalar `regularization` of
 [`phonometry.room.impulse_response`](/phonometry/reference/api/rooms/impulse-response/#impulse_response), which this generalises): in-band
 the equalized magnitude deviates from unity by at most
-`regularization_inside * max|H|**2 / min|H|**2` -- the analytic residue
-$\epsilon/(\lvert H \rvert^2 + \epsilon)$ -- and the achieved figure
+`regularization_inside * max|H|**2 / min|H|**2` (the analytic residue
+$\epsilon/(\lvert H \rvert^2 + \epsilon)$), and the achieved figure
 is reported as [`InverseFilterResult.flatness_db`](/phonometry/reference/api/signals/inversion/#inversefilterresult).
 
 Use the result's [`InverseFilterResult.apply`](/phonometry/reference/api/signals/inversion/#inversefilterresultapply) to equalize

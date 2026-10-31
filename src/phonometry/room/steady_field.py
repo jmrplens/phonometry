@@ -68,8 +68,8 @@ wavelength. ``source_model`` selects which of the three
 **Schroeder frequency** :math:`f_\mathrm{s} = 2000 \sqrt{T / V}` (Kuttruff Equation
 (3.44),
 ``V`` in cubic metres, ``T`` in seconds) marks the boundary between the
-modal low-frequency regime -- where discrete room modes rule and the diffuse
-assumption of ``R`` and ``rc`` fails -- and the high-frequency regime of
+modal low-frequency regime, where discrete room modes rule and the diffuse
+assumption of ``R`` and ``rc`` fails, and the high-frequency regime of
 overlapping modes where the statistical field of this module applies.
 """
 
@@ -561,8 +561,8 @@ class SteadyFieldResult(OwnsArrays):
         sampled at the same places, and the plot draws each of them against
         :attr:`distances` point for point, so the four arrays are one curve
         read off by position. A level array of another length is matplotlib
-        refusing the pair -- ``x and y must have same first dimension, but
-        have shapes (30,) and (29,)`` -- in both directions, one short and one
+        refusing the pair (``x and y must have same first dimension, but
+        have shapes (30,) and (29,)``) in both directions, one short and one
         long alike. That message carries two bare shapes and names neither the
         field that slipped nor the result it came from, and it arrives partway
         through the drawing: a caller who passed an axes of their own keeps

@@ -47,7 +47,7 @@ def _typesignal(x: ArrayLike, *, name: str = "x") -> np.ndarray:
     A non-finite sample is refused for the same reason one layer further
     down: a single ``NaN`` survives every filter and poisons every band
     computed from it, and it arrives by two routes that are the same value
-    afterwards -- a ``None`` sitting inside the sequence, and a ``NaN`` the
+    afterwards: a ``None`` sitting inside the sequence, and a ``NaN`` the
     caller passed. The entry points that refused it by hand did so each in
     its own words, and only some of them refused it at all; the check
     belongs where every one of them passes, and they now share this one.

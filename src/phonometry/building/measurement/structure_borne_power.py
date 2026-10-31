@@ -20,7 +20,7 @@ The power a resonant plate dissipates equals
 
 with the references :math:`f_0 = 1` Hz, :math:`m_0 = 1` kg (printed as 1 kg;
 the quantity it normalises is a mass per unit area, so the reference is
-1 kg/m² -- see ``docs/ERRATA.md``), :math:`S_0 = 1` m²;
+1 kg/m², see ``docs/ERRATA.md``), :math:`S_0 = 1` m²;
 the fixed ``-60 dB`` term is
 :math:`10 \log_{10}(v_0^2 / P_0)` for the EN 15657 velocity reference
 :math:`v_0 = 10^{-9}` m/s and :math:`P_0 = 1` pW. The spatial mean velocity
@@ -136,7 +136,7 @@ _MOBILITY_LEVEL_CONSTANT = (_REFERENCE_VELOCITY / _REFERENCE_FORCE) ** 2
 def spatial_mean_velocity_level(levels: ArrayLike) -> float:
     r"""Spatial-average velocity level over the plate (EN 15657, Formula 12).
 
-    :math:`L_\mathrm{v} = 10 \log_{10}\left( \frac{1}{N} \sum 10^{L_{\mathrm{v},i}/10} \right)` --
+    :math:`L_\mathrm{v} = 10 \log_{10}\left( \frac{1}{N} \sum 10^{L_{\mathrm{v},i}/10} \right)`,
     the energetic average of the
     per-position velocity levels.
 
@@ -284,7 +284,7 @@ class StructureBornePowerResult(OwnsArrays):
         checks: every producer already refuses anything else
         (:func:`reception_plate_power` routes ``mass_per_area`` and ``area``
         through :func:`structure_borne_power_level`, which validates both), so
-        a NaN here can only be planted by hand -- and the fiche would print it
+        a NaN here can only be planted by hand, and the fiche would print it
         verbatim in the accredited extended-result line
         (``Plate mass per area m = nan kg/m2``) without a word.
 

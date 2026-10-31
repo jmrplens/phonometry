@@ -6,15 +6,15 @@ the source level in a given direction and the mean-square sound pressure level
 at the receiver, :math:`N_\mathrm{PL}(x) = L_\mathrm{S} - L_p(x)` (ISO 18405:2017,
 3.4.1.4). Here it is the sum of geometrical spreading and volume absorption:
 
-* :func:`spreading_loss` -- geometrical spreading, :math:`20 \log_{10} R`
+* :func:`spreading_loss`: geometrical spreading, :math:`20 \log_{10} R`
   (spherical), :math:`10 \log_{10} R` (cylindrical) or spherical-then-cylindrical
   (``"practical"``).
-* :func:`seawater_absorption` -- the volume absorption coefficient
+* :func:`seawater_absorption`: the volume absorption coefficient
   :math:`\alpha` in
   dB/km, from three coexisting formulations selectable through ``model``:
   Francois & Garrison (1982, the default and reference), Ainslie & McColm (1998,
   a legible simplification of it) and Thorp (1967, a frequency-only form).
-* :func:`propagation_loss` -- the total
+* :func:`propagation_loss`: the total
   :math:`\mathrm{PL} = \text{spreading} + \alpha R` versus range,
   returned as a :class:`PropagationLossResult` with a ``.plot()``.
 
@@ -291,22 +291,22 @@ class PropagationLossResult(OwnsArrays):
 
         The three curves are one decomposition, and it is a decomposition only
         range by range: ``pl`` is ``spreading + absorption`` at each entry of
-        ``range_m``. That is what a reader takes it apart for -- to subtract
+        ``range_m``. That is what a reader takes it apart for (to subtract
         the absorption and put back the one a different water would charge, or
-        to read the spreading law's exponent off its own term -- and every one
+        to read the spreading law's exponent off its own term), and every one
         of those operations is elementwise. A term of another length is not
         obviously wrong to look at, since all three are losses in dB of
         entirely plausible size; it is wrong because each of its values then
         answers for a range the row beside it did not come from. The figure
         does stop on a length disagreement, all three curves being drawn
         against ``range_m``, but with matplotlib's own ``x and y must have
-        same first dimension, but have shapes (4,) and (3,)`` -- shapes only,
+        same first dimension, but have shapes (4,) and (3,)``: shapes only,
         naming neither field, and raised by the drawing rather than by the
         result that was wrong all along.
 
         The ranks are pinned as well, because a count cannot see an extra
-        axis. A ``pl`` of shape ``(n, 2)`` -- two waters stacked side by side,
-        or ``(range, loss)`` pairs kept in one array -- carries one value per
+        axis. A ``pl`` of shape ``(n, 2)`` (two waters stacked side by side,
+        or ``(range, loss)`` pairs kept in one array) carries one value per
         range on its first axis exactly as a single curve does, passes the
         length check, and reaches matplotlib, which draws every column it is
         handed: the figure comes back with a second total-loss curve and the
@@ -315,7 +315,7 @@ class PropagationLossResult(OwnsArrays):
         a grid, the input check testing for finite positive values and not for
         rank: from a two-by-three grid the figure would come back with nine
         lines under three distinct legend labels, each one running down a
-        column and so joining ranges that are not neighbours -- the first of
+        column and so joining ranges that are not neighbours, the first of
         them straight from 100 m to 1000 m, with the 200 m and 400 m between
         them handed to two other lines.
 

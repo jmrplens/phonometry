@@ -55,8 +55,8 @@ Turned around, the same equation answers the question a designer actually asks:
 That is [`enclosure_required_transmission_loss`](/phonometry/reference/api/noise_control/enclosures/#enclosure_required_transmission_loss), which returns the required
 `R` per band in the same [`EnclosureInsertionLossResult`](/phonometry/reference/api/noise_control/enclosures/#enclosureinsertionlossresult).
 
-**The panel transmission loss `R` is supplied by the caller** -- measured, or
-predicted by a panel model -- as a per-band array, a callable of frequency, or
+**The panel transmission loss `R` is supplied by the caller** (measured, or
+predicted by a panel model) as a per-band array, a callable of frequency, or
 a panel prediction result (a [`phonometry.building.SoundReductionResult`](/phonometry/reference/api/building/panel-transmission/#soundreductionresult)
 or [`phonometry.building.ApertureTransmissionResult`](/phonometry/reference/api/building/aperture-transmission/#aperturetransmissionresult), matched structurally
 so no dependency on `building` is introduced). This module never predicts

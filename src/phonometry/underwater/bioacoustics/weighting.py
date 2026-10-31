@@ -16,14 +16,14 @@ has its minimum at the weighted threshold :math:`T_\mathrm{w} = K + C`. Only the
 parameter table changes between guidance versions, so the version is explicit
 in the API and is carried on every result object:
 
-* ``"nmfs-2024"`` -- NOAA Fisheries, *Updated Technical Guidance*, version 3.0
+* ``"nmfs-2024"``: NOAA Fisheries, *Updated Technical Guidance*, version 3.0
   (October 2024), Table 5 and Table ES3. **The default**: it supersedes the
   2018 revision, uses :math:`b = 5` for every group, renames the groups to
   the Southall scheme (LF/HF/VHF cetaceans, PW/OW in water, PA/OA in air) and
   replaces "PTS onset" with "auditory injury (AUD INJ) onset".
-* ``"nmfs-2018"`` -- the 2018 revision, version 2.0, Table 3 and Table ES3.
+* ``"nmfs-2018"``: the 2018 revision, version 2.0, Table 3 and Table ES3.
   Still cited by assessments already in flight.
-* ``"southall-2019"`` -- Southall et al., *Aquatic Mammals* 45(2), Tables 5, 6
+* ``"southall-2019"``: Southall et al., *Aquatic Mammals* 45(2), Tables 5, 6
   and 7, the peer-reviewed criteria; adds sirenians (SI) and both in-air
   carnivore groups. Numerically identical to NMFS 2018 on the five shared
   groups.
@@ -645,8 +645,8 @@ class AuditoryWeightingResult(OwnsArrays):
         draw time and naming neither field. ``exposure_function`` is read by
         nothing here at all: :meth:`plot` never touches it, so a curve cut
         short still draws a clean figure while the quantity it is consulted
-        for -- its minimum, the weighted TTS onset :math:`T_\mathrm{w}`, and
-        the frequency that minimum falls at -- is taken over whichever part
+        for (its minimum, the weighted TTS onset :math:`T_\mathrm{w}`, and
+        the frequency that minimum falls at) is taken over whichever part
         survived and comes back wrong without a word.
 
         The rank is pinned beside the length, because an ``(n, 2)`` column
@@ -812,7 +812,7 @@ class WeightedExposureResult(OwnsArrays):
         criterion is not published); positive means the criterion is exceeded.
     :ivar tts_margin: ``cumulative_sel - tts_sel``, in dB (or ``None``).
     :ivar peak_margin: ``peak_spl - injury_peak_spl``, in dB (or ``None``).
-    :ivar tts_peak_margin: ``peak_spl - tts_peak_spl``, in dB (or ``None``) --
+    :ivar tts_peak_margin: ``peak_spl - tts_peak_spl``, in dB (or ``None``):
         the peak-SPL half of the dual metric on the TTS side, which can trip
         ``exceeds_tts`` on its own.
     :ivar guidance: The guidance version.
@@ -873,7 +873,7 @@ class WeightedExposureResult(OwnsArrays):
         anything stored here: it is the flat zero-to-peak level of the record
         the spectrum came from, in dB re 1 µPa against band exposures in
         dB re 1 µPa²·s, and no band column carries the crest factor that would
-        relate the two. It is refused only when it is not a number at all --
+        relate the two. It is refused only when it is not a number at all:
         ``None``, the state the producer uses for a level that was never
         supplied, is left alone. Its two margins *are* closed: each is that
         stored level less a stored criterion, and ``None`` exactly when there
@@ -951,8 +951,8 @@ def _margins_agree(margin: float | None, expected: float | None) -> bool:
     """Whether a stored margin is the one its level and criterion imply.
 
     :func:`_margin` read backwards, for :func:`_require_margins_restate`. An
-    absent margin and an absent expectation are the same statement -- there
-    was no level to compare, or no criterion published to compare it with --
+    absent margin and an absent expectation are the same statement (there
+    was no level to compare, or no criterion published to compare it with),
     and one of each is a contradiction whichever way round it falls. Where both
     are present a billionth of a decibel is allowed, so a caller who recomputed
     the subtraction along another floating-point path is not refused over the

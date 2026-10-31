@@ -35,8 +35,8 @@ narrowband.
 The **envelope spectrum** (:func:`envelope_spectrum`) transforms the
 detected envelope itself: Section 13.3 of the book runs a band-pass
 filter and a square-law envelope detector into a DC remover before
-correlating (Figure 13.11), because the spectral content of the envelope
-- not of the signal - is where amplitude modulations show as discrete
+correlating (Figure 13.11), because the spectral content of the envelope,
+not of the signal, is where amplitude modulations show as discrete
 lines. The optional ``band`` argument reproduces the figure's band-pass
 front end (the classical bearing-envelope chain: isolate the resonance
 band, then envelope it). An AM tone with modulation frequency :math:`f_\mathrm{m}`
@@ -133,7 +133,7 @@ class EnvelopeResult(OwnsArrays):
         stacks the envelope panel and the instantaneous-frequency panel on a
         shared time axis, so the moment a modulation peaks in the upper panel
         is read against the frequency directly below it. Decimation is what
-        makes that fragile -- the envelope goes through a filter and the
+        makes that fragile: the envelope goes through a filter and the
         phase through plain subsampling, and only the output rate ties the
         two results together afterwards.
 
@@ -339,7 +339,7 @@ class EnvelopeSpectrumResult(OwnsArrays):
         :meth:`plot` draws them as two panels, the envelope against
         :attr:`times` above and the modulation lines against
         :attr:`frequencies` below, and reads a line's height as the
-        modulation depth carried by the envelope in the panel above -- which
+        modulation depth carried by the envelope in the panel above, which
         holds only while each panel's pair is one measurement.
 
         :attr:`band` states the two edges of the optional band-pass front
@@ -350,10 +350,10 @@ class EnvelopeSpectrumResult(OwnsArrays):
         it is closed over the panel's own column: it is the plain mean of
         :attr:`envelope`, the DC that Figure 13.11's remover subtracts before
         the transform, so ``envelope - mean_level`` is what the lines below
-        were measured on. Nothing about it is a decibel -- the detector output
-        is a linear amplitude (or its square), and the documented closed forms
+        were measured on. Nothing about it is a decibel (the detector output
+        is a linear amplitude or its square, and the documented closed forms
         :math:`A_0` and :math:`A_0^2 (1 + m^2/2)` are exactly the arithmetic
-        means of those two columns -- so neither a level of the column nor its
+        means of those two columns), so neither a level of the column nor its
         energy mean restates it. :meth:`plot` draws it as the labelled rule
         across the envelope panel, where the reader takes the modulation as
         the trace's excursion about that rule: a mean level belonging to
@@ -366,7 +366,7 @@ class EnvelopeSpectrumResult(OwnsArrays):
         decibel margins elsewhere in the tree: an envelope mean carries the
         record's own units and no bounded scale, so a caller who recomputed
         the mean along another summation path must not be refused over the
-        last bit, while an absolute floor would be a floor in nothing --
+        last bit, while an absolute floor would be a floor in nothing:
         a squared detector reading a tone at the threshold of hearing means
         some :math:`10^{-9}` Pa^2, and a floor that size would wave through
         every statement about it, zero and negatives included.
@@ -375,7 +375,7 @@ class EnvelopeSpectrumResult(OwnsArrays):
         transform never makes one. So is an undetermined one:
         :func:`envelope_spectrum` refuses a non-finite record, but a finite
         one can still overflow inside the Hilbert transform and detect an
-        all-NaN envelope, and NaN is then the mean's honest restatement --
+        all-NaN envelope, and NaN is then the mean's honest restatement,
         which no comparison of NaN with NaN can confirm. Such a column is
         one the producer legitimately emits, so it is passed rather than
         refused; only a column with a mean is held to it.
@@ -489,8 +489,8 @@ def envelope_spectrum(
     is tapered and transformed once, scaled by the taper's coherent gain
     so a sinusoidal modulation whose frequency falls on an analysis bin
     reads out as a line at its exact amplitude. An off-bin modulation
-    frequency reads low by the taper's scalloping loss -- up to about
-    1.4 dB (~15 %) for the default Hann midway between bins -- like any
+    frequency reads low by the taper's scalloping loss (up to about
+    1.4 dB, ~15 %, for the default Hann midway between bins), like any
     single-record amplitude spectrum.
 
     Closed forms for an AM tone
@@ -507,8 +507,8 @@ def envelope_spectrum(
     frequencies), mains hum and wind-turbine amplitude modulation appear
     the same way: lines at the modulation frequency and its harmonics,
     separated from the carrier's own spectrum. For the classical bearing
-    chain -- isolate a structural-resonance band excited by the defect
-    impacts, then envelope it -- pass the resonance band as ``band``: the
+    chain (isolate a structural-resonance band excited by the defect
+    impacts, then envelope it) pass the resonance band as ``band``: the
     record is band-pass filtered (zero-phase, so the modulation phase is
     untouched) before the detector, the Figure 13.11 front end.
 

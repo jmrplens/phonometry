@@ -1,8 +1,8 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
 r"""Psychoacoustic annoyance (PA) after Fastl & Zwicker.
 
-Psychoacoustic annoyance combines four hearing sensations -- loudness,
-sharpness, fluctuation strength and roughness -- into a single figure that
+Psychoacoustic annoyance combines four hearing sensations (loudness,
+sharpness, fluctuation strength and roughness) into a single figure that
 tracks annoyance ratings from listening experiments. The model is due to
 Widmann (1992) and is given in Fastl & Zwicker, *Psychoacoustics: Facts and
 Models* (Equations 16.2-16.4):
@@ -32,7 +32,7 @@ open SQAT reference implementation.
 :func:`psychoacoustic_annoyance` evaluates the model from the four quantities
 directly. :func:`psychoacoustic_annoyance_from_signal` is a convenience that
 derives them from a calibrated pressure signal using the library's existing
-models -- N5/S from ISO 532-1 Zwicker loudness and DIN 45692 sharpness, R from
+models: N5/S from ISO 532-1 Zwicker loudness and DIN 45692 sharpness, R from
 ECMA-418-2 roughness and F from
 :func:`~phonometry.psychoacoustics.quality.fluctuation_strength`. That composite
 mixes model families (Zwicker N5/S, Sottek R, Osses F); the original PA model

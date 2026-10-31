@@ -40,8 +40,8 @@ Both references trace back to the same ASHRAE data for the elbows: Bies
 Table 8.11 is indexed by $W / \lambda$ and Long Tables 14.5-14.7 by the
 frequency-width product `f w` (kHz times inches), and the two indexings agree
 band by band ($W / \lambda = 0.074 f w$), so [`elbow_insertion_loss`](/phonometry/reference/api/noise_control/hvac/#elbow_insertion_loss)
-serves both. Where they genuinely differ -- the end reflection, tabulated by
-Bies and given in closed form by Long -- both are selectable
+serves both. Where they genuinely differ (the end reflection, tabulated by
+Bies and given in closed form by Long), both are selectable
 (`method="bies"` or `method="long"`) and neither replaces the other.
 
 [`phonometry.noise_control.duct_path`](/phonometry/reference/api/noise_control/duct-path/#duct_path) chains these elements into the

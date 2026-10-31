@@ -601,7 +601,7 @@ def sound_power_intensity(
     :param repeatability_limit: Override for the criterion-3 limit ``s`` (dB),
         scalar or per band; defaults to ISO 9614-2 Table 2 by ``frequencies``
         for ``'engineering'``. For ``'survey'`` the default is the A-weighted
-        4 dB reused per band (extrapolated -- non-normative).
+        4 dB reused per band (extrapolated, non-normative).
     :return: :class:`SoundPowerIntensityResult`.
     :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a float), or
         ``frequencies`` holds a text or a value that is not a real number, or ``grade``

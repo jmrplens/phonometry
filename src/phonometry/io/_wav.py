@@ -2,10 +2,10 @@
 r"""Base-install WAV reading: scipy decodes the samples, the walker the rest.
 
 :mod:`scipy.io.wavfile` already decodes every linear WAV variant measurement
-equipment writes -- PCM 1-64 bit (24-bit arrives as ``int32`` with the sample
-left-justified in the container), IEEE float 32/64, WAVE_FORMAT_EXTENSIBLE
-(it resolves the codec from the SubFormat GUID) and RF64 (it honours
-``ds64``) -- so the base install needs no new dependency to read the linear
+equipment writes (PCM 1-64 bit, 24-bit arriving as ``int32`` with the sample
+left-justified in the container; IEEE float 32/64; WAVE_FORMAT_EXTENSIBLE,
+whose codec it resolves from the SubFormat GUID; and RF64, whose ``ds64`` it
+honours), so the base install needs no new dependency to read the linear
 recordings of an NTi XL2 Extended Acoustic Pack, a Svantek SVAN or a field
 recorder. What scipy does not do is keep the metadata (it skips ``bext`` and
 friends with a ``WavFileWarning``) or choose a float scaling; this module
@@ -13,7 +13,7 @@ adds both and returns a :class:`~phonometry.io.Signal`.
 
 **Integer scaling.** Integer samples are divided by :math:`2^{B-1}` for a
 ``B``-bit container (128 for the unsigned 8-bit convention, 32768 for 16-bit,
-:math:`2^{31}` for 24-bit-in-``int32`` -- scipy's left-justification makes
+:math:`2^{31}` for 24-bit-in-``int32``, where scipy's left-justification makes
 that identical to dividing the 24-bit value by :math:`2^{23}`). Two reasons,
 in order of weight:
 
@@ -24,7 +24,7 @@ in order of weight:
   for divisor ``D``: the calibrator recording gives
   ``calibration_factor = p_ref / rms(n_cal / D) = D * p_ref / rms(n_cal)``, and
   a measurement then reads
-  ``x * calibration_factor = (n / D) * D * p_ref / rms(n_cal)`` -- ``D``
+  ``x * calibration_factor = (n / D) * D * p_ref / rms(n_cal)``, and ``D``
   divides out exactly. The perennial 32767-vs-32768 debate is therefore moot
   here; even uncalibrated, the difference is
   ``20*log10(32768/32767) = 0.00027 dB``, some 380 times smaller than the
@@ -87,7 +87,7 @@ class AudioFileInfo(RichDisplay):
     :func:`phonometry.io.read` warns when asked to read one.
     ``channel_mask``/``channel_labels``, ``bext``, ``has_ixml`` and
     ``cue_points`` are WAV-family metadata and are ``None``/empty for other
-    containers -- except ``bext``, which a FLAC can also carry in its
+    containers, except ``bext``, which a FLAC can also carry in its
     APPLICATION ``riff`` block (see :mod:`phonometry.io._flac`).
     """
 
@@ -173,10 +173,10 @@ def read_wav(
 ) -> Signal:
     """Read a linear (PCM or IEEE float) WAV into a :class:`Signal`.
 
-    scipy decodes the samples -- memory-mapped where the container allows
-    it (everything but 24-bit, whose 3-byte stride no numpy dtype can map),
-    so the integer file is paged in rather than duplicated while the float64
-    copy is built -- and its ``WavFileWarning`` about skipped chunks is
+    scipy decodes the samples (memory-mapped where the container allows
+    it, which is everything but 24-bit, whose 3-byte stride no numpy dtype
+    can map, so the integer file is paged in rather than duplicated while the
+    float64 copy is built), and its ``WavFileWarning`` about skipped chunks is
     suppressed, because the chunk walker read those chunks already: the
     ``bext`` provenance and EXTENSIBLE channel labels land on the returned
     object instead of a warning about their loss. Samples are scaled per
@@ -190,8 +190,8 @@ def read_wav(
     is checked against the bytes the file actually holds. The walker never
     verifies this (``info()`` on a header-only forgery is a feature, and it
     seeks past the payload rather than reading it), and scipy cannot be
-    relied on to: its non-mmap path -- 24-bit, the depth field recorders
-    actually write -- tolerates a short read and returns the frames it
+    relied on to: its non-mmap path (24-bit, the depth field recorders
+    actually write) tolerates a short read and returns the frames it
     found. A truncated recording (interrupted copy, full card) would then
     come back as a shorter file that looks right, and a level integrated
     over it (Leq, SEL) would be a wrong number with nothing wrong-looking

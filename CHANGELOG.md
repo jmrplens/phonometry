@@ -2215,6 +2215,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **The API reference and `help()` show no double hyphen where a sentence
+  wanted a colon, and the `fluids` package says what it holds.** Docstrings
+  spelt a dash as `--`, which `help()` prints as it is and the site published
+  as an em dash: 586 lines in 116 modules, 92 of them list items such as
+  ``:func:`x` -- text``. Each now reads as a colon, a comma, a parenthesis or a
+  sentence of its own, as the sentence needs. Another 35 list items in 8
+  modules joined their head to their text with a single spaced hyphen
+  (``:func:`x` - text``), and they take the colon too; the envelope page no
+  longer shows a stray list item where a wrapped line of its docstring opened
+  on such a hyphen. `scripts/check_em_dashes.py` refuses the double hyphen in
+  a docstring and in the prose of every page, outside code, math, link
+  destinations and HTML comments, the spaced form in any other published
+  string, and the spaced single hyphen after a list item's head, so none can
+  come back (rule P6); it also reads the entities and the escapes of the em
+  dash (`&mdash;`, `\u2014`) as the character they publish, where they are
+  decoded: an escape in a frontmatter counts in a double-quoted value only,
+  as YAML has it. The API reference fences a code directive's body and a
+  doctest as code, under a fence longer than any run of backticks the example
+  shows, as the check reads them in the docstring. The `fluids` package opens
+  with a sentence naming humid air by IEC 61094-2 Annex F, sea water, ideal
+  gases and the fluid states and nonlinearity parameters books print, where
+  its API page read "fluids domain of phonometry (see module docstrings)".
+
 - **A record that holds a read-only mapping pickles and deep-copies.**
   `MappingProxyType` can be neither pickled nor deep-copied, and 48 of the
   records the test suite builds held one and failed both with `TypeError:
@@ -10599,9 +10622,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   come to cost about 260. The loop was the price of determinism: numpy's `log`
   is dispatched on what the CPU offers and its AVX512 kernels disagree with
   the rest in the last bit, so every transcendental on the design path was
-  taken from `math` one element at a time, and `log` -- the one that runs
+  taken from `math` one element at a time, and `log` (the one that runs
   inside the Levenberg-Marquardt iteration, three quarters of a million calls
-  per design -- carried almost all of the cost. The new module spells the C
+  per design) carried almost all of the cost. The new module spells the C
   library's own `log`, the table-driven routine from ARM's optimized-routines
   that glibc ships, in numpy operations IEEE 754 pins exactly: plain
   arithmetic, integer bit work and table takes, with the routine's fused
@@ -14523,7 +14546,7 @@ the whole of the migration.
   vector total `a_hv` for hand-arm, the Part B dominant-axis value for
   whole-body (not the ISO 2631-1 Eq. (10) vector total `a_v`).
 - `metrology.envelope_spectrum`: optional `band=(low, high)` zero-phase
-  band-pass pre-filter ahead of the envelope detector -- the band-pass
+  band-pass pre-filter ahead of the envelope detector: the band-pass
   front end of Bendat & Piersol Figure 13.11 and the classical
   bearing-envelope chain; the band travels with the result. The
   amplitude-calibration docs now state the on-bin condition and the

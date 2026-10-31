@@ -15,7 +15,7 @@ quantitative pillars of that chapter.
 
 **Stationarity** (B&P Sec. 10.3.1.1). The record is divided into `N` equal
 intervals, a mean square value (or another moment) is computed for each, and
-the sequence is tested for underlying trends with a *nonparametric* test --
+the sequence is tested for underlying trends with a *nonparametric* test:
 no assumption about the sampling distribution of the values is needed. The
 book's test is the **reverse arrangement test** (Sec. 4.5.2): count the pairs
 $i < j$ with $x_i > x_j$. For an ordered sequence of independent
@@ -42,7 +42,7 @@ $$
 (Eqs. (5.214)-(5.216)) determine every crossing and peak statistic:
 
 * the expected number of zero crossings per unit time (both slopes),
-  $N_0 = (1/\pi)(\sigma_v / \sigma_x)$ (Eq. (5.195)) -- equivalently
+  $N_0 = (1/\pi)(\sigma_v / \sigma_x)$ (Eq. (5.195)), equivalently
   $2\sqrt{m_2 / m_0}$ with the plain frequency moments
   $m_k = \int f^k G \, df$; twice the record's *apparent frequency*;
 * the expected number of crossings of level `a`,
@@ -94,8 +94,8 @@ $N_0 = (1/\pi)(\sigma_v/\sigma_x) = 2\sqrt{m_2/m_0}$
 $N_a = N_0 \mathrm{e}^{-a^2/(2\sigma_x^2)}$ (Eq. (5.196)), with the
 spectral moments taken from the record's own Welch autospectrum. For
 low-pass white noise of bandwidth `B` the expectation is
-$N_0 = 2B/\sqrt{3}$ -- an apparent frequency of `0.58 B` (B&P
-Example 5.12) -- and for bandwidth-limited white noise centred on
+$N_0 = 2B/\sqrt{3}$, an apparent frequency of `0.58 B` (B&P
+Example 5.12), and for bandwidth-limited white noise centred on
 `fc`, $N_0 = 2\sqrt{f_\mathrm{c}^2 + B^2/12}$ (Example 5.13).
 
 The record mean is removed first (the formulas hold for zero mean
@@ -244,9 +244,9 @@ Peak (maxima) statistics of a record against the Rice expectations.
 "Positive peaks" are the record's local maxima, positive or negative
 in value (B&P Sec. 5.5.3). For Gaussian records the expected rate of
 maxima is $M = (1/2\pi)(\sigma_a/\sigma_v) = \sqrt{m_4/m_2}$
-(Eq. (5.211)), and the ratio $r = N_0/(2M)$ -- the
+(Eq. (5.211)), and the ratio $r = N_0/(2M)$, the
 **irregularity factor**, between 0 and 1 by the Schwartz inequality
-(Eq. (5.220)) -- fixes the standardized peak-height distribution:
+(Eq. (5.220)), fixes the standardized peak-height distribution:
 Rayleigh at $r = 1$ (every cycle carries one maximum), Gaussian
 as $r \to 0$ (Sec. 5.5.4).
 
@@ -290,8 +290,8 @@ factor.
 
 B&P Eq. (5.223): the probability that a maximum chosen at random
 exceeds `z` record RMS units. $\mathrm{e}^{-z^2/2}$ for narrow
-bandwidth data -- $\mathrm{e}^{-8} = 0.00033$ at $z = 4$, B&P
-Example 5.14 -- and the Gaussian exceedance in the wide
+bandwidth data ($\mathrm{e}^{-8} = 0.00033$ at $z = 4$, B&P
+Example 5.14) and the Gaussian exceedance in the wide
 bandwidth limit.
 
 **Parameters**
@@ -341,7 +341,7 @@ The B&P Sec. 10.3.1.1 procedure: (1) divide the record into
 `n_segments` equal intervals, assumed long enough for the values to
 be independent; (2) compute a mean square value (or another moment)
 for each interval; (3) test the sequence for underlying trends with a
-nonparametric test -- no knowledge of the record's bandwidth or
+nonparametric test, with no knowledge of the record's bandwidth or
 sampling distribution required. Nonstationarities that show in the
 mean square value (the usual case: gain drifts, level ramps, machinery
 running up) are detected regardless of the record's spectrum; the
@@ -467,7 +467,7 @@ trend_test(
 Nonparametric trend test on a sequence of observations or estimates.
 
 Tests the hypothesis that the sequence holds independent observations
-of one random variable -- no underlying trend -- without assuming any
+of one random variable (no underlying trend) without assuming any
 sampling distribution (B&P Sec. 4.5.2). Two classical statistics:
 
 * `"reverse_arrangements"` (default): the count `A` of pairs

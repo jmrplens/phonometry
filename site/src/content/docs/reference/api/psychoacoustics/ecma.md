@@ -56,7 +56,7 @@ threshold in quiet (Formulae 23-25, Tables 2 and 3) and the sum of
 Formula 26.
 
 The API is monaural: the quadratic-mean binaural combination of
-Formula (118) (Clause 8.1.5) is not implemented -- analyse each channel
+Formula (118) (Clause 8.1.5) is not implemented: analyse each channel
 separately.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.

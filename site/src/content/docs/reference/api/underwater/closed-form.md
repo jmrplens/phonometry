@@ -12,15 +12,15 @@ the source level in a given direction and the mean-square sound pressure level
 at the receiver, $N_\mathrm{PL}(x) = L_\mathrm{S} - L_p(x)$ (ISO 18405:2017,
 3.4.1.4). Here it is the sum of geometrical spreading and volume absorption:
 
-* [`spreading_loss`](/phonometry/reference/api/underwater/closed-form/#spreading_loss) -- geometrical spreading, $20 \log_{10} R$
+* [`spreading_loss`](/phonometry/reference/api/underwater/closed-form/#spreading_loss): geometrical spreading, $20 \log_{10} R$
   (spherical), $10 \log_{10} R$ (cylindrical) or spherical-then-cylindrical
   (`"practical"`).
-* [`seawater_absorption`](/phonometry/reference/api/underwater/closed-form/#seawater_absorption) -- the volume absorption coefficient
+* [`seawater_absorption`](/phonometry/reference/api/underwater/closed-form/#seawater_absorption): the volume absorption coefficient
   $\alpha$ in
   dB/km, from three coexisting formulations selectable through `model`:
   Francois & Garrison (1982, the default and reference), Ainslie & McColm (1998,
   a legible simplification of it) and Thorp (1967, a frequency-only form).
-* [`propagation_loss`](/phonometry/reference/api/underwater/closed-form/#propagation_loss) -- the total
+* [`propagation_loss`](/phonometry/reference/api/underwater/closed-form/#propagation_loss): the total
   $\mathrm{PL} = \text{spreading} + \alpha R$ versus range,
   returned as a [`PropagationLossResult`](/phonometry/reference/api/underwater/closed-form/#propagationlossresult) with a `.plot()`.
 

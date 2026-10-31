@@ -250,6 +250,87 @@ def test_math_directive_keeps_one_environment_in_one_block() -> None:
     assert out.count("\\begin{aligned}") == out.count("\\end{aligned}") == 1
 
 
+def test_code_directive_and_doctest_become_fenced_code() -> None:
+    # Shown raw, ``.. code-block:: bash`` and a ``>>>`` session read as prose
+    # (the prompt even as a nested blockquote), and the prose checks of the
+    # page then read their option flags as dashes the docstring never wrote.
+    text = (
+        "Run it as\n"
+        "\n"
+        ".. code-block:: bash\n"
+        "   :linenos:\n"
+        "\n"
+        "   python x.py --count -- y\n"
+        "\n"
+        ">>> run('--count')\n"
+        "'--'\n"
+        "\n"
+        "* An item\n"
+        "\n"
+        "  .. code::\n"
+        "\n"
+        "     a --b\n"
+    )
+    out = gad.render_prose(text, {}, gad.RoleStats())
+    assert "```bash\npython x.py --count -- y\n```" in out
+    assert "```python\n>>> run('--count')\n'--'\n```" in out
+    # Nested in a list item, the fence keeps the item's indent; a directive
+    # that names no language is text.
+    assert "  ```text\n  a --b\n  ```" in out
+    assert ".. code" not in out
+    assert ":linenos:" not in out
+
+
+def test_a_fence_shown_inside_a_code_example_does_not_close_it() -> None:
+    # A three-backtick fence around an example that shows a fenced snippet of
+    # its own closes on the snippet's first marker, and the rest of the
+    # example reaches the page as its text, option flags and all.
+    from markdown_fences import fences
+
+    text = (
+        "Write the page as\n"
+        "\n"
+        ".. code-block:: markdown\n"
+        "\n"
+        "   ```bash\n"
+        "   python x.py --count\n"
+        "   ```\n"
+        "\n"
+        "or as::\n"
+        "\n"
+        "    ````\n"
+        "    make audit -- --only\n"
+        "    ````\n"
+        "\n"
+        ">>> print('```')\n"
+        "```\n"
+    )
+    out = gad.render_prose(text, {}, gad.RoleStats())
+    blocks = list(fences(out))
+    assert [block.info for block in blocks] == ["markdown", "text", "python"]
+    assert blocks[0].body == "```bash\npython x.py --count\n```\n"
+    assert blocks[1].body == "````\nmake audit -- --only\n````\n"
+    assert blocks[2].body == ">>> print('```')\n```\n"
+    # A docstring with nothing of the kind keeps the three backticks.
+    plain = gad.render_prose(".. code-block:: bash\n\n   ls\n", {}, gad.RoleStats())
+    assert "```bash\nls\n```" in plain
+    assert "````" not in plain
+
+
+def test_a_docstring_published_verbatim_keeps_its_own_fence_inside() -> None:
+    # A docstring the parser cannot read goes out whole in one text block; a
+    # fence it shows would close that block early.
+    from markdown_fences import fences
+
+    doc = "Shows a fence.\n\n```\nmake audit -- --only\n```\n\n:frobnicate: x"
+    failures: list[str] = []
+    out = "\n".join(
+        gad._render_docbody("phonometry.x.f", doc, {}, gad.RoleStats(), failures)
+    )
+    assert failures
+    assert [(block.info, block.body) for block in fences(out)] == [("text", f"{doc}\n")]
+
+
 # ---------------------------------------------------------------------------
 # Full generation
 # ---------------------------------------------------------------------------

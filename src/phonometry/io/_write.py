@@ -2,7 +2,7 @@
 r"""Base-install WAV writing: scipy where it already serves, in-house where not.
 
 :func:`scipy.io.wavfile.write` covers most of what a measurement export
-needs -- PCM 16/32, IEEE float 32/64, and automatic RF64 promotion when the
+needs: PCM 16/32, IEEE float 32/64, and automatic RF64 promotion when the
 file would pass the 4 GiB RIFF limit (verified in the scipy source: it
 rebuilds the header as ``RF64`` + ``ds64`` when ``file size - 8`` exceeds
 0xFFFFFFFF, exactly the EBU Tech 3306 layout the reader in this package
@@ -41,15 +41,15 @@ quantisation error independent of the signal, replacing correlated
 distortion with a benign constant noise floor of variance
 :math:`\Delta^2/4` (dither :math:`\Delta^2/6` plus quantiser
 :math:`\Delta^2/12`), about 4.8 dB above the undithered quantiser alone.
-That trade is right for audition and wrong for analysis -- dither *adds*
-noise to data -- which is why it is opt-in, and refused entirely at 24 bits
+That trade is right for audition and wrong for analysis (dither *adds*
+noise to data), which is why it is opt-in, and refused entirely at 24 bits
 or above, where the quantisation error (roughly -146 dBFS at 24 bits) is
 already far below the noise floor of any microphone chain and the added
 noise would buy nothing.
 
 **24-bit packing.** A 24-bit PCM sample is three little-endian bytes.
 NumPy cannot address a 3-byte stride, so each code is materialised as a
-little-endian ``int32`` and the low three bytes are kept -- the exact
+little-endian ``int32`` and the low three bytes are kept: the exact
 inverse of the read path, where scipy left-justifies the three bytes into
 ``int32`` (so ``raw24 / 2^23 == int32 / 2^31``). The container is written
 as plain ``WAVE_FORMAT_PCM``: Microsoft's guidance prefers EXTENSIBLE
@@ -60,8 +60,8 @@ here (a channel mask can be attached via ``Signal.channel_labels`` and the
 sidecar instead).
 
 Integer input arrays (``int16``/``int32``) are written as a bit-exact
-pass-through of their codes -- the archival path, where the file must hold
-exactly the integers that came from the converter -- and refuse a
+pass-through of their codes (the archival path, where the file must hold
+exactly the integers that came from the converter) and refuse a
 conflicting ``subtype`` rather than resample the codes behind the caller's
 back.
 """
@@ -286,8 +286,8 @@ def build_wav_header(
     RIFF-framed, e.g. a ``bext``) land between ``fmt`` and ``data``.
 
     The container promotes itself to RF64 under the same condition scipy's
-    writer uses -- the RIFF payload (file size minus the 8-byte outer
-    header) exceeding 0xFFFFFFFF -- with the EBU Tech 3306 layout: fourcc
+    writer uses (the RIFF payload, file size minus the 8-byte outer
+    header, exceeding 0xFFFFFFFF) with the EBU Tech 3306 layout: fourcc
     ``RF64``, outer size 0xFFFFFFFF, a ``ds64`` first after ``WAVE``
     carrying the real 64-bit sizes, and the ``data`` size field set to the
     0xFFFFFFFF sentinel. IEEE float files get the ``fact`` frame count and
@@ -369,9 +369,9 @@ def append_riff_chunk(path: str | Path, chunk_id: bytes, payload: bytes) -> None
     """Append a chunk to a finished WAV/RF64 file and repair its size field.
 
     The path for files scipy wrote (its writer offers no metadata): the
-    chunk lands after ``data`` -- a legal position, and the one the
+    chunk lands after ``data`` (a legal position, and the one the
     package's own walker and every RIFF reader that honours chunk headers
-    handle -- the file is first padded to even length if the data payload
+    handle); the file is first padded to even length if the data payload
     left it odd (scipy writes no alignment pad), and the container's
     declared size is patched: the 32-bit RIFF size at offset 4, or for
     RF64/BW64 the 64-bit ``ds64`` riff size at offset 20 (the fixed
@@ -531,7 +531,7 @@ def write_wav_stream(
 
     The in-house writer: because ``frames`` is known up front, the header
     (RF64 automatic past 4 GiB) is exact before the first sample lands
-    and nothing is ever seeked back and patched -- each block is encoded,
+    and nothing is ever seeked back and patched: each block is encoded,
     interleaved and appended, so an hour of RF64 flows through a
     block-sized memory window. The blocks carry quantised codes for the
     PCM subtypes and float samples for the float ones; no scaling happens
@@ -544,7 +544,7 @@ def write_wav_stream(
         place at close so the sizes on disk describe what was actually
         written, instead of the mismatch being an error.
     :raises ValueError: If the blocks do not add up to exactly ``frames``
-        frames and ``frames`` was not an estimate -- the header already
+        frames and ``frames`` was not an estimate: the header already
         promised that length, so a mismatch is a corrupt file, not a
         rounding detail.
     :raises TypeError: if ``frames`` is not a single number.
@@ -757,10 +757,10 @@ def write(
     What this function will never do, each a documented ecosystem default
     that destroys a measurement: normalise (python-acoustics ``to_wav``),
     resample, or mix channels. Samples that exceed full scale on an
-    integer subtype are saturated and *reported* -- see
+    integer subtype are saturated and *reported* (see
     :class:`ClippingWarning` and the module docstring for the exact
     quantisation math, the +1.0 edge, and why the scaling choice cancels
-    out of calibrated results.
+    out of calibrated results).
 
     :param path: Destination file; the suffix picks the container: the
         WAV family (``.wav``, ``.wave``, ``.bwf``) on the base install,
@@ -783,8 +783,8 @@ def write(
         R 128 fields with the library's BS.1770 implementation on the
         samples being written (one extra pass, which is why it is
         opt-in); a :class:`BroadcastMetadata` is written as given.
-        Every written chunk's CodingHistory is extended -- never
-        replaced -- with phonometry's ``A=,F=,W=,M=,T=`` line.
+        Every written chunk's CodingHistory is extended, never
+        replaced, with phonometry's ``A=,F=,W=,M=,T=`` line.
     :param dither: ``"tpdf"`` adds +/-1 LSB triangular-PDF dither before
         quantising to ``PCM_16`` (Lipshitz et al. 1992; see the module
         docstring); ``None`` (default) quantises plainly. Refused for any

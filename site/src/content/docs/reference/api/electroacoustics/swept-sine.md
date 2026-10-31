@@ -26,7 +26,7 @@ frequency with one measurement instead of a tone-by-tone sweep.
 
 Two excitation/deconvolution pairs are implemented:
 
-* **Synchronized swept-sine (Novak et al. 2015)** -- the sweep
+* **Synchronized swept-sine (Novak et al. 2015)**: the sweep
   $x(t) = \sin[2\pi f_1 L \exp(t/L)]$ with the rate rounded so
   that $f_1 L$ is an integer (Eqs. 47/49). Time-shifting this
   signal by $L \ln(n)$ is then *exactly* equivalent to generating
@@ -39,7 +39,7 @@ Two excitation/deconvolution pairs are implemented:
   [`synchronized_sweep_signal`](/phonometry/reference/api/electroacoustics/swept-sine/#synchronized_sweep_signal); analysed with
   `method="synchronized"` (the default).
 
-* **Exponential sweep with the Farina inverse filter** -- the classical
+* **Exponential sweep with the Farina inverse filter**: the classical
   ESS of [`phonometry.room.sweep_signal`](/phonometry/reference/api/rooms/impulse-response/#sweep_signal) deconvolved by the time-reversed,
   amplitude-compensated sweep (Farina 2000; ISO 18233:2006 Figure B.2,
   the machinery of [`phonometry.room.impulse_response`](/phonometry/reference/api/rooms/impulse-response/#impulse_response)). The harmonic
@@ -54,7 +54,7 @@ $y = x + a_2 x^2 + a_3 x^3$ with a unit sweep must return, by the
 Chebyshev identities, $\lvert H_1 \rvert = 1 + 3 a_3/4$,
 $\lvert H_2 \rvert = a_2/2$ (phase $-\pi/2$) and
 $\lvert H_3 \rvert = a_3/4$ (phase $\pi$), and a THD(f) equal to
-the closed form $\sqrt{(a_2/2)^2 + (a_3/4)^2} / (1 + 3 a_3/4)$ -- which
+the closed form $\sqrt{(a_2/2)^2 + (a_3/4)^2} / (1 + 3 a_3/4)$, which
 also matches [`phonometry.electroacoustics.thd`](/phonometry/reference/api/electroacoustics/distortion/#thd) measured tone by tone on
 the same system.
 
@@ -118,7 +118,7 @@ capped at `f2` by the inverse filter).
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If the inputs are invalid; if `ir_length` (explicit or default) cannot fit between the harmonic arrivals -- lengthen the sweep, lower `n_harmonics` or pass a shorter `ir_length`; if `method="farina"` is asked for orders beyond the anticausal span of its linear deconvolution; or if no excitation frequency has a measurable order-2 product (`f1` above `fs/4`, where every order-2 product would exceed Nyquist). |
+| ValueError | If the inputs are invalid; if `ir_length` (explicit or default) cannot fit between the harmonic arrivals: lengthen the sweep, lower `n_harmonics` or pass a shorter `ir_length`; if `method="farina"` is asked for orders beyond the anticausal span of its linear deconvolution; or if no excitation frequency has a measurable order-2 product (`f1` above `fs/4`, where every order-2 product would exceed Nyquist). |
 | TypeError | if `amplitude`, `duration_s`, `f1`, `f2` or `fs` is not a single number, or `ir_length` or `n_harmonics` is a flag, a text or an array where a count goes, or `method` is not a text. |
 
 ## SweptSineDistortionResult

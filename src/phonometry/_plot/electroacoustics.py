@@ -592,7 +592,7 @@ def _sign_theta_labels(ax: PolarAxes) -> None:
     format spec, so it ignores the ``axes.unicode_minus`` setting and draws a
     negative angle with an ASCII hyphen: a shorter, lower glyph than the minus
     the radial labels beside it carry, inside one figure. Only the glyph
-    changes -- the tick positions stay the ones matplotlib's locator chose.
+    changes: the tick positions stay the ones matplotlib's locator chose.
     """
     from matplotlib.ticker import FuncFormatter
 

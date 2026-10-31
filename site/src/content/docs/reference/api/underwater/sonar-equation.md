@@ -7,15 +7,15 @@ sidebar:
 
 The sonar equation (passive and active), in decibels.
 
-Combines the sonar performance terms -- source level `SL`, propagation loss
+Combines the sonar performance terms (source level `SL`, propagation loss
 `PL`, noise level `NL`, directivity index `DI`, detection threshold `DT`,
-target strength `TS` and reverberation level `RL` -- into the signal excess
+target strength `TS` and reverberation level `RL`) into the signal excess
 `SE`, the signal-to-noise ratio and the figure of merit (the maximum allowable
 propagation loss at the detection limit $\mathrm{SE} = 0$):
 
-* [`passive_sonar_equation`](/phonometry/reference/api/underwater/sonar-equation/#passive_sonar_equation) --
+* [`passive_sonar_equation`](/phonometry/reference/api/underwater/sonar-equation/#passive_sonar_equation):
   $\mathrm{SE} = \mathrm{SL} - \mathrm{PL} - (\mathrm{NL} - \mathrm{DI}) - \mathrm{DT}$.
-* [`active_sonar_equation`](/phonometry/reference/api/underwater/sonar-equation/#active_sonar_equation) -- monostatic, noise-limited
+* [`active_sonar_equation`](/phonometry/reference/api/underwater/sonar-equation/#active_sonar_equation): monostatic, noise-limited
   $\mathrm{SE} = \mathrm{SL} - 2\,\mathrm{PL} + \mathrm{TS} - (\mathrm{NL} - \mathrm{DI}) - \mathrm{DT}$ or, when a reverberation level
   is given, reverberation-limited
   $\mathrm{SE} = \mathrm{SL} - 2\,\mathrm{PL} + \mathrm{TS} - \mathrm{RL} - \mathrm{DT}$.
@@ -42,7 +42,7 @@ range at which the detection probability is 50 %:
   [`phonometry.underwater.propagation.closed_form`](/phonometry/reference/api/underwater/closed-form/) (spreading plus volume absorption),
   which is strictly increasing with range and therefore has a single crossing;
 * [`detection_range_from_curve`](/phonometry/reference/api/underwater/sonar-equation/#detection_range_from_curve) reads the crossing off any computed loss
-  curve -- a normal-mode, parabolic-equation or Weston-regime prediction --
+  curve (a normal-mode, parabolic-equation or Weston-regime prediction),
   where the oscillatory loss of a real waveguide can cross the figure of merit
   more than once (Ainslie, *Principles of Sonar Performance Modelling*, §11.2.8
   makes exactly that point about convergence zones).

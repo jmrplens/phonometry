@@ -14,7 +14,7 @@ Clean-room implementation of the tonality signal chain of ECMA-418-2:2025
 tonal/noise decomposition with the full Clause 6.2.3 band averaging
 (Clause 6.2.2-6.2.7,
 [`phonometry.psychoacoustics.loudness.ecma._tonal_noise_split`](/phonometry/reference/api/psychoacoustics/ecma/)) are
-reused from [`phonometry.psychoacoustics.loudness.ecma`](/phonometry/reference/api/psychoacoustics/ecma/) -- loudness and
+reused from [`phonometry.psychoacoustics.loudness.ecma`](/phonometry/reference/api/psychoacoustics/ecma/), so loudness and
 tonality therefore report the same underlying `N'_tonal(l, z)` for the same
 signal; this module adds
 

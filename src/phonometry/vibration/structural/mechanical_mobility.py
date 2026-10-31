@@ -47,16 +47,16 @@ of mass ``m``, viscous damping ``c`` and stiffness ``k``, whose receptance is
 :math:`H(\omega) = 1 / (k - \omega^2 m + j \omega c)` (consistent with the
 ISO 7626-1
 Table 1 / 3.1.2 definitions). At its resonance :math:`\omega_0 = \sqrt{k/m}`
-the driving-point mobility is purely real and equal to :math:`1/c` -- the
+the driving-point mobility is purely real and equal to :math:`1/c`, the
 mobility peak
 measures the damping. This module is the FRF backbone for the structure-borne
 source and transmission standards (ISO 9611, ISO 10846, EN 15657, EN 12354-5).
 
 **Measured FRFs (ISO 7626-2:2015).** The single-point measurement side is
 covered by the library's spectral estimators: processing of random-excitation
-records per ISO 7626-2, 8.1.3 -- the H1 estimator
-:math:`H = G(\text{response},\text{force}) / G(\text{force},\text{force})`
--- and the ordinary coherence
+records per ISO 7626-2, 8.1.3 (the H1 estimator
+:math:`H = G(\text{response},\text{force}) / G(\text{force},\text{force})`)
+and the ordinary coherence
 :math:`\gamma^2 = |G_{xy}|^2 / (G_{xx} G_{yy})`
 used for its data-quality checks are
 :func:`phonometry.electroacoustics.frequency_response.transfer_function` (with
@@ -208,7 +208,7 @@ def convert_frf(
     :param value: The (complex) FRF value(s) of kind *source*.
     :param frequency: Frequency ``f``, in hertz (scalar or array, broadcast with
         *value*).
-    :param source: The FRF kind of *value* -- one of ``"receptance"``,
+    :param source: The FRF kind of *value*: one of ``"receptance"``,
         ``"mobility"``, ``"accelerance"``, ``"dynamic_stiffness"``,
         ``"impedance"`` or ``"apparent_mass"``.
     :param target: The FRF kind to convert to (same set).
@@ -601,7 +601,7 @@ class MobilityResult(OwnsArrays):
         The FRF must also cover at least one frequency. Two length-0 axes
         agree with each other, so the pair passes every count above, and the
         fiche then asks numpy for the peak of nothing and dies on "attempt
-        to get argmax of an empty sequence" -- a message naming neither the
+        to get argmax of an empty sequence", a message naming neither the
         field nor the result. A single-frequency FRF is a different thing
         and stays allowed: it carries nought-dimensional axes, which is one
         frequency's worth of data rather than none.

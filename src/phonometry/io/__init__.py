@@ -5,14 +5,14 @@ Every audio function here treats a file as a measurement record rather than
 as material to be played back, which fixes the defaults: the native sample
 rate is kept (no resampling on load), channels are never mixed down, samples
 are never normalized, and integer PCM is scaled by exactly :math:`2^{B-1}`
-into float64 -- a power of two, so the scaling is exact in binary floating
+into float64: a power of two, so the scaling is exact in binary floating
 point, and a constant that cancels out of every calibrated level because the
 calibrator tone is read through the same path (the derivation lives with the
 WAV reader's source).
 
 :func:`read` returns a :class:`Signal`: the samples as ``(channels, samples)``
 float64 together with the sample rate, the calibration, the channel labels,
-the ``bext`` broadcast provenance (EBU Tech 3285) and the origin record --
+the ``bext`` broadcast provenance (EBU Tech 3285) and the origin record:
 one immutable object that any ``(x, fs, ...)`` function of the library
 accepts today via :func:`numpy.asarray`. The base install reads every linear
 WAV a sound level meter or field recorder writes (PCM 16/24/32-bit, IEEE
@@ -21,8 +21,8 @@ extra (python-soundfile, which bundles the LGPL libsndfile) adds FLAC, AIFF,
 Ogg/Opus and MP3, and lossy sources raise :class:`LossyCompressionWarning`
 because a level computed from a lossy codec is not metrologically defensible.
 
-:func:`info` answers from the headers alone -- format, rate, channels, valid
-bits, duration, ``bext``, cue points -- without decoding a single sample, so
+:func:`info` answers from the headers alone (format, rate, channels, valid
+bits, duration, ``bext``, cue points) without decoding a single sample, so
 it is safe on a 12-hour RF64. :func:`read_blocks` streams what :func:`read`
 would return, one :class:`Signal` per block, into the library's stateful
 filters. :func:`write` produces WAV/BWF (and FLAC with the extra) with exact

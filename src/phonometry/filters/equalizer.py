@@ -7,33 +7,33 @@ parametric equalization (published as a W3C Working Group Note:
 https://www.w3.org/TR/audio-eq-cookbook/). Every filter type of the cookbook
 is available:
 
-* ``peaking`` - the bell of a parametric EQ: gain ``G`` dB exactly at ``f0``,
-  0 dB exactly at DC and Nyquist.
-* ``lowshelf`` / ``highshelf`` - shelving filters: gain ``G`` dB exactly at
-  DC (low shelf) or Nyquist (high shelf), 0 dB at the opposite end, with the
+* ``peaking``: the bell of a parametric EQ, with gain ``G`` dB exactly at
+  ``f0`` and 0 dB exactly at DC and Nyquist.
+* ``lowshelf`` / ``highshelf``: shelving filters, with gain ``G`` dB exactly
+  at DC (low shelf) or Nyquist (high shelf), 0 dB at the opposite end, and the
   transition centred on ``f0`` (the midpoint-gain frequency).
-* ``lowpass`` / ``highpass`` - second-order Butterworth-style sections with
+* ``lowpass`` / ``highpass``: second-order Butterworth-style sections with
   a resonance set by ``Q`` (:math:`Q = 1/\sqrt{2}` is the Butterworth
   alignment; the magnitude at ``f0`` is exactly ``Q``).
-* ``bandpass`` - constant 0 dB peak gain at ``f0``.
-* ``bandpass_skirt`` - the cookbook's constant-skirt-gain variant (peak
+* ``bandpass``: constant 0 dB peak gain at ``f0``.
+* ``bandpass_skirt``: the cookbook's constant-skirt-gain variant (peak
   gain ``Q``).
-* ``notch`` - a null exactly at ``f0``, 0 dB at DC and Nyquist.
-* ``allpass`` - unit magnitude everywhere; only the phase turns (360
+* ``notch``: a null exactly at ``f0``, 0 dB at DC and Nyquist.
+* ``allpass``: unit magnitude everywhere; only the phase turns (360
   degrees across the band, steepest at ``f0``).
 
 Each section is parameterized exactly as the cookbook defines: sample rate
 ``fs``, centre/corner frequency ``f0``, gain ``gain_db`` (peaking and
 shelves only) and one of
 
-* ``q`` - the quality factor (default :math:`1/\sqrt{2}`),
-* ``bw`` - the bandwidth in octaves, mapped through the cookbook's
+* ``q``: the quality factor (default :math:`1/\sqrt{2}`),
+* ``bw``: the bandwidth in octaves, mapped through the cookbook's
   digital-domain relation
   :math:`\alpha = \sin(\omega_0) \sinh\!\left( \frac{\ln 2}{2} \, BW \,
   \frac{\omega_0}{\sin \omega_0} \right)`
   (the :math:`\omega_0/\sin \omega_0` factor compensates the bilinear
   frequency warping), or
-* ``slope`` - the shelf-slope parameter ``S`` (shelves only;
+* ``slope``: the shelf-slope parameter ``S`` (shelves only;
   :math:`S = 1` is the steepest slope that stays monotonic).
 
 For the peaking filter the bandwidth is measured between the midpoint-gain
@@ -400,8 +400,8 @@ def _check_section_stability(
     In exact arithmetic every cookbook section with :math:`\alpha > 0` is
     stable, but at the extremes (a very wide ``bw`` or ``f0`` within a few
     ppm of DC or the Nyquist frequency) the rounded coefficients can land
-    exactly on the stability-triangle boundary -- e.g. ``a2 == -1.0``, a
-    pole pair on the unit circle -- and the filter would ring forever
+    exactly on the stability-triangle boundary (e.g. ``a2 == -1.0``, a
+    pole pair on the unit circle), and the filter would ring forever
     without any arithmetic error to flag it.
     """
     require_scalar(a1, "a1")

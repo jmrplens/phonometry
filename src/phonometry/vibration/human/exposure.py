@@ -4,7 +4,7 @@ r"""Human exposure to whole-body and hand-transmitted vibration.
 The measurement chain of the ISO human-vibration family is implemented from the
 standards' own analog definitions, clean-room:
 
-* **ISO 8041-1:2017** - the authoritative *master* definition of every
+* **ISO 8041-1:2017**: the authoritative *master* definition of every
   frequency weighting.  A single cascade
   :math:`H(s) = H_\mathrm{h}(s) H_\mathrm{l}(s) H_\mathrm{t}(s) H_\mathrm{s}(s)`
   (Formula (5)) of second-order band-limiting Butterworth sections
@@ -18,27 +18,27 @@ standards' own analog definitions, clean-room:
   among the quantities an instrument must display and Annex B tabulates it in
   three columns of its own.
 
-* **ISO 2631-1:1997** - whole-body vibration: the weighted r.m.s. acceleration
-  ``a_w`` (Eq. (1)/(9)), the vibration total value ``a_v`` with axis
+* **ISO 2631-1:1997** (whole-body vibration): the weighted r.m.s.
+  acceleration ``a_w`` (Eq. (1)/(9)), the vibration total value ``a_v`` with axis
   multiplying factors ``k`` (Eq. (10)), the running r.m.s. and maximum
   transient vibration value ``MTVV`` (Eqs. (2)-(4)), the vibration dose value
   ``VDV`` (Eq. (5)), the crest factor (6.2.1) and the energy-equivalent
   magnitude relations of Annex B (Eqs. (B.1)-(B.3)).
 
-* **ISO 2631-2:2003** - whole-body vibration in buildings: the direction-
-  independent weighting ``Wm`` (Annex A).
+* **ISO 2631-2:2003** (whole-body vibration in buildings): the
+  direction-independent weighting ``Wm`` (Annex A).
 
-* **ISO 2631-4:2001** - ride comfort in fixed-guideway (rail) transport: the
-  vertical weighting ``Wb`` (Annex A) with the ``Wk`` axis multiplying
+* **ISO 2631-4:2001** (ride comfort in fixed-guideway transport such as
+  rail): the vertical weighting ``Wb`` (Annex A) with the ``Wk`` axis multiplying
   factors.  ``Wb`` is realised here from its exact ISO 8041-1 Table 3
   parameters (of which ISO 2631-4 Table A.1 is the two-decimal rounding).
 
-* **ISO 5349-1:2001 / ISO 5349-2:2001** - hand-transmitted vibration: the
+* **ISO 5349-1:2001 / ISO 5349-2:2001** (hand-transmitted vibration): the
   vibration total value ``a_hv`` (5349-1 Eq. (1)), the daily exposure ``A(8)``
   for single and multiple operations (5349-1 Eqs. (2)/(3); 5349-2 Eqs. (1)-(3))
   and the vibration-white-finger dose relation of 5349-1 Annex C (Eq. (C.1)).
 
-* **Directive 2002/44/EC** - the daily exposure action and limit values
+* **Directive 2002/44/EC**: the daily exposure action and limit values
   (Article 3) that ISO does not fix: hand-arm ``A(8)`` EAV ``2.5`` /
   ELV ``5`` m/s2; whole-body ``A(8)`` EAV ``0.5`` / ELV ``1.15`` m/s2 (or VDV
   EAV ``9.1`` / ELV ``21`` m/s^1.75).  The hand-arm ``A(8)`` is based on the
@@ -1264,9 +1264,9 @@ class ExposureAssessment(RichDisplay):
     def __post_init__(self) -> None:
         """Reject an assessment whose kind or metric tag is unknown or unpaired.
 
-        The fiche routes through ``kind`` twice -- the basis line names the
+        The fiche routes through ``kind`` twice (the basis line names the
         applied ISO standard by it and the operations table heads its
-        magnitude column with the per-kind symbol -- and through ``metric``
+        magnitude column with the per-kind symbol) and through ``metric``
         for the exposure unit. An unpinned tag used to render a complete
         page with an empty standard name and the whole-body symbol over
         hand-arm data.
@@ -1276,7 +1276,7 @@ class ExposureAssessment(RichDisplay):
         ``kind="hav"`` with ``metric="vdv"`` names a quantity the Directive
         does not define. Assessed alone, that pair used to render a fiche
         headed by the hand-arm ISO standard whose every threshold, zone and
-        verdict came from the whole-body VDV values -- a hand-arm ``A(8)`` of
+        verdict came from the whole-body VDV values: a hand-arm ``A(8)`` of
         3,5 m/s2, well into the action zone above the 2,5 m/s2 EAV, printed
         "below the exposure action value" and passed against 21 m/s^1,75.
 

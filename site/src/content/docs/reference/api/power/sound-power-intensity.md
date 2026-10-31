@@ -527,7 +527,7 @@ screening.
 | `frequencies` | `(N_bands,)` nominal band centres (Hz), for the A-weighted total and the Table 2 repeatability limits. |
 | `fraction` | The band set, 3 for one-third octaves (default) or 1 for octaves (Table 2 lookup). |
 | `grade` | `'engineering'` (grade 2) or `'survey'` (grade 3); selects `K` for the reported `Ld` and the criterion-2 warning. |
-| `repeatability_limit` | Override for the criterion-3 limit `s` (dB), scalar or per band; defaults to ISO 9614-2 Table 2 by `frequencies` for `'engineering'`. For `'survey'` the default is the A-weighted 4 dB reused per band (extrapolated -- non-normative). |
+| `repeatability_limit` | Override for the criterion-3 limit `s` (dB), scalar or per band; defaults to ISO 9614-2 Table 2 by `frequencies` for `'engineering'`. For `'survey'` the default is the A-weighted 4 dB reused per band (extrapolated, non-normative). |
 
 **Returns:** [`SoundPowerIntensityResult`](/phonometry/reference/api/power/sound-power-intensity/#soundpowerintensityresult).
 

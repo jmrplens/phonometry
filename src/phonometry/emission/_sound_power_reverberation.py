@@ -413,7 +413,7 @@ def _background_corrected_mean(
     minus corrected mean).
 
     With 1D pre-averaged ``levels`` the per-position information is gone, so a
-    single ``K1`` is computed from the averaged spectra -- an approximation of
+    single ``K1`` is computed from the averaged spectra: an approximation of
     the per-position procedure that is exact only when every position has the
     same source-to-background margin. Prefer per-position input.
     """

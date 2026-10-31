@@ -370,8 +370,8 @@ class OutdoorAttenuation(OwnsArrays):
         The breakdown must also cover at least one band. Seven length-0 terms
         agree with each other and satisfy every count above, and the sheet
         then reads the first band of an axis that has none, dying inside the
-        renderer on numpy's "index 0 is out of bounds for axis 0 with size 0"
-        -- a message naming neither the field nor the result.
+        renderer on numpy's "index 0 is out of bounds for axis 0 with size 0",
+        a message naming neither the field nor the result.
 
         :raises ValueError: if any term disagrees with ``frequencies``, or
             the breakdown covers no band.
@@ -987,7 +987,7 @@ def barrier_attenuation(
     takes a negative sign (ISO 9613-2:1996, text after Eq. (16)) and Eq. (14)
     still applies: ``Dz`` falls continuously from :math:`10 \log_{10} 3 = 4.8` dB
     at grazing (:math:`z = 0`) towards 0 as the clearance deepens, clamped at
-    0 (the logarithm's argument is floored at 1 -- a barrier below the sight
+    0 (the logarithm's argument is floored at 1: a barrier below the sight
     line never amplifies).
 
     :param barrier: Barrier geometry (:class:`Barrier`).

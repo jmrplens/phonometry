@@ -6,10 +6,10 @@ the bare ``(x, fs)`` pair: the object read from a measurement file
 already knows its sample rate and, when calibrated, its
 digital-to-pascal factor, so asking the caller to repeat either is
 asking for a transcription error. All of them or none: a function that
-took the object but silently dropped its calibration -- one row away
-from functions that honour it -- would compute a wrong level that looks
+took the object but silently dropped its calibration (one row away
+from functions that honour it) would compute a wrong level that looks
 right, the exact failure the object exists to prevent. The bare-array
-signatures are unchanged -- a plain array with an explicit ``fs`` and
+signatures are unchanged: a plain array with an explicit ``fs`` and
 ``calibration_factor`` computes exactly what it always did.
 """
 

@@ -32,7 +32,7 @@ adds the roughness-specific chain:
 The optional entropy weighting of Clause 7.1.6 requires an external rotational
 speed signal and is not implemented (see ``notes-ecma418-2-roughness.md``).
 The API is monaural: the quadratic-mean binaural combination of
-Formula (112) (Clause 7.1.11) is not implemented -- analyse each channel
+Formula (112) (Clause 7.1.11) is not implemented: analyse each channel
 separately.
 
 The calibration constant ``c_R`` of Formula (104) is the standard's tabulated
@@ -41,7 +41,7 @@ point exactly: a 1 kHz carrier 100 %-amplitude-modulated at 70 Hz with an
 overall sound pressure level of 60 dB SPL computes to 0.9999 asper against
 the defined 1 asper. Note the level convention: Clause 7 states the *sound
 pressure level of the signal* (its overall RMS level), not the level of the
-unmodulated carrier -- a fully modulated signal whose carrier alone sits at
+unmodulated carrier: a fully modulated signal whose carrier alone sits at
 60 dB is +1.76 dB hot overall and reads ~4 % high.
 """
 

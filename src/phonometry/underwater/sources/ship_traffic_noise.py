@@ -6,12 +6,12 @@ level of a ship can be *estimated* from readily available traffic parameters
 (vessel class, speed, length) with published semi-empirical models. This module
 implements three, selectable through ``model``:
 
-* ``"jomopans-echo"`` -- the JOMOPANS-ECHO reference spectrum (MacGillivray &
+* ``"jomopans-echo"``: the JOMOPANS-ECHO reference spectrum (MacGillivray &
   de Jong 2021), per **vessel class** with class reference speeds; validated
   against 1862 source-level measurements (ECHO programme), σ ≈ 6 dB. Default.
-* ``"randi"`` -- the RANDI 3.1 semi-empirical model: an "average ship" baseline
+* ``"randi"``: the RANDI 3.1 semi-empirical model, an "average ship" baseline
   spectrum scaled by speed and length.
-* ``"wales-heitmeyer"`` -- the Wales & Heitmeyer (2002) ensemble merchant-ship
+* ``"wales-heitmeyer"``: the Wales & Heitmeyer (2002) ensemble merchant-ship
   spectrum (no speed/length dependence), valid 30 Hz-1200 Hz.
 
 All three return an equivalent-monopole source spectral-density level (dB re
@@ -24,7 +24,7 @@ Source (clean-room, implemented from the equations, validated against the
 authors' own Excel reference implementation, File S1): MacGillivray, A.;
 de Jong, C. (2021), "A Reference Spectrum Model for Estimating Source Levels of
 Marine Shipping Based on Automated Identification System Data", J. Mar. Sci.
-Eng. 9(4), 369, https://doi.org/10.3390/jmse9040369 (CC-BY) -- which also
+Eng. 9(4), 369, https://doi.org/10.3390/jmse9040369 (CC-BY), which also
 reproduces RANDI 3.1 [Breeding et al.] and Wales & Heitmeyer (2002).
 """
 

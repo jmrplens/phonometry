@@ -332,7 +332,7 @@ def test_average_bands_matches_stacked_mean_bitwise() -> None:
     le = importlib.import_module("phonometry.psychoacoustics.loudness.ecma")
 
     p_bands, n_new = _short_band_signals()
-    got = le._average_bands_full(p_bands, n_new)
+    got, _ = le._average_bands_full(p_bands, n_new)
 
     cache: dict = {}
     for band in range(le._CBF):
@@ -650,3 +650,61 @@ def test_every_band_starts_on_the_block_that_first_holds_the_sound(
                 rtol=1e-12,
                 atol=0.0,
             ), band
+
+
+def test_the_split_forms_each_band_s_basis_loudness_once(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """N'_basis(l, z) of each band at its own block size is formed once a call.
+
+    The scaled ACF of Formula 30 multiplies a band's normalized ACF by the
+    N'_basis(l, z) of Formula 25 of the same blocks, so the band averaging of
+    Clause 6.2.3 already forms N'_basis for every band at the block size
+    Table 4 gives it. Formula 26 reads those values back: neither the
+    loudness nor the tonality segments, rectifies and squares a band a second
+    time at a block size it has already been through. The values the split
+    returns are each band's own N'_basis, resampled onto the common grid of
+    Clause 6.2.6, bit for bit, and not those of a block size the band was
+    re-segmented at for a neighbour's average.
+    """
+    from scipy import signal as sp_signal
+
+    import phonometry.psychoacoustics.loudness.ecma as ecma
+
+    band_basis = ecma._band_basis_loudness
+    passes: list[tuple[int, int]] = []
+
+    def counted(
+        p_band: np.ndarray, band: int, block_size: int, n_new: int
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+        passes.append((band, block_size))
+        return band_basis(p_band, band, block_size, n_new)
+
+    split = ecma._tonal_noise_split
+    captured: list[np.ndarray] = []
+
+    def spy(
+        x: np.ndarray, field: str
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray, int, int, np.ndarray]:
+        out = split(x, field)
+        captured.append(out[5])
+        return out
+
+    monkeypatch.setattr(ecma, "_band_basis_loudness", counted)
+    monkeypatch.setattr(ecma, "_tonal_noise_split", spy)
+    x = _tone(1000.0, 60.0, seconds=0.3) + _tone(93.75, 70.0, seconds=0.3)
+    for metric in (psychoacoustics.loudness_ecma, psychoacoustics.tonality_ecma):
+        passes.clear()
+        metric(x, FS)
+        assert len(passes) == len(set(passes)), metric.__name__
+        assert {(band, int(ecma._S_B[band])) for band in range(53)} <= set(passes)
+
+    padded, _, n_new = ecma._preprocess(x)
+    p_om = sp_signal.sosfilt(ecma._ear_filter_sos("free"), padded)
+    specific = captured[0]
+    for band in range(53):
+        _, _, own = band_basis(
+            ecma._auditory_bandpass(p_om, band), band, int(ecma._S_B[band]), n_new
+        )
+        expected = ecma._resample_common(own, band, specific.shape[0])
+        assert np.array_equal(specific[:, band], expected), band

@@ -31,6 +31,7 @@ from .compute import (
     ComputeImportError,
     Dtype,
     RunProvenance,
+    _package_version,
     _requested,
 )
 
@@ -117,6 +118,7 @@ def _provenance(compute: Compute, **found: str | None) -> RunProvenance:
         device=compute.device,
         device_index=compute.device_index,
         dtype=compute.dtype,
+        phonometry_version=_package_version(),
         numpy_version=np.__version__,
         array_library=found.get("array_library"),
         cuda_runtime=found.get("cuda_runtime"),

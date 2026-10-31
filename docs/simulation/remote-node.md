@@ -47,8 +47,10 @@ The node runs the function on the device asked for, with no fallback of its
 own, and sends back the probe histories and the snapshots, which are read here
 into arrays sized from your request; a video writer sends its video's bytes
 instead of snapshots. `result.provenance.host` names the node and
-`result.provenance.package_sha256` the package that ran; the rest of the
-provenance is the node's: its NumPy, its array library, its GPU.
+`result.provenance.package_sha256` the package that ran, and
+`result.provenance.phonometry_version` is your own version, which the job
+carries: from its cache the node cannot name the package it runs. The rest of
+the provenance is the node's: its NumPy, its array library, its GPU.
 
 ## 2. Naming a node: the hosts file
 

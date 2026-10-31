@@ -29,7 +29,7 @@ from contextlib import contextmanager
 from contextvars import ContextVar
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Final, Literal, cast, get_args
+from typing import TYPE_CHECKING, Any, ClassVar, Final, Literal, cast, get_args
 
 import numpy as np
 
@@ -38,7 +38,7 @@ from .._internal.validation import require_choice, require_count, require_positi
 from .._internal.warnings import PhonometryWarning
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator
+    from collections.abc import Iterator, Mapping
 
 __all__ = [
     "Compute",
@@ -81,6 +81,10 @@ _RUNS_THERE = MappingProxyType(
         "ElasticFDTD2D": ("ElasticRun", "elastic_fdtd_simulation"),
     }
 )
+#: The unit a record's display gives its fields where the name misleads:
+#: ``device_index`` numbers a GPU, and the display would read the head noun
+#: "index" as a level in decibels.
+_DEVICE_INDEX_UNITS: Mapping[str, str] = MappingProxyType({"device_index": ""})
 
 
 class ComputeImportError(ImportError):
@@ -182,6 +186,8 @@ class Compute(RichDisplay):
         fallback asked of ``"cpu"`` on this machine.
     """
 
+    _display_units: ClassVar[Mapping[str, str]] = _DEVICE_INDEX_UNITS
+
     device: Device = "cpu"
     device_index: int = 0
     dtype: Dtype = "float64"
@@ -282,6 +288,9 @@ class RunProvenance(RichDisplay):
     :ivar device: The device that stepped the fields.
     :ivar device_index: Which GPU, ``0`` where there is one.
     :ivar dtype: The dtype of the fields.
+    :ivar phonometry_version: The version of the phonometry that ran the
+        steps (``phonometry.__version__``); on a node, the client's own, whose
+        package the node runs.
     :ivar numpy_version: NumPy's version where the run stepped.
     :ivar array_library: The array library and its version (``"cupy 14.2.0"``),
         or ``None`` for NumPy.
@@ -295,7 +304,8 @@ class RunProvenance(RichDisplay):
         lowercase hex, or ``None`` for a run on this machine.
     :raises TypeError: for a ``device`` or ``dtype`` that is not text, a
         ``device_index`` that is not a number (a bool is not one), a
-        ``numpy_version`` that is not text, or a ``host``,
+        ``phonometry_version`` or ``numpy_version`` that is not text, or a
+        ``host``,
         ``array_library``, ``cuda_runtime``, ``cuda_driver_api``, ``gpu`` or
         ``package_sha256`` that is neither text nor ``None``.
     :raises ValueError: for an unknown device or dtype, ``"torch:mps"`` in
@@ -304,10 +314,13 @@ class RunProvenance(RichDisplay):
         not 64 lowercase hexadecimal digits.
     """
 
+    _display_units: ClassVar[Mapping[str, str]] = _DEVICE_INDEX_UNITS
+
     host: str | None
     device: Device
     device_index: int
     dtype: Dtype
+    phonometry_version: str
     numpy_version: str
     array_library: str | None
     cuda_runtime: str | None
@@ -321,9 +334,11 @@ class RunProvenance(RichDisplay):
         require_choice(self.dtype, "dtype", _DTYPES)
         index = _placement_index(self.device, self.dtype, self.device_index)
         object.__setattr__(self, "device_index", index)
-        if not isinstance(self.numpy_version, str):
-            msg = f"'numpy_version' must be a text, got {self.numpy_version!r}."
-            raise TypeError(msg)
+        for name in _REQUIRED_TEXTS:
+            value = getattr(self, name)
+            if not isinstance(value, str):
+                msg = f"'{name}' must be a text, got {value!r}."
+                raise TypeError(msg)
         for name in _OPTIONAL_TEXTS:
             value = getattr(self, name)
             if value is not None and not isinstance(value, str):
@@ -337,6 +352,8 @@ class RunProvenance(RichDisplay):
             raise ValueError(msg)
 
 
+#: The fields of a :class:`RunProvenance` that every run records as a text.
+_REQUIRED_TEXTS = ("phonometry_version", "numpy_version")
 #: The fields of a :class:`RunProvenance` that hold a text, or ``None`` where
 #: the run had nothing to record.
 _OPTIONAL_TEXTS = (
@@ -350,6 +367,38 @@ _OPTIONAL_TEXTS = (
 
 
 _AMBIENT: ContextVar[Compute | None] = ContextVar("phonometry_compute", default=None)
+
+#: The version a node runs a job as: the client's, sent with the job. A node
+#: runs the package the client sent, from its cache, where neither installed
+#: metadata nor the source tree's ``VERSION`` file names it; ``None`` outside
+#: a job, where the package is the one this process imported.
+_SHIPPED_VERSION: ContextVar[str | None] = ContextVar(
+    "phonometry_shipped_version", default=None
+)
+
+
+def _package_version() -> str:
+    """The version of the phonometry that runs, as a run's provenance records it.
+
+    The version a node's job was sent with, inside one; else this process's
+    ``phonometry.__version__``, read only here so that a node never reads it.
+    """
+    shipped = _SHIPPED_VERSION.get()
+    if shipped is not None:
+        return shipped
+    from .._version import __version__
+
+    return __version__
+
+
+@contextmanager
+def _running_as(version: str) -> Iterator[None]:
+    """Record *version* in the provenance of every run in this block (a node's job)."""
+    token = _SHIPPED_VERSION.set(version)
+    try:
+        yield
+    finally:
+        _SHIPPED_VERSION.reset(token)
 
 
 @contextmanager

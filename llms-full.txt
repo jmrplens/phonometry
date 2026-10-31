@@ -39314,6 +39314,44 @@ print(meta.container, meta.format_name, meta.bit_depth)   # WAV PCM 24
 print(meta.n_samples, f"{meta.duration_s:.1f} s")         # 480000 10.0 s
 ```
 
+### One channel, a stretch of the record, a chain of steps
+
+Indexing a `Signal` hands back its samples, which is what lets it stand in
+for the array, and the rate and the calibration stay behind. Two methods
+narrow the record and keep them: `pick(channels)` takes channels by index,
+in the order given, and `crop(tmin, tmax)` keeps the samples between two
+times in seconds, half-open like a Python slice, so `crop(0.0, t)` and
+`crop(t)` split the record with nothing counted twice. A third,
+`pipe(func, *args, **kwargs)`, is `func(sig, *args, **kwargs)`: the
+functions of the library take the `Signal` first and hand a new one back,
+and `pipe` writes a chain of them in the order it runs instead of inside
+out. What `func` returns comes back as it is, a `Signal` to go on with or a
+number that ends the chain; a function that takes the `Signal` elsewhere
+than first goes in a `lambda`.
+
+```python
+from phonometry import filters, signals
+
+# take: a two-channel stand-in for a calibrated take (Pa), synthesized so
+#   the guide runs; in a real measurement it comes from io.read.
+take = io.Signal(
+    np.vstack([recording, 0.5 * recording]), fs,
+    calibration_factor=1.0, channel_labels=("front", "rear"),
+)
+print(take.pick(1).channel_labels, take.crop(2.0, 6.0).duration_s)  # ('rear',) 4.0
+
+nested = signals.leq(
+    filters.weighting_filter(take.pick(0), weighting="A").crop(2.0, 6.0)
+)
+chained = (
+    take.pick(0)
+    .pipe(filters.weighting_filter, weighting="A")
+    .crop(2.0, 6.0)
+    .pipe(signals.leq)
+)
+print(f"{chained:.2f} dB", chained == nested)   # 57.25 dB True
+```
+
 ## Calibrating from the calibrator take
 
 The [calibration guide](https://docs.jmrp.io/phonometry/signals/metrology/calibration/) derives
@@ -53086,7 +53124,7 @@ documents, one page per module.
 | `read_blocks` | `function` | **Stream a file block by block.**<br>• `path`, `block_size` [samples]<br>• `overlap`: samples shared between consecutive blocks (Default: 0)<br>• `calibration_factor`: as in `read`; `None` takes the sidecar's (Default: `None`)<br>Yields exactly what `read` returns, in slices: feeds `BlockProcessing(stateful=True)` unchanged | `for block in io.read_blocks(p, 65536): ...`<br><br>• each `block`: a `Signal` with the rate, calibration, labels and provenance `read` gives |
 | `write` | `function` | **Write WAV/BWF (FLAC with `[audio]`) without touching the level.**<br>• `path`, `x` (array or `Signal`), `fs` (taken from `x` when `x` is a `Signal`)<br>• `subtype`: 'PCM_16'/'PCM_24'/'PCM_32'/'FLOAT'/'DOUBLE' (Default: FLOAT for float data, the matching depth for integer pass-through; FLAC: PCM up to 24)<br>• `bext`: None (Default) carries a `Signal`'s own provenance; `"loudness"` also measures the five EBU R 128 fields in-house; a `BroadcastMetadata` is written as given<br>• `dither`: 'tpdf' at PCM_16 only (Default: None)<br>• `rng`: `numpy.random.Generator` or int seed for the dither noise, for byte-reproducible writes (Default: None = fresh entropy)<br>• `sidecar`: write the calibration sidecar too (Default: False)<br>Never normalizes; clipping saturates, is counted and warns (`ClippingWarning`); RF64 automatic past 4 GiB | `io.write("out.wav", sig, subtype="PCM_24")` |
 | `convert` | `function` | **Convert between lossless containers with the measurement intact.**<br>• `src`, `dst`: WAV/BWF/RF64 ↔ FLAC (lossy targets refused)<br>Samples bit-exact at full precision, `bext` carried (into FLAC via the `riff` APPLICATION block), sidecar copied byte for byte, CodingHistory extended one line; streams, so an hour of RF64 converts flat | `io.convert("night.wav", "night.flac")` |
-| `Signal` | `dataclass` | **Samples plus the metadata they need.**<br>• `data`: (channels, samples) float64<br>• `fs` [Hz]<br>• `calibration_factor`: Pa per digital unit, or None until known<br>• `channel_labels`, `provenance` (`bext`), `source` (`SignalOrigin`)<br>`np.asarray(sig)` yields the bare array (1D mono), so every `(x, fs, ...)` function accepts it; `leq`/`laeq`/`ln_levels`/`sel`/`lc_peak`/`sound_exposure`/`lex_8h` read fs and calibration from it directly | `sig.duration_s`, `sig.n_channels`<br>`sig.plot()` draws the calibrated waveform |
+| `Signal` | `dataclass` | **Samples plus the metadata they need.**<br>• `data`: (channels, samples) float64<br>• `fs` [Hz]<br>• `calibration_factor`: Pa per digital unit, or None until known<br>• `channel_labels`, `provenance` (`bext`), `source` (`SignalOrigin`)<br>`np.asarray(sig)` yields the bare array (1D mono), so every `(x, fs, ...)` function accepts it; `leq`/`laeq`/`ln_levels`/`sel`/`lc_peak`/`sound_exposure`/`lex_8h` read fs and calibration from it directly<br>• `pick(channels)`, `crop(tmin, tmax)`: narrowed copies that keep the rate and the calibration<br>• `pipe(func, *args, **kwargs)`: `func(sig, *args, **kwargs)`, so a chain of functions reads in the order it runs | `sig.duration_s`, `sig.n_channels`<br>`sig.plot()` draws the calibrated waveform<br>`sig.pick(0).pipe(filters.weighting_filter).crop(10.0, 30.0).pipe(signals.leq)` |
 | `SignalOrigin` | `dataclass` | **Where a `Signal` came from.**<br>• `path`, `container`, `format_name`<br>• `bit_depth`: valid bits, None for lossy codecs<br>• `lossy`: the read-time warning, kept attached to the data | `sig.source.lossy` |
 | `AudioFileInfo` | `dataclass` | **Everything `info()` reads from the headers.**<br>• `container`, `format_name`, `fs`, `n_channels`, `n_samples`, `duration_s` [s], `bit_depth`, `lossy`<br>• `channel_mask` / `channel_labels` (EXTENSIBLE speaker positions)<br>• `bext`, `has_ixml`, `cue_points` | `io.info(p).duration_s` |
 | `BroadcastMetadata` | `dataclass` | **The `bext` chunk of EBU Tech 3285 v2, field by field.**<br>• `description`, `originator`, `originator_reference`, `origination_date`/`_time`<br>• `time_reference`: 64-bit samples since midnight<br>• `version`, `umid`<br>• v2 loudness: `loudness_value`, `loudness_range`, `max_true_peak_level`, `max_momentary_loudness`, `max_short_term_loudness` (0x7FFF sentinel → None)<br>• `coding_history` (EBU R98) | `io.info(p).bext.time_reference` |
@@ -55302,7 +55340,7 @@ documents, one page per module.
 | `ForceSource` | `dataclass` | **Directional body-force source for the elastic solver.**<br>• `ix` / `iy`: staggered velocity node<br>• `direction`: `'x'` \| `'y'`<br>• `waveform`: callable t → line force [N/m] / `amplitude`<br>A vertical force under a free surface reproduces Lamb's problem | `ForceSource(ix=300, iy=0, direction='y', amplitude=1e6, waveform=simulation.GaussianPulse(ix=0, iy=0, half_width_s=8e-6).value)` |
 | `Compute` | `dataclass` | **Where an FDTD simulation steps, in which dtype, and whether it may fall back (frozen, keyword-only).**<br>• `device`: `"cpu"` (NumPy, Default) \| `"cupy"` (an NVIDIA GPU through CuPy) \| `"torch:cpu"` \| `"torch:cuda"` \| `"torch:mps"` (Apple silicon, float32 only)<br>• `device_index`: which GPU, for `"cupy"` and `"torch:cuda"` (Default: 0)<br>• `dtype`: `"float64"` (Default) \| `"float32"`<br>• `fallback`: run on NumPy with a `ComputeFallbackWarning` when the device is not available, instead of raising (Default: False)<br>• `host`: the node a run goes to, by its name in the hosts file (Default: None, this machine); only `fdtd_simulation` and `elastic_fdtd_simulation` run on a node<br>• `timeout_s`: the longest a remote run may take [s] (Default: the hosts file's, else no limit)<br>A request: building one imports and probes nothing, so a record naming a GPU can be written on a machine without one | `simulation.Compute(device='cupy', dtype='float32')`<br>`simulation.Compute(device='torch:cuda', device_index=1, fallback=True)` |
 | `use` | `function` | **Make a `Compute` the placement of every simulation built in a `with` block.**<br>• `compute`: a `Compute` record; anything else is a `TypeError`<br>• the placement asked for is the `compute=` argument, else the innermost `use` block, else the `PHONOMETRY_COMPUTE` environment variable, else NumPy in float64<br>• `PHONOMETRY_COMPUTE` reads `device[:index][@host][,option...]` with the options `float32`, `float64` and `fallback` (`cupy:1`, `torch:mps,float32`, `cupy@nas`), when a placement is resolved and never at import<br>• held in a context variable: whether a new thread or process sees it depends on how it is started; give a worker its placement through `compute=` or `PHONOMETRY_COMPUTE` | `with simulation.use(simulation.Compute(device='cupy')):`<br>`    ...` |
-| `RunProvenance` | `dataclass` | **Where a run actually stepped, as its result records it (frozen).**<br>• `host`: the node's name in the hosts file, `None` for this machine<br>• `device` / `device_index` / `dtype`: the placement the fields stepped on<br>• `numpy_version`<br>• `array_library`: the library and its version (`"cupy 14.2.0"`), `None` for NumPy<br>• `cuda_runtime`: the CUDA runtime the library uses (`"13.2"`), `None` off a CUDA device<br>• `cuda_driver_api`: the CUDA version the driver supports (`"13.3"`, CuPy only), not the NVIDIA driver's own version<br>• `gpu`: the GPU's name, `None` off a GPU<br>• `package_sha256`: the SHA-256 of the package that ran on the node, `None` here | `provenance.device, provenance.gpu` |
+| `RunProvenance` | `dataclass` | **Where a run actually stepped, as its result records it (frozen).**<br>• `host`: the node's name in the hosts file, `None` for this machine<br>• `device` / `device_index` / `dtype`: the placement the fields stepped on<br>• `phonometry_version`: the phonometry that ran the steps; on a node, the client's own, whose package the node runs<br>• `numpy_version`<br>• `array_library`: the library and its version (`"cupy 14.2.0"`), `None` for NumPy<br>• `cuda_runtime`: the CUDA runtime the library uses (`"13.2"`), `None` off a CUDA device<br>• `cuda_driver_api`: the CUDA version the driver supports (`"13.3"`, CuPy only), not the NVIDIA driver's own version<br>• `gpu`: the GPU's name, `None` off a GPU<br>• `package_sha256`: the SHA-256 of the package that ran on the node, `None` here | `provenance.device, provenance.gpu` |
 | `ComputeImportError` | `exception` | **The library a requested device needs is not installed.** Subclass of `ImportError` | `except simulation.ComputeImportError: ...` |
 | `ComputeDeviceError` | `exception` | **A requested device is not present or cannot be used.** Subclass of `RuntimeError` | `except simulation.ComputeDeviceError: ...` |
 | `ComputeFallbackWarning` | `warning class` | **A requested device was not available and the run went to NumPy**, as `Compute(fallback=True)` allows. Subclass of `PhonometryWarning` | `warnings.simplefilter('error', simulation.ComputeFallbackWarning)` |
@@ -71174,6 +71212,7 @@ engine reports the same record as `sim.provenance`:
 | Field | What it holds |
 |---|---|
 | `device`, `device_index`, `dtype` | the placement the fields stepped on, after any fallback |
+| `phonometry_version` | the version of the phonometry that ran the steps; on a node, the client's own, whose package the node runs |
 | `numpy_version` | NumPy's version where the run stepped |
 | `array_library` | the array library and its version (`"cupy 14.2.0"`, `"torch 2.14.1"`), `None` for NumPy |
 | `cuda_runtime` | the CUDA runtime the array library uses (`"13.2"`), `None` off a CUDA device |
@@ -71198,8 +71237,9 @@ on_gpu = simulation.fdtd_simulation(run, compute=simulation.Compute(device="cupy
 print(on_gpu.provenance)
 # On the machine of the proof in section 6:
 # RunProvenance(host=None, device='cupy', device_index=0, dtype='float64',
-#     numpy_version='2.5.4', array_library='cupy 14.2.0', cuda_runtime='13.2',
-#     cuda_driver_api='13.3', gpu='NVIDIA GeForce RTX 4060', package_sha256=None)
+#     phonometry_version='4.0.0', numpy_version='2.5.4',
+#     array_library='cupy 14.2.0', cuda_runtime='13.2', cuda_driver_api='13.3',
+#     gpu='NVIDIA GeForce RTX 4060', package_sha256=None)
 ```
 
 An engine's fields live on its device. `sim.p`, `sim.vx` and `sim.vy` of an
@@ -72967,8 +73007,10 @@ The node runs the function on the device asked for, with no fallback of its
 own, and sends back the probe histories and the snapshots, which are read here
 into arrays sized from your request; a video writer sends its video's bytes
 instead of snapshots. `result.provenance.host` names the node and
-`result.provenance.package_sha256` the package that ran; the rest of the
-provenance is the node's: its NumPy, its array library, its GPU.
+`result.provenance.package_sha256` the package that ran, and
+`result.provenance.phonometry_version` is your own version, which the job
+carries: from its cache the node cannot name the package it runs. The rest of
+the provenance is the node's: its NumPy, its array library, its GPU.
 
 ## 2. Naming a node: the hosts file
 
@@ -76073,7 +76115,9 @@ fields, after the others: `snapshot_decimation`, every how many cells a
 snapshot keeps along each axis (1 for every cell, as before), and
 `provenance`, the `simulation.RunProvenance` of where the run stepped. A
 result built by hand passes both, and leaving one out raises `TypeError`
-naming it; the results the simulation functions return carry both already.
+naming it; the results the simulation functions return carry both already. A
+`RunProvenance` built by hand passes every field, `phonometry_version`, the
+version of the phonometry that ran the steps, among them.
 
 `filters.WeightingFilter(..., high_accuracy=None)` used to select the
 default. `high_accuracy` is a plain `bool` now, `True` by default, and `None`

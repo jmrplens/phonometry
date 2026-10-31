@@ -24,6 +24,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
+from phonometry import filters, signals
 from phonometry.io import Signal
 
 FS = 48000
@@ -278,3 +279,68 @@ def test_a_caller_supplied_label_reaches_the_lines_instead_of_crashing() -> None
     assert [line.get_label() for line in theirs.get_lines()] == ["mine", "mine"]
     ours = _stereo().plot()
     assert [line.get_label() for line in ours.get_lines()] == ["left", "right"]
+
+
+# pipe: a function of the library written as a step of a chain (Discussion #588).
+
+
+def test_pipe_reads_the_chain_in_the_order_it_runs() -> None:
+    """The chain of functions, inside out, and the same chain through pipe."""
+    take = _stereo()
+    nested = signals.leq(
+        filters.weighting_filter(take.pick(0), weighting="A").crop(0.25, 0.75)
+    )
+    chained = (
+        take.pick(0)
+        .pipe(filters.weighting_filter, weighting="A")
+        .crop(0.25, 0.75)
+        .pipe(signals.leq)
+    )
+    assert chained == nested
+
+
+def test_pipe_hands_the_signal_first_and_the_rest_as_given() -> None:
+    """Positional and keyword arguments reach the function, after the Signal."""
+    take = _stereo()
+    seen: list[tuple[object, ...]] = []
+
+    def record(signal: Signal, first: int, /, *rest: int, key: str) -> str:
+        seen.append((signal, first, rest, key))
+        return key
+
+    assert take.pipe(record, 1, 2, 3, key="k") == "k"
+    assert seen == [(take, 1, (2, 3), "k")]
+
+
+def test_pipe_returns_what_the_function_returns_as_it_is() -> None:
+    """Nothing is computed or wrapped by pipe: a Signal chains, a number ends."""
+    take = _stereo()
+    narrowed = take.pipe(Signal.pick, 1)
+    assert isinstance(narrowed, Signal)
+    assert narrowed.channel_labels == ("right",)
+    assert take.pipe(lambda signal: signal.n_samples) == FS
+
+
+def test_pipe_passes_a_keyword_named_func_on_to_the_function() -> None:
+    """``func`` is positional only, so the function may take one of that name."""
+
+    def named(signal: Signal, *, func: str) -> str:
+        return f"{signal.n_channels} {func}"
+
+    assert _stereo().pipe(named, func="mean") == "2 mean"
+
+
+@pytest.mark.parametrize(
+    ("value", "kind"), [(3.0, "float"), ((signals.leq, "x"), "tuple")]
+)
+def test_pipe_refuses_what_cannot_be_called_by_name(value: object, kind: str) -> None:
+    """A value where the function belongs is a TypeError that says which.
+
+    The pair of pandas, a function and the keyword the Signal goes to, is
+    one: the message says where such a function goes instead.
+    """
+    stereo = _stereo()
+    with pytest.raises(
+        TypeError, match=f"'func' must be a function .*, got {kind}; .* in a lambda"
+    ):
+        stereo.pipe(value)  # type: ignore[arg-type]

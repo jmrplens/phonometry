@@ -327,6 +327,10 @@ def test_a_hosts_file_past_one_mebibyte_is_refused_before_it_is_read(
         hosts.load_host("nas")
 
 
+@pytest.mark.skipif(
+    sys.platform == "win32",
+    reason="a Windows file name is UTF-16, so no name fails UTF-8",
+)
 def test_a_hosts_file_name_that_is_not_utf8_is_named_by_its_escapes(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

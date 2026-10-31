@@ -20,3 +20,8 @@ docker/node/Dockerfile text eol=lf
 /README_PYPI.md text eol=lf
 /tests/test*.py text eol=lf
 /src/** text=auto eol=lf
+# The PyOctaveBand stub is built and published the same way, and the test
+# that holds stub/LICENSE to the project's LICENSE compares their bytes, so
+# its files are pinned too: a Windows checkout would otherwise give the copy
+# CRLF and leave the original LF.
+/stub/** text=auto eol=lf

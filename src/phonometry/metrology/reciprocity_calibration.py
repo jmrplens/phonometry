@@ -63,7 +63,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 
@@ -416,9 +416,103 @@ class ReciprocityUncertaintyRow(RichDisplay):
     subclauses: tuple[str, ...] = ()
 
 
-def _rows(
-    group: str, *rows: tuple[str, str, tuple[str, ...]]
-) -> dict[str, ReciprocityUncertaintyRow]:
+#: The components of IEC 61094-2:2009 Table 1, by the name
+#: :func:`reciprocity_uncertainty_budget` takes each by.
+PressureReciprocityComponent = Literal[
+    "series_impedance",
+    "voltage_ratio",
+    "cross_talk",
+    "noise",
+    "distortion",
+    "frequency",
+    "receiver_ground_shield",
+    "transmitter_ground_shield",
+    "coupler_length",
+    "coupler_diameter",
+    "coupler_volume",
+    "coupler_surface_area",
+    "leakage",
+    "capillary_tube_dimensions",
+    "static_pressure",
+    "temperature",
+    "relative_humidity",
+    "front_cavity_depth",
+    "front_cavity_volume",
+    "equivalent_volume",
+    "resonance_frequency",
+    "loss_factor",
+    "diaphragm_compliance",
+    "diaphragm_mass",
+    "diaphragm_resistance",
+    "front_cavity_thread",
+    "polarizing_voltage",
+    "heat_conduction_theory",
+    "excess_volume",
+    "viscosity_losses",
+    "radial_wave_motion",
+    "rounding",
+    "repeatability",
+    "static_pressure_corrections",
+    "temperature_corrections",
+]
+
+#: The components of IEC 61094-3:2016 Table 1, by the name
+#: :func:`reciprocity_uncertainty_budget` takes each by.
+FreeFieldReciprocityComponent = Literal[
+    "series_impedance",
+    "voltage_ratio",
+    "cross_talk",
+    "noise",
+    "distortion",
+    "reflections",
+    "frequency",
+    "receiver_shield",
+    "transmitter_shield",
+    "distance",
+    "static_pressure",
+    "temperature",
+    "relative_humidity",
+    "standing_waves",
+    "air_attenuation",
+    "acoustic_centers",
+    "polarizing_voltage",
+    "plane_wave_deviation",
+    "mathematical_manipulations",
+    "rounding",
+    "repeatability",
+    "static_pressure_corrections",
+    "temperature_corrections",
+]
+
+#: A component of either Table 1, the keys a budget of either field may take.
+ReciprocityComponent = Literal[
+    PressureReciprocityComponent, FreeFieldReciprocityComponent
+]
+
+#: A component both Tables 1 list, in the order of IEC 61094-2: the keys a
+#: budget takes whichever its field, so the only ones a type checker can
+#: accept when the field is held in a variable that may be either.
+SharedReciprocityComponent = Literal[
+    "series_impedance",
+    "voltage_ratio",
+    "cross_talk",
+    "noise",
+    "distortion",
+    "frequency",
+    "static_pressure",
+    "temperature",
+    "relative_humidity",
+    "polarizing_voltage",
+    "rounding",
+    "repeatability",
+    "static_pressure_corrections",
+    "temperature_corrections",
+]
+
+
+def _rows[K: str](
+    group: str, *rows: tuple[K, str, tuple[str, ...]]
+) -> dict[K, ReciprocityUncertaintyRow]:
     return {
         key: ReciprocityUncertaintyRow(component, group, subclauses)
         for key, component, subclauses in rows
@@ -455,94 +549,114 @@ _POLARIZING_VOLTAGE = f"{_MICROPHONE_PARAMETERS}.3"
 #: :func:`~phonometry.metrology.coupler_parameter_uncertainty` take each
 #: component by, in the table's order. "Unintentional coupler/microphone
 #: leakage" and the rounding error and repeatability print no subclause.
-IEC61094_2_TABLE_1: Mapping[str, ReciprocityUncertaintyRow] = MappingProxyType(
-    {
-        **_rows(
-            _ELECTRICAL,
-            ("series_impedance", "Series impedance", ("7.2",)),
-            ("voltage_ratio", "Voltage ratio", ("7.2",)),
-            ("cross_talk", "Cross-talk", ("7.2",)),
-            ("noise", "Inherent and ambient noise", ("7.2",)),
-            ("distortion", "Distortion", ("7.2",)),
-            ("frequency", "Frequency", ("7.2",)),
-            ("receiver_ground_shield", "Receiver ground shield", ("6.3",)),
-            ("transmitter_ground_shield", "Transmitter ground shield", ("6.3", "7.2")),
-        ),
-        **_rows(
-            "Coupler properties",
-            ("coupler_length", "Coupler length", (_COUPLER_DIMENSIONS,)),
-            ("coupler_diameter", "Coupler diameter", (_COUPLER_DIMENSIONS,)),
-            (
-                "coupler_volume",
-                "Coupler volume",
-                (_COUPLER_DIMENSIONS, _HEAT_CONDUCTION_LOSSES),
+IEC61094_2_TABLE_1: Mapping[PressureReciprocityComponent, ReciprocityUncertaintyRow] = (
+    MappingProxyType(
+        {
+            **_rows(
+                _ELECTRICAL,
+                ("series_impedance", "Series impedance", ("7.2",)),
+                ("voltage_ratio", "Voltage ratio", ("7.2",)),
+                ("cross_talk", "Cross-talk", ("7.2",)),
+                ("noise", "Inherent and ambient noise", ("7.2",)),
+                ("distortion", "Distortion", ("7.2",)),
+                ("frequency", "Frequency", ("7.2",)),
+                ("receiver_ground_shield", "Receiver ground shield", ("6.3",)),
+                (
+                    "transmitter_ground_shield",
+                    "Transmitter ground shield",
+                    ("6.3", "7.2"),
+                ),
             ),
-            (
-                "coupler_surface_area",
-                "Coupler surface area",
-                (_COUPLER_DIMENSIONS, _HEAT_CONDUCTION_LOSSES),
+            **_rows(
+                "Coupler properties",
+                ("coupler_length", "Coupler length", (_COUPLER_DIMENSIONS,)),
+                ("coupler_diameter", "Coupler diameter", (_COUPLER_DIMENSIONS,)),
+                (
+                    "coupler_volume",
+                    "Coupler volume",
+                    (_COUPLER_DIMENSIONS, _HEAT_CONDUCTION_LOSSES),
+                ),
+                (
+                    "coupler_surface_area",
+                    "Coupler surface area",
+                    (_COUPLER_DIMENSIONS, _HEAT_CONDUCTION_LOSSES),
+                ),
+                ("leakage", "Unintentional coupler/microphone leakage", ()),
+                (
+                    "capillary_tube_dimensions",
+                    "Capillary tube dimensions",
+                    (_CAPILLARY_TUBE,),
+                ),
+                ("static_pressure", "Static pressure", (_PHYSICAL_QUANTITIES,)),
+                ("temperature", "Temperature", (_PHYSICAL_QUANTITIES,)),
+                ("relative_humidity", "Relative humidity", (_PHYSICAL_QUANTITIES,)),
             ),
-            ("leakage", "Unintentional coupler/microphone leakage", ()),
-            (
-                "capillary_tube_dimensions",
-                "Capillary tube dimensions",
-                (_CAPILLARY_TUBE,),
+            **_rows(
+                _MICROPHONE,
+                ("front_cavity_depth", "Front cavity depth", (_FRONT_CAVITY,)),
+                ("front_cavity_volume", "Front cavity volume", (_FRONT_CAVITY,)),
+                ("equivalent_volume", "Equivalent volume", (_ACOUSTIC_IMPEDANCE,)),
+                ("resonance_frequency", "Resonance frequency", (_ACOUSTIC_IMPEDANCE,)),
+                ("loss_factor", "Loss factor", (_ACOUSTIC_IMPEDANCE,)),
+                (
+                    "diaphragm_compliance",
+                    "Diaphragm compliance",
+                    (_ACOUSTIC_IMPEDANCE,),
+                ),
+                ("diaphragm_mass", "Diaphragm mass", (_ACOUSTIC_IMPEDANCE,)),
+                (
+                    "diaphragm_resistance",
+                    "Diaphragm resistance",
+                    (_ACOUSTIC_IMPEDANCE,),
+                ),
+                (
+                    "front_cavity_thread",
+                    "Additional heat conduction caused by front cavity thread",
+                    (_FRONT_CAVITY,),
+                ),
+                (
+                    "polarizing_voltage",
+                    "Polarizing voltage",
+                    ("6.5.3", _POLARIZING_VOLTAGE),
+                ),
             ),
-            ("static_pressure", "Static pressure", (_PHYSICAL_QUANTITIES,)),
-            ("temperature", "Temperature", (_PHYSICAL_QUANTITIES,)),
-            ("relative_humidity", "Relative humidity", (_PHYSICAL_QUANTITIES,)),
-        ),
-        **_rows(
-            _MICROPHONE,
-            ("front_cavity_depth", "Front cavity depth", (_FRONT_CAVITY,)),
-            ("front_cavity_volume", "Front cavity volume", (_FRONT_CAVITY,)),
-            ("equivalent_volume", "Equivalent volume", (_ACOUSTIC_IMPEDANCE,)),
-            ("resonance_frequency", "Resonance frequency", (_ACOUSTIC_IMPEDANCE,)),
-            ("loss_factor", "Loss factor", (_ACOUSTIC_IMPEDANCE,)),
-            ("diaphragm_compliance", "Diaphragm compliance", (_ACOUSTIC_IMPEDANCE,)),
-            ("diaphragm_mass", "Diaphragm mass", (_ACOUSTIC_IMPEDANCE,)),
-            ("diaphragm_resistance", "Diaphragm resistance", (_ACOUSTIC_IMPEDANCE,)),
-            (
-                "front_cavity_thread",
-                "Additional heat conduction caused by front cavity thread",
-                (_FRONT_CAVITY,),
+            **_rows(
+                _THEORY,
+                ("heat_conduction_theory", "Heat conduction theory", ("Annex A",)),
+                ("excess_volume", "Adding of excess volume", (_FRONT_CAVITY, "7.4")),
+                ("viscosity_losses", "Viscosity losses", ("7.4",)),
+                (
+                    "radial_wave_motion",
+                    "Radial wave-motion",
+                    ("6.4", _COUPLER_DIMENSIONS, "7.4"),
+                ),
             ),
-            (
-                "polarizing_voltage",
-                "Polarizing voltage",
-                ("6.5.3", _POLARIZING_VOLTAGE),
+            **_rows(
+                _PROCESSING,
+                ("rounding", "Rounding error", ()),
+                ("repeatability", "Repeatability of measurements", ()),
+                (
+                    "static_pressure_corrections",
+                    "Static pressure corrections",
+                    ("6.5", "Annex D"),
+                ),
+                (
+                    "temperature_corrections",
+                    "Temperature corrections",
+                    ("6.5", "Annex D"),
+                ),
             ),
-        ),
-        **_rows(
-            _THEORY,
-            ("heat_conduction_theory", "Heat conduction theory", ("Annex A",)),
-            ("excess_volume", "Adding of excess volume", (_FRONT_CAVITY, "7.4")),
-            ("viscosity_losses", "Viscosity losses", ("7.4",)),
-            (
-                "radial_wave_motion",
-                "Radial wave-motion",
-                ("6.4", _COUPLER_DIMENSIONS, "7.4"),
-            ),
-        ),
-        **_rows(
-            _PROCESSING,
-            ("rounding", "Rounding error", ()),
-            ("repeatability", "Repeatability of measurements", ()),
-            (
-                "static_pressure_corrections",
-                "Static pressure corrections",
-                ("6.5", "Annex D"),
-            ),
-            ("temperature_corrections", "Temperature corrections", ("6.5", "Annex D")),
-        ),
-    }
+        }
+    )
 )
 
 #: IEC 61094-3:2016 Table 1, "Uncertainty components", printed folios 17 and
 #: 18 (PDF pages 19 and 20), keyed like :data:`IEC61094_2_TABLE_1` and in the
 #: table's order. "Mathematical manipulations", the rounding error and the
 #: repeatability print no subclause.
-IEC61094_3_TABLE_1: Mapping[str, ReciprocityUncertaintyRow] = MappingProxyType(
+IEC61094_3_TABLE_1: Mapping[
+    FreeFieldReciprocityComponent, ReciprocityUncertaintyRow
+] = MappingProxyType(
     {
         **_rows(
             _ELECTRICAL,
@@ -590,9 +704,11 @@ IEC61094_3_TABLE_1: Mapping[str, ReciprocityUncertaintyRow] = MappingProxyType(
 )
 
 #: The table each field's budget draws its components from.
-_BUDGET_TABLES: Mapping[str, Mapping[str, ReciprocityUncertaintyRow]] = (
-    MappingProxyType({"pressure": IEC61094_2_TABLE_1, "free": IEC61094_3_TABLE_1})
-)
+_BUDGET_TABLES: Mapping[
+    CalibrationField,
+    Mapping[PressureReciprocityComponent, ReciprocityUncertaintyRow]
+    | Mapping[FreeFieldReciprocityComponent, ReciprocityUncertaintyRow],
+] = MappingProxyType({"pressure": IEC61094_2_TABLE_1, "free": IEC61094_3_TABLE_1})
 
 
 @dataclass(frozen=True)
@@ -710,8 +826,43 @@ class ReciprocityUncertaintyBudget(OwnsArrays):
         )
 
 
+@overload
 def reciprocity_uncertainty_budget(
-    standard_uncertainties_db: Mapping[str, ArrayLike],
+    standard_uncertainties_db: Mapping[PressureReciprocityComponent, ArrayLike],
+    *,
+    frequencies: ArrayLike,
+    field: Literal["pressure"] = "pressure",
+    additional_uncertainties_db: Mapping[str, ArrayLike] | None = None,
+    coverage_factor: float = _COVERAGE_FACTOR,
+) -> ReciprocityUncertaintyBudget: ...
+
+
+@overload
+def reciprocity_uncertainty_budget(
+    standard_uncertainties_db: Mapping[FreeFieldReciprocityComponent, ArrayLike],
+    *,
+    frequencies: ArrayLike,
+    field: Literal["free"],
+    additional_uncertainties_db: Mapping[str, ArrayLike] | None = None,
+    coverage_factor: float = _COVERAGE_FACTOR,
+) -> ReciprocityUncertaintyBudget: ...
+
+
+@overload
+def reciprocity_uncertainty_budget(
+    standard_uncertainties_db: Mapping[SharedReciprocityComponent, ArrayLike],
+    *,
+    frequencies: ArrayLike,
+    field: CalibrationField,
+    additional_uncertainties_db: Mapping[str, ArrayLike] | None = None,
+    coverage_factor: float = _COVERAGE_FACTOR,
+) -> ReciprocityUncertaintyBudget: ...
+
+
+def reciprocity_uncertainty_budget(
+    standard_uncertainties_db: Mapping[PressureReciprocityComponent, ArrayLike]
+    | Mapping[FreeFieldReciprocityComponent, ArrayLike]
+    | Mapping[SharedReciprocityComponent, ArrayLike],
     *,
     frequencies: ArrayLike,
     field: CalibrationField = "pressure",
@@ -741,7 +892,10 @@ def reciprocity_uncertainty_budget(
 
     :param frequencies: The frequencies, in Hz, increasing.
     :param standard_uncertainties_db: The components, keyed by name, each a
-        standard uncertainty in dB, one value or one per frequency.
+        standard uncertainty in dB, one value or one per frequency. A type
+        checker pairs the keys with ``field``: those of IEC 61094-2 Table 1 with
+        ``"pressure"``, those of IEC 61094-3 Table 1 with ``"free"``, and only
+        the ones both tables list with a field held in a variable.
     :param field: ``"pressure"`` (default) or ``"free"``.
     :param additional_uncertainties_db: Further components, by name, in the same
         form (Default: none).
@@ -756,7 +910,10 @@ def reciprocity_uncertainty_budget(
     field = require_choice(field, "field", CALIBRATION_FIELDS)
     frequencies = _frequency_axis(frequencies)
     table = _BUDGET_TABLES[field]
-    unknown = [key for key in standard_uncertainties_db if key not in table]
+    given: Mapping[ReciprocityComponent, ArrayLike] = dict(
+        standard_uncertainties_db.items()
+    )
+    unknown = [key for key in given if key not in table]
     if unknown:
         msg = (
             f"{unknown} are not components of Table 1 of {_STANDARDS[field]}; the "
@@ -768,22 +925,20 @@ def reciprocity_uncertainty_budget(
     components: list[str] = []
     rows: list[NDArray[np.float64]] = []
     for key, row in table.items():
-        if key in standard_uncertainties_db:
+        if key in given:
             names.append(key)
             components.append(row.component)
-            rows.append(
-                _band_column(standard_uncertainties_db[key], key, frequencies.size)
-            )
-    for key, value in (additional_uncertainties_db or {}).items():
-        if key in names or key in table:
+            rows.append(_band_column(given[key], key, frequencies.size))
+    for name, value in (additional_uncertainties_db or {}).items():
+        if name in names or name in table:
             msg = (
-                f"The additional component {key!r} has the name of a component "
+                f"The additional component {name!r} has the name of a component "
                 "of Table 1; pass it under that name instead."
             )
             raise ValueError(msg)
-        names.append(str(key))
-        components.append(str(key))
-        rows.append(_band_column(value, str(key), frequencies.size))
+        names.append(str(name))
+        components.append(str(name))
+        rows.append(_band_column(value, str(name), frequencies.size))
     if not rows:
         msg = "The budget needs at least one component."
         raise ValueError(msg)

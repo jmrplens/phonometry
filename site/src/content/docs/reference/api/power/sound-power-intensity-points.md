@@ -208,7 +208,7 @@ DiscretePointIntensityResult(
     f4: np.ndarray | None,
     pressure_residual_index: np.ndarray | None,
     fraction: Literal[1, 3],
-    grade: str,
+    grade: Literal['precision', 'engineering', 'survey'],
 )
 ```
 

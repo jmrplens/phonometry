@@ -49,7 +49,7 @@ section is declared and the analysis runs past it.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -83,6 +83,10 @@ if TYPE_CHECKING:
     from .._internal.types import ReportEngine
     from .._report.metadata import ReportMetadata
     from ..room.noise_criteria import NCResult, RCResult
+
+#: The dimensions a duct cross section is described by, the keyword arguments
+#: of :func:`~phonometry.noise_control.duct_modes.plane_wave_limit`.
+DuctSectionDimension = Literal["diameter_m", "width_m", "height_m", "area"]
 
 
 #: Default self-noise sound power level, dB re 1 pW, used where an element has
@@ -474,7 +478,7 @@ def duct_path(
     criterion: CriterionFamily = "NC",
     target: float | None = None,
     self_noise_floor: float | None = DEFAULT_SELF_NOISE_FLOOR,
-    section: Mapping[str, float] | None = None,
+    section: Mapping[DuctSectionDimension, float] | None = None,
     flow_velocity: float = 0.0,
     speed_of_sound: float = 343.0,
     label: str = "Duct path",
@@ -530,8 +534,11 @@ def duct_path(
     if section is not None:
         from .duct_modes import _warn_above_plane_wave_limit, plane_wave_limit
 
+        # The dimensions are the keyword arguments of plane_wave_limit, which
+        # refuses a name it does not take.
+        dimensions: dict[str, float] = dict(section.items())
         limit = plane_wave_limit(
-            flow_velocity=flow_velocity, speed_of_sound=speed_of_sound, **section
+            flow_velocity=flow_velocity, speed_of_sound=speed_of_sound, **dimensions
         )
         _warn_above_plane_wave_limit(f, limit, label)
 

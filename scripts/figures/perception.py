@@ -9,7 +9,7 @@ here is embedded by a page under ``perception/``.
 
 import itertools
 from functools import cache
-from typing import Literal
+from typing import TYPE_CHECKING, Literal
 
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
@@ -28,6 +28,12 @@ from .theme import (
     LABEL_FREQ_HZ,
     save_figure,
 )
+
+if TYPE_CHECKING:
+    from phonometry.hearing.sound_field_audiometry import (
+        LateralPosition,
+        SoundFieldPosition,
+    )
 
 #: The ECMA-418-2 units carry the Sottek Hearing Model subscript
 #: (Bark_HMS, sone_HMS, tu_HMS, vacil_HMS); mathtext is the only clean way
@@ -4555,7 +4561,7 @@ def generate_audiometry_sound_field(output_dir: str) -> None:
 
     # A treated room with the loudspeaker 1.2 m from the listener: the room's
     # modes spoil the two lowest bands, so the usable range starts at 500 Hz.
-    lateral = {
+    lateral: dict[LateralPosition, list[float]] = {
         "left": [2.6, -2.2, 0.8, 0.6, -0.4, 0.5, 0.9, -0.7, 1.2, -1.1, 1.4],
         "right": [-2.4, 1.9, -0.6, 0.3, 0.7, -0.8, 0.4, 1.1, -1.3, 1.5, -0.9],
         "up": [1.2, 2.3, 0.5, -0.9, 0.2, 0.6, -0.5, 0.8, 0.4, -1.2, 1.6],
@@ -4571,7 +4577,7 @@ def generate_audiometry_sound_field(output_dir: str) -> None:
         loudspeaker_distance_m=1.2,
     )
     # Four loudspeakers fed with uncorrelated narrow bands of noise.
-    six = {
+    six: dict[SoundFieldPosition, list[float]] = {
         "front": [1.4, 0.9, 0.6, -0.8, 0.5, 1.1, -0.4, 0.7, -0.6, 0.9, 1.2],
         "back": [-1.2, -0.6, 0.8, 0.5, -0.9, -0.7, 0.6, -0.5, 0.8, -1.0, -0.8],
         "left": [0.8, 1.3, -0.5, 0.9, 0.4, -0.6, 1.0, 0.6, -0.9, 0.5, 1.4],

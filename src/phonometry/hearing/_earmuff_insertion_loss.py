@@ -75,6 +75,7 @@ from .._internal.validation import require_scalar
 from .sound_field_audiometry import (
     _RANDOM_INCIDENCE_CLAUSE,
     DiffuseSoundFieldCheck,
+    SoundFieldPosition,
     _diffuse_field_check,
 )
 
@@ -667,7 +668,7 @@ def earmuff_insertion_loss(
 
 
 def check_random_incidence_field(
-    position_levels: Mapping[str, ArrayLike],
+    position_levels: Mapping[SoundFieldPosition, ArrayLike],
     reference_levels: ArrayLike,
     *,
     directional_levels: ArrayLike | None = None,

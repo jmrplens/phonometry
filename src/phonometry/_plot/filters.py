@@ -827,6 +827,8 @@ def plot_periodic_clause(
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the verdict markers.
     :return: The axes.
+    :raises TypeError: for ``yerr`` on the margins of Clause 13, which the
+        plot sets itself: each result's error bar is its own uncertainty.
     """
     from .._i18n import localize_axes
     from .metrology import _draw_conformance
@@ -883,6 +885,8 @@ def plot_periodic_verification(
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the verdict markers.
     :return: The axes.
+    :raises TypeError: for ``yerr``, which the plot sets itself: each
+        result's error bar is its own uncertainty.
     """
     ax = ax if ax is not None else _new_axes()
     shown: set[str] = set()

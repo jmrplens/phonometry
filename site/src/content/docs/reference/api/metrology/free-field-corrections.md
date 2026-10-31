@@ -351,7 +351,7 @@ correction is their mean.
 
 ```python
 correction_uncertainty_budget(
-    stated_uncertainties_db: Mapping[str, float],
+    stated_uncertainties_db: Mapping[Literal['a1', 'a2', 'a3', 'a4', 'a5', 'a6', 'a7', 'a8', 'a9', 'a10', 'a11', 'a12', 'a13', 'a14', 'a15'], float],
     *,
     repeatability_dof: float,
     frequency_hz: float,

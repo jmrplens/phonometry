@@ -133,12 +133,19 @@ if TYPE_CHECKING:
 FreeFieldRoom = Literal["anechoic", "hemi-anechoic"]
 QualificationBandwidth = Literal["discrete-frequency", "broadband"]
 
-_ROOMS: tuple[str, ...] = ("anechoic", "hemi-anechoic")
+_ROOMS: tuple[FreeFieldRoom, ...] = ("anechoic", "hemi-anechoic")
 #: ISO 3745:2012/Amd.1:2017 A.3.3 a) to e): at least one traverse path towards
 #: a dihedral corner, one towards a trihedral corner, one towards the centre of
 #: the most uniform boundary surface, one towards the closest boundary surface
 #: and one towards the boundary surfaces with unique features.
-_PATH_TARGETS: tuple[str, ...] = (
+PathTarget = Literal[
+    "dihedral corner",
+    "trihedral corner",
+    "boundary center",
+    "closest boundary",
+    "unique features",
+]
+_PATH_TARGETS: tuple[PathTarget, ...] = (
     "dihedral corner",
     "trihedral corner",
     "boundary center",
@@ -426,7 +433,9 @@ def _as_levels(value: ArrayLike, n_points: int, name: str) -> np.ndarray:
     return np.ascontiguousarray(arr)
 
 
-def _checked_targets(targets: str | Sequence[str]) -> tuple[str, ...]:
+def _checked_targets(
+    targets: PathTarget | Sequence[PathTarget],
+) -> tuple[PathTarget, ...]:
     """The A.3.3 targets of a traverse, one name or several, as a tuple."""
     named = (targets,) if isinstance(targets, str) else tuple(targets)
     unknown = [t for t in named if t not in _PATH_TARGETS]
@@ -549,7 +558,7 @@ class MicrophoneTraverse(OwnsArrays):
     monitor_levels: np.ndarray | None = None
     background_levels: np.ndarray | None = None
     name: str = ""
-    targets: tuple[str, ...] = ()
+    targets: tuple[PathTarget, ...] = ()
 
     def __post_init__(self) -> None:
         """Hold every array as float64 and refuse inconsistent shapes.
@@ -583,7 +592,7 @@ class MicrophoneTraverse(OwnsArrays):
         monitor_levels: ArrayLike | None = None,
         background_levels: ArrayLike | None = None,
         name: str = "",
-        targets: Sequence[str] = (),
+        targets: Sequence[PathTarget] = (),
     ) -> MicrophoneTraverse:
         """A traverse laid out along a straight line from ``start_m``.
 
@@ -924,7 +933,7 @@ class InverseSquareLawResult(OwnsArrays):
     origin_fitted: bool
     source_box_m: np.ndarray | None
     traverse_names: tuple[str, ...]
-    traverse_targets: tuple[tuple[str, ...], ...]
+    traverse_targets: tuple[tuple[PathTarget, ...], ...]
     positions_m: tuple[np.ndarray, ...]
     distances: tuple[np.ndarray, ...]
     levels: tuple[np.ndarray, ...]
@@ -1259,7 +1268,7 @@ class SourceDirectionalityResult(OwnsArrays):
     """
 
     frequencies: np.ndarray
-    room: str
+    room: FreeFieldRoom
     mean_level: np.ndarray
     max_positive_deviation_db: np.ndarray
     max_negative_deviation_db: np.ndarray

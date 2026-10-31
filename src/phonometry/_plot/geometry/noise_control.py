@@ -59,6 +59,7 @@ if TYPE_CHECKING:
         ReactiveSilencerResult,
         SilencerChain,
         SilencerChainElement,
+        SilencerDimension,
     )
 
 #: The named reactive silencers a drawing exists for.
@@ -476,7 +477,9 @@ def _validate_branch_geometry(
     _duct_diameter(branch_area, "branch_area")
 
 
-def _require_silencer_keys(kind: str, geometry: Mapping[str, float]) -> None:
+def _require_silencer_keys(
+    kind: str, geometry: Mapping[SilencerDimension, float]
+) -> None:
     """Refuse a geometry that is not a mapping, or that holds a key the kind
     is not drawn from, naming every such key.
 
@@ -500,7 +503,7 @@ def _require_silencer_keys(kind: str, geometry: Mapping[str, float]) -> None:
 
 def plot_silencer_geometry(
     kind: SilencerKind,
-    geometry: Mapping[str, float],
+    geometry: Mapping[SilencerDimension, float],
     *,
     ax: Axes | None = None,
     language: Language = "en",
@@ -620,7 +623,7 @@ def plot_silencer_result_geometry(
     if result.chain is not None:
         return plot_silencer_chain_geometry(result.chain, ax=ax, language=language)
     # A named device holds its geometry: the record refuses neither or both.
-    geometry = cast("dict[str, float]", result.geometry)
+    geometry = cast("dict[SilencerDimension, float]", result.geometry)
     return plot_silencer_geometry(
         cast("SilencerKind", result.kind), geometry, ax=ax, language=language
     )

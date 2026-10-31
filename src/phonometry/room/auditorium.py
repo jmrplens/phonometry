@@ -1913,7 +1913,7 @@ class PerceptibleDifference(OwnsArrays):
     :ivar second: The other, of the same shape.
     """
 
-    symbol: str
+    symbol: Symbol
     first: NDArray[np.float64]
     second: NDArray[np.float64]
 
@@ -2007,7 +2007,7 @@ def assess_perceptible_difference(
     )
 
 
-def _table_a1_row(symbol: str) -> AuditoriumQuantity:
+def _table_a1_row(symbol: Symbol) -> AuditoriumQuantity:
     """One row of Table A.1, by either symbol the standard prints for it."""
     key = _TABLE_A1_ALIASES.get(symbol, symbol)
     if key not in TABLE_A1:

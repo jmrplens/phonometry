@@ -242,7 +242,7 @@ class SoundPowerIntensityResult(OwnsArrays):
     pressure_residual_index: np.ndarray | None
     surface_area: float
     fraction: BandFraction
-    grade: str
+    grade: Grade
     repeatability_limit_db: np.ndarray | None = None
 
     def __post_init__(self) -> None:

@@ -247,62 +247,85 @@ def _row(
     )
 
 
+#: The descriptors of the fifteen components of Table I.1, ``a1`` to ``a15``.
+TableI1Descriptor = Literal[
+    "a1",
+    "a2",
+    "a3",
+    "a4",
+    "a5",
+    "a6",
+    "a7",
+    "a8",
+    "a9",
+    "a10",
+    "a11",
+    "a12",
+    "a13",
+    "a14",
+    "a15",
+]
+
 #: IEC 62585:2012 Table I.1, "Description of likely uncertainty components",
 #: keyed by the descriptor ``"a1"`` to ``"a15"`` the table prints, in its
 #: order. Tables I.2 and I.3 fill in the values at 1 kHz and 8 kHz.
-IEC62585_TABLE_I1: Mapping[str, UncertaintyComponentRow] = MappingProxyType(
-    {
-        "a1": _row("L_ind1", "Level measurement: sound level meter in free-field"),
-        "a2": _row("L_ind2", "Level measurement: reference microphone in free-field"),
-        "a3": _row(
-            "L_ind3a",
-            "Level measurement: reference microphone in comparison coupler",
-        ),
-        "a4": _row(
-            "L_ind3b", "Level measurement: sound level meter in comparison coupler"
-        ),
-        "a5": _row(
-            "L_p,F1 - L_p,F2",
-            "(Uncorrected) drift in level of SPL in free-field between measurements "
-            "with sound level meter and reference microphone",
-        ),
-        "a6": _row(
-            "L_p,P1 - L_p,P2",
-            "Difference in sound pressure level at sound level meter and reference "
-            "microphone in comparison coupler",
-        ),
-        "a7": _row(
-            "C_FF,RM",
-            "Free-field correction of reference microphone from IEC/TS 61094-7",
-            2.0,
-        ),
-        "a8": _row(
-            "Gain of SLM",
-            "Maximum drift in gain of sound level meter during measurements",
-        ),
-        "a9": _row(
-            "Gain of RM channel",
-            "Maximum drift in gain of reference microphone channel during measurements",
-        ),
-        "a10": _row(
-            "Source to microphone distance",
-            "Resetting distance from sound source to reference microphone or sound "
-            "level meter",
-        ),
-        "a11": _row(
-            "Free-progressive sound wave",
-            "Due to reflections and non-uniform wave front",
-        ),
-        "a12": _row("SLM and RM mountings", "Due to reflection from mountings"),
-        "a13": _row(
-            "Microphone diameters",
-            "Ratio of reference microphone and sound level meter microphone diameters",
-        ),
-        "a14": _row("Rounding", "Rounding of final result"),
-        "a15": _row(
-            "Repeatability", "Repeat measurements with combinations stated", 1.0
-        ),
-    }
+IEC62585_TABLE_I1: Mapping[TableI1Descriptor, UncertaintyComponentRow] = (
+    MappingProxyType(
+        {
+            "a1": _row("L_ind1", "Level measurement: sound level meter in free-field"),
+            "a2": _row(
+                "L_ind2", "Level measurement: reference microphone in free-field"
+            ),
+            "a3": _row(
+                "L_ind3a",
+                "Level measurement: reference microphone in comparison coupler",
+            ),
+            "a4": _row(
+                "L_ind3b", "Level measurement: sound level meter in comparison coupler"
+            ),
+            "a5": _row(
+                "L_p,F1 - L_p,F2",
+                "(Uncorrected) drift in level of SPL in free-field between measurements "
+                "with sound level meter and reference microphone",
+            ),
+            "a6": _row(
+                "L_p,P1 - L_p,P2",
+                "Difference in sound pressure level at sound level meter and reference "
+                "microphone in comparison coupler",
+            ),
+            "a7": _row(
+                "C_FF,RM",
+                "Free-field correction of reference microphone from IEC/TS 61094-7",
+                2.0,
+            ),
+            "a8": _row(
+                "Gain of SLM",
+                "Maximum drift in gain of sound level meter during measurements",
+            ),
+            "a9": _row(
+                "Gain of RM channel",
+                "Maximum drift in gain of reference microphone channel during measurements",
+            ),
+            "a10": _row(
+                "Source to microphone distance",
+                "Resetting distance from sound source to reference microphone or sound "
+                "level meter",
+            ),
+            "a11": _row(
+                "Free-progressive sound wave",
+                "Due to reflections and non-uniform wave front",
+            ),
+            "a12": _row("SLM and RM mountings", "Due to reflection from mountings"),
+            "a13": _row(
+                "Microphone diameters",
+                "Ratio of reference microphone and sound level meter microphone diameters",
+            ),
+            "a14": _row("Rounding", "Rounding of final result"),
+            "a15": _row(
+                "Repeatability", "Repeat measurements with combinations stated", 1.0
+            ),
+        }
+    )
 )
 
 #: The component whose standard uncertainty comes from a statistical
@@ -1613,7 +1636,7 @@ def _repeatability_dof(value: float) -> float:
 
 
 def correction_uncertainty_budget(
-    stated_uncertainties_db: Mapping[str, float],
+    stated_uncertainties_db: Mapping[TableI1Descriptor, float],
     *,
     repeatability_dof: float,
     frequency_hz: float,

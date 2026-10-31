@@ -19,6 +19,13 @@ Stdlib only, like every module of this package.
 from __future__ import annotations
 
 import math
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from phonometry.metrology.comparison_calibration import (
+        FreeFieldComparisonComponent,
+        PressureComparisonComponent,
+    )
 
 #: IEC 61094-5:2016 Table A.1, folio 15 (PDF page 17): the correction, in
 #: dB, keyed by frequency in kHz as the table prints it.
@@ -44,7 +51,7 @@ IEC61094_5_TABLE_A1_RELATIVE_EXPANDED = 0.1
 
 #: IEC 61094-5:2016 Table D.1, folio 20 (PDF page 22): the standard
 #: uncertainty column, in dB, keyed by component.
-IEC61094_5_TABLE_D1_STANDARD_DB: dict[str, float] = {
+IEC61094_5_TABLE_D1_STANDARD_DB: dict[PressureComparisonComponent, float] = {
     "reference": 0.025,
     "capacitance": 0.006,
     "non_linearity": 0.017,
@@ -62,7 +69,7 @@ IEC61094_5_TABLE_D1_STANDARD_DB: dict[str, float] = {
 #: 20 lg (200,2/200) dB with a rectangular distribution". The repeatability
 #: row states no value ("Found from the standard uncertainties of a large
 #: number of similar measurements."), so it is not here.
-IEC61094_5_TABLE_D1_STATED: dict[str, tuple[float, float]] = {
+IEC61094_5_TABLE_D1_STATED: dict[PressureComparisonComponent, tuple[float, float]] = {
     "reference": (0.05, 2.0),
     "capacitance": (0.01, math.sqrt(3.0)),
     "non_linearity": (0.03, math.sqrt(3.0)),
@@ -141,7 +148,7 @@ IEC61094_8_TABLE_1_TEXT: dict[str, tuple[str, str, tuple[str, ...]]] = {
 
 #: BS EN 61094-8:2012 Table 2, folio 17 (PDF page 19): the source of
 #: uncertainty of each row as printed, in the table's order.
-IEC61094_8_TABLE_2_SOURCES: dict[str, str] = {
+IEC61094_8_TABLE_2_SOURCES: dict[FreeFieldComparisonComponent, str] = {
     "reference": "Free-field sensitivity of the reference microphone",
     "source_stability": "Stability of sound source",
     "positioning": "Positioning accuracy (including acoustic centre uncertainty)",
@@ -161,7 +168,7 @@ IEC61094_8_TABLE_2_SOURCES: dict[str, str] = {
 #: BS EN 61094-8:2012 Table 2, folio 17 (PDF page 19): the subclause
 #: references of the twelve typical components, in the table's order ("-"
 #: for the rounding error).
-IEC61094_8_TABLE_2_SUBCLAUSES: dict[str, tuple[str, ...]] = {
+IEC61094_8_TABLE_2_SUBCLAUSES: dict[FreeFieldComparisonComponent, tuple[str, ...]] = {
     "reference": ("8.2",),
     "source_stability": ("8.4",),
     "positioning": ("7.3", "8.4"),

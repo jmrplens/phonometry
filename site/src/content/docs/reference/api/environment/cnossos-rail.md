@@ -531,7 +531,7 @@ RailwayEmissionResult(
     third_octave_line_power: NDArray[np.float64],
     line_power: NDArray[np.float64],
     total_line_power: NDArray[np.float64],
-    components: dict[str, tuple[NDArray[np.float64], NDArray[np.float64]]] = ...,
+    components: dict[Literal['rolling', 'traction', 'aerodynamic', 'bridge'], tuple[NDArray[np.float64], NDArray[np.float64]]] = ...,
 )
 ```
 

@@ -308,7 +308,7 @@ enclosure_sound_power_insulation(
     frequencies: ArrayLike | None = None,
     a_weighted_without: float | None = None,
     a_weighted_with: float | None = None,
-    base_standard: str = 'ISO 3744',
+    base_standard: Literal['ISO 3741', 'ISO 3742', 'ISO 3743-2', 'ISO 3743-1', 'ISO 3744', 'ISO 3746', 'ISO 3747', 'ISO 9614-1', 'ISO 9614-2'] = 'ISO 3744',
     condition: Literal['laboratory', 'in-situ'] = 'laboratory',
     source_kind: Literal['actual', 'reciprocity', 'artificial'] = 'actual',
     fraction: Literal[1, 3] | np.integer[Any] = 3,
@@ -331,7 +331,7 @@ the ISO 3744 Annex E table, which is what the note to clause 6.2 prefers.
 | `frequencies` | Nominal band centres, in hertz. |
 | `a_weighted_without` | $L_{WA}$ without the enclosure, in decibels, when it was measured rather than computed. |
 | `a_weighted_with` | The same with the enclosure, in decibels. |
-| `base_standard` | The standard the sound power came from, as Table 1 lists them. |
+| `base_standard` | The standard the sound power came from, one of those Table 1 of either part lists for a sound power (default `"ISO 3744"`). |
 | `condition` | `"laboratory"` for part 1, `"in-situ"` for part 2. |
 | `source_kind` | `"actual"`, `"reciprocity"` or `"artificial"`. |
 | `fraction` | The band set, 3 for one-third octaves (default) or 1 for octaves. |
@@ -342,8 +342,8 @@ the ISO 3744 Annex E table, which is what the note to clause 6.2 prefers.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | For spectra that do not match, non-finite values, half an A-weighted pair, an unknown condition, source kind or band fraction, or a combination of condition and source kind Table 1 does not have. |
-| TypeError | if `fraction` is not an integer (a word, a flag or a float), `a_weighted_with` or `a_weighted_without` is not a single number, or `frequencies`, `level_with` or `level_without` holds a text or a value that is not a real number. |
+| ValueError | For spectra that do not match, non-finite values, half an A-weighted pair, an unknown base standard, condition, source kind or band fraction, or a combination of condition and source kind Table 1 does not have. |
+| TypeError | if `base_standard` is not a text, `fraction` is not an integer (a word, a flag or a float), `a_weighted_with` or `a_weighted_without` is not a single number, or `frequencies`, `level_with` or `level_without` holds a text or a value that is not a real number. |
 
 ## enclosure_sound_pressure_insulation
 
@@ -355,7 +355,7 @@ enclosure_sound_pressure_insulation(
     frequencies: ArrayLike | None = None,
     a_weighted_without: float | None = None,
     a_weighted_with: float | None = None,
-    base_standard: str = 'ISO 11201',
+    base_standard: Literal['ISO 11201', 'ISO 11202', 'ISO 11204'] = 'ISO 11201',
     condition: Literal['laboratory', 'in-situ'] = 'laboratory',
     source_kind: Literal['actual', 'reciprocity', 'artificial'] = 'actual',
     fraction: Literal[1, 3] | np.integer[Any] = 3,
@@ -380,7 +380,7 @@ different numbers about the same enclosure.
 | `frequencies` | Nominal band centres, in hertz. |
 | `a_weighted_without` | $L_{pA}$ without the enclosure, in decibels, when it was measured rather than computed. |
 | `a_weighted_with` | The same with the enclosure, in decibels. |
-| `base_standard` | The standard the pressure levels came from. |
+| `base_standard` | The standard the pressure levels came from, one of those Table 1 of either part lists for a sound pressure level (default `"ISO 11201"`). |
 | `condition` | `"laboratory"` for part 1, `"in-situ"` for part 2. |
 | `source_kind` | `"actual"`, `"reciprocity"` or `"artificial"`. |
 | `fraction` | The band set, 3 for one-third octaves (default) or 1 for octaves. |
@@ -391,8 +391,8 @@ different numbers about the same enclosure.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | For spectra that do not match, non-finite values, half an A-weighted pair, an unknown condition, source kind or band fraction, or a combination of condition and source kind Table 1 does not have. |
-| TypeError | if `fraction` is not an integer (a word, a flag or a float), `a_weighted_with` or `a_weighted_without` is not a single number, or `frequencies`, `level_with` or `level_without` holds a text or a value that is not a real number. |
+| ValueError | For spectra that do not match, non-finite values, half an A-weighted pair, an unknown base standard, condition, source kind or band fraction, or a combination of condition and source kind Table 1 does not have. |
+| TypeError | if `base_standard` is not a text, `fraction` is not an integer (a word, a flag or a float), `a_weighted_with` or `a_weighted_without` is not a single number, or `frequencies`, `level_with` or `level_without` holds a text or a value that is not a real number. |
 
 ## EnclosureInsulationResult
 

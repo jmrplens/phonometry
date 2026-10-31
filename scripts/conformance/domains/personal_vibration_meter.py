@@ -37,12 +37,17 @@ Oracle: ISO 8041-2:2021, printed folios 8, 12, 13, 14, 23, 26 to 32, 37 and
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import reference_data as ref
 
 import phonometry as ph
 
 from ..registry import Outcome, count, numeric, record, register
 from .signal_burst import _indications
+
+if TYPE_CHECKING:
+    from phonometry.vibration.human.signal_burst import BurstQuantity
 
 _PVEM = "Personal vibration exposure meters (ISO 8041-2)"
 
@@ -57,7 +62,7 @@ _TABLES: tuple[
     tuple[
         int,
         str,
-        tuple[str, ...],
+        tuple[BurstQuantity, ...],
         dict[tuple[str, int | None], tuple[tuple[float, float], ...]],
     ],
     ...,
@@ -104,7 +109,7 @@ def _register_reproduction() -> None:
         def _check(
             number: int = number,
             application: str = application,
-            columns: tuple[str, ...] = columns,
+            columns: tuple[BurstQuantity, ...] = columns,
             table: dict[
                 tuple[str, int | None], tuple[tuple[float, float], ...]
             ] = table,
@@ -138,7 +143,7 @@ def _register_identity() -> None:
         def _check(
             number: int = number,
             application: str = application,
-            columns: tuple[str, ...] = columns,
+            columns: tuple[BurstQuantity, ...] = columns,
             table: dict[
                 tuple[str, int | None], tuple[tuple[float, float], ...]
             ] = table,

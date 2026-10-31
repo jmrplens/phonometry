@@ -1346,8 +1346,8 @@ The range is [`TYPICAL_WIND_SHEAR_EXPONENT_RANGE`](/phonometry/reference/api/env
 ```python
 WindTurbineRatingLevel(
     equivalent_level: float,
-    adjustments: Mapping[str, float],
-    governing: str | None,
+    adjustments: Mapping[Literal['tonal', 'amplitude_modulation', 'impulsive'], float],
+    governing: Literal['tonal', 'amplitude_modulation', 'impulsive'] | None,
     rating_level: float,
 )
 ```

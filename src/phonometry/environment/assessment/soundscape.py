@@ -205,7 +205,17 @@ class QuestionnaireScale(RichDisplay):
 #: variables of Formulas (A.1) and (A.2) of ISO/TS 12913-3: ``p`` pleasant,
 #: ``ch`` chaotic, ``v`` vibrant, ``u`` uneventful, ``ca`` calm, ``a``
 #: annoying, ``e`` eventful, ``m`` monotonous.
-PERCEIVED_AFFECTIVE_QUALITY_ATTRIBUTES: tuple[str, ...] = (
+AffectiveQuality = Literal[
+    "pleasant",
+    "chaotic",
+    "vibrant",
+    "uneventful",
+    "calm",
+    "annoying",
+    "eventful",
+    "monotonous",
+]
+PERCEIVED_AFFECTIVE_QUALITY_ATTRIBUTES: tuple[AffectiveQuality, ...] = (
     "pleasant",
     "chaotic",
     "vibrant",
@@ -877,7 +887,7 @@ class PleasantnessEventfulness(OwnsArrays):
 
 
 def pleasantness_eventfulness(
-    scale_values: Mapping[str, ArrayLike] | ArrayLike,
+    scale_values: Mapping[AffectiveQuality, ArrayLike] | ArrayLike,
     *,
     sites: ArrayLike | Sequence[object] | None = None,
     central_tendency: Literal["median", "mean"] = "median",
@@ -927,7 +937,7 @@ def pleasantness_eventfulness(
                 f"{sorted(missing)}, unexpected {sorted(extra)}."
             )
             raise ValueError(msg)
-        ordered = {
+        ordered: dict[str, ArrayLike] = {
             name: scale_values[name] for name in PERCEIVED_AFFECTIVE_QUALITY_ATTRIBUTES
         }
         _, matrix = _columns(ordered, [], "", integer=False)

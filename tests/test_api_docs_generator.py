@@ -696,6 +696,36 @@ def test_alias_expansion_leaves_quotes_attributes_and_foreign_names_alone() -> N
     )
 
 
+def test_a_literal_composed_of_others_prints_as_one_list() -> None:
+    """A ``Literal`` nested in another reads as its members, in their order.
+
+    A type checker reads ``Literal[Literal["a"], "b"]`` as ``Literal["a", "b"]``,
+    and so does the runtime alias; the page prints that list, not the nesting
+    the alias was composed with.
+    """
+    module = "phonometry.noise_control.enclosure_insulation"
+    assert gad.expand_unpublished_aliases("TestEnvironmentStandard", module) == (
+        "Literal['ISO 3743-1', 'ISO 3744', 'ISO 3746', 'ISO 3747', 'ISO 9614-1', "
+        "'ISO 9614-2', 'ISO 11201', 'ISO 11202', 'ISO 11204']"
+    )
+    assert gad.expand_unpublished_aliases(
+        "BurstRow | None", "phonometry.vibration.human.signal_burst"
+    ) == (
+        "Literal['Wb', 'Wc', 'Wd', 'We', 'Wf', 'Wh', 'Wj', 'Wk', 'Wm', "
+        "'band-limiting'] | None"
+    )
+    # Nested twice, written through typing, or a lone member: one flat list.
+    assert gad._flattened_literals(
+        "typing.Literal['a', Literal[Literal['b'], 'c']]"
+    ) == ("typing.Literal['a', 'b', 'c']")
+    assert gad._flattened_literals("Literal[Literal['a']]") == "Literal['a']"
+    # Two Literals side by side are no nesting, and keep their spelling.
+    side_by_side = "Mapping[Literal['a'],  Literal['b']]"
+    assert gad._flattened_literals(side_by_side) == side_by_side
+    # A text that does not parse is left as it is.
+    assert gad._flattened_literals("Literal[Literal['a'") == "Literal[Literal['a'"
+
+
 def test_an_alias_a_package_published_would_stay_a_name(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

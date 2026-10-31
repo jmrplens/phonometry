@@ -126,9 +126,13 @@ BurstApplication = Literal["hand-arm", "whole-body", "low-frequency-whole-body"]
 
 #: A row of Tables 7 to 9: a frequency weighting, or the band-limiting row.
 BurstRow = Literal[WeightingName, "band-limiting"]
+#: The columns Tables 7 to 9 print: the r.m.s. value, the vibration dose
+#: value, the maximum transient vibration value with linear and with
+#: exponential averaging, and the motion sickness dose value.
+BurstQuantity = Literal["rms", "vdv", "mtvv_linear", "mtvv_exponential", "msdv"]
 
 #: The indications of one burst length, by printed column name.
-BurstColumns = Mapping[str, float]
+BurstColumns = Mapping[BurstQuantity, float]
 
 #: The indications by burst length, ``None`` for the continuous row.
 #: ``Mapping`` is invariant in its key, so a ``dict[int, ...]`` that leaves
@@ -273,7 +277,7 @@ SAWTOOTH_BURST_TESTS: Mapping[str, SawtoothBurstTest] = MappingProxyType(
 #: The tolerance each printed column of Tables 7 to 9 is judged against, in
 #: per cent. Every column is 10 % except the vibration dose value, which is
 #: 12 % in all 48 of its cells.
-BURST_TOLERANCE_PERCENT: Mapping[str, float] = MappingProxyType(
+BURST_TOLERANCE_PERCENT: Mapping[BurstQuantity, float] = MappingProxyType(
     {
         "rms": 10.0,
         "vdv": 12.0,
@@ -284,9 +288,14 @@ BURST_TOLERANCE_PERCENT: Mapping[str, float] = MappingProxyType(
 )
 
 #: The quantities each table prints, in printed column order.
-_TABLE_7_QUANTITIES = ("rms",)
-_TABLE_8_QUANTITIES = ("rms", "vdv", "mtvv_linear", "mtvv_exponential")
-_TABLE_9_QUANTITIES = ("rms", "msdv")
+_TABLE_7_QUANTITIES: tuple[BurstQuantity, ...] = ("rms",)
+_TABLE_8_QUANTITIES: tuple[BurstQuantity, ...] = (
+    "rms",
+    "vdv",
+    "mtvv_linear",
+    "mtvv_exponential",
+)
+_TABLE_9_QUANTITIES: tuple[BurstQuantity, ...] = ("rms", "msdv")
 
 #: The rows of Tables 7 to 9, keyed by burst length with ``None`` for the
 #: continuous row, in the printed column order of the table above them.
@@ -398,7 +407,7 @@ _TABLE_9_ROWS: dict[str, dict[int | None, tuple[float, ...]]] = {
 #: The three printed tables, each with the application it grades and the
 #: columns it prints, in printed order.
 _PrintedTable = tuple[
-    str, tuple[str, ...], dict[str, dict[int | None, tuple[float, ...]]]
+    str, tuple[BurstQuantity, ...], dict[str, dict[int | None, tuple[float, ...]]]
 ]
 _PRINTED_TABLES: tuple[_PrintedTable, ...] = (
     (_HAND_ARM, _TABLE_7_QUANTITIES, _TABLE_7_ROWS),
@@ -407,9 +416,11 @@ _PRINTED_TABLES: tuple[_PrintedTable, ...] = (
 )
 
 
-def _build_response_table() -> dict[tuple[str, str, int | None], Mapping[str, float]]:
+def _build_response_table() -> dict[
+    tuple[str, str, int | None], Mapping[BurstQuantity, float]
+]:
     """Flatten the three printed tables into one indication lookup."""
-    table: dict[tuple[str, str, int | None], Mapping[str, float]] = {}
+    table: dict[tuple[str, str, int | None], Mapping[BurstQuantity, float]] = {}
     for application, quantities, rows in _PRINTED_TABLES:
         for row, cells in rows.items():
             for n_cycles, values in cells.items():
@@ -426,9 +437,9 @@ def _build_response_table() -> dict[tuple[str, str, int | None], Mapping[str, fl
 #: MSDV). ``n_cycles`` is ``None`` for the continuous row. The values are the
 #: response to a 1 m/s2 amplitude signal and scale with the amplitude of the
 #: actual test signal, which is what 5.9 says on folio 16.
-SIGNAL_BURST_RESPONSE: Mapping[tuple[str, str, int | None], Mapping[str, float]] = (
-    MappingProxyType(_build_response_table())
-)
+SIGNAL_BURST_RESPONSE: Mapping[
+    tuple[str, str, int | None], Mapping[BurstQuantity, float]
+] = MappingProxyType(_build_response_table())
 
 
 def _require_application(application: str) -> SawtoothBurstTest:
@@ -647,7 +658,7 @@ def signal_burst_indications(
     n_cycles: int | None,
     *,
     fs: float | None = None,
-) -> dict[str, float]:
+) -> dict[BurstQuantity, float]:
     """What a conforming meter indicates for one row of Tables 7 to 9.
 
     Runs the library chain the standard describes: the burst of
@@ -689,7 +700,7 @@ def signal_burst_indications(
     )
 
     printed = SIGNAL_BURST_RESPONSE[test.application, row, burst_cycles]
-    indications: dict[str, float] = {}
+    indications: dict[BurstQuantity, float] = {}
     method: Literal["linear", "exponential"]
     for quantity in printed:
         if quantity == "rms":
@@ -738,7 +749,7 @@ class SignalBurstVerification(OwnsArrays):
     weighting: BurstRow
     amplitude_m_s2: float
     cycle_counts: tuple[int | None, ...]
-    quantities: tuple[str, ...]
+    quantities: tuple[BurstQuantity, ...]
     measured: NDArray[np.float64]
 
     def __post_init__(self) -> None:

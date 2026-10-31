@@ -1098,7 +1098,7 @@ convert(
     src: str | Path,
     dst: str | Path,
     *,
-    subtype: str | None = None,
+    subtype: Literal['PCM_16', 'PCM_24', 'PCM_32', 'FLOAT', 'DOUBLE'] | None = None,
     block_size: int | np.integer[Any] = 1048576,
 ) -> AudioFileInfo
 ```
@@ -1237,7 +1237,7 @@ dictionary has merged them.
 ```python
 Provenance(
     *,
-    kind: str,
+    kind: Literal['datasheet', 'declaration_of_performance', 'test_report', 'measurement', 'calculation', 'publication', 'other'],
     document: str,
     version: str | None,
     consulted: str,

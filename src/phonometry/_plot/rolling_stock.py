@@ -48,7 +48,7 @@ if TYPE_CHECKING:
         SmallRoughnessDeviation,
         StationaryTestResult,
     )
-    from ..environment.sources.track_decay import TrackDecayRate
+    from ..environment.sources.track_decay import Direction, TrackDecayRate
 
 #: Axis labels the renderers share, named once so the table and the axes agree.
 _WAVELENGTH_LABEL = r"Wavelength $\lambda$ [cm]"
@@ -861,7 +861,11 @@ def _draw_reference_decay(
             label=_first_series_label(first_label, i, label),
             color=_C_PRIMARY if rates.direction == "vertical" else _C_TERTIARY,
         )
-    for direction, color in (("vertical", _C_REFERENCE), ("lateral", _C_SECONDARY)):
+    limit_colors: tuple[tuple[Direction, str], ...] = (
+        ("vertical", _C_REFERENCE),
+        ("lateral", _C_SECONDARY),
+    )
+    for direction, color in limit_colors:
         direction_limit = result.decay_limits_db_per_m.get(direction)
         if direction_limit:
             label = f"{_t('Lower limit', language)}, {_t(direction.capitalize(), language).lower()}"

@@ -117,7 +117,7 @@ CEILING_UNCERTAINTY = {125.0: 0.23, 250.0: 0.23, 500.0: 0.11, 1000.0: 0.1, 2000.
 ```python
 CeilingSpecimenCheck(
     area: float,
-    mounting: str,
+    mounting: Literal['A', 'B', 'E', 'J'],
     depth_mm: float | None,
     deflection_mm: float,
     substructure_width_mm: float,

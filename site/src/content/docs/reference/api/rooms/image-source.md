@@ -260,6 +260,13 @@ Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the room-outline rectangle. |
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `max_order` is a flag, a text or an array where a count goes. |
+| ValueError | for a negative `max_order`. |
+
 ## reflection_density
 
 ```python

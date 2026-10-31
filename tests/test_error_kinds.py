@@ -42,6 +42,8 @@ reads is data, so a field of the wrong type in it is a malformed file and a
 from __future__ import annotations
 
 import ast
+import functools
+import importlib.util
 import re
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -789,6 +791,7 @@ def _raises_type_error(function: ast.FunctionDef | ast.AsyncFunctionDef) -> int 
     return None
 
 
+@functools.cache
 def _validators_raising_type_error() -> frozenset[str]:
     """The public validators of ``_internal/validation.py`` that raise TypeError.
 
@@ -931,8 +934,411 @@ def _unnamed(handed: set[str], documented: str) -> list[str]:
     return sorted(p for p in handed if not re.search(rf"\b{re.escape(p)}\b", field))
 
 
+#: Where a ``.plot`` hands its keywords: the package of the renderers.
+_RENDERERS = "phonometry._plot"
+
+#: The check a renderer refuses a keyword it computes with (``_plot/common.py``):
+#: ``refuse_fixed_keywords(kwargs, renderer, *names, reason=...)``.
+_REFUSE_KEYWORDS = "refuse_fixed_keywords"
+
+#: How many calls deep the caller's keywords are followed through renderers.
+_RENDERER_DEPTH = 6
+
+
+def _module_name(path: Path) -> str:
+    """The dotted name of a module under ``src``."""
+    parts = list(path.relative_to(SRC.parent).with_suffix("").parts)
+    if parts[-1] == "__init__":
+        parts = parts[:-1]
+    return ".".join(parts)
+
+
+def _module_path(module: str) -> Path | None:
+    """The source file of a module of the package, or ``None``."""
+    base = SRC.parent.joinpath(*module.split("."))
+    for candidate in (base.with_suffix(".py"), base / "__init__.py"):
+        if candidate.is_file():
+            return candidate
+    return None
+
+
+@functools.cache
+def _parsed_module(module: str) -> ast.Module | None:
+    path = _module_path(module)
+    return None if path is None else ast.parse(path.read_text(encoding="utf-8"))
+
+
+def _imported_names(node: ast.AST, module: str) -> dict[str, tuple[str, str]]:
+    """Every ``from x import name`` under *node*, as ``{name: (module, name)}``.
+
+    A module imported under a name of its own (``import a.b as c``) is
+    ``{c: ("a.b", "")}``.
+    """
+    path = _module_path(module)
+    package = (
+        module
+        if path is not None and path.name == "__init__.py"
+        else (module.rpartition(".")[0])
+    )
+    found: dict[str, tuple[str, str]] = {}
+    for child in ast.walk(node):
+        if isinstance(child, ast.Import):
+            # ``import phonometry._plot.simulation as drawing`` names the module.
+            found.update(
+                (alias.asname, (alias.name, ""))
+                for alias in child.names
+                if alias.asname is not None
+            )
+            continue
+        if not isinstance(child, ast.ImportFrom):
+            continue
+        try:
+            source = importlib.util.resolve_name(
+                "." * child.level + (child.module or ""), package
+            )
+        except ValueError:
+            continue
+        for alias in child.names:
+            found[alias.asname or alias.name] = (source, alias.name)
+    return found
+
+
+@functools.cache
+def _defined(
+    module: str, name: str, depth: int = 0
+) -> tuple[str, ast.FunctionDef] | None:
+    """The function *name* of *module*, followed through the module's re-exports."""
+    tree = _parsed_module(module)
+    if tree is None or depth > _RENDERER_DEPTH:
+        return None
+    for node in tree.body:
+        if isinstance(node, ast.FunctionDef) and node.name == name:
+            return module, node
+    source = _module_imports(module).get(name)
+    return None if source is None else _defined(*source, depth=depth + 1)
+
+
+def _holds(node: ast.expr, holders: frozenset[str]) -> bool:
+    """Whether *node* is one of *holders*: the caller's keywords or a copy."""
+    return isinstance(node, ast.Name) and node.id in holders
+
+
+def _spreads(node: ast.expr, holders: frozenset[str]) -> bool:
+    """Whether *node* holds the caller's keywords: a holder, or a dict display
+    that spreads one (``{"cmap": "gray", **kwargs}``).
+    """
+    if _holds(node, holders):
+        return True
+    return isinstance(node, ast.Dict) and any(
+        key is None and _holds(value, holders)
+        for key, value in zip(node.keys, node.values, strict=True)
+    )
+
+
+def _copies(value: ast.expr, holders: frozenset[str]) -> bool:
+    """Whether an assigned *value* is a copy of the caller's keywords.
+
+    ``dict(kwargs)``, ``dict(kwargs, cmap="gray")``, ``kwargs.copy()`` and a
+    dict display that spreads them keep every keyword the caller passed.
+    """
+    if _spreads(value, holders):
+        return True
+    if not isinstance(value, ast.Call):
+        return False
+    if isinstance(value.func, ast.Name) and value.func.id == "dict":
+        return bool(value.args) and _holds(value.args[0], holders)
+    return (
+        isinstance(value.func, ast.Attribute)
+        and value.func.attr == "copy"
+        and not value.args
+        and _holds(value.func.value, holders)
+    )
+
+
+def _holders(function: ast.FunctionDef, holder: str) -> frozenset[str]:
+    """*holder* and the locals of *function* that copy it."""
+    holders = frozenset({holder})
+    grown = True
+    while grown:
+        grown = False
+        for node in _own_statements(function):
+            if (
+                isinstance(node, ast.Assign)
+                and len(node.targets) == 1
+                and isinstance(node.targets[0], ast.Name)
+                and node.targets[0].id not in holders
+                and _copies(node.value, holders)
+            ):
+                holders |= {node.targets[0].id}
+                grown = True
+    return holders
+
+
+def _handed_keywords(
+    call: ast.Call, holders: frozenset[str], callee: ast.FunctionDef
+) -> str | None:
+    """The parameter of *callee* the caller's keywords *holders* arrive in.
+
+    Spread into the call (``**kwargs``, ``**options`` copied from them, or
+    ``**{"cmap": "gray", **kwargs}``) they arrive in the callee's own ``**``
+    parameter; handed as one argument (``_draw_margins(ax, kwargs)``) they
+    arrive in the parameter that argument binds.
+    """
+    if any(k.arg is None and _spreads(k.value, holders) for k in call.keywords):
+        return callee.args.kwarg.arg if callee.args.kwarg else None
+    positional = [*callee.args.posonlyargs, *callee.args.args]
+    for index, argument in enumerate(call.args):
+        if _holds(argument, holders):
+            return positional[index].arg if index < len(positional) else None
+    for keyword in call.keywords:
+        if keyword.arg is not None and _holds(keyword.value, holders):
+            return keyword.arg
+    return None
+
+
+def _refusals_through(
+    module: str,
+    function: ast.FunctionDef,
+    holder: str,
+    depth: int = 0,
+) -> frozenset[str]:
+    """The keywords refused with ``TypeError`` once *holder* reaches *function*.
+
+    A renderer refuses a keyword it computes (the baseline of stacked bars,
+    the colour scale of a field) with :data:`_REFUSE_KEYWORDS`, which raises
+    ``TypeError`` naming it. The caller's keywords are followed into every
+    renderer and helper of ``phonometry._plot`` they are handed to, spread or
+    as one argument, so the refusal is found however deep it is made.
+    """
+    refused: set[str] = set()
+    imported = _names_in_reach(module, function)
+    holders = _holders(function, holder)
+    for node in _own_statements(function):
+        if not isinstance(node, ast.Call):
+            continue
+        if isinstance(node.func, ast.Name) and node.func.id == _REFUSE_KEYWORDS:
+            refused |= _refused_here(node, holders)
+            continue
+        found = (
+            _called_renderer(node.func, imported, module)
+            if depth < _RENDERER_DEPTH
+            else None
+        )
+        if found is None:
+            continue
+        callee_module, callee = found
+        arrives = _handed_keywords(node, holders, callee)
+        if arrives is not None:
+            refused |= _refusals_through(callee_module, callee, arrives, depth + 1)
+    return frozenset(refused)
+
+
+def _names_in_reach(
+    module: str, function: ast.FunctionDef | ast.AsyncFunctionDef
+) -> dict[str, tuple[str, str]]:
+    """What *function* can call by an imported name: its module's imports and
+    its own.
+    """
+    return {**_module_imports(module), **_imported_names(function, module)}
+
+
+@functools.cache
+def _module_imports(module: str) -> dict[str, tuple[str, str]]:
+    """Every import anywhere in *module*, read once."""
+    tree = _parsed_module(module)
+    return _imported_names(tree, module) if tree is not None else {}
+
+
+def _refused_here(call: ast.Call, holders: frozenset[str]) -> frozenset[str]:
+    """The keywords a :data:`_REFUSE_KEYWORDS` call refuses of *holders*."""
+    first = call.args[0] if call.args else None
+    if first is None or not _holds(first, holders):
+        return frozenset()
+    return frozenset(
+        argument.value
+        for argument in call.args[2:]
+        if isinstance(argument, ast.Constant) and isinstance(argument.value, str)
+    )
+
+
+def _called_renderer(
+    func: ast.expr, imported: dict[str, tuple[str, str]], module: str
+) -> tuple[str, ast.FunctionDef] | None:
+    """The renderer or helper of ``phonometry._plot`` a call runs.
+
+    Called by its name (``plot_fdtd_snapshot(...)``), or through the module
+    it is imported with (``from .._plot import simulation as drawing``, then
+    ``drawing.plot_fdtd_snapshot(...)``).
+    """
+    if isinstance(func, ast.Name):
+        source = imported.get(func.id, (module, func.id))
+    elif isinstance(func, ast.Attribute) and isinstance(func.value, ast.Name):
+        owner = imported.get(func.value.id)
+        if owner is None:
+            return None
+        package, name = owner
+        source = (f"{package}.{name}" if name else package, func.attr)
+        if _module_path(source[0]) is None:
+            return None
+    else:
+        return None
+    if not source[0].startswith(_RENDERERS):
+        return None
+    return _defined(*source)
+
+
+#: Checks a method may run on a parameter before it hands it to a renderer,
+#: which refuse any value outside their options with ``ValueError``, whatever
+#: its type (``language not in ("en", "es")``): the renderer's ``TypeError``
+#: for the same parameter is never reached.
+_REFUSED_BEFORE = frozenset({"check_language"})
+
+
+def _bound_arguments(call: ast.Call, callee: ast.FunctionDef) -> dict[str, ast.expr]:
+    """What *call* hands each parameter of *callee*, by position and by keyword."""
+    positional = [a.arg for a in (*callee.args.posonlyargs, *callee.args.args)]
+    bound: dict[str, ast.expr] = {}
+    for index, argument in enumerate(call.args):
+        if isinstance(argument, ast.Starred) or index >= len(positional):
+            break
+        bound[positional[index]] = argument
+    bound.update({k.arg: k.value for k in call.keywords if k.arg is not None})
+    return bound
+
+
+def _type_checked_by_renderers(
+    module: str,
+    function: ast.FunctionDef | ast.AsyncFunctionDef,
+    validators: frozenset[str],
+    depth: int = 0,
+) -> set[str]:
+    """The parameters of *function* a renderer it calls refuses with ``TypeError``.
+
+    Each renderer of ``phonometry._plot`` the function calls is read the way
+    a public function is: the parameters it hands as given to a validator
+    that raises ``TypeError``, through its own module's helpers and the
+    renderers it calls in turn. Each is traced back through the call's
+    arguments to the parameter of *function* it was handed as given
+    (``frequency_index=frequency_index``).
+    """
+    parameters = set(_parameters(function)) - {"self", "cls"}
+    imported = _names_in_reach(module, function)
+    found: set[str] = set()
+    for node in _own_statements(function):
+        if not isinstance(node, ast.Call) or depth >= _RENDERER_DEPTH:
+            continue
+        called = _called_renderer(node.func, imported, module)
+        if called is None:
+            continue
+        callee_module, renderer = called
+        reached = _renderer_type_checks(callee_module, renderer, validators, depth + 1)
+        bound = _bound_arguments(node, renderer)
+        for name in reached & set(bound):
+            handed = _handed_parameter(bound[name], parameters, through_self=False)
+            if handed is not None:
+                found.add(handed)
+    return found
+
+
+@functools.cache
+def _module_helpers(module: str) -> dict[str, ast.FunctionDef]:
+    """The private functions of *module*, by name."""
+    tree = _parsed_module(module)
+    return {
+        f.name: f
+        for f in (tree.body if tree is not None else [])
+        if isinstance(f, ast.FunctionDef) and f.name.startswith("_")
+    }
+
+
+@functools.cache
+def _renderer_type_checks(
+    module: str, renderer: ast.FunctionDef, validators: frozenset[str], depth: int
+) -> frozenset[str]:
+    """The parameters of *renderer* refused with ``TypeError``, read once each.
+
+    A renderer reached from many methods is read the first time only: what it
+    refuses does not depend on who calls it.
+    """
+    return frozenset(
+        _hands_to_a_type_checking_validator(
+            renderer, _module_helpers(module), validators, through_self=False
+        )
+        | _type_checked_by_renderers(module, renderer, validators, depth)
+    )
+
+
+def _checked_first(function: ast.FunctionDef | ast.AsyncFunctionDef) -> set[str]:
+    """The parameters *function* hands to one of :data:`_REFUSED_BEFORE`."""
+    return {
+        node.args[0].id
+        for node in _own_statements(function)
+        if isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id in _REFUSED_BEFORE
+        and node.args
+        and isinstance(node.args[0], ast.Name)
+    }
+
+
+def renderer_refusals(
+    function: ast.FunctionDef | ast.AsyncFunctionDef,
+    module: str,
+    validators: frozenset[str] | None = None,
+) -> frozenset[str]:
+    """The keywords and parameters *function* hands to a renderer that refuses them.
+
+    A public ``.plot`` forwards its ``**kwargs`` to the renderer of
+    ``phonometry._plot`` that draws it; a keyword that renderer refuses is a
+    ``TypeError`` the caller of the ``.plot`` meets, and its docstring says so
+    by name. So is a named parameter the method hands on as given and the
+    renderer refuses with ``TypeError`` (``frequency_index`` of a piston's
+    ``plot_geometry``), unless the method itself refuses every wrong value
+    of it first (:data:`_REFUSED_BEFORE`).
+    """
+    if isinstance(function, ast.AsyncFunctionDef):
+        return frozenset()
+    if validators is None:
+        validators = _validators_raising_type_error()
+    refused = _type_checked_by_renderers(module, function, validators) - (
+        _checked_first(function)
+    )
+    if function.args.kwarg is not None:
+        refused |= _refusals_through(module, function, function.args.kwarg.arg)
+    return frozenset(refused)
+
+
+def _is_public(
+    function: ast.FunctionDef | ast.AsyncFunctionDef, owner: ast.ClassDef | None
+) -> bool:
+    """Whether a caller reaches *function*: a public function, or a public
+    method (``__init__``, ``__post_init__`` and the like included) of a
+    public class.
+    """
+    if owner is None:
+        return not function.name.startswith("_")
+    return not owner.name.startswith("_") and (
+        not function.name.startswith("_") or function.name in _PUBLIC_METHODS
+    )
+
+
+def _documented(
+    function: ast.FunctionDef | ast.AsyncFunctionDef, owner: ast.ClassDef | None
+) -> str:
+    """The text that documents *function*: its docstring and, for a
+    constructor, its class's, which may carry the field instead.
+    """
+    documented = ast.get_docstring(function) or ""
+    if owner is not None and function.name in {"__post_init__", "__init__"}:
+        documented += "\n" + (ast.get_docstring(owner) or "")
+    return documented
+
+
 def undocumented_type_errors(
-    source: str, validators: frozenset[str] | None = None
+    source: str,
+    validators: frozenset[str] | None = None,
+    *,
+    module: str | None = None,
 ) -> list[str]:
     """Every public function that raises ``TypeError`` and does not say so.
 
@@ -947,6 +1353,11 @@ def undocumented_type_errors(
     with ``:raises TypeError:``, and that field names every parameter it hands
     on: a field about one parameter does not tell the caller that another is
     refused the same way.
+
+    Given its *module*, a function that hands its ``**kwargs`` to a renderer
+    of ``phonometry._plot`` is followed into it (:func:`renderer_refusals`):
+    every keyword the renderer refuses is named in the field too, because the
+    ``.plot`` a caller reads is where the refusal reaches them.
     """
     if validators is None:
         validators = _validators_raising_type_error()
@@ -963,28 +1374,22 @@ def undocumented_type_errors(
             if isinstance(child, ast.ClassDef):
                 visit(child, child)
                 continue
-            if not isinstance(child, (ast.FunctionDef, ast.AsyncFunctionDef)):
-                continue
-            if owner is None:
-                public = not child.name.startswith("_")
-            else:
-                public = not owner.name.startswith("_") and (
-                    not child.name.startswith("_") or child.name in _PUBLIC_METHODS
-                )
-            if not public:
+            if not isinstance(
+                child, (ast.FunctionDef, ast.AsyncFunctionDef)
+            ) or not _is_public(child, owner):
                 continue
             through_self = owner is not None and child.name in _PUBLIC_METHODS
             handed = _hands_to_a_type_checking_validator(
                 child, helpers, validators, through_self=through_self
             )
+            if module is not None:
+                handed |= renderer_refusals(child, module, validators)
             line = _raises_type_error(child)
             if line is None and handed:
                 line = child.lineno
             if line is None:
                 continue
-            documented = ast.get_docstring(child) or ""
-            if owner is not None and child.name in {"__post_init__", "__init__"}:
-                documented += "\n" + (ast.get_docstring(owner) or "")
+            documented = _documented(child, owner)
             where = child.name if owner is None else f"{owner.name}.{child.name}"
             if ":raises TypeError" not in documented:
                 found.append(f"{where}:{line}")
@@ -999,7 +1404,9 @@ def test_a_public_function_that_raises_type_error_documents_it() -> None:
     found = [
         f"{file.relative_to(SRC).as_posix()}:{where}"
         for file in sorted(SRC.rglob("*.py"))
-        for where in undocumented_type_errors(file.read_text(encoding="utf-8"))
+        for where in undocumented_type_errors(
+            file.read_text(encoding="utf-8"), module=_module_name(file)
+        )
     ]
     assert not found, (
         "public functions that raise TypeError without a ':raises TypeError:' "
@@ -1161,3 +1568,184 @@ def test_the_validators_the_rule_follows_include_the_band_set_and_the_scalar() -
     validators = _validators_raising_type_error()
     assert {"require_band_fraction", "require_scalar", "require_choice"} <= validators
     assert not any(name.startswith("_") for name in validators)
+
+
+def _method(module: str, owner: str, name: str) -> ast.FunctionDef:
+    """The definition of ``owner.name`` in *module*, read from its source."""
+    tree = _parsed_module(module)
+    assert tree is not None
+    for node in ast.walk(tree):
+        if isinstance(node, ast.ClassDef) and node.name == owner:
+            for child in node.body:
+                if isinstance(child, ast.FunctionDef) and child.name == name:
+                    return child
+    msg = f"{module}.{owner}.{name}"
+    raise LookupError(msg)
+
+
+@pytest.mark.parametrize(
+    ("module", "owner", "name", "refused"),
+    [
+        # Spread into the renderer, refused there.
+        ("phonometry.simulation.fdtd", "FDTDResult", "plot", {"color_limit"}),
+        (
+            "phonometry.simulation.elastic_fdtd",
+            "ElasticFDTDResult",
+            "plot",
+            {"color_limit"},
+        ),
+        # Spread into a renderer the package re-exports from a submodule.
+        ("phonometry.simulation.fdtd", "FDTD2D", "plot_geometry", {"extent", "origin"}),
+        # Handed on as one argument to a helper, refused there.
+        ("phonometry.filters.periodic_tests", "PeriodicTestClause", "plot", {"yerr"}),
+        # Spread into a helper of the renderer's own module.
+        (
+            "phonometry.building.prediction.detailed_model",
+            "DetailedAirborneResult",
+            "plot",
+            {"bottom"},
+        ),
+        # A named parameter handed on as given, refused by a validator of the
+        # renderer.
+        (
+            "phonometry.electroacoustics.piston",
+            "RadiatingPistonResult",
+            "plot_geometry",
+            {"frequency_index"},
+        ),
+        (
+            "phonometry.room.image_source",
+            "ImageSourceResult",
+            "plot_geometry",
+            {"max_order"},
+        ),
+        # The method refuses any language outside its options first, so the
+        # renderer's TypeError for one is never reached.
+        ("phonometry.room.spatial_decay", "SpatialDecayResult", "plot", set()),
+    ],
+)
+def test_a_plot_is_followed_into_the_renderer_that_refuses_its_keywords(
+    module: str, owner: str, name: str, refused: set[str]
+) -> None:
+    """The keywords a ``.plot`` hands on reach the renderer, spread or as one
+    argument, through a re-export and through the renderer's own helpers, and
+    so does a named parameter the renderer refuses with ``TypeError``.
+    """
+    assert renderer_refusals(_method(module, owner, name), module) == refused
+
+
+_PLOT_UNDOCUMENTED = '''
+class Result:
+    def plot(self, ax=None, **kwargs):
+        """Plot the snapshot.
+
+        :param kwargs: Forwarded to ``imshow``.
+        :return: The axes.
+        """
+        from .._plot.simulation import plot_fdtd_snapshot
+
+        return plot_fdtd_snapshot(self, ax=ax, **kwargs)
+'''
+
+_PLOT_OTHER_FIELD = '''
+class Result:
+    def plot(self, ax=None, *, kind="probes", **kwargs):
+        """Plot the snapshot.
+
+        :raises TypeError: for a ``kind`` that is not a text.
+        """
+        from .._plot.simulation import plot_fdtd_snapshot
+
+        return plot_fdtd_snapshot(self, ax=ax, **kwargs)
+'''
+
+_PLOT_DOCUMENTED = '''
+class Result:
+    def plot(self, ax=None, **kwargs):
+        """Plot the snapshot.
+
+        :raises TypeError: for ``color_limit``, which the field drawn sets.
+        """
+        from .._plot.simulation import plot_fdtd_snapshot
+
+        return plot_fdtd_snapshot(self, ax=ax, **kwargs)
+
+    def summary(self, **kwargs):
+        """Keywords that reach no renderer are no refusal."""
+        return dict(kwargs)
+'''
+
+
+_THROUGH_A_MODULE_ALIAS = '''
+class Result:
+    def plot(self, ax=None, **kwargs):
+        """Plot the snapshot."""
+        from .._plot import simulation as drawing
+
+        return drawing.plot_fdtd_snapshot(self, ax=ax, **kwargs)
+'''
+
+_THROUGH_A_COPY = '''
+class Result:
+    def plot(self, ax=None, **kwargs):
+        """Plot the snapshot."""
+        from .._plot.simulation import plot_fdtd_snapshot
+
+        options = dict(kwargs)
+        return plot_fdtd_snapshot(self, ax=ax, **options)
+'''
+
+_THROUGH_A_MERGED_COPY = '''
+class Result:
+    def plot(self, ax=None, **kwargs):
+        """Plot the snapshot."""
+        from .._plot.simulation import plot_fdtd_snapshot
+
+        options = {"cmap": "gray", **kwargs}
+        return plot_fdtd_snapshot(self, ax=ax, **options)
+'''
+
+_THROUGH_A_SPREAD_DISPLAY = '''
+class Result:
+    def plot(self, ax=None, **kwargs):
+        """Plot the snapshot."""
+        from .._plot.simulation import plot_fdtd_snapshot
+
+        return plot_fdtd_snapshot(self, ax=ax, **{"cmap": "gray", **kwargs})
+'''
+
+
+@pytest.mark.parametrize(
+    "source",
+    [
+        _THROUGH_A_MODULE_ALIAS,
+        _THROUGH_A_COPY,
+        _THROUGH_A_MERGED_COPY,
+        _THROUGH_A_SPREAD_DISPLAY,
+    ],
+    ids=["module alias", "dict copy", "merged copy", "spread display"],
+)
+def test_the_keywords_are_followed_however_they_are_handed_on(source: str) -> None:
+    """A renderer called through the module it is imported with, and keywords
+    copied into a local or merged into a dict before the spread, still reach
+    the renderer that refuses ``color_limit``.
+    """
+    found = undocumented_type_errors(source, module="phonometry.simulation.fdtd")
+    assert [where.split(":")[0] for where in found] == ["Result.plot"]
+
+
+def test_the_docstring_rule_names_the_keywords_a_renderer_refuses() -> None:
+    """A ``.plot`` whose renderer refuses a keyword documents ``TypeError``
+    and names the keyword; a field about something else does not cover it.
+    """
+    module = "phonometry.simulation.fdtd"
+    assert [
+        w.split(":")[0]
+        for w in undocumented_type_errors(_PLOT_UNDOCUMENTED, module=module)
+    ] == ["Result.plot"]
+    assert undocumented_type_errors(_PLOT_OTHER_FIELD, module=module) == [
+        "Result.plot:3 names no color_limit"
+    ]
+    assert undocumented_type_errors(_PLOT_DOCUMENTED, module=module) == []
+    # Without its module the source is read alone, as before.
+    assert undocumented_type_errors(_PLOT_UNDOCUMENTED) == []

@@ -998,10 +998,10 @@ of the working sound pressure level of 8.5.2 b) to d).
 
 ```python
 HeadphoneClassification(
-    principle: str,
-    earphone_type: str,
-    coupling: str,
-    radiation: str,
+    principle: Literal['D', 'E', 'F', 'M', 'P', 'S'],
+    earphone_type: Literal['C', 'E', 'H', 'I', 'M', 'S', 'T'],
+    coupling: Literal['L', 'S'],
+    radiation: Literal['C', 'O'],
     impedance_ohm: float,
     n_channels: int,
 )

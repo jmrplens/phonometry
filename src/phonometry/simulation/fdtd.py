@@ -1539,7 +1539,9 @@ class FDTD2D:
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to the obstacle ``imshow``.
         :raises TypeError: for a probe that is not a pair, or an index that is
-            not a number.
+            not a number, and for ``extent`` or ``origin`` in ``kwargs``, which
+            the grid sets: the obstacles are drawn on the grid the sources and
+            probes are on.
         :raises ValueError: for a probe of more or fewer than two indices, an
             index that is not whole, or a cell outside the grid or inside an
             obstacle, refused in the words a run uses.
@@ -1923,6 +1925,11 @@ class FDTDResult(OwnsArrays):
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to the underlying ``plot``/``imshow``.
         :return: The axes.
+        :raises TypeError: for ``color_limit`` with ``kind="snapshot"``, which
+            the field drawn sets (``vmin`` and ``vmax`` reach ``imshow``).
+        :raises ValueError: for a ``kind`` other than ``"probes"`` and
+            ``"snapshot"``, a ``language`` other than ``"en"`` and ``"es"``,
+            or a snapshot asked of a result that holds none.
         """
         from .._i18n import check_language
 
@@ -2464,7 +2471,8 @@ def _march(
     leaves the device context it is suspended in). Each step is reported to
     the step hook, as :func:`_record_run` reports it, so a node stops a run
     whose client went away; a writer that finds its colour limit first
-    marches twice, and the count goes from 1 to *steps* twice.
+    marches twice, and the count goes from 1 to the step of its last frame
+    the first time and from 1 to *steps* the second.
 
     It is :func:`_record_run`'s march with the field handed out instead of
     stored, for a writer that draws each frame and keeps none; the two share

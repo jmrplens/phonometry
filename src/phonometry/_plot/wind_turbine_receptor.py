@@ -44,6 +44,7 @@ if TYPE_CHECKING:
         SoundEmergence,
         SoundRelevantTurbines,
         ToneSearchLimit,
+        TurbineAdjustment,
         TurbineSoundLevels,
         WindShearProfile,
         WindTurbineRatingLevel,
@@ -927,7 +928,11 @@ def plot_wind_turbine_rating_level(
     from .._i18n import localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    names = ("tonal", "amplitude_modulation", "impulsive")
+    names: tuple[TurbineAdjustment, ...] = (
+        "tonal",
+        "amplitude_modulation",
+        "impulsive",
+    )
     labels = [
         _t(text, language) for text in ("Tonal", "Amplitude modulation", "Impulsive")
     ]

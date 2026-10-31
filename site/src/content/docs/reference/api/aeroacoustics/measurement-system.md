@@ -23,7 +23,7 @@ and is not repeated here.
 AircraftSystemComplianceResult(
     directional: Mapping[float, Mapping[float, float]] | None = None,
     frequency_response: Mapping[float, float] | None = None,
-    linearity: Mapping[str, float] | None = None,
+    linearity: Mapping[Literal['reference', 'other'], float] | None = None,
     resolution: float | None = None,
 )
 ```
@@ -72,7 +72,7 @@ verify_aircraft_noise_system(
     *,
     directional: Mapping[int, Mapping[int, float] | Mapping[float, float]] | Mapping[float, Mapping[int, float] | Mapping[float, float]] | None = None,
     frequency_response: Mapping[int, float] | Mapping[float, float] | None = None,
-    linearity: Mapping[str, float] | None = None,
+    linearity: Mapping[Literal['reference', 'other'], float] | None = None,
     resolution: float | None = None,
 ) -> AircraftSystemComplianceResult
 ```

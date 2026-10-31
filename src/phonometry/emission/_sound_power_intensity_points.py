@@ -965,7 +965,7 @@ class DiscretePointIntensityResult(OwnsArrays):
     f4: np.ndarray | None
     pressure_residual_index: np.ndarray | None
     fraction: BandFraction
-    grade: str
+    grade: DeterminationGrade
 
     def __post_init__(self) -> None:
         """Reject a determination whose per-band quantities disagree.
@@ -1099,9 +1099,7 @@ class DiscretePointIntensityResult(OwnsArrays):
         r""":math:`L_\mathrm{d} = \delta_{pI0} - K` per band at the requested grade (Eq. (10))."""
         if self.pressure_residual_index is None:
             return None
-        return _dynamic_capability(
-            self.pressure_residual_index, cast("DeterminationGrade", self.grade)
-        )
+        return _dynamic_capability(self.pressure_residual_index, self.grade)
 
     @property
     def criterion_1(self) -> np.ndarray | None:
@@ -1140,7 +1138,7 @@ class DiscretePointIntensityResult(OwnsArrays):
             self.n_positions,
             self.frequencies,
             _check_fraction(self.fraction),
-            cast("DeterminationGrade", self.grade),
+            self.grade,
         )
 
     @property

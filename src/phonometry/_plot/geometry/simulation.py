@@ -143,6 +143,15 @@ def plot_fdtd_domain(
     :raises TypeError: for ``extent`` or ``origin``, which the grid sets.
     """
     _check_language(language)
+    # Refused for every domain, with obstacles or without, so a call that
+    # passes the grid's placement fails the same way whatever the domain holds.
+    refuse_fixed_keywords(
+        kwargs,
+        "plot_fdtd_domain",
+        "extent",
+        "origin",
+        reason="places the obstacles on the grid the sources and probes are on",
+    )
     from ..._i18n import localize_axes
 
     pts: NDArray[np.float64] | None = None
@@ -161,13 +170,6 @@ def plot_fdtd_domain(
     mask = getattr(sim, "_obstacle", None)
     if mask is not None:
         overlay = np.ma.masked_where(~mask, np.ones_like(mask, dtype=float))
-        refuse_fixed_keywords(
-            kwargs,
-            "plot_fdtd_domain",
-            "extent",
-            "origin",
-            reason="places the obstacles on the grid the sources and probes are on",
-        )
         kwargs.setdefault("cmap", "gray")
         kwargs.setdefault("vmin", 0.0)
         kwargs.setdefault("vmax", 2.0)

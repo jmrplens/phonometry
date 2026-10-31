@@ -37,7 +37,7 @@ and prints its rows from 125 Hz, and ISO 4869-3 Table 1 writes "> 5" where
 from __future__ import annotations
 
 import math
-from typing import Literal
+from typing import TYPE_CHECKING, Literal
 
 import numpy as np
 import reference_data as ref
@@ -45,6 +45,12 @@ import reference_data as ref
 from phonometry import hearing
 
 from ..registry import Outcome, count, record, register
+
+if TYPE_CHECKING:
+    from phonometry.hearing.sound_field_audiometry import (
+        LateralPosition,
+        SoundFieldPosition,
+    )
 
 _ISO8253 = "Audiometric test methods (ISO 8253)"
 _ISO4869_3 = "Earmuff insertion loss on a test fixture (ISO 4869-3)"
@@ -443,7 +449,9 @@ def _chk_diffuse_table_1() -> Outcome:
     expected = {
         f"index {index:g} dB": allowed for index, allowed in ref.ISO8253_2_TABLE_1
     }
-    six = dict.fromkeys(("front", "back", "left", "right", "up", "down"), [0.0])
+    six: dict[SoundFieldPosition, list[float]] = dict.fromkeys(
+        ("front", "back", "left", "right", "up", "down"), [0.0]
+    )
     computed = {
         f"index {index:g} dB": float(
             hearing.check_diffuse_sound_field(
@@ -471,7 +479,9 @@ def _chk_inverse_distance() -> Outcome:
     5.2 c) and 5.4 c) name the law and print no number, so the expected side
     is the two values worked out by hand from it, to 0,001 dB.
     """
-    four = dict.fromkeys(("left", "right", "up", "down"), [0.0])
+    four: dict[LateralPosition, list[float]] = dict.fromkeys(
+        ("left", "right", "up", "down"), [0.0]
+    )
     common = {
         "front_levels": [0.0],
         "back_levels": [0.0],
@@ -518,7 +528,9 @@ def _chk_4869_3_budget() -> Outcome:
 )
 def _chk_4869_3_table_1() -> Outcome:
     """5 dB allows 5 dB (the text's 'at least 5 dB'), 4,5 dB allows 4 dB."""
-    six = dict.fromkeys(("front", "back", "left", "right", "up", "down"), [0.0])
+    six: dict[SoundFieldPosition, list[float]] = dict.fromkeys(
+        ("front", "back", "left", "right", "up", "down"), [0.0]
+    )
     computed = {
         f"index {index:g} dB": float(
             hearing.check_random_incidence_field(

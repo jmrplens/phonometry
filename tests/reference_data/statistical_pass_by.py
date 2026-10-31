@@ -26,18 +26,19 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from phonometry.environment.sources._statistical_pass_by import (
         RoadSpeedCategory,
+        VehicleCategory,
     )
 
 # ---------------------------------------------------------------------------
 # ISO 11819-1:1997 Table 1 (folio 13): reference speed (km/h) and weighting
 # factor W_x of each vehicle category in each road speed category.
 # ---------------------------------------------------------------------------
-TABLE_1_REFERENCE_SPEEDS_KMH: dict[str, dict[str, float]] = {
+TABLE_1_REFERENCE_SPEEDS_KMH: dict[RoadSpeedCategory, dict[VehicleCategory, float]] = {
     "low": {"1": 50.0, "2a": 50.0, "2b": 50.0},
     "medium": {"1": 80.0, "2a": 70.0, "2b": 70.0},
     "high": {"1": 110.0, "2a": 85.0, "2b": 85.0},
 }
-TABLE_1_WEIGHTING_FACTORS: dict[str, dict[str, float]] = {
+TABLE_1_WEIGHTING_FACTORS: dict[RoadSpeedCategory, dict[VehicleCategory, float]] = {
     "low": {"1": 0.900, "2a": 0.075, "2b": 0.025},
     "medium": {"1": 0.800, "2a": 0.100, "2b": 0.100},
     "high": {"1": 0.700, "2a": 0.075, "2b": 0.225},
@@ -47,8 +48,16 @@ TABLE_1_WEIGHTING_FACTORS: dict[str, dict[str, float]] = {
 # ISO 11819-1:1997 Table 2 (folio 15): standard deviation of individual
 # vehicles around L_veh and the 95 % confidence interval around L_veh, dB.
 # ---------------------------------------------------------------------------
-TABLE_2_STANDARD_DEVIATIONS_DB: dict[str, float] = {"1": 1.5, "2a": 2.0, "2b": 2.0}
-TABLE_2_CONFIDENCE_INTERVALS_DB: dict[str, float] = {"1": 0.3, "2a": 0.7, "2b": 0.7}
+TABLE_2_STANDARD_DEVIATIONS_DB: dict[VehicleCategory, float] = {
+    "1": 1.5,
+    "2a": 2.0,
+    "2b": 2.0,
+}
+TABLE_2_CONFIDENCE_INTERVALS_DB: dict[VehicleCategory, float] = {
+    "1": 0.3,
+    "2a": 0.7,
+    "2b": 0.7,
+}
 
 # ---------------------------------------------------------------------------
 # ISO 11819-1:1997 7.3 (folio 10): minimum numbers of vehicles for surface
@@ -56,14 +65,18 @@ TABLE_2_CONFIDENCE_INTERVALS_DB: dict[str, float] = {"1": 0.3, "2a": 0.7, "2b": 
 # the standard deviations of speed the reference speed may lie within.
 # ---------------------------------------------------------------------------
 MINIMUM_VEHICLE_COUNTS: dict[str, int] = {"1": 100, "2a": 30, "2b": 30, "2": 80}
-SPEED_WINDOW_STANDARD_DEVIATIONS: dict[str, float] = {"1": 1.5, "2a": 1.0, "2b": 1.0}
+SPEED_WINDOW_STANDARD_DEVIATIONS: dict[VehicleCategory, float] = {
+    "1": 1.5,
+    "2a": 1.0,
+    "2b": 1.0,
+}
 
 # ---------------------------------------------------------------------------
 # ISO 11819-1:1997 Annex D (folio 22), the table printed as "Table E.1": L_veh
 # (dB) of the seven surfaces and the "Average surface (Normalized reference
 # case)" row.
 # ---------------------------------------------------------------------------
-ANNEX_D_SURFACES_DB: dict[str, dict[str, float]] = {
+ANNEX_D_SURFACES_DB: dict[str, dict[VehicleCategory, float]] = {
     "A1": {"1": 76.6, "2a": 81.1, "2b": 84.1},
     "A2": {"1": 75.9, "2a": 80.0, "2b": 83.0},
     "A3": {"1": 76.4, "2a": 81.8, "2b": 84.0},
@@ -72,44 +85,56 @@ ANNEX_D_SURFACES_DB: dict[str, dict[str, float]] = {
     "B2": {"1": 76.4, "2a": 80.4, "2b": 83.3},
     "B3": {"1": 76.4, "2a": 81.0, "2b": 84.1},
 }
-ANNEX_D_AVERAGE_DB: dict[str, float] = {"1": 76.4, "2a": 81.0, "2b": 84.0}
+ANNEX_D_AVERAGE_DB: dict[VehicleCategory, float] = {"1": 76.4, "2a": 81.0, "2b": 84.0}
 
 # ---------------------------------------------------------------------------
 # ISO 11819-1:1997 Annex E, "Sound level and speed regression data
 # (uncorrected for temperature)", road speed category medium (folio 26).
 # ---------------------------------------------------------------------------
 ANNEX_E_ROAD_SPEED_CATEGORY: RoadSpeedCategory = "medium"
-ANNEX_E_VEHICLE_COUNTS: dict[str, int] = {"1": 107, "2a": 34, "2b": 53}
+ANNEX_E_VEHICLE_COUNTS: dict[VehicleCategory, int] = {"1": 107, "2a": 34, "2b": 53}
 ANNEX_E_HEAVY_VEHICLE_COUNT = 87
-ANNEX_E_INTERCEPTS_DB: dict[str, float] = {"1": 16.6, "2a": 46.5, "2b": 34.5}
-ANNEX_E_SLOPES_DB: dict[str, float] = {"1": 32.55, "2a": 18.76, "2b": 26.74}
-ANNEX_E_CORRELATIONS: dict[str, float] = {"1": 0.79, "2a": 0.51, "2b": 0.49}
-ANNEX_E_MEAN_LEVELS_DB: dict[str, float] = {"1": 80.0, "2a": 81.8, "2b": 84.4}
-ANNEX_E_LEVEL_STANDARD_DEVIATIONS_DB: dict[str, float] = {
+ANNEX_E_INTERCEPTS_DB: dict[VehicleCategory, float] = {
+    "1": 16.6,
+    "2a": 46.5,
+    "2b": 34.5,
+}
+ANNEX_E_SLOPES_DB: dict[VehicleCategory, float] = {"1": 32.55, "2a": 18.76, "2b": 26.74}
+ANNEX_E_CORRELATIONS: dict[VehicleCategory, float] = {"1": 0.79, "2a": 0.51, "2b": 0.49}
+ANNEX_E_MEAN_LEVELS_DB: dict[VehicleCategory, float] = {
+    "1": 80.0,
+    "2a": 81.8,
+    "2b": 84.4,
+}
+ANNEX_E_LEVEL_STANDARD_DEVIATIONS_DB: dict[VehicleCategory, float] = {
     "1": 2.2,
     "2a": 2.5,
     "2b": 2.3,
 }
-ANNEX_E_RESIDUAL_STANDARD_DEVIATIONS_DB: dict[str, float] = {
+ANNEX_E_RESIDUAL_STANDARD_DEVIATIONS_DB: dict[VehicleCategory, float] = {
     "1": 1.3,
     "2a": 2.1,
     "2b": 2.0,
 }
 #: "Value converted from the logarithm of speed".
-ANNEX_E_MEAN_SPEEDS_KMH: dict[str, float] = {"1": 88.5, "2a": 75.8, "2b": 73.7}
-ANNEX_E_SPEED_STANDARD_DEVIATIONS_KMH: dict[str, float] = {
+ANNEX_E_MEAN_SPEEDS_KMH: dict[VehicleCategory, float] = {
+    "1": 88.5,
+    "2a": 75.8,
+    "2b": 73.7,
+}
+ANNEX_E_SPEED_STANDARD_DEVIATIONS_KMH: dict[VehicleCategory, float] = {
     "1": 13.3,
     "2a": 7.5,
     "2b": 6.4,
 }
-ANNEX_E_VEHICLE_SOUND_LEVELS_DB: dict[str, float] = {
+ANNEX_E_VEHICLE_SOUND_LEVELS_DB: dict[VehicleCategory, float] = {
     "1": 78.5,
     "2a": 81.1,
     "2b": 83.8,
 }
 #: "Vehicle Sound Level after temp. correction" (folio 26), air 23 °C average
 #: (folio 25).
-ANNEX_E_CORRECTED_VEHICLE_SOUND_LEVELS_DB: dict[str, float] = {
+ANNEX_E_CORRECTED_VEHICLE_SOUND_LEVELS_DB: dict[VehicleCategory, float] = {
     "1": 78.8,
     "2a": 81.1,
     "2b": 83.8,
@@ -120,7 +145,7 @@ ANNEX_E_REFERENCE_INDEX_DB = 77.3
 ANNEX_E_DIFFERENCE_DB = 2.8
 
 
-def annex_e_pass_bys(category: str) -> tuple[list[float], list[float]]:
+def annex_e_pass_bys(category: VehicleCategory) -> tuple[list[float], list[float]]:
     r"""Pass-bys whose least-squares line is exactly the Annex E one.
 
     Pairs of pass-bys at one speed, one level above the printed line and one

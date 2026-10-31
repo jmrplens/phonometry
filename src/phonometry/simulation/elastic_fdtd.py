@@ -1568,6 +1568,11 @@ class ElasticFDTDResult(OwnsArrays):
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to the underlying ``plot``/``imshow``.
         :return: The axes.
+        :raises TypeError: for ``color_limit`` with ``kind="snapshot"``, which
+            the field drawn sets (``vmin`` and ``vmax`` reach ``imshow``).
+        :raises ValueError: for a ``kind`` other than ``"probes"`` and
+            ``"snapshot"``, a ``language`` other than ``"en"`` and ``"es"``,
+            or a snapshot asked of a result that holds none.
         """
         from .._i18n import check_language
 

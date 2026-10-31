@@ -27,6 +27,7 @@ from phonometry._plot.common import (
     theme_fill,
     theme_line,
 )
+from phonometry.emission.free_field_qualification import PathTarget
 
 from .i18n import _LANG, _fmt_minus, localize_panel, lookup
 from .theme import (
@@ -5864,7 +5865,9 @@ def generate_high_frequency_sound_power(output_dir: str) -> None:
 #: 125, 250, 500 Hz and 10 kHz.
 _FF_SURFACES = ((0, -4.0), (0, 4.0), (1, -3.0), (1, 3.0), (2, 5.0))
 _FF_WEDGE_R = (0.30, 0.22, 0.12, 0.07, 0.05)
-_FF_PATHS = (
+_FF_PATHS: tuple[
+    tuple[str, str, tuple[float, float, float], tuple[PathTarget, ...]], ...
+] = (
     ("dihedral corner", "diedro", (4.0, 3.0, 2.5), ("dihedral corner",)),
     ("trihedral corner", "triedro", (-4.0, 3.0, 5.0), ("trihedral corner",)),
     ("centre of a wall", "centro de una pared", (0.0, -3.0, 2.5), ("boundary center",)),

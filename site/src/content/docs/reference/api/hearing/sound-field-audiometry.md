@@ -75,7 +75,7 @@ Clause, table and annex numbers refer to ISO 8253-2:2009(E).
 
 ```python
 check_diffuse_sound_field(
-    position_levels: Mapping[str, ArrayLike],
+    position_levels: Mapping[Literal['front', 'back', 'left', 'right', 'up', 'down'], ArrayLike],
     reference_levels: ArrayLike,
     *,
     directional_levels: ArrayLike | None = None,
@@ -126,7 +126,7 @@ them.
 
 ```python
 check_free_sound_field(
-    lateral_levels: Mapping[str, ArrayLike],
+    lateral_levels: Mapping[Literal['left', 'right', 'up', 'down'], ArrayLike],
     reference_levels: ArrayLike,
     *,
     front_levels: ArrayLike,
@@ -185,7 +185,7 @@ to 5.2 says only an anechoic room does.
 
 ```python
 check_quasi_free_sound_field(
-    lateral_levels: Mapping[str, ArrayLike],
+    lateral_levels: Mapping[Literal['left', 'right', 'up', 'down'], ArrayLike],
     reference_levels: ArrayLike,
     *,
     front_levels: ArrayLike,
@@ -253,7 +253,7 @@ DiffuseSoundFieldCheck(
     directional_variation_db: np.ndarray,
     front_to_random_index: np.ndarray | None,
     standard: Literal['ISO 8253-2 5.3', 'ISO 4869-3 5.2.2'],
-    positions: tuple[str, ...] = ('front', 'back', 'left', 'right', 'up', 'down'),
+    positions: tuple[Literal['front', 'back', 'left', 'right', 'up', 'down'], ...] = ('front', 'back', 'left', 'right', 'up', 'down'),
 )
 ```
 
@@ -385,7 +385,7 @@ FreeSoundFieldCheck(
     lateral_deviation_db: np.ndarray,
     axis_difference: np.ndarray,
     loudspeaker_distance_m: float,
-    positions: tuple[str, ...] = ('left', 'right', 'up', 'down'),
+    positions: tuple[Literal['left', 'right', 'up', 'down'], ...] = ('left', 'right', 'up', 'down'),
 )
 ```
 

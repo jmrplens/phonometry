@@ -19,6 +19,7 @@ from phonometry._plot.common import (
     place_legend_clear,
     theme_fill,
 )
+from phonometry.metrology.free_field_corrections import TableI1Descriptor
 
 from .i18n import _LANG, _fmt_minus
 from .theme import (
@@ -46,6 +47,9 @@ if TYPE_CHECKING:
         JigCouplerVerification,
         RandomIncidenceSensitivity,
         SoundLevelMeterPeriodicVerification,
+    )
+    from phonometry.metrology.comparison_calibration import (
+        PressureComparisonComponent,
     )
 
 
@@ -1561,7 +1565,7 @@ def generate_diffuse_field_sensitivity(output_dir: str) -> None:
 
 #: Annex I, Table I.2 (printed folio 38): the value of each component at
 #: 1 kHz, which the guide writes out as ``table_i2``.
-_TABLE_I2_DB = {
+_TABLE_I2_DB: dict[TableI1Descriptor, float] = {
     "a1": 0.005,
     "a2": 0.005,
     "a3": 0.005,
@@ -1580,7 +1584,12 @@ _TABLE_I2_DB = {
 }
 
 #: Table I.3 (printed folio 39): the four components that change at 8 kHz.
-_TABLE_I3_CHANGES_DB = {"a7": 0.17, "a11": 0.104, "a12": 0.104, "a15": 0.06}
+_TABLE_I3_CHANGES_DB: dict[TableI1Descriptor, float] = {
+    "a7": 0.17,
+    "a11": 0.104,
+    "a12": 0.104,
+    "a15": 0.06,
+}
 
 #: The guide's per-octave budget, 63 Hz to 16 kHz: the expanded uncertainty
 #: of C_FF,RM (a7), the field and mountings (a11 and a12) and the
@@ -1732,7 +1741,7 @@ def generate_free_field_verification(output_dir: str) -> None:
 
 
 #: IEC 61094-5 Table D.1, the eight standard uncertainties at 2 kHz, dB.
-_TABLE_D1_DB = {
+_TABLE_D1_DB: "dict[PressureComparisonComponent, float]" = {
     "reference": 0.025,
     "capacitance": 0.006,
     "non_linearity": 0.017,

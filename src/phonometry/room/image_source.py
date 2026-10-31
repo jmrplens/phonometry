@@ -392,6 +392,9 @@ class ImageSourceResult(OwnsArrays):
             draws the direct sound only.
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to the room-outline rectangle.
+        :raises TypeError: if ``max_order`` is a flag, a text or an array where
+            a count goes.
+        :raises ValueError: for a negative ``max_order``.
         """
         from .._i18n import check_language
         from .._plot.geometry import plot_image_source_geometry

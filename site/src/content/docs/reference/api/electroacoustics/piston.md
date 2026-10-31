@@ -444,3 +444,10 @@ Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 | `frequency_index` | Index of the frequency whose far-field lobe is overlaid (default: the highest); ignored when the result carries no directivity. |
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the piston rectangle. |
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `frequency_index` is not a single number. |
+| ValueError | if `frequency_index` does not index one of the computed frequencies, when the result carries a directivity. |

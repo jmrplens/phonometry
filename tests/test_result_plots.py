@@ -1409,6 +1409,13 @@ def _obstacle_domain() -> object:
     return FDTD2D(343.0, 0.05, shape=(20, 20), obstacle_mask=mask)
 
 
+def _open_domain() -> object:
+    """A domain with no obstacle, whose figure still sits on the grid."""
+    from phonometry.simulation import FDTD2D
+
+    return FDTD2D(343.0, 0.05, shape=(20, 20))
+
+
 def _snapshot_plot(result: FDTDResult | ElasticFDTDResult) -> object:
     """*result* with its snapshot plot as its ``plot``, for a row of the table below."""
     import functools
@@ -1478,6 +1485,8 @@ def _elastic_snapshots() -> object:
         ),
         (_obstacle_domain, "plot_geometry", "extent", (0.0, 1.0, 1.0, 0.0)),
         (_obstacle_domain, "plot_geometry", "origin", "lower"),
+        (_open_domain, "plot_geometry", "extent", (0.0, 1.0, 1.0, 0.0)),
+        (_open_domain, "plot_geometry", "origin", "lower"),
         (_acoustic_snapshots, "plot", "color_limit", 0.5),
         (_elastic_snapshots, "plot", "color_limit", 0.5),
     ],

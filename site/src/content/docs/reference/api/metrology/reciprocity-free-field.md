@@ -573,7 +573,7 @@ Each one left at zero contributes no component.
 ```python
 FreeFieldParameterUncertainty(
     frequencies: NDArray[np.float64],
-    component_uncertainties_db: Mapping[str, NDArray[np.float64]],
+    component_uncertainties_db: Mapping[Literal['series_impedance', 'voltage_ratio', 'cross_talk', 'noise', 'distortion', 'reflections', 'frequency', 'receiver_shield', 'transmitter_shield', 'distance', 'static_pressure', 'temperature', 'relative_humidity', 'standing_waves', 'air_attenuation', 'acoustic_centers', 'polarizing_voltage', 'plane_wave_deviation', 'mathematical_manipulations', 'rounding', 'repeatability', 'static_pressure_corrections', 'temperature_corrections'], NDArray[np.float64]],
     microphone: int,
 )
 ```

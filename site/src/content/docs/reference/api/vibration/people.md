@@ -555,7 +555,7 @@ PeopleAssessment(
     kb_fmax: float,
     kb_ftr: float | None,
     guide: GuideValues,
-    source: str,
+    source: Literal['general', 'road', 'railway', 'urban_railway', 'quarry_blasting', 'road_existing', 'induced_seismic'],
     *,
     rare_short_events: bool = False,
 )

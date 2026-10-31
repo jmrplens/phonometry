@@ -14,7 +14,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -36,8 +36,12 @@ __all__ = [
 #: Maximum system frequency-response deviation, in dB (§4.5.1).
 _FREQUENCY_RESPONSE_LIMIT = 1.5
 
+#: The two level ranges whose non-linearity §4.5.2 limits: the reference range
+#: and every other one.
+LinearityRange = Literal["reference", "other"]
+
 #: Maximum level non-linearity per level range, in dB (§4.5.2).
-_LINEARITY_LIMITS = {"reference": 0.4, "other": 0.5}
+_LINEARITY_LIMITS: dict[LinearityRange, float] = {"reference": 0.4, "other": 0.5}
 
 #: Coarsest readout resolution the standard accepts, in dB (§4.7).
 _RESOLUTION_LIMIT = 0.1
@@ -106,7 +110,7 @@ class AircraftSystemComplianceResult(OwnsArrays):
 
     directional: Mapping[float, Mapping[float, float]] | None = None
     frequency_response: Mapping[float, float] | None = None
-    linearity: Mapping[str, float] | None = None
+    linearity: Mapping[LinearityRange, float] | None = None
     resolution: float | None = None
 
     def __post_init__(self) -> None:
@@ -217,7 +221,7 @@ def verify_aircraft_noise_system(
     *,
     directional: Mapping[int, BandMapping] | Mapping[float, BandMapping] | None = None,
     frequency_response: BandMapping | None = None,
-    linearity: Mapping[str, float] | None = None,
+    linearity: Mapping[LinearityRange, float] | None = None,
     resolution: float | None = None,
 ) -> AircraftSystemComplianceResult:
     """Verify measured performance against IEC 61265:1995 tolerances.
@@ -296,7 +300,9 @@ def _frequency_response_checks(
     ]
 
 
-def _linearity_checks(linearity: Mapping[str, float]) -> list[dict[str, Any]]:
+def _linearity_checks(
+    linearity: Mapping[LinearityRange, float],
+) -> list[dict[str, Any]]:
     """Level non-linearity checks against the ±0.4/±0.5 dB limits (§4.5.2).
 
     :param linearity: ``{"reference": dB, "other": dB}``.

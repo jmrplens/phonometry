@@ -785,7 +785,9 @@ def expand_unpublished_aliases(text: str, module_name: str, depth: int = 0) -> s
     ``form: DeclarationForm`` names something a reader can neither import nor
     look up: no type alias is public. So ``form: Literal['dual-number',
     'single-number']`` is what the page shows, the alias's definition as its
-    author wrote it. An alias some package did publish would stay a name.
+    author wrote it. An alias some package did publish would stay a name. An
+    alias that composes a ``Literal`` from others reads as the one list of its
+    members (see :func:`_flattened_literals`).
 
     :param text: The annotation as the source writes it.
     :param module_name: The module the annotation was written in, whose
@@ -807,7 +809,68 @@ def expand_unpublished_aliases(text: str, module_name: str, depth: int = 0) -> s
             return alias_name
         return expand_unpublished_aliases(definition, home, depth + 1)
 
-    return _substitute_names(text, substitute)
+    expanded = _substitute_names(text, substitute)
+    return _flattened_literals(expanded) if depth == 0 else expanded
+
+
+def _is_literal(node: ast.expr) -> bool:
+    """Whether ``node`` is a ``Literal[...]`` (or ``typing.Literal[...]``)."""
+    if not isinstance(node, ast.Subscript):
+        return False
+    head = node.value
+    name = head.attr if isinstance(head, ast.Attribute) else getattr(head, "id", "")
+    return name == "Literal"
+
+
+def _literal_members(node: ast.Subscript) -> list[ast.expr]:
+    inner = node.slice
+    return list(inner.elts) if isinstance(inner, ast.Tuple) else [inner]
+
+
+class _LiteralFlattener(ast.NodeTransformer):
+    """Splice the members of a ``Literal`` written inside another into it."""
+
+    def __init__(self) -> None:
+        self.changed = False
+
+    def visit_Subscript(self, node: ast.Subscript) -> ast.expr:
+        self.generic_visit(node)
+        if not _is_literal(node):
+            return node
+        members: list[ast.expr] = []
+        for member in _literal_members(node):
+            if isinstance(member, ast.Subscript) and _is_literal(member):
+                members.extend(_literal_members(member))
+                self.changed = True
+            else:
+                members.append(member)
+        node.slice = (
+            members[0] if len(members) == 1 else ast.Tuple(elts=members, ctx=ast.Load())
+        )
+        return node
+
+
+def _flattened_literals(text: str) -> str:
+    """The annotation with each ``Literal`` nested in another spelled as its members.
+
+    An alias may compose its choices from smaller ones (``Literal[Part2Power,
+    "ISO 3741"]``), and a type checker reads ``Literal[Literal["a"], "b"]`` as
+    ``Literal["a", "b"]``. The page prints that one list, the way the runtime
+    alias holds it, so the choices read in one place. An annotation without
+    such a nesting comes back as written.
+
+    :param text: The annotation, its aliases already spelled out.
+    :return: The annotation with nested ``Literal`` members spliced in.
+    """
+    if text.count("Literal[") < 2:
+        return text
+    try:
+        tree = ast.parse(text, mode="eval")
+    except SyntaxError:
+        return text
+    flattener = _LiteralFlattener()
+    flattened = flattener.visit(tree)
+    return ast.unparse(flattened) if flattener.changed else text
 
 
 def _substitute_names(text: str, substitute: Callable[[re.Match[str]], str]) -> str:

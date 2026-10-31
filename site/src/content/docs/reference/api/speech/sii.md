@@ -333,7 +333,7 @@ Standard speech spectrum level by vocal effort (ANSI S3.5-1997 Table 3).
 ```python
 StandardSpeechSpectrum(
     frequencies: np.ndarray,
-    vocal_efforts: tuple[str, ...],
+    vocal_efforts: tuple[Literal['normal', 'raised', 'loud', 'shout'], ...],
     levels: np.ndarray,
 )
 ```

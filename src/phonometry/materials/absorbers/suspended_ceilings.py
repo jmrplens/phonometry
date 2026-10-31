@@ -228,7 +228,7 @@ class CeilingSpecimenCheck(RichDisplay):
     """
 
     area: float
-    mounting: str
+    mounting: MountingLetter
     depth_mm: float | None
     deflection_mm: float
     substructure_width_mm: float

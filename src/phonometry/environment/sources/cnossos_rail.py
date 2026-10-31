@@ -2545,6 +2545,11 @@ class RailwayTrack(OwnsArrays):
         _require_record(self, "impact_roughness", WavelengthSpectrum, optional=True)
 
 
+#: The physical sources whose spectra a railway emission keeps apart in
+#: :attr:`RailwayEmissionResult.components`.
+RailwaySource = Literal["rolling", "traction", "aerodynamic", "bridge"]
+
+
 @dataclass(frozen=True)
 class RailwayEmissionResult(OwnsArrays):
     """Directional sound power per metre of a CNOSSOS-EU railway source.
@@ -2568,8 +2573,8 @@ class RailwayEmissionResult(OwnsArrays):
     third_octave_line_power: NDArray[np.float64]
     line_power: NDArray[np.float64]
     total_line_power: NDArray[np.float64]
-    components: dict[str, tuple[NDArray[np.float64], NDArray[np.float64]]] = field(
-        default_factory=dict
+    components: dict[RailwaySource, tuple[NDArray[np.float64], NDArray[np.float64]]] = (
+        field(default_factory=dict)
     )
 
     def __post_init__(self) -> None:
@@ -2754,7 +2759,7 @@ def _vehicle_spectra(
 ) -> tuple[
     list[list[NDArray[np.float64]]],
     list[NDArray[np.float64]],
-    list[tuple[str, int, NDArray[np.float64]]],
+    list[tuple[RailwaySource, int, NDArray[np.float64]]],
 ]:
     """Every source spectrum of one vehicle, sorted by source height.
 
@@ -2768,7 +2773,7 @@ def _vehicle_spectra(
     # (EU) 2021/1226 point (4)(c): bridge noise is at source A and
     # omni-directional, so it bypasses the directivity corrections.
     omni: list[NDArray[np.float64]] = []
-    components: list[tuple[str, int, NDArray[np.float64]]] = []
+    components: list[tuple[RailwaySource, int, NDArray[np.float64]]] = []
 
     if vehicle.condition is not RunningCondition.IDLING:
         speed = _speed(vehicle.speed_kmh)
@@ -2892,7 +2897,7 @@ def railway_source_power(
 
     n_bands = len(RAILWAY_THIRD_OCTAVE_BANDS_HZ)
     per_height: list[list[NDArray[np.float64]]] = [[], []]
-    components: dict[str, list[list[NDArray[np.float64]]]] = {
+    components: dict[RailwaySource, list[list[NDArray[np.float64]]]] = {
         name: [[], []] for name in ("rolling", "traction", "aerodynamic", "bridge")
     }
     hor = horizontal_directivity(phi)

@@ -628,9 +628,28 @@ PERIODIC_TEST_ENVIRONMENT: Mapping[str, tuple[float, float]] = MappingProxyType(
     }
 )
 
+#: The requirements of IEC 61672-3:2013 a periodic test judges, and the
+#: clauses that test them.
+SlmRequirement = Literal[
+    "acoustic_weighting",
+    "electrical_weighting",
+    "weighting_at_1khz",
+    "time_weighting_at_1khz",
+    "long_term_stability",
+    "level_linearity",
+    "range_linearity",
+    "toneburst",
+    "c_peak",
+    "overload",
+    "high_level_stability",
+]
+SlmClause = Literal[
+    "12", "13", "14.2", "14.3", "15", "16", "17", "18", "19", "20", "21"
+]
+
 #: The requirements :func:`verify_sound_level_meter_periodic` grades, in the
 #: order of IEC 61672-3:2013.
-SLM_PERIODIC_REQUIREMENTS: tuple[str, ...] = (
+SLM_PERIODIC_REQUIREMENTS: tuple[SlmRequirement, ...] = (
     "acoustic_weighting",
     "electrical_weighting",
     "weighting_at_1khz",
@@ -645,7 +664,7 @@ SLM_PERIODIC_REQUIREMENTS: tuple[str, ...] = (
 )
 
 #: The clause of IEC 61672-3:2013 each requirement is tested in.
-_CLAUSES: dict[str, str] = {
+_CLAUSES: dict[SlmRequirement, SlmClause] = {
     "acoustic_weighting": "12",
     "electrical_weighting": "13",
     "weighting_at_1khz": "14.2",
@@ -780,16 +799,20 @@ _OVERLOAD_LIMIT_DB = 1.5
 _C_PEAK_ROWS = (2, 3, 4)
 
 #: The frequency weightings a sound level meter may provide (5.1.9, 5.1.10).
-_WEIGHTINGS: tuple[str, ...] = ("A", "C", "Z")
+MeterWeighting = Literal["A", "C", "Z"]
+_WEIGHTINGS: tuple[MeterWeighting, ...] = ("A", "C", "Z")
 
 #: The weightings 14.2 compares with A.
-_WEIGHTINGS_VS_A: tuple[str, ...] = ("C", "Z")
+WeightingVersusA = Literal["C", "Z"]
+_WEIGHTINGS_VS_A: tuple[WeightingVersusA, ...] = ("C", "Z")
 
 #: The displays 14.3 compares with F: S-time-weighted and time-averaged.
-_TIME_WEIGHTINGS_VS_F: tuple[str, ...] = ("S", "eq")
+DisplayVersusF = Literal["S", "eq"]
+_TIME_WEIGHTINGS_VS_F: tuple[DisplayVersusF, ...] = ("S", "eq")
 
 #: The toneburst measurements of 18.2, as :data:`IEC61672_TABLE_4` keys them.
-_TONEBURST_KEYS: tuple[str, ...] = ("F", "S", "E")
+ToneburstResponse = Literal["F", "S", "E"]
+_TONEBURST_KEYS: tuple[ToneburstResponse, ...] = ("F", "S", "E")
 
 #: The readings of Clause 17: the reference sound level held on each level
 #: range besides the reference one (17.3), and 5 dB above the first
@@ -797,7 +820,8 @@ _TONEBURST_KEYS: tuple[str, ...] = ("F", "S", "E")
 #: (17.4). On the reference level range 17.3 reads the reference sound level
 #: 17.2 set, a deviation of zero by construction (IEC 61672-1 5.6.3); 17.4
 #: reads a level 17.2 did not set, and "for each level range".
-_RANGE_READINGS: tuple[str, ...] = ("17.3", "17.4")
+RangeReading = Literal["17.3", "17.4"]
+_RANGE_READINGS: tuple[RangeReading, ...] = ("17.3", "17.4")
 
 #: What each reading of Clause 17 is, as the statement names it.
 _RANGE_READING_NAMES: dict[str, str] = {
@@ -921,7 +945,7 @@ def _row(
 
 
 def _keyed(
-    values: Mapping[str, Any], name: str, keys: tuple[str, ...]
+    values: Mapping[Any, Any], name: str, keys: tuple[str, ...]
 ) -> dict[str, Any]:
     """A mapping whose keys are among ``keys``, in their order.
 
@@ -1087,7 +1111,7 @@ def _range_rows(values: Mapping[str, Any], name: str) -> dict[str, tuple[float, 
     return rows
 
 
-def _other_ranges_held(rows: Mapping[str, Sequence[float]]) -> int:
+def _other_ranges_held(rows: Mapping[RangeReading, Sequence[float]]) -> int:
     """How many level ranges besides the reference one the rows of 17 cover."""
     if "17.3" in rows:
         return len(rows["17.3"])
@@ -1215,21 +1239,27 @@ class SoundLevelMeterPeriodicMeasurements(RichDisplay):
     calibration_check_initial_level: float | None = None
     calibration_check_adjusted_level: float | None = None
     microphone_self_noise_level: float | None = None
-    electrical_self_noise_levels: Mapping[str, float] | None = None
+    electrical_self_noise_levels: Mapping[MeterWeighting, float] | None = None
     acoustic_weighting_deviations_db: Sequence[float] | None = None
     acoustic_weighting_uncertainties_db: Sequence[float] | None = None
     acoustic_weighting_uncertainties_without_correction_data_db: (
         Sequence[float] | None
     ) = None
-    electrical_weighting_deviations_db: Mapping[str, Sequence[float]] | None = None
-    electrical_weighting_uncertainties_db: Mapping[str, Sequence[float]] | None = None
-    electrical_weighting_uncertainties_without_correction_data_db: (
-        Mapping[str, Sequence[float]] | None
+    electrical_weighting_deviations_db: (
+        Mapping[MeterWeighting, Sequence[float]] | None
     ) = None
-    weighting_at_1khz_deviations_db: Mapping[str, float] | None = None
-    weighting_at_1khz_uncertainties_db: Mapping[str, float] | None = None
-    time_weighting_at_1khz_deviations_db: Mapping[str, float] | None = None
-    time_weighting_at_1khz_uncertainties_db: Mapping[str, float] | None = None
+    electrical_weighting_uncertainties_db: (
+        Mapping[MeterWeighting, Sequence[float]] | None
+    ) = None
+    electrical_weighting_uncertainties_without_correction_data_db: (
+        Mapping[MeterWeighting, Sequence[float]] | None
+    ) = None
+    weighting_at_1khz_deviations_db: Mapping[WeightingVersusA, float] | None = None
+    weighting_at_1khz_uncertainties_db: Mapping[WeightingVersusA, float] | None = None
+    time_weighting_at_1khz_deviations_db: Mapping[DisplayVersusF, float] | None = None
+    time_weighting_at_1khz_uncertainties_db: Mapping[DisplayVersusF, float] | None = (
+        None
+    )
     long_term_stability_db: float | None = None
     long_term_stability_uncertainty_db: float | None = None
     linearity_deviations_db: Sequence[float] | None = None
@@ -1239,10 +1269,14 @@ class SoundLevelMeterPeriodicMeasurements(RichDisplay):
     linearity_starting_level: float | None = None
     linearity_overload_level: float | None = None
     linearity_under_range_level: float | None = None
-    range_linearity_deviations_db: Mapping[str, Sequence[float]] | None = None
-    range_linearity_uncertainties_db: Mapping[str, Sequence[float]] | None = None
-    toneburst_responses_db: Mapping[str, Sequence[float]] | None = None
-    toneburst_uncertainties_db: Mapping[str, Sequence[float]] | None = None
+    range_linearity_deviations_db: Mapping[RangeReading, Sequence[float]] | None = None
+    range_linearity_uncertainties_db: Mapping[RangeReading, Sequence[float]] | None = (
+        None
+    )
+    toneburst_responses_db: Mapping[ToneburstResponse, Sequence[float]] | None = None
+    toneburst_uncertainties_db: Mapping[ToneburstResponse, Sequence[float]] | None = (
+        None
+    )
     c_peak_differences: Sequence[float] | None = None
     c_peak_uncertainties_db: Sequence[float] | None = None
     c_peak_overload_indicated: bool | np.bool_ | None = None
@@ -1376,7 +1410,7 @@ class SoundLevelMeterPeriodicMeasurements(RichDisplay):
                         {k: _scalar(v, f"{name}[{k!r}]") for k, v in items.items()}
                     ),
                 )
-        for name, keys in (
+        for name, row_keys in (
             ("electrical_weighting_deviations_db", _WEIGHTINGS),
             ("electrical_weighting_uncertainties_db", _WEIGHTINGS),
             (
@@ -1388,7 +1422,7 @@ class SoundLevelMeterPeriodicMeasurements(RichDisplay):
         ):
             value = getattr(self, name)
             if value is not None:
-                items = _keyed(value, name, keys)
+                items = _keyed(value, name, row_keys)
                 self._set(
                     name,
                     MappingProxyType(
@@ -1569,7 +1603,7 @@ _CORRECTION_DATA_SPLITS: tuple[tuple[str, str], ...] = (
 )
 
 #: Each graded requirement's result field and uncertainty field.
-_PAIRS: dict[str, tuple[str, str]] = {
+_PAIRS: dict[SlmRequirement, tuple[str, str]] = {
     "acoustic_weighting": (
         "acoustic_weighting_deviations_db",
         "acoustic_weighting_uncertainties_db",
@@ -1844,8 +1878,8 @@ class SoundLevelMeterPeriodicRequirement(RichDisplay):
         reason, and not results 4.3 forbids using.
     """
 
-    name: str
-    clause: str
+    name: SlmRequirement
+    clause: SlmClause
     tables: str
     labels: tuple[str, ...]
     verifications: tuple[ConformanceVerification, ...]
@@ -2099,7 +2133,7 @@ class SoundLevelMeterPeriodicVerification(RichDisplay):
     def _measured(self) -> set[str]:
         """The clauses the record holds, records included."""
         m = self.measurements
-        present = {r.clause for r in self.requirements}
+        present: set[str] = {r.clause for r in self.requirements}
         if m.static_pressures_kpa is not None:
             present.add("7")
         if m.calibration_check_initial_level is not None:
@@ -2842,7 +2876,9 @@ class SoundLevelMeterPeriodicVerification(RichDisplay):
                 f"26 °C, 25 % to 70 %): {'; '.join(self.conditions_outside)}."
             )
         if self.failed:
-            by_clause = {r.clause: r for r in self.requirements}
+            by_clause: dict[str, SoundLevelMeterPeriodicRequirement] = {
+                r.clause: r for r in self.requirements
+            }
             reasons = "; ".join(
                 f"{_clause_label(clause)}, {label}: "
                 f"{by_clause[clause].failure_reason(label)}"
@@ -3132,7 +3168,7 @@ def _weighting_limits(meter_class: int) -> dict[float, tuple[float, float]]:
 
 
 def _simple(
-    name: str,
+    name: SlmRequirement,
     labels: Sequence[str],
     deviations: Sequence[float],
     uncertainties: Sequence[float],
@@ -3157,13 +3193,13 @@ def _simple(
     )
 
 
-def _weighting_requirement(
-    name: str,
-    rows: Mapping[str, Sequence[float]],
-    rows_u: Mapping[str, Sequence[float]],
+def _weighting_requirement[K: str](
+    name: SlmRequirement,
+    rows: Mapping[K, Sequence[float]],
+    rows_u: Mapping[K, Sequence[float]],
     frequencies: tuple[float, ...],
     meter_class: int,
-    rows_u_split: Mapping[str, Sequence[float]] | None = None,
+    rows_u_split: Mapping[K, Sequence[float]] | None = None,
 ) -> SoundLevelMeterPeriodicRequirement:
     """12 or 13: Table 3 at each nominal frequency, the maximum by band.
 
@@ -3312,12 +3348,12 @@ def _c_peak(
     )
 
 
-def _keyed_requirement(
-    name: str,
-    values: Mapping[str, float] | None,
-    spread: Mapping[str, float] | None,
+def _keyed_requirement[K: str](
+    name: SlmRequirement,
+    values: Mapping[K, float] | None,
+    spread: Mapping[K, float] | None,
     limit: float,
-    names: Mapping[str, str],
+    names: Mapping[K, str],
 ) -> SoundLevelMeterPeriodicRequirement | None:
     """14.2 or 14.3: one result per key, one limit and one maximum."""
     if values is None or spread is None:
@@ -3332,7 +3368,7 @@ def _keyed_requirement(
 
 
 def _scalar_requirement(
-    name: str,
+    name: SlmRequirement,
     value: float | None,
     uncertainty: float | None,
     limit: float,
@@ -3347,7 +3383,7 @@ def _scalar_requirement(
 
 
 def _sequence_requirement(
-    name: str,
+    name: SlmRequirement,
     values: Sequence[float] | None,
     spread: Sequence[float] | None,
     limit: float,
@@ -3432,8 +3468,12 @@ def _range_linearity(
 
 
 #: The labels of the 14.2 and 14.3 results, by key.
-_WEIGHTING_VS_A_LABELS = MappingProxyType({"C": "LC - LA", "Z": "LZ - LA"})
-_TIME_WEIGHTING_VS_F_LABELS = MappingProxyType({"S": "LAS - LAF", "eq": "LAeq - LAF"})
+_WEIGHTING_VS_A_LABELS: Mapping[WeightingVersusA, str] = MappingProxyType(
+    {"C": "LC - LA", "Z": "LZ - LA"}
+)
+_TIME_WEIGHTING_VS_F_LABELS: Mapping[DisplayVersusF, str] = MappingProxyType(
+    {"S": "LAS - LAF", "eq": "LAeq - LAF"}
+)
 
 
 def verify_sound_level_meter_periodic(

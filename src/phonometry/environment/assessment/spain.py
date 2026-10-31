@@ -1409,7 +1409,7 @@ class ActivityAssessment(RichDisplay):
 
 
 def _period_durations(
-    period_hours: Mapping[str, float] | None,
+    period_hours: Mapping[EvaluationPeriod, float] | None,
 ) -> dict[str, float]:
     """The period durations ``T``, with any caller override applied.
 
@@ -1455,9 +1455,9 @@ def _validate_annual_inputs(
 
 def _annual_index(
     reported: int,
-    period: str,
+    period: EvaluationPeriod,
     *,
-    long_term_levels: Mapping[str, float] | None,
+    long_term_levels: Mapping[EvaluationPeriod, float] | None,
     operating_days: int | np.integer[Any] | None,
     year_days: int | np.integer[Any],
     closed_level: float,
@@ -1490,7 +1490,7 @@ def _assess_period(
     duration: float,
     limit: float,
     *,
-    long_term_levels: Mapping[str, float] | None,
+    long_term_levels: Mapping[EvaluationPeriod, float] | None,
     operating_days: int | np.integer[Any] | None,
     year_days: int | np.integer[Any],
     closed_level: float,
@@ -1535,15 +1535,15 @@ def _assess_period(
 
 
 def assess_activity(
-    measurements: Mapping[str, Sequence[NoisePhase]],
+    measurements: Mapping[EvaluationPeriod, Sequence[NoisePhase]],
     limits: RegulationLimits,
     *,
-    long_term_levels: Mapping[str, float] | None = None,
+    long_term_levels: Mapping[EvaluationPeriod, float] | None = None,
     operating_days: int | np.integer[Any] | None = None,
     year_days: int | np.integer[Any] = 365,
     closed_level: float = 0.0,
     new_activity: bool = True,
-    period_hours: Mapping[str, float] | None = None,
+    period_hours: Mapping[EvaluationPeriod, float] | None = None,
 ) -> ActivityAssessment:
     """Assess an activity against the RD 1367/2007 limit values (Article 25).
 

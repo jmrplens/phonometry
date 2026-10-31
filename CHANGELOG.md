@@ -2181,6 +2181,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `weighting_filter(x, fs, high_accuracy=True)`, `high_accuracy=1` was. Each
   is now checked before the store is asked.
 
+- **The FDTD plots document the keywords their figure refuses.**
+  `FDTDResult.plot` and `ElasticFDTDResult.plot` raise `TypeError` for a
+  `color_limit` with `kind="snapshot"`, whose colour limits the field drawn
+  sets, and `FDTD2D.plot_geometry` for an `extent` or an `origin`, which the
+  grid sets; their reference pages did not say so, and now do under
+  `:raises TypeError:`. `FDTD2D.plot_geometry` refuses the two for every
+  domain: on one without obstacles it dropped them without a word.
+  `electroacoustics.RadiatingPistonResult.plot_geometry` and
+  `room.ImageSourceResult.plot_geometry` now document the `TypeError` their
+  figure raises for a `frequency_index` or a `max_order` that is not a
+  number, and the `ValueError` for one out of range. The rule that a
+  function documents every `TypeError` it raises now follows what a
+  function hands on into the renderer that draws its figure, its keywords
+  and its named parameters alike, through that renderer's own helpers, a
+  copy of the keywords and a renderer called through its module, so a
+  refusal there is named on the method a caller reads.
+
 - **The type check reads the conformance scripts against the oracle tables
   they compare with, and every place that gives the command runs the same
   one.** The conformance scripts import their oracle tables from `tests/`,
@@ -3832,6 +3849,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   the hearing groups of `underwater`, the string half of a union such as the
   `seabed` of the Weston functions, `"sand" | "mud"` beside a `WestonSeabed`,
   or the CNOSSOS-EU codes beside their `Enum`, and some four hundred more.
+  A collection of choices and the keys of a mapping are typed by their items
+  the same way: the targets of `emission.MicrophoneTraverse`, the positions
+  `hearing.check_free_sound_field` and its siblings read levels at, the
+  evaluation periods `environment.assess_activity` takes as keys, the
+  adjustments of `environment.WindTurbineRatingLevel`, the parameters of
+  `environment.BinauralIndicators`, the six measurement tables of
+  `metrology.SoundLevelMeterPeriodicMeasurements`, the components of
+  `metrology.comparison_uncertainty_budget` and
+  `metrology.reciprocity_uncertainty_budget`, the directions of the decay
+  limits `environment.check_reference_track` takes, the columns of each
+  burst length `vibration.verify_signal_burst_response` reads and
+  `vibration.signal_burst_indications` returns, and some sixty more. A
+  call that passes a variable typed `str` there now needs the variable typed
+  by the vocabulary, or the value written in place. The two budgets pair the
+  components with their `field`: a mapping typed by the components of one
+  table goes with that table's field and no other, and a field held in a
+  variable that may be either takes the components both tables list. The
+  published tables these vocabularies key (`SPB_*`, `IEC62585_TABLE_I1`, the IEC 61094 tables
+  of the comparison and reciprocity budgets, the IEC 60268-7 letter tables,
+  `REFERENCE_TRACK_DECAY_LIMITS_DB_PER_M`, `TRACK_DECAY_DIRECTIONS`,
+  `PROVENANCE_KINDS` and the rest, 24 in all) are keyed by the same aliases,
+  so a typed caller that indexes one with a free `str` needs the `Literal`
+  too. Nothing changes at run time but one refusal:
+  `noise_control.enclosure_sound_power_insulation` and
+  `enclosure_sound_pressure_insulation` take the `base_standard` Table 1 of
+  ISO 11546 lists for their quantity and refuse any other with `ValueError`,
+  where an unknown standard was carried into the result as if it gave band
+  values.
   `underwater.detection_range` takes the `law` and `model` of
   `propagation_loss` with the same types. A type checker and an
   editor offer the options and refuse a misspelling before the call runs; the
@@ -3846,7 +3891,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   that does one of those; it follows the text through `str(...)`,
   `.strip().lower()` and the locals bound from it, through a dict spread into
   a call and through a function the body imports, and a table handed on
-  beside it closes the helper that checks it. A test holds every such
+  beside it closes the helper that checks it. It reads a collection of
+  strings and the keys of a mapping item by item, through a loop, a
+  comprehension, `.items()` and `.keys()`, takes a set difference with the
+  options or a subset test as the closed set, follows a comprehension that
+  copies each item, reads a table held in a local, picked by a conditional
+  expression, picked out of a table of tables or imported from another
+  module of the package as the one written in place, reads a frozen table
+  the source builds with code off the imported module, reads every
+  annotation through the module's type aliases, follows a record field out
+  of `__post_init__` into the helper that checks it, and closes a field its
+  own module compares with a string anywhere. A string a caller writes
+  below the top level of a collection or a mapping, which it does not
+  follow, is a choice unless its reason for staying open is written down.
+  A test holds every such
   `Literal` to the table that answers it. `noise_control.InstallationCase`
   reads `"any"` in `source_side` for the four insertion cases, as its
   documentation said, instead of a sentence.

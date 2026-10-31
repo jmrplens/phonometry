@@ -169,25 +169,31 @@ def audiogram_parameters(
 ) -> AudiogramParameters:
     """Fit parameters of a published group audiogram.
 
-    :param group: Hearing-group code, one of :data:`AUDIOGRAM_GROUPS`
-        (case-insensitive).
+    :param group: Hearing-group code, one of :data:`AUDIOGRAM_GROUPS`, as
+        written.
     :param normalized: Return the Table 3 normalised fit instead of the Table 2
         absolute one.
     :return: The :class:`AudiogramParameters` for that group.
+    :raises TypeError: If ``group`` is not a text.
     :raises ValueError: If the group has no published audiogram.
     """
-    key = str(group).strip().upper()
+    if not isinstance(group, str):
+        msg = f"'group' must be a text, one of {AUDIOGRAM_GROUPS}; got {group!r}."
+        raise TypeError(msg)
+    # Any text a caller writes, not only the codes the Literal lists: the LF
+    # cetaceans of the weighting groups have no audiogram, and say so.
+    named: str = group
     table = _AUDIOGRAM_NORMALIZED if normalized else _AUDIOGRAM_ORIGINAL
-    if key not in table:
+    if named not in table:
         extra = (
             " Southall et al. publish no fitted audiogram for LF cetaceans"
             " (the F1 parameter is never printed)."
-            if key == "LF"
+            if named == "LF"
             else ""
         )
         msg = f"'group' must be one of {AUDIOGRAM_GROUPS}, got {group!r}.{extra}"
         raise ValueError(msg)
-    return table[key]
+    return table[named]
 
 
 @dataclass(frozen=True)
@@ -293,6 +299,7 @@ def group_audiogram(
     :param normalized: Use the normalised fit (0 dB at best sensitivity).
     :return: An :class:`AudiogramResult`.
     :raises ValueError: If the group is unknown or a frequency is invalid.
+    :raises TypeError: if ``group`` is not a text.
     """
     params = audiogram_parameters(group, normalized=normalized)
     f_khz = _frequency_khz(frequency_hz)

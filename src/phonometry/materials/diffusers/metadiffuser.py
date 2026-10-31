@@ -227,7 +227,8 @@ def metadiffuser_reflection(
         ``P0``.
     :return: A :class:`MetadiffuserResult` with one reflection row per well.
     :raises TypeError: if ``depth_m`` or ``period_m`` is not a single number, or
-        ``frequency`` holds a text or a value that is not a real number.
+        ``frequency`` holds a text or a value that is not a real number, or
+        ``resonator_geometry`` is not a text.
     """
     f = require_positive_array(frequency, "frequency")
     cells = _check_panel(wells, depth_m, period_m)
@@ -300,7 +301,8 @@ def metadiffuser_polar_response(
         speed of sound ``c0`` also carries the far field.
     :return: A
         :class:`~phonometry.materials.diffusers.design.DiffuserPolarResponse`.
-    :raises TypeError: if ``frequency`` is not a single number.
+    :raises TypeError: if ``frequency`` is not a single number, or
+        ``resonator_geometry`` is not a text.
     """
     f = require_positive(frequency, "frequency")
     result = metadiffuser_reflection(
@@ -366,7 +368,8 @@ def metadiffuser_diffusion_spectrum(
     :return: A
         :class:`~phonometry.materials.diffusers.scattering_diffusion.DiffusionSpectrum`
         carrying the raw ``d(f)`` and the normalised ``d_n(f)``.
-    :raises TypeError: if ``depth_m`` or ``period_m`` is not a single number.
+    :raises TypeError: if ``depth_m`` or ``period_m`` is not a single number, or
+        ``resonator_geometry`` is not a text.
     """
     freqs = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
     if freqs.ndim != 1 or freqs.size == 0:

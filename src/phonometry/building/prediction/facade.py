@@ -512,7 +512,8 @@ def facade_sound_reduction(
     :param frequencies: Optional band centre frequencies (Hz), stored on the
         result for plotting; must match the element band count.
     :return: A :class:`FacadePredictionResult`.
-    :raises TypeError: if ``area`` or ``volume`` is not a single number.
+    :raises TypeError: if ``area`` or ``volume`` is not a single number, or ``fraction``
+        is not an integer (a word, a flag or a float).
     """
     delta = float(delta_l_fs)
     require_scalar(volume, "volume")

@@ -653,7 +653,8 @@ def weighted_thd(
     :param window: FFT window used only for fundamental auto-detection.
     :return: Weighted THD, as a ratio.
     :raises ValueError: If the inputs are invalid.
-    :raises TypeError: if ``fs``, ``fundamental`` or ``notch_q`` is not a single number.
+    :raises TypeError: if ``fs``, ``fundamental`` or ``notch_q`` is not a single number,
+        or ``weighting`` is not a text.
     """
     fs = resolve_fs(x, fs, name="x")
     sig = _validate_signal(x)

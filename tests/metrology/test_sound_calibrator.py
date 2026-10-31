@@ -465,7 +465,7 @@ def test_classes_ls_and_2_at_1_khz() -> None:
     ls = metrology.verify_sound_calibrator("LS", record, nominal_frequency_hz=1000.0)
     assert ls.passes
     assert ls.requirement("distortion").acceptance_limits == (0.0, 2.0)
-    two = metrology.verify_sound_calibrator(2, record, nominal_frequency_hz=1000.0)
+    two = metrology.verify_sound_calibrator("2", record, nominal_frequency_hz=1000.0)
     assert two.requirement("level").acceptance_limits == (-0.40, 0.40)
     assert two.requirement("level").max_uncertainty == 0.35
     assert two.calibrator_class == "2"

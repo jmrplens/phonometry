@@ -293,7 +293,7 @@ def test_filter_rejects_non_string_mode() -> None:
     """A non-string mode used to die in str.lower, deep in level calculation."""
     bank = filters.OctaveFilterBank(48000)
     x = np.zeros(1000)
-    with pytest.raises(TypeError, match="'mode' must be a string"):
+    with pytest.raises(TypeError, match=r"'mode' must be one of .*, a text; got None"):
         bank.filter(x, mode=None)  # type: ignore[arg-type]
 
 

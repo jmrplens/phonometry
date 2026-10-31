@@ -220,6 +220,7 @@ def psychoacoustic_annoyance_from_signal(
     :param calibration_factor: Digital-units-to-Pa factor applied to
         ``x``. An explicit value wins over the one a Signal carries.
     :return: A :class:`PsychoacousticAnnoyanceResult`.
+    :raises TypeError: if ``field`` is not a text.
     """
     from ..loudness.zwicker import loudness_zwicker
     from ._fluctuation_strength import fluctuation_strength as _fluctuation_strength

@@ -301,6 +301,15 @@ def _map_breakpoint(exponent: float, fraction: float) -> float:
     return float(1 + scale * (omega_octave - 1))
 
 
+def _edition_spec(edition: object) -> dict[str, Any]:
+    """The Table 1 spec of *edition*, named as written.
+
+    :raises ValueError: if ``edition`` names no published edition.
+    :raises TypeError: if ``edition`` is not a text.
+    """
+    return _FILTER_EDITIONS[require_choice(edition, "edition", tuple(_FILTER_EDITIONS))]
+
+
 def class_limits(
     fraction: float, filter_class: int, omega: ArrayLike, *, edition: Edition = "2014"
 ) -> tuple[np.ndarray, np.ndarray]:
@@ -331,10 +340,7 @@ def class_limits(
         exactly.
     """
     require_scalar(fraction, "fraction")
-    spec = _FILTER_EDITIONS.get(edition)
-    if spec is None:
-        msg = "edition must be '2014' or '1995'."
-        raise ValueError(msg)
+    spec = _edition_spec(edition)
     if filter_class not in spec["classes"]:
         msg = f"filter_class must be one of {spec['classes']} for edition '{edition}'."
         raise ValueError(msg)
@@ -1111,7 +1117,7 @@ def verify_filter_class(
         least 16, a ``points_per_bandwidth`` below its floor, or an unknown
         edition.
     :raises TypeError: if ``n_points`` or ``points_per_bandwidth`` is a flag, a text or
-        an array where a count goes.
+        an array where a count goes, or ``edition`` is not a text.
     """
     n_points = require_count(n_points, "n_points", at_least=None)
     if n_points < _MIN_GRID_POINTS:
@@ -1120,10 +1126,7 @@ def verify_filter_class(
     points_per_bandwidth = require_count(
         points_per_bandwidth, "points_per_bandwidth", at_least=_MIN_POINTS_PER_BANDWIDTH
     )
-    spec = _FILTER_EDITIONS.get(edition)
-    if spec is None:
-        msg = "edition must be '2014' or '1995'."
-        raise ValueError(msg)
+    spec = _edition_spec(edition)
     classes_ordered: tuple[int, ...] = spec["classes"]  # best -> worst
 
     # Table 1 breakpoints (both sides) that must always be evaluated.

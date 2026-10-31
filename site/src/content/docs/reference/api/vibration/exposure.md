@@ -340,7 +340,7 @@ Eq. (10) vector total `a_v`.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if the inputs differ in length, carry non-finite values, or `labels` mismatches. |
-| TypeError | if `durations_s` or `total_values` holds a text or a value that is not a real number. |
+| TypeError | if `durations_s` or `total_values` holds a text or a value that is not a real number, or `kind` is not a text. |
 
 ## DailyVibrationExposure
 
@@ -491,6 +491,7 @@ Assess a daily exposure against Directive 2002/44/EC (Article 3).
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an unknown `kind`/`metric` combination or a non-finite or negative `value`. |
+| TypeError | if `kind` or `metric` is not a text. |
 
 ## ExposureAssessment
 

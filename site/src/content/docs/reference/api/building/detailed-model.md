@@ -1230,7 +1230,7 @@ data come from a laboratory measurement.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If any element property is not positive and finite. |
-| TypeError | if `frequencies` holds a text or a value that is not a real number. |
+| TypeError | if `frequencies` holds a text or a value that is not a real number, or `fraction` is not an integer (a word, a flag or a float). |
 
 ## in_situ_equivalent_absorption_length
 

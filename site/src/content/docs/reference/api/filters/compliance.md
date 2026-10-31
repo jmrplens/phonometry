@@ -496,4 +496,4 @@ requirement on its own.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an `n_points` that is not a whole number of at least 16, a `points_per_bandwidth` below its floor, or an unknown edition. |
-| TypeError | if `n_points` or `points_per_bandwidth` is a flag, a text or an array where a count goes. |
+| TypeError | if `n_points` or `points_per_bandwidth` is a flag, a text or an array where a count goes, or `edition` is not a text. |

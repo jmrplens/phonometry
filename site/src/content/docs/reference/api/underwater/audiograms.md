@@ -69,7 +69,7 @@ Fit parameters of a published group audiogram.
 
 | Name | Description |
 | :--- | :--- |
-| `group` | Hearing-group code, one of [`AUDIOGRAM_GROUPS`](/phonometry/reference/api/underwater/audiograms/#audiogram_groups) (case-insensitive). |
+| `group` | Hearing-group code, one of [`AUDIOGRAM_GROUPS`](/phonometry/reference/api/underwater/audiograms/#audiogram_groups), as written. |
 | `normalized` | Return the Table 3 normalised fit instead of the Table 2 absolute one. |
 
 **Returns:** The [`AudiogramParameters`](/phonometry/reference/api/underwater/audiograms/#audiogramparameters) for that group.
@@ -78,6 +78,7 @@ Fit parameters of a published group audiogram.
 
 | Exception | When |
 | :--- | :--- |
+| TypeError | If `group` is not a text. |
 | ValueError | If the group has no published audiogram. |
 
 ## AudiogramParameters
@@ -193,6 +194,7 @@ Table 3 (`normalized=True`).
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the group is unknown or a frequency is invalid. |
+| TypeError | if `group` is not a text. |
 
 ## orca_audiogram
 

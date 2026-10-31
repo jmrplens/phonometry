@@ -830,3 +830,413 @@ def test_an_area_type_is_one_every_limit_table_prints() -> None:
     )
     resolved = {spain._AREA_ALIASES.get(o, o) for o in typing.get_args(spain.AreaType)}
     assert all(resolved == set(table) for table in tables)
+
+
+# --------------------------------------------------------------------------
+# One spelling (rule A45): a choice typed Literal is checked as written.
+
+#: The options of the synthetic choices below.
+_Pace = Literal["fast", "slow"]
+_PACES: tuple[_Pace, ...] = ("fast", "slow")
+
+
+def _folded_before_the_check(mode: _Pace) -> str:
+    key = mode.strip().lower()
+    return require_choice(key, "mode", _PACES)
+
+
+def _checked_before_the_fold(mode: _Pace) -> str:
+    named = require_choice(mode, "mode", _PACES)
+    return named.upper()
+
+
+def _refused_before_the_fold(mode: _Pace) -> str:
+    if mode not in _PACES:
+        raise ValueError(mode)
+    return mode.title()
+
+
+def _made_a_text(mode: _Pace) -> str:
+    return require_choice(
+        str(mode),
+        "mode",
+        _PACES,
+    )
+
+
+def _lowered(text: str) -> str:
+    return text.lower()
+
+
+def _folded_by_a_helper(mode: _Pace) -> str:
+    return require_choice(_lowered(mode), "mode", _PACES)
+
+
+def _checks(text: object) -> _Pace:
+    return require_choice(text, "mode", _PACES)
+
+
+def _checked_by_a_helper(mode: _Pace) -> str:
+    _checks(mode)
+    return mode.casefold()
+
+
+def _folded_after_a_private_helper(mode: _Pace) -> bool:
+    return _resolve(mode).upper() == "FAST"
+
+
+#: Spellings no option lists, mapped to one.
+_UNLISTED_ALIASES = {"quick": "fast"}
+
+#: A spelling the Literal lists on purpose, mapped to the option it stands for.
+_LISTED_ALIASES = {"slow": "fast"}
+
+
+def _maps_an_unlisted_alias(mode: _Pace) -> str:
+    key = _UNLISTED_ALIASES.get(mode, mode)
+    return require_choice(key, "mode", _PACES)
+
+
+def _maps_a_listed_alias(mode: _Pace) -> str:
+    key = _LISTED_ALIASES.get(mode, mode)
+    return require_choice(key, "mode", _PACES)
+
+
+def _items_folded(sides: Sequence[_Side]) -> set[str]:
+    return {side.lower() for side in sides if side.lower() in ("left", "right")}
+
+
+def _keys_checked_as_a_whole(levels: Mapping[_Side, float]) -> set[str]:
+    extra = set(levels) - {"left", "right"}
+    if extra:
+        raise ValueError(sorted(extra))
+    return {str(side) for side in levels}
+
+
+def _cleaned(
+    function: object, name: str, *, options: tuple[str, ...], collection: bool = False
+) -> list[str]:
+    reading = ccl._received(
+        function,
+        name,
+        options=frozenset(options),
+        collection=collection,
+        depth=0,
+    )
+    return ccl._cleans_up_first(reading)
+
+
+def test_a_clean_up_before_the_check_is_refused() -> None:
+    """``mode.strip().lower()`` ahead of ``require_choice`` lets ``" FAST "`` in."""
+    assert _cleaned(_folded_before_the_check, "mode", options=_PACES) == [
+        ".lower()",
+        ".strip()",
+    ]
+
+
+def test_a_check_as_written_before_the_clean_up_passes() -> None:
+    """A clean-up after the text is checked as written accepts nothing more."""
+    assert _cleaned(_checked_before_the_fold, "mode", options=_PACES) == []
+    assert _cleaned(_refused_before_the_fold, "mode", options=_PACES) == []
+
+
+def test_a_text_made_of_any_value_is_a_clean_up() -> None:
+    """``str(mode)`` takes ``2`` for ``"2"``, on a line of its own or not."""
+    assert _cleaned(_made_a_text, "mode", options=_PACES) == ["str()"]
+
+
+def test_a_clean_up_in_a_helper_is_followed() -> None:
+    """The helper folds the text it is handed before anyone checks it."""
+    assert _cleaned(_folded_by_a_helper, "mode", options=_PACES) == [
+        "handed to _lowered(text), .lower()"
+    ]
+
+
+def test_a_check_in_a_helper_is_a_check_where_it_is_called() -> None:
+    """A helper that checks the text first checks it for its caller."""
+    assert _cleaned(_checked_by_a_helper, "mode", options=_PACES) == []
+
+
+def test_a_clean_up_of_what_a_private_helper_hands_back_is_one() -> None:
+    """``_resolve(mode).upper()`` folds the text the helper hands back."""
+    assert _cleaned(_folded_after_a_private_helper, "mode", options=_PACES) == [
+        ".upper()"
+    ]
+
+
+def test_an_alias_the_literal_does_not_list_is_refused() -> None:
+    """``ALIASES.get(mode, mode)`` with a key no option spells takes it in;
+    a map of spellings the ``Literal`` lists on purpose accepts nothing more.
+    """
+    assert _cleaned(_maps_an_unlisted_alias, "mode", options=_PACES) == [
+        "an alias map .get(text, text)"
+    ]
+    assert _cleaned(_maps_a_listed_alias, "mode", options=_PACES) == []
+
+
+def test_the_items_of_a_collection_are_read_one_by_one() -> None:
+    """Each item folded before its check is a clean-up; a leftover refused as
+    a whole (``set(levels) - OPTIONS``) is a check of every key as written.
+    """
+    sides = ("left", "right")
+    assert _cleaned(_items_folded, "sides", options=sides, collection=True) == [
+        ".lower()"
+    ]
+    assert (
+        _cleaned(_keys_checked_as_a_whole, "levels", options=sides, collection=True)
+        == []
+    )
+
+
+@dataclass(frozen=True)
+class _Checked:
+    """A record that checks its choice as written when it is built."""
+
+    pace: _Pace
+
+    def __post_init__(self) -> None:
+        require_choice(self.pace, "pace", _PACES)
+
+
+@dataclass(frozen=True)
+class _Unchecked:
+    """A record that leaves its choice to whoever reads it."""
+
+    stride: _Pace
+
+
+def _reads_checked(record: _Checked) -> bool:
+    return record.pace.lower() == "fast"
+
+
+def _reads_unchecked(record: _Unchecked) -> bool:
+    return record.stride.lower() == "fast"
+
+
+def test_a_record_field_is_read_where_its_module_uses_it() -> None:
+    """A field checked when the record is built may be cleaned up later; one
+    that is not is cleaned up by the module that reads it.
+    """
+    constants = ccl._module_constants(sys.modules[__name__])
+    options = frozenset(_PACES)
+    checked = ccl._field_spelling(
+        _Checked, "pace", constants, options=options, collection=False
+    )
+    unchecked = ccl._field_spelling(
+        _Unchecked, "stride", constants, options=options, collection=False
+    )
+    assert checked == []
+    assert unchecked == [".lower() in _reads_unchecked()"]
+
+
+def test_every_literal_choice_is_checked_as_written() -> None:
+    """The package passes: no public choice typed ``Literal`` is cleaned up
+    before its check, here or in a function it is handed to (rule A45).
+    """
+    assert list(ccl.cleaned_up_choices()) == []
+
+
+#: Two route names, bound to constants a table is keyed by.
+_PER_LEAF = "per_leaf"
+_TOGETHER = "together"
+_ROUTES = {_PER_LEAF: 40.0, _TOGETHER: 50.0}
+
+
+def _route(quantity: str) -> float:
+    if quantity not in _ROUTES:
+        raise ValueError(quantity)
+    return _ROUTES[quantity]
+
+
+def test_a_table_keyed_by_named_constants_holds_their_strings() -> None:
+    """``{_DNT_A: ...}`` is keyed by the text ``_DNT_A`` is bound to, so a
+    ``str`` checked against it is a closed choice like one checked against
+    ``{"DnT,A": ...}``.
+    """
+    constants = ccl._module_constants(sys.modules[__name__])
+    assert ccl.strings_of(ast.Name(id="_ROUTES"), constants) == ("per_leaf", "together")
+    found = ccl.code_evidence(_tree(_route), ccl._the_name("quantity"), constants)
+    assert found == ["'in' a set of strings", "a lookup by key"]
+
+
+class _Pacer:
+    """A class whose public method hands its choice to a method of its own."""
+
+    def pace(self, mode: _Pace) -> bool:
+        return self._matches(mode)
+
+    def _matches(self, mode: str) -> bool:
+        return mode.lower() in _PACES
+
+
+@dataclass(frozen=True)
+class _Holder:
+    """A record whose public method hands its choice to an object it holds."""
+
+    pacer: _Pacer
+
+    def pace(self, mode: _Pace) -> bool:
+        return self.pacer.pace(mode)
+
+
+def test_a_clean_up_in_a_method_of_its_own_class_is_followed() -> None:
+    """``self._matches(mode)`` and ``self.pacer.pace(mode)`` are followed
+    into the method they call, through the class and through the annotation
+    of the field that holds the object.
+    """
+    assert _cleaned(_Pacer.pace, "mode", options=_PACES) == [
+        "handed to _Pacer._matches(mode), .lower()"
+    ]
+    assert _cleaned(_Holder.pace, "mode", options=_PACES) == [
+        "handed to _Pacer.pace(mode), handed to _Pacer._matches(mode), .lower()"
+    ]
+
+
+#: The options of a check that also takes a spelling of its own.
+_QUICK = {"quick": "fast"}
+
+
+def _checked_against_more(mode: _Pace) -> str:
+    named = require_choice(mode, "mode", (*_PACES, *_QUICK))
+    return _QUICK.get(named, named)
+
+
+def test_a_check_against_options_the_literal_does_not_list_is_refused() -> None:
+    """``require_choice(mode, "mode", (*_PACES, *_QUICK))`` reads the text as
+    written and still takes ``"quick"``, which no option spells.
+    """
+    constants = ccl._module_constants(sys.modules[__name__])
+    starred = ast.parse("(*_PACES, *_QUICK)", mode="eval").body
+    assert ccl.strings_of(starred, constants) == ("fast", "slow", "quick")
+    assert _cleaned(_checked_against_more, "mode", options=_PACES) == [
+        "options wider than the Literal ('quick',)"
+    ]
+    assert _cleaned(_checked_before_the_fold, "mode", options=_PACES) == []
+
+
+def _refused_against_more(mode: _Pace) -> str:
+    if mode not in ("fast", "slow", "quick"):
+        raise ValueError(mode)
+    return mode.lower()
+
+
+def _sides_held_to_more(sides: Sequence[_Side]) -> set[str]:
+    if not set(sides) <= {"left", "right", "top"}:
+        raise ValueError(sides)
+    return {side.upper() for side in sides}
+
+
+def _keys_held_to_more(levels: Mapping[_Side, float]) -> set[str]:
+    extra = set(levels) - {"left", "right", "top"}
+    if extra:
+        raise ValueError(sorted(extra))
+    return {side.upper() for side in levels}
+
+
+def test_a_membership_test_against_options_the_literal_does_not_list_is_refused() -> (
+    None
+):
+    """``if mode not in ("fast", "slow", "quick"): raise`` reads the text as
+    written and still takes ``"quick"``; so do a subset test and a leftover
+    refused as a whole against a set wider than the ``Literal``.
+    """
+    sides = ("left", "right")
+    assert _cleaned(_refused_against_more, "mode", options=_PACES) == [
+        "options wider than the Literal ('quick',)"
+    ]
+    assert _cleaned(_sides_held_to_more, "sides", options=sides, collection=True) == [
+        "options wider than the Literal ('top',)"
+    ]
+    assert _cleaned(_keys_held_to_more, "levels", options=sides, collection=True) == [
+        "options wider than the Literal ('top',)"
+    ]
+    assert _cleaned(_refused_before_the_fold, "mode", options=_PACES) == []
+    assert (
+        _cleaned(_keys_checked_as_a_whole, "levels", options=sides, collection=True)
+        == []
+    )
+
+
+#: The options of two kinds of record, one row each, as a shared helper picks
+#: the row of the record it is handed.
+_ROWS_BY_KIND = {"pace": ("fast", "slow"), "gait": ("walk", "run")}
+
+#: The same table, with a row for the pace that also takes a spelling of its own.
+_WIDER_ROWS = {"pace": ("fast", "slow", "quick"), "gait": ("walk", "run")}
+
+
+def _refused_against_a_picked_row(mode: _Pace, kind: str) -> str:
+    paces = _ROWS_BY_KIND[kind]
+    if mode not in paces:
+        raise ValueError(mode)
+    return mode.lower()
+
+
+def _refused_against_a_wider_row(mode: _Pace, kind: str) -> str:
+    if mode not in _WIDER_ROWS[kind]:
+        raise ValueError(mode)
+    return mode.lower()
+
+
+def test_a_check_against_a_row_picked_at_run_time_is_held_to_the_closest_row() -> None:
+    """``_ROWS_BY_KIND[kind]`` is one row of the table, and the row of the
+    ``Literal``'s own options takes nothing more; a table none of whose rows
+    is the ``Literal``'s alone lets through what the closest row adds.
+    """
+    assert _cleaned(_refused_against_a_picked_row, "mode", options=_PACES) == []
+    assert _cleaned(_refused_against_a_wider_row, "mode", options=_PACES) == [
+        "options wider than the Literal ('quick',)"
+    ]
+
+
+def test_an_escape_in_a_literal_option_is_the_character_it_spells() -> None:
+    """An escape written in a ``Literal`` option is the character it spells,
+    a tab and not a backslash and a ``t``, so ``write_catalogue``'s tab
+    delimiter is one of the options its check holds it to.
+    """
+    assert ccl._literal_options('Literal[",", ";", "\\t"]') == {",", ";", "\t"}
+
+
+class _PrivateBase:
+    """A base the package would not export, with a public method."""
+
+    def paced(self, mode: _Pace) -> bool:
+        return mode.upper() == "FAST"
+
+
+class _Exported(_PrivateBase):
+    """A class that inherits ``paced`` and defines nothing of its own."""
+
+
+class _Overriding(_PrivateBase):
+    """A class that defines ``paced`` again, so it inherits nothing."""
+
+    def paced(self, mode: _Pace) -> bool:
+        return require_choice(mode, "mode", _PACES) == "fast"
+
+
+def test_a_public_method_inherited_from_a_private_base_is_read(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """``paced`` is a public method of ``_Exported``, defined on its base:
+    it is read, under the base, and its clean-up fails; a method the class
+    defines again is its own.
+    """
+    monkeypatch.setattr(_PrivateBase, "__module__", "phonometry.synthetic")
+    inherited = list(ccl._inherited_methods(_Exported))
+    overridden = list(ccl._inherited_methods(_Overriding))
+    assert inherited == [(_PrivateBase, "paced", _PrivateBase.paced)]
+    assert overridden == []
+    assert _cleaned(_PrivateBase.paced, "mode", options=_PACES) == [".upper()"]
+
+
+def test_a_method_the_package_inherits_from_a_private_base_is_read_once() -> None:
+    """``plot`` of the six layers of ``materials.absorbers.layered`` is
+    defined on ``_DrawableLayer``: the walk reads it once, under that base.
+    """
+    plots = [
+        (home, qualname)
+        for home, qualname, _ in ccl._targets()
+        if qualname.endswith("_DrawableLayer.plot")
+    ]
+    assert plots == [("phonometry.materials.absorbers.layered", "_DrawableLayer.plot")]

@@ -492,14 +492,16 @@ def guide_values(
     :return: The three values, as a :class:`GuideValues`.
     :raises ValueError: For an unknown area, time of day, source or edition,
         or a source the edition does not have.
+    :raises TypeError: if ``area``, ``edition``, ``source`` or ``time_of_day`` is not a
+        text.
     """
-    year = require_choice(str(edition), "edition", _EDITIONS)
+    year = require_choice(edition, "edition", _EDITIONS)
     table = GUIDE_VALUES if year == "1999" else GUIDE_VALUES_2023
-    row = table[require_choice(str(area), "area", _AREAS)]
-    which = require_choice(str(time_of_day), "time_of_day", _PERIODS)
+    row = table[require_choice(area, "area", _AREAS)]
+    which = require_choice(time_of_day, "time_of_day", _PERIODS)
     values = row[which]
     kind = require_choice(
-        str(source), "source", _SOURCES if year == "1999" else _SOURCES_2023
+        source, "source", _SOURCES if year == "1999" else _SOURCES_2023
     )
     if kind in _RAISED_SOURCES:
         # Rounded to the decimals of the table, so 0,05 times 1,5 is 0,075
@@ -582,7 +584,7 @@ def construction_guide_values(
     :raises ValueError: For a duration that is not a whole number of days
         from 1 to 78, an unknown stage, an unknown area or a sensitive one.
     :raises TypeError: if ``duration_days`` is a flag, a text or an array where a count
-        goes.
+        goes, or ``area`` or ``stage`` is not a text.
     """
     days = require_count(duration_days, "duration_days")
     if days > _CONSTRUCTION_MAX_DAYS:
@@ -592,9 +594,9 @@ def construction_guide_values(
         )
         raise ValueError(msg)
     columns = CONSTRUCTION_GUIDE_VALUES[
-        require_choice(str(stage), "stage", CONSTRUCTION_STAGES)
+        require_choice(stage, "stage", CONSTRUCTION_STAGES)
     ]
-    kind = require_choice(str(area), "area", _AREAS)
+    kind = require_choice(area, "area", _AREAS)
     if kind == _NO_CONSTRUCTION_TABLE:
         msg = (
             "Table 2 is not applicable to an especially sensitive area (6.5.4.2); "
@@ -661,10 +663,10 @@ def assessment_vibration_severity(
     :raises ValueError: For mismatched or negative inputs, an unknown time of day,
         an exposure longer than the period, or a rest-time flag by night.
     :raises TypeError: if ``exposure_s`` or ``kb_ftm`` holds a text or a value that is
-        not a real number.
+        not a real number, or ``time_of_day`` is not a text.
     """
     severities, durations = _exposures(kb_ftm, exposure_s)
-    which = require_choice(str(time_of_day), "time_of_day", _PERIODS)
+    which = require_choice(time_of_day, "time_of_day", _PERIODS)
     total = ASSESSMENT_PERIOD_S[which]
     if float(np.sum(durations)) > total * (1.0 + 1e-9):
         msg = (
@@ -700,13 +702,12 @@ def admissible_exposure_s(
     :return: The exposure, in seconds.
     :raises ValueError: For a non-positive severity or guide value, or an
         unknown time of day.
-    :raises TypeError: if ``a_r`` or ``kb_ftm`` is not a single number.
+    :raises TypeError: if ``a_r`` or ``kb_ftm`` is not a single number, or
+        ``time_of_day`` is not a text.
     """
     severity = require_positive(kb_ftm, "kb_ftm")
     guide = require_positive(a_r, "a_r")
-    total = ASSESSMENT_PERIOD_S[
-        require_choice(str(time_of_day), "time_of_day", _PERIODS)
-    ]
+    total = ASSESSMENT_PERIOD_S[require_choice(time_of_day, "time_of_day", _PERIODS)]
     return (guide / severity) ** 2 * total
 
 
@@ -828,7 +829,7 @@ def railway_assessment_severity(
     :raises ValueError: For mismatched or negative inputs, more occupied
         intervals than the period holds, or an unknown time of day.
     :raises TypeError: if ``kb_ftm``, ``occupied_takte`` or ``spread`` holds a text or a
-        value that is not a real number.
+        value that is not a real number, or ``time_of_day`` is not a text.
     """
     severities = require_finite_array(kb_ftm, "kb_ftm")
     takte = require_finite_array(occupied_takte, "occupied_takte")
@@ -842,7 +843,7 @@ def railway_assessment_severity(
     ):
         msg = "'kb_ftm' must not be negative and 'occupied_takte' must be whole and not negative."
         raise ValueError(msg)
-    which = require_choice(str(time_of_day), "time_of_day", _PERIODS)
+    which = require_choice(time_of_day, "time_of_day", _PERIODS)
     total = ASSESSMENT_TAKT_COUNT[which]
     if float(np.sum(takte)) > total:
         msg = f"the classes occupy {int(np.sum(takte))} clock intervals, more than the {total} of the {which}."
@@ -921,10 +922,9 @@ def kb_fmax_from_peak_velocity(
         and ``"single_event"``.
     :return: :math:`KB^*_{F\mathrm{max}}`.
     :raises ValueError: For a bad velocity or frequency, or an unknown kind.
+    :raises TypeError: if ``kind`` is not a text.
     """
-    factor = PEAK_TO_KB_FACTORS[
-        require_choice(str(kind), "kind", tuple(PEAK_TO_KB_FACTORS))
-    ]
+    factor = PEAK_TO_KB_FACTORS[require_choice(kind, "kind", tuple(PEAK_TO_KB_FACTORS))]
     return kb_from_peak_velocity(peak_velocity_mm_s, frequency_hz) * factor
 
 
@@ -1019,7 +1019,7 @@ class PeopleAssessment(RichDisplay):
 def _edition_of(guide: GuideValues, edition: str | None) -> str:
     """The edition a verdict is read under: the guide values' own, or the one asked for if it is the same."""
     year = require_choice(
-        str(guide.edition if edition is None else edition), "edition", _EDITIONS
+        guide.edition if edition is None else edition, "edition", _EDITIONS
     )
     if year != guide.edition:
         msg = (
@@ -1161,12 +1161,13 @@ def assess_people_in_buildings(
     :raises ValueError: For a negative severity, an unknown source or
         edition, an edition other than the guide values are of, or a verdict
         that needs :math:`KB_\mathrm{FTr}` without one given.
-    :raises TypeError: if ``kb_fmax`` or ``kb_ftr`` is not a single number.
+    :raises TypeError: if ``kb_fmax`` or ``kb_ftr`` is not a single number, or
+        ``source`` is not a text.
     """
     peak = require_non_negative(kb_fmax, "kb_fmax")
     year = _edition_of(guide, edition)
     kind = require_choice(
-        str(source), "source", _SOURCES if year == "1999" else _SOURCES_2023
+        source, "source", _SOURCES if year == "1999" else _SOURCES_2023
     )
     rare = rare_short_events or kind in ("quarry_blasting", "induced_seismic")
     needs_ftr = _people_decision(peak, guide, kind, rare=rare) is None

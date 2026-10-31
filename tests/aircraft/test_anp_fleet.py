@@ -250,8 +250,11 @@ def test_error_paths() -> None:
         _DB.aircraft("NOPE")
     with pytest.raises(ValueError, match=r"'metric' must be one of"):
         _DB.npd_curves("747100", "departure", "EPNL")
-    with pytest.raises(ValueError, match=r"'operation' must be 'departure'"):
-        _DB.npd_curves("747100", "sideways", "SEL")
+    with pytest.raises(ValueError, match=r"'operation' must be one of"):
+        _DB.npd_curves("747100", "sideways", "SEL")  # type: ignore[arg-type]
+    for spelling in ("Departure", "d", "approach", "takeoff", " A "):
+        with pytest.raises(ValueError, match=r"'operation' must be one of"):
+            _DB.npd_curves("747100", spelling, "SEL")  # type: ignore[arg-type]
     with pytest.raises(
         KeyError, match=r"no fixed-point profile for aircraft 'PA31'.*stage length 9"
     ):

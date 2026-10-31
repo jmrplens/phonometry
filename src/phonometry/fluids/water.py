@@ -41,6 +41,7 @@ from .._internal.types import as_float_or_array
 from .._internal.validation import (
     require_above_absolute_zero,
     require_above_absolute_zero_array,
+    require_choice,
     require_finite_array,
     require_scalar,
 )
@@ -66,7 +67,7 @@ __all__ = [
 _BAR_PER_MPA = 10.0
 #: kg/cm² per bar (100 kPa = 1.019716 kg/cm²; 1 bar = 100 kPa).
 _KGCM2_PER_BAR = 1.019716
-_MODELS = ("unesco", "del_grosso", "mackenzie", "medwin")
+_MODELS: tuple[SoundSpeedModel, ...] = ("unesco", "del_grosso", "mackenzie", "medwin")
 _DEPTH_NEGATIVE_MSG = "'depth_m' must be non-negative."
 
 
@@ -409,7 +410,8 @@ def sea_water_sound_speed(
         depth are all numbers; an array of their broadcast shape when one is a sequence
         or an array, a zero-dimensional one included.
     :raises ValueError: If ``model`` is unknown or an input is non-finite.
-    :raises TypeError: if ``latitude_deg`` is not a single number, or ``depth_m``,
+    :raises TypeError: if ``model`` is not a text, ``latitude_deg`` is not a
+        single number, or ``depth_m``,
         ``salinity_psu`` or ``temperature_c`` holds a text or a value that is not a real
         number.
 
@@ -433,12 +435,12 @@ def sea_water_sound_speed(
         raise ValueError(msg)
     if np.any(z < 0.0):
         raise ValueError(_DEPTH_NEGATIVE_MSG)
-    key = model.strip().lower()
+    key = require_choice(model, "model", _MODELS)
     if key == "mackenzie":
         c = np.asarray(_mackenzie(t, s, z), dtype=np.float64)
     elif key == "medwin":
         c = np.asarray(_medwin(t, s, z), dtype=np.float64)
-    elif key in ("unesco", "del_grosso"):
+    else:  # "unesco" or "del_grosso"
         pressure_bar = (
             np.asarray(_pressure_mpa(z, _finite(latitude_deg, "latitude_deg")))
             * _BAR_PER_MPA
@@ -449,9 +451,6 @@ def sea_water_sound_speed(
             else _del_grosso(t, s, pressure_bar * _KGCM2_PER_BAR),
             dtype=np.float64,
         )
-    else:
-        msg = f"'model' must be one of {_MODELS}, got {model!r}."
-        raise ValueError(msg)
     return as_float_or_array(c, like=(temperature_c, salinity_psu, depth_m))
 
 
@@ -583,6 +582,7 @@ def sea_water(
     :param sound_speed_model: Which of the four fits to use; see the module
         docstring.
     :return: The :class:`~phonometry.fluids.Fluid` at that point.
+    :raises TypeError: if ``sound_speed_model`` is not a text.
 
     The density and the speed of sound come from different sources, which is
     why both are named in the result's ``model``. Neither source in this

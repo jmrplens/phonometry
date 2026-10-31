@@ -514,7 +514,9 @@ def test_invalid_inputs() -> None:
     ):
         psychoacoustics.loudness_zwicker_from_spectrum(ten_bands)
     levels = np.full(28, 60.0)
-    with pytest.raises(ValueError, match=r"'field' must be 'free' or 'diffuse'"):
+    with pytest.raises(
+        ValueError, match=r"'field' must be one of \('free', 'diffuse'\)"
+    ):
         psychoacoustics.loudness_zwicker_from_spectrum(levels, field="reverberant")
     x = np.ones(1000)
     with pytest.raises(ValueError, match=r"'fs' must be a positive sampling rate"):

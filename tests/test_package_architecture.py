@@ -780,6 +780,104 @@ def test_no_docstring_breaks_its_own_field_list() -> None:
     )
 
 
+#: A field marker at the start of a docstring line.
+_FIELD_MARKERS = (
+    ":param",
+    ":return",
+    ":raises",
+    ":warns",
+    ":ivar",
+    ":type",
+    ":rtype",
+    ":vartype",
+)
+
+#: A sentence of a field that is nothing but a cross-reference: the tail of a
+#: sentence another field, or a clause written into it, cut off.
+_LONE_REFERENCE = re.compile(r"(?:^|[.!?]\s+)(:\w+:`[^`]+`)\.(?:\s|$)")
+
+
+def _field_texts(docstring: str) -> list[str]:
+    """Each field of a docstring's field list, its continuation lines joined."""
+    texts: list[list[str]] = []
+    current: list[str] | None = None
+    for line in docstring.split("\n"):
+        if line.startswith(_FIELD_MARKERS):
+            current = [line.strip()]
+            texts.append(current)
+        elif current is not None and line.startswith((" ", "\t")):
+            current.append(line.strip())
+        else:
+            current = None
+    return [" ".join(text) for text in texts]
+
+
+def _split_fields(source: str) -> list[str]:
+    """The fields of *source*'s docstrings another field or clause cut in two."""
+    return [
+        f"{node.lineno} {node.name}: ...{text[-70:]!r}"
+        for node in ast.walk(ast.parse(source))
+        if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef)
+        for text in _field_texts(ast.get_docstring(node) or "")
+        if text[-1:].isalnum() or text[-1:] in ",;" or _LONE_REFERENCE.search(text)
+    ]
+
+
+def test_no_docstring_field_is_cut_in_two() -> None:
+    """A field written into the middle of another field's sentence cuts it.
+
+    `weighting_filter` once read ``:return: ... a bare array back; a`` with
+    ``:raises TypeError:`` on the next line and the rest of the return text
+    under it, and `duct_path` once wrote ``criterion`` into the first line of
+    a ``:raises TypeError:`` whose sentence went on below, leaving
+    ``:class:`DuctElement`.`` as a sentence of its own. The page then ends the
+    return text mid-sentence and prints it inside the exception. A field
+    whose text stops on a word or a comma, or holds a sentence that is only a
+    cross-reference, is cut in two.
+    """
+    cut = [
+        f"{path.relative_to('src')}:{finding}"
+        for path in sorted(Path("src/phonometry").rglob("*.py"))
+        for finding in _split_fields(path.read_text(encoding="utf-8"))
+    ]
+    assert not cut, "docstring fields cut in two:\n  " + "\n  ".join(cut)
+
+
+def test_a_field_cut_in_two_is_found() -> None:
+    """Both ways a field was cut are read, and a whole field list is not."""
+    cut_return = '''
+def f(x):
+    """Weight a signal.
+
+    :return: The weighted record. A bare array gives an array back; a
+    :raises TypeError: if ``x`` is not a text.
+        :class:`Signal` gives a Signal.
+    """
+'''
+    cut_raises = '''
+def g(elements, criterion):
+    """Route a duct path.
+
+    :raises TypeError: If an entry of ``elements`` is not a, or ``criterion`` is not a
+        text.
+        :class:`DuctElement`.
+    """
+'''
+    whole = '''
+def h(elements, criterion):
+    """Route a duct path.
+
+    :return: The weighted record. A bare array gives an array back; a
+        :class:`Signal` gives a Signal.
+    :raises TypeError: If an entry of ``elements`` is not a
+        :class:`DuctElement`, or ``criterion`` is not a text.
+    """
+'''
+    assert len(_split_fields(cut_return)) == 1
+    assert len(_split_fields(cut_raises)) == 1
+    assert _split_fields(whole) == []
+
+
 def test_every_warning_a_package_can_raise_is_published() -> None:
     """A warning you cannot name is a warning you cannot filter.
 

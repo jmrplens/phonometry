@@ -256,7 +256,8 @@ def mass_law_transmission_loss(
     :raises ValueError: for a non-positive input, an unknown incidence or a
         band set other than 1 or 3.
     :raises TypeError: if ``incidence`` is not a text, or ``field_correction`` or
-        ``mass_per_area`` is not a single number.
+        ``mass_per_area`` is not a single number, or ``fraction`` is not an integer (a
+        word, a flag or a float).
     """
     incidence = require_choice(incidence, "incidence", ("normal", "field"))
     m2 = require_positive(mass_per_area, "mass_per_area")
@@ -372,6 +373,8 @@ class SoundReductionResult(OwnsArrays):
             octaves or 1 for octaves (Default: ``None``, read from the number
             of values).
         :return: The :class:`~phonometry.building.measurement.ratings.WeightedRatingResult`.
+        :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a
+            float).
         """
         from ..measurement.ratings import weighted_rating
 
@@ -505,7 +508,8 @@ def single_panel_transmission_loss(
         or if neither *critical_frequency* nor *bending_stiffness* is given.
     :raises TypeError: if ``coincidence_model`` is not a text, or
         ``critical_frequency``, ``field_correction``, ``loss_factor`` or
-        ``mass_per_area`` is not a single number.
+        ``mass_per_area`` is not a single number, or ``fraction`` is not an integer (a
+        word, a flag or a float).
     """
     model = require_choice(coincidence_model, "coincidence_model", ("sharp", "cremer"))
     m2 = require_positive(mass_per_area, "mass_per_area")
@@ -1309,7 +1313,7 @@ def orthotropic_transmission_loss(
     :raises TypeError: if ``method`` is not a text, or ``area``,
         ``critical_frequency_lower``, ``critical_frequency_upper``,
         ``limiting_angle_deg``, ``loss_factor`` or ``mass_per_area`` is not a single
-        number.
+        number, or ``fraction`` is not an integer (a word, a flag or a float).
     """
     require_scalar(limiting_angle_deg, "limiting_angle_deg")
     chosen = require_choice(method, "method", ("integral", "heckl"))
@@ -1482,7 +1486,7 @@ def double_wall_transmission_loss(
     :return: A :class:`SoundReductionResult` (model ``"double-wall"``).
     :raises ValueError: for a non-positive input.
     :raises TypeError: if ``gap_m``, ``loss_factor``, ``mass1`` or ``mass2`` is not a
-        single number.
+        single number, or ``fraction`` is not an integer (a word, a flag or a float).
     """
     m1 = require_positive(mass1, "mass1")
     m2 = require_positive(mass2, "mass2")

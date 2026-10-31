@@ -111,3 +111,9 @@ integrator attack).
 | `narrowband` | If True (requires the rate, as `fs` or carried by a [`Signal`](/phonometry/reference/api/io/io/#signal)), estimate the tone level with a coherent single-frequency (Goertzel) detector locked to the tone near `frequency` instead of the full-band RMS. This rejects broadband hum/noise in the reference take, which otherwise inflates the RMS and shrinks the factor by $-10 \log_{10}(1 + 1/\mathrm{SNR})$ (about -0.44 dB at 20 dB SNR), silently biasing every subsequent level. The default (False) keeps the exact legacy broadband-RMS behaviour; enable it for noisy coupler recordings. |
 
 **Returns:** Calibration factor (sensitivity multiplier).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `calibrator_class` is not a text. |

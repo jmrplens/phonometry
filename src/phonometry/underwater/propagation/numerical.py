@@ -61,6 +61,7 @@ from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays, handed_over
 from ..._internal.rays import DynamicRays, SlopingBoundary, march_rays
 from ..._internal.validation import (
+    require_choice,
     require_count,
     require_equal_shapes,
     require_positive,
@@ -325,10 +326,7 @@ def _resolve_boundary(
             require_positive(bottom.density, "density"),
             require_positive(bottom.speed_of_sound, "speed_of_sound"),
         )
-    key = bottom.strip().lower()
-    if key not in _BOTTOM_TYPES:
-        msg = f"'bottom' must be one of {_BOTTOM_TYPES}, got {bottom!r}."
-        raise ValueError(msg)
+    key = require_choice(bottom, "bottom", _BOTTOM_TYPES)
     return key, None
 
 
@@ -571,7 +569,7 @@ def normal_modes(
     :raises ValueError: If the inputs are invalid.
     :raises TypeError: if ``density``, ``frequency_hz``, ``receiver_depth`` or
         ``source_depth`` is not a single number, or ``n_depth_points`` is a flag, a text
-        or an array where a count goes.
+        or an array where a count goes, or ``bottom`` is not a text.
     """
     f = require_positive(frequency_hz, "frequency_hz")
     rho = require_positive(density, "density")
@@ -584,10 +582,7 @@ def normal_modes(
     if not (0.0 < zs < water_depth) or not (0.0 < zr < water_depth):
         msg = "'source_depth'/'receiver_depth' must lie within the water column."
         raise ValueError(msg)
-    key = bottom.strip().lower()
-    if key not in _BOTTOM_TYPES:
-        msg = f"'bottom' must be one of {_BOTTOM_TYPES}, got {bottom!r}."
-        raise ValueError(msg)
+    key = require_choice(bottom, "bottom", _BOTTOM_TYPES)
     if n_depth_points is None:
         n_depth_points = min(
             20_000,
@@ -1517,7 +1512,7 @@ def eigenrays(
     :raises ValueError: If the inputs are invalid.
     :raises TypeError: if ``receiver_depth`` or ``receiver_range`` is not a single
         number, or ``max_n_arrivals`` or ``n_steps`` is a flag, a text or an array where
-        a count goes.
+        a count goes, or ``bottom`` is not a text.
     """
     key, seabed = _resolve_boundary(bottom)
     if trace.bathymetry_ranges is not None:
@@ -2977,6 +2972,14 @@ class VolumeAbsorption(RichDisplay):
     salinity: float = 35.0
     ph: float = 8.0
 
+    def __post_init__(self) -> None:
+        """Refuse a model the closed-form absorption does not name, as written.
+
+        :raises TypeError: if ``model`` is not a text.
+        :raises ValueError: if ``model`` names none of the three models.
+        """
+        require_choice(self.model, "model", _ABSORPTION_MODELS)
+
 
 def _resolve_absorption(
     absorption: AbsorptionModel | VolumeAbsorption | None,
@@ -2987,17 +2990,13 @@ def _resolve_absorption(
     if absorption is None:
         return None, 0.0
     spec = (
-        VolumeAbsorption(model=absorption)
+        VolumeAbsorption(
+            model=require_choice(absorption, "absorption", _ABSORPTION_MODELS)
+        )
         if isinstance(absorption, str)
         else absorption
     )
-    key = spec.model.strip().lower()
-    if key not in _ABSORPTION_MODELS:
-        msg = (
-            f"'absorption' must name one of {_ABSORPTION_MODELS} or be None,"
-            f" got {spec.model!r}."
-        )
-        raise ValueError(msg)
+    key = spec.model
     return key, float(
         seawater_absorption(
             frequency_hz,
@@ -3354,7 +3353,7 @@ def gaussian_beams(
     :raises ValueError: If the inputs are invalid.
     :raises TypeError: if ``frequency_hz``, ``max_range``, ``range_step`` or
         ``source_depth`` is not a single number, or ``n_depth_points`` is a flag, a text
-        or an array where a count goes.
+        or an array where a count goes, or ``absorption`` or ``bottom`` is not a text.
     :warns NumericalPropagationWarning: when the source sits on a kink of the profile
         (Sect. 3.7.4's spurious horizontal jet), and when one marching step
         carries the steepest beam of the fan across more than a quarter of

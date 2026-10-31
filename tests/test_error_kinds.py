@@ -1334,6 +1334,340 @@ def _documented(
     return documented
 
 
+#: How many aliases deep a parameter's annotation is read for a ``Literal``.
+_LITERAL_ALIAS_DEPTH = 4
+
+#: How many calls deep a choice is followed into the helpers it is handed to.
+_CHOICE_DEPTH = 4
+
+
+def _module_statements(body: list[ast.stmt]) -> Iterator[ast.stmt]:
+    """The statements of a module body, those under its top-level ``if``
+    blocks included (an alias under ``if TYPE_CHECKING:`` is the module's).
+    """
+    for node in body:
+        if isinstance(node, ast.If):
+            yield from _module_statements(node.body)
+            yield from _module_statements(node.orelse)
+        else:
+            yield node
+
+
+@functools.cache
+def _module_bindings(module: str) -> dict[str, ast.expr]:
+    """The names *module* binds at its top level, each to its expression:
+    ``X = ...``, ``X: T = ...`` and ``type X = ...``.
+    """
+    tree = _parsed_module(module)
+    found: dict[str, ast.expr] = {}
+    for node in _module_statements(tree.body if tree is not None else []):
+        if isinstance(node, ast.Assign) and len(node.targets) == 1:
+            target = node.targets[0]
+            if isinstance(target, ast.Name):
+                found[target.id] = node.value
+        elif (
+            isinstance(node, ast.AnnAssign)
+            and isinstance(node.target, ast.Name)
+            and node.value is not None
+        ):
+            found[node.target.id] = node.value
+        elif isinstance(node, ast.TypeAlias) and isinstance(node.name, ast.Name):
+            found[node.name.id] = node.value
+    return found
+
+
+def _names_a_literal(annotation: ast.expr, module: str, depth: int = 0) -> bool:
+    """Whether an annotation is a choice: a ``Literal[...]`` written in it, or
+    a name its module binds or imports to one (``mode: Mode | None``).
+    """
+    for part in ast.walk(annotation):
+        if isinstance(part, ast.Subscript) and (
+            ast.unparse(part.value).rpartition(".")[2] == "Literal"
+        ):
+            return True
+        if (
+            isinstance(part, ast.Name)
+            and depth < _LITERAL_ALIAS_DEPTH
+            and _alias_is_literal(module, part.id, depth + 1)
+        ):
+            return True
+    return False
+
+
+@functools.cache
+def _alias_is_literal(module: str, name: str, depth: int) -> bool:
+    """Whether *name*, as *module* knows it, is a ``Literal`` alias."""
+    bound = _module_bindings(module).get(name)
+    if bound is not None:
+        return _names_a_literal(bound, module, depth)
+    source = _module_imports(module).get(name)
+    if source is None or not source[1] or not source[0].startswith("phonometry"):
+        return False
+    return depth < _LITERAL_ALIAS_DEPTH and _alias_is_literal(*source, depth + 1)
+
+
+def _choices(function: ast.FunctionDef | ast.AsyncFunctionDef, module: str) -> set[str]:
+    """The parameters of *function* typed with a ``Literal`` of their options."""
+    arguments = function.args
+    return {
+        a.arg
+        for a in (*arguments.posonlyargs, *arguments.args, *arguments.kwonlyargs)
+        if a.annotation is not None and _names_a_literal(a.annotation, module)
+    }
+
+
+@functools.cache
+def _definition(
+    module: str, name: str, depth: int = 0
+) -> tuple[str, ast.FunctionDef | ast.ClassDef] | None:
+    """The function or class *name* of *module*, followed through re-exports.
+
+    Of a function written several times (its ``@overload`` signatures and
+    then the one that runs), the one that runs: the last.
+    """
+    tree = _parsed_module(module)
+    if tree is None or depth > _RENDERER_DEPTH:
+        return None
+    found = [
+        node
+        for node in tree.body
+        if isinstance(node, ast.FunctionDef | ast.ClassDef) and node.name == name
+    ]
+    if found:
+        return module, found[-1]
+    source = _module_imports(module).get(name)
+    if source is None or not source[1] or not source[0].startswith("phonometry"):
+        return None
+    return _definition(*source, depth=depth + 1)
+
+
+def _method_named(owner: ast.ClassDef, name: str) -> ast.FunctionDef | None:
+    """The method *name* *owner* defines, the last if it is written several times."""
+    found = [
+        node
+        for node in owner.body
+        if isinstance(node, ast.FunctionDef) and node.name == name
+    ]
+    return found[-1] if found else None
+
+
+def _held_class(
+    module: str, owner: ast.ClassDef, attribute: str
+) -> tuple[str, ast.ClassDef] | None:
+    """The class the field *attribute* of *owner* is annotated with
+    (``database: ANPDatabase`` for ``self.database``).
+    """
+    for node in owner.body:
+        if (
+            isinstance(node, ast.AnnAssign)
+            and isinstance(node.target, ast.Name)
+            and node.target.id == attribute
+        ):
+            names = [
+                part.id
+                for part in ast.walk(node.annotation)
+                if isinstance(part, ast.Name)
+            ]
+            found = [_definition(module, name) for name in names]
+            classes = [
+                f for f in found if f is not None and isinstance(f[1], ast.ClassDef)
+            ]
+            if len(classes) == 1:
+                module_name, held = classes[0]
+                assert isinstance(held, ast.ClassDef)
+                return module_name, held
+    return None
+
+
+#: What a call runs: the module it is defined in, its definition, and the
+#: class it is a method of.
+_Called = tuple[str, ast.FunctionDef | ast.ClassDef, ast.ClassDef | None]
+
+
+def _called_definition(
+    func: ast.expr,
+    imported: dict[str, tuple[str, str]],
+    module: str,
+    owner: ast.ClassDef | None,
+) -> _Called | None:
+    """The function, class or method of the package a call runs.
+
+    By its name (imported or the module's own), through the module it is
+    imported with, off ``self``/``cls`` (a method of the class), or off an
+    object the class holds (``self.database.event_level``, through the
+    annotation of the field).
+    """
+    if isinstance(func, ast.Name):
+        source = imported.get(func.id, (module, func.id))
+        found = _definition(*source) if source[0].startswith("phonometry") else None
+        return None if found is None else (found[0], found[1], None)
+    if not isinstance(func, ast.Attribute):
+        return None
+    value = func.value
+    if isinstance(value, ast.Name) and value.id in {"self", "cls"} and owner:
+        method = _method_named(owner, func.attr)
+        return None if method is None else (module, method, owner)
+    if isinstance(value, ast.Name) and value.id in imported:
+        package, name = imported[value.id]
+        held_module = f"{package}.{name}" if name else package
+        if (
+            not held_module.startswith("phonometry")
+            or _module_path(held_module) is None
+        ):
+            return None
+        found = _definition(held_module, func.attr)
+        return None if found is None else (found[0], found[1], None)
+    if (
+        isinstance(value, ast.Attribute)
+        and isinstance(value.value, ast.Name)
+        and value.value.id == "self"
+        and owner is not None
+    ):
+        held = _held_class(module, owner, value.attr)
+        method = None if held is None else _method_named(held[1], func.attr)
+        return None if held is None or method is None else (held[0], method, held[1])
+    return None
+
+
+def _receiving(
+    called: ast.FunctionDef | ast.ClassDef,
+) -> tuple[list[str], str]:
+    """The positional parameters of what a call runs, and the text that
+    documents it: a function's own, or a class's with its constructor's.
+    """
+    if isinstance(called, ast.FunctionDef):
+        positional = [a.arg for a in (*called.args.posonlyargs, *called.args.args)]
+        if positional and positional[0] in {"self", "cls"}:
+            positional = positional[1:]
+        return positional, ast.get_docstring(called) or ""
+    documented = ast.get_docstring(called) or ""
+    init = _method_named(called, "__init__")
+    if init is not None:
+        positional, own = _receiving(init)
+        return positional, documented + "\n" + own
+    post_init = _method_named(called, "__post_init__")
+    if post_init is not None:
+        documented += "\n" + (ast.get_docstring(post_init) or "")
+    fields: list[str] = []
+    for node in called.body:
+        if not (isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name)):
+            continue
+        written = ast.unparse(node.annotation)
+        if "KW_ONLY" in written:
+            break
+        if "ClassVar" not in written:
+            fields.append(node.target.id)
+    return fields, documented
+
+
+def _bound(call: ast.Call, positional: list[str]) -> dict[str, ast.expr]:
+    """What *call* hands each parameter, by position and by keyword."""
+    bound: dict[str, ast.expr] = {}
+    for index, argument in enumerate(call.args):
+        if isinstance(argument, ast.Starred) or index >= len(positional):
+            break
+        bound[positional[index]] = argument
+    bound.update({k.arg: k.value for k in call.keywords if k.arg is not None})
+    return bound
+
+
+def _field_choices(owner: ast.ClassDef | None, module: str) -> set[str]:
+    """The fields of *owner* typed with a ``Literal`` of their options."""
+    if owner is None:
+        return set()
+    return {
+        node.target.id
+        for node in owner.body
+        if isinstance(node, ast.AnnAssign)
+        and isinstance(node.target, ast.Name)
+        and _names_a_literal(node.annotation, module)
+    }
+
+
+def _calls_own_method(call: ast.Call, owner: ast.ClassDef | None) -> bool:
+    """Whether *call* runs a method of *owner* off ``self``."""
+    return (
+        owner is not None
+        and isinstance(call.func, ast.Attribute)
+        and isinstance(call.func.value, ast.Name)
+        and call.func.value.id == "self"
+        and _method_named(owner, call.func.attr) is not None
+    )
+
+
+# PLR0913: the recursion carries what it has followed.
+def handed_choices(  # noqa: PLR0913
+    function: ast.FunctionDef | ast.AsyncFunctionDef,
+    module: str,
+    owner: ast.ClassDef | None,
+    validators: frozenset[str],
+    choices: set[str],
+    *,
+    through_self: bool,
+    depth: int = 0,
+) -> set[str]:
+    """The *choices* of *function* refused with ``TypeError`` further on.
+
+    A choice (a parameter typed with a ``Literal``, or such a field read off
+    ``self`` in a constructor) handed as given to another public function,
+    class or method of the package whose docstring names its ``TypeError``
+    for that parameter is refused the same way when the caller passes a
+    value that is not text; so is one handed to a private helper, of the
+    module or imported from another, or to a private method of the class,
+    that hands it on to a validator raising ``TypeError`` or to such a public
+    function. The caller's own docstring names it:
+    ``sea_water(sound_speed_model=5)`` raises the ``TypeError`` of
+    :func:`sea_water_sound_speed`.
+    """
+    if depth > _CHOICE_DEPTH or not choices:
+        return set()
+    imported = _names_in_reach(module, function)
+    found: set[str] = set()
+    for node in _own_statements(function):
+        if not isinstance(node, ast.Call):
+            continue
+        called = _called_definition(node.func, imported, module, owner)
+        if called is None or called[1] is function:
+            continue
+        callee_module, callee, callee_owner = called
+        positional, documented = _receiving(callee)
+        handed: dict[str, str] = {}
+        for name, argument in _bound(node, positional).items():
+            parameter = _handed_parameter(argument, choices, through_self=through_self)
+            if parameter in choices:
+                handed[name] = parameter
+        if not (
+            callee.name.startswith("_")
+            or (callee_owner is not None and callee_owner.name.startswith("_"))
+        ):
+            if ":raises TypeError" in documented:
+                found |= {
+                    parameter
+                    for name, parameter in handed.items()
+                    if not _unnamed({name}, documented)
+                }
+            continue
+        if not isinstance(callee, ast.FunctionDef):
+            continue
+        fields = through_self and _calls_own_method(node, owner)
+        inner = set(handed) | (choices if fields else set())
+        reached = _hands_to_a_type_checking_validator(
+            callee, _module_helpers(callee_module), validators, through_self=fields
+        ) | handed_choices(
+            callee,
+            callee_module,
+            callee_owner,
+            validators,
+            inner,
+            through_self=fields,
+            depth=depth + 1,
+        )
+        found |= {handed[name] for name in reached if name in handed}
+        if fields:
+            found |= reached & choices
+    return found
+
+
 def undocumented_type_errors(
     source: str,
     validators: frozenset[str] | None = None,
@@ -1384,6 +1718,17 @@ def undocumented_type_errors(
             )
             if module is not None:
                 handed |= renderer_refusals(child, module, validators)
+                choices = _choices(child, module) | (
+                    _field_choices(owner, module) if through_self else set()
+                )
+                handed |= handed_choices(
+                    child,
+                    module,
+                    owner,
+                    validators,
+                    choices,
+                    through_self=through_self,
+                ) - _checked_first(child)
             line = _raises_type_error(child)
             if line is None and handed:
                 line = child.lineno
@@ -1749,3 +2094,107 @@ def test_the_docstring_rule_names_the_keywords_a_renderer_refuses() -> None:
     assert undocumented_type_errors(_PLOT_DOCUMENTED, module=module) == []
     # Without its module the source is read alone, as before.
     assert undocumented_type_errors(_PLOT_UNDOCUMENTED) == []
+
+
+_HANDS_A_CHOICE_ON = '''
+from typing import Literal
+
+from .water import sea_water_sound_speed
+
+
+def speed(t, model: Literal["unesco", "mackenzie"] = "unesco"):
+    """A speed, its model refused where it is handed.
+
+    :raises ValueError: for an unknown model.
+    """
+    return sea_water_sound_speed(t, 35.0, 0.0, model=model)
+
+
+def documented(t, model: Literal["unesco", "mackenzie"] = "unesco"):
+    """A speed.
+
+    :raises TypeError: if ``model`` is not a text.
+    """
+    return sea_water_sound_speed(t, 35.0, 0.0, model=model)
+
+
+def labelled(t, name: str = "unesco"):
+    """A text that is no choice of this function's."""
+    return sea_water_sound_speed(t, 35.0, 0.0, model=name)
+'''
+
+
+def test_a_choice_handed_on_names_the_type_error_of_where_it_goes() -> None:
+    """``speed(t, model=5)`` raises the ``TypeError`` of
+    :func:`sea_water_sound_speed`, so its docstring names it; a parameter that
+    is not typed as a choice is the other rule's to read.
+    """
+    found = undocumented_type_errors(
+        _HANDS_A_CHOICE_ON, module="phonometry.fluids.water"
+    )
+    assert [where.split(":")[0] for where in found] == ["speed"]
+
+
+def _class_named(module: str, name: str) -> ast.ClassDef:
+    tree = _parsed_module(module)
+    assert tree is not None
+    return next(
+        node
+        for node in ast.walk(tree)
+        if isinstance(node, ast.ClassDef) and node.name == name
+    )
+
+
+@pytest.mark.parametrize(
+    ("module", "owner", "name", "handed"),
+    [
+        # Handed to a public function of another module.
+        ("phonometry.fluids.water", None, "sea_water", {"sound_speed_model"}),
+        # Handed to a private helper imported from a sibling module.
+        ("phonometry.metrology.calibration", None, "sensitivity", {"calibrator_class"}),
+        # Handed to the method of an object the record holds.
+        (
+            "phonometry.aircraft.anp_fleet",
+            "ANPAircraft",
+            "event_level",
+            {"absorption", "metric", "operation"},
+        ),
+        # A field a constructor reads through a private method of its own.
+        (
+            "phonometry.vibration.human.instrumentation",
+            "RunningRMSDecayVerification",
+            "__post_init__",
+            {"method"},
+        ),
+    ],
+)
+def test_a_choice_is_followed_however_it_is_handed_on(
+    module: str, owner: str | None, name: str, handed: set[str]
+) -> None:
+    """The rule follows a choice into another module, an imported helper, an
+    object the record holds and a method of the record's own.
+    """
+    owner_class = _class_named(module, owner) if owner is not None else None
+    if owner_class is None:
+        tree = _parsed_module(module)
+        assert tree is not None
+        function = [
+            node
+            for node in tree.body
+            if isinstance(node, ast.FunctionDef) and node.name == name
+        ][-1]
+    else:
+        function = _method(module, owner_class.name, name)
+    through_self = owner_class is not None and name in _PUBLIC_METHODS
+    choices = _choices(function, module) | (
+        _field_choices(owner_class, module) if through_self else set()
+    )
+    found = handed_choices(
+        function,
+        module,
+        owner_class,
+        _validators_raising_type_error(),
+        choices,
+        through_self=through_self,
+    )
+    assert found == handed

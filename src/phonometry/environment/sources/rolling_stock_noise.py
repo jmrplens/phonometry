@@ -995,6 +995,7 @@ def rolling_stock_test(
     :param method: One of :data:`ROLLING_STOCK_TEST_METHODS`.
     :return: The test.
     :raises ValueError: See :class:`RollingStockTestResult`.
+    :raises TypeError: if ``method`` is not a text.
     """
     return RollingStockTestResult(
         method=method,
@@ -1958,7 +1959,7 @@ def _frozen_decay_limits(
         direction of :data:`TRACK_DECAY_DIRECTIONS` and for no other, every
         band at a positive frequency and no two in one one-third octave band.
     """
-    given = {str(direction) for direction in limits}
+    given = set(limits)
     problems = [
         f"no limit for the {d} direction"
         for d in TRACK_DECAY_DIRECTIONS
@@ -1971,7 +1972,7 @@ def _frozen_decay_limits(
     ]
     problems += [
         f"an unknown direction {d!r}"
-        for d in sorted(given - set(TRACK_DECAY_DIRECTIONS))
+        for d in sorted(given - set(TRACK_DECAY_DIRECTIONS), key=repr)
     ]
     if not problems:
         problems = [

@@ -1518,7 +1518,7 @@ def valve_hydrodynamic_noise(
         written for, or if the operating point is at or past flashing, where
         Equations (9) and (13) divide by zero.
     :raises TypeError: if ``frequencies`` holds a text or a value that is not a real
-        number.
+        number, or ``strouhal_form`` is not a text.
     """
     mass_flow = stream.mass_flow
     inlet_pressure_pa = stream.inlet_pressure_pa

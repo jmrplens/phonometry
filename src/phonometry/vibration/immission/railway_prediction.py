@@ -653,10 +653,9 @@ def ground_to_floor_level_difference(
     :return: :math:`\Delta L_{v,\mathrm{DB}}`, in decibels, one per band.
     :raises ValueError: For an unknown floor or a frequency the tables have
         no column for.
+    :raises TypeError: if ``floor`` is not a text.
     """
-    table = GROUND_TO_FLOOR_LEVEL_DIFFERENCES[
-        require_choice(str(floor), "floor", _FLOORS)
-    ]
+    table = GROUND_TO_FLOOR_LEVEL_DIFFERENCES[require_choice(floor, "floor", _FLOORS)]
     index = _nominal([floor_natural_frequency_hz], FLOOR_NATURAL_FREQUENCIES_HZ)
     return np.asarray(table[FLOOR_NATURAL_FREQUENCIES_HZ[int(index[0])]])
 
@@ -678,11 +677,12 @@ def ground_to_foundation_level_difference(
     :return: :math:`\Delta L_{v,\mathrm{FB}}`, in decibels, one per band from
         4 Hz to 80 Hz.
     :raises ValueError: For an unknown level or statistic.
+    :raises TypeError: if ``level`` or ``statistic`` is not a text.
     """
     table = GROUND_TO_FOUNDATION_LEVEL_DIFFERENCES[
-        require_choice(str(level), "level", _LEVELS)
+        require_choice(level, "level", _LEVELS)
     ]
-    return np.asarray(table[require_choice(str(statistic), "statistic", _STATISTICS)])
+    return np.asarray(table[require_choice(statistic, "statistic", _STATISTICS)])
 
 
 def foundation_to_floor_level_difference(
@@ -710,14 +710,15 @@ def foundation_to_floor_level_difference(
     :raises ValueError: For an unknown floor or statistic, a non-positive
         frequency, or a non-finite input.
     :raises TypeError: if ``floor_natural_frequency_hz`` is not a single number, or
-        ``frequencies`` holds a text or a value that is not a real number.
+        ``frequencies`` holds a text or a value that is not a real number, or ``floor``
+        or ``statistic`` is not a text.
     """
     freqs = require_positive_array(frequencies, "frequencies")
     natural = require_positive(floor_natural_frequency_hz, "floor_natural_frequency_hz")
     table = FOUNDATION_TO_FLOOR_LEVEL_DIFFERENCES[
-        require_choice(str(floor), "floor", _FLOORS)
+        require_choice(floor, "floor", _FLOORS)
     ]
-    values = np.asarray(table[require_choice(str(statistic), "statistic", _STATISTICS)])
+    values = np.asarray(table[require_choice(statistic, "statistic", _STATISTICS)])
     known = np.isfinite(values)
     grid = np.log10(np.asarray(FOUNDATION_TO_FLOOR_RATIOS)[known])
     ratio = np.log10(freqs / natural)
@@ -1001,11 +1002,12 @@ def train_decay_exponent(
     :param fitted_with: ``"power_and_damping"`` (default) or ``"power_law"``.
     :return: :math:`n_\mathrm{Zug}`.
     :raises ValueError: For a negative exponent or an unknown fit.
-    :raises TypeError: if ``point_exponent`` is not a single number.
+    :raises TypeError: if ``point_exponent`` is not a single number, or ``fitted_with``
+        is not a text.
     """
     exponent = require_non_negative(point_exponent, "point_exponent")
     correction = LINE_SOURCE_EXPONENT_CORRECTION[
-        require_choice(str(fitted_with), "fitted_with", _FITS)
+        require_choice(fitted_with, "fitted_with", _FITS)
     ]
     return exponent - correction
 

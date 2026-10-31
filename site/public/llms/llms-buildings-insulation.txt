@@ -588,8 +588,8 @@ print(conformity.passes)   # True
 ```
 
 Impact quantities offer situations B/C only (Table 4, no 500 Hz band in the 2020
-edition), and $\Delta L$ only situation A. Descriptors are case-insensitive with
-aliases (`rprime_w`/`dnt_w`→`r_w`, `lprime_n_w`→`ln_w`); combine independent
+edition), and $\Delta L$ only situation A. Descriptors are written as listed,
+lower case, with aliases (`rprime_w`/`dnt_w`→`r_w`, `lprime_n_w`→`ln_w`); combine independent
 components in quadrature with `metrology.combined_standard_uncertainty`, and reduce by $m$
 independent measurements with `reduce_by_independent_measurements` ($u/\sqrt{m}$).
 

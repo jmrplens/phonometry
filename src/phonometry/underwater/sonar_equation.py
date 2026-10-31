@@ -56,6 +56,7 @@ import numpy as np
 from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
     require_axis_rank,
+    require_choice,
     require_count,
     require_equal_shapes,
     require_positive,
@@ -410,7 +411,8 @@ def detection_range(
     :return: A :class:`DetectionRangeResult`.
     :raises ValueError: If an input is invalid.
     :raises TypeError: if ``figure_of_merit``, ``max_range`` or ``ph`` is not a single
-        number, or ``n_points`` is a flag, a text or an array where a count goes.
+        number, or ``n_points`` is a flag, a text or an array where a count goes, or
+        ``law`` or ``model`` is not a text.
     """
     require_scalar(ph, "ph")
     from scipy.optimize import brentq
@@ -495,7 +497,8 @@ def detection_range_from_curve(
         :func:`detection_range` returns the same two values for the same two
         situations.
     :raises ValueError: If the inputs are invalid.
-    :raises TypeError: if ``figure_of_merit`` is not a single number.
+    :raises TypeError: if ``figure_of_merit`` is not a single number, or ``crossing`` is
+        not a text.
     """
     fom = _finite(figure_of_merit, "figure_of_merit")
     r = _finite_array(range_m, "range_m")
@@ -516,10 +519,7 @@ def detection_range_from_curve(
     if r.size < _MIN_CURVE_POINTS or np.any(np.diff(r) <= 0.0):
         msg = "'range_m' must be strictly increasing with at least two samples."
         raise ValueError(msg)
-    key = crossing.strip().lower()
-    if key not in ("first", "last"):
-        msg = f"'crossing' must be 'first' or 'last', got {crossing!r}."
-        raise ValueError(msg)
+    key = require_choice(crossing, "crossing", ("first", "last"))
     below = pl <= fom
     up = np.flatnonzero(below[:-1] & ~below[1:])
     if up.size == 0:

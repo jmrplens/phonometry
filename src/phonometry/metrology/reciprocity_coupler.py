@@ -481,7 +481,8 @@ def heat_conduction_correction(
     :return: The :class:`HeatConductionCorrection`.
     :raises ValueError: for a volume, surface or ratio that is not positive,
         or frequencies that are not positive and increasing.
-    :raises TypeError: if ``surface_area_m2`` or ``volume_m3`` is not a single number.
+    :raises TypeError: if ``surface_area_m2`` or ``volume_m3`` is not a single number,
+        or ``method`` is not a text.
     """
     frequencies = _frequency_axis(frequencies)
     volume = require_positive(volume_m3, "volume_m3")

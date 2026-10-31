@@ -109,6 +109,7 @@ and the reciprocity method exists only in the laboratory.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For an unknown condition or source kind, or a combination the standard does not have. |
+| TypeError | if `condition` or `source_kind` is not a text. |
 
 ## ARTIFICIAL_SOURCE_DROP_MM
 
@@ -210,7 +211,7 @@ rather than a number the annex does not give.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For an unknown standard, a coefficient outside `(0, 1]` or a non-positive area. |
-| TypeError | if `mean_absorption_coefficient`, `measurement_surface_area_m2` or `room_surface_area_m2` is not a single number. |
+| TypeError | if `mean_absorption_coefficient`, `measurement_surface_area_m2` or `room_surface_area_m2` is not a single number, or `base_standard` is not a text. |
 
 ## enclosure_artificial_source_insulation
 
@@ -257,7 +258,7 @@ $D_p$ and 9.4 e) reports whichever it was. That is `quantity`.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For arrays that are not two-dimensional and matched, fewer than two source positions, or an unknown quantity. |
-| TypeError | if `fraction` is not an integer (a word, a flag or a float), or `frequencies`, `level_with_by_position` or `level_without_by_position` holds a text or a value that is not a real number. |
+| TypeError | if `fraction` is not an integer (a word, a flag or a float), or `frequencies`, `level_with_by_position` or `level_without_by_position` holds a text or a value that is not a real number, or `condition` or `quantity` is not a text. |
 
 ## enclosure_reciprocity_insulation
 
@@ -343,7 +344,7 @@ the ISO 3744 Annex E table, which is what the note to clause 6.2 prefers.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For spectra that do not match, non-finite values, half an A-weighted pair, an unknown base standard, condition, source kind or band fraction, or a combination of condition and source kind Table 1 does not have. |
-| TypeError | if `base_standard` is not a text, `fraction` is not an integer (a word, a flag or a float), `a_weighted_with` or `a_weighted_without` is not a single number, or `frequencies`, `level_with` or `level_without` holds a text or a value that is not a real number. |
+| TypeError | if `base_standard` is not a text, `fraction` is not an integer (a word, a flag or a float), `a_weighted_with` or `a_weighted_without` is not a single number, or `frequencies`, `level_with` or `level_without` holds a text or a value that is not a real number, or `condition` or `source_kind` is not a text. |
 
 ## enclosure_sound_pressure_insulation
 
@@ -392,7 +393,7 @@ different numbers about the same enclosure.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For spectra that do not match, non-finite values, half an A-weighted pair, an unknown base standard, condition, source kind or band fraction, or a combination of condition and source kind Table 1 does not have. |
-| TypeError | if `base_standard` is not a text, `fraction` is not an integer (a word, a flag or a float), `a_weighted_with` or `a_weighted_without` is not a single number, or `frequencies`, `level_with` or `level_without` holds a text or a value that is not a real number. |
+| TypeError | if `base_standard` is not a text, `fraction` is not an integer (a word, a flag or a float), `a_weighted_with` or `a_weighted_without` is not a single number, or `frequencies`, `level_with` or `level_without` holds a text or a value that is not a real number, or `condition` or `source_kind` is not a text. |
 
 ## EnclosureInsulationResult
 
@@ -795,7 +796,7 @@ rows; what is done here is the trim to the rating bands.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a spectrum that does not carry the rating bands. |
-| TypeError | if `fraction` is not an integer (a word, a flag or a float), or `insulation` holds a text or a value that is not a real number. |
+| TypeError | if `fraction` is not an integer (a word, a flag or a float), or `insulation` holds a text or a value that is not a real number, or `quantity` is not a text. |
 
 ## WeightedEnclosureInsulation
 

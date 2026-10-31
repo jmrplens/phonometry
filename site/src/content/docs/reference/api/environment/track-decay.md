@@ -134,7 +134,7 @@ the ratio to the direct response enters.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For responses that are not positive and finite, a grid that is not finite, has fewer than two positions, does not start at 0 or does not strictly increase, frequencies that do not name distinct bands in increasing order, or shapes that do not agree. |
-| TypeError | if `frequencies` holds a text or a value that is not a real number. |
+| TypeError | if `frequencies` holds a text or a value that is not a real number, or `direction` is not a text. |
 
 ## TrackDecayRate
 

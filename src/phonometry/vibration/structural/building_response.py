@@ -250,6 +250,7 @@ def fundamental_frequency(
     :param width_m: Width ``b`` parallel to the force, in metres.
     :param coefficient: The code coefficient, or ``None`` for the midpoint.
     :return: The fundamental frequency, in hertz.
+    :raises TypeError: if ``model`` is not a text.
     """
     return 1.0 / fundamental_period(
         model,
@@ -379,7 +380,8 @@ def estimate_fundamental_frequency(
     :param coefficient: The code coefficient, or ``None`` for the midpoint.
     :return: The prediction, as a :class:`BuildingFrequencyEstimate`.
     :raises ValueError: For anything :func:`fundamental_period` refuses.
-    :raises TypeError: if ``coefficient`` is not a single number.
+    :raises TypeError: if ``coefficient`` is not a single number, or ``model`` is not a
+        text.
     """
     period = fundamental_period(
         model,

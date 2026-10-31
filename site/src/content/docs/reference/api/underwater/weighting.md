@@ -90,6 +90,7 @@ Auditory weighting function `W(f)` of a marine-mammal hearing group.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If an input is invalid. |
+| TypeError | if `group` or `guidance` is not a text. |
 
 ## AuditoryWeightingResult
 
@@ -160,6 +161,7 @@ Published TTS and injury onset criteria of a hearing group.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the version or the group is unknown. |
+| TypeError | if `group` or `guidance` is not a text. |
 
 ## ExposureCriteria
 
@@ -225,6 +227,7 @@ Hearing-group codes defined by a guidance version.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the version is unknown. |
+| TypeError | if `guidance` is not a text. |
 
 ## weighted_exposure
 
@@ -271,7 +274,7 @@ dual-metric rule requires.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If an input is invalid. |
-| TypeError | if `peak_spl` is not a single number, or `n_events` is a flag, a text or an array where a count goes. |
+| TypeError | if `peak_spl` is not a single number, `n_events` is a flag, a text or an array where a count goes, or `group` or `guidance` is not a text. |
 
 ## WeightedExposureResult
 
@@ -385,7 +388,7 @@ Weighting/exposure parameters of one hearing group.
 
 | Name | Description |
 | :--- | :--- |
-| `group` | Hearing-group code as used by `guidance` (case-insensitive). |
+| `group` | Hearing-group code as used by `guidance`, as written. |
 | `guidance` | One of [`WEIGHTING_GUIDANCE`](/phonometry/reference/api/underwater/weighting/#weighting_guidance). |
 
 **Returns:** The [`WeightingParameters`](/phonometry/reference/api/underwater/weighting/#weightingparameters) row.
@@ -394,6 +397,7 @@ Weighting/exposure parameters of one hearing group.
 
 | Exception | When |
 | :--- | :--- |
+| TypeError | If `group` or `guidance` is not a text. |
 | ValueError | If the version or the group is unknown. |
 
 ## WeightingParameters

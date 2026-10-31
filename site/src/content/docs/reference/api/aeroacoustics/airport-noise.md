@@ -120,7 +120,7 @@ Engine-installation lateral-directivity correction `ΔI(φ)` (Eq. 4-15/4-16).
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `mounting` is unknown or the angle is non-finite. |
-| TypeError | if `depression_deg` is not a single number. |
+| TypeError | if `depression_deg` is not a single number, or `mounting` is not a text. |
 
 ## event_level
 
@@ -172,6 +172,7 @@ ground-roll segments, and combines them into the exposure level `SEL`
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
+| TypeError | if `metric` or `mounting` is not a text. |
 
 ## FlightSegmentState
 
@@ -340,6 +341,7 @@ Evaluates [`event_level`](/phonometry/reference/api/aeroacoustics/airport-noise/
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
+| TypeError | if `metric` or `mounting` is not a text. |
 
 ## noise_fraction
 
@@ -549,4 +551,4 @@ aircraft ($\psi < 90^\circ$) it is zero.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` is unknown or the inputs are invalid. |
-| TypeError | if `azimuth_deg` or `distance_m` is not a single number. |
+| TypeError | if `azimuth_deg` or `distance_m` is not a single number, or `engine` is not a text. |

@@ -111,7 +111,7 @@ the source may run all day and still keep to $A_\mathrm{r}$.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a non-positive severity or guide value, or an unknown time of day. |
-| TypeError | if `a_r` or `kb_ftm` is not a single number. |
+| TypeError | if `a_r` or `kb_ftm` is not a single number, or `time_of_day` is not a text. |
 
 ## admissible_trains_per_hour
 
@@ -215,7 +215,7 @@ under the rules of the other is not an assessment of either.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a negative severity, an unknown source or edition, an edition other than the guide values are of, or a verdict that needs $KB_\mathrm{FTr}$ without one given. |
-| TypeError | if `kb_fmax` or `kb_ftr` is not a single number. |
+| TypeError | if `kb_fmax` or `kb_ftr` is not a single number, or `source` is not a text. |
 
 ## ASSESSMENT_PERIOD_S
 
@@ -270,7 +270,7 @@ not applied to road or rail traffic.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For mismatched or negative inputs, an unknown time of day, an exposure longer than the period, or a rest-time flag by night. |
-| TypeError | if `exposure_s` or `kb_ftm` holds a text or a value that is not a real number. |
+| TypeError | if `exposure_s` or `kb_ftm` holds a text or a value that is not a real number, or `time_of_day` is not a text. |
 
 ## BLASTING_EXCEPTION_KB_FMAX
 
@@ -341,7 +341,7 @@ is not applicable to an especially sensitive area, a hospital for one;
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a duration that is not a whole number of days from 1 to 78, an unknown stage, an unknown area or a sensitive one. |
-| TypeError | if `duration_days` is a flag, a text or an array where a count goes. |
+| TypeError | if `duration_days` is a flag, a text or an array where a count goes, or `area` or `stage` is not a text. |
 
 ## CONSTRUCTION_STAGES
 
@@ -397,6 +397,7 @@ The guide values of Table 1 for one area, time of day and kind of source.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For an unknown area, time of day, source or edition, or a source the edition does not have. |
+| TypeError | if `area`, `edition`, `source` or `time_of_day` is not a text. |
 
 ## GUIDE_VALUES_2023
 
@@ -499,6 +500,7 @@ the asterisk marks: Table 3 puts its factors at about 15 % either way.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a bad velocity or frequency, or an unknown kind. |
+| TypeError | if `kind` is not a text. |
 
 ## kb_from_peak_velocity
 
@@ -668,7 +670,7 @@ how Example 8 reports $0{,}325^{+0{,}059}_{-0{,}073}$.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For mismatched or negative inputs, more occupied intervals than the period holds, or an unknown time of day. |
-| TypeError | if `kb_ftm`, `occupied_takte` or `spread` holds a text or a value that is not a real number. |
+| TypeError | if `kb_ftm`, `occupied_takte` or `spread` holds a text or a value that is not a real number, or `time_of_day` is not a text. |
 
 ## RAILWAY_NIGHT_INVESTIGATION_KB
 

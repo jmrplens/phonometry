@@ -1153,9 +1153,10 @@ def sound_power_pressure(
     :param sigma_omc_db: ``sigma_omc`` (dB), operating/mounting instability.
     :return: :class:`SoundPowerResult`.
     :raises TypeError: if ``distance``, ``radius`` or ``sigma_omc_db`` is not a single
-        number, or ``dimensions`` holds a text or a value that is not a real number.
+        number, or ``dimensions`` holds a text or a value that is not a real number, or
+        ``grade`` is not a text.
     """
-    grade = _check_grade(grade)
+    grade = require_choice(grade, "grade", ("engineering", "survey"))
     sigma_omc_db = require_non_negative(sigma_omc_db, "sigma_omc_db")
     levels = np.atleast_2d(np.asarray(levels_positions, dtype=np.float64))
     # The number is a count of array axes, not a quantity.
@@ -1647,9 +1648,9 @@ def sound_energy_pressure(
     :raises TypeError: if ``distance``, ``integration_time``, ``radius`` or
         ``sigma_omc_db`` is not a single number, ``n_events`` is a flag, a text or an
         array where a count goes, or ``dimensions`` holds a text or a value that is not
-        a real number.
+        a real number, or ``grade`` is not a text.
     """
-    grade = _check_grade(grade)
+    grade = require_choice(grade, "grade", ("engineering", "survey"))
     sigma_omc_db = require_non_negative(sigma_omc_db, "sigma_omc_db")
     levels, event_count = _event_position_levels(levels_positions, n_events)
     if levels.shape[1] == 0:

@@ -172,8 +172,8 @@ class MountingCheck(RichDisplay):
         """
         require_non_negative(self.peak_acceleration_m_s2, "peak_acceleration_m_s2")
         require_positive(self.upper_frequency_hz, "upper_frequency_hz")
-        require_choice(str(self.direction), "direction", _DIRECTIONS)
-        require_choice(str(self.surface), "surface", _SURFACES)
+        require_choice(self.direction, "direction", _DIRECTIONS)
+        require_choice(self.surface, "surface", _SURFACES)
 
     @property
     def frequency_limit_hz(self) -> float:
@@ -237,12 +237,12 @@ def check_loose_mounting(
     :raises ValueError: For a negative acceleration, a non-positive
         frequency, or an unknown direction or surface.
     :raises TypeError: if ``peak_acceleration_m_s2`` or ``upper_frequency_hz`` is not a
-        single number.
+        single number, or ``direction`` or ``surface`` is not a text.
     """
     peak = require_non_negative(peak_acceleration_m_s2, "peak_acceleration_m_s2")
     upper = require_positive(upper_frequency_hz, "upper_frequency_hz")
-    which = require_choice(str(direction), "direction", _DIRECTIONS)
-    where = require_choice(str(surface), "surface", _SURFACES)
+    which = require_choice(direction, "direction", _DIRECTIONS)
+    where = require_choice(surface, "surface", _SURFACES)
     return MountingCheck(
         peak_acceleration_m_s2=peak,
         upper_frequency_hz=upper,
@@ -263,8 +263,9 @@ def instrument_confidence_limit_percent(
         tolerances, so class 1 is the column that applies to a meter of today.
     :return: The limit, in per cent of the displayed value.
     :raises ValueError: For an unknown quantity or class.
+    :raises TypeError: if ``quantity`` is not a text.
     """
-    which = require_choice(str(quantity), "quantity", _QUANTITIES)
+    which = require_choice(quantity, "quantity", _QUANTITIES)
     if accuracy_class not in _CLASSES:
         msg = f"'accuracy_class' must be 1 or 2; got {accuracy_class!r}."
         raise ValueError(msg)

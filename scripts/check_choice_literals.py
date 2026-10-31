@@ -76,6 +76,22 @@ A string a caller writes below the top level of a collection or a mapping
 ``Sequence[Sequence[str]]``) is not followed through the code, so it is
 called a choice as it stands: it is typed with its ``Literal``, or it goes
 in :data:`OPEN` with the reason it is open (:func:`takes_nested_strings`).
+
+A choice typed ``Literal`` promises one spelling of each option, and the
+guard holds the code to it (rule A45, :func:`cleaned_up_choices`): a public
+parameter or record field whose annotation is a ``Literal`` (an alias of one,
+a union holding one, or a collection or mapping of one) fails when the code
+folds its case, strips its spaces, replaces its separators, makes a text of
+any value with ``str()`` or maps an alias the ``Literal`` does not list,
+before it checks the text as the caller wrote it with ``require_choice`` (or
+``if text not in OPTIONS: raise``). A check as written holds the text to the
+``Literal`` only when the options it is held against are ones the
+``Literal`` lists, so a ``require_choice``, a membership test or a subset
+test against a wider set fails too; against one row of a table picked when
+the code runs, it is held to the row closest to the ``Literal``. The text is
+followed into every function it is handed to, six calls deep, and a record
+field from its ``__post_init__`` into every function of its module that
+reads it.
 """
 
 from __future__ import annotations
@@ -178,6 +194,10 @@ _ANP_FILE = (
     "a word as the ANP database file spells it, and a caller's own database "
     "file may spell it otherwise"
 )
+_GRADED = (
+    "a requirement name read back from the result's own requirements, a key "
+    "refused with KeyError (A44), not a choice a caller makes"
+)
 
 #: Strings that are open on purpose, keyed by ``(module, qualified name,
 #: parameter)``, each with its reason. An entry that matches nothing fails.
@@ -252,6 +272,16 @@ OPEN: dict[tuple[str, str, str], str] = {
         "one of the result's own requirements, a set that depends on the "
         "filter class and the edition the result was judged against"
     ),
+    (
+        "phonometry.filters.compliance",
+        "FilterComplianceResult.binding_margin",
+        "requirement",
+    ): _GRADED,
+    (
+        "phonometry.filters.compliance",
+        "FilterComplianceResult.requirement_class",
+        "requirement",
+    ): _GRADED,
     ("phonometry.fluids.catalogue", "gases_named", "name"): _CATALOGUE_NAME,
     ("phonometry.materials.absorbers.carpets", "carpets_named", "name"): (
         _CATALOGUE_NAME
@@ -289,6 +319,14 @@ OPEN: dict[tuple[str, str, str], str] = {
     ): "the symbol or name as the table prints it, a label",
     ("phonometry.metrology.reference_values", "ReferenceValue", "quantity"): (
         "the name of the quantity as ISO 1683 prints it, a label"
+    ),
+    (
+        "phonometry.metrology.sound_level_meter",
+        "SoundLevelMeterPeriodicRequirement.failure_reason",
+        "label",
+    ): (
+        "a label of the requirement's own 'failed' results, read back from "
+        "the record as a key (A44), not a choice a caller makes"
     ),
     ("phonometry.noise_control._duct_path", "DuctElement", "code"): (
         "a worksheet code the caller chooses, a label"
@@ -891,23 +929,52 @@ def strings_of(
     if node is None or depth > _STRINGS_DEPTH:
         return ()
     if isinstance(node, ast.Tuple | ast.List | ast.Set):
-        values = [
-            element.value
-            for element in node.elts
-            if isinstance(element, ast.Constant) and isinstance(element.value, str)
-        ]
-        return tuple(values) if values and len(values) == len(node.elts) else ()
+        return _display_strings(node.elts, constants, depth)
     if isinstance(node, ast.Dict):
         return tuple(
-            key.value
-            for key in node.keys
-            if isinstance(key, ast.Constant) and isinstance(key.value, str)
+            text for key in node.keys if (text := _key_text(key, constants)) is not None
         )
     if isinstance(node, ast.Call) and node.args:
         return strings_of(node.args[0], constants, depth + 1)
     if isinstance(node, ast.Name) and node.id in constants:
         return strings_of(constants[node.id], constants, depth + 1)
     return _picked_strings(node, constants, depth)
+
+
+def _display_strings(
+    elements: list[ast.expr], constants: Mapping[str, ast.expr], depth: int
+) -> tuple[str, ...]:
+    """The strings a tuple, list or set display holds, or ``()``.
+
+    Each item is a string written in place or a starred set of strings
+    (``(*_SINGLE, *_ALIASES)`` holds the items of one and the keys of the
+    other); one item of another kind makes the display no set of strings.
+    """
+    values: list[str] = []
+    for element in elements:
+        if isinstance(element, ast.Constant) and isinstance(element.value, str):
+            values.append(element.value)
+            continue
+        held = (
+            strings_of(element.value, constants, depth + 1)
+            if isinstance(element, ast.Starred)
+            else ()
+        )
+        if not held:
+            return ()
+        values.extend(held)
+    return tuple(values)
+
+
+def _key_text(key: ast.expr | None, constants: Mapping[str, ast.expr]) -> str | None:
+    """The string a dict display key holds: written in place, or a module
+    constant bound to one (``{_DNT_A: ...}`` with ``_DNT_A = "DnT,A"``).
+    """
+    if isinstance(key, ast.Name) and key.id in constants:
+        key = constants[key.id]
+    if isinstance(key, ast.Constant) and isinstance(key.value, str):
+        return key.value
+    return None
 
 
 def _picked_strings(
@@ -1263,14 +1330,31 @@ def _callee(
 ) -> FunctionType | None:
     """The function a call names, looked up in *namespace*.
 
-    One of the package's, or one of the module *home* the caller lives in.
+    One of the package's, or one of the module *home* the caller lives in. A
+    method reaches its own class through ``self`` and ``cls``
+    (:func:`_namespace`), and an object it holds through the annotation of
+    the field (``self.database.event_level(...)``).
     """
     target: object | None = None
-    if isinstance(node.func, ast.Name):
-        target = namespace.get(node.func.id)
-    elif isinstance(node.func, ast.Attribute) and isinstance(node.func.value, ast.Name):
-        owner = namespace.get(node.func.value.id)
-        target = getattr(owner, node.func.attr, None) if owner is not None else None
+    function = node.func
+    if isinstance(function, ast.Name):
+        target = namespace.get(function.id)
+    elif isinstance(function, ast.Attribute) and isinstance(function.value, ast.Name):
+        owner = namespace.get(function.value.id)
+        target = getattr(owner, function.attr, None) if owner is not None else None
+    elif (
+        isinstance(function, ast.Attribute)
+        and isinstance(function.value, ast.Attribute)
+        and isinstance(function.value.value, ast.Name)
+        and function.value.value.id == "self"
+    ):
+        holder = namespace.get("self")
+        held = (
+            _held_class(holder, function.value.attr)
+            if inspect.isclass(holder)
+            else None
+        )
+        target = getattr(held, function.attr, None) if held is not None else None
     target = getattr(target, "__func__", target)
     if inspect.isclass(target):
         target = vars(target).get("__init__")
@@ -1364,13 +1448,57 @@ def _namespace(function: object, tree: ast.AST, module_name: str) -> dict[str, o
 
     A wrapped function (a record's ``__post_init__`` is wrapped where the
     record takes ownership of its arrays) names what its own module imports,
-    not what the wrapper's module does.
+    not what the wrapper's module does. A method also names its own class as
+    ``self`` and ``cls``, so ``self._range_mask(weighting)`` is followed into
+    the method it calls.
     """
     unwrapped = inspect.unwrap(function) if callable(function) else function
-    return {
+    names: dict[str, object] = {
         **getattr(unwrapped, "__globals__", {}),
         **_local_imports(tree, module_name),
     }
+    owner = _owning_class(unwrapped, module_name)
+    if owner is not None:
+        names["self"] = owner
+        names["cls"] = owner
+    return names
+
+
+def _owning_class(function: object, module_name: str) -> type | None:
+    """The class *function* is defined in, read off its ``__qualname__``."""
+    path = (getattr(function, "__qualname__", "") or "").split(".")[:-1]
+    if not path or "<locals>" in path:
+        return None
+    owner: object = sys.modules.get(module_name)
+    for part in path:
+        owner = getattr(owner, part, None)
+    return owner if inspect.isclass(owner) else None
+
+
+def _held_class(owner: type, attribute: str) -> type | None:
+    """The class the field *attribute* of *owner* is annotated with.
+
+    ``database: ANPDatabase`` makes ``self.database.event_level`` the method
+    of :class:`ANPDatabase`. An annotation written as text (``from
+    __future__ import annotations``) is read in the module that wrote it; a
+    union holding one class is that class.
+    """
+    for base in owner.__mro__:
+        hint = inspect.get_annotations(base).get(attribute)
+        if hint is None:
+            continue
+        if isinstance(hint, str):
+            namespace = vars(sys.modules[base.__module__])
+            candidates = [namespace.get(part.strip()) for part in hint.split("|")]
+        else:
+            candidates = [hint, *typing.get_args(hint)]
+        classes = [
+            candidate
+            for candidate in candidates
+            if inspect.isclass(candidate) and candidate is not type(None)
+        ]
+        return classes[0] if len(classes) == 1 else None
+    return None
 
 
 def _checks_received(
@@ -1528,18 +1656,50 @@ def _exported_targets(exported: str, obj: object) -> Iterator[tuple[str, object]
 
 
 def _targets() -> Iterator[tuple[str, str, object]]:
-    """``(module, qualname, object)`` of every public callable and record."""
+    """``(module, qualname, object)`` of every public callable and record.
+
+    A public method a public class inherits from a base the package does not
+    export (``plot`` of the layers of :mod:`~phonometry.materials.absorbers.layered`,
+    defined on a private ``_DrawableLayer``) is a public method of each of
+    them; it is read once, under the base that defines it.
+    """
     seen: set[tuple[str, str]] = set()
+    walked: set[int] = set()
+    classes: dict[type, None] = {}
     for module in _public_modules():
         for exported in getattr(module, "__all__", ()):
             obj = getattr(module, exported, None)
             home = getattr(obj, "__module__", "") or ""
             if not home.startswith("phonometry"):
                 continue
+            if inspect.isclass(obj):
+                classes[obj] = None
             for qualname, target in _exported_targets(exported, obj):
                 if (home, qualname) not in seen:
                     seen.add((home, qualname))
+                    walked.add(id(target))
                     yield home, qualname, target
+    for cls in classes:
+        for base, attribute, function in _inherited_methods(cls):
+            if id(function) not in walked:
+                walked.add(id(function))
+                yield base.__module__, f"{base.__qualname__}.{attribute}", function
+
+
+def _inherited_methods(cls: type) -> Iterator[tuple[type, str, object]]:
+    """``(base, name, function)`` of every public method *cls* inherits from
+    a base of the package, and does not define again itself.
+    """
+    row = issubclass(cls, CatalogueRow)
+    for base in cls.__mro__[1:]:
+        if not base.__module__.startswith("phonometry"):
+            continue
+        for attribute, function in _public_methods(base):
+            if attribute == "__init__" and row:
+                continue
+            resolved = inspect.getattr_static(cls, attribute, None)
+            if getattr(resolved, "__func__", resolved) is function:
+                yield base, attribute, function
 
 
 def _parsed(obj: object) -> ast.AST | None:
@@ -1888,6 +2048,565 @@ def string_choices() -> Iterator[Choice]:
             yield Choice(home, qualname, name, annotation, tuple(evidence))
 
 
+#: How many calls deep a ``Literal`` choice is followed into the functions it
+#: is handed to, looking for a clean-up before its check.
+_SPELLING_DEPTH = 6
+
+
+class _Reading(NamedTuple):
+    """How one function reads a choice: where it cleans the text up, and
+    where it checks the text as the caller wrote it.
+
+    *folds* pairs where each clean-up starts with what it does; *checks*
+    holds where each check of the text as written ends. Positions are
+    ``(line, column)`` in the function's own source.
+    """
+
+    folds: tuple[tuple[tuple[int, int], str], ...]
+    checks: tuple[tuple[int, int], ...]
+
+
+def _start(node: ast.AST) -> tuple[int, int]:
+    """Where *node* starts, ``(line, column)``."""
+    line: int = getattr(node, "lineno", 0)
+    column: int = getattr(node, "col_offset", 0)
+    return line, column
+
+
+def _end(node: ast.AST) -> tuple[int, int]:
+    """Where *node* ends, ``(line, column)``, or where it starts if unknown."""
+    line: int | None = getattr(node, "end_lineno", None)
+    column: int | None = getattr(node, "end_col_offset", None)
+    if line is None or column is None:
+        return _start(node)
+    return line, column
+
+
+def _cleaned_up(
+    node: ast.Call,
+    matches: Callable[[ast.expr], bool],
+    constants: dict[str, ast.expr],
+    options: frozenset[str],
+) -> str | None:
+    """What a call does to the caller's text, when it cleans it up or maps it.
+
+    A method that only cleans up a text (``mode.lower()``,
+    ``str(mode).strip()``, ``_require_str(mode).upper()`` on what a private
+    helper hands back), ``str(mode)``, which makes a text of any value (``2``
+    for ``"2"``), and an alias map that hands back what it does not know
+    (``ALIASES.get(mode, mode)``). An alias map whose every key is one of the
+    *options* the ``Literal`` lists on purpose (``{"J_LFC": "J_LF"}``) maps a
+    spelling the caller was offered, and accepts nothing more.
+    """
+    function = node.func
+    if (
+        isinstance(function, ast.Attribute)
+        and function.attr in _NORMALISERS
+        and _derived_from(function.value, matches)
+    ):
+        return f".{function.attr}()"
+    if (
+        isinstance(function, ast.Name)
+        and function.id == "str"
+        and len(node.args) == 1
+        and matches(node.args[0])
+    ):
+        return "str()"
+    if (
+        isinstance(function, ast.Attribute)
+        and function.attr == "get"
+        and len(node.args) == 2
+        and all(matches(argument) for argument in node.args)
+    ):
+        keys = strings_of(function.value, constants)
+        if keys and set(keys) <= options:
+            return None
+        return "an alias map .get(text, text)"
+    return None
+
+
+def _raises(body: list[ast.stmt]) -> bool:
+    return any(
+        isinstance(node, ast.Raise)
+        for statement in body
+        for node in ast.walk(statement)
+    )
+
+
+def _unlisted_items(
+    tree: ast.AST, is_raw: Callable[[ast.expr], bool], constants: dict[str, ast.expr]
+) -> dict[str, ast.expr]:
+    """The locals bound to what a collection holds beyond a set of strings,
+    each with the options it is taken against.
+
+    ``extra = set(levels) - set(OPTIONS)`` or ``set(levels).difference(OPTIONS)``:
+    a collection whose leftover is refused is checked as written, as a whole.
+    """
+    names: dict[str, ast.expr] = {}
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Assign):
+            continue
+        value = node.value
+        against: ast.expr | None = None
+        if (
+            isinstance(value, ast.BinOp)
+            and isinstance(value.op, ast.Sub)
+            and is_raw(_held(value.left))
+        ):
+            against = value.right
+        elif (
+            isinstance(value, ast.Call)
+            and isinstance(value.func, ast.Attribute)
+            and value.func.attr == "difference"
+            and bool(value.args)
+            and is_raw(_held(value.func.value))
+        ):
+            against = value.args[0]
+        if against is not None and strings_of(against, constants):
+            names.update(
+                (target.id, against)
+                for target in node.targets
+                if isinstance(target, ast.Name)
+            )
+    return names
+
+
+class _Refusal(NamedTuple):
+    """A test that refuses the text as written: where it starts and ends, and
+    the options it lets through.
+    """
+
+    start: tuple[int, int]
+    end: tuple[int, int]
+    against: ast.expr
+
+
+def _refused_unless_listed(
+    node: ast.If,
+    is_raw: Callable[[ast.expr], bool],
+    constants: dict[str, ast.expr],
+    unlisted: dict[str, ast.expr],
+) -> list[_Refusal]:
+    """The tests of *node* that refuse the text as written.
+
+    ``if text not in OPTIONS: raise ...``; for a collection, ``if not
+    set(levels) <= OPTIONS: raise ...`` or ``if extra: raise ...`` with
+    ``extra`` bound to what it holds beyond the options (:func:`_unlisted_items`).
+    Each comes with the options it is held against, which the caller holds
+    to the ``Literal`` (:func:`_wider_than_the_literal`).
+    """
+    if not _raises(node.body):
+        return []
+    found: list[_Refusal] = []
+    for part in ast.walk(node.test):
+        if isinstance(part, ast.Name) and part.id in unlisted:
+            found.append(
+                _Refusal(_start(node.test), _end(node.test), unlisted[part.id])
+            )
+        if not isinstance(part, ast.Compare):
+            continue
+        left, operator, right = part.left, part.ops[0], part.comparators[0]
+        if is_raw(left) and isinstance(operator, ast.NotIn):
+            if strings_of(right, constants):
+                found.append(_Refusal(_start(part), _end(part), right))
+        elif _subset_evidence(left, operator, right, is_raw, constants):
+            options = right if isinstance(operator, ast.LtE | ast.Lt) else left
+            found.append(_Refusal(_start(part), _end(part), options))
+    return found
+
+
+def _strings_picked(
+    node: ast.expr | None, constants: Mapping[str, ast.expr]
+) -> list[tuple[str, ...]]:
+    """Each set of strings *node* may hold when the code runs.
+
+    One set for a set written out (:func:`strings_of`); one per branch of a
+    conditional expression, and one per table of a table of tables picked by
+    a key the code works out (``_FIELD_QUANTITIES[type(result)]``), where
+    :func:`strings_of` reads them all together.
+    """
+    for _ in range(_STRINGS_DEPTH):
+        if isinstance(node, ast.Name) and node.id in constants:
+            node = constants[node.id]
+        elif isinstance(node, ast.Call) and node.args:
+            node = node.args[0]
+        else:
+            break
+    if isinstance(node, ast.IfExp):
+        branches = [
+            *_strings_picked(node.body, constants),
+            *_strings_picked(node.orelse, constants),
+        ]
+        if branches:
+            return branches
+    if isinstance(node, ast.Subscript):
+        table = _dict_display(node.value, constants, 0)
+        rows = [strings_of(value, constants) for value in table.values] if table else []
+        if rows and all(rows):
+            return rows
+    held = strings_of(node, constants)
+    return [held] if held else []
+
+
+def _wider_than_the_literal(
+    against: ast.expr | None,
+    constants: Mapping[str, ast.expr],
+    options: frozenset[str],
+) -> tuple[str, ...]:
+    """The strings a check of the text as written lets through that the
+    ``Literal``'s *options* do not list, none when the options are unknown.
+
+    A check against one of several sets picked when the code runs
+    (:func:`_strings_picked`) lets through what the closest of them holds
+    beyond the options: none, when one of them lists only options.
+    """
+    if not options:
+        return ()
+    extras = [
+        tuple(sorted(set(held) - options))
+        for held in _strings_picked(against, constants)
+    ]
+    return min(extras, key=len, default=())
+
+
+def _cleans_up_first(reading: _Reading) -> list[str]:
+    """The clean-ups a reading makes before its first check of the text as
+    written, or all of them when it never checks the text as written.
+    """
+    first = min(reading.checks, default=None)
+    return list(
+        dict.fromkeys(
+            label
+            for start, label in sorted(reading.folds)
+            if first is None or start < first
+        )
+    )
+
+
+class _Reader(NamedTuple):
+    """What one function's reading of a choice needs, carried down its calls."""
+
+    is_raw: Callable[[ast.expr], bool]
+    matches: Callable[[ast.expr], bool]
+    namespace: dict[str, object]
+    module_name: str
+    constants: dict[str, ast.expr]
+    spread: dict[str, dict[str, ast.expr]]
+    options: frozenset[str]
+    collection: bool
+    depth: int
+
+
+# PLR0913: the recursion carries what it has followed so far.
+def _spelling(  # noqa: PLR0913
+    tree: ast.AST,
+    target: Callable[[ast.expr], bool],
+    namespace: dict[str, object],
+    module_name: str,
+    constants: dict[str, ast.expr],
+    *,
+    options: frozenset[str],
+    collection: bool,
+    depth: int,
+) -> _Reading:
+    """How *tree* reads the choice *target* picks out, among *options*.
+
+    The text as the caller wrote it is the target itself and, for a
+    collection, each of its items; a clean-up is read off the text as written
+    and off the locals bound from it (:func:`_following`). A function the
+    text is handed to is followed: a clean-up inside it, before its own check,
+    is a clean-up where the call is made, and a check inside it, before any
+    clean-up, is a check where the call ends.
+    """
+    constants = {**constants, **_local_tables(tree, constants)}
+    items = _item_names(tree, target) if collection else set()
+
+    def is_raw(node: ast.expr) -> bool:
+        return target(node) or (isinstance(node, ast.Name) and node.id in items)
+
+    reader = _Reader(
+        is_raw=is_raw,
+        matches=_following(tree, is_raw),
+        namespace=namespace,
+        module_name=module_name,
+        constants=constants,
+        spread=_spread_dicts(tree),
+        options=options,
+        collection=collection,
+        depth=depth,
+    )
+    unlisted = _unlisted_items(tree, is_raw, constants) if collection else {}
+    folds: list[tuple[tuple[int, int], str]] = []
+    checks: list[tuple[int, int]] = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.If):
+            for refusal in _refused_unless_listed(node, is_raw, constants, unlisted):
+                checks.append(refusal.end)
+                wider = _wider_than_the_literal(refusal.against, constants, options)
+                if wider:
+                    label = f"options wider than the Literal {wider}"
+                    folds.append((refusal.start, label))
+        elif isinstance(node, ast.Call):
+            _read_call(node, reader, folds, checks)
+    return _Reading(tuple(folds), tuple(checks))
+
+
+def _read_call(
+    node: ast.Call,
+    reader: _Reader,
+    folds: list[tuple[tuple[int, int], str]],
+    checks: list[tuple[int, int]],
+) -> None:
+    """Add what one call does to the choice: a clean-up, a check as written,
+    or either of those inside a function the choice is handed to.
+    """
+    label = _cleaned_up(node, reader.matches, reader.constants, reader.options)
+    if label is not None:
+        folds.append((_start(node), label))
+    if node.args and reader.is_raw(node.args[0]) and _call_name(node) in VALIDATORS:
+        checks.append(_end(node))
+        wider = _beyond_the_literal(node, reader)
+        if wider:
+            folds.append((_start(node), f"options wider than the Literal {wider}"))
+    callee = _callee(node, reader.namespace, reader.module_name)
+    if callee is not None and reader.depth < _SPELLING_DEPTH:
+        _read_handed_on(node, callee, reader, folds, checks)
+
+
+def _beyond_the_literal(node: ast.Call, reader: _Reader) -> tuple[str, ...]:
+    """The options a check of the text as written takes that the ``Literal``
+    does not list.
+
+    ``require_choice(text, "quantity", (*_SINGLE, *_ALIASES))`` reads the text
+    as the caller wrote it, and still takes an alias of the table's own that
+    no option spells: the check holds the text to the ``Literal`` only when
+    its options are among the ones the ``Literal`` lists. A membership or
+    subset test is held the same way (:func:`_refused_unless_listed`).
+    """
+    argument = node.args[2] if len(node.args) > 2 else None
+    for keyword in node.keywords:
+        if keyword.arg == "options":
+            argument = keyword.value
+    return _wider_than_the_literal(argument, reader.constants, reader.options)
+
+
+def _read_handed_on(
+    node: ast.Call,
+    callee: FunctionType,
+    reader: _Reader,
+    folds: list[tuple[tuple[int, int], str]],
+    checks: list[tuple[int, int]],
+) -> None:
+    """Add what *callee* does with the choice a call hands it."""
+    for parameter, value in _arguments(node, callee, reader.spread).items():
+        if not reader.matches(value):
+            continue
+        inner = _received(
+            callee,
+            parameter,
+            options=reader.options,
+            collection=reader.collection,
+            depth=reader.depth + 1,
+        )
+        first = _cleans_up_first(inner)
+        if first:
+            label = f"handed to {callee.__qualname__}({parameter}), {first[0]}"
+            folds.append((_start(node), label))
+        elif inner.checks and reader.is_raw(value):
+            checks.append(_end(node))
+
+
+@functools.cache
+def _received(
+    function: Callable[..., object],
+    name: str,
+    *,
+    options: frozenset[str],
+    collection: bool,
+    depth: int,
+) -> _Reading:
+    """How *function* reads the choice among *options* it receives as
+    parameter *name*.
+    """
+    tree = _parsed(function)
+    if tree is None:
+        return _Reading((), ())
+    module_name = getattr(function, "__module__", "") or ""
+    return _spelling(
+        tree,
+        _the_name(name),
+        _namespace(function, tree, module_name),
+        module_name,
+        _module_constants(sys.modules.get(module_name)),
+        options=options,
+        collection=collection,
+        depth=depth,
+    )
+
+
+def _literal_options(annotation: str) -> frozenset[str]:
+    """The options the ``Literal`` of an annotation, read through its
+    aliases (:func:`expanded`), lists: every quoted text in it, read as the
+    string it spells, so an escape written in the annotation is the
+    character it stands for (a tab, not a backslash and a ``t``).
+    """
+    return frozenset(_spelled(text) for text in _QUOTED_TEXT.findall(annotation))
+
+
+def _spelled(quoted: str) -> str:
+    """The string a quoted text of an annotation spells, escapes read."""
+    try:
+        text = ast.literal_eval(quoted)
+    except (SyntaxError, ValueError):
+        return quoted[1:-1]
+    return text if isinstance(text, str) else quoted[1:-1]
+
+
+def _literal_shape(annotation: str) -> tuple[bool, bool]:
+    """Whether an annotation is a ``Literal`` choice, and whether its
+    ``Literal`` is what a collection holds or a mapping is keyed by.
+    """
+    collection = any(
+        (item := _item(member)) is not None and _is_literal(item)
+        for member in _members(annotation)
+    )
+    return _is_literal(annotation), collection
+
+
+def _post_init(record: type) -> Callable[..., object] | None:
+    """The ``__post_init__`` a record runs, its own or the nearest base's."""
+    for owner in record.__mro__:
+        check = vars(owner).get("__post_init__")
+        if check is not None:
+            unwrapped: Callable[..., object] = inspect.unwrap(check)
+            return unwrapped
+    return None
+
+
+def _field_spelling(
+    record: type,
+    name: str,
+    constants: dict[str, ast.expr],
+    *,
+    options: frozenset[str],
+    collection: bool,
+) -> list[str]:
+    """The clean-ups the code makes of record field *name* before its check.
+
+    A field the record's ``__post_init__`` checks as written is closed when
+    the record is built, so a later clean-up accepts nothing more. A field it
+    does not check is read wherever its module reads ``<expr>.<name>``.
+    """
+    check = _post_init(record)
+    tree = _parsed(check) if check is not None else None
+    if check is not None and tree is not None:
+        module_name = check.__module__
+        reading = _spelling(
+            tree,
+            _field_of_self(name),
+            _namespace(check, tree, module_name),
+            module_name,
+            _module_constants(sys.modules.get(module_name)),
+            options=options,
+            collection=collection,
+            depth=0,
+        )
+        first = _cleans_up_first(reading)
+        if first or reading.checks:
+            return first
+    module = sys.modules.get(record.__module__)
+    namespace = dict(vars(module)) if module is not None else {}
+    found: list[str] = []
+    for owner, function in _functions_reading(record.__module__, name):
+        reading = _spelling(
+            function,
+            _field_read(name, own=owner == record.__name__),
+            namespace,
+            record.__module__,
+            constants,
+            options=options,
+            collection=collection,
+            depth=0,
+        )
+        found.extend(
+            f"{label} in {function.name}()" for label in _cleans_up_first(reading)
+        )
+    return list(dict.fromkeys(found))
+
+
+def cleaned_up_choices() -> Iterator[Choice]:
+    """Every public ``Literal`` choice the code cleans up before it checks it.
+
+    A parameter or a record field typed with a ``Literal`` of its options (an
+    alias of one, a union holding one, or a collection or mapping of one)
+    promises one spelling of each option. The code that reads it must check
+    the text as the caller wrote it (``require_choice``, ``check_language``,
+    ``check_engine``, or ``if text not in OPTIONS: raise``) before it folds
+    the case, strips the spaces, makes a text of another value with
+    ``str()`` or maps an alias it does not list (``ALIASES.get(text,
+    text)``), in its own body or in a function it hands the text to, and the
+    check must hold no option the ``Literal`` does not list; otherwise ``"a"``
+    passes for ``"A"`` when the call runs while a type checker refuses it.
+    A method is followed into the methods of its own class it calls
+    (``self._range_mask(weighting)``) and into those of an object it holds
+    (``self.database.event_level(...)``). This is rule A45.
+    """
+    for home, qualname, obj in _targets():
+        if inspect.isclass(obj):
+            if not issubclass(obj, CatalogueRow):
+                yield from _cleaned_up_fields(home, qualname, obj)
+        else:
+            yield from _cleaned_up_parameters(home, qualname, obj)
+
+
+def _cleaned_up_fields(home: str, qualname: str, record: type) -> Iterator[Choice]:
+    """The ``Literal`` fields of a public record its code cleans up first."""
+    constants = _module_constants(sys.modules.get(home))
+    for field in dataclasses.fields(record):
+        annotation = _annotation(field.type)
+        read = expanded(annotation, _field_module(record, field.name))
+        literal, collection = _literal_shape(read)
+        if not literal:
+            continue
+        evidence = _field_spelling(
+            record,
+            field.name,
+            constants,
+            options=_literal_options(read),
+            collection=collection,
+        )
+        if evidence:
+            yield Choice(home, qualname, field.name, annotation, tuple(evidence))
+
+
+def _cleaned_up_parameters(
+    home: str, qualname: str, function: object
+) -> Iterator[Choice]:
+    """The ``Literal`` parameters of a public function its code cleans up first."""
+    if not callable(function) or _parsed(function) is None:
+        return
+    try:
+        signature = inspect.signature(function)
+    except (TypeError, ValueError):
+        return
+    for parameter in signature.parameters.values():
+        annotation = _annotation(parameter.annotation)
+        read = expanded(annotation, home)
+        literal, collection = _literal_shape(read)
+        if not literal:
+            continue
+        reading = _received(
+            function,
+            parameter.name,
+            options=_literal_options(read),
+            collection=collection,
+            depth=0,
+        )
+        evidence = _cleans_up_first(reading)
+        if evidence:
+            yield Choice(home, qualname, parameter.name, annotation, tuple(evidence))
+
+
 def offenders() -> tuple[list[Choice], list[tuple[str, str, str]]]:
     """The closed choices typed ``str``, and the stale entries of :data:`OPEN`."""
     found: list[Choice] = []
@@ -1903,14 +2622,33 @@ def offenders() -> tuple[list[Choice], list[tuple[str, str, str]]]:
 
 
 def main() -> int:
-    """Report every closed choice typed ``str``; the exit status says if any."""
+    """Report every closed choice typed ``str`` and every ``Literal`` choice
+    cleaned up before its check; the exit status says if any.
+    """
     found, stale = offenders()
-    if not (found or stale):
+    cleaned = sorted(cleaned_up_choices())
+    if not (found or stale or cleaned):
         print(
             "Every public choice of a fixed set of strings is typed Literal, "
-            "and every string left open says why."
+            "every string left open says why, and every Literal choice is "
+            "checked as the caller wrote it."
         )
         return 0
+    for choice in cleaned:
+        print(
+            "::error::a Literal choice takes a spelling its Literal does not "
+            f"list: {choice.module}.{choice.qualname}({choice.name}): "
+            + "; ".join(dict.fromkeys(choice.evidence))
+        )
+    if cleaned:
+        print(
+            "  -> check the text as written (require_choice) against the "
+            "options the Literal lists, before any clean-up, and drop the "
+            "folding: the Literal lists the one spelling of each option "
+            "(rule A45)."
+        )
+    if not (found or stale):
+        return 1
     if found:
         print("::error::a public choice of a fixed set is typed str")
         print(f"{len(found)} parameter(s) or field(s) take any string:")

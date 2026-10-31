@@ -549,7 +549,7 @@ def test_barrier_rejects_bad_geometry() -> None:
             method="kurze_anderson",
             ground_flow_resistivity_pa_s_m2=2e5,
         )
-    with pytest.raises(ValueError, match=r"unknown method 'utd'"):
+    with pytest.raises(ValueError, match=r"'method' must be one of .*; got 'utd'"):
         environment.barrier_insertion_loss(
             _BANDS, 1.0, 50.0, 4.0, 100.0, 1.5, method="utd"
         )  # type: ignore[arg-type]

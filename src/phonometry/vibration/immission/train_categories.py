@@ -167,9 +167,10 @@ def train_weighting_factor(
     :param alignment: ``"surface"`` (default) or ``"underground"``.
     :return: :math:`\alpha_\mathrm{Zug}`, dimensionless.
     :raises ValueError: For an unknown kind or alignment.
+    :raises TypeError: if ``alignment`` or ``kind`` is not a text.
     """
-    row = TRAIN_WEIGHTING_FACTORS[require_choice(str(kind), "kind", TRAIN_KINDS)]
-    return row[require_choice(str(alignment), "alignment", _ALIGNMENTS)]
+    row = TRAIN_WEIGHTING_FACTORS[require_choice(kind, "kind", TRAIN_KINDS)]
+    return row[require_choice(alignment, "alignment", _ALIGNMENTS)]
 
 
 def _passages(kb_fti_zug: ArrayLike) -> NDArray[np.float64]:
@@ -267,7 +268,7 @@ def train_assessment_severity(
     :raises ValueError: For mismatched, negative or non-finite inputs, a
         count that is not whole, or an unknown time of day.
     :raises TypeError: if ``alpha``, ``kb_ftm_zug`` or ``trains`` holds a text or a
-        value that is not a real number.
+        value that is not a real number, or ``time_of_day`` is not a text.
     """
     severities = require_finite_array(kb_ftm_zug, "kb_ftm_zug")
     counts = require_finite_array(trains, "trains")
@@ -292,7 +293,7 @@ def train_assessment_severity(
             "whole and 'alpha' positive."
         )
         raise ValueError(msg)
-    which = require_choice(str(time_of_day), "time_of_day", _PERIODS)
+    which = require_choice(time_of_day, "time_of_day", _PERIODS)
     total = ASSESSMENT_TAKT_COUNT[which]
     counted = np.where(severities <= TAKT_SUPPRESSION_THRESHOLD, 0.0, severities)
     return float(np.sqrt(np.sum(counts * (factors * counted) ** 2) / total))
@@ -317,10 +318,11 @@ def railway_guide_values(
     :return: The three values, as a :class:`~phonometry.vibration.GuideValues`
         of the 2023 edition.
     :raises ValueError: For an unknown area, time of day or alignment.
+    :raises TypeError: if ``alignment``, ``area`` or ``time_of_day`` is not a text.
     """
-    kind = require_choice(str(area), "area", tuple(GUIDE_VALUES_2023))
-    which = require_choice(str(time_of_day), "time_of_day", _PERIODS)
-    where = require_choice(str(alignment), "alignment", _ALIGNMENTS)
+    kind = require_choice(area, "area", tuple(GUIDE_VALUES_2023))
+    which = require_choice(time_of_day, "time_of_day", _PERIODS)
+    where = require_choice(alignment, "alignment", _ALIGNMENTS)
     values = GUIDE_VALUES_2023[kind][which]
     if which == "day" or (where == "underground" and kind in _UNDERGROUND_TABLE_AREAS):
         return values
@@ -466,13 +468,13 @@ def assess_railway_change(
     :raises ValueError: For a negative quantity, an unknown time of day, or
         guide values of the 1999 edition or of the other period.
     :raises TypeError: if ``kb_fmax_after``, ``kb_fmax_before``, ``kb_ftr_after`` or
-        ``kb_ftr_before`` is not a single number.
+        ``kb_ftr_before`` is not a single number, or ``time_of_day`` is not a text.
     """
     fmax_before = require_non_negative(kb_fmax_before, "kb_fmax_before")
     fmax_after = require_non_negative(kb_fmax_after, "kb_fmax_after")
     ftr_before = require_non_negative(kb_ftr_before, "kb_ftr_before")
     ftr_after = require_non_negative(kb_ftr_after, "kb_ftr_after")
-    which = require_choice(str(time_of_day), "time_of_day", _PERIODS)
+    which = require_choice(time_of_day, "time_of_day", _PERIODS)
     if guide.edition != _DRAFT or guide.time_of_day != which:
         msg = (
             "6.5.3.6 is a clause of the draft: the guide values must be of the "

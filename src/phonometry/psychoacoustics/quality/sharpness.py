@@ -198,6 +198,7 @@ def sharpness_din(
     :param calibration_factor: Digital-units-to-Pa factor. An explicit
         value wins over the one a Signal carries.
     :return: Sharpness in acum.
+    :raises TypeError: if ``field`` is not a text.
     """
     zw: ZwickerLoudness = loudness_zwicker(
         x, fs, field=field, stationary=True, calibration_factor=calibration_factor

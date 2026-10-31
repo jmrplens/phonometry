@@ -110,7 +110,7 @@ not one of them, as the clause is printed.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a negative quantity, an unknown time of day, or guide values of the 1999 edition or of the other period. |
-| TypeError | if `kb_fmax_after`, `kb_fmax_before`, `kb_ftr_after` or `kb_ftr_before` is not a single number. |
+| TypeError | if `kb_fmax_after`, `kb_fmax_before`, `kb_ftr_after` or `kb_ftr_before` is not a single number, or `time_of_day` is not a text. |
 
 ## RAILWAY_CHANGE_TOLERANCE_PERCENT
 
@@ -155,6 +155,7 @@ an altered or extended line (6.5.3.6 b)).
 | Exception | When |
 | :--- | :--- |
 | ValueError | For an unknown area, time of day or alignment. |
+| TypeError | if `alignment`, `area` or `time_of_day` is not a text. |
 
 ## railway_kb_fmax
 
@@ -301,7 +302,7 @@ two tracks can each carry a train in the same interval.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For mismatched, negative or non-finite inputs, a count that is not whole, or an unknown time of day. |
-| TypeError | if `alpha`, `kb_ftm_zug` or `trains` holds a text or a value that is not a real number. |
+| TypeError | if `alpha`, `kb_ftm_zug` or `trains` holds a text or a value that is not a real number, or `time_of_day` is not a text. |
 
 ## train_category_rms
 
@@ -404,6 +405,7 @@ The weighting factor $\alpha_\mathrm{Zug}$ of Table 2 for one category.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For an unknown kind or alignment. |
+| TypeError | if `alignment` or `kind` is not a text. |
 
 ## TRAIN_WEIGHTING_FACTORS
 

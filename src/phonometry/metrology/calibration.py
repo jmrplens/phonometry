@@ -162,6 +162,7 @@ def sensitivity(
         The default (False) keeps the exact legacy broadband-RMS behaviour;
         enable it for noisy coupler recordings.
     :return: Calibration factor (sensitivity multiplier).
+    :raises TypeError: if ``calibrator_class`` is not a text.
     """
     fs = resolve_optional_fs(reference_signal, fs)
     # calibrate=False: this function *derives* the digital-to-pascal factor

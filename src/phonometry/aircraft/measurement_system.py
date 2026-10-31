@@ -20,7 +20,7 @@ import numpy as np
 
 from .._internal.frozen import OwnsArrays
 from .._internal.types import float_keyed
-from .._internal.validation import require_scalar
+from .._internal.validation import require_choice, require_scalar
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -119,6 +119,7 @@ class AircraftSystemComplianceResult(OwnsArrays):
         :raises ValueError: If a frequency or angle is out of the tabulated
             range, or a linearity key is neither ``"reference"`` nor
             ``"other"``.
+        :raises TypeError: If a ``linearity`` key is not a text.
         """
         if self.directional is not None:
             object.__setattr__(
@@ -145,7 +146,7 @@ class AircraftSystemComplianceResult(OwnsArrays):
             object.__setattr__(
                 self,
                 "linearity",
-                MappingProxyType({str(k): float(v) for k, v in self.linearity.items()}),
+                MappingProxyType({k: float(v) for k, v in self.linearity.items()}),
             )
         if self.resolution is not None:
             object.__setattr__(self, "resolution", float(self.resolution))
@@ -240,7 +241,9 @@ def verify_aircraft_noise_system(
     :return: An :class:`AircraftSystemComplianceResult`, whose ``passes`` is
         the conjunction of every check and ``False`` when no measurement was
         supplied.
-    :raises ValueError: If a frequency or angle is out of the tabulated range.
+    :raises ValueError: If a frequency or angle is out of the tabulated range,
+        or a ``linearity`` key is neither ``"reference"`` nor ``"other"``.
+    :raises TypeError: If a ``linearity`` key is not a text.
     """
     return AircraftSystemComplianceResult(
         directional=None
@@ -308,12 +311,11 @@ def _linearity_checks(
     :param linearity: ``{"reference": dB, "other": dB}``.
     :return: One check per supplied level range.
     :raises ValueError: For a key other than ``"reference"`` or ``"other"``.
+    :raises TypeError: For a key that is not a text.
     """
     checks: list[dict[str, Any]] = []
-    for kind, dev in linearity.items():
-        if kind not in _LINEARITY_LIMITS:
-            msg = "linearity keys must be 'reference' or 'other'."
-            raise ValueError(msg)
+    for key, dev in linearity.items():
+        kind = require_choice(key, "linearity", tuple(_LINEARITY_LIMITS))
         limit = _LINEARITY_LIMITS[kind]
         checks.append(
             {

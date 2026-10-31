@@ -494,9 +494,12 @@ def test_facade_requirement_use_and_room_aliases() -> None:
     for use, room in (
         ("dwelling", "dormitorios"),
         ("housing", "bedroom"),
-        ("RESIDENTIAL", "Bedrooms"),
     ):
         assert hr.db_hr_facade_requirement(62.0, use, room).limit == reference
+    with pytest.raises(ValueError, match=r"'building_use' must be one of"):
+        hr.db_hr_facade_requirement(62.0, "RESIDENTIAL", "bedrooms")  # type: ignore[arg-type]
+    with pytest.raises(ValueError, match=r"'room_type' must be one of"):
+        hr.db_hr_facade_requirement(62.0, "residential", "Bedrooms")  # type: ignore[arg-type]
     assert (
         hr.db_hr_facade_requirement(62.0, "docente", "aulas").limit
         == hr.db_hr_facade_requirement(62.0, "educational", "classrooms").limit
@@ -595,7 +598,7 @@ def test_party_wall_requirement_clause_2_1_1_c() -> None:
     combined = hr.db_hr_party_wall_requirement("DnT,A")
     assert (combined.quantity, combined.limit) == ("DnT,A", 50.0)
     with pytest.raises(ValueError, match=r"'quantity' must be"):
-        hr.db_hr_party_wall_requirement("RA")
+        hr.db_hr_party_wall_requirement("RA")  # type: ignore[arg-type]
 
 
 @pytest.mark.parametrize(
@@ -803,20 +806,20 @@ def test_a_check_on_an_undetermined_value_is_refused() -> None:
 
 def test_requirement_lookup_validation() -> None:
     """Unknown uses, rooms and room-pair combinations are rejected."""
+    with pytest.raises(ValueError, match=r"'building_use' must be one of"):
+        hr.db_hr_facade_requirement(62.0, "industrial", "bedrooms")  # type: ignore[arg-type]
     with pytest.raises(
         ValueError, match=r"Unknown \(building_use, room_type\) combination"
     ):
-        hr.db_hr_facade_requirement(62.0, "industrial", "bedrooms")
+        hr.db_hr_facade_requirement(62.0, "residential", "classrooms")
     with pytest.raises(ValueError, match=r"'dominant_noise' must be"):
         hr.db_hr_facade_requirement(
             62.0, "residential", "bedrooms", dominant_noise="sea"
         )
     with pytest.raises(ValueError, match=r"'ld' must be finite"):
         hr.db_hr_facade_requirement(math.nan, "residential", "bedrooms")
-    with pytest.raises(
-        ValueError, match=r"Unknown \(receiving_room, source_room\) combination"
-    ):
-        hr.db_hr_airborne_requirement("protected", "outdoors")
+    with pytest.raises(ValueError, match=r"'source_room' must be one of"):
+        hr.db_hr_airborne_requirement("protected", "outdoors")  # type: ignore[arg-type]
     with pytest.raises(ValueError, match=r"'room_use' must be"):
         hr.db_hr_reverberation_requirement("swimming_pool")
 
@@ -886,7 +889,7 @@ def test_a_table_key_that_is_not_a_string_is_refused_by_name() -> None:
     it is a ``TypeError``, because a number where a word belongs is the wrong
     type.
     """
-    with pytest.raises(TypeError, match=r"'building_use' must be a string"):
+    with pytest.raises(TypeError, match=r"'building_use' must be one of .*, a text"):
         hr.db_hr_facade_requirement(60.0, 5, "protected")  # type: ignore[arg-type]
-    with pytest.raises(TypeError, match=r"'room_type' must be a string"):
+    with pytest.raises(TypeError, match=r"'room_type' must be one of .*, a text"):
         hr.db_hr_facade_requirement(60.0, "residential", None)  # type: ignore[arg-type]

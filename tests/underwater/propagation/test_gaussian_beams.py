@@ -1953,8 +1953,10 @@ def test_invalid_inputs_rejected() -> None:
         gaussian_beams(
             200.0, *iso, source_depth=500.0, ranges_m=[500.0], n_depth_points=1
         )
-    with pytest.raises(ValueError, match=r"'absorption' must name one of"):
-        gaussian_beams(200.0, *iso, source_depth=500.0, absorption="mud")
+    with pytest.raises(ValueError, match=r"'absorption' must be one of"):
+        gaussian_beams(200.0, *iso, source_depth=500.0, absorption="mud")  # type: ignore[arg-type]
+    with pytest.raises(ValueError, match=r"'absorption' must be one of"):
+        gaussian_beams(200.0, *iso, source_depth=500.0, absorption="Thorp")  # type: ignore[arg-type]
 
 
 def test_the_result_lines_up_with_the_parabolic_equation_grid_and_plots() -> None:

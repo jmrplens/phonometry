@@ -199,6 +199,12 @@ Apply the pre-designed filter bank to a signal.
 
 **Returns:** An [`OctaveFilterResult`](/phonometry/reference/api/filters/core/#octavefilterresult) carrying the band `levels`, their `frequencies` and, when `sigbands` asked for them, the per-band `bands`.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `mode` is not a text. |
+
 ### OctaveFilterBank.frequencies
 
 *property*
@@ -256,7 +262,7 @@ Short-time fractional-octave analysis: level per band over time.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `overlap` or `window_time` is not a single number. |
+| TypeError | if `overlap` or `window_time` is not a single number, or `mode` is not a text. |
 
 ### OctaveFilterBank.upper_edges
 

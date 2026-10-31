@@ -1014,7 +1014,8 @@ class JointGapSeries(OwnsArrays):
         :param quantity: ``"r_s_w"``, ``"r_s_w_c"`` or ``"r_s_w_ctr"`` (default).
         :return: The single number, in dB.
         :raises ValueError: If the width lies outside the measured widths.
-        :raises TypeError: if ``gap_mm`` is not a single number.
+        :raises TypeError: if ``gap_mm`` is not a single number, or ``quantity`` is not
+            a text.
         """
         values = self.single_number(quantity)
         widths = np.asarray(self.gap_widths_mm, dtype=np.float64)

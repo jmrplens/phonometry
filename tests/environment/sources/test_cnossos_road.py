@@ -700,10 +700,14 @@ def test_segment_power_feeds_the_propagation_stage() -> None:
 
 
 def test_unknown_category_and_surface_are_rejected() -> None:
-    with pytest.raises(ValueError, match="Unknown vehicle category"):
-        road_rolling_noise("7", 50.0)
-    with pytest.raises(ValueError, match="Unknown road surface"):
-        road_surface_coefficients("gravel")
+    with pytest.raises(ValueError, match="'category' must be one of"):
+        road_rolling_noise("7", 50.0)  # type: ignore[arg-type]
+    with pytest.raises(ValueError, match="'category' must be one of"):
+        road_rolling_noise("4A", 50.0)  # type: ignore[arg-type]
+    with pytest.raises(TypeError, match="'category' must be one of .*, a text"):
+        road_rolling_noise(1, 50.0)  # type: ignore[arg-type]
+    with pytest.raises(ValueError, match="'surface' must be one of"):
+        road_surface_coefficients("gravel")  # type: ignore[arg-type]
 
 
 def test_invalid_inputs_are_rejected() -> None:

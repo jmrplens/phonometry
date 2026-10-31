@@ -430,10 +430,10 @@ class EnclosureTestEnvironmentCheck(RichDisplay):
         :raises ValueError: For an unknown standard, a coefficient outside
             ``(0, 1]`` or a ratio that is not positive.
         :raises TypeError: if ``actual_area_ratio`` or ``mean_absorption_coefficient``
-            is not a single number.
+            is not a single number, or ``base_standard`` is not a text.
         """
         require_choice(
-            str(self.base_standard),
+            self.base_standard,
             "base_standard",
             tuple(TEST_ENVIRONMENT_REQUIREMENTS),
         )
@@ -622,8 +622,8 @@ def enclosure_sound_power_insulation(
     :raises TypeError: if ``base_standard`` is not a text, ``fraction`` is not an
         integer (a word, a flag or a float), ``a_weighted_with`` or
         ``a_weighted_without`` is not a single number, or ``frequencies``,
-        ``level_with`` or ``level_without`` holds a text or a value that is not a
-        real number.
+        ``level_with`` or ``level_without`` holds a text or a value that is not a real
+        number, or ``condition`` or ``source_kind`` is not a text.
     """
     return _insulation(
         level_without,
@@ -684,8 +684,8 @@ def enclosure_sound_pressure_insulation(
     :raises TypeError: if ``base_standard`` is not a text, ``fraction`` is not an
         integer (a word, a flag or a float), ``a_weighted_with`` or
         ``a_weighted_without`` is not a single number, or ``frequencies``,
-        ``level_with`` or ``level_without`` holds a text or a value that is not a
-        real number.
+        ``level_with`` or ``level_without`` holds a text or a value that is not a real
+        number, or ``condition`` or ``source_kind`` is not a text.
     """
     return _insulation(
         level_without,
@@ -786,9 +786,10 @@ def enclosure_artificial_source_insulation(
         fewer than two source positions, or an unknown quantity.
     :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a float), or
         ``frequencies``, ``level_with_by_position`` or ``level_without_by_position``
-        holds a text or a value that is not a real number.
+        holds a text or a value that is not a real number, or ``condition`` or
+        ``quantity`` is not a text.
     """
-    kind = require_choice(str(quantity), "quantity", _ARTIFICIAL_QUANTITIES)
+    kind = require_choice(quantity, "quantity", _ARTIFICIAL_QUANTITIES)
     without = require_finite_matrix(
         level_without_by_position, "level_without_by_position"
     )
@@ -846,13 +847,14 @@ def weighted_enclosure_insulation(
     :return: The rating, as a :class:`WeightedEnclosureInsulation`.
     :raises ValueError: For a spectrum that does not carry the rating bands.
     :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a float), or
-        ``insulation`` holds a text or a value that is not a real number.
+        ``insulation`` holds a text or a value that is not a real number, or
+        ``quantity`` is not a text.
     """
     from ..building import weighted_rating
 
     values = require_finite_array(insulation, "insulation")
     fraction = require_band_fraction(fraction, "fraction")
-    kind = require_choice(str(quantity), "quantity", _RATEABLE_QUANTITIES)
+    kind = require_choice(quantity, "quantity", _RATEABLE_QUANTITIES)
     bands = _rating_bands(fraction)
     _require_rating_bands(values, bands)
     result = weighted_rating(values, fraction)
@@ -998,10 +1000,10 @@ def check_enclosure_test_environment(
         ``(0, 1]`` or a non-positive area.
     :raises TypeError: if ``mean_absorption_coefficient``,
         ``measurement_surface_area_m2`` or ``room_surface_area_m2`` is not a single
-        number.
+        number, or ``base_standard`` is not a text.
     """
     name = require_choice(
-        str(base_standard), "base_standard", tuple(TEST_ENVIRONMENT_REQUIREMENTS)
+        base_standard, "base_standard", tuple(TEST_ENVIRONMENT_REQUIREMENTS)
     )
     alpha = require_positive(mean_absorption_coefficient, "mean_absorption_coefficient")
     if alpha > 1.0:
@@ -1135,8 +1137,8 @@ def _method_pair(
     :raises ValueError: For an unknown condition or source kind, or a
         combination the standard does not have.
     """
-    where = require_choice(str(condition), "condition", _CONDITIONS)
-    kind = require_choice(str(source_kind), "source_kind", _SOURCE_KINDS)
+    where = require_choice(condition, "condition", _CONDITIONS)
+    kind = require_choice(source_kind, "source_kind", _SOURCE_KINDS)
     if (where, kind) not in _METHODS:
         msg = (
             f"ISO 11546 has no {kind} source in the {where} condition: the "
@@ -1164,5 +1166,6 @@ def applicable_methods(
     :return: The rows, as :class:`MethodEntry` values.
     :raises ValueError: For an unknown condition or source kind, or a
         combination the standard does not have.
+    :raises TypeError: if ``condition`` or ``source_kind`` is not a text.
     """
     return _METHODS[_method_pair(condition, source_kind)]

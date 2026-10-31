@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING, cast
 import numpy as np
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping, Sequence
+    from collections.abc import Iterable, Mapping, Sequence
 
     from numpy.typing import ArrayLike
 
@@ -410,6 +410,32 @@ def require_choice[T](value: object, name: str, options: tuple[T, ...]) -> T:
         msg = f"'{name}' must be one of {options}; got {value!r}."
         raise ValueError(msg)
     return value
+
+
+def require_aliased_choice(
+    value: object, name: str, canonical: Iterable[str], aliases: Mapping[str, str]
+) -> str:
+    """Require *value* to name an option as written, and give its canonical
+    spelling.
+
+    *canonical* are the options a table prints and *aliases* the other
+    spellings the ``Literal`` lists on purpose (``"docente"`` for
+    ``"educational"``); the text is checked as the caller wrote it
+    (:func:`require_choice`) and only then mapped, and an alias of an option
+    the table does not hold is no option here.
+
+    :param value: The value to validate.
+    :param name: Parameter name used in the error message.
+    :param canonical: The options the table prints.
+    :param aliases: The listed spellings, each mapped to its option.
+    :return: The canonical spelling of the option named.
+    :raises TypeError: for a value that is not a text.
+    :raises ValueError: for a text that names none of the options.
+    """
+    known = sorted(set(canonical))
+    offered = (*known, *(alias for alias, to in aliases.items() if to in known))
+    named = require_choice(value, name, offered)
+    return aliases.get(named, named)
 
 
 #: The two band sets a standard rates or tabulates: octaves and thirds.

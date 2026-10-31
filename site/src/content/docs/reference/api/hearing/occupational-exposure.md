@@ -217,7 +217,8 @@ sampling advisory. The uncertainty is the job-based budget (Eq C.9, Table C.4).
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `effective_duration_hours` or `u3` is not a single number. |
+| ValueError | for an `instrument` Table C.5 does not list. |
+| TypeError | if `effective_duration_hours` or `u3` is not a single number, or `instrument` is not a text. |
 
 ## INSTRUMENT_U2
 
@@ -268,8 +269,8 @@ $c_2 = c_3 = 1$.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | for a `sample_duration_hours` that is not positive, or an `n_workers` that is not a whole number from 1. |
-| TypeError | if `effective_duration_hours`, `sample_duration_hours` or `u3` is not a single number, or `n_workers` is a flag, a text or an array where a count goes. |
+| ValueError | for a `sample_duration_hours` that is not positive, an `n_workers` that is not a whole number from 1, or an `instrument` Table C.5 does not list. |
+| TypeError | if `effective_duration_hours`, `sample_duration_hours` or `u3` is not a single number, `n_workers` is a flag, a text or an array where a count goes, or `instrument` is not a text. |
 
 ## min_cumulative_duration_hours
 
@@ -392,7 +393,8 @@ follows Eq C.3 with sampling `u1a` (Eq C.6), optional duration `u1b`
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `u3` is not a single number. |
+| ValueError | for an `instrument` Table C.5 does not list. |
+| TypeError | if `u3` is not a single number, or `instrument` is not a text. |
 
 ## TaskContribution
 

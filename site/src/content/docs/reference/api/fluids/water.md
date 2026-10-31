@@ -139,6 +139,12 @@ Sea water at one point of the ocean.
 
 **Returns:** The [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) at that point.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `sound_speed_model` is not a text. |
+
 The density and the speed of sound come from different sources, which is
 why both are named in the result's `model`. Neither source in this
 library prints a ratio of specific heats, a viscosity or a thermal
@@ -253,7 +259,7 @@ Speed of sound in sea water, in metres per second.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `model` is unknown or an input is non-finite. |
-| TypeError | if `latitude_deg` is not a single number, or `depth_m`, `salinity_psu` or `temperature_c` holds a text or a value that is not a real number. |
+| TypeError | if `model` is not a text, `latitude_deg` is not a single number, or `depth_m`, `salinity_psu` or `temperature_c` holds a text or a value that is not a real number. |
 
 :::note
 Each equation is a fit over a bounded oceanographic domain and

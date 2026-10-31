@@ -182,7 +182,7 @@ distribution), L90 the level exceeded 90% of the time, etc.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `calibration_factor` is not a single number. |
+| TypeError | if `calibration_factor` is not a single number, or `weighting` is not a text. |
 
 ## sel
 
@@ -221,7 +221,7 @@ reference responses, Equation 8, in the test suite).
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `calibration_factor` or `fs` is not a single number. |
+| TypeError | if `calibration_factor` or `fs` is not a single number, or `weighting` is not a text. |
 
 ## sound_exposure
 

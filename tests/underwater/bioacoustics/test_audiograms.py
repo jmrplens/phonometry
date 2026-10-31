@@ -108,7 +108,9 @@ def test_normalized_and_original_share_the_result_shape() -> None:
     assert res.group == "OCW"
     assert "Table 3" in res.source
     assert res.in_air is False
-    assert audiogram_parameters("ocw", normalized=True).t0 == 2.36
+    assert audiogram_parameters("OCW", normalized=True).t0 == 2.36
+    with pytest.raises(ValueError, match=r"'group' must be one of"):
+        audiogram_parameters("ocw", normalized=True)  # type: ignore[arg-type]
 
 
 def test_in_air_groups_are_flagged() -> None:

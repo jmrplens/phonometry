@@ -3909,6 +3909,61 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   reads `"any"` in `source_side` for the four insertion cases, as its
   documentation said, instead of a sentence.
 
+- **A choice the code cleaned up before checking it is matched as it is
+  written.** A parameter or a record field typed with a `Literal` of its
+  options, whose code cleaned the text up before it checked it, now takes the
+  spellings that `Literal` lists, and only those. 198 parameters and fields of
+  146 functions and records folded the case, stripped the spaces, swapped
+  `_`, `-` and spaces, mapped an alias of their own or made a text of any
+  value with `str()` before they looked the choice up, so
+  `filters.WeightingFilter(48000, "a")`,
+  `filters.time_weighting(x, fs, mode="FAST")`, the level `mode` of
+  `OctaveFilterBank.filter` and `spectrogram`, `signals.ln_levels(...,
+  weighting="z")`, `materials.mounting_type("e")`,
+  `underwater.spreading_loss(r, law="SPHERICAL")` and
+  `vibration.guide_values(..., edition=1999)` ran although a type checker
+  refused every one of them. They now raise `ValueError` for a text that
+  names no option and `TypeError` for a value that is not text, as
+  `require_choice` does. The aliases of their own that no `Literal` listed
+  are gone: `"turbofan"`, `"prop"` and `"propeller"` for the `engine` of
+  `aircraft.start_of_roll_directivity`, `"prop"` for an engine `mounting`,
+  `"approach"`, `"landing"`, `"takeoff"`, `"take-off"`, `"arrivals"`,
+  `"departures"`, `"a"` and `"d"` for the `operation` of the ANP lookups,
+  and `"other"` and `"others"` for a furnished room of
+  `building.estimate_reverberation_index`.
+  The aliases a `Literal` lists on purpose stay: `"docente"`, `"dnt_w"`,
+  `"J_LFC"`, `"conference_hall"`. `aircraft.PerformanceAircraft.flap`
+  matches its `operation` as written and still folds the flap identifier,
+  which the ANP tables spell inconsistently; the database files themselves are
+  read whatever case they write their operations in.
+  `underwater.VolumeAbsorption` refuses an unknown `model` when it is built,
+  not when a solver reads it, and `building.db_hr_party_wall_requirement`
+  types its `quantity` as `Literal["D2m,nT,Atr", "DnT,A"]`. The migration
+  guide lists every parameter with the spellings it stopped taking.
+  The `onset_rate_method` of `environment.detect_onsets` and
+  `environment.impulsive_sound_adjustment`, which fitted any value but
+  `"upper_half"` as least squares, is checked as written too. An `instrument`
+  that Table C.5 does not list raises `ValueError` in
+  `hearing.task_based_exposure`, `hearing.job_based_exposure` and
+  `hearing.full_day_exposure` instead of `KeyError`, and the choices that
+  refused a value that is not text with `ValueError` before handing it on
+  (the `grade` of `emission.sound_power_pressure` and
+  `emission.sound_energy_pressure`, the `method` of
+  `environment.barrier_insertion_loss`, the `edition` of the IEC 61260 and
+  IEC 61672 verifications and class limits, the `field` of the Zwicker
+  loudness and of what reads it, the `kind` and `metric` of
+  `vibration.exposure_assessment`) raise `TypeError` for it, as every other
+  choice does. `scripts/check_choice_literals.py` fails a public `Literal`
+  choice that its code, or any function it hands the choice to, six calls
+  deep, cleans up before it checks the text as written, or checks against
+  options its `Literal` does not list; it follows a method into the methods
+  of its own class and of the objects it holds, reads the public methods a
+  class inherits from a private base, and follows a record field from its
+  `__post_init__` to every function of its module that reads it (rule A45).
+  The docstrings name the `TypeError` a choice meets in the function it is
+  handed to, and `tests/test_error_kinds.py` follows a choice into the public
+  functions, classes, methods and helpers it is handed to.
+
 - **A parameter whose name carries its unit and that has a default is written
   by name.** `signals.noise_signal(fs, duration_s=2.0)`,
   `speech.stipa_signal(fs, duration_s=18.0)`,

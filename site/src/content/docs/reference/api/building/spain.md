@@ -175,6 +175,7 @@ For a road-traffic or aircraft dominant site the quantity is
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a spectrum Formula (A.5) does not cover. |
+| TypeError | if `spectrum` is not a text. |
 
 ## d2m_nt_atr
 
@@ -216,6 +217,7 @@ report are stated in is not the same.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a spectrum Formula (A.6) does not cover. |
+| TypeError | if `spectrum` is not a text. |
 
 ## db_hr_airborne_requirement
 
@@ -256,7 +258,8 @@ those instead.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | For an unknown combination, or for `shared_opening` in a case DB-HR does not contemplate (a protected room against a services or activity room, and any `"same_unit"` case). |
+| ValueError | For a room either argument does not name, or for `shared_opening` in a case DB-HR does not contemplate (a protected room against a services or activity room, and any `"same_unit"` case). |
+| TypeError | if `receiving_room` or `source_room` is not a text. |
 
 ## db_hr_facade_requirement
 
@@ -299,7 +302,7 @@ residential acoustic areas.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For an unknown use/room combination, an unknown dominant noise, or a non-finite `Ld`. |
-| TypeError | if `ld` is not a single number. |
+| TypeError | if `ld` is not a single number, or `building_use`, `dominant_noise` or `room_type` is not a text. |
 
 ## DB_HR_FREQUENCIES_HZ
 
@@ -342,6 +345,7 @@ one-third-octave bands 100 Hz to 5 kHz (Formulae (A.5) to (A.7)).
 | Exception | When |
 | :--- | :--- |
 | ValueError | For an unknown spectrum, a wrong band count, or non-finite values. |
+| TypeError | if `spectrum` is not a text. |
 
 ## db_hr_impact_requirement
 
@@ -374,6 +378,7 @@ horizontally adjacent to a staircase.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a combination DB-HR states no impact limit for. |
+| TypeError | if `receiving_room` or `source_room` is not a text. |
 
 ## DB_HR_NORMALIZED_SPECTRA
 
@@ -387,7 +392,7 @@ DB_HR_NORMALIZED_SPECTRA = {'pink': (-30.1, -27.1, -24.4, -21.9, -19.6, -17.6, -
 
 ```python
 db_hr_party_wall_requirement(
-    quantity: str = 'D2m,nT,Atr',
+    quantity: Literal['D2m,nT,Atr', 'DnT,A'] = 'D2m,nT,Atr',
 ) -> DBHRRequirement
 ```
 
@@ -403,7 +408,7 @@ requirements, so this function returns the one route asked for.
 
 | Name | Description |
 | :--- | :--- |
-| `quantity` | `_D2M_NT_ATR` (default, the per-leaf route) or `_DNT_A` (the combined route). |
+| `quantity` | `"D2m,nT,Atr"` (default, the per-leaf route, 40 dBA) or `"DnT,A"` (the combined route, 50 dBA). |
 
 **Returns:** The [`DBHRRequirement`](/phonometry/reference/api/building/spain/#dbhrrequirement) of the chosen route.
 
@@ -411,6 +416,7 @@ requirements, so this function returns the one route asked for.
 
 | Exception | When |
 | :--- | :--- |
+| TypeError | if `quantity` is not a text. |
 | ValueError | For an unknown quantity. |
 
 ## db_hr_reverberation_requirement
@@ -445,6 +451,7 @@ area of at least 0,2 m2 per cubic metre of room volume.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For an unknown room use. |
+| TypeError | if `room_use` is not a text. |
 
 ## DBHRAssessment
 

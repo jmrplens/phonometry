@@ -655,6 +655,7 @@ def measurement_expanded_uncertainty(
     :param quantity: The column of Table 7, as in :func:`measurement_reproducibility`.
     :return: The expanded uncertainty, in dB.
     :raises ValueError: As :func:`measurement_reproducibility`.
+    :raises TypeError: if ``quantity`` is not a text.
     """
     return ISO7235_COVERAGE_FACTOR * measurement_reproducibility(
         frequency, quantity=quantity

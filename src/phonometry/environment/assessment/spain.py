@@ -89,6 +89,7 @@ from ..._internal.boundary import settled
 from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
+    require_aliased_choice,
     require_choice,
     require_count,
     require_equal_shapes,
@@ -368,22 +369,9 @@ def _positive(value: float, name: str) -> float:
     return scalar
 
 
-def _normalise(value: str, aliases: Mapping[str, str], name: str) -> str:
-    """Lower-case ``value``, replace spaces by underscores and resolve aliases."""
-    if not isinstance(value, str):
-        msg = f"'{name}' must be a string; got {value!r}."
-        raise TypeError(msg)
-    key = value.strip().lower().replace(" ", "_").replace("-", "_")
-    return aliases.get(key, key)
-
-
-def _check_period(period: str) -> str:
-    """Validate an evaluation-period name."""
-    key = str(period).strip().lower()
-    if key not in RD1367_EVALUATION_PERIODS:
-        msg = f"'period' must be one of 'day', 'evening', 'night'; got {period!r}."
-        raise ValueError(msg)
-    return key
+def _check_period(period: object) -> EvaluationPeriod:
+    """An evaluation-period name, as written."""
+    return require_choice(period, "period", RD1367_EVALUATION_PERIODS)
 
 
 def round_reported_level(value: float) -> int:
@@ -922,16 +910,9 @@ def _limits[K](
     )
 
 
-def _area_key(area_type: str, table: Mapping[str, Any]) -> str:
-    """Resolve and validate an acoustic area type against a table."""
-    key = _normalise(area_type, _AREA_ALIASES, "area_type")
-    if key not in table:
-        msg = (
-            "'area_type' must be one of "
-            f"{sorted(table)} (or a documented alias); got {area_type!r}."
-        )
-        raise ValueError(msg)
-    return key
+def _area_key(area_type: object, table: Mapping[str, Any]) -> str:
+    """The row of a table an acoustic area type names, as written."""
+    return require_aliased_choice(area_type, "area_type", table, _AREA_ALIASES)
 
 
 def outdoor_quality_objectives(
@@ -955,12 +936,10 @@ def outdoor_quality_objectives(
         on 24 October 2007, or ``"new"`` for the rest (5 dB stricter).
     :return: The applicable :class:`RegulationLimits` for the index ``Lx``.
     :raises ValueError: For an unknown area type or urbanisation state.
+    :raises TypeError: if ``area_type`` or ``urbanization`` is not a text.
     """
     key = _area_key(area_type, _OUTDOOR_OBJECTIVES)
-    state = str(urbanization).strip().lower()
-    if state not in ("existing", "new"):
-        msg = f"'urbanization' must be 'existing' or 'new'; got {urbanization!r}."
-        raise ValueError(msg)
+    state = require_choice(urbanization, "urbanization", ("existing", "new"))
     offset = 0.0 if state == "existing" else -5.0
     suffix = (
         "existing urbanised areas"
@@ -978,11 +957,15 @@ def outdoor_quality_objectives(
 
 
 def _indoor_key(
-    building_use: str, room_type: str, table: Mapping[tuple[str, str], Any]
+    building_use: object, room_type: object, table: Mapping[tuple[str, str], Any]
 ) -> tuple[str, str]:
-    """Resolve and validate a (building use, room type) pair against a table."""
-    use = _normalise(building_use, _USE_ALIASES, "building_use")
-    room = _normalise(room_type, _ROOM_ALIASES, "room_type")
+    """The row of a table a (building use, room type) pair names, as written."""
+    use = require_aliased_choice(
+        building_use, "building_use", {u for u, _ in table}, _USE_ALIASES
+    )
+    room = require_aliased_choice(
+        room_type, "room_type", {r for _, r in table}, _ROOM_ALIASES
+    )
     if (use, room) not in table:
         msg = (
             "Unknown (building_use, room_type) combination "
@@ -1021,6 +1004,7 @@ def indoor_quality_objectives(
         ``"classrooms"`` or ``"reading_rooms"``.
     :return: The applicable :class:`RegulationLimits` for the index ``Lx``.
     :raises ValueError: For an unknown combination.
+    :raises TypeError: if ``building_use`` or ``room_type`` is not a text.
     """
     key = _indoor_key(building_use, room_type, _INDOOR_OBJECTIVES)
     return _limits(
@@ -1039,14 +1023,11 @@ def vibration_quality_objective(building_use: BuildingUse) -> float:
         ``"hospital"``) or ``"educational"``.
     :return: The ``Law`` objective, in dB.
     :raises ValueError: For an unknown building use.
+    :raises TypeError: if ``building_use`` is not a text.
     """
-    use = _normalise(building_use, _USE_ALIASES, "building_use")
-    if use not in _VIBRATION_OBJECTIVES:
-        msg = (
-            "'building_use' must be one of "
-            f"{sorted(_VIBRATION_OBJECTIVES)}; got {building_use!r}."
-        )
-        raise ValueError(msg)
+    use = require_aliased_choice(
+        building_use, "building_use", _VIBRATION_OBJECTIVES, _USE_ALIASES
+    )
     return _VIBRATION_OBJECTIVES[use]
 
 
@@ -1060,6 +1041,7 @@ def infrastructure_limits(area_type: AreaType) -> RegulationLimits:
     :param area_type: Acoustic area type letter, or an alias.
     :return: The applicable :class:`RegulationLimits` for the index ``Lx``.
     :raises ValueError: For an unknown area type.
+    :raises TypeError: if ``area_type`` is not a text.
     """
     key = _area_key(area_type, _INFRASTRUCTURE_LIMITS)
     return _limits(
@@ -1080,6 +1062,7 @@ def max_infrastructure_limit(area_type: AreaType) -> float:
     :param area_type: Acoustic area type letter, or an alias.
     :return: The ``LAmax`` limit, in dB.
     :raises ValueError: For an unknown area type.
+    :raises TypeError: if ``area_type`` is not a text.
     """
     key = _area_key(area_type, _MAX_INFRASTRUCTURE_LIMITS)
     return _MAX_INFRASTRUCTURE_LIMITS[key]
@@ -1096,6 +1079,7 @@ def activity_limits(area_type: AreaType) -> RegulationLimits:
     :param area_type: Acoustic area type letter, or an alias.
     :return: The applicable :class:`RegulationLimits` for the index ``LK,x``.
     :raises ValueError: For an unknown area type.
+    :raises TypeError: if ``area_type`` is not a text.
     """
     key = _area_key(area_type, _ACTIVITY_LIMITS)
     return _limits(
@@ -1153,6 +1137,7 @@ def adjacent_premises_limits(
         ``"offices"``, ``"classrooms"`` or ``"reading_rooms"``.
     :return: The applicable :class:`RegulationLimits` for the index ``LK,x``.
     :raises ValueError: For an unknown combination.
+    :raises TypeError: if ``building_use`` or ``room_type`` is not a text.
     """
     key = _indoor_key(building_use, room_type, _ADJACENT_LIMITS)
     return _limits(

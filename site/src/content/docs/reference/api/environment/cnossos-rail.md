@@ -159,6 +159,7 @@ Bridge transfer function `L_H,bridge,i` of Table G-7, in dB per axle.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the column is not tabulated. |
+| TypeError | if `bridge` is not a text. |
 
 ## BridgeType
 
@@ -384,6 +385,7 @@ to be supplied by the Member State.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the class carries no spectrum in Table G-1b. |
+| TypeError | if `roughness` is not a text. |
 
 ## RailJoints
 
@@ -832,6 +834,7 @@ Track transfer function `L_H,TR,i` of Table G-3a, in dB per axle.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the column is not tabulated. |
+| TypeError | if `track` is not a text. |
 
 ## TrackBase
 
@@ -949,6 +952,7 @@ one table serves both running conditions.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the vehicle is not tabulated. |
+| TypeError | if `vehicle` is not a text. |
 
 ## TractionVehicle
 
@@ -1141,6 +1145,7 @@ Wheel roughness `L_r,VEH` of Table G-1a.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the brake type is not tabulated. |
+| TypeError | if `brake` is not a text. |
 
 ## wheel_transfer
 

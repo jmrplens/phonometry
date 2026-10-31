@@ -1190,4 +1190,212 @@ print(hearing.nipts(95.0, 40.0, 0.9).frequencies[:3])
 # [ 500. 1000. 2000.]
 ```
 
+## Every `.plot()` takes the axes first
+
+Every result's `.plot()` now reads `plot(ax=None, *, ...)`: the axes first,
+and every other argument by name, `language` included. Three did not start
+with the axes in 3.3.0, so `plot(ax)` on them handed the axes to the wrong
+parameter:
+
+| 3.3.0 | 4.0 |
+| --- | --- |
+| `LoudspeakerCharacteristics.plot("impedance", ax)` | `.plot(ax, quantity="impedance")` |
+| `MicrophoneCharacteristics.plot("noise", ax)` | `.plot(ax, quantity="noise")` |
+| `TransferMatrix.plot(f, rho_c, ax)` | `.plot(ax, frequencies=f, characteristic_impedance=rho_c)` |
+
+Six results that are newer than 3.3.0 took `language` by position in
+4.0.0rc1: the four hearing-protector ratings and the two low-frequency
+intensity results. `plot(ax, "es")` on those is `plot(ax, language="es")`
+now, as it is everywhere else.
+
+The public `plot_*` helpers, which draw a device or a geometry rather than a
+result, share one shape now as well: what they draw by position, and the
+axes, the language and the style keywords by name,
+`plot_x(<data>, *, ax=None, ..., language="en", **kwargs)`. Seventeen took the
+axes after their data and six took them first. `plot_silencer_geometry` also
+took every dimension as a keyword of its own; it takes the `kind` and the
+`geometry` a `ReactiveSilencerResult` keeps now, the dimensions in one mapping
+under the same keys, so the drawing reads like the result:
+
+| 3.3.0 or 4.0.0rc1 | 4.0 |
+| --- | --- |
+| `vibration.plot_plate_geometry(0.8, 0.6, ax)`, `environment.plot_barrier_geometry(ax, source_height=...)` and the other twenty-one public `plot_*` helpers | `plot_plate_geometry(0.8, 0.6, ax=ax)`, `plot_barrier_geometry(ax=ax, source_height_m=...)` |
+| `noise_control.plot_silencer_geometry("expansion chamber", ax, length=0.3, chamber_area=0.04, pipe_area=0.01)` | `plot_silencer_geometry("expansion chamber", {"length": 0.3, "chamber_area": 0.04, "pipe_area": 0.01}, ax=ax)` |
+
+## A multi-panel `.plot()` returns a tuple of axes
+
+A `.plot()` that draws more than one panel returns, without `ax`, a tuple of
+its axes, the top panel first, where 3.3.0 and 4.0.0rc1 returned a NumPy
+array of them. Indexing, unpacking and `len()` work as before; the array's
+own attributes do not:
+
+| 3.3.0 or 4.0.0rc1 | 4.0 |
+| --- | --- |
+| `axes = result.plot()`, then `axes.shape` or `axes.size` | `len(result.plot())` |
+| `result.plot().flat`, `result.plot().ravel()` | the tuple itself: `for ax in result.plot()` |
+| `isinstance(drawn, np.ndarray)`, to tell several panels from one axes | `isinstance(drawn, tuple)` |
+
+With `ax` the plot draws one panel on it and returns that axes, as before.
+Each case is a typed overload now, so a type checker reads
+`top, bottom = result.plot()` as two `Axes` and `result.plot(ax=ax)` as one.
+`ZwickerLoudness.plot()` without `ax` still returns one axes for a stationary
+result and two for a time-varying one, which only the data decide.
+
+The plots that draw on a polar axes say so. `PistonDirectivity`,
+`VectorChangeResult` and `DiffuserPolarResponse` return a `PolarAxes`, and so
+do `DiffusionResult.plot()` without `ax`, `DirectivityFactor.plot()` for its
+`"response"` view, and `LoudspeakerCharacteristics.plot()` and
+`MicrophoneCharacteristics.plot()` for `quantity="directivity"`. Those take a
+`PolarAxes` where they need one; matplotlib types a subplot made with
+`projection="polar"` as plain `Axes`, so a typed caller hands it over as
+`typing.cast(PolarAxes, ax)`. `DiffuserPolarResponse.plot()` refuses a
+cartesian axes with a `ValueError` that names `ax`, as the other polar plots
+do, where it raised an `AttributeError` from matplotlib.
+
+## A zero-dimensional array gives a zero-dimensional array
+
+A function of a number or an array of them returns a `float` only when every
+argument that decides the shape of its result is a number, a Python or a
+NumPy one, and an array as soon as one of them is a sequence or an array,
+where 3.3.0 and 4.0.0rc1 returned a `float` for a zero-dimensional array.
+Ninety public functions and methods follow the rule, `room.room_constant`,
+`room.critical_distance` and `fluids.sea_water_sound_speed` among them, and
+`vibration.evaluation_zone` follows it with a zone letter where the others
+give a `float`:
+
+| 3.3.0 or 4.0.0rc1 | 4.0 |
+| --- | --- |
+| `room.room_constant(100.0, np.array(0.2))` returned the `float` `25.0` | it returns `array(25.)`; `float(...)` or `.item()` gives the number |
+| `emission.local_environmental_correction([0.5])` returned a `float` for any one-element input, as did `emission.environmental_ratio_from_k2`, `emission.environmental_ratio_from_absorption`, and the `background_margin_db` field and the `correction` property of the `WorkstationBackgroundCorrection` that `emission.background_noise_correction_at_workstation` returns | each gives a one-element array; hand over `0.5`, not `[0.5]`, to get a number |
+| `electroacoustics.piston_resistance(1.0)` returned a `numpy.float64`, as did `piston_reactance` and `piston_directivity` | it returns a Python `float`, with no `.shape` or `.dtype` |
+
+Sixty-six of them gain typed overloads, so a type checker reads
+`room.room_constant(100.0, 0.2)` as a `float` and
+`room.room_constant(100.0, alphas)` as an array whatever the shape of
+`alphas`; an `ArrayLike` or a nested list reads as the union, which a typed
+caller narrows. The reducers (`signals.leq` and the other levels of a signal,
+`building.energy_average_level`, `room.directivity_energy_average` and their
+kin), whose result is one number for a one-dimensional input, keep the union
+and their behaviour.
+
+## A sample rate is a `float`, and a count takes a NumPy integer
+
+The rate of a `Signal` is the `float` it was given, so a type checker reads
+`sig.fs` as a `float`, where it read an `int`, and every function that runs
+at any positive rate takes a `float`: the rate one function returns is the
+rate the next one takes. The functions that need a whole number of samples
+per second keep refusing a fractional one: `io.write`, which writes the rate
+into the file's header, the test signals of `electroacoustics`,
+`electroacoustics.field_strength_meter`, `room.image_source_rir`,
+`psychoacoustics.loudness_zwicker`, `psychoacoustics.sharpness_din`,
+`psychoacoustics.psychoacoustic_annoyance_from_signal` and `speech.stoi`.
+`vibration.evaluate_train_passage`, `signals.resample_signal` handed a Signal
+and the Method B bank of `environment` refused a fractional rate as well, on
+the grounds that the filter bank needed a whole one, which it does not: they
+run at any rate.
+
+| 3.3.0 or 4.0.0rc1 | 4.0 |
+| --- | --- |
+| `psychoacoustics.loudness_zwicker(x, sig.fs)` type checked, `sig.fs` read as an `int` | hand over the Signal, `loudness_zwicker(sig)`, or `int(sig.fs)` |
+| `io.write(path, io.Signal(x, 44100.5))` failed inside the header with `struct.error` | it raises `ValueError` naming `fs`, as `fs=44100.5` does |
+| `filters.OctaveFilterBank(fs, order=2.5)`, `room.mls_signal(10.5)` and the other counts checked only as one number ran with a fraction or a bool | a fraction raises `ValueError: 'order' must be a whole number`, a bool a `TypeError`; pass the whole number |
+| `emission.sound_intensity(p1, p2, fs, spacing_m=d, fraction=1.0)` ran | it raises `TypeError`, as every band fraction does; pass `1` or `3` |
+
+A count, a band fraction or a flag takes the NumPy integer or truth value
+its validator takes (`int | np.integer[Any]`, `BandFraction |
+np.integer[Any]`, `bool | np.bool_`), and values by band take a mapping keyed
+by integers (`{125: 40.0}`) as they take one keyed by floats. A count that
+was checked only as one number is read by the same whole-number check, so a
+fraction or a bool it used to take is refused, as in the rows above. A result
+record that validates a count or a band fraction holds the `int` it reads,
+where it kept a NumPy integer as it was given.
+
+## Verdicts are result objects, not dictionaries
+
+The three `verify_*` functions of 3.3.0 returned `dict[str, Any]` and now
+return a frozen dataclass, like every other result in the library.
+`filter_class_compliance`, the public wrapper that existed only to package the
+filter verdict, went with the change, since the verifier now returns the
+object itself. Each key of the dictionary is an attribute of the same name,
+but for `passed`, which is `passes`, and every argument after the one the call
+is about is written by name.
+
+| 3.3.0 | 4.0 |
+| --- | --- |
+| `verify_filter_class(bank)["overall_class"]` | `filters.verify_filter_class(bank).overall_class` |
+| `verify_filter_class(bank, 4096)` | `filters.verify_filter_class(bank, n_points=4096)` |
+| `verify_weighting_class(wf)["overall_class"]` | `filters.verify_weighting_class(wf).overall_class` |
+| `verify_aircraft_noise_system(...)["passed"]` | `aircraft.verify_aircraft_noise_system(...).passes` |
+| `filter_class_compliance(bank)` | `filters.verify_filter_class(bank)`, which returns the same `FilterComplianceResult` |
+
+`verify_intensity_class` and `verify_quasi_peak_dynamics` are newer than
+3.3.0, and in 4.0.0rc1 they already returned their records.
+
+```python
+from phonometry.filters import OctaveFilterBank, verify_filter_class
+
+verdict = verify_filter_class(OctaveFilterBank(48000, fraction=1, limits=[125, 4000]))
+print(verdict.overall_class, len(verdict.bands))
+```
+
+`verify_running_rms_decay` is newer than 3.3.0, and in 4.0.0rc1 it returned a
+bare `bool`, which threw away the printed interval and the measured time it
+had judged. It now returns a `RunningRMSDecayVerification` that keeps both:
+the verdict is `.passes`, beside `.measured_time_s`, `.printed_time_s`,
+`.tolerance_s` and the interval as `.lower_time_s` and `.upper_time_s`. The
+object refuses to be read as a truth value, so an
+`if verify_running_rms_decay(...):` written against the release candidate
+raises `TypeError` instead of passing every meter.
+
+## A verdict says `passes`, refuses a truth value, and comes from a verb
+
+A judgement is named for what it judges: `verify_` an instrument, `assess_` a
+measured situation, `check_` the setup a method needs. Each returns a record
+that keeps its reasons, and a pass or a fail is spelled `passes` on every one of
+them. A record a judging function returns, and every record with a `passes`,
+refuses to be read as a truth value: `if verdict:` raises `TypeError` and the
+message names what to read. In 3.3.0 and 4.0.0rc1 these records were always
+true, so an `if` written against them passed every failure: read `.passes` on
+`QuasiPeakDynamicsResult`, `AircraftSystemComplianceResult`,
+`WeightingVerification`, `PhaseVerification`, `SignalBurstVerification`,
+`DBHRCheck`, `DBHRAssessment`, `ActivityAssessment` and `PeriodAssessment`;
+`.overall_class` on `FilterComplianceResult`, `WeightingComplianceResult` and
+`IntensityInstrumentComplianceResult`; `.within_guideline` on
+`DamageAssessment`, since exceeding a guideline value of DIN 4150-3 is not a
+failure; `.qualified` on `PrecisionCriteria`; `.adjustment` on
+`TonalAssessmentResult`; and `.decisive_audibility` or `.audible` on
+`ToneAudibilityResult`.
+
+| 3.3.0 or 4.0.0rc1 | 4.0 |
+| --- | --- |
+| `.complies` on `DbHrCheck`, `DbHrAssessment` (now `DBHRCheck`, `DBHRAssessment`), `ActivityAssessment` and `PeriodAssessment` | `.passes` |
+| `vibration.is_significant_change(change, zone_b_upper)` | `vibration.assess_operational_change(change, zone_b_upper).significant`, beside the `.threshold` it is read against. A significant change is a reason to investigate, not a failure, so the flag keeps its name |
+| `materials.limp_frame_applicable(k_c, criterion=...)` | `materials.check_limp_frame(k_c, criterion=...).passes`, beside the `.ratio` and the `.threshold`. A ratio exactly on the threshold no longer passes: Allard & Atalla print both criteria as strict inequalities |
+| `fi.field_is_stationary(limit=...)` on a `FieldIndicators` | `fi.check_field_stationarity().passes`, and band by band its `.stationary`. The limit is the 0.6 of Table B.3, read as `.limit`, and no longer an argument |
+| `room.perceptibly_different(symbol, first, second)` | `room.assess_perceptible_difference(symbol, first, second).different`; the two values must now have the same shape |
+| `materials.check_base_plate_scattering(s) == ()` | `materials.check_base_plate_scattering(s).passes`, with the bands over the limit in `.exceeded_frequencies` and the per-band `.margins`, `.exceeds` and `.limits` beside them. A coefficient that is not finite raises `ValueError`, where it used to pass |
+| `corrected, limited = building.background_corrected_level(lp, lb)` | `result = building.background_corrected_level(lp, lb)`, then `result.corrected_levels` and `result.limited` |
+| `k1, held = emission.background_noise_correction_at_workstation(lp, lb)` | `result = emission.background_noise_correction_at_workstation(lp, lb)`, then `result.correction` and `result.upper_bound` |
+
+The 3.3.0 top-level names this renames (`rigid_mass_calibration_check`,
+`satisfies_lower_requirement`, `satisfies_upper_requirement`,
+`strong_coupling_satisfied` and `tonal_seeking_survey`) are in the table of
+the names that are gone, at the end of this page.
+
+```python
+from phonometry import building, materials
+
+conformity = building.assess_requirement_conformity(52.0, 1.5, 50.0, bound="minimum")
+print(conformity.passes, conformity.margin_db)
+# True 0.5
+check = materials.check_base_plate_scattering([0.02] * len(materials.BASE_PLATE_BANDS_HZ))
+print(check.passes, check.exceeded_frequencies.size)
+# True 0
+try:
+    bool(check)
+except TypeError as error:
+    print(type(error).__name__)
+# TypeError
+```
+
 ---

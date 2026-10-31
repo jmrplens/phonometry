@@ -94,8 +94,8 @@ prominence `P`.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | for a non-positive `dt` or fewer than two samples. |
-| TypeError | if `dt` is not a single number. |
+| ValueError | for a non-positive `dt`, fewer than two samples, or an `onset_rate_method` other than the two listed. |
+| TypeError | if `dt` is not a single number, or `onset_rate_method` is not a text. |
 
 ## impulse_adjustment
 
@@ -369,7 +369,8 @@ together with the source category (Clause 7) and the adjusted `LAeq`.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | for invalid `fs`, `dt`, an empty signal, or an `x` that is not one channel (a 1-D series). |
+| ValueError | for invalid `fs`, `dt`, an empty signal, an `x` that is not one channel (a 1-D series), or an `onset_rate_method` other than the two listed. |
+| TypeError | if `onset_rate_method` is not a text. |
 
 ## ImpulsiveSoundResult
 

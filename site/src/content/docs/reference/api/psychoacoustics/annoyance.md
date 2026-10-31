@@ -127,6 +127,12 @@ variant (see [`fluctuation_strength`](/phonometry/reference/api/psychoacoustics/
 
 **Returns:** A [`PsychoacousticAnnoyanceResult`](/phonometry/reference/api/psychoacoustics/annoyance/#psychoacousticannoyanceresult).
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `field` is not a text. |
+
 ## PsychoacousticAnnoyanceResult
 
 ```python

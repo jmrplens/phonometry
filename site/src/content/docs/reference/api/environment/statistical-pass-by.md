@@ -184,7 +184,7 @@ stay on the result.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For an unknown category, a speed that is not positive, a level that is not finite, inputs that do not match pass-by for pass-by, fewer than three pass-bys, or pass-bys all at one speed. |
-| TypeError | if `road_speed_category` is not a text, or `max_levels` or `speeds_kmh` holds a text or a value that is not a real number. |
+| TypeError | if `road_speed_category` is not a text, or `max_levels` or `speeds_kmh` holds a text or a value that is not a real number, or `vehicle_category` is not a text. |
 
 ## PassByRegression
 

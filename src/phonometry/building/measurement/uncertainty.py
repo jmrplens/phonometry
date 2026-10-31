@@ -524,14 +524,14 @@ class UncertainValue(RichDisplay):
 # --------------------------------------------------------------------------- #
 # Lookups.
 # --------------------------------------------------------------------------- #
-def _canonical(quantity: str) -> str:
-    key = quantity.strip().lower()
-    key = _ALIASES.get(key, key)
-    if key not in _SINGLE:
-        valid = ", ".join(sorted(set(_SINGLE) | set(_ALIASES)))
-        msg = f"Unknown single-number quantity {quantity!r}. Valid: {valid}."
-        raise ValueError(msg)
-    return key
+def _canonical(quantity: object) -> str:
+    """The Table 4 to 7 row of a single-number quantity, named as written.
+
+    An alias the :data:`SingleNumberQuantity` lists on purpose (``"dnt_w"``,
+    Clause 7.2) resolves to the row of the descriptor it shares.
+    """
+    named = require_choice(quantity, "quantity", (*_SINGLE, *_ALIASES))
+    return _ALIASES.get(named, named)
 
 
 def band_uncertainty(
@@ -587,7 +587,7 @@ def single_number_uncertainty(
 ) -> float:
     """The tabulated single-number standard uncertainty ``u``, in dB.
 
-    Descriptors (case-insensitive, with aliases) cover the ISO 717 ratings:
+    Descriptors, written as listed, with aliases, cover the ISO 717 ratings:
     ``"r_w"`` (also ``rprime_w``/``dn_w``/``dnt_w``) and its spectrum-adaptation
     variants ``"r_w+c_50_5000"`` etc. (Table 3); ``"ln_w"``/``"ln_w+ci"`` (Table 5);
     ``"delta_lw"`` (Table 7). ``upper_limit=True`` selects the situation-A ``σR95``
@@ -603,6 +603,7 @@ def single_number_uncertainty(
     :param upper_limit: Select the ``σR95`` upper limit (airborne, situation A).
     :raises ValueError: Unknown descriptor, an untabulated situation, or an
         ``upper_limit`` request outside airborne/situation A.
+    :raises TypeError: if ``quantity`` is not a text.
     """
     key = _canonical(quantity)
     situations, sigma_r95 = _SINGLE[key]
@@ -716,6 +717,7 @@ def uncertain_value(
     :param coverage: Coverage probability as a fraction.
     :param one_sided: Use the one-sided coverage factor.
     :param upper_limit: Use the ``σR95`` upper limit (airborne, situation A).
+    :raises TypeError: if ``quantity`` is not a text.
     """
     u = single_number_uncertainty(quantity, situation, upper_limit=upper_limit)
     k = max(insulation_coverage_factor(coverage, one_sided=one_sided), 1.0)

@@ -91,7 +91,7 @@ def test_spectrogram_rejects_non_string_mode() -> None:
     """A non-string mode used to die in str.lower, deep in level calculation."""
     bank = filters.OctaveFilterBank(fs=FS, fraction=1, limits=[100, 5000])
     one_second = np.zeros(FS)
-    with pytest.raises(TypeError, match="'mode' must be a string"):
+    with pytest.raises(TypeError, match="'mode' must be one of .*, a text"):
         bank.spectrogram(one_second, mode=None)  # type: ignore[arg-type]
 
 

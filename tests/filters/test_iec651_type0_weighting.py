@@ -200,12 +200,12 @@ def test_default_edition_is_unchanged_by_the_new_one() -> None:
 
 def test_unknown_edition_is_refused_by_the_verifier() -> None:
     weighting = filters.WeightingFilter(48000, "A")
-    with pytest.raises(ValueError, match="edition must be"):
+    with pytest.raises(ValueError, match="'edition' must be one of"):
         filters.verify_weighting_class(weighting, edition="1985")
 
 
 def test_unknown_edition_is_refused_by_the_limits() -> None:
-    with pytest.raises(ValueError, match="edition must be"):
+    with pytest.raises(ValueError, match="'edition' must be one of"):
         filters.weighting_class_limits(1, edition="1985")
 
 

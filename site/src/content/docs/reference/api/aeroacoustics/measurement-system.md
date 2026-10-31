@@ -98,4 +98,5 @@ verification (subclause 4.6) and is not repeated here.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If a frequency or angle is out of the tabulated range. |
+| ValueError | If a frequency or angle is out of the tabulated range, or a `linearity` key is neither `"reference"` nor `"other"`. |
+| TypeError | If a `linearity` key is not a text. |

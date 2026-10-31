@@ -335,10 +335,14 @@ def test_1995_rejects_out_of_range_class_and_bad_edition() -> None:
         ValueError, match=r"filter_class must be one of .* for edition '2014'"
     ):
         class_limits(1.0, 0, band_centre)  # class 0 invalid for 2014
-    with pytest.raises(ValueError, match=r"edition must be '2014'"):
+    with pytest.raises(
+        ValueError, match=r"'edition' must be one of \('2014', '1995'\)"
+    ):
         class_limits(1.0, 1, band_centre, edition="2020")
     bank = filters.OctaveFilterBank(fs=48000, fraction=1, order=6, limits=[500, 2000])
-    with pytest.raises(ValueError, match=r"edition must be '2014'"):
+    with pytest.raises(
+        ValueError, match=r"'edition' must be one of \('2014', '1995'\)"
+    ):
         filters.verify_filter_class(bank, edition="2020")
 
 

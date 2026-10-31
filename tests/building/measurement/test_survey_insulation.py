@@ -318,30 +318,18 @@ def test_estimate_weighted_column() -> None:
         assert got == pytest.approx(expected)
 
 
-def test_estimate_furnished_aliases() -> None:
-    """'other'/'others' map to the general furnished row."""
-    base = building.estimate_reverberation_index(10.0, "furnished")
-    np.testing.assert_allclose(
-        building.estimate_reverberation_index(10.0, "other"), base
-    )
-    np.testing.assert_allclose(
-        building.estimate_reverberation_index(10.0, "others"), base
-    )
+@pytest.mark.parametrize("room", ["other", "others"])
+def test_estimate_has_no_alias_for_the_furnished_row(room: str) -> None:
+    """'other' and 'others', aliases of 3.3.0, name no row of Table 4."""
+    with pytest.raises(ValueError, match=r"'room' must be one of"):
+        building.estimate_reverberation_index(10.0, room)  # type: ignore[call-overload]
 
 
-def test_estimate_room_is_case_and_space_insensitive() -> None:
-    """Room labels are normalized (trimmed + lower-cased) before lookup."""
-    base = building.estimate_reverberation_index(10.0, "kitchen")
-    np.testing.assert_allclose(
-        building.estimate_reverberation_index(10.0, " Kitchen "), base
-    )
-    np.testing.assert_allclose(
-        building.estimate_reverberation_index(10.0, "KITCHEN"), base
-    )
-    furn = building.estimate_reverberation_index(10.0, "furnished")
-    np.testing.assert_allclose(
-        building.estimate_reverberation_index(10.0, " OTHER "), furn
-    )
+@pytest.mark.parametrize("room", [" Kitchen ", "KITCHEN", " OTHER ", "A"])
+def test_estimate_takes_the_room_as_written(room: str) -> None:
+    """A room key is matched as the Literal spells it, not trimmed or folded."""
+    with pytest.raises(ValueError, match=r"'room' must be one of"):
+        building.estimate_reverberation_index(10.0, room)  # type: ignore[call-overload]
 
 
 def test_estimate_volume_range_boundaries() -> None:
@@ -372,10 +360,8 @@ def test_estimate_rejects_bad_inputs() -> None:
     # The error names the actual volume range, not an internal index.
     with pytest.raises(ValueError, match=r"60 <= V <= 150"):
         building.estimate_reverberation_index(100.0, "kitchen")  # only V < 35
-    with pytest.raises(
-        ValueError, match=r"'room' .* is not tabulated for the volume range"
-    ):
-        building.estimate_reverberation_index(10.0, "z")
+    with pytest.raises(ValueError, match=r"'room' must be one of"):
+        building.estimate_reverberation_index(10.0, "z")  # type: ignore[call-overload]
     with pytest.raises(ValueError, match=r"'volume' must be positive"):
         building.estimate_reverberation_index(0.0, "a")
 

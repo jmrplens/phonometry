@@ -264,7 +264,7 @@ unit area as *tie_stiffness_per_area* (see
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive input. |
-| TypeError | if `gap_m`, `loss_factor`, `mass1` or `mass2` is not a single number. |
+| TypeError | if `gap_m`, `loss_factor`, `mass1` or `mass2` is not a single number, or `fraction` is not an integer (a word, a flag or a float). |
 
 ## field_incidence_correction
 
@@ -331,7 +331,7 @@ builds its estimate on).
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive input, an unknown incidence or a band set other than 1 or 3. |
-| TypeError | if `incidence` is not a text, or `field_correction` or `mass_per_area` is not a single number. |
+| TypeError | if `incidence` is not a text, or `field_correction` or `mass_per_area` is not a single number, or `fraction` is not an integer (a word, a flag or a float). |
 
 ## mass_spring_mass_resonance
 
@@ -571,7 +571,7 @@ no smooth model predicts.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive input, an unknown method, a coincidence range that is not increasing, or a Heckl construction whose points would be out of order. |
-| TypeError | if `method` is not a text, or `area`, `critical_frequency_lower`, `critical_frequency_upper`, `limiting_angle_deg`, `loss_factor` or `mass_per_area` is not a single number. |
+| TypeError | if `method` is not a text, or `area`, `critical_frequency_lower`, `critical_frequency_upper`, `limiting_angle_deg`, `loss_factor` or `mass_per_area` is not a single number, or `fraction` is not an integer (a word, a flag or a float). |
 
 ## PLATEAU_MATERIALS
 
@@ -784,7 +784,7 @@ let it be computed from *bending_stiffness* and *mass_per_area* through
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive input, an unknown coincidence model, or if neither *critical_frequency* nor *bending_stiffness* is given. |
-| TypeError | if `coincidence_model` is not a text, or `critical_frequency`, `field_correction`, `loss_factor` or `mass_per_area` is not a single number. |
+| TypeError | if `coincidence_model` is not a text, or `critical_frequency`, `field_correction`, `loss_factor` or `mass_per_area` is not a single number, or `fraction` is not an integer (a word, a flag or a float). |
 
 ## SoundReductionResult
 
@@ -884,6 +884,12 @@ requires the spectrum to be on the 16 one-third-octave bands (100 Hz to
 | `fraction` | Band set forwarded to [`phonometry.building.weighted_rating`](/phonometry/reference/api/building/ratings/#weighted_rating), 3 for one-third octaves or 1 for octaves (Default: `None`, read from the number of values). |
 
 **Returns:** The [`WeightedRatingResult`](/phonometry/reference/api/building/ratings/#weightedratingresult).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `fraction` is not an integer (a word, a flag or a float). |
 
 ### SoundReductionResult.report()
 

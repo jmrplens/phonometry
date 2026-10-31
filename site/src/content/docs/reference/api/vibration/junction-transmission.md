@@ -186,7 +186,7 @@ $\bar{\tau} = \int_0^{\pi/2} \tau(\theta) \cos\theta \,\mathrm{d}\theta$, evalua
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive `chi`/`psi`, an unknown junction or section, or a straight section that does not exist. |
-| TypeError | if `chi` is not a single number. |
+| TypeError | if `chi` is not a single number, or `section` is not a text. |
 
 ## corner_transmission_coefficient
 
@@ -220,7 +220,7 @@ Returns `0` for angles beyond the cut-off $\arcsin(\chi)$
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive `chi`/`psi`, an out-of-range angle or an unknown junction. |
-| TypeError | if `chi` or `psi` is not a single number. |
+| TypeError | if `chi` or `psi` is not a single number, or `junction` is not a text. |
 
 ## coupling_loss_factor
 
@@ -334,6 +334,7 @@ used by the Eq. 5.116 vibration reduction index. For the in-line junction
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive input or an unknown junction. |
+| TypeError | if `junction` is not a text. |
 
 ## junction_wave_parameters
 
@@ -678,7 +679,7 @@ covered.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive `chi`/`psi`, an out-of-range angle, or a junction without a straight section. |
-| TypeError | if `chi` or `psi` is not a single number. |
+| TypeError | if `chi` or `psi` is not a single number, or `junction` is not a text. |
 
 ## wave_vibration_reduction_index
 

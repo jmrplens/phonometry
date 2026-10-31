@@ -521,7 +521,7 @@ tapping machine on the source-room floor.
 | Exception | When |
 | :--- | :--- |
 | ValueError | On incompatible band counts or non-positive areas. |
-| TypeError | if `reference_area` is not a single number. |
+| TypeError | if `reference_area` is not a single number, or `fraction` is not an integer (a word, a flag or a float). |
 
 ## normalized_flanking_level_difference
 
@@ -558,7 +558,7 @@ area $A_0 = 10$ m².
 | Exception | When |
 | :--- | :--- |
 | ValueError | On incompatible band counts or non-positive areas. |
-| TypeError | if `reference_area` is not a single number. |
+| TypeError | if `reference_area` is not a single number, or `fraction` is not an integer (a word, a flag or a float). |
 
 ## StrongCouplingCheck
 

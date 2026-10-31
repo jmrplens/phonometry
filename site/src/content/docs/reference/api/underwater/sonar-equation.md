@@ -199,7 +199,7 @@ merit works for both sonar modes: the active figure of merit returned by
 | Exception | When |
 | :--- | :--- |
 | ValueError | If an input is invalid. |
-| TypeError | if `figure_of_merit`, `max_range` or `ph` is not a single number, or `n_points` is a flag, a text or an array where a count goes. |
+| TypeError | if `figure_of_merit`, `max_range` or `ph` is not a single number, or `n_points` is a flag, a text or an array where a count goes, or `law` or `model` is not a text. |
 
 ## detection_range_from_curve
 
@@ -235,7 +235,7 @@ linearly between the two bracketing samples. Real waveguides oscillate, so
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
-| TypeError | if `figure_of_merit` is not a single number. |
+| TypeError | if `figure_of_merit` is not a single number, or `crossing` is not a text. |
 
 ## detection_threshold
 

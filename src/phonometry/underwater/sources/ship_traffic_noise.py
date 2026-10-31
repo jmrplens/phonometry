@@ -37,6 +37,7 @@ import numpy as np
 
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
+    require_choice,
     require_positive,
     require_positive_array,
     require_ranks,
@@ -138,10 +139,7 @@ def _clean_frequencies(
 def _jomopans_echo(
     f: NDArray[np.float64], vessel_class: str, speed_kt: float, length_m: float
 ) -> NDArray[np.float64]:
-    key = vessel_class.strip().lower()
-    if key not in _VESSEL_CLASSES:
-        msg = f"'vessel_class' must be one of {VESSEL_CLASSES}, got {vessel_class!r}."
-        raise ValueError(msg)
+    key = require_choice(vessel_class, "vessel_class", VESSEL_CLASSES)
     v_c, cargo, d_lo, d_hi = _VESSEL_CLASSES[key]
     v = require_positive(speed_kt, "speed_kt")
     length = require_positive(length_m, "length_m")
@@ -280,27 +278,25 @@ def ship_source_spectrum(
     :raises ValueError: If ``model``/``vessel_class`` is unknown or an input is
         invalid.
     :raises TypeError: if ``length_m`` or ``speed_kt`` is not a single number, or
-        ``frequencies`` holds a text or a value that is not a real number.
+        ``frequencies`` holds a text or a value that is not a real number, or ``model``
+        or ``vessel_class`` is not a text.
     """
     f = _clean_frequencies(frequencies)
-    key = model.strip().lower()
+    key = require_choice(model, "model", _MODELS)
     used_class: str | None = None
     used_speed: float | None = None
     used_length: float | None = None
     if key == "jomopans-echo":
         psd = _jomopans_echo(f, vessel_class, speed_kt, length_m)
-        used_class = vessel_class.strip().lower()
+        used_class = vessel_class
         used_speed = float(speed_kt)
         used_length = float(length_m)
     elif key == "randi":
         psd = _randi(f, speed_kt, length_m)
         used_speed = float(speed_kt)
         used_length = float(length_m)
-    elif key == "wales-heitmeyer":
+    else:  # "wales-heitmeyer"
         psd = _wales_heitmeyer(f)
-    else:
-        msg = f"'model' must be one of {_MODELS}, got {model!r}."
-        raise ValueError(msg)
     band = psd + 10.0 * np.log10(0.231 * f)
     return ShipTrafficSpectrum(
         frequencies=f,

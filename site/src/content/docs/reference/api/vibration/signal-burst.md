@@ -149,7 +149,7 @@ the laboratory rig, not this record.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the application, the burst length or the sampling rate is not one this clause defines, or the amplitude is not finite and positive. |
-| TypeError | If `n_cycles` is neither an integer nor `None`, or `amplitude_m_s2` or `fs` is not one number. |
+| TypeError | If `n_cycles` is neither an integer nor `None`, or `amplitude_m_s2` or `fs` is not one number, or `application` is not a text. |
 
 ## SAWTOOTH_BURST_TESTS
 
@@ -246,7 +246,7 @@ the linear and the exponential average of Annex D.
 | Exception | When |
 | :--- | :--- |
 | ValueError | As for [`sawtooth_burst`](/phonometry/reference/api/vibration/signal-burst/#sawtooth_burst), and if the weighting belongs to another application. |
-| TypeError | If `n_cycles` is neither an integer nor `None`, or `fs` is not one number. |
+| TypeError | If `n_cycles` is neither an integer nor `None`, or `fs` is not one number, or `application` or `name` is not a text. |
 
 ## SIGNAL_BURST_RESPONSE
 
@@ -393,4 +393,4 @@ exactly.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the application, the weighting or a burst length is not one this clause defines, if a column is not printed for that application, if the rows disagree about which columns they report, if `measured` is empty, if an indication is negative or not finite, or if the amplitude is not finite and positive. |
-| TypeError | If a burst length is neither an integer nor `None`, or `amplitude_m_s2` is not one number. |
+| TypeError | If a burst length is neither an integer nor `None`, or `amplitude_m_s2` is not one number, or `application` or `name` is not a text. |

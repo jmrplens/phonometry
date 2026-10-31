@@ -521,7 +521,7 @@ def duct_path(
     :raises ValueError: If the spectra do not share one value per band or the
         criterion family is unknown.
     :raises TypeError: If an entry of ``elements`` is not a
-        :class:`DuctElement`.
+        :class:`DuctElement`, or ``criterion`` is not a text.
     """
     f = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
     if f.ndim != 1 or f.size == 0:

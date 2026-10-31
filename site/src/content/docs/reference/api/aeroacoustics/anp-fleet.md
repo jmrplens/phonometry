@@ -99,6 +99,13 @@ ANPAircraft.event_level(
 
 Single-event level at a receiver (see [`ANPDatabase.event_level`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpdatabaseevent_level)).
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | for an `operation`, `metric` or `absorption` other than those listed (the spelling as written). |
+| TypeError | if `operation`, `metric` or `absorption` is not a text. |
+
 ### ANPAircraft.noise_contour()
 
 ```python
@@ -119,6 +126,13 @@ ANPAircraft.noise_contour(
 
 Single-event ground contour (see [`ANPDatabase.noise_contour`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpdatabasenoise_contour)).
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | for an `operation`, `metric` or `absorption` other than those listed (the spelling as written). |
+| TypeError | if `operation`, `metric` or `absorption` is not a text. |
+
 ### ANPAircraft.npd_curves()
 
 ```python
@@ -129,6 +143,13 @@ ANPAircraft.npd_curves(
 ```
 
 NPD curves for this aircraft (see [`ANPDatabase.npd_curves`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpdatabasenpd_curves)).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | for an `operation` or `metric` other than those listed (the spelling as written, `"departure"` and not `"Departure"`). |
+| TypeError | if `operation` is not a text. |
 
 ### ANPAircraft.profile()
 
@@ -142,6 +163,13 @@ ANPAircraft.profile(
 ```
 
 Fixed-point profile (see [`ANPDatabase.profile`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpdatabaseprofile)).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | for an `operation` other than the four listed (the spelling as written, `"arrival"` and not `"ARRIVAL"`). |
+| TypeError | if `operation` is not a text. |
 
 ### ANPAircraft.revised_npd_curves()
 
@@ -158,6 +186,13 @@ ANPAircraft.revised_npd_curves(
 ```
 
 NPD curves for another atmosphere (see [`ANPDatabase.revised_npd_curves`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpdatabaserevised_npd_curves)).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | for an `operation`, `metric` or `absorption` other than those listed (the spelling as written). |
+| TypeError | if `operation` or `absorption` is not a text. |
 
 ### ANPAircraft.spectral_class()
 
@@ -182,6 +217,7 @@ Spectral class of this aircraft's NPD for an operation.
 | Exception | When |
 | :--- | :--- |
 | KeyError | if the database carries no such class. |
+| TypeError | if `operation` is not a text. |
 
 ## ANPDatabase
 
@@ -266,7 +302,8 @@ Feeds the aircraft's profile and NPD curves into
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `absorption` is not a text. |
+| ValueError | for an `operation`, `metric` or `absorption` other than those listed (the spelling as written, `"departure"` and not `"DEPARTURE"` or `"takeoff"`). |
+| TypeError | if `operation`, `metric` or `absorption` is not a text. |
 
 ### ANPDatabase.flight_profile()
 
@@ -306,6 +343,7 @@ which is why one has to be given and why the answer is not a table entry.
 | Exception | When |
 | :--- | :--- |
 | KeyError | If the aircraft has no procedural-step profile or no default weight for the request. |
+| TypeError | if `operation` is not a text. |
 
 ### ANPDatabase.noise_contour()
 
@@ -353,7 +391,8 @@ Feeds the aircraft's profile and NPD curves into
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `absorption` is not a text. |
+| ValueError | for an `operation`, `metric` or `absorption` other than those listed (the spelling as written, `"departure"` and not `"DEPARTURE"` or `"takeoff"`). |
+| TypeError | if `operation`, `metric` or `absorption` is not a text. |
 
 ### ANPDatabase.npd_curves()
 
@@ -383,6 +422,7 @@ NPD curves for an aircraft, operation and noise metric.
 | :--- | :--- |
 | KeyError | If the aircraft has no NPD data for the request. |
 | ValueError | If the metric or operation is unknown. |
+| TypeError | if `operation` is not a text. |
 
 ### ANPDatabase.performance_aircraft()
 
@@ -441,6 +481,13 @@ Takes the same arguments as `flight_profile`.
 
 **Returns:** An [`ANPProfile`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpprofile).
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | for an `operation` other than the four listed (the spelling as written), and as `flight_profile` does. |
+| TypeError | if `operation` is not a text. |
+
 ### ANPDatabase.procedural_steps()
 
 ```python
@@ -477,7 +524,8 @@ read only for a departure.
 | Exception | When |
 | :--- | :--- |
 | KeyError | If the aircraft has no procedural-step profile for the request, or `profile_id` is not among the available ones. |
-| ValueError | If `profile_id` is `None` and several profiles exist with none of them named `"DEFAULT"`. |
+| ValueError | If `profile_id` is `None` and several profiles exist with none of them named `"DEFAULT"`, or for an `operation` other than the four listed. |
+| TypeError | if `operation` is not a text. |
 
 ### ANPDatabase.profile()
 
@@ -516,6 +564,7 @@ none named `"DEFAULT"`) raises listing the identifiers.
 | :--- | :--- |
 | KeyError | If the aircraft is unknown, has no fixed-point profile for the request, or `profile_id` is not among the available ones. |
 | ValueError | If `profile_id` is `None` and several profiles exist with none of them named `"DEFAULT"`. |
+| TypeError | if `operation` is not a text. |
 
 ### ANPDatabase.revised_npd_curves()
 
@@ -559,6 +608,7 @@ it.
 | :--- | :--- |
 | KeyError | if the aircraft, its NPD data or its spectral class is missing. |
 | ValueError | for an unknown metric, operation or absorption route. |
+| TypeError | if `operation` or `absorption` is not a text. |
 
 ### ANPDatabase.spectral_class()
 

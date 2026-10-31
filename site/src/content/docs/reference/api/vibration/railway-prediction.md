@@ -126,7 +126,7 @@ table has no value for gives `nan`.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For an unknown floor or statistic, a non-positive frequency, or a non-finite input. |
-| TypeError | if `floor_natural_frequency_hz` is not a single number, or `frequencies` holds a text or a value that is not a real number. |
+| TypeError | if `floor_natural_frequency_hz` is not a single number, or `frequencies` holds a text or a value that is not a real number, or `floor` or `statistic` is not a text. |
 
 ## FOUNDATION_TO_FLOOR_LEVEL_DIFFERENCES
 
@@ -222,6 +222,7 @@ considerably.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For an unknown floor or a frequency the tables have no column for. |
+| TypeError | if `floor` is not a text. |
 
 ## GROUND_TO_FLOOR_LEVEL_DIFFERENCES
 
@@ -260,6 +261,7 @@ same 14 bands, or padded with zeros above them by the caller.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For an unknown level or statistic. |
+| TypeError | if `level` or `statistic` is not a text. |
 
 ## GROUND_TO_FOUNDATION_LEVEL_DIFFERENCES
 
@@ -697,7 +699,7 @@ point exponent below the correction gives a negative result, as printed.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a negative exponent or an unknown fit. |
-| TypeError | if `point_exponent` is not a single number. |
+| TypeError | if `point_exponent` is not a single number, or `fitted_with` is not a text. |
 
 ## train_velocity_ratio
 

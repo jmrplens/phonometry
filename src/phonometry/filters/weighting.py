@@ -166,11 +166,11 @@ def _require_design_flag(value: object) -> bool:
 
 
 def _require_str(value: object, name: str) -> str:
-    """Require *value* to be a string before any case folding touches it.
+    """Require *value* to be a string before a choice check compares it.
 
-    The choice checks in this module fold case first (``weighting.upper()``,
-    ``mode.lower()``), so a non-string used to die in the stdlib's attribute
-    lookup before the module's own message could name the parameter.
+    The choice checks in this module compare the text as written, so a
+    non-string would otherwise reach them as a value no option equals and be
+    refused as the wrong value rather than the wrong type.
 
     :param value: The value to validate.
     :param name: Parameter name used in the error message.
@@ -653,7 +653,7 @@ class WeightingFilter:
         _require_str(weighting, "weighting")
         high_accuracy = _require_design_flag(high_accuracy)
         self.fs = fs
-        self.weighting = weighting.upper()
+        self.weighting = weighting
         self.stateful = stateful
         self.high_accuracy = high_accuracy
 
@@ -969,10 +969,9 @@ def _prepare_time_weighting_initial_state(
         return np.zeros(state_shape, dtype=x_sq.dtype)
 
     if isinstance(initial_state, str):
-        state_name = initial_state.lower()
-        if state_name == "zero":
+        if initial_state == "zero":
             return np.zeros(state_shape, dtype=x_sq.dtype)
-        if state_name == "first":
+        if initial_state == "first":
             if x_sq.shape[-1] == 0:
                 raise ValueError(invalid_initial_state_message)
             return np.asarray(np.take(x_sq, 0, axis=-1), dtype=x_sq.dtype).copy()
@@ -1076,21 +1075,20 @@ def time_weighting(
     x_sq = x_proc**2
     initial = _prepare_time_weighting_initial_state(x_sq, initial_state)
 
-    mode_lower = mode.lower()
-    if mode_lower not in _TIME_WEIGHTINGS:
+    if mode not in _TIME_WEIGHTINGS:
         raise ValueError(_MODE_INVALID)
 
-    if mode_lower in ["fast", "slow"]:
-        tau = 0.125 if mode_lower == "fast" else 1.0
+    if mode in ["fast", "slow"]:
+        tau = 0.125 if mode == "fast" else 1.0
         alpha = 1 - np.exp(-1 / (fs * tau))
         b = [alpha]
         a = [1, -(1 - alpha)]
         # We apply the weighting to the squared signal to get the Mean Square value
         zi = np.expand_dims((1 - alpha) * initial, axis=-1)
         y, _ = signal.lfilter(b, a, x_sq, axis=-1, zi=zi)
-        return _as_envelope(x, cast(np.ndarray, y), fs, mode_lower)
+        return _as_envelope(x, cast(np.ndarray, y), fs, mode)
 
-    if mode_lower == "impulse":
+    if mode == "impulse":
         # Time weighting I of the withdrawn IEC 60651: 35 ms rising, 1500 ms falling
         tau_rise = 0.035
         tau_fall = 1.5
@@ -1107,7 +1105,7 @@ def time_weighting(
         y_t = _apply_impulse_kernel(x_t, alpha_rise, alpha_fall, initial_kernel)
 
         # Move time axis back
-        return _as_envelope(x, np.moveaxis(y_t, 0, -1), fs, mode_lower)
+        return _as_envelope(x, np.moveaxis(y_t, 0, -1), fs, mode)
 
     raise ValueError(_MODE_INVALID)
 
@@ -1128,11 +1126,10 @@ class TimeWeighting:
         if fs <= 0:
             raise ValueError(_FS_POSITIVE)
         _require_str(mode, "mode")
-        folded = mode.lower()
-        if folded not in _TIME_WEIGHTINGS:
+        if mode not in _TIME_WEIGHTINGS:
             raise ValueError(_MODE_INVALID)
         self.fs = fs
-        self.mode: Mode = folded
+        self.mode: Mode = mode
         self._state: np.ndarray | None = None
 
     def process(self, x: Signal | ArrayLike) -> TimeWeightedEnvelope | np.ndarray:

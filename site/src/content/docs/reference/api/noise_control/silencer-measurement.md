@@ -446,6 +446,7 @@ figure at 4 kHz within 6.
 | Exception | When |
 | :--- | :--- |
 | ValueError | As [`measurement_reproducibility`](/phonometry/reference/api/noise_control/silencer-measurement/#measurement_reproducibility). |
+| TypeError | if `quantity` is not a text. |
 
 ## measurement_reproducibility
 

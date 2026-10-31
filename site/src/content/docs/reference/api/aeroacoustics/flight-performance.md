@@ -564,13 +564,15 @@ Aerodynamic coefficients for one flap configuration.
 
 | Name | Description |
 | :--- | :--- |
-| `operation` | `"A"` (arrival) or `"D"` (departure). |
-| `flap_id` | Flap identifier as the procedure spells it. |
+| `operation` | `"A"` (arrival) or `"D"` (departure), as written. |
+| `flap_id` | Flap identifier as the procedure spells it; its case and padding are folded, as the tables disagree on both. |
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
+| TypeError | if `operation` is not a text. |
+| ValueError | if `operation` is neither `"A"` nor `"D"`. |
 | KeyError | if the aeroplane has no such configuration. Eq. B-21 takes `R` from the ANP `Aerodynamic_Coefficients` table for the step's own `Flap_ID` and names no fallback for an identifier that is not in it, so this raises rather than substituting a default: a silently substituted drag ratio changes every climb angle of the profile and nothing downstream can tell. |
 
 ## ProfilePoint

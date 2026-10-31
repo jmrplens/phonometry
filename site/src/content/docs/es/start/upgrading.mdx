@@ -2272,6 +2272,7 @@ que cubre:
 | `RegulationLimits[period]` para un periodo que no guarda | `ValueError` | `KeyError`. La clave se compara tal cual, como la de un `dict`: `limits["Day"]` y `limits[" night "]`, que se leían como `"day"` y `"night"`, ahora también lanzan `KeyError`. El periodo de `environment.PeriodAssessment`, que es una elección, sigue lanzando `ValueError` |
 | `emission.measurement_positions("hemisphere", ..., n_reflecting_planes=3, grade="survey")` | `NotImplementedError` | las posiciones 14, 21 y 22 de la Tabla B.2 de ISO 3746:2010 |
 | `emission.measurement_positions("hemisphere", ..., grade="survey")` sobre un plano reflectante | las posiciones 4, 5, 6 y 10 de la Tabla B.1 de ISO 3744, el conjunto para una fuente con tonos | las posiciones 4, 5, 6 y 10 de la Tabla B.1 de ISO 3746:2010, las que prescribe el apartado 8.2.1: las posiciones de banda ancha con esos números de la Tabla B.2 de ISO 3744 |
+| un `instrument=` que la tabla C.5 no enumera (`"Class 1"` por `"class1"`), en `hearing.task_based_exposure`, `hearing.job_based_exposure` y `hearing.full_day_exposure` | `KeyError` | `ValueError`, y `TypeError` para un valor que no es texto: el instrumento es una elección, no una clave que el llamador vuelve a leer |
 | `fluids.FluidPropertyUnavailable` | la excepción | `fluids.FluidPropertyUnavailableError`, que sigue siendo un `AttributeError`, así que `hasattr` y `getattr` con un valor por defecto se comportan como antes |
 
 Estos avisos derivan ahora de `PhonometryWarning`, cada uno con un tema propio,
@@ -2310,6 +2311,242 @@ print(issubclass(environment.RoadDeviceWarning, phonometry.PhonometryWarning))
 # ValueError
 # True
 ```
+
+## Una opción se compara tal como se escribe
+
+Un parámetro o un campo de registro tipado con un `Literal` de sus opciones,
+cuyo código limpiaba el texto antes de comprobarlo, acepta ahora las grafías
+que ese `Literal` enumera, y solo esas. Antes de 4.0, 198 de ellos cambiaban
+mayúsculas y minúsculas, quitaban espacios, intercambiaban `_`, `-` y
+espacios, traducían un alias propio o convertían en texto cualquier valor con
+`str()` antes de buscar la opción, de modo que una llamada que un comprobador
+de tipos rechazaba se ejecutaba igualmente:
+`filters.WeightingFilter(48000, "a")`, `filters.time_weighting(x, fs,
+mode="FAST")`, `vibration.guide_values("residential", edition=1999)`. Otros
+dos leían una opción y tomaban cualquier otro valor por la segunda: el
+`onset_rate_method` de `environment.detect_onsets` y de
+`environment.impulsive_sound_adjustment` ajustaba como mínimos cuadrados todo
+lo que no fuera `"upper_half"`. En 4.0 esa llamada lanza `ValueError`, o
+`TypeError` para un valor que no es texto, y el arreglo es escribir la opción
+tal como la enumera su `Literal`. Los alias
+que un `Literal` enumera a propósito siguen valiendo: `"docente"` por
+`"educational"` en `building.db_hr_facade_requirement`, `"dnt_w"` por `"r_w"`
+en `building.single_number_uncertainty`. Los ficheros que lee la biblioteca,
+como una base de datos ANP, se siguen leyendo escriban sus palabras con las
+mayúsculas que escriban.
+
+```python
+from phonometry import filters
+
+try:
+    filters.WeightingFilter(48000, "a")
+except ValueError as refusal:
+    print(type(refusal).__name__)
+print(filters.WeightingFilter(48000, "A").weighting)
+# ValueError
+# A
+```
+
+Cada fila es un parámetro que dejó de aceptar una grafía, con un ejemplo de cada
+clase que aceptaba y todos sus alias propios. Los ejemplos salen de ejecutar,
+con la grafía cambiada, las llamadas que hace la batería de pruebas y unas pocas
+escritas a propósito, sobre el código justo anterior a 4.0. Algunos de los
+parámetros son posteriores a 4.0.0rc1, o se renombraron después; sus filas solo
+afectan al código escrito desde entonces.
+
+| Parámetro | Aceptaba antes de 4.0 | 4.0 lanza |
+| --- | --- | --- |
+| `aircraft.ANPAircraft.event_level(metric=)` | otras mayúsculas (`"EXPOSURE"` por `"exposure"`); espacios alrededor (`" exposure "` por `"exposure"`) | `ValueError` |
+| `aircraft.ANPAircraft.event_level(operation=)` | otras mayúsculas (`"DEPARTURE"` por `"departure"`); espacios alrededor (`" departure "` por `"departure"`); alias propios (`"a"`, `"approach"`, `"arrivals"`, `"d"`, `"departures"`, `"landing"`, `"take-off"`, `"takeoff"`); un valor que no es texto pero se escribe como una opción | `ValueError`, y `TypeError` para un valor que no es texto |
+| `aircraft.ANPAircraft.noise_contour(metric=)` | otras mayúsculas (`"EXPOSURE"` por `"exposure"`); espacios alrededor (`" exposure "` por `"exposure"`) | `ValueError` |
+| `aircraft.ANPAircraft.noise_contour(operation=)` | otras mayúsculas (`"DEPARTURE"` por `"departure"`); espacios alrededor (`" departure "` por `"departure"`); alias propios (`"a"`, `"approach"`, `"arrivals"`, `"d"`, `"departures"`, `"landing"`, `"take-off"`, `"takeoff"`); un valor que no es texto pero se escribe como una opción | `ValueError`, y `TypeError` para un valor que no es texto |
+| `aircraft.ANPAircraft.npd_curves(operation=)` | otras mayúsculas (`"DEPARTURE"` por `"departure"`); espacios alrededor (`" departure "` por `"departure"`); alias propios (`"a"`, `"approach"`, `"arrivals"`, `"d"`, `"departures"`, `"landing"`, `"take-off"`, `"takeoff"`); un valor que no es texto pero se escribe como una opción | `ValueError`, y `TypeError` para un valor que no es texto |
+| `aircraft.ANPAircraft.profile(operation=)` | otras mayúsculas (`"DEPARTURE"` por `"departure"`); espacios alrededor (`" departure "` por `"departure"`); alias propios (`"a"`, `"approach"`, `"arrivals"`, `"d"`, `"departures"`, `"landing"`, `"take-off"`, `"takeoff"`); un valor que no es texto pero se escribe como una opción | `ValueError`, y `TypeError` para un valor que no es texto |
+| `aircraft.ANPAircraft.revised_npd_curves(operation=)` | otras mayúsculas (`"DEPARTURE"` por `"departure"`); espacios alrededor (`" departure "` por `"departure"`); alias propios (`"a"`, `"approach"`, `"arrivals"`, `"d"`, `"departures"`, `"landing"`, `"take-off"`, `"takeoff"`); un valor que no es texto pero se escribe como una opción | `ValueError`, y `TypeError` para un valor que no es texto |
+| `aircraft.ANPAircraft.spectral_class(operation=)` | otras mayúsculas (`"DEPARTURE"` por `"departure"`); espacios alrededor (`" departure "` por `"departure"`); un valor que no es texto pero se escribe como una opción | `ValueError`, y `TypeError` para un valor que no es texto |
+| `aircraft.ANPDatabase.event_level(metric=)` | otras mayúsculas (`"EXPOSURE"` por `"exposure"`); espacios alrededor (`" exposure "` por `"exposure"`) | `ValueError` |
+| `aircraft.ANPDatabase.event_level(operation=)` | otras mayúsculas (`"DEPARTURE"` por `"departure"`); espacios alrededor (`" departure "` por `"departure"`); alias propios (`"a"`, `"approach"`, `"arrivals"`, `"d"`, `"departures"`, `"landing"`, `"take-off"`, `"takeoff"`); un valor que no es texto pero se escribe como una opción | `ValueError`, y `TypeError` para un valor que no es texto |
+| `aircraft.ANPDatabase.flight_profile(operation=)` | otras mayúsculas (`"DEPARTURE"` por `"departure"`); espacios alrededor (`" departure "` por `"departure"`); un valor que no es texto pero se escribe como una opción | `ValueError`, y `TypeError` para un valor que no es texto |
+| `aircraft.ANPDatabase.noise_contour(metric=)` | otras mayúsculas (`"EXPOSURE"` por `"exposure"`); espacios alrededor (`" exposure "` por `"exposure"`) | `ValueError` |
+| `aircraft.ANPDatabase.noise_contour(operation=)` | otras mayúsculas (`"DEPARTURE"` por `"departure"`); espacios alrededor (`" departure "` por `"departure"`); alias propios (`"a"`, `"approach"`, `"arrivals"`, `"d"`, `"departures"`, `"landing"`, `"take-off"`, `"takeoff"`); un valor que no es texto pero se escribe como una opción | `ValueError`, y `TypeError` para un valor que no es texto |
+| `aircraft.ANPDatabase.npd_curves(operation=)` | otras mayúsculas (`"DEPARTURE"` por `"departure"`); espacios alrededor (`" A "` por `"A"`); alias propios (`"a"`, `"approach"`, `"arrivals"`, `"d"`, `"departures"`, `"landing"`, `"take-off"`, `"takeoff"`); un valor que no es texto pero se escribe como una opción | `ValueError`, y `TypeError` para un valor que no es texto |
+| `aircraft.ANPDatabase.procedural_profile(operation=)` | otras mayúsculas (`"DEPARTURE"` por `"departure"`); espacios alrededor (`" departure "` por `"departure"`); alias propios (`"a"`, `"approach"`, `"arrivals"`, `"d"`, `"departures"`, `"landing"`, `"take-off"`, `"takeoff"`); un valor que no es texto pero se escribe como una opción | `ValueError`, y `TypeError` para un valor que no es texto |
+| `aircraft.ANPDatabase.procedural_steps(operation=)` | otras mayúsculas (`"DEPARTURE"` por `"departure"`); espacios alrededor (`" departure "` por `"departure"`); alias propios (`"a"`, `"approach"`, `"arrivals"`, `"d"`, `"departures"`, `"landing"`, `"take-off"`, `"takeoff"`); un valor que no es texto pero se escribe como una opción | `ValueError`, y `TypeError` para un valor que no es texto |
+| `aircraft.ANPDatabase.profile(operation=)` | otras mayúsculas (`"DEPARTURE"` por `"departure"`); espacios alrededor (`" departure "` por `"departure"`); un valor que no es texto pero se escribe como una opción | `ValueError`, y `TypeError` para un valor que no es texto |
+| `aircraft.ANPDatabase.revised_npd_curves(operation=)` | otras mayúsculas (`"DEPARTURE"` por `"departure"`); espacios alrededor (`" departure "` por `"departure"`); alias propios (`"a"`, `"approach"`, `"arrivals"`, `"d"`, `"departures"`, `"landing"`, `"take-off"`, `"takeoff"`); un valor que no es texto pero se escribe como una opción | `ValueError`, y `TypeError` para un valor que no es texto |
+| `aircraft.AircraftSystemComplianceResult(linearity=)` | claves que no son texto pero se escriben como opciones | `TypeError` para un valor que no es texto |
+| `aircraft.PerformanceAircraft.flap(operation=)` | otras mayúsculas (`"d"` por `"D"`); espacios alrededor (`" D "` por `"D"`); un valor que no es texto pero se escribe como una opción | `ValueError`, y `TypeError` para un valor que no es texto |
+| `aircraft.engine_installation_correction(mounting=)` | otras mayúsculas (`"WING"` por `"wing"`); espacios alrededor (`" wing "` por `"wing"`); alias propios (`"prop"`) | `ValueError` |
+| `aircraft.event_level(metric=)` | otras mayúsculas (`"EXPOSURE"` por `"exposure"`); espacios alrededor (`" exposure "` por `"exposure"`) | `ValueError` |
+| `aircraft.event_level(mounting=)` | otras mayúsculas (`"WING"` por `"wing"`); espacios alrededor (`" wing "` por `"wing"`) | `ValueError` |
+| `aircraft.ground_effect_adjustment(flow_resistivity=)` | otras mayúsculas (`"g"` por `"G"`); espacios alrededor (`" G "` por `"G"`) | `ValueError` |
+| `aircraft.noise_contour(metric=)` | otras mayúsculas (`"EXPOSURE"` por `"exposure"`); espacios alrededor (`" exposure "` por `"exposure"`) | `ValueError` |
+| `aircraft.noise_contour(mounting=)` | otras mayúsculas (`"WING"` por `"wing"`); espacios alrededor (`" wing "` por `"wing"`) | `ValueError` |
+| `aircraft.start_of_roll_directivity(engine=)` | otras mayúsculas (`"JET"` por `"jet"`); espacios alrededor (`" jet "` por `"jet"`); alias propios (`"prop"`, `"propeller"`, `"turbofan"`) | `ValueError` |
+| `aircraft.terrain_screening_adjustment(flow_resistivity=)` | otras mayúsculas (`"d"` por `"D"`); espacios alrededor (`" D "` por `"D"`) | `ValueError` |
+| `building.d2m_nt_a(spectrum=)` | otras mayúsculas (`"RAILWAY"` por `"railway"`); espacios alrededor (`" railway "` por `"railway"`); un valor que no es texto pero se escribe como una opción | `ValueError`, y `TypeError` para un valor que no es texto |
+| `building.d2m_nt_atr(spectrum=)` | otras mayúsculas (`"TRAFFIC"` por `"traffic"`); espacios alrededor (`" traffic "` por `"traffic"`); un valor que no es texto pero se escribe como una opción | `ValueError`, y `TypeError` para un valor que no es texto |
+| `building.db_hr_airborne_requirement(receiving_room=)` | otras mayúsculas (`"PROTECTED"` por `"protected"`); espacios alrededor (`" protected "` por `"protected"`); un valor que no es texto pero se escribe como una opción | `ValueError`, y `TypeError` para un valor que no es texto |
+| `building.db_hr_airborne_requirement(source_room=)` | otras mayúsculas (`"SAME_UNIT"` por `"same_unit"`); espacios alrededor (`" same_unit "` por `"same_unit"`); un valor que no es texto pero se escribe como una opción | `ValueError`, y `TypeError` para un valor que no es texto |
+| `building.db_hr_facade_requirement(building_use=)` | otras mayúsculas (`"RESIDENTIAL"` por `"residential"`); espacios alrededor (`" residential "` por `"residential"`) | `ValueError` |
+| `building.db_hr_facade_requirement(dominant_noise=)` | otras mayúsculas (`"ROAD"` por `"road"`); espacios alrededor (`" road "` por `"road"`); un valor que no es texto pero se escribe como una opción | `ValueError`, y `TypeError` para un valor que no es texto |
+| `building.db_hr_facade_requirement(room_type=)` | otras mayúsculas (`"BEDROOMS"` por `"bedrooms"`); espacios alrededor (`" bedrooms "` por `"bedrooms"`) | `ValueError` |
+| `building.db_hr_global_index(spectrum=)` | otras mayúsculas (`"PINK"` por `"pink"`); espacios alrededor (`" pink "` por `"pink"`); un valor que no es texto pero se escribe como una opción | `ValueError`, y `TypeError` para un valor que no es texto |
+| `building.db_hr_impact_requirement(receiving_room=)` | otras mayúsculas (`"PROTECTED"` por `"protected"`); espacios alrededor (`" protected "` por `"protected"`); un valor que no es texto pero se escribe como una opción | `ValueError`, y `TypeError` para un valor que no es texto |
+| `building.db_hr_impact_requirement(source_room=)` | otras mayúsculas (`"OTHER_UNIT"` por `"other_unit"`); espacios alrededor (`" other_unit "` por `"other_unit"`); un valor que no es texto pero se escribe como una opción | `ValueError`, y `TypeError` para un valor que no es texto |
+| `building.db_hr_reverberation_requirement(room_use=)` | otras mayúsculas (`"CLASSROOM"` por `"classroom"`); espacios alrededor (`" classroom "` por `"classroom"`); un valor que no es texto pero se escribe como una opción | `ValueError`, y `TypeError` para un valor que no es texto |
+| `building.estimate_reverberation_index(room=)` | otras mayúsculas (`"G"` por `"g"`); espacios alrededor (`" g "` por `"g"`); alias propios (`"other"`, `"others"`) | `ValueError` |
+| `building.single_number_uncertainty(quantity=)` | otras mayúsculas (`"R_W"` por `"r_w"`); espacios alrededor (`" r_w "` por `"r_w"`) | `ValueError` |
+| `building.uncertain_value(quantity=)` | otras mayúsculas (`"R_W"` por `"r_w"`); espacios alrededor (`" r_w "` por `"r_w"`) | `ValueError` |
+| `environment.activity_limits(area_type=)` | otras mayúsculas (`"A"` por `"a"`); espacios alrededor (`" a "` por `"a"`) | `ValueError` |
+| `environment.adjacent_premises_limits(building_use=)` | otras mayúsculas (`"RESIDENTIAL"` por `"residential"`); espacios alrededor (`" residential "` por `"residential"`) | `ValueError` |
+| `environment.adjacent_premises_limits(room_type=)` | otras mayúsculas (`"BEDROOMS"` por `"bedrooms"`); espacios alrededor (`" bedrooms "` por `"bedrooms"`) | `ValueError` |
+| `environment.assess_activity(period_hours=)` | otras mayúsculas (claves: `{"Day": 12.0}`); espacios alrededor (claves: `{" day ": 12.0}`); claves que no son texto pero se escriben como opciones | `ValueError`, y `TypeError` para un valor que no es texto |
+| `environment.bridge_transfer(bridge=)` | un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
+| `environment.detect_onsets(onset_rate_method=)` | cualquier valor: todo lo que no fuera exactamente `"upper_half"` se ajustaba como `"least_squares"` (`"UPPER_HALF"`, `" upper_half "`, `"banana"`, `5`) | `ValueError`, y `TypeError` para un valor que no es texto |
+| `environment.impulsive_sound_adjustment(onset_rate_method=)` | cualquier valor: todo lo que no fuera exactamente `"upper_half"` se ajustaba como `"least_squares"` (`"UPPER_HALF"`, `" upper_half "`, `"banana"`, `5`) | `ValueError`, y `TypeError` para un valor que no es texto |
+| `environment.indoor_quality_objectives(building_use=)` | otras mayúsculas (`"RESIDENTIAL"` por `"residential"`); espacios alrededor (`" residential "` por `"residential"`) | `ValueError` |
+| `environment.indoor_quality_objectives(room_type=)` | otras mayúsculas (`"LIVING"` por `"living"`); espacios alrededor (`" living "` por `"living"`) | `ValueError` |
+| `environment.infrastructure_limits(area_type=)` | otras mayúsculas (`"E"` por `"e"`); espacios alrededor (`" e "` por `"e"`) | `ValueError` |
+| `environment.max_infrastructure_limit(area_type=)` | otras mayúsculas (`"E"` por `"e"`); espacios alrededor (`" e "` por `"e"`) | `ValueError` |
+| `environment.measured_insertion_loss_indirect(receiver_type_after=)` | un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
+| `environment.measured_insertion_loss_indirect(receiver_type_before=)` | un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
+| `environment.outdoor_quality_objectives(area_type=)` | otras mayúsculas (`"E"` por `"e"`); espacios alrededor (`" e "` por `"e"`) | `ValueError` |
+| `environment.outdoor_quality_objectives(urbanization=)` | otras mayúsculas (`"EXISTING"` por `"existing"`); espacios alrededor (`" existing "` por `"existing"`); un valor que no es texto pero se escribe como una opción | `ValueError`, y `TypeError` para un valor que no es texto |
+| `environment.pass_by_regression(vehicle_category=)` | espacios alrededor (`" 1 "` por `"1"`); un número (`1` por `"1"`); un valor que no es texto pero se escribe como una opción | `ValueError`, y `TypeError` para un valor que no es texto |
+| `environment.rail_roughness(roughness=)` | un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
+| `environment.road_propulsion_noise(category=)` | un número (`1` por `"1"`); un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
+| `environment.road_propulsion_noise(surface=)` | un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
+| `environment.road_rolling_noise(category=)` | un número (`1` por `"1"`); un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
+| `environment.road_rolling_noise(surface=)` | un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
+| `environment.road_source_power(surface=)` | un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
+| `environment.road_surface_coefficients(surface=)` | un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
+| `environment.road_vehicle_sound_power(category=)` | un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
+| `environment.road_vehicle_sound_power(surface=)` | un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
+| `environment.statistical_pass_by(corrected_vehicle_sound_levels=)` | otras mayúsculas (claves: `{"1": 78.8, "2A": 81.1, "2B": 83.8}`); espacios alrededor (claves: `{" 1 ": 78.8, " 2a ": 81.1, " 2b ": 83.8}`); claves que no son texto pero se escriben como opciones | `ValueError`, y `TypeError` para un valor que no es texto |
+| `environment.statistical_pass_by(reference_levels=)` | otras mayúsculas (claves: `{"1": 80.0, "2A": 85.0, "2B": 89.0}`); espacios alrededor (claves: `{" 1 ": 80.0, " 2a ": 85.0, " 2b ": 89.0}`); claves que no son texto pero se escriben como opciones | `ValueError`, y `TypeError` para un valor que no es texto |
+| `environment.statistical_pass_by(weighting_factors=)` | otras mayúsculas (claves: `{"1": 0.9, "2A": 0.075, "2B": 0.025}`); espacios alrededor (claves: `{" 1 ": 0.9, " 2a ": 0.075, " 2b ": 0.025}`); claves que no son texto pero se escriben como opciones | `ValueError`, y `TypeError` para un valor que no es texto |
+| `environment.statistical_pass_by_index(vehicle_sound_levels=)` | otras mayúsculas (claves: `{"1": 78.5, "2A": 81.1, "2B": 83.8}`); espacios alrededor (claves: `{" 1 ": 78.5, " 2a ": 81.1, " 2b ": 83.8}`); claves que no son texto pero se escriben como opciones | `ValueError`, y `TypeError` para un valor que no es texto |
+| `environment.statistical_pass_by_index(weighting_factors=)` | otras mayúsculas (claves: `{"1": 0.8, "2A": 0.1, "2B": 0.1}`); espacios alrededor (claves: `{" 1 ": 0.8, " 2a ": 0.1, " 2b ": 0.1}`); claves que no son texto pero se escriben como opciones | `ValueError`, y `TypeError` para un valor que no es texto |
+| `environment.track_transfer(track=)` | un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
+| `environment.traction_sound_power(vehicle=)` | un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
+| `environment.vibration_quality_objective(building_use=)` | otras mayúsculas (`"RESIDENTIAL"` por `"residential"`); espacios alrededor (`" residential "` por `"residential"`) | `ValueError` |
+| `environment.wheel_roughness(brake=)` | un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
+| `filters.OctaveFilterBank.filter(mode=)` | otras mayúsculas (`"RMS"` por `"rms"`) | `ValueError` |
+| `filters.OctaveFilterBank.spectrogram(mode=)` | otras mayúsculas (`"RMS"` por `"rms"`) | `ValueError` |
+| `filters.TimeWeighting(mode=)` | otras mayúsculas (`"FAST"` por `"fast"`) | `ValueError` |
+| `filters.WeightingFilter(weighting=)` | otras mayúsculas (`"a"` por `"A"`) | `ValueError` |
+| `filters.time_weighting(initial_state=)` | otras mayúsculas (`"ZERO"` por `"zero"`) | `ValueError` |
+| `filters.time_weighting(mode=)` | otras mayúsculas (`"FAST"` por `"fast"`) | `ValueError` |
+| `fluids.sea_water(sound_speed_model=)` | otras mayúsculas (`"UNESCO"` por `"unesco"`); espacios alrededor (`" unesco "` por `"unesco"`) | `ValueError` |
+| `fluids.sea_water_sound_speed(model=)` | otras mayúsculas (`"MACKENZIE"` por `"mackenzie"`); espacios alrededor (`" mackenzie "` por `"mackenzie"`) | `ValueError` |
+| `materials.check_ceiling_specimen(mounting=)` | otras mayúsculas (`"e"` por `"E"`); un valor que no es texto pero se escribe como una opción | `ValueError`, y `TypeError` para un valor que no es texto |
+| `materials.mounting_type(letter=)` | otras mayúsculas (`"e"` por `"E"`); un valor que no es texto pero se escribe como una opción | `ValueError`, y `TypeError` para un valor que no es texto |
+| `metrology.CalibratorTableRow.for_class(calibrator_class=)` | otras mayúsculas (`"1/m"` por `"1/M"`); espacios alrededor (`" 1 "` por `"1"`); un número (`1` por `"1"`); un valor que no es texto pero se escribe como una opción | `ValueError`, y `TypeError` para un valor que no es texto |
+| `metrology.sensitivity(calibrator_class=)` | espacios alrededor (`" 1 "` por `"1"`); un número (`1` por `"1"`); un valor que no es texto pero se escribe como una opción | `ValueError`, y `TypeError` para un valor que no es texto |
+| `metrology.verify_sound_calibrator(calibrator_class=)` | espacios alrededor (`" 1 "` por `"1"`); un número (`1` por `"1"`); un valor que no es texto pero se escribe como una opción | `ValueError`, y `TypeError` para un valor que no es texto |
+| `metrology.verify_sound_calibrator(environmental_test=)` | un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
+| `noise_control.applicable_methods(condition=)` | un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
+| `noise_control.applicable_methods(source_kind=)` | un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
+| `noise_control.cabin_insulation(method=)` | un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
+| `noise_control.check_enclosure_test_environment(base_standard=)` | un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
+| `noise_control.enclosure_artificial_source_insulation(condition=)` | un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
+| `noise_control.enclosure_artificial_source_insulation(quantity=)` | un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
+| `noise_control.enclosure_sound_power_insulation(condition=)` | un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
+| `noise_control.enclosure_sound_power_insulation(source_kind=)` | un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
+| `noise_control.enclosure_sound_pressure_insulation(condition=)` | un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
+| `noise_control.enclosure_sound_pressure_insulation(source_kind=)` | un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
+| `noise_control.screen_attenuation(source_kind=)` | un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
+| `noise_control.uncertainty_conditions(method=)` | un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
+| `noise_control.weighted_cabin_insulation(method=)` | un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
+| `noise_control.weighted_enclosure_insulation(quantity=)` | un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
+| `signals.ln_levels(mode=)` | otras mayúsculas (`"FAST"` por `"fast"`) | `ValueError` |
+| `signals.ln_levels(weighting=)` | otras mayúsculas (`"a"` por `"A"`) | `ValueError` |
+| `signals.sel(weighting=)` | otras mayúsculas (`"a"` por `"A"`) | `ValueError` |
+| `underwater.VolumeAbsorption(model=)` | otras mayúsculas (`"THORP"` por `"thorp"`); espacios alrededor (`" thorp "` por `"thorp"`); un valor que no es texto pero se escribe como una opción | `ValueError`, y `TypeError` para un valor que no es texto |
+| `underwater.WeightedExposureResult(group=)` | otras mayúsculas (`"vhf"` por `"VHF"`); espacios alrededor (`" VHF "` por `"VHF"`); un valor que no es texto pero se escribe como una opción | `ValueError`, y `TypeError` para un valor que no es texto |
+| `underwater.WeightedExposureResult(guidance=)` | otras mayúsculas (`"NMFS-2024"` por `"nmfs-2024"`); espacios alrededor (`" nmfs-2024 "` por `"nmfs-2024"`); otro separador (`"nmfs_2024"` por `"nmfs-2024"`); un valor que no es texto pero se escribe como una opción | `ValueError`, y `TypeError` para un valor que no es texto |
+| `underwater.audiogram_parameters(group=)` | otras mayúsculas (`"hf"` por `"HF"`); espacios alrededor (`" HF "` por `"HF"`); un valor que no es texto pero se escribe como una opción | `ValueError`, y `TypeError` para un valor que no es texto |
+| `underwater.auditory_weighting(group=)` | otras mayúsculas (`"hf"` por `"HF"`); espacios alrededor (`" HF "` por `"HF"`); un valor que no es texto pero se escribe como una opción | `ValueError`, y `TypeError` para un valor que no es texto |
+| `underwater.auditory_weighting(guidance=)` | otras mayúsculas (`"NMFS-2018"` por `"nmfs-2018"`); espacios alrededor (`" nmfs-2018 "` por `"nmfs-2018"`); otro separador (`"nmfs_2018"` por `"nmfs-2018"`); un valor que no es texto pero se escribe como una opción | `ValueError`, y `TypeError` para un valor que no es texto |
+| `underwater.detection_range(law=)` | otras mayúsculas (`"SPHERICAL"` por `"spherical"`); espacios alrededor (`" spherical "` por `"spherical"`) | `ValueError` |
+| `underwater.detection_range(model=)` | otras mayúsculas (`"FRANCOIS-GARRISON"` por `"francois-garrison"`); espacios alrededor (`" francois-garrison "` por `"francois-garrison"`) | `ValueError` |
+| `underwater.detection_range_from_curve(crossing=)` | otras mayúsculas (`"FIRST"` por `"first"`); espacios alrededor (`" first "` por `"first"`) | `ValueError` |
+| `underwater.effective_depth(seabed=)` | otras mayúsculas (`"SAND"` por `"sand"`); espacios alrededor (`" sand "` por `"sand"`); un valor que no es texto pero se escribe como una opción | `ValueError`, y `TypeError` para un valor que no es texto |
+| `underwater.eigenrays(bottom=)` | otras mayúsculas (`"PRESSURE-RELEASE"` por `"pressure-release"`); espacios alrededor (`" pressure-release "` por `"pressure-release"`) | `ValueError` |
+| `underwater.exposure_criteria(group=)` | otras mayúsculas (`"lf"` por `"LF"`); espacios alrededor (`" LF "` por `"LF"`); un valor que no es texto pero se escribe como una opción | `ValueError`, y `TypeError` para un valor que no es texto |
+| `underwater.exposure_criteria(guidance=)` | otras mayúsculas (`"SOUTHALL-2019"` por `"southall-2019"`); espacios alrededor (`" southall-2019 "` por `"southall-2019"`); otro separador (`"southall_2019"` por `"southall-2019"`); un valor que no es texto pero se escribe como una opción | `ValueError`, y `TypeError` para un valor que no es texto |
+| `underwater.gaussian_beams(bottom=)` | otras mayúsculas (`"RIGID"` por `"rigid"`); espacios alrededor (`" rigid "` por `"rigid"`) | `ValueError` |
+| `underwater.group_audiogram(group=)` | otras mayúsculas (`"hf"` por `"HF"`); espacios alrededor (`" HF "` por `"HF"`); un valor que no es texto pero se escribe como una opción | `ValueError`, y `TypeError` para un valor que no es texto |
+| `underwater.hearing_groups(guidance=)` | otras mayúsculas (`"SOUTHALL-2019"` por `"southall-2019"`); espacios alrededor (`" southall-2019 "` por `"southall-2019"`); otro separador (`"southall_2019"` por `"southall-2019"`); un valor que no es texto pero se escribe como una opción | `ValueError`, y `TypeError` para un valor que no es texto |
+| `underwater.normal_modes(bottom=)` | otras mayúsculas (`"PRESSURE-RELEASE"` por `"pressure-release"`); espacios alrededor (`" pressure-release "` por `"pressure-release"`) | `ValueError` |
+| `underwater.propagation_loss(law=)` | otras mayúsculas (`"SPHERICAL"` por `"spherical"`); espacios alrededor (`" spherical "` por `"spherical"`) | `ValueError` |
+| `underwater.propagation_loss(model=)` | otras mayúsculas (`"FRANCOIS-GARRISON"` por `"francois-garrison"`); espacios alrededor (`" francois-garrison "` por `"francois-garrison"`) | `ValueError` |
+| `underwater.reflection_loss_gradient(seabed=)` | otras mayúsculas (`"SAND"` por `"sand"`); espacios alrededor (`" sand "` por `"sand"`); un valor que no es texto pero se escribe como una opción | `ValueError`, y `TypeError` para un valor que no es texto |
+| `underwater.seawater_absorption(model=)` | otras mayúsculas (`"THORP"` por `"thorp"`); espacios alrededor (`" thorp "` por `"thorp"`) | `ValueError` |
+| `underwater.ship_source_spectrum(model=)` | otras mayúsculas (`"JOMOPANS-ECHO"` por `"jomopans-echo"`); espacios alrededor (`" jomopans-echo "` por `"jomopans-echo"`) | `ValueError` |
+| `underwater.ship_source_spectrum(vessel_class=)` | otras mayúsculas (`"BULKER"` por `"bulker"`); espacios alrededor (`" bulker "` por `"bulker"`); un valor que no es texto pero se escribe como una opción | `ValueError`, y `TypeError` para un valor que no es texto |
+| `underwater.sound_speed_profile(model=)` | otras mayúsculas (`"MEDWIN"` por `"medwin"`); espacios alrededor (`" medwin "` por `"medwin"`) | `ValueError` |
+| `underwater.spreading_loss(law=)` | otras mayúsculas (`"SPHERICAL"` por `"spherical"`); espacios alrededor (`" spherical "` por `"spherical"`) | `ValueError` |
+| `underwater.waveguide_cutoff_frequency(seabed=)` | otras mayúsculas (`"SAND"` por `"sand"`); espacios alrededor (`" sand "` por `"sand"`); un valor que no es texto pero se escribe como una opción | `ValueError`, y `TypeError` para un valor que no es texto |
+| `underwater.weighted_exposure(group=)` | otras mayúsculas (`"vhf"` por `"VHF"`); espacios alrededor (`" VHF "` por `"VHF"`); un valor que no es texto pero se escribe como una opción | `ValueError`, y `TypeError` para un valor que no es texto |
+| `underwater.weighted_exposure(guidance=)` | otras mayúsculas (`"NMFS-2024"` por `"nmfs-2024"`); espacios alrededor (`" nmfs-2024 "` por `"nmfs-2024"`); otro separador (`"nmfs_2024"` por `"nmfs-2024"`); un valor que no es texto pero se escribe como una opción | `ValueError`, y `TypeError` para un valor que no es texto |
+| `underwater.weighting_parameters(group=)` | otras mayúsculas (`"hf"` por `"HF"`); espacios alrededor (`" HF "` por `"HF"`); un valor que no es texto pero se escribe como una opción | `ValueError`, y `TypeError` para un valor que no es texto |
+| `underwater.weighting_parameters(guidance=)` | otras mayúsculas (`"NMFS-2018"` por `"nmfs-2018"`); espacios alrededor (`" nmfs-2018 "` por `"nmfs-2018"`); otro separador (`"nmfs_2018"` por `"nmfs-2018"`); un valor que no es texto pero se escribe como una opción | `ValueError`, y `TypeError` para un valor que no es texto |
+| `underwater.weston_propagation_loss(seabed=)` | otras mayúsculas (`"SAND"` por `"sand"`); espacios alrededor (`" sand "` por `"sand"`); un valor que no es texto pero se escribe como una opción | `ValueError`, y `TypeError` para un valor que no es texto |
+| `underwater.weston_regime_boundaries(seabed=)` | otras mayúsculas (`"SAND"` por `"sand"`); espacios alrededor (`" sand "` por `"sand"`); un valor que no es texto pero se escribe como una opción | `ValueError`, y `TypeError` para un valor que no es texto |
+| `vibration.PhaseVerification(weighting=)` | un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
+| `vibration.RunningRMSDecayVerification(method=)` | un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
+| `vibration.WeightingVerification(weighting=)` | un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
+| `vibration.admissible_exposure_s(time_of_day=)` | un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
+| `vibration.angular_average_transmission_coefficient(junction=)` | otras mayúsculas (`"x"` por `"X"`); un valor que no es texto pero se escribe como una opción | `ValueError`, y `TypeError` para un valor que no es texto |
+| `vibration.angular_average_transmission_coefficient(section=)` | otras mayúsculas (`"CORNER"` por `"corner"`); un valor que no es texto pero se escribe como una opción | `ValueError`, y `TypeError` para un valor que no es texto |
+| `vibration.assess_people_in_buildings(source=)` | un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
+| `vibration.assess_railway_change(time_of_day=)` | un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
+| `vibration.assessment_vibration_severity(time_of_day=)` | un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
+| `vibration.band_limited_weighting_factor(name=)` | un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
+| `vibration.check_loose_mounting(direction=)` | un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
+| `vibration.check_loose_mounting(surface=)` | un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
+| `vibration.construction_guide_values(area=)` | un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
+| `vibration.construction_guide_values(stage=)` | un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
+| `vibration.corner_transmission_coefficient(junction=)` | otras mayúsculas (`"x"` por `"X"`); un valor que no es texto pero se escribe como una opción | `ValueError`, y `TypeError` para un valor que no es texto |
+| `vibration.foundation_to_floor_level_difference(floor=)` | un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
+| `vibration.foundation_to_floor_level_difference(statistic=)` | un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
+| `vibration.geometric_exponent(character=)` | un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
+| `vibration.geometric_exponent(geometry=)` | un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
+| `vibration.geometric_exponent(wave=)` | un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
+| `vibration.ground_to_floor_level_difference(floor=)` | un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
+| `vibration.ground_to_foundation_level_difference(level=)` | un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
+| `vibration.ground_to_foundation_level_difference(statistic=)` | un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
+| `vibration.guide_values(area=)` | un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
+| `vibration.guide_values(edition=)` | un número (`1999` por `"1999"`); un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
+| `vibration.guide_values(source=)` | un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
+| `vibration.guide_values(time_of_day=)` | un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
+| `vibration.indication_tolerance_percent(name=)` | un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
+| `vibration.instrument_confidence_limit_percent(quantity=)` | un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
+| `vibration.junction_transmission(junction=)` | otras mayúsculas (`"l"` por `"L"`); un valor que no es texto pero se escribe como una opción | `ValueError`, y `TypeError` para un valor que no es texto |
+| `vibration.kb_fmax_from_peak_velocity(kind=)` | un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
+| `vibration.phase_tolerance_deg(name=)` | un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
+| `vibration.railway_assessment_severity(time_of_day=)` | un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
+| `vibration.railway_guide_values(alignment=)` | un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
+| `vibration.railway_guide_values(area=)` | un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
+| `vibration.railway_guide_values(time_of_day=)` | un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
+| `vibration.reference_indication(name=)` | un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
+| `vibration.running_rms_decay_time(method=)` | un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
+| `vibration.sawtooth_burst(application=)` | un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
+| `vibration.signal_burst_indications(application=)` | un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
+| `vibration.signal_burst_indications(name=)` | un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
+| `vibration.straight_transmission_coefficient(junction=)` | otras mayúsculas (`"t1"` por `"T1"`); un valor que no es texto pero se escribe como una opción | `ValueError`, y `TypeError` para un valor que no es texto |
+| `vibration.train_assessment_severity(time_of_day=)` | un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
+| `vibration.train_decay_exponent(fitted_with=)` | un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
+| `vibration.train_weighting_factor(alignment=)` | un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
+| `vibration.train_weighting_factor(kind=)` | un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
+| `vibration.verify_phase_response(name=)` | un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
+| `vibration.verify_running_rms_decay(method=)` | un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
+| `vibration.verify_signal_burst_response(application=)` | un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
+| `vibration.verify_signal_burst_response(name=)` | un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
+| `vibration.verify_weighting(name=)` | un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
+| `vibration.weighting_tolerance_percent(name=)` | un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
 
 ## Los setenta y ocho nombres que ya no están
 

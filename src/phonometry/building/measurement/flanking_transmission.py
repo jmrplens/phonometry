@@ -971,7 +971,8 @@ def normalized_flanking_level_difference(
     :return: A :class:`FlankingLevelDifferenceResult`; the single-number
         rating is formed only for 16 (one-third-octave) or 5 (octave) bands.
     :raises ValueError: On incompatible band counts or non-positive areas.
-    :raises TypeError: if ``reference_area`` is not a single number.
+    :raises TypeError: if ``reference_area`` is not a single number, or ``fraction`` is
+        not an integer (a word, a flag or a float).
     """
     l1 = _as_1d(source_level, "source_level")
     l2 = _as_1d(receive_level, "receive_level")
@@ -1015,7 +1016,8 @@ def normalized_flanking_impact_level(
     :return: A :class:`FlankingImpactLevelResult`; the single-number rating is
         formed only for 16 (one-third-octave) or 5 (octave) bands.
     :raises ValueError: On incompatible band counts or non-positive areas.
-    :raises TypeError: if ``reference_area`` is not a single number.
+    :raises TypeError: if ``reference_area`` is not a single number, or ``fraction`` is
+        not an integer (a word, a flag or a float).
     """
     l2 = _as_1d(receive_level, "receive_level")
     area = _positive_array(absorption_area, "absorption_area")

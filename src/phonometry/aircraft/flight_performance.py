@@ -48,6 +48,7 @@ import numpy as np
 
 from .._internal.display import RichDisplay
 from .._internal.validation import (
+    require_choice,
     require_count,
     require_finite_fields,
     require_scalar,
@@ -714,8 +715,12 @@ class PerformanceAircraft(RichDisplay):
     def flap(self, operation: Operation, flap_id: str) -> AerodynamicCoefficients:
         """Aerodynamic coefficients for one flap configuration.
 
-        :param operation: ``"A"`` (arrival) or ``"D"`` (departure).
-        :param flap_id: Flap identifier as the procedure spells it.
+        :param operation: ``"A"`` (arrival) or ``"D"`` (departure), as
+            written.
+        :param flap_id: Flap identifier as the procedure spells it; its case
+            and padding are folded, as the tables disagree on both.
+        :raises TypeError: if ``operation`` is not a text.
+        :raises ValueError: if ``operation`` is neither ``"A"`` nor ``"D"``.
         :raises KeyError: if the aeroplane has no such configuration. Eq. B-21
             takes ``R`` from the ANP ``Aerodynamic_Coefficients`` table for the
             step's own ``Flap_ID`` and names no fallback for an identifier that
@@ -723,7 +728,12 @@ class PerformanceAircraft(RichDisplay):
             silently substituted drag ratio changes every climb angle of the
             profile and nothing downstream can tell.
         """
-        wanted = (_fold(operation), _fold(flap_id))
+        # The operation is the caller's choice and is matched as written; the
+        # flap identifier is free text from a procedure, and both sides of
+        # the table lookup are folded because the tables spell their keys
+        # inconsistently.
+        named = require_choice(operation, "operation", ("D", "A"))
+        wanted = (_fold(named), _fold(flap_id))
         for (op, fid), value in self.aerodynamic_coefficients.items():
             if (_fold(op), _fold(fid)) == wanted:
                 return value

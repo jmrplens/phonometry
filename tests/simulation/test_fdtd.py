@@ -421,29 +421,50 @@ def test_obstacle_mask_validation() -> None:
 
 
 @pytest.mark.parametrize(
-    ("boundaries", "match"),
+    ("boundaries", "error", "match"),
     [
-        ({"north": "rigid"}, "unknown boundary sides"),
-        ({"left": "open"}, r"boundary for side .* must be one of"),
-        ("anechoic", r"boundary for side .* must be one of"),
+        ({"north": "rigid"}, ValueError, r"'sides' must be one of \('left'"),
+        ({"left": "open"}, ValueError, r"'sides\['left'\]' must be one of"),
+        ({"left": "Rigid"}, ValueError, r"'sides\['left'\]' must be one of"),
+        ("anechoic", ValueError, r"'sides' must be one of \('rigid'"),
+        ({3: "rigid"}, TypeError, r"'sides' must be one of .*, a text"),
+        (7, TypeError, r"'sides' must be one of .*, a text"),
     ],
 )
-def test_boundary_spec_rejects_unknown_values(
+def test_boundary_spec_rejects_unknown_values_when_it_is_built(
     boundaries: object,
+    error: type[Exception],
     match: str,
 ) -> None:
-    sources = [GaussianPulse(ix=5, iy=5, half_width_s=1e-4)]
-    # The record holds the sides as given; the run that reads them refuses.
-    sides = FDTDBoundaries(sides=boundaries)  # type: ignore[arg-type]
-    with pytest.raises(ValueError, match=match):
-        FDTDRun(
-            c=C0,
-            dx=0.05,
-            duration_s=1e-3,
-            shape=(30, 30),
-            sources=sources,
-            boundaries=sides,
-        )
+    """A side and a termination name are checked as written where the record is built.
+
+    The record held them as given, and only the run that read them refused
+    one, so a misspelt side surfaced away from the line that wrote it.
+    """
+    with pytest.raises(error, match=match):
+        FDTDBoundaries(sides=boundaries)  # type: ignore[arg-type]
+
+
+@pytest.mark.parametrize(
+    ("cells", "error", "match"),
+    [
+        (2.5, ValueError, "'absorbing_layer_cells' must be a whole number"),
+        ("20", TypeError, "absorbing_layer_cells"),
+        (np.ones(2), TypeError, "absorbing_layer_cells"),
+    ],
+)
+def test_the_sponge_thickness_is_a_count_when_the_boundaries_are_built(
+    cells: object, error: type[Exception], match: str
+) -> None:
+    """Refused where it is written, a rigid boundary's included, where it was never read."""
+    with pytest.raises(error, match=match):
+        FDTDBoundaries(sides="rigid", absorbing_layer_cells=cells)  # type: ignore[arg-type]
+
+
+def test_the_boundaries_hold_a_numpy_count_as_an_int() -> None:
+    boundaries = FDTDBoundaries(sides="absorbing", absorbing_layer_cells=np.int64(6))
+    assert type(boundaries.absorbing_layer_cells) is int
+    assert boundaries.absorbing_layer_cells == 6
 
 
 @pytest.mark.parametrize(
@@ -452,7 +473,7 @@ def test_boundary_spec_rejects_unknown_values(
         ({"left": 0.0}, "strictly positive"),
         ({"left": np.full(30, np.inf)}, "strictly positive"),
         ({"left": np.zeros(7)}, "length 30"),
-        ({"up": 400.0}, "unknown impedance sides"),
+        ({"up": 400.0}, r"'edge_impedance' must be one of .*; got 'up'"),
     ],
 )
 def test_edge_impedance_validation(
@@ -672,14 +693,6 @@ def test_each_snapshot_is_the_field_of_its_own_step() -> None:
             {"boundaries": FDTDBoundaries(sides="absorbing", absorbing_layer_cells=0)},
             "absorbing_layer_cells must be >= 1",
         ),
-        (
-            {
-                "boundaries": FDTDBoundaries(
-                    sides="absorbing", absorbing_layer_cells=2.5
-                )
-            },
-            "'absorbing_layer_cells' must be a whole number",
-        ),
     ],
 )
 def test_simulation_rejects_invalid_arguments(
@@ -729,7 +742,7 @@ def test_a_recording_holds_whole_pairs_and_counts() -> None:
     probes = [(np.int64(3), 4.0)]
     recording = FDTDRecording(
         probes=probes,  # type: ignore[arg-type]
-        snapshot_every=np.int64(5),  # type: ignore[arg-type]
+        snapshot_every=np.int64(5),
         snapshot_decimation=2.0,  # type: ignore[arg-type]
     )
     probes.append((9, 9))
@@ -924,7 +937,9 @@ def test_plot_rejects_unknown_kind_and_missing_snapshots() -> None:
             recording=FDTDRecording(probes=[(10, 10)]),
         )
     )
-    with pytest.raises(ValueError, match=r"kind must be 'probes'"):
+    with pytest.raises(
+        ValueError, match=r"'kind' must be one of \('probes', 'snapshot'\)"
+    ):
         res.plot(kind="field")
     with pytest.raises(
         ValueError,
@@ -1009,7 +1024,7 @@ def test_the_engine_names_its_absorbing_layer_as_the_run_does() -> None:
         (
             {"absorbing_layer_cells": 4, "absorbing_sides": ("north",)},
             ValueError,
-            r"unknown absorbing sides: \['north'\]",
+            r"'absorbing_sides' must be one of .*; got 'north'",
         ),
         (
             {"absorbing_layer_cells": "4"},

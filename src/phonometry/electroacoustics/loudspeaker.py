@@ -311,7 +311,8 @@ class LoudspeakerDirectivity(OwnsArrays):
     def __post_init__(self) -> None:
         """Hold the pattern as two read-only ``float64`` arrays, whatever pair it was given as.
 
-        :raises TypeError: if ``polar`` is a text or no sequence.
+        :raises TypeError: if ``polar`` is a text or no sequence, or a member
+            holds a complex number or a text.
         :raises ValueError: if ``polar`` holds other than two members.
         """
         if self.polar is not None:

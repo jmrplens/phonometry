@@ -2186,6 +2186,8 @@ ValueError` to absorb any bad input should catch `(TypeError, ValueError)`.
 | an array, `None`, a text or an object that is not a number where one number belongs, on any scalar parameter | `ValueError`, and a text that reads as a number, such as `"20"`, was taken as that number | `TypeError`, naming the parameter, for `"20"` and `"fifty"` alike: a text is the wrong type where a number belongs, whatever it reads as |
 | an element that is not a number inside an array of numbers (`[None, 1.0]`, `["94.0", "94.1"]`) | `ValueError`, and text numpy reads as numbers was taken as them | `TypeError`, for text whatever it reads as |
 | a complex number or array where a real one belongs, on any parameter the shared guards read | `ValueError` | `TypeError`, saying it must be real |
+| a NumPy complex number where one real number belongs (`np.complex128(343 + 50j)`), on any parameter the shared guards read, or inside an array of objects; a complex value or a text on a real input of the FDTD engines: a map of `simulation.FDTD2D` or `simulation.ElasticFDTD2D` (`c`, `rho`, `c_p`, `c_s`, `damping`), `dx`, `cfl`, the numbers of the sources and of `simulation.Material`, `simulation.ContourProbe`, `simulation.ContourPhasors` and `simulation.far_field_from_contour` | read as its real part with no more than a `ComplexWarning`: the elastic engine stepped the real part of a complex `c_p`, `c_s` or `rho`, and every map of both engines took a text as the number it spells (`c="343"`) | `TypeError`, saying it must be real, or that it must be numbers and not text |
+| an index that is not an integer (a flag, a float, a fraction, a text, or an array of another dtype): `order=` of `signals.miso_coherence`, the channels of `io.Signal.pick` | read through `int()`: `order=(0.5, 1.7)` conditioned the inputs as `(0, 1)` and `order="10"` as `(1, 0)`, `pick([1.5])` picked channel 1 and `pick("01")` channels 0 and 1 | `TypeError`, naming the parameter |
 | an array of the wrong kind: a mask that is not boolean (`obstacle_mask=` of `simulation.FDTD2D` and `simulation.fdtd_simulation`, the region masks of `simulation.ElasticFDTD2D.from_regions`, `valid=` of `vibration.band_averaged_stiffness`), `line_counts` of `vibration.BandAveragedStiffness` that are not integers, exclusion flags that are neither booleans nor integers (`excluded_blocks=` of `environment.amplitude_modulation_period`, `excluded=` of `environment.bin_amplitude_modulation`), text where the readings, distances and durations of the service equipment functions of `building` belong (`building.verify_calibration_deviation`, `building.check_background_duration` and the rest) | `ValueError` | `TypeError` |
 | a sequence where one measurement belongs: the pressures and temperatures of `noise_control.normal_air_density`, `noise_control.total_pressure`, `noise_control.total_pressure_loss` and `noise_control.pressure_loss_coefficient`, `altitude` of `emission.static_pressure_from_altitude`, `tolerance_s=` of `building.check_background_duration` | `ValueError`, and the `noise_control` functions read a one-element sequence as its element | `TypeError`, a one-element sequence included |
 | a whole number (a count, an index, a class, a number of points or of decimals: any parameter written as an `int`) given as a text, a bool or an array: `signals.zoom_fft(..., n_points=)`, `signals.window_metrics(window, n)`, `signals.min_phase(..., oversample=)`, `electroacoustics.swept_sine_distortion(..., n_harmonics=)`, `metrology.stationarity_test(..., n_segments=)`, `vibration.story_fundamental_frequency(n_stories)`, `n_events=` of the sound energy functions and of `emission.SoundEnergyResult` and `emission.ReverberationSoundEnergyResult`, `n=` of `building.prediction_input_uncertainty` and `building.intensity_element_normalized_difference`, `oversample=` of `signals.lc_peak` and `broadcast.true_peak_level`, `max_order=` of `room.image_source_rir` and `room.audible_image_count`, the grid indices and step counts of `simulation.FDTD2D`, `duration_days=` of `vibration.construction_guide_values`, `start_band=` of `aircraft.tone_correction`, `n_level_ranges=` of `metrology.SoundLevelMeterFeatures`, `n_impacts` of `vibration.ImpactMobilityResult`, the position counts of `ReportMetadata` | `ValueError`, or, where the value went through `int()`, a bool taken as 0 or 1, a text parsed and a fraction truncated without a word (`n_points=100.6` drew 100 points) | `TypeError`. A number that is not whole, or is below the least the count can be, is a `ValueError`, and a whole float such as `5.0` is taken as `5` |
@@ -2509,6 +2511,11 @@ write the option as its `Literal` lists it where the record is built.
 | `noise_control.LiquidTrim(coefficient=)` | stored any value, refused later or not at all | refused when built |
 | `noise_control.ValveTrim(coefficient=)` | stored any value, refused later or not at all | refused when built |
 | `phonometry.ReportMetadata(tube_shape=)` | `ValueError` for any value it did not know, text or not | `ValueError` for a text it does not offer, `TypeError` for a value that is not text |
+| `simulation.ElasticBoundaries(sides=)` | stored any value; the run that held the record refused an unknown side or name with `ValueError`, text or not | `ValueError` for a side or a name it does not offer, `TypeError` for one that is not text, when built |
+| `simulation.FDTDBoundaries(sides=)` | stored any value; the run that held the record refused an unknown side or name with `ValueError`, text or not, ran a flag as an impedance of 1 Pa s/m and refused `None` as an impedance that is not finite | `ValueError` for a side or a name it does not offer, `TypeError` for a side that is not text and for a termination that is neither a name nor a real number or an array of them (a flag, `None`, a flag among the numbers of a profile), when built; an impedance is held as a float, a profile as a read-only float64 array |
+| `simulation.ElasticRecording(probe_fields=, snapshot_field=)` | `ValueError` for any field it did not know, text or not; `probe_fields="vy"` was read a letter at a time and refused `"v"` | `ValueError` for a text it does not offer, `TypeError` for a field that is not text; a single name records that one field |
+| `simulation.ForceSource(direction=)` | `ValueError` for any direction it did not know, text or not | `ValueError` for a text other than `"x"` and `"y"`, `TypeError` for a value that is not text |
+| `simulation.PlaneWaveSource(direction=)` | stored any value; `FDTD2D.add_source` and the run that held it refused one it did not know | refused when built |
 | `vibration.GuideValues(time_of_day=, edition=)` | stored any value, refused later or not at all | refused when built |
 | `vibration.FaultLine(family=)` | stored any value, refused later or not at all | refused when built |
 
@@ -2534,6 +2541,9 @@ error:
 | `io.write_catalogue(delimiter=, decimal=)` beside a JSON document | `ValueError` for anything but the default dialect, text or not | `TypeError` for a value that is not text |
 | `underwater.gaussian_beams(absorption=)` | `AttributeError` for a value that is neither text nor a `VolumeAbsorption` | `TypeError` |
 | `filters.FilterPeriodicVerification.clause()` | `KeyError` for any name it had not measured | `ValueError` for a text that names none of the five clauses, `TypeError` for a value that is not text; `KeyError` for a clause that was not measured |
+| `simulation.FDTD2D(absorbing_sides=, edge_impedance=)`, `simulation.ElasticFDTD2D(absorbing_sides=, free_sides=)` | `ValueError` for any side it did not know, text or not, its message listing the unknown sides | `ValueError` for a text that is not a side, `TypeError` for a side that is not text, its message the one every choice raises (`'free_sides' must be one of ('left', 'right', 'top', 'bottom'); got 'north'.`) |
+| `simulation.FDTD2D.add_plane_wave(direction=)`, `simulation.ElasticFDTD2D.collocated(field)`, `simulation.FDTDResult.plot(kind=)`, `simulation.ElasticFDTDResult.plot(kind=)` | `ValueError` for any value it did not know, text or not | `ValueError` for a text it does not offer, `TypeError` for a value that is not text |
+| `simulation.FDTD2D(edge_impedance=)` with an impedance that is no real number | a flag, alone or among the numbers of a profile, ran as an impedance of 1 Pa s/m, `None` raised `ValueError` as an impedance that is not finite, a text `ValueError` from the float conversion | `TypeError` |
 
 A key of a mapping and an item of a sequence is checked one by one:
 `environment.assess_activity` ignored a period key it did not know beside one
@@ -2554,6 +2564,25 @@ took any `language` and now refuse one they do not offer, as every other plot
 does. A typed caller that indexes a published table with a free `str` (a
 `str` variable into `room.TABLE_A1` or `hearing.EARPHONES`) needs the
 `Literal` the table is keyed by now; the values did not move.
+
+The sponge thickness of `simulation.FDTDBoundaries` and
+`simulation.ElasticBoundaries` is held as the whole number of cells it names
+and checked when the record is built: a value that is not a number raises
+`TypeError` and a fraction `ValueError`, where it was stored as given and read
+only by a run with an absorbing side (`FDTDBoundaries(sides="rigid",
+absorbing_layer_cells=2.5)` was built and run). A `shape` given to
+`simulation.FDTD2D`, `simulation.ElasticFDTD2D`, `simulation.FDTDRun` or
+`simulation.ElasticRun` is read whenever it is given: a run holds it as a pair
+of ints, from any sequence of the two counts (a list or a `range` too) or a
+one-dimensional integer array, where only a tuple or a list was taken, a
+malformed one is refused beside a map too, and one
+that names a grid other than the map's raises `ValueError` (`shape (4, 8) does
+not match the c map, whose shape is (8, 8)`), where an engine ignored a shape
+beside a map and a run held it as given.
+`simulation.ElasticFDTD2D.from_regions` reads its `shape` the same way: a
+third count raises `ValueError` and a text `TypeError`, where the third count
+was dropped. A `numpy` integer is taken wherever these records and the engines
+take a count, and nested lists wherever they take a map.
 
 ## A record a caller builds holds what its fields say
 

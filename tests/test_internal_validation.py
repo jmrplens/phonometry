@@ -33,15 +33,25 @@ if TYPE_CHECKING:
 
 from phonometry._internal.validation import (
     check_engine,
+    floats_of,
+    indices_of,
+    is_integer,
+    pair_of_arrays,
     require_1d_signal,
+    require_above_absolute_zero,
     require_above_absolute_zero_array,
     require_count,
     require_equal_shapes,
+    require_finite,
     require_finite_array,
     require_finite_fields,
+    require_fraction,
+    require_non_negative,
     require_per_band,
+    require_positive,
     require_positive_array,
     require_ranks,
+    require_real,
     require_same_length,
     require_same_shape,
 )
@@ -312,6 +322,82 @@ def test_a_complex_input_is_refused_rather_than_flattened(
         validator(complex_input, "x", *args)
 
 
+@pytest.mark.parametrize(
+    "guard",
+    [
+        require_positive,
+        require_finite,
+        require_non_negative,
+        require_fraction,
+        require_above_absolute_zero,
+    ],
+)
+@pytest.mark.parametrize(
+    "complex_number",
+    [
+        np.complex128(0.5 + 0.25j),
+        np.complex64(0.5 + 0.25j),
+        0.5 + 0.25j,
+        np.array(0.5j),
+    ],
+    ids=["complex128", "complex64", "python", "zero-dimensional"],
+)
+def test_a_scalar_guard_refuses_a_complex_number(
+    guard: Callable[[float, str], float], complex_number: object
+) -> None:
+    """A NumPy complex number is refused as a Python one is, not read as its real part.
+
+    :func:`float` refuses ``0.5 + 0.25j`` and reads ``np.complex128(0.5 +
+    0.25j)`` as ``0.5`` with no more than a ``ComplexWarning``, so every
+    shared scalar guard took a NumPy complex number for the real number it
+    was not. Each refuses it now, through :func:`require_real`.
+    """
+    with pytest.raises(TypeError, match="'x' must be a number"):
+        guard(complex_number, "x")  # type: ignore[arg-type]
+    with pytest.raises(TypeError, match="no complex here"):
+        require_real(complex_number, "no complex here")
+
+
+def test_an_array_of_objects_that_holds_a_complex_number_is_refused() -> None:
+    """An object array is read item by item, and a NumPy complex item is refused.
+
+    ``np.array([np.complex128(1 + 2j)], dtype=object)`` has no complex dtype
+    to ask for, and its conversion to float64 keeps ``1.0``.
+    """
+    objects = np.array([1.0, np.complex128(1 + 2j)], dtype=object)
+    with pytest.raises(TypeError, match="'x' must be real, not complex"):
+        require_finite_array(objects, "x")
+
+
+def test_a_record_of_arrays_or_numbers_refuses_a_complex_member() -> None:
+    """A pair of arrays and a sequence of numbers each refuse a complex member."""
+    with pytest.raises(TypeError, match="'curve' must be a pair .* of real numbers"):
+        pair_of_arrays(([0.0, 90.0], np.array([0.0, 1j])), "curve", "(angles, levels)")
+    with pytest.raises(TypeError, match="'curve' must be a pair .* of real numbers"):
+        pair_of_arrays(
+            ([0.0, 90.0], [np.complex128(1j), 0.0]), "curve", "(angles, levels)"
+        )
+    with pytest.raises(TypeError, match="'limits' must be"):
+        floats_of((1.0, np.complex128(2 + 1j)), "limits", "a (low, high) pair")
+
+
+@pytest.mark.parametrize(
+    "texts",
+    [["0.0", "90.0"], np.array(["0.0", "90.0"]), np.array(["0.0"], dtype=object)],
+    ids=["list", "array", "objects"],
+)
+def test_a_pair_of_arrays_refuses_a_member_of_texts(texts: object) -> None:
+    """A member written as texts is the wrong type, not the numbers it spells.
+
+    ``np.array(["0.0", "90.0"], dtype=np.float64)`` parses the texts, so a
+    curve whose angles were left as text was read as numbers.
+    """
+    with pytest.raises(
+        TypeError, match="'curve' must be a pair .* of numbers, not text"
+    ):
+        pair_of_arrays((texts, [0.0, 1.0]), "curve", "(angles, levels)")
+
+
 # ---------------------------------------------------------------------------
 # The finite guard reads both axes of a complex field
 # ---------------------------------------------------------------------------
@@ -335,6 +421,19 @@ def test_a_lone_complex_scalar_is_measured_on_both_axes_too(bad: complex) -> Non
     """The nought-dimensional case takes the scalar wording, not the array one."""
     result = _Result(first=bad)
     with pytest.raises(ValueError, match="'first' must be finite"):
+        require_finite_fields(result, "first")
+
+
+@pytest.mark.parametrize("bad", [complex(2.0, np.nan), complex(2.0, np.inf)])
+def test_an_array_of_objects_is_measured_on_both_axes_too(bad: complex) -> None:
+    """A NumPy complex number held as an object is read whole, not as its real part.
+
+    An array of objects has no complex dtype to ask for, and its conversion
+    to ``float64`` kept the real part of ``np.complex128(2 + inf j)`` with no
+    more than a ``ComplexWarning``, so the infinity passed the guard.
+    """
+    result = _Result(first=np.array([1.0, np.complex128(bad)], dtype=object))
+    with pytest.raises(ValueError, match="'first' must contain only finite values"):
         require_finite_fields(result, "first")
 
 
@@ -405,3 +504,35 @@ def test_a_count_is_a_whole_number_and_nothing_else() -> None:
             ValueError, match="'storeys' must be a whole number, at least 1"
         ):
             require_count(bad, "storeys")
+
+
+def test_an_integer_is_one_by_its_type() -> None:
+    """``int()`` takes a fraction, a flag and a text as an integer; the test
+    of one takes a Python or NumPy integer only.
+    """
+    for good in (0, -3, np.int8(2), np.uint64(7)):
+        assert is_integer(good)
+    for bad in (True, np.True_, 1.0, 1.5, "1", b"1", None, np.array(1), [1]):
+        assert not is_integer(bad)
+
+
+def test_indices_are_integers_in_a_sequence_or_a_one_dimensional_integer_array() -> (
+    None
+):
+    """Each index is an integer by its type, in the order given; a text is
+    not a sequence of its letters, and an array is one-dimensional and of an
+    integer dtype.
+    """
+    assert indices_of([2, np.int64(0)], "rows") == (2, 0)
+    assert indices_of(range(3), "rows") == (0, 1, 2)
+    assert indices_of(np.array([1, 0], dtype=np.uint8), "rows") == (1, 0)
+    assert indices_of((), "rows") == ()
+    for bad in ([0.5], [1.0], [True], ["1"], [np.array(1)], [None]):
+        with pytest.raises(TypeError, match="'rows' must hold integer indices"):
+            indices_of(bad, "rows")
+    for bad in ("01", b"01", 3, None):
+        with pytest.raises(TypeError, match="'rows' must be a sequence of integer"):
+            indices_of(bad, "rows")
+    for bad in (np.array(1), np.array([[0, 1]]), np.array([1.0]), np.array([True])):
+        with pytest.raises(TypeError, match="'rows' must be integer indices"):
+            indices_of(bad, "rows")

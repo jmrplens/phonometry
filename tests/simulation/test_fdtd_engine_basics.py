@@ -96,11 +96,11 @@ def test_scalar_c_requires_shape() -> None:
         ),
         (
             {"absorbing_layer_cells": 4, "absorbing_sides": ("north",)},
-            "unknown absorbing sides",
+            "'absorbing_sides' must be one of",
         ),
         (
             {"absorbing_layer_cells": 4, "absorbing_sides": "north"},
-            "unknown absorbing sides",
+            "'absorbing_sides' must be one of",
         ),
         # A malformed grid shape used to be reported by somebody else: numpy,
         # or the absorbing_layer_cells guard for a zero-length side, or a message

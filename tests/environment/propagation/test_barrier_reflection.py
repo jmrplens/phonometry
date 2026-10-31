@@ -515,6 +515,27 @@ class TestReflectionIndex:
         with pytest.raises(ValueError, match="'low_band_microphones' must name"):
             _index(front, free, low_band_microphones=(0, 1))
 
+    @pytest.mark.parametrize(
+        "microphones",
+        [
+            pytest.param((1.5, 2.5), id="fractions"),
+            pytest.param((1.0, 2.0), id="whole floats"),
+            pytest.param((True, 2), id="a flag"),
+            pytest.param(("1", "2"), id="texts"),
+            pytest.param("12", id="one text"),
+            pytest.param(np.array([1.0, 2.0]), id="float array"),
+        ],
+    )
+    def test_a_low_band_microphone_that_is_no_integer_is_refused(
+        self, microphones: object
+    ) -> None:
+        """A microphone is named by its number, an integer by its type: ``int()``
+        read each of these as microphones 1 and 2 and averaged them.
+        """
+        front, free = _grid()
+        with pytest.raises(TypeError, match="'low_band_microphones'"):
+            _index(front, free, low_band_microphones=microphones)
+
 
 class TestSignalContract:
     """The records arrive as Signals: the rate and the calibration go with them."""

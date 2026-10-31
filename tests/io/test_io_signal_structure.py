@@ -58,6 +58,63 @@ def test_pick_takes_the_channels_in_the_order_asked_for() -> None:
     assert np.array_equal(np.asarray(swapped)[0], _stereo().data[1])
 
 
+def test_pick_takes_a_zero_dimensional_integer_array_as_one_channel() -> None:
+    """``np.asarray(np.argmax(levels))`` is an integer array of no dimension:
+    the annotation takes it, and it names one channel as the integer it holds.
+    """
+    stereo = _stereo()
+    one = stereo.pick(np.array(1))
+    assert one.channel_labels == ("right",)
+    assert np.array_equal(np.asarray(one), np.asarray(stereo.pick(1)))
+    with pytest.raises(IndexError, match="out of range"):
+        stereo.pick(np.array(2))
+
+
+def test_pick_takes_every_integer_form_of_its_annotation() -> None:
+    """A Python or NumPy integer, a sequence or a range of them, or an integer
+    array of one dimension, of any integer dtype, names the same channels.
+    """
+    stereo = _stereo()
+    expected = ("right", "left")
+    assert stereo.pick(np.uint8(1)).channel_labels == ("right",)
+    assert stereo.pick(range(1, -1, -1)).channel_labels == expected
+    assert stereo.pick((np.int64(1), 0)).channel_labels == expected
+    assert stereo.pick(np.array([1, 0], dtype=np.int32)).channel_labels == expected
+    assert stereo.pick(np.array(-1, dtype=np.int16)).channel_labels == ("right",)
+
+
+@pytest.mark.parametrize(
+    "channels",
+    [
+        pytest.param(np.array(1.5), id="0-d float array"),
+        pytest.param(np.array(1.0), id="0-d whole float array"),
+        pytest.param(np.asarray(np.True_), id="0-d flag array"),
+        pytest.param(np.array([1.0]), id="float array"),
+        pytest.param(np.array([True]), id="flag array"),
+        pytest.param(np.array([[0, 1]]), id="2-d integer array"),
+        pytest.param(True, id="flag"),
+        pytest.param(np.True_, id="NumPy flag"),
+        pytest.param(1.0, id="whole float"),
+        pytest.param([0.5], id="fraction in a list"),
+        pytest.param([1.0], id="whole float in a list"),
+        pytest.param([True], id="flag in a list"),
+        pytest.param([np.array(1)], id="array in a list"),
+        pytest.param("1", id="text"),
+        pytest.param("01", id="text of two digits"),
+        pytest.param(b"1", id="bytes"),
+    ],
+)
+def test_pick_refuses_a_channel_that_is_no_integer(channels: object) -> None:
+    """A channel is an index, an integer by its type: ``int()`` takes a
+    fraction, a flag, a whole float and a text as one, so each of these
+    picked a channel nobody named (``np.array(1.5)`` channel 1, ``"01"``
+    both), and is refused instead, by the parameter's name.
+    """
+    stereo = _stereo()
+    with pytest.raises(TypeError, match="'channels'"):
+        stereo.pick(channels)  # type: ignore[arg-type]
+
+
 def test_pick_refuses_a_channel_that_is_not_there() -> None:
     """An index past the last channel is a mistake, not an empty result."""
     stereo = _stereo()

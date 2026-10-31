@@ -53,9 +53,10 @@ edge, and second-order convergence under grid refinement.
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from functools import cached_property
+from numbers import Real
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Literal, Protocol
 
@@ -71,6 +72,10 @@ from .._internal.frozen import (
     reduce_with_plain_rows,
 )
 from .._internal.validation import (
+    holds_complex,
+    holds_text,
+    refuse_complex,
+    refuse_text,
     require_choice,
     require_count,
     require_equal_counts,
@@ -84,7 +89,7 @@ from .compute import Compute, RunProvenance, _local_request, _requested
 from .ntff import ContourPhasors
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Generator, Iterable, Sequence
+    from collections.abc import Callable, Generator, Iterable
 
     from matplotlib.axes import Axes
 
@@ -105,7 +110,14 @@ __all__ = [
     "fdtd_simulation",
 ]
 
-Field2D = NDArray[np.float64]
+#: A real-valued map over the ``(ny, nx)`` grid. A map given as an array is
+#: held as it was given, a float32 one included.
+Field2D = NDArray[np.floating[Any]]
+
+#: A grid shape ``(ny, nx)``: two whole numbers of cells, a NumPy integer
+#: included, as any sequence of the two (a tuple, a list, an array's
+#: ``shape``) or as a one-dimensional integer array of them.
+GridShape = Sequence[int | np.integer[Any]] | NDArray[np.integer[Any]]
 
 #: A side of the rectangular domain, by name.
 Side = Literal["left", "right", "top", "bottom"]
@@ -120,16 +132,43 @@ _SIDES: tuple[Side, ...] = ("left", "right", "top", "bottom")
 _SIDE_TRAVEL: tuple[Travel, ...] = ("down", "up", "left", "right")
 
 #: Boundary-condition names accepted by :func:`fdtd_simulation`.
-_BOUNDARY_NAMES = ("rigid", "absorbing")
+_BOUNDARY_NAMES: tuple[AcousticBoundary, ...] = ("rigid", "absorbing")
+
+#: What a result's ``plot`` draws.
+_PLOT_KINDS: tuple[Literal["probes", "snapshot"], ...] = ("probes", "snapshot")
+
+#: The NumPy kinds of a real number an impedance may be given as: signed and
+#: unsigned integers and floats, never a flag, a complex number or a text.
+_REAL_KINDS = "iuf"
 
 #: The target reflection of a sponge layer when the caller names none: the
 #: default of both engines, which a run keeps.
 _DEFAULT_SPONGE_REFLECTION = 1e-4
 
 
+def _real_numbers(name: str, value: object, complex_refusal: str | None = None) -> None:
+    """Refuse a number, a sequence or an array that holds a complex number or a text.
+
+    NumPy reads both as real numbers the caller never gave: a complex value
+    as its real part (``np.asarray(z, dtype=np.float64)`` with no more than a
+    ``ComplexWarning``, ``float(np.real(z))`` with none) and a text as the
+    number it spells (``np.asarray([["343"]], dtype=np.float64)``), so a map
+    of a medium, a drive or a list of frequencies is checked for both before
+    it is converted.
+
+    :param complex_refusal: The refusal of a complex value, where the
+        parameter words its own.
+    :raises TypeError: for a complex number or a text, alone or among the
+        numbers of a sequence or an array.
+    """
+    refuse_complex(value, complex_refusal or f"{name} must be real, not complex")
+    refuse_text(value, f"{name} must be numbers, not text")
+
+
 def _positive_finite(name: str, value: float) -> float:
     """Validate that *value* is a strictly positive finite scalar."""
     require_scalar(value, name)
+    refuse_complex(value, f"{name} must be real, not complex")
     out = float(value)
     if not np.isfinite(out) or out <= 0.0:
         msg = f"{name} must be positive and finite"
@@ -140,6 +179,7 @@ def _positive_finite(name: str, value: float) -> float:
 def _finite(name: str, value: float) -> float:
     """Validate that *value* is a finite scalar."""
     require_scalar(value, name)
+    refuse_complex(value, f"{name} must be real, not complex")
     out = float(value)
     if not np.isfinite(out):
         msg = f"{name} must be finite"
@@ -147,7 +187,7 @@ def _finite(name: str, value: float) -> float:
     return out
 
 
-def _integer(name: str, value: int) -> int:
+def _integer(name: str, value: object) -> int:
     """Validate that *value* is an integral scalar (bool is rejected).
 
     A count or a cell index of the grid, refused as
@@ -207,13 +247,26 @@ class GaussianPulse(RichDisplay):
     t0: float | None = None
     amplitude: float = 1.0
 
+    if TYPE_CHECKING:
+
+        def __init__(
+            self,
+            *,
+            ix: int | np.integer[Any],
+            iy: int | np.integer[Any],
+            half_width_s: float,
+            t0: float | None = None,
+            amplitude: float = 1.0,
+        ) -> None: ...
+
     def __post_init__(self) -> None:
         """Hold the cell indices as ints and check the pulse parameters.
 
         ``half_width_s`` is positive, ``amplitude`` and ``t0`` finite.
 
         :raises TypeError: if ``ix`` or ``iy`` is not a number, or
-            ``amplitude``, ``half_width_s`` or ``t0`` is not a single number.
+            ``amplitude``, ``half_width_s`` or ``t0`` is not a single real
+            number (a text or a complex number among them).
         :raises ValueError: if ``ix`` or ``iy`` is not whole.
         """
         _hold_cells(self, "ix", "iy")
@@ -248,6 +301,18 @@ class CWSource(RichDisplay):
     amplitude: float = 1.0
     ramp_cycles: float = 3.0
 
+    if TYPE_CHECKING:
+
+        def __init__(
+            self,
+            *,
+            ix: int | np.integer[Any],
+            iy: int | np.integer[Any],
+            frequency: float,
+            amplitude: float = 1.0,
+            ramp_cycles: float = 3.0,
+        ) -> None: ...
+
     def __post_init__(self) -> None:
         """Hold the cell indices as ints and check the drive parameters.
 
@@ -255,11 +320,12 @@ class CWSource(RichDisplay):
 
         :raises TypeError: if ``ix`` or ``iy`` is not a number, or
             ``amplitude``, ``frequency`` or ``ramp_cycles`` is not a single
-            number.
+            real number (a text or a complex number among them).
         :raises ValueError: if ``ix`` or ``iy`` is not whole.
         """
         _hold_cells(self, "ix", "iy")
         require_scalar(self.ramp_cycles, "ramp_cycles")
+        refuse_complex(self.ramp_cycles, "ramp_cycles must be real, not complex")
         _positive_finite("frequency", self.frequency)
         _finite("amplitude", self.amplitude)
         if not np.isfinite(self.ramp_cycles) or self.ramp_cycles < 0.0:
@@ -302,18 +368,32 @@ class SignalSource(OwnsArrays):
     fs: float
     amplitude: float = 1.0
 
+    if TYPE_CHECKING:
+
+        def __init__(
+            self,
+            *,
+            ix: int | np.integer[Any],
+            iy: int | np.integer[Any],
+            samples: ArrayLike,
+            fs: float,
+            amplitude: float = 1.0,
+        ) -> None: ...
+
     def __post_init__(self) -> None:
         """Hold the cell indices as ints, check ``fs`` and freeze the ``samples``.
 
         ``fs`` is positive and ``samples`` a finite, non-empty 1D array.
 
-        :raises TypeError: if ``ix`` or ``iy`` is not a number, or
-            ``amplitude`` or ``fs`` is not a single number.
+        :raises TypeError: if ``ix`` or ``iy`` is not a number,
+            ``amplitude`` or ``fs`` is not a single real number, or
+            ``samples`` holds a complex number or a text.
         :raises ValueError: if ``ix`` or ``iy`` is not whole.
         """
         _hold_cells(self, "ix", "iy")
         _positive_finite("fs", self.fs)
         _finite("amplitude", self.amplitude)
+        _real_numbers("samples", self.samples)
         arr = np.asarray(self.samples, dtype=np.float64)
         if arr.ndim != 1:
             msg = "samples must be a 1D array"
@@ -370,18 +450,32 @@ class PlaneWaveSource(RichDisplay):
     offset: int = 0
     amplitude: float = 1.0
 
+    if TYPE_CHECKING:
+
+        def __init__(
+            self,
+            *,
+            direction: Travel,
+            waveform: Callable[[float], float],
+            offset: int | np.integer[Any] = 0,
+            amplitude: float = 1.0,
+        ) -> None: ...
+
     def __post_init__(self) -> None:
-        """Require a callable ``waveform`` and a finite ``amplitude``.
+        """Require a known ``direction``, a callable ``waveform`` and a finite ``amplitude``.
 
-        ``direction`` and ``offset`` are checked against the grid in
-        :meth:`FDTD2D.add_source`, which is the first place a grid exists;
-        ``offset`` is held as the whole number of cells it names here.
+        ``offset`` is held as the whole number of cells it names here, and
+        checked against the grid in :meth:`FDTD2D.add_source`, which is the
+        first place a grid exists.
 
-        :raises TypeError: if ``waveform`` is not callable, ``offset`` is not a
-            number, or ``amplitude`` is not one number.
-        :raises ValueError: if ``offset`` is not whole or ``amplitude`` is not
-            finite.
+        :raises TypeError: if ``direction`` is not a text, ``waveform`` is not
+            callable, ``offset`` is not a number, or ``amplitude`` is not one
+            real number.
+        :raises ValueError: if ``direction`` is not ``"down"``, ``"up"``,
+            ``"left"`` or ``"right"``, ``offset`` is not whole or
+            ``amplitude`` is not finite.
         """
+        require_choice(self.direction, "direction", _SIDE_TRAVEL)
         _hold_cells(self, "offset")
         if not callable(self.waveform):
             msg = "waveform must be callable"
@@ -442,14 +536,18 @@ def _sigma_map(
 
 
 def _validate_sponge_damping(
-    absorbing_layer_cells: int,
+    absorbing_layer_cells: int | np.integer[Any],
     absorbing_layer_reflection: float,
-    damping: float | NDArray[np.float64],
+    damping: ArrayLike,
     ny: int,
     nx: int,
 ) -> tuple[int, NDArray[np.float64]]:
     """Validate the sponge/damping spec into ``(cells, damping map)``."""
     require_scalar(absorbing_layer_reflection, "absorbing_layer_reflection")
+    refuse_complex(
+        absorbing_layer_reflection,
+        "absorbing_layer_reflection must be real, not complex",
+    )
     require_scalar(absorbing_layer_cells, "absorbing_layer_cells")
     cells = _integer("absorbing_layer_cells", absorbing_layer_cells)
     if cells < 0:
@@ -464,6 +562,7 @@ def _validate_sponge_damping(
     if not 0.0 < absorbing_layer_reflection < 1.0:
         msg = "absorbing_layer_reflection must lie strictly between 0 and 1"
         raise ValueError(msg)
+    _real_numbers("damping", damping)
     damping_map = np.asarray(damping, dtype=np.float64)
     if damping_map.ndim not in (0, 2):
         msg = "damping must be a scalar or an (ny, nx) map"
@@ -483,7 +582,9 @@ def _validate_sponge_damping(
 class _PressureEngine(Protocol):
     """The stepping interface the shared ``run()`` driver relies on."""
 
-    _backend: _backends.Backend
+    @property
+    def _backend(self) -> _backends.Backend:
+        """The backend the engine steps on, read to bring a frame to the host."""
 
     def step(self) -> None:
         """Advance the leapfrog scheme by one time step."""
@@ -494,8 +595,8 @@ class _PressureEngine(Protocol):
 
 
 def _snapshot_options(
-    snapshot_every: int | None,
-    snapshot_decimation: int,
+    snapshot_every: int | np.integer[Any] | None,
+    snapshot_decimation: int | np.integer[Any],
 ) -> tuple[int | None, int]:
     """The snapshot cadence and decimation, validated alike on every route.
 
@@ -522,9 +623,9 @@ def _snapshot_options(
 
 def _run_recording(
     engine: _PressureEngine,
-    n_steps: int,
-    snapshot_every: int | None,
-    snapshot_decimation: int,
+    n_steps: int | np.integer[Any],
+    snapshot_every: int | np.integer[Any] | None,
+    snapshot_decimation: int | np.integer[Any],
 ) -> NDArray[np.floating]:
     """Validate the ``run()`` arguments and march, recording pressure frames.
 
@@ -554,7 +655,7 @@ def _run_recording(
 
 
 def _validated_obstacle(
-    obstacle_mask: NDArray[np.bool_] | None, ny: int, nx: int
+    obstacle_mask: ArrayLike | None, ny: int, nx: int
 ) -> NDArray[np.bool_] | None:
     """Validate the obstacle mask; ``None`` when absent or all open."""
     if obstacle_mask is None:
@@ -575,18 +676,21 @@ def _validated_obstacle(
 def _grid_shape(shape: object) -> tuple[int, int]:
     """The ``(ny, nx)`` grid a scalar sound speed is spread over.
 
-    A value that is not a pair, or a cell count that is not a number, is the
-    wrong type; a pair of another length, or a count that is not a whole
-    number of one cell or more, is a wrong value. A whole float is kept as
-    the count it names.
+    Any sequence of the two counts is read, and a one-dimensional array as
+    the sequence of its items. A value that is not a sequence, a text, or a
+    cell count that is not a number, is the wrong type; a sequence of another
+    length, or a count that is not a whole number of one cell or more, is a
+    wrong value. A whole float is kept as the count it names.
 
-    :raises TypeError: for a value that is not a tuple or a list, or a count
-        that is not a number.
+    :raises TypeError: for a value that is neither a sequence nor a
+        one-dimensional array, a text, or a count that is not a number.
     :raises ValueError: for a sequence of another length than two, or a count
         that is not a whole number of at least one.
     """
     msg = f"shape must be a pair of positive integers (ny, nx); got {shape!r}"
-    if not isinstance(shape, (tuple, list)):
+    if isinstance(shape, np.ndarray) and shape.ndim == 1:
+        shape = shape.tolist()
+    if not isinstance(shape, Sequence) or isinstance(shape, str | bytes):
         raise TypeError(msg)
     # The length of a fixed-size argument, not a quantity.
     if len(shape) != 2:  # noqa: PLR2004
@@ -600,31 +704,55 @@ def _grid_shape(shape: object) -> tuple[int, int]:
     return ny, nx
 
 
-def _resolve_c_map(c: float | Field2D, shape: tuple[int, int] | None) -> Field2D:
-    """Broadcast/validate the sound-speed spec into a positive 2D map."""
-    if np.iscomplexobj(c):
-        msg = "c must be real; a complex sound speed is not supported"
-        raise TypeError(msg)
+def _given_grid(shape: GridShape | None) -> tuple[int, int] | None:
+    """The grid a given ``shape`` names, checked whether a map is given beside it or not.
+
+    :raises TypeError: as :func:`_grid_shape`.
+    :raises ValueError: as :func:`_grid_shape`.
+    """
+    return None if shape is None else _grid_shape(shape)
+
+
+def _map_on_grid(name: str, field: Field2D, grid: tuple[int, int] | None) -> None:
+    """Refuse a ``shape`` given beside a map that names another grid.
+
+    :raises ValueError: when *grid* is given and the map has another shape.
+    """
+    if grid is not None and field.shape != grid:
+        msg = (
+            f"shape {grid} does not match the {name} map, whose shape is "
+            f"{field.shape}; give shape only for a scalar {name}, or the map's own"
+        )
+        raise ValueError(msg)
+
+
+def _resolve_c_map(c: ArrayLike, shape: GridShape | None) -> Field2D:
+    """Broadcast/validate the sound-speed spec into a positive 2D map.
+
+    A ``shape`` is read whenever it is given: it spreads a scalar ``c`` over
+    the grid it names, and beside a map it must name the map's grid.
+    """
+    _real_numbers("c", c, "c must be real; a complex sound speed is not supported")
+    grid = _given_grid(shape)
     if np.isscalar(c):
-        if shape is None:
+        if grid is None:
             msg = "shape is required when c is a scalar"
             raise ValueError(msg)
-        c_map = np.full(_grid_shape(shape), float(np.real(c)), dtype=np.float64)
+        c_map = np.full(grid, float(np.real(c)), dtype=np.float64)
     else:
         c_map = np.asarray(c, dtype=np.float64)
     # The number is a count of array axes, not a quantity.
     if c_map.ndim != 2:  # noqa: PLR2004
         msg = "c must be a 2D (ny, nx) map"
         raise ValueError(msg)
+    _map_on_grid("c", c_map, grid)
     _positive_map("c", c_map)
     return c_map
 
 
-def _resolve_rho_map(rho: float | Field2D, ny: int, nx: int) -> Field2D:
+def _resolve_rho_map(rho: ArrayLike, ny: int, nx: int) -> Field2D:
     """Broadcast/validate the density spec into a positive ``(ny, nx)`` map."""
-    if np.iscomplexobj(rho):
-        msg = "rho must be real; a complex density is not supported"
-        raise TypeError(msg)
+    _real_numbers("rho", rho, "rho must be real; a complex density is not supported")
     rho_map = (
         np.full((ny, nx), float(np.real(rho)), dtype=np.float64)
         if np.isscalar(rho)
@@ -640,26 +768,91 @@ def _resolve_rho_map(rho: float | Field2D, ny: int, nx: int) -> Field2D:
 def _resolve_sponge_sides(
     absorbing_sides: Side | Iterable[Side] | None,
 ) -> tuple[Side, ...]:
-    """Normalise the sponge-side spec into a validated tuple of side names."""
+    """Normalise the sponge-side spec into a validated tuple of side names.
+
+    :raises TypeError: for a side that is not a text.
+    :raises ValueError: for a side that is not ``"left"``, ``"right"``,
+        ``"top"`` or ``"bottom"``.
+    """
     if absorbing_sides is None:
-        sides: tuple[Side, ...] = _SIDES
-    elif isinstance(absorbing_sides, str):
-        # A bare string would iterate per character; treat it as one side.
-        sides = (absorbing_sides,)
-    else:
-        sides = tuple(absorbing_sides)
-    unknown = set(sides) - set(_SIDES)
-    if unknown:
-        msg = f"unknown absorbing sides: {sorted(unknown)}"
-        raise ValueError(msg)
-    return sides
+        return _SIDES
+    # A bare string would iterate per character; treat it as one side.
+    given = (absorbing_sides,) if isinstance(absorbing_sides, str) else absorbing_sides
+    return tuple(require_choice(side, "absorbing_sides", _SIDES) for side in given)
 
 
-def _edge_impedance_profile(
-    side: str, value: float | NDArray[np.float64], n_edge: int
-) -> Field2D:
-    """Broadcast/validate one side's impedance into a positive 1D profile."""
-    z = np.asarray(value, dtype=np.float64)
+def _impedance_numbers(side: str, value: object) -> NDArray[Any]:
+    """One side's impedance read as numbers: a real scalar, or a profile of them.
+
+    Read as NumPy reads it, so no number moves; only what is no real number
+    is refused here, where ``np.asarray(value, float)`` would read a flag as
+    an impedance of 1 Pa s/m and ``None`` as NaN. Real numbers NumPy keeps
+    as objects (an int too large for 64 bits, a ``Fraction``) are read as
+    floats, and one too large for a float is no finite impedance.
+
+    :raises TypeError: for a flag, ``None``, a text, a complex number or
+        anything else that is not a real number or an array of them.
+    :raises ValueError: for a ragged profile, or a number too large for a
+        float.
+    """
+    read = None
+    if value is not None and not isinstance(value, str | bool | np.bool_):
+        try:
+            read = np.asarray(value)
+        except ValueError:
+            msg = f"impedance for side {side!r} must be a scalar or a 1D array"
+            raise ValueError(msg) from None
+    if read is not None and read.dtype == np.object_:
+        read = _real_objects(side, read)
+    elif read is not None and _holds_a_flag(value, read):
+        # ``[True, 415.0]`` reads as the floats ``[1.0, 415.0]``.
+        read = None
+    if read is None or read.dtype.kind not in _REAL_KINDS:
+        msg = (
+            f"impedance for side {side!r} must be a real number [Pa s/m] or an "
+            f"array of them; got {type(value).__name__}"
+        )
+        raise TypeError(msg)
+    return read
+
+
+def _holds_a_flag(value: object, read: NDArray[Any]) -> bool:
+    """Whether a profile written as items holds a flag NumPy read as a number.
+
+    NumPy reads ``[True, 415.0]`` as the floats ``[1.0, 415.0]``, so the
+    items are read as they were written, before NumPy chose one type for
+    them. An array holds one type, which :func:`_impedance_numbers` reads.
+    """
+    if isinstance(value, np.ndarray) or read.ndim == 0:
+        return False
+    items = np.asarray(value, dtype=object).ravel().tolist()
+    return any(isinstance(item, bool | np.bool_) for item in items)
+
+
+def _real_objects(side: str, read: NDArray[np.object_]) -> NDArray[np.float64] | None:
+    """Real numbers NumPy holds as objects, as floats, or ``None`` when one is no real number.
+
+    :raises ValueError: for a number too large for a float.
+    """
+    if not all(
+        isinstance(item, Real) and not isinstance(item, bool | np.bool_)
+        for item in read.ravel().tolist()
+    ):
+        return None
+    try:
+        return read.astype(np.float64)
+    except OverflowError:
+        msg = f"impedance for side {side!r} must be strictly positive and finite"
+        raise ValueError(msg) from None
+
+
+def _edge_impedance_profile(side: str, value: ArrayLike, n_edge: int) -> Field2D:
+    """Broadcast/validate one side's impedance into a positive 1D profile.
+
+    :raises TypeError: for an impedance that is not a real number or an
+        array of them (:func:`_impedance_numbers`).
+    """
+    z = _impedance_numbers(side, value).astype(np.float64)
     if z.ndim == 0:
         z = np.full(n_edge, float(z), dtype=np.float64)
     if z.shape != (n_edge,):
@@ -675,7 +868,7 @@ def _edge_impedance_profile(
 
 
 def _validated_impedances(
-    edge_impedance: Mapping[Side, float | NDArray[np.float64]] | None,
+    edge_impedance: Mapping[Side, ArrayLike] | None,
     absorbing: tuple[Side, ...],
     ny: int,
     nx: int,
@@ -685,13 +878,14 @@ def _validated_impedances(
     :param absorbing: The sides that carry a sponge layer, which cannot
         also be impedance boundaries.
     :return: One pair per impedance side, in the order of :data:`_SIDES`.
+    :raises TypeError: for a side that is not a text.
+    :raises ValueError: for a side that is not ``"left"``, ``"right"``,
+        ``"top"`` or ``"bottom"``.
     """
     if not edge_impedance:
         return []
-    unknown = set(edge_impedance) - set(_SIDES)
-    if unknown:
-        msg = f"unknown impedance sides: {sorted(unknown)}"
-        raise ValueError(msg)
+    for side in edge_impedance:
+        require_choice(side, "edge_impedance", _SIDES)
     profiles: list[tuple[str, Field2D]] = []
     for side in _SIDES:  # deterministic order
         if side not in edge_impedance:
@@ -709,9 +903,10 @@ def _validated_impedances(
 def _require_courant(cfl: float) -> None:
     """Refuse a Courant number outside ``(0, 1)``, where the leapfrog is unstable.
 
-    :raises TypeError: if ``cfl`` is not a single number.
+    :raises TypeError: if ``cfl`` is not a single real number.
     """
     require_scalar(cfl, "cfl")
+    refuse_complex(cfl, "cfl must be real, not complex")
     if not np.isfinite(cfl) or not 0.0 < cfl < 1.0:
         msg = (
             "cfl must lie in (0, 1): the leapfrog scheme "
@@ -730,7 +925,7 @@ def _time_step(cfl: float, dx: float, c_max: float) -> float:
 
 
 def _acoustic_grid(
-    c: float | Field2D, shape: tuple[int, int] | None, cfl: float, dx: float
+    c: ArrayLike, shape: GridShape | None, cfl: float, dx: float
 ) -> tuple[Field2D, float, float]:
     """The sound-speed map, the grid spacing and the time step, checked on the host.
 
@@ -764,18 +959,18 @@ class _AcousticMedium:
 
 
 def _acoustic_medium(
-    c: float | Field2D,
+    c: ArrayLike,
     dx: float,
     *,
-    rho: float | Field2D,
+    rho: ArrayLike,
     cfl: float,
-    absorbing_layer_cells: int,
+    absorbing_layer_cells: int | np.integer[Any],
     absorbing_sides: Side | Iterable[Side] | None,
     absorbing_layer_reflection: float,
-    damping: float | NDArray[np.float64],
-    shape: tuple[int, int] | None,
-    edge_impedance: Mapping[Side, float | NDArray[np.float64]] | None,
-    obstacle_mask: NDArray[np.bool_] | None,
+    damping: ArrayLike,
+    shape: GridShape | None,
+    edge_impedance: Mapping[Side, ArrayLike] | None,
+    obstacle_mask: ArrayLike | None,
 ) -> _AcousticMedium:
     """Check every argument of :class:`FDTD2D` that describes the medium.
 
@@ -874,10 +1069,10 @@ def _check_plane_source(
     shape: tuple[int, ...],
     obstacle: NDArray[np.bool_] | None,
 ) -> None:
-    """Refuse a plane-wave injection line off the grid or across the obstacle."""
-    if source.direction not in _SIDE_TRAVEL:
-        msg = "'direction' must be 'down', 'up', 'left' or 'right'."
-        raise ValueError(msg)
+    """Refuse a plane-wave injection line off the grid or across the obstacle.
+
+    Its ``direction`` was checked when the source was built.
+    """
     offset = _integer("plane-wave offset", source.offset)
     ny, nx = shape
     limit = ny if source.direction in ("down", "up") else nx
@@ -985,16 +1180,17 @@ class ContourProbe:
     :ivar normals: Outward unit normals of each sample, same shape.
     :ivar frequencies: The tracked frequencies [Hz].
     :raises TypeError: if ``ix0``, ``ix1``, ``iy0`` or ``iy1`` is a flag, a text or an
-        array where a count goes.
+        array where a count goes, or ``frequencies`` holds a complex number
+        or a text.
     """
 
     def __init__(
         self,
         engine: FDTD2D,
-        ix0: int,
-        ix1: int,
-        iy0: int,
-        iy1: int,
+        ix0: int | np.integer[Any],
+        ix1: int | np.integer[Any],
+        iy0: int | np.integer[Any],
+        iy1: int | np.integer[Any],
         frequencies: ArrayLike,
     ) -> None:
         require_scalar(ix0, "ix0")
@@ -1013,6 +1209,7 @@ class ContourProbe:
                 "open cell on both sides"
             )
             raise ValueError(msg)
+        _real_numbers("frequencies", frequencies)
         freqs = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
         if (
             freqs.ndim != 1
@@ -1172,7 +1369,13 @@ class ContourProbe:
             :func:`~phonometry.simulation.ntff.far_field_from_contour`.
         :raises ValueError: If the frequency is not tracked or nothing has
             been accumulated yet.
+        :raises TypeError: If ``frequency`` is not one real number: an
+            array, a text or a complex number, which a lookup through
+            :func:`float` would read as the number it spells or as its real
+            part.
         """
+        require_scalar(frequency, "frequency")
+        refuse_complex(frequency, "frequency must be real, not complex")
         matches = [
             i for i, f in enumerate(self.frequencies) if np.isclose(f, float(frequency))
         ]
@@ -1249,7 +1452,7 @@ class FDTD2D:
         lossy region follow :math:`k = (\omega - j \sigma) / c` with the
         real characteristic impedance :math:`\rho c`).
     :param shape: Grid shape ``(ny, nx)``, required only when ``c`` is a
-        scalar.
+        scalar; beside a map it must be the map's own shape.
     :param edge_impedance: Locally reacting boundary sides: a mapping from
         side name to a real specific acoustic impedance [Pa s/m], either a
         scalar or a per-edge-cell 1D array (length ``ny`` for ``left``/
@@ -1263,11 +1466,17 @@ class FDTD2D:
     :param compute: Where the engine steps (:class:`Compute`); ``None``
         follows :func:`use`, then ``PHONOMETRY_COMPUTE``, then NumPy.
     :raises TypeError: if ``cfl``, ``dx`` or ``absorbing_layer_reflection`` is not
-        a single number, ``absorbing_layer_cells`` is a flag, a text or an array
-        where a count goes, or ``compute`` is neither a :class:`Compute` nor
-        ``None``.
-    :raises ValueError: for an argument out of its range, and for a ``compute``
-        that names a host: an engine steps in this process, and only
+        a single real number, ``c``, ``rho`` or ``damping`` holds a complex
+        number or a text, ``absorbing_layer_cells`` is a flag, a text or an array
+        where a count goes, ``shape`` is not a pair or holds a count that is
+        not a number, a side of ``absorbing_sides`` or ``edge_impedance`` is
+        not a text, an impedance of ``edge_impedance`` is not a real number or
+        an array of them (a flag, ``None`` or a text among them), or
+        ``compute`` is neither a :class:`Compute` nor ``None``.
+    :raises ValueError: for an argument out of its range, a ``shape`` given
+        beside a map of another shape, a side that is not ``"left"``,
+        ``"right"``, ``"top"`` or ``"bottom"``, and for a ``compute`` that
+        names a host: an engine steps in this process, and only
         :func:`fdtd_simulation` runs on a node.
     :raises ComputeImportError: when the library of the device ``compute``
         asks for is not installed or does not import.
@@ -1278,18 +1487,18 @@ class FDTD2D:
 
     def __init__(
         self,
-        c: float | Field2D,
+        c: ArrayLike,
         dx: float,
         *,
-        rho: float | Field2D = 1.2,
+        rho: ArrayLike = 1.2,
         cfl: float = 0.6,
-        absorbing_layer_cells: int = 0,
+        absorbing_layer_cells: int | np.integer[Any] = 0,
         absorbing_sides: Side | Iterable[Side] | None = None,
         absorbing_layer_reflection: float = _DEFAULT_SPONGE_REFLECTION,
-        damping: float | NDArray[np.float64] = 0.0,
-        shape: tuple[int, int] | None = None,
-        edge_impedance: Mapping[Side, float | NDArray[np.float64]] | None = None,
-        obstacle_mask: NDArray[np.bool_] | None = None,
+        damping: ArrayLike = 0.0,
+        shape: GridShape | None = None,
+        edge_impedance: Mapping[Side, ArrayLike] | None = None,
+        obstacle_mask: ArrayLike | None = None,
         compute: Compute | None = None,
     ) -> None:
         medium = _acoustic_medium(
@@ -1373,7 +1582,7 @@ class FDTD2D:
         self.edge_impedance: Mapping[Side, float | NDArray[np.float64]] = (
             MappingProxyType(
                 {
-                    side: float(value)
+                    side: float(np.asarray(value, dtype=np.float64))
                     if np.ndim(value) == 0
                     else read_only_copy(value, np.float64)
                     for side, value in (edge_impedance or {}).items()
@@ -1464,12 +1673,11 @@ class FDTD2D:
         :raises ValueError: For an unknown direction, a non-positive or
             non-finite ``half_width_m``/``wavelength_m``, or a non-finite
             ``center_m``/``amplitude``.
-        :raises TypeError: if ``amplitude``, ``center_m``, ``wavelength_m`` or
-            ``half_width_m`` is not a single number.
+        :raises TypeError: if ``direction`` is not a text, or ``amplitude``,
+            ``center_m``, ``wavelength_m`` or ``half_width_m`` is not a single
+            real number.
         """
-        if direction not in _SIDE_TRAVEL:
-            msg = "'direction' must be 'down', 'up', 'left' or 'right'."
-            raise ValueError(msg)
+        require_choice(direction, "direction", _SIDE_TRAVEL)
         width = require_positive(half_width_m, "half_width_m")
         wavelength = (
             None
@@ -1519,7 +1727,9 @@ class FDTD2D:
         self,
         ax: Axes | None = None,
         *,
-        probes: Iterable[tuple[int, int]] | None = None,
+        probes: Iterable[Sequence[int | np.integer[Any]]]
+        | NDArray[np.integer[Any]]
+        | None = None,
         language: Language = "en",
         **kwargs: Any,
     ) -> Axes:
@@ -1574,7 +1784,13 @@ class FDTD2D:
             self._sources.append(source)
 
     def add_contour_probe(
-        self, ix0: int, ix1: int, iy0: int, iy1: int, *, frequencies: ArrayLike
+        self,
+        ix0: int | np.integer[Any],
+        ix1: int | np.integer[Any],
+        iy0: int | np.integer[Any],
+        iy1: int | np.integer[Any],
+        *,
+        frequencies: ArrayLike,
     ) -> ContourProbe:
         r"""Record ``p`` and ``v_n`` phasors on a closed rectangular contour.
 
@@ -1604,6 +1820,8 @@ class FDTD2D:
         :return: The registered :class:`ContourProbe`.
         :raises ValueError: For a block without open faces on all sides or
             invalid frequencies.
+        :raises TypeError: For a cell index that is a flag, a text or an
+            array, or ``frequencies`` that hold a complex number or a text.
         """
         probe = ContourProbe(self, ix0, ix1, iy0, iy1, frequencies)
         self._contour_probes.append(probe)
@@ -1690,10 +1908,10 @@ class FDTD2D:
 
     def run(
         self,
-        n_steps: int,
+        n_steps: int | np.integer[Any],
         *,
-        snapshot_every: int | None = None,
-        snapshot_decimation: int = 1,
+        snapshot_every: int | np.integer[Any] | None = None,
+        snapshot_decimation: int | np.integer[Any] = 1,
     ) -> NDArray[np.floating]:
         """Advance ``n_steps`` steps, optionally recording pressure frames.
 
@@ -1925,8 +2143,9 @@ class FDTDResult(OwnsArrays):
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to the underlying ``plot``/``imshow``.
         :return: The axes.
-        :raises TypeError: for ``color_limit`` with ``kind="snapshot"``, which
-            the field drawn sets (``vmin`` and ``vmax`` reach ``imshow``).
+        :raises TypeError: for a ``kind`` that is not a text, or
+            ``color_limit`` with ``kind="snapshot"``, which the field drawn
+            sets (``vmin`` and ``vmax`` reach ``imshow``).
         :raises ValueError: for a ``kind`` other than ``"probes"`` and
             ``"snapshot"``, a ``language`` other than ``"en"`` and ``"es"``,
             or a snapshot asked of a result that holds none.
@@ -1934,18 +2153,13 @@ class FDTDResult(OwnsArrays):
         from .._i18n import check_language
 
         check_language(language)
-        if kind == "probes":
+        if require_choice(kind, "kind", _PLOT_KINDS) == "probes":
             from .._plot.simulation import plot_fdtd_probes
 
             return plot_fdtd_probes(self, ax=ax, language=language, **kwargs)
-        if kind == "snapshot":
-            from .._plot.simulation import plot_fdtd_snapshot
+        from .._plot.simulation import plot_fdtd_snapshot
 
-            return plot_fdtd_snapshot(
-                self, ax=ax, frame=frame, language=language, **kwargs
-            )
-        msg = "kind must be 'probes' or 'snapshot'"
-        raise ValueError(msg)
+        return plot_fdtd_snapshot(self, ax=ax, frame=frame, language=language, **kwargs)
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -1976,6 +2190,17 @@ class FDTDRecording(RichDisplay):
     snapshot_every: int | None = None
     snapshot_decimation: int = 1
 
+    if TYPE_CHECKING:
+
+        def __init__(
+            self,
+            *,
+            probes: Sequence[Sequence[int | np.integer[Any]]]
+            | NDArray[np.integer[Any]] = (),
+            snapshot_every: int | np.integer[Any] | None = None,
+            snapshot_decimation: int | np.integer[Any] = 1,
+        ) -> None: ...
+
     def __post_init__(self) -> None:
         """Refuse a malformed probe or count when the record is built.
 
@@ -2005,28 +2230,85 @@ class FDTDBoundaries(OwnsArrays):
         side name (``left``/``right``/``top``/``bottom``) to ``"rigid"``,
         ``"absorbing"``, or a real specific impedance [Pa s/m] (scalar or
         per-edge-cell 1D array, Eqs. 4.33-4.35); a side the mapping leaves
-        out is rigid. A mapping is held as a read-only copy, and an
-        impedance profile given as a list as a read-only array of the
-        record's own, so a change to the caller's dictionary or list
+        out is rigid. A mapping is held as a read-only copy, an impedance
+        as the float a run reads, and a profile, given as a list or as an
+        array of any real type, as a read-only float64 array of the
+        record's own, so a change to the caller's dictionary, list or array
         afterwards does not reach the record.
     :param absorbing_layer_cells: Sponge-layer thickness for absorbing sides,
-        in cells.
+        in cells, held as the whole number it names.
+    :raises TypeError: for ``sides`` that are neither a name nor a mapping,
+        a side of ``sides`` that is not a text, a termination that is
+        neither a name nor a real number or an array of them (a flag,
+        ``None`` or a complex number among them), or an
+        ``absorbing_layer_cells`` that is a flag, a text, an array or
+        anything else that is not a number.
+    :raises ValueError: for a side that is not ``"left"``, ``"right"``,
+        ``"top"`` or ``"bottom"``, a termination name that is not
+        ``"rigid"`` or ``"absorbing"``, a ragged impedance profile or an
+        impedance too large for a float, or an ``absorbing_layer_cells`` that
+        is not a whole number.
     """
 
-    sides: (
-        AcousticBoundary | Mapping[Side, AcousticBoundary | float | NDArray[np.float64]]
-    ) = "rigid"
+    sides: AcousticBoundary | Mapping[Side, AcousticBoundary | float | Field2D] = (
+        "rigid"
+    )
     absorbing_layer_cells: int = 20
 
-    def __post_init__(self) -> None:
-        """Hold a mapping of sides as a read-only copy of its own.
+    if TYPE_CHECKING:
 
-        The sides and the thickness are checked where a run reads them, not
-        here.
+        def __init__(
+            self,
+            *,
+            sides: AcousticBoundary
+            | Mapping[
+                Side,
+                AcousticBoundary
+                | float
+                | np.floating[Any]
+                | np.integer[Any]
+                | Sequence[float | np.floating[Any] | np.integer[Any]]
+                | NDArray[np.floating[Any] | np.integer[Any]],
+            ] = "rigid",
+            absorbing_layer_cells: int | np.integer[Any] = 20,
+        ) -> None: ...
+
+    def __post_init__(self) -> None:
+        """Refuse an unknown side or termination, and hold the sides and the thickness.
+
+        A mapping of sides is held as a read-only copy of its own, each
+        impedance as the float or the float64 profile a run reads, and the
+        thickness as the whole number of cells it names. Whether a profile
+        fits its edge, an impedance is positive, and the thickness fits the
+        grid, is checked where a run reads them, the first place a grid
+        exists.
         """
         if isinstance(self.sides, Mapping):
-            held = {side: _held_map(value) for side, value in self.sides.items()}
+            held: dict[Side, AcousticBoundary | float | Field2D] = {}
+            for side, value in self.sides.items():
+                require_choice(side, "sides", _SIDES)
+                if isinstance(value, str):
+                    held[side] = require_choice(
+                        value, f"sides[{side!r}]", _BOUNDARY_NAMES
+                    )
+                    continue
+                # An impedance, held as the float or the float64 profile a
+                # run reads (_edge_impedance_profile), read once here.
+                numbers = _impedance_numbers(side, value)
+                held[side] = (
+                    float(numbers)
+                    if numbers.ndim == 0
+                    else read_only_copy(numbers, np.float64)
+                )
             object.__setattr__(self, "sides", MappingProxyType(held))
+        else:
+            require_choice(self.sides, "sides", _BOUNDARY_NAMES)
+        require_scalar(self.absorbing_layer_cells, "absorbing_layer_cells")
+        object.__setattr__(
+            self,
+            "absorbing_layer_cells",
+            _integer("absorbing_layer_cells", self.absorbing_layer_cells),
+        )
 
     def __reduce__(self) -> tuple[Any, tuple[type, dict[str, Any]]]:
         """Rebuild from the fields: a read-only mapping of sides does not pickle."""
@@ -2048,7 +2330,7 @@ class _AcousticChecks:
     dt: float
     obstacle: NDArray[np.bool_] | None
     absorbing_sides: tuple[Side, ...]
-    edge_impedance: Mapping[Side, float | NDArray[np.float64]]
+    edge_impedance: Mapping[Side, float | Field2D]
     absorbing_layer_cells: int
     probe_ix: NDArray[np.int_]
     steps: int
@@ -2081,7 +2363,8 @@ class FDTDRun(OwnsArrays):
     :param duration_s: Physical time to simulate [s].
     :param sources: One or more of :class:`GaussianPulse`,
         :class:`CWSource`, :class:`SignalSource` or :class:`PlaneWaveSource`.
-    :param shape: Grid shape ``(ny, nx)``, required when ``c`` is a scalar.
+    :param shape: Grid shape ``(ny, nx)``, required when ``c`` is a scalar;
+        beside a map it must be the map's own shape.
     :param rho: Density map [kg/m3]; scalar or ``(ny, nx)`` array.
     :param cfl: Courant number in ``(0, 1)`` (Eqs. 4.13-4.14); the time step
         is :math:`\Delta t = C_\mathrm{N}\, \Delta x / (c_{\max} \sqrt{2})`.
@@ -2100,13 +2383,14 @@ class FDTDRun(OwnsArrays):
     :raises TypeError: If an argument is of the wrong type: a ``duration_s``,
         ``cfl`` or ``dx`` that is not one number, a ``recording`` that is
         neither an :class:`FDTDRecording` nor ``None``, ``boundaries`` that
-        are neither an :class:`FDTDBoundaries` nor ``None``, an
-        ``absorbing_layer_cells`` of the boundaries that is not a number, a
-        ``shape`` that is not a pair, a complex medium, or an
-        ``obstacle_mask`` that is not boolean.
-    :raises ValueError: If an argument is out of its range, a side of the
-        boundaries is unknown or terminated by an unknown name, or a source,
-        a probe or the obstacle does not fit the grid.
+        are neither an :class:`FDTDBoundaries` nor ``None``, a ``shape``
+        that is not a pair or holds a count that is not a number, a medium
+        (``c``, ``rho``, ``damping``) that holds a complex number or a text,
+        or an ``obstacle_mask`` that is not boolean.
+    :raises ValueError: If an argument is out of its range, a ``shape`` is
+        not two whole numbers of one cell or more or is given beside a map of
+        another shape, or a source, a probe or the obstacle does not fit the
+        grid.
     """
 
     c: float | Field2D
@@ -2121,16 +2405,38 @@ class FDTDRun(OwnsArrays):
     obstacle_mask: NDArray[np.bool_] | None = None
     damping: float | Field2D = 0.0
 
+    if TYPE_CHECKING:
+
+        def __init__(
+            self,
+            *,
+            c: ArrayLike,
+            dx: float,
+            duration_s: float,
+            sources: Sequence[AnySource],
+            shape: GridShape | None = None,
+            rho: ArrayLike = 1.2,
+            cfl: float = 0.6,
+            recording: FDTDRecording | None = None,
+            boundaries: FDTDBoundaries | None = None,
+            obstacle_mask: ArrayLike | None = None,
+            damping: ArrayLike = 0.0,
+        ) -> None: ...
+
     def __post_init__(self) -> None:
-        """Hold the containers and the maps so they cannot change, then check every argument."""
+        """Hold the containers and the maps so they cannot change, then check every argument.
+
+        A ``shape`` is held as the pair of whole numbers it names: the grid a
+        scalar ``c`` is spread over, or, beside a map, the map's own grid.
+        """
         object.__setattr__(self, "sources", tuple(self.sources))
+        if self.shape is not None:
+            object.__setattr__(self, "shape", _grid_shape(self.shape))
         for name in ("c", "rho", "damping"):
             object.__setattr__(self, name, _held_map(getattr(self, name)))
         object.__setattr__(self, "obstacle_mask", _held_map(self.obstacle_mask, None))
-        checks = self._checked
-        if self.shape is not None and np.isscalar(self.c):
-            # Read only for a scalar c: held as the grid it was built on.
-            object.__setattr__(self, "shape", checks.grid)
+        # Every argument is checked once, here, and what the checks found is kept.
+        _ = self._checked
 
     @cached_property
     def _checked(self) -> _AcousticChecks:
@@ -2154,15 +2460,12 @@ def _held_map(
     number, a text, an array or ``None`` is left as it is. So is a value the
     conversion refuses (an int too large for a float, a number whose float
     divides by zero), which the checks then refuse in their own words and in
-    their own order, and a map that holds complex numbers, which the checks
-    meet as they always did: :class:`FDTDRun`'s ``c`` and ``rho`` refuse it
-    with ``TypeError``; elsewhere a map of Python complex numbers raises
-    ``TypeError`` in the float conversion, and one of NumPy complex numbers
-    loses its imaginary part with a ``ComplexWarning`` and stays the
-    caller's list. Read here as float64, a map of NumPy complex numbers
-    would warn a second time; read as complex, a map of Python complex
-    numbers would turn its refusal into a warning. So only a real-valued map
-    is held.
+    their own order, and a map that holds a complex number or a text, which
+    every check of a medium refuses with ``TypeError`` (``c``, ``rho``,
+    ``c_p``, ``c_s``, ``damping``): read here as float64, NumPy would keep
+    only the real part of a complex number, with no more than a
+    ``ComplexWarning``, and the number a text spells. So only a real-valued
+    map is held.
 
     :param dtype: What the checks read the map as: float64 for a medium,
         ``None`` for the obstacle, whose checks require booleans.
@@ -2170,7 +2473,12 @@ def _held_map(
     if value is None or np.isscalar(value) or isinstance(value, np.ndarray):
         return value
     try:
-        held = None if np.iscomplexobj(value) else np.array(value, dtype=dtype)
+        objects = np.asarray(value, dtype=object)
+        held = (
+            None
+            if holds_complex(objects) or holds_text(objects)
+            else np.array(value, dtype=dtype)
+        )
     except (TypeError, ValueError, ArithmeticError):
         held = None
     return value if held is None else read_only(held)
@@ -2192,19 +2500,19 @@ def _acoustic_boundaries_or_rigid(boundaries: object) -> FDTDBoundaries:
 def _acoustic_checks(run: FDTDRun) -> _AcousticChecks:
     """Check every argument of *run*, as :func:`fdtd_simulation` always did.
 
-    The recording's type, the boundaries' type and their sponge thickness,
-    the sources, the duration and the sides, then the medium
+    The recording's type, the boundaries' type, the sources, the duration
+    and the sponge thickness of absorbing sides, then the medium
     (:func:`_acoustic_medium`: the grid and the time step, the density, the
     sponge and the damping, the impedance edges, the obstacle), then the
-    sources and the probes on the grid and the step count. The recording
-    checked its own fields when it was built; here its probes meet the grid.
+    sources and the probes on the grid and the step count. The recording and
+    the boundaries checked their own fields when they were built; here the
+    probes and the impedances meet the grid.
 
     :raises TypeError: as :class:`FDTDRun` documents.
     :raises ValueError: as :class:`FDTDRun` documents.
     """
     recording = _recording_or_empty(run.recording, FDTDRecording)
     boundaries = _acoustic_boundaries_or_rigid(run.boundaries)
-    require_scalar(boundaries.absorbing_layer_cells, "absorbing_layer_cells")
     if len(run.sources) == 0:
         msg = "at least one source is required"
         raise ValueError(msg)
@@ -2212,7 +2520,7 @@ def _acoustic_checks(run: FDTDRun) -> _AcousticChecks:
     absorbing_sides, edge_impedance = _parse_boundaries(boundaries.sides)
     width = 0
     if absorbing_sides:
-        width = _integer("absorbing_layer_cells", boundaries.absorbing_layer_cells)
+        width = boundaries.absorbing_layer_cells
         if width < 1:
             msg = "absorbing_layer_cells must be >= 1"
             raise ValueError(msg)
@@ -2318,38 +2626,30 @@ def _cleared(first: NDArray[np.floating], second: NDArray[np.floating] | None) -
 
 
 def _parse_boundaries(
-    boundaries: AcousticBoundary
-    | Mapping[Side, AcousticBoundary | float | NDArray[np.float64]],
-) -> tuple[tuple[Side, ...], dict[Side, float | NDArray[np.float64]]]:
-    """Split the boundary spec into sponge sides and impedance sides."""
-    spec: dict[Side, str | float | NDArray[np.float64]]
-    if isinstance(boundaries, str):
-        spec = dict.fromkeys(_SIDES, boundaries)
-    else:
-        unknown = set(boundaries) - set(_SIDES)
-        if unknown:
-            msg = f"unknown boundary sides: {sorted(unknown)}"
-            raise ValueError(msg)
-        spec = {side: boundaries.get(side, "rigid") for side in _SIDES}
+    boundaries: AcousticBoundary | Mapping[Side, AcousticBoundary | float | Field2D],
+) -> tuple[tuple[Side, ...], dict[Side, float | Field2D]]:
+    """Split the boundary spec into sponge sides and impedance sides.
+
+    The :class:`FDTDBoundaries` the spec comes from checked its sides and
+    their names when it was built.
+    """
+    spec: Mapping[Side, AcousticBoundary | float | Field2D] = (
+        dict.fromkeys(_SIDES, boundaries) if isinstance(boundaries, str) else boundaries
+    )
     absorbing: list[Side] = []
-    impedance: dict[Side, float | NDArray[np.float64]] = {}
+    impedance: dict[Side, float | Field2D] = {}
     for side in _SIDES:
-        value = spec[side]
-        if isinstance(value, str):
-            if value not in _BOUNDARY_NAMES:
-                msg = (
-                    f"boundary for side {side!r} must be one of "
-                    f"{_BOUNDARY_NAMES} or a real impedance, got {value!r}"
-                )
-                raise ValueError(msg)
-            if value == "absorbing":
-                absorbing.append(side)
-        else:
+        value = spec.get(side, "rigid")
+        if not isinstance(value, str):
             impedance[side] = value
+        elif value == "absorbing":
+            absorbing.append(side)
     return tuple(absorbing), impedance
 
 
-def _probe_pairs(probes: Iterable[tuple[int, int]]) -> tuple[tuple[int, int], ...]:
+def _probe_pairs(
+    probes: Iterable[Sequence[int | np.integer[Any]]] | NDArray[np.integer[Any]],
+) -> tuple[tuple[int, int], ...]:
     """The probe cells as whole ``(ix, iy)`` pairs, read before any grid exists.
 
     :class:`FDTDRecording` reads them here when it is built, and
@@ -2377,7 +2677,7 @@ def _probe_pairs(probes: Iterable[tuple[int, int]]) -> tuple[tuple[int, int], ..
 
 
 def _probe_indices(
-    probes: Iterable[tuple[int, int]],
+    probes: Iterable[Sequence[int | np.integer[Any]]] | NDArray[np.integer[Any]],
     shape: tuple[int, int],
     obstacle: NDArray[np.bool_] | None,
 ) -> NDArray[np.int_]:

@@ -2414,16 +2414,6 @@ def test_a_record_holding_a_read_only_mapping_travels() -> None:
     assert missing == []
 
 
-#: Protocols of the package that declare a settable member on purpose, keyed by
-#: file and protocol, each with the reason.
-PROTOCOL_ATTRIBUTE_EXEMPT: dict[tuple[str, str], str] = {
-    ("simulation/fdtd.py", "_PressureEngine"): (
-        "a private engine contract in a file scripts/gpu_parity.py fingerprints, "
-        "whose _backend is assigned by the engine that holds it"
-    ),
-}
-
-
 def _is_protocol(node: ast.AST) -> bool:
     return isinstance(node, ast.ClassDef) and any(
         (isinstance(base, ast.Name) and base.id == "Protocol")
@@ -2456,13 +2446,9 @@ def test_a_protocol_declares_its_data_members_as_properties() -> None:
         f"{path}:{node.name}.{child.target.id}"
         for path, node in _protocols()
         for child in node.body
-        if isinstance(child, ast.AnnAssign)
-        and isinstance(child.target, ast.Name)
-        and (path, node.name) not in PROTOCOL_ATTRIBUTE_EXEMPT
+        if isinstance(child, ast.AnnAssign) and isinstance(child.target, ast.Name)
     )
     assert offenders == []
-    protocols = {(path, node.name) for path, node in _protocols()}
-    assert set(PROTOCOL_ATTRIBUTE_EXEMPT) <= protocols, "stale exemption"
 
 
 def _is_type_checking(test: ast.expr) -> bool:
@@ -2606,3 +2592,183 @@ def test_the_static_case_rule_reads_an_array_written_in_the_call() -> None:
     )
     assert _arrays_of_a_written_dtype_handed_on(written) == [1, 2, 3]
     assert _arrays_of_a_written_dtype_handed_on(named) == []
+
+
+#: The NumPy numbers an annotation takes on their own, as the annotations
+#: reader resolves them.
+_NUMPY_NUMBER_KINDS = frozenset({"numpy.integer", "numpy.floating"})
+
+#: The Python numbers a sequence of numbers is written with.
+_PYTHON_NUMBERS = frozenset({"builtins.int", "builtins.float"})
+
+#: The containers a caller writes, each with the annotations that take it:
+#: a list is taken by a ``list`` or a ``Sequence`` and not by a ``tuple``, so
+#: the items of a ``tuple`` branch do not make a list of them a valid
+#: argument, nor those of a ``set`` branch.
+_TAKEN_BY: dict[str, frozenset[str]] = {
+    "list": frozenset(
+        {
+            "builtins.list",
+            "typing.List",
+            "typing.Sequence",
+            "typing.MutableSequence",
+            "typing.Iterable",
+            "typing.Collection",
+            "collections.abc.Sequence",
+            "collections.abc.MutableSequence",
+            "collections.abc.Iterable",
+            "collections.abc.Collection",
+        }
+    ),
+    "tuple": frozenset(
+        {
+            "builtins.tuple",
+            "typing.Tuple",
+            "typing.Sequence",
+            "typing.Iterable",
+            "typing.Collection",
+            "collections.abc.Sequence",
+            "collections.abc.Iterable",
+            "collections.abc.Collection",
+        }
+    ),
+    "set": frozenset(
+        {
+            "builtins.set",
+            "builtins.frozenset",
+            "typing.Set",
+            "typing.FrozenSet",
+            "typing.AbstractSet",
+            "typing.Iterable",
+            "typing.Collection",
+            "collections.abc.Set",
+            "collections.abc.Iterable",
+            "collections.abc.Collection",
+        }
+    ),
+}
+
+
+def test_every_container_is_a_list_a_tuple_or_a_set_to_a_caller() -> None:
+    """Each container the annotations reader knows takes a list, a tuple or a set."""
+    assert set().union(*_TAKEN_BY.values()) == cpa._CONTAINERS
+
+
+def _numbers_left_out_of_sequences(
+    annotations: cpa.Annotations,
+    module: str,
+    node: ast.expr | None,
+    taken: frozenset[str | None] = frozenset(),
+) -> list[str]:
+    """The sequences of an annotation that refuse a NumPy number it takes alone.
+
+    ``int | np.integer[Any] | Sequence[int]`` takes one ``np.int64`` and
+    refuses a list of them, to a type checker, where a body that reads each
+    item as a number takes both. The sequences of one union are read
+    together (``Sequence[float] | Sequence[np.floating[Any]]`` holds the
+    NumPy float), as far as they take the same container a caller writes
+    (a ``tuple[np.integer[Any], ...]`` beside ``Sequence[int]`` takes a
+    tuple of NumPy integers and not a list of them, :data:`_TAKEN_BY`), a
+    nested sequence holds what the sequence around it takes alone (*taken*),
+    and a mapping's values are read as an annotation of their own.
+    """
+    members = annotations.members(module, node)
+    alone = taken | (
+        {annotations.resolve(where, member) for where, member in members}
+        & _NUMPY_NUMBER_KINDS
+    )
+    found: list[str] = []
+    items: list[tuple[str, ast.expr]] = []
+    written: list[str] = []
+    kinds_of: dict[str, set[str | None]] = {}
+    for where, member in members:
+        dotted = annotations.resolve(where, member)
+        held = [item for item in cpa._items(member) if not cpa._is_ellipsis(item)]
+        if dotted in cpa._MAPPINGS and held:
+            found += _numbers_left_out_of_sequences(annotations, where, held[-1])
+        elif dotted in cpa._CONTAINERS:
+            items += [(where, item) for item in held]
+            written.append(ast.unparse(member))
+            kinds = {
+                annotations.resolve(inner, number)
+                for item in held
+                for inner, number in annotations.members(where, item)
+            }
+            for container, takers in _TAKEN_BY.items():
+                if dotted in takers:
+                    kinds_of.setdefault(container, set()).update(kinds)
+    if any(kinds & _PYTHON_NUMBERS and alone - kinds for kinds in kinds_of.values()):
+        found.append(" | ".join(written))
+    for where, item in items:
+        found += _numbers_left_out_of_sequences(annotations, where, item, alone)
+    return found
+
+
+def _annotations_leaving_numbers_out(
+    package: return_overloads.Package, annotations: cpa.Annotations
+) -> list[str]:
+    """Every parameter and annotated name of *package* whose sequences refuse a NumPy number it takes alone."""
+    found: list[str] = []
+    for module, tree in sorted(package.trees.items()):
+        for node in ast.walk(tree):
+            if isinstance(node, ast.arg):
+                name, annotation = node.arg, node.annotation
+            elif isinstance(node, ast.AnnAssign):
+                name, annotation = ast.unparse(node.target), node.annotation
+            else:
+                continue
+            found += [
+                f"{module}:{node.lineno}: {name}: {sequence}"
+                for sequence in _numbers_left_out_of_sequences(
+                    annotations, module, annotation
+                )
+            ]
+    return found
+
+
+def test_a_numpy_number_taken_alone_is_taken_in_a_sequence_too() -> None:
+    """An annotation that takes ``np.int64`` alone takes a list of them beside it.
+
+    ``Signal.pick(channels: int | np.integer[Any] | Sequence[int])`` took one
+    NumPy channel index and, for mypy, refused a list of them, and the
+    impedance profile of ``FDTDBoundaries`` took a NumPy float alone and a
+    ``Sequence[float]`` beside it, while each call ran. A NumPy number a
+    caller may pass alone is one a caller collects in a list.
+    """
+    package, annotations = _record_reader()
+    assert _annotations_leaving_numbers_out(package, annotations) == []
+
+
+def test_the_sequence_rule_reads_a_union_whole(tmp_path: Path) -> None:
+    """Aliases are spelt out, sibling sequences read together, mapping values read too."""
+    root = tmp_path / "pkg"
+    root.mkdir()
+    (root / "__init__.py").write_text("", encoding="utf-8")
+    (root / "api.py").write_text(
+        "from collections.abc import Mapping, Sequence\n"
+        "from typing import Any\n"
+        "import numpy as np\n"
+        "from numpy.typing import NDArray\n"
+        "Index = int | np.integer[Any]\n"
+        "Values = Sequence[float] | Sequence[np.floating[Any]] | NDArray[Any]\n"
+        "def pick(channels: Index | Sequence[int]) -> None: ...\n"
+        "def profile(sides: Mapping[str, float | np.floating[Any] | list[float]]) -> None: ...\n"
+        "def nested(rows: np.integer[Any] | Sequence[Sequence[int]]) -> None: ...\n"
+        "def kept(channels: Index | Sequence[int | np.integer[Any]]) -> None: ...\n"
+        "def siblings(values: float | np.floating[Any] | Values) -> None: ...\n"
+        "def plain(values: float | Sequence[float]) -> None: ...\n"
+        "def tupled(channels: Index | tuple[np.integer[Any], ...] | Sequence[int]) -> None: ...\n"
+        "def fixed(pair: np.floating[Any] | tuple[float, float]) -> None: ...\n"
+        "def listed(channels: Index | list[np.integer[Any]] | Sequence[int]) -> None: ...\n",
+        encoding="utf-8",
+    )
+    package = return_overloads.Package(sorted(root.rglob("*.py")), root)
+    annotations = cpa.Annotations(package)
+    assert _annotations_leaving_numbers_out(package, annotations) == [
+        "pkg.api:7: channels: Sequence[int]",
+        "pkg.api:8: sides: list[float]",
+        "pkg.api:9: rows: Sequence[int]",
+        "pkg.api:13: channels: tuple[np.integer[Any], ...] | Sequence[int]",
+        "pkg.api:14: pair: tuple[float, float]",
+        "pkg.api:15: channels: list[np.integer[Any]] | Sequence[int]",
+    ]

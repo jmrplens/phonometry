@@ -9,14 +9,15 @@ through these helpers; existing modules migrate as they are touched.
 from __future__ import annotations
 
 import math
-from typing import TYPE_CHECKING, cast
+from collections.abc import Iterable
+from typing import TYPE_CHECKING, Any, TypeGuard, cast
 
 import numpy as np
 
 from .frozen import owned_members
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable, Mapping, Sequence
+    from collections.abc import Mapping, Sequence
 
     from numpy.typing import ArrayLike, NDArray
 
@@ -129,6 +130,60 @@ def refuse_text(value: object, msg: str) -> None:
         raise TypeError(msg)
 
 
+def holds_complex(value: object) -> bool:
+    """True when *value* is a complex number, or an array that holds one.
+
+    A Python ``complex``, a NumPy complex scalar, a NumPy array of a complex
+    dtype, or an object array with a complex element. NumPy reads a complex
+    value as a real one with no more than a ``ComplexWarning``:
+    ``float(np.complex128(343 + 50j))`` is ``343.0``, and so is each element
+    of ``np.asarray(z, dtype=np.float64)``, so a guard that converts first
+    checks a medium, a level or a rate the caller never gave. A complex value
+    where a real one belongs is the wrong type, as a text is.
+
+    :param value: The value to test, of any type.
+    :return: Whether *value* is or holds a complex number.
+    """
+    if isinstance(value, complex | np.complexfloating):
+        return True
+    if not isinstance(value, np.ndarray):
+        return False
+    kind = value.dtype.kind
+    if kind == "c":
+        return True
+    return kind == "O" and any(
+        isinstance(item, complex | np.complexfloating) for item in value.flat
+    )
+
+
+def refuse_complex(value: object, msg: str) -> None:
+    """Refuse a complex number, or a sequence or array that holds one, with *msg*.
+
+    For the conversions that read a complex value as its real part
+    (``np.asarray(z, dtype=np.float64)``, ``float(np.complex128(z))``) where a
+    real number belongs: see :func:`holds_complex`. A sequence is read as
+    the objects it holds, so a list of NumPy complex numbers is found as an
+    array of them is. A ragged nesting is left to the conversion that
+    follows, which refuses it on its own terms.
+
+    :param value: The caller's value, of any type.
+    :param msg: The refusal, worded by the guard that owns the parameter.
+    :raises TypeError: with *msg*, for a complex number or anything that holds
+        one.
+    """
+    if isinstance(value, np.ndarray | complex | np.complexfloating):
+        found = holds_complex(value)
+    elif isinstance(value, str | bytes):
+        found = False
+    else:
+        try:
+            found = holds_complex(np.asarray(value, dtype=object))
+        except ValueError:
+            return
+    if found:
+        raise TypeError(msg)
+
+
 def require_real(value: object, msg: str) -> float:
     """*value* as a ``float``, or a refusal worded *msg* when it is not one number.
 
@@ -138,19 +193,21 @@ def require_real(value: object, msg: str) -> float:
     rather than only on those where :func:`float` happens to refuse it.
 
     The refusal keeps the class the mistake has. An array, ``None``, a text
-    (whether or not it reads as a number, see :func:`holds_text`) or any other
-    object :func:`float` cannot take is the wrong type, and is refused with
-    :class:`TypeError`; a number too large for a float is a value of the
-    right type, and is refused with :class:`ValueError`.
+    (whether or not it reads as a number, see :func:`holds_text`), a complex
+    number or any other object :func:`float` cannot take is the wrong type,
+    and is refused with :class:`TypeError`; a number too large for a float
+    is a value of the right type, and is refused with :class:`ValueError`.
+    :func:`float` refuses a Python ``complex`` and reads a NumPy one as its
+    real part (:func:`holds_complex`), so both are refused here before it.
 
     :param value: The caller's value, of any type.
     :param msg: The refusal, worded by the guard that owns the parameter.
     :return: ``float(value)``.
-    :raises TypeError: with *msg*, for an array of any shape, a text, or
-        anything whose type :func:`float` refuses.
+    :raises TypeError: with *msg*, for an array of any shape, a text, a
+        complex number, or anything whose type :func:`float` refuses.
     :raises ValueError: with *msg*, for a number :func:`float` cannot hold.
     """
-    if not is_scalar(value) or holds_text(value):
+    if not is_scalar(value) or holds_text(value) or holds_complex(value):
         raise TypeError(msg)
     try:
         return float(cast("float", value))
@@ -506,7 +563,9 @@ def _as_float64(x: ArrayLike, name: str) -> np.ndarray:
     Two inputs numpy converts are refused rather than converted. A complex
     array: ``np.asarray(z, dtype=float64)`` drops the imaginary part with no
     more than a ``ComplexWarning``, so ``np.array([1 + 2j])`` would arrive at
-    the guards below as ``[1.0]`` and pass every one of them. And text:
+    the guards below as ``[1.0]`` and pass every one of them, and an array
+    of objects that holds a NumPy complex number would too
+    (:func:`holds_complex`). And text:
     ``np.asarray(["94.0"], dtype=float64)`` parses it, so a column of readings
     left as text passed for numbers while one cell that reads as none raised
     a ``ValueError``; text is the wrong type where numbers belong whatever it
@@ -521,7 +580,7 @@ def _as_float64(x: ArrayLike, name: str) -> np.ndarray:
     except ValueError as exc:
         msg = f"'{name}' must be numeric."
         raise ValueError(msg) from exc
-    if array.dtype.kind == "c":
+    if holds_complex(array):
         msg = f"'{name}' must be real, not complex."
         raise TypeError(msg)
     if holds_text(array):
@@ -897,6 +956,10 @@ def require_same_shape(owner: object, *fields: str, quantity: str = "point") -> 
 def _as_numeric_field(owner: object, name: str, value: object) -> np.ndarray:
     """A field of *owner* as an array, ``float64`` unless it is complex.
 
+    An array of objects that holds a complex number is read as complex, so
+    both axes are checked: read as ``float64``, NumPy would keep the real
+    part of a NumPy complex number with no more than a ``ComplexWarning``.
+
     :raises TypeError: if the field is text or holds an element that is not a
         number.
     :raises ValueError: if the field is a ragged nesting.
@@ -912,7 +975,7 @@ def _as_numeric_field(owner: object, name: str, value: object) -> np.ndarray:
     if array.dtype.kind == "c":
         return array
     try:
-        return array.astype(np.float64)
+        return array.astype(np.complex128 if holds_complex(array) else np.float64)
     except TypeError as exc:
         msg = f"{type(owner).__name__}: '{name}' must be numeric."
         raise TypeError(msg) from exc
@@ -990,9 +1053,59 @@ def is_class_designation(value: object, expected: Sequence[int]) -> bool:
     :param expected: The classes the edition or standard defines.
     :return: ``True`` when *value* designates one of *expected*.
     """
-    if isinstance(value, bool) or not isinstance(value, (int, np.integer)):
-        return False
-    return int(value) in expected
+    return is_integer(value) and int(value) in expected
+
+
+def is_integer(value: object) -> TypeGuard[int | np.integer[Any]]:
+    """Whether *value* is an integer by its type: an ``int`` or a NumPy
+    integer, never a bool.
+
+    ``int()`` is not this test: it takes ``1.5`` as 1, ``True`` as 1 and
+    ``"1"`` as 1, so a value that reads an index, a designation or a count
+    through it takes each of them as the integer it was never given.
+
+    :param value: The value to test, of any type.
+    :return: Whether *value* is a Python or NumPy integer and not a bool.
+    """
+    return isinstance(value, int | np.integer) and not isinstance(value, bool)
+
+
+def indices_of(value: object, name: str) -> tuple[int, ...]:
+    """The indices a sequence of integers, or an integer array of one
+    dimension, holds, in their order.
+
+    An index picks an item by its place, so each is an integer by its type
+    (:func:`is_integer`); a fraction, a whole float, a flag or a text that
+    spells one is refused rather than read through ``int()``, and a text is
+    never read as a sequence of its letters.
+
+    :param value: A sequence (a list, a tuple, a range) or any other
+        iterable of Python or NumPy integers, or a one-dimensional array of
+        an integer dtype.
+    :param name: Parameter name used in the error message.
+    :return: The indices, as Python integers.
+    :raises TypeError: for a text, bytes, an array that has other than one
+        dimension or is not of an integer dtype, a value that holds no
+        items, or an item that is not an integer.
+    """
+    if isinstance(value, np.ndarray):
+        if value.ndim != 1 or not np.issubdtype(value.dtype, np.integer):
+            msg = (
+                f"'{name}' must be integer indices; an array of them is one-"
+                f"dimensional and of an integer dtype, got {value.ndim} "
+                f"dimensions of {value.dtype}."
+            )
+            raise TypeError(msg)
+        return tuple(int(item) for item in value)
+    if isinstance(value, str | bytes) or not isinstance(value, Iterable):
+        msg = f"'{name}' must be a sequence of integer indices, got {value!r}."
+        raise TypeError(msg)
+    items = tuple(value)
+    for item in items:
+        if not is_integer(item):
+            msg = f"'{name}' must hold integer indices, got {item!r}."
+            raise TypeError(msg)
+    return tuple(int(item) for item in items)
 
 
 def require_per_band(
@@ -1079,8 +1192,9 @@ def arrays_of(
         pair (angles_deg, relative_db) of two arrays"``).
     :param n_members: How many arrays it holds.
     :return: The members, each a ``float64`` array.
-    :raises TypeError: if *value* is a text or is not a sequence at all, or
-        *n_members* is not a number.
+    :raises TypeError: if *value* is a text or is not a sequence at all, a
+        member holds a complex number or a text, or *n_members* is not a
+        number.
     :raises ValueError: if it holds other than *n_members* members, or
         *n_members* is not a whole number of at least one.
     """
@@ -1097,6 +1211,9 @@ def arrays_of(
     if len(items) != expected:
         msg += f", not {len(items)} of them."
         raise ValueError(msg)
+    for item in items:
+        refuse_complex(item, f"{msg} of real numbers, not complex ones.")
+        refuse_text(item, f"{msg} of numbers, not text.")
     return tuple(np.asarray(item, dtype=np.float64) for item in items)
 
 
@@ -1112,7 +1229,8 @@ def pair_of_arrays(
     :param members: What the two members are, as the message spells them
         (``"(angles_deg, relative_db)"``).
     :return: The two members, each a ``float64`` array.
-    :raises TypeError: if *value* is a text or is not a sequence at all.
+    :raises TypeError: if *value* is a text or is not a sequence at all,
+        or a member holds a complex number or a text.
     :raises ValueError: if it holds other than two members.
     """
     first, second = arrays_of(value, name, f"a pair {members} of two arrays", 2)
@@ -1138,8 +1256,8 @@ def floats_of(
     :param n_members: How many numbers it holds, or ``None`` for any count.
     :return: The numbers, each a ``float``.
     :raises TypeError: if *value* is a text or is not a sequence at all, a
-        member is not one number (a text included), or *n_members* is not a
-        number.
+        member is not one number (a text or a complex number included), or
+        *n_members* is not a number.
     :raises ValueError: if it holds other than *n_members* members, a
         member is a number too large for a float, or *n_members* is not a
         whole number of at least one.

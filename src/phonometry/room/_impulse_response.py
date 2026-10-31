@@ -1000,7 +1000,7 @@ class ShapedSweepResult(OwnsArrays):
 
 
 def _shaped_target_db(
-    target: str | tuple[np.ndarray, np.ndarray],
+    target: str | tuple[ArrayLike, ArrayLike],
     freqs: np.ndarray,
     f_range: tuple[float, float],
 ) -> np.ndarray:
@@ -1079,7 +1079,7 @@ def shaped_sweep_signal(
     f2: float,
     duration_s: float,
     *,
-    target: Literal["white", "pink"] | tuple[np.ndarray, np.ndarray] = "pink",
+    target: Literal["white", "pink"] | tuple[ArrayLike, ArrayLike] = "pink",
     amplitude: float = 1.0,
     start_delay: float | None = None,
     fade: float = 0.01,

@@ -97,6 +97,7 @@ reads it.
 from __future__ import annotations
 
 import ast
+import builtins
 import collections.abc
 import dataclasses
 import enum
@@ -145,6 +146,33 @@ _COLLECTIONS = frozenset(
 
 #: The generic mappings whose keys a caller writes.
 _MAPPINGS = frozenset({"Dict", "Mapping", "MutableMapping", "dict"})
+
+#: The class of the values each origin of :data:`_COLLECTIONS` and
+#: :data:`_MAPPINGS` stands for, as a test of the form reads it:
+#: ``isinstance(sides, Mapping)`` holds for every value of a ``Mapping[...]``
+#: member and for no text.
+_ORIGINS: Mapping[str, type] = MappingProxyType(
+    {
+        "AbstractSet": collections.abc.Set,
+        "Collection": collections.abc.Collection,
+        "Dict": dict,
+        "FrozenSet": frozenset,
+        "Iterable": collections.abc.Iterable,
+        "List": list,
+        "Mapping": collections.abc.Mapping,
+        "MutableMapping": collections.abc.MutableMapping,
+        "MutableSequence": collections.abc.MutableSequence,
+        "MutableSet": collections.abc.MutableSet,
+        "Sequence": collections.abc.Sequence,
+        "Set": collections.abc.Set,
+        "Tuple": tuple,
+        "dict": dict,
+        "frozenset": frozenset,
+        "list": list,
+        "set": set,
+        "tuple": tuple,
+    }
+)
 
 #: A subscripted annotation member, ``Sequence[str]`` or
 #: ``collections.abc.Mapping[str, float]``, split into its origin and arguments.
@@ -905,6 +933,37 @@ def _held(node: ast.expr) -> ast.expr:
     return node
 
 
+class _Binding(NamedTuple):
+    """An assignment that binds a value: its targets, the value, and the
+    annotation it is written with, ``None`` for a plain one.
+    """
+
+    targets: list[ast.expr]
+    value: ast.expr
+    annotation: ast.expr | None
+
+
+def _bindings(tree: ast.AST) -> Iterator[_Binding]:
+    """Every assignment in *tree* that binds a value.
+
+    ``given: tuple[Side, ...] = (side,)`` binds ``given`` to the same value as
+    ``given = (side,)``, so a reader of locals reads both; an annotation
+    with no value (``given: tuple[Side, ...]``) binds nothing.
+    """
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Assign):
+            yield _Binding(node.targets, node.value, None)
+        elif isinstance(node, ast.AnnAssign) and node.value is not None:
+            yield _Binding([node.target], node.value, node.annotation)
+
+
+def _one_name(binding: _Binding) -> str | None:
+    """The name a binding of one plain name binds, else ``None``."""
+    if len(binding.targets) == 1 and isinstance(binding.targets[0], ast.Name):
+        return binding.targets[0].id
+    return None
+
+
 def _following(
     tree: ast.AST, is_target: Callable[[ast.expr], bool]
 ) -> Callable[[ast.expr], bool]:
@@ -1497,14 +1556,11 @@ def _local_imports(tree: ast.AST, module_name: str) -> dict[str, object]:
 def _spread_dicts(tree: ast.AST) -> dict[str, dict[str, ast.expr]]:
     """The dicts of keyword arguments a body builds to spread into a call."""
     found: dict[str, dict[str, ast.expr]] = {}
-    for node in ast.walk(tree):
-        if not (
-            isinstance(node, ast.Assign)
-            and len(node.targets) == 1
-            and isinstance(node.targets[0], ast.Name)
-        ):
+    for binding in _bindings(tree):
+        name = _one_name(binding)
+        if name is None:
             continue
-        value = node.value
+        value = binding.value
         entries: dict[str, ast.expr] = {}
         if isinstance(value, ast.Dict):
             entries = {
@@ -1519,7 +1575,7 @@ def _spread_dicts(tree: ast.AST) -> dict[str, dict[str, ast.expr]]:
                 if keyword.arg is not None
             }
         if entries:
-            found[node.targets[0].id] = entries
+            found[name] = entries
     return found
 
 
@@ -2349,10 +2405,8 @@ def _unlisted_items(
     a collection whose leftover is refused is checked as written, as a whole.
     """
     names: dict[str, ast.expr] = {}
-    for node in ast.walk(tree):
-        if not isinstance(node, ast.Assign):
-            continue
-        value = node.value
+    for binding in _bindings(tree):
+        value = binding.value
         against: ast.expr | None = None
         if (
             isinstance(value, ast.BinOp)
@@ -2371,7 +2425,7 @@ def _unlisted_items(
         if against is not None and strings_of(against, constants):
             names.update(
                 (target.id, against)
-                for target in node.targets
+                for target in binding.targets
                 if isinstance(target, ast.Name)
             )
     return names
@@ -2818,55 +2872,6 @@ def _cleaned_up_parameters(
 # text, and a choice that is not checked on every path
 # ---------------------------------------------------------------------------
 
-#: The script whose ``_COVERED`` names the files the GPU parity lock holds.
-GPU_PARITY_SCRIPT = pathlib.Path(__file__).resolve().parent / "gpu_parity.py"
-
-#: Why the modules of those files are exempt as a whole.
-GPU_PARITY_REASON = (
-    "GPU-parity batch: an edit to a file scripts/gpu_parity.py fingerprints "
-    "invalidates gpu-parity.lock, so the choices of those files are typed and "
-    "checked in one batch of their own, with the GPU run that records the "
-    "lock again"
-)
-
-
-def gpu_parity_modules(
-    script: pathlib.Path = GPU_PARITY_SCRIPT,
-) -> MappingProxyType[str, str]:
-    """The package modules the GPU parity lock holds, each with the reason.
-
-    Read from ``_COVERED`` in the source of *script*, so the exemption follows
-    the files the lock fingerprints and cannot drift from them; each entry is
-    a path joined onto the repository root with ``/``, and the ones under
-    ``src/`` are modules of the package.
-    """
-    if not script.is_file():
-        return MappingProxyType({})
-    tree = ast.parse(script.read_text(encoding="utf-8"), filename=str(script))
-    paths: list[str] = []
-    for node in tree.body:
-        if isinstance(node, ast.Assign) and any(
-            isinstance(target, ast.Name) and target.id == "_COVERED"
-            for target in node.targets
-        ):
-            paths = [
-                element.right.value
-                for element in getattr(node.value, "elts", [])
-                if isinstance(element, ast.BinOp)
-                and isinstance(element.right, ast.Constant)
-                and isinstance(element.right.value, str)
-            ]
-    modules: dict[str, str] = {}
-    for path in paths:
-        parts = pathlib.PurePosixPath(path).with_suffix("").parts
-        if parts[:1] == ("src",) and len(parts) > 1:
-            modules[".".join(parts[1:])] = GPU_PARITY_REASON
-    return MappingProxyType(modules)
-
-
-#: The modules of the files the GPU parity lock holds, keyed by module.
-GPU_PARITY = gpu_parity_modules()
-
 #: A published table keyed by text, or a tuple of texts, whose keys equal a
 #: vocabulary of the package by coincidence, keyed by ``(module, name)``, with
 #: the reason. An entry that matches nothing fails.
@@ -3190,7 +3195,7 @@ def vocabulary_tables() -> Iterator[Choice]:
             ):
                 continue
             home, annotation = _home_of_constant(module, name, value)
-            if (home, name) in seen or home in GPU_PARITY:
+            if (home, name) in seen:
                 continue
             seen.add((home, name))
             for path, texts in _keyed_by_text(
@@ -3591,20 +3596,23 @@ def _attribute_source(
         for parameter in _parameters_of(function)
         if parameter.arg == holder.id and parameter.annotation is not None
     ]
-    for node in ast.walk(function):
-        if (
-            isinstance(node, ast.Assign)
-            and any(
-                isinstance(target, ast.Name) and target.id == holder.id
-                for target in node.targets
-            )
-            and isinstance(node.value, ast.Call)
+    for binding in _bindings(function):
+        if not any(
+            isinstance(target, ast.Name) and target.id == holder.id
+            for target in binding.targets
         ):
-            called = getattr(module, _call_name(node.value), None)
+            continue
+        if binding.annotation is not None:
+            # ``held: Record = ...`` names the record it holds.
+            candidates.append(
+                _resolved(ast.unparse(binding.annotation).strip("'\""), module_name)
+            )
+        if isinstance(binding.value, ast.Call):
+            called = getattr(module, _call_name(binding.value), None)
             if inspect.isclass(called):
                 candidates.append(called)
                 continue
-            returned = _returned(node.value, function, module_name)
+            returned = _returned(binding.value, function, module_name)
             if returned is not None:
                 candidates.append(_resolved(returned[0].strip("'\""), returned[1]))
     for candidate in candidates:
@@ -3650,7 +3658,7 @@ def constant_fields() -> Iterator[Choice]:
     held to it. This is rule A21 for a record.
     """
     for home, qualname, target in _targets():
-        if home in GPU_PARITY or not inspect.isclass(target):
+        if not inspect.isclass(target):
             continue
         if not dataclasses.is_dataclass(target) or issubclass(target, CatalogueRow):
             continue
@@ -3732,52 +3740,149 @@ def _never(node: ast.expr) -> bool:
     return False
 
 
+def _one_text(node: ast.expr) -> tuple[type, ...]:
+    """The form of a single choice: a text."""
+    return (str,)
+
+
+def _classes_named(
+    node: ast.expr, names: Mapping[str, object] | None = None
+) -> tuple[type, ...] | None:
+    """The classes an ``isinstance`` test or a class pattern names, read in
+    *names* (a function's namespace), the builtins and :mod:`collections.abc`;
+    ``None`` when one of them is not a class read there.
+    """
+    if isinstance(node, ast.Tuple):
+        parts = [_classes_named(each, names) for each in node.elts]
+    elif isinstance(node, ast.BinOp) and isinstance(node.op, ast.BitOr):
+        parts = [_classes_named(node.left, names), _classes_named(node.right, names)]
+    else:
+        found = _named_object(node, names)
+        origin = typing.get_origin(found) or found
+        return (origin,) if isinstance(origin, type) else None
+    if any(part is None for part in parts):
+        return None
+    return tuple(cls for part in parts if part is not None for cls in part)
+
+
+def _named_object(node: ast.expr, names: Mapping[str, object] | None) -> object:
+    """The object a name or a dotted name stands for in *names*, the builtins,
+    :mod:`collections.abc` or the modules imported (``np.ndarray``,
+    ``collections.abc.Mapping``), or ``None``.
+    """
+    if isinstance(node, ast.Attribute):
+        owner = _named_object(node.value, names)
+        return getattr(owner, node.attr, None) if owner is not None else None
+    if not isinstance(node, ast.Name):
+        return None
+    for scope in (names or {}, vars(builtins), vars(collections.abc)):
+        if node.id in scope:
+            return scope[node.id]
+    return sys.modules.get(node.id)
+
+
 class _Subject(NamedTuple):
     """What the path checks know of a choice: the expressions that hold it
     (*raw*), the one that is the whole of a collection of choices, whose
-    emptiness says only that there is nothing to check (*whole*), and the
-    options its ``Literal`` lists (*listed*).
+    emptiness says only that there is nothing to check (*whole*), the
+    options its ``Literal`` lists (*listed*), for the items, keys or values
+    of a choice that is also taken as one text, the expressions that hold
+    the whole value, which hold none of them when they equal a text
+    (*textless*), the classes of the values an expression that holds the
+    choice takes that hold what the check reads (*forms*: a text for one
+    choice, a mapping for the keys of ``Mapping[Side, ...]``), and the
+    classes a test of the form names (*classes*).
     """
 
     raw: Callable[[ast.expr], bool]
     whole: Callable[[ast.expr], bool]
     listed: frozenset[str]
+    textless: Callable[[ast.expr], bool] = _never
+    forms: Callable[[ast.expr], tuple[type, ...]] = _one_text
+    classes: Callable[[ast.expr], tuple[type, ...] | None] = _classes_named
 
 
-def _asks_its_form(test: ast.expr, subject: _Subject) -> bool:
-    """Whether *test* is about the choice itself and asks only what form it
-    takes, never which text it holds.
+def _overlaps(form: type, cls: type) -> bool:
+    """Whether a value of *form* that holds something to check can be an
+    instance of *cls*.
 
-    A check of a choice may sit behind such a test without leaving a path on
-    which the choice goes unchecked: ``if text is not None``, ``if
-    isinstance(text, str)``, ``if not texts`` (of a collection, which holds
-    nothing to check when it is empty) run the check whenever there is a text
-    to check, and ``not``, ``and`` and ``or`` of such tests do too. A test of
-    the text (``mode == "fast"``, ``mode in _QUICK``, ``not mode``) sends
-    other texts, a misspelling included, down the other path, and a test that
-    also asks something else (``strict and text is not None``) takes the path
-    for a reason that is not the choice; neither is about its form.
+    A text holds no item, key or value, so a class of texts meets the form of
+    a collection (``isinstance(sides, str)`` against ``Sequence[Side]``) only
+    in a value that holds none of them; a form the guard does not know
+    (``object``) meets every class.
+    """
+    if issubclass(form, cls):
+        return True
+    if not issubclass(cls, form):
+        return False
+    return form in {str, object} or not issubclass(cls, str)
+
+
+def _form_holds_none(
+    forms: tuple[type, ...], classes: tuple[type, ...], *, truth: bool
+) -> bool:
+    """Whether a value that is (*truth*) or is not an instance of one of
+    *classes* holds nothing a check of the choice reads, the choice taking
+    *forms* when it holds something.
+
+    Being one of them holds nothing when no form meets any of them
+    (:func:`_overlaps`); being none of them, when every form is one of them.
+    """
+    if truth:
+        return not any(_overlaps(form, cls) for form in forms for cls in classes)
+    return all(any(issubclass(form, cls) for cls in classes) for form in forms)
+
+
+def _holds_none(test: ast.expr, subject: _Subject, *, truth: bool) -> bool:
+    """Whether *test* is about the form of the choice and coming out *truth*
+    means it holds nothing a check of it reads.
+
+    A check of a choice may sit behind such a test, and a path may leave
+    before the check through one, without leaving a choice unchecked: ``if
+    text is not None: check``, ``if text is None: return``, ``if not
+    isinstance(text, str): return``, ``if not texts: return`` (of a
+    collection, which holds nothing to check when it is empty), and ``not``,
+    ``and`` and ``or`` of such tests. The way the test comes out is what
+    counts: ``if text is not None: return`` and ``if isinstance(text, str):
+    return`` leave with the text, ``if texts: return`` with the items, and
+    ``if isinstance(sides, Mapping): return`` with the keys of the mapping
+    the keys' check reads, though not with a single choice. A test of the
+    text (``mode == "fast"``, ``mode in _QUICK``, ``not mode``) is no test
+    of the form, and one that also asks something else (``strict and text
+    is not None``) holds nothing to check only where its test of the form
+    says so.
     """
     if isinstance(test, ast.BoolOp):
-        return all(_asks_its_form(value, subject) for value in test.values)
+        parts = [_holds_none(value, subject, truth=truth) for value in test.values]
+        # An ``and`` that holds, or an ``or`` that fails, holds every part.
+        every_part = isinstance(test.op, ast.And) == truth
+        return any(parts) if every_part else all(parts)
     if isinstance(test, ast.UnaryOp) and isinstance(test.op, ast.Not):
-        return _asks_its_form(test.operand, subject)
+        return _holds_none(test.operand, subject, truth=not truth)
     if subject.whole(test):
-        return True
+        # A collection that tests false is empty.
+        return not truth
     if isinstance(test, ast.Compare):
         sides = [test.left, *test.comparators]
-        return (
+        if (
             len(test.ops) == 1
             and isinstance(test.ops[0], ast.Is | ast.IsNot)
             and any(subject.raw(side) for side in sides)
             and any(_is_none(side) for side in sides)
-        )
-    return (
+        ):
+            return truth == isinstance(test.ops[0], ast.Is)
+        return False
+    if not (
         isinstance(test, ast.Call)
         and isinstance(test.func, ast.Name)
         and test.func.id == "isinstance"
-        and len(test.args) == 2
+        and len(test.args) == _PAIR
         and subject.raw(test.args[0])
+    ):
+        return False
+    classes = subject.classes(test.args[1])
+    return classes is not None and _form_holds_none(
+        subject.forms(test.args[0]), classes, truth=truth
     )
 
 
@@ -3800,15 +3905,16 @@ def _texts_of(node: ast.expr) -> frozenset[str]:
 
 def _implies_listed(test: ast.expr, subject: _Subject, *, truth: bool) -> bool:
     """Whether *test* coming out *truth* means the choice holds one of the
-    options its ``Literal`` lists.
+    options its ``Literal`` lists, or holds no part to check.
 
     ``if radiation == "unknown": return ...`` before the check leaves the
     function only for ``"unknown"``, an option, so no misspelling leaves
     with it; ``if mode == "typo": return`` and ``if mode != "fast": return``
-    let a text the ``Literal`` does not list leave unchecked.
+    let a text the ``Literal`` does not list leave unchecked. For the keys
+    of ``Pace | Mapping[Side, ...]``, ``if sides == "fast": return`` leaves
+    with a text, which holds no key (*textless*), whether or not the text is
+    a side; ``if side == "fast": continue`` skips a key spelt as a pace.
     """
-    if not subject.listed:
-        return False
     if isinstance(test, ast.UnaryOp) and isinstance(test.op, ast.Not):
         return _implies_listed(test.operand, subject, truth=not truth)
     if isinstance(test, ast.BoolOp):
@@ -3821,49 +3927,73 @@ def _implies_listed(test: ast.expr, subject: _Subject, *, truth: bool) -> bool:
     operator, left, right = test.ops[0], test.left, test.comparators[0]
     if isinstance(operator, ast.Eq | ast.NotEq):
         if subject.raw(left):
+            compared = left
             texts = _texts_of(right) if isinstance(right, ast.Constant) else frozenset()
         elif subject.raw(right):
+            compared = right
             texts = _texts_of(left) if isinstance(left, ast.Constant) else frozenset()
         else:
             return False
         positive = isinstance(operator, ast.Eq) == truth
     elif isinstance(operator, ast.In | ast.NotIn) and subject.raw(left):
+        compared = left
         texts = _texts_of(right)
         positive = isinstance(operator, ast.In) == truth
     else:
         return False
-    return positive and bool(texts) and texts <= subject.listed
-
-
-def _matches_its_form(match: ast.Match, subject: _Subject) -> bool:
-    """Whether a ``match`` on the choice tells its cases apart by form only:
-    ``None``, a class pattern or a capture, never a text, and no guard that
-    asks anything else.
-    """
-
-    def form(pattern: ast.pattern) -> bool:
-        if isinstance(pattern, ast.MatchOr):
-            return all(form(option) for option in pattern.patterns)
-        if isinstance(pattern, ast.MatchAs):
-            return pattern.pattern is None or form(pattern.pattern)
-        return isinstance(pattern, ast.MatchClass) or (
-            isinstance(pattern, ast.MatchSingleton) and pattern.value is None
-        )
-
-    return subject.raw(match.subject) and all(
-        form(case.pattern)
-        and (case.guard is None or _asks_its_form(case.guard, subject))
-        for case in match.cases
+    return (
+        positive
+        and bool(texts)
+        and (texts <= subject.listed or subject.textless(compared))
     )
+
+
+def _pattern_holds_none(
+    pattern: ast.pattern, subject: _Subject, matched: ast.expr
+) -> bool:
+    """Whether a value *pattern* matches holds nothing a check of the choice
+    reads, by its form: ``None`` (or a flag), or a class the choice holding
+    something never is (:func:`_form_holds_none`).
+    """
+    if isinstance(pattern, ast.MatchOr):
+        return all(
+            _pattern_holds_none(option, subject, matched) for option in pattern.patterns
+        )
+    if isinstance(pattern, ast.MatchAs):
+        return pattern.pattern is not None and _pattern_holds_none(
+            pattern.pattern, subject, matched
+        )
+    if isinstance(pattern, ast.MatchSingleton):
+        return True
+    if isinstance(pattern, ast.MatchClass):
+        classes = subject.classes(pattern.cls)
+        return classes is not None and _form_holds_none(
+            subject.forms(matched), classes, truth=True
+        )
+    return False
+
+
+def _case_holds_none(
+    case: ast.match_case, subject: _Subject, matched: ast.expr
+) -> bool:
+    """Whether the paths through *case* of a ``match`` on the choice hold
+    nothing a check of it reads: ``case None: return`` before the check
+    leaves none unchecked, ``case str(): return`` leaves the text.
+    """
+    if case.guard is not None and _taken_safely(case.guard, subject, truth=True):
+        return True
+    return _pattern_holds_none(case.pattern, subject, matched)
 
 
 def _taken_safely(test: ast.expr, subject: _Subject, *, truth: bool) -> bool:
     """Whether the paths on which *test* comes out *truth* hold no text the
-    choice's check would refuse: the test asks only the choice's form
-    (:func:`_asks_its_form`), or coming out *truth* means the choice holds a
-    listed option (:func:`_implies_listed`).
+    choice's check would refuse: coming out *truth* means, by the choice's
+    form, that it holds nothing the check reads (:func:`_holds_none`), or
+    that it holds a listed option (:func:`_implies_listed`).
     """
-    return _asks_its_form(test, subject) or _implies_listed(test, subject, truth=truth)
+    return _holds_none(test, subject, truth=truth) or _implies_listed(
+        test, subject, truth=truth
+    )
 
 
 #: The expressions that run an element once for each item their loops take.
@@ -3968,8 +4098,9 @@ def _behind_a_test_of(
 ) -> bool:
     """Whether *node*, inside *statement*, runs only behind a test of the
     choice that lets no text its check would refuse through: one of its form
-    (``if text is None: return``) or one that holds only for a listed option
-    (``if method == "vdi2081": return ...``), :func:`_taken_safely`.
+    that holds only where it holds nothing to check (``if text is None:
+    return``, ``case None: return``) or one that holds only for a listed
+    option (``if method == "vdi2081": return ...``), :func:`_taken_safely`.
     """
     child, holder = node, parents.get(node)
     while holder is not None:
@@ -3985,8 +4116,9 @@ def _behind_a_test_of(
             )
         ) or (
             isinstance(holder, ast.Match)
-            and child is not holder.subject
-            and _matches_its_form(holder, subject)
+            and isinstance(child, ast.match_case)
+            and subject.raw(holder.subject)
+            and _case_holds_none(child, subject, holder.subject)
         ):
             return True
         if holder is statement:
@@ -4150,25 +4282,218 @@ def _with_copies(
     the choice's ``Literal`` lists (:func:`_carries`).
     """
     copies: set[str] = set()
-    for node in ast.walk(tree):
-        if isinstance(node, ast.Assign) and len(node.targets) == 1:
-            bound, value = node.targets[0], node.value
-        elif isinstance(node, ast.AnnAssign) and node.value is not None:
-            bound, value = node.target, node.value
-        else:
+    for binding in _bindings(tree):
+        name = _one_name(binding)
+        if name is None:
             continue
-        if not isinstance(bound, ast.Name):
-            continue
+        value = binding.value
         branches = (
             [value.body, value.orelse] if isinstance(value, ast.IfExp) else [value]
         )
         if all(_carries(branch, target, options) for branch in branches):
-            copies.add(bound.id)
+            copies.add(name)
 
     def matches(node: ast.expr) -> bool:
         return target(node) or (isinstance(node, ast.Name) and node.id in copies)
 
     return matches
+
+
+def _wrapping_copies(tree: ast.AST, target: Callable[[ast.expr], bool]) -> set[str]:
+    """The locals bound to a one-item tuple of the target, on some branch.
+
+    ``given = (sides,) if isinstance(sides, str) else sides`` holds the
+    single choice of a choice-or-sequence parameter as its one item, so a
+    check of each item of ``given`` checks the single choice too.
+    """
+    names: set[str] = set()
+    for binding in _bindings(tree):
+        name = _one_name(binding)
+        if name is None:
+            continue
+        value = binding.value
+        branches = (
+            [value.body, value.orelse] if isinstance(value, ast.IfExp) else [value]
+        )
+        if any(
+            isinstance(branch, ast.Tuple)
+            and len(branch.elts) == 1
+            and target(branch.elts[0])
+            for branch in map(_held, branches)
+        ):
+            names.add(name)
+    return names
+
+
+def _value_names(tree: ast.AST, target: Callable[[ast.expr], bool]) -> set[str]:
+    """The names a loop or a comprehension binds to each value of a mapping target.
+
+    The value of ``for side, value in sides.items()`` and the name of ``for
+    value in sides.values()``.
+    """
+    names: set[str] = set()
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.For | ast.AsyncFor | ast.comprehension):
+            continue
+        source, bound = node.iter, node.target
+        if not (
+            isinstance(source, ast.Call)
+            and isinstance(source.func, ast.Attribute)
+            and source.func.attr in {"items", "values"}
+            and not source.args
+            and target(_held(source.func.value))
+        ):
+            continue
+        if source.func.attr == "items":
+            if not (isinstance(bound, ast.Tuple) and len(bound.elts) == _PAIR):
+                continue
+            bound = bound.elts[1]
+        if isinstance(bound, ast.Name):
+            names.add(bound.id)
+    return names
+
+
+#: The parts of a choice a check may cover, each a branch of its annotation:
+#: the choice as one value (``Literal[...]``), each item of a sequence or key
+#: of a mapping (``Sequence[Side]``, ``Mapping[Side, ...]``), and each value
+#: of a mapping whose values may be a choice (``Mapping[..., Boundary |
+#: float]``).
+_WHOLE, _ITEMS, _VALUES = "the choice itself", "each item or key", "each value"
+_PAIR = 2
+
+
+def _branches(annotation: str) -> dict[str, frozenset[str]]:
+    """The parts of a ``Literal`` choice its annotation lets a caller write,
+    each with the options its own ``Literal`` lists.
+
+    ``Boundary | Mapping[Side, Boundary | float]`` takes a choice as one
+    value, a side as each key and a choice as each value: three parts, each
+    of which a check must cover, a key against the sides and a value against
+    the boundaries. The annotation is read with its aliases spelt out
+    (:func:`expanded`), so a ``Literal`` is one by what it is, not by a name
+    another module gives one.
+    """
+    found: dict[str, frozenset[str]] = {}
+
+    def add(part: str, annotations: list[str]) -> None:
+        literals = [each for each in annotations if each.startswith("Literal[")]
+        if literals:
+            options = frozenset(
+                text for each in literals for text in _literal_options(each)
+            )
+            found[part] = found.get(part, frozenset()) | options
+
+    for member in _members(annotation):
+        add(_WHOLE, [member])
+        item = _item(member)
+        if item is not None:
+            add(_ITEMS, _members(item))
+        parsed = _generic(member)
+        if parsed is not None and parsed[0] in _MAPPINGS and len(parsed[1]) == _PAIR:
+            add(_VALUES, _members(parsed[1][1]))
+    return found
+
+
+def _forms(annotation: str, part: str | None, *, collection: bool) -> tuple[type, ...]:
+    """The classes of the values a choice takes that hold what *part* checks.
+
+    One text is a ``str``; the items or keys of a choice are held by the
+    collections and mappings of its annotation (the keys of ``Boundary |
+    Mapping[Side, ...]`` by a mapping only, so ``if isinstance(sides,
+    Mapping): return`` leaves with them), its values by its mappings, and a
+    choice read whole (*part* ``None``) by every member that holds a text. An
+    origin the guard does not know is ``object``, which no test of the form
+    tells apart from any other.
+    """
+    if part == _WHOLE or (part is None and not collection):
+        return (str,)
+    found: list[type] = []
+    for member in _members(annotation):
+        if part is None and member.startswith("Literal["):
+            found.append(str)
+            continue
+        parsed = _generic(member)
+        if parsed is None:
+            continue
+        origin, arguments = parsed
+        item = _item(member)
+        items = item is not None and any(
+            each.startswith("Literal[") for each in _members(item)
+        )
+        values = (
+            origin in _MAPPINGS
+            and len(arguments) == _PAIR
+            and any(each.startswith("Literal[") for each in _members(arguments[1]))
+        )
+        if (items and part in {None, _ITEMS}) or (values and part in {None, _VALUES}):
+            found.append(_ORIGINS.get(origin, object))
+    return tuple(dict.fromkeys(found)) or (object,)
+
+
+def _part_verdict(
+    function: Callable[..., object], name: str, annotation: str, *, field: bool
+) -> str | None:
+    """What is wrong with how one part of a choice of several parts is checked.
+
+    A choice whose annotation has more than one part (:func:`_branches`)
+    passes only when every part reaches a check on every path: a check of
+    the single name says nothing of the keys of a mapping, nor a check of
+    the keys of its values.
+    """
+    branches = _branches(annotation)
+    if len(branches) < _PAIR:
+        return None
+    for branch, options in branches.items():
+        verdict = _verdict(
+            _checks_of(
+                function,
+                name,
+                field=field,
+                collection=True,
+                depth=0,
+                options=options,
+                part=branch,
+                forms=_forms(annotation, branch, collection=True),
+            )
+        )
+        if verdict is not None:
+            return f"{branch}: {verdict}"
+    return None
+
+
+def _choice_verdict(
+    function: Callable[..., object] | None,
+    name: str,
+    annotation: str,
+    *,
+    field: bool,
+) -> str | None:
+    """What is wrong with how the choice *name* of *function* (a record's
+    ``__post_init__`` with *field*) is checked, its annotation *annotation*
+    read with its aliases spelt out, or ``None``.
+
+    A choice its annotation lets a caller write in one part is read whole; one
+    of several parts is read part by part (:func:`_part_verdict`), since a
+    test of its form sends each part down a path of its own
+    (``isinstance(sides, Mapping)``) and the whole value meets no one check
+    on every path.
+    """
+    if function is None:
+        return _verdict(())
+    if len(_branches(annotation)) >= _PAIR:
+        return _part_verdict(function, name, annotation, field=field)
+    _, collection = _literal_shape(annotation)
+    return _verdict(
+        _checks_of(
+            function,
+            name,
+            field=field,
+            collection=collection,
+            depth=0,
+            options=_literal_options(annotation),
+            forms=_forms(annotation, None, collection=collection),
+        )
+    )
 
 
 def _record_constructor(callee: Callable[..., object]) -> type | None:
@@ -4193,6 +4518,8 @@ def _checks_of(
     collection: bool,
     depth: int,
     options: frozenset[str] = frozenset(),
+    part: str | None = None,
+    forms: tuple[type, ...] | None = None,
 ) -> tuple[_Check, ...]:
     """The checks a choice reaches in *function*, received as parameter (or,
     with *field*, read as ``self.<name>``) *name*.
@@ -4200,6 +4527,15 @@ def _checks_of(
     *options* are the texts the choice's ``Literal`` lists: a path that skips
     the check only when the choice holds one of them leaves no misspelling
     unchecked (:func:`_implies_listed`).
+
+    With *part* (:func:`_branches`), only the checks of that part: of the
+    choice as one value, of each item or key, or of each value of a mapping.
+    *forms* are the classes of the values the choice takes that hold what is
+    checked (:func:`_forms`), so a test of the form tells apart the paths
+    that hold it from those that do not: ``if isinstance(sides, Mapping):
+    return`` leaves no single choice unchecked and every key of the mapping.
+    Without them, a single text is a ``str`` and anything else a form no test
+    tells apart.
     """
     tree = _parsed(function)
     if tree is None:
@@ -4207,15 +4543,62 @@ def _checks_of(
     module_name = getattr(function, "__module__", "") or ""
     namespace = _namespace(function, tree, module_name)
     spread = _spread_dicts(tree)
-    target = _with_copies(
-        tree, _field_of_self(name) if field else _the_name(name), options
-    )
-    items = _item_names(tree, target) if collection else set()
+    base = _field_of_self(name) if field else _the_name(name)
+    target = _with_copies(tree, base, options)
+    whole = part in {None, _WHOLE}
+    single = part == _WHOLE or (part is None and not collection)
+    whole_forms = forms or ((str,) if single else (object,))
+    # What a test of emptiness is about: a collection of choices, which holds
+    # nothing to check when it is empty.
+    whole_of = target if collection else _never
+    if part is None:
+        items = _item_names(tree, target) if collection else set()
+    elif part == _WHOLE:
+        wrapping = _wrapping_copies(tree, target)
+        # The choice as one text has no emptiness to ask about (``""`` is no
+        # option); the one-item tuple that holds it is never empty.
+        whole_of = _with_copies(tree, lambda node: _the_names(node, wrapping), options)
+        items = _item_names(tree, whole_of)
+    elif part == _ITEMS:
+        items = _item_names(tree, target)
+    else:
+        items = _value_names(tree, target)
 
     def is_raw(node: ast.expr) -> bool:
-        return target(node) or (isinstance(node, ast.Name) and node.id in items)
+        if whole and target(node):
+            return True
+        if part == _VALUES and isinstance(node, ast.Subscript) and target(node.value):
+            return True
+        return isinstance(node, ast.Name) and node.id in items
 
-    subject = _Subject(is_raw, target if collection else _never, options)
+    def mentions(node: ast.expr) -> bool:
+        return target(node) or is_raw(node)
+
+    def forms_of(node: ast.expr) -> tuple[type, ...]:
+        """The forms of what *node* holds: the choice's own for the choice, a
+        text for one item, key or value, and none a test can tell apart for
+        a copy of the choice in a form of its own (``tuple(sides)``).
+        """
+        if base(node):
+            return whole_forms
+        if target(node) or whole_of(node):
+            return (object,)
+        return (str,)
+
+    def classes_of(node: ast.expr) -> tuple[type, ...] | None:
+        return _classes_named(node, namespace)
+
+    # A test of the choice as a whole (``if isinstance(sides, Mapping)``)
+    # tells the paths apart by the forms that hold each part, and the whole
+    # equal to a text holds no item, key or value.
+    subject = _Subject(
+        mentions,
+        whole_of,
+        options,
+        target if part in {_ITEMS, _VALUES} else _never,
+        forms_of,
+        classes_of,
+    )
     root = tree.body[0] if isinstance(tree, ast.Module) and tree.body else tree
     parents = _parents(tree)
     # Each place the choice meets a check, with the checks it meets there.
@@ -4247,38 +4630,41 @@ def _checks_of(
                     collection=collection,
                     depth=depth + 1,
                     options=options,
+                    part=part,
+                    forms=forms,
                 )
             )
         record = _record_constructor(callee)
         for parameter, handed in _arguments(node, callee, spread).items():
             value = _held(handed)
             keys_kept = _keeps_keys(value, target, options)
-            if not (is_raw(value) or keys_kept):
+            handed_part = _handed_part(
+                part,
+                value,
+                target,
+                is_raw,
+                keys_kept=keys_kept,
+                wrapped=whole_of if part == _WHOLE else _never,
+            )
+            if handed_part is False:
                 continue
-            if record is not None:
-                check = _post_init(record)
-                if check is not None:
-                    inner.extend(
-                        _checks_of(
-                            check,
-                            parameter,
-                            field=True,
-                            collection=collection and (target(value) or keys_kept),
-                            depth=depth + 1,
-                            options=options,
-                        )
-                    )
-            else:
-                inner.extend(
-                    _checks_of(
-                        callee,
-                        parameter,
-                        field=False,
-                        collection=collection and (target(value) or keys_kept),
-                        depth=depth + 1,
-                        options=options,
-                    )
+            check = _post_init(record) if record is not None else callee
+            if check is None:
+                continue
+            inner.extend(
+                _checks_of(
+                    check,
+                    parameter,
+                    field=record is not None,
+                    collection=collection and (target(value) or keys_kept),
+                    depth=depth + 1,
+                    options=options,
+                    part=handed_part,
+                    # The value itself, handed on whole, takes the forms it
+                    # took here; a copy or a part of it, its own.
+                    forms=forms if base(value) and handed_part == part else None,
                 )
+            )
         if inner:
             sites.append((node, tuple(inner)))
     validated = [
@@ -4308,6 +4694,40 @@ def _checks_of(
 
 def _contains(outer: ast.AST, node: ast.AST) -> bool:
     return any(part is node for part in ast.walk(outer))
+
+
+def _the_names(node: ast.expr, names: set[str]) -> bool:
+    return isinstance(node, ast.Name) and node.id in names
+
+
+def _handed_part(
+    part: str | None,
+    value: ast.expr,
+    target: Callable[[ast.expr], bool],
+    is_raw: Callable[[ast.expr], bool],
+    *,
+    keys_kept: bool,
+    wrapped: Callable[[ast.expr], bool] = _never,
+) -> str | None | bool:
+    """Which part of the choice a call hands on, read where it is received.
+
+    Without a part, any reading of the choice (``None``); the whole value,
+    or a mapping keeping its keys for the keys, hands the same part on; one
+    item, key or value hands the choice itself. A local that holds the
+    single choice as its one item (*wrapped*, ``(paces,) if
+    isinstance(paces, str) else tuple(paces)``) hands it as an item, which
+    the callee checks with the items it is handed. ``False`` when the call
+    hands none of it.
+    """
+    if part is None:
+        return None if is_raw(value) or keys_kept else False
+    if (target(value) and part != _WHOLE) or (keys_kept and part == _ITEMS):
+        return part
+    if wrapped(value):
+        return _ITEMS
+    if is_raw(value):
+        return _WHOLE
+    return False
 
 
 def _runs_before(
@@ -4406,19 +4826,23 @@ def unchecked_choices() -> Iterator[Choice]:
     that argument is absent, and one checked with ``if text not in OPTIONS``
     refuses a number with ``ValueError``. A check behind a test of the
     choice's form (``if text is not None``, ``if isinstance(text, str)``)
-    runs whenever there is a choice to check, and a path that skips it only
+    runs whenever there is a choice to check, and a return behind one leaves
+    none unchecked only when the test comes out holding nothing to check
+    (``if text is None: return``, never ``if text is not None: return``, and
+    ``if isinstance(sides, Mapping): return`` for the single name, never for
+    the keys of the mapping, :func:`_holds_none`); a path that skips it only
     for an option the ``Literal`` lists (``if method == "vdi2081": return``)
     lets no misspelling past; a test of the text (``if mode == "fast"``)
     does (:func:`_taken_safely`). The filter of a comprehension is such a
     test of each item: ``{side: v for side, v in limits.items() if side in
     SIDES}`` hands on only the keys it keeps, and a check in the element of
     ``[... for side in sides if side != "both"]`` runs only for the items it
-    keeps. This is rule A45.
+    keeps. A choice its annotation lets a caller write in several parts
+    (:func:`_branches`) is checked in each (:func:`_part_verdict`). This is
+    rule A45.
     """
     inputs = _input_records()
     for home, qualname, obj in _targets():
-        if home in GPU_PARITY:
-            continue
         if inspect.isclass(obj):
             if (
                 not dataclasses.is_dataclass(obj)
@@ -4429,22 +4853,10 @@ def unchecked_choices() -> Iterator[Choice]:
             check = _post_init(obj)
             for field in dataclasses.fields(obj):
                 read = expanded(_annotation(field.type), _field_module(obj, field.name))
-                literal, collection = _literal_shape(read)
+                literal, _ = _literal_shape(read)
                 if not (literal and _literal_options(read)):
                     continue
-                checks = (
-                    _checks_of(
-                        check,
-                        field.name,
-                        field=True,
-                        collection=collection,
-                        depth=0,
-                        options=_literal_options(read),
-                    )
-                    if check is not None
-                    else ()
-                )
-                verdict = _verdict(checks)
+                verdict = _choice_verdict(check, field.name, read, field=True)
                 if verdict is not None:
                     yield Choice(
                         home, qualname, field.name, _annotation(field.type), (verdict,)
@@ -4458,19 +4870,10 @@ def unchecked_choices() -> Iterator[Choice]:
             continue
         for parameter in signature.parameters.values():
             read = expanded(_annotation(parameter.annotation), home)
-            literal, collection = _literal_shape(read)
+            literal, _ = _literal_shape(read)
             if not (literal and _literal_options(read)):
                 continue
-            verdict = _verdict(
-                _checks_of(
-                    obj,
-                    parameter.name,
-                    field=False,
-                    collection=collection,
-                    depth=0,
-                    options=_literal_options(read),
-                )
-            )
+            verdict = _choice_verdict(obj, parameter.name, read, field=False)
             if verdict is not None:
                 yield Choice(
                     home,

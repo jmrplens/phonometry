@@ -422,7 +422,9 @@ jobs:
       run: python scripts/check_identifier_spelling.py
     # The same walk holds every public choice of a fixed set of strings to a
     # Literal of its options, so a type checker refuses a misspelt option
-    # before the call runs; a string open by its nature says why.
+    # before the call runs; a string open by its nature says why. Each one is
+    # checked on every path, a choice written in several parts (a single
+    # name, each key and each value of a mapping) in each of them.
     - name: Check that every fixed public choice is typed Literal
       run: python scripts/check_choice_literals.py
 
@@ -1050,8 +1052,11 @@ jobs:
   # made twice. Then it follows every parameter through assignments, views,
   # containers and the package's own helpers to the other places an array is
   # kept, and fails on one that is not a read-only copy of its own, and on any
-  # handed_over call it cannot prove is the only holder of a new array. An AST
-  # data-flow walk, static and dependency-free, so it runs on its own.
+  # handed_over call it cannot prove is the only holder of a new array. A
+  # record a caller builds converts each container it holds, and a field
+  # stored back as given, or wrapped by MappingProxyType without a copy, is no
+  # conversion. An AST data-flow walk, static and dependency-free, so it runs
+  # on its own.
   array-aliasing:
     name: Every result keeps its own copy of the arrays it was given
     runs-on: ubuntu-latest
@@ -1137,10 +1142,12 @@ jobs:
   # and the record constructors it is handed to, a field a caller-built
   # record stores to its constructor, a mapping keyed by float to one keyed
   # by int beside it, and fs and the other scalar quantities of the
-  # vocabulary to one family of numbers. The files gpu_parity.py
-  # fingerprints are left out as a whole, read from its _COVERED. It reads
-  # the annotations through the package's aliases and imports. Static and
-  # dependency-free, so it runs on its own.
+  # vocabulary to one family of numbers, a field handed by its name together
+  # with its record (_hold_cells(self, "ix")) included, and an item a body
+  # unpacks or indexes (ny, nx = shape; ix, iy = entry) to the items of the
+  # annotation or the elements of its items. It reads the annotations through
+  # the package's aliases and imports. Static and dependency-free, so it runs
+  # on its own.
   parameter-annotations:
     name: Every public parameter admits what its body converts
     runs-on: ubuntu-latest

@@ -32,6 +32,8 @@ import numpy as np
 
 from .._internal.display import RichDisplay
 from .._internal.validation import (
+    indices_of,
+    is_integer,
     require_equal_counts,
     require_scalar,
 )
@@ -233,7 +235,13 @@ class Signal(RichDisplay):
         """Length in seconds."""
         return self.n_samples / float(self.fs)
 
-    def pick(self, channels: int | np.integer[Any] | Sequence[int]) -> Signal:
+    def pick(
+        self,
+        channels: int
+        | np.integer[Any]
+        | Sequence[int | np.integer[Any]]
+        | NDArray[np.integer[Any]],
+    ) -> Signal:
         """The chosen channels, as a new Signal.
 
         Indexing a Signal yields the samples, which is what makes it a
@@ -242,15 +250,25 @@ class Signal(RichDisplay):
         keeps them, so a multichannel take can be narrowed to the channel
         under test and stay a measurement.
 
-        :param channels: One channel index, or a sequence of them, in the
-            order they should appear in the result.
+        :param channels: One channel index, or a sequence or an integer
+            array of them, Python or NumPy integers, in the order they
+            should appear in the result; an integer array of no dimension
+            is one index.
         :return: A :class:`Signal` with those channels, in that order.
         :raises IndexError: If a channel is out of range.
+        :raises TypeError: If a channel is not an integer (a flag, a float,
+            a fraction or a text), or *channels* is a text, or an array of
+            two dimensions or more or of a dtype that is not an integer one.
         """
-        wanted = (
-            [channels] if isinstance(channels, (int, np.integer)) else list(channels)
+        if isinstance(channels, np.ndarray) and channels.ndim == 0:
+            # One index, held as the one item of an array of one dimension,
+            # whose dtype indices_of then reads as it reads any other.
+            channels = channels.reshape(1)
+        picked = (
+            [int(channels)]
+            if is_integer(channels)
+            else list(indices_of(channels, "channels"))
         )
-        picked = [int(c) for c in wanted]
         for c in picked:
             if not -self.data.shape[0] <= c < self.data.shape[0]:
                 msg = f"channel {c} out of range for a {self.data.shape[0]}-channel signal"

@@ -3,7 +3,7 @@
  "cuda_driver_api": "13.3",
  "cupy": "14.2.0",
  "cupy_cuda_runtime": "13.2",
- "engine_fingerprint": "cd6a9e69fb902f63445bbb8c1b2334b8c0943592b62a5820d34ce0f942b9bf57",
+ "engine_fingerprint": "ffa5887b87ae5d5b4f03be2cd1dc187d929bcc0b99e8b82f0e88c94419e9cf54",
  "fields_bit_identical": true,
  "fields_max_relative": {
   "contour": 0.0,
@@ -304,7 +304,7 @@
   "plane_wave": 0.0,
   "sponge": 0.0
  },
- "measured_on": "2026-10-24",
+ "measured_on": "2026-10-30",
  "numpy": "2.5.4",
  "nvidia_driver": "610.57.04",
  "nvrtc": "13.3",

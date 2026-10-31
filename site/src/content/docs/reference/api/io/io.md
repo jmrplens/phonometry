@@ -1641,7 +1641,9 @@ Samples per channel (frames).
 ### Signal.pick()
 
 ```python
-Signal.pick(channels: int | np.integer[Any] | Sequence[int]) -> Signal
+Signal.pick(
+    channels: int | np.integer[Any] | Sequence[int | np.integer[Any]] | NDArray[np.integer[Any]],
+) -> Signal
 ```
 
 The chosen channels, as a new Signal.
@@ -1656,7 +1658,7 @@ under test and stay a measurement.
 
 | Name | Description |
 | :--- | :--- |
-| `channels` | One channel index, or a sequence of them, in the order they should appear in the result. |
+| `channels` | One channel index, or a sequence or an integer array of them, Python or NumPy integers, in the order they should appear in the result; an integer array of no dimension is one index. |
 
 **Returns:** A [`Signal`](/phonometry/reference/api/io/io/#signal) with those channels, in that order.
 
@@ -1665,6 +1667,7 @@ under test and stay a measurement.
 | Exception | When |
 | :--- | :--- |
 | IndexError | If a channel is out of range. |
+| TypeError | If a channel is not an integer (a flag, a float, a fraction or a text), or *channels* is a text, or an array of two dimensions or more or of a dtype that is not an integer one. |
 
 ### Signal.plot()
 

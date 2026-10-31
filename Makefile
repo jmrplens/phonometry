@@ -327,8 +327,11 @@ boundary-comparisons:
 # copy of their own (object.__setattr__, a plain class's attributes, read_only
 # calls) and fails on one that is not a copy (read_only_copy, for anything
 # that is not such a record), and on any handed_over call it cannot prove is
-# the only holder of a new array. On the tree it was written against it found
-# 349 places in 121 files, and then 428 records without the base. Stdlib only.
+# the only holder of a new array. A record a caller builds converts each list,
+# tuple, array or dict it holds into one of its own; a field stored back as it
+# was given, or wrapped by MappingProxyType without a copy, is no conversion.
+# On the tree it was written against it found 349 places in 121 files, and
+# then 428 records without the base. Stdlib only.
 array-aliasing:
 	$(PYTHON) scripts/check_array_aliasing.py
 
@@ -380,22 +383,30 @@ return-overloads:
 # list, dict or set anywhere. Annotations are read through the package's
 # aliases and imports. On the tree it was written against it found 559
 # parameters of 313 functions and methods, 534 converted and 25 holding a
-# list or a dict, the 9 of the files gpu_parity.py fingerprints and two
-# exempt label lists among them: those files are left out as a whole, read
-# from its _COVERED, and the two lists keep their reasons. It holds one
-# number the same way: a count, a band fraction or a flag that reaches a
-# validator taking a numpy integer (require_count, require_band_fraction,
-# an isinstance check that lets one through) or np.bool_, or a public
-# function that takes one, admits np.integer[Any] or np.bool_, a record field
-# kept as given included, and so does a whole number a scalar check such as
-# require_scalar reads; a value handed to a record's generated constructor is
-# followed into its __post_init__, and a field a caller-built record stores
-# is admitted by its constructor or listed in CONSTRUCTOR_EXEMPT; a mapping
-# keyed by float stands beside one keyed by int; and fs, fraction and the
-# other scalar quantities of the vocabulary keep one family of numbers across
-# the API, each exception in FAMILY_EXEMPT with its reason. On the tree before
-# that part it found 231 counts, band fractions and flags, 43 counts a scalar
-# check read as one number, 11 mappings and 40 sample rates. Stdlib only.
+# list or a dict, two exempt label lists among them, which keep their
+# reasons. It holds one number the same way: a count, a band fraction or a
+# flag that reaches a validator taking a numpy integer (require_count,
+# require_band_fraction, an isinstance check that lets one through) or
+# np.bool_, or a public function that takes one, admits np.integer[Any] or
+# np.bool_, a record field kept as given included, and so does a whole number
+# a scalar check such as require_scalar reads; a value handed to a record's
+# generated constructor is followed into its __post_init__, and from there
+# into a function handed the record and the field's name
+# (_hold_cells(self, "ix", "iy")); an item a body unpacks or indexes
+# (ny, nx = shape; shape[0]) answers to the annotation's items, and an element
+# of an item it unpacks (ix, iy = entry) to the elements of its items; a field
+# a caller-built record stores is admitted by its constructor or listed in
+# CONSTRUCTOR_EXEMPT, and a store that gives the field back as it was given,
+# itself or wrapped by MappingProxyType, read_only or cast, converts nothing; a
+# mapping keyed by float stands beside one keyed by int; and fs, fraction and
+# the other scalar quantities of the vocabulary keep one family of numbers
+# across the API, each exception in FAMILY_EXEMPT with its reason. On the tree
+# before that part it found 231 counts, band fractions and flags, 43 counts a
+# scalar check read as one number, 11 mappings and 40 sample rates; once it
+# followed a field handed by its name with its record, the ten cell indices
+# of the FDTD sources and the plane-wave offset; and once it read unpacked and
+# indexed items, the probes of FDTD2D.plot_geometry and the target pair of
+# room.shaped_sweep_signal. Stdlib only.
 parameter-annotations:
 	$(PYTHON) scripts/check_parameter_annotations.py
 
@@ -430,8 +441,10 @@ identifier-spelling:
 # strings (a validator, an `in` against strings, a lookup by key, two quoted
 # options in its docstring, or the same parameter handed on to one that does)
 # to a `Literal` of its options; a string open by its nature is listed with its
-# reason. Needs the package importable, for the same reason parameter-units
-# does.
+# reason. Each Literal choice reaches require_choice on every path, and a
+# choice written in several parts (a single name, each key and each value of
+# Boundary | Mapping[Side, Boundary | float]) in each of them. Needs the
+# package importable, for the same reason parameter-units does.
 choice-literals:
 	$(PYTHON) scripts/check_choice_literals.py
 

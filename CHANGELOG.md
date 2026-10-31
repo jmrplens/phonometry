@@ -4099,9 +4099,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   through `Final`, with `OPEN_TABLES` for the ones that match by coincidence
   (rule A21); and a record field typed `str` that the package fills only with
   fixed texts, followed back through the return annotation of the function
-  that hands them over. The GPU-parity engines, the files
-  `scripts/gpu_parity.py` fingerprints, keep their vocabularies as they are
-  until they are retyped together.
+  that hands them over.
 
 - **A record a caller builds holds what its fields say, and its constructor
   says what it takes.** A record kept a list, a tuple or an array of the
@@ -4220,6 +4218,91 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   or `dict` at any depth of its annotation and through an alias of either,
   a protocol member that is not a property, and a module `__getattr__` a
   type checker can see.
+
+- **The FDTD engines and the records they run take what runs, and a misspelt
+  side is refused where it is written.** `simulation.FDTD2D` and
+  `simulation.ElasticFDTD2D` take their maps (`c`, `rho`, `damping`, `c_p`,
+  `c_s`, `obstacle_mask` and an impedance profile of `edge_impedance`) as any
+  array-like, nested lists included, their `shape` as a tuple or a list of two
+  whole numbers, and every count (`absorbing_layer_cells`, the `n_steps`,
+  `snapshot_every` and `snapshot_decimation` of `run()`, the bounds of
+  `add_contour_probe`) as a NumPy integer too, as they did when the call ran;
+  `FDTD2D.plot_geometry` takes the probe cells `FDTDRecording` takes, NumPy
+  indices, lists and an array of pairs included. `simulation.FDTDRun`,
+  `simulation.ElasticRun`, the six sources, the two recordings and the two
+  boundaries declare the constructor a type checker reads, which takes the
+  same: `FDTDRun(c=[[343.0, ...], ...])`, `GaussianPulse(ix=np.int64(4), ...)`
+  and a float32 map type-check, and the fields keep the types they hold (a map
+  is any float array, since a float32 map is held as given).
+  `simulation.FDTDBoundaries` and `simulation.ElasticBoundaries` check their
+  sides and the names that terminate them when they are built, and hold the
+  sponge thickness as the whole number of cells it names, refused there when
+  it is no count, where a run that held them refused a misspelt side, and read
+  the thickness only when a side absorbed. `FDTDBoundaries` holds each
+  impedance as the float, or the read-only float64 profile, a run reads, an
+  integer profile and a float32 scalar included, and refuses one that is no
+  real number with `TypeError` when it is built, a flag among the numbers of
+  a profile included (NumPy reads `[True, 415.0]` as two floats), as
+  `FDTD2D(edge_impedance=...)` now does: a flag ran as an impedance of 1 Pa
+  s/m, and `None` was refused only by the run, as an impedance that is not
+  finite. `simulation.PlaneWaveSource` checks its direction when it is built.
+  The sides of `absorbing_sides`, `free_sides` and `edge_impedance`, the
+  fields of an `ElasticRecording`, the direction of a `ForceSource` and of
+  `FDTD2D.add_plane_wave`, the field of `ElasticFDTD2D.collocated` and the
+  `kind` of both results' `.plot()` are checked as written: a value that is
+  not a text raises `TypeError`, where it raised `ValueError`, and the message
+  is the one every choice raises; `ElasticRecording(probe_fields="vy")`
+  records that one field, where the name was read a letter at a time. Both
+  engines and both runs read a `shape` whenever it is given: held as a pair of
+  ints from any sequence of the two counts or a one-dimensional integer array,
+  where only a tuple or a list was taken, refused when malformed, and refused
+  with `ValueError` beside a map whose grid it does not name, where an engine
+  ignored it and a run held it; `ElasticFDTD2D.from_regions` reads its `shape`
+  the same way, where a third count was dropped. A complex value or a text
+  where a real number belongs is refused with `TypeError` by every real input
+  of both engines and both runs, of the six sources, of `Material` and the
+  `(c_p, c_s, rho)` triples that stand for one, of `FDTD2D.add_plane_wave`, of
+  the contour probe and its `phasors()`, of `ContourPhasors` and of
+  `far_field_from_contour`: the elastic engine stepped the real part of a
+  complex `c_p`, `c_s` or `rho` where the acoustic engine refused a complex `c`
+  or `rho`, every map of both engines took a text as the number it spells
+  (`c="343"`), and a NumPy complex number given to `dx`, `cfl`, a source's
+  frequency or amplitude or a material's speed was read as its real part with
+  no more than a `ComplexWarning`. The scalar guards every module shares read
+  a NumPy complex number that way too, where they refused a Python one, and
+  now refuse both; the array guards read an array of objects that holds one
+  whole, so its imaginary part is checked too, and a curve or an elevation
+  model held as arrays refuses a member of texts. `io.Signal.pick` takes a
+  list or an integer array of NumPy channel indices, as it took one alone,
+  and an integer array of no dimension as the one index it holds, where it
+  raised `TypeError`, and refuses with `TypeError` a channel that is no
+  integer (a flag, a float, a fraction, a text, an array of another dtype),
+  where `int()` took `[1.5]` as channel 1 and `"01"` as channels 0 and 1; the
+  `order` of `signals.miso_coherence` and the `low_band_microphones` of
+  `environment.reflection_index` refuse one the same way, where `int()` read
+  `(0.5, 1.7)` as the order `(0, 1)` and `"12"` as microphones 1 and 2, and
+  take NumPy integers and an integer array of them for a type checker too, as
+  they did when the call ran. An impedance profile of `FDTDBoundaries` takes
+  NumPy numbers, for a type checker as when the call ran. What the engines
+  compute did not move: `engine-digests.json` is unchanged, and a new CuPy
+  proof is recorded in `gpu-parity.lock`. The checks of the parameters, of the
+  records a caller builds, of the choices and of the documented `TypeError` no
+  longer leave the files `scripts/gpu_parity.py` fingerprints out.
+  `scripts/check_parameter_annotations.py` follows a field handed by its name
+  together with its record (`_hold_cells(self, "ix", "iy")`), which it read as
+  never validated, and the items and elements a body unpacks or indexes (`ny,
+  nx = shape`, `shape[0]`, `ix, iy = entry`), which found
+  `plot_geometry(probes)` and `room.shaped_sweep_signal(target)`, whose two
+  arrays `np.asarray` converts and which now takes `tuple[ArrayLike,
+  ArrayLike]`; `scripts/check_choice_literals.py` holds each part of a choice
+  of several parts (the single name, each key and each value of `Boundary |
+  Mapping[Side, Boundary | float]`) to a check of its own, and reads a test
+  of a choice's form by the way it comes out and the part it holds, so `if
+  mode is not None: return`, `if isinstance(mode, str): return`, `case str():
+  return` and `if isinstance(sides, Mapping): return` before the check of the
+  keys leave a path unchecked, where any test of the form kept every path;
+  and a record that stores a field back as it was given, or wrapped in
+  `MappingProxyType` without a copy, no longer counts as converting it.
 
 - **A parameter whose name carries its unit and that has a default is written
   by name.** `signals.noise_signal(fs, duration_s=2.0)`,

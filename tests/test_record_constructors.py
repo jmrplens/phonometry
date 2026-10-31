@@ -68,17 +68,9 @@ def reader() -> cpa.Reader:
     return cpa.Reader(package)
 
 
-def _in_gpu_files(reader: cpa.Reader, record: str) -> bool:
-    module = reader.annotations.classes[record][0]
-    path = cpa.repository_path(reader.package.paths[module], _SOURCE)
-    return path in set(cpa.gpu_parity_files())
-
-
 def test_every_record_says_what_its_constructor_takes(reader: cpa.Reader) -> None:
     problems: dict[str, list[str]] = {}
     for record in cpa.public_records(reader.package, reader.annotations):
-        if _in_gpu_files(reader, record):
-            continue
         found = cpa.constructor_problems(reader, record)
         if found:
             problems[record] = found
@@ -259,7 +251,7 @@ def test_a_stub_exemption_still_covers_a_record_that_converts(
 
 def _reader(tmp_path: pathlib.Path, source: str) -> cpa.Reader:
     root = tmp_path / "pkg"
-    root.mkdir()
+    root.mkdir(exist_ok=True)
     (root / "__init__.py").write_text("", encoding="utf-8")
     (root / "api.py").write_text(_IMPORTS + textwrap.dedent(source), encoding="utf-8")
     package = overloads.Package(sorted(root.rglob("*.py")), root)
@@ -316,14 +308,72 @@ class Spectrum:
                 np.asarray(getattr(self, name), dtype=float),
             )
         for each in fields(self):
-            object.__setattr__(self, each.name, getattr(self, each.name))
+            object.__setattr__(self, each.name, _owned(getattr(self, each.name)))
 
     def _set(self, name: str, value: object) -> None:
         object.__setattr__(self, name, value)
+
+
+def _owned(value: object) -> object:
+    return tuple(value) if isinstance(value, list) else value
 """,
     )
     assert cpa.converted_fields(reader, "pkg.api.Spectrum") == {"levels", "weights"}
     assert cpa.kept_as_given(reader, "pkg.api.Spectrum") == []
+
+
+def test_a_field_stored_back_as_it_was_given_converts_nothing(
+    tmp_path: pathlib.Path,
+) -> None:
+    """The field itself, or a wrapper that copies none of it, still holds the caller's container.
+
+    ``MappingProxyType(self.sides)`` is a read-only view of the caller's own
+    dictionary, ``read_only(self.levels)`` the caller's own array and
+    ``cast(...)`` the value it is handed, by its name or through a loop over
+    the field names; ``MappingProxyType(dict(self.kept))`` holds a copy.
+    """
+    frozen = tmp_path / "pkg" / "_internal" / "frozen.py"
+    frozen.parent.mkdir(parents=True)
+    (frozen.parent / "__init__.py").write_text("", encoding="utf-8")
+    frozen.write_text(
+        "def read_only(array):\n    array.flags.writeable = False\n    return array\n",
+        encoding="utf-8",
+    )
+    reader = _reader(
+        tmp_path,
+        _TAKER
+        + """
+from types import MappingProxyType
+from typing import cast
+
+from ._internal.frozen import read_only
+
+
+@dataclass(frozen=True, kw_only=True)
+class Spectrum:
+    sides: Mapping[str, str]
+    levels: NDArray[np.float64]
+    weights: tuple[float, ...] = ()
+    table: Mapping[str, float] = field(default_factory=dict)
+    kept: Mapping[str, float] = field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "sides", MappingProxyType(self.sides))
+        object.__setattr__(self, "levels", read_only(self.levels))
+        for name in ("weights",):
+            object.__setattr__(self, name, getattr(self, name))
+        object.__setattr__(
+            self, "table", cast("Mapping[str, float]", MappingProxyType(self.table))
+        )
+        object.__setattr__(self, "kept", MappingProxyType(dict(self.kept)))
+""",
+    )
+    assert cpa.converted_fields(reader, "pkg.api.Spectrum") == {"kept"}
+    kept = {
+        field.name: written
+        for field, written in cpa.kept_as_given(reader, "pkg.api.Spectrum")
+    }
+    assert sorted(kept) == ["levels", "sides", "table", "weights"]
 
 
 def test_a_stub_out_of_step_with_its_fields_is_refused(tmp_path: pathlib.Path) -> None:

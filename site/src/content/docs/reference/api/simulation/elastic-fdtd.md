@@ -155,7 +155,7 @@ $1/\sqrt{r}$ amplitude spreading.
 ElasticBoundaries(
     *,
     sides: Literal['rigid', 'absorbing', 'free'] | Mapping[Literal['left', 'right', 'top', 'bottom'], Literal['rigid', 'absorbing', 'free']] = 'rigid',
-    absorbing_layer_cells: int = 20,
+    absorbing_layer_cells: int | np.integer[Any] = 20,
 )
 ```
 
@@ -169,25 +169,32 @@ is why it travels with the sides rather than beside them.
 | Name | Description |
 | :--- | :--- |
 | `sides` | `"rigid"` (default), `"absorbing"`, `"free"`, or a mapping from side name (`left`/`right`/`top`/`bottom`) to one of those. A mapping is held as a read-only copy, so a change to the caller's dictionary afterwards does not reach the record. |
-| `absorbing_layer_cells` | Sponge-layer thickness for absorbing sides, in cells. |
+| `absorbing_layer_cells` | Sponge-layer thickness for absorbing sides, in cells, held as the whole number it names. |
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | for `sides` that are neither a name nor a mapping, a side or a termination of `sides` that is not a text, or an `absorbing_layer_cells` that is a flag, a text, an array or anything else that is not a number. |
+| ValueError | for a side that is not `"left"`, `"right"`, `"top"` or `"bottom"`, a termination that is not `"rigid"`, `"absorbing"` or `"free"`, or an `absorbing_layer_cells` that is not a whole number. |
 
 ## ElasticFDTD2D
 
 ```python
 ElasticFDTD2D(
-    c_p: float | NDArray[np.float64],
-    c_s: float | NDArray[np.float64],
+    c_p: ArrayLike,
+    c_s: ArrayLike,
     dx: float,
     *,
-    rho: float | NDArray[np.float64],
+    rho: ArrayLike,
     cfl: float = 0.6,
-    absorbing_layer_cells: int = 0,
+    absorbing_layer_cells: int | np.integer[Any] = 0,
     absorbing_sides: Literal['left', 'right', 'top', 'bottom'] | Iterable[Literal['left', 'right', 'top', 'bottom']] | None = None,
     absorbing_layer_reflection: float = 0.0001,
-    damping: float | NDArray[np.float64] = 0.0,
-    shape: tuple[int, int] | None = None,
+    damping: ArrayLike = 0.0,
+    shape: Sequence[int | np.integer[Any]] | NDArray[np.integer[Any]] | None = None,
     free_sides: Literal['left', 'right', 'top', 'bottom'] | Iterable[Literal['left', 'right', 'top', 'bottom']] | None = None,
-    obstacle_mask: NDArray[np.bool_] | None = None,
+    obstacle_mask: ArrayLike | None = None,
     compute: Compute | None = None,
 )
 ```
@@ -228,7 +235,7 @@ interfaces converge to the physical traction continuity.
 | `absorbing_sides` | Which sides absorb: a single side name or an iterable drawn from `{"left", "right", "top", "bottom"}` (default: all four when `absorbing_layer_cells > 0`). |
 | `absorbing_layer_reflection` | Target round-trip amplitude reflection of the sponge layer; sets the peak absorption rate. |
 | `damping` | Bulk amplitude decay rate [1/s]: a scalar for the whole field or an `(ny, nx)` map for locally lossy regions. |
-| `shape` | Grid shape `(ny, nx)`, required only when `c_p` is a scalar. |
+| `shape` | Grid shape `(ny, nx)`, required only when `c_p` is a scalar; beside a map it must be the map's own shape. |
 | `free_sides` | Sides carrying a traction-free surface (stress imaging, Moczo et al. Eq. 9.9): a single side name or an iterable drawn from `{"left", "right", "top", "bottom"}` (default: none). The surface plane runs through the boundary row/column of cell centres, the normal stress is pinned to zero there and the shear stress is imaged antisymmetrically above it. A side cannot be both free and absorbing. |
 | `obstacle_mask` | Boolean map, shape `(ny, nx)`, of rigid cells: every face adjacent to a masked cell is closed (zero normal velocity) and every touching corner shear stress is zeroed, i.e. a shear-free rigid inclusion, rasterising arbitrary interior geometry. |
 | `compute` | Where the engine steps ([`Compute`](/phonometry/reference/api/simulation/compute/#compute)); `None` follows [`use`](/phonometry/reference/api/simulation/compute/#use), then `PHONOMETRY_COMPUTE`, then NumPy. |
@@ -237,8 +244,8 @@ interfaces converge to the physical traction continuity.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `cfl` or `absorbing_layer_reflection` is not a single number, `absorbing_layer_cells` is a flag, a text or an array where a count goes, or `compute` is neither a [`Compute`](/phonometry/reference/api/simulation/compute/#compute) nor `None`. |
-| ValueError | for an argument out of its range, and for a `compute` that names a host: an engine steps in this process, and only [`elastic_fdtd_simulation`](/phonometry/reference/api/simulation/elastic-fdtd/#elastic_fdtd_simulation) runs on a node. |
+| TypeError | if `cfl`, `dx` or `absorbing_layer_reflection` is not a single real number, `c_p`, `c_s`, `rho` or `damping` holds a complex number or a text, `absorbing_layer_cells` is a flag, a text or an array where a count goes, `shape` is not a pair or holds a count that is not a number, a side of `absorbing_sides` or `free_sides` is not a text, or `compute` is neither a [`Compute`](/phonometry/reference/api/simulation/compute/#compute) nor `None`. |
+| ValueError | for an argument out of its range, a `shape` given beside a map of another shape, a side that is not `"left"`, `"right"`, `"top"` or `"bottom"`, and for a `compute` that names a host: an engine steps in this process, and only [`elastic_fdtd_simulation`](/phonometry/reference/api/simulation/elastic-fdtd/#elastic_fdtd_simulation) runs on a node. |
 | ComputeImportError | when the library of the device `compute` asks for is not installed or does not import. |
 | ComputeDeviceError | when that device is not present, or fails a first small computation; with `fallback=True` the engine warns with [`ComputeFallbackWarning`](/phonometry/reference/api/simulation/compute/#computefallbackwarning) and steps on NumPy instead. |
 
@@ -269,6 +276,13 @@ positions. The result is on the engine's device, where the fields
 live: a NumPy array by default, the backend's own array on another
 device; `numpy_field` gives NumPy copies of the stored fields.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `field` is not a text. |
+| ValueError | if `field` is not `"p"`, `"vx"` or `"vy"`. |
+
 ### ElasticFDTD2D.energy()
 
 ```python
@@ -289,7 +303,7 @@ contribute nothing.
 
 ```python
 ElasticFDTD2D.from_regions(
-    shape: tuple[int, int],
+    shape: Sequence[int | np.integer[Any]] | NDArray[np.integer[Any]],
     dx: float,
     *,
     background: Material | CatalogueRow | tuple[float, float, float],
@@ -320,7 +334,7 @@ or `numpy.s_[120:, :]` for the same thing spelled as a slice.
 
 | Name | Description |
 | :--- | :--- |
-| `shape` | Grid shape `(ny, nx)`. |
+| `shape` | Grid shape `(ny, nx)`, a pair of whole numbers of at least two cells each. |
 | `dx` | Grid spacing [m] (square cells). |
 | `background` | The material filling the whole grid first: a [`Material`](/phonometry/reference/api/simulation/elastic-fdtd/#material), a `(c_p, c_s, rho)` triple, e.g. [`WATER`](/phonometry/reference/api/simulation/elastic-fdtd/#water), or a solid's catalogue row ([`SolidMaterial`](/phonometry/reference/api/solids/catalogue/#solidmaterial)), whose bulk longitudinal speed, transverse speed and density are read through [`printed`](/phonometry/reference/api/io/io/#cataloguerowprinted). |
 | `regions` | `(where, material)` pairs painted in order, each material taken in any of the forms `background` takes. |
@@ -332,8 +346,8 @@ or `numpy.s_[120:, :]` for the same thing spelled as a slice.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If a mask does not match `shape` or a material spec is invalid, a catalogue row's refusal among them, or a `compute` keyword names a host: the engine steps in this process. |
-| TypeError | For a mask array that is not boolean, a catalogue row of a class that lacks any of the bulk longitudinal speed, the transverse speed and the density, or a `compute` keyword that is neither a [`Compute`](/phonometry/reference/api/simulation/compute/#compute) nor `None`. |
+| ValueError | If `shape` is not two whole numbers of two cells or more, a mask does not match `shape` or a material spec is invalid, a catalogue row's refusal among them, or a `compute` keyword names a host: the engine steps in this process. |
+| TypeError | For a `shape` that is not a pair or holds a count that is not a number, a `dx` that is not one real number, a material's speed or density that is a complex number or a text, a mask array that is not boolean, a catalogue row of a class that lacks any of the bulk longitudinal speed, the transverse speed and the density, or a `compute` keyword that is neither a [`Compute`](/phonometry/reference/api/simulation/compute/#compute) nor `None`. |
 | ComputeImportError | When the library of the device a `compute` keyword asks for is not installed or does not import. |
 | ComputeDeviceError | When that device is not present, or fails a first small computation; with `fallback=True` the engine warns with [`ComputeFallbackWarning`](/phonometry/reference/api/simulation/compute/#computefallbackwarning), pointing at the line that called this method, and steps on NumPy instead. |
 
@@ -383,10 +397,10 @@ Where this engine steps: device, dtype and library versions.
 
 ```python
 ElasticFDTD2D.run(
-    n_steps: int,
+    n_steps: int | np.integer[Any],
     *,
-    snapshot_every: int | None = None,
-    snapshot_decimation: int = 1,
+    snapshot_every: int | np.integer[Any] | None = None,
+    snapshot_decimation: int | np.integer[Any] = 1,
 ) -> NDArray[np.floating]
 ```
 
@@ -499,7 +513,7 @@ Plot the probe histories or one recorded field snapshot.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | for `color_limit` with `kind="snapshot"`, which the field drawn sets (`vmin` and `vmax` reach `imshow`). |
+| TypeError | for a `kind` that is not a text, or `color_limit` with `kind="snapshot"`, which the field drawn sets (`vmin` and `vmax` reach `imshow`). |
 | ValueError | for a `kind` other than `"probes"` and `"snapshot"`, a `language` other than `"en"` and `"es"`, or a snapshot asked of a result that holds none. |
 
 ### ElasticFDTDResult.size
@@ -513,11 +527,11 @@ Domain size `(lx, ly)` [m].
 ```python
 ElasticRecording(
     *,
-    probes: Sequence[tuple[int, int]] = (),
-    probe_fields: Sequence[Literal['p', 'vx', 'vy']] = ('vy',),
-    snapshot_every: int | None = None,
+    probes: Sequence[Sequence[int | np.integer[Any]]] | NDArray[np.integer[Any]] = (),
+    probe_fields: Literal['p', 'vx', 'vy'] | Sequence[Literal['p', 'vx', 'vy']] = ('vy',),
+    snapshot_every: int | np.integer[Any] | None = None,
     snapshot_field: Literal['p', 'vx', 'vy'] = 'p',
-    snapshot_decimation: int = 1,
+    snapshot_decimation: int | np.integer[Any] = 1,
 )
 ```
 
@@ -533,7 +547,7 @@ nothing (the default) runs the physics and keeps only the time axis.
 | Name | Description |
 | :--- | :--- |
 | `probes` | Probe cells as `(ix, iy)` index pairs. |
-| `probe_fields` | Which fields each probe records, drawn from `("p", "vx", "vy")` (default `("vy",)`, the component a surface accelerometer would see). |
+| `probe_fields` | Which fields each probe records, drawn from `("p", "vx", "vy")` (default `("vy",)`, the component a surface accelerometer would see); a single name records that field alone. |
 | `snapshot_every` | Record a full field snapshot every this many steps (and at $t = 0$); `None` records none. |
 | `snapshot_field` | Field recorded in the snapshots (`"p"`/`"vx"`/`"vy"`, interpolated to cell centres). |
 | `snapshot_decimation` | Keep every this many cells along each axis in a snapshot (default 1, every cell); the result records it. |
@@ -542,7 +556,7 @@ nothing (the default) runs the physics and keeps only the time axis.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | for a probe that is not a pair or has an index that is not a number, a `snapshot_every` that is a flag, a text, an array or anything else that is neither a number nor `None`, or a `snapshot_decimation` that is a flag, a text, an array or anything else that is not a number. |
+| TypeError | for a probe that is not a pair or has an index that is not a number, a field of `probe_fields` or a `snapshot_field` that is not a text, a `snapshot_every` that is a flag, a text, an array or anything else that is neither a number nor `None`, or a `snapshot_decimation` that is a flag, a text, an array or anything else that is not a number. |
 | ValueError | for `probe_fields` that are empty, repeat a field or name one that is not `"p"`, `"vx"` or `"vy"`, a `snapshot_field` that is none of them, a probe of more or fewer than two indices or with an index that is not a whole number, or a `snapshot_every` or `snapshot_decimation` that is not a whole number of 1 or more. |
 
 ## ElasticRun
@@ -550,18 +564,18 @@ nothing (the default) runs the physics and keeps only the time axis.
 ```python
 ElasticRun(
     *,
-    c_p: float | NDArray[np.float64],
-    c_s: float | NDArray[np.float64],
+    c_p: ArrayLike,
+    c_s: ArrayLike,
     dx: float,
     duration_s: float,
     sources: Sequence[ExplosionSource | ForceSource],
-    rho: float | NDArray[np.float64],
-    shape: tuple[int, int] | None = None,
+    rho: ArrayLike,
+    shape: Sequence[int | np.integer[Any]] | NDArray[np.integer[Any]] | None = None,
     cfl: float = 0.6,
     recording: ElasticRecording | None = None,
     boundaries: ElasticBoundaries | None = None,
-    obstacle_mask: NDArray[np.bool_] | None = None,
-    damping: float | NDArray[np.float64] = 0.0,
+    obstacle_mask: ArrayLike | None = None,
+    damping: ArrayLike = 0.0,
 )
 ```
 
@@ -584,7 +598,7 @@ grid), and nothing the caller changes afterwards reaches a checked run.
 | `duration_s` | Physical time to simulate [s]. |
 | `sources` | One or more of [`ExplosionSource`](/phonometry/reference/api/simulation/elastic-fdtd/#explosionsource) or [`ForceSource`](/phonometry/reference/api/simulation/elastic-fdtd/#forcesource). |
 | `rho` | Density map [kg/m3]; scalar or `(ny, nx)` array. |
-| `shape` | Grid shape `(ny, nx)`, required when `c_p` is scalar. |
+| `shape` | Grid shape `(ny, nx)`, required when `c_p` is scalar; beside a map it must be the map's own shape. |
 | `cfl` | Courant number in `(0, 1)` (Virieux Eqs. 6-7); the time step is $\Delta t = C_\mathrm{N}\, \Delta x / (c_{\mathrm{p},\max} \sqrt{2})$. Default 0.6. |
 | `recording` | What the run records ([`ElasticRecording`](/phonometry/reference/api/simulation/elastic-fdtd/#elasticrecording)): the probe cells and their fields, and the snapshot cadence and field. `None` records nothing but the time axis. |
 | `boundaries` | How the domain edges are terminated ([`ElasticBoundaries`](/phonometry/reference/api/simulation/elastic-fdtd/#elasticboundaries)); `None` is rigid on all four sides. |
@@ -595,16 +609,16 @@ grid), and nothing the caller changes afterwards reaches a checked run.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | If an argument is of the wrong type, among them a `cfl` or `dx` that is not one number, a `recording` that is neither an [`ElasticRecording`](/phonometry/reference/api/simulation/elastic-fdtd/#elasticrecording) nor `None`, or `boundaries` that are neither an [`ElasticBoundaries`](/phonometry/reference/api/simulation/elastic-fdtd/#elasticboundaries) nor `None`. |
-| ValueError | If an argument is out of its range, or a source, a probe or the obstacle does not fit the grid. |
+| TypeError | If an argument is of the wrong type, among them a `cfl` or `dx` that is not one number, a `recording` that is neither an [`ElasticRecording`](/phonometry/reference/api/simulation/elastic-fdtd/#elasticrecording) nor `None`, `boundaries` that are neither an [`ElasticBoundaries`](/phonometry/reference/api/simulation/elastic-fdtd/#elasticboundaries) nor `None`, a `shape` that is not a pair or holds a count that is not a number, or a medium (`c_p`, `c_s`, `rho`, `damping`) that holds a complex number or a text. |
+| ValueError | If an argument is out of its range, a `shape` is not two whole numbers of two cells or more or is given beside a map of another shape, or a source, a probe or the obstacle does not fit the grid. |
 
 ## ExplosionSource
 
 ```python
 ExplosionSource(
     *,
-    ix: int,
-    iy: int,
+    ix: int | np.integer[Any],
+    iy: int | np.integer[Any],
     waveform: Callable[[float], float],
     amplitude: float = 1.0,
 )
@@ -642,8 +656,8 @@ are not used here).
 ```python
 ForceSource(
     *,
-    ix: int,
-    iy: int,
+    ix: int | np.integer[Any],
+    iy: int | np.integer[Any],
     direction: Literal['x', 'y'],
     waveform: Callable[[float], float],
     amplitude: float = 1.0,

@@ -24,6 +24,7 @@ import collections
 import copy
 import dataclasses
 import inspect
+import math
 import pathlib
 import pickle
 import sys
@@ -237,6 +238,30 @@ _HAND_BUILT: dict[str, Callable[[], object]] = {
         segment=1.0,
     ),
     "AnimationFrame": lambda: ph.simulation.AnimationFrame(size=[960, 540]),
+    "SignalSource": lambda: ph.simulation.SignalSource(
+        ix=2, iy=3, samples=[0.0, 1.0, 0.0, -1.0], fs=48000.0
+    ),
+    "FDTDRun": lambda: ph.simulation.FDTDRun(
+        c=[[343.0] * 8] * 6,
+        dx=0.01,
+        duration_s=1e-4,
+        sources=[ph.simulation.GaussianPulse(ix=2, iy=3, half_width_s=4e-5)],
+        shape=[6, 8],
+        rho=[[1.2] * 8] * 6,
+        obstacle_mask=[[False] * 8] * 5 + [[False] * 7 + [True]],
+        damping=[[0.5] * 8] * 6,
+    ),
+    "ElasticRun": lambda: ph.simulation.ElasticRun(
+        c_p=[[4000.0] * 8] * 6,
+        c_s=[[2300.0] * 8] * 6,
+        dx=0.01,
+        duration_s=2e-4,
+        sources=[ph.simulation.ExplosionSource(ix=3, iy=2, waveform=math.sin)],
+        rho=[[2700.0] * 8] * 6,
+        shape=[6, 8],
+        obstacle_mask=[[False] * 8] * 5 + [[False] * 7 + [True]],
+        damping=[[0.5] * 8] * 6,
+    ),
     "ImpulseResponseResult": lambda: ph.room.ImpulseResponseResult(
         ir=[1.0, 0.5, 0.25], fs=48000.0, method="farina"
     ),
@@ -505,12 +530,8 @@ def test_every_record_a_caller_builds_that_converts_is_built_here(
 ) -> None:
     """A converting record a caller builds is held to the rule by an instance."""
     covered = {_dotted(record) for record in records}
-    gpu_files = set(cpa.gpu_parity_files())
     missing = []
     for record in cpa.built_records(reader):
-        module = reader.annotations.classes[record][0]
-        if cpa.repository_path(reader.package.paths[module], _SOURCE) in gpu_files:
-            continue
         if cpa.stub_exemption(reader, record) or record in covered:
             continue
         fields = cpa.record_fields(reader.package, reader.annotations, record)

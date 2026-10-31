@@ -15,13 +15,15 @@ import copy
 import dataclasses
 import pickle
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 import pytest
 
 from phonometry.simulation import (
+    FDTD2D,
     ElasticBoundaries,
+    ElasticFDTD2D,
     ElasticRecording,
     ElasticRun,
     ExplosionSource,
@@ -37,6 +39,9 @@ if TYPE_CHECKING:
     from collections.abc import Callable
 
 _PULSE = GaussianPulse(ix=4, iy=4, half_width_s=4e-5)
+
+#: Which engine a test builds a run for.
+Engine = Literal["acoustic", "elastic"]
 
 
 def _acoustic(**changes: Any) -> FDTDRun:
@@ -76,12 +81,6 @@ def _elastic(**changes: Any) -> ElasticRun:
             {"boundaries": FDTDBoundaries(sides="absorbing", absorbing_layer_cells=0)},
             ValueError,
             "absorbing_layer_cells must be >= 1",
-        ),
-        (
-            _acoustic,
-            {"boundaries": FDTDBoundaries(sides="rigid", absorbing_layer_cells="20")},
-            TypeError,
-            "'absorbing_layer_cells' must be one number, not a text",
         ),
         (
             _acoustic,
@@ -339,14 +338,6 @@ class _NoFloat:
             sources=[_PULSE],
             damping=_HUGE,
         ),
-        lambda: FDTDRun(
-            c=343.0,
-            dx=0.01,
-            duration_s=-1.0,
-            shape=(8, 8),
-            sources=[_PULSE],
-            boundaries=FDTDBoundaries(sides={"top": [10**400] * 8}),
-        ),
         lambda: ElasticRun(
             c_p=4000.0,
             c_s=_HUGE,
@@ -363,7 +354,7 @@ class _NoFloat:
             sources=[_PULSE],
         ),
     ],
-    ids=["c", "damping", "impedance", "elastic c_s", "no float in c"],
+    ids=["c", "damping", "elastic c_s", "no float in c"],
 )
 def test_a_map_the_float_conversion_refuses_is_checked_in_its_turn(
     build: Callable[[], FDTDRun | ElasticRun],
@@ -419,6 +410,76 @@ def test_acoustic_boundaries_hold_a_mapping_of_sides_read_only() -> None:
         FDTDBoundaries("absorbing")  # type: ignore[misc]
 
 
+def test_acoustic_boundaries_hold_each_impedance_as_the_run_reads_it() -> None:
+    """A real scalar of any type is held as a float, a profile of any real
+    type as a read-only float64 array of the record's own: what the run
+    reads, read once when the record is built.
+    """
+    profile = np.full(8, 415, dtype=np.int64)
+    boundaries = FDTDBoundaries(
+        sides={"left": profile, "right": np.float32(415.0), "top": np.int64(415)}
+    )
+    sides = boundaries.sides
+    assert not isinstance(sides, str)
+    held = sides["left"]
+    assert isinstance(held, np.ndarray)
+    assert held.dtype == np.float64
+    assert not held.flags.writeable
+    assert held.tolist() == [415.0] * 8
+    profile[0] = 1
+    assert held[0] == 415.0
+    for side in ("right", "top"):
+        assert type(sides[side]) is float
+        assert sides[side] == 415.0
+    run = _acoustic(boundaries=boundaries)
+    reference = _acoustic(
+        boundaries=FDTDBoundaries(
+            sides={"left": [415.0] * 8, "right": 415.0, "top": 415.0}
+        )
+    )
+    assert np.array_equal(fdtd_simulation(run).times, fdtd_simulation(reference).times)
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        None,
+        True,
+        np.True_,
+        object(),
+        1 + 2j,
+        [415, None],
+        [True, 415.0],
+        (415.0, np.True_),
+        [[True], [415.0]],
+    ],
+)
+def test_acoustic_boundaries_refuse_an_impedance_that_is_no_real_number(
+    value: object,
+) -> None:
+    """A flag ran as an impedance of 1 Pa s/m and ``None`` was refused only
+    by the run, as an impedance that is not finite: each is refused when the
+    record is built, as the type it is, a flag among the numbers of a profile
+    too, which NumPy reads as ``1.0`` beside them.
+    """
+    with pytest.raises(TypeError, match="impedance for side 'left' must be a real"):
+        FDTDBoundaries(sides={"left": value})  # type: ignore[dict-item]
+
+
+@pytest.mark.parametrize("value", [10**400, [10**400] * 8, [[415.0, 415.0], [415.0]]])
+def test_acoustic_boundaries_refuse_an_impedance_no_float_holds(value: object) -> None:
+    with pytest.raises(ValueError, match="impedance for side 'left' must be"):
+        FDTDBoundaries(sides={"left": value})  # type: ignore[dict-item]
+
+
+@pytest.mark.parametrize("value", [None, True, "415", [True] + [415.0] * 7])
+def test_the_acoustic_engine_refuses_an_impedance_that_is_no_real_number(
+    value: object,
+) -> None:
+    with pytest.raises(TypeError, match="impedance for side 'left' must be a real"):
+        FDTD2D(np.full((8, 8), 343.0), 0.01, edge_impedance={"left": value})  # type: ignore[dict-item]
+
+
 def test_no_boundaries_is_rigid_on_all_four_sides() -> None:
     run = _acoustic(recording=FDTDRecording(probes=[(5, 5)]))
     rigid = _acoustic(
@@ -457,3 +518,120 @@ def test_a_simulation_function_takes_its_own_run_only() -> None:
         fdtd_simulation(elastic)  # type: ignore[arg-type]
     with pytest.raises(TypeError, match="'run' must be an ElasticRun, got FDTDRun"):
         elastic_fdtd_simulation(acoustic)  # type: ignore[arg-type]
+
+
+def _over_a_map(engine: Engine, shape: object) -> FDTDRun | ElasticRun:
+    """A run whose speed is a map, with *shape* beside it."""
+    if engine == "acoustic":
+        return FDTDRun(
+            c=np.full((8, 8), 343.0),
+            dx=0.01,
+            duration_s=1e-4,
+            sources=[_PULSE],
+            shape=shape,  # type: ignore[arg-type]
+        )
+    return ElasticRun(
+        c_p=np.full((8, 8), 4000.0),
+        c_s=2300.0,
+        dx=0.01,
+        duration_s=1e-4,
+        sources=[ExplosionSource(ix=4, iy=4, waveform=_PULSE.value)],
+        rho=2500.0,
+        shape=shape,  # type: ignore[arg-type]
+    )
+
+
+@pytest.mark.parametrize("engine", ["acoustic", "elastic"])
+def test_a_run_holds_the_shape_it_is_given_as_a_pair_of_ints(engine: Engine) -> None:
+    """A list or NumPy counts read back as the tuple of ints the grid is.
+
+    With a map, the shape was not read and the run kept whatever it was
+    handed, a list a caller could still append to included.
+    """
+    by_speed = (_acoustic if engine == "acoustic" else _elastic)(shape=[np.int64(8), 8])
+    by_map = _over_a_map(engine, [np.int64(8), 8])
+    for run in (by_speed, by_map):
+        assert run.shape == (8, 8)
+        assert [type(n) for n in run.shape] == [int, int]
+
+
+@pytest.mark.parametrize("engine", ["acoustic", "elastic"])
+@pytest.mark.parametrize(
+    "shape", [range(8, 10), np.array([8, 9]), np.array([8, 9], dtype=np.int32)]
+)
+def test_a_shape_is_any_sequence_of_two_counts_or_an_array_of_them(
+    engine: Engine, shape: object
+) -> None:
+    """The annotation took any sequence and the run a tuple or a list only:
+    ``range(8, 10)`` passed mypy and raised ``TypeError``. Any sequence of the
+    two counts is read now, and a one-dimensional integer array as its items.
+    """
+    run = (_acoustic if engine == "acoustic" else _elastic)(shape=shape)
+    assert run.shape == (8, 9)
+    assert [type(n) for n in run.shape] == [int, int]
+
+
+@pytest.mark.parametrize("engine", ["acoustic", "elastic"])
+@pytest.mark.parametrize(
+    ("shape", "error"),
+    [
+        ((8, 8, 1), ValueError),
+        ((8, 0), ValueError),
+        (8, TypeError),
+        ("xx", TypeError),
+        (np.array([[8, 8]]), TypeError),
+    ],
+)
+def test_a_run_refuses_a_malformed_shape_beside_a_map_too(
+    engine: Engine, shape: object, error: type[Exception]
+) -> None:
+    with pytest.raises(error, match="shape must be a pair of positive integers"):
+        _over_a_map(engine, shape)
+
+
+@pytest.mark.parametrize("engine", ["acoustic", "elastic"])
+def test_a_shape_beside_a_map_names_the_map_s_grid(engine: Engine) -> None:
+    """A shape beside a map was held as given, the map's grid or not, and
+    the engine read none: each now refuses one that names another grid.
+    """
+    name = "c" if engine == "acoustic" else "c_p"
+    match = rf"shape \(4, 8\) does not match the {name} map, whose shape is \(8, 8\)"
+    with pytest.raises(ValueError, match=match):
+        _over_a_map(engine, (4, 8))
+    if engine == "acoustic":
+        with pytest.raises(ValueError, match=match):
+            FDTD2D(np.full((8, 8), 343.0), 0.01, shape=(4, 8))
+        with pytest.raises(TypeError, match="shape must be a pair"):
+            FDTD2D(np.full((8, 8), 343.0), 0.01, shape="garbage")  # type: ignore[arg-type]
+        assert FDTD2D(np.full((8, 8), 343.0), 0.01, shape=[8, np.int64(8)]).c.shape == (
+            8,
+            8,
+        )
+        return
+    with pytest.raises(ValueError, match=match):
+        ElasticFDTD2D(np.full((8, 8), 4000.0), 2300.0, 0.01, rho=2500.0, shape=(4, 8))
+    with pytest.raises(TypeError, match="shape must be a pair"):
+        ElasticFDTD2D(np.full((8, 8), 4000.0), 2300.0, 0.01, rho=2500.0, shape="xx")  # type: ignore[arg-type]
+    assert ElasticFDTD2D(
+        4000.0, 2300.0, 0.01, rho=2500.0, shape=[np.int64(8), 8]
+    ).c_p.shape == (8, 8)
+
+
+@pytest.mark.parametrize(
+    ("shape", "error"),
+    [((8, 8, 3), ValueError), ("xx", TypeError), ((8, 1.5), ValueError)],
+)
+def test_from_regions_reads_its_shape_as_the_engines_do(
+    shape: object, error: type[Exception]
+) -> None:
+    """A third count was dropped and a text indexed a letter at a time."""
+    with pytest.raises(error, match="shape must be a pair of positive integers"):
+        ElasticFDTD2D.from_regions(shape, 0.01, background=(4000.0, 2300.0, 2500.0))  # type: ignore[arg-type]
+
+
+def test_a_single_probe_field_is_one_field() -> None:
+    """``probe_fields="vy"`` was read a letter at a time and refused "v"."""
+    assert ElasticRecording(probe_fields="vy").probe_fields == ("vy",)
+    assert ElasticRecording(probe_fields="p").probe_fields == ("p",)
+    with pytest.raises(ValueError, match="'probe_fields' must be one of"):
+        ElasticRecording(probe_fields="pv")  # type: ignore[arg-type]

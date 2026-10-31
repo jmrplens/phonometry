@@ -152,9 +152,10 @@ def test_plane_source_steady_state_is_plane_and_one_way() -> None:
 
 def test_plane_source_validation_and_geometry_preview() -> None:
     sim = FDTD2D(C0, DX, shape=(40, 40))
-    bad_direction = PlaneWaveSource(direction="sideways", waveform=lambda t: 0.0)
-    with pytest.raises(ValueError, match=r"'direction' must be"):
-        sim.add_source(bad_direction)
+    with pytest.raises(ValueError, match=r"'direction' must be one of"):
+        PlaneWaveSource(direction="sideways", waveform=lambda t: 0.0)  # type: ignore[arg-type]
+    with pytest.raises(TypeError, match=r"'direction' must be one of .*, a text"):
+        PlaneWaveSource(direction=None, waveform=lambda t: 0.0)  # type: ignore[arg-type]
     bad_offset = PlaneWaveSource(direction="down", waveform=lambda t: 0.0, offset=40)
     with pytest.raises(ValueError, match=r"plane-wave offset lies outside the grid"):
         sim.add_source(bad_offset)

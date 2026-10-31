@@ -404,7 +404,7 @@ reflection_index(
     speed_of_sound: float,
     window_length_s: float | ArrayLike = 0.006,
     low_band_window_length_s: float | ArrayLike = 0.0079,
-    low_band_microphones: Sequence[int] = (1, 2, 3, 4, 5, 6),
+    low_band_microphones: Sequence[int | np.integer[Any]] | NDArray[np.integer[Any]] = (1, 2, 3, 4, 5, 6),
     directivity_corrections: ArrayLike | None = None,
     lowest_band_hz: float = 200.0,
 ) -> ReflectionIndexResult
@@ -450,7 +450,7 @@ within 5 % of 1; the value computed is always used here.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the records are not shaped as above, the rate is missing or disagrees, a window does not fit its record, or a parameter is out of range. |
-| TypeError | if `speed_of_sound` is not a single number. |
+| TypeError | if `speed_of_sound` is not a single number, or `low_band_microphones` is a text or holds a microphone that is not an integer. |
 
 **Warns**
 

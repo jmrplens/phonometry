@@ -16,6 +16,7 @@ import shlex
 import shutil
 from typing import TYPE_CHECKING
 
+from ..._internal.json_input import escaped
 from ..._internal.programs import past_the_working_directory
 from . import bootstrap
 
@@ -127,7 +128,7 @@ def ssh_program() -> tuple[str, ...]:
     installed = past_the_working_directory("ssh", found)
     if installed is None:
         msg = (
-            f"ssh was found only in the working directory ({found}), which Windows "
+            f"ssh was found only in the working directory ({escaped(found)}), which Windows "
             "searches before PATH; phonometry does not run a program from there. "
             "Put an OpenSSH client on PATH to run on a node"
         )
@@ -136,8 +137,8 @@ def ssh_program() -> tuple[str, ...]:
         _LOG.info(
             "running %s from PATH, not %s from the working directory, which "
             "Windows searches first",
-            installed,
-            found,
+            escaped(installed),
+            escaped(found),
         )
     return (installed,)
 

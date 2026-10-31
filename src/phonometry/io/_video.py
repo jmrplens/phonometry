@@ -708,10 +708,16 @@ class _FramePipe:
             drain.join(timeout=_EXIT_TIMEOUT_S)
 
     def _failure(self, reason: str) -> VideoEncoderError:
-        """Stop ffmpeg; the error names the file, the encoder and what ffmpeg wrote last on stderr."""
+        """Stop ffmpeg; the error names the file, the encoder and what ffmpeg wrote last on stderr.
+
+        What ffmpeg wrote is quoted through :func:`escaped`: it names the
+        file it writes as it was given, the caller's name in it, so a mark
+        that reorders text or a control character there is written as its
+        escape.
+        """
         self.abort()
         with self._tail_lock:
-            said = "\n".join(self._tail) or "(nothing on stderr)"
+            said = escaped("\n".join(self._tail)) or "(nothing on stderr)"
         # Named here because ffmpeg does not always name it: an option it
         # does not know is refused without a word of the encoder.
         encoder = f" with the encoder {self.encoder_name}" if self.encoder_name else ""
@@ -802,7 +808,7 @@ def settle(partial: Path, path: Path) -> None:
     except OSError as exc:
         msg = (
             f"the video is finished but could not take the place of {escaped(str(path))} ({exc}); "
-            f"it is at {partial}"
+            f"it is at {escaped(str(partial))}"
         )
         raise VideoEncoderError(msg) from exc
 

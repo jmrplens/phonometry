@@ -494,6 +494,22 @@ def test_windows_runs_the_ssh_on_path_past_one_in_the_working_directory(
     ]
 
 
+def test_windows_logs_the_ssh_it_runs_by_its_escapes(
+    windows: Path, monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
+) -> None:
+    """A directory of ``PATH`` is the environment's, and may hold a mark that reorders text."""
+    installed = _install_ssh(windows / "else\u202ewhere")
+    monkeypatch.setenv("PATH", str(installed.parent))
+    with caplog.at_level(logging.INFO, logger="phonometry.simulation"):
+        assert command.ssh_program() == (str(installed),)
+    (record,) = caplog.records
+    logged = record.getMessage()
+    assert "\u202e" not in logged
+    assert logged.startswith(
+        f"running {windows}{os.sep}else\\u202ewhere{os.sep}ssh.exe "
+    )
+
+
 def test_windows_takes_the_first_ssh_of_path_in_its_order(
     windows: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

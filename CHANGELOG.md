@@ -39,11 +39,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   warnings with those marks and lone surrogates escaped as well as its
   control characters, a node's provenance holding any of them being refused.
   A message that names a file a caller or the environment gave (those of the
-  `io` readers and writers, of the video encoder, of the hosts file and of
-  the package a node is sent) writes the name with its control characters,
-  its marks that reorder text and its bytes that are not UTF-8 as escapes, as
-  the catalogue and sidecar readers already did, so that the message can
-  always be printed and logged.
+  `io` readers and writers, of the video encoder and the partial file it
+  leaves behind, of the ffmpeg and the `ssh` found on `PATH`, of the hosts
+  file and of the package a node is sent), and the log line that names a
+  program found there, writes the name with its control characters, its marks
+  that reorder text and its bytes that are not UTF-8 as escapes, as the
+  catalogue and sidecar readers already did, and what ffmpeg wrote on stderr,
+  which names the file it writes, is quoted the same way, so that the message
+  can always be printed and logged and cannot move the terminal it is printed
+  on.
   `scripts/check_regular_file_reads.py`, run by `make regular-file-reads` and
   in CI, fails on a read in `src` that opens a file without the shared check;
   on the tree before this change it reports fifteen reads, every one of them

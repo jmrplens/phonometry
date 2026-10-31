@@ -219,7 +219,7 @@ def find_ffmpeg() -> str:
     installed = past_the_working_directory(named, found)
     if installed is None:
         msg = (
-            f"ffmpeg was found only in the working directory ({found}), which Windows "
+            f"ffmpeg was found only in the working directory ({escaped(found)}), which Windows "
             "searches before PATH; phonometry does not run a program from there. "
             "Put ffmpeg on PATH, or name it by its full path in "
             "rcParams['animation.ffmpeg_path']"
@@ -229,8 +229,8 @@ def find_ffmpeg() -> str:
         _LOG.info(
             "running %s from PATH, not %s from the working directory, which "
             "Windows searches first",
-            installed,
-            found,
+            escaped(installed),
+            escaped(found),
         )
     return installed
 
@@ -262,8 +262,13 @@ def _run(
 
 
 def _tail(stderr: bytes) -> str:
-    """The last of what ffmpeg wrote on stderr, as text, for a message or the log."""
-    return stderr.decode(errors="replace")[-_STDERR_TAIL_CHARS:].strip()
+    """The last of what ffmpeg wrote on stderr, as text, for a message or the log.
+
+    Its control characters and marks that reorder text are written as their
+    escapes (:func:`escaped`), so that quoting it cannot move the caller's
+    terminal.
+    """
+    return escaped(stderr.decode(errors="replace")[-_STDERR_TAIL_CHARS:].strip())
 
 
 def _listed(path: str, flag: str) -> bytes:
@@ -572,7 +577,8 @@ def choose(
     codecs = CONTAINER_CODECS[container] if codec is None else (codec,)
     msg = (
         f"encoder={encoder!r} cannot write {'/'.join(codecs)} into .{container} with "
-        f"{ffmpeg.path} ({ffmpeg.version}); tried {', '.join(tried) or 'nothing it has'}."
+        f"{escaped(ffmpeg.path)} ({escaped(ffmpeg.version)}); "
+        f"tried {', '.join(tried) or 'nothing it has'}."
     )
     if encoder != "auto":
         working = [

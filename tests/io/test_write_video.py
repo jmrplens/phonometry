@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import gc
 import logging
+import os
 import subprocess
 import sys
 import threading
@@ -421,6 +422,70 @@ def test_a_finished_video_that_cannot_take_the_place_of_path_says_where_it_is(
     (left,) = [p for p in tmp_path.iterdir() if p.name.endswith(".partial")]
     assert str(left) in str(caught.value)
     assert left.read_bytes().startswith(b"\x1a\x45\xdf\xa3")
+
+
+#: Marks a caller's file name can hold that no message prints as they are:
+#: one that reorders text, the escape that opens a terminal's commands, and
+#: the lone surrogate Python holds for a byte that is not UTF-8 (a Windows
+#: file name is UTF-16, so no name holds one there).
+_UNPRINTABLE_MARKS = [
+    "‮",
+    "\x1b",
+    pytest.param(
+        "\udcff",
+        marks=pytest.mark.skipif(
+            sys.platform == "win32",
+            reason="a Windows file name is UTF-16, so no name fails UTF-8",
+        ),
+    ),
+]
+
+
+@pytest.mark.parametrize("mark", _UNPRINTABLE_MARKS)
+def test_a_video_left_at_its_partial_name_is_named_by_its_escapes(
+    tmp_path: Path, mark: str
+) -> None:
+    """The partial file is named after the caller's file, so it is escaped as that name is."""
+    from phonometry.io import _video as pipe_module
+
+    path = tmp_path / f"w{mark}.webm"
+    partial = tmp_path / f".w{mark}.webm.0123.partial"
+    with pytest.raises(
+        io.VideoEncoderError, match="could not take the place of"
+    ) as caught:
+        pipe_module.settle(partial, path)
+    message = str(caught.value)
+    message.encode("utf-8")
+    assert mark not in message
+    escape = ascii(mark)[1:-1]
+    assert message.endswith(f"it is at {tmp_path}{os.sep}.w{escape}.webm.0123.partial")
+
+
+def test_what_ffmpeg_wrote_is_quoted_with_its_unprintable_characters_escaped(
+    tmp_path: Path,
+) -> None:
+    """ffmpeg names the file it writes as it was given, the caller's name in it."""
+    from phonometry.io import _video as pipe_module
+    from phonometry.io._video_encoders import FFmpeg
+
+    request = pipe_module.video_request(tmp_path / "w.webm", io.VideoOptions())
+    ffmpeg = FFmpeg(path="ffmpeg", version="", encoders=frozenset())
+    pipe = pipe_module._FramePipe(
+        request, ffmpeg, "20/1", output=tmp_path / "p.webm", choice=None
+    )
+    pipe._tail.extend(
+        [
+            "Error opening output .w‮\x1b[2J.webm.partial: Permission denied",
+            "\x9b31m\tthe end",
+        ]
+    )
+    message = str(pipe._failure("ffmpeg exited with status 1"))
+    for mark in ("‮", "\x1b", "\x9b"):
+        assert mark not in message
+    assert message.endswith(
+        "ffmpeg said:\nError opening output .w\\u202e\\x1b[2J.webm.partial: "
+        "Permission denied\n\\x9b31m\tthe end"
+    )
 
 
 def test_two_writes_to_one_path_never_share_a_partial_file(tmp_path: Path) -> None:

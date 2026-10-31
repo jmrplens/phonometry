@@ -284,7 +284,7 @@ energy_average_level(
     levels: Sequence[float] | np.ndarray,
     *,
     axis: int = -1,
-) -> np.ndarray | float
+) -> float | NDArray[np.float64]
 ```
 
 Energy-average sound pressure level (ISO 16283-1:2014, Formula (9)).

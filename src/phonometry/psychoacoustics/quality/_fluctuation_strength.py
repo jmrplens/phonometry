@@ -327,13 +327,13 @@ _INV_GRID_HZ = np.linspace(20.0, 20000.0, 20000)
 _INV_GRID_BARK = _hz_to_bark(_INV_GRID_HZ)
 
 
-def _bark_center_hz(z: NDArray[np.float64] | float) -> NDArray[np.float64] | np.float64:
-    """Approximate inverse of :func:`_hz_to_bark` for a band centre (Hz).
+def _bark_center_hz(z: NDArray[np.float64]) -> NDArray[np.float64]:
+    """Approximate inverse of :func:`_hz_to_bark` for band centres (Hz).
 
-    Accepts a scalar or an array of critical-band rates and returns the matching
+    Takes an array of critical-band rates and returns the matching
     frequencies by numerical inversion of Eq. 3 on a precomputed monotone grid.
     """
-    return np.interp(z, _INV_GRID_BARK, _INV_GRID_HZ)
+    return np.asarray(np.interp(z, _INV_GRID_BARK, _INV_GRID_HZ), dtype=np.float64)
 
 
 def _band_envelopes(

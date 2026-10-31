@@ -69,7 +69,7 @@ import math
 import warnings
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, overload
 
 import numpy as np
 
@@ -77,9 +77,10 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike
+    from numpy.typing import ArrayLike, NDArray
 
     from ..._i18n import Language
+    from ..._internal.types import RealScalar, RealValues
     from ..._report.metadata import ReportMetadata
 
 
@@ -146,9 +147,27 @@ class DynamicStiffnessWarning(PhonometryWarning):
 # ---------------------------------------------------------------------------
 
 
+@overload
+def apparent_dynamic_stiffness[S: RealScalar](
+    resonant_frequency_hz: S, total_mass_per_area_kg_m2: float
+) -> float: ...
+
+
+@overload
+def apparent_dynamic_stiffness[V: RealValues](
+    resonant_frequency_hz: V, total_mass_per_area_kg_m2: float
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def apparent_dynamic_stiffness[A: ArrayLike](
+    resonant_frequency_hz: A, total_mass_per_area_kg_m2: float
+) -> float | NDArray[np.float64]: ...
+
+
 def apparent_dynamic_stiffness(
     resonant_frequency_hz: ArrayLike, total_mass_per_area_kg_m2: float
-) -> np.ndarray | float:
+) -> float | NDArray[np.float64]:
     r"""Apparent dynamic stiffness per unit area ``s't`` (Formula 4).
 
     Inverts the test resonance :math:`f_\mathrm{r} = (1/2\pi)\sqrt{s'_\mathrm{t}/m'_\mathrm{t}}` to
@@ -160,8 +179,9 @@ def apparent_dynamic_stiffness(
         test ``m't``, in kg/m2 (the load plate plus fittings over the 0,04 m2
         specimen; the standard's plate gives
         :math:`m'_\mathrm{t} = 8~\text{kg} / 0.04~\text{m}^2 = 200` kg/m2).
-    :return: The apparent dynamic stiffness per unit area ``s't``, in N/m3
-        (numerically MN/m3 when divided by 1e6).
+    :return: The apparent dynamic stiffness per unit area ``s't``, in N/m3 (numerically
+        MN/m3 when divided by 1e6); a ``float`` for a number; an array for a sequence or
+        an array, a zero-dimensional one included.
     :raises TypeError: if ``total_mass_per_area_kg_m2`` is not a single number.
     """
     total_mass_per_area_kg_m2 = require_positive(
@@ -171,7 +191,36 @@ def apparent_dynamic_stiffness(
     if np.any(fr <= 0.0):
         msg = "'resonant_frequency_hz' must be positive."
         raise ValueError(msg)
-    return as_float_or_array(_FOUR_PI_SQ * total_mass_per_area_kg_m2 * fr**2)
+    return as_float_or_array(
+        _FOUR_PI_SQ * total_mass_per_area_kg_m2 * fr**2, like=(resonant_frequency_hz,)
+    )
+
+
+@overload
+def enclosed_gas_stiffness[S: RealScalar](
+    thickness_m: S,
+    porosity: float,
+    *,
+    static_pressure_pa: float = _STANDARD_ATMOSPHERIC_PRESSURE,
+) -> float: ...
+
+
+@overload
+def enclosed_gas_stiffness[V: RealValues](
+    thickness_m: V,
+    porosity: float,
+    *,
+    static_pressure_pa: float = _STANDARD_ATMOSPHERIC_PRESSURE,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def enclosed_gas_stiffness[A: ArrayLike](
+    thickness_m: A,
+    porosity: float,
+    *,
+    static_pressure_pa: float = _STANDARD_ATMOSPHERIC_PRESSURE,
+) -> float | NDArray[np.float64]: ...
 
 
 def enclosed_gas_stiffness(
@@ -179,7 +228,7 @@ def enclosed_gas_stiffness(
     porosity: float,
     *,
     static_pressure_pa: float = _STANDARD_ATMOSPHERIC_PRESSURE,
-) -> np.ndarray | float:
+) -> float | NDArray[np.float64]:
     r"""Enclosed-gas dynamic stiffness per unit area ``s'a`` (Formula 7).
 
     The isothermal compression of the pore air adds a stiffness in parallel
@@ -190,7 +239,9 @@ def enclosed_gas_stiffness(
     :param porosity: Porosity ``epsilon`` of the specimen (0-1).
     :param static_pressure_pa: Atmospheric pressure ``p0``, in pascals
         (default the standard's 0,1 MPa).
-    :return: The enclosed-gas dynamic stiffness per unit area ``s'a``, in N/m3.
+    :return: The enclosed-gas dynamic stiffness per unit area ``s'a``, in N/m3; a
+        ``float`` for a number; an array for a sequence or an array, a zero-dimensional
+        one included.
     :raises TypeError: if ``porosity`` or ``static_pressure_pa`` is not a single number.
 
     .. note::
@@ -207,7 +258,7 @@ def enclosed_gas_stiffness(
     if np.any(d <= 0.0):
         msg = "'thickness_m' must be positive."
         raise ValueError(msg)
-    return as_float_or_array(static_pressure_pa / (d * porosity))
+    return as_float_or_array(static_pressure_pa / (d * porosity), like=(thickness_m,))
 
 
 def installed_dynamic_stiffness(
@@ -302,9 +353,27 @@ def installed_dynamic_stiffness(
     return apparent_stiffness_n_m3
 
 
+@overload
+def natural_frequency[S: RealScalar](
+    dynamic_stiffness_n_m3: S, mass_per_area_kg_m2: float
+) -> float: ...
+
+
+@overload
+def natural_frequency[V: RealValues](
+    dynamic_stiffness_n_m3: V, mass_per_area_kg_m2: float
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def natural_frequency[A: ArrayLike](
+    dynamic_stiffness_n_m3: A, mass_per_area_kg_m2: float
+) -> float | NDArray[np.float64]: ...
+
+
 def natural_frequency(
     dynamic_stiffness_n_m3: ArrayLike, mass_per_area_kg_m2: float
-) -> np.ndarray | float:
+) -> float | NDArray[np.float64]:
     r"""Natural frequency ``f0`` of the resiliently supported floor (Formula 2).
 
     :math:`f_0 = (1/2\pi)\sqrt{s'/m'}`.
@@ -315,7 +384,8 @@ def natural_frequency(
         turns one into the other.
     :param mass_per_area_kg_m2: Mass per unit area of the supported floor
         ``m'``, in kg/m2.
-    :return: The natural frequency ``f0``, in hertz.
+    :return: The natural frequency ``f0``, in hertz; a ``float`` for a number; an array
+        for a sequence or an array, a zero-dimensional one included.
     :raises TypeError: if ``mass_per_area_kg_m2`` is not a single number.
     """
     mass_per_area_kg_m2 = require_positive(mass_per_area_kg_m2, "mass_per_area_kg_m2")
@@ -323,7 +393,9 @@ def natural_frequency(
     if np.any(s <= 0.0):
         msg = "'dynamic_stiffness_n_m3' must be positive."
         raise ValueError(msg)
-    return as_float_or_array(np.sqrt(s / mass_per_area_kg_m2) / _TWO_PI)
+    return as_float_or_array(
+        np.sqrt(s / mass_per_area_kg_m2) / _TWO_PI, like=(dynamic_stiffness_n_m3,)
+    )
 
 
 # ---------------------------------------------------------------------------

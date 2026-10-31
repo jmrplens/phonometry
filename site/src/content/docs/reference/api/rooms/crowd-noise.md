@@ -85,11 +85,25 @@ measured levels along a line of workstations, and predicts nothing.
 
 ```python
 absorption_per_table(
+    distance: float | np.floating[Any] | np.integer[Any],
+    speech_to_noise: float,
+    *,
+    directivity: float = 2.0,
+) -> float
+
+absorption_per_table(
+    distance: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    speech_to_noise: float,
+    *,
+    directivity: float = 2.0,
+) -> NDArray[np.float64]
+
+absorption_per_table(
     distance: ArrayLike,
     speech_to_noise: float,
     *,
     directivity: float = 2.0,
-) -> np.ndarray | float
+) -> float | NDArray[np.float64]
 ```
 
 Absorption per table giving a chosen `L_SN` (inverse of (17.52)).
@@ -107,7 +121,7 @@ bound (Equation (17.54)).
 | `speech_to_noise` | Target speech-to-noise ratio `L_SN`, dB. |
 | `directivity` | Talker directivity factor `Q`. |
 
-**Returns:** The equivalent absorption area per table `A_tab`, m2.
+**Returns:** The equivalent absorption area per table `A_tab`, m2; a `float` for a number; an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -164,11 +178,32 @@ Equation (17.50) at the listener across the table.
 
 ```python
 crowd_noise_level(
+    talkers: float | np.floating[Any] | np.integer[Any],
+    absorption_area: float | np.floating[Any] | np.integer[Any],
+    *,
+    sound_power_level: float = 70.0,
+) -> float
+
+crowd_noise_level(
+    talkers: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    absorption_area: ArrayLike,
+    *,
+    sound_power_level: float = 70.0,
+) -> NDArray[np.float64]
+
+crowd_noise_level(
+    talkers: float | np.floating[Any] | np.integer[Any],
+    absorption_area: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    *,
+    sound_power_level: float = 70.0,
+) -> NDArray[np.float64]
+
+crowd_noise_level(
     talkers: ArrayLike,
     absorption_area: ArrayLike,
     *,
     sound_power_level: float = 70.0,
-) -> np.ndarray | float
+) -> float | NDArray[np.float64]
 ```
 
 Reverberant level of `N` simultaneous talkers (Long Equation (17.51)).
@@ -186,7 +221,7 @@ counted per occupied table).
 | `absorption_area` | Total equivalent absorption area `A` of the room, metric sabins (m2) (scalar or array). |
 | `sound_power_level` | Sound power level `Lw` of one talker, dB re 1 pW (default [`NORMAL_VOICE_POWER_LEVEL`](/phonometry/reference/api/rooms/crowd-noise/#normal_voice_power_level)). |
 
-**Returns:** The self-generated reverberant level, dB.
+**Returns:** The self-generated reverberant level, dB; a `float` when `talkers` and `absorption_area` are both numbers; an array of their broadcast shape when one is a sequence or an array, a zero-dimensional one included.
 
 ## CrowdNoiseResult
 
@@ -265,11 +300,25 @@ PRIVACY_SNR_DB = -9.0
 
 ```python
 speech_direct_level(
+    distance: float | np.floating[Any] | np.integer[Any],
+    *,
+    sound_power_level: float = 70.0,
+    directivity: float = 2.0,
+) -> float
+
+speech_direct_level(
+    distance: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    *,
+    sound_power_level: float = 70.0,
+    directivity: float = 2.0,
+) -> NDArray[np.float64]
+
+speech_direct_level(
     distance: ArrayLike,
     *,
     sound_power_level: float = 70.0,
     directivity: float = 2.0,
-) -> np.ndarray | float
+) -> float | NDArray[np.float64]
 ```
 
 Direct-field level of one talker (Long Equation (17.50)).
@@ -285,7 +334,7 @@ across the table receives.
 | `sound_power_level` | Talker sound power level `Lw`, dB re 1 pW (default [`NORMAL_VOICE_POWER_LEVEL`](/phonometry/reference/api/rooms/crowd-noise/#normal_voice_power_level)). |
 | `directivity` | Talker directivity factor `Q` (default [`TALKER_DIRECTIVITY`](/phonometry/reference/api/rooms/crowd-noise/#talker_directivity)). |
 
-**Returns:** The direct-field sound pressure level, dB.
+**Returns:** The direct-field sound pressure level, dB; a `float` for a number; an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -297,11 +346,32 @@ across the table receives.
 
 ```python
 speech_to_noise_ratio(
+    distance: float | np.floating[Any] | np.integer[Any],
+    absorption_per_table: float | np.floating[Any] | np.integer[Any],
+    *,
+    directivity: float = 2.0,
+) -> float
+
+speech_to_noise_ratio(
+    distance: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    absorption_per_table: ArrayLike,
+    *,
+    directivity: float = 2.0,
+) -> NDArray[np.float64]
+
+speech_to_noise_ratio(
+    distance: float | np.floating[Any] | np.integer[Any],
+    absorption_per_table: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    *,
+    directivity: float = 2.0,
+) -> NDArray[np.float64]
+
+speech_to_noise_ratio(
     distance: ArrayLike,
     absorption_per_table: ArrayLike,
     *,
     directivity: float = 2.0,
-) -> np.ndarray | float
+) -> float | NDArray[np.float64]
 ```
 
 Speech-to-noise ratio across a table (Long Equation (17.52)).
@@ -318,7 +388,7 @@ number of talkers appears: a busier room brings its own absorption with it.
 | `absorption_per_table` | Equivalent absorption area per occupied table `A_tab`, m2. |
 | `directivity` | Talker directivity factor `Q`. |
 
-**Returns:** The speech-to-noise ratio, dB.
+**Returns:** The speech-to-noise ratio, dB; a `float` when `distance` and `absorption_per_table` are both numbers; an array of their broadcast shape when one is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

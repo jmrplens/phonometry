@@ -37,6 +37,7 @@ from typing import TYPE_CHECKING, Literal, overload
 
 import numpy as np
 
+from .._internal.types import as_float_or_array
 from .._internal.validation import (
     require_above_absolute_zero,
     require_above_absolute_zero_array,
@@ -47,6 +48,8 @@ from ._state import Fluid
 
 if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
+
+    from .._internal.types import RealScalar, RealValues
 
 #: The four sound-speed equations of sea water.
 SoundSpeedModel = Literal["unesco", "del_grosso", "mackenzie", "medwin"]
@@ -109,6 +112,20 @@ def depth_to_gauge_pressure_mpa(*, depth_m: float, latitude_deg: float = 45.0) -
     return float(_pressure_mpa(z, _finite(latitude_deg, "latitude_deg")))
 
 
+@overload
+def _pressure_mpa(
+    z: float,
+    latitude_deg: float,
+) -> float: ...
+
+
+@overload
+def _pressure_mpa(
+    z: NDArray[np.float64],
+    latitude_deg: float,
+) -> NDArray[np.float64]: ...
+
+
 def _pressure_mpa(
     z: float | NDArray[np.float64],
     latitude_deg: float,
@@ -125,6 +142,22 @@ def _pressure_mpa(
 # ---------------------------------------------------------------------------
 # Mackenzie (1981)
 # ---------------------------------------------------------------------------
+
+
+@overload
+def _mackenzie(
+    t: float,
+    s: float,
+    depth: float,
+) -> float: ...
+
+
+@overload
+def _mackenzie(
+    t: NDArray[np.float64],
+    s: NDArray[np.float64],
+    depth: NDArray[np.float64],
+) -> NDArray[np.float64]: ...
 
 
 def _mackenzie(
@@ -148,6 +181,22 @@ def _mackenzie(
 # ---------------------------------------------------------------------------
 # Medwin (1975)
 # ---------------------------------------------------------------------------
+
+
+@overload
+def _medwin(
+    t: float,
+    s: float,
+    depth: float,
+) -> float: ...
+
+
+@overload
+def _medwin(
+    t: NDArray[np.float64],
+    s: NDArray[np.float64],
+    depth: NDArray[np.float64],
+) -> NDArray[np.float64]: ...
 
 
 def _medwin(
@@ -199,6 +248,22 @@ _A = (
 )
 
 
+@overload
+def _unesco(
+    t: float,
+    s: float,
+    pressure_bar: float,
+) -> float: ...
+
+
+@overload
+def _unesco(
+    t: NDArray[np.float64],
+    s: NDArray[np.float64],
+    pressure_bar: NDArray[np.float64],
+) -> NDArray[np.float64]: ...
+
+
 def _unesco(
     t: float | NDArray[np.float64],
     s: float | NDArray[np.float64],
@@ -227,6 +292,22 @@ def _unesco(
 # ---------------------------------------------------------------------------
 
 
+@overload
+def _del_grosso(
+    t: float,
+    s: float,
+    pressure_kgcm2: float,
+) -> float: ...
+
+
+@overload
+def _del_grosso(
+    t: NDArray[np.float64],
+    s: NDArray[np.float64],
+    pressure_kgcm2: NDArray[np.float64],
+) -> NDArray[np.float64]: ...
+
+
 def _del_grosso(
     t: float | NDArray[np.float64],
     s: float | NDArray[np.float64],
@@ -253,24 +334,57 @@ def _del_grosso(
 
 
 @overload
-def sea_water_sound_speed(
-    temperature_c: float,
-    salinity_psu: float,
-    depth_m: float,
+def sea_water_sound_speed[S1: RealScalar, S2: RealScalar, S3: RealScalar](
+    temperature_c: S1,
+    salinity_psu: S2,
+    depth_m: S3,
     *,
-    model: SoundSpeedModel = ...,
-    latitude_deg: float = ...,
+    model: SoundSpeedModel = "unesco",
+    latitude_deg: float = 45.0,
 ) -> float: ...
 
 
 @overload
-def sea_water_sound_speed(
-    temperature_c: ArrayLike,
-    salinity_psu: ArrayLike,
-    depth_m: ArrayLike,
+def sea_water_sound_speed[V: RealValues, A2: ArrayLike, A3: ArrayLike](
+    temperature_c: V,
+    salinity_psu: A2,
+    depth_m: A3,
     *,
-    model: SoundSpeedModel = ...,
-    latitude_deg: float = ...,
+    model: SoundSpeedModel = "unesco",
+    latitude_deg: float = 45.0,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def sea_water_sound_speed[S1: RealScalar, V: RealValues, A3: ArrayLike](
+    temperature_c: S1,
+    salinity_psu: V,
+    depth_m: A3,
+    *,
+    model: SoundSpeedModel = "unesco",
+    latitude_deg: float = 45.0,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def sea_water_sound_speed[S1: RealScalar, S2: RealScalar, V: RealValues](
+    temperature_c: S1,
+    salinity_psu: S2,
+    depth_m: V,
+    *,
+    model: SoundSpeedModel = "unesco",
+    latitude_deg: float = 45.0,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def sea_water_sound_speed[A1: ArrayLike, A2: ArrayLike, A3: ArrayLike](
+    temperature_c: A1,
+    salinity_psu: A2,
+    depth_m: A3,
+    *,
+    model: SoundSpeedModel = "unesco",
+    latitude_deg: float = 45.0,
 ) -> float | NDArray[np.float64]: ...
 
 
@@ -291,7 +405,9 @@ def sea_water_sound_speed(
         ``"medwin"``.
     :param latitude_deg: Latitude for the depth→pressure conversion, in degrees
         (used by ``"unesco"`` and ``"del_grosso"``; default 45°).
-    :return: The sound speed ``c``, in m/s.
+    :return: The sound speed ``c``, in m/s; a ``float`` when temperature, salinity and
+        depth are all numbers; an array of their broadcast shape when one is a sequence
+        or an array, a zero-dimensional one included.
     :raises ValueError: If ``model`` is unknown or an input is non-finite.
     :raises TypeError: if ``latitude_deg`` is not a single number, or ``depth_m``,
         ``salinity_psu`` or ``temperature_c`` holds a text or a value that is not a real
@@ -308,11 +424,6 @@ def sea_water_sound_speed(
         Ainslie's words) and drifts by a few m/s against the UNESCO standard
         away from mid-range temperatures and shallow depths.
     """
-    scalar = (
-        np.isscalar(temperature_c)
-        and np.isscalar(salinity_psu)
-        and np.isscalar(depth_m)
-    )
     t = require_above_absolute_zero_array(temperature_c, "temperature_c")
     s = require_finite_array(salinity_psu, "salinity_psu")
     z = require_finite_array(depth_m, "depth_m")
@@ -341,9 +452,7 @@ def sea_water_sound_speed(
     else:
         msg = f"'model' must be one of {_MODELS}, got {model!r}."
         raise ValueError(msg)
-    # The validators return at least 1-D, so a scalar call comes back as a
-    # one-element array; unwrap it so the point case keeps its old type.
-    return float(np.ravel(c)[0]) if scalar else c
+    return as_float_or_array(c, like=(temperature_c, salinity_psu, depth_m))
 
 
 # ---------------------------------------------------------------------------

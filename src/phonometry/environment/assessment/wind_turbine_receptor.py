@@ -61,14 +61,14 @@ import math
 from dataclasses import KW_ONLY, dataclass
 from enum import StrEnum
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 
 from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays, read_only
 from ..._internal.levels_math import energy_mean, energy_sum
-from ..._internal.types import A_OR_Z_WEIGHTINGS, AOrZWeighting
+from ..._internal.types import A_OR_Z_WEIGHTINGS, AOrZWeighting, as_float_or_array
 from ..._internal.validation import (
     require_choice,
     require_finite,
@@ -87,6 +87,7 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
 
     from ..._i18n import Language
+    from ..._internal.types import RealScalar, RealValues
 
 Averaging = Literal["energy", "arithmetic"]
 
@@ -479,13 +480,53 @@ def _nominal_lookup(
 # ---------------------------------------------------------------------------
 # Wind speed at another height (Annex K; IEC 61400-11:2012 Annex D)
 # ---------------------------------------------------------------------------
+@overload
+def power_law_wind_speed[S1: RealScalar, S2: RealScalar](
+    reference_speed_m_s: S1,
+    *,
+    height_m: float,
+    reference_height_m: float,
+    shear_exponent: S2,
+) -> float: ...
+
+
+@overload
+def power_law_wind_speed[V: RealValues, A2: ArrayLike](
+    reference_speed_m_s: V,
+    *,
+    height_m: float,
+    reference_height_m: float,
+    shear_exponent: A2,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def power_law_wind_speed[S1: RealScalar, V: RealValues](
+    reference_speed_m_s: S1,
+    *,
+    height_m: float,
+    reference_height_m: float,
+    shear_exponent: V,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def power_law_wind_speed[A1: ArrayLike, A2: ArrayLike](
+    reference_speed_m_s: A1,
+    *,
+    height_m: float,
+    reference_height_m: float,
+    shear_exponent: A2,
+) -> float | NDArray[np.float64]: ...
+
+
 def power_law_wind_speed(
     reference_speed_m_s: ArrayLike,
     *,
     height_m: float,
     reference_height_m: float,
     shear_exponent: ArrayLike,
-) -> NDArray[np.float64] | float:
+) -> float | NDArray[np.float64]:
     r"""Wind speed at another height by the power law (Equation (K.1)).
 
     :math:`V_z = V_{z,\mathrm{ref}} \, (z/z_\mathrm{ref})^{\alpha}`, the
@@ -496,8 +537,10 @@ def power_law_wind_speed(
     :param height_m: Height of the wanted wind speed, in m.
     :param reference_height_m: Height of the known wind speed, in m.
     :param shear_exponent: The wind shear exponent :math:`\alpha`.
-    :return: The wind speed at ``height_m``, in m/s; a ``float`` for scalar
-        inputs.
+    :return: The wind speed at ``height_m``, in m/s; a ``float`` when
+        ``reference_speed_m_s`` and ``shear_exponent`` are both numbers; an array of
+        their broadcast shape when one is a sequence or an array, a zero-dimensional one
+        included.
     :raises ValueError: If a height is not positive, a speed is negative or a
         value is not finite.
     :raises TypeError: if ``height_m`` or ``reference_height_m`` is not a single number.
@@ -513,7 +556,39 @@ def power_law_wind_speed(
         msg = "'reference_speed_m_s' must not be negative."
         raise ValueError(msg)
     out = speed * (z / z_ref) ** alpha
-    return float(out) if out.ndim == 0 else np.asarray(out, dtype=np.float64)
+    return as_float_or_array(out, like=(reference_speed_m_s, shear_exponent))
+
+
+@overload
+def wind_shear_exponent[S1: RealScalar, S2: RealScalar](
+    speed_m_s: S1,
+    reference_speed_m_s: S2,
+    *,
+    height_m: float,
+    reference_height_m: float,
+) -> float: ...
+
+
+@overload
+def wind_shear_exponent[V: RealValues, A2: ArrayLike](
+    speed_m_s: V, reference_speed_m_s: A2, *, height_m: float, reference_height_m: float
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def wind_shear_exponent[S1: RealScalar, V: RealValues](
+    speed_m_s: S1, reference_speed_m_s: V, *, height_m: float, reference_height_m: float
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def wind_shear_exponent[A1: ArrayLike, A2: ArrayLike](
+    speed_m_s: A1,
+    reference_speed_m_s: A2,
+    *,
+    height_m: float,
+    reference_height_m: float,
+) -> float | NDArray[np.float64]: ...
 
 
 def wind_shear_exponent(
@@ -522,7 +597,7 @@ def wind_shear_exponent(
     *,
     height_m: float,
     reference_height_m: float,
-) -> NDArray[np.float64] | float:
+) -> float | NDArray[np.float64]:
     r"""Wind shear exponent from two wind speeds (Equation (K.2)).
 
     :math:`\alpha = \ln(V_z/V_{z,\mathrm{ref}}) / \ln(z/z_\mathrm{ref})`; with
@@ -534,7 +609,9 @@ def wind_shear_exponent(
     :param reference_speed_m_s: Wind speed at ``reference_height_m``, in m/s.
     :param height_m: The higher (or other) height, in m.
     :param reference_height_m: The reference height, in m.
-    :return: The shear exponent; a ``float`` for scalar inputs.
+    :return: The shear exponent; a ``float`` when the two speeds are numbers; an array
+        of their broadcast shape when one is a sequence or an array, a zero-dimensional
+        one included.
     :raises ValueError: If a speed or height is not positive, or the two
         heights are the same.
     :raises TypeError: if ``height_m`` or ``reference_height_m`` is not a single number.
@@ -553,7 +630,37 @@ def wind_shear_exponent(
         msg = "The wind speeds must be positive for their ratio to have a logarithm."
         raise ValueError(msg)
     out = np.log(upper / lower) / math.log(z / z_ref)
-    return float(out) if out.ndim == 0 else np.asarray(out, dtype=np.float64)
+    return as_float_or_array(out, like=(speed_m_s, reference_speed_m_s))
+
+
+@overload
+def logarithmic_wind_speed[S: RealScalar](
+    reference_speed_m_s: S,
+    *,
+    height_m: float,
+    reference_height_m: float,
+    roughness_length: float = REFERENCE_ROUGHNESS_LENGTH_M,
+) -> float: ...
+
+
+@overload
+def logarithmic_wind_speed[V: RealValues](
+    reference_speed_m_s: V,
+    *,
+    height_m: float,
+    reference_height_m: float,
+    roughness_length: float = REFERENCE_ROUGHNESS_LENGTH_M,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def logarithmic_wind_speed[A: ArrayLike](
+    reference_speed_m_s: A,
+    *,
+    height_m: float,
+    reference_height_m: float,
+    roughness_length: float = REFERENCE_ROUGHNESS_LENGTH_M,
+) -> float | NDArray[np.float64]: ...
 
 
 def logarithmic_wind_speed(
@@ -562,7 +669,7 @@ def logarithmic_wind_speed(
     height_m: float,
     reference_height_m: float,
     roughness_length: float = REFERENCE_ROUGHNESS_LENGTH_M,
-) -> NDArray[np.float64] | float:
+) -> float | NDArray[np.float64]:
     r"""Wind speed at another height by the logarithmic profile.
 
     :math:`V_z = V_{z,\mathrm{ref}} \ln(z/z_0) / \ln(z_\mathrm{ref}/z_0)`
@@ -575,8 +682,8 @@ def logarithmic_wind_speed(
     :param height_m: Height of the wanted wind speed, in m.
     :param reference_height_m: Height of the known wind speed, in m.
     :param roughness_length: Roughness length :math:`z_0`, in m.
-    :return: The wind speed at ``height_m``, in m/s; a ``float`` for scalar
-        inputs.
+    :return: The wind speed at ``height_m``, in m/s; a ``float`` for a number; an array
+        for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: If a height or the roughness length is not positive,
         a height does not exceed the roughness length, or a speed is negative.
     :raises TypeError: if ``height_m``, ``reference_height_m`` or ``roughness_length``
@@ -593,7 +700,7 @@ def logarithmic_wind_speed(
         msg = "'reference_speed_m_s' must be finite and not negative."
         raise ValueError(msg)
     out = speed * math.log(z / z0) / math.log(z_ref / z0)
-    return float(out) if out.ndim == 0 else np.asarray(out, dtype=np.float64)
+    return as_float_or_array(out, like=(reference_speed_m_s,))
 
 
 @dataclass(frozen=True)
@@ -619,14 +726,23 @@ class WindShearProfile(RichDisplay):
         low_alpha, high_alpha = TYPICAL_WIND_SHEAR_EXPONENT_RANGE
         return low_alpha <= self.shear_exponent <= high_alpha
 
-    def speed_at(self, height_m: ArrayLike) -> NDArray[np.float64] | float:
+    @overload
+    def speed_at[S: RealScalar](self, height_m: S) -> float: ...
+
+    @overload
+    def speed_at[V: RealValues](self, height_m: V) -> NDArray[np.float64]: ...
+
+    @overload
+    def speed_at[A: ArrayLike](self, height_m: A) -> float | NDArray[np.float64]: ...
+
+    def speed_at(self, height_m: ArrayLike) -> float | NDArray[np.float64]:
         """The power-law wind speed at ``height_m`` (Equation (K.1)), in m/s."""
         heights = np.asarray(height_m, dtype=np.float64)
         if not np.all(np.isfinite(heights)) or np.any(heights <= 0.0):
             msg = "'height_m' must be finite and positive."
             raise ValueError(msg)
         out = self.speeds_m_s[0] * (heights / self.heights_m[0]) ** self.shear_exponent
-        return float(out) if out.ndim == 0 else np.asarray(out, dtype=np.float64)
+        return as_float_or_array(out, like=(height_m,))
 
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
@@ -1845,9 +1961,25 @@ def sound_emergence(
     )
 
 
+@overload
+def amplitude_modulation_adjustment[S: RealScalar](modulation_depth_db: S) -> float: ...
+
+
+@overload
+def amplitude_modulation_adjustment[V: RealValues](
+    modulation_depth_db: V,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def amplitude_modulation_adjustment[A: ArrayLike](
+    modulation_depth_db: A,
+) -> float | NDArray[np.float64]: ...
+
+
 def amplitude_modulation_adjustment(
     modulation_depth_db: ArrayLike,
-) -> NDArray[np.float64] | float:
+) -> float | NDArray[np.float64]:
     r"""The amplitude modulation adjustment of Figure A.1, in dB.
 
     The example adjustment of A.3: none below a modulation depth of 3 dB,
@@ -1857,8 +1989,8 @@ def amplitude_modulation_adjustment(
     :func:`~phonometry.environment.assessment.wind_turbine_modulation.amplitude_modulation_period`).
 
     :param modulation_depth_db: The modulation depth, in dB.
-    :return: The adjustment :math:`K_\mathrm{am}`, in dB; a ``float`` for a
-        scalar depth.
+    :return: The adjustment :math:`K_\mathrm{am}`, in dB; a ``float`` for a number; an
+        array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: If a depth is negative or not finite.
     """
     depth = np.asarray(modulation_depth_db, dtype=np.float64)
@@ -1872,7 +2004,7 @@ def amplitude_modulation_adjustment(
     out = np.where(
         depth < _AM_ONSET_DB, 0.0, np.minimum(rising, _AM_MAXIMUM_ADJUSTMENT_DB)
     )
-    return float(out) if out.ndim == 0 else np.asarray(out, dtype=np.float64)
+    return as_float_or_array(out, like=(modulation_depth_db,))
 
 
 @dataclass(frozen=True)

@@ -72,7 +72,7 @@ import math
 import warnings
 from dataclasses import KW_ONLY, dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 
@@ -96,6 +96,7 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
 
     from ..._i18n import Language
+    from ..._internal.types import RealScalar, RealValues
 
 __all__ = [
     "BENDING_STRESS_CONSTANT",
@@ -266,6 +267,39 @@ class BuildingDamageWarning(PhonometryWarning):
     """
 
 
+@overload
+def guideline_velocity[S: RealScalar](
+    building_class: BuildingClass,
+    frequency: S | None = None,
+    *,
+    location: MeasurementLocation = "foundation",
+    duration: VibrationDuration = "short_term",
+    massive_structure: bool = False,
+) -> float: ...
+
+
+@overload
+def guideline_velocity[V: RealValues](
+    building_class: BuildingClass,
+    frequency: V,
+    *,
+    location: MeasurementLocation = "foundation",
+    duration: VibrationDuration = "short_term",
+    massive_structure: bool = False,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def guideline_velocity[A: ArrayLike](
+    building_class: BuildingClass,
+    frequency: A | None = None,
+    *,
+    location: MeasurementLocation = "foundation",
+    duration: VibrationDuration = "short_term",
+    massive_structure: bool = False,
+) -> float | NDArray[np.float64]: ...
+
+
 def guideline_velocity(
     building_class: BuildingClass,
     frequency: ArrayLike | None = None,
@@ -273,7 +307,7 @@ def guideline_velocity(
     location: MeasurementLocation = "foundation",
     duration: VibrationDuration = "short_term",
     massive_structure: bool = False,
-) -> np.ndarray | float:
+) -> float | NDArray[np.float64]:
     r"""The guideline peak velocity of Table 1 or Table 3, in mm/s.
 
     At the foundation for short-term vibration the guideline is a function of
@@ -296,8 +330,9 @@ def guideline_velocity(
         massive engineering structure. The allowance is written for row 1 of
         Table 1 alone, so it applies to the commercial class and to short-term
         vibration, and is refused anywhere else.
-    :return: The guideline peak velocity, in millimetres per second; a float
-        unless *frequency* was an array.
+    :return: The guideline peak velocity, in millimetres per second: a ``float`` without
+        a frequency or for a number; an array for a sequence or an array, a
+        zero-dimensional one included.
     :raises ValueError: If a name is not one of its choices, if the
         short-term foundation case is asked for without a frequency, if a
         frequency is given for a case that does not read one, if a frequency
@@ -355,7 +390,7 @@ def guideline_velocity(
         FOUNDATION_FREQUENCIES_HZ,
         SHORT_TERM_FOUNDATION_MM_S[cls],
     )
-    return as_float_or_array(factor * values)
+    return as_float_or_array(factor * values, like=(frequency,))
 
 
 def pipeline_guideline_velocity(
@@ -561,6 +596,39 @@ def story_fundamental_frequency(n_stories: int) -> float:
     return STORY_FREQUENCY_NUMERATOR_HZ / n
 
 
+@overload
+def bending_stress[S: RealScalar](
+    peak_velocity_m_s: S,
+    *,
+    dynamic_modulus_pa: float,
+    density: float,
+    load_ratio: float = 1.0,
+    mode_factor: float = 1.0,
+) -> float: ...
+
+
+@overload
+def bending_stress[V: RealValues](
+    peak_velocity_m_s: V,
+    *,
+    dynamic_modulus_pa: float,
+    density: float,
+    load_ratio: float = 1.0,
+    mode_factor: float = 1.0,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def bending_stress[A: ArrayLike](
+    peak_velocity_m_s: A,
+    *,
+    dynamic_modulus_pa: float,
+    density: float,
+    load_ratio: float = 1.0,
+    mode_factor: float = 1.0,
+) -> float | NDArray[np.float64]: ...
+
+
 def bending_stress(
     peak_velocity_m_s: ArrayLike,
     *,
@@ -568,7 +636,7 @@ def bending_stress(
     density: float,
     load_ratio: float = 1.0,
     mode_factor: float = 1.0,
-) -> np.ndarray | float:
+) -> float | NDArray[np.float64]:
     r"""Peak bending stress from a peak velocity, Formula (1) of 6.2.
 
     For a beam or a one-way slab of full rectangular section, constant
@@ -599,8 +667,8 @@ def bending_stress(
         any uniformly distributed load it carries over its own weight. 1 for
         a beam carrying nothing else.
     :param mode_factor: The mode coefficient :math:`k_n`, dimensionless.
-    :return: The peak bending stress, in pascals; a float unless the velocity
-        was an array.
+    :return: The peak bending stress, in pascals; a ``float`` for a number; an array for
+        a sequence or an array, a zero-dimensional one included.
     :raises ValueError: If a material property, the load ratio or the mode
         factor is not positive and finite, or a velocity is negative.
     :raises TypeError: if ``density``, ``dynamic_modulus_pa``, ``load_ratio`` or
@@ -615,7 +683,7 @@ def bending_stress(
         msg = "'peak_velocity_m_s' must be non-negative and finite."
         raise ValueError(msg)
     sigma = BENDING_STRESS_CONSTANT * math.sqrt(e_dyn * rho * ratio) * k_n * v
-    return as_float_or_array(sigma)
+    return as_float_or_array(sigma, like=(peak_velocity_m_s,))
 
 
 @dataclass(frozen=True)

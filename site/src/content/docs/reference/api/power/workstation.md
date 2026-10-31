@@ -182,10 +182,38 @@ compared with a limit value, and is this function's default.
 
 ```python
 emission_sound_pressure_level(
+    measured_level: float | np.floating[Any] | np.integer[Any],
+    *,
+    background_correction: float | np.floating[Any] | np.integer[Any] = ...,
+    local_correction: float | np.floating[Any] | np.integer[Any] = ...,
+) -> float
+
+emission_sound_pressure_level(
+    measured_level: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    *,
+    background_correction: ArrayLike = ...,
+    local_correction: ArrayLike = ...,
+) -> NDArray[np.float64]
+
+emission_sound_pressure_level(
+    measured_level: float | np.floating[Any] | np.integer[Any],
+    *,
+    background_correction: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    local_correction: ArrayLike = ...,
+) -> NDArray[np.float64]
+
+emission_sound_pressure_level(
+    measured_level: float | np.floating[Any] | np.integer[Any],
+    *,
+    background_correction: float | np.floating[Any] | np.integer[Any] = ...,
+    local_correction: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+) -> NDArray[np.float64]
+
+emission_sound_pressure_level(
     measured_level: ArrayLike,
     *,
-    background_correction: ArrayLike = 0.0,
-    local_correction: ArrayLike = 0.0,
+    background_correction: ArrayLike = ...,
+    local_correction: ArrayLike = ...,
 ) -> float | NDArray[np.float64]
 ```
 
@@ -214,7 +242,7 @@ recognised, so the rule is the caller's to keep.
 | `background_correction` | $K_1$ in decibels (default 0). |
 | `local_correction` | $K_3$ in decibels (default 0). |
 
-**Returns:** $L_p$ in decibels, of the broadcast shape.
+**Returns:** $L_p$ in decibels; a `float` when the reading and the two corrections are all numbers; an array of their broadcast shape when one is a sequence or an array, a zero-dimensional one included.
 
 ## EmissionPressureResult
 
@@ -288,9 +316,27 @@ grade 3), judged on the settled margin as $K_1$ is.
 
 ```python
 environmental_ratio_from_absorption(
+    absorption_area: float | np.floating[Any] | np.integer[Any],
+    measurement_surface_m2: float,
+    directivity_index: float | np.floating[Any] | np.integer[Any] = ...,
+) -> float
+
+environmental_ratio_from_absorption(
+    absorption_area: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    measurement_surface_m2: float,
+    directivity_index: ArrayLike = ...,
+) -> NDArray[np.float64]
+
+environmental_ratio_from_absorption(
+    absorption_area: float | np.floating[Any] | np.integer[Any],
+    measurement_surface_m2: float,
+    directivity_index: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+) -> NDArray[np.float64]
+
+environmental_ratio_from_absorption(
     absorption_area: ArrayLike,
     measurement_surface_m2: float,
-    directivity_index: ArrayLike = 0.0,
+    directivity_index: ArrayLike = ...,
 ) -> float | NDArray[np.float64]
 ```
 
@@ -314,7 +360,7 @@ why ISO 11204 A.1.2 says the two routes rest on the same assumptions.
 | `measurement_surface_m2` | Area $S_M$ of the reference measurement surface, in square metres, strictly positive. |
 | `directivity_index` | $D^*_{I,\mathrm{op}}$ in decibels (default 0). |
 
-**Returns:** The ratio $z$.
+**Returns:** The ratio $z$; a `float` when `absorption_area` and `directivity_index` are both numbers; an array of their broadcast shape when one is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -327,8 +373,23 @@ why ISO 11204 A.1.2 says the two routes rest on the same assumptions.
 
 ```python
 environmental_ratio_from_k2(
+    environmental_correction: float | np.floating[Any] | np.integer[Any],
+    directivity_index: float | np.floating[Any] | np.integer[Any] = ...,
+) -> float
+
+environmental_ratio_from_k2(
+    environmental_correction: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    directivity_index: ArrayLike = ...,
+) -> NDArray[np.float64]
+
+environmental_ratio_from_k2(
+    environmental_correction: float | np.floating[Any] | np.integer[Any],
+    directivity_index: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+) -> NDArray[np.float64]
+
+environmental_ratio_from_k2(
     environmental_correction: ArrayLike,
-    directivity_index: ArrayLike = 0.0,
+    directivity_index: ArrayLike = ...,
 ) -> float | NDArray[np.float64]
 ```
 
@@ -360,7 +421,7 @@ limitation here.
 | `environmental_correction` | $K_2$ in decibels, non-negative. |
 | `directivity_index` | $D^*_{I,\mathrm{op}}$ in decibels (default 0, no directivity). |
 
-**Returns:** The ratio $z$, of the broadcast shape.
+**Returns:** The ratio $z$; a `float` when `environmental_correction` and `directivity_index` are both numbers; an array of their broadcast shape when one is a sequence or an array, a zero-dimensional one included.
 
 ## GRADE_2_MAX_K3
 
@@ -401,6 +462,14 @@ weakest part.
 
 ```python
 local_environmental_correction(
+    ratio: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+local_environmental_correction(
+    ratio: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+) -> NDArray[np.float64]
+
+local_environmental_correction(
     ratio: ArrayLike,
 ) -> float | NDArray[np.float64]
 ```
@@ -427,7 +496,7 @@ correction cannot be negative: the room can only add to the reading.
 | :--- | :--- |
 | `ratio` | The dimensionless $z$, strictly positive; a scalar or one value per band. |
 
-**Returns:** $K_3$ in decibels, of the same shape.
+**Returns:** $K_3$ in decibels, of the shape of `ratio`; a `float` for a number; an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -599,6 +668,9 @@ cannot be built to hold a correction its margin does not give.
 *property*
 
 $K_1$, in decibels: a number, or one value per band.
+
+A `float` when `background_margin_db` is a number, and an array
+when it is a sequence or an array, a zero-dimensional one included.
 
 ### WorkstationBackgroundCorrection.upper_bound
 

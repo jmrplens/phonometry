@@ -1172,10 +1172,10 @@ def _grid_lateral_attenuation(
 def _grid_installation(
     phi_att: NDArray[np.float64],
     mount_key: str,
-) -> NDArray[np.float64] | float:
+) -> NDArray[np.float64]:
     """``ΔI(φ)`` (Eq. 4-15/4-16), the array form of :func:`engine_installation_correction`."""
     if mount_key in ("propeller", "prop"):
-        return 0.0
+        return np.zeros_like(phi_att, dtype=np.float64)
     a_i, b_i, c_i = _INSTALLATION[mount_key]
     phi_eff = np.radians(np.maximum(phi_att, 0.0))
     num = (a_i * np.cos(phi_eff) ** 2 + np.sin(phi_eff) ** 2) ** b_i

@@ -353,10 +353,16 @@ record-display:
 # function that reaches a polar axes (making one, or calling a function that
 # returns or reaches one) with no head that returns PolarAxes and a return
 # that leaves it unsaid: a plain Axes, Any, or panels none of which is polar.
+# A function of a number or an array of them is the same case: it fails on a
+# return that names a single value and an array (float | NDArray, a grade or
+# an array of grades) with no heads, and on a head that returns that union
+# unless its siblings return the value alone and the array alone.
 # Annotations are read through the package's aliases and imports, and a
 # projection through the module constant that holds it. On the tree it was
-# written against it found 74 such functions, one of which
-# (_plot_one_quantity) it now exempts. Stdlib only.
+# written against it found 74 such plots, one of which (_plot_one_quantity)
+# it now exempts, and 108 functions of a number or an array, of which the
+# reducers, the data-dependent ones and the private helpers behind the
+# overloads stay exempt with their reasons. Stdlib only.
 return-overloads:
 	$(PYTHON) scripts/check_return_overloads.py
 

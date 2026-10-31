@@ -522,6 +522,44 @@ def test_overload_placeholder_default_reads_as_ellipsis() -> None:
     assert "Ellipsis" not in rendered
 
 
+def test_a_type_parameter_reads_as_its_bound() -> None:
+    """A head that takes ``frequency: S`` with ``[S: RealScalar]`` shows what it accepts.
+
+    The type parameter is there for mypy, which otherwise answers ``Any`` for
+    an array whose shape it does not know; a reader needs the bound, spelled
+    out like any other unpublished alias.
+    """
+    from phonometry.psychoacoustics import erb_bandwidth
+
+    rendered = gad.format_signature("erb_bandwidth", erb_bandwidth)
+    forms = rendered.split("\n\n")
+    assert len(forms) == 3, rendered
+    assert "frequency: float | np.floating[Any] | np.integer[Any]" in forms[0]
+    assert "-> float" in forms[0]
+    assert (
+        "frequency: Sequence[float] | Sequence[np.floating[Any]] | "
+        "Sequence[np.integer[Any]] | NDArray[Any]"
+    ) in forms[1]
+    assert "frequency: ArrayLike" in forms[2]
+    assert re.search(r"frequency: [SVA]\b", rendered) is None, rendered
+
+
+def test_a_bound_leaves_a_literal_member_of_the_same_spelling_alone() -> None:
+    """``Literal['A']`` is a choice the function accepts, not the type ``A``.
+
+    A head with ``[A: ArrayLike]`` and a ``weighting: Literal['A', 'C']``
+    must print the choices as written: only the names outside quotes are the
+    type parameter. The alias expansion skips quoted text for the same reason.
+    """
+    bounds = {"A": "ArrayLike", "S": "float"}
+    assert (
+        gad._format_annotation("Literal['A', 'C'] | A", None, bounds)
+        == "Literal['A', 'C'] | ArrayLike"
+    )
+    assert gad._format_annotation('Literal["S"]', None, bounds) == 'Literal["S"]'
+    assert gad._format_annotation("S", None, bounds) == "float"
+
+
 def test_plain_function_still_renders_one_form() -> None:
     """Nothing changes for the functions that declare no overloads."""
     from phonometry.signals.levels import leq

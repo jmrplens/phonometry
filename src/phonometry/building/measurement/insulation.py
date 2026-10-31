@@ -93,7 +93,7 @@ import numpy as np
 
 from ..._internal.frozen import OwnsArrays
 from ..._internal.levels_math import energy_mean
-from ..._internal.types import ReportEngine, as_float_or_array
+from ..._internal.types import ReportEngine, as_float_if_reduced
 from ..._internal.validation import (
     check_engine,
     is_positive,
@@ -121,6 +121,7 @@ if TYPE_CHECKING:
     from collections.abc import Sequence
 
     from matplotlib.axes import Axes
+    from numpy.typing import NDArray
 
     from ..._i18n import Language
     from ..._report.metadata import ReportMetadata
@@ -726,7 +727,7 @@ def _render_iso16283_facade(
 
 def energy_average_level(
     levels: Sequence[float] | np.ndarray, *, axis: int = -1
-) -> np.ndarray | float:
+) -> float | NDArray[np.float64]:
     r"""Energy-average sound pressure level (ISO 16283-1:2014, Formula (9)).
 
     Combines sound pressure levels measured at several microphone
@@ -750,7 +751,7 @@ def energy_average_level(
     if not np.all(np.isfinite(data)):
         msg = "'levels' must contain only finite values."
         raise ValueError(msg)
-    return as_float_or_array(energy_mean(data, axis=axis))
+    return as_float_if_reduced(energy_mean(data, axis=axis))
 
 
 def _as_band_levels(levels: Sequence[float] | np.ndarray, name: str) -> np.ndarray:

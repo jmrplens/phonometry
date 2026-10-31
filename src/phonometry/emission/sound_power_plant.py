@@ -130,7 +130,7 @@ import warnings
 from dataclasses import KW_ONLY, dataclass
 from functools import cached_property
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 
@@ -138,6 +138,7 @@ from .._internal.boundary import settled
 from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, read_only
 from .._internal.levels_math import energy_mean, energy_sum
+from .._internal.types import as_float_or_array
 from .._internal.validation import (
     is_at_most,
     require_count,
@@ -162,6 +163,7 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
+    from .._internal.types import RealScalar, RealValues
 
 __all__ = [
     "PLANT_AIR_ABSORPTION_DB_PER_M",
@@ -509,6 +511,22 @@ def plant_mean_distance_limits_m(plant_area_m2: float) -> tuple[float, float]:
     )
 
 
+@overload
+def plant_background_correction[S: RealScalar](level_difference: S) -> float: ...
+
+
+@overload
+def plant_background_correction[V: RealValues](
+    level_difference: V,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def plant_background_correction[A: ArrayLike](
+    level_difference: A,
+) -> float | NDArray[np.float64]: ...
+
+
 def plant_background_correction(
     level_difference: ArrayLike,
 ) -> float | NDArray[np.float64]:
@@ -524,8 +542,9 @@ def plant_background_correction(
 
     :param level_difference: The level with the plant operating less the
         background level alone, in decibels: one value or an array.
-    :return: The correction, in decibels, a ``float`` for one difference and an
-        array of the same shape otherwise.
+    :return: The correction, in decibels, of the shape of ``level_difference``; a
+        ``float`` for a number; an array for a sequence or an array, a zero-dimensional
+        one included.
     :raises ValueError: for a non-finite difference or one below 6 dB, which
         the table calls an invalid measurement.
     """
@@ -545,9 +564,7 @@ def plant_background_correction(
     rows = np.floor(np.minimum(diff, _PREFERRED_BACKGROUND_MARGIN_DB) + 0.5).astype(int)
     table = np.vectorize(PLANT_BACKGROUND_CORRECTION.__getitem__, otypes=[float])
     correction = np.where(diff > _PREFERRED_BACKGROUND_MARGIN_DB, 0.0, table(rows))
-    if correction.ndim == 0:
-        return float(correction)
-    return np.asarray(correction, dtype=np.float64)
+    return as_float_or_array(correction, like=(level_difference,))
 
 
 def plant_air_absorption_db_per_m(

@@ -75,9 +75,23 @@ MODE_KINDS = ('axial', 'tangential', 'oblique')
 room_modal_density(
     dimensions: ArrayLike,
     *,
+    frequency: float | np.floating[Any] | np.integer[Any],
+    speed_of_sound: float = 343.0,
+) -> float
+
+room_modal_density(
+    dimensions: ArrayLike,
+    *,
+    frequency: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    speed_of_sound: float = 343.0,
+) -> NDArray[np.float64]
+
+room_modal_density(
+    dimensions: ArrayLike,
+    *,
     frequency: ArrayLike,
     speed_of_sound: float = 343.0,
-) -> np.ndarray | float
+) -> float | NDArray[np.float64]
 ```
 
 Modal density $dN/df$ in modes per hertz (Long Equation (8.46)).
@@ -98,7 +112,7 @@ between adjacent eigenfrequencies.
 | `dimensions` | Room dimensions `(lx, ly, lz)`, m. |
 | `speed_of_sound` | Speed of sound `c0`, m/s. |
 
-**Returns:** The modal density, modes/Hz.
+**Returns:** The modal density, modes/Hz; a `float` for a number; an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -112,9 +126,23 @@ between adjacent eigenfrequencies.
 room_mode_count(
     dimensions: ArrayLike,
     *,
+    frequency: float | np.floating[Any] | np.integer[Any],
+    speed_of_sound: float = 343.0,
+) -> float
+
+room_mode_count(
+    dimensions: ArrayLike,
+    *,
+    frequency: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    speed_of_sound: float = 343.0,
+) -> NDArray[np.float64]
+
+room_mode_count(
+    dimensions: ArrayLike,
+    *,
     frequency: ArrayLike,
     speed_of_sound: float = 343.0,
-) -> np.ndarray | float
+) -> float | NDArray[np.float64]
 ```
 
 Integrated number of modes below `frequency` (Long Equation (8.45)).
@@ -136,7 +164,7 @@ fit below `f`; the exact enumeration is [`room_modes`](/phonometry/reference/api
 | `dimensions` | Room dimensions `(lx, ly, lz)`, m. |
 | `speed_of_sound` | Speed of sound `c0`, m/s. |
 
-**Returns:** The (non-integer) mode count.
+**Returns:** The (non-integer) mode count; a `float` for a number; an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -152,7 +180,7 @@ room_mode_frequency(
     dimensions: ArrayLike,
     *,
     speed_of_sound: float = 343.0,
-) -> np.ndarray | float
+) -> float | NDArray[np.float64]
 ```
 
 Eigenfrequency of a rectangular-room mode (Long Equation (8.43)).
@@ -254,7 +282,15 @@ Number of enumerated modes of each kind, keyed by [`MODE_KINDS`](/phonometry/ref
 ### RoomModesResult.density()
 
 ```python
-RoomModesResult.density(frequency: ArrayLike) -> np.ndarray | float
+RoomModesResult.density(
+    frequency: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+RoomModesResult.density(
+    frequency: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+) -> NDArray[np.float64]
+
+RoomModesResult.density(frequency: ArrayLike) -> float | NDArray[np.float64]
 ```
 
 Modal density at `frequency` for this room (Long Equation (8.46)).
@@ -265,7 +301,7 @@ Modal density at `frequency` for this room (Long Equation (8.46)).
 | :--- | :--- |
 | `frequency` | Frequency, in hertz (scalar or array). |
 
-**Returns:** The modal density, in modes per hertz, of the shape of *frequency*.
+**Returns:** The modal density, in modes per hertz, of the shape of *frequency*; a `float` for a number; an array for a sequence or an array, a zero-dimensional one included.
 
 ### RoomModesResult.edge_length
 

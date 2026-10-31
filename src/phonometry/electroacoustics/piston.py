@@ -77,12 +77,13 @@ high ``ka``.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, overload
 
 import numpy as np
 from scipy import special
 
 from .._internal.frozen import OwnsArrays, read_only
+from .._internal.types import as_float_or_array
 from .._internal.validation import (
     require_finite_fields,
     require_positive,
@@ -96,6 +97,7 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
+    from .._internal.types import RealScalar, RealValues
 
 __all__ = [
     "PistonDirectivity",
@@ -112,7 +114,19 @@ _RHO_AIR = 1.206
 _C_AIR = 343.0
 
 
-def piston_resistance(x: ArrayLike) -> np.ndarray | float:
+@overload
+def piston_resistance[S: RealScalar](x: S) -> float: ...
+
+
+@overload
+def piston_resistance[V: RealValues](x: V) -> NDArray[np.float64]: ...
+
+
+@overload
+def piston_resistance[A: ArrayLike](x: A) -> float | NDArray[np.float64]: ...
+
+
+def piston_resistance(x: ArrayLike) -> float | NDArray[np.float64]:
     r"""Piston resistance function :math:`R_1(x) = 1 - 2 J_1(x) / x`.
 
     The real part of the normalized radiation impedance of a baffled circular
@@ -121,7 +135,8 @@ def piston_resistance(x: ArrayLike) -> np.ndarray | float:
     high ``x``.
 
     :param x: Argument :math:`x = 2ka` (scalar or array), dimensionless.
-    :return: ``R1(x)`` (float for scalar input, else an array).
+    :return: ``R1(x)``; a ``float`` for a number; an array for a sequence or an array, a
+        zero-dimensional one included.
     """
     arr = np.asarray(x, dtype=np.float64)
     if np.any(arr < 0.0) or not np.all(np.isfinite(arr)):
@@ -132,10 +147,22 @@ def piston_resistance(x: ArrayLike) -> np.ndarray | float:
     # J1(x)/x -> 1/2 as x -> 0, so R1 -> 0; the input is validated finite, so
     # the 0/0 at x = 0 is the only non-finite point and is set to that limit.
     out = np.where(np.isfinite(out), out, 0.0)
-    return out[()] if out.ndim == 0 else out
+    return as_float_or_array(out, like=(x,))
 
 
-def piston_reactance(x: ArrayLike) -> np.ndarray | float:
+@overload
+def piston_reactance[S: RealScalar](x: S) -> float: ...
+
+
+@overload
+def piston_reactance[V: RealValues](x: V) -> NDArray[np.float64]: ...
+
+
+@overload
+def piston_reactance[A: ArrayLike](x: A) -> float | NDArray[np.float64]: ...
+
+
+def piston_reactance(x: ArrayLike) -> float | NDArray[np.float64]:
     r"""Piston reactance function :math:`X_1(x) = 2 H_1(x) / x` (``H1`` Struve
     order 1).
 
@@ -145,7 +172,8 @@ def piston_reactance(x: ArrayLike) -> np.ndarray | float:
     at high ``x``.
 
     :param x: Argument :math:`x = 2ka` (scalar or array), dimensionless.
-    :return: ``X1(x)`` (float for scalar input, else an array).
+    :return: ``X1(x)``; a ``float`` for a number; an array for a sequence or an array, a
+        zero-dimensional one included.
     """
     arr = np.asarray(x, dtype=np.float64)
     if np.any(arr < 0.0) or not np.all(np.isfinite(arr)):
@@ -156,10 +184,32 @@ def piston_reactance(x: ArrayLike) -> np.ndarray | float:
     # H1(x)/x -> 0 as x -> 0 (H1 ~ 2 x^2 / 3 pi), so X1 -> 0; the 0/0 at x = 0
     # is the only non-finite point (the input is validated finite).
     out = np.where(np.isfinite(out), out, 0.0)
-    return out[()] if out.ndim == 0 else out
+    return as_float_or_array(out, like=(x,))
 
 
-def piston_directivity(ka: ArrayLike, theta: ArrayLike) -> np.ndarray | float:
+@overload
+def piston_directivity[S1: RealScalar, S2: RealScalar](ka: S1, theta: S2) -> float: ...
+
+
+@overload
+def piston_directivity[V: RealValues, A2: ArrayLike](
+    ka: V, theta: A2
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def piston_directivity[S1: RealScalar, V: RealValues](
+    ka: S1, theta: V
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def piston_directivity[A1: ArrayLike, A2: ArrayLike](
+    ka: A1, theta: A2
+) -> float | NDArray[np.float64]: ...
+
+
+def piston_directivity(ka: ArrayLike, theta: ArrayLike) -> float | NDArray[np.float64]:
     r"""Far-field directivity :math:`D = 2 J_1(ka \sin\theta) / (ka \sin\theta)`.
 
     The pressure amplitude of a baffled circular piston relative to its
@@ -169,7 +219,9 @@ def piston_directivity(ka: ArrayLike, theta: ArrayLike) -> np.ndarray | float:
     :param ka: Wavenumber-radius product ``ka`` (scalar or array).
     :param theta: Polar angle from the axis, rad (scalar or array). Broadcast
         against ``ka``.
-    :return: ``D`` (float for scalar inputs, else an array).
+    :return: ``D``; a ``float`` when ``ka`` and ``theta`` are both numbers; an array of
+        their broadcast shape when one is a sequence or an array, a zero-dimensional one
+        included.
     """
     ka_arr = np.asarray(ka, dtype=np.float64)
     theta_arr = np.asarray(theta, dtype=np.float64)
@@ -193,7 +245,7 @@ def piston_directivity(ka: ArrayLike, theta: ArrayLike) -> np.ndarray | float:
     # 2 J1(u)/u -> 1 as u -> 0 (on-axis, or ka = 0): the 0/0 there is the only
     # non-finite point and is set to that limit.
     out = np.where(np.isfinite(out), out, 1.0)
-    return out[()] if out.ndim == 0 else out
+    return as_float_or_array(out, like=(ka, theta))
 
 
 #: Default polar-angle grid of the directivity pattern: 361 points spanning the

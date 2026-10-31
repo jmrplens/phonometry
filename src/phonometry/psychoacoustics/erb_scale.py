@@ -53,14 +53,16 @@ filter shapes from notched-noise data", *Hearing Research* 47, 103-138.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, overload
 
 import numpy as np
 
 from .._internal.types import as_float_or_array
 
 if TYPE_CHECKING:
-    from numpy.typing import ArrayLike
+    from numpy.typing import ArrayLike, NDArray
+
+    from .._internal.types import RealScalar, RealValues
 
 __all__ = [
     "CAM_C",
@@ -81,7 +83,19 @@ ERB_C2_PER_HZ = 0.004368
 CAM_C = 21.366
 
 
-def erb_bandwidth(frequency: ArrayLike) -> np.ndarray | float:
+@overload
+def erb_bandwidth[S: RealScalar](frequency: S) -> float: ...
+
+
+@overload
+def erb_bandwidth[V: RealValues](frequency: V) -> NDArray[np.float64]: ...
+
+
+@overload
+def erb_bandwidth[A: ArrayLike](frequency: A) -> float | NDArray[np.float64]: ...
+
+
+def erb_bandwidth(frequency: ArrayLike) -> float | NDArray[np.float64]:
     r"""Equivalent rectangular bandwidth of the auditory filter, Hz.
 
     :math:`\text{ERB}_N = 24.673 \, (0.004368 f + 1)` (Glasberg and Moore
@@ -90,16 +104,29 @@ def erb_bandwidth(frequency: ArrayLike) -> np.ndarray | float:
 
     :param frequency: Filter centre frequency ``f``, Hz (scalar or array,
         non-negative).
-    :return: The bandwidth ``ERB_N``, Hz; a float for a scalar input.
+    :return: The bandwidth ``ERB_N``, Hz; a ``float`` for a number; an array for a
+        sequence or an array, a zero-dimensional one included.
     """
     f = np.asarray(frequency, dtype=np.float64)
     if not np.all(np.isfinite(f)) or np.any(f < 0.0):
         msg = "'frequency' must be non-negative and finite."
         raise ValueError(msg)
-    return as_float_or_array(ERB_C1_HZ * (ERB_C2_PER_HZ * f + 1.0))
+    return as_float_or_array(ERB_C1_HZ * (ERB_C2_PER_HZ * f + 1.0), like=(frequency,))
 
 
-def cam_from_frequency(frequency: ArrayLike) -> np.ndarray | float:
+@overload
+def cam_from_frequency[S: RealScalar](frequency: S) -> float: ...
+
+
+@overload
+def cam_from_frequency[V: RealValues](frequency: V) -> NDArray[np.float64]: ...
+
+
+@overload
+def cam_from_frequency[A: ArrayLike](frequency: A) -> float | NDArray[np.float64]: ...
+
+
+def cam_from_frequency(frequency: ArrayLike) -> float | NDArray[np.float64]:
     r"""ERB_N number (Cam) of a frequency.
 
     :math:`i = 21.366 \log_{10}(0.004368 f + 1)` (Glasberg and Moore 1990;
@@ -108,25 +135,43 @@ def cam_from_frequency(frequency: ArrayLike) -> np.ndarray | float:
     One Cam is one auditory-filter width.
 
     :param frequency: Frequency ``f``, Hz (scalar or array, non-negative).
-    :return: The ERB_N number, Cam; a float for a scalar input.
+    :return: The ERB_N number, Cam; a ``float`` for a number; an array for a sequence or
+        an array, a zero-dimensional one included.
     """
     f = np.asarray(frequency, dtype=np.float64)
     if not np.all(np.isfinite(f)) or np.any(f < 0.0):
         msg = "'frequency' must be non-negative and finite."
         raise ValueError(msg)
-    return as_float_or_array(CAM_C * np.log10(ERB_C2_PER_HZ * f + 1.0))
+    return as_float_or_array(
+        CAM_C * np.log10(ERB_C2_PER_HZ * f + 1.0), like=(frequency,)
+    )
 
 
-def frequency_from_cam(cam: ArrayLike) -> np.ndarray | float:
+@overload
+def frequency_from_cam[S: RealScalar](cam: S) -> float: ...
+
+
+@overload
+def frequency_from_cam[V: RealValues](cam: V) -> NDArray[np.float64]: ...
+
+
+@overload
+def frequency_from_cam[A: ArrayLike](cam: A) -> float | NDArray[np.float64]: ...
+
+
+def frequency_from_cam(cam: ArrayLike) -> float | NDArray[np.float64]:
     r"""Frequency of an ERB_N number, the inverse of :func:`cam_from_frequency`.
 
     :math:`f = (10^{i / 21.366} - 1) / 0.004368`.
 
     :param cam: ERB_N number ``i``, Cam (scalar or array, non-negative).
-    :return: The frequency ``f``, Hz; a float for a scalar input.
+    :return: The frequency ``f``, Hz; a ``float`` for a number; an array for a sequence
+        or an array, a zero-dimensional one included.
     """
     i = np.asarray(cam, dtype=np.float64)
     if not np.all(np.isfinite(i)) or np.any(i < 0.0):
         msg = "'cam' must be non-negative and finite."
         raise ValueError(msg)
-    return as_float_or_array((np.power(10.0, i / CAM_C) - 1.0) / ERB_C2_PER_HZ)
+    return as_float_or_array(
+        (np.power(10.0, i / CAM_C) - 1.0) / ERB_C2_PER_HZ, like=(cam,)
+    )

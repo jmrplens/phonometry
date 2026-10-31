@@ -110,13 +110,31 @@ Compare one measured peak velocity with its guideline value.
 
 ```python
 bending_stress(
+    peak_velocity_m_s: float | np.floating[Any] | np.integer[Any],
+    *,
+    dynamic_modulus_pa: float,
+    density: float,
+    load_ratio: float = 1.0,
+    mode_factor: float = 1.0,
+) -> float
+
+bending_stress(
+    peak_velocity_m_s: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    *,
+    dynamic_modulus_pa: float,
+    density: float,
+    load_ratio: float = 1.0,
+    mode_factor: float = 1.0,
+) -> NDArray[np.float64]
+
+bending_stress(
     peak_velocity_m_s: ArrayLike,
     *,
     dynamic_modulus_pa: float,
     density: float,
     load_ratio: float = 1.0,
     mode_factor: float = 1.0,
-) -> np.ndarray | float
+) -> float | NDArray[np.float64]
 ```
 
 Peak bending stress from a peak velocity, Formula (1) of 6.2.
@@ -144,7 +162,7 @@ cases, so it moves the answer by less than a third.
 | `load_ratio` | The load coefficient $G_\mathrm{ges}/G_\mathrm{balken}$, the beam's own weight plus any uniformly distributed load it carries over its own weight. 1 for a beam carrying nothing else. |
 | `mode_factor` | The mode coefficient $k_n$, dimensionless. |
 
-**Returns:** The peak bending stress, in pascals; a float unless the velocity was an array.
+**Returns:** The peak bending stress, in pascals; a `float` for a number; an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -314,12 +332,30 @@ draws; pass *frequency* to sample the same polyline elsewhere.
 ```python
 guideline_velocity(
     building_class: Literal['commercial', 'residential', 'sensitive'],
+    frequency: float | np.floating[Any] | np.integer[Any] | None = None,
+    *,
+    location: Literal['foundation', 'top_floor'] = 'foundation',
+    duration: Literal['short_term', 'long_term'] = 'short_term',
+    massive_structure: bool = False,
+) -> float
+
+guideline_velocity(
+    building_class: Literal['commercial', 'residential', 'sensitive'],
+    frequency: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    *,
+    location: Literal['foundation', 'top_floor'] = 'foundation',
+    duration: Literal['short_term', 'long_term'] = 'short_term',
+    massive_structure: bool = False,
+) -> NDArray[np.float64]
+
+guideline_velocity(
+    building_class: Literal['commercial', 'residential', 'sensitive'],
     frequency: ArrayLike | None = None,
     *,
     location: Literal['foundation', 'top_floor'] = 'foundation',
     duration: Literal['short_term', 'long_term'] = 'short_term',
     massive_structure: bool = False,
-) -> np.ndarray | float
+) -> float | NDArray[np.float64]
 ```
 
 The guideline peak velocity of Table 1 or Table 3, in mm/s.
@@ -341,7 +377,7 @@ number for all frequencies, and *frequency* is then not needed.
 | `duration` | `"short_term"` (Table 1, default) or `"long_term"` (Table 3). |
 | `massive_structure` | Raise the row 1 values by [`MASSIVE_STRUCTURE_FACTOR`](/phonometry/reference/api/vibration/building-damage/#massive_structure_factor), which is the most 5.1 allows a massive engineering structure. The allowance is written for row 1 of Table 1 alone, so it applies to the commercial class and to short-term vibration, and is refused anywhere else. |
 
-**Returns:** The guideline peak velocity, in millimetres per second; a float unless *frequency* was an array.
+**Returns:** The guideline peak velocity, in millimetres per second: a `float` without a frequency or for a number; an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

@@ -77,7 +77,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, overload
 
 import numpy as np
 
@@ -96,6 +96,7 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
+    from .._internal.types import RealScalar, RealValues
 
 #: Sound power level of one talker in normal conversation, dB re 1 pW
 #: (Long, Chapter 17, "a normal conversational level").
@@ -122,12 +123,39 @@ def _require_distance(value: ArrayLike, name: str) -> NDArray[np.float64]:
     return r
 
 
+@overload
+def speech_direct_level[S: RealScalar](
+    distance: S,
+    *,
+    sound_power_level: float = NORMAL_VOICE_POWER_LEVEL,
+    directivity: float = TALKER_DIRECTIVITY,
+) -> float: ...
+
+
+@overload
+def speech_direct_level[V: RealValues](
+    distance: V,
+    *,
+    sound_power_level: float = NORMAL_VOICE_POWER_LEVEL,
+    directivity: float = TALKER_DIRECTIVITY,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def speech_direct_level[A: ArrayLike](
+    distance: A,
+    *,
+    sound_power_level: float = NORMAL_VOICE_POWER_LEVEL,
+    directivity: float = TALKER_DIRECTIVITY,
+) -> float | NDArray[np.float64]: ...
+
+
 def speech_direct_level(
     distance: ArrayLike,
     *,
     sound_power_level: float = NORMAL_VOICE_POWER_LEVEL,
     directivity: float = TALKER_DIRECTIVITY,
-) -> np.ndarray | float:
+) -> float | NDArray[np.float64]:
     r"""Direct-field level of one talker (Long Equation (17.50)).
 
     :math:`L_p = L_W + 10 \log_{10}[Q / (4 \pi r^2)]`, the signal a listener
@@ -138,13 +166,52 @@ def speech_direct_level(
         (default :data:`NORMAL_VOICE_POWER_LEVEL`).
     :param directivity: Talker directivity factor ``Q`` (default
         :data:`TALKER_DIRECTIVITY`).
-    :return: The direct-field sound pressure level, dB.
+    :return: The direct-field sound pressure level, dB; a ``float`` for a number; an
+        array for a sequence or an array, a zero-dimensional one included.
     :raises TypeError: if ``directivity`` is not a single number.
     """
     r = _require_distance(distance, "distance")
     q = require_positive(directivity, "directivity")
     lw = float(sound_power_level)
-    return as_float_or_array(lw + 10.0 * np.log10(q / (4.0 * np.pi * r**2)))
+    return as_float_or_array(
+        lw + 10.0 * np.log10(q / (4.0 * np.pi * r**2)), like=(distance,)
+    )
+
+
+@overload
+def crowd_noise_level[S1: RealScalar, S2: RealScalar](
+    talkers: S1,
+    absorption_area: S2,
+    *,
+    sound_power_level: float = NORMAL_VOICE_POWER_LEVEL,
+) -> float: ...
+
+
+@overload
+def crowd_noise_level[V: RealValues, A2: ArrayLike](
+    talkers: V,
+    absorption_area: A2,
+    *,
+    sound_power_level: float = NORMAL_VOICE_POWER_LEVEL,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def crowd_noise_level[S1: RealScalar, V: RealValues](
+    talkers: S1,
+    absorption_area: V,
+    *,
+    sound_power_level: float = NORMAL_VOICE_POWER_LEVEL,
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def crowd_noise_level[A1: ArrayLike, A2: ArrayLike](
+    talkers: A1,
+    absorption_area: A2,
+    *,
+    sound_power_level: float = NORMAL_VOICE_POWER_LEVEL,
+) -> float | NDArray[np.float64]: ...
 
 
 def crowd_noise_level(
@@ -152,7 +219,7 @@ def crowd_noise_level(
     absorption_area: ArrayLike,
     *,
     sound_power_level: float = NORMAL_VOICE_POWER_LEVEL,
-) -> np.ndarray | float:
+) -> float | NDArray[np.float64]:
     r"""Reverberant level of ``N`` simultaneous talkers (Long Equation (17.51)).
 
     :math:`L_p = L_W + 10 \log_{10} N + 10 \log_{10}(4 / A)` with the room's
@@ -166,7 +233,9 @@ def crowd_noise_level(
         room, metric sabins (m2) (scalar or array).
     :param sound_power_level: Sound power level ``Lw`` of one talker,
         dB re 1 pW (default :data:`NORMAL_VOICE_POWER_LEVEL`).
-    :return: The self-generated reverberant level, dB.
+    :return: The self-generated reverberant level, dB; a ``float`` when ``talkers`` and
+        ``absorption_area`` are both numbers; an array of their broadcast shape when one
+        is a sequence or an array, a zero-dimensional one included.
     """
     n = np.asarray(talkers, dtype=np.float64)
     if not np.all(np.isfinite(n)) or np.any(n < 1.0):
@@ -177,7 +246,34 @@ def crowd_noise_level(
         msg = "'absorption_area' must be positive and finite."
         raise ValueError(msg)
     lw = float(sound_power_level)
-    return as_float_or_array(lw + 10.0 * np.log10(n) + 10.0 * np.log10(4.0 / a))
+    return as_float_or_array(
+        lw + 10.0 * np.log10(n) + 10.0 * np.log10(4.0 / a),
+        like=(talkers, absorption_area),
+    )
+
+
+@overload
+def speech_to_noise_ratio[S1: RealScalar, S2: RealScalar](
+    distance: S1, absorption_per_table: S2, *, directivity: float = TALKER_DIRECTIVITY
+) -> float: ...
+
+
+@overload
+def speech_to_noise_ratio[V: RealValues, A2: ArrayLike](
+    distance: V, absorption_per_table: A2, *, directivity: float = TALKER_DIRECTIVITY
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def speech_to_noise_ratio[S1: RealScalar, V: RealValues](
+    distance: S1, absorption_per_table: V, *, directivity: float = TALKER_DIRECTIVITY
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def speech_to_noise_ratio[A1: ArrayLike, A2: ArrayLike](
+    distance: A1, absorption_per_table: A2, *, directivity: float = TALKER_DIRECTIVITY
+) -> float | NDArray[np.float64]: ...
 
 
 def speech_to_noise_ratio(
@@ -185,7 +281,7 @@ def speech_to_noise_ratio(
     absorption_per_table: ArrayLike,
     *,
     directivity: float = TALKER_DIRECTIVITY,
-) -> np.ndarray | float:
+) -> float | NDArray[np.float64]:
     r"""Speech-to-noise ratio across a table (Long Equation (17.52)).
 
     :math:`L_\mathrm{SN} = 10 \log_{10}[Q / (4 \pi r^2)]
@@ -197,7 +293,9 @@ def speech_to_noise_ratio(
     :param absorption_per_table: Equivalent absorption area per occupied table
         ``A_tab``, m2.
     :param directivity: Talker directivity factor ``Q``.
-    :return: The speech-to-noise ratio, dB.
+    :return: The speech-to-noise ratio, dB; a ``float`` when ``distance`` and
+        ``absorption_per_table`` are both numbers; an array of their broadcast shape
+        when one is a sequence or an array, a zero-dimensional one included.
     :raises TypeError: if ``directivity`` is not a single number.
     """
     r = _require_distance(distance, "distance")
@@ -207,8 +305,27 @@ def speech_to_noise_ratio(
         raise ValueError(msg)
     q = require_positive(directivity, "directivity")
     return as_float_or_array(
-        10.0 * np.log10(q / (4.0 * np.pi * r**2)) + 10.0 * np.log10(a_tab / 4.0)
+        10.0 * np.log10(q / (4.0 * np.pi * r**2)) + 10.0 * np.log10(a_tab / 4.0),
+        like=(distance, absorption_per_table),
     )
+
+
+@overload
+def absorption_per_table[S: RealScalar](
+    distance: S, speech_to_noise: float, *, directivity: float = TALKER_DIRECTIVITY
+) -> float: ...
+
+
+@overload
+def absorption_per_table[V: RealValues](
+    distance: V, speech_to_noise: float, *, directivity: float = TALKER_DIRECTIVITY
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def absorption_per_table[A: ArrayLike](
+    distance: A, speech_to_noise: float, *, directivity: float = TALKER_DIRECTIVITY
+) -> float | NDArray[np.float64]: ...
 
 
 def absorption_per_table(
@@ -216,7 +333,7 @@ def absorption_per_table(
     speech_to_noise: float,
     *,
     directivity: float = TALKER_DIRECTIVITY,
-) -> np.ndarray | float:
+) -> float | NDArray[np.float64]:
     r"""Absorption per table giving a chosen ``L_SN`` (inverse of (17.52)).
 
     :math:`A_{\text{tab}} = 16 \pi r^2\, 10^{L_\mathrm{SN}/10} / Q`. With
@@ -229,7 +346,8 @@ def absorption_per_table(
         distance ``rt`` for the privacy bound.
     :param speech_to_noise: Target speech-to-noise ratio ``L_SN``, dB.
     :param directivity: Talker directivity factor ``Q``.
-    :return: The equivalent absorption area per table ``A_tab``, m2.
+    :return: The equivalent absorption area per table ``A_tab``, m2; a ``float`` for a
+        number; an array for a sequence or an array, a zero-dimensional one included.
     :raises TypeError: if ``directivity`` or ``speech_to_noise`` is not a single number.
     """
     r = _require_distance(distance, "distance")
@@ -239,7 +357,9 @@ def absorption_per_table(
     if not np.isfinite(snr):
         msg = "'speech_to_noise' must be finite."
         raise ValueError(msg)
-    return as_float_or_array(16.0 * np.pi * r**2 * 10.0 ** (snr / 10.0) / q)
+    return as_float_or_array(
+        16.0 * np.pi * r**2 * 10.0 ** (snr / 10.0) / q, like=(distance,)
+    )
 
 
 @dataclass(frozen=True)

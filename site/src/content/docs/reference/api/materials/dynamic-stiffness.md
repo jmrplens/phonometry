@@ -74,9 +74,19 @@ are explicitly excluded there.
 
 ```python
 apparent_dynamic_stiffness(
+    resonant_frequency_hz: float | np.floating[Any] | np.integer[Any],
+    total_mass_per_area_kg_m2: float,
+) -> float
+
+apparent_dynamic_stiffness(
+    resonant_frequency_hz: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    total_mass_per_area_kg_m2: float,
+) -> NDArray[np.float64]
+
+apparent_dynamic_stiffness(
     resonant_frequency_hz: ArrayLike,
     total_mass_per_area_kg_m2: float,
-) -> np.ndarray | float
+) -> float | NDArray[np.float64]
 ```
 
 Apparent dynamic stiffness per unit area `s't` (Formula 4).
@@ -91,7 +101,7 @@ $s'_\mathrm{t} = 4 \pi^2 m'_\mathrm{t} f_\mathrm{r}^2$.
 | `resonant_frequency_hz` | Extrapolated resonant frequency `fr`, in hertz (scalar or array). |
 | `total_mass_per_area_kg_m2` | Total mass per unit area used during the test `m't`, in kg/m2 (the load plate plus fittings over the 0,04 m2 specimen; the standard's plate gives $m'_\mathrm{t} = 8~\text{kg} / 0.04~\text{m}^2 = 200$ kg/m2). |
 
-**Returns:** The apparent dynamic stiffness per unit area `s't`, in N/m3 (numerically MN/m3 when divided by 1e6).
+**Returns:** The apparent dynamic stiffness per unit area `s't`, in N/m3 (numerically MN/m3 when divided by 1e6); a `float` for a number; an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -202,11 +212,25 @@ Advisory when the enclosed-gas term makes `s'` unresolvable (clause 8.2).
 
 ```python
 enclosed_gas_stiffness(
+    thickness_m: float | np.floating[Any] | np.integer[Any],
+    porosity: float,
+    *,
+    static_pressure_pa: float = 100000.0,
+) -> float
+
+enclosed_gas_stiffness(
+    thickness_m: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    porosity: float,
+    *,
+    static_pressure_pa: float = 100000.0,
+) -> NDArray[np.float64]
+
+enclosed_gas_stiffness(
     thickness_m: ArrayLike,
     porosity: float,
     *,
     static_pressure_pa: float = 100000.0,
-) -> np.ndarray | float
+) -> float | NDArray[np.float64]
 ```
 
 Enclosed-gas dynamic stiffness per unit area `s'a` (Formula 7).
@@ -222,7 +246,7 @@ with the material's structure: $s'_\mathrm{a} = p_0 / (d\,\epsilon)$.
 | `porosity` | Porosity `epsilon` of the specimen (0-1). |
 | `static_pressure_pa` | Atmospheric pressure `p0`, in pascals (default the standard's 0,1 MPa). |
 
-**Returns:** The enclosed-gas dynamic stiffness per unit area `s'a`, in N/m3.
+**Returns:** The enclosed-gas dynamic stiffness per unit area `s'a`, in N/m3; a `float` for a number; an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -332,9 +356,19 @@ in pascal seconds per square metre, a thousand times smaller a unit.
 
 ```python
 natural_frequency(
+    dynamic_stiffness_n_m3: float | np.floating[Any] | np.integer[Any],
+    mass_per_area_kg_m2: float,
+) -> float
+
+natural_frequency(
+    dynamic_stiffness_n_m3: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    mass_per_area_kg_m2: float,
+) -> NDArray[np.float64]
+
+natural_frequency(
     dynamic_stiffness_n_m3: ArrayLike,
     mass_per_area_kg_m2: float,
-) -> np.ndarray | float
+) -> float | NDArray[np.float64]
 ```
 
 Natural frequency `f0` of the resiliently supported floor (Formula 2).
@@ -348,7 +382,7 @@ $f_0 = (1/2\pi)\sqrt{s'/m'}$.
 | `dynamic_stiffness_n_m3` | Dynamic stiffness per unit area `s'` of the installed layer, in N/m3 (scalar or array). The apparent `s't` of a test specimen is not it; [`installed_dynamic_stiffness`](/phonometry/reference/api/materials/dynamic-stiffness/#installed_dynamic_stiffness) turns one into the other. |
 | `mass_per_area_kg_m2` | Mass per unit area of the supported floor `m'`, in kg/m2. |
 
-**Returns:** The natural frequency `f0`, in hertz.
+**Returns:** The natural frequency `f0`, in hertz; a `float` for a number; an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

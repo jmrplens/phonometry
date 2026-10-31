@@ -58,8 +58,10 @@ from ._shared import _S0, SoundPowerWarning, _a_weighting_corrections
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
+    from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
+    from .._internal.types import RealScalar, RealValues
     from .._report.metadata import ReportMetadata
     from .free_field_qualification import FreeFieldCheck
 
@@ -611,7 +613,7 @@ def meteorological_corrections(
             msg = "'air_absorption_db_per_m' must be non-negative."
             raise ValueError(msg)
         c3_arr = a0 * (1.0053 - 0.0012 * a0) ** 1.6
-        c3 = as_float_or_array(c3_arr)
+        c3 = as_float_or_array(c3_arr, like=(air_absorption_db_per_m,))
     return MeteorologicalCorrection(c1=c1, c2=c2, c3=c3)
 
 
@@ -640,11 +642,27 @@ def _sigma_r0_3745(nominal: int, room: PrecisionRoom) -> float:
     raise ValueError(msg)
 
 
+@overload
+def precision_uncertainty[S: RealScalar](
+    sigma_r0: S, sigma_omc_db: float = 0.0, coverage_factor: float = 2.0
+) -> float: ...
+
+
+@overload
+def precision_uncertainty[V: RealValues](
+    sigma_r0: V, sigma_omc_db: float = 0.0, coverage_factor: float = 2.0
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def precision_uncertainty[A: ArrayLike](
+    sigma_r0: A, sigma_omc_db: float = 0.0, coverage_factor: float = 2.0
+) -> float | NDArray[np.float64]: ...
+
+
 def precision_uncertainty(
-    sigma_r0: float | np.ndarray,
-    sigma_omc_db: float = 0.0,
-    coverage_factor: float = 2.0,
-) -> float | np.ndarray:
+    sigma_r0: ArrayLike, sigma_omc_db: float = 0.0, coverage_factor: float = 2.0
+) -> float | NDArray[np.float64]:
     r"""Expanded uncertainty :math:`U = k \sigma_\mathrm{tot}` (ISO 3745:2012).
 
     ISO 3745:2012 Eq. 24/25:
@@ -655,7 +673,9 @@ def precision_uncertainty(
     :param sigma_r0: Reproducibility standard deviation (Tables 2/3), dB.
     :param sigma_omc_db: Operating/mounting standard deviation ``sigma_omc_db``, dB.
     :param coverage_factor: ``k`` (typically 2 or 1.6).
-    :return: ``U`` in decibels, scalar or per band matching ``sigma_r0``.
+    :return: ``U`` in decibels, one value or one per band as ``sigma_r0`` is; a
+        ``float`` for a number; an array for a sequence or an array, a zero-dimensional
+        one included.
     :raises TypeError: if ``coverage_factor`` or ``sigma_omc_db`` is not a single
         number.
     """
@@ -669,7 +689,7 @@ def precision_uncertainty(
         raise ValueError(msg)
     sigma_tot = np.hypot(np.asarray(sigma_r0, dtype=np.float64), sigma_omc_db)
     u = coverage_factor * sigma_tot
-    return as_float_or_array(u)
+    return as_float_or_array(u, like=(sigma_r0,))
 
 
 def _precision_k1(

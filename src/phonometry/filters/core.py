@@ -1053,7 +1053,7 @@ class OctaveFilterBank:
         # sosfilt supports axis=-1 by default
         return cast(np.ndarray, y)
 
-    def _calculate_level(self, y: np.ndarray, mode: Mode) -> float | np.ndarray:
+    def _calculate_level(self, y: np.ndarray, mode: Mode) -> NDArray[np.float64]:
         """Calculate the level (RMS or Peak) in dB."""
         if mode.lower() == "rms":
             # Use norm for better performance and reduced memory overhead
@@ -1072,11 +1072,13 @@ class OctaveFilterBank:
 
         if self.dbfs:
             # dBFS: 0 dB is RMS = 1.0 or Peak = 1.0
-            return cast(np.ndarray, 20 * np.log10(val_linear))
+            return np.asarray(20 * np.log10(val_linear), dtype=np.float64)
 
         # Physical SPL: apply sensitivity and use 20uPa reference
         pressure_pa = val_linear * self.calibration_factor
-        return cast(np.ndarray, 20 * np.log10(np.maximum(pressure_pa, eps) / _P0))
+        return np.asarray(
+            20 * np.log10(np.maximum(pressure_pa, eps) / _P0), dtype=np.float64
+        )
 
 
 def _decimate_and_filter(x: np.ndarray, sos: np.ndarray, factor: int) -> np.ndarray:

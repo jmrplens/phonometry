@@ -1102,7 +1102,9 @@ jobs:
   # return naming one axes and several with no overload heads, on a head that
   # returns such a union, and on a function that reaches a polar axes, by
   # making one or calling one that does, typed plain Axes, Any, or panels
-  # none of which is polar. It reads the annotations through the package's
+  # none of which is polar. A function of a number or an array of them is the
+  # same case: a return naming a single value and an array needs heads that
+  # return each alone. It reads the annotations through the package's
   # aliases and imports and follows calls across modules. Static and
   # dependency-free, so it runs on its own.
   return-overloads:

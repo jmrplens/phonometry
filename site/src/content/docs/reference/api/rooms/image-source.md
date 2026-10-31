@@ -264,11 +264,25 @@ Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 
 ```python
 reflection_density(
+    time: float | np.floating[Any] | np.integer[Any],
+    volume: float,
+    *,
+    speed_of_sound: float = 343.0,
+) -> float
+
+reflection_density(
+    time: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    volume: float,
+    *,
+    speed_of_sound: float = 343.0,
+) -> NDArray[np.float64]
+
+reflection_density(
     time: ArrayLike,
     volume: float,
     *,
     speed_of_sound: float = 343.0,
-) -> np.ndarray | float
+) -> float | NDArray[np.float64]
 ```
 
 Temporal density of reflections $dN/dt = 4 \pi c^3 t^2 / V$.
@@ -288,7 +302,7 @@ up with this density).
 | `volume` | Room volume `V`, m3. |
 | `speed_of_sound` | Speed of sound `c`, m/s. |
 
-**Returns:** `dN/dt` in reflections per second.
+**Returns:** `dN/dt` in reflections per second; a `float` for a number; an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

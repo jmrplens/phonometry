@@ -1042,10 +1042,28 @@ plenum_attenuation(
     exit_area: float,
     line_of_sight: float,
     wall_area: float,
+    mean_absorption: float | np.floating[Any] | np.integer[Any],
+    *,
+    angle_rad: float = 0.0,
+) -> float
+
+plenum_attenuation(
+    exit_area: float,
+    line_of_sight: float,
+    wall_area: float,
+    mean_absorption: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    *,
+    angle_rad: float = 0.0,
+) -> NDArray[np.float64]
+
+plenum_attenuation(
+    exit_area: float,
+    line_of_sight: float,
+    wall_area: float,
     mean_absorption: ArrayLike,
     *,
     angle_rad: float = 0.0,
-) -> np.ndarray | float
+) -> float | NDArray[np.float64]
 ```
 
 Plenum-chamber transmission loss by Wells' method (Bies Eq. (8.275)).
@@ -1070,7 +1088,7 @@ with the wavelength; it underpredicts the low-frequency loss by 5-10 dB.
 | `mean_absorption` | Mean Sabine wall absorption `alpha` in `(0, 1)` (scalar or per-band). |
 | `angle_rad` | Angle `theta` between the inlet axis and the line to the outlet, in `[0, pi/2]` rad (default 0). |
 
-**Returns:** The transmission loss, dB (float for scalar absorption, else a per-band array).
+**Returns:** The transmission loss, dB; a `float` for a number as the mean absorption; a per-band array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -1128,17 +1146,59 @@ side `sqrt(S_out)`) and the wall area is annotated.
 ```python
 room_effect(
     distance: float,
+    room_constant: float | np.floating[Any] | np.integer[Any],
+    *,
+    directivity: float | np.floating[Any] | np.integer[Any] = ...,
+) -> float
+
+room_effect(
+    distance: float,
+    room_constant: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    *,
+    directivity: ArrayLike = ...,
+) -> NDArray[np.float64]
+
+room_effect(
+    distance: float,
+    room_constant: float | np.floating[Any] | np.integer[Any],
+    *,
+    directivity: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+) -> NDArray[np.float64]
+
+room_effect(
+    distance: float,
     room_constant: ArrayLike,
     *,
     directivity: ArrayLike = ...,
-) -> np.ndarray | float
+) -> float | NDArray[np.float64]
+
+room_effect(
+    distance: float,
+    *,
+    absorption_area: float | np.floating[Any] | np.integer[Any],
+    directivity: float | np.floating[Any] | np.integer[Any] = ...,
+) -> float
+
+room_effect(
+    distance: float,
+    *,
+    absorption_area: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    directivity: ArrayLike = ...,
+) -> NDArray[np.float64]
+
+room_effect(
+    distance: float,
+    *,
+    absorption_area: float | np.floating[Any] | np.integer[Any],
+    directivity: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+) -> NDArray[np.float64]
 
 room_effect(
     distance: float,
     *,
     absorption_area: ArrayLike,
     directivity: ArrayLike = ...,
-) -> np.ndarray | float
+) -> float | NDArray[np.float64]
 ```
 
 Room effect: the drop from the terminal sound power to the room level.
@@ -1171,7 +1231,7 @@ guideline's directivity comes from a chart against frequency, which is why
 | `absorption_area` | Equivalent absorption area $A = S \alpha$, m2 (scalar or per-band; from [`phonometry.room.equivalent_absorption_area`](/phonometry/reference/api/rooms/enclosed-space-absorption/#equivalent_absorption_area)). Give this or `room_constant`, not both. |
 | `directivity` | Directivity factor `Q` of the terminal device (`2` flush in a ceiling or wall, `4` at an edge, `8` in a corner), scalar or per-band. |
 
-**Returns:** The room effect as a positive attenuation, dB (a float when every input is scalar, otherwise a per-band array).
+**Returns:** The room effect as a positive attenuation, dB; a `float` when the absorption measure and `directivity` are both numbers; an array of their broadcast shape when one is a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

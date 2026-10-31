@@ -29,7 +29,7 @@ laeq(
     *,
     calibration_factor: float | None = None,
     dbfs: bool = False,
-) -> float | np.ndarray
+) -> float | NDArray[np.float64]
 ```
 
 A-weighted equivalent continuous sound level (LAeq).
@@ -55,7 +55,7 @@ lc_peak(
     calibration_factor: float | None = None,
     dbfs: bool = False,
     oversample: int = 8,
-) -> float | np.ndarray
+) -> float | NDArray[np.float64]
 ```
 
 C-weighted peak sound level, LCpeak (IEC 61672-1:2013, subclause 5.13).
@@ -99,7 +99,7 @@ leq(
     *,
     calibration_factor: float | None = None,
     dbfs: bool = False,
-) -> float | np.ndarray
+) -> float | NDArray[np.float64]
 ```
 
 Equivalent continuous sound level (Leq) over the whole signal.
@@ -123,7 +123,7 @@ lex_8h(
     *,
     duration_hours: float | None = None,
     calibration_factor: float | None = None,
-) -> float | np.ndarray
+) -> float | NDArray[np.float64]
 ```
 
 Normalized 8-h average sound level, LEX,8h (IEC 61252, 3.3).
@@ -156,7 +156,7 @@ ln_levels(
     *,
     calibration_factor: float | None = None,
     dbfs: bool = False,
-) -> dict[int, float | np.ndarray]
+) -> dict[int, float | NDArray[np.float64]]
 ```
 
 Statistical percentile levels (LN) from the time-weighted level envelope.
@@ -194,7 +194,7 @@ sel(
     *,
     calibration_factor: float | None = None,
     dbfs: bool = False,
-) -> float | np.ndarray
+) -> float | NDArray[np.float64]
 ```
 
 Sound exposure level (SEL / LAE): the event level normalized to 1 second.
@@ -232,7 +232,7 @@ sound_exposure(
     *,
     duration_hours: float | None = None,
     calibration_factor: float | None = None,
-) -> float | np.ndarray
+) -> float | NDArray[np.float64]
 ```
 
 A-weighted sound exposure E in pascal-squared hours (IEC 61252, 3.1).

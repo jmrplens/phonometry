@@ -81,7 +81,25 @@ high `ka`.
 ## piston_directivity
 
 ```python
-piston_directivity(ka: ArrayLike, theta: ArrayLike) -> np.ndarray | float
+piston_directivity(
+    ka: float | np.floating[Any] | np.integer[Any],
+    theta: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+piston_directivity(
+    ka: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    theta: ArrayLike,
+) -> NDArray[np.float64]
+
+piston_directivity(
+    ka: float | np.floating[Any] | np.integer[Any],
+    theta: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+) -> NDArray[np.float64]
+
+piston_directivity(
+    ka: ArrayLike,
+    theta: ArrayLike,
+) -> float | NDArray[np.float64]
 ```
 
 Far-field directivity $D = 2 J_1(ka \sin\theta) / (ka \sin\theta)$.
@@ -97,7 +115,7 @@ $D(0) = 1$.
 | `ka` | Wavenumber-radius product `ka` (scalar or array). |
 | `theta` | Polar angle from the axis, rad (scalar or array). Broadcast against `ka`. |
 
-**Returns:** `D` (float for scalar inputs, else an array).
+**Returns:** `D`; a `float` when `ka` and `theta` are both numbers; an array of their broadcast shape when one is a sequence or an array, a zero-dimensional one included.
 
 ## piston_directivity_pattern
 
@@ -130,7 +148,13 @@ the first zero of `J1` ($ka \sin\theta = 3.8317$).
 ## piston_reactance
 
 ```python
-piston_reactance(x: ArrayLike) -> np.ndarray | float
+piston_reactance(x: float | np.floating[Any] | np.integer[Any]) -> float
+
+piston_reactance(
+    x: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+) -> NDArray[np.float64]
+
+piston_reactance(x: ArrayLike) -> float | NDArray[np.float64]
 ```
 
 Piston reactance function $X_1(x) = 2 H_1(x) / x$ (`H1` Struve
@@ -147,12 +171,18 @@ at high `x`.
 | :--- | :--- |
 | `x` | Argument $x = 2ka$ (scalar or array), dimensionless. |
 
-**Returns:** `X1(x)` (float for scalar input, else an array).
+**Returns:** `X1(x)`; a `float` for a number; an array for a sequence or an array, a zero-dimensional one included.
 
 ## piston_resistance
 
 ```python
-piston_resistance(x: ArrayLike) -> np.ndarray | float
+piston_resistance(x: float | np.floating[Any] | np.integer[Any]) -> float
+
+piston_resistance(
+    x: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+) -> NDArray[np.float64]
+
+piston_resistance(x: ArrayLike) -> float | NDArray[np.float64]
 ```
 
 Piston resistance function $R_1(x) = 1 - 2 J_1(x) / x$.
@@ -168,7 +198,7 @@ high `x`.
 | :--- | :--- |
 | `x` | Argument $x = 2ka$ (scalar or array), dimensionless. |
 
-**Returns:** `R1(x)` (float for scalar input, else an array).
+**Returns:** `R1(x)`; a `float` for a number; an array for a sequence or an array, a zero-dimensional one included.
 
 ## PistonDirectivity
 

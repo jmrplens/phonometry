@@ -104,12 +104,13 @@ import math
 import warnings
 from dataclasses import KW_ONLY, dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, overload
 
 import numpy as np
 
 from .._internal.boundary import settled
 from .._internal.frozen import OwnsArrays
+from .._internal.types import as_float_or_array
 from .._internal.validation import (
     require_non_negative,
     require_positive,
@@ -124,6 +125,7 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
+    from .._internal.types import RealScalar, RealValues
 
 __all__ = [
     "DEFAULT_COVERAGE_FACTOR",
@@ -176,22 +178,6 @@ DEFAULT_COVERAGE_FACTOR = 1.6
 
 #: Fewest repeated readings Equation (C.1) can be evaluated on.
 _MIN_REPEATS = 2
-
-
-def _like(values: NDArray[np.float64]) -> float | NDArray[np.float64]:
-    """Return *values* as a number when they are one, and as an array otherwise.
-
-    The array guards coerce a scalar to a one-element array, and a caller who
-    handed over one number wants one number back: every quantity here is
-    equally at home as an overall A-weighted value and as a spectrum, so the
-    shape of the answer follows the shape of the question.
-
-    The question is the *broadcast* of every argument, not of the first one. A
-    scalar environmental correction against a per-band directivity index is one
-    value per band, and reading the rank off the correction alone returned the
-    first band and dropped the rest, silently.
-    """
-    return float(values.reshape(-1)[0]) if values.size == 1 else values
 
 
 @dataclass(frozen=True)
@@ -290,7 +276,11 @@ class WorkstationBackgroundCorrection(OwnsArrays):
 
     @property
     def correction(self) -> float | NDArray[np.float64]:
-        """:math:`K_1`, in decibels: a number, or one value per band."""
+        """:math:`K_1`, in decibels: a number, or one value per band.
+
+        A ``float`` when ``background_margin_db`` is a number, and an array
+        when it is a sequence or an array, a zero-dimensional one included.
+        """
         delta = np.asarray(self.background_margin_db, dtype=np.float64)
         clamped = np.clip(delta, self._floor_db, None)
         correction = -10.0 * np.log10(1.0 - np.power(10.0, -0.1 * clamped))
@@ -298,7 +288,7 @@ class WorkstationBackgroundCorrection(OwnsArrays):
         # readings that is 15 dB in decimal is not taken as above it in binary.
         judged = settled(delta)
         correction = np.where(judged > NEGLIGIBLE_BACKGROUND_MARGIN_DB, 0.0, correction)
-        return _like(np.asarray(correction, dtype=np.float64))
+        return as_float_or_array(correction, like=(self.background_margin_db,))
 
     @property
     def upper_bound(self) -> bool:
@@ -349,7 +339,10 @@ def background_noise_correction_at_workstation(
         )
         raise ValueError(msg)
     result = WorkstationBackgroundCorrection(
-        _like(np.asarray(measured - background, dtype=np.float64)), grade=checked
+        as_float_or_array(
+            measured - background, like=(measured_level, background_level)
+        ),
+        grade=checked,
     )
     if result.upper_bound:
         floor = MIN_BACKGROUND_MARGIN_DB[checked]
@@ -362,6 +355,20 @@ def background_noise_correction_at_workstation(
             stacklevel=2,
         )
     return result
+
+
+@overload
+def local_environmental_correction[S: RealScalar](ratio: S) -> float: ...
+
+
+@overload
+def local_environmental_correction[V: RealValues](ratio: V) -> NDArray[np.float64]: ...
+
+
+@overload
+def local_environmental_correction[A: ArrayLike](
+    ratio: A,
+) -> float | NDArray[np.float64]: ...
 
 
 def local_environmental_correction(ratio: ArrayLike) -> float | NDArray[np.float64]:
@@ -387,7 +394,8 @@ def local_environmental_correction(ratio: ArrayLike) -> float | NDArray[np.float
 
     :param ratio: The dimensionless :math:`z`, strictly positive; a scalar or
         one value per band.
-    :return: :math:`K_3` in decibels, of the same shape.
+    :return: :math:`K_3` in decibels, of the shape of ``ratio``; a ``float`` for a
+        number; an array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: If any value is not strictly positive.
     :raises TypeError: if ``ratio`` holds a text or a value that is not a real number.
     """
@@ -401,12 +409,35 @@ def local_environmental_correction(ratio: ArrayLike) -> float | NDArray[np.float
     # a report; the two zeros are the same number, so publish the one with the
     # sign a reader expects.
     correction = correction + 0.0
-    return _like(np.asarray(correction, dtype=np.float64))
+    return as_float_or_array(correction, like=(ratio,))
+
+
+@overload
+def environmental_ratio_from_k2[S1: RealScalar, S2: RealScalar](
+    environmental_correction: S1, directivity_index: S2 = ...
+) -> float: ...
+
+
+@overload
+def environmental_ratio_from_k2[V: RealValues, A2: ArrayLike](
+    environmental_correction: V, directivity_index: A2 = ...
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def environmental_ratio_from_k2[S1: RealScalar, V: RealValues](
+    environmental_correction: S1, directivity_index: V
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def environmental_ratio_from_k2[A1: ArrayLike, A2: ArrayLike](
+    environmental_correction: A1, directivity_index: A2 = ...
+) -> float | NDArray[np.float64]: ...
 
 
 def environmental_ratio_from_k2(
-    environmental_correction: ArrayLike,
-    directivity_index: ArrayLike = 0.0,
+    environmental_correction: ArrayLike, directivity_index: ArrayLike = 0.0
 ) -> float | NDArray[np.float64]:
     r"""The ratio :math:`z` from the environmental correction of the test room.
 
@@ -432,7 +463,9 @@ def environmental_ratio_from_k2(
     :param environmental_correction: :math:`K_2` in decibels, non-negative.
     :param directivity_index: :math:`D^*_{I,\mathrm{op}}` in decibels
         (default 0, no directivity).
-    :return: The ratio :math:`z`, of the broadcast shape.
+    :return: The ratio :math:`z`; a ``float`` when ``environmental_correction`` and
+        ``directivity_index`` are both numbers; an array of their broadcast shape when
+        one is a sequence or an array, a zero-dimensional one included.
     """
     k2 = np.asarray(environmental_correction, dtype=np.float64)
     di = np.asarray(directivity_index, dtype=np.float64)
@@ -440,7 +473,31 @@ def environmental_ratio_from_k2(
         msg = "'environmental_correction' is a correction and cannot be negative."
         raise ValueError(msg)
     ratio = 1.0 - (1.0 - np.power(10.0, -0.1 * k2)) * np.power(10.0, -0.1 * di)
-    return _like(np.asarray(ratio, dtype=np.float64))
+    return as_float_or_array(ratio, like=(environmental_correction, directivity_index))
+
+
+@overload
+def environmental_ratio_from_absorption[S1: RealScalar, S2: RealScalar](
+    absorption_area: S1, measurement_surface_m2: float, directivity_index: S2 = ...
+) -> float: ...
+
+
+@overload
+def environmental_ratio_from_absorption[V: RealValues, A2: ArrayLike](
+    absorption_area: V, measurement_surface_m2: float, directivity_index: A2 = ...
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def environmental_ratio_from_absorption[S1: RealScalar, V: RealValues](
+    absorption_area: S1, measurement_surface_m2: float, directivity_index: V
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def environmental_ratio_from_absorption[A1: ArrayLike, A2: ArrayLike](
+    absorption_area: A1, measurement_surface_m2: float, directivity_index: A2 = ...
+) -> float | NDArray[np.float64]: ...
 
 
 def environmental_ratio_from_absorption(
@@ -466,7 +523,9 @@ def environmental_ratio_from_absorption(
         surface, in square metres, strictly positive.
     :param directivity_index: :math:`D^*_{I,\mathrm{op}}` in decibels
         (default 0).
-    :return: The ratio :math:`z`.
+    :return: The ratio :math:`z`; a ``float`` when ``absorption_area`` and
+        ``directivity_index`` are both numbers; an array of their broadcast shape when
+        one is a sequence or an array, a zero-dimensional one included.
     :raises ValueError: If either area is not strictly positive.
     :raises TypeError: if ``measurement_surface_m2`` is not a single number, or
         ``absorption_area`` holds a text or a value that is not a real number.
@@ -475,7 +534,37 @@ def environmental_ratio_from_absorption(
     s_m = require_positive(measurement_surface_m2, "measurement_surface_m2")
     di = np.asarray(directivity_index, dtype=np.float64)
     ratio = 1.0 - np.power(10.0, -0.1 * di) / (1.0 + a / (4.0 * s_m))
-    return _like(np.asarray(ratio, dtype=np.float64))
+    return as_float_or_array(ratio, like=(absorption_area, directivity_index))
+
+
+@overload
+def emission_sound_pressure_level[S1: RealScalar, S2: RealScalar, S3: RealScalar](
+    measured_level: S1, *, background_correction: S2 = ..., local_correction: S3 = ...
+) -> float: ...
+
+
+@overload
+def emission_sound_pressure_level[V: RealValues, A2: ArrayLike, A3: ArrayLike](
+    measured_level: V, *, background_correction: A2 = ..., local_correction: A3 = ...
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def emission_sound_pressure_level[S1: RealScalar, V: RealValues, A3: ArrayLike](
+    measured_level: S1, *, background_correction: V, local_correction: A3 = ...
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def emission_sound_pressure_level[S1: RealScalar, S2: RealScalar, V: RealValues](
+    measured_level: S1, *, background_correction: S2 = ..., local_correction: V
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def emission_sound_pressure_level[A1: ArrayLike, A2: ArrayLike, A3: ArrayLike](
+    measured_level: A1, *, background_correction: A2 = ..., local_correction: A3 = ...
+) -> float | NDArray[np.float64]: ...
 
 
 def emission_sound_pressure_level(
@@ -504,13 +593,17 @@ def emission_sound_pressure_level(
     :param measured_level: The uncorrected reading :math:`L'_p`, in decibels.
     :param background_correction: :math:`K_1` in decibels (default 0).
     :param local_correction: :math:`K_3` in decibels (default 0).
-    :return: :math:`L_p` in decibels, of the broadcast shape.
+    :return: :math:`L_p` in decibels; a ``float`` when the reading and the two
+        corrections are all numbers; an array of their broadcast shape when one is a
+        sequence or an array, a zero-dimensional one included.
     """
     measured = np.asarray(measured_level, dtype=np.float64)
     k1 = np.asarray(background_correction, dtype=np.float64)
     k3 = np.asarray(local_correction, dtype=np.float64)
     level = np.asarray(measured - k1 - k3, dtype=np.float64)
-    return float(level) if level.ndim == 0 else level
+    return as_float_or_array(
+        level, like=(measured_level, background_correction, local_correction)
+    )
 
 
 def operating_standard_deviation(levels: ArrayLike) -> float:

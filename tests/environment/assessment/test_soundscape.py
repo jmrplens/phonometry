@@ -802,7 +802,7 @@ def test_scale_values_are_a_new_array(part: int) -> None:
     positions = np.array([1.0, 3.0, 5.0])
     values = sc.method_a_scale_values(positions, part=part)
     assert not np.shares_memory(values, positions)
-    values[0] = 4.0  # type: ignore[index]
+    values[0] = 4.0
     np.testing.assert_array_equal(positions, [1.0, 3.0, 5.0])
 
 

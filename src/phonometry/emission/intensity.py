@@ -59,7 +59,7 @@ from __future__ import annotations
 import math
 from dataclasses import KW_ONLY, dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, ClassVar
+from typing import TYPE_CHECKING, Any, ClassVar, Literal, overload
 
 import numpy as np
 
@@ -76,6 +76,7 @@ if TYPE_CHECKING:
 from .._internal.boundary import settled, settled_net_share
 from .._internal.frozen import OwnsArrays
 from .._internal.levels_math import energy_mean
+from .._internal.types import answer_form, as_float_if_reduced, one_value
 from .._internal.utils import _typesignal
 from .._internal.validation import (
     require_axis_count,
@@ -405,13 +406,20 @@ class FieldStationarityCheck(OwnsArrays):
     def stationary(self) -> bool | NDArray[np.bool_]:
         """Whether :math:`F_1` stays within the limit: a bool, or one per band.
 
+        A ``bool`` when ``f1`` is a number, and an array of them when it is a
+        sequence or an array, a zero-dimensional one included.
+
         Judged settled: samples whose standard deviation is 0,6 of their mean
         in decimal are at the limit, whichever side of it the last bits fall.
         """
-        within = settled(np.asarray(self.f1, dtype=np.float64)) <= self.limit
-        return (
-            bool(within) if np.ndim(within) == 0 else np.asarray(within, dtype=np.bool_)
+        within = np.asarray(
+            settled(np.asarray(self.f1, dtype=np.float64)) <= self.limit,
+            dtype=np.bool_,
         )
+        form = answer_form((self.f1,))
+        if form == "array":
+            return within
+        return bool(one_value(within)) if form == "number" else one_value(within)
 
     @property
     def passes(self) -> bool:
@@ -905,7 +913,7 @@ def _coefficient_of_variation(
 
 def temporal_variability_indicator(
     short_time_intensity: list[float] | np.ndarray,
-) -> float | np.ndarray:
+) -> float | NDArray[np.float64]:
     r"""ISO 9614-1:1993 temporal variability indicator F1 (equation (A.1)).
 
     In the initial test a "typical" measurement position is chosen on an
@@ -954,17 +962,17 @@ def temporal_variability_indicator(
             "(ISO 9614-1 Annex A Note 9 recommends M = 10)."
         )
         raise ValueError(msg)
-    if samples.ndim == 1:
-        return _coefficient_of_variation(samples, non_positive_message=_F1_NON_POSITIVE)
-    return np.asarray(
+    bands = samples.reshape(samples.shape[0], -1)
+    f1 = np.asarray(
         [
             _coefficient_of_variation(
-                samples[:, b], non_positive_message=_F1_NON_POSITIVE
+                bands[:, b], non_positive_message=_F1_NON_POSITIVE
             )
-            for b in range(samples.shape[1])
+            for b in range(bands.shape[1])
         ],
         dtype=np.float64,
     )
+    return as_float_if_reduced(f1.reshape(samples.shape[1:]))
 
 
 def _field_indicators_1d(lp: np.ndarray, i_n: np.ndarray) -> tuple[float, float, float]:
@@ -982,12 +990,45 @@ def _field_indicators_1d(lp: np.ndarray, i_n: np.ndarray) -> tuple[float, float,
     return lp_surface - li_abs, lp_surface - li_alg, f4
 
 
+@overload
+def _temporal_indicator_for(
+    temporal_intensity: None, n_bands: int, *, scalar_surface: bool
+) -> None: ...
+
+
+@overload
+def _temporal_indicator_for(
+    temporal_intensity: list[float] | np.ndarray,
+    n_bands: int,
+    *,
+    scalar_surface: Literal[True],
+) -> float: ...
+
+
+@overload
+def _temporal_indicator_for(
+    temporal_intensity: list[float] | np.ndarray,
+    n_bands: int,
+    *,
+    scalar_surface: Literal[False],
+) -> NDArray[np.float64]: ...
+
+
+@overload
 def _temporal_indicator_for(
     temporal_intensity: list[float] | np.ndarray | None,
     n_bands: int,
     *,
     scalar_surface: bool,
-) -> float | np.ndarray | None:
+) -> float | NDArray[np.float64] | None: ...
+
+
+def _temporal_indicator_for(
+    temporal_intensity: list[float] | np.ndarray | None,
+    n_bands: int,
+    *,
+    scalar_surface: bool,
+) -> float | NDArray[np.float64] | None:
     """F1 from the optional short-time samples, checked against the band count.
 
     ``None`` in, ``None`` out: F1 is optional on a :class:`FieldIndicators`,
@@ -1015,11 +1056,9 @@ def _temporal_indicator_for(
             f"{f1_size} for {n_bands} band(s)."
         )
         raise ValueError(msg)
-    if scalar_surface and np.ndim(f1) != 0:
+    if scalar_surface:
         return float(np.asarray(f1).reshape(()))
-    if not scalar_surface and np.ndim(f1) == 0:
-        return np.asarray([f1], dtype=np.float64)
-    return f1
+    return np.atleast_1d(np.asarray(f1, dtype=np.float64))
 
 
 def field_indicators(

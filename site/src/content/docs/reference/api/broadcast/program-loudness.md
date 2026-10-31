@@ -50,9 +50,24 @@ ITU-R BS.1770). 1 LU is equivalent to 1 dB.
 
 ```python
 channel_weight(
+    azimuth: float | np.floating[Any] | np.integer[Any],
+    elevation: float | np.floating[Any] | np.integer[Any] = ...,
+) -> float
+
+channel_weight(
+    azimuth: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    elevation: ArrayLike = ...,
+) -> NDArray[np.float64]
+
+channel_weight(
+    azimuth: float | np.floating[Any] | np.integer[Any],
+    elevation: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+) -> NDArray[np.float64]
+
+channel_weight(
     azimuth: ArrayLike,
-    elevation: ArrayLike = 0.0,
-) -> float | np.ndarray
+    elevation: ArrayLike = ...,
+) -> float | NDArray[np.float64]
 ```
 
 Position-dependent channel weight `Gi` (BS.1770-5 Annex 3, Table 4).
@@ -70,7 +85,7 @@ altogether (use a weight of 0 for them).
 | `azimuth` | Azimuth angle(s) of the loudspeaker position, in degrees (0 in front, positive to either side; only the magnitude matters). |
 | `elevation` | Elevation angle(s), in degrees. |
 
-**Returns:** The weight `Gi`: 1.41 where `|elevation| < 30` and `60 <= |azimuth| <= 120`, else 1.0. Float for scalar inputs.
+**Returns:** The weight `Gi`: 1.41 where `|elevation| < 30` and `60 <= |azimuth| <= 120`, else 1.0; a `float` when `azimuth` and `elevation` are both numbers; an array of their broadcast shape when one is a sequence or an array, a zero-dimensional one included.
 
 ## DEFAULT_CHANNEL_WEIGHTS
 
@@ -463,7 +478,7 @@ true_peak_level(
     x: Signal | Sequence[float] | np.ndarray,
     fs: float | None = None,
     oversample: int | None = None,
-) -> float | np.ndarray
+) -> float | NDArray[np.float64]
 ```
 
 True-peak level in dBTP (BS.1770-5 Annex 2).

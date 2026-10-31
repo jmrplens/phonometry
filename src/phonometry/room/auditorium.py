@@ -60,6 +60,7 @@ import numpy as np
 from .._internal.boundary import settled
 from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, read_only
+from .._internal.types import as_float_if_reduced, as_float_or_array
 from .._internal.validation import (
     require_choice,
     require_finite_array,
@@ -83,7 +84,7 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
-    from .._internal.types import TwoPanels
+    from .._internal.types import RealScalar, RealValues, TwoPanels
     from ..io._signal import Signal
 
 Symbol = Literal["G", "EDT", "C80", "D50", "Ts", "J_LF", "J_LFC", "L_J"]
@@ -336,13 +337,33 @@ def _band_exposure_levels(
     return frequency, levels
 
 
+@overload
+def sound_pressure_exposure_level(
+    ir: Signal | list[float] | NDArray[np.float64],
+    fs: int | None = None,
+    *,
+    limits: None,
+    fraction: int = 1,
+) -> float: ...
+
+
+@overload
+def sound_pressure_exposure_level(
+    ir: Signal | list[float] | NDArray[np.float64],
+    fs: int | None = None,
+    *,
+    limits: tuple[float, float] = _DEFAULT_BANDS,
+    fraction: int = 1,
+) -> NDArray[np.float64]: ...
+
+
 def sound_pressure_exposure_level(
     ir: Signal | list[float] | NDArray[np.float64],
     fs: int | None = None,
     *,
     limits: tuple[float, float] | None = _DEFAULT_BANDS,
     fraction: int = 1,
-) -> NDArray[np.float64] | float:
+) -> float | NDArray[np.float64]:
     r"""Sound pressure exposure level of an impulse response, per band.
 
     ISO 3382-1:2009, Equation (A.2):
@@ -391,10 +412,25 @@ def sound_pressure_exposure_level(
     return float(levels[0]) if limits is None else levels
 
 
+@overload
+def free_field_reference_level[S: RealScalar](level: S, distance: float) -> float: ...
+
+
+@overload
+def free_field_reference_level[V: RealValues](
+    level: V, distance: float
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def free_field_reference_level[A: ArrayLike](
+    level: A, distance: float
+) -> float | NDArray[np.float64]: ...
+
+
 def free_field_reference_level(
-    level: ArrayLike,
-    distance: float,
-) -> NDArray[np.float64] | float:
+    level: ArrayLike, distance: float
+) -> float | NDArray[np.float64]:
     r"""Free-field level at 10 m from one measured at another distance.
 
     ISO 3382-1:2009, Equations (A.4) and (A.8), which are the same
@@ -418,7 +454,9 @@ def free_field_reference_level(
     :param level: The level measured at ``distance``, in dB. Any shape.
     :param distance: Source-to-microphone distance of that measurement, in
         metres.
-    :return: The level referred to 10 m, in dB, in the shape of ``level``.
+    :return: The level referred to 10 m, in dB, in the shape of ``level``; a ``float``
+        for a number; an array for a sequence or an array, a zero-dimensional one
+        included.
     :raises ValueError: If ``distance`` is not a positive, finite length.
     :raises TypeError: if ``distance`` is not a single number.
     """
@@ -437,12 +475,12 @@ def free_field_reference_level(
             stacklevel=2,
         )
     corrected = values + 20.0 * np.log10(distance / REFERENCE_DISTANCE_M)
-    return float(corrected) if corrected.ndim == 0 else corrected
+    return as_float_or_array(corrected, like=(level,))
 
 
 def directivity_energy_average(
     levels: ArrayLike, *, axis: int = -1
-) -> NDArray[np.float64] | float:
+) -> float | NDArray[np.float64]:
     r"""Average a free-field measurement over bearings around the source.
 
     The note under ISO 3382-1:2009, Equation (A.4) asks for the free-field
@@ -501,13 +539,36 @@ def directivity_energy_average(
         10.0 * np.log10(np.mean(10.0 ** (values / 10.0), axis=axis)),
         dtype=np.float64,
     )
-    return float(mean) if mean.ndim == 0 else mean
+    return as_float_if_reduced(mean)
+
+
+@overload
+def reverberation_room_reference_level[S1: RealScalar, S2: RealScalar](
+    reverberation_room_level: S1, absorption_area: S2
+) -> float: ...
+
+
+@overload
+def reverberation_room_reference_level[V: RealValues, A2: ArrayLike](
+    reverberation_room_level: V, absorption_area: A2
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def reverberation_room_reference_level[S1: RealScalar, V: RealValues](
+    reverberation_room_level: S1, absorption_area: V
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def reverberation_room_reference_level[A1: ArrayLike, A2: ArrayLike](
+    reverberation_room_level: A1, absorption_area: A2
+) -> float | NDArray[np.float64]: ...
 
 
 def reverberation_room_reference_level(
-    reverberation_room_level: ArrayLike,
-    absorption_area: ArrayLike,
-) -> NDArray[np.float64] | float:
+    reverberation_room_level: ArrayLike, absorption_area: ArrayLike
+) -> float | NDArray[np.float64]:
     r"""Free-field reference level at 10 m from a reverberation-room measurement.
 
     ISO 3382-1:2009, Equation (A.5):
@@ -548,7 +609,9 @@ def reverberation_room_reference_level(
         ``docs/ERRATA.md`` carries the rest.
     :param absorption_area: Equivalent sound absorption area of that room,
         in m², broadcast against ``reverberation_room_level``.
-    :return: The reference exposure level at 10 m, in dB.
+    :return: The reference exposure level at 10 m, in dB; a ``float`` when the level and
+        the absorption area are both numbers; an array of their broadcast shape when one
+        is a sequence or an array, a zero-dimensional one included.
     :raises ValueError: If the absorption area is not a positive, finite area.
     """
     levels = np.asarray(reverberation_room_level, dtype=np.float64)
@@ -560,13 +623,38 @@ def reverberation_room_reference_level(
         levels + 10.0 * np.log10(area) - DIFFUSE_FIELD_REFERENCE_OFFSET_DB,
         dtype=np.float64,
     )
-    return float(reference) if reference.ndim == 0 else reference
+    return as_float_or_array(
+        reference, like=(reverberation_room_level, absorption_area)
+    )
+
+
+@overload
+def sound_strength_from_power[S1: RealScalar, S2: RealScalar](
+    pressure_level: S1, power_level: S2
+) -> float: ...
+
+
+@overload
+def sound_strength_from_power[V: RealValues, A2: ArrayLike](
+    pressure_level: V, power_level: A2
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def sound_strength_from_power[S1: RealScalar, V: RealValues](
+    pressure_level: S1, power_level: V
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def sound_strength_from_power[A1: ArrayLike, A2: ArrayLike](
+    pressure_level: A1, power_level: A2
+) -> float | NDArray[np.float64]: ...
 
 
 def sound_strength_from_power(
-    pressure_level: ArrayLike,
-    power_level: ArrayLike,
-) -> NDArray[np.float64] | float:
+    pressure_level: ArrayLike, power_level: ArrayLike
+) -> float | NDArray[np.float64]:
     r"""Sound strength from the source's sound power level.
 
     ISO 3382-1:2009, Equation (A.9):
@@ -586,14 +674,16 @@ def sound_strength_from_power(
         the room under test, in dB.
     :param power_level: Sound power level of the source, in dB, broadcast
         against ``pressure_level``.
-    :return: The sound strength G, in dB.
+    :return: The sound strength G, in dB; a ``float`` when the two levels are numbers;
+        an array of their broadcast shape when one is a sequence or an array, a
+        zero-dimensional one included.
     """
     pressure = np.asarray(pressure_level, dtype=np.float64)
     power = np.asarray(power_level, dtype=np.float64)
     strength = np.asarray(
         pressure - power + SOUND_STRENGTH_POWER_OFFSET_DB, dtype=np.float64
     )
-    return float(strength) if strength.ndim == 0 else strength
+    return as_float_or_array(strength, like=(pressure_level, power_level))
 
 
 @dataclass(frozen=True)
@@ -1927,7 +2017,19 @@ def _table_a1_row(symbol: str) -> AuditoriumQuantity:
     return TABLE_A1[key]
 
 
-def min_receiver_positions(seats: ArrayLike) -> NDArray[np.float64] | float:
+@overload
+def min_receiver_positions[S: RealScalar](seats: S) -> float: ...
+
+
+@overload
+def min_receiver_positions[V: RealValues](seats: V) -> NDArray[np.float64]: ...
+
+
+@overload
+def min_receiver_positions[A: ArrayLike](seats: A) -> float | NDArray[np.float64]: ...
+
+
+def min_receiver_positions(seats: ArrayLike) -> float | NDArray[np.float64]:
     r"""Fewest microphone positions a hall of a given size wants (Table A.2).
 
     ISO 3382-1:2009, Table A.2 prints three pairs, 500 seats to 6 positions,
@@ -1949,8 +2051,9 @@ def min_receiver_positions(seats: ArrayLike) -> NDArray[np.float64] | float:
     as balconies and under-balcony areas will need more than this.
 
     :param seats: The number of seats in the hall.
-    :return: The minimum number of positions, not rounded, clamped to the
-        6 to 10 the table and A.4 between them authorise.
+    :return: The minimum number of positions, not rounded, clamped to the 6 to 10 the
+        table and A.4 between them authorise; a ``float`` for a number; an array for a
+        sequence or an array, a zero-dimensional one included.
     :raises ValueError: If a seat count is not a positive, finite number.
     """
     count = np.asarray(seats, dtype=np.float64)
@@ -1959,7 +2062,7 @@ def min_receiver_positions(seats: ArrayLike) -> NDArray[np.float64] | float:
         raise ValueError(msg)
     line = 6.0 + 2.0 * np.log2(count / 500.0)
     positions = np.asarray(np.clip(line, 6.0, 10.0), dtype=np.float64)
-    return float(positions) if positions.ndim == 0 else positions
+    return as_float_or_array(positions, like=(seats,))
 
 
 def gliding_directivity_deviation(levels: ArrayLike) -> NDArray[np.float64]:

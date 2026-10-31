@@ -106,13 +106,14 @@ import math
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 from scipy import stats
 
 from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays, read_only
+from ..._internal.types import as_float_or_array
 from ..._internal.validation import require_choice, require_real, require_scalar
 
 if TYPE_CHECKING:
@@ -120,6 +121,7 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
 
     from ..._i18n import Language
+    from ..._internal.types import RealScalar, RealValues
 
 EnvironmentType = Literal["real", "recorded", "virtual"]
 
@@ -589,6 +591,22 @@ def _method_a_scale(part: int) -> QuestionnaireScale:
     return METHOD_A_SCALES[part]
 
 
+@overload
+def method_a_scale_values[S: RealScalar](positions: S, *, part: int) -> float: ...
+
+
+@overload
+def method_a_scale_values[V: RealValues](
+    positions: V, *, part: int
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def method_a_scale_values[A: ArrayLike](
+    positions: A, *, part: int
+) -> float | NDArray[np.float64]: ...
+
+
 def method_a_scale_values(
     positions: ArrayLike, *, part: int
 ) -> float | NDArray[np.float64]:
@@ -603,8 +621,9 @@ def method_a_scale_values(
     :param positions: The position of each ticked box, 1 (left) to 5 (right);
         ``NaN`` for a question left blank.
     :param part: The part of the questionnaire, 1 to 4.
-    :return: The scale values, a float for a scalar input; an array is always
-        a new one, never a view of *positions*.
+    :return: The scale values; a ``float`` for a number; an array for a sequence or an
+        array, a zero-dimensional one included. An array is always a new one, never a
+        view of *positions*.
     :raises ValueError: for a part other than 1 to 4 or a position that is
         not a whole number from 1 to 5.
     """
@@ -618,7 +637,7 @@ def method_a_scale_values(
         if scale.scale_values == _ASCENDING
         else (_SCALE_MAX + 1.0) - checked
     )
-    return float(values) if values.ndim == 0 else values
+    return as_float_or_array(values, like=(positions,))
 
 
 @dataclass(frozen=True)
@@ -1217,6 +1236,20 @@ def pearson_correlation(
 # ---------------------------------------------------------------------------
 
 
+@overload
+def method_b_scale_values[S: RealScalar](marked_fraction: S) -> float: ...
+
+
+@overload
+def method_b_scale_values[V: RealValues](marked_fraction: V) -> NDArray[np.float64]: ...
+
+
+@overload
+def method_b_scale_values[A: ArrayLike](
+    marked_fraction: A,
+) -> float | NDArray[np.float64]: ...
+
+
 def method_b_scale_values(marked_fraction: ArrayLike) -> float | NDArray[np.float64]:
     """The scale value of a mark on a Method B scale (ISO/TS 12913-3 B.2).
 
@@ -1230,7 +1263,8 @@ def method_b_scale_values(marked_fraction: ArrayLike) -> float | NDArray[np.floa
 
     :param marked_fraction: The position of each mark from the left-hand
         tick, 0, to the right-hand one, 1; ``NaN`` for a scale left blank.
-    :return: The scale values, a float for a scalar input.
+    :return: The scale values; a ``float`` for a number; an array for a sequence or an
+        array, a zero-dimensional one included.
     :raises ValueError: for a fraction outside 0 to 1 or an infinite one.
     """
     fraction = np.asarray(marked_fraction, dtype=np.float64)
@@ -1241,7 +1275,7 @@ def method_b_scale_values(marked_fraction: ArrayLike) -> float | NDArray[np.floa
         )
         raise ValueError(msg)
     values = np.round(_SCALE_MIN + (_SCALE_MAX - _SCALE_MIN) * fraction, 1)
-    return float(values) if values.ndim == 0 else values
+    return as_float_or_array(values, like=(marked_fraction,))
 
 
 @dataclass(frozen=True)

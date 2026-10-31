@@ -69,7 +69,15 @@ CAM_C = 21.366
 ## cam_from_frequency
 
 ```python
-cam_from_frequency(frequency: ArrayLike) -> np.ndarray | float
+cam_from_frequency(
+    frequency: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+cam_from_frequency(
+    frequency: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+) -> NDArray[np.float64]
+
+cam_from_frequency(frequency: ArrayLike) -> float | NDArray[np.float64]
 ```
 
 ERB_N number (Cam) of a frequency.
@@ -85,12 +93,20 @@ One Cam is one auditory-filter width.
 | :--- | :--- |
 | `frequency` | Frequency `f`, Hz (scalar or array, non-negative). |
 
-**Returns:** The ERB_N number, Cam; a float for a scalar input.
+**Returns:** The ERB_N number, Cam; a `float` for a number; an array for a sequence or an array, a zero-dimensional one included.
 
 ## erb_bandwidth
 
 ```python
-erb_bandwidth(frequency: ArrayLike) -> np.ndarray | float
+erb_bandwidth(
+    frequency: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+erb_bandwidth(
+    frequency: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+) -> NDArray[np.float64]
+
+erb_bandwidth(frequency: ArrayLike) -> float | NDArray[np.float64]
 ```
 
 Equivalent rectangular bandwidth of the auditory filter, Hz.
@@ -105,7 +121,7 @@ $24.7 \, (4.37 F + 1)$ for `F` in kHz).
 | :--- | :--- |
 | `frequency` | Filter centre frequency `f`, Hz (scalar or array, non-negative). |
 
-**Returns:** The bandwidth `ERB_N`, Hz; a float for a scalar input.
+**Returns:** The bandwidth `ERB_N`, Hz; a `float` for a number; an array for a sequence or an array, a zero-dimensional one included.
 
 ## ERB_C1_HZ
 
@@ -126,7 +142,13 @@ ERB_C2_PER_HZ = 0.004368
 ## frequency_from_cam
 
 ```python
-frequency_from_cam(cam: ArrayLike) -> np.ndarray | float
+frequency_from_cam(cam: float | np.floating[Any] | np.integer[Any]) -> float
+
+frequency_from_cam(
+    cam: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+) -> NDArray[np.float64]
+
+frequency_from_cam(cam: ArrayLike) -> float | NDArray[np.float64]
 ```
 
 Frequency of an ERB_N number, the inverse of [`cam_from_frequency`](/phonometry/reference/api/psychoacoustics/erb-scale/#cam_from_frequency).
@@ -139,4 +161,4 @@ $f = (10^{i / 21.366} - 1) / 0.004368$.
 | :--- | :--- |
 | `cam` | ERB_N number `i`, Cam (scalar or array, non-negative). |
 
-**Returns:** The frequency `f`, Hz; a float for a scalar input.
+**Returns:** The frequency `f`, Hz; a `float` for a number; an array for a sequence or an array, a zero-dimensional one included.

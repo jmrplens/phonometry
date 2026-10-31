@@ -67,7 +67,7 @@ from typing import TYPE_CHECKING, Any, overload
 import numpy as np
 
 from .._internal.frozen import OwnsArrays
-from .._internal.types import as_float_or_array
+from .._internal.types import as_float_if_reduced, as_float_or_array
 from .._internal.validation import require_positive, require_ranks, require_same_length
 from .steady_field import schroeder_frequency
 
@@ -76,7 +76,7 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
-    from .._internal.types import TwoPanels
+    from .._internal.types import RealScalar, RealValues, TwoPanels
 
 __all__ = [
     "MODE_KINDS",
@@ -132,7 +132,7 @@ def room_mode_frequency(
     dimensions: ArrayLike,
     *,
     speed_of_sound: float = _SPEED_OF_SOUND_M_S,
-) -> np.ndarray | float:
+) -> float | NDArray[np.float64]:
     r"""Eigenfrequency of a rectangular-room mode (Long Equation (8.43)).
 
     .. math::
@@ -167,7 +167,25 @@ def room_mode_frequency(
         msg = "'orders' must be non-negative integers."
         raise ValueError(msg)
     freqs = 0.5 * c0 * np.sqrt(np.sum((n / dims) ** 2, axis=1))
-    return float(freqs[0]) if single else freqs
+    return as_float_if_reduced(freqs[0] if single else freqs)
+
+
+@overload
+def room_mode_count[S: RealScalar](
+    dimensions: ArrayLike, *, frequency: S, speed_of_sound: float = _SPEED_OF_SOUND_M_S
+) -> float: ...
+
+
+@overload
+def room_mode_count[V: RealValues](
+    dimensions: ArrayLike, *, frequency: V, speed_of_sound: float = _SPEED_OF_SOUND_M_S
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def room_mode_count[A: ArrayLike](
+    dimensions: ArrayLike, *, frequency: A, speed_of_sound: float = _SPEED_OF_SOUND_M_S
+) -> float | NDArray[np.float64]: ...
 
 
 def room_mode_count(
@@ -175,7 +193,7 @@ def room_mode_count(
     *,
     frequency: ArrayLike,
     speed_of_sound: float = _SPEED_OF_SOUND_M_S,
-) -> np.ndarray | float:
+) -> float | NDArray[np.float64]:
     r"""Integrated number of modes below ``frequency`` (Long Equation (8.45)).
 
     .. math::
@@ -192,7 +210,8 @@ def room_mode_count(
     :param frequency: Upper frequency ``f``, Hz (scalar or array).
     :param dimensions: Room dimensions ``(lx, ly, lz)``, m.
     :param speed_of_sound: Speed of sound ``c0``, m/s.
-    :return: The (non-integer) mode count.
+    :return: The (non-integer) mode count; a ``float`` for a number; an array for a
+        sequence or an array, a zero-dimensional one included.
     :raises TypeError: if ``speed_of_sound`` is not a single number.
     """
     dims = _require_dimensions(dimensions)
@@ -208,7 +227,25 @@ def room_mode_count(
         + (np.pi / 4.0) * surface * x**2
         + (edges / 8.0) * x
     )
-    return as_float_or_array(n)
+    return as_float_or_array(n, like=(frequency,))
+
+
+@overload
+def room_modal_density[S: RealScalar](
+    dimensions: ArrayLike, *, frequency: S, speed_of_sound: float = _SPEED_OF_SOUND_M_S
+) -> float: ...
+
+
+@overload
+def room_modal_density[V: RealValues](
+    dimensions: ArrayLike, *, frequency: V, speed_of_sound: float = _SPEED_OF_SOUND_M_S
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def room_modal_density[A: ArrayLike](
+    dimensions: ArrayLike, *, frequency: A, speed_of_sound: float = _SPEED_OF_SOUND_M_S
+) -> float | NDArray[np.float64]: ...
 
 
 def room_modal_density(
@@ -216,7 +253,7 @@ def room_modal_density(
     *,
     frequency: ArrayLike,
     speed_of_sound: float = _SPEED_OF_SOUND_M_S,
-) -> np.ndarray | float:
+) -> float | NDArray[np.float64]:
     r"""Modal density :math:`dN/df` in modes per hertz (Long Equation (8.46)).
 
     .. math::
@@ -231,7 +268,8 @@ def room_modal_density(
     :param frequency: Frequency ``f``, Hz (scalar or array).
     :param dimensions: Room dimensions ``(lx, ly, lz)``, m.
     :param speed_of_sound: Speed of sound ``c0``, m/s.
-    :return: The modal density, modes/Hz.
+    :return: The modal density, modes/Hz; a ``float`` for a number; an array for a
+        sequence or an array, a zero-dimensional one included.
     :raises TypeError: if ``speed_of_sound`` is not a single number.
     """
     dims = _require_dimensions(dimensions)
@@ -246,7 +284,7 @@ def room_modal_density(
         + (np.pi / 2.0) * surface * f / c0**2
         + edges / (8.0 * c0)
     )
-    return as_float_or_array(density)
+    return as_float_or_array(density, like=(frequency,))
 
 
 @dataclass(frozen=True)
@@ -354,12 +392,22 @@ class RoomModesResult(OwnsArrays):
         """Number of enumerated modes of each kind, keyed by :data:`MODE_KINDS`."""
         return {kind: int(np.count_nonzero(self.kinds == kind)) for kind in MODE_KINDS}
 
-    def density(self, frequency: ArrayLike) -> np.ndarray | float:
+    @overload
+    def density[S: RealScalar](self, frequency: S) -> float: ...
+
+    @overload
+    def density[V: RealValues](self, frequency: V) -> NDArray[np.float64]: ...
+
+    @overload
+    def density[A: ArrayLike](self, frequency: A) -> float | NDArray[np.float64]: ...
+
+    def density(self, frequency: ArrayLike) -> float | NDArray[np.float64]:
         """Modal density at ``frequency`` for this room (Long Equation (8.46)).
 
         :param frequency: Frequency, in hertz (scalar or array).
-        :return: The modal density, in modes per hertz, of the shape of
-            *frequency*.
+        :return: The modal density, in modes per hertz, of the shape of *frequency*; a
+            ``float`` for a number; an array for a sequence or an array, a
+            zero-dimensional one included.
         """
         return room_modal_density(
             frequency=frequency,

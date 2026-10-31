@@ -3,9 +3,11 @@
 
 ``scripts/check_return_overloads.py`` reads every function of the package and
 asks that a return naming one axes and several (a tuple, a list or an array
-of them) stand on an implementation with overload heads, never on a head, and
+of them) stand on an implementation with overload heads, never on a head,
 that a function reaching a polar axes say ``PolarAxes``, or have a head that
-does. Its own run only says the tree is clean today; these tests fix what it
+does, and that a return naming a single value and an array stand on an
+implementation whose heads say each case, the union only on the last head
+left for what a type checker cannot shape. Its own run only says the tree is clean today; these tests fix what it
 must catch, on small packages written for the purpose (a multiline signature,
 an alias, a renamed import, a polar axes two calls away), and what it must
 let through. Each route by which it follows a name (an import inside a
@@ -20,6 +22,7 @@ import pathlib
 import sys
 import textwrap
 
+import numpy as np
 import pytest
 
 _SCRIPTS = str(pathlib.Path(__file__).resolve().parent.parent / "scripts")
@@ -654,6 +657,236 @@ def test_an_exemption_covers_only_what_it_names(tmp_path: pathlib.Path) -> None:
     )
     assert not kept
     assert stale == [(path, "plot_gone")]
+
+
+# ---------------------------------------------------------------------------
+# A single value or an array of them
+# ---------------------------------------------------------------------------
+
+
+def test_a_number_or_an_array_without_overloads_is_refused(
+    tmp_path: pathlib.Path,
+) -> None:
+    refused = _refused(
+        tmp_path,
+        levels="""
+        def room_constant(
+            surface_area: float,
+            mean_absorption: object,
+        ) -> (
+            float
+            | NDArray[np.float64]
+        ):
+            raise NotImplementedError
+        """,
+    )
+    assert refused == {
+        "room_constant": "returns float | NDArray[np.float64], and no overload "
+        "says which argument decides between the value and the array"
+    }
+
+
+@pytest.mark.parametrize(
+    "returns",
+    [
+        "np.ndarray | float",
+        "float | NDArray[np.float64]",
+        "Union[float, np.ndarray]",
+        "Optional[float] | np.ndarray",
+        "int | np.ndarray",
+        "complex | NDArray[np.complex128]",
+        "bool | NDArray[np.bool_]",
+        "np.float64 | NDArray[np.float64]",
+        "np.double | np.ndarray",
+        "np.int_ | np.ndarray",
+        "float | np.matrix",
+        "np.floating[Any] | np.ndarray",
+        "Literal['A', 'B'] | NDArray[np.str_]",
+        "str | NDArray[np.str_]",
+        "'float | NDArray[np.float64]'",
+    ],
+)
+def test_every_spelling_of_a_value_or_an_array_is_read(
+    tmp_path: pathlib.Path, returns: str
+) -> None:
+    refused = _refused(
+        tmp_path,
+        levels=f"""
+        def level(x: object) -> {returns}:
+            raise NotImplementedError
+        """,
+    )
+    assert list(refused) == ["level"]
+
+
+def test_every_numpy_scalar_and_array_class_is_known() -> None:
+    """The gate names numpy's types by hand, so a new numpy cannot slip one past it.
+
+    It stays free of numpy, which leaves the two sets to be kept against the
+    numpy installed here: every scalar class it exports (a subclass of
+    ``numpy.generic``, aliases such as ``double`` and ``int_`` included) is a
+    single value, and every array class (a subclass of ``numpy.ndarray``) an
+    array.
+    """
+    exported = {name: getattr(np, name) for name in dir(np)}
+    classes = {name: obj for name, obj in exported.items() if isinstance(obj, type)}
+    scalars = {f"numpy.{n}" for n, c in classes.items() if issubclass(c, np.generic)}
+    arrays = {f"numpy.{n}" for n, c in classes.items() if issubclass(c, np.ndarray)}
+    assert scalars - cro._SCALARS == set()
+    assert arrays - cro._ARRAYS == set()
+
+
+@pytest.mark.parametrize(
+    "returns",
+    [
+        "float",
+        "NDArray[np.float64]",
+        "float | None",
+        "NDArray[np.float64] | None",
+        "tuple[float, NDArray[np.float64]]",
+        "dict[int, float | np.ndarray]",
+        "list[float]",
+    ],
+)
+def test_a_return_that_is_not_a_value_or_an_array_is_let_through(
+    tmp_path: pathlib.Path, returns: str
+) -> None:
+    assert not _refused(
+        tmp_path,
+        levels=f"""
+        def level(x: object) -> {returns}:
+            raise NotImplementedError
+        """,
+    )
+
+
+def test_an_alias_of_the_value_or_the_array_is_read_through(
+    tmp_path: pathlib.Path,
+) -> None:
+    refused = _refused(
+        tmp_path,
+        kinds="""
+        Grade = Literal["A", "B", "C"]
+        Levels = NDArray[np.float64]
+        Either = float | Levels
+        """,
+        levels="""
+        from .kinds import Either, Grade
+
+        def level(x: object) -> Either:
+            raise NotImplementedError
+
+        def grade(x: object) -> Grade | NDArray[np.str_]:
+            raise NotImplementedError
+        """,
+    )
+    assert set(refused) == {"level", "grade"}
+
+
+_SCALAR_HEADS = """
+from numpy.typing import ArrayLike
+
+@overload
+def level[S: float](x: S) -> float: ...
+@overload
+def level[V: list[float]](x: V) -> NDArray[np.float64]: ...
+@overload
+def level[A: ArrayLike](x: A) -> float | NDArray[np.float64]: ...
+def level(x: ArrayLike) -> float | NDArray[np.float64]:
+    raise NotImplementedError
+"""
+
+
+def test_heads_that_say_each_case_let_the_last_resort_through(
+    tmp_path: pathlib.Path,
+) -> None:
+    """The union head is the one left for what a type checker cannot shape."""
+    assert not _refused(tmp_path, levels=_SCALAR_HEADS)
+
+
+@pytest.mark.parametrize(
+    ("head", "union"),
+    [
+        (
+            "def level[S: float](x: S) -> float: ...",
+            "def level[S: float](x: S) -> float | NDArray[np.float64]: ...",
+        ),
+        (
+            "def level[V: list[float]](x: V) -> NDArray[np.float64]: ...",
+            "def level[V: list[float]](x: V) -> float | NDArray[np.float64]: ...",
+        ),
+    ],
+)
+def test_heads_that_leave_one_case_unsaid_are_refused(
+    tmp_path: pathlib.Path, head: str, union: str
+) -> None:
+    """Without a head for the value alone, or the array alone, every union head fails."""
+    refused = _refused(tmp_path, levels=_SCALAR_HEADS.replace(head, union))
+    assert refused
+    assert all(name.startswith("level (overload") for name in refused), refused
+    assert all(
+        "no other head returns the value alone" in why for why in refused.values()
+    )
+
+
+@pytest.mark.parametrize(
+    ("heads", "missing"),
+    [
+        (
+            """
+            @overload
+            def level[S: float](x: S) -> float: ...
+            """,
+            "the array",
+        ),
+        (
+            """
+            @overload
+            def level[V: list[float]](x: V) -> NDArray[np.float64]: ...
+            """,
+            "the value",
+        ),
+    ],
+)
+def test_heads_that_never_return_one_case_leave_the_union_refused(
+    tmp_path: pathlib.Path, heads: str, missing: str
+) -> None:
+    """A type checker reads only the heads: a float head alone refuses every array."""
+    refused = _refused(
+        tmp_path,
+        levels=textwrap.dedent(heads)
+        + """
+def level(x: object) -> float | NDArray[np.float64]:
+    raise NotImplementedError
+""",
+    )
+    assert refused == {
+        "level": f"returns float | NDArray[np.float64], and no overload head "
+        f"returns {missing}"
+    }
+
+
+def test_heads_overloaded_on_something_else_still_need_both_cases(
+    tmp_path: pathlib.Path,
+) -> None:
+    """Two heads for two keywords, each returning the union, say nothing of the shape."""
+    refused = _refused(
+        tmp_path,
+        levels="""
+        @overload
+        def distance(room_constant: object) -> float | np.ndarray: ...
+        @overload
+        def distance(*, absorption_area: object) -> float | np.ndarray: ...
+        def distance(
+            room_constant: object = None, *, absorption_area: object = None
+        ) -> float | np.ndarray:
+            raise NotImplementedError
+        """,
+    )
+    assert set(refused) == {
+        "distance (overload room_constant: object)",
+        "distance (overload absorption_area: object)",
+    }
 
 
 def test_the_package_keeps_the_rule() -> None:

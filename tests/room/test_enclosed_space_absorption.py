@@ -10,6 +10,7 @@ from __future__ import annotations
 import dataclasses
 
 import numpy as np
+import numpy.typing as npt
 import pytest
 from reference_data import (
     EN12354_6_A_BARE,
@@ -133,6 +134,34 @@ def test_equivalent_area_per_band_objects() -> None:
     objects = np.array([[1.0, 2.0, 3.0], [0.5, 0.5, 0.5]])
     a = m.equivalent_absorption_area([(10.0, [0.1, 0.2, 0.3])], objects=objects)
     np.testing.assert_allclose(a, [2.5, 4.5, 6.5])
+
+
+@pytest.mark.parametrize(
+    ("objects", "form"),
+    [
+        (3.0, "float"),
+        (np.float64(3.0), "float"),
+        ([1.0, 2.0], "float"),
+        (np.array([1.0, 2.0]), "float"),
+        (np.array(3.0), "zero-dimensional"),
+        ([np.array(1.0), np.array(2.0)], "zero-dimensional"),
+        ([[1.0, 2.0], [0.5, 0.5]], "per-band"),
+    ],
+)
+def test_equivalent_area_keeps_the_form_of_an_object_s_entry(
+    objects: npt.ArrayLike, form: str
+) -> None:
+    # An object's entry decides the form as the caller gave it, so a single
+    # value that is a zero-dimensional array is not read as a plain number.
+    a = m.equivalent_absorption_area([(10.0, 0.2)], objects=objects)
+    if form == "float":
+        assert type(a) is float
+    elif form == "zero-dimensional":
+        assert isinstance(a, np.ndarray)
+        assert a.ndim == 0
+    else:
+        assert isinstance(a, np.ndarray)
+        assert a.shape == (2,)
 
 
 def test_air_condition_none_neglects_air() -> None:

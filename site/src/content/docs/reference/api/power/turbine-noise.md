@@ -155,8 +155,16 @@ above 1 m/s (4.3).
 
 ```python
 turbine_background_correction(
+    level_difference: float | np.floating[Any] | np.integer[Any],
+) -> float
+
+turbine_background_correction(
+    level_difference: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+) -> NDArray[np.float64]
+
+turbine_background_correction(
     level_difference: ArrayLike,
-) -> float | np.ndarray
+) -> float | NDArray[np.float64]
 ```
 
 Correction for background noise of Table 2 (clause 8.1).
@@ -193,7 +201,7 @@ than to the surface-averaged level.
 | :--- | :--- |
 | `level_difference` | The level with the source operating less the background level, at each position, in dB (scalar or 1-D array). |
 
-**Returns:** The correction to subtract, in dB: a `float` for a scalar, an array for an array.
+**Returns:** The correction to subtract, in dB; a `float` for a number; an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

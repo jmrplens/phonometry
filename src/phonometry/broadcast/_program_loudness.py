@@ -42,7 +42,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from math import ceil, isclose
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 from scipy import signal
@@ -53,14 +53,15 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike
+    from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
+    from .._internal.types import RealScalar, RealValues
     from .._report.metadata import ReportMetadata
 
 from .._internal.frozen import OwnsArrays
 from .._internal.peaks import inter_sample_peak
-from .._internal.types import ReportEngine, as_float_or_array
+from .._internal.types import ReportEngine, as_float_if_reduced, as_float_or_array
 from .._internal.validation import (
     check_engine,
     require_count,
@@ -423,9 +424,33 @@ def k_weighting_response(
 # ---------------------------------------------------------------------------
 
 
+@overload
+def channel_weight[S1: RealScalar, S2: RealScalar](
+    azimuth: S1, elevation: S2 = ...
+) -> float: ...
+
+
+@overload
+def channel_weight[V: RealValues, A2: ArrayLike](
+    azimuth: V, elevation: A2 = ...
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def channel_weight[S1: RealScalar, V: RealValues](
+    azimuth: S1, elevation: V
+) -> NDArray[np.float64]: ...
+
+
+@overload
+def channel_weight[A1: ArrayLike, A2: ArrayLike](
+    azimuth: A1, elevation: A2 = ...
+) -> float | NDArray[np.float64]: ...
+
+
 def channel_weight(
     azimuth: ArrayLike, elevation: ArrayLike = 0.0
-) -> float | np.ndarray:
+) -> float | NDArray[np.float64]:
     """Position-dependent channel weight ``Gi`` (BS.1770-5 Annex 3, Table 4).
 
     Extends the Table 3 weights to arbitrarily placed loudspeakers of the
@@ -437,8 +462,10 @@ def channel_weight(
     :param azimuth: Azimuth angle(s) of the loudspeaker position, in degrees
         (0 in front, positive to either side; only the magnitude matters).
     :param elevation: Elevation angle(s), in degrees.
-    :return: The weight ``Gi``: 1.41 where ``|elevation| < 30`` and
-        ``60 <= |azimuth| <= 120``, else 1.0. Float for scalar inputs.
+    :return: The weight ``Gi``: 1.41 where ``|elevation| < 30`` and ``60 <= |azimuth| <=
+        120``, else 1.0; a ``float`` when ``azimuth`` and ``elevation`` are both
+        numbers; an array of their broadcast shape when one is a sequence or an array, a
+        zero-dimensional one included.
     """
     theta = np.abs(np.asarray(azimuth, dtype=np.float64))
     phi = np.abs(np.asarray(elevation, dtype=np.float64))
@@ -455,7 +482,7 @@ def channel_weight(
         & (theta <= _SIDE_AZIMUTH_MAX_DEG)
         & (phi < _MID_LAYER_ELEVATION_DEG)
     )
-    return as_float_or_array(np.where(side, 1.41, 1.0))
+    return as_float_or_array(np.where(side, 1.41, 1.0), like=(azimuth, elevation))
 
 
 def _resolve_weights(n_channels: int, weights: ArrayLike | None) -> np.ndarray:
@@ -601,7 +628,7 @@ def loudness_range(short_term_loudness: ArrayLike) -> float:
 
 def true_peak_level(
     x: SignalInput, fs: float | None = None, oversample: int | None = None
-) -> float | np.ndarray:
+) -> float | NDArray[np.float64]:
     """True-peak level in dBTP (BS.1770-5 Annex 2).
 
     Estimates the inter-sample peak by oversampling the signal to at least
@@ -643,7 +670,7 @@ def true_peak_level(
     peak = inter_sample_peak(x_proc, int(oversample))
     with np.errstate(divide="ignore"):
         out = 20.0 * np.log10(peak)
-    return as_float_or_array(out)
+    return as_float_if_reduced(out)
 
 
 # ---------------------------------------------------------------------------

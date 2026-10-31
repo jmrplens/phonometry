@@ -36,10 +36,22 @@ distribution is out of scope.
 
 ```python
 air_absorption_area(
+    m: float | np.floating[Any] | np.integer[Any],
+    volume: float,
+    object_fraction: float = 0.0,
+) -> float
+
+air_absorption_area(
+    m: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    volume: float,
+    object_fraction: float = 0.0,
+) -> NDArray[np.float64]
+
+air_absorption_area(
     m: ArrayLike,
     volume: float,
     object_fraction: float = 0.0,
-) -> np.ndarray | float
+) -> float | NDArray[np.float64]
 ```
 
 Equivalent absorption area of the air (Formula 2).
@@ -52,7 +64,7 @@ Equivalent absorption area of the air (Formula 2).
 | `volume` | Volume of the empty enclosed space `V`, m3. |
 | `object_fraction` | Object fraction `psi` (0-1). |
 
-**Returns:** The air absorption area $A_{\text{air}} = 4 m V (1 - \psi)$, m2.
+**Returns:** The air absorption area $A_{\text{air}} = 4 m V (1 - \psi)$, m2; a `float` for a number; an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 
@@ -103,7 +115,7 @@ equivalent_absorption_area(
     *,
     objects: ArrayLike = (),
     air_area: ArrayLike = 0.0,
-) -> np.ndarray | float
+) -> float | NDArray[np.float64]
 ```
 
 Total equivalent sound absorption area (Formula 1).
@@ -116,7 +128,7 @@ Total equivalent sound absorption area (Formula 1).
 | `objects` | Equivalent absorption areas of the objects `Aobj`, m2 (see [`hard_object_absorption`](/phonometry/reference/api/rooms/enclosed-space-absorption/#hard_object_absorption)): a single value, a 1-D sequence of one value per object, or a 2-D array `(n_objects, n_bands)` for per-band values; summed over the objects. |
 | `air_area` | Air absorption area `Aair`, m2 (see [`air_absorption_area`](/phonometry/reference/api/rooms/enclosed-space-absorption/#air_absorption_area)); scalar or per-band. |
 
-**Returns:** The total equivalent absorption area `A`, m2; a float for all-scalar inputs, otherwise a per-band array.
+**Returns:** The total equivalent absorption area `A`, m2; a `float` when the coefficients, an object's entry and `air_area` are all numbers, a zero-dimensional array when each is one value and one of them is a zero-dimensional array, otherwise a per-band array.
 
 ## hard_object_absorption
 
@@ -164,12 +176,28 @@ Object fraction `psi` of an enclosed space (Formula 3).
 
 ```python
 reverberation_time(
+    absorption_area: float | np.floating[Any] | np.integer[Any],
+    volume: float,
+    *,
+    object_fraction: float = 0.0,
+    speed_of_sound: float = 345.6,
+) -> float
+
+reverberation_time(
+    absorption_area: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
+    volume: float,
+    *,
+    object_fraction: float = 0.0,
+    speed_of_sound: float = 345.6,
+) -> NDArray[np.float64]
+
+reverberation_time(
     absorption_area: ArrayLike,
     volume: float,
     *,
     object_fraction: float = 0.0,
     speed_of_sound: float = 345.6,
-) -> np.ndarray | float
+) -> float | NDArray[np.float64]
 ```
 
 Reverberation time from the equivalent absorption area (Formula 5).
@@ -183,7 +211,7 @@ Reverberation time from the equivalent absorption area (Formula 5).
 | `object_fraction` | Object fraction `psi` (0-1). |
 | `speed_of_sound` | Speed of sound `c0`, m/s (default 345.6, which gives the factor `0.16`). |
 
-**Returns:** The reverberation time $T = \frac{55.3}{c_0} \frac{V (1 - \psi)}{A}$, s.
+**Returns:** The reverberation time $T = \frac{55.3}{c_0} \frac{V (1 - \psi)}{A}$, s; a `float` for a number; an array for a sequence or an array, a zero-dimensional one included.
 
 **Raises**
 

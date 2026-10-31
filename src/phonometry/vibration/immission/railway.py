@@ -48,7 +48,7 @@ import math
 import warnings
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, overload
 
 import numpy as np
 import scipy.signal as sig
@@ -410,6 +410,14 @@ def passage_average_velocity(interval_rms_mm_s: ArrayLike) -> float:
     """
     values = _non_negative(interval_rms_mm_s, "interval_rms_mm_s")
     return float(np.sqrt(np.mean(values**2)))
+
+
+@overload
+def passage_average_level(levels: ArrayLike, *, axis: None = None) -> float: ...
+
+
+@overload
+def passage_average_level(levels: ArrayLike, *, axis: int) -> NDArray[np.float64]: ...
 
 
 def passage_average_level(

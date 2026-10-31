@@ -132,7 +132,7 @@ def test_an_unknown_scale_is_refused_by_name() -> None:
 
     mpl.use("Agg")
     one = _stereo().pick(0)
-    with pytest.raises(ValueError, match="scale must be"):
+    with pytest.raises(ValueError, match="'scale' must be one of"):
         one.plot(scale="log")
 
 

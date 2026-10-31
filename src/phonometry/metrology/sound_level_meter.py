@@ -163,13 +163,14 @@ import numpy as np
 from .._internal.display import RichDisplay
 from .._internal.validation import (
     is_class_designation,
+    require_choice,
     require_count,
     require_real,
 )
 from .conformance import ConformanceVerification, verify_conformance
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Mapping, Sequence
+    from collections.abc import Callable, Iterable, Mapping, Sequence
 
     from matplotlib.axes import Axes
 
@@ -398,32 +399,34 @@ _E_REFERENCES_DB = (
 #: exposure level (:math:`L_\mathrm{AE} - L_\mathrm{A}`, the 12 durations of
 #: F, whose limits it shares). The rows hold for the A, C and Z weightings
 #: alike (NOTE 3).
-IEC61672_TABLE_4: Mapping[str, tuple[ToneburstReference, ...]] = MappingProxyType(
-    {
-        "F": tuple(
-            _burst(duration, reference, *_F_AND_E_LIMITS_DB[duration])
-            for duration, reference in zip(
-                _F_AND_E_LIMITS_DB, _F_REFERENCES_DB, strict=True
-            )
-        ),
-        "S": (
-            _burst(1000.0, -2.0, (-0.5, 0.5), (-1.0, 1.0)),
-            _burst(500.0, -4.1, (-0.5, 0.5), (-1.0, 1.0)),
-            _burst(200.0, -7.4, (-0.5, 0.5), (-1.0, 1.0)),
-            _burst(100.0, -10.2, (-1.0, 1.0), (-1.0, 1.0)),
-            _burst(50.0, -13.1, (-1.0, 1.0), (-1.5, 1.0)),
-            _burst(20.0, -17.0, (-1.5, 1.0), (-2.0, 1.0)),
-            _burst(10.0, -20.0, (-2.0, 1.0), (-3.0, 1.0)),
-            _burst(5.0, -23.0, (-2.5, 1.0), (-4.0, 1.0)),
-            _burst(2.0, -27.0, (-3.0, 1.0), (-5.0, 1.0)),
-        ),
-        "E": tuple(
-            _burst(duration, reference, *_F_AND_E_LIMITS_DB[duration])
-            for duration, reference in zip(
-                _F_AND_E_LIMITS_DB, _E_REFERENCES_DB, strict=True
-            )
-        ),
-    }
+IEC61672_TABLE_4: Mapping[ToneburstResponse, tuple[ToneburstReference, ...]] = (
+    MappingProxyType(
+        {
+            "F": tuple(
+                _burst(duration, reference, *_F_AND_E_LIMITS_DB[duration])
+                for duration, reference in zip(
+                    _F_AND_E_LIMITS_DB, _F_REFERENCES_DB, strict=True
+                )
+            ),
+            "S": (
+                _burst(1000.0, -2.0, (-0.5, 0.5), (-1.0, 1.0)),
+                _burst(500.0, -4.1, (-0.5, 0.5), (-1.0, 1.0)),
+                _burst(200.0, -7.4, (-0.5, 0.5), (-1.0, 1.0)),
+                _burst(100.0, -10.2, (-1.0, 1.0), (-1.0, 1.0)),
+                _burst(50.0, -13.1, (-1.0, 1.0), (-1.5, 1.0)),
+                _burst(20.0, -17.0, (-1.5, 1.0), (-2.0, 1.0)),
+                _burst(10.0, -20.0, (-2.0, 1.0), (-3.0, 1.0)),
+                _burst(5.0, -23.0, (-2.5, 1.0), (-4.0, 1.0)),
+                _burst(2.0, -27.0, (-3.0, 1.0), (-5.0, 1.0)),
+            ),
+            "E": tuple(
+                _burst(duration, reference, *_F_AND_E_LIMITS_DB[duration])
+                for duration, reference in zip(
+                    _F_AND_E_LIMITS_DB, _E_REFERENCES_DB, strict=True
+                )
+            ),
+        }
+    )
 )
 
 #: The complete-cycle signal of IEC 61672-1:2013 Table 5, named once for its
@@ -613,8 +616,10 @@ ELECTRICAL_TEST_FREQUENCIES_HZ: Mapping[int, tuple[float, ...]] = MappingProxyTy
 #: tested at, in milliseconds: 200 ms, 2 ms and 0,25 ms for the maximum
 #: F-weighted level and the sound exposure level, 200 ms and 2 ms for the
 #: maximum S-weighted level.
-TONEBURST_TEST_DURATIONS_MS: Mapping[str, tuple[float, ...]] = MappingProxyType(
-    {"F": (200.0, 2.0, 0.25), "S": (200.0, 2.0), "E": (200.0, 2.0, 0.25)}
+TONEBURST_TEST_DURATIONS_MS: Mapping[ToneburstResponse, tuple[float, ...]] = (
+    MappingProxyType(
+        {"F": (200.0, 2.0, 0.25), "S": (200.0, 2.0), "E": (200.0, 2.0, 0.25)}
+    )
 )
 
 #: IEC 61672-3:2013 7.1: the ranges of environmental conditions periodic tests
@@ -1118,6 +1123,20 @@ def _other_ranges_held(rows: Mapping[RangeReading, Sequence[float]]) -> int:
     return len(rows["17.4"]) - _REFERENCE_RANGE_READINGS
 
 
+def _require_keys(
+    table: Iterable[object] | None, name: str, options: tuple[str, ...]
+) -> None:
+    """Check each key of a table of :class:`SoundLevelMeterPeriodicMeasurements`
+    as written, when the table is given.
+
+    :raises TypeError: for a key that is not a text.
+    :raises ValueError: for a text that is not one of *options*.
+    """
+    if table is not None:
+        for key in table:
+            require_choice(key, name, options)
+
+
 @dataclass(frozen=True, kw_only=True)
 class SoundLevelMeterPeriodicMeasurements(RichDisplay):
     r"""What a laboratory measured in the periodic tests of IEC 61672-3:2013.
@@ -1300,7 +1319,76 @@ class SoundLevelMeterPeriodicMeasurements(RichDisplay):
             range whose lower boundary is not below its upper one, a
             starting point outside it, or a step at or past the first
             indication of overload or under-range.
+        :raises TypeError: if a key of ``electrical_self_noise_levels``,
+            ``electrical_weighting_deviations_db``,
+            ``electrical_weighting_uncertainties_db``,
+            ``electrical_weighting_uncertainties_without_correction_data_db``,
+            ``range_linearity_deviations_db``,
+            ``range_linearity_uncertainties_db``,
+            ``time_weighting_at_1khz_deviations_db``,
+            ``time_weighting_at_1khz_uncertainties_db``,
+            ``toneburst_responses_db``, ``toneburst_uncertainties_db``,
+            ``weighting_at_1khz_deviations_db`` or
+            ``weighting_at_1khz_uncertainties_db`` is not a text.
         """
+        _require_keys(
+            self.electrical_self_noise_levels,
+            "electrical_self_noise_levels",
+            _WEIGHTINGS,
+        )
+        _require_keys(
+            self.electrical_weighting_deviations_db,
+            "electrical_weighting_deviations_db",
+            _WEIGHTINGS,
+        )
+        _require_keys(
+            self.electrical_weighting_uncertainties_db,
+            "electrical_weighting_uncertainties_db",
+            _WEIGHTINGS,
+        )
+        _require_keys(
+            self.electrical_weighting_uncertainties_without_correction_data_db,
+            "electrical_weighting_uncertainties_without_correction_data_db",
+            _WEIGHTINGS,
+        )
+        _require_keys(
+            self.weighting_at_1khz_deviations_db,
+            "weighting_at_1khz_deviations_db",
+            _WEIGHTINGS_VS_A,
+        )
+        _require_keys(
+            self.weighting_at_1khz_uncertainties_db,
+            "weighting_at_1khz_uncertainties_db",
+            _WEIGHTINGS_VS_A,
+        )
+        _require_keys(
+            self.time_weighting_at_1khz_deviations_db,
+            "time_weighting_at_1khz_deviations_db",
+            _TIME_WEIGHTINGS_VS_F,
+        )
+        _require_keys(
+            self.time_weighting_at_1khz_uncertainties_db,
+            "time_weighting_at_1khz_uncertainties_db",
+            _TIME_WEIGHTINGS_VS_F,
+        )
+        _require_keys(
+            self.range_linearity_deviations_db,
+            "range_linearity_deviations_db",
+            _RANGE_READINGS,
+        )
+        _require_keys(
+            self.range_linearity_uncertainties_db,
+            "range_linearity_uncertainties_db",
+            _RANGE_READINGS,
+        )
+        _require_keys(
+            self.toneburst_responses_db, "toneburst_responses_db", _TONEBURST_KEYS
+        )
+        _require_keys(
+            self.toneburst_uncertainties_db,
+            "toneburst_uncertainties_db",
+            _TONEBURST_KEYS,
+        )
         self._freeze_environment()
         self._freeze_scalars()
         self._freeze_rows()

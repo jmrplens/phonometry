@@ -10,15 +10,20 @@ under Figures A.1 and A.2 on printed folios 12 and 13.
 from __future__ import annotations
 
 import math
+from typing import TYPE_CHECKING
 
 import numpy as np
 import pytest
 
 from phonometry import vibration
 
+if TYPE_CHECKING:
+    from phonometry.vibration.machinery.evaluation import GearQuantity
+
+
 #: Tables 2, 3 and 4, transcribed a second time so a change to the library's
 #: copy has to be made twice to pass.
-PRINTED_ZONES: dict[str, dict[float, tuple[float, float, float]]] = {
+PRINTED_ZONES: dict[GearQuantity, dict[float, tuple[float, float, float]]] = {
     "displacement": {
         31.5: (20.0, 31.5, 50.0),
         50.0: (31.5, 50.0, 80.0),
@@ -64,7 +69,7 @@ PRINTED_CLASSES: dict[tuple[str, str], tuple[float, float, float | None]] = {
 
 
 @pytest.mark.parametrize("quantity", sorted(PRINTED_ZONES))
-def test_every_printed_row_of_the_three_tables(quantity: str) -> None:
+def test_every_printed_row_of_the_three_tables(quantity: GearQuantity) -> None:
     for rating, printed in PRINTED_ZONES[quantity].items():
         assert vibration.gear_unit_zone_boundaries(quantity, rating).as_tuple == printed
 

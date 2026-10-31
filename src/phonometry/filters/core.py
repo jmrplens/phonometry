@@ -66,9 +66,6 @@ __all__ = [
 _P0 = REFERENCE_VALUES["gas"]["sound_pressure"].value
 
 
-#: Filter families the bank knows how to design (see ``OctaveFilterBank``).
-_VALID_FILTERS = ["butter", "cheby1", "cheby2", "ellip", "bessel"]
-
 #: The ratio of a band's decimated Nyquist frequency to its upper band edge.
 #: A band designed close to its own Nyquist frequency is bent by the bilinear
 #: transform: just inside its upper band edge it attenuates less than the same
@@ -434,6 +431,17 @@ class FilterDesign(RichDisplay):
     attenuation: float = 72.0
     resample: bool = True
 
+    def __post_init__(self) -> None:
+        """Refuse a choice its ``Literal`` does not list, when the record is built.
+
+        :raises TypeError: if ``filter_type`` is not a text.
+        """
+        require_choice(
+            self.filter_type,
+            "filter_type",
+            ("butter", "cheby1", "cheby2", "ellip", "bessel"),
+        )
+
 
 @dataclass(frozen=True, kw_only=True)
 class LevelCalibration(RichDisplay):
@@ -528,9 +536,6 @@ def _validate_bank_design(
         raise ValueError(msg)
     if limits[0] >= limits[1]:
         msg = "The lower limit must be less than the upper limit."
-        raise ValueError(msg)
-    if design.filter_type not in _VALID_FILTERS:
-        msg = f"Invalid filter_type. Must be one of {_VALID_FILTERS}"
         raise ValueError(msg)
     if design.resample and block_processing.stateful:
         # a stateful resampling algorithm would be required...
@@ -1197,13 +1202,14 @@ def octave_filter(
         per-band ``bands``. With *nominal=True* the frequencies are
         IEC 61260-1 labels instead of floats.
     :raises TypeError: if ``fraction`` or ``fs`` is not a single number,
-        ``order`` is a flag, a text or an array where a count goes, or
-        ``limits`` is not a pair of numbers.
+        ``order`` is a flag, a text or an array where a count goes,
+        ``limits`` is not a pair of numbers, or ``mode`` is not a text.
     :raises ValueError: for a bare array with no ``fs``, a sample rate or a
         bandwidth that is not positive, an ``order`` that is not a whole
         number from 1, or frequency limits or a design the bank cannot be
         built with.
     """
+    require_choice(mode, "mode", ("rms", "peak"))
     fs = resolve_fs(x, fs)
     # Both branches see the same already-checked pair: without this, a
     # malformed limits argument died in the cache key's float() coercion on

@@ -143,7 +143,9 @@ __all__ = [
 #: 1 % apart rather than identical: 4,9/4,6 is 1,065 where the exact
 #: :math:`K_v` to :math:`C_v` conversion asks for :math:`\sqrt{1{,}156}`,
 #: which is 1,075.
-FLOW_COEFFICIENT_CONSTANTS = MappingProxyType({"Cv": 4.6e-3, "Kv": 4.9e-3})
+FLOW_COEFFICIENT_CONSTANTS: Mapping[Coefficient, float] = MappingProxyType(
+    {"Cv": 4.6e-3, "Kv": 4.9e-3}
+)
 
 #: The universal gas constant as the standard prints it in Clause 4, in
 #: J/(kmol K). It is paired with a molecular mass in kg/kmol, which is the
@@ -207,7 +209,9 @@ PIPE_WALL_MACH_LIMIT = 0.3
 #: the coefficient wanted. It is the reciprocal of an area per unit
 #: coefficient, so the two figures differ by the same conversion as
 #: :data:`FLOW_COEFFICIENT_CONSTANTS`.
-LAST_STAGE_AREA_CONSTANTS = MappingProxyType({"Cv": 4.89e4, "Kv": 4.23e4})
+LAST_STAGE_AREA_CONSTANTS: Mapping[Coefficient, float] = MappingProxyType(
+    {"Cv": 4.89e4, "Kv": 4.23e4}
+)
 
 #: Equation (28a)'s printed constant, which is what makes the first branch of
 #: NOTE 3 differ from a plain quadrature sum.
@@ -1508,6 +1512,13 @@ class ValveTrim(RichDisplay):
     efficiency_correction: float
     strouhal_number: float
     coefficient: Coefficient = "Cv"
+
+    def __post_init__(self) -> None:
+        """Refuse a choice its ``Literal`` does not list, when the record is built.
+
+        :raises TypeError: if ``coefficient`` is not a text.
+        """
+        require_choice(self.coefficient, "coefficient", ("Cv", "Kv"))
 
 
 @dataclass(frozen=True, kw_only=True)

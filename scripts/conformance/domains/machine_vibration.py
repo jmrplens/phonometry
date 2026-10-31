@@ -21,13 +21,20 @@ from __future__ import annotations
 
 import functools
 import math
-from typing import Literal
+from typing import TYPE_CHECKING, Literal
 
 import numpy as np
 
 import phonometry as ph
 
 from ..registry import Outcome, numeric, register
+
+if TYPE_CHECKING:
+    from phonometry.vibration.machinery.evaluation import (
+        BoundedZone,
+        MachineGroup,
+        MachineSupport,
+    )
 
 _MACHINE_VIB = "Machine vibration evaluation (ISO 20816)"
 
@@ -53,7 +60,7 @@ _PRINTED_RANGES = {
     "C/D": (4.5, 14.7),
 }
 #: Annex C.2: the factors that move the zone A curve onto the other limits.
-_PRINTED_FACTORS = {"A": 1.0, "B": 2.56, "C": 6.4}
+_PRINTED_FACTORS: dict[BoundedZone, float] = {"A": 1.0, "B": 2.56, "C": 6.4}
 
 #: A criterion shaped like Figure 9, for the rows that exercise Formula (C.1).
 _V_A = 1.12
@@ -95,7 +102,7 @@ def _chk_magnitude_change() -> Outcome:
     )
 
 
-def _chk_zone_factor(zone: str) -> Outcome:
+def _chk_zone_factor(zone: BoundedZone) -> Outcome:
     """One of the three factors of Annex C.2, read back off the criterion.
 
     Recovered as the ratio of the zone limit to the zone A limit rather than
@@ -120,7 +127,7 @@ def _chk_zone_factor(zone: str) -> Outcome:
 
 def _register_zone_factors() -> None:
     """Register the three zone-limit factors of Annex C.2."""
-    for zone in ("A", "B", "C"):
+    for zone in _PRINTED_FACTORS:
         register(
             _MACHINE_VIB,
             "ISO 20816-1:2016 Annex C.2",
@@ -237,7 +244,9 @@ def _chk_high_slope() -> Outcome:
 #: Tables A.1 and A.2 of ISO 10816-3:2009 on printed folio 11, as printed:
 #: (r.m.s. displacement in micrometres, r.m.s. velocity in mm/s) at the A/B,
 #: B/C and C/D boundaries of each group and support class.
-_PRINTED_INDUSTRIAL: dict[tuple[str, str], tuple[tuple[float, ...], ...]] = {
+_PRINTED_INDUSTRIAL: dict[
+    tuple[MachineGroup, MachineSupport], tuple[tuple[float, ...], ...]
+] = {
     ("group_1", "rigid"): ((29.0, 57.0, 90.0), (2.3, 4.5, 7.1)),
     ("group_1", "flexible"): ((45.0, 90.0, 140.0), (3.5, 7.1, 11.0)),
     ("group_2", "rigid"): ((22.0, 45.0, 71.0), (1.4, 2.8, 4.5)),
@@ -250,7 +259,9 @@ _PRINTED_CHANGE_FRACTION = 0.25
 _PRINTED_HEADROOM = 1.25
 
 
-def _chk_industrial_row(group: str, support: str, quantity: int) -> Outcome:
+def _chk_industrial_row(
+    group: MachineGroup, support: MachineSupport, quantity: int
+) -> Outcome:
     """One row of Table A.1 or A.2, compared boundary by boundary."""
     printed = _PRINTED_INDUSTRIAL[group, support][quantity]
     limits = ph.vibration.INDUSTRIAL_MACHINE_ZONES[group, support]

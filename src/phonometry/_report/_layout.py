@@ -769,6 +769,9 @@ def compliance_table(
         numbers, not user text).
     :param col_widths: Optional explicit column widths; defaults to
         ``[64, 36, 50, 24]`` mm (summing to the 174 mm content width).
+    :raises TypeError: if the status of an entry of ``rows`` is not a text.
+    :raises ValueError: if the status of an entry of ``rows`` is not
+        ``"pass"``, ``"fail"`` or ``"info"``.
     """
     from reportlab.lib import colors
     from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
@@ -798,7 +801,7 @@ def compliance_table(
         leading=11,
     )
 
-    def _result_markup(status: str) -> str:
+    def _result_markup(status: object) -> str:
         """The result cell of one row: a verdict, or the informational dash.
 
         The dash is what an unjudged row prints, so it has to be asked for by

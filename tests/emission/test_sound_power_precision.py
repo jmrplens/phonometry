@@ -86,7 +86,7 @@ def test_precision_positions_hemisphere_z_nonnegative() -> None:
 
 
 def test_precision_positions_invalid_surface_raises() -> None:
-    with pytest.raises(ValueError, match="'surface' must be 'sphere' or 'hemisphere'"):
+    with pytest.raises(ValueError, match="'surface' must be one of"):
         precision_positions("box", radius=1.0)  # type: ignore[arg-type]
 
 
@@ -387,7 +387,7 @@ def test_anechoic_bands_above_10khz_survive_without_lwa() -> None:
 
 def test_anechoic_invalid_surface_raises() -> None:
     levels = np.full((40, 1), 70.0)
-    with pytest.raises(ValueError, match="'surface' must be 'sphere' or 'hemisphere'"):
+    with pytest.raises(ValueError, match="'surface' must be one of"):
         sound_power_anechoic(levels, "box", radius=1.0)  # type: ignore[arg-type]
 
 

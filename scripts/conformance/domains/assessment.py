@@ -33,6 +33,7 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from phonometry.environment import ImpulseOnset
+    from phonometry.hearing._real_ear_attenuation import FrequencyRange, Protector
     from phonometry.metrology import UncertaintyResult
 
 _NTA = "Impulsive-sound prominence (NT ACOU 112)"
@@ -391,8 +392,10 @@ _REAT = "Hearing protector attenuation (ISO 4869-1)"
 
 
 def _reat_budget_mismatches(
-    library: Mapping[str, Mapping[str, ph.hearing.ProtectorUncertaintyBudget]],
-    printed: dict[str, list[tuple[float, float, float, float, float]]],
+    library: Mapping[
+        Protector, Mapping[FrequencyRange, ph.hearing.ProtectorUncertaintyBudget]
+    ],
+    printed: Mapping[Protector, list[tuple[float, float, float, float, float]]],
 ) -> tuple[int, int]:
     """Cells of Table A.2 or B.2 the library's budgets do not reproduce.
 

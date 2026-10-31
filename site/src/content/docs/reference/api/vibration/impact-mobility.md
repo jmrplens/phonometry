@@ -240,7 +240,7 @@ lower `min_n_records` states that fewer were judged enough.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an invalid range, exclusion or limit, a `min_n_records` that is not a whole number of at least 1, or exclusions that leave no frequency of the range to judge. |
-| TypeError | if `min_coherence` is not a single number, or `min_n_records` is a flag, a text or an array where a count goes. |
+| TypeError | if `min_coherence` is not a single number, `min_n_records` is a flag, a text or an array where a count goes, or `frequency_range_hz` is not a pair of numbers. |
 
 ## check_double_hit
 
@@ -334,6 +334,7 @@ reported beside it as [`ForceSpectrumCheck.energy_fraction_above`](/phonometry/r
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an invalid record, sample rate, range or limit. |
+| TypeError | if `frequency_range_hz` is not a pair of numbers, or `fs` or `max_drop_db` is not a single number. |
 
 ## check_overload
 
@@ -1121,6 +1122,7 @@ that way.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for records of different shapes, not finite or too short, a non-positive sample rate, an unknown response quantity, an invalid window, a range that holds no bin above 0 Hz, or a force spectrum that vanishes at some frequency of the range. |
+| TypeError | if `response_quantity` is not a text, or `frequency_range_hz` is not a pair of numbers. |
 
 **Warns**
 
@@ -1293,6 +1295,12 @@ ImpactMobilityResult.to(
 ```
 
 Convert the mobility to another FRF kind (see [`.convert_frf`](/phonometry/reference/api/vibration/mechanical-mobility/#convert_frf)).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `target` is not a text. |
 
 ## OverloadCheck
 
@@ -1568,7 +1576,7 @@ the record the exponential window multiplied:
 | Exception | When |
 | :--- | :--- |
 | ValueError | for mismatched or non-finite data, a band that is not a pair of positive numbers or holds fewer than three frequencies, an unknown kind, or a band whose data hold no lightly damped mode. |
-| TypeError | if `exponential_decay_rate_per_s` is not a single number. |
+| TypeError | if `exponential_decay_rate_per_s` is not a single number, `kind` is not a text, or `band_hz` is not a pair of numbers. |
 
 ## SingleModeFitResult
 
@@ -1741,6 +1749,7 @@ of the range of interest.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for mismatched or non-finite data, or a range that holds none of the frequencies. |
+| TypeError | if `frequency_range_hz` is not a pair of numbers. |
 
 ## WINDOWED_RESPONSE_END_RATIO
 

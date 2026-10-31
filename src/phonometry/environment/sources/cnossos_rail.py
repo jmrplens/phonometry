@@ -2601,8 +2601,8 @@ class RailwayEmissionResult(OwnsArrays):
 
         :raises ValueError: if the band, 1/3-octave or source-height axes
             disagree.
-        :raises TypeError: if ``heights_m`` or ``third_octave_frequencies`` is a single
-            number where an array goes.
+        :raises TypeError: if ``heights_m``, ``third_octave_frequencies`` or an
+            entry of ``components`` is a single number where an array goes.
         """
         require_ranks(
             self,

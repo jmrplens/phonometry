@@ -87,7 +87,7 @@ _DEVICE_PHRASE = {
 }
 
 
-def _device_phrase(device: str, language: Language) -> str:
+def _device_phrase(device: object, language: Language) -> str:
     """The localised Table 2 column-group name of a device kind.
 
     An unrecognised tag is refused rather than labelled as a complete

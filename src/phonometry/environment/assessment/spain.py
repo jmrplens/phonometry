@@ -156,17 +156,19 @@ EvaluationPeriod = Literal["day", "evening", "night"]
 RD1367_EVALUATION_PERIODS: tuple[EvaluationPeriod, ...] = ("day", "evening", "night")
 
 #: Default duration of each evaluation period, in hours (Annex I A.1 a).
-RD1367_PERIOD_HOURS: Mapping[str, float] = MappingProxyType(
+RD1367_PERIOD_HOURS: Mapping[EvaluationPeriod, float] = MappingProxyType(
     {"day": 12.0, "evening": 4.0, "night": 8.0}
 )
 
 #: Local-time start/end hour of each evaluation period (Annex I A.1 b).
-RD1367_PERIOD_CLOCK_LIMITS: Mapping[str, tuple[int, int]] = MappingProxyType(
-    {
-        "day": (7, 19),
-        "evening": (19, 23),
-        "night": (23, 7),
-    }
+RD1367_PERIOD_CLOCK_LIMITS: Mapping[EvaluationPeriod, tuple[int, int]] = (
+    MappingProxyType(
+        {
+            "day": (7, 19),
+            "evening": (19, 23),
+            "night": (23, 7),
+        }
+    )
 )
 
 #: Maximum of the summed correction ``Kt + Kf + Ki``, in dB (Annex IV A.3.3).
@@ -1395,7 +1397,7 @@ class ActivityAssessment(RichDisplay):
 
 def _period_durations(
     period_hours: Mapping[EvaluationPeriod, float] | None,
-) -> dict[str, float]:
+) -> dict[EvaluationPeriod, float]:
     """The period durations ``T``, with any caller override applied.
 
     :param period_hours: Durations in hours keyed by period, or ``None``.
@@ -1563,9 +1565,16 @@ def assess_activity(
     :return: An :class:`ActivityAssessment`.
     :raises ValueError: For an unknown period key, empty phase list,
         inconsistent durations, or invalid annual parameters.
-    :raises TypeError: if ``closed_level`` is not a single number, or ``operating_days``
-        or ``year_days`` is a flag, a text or an array where a count goes.
+    :raises TypeError: if ``closed_level`` is not a single number, ``operating_days``
+        or ``year_days`` is a flag, a text or an array where a count goes, a key
+        of ``measurements``, ``long_term_levels`` or ``period_hours`` is not a
+        text, or a value of ``period_hours`` is not a single number.
     """
+    for period in measurements:
+        require_choice(period, "measurements", RD1367_EVALUATION_PERIODS)
+    if long_term_levels is not None:
+        for period in long_term_levels:
+            require_choice(period, "long_term_levels", RD1367_EVALUATION_PERIODS)
     if not measurements:
         msg = "At least one evaluation period must be supplied."
         raise ValueError(msg)
@@ -1587,12 +1596,6 @@ def assess_activity(
         for name in RD1367_EVALUATION_PERIODS
         if name in measurements
     ]
-    if not assessments:
-        msg = (
-            "None of the supplied keys is an evaluation period; expected "
-            f"any of {RD1367_EVALUATION_PERIODS}."
-        )
-        raise ValueError(msg)
     if new_activity and all(p.long_term_pass is None for p in assessments):
         # Article 25.1 b i is mandatory for a new activity, so an assessment
         # that never evaluates it cannot conclude anything about compliance.

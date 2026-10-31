@@ -22,6 +22,7 @@ import numpy as np
 from .._internal.peaks import inter_sample_peak
 from .._internal.types import as_float_if_reduced
 from .._internal.validation import (
+    require_choice,
     require_count,
     require_scalar,
 )
@@ -179,8 +180,9 @@ def ln_levels(
     :return: Dict mapping each N to its level (scalar for 1D input,
         array (channels,) for 2D input).
     :raises TypeError: if ``calibration_factor`` is not a single number, or
-        ``weighting`` is not a text.
+        ``weighting`` is not a text, or ``mode`` is not a text.
     """
+    require_choice(weighting, "weighting", ("A", "C", "B", "D", "G", "AU", "468", "Z"))
     fs = _resolve_fs(x, fs)
     calibration_factor = _resolve_calibration(x, calibration_factor)
     x_proc = _resolve_samples_raw(x, calibrate=False)
@@ -302,6 +304,7 @@ def sel(
     :raises TypeError: if ``calibration_factor`` or ``fs`` is not a single number, or
         ``weighting`` is not a text.
     """
+    require_choice(weighting, "weighting", ("A", "C", "B", "D", "G", "AU", "468", "Z"))
     require_scalar(fs, "fs")
     fs = _resolve_fs(x, fs)
     calibration_factor = _resolve_calibration(x, calibration_factor)

@@ -198,13 +198,13 @@ def test_weighting_filter_class_direct_use() -> None:
 
 def test_weighting_filter_class_rejects_non_string_curve() -> None:
     """A non-string curve used to die in str.upper before the curve message."""
-    with pytest.raises(TypeError, match="'weighting' must be a string"):
+    with pytest.raises(TypeError, match="'weighting' must be one of .*, a text"):
         filters.WeightingFilter(48000, weighting=5)  # type: ignore[arg-type]
 
 
 def test_weighting_filter_rejects_non_string_curve() -> None:
     x = np.zeros(100)
-    with pytest.raises(TypeError, match="'weighting' must be a string"):
+    with pytest.raises(TypeError, match="'weighting' must be one of .*, a text"):
         filters.weighting_filter(x, 48000, weighting=5)  # type: ignore[arg-type]
 
 
@@ -334,7 +334,7 @@ def test_time_weighting_initial_state_invalid() -> None:
     fs = 1000
     x = np.ones(fs)
 
-    with pytest.raises(ValueError, match=r"initial_state must be None"):
+    with pytest.raises(ValueError, match="'initial_state' must be one of"):
         filters.time_weighting(x, fs, mode="fast", initial_state="invalid")
 
     two_channels = np.ones((2, 10))

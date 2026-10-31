@@ -387,11 +387,11 @@ def test_diotic_alias_matches_binaural() -> None:
 
 
 def test_invalid_inputs() -> None:
-    with pytest.raises(ValueError, match="field must be one of"):
+    with pytest.raises(ValueError, match="'field' must be one of"):
         psychoacoustics.loudness_moore_glasberg_from_spectrum(
             [(1000.0, 40.0)], field="near"
         )
-    with pytest.raises(ValueError, match="presentation must be one of"):
+    with pytest.raises(ValueError, match="'presentation' must be one of"):
         psychoacoustics.loudness_moore_glasberg_from_spectrum(
             [(1000.0, 40.0)], presentation="mono"
         )

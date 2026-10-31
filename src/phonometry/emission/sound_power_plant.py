@@ -141,6 +141,7 @@ from .._internal.levels_math import energy_mean, energy_sum
 from .._internal.types import as_float_or_array
 from .._internal.validation import (
     is_at_most,
+    require_choice,
     require_count,
     require_finite,
     require_finite_matrix,
@@ -1384,8 +1385,8 @@ def plant_measurement_contour(
         area, a layout of fewer than three positions, an omitted position that
         is not a whole number from 0, or omitted positions without a layout to
         refer to.
-    :raises TypeError: if ``n_positions`` or an omitted position is a flag, a
-        text or an array where a count goes.
+    :raises TypeError: if ``n_positions`` or an item of ``omitted_positions`` is a
+        flag, a text or an array where a count goes.
     """
     # The record validates the layout again; read here, a NumPy integer is
     # the int the record stores.
@@ -1904,13 +1905,10 @@ class PlantRequirement(RichDisplay):
 
         :raises ValueError: for a comparison outside ``">"``, ``">="``,
             ``"<="`` and ``"="``, or a negative tolerance.
-        :raises TypeError: if ``tolerance`` is not a single number.
+        :raises TypeError: if ``tolerance`` is not a single number, or ``comparison`` is
+            not a text.
         """
-        if self.comparison not in _COMPARISONS:
-            msg = (
-                f"'comparison' must be one of {_COMPARISONS}; got {self.comparison!r}."
-            )
-            raise ValueError(msg)
+        require_choice(self.comparison, "comparison", _COMPARISONS)
         require_scalar(self.tolerance, "tolerance")
         if math.isnan(self.tolerance) or self.tolerance < 0.0:
             msg = f"'tolerance' must be >= 0; got {self.tolerance!r}."

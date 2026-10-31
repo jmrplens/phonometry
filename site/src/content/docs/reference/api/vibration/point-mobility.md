@@ -131,7 +131,7 @@ bending wave speed $c_\mathrm{B} = (B \omega^2 / m')^{1/4}$
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive input or unknown location. |
-| TypeError | if `mass_per_length` is not a single number. |
+| TypeError | if `mass_per_length` is not a single number, or `location` is not a text. |
 
 ## infinite_beam_mobility
 
@@ -168,6 +168,7 @@ $\omega^{-1/2}$.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive input or unknown location. |
+| TypeError | if `location` is not a text. |
 
 ## infinite_beam_moment_mobility
 
@@ -227,6 +228,12 @@ Infinite-beam point mobility bundled as a [`MobilityResult`](/phonometry/referen
 
 **Returns:** The [`MobilityResult`](/phonometry/reference/api/vibration/mechanical-mobility/#mobilityresult) (driving point).
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `location` is not a text. |
+
 ## infinite_plate_impedance
 
 ```python
@@ -261,7 +268,7 @@ point force.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive stiffness/mass or unknown location. |
-| TypeError | if `bending_stiffness` or `mass_per_area` is not a single number. |
+| TypeError | if `bending_stiffness` or `mass_per_area` is not a single number, or `location` is not a text. |
 
 ## infinite_plate_mobility
 
@@ -295,6 +302,7 @@ independent).
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive stiffness/mass or unknown location. |
+| TypeError | if `location` is not a text. |
 
 ## infinite_plate_point_mobility
 
@@ -324,6 +332,12 @@ with the ISO 7626 mobility machinery.
 | `location` | `"center"` or `"edge"`. |
 
 **Returns:** The [`MobilityResult`](/phonometry/reference/api/vibration/mechanical-mobility/#mobilityresult) (driving point).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `location` is not a text. |
 
 ## injected_power
 

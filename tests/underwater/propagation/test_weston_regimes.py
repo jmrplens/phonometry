@@ -10,6 +10,8 @@ solvers of ``phonometry.underwater.propagation.numerical``.
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import matplotlib as mpl
 
 mpl.use("Agg")
@@ -33,6 +35,9 @@ from phonometry.underwater.propagation.weston_regimes import (
     weston_regime_boundaries,
 )
 
+if TYPE_CHECKING:
+    from phonometry.underwater.propagation.weston_regimes import SeabedName
+
 # ---------------------------------------------------------------------------
 # Table 9.1 (printed p. 454)
 # ---------------------------------------------------------------------------
@@ -43,7 +48,7 @@ from phonometry.underwater.propagation.weston_regimes import (
     [("sand", 0.88, 0.0161, 5e-5), ("mud", 0.09, 0.00165, 5e-6)],
 )
 def test_loss_parameter_reproduces_table_9_1(
-    seabed: str, beta: float, expected: float, half_digit: float
+    seabed: SeabedName, beta: float, expected: float, half_digit: float
 ) -> None:
     """ε = β_sed/(40·π·lg e), Ainslie Eq. (9.23); Table 9.1 prints 0.0161 and 0.00165.
 

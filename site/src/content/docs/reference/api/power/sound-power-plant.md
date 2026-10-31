@@ -521,7 +521,7 @@ the plan and found wanting is how the procedure starts (9.1.2.3, NOTE 6).
 | Exception | When |
 | :--- | :--- |
 | ValueError | for polygons that do not form a contour round the plant area, a layout of fewer than three positions, an omitted position that is not a whole number from 0, or omitted positions without a layout to refer to. |
-| TypeError | if `n_positions` or an omitted position is a flag, a text or an array where a count goes. |
+| TypeError | if `n_positions` or an item of `omitted_positions` is a flag, a text or an array where a count goes. |
 
 ## plant_method_uncertainty
 

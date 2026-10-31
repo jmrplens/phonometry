@@ -30,6 +30,10 @@ from typing import TYPE_CHECKING, Any, Final, Literal
 import numpy as np
 
 from .._internal.frozen import OwnsArrays, read_only
+
+# Imported to run, not only to type: typing.get_type_hints resolves the
+# sex field of AgeThresholdResult in this module's namespace.
+from .._internal.types import Sex  # noqa: TC001
 from .._internal.validation import (
     require_choice,
     require_ranks,
@@ -191,7 +195,7 @@ _SL_FEMALE: np.ndarray = np.array(
 _MEDIAN = {"male": _MEDIAN_MALE, "female": _MEDIAN_FEMALE}
 _SU = {"male": _SU_MALE, "female": _SU_FEMALE}
 _SL = {"male": _SL_MALE, "female": _SL_FEMALE}
-SEXES: tuple[str, ...] = ("male", "female")
+SEXES: tuple[Sex, ...] = ("male", "female")
 
 #: Reference threshold of hearing, in dB, free-field then diffuse-field, at
 #: :data:`AUDIOMETRIC_FREQUENCIES_HZ` (ISO 389-7:2005 Table 1).
@@ -228,7 +232,7 @@ class AgeThresholdResult(OwnsArrays):
     """
 
     age: float
-    sex: Literal["male", "female"]
+    sex: Sex
     fractile: float
     frequencies: np.ndarray
     median: np.ndarray
@@ -319,7 +323,7 @@ def _spread(coeffs: np.ndarray, u: float) -> np.ndarray:
 
 def age_threshold(
     age: float,
-    sex: Literal["male", "female"] = "male",
+    sex: Sex = "male",
     fractile: float = 0.5,
     frequencies: ArrayLike | None = None,
 ) -> AgeThresholdResult:
@@ -343,7 +347,8 @@ def age_threshold(
     :return: An :class:`AgeThresholdResult` with the distribution and ``.plot()``.
     :raises ValueError: for an age below 18, an unknown sex, a fractile outside
         (0, 1), or an unknown frequency.
-    :raises TypeError: if ``age`` or ``fractile`` is not a single number.
+    :raises TypeError: if ``age`` or ``fractile`` is not a single number, or
+        ``sex`` is not a text.
     """
     require_scalar(age, "age")
     if age < _REFERENCE_AGE:
@@ -352,9 +357,7 @@ def age_threshold(
             f"lower limit); got {age}."
         )
         raise ValueError(msg)
-    if sex not in _MEDIAN:
-        msg = f"sex must be one of {SEXES}; got {sex!r}."
-        raise ValueError(msg)
+    require_choice(sex, "sex", SEXES)
     require_scalar(fractile, "fractile")
     if not 0.0 < fractile < 1.0:
         msg = f"fractile must be in (0, 1); got {fractile}."
@@ -537,25 +540,28 @@ _RETSPL_OTHER: np.ndarray = np.array(
     dtype=np.float64,
 )
 
+#: An earphone ISO 389-1 prints a reference level for.
+ReferenceEarphone = Literal["DT 48", "TDH 39", "other supra-aural"]
+
 #: The three earphone names, written once. They are keys of two tables and
 #: the default of two entry points, and a name that drifts between them would
 #: be a lookup that fails rather than a typo anyone sees.
-_DT48 = "DT 48"
+_DT48: Final = "DT 48"
 _TDH39: Final = "TDH 39"
-_OTHER = "other supra-aural"
+_OTHER: Final = "other supra-aural"
 
-_RETSPL = {
+_RETSPL: Mapping[ReferenceEarphone, np.ndarray] = {
     _DT48: _RETSPL_DT48,
     _TDH39: _RETSPL_TDH39,
     _OTHER: _RETSPL_OTHER,
 }
 
 #: The earphones ISO 389-1 prints a reference level for.
-EARPHONES: tuple[str, ...] = tuple(_RETSPL)
+EARPHONES: tuple[ReferenceEarphone, ...] = tuple(_RETSPL)
 
 #: What each of them is calibrated on: the two named models on the acoustic
 #: coupler of Clause 4.2, everything else on the artificial ear of 4.3.
-EARPHONE_COUPLERS: Mapping[str, str] = MappingProxyType(
+EARPHONE_COUPLERS: Mapping[ReferenceEarphone, str] = MappingProxyType(
     {
         _DT48: "IEC 60303 acoustic coupler",
         _TDH39: "IEC 60303 acoustic coupler",
@@ -583,7 +589,7 @@ def _select_retspl(values: np.ndarray, frequencies: ArrayLike | None) -> np.ndar
 
 
 def earphone_reference_level(
-    earphone: Literal["DT 48", "TDH 39", "other supra-aural"] = _TDH39,
+    earphone: ReferenceEarphone = _TDH39,
     frequencies: ArrayLike | None = None,
 ) -> np.ndarray:
     """Reference equivalent threshold sound pressure level (ISO 389-1:1998).
@@ -601,16 +607,15 @@ def earphone_reference_level(
         hertz; ``None`` uses all twenty-three.
     :return: The reference level, in dB, aligned with the frequencies.
     :raises ValueError: For an unknown earphone or frequency.
+    :raises TypeError: if ``earphone`` is not a text.
     """
-    if earphone not in _RETSPL:
-        msg = f"earphone must be one of {EARPHONES}; got {earphone!r}."
-        raise ValueError(msg)
+    require_choice(earphone, "earphone", EARPHONES)
     return _select_retspl(_RETSPL[earphone], frequencies)
 
 
 def hearing_level_to_coupler_spl(
     hearing_level: ArrayLike,
-    earphone: Literal["DT 48", "TDH 39", "other supra-aural"] = _TDH39,
+    earphone: ReferenceEarphone = _TDH39,
     *,
     frequencies: ArrayLike | None = None,
 ) -> np.ndarray:
@@ -628,6 +633,7 @@ def hearing_level_to_coupler_spl(
     :return: The equivalent sound pressure level in the coupler, in dB.
     :raises ValueError: If the audiogram does not match the frequencies, or
         for an unknown earphone or frequency.
+    :raises TypeError: if ``earphone`` is not a text.
     """
     reference = earphone_reference_level(earphone, frequencies)
     levels = np.atleast_1d(np.asarray(hearing_level, dtype=np.float64))

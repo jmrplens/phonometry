@@ -58,6 +58,7 @@ import numpy as np
 
 from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
+    require_choice,
     require_count,
     require_equal_counts,
     require_ranks,
@@ -297,7 +298,11 @@ def correlation(
         the full ``N-1`` samples).
     :return: A :class:`CorrelationResult`.
     :raises ValueError: If the inputs or parameters are invalid.
+    :raises TypeError: if ``normalization`` is not a text.
     """
+    require_choice(
+        normalization, "normalization", ("biased", "unbiased", "coefficient")
+    )
     xa = _validate_signal(x, "x", context="a correlation estimate")
     is_auto = y is None
     ya = xa if y is None else _validate_signal(y, "y", context="a correlation estimate")
@@ -479,10 +484,8 @@ def _refine_peak(
     return position
 
 
-def _validate_refinement(interpolation: str, upsample: int | np.integer[Any]) -> int:
-    if interpolation not in ("parabolic", "none"):
-        msg = "'interpolation' must be 'parabolic' or 'none'."
-        raise ValueError(msg)
+def _validate_refinement(interpolation: object, upsample: int | np.integer[Any]) -> int:
+    require_choice(interpolation, "interpolation", ("parabolic", "none"))
     require_scalar(upsample, "upsample")
     factor = require_count(upsample, "upsample", at_least=None)
     if factor < 1:
@@ -532,7 +535,7 @@ class TimeDelayResult(OwnsArrays):
     delay: float
     delay_samples: float
     method: Literal["direct", "gcc", "phase"]
-    weighting: str | None
+    weighting: _Weighting | None
     lags: NDArray[np.float64]
     correlation: NDArray[np.float64]
     peak_correlation: float
@@ -814,8 +817,11 @@ def time_delay(
         Eq. 8.129 delay uncertainty (``None``: no error reported).
     :return: A :class:`TimeDelayResult`.
     :raises ValueError: If the inputs or parameters are invalid.
-    :raises TypeError: if ``upsample`` is a flag, a text or an array where a count goes.
+    :raises TypeError: if ``upsample`` is a flag, a text or an array where a count goes,
+        or ``interpolation``, ``method`` or ``weighting`` is not a text.
     """
+    require_choice(method, "method", ("gcc", "direct", "phase"))
+    require_choice(weighting, "weighting", ("none", "roth", "scot", "phat", "ml"))
     xa = _validate_signal(x, "x", context="a time-delay estimate")
     ya = _validate_signal(y, "y", context="a time-delay estimate")
     fs = resolve_pair_fs(x, y, fs)
@@ -828,7 +834,7 @@ def time_delay(
     fs_v = _positive(fs, "fs")
     factor = _validate_refinement(interpolation, upsample)
 
-    weight_name: str | None = None
+    weight_name: _Weighting | None = None
     if method == "direct":
         lag_samples, curve = _direct_tde_curve(xa, ya, fs_v, max_delay)
         peak = int(np.argmax(np.abs(curve)))
@@ -926,7 +932,8 @@ def impulse_response_delay(
     :param upsample: Integer local-upsampling factor (default 8).
     :return: Delay in seconds (relative to :math:`t = 0` or to ``reference``).
     :raises ValueError: If the inputs or parameters are invalid.
-    :raises TypeError: if ``upsample`` is a flag, a text or an array where a count goes.
+    :raises TypeError: if ``upsample`` is a flag, a text or an array where a count goes,
+        or ``interpolation`` is not a text.
     """
     ira = _validate_signal(ir, "ir", context=_DELAY_CONTEXT)
     if reference is None:
@@ -1050,6 +1057,7 @@ def align_impulse_responses(
     :param upsample: Integer local-upsampling factor (default 8).
     :return: An :class:`AlignedImpulseResponseResult`.
     :raises ValueError: If the inputs or parameters are invalid.
+    :raises TypeError: if ``interpolation`` is not a text.
     """
     ira = _validate_signal(ir, "ir", context=_DELAY_CONTEXT)
     refa = _validate_signal(reference, "reference", context=_DELAY_CONTEXT)

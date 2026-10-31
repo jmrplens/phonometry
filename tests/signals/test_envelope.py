@@ -381,7 +381,7 @@ def test_envelope_spectrum_band_validation() -> None:
 
 def test_envelope_spectrum_validates_inputs() -> None:
     x = _am_signal()
-    with pytest.raises(ValueError, match=r"'kind' must be 'magnitude' or 'squared'"):
+    with pytest.raises(ValueError, match="'kind' must be one of"):
         ph.signals.envelope_spectrum(x, FS, kind="log")
     with pytest.raises(ValueError, match=r"'nfft' must be at least the record length"):
         ph.signals.envelope_spectrum(x, FS, nfft=100)

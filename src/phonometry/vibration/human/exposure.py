@@ -467,7 +467,7 @@ class WeightingResponse(OwnsArrays):
         a reader, and ``.plot()``, which of the two curves this is.
     """
 
-    name: str
+    name: WeightingName
     frequencies: Real
     response: Complex
     magnitude: Real
@@ -492,7 +492,7 @@ class WeightingResponse(OwnsArrays):
 
 
 def _response_result(
-    name: str, frequencies: ArrayLike, *, band_limiting: bool
+    name: WeightingName, frequencies: ArrayLike, *, band_limiting: bool
 ) -> WeightingResponse:
     """Evaluate one of the two responses of ``name`` and package it."""
     freq = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
@@ -529,7 +529,9 @@ def frequency_weighting(
     :param frequencies: Frequencies at which to evaluate, in hertz (> 0).
     :return: A :class:`WeightingResponse` with ``.plot()``.
     :raises ValueError: if ``name`` is unknown or ``frequencies`` is empty.
+    :raises TypeError: if ``name`` is not a text.
     """
+    require_choice(name, "name", ("Wb", "Wc", "Wd", "We", "Wf", "Wh", "Wj", "Wk", "Wm"))
     return _response_result(name, frequencies, band_limiting=False)
 
 
@@ -564,7 +566,9 @@ def band_limiting_response(
     :return: A :class:`WeightingResponse` with ``band_limiting`` true and
         ``.plot()``.
     :raises ValueError: if ``name`` is unknown or ``frequencies`` is empty.
+    :raises TypeError: if ``name`` is not a text.
     """
+    require_choice(name, "name", ("Wb", "Wc", "Wd", "We", "Wf", "Wh", "Wj", "Wk", "Wm"))
     return _response_result(name, frequencies, band_limiting=True)
 
 
@@ -578,7 +582,9 @@ def band_limiting_factors(name: WeightingName, frequencies: ArrayLike) -> Real:
     :param name: Weighting name (one of :data:`WEIGHTING_NAMES`).
     :param frequencies: Band centre frequencies, in hertz.
     :return: Band-limiting factor per frequency.
+    :raises TypeError: if ``name`` is not a text.
     """
+    require_choice(name, "name", ("Wb", "Wc", "Wd", "We", "Wf", "Wh", "Wj", "Wk", "Wm"))
     return band_limiting_response(name, frequencies).magnitude
 
 
@@ -591,7 +597,9 @@ def weighting_factors(name: WeightingName, frequencies: ArrayLike) -> Real:
     :param name: Weighting name (one of :data:`WEIGHTING_NAMES`).
     :param frequencies: Band centre frequencies, in hertz.
     :return: Weighting factor per frequency.
+    :raises TypeError: if ``name`` is not a text.
     """
+    require_choice(name, "name", ("Wb", "Wc", "Wd", "We", "Wf", "Wh", "Wj", "Wk", "Wm"))
     return frequency_weighting(name, frequencies).magnitude
 
 
@@ -618,8 +626,9 @@ def apply_weighting(
     :return: The frequency-weighted acceleration signal, same length as input.
     :raises ValueError: if ``x`` is not 1-D, ``fs`` is not positive, or
         ``name`` is unknown.
-    :raises TypeError: if ``fs`` is not a single number.
+    :raises TypeError: if ``fs`` is not a single number, or ``name`` is not a text.
     """
+    require_choice(name, "name", ("Wb", "Wc", "Wd", "We", "Wf", "Wh", "Wj", "Wk", "Wm"))
     return _apply_response(x, fs, name=name, band_limiting=False)
 
 
@@ -653,8 +662,9 @@ def apply_band_limiting(
     :return: The band-limited acceleration signal, same length as input.
     :raises ValueError: if ``x`` is not 1-D, ``fs`` is not positive, or
         ``name`` is unknown.
-    :raises TypeError: if ``fs`` is not a single number.
+    :raises TypeError: if ``fs`` is not a single number, or ``name`` is not a text.
     """
+    require_choice(name, "name", ("Wb", "Wc", "Wd", "We", "Wf", "Wh", "Wj", "Wk", "Wm"))
     return _apply_response(x, fs, name=name, band_limiting=True)
 
 
@@ -693,7 +703,7 @@ class WeightedSpectrum(OwnsArrays):
 
     frequencies: Real
     band_accelerations: Real
-    weighting_name: str
+    weighting_name: WeightingName
     weighting_factors: Real
     weighted: Real
     overall: float
@@ -775,8 +785,11 @@ def weighted_acceleration(
     :raises ValueError: if the inputs differ in length, are empty or carry
         non-finite values.
     :raises TypeError: if ``band_accelerations`` or ``frequencies`` holds a text or a
-        value that is not a real number.
+        value that is not a real number, or ``weighting`` is not a text.
     """
+    require_choice(
+        weighting, "weighting", ("Wb", "Wc", "Wd", "We", "Wf", "Wh", "Wj", "Wk", "Wm")
+    )
     # Finiteness is required of both vectors: a NaN band acceleration (or the
     # NaN factor a NaN centre frequency weights it with) flows through the
     # root-sum-of-squares into an a_w of NaN, and the plot then titles itself
@@ -852,8 +865,10 @@ def running_rms(
     :return: The running r.m.s. value ``a_w(t0)`` per sample, in m/s2.
     :raises ValueError: for a bad signal, non-positive ``fs``/``tau`` or an
         unknown ``method``.
-    :raises TypeError: if ``fs`` or ``integration_time`` is not a single number.
+    :raises TypeError: if ``fs`` or ``integration_time`` is not a single number, or
+        ``method`` is not a text.
     """
+    require_choice(method, "method", ("linear", "exponential"))
     fs = resolve_fs(x, fs, name="x")
     x = _weighted_signal(x)
     fs = _positive_fs(fs)
@@ -915,7 +930,9 @@ def mtvv(
     :return: The MTVV, in m/s2.
     :raises ValueError: for a bad signal, non-positive ``fs``/``tau`` or an
         unknown ``method``.
+    :raises TypeError: if ``method`` is not a text.
     """
+    require_choice(method, "method", ("linear", "exponential"))
     return float(
         np.max(running_rms(x, fs, integration_time=integration_time, method=method))
     )

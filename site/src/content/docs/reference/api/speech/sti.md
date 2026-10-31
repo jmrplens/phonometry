@@ -298,7 +298,7 @@ STIResult(
     mti: np.ndarray,
     mtf: np.ndarray,
     band_levels: np.ndarray | None,
-    rating: str,
+    rating: Literal['U', 'J', 'I', 'H', 'G', 'F', 'E', 'D', 'C', 'B', 'A', 'A+'],
     ambient_levels: np.ndarray | None = None,
 )
 ```

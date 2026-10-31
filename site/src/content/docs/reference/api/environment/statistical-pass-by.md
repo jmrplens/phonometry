@@ -141,6 +141,7 @@ averages.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For no surfaces, or a surface without exactly the three categories. |
+| TypeError | if a category of `surface_levels` is not a text, or a level in it is not a single number. |
 
 ## pass_by_regression
 
@@ -463,7 +464,7 @@ speed windows are judged, kept on the result and emitted as
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a category the method does not use, rows that do not match, a category with fewer than three pass-bys or all at one speed, or invalid weighting factors or levels. |
-| TypeError | if `road_speed_category` is not a text, or `reference_levels` is not a single number. |
+| TypeError | if `road_speed_category` or a key of `corrected_vehicle_sound_levels`, `reference_levels` or `weighting_factors` is not a text, or `reference_levels` or a value of one of those mappings is not a single number. |
 
 ## statistical_pass_by_index
 
@@ -511,7 +512,7 @@ before calling this.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a road speed category the standard does not define, a level missing, unknown or not finite, or weighting factors that are negative or do not add up to 1. |
-| TypeError | if `road_speed_category` is not a text. |
+| TypeError | if `road_speed_category` or a key of `vehicle_sound_levels` or `weighting_factors` is not a text, or a value of either is not a single number. |
 
 ## StatisticalPassByResult
 

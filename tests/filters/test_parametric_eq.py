@@ -479,7 +479,7 @@ def test_every_type_designs_and_is_stable(filter_type: str) -> None:
 
 
 def test_rejects_unknown_type_and_bad_frequencies() -> None:
-    with pytest.raises(ValueError, match=r"Unknown filter_type 'bell'"):
+    with pytest.raises(ValueError, match="'filter_type' must be one of"):
         ph.filters.EQSection(filter_type="bell", f0=1000.0)  # type: ignore[arg-type]
     with pytest.raises(ValueError, match=r"'f0' must be positive"):
         ph.filters.EQSection(filter_type="peaking", f0=0.0)

@@ -355,7 +355,7 @@ the middle need a few seconds.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If an input is invalid, or `peak_to_rms` is not below the ratio of the unclipped record. |
-| TypeError | if `duration_s`, `peak_to_rms` or `rms` is not a single number, or `fs` is a flag, a text or an array where a count goes. |
+| TypeError | if `duration_s`, `peak_to_rms` or `rms` is not a single number, or `fs` is a flag, a text or an array where a count goes, or `spectrum` is not a text. |
 
 ## SIMULATED_PROGRAM_SPECTRUM
 

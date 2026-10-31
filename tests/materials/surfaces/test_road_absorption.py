@@ -310,7 +310,7 @@ def test_adrienne_window_guards() -> None:
         adrienne_window(FS, flat_duration_s=0.0)
     with pytest.raises(ValueError, match="Edge durations must be non-negative"):
         adrienne_window(FS, leading_duration_s=-1e-3)
-    with pytest.raises(ValueError, match="Edge shapes must be one of"):
+    with pytest.raises(ValueError, match="'(leading|trailing)_edge' must be one of"):
         adrienne_window(FS, trailing_edge="triangular")
 
 

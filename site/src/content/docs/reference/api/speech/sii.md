@@ -77,6 +77,7 @@ Build the plottable band table of an ANSI S3.5-1997 band procedure.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an unknown procedure name. |
+| TypeError | if `method` is not a text. |
 
 ## SIIProcedure
 
@@ -273,6 +274,7 @@ equally-contributing critical bands or the 6 octave bands.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if a spectrum has the wrong length or carries a non-finite value, or the method or effort name is unknown. |
+| TypeError | if `method` is not a text. |
 
 ## standard_speech_spectra
 
@@ -303,6 +305,7 @@ function, which still returns the bare per-band array.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an unknown vocal effort, or an empty selection. |
+| TypeError | if an entry of `vocal_efforts` is not a text. |
 
 ## standard_speech_spectrum
 
@@ -327,6 +330,7 @@ Standard speech spectrum level by vocal effort (ANSI S3.5-1997 Table 3).
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an unknown vocal effort. |
+| TypeError | if `vocal_effort` is not a text. |
 
 ## StandardSpeechSpectrum
 

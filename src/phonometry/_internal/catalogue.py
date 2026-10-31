@@ -101,7 +101,8 @@ _PACKAGED_KEYS = frozenset({*_REQUIRED, "conventions", "validity"})
 #: estimate (``"estimated"``), or the result of an extended application of a
 #: test (``"extended"``). A source that does not say is left without an
 #: entry rather than given one of these.
-CATALOGUE_BASES: tuple[str, ...] = (
+CatalogueBasis = Literal["measured", "declared", "calculated", "estimated", "extended"]
+CATALOGUE_BASES: tuple[CatalogueBasis, ...] = (
     "measured",
     "declared",
     "calculated",

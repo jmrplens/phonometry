@@ -88,7 +88,7 @@ from dataclasses import dataclass, field
 from io import StringIO
 from pathlib import Path
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, NamedTuple
+from typing import TYPE_CHECKING, Any, Literal, NamedTuple
 
 from .._internal.catalogue import (
     _NOUNS,
@@ -96,6 +96,7 @@ from .._internal.catalogue import (
     CatalogueIssue,
     PrintedNumber,
 )
+from .._internal.validation import require_choice
 from ._catalogue import (
     _EXTRA,
     _FORBIDDEN,
@@ -130,8 +131,10 @@ if TYPE_CHECKING:
     from ._catalogue import Catalogue, _Names
 
 #: The delimiters and the decimal marks a header may declare.
-_DELIMITERS = (",", ";", "\t")
-_DECIMALS = (".", ",")
+type _Delimiter = Literal[",", ";", "\t"]
+type _Decimal = Literal[".", ","]
+_DELIMITERS: tuple[_Delimiter, ...] = (",", ";", "\t")
+_DECIMALS: tuple[_Decimal, ...] = (".", ",")
 #: The largest header read, checked before more than the limit is read, as
 #: the largest file is.
 _MAX_HEADER = 64 * 1024
@@ -309,20 +312,25 @@ def _dialect_problems(held: object) -> list[tuple[str, str]]:
     return problems
 
 
-def check_dialect(delimiter: str, decimal: str) -> _Dialect:
+def check_dialect(
+    delimiter: _Delimiter, decimal: _Decimal, *, json_document: str | None = None
+) -> _Dialect:
     """The dialect :func:`~phonometry.io.write_catalogue` is asked to write.
 
+    :param json_document: The name of the JSON document written in place of
+        a CSV file, which takes no dialect but the default one.
+    :raises TypeError: if ``delimiter`` or ``decimal`` is not a text.
     :raises ValueError: for a delimiter or a decimal mark a catalogue CSV
-        does not take, and for a decimal comma between commas.
+        does not take, for a decimal comma between commas, and for a dialect
+        beside a JSON document.
     """
-    if delimiter not in _DELIMITERS:
+    require_choice(delimiter, "delimiter", _DELIMITERS)
+    require_choice(decimal, "decimal", _DECIMALS)
+    if json_document is not None and (delimiter, decimal) != (",", "."):
         msg = (
-            f"delimiter={delimiter!r}: a catalogue CSV is delimited by ',', ';' or "
-            "a tab, '\\t'"
+            "delimiter= and decimal= declare a CSV file's dialect, and "
+            f"{json_document!r} is a JSON document"
         )
-        raise ValueError(msg)
-    if decimal not in _DECIMALS:
-        msg = f"decimal={decimal!r}: a catalogue CSV's decimal mark is '.' or ','"
         raise ValueError(msg)
     if delimiter == decimal:
         msg = (

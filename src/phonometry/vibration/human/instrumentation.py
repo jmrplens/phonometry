@@ -153,7 +153,7 @@ _FREQUENCIES_MSG = "'frequencies' must be positive and finite."
 #: rounded decimals printed beside them: the exponents are the exact values
 #: and the decimals are the courtesy.
 _WHOLE_BODY_TRANSITIONS = (-6, -2, 18, 22)
-_TRANSITION_EXPONENTS: dict[str, tuple[int, int, int, int]] = {
+_TRANSITION_EXPONENTS: dict[WeightingName, tuple[int, int, int, int]] = {
     "Wb": _WHOLE_BODY_TRANSITIONS,
     "Wc": _WHOLE_BODY_TRANSITIONS,
     "Wd": _WHOLE_BODY_TRANSITIONS,
@@ -166,7 +166,7 @@ _TRANSITION_EXPONENTS: dict[str, tuple[int, int, int, int]] = {
 }
 
 #: Table 4 as frequencies in hertz, ``(ft1, ft2, ft3, ft4)`` per weighting.
-TRANSITION_FREQUENCIES_HZ: Mapping[str, tuple[float, float, float, float]] = (
+TRANSITION_FREQUENCIES_HZ: Mapping[WeightingName, tuple[float, float, float, float]] = (
     MappingProxyType(
         {
             name: (
@@ -201,7 +201,7 @@ TAIL_TOLERANCE_PERCENT = (UNCONSTRAINED_BELOW_PERCENT, 26.0, math.inf)
 #: 500 rad/s for hand-transmitted, 2,5 rad/s for the low-frequency case), and
 #: they are divided by 2 pi here rather than transcribed from the rounded
 #: hertz beside them.
-_REFERENCE_RAD_S: dict[str, float] = {
+_REFERENCE_RAD_S: dict[WeightingName, float] = {
     "Wb": 100.0,
     "Wc": 100.0,
     "Wd": 100.0,
@@ -212,7 +212,7 @@ _REFERENCE_RAD_S: dict[str, float] = {
     "Wk": 100.0,
     "Wm": 100.0,
 }
-REFERENCE_FREQUENCY_HZ: Mapping[str, float] = MappingProxyType(
+REFERENCE_FREQUENCY_HZ: Mapping[WeightingName, float] = MappingProxyType(
     {name: omega / (2.0 * math.pi) for name, omega in _REFERENCE_RAD_S.items()}
 )
 
@@ -220,7 +220,7 @@ REFERENCE_FREQUENCY_HZ: Mapping[str, float] = MappingProxyType(
 #: metres per second squared. The weightings are not unity there, so the
 #: indication a conforming meter shows is this value times the weighting
 #: factor at the reference frequency.
-REFERENCE_ACCELERATION_M_S2: Mapping[str, float] = MappingProxyType(
+REFERENCE_ACCELERATION_M_S2: Mapping[WeightingName, float] = MappingProxyType(
     {
         "Wb": 1.0,
         "Wc": 1.0,
@@ -245,18 +245,20 @@ REFERENCE_ACCELERATION_M_S2: Mapping[str, float] = MappingProxyType(
 #: 8 Hz that opens the hand-transmitted range is the band centred on
 #: ``10**(9/10) = 7,943`` Hz, which is why the printed lower bound is 8 and
 #: the first Annex B row inside it is not.
-NOMINAL_FREQUENCY_RANGE_HZ: Mapping[str, tuple[float, float]] = MappingProxyType(
-    {
-        "Wb": (0.5, 80.0),
-        "Wc": (0.5, 80.0),
-        "Wd": (0.5, 80.0),
-        "We": (0.5, 80.0),
-        "Wf": (0.1, 0.5),
-        "Wh": (8.0, 1000.0),
-        "Wj": (0.5, 80.0),
-        "Wk": (0.5, 80.0),
-        "Wm": (1.0, 80.0),
-    }
+NOMINAL_FREQUENCY_RANGE_HZ: Mapping[WeightingName, tuple[float, float]] = (
+    MappingProxyType(
+        {
+            "Wb": (0.5, 80.0),
+            "Wc": (0.5, 80.0),
+            "Wd": (0.5, 80.0),
+            "We": (0.5, 80.0),
+            "Wf": (0.1, 0.5),
+            "Wh": (8.0, 1000.0),
+            "Wj": (0.5, 80.0),
+            "Wk": (0.5, 80.0),
+            "Wm": (1.0, 80.0),
+        }
+    )
 )
 
 #: The coverage factor the expanded uncertainty of a conformance measurement
@@ -1248,7 +1250,7 @@ _DECAY_FRACTION = 0.1
 #: value takes to fall to 10 % of its initial value after a steady reference
 #: sinusoid is suddenly shut off, in seconds. One row per printed time
 #: constant, ``(integration time, printed time, printed tolerance)``.
-RUNNING_RMS_DECAY_TIME_S: Mapping[str, tuple[tuple[float, float, float], ...]] = (
+RUNNING_RMS_DECAY_TIME_S: Mapping[Method, tuple[tuple[float, float, float], ...]] = (
     MappingProxyType(
         {
             "linear": ((0.125, 0.124, 0.005), (1.0, 0.99, 0.05), (8.0, 7.92, 0.2)),
@@ -1345,7 +1347,9 @@ class RunningRMSDecayVerification(RichDisplay):
 
     def _row(self) -> tuple[float, float]:
         """The printed decay time and its tolerance, in seconds."""
-        averaging = require_choice(self.method, "method", ("linear", "exponential"))
+        averaging = require_choice(
+            self.method, "method", tuple(RUNNING_RMS_DECAY_TIME_S)
+        )
         tau = float(self.integration_time)
         for printed_tau, printed_time, tolerance in RUNNING_RMS_DECAY_TIME_S[averaging]:
             if math.isclose(tau, printed_tau, rel_tol=1e-9, abs_tol=0.0):

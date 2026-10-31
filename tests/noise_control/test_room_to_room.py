@@ -282,12 +282,10 @@ def test_validation() -> None:
         ValueError, match=r"'criterion\.flanking_penalty' must be non-negative"
     ):
         _chain(criterion=negative_flanking)
-    unknown_family = noise_control.DesignCriterion(family="NR")
-    with pytest.raises(ValueError, match=r"'criterion' must be one of"):
-        _chain(criterion=unknown_family)
-    unknown_model = noise_control.SourceRoom(level=_SOURCE, model="constant_energy")
-    with pytest.raises(ValueError, match=r"'source\.model' must be one of"):
-        _chain(source=unknown_model)
+    with pytest.raises(ValueError, match=r"'family' must be one of"):
+        noise_control.DesignCriterion(family="NR")  # type: ignore[arg-type]
+    with pytest.raises(ValueError, match=r"'model' must be one of"):
+        noise_control.SourceRoom(level=_SOURCE, model="constant_energy")  # type: ignore[arg-type]
     nan_target = noise_control.DesignCriterion(target=_NAN)
     with pytest.raises(ValueError, match=r"'target' must be a finite criterion value"):
         _chain(criterion=nan_target)

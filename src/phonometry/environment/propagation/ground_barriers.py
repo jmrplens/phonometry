@@ -142,7 +142,10 @@ __all__ = [
 #: only tags a :class:`BarrierInsertionLoss` may carry: the fiche and the plot
 #: both name the model from this tag, so one they do not know would be printed
 #: as the basis of a prediction the library never made.
-_BARRIER_METHODS: tuple[str, ...] = ("kurze_anderson", "exact")
+_BARRIER_METHODS: tuple[Literal["kurze_anderson", "exact"], ...] = (
+    "kurze_anderson",
+    "exact",
+)
 #: Tolerance on |x|, x = sqrt(2*pi*N), below which x/tanh(x) is replaced by its
 #: x -> 0 limit of 1+0j (guards the 0/0 indeterminate form at N = 0).
 _X_OVER_TANH_EPS = 1e-9
@@ -413,8 +416,10 @@ def ground_effect(
         are given, a height is negative, or the distance is not positive.
     :raises TypeError: if ``distance``, ``flow_resistivity_pa_s_m2``,
         ``receiver_height_m`` or ``source_height_m`` is not a single number, or
-        ``frequencies`` holds a text or a value that is not a real number.
+        ``frequencies`` holds a text or a value that is not a real number, or ``model``
+        is not a text.
     """
+    require_choice(model, "model", ("delany_bazley", "miki"))
     require_scalar(distance, "distance")
     require_scalar(receiver_height_m, "receiver_height_m")
     require_scalar(source_height_m, "source_height_m")
@@ -939,10 +944,11 @@ def barrier_insertion_loss(
         other than the two listed, or if a ground is requested with
         ``method="kurze_anderson"``.
     :raises TypeError: if ``barrier_distance``, ``barrier_height_m``,
-        ``receiver_distance`` or ``thickness_m`` is not a single number,
-        ``frequencies`` holds a text or a value that is not a real number, or
-        ``method`` is not a text.
+        ``receiver_distance`` or ``thickness_m`` is not a single number, ``frequencies``
+        holds a text or a value that is not a real number, or ``method`` is not a text,
+        or ``ground_model`` is not a text.
     """
+    require_choice(ground_model, "ground_model", ("delany_bazley", "miki"))
     require_choice(method, "method", _BARRIER_METHODS)
     thickness_m = _validate_barrier_geometry(
         source_height_m,

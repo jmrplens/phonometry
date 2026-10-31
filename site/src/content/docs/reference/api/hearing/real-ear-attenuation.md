@@ -280,6 +280,7 @@ separate requirements of the test site and are not judged here.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if a position is missing or unknown, if the bands do not match, if a rotation is given without its microphone's rejection or the other way round, or if that rejection is below the 10 dB Table 1 accepts. |
+| TypeError | if a position of `position_levels` is not a text. |
 
 ## min_significant_difference
 
@@ -519,6 +520,7 @@ to one decimal, as the tables print them (see
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a protector type the tables do not list, or for frequencies that are not positive and finite. |
+| TypeError | if `protector` is not a text. |
 
 ## REAT_FIELD_VARIATION_LIMITS
 

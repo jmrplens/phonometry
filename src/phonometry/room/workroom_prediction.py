@@ -58,6 +58,7 @@ import numpy as np
 from .._internal.display import RichDisplay
 from .._internal.levels_math import energy_sum
 from .._internal.validation import (
+    require_choice,
     require_finite,
     require_finite_array,
     require_positive,
@@ -128,14 +129,14 @@ SOURCE_DETAIL_LEVELS: Mapping[int, str] = MappingProxyType(
 #: decibels. The far region is the one with no upper bound printed: there
 #: ``DL2`` may pass 6 dB and ``DLf`` may be negative, because the fittings
 #: scatter more than the walls reflect.
-TYPICAL_DECAY_RANGE_DB: Mapping[str, _Range] = MappingProxyType(
+TYPICAL_DECAY_RANGE_DB: Mapping[Region, _Range] = MappingProxyType(
     {
         "near": (5.0, 6.0),
         "middle": (2.0, 5.0),
         "far": (6.0, None),
     }
 )
-TYPICAL_EXCESS_RANGE_DB: Mapping[str, _Range] = MappingProxyType(
+TYPICAL_EXCESS_RANGE_DB: Mapping[Region, _Range] = MappingProxyType(
     {
         "near": (None, None),
         "middle": (2.0, 10.0),
@@ -166,7 +167,7 @@ class PredictionMethod(RichDisplay):
 
 #: Table 4 and Table E.1 as one table: the four categories with the levels of
 #: detail each of them is recommended to be fed.
-PREDICTION_METHODS: Mapping[str, PredictionMethod] = MappingProxyType(
+PREDICTION_METHODS: Mapping[Category, PredictionMethod] = MappingProxyType(
     {
         "1": PredictionMethod(
             category="1",
@@ -215,7 +216,7 @@ PREDICTION_METHODS: Mapping[str, PredictionMethod] = MappingProxyType(
 
 #: Table E.1 on its own, as the level ranges keyed by category.
 RECOMMENDED_DETAIL: Mapping[
-    str, tuple[tuple[int, ...], tuple[int, ...], tuple[int, ...]]
+    Category, tuple[tuple[int, ...], tuple[int, ...], tuple[int, ...]]
 ] = MappingProxyType(
     {
         key: (method.room_detail, method.fitting_detail, method.source_detail)
@@ -277,11 +278,9 @@ def prediction_method(category: Category) -> PredictionMethod:
     :param category: ``"1"``, ``"2a"``, ``"2b"`` or ``"2c"``.
     :return: The row, as a :class:`PredictionMethod`.
     :raises ValueError: For a category Table 4 does not print.
+    :raises TypeError: if ``category`` is not a text.
     """
-    if category not in PREDICTION_METHODS:
-        printed = ", ".join(sorted(PREDICTION_METHODS))
-        msg = f"Table 4 of ISO 11690-3 prints categories {printed}; got {category!r}."
-        raise ValueError(msg)
+    require_choice(category, "category", tuple(PREDICTION_METHODS))
     return PREDICTION_METHODS[category]
 
 
@@ -305,6 +304,7 @@ def check_prediction_detail(
     :param source_detail: The level of Table 3 the sources are described at.
     :return: The verdict, as a :class:`PredictionDetailCheck`.
     :raises ValueError: For an unknown category or a level no table prints.
+    :raises TypeError: if ``category`` is not a text.
     """
     method = prediction_method(category)
     _require_level(room_detail, ROOM_DETAIL_LEVELS, "room_detail", 1)
@@ -456,7 +456,9 @@ def typical_decay_range(region: Region) -> _Range:
     :return: The lower bound and the upper one, which is ``None`` in the far
         region because the clause prints none.
     :raises ValueError: For a region 4.3 does not name.
+    :raises TypeError: if ``region`` is not a text.
     """
+    require_choice(region, "region", ("near", "middle", "far"))
     return _region(region, TYPICAL_DECAY_RANGE_DB)
 
 
@@ -470,11 +472,13 @@ def typical_excess_range(region: Region) -> _Range:
     :return: The lower bound and the upper one, either of which may be
         ``None``.
     :raises ValueError: For a region 4.3 does not name.
+    :raises TypeError: if ``region`` is not a text.
     """
+    require_choice(region, "region", ("near", "middle", "far"))
     return _region(region, TYPICAL_EXCESS_RANGE_DB)
 
 
-def _region(region: str, table: Mapping[str, _Range]) -> _Range:
+def _region(region: Region, table: Mapping[Region, _Range]) -> _Range:
     """One row of the 4.3 ranges, or a refusal naming the three it prints."""
     if region not in table:
         printed = ", ".join(sorted(table))

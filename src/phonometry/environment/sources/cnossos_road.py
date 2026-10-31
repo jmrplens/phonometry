@@ -163,6 +163,7 @@ RoadVehicleCode = Literal[
     "4a",
     "4b",
 ]
+_ROAD_VEHICLE_CODES: tuple[RoadVehicleCode, ...] = ("1", "2", "3", "4a", "4b")
 
 
 class RoadVehicleCategory(Enum):
@@ -240,7 +241,7 @@ class RoadSurface(Enum):
 # Delegated Directive (EU) 2021/1226 Annex point (19)(a). Rows are
 # (A_R, B_R, A_P, B_P) over the eight octave bands 63 Hz .. 8 kHz, in dB.
 # ---------------------------------------------------------------------------
-_TABLE_F1: dict[str, tuple[tuple[float, ...], ...]] = {
+_TABLE_F1: dict[RoadVehicleCode, tuple[tuple[float, ...], ...]] = {
     "1": (
         (83.1, 89.2, 87.7, 93.1, 100.1, 96.7, 86.8, 76.2),
         (30.0, 41.5, 38.9, 25.7, 32.5, 37.2, 39.0, 40.0),
@@ -285,7 +286,7 @@ _TABLE_F2_B: tuple[float, ...] = (0.0, 0.0, 0.0, -3.1, -6.4, -14.0, -22.4, -11.4
 # unchanged since Commission Directive (EU) 2015/996.
 # Values are ((C_R, C_P) for k = 1 crossing, (C_R, C_P) for k = 2 roundabout).
 # ---------------------------------------------------------------------------
-_TABLE_F3: dict[str, tuple[tuple[float, float], tuple[float, float]]] = {
+_TABLE_F3: dict[RoadVehicleCode, tuple[tuple[float, float], tuple[float, float]]] = {
     "1": ((-4.5, 5.5), (-4.4, 3.1)),
     "2": ((-4.0, 9.0), (-2.3, 6.7)),
     "3": ((-4.0, 9.0), (-2.3, 6.7)),
@@ -297,7 +298,7 @@ _TABLE_F3: dict[str, tuple[tuple[float, float], tuple[float, float]]] = {
 #: 0,08 for light vehicles, 0,04 for the two heavy categories, and no
 #: temperature dependence for the powered two-wheelers, which have no rolling
 #: noise at all.
-_TEMPERATURE_COEFFICIENTS_DB_PER_K: dict[str, float] = {
+_TEMPERATURE_COEFFICIENTS_DB_PER_K: dict[RoadVehicleCode, float] = {
     "1": 0.08,
     "2": 0.04,
     "3": 0.04,
@@ -322,7 +323,9 @@ def _surface_row(
     medium: tuple[tuple[float, ...], float],
     heavy: tuple[tuple[float, ...], float],
     two_wheelers: tuple[tuple[float, ...], float] = (_ZERO_8, 0.0),
-) -> tuple[float | None, float | None, dict[str, tuple[tuple[float, ...], float]]]:
+) -> tuple[
+    float | None, float | None, dict[RoadVehicleCode, tuple[tuple[float, ...], float]]
+]:
     """Assemble one Table F-4 row (the 4a/4b row is shared by both categories)."""
     return (
         v_min,
@@ -338,7 +341,12 @@ def _surface_row(
 
 
 _TABLE_F4: dict[
-    str, tuple[float | None, float | None, dict[str, tuple[tuple[float, ...], float]]]
+    str,
+    tuple[
+        float | None,
+        float | None,
+        dict[RoadVehicleCode, tuple[tuple[float, ...], float]],
+    ],
 ] = {
     RoadSurface.REFERENCE.value: _surface_row(
         None,
@@ -448,6 +456,16 @@ _TABLE_F4: dict[
 }
 
 
+def _require_codes(table: Mapping[RoadVehicleCode, object], name: str) -> None:
+    """Check that each key of a per-category table is a code of Table [2.2.a].
+
+    :raises TypeError: for a key that is not a text.
+    :raises ValueError: for a text that is not a code of the table.
+    """
+    for key in table:
+        require_choice(key, name, _ROAD_VEHICLE_CODES)
+
+
 @dataclass(frozen=True, kw_only=True)
 class RoadEmissionCoefficients(RichDisplay):
     """Appendix F coefficient database for the road source.
@@ -472,23 +490,39 @@ class RoadEmissionCoefficients(RichDisplay):
         of temperatures.
     """
 
-    rolling_a: Mapping[str, tuple[float, ...]]
-    rolling_b: Mapping[str, tuple[float, ...]]
-    propulsion_a: Mapping[str, tuple[float, ...]]
-    propulsion_b: Mapping[str, tuple[float, ...]]
+    rolling_a: Mapping[RoadVehicleCode, tuple[float, ...]]
+    rolling_b: Mapping[RoadVehicleCode, tuple[float, ...]]
+    propulsion_a: Mapping[RoadVehicleCode, tuple[float, ...]]
+    propulsion_b: Mapping[RoadVehicleCode, tuple[float, ...]]
     studded_a: tuple[float, ...]
     studded_b: tuple[float, ...]
-    junction_c: Mapping[str, tuple[tuple[float, float], tuple[float, float]]]
-    temperature_coefficient_db_per_k: Mapping[str, float]
+    junction_c: Mapping[
+        RoadVehicleCode, tuple[tuple[float, float], tuple[float, float]]
+    ]
+    temperature_coefficient_db_per_k: Mapping[RoadVehicleCode, float]
 
     def __post_init__(self) -> None:
-        """Hold every per-category table read-only.
+        """Check each category key, and hold every per-category table read-only.
 
         ``frozen=True`` stops a field from being rebound, not a dictionary in
         it from being edited, and the default instance is shared by every
         caller. The tables are wrapped on this instance and on any a caller
         builds.
+
+        :raises ValueError: if a key of a per-category table is not a code of
+            Table [2.2.a].
+        :raises TypeError: if a key of ``rolling_a``, ``rolling_b``,
+            ``propulsion_a``, ``propulsion_b``, ``junction_c`` or
+            ``temperature_coefficient_db_per_k`` is not a text.
         """
+        _require_codes(self.rolling_a, "rolling_a")
+        _require_codes(self.rolling_b, "rolling_b")
+        _require_codes(self.propulsion_a, "propulsion_a")
+        _require_codes(self.propulsion_b, "propulsion_b")
+        _require_codes(self.junction_c, "junction_c")
+        _require_codes(
+            self.temperature_coefficient_db_per_k, "temperature_coefficient_db_per_k"
+        )
         for field in fields(self):
             value = getattr(self, field.name)
             if isinstance(value, Mapping):
@@ -534,9 +568,19 @@ class RoadSurfaceCoefficients(RichDisplay):
     """
 
     name: str
-    alpha: dict[str, tuple[float, ...]]
-    beta: dict[str, float]
+    alpha: dict[RoadVehicleCode, tuple[float, ...]]
+    beta: dict[RoadVehicleCode, float]
     speed_range_kmh: tuple[float, float] | None
+
+    def __post_init__(self) -> None:
+        """Check each category key of the row.
+
+        :raises ValueError: if a key of ``alpha`` or ``beta`` is not a code of
+            Table [2.2.a].
+        :raises TypeError: if a key of ``alpha`` or ``beta`` is not a text.
+        """
+        _require_codes(self.alpha, "alpha")
+        _require_codes(self.beta, "beta")
 
 
 def road_surface_coefficients(
@@ -626,7 +670,9 @@ def _category_key(category: RoadVehicleCategory | str) -> RoadVehicleCode:
     return cast("RoadVehicleCode", key)
 
 
-def _require_category(key: str, coefficients: RoadEmissionCoefficients) -> None:
+def _require_category(
+    key: RoadVehicleCode, coefficients: RoadEmissionCoefficients
+) -> None:
     """Check that a substituted Appendix F database covers the category.
 
     :func:`_category_key` only checks that the category exists in Table
@@ -659,7 +705,8 @@ def _require_category(key: str, coefficients: RoadEmissionCoefficients) -> None:
 
 
 def _surface_of(
-    surface: RoadSurface | RoadSurfaceName | RoadSurfaceCoefficients, key: str
+    surface: RoadSurface | RoadSurfaceName | RoadSurfaceCoefficients,
+    key: RoadVehicleCode,
 ) -> RoadSurfaceCoefficients:
     """Resolve a surface and check that it covers the vehicle category.
 
@@ -1124,6 +1171,12 @@ def road_source_power(
         an invalid flow rate or speed.
     :raises TypeError: if ``surface`` is neither a text nor a road surface.
     """
+    # The surface is read once, so a misspelt name is refused before any flow.
+    row = (
+        surface
+        if isinstance(surface, RoadSurfaceCoefficients)
+        else road_surface_coefficients(surface)
+    )
     flows = [traffic] if isinstance(traffic, RoadTraffic) else list(traffic)
     if not flows:
         msg = "'traffic' must carry at least one vehicle category."
@@ -1143,7 +1196,7 @@ def road_source_power(
         lwr = road_rolling_noise(
             key,
             v,
-            surface=surface,
+            surface=row,
             temperature_c=temperature_c,
             studded_fraction=flow.studded_fraction,
             studded_months=studded_months,
@@ -1154,7 +1207,7 @@ def road_source_power(
         lwp = road_propulsion_noise(
             key,
             v,
-            surface=surface,
+            surface=row,
             road_slope_percent=road_slope_percent,
             junction_distance=junction_distance,
             junction_type=junction_type,

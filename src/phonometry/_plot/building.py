@@ -2614,6 +2614,9 @@ def plot_low_frequency_intensity(
     :param kwargs: Forwarded to the ``RI`` bar call.
     :return: The axes.
     """
+    from .._i18n import check_language
+
+    check_language(language)
     return _plot_low_frequency(
         result,
         result.r_i,
@@ -2645,6 +2648,9 @@ def plot_low_frequency_element(
     :param kwargs: Forwarded to the ``DI,n,e`` bar call.
     :return: The axes.
     """
+    from .._i18n import check_language
+
+    check_language(language)
     return _plot_low_frequency(
         result,
         result.d_i_n_e,

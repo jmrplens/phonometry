@@ -2548,6 +2548,89 @@ afectan al código escrito desde entonces.
 | `vibration.verify_weighting(name=)` | un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
 | `vibration.weighting_tolerance_percent(name=)` | un valor que no es texto pero se escribe como una opción | `TypeError` para un valor que no es texto |
 
+## Un registro rechaza una opción al construirse
+
+Un registro que construye quien llama comprueba en su `__post_init__`, tal
+como se escribe, cada campo tipado con un `Literal`: un texto que no ofrece
+lanza `ValueError` y un valor que no es texto lanza `TypeError`, al construir
+el registro. Antes de 4.0 la mayoría guardaba cualquier valor y lo dejaba a
+quien lo leyera, de modo que una errata fallaba más tarde, en otra llamada, o
+no fallaba; los cuatro que sí comprobaban rechazaban con `ValueError` un valor
+que no es texto. El arreglo es escribir la opción tal como la enumera su
+`Literal` donde se construye el registro.
+
+| Registro | Antes de 4.0 | 4.0 |
+| --- | --- | --- |
+| `aircraft.ANPNPDCurves(metric=, operation=)` | guardaba cualquier valor, rechazado más tarde o nunca | rechazado al construirse |
+| `aircraft.SpectralClass(operation=)` | guardaba cualquier valor, rechazado más tarde o nunca | rechazado al construirse |
+| `aircraft.RotorcraftAtmosphere(atmospheric_method=)` | guardaba cualquier valor, rechazado más tarde o nunca | rechazado al construirse |
+| `aircraft.RotorcraftGround(flow_resistivity=)` | guardaba cualquier valor, rechazado más tarde o nunca | rechazado al construirse |
+| `building.BandPath(kind=)` | guardaba cualquier valor, rechazado más tarde o nunca | rechazado al construirse |
+| `building.FlankingPath(kind=)` | guardaba cualquier valor, rechazado más tarde o nunca | rechazado al construirse |
+| `electroacoustics.MicrophoneNoise(weighting=)` | guardaba cualquier valor, rechazado más tarde o nunca | rechazado al construirse |
+| `emission.MicrophoneTraverse(targets=)` | `ValueError` para cualquier objetivo que no conocía, texto o no | `ValueError` para un texto que no ofrece, `TypeError` para un objetivo que no es texto |
+| `environment.BinnedSoundLevels(averaging=)` | guardaba cualquier valor, rechazado más tarde o nunca | rechazado al construirse |
+| `environment.RoadEmissionCoefficients` (las claves de categoría de sus tablas por categoría) | guardaba cualquier clave, rechazada más tarde o nunca | `ValueError` para un texto que no es un código de la Tabla [2.2.a], `TypeError` para una clave que no es texto, cada clave al construirse |
+| `environment.RoadSurfaceCoefficients(alpha=, beta=)` (sus claves de categoría) | guardaba cualquier clave, rechazada más tarde o nunca | `ValueError` para un texto que no es un código de la Tabla [2.2.a], `TypeError` para una clave que no es texto, cada clave al construirse |
+| `filters.FilterDesign(filter_type=)` | guardaba cualquier valor, rechazado más tarde o nunca | rechazado al construirse |
+| `filters.EQSection(filter_type=)` | `ValueError` para cualquier valor que no conocía, texto o no | `ValueError` para un texto que no ofrece, `TypeError` para un valor que no es texto |
+| `hearing.Task(instrument=)` | guardaba cualquier valor, rechazado más tarde o nunca | rechazado al construirse |
+| `materials.FiberResistivityFit(direction=)` | guardaba cualquier valor, rechazado más tarde o nunca | rechazado al construirse |
+| `metrology.SoundLevelMeterPeriodicMeasurements` (las claves de sus diccionarios por ponderación, por rango y por respuesta) | `ValueError` para cualquier clave que no conocía | `ValueError` para un texto que no conoce, `TypeError` para una clave que no es texto, cada clave al construirse |
+| `noise_control.DesignCriterion(family=)` | guardaba cualquier valor, rechazado más tarde o nunca | rechazado al construirse |
+| `noise_control.SourceRoom(model=)` | guardaba cualquier valor, rechazado más tarde o nunca | rechazado al construirse |
+| `noise_control.LiquidTrim(coefficient=)` | guardaba cualquier valor, rechazado más tarde o nunca | rechazado al construirse |
+| `noise_control.ValveTrim(coefficient=)` | guardaba cualquier valor, rechazado más tarde o nunca | rechazado al construirse |
+| `phonometry.ReportMetadata(tube_shape=)` | `ValueError` para cualquier valor que no conocía, texto o no | `ValueError` para un texto que no ofrece, `TypeError` para un valor que no es texto |
+| `vibration.GuideValues(time_of_day=, edition=)` | guardaba cualquier valor, rechazado más tarde o nunca | rechazado al construirse |
+| `vibration.FaultLine(family=)` | guardaba cualquier valor, rechazado más tarde o nunca | rechazado al construirse |
+
+Las funciones comprueban también la opción en todos los caminos. Una que se
+leía solo en algunos caminos aceptaba cualquier valor en los demás, y una que
+se comprobaba con una comparación rechazaba con `ValueError` un valor que no es
+texto, o con un error ajeno:
+
+| Llamada | Antes de 4.0 | 4.0 |
+| --- | --- | --- |
+| `environment.ground_effect(model=)` | aceptaba cualquier valor sin `flow_resistivity_pa_s_m2` | `ValueError` para un texto que no ofrece, `TypeError` para un valor que no es texto, se dé lo que se dé |
+| `environment.barrier_insertion_loss(ground_model=)` | aceptaba cualquier valor sin `ground_flow_resistivity_pa_s_m2` | lo mismo |
+| `environment.atmospheric_parabolic_equation(model=)` | aceptaba cualquier valor sin `flow_resistivity_pa_s_m2` | lo mismo |
+| `metrology.coupler_transfer_impedance(heat_conduction_method=)` | aceptaba cualquier valor con un `PlaneWaveCoupler` | lo mismo |
+| `noise_control.elbow_insertion_loss(lined_side=)` | aceptaba cualquier valor con `model="ashrae"` | lo mismo |
+| `noise_control.fan_sound_power(assembly=)` | aceptaba cualquier valor con `model="ashrae"` | lo mismo |
+| `noise_control.fan_sound_power(fan_type=)` | aceptaba cualquier valor con `model="vdi2081"` | lo mismo |
+| `signals.time_delay(weighting=)` | aceptaba cualquier valor salvo con `method="gcc"` | lo mismo |
+| `underwater.ship_source_spectrum(vessel_class=)` | aceptaba cualquier valor salvo con `model="jomopans-echo"` | lo mismo |
+| `emission.reference_source_calibration(arrangement=)`, `emission.reference_source_reproducibility(arrangement=)` | aceptaba cualquier valor en una cámara reverberante | lo mismo; allí se sigue aceptando `None` |
+| `building.single_number_uncertainty(situation=)` con `upper_limit=True` | `ValueError` para todo lo que no fuera `"A"`, texto o no | `ValueError` para un texto distinto de `"A"`, `TypeError` para un valor que no es texto |
+| `io.write(subtype=)` con muestras enteras | `ValueError` para todo lo que no fuera el subtipo propio de las muestras, texto o no | `TypeError` para un valor que no es texto |
+| `io.write_catalogue(delimiter=, decimal=)` junto a un documento JSON | `ValueError` para todo lo que no fuera el dialecto por defecto, texto o no | `TypeError` para un valor que no es texto |
+| `underwater.gaussian_beams(absorption=)` | `AttributeError` para un valor que no es texto ni un `VolumeAbsorption` | `TypeError` |
+| `filters.FilterPeriodicVerification.clause()` | `KeyError` para cualquier nombre que no se hubiera medido | `ValueError` para un texto que no nombra ninguna de las cinco cláusulas, `TypeError` para un valor que no es texto; `KeyError` para una cláusula que no se midió |
+
+Cada clave de un diccionario y cada elemento de una secuencia se comprueba uno
+a uno: `environment.assess_activity` ignoraba un periodo que no conocía junto
+a otro que sí, y ahora lanza `ValueError` por él; una clave de
+`environment.pleasantness_eventfulness` que no es texto lanzaba `ValueError` y
+ahora lanza `TypeError`; las comprobaciones del campo sonoro de ISO 8253-2,
+ISO 4869-1 e ISO 4869-3 tropezaban con esa clave con un `TypeError` ajeno, al
+ordenar, y ahora nombran el parámetro; las claves de los límites de
+decaimiento de la vía de referencia y de la `geometry` del dibujo de un
+silenciador lanzan `TypeError` cuando no son texto; una clave de la `section`
+de un conducto que
+`noise_control.duct_path` no admite lanzaba el `TypeError` de un argumento por
+nombre desconocido y ahora lanza `ValueError`; y los balances de
+incertidumbre de la comparación, de la reciprocidad y de las correcciones de
+campo libre conservan su mensaje para un componente desconocido y lanzan
+`TypeError` para una clave que no es texto. Doce `.plot()` de los resultados
+de protectores auditivos, de reducción activa de ruido, de atenuación en oído
+real y de baja frecuencia de ISO 15186-3, y
+`building.SoundReductionResult.report`, aceptaban cualquier `language` y ahora
+rechazan el que no ofrecen, como el resto de los gráficos. Quien indexa con
+tipos una tabla publicada con un `str` libre (una variable `str` en
+`room.TABLE_A1` o en `hearing.EARPHONES`) necesita ahora el `Literal` por el
+que está indexada; los valores no cambian.
+
 ## Los setenta y ocho nombres que ya no están
 
 Todo lo demás se movió. Estos setenta y ocho no existen en ningún módulo público:

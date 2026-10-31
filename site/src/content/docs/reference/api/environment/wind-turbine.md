@@ -93,7 +93,7 @@ $R_0 = H + D/2$
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a dimension is not positive or `rotor_axis` is not one of the two orientations. |
-| TypeError | if `hub_height_m` or `rotor_diameter_m` is not a single number. |
+| TypeError | if `hub_height_m` or `rotor_diameter_m` is not a single number, or `rotor_axis` is not a text. |
 
 ## wind_turbine_tonality
 

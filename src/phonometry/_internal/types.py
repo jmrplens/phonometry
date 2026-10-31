@@ -88,6 +88,16 @@ FreeOrDiffuseField = Literal["free", "diffuse"]
 #: coupler) or a free field.
 CalibrationField = Literal["pressure", "free"]
 
+#: A ground impedance class of the Nordtest classification, by its letter:
+#: ``"A"`` (very soft, snow or moss) to ``"H"`` (very hard, dense concrete),
+#: as CNOSSOS-EU and ECAC Doc 32 Table 5 rate a ground and IEC TS
+#: 61400-11-2:2024 Table C.1 describes it.
+GroundClass = Literal["A", "B", "C", "D", "E", "F", "G", "H"]
+
+#: The sex a population statistic is tabulated by, as ISO 7029, ISO 1999 and
+#: ISO 2631-5 print their columns.
+Sex = Literal["male", "female"]
+
 #: The engine a ``report`` entry point draws its fiche with. ``"reportlab"``
 #: is the only one; the parameter is the seam a second engine would come in by.
 ReportEngine = Literal["reportlab"]

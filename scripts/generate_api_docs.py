@@ -1821,6 +1821,15 @@ def render_index(
         ),
         ":::",
         "",
+        ":::note[Choices]",
+        (
+            "A choice is checked as written: a text it does not offer is a "
+            "`ValueError` and a value that is not a text a `TypeError`. That "
+            "holds for `language` and `engine` everywhere they are taken, and "
+            "is said here once rather than on every function."
+        ),
+        ":::",
+        "",
     ]
     by_section: dict[str, list[ModuleDoc]] = {}
     for page in pages:

@@ -50,6 +50,7 @@ from .._internal.levels_math import energy_mean, energy_sum, weighted_energy_mea
 from .._internal.types import ReportEngine, as_float_or_array
 from .._internal.validation import (
     check_engine,
+    require_choice,
     require_ranks,
     require_same_length,
     require_scalar,
@@ -293,7 +294,7 @@ class PrecisionSoundPowerResult(OwnsArrays):
     directivity_index: np.ndarray
     non_uniformity_index: np.ndarray
     surface_area: float
-    surface: str
+    surface: PrecisionSurface
     sound_power_level_a: float
     uncertainty: float
     uncertainty_bands: np.ndarray
@@ -464,14 +465,12 @@ def precision_positions(
         ignored for a sphere (only Table D.1 exists).
     :param n_positions: ``20`` (primary array) or ``40`` (full array).
     :return: ``(n_positions, 3)`` microphone coordinates, in metres.
-    :raises TypeError: if ``radius`` is not a single number.
+    :raises TypeError: if ``radius`` is not a single number, or ``array`` or ``surface``
+        is not a text.
     """
     require_scalar(radius, "radius")
-    if surface not in ("sphere", "hemisphere"):
-        raise ValueError(_SURFACE_CHOICE_MSG)
-    if array not in ("general", "broadband"):
-        msg = "'array' must be 'general' or 'broadband'."
-        raise ValueError(msg)
+    require_choice(surface, "surface", ("sphere", "hemisphere"))
+    require_choice(array, "array", ("general", "broadband"))
     if radius <= 0:
         msg = "A positive 'radius' is required."
         raise ValueError(msg)
@@ -923,11 +922,11 @@ def sound_power_anechoic(
         radius, or when a band lies outside the qualified frequency range.
     :return: :class:`PrecisionSoundPowerResult`.
     :raises ValueError: for a room qualification of the other room type.
-    :raises TypeError: if ``radius`` is not a single number.
+    :raises TypeError: if ``radius`` is not a single number, or ``surface`` is not a
+        text.
     """
     require_scalar(radius, "radius")
-    if surface not in ("sphere", "hemisphere"):
-        raise ValueError(_SURFACE_CHOICE_MSG)
+    require_choice(surface, "surface", ("sphere", "hemisphere"))
     if radius <= 0:
         msg = "A positive 'radius' is required."
         raise ValueError(msg)

@@ -419,6 +419,7 @@ requirement) and a footer with the identity block and disclaimer.
 | :--- | :--- |
 | ValueError | If `engine` or `quantity` is unknown, or the selected quantity has no single-number rating (the survey needs 5 octave or 16 one-third-octave bands, and `R'` needs `area` and `volume`). |
 | ImportError | If reportlab is not installed (`pip install "phonometry[report]"`), or matplotlib is missing for the embedded figure (`pip install "phonometry[plot]"`). |
+| TypeError | if `quantity` is not a text. |
 
 ## SurveyFacadeResult
 

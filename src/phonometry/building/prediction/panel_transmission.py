@@ -88,7 +88,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Literal, overload
+from typing import TYPE_CHECKING, Any, Literal, get_args, overload
 
 import numpy as np
 from scipy.integrate import quad
@@ -135,7 +135,7 @@ _FREQ_POSITIVE_MSG = "'frequency' must be positive."
 _FREQ_1D_MSG = "'frequency' must be a non-empty 1-D array."
 
 
-def _plateau_constants() -> dict[str, tuple[float, float, float]]:
+def _plateau_constants() -> dict[PlateauMaterialName, tuple[float, float, float]]:
     """The plateau method's three numbers per material, by lower-case name.
 
     Read from :data:`phonometry.solids.PUBLISHED_PLATEAU_DATA`, where the
@@ -143,7 +143,7 @@ def _plateau_constants() -> dict[str, tuple[float, float, float]]:
     time here. Every row of that table prints all three, so a missing one is
     a broken data file and not a material the method cannot handle.
     """
-    constants: dict[str, tuple[float, float, float]] = {}
+    constants: dict[PlateauMaterialName, tuple[float, float, float]] = {}
     for row in PUBLISHED_PLATEAU_DATA.values():
         density = row.surface_density_per_mm_kg_m2
         height = row.coincidence_height_db
@@ -151,7 +151,10 @@ def _plateau_constants() -> dict[str, tuple[float, float, float]]:
         if density is None or height is None or ratio is None:  # pragma: no cover
             msg = f"{row.name!r} lacks a plateau-method constant ({row.source})"
             raise ValueError(msg)
-        constants[row.name.casefold()] = (density, height, ratio)
+        name = require_choice(
+            row.name.casefold(), "name", get_args(PlateauMaterialName)
+        )
+        constants[name] = (density, height, ratio)
     return constants
 
 
@@ -165,8 +168,8 @@ PlateauMaterialName = Literal[
 #: per mm of thickness, coincidence plateau height in dB, frequency ratio
 #: B/A)``, keyed by the lower-case material name. The numbers are the rows of
 #: :data:`phonometry.solids.PUBLISHED_PLATEAU_DATA`, which holds the table.
-PLATEAU_MATERIALS: Mapping[str, tuple[float, float, float]] = MappingProxyType(
-    _plateau_constants()
+PLATEAU_MATERIALS: Mapping[PlateauMaterialName, tuple[float, float, float]] = (
+    MappingProxyType(_plateau_constants())
 )
 #: The fields of a :class:`~phonometry.solids.PlateauMaterial` row that hold
 #: the three numbers of a :data:`PLATEAU_MATERIALS` entry, in its order.
@@ -405,6 +408,9 @@ class SoundReductionResult(OwnsArrays):
             (e.g. ``engine``).
         :return: The written ``path`` as a :class:`str`.
         """
+        from ..._i18n import check_language
+
+        check_language(language)
         return self.rating().report(
             path, metadata=metadata, language=language, **kwargs
         )
@@ -587,7 +593,9 @@ def single_panel_transmission_loss(
     )
 
 
-def _plateau_constant(material: str | PlateauMaterial, index: int) -> float:
+def _plateau_constant(
+    material: PlateauMaterialName | PlateauMaterial, index: int
+) -> float:
     """One of a material's three plateau constants, by its place in the row.
 
     A name reads the :data:`PLATEAU_MATERIALS` entry. A row reads its cell
@@ -602,7 +610,7 @@ def _plateau_constant(material: str | PlateauMaterial, index: int) -> float:
     return PLATEAU_MATERIALS[material][index]
 
 
-def _plateau_material(material: object) -> str | PlateauMaterial:
+def _plateau_material(material: object) -> PlateauMaterialName | PlateauMaterial:
     """A name held to :data:`PLATEAU_MATERIALS`, or a plateau row as it is.
 
     :raises ValueError: for an unknown material name.
@@ -621,7 +629,7 @@ def _plateau_material(material: object) -> str | PlateauMaterial:
 
 
 def _material_constants(
-    material: str | PlateauMaterial,
+    material: PlateauMaterialName | PlateauMaterial,
     thickness_mm: float | None,
     mass_per_area: float | None,
     plateau_height: float | None,

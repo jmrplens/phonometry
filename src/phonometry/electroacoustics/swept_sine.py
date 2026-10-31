@@ -62,6 +62,7 @@ import numpy as np
 
 from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
+    require_choice,
     require_count,
     require_ranks,
     require_same_length,
@@ -706,7 +707,7 @@ def swept_sine_distortion(
         above ``fs/4``, where every order-2 product would exceed Nyquist).
     :raises TypeError: if ``amplitude``, ``duration_s``, ``f1``, ``f2`` or ``fs`` is not
         a single number, or ``ir_length`` or ``n_harmonics`` is a flag, a text or an
-        array where a count goes.
+        array where a count goes, or ``method`` is not a text.
     """
     fs = resolve_fs(recorded, fs, name="recorded")
     rec = apply_calibration(recorded, _validated_recording(recorded))
@@ -716,9 +717,7 @@ def swept_sine_distortion(
     _validate_sweep_band(fs_v, f1_v, f2_v)
     duration_s_v = _positive(duration_s, "duration_s")
     amplitude_v = _positive(amplitude, "amplitude")
-    if method not in ("synchronized", "farina"):
-        msg = "'method' must be 'synchronized' or 'farina'."
-        raise ValueError(msg)
+    require_choice(method, "method", ("synchronized", "farina"))
     require_scalar(n_harmonics, "n_harmonics")
     n_orders = require_count(n_harmonics, "n_harmonics", at_least=None)
     if n_orders < _MIN_HARMONIC_ORDER:

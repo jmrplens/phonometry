@@ -119,7 +119,7 @@ bound (clause 8.2.3).
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `background_levels` holds a text or a value that is not a real number. |
+| TypeError | if `background_levels` holds a text or a value that is not a real number, or `grade` is not a text. |
 
 ## environmental_correction
 
@@ -313,7 +313,7 @@ Cartesian `(x, y, z)` in metres, in the order of the position numbers.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a surface other than `'hemisphere'`, a radius that is not positive, a number of reflecting planes other than 1, 2 or 3, or an unknown grade. |
-| TypeError | if `radius` is not a single number. |
+| TypeError | if `radius` is not a single number, or `grade` or `surface` is not a text. |
 
 ## plot_microphone_positions
 
@@ -555,7 +555,7 @@ The level holds for the meteorological conditions of the test; above
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a malformed or non-finite level array, a geometry that does not describe the surface, too few positions, a background without its `integration_time`, or a mismatched `frequencies` length. |
-| TypeError | if `distance`, `integration_time`, `radius` or `sigma_omc_db` is not a single number, `n_events` is a flag, a text or an array where a count goes, or `dimensions` holds a text or a value that is not a real number, or `grade` is not a text. |
+| TypeError | if `distance`, `integration_time`, `radius` or `sigma_omc_db` is not a single number, `n_events` is a flag, a text or an array where a count goes, or `dimensions` holds a text or a value that is not a real number, or `grade` is not a text, or `surface` is not a text. |
 
 ## sound_power_pressure
 
@@ -616,7 +616,7 @@ sound power level is combined via ISO 3744 Annex E.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `distance`, `radius` or `sigma_omc_db` is not a single number, or `dimensions` holds a text or a value that is not a real number, or `grade` is not a text. |
+| TypeError | if `distance`, `radius` or `sigma_omc_db` is not a single number, or `dimensions` holds a text or a value that is not a real number, or `grade` is not a text, or `surface` is not a text. |
 
 ## SoundEnergyResult
 
@@ -761,6 +761,7 @@ $L_{W\mathrm{Ad}} = L_{W\mathrm{A}} + K_{W\mathrm{A}}$ (ISO 4871 clause 3.15).
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the A-weighted sound power level is not finite (several bands were combined without `frequencies`). |
+| TypeError | if `form` is not a text. |
 
 ### SoundPowerResult.plot()
 

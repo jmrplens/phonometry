@@ -85,6 +85,7 @@ import numpy as np
 
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
+    require_choice,
     require_finite_array,
     require_positive,
     require_ranks,
@@ -141,7 +142,7 @@ class WallTieStiffness(OwnsArrays):
 #: is a property of the tie *at that cavity width*: the same vertical-twist
 #: design measures 94,0 MN/m at 50 mm and 43,4 MN/m at 100 mm, so pass the
 #: matching ``gap_m`` to the double-wall functions.
-WALL_TIE_STIFFNESS: Mapping[str, WallTieStiffness] = MappingProxyType(
+WALL_TIE_STIFFNESS: Mapping[WallTie, WallTieStiffness] = MappingProxyType(
     {
         "butterfly": WallTieStiffness(cavity_width_m=0.050, stiffness=1.7e6),
         "double_triangle": WallTieStiffness(cavity_width_m=0.050, stiffness=16.1e6),
@@ -163,7 +164,13 @@ def wall_tie_stiffness(tie: WallTie) -> WallTieStiffness:
         at which the tie was measured (``cavity_width_m``) and its dynamic
         stiffness ``sX mm`` in N/m (``stiffness``).
     :raises ValueError: for an unknown tie name.
+    :raises TypeError: if ``tie`` is not a text.
     """
+    require_choice(
+        tie,
+        "tie",
+        ("butterfly", "double_triangle", "vertical_twist", "vertical_twist_100mm"),
+    )
     try:
         return WALL_TIE_STIFFNESS[tie]
     except KeyError:

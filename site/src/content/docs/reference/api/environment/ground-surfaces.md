@@ -339,6 +339,7 @@ into both.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a model other than the two, for a row whose page names another fit than *model*, or when the row holds no number for the resistivity, in which case the message says what the page has there instead. |
+| TypeError | if `model` is not a text. |
 
 ### GroundSurface.printed()
 

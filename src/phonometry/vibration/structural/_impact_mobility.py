@@ -97,6 +97,7 @@ import numpy as np
 
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
+    require_choice,
     require_count,
     require_finite,
     require_non_negative,
@@ -816,7 +817,8 @@ class ImpactMobilityResult(OwnsArrays):
             coherence lies outside [0, 1], fewer than one impact is recorded, the
             decay rate is negative, or the response quantity is unknown.
         :raises TypeError: if ``exponential_decay_rate_per_s`` is not a single number,
-            or ``n_impacts`` is a flag, a text or an array where a count goes.
+            or ``n_impacts`` is a flag, a text or an array where a count goes, or
+            ``response_quantity`` is not a text.
         """
         require_ranks(
             self,
@@ -851,12 +853,9 @@ class ImpactMobilityResult(OwnsArrays):
         require_non_negative(
             self.exponential_decay_rate_per_s, "exponential_decay_rate_per_s"
         )
-        if self.response_quantity not in _FRF_OF_RESPONSE:
-            msg = (
-                f"{owner}: 'response_quantity' must be one of "
-                f"{tuple(_FRF_OF_RESPONSE)}; got {self.response_quantity!r}."
-            )
-            raise ValueError(msg)
+        require_choice(
+            self.response_quantity, "response_quantity", tuple(_FRF_OF_RESPONSE)
+        )
 
     @property
     def magnitude(self) -> np.ndarray:
@@ -884,7 +883,22 @@ class ImpactMobilityResult(OwnsArrays):
             "apparent_mass",
         ],
     ) -> np.ndarray:
-        """Convert the mobility to another FRF kind (see :func:`.convert_frf`)."""
+        """Convert the mobility to another FRF kind (see :func:`.convert_frf`).
+
+        :raises TypeError: if ``target`` is not a text.
+        """
+        require_choice(
+            target,
+            "target",
+            (
+                "receptance",
+                "mobility",
+                "accelerance",
+                "dynamic_stiffness",
+                "impedance",
+                "apparent_mass",
+            ),
+        )
         return convert_frf(
             self.mobility, frequency=self.frequencies, source="mobility", target=target
         )
@@ -1081,6 +1095,8 @@ def impact_mobility(
         short, a non-positive sample rate, an unknown response quantity, an
         invalid window, a range that holds no bin above 0 Hz, or a force
         spectrum that vanishes at some frequency of the range.
+    :raises TypeError: if ``response_quantity`` is not a text, or
+        ``frequency_range_hz`` is not a pair of numbers.
     :warns ImpactExcitationWarning: when the force window removes an impact.
     """
     rate = require_positive(
@@ -1094,12 +1110,7 @@ def impact_mobility(
             f"{f_records.shape} and {x_records.shape}."
         )
         raise ValueError(msg)
-    if response_quantity not in _FRF_OF_RESPONSE:
-        msg = (
-            f"'response_quantity' must be one of {tuple(_FRF_OF_RESPONSE)}; "
-            f"got {response_quantity!r}."
-        )
-        raise ValueError(msg)
+    require_choice(response_quantity, "response_quantity", tuple(_FRF_OF_RESPONSE))
     n = f_records.shape[1]
     exponential = exponential_window(
         n, rate, decay_rate_per_s=exponential_decay_rate_per_s
@@ -1381,12 +1392,7 @@ class SingleModeFitResult(OwnsArrays):
         require_ranks(self, frequencies=1, frf=1)
         require_same_length(self, "frequencies", "frf", axis="frequency")
         owner = type(self).__name__
-        if self.kind not in ("accelerance", "mobility", "receptance"):
-            msg = (
-                f"{owner}: 'kind' must be 'accelerance', 'mobility' or "
-                f"'receptance'; got {self.kind!r}."
-            )
-            raise ValueError(msg)
+        require_choice(self.kind, "kind", ("accelerance", "mobility", "receptance"))
         pole = complex(self.pole_rad_s)
         if not (pole.imag > 0.0 and pole.real < 0.0) or not math.isfinite(abs(pole)):
             msg = f"{owner}: 'pole_rad_s' must be a decaying oscillation, -sigma + j*omega_d."
@@ -1566,7 +1572,8 @@ def single_mode_fit(
     :raises ValueError: for mismatched or non-finite data, a band that is not
         a pair of positive numbers or holds fewer than three frequencies, an
         unknown kind, or a band whose data hold no lightly damped mode.
-    :raises TypeError: if ``exponential_decay_rate_per_s`` is not a single number.
+    :raises TypeError: if ``exponential_decay_rate_per_s`` is not a single number,
+        ``kind`` is not a text, or ``band_hz`` is not a pair of numbers.
     """
     freqs = np.asarray(frequencies, dtype=np.float64)
     values = np.asarray(frf, dtype=np.complex128)
@@ -1576,9 +1583,7 @@ def single_mode_fit(
     if not (np.all(np.isfinite(freqs)) and np.all(np.isfinite(values))):
         msg = "'frequencies' and 'frf' must be finite."
         raise ValueError(msg)
-    if kind not in ("accelerance", "mobility", "receptance"):
-        msg = f"'kind' must be 'accelerance', 'mobility' or 'receptance'; got {kind!r}."
-        raise ValueError(msg)
+    require_choice(kind, "kind", ("accelerance", "mobility", "receptance"))
     low, high = _pair(band_hz, "band_hz")
     low = require_positive(low, "band_hz[0]")
     high = require_positive(high, "band_hz[1]")
@@ -1715,7 +1720,8 @@ class ForceSpectrumCheck(OwnsArrays):
 
         :raises ValueError: if the arrays differ in rank or length, the range
             holds fewer than two frequencies, or the limit is not positive.
-        :raises TypeError: if ``max_drop_db`` is not a single number.
+        :raises TypeError: if ``max_drop_db`` is not a single number, or
+            ``frequency_range_hz`` is not a pair of numbers.
         """
         require_ranks(self, frequencies=1, energy_spectral_density=1)
         require_same_length(
@@ -1820,6 +1826,8 @@ def check_force_spectrum(
     :param max_drop_db: The largest fall across the range to accept, in dB.
     :return: A :class:`ForceSpectrumCheck`.
     :raises ValueError: for an invalid record, sample rate, range or limit.
+    :raises TypeError: if ``frequency_range_hz`` is not a pair of numbers, or
+        ``fs`` or ``max_drop_db`` is not a single number.
     """
     rate = require_positive(resolve_fs(force_n, fs, name="force_n"), "fs")
     spectrum = energy_spectral_density(force_n, rate)
@@ -2395,8 +2403,9 @@ def check_coherence(
     :raises ValueError: for an invalid range, exclusion or limit, a
         ``min_n_records`` that is not a whole number of at least 1, or
         exclusions that leave no frequency of the range to judge.
-    :raises TypeError: if ``min_coherence`` is not a single number, or ``min_n_records``
-        is a flag, a text or an array where a count goes.
+    :raises TypeError: if ``min_coherence`` is not a single number, ``min_n_records``
+        is a flag, a text or an array where a count goes, or
+        ``frequency_range_hz`` is not a pair of numbers.
     """
     low, high = _frequency_range(frequency_range_hz)
     records = require_count(min_n_records, "min_n_records")
@@ -2574,6 +2583,7 @@ def verify_channel_match(
     :return: A :class:`ChannelMatchVerification` over the range.
     :raises ValueError: for mismatched or non-finite data, or a range that
         holds none of the frequencies.
+    :raises TypeError: if ``frequency_range_hz`` is not a pair of numbers.
     """
     freqs = np.asarray(frequencies, dtype=np.float64)
     values = np.asarray(response, dtype=np.complex128)

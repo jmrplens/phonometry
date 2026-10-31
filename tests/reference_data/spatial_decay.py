@@ -29,6 +29,11 @@ Stdlib only, like every module of this package.
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from phonometry.room.spatial_decay import EvaluatedRegion
+
 # ---------------------------------------------------------------------------
 # ISO 14257:2001 Annex C
 # ---------------------------------------------------------------------------
@@ -50,7 +55,7 @@ ANNEX_C_DISTANCES_M: tuple[float, ...] = (
 
 #: 6.2 as the example applies it: the boundaries of the three distance ranges,
 #: in metres.
-ANNEX_C_RANGES_M: dict[str, tuple[float, float]] = {
+ANNEX_C_RANGES_M: dict[EvaluatedRegion, tuple[float, float]] = {
     "near": (2.0, 5.0),
     "middle": (5.0, 24.0),
     "far": (24.0, 48.0),
@@ -139,7 +144,7 @@ ANNEX_C_TABLE_C6_NORMALIZED_DB: tuple[float, ...] = (
 
 #: Table C.7: the printed rate of spatial decay, in decibels per distance
 #: doubling, by range and octave centre in hertz.
-ANNEX_C_TABLE_C7_DB: dict[str, dict[int, float]] = {
+ANNEX_C_TABLE_C7_DB: dict[EvaluatedRegion, dict[int, float]] = {
     "near": {125: 5.2, 250: 5.2, 500: 5.7, 1000: 4.6, 2000: 4.8, 4000: 5.5},
     "middle": {125: 3.7, 250: 4.0, 500: 3.5, 1000: 4.4, 2000: 4.5, 4000: 5.4},
     "far": {125: 4.6, 250: 6.0, 500: 2.6, 1000: 5.2, 2000: 4.0, 4000: 3.6},
@@ -147,29 +152,41 @@ ANNEX_C_TABLE_C7_DB: dict[str, dict[int, float]] = {
 
 #: Table C.8: the same rate for A-weighted pink noise, in decibels per distance
 #: doubling.
-ANNEX_C_TABLE_C8_DB: dict[str, float] = {"near": 5.1, "middle": 4.6, "far": 4.1}
+ANNEX_C_TABLE_C8_DB: dict[EvaluatedRegion, float] = {
+    "near": 5.1,
+    "middle": 4.6,
+    "far": 4.1,
+}
 
 #: Table C.9: the printed excess of sound pressure level, in decibels.
-ANNEX_C_TABLE_C9_DB: dict[str, dict[int, float]] = {
+ANNEX_C_TABLE_C9_DB: dict[EvaluatedRegion, dict[int, float]] = {
     "near": {125: 5.6, 250: 3.8, 500: 4.3, 1000: 5.2, 2000: 5.4, 4000: 4.0},
     "middle": {125: 8.1, 250: 6.3, 500: 6.9, 1000: 7.3, 2000: 7.8, 4000: 5.6},
     "far": {125: 11.5, 250: 8.6, 500: 9.8, 1000: 8.3, 2000: 9.4, 4000: 6.6},
 }
 
 #: Table C.10: the same excess for A-weighted pink noise, in decibels.
-ANNEX_C_TABLE_C10_DB: dict[str, float] = {"near": 4.8, "middle": 7.0, "far": 8.5}
+ANNEX_C_TABLE_C10_DB: dict[EvaluatedRegion, float] = {
+    "near": 4.8,
+    "middle": 7.0,
+    "far": 8.5,
+}
 
 #: Table C.11: the excess the annex prints at the conventional distance of each
 #: range, in decibels, by octave centre in hertz. Equation (8) does not give
 #: these numbers (see the errata registry).
-ANNEX_C_TABLE_C11_DB: dict[str, dict[int, float]] = {
+ANNEX_C_TABLE_C11_DB: dict[EvaluatedRegion, dict[int, float]] = {
     "near": {125: 6.2, 250: 4.0, 500: 4.4, 1000: 5.2, 2000: 5.3, 4000: 3.9},
     "middle": {125: 7.8, 250: 5.4, 500: 6.4, 1000: 6.9, 2000: 7.7, 4000: 5.8},
     "far": {125: 10.6, 250: 7.4, 500: 9.3, 1000: 7.2, 2000: 9.2, 4000: 6.1},
 }
 
 #: Table C.12: the same three figures for A-weighted pink noise, in decibels.
-ANNEX_C_TABLE_C12_DB: dict[str, float] = {"near": 4.8, "middle": 6.8, "far": 8.0}
+ANNEX_C_TABLE_C12_DB: dict[EvaluatedRegion, float] = {
+    "near": 4.8,
+    "middle": 6.8,
+    "far": 8.0,
+}
 
 #: Table 1 on printed folio 4 (PDF page 14): the A-weighted pink-noise spectrum,
 #: in decibels, by octave centre in hertz.
@@ -230,14 +247,14 @@ SUVA_CURVE_DB: dict[float, tuple[float, ...]] = {
 #: The Figure 7 summary: the decay rate the survey's own analysis program read
 #: off that curve, in decibels per distance doubling. The printed rows are
 #: labelled "pres", "moyen" and "loin".
-SUVA_DECAY_DB: dict[str, tuple[float, ...]] = {
+SUVA_DECAY_DB: dict[EvaluatedRegion, tuple[float, ...]] = {
     "near": (4.5, 2.3, 3.4, 3.0, 2.4, 2.9, 2.8),
     "middle": (2.2, 1.4, 3.1, 1.7, 2.0, 2.2, 2.1),
     "far": (2.6, 4.7, 2.9, 3.4, 3.4, 4.1, 3.5),
 }
 
 #: The same summary: the excess of sound pressure level, in decibels.
-SUVA_EXCESS_DB: dict[str, tuple[float, ...]] = {
+SUVA_EXCESS_DB: dict[EvaluatedRegion, tuple[float, ...]] = {
     "near": (1.7, 5.8, 5.0, 3.3, 6.3, 5.7, 5.1),
     "middle": (9.0, 13.5, 12.4, 10.8, 14.4, 13.0, 12.8),
     "far": (15.4, 18.5, 17.9, 16.1, 20.1, 17.5, 18.2),
@@ -246,7 +263,7 @@ SUVA_EXCESS_DB: dict[str, tuple[float, ...]] = {
 #: 2.6.2 on PDF page 11, printed page 9: the three distance ranges, printed
 #: with both bounds, in metres. The path stops at 48 m, so the far range is
 #: evaluated over 16 m to 48 m.
-SUVA_RANGES_M: dict[str, tuple[float, float]] = {
+SUVA_RANGES_M: dict[EvaluatedRegion, tuple[float, float]] = {
     "near": (1.0, 5.0),
     "middle": (5.0, 16.0),
     "far": (16.0, 64.0),

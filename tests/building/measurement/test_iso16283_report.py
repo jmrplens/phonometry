@@ -214,10 +214,10 @@ def test_unknown_quantity_rejected(tmp_path: Path) -> None:
     """An unknown field quantity raises ``ValueError``."""
     airborne = _airborne_result()
     out = str(tmp_path / "x.pdf")
-    with pytest.raises(ValueError, match=r"Unknown field quantity"):
+    with pytest.raises(ValueError, match="'quantity' must be one of"):
         airborne.report(out, quantity="dn")
     impact = building.impact_insulation(_IMPACT_LN, _T_AT_T0)
-    with pytest.raises(ValueError, match=r"Unknown field quantity"):
+    with pytest.raises(ValueError, match="'quantity' must be one of"):
         impact.report(out, quantity="dnt")
 
 

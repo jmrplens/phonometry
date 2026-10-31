@@ -191,7 +191,7 @@ SPB_WEIGHTING_FACTORS: Mapping[RoadSpeedCategory, Mapping[VehicleCategory, float
 
 #: 7.3: the fewest vehicles to be measured for surface classification, by
 #: category, with ``"2"`` for the two heavy categories together.
-SPB_MIN_VEHICLE_COUNTS: Mapping[str, int] = MappingProxyType(
+SPB_MIN_VEHICLE_COUNTS: Mapping[VehicleCategory | Literal["2"], int] = MappingProxyType(
     {"1": 100, "2a": 30, "2b": 30, "2": 80}
 )
 
@@ -281,7 +281,7 @@ def _reported_levels(
     return {key: _round_tenth(value) for key, value in levels.items()}
 
 
-def _road_category(road_speed_category: str) -> RoadSpeedCategory:
+def _road_category(road_speed_category: object) -> RoadSpeedCategory:
     return require_choice(
         road_speed_category, "road_speed_category", SPB_ROAD_SPEED_CATEGORIES
     )
@@ -385,7 +385,9 @@ def statistical_pass_by_index(
     :raises ValueError: For a road speed category the standard does not define,
         a level missing, unknown or not finite, or weighting factors that are
         negative or do not add up to 1.
-    :raises TypeError: if ``road_speed_category`` is not a text.
+    :raises TypeError: if ``road_speed_category`` or a key of
+        ``vehicle_sound_levels`` or ``weighting_factors`` is not a text, or a
+        value of either is not a single number.
     """
     road = _road_category(road_speed_category)
     levels = _per_category(vehicle_sound_levels, "vehicle_sound_levels")
@@ -888,8 +890,10 @@ def statistical_pass_by(
     :raises ValueError: For a category the method does not use, rows that do
         not match, a category with fewer than three pass-bys or all at one
         speed, or invalid weighting factors or levels.
-    :raises TypeError: if ``road_speed_category`` is not a text, or ``reference_levels``
-        is not a single number.
+    :raises TypeError: if ``road_speed_category`` or a key of
+        ``corrected_vehicle_sound_levels``, ``reference_levels`` or
+        ``weighting_factors`` is not a text, or ``reference_levels`` or a value
+        of one of those mappings is not a single number.
     """
     road = _road_category(road_speed_category)
     labels = np.asarray(vehicle_categories, dtype=object).ravel()
@@ -988,6 +992,8 @@ def normalized_reference_levels(
     :return: The mean level of each category, in decibels, unrounded.
     :raises ValueError: For no surfaces, or a surface without exactly the three
         categories.
+    :raises TypeError: if a category of ``surface_levels`` is not a text, or a
+        level in it is not a single number.
     """
     if not surface_levels:
         msg = "'surface_levels' must hold at least one surface."

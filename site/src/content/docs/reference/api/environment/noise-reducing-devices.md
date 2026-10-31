@@ -116,7 +116,7 @@ for a railway one, on the same weighting as the absorption rating above.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the input does not cover the eighteen bands, is not finite, or the spectrum is not one of the two. |
-| TypeError | if `sound_reduction_index` holds a text or a value that is not a real number. |
+| TypeError | if `sound_reduction_index` holds a text or a value that is not a real number, or `spectrum` is not a text. |
 
 ## INSULATION_CATEGORIES
 
@@ -233,7 +233,7 @@ print a category ladder, so a railway rating carries none.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the input does not cover the eighteen bands, is not finite, or the spectrum is not one of the two. |
-| TypeError | if `absorption_coefficients` holds a text or a value that is not a real number. |
+| TypeError | if `absorption_coefficients` holds a text or a value that is not a real number, or `spectrum` is not a text. |
 
 **Warns**
 

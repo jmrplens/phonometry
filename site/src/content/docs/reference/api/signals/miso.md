@@ -113,6 +113,7 @@ ordering the inputs by descending ordinary coherence with the output.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs or parameters are invalid. |
+| TypeError | if `scaling` is not a text. |
 
 ## MISOCoherenceResult
 

@@ -21,6 +21,7 @@ Validation strategy: the standard's own numbers, not self-consistency.
 from __future__ import annotations
 
 import dataclasses
+from typing import Any
 
 import numpy as np
 import pytest
@@ -293,11 +294,12 @@ def test_an_octave_curve_off_the_rating_axis_is_refused(field_name: str) -> None
 
     res = weighted_absorption(_ANNEX_A1_ALPHA_P)
     short = np.asarray(getattr(res, field_name), dtype=float)[:-1]
+    changes: dict[str, Any] = {field_name: short}
     with pytest.raises(
         ValueError,
         match=rf"'{field_name}'.*must each carry one value per octave band",
     ):
-        dataclasses.replace(res, **{field_name: short})
+        dataclasses.replace(res, **changes)
 
 
 def test_a_single_value_reference_curve_is_refused() -> None:

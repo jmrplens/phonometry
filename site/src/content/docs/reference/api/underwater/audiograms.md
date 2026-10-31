@@ -85,7 +85,7 @@ Fit parameters of a published group audiogram.
 
 ```python
 AudiogramParameters(
-    group: str,
+    group: Literal['HF', 'VHF', 'SI', 'PCW', 'OCW', 'PCA', 'OCA'],
     t0: float,
     f1_khz: float,
     f2_khz: float,
@@ -118,7 +118,7 @@ Group-audiogram fit parameters (Southall et al. 2019, Tables 2 and 3).
 AudiogramResult(
     frequencies: NDArray[np.float64],
     threshold: NDArray[np.float64],
-    group: str,
+    group: Literal['HF', 'VHF', 'SI', 'PCW', 'OCW', 'PCA', 'OCA'] | Literal['orca'],
     source: str,
     *,
     in_air: bool,

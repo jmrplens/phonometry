@@ -207,10 +207,20 @@ causal part (B.5).
 
 **Returns:** An [`ImpulseResponseResult`](/phonometry/reference/api/rooms/impulse-response/#impulseresponseresult) wrapping the recovered impulse response. It behaves like the raw IR array (`np.asarray(result)`, indexing, `.size`) for every downstream consumer and adds [`ImpulseResponseResult.plot`](/phonometry/reference/api/rooms/impulse-response/#impulseresponseresultplot).
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `method` is not a text. |
+
 ## ImpulseResponseResult
 
 ```python
-ImpulseResponseResult(ir: np.ndarray, fs: float | None, method: str)
+ImpulseResponseResult(
+    ir: np.ndarray,
+    fs: float | None,
+    method: Literal['spectral', 'farina', 'mls', 'golay'],
+)
 ```
 
 Recovered broadband impulse response with its acquisition metadata.
@@ -506,7 +516,7 @@ measurement's noise floor (that is its purpose: SNR shaping).
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `amplitude`, `duration_s`, `f1`, `f2`, `fade` or `fs` is not a single number. |
+| TypeError | if `amplitude`, `duration_s`, `f1`, `f2`, `fade` or `fs` is not a single number, or `target` is not a text. |
 
 ## ShapedSweepResult
 

@@ -551,7 +551,7 @@ direct way to trade resolution for time.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
-| TypeError | if `frequency_hz`, `max_range`, `range_step` or `source_depth` is not a single number, or `n_depth_points` is a flag, a text or an array where a count goes, or `absorption` or `bottom` is not a text. |
+| TypeError | if `frequency_hz`, `max_range`, `range_step` or `source_depth` is not a single number, or `n_depth_points` is a flag, a text or an array where a count goes, `bottom` is not a text, or `absorption` is neither a text nor a [`VolumeAbsorption`](/phonometry/reference/api/underwater/numerical/#volumeabsorption). |
 
 **Warns**
 
@@ -574,7 +574,7 @@ GaussianBeamResult(
     beam_widths: NDArray[np.float64],
     wavefront_curvatures: NDArray[np.float64],
     initial_beam_widths: NDArray[np.float64],
-    absorption_model: str | None,
+    absorption_model: Literal['francois-garrison', 'ainslie-mccolm', 'thorp'] | None,
     absorption_db_per_km: float,
     seabed_density: float | None,
     seabed_sound_speed: float | None,

@@ -19,7 +19,7 @@ import math
 import re
 from collections.abc import Callable
 from types import MappingProxyType
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import matplotlib as mpl
 
@@ -31,6 +31,9 @@ import pytest
 import reference_data as ref
 
 from phonometry import metrology
+
+if TYPE_CHECKING:
+    from phonometry.metrology.sound_level_meter import ToneburstResponse
 
 _NAN = math.nan
 
@@ -240,7 +243,9 @@ def test_table_4_s_matches_the_page() -> None:
 
 
 @pytest.mark.parametrize(("key", "tau_s"), [("F", 0.125), ("S", 1.0)])
-def test_table_4_time_weighted_rows_follow_equation_7(key: str, tau_s: float) -> None:
+def test_table_4_time_weighted_rows_follow_equation_7(
+    key: ToneburstResponse, tau_s: float
+) -> None:
     """delta_ref = 10 lg(1 - exp(-Tb/tau)), rounded to a tenth (NOTE 1)."""
     for row in metrology.IEC61672_TABLE_4[key]:
         exact = 10.0 * math.log10(1.0 - math.exp(-row.duration_ms / 1000.0 / tau_s))
@@ -1543,8 +1548,8 @@ def test_more_readings_than_level_ranges_is_refused() -> None:
         ({"17.3": [0.1], "17.4": [0.0, 0.2, 0.3]}, "; got 3 and 1"),
         ({"17.3": [_NAN, _NAN]}, "holds no measured value"),
         ({"17.4": [_NAN, _NAN]}, "holds no measured value"),
-        ({"17.5": [0.0]}, "must be a non-empty mapping keyed by '17.3', '17.4'"),
-        ([0.1, 0.2], "must be a mapping keyed by"),
+        ({"17.5": [0.0]}, "'range_linearity_deviations_db' must be one of"),
+        ([0.1, 0.2], "'range_linearity_deviations_db' must be one of .*, a text"),
     ],
     ids=[
         "17.4 without the reference range",
@@ -2281,7 +2286,7 @@ _ELECTRICAL_SPLIT = "electrical_weighting_uncertainties_without_correction_data_
         ),
         (
             {"weighting_at_1khz_deviations_db": {"C": 0.0, "B": 0.0}},
-            "'weighting_at_1khz_deviations_db' must be a non-empty mapping keyed by",
+            "'weighting_at_1khz_deviations_db' must be one of",
         ),
         (
             {

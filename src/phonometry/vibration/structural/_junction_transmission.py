@@ -299,7 +299,7 @@ def _critical_frequency(thickness: float, wave_speed: float) -> float:
     )
 
 
-def _junction(junction: str) -> tuple[float, float, float | None]:
+def _junction(junction: object) -> tuple[float, float, float | None]:
     """Validated ``(J1, J2, J3)`` for a perpendicular junction name."""
     name = require_choice(junction, "junction", tuple(_JUNCTIONS))
     return _JUNCTIONS[name]
@@ -456,8 +456,10 @@ def angular_average_transmission_coefficient(
     :return: The angular-average transmission coefficient ``tau_bar``.
     :raises ValueError: for a non-positive ``chi``/``psi``, an unknown junction
         or section, or a straight section that does not exist.
-    :raises TypeError: if ``chi`` is not a single number, or ``section`` is not a text.
+    :raises TypeError: if ``chi`` is not a single number, or ``section`` is not a text,
+        or ``junction`` is not a text.
     """
+    require_choice(junction, "junction", ("X", "T1", "T2", "L"))
     require_scalar(chi, "chi")
     section = require_choice(section, "section", ("corner", "straight"))
     if section == "corner":

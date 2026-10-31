@@ -358,7 +358,7 @@ is used unchanged.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `kind` is unknown, areas/lengths are not positive, or any value is non-finite. |
-| TypeError | if `coupling_length`, `delta_r`, `k_ij`, `kij_min`, `r_receive`, `r_source` or `separating_area` is not a single number. |
+| TypeError | if `coupling_length`, `delta_r`, `k_ij`, `kij_min`, `r_receive`, `r_source` or `separating_area` is not a single number, or `kind` is not a text. |
 
 ## FlankingPath
 
@@ -625,7 +625,7 @@ Supported `junction_type` values and their formulas:
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `mass_ratio` is not positive, `frequency`/`f1` are not positive, an unknown `junction_type`/`path` is given, the requested path does not exist for the junction, or the E.7 double-leaf branch is requested outside its $m_2/m_1 > 3$ validity. |
-| TypeError | if `f1`, `frequency` or `mass_ratio` is not a single number. |
+| TypeError | if `f1`, `frequency` or `mass_ratio` is not a single number, or `junction_type` or `path` is not a text. |
 
 ## PathContribution
 

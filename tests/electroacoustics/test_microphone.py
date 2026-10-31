@@ -593,7 +593,7 @@ def test_plot_rejects_unknown_quantity_and_missing_data() -> None:
     matplotlib.use("Agg")
 
     result = _example_result()
-    with pytest.raises(ValueError, match="unknown quantity"):
+    with pytest.raises(ValueError, match="'quantity' must be one of"):
         result.plot(quantity="bogus")
     f, rel = _flat_response()
     bare = electroacoustics.microphone_characteristics(
@@ -795,16 +795,8 @@ def test_a_weighting_outside_iec_60268_1_is_refused_at_construction(
     reportlab's paragraph parser and ended the render with ``parse ended with
     1 unclosed tags``, naming neither the field nor the result.
     """
-    f, rel = _flat_response()
-    noise = electroacoustics.MicrophoneNoise(equivalent_level=14.0, weighting=weighting)
-    with pytest.raises(ValueError, match=r"'noise_weighting' must be one of"):
-        electroacoustics.microphone_characteristics(
-            frequencies=f,
-            response_db=rel,
-            sensitivity_mv_per_pa=_M_MV,
-            tolerance_db=_TOL,
-            noise=noise,
-        )
+    with pytest.raises(ValueError, match=r"'weighting' must be one of"):
+        electroacoustics.MicrophoneNoise(equivalent_level=14.0, weighting=weighting)  # type: ignore[arg-type]
 
 
 def test_the_bs468_quasi_peak_weighting_is_accepted(tmp_path: Path) -> None:
@@ -835,16 +827,8 @@ def test_the_legacy_ccir_name_is_refused_for_the_one_the_library_uses() -> None:
     ``weighted_thd`` take ``"468"`` and this field took ``"CCIR"``, so a
     value that worked in one place raised in the other.
     """
-    f, rel = _flat_response()
-    noise = electroacoustics.MicrophoneNoise(equivalent_level=14.0, weighting="CCIR")
-    with pytest.raises(ValueError, match=r"'noise_weighting' must be one of"):
-        electroacoustics.microphone_characteristics(
-            frequencies=f,
-            response_db=rel,
-            sensitivity_mv_per_pa=_M_MV,
-            tolerance_db=_TOL,
-            noise=noise,
-        )
+    with pytest.raises(ValueError, match=r"'weighting' must be one of"):
+        electroacoustics.MicrophoneNoise(equivalent_level=14.0, weighting="CCIR")  # type: ignore[arg-type]
 
 
 def test_every_weighting_name_the_api_takes_is_a_curve_the_filter_knows() -> None:

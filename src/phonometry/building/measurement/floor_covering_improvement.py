@@ -614,7 +614,7 @@ def impact_improvement(
 #: of ISO 16251-1 and ISO 10140-1 Annexes G and H, the sound reduction index
 #: of a joint (ISO 10140-1 Annex J) and the rainfall intensity level, raw and
 #: normalized (ISO 10140-1 Annex K).
-_OCTAVE_BAND_QUANTITIES: tuple[str, ...] = ("ΔL", "ΔR", "Rs", "LI", "LI,norm")
+_OCTAVE_BAND_QUANTITIES: tuple[Quantity, ...] = ("ΔL", "ΔR", "Rs", "LI", "LI,norm")
 
 
 @dataclass(frozen=True)

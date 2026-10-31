@@ -186,7 +186,7 @@ DB_HR_FREQUENCIES_HZ: tuple[float, ...] = (
 #: ``"pink"`` is Table A.5 (``LAr,i``), ``"traffic"`` Table A.3 (``LAtr,i``),
 #: ``"railway"`` Table A.4 (``LAef,i``, numerically equal to Table A.3) and
 #: ``"aircraft"`` Table A.2 (``LAav,i``).
-DB_HR_NORMALIZED_SPECTRA: Mapping[str, tuple[float, ...]] = MappingProxyType(
+DB_HR_NORMALIZED_SPECTRA: Mapping[Spectrum, tuple[float, ...]] = MappingProxyType(
     {
         "pink": (
             -30.1,
@@ -753,14 +753,10 @@ class DBHRRequirement(RichDisplay):
         :func:`check_db_hr_requirement` branches on ``"min"`` and treats
         anything else as ``"max"``, so an unchecked typo would produce a
         confident, inverted verdict.
+
+        :raises TypeError: if ``direction`` is not a text.
         """
-        if self.direction not in ("min", "max"):
-            msg = (
-                "'direction' must be 'min' (the quantity must reach the "
-                "limit) or 'max' (it must not exceed it); got "
-                f"{self.direction!r}."
-            )
-            raise ValueError(msg)
+        require_choice(self.direction, "direction", ("min", "max"))
 
 
 @dataclass(frozen=True)

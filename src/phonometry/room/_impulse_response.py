@@ -73,6 +73,7 @@ from scipy import signal
 from .._internal.frozen import OwnsArrays
 from .._internal.utils import _typesignal
 from .._internal.validation import (
+    require_choice,
     require_count,
     require_equal_shapes,
     require_ranks,
@@ -84,6 +85,11 @@ from ..io._resolve import (
     apply_calibration,
     resolve_optional_pair_fs,
 )
+
+#: How an impulse response was measured: by spectral division or the Farina
+#: deconvolution of a swept sine, by a maximum-length sequence, or by a
+#: complementary Golay pair.
+ExcitationMethod = Literal["spectral", "farina", "mls", "golay"]
 
 
 class ImpulseResponseWarning(PhonometryWarning):
@@ -171,7 +177,7 @@ class ImpulseResponseResult(OwnsArrays):
 
     ir: np.ndarray
     fs: float | None
-    method: str
+    method: ExcitationMethod
 
     def __array__(
         self, dtype: DTypeLike | None = None, *, copy: bool | None = None
@@ -517,7 +523,9 @@ def impulse_response(
         response. It behaves like the raw IR array (``np.asarray(result)``,
         indexing, ``.size``) for every downstream consumer and adds
         :meth:`ImpulseResponseResult.plot`.
+    :raises TypeError: if ``method`` is not a text.
     """
+    require_choice(method, "method", ("spectral", "farina"))
     fs = resolve_optional_pair_fs(
         recorded, reference, fs, names=("recorded", "reference")
     )
@@ -990,15 +998,9 @@ def _shaped_target_db(
     """
     safe = np.maximum(freqs, freqs[1] if freqs.size > 1 else 1.0)
     if isinstance(target, str):
-        if target == "white":
+        if require_choice(target, "target", ("white", "pink")) == "white":
             return np.zeros_like(freqs)
-        if target == "pink":
-            return np.asarray(-10.0 * np.log10(safe / f_range[0]))
-        msg = (
-            f"unknown named target {target!r}; use 'white', 'pink' or a "
-            "(frequencies, magnitude_db) pair"
-        )
-        raise ValueError(msg)
+        return np.asarray(-10.0 * np.log10(safe / f_range[0]))
     t_freq = np.asarray(target[0], dtype=np.float64)
     t_db = np.asarray(target[1], dtype=np.float64)
     # The number is a count of array axes, not a quantity.
@@ -1125,7 +1127,7 @@ def shaped_sweep_signal(
         the synthesis metadata (grid, imposed magnitude, group delay,
         crest factor).
     :raises TypeError: if ``amplitude``, ``duration_s``, ``f1``, ``f2``, ``fade`` or
-        ``fs`` is not a single number.
+        ``fs`` is not a single number, or ``target`` is not a text.
     """
     require_scalar(amplitude, "amplitude")
     require_scalar(fade, "fade")

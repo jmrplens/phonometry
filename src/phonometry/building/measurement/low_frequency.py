@@ -100,7 +100,7 @@ import numpy as np
 
 from ..._internal.frozen import OwnsArrays
 from ..._internal.levels_math import energy_mean
-from ..._internal.validation import require_scalar
+from ..._internal.validation import require_choice, require_scalar
 from ..._internal.warnings import PhonometryWarning
 
 if TYPE_CHECKING:
@@ -745,11 +745,9 @@ def apply_low_frequency_procedure(
         disagree, if the 50 Hz, 63 Hz or 80 Hz band is absent from
         ``frequencies``, if a receiving room is missing either half of
         Clause 10.4, or if a source room brings either half of it.
+    :raises TypeError: if ``room`` is not a text.
     """
-    if room not in _ROOMS:
-        expected = " or ".join(repr(name) for name in _ROOMS)
-        msg = f"'room' must be {expected}, got {room!r}."
-        raise ValueError(msg)
+    require_choice(room, "room", _ROOMS)
     levels = np.asarray(levels, dtype=np.float64)
     freqs = np.asarray(frequencies, dtype=np.float64)
     if levels.ndim != 1 or freqs.ndim != 1:

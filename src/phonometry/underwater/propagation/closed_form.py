@@ -283,8 +283,8 @@ class PropagationLossResult(OwnsArrays):
     absorption: NDArray[np.float64]
     frequency: float
     absorption_db_per_km: float
-    law: str
-    model: str
+    law: SpreadingLaw
+    model: AbsorptionModel
 
     def __post_init__(self) -> None:
         """Reject a loss curve whose terms do not run over the same ranges.

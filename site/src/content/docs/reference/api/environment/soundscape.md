@@ -528,7 +528,7 @@ attributes they name are part 2, and that is what they are applied to
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a mapping that does not name the eight attributes, a value outside 1 to 5, or sites that do not match the respondents. |
-| TypeError | if `central_tendency` is not a text. |
+| TypeError | if `central_tendency` or a key of `scale_values` is not a text. |
 
 ## PLEASANTNESS_EVENTFULNESS_RANGE
 

@@ -73,6 +73,7 @@ import numpy as np
 
 from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
+    require_choice,
     require_count,
     require_ranks,
     require_same_length,
@@ -310,13 +311,12 @@ def cepstrum(
         time-aliasing of sharp log-spectrum features.
     :return: A :class:`CepstrumResult`.
     :raises ValueError: If the inputs or parameters are invalid.
-    :raises TypeError: if ``nfft`` is a flag, a text or an array where a count goes.
+    :raises TypeError: if ``nfft`` is a flag, a text or an array where a count goes, or
+        ``kind`` is not a text.
     """
     xa = _validate_signal(x, "x", context="a cepstrum")
     fs_v = _positive(resolve_fs(x, fs), "fs")
-    if kind not in _KINDS:
-        msg = f"'kind' must be one of {_KINDS}, got {kind!r}."
-        raise ValueError(msg)
+    require_choice(kind, "kind", _KINDS)
     n = _validate_nfft(xa.size, nfft)
 
     delay = 0
@@ -464,13 +464,12 @@ def lifter(
         length, rounded up to even).
     :return: A :class:`LifterResult`.
     :raises ValueError: If the inputs or parameters are invalid.
-    :raises TypeError: if ``nfft`` is a flag, a text or an array where a count goes.
+    :raises TypeError: if ``nfft`` is a flag, a text or an array where a count goes, or
+        ``mode`` is not a text.
     """
     xa = _validate_signal(x, "x", context="liftering")
     fs_v = _positive(resolve_fs(x, fs), "fs")
-    if mode not in ("lowpass", "highpass"):
-        msg = f"'mode' must be 'lowpass' or 'highpass', got {mode!r}."
-        raise ValueError(msg)
+    require_choice(mode, "mode", ("lowpass", "highpass"))
     n = _validate_nfft(xa.size, nfft)
     cut = round(_positive(cutoff, "cutoff") * fs_v)
     if not 1 <= cut <= n // 2:

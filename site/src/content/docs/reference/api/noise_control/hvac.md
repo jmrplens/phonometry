@@ -327,7 +327,7 @@ one rather than as the width in the plane of the bend.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `lined_side` or `model` is not a text, or `speed_of_sound` or `width_m` is not a single number. |
+| TypeError | if `lined_side` or `model` is not a text, or `speed_of_sound` or `width_m` is not a single number, or `bend_type` is not a text. |
 
 ## end_reflection_loss
 
@@ -378,7 +378,7 @@ The two agree within a couple of decibels over the bands both cover.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `method` is not a text, or `aspect_ratio`, `diameter_m`, `max_reduction` or `speed_of_sound` is not a single number. |
+| TypeError | if `method` is not a text, or `aspect_ratio`, `diameter_m`, `max_reduction` or `speed_of_sound` is not a single number, or `termination` is not a text. |
 
 ## end_reflection_loss_closed_form
 

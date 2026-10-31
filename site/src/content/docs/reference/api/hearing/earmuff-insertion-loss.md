@@ -172,6 +172,7 @@ unjudged.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if a position is missing or unknown, if the bands do not match, if a reading is given without its index or the other way round, if a single index is below 4 dB, or if a band from 500 Hz up has fewer than two finite readings. |
+| TypeError | if a position of `position_levels` is not a text. |
 
 ## earmuff_insertion_loss
 

@@ -444,7 +444,7 @@ def test_fractional_delay_invalid_inputs() -> None:
     x = ph.signals.noise_signal(FS, duration_s=0.05, seed=11)
     full_length = float(x.size)
     two_dimensional = np.zeros((2, 8))
-    with pytest.raises(ValueError, match=r"'mode' must be 'linear'"):
+    with pytest.raises(ValueError, match="'mode' must be one of"):
         ph.signals.fractional_delay(x, 1.0, mode="wrap")  # type: ignore[arg-type]
     with pytest.raises(
         ValueError, match=r"'delay' magnitude must be smaller than the record length"

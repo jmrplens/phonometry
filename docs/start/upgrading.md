@@ -2475,6 +2475,85 @@ changed, on the code just before 4.0. Some of the parameters are newer than
 | `vibration.verify_weighting(name=)` | a value that is not text but prints as an option | `TypeError` for a value that is not text |
 | `vibration.weighting_tolerance_percent(name=)` | a value that is not text but prints as an option | `TypeError` for a value that is not text |
 
+## A record refuses a choice when it is built
+
+A record a caller builds checks each field typed with a `Literal` in its
+`__post_init__`, as written: a text it does not offer raises `ValueError` and
+a value that is not a text raises `TypeError`, when the record is built.
+Before 4.0 most of them stored any value and left it to whatever read it,
+so a misspelling failed later, in another call, or not at all; the four
+that did check refused a value that is not text with `ValueError`. The fix is to
+write the option as its `Literal` lists it where the record is built.
+
+| Record | Before 4.0 | 4.0 |
+| --- | --- | --- |
+| `aircraft.ANPNPDCurves(metric=, operation=)` | stored any value, refused later or not at all | refused when built |
+| `aircraft.SpectralClass(operation=)` | stored any value, refused later or not at all | refused when built |
+| `aircraft.RotorcraftAtmosphere(atmospheric_method=)` | stored any value, refused later or not at all | refused when built |
+| `aircraft.RotorcraftGround(flow_resistivity=)` | stored any value, refused later or not at all | refused when built |
+| `building.BandPath(kind=)` | stored any value, refused later or not at all | refused when built |
+| `building.FlankingPath(kind=)` | stored any value, refused later or not at all | refused when built |
+| `electroacoustics.MicrophoneNoise(weighting=)` | stored any value, refused later or not at all | refused when built |
+| `emission.MicrophoneTraverse(targets=)` | `ValueError` for any target it did not know, text or not | `ValueError` for a text it does not offer, `TypeError` for a target that is not text |
+| `environment.BinnedSoundLevels(averaging=)` | stored any value, refused later or not at all | refused when built |
+| `environment.RoadEmissionCoefficients` (the category keys of its per-category tables) | stored any key, refused later or not at all | `ValueError` for a text that is not a code of Table [2.2.a], `TypeError` for a key that is not text, each key when built |
+| `environment.RoadSurfaceCoefficients(alpha=, beta=)` (their category keys) | stored any key, refused later or not at all | `ValueError` for a text that is not a code of Table [2.2.a], `TypeError` for a key that is not text, each key when built |
+| `filters.FilterDesign(filter_type=)` | stored any value, refused later or not at all | refused when built |
+| `filters.EQSection(filter_type=)` | `ValueError` for any value it did not know, text or not | `ValueError` for a text it does not offer, `TypeError` for a value that is not text |
+| `hearing.Task(instrument=)` | stored any value, refused later or not at all | refused when built |
+| `materials.FiberResistivityFit(direction=)` | stored any value, refused later or not at all | refused when built |
+| `metrology.SoundLevelMeterPeriodicMeasurements` (the keys of its per-weighting, per-range and per-response mappings) | `ValueError` for any key it did not know | `ValueError` for a text it does not know, `TypeError` for a key that is not a text, each key when built |
+| `noise_control.DesignCriterion(family=)` | stored any value, refused later or not at all | refused when built |
+| `noise_control.SourceRoom(model=)` | stored any value, refused later or not at all | refused when built |
+| `noise_control.LiquidTrim(coefficient=)` | stored any value, refused later or not at all | refused when built |
+| `noise_control.ValveTrim(coefficient=)` | stored any value, refused later or not at all | refused when built |
+| `phonometry.ReportMetadata(tube_shape=)` | `ValueError` for any value it did not know, text or not | `ValueError` for a text it does not offer, `TypeError` for a value that is not text |
+| `vibration.GuideValues(time_of_day=, edition=)` | stored any value, refused later or not at all | refused when built |
+| `vibration.FaultLine(family=)` | stored any value, refused later or not at all | refused when built |
+
+A choice is checked on every path of the functions too. One read on some
+paths only took any value on the others, and one checked with a comparison
+refused a value that is not text with `ValueError`, or with an unrelated
+error:
+
+| Call | Before 4.0 | 4.0 |
+| --- | --- | --- |
+| `environment.ground_effect(model=)` | took any value without `flow_resistivity_pa_s_m2` | `ValueError` for a text it does not offer, `TypeError` for a value that is not text, whatever else is given |
+| `environment.barrier_insertion_loss(ground_model=)` | took any value without `ground_flow_resistivity_pa_s_m2` | the same |
+| `environment.atmospheric_parabolic_equation(model=)` | took any value without `flow_resistivity_pa_s_m2` | the same |
+| `metrology.coupler_transfer_impedance(heat_conduction_method=)` | took any value with a `PlaneWaveCoupler` | the same |
+| `noise_control.elbow_insertion_loss(lined_side=)` | took any value with `model="ashrae"` | the same |
+| `noise_control.fan_sound_power(assembly=)` | took any value with `model="ashrae"` | the same |
+| `noise_control.fan_sound_power(fan_type=)` | took any value with `model="vdi2081"` | the same |
+| `signals.time_delay(weighting=)` | took any value unless `method="gcc"` | the same |
+| `underwater.ship_source_spectrum(vessel_class=)` | took any value unless `model="jomopans-echo"` | the same |
+| `emission.reference_source_calibration(arrangement=)`, `emission.reference_source_reproducibility(arrangement=)` | took any value in a reverberation room | the same; `None` is still taken there |
+| `building.single_number_uncertainty(situation=)` with `upper_limit=True` | `ValueError` for anything but `"A"`, text or not | `ValueError` for a text other than `"A"`, `TypeError` for a value that is not text |
+| `io.write(subtype=)` with integer samples | `ValueError` for anything but the samples' own subtype, text or not | `TypeError` for a value that is not text |
+| `io.write_catalogue(delimiter=, decimal=)` beside a JSON document | `ValueError` for anything but the default dialect, text or not | `TypeError` for a value that is not text |
+| `underwater.gaussian_beams(absorption=)` | `AttributeError` for a value that is neither text nor a `VolumeAbsorption` | `TypeError` |
+| `filters.FilterPeriodicVerification.clause()` | `KeyError` for any name it had not measured | `ValueError` for a text that names none of the five clauses, `TypeError` for a value that is not text; `KeyError` for a clause that was not measured |
+
+A key of a mapping and an item of a sequence is checked one by one:
+`environment.assess_activity` ignored a period key it did not know beside one
+it knew and now raises `ValueError` for it; a key of
+`environment.pleasantness_eventfulness` that is not text raised `ValueError`
+and now raises `TypeError`; the sound field checks of ISO 8253-2, ISO 4869-1
+and ISO 4869-3 met such a key with an unrelated `TypeError` from sorting and
+now name the parameter; the keys of the reference track decay limits and of
+a silencer drawing's `geometry` raise `TypeError` when they are not text; a
+key of a duct `section` that
+`noise_control.duct_path` does not take raised the `TypeError` of an unknown
+keyword and now raises `ValueError`; and the uncertainty budgets of the comparison, the
+reciprocity and the free-field corrections keep their message for an unknown
+component and raise `TypeError` for a key that is not text. Twelve `.plot()`
+of the hearing protector, active noise reduction, real-ear attenuation and
+ISO 15186-3 low-frequency results, and `building.SoundReductionResult.report`,
+took any `language` and now refuse one they do not offer, as every other plot
+does. A typed caller that indexes a published table with a free `str` (a
+`str` variable into `room.TABLE_A1` or `hearing.EARPHONES`) needs the
+`Literal` the table is keyed by now; the values did not move.
+
 ## The seventy-eight names that are gone
 
 Everything else moved. These seventy-eight exist in no public module:

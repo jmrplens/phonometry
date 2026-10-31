@@ -442,6 +442,9 @@ def plot_assumed_protection(
     :param kwargs: Forwarded to the ``APV`` curve.
     :return: The axes.
     """
+    from .._i18n import check_language
+
+    check_language(language)
     from .._i18n import localize_axes
 
     ax = ax if ax is not None else _new_axes()
@@ -511,6 +514,9 @@ def plot_hml_rating(
     :param kwargs: Forwarded to the ``PNR`` curve.
     :return: The axes.
     """
+    from .._i18n import check_language
+
+    check_language(language)
     from .._i18n import localize_axes
     from ..hearing.hearing_protectors import HML_REFERENCE_C_MINUS_A
 
@@ -580,6 +586,9 @@ def plot_snr_rating(
     :param kwargs: Forwarded to the per-subject bars.
     :return: The axes.
     """
+    from .._i18n import check_language
+
+    check_language(language)
     from .._i18n import localize_axes
 
     ax = ax if ax is not None else _new_axes()
@@ -639,6 +648,9 @@ def plot_protected_level(
     :raises ValueError: for an ``HML`` or ``SNR`` result, which carries no
         spectrum.
     """
+    from .._i18n import check_language
+
+    check_language(language)
     from .._i18n import localize_axes
 
     if result.band_levels is None or result.frequencies is None:
@@ -706,6 +718,9 @@ def plot_real_ear_attenuation(
     :param kwargs: Forwarded to the mean curve.
     :return: The axes.
     """
+    from .._i18n import check_language
+
+    check_language(language)
     from .._i18n import localize_axes
 
     created = ax is None
@@ -778,6 +793,9 @@ def plot_attenuation_difference(
     :param kwargs: Forwarded to the difference bars.
     :return: The axes.
     """
+    from .._i18n import check_language
+
+    check_language(language)
     from matplotlib.patches import Patch
 
     from .._i18n import decimal_comma, localize_axes
@@ -859,6 +877,9 @@ def plot_reat_sound_field(
     :param kwargs: Forwarded to the position deviation curve.
     :return: The axes.
     """
+    from .._i18n import check_language
+
+    check_language(language)
     from .._i18n import localize_axes
 
     ax = ax if ax is not None else _new_axes()
@@ -952,6 +973,9 @@ def plot_active_insertion_loss(
     :param kwargs: Forwarded to the mean curve.
     :return: The axes.
     """
+    from .._i18n import check_language
+
+    check_language(language)
     from .._i18n import localize_axes
 
     ax = ax if ax is not None else _new_axes()
@@ -1016,6 +1040,9 @@ def plot_anr_total_attenuation(
     :param kwargs: Forwarded to the mean total attenuation curve.
     :return: The axes.
     """
+    from .._i18n import check_language
+
+    check_language(language)
     from .._i18n import localize_axes
 
     ax = ax if ax is not None else _new_axes()
@@ -1103,6 +1130,9 @@ def plot_anr_linearity(
     :param kwargs: Forwarded to the median step curve.
     :return: The axes.
     """
+    from .._i18n import check_language
+
+    check_language(language)
     from .._i18n import decimal_comma, localize_axes
 
     ax = ax if ax is not None else _new_axes()

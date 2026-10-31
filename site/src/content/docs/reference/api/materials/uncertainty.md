@@ -169,6 +169,7 @@ per one-third-octave band; $\sigma_\mathrm{r} = 0.6\,\sigma_\mathrm{R}$ (Formula
 | Exception | When |
 | :--- | :--- |
 | ValueError | Mismatched shapes, an untabulated frequency, an unknown `condition` or an untabulated `coverage`. |
+| TypeError | if `condition` is not a text. |
 
 ## practical_coefficient_uncertainty
 
@@ -202,6 +203,7 @@ $\sigma_\mathrm{r} = 0.6\,\sigma_\mathrm{R}$ (Formula (5)).
 | Exception | When |
 | :--- | :--- |
 | ValueError | Mismatched shapes, an untabulated frequency, an unknown `condition` or an untabulated `coverage`. |
+| TypeError | if `condition` is not a text. |
 
 ## single_number_rating_uncertainty
 
@@ -233,7 +235,7 @@ $\sigma_\mathrm{r} = 0.02\,D_{L\alpha,\mathrm{NRD}}$ (Formula (9)).
 | Exception | When |
 | :--- | :--- |
 | ValueError | Negative `dl_alpha`, unknown `condition` or an untabulated `coverage`. |
-| TypeError | if `dl_alpha` is not a single number. |
+| TypeError | if `dl_alpha` is not a single number, or `condition` is not a text. |
 
 ## sound_absorption_coefficient_uncertainty
 
@@ -267,6 +269,7 @@ $\sigma_\mathrm{r} = 0.6\,\sigma_\mathrm{R}$ (Formula (3)).
 | Exception | When |
 | :--- | :--- |
 | ValueError | Mismatched shapes, an untabulated frequency, an unknown `condition` or an untabulated `coverage`. |
+| TypeError | if `condition` is not a text. |
 
 ## weighted_coefficient_uncertainty
 
@@ -299,4 +302,4 @@ the value.
 | Exception | When |
 | :--- | :--- |
 | ValueError | Unknown `condition` or an untabulated `coverage`. |
-| TypeError | if `alpha_w` is not a single number. |
+| TypeError | if `alpha_w` is not a single number, or `condition` is not a text. |

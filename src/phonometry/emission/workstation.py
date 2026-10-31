@@ -267,6 +267,7 @@ class WorkstationBackgroundCorrection(OwnsArrays):
         """Reject a grade the group does not name.
 
         :raises ValueError: For a grade that is neither of the two.
+        :raises TypeError: if ``grade`` is not a text.
         """
         _check_grade(self.grade)
 
@@ -327,6 +328,7 @@ def background_noise_correction_at_workstation(
         the background held it anywhere.
     :raises ValueError: If the two arguments do not have the same shape, or the
         grade is neither of the two.
+    :raises TypeError: if ``grade`` is not a text.
     """
     checked = _check_grade(grade)
     measured = np.asarray(measured_level, dtype=np.float64)

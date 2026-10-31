@@ -543,9 +543,9 @@ def test_a_british_choice_the_4_0_retired_is_refused() -> None:
     spectra = np.zeros((5, 24))
     with pytest.raises(ValueError, match=r"'model' must be one of"):
         ph.vibration.fundamental_period("storeys", n_stories=10)  # type: ignore[arg-type]
-    with pytest.raises(ValueError, match=r"'location' must be 'center' or 'edge'"):
+    with pytest.raises(ValueError, match="'location' must be one of"):
         ph.vibration.infinite_plate_impedance(1.0, 10.0, location="centre")
-    with pytest.raises(ValueError, match=r"Unknown procedure 'aeroplane'"):
+    with pytest.raises(ValueError, match="'procedure' must be one of"):
         ph.aircraft.effective_perceived_noise_level(spectra, procedure="aeroplane")
 
 

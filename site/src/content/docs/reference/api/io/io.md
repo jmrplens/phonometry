@@ -1129,6 +1129,7 @@ original) so tools that only read PCM can open it.
 | :--- | :--- |
 | ValueError | For a lossy or unknown target suffix, source and destination naming the same file, a FLAC target that cannot hold the source without an explicit `subtype`, an invalid `block_size`, a sidecar beside the source that [`read_sidecar`](/phonometry/reference/api/io/io/#read_sidecar) refuses or whose labels do not give one to each channel of the source, or a pipe, a device, a socket or a directory at the sidecar's name beside the destination; a sidecar is refused before a sample is written. |
 | ImportError | If source or target needs the `[audio]` extra and it is not installed. |
+| TypeError | if `subtype` is not a text. |
 
 ## CuePoint
 
@@ -1690,6 +1691,12 @@ Requires matplotlib
 (`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `scale` is not a text. |
+
 ### Signal.shape
 
 *property*
@@ -1840,7 +1847,7 @@ out of calibrated results.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For an unknown suffix or subtype, a missing or conflicting `fs` or one that is not a whole number (given or the [`Signal`](/phonometry/reference/api/io/io/#signal)'s own), a dither request outside `PCM_16`, an `rng` without a `dither` for it to seed, bext metadata that violates Tech 3285 (oversize field, version too old for a carried UMID or loudness), a sidecar request without a calibrated [`Signal`](/phonometry/reference/api/io/io/#signal), one whose calibration or channel labels no sidecar holds or whose sidecar would pass the 1 MiB a reader takes, or one with a pipe, a device, a socket or a directory at the sidecar's name, refused before the audio is written. |
-| TypeError | if `fs` is a flag, a text or an array where a count goes. |
+| TypeError | if `fs` is a flag, a text or an array where a count goes, or `bext`, `dither` or `subtype` is not a text. |
 
 ## write_catalogue
 
@@ -1937,7 +1944,7 @@ the reader's own words and naming the file.
 | Exception | When |
 | :--- | :--- |
 | CatalogueError | for no rows, rows from more than one table or document, a key a file cannot hold, a name that is reserved or malformed, the cells a CSV file cannot hold, and what [`read_catalogue`](/phonometry/reference/api/io/io/#read_catalogue) would refuse in the file: more than 50 000 rows, a file past 16 MiB or a CSV header past 64 KiB, and a text longer than a reader takes among it. |
-| TypeError | for rows that are not catalogue rows of one class (fluid states among them), or a *catalogue* or *about* the rows need and do not bring. |
+| TypeError | for rows that are not catalogue rows of one class (fluid states among them), or a *catalogue* or *about* the rows need and do not bring, or `decimal` or `delimiter` is not a text. |
 | ValueError | for a name that ends in neither `.json` nor `.csv`, a dialect a CSV file cannot take, and a dialect beside a JSON file. |
 | FileExistsError | for a file at *path* or at its header without *overwrite*, one made at either while the files are written among them (where no hard link is made, each name holds an empty file of the writer's own for the instant before its file is in place), and for a symbolic link at either. |
 

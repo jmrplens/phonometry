@@ -61,7 +61,7 @@ from math import isfinite, log10
 from typing import TYPE_CHECKING, Any, Literal
 
 from ..._internal.display import RichDisplay
-from ..._internal.validation import check_engine, require_scalar
+from ..._internal.validation import check_engine, require_choice, require_scalar
 from ..._internal.warnings import PhonometryWarning
 
 if TYPE_CHECKING:
@@ -192,6 +192,13 @@ class FlankingPath(RichDisplay):
     label: str
     kind: Literal["Ff", "Df", "Fd"]
     r_ij_w: float
+
+    def __post_init__(self) -> None:
+        """Refuse a choice its ``Literal`` does not list, when the record is built.
+
+        :raises TypeError: if ``kind`` is not a text.
+        """
+        require_choice(self.kind, "kind", ("Ff", "Df", "Fd"))
 
 
 @dataclass(frozen=True)
@@ -652,8 +659,22 @@ def junction_vibration_reduction(
         requested path does not exist for the junction, or the E.7 double-leaf
         branch is requested outside its :math:`m_2/m_1 > 3` validity.
     :raises TypeError: if ``f1``, ``frequency`` or ``mass_ratio`` is not a single
-        number.
+        number, or ``junction_type`` or ``path`` is not a text.
     """
+    require_choice(
+        junction_type,
+        "junction_type",
+        (
+            "rigid_cross",
+            "rigid_t",
+            "flexible_t",
+            "lightweight_facade",
+            "lightweight_double_homogeneous",
+            "lightweight_double_coupled",
+            "corner",
+            "thickness_change",
+        ),
+    )
     ratio = _check_finite(mass_ratio, "mass_ratio")
     if ratio <= 0.0:
         msg = "'mass_ratio' must be positive."
@@ -664,9 +685,7 @@ def junction_vibration_reduction(
     if _check_finite(f1, "f1") <= 0.0:
         msg = "'f1' must be positive."
         raise ValueError(msg)
-    if path not in ("through", "corner", "double_leaf"):
-        msg = "'path' must be 'through', 'corner' or 'double_leaf'."
-        raise ValueError(msg)
+    require_choice(path, "path", ("through", "corner", "double_leaf"))
     branch = _KIJ_BRANCHES.get(junction_type)
     if branch is None:
         msg = (
@@ -805,11 +824,10 @@ def flanking_path(
     :raises ValueError: If ``kind`` is unknown, areas/lengths are not positive,
         or any value is non-finite.
     :raises TypeError: if ``coupling_length``, ``delta_r``, ``k_ij``, ``kij_min``,
-        ``r_receive``, ``r_source`` or ``separating_area`` is not a single number.
+        ``r_receive``, ``r_source`` or ``separating_area`` is not a single number, or
+        ``kind`` is not a text.
     """
-    if kind not in ("Ff", "Df", "Fd"):
-        msg = "'kind' must be 'Ff', 'Df' or 'Fd'."
-        raise ValueError(msg)
+    require_choice(kind, "kind", ("Ff", "Df", "Fd"))
     rs = _check_finite(r_source, "r_source")
     rr = _check_finite(r_receive, "r_receive")
     kij = _check_finite(k_ij, "k_ij")

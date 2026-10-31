@@ -76,8 +76,8 @@ ShipTrafficSpectrum(
     frequencies: NDArray[np.float64],
     source_psd: NDArray[np.float64],
     band_level: NDArray[np.float64],
-    model: str,
-    vessel_class: str | None,
+    model: Literal['jomopans-echo', 'randi', 'wales-heitmeyer'],
+    vessel_class: Literal['bulker', 'containership', 'cruise', 'dredger', 'fishing', 'government/research', 'naval', 'other', 'passenger', 'recreational', 'tanker', 'tug', 'vehicle carrier'] | None,
     speed_kt: float | None,
     length_m: float | None,
 )

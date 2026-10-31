@@ -482,11 +482,10 @@ class SurveyAirborneResult(OwnsArrays):
         :raises ImportError: If reportlab is not installed
             (``pip install "phonometry[report]"``), or matplotlib is missing for
             the embedded figure (``pip install "phonometry[plot]"``).
+        :raises TypeError: if ``quantity`` is not a text.
         """
         _validate_report_request(engine, language)
-        if quantity not in ("dnt", "r_prime"):
-            msg = f"Unknown survey quantity {quantity!r}; expected 'dnt' or 'r_prime'."
-            raise ValueError(msg)
+        require_choice(quantity, "quantity", ("dnt", "r_prime"))
         rating = self.rating if quantity == "dnt" else self.r_prime_rating
         if rating is None:
             msg = (

@@ -641,6 +641,12 @@ Draw the reference boxes and the measurement surface around them.
 
 **Returns:** The axes.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `view` is not a text. |
+
 ### TurbineMeasurementSurface.x_edges_m
 
 *property*
@@ -740,6 +746,12 @@ as in both elevations of Figure 2, with the overhead line.
 | `kwargs` | Forwarded to the outline of the measurement surface. |
 
 **Returns:** The axes.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `view` is not a text. |
 
 ## TurbineNoiseDeclaration
 

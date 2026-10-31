@@ -34,6 +34,7 @@ from .._internal.frozen import OwnsArrays
 # Shared Welch-core defaults and helpers (single source of truth for the
 # segment policy across the spectral estimators).
 from .._internal.validation import (
+    require_choice,
     require_count,
     require_equal_counts,
     require_ranks,
@@ -274,14 +275,13 @@ def transfer_function(
     :param overlap: Segment overlap fraction (default 0.5).
     :return: A :class:`FrequencyResponseResult`.
     :raises ValueError: If the inputs or parameters are invalid.
-    :raises TypeError: if ``nperseg`` is a flag, a text or an array where a count goes.
+    :raises TypeError: if ``nperseg`` is a flag, a text or an array where a count goes,
+        or ``estimator`` is not a text.
     """
     fs = resolve_pair_fs(x, y, fs)
     xa, ya = _validate_pair(x, y, "transfer_function")
     fs_v = _positive(fs, "fs")
-    if estimator not in ("H1", "H2"):
-        msg = "'estimator' must be 'H1' or 'H2'."
-        raise ValueError(msg)
+    require_choice(estimator, "estimator", ("H1", "H2"))
     seg, ovl = _welch_params(xa.size, fs_v, nperseg, overlap)
 
     freqs, gxy, gxx, gyy = _spectra(xa, ya, fs_v, seg, ovl)

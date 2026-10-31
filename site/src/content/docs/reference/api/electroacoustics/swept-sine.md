@@ -119,7 +119,7 @@ capped at `f2` by the inverse filter).
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid; if `ir_length` (explicit or default) cannot fit between the harmonic arrivals -- lengthen the sweep, lower `n_harmonics` or pass a shorter `ir_length`; if `method="farina"` is asked for orders beyond the anticausal span of its linear deconvolution; or if no excitation frequency has a measurable order-2 product (`f1` above `fs/4`, where every order-2 product would exceed Nyquist). |
-| TypeError | if `amplitude`, `duration_s`, `f1`, `f2` or `fs` is not a single number, or `ir_length` or `n_harmonics` is a flag, a text or an array where a count goes. |
+| TypeError | if `amplitude`, `duration_s`, `f1`, `f2` or `fs` is not a single number, or `ir_length` or `n_harmonics` is a flag, a text or an array where a count goes, or `method` is not a text. |
 
 ## SweptSineDistortionResult
 

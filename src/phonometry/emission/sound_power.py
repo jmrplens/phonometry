@@ -552,7 +552,9 @@ class SoundPowerResult(OwnsArrays):
             :class:`~phonometry.emission.declaration.NoiseEmissionDeclaration`.
         :raises ValueError: If the A-weighted sound power level is not finite
             (several bands were combined without ``frequencies``).
+        :raises TypeError: if ``form`` is not a text.
         """
+        require_choice(form, "form", ("dual-number", "single-number"))
         from .declaration import NoiseEmissionDeclaration, OperatingModeDeclaration
 
         lwa = float(self.sound_power_level_a)
@@ -606,7 +608,7 @@ def background_noise_correction(
     :param grade: ``'engineering'`` (ISO 3744) or ``'survey'`` (ISO 3746).
     :return: ``K1`` per band, in decibels.
     :raises TypeError: if ``background_levels`` holds a text or a value that is not a
-        real number.
+        real number, or ``grade`` is not a text.
     """
     low, high = _K1_CRITERIA[_check_grade(grade)]
     src = np.asarray(source_levels, dtype=np.float64)
@@ -907,8 +909,10 @@ def measurement_positions(
     :raises ValueError: for a surface other than ``'hemisphere'``, a radius
         that is not positive, a number of reflecting planes other than 1, 2
         or 3, or an unknown grade.
-    :raises TypeError: if ``radius`` is not a single number.
+    :raises TypeError: if ``radius`` is not a single number, or ``grade`` or ``surface``
+        is not a text.
     """
+    require_choice(surface, "surface", ("hemisphere", "box"))
     require_scalar(radius, "radius")
     if surface != "hemisphere":
         msg = (
@@ -1154,8 +1158,9 @@ def sound_power_pressure(
     :return: :class:`SoundPowerResult`.
     :raises TypeError: if ``distance``, ``radius`` or ``sigma_omc_db`` is not a single
         number, or ``dimensions`` holds a text or a value that is not a real number, or
-        ``grade`` is not a text.
+        ``grade`` is not a text, or ``surface`` is not a text.
     """
+    require_choice(surface, "surface", ("hemisphere", "box"))
     grade = require_choice(grade, "grade", ("engineering", "survey"))
     sigma_omc_db = require_non_negative(sigma_omc_db, "sigma_omc_db")
     levels = np.atleast_2d(np.asarray(levels_positions, dtype=np.float64))
@@ -1648,8 +1653,9 @@ def sound_energy_pressure(
     :raises TypeError: if ``distance``, ``integration_time``, ``radius`` or
         ``sigma_omc_db`` is not a single number, ``n_events`` is a flag, a text or an
         array where a count goes, or ``dimensions`` holds a text or a value that is not
-        a real number, or ``grade`` is not a text.
+        a real number, or ``grade`` is not a text, or ``surface`` is not a text.
     """
+    require_choice(surface, "surface", ("hemisphere", "box"))
     grade = require_choice(grade, "grade", ("engineering", "survey"))
     sigma_omc_db = require_non_negative(sigma_omc_db, "sigma_omc_db")
     levels, event_count = _event_position_levels(levels_positions, n_events)

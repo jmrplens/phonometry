@@ -750,6 +750,7 @@ method (8.6.3.3).
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the shapes disagree, a value is out of range or the reference band is missing. |
+| TypeError | if `field` is not a text. |
 
 ## FieldComparisonResponse
 

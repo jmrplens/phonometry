@@ -227,7 +227,7 @@ def test_unknown_airborne_quantity_rejected(tmp_path: Path) -> None:
     """An unknown airborne quantity raises ``ValueError``."""
     airborne = _airborne()
     out = str(tmp_path / "x.pdf")
-    with pytest.raises(ValueError, match=r"Unknown survey quantity"):
+    with pytest.raises(ValueError, match="'quantity' must be one of"):
         airborne.report(out, quantity="dn")
 
 

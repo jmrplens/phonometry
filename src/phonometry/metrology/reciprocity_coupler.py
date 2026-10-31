@@ -134,6 +134,8 @@ if TYPE_CHECKING:
     from ..fluids import Fluid
 
 Coupler = Literal["plane_wave", "large_volume"]
+#: A laboratory standard microphone type of Tables C.1 and C.2.
+MicrophoneType = Literal["LS1P", "LS2aP", "LS2bP"]
 Method = Literal["exact", "approximation"]
 
 __all__ = [
@@ -1057,7 +1059,7 @@ class CouplerDimensions(RichDisplay):
 #: IEC 61094-2:2009 Table C.1, "Nominal dimensions for plane-wave couplers",
 #: printed folio 28 (PDF page 30), keyed by microphone type. E is printed as a
 #: range of lengths.
-IEC61094_2_TABLE_C1: Mapping[str, CouplerDimensions] = MappingProxyType(
+IEC61094_2_TABLE_C1: Mapping[MicrophoneType, CouplerDimensions] = MappingProxyType(
     {
         "LS1P": CouplerDimensions(
             microphone_diameter_mm=23.77,
@@ -1086,7 +1088,7 @@ IEC61094_2_TABLE_C1: Mapping[str, CouplerDimensions] = MappingProxyType(
 #: IEC 61094-2:2009 Table C.2, "Nominal dimensions and tolerances for
 #: large-volume couplers", printed folio 29 (PDF page 31), keyed by microphone
 #: type; the tolerance is ± 0,03 mm on C, E and F.
-IEC61094_2_TABLE_C2: Mapping[str, CouplerDimensions] = MappingProxyType(
+IEC61094_2_TABLE_C2: Mapping[MicrophoneType, CouplerDimensions] = MappingProxyType(
     {
         "LS1P": CouplerDimensions(
             microphone_diameter_mm=23.77, front_cavity_diameter_mm=18.6, coupler_diameter_mm=42.88, front_cavity_depth_mm=1.95, coupler_length_mm=12.55,
@@ -1395,6 +1397,9 @@ def coupler_transfer_impedance(
     :raises ValueError: for frequencies that are not positive and increasing,
         a static pressure that is not positive, or an unknown method.
     """
+    require_choice(
+        heat_conduction_method, "heat_conduction_method", ("exact", "approximation")
+    )
     frequencies = _frequency_axis(frequencies)
     pressure = require_positive(static_pressure_pa, "static_pressure_pa")
     medium = _gas(temperature_c, pressure, relative_humidity_percent, gas)

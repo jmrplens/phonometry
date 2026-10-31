@@ -548,9 +548,9 @@ def test_time_delay_rejects_invalid_inputs() -> None:
     y = np.roll(x, 5)
     with pytest.raises(ValueError, match=r"time_delay: 'x'.*'y'.*one value per sample"):
         ph.signals.time_delay(x, y[:-1], FS)
-    with pytest.raises(ValueError, match=r"'method' must be 'gcc'"):
+    with pytest.raises(ValueError, match="'method' must be one of"):
         ph.signals.time_delay(x, y, FS, method="fft")  # type: ignore[arg-type]
-    with pytest.raises(ValueError, match=r"'weighting' must be 'none'"):
+    with pytest.raises(ValueError, match="'weighting' must be one of"):
         ph.signals.time_delay(x, y, FS, weighting="eckart")  # type: ignore[arg-type]
     with pytest.raises(ValueError, match=r"'interpolation' must be"):
         ph.signals.time_delay(x, y, FS, interpolation="cubic")  # type: ignore[arg-type]

@@ -103,6 +103,7 @@ from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     check_engine,
     refuse_text,
+    require_choice,
     require_equal_counts,
     require_equal_shapes,
     require_ranks,
@@ -1434,6 +1435,7 @@ class ToneAudibilityResult(OwnsArrays):
         :param kwargs: Forwarded to the primary artist call.
         :return: The axes.
         :raises ValueError: If ``view`` is not one of the two names above.
+        :raises TypeError: if ``view`` is not a text.
         """
         from ..._i18n import check_language
         from ..._plot.psychoacoustics import (
@@ -1441,9 +1443,7 @@ class ToneAudibilityResult(OwnsArrays):
             plot_tone_audibility_levels,
         )
 
-        if view not in ("audibility", "levels"):
-            msg = f"Unknown view {view!r}; use 'audibility' or 'levels'."
-            raise ValueError(msg)
+        require_choice(view, "view", ("audibility", "levels"))
         render = (
             plot_tone_audibility
             if view == "audibility"

@@ -103,7 +103,7 @@ $\ln(1 - \alpha_i)$, so each must be below 1.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `speed_of_sound` is not a single number. |
+| TypeError | if `speed_of_sound` is not a single number, or an entry of `dimensions` is not a real number. |
 
 ## eyring_reverberation_time
 
@@ -147,7 +147,7 @@ coefficient stays within the shared unit-error ceiling of 2.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `speed_of_sound` or `volume` is not a single number. |
+| TypeError | if `speed_of_sound` or `volume` is not a single number, or an area of `surfaces` is not a real number. |
 
 ## fitzroy_reverberation_time
 
@@ -187,7 +187,7 @@ must be below 1.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `speed_of_sound` is not a single number. |
+| TypeError | if `speed_of_sound` is not a single number, or an entry of `dimensions` is not a real number. |
 
 ## mean_absorption
 
@@ -207,6 +207,12 @@ $\bar{\alpha} = A / S$.
 | `surfaces` | Sequence of `(area, absorption_coefficient)` pairs; each coefficient a scalar or a per-band array. |
 
 **Returns:** The mean absorption $\sum_i S_i \alpha_i / \sum_i S_i$; a `float` when the coefficients are all numbers, a zero-dimensional array when each is one value and one of them is a zero-dimensional array, otherwise a per-band array.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if an area of `surfaces` is not a real number. |
 
 ## millington_sette_reverberation_time
 
@@ -250,7 +256,7 @@ this model's domain (use Sabine, or Eyring while the mean stays below 1).
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `speed_of_sound` or `volume` is not a single number. |
+| TypeError | if `speed_of_sound` or `volume` is not a single number, or an area of `surfaces` is not a real number. |
 
 ## reverberation_time_models
 
@@ -286,6 +292,13 @@ the strictest of the five domains: every absorption below 1.
 | `speed_of_sound` | Speed of sound `c0`, m/s. |
 
 **Returns:** The [`ReverberationModelResult`](/phonometry/reference/api/rooms/reverberation-prediction/#reverberationmodelresult).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | for `absorptions` that are not the three wall pairs, and for what the five models refuse. |
+| TypeError | if an entry of `dimensions` is not a real number, or `speed_of_sound` is not a single number. |
 
 ## ReverberationModelResult
 
@@ -427,4 +440,4 @@ error (a percentage passed instead of a fraction).
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `speed_of_sound` or `volume` is not a single number. |
+| TypeError | if `speed_of_sound` or `volume` is not a single number, or an area of `surfaces` is not a real number. |

@@ -10,6 +10,12 @@ pressure-intensity index and the phase-mismatch error the index implies.
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from phonometry.emission._sound_power_in_duct import MicrophoneShield
+    from phonometry.emission._sound_power_intensity_points import DeterminationGrade
+
 # ---------------------------------------------------------------------------
 # ISO 3745:2012 precision sound power (anechoic/hemi-anechoic). The Clause 10.5
 # EXAMPLE combines sigma_omc = 2,0 dB and sigma_R0 = 0,5 dB at k = 2 to the
@@ -97,7 +103,7 @@ IEC61043_PHASE_MISMATCH_DEG = 0.26
 # ---------------------------------------------------------------------------
 
 # Table 1, "Factor de error de desviación, K" (printed p. 11), in dB, by grade.
-ISO9614_1_TABLE_1_K: dict[str, float] = {
+ISO9614_1_TABLE_1_K: dict[DeterminationGrade, float] = {
     "precision": 10.0,
     "engineering": 10.0,
     "survey": 7.0,
@@ -273,7 +279,7 @@ ISO5136_TABLE_D1: tuple[tuple[float, ...], ...] = (
 ISO5136_TABLE_D1_TOLERANCE_DB = 0.05
 #: Clause 1.1 (PDF page 11, printed p. 1): the maximum mean flow velocity at
 #: the microphone head per shield, m/s, and the test-duct diameter range, m.
-ISO5136_MAX_VELOCITY: dict[str, float] = {
+ISO5136_MAX_VELOCITY: dict[MicrophoneShield, float] = {
     "foam-ball": 15.0,
     "nose-cone": 20.0,
     "sampling-tube": 40.0,

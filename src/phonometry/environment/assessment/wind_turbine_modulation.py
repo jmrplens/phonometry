@@ -90,6 +90,7 @@ from ..._internal.frozen import OwnsArrays, read_only
 from ..._internal.levels_math import energy_sum
 from ..._internal.validation import (
     is_class_designation,
+    require_choice,
     require_count,
     require_finite_array,
     require_finite_matrix,
@@ -258,7 +259,7 @@ def amplitude_modulation_band_levels(
         levels are not finite.
     :raises TypeError: if ``band`` is a flag, a text or an array where a count goes, or
         ``band_levels`` or ``frequencies`` holds a text or a value that is not a real
-        number.
+        number, or ``weighting`` is not a text.
     """
     if not is_class_designation(band, tuple(AM_FREQUENCY_BANDS_HZ)):
         msg = (
@@ -266,9 +267,7 @@ def amplitude_modulation_band_levels(
             f"got {band!r}."
         )
         raise ValueError(msg)
-    if weighting not in ("A", "Z"):
-        msg = f"'weighting' must be 'A' or 'Z'; got {weighting!r}."
-        raise ValueError(msg)
+    require_choice(weighting, "weighting", ("A", "Z"))
     levels = require_finite_matrix(band_levels, "band_levels")
     freqs = require_finite_array(frequencies, "frequencies")
     if freqs.size != levels.shape[1]:
@@ -495,6 +494,7 @@ class ModulationBlock(OwnsArrays):
         :param language: ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to the primary artist.
         :return: The axes.
+        :raises TypeError: if ``kind`` is not a text.
         """
         from ..._i18n import check_language
         from ..._plot.wind_turbine_receptor import plot_modulation_block

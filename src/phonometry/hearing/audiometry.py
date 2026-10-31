@@ -96,7 +96,7 @@ import numpy as np
 from .._internal.boundary import round_half_up, settled
 from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, read_only
-from .._internal.validation import require_scalar
+from .._internal.validation import require_choice, require_scalar
 from .sound_field_audiometry import (
     SOUND_FIELD_AMBIENT_BANDS_HZ as _SOUND_FIELD_BANDS_HZ,
 )
@@ -212,7 +212,7 @@ BONE_CONDUCTION_AMBIENT_LIMITS_DB: Mapping[float, np.ndarray] = MappingProxyType
 #: supra-aural earphones, the ones Table 2 assumes), ``"ER-3A"`` (the Etymotic
 #: insert earphone) and ``"HDA 200"`` (the Sennheiser circumaural one). The
 #: HDA 200 column prints no value below 63 Hz, which is NaN here.
-EARPHONE_ATTENUATION: Mapping[str, np.ndarray] = MappingProxyType(
+EARPHONE_ATTENUATION: Mapping[Earphone, np.ndarray] = MappingProxyType(
     {
         "supra-aural": read_only(
             np.array(
@@ -247,8 +247,9 @@ VIBROTACTILE_HEARING_LEVELS: Mapping[float, float] = MappingProxyType(
     {250.0: 40.0, 500.0: 60.0, 1000.0: 70.0}
 )
 
-_PRESENTATIONS: tuple[str, ...] = get_args(Presentation)
-_CONDUCTIONS: tuple[str, ...] = ("air", "bone")
+_PRESENTATIONS: tuple[Presentation, ...] = get_args(Presentation)
+_EARPHONES: tuple[Earphone, ...] = get_args(Earphone)
+_CONDUCTIONS: tuple[Presentation, ...] = ("air", "bone")
 #: The NOTEs to Tables 2 and 4 and footnote a to ISO 8253-2 Table 2: the two
 #: threshold shifts the limits are written for, and what the larger one adds.
 _BASE_THRESHOLD_SHIFT_DB = 2.0
@@ -306,7 +307,7 @@ _RETEST_DISAGREEMENT_DB = 10.0
 _CROSS_HEARING_LEVEL_DB = 40.0
 #: 8.4 NOTE: the vibrotactile levels for forehead placement lie this much lower.
 _FOREHEAD_OFFSET_DB = 10.0
-_PLACEMENTS: tuple[str, ...] = ("mastoid", "forehead")
+_PLACEMENTS: tuple[VibratorPlacement, ...] = ("mastoid", "forehead")
 
 #: Annex A: where "up to 4 kHz" ends.
 _UNCERTAINTY_SPLIT_HZ = 4000.0
@@ -401,7 +402,7 @@ def _table_for(
 
 
 def _earphone_allowance(
-    presentation: str, earphone: str, earphone_attenuation: ArrayLike | None
+    presentation: str, earphone: Earphone, earphone_attenuation: ArrayLike | None
 ) -> np.ndarray:
     """What an earphone's extra attenuation adds to the limits of Table 2.
 
@@ -496,8 +497,11 @@ def ambient_noise_limits(
         earphone or threshold shift, or an earphone with bone conduction or
         sound field.
     :raises TypeError: if ``allowed_threshold_shift_db``, ``lowest_hearing_level`` or
-        ``lowest_test_frequency_hz`` is not a single number.
+        ``lowest_test_frequency_hz`` is not a single number, or ``earphone`` or
+        ``presentation`` is not a text.
     """
+    require_choice(presentation, "presentation", _PRESENTATIONS)
+    require_choice(earphone, "earphone", _EARPHONES)
     require_scalar(allowed_threshold_shift_db, "allowed_threshold_shift_db")
     require_scalar(lowest_test_frequency_hz, "lowest_test_frequency_hz")
     table, _bands = _table_for(presentation)
@@ -809,7 +813,10 @@ def check_audiometric_ambient_noise(
     :raises ValueError: for the reasons :func:`ambient_noise_limits` gives, a
         frequency the table does not list, or levels that do not match the
         bands.
+    :raises TypeError: if ``presentation`` or ``earphone`` is not a text.
     """
+    require_choice(presentation, "presentation", _PRESENTATIONS)
+    require_choice(earphone, "earphone", _EARPHONES)
     _table, bands = _table_for(presentation)
     # Validates the tester's choices against the tables before anything else.
     ambient_noise_limits(
@@ -2106,17 +2113,13 @@ def audiogram_cautions(
     :raises ValueError: for neither set of levels, levels that do not match
         the frequencies, a frequency that is not positive, or an unknown
         placement.
+    :raises TypeError: if ``vibrator_placement`` is not a text.
     """
     freqs = _levels(frequencies, "frequencies")
     if np.any(freqs <= 0.0):
         msg = "'frequencies' must be positive, in hertz."
         raise ValueError(msg)
-    if vibrator_placement not in _PLACEMENTS:
-        msg = (
-            f"'vibrator_placement' must be one of {_PLACEMENTS}; got "
-            f"{vibrator_placement!r}."
-        )
-        raise ValueError(msg)
+    require_choice(vibrator_placement, "vibrator_placement", _PLACEMENTS)
     if (
         air_conduction_threshold_levels is None
         and bone_conduction_threshold_levels is None
@@ -2320,15 +2323,14 @@ def audiometric_uncertainty(
         positive, or a component or step that is negative or not finite.
     :raises TypeError: if ``environment_uncertainty_db``, ``frequency``,
         ``level_step_db``, ``special_uncertainty_db``, ``subject_uncertainty_db`` or
-        ``tester_uncertainty_db`` is not a single number.
+        ``tester_uncertainty_db`` is not a single number, or ``conduction`` is not a
+        text.
     """
     require_scalar(environment_uncertainty_db, "environment_uncertainty_db")
     require_scalar(special_uncertainty_db, "special_uncertainty_db")
     require_scalar(subject_uncertainty_db, "subject_uncertainty_db")
     require_scalar(tester_uncertainty_db, "tester_uncertainty_db")
-    if conduction not in _CONDUCTIONS:
-        msg = f"'conduction' must be one of {_CONDUCTIONS}; got {conduction!r}."
-        raise ValueError(msg)
+    require_choice(conduction, "conduction", _CONDUCTIONS)
     require_scalar(frequency, "frequency")
     f = float(frequency)
     if not math.isfinite(f) or f <= 0.0:

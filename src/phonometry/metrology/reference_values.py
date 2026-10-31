@@ -61,6 +61,9 @@ if TYPE_CHECKING:
 __all__ = ["REFERENCE_VALUES", "ReferenceValue"]
 
 
+#: The medium a table of ISO 1683:2015 gives its reference values for.
+Medium = Literal["gas", "liquid", "solid"]
+
 #: Where each row is printed in ISO 1683:2015.
 _TABLE_1: Final = "Table 1"
 _TABLE_2: Final = "Table 2"
@@ -84,7 +87,7 @@ class ReferenceValue(RichDisplay):
     """
 
     quantity: str
-    medium: Literal["gas", "liquid", "solid"]
+    medium: Medium
     value: float
     unit: str
     printed: str
@@ -98,7 +101,7 @@ def _rows(rows: dict[str, ReferenceValue]) -> Mapping[str, ReferenceValue]:
 #: ISO 1683:2015 Tables 1 to 3 and the alternative of note b of Table 3, keyed
 #: by medium (``"gas"``, ``"liquid"``, ``"solid"``) and then by quantity. Read
 #: from UNE-EN ISO 1683:2016, PDF pages 8 and 9 (printed folios 8 and 9).
-REFERENCE_VALUES: Mapping[str, Mapping[str, ReferenceValue]] = MappingProxyType(
+REFERENCE_VALUES: Mapping[Medium, Mapping[str, ReferenceValue]] = MappingProxyType(
     {
         "gas": _rows(
             {

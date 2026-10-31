@@ -195,8 +195,12 @@ class TestRefusals:
     """What the two functions will not answer."""
 
     def test_an_unknown_earphone(self) -> None:
-        with pytest.raises(ValueError, match="earphone must be one of"):
-            h.earphone_reference_level("HDA 200")
+        with pytest.raises(ValueError, match="'earphone' must be one of"):
+            h.earphone_reference_level("HDA 200")  # type: ignore[arg-type]
+
+    def test_an_earphone_that_is_not_a_text(self) -> None:
+        with pytest.raises(TypeError, match="'earphone' must be one of .*, a text"):
+            h.earphone_reference_level(39)  # type: ignore[arg-type]
 
     def test_a_frequency_the_table_does_not_carry(self) -> None:
         with pytest.raises(ValueError, match="not an ISO 389-1 test frequency"):

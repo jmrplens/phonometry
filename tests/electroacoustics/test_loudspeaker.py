@@ -437,7 +437,7 @@ def test_plot_rejects_unknown_quantity_and_missing_data() -> None:
     matplotlib.use("Agg")
 
     result = _example_result()
-    with pytest.raises(ValueError, match=r"unknown quantity 'bogus'"):
+    with pytest.raises(ValueError, match="'quantity' must be one of"):
         result.plot(quantity="bogus")
     f, spl = _flat_response()
     bare = electroacoustics.loudspeaker_characteristics(

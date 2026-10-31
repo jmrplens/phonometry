@@ -133,6 +133,11 @@ class Fluid(RichDisplay):
         what it is, and a NaN among them would otherwise travel the whole way to
         a result. A composition fraction may be zero, since dry air has no water
         vapour, so those are only required to be finite and not negative.
+
+        :raises TypeError: if a value of ``properties`` is not a single number.
+        :raises ValueError: if a value of ``properties`` is not positive and
+            finite, or a fraction of ``composition`` is not finite or is
+            negative.
         """
         for quantity, value in self.properties.items():
             require_positive(value, f"properties[{quantity!r}]")

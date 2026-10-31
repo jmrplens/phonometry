@@ -276,6 +276,7 @@ verdict row and a footer with the identity block and disclaimer.
 | :--- | :--- |
 | ValueError | If `engine` or `quantity` is unknown, the selected quantity is not available, the result does not hold the 16 core one-third-octave bands (100 Hz to 3150 Hz) the ISO 717-1 rating needs. |
 | ImportError | If reportlab is not installed (`pip install "phonometry[report]"`), or matplotlib is missing for the embedded figure (`pip install "phonometry[plot]"`). |
+| TypeError | if `quantity` is not a text. |
 
 ## energy_average_level
 
@@ -388,7 +389,7 @@ are not the ISO 16283 quantity.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If band counts differ, if `method` is unknown, if `t2`/`t0`/`area`/`volume` are not positive, if `area` is given without `surface_level`, if `surface_level` and `area` are given without `volume`, if `frequencies` does not carry one band centre per measured band, if inputs are non-finite, if `low_frequency` is given without `frequencies` or with `method="road_traffic"`, if `volume` disagrees with the procedure, or if the 63 Hz octave reverberation time is missing. A room that does not round below 25 m³ is refused where the corner measurements are described, by [`LowFrequencyProcedure`](/phonometry/reference/api/building/low-frequency/#lowfrequencyprocedure) itself. Supplying `surface_level` alone is not an error: `r_prime` simply stays `None`. |
-| TypeError | if `area`, `t0` or `volume` is not a single number. |
+| TypeError | if `area`, `t0` or `volume` is not a single number, or `method` is not a text. |
 
 **Warns**
 
@@ -487,6 +488,7 @@ and a footer with the identity block and disclaimer.
 | :--- | :--- |
 | ValueError | If `engine` or `quantity` is unknown, the selected quantity is not available, or the result does not hold the 16 core one-third-octave bands (100 Hz to 3150 Hz) the ISO 717-1 rating needs. |
 | ImportError | If reportlab is not installed (`pip install "phonometry[report]"`), or matplotlib is missing for the embedded figure (`pip install "phonometry[plot]"`). |
+| TypeError | if `quantity` is not a text. |
 
 ## impact_insulation
 
@@ -645,6 +647,7 @@ disclaimer.
 | :--- | :--- |
 | ValueError | If `engine` or `quantity` is unknown, the selected quantity is not available, the result does not hold the 16 core one-third-octave bands (100 Hz to 3150 Hz) the ISO 717-2 rating needs. |
 | ImportError | If reportlab is not installed (`pip install "phonometry[report]"`), or matplotlib is missing for the embedded figure (`pip install "phonometry[plot]"`). |
+| TypeError | if `quantity` is not a text. |
 
 ## ReportMetadata
 

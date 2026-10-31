@@ -1510,6 +1510,12 @@ Convert $k_{2,1}$ to an FRF (ISO 10846-1 Annex A / Table A.2).
 `"apparent_mass"` ($m_{\mathrm{eff}} = -k/\omega^2$); see
 [`phonometry.vibration.convert_frf`](/phonometry/reference/api/vibration/mechanical-mobility/#convert_frf).
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `target` is not a text. |
+
 ### TransferStiffnessResult.valid
 
 *property*

@@ -43,7 +43,7 @@ IEC62585_TABLE_I2_VALUES_DB: dict[TableI1Descriptor, float] = {
 }
 
 #: Table I.2: the ``u_i(C_FF,SLM)`` column as printed, to its four decimals.
-IEC62585_TABLE_I2_STANDARD_DB: dict[str, float] = {
+IEC62585_TABLE_I2_STANDARD_DB: dict[TableI1Descriptor, float] = {
     "a1": 0.0029,
     "a2": 0.0029,
     "a3": 0.0029,

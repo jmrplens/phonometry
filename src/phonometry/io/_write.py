@@ -77,7 +77,7 @@ from typing import TYPE_CHECKING, Any, Literal, overload
 import numpy as np
 from scipy.io import wavfile
 
-from .._internal.validation import require_count, require_scalar
+from .._internal.validation import require_choice, require_count, require_scalar
 from .._internal.warnings import PhonometryWarning
 from ._bext import (
     coding_history_line,
@@ -183,7 +183,7 @@ def _resolve_input(
     return data, require_count(fs, "fs", at_least=None)
 
 
-def _resolve_subtype(data: np.ndarray, subtype: str | None) -> Subtype:
+def _resolve_subtype(data: np.ndarray, subtype: object) -> Subtype:
     """Pick or validate the subtype for the resolved input data.
 
     Float data defaults to ``FLOAT``: float32 represents every sample that
@@ -212,13 +212,7 @@ def _resolve_subtype(data: np.ndarray, subtype: str | None) -> Subtype:
         raise TypeError(msg)
     if subtype is None:
         return "FLOAT"
-    if subtype not in _SUBTYPES:
-        msg = (
-            f"unknown subtype {subtype!r}; the WAV writer offers "
-            f"{sorted(_SUBTYPE_SPEC)}"
-        )
-        raise ValueError(msg)
-    return subtype
+    return require_choice(subtype, "subtype", _SUBTYPES)
 
 
 def _quantise(
@@ -460,16 +454,14 @@ def _resolve_bext(
         meta = provenance
     elif isinstance(bext, BroadcastMetadata):
         meta = bext
-    elif bext == "loudness":
+    else:
+        require_choice(bext, "bext", ("loudness",))
         base = provenance if provenance is not None else fresh_metadata()
         if data.dtype.kind == "f":
             full_scale = np.asarray(data, dtype=np.float64)
         else:
             full_scale = data / float(2 ** (8 * data.dtype.itemsize - 1))
         meta = with_measured_loudness(base, full_scale, fs)
-    else:
-        msg = f"unknown bext {bext!r}: pass None, 'loudness' or a BroadcastMetadata"
-        raise ValueError(msg)
     if meta is None:
         return None
     line = coding_history_line(
@@ -822,8 +814,13 @@ def write(
         no sidecar holds or whose sidecar would pass the 1 MiB a reader
         takes, or one with a pipe, a device, a socket or a directory at the
         sidecar's name, refused before the audio is written.
-    :raises TypeError: if ``fs`` is a flag, a text or an array where a count goes.
+    :raises TypeError: if ``fs`` is a flag, a text or an array where a count goes, or
+        ``bext``, ``dither`` or ``subtype`` is not a text.
     """
+    if dither is not None:
+        require_choice(dither, "dither", ("tpdf",))
+    if subtype is not None:
+        require_choice(subtype, "subtype", _SUBTYPES)
     target = Path(path)
     _check_target_suffix(path, target)
     carried = _sidecar_request(x=x, sidecar=sidecar)
@@ -883,15 +880,10 @@ def _scipy_write(path: str | Path, fs: int, data: np.ndarray) -> None:
 
 
 def _flac_passthrough_codes(
-    data: np.ndarray, subtype: str | None, dither: str | None
+    data: np.ndarray, subtype: object, dither: str | None
 ) -> np.ndarray:
     """int16 codes pass through whole; a conflicting request is refused."""
-    if subtype not in (None, "PCM_16"):
-        msg = (
-            "integer int16 input is a bit-exact pass-through of PCM_16; "
-            f"requesting subtype={subtype!r} would resample the codes"
-        )
-        raise ValueError(msg)
+    require_choice(subtype, "subtype", (None, "PCM_16"))
     _refuse_passthrough_dither(dither)
     return data.astype(np.int16)
 

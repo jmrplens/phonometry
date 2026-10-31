@@ -125,7 +125,7 @@ class TestSpectrogramValidation:
 
     def test_rejects_bad_scaling(self) -> None:
         x = np.ones(1024)
-        with pytest.raises(ValueError, match=r"'scaling' must be 'density'"):
+        with pytest.raises(ValueError, match="'scaling' must be one of"):
             signals.spectrogram(x, 1000.0, scaling="amplitude")  # type: ignore[arg-type]
 
     def test_rejects_short_signal(self) -> None:

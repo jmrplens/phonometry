@@ -120,7 +120,7 @@ upper limit for airborne, situation A (Annex D Table D.1).
 | Exception | When |
 | :--- | :--- |
 | ValueError | Unknown measurand, or a situation not tabulated for it. |
-| TypeError | if `measurand` is not a text. |
+| TypeError | if `measurand` or `situation` is not a text. |
 
 ## BandUncertainty
 
@@ -390,7 +390,7 @@ available for impact sound insulation (Table 5, footnote a).
 | Exception | When |
 | :--- | :--- |
 | ValueError | Unknown descriptor, an untabulated situation, or an `upper_limit` request outside airborne/situation A. |
-| TypeError | if `quantity` is not a text. |
+| TypeError | if `quantity` or `situation` is not a text. |
 
 ## single_number_uncertainty_uncorrelated
 
@@ -468,7 +468,7 @@ dataclasses. For conformity checks pass `one_sided=True` and read
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `quantity` is not a text. |
+| TypeError | if `quantity` or `situation` is not a text. |
 
 ## UncertainValue
 

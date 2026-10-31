@@ -142,6 +142,7 @@ brings a 63 Hz octave value.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `room` is neither name, if the band counts disagree, if the 50 Hz, 63 Hz or 80 Hz band is absent from `frequencies`, if a receiving room is missing either half of Clause 10.4, or if a source room brings either half of it. |
+| TypeError | if `room` is not a text. |
 
 ## corner_level
 

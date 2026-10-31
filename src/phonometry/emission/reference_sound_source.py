@@ -82,7 +82,7 @@ from __future__ import annotations
 import math
 import warnings
 from dataclasses import KW_ONLY, dataclass
-from typing import TYPE_CHECKING, Any, Literal, cast
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -90,6 +90,7 @@ from .._internal.frozen import OwnsArrays
 from .._internal.levels_math import energy_mean, energy_sum
 from .._internal.validation import (
     require_band_fraction,
+    require_choice,
     require_positive,
     require_scalar,
 )
@@ -194,7 +195,9 @@ _OCTAVE_STEP = 3
 _THIRD_OCTAVE = 3
 
 
-def _column(environment: str, arrangement: str | None) -> int:
+def _column(environment: str, arrangement: object) -> int:
+    if arrangement is not None:
+        require_choice(arrangement, "arrangement", ("paths", "fixed"))
     if environment == "reverberation-room":
         return 2
     if environment != "hemi-anechoic":
@@ -203,11 +206,11 @@ def _column(environment: str, arrangement: str | None) -> int:
             f"got {environment!r}."
         )
         raise ValueError(msg)
-    if arrangement not in ("paths", "fixed"):
+    if arrangement is None:
         msg = (
             "'arrangement' must be 'paths' (meridional or spiral) or 'fixed' "
             "(20 discrete positions or coaxial circular paths) in a hemi-anechoic "
-            f"room; got {arrangement!r}."
+            "room; got None."
         )
         raise ValueError(msg)
     return 0 if arrangement == "paths" else 1
@@ -306,7 +309,8 @@ def radiation_impedance_correction(
     :raises ValueError: for an unknown radiation character, a monopole or
         dipole without frequencies and knee frequency, or a dipole band below
         the knee frequency, for which Annex A gives no formula.
-    :raises TypeError: if ``knee_frequency_hz`` is not a single number.
+    :raises TypeError: if ``knee_frequency_hz`` is not a single number, or ``radiation``
+        is not a text.
     """
     _validate_meteorology(temperature_c, static_pressure_kpa)
     theta = temperature_c + _KELVIN_OFFSET
@@ -317,11 +321,7 @@ def radiation_impedance_correction(
             1 if frequencies is None else np.atleast_1d(np.asarray(frequencies)).size
         )
         return np.full(count, pressure_term + _C2_UNKNOWN * ratio, dtype=np.float64)
-    if radiation not in ("monopole", "dipole"):
-        msg = (
-            f"'radiation' must be 'unknown', 'monopole' or 'dipole'; got {radiation!r}."
-        )
-        raise ValueError(msg)
+    require_choice(radiation, "radiation", ("monopole", "dipole"))
     if frequencies is None or knee_frequency_hz is None:
         msg = (
             f"a {radiation} needs 'frequencies' and 'knee_frequency_hz': "
@@ -365,8 +365,10 @@ def reference_source_reproducibility(
         octaves.
     :return: :math:`\sigma_R` per band, in dB.
     :raises ValueError: for a band outside Table 2 or an unknown option.
-    :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a float).
+    :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a float), or
+        ``arrangement`` or ``environment`` is not a text.
     """
+    require_choice(environment, "environment", ("hemi-anechoic", "reverberation-room"))
     column = _column(environment, arrangement)
     freqs = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
     if require_band_fraction(fraction, "fraction") == _THIRD_OCTAVE:
@@ -468,7 +470,7 @@ class ReferenceSourceCalibration(OwnsArrays):
     expanded_uncertainty_db: np.ndarray
     coverage_factor: float
     arrangement: Literal["paths", "fixed"]
-    radiation: str | None
+    radiation: RadiationCharacter | None
     knee_frequency_hz: float | None
     intensity_sound_power_level: np.ndarray | None = None
     room_qualification: FreeFieldCheck | None = None
@@ -654,7 +656,7 @@ class ReferenceSourceCalibration(OwnsArrays):
             levels = levels - radiation_impedance_correction(
                 temperature_c=temperature_c,
                 static_pressure_kpa=static_pressure_kpa,
-                radiation=cast("RadiationCharacter", self.radiation),
+                radiation=self.radiation,
                 frequencies=self.frequencies,
                 knee_frequency_hz=self.knee_frequency_hz,
             )
@@ -939,8 +941,10 @@ def reference_source_calibration(
         from 50 Hz to 20 kHz, no position, levels, background levels, maxima
         or a manufacturer's :math:`C_2` that are not finite, or inconsistent
         shapes.
-    :raises TypeError: if ``coverage_factor`` is not a single number.
+    :raises TypeError: if ``coverage_factor`` is not a single number, or ``arrangement``
+        or ``radiation`` is not a text.
     """
+    require_choice(radiation, "radiation", ("monopole", "dipole", "unknown"))
     freqs, ks = _calibration_bands(frequencies)
     _column("hemi-anechoic", arrangement)
     air = CalibrationConditions() if conditions is None else conditions

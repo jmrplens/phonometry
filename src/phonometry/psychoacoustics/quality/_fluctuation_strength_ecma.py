@@ -115,6 +115,7 @@ from ..._internal.frozen import OwnsArrays
 from ..._internal.utils import _typesignal
 from ..._internal.validation import (
     require_1d_signal,
+    require_choice,
     require_positive,
     require_ranks,
     require_same_length,
@@ -955,16 +956,14 @@ def fluctuation_strength_ecma(
         (Formula 169).
     :raises ValueError: for an empty, multichannel or non-finite signal, a
         non-finite or non-positive ``fs``, or an unknown ``field``.
-    :raises TypeError: if ``fs`` is not a single number.
+    :raises TypeError: if ``fs`` is not a single number, or ``field`` is not a text.
 
     A 1 kHz carrier 100 %-amplitude-modulated at 4 Hz with an overall level
     of 60 dB SPL yields 1 vacil_HMS (Clause 9 calibration; reproduced to
     0.9958 vacil_HMS with the tabulated c_F of Formula (163) once the 90th
     percentile settles, by a 12 s signal).
     """
-    if field not in ("free", "diffuse"):
-        msg = "field must be 'free' or 'diffuse'"
-        raise ValueError(msg)
+    require_choice(field, "field", ("free", "diffuse"))
     fs = resolve_fs(x, fs, name="x")
     samples = apply_calibration(
         x,

@@ -150,17 +150,19 @@ FOUNDATION_FREQUENCIES_HZ: tuple[float, ...] = (1.0, 10.0, 50.0, 100.0)
 #: table prints a band as a range ("20 bis 40"), and Bild 1 shows what the
 #: range means: a straight line from the value at the start of the band to
 #: the value at its end, on a linear frequency axis.
-SHORT_TERM_FOUNDATION_MM_S: Mapping[str, tuple[float, ...]] = MappingProxyType(
-    {
-        "commercial": (20.0, 20.0, 40.0, 50.0),
-        "residential": (5.0, 5.0, 15.0, 20.0),
-        "sensitive": (3.0, 3.0, 8.0, 10.0),
-    }
+SHORT_TERM_FOUNDATION_MM_S: Mapping[BuildingClass, tuple[float, ...]] = (
+    MappingProxyType(
+        {
+            "commercial": (20.0, 20.0, 40.0, 50.0),
+            "residential": (5.0, 5.0, 15.0, 20.0),
+            "sensitive": (3.0, 3.0, 8.0, 10.0),
+        }
+    )
 )
 
 #: Table 1, last column: the guideline peak velocity in the topmost floor
 #: plane, horizontal, at all frequencies, in millimetres per second.
-SHORT_TERM_TOP_FLOOR_MM_S: Mapping[str, float] = MappingProxyType(
+SHORT_TERM_TOP_FLOOR_MM_S: Mapping[BuildingClass, float] = MappingProxyType(
     {
         "commercial": 40.0,
         "residential": 15.0,
@@ -172,7 +174,7 @@ SHORT_TERM_TOP_FLOOR_MM_S: Mapping[str, float] = MappingProxyType(
 #: horizontal, at all frequencies, in millimetres per second. Table 3 has no
 #: foundation column, because a structure responding at its own frequencies
 #: is judged where it responds.
-LONG_TERM_TOP_FLOOR_MM_S: Mapping[str, float] = MappingProxyType(
+LONG_TERM_TOP_FLOOR_MM_S: Mapping[BuildingClass, float] = MappingProxyType(
     {
         "commercial": 10.0,
         "residential": 5.0,
@@ -207,7 +209,7 @@ PIPELINE_MATERIALS: tuple[PipelineMaterial, ...] = (
 #: Table 2: the guideline peak velocity on a buried pipeline, in millimetres
 #: per second, by pipe material. Row 2 covers vitrified clay, concrete,
 #: reinforced and prestressed concrete, and metal with or without flanges.
-PIPELINE_MM_S: Mapping[str, float] = MappingProxyType(
+PIPELINE_MM_S: Mapping[PipelineMaterial, float] = MappingProxyType(
     {
         "welded_steel": 100.0,
         "concrete_or_flanged_metal": 80.0,
@@ -542,8 +544,14 @@ def assess_building_vibration(
     :return: The comparison, as a :class:`DamageAssessment`.
     :raises ValueError: If the velocity is negative or not finite, or for any
         reason :func:`guideline_velocity` raises.
-    :raises TypeError: if ``velocity_mm_s`` is not a single number.
+    :raises TypeError: if ``velocity_mm_s`` is not a single number, or
+        ``building_class``, ``duration`` or ``location`` is not a text.
     """
+    require_choice(
+        building_class, "building_class", ("commercial", "residential", "sensitive")
+    )
+    require_choice(location, "location", ("foundation", "top_floor"))
+    require_choice(duration, "duration", ("short_term", "long_term"))
     # Non-negative rather than positive: a foundation that did not move is a
     # measurement like any other, and it keeps to every guideline value there
     # is. Refusing it would refuse the easiest case the standard covers.

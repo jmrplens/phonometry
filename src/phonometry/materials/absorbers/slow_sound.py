@@ -498,16 +498,15 @@ def helmholtz_resonator_impedance(
     :return: Complex acoustic impedance ``Z_HR``, in Pa s/m3, shaped like
         ``frequency``.
     :raises TypeError: if ``lattice_step_m`` or ``slit_height_m`` is not a single
-        number, or ``frequency`` holds a text or a value that is not a real number.
+        number, or ``frequency`` holds a text or a value that is not a real number, or
+        ``geometry`` is not a text.
     """
     f = require_positive_array(frequency, "frequency")
     ln = require_positive(resonator.neck_length_m, "neck_length_m")
     wn = require_positive(resonator.neck_side_m, "neck_side_m")
     lc = require_positive(resonator.cavity_length_m, "cavity_length_m")
     wc = require_positive(resonator.cavity_side_m, "cavity_side_m")
-    if geometry not in ("square", "slit"):
-        msg = "'geometry' must be 'square' or 'slit'."
-        raise ValueError(msg)
+    require_choice(geometry, "geometry", ("square", "slit"))
     omega = 2.0 * np.pi * f
     if geometry == "slit":
         rho_n, kap_n, rho_c, kap_c, z_n, z_c, dl = _slit_resonator_ducts(

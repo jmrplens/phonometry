@@ -338,7 +338,10 @@ class ANPNPDCurves(OwnsArrays):
 
         :raises ValueError: if the level table disagrees with the powers or the
             distances.
+        :raises TypeError: if ``metric`` or ``operation`` is not a text.
         """
+        require_choice(self.metric, "metric", ("SEL", "LAmax"))
+        require_choice(self.operation, "operation", ("A", "D"))
         require_ranks(self, powers=1, distances_m=1, levels=2)
         require_same_length(self, "powers", "levels", axis="power setting")
         require_same_length(self, "distances_m", ("levels", 1), axis="slant distance")
@@ -480,7 +483,9 @@ class SpectralClass(OwnsArrays):
         """Reject a class whose levels do not run over its bands.
 
         :raises ValueError: if the two arrays disagree or carry an extra axis.
+        :raises TypeError: if ``operation`` is not a text.
         """
+        require_choice(self.operation, "operation", ("A", "D"))
         require_ranks(self, frequencies=1, levels=1)
         require_same_length(self, "frequencies", "levels")
 
@@ -532,7 +537,7 @@ class ANPAircraft(RichDisplay):
         :raises ValueError: for an ``operation`` or ``metric`` other than those
             listed (the spelling as written, ``"departure"`` and not
             ``"Departure"``).
-        :raises TypeError: if ``operation`` is not a text.
+        :raises TypeError: if ``operation`` or ``metric`` is not a text.
         """
         return self.database.npd_curves(self.aircraft_id, operation, metric)
 
@@ -566,7 +571,7 @@ class ANPAircraft(RichDisplay):
 
         :raises ValueError: for an ``operation``, ``metric`` or ``absorption``
             other than those listed (the spelling as written).
-        :raises TypeError: if ``operation`` or ``absorption`` is not a text.
+        :raises TypeError: if ``operation``, ``absorption`` or ``metric`` is not a text.
         """
         return self.database.revised_npd_curves(
             self.aircraft_id,
@@ -837,7 +842,7 @@ class ANPDatabase:
         :raises KeyError: if the aircraft, its NPD data or its spectral class is
             missing.
         :raises ValueError: for an unknown metric, operation or absorption route.
-        :raises TypeError: if ``operation`` or ``absorption`` is not a text.
+        :raises TypeError: if ``operation``, ``absorption`` or ``metric`` is not a text.
         """
         from .npd_atmosphere import revise_npd_curves
 
@@ -862,11 +867,9 @@ class ANPDatabase:
         :return: An :class:`ANPNPDCurves`.
         :raises KeyError: If the aircraft has no NPD data for the request.
         :raises ValueError: If the metric or operation is unknown.
-        :raises TypeError: if ``operation`` is not a text.
+        :raises TypeError: if ``operation`` or ``metric`` is not a text.
         """
-        if metric not in _METRICS:
-            msg = f"'metric' must be one of {_METRICS}, got {metric!r}."
-            raise ValueError(msg)
+        require_choice(metric, "metric", _METRICS)
         op = _operation_code(operation)
         m = self._aircraft.get(aircraft_id)
         if m is None:

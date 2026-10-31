@@ -246,6 +246,7 @@ def spectrogram(
     :param scaling: ``'density'`` (units²/Hz) or ``'spectrum'`` (units²).
     :return: A :class:`SpectrogramResult`.
     :raises ValueError: If the inputs or parameters are invalid.
+    :raises TypeError: if ``scaling`` is not a text.
     """
     xa = _validate_signal(x, "x", context="a spectrogram")
     fs_v = _positive(resolve_fs(x, fs), "fs")

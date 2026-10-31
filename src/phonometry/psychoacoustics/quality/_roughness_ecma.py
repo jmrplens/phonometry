@@ -68,6 +68,7 @@ from ..._internal.frozen import OwnsArrays
 from ..._internal.utils import _typesignal
 from ..._internal.validation import (
     require_1d_signal,
+    require_choice,
     require_ranks,
     require_same_length,
     require_scalar,
@@ -628,15 +629,13 @@ def roughness_ecma(
     :return: An :class:`EcmaRoughness` with the single value R (Clause 7.1.10),
         the average specific roughness R'(z) (Clause 7.1.8) and the
         time-dependent roughness R(l50) (Formula 111).
-    :raises TypeError: if ``fs`` is not a single number.
+    :raises TypeError: if ``fs`` is not a single number, or ``field`` is not a text.
 
     A 1 kHz carrier 100 %-amplitude-modulated at 70 Hz with an overall level
     of 60 dB SPL yields 1 asper (Clause 7 calibration; reproduced to 0.9999
     asper with the tabulated c_R of Formula (104)).
     """
-    if field not in ("free", "diffuse"):
-        msg = "field must be 'free' or 'diffuse'"
-        raise ValueError(msg)
+    require_choice(field, "field", ("free", "diffuse"))
     fs = resolve_fs(x, fs, name="x")
     samples = apply_calibration(
         x,

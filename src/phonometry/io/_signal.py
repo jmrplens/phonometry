@@ -310,6 +310,7 @@ class Signal(RichDisplay):
         Requires matplotlib
         (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
+        :raises TypeError: if ``scale`` is not a text.
         """
         from .._i18n import check_language
         from .._plot.io import plot_signal

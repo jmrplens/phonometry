@@ -59,6 +59,7 @@ import numpy as np
 
 from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
+    require_choice,
     require_count,
     require_ranks,
     require_same_length,
@@ -159,7 +160,8 @@ def noise_signal(
         reproduces the same record. ``None`` draws fresh entropy.
     :return: The noise record, ``round(fs * duration_s)`` samples.
     :raises ValueError: If the inputs or parameters are invalid.
-    :raises TypeError: if ``duration_s``, ``fs`` or ``rms`` is not a single number.
+    :raises TypeError: if ``duration_s``, ``fs`` or ``rms`` is not a single number, or
+        ``color`` is not a text.
     """
     require_scalar(fs, "fs")
     fs_v = float(fs)
@@ -175,9 +177,7 @@ def noise_signal(
     if n < _MIN_NOISE_SAMPLES:
         msg = f"'fs'*'duration_s' must give at least 16 samples, got {n}."
         raise ValueError(msg)
-    if color not in _COLOR_EXPONENTS:
-        msg = "'color' must be one of 'white', 'pink', 'red', 'blue', 'violet'."
-        raise ValueError(msg)
+    require_choice(color, "color", tuple(_COLOR_EXPONENTS))
     require_scalar(rms, "rms")
     rms_v = float(rms)
     if not np.isfinite(rms_v) or rms_v <= 0.0:
@@ -809,7 +809,7 @@ def fractional_delay(
     :param mode: Boundary convention, ``'linear'`` or ``'circular'``.
     :return: The delayed record, same length as ``x``.
     :raises ValueError: If the inputs or parameters are invalid.
-    :raises TypeError: if ``delay`` is not a single number.
+    :raises TypeError: if ``delay`` is not a single number, or ``mode`` is not a text.
     """
     xa = _validate_1d_finite(x, "x")
     require_scalar(delay, "delay")
@@ -823,9 +823,7 @@ def fractional_delay(
             f"({xa.size} samples)."
         )
         raise ValueError(msg)
-    if mode not in ("linear", "circular"):
-        msg = "'mode' must be 'linear' or 'circular'."
-        raise ValueError(msg)
+    require_choice(mode, "mode", ("linear", "circular"))
     if mode == "linear":
         # A delay is a negative advance; float negation is exact, so the
         # phase ramp is bit-identical to the alignment kernel's.

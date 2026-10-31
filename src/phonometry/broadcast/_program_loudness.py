@@ -946,6 +946,7 @@ class ProgramLoudnessResult(OwnsArrays):
         :raises ImportError: If reportlab is not installed
             (``pip install "phonometry[report]"``), or matplotlib is missing for
             the embedded figure (``pip install "phonometry[plot]"``).
+        :raises TypeError: if ``tolerance`` is not a text.
         """
         from .._i18n import check_language
 

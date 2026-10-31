@@ -64,16 +64,17 @@ from .._internal.validation import (
     require_scalar,
 )
 
+# Imported where the module runs, not only for a type checker: the two
+# vocabularies type fields of DetectionRangeResult, whose annotations a reader
+# resolves from this module.
+from .propagation.closed_form import AbsorptionModel, SpreadingLaw  # noqa: TC001
+
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
-    from .propagation.closed_form import (
-        AbsorptionModel,
-        PropagationLossResult,
-        SpreadingLaw,
-    )
+    from .propagation.closed_form import PropagationLossResult
 
 __all__ = [
     "DetectionRangeResult",
@@ -357,8 +358,8 @@ class DetectionRangeResult(OwnsArrays):
     range_m: NDArray[np.float64]
     propagation_loss: NDArray[np.float64]
     absorption_db_per_km: float
-    law: str
-    model: str
+    law: SpreadingLaw
+    model: AbsorptionModel
 
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
@@ -414,6 +415,8 @@ def detection_range(
         number, or ``n_points`` is a flag, a text or an array where a count goes, or
         ``law`` or ``model`` is not a text.
     """
+    require_choice(law, "law", ("spherical", "cylindrical", "practical"))
+    require_choice(model, "model", ("francois-garrison", "ainslie-mccolm", "thorp"))
     require_scalar(ph, "ph")
     from scipy.optimize import brentq
 

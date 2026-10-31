@@ -634,7 +634,7 @@ def test_unknown_measurand_with_upper_limit() -> None:
 
 
 def test_unknown_situation_single_number() -> None:
-    with pytest.raises(ValueError, match="Unknown situation"):
+    with pytest.raises(ValueError, match="'situation' must be one of"):
         single_number_uncertainty("r_w", "Z")  # type: ignore[arg-type]
 
 

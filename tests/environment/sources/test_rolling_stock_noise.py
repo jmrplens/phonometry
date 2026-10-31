@@ -1388,7 +1388,8 @@ def test_the_curve_radius_and_the_gradient_at_their_limits(
         ),
         (
             {"vertical": {250.0: 1.0}, "lateral": {250.0: 1.0}, "axial": {}},
-            "'decay_limits_db_per_m' has an unknown direction 'axial'.",
+            "'decay_limits_db_per_m' must be one of \\('vertical', 'lateral'\\); "
+            "got 'axial'.",
         ),
         (
             {"vertical": {250.0: 5.0, 251.0: 1.0}, "lateral": {250.0: 1.0}},

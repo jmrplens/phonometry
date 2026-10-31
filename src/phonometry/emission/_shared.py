@@ -63,6 +63,7 @@ import numpy as np
 
 from .._internal.levels_math import energy_mean
 from .._internal.validation import (
+    require_choice,
     require_count,
     require_positive,
     require_scalar,
@@ -242,10 +243,8 @@ def _c2_correction(temperature_c: float, static_pressure_kpa: float) -> float:
     )
 
 
-def _check_grade(grade: str) -> Grade:
-    if grade not in ("engineering", "survey"):
-        msg = "'grade' must be 'engineering' or 'survey'."
-        raise ValueError(msg)
+def _check_grade(grade: object) -> Grade:
+    require_choice(grade, "grade", ("engineering", "survey"))
     return cast("Grade", grade)
 
 

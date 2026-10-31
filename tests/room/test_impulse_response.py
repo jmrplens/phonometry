@@ -356,7 +356,7 @@ def test_invalid_arguments() -> None:
     with pytest.raises(ValueError, match="order must be one of"):
         room.mls_signal(99)  # unsupported order
     ten = np.zeros(10)
-    with pytest.raises(ValueError, match="unknown method"):
+    with pytest.raises(ValueError, match="'method' must be one of"):
         room.impulse_response(ten, ten, FS, method="bogus")
     with pytest.raises(ValueError, match=r"method='farina' requires f_range"):
         room.impulse_response(ten, ten, FS, method="farina")  # no f_range

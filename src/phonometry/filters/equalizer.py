@@ -68,6 +68,7 @@ from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays
 from .._internal.utils import _sos_initial_state, _sos_state_mismatch
 from .._internal.validation import (
+    require_choice,
     require_count,
     require_ranks,
     require_same_length,
@@ -152,18 +153,30 @@ class EQSection(RichDisplay):
     slope: float | None = None
 
     def __post_init__(self) -> None:
-        """Reject a section the cookbook cannot design (type, ``f0``, gain, Q/BW/S)."""
+        """Reject a section the cookbook cannot design (type, ``f0``, gain, Q/BW/S).
+
+        :raises TypeError: if ``filter_type`` is not a text.
+        """
+        require_choice(
+            self.filter_type,
+            "filter_type",
+            (
+                "peaking",
+                "lowshelf",
+                "highshelf",
+                "lowpass",
+                "highpass",
+                "bandpass",
+                "bandpass_skirt",
+                "notch",
+                "allpass",
+            ),
+        )
         _validate_section(self)
 
 
 def _validate_section(section: EQSection) -> None:
     """Validate one :class:`EQSection` against the cookbook's parameter rules."""
-    if section.filter_type not in _DESIGNERS:
-        msg = (
-            f"Unknown filter_type {section.filter_type!r}; expected one of "
-            f"{sorted(_DESIGNERS)}."
-        )
-        raise ValueError(msg)
     for name, value in (
         ("f0", section.f0),
         ("gain_db", section.gain_db),

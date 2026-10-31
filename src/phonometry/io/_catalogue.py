@@ -2685,9 +2685,9 @@ def write_catalogue(
         :func:`read_catalogue` would refuse in the file: more than 50 000
         rows, a file past 16 MiB or a CSV header past 64 KiB, and a text
         longer than a reader takes among it.
-    :raises TypeError: for rows that are not catalogue rows of one class
-        (fluid states among them), or a *catalogue* or *about* the rows
-        need and do not bring.
+    :raises TypeError: for rows that are not catalogue rows of one class (fluid states
+        among them), or a *catalogue* or *about* the rows need and do not bring, or
+        ``decimal`` or ``delimiter`` is not a text.
     :raises ValueError: for a name that ends in neither ``.json`` nor
         ``.csv``, a dialect a CSV file cannot take, and a dialect beside a
         JSON file.
@@ -2701,22 +2701,18 @@ def write_catalogue(
     if not isinstance(rows, Mapping):
         msg = f"rows is a {type(rows).__name__}, and write_catalogue takes a mapping of rows"
         raise TypeError(msg)
+    from ._catalogue_csv import check_dialect
+
+    dialect = check_dialect(
+        delimiter, decimal, json_document=target.name if kind == "json" else None
+    )
     if kind == "json":
-        if (delimiter, decimal) != (",", "."):
-            msg = (
-                "delimiter= and decimal= declare a CSV file's dialect, and "
-                f"{target.name!r} is a JSON document"
-            )
-            raise ValueError(msg)
         writer = _Writer(rows)
         document = _document(writer, rows, catalogue, about, provenance)
         text = _dumps(document) + "\n"
         _read_text(text, writer.row_type, _escaped(target.name))
         _write_atomic(target, text, overwrite=overwrite)
         return (target,)
-    from ._catalogue_csv import check_dialect
-
-    dialect = check_dialect(delimiter, decimal)
     writer = _Writer(rows)
     document = _document(writer, rows, catalogue, about, provenance)
     return _write_sheet(document, writer, target, dialect, overwrite=overwrite)

@@ -325,7 +325,7 @@ def test_validation_errors() -> None:
         ph.electroacoustics.swept_sine_distortion(
             not_finite, FS, f1=F1, f2=F2, duration_s=SECONDS
         )
-    with pytest.raises(ValueError, match=r"'method' must be 'synchronized'"):
+    with pytest.raises(ValueError, match="'method' must be one of"):
         ph.electroacoustics.swept_sine_distortion(
             rec, FS, f1=F1, f2=F2, duration_s=SECONDS, method="nope"
         )  # type: ignore[arg-type]

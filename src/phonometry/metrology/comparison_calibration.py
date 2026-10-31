@@ -2706,15 +2706,16 @@ def comparison_uncertainty_budget(
         table, an additional component without a name or with the name of
         another component, no component at all, or a value that is negative
         or not finite.
-    :raises TypeError: if ``field`` is not a text, or ``coverage_factor`` or
-        ``frequency_hz`` is not a single number.
+    :raises TypeError: if ``field`` or a key of ``standard_uncertainties_db`` is
+        not a text, or ``coverage_factor`` or ``frequency_hz`` is not a single
+        number.
     """
     field = require_choice(field, "field", CALIBRATION_FIELDS)
     table = _BUDGET_TABLES[field]
     given: Mapping[ComparisonComponent, float | Quantity] = dict(
         standard_uncertainties_db.items()
     )
-    unknown = [key for key in given if key not in table]
+    unknown = [key for key in given if isinstance(key, str) and key not in table]
     if unknown:
         msg = (
             f"{unknown} are not components of {_STANDARDS[field]}'s table; the "
@@ -2722,6 +2723,8 @@ def comparison_uncertainty_budget(
             "'additional_components'."
         )
         raise ValueError(msg)
+    for key in given:
+        require_choice(key, "standard_uncertainties_db", tuple(table))
     names: list[str] = []
     components: list[str] = []
     quantities: list[Quantity] = []
@@ -4344,6 +4347,9 @@ def time_selective_response(
     :raises ValueError: for what :class:`TimeSelectiveResponse` refuses.
     :raises TypeError: if ``window_shape`` is not a text.
     """
+    require_choice(
+        window_shape, "window_shape", ("tukey", "hann", "hamming", "rectangular")
+    )
     return TimeSelectiveResponse(
         impulse_response=np.asarray(impulse_response, dtype=np.float64),
         fs=fs,

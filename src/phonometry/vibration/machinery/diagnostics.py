@@ -164,6 +164,15 @@ class FaultLine(RichDisplay):
     family: Literal["shaft", "bearing", "gear", "motor", "blade"]
     description: str
 
+    def __post_init__(self) -> None:
+        """Refuse a choice its ``Literal`` does not list, when the record is built.
+
+        :raises TypeError: if ``family`` is not a text.
+        """
+        require_choice(
+            self.family, "family", ("shaft", "bearing", "gear", "motor", "blade")
+        )
+
 
 def _line(
     name: str,

@@ -55,9 +55,11 @@ if TYPE_CHECKING:
 
     from phonometry.vibration._choices import BuildingClass
     from phonometry.vibration.human.exposure import WeightingName
+    from phonometry.vibration.human.instrumentation import Method
     from phonometry.vibration.human.signal_burst import BurstApplication
+    from phonometry.vibration.machinery.evaluation import MachineGroup, MachineSupport
     from phonometry.vibration.structural.building_damage import PipelineMaterial
-    from phonometry.vibration.structural.building_response import PeriodModel
+    from phonometry.vibration.structural.building_response import CoefficientModel
 
 
 def generate_junction_transmission(output_dir: str) -> None:
@@ -2842,7 +2844,7 @@ def generate_building_frequency_prediction(output_dir: str) -> None:
         label="$f = 46/h$ (Figure D.1)",
     )
     # (model, curve label, short label for the bar rows, colour, dash)
-    forms: tuple[tuple[PeriodModel, str, str, str, str], ...] = (
+    forms: tuple[tuple[CoefficientModel, str, str, str, str], ...] = (
         ("height", "$T = k_1 h$ (D.1)", "$T = k_1 h$", COLOR_TERTIARY, "--"),
         (
             "height_width",
@@ -3010,7 +3012,7 @@ def generate_industrial_machine_zones(output_dir: str) -> None:
     print("Generating industrial_machine_zones...")
     from phonometry import vibration
 
-    classes = (
+    classes: tuple[tuple[MachineGroup, MachineSupport, str], ...] = (
         ("group_1", "rigid", "group 1\nrigid"),
         ("group_1", "flexible", "group 1\nflexible"),
         ("group_2", "rigid", "group 2\nrigid"),
@@ -5257,7 +5259,7 @@ def generate_meter_running_rms_decay(output_dir: str) -> None:
 
     # One colour per average, on both panels that draw one, and one colour per
     # printed column, on both panels that draw one.
-    averages = (
+    averages: tuple[tuple[Method, str, str], ...] = (
         (
             "linear",
             COLOR_PRIMARY,

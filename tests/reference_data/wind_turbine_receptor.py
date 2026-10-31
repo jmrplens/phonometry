@@ -24,6 +24,11 @@ where ``k * 0.1`` exceeds the literal; ``16 * 0.1`` is exactly 1.6).
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from phonometry._internal.types import GroundClass
+
 # ---------------------------------------------------------------------------
 # Annex K: wind shear
 # ---------------------------------------------------------------------------
@@ -150,7 +155,7 @@ WT_FIGURE_A1_POINTS_DB: tuple[tuple[float, float], ...] = (
 #: Table C.1, the impedance classes: letter -> (representative flow
 #: resistivity in kPa s/m^2, the Nordtest flow resistivity classes it covers
 #: in kPa s/m^2, empty where the table prints a dash, and the description).
-WT_C1_IMPEDANCE_CLASSES: dict[str, tuple[float, tuple[float, ...], str]] = {
+WT_C1_IMPEDANCE_CLASSES: dict[GroundClass, tuple[float, tuple[float, ...], str]] = {
     "A": (12.5, (10.0, 15.0), "Very soft (snow, moss like)"),
     "B": (
         32.0,

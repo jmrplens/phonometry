@@ -122,7 +122,7 @@ Psychoacoustic loudness per ECMA-418-2:2025 (Sottek Hearing Model).
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `fs` is not a single number. |
+| TypeError | if `fs` is not a single number, or `field` is not a text. |
 
 The 1 kHz / 40 dB SPL sinusoid defines 1 sone_HMS via the calibration
 constant of Formula (23); with the full Clause 6.2.3 averaging this

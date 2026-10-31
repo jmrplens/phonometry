@@ -1665,10 +1665,9 @@ def field_comparison_response(
     :return: A :class:`FieldComparisonResponse`.
     :raises ValueError: If the shapes disagree, a value is out of range or
         the reference band is missing.
+    :raises TypeError: if ``field`` is not a text.
     """
-    if field not in {"free", "diffuse"}:
-        msg = "'field' must be 'free' or 'diffuse'."
-        raise ValueError(msg)
+    require_choice(field, "field", ("free", "diffuse"))
     f = _frequencies(frequencies)
     emf = np.atleast_2d(np.asarray(source_emf_v, dtype=np.float64))
     if emf.ndim != _MATRIX_NDIM or emf.shape[1] != f.size:

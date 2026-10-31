@@ -109,7 +109,7 @@ stays empty, is in the module docstring; each metric carries its method.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a recording that is not two channels, an unknown field or row, or a loudness exceeded 95 % of the time of zero, which leaves $N_5/N_{95}$ undefined. |
-| TypeError | if `field` is not a text. |
+| TypeError | if `field` or an entry of `parameters` is not a text. |
 
 **Warns**
 
@@ -183,6 +183,7 @@ representative value marked.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if the row was not computed or nothing was. |
+| TypeError | if `parameter` is not a text. |
 
 ### BinauralIndicators.reporting_results()
 
@@ -233,7 +234,7 @@ The single representative value of a metric: the higher ear (D.2).
 ```python
 BinauralMetric(
     symbol: str,
-    parameter: str,
+    parameter: Literal['sound_pressure_level', 'loudness', 'sharpness', 'tonality', 'roughness', 'fluctuation_strength'],
     left: float,
     right: float,
     unit: str,

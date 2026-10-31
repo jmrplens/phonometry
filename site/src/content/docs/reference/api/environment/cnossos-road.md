@@ -358,14 +358,14 @@ propulsion term is the whole of it (2.2.3).
 ```python
 RoadEmissionCoefficients(
     *,
-    rolling_a: Mapping[str, tuple[float, ...]],
-    rolling_b: Mapping[str, tuple[float, ...]],
-    propulsion_a: Mapping[str, tuple[float, ...]],
-    propulsion_b: Mapping[str, tuple[float, ...]],
+    rolling_a: Mapping[Literal['1', '2', '3', '4a', '4b'], tuple[float, ...]],
+    rolling_b: Mapping[Literal['1', '2', '3', '4a', '4b'], tuple[float, ...]],
+    propulsion_a: Mapping[Literal['1', '2', '3', '4a', '4b'], tuple[float, ...]],
+    propulsion_b: Mapping[Literal['1', '2', '3', '4a', '4b'], tuple[float, ...]],
     studded_a: tuple[float, ...],
     studded_b: tuple[float, ...],
-    junction_c: Mapping[str, tuple[tuple[float, float], tuple[float, float]]],
-    temperature_coefficient_db_per_k: Mapping[str, float],
+    junction_c: Mapping[Literal['1', '2', '3', '4a', '4b'], tuple[tuple[float, float], tuple[float, float]]],
+    temperature_coefficient_db_per_k: Mapping[Literal['1', '2', '3', '4a', '4b'], float],
 )
 ```
 
@@ -458,8 +458,8 @@ Road surfaces tabulated in Table F-4 (as replaced by 2021/1226).
 RoadSurfaceCoefficients(
     *,
     name: str,
-    alpha: dict[str, tuple[float, ...]],
-    beta: dict[str, float],
+    alpha: dict[Literal['1', '2', '3', '4a', '4b'], tuple[float, ...]],
+    beta: dict[Literal['1', '2', '3', '4a', '4b'], float],
     speed_range_kmh: tuple[float, float] | None,
 )
 ```

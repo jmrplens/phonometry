@@ -110,7 +110,7 @@ and the switch-on transient is part of what they measure.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if `x` is not 1-D, `fs` is not positive, or `name` is unknown. |
-| TypeError | if `fs` is not a single number. |
+| TypeError | if `fs` is not a single number, or `name` is not a text. |
 
 ## apply_weighting
 
@@ -147,7 +147,7 @@ negligible, as for any block frequency-domain filtering.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if `x` is not 1-D, `fs` is not positive, or `name` is unknown. |
-| TypeError | if `fs` is not a single number. |
+| TypeError | if `fs` is not a single number, or `name` is not a text. |
 
 ## band_limiting_factors
 
@@ -172,6 +172,12 @@ Tables B.1 to B.9.
 | `frequencies` | Band centre frequencies, in hertz. |
 
 **Returns:** Band-limiting factor per frequency.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `name` is not a text. |
 
 ## band_limiting_response
 
@@ -218,6 +224,7 @@ the standard cites it.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if `name` is unknown or `frequencies` is empty. |
+| TypeError | if `name` is not a text. |
 
 ## combined_daily_exposure
 
@@ -575,6 +582,7 @@ transition and upward step - of weighting `name` at `frequencies`.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if `name` is unknown or `frequencies` is empty. |
+| TypeError | if `name` is not a text. |
 
 ## hav_daily_exposure
 
@@ -720,6 +728,7 @@ defines the MTVV on.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a bad signal, non-positive `fs`/`tau` or an unknown `method`. |
+| TypeError | if `method` is not a text. |
 
 ## REFERENCE_DURATION_S
 
@@ -759,7 +768,7 @@ Running r.m.s. of a weighted signal (ISO 2631-1 Eqs. (2)/(3)).
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a bad signal, non-positive `fs`/`tau` or an unknown `method`. |
-| TypeError | if `fs` or `integration_time` is not a single number. |
+| TypeError | if `fs` or `integration_time` is not a single number, or `method` is not a text. |
 
 ## vibration_dose_value
 
@@ -935,7 +944,7 @@ comparing against the tabulated factors; a nominal label (e.g.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if the inputs differ in length, are empty or carry non-finite values. |
-| TypeError | if `band_accelerations` or `frequencies` holds a text or a value that is not a real number. |
+| TypeError | if `band_accelerations` or `frequencies` holds a text or a value that is not a real number, or `weighting` is not a text. |
 
 ## WeightedSpectrum
 
@@ -943,7 +952,7 @@ comparing against the tabulated factors; a nominal label (e.g.
 WeightedSpectrum(
     frequencies: NDArray[np.float64],
     band_accelerations: NDArray[np.float64],
-    weighting_name: str,
+    weighting_name: Literal['Wb', 'Wc', 'Wd', 'We', 'Wf', 'Wh', 'Wj', 'Wk', 'Wm'],
     weighting_factors: NDArray[np.float64],
     weighted: NDArray[np.float64],
     overall: float,
@@ -1002,6 +1011,12 @@ magnitude array (the `W_i` of ISO 2631-1 Eq. (9) / ISO 5349-1 Eq. (A.1)).
 
 **Returns:** Weighting factor per frequency.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `name` is not a text. |
+
 ## WEIGHTING_NAMES
 
 *Constant* (`tuple`).
@@ -1014,7 +1029,7 @@ WEIGHTING_NAMES = ('Wb', 'Wc', 'Wd', 'We', 'Wf', 'Wh', 'Wj', 'Wk', 'Wm')
 
 ```python
 WeightingResponse(
-    name: str,
+    name: Literal['Wb', 'Wc', 'Wd', 'We', 'Wf', 'Wh', 'Wj', 'Wk', 'Wm'],
     frequencies: NDArray[np.float64],
     response: NDArray[np.complex128],
     magnitude: NDArray[np.float64],

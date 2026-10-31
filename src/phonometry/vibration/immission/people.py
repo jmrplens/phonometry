@@ -121,6 +121,19 @@ Source = Literal[
 
 #: The areas of Table 1, by use.
 Area = Literal["industrial", "commercial", "mixed", "residential", "sensitive"]
+#: The alignment of a railway line: on the surface or underground.
+Alignment = Literal["surface", "underground"]
+#: A stage of 6.5.4.2 a construction site may be held to.
+ConstructionStage = Literal["I", "II", "III"]
+#: A kind of vibration of Table 3, the row of its factor :math:`c_F`.
+VibrationKind = Literal[
+    "harmonic",
+    "harmonic_distorted",
+    "stochastic_resonant",
+    "stochastic",
+    "single_event_resonant",
+    "single_event",
+]
 
 __all__ = [
     "ASSESSMENT_PERIOD_S",
@@ -161,13 +174,13 @@ __all__ = [
 
 #: The assessment period :math:`T_\mathrm{r}` of 3.7.3, in seconds: 16 h by day (6:00
 #: to 22:00) and 8 h by night.
-ASSESSMENT_PERIOD_S: Mapping[str, float] = MappingProxyType(
+ASSESSMENT_PERIOD_S: Mapping[TimeOfDay, float] = MappingProxyType(
     {"day": 16.0 * 3600.0, "night": 8.0 * 3600.0}
 )
 
 #: :math:`N_\mathrm{r}` of Annex A: the 30 s clock intervals in an assessment period,
 #: 1920 by day and 960 by night.
-ASSESSMENT_TAKT_COUNT: Mapping[str, int] = MappingProxyType(
+ASSESSMENT_TAKT_COUNT: Mapping[TimeOfDay, int] = MappingProxyType(
     {
         period: round(seconds / TAKT_DURATION_S)
         for period, seconds in ASSESSMENT_PERIOD_S.items()
@@ -212,7 +225,7 @@ URBAN_RAILWAY_FACTOR: float = 1.5
 #: area, or above 0,3 on an underground line in the areas of rows 3 to 5, is
 #: a reason to look into the cause (flat spots on wheels, for one) and to put
 #: it right, not a verdict. The value still counts in :math:`KB_\mathrm{FTr}`.
-RAILWAY_NIGHT_INVESTIGATION_KB: Mapping[str, float] = MappingProxyType(
+RAILWAY_NIGHT_INVESTIGATION_KB: Mapping[Alignment, float] = MappingProxyType(
     {
         "surface": 0.6,
         "underground": 0.3,
@@ -258,6 +271,14 @@ class GuideValues(RichDisplay):
     a_r: float
     time_of_day: TimeOfDay = "day"
     edition: Edition = "1999"
+
+    def __post_init__(self) -> None:
+        """Refuse a choice its ``Literal`` does not list, when the record is built.
+
+        :raises TypeError: if ``time_of_day`` or ``edition`` is not a text.
+        """
+        require_choice(self.time_of_day, "time_of_day", ("day", "night"))
+        require_choice(self.edition, "edition", ("1999", "2023"))
 
 
 #: Table 1 (printed page 6): the guide values by kind of area, keyed by the
@@ -333,7 +354,7 @@ GUIDE_VALUES_2023: Mapping[Area, Mapping[TimeOfDay, GuideValues]] = MappingProxy
 #: stage I no considerable annoyance is expected; below stage II none either
 #: provided the measures of 6.5.4.3 are taken; above stage III the exposure is
 #: unreasonable and special agreements are needed.
-CONSTRUCTION_STAGES: tuple[str, ...] = ("I", "II", "III")
+CONSTRUCTION_STAGES: tuple[ConstructionStage, ...] = ("I", "II", "III")
 
 #: Table 2 (printed page 9): the daytime guide values for a construction
 #: site, keyed by stage and by the longest duration of the column in working
@@ -341,36 +362,38 @@ CONSTRUCTION_STAGES: tuple[str, ...] = ("I", "II", "III")
 #: to 6 days are interpolated (Figure 3), and beyond 78 days the standard
 #: makes no statement. :math:`A_\mathrm{o}` is 5 in every cell, or 6 in a commercial
 #: or industrial area.
-CONSTRUCTION_GUIDE_VALUES: Mapping[str, Mapping[int, GuideValues]] = MappingProxyType(
-    {
-        "I": MappingProxyType(
-            {
-                1: GuideValues(a_u=0.8, a_o=5.0, a_r=0.4),
-                26: GuideValues(a_u=0.4, a_o=5.0, a_r=0.3),
-                78: GuideValues(a_u=0.3, a_o=5.0, a_r=0.2),
-            }
-        ),
-        "II": MappingProxyType(
-            {
-                1: GuideValues(a_u=1.2, a_o=5.0, a_r=0.8),
-                26: GuideValues(a_u=0.8, a_o=5.0, a_r=0.6),
-                78: GuideValues(a_u=0.6, a_o=5.0, a_r=0.4),
-            }
-        ),
-        "III": MappingProxyType(
-            {
-                1: GuideValues(a_u=1.6, a_o=5.0, a_r=1.2),
-                26: GuideValues(a_u=1.2, a_o=5.0, a_r=1.0),
-                78: GuideValues(a_u=0.8, a_o=5.0, a_r=0.6),
-            }
-        ),
-    }
+CONSTRUCTION_GUIDE_VALUES: Mapping[ConstructionStage, Mapping[int, GuideValues]] = (
+    MappingProxyType(
+        {
+            "I": MappingProxyType(
+                {
+                    1: GuideValues(a_u=0.8, a_o=5.0, a_r=0.4),
+                    26: GuideValues(a_u=0.4, a_o=5.0, a_r=0.3),
+                    78: GuideValues(a_u=0.3, a_o=5.0, a_r=0.2),
+                }
+            ),
+            "II": MappingProxyType(
+                {
+                    1: GuideValues(a_u=1.2, a_o=5.0, a_r=0.8),
+                    26: GuideValues(a_u=0.8, a_o=5.0, a_r=0.6),
+                    78: GuideValues(a_u=0.6, a_o=5.0, a_r=0.4),
+                }
+            ),
+            "III": MappingProxyType(
+                {
+                    1: GuideValues(a_u=1.6, a_o=5.0, a_r=1.2),
+                    26: GuideValues(a_u=1.2, a_o=5.0, a_r=1.0),
+                    78: GuideValues(a_u=0.8, a_o=5.0, a_r=0.6),
+                }
+            ),
+        }
+    )
 )
 
 #: Table 3 (printed page 10): the empirical factor :math:`c_F` of Formula (7)
 #: by kind of vibration, rows 1 to 4 with their a) and b). Mean values from
 #: experience, the table says, and about 15 % either way.
-PEAK_TO_KB_FACTORS: Mapping[str, float] = MappingProxyType(
+PEAK_TO_KB_FACTORS: Mapping[VibrationKind, float] = MappingProxyType(
     {
         "harmonic": 0.9,
         "harmonic_distorted": 0.8,
@@ -561,7 +584,7 @@ def _interpolated(low: float, high: float, days: int) -> float:
 def construction_guide_values(
     duration_days: int | np.integer[Any],
     *,
-    stage: Literal["I", "II", "III"] = "I",
+    stage: ConstructionStage = "I",
     area: Area = "residential",
 ) -> GuideValues:
     r"""The daytime guide values of Table 2 for a construction site (6.5.4.2).
@@ -896,14 +919,7 @@ def kb_fmax_from_peak_velocity(
     peak_velocity_mm_s: float,
     frequency_hz: float,
     *,
-    kind: Literal[
-        "harmonic",
-        "harmonic_distorted",
-        "stochastic_resonant",
-        "stochastic",
-        "single_event_resonant",
-        "single_event",
-    ],
+    kind: VibrationKind,
 ) -> float:
     r"""An estimate of :math:`KB_\mathrm{Fmax}` from an unweighted record, Formula (7).
 
@@ -1162,8 +1178,10 @@ def assess_people_in_buildings(
         edition, an edition other than the guide values are of, or a verdict
         that needs :math:`KB_\mathrm{FTr}` without one given.
     :raises TypeError: if ``kb_fmax`` or ``kb_ftr`` is not a single number, or
-        ``source`` is not a text.
+        ``source`` is not a text, or ``edition`` is not a text.
     """
+    if edition is not None:
+        require_choice(edition, "edition", ("1999", "2023"))
     peak = require_non_negative(kb_fmax, "kb_fmax")
     year = _edition_of(guide, edition)
     kind = require_choice(

@@ -57,6 +57,7 @@ from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
     check_engine,
+    require_choice,
     require_equal_shapes,
     require_finite_fields,
     require_positive,
@@ -667,7 +668,11 @@ class LoudspeakerCharacteristics(OwnsArrays):
             axes for ``"directivity"``.
         :raises ImportError: If matplotlib is not installed
             (``pip install "phonometry[plot]"``).
+        :raises TypeError: if ``quantity`` is not a text.
         """
+        require_choice(
+            quantity, "quantity", ("response", "impedance", "thd", "directivity")
+        )
         from .._i18n import check_language
         from .._plot.electroacoustics import plot_loudspeaker_characteristics
 

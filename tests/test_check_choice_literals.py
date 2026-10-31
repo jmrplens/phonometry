@@ -22,7 +22,7 @@ import pathlib
 import sys
 import textwrap
 import typing
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Literal
@@ -1240,3 +1240,669 @@ def test_a_method_the_package_inherits_from_a_private_base_is_read_once() -> Non
         if qualname.endswith("_DrawableLayer.plot")
     ]
     assert plots == [("phonometry.materials.absorbers.layered", "_DrawableLayer.plot")]
+
+
+def _never_checked(mode: _Pace) -> bool:
+    return mode == "fast"
+
+
+def _checked_with_not_in(mode: _Pace) -> _Pace:
+    if mode not in _PACES:
+        raise ValueError(mode)
+    return mode
+
+
+def _checked_beside_another(mode: _Pace, *, strict: bool) -> _Pace:
+    if strict:
+        require_choice(mode, "mode", _PACES)
+    return mode
+
+
+def _checked_behind_its_own_test(mode: _Pace | None) -> _Pace | None:
+    if mode is not None:
+        require_choice(mode, "mode", _PACES)
+    return mode
+
+
+def _verdict_of(
+    function: Callable[..., object],
+    name: str,
+    *,
+    collection: bool = False,
+    options: Iterable[str] = (),
+) -> str | None:
+    return ccl._verdict(
+        ccl._checks_of(
+            function,
+            name,
+            field=False,
+            collection=collection,
+            depth=0,
+            options=frozenset(options),
+        )
+    )
+
+
+def test_a_choice_is_checked_by_a_shared_validator_on_every_path() -> None:
+    """``require_choice`` where the function starts passes; a check only
+    beside another argument, a ``not in`` that refuses a number with
+    ``ValueError`` and no check at all each fail with their own verdict.
+    """
+    assert _verdict_of(_validated, "mode") is None
+    assert _verdict_of(_checked_behind_its_own_test, "mode") is None
+    assert _verdict_of(_checked_beside_another, "mode") == (
+        "checked on some paths only, so a misspelling passes on the others"
+    )
+    assert _verdict_of(_checked_with_not_in, "mode") == (
+        "checked with ``not in``, so a value that is not a text is refused "
+        "with ValueError instead of TypeError"
+    )
+    assert _verdict_of(_never_checked, "mode") == (
+        "never checked, so a misspelling passes"
+    )
+
+
+def _checked_after_an_early_return(mode: _Pace, *, quick: bool) -> _Pace:
+    if quick:
+        return "fast"
+    require_choice(mode, "mode", _PACES)
+    return mode
+
+
+def _column_of(mode: _Pace, *, quick: bool) -> int:
+    if quick:
+        return 0
+    require_choice(mode, "mode", _PACES)
+    return 1
+
+
+def _checked_after_a_helper_returns_early(mode: _Pace, *, quick: bool) -> int:
+    return _column_of(mode, quick=quick)
+
+
+def _checked_after_its_own_early_return(mode: _Pace | None) -> _Pace | None:
+    if mode is None:
+        return None
+    require_choice(mode, "mode", _PACES)
+    return mode
+
+
+def _checked_before_an_early_return(mode: _Pace, *, quick: bool) -> _Pace:
+    require_choice(mode, "mode", _PACES)
+    if quick:
+        return "fast"
+    return mode
+
+
+def _checked_after_a_yield(mode: _Pace) -> typing.Iterator[_Pace]:
+    yield "fast"
+    yield require_choice(mode, "mode", _PACES)
+
+
+def _items_skipped_before_the_check(paces: Sequence[_Pace], *, skip: bool) -> None:
+    for pace in paces:
+        if skip:
+            continue
+        require_choice(pace, "paces", _PACES)
+
+
+def _items_checked_after_an_inner_loop(paces: Sequence[_Pace]) -> None:
+    for pace in paces:
+        for _ in range(2):
+            if pace:
+                break
+        require_choice(pace, "paces", _PACES)
+
+
+def test_a_return_before_the_check_leaves_a_path_unchecked() -> None:
+    """A ``return`` that runs before the check, in the function or in a
+    helper the choice is handed to, ends the paths that take it with the
+    choice unchecked, and so does a ``continue`` of the loop that checks each
+    item; one behind a test of the choice itself, one after the check, a
+    ``yield`` and a ``break`` of an inner loop leave none.
+    """
+    some_paths = "checked on some paths only, so a misspelling passes on the others"
+    assert _verdict_of(_checked_after_an_early_return, "mode") == some_paths
+    assert _verdict_of(_checked_after_a_helper_returns_early, "mode") == some_paths
+    assert (
+        _verdict_of(_items_skipped_before_the_check, "paces", collection=True)
+        == some_paths
+    )
+    assert _verdict_of(_checked_after_its_own_early_return, "mode") is None
+    assert _verdict_of(_checked_before_an_early_return, "mode") is None
+    assert _verdict_of(_checked_after_a_yield, "mode") is None
+    assert (
+        _verdict_of(_items_checked_after_an_inner_loop, "paces", collection=True)
+        is None
+    )
+
+
+def _checked_behind_a_test_of_its_text(mode: str) -> str:
+    if mode == "fast":
+        require_choice(mode, "mode", _PACES)
+    return mode
+
+
+def _checked_behind_a_test_of_its_form_and_more(
+    mode: _Pace | None, *, strict: bool
+) -> _Pace | None:
+    if strict and mode is not None:
+        require_choice(mode, "mode", _PACES)
+    return mode
+
+
+def _checked_after_a_misspelling_returns(mode: str) -> str:
+    if mode == "typo":
+        return "fast"
+    require_choice(mode, "mode", _PACES)
+    return mode
+
+
+def _checked_after_an_empty_text_returns(mode: str) -> str:
+    if not mode:
+        return "fast"
+    require_choice(mode, "mode", _PACES)
+    return mode
+
+
+def _checked_after_a_text_matched_returns(mode: str) -> str:
+    match mode:
+        case "typo":
+            return "fast"
+    require_choice(mode, "mode", _PACES)
+    return mode
+
+
+def _checked_after_a_listed_option_returns(mode: _Pace) -> int:
+    if mode == "fast":
+        return 0
+    require_choice(mode, "mode", ("slow",))
+    return 1
+
+
+def _checked_but_for_a_listed_option(mode: _Pace) -> _Pace:
+    if mode != "fast":
+        require_choice(mode, "mode", _PACES)
+    return mode
+
+
+def _checked_in_the_else_of_a_listed_option(mode: _Pace) -> int:
+    if mode == "fast":
+        column = 0
+    else:
+        column = 1
+        require_choice(mode, "mode", _PACES)
+    return column
+
+
+def _checked_after_listed_options_return(mode: _Pace) -> int:
+    if mode in ("fast", "slow"):
+        return 0
+    require_choice(mode, "mode", _PACES)
+    return 1
+
+
+def _checked_after_none_is_matched(mode: _Pace | None) -> _Pace | None:
+    match mode:
+        case None:
+            return None
+    require_choice(mode, "mode", _PACES)
+    return mode
+
+
+def _items_checked_after_an_empty_collection_returns(paces: Sequence[_Pace]) -> None:
+    if not paces:
+        return
+    for pace in paces:
+        require_choice(pace, "paces", _PACES)
+
+
+def test_only_a_test_of_its_form_or_of_a_listed_option_keeps_every_path() -> None:
+    """A check behind a test of the text, or one a misspelling can return
+    before, leaves a misspelling unchecked on the other path: ``if mode ==
+    "fast": require_choice(...)``, ``if mode == "typo": return``, ``if not
+    mode: return`` (an empty text is not an option), ``case "typo": return``
+    and ``if strict and mode is not None`` (a test that asks something
+    besides the form). A test of the form (``is None``, the emptiness of a
+    collection, ``case None``) keeps every path, and so does one that skips
+    the check only for an option the ``Literal`` lists (``if method ==
+    "vdi2081": return ...``), in either branch.
+    """
+    some_paths = "checked on some paths only, so a misspelling passes on the others"
+    paces = frozenset(_PACES)
+    for leaky in (
+        _checked_behind_a_test_of_its_text,
+        _checked_behind_a_test_of_its_form_and_more,
+        _checked_after_a_misspelling_returns,
+        _checked_after_an_empty_text_returns,
+        _checked_after_a_text_matched_returns,
+    ):
+        assert _verdict_of(leaky, "mode", options=paces) == some_paths, leaky
+    for tight in (
+        _checked_after_a_listed_option_returns,
+        _checked_but_for_a_listed_option,
+        _checked_in_the_else_of_a_listed_option,
+        _checked_after_listed_options_return,
+        _checked_after_none_is_matched,
+    ):
+        assert _verdict_of(tight, "mode", options=paces) is None, tight
+    assert (
+        _verdict_of(
+            _items_checked_after_an_empty_collection_returns,
+            "paces",
+            collection=True,
+            options=paces,
+        )
+        is None
+    )
+    # An option is known only from the Literal: without it, the return
+    # before the check is a path a misspelling could take.
+    assert _verdict_of(_checked_after_a_listed_option_returns, "mode") == some_paths
+
+
+def _rows_once_each(paces: Sequence[_Pace]) -> tuple[_Pace, ...]:
+    rows = tuple(dict.fromkeys(paces))
+    for row in rows:
+        require_choice(row, "paces", _PACES)
+    return rows
+
+
+def _one_or_several_paces(paces: _Pace | Sequence[_Pace]) -> list[_Pace]:
+    chosen = (paces,) if isinstance(paces, str) else tuple(paces)
+    return [require_choice(pace, "paces", _PACES) for pace in chosen]
+
+
+def _keys_of_a_copy(levels: Mapping[_Pace, float]) -> None:
+    given: Mapping[_Pace, float] = dict(levels.items())
+    for key in given:
+        require_choice(key, "levels", _PACES)
+
+
+def _a_copy_left_unchecked(levels: Mapping[_Pace, float]) -> None:
+    given = dict(levels.items())
+    if not given:
+        raise ValueError(levels)
+
+
+def test_a_check_of_a_copy_of_the_items_is_a_check_of_the_items() -> None:
+    """``tuple(dict.fromkeys(x))``, ``(x,) if isinstance(x, str) else
+    tuple(x)`` and ``dict(x.items())`` hold the caller's items, so a check
+    of each item of the copy checks each item of the choice; a copy nobody
+    checks leaves the choice unchecked.
+    """
+    assert _verdict_of(_rows_once_each, "paces", collection=True) is None
+    assert _verdict_of(_one_or_several_paces, "paces", collection=True) is None
+    assert _verdict_of(_keys_of_a_copy, "levels", collection=True) is None
+    assert _verdict_of(_a_copy_left_unchecked, "levels", collection=True) == (
+        "never checked, so a misspelling passes"
+    )
+
+
+@dataclass(frozen=True)
+class _Strides:
+    """A record that checks each of its choices when it is built."""
+
+    paces: tuple[_Pace, ...]
+
+    def __post_init__(self) -> None:
+        for pace in self.paces:
+            require_choice(pace, "paces", _PACES)
+
+    @classmethod
+    def of(cls, paces: Sequence[_Pace]) -> _Strides:
+        return cls(paces=tuple(paces))
+
+
+def test_a_choice_handed_to_the_record_a_classmethod_builds_is_checked_there() -> None:
+    """``cls(paces=tuple(paces))`` is followed into the record's
+    ``__post_init__``, where each item is checked.
+    """
+    assert _verdict_of(_Strides.of, "paces", collection=True) is None
+
+
+@dataclass(frozen=True)
+class _CheckedPaceLimits:
+    """A record that checks each key of its limits when it is built."""
+
+    limits: Mapping[_Pace, float]
+
+    def __post_init__(self) -> None:
+        for pace in self.limits:
+            require_choice(pace, "limits", _PACES)
+
+
+@dataclass(frozen=True)
+class _UncheckedPaceLimits:
+    """A record that keeps its limits as they come."""
+
+    limits: Mapping[_Pace, float]
+
+
+def _limits_rebuilt(limits: Mapping[_Pace, float]) -> _CheckedPaceLimits:
+    return _CheckedPaceLimits(
+        limits={pace: float(value) for pace, value in limits.items()}
+    )
+
+
+def _limits_rebuilt_unchecked(limits: Mapping[_Pace, float]) -> _UncheckedPaceLimits:
+    return _UncheckedPaceLimits(
+        limits={pace: abs(value) for pace, value in limits.items()}
+    )
+
+
+def test_a_dict_comprehension_that_keeps_the_keys_hands_them_on() -> None:
+    """``{pace: float(value) for pace, value in limits.items()}`` gives each
+    key a new value and keeps the key, so the record that checks its keys
+    checks the caller's; a record that checks nothing leaves them unchecked.
+    """
+    assert _verdict_of(_limits_rebuilt, "limits", collection=True) is None
+    assert _verdict_of(_limits_rebuilt_unchecked, "limits", collection=True) == (
+        "never checked, so a misspelling passes"
+    )
+
+
+def _limits_kept_if_listed(limits: Mapping[_Pace, float]) -> _CheckedPaceLimits:
+    return _CheckedPaceLimits(
+        limits={pace: float(value) for pace, value in limits.items() if pace in _PACES}
+    )
+
+
+def _limits_kept_if_set(limits: Mapping[_Pace, float]) -> _CheckedPaceLimits:
+    return _CheckedPaceLimits(
+        limits={pace: float(value) for pace, value in limits.items() if value}
+    )
+
+
+def _limits_kept_if_set_then_checked(limits: Mapping[_Pace, float]) -> None:
+    kept = {pace: value for pace, value in limits.items() if value}
+    for key in kept:
+        require_choice(key, "limits", _PACES)
+
+
+def _limits_kept_but_one_option(limits: Mapping[_Pace, float]) -> _CheckedPaceLimits:
+    return _CheckedPaceLimits(
+        limits={pace: float(value) for pace, value in limits.items() if pace != "fast"}
+    )
+
+
+def test_a_dict_comprehension_that_drops_keys_hands_on_only_the_kept_ones() -> None:
+    """A filter drops the keys it fails for before any check sees them, so a
+    misspelling the filter drops passes unchecked, handed on or held in a
+    local: ``if pace in _PACES`` drops it silently and ``if value`` drops any
+    key whose value is zero. A filter that drops only an option the
+    ``Literal`` lists (``if pace != "fast"``) drops no misspelling.
+    """
+    never = "never checked, so a misspelling passes"
+    assert _verdict_of(_limits_kept_if_listed, "limits", collection=True) == never
+    assert _verdict_of(_limits_kept_if_set, "limits", collection=True) == never
+    assert (
+        _verdict_of(_limits_kept_if_set_then_checked, "limits", collection=True)
+        == never
+    )
+    assert (
+        _verdict_of(
+            _limits_kept_but_one_option, "limits", collection=True, options=_PACES
+        )
+        is None
+    )
+
+
+def _paces_checked_in_a_comprehension(paces: Sequence[_Pace]) -> list[_Pace]:
+    return [require_choice(pace, "paces", _PACES) for pace in paces]
+
+
+def _paces_checked_where_a_filter_holds(paces: Sequence[_Pace]) -> list[_Pace]:
+    return [require_choice(pace, "paces", _PACES) for pace in paces if pace]
+
+
+def _paces_checked_but_one_option(paces: Sequence[_Pace]) -> list[_Pace]:
+    return [require_choice(pace, "paces", _PACES) for pace in paces if pace != "fast"]
+
+
+def _pace_checked_per_step(pace: _Pace, steps: int) -> list[_Pace]:
+    return [require_choice(pace, "pace", _PACES) for _ in range(steps)]
+
+
+def test_a_check_in_a_comprehension_runs_only_where_its_clauses_let_it() -> None:
+    """A check in the element of a comprehension runs once for each item its
+    filters keep, so a filter that drops a text the ``Literal`` does not list
+    (``if pace`` drops ``""``) leaves it unchecked, as a ``continue`` would; a
+    comprehension over something else than the choice runs it only when that
+    holds an item, as a ``for`` loop does. A comprehension over the choice
+    itself, and a filter that drops only a listed option, leave none.
+    """
+    some_paths = "checked on some paths only, so a misspelling passes on the others"
+    assert (
+        _verdict_of(_paces_checked_in_a_comprehension, "paces", collection=True) is None
+    )
+    assert (
+        _verdict_of(
+            _paces_checked_where_a_filter_holds,
+            "paces",
+            collection=True,
+            options=_PACES,
+        )
+        == some_paths
+    )
+    assert (
+        _verdict_of(
+            _paces_checked_but_one_option, "paces", collection=True, options=_PACES
+        )
+        is None
+    )
+    assert _verdict_of(_pace_checked_per_step, "pace") == some_paths
+
+
+def test_a_stale_unchecked_entry_fails_and_a_needed_one_does_not(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """An entry of ``UNCHECKED`` the walk still finds is kept; one it no
+    longer finds is stale. The walk hands back every unchecked choice, the
+    exempt ones too, so a needed entry is never mistaken for a stale one.
+    """
+    needed = ("phonometry.synthetic", "_never_checked", "mode")
+    gone = ("phonometry.nowhere", "gone", "mode")
+    monkeypatch.setitem(ccl.UNCHECKED, needed, "a reason that still applies")
+    monkeypatch.setitem(ccl.UNCHECKED, gone, "a reason that no longer applies")
+    walk = [ccl.Choice(*needed, "_Pace", ("never checked",))]
+    stale = ccl._stale_unchecked(walk)
+    assert needed not in stale
+    assert gone in stale
+
+
+def test_every_literal_choice_is_checked_on_every_path() -> None:
+    """The package passes: every public ``Literal`` choice and every one a
+    record a caller builds holds reaches a shared validator on every path,
+    and no entry of ``UNCHECKED`` is stale (rule A45).
+    """
+    every = list(ccl.unchecked_choices())
+    assert [
+        choice
+        for choice in every
+        if (choice.module, choice.qualname, choice.name) not in ccl.UNCHECKED
+    ] == []
+    assert ccl._stale_unchecked(every) == []
+
+
+#: A table of this module keyed by the options of ``_Pace`` but typed ``str``.
+_PACE_LIMITS_TEXT: dict[str, float] = {"fast": 0.125, "slow": 1.0}
+#: The same table keyed by the vocabulary.
+_PACE_LIMITS: dict[_Pace, float] = {"fast": 0.125, "slow": 1.0}
+
+
+def test_a_table_keyed_by_any_text_whose_keys_are_a_vocabulary_is_found() -> None:
+    """A ``dict[str, ...]`` whose keys are the options of a ``Literal`` of its
+    module is the vocabulary written twice; keyed by the ``Literal`` it is not.
+    """
+    text = list(
+        ccl._keyed_by_text(
+            _PACE_LIMITS_TEXT,
+            ccl._annotation_node("dict[str, float]"),
+            __name__,
+            "",
+            0,
+        )
+    )
+    typed = list(
+        ccl._keyed_by_text(
+            _PACE_LIMITS,
+            ccl._annotation_node("dict[_Pace, float]"),
+            __name__,
+            "",
+            0,
+        )
+    )
+    assert text == [("", frozenset({"fast", "slow"}))]
+    assert typed == []
+
+
+#: A table annotation spelled through an alias of this module.
+_PaceTable = dict[str, float]
+
+
+@dataclass(frozen=True)
+class _PaceLimits:
+    """A published record whose table field is keyed by any text."""
+
+    limits: dict[str, float]
+
+
+def _found(value: object, annotation: str | None) -> list[tuple[str, frozenset[str]]]:
+    return list(
+        ccl._keyed_by_text(
+            value, ccl._annotation_node(annotation, __name__), __name__, "", 0
+        )
+    )
+
+
+def test_a_table_is_read_through_its_alias_and_its_qualifier() -> None:
+    """An alias of the module, ``Final`` around the type and a ``Sequence``
+    of texts let any text in as surely as ``dict[str, ...]`` written out.
+    """
+    paces = frozenset({"fast", "slow"})
+    assert _found(_PACE_LIMITS_TEXT, "_PaceTable") == [("", paces)]
+    assert _found(_PACE_LIMITS_TEXT, "Final[dict[str, float]]") == [("", paces)]
+    assert _found(_PACE_LIMITS, "Final[dict[_Pace, float]]") == []
+    assert _found(_PACES, "Sequence[str]") == [("", paces)]
+    assert _found(_PACES, "Final[tuple[str, ...]]") == [("", paces)]
+    assert _found(_PACES, "Sequence[_Pace]") == []
+    # An annotation that says nothing of the keys lets any text in.
+    assert _found(_PACE_LIMITS_TEXT, "Any") == [("", paces)]
+
+
+def test_each_part_of_a_tuple_key_and_each_field_of_a_record_is_read() -> None:
+    """The parts of a key ``("fast", "dry")`` are a vocabulary each, and a
+    published record's table fields are read through the record's own
+    annotations.
+    """
+    table = {("fast", "dry"): 1.0, ("slow", "wet"): 2.0}
+    assert _found(table, "dict[tuple[str, str], float]") == [
+        ("[key]<0>", frozenset({"fast", "slow"})),
+        ("[key]<1>", frozenset({"dry", "wet"})),
+    ]
+    assert _found(table, "dict[tuple[_Pace, str], float]") == [
+        ("[key]<1>", frozenset({"dry", "wet"}))
+    ]
+    assert _found(_PaceLimits(limits=dict(_PACE_LIMITS_TEXT)), None) == [
+        (".limits", frozenset({"fast", "slow"}))
+    ]
+
+
+def _pace_of(*, quick: bool) -> _Pace:
+    return "fast" if quick else "slow"
+
+
+def _pace_and_count(*, quick: bool) -> tuple[_Pace, int]:
+    return _pace_of(quick=quick), 1
+
+
+def _text_of(*, quick: bool) -> str:
+    return "fast" if quick else "any text"
+
+
+@dataclass(frozen=True)
+class _Stride:
+    """A record whose field is typed with the vocabulary."""
+
+    pace: _Pace
+
+
+def _filled_from_returns(*, quick: bool) -> tuple[object, ...]:
+    def _stride() -> _Stride:
+        return _Stride(pace=_pace_of(quick=quick))
+
+    unpacked, _count = _pace_and_count(quick=quick)
+    stride = _stride()
+    return (_pace_of(quick=quick), unpacked, stride.pace, _text_of(quick=quick))
+
+
+def test_a_value_handed_back_by_a_function_typed_with_a_literal_is_closed() -> None:
+    """Guard (c) reads what fills a record field back to where it is written:
+    a call to a function annotated to return a ``Literal``, an item unpacked
+    from a ``tuple[...]`` such a helper returns, and a field of the record a
+    nested function returns are the vocabulary; a function annotated ``str``
+    hands back any text.
+    """
+    tree = _tree(_filled_from_returns)
+    function = next(
+        node
+        for node in ast.walk(tree)
+        if isinstance(node, ast.FunctionDef) and node.name == "_filled_from_returns"
+    )
+    returned = next(
+        node.value for node in ast.walk(function) if isinstance(node, ast.Return)
+    )
+    assert isinstance(returned, ast.Tuple)
+    sources = [ccl._source(item, function, __name__, 0) for item in returned.elts]
+    paces = frozenset({"fast", "slow"})
+    assert sources[:3] == [ccl._Source("literal", paces)] * 3
+    assert sources[3] == ccl._OPEN_SOURCE
+
+
+def test_the_gpu_parity_exemption_is_read_from_the_files_the_lock_holds(
+    tmp_path: pathlib.Path,
+) -> None:
+    """The modules exempt as the GPU-parity batch are the ``src/`` files of
+    ``_COVERED`` in ``scripts/gpu_parity.py``, so the list follows the lock.
+    """
+    script = tmp_path / "gpu_parity.py"
+    script.write_text(
+        "_COVERED = (\n"
+        '    _ROOT / "src/phonometry/simulation/engine.py",\n'
+        '    _ROOT / "scripts/scenarios.py",\n'
+        ")\n",
+        encoding="utf-8",
+    )
+    assert dict(ccl.gpu_parity_modules(script)) == {
+        "phonometry.simulation.engine": ccl.GPU_PARITY_REASON
+    }
+    assert set(ccl.GPU_PARITY) == {
+        "phonometry.simulation.fdtd",
+        "phonometry.simulation.elastic_fdtd",
+        "phonometry.simulation._backends",
+    }
+
+
+def test_a_stale_open_table_entry_fails(monkeypatch: pytest.MonkeyPatch) -> None:
+    """An exemption for a table the walk no longer flags cannot outlive its reason."""
+    key = ("phonometry.nowhere", "GONE")
+    monkeypatch.setitem(ccl.OPEN_TABLES, key, "a reason that no longer applies")
+    needed = ("phonometry.synthetic", "TABLE")
+    monkeypatch.setitem(ccl.OPEN_TABLES, needed, "a reason that still applies")
+    walk = [ccl.Choice(*needed, "keys", "dict[str, float]", ("its keys",))]
+    stale = ccl._stale_tables(walk)
+    assert key in stale
+    assert needed not in stale
+
+
+def test_every_published_table_of_a_vocabulary_is_keyed_by_it() -> None:
+    """The package passes: no published table keyed by any text holds the
+    options of a vocabulary, and no entry of ``OPEN_TABLES`` is stale (rule A21).
+    """
+    tables = list(ccl.vocabulary_tables())
+    assert [
+        table
+        for table in tables
+        if (table.module, table.qualname) not in ccl.OPEN_TABLES
+    ] == []
+    assert ccl._stale_tables(tables) == []

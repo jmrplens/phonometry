@@ -643,6 +643,7 @@ def miso_coherence(
     :param scaling: ``'density'`` (units²/Hz) or ``'spectrum'`` (units²).
     :return: A :class:`MISOCoherenceResult`.
     :raises ValueError: If the inputs or parameters are invalid.
+    :raises TypeError: if ``scaling`` is not a text.
     """
     records = _records(inputs)
     xs, ya = _validate_inputs(records, output)

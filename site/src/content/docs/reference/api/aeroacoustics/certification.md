@@ -63,6 +63,7 @@ the 10 dB-down window give $\mathrm{EPNL} = \mathrm{PNLTM} + D$.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the input is not a `(K, 24)` finite array, or `procedure` is not `"airplane"` or `"helicopter"`. |
+| TypeError | if `procedure` is not a text. |
 
 ## epnl_from_pnlt
 

@@ -114,7 +114,7 @@ open or closed fence).
 | Exception | When |
 | :--- | :--- |
 | ValueError | For an unknown shape, a negative height/absorption, or a shape/height combination the figure marks "does not apply". |
-| TypeError | if `absorption` or `line_of_sight` is not a single number. |
+| TypeError | if `absorption` or `line_of_sight` is not a single number, or `shape` is not a text. |
 
 ## facade_sound_reduction
 

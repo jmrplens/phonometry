@@ -87,6 +87,14 @@ if TYPE_CHECKING:
 #: The dimensions a duct cross section is described by, the keyword arguments
 #: of :func:`~phonometry.noise_control.duct_modes.plane_wave_limit`.
 DuctSectionDimension = Literal["diameter_m", "width_m", "height_m", "area"]
+#: The dimensions a duct section is given by, the keywords of
+#: :func:`~phonometry.noise_control.plane_wave_limit`.
+_SECTION_DIMENSIONS: tuple[DuctSectionDimension, ...] = (
+    "diameter_m",
+    "width_m",
+    "height_m",
+    "area",
+)
 
 
 #: Default self-noise sound power level, dB re 1 pW, used where an element has
@@ -518,10 +526,11 @@ def duct_path(
     :param speed_of_sound: Speed of sound, m/s, for the same check.
     :param label: A short human label of the path.
     :return: A :class:`DuctPathResult`.
-    :raises ValueError: If the spectra do not share one value per band or the
-        criterion family is unknown.
-    :raises TypeError: If an entry of ``elements`` is not a
-        :class:`DuctElement`, or ``criterion`` is not a text.
+    :raises ValueError: If the spectra do not share one value per band, the
+        criterion family is unknown, or a key of ``section`` is not one of
+        ``diameter_m``, ``width_m``, ``height_m`` or ``area``.
+    :raises TypeError: If an entry of ``elements`` is not a :class:`DuctElement`,
+        or ``criterion`` or a key of ``section`` is not a text.
     """
     f = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
     if f.ndim != 1 or f.size == 0:
@@ -532,6 +541,8 @@ def duct_path(
     family, goal = validate_target(criterion, target)
 
     if section is not None:
+        for dimension in section:
+            require_choice(dimension, "section", _SECTION_DIMENSIONS)
         from .duct_modes import _warn_above_plane_wave_limit, plane_wave_limit
 
         # The dimensions are the keyword arguments of plane_wave_limit, which

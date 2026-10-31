@@ -70,6 +70,7 @@ import numpy as np
 
 from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
+    require_choice,
     require_count,
     require_equal_counts,
     require_ranks,
@@ -377,11 +378,8 @@ def _validate_confidence(confidence: float) -> float:
     return conf
 
 
-def _validate_scaling(scaling: str) -> Scaling:
-    if scaling not in _SCALINGS:
-        msg = "'scaling' must be 'density' or 'spectrum'."
-        raise ValueError(msg)
-    return scaling
+def _validate_scaling(scaling: object) -> Scaling:
+    return require_choice(scaling, "scaling", _SCALINGS)
 
 
 # ---------------------------------------------------------------------------
@@ -526,7 +524,8 @@ def power_spectral_density(
     :return: A :class:`SpectralDensityResult`.
     :raises ValueError: If the inputs or parameters are invalid.
     :raises TypeError: if ``confidence`` or ``overlap`` is not a single number, or
-        ``nperseg`` is a flag, a text or an array where a count goes.
+        ``nperseg`` is a flag, a text or an array where a count goes, or ``scaling`` is
+        not a text.
     """
     xa = _validate_signal(x, "x")
     fs_v = _positive(resolve_fs(x, fs), "fs")
@@ -747,7 +746,7 @@ def cross_spectral_density(
     :return: A :class:`CrossSpectralDensityResult`.
     :raises ValueError: If the inputs or parameters are invalid.
     :raises TypeError: if ``overlap`` is not a single number, or ``nperseg`` is a flag,
-        a text or an array where a count goes.
+        a text or an array where a count goes, or ``scaling`` is not a text.
     """
     xa = _validate_signal(x, "x")
     ya = _validate_signal(y, "y")
@@ -990,7 +989,7 @@ def coherent_output_spectrum(
     :return: A :class:`CoherentOutputSpectrumResult`.
     :raises ValueError: If the inputs or parameters are invalid.
     :raises TypeError: if ``overlap`` is not a single number, or ``nperseg`` is a flag,
-        a text or an array where a count goes.
+        a text or an array where a count goes, or ``scaling`` is not a text.
     """
     xa = _validate_signal(x, "x")
     ya = _validate_signal(y, "y")
@@ -1074,11 +1073,9 @@ def _smoothing_validate(f: NDArray[np.float64], v: NDArray[np.float64]) -> None:
         raise ValueError(msg)
 
 
-def _smoothing_to_power(v: NDArray[np.float64], domain: str) -> NDArray[np.float64]:
+def _smoothing_to_power(v: NDArray[np.float64], domain: object) -> NDArray[np.float64]:
     """Map the input spectrum onto power-like values per ``domain``."""
-    if domain not in ("power", "amplitude", "db"):
-        msg = "'domain' must be 'power', 'amplitude' or 'db'."
-        raise ValueError(msg)
+    require_choice(domain, "domain", ("power", "amplitude", "db"))
     if domain == "db":
         return np.asarray(10.0 ** (v / 10.0), dtype=np.float64)
     if np.any(v < 0.0):
@@ -1161,7 +1158,8 @@ def fractional_octave_smoothing(
         returned in the same domain.
     :return: Smoothed spectrum, same shape and domain as ``values``.
     :raises ValueError: If the inputs or parameters are invalid.
-    :raises TypeError: if ``fraction`` is not a single number.
+    :raises TypeError: if ``fraction`` is not a single number, or ``domain`` is not a
+        text.
     """
     f = np.asarray(frequencies, dtype=np.float64)
     v = np.asarray(values, dtype=np.float64)

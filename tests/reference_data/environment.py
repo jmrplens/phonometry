@@ -26,6 +26,10 @@ if TYPE_CHECKING:
         TrackTransferCode,
         TractionVehicleName,
     )
+    from phonometry.environment.sources.cnossos_road import (
+        RoadSurfaceName,
+        RoadVehicleCode,
+    )
 
 #: Versioned root of the committed oracle data.
 _DATA = pathlib.Path(__file__).parent.parent / "data"
@@ -1931,7 +1935,7 @@ def cnossos_rail_2015_vehicles() -> dict[str, dict[str, str]]:
 # Table F-4 keeps the amended layout, in which categories 4a and 4b share a
 # single "4a/4b" row.
 # ---------------------------------------------------------------------------
-CNOSSOS_ROAD_TABLE_F1: dict[str, dict[str, tuple[float, ...]]] = {
+CNOSSOS_ROAD_TABLE_F1: dict[RoadVehicleCode, dict[str, tuple[float, ...]]] = {
     "1": {
         "AR": (83.1, 89.2, 87.7, 93.1, 100.1, 96.7, 86.8, 76.2),
         "BR": (30.0, 41.5, 38.9, 25.7, 32.5, 37.2, 39.0, 40.0),
@@ -1969,7 +1973,7 @@ CNOSSOS_ROAD_TABLE_F2: dict[str, tuple[float, ...]] = {
     "bi": (0.0, 0.0, 0.0, -3.1, -6.4, -14.0, -22.4, -11.4),
 }
 
-CNOSSOS_ROAD_TABLE_F3: dict[str, dict[int, tuple[float, float]]] = {
+CNOSSOS_ROAD_TABLE_F3: dict[RoadVehicleCode, dict[int, tuple[float, float]]] = {
     "1": {
         1: (-4.5, 5.5),
         2: (-4.4, 3.1),
@@ -1992,7 +1996,9 @@ CNOSSOS_ROAD_TABLE_F3: dict[str, dict[int, tuple[float, float]]] = {
     },
 }
 
-CNOSSOS_ROAD_TABLE_F4: dict[str, dict[str, tuple[tuple[float, ...], float]]] = {
+CNOSSOS_ROAD_TABLE_F4: dict[
+    RoadSurfaceName, dict[str, tuple[tuple[float, ...], float]]
+] = {
     "reference road surface": {
         "1": ((0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0), 0.0),
         "2": ((0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0), 0.0),
@@ -2099,7 +2105,7 @@ CNOSSOS_A_WEIGHTING_TABLE: tuple[float, ...] = (
 # Validity speed ranges printed in the two leading columns of Table F-4, in
 # km/h; the reference road surface carries none. Same instrument as
 # CNOSSOS_ROAD_TABLE_F4.
-CNOSSOS_ROAD_TABLE_F4_SPEED_RANGE: dict[str, tuple[float, float] | None] = {
+CNOSSOS_ROAD_TABLE_F4_SPEED_RANGE: dict[RoadSurfaceName, tuple[float, float] | None] = {
     "reference road surface": None,
     "1-layer ZOAB": (50.0, 130.0),
     "2-layer ZOAB": (50.0, 130.0),
@@ -2123,7 +2129,7 @@ CNOSSOS_ROAD_TABLE_F4_SPEED_RANGE: dict[str, tuple[float, float] | None] = {
 # and 3)" (Directive (EU) 2015/996, Annex II 2.2.3, unamended). The powered
 # two-wheelers of category 4 have no rolling noise, so the Directive prints no
 # K_m for them and the correction is identically zero.
-CNOSSOS_ROAD_TEMPERATURE_COEFFICIENTS_DB_PER_C: dict[str, float] = {
+CNOSSOS_ROAD_TEMPERATURE_COEFFICIENTS_DB_PER_C: dict[RoadVehicleCode, float] = {
     "1": 0.08,
     "2": 0.04,
     "3": 0.04,
@@ -2144,6 +2150,19 @@ CNOSSOS_ROAD_BANDS: tuple[str, ...] = (
 )
 
 
+#: The vehicle categories of Table [2.2.a], as a committed CSV spells them.
+_ROAD_CATEGORIES: tuple[RoadVehicleCode, ...] = ("1", "2", "3", "4a", "4b")
+
+
+def _road_category(text: str) -> RoadVehicleCode:
+    """The category column of a committed CSV row, read as the code it spells."""
+    for code in _ROAD_CATEGORIES:
+        if code == text:
+            return code
+    msg = f"unknown CNOSSOS road category {text!r}"
+    raise ValueError(msg)
+
+
 def _cnossos_road_rows(name: str) -> list[dict[str, str]]:
     """Rows of one committed CSV under ``tests/data/cnossos/``."""
     with (_DATA / "cnossos" / name).open(newline="", encoding="utf-8") as handle:
@@ -2161,35 +2180,40 @@ def cnossos_road_workbook_cases() -> list[dict[str, str]]:
     return _cnossos_road_rows("road_emission_cases.csv")
 
 
-def cnossos_road_2015_coefficients() -> dict[str, dict[str, tuple[float, ...]]]:
+def cnossos_road_2015_coefficients() -> dict[
+    RoadVehicleCode, dict[str, tuple[float, ...]]
+]:
     """Table F-1 as published in (EU) 2015/996, keyed by category then ``AR``,
     ``BR``, ``AP``, ``BP``. This is the superseded database the workbook was
     computed with, not the one the library ships.
     """
-    table: dict[str, dict[str, tuple[float, ...]]] = {}
+    table: dict[RoadVehicleCode, dict[str, tuple[float, ...]]] = {}
     for row in _cnossos_road_rows("road_coefficients_2015.csv"):
-        table.setdefault(row["category"], {})[row["coefficient"]] = tuple(
+        category = _road_category(row["category"])
+        table.setdefault(category, {})[row["coefficient"]] = tuple(
             float(row[band]) for band in CNOSSOS_ROAD_BANDS
         )
     return table
 
 
 def cnossos_road_2015_surfaces() -> dict[
-    str, tuple[str, dict[str, tuple[float, ...]], dict[str, float]]
+    str,
+    tuple[str, dict[RoadVehicleCode, tuple[float, ...]], dict[RoadVehicleCode, float]],
 ]:
     """Table F-4 as published in (EU) 2015/996, keyed by the ``NLxx`` surface
     identifier the workbook uses: ``(description, alpha, beta)``.
     """
     names: dict[str, str] = {}
-    alpha: dict[str, dict[str, tuple[float, ...]]] = {}
-    beta: dict[str, dict[str, float]] = {}
+    alpha: dict[str, dict[RoadVehicleCode, tuple[float, ...]]] = {}
+    beta: dict[str, dict[RoadVehicleCode, float]] = {}
     for row in _cnossos_road_rows("road_surfaces_2015.csv"):
         surface = row["surface"]
+        category = _road_category(row["category"])
         names[surface] = row["description"]
-        alpha.setdefault(surface, {})[row["category"]] = tuple(
+        alpha.setdefault(surface, {})[category] = tuple(
             float(row[band]) for band in CNOSSOS_ROAD_BANDS
         )
-        beta.setdefault(surface, {})[row["category"]] = float(row["beta"])
+        beta.setdefault(surface, {})[category] = float(row["beta"])
     return {s: (names[s], alpha[s], beta[s]) for s in names}
 
 

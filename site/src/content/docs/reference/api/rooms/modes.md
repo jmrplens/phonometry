@@ -274,7 +274,7 @@ The normal modes of a rectangular room up to a frequency limit.
 ### RoomModesResult.count_by_kind()
 
 ```python
-RoomModesResult.count_by_kind() -> dict[str, int]
+RoomModesResult.count_by_kind() -> dict[Literal['axial', 'tangential', 'oblique'], int]
 ```
 
 Number of enumerated modes of each kind, keyed by [`MODE_KINDS`](/phonometry/reference/api/rooms/modes/#mode_kinds).

@@ -45,13 +45,16 @@ from __future__ import annotations
 
 import math
 from collections.abc import Callable
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import reference_data as ref
 
 import phonometry as ph
 
 from ..registry import Outcome, count, record, register
+
+if TYPE_CHECKING:
+    from phonometry.metrology.sound_level_meter import ToneburstResponse
 
 _SLM = "Sound level meter periodic tests (IEC 61672-3, IEC 61672-1)"
 
@@ -132,7 +135,12 @@ def _chk_table_4_s() -> Outcome:
 def _chk_table_4_equations() -> Outcome:
     """The 33 reference responses, rounded to a tenth as the page rounds them."""
     matching = total = 0
-    for key, tau_s in (("F", 0.125), ("S", 1.0), ("E", None)):
+    time_constants: tuple[tuple[ToneburstResponse, float | None], ...] = (
+        ("F", 0.125),
+        ("S", 1.0),
+        ("E", None),
+    )
+    for key, tau_s in time_constants:
         for row in ph.metrology.IEC61672_TABLE_4[key]:
             seconds = row.duration_ms / 1000.0
             exact = (

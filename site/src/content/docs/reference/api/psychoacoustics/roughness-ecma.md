@@ -131,7 +131,7 @@ Psychoacoustic roughness per ECMA-418-2:2025 (Sottek Hearing Model).
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `fs` is not a single number. |
+| TypeError | if `fs` is not a single number, or `field` is not a text. |
 
 A 1 kHz carrier 100 %-amplitude-modulated at 70 Hz with an overall level
 of 60 dB SPL yields 1 asper (Clause 7 calibration; reproduced to 0.9999

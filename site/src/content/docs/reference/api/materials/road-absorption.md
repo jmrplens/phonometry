@@ -151,7 +151,7 @@ normative fixed set of timings. The lower usable frequency scales as
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `fs` is not positive, a duration is negative, the flat duration is not positive, or an edge shape is unknown. |
-| TypeError | if `flat_duration_s`, `fs`, `leading_duration_s` or `trailing_duration_s` is not a single number. |
+| TypeError | if `flat_duration_s`, `fs`, `leading_duration_s` or `trailing_duration_s` is not a single number, or `leading_edge` or `trailing_edge` is not a text. |
 
 ## check_spot_frequency_range
 

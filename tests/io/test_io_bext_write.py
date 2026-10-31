@@ -247,5 +247,5 @@ def test_version_gating_is_enforced_on_write(tmp_path: Path) -> None:
 
 
 def test_unknown_bext_argument_is_refused(tmp_path: Path) -> None:
-    with pytest.raises(ValueError, match=r"unknown bext 'auto'"):
+    with pytest.raises(ValueError, match="'bext' must be one of"):
         write(tmp_path / "x.wav", np.zeros(4), FS, bext="auto")

@@ -407,7 +407,7 @@ adds its own, which `additional_components` carries.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a set of components that is not the 15 of Table I.1, a value that is negative or not finite, degrees of freedom that are not positive, or a static pressure outside clause 6. |
-| TypeError | if `correction`, `frequency_hz`, `repeatability_dof` or `static_pressure_kpa` is not a single number. |
+| TypeError | if `correction`, `frequency_hz`, `repeatability_dof` or `static_pressure_kpa` is not a single number, or a key of `stated_uncertainties_db` is not a text. |
 
 ## CorrectionUncertaintyBudget
 

@@ -81,6 +81,7 @@ from scipy import special
 from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
     require_axis_count,
+    require_choice,
     require_count,
     require_equal_counts,
     require_finite_fields,
@@ -414,7 +415,7 @@ def _check_null_mean(
 def _acceptance_region(
     owner: str,
     values: NDArray[np.float64],
-    method: str,
+    method: object,
     alpha: float,
     median: float | None,
 ) -> tuple[int, int]:
@@ -436,9 +437,7 @@ def _acceptance_region(
         (0, 1), or a runs sequence has no median or nothing on one side of it.
     """
     require_scalar(alpha, "alpha")
-    if method not in _METHODS:
-        msg = f"{owner}: 'method' must be one of {_METHODS}, got {method!r}."
-        raise ValueError(msg)
+    require_choice(method, "method", _METHODS)
     if not 0.0 < alpha < 1.0:
         msg = f"{owner}: 'alpha' must be inside (0, 1), got {alpha!r}."
         raise ValueError(msg)
@@ -553,7 +552,7 @@ class TrendTestResult(OwnsArrays):
             of observations than the declared count, or the null mean is not
             the one that sequence and method state.
         :raises TypeError: if ``alpha`` is not a single number, or ``values`` is a
-            single number where an array goes.
+            single number where an array goes, or ``method`` is not a text.
         """
         require_ranks(self, values=1)
         owner = type(self).__name__
@@ -650,7 +649,7 @@ def _trend_test_runs(values: NDArray[np.float64], alpha: float) -> TrendTestResu
 
 
 def _validate_trend_inputs(
-    values: ArrayLike, method: str, alpha: float
+    values: ArrayLike, method: object, alpha: float
 ) -> NDArray[np.float64]:
     require_scalar(alpha, "alpha")
     seq = np.asarray(values, dtype=np.float64)
@@ -666,9 +665,7 @@ def _validate_trend_inputs(
     if not np.all(np.isfinite(seq)):
         msg = "'values' must be finite."
         raise ValueError(msg)
-    if method not in _METHODS:
-        msg = f"'method' must be one of {_METHODS}, got {method!r}."
-        raise ValueError(msg)
+    require_choice(method, "method", _METHODS)
     if not 0.0 < alpha < 1.0:
         msg = f"'alpha' must be inside (0, 1), got {alpha!r}."
         raise ValueError(msg)
@@ -710,7 +707,7 @@ def trend_test(
         tabulated by B&P).
     :return: A :class:`TrendTestResult`.
     :raises ValueError: If the inputs or parameters are invalid.
-    :raises TypeError: if ``alpha`` is not a single number.
+    :raises TypeError: if ``alpha`` is not a single number, or ``method`` is not a text.
     """
     seq = _validate_trend_inputs(values, method, alpha)
     if method == "reverse_arrangements":
@@ -811,7 +808,7 @@ class StationarityTestResult(OwnsArrays):
             other or with the declared number of segments, or the null mean
             is not the one those segment values and that method state.
         :raises TypeError: if ``alpha`` is not a single number, or ``segment_values`` is
-            a single number where an array goes.
+            a single number where an array goes, or ``method`` is not a text.
         """
         require_ranks(self, segment_values=1, segment_times=1)
         require_same_length(self, "segment_values", "segment_times", axis="segment")
@@ -904,13 +901,11 @@ def stationarity_test(
     :return: A :class:`StationarityTestResult`.
     :raises ValueError: If the inputs or parameters are invalid.
     :raises TypeError: if ``n_segments`` is a flag, a text or an array where a count
-        goes.
+        goes, or ``statistic`` is not a text, or ``method`` is not a text.
     """
     xa = _validate_signal(x, "x", context="a stationarity test")
     fs_v = _positive(resolve_fs(x, fs), "fs")
-    if statistic not in _STATISTICS:
-        msg = f"'statistic' must be one of {_STATISTICS}, got {statistic!r}."
-        raise ValueError(msg)
+    require_choice(statistic, "statistic", _STATISTICS)
     require_scalar(n_segments, "n_segments")
     segments = require_count(n_segments, "n_segments", at_least=None)
     if not _MIN_OBSERVATIONS <= segments <= xa.size:

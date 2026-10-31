@@ -17,6 +17,7 @@ Oracles:
 from __future__ import annotations
 
 import dataclasses
+from typing import TYPE_CHECKING, Any
 
 import matplotlib as mpl
 
@@ -33,6 +34,9 @@ from phonometry.underwater.bioacoustics.audiograms import (
     group_audiogram,
     orca_audiogram,
 )
+
+if TYPE_CHECKING:
+    from phonometry.underwater.bioacoustics.audiograms import AudiogramGroup
 
 # ---------------------------------------------------------------------------
 # Southall et al. (2019) Equation (1)
@@ -51,7 +55,7 @@ from phonometry.underwater.bioacoustics.audiograms import (
     ],
 )
 def test_threshold_at_f0_matches_the_published_prose_value(
-    group: str, printed: float
+    group: AudiogramGroup, printed: float
 ) -> None:
     """Eq. (1) + Table 2 + Table 4 reproduce the three thresholds quoted in prose."""
     f0_khz = BEST_HEARING_FREQUENCY_KHZ[group][0]
@@ -89,7 +93,9 @@ def test_normalized_audiogram_removes_the_absolute_sensitivity() -> None:
 
 @pytest.mark.parametrize("group", AUDIOGRAM_GROUPS)
 @pytest.mark.parametrize("normalized", [False, True])
-def test_best_frequency_agrees_with_table_4(group: str, *, normalized: bool) -> None:
+def test_best_frequency_agrees_with_table_4(
+    group: AudiogramGroup, *, normalized: bool
+) -> None:
     """The fit minimum lands on the ``f0`` column of Table 4 (printed p. 148).
 
     Table 4 is quoted to two significant figures and comes from the measured
@@ -113,6 +119,16 @@ def test_normalized_and_original_share_the_result_shape() -> None:
         audiogram_parameters("ocw", normalized=True)  # type: ignore[arg-type]
 
 
+def test_a_group_without_an_audiogram_says_why() -> None:
+    """The LF cetaceans weigh exposure but have no fitted audiogram, and the
+    refusal says so; a code that is not a text is the wrong type.
+    """
+    with pytest.raises(ValueError, match=r"no fitted audiogram for LF cetaceans"):
+        audiogram_parameters("LF")  # type: ignore[arg-type]
+    with pytest.raises(TypeError, match=r"'group' must be one of .*, a text"):
+        audiogram_parameters(5)  # type: ignore[arg-type]
+
+
 def test_in_air_groups_are_flagged() -> None:
     assert group_audiogram(2.3e3, "PCA").in_air is True
     assert group_audiogram(10e3, "OCA").in_air is True
@@ -121,7 +137,7 @@ def test_in_air_groups_are_flagged() -> None:
 def test_lf_cetaceans_have_no_published_audiogram() -> None:
     """Southall et al. never print F1 for LF cetaceans, so the group is absent."""
     assert "LF" not in AUDIOGRAM_GROUPS
-    with pytest.raises(ValueError, match="no fitted audiogram for LF"):
+    with pytest.raises(ValueError, match="'group' must be one of"):
         group_audiogram(1e3, "LF")
 
 
@@ -210,8 +226,9 @@ def test_an_audiogram_curve_with_an_extra_axis_is_refused(field: str) -> None:
     """
     res = group_audiogram(np.logspace(2.0, 5.0, 40), "HF")
     column = np.column_stack([getattr(res, field)] * 2)
+    changes: dict[str, Any] = {field: column}
     with pytest.raises(ValueError, match=f"'{field}' must have one axis"):
-        dataclasses.replace(res, **{field: column})
+        dataclasses.replace(res, **changes)
 
 
 def test_a_threshold_that_outruns_its_frequencies_is_refused() -> None:

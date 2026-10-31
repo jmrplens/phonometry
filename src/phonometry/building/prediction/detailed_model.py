@@ -1660,6 +1660,13 @@ class BandPath(OwnsArrays):
     kind: Literal["Dd", "Ff", "Df", "Fd"]
     values: np.ndarray
 
+    def __post_init__(self) -> None:
+        """Refuse a choice its ``Literal`` does not list, when the record is built.
+
+        :raises TypeError: if ``kind`` is not a text.
+        """
+        require_choice(self.kind, "kind", ("Dd", "Ff", "Df", "Fd"))
+
 
 def _path_matrix(paths: Sequence[BandPath], n_bands: int) -> np.ndarray:
     """Stack the paths' per-band values into a ``paths x bands`` matrix."""

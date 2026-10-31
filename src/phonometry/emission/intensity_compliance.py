@@ -72,6 +72,7 @@ import numpy as np
 from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
     check_engine,
+    require_choice,
     require_count,
     require_equal_counts,
     require_ranks,
@@ -259,8 +260,10 @@ def residual_index_limits(
         (``frequencies``, ``class_1``, ``class_2``).
     :raises ValueError: If ``device`` is unknown, ``spacing_m`` is not positive
         or a frequency is not a tabulated band.
-    :raises TypeError: if ``spacing_m`` is not a single number.
+    :raises TypeError: if ``spacing_m`` is not a single number, or ``device`` is not a
+        text.
     """
+    require_choice(device, "device", ("probe", "processor", "instrument"))
     col1, col2 = _check_device(device)
     offset = _spacing_offset(spacing_m)
     rows = {row[0]: row for row in _TABLE2}
@@ -385,7 +388,9 @@ def verify_intensity_class(
     :raises ValueError: If the inputs disagree in length, a frequency is not a
         tabulated band, a band is repeated, or ``device``/``spacing_m`` are
         invalid.
+    :raises TypeError: if ``device`` is not a text.
     """
+    require_choice(device, "device", ("probe", "processor", "instrument"))
     measured = np.atleast_1d(np.asarray(residual_index, dtype=np.float64))
     supplied = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
     if measured.ndim != 1 or supplied.ndim != 1:

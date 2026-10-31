@@ -770,6 +770,12 @@ Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the level curve's `Axes.plot`. |
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `component` is not a text. |
+
 ## LoopImpedance
 
 ```python

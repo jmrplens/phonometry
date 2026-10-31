@@ -44,7 +44,7 @@ with.
 
 from __future__ import annotations
 
-from typing import Literal, cast
+from typing import TYPE_CHECKING, Literal, cast
 
 import numpy as np
 from reference_data import enclosure_cabin_insulation as enclosure
@@ -64,6 +64,9 @@ from phonometry.room.spatial_decay import (
     PINK_NOISE_WEIGHTS_DB,
     STABILITY_TOLERANCE_DB,
 )
+
+if TYPE_CHECKING:
+    from phonometry.room.spatial_decay import EvaluatedRegion
 
 from ..registry import Outcome, count, numeric, record, register
 
@@ -95,7 +98,7 @@ def _corrected(band: int) -> np.ndarray:
     )
 
 
-def _keep(region: str) -> np.ndarray:
+def _keep(region: EvaluatedRegion) -> np.ndarray:
     low, high = spatial.ANNEX_C_RANGES_M[region]
     return np.asarray((_DISTANCES_M >= low) & (_DISTANCES_M <= high), dtype=bool)
 
@@ -573,7 +576,7 @@ def _chk_equation_eight_leaves_table_c11() -> Outcome:
 #   Dortmund/Berlin/Dresden 2006, whose PDF page numbers equal its folios.
 
 
-def _suva_range(column: str, region: str) -> tuple[np.ndarray, np.ndarray]:
+def _suva_range(column: str, region: EvaluatedRegion) -> tuple[np.ndarray, np.ndarray]:
     """One printed column over one printed range, as values and distances."""
     index = spatial.SUVA_COLUMNS.index(column)
     low, high = spatial.SUVA_RANGES_M[region]

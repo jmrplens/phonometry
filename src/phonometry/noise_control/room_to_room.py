@@ -185,7 +185,14 @@ class SourceRoom(OwnsArrays):
         way needs the room constant that turns a power into a level. Checked
         here rather than where the object is used, so the complaint arrives
         at the line that built it.
+
+        :raises TypeError: if ``model`` is not a text.
         """
+        require_choice(
+            self.model,
+            "model",
+            ("constant_power", "constant_volume", "constant_pressure"),
+        )
         if (self.level is None) == (self.power_level is None):
             msg = (
                 "give exactly one of 'level' (the source-room level L_p1) or "
@@ -220,6 +227,13 @@ class DesignCriterion(RichDisplay):
     family: CriterionFamily = "NC"
     target: float | None = None
     flanking_penalty: float = 0.0
+
+    def __post_init__(self) -> None:
+        """Refuse a choice its ``Literal`` does not list, when the record is built.
+
+        :raises TypeError: if ``family`` is not a text.
+        """
+        require_choice(self.family, "family", ("NC", "RC"))
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -578,7 +592,7 @@ def room_to_room_transmission(
     :raises TypeError: if ``partition_area`` or ``receiver_distance_m`` is not a single
         number.
     """
-    from ..room.steady_field import SOURCE_POWER_MODELS, steady_state_spl
+    from ..room.steady_field import steady_state_spl
 
     source = SourceRoom() if source is None else source
     criterion = DesignCriterion() if criterion is None else criterion
@@ -589,7 +603,6 @@ def room_to_room_transmission(
         raise ValueError(msg)
     n = f.size
 
-    require_choice(source.model, "source.model", tuple(SOURCE_POWER_MODELS))
     lw: NDArray[np.float64] | None = None
     # SourceRoom.__post_init__ has already refused every other combination,
     # so these two branches are the only ones reachable.

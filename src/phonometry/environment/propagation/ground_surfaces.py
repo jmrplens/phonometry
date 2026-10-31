@@ -72,6 +72,7 @@ from ..._internal.catalogue import (
     search_text,
     take,
 )
+from ..._internal.validation import require_choice
 from ...materials.absorbers.porous import ABSORBER_AIR, delany_bazley, miki
 
 if TYPE_CHECKING:
@@ -184,10 +185,9 @@ class GroundSurface(CatalogueRow):
             page names another fit than *model*, or when the row holds no
             number for the resistivity, in which case the message says what
             the page has there instead.
+        :raises TypeError: if ``model`` is not a text.
         """
-        if model not in _GROUND_MODELS:
-            msg = f"'model' must be 'delany_bazley' or 'miki'; got {model!r}."
-            raise ValueError(msg)
+        require_choice(model, "model", _GROUND_MODELS)
         self._check_fit(model)
         sigma = self.printed("flow_resistivity_pa_s_m2", wanted_by=model)
         if model == "miki":

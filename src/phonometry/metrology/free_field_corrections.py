@@ -102,6 +102,7 @@ from .._internal.frozen import OwnsArrays, read_only
 from .._internal.validation import (
     _as_float64,
     check_engine,
+    require_choice,
     require_count,
     require_finite,
     require_finite_array,
@@ -952,12 +953,7 @@ class FreeFieldCorrection(OwnsArrays):
             ``frequencies`` or ``reference_correction`` holds a text or a value that is
             not a real number.
         """
-        if self.source not in _SOURCES:
-            msg = (
-                f"FreeFieldCorrection: 'source' must be one of {tuple(_SOURCES)}; "
-                f"got {self.source!r}."
-            )
-            raise ValueError(msg)
+        require_choice(self.source, "source", tuple(_SOURCES))
         frequencies = _frequency_axis(self.frequencies)
         object.__setattr__(self, "frequencies", read_only(frequencies))
         corrections = np.array(self.corrections, dtype=np.float64, ndmin=2, copy=None)
@@ -1635,6 +1631,36 @@ def _repeatability_dof(value: float) -> float:
     return dof
 
 
+def _require_table_i1_components(
+    stated_uncertainties_db: Mapping[TableI1Descriptor, float],
+) -> None:
+    """Check that the stated uncertainties are keyed by the 15 components of
+    IEC 62585 Table I.1, each key as written.
+
+    A component left out and a text the table does not list are named
+    together; a key that is not a text is refused once both are in order.
+
+    :raises TypeError: for a key that is not a text.
+    :raises ValueError: for a key the table does not list, or a component
+        left out.
+    """
+    expected = tuple(IEC62585_TABLE_I1)
+    missing = [key for key in expected if key not in stated_uncertainties_db]
+    extra = [
+        key
+        for key in stated_uncertainties_db
+        if isinstance(key, str) and key not in IEC62585_TABLE_I1
+    ]
+    if missing or extra:
+        msg = (
+            "'stated_uncertainties_db' must hold the 15 components of IEC 62585 Table I.1, keyed "
+            f"'a1' to 'a15'; missing {missing}, unknown {extra}."
+        )
+        raise ValueError(msg)
+    for key in stated_uncertainties_db:
+        require_choice(key, "stated_uncertainties_db", expected)
+
+
 def correction_uncertainty_budget(
     stated_uncertainties_db: Mapping[TableI1Descriptor, float],
     *,
@@ -1695,18 +1721,10 @@ def correction_uncertainty_budget(
         I.1, a value that is negative or not finite, degrees of freedom that
         are not positive, or a static pressure outside clause 6.
     :raises TypeError: if ``correction``, ``frequency_hz``, ``repeatability_dof`` or
-        ``static_pressure_kpa`` is not a single number.
+        ``static_pressure_kpa`` is not a single number, or a key of
+        ``stated_uncertainties_db`` is not a text.
     """
-    expected = tuple(IEC62585_TABLE_I1)
-    given = tuple(stated_uncertainties_db)
-    missing = [key for key in expected if key not in stated_uncertainties_db]
-    extra = [key for key in given if key not in IEC62585_TABLE_I1]
-    if missing or extra:
-        msg = (
-            "'stated_uncertainties_db' must hold the 15 components of IEC 62585 Table I.1, keyed "
-            f"'a1' to 'a15'; missing {missing}, unknown {extra}."
-        )
-        raise ValueError(msg)
+    _require_table_i1_components(stated_uncertainties_db)
     frequency = require_positive(frequency_hz, "frequency_hz")
     dof = _repeatability_dof(repeatability_dof)
     quantities: list[Quantity] = []

@@ -1171,13 +1171,9 @@ class FlightProfile(RichDisplay):
 
         :raises ValueError: if the operation is not ``"A"`` or ``"D"``, fewer
             than two points are given, or the distances decrease.
+        :raises TypeError: if ``operation`` is not a text.
         """
-        if self.operation not in (_ARRIVAL, _DEPARTURE):
-            msg = (
-                f"FlightProfile: 'operation' must be {_ARRIVAL!r} (arrival) or "
-                f"{_DEPARTURE!r} (departure); got {self.operation!r}."
-            )
-            raise ValueError(msg)
+        require_choice(self.operation, "operation", (_ARRIVAL, _DEPARTURE))
         least_points = 2
         if len(self.points) < least_points:
             msg = (

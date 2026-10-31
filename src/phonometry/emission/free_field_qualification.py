@@ -120,7 +120,12 @@ from typing import TYPE_CHECKING, Any, Literal
 import numpy as np
 
 from .._internal.frozen import OwnsArrays, read_only
-from .._internal.validation import require_finite, require_positive, require_scalar
+from .._internal.validation import (
+    require_choice,
+    require_finite,
+    require_positive,
+    require_scalar,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterator, Sequence
@@ -152,7 +157,7 @@ _PATH_TARGETS: tuple[PathTarget, ...] = (
     "closest boundary",
     "unique features",
 )
-_BANDWIDTHS: tuple[str, ...] = ("discrete-frequency", "broadband")
+_BANDWIDTHS: tuple[QualificationBandwidth, ...] = ("discrete-frequency", "broadband")
 
 #: Reference distance of Formula (2), in metres.
 _R0_M = 1.0
@@ -304,10 +309,8 @@ def _band_indices(frequencies: ArrayLike) -> np.ndarray:
     return ks
 
 
-def _check_room(room: str) -> None:
-    if room not in _ROOMS:
-        msg = f"'room' must be 'anechoic' or 'hemi-anechoic'; got {room!r}."
-        raise ValueError(msg)
+def _check_room(room: object) -> None:
+    require_choice(room, "room", _ROOMS)
 
 
 def _table_a1(k: int, room: str) -> float:
@@ -344,6 +347,7 @@ def inverse_square_law_tolerance(
     :return: The half-width of the tolerance band, in dB, per frequency.
     :raises ValueError: for an unknown room, a non-positive frequency or
         frequencies that are not one value or a 1-D array.
+    :raises TypeError: if ``room`` is not a text.
     """
     _check_room(room)
     return np.array(
@@ -361,6 +365,7 @@ def directionality_tolerance(
     :return: The half-width of the tolerance band, in dB, per frequency.
     :raises ValueError: for an unknown room, a non-positive frequency or
         frequencies that are not one value or a 1-D array.
+    :raises TypeError: if ``room`` is not a text.
     """
     _check_room(room)
     return np.array(
@@ -438,13 +443,8 @@ def _checked_targets(
 ) -> tuple[PathTarget, ...]:
     """The A.3.3 targets of a traverse, one name or several, as a tuple."""
     named = (targets,) if isinstance(targets, str) else tuple(targets)
-    unknown = [t for t in named if t not in _PATH_TARGETS]
-    if unknown:
-        msg = (
-            f"'targets' must be among {', '.join(map(repr, _PATH_TARGETS))} "
-            f"(ISO 3745:2012/Amd.1:2017, A.3.3); got {unknown[0]!r}."
-        )
-        raise ValueError(msg)
+    for target in named:
+        require_choice(target, "targets", _PATH_TARGETS)
     return named
 
 
@@ -568,6 +568,7 @@ class MicrophoneTraverse(OwnsArrays):
             not have one row per point, a level is infinite, a monitor or
             background reading a measured level needs is not finite, or a
             target is not one of A.3.3.
+        :raises TypeError: if an entry of ``targets`` is not a text.
         """
         object.__setattr__(self, "targets", _checked_targets(self.targets))
         positions = _checked_positions(self.positions_m)
@@ -956,6 +957,7 @@ class InverseSquareLawResult(OwnsArrays):
 
         :raises ValueError: for an unknown room, a frequency that is not
             positive, or radii other than the ones the levels qualify.
+        :raises TypeError: if ``room`` is not a text.
         """
         _check_room(self.room)
         _lookup_bands(self.frequencies)
@@ -1181,6 +1183,7 @@ def inverse_square_law_deviations(
     :raises ValueError: if both ``origin_m`` and ``source_box_m`` are given, a
         traverse's level columns do not match the frequencies, a traverse has
         no level at a frequency, or a point coincides with the origin.
+    :raises TypeError: if ``room`` is not a text.
     """
     _check_room(room)
     freqs = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
@@ -1237,7 +1240,7 @@ def directionality_positions(
     :param room: ``"anechoic"`` or ``"hemi-anechoic"``.
     :param radius: The radius, in metres; 1,5 m in B.3.2.
     :return: ``(32, 3)`` or ``(64, 3)`` coordinates, in metres.
-    :raises TypeError: if ``radius`` is not a single number.
+    :raises TypeError: if ``radius`` is not a single number, or ``room`` is not a text.
     """
     _check_room(room)
     radius = require_positive(radius, "radius")
@@ -1278,6 +1281,7 @@ class SourceDirectionalityResult(OwnsArrays):
 
         :raises ValueError: for an unknown room or a frequency that is not
             positive.
+        :raises TypeError: if ``room`` is not a text.
         """
         _check_room(self.room)
         _lookup_bands(self.frequencies)
@@ -1363,6 +1367,7 @@ def verify_source_directionality(
     :return: :class:`SourceDirectionalityResult`.
     :raises ValueError: for the wrong number of positions, levels that are not
         finite, or bands that do not match.
+    :raises TypeError: if ``room`` is not a text.
     """
     _check_room(room)
     freqs = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
@@ -1626,7 +1631,8 @@ class FreeFieldCheck(OwnsArrays):
             declaration that is not ``True``, ``False`` or ``None``.
         :raises TypeError: if ``measurement_radius_m``,
             ``reflecting_plane_absorption_coefficient``, ``reflecting_plane_margin_m``
-            or ``speed_of_sound`` is not a single number.
+            or ``speed_of_sound`` is not a single number, or ``bandwidth`` is not a
+            text.
         """
         fits = _checked_fits(self.results, self.bandwidth)
         room = fits[0].room
@@ -2011,16 +2017,14 @@ def _checked_declaration(value: object, name: str) -> bool | None:
 
 def _checked_fits(
     results: InverseSquareLawResult | Sequence[InverseSquareLawResult],
-    bandwidth: str,
+    bandwidth: object,
 ) -> tuple[InverseSquareLawResult, ...]:
     """The results of every test source, all for one room, and a known bandwidth."""
     fits = (results,) if isinstance(results, InverseSquareLawResult) else tuple(results)
     if not fits:
         msg = "'results' must hold at least one InverseSquareLawResult."
         raise ValueError(msg)
-    if bandwidth not in _BANDWIDTHS:
-        msg = f"'bandwidth' must be 'discrete-frequency' or 'broadband'; got {bandwidth!r}."
-        raise ValueError(msg)
+    require_choice(bandwidth, "bandwidth", _BANDWIDTHS)
     room = fits[0].room
     if any(fit.room != room for fit in fits):
         msg = "every result must be for the same room type."
@@ -2137,8 +2141,10 @@ def check_free_field(
         ``results``, an unknown bandwidth, an absorption coefficient outside
         0 to 1, or a margin that is not finite.
     :raises TypeError: for a working-area declaration that is not ``True``,
-        ``False`` or ``None`` (a NumPy truth value is one).
+        ``False`` or ``None`` (a NumPy truth value is one), or a ``bandwidth``
+        that is not a text.
     """
+    require_choice(bandwidth, "bandwidth", ("discrete-frequency", "broadband"))
     fits = (results,) if isinstance(results, InverseSquareLawResult) else tuple(results)
     directionality = (
         source_directionality

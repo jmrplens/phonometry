@@ -16,6 +16,8 @@ clauses, which is shorter than Part 1's.
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import pytest
 from reference_data import (
     ISO8041_2_COVERAGE_FACTOR,
@@ -34,6 +36,9 @@ from reference_data import (
 
 from phonometry import vibration
 
+if TYPE_CHECKING:
+    from phonometry.vibration.human.signal_burst import BurstApplication, BurstRow
+
 #: The three printed tables of Part 2, each with the application whose Part 1
 #: table it has to match.
 PART_2_TABLES = (
@@ -43,7 +48,7 @@ PART_2_TABLES = (
 )
 
 
-def _row_name(row: str) -> str:
+def _row_name(row: BurstRow) -> BurstRow:
     """The library's name for a printed row, ``Band limiting`` included."""
     return vibration.BAND_LIMITING if row == "band-limiting" else row
 
@@ -53,7 +58,7 @@ def _row_name(row: str) -> str:
 # ---------------------------------------------------------------------------
 @pytest.mark.parametrize(("application", "printed"), ISO8041_2_TABLE6.items())
 def test_the_part_2_test_signal_is_the_part_1_test_signal(
-    application: str,
+    application: BurstApplication,
     printed: tuple[tuple[str, ...], float, float, tuple[int, ...], float, float],
 ) -> None:
     """Table 6 of Part 2 (folio 12), field by field against Part 1's."""
@@ -76,9 +81,9 @@ def test_the_part_2_tables_print_72_lines_and_228_cells() -> None:
 
 @pytest.mark.parametrize(("application", "columns", "table"), PART_2_TABLES)
 def test_every_part_2_indication_is_the_part_1_indication(
-    application: str,
+    application: BurstApplication,
     columns: tuple[str, ...],
-    table: dict[tuple[str, int | None], tuple[tuple[float, float], ...]],
+    table: dict[tuple[BurstRow, int | None], tuple[tuple[float, float], ...]],
 ) -> None:
     """Cell by cell: each Part 2 indication equals the Part 1 cell exactly.
 
@@ -95,9 +100,9 @@ def test_every_part_2_indication_is_the_part_1_indication(
 
 @pytest.mark.parametrize(("application", "columns", "table"), PART_2_TABLES)
 def test_every_part_2_tolerance_is_the_part_1_tolerance(
-    application: str,
+    application: BurstApplication,
     columns: tuple[str, ...],
-    table: dict[tuple[str, int | None], tuple[tuple[float, float], ...]],
+    table: dict[tuple[BurstRow, int | None], tuple[tuple[float, float], ...]],
 ) -> None:
     """And the tolerance printed beside each cell, 10 % or 12 % for the VDV."""
     for (row, cycles), cells in table.items():

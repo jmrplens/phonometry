@@ -15,7 +15,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Literal
 
-from ..._internal.validation import require_positive
+from ..._internal.validation import require_choice, require_positive
 from ..common import _new_axes
 from ._draft import (
     _check_language,
@@ -80,12 +80,11 @@ def plot_junction_geometry(
     :return: The axes.
     :raises ValueError: for an unknown junction type, or a thickness that is
         not positive and finite.
-    :raises TypeError: if ``thickness1_m`` or ``thickness2_m`` is not a single number.
+    :raises TypeError: if ``thickness1_m`` or ``thickness2_m`` is not a single number,
+        or ``junction`` is not a text.
     """
     _check_language(language)
-    if junction not in ("L", "T1", "T2", "X"):
-        msg = "'junction' must be 'L', 'T1', 'T2' or 'X'."
-        raise ValueError(msg)
+    require_choice(junction, "junction", ("L", "T1", "T2", "X"))
     # require_positive rather than a bare ``<= 0.0``: NaN compares False
     # against every bound, so a NaN thickness used to pass and draw plates
     # collapsed to nothing under a dimension label reading "nan mm". Each

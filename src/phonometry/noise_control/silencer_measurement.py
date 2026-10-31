@@ -208,6 +208,9 @@ ISO7235_SPREAD_LIMITS: tuple[tuple[float, float], ...] = (
     (160.0, 6.0),
 )
 
+#: A column of ISO 7235:2003 Table 7: the quantity a reproducibility is for.
+ReproducibilityQuantity = Literal["insertion_loss", "transmission_loss", "intensity"]
+
 #: ISO 7235:2003, Table 7. Estimated reproducibility standard deviation, in
 #: dB, keyed by quantity and read as ``(upper band centre in Hz, sigma_R)``
 #: pairs in order.
@@ -216,29 +219,29 @@ ISO7235_SPREAD_LIMITS: tuple[tuple[float, float], ...] = (
 #: silencers; the other two are estimates based on experience (7.9). The
 #: sound-intensity column is qualified by a footnote limiting it to 5 000 Hz,
 #: which is why its last pair stops there rather than at 10 000 Hz.
-ISO7235_REPRODUCIBILITY: Mapping[str, tuple[tuple[float, float], ...]] = (
-    MappingProxyType(
-        {
-            "insertion_loss": (
-                (100.0, 1.5),
-                (500.0, 1.0),
-                (1250.0, 2.0),
-                (10000.0, 3.0),
-            ),
-            "transmission_loss": (
-                (100.0, 3.0),
-                (500.0, 3.0),
-                (1250.0, 3.0),
-                (10000.0, 3.0),
-            ),
-            "intensity": (
-                (100.0, 3.0),
-                (500.0, 1.5),
-                (1250.0, 1.0),
-                (5000.0, 1.0),
-            ),
-        }
-    )
+ISO7235_REPRODUCIBILITY: Mapping[
+    ReproducibilityQuantity, tuple[tuple[float, float], ...]
+] = MappingProxyType(
+    {
+        "insertion_loss": (
+            (100.0, 1.5),
+            (500.0, 1.0),
+            (1250.0, 2.0),
+            (10000.0, 3.0),
+        ),
+        "transmission_loss": (
+            (100.0, 3.0),
+            (500.0, 3.0),
+            (1250.0, 3.0),
+            (10000.0, 3.0),
+        ),
+        "intensity": (
+            (100.0, 3.0),
+            (500.0, 1.5),
+            (1250.0, 1.0),
+            (5000.0, 1.0),
+        ),
+    }
 )
 
 #: ISO 7235:2003, 7.9. The expanded uncertainty for a coverage probability of
@@ -603,9 +606,7 @@ def survey_reproducibility(frequency: float) -> float:
 def measurement_reproducibility(
     frequency: float,
     *,
-    quantity: Literal[
-        "insertion_loss", "transmission_loss", "intensity"
-    ] = "insertion_loss",
+    quantity: ReproducibilityQuantity = "insertion_loss",
 ) -> float:
     r"""ISO 7235 Table 7: the reproducibility standard deviation.
 
@@ -640,9 +641,7 @@ def measurement_reproducibility(
 def measurement_expanded_uncertainty(
     frequency: float,
     *,
-    quantity: Literal[
-        "insertion_loss", "transmission_loss", "intensity"
-    ] = "insertion_loss",
+    quantity: ReproducibilityQuantity = "insertion_loss",
 ) -> float:
     """ISO 7235 7.9: twice the reproducibility, for 95 % coverage.
 

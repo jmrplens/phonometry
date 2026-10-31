@@ -116,7 +116,7 @@ Psychoacoustic tonality per ECMA-418-2:2025 (Sottek Hearing Model).
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `f_high`, `f_low` or `fs` is not a single number. |
+| TypeError | if `f_high`, `f_low` or `fs` is not a single number, or `field` is not a text. |
 
 The 1 kHz / 40 dB SPL sinusoid yields 1 tu_HMS by construction of the
 calibration factor of Formula (51).

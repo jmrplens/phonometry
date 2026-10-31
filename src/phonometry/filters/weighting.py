@@ -97,6 +97,7 @@ from scipy import signal
 from .._internal.frozen import OwnsArrays
 from .._internal.utils import _sos_initial_state, _sos_state_mismatch
 from .._internal.validation import (
+    require_choice,
     require_count,
     require_positive,
     require_scalar,
@@ -647,6 +648,9 @@ class WeightingFilter:
         :raises ValueError: if ``fs`` is not positive, or ``weighting`` names
             no curve this class designs or one it cannot design as asked.
         """
+        require_choice(
+            weighting, "weighting", ("A", "C", "B", "D", "G", "AU", "468", "Z")
+        )
         require_scalar(fs, "fs")
         if fs <= 0:
             raise ValueError(_FS_POSITIVE)
@@ -946,6 +950,7 @@ def weighting_filter(
     :raises TypeError: if ``high_accuracy`` is not ``True`` or ``False``,
         ``fs`` is not one number, or ``weighting`` is not a text.
     """
+    require_choice(weighting, "weighting", ("A", "C", "B", "D", "G", "AU", "468", "Z"))
     fs = resolve_fs(x, fs)
     wf = _cached_weighting_filter(
         fs, weighting, high_accuracy=_require_design_flag(high_accuracy)
@@ -969,13 +974,11 @@ def _prepare_time_weighting_initial_state(
         return np.zeros(state_shape, dtype=x_sq.dtype)
 
     if isinstance(initial_state, str):
-        if initial_state == "zero":
+        if require_choice(initial_state, "initial_state", ("zero", "first")) == "zero":
             return np.zeros(state_shape, dtype=x_sq.dtype)
-        if initial_state == "first":
-            if x_sq.shape[-1] == 0:
-                raise ValueError(invalid_initial_state_message)
-            return np.asarray(np.take(x_sq, 0, axis=-1), dtype=x_sq.dtype).copy()
-        raise ValueError(invalid_initial_state_message)
+        if x_sq.shape[-1] == 0:
+            raise ValueError(invalid_initial_state_message)
+        return np.asarray(np.take(x_sq, 0, axis=-1), dtype=x_sq.dtype).copy()
 
     try:
         state = np.asarray(initial_state, dtype=x_sq.dtype)
@@ -1064,7 +1067,8 @@ def time_weighting(
         :class:`TimeWeightedEnvelope`, which stands in for that array
         everywhere it was used and adds the rate and a level plot. It is not
         a Signal, because a mean square is not a pressure record.
-    :raises TypeError: if ``fs`` is not a single number.
+    :raises TypeError: if ``fs`` is not a single number, or ``initial_state`` or
+        ``mode`` is not a text.
     """
     require_scalar(fs, "fs")
     fs = resolve_fs(x, fs)
@@ -1075,8 +1079,7 @@ def time_weighting(
     x_sq = x_proc**2
     initial = _prepare_time_weighting_initial_state(x_sq, initial_state)
 
-    if mode not in _TIME_WEIGHTINGS:
-        raise ValueError(_MODE_INVALID)
+    require_choice(mode, "mode", _TIME_WEIGHTINGS)
 
     if mode in ["fast", "slow"]:
         tau = 0.125 if mode == "fast" else 1.0
@@ -1120,14 +1123,13 @@ class TimeWeighting:
     def __init__(self, fs: float, mode: Mode = "fast") -> None:
         """:param fs: Sample rate in Hz.
         :param mode: 'fast' (125 ms), 'slow' (1000 ms) or 'impulse' (35 ms / 1.5 s).
-        :raises TypeError: if ``fs`` is not a single number.
+        :raises TypeError: if ``fs`` is not a single number, or ``mode`` is not a text.
         """
         require_scalar(fs, "fs")
         if fs <= 0:
             raise ValueError(_FS_POSITIVE)
         _require_str(mode, "mode")
-        if mode not in _TIME_WEIGHTINGS:
-            raise ValueError(_MODE_INVALID)
+        require_choice(mode, "mode", _TIME_WEIGHTINGS)
         self.fs = fs
         self.mode: Mode = mode
         self._state: np.ndarray | None = None

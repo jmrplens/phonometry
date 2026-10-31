@@ -750,6 +750,12 @@ def test_a_json_document_takes_no_dialect(tmp_path: pathlib.Path) -> None:
     mine = _mine()
     with pytest.raises(ValueError, match="delimiter= and decimal= declare"):
         io.write_catalogue(mine, tmp_path / "mine.json", delimiter=";")
+    # A decimal comma beside a JSON document is the same mistake, not a
+    # comma delimiter to change.
+    with pytest.raises(ValueError, match="delimiter= and decimal= declare"):
+        io.write_catalogue(mine, tmp_path / "mine.json", decimal=",")
+    with pytest.raises(TypeError, match="'delimiter' must be one of"):
+        io.write_catalogue(mine, tmp_path / "mine.json", delimiter=5)  # type: ignore[arg-type]
     assert list(tmp_path.iterdir()) == []
 
 

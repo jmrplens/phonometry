@@ -429,6 +429,7 @@ def track_decay_rate(
     :raises TypeError: if ``frequencies`` holds a text or a value that is not a real
         number, or ``direction`` is not a text.
     """
+    require_choice(direction, "direction", ("vertical", "lateral"))
     frequencies = require_positive_array(frequencies, "frequencies")
     grid: ArrayLike = (
         track_decay_excitation_positions(sleeper_spacing_m=sleeper_spacing_m)

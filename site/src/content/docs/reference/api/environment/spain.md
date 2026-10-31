@@ -286,7 +286,7 @@ derived from `operating_days`: the reported daily level then represents
 | Exception | When |
 | :--- | :--- |
 | ValueError | For an unknown period key, empty phase list, inconsistent durations, or invalid annual parameters. |
-| TypeError | if `closed_level` is not a single number, or `operating_days` or `year_days` is a flag, a text or an array where a count goes. |
+| TypeError | if `closed_level` is not a single number, `operating_days` or `year_days` is a flag, a text or an array where a count goes, a key of `measurements`, `long_term_levels` or `period_hours` is not a text, or a value of `period_hours` is not a single number. |
 
 ## corrected_level
 

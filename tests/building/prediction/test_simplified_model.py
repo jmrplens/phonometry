@@ -204,9 +204,7 @@ def test_kij_invalid_inputs() -> None:
         building.junction_vibration_reduction("rigid_cross", "through", -1.0)
     with pytest.raises(ValueError, match="'junction_type' must be one of"):
         building.junction_vibration_reduction("unknown", "through", 1.0)  # type: ignore[arg-type]
-    with pytest.raises(
-        ValueError, match="'path' must be 'through', 'corner' or 'double_leaf'"
-    ):
+    with pytest.raises(ValueError, match="'path' must be one of"):
         building.junction_vibration_reduction("rigid_cross", "diagonal", 1.0)  # type: ignore[arg-type]
 
 
@@ -333,7 +331,7 @@ def test_flanking_element_kij_min_is_noop_for_annex_h_geometry() -> None:
 
 
 def test_flanking_path_invalid() -> None:
-    with pytest.raises(ValueError, match="'kind' must be 'Ff', 'Df' or 'Fd'"):
+    with pytest.raises(ValueError, match="'kind' must be one of"):
         building.flanking_path(
             label="x",
             kind="XX",

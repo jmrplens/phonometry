@@ -182,7 +182,7 @@ distribution), L90 the level exceeded 90% of the time, etc.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `calibration_factor` is not a single number, or `weighting` is not a text. |
+| TypeError | if `calibration_factor` is not a single number, or `weighting` is not a text, or `mode` is not a text. |
 
 ## sel
 

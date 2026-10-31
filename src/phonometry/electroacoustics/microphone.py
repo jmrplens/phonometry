@@ -332,6 +332,13 @@ class MicrophoneNoise(OwnsArrays):
     weighting: NoiseWeighting = "A"
     spectrum: tuple[ArrayLike, ArrayLike] | None = None
 
+    def __post_init__(self) -> None:
+        """Refuse a choice its ``Literal`` does not list, when the record is built.
+
+        :raises TypeError: if ``weighting`` is not a text.
+        """
+        require_choice(self.weighting, "weighting", ("A", "468"))
+
 
 #: No inherent-noise data supplied, A-weighted: the Clause 17 default.
 _DEFAULT_NOISE = MicrophoneNoise()
@@ -702,7 +709,11 @@ class MicrophoneCharacteristics(OwnsArrays):
             axes for ``"directivity"``.
         :raises ImportError: If matplotlib is not installed
             (``pip install "phonometry[plot]"``).
+        :raises TypeError: if ``quantity`` is not a text.
         """
+        require_choice(
+            quantity, "quantity", ("response", "directivity", "noise", "distortion")
+        )
         from .._i18n import check_language
         from .._plot.electroacoustics import plot_microphone_characteristics
 

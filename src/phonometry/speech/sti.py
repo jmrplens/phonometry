@@ -27,7 +27,7 @@ from __future__ import annotations
 
 import warnings
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, overload
+from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 
@@ -137,7 +137,22 @@ _ENVELOPE_LPF_HZ = 100.0
 # Annex F (informative) qualification bands: edges 0.36-0.76 in 0.04
 # steps; categories U (< 0.36), J..A, A+ (>= 0.76). Unchanged in Ed.5.
 _RATING_EDGES = (0.36, 0.40, 0.44, 0.48, 0.52, 0.56, 0.60, 0.64, 0.68, 0.72, 0.76)
-_RATING_LETTERS = ("U", "J", "I", "H", "G", "F", "E", "D", "C", "B", "A", "A+")
+#: The Annex F qualification letters, worst first.
+STIRating = Literal["U", "J", "I", "H", "G", "F", "E", "D", "C", "B", "A", "A+"]
+_RATING_LETTERS: tuple[STIRating, ...] = (
+    "U",
+    "J",
+    "I",
+    "H",
+    "G",
+    "F",
+    "E",
+    "D",
+    "C",
+    "B",
+    "A",
+    "A+",
+)
 
 
 @dataclass(frozen=True)
@@ -163,7 +178,7 @@ class STIResult(OwnsArrays):
     mti: np.ndarray
     mtf: np.ndarray
     band_levels: np.ndarray | None
-    rating: str
+    rating: STIRating
     ambient_levels: np.ndarray | None = None
 
     def __post_init__(self) -> None:
@@ -301,7 +316,7 @@ class STIResult(OwnsArrays):
         )
 
 
-def _rating(sti: float) -> str:
+def _rating(sti: float) -> STIRating:
     """Annex F qualification letter for an STI value (band edges 0.36-0.76).
 
     Note: the qualification bands are 0.04 STI wide, so every band edge flips a

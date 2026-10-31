@@ -8,10 +8,11 @@ Lazy imports from the results' ``.plot()`` methods in
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
+from .._internal.validation import require_choice
 from .common import (
     _C_MUTED,
     _C_PRIMARY,
@@ -193,7 +194,7 @@ def plot_modulation_block(
     result: ModulationBlock,
     ax: Axes | None = None,
     *,
-    kind: str = "spectrum",
+    kind: Literal["spectrum", "series"] = "spectrum",
     language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
@@ -205,12 +206,12 @@ def plot_modulation_block(
     :param language: ``"en"`` or ``"es"``.
     :param kwargs: Forwarded to the primary artist.
     :return: The axes.
+    :raises TypeError: if ``kind`` is not a text.
+    :raises ValueError: for a kind that is neither.
     """
     from .._i18n import localize_axes
 
-    if kind not in ("spectrum", "series"):
-        msg = f"'kind' must be 'spectrum' or 'series'; got {kind!r}."
-        raise ValueError(msg)
+    require_choice(kind, "kind", ("spectrum", "series"))
     ax = ax if ax is not None else _new_axes()
     if kind == "series":
         _draw_block_series(result, ax, language, kwargs)

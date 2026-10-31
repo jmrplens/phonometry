@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import dataclasses
 import types
+from typing import TYPE_CHECKING
 
 import pytest
 
@@ -20,7 +21,11 @@ from phonometry import emission, metrology, underwater, vibration
 from phonometry.building.measurement import structure_borne_power
 from phonometry.environment.assessment import impulsive_sound
 
+if TYPE_CHECKING:
+    from phonometry.metrology.reference_values import Medium
+
 _MICRO = 1e-6
+
 _NANO = 1e-9
 _PICO = 1e-12
 
@@ -57,7 +62,7 @@ def test_the_table_holds_exactly_the_printed_rows() -> None:
 
 
 @pytest.mark.parametrize(("medium", "key"), sorted(_PRINTED))
-def test_each_value_is_the_printed_one(medium: str, key: str) -> None:
+def test_each_value_is_the_printed_one(medium: Medium, key: str) -> None:
     """The value in SI, the unit it is in, and the table it is printed in."""
     number, prefix, unit, table = _PRINTED[medium, key]
     row = _TABLE[medium][key]
@@ -108,7 +113,7 @@ def test_note_b_of_table_2_is_the_air_to_water_offset() -> None:
     ],
 )
 def test_the_constants_that_predate_the_table_are_its_values(
-    constant: float, medium: str, key: str
+    constant: float, medium: Medium, key: str
 ) -> None:
     """The constants that existed before the table, public or private, read it."""
     assert constant == _TABLE[medium][key].value

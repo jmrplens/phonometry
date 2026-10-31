@@ -176,7 +176,7 @@ untouched) before the detector, the Figure 13.11 front end.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs or parameters are invalid. |
-| TypeError | if `nfft` is a flag, a text or an array where a count goes. |
+| TypeError | if `nfft` is a flag, a text or an array where a count goes, `kind` is not a text, or an edge of `band` is not a real number. |
 
 ## EnvelopeResult
 

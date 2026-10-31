@@ -47,7 +47,11 @@ from ..registry import Outcome, count, numeric, record, register
 from .signal_burst import _indications
 
 if TYPE_CHECKING:
-    from phonometry.vibration.human.signal_burst import BurstQuantity
+    from phonometry.vibration.human.signal_burst import (
+        BurstApplication,
+        BurstQuantity,
+        BurstRow,
+    )
 
 _PVEM = "Personal vibration exposure meters (ISO 8041-2)"
 
@@ -61,9 +65,9 @@ _TABLE6_FIELDS = 6
 _TABLES: tuple[
     tuple[
         int,
-        str,
+        BurstApplication,
         tuple[BurstQuantity, ...],
-        dict[tuple[str, int | None], tuple[tuple[float, float], ...]],
+        dict[tuple[BurstRow, int | None], tuple[tuple[float, float], ...]],
     ],
     ...,
 ] = (
@@ -82,14 +86,14 @@ _TABLES: tuple[
 _PRINTED_CELLS = {7: 12, 8: 192, 9: 24}
 
 
-def _row_name(row: str) -> str:
+def _row_name(row: BurstRow) -> BurstRow:
     """The library's name for a printed row, the band-limiting one included."""
     return ph.vibration.BAND_LIMITING if row == "band-limiting" else row
 
 
 def _cell_count(
     number: int,
-    table: dict[tuple[str, int | None], tuple[tuple[float, float], ...]],
+    table: dict[tuple[BurstRow, int | None], tuple[tuple[float, float], ...]],
 ) -> int:
     """How many cells the transcription holds, checked against the page."""
     total = sum(len(cells) for cells in table.values())
@@ -108,10 +112,10 @@ def _register_reproduction() -> None:
 
         def _check(
             number: int = number,
-            application: str = application,
+            application: BurstApplication = application,
             columns: tuple[BurstQuantity, ...] = columns,
             table: dict[
-                tuple[str, int | None], tuple[tuple[float, float], ...]
+                tuple[BurstRow, int | None], tuple[tuple[float, float], ...]
             ] = table,
         ) -> Outcome:
             total = _cell_count(number, table)
@@ -142,10 +146,10 @@ def _register_identity() -> None:
 
         def _check(
             number: int = number,
-            application: str = application,
+            application: BurstApplication = application,
             columns: tuple[BurstQuantity, ...] = columns,
             table: dict[
-                tuple[str, int | None], tuple[tuple[float, float], ...]
+                tuple[BurstRow, int | None], tuple[tuple[float, float], ...]
             ] = table,
         ) -> Outcome:
             total = _cell_count(number, table)

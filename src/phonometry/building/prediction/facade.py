@@ -74,6 +74,7 @@ import numpy as np
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     require_axis_count,
+    require_choice,
     require_count,
     require_equal_counts,
     require_equal_shapes,
@@ -284,8 +285,9 @@ class FacadePredictionResult(OwnsArrays):
         :raises ValueError: if the per-band quantities disagree, if an element
             partial index does not run over the predicted bands, or if the
             retained geometry holds a different number of elements.
-        :raises TypeError: if ``elements`` is ``None``, or ``r_prime`` is a
-            single number rather than one value per band.
+        :raises TypeError: if ``elements`` is ``None``, or ``r_prime`` or an
+            entry of ``element_r`` is a single number rather than one value
+            per band.
         """
         require_present(self, "elements")
         require_ranks(self, r_prime=1, r_45=1, r_tr_s=1, d_2m_nt=1, frequencies=1)
@@ -647,12 +649,26 @@ def outdoor_attenuation(width_m: float, height_m: float, distance: float) -> flo
     return float(-10.0 * log10(corridor))  # (E.2a)
 
 
+#: A façade shape of EN 12354-3:2000 Figure C.2, by its row.
+FacadeShape = Literal[
+    "plane_facade",
+    "gallery_2",
+    "gallery_3",
+    "gallery_4",
+    "gallery_5",
+    "balcony_6",
+    "balcony_7",
+    "balcony_8",
+    "terrace_open",
+    "terrace_closed",
+]
+
 #: EN 12354-3:2000 Annex C, Figure C.2: façade-shape level difference ΔLfs
 #: (dB). Keyed by shape; each value maps the line-of-sight height bin
 #: (0: < 1,5 m; 1: 1,5 m to 2,5 m; 2: > 2,5 m) to the (αw ≤ 0,3; 0,6; ≥ 0,9)
 #: triple, or None where the figure prints "does not apply". The 2017 edition
 #: (DIN EN ISO 12354-3, Tabelle C.1) tabulates identical values.
-_DELTA_LFS: dict[str, tuple[tuple[float, float, float] | None, ...]] = {
+_DELTA_LFS: dict[FacadeShape, tuple[tuple[float, float, float] | None, ...]] = {
     "plane_facade": ((0.0, 0.0, 0.0), (0.0, 0.0, 0.0), (0.0, 0.0, 0.0)),
     "gallery_2": ((-1.0, -1.0, 0.0), None, None),
     "gallery_3": ((-1.0, -1.0, 0.0), (-1.0, 0.0, 2.0), (1.0, 1.0, 2.0)),
@@ -674,18 +690,7 @@ _DLFS_HEIGHT_EDGES = (1.5, 2.5)
 
 
 def facade_shape_level_difference(
-    shape: Literal[
-        "plane_facade",
-        "gallery_2",
-        "gallery_3",
-        "gallery_4",
-        "gallery_5",
-        "balcony_6",
-        "balcony_7",
-        "balcony_8",
-        "terrace_open",
-        "terrace_closed",
-    ],
+    shape: FacadeShape,
     *,
     line_of_sight: float = 0.0,
     absorption: float = 0.3,
@@ -715,14 +720,10 @@ def facade_shape_level_difference(
     :return: ``ΔLfs``, in dB.
     :raises ValueError: For an unknown shape, a negative height/absorption, or
         a shape/height combination the figure marks "does not apply".
-    :raises TypeError: if ``absorption`` or ``line_of_sight`` is not a single number.
+    :raises TypeError: if ``absorption`` or ``line_of_sight`` is not a single
+        number, or ``shape`` is not a text.
     """
-    try:
-        rows = _DELTA_LFS[shape]
-    except KeyError:
-        valid = ", ".join(sorted(_DELTA_LFS))
-        msg = f"Unknown facade shape {shape!r}. Valid: {valid}."
-        raise ValueError(msg) from None
+    rows = _DELTA_LFS[require_choice(shape, "shape", tuple(_DELTA_LFS))]
     require_scalar(line_of_sight, "line_of_sight")
     h = float(line_of_sight)
     require_scalar(absorption, "absorption")

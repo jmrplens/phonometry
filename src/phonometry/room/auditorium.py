@@ -88,6 +88,11 @@ if TYPE_CHECKING:
     from ..io._signal import Signal
 
 Symbol = Literal["G", "EDT", "C80", "D50", "Ts", "J_LF", "J_LFC", "L_J"]
+#: The symbol a row of Table A.1 is keyed by: every :data:`Symbol` but
+#: ``"J_LFC"``, which shares the row of ``"J_LF"``.
+RowSymbol = Literal["G", "EDT", "C80", "D50", "Ts", "J_LF", "L_J"]
+#: An angular weighting of the early lateral energy fraction.
+LateralWeighting = Literal["squared", "cosine"]
 
 __all__ = [
     "DIFFUSE_FIELD_REFERENCE_OFFSET_DB",
@@ -853,7 +858,7 @@ IACC_JND = 0.075
 
 #: The two angular weightings Equations (A.14) and (A.15) print for the early
 #: lateral energy fraction.
-LATERAL_WEIGHTINGS = ("squared", "cosine")
+LATERAL_WEIGHTINGS: tuple[LateralWeighting, ...] = ("squared", "cosine")
 
 
 def _window_energy(
@@ -902,7 +907,7 @@ class LateralEnergyResult(OwnsArrays):
 
     frequencies: NDArray[np.float64] | None
     energy_fraction: NDArray[np.float64]
-    weighting: str
+    weighting: LateralWeighting
 
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
@@ -924,7 +929,7 @@ def early_lateral_energy_fraction(
     lateral_ir: Signal | ArrayLike,
     fs: float | None = None,
     *,
-    weighting: Literal["squared", "cosine"] = "squared",
+    weighting: LateralWeighting = "squared",
     limits: tuple[float, float] | None = _DEFAULT_BANDS,
     fraction: int | np.integer[Any] = 1,
 ) -> LateralEnergyResult:
@@ -1678,7 +1683,7 @@ class AuditoriumQuantity(RichDisplay):
         {"just_noticeable_difference": ""}
     )
 
-    symbol: str
+    symbol: RowSymbol
     aspect: str
     averaging_bands_hz: tuple[float, ...]
     just_noticeable_difference: float | None
@@ -1698,7 +1703,7 @@ _CLARITY_ASPECT = "Perceived clarity of sound"
 #: Five listener aspects and seven quantities: "Perceived clarity of sound"
 #: carries three of them, and the early lateral energy fraction is one row
 #: with two alternative symbols.
-TABLE_A1 = MappingProxyType(
+TABLE_A1: Mapping[RowSymbol, AuditoriumQuantity] = MappingProxyType(
     {
         "G": AuditoriumQuantity(
             symbol="G",
@@ -1774,12 +1779,23 @@ TABLE_A1 = MappingProxyType(
 )
 
 
-#: The alternative symbol Table A.1 prints inside a row it shares. "Early
-#: lateral energy fraction, J_LF or J_LFC" is one row, with one band set, one
+#: The row of Table A.1 each symbol is read from. "Early lateral energy
+#: fraction, J_LF or J_LFC" is one row, with one band set, one
 #: just-noticeable difference and one typical range, so the cosine-weighted
 #: variant of Equation (A.15) is looked up through the row of Equation (A.14)
 #: rather than being given an eighth row of its own.
-_TABLE_A1_ALIASES = {"J_LFC": "J_LF"}
+_TABLE_A1_ROW: Mapping[Symbol, RowSymbol] = MappingProxyType(
+    {
+        "G": "G",
+        "EDT": "EDT",
+        "C80": "C80",
+        "D50": "D50",
+        "Ts": "Ts",
+        "J_LF": "J_LF",
+        "J_LFC": "J_LF",
+        "L_J": "L_J",
+    }
+)
 
 
 def _band_positions(
@@ -1844,7 +1860,11 @@ def single_number_average(
     :raises ValueError: If the symbol is not one Table A.1 prints, if the two
         arrays disagree in length, or if the band axis does not carry every
         band the quantity averages.
+    :raises TypeError: if ``symbol`` is not a text.
     """
+    require_choice(
+        symbol, "symbol", ("G", "EDT", "C80", "D50", "Ts", "J_LF", "J_LFC", "L_J")
+    )
     quantity = _table_a1_row(symbol)
     readings = np.asarray(values, dtype=np.float64)
     centres = np.asarray(frequencies, dtype=np.float64)
@@ -1923,6 +1943,7 @@ class PerceptibleDifference(OwnsArrays):
         :raises ValueError: If the symbol is not one Table A.1 prints, if the
             table prints no just-noticeable difference for it, or if the two
             values do not have the same shape.
+        :raises TypeError: if ``symbol`` is not a text.
         """
         quantity = _table_a1_row(self.symbol)
         if quantity.just_noticeable_difference is None:
@@ -1999,7 +2020,11 @@ def assess_perceptible_difference(
     :raises ValueError: If the symbol is not one Table A.1 prints, if the
         table prints no just-noticeable difference for it, or if the two
         values do not have the same shape.
+    :raises TypeError: if ``symbol`` is not a text.
     """
+    require_choice(
+        symbol, "symbol", ("G", "EDT", "C80", "D50", "Ts", "J_LF", "J_LFC", "L_J")
+    )
     return PerceptibleDifference(
         symbol,
         np.asarray(first, dtype=np.float64),
@@ -2009,12 +2034,9 @@ def assess_perceptible_difference(
 
 def _table_a1_row(symbol: Symbol) -> AuditoriumQuantity:
     """One row of Table A.1, by either symbol the standard prints for it."""
-    key = _TABLE_A1_ALIASES.get(symbol, symbol)
-    if key not in TABLE_A1:
-        printed = ", ".join(sorted([*TABLE_A1, *_TABLE_A1_ALIASES]))
-        msg = f"ISO 3382-1:2009, Table A.1 prints {printed}; got {symbol!r}."
-        raise ValueError(msg)
-    return TABLE_A1[key]
+    return TABLE_A1[
+        _TABLE_A1_ROW[require_choice(symbol, "symbol", tuple(_TABLE_A1_ROW))]
+    ]
 
 
 @overload

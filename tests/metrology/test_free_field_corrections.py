@@ -17,6 +17,7 @@ from __future__ import annotations
 import dataclasses
 import math
 import types
+from typing import TYPE_CHECKING
 
 import matplotlib as mpl
 
@@ -31,7 +32,11 @@ from scipy.stats import t as student
 from phonometry import metrology
 from phonometry.metrology import free_field_corrections as ffc
 
+if TYPE_CHECKING:
+    from phonometry.metrology.free_field_corrections import TableI1Descriptor
+
 #: The exact one-third-octave frequencies from 63 Hz to 16 kHz.
+
 _THIRDS = metrology.exact_frequencies(63.0, 16000.0, fraction=3)
 
 #: Exact base-ten counterparts of the nominal frequencies the maxima name.
@@ -87,7 +92,9 @@ def test_table_i1_rows_are_frozen() -> None:
 
 
 @pytest.mark.parametrize("key", sorted(ref.IEC62585_TABLE_I2_STANDARD_DB))
-def test_table_i2_standard_uncertainties_round_to_the_page(key: str) -> None:
+def test_table_i2_standard_uncertainties_round_to_the_page(
+    key: TableI1Descriptor,
+) -> None:
     budget = _budget_i2()
     index = budget.descriptors.index(key)
     printed = ref.IEC62585_TABLE_I2_STANDARD_DB[key]

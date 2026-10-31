@@ -437,7 +437,7 @@ def _point(distance_ft: float) -> ProfilePoint:
 
 def test_flight_profile_refuses_an_unknown_operation() -> None:
     points = (_point(0.0), _point(1.0))
-    with pytest.raises(ValueError, match=r"FlightProfile: 'operation'"):
+    with pytest.raises(ValueError, match="'operation' must be one of"):
         FlightProfile(aircraft_id="JETW", operation="X", procedure_id="", points=points)
 
 

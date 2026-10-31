@@ -64,7 +64,7 @@ quantile of `fractile` and the spread is the upper one for `z >= 0`
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an age below 18, an unknown sex, a fractile outside (0, 1), or an unknown frequency. |
-| TypeError | if `age` or `fractile` is not a single number. |
+| TypeError | if `age` or `fractile` is not a single number, or `sex` is not a text. |
 
 ## AgeThresholdResult
 
@@ -157,6 +157,7 @@ standard prints two tables rather than one.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For an unknown earphone or frequency. |
+| TypeError | if `earphone` is not a text. |
 
 ## EARPHONES
 
@@ -207,6 +208,7 @@ is a decibel more in the coupler.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the audiogram does not match the frequencies, or for an unknown earphone or frequency. |
+| TypeError | if `earphone` is not a text. |
 
 ## reference_threshold
 

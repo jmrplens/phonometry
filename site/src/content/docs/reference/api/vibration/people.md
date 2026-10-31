@@ -215,7 +215,7 @@ under the rules of the other is not an assessment of either.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a negative severity, an unknown source or edition, an edition other than the guide values are of, or a verdict that needs $KB_\mathrm{FTr}$ without one given. |
-| TypeError | if `kb_fmax` or `kb_ftr` is not a single number, or `source` is not a text. |
+| TypeError | if `kb_fmax` or `kb_ftr` is not a single number, or `source` is not a text, or `edition` is not a text. |
 
 ## ASSESSMENT_PERIOD_S
 

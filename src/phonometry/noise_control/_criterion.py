@@ -36,7 +36,7 @@ CRITERION_FAMILIES: tuple[CriterionFamily, ...] = ("NC", "RC")
 
 
 def validate_target(
-    criterion: str, target: float | None
+    criterion: object, target: float | None
 ) -> tuple[CriterionFamily, float | None]:
     """Validate a criterion family and its target value.
 

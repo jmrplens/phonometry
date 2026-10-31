@@ -22,6 +22,7 @@ from typing import TYPE_CHECKING, Any, Literal
 import numpy as np
 
 from ..._internal.validation import (
+    require_choice,
     require_count,
     require_non_negative,
     require_positive,
@@ -778,8 +779,10 @@ def plot_impedance_tube_geometry(
         thickness that is not finite and positive, or an ``x1`` no greater
         than the spacing.
     :raises TypeError: if ``diameter_m``, ``sample_thickness_m``, ``spacing_m`` or
-        ``x1`` is not a single number.
+        ``x1`` is not a single number, or ``shape`` is not a text.
     """
+    if shape is not None:
+        require_choice(shape, "shape", ("circular", "rectangular", "square"))
     from ...materials.absorbers.impedance_tube import plane_wave_frequency_range
 
     _check_language(language)
@@ -899,8 +902,10 @@ def plot_transmission_tube_geometry(
     :raises ValueError: naming the first length or diameter that is not
         finite and positive, or an ``l2`` no greater than the thickness.
     :raises TypeError: if ``diameter_m``, ``l2`` or ``thickness_m`` is not a single
-        number.
+        number, or ``shape`` is not a text.
     """
+    if shape is not None:
+        require_choice(shape, "shape", ("circular", "rectangular", "square"))
     require_scalar(l2, "l2")
     require_scalar(thickness_m, "thickness_m")
     from ...materials.absorbers.four_microphone import (

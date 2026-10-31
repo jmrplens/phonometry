@@ -70,6 +70,7 @@ from numpy.typing import ArrayLike, NDArray
 
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
+    require_choice,
     require_equal_shapes,
     require_present,
     require_scalar,
@@ -345,8 +346,13 @@ def adrienne_window(
         negative, the flat duration is not positive, or an edge shape is
         unknown.
     :raises TypeError: if ``flat_duration_s``, ``fs``, ``leading_duration_s`` or
-        ``trailing_duration_s`` is not a single number.
+        ``trailing_duration_s`` is not a single number, or ``leading_edge`` or
+        ``trailing_edge`` is not a text.
     """
+    require_choice(leading_edge, "leading_edge", ("blackman-harris", "cosine-squared"))
+    require_choice(
+        trailing_edge, "trailing_edge", ("blackman-harris", "cosine-squared")
+    )
     require_scalar(flat_duration_s, "flat_duration_s")
     require_scalar(fs, "fs")
     require_scalar(leading_duration_s, "leading_duration_s")

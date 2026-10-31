@@ -110,22 +110,31 @@ __all__ = [
     "track_excitation_frequency",
 ]
 
+#: The geometry of a source in Figure 1 of DIN 4150-1.
+SourceGeometry = Literal["point", "line"]
+#: The character in time of a source in Figure 1: stationary or impulsive.
+SourceCharacter = Literal["harmonic", "impulsive"]
+#: The wave that carries the vibration in Figure 1.
+WaveType = Literal["surface", "body"]
+
 #: Figure 1 (printed page 6): the exponent :math:`n` of Formula (2) by the
 #: geometry of the source (``"point"`` or ``"line"``), its character in time
 #: (``"harmonic"``, stationary, or ``"impulsive"``) and the wave that
 #: carries it (``"surface"`` or ``"body"``). Each of point, impulsive and
 #: body adds 0,5 to the 0 of a harmonic line source on a surface wave.
-SOURCE_EXPONENTS: Mapping[tuple[str, str, str], float] = MappingProxyType(
-    {
-        ("line", "harmonic", "surface"): 0.0,
-        ("line", "harmonic", "body"): 0.5,
-        ("point", "harmonic", "surface"): 0.5,
-        ("line", "impulsive", "surface"): 0.5,
-        ("point", "harmonic", "body"): 1.0,
-        ("line", "impulsive", "body"): 1.0,
-        ("point", "impulsive", "surface"): 1.0,
-        ("point", "impulsive", "body"): 1.5,
-    }
+SOURCE_EXPONENTS: Mapping[tuple[SourceGeometry, SourceCharacter, WaveType], float] = (
+    MappingProxyType(
+        {
+            ("line", "harmonic", "surface"): 0.0,
+            ("line", "harmonic", "body"): 0.5,
+            ("point", "harmonic", "surface"): 0.5,
+            ("line", "impulsive", "surface"): 0.5,
+            ("point", "harmonic", "body"): 1.0,
+            ("line", "impulsive", "body"): 1.0,
+            ("point", "impulsive", "surface"): 1.0,
+            ("point", "impulsive", "body"): 1.5,
+        }
+    )
 )
 
 #: The far-field exponent of a train, a chain of point sources not excited
@@ -244,9 +253,9 @@ MACHINE_COUNT_CORRECTION: Mapping[int, tuple[float, ...]] = MappingProxyType({
     ),
 })  # fmt: skip
 
-_GEOMETRIES = ("point", "line")
-_CHARACTERS = ("harmonic", "impulsive")
-_WAVES = ("surface", "body")
+_GEOMETRIES: tuple[SourceGeometry, ...] = ("point", "line")
+_CHARACTERS: tuple[SourceCharacter, ...] = ("harmonic", "impulsive")
+_WAVES: tuple[WaveType, ...] = ("surface", "body")
 #: Storeys up to which a building on medium ground answers at about 15 Hz,
 #: and up to which at 8 to 12 Hz (Clause 4.3).
 _LOW_RISE_STOREYS = 2
@@ -269,9 +278,9 @@ _KJ_PER_KN_M = 1.0
 
 def geometric_exponent(
     *,
-    geometry: Literal["point", "line"],
-    character: Literal["harmonic", "impulsive"],
-    wave: Literal["surface", "body"],
+    geometry: SourceGeometry,
+    character: SourceCharacter,
+    wave: WaveType,
 ) -> float:
     """The exponent :math:`n` of Formula (2) for a source and a wave, Figure 1.
 

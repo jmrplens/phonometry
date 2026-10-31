@@ -78,6 +78,7 @@ from ..._internal.catalogue import (
     take,
 )
 from ..._internal.frozen import OwnsArrays
+from ..._internal.validation import require_choice
 from .porous import (
     ABSORBER_AIR,
     delany_bazley,
@@ -334,13 +335,11 @@ class PorousMaterial(CatalogueRow):
         :raises ValueError: for an unknown model name, or when the page does
             not print a parameter the model needs, in which case the message
             says what the page had there instead.
+        :raises TypeError: if ``model`` is not a text.
         """
-        if model not in {"johnson_champoux_allard", "delany_bazley", "miki"}:
-            msg = (
-                f"'model' must be one of 'johnson_champoux_allard', "
-                f"'delany_bazley' or 'miki'; got {model!r}."
-            )
-            raise ValueError(msg)
+        require_choice(
+            model, "model", ("johnson_champoux_allard", "delany_bazley", "miki")
+        )
         sigma = self.printed("flow_resistivity_pa_s_m2", wanted_by=model)
         if model == "delany_bazley":
             return delany_bazley(frequency, sigma, fluid=fluid)

@@ -47,6 +47,8 @@ from phonometry import hearing
 from ..registry import Outcome, count, record, register
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from phonometry.hearing.sound_field_audiometry import (
         LateralPosition,
         SoundFieldPosition,
@@ -73,9 +75,9 @@ def _cells(library: np.ndarray, printed: tuple[float, ...]) -> tuple[int, int]:
     return int(np.sum(same)), want.size
 
 
-def _table(
-    library: dict[float, np.ndarray] | dict[str, np.ndarray],
-    printed: dict[float, tuple[float, ...]] | dict[str, tuple[float, ...]],
+def _table[K](
+    library: Mapping[K, np.ndarray],
+    printed: Mapping[K, tuple[float, ...]],
     subject: str,
 ) -> Outcome:
     """A count over every cell of a printed table.
@@ -87,7 +89,7 @@ def _table(
     """
     matching = total = 0
     for key, column in printed.items():
-        got, n = _cells(library[key], column)  # type: ignore[index]
+        got, n = _cells(library[key], column)
         matching += got
         total += n
     return count(matching, total, subject=subject)
@@ -115,7 +117,7 @@ def _chk_table_2() -> Outcome:
 def _chk_table_3() -> Outcome:
     """72 printed cells and the three dashes of the HDA 200 below 63 Hz."""
     return _table(
-        dict(hearing.EARPHONE_ATTENUATION), ref.ISO8253_1_TABLE_3, "cells of Table 3"
+        hearing.EARPHONE_ATTENUATION, ref.ISO8253_1_TABLE_3, "cells of Table 3"
     )
 
 

@@ -904,8 +904,8 @@ def reciprocity_uncertainty_budget(
     :raises ValueError: for a key that is not in the field's Table 1, an
         additional component with the name of another, no component at all,
         or a value that is negative or not finite.
-    :raises TypeError: if ``field`` is not a text, or ``coverage_factor`` is not a
-        single number.
+    :raises TypeError: if ``field`` or a key of ``standard_uncertainties_db`` is
+        not a text, or ``coverage_factor`` is not a single number.
     """
     field = require_choice(field, "field", CALIBRATION_FIELDS)
     frequencies = _frequency_axis(frequencies)
@@ -913,7 +913,7 @@ def reciprocity_uncertainty_budget(
     given: Mapping[ReciprocityComponent, ArrayLike] = dict(
         standard_uncertainties_db.items()
     )
-    unknown = [key for key in given if key not in table]
+    unknown = [key for key in given if isinstance(key, str) and key not in table]
     if unknown:
         msg = (
             f"{unknown} are not components of Table 1 of {_STANDARDS[field]}; the "
@@ -921,6 +921,8 @@ def reciprocity_uncertainty_budget(
             "'additional_uncertainties_db'."
         )
         raise ValueError(msg)
+    for key in given:
+        require_choice(key, "standard_uncertainties_db", tuple(table))
     names: list[str] = []
     components: list[str] = []
     rows: list[NDArray[np.float64]] = []

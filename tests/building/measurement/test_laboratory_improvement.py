@@ -111,7 +111,9 @@ def test_table_e1_curves_are_the_printed_bands(element: BasicElement) -> None:
         ("lightweight_3", "lightweight_3"),
     ],
 )
-def test_table_4_curves_are_the_printed_bands(floor: str, column: str) -> None:
+def test_table_4_curves_are_the_printed_bands(
+    floor: ReferenceFloor, column: str
+) -> None:
     """ISO 717-2:2020 Table 4, all 16 bands of each floor as printed."""
     table = building.IMPACT_REFERENCE_FLOORS[floor]
     assert tuple(table) == tuple(_CORE)

@@ -13,12 +13,16 @@ every other cell to the printed decimal.
 from __future__ import annotations
 
 import math
+from typing import TYPE_CHECKING
 
 import numpy as np
 import pytest
 import reference_data as ref
 
 from phonometry import hearing
+
+if TYPE_CHECKING:
+    from phonometry.hearing._real_ear_attenuation import FrequencyRange
 
 _A3 = np.asarray(ref.ISO4869_1_TABLE_A3, dtype=float)
 
@@ -314,7 +318,7 @@ def test_minimum_difference_from_the_unrounded_budget() -> None:
     Only the earplug columns move; the earmuff ones round to the printed
     2,3 dB and 6,9 dB either way.
     """
-    middle = "250 Hz up to 4 kHz"
+    middle: FrequencyRange = "250 Hz up to 4 kHz"
     within = hearing.REAT_WITHIN_LABORATORY_UNCERTAINTY
     between = hearing.REAT_BETWEEN_LABORATORY_UNCERTAINTY
     plug_within = hearing.min_significant_difference(

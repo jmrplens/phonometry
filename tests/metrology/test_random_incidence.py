@@ -879,7 +879,7 @@ def test_the_weights_view_draws_table_a1_in_per_cent() -> None:
 
 def test_an_unknown_view_is_refused() -> None:
     result = _two_plane_result()
-    with pytest.raises(ValueError, match="Unknown view"):
+    with pytest.raises(ValueError, match="'view' must be one of"):
         result.plot(view="sphere")
 
 
@@ -917,7 +917,7 @@ def test_the_sensitivity_views_draw_the_levels_and_the_correction() -> None:
     np.testing.assert_allclose(ax.lines[0].get_ydata(), [-0.05, -0.85, -2.45])
     assert ax.get_ylabel() == "Corrección [dB]"
     plt.close("all")
-    with pytest.raises(ValueError, match="Unknown view"):
+    with pytest.raises(ValueError, match="'view' must be one of"):
         result.plot(view="polar")
 
 

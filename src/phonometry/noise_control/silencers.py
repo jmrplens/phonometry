@@ -110,7 +110,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import KW_ONLY, dataclass
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Final, Literal
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
@@ -135,6 +135,15 @@ if TYPE_CHECKING:
     from .._i18n import Language
     from .._internal.types import ReportEngine
     from .._report.metadata import ReportMetadata
+
+#: The device a reactive silencer result describes, as its report names it.
+SilencerKind = Literal[
+    "expansion chamber",
+    "Helmholtz resonator",
+    "quarter-wave resonator",
+    "extended-tube chamber",
+    "element chain",
+]
 
 __all__ = [
     "ReactiveSilencerResult",
@@ -582,7 +591,7 @@ class ReactiveSilencerResult(OwnsArrays):
     transmission_loss: np.ndarray
     insertion_loss: np.ndarray | None
     transfer_matrix: np.ndarray
-    kind: str
+    kind: SilencerKind
     _: KW_ONLY
     resonances: np.ndarray | None
     geometry: dict[SilencerDimension, float] | None
@@ -769,7 +778,7 @@ def _result(
     rho: float,
     source_impedance: ArrayLike | None,
     radiation_impedance: ArrayLike | None,
-    kind: str,
+    kind: SilencerKind,
     resonances: NDArray[np.float64] | None = None,
     geometry: dict[SilencerDimension, float] | None = None,
     areas: Sequence[float] | None = None,
@@ -1122,7 +1131,7 @@ def extended_tube_chamber(
 
 #: The ``kind`` of a result assembled element by element rather than from one
 #: of the named devices; shared with the geometry renderer.
-_KIND_CHAIN = "element chain"
+_KIND_CHAIN: Final = "element chain"
 
 
 @dataclass(frozen=True)

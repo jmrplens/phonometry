@@ -34,6 +34,7 @@ import numpy as np
 from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
+    require_choice,
     require_positive,
     require_positive_array,
     require_present,
@@ -230,6 +231,7 @@ def metadiffuser_reflection(
         ``frequency`` holds a text or a value that is not a real number, or
         ``resonator_geometry`` is not a text.
     """
+    require_choice(resonator_geometry, "resonator_geometry", ("square", "slit"))
     f = require_positive_array(frequency, "frequency")
     cells = _check_panel(wells, depth_m, period_m)
     rows = np.empty((len(cells), f.size), dtype=np.complex128)
@@ -304,6 +306,7 @@ def metadiffuser_polar_response(
     :raises TypeError: if ``frequency`` is not a single number, or
         ``resonator_geometry`` is not a text.
     """
+    require_choice(resonator_geometry, "resonator_geometry", ("square", "slit"))
     f = require_positive(frequency, "frequency")
     result = metadiffuser_reflection(
         np.asarray([f]),
@@ -371,6 +374,7 @@ def metadiffuser_diffusion_spectrum(
     :raises TypeError: if ``depth_m`` or ``period_m`` is not a single number, or
         ``resonator_geometry`` is not a text.
     """
+    require_choice(resonator_geometry, "resonator_geometry", ("square", "slit"))
     freqs = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
     if freqs.ndim != 1 or freqs.size == 0:
         msg = "'frequencies' must be a non-empty 1-D sequence."

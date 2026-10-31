@@ -25,18 +25,31 @@ if TYPE_CHECKING:
 #: Supported rendering languages. English is the default everywhere.
 Language = Literal["en", "es"]
 
-_VALID_LANGUAGES = ("en", "es")
+_VALID_LANGUAGES: tuple[Language, ...] = ("en", "es")
 
 
-def check_language(language: str) -> Language:
-    """Return ``language`` if supported, else raise a clear :class:`ValueError`."""
+def check_language(language: object) -> Language:
+    """Return ``language`` if supported.
+
+    A language is one of the names :data:`Language` lists, written as a text:
+    a value of another type (``language=None``, ``language=1``) is the wrong
+    type, and a text that names no supported language the wrong value.
+
+    :param language: The requested language.
+    :return: The language, typed as one of the supported ones.
+    :raises TypeError: for a value that is not a text.
+    :raises ValueError: for a text that names no supported language.
+    """
+    if not isinstance(language, str):
+        msg = f"'language' must be one of {_VALID_LANGUAGES}, a text; got {language!r}."
+        raise TypeError(msg)
     if language not in _VALID_LANGUAGES:
         msg = (
             f"Unknown language {language!r}; supported languages are "
             f"{_VALID_LANGUAGES}."
         )
         raise ValueError(msg)
-    return language  # type: ignore[return-value]
+    return language
 
 
 def format_number(

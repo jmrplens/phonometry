@@ -349,7 +349,7 @@ components (an erratum; see `docs/ERRATA.md`).
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a key that is not a component of the field's table, an additional component without a name or with the name of another component, no component at all, or a value that is negative or not finite. |
-| TypeError | if `field` is not a text, or `coverage_factor` or `frequency_hz` is not a single number. |
+| TypeError | if `field` or a key of `standard_uncertainties_db` is not a text, or `coverage_factor` or `frequency_hz` is not a single number. |
 
 ## ComparisonCalibration
 

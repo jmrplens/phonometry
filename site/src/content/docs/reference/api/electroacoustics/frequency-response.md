@@ -205,4 +205,4 @@ returned alongside as a data-quality indicator.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs or parameters are invalid. |
-| TypeError | if `nperseg` is a flag, a text or an array where a count goes. |
+| TypeError | if `nperseg` is a flag, a text or an array where a count goes, or `estimator` is not a text. |

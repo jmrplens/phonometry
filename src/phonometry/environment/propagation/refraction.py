@@ -57,6 +57,7 @@ import numpy as np
 from ..._internal.frozen import OwnsArrays, handed_over
 from ..._internal.rays import march_rays
 from ..._internal.validation import (
+    require_choice,
     require_count,
     require_equal_shapes,
     require_positive,
@@ -752,8 +753,10 @@ def atmospheric_parabolic_equation(
     :return: An :class:`AtmosphericPEResult`.
     :raises ValueError: If the inputs are invalid or the impedance is unspecified.
     :raises TypeError: if ``frequency_hz``, ``height_step_m``, ``max_height_m``,
-        ``max_range``, ``range_step`` or ``source_height_m`` is not a single number.
+        ``max_range``, ``range_step`` or ``source_height_m`` is not a single number, or
+        ``model`` is not a text.
     """
+    require_choice(model, "model", ("delany_bazley", "miki"))
     f = require_positive(frequency_hz, "frequency_hz")
     z_prof, c_prof = _clean_profile(profile)
     require_scalar(source_height_m, "source_height_m")

@@ -13,6 +13,11 @@ publishes those twenty-one and four names that belong to none of them:
 > signature, parameter table and cross-link, lives on the site:
 > [phonometry API reference](https://docs.jmrp.io/phonometry/reference/api/).
 
+> **Note.** A choice is checked as written: a text it does not offer is a
+> `ValueError` and a value that is not a text a `TypeError`. That holds for
+> `language` and `engine` everywhere they are taken, and is said here once
+> rather than on every function.
+
 ## Namespaces
 
 The library is organized into twenty-one subpackages, and importing the

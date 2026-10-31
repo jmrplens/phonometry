@@ -327,7 +327,7 @@ def test_invalid_inputs_raise() -> None:
         match=r"'threshold' must be a 1-D vector of 18 one-third-octave band values",
     ):
         sii.speech_intelligibility_index("normal", threshold=short_threshold)
-    with pytest.raises(ValueError, match=r"Unknown vocal_effort"):
+    with pytest.raises(ValueError, match="'vocal_effort' must be one of"):
         sii.standard_speech_spectrum("whisper")
 
 
@@ -504,7 +504,7 @@ def test_standard_speech_spectra_single_effort() -> None:
 
 
 def test_standard_speech_spectra_rejects_unknown_and_empty() -> None:
-    with pytest.raises(ValueError, match=r"Unknown vocal_effort"):
+    with pytest.raises(ValueError, match="'vocal_effort' must be one of"):
         sii.standard_speech_spectra("whisper")
     with pytest.raises(ValueError, match=r"'vocal_efforts' cannot be empty"):
         sii.standard_speech_spectra([])
@@ -913,9 +913,9 @@ def test_default_method_is_unchanged_one_third_octave() -> None:
 
 
 def test_speech_intelligibility_index_rejects_unknown_method() -> None:
-    with pytest.raises(ValueError, match="Unknown SII method"):
+    with pytest.raises(ValueError, match="'method' must be one of"):
         sii.speech_intelligibility_index("normal", method="bark")
-    with pytest.raises(ValueError, match="Unknown SII method"):
+    with pytest.raises(ValueError, match="'method' must be one of"):
         sii.sii_procedure("bark")
 
 

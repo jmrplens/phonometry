@@ -100,6 +100,7 @@ components.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an age below 18, an unknown sex, a non-positive duration, a fractile outside (0, 1), or an unknown frequency. |
+| TypeError | if `age` or `fractile` is not a single number, or `sex` is not a text. |
 
 The noise component inherits the validated-domain checks of [`nipts`](/phonometry/reference/api/hearing/noise-induced-hearing-loss/#nipts),
 so exposure conditions outside the standard's stated ranges raise a

@@ -51,6 +51,7 @@ import numpy as np
 from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
+    require_choice,
     require_count,
     require_non_negative,
     require_positive_array,
@@ -455,6 +456,11 @@ def _layer_terms(
     return terms
 
 
+def _termination_name(termination: object) -> TerminationName:
+    """The named termination, checked as written."""
+    return require_choice(termination, "termination", ("rigid", "free"))
+
+
 def _termination_admittance(
     termination: TerminationName | ArrayLike,
     f: Real,
@@ -471,7 +477,7 @@ def _termination_admittance(
     :math:`[0, \pi/2)`, and the equivalent-fluid path must stay
     bit-identical.
     """
-    if isinstance(termination, str) and termination == "free":
+    if isinstance(termination, str) and _termination_name(termination) == "free":
         return np.full(f.shape, cos_t / rc, dtype=np.complex128)
     zl_arr = _termination_impedance(termination, f, cos_t=cos_t, rc=rc)
     if zl_arr is None:
@@ -494,12 +500,9 @@ def _termination_impedance(
     the hard wall the one case that has no finite impedance.
     """
     if isinstance(termination, str):
-        if termination == "rigid":
+        if _termination_name(termination) == "rigid":
             return None
-        if termination == "free":
-            return np.full(f.shape, rc / cos_t, dtype=np.complex128)
-        msg = "'termination' must be 'rigid', 'free' or a complex impedance."
-        raise ValueError(msg)
+        return np.full(f.shape, rc / cos_t, dtype=np.complex128)
     zl_arr = np.asarray(termination, dtype=np.complex128)
     if zl_arr.ndim > 0 and zl_arr.shape != f.shape:
         msg = (
@@ -755,7 +758,7 @@ def layered_absorber(
         relative_humidity_percent=70.0)``, to work in the air of the room.
     :return: A :class:`LayeredAbsorberResult`.
     :raises TypeError: if ``angle_rad`` is not a single number, or ``frequency`` holds a
-        text or a value that is not a real number.
+        text or a value that is not a real number, or ``termination`` is not a text.
     """
     f = require_positive_array(frequency, "frequency")
     if not layers:
@@ -769,6 +772,8 @@ def layered_absorber(
     if not 0.0 <= theta < np.pi / 2.0 - 1e-6:
         msg = "'angle_rad' must satisfy 0 <= angle < pi/2 - 1e-6."
         raise ValueError(msg)
+    if isinstance(termination, str):
+        _termination_name(termination)
     c0 = fluid.speed_of_sound
     rho0 = fluid.density
 
@@ -870,9 +875,12 @@ def diffuse_field_absorption(
     :return: A :class:`DiffuseFieldAbsorptionResult`.
     :raises TypeError: if ``angle_limit_rad`` is not a single number,
         ``n_quadrature_points`` is a flag, a text or an array where a count goes, or
-        ``frequency`` holds a text or a value that is not a real number.
+        ``frequency`` holds a text or a value that is not a real number, or
+        ``termination`` is not a text.
     """
     f = require_positive_array(frequency, "frequency")
+    if isinstance(termination, str):
+        _termination_name(termination)
     require_scalar(angle_limit_rad, "angle_limit_rad")
     lim = float(angle_limit_rad)
     if not 0.0 < lim <= np.pi / 2.0:

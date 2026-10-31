@@ -71,8 +71,10 @@ from .people import (
     _PERIODS,
     ASSESSMENT_TAKT_COUNT,
     GUIDE_VALUES_2023,
+    Alignment,
     Area,
     GuideValues,
+    TimeOfDay,
     _keeps_to,
 )
 from .vibration_meter import TAKT_SUPPRESSION_THRESHOLD
@@ -81,9 +83,6 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
     from collections.abc import Mapping
 
     from numpy.typing import ArrayLike, NDArray
-
-TimeOfDay = Literal["day", "night"]
-Alignment = Literal["surface", "underground"]
 
 __all__ = [
     "RAILWAY_CHANGE_TOLERANCE_PERCENT",
@@ -125,14 +124,16 @@ TRAIN_KINDS: tuple[TrainKind, ...] = (
 #: ``"underground"``. E DIN 45672-3:2023-02 Table E.1 prints the same ten
 #: values. A people mover or any other very short vehicle with a short passage
 #: takes the tram row.
-TRAIN_WEIGHTING_FACTORS: Mapping[str, Mapping[str, float]] = MappingProxyType(
-    {
-        "tram_metro": MappingProxyType({"surface": 0.7, "underground": 1.0}),
-        "s_bahn": MappingProxyType({"surface": 0.8, "underground": 1.0}),
-        "passenger": MappingProxyType({"surface": 0.9, "underground": 1.0}),
-        "freight": MappingProxyType({"surface": 1.0, "underground": 1.0}),
-        "freight_long": MappingProxyType({"surface": 1.3, "underground": 1.3}),
-    }
+TRAIN_WEIGHTING_FACTORS: Mapping[TrainKind, Mapping[Alignment, float]] = (
+    MappingProxyType(
+        {
+            "tram_metro": MappingProxyType({"surface": 0.7, "underground": 1.0}),
+            "s_bahn": MappingProxyType({"surface": 0.8, "underground": 1.0}),
+            "passenger": MappingProxyType({"surface": 0.9, "underground": 1.0}),
+            "freight": MappingProxyType({"surface": 1.0, "underground": 1.0}),
+            "freight_long": MappingProxyType({"surface": 1.3, "underground": 1.3}),
+        }
+    )
 )
 
 #: The upper guide value :math:`A_\mathrm{o}` a line to be built new is held to at
@@ -140,7 +141,7 @@ TRAIN_WEIGHTING_FACTORS: Mapping[str, Mapping[str, float]] = MappingProxyType(
 #: :math:`A_\mathrm{o}` of Table 1 in an industrial or commercial area and 0,3 in a
 #: mixed, residential or sensitive one. The same values bound the planned
 #: case of an altered line (6.5.3.6 b)).
-RAILWAY_NEW_LINE_NIGHT_A_O: Mapping[str, float] = MappingProxyType(
+RAILWAY_NEW_LINE_NIGHT_A_O: Mapping[Alignment, float] = MappingProxyType(
     {"surface": 0.6, "underground": 0.3}
 )
 
@@ -149,7 +150,7 @@ RAILWAY_NEW_LINE_NIGHT_A_O: Mapping[str, float] = MappingProxyType(
 #: (6.5.3.6): 25 %, below which a laboratory study found no one notices.
 RAILWAY_CHANGE_TOLERANCE_PERCENT: float = 25.0
 
-_ALIGNMENTS = ("surface", "underground")
+_ALIGNMENTS: tuple[Alignment, ...] = ("surface", "underground")
 #: The areas of Table 1 rows 1 and 2, which keep their own night A_o
 #: underground (6.5.3.5).
 _UNDERGROUND_TABLE_AREAS = ("industrial", "commercial")

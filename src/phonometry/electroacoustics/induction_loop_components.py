@@ -460,7 +460,9 @@ class LoopField(OwnsArrays):
         :param component: ``"x"``, ``"y"``, ``"z"`` or ``"magnitude"``.
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to the level curve's ``Axes.plot``.
+        :raises TypeError: if ``component`` is not a text.
         """
+        require_choice(component, "component", ("x", "y", "z", "magnitude"))
         from .._i18n import check_language
         from .._plot.induction_loop import plot_loop_field
 

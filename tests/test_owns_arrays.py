@@ -544,6 +544,84 @@ def test_a_refusal_names_a_bytearray_as_the_caller_gave_it(
     assert str(refused.value) == refusal
 
 
+@dataclasses.dataclass(frozen=True)
+class _QuotesWhole(OwnsArrays):
+    given: object
+
+    def __post_init__(self) -> None:
+        # Refuses what it holds whole, quoting it as a check of the library
+        # quotes a value of the wrong type.
+        raise TypeError(frozen.given_repr(self.given))
+
+
+class _Two(NamedTuple):
+    first: object
+    second: object
+
+
+def _objects(*members: object) -> np.ndarray:
+    held = np.empty(len(members), dtype=object)
+    for index, member in enumerate(members):
+        held[index] = member
+    return held
+
+
+@pytest.mark.parametrize(
+    ("given", "quoted"),
+    [
+        ([bytearray(b"ab"), 1.0], "[bytearray(b'ab'), 1.0]"),
+        ((bytearray(b"ab"),), "(bytearray(b'ab'),)"),
+        ({"k": bytearray(b"ab")}, "{'k': bytearray(b'ab')}"),
+        (
+            MappingProxyType({"k": bytearray(b"ab")}),
+            "mappingproxy({'k': bytearray(b'ab')})",
+        ),
+        (
+            OrderedDict(k=bytearray(b"ab")),
+            "{'k': bytearray(b'ab')}",
+        ),
+        (_Two(bytearray(b"ab"), 1.0), "_Two(first=bytearray(b'ab'), second=1.0)"),
+        (
+            _objects(bytearray(b"ab"), 1.0),
+            "array([bytearray(b'ab'), 1.0], dtype=object)",
+        ),
+        ({"k": (bytearray(b"ab"), 1.0)}, "{'k': (bytearray(b'ab'), 1.0)}"),
+        (
+            {"k": b"ab", "j": bytearray(b"cd")},
+            "{'k': b'ab', 'j': bytearray(b'cd')}",
+        ),
+        ({"k": 1.0}, "{'k': 1.0}"),
+    ],
+    ids=[
+        "list",
+        "one-member-tuple",
+        "mapping",
+        "read-only-mapping",
+        "mapping-of-another-class",
+        "named-tuple",
+        "array-of-objects",
+        "nested",
+        "bytes-beside-a-bytearray",
+        "no-bytearray",
+    ],
+)
+def test_a_refusal_quotes_a_container_with_the_bytearray_it_holds(
+    given: object, quoted: str
+) -> None:
+    """A container quoted whole shows the caller's ``bytearray``, wherever the record holds one.
+
+    The record holds a ``bytearray`` as the ``bytes`` it spells inside a
+    mapping, a read-only mapping, a named tuple and an array of objects as
+    inside a tuple or a list, and a refusal that quoted one of them whole
+    quoted the ``bytes``: ``{'k': b'ab'}`` for the caller's
+    ``{'k': bytearray(b'ab')}``. A mapping of another class is held, and
+    quoted, as the plain ``dict`` the record keeps.
+    """
+    with pytest.raises(TypeError) as refused:
+        _QuotesWhole(given)
+    assert str(refused.value) == quoted
+
+
 def test_a_record_built_by_the_checks_names_the_bytearray_too() -> None:
     """A record a hook builds from what it holds names the caller's ``bytearray`` as well."""
     with pytest.raises(TypeError, match=r"^bytearray bytearray\(b'ab'\)$"):

@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import dataclasses
 import math
+from types import MappingProxyType
 
 import matplotlib as mpl
 
@@ -1625,6 +1626,19 @@ def test_a_ground_refuses_text_among_its_elevations_when_built() -> None:
     # the bytes it spells, a text, and refuses it naming what the caller gave.
     with pytest.raises(TypeError, match="'terrain' must be .*, not bytearray"):
         RotorcraftGround(terrain=bytearray(b"abc"))  # type: ignore[arg-type]
+    # A mapping in place of one elevation is quoted with the bytearray it
+    # holds, where the refusal quoted the bytes the record holds for it.
+    with pytest.raises(
+        TypeError,
+        match=r"^'ground_elevation' must be a number, got \{'a': bytearray\(b'1'\)\}\.$",
+    ):
+        RotorcraftGround(ground_elevation={"a": bytearray(b"1")})  # type: ignore[arg-type]
+    proxy = MappingProxyType({"a": bytearray(b"1")})
+    with pytest.raises(
+        TypeError,
+        match=r"got mappingproxy\(\{'a': bytearray\(b'1'\)\}\)\.$",
+    ):
+        RotorcraftGround(ground_elevation=proxy)  # type: ignore[arg-type]
 
 
 def test_a_ground_holds_the_flow_resistivity_it_was_given() -> None:

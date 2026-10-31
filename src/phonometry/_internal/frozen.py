@@ -360,20 +360,56 @@ def given_repr(value: object) -> str:
     :func:`given_type` for a quotation: the ``bytes`` a record holds for a
     caller's ``bytearray`` while its checks run is quoted as the
     ``bytearray`` the caller wrote (``bytearray(b'1k')``), and so is one
-    among the members of a tuple or a list (``(bytearray(b'1k'), 400.0)``);
-    anything else is quoted as ``repr`` quotes it.
+    held anywhere :func:`_owned` holds one, among the members of a tuple, a
+    list or a named tuple (``(bytearray(b'1k'), 400.0)``), the values of a
+    mapping or a read-only one (``{'k': bytearray(b'1k')}``) and the members
+    of an array of objects, at any depth; anything else is quoted as
+    ``repr`` quotes it.
 
     :param value: A value a check refuses.
     :return: Its ``repr`` as the caller gave it.
     """
+    if not _SPELT.get():
+        return repr(value)
+    return repr(_as_given(value))
+
+
+def _as_given(value: object) -> object:
+    """*value* with each ``bytes`` held for a caller's ``bytearray`` back as one.
+
+    Only for :func:`given_repr` to quote: a container :func:`_owned`
+    rebuilds around what it holds (a tuple, a named tuple, a list, a
+    mapping, a read-only mapping, an array of objects) is rebuilt the same
+    way around a new ``bytearray`` of each such ``bytes``, so that ``repr``
+    quotes what the caller gave. A container that holds none comes back as
+    it is, and so does anything else.
+    """
     if _held_for_a_bytearray(value):
-        return f"bytearray({value!r})"
-    if _SPELT.get() and type(value) in {tuple, list}:
-        members = [given_repr(member) for member in cast("Iterable[object]", value)]
-        if type(value) is list:
-            return f"[{', '.join(members)}]"
-        return f"({members[0]},)" if len(members) == 1 else f"({', '.join(members)})"
-    return repr(value)
+        return bytearray(cast("bytes", value))
+    if isinstance(value, tuple | list):
+        members = [_as_given(member) for member in value]
+        if all(new is old for new, old in zip(members, value, strict=True)):
+            return value
+        if isinstance(value, list):
+            return members
+        make = getattr(type(value), "_make", None)
+        return make(members) if make is not None else tuple(members)
+    if isinstance(value, Mapping):
+        pairs = {key: _as_given(item) for key, item in value.items()}
+        if all(pairs[key] is item for key, item in value.items()):
+            return value
+        return MappingProxyType(pairs) if isinstance(value, MappingProxyType) else pairs
+    if isinstance(value, np.ndarray) and value.dtype == object:
+        members = [_as_given(member) for member in value.flat]
+        if all(new is old for new, old in zip(members, value.flat, strict=True)):
+            return value
+        held = np.empty(value.shape, dtype=object)
+        # One element at a time, as _owned_objects does: an array assigned
+        # to a slice would be spread over it instead of held whole.
+        for index, member in zip(np.ndindex(value.shape), members, strict=True):
+            held[index] = member
+        return held
+    return value
 
 
 def _owned_array(value: np.ndarray, *, always: bool) -> np.ndarray:

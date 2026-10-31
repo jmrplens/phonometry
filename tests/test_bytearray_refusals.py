@@ -13,8 +13,10 @@ know the ``bytes`` held for a caller's ``bytearray`` while the checks run.
 Every record the factories of ``tests/result_factories.py`` build through the
 public API, and every record one of them holds (a band set, a run, a
 boundary), is built again here with a ``bytearray`` in each of its fields,
-whole and as the first member of a tuple or a list, and every refusal the
-library raises names no ``bytes`` and quotes none. :data:`OTHERS` builds the
+whole, as the first member of a tuple or a list, and inside a mapping, a
+read-only mapping, a named tuple and an array of objects given in the
+field's place, and every refusal the library raises names no ``bytes`` and
+quotes none. :data:`OTHERS` builds the
 records with a refusal of their own that no factory reaches. A field whose value goes
 straight to Python or NumPy is refused in their words
 (``could not convert string to float: b'ab'``): that refusal is not raised
@@ -30,8 +32,10 @@ import pathlib
 import re
 import warnings
 from collections.abc import Mapping
-from typing import TYPE_CHECKING
+from types import MappingProxyType
+from typing import TYPE_CHECKING, NamedTuple
 
+import numpy as np
 import pytest
 import result_factories
 
@@ -65,14 +69,37 @@ def _factories() -> list[tuple[str, Callable[[], object]]]:
     return found
 
 
+class _Held(NamedTuple):
+    first: object
+    second: object
+
+
+def _held_in_objects() -> np.ndarray:
+    """An array of objects whose first member is a ``bytearray``."""
+    held = np.empty(2, dtype=object)
+    held[0] = bytearray(b"ab")
+    held[1] = 1.0
+    return held
+
+
 def _probes(value: object) -> Iterator[tuple[str, object]]:
-    """A ``bytearray`` in place of *value*, whole and as its first member."""
+    """A ``bytearray`` in place of *value*: whole, as its first member, and in a container.
+
+    A refusal that quotes a container the field was given quotes its
+    members, and a record holds the ``bytearray`` among them as the
+    ``bytes`` it spells, in a mapping, a read-only mapping, a named tuple
+    and an array of objects as in a tuple or a list.
+    """
     yield "whole", bytearray(b"ab")
     yield "one byte", bytearray(b"1")
     if type(value) in {tuple, list} and value:
         members = list(value)  # type: ignore[call-overload]
         members[0] = bytearray(b"ab")
         yield "first member", type(value)(members)
+    yield "in a mapping", {"k": bytearray(b"ab")}
+    yield "in a read-only mapping", MappingProxyType({"k": bytearray(b"ab")})
+    yield "in a named tuple", _Held(bytearray(b"ab"), 1.0)
+    yield "in an array of objects", _held_in_objects()
 
 
 def _raised_by_the_library(error: BaseException) -> bool:

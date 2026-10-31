@@ -63,7 +63,7 @@ miso_coherence(
     fs: float | None = None,
     *,
     order: Sequence[int | np.integer[Any]] | NDArray[np.integer[Any]] | None = None,
-    window: str = 'hann',
+    window: str | tuple[ArrayLike, ...] = 'hann',
     nperseg: int | np.integer[Any] | None = None,
     overlap: float = 0.5,
     scaling: Literal['density', 'spectrum'] = 'density',
@@ -101,7 +101,7 @@ ordering the inputs by descending ordinary coherence with the output.
 | `output` | The output record, 1-D, same length as the inputs. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples, so the output autospectrum and the coherent output spectra come out in Pa²/Hz, or Pa² for `scaling='spectrum'`. Every coherence is a ratio and does not move. |
 | `fs` | Sample rate, in Hz. Required when both records are bare arrays; either may be a [`Signal`](/phonometry/reference/api/io/io/#signal) and supply it, and two Signals recorded at different rates are refused rather than arbitrated. |
 | `order` | Conditioning order as input indices (default `0..q-1`). |
-| `window` | Segment taper (default Hann). |
+| `window` | Segment taper, a scipy window name or a tuple of a name and its parameters, such as `("kaiser", 8.6)` (default Hann). |
 | `nperseg` | Welch segment length; `None` picks a default. |
 | `overlap` | Segment overlap fraction in [0, 1) (default 0.5). |
 | `scaling` | `'density'` (units²/Hz) or `'spectrum'` (units²). |
@@ -133,7 +133,7 @@ MISOCoherenceResult(
     n_segments: int,
     n_averages: float,
     resolution_bandwidth: float,
-    window: str,
+    window: str | tuple[ArrayLike, ...],
     nperseg: int,
     overlap: float,
     scaling: Literal['density', 'spectrum'],
@@ -166,7 +166,7 @@ conditioning that produced the partial coherences is recorded in
 | `n_segments` | Raw number of (possibly overlapped) segments averaged. |
 | `n_averages` | Effective number of independent averages $n_\mathrm{d}$. |
 | `resolution_bandwidth` | Effective noise bandwidth $B_\mathrm{e}$, in Hz. |
-| `window` | Taper name. |
+| `window` | The taper, a window name or a tuple of a name and its parameters, as given (a list parameter as a tuple). |
 | `nperseg` | Segment length, in samples. |
 | `overlap` | Segment overlap fraction. |
 | `scaling` | `'density'` or `'spectrum'`. |

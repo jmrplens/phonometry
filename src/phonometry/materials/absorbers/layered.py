@@ -74,7 +74,7 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike
 
     from ..._i18n import Language
-    from ..._internal.types import Real
+    from ..._internal.types import NumericArrayLike, Real
     from ...fluids import Fluid
 
 #: Discriminator tag of the term tuples built by :func:`_layer_terms`: a
@@ -462,7 +462,7 @@ def _termination_name(termination: object) -> TerminationName:
 
 
 def _termination_admittance(
-    termination: TerminationName | ArrayLike,
+    termination: TerminationName | NumericArrayLike,
     f: Real,
     *,
     cos_t: float,
@@ -486,7 +486,7 @@ def _termination_admittance(
 
 
 def _termination_impedance(
-    termination: TerminationName | ArrayLike,
+    termination: TerminationName | NumericArrayLike,
     f: Real,
     *,
     cos_t: float,
@@ -716,7 +716,7 @@ def layered_absorber(
     layers: Sequence[Layer],
     *,
     angle_rad: float = 0.0,
-    termination: TerminationName | ArrayLike = "rigid",
+    termination: TerminationName | NumericArrayLike = "rigid",
     fluid: Fluid = ABSORBER_AIR,
 ) -> LayeredAbsorberResult:
     r"""Transfer-matrix prediction of a layered absorber at one angle.
@@ -844,7 +844,7 @@ def diffuse_field_absorption(
     *,
     angle_limit_rad: float = np.pi / 2.0,
     n_quadrature_points: int | np.integer[Any] = 64,
-    termination: TerminationName | ArrayLike = "rigid",
+    termination: TerminationName | NumericArrayLike = "rigid",
     fluid: Fluid = ABSORBER_AIR,
 ) -> DiffuseFieldAbsorptionResult:
     r"""Random-incidence absorption by the Paris integral (Mechel Sect. D.5).

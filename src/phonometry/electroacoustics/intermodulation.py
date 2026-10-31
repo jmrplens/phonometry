@@ -47,6 +47,7 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
+    from .._internal.types import WindowSpec
     from ..io._signal import Signal
 
 __all__ = [
@@ -180,7 +181,7 @@ def modulation_distortion(
     *,
     f_low: float,
     f_high: float,
-    window: str = "hann",
+    window: WindowSpec = "hann",
 ) -> ModulationDistortionResult:
     r"""Modulation distortion of the nth order (IEC 60268-3 14.12.7).
 
@@ -213,7 +214,8 @@ def modulation_distortion(
         that disagrees with it raises instead of silently winning.
     :param f_low: Low modulating tone ``f1``, in Hz (e.g. 60 Hz).
     :param f_high: High carrier tone ``f2``, in Hz (e.g. 7 kHz).
-    :param window: FFT window (default ``'hann'``).
+    :param window: FFT window, a scipy window name or a tuple of a name and its
+        parameters (default ``'hann'``).
     :return: A :class:`ModulationDistortionResult` with ``d2``, ``d3`` and
         the ``smpte`` combined RMS.
     :raises ValueError: If the inputs are invalid.
@@ -271,7 +273,7 @@ def difference_frequency_distortion(
     f1: float,
     f2: float,
     order: int = 2,
-    window: str = "hann",
+    window: WindowSpec = "hann",
 ) -> float:
     r"""Difference-frequency distortion of the nth order (IEC 60268-3
     14.12.8).
@@ -302,7 +304,8 @@ def difference_frequency_distortion(
     :param f1: Lower tone, in Hz.
     :param f2: Upper tone, in Hz.
     :param order: Product order (2 or 3).
-    :param window: FFT window (default ``'hann'``).
+    :param window: FFT window, a scipy window name or a tuple of a name and its
+        parameters (default ``'hann'``).
     :return: nth-order difference-frequency distortion, as a ratio.
     :raises ValueError: If ``order`` is not 2 or 3 or the inputs are invalid.
     """
@@ -340,7 +343,7 @@ def total_difference_frequency_distortion(
     f1: float = 8000.0,
     f2: float = 11950.0,
     *,
-    window: str = "hann",
+    window: WindowSpec = "hann",
 ) -> float:
     r"""Total difference-frequency distortion (IEC 60268-3 14.12.10).
 
@@ -371,7 +374,8 @@ def total_difference_frequency_distortion(
         that disagrees with it raises instead of silently winning.
     :param f1: Lower tone, in Hz (default 8 kHz, per 14.12.10.2 b).
     :param f2: Upper tone, in Hz (default 11.95 kHz, per 14.12.10.2 b).
-    :param window: FFT window (default ``'hann'``).
+    :param window: FFT window, a scipy window name or a tuple of a name and its
+        parameters (default ``'hann'``).
     :return: Total difference-frequency distortion, as a ratio.
     :raises ValueError: If the inputs are invalid.
     """
@@ -432,7 +436,7 @@ def dynamic_intermodulation_distortion(
     *,
     f_sine: float = 15000.0,
     f_square: float = 3150.0,
-    window: str = "hann",
+    window: WindowSpec = "hann",
 ) -> float:
     r"""Dynamic intermodulation distortion DIM (IEC 60268-3 14.12.9).
 
@@ -453,7 +457,8 @@ def dynamic_intermodulation_distortion(
         that disagrees with it raises instead of silently winning.
     :param f_sine: High sine frequency, in Hz (default 15 kHz).
     :param f_square: Square-wave fundamental, in Hz (default 3.15 kHz).
-    :param window: FFT window (default ``'hann'``).
+    :param window: FFT window, a scipy window name or a tuple of a name and its
+        parameters (default ``'hann'``).
     :return: Dynamic intermodulation distortion, as a ratio.
     :raises ValueError: If the inputs are invalid.
     """

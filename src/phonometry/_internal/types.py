@@ -9,9 +9,9 @@ they are touched.
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
+from collections.abc import Iterator, Mapping, Sequence
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, Protocol
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
@@ -21,6 +21,61 @@ if TYPE_CHECKING:
 
 #: Real-valued float64 array alias shared across the library.
 Real = NDArray[np.float64]
+
+
+class SupportsNumericArray(Protocol):
+    """Anything whose ``__array__`` gives an array of numbers.
+
+    A numpy array of a number or truth-value dtype, a numpy scalar, or an
+    object of another library that converts itself so. An array of texts
+    does not, nor does one typed with another dtype: an object array, whose
+    type says nothing of what it holds, an array of dates or durations, and
+    one typed ``NDArray[np.generic]``, which an array of texts is.
+    """
+
+    def __array__(self) -> np.ndarray[Any, np.dtype[np.number[Any] | np.bool_]]: ...
+
+
+class NestedSequence[T](Protocol):
+    """A sequence of ``T``, or of such sequences, at any depth.
+
+    What ``Sequence`` reads, but for membership: a list, a tuple and a
+    range are asked about any object, a ``str`` only about a text and
+    ``bytes`` only about bytes or an integer, so neither text is a nested
+    sequence of anything; a mapping, which has no ``count`` or ``index``,
+    is none either. numpy reads its own array-likes the same way.
+    """
+
+    def __len__(self, /) -> int: ...
+    def __getitem__(self, index: int, /) -> T | NestedSequence[T]: ...
+    def __contains__(self, value: object, /) -> bool: ...
+    def __iter__(self, /) -> Iterator[T | NestedSequence[T]]: ...
+    def __reversed__(self, /) -> Iterator[T | NestedSequence[T]]: ...
+    # A list of numbers counts only a number: typed object, the method would
+    # refuse every typed list, as numpy's own nested sequence says.
+    def count(self, value: Any, /) -> int: ...  # noqa: ANN401
+    # The same holds for the position of an item.
+    def index(self, value: Any, /) -> int: ...  # noqa: ANN401
+
+
+#: The forms of numbers ``np.asarray`` converts to an array of numbers: a
+#: number (a ``bool``, an ``int``, a ``float`` or a ``complex``), a sequence
+#: of numbers at any depth, a numpy number or array of a number or
+#: truth-value dtype, anything else whose ``__array__`` gives one, and a
+#: sequence of such arrays. It is numpy's ``ArrayLike`` without its texts,
+#: and without the arrays typed with another dtype (object, ``np.generic``,
+#: dates, durations) and the buffers ``ArrayLike`` admits: ``ArrayLike``
+#: admits any ``str`` and any ``bytes``, so beside a ``Literal`` of choices
+#: (``termination: TerminationName | ArrayLike``) it took a misspelt choice
+#: as numbers, which only the call refused. Beside a ``Literal`` this alias
+#: stands for the numbers, and a text that is not one of the choices is a
+#: type error.
+NumericArrayLike = (
+    complex
+    | NestedSequence[complex]
+    | SupportsNumericArray
+    | NestedSequence[SupportsNumericArray]
+)
 
 #: One real number, as a function that takes a number or an array of them is
 #: handed it: a Python ``float`` or ``int``, or a numpy one (``np.float32``
@@ -104,6 +159,36 @@ GroundClass = Literal["A", "B", "C", "D", "E", "F", "G", "H"]
 #: The sex a population statistic is tabulated by, as ISO 7029, ISO 1999 and
 #: ISO 2631-5 print their columns.
 Sex = Literal["male", "female"]
+
+#: A spectral-analysis taper, as :func:`scipy.signal.get_window` reads one: a
+#: window name (``"hann"``), or a tuple of a name and its parameters
+#: (``("kaiser", 8.6)``, ``("tukey", 0.5)``, ``("general_cosine", weights)``).
+#: A bare number, which ``get_window`` reads as the beta of a Kaiser window,
+#: is left out: the Welch estimators refuse it, and ``("kaiser", beta)``
+#: names it everywhere.
+WindowSpec = str | tuple[ArrayLike, ...]
+
+
+def own_window(window: WindowSpec) -> WindowSpec:
+    """The window specification with no parameter the caller can still edit.
+
+    A name is kept as given. In a tuple, a list parameter, such as the
+    weights of ``("general_cosine", weights)``, becomes a tuple, so editing
+    the caller's weights afterwards does not rename the window a result
+    was computed with. Every result that keeps its window stores it through
+    this function first in its ``__post_init__``, so one a caller builds by
+    hand, or :func:`dataclasses.replace` builds anew, holds it as the
+    function that computes it would; an array parameter is the read-only
+    copy :class:`~phonometry._internal.frozen.OwnsArrays` made of it before
+    that hook ran.
+
+    :param window: The specification a record was given.
+    :return: The same specification, its list parameters as tuples.
+    """
+    if not isinstance(window, tuple):
+        return window
+    return tuple(tuple(item) if isinstance(item, list) else item for item in window)
+
 
 #: The engine a ``report`` entry point draws its fiche with. ``"reportlab"``
 #: is the only one; the parameter is the seam a second engine would come in by.

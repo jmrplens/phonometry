@@ -3689,6 +3689,56 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   a `list`, a `dict` or a `set`; rule A58 of the contributor guide states
   it.
 
+- **A window takes its parameters, and a dict written in a call is read
+  against the one mapping it is passed for.** The `window` of 19 functions
+  that hand it to `scipy.signal.get_window` or to a Welch estimator was
+  annotated `str` while the call ran with a tuple of a window's name and its
+  parameters: `signals.power_spectral_density`,
+  `signals.cross_spectral_density`, `signals.coherent_output_spectrum`,
+  `signals.miso_coherence`, `signals.spectrogram`, `signals.zoom_fft`,
+  `signals.envelope_spectrum`, `signals.time_delay` and the eleven
+  distortion, intermodulation and dynamic-range functions of
+  `electroacoustics` take `str | tuple[ArrayLike, ...]`, as
+  `signals.window_metrics` does, so `window=("kaiser", 8.6)` type-checks.
+  The eight results that store the window (`SpectralDensityResult`,
+  `CrossSpectralDensityResult`, `CoherentOutputSpectrumResult`,
+  `MISOCoherenceResult`, `SpectrogramResult`, `ZoomFFTResult`,
+  `EnvelopeSpectrumResult` and `WindowMetricsResult`) hold a list of weights
+  as a tuple of the same numbers however they are built, by the function, by
+  hand or anew by `dataclasses.replace`, so editing the caller's weights
+  afterwards no longer renames the window a result was computed with. mypy
+  reads a `dict` written in a call against the parameter's type only when
+  that type holds one mapping: with a union of several it reads the `dict`
+  on its own, a column name as a `str` and two inner mappings with keys of
+  two types as `object`. So `vibration.verify_signal_burst_response("whole-body",
+  "Wk", {16: {"rms": 0.115}})` was refused, and so was a directional response
+  with one band read at 22.5 degrees in `aircraft.verify_aircraft_noise_system`;
+  each mapping of those unions is now taken by an overload of its own.
+  `scripts/check_parameter_annotations.py` fails on a parameter that reaches
+  a window reader of SciPy and refuses a tuple of a window's name and any
+  count of its parameters, followed through the helpers it is handed to, and
+  on a union of mappings a written `dict` needs one at a time that no
+  overload splits; rule A58 of the contributor guide states both.
+
+- **A misspelt choice beside numbers is a type error.** The `initial_state`
+  of `filters.time_weighting`, the `flow_resistivity` of
+  `aircraft.terrain_screening_adjustment` and of `aircraft.RotorcraftGround`,
+  and the `termination` of `materials.layered_absorber` and of
+  `materials.diffuse_field_absorption` take one of a few words or numbers.
+  The numbers were annotated with numpy's `ArrayLike`, which admits any text,
+  so `termination="rigidd"` type-checked and only the call refused it. They
+  take an array-like of numbers that admits no text now (a number, a
+  sequence of numbers, a numpy number or array of a number or truth-value
+  dtype, or anything that converts itself to one), so a type checker refuses
+  the misspelling as the call does; nothing changes at run time. A type
+  checker refuses there too what `ArrayLike` admitted of an array typed with
+  a dtype that is no number or truth value (`np.object_`, `np.generic`,
+  `np.datetime64`, `np.timedelta64`) and of a buffer such as `memoryview`;
+  the call still converts an object array of numbers.
+  `scripts/check_parameter_annotations.py` fails on a `Literal` choice beside
+  an alternative that takes any text, and rule A59 of the contributor guide
+  states it.
+
 - **A function of a number or an array of them returns an array for an array,
   a zero-dimensional one included, and says so in its signature.** Ninety
   public functions and methods such as `room.room_constant`,

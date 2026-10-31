@@ -14,7 +14,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 
@@ -216,6 +216,36 @@ def _rebuilt_result(
     cls: type[AircraftSystemComplianceResult], kwargs: dict[str, Any]
 ) -> AircraftSystemComplianceResult:
     return cls(**kwargs)
+
+
+@overload
+def verify_aircraft_noise_system(
+    *,
+    directional: Mapping[int, BandMapping],
+    frequency_response: BandMapping | None = None,
+    linearity: Mapping[LinearityRange, float] | None = None,
+    resolution: float | None = None,
+) -> AircraftSystemComplianceResult: ...
+
+
+@overload
+def verify_aircraft_noise_system(
+    *,
+    directional: Mapping[float, BandMapping],
+    frequency_response: BandMapping | None = None,
+    linearity: Mapping[LinearityRange, float] | None = None,
+    resolution: float | None = None,
+) -> AircraftSystemComplianceResult: ...
+
+
+@overload
+def verify_aircraft_noise_system(
+    *,
+    directional: None = None,
+    frequency_response: BandMapping | None = None,
+    linearity: Mapping[LinearityRange, float] | None = None,
+    resolution: float | None = None,
+) -> AircraftSystemComplianceResult: ...
 
 
 def verify_aircraft_noise_system(

@@ -1686,6 +1686,18 @@ print(signal.data[0, 0], signal.data.flags.writeable)
 # 0.0 True
 ```
 
+The window a spectral result was computed with is held the same way.
+`signals.power_spectral_density`, `signals.cross_spectral_density`,
+`signals.coherent_output_spectrum`, `signals.miso_coherence`,
+`signals.spectrogram`, `signals.zoom_fft`, `signals.envelope_spectrum` and
+`signals.window_metrics` store the `window` they were given, and a window
+given with its parameters keeps parameters of its own: the weights of
+`("general_cosine", weights)` given as a list are held as a tuple of the
+same numbers, where 3.3.0 held the caller's list, so
+`result.window == ("general_cosine", (0.5, 0.5))`; given as an array they
+are a read-only copy, as every array a result holds is. A result built by
+hand, or anew by `dataclasses.replace`, holds its window the same way.
+
 ## A catalogue row says what its source claims for each cell
 
 The published catalogues of materials are new in 4.0: neither 3.3.0 nor

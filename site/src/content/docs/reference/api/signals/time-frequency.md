@@ -61,7 +61,7 @@ spectrogram(
     x: Signal | ArrayLike,
     fs: float | None = None,
     *,
-    window: str = 'hann',
+    window: str | tuple[ArrayLike, ...] = 'hann',
     nperseg: int | np.integer[Any] | None = None,
     overlap: float = 0.5,
     scaling: Literal['density', 'spectrum'] = 'density',
@@ -100,7 +100,7 @@ tones, sweeps, transients - not a low-variance spectral estimator.
 | :--- | :--- |
 | `x` | Signal, 1-D. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples, so every frame's power come out in Pa²/Hz, or Pa² for `scaling='spectrum'`. |
 | `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
-| `window` | Segment taper (any scipy window name; default Hann). |
+| `window` | Segment taper, a scipy window name or a tuple of a name and its parameters, such as `("kaiser", 8.6)` (default Hann). |
 | `nperseg` | Segment length; `None` picks a length giving a bin spacing of at most 4 Hz (the Welch-module default). |
 | `overlap` | Segment overlap fraction in [0, 1) (default 0.5). |
 | `scaling` | `'density'` (units²/Hz) or `'spectrum'` (units²). |
@@ -126,7 +126,7 @@ SpectrogramResult(
     random_error: float,
     n_segments: int,
     hop: int,
-    window: str,
+    window: str | tuple[ArrayLike, ...],
     nperseg: int,
     overlap: float,
     scaling: Literal['density', 'spectrum'],
@@ -147,7 +147,7 @@ Calibrated STFT power spectrogram (B&P Section 12.6.4.2).
 | `random_error` | Normalized random error of each (unaveraged) power cell for random data, $1/\sqrt{n_\mathrm{d}} = 1$ with $n_\mathrm{d} = 1$ (Eq. 8.158); Bendat & Piersol quote $\sqrt{2}/1.25 \approx 1.13$ for the magnitude display (Section 12.6.4.2). Deterministic components are unaffected. |
 | `n_segments` | Number of segments (columns). |
 | `hop` | Hop between segment starts, in samples. |
-| `window` | Taper name. |
+| `window` | The taper, a window name or a tuple of a name and its parameters, as given (a list parameter as a tuple). |
 | `nperseg` | Segment length, in samples. |
 | `overlap` | Segment overlap fraction. |
 | `scaling` | `'density'` or `'spectrum'`. |
@@ -181,7 +181,7 @@ zoom_fft(
     f_min: float,
     f_max: float,
     n_points: int | np.integer[Any] | None = None,
-    window: str = 'hann',
+    window: str | tuple[ArrayLike, ...] = 'hann',
 ) -> ZoomFFTResult
 ```
 
@@ -216,7 +216,7 @@ tones closer than $B_\mathrm{e}$ (Eq. 11.127).
 | `f_min` | Lower edge of the zoom band, in Hz ($\ge 0$). |
 | `f_max` | Upper edge of the zoom band, in Hz ($\le f_\mathrm{s}/2$). |
 | `n_points` | Grid points across `[f_min, f_max]` (endpoints included); `None` places one point per record-length resolution $f_\mathrm{s}/N$. |
-| `window` | Record taper (any scipy window name; default Hann; `'boxcar'` for none). |
+| `window` | Record taper, a scipy window name or a tuple of a name and its parameters (default Hann; `'boxcar'` for none). |
 
 **Returns:** A [`ZoomFFTResult`](/phonometry/reference/api/signals/time-frequency/#zoomfftresult).
 
@@ -237,7 +237,7 @@ ZoomFFTResult(
     power: NDArray[np.float64],
     bin_spacing_hz: float,
     resolution_bandwidth: float,
-    window: str,
+    window: str | tuple[ArrayLike, ...],
     n_points: int,
 )
 ```
@@ -254,7 +254,7 @@ Narrow-band zoom spectrum on a fine frequency grid (B&P 11.5.4).
 | `power` | Mean-square spectrum $\text{amplitude}^2/2$ ($\text{amplitude}^2$ at DC/Nyquist), consistent with the `'spectrum'` scaling of the Welch module: a tone reads its mean square $A^2/2$. |
 | `bin_spacing_hz` | Grid spacing, in Hz - freely chosen, finer than $f_\mathrm{s}/N$ if requested (the zoom gain of Eq. 11.127). |
 | `resolution_bandwidth` | Effective noise bandwidth $B_\mathrm{e} = f_\mathrm{s} \sum w^2 / \left( \sum w \right)^2$ of the tapered record, in Hz - the true resolution, set by the record length and taper, that no grid refinement improves. |
-| `window` | Taper name. |
+| `window` | The taper, a window name or a tuple of a name and its parameters, as given (a list parameter as a tuple). |
 | `n_points` | Number of grid points. |
 
 ### ZoomFFTResult.plot()

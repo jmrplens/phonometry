@@ -71,7 +71,7 @@ coherent_output_spectrum(
     y: Signal | ArrayLike,
     fs: float | None = None,
     *,
-    window: str = 'hann',
+    window: str | tuple[ArrayLike, ...] = 'hann',
     nperseg: int | np.integer[Any] | None = None,
     overlap: float = 0.5,
     scaling: Literal['density', 'spectrum'] = 'density',
@@ -101,7 +101,7 @@ the implementation.
 | `x` | Input (reference) signal, 1-D. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples, so all three densities come out in Pa²/Hz, or Pa² for `scaling='spectrum'`. The coherence and the signal-to-noise ratio are ratios and do not move. |
 | `y` | Output (response) signal, 1-D, same length as `x`. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples, so all three densities come out in Pa²/Hz, or Pa² for `scaling='spectrum'`. The coherence and the signal-to-noise ratio are ratios and do not move. |
 | `fs` | Sample rate, in Hz. Required when both records are bare arrays; either may be a [`Signal`](/phonometry/reference/api/io/io/#signal) and supply it, and two Signals recorded at different rates are refused rather than arbitrated. |
-| `window` | Segment taper (default Hann). |
+| `window` | Segment taper, a scipy window name or a tuple of a name and its parameters, such as `("kaiser", 8.6)` (default Hann). |
 | `nperseg` | Welch segment length; `None` picks a default. |
 | `overlap` | Segment overlap fraction in [0, 1) (default 0.5). |
 | `scaling` | `'density'` or `'spectrum'`. |
@@ -132,7 +132,7 @@ CoherentOutputSpectrumResult(
     n_segments: int,
     n_averages: float,
     resolution_bandwidth: float,
-    window: str,
+    window: str | tuple[ArrayLike, ...],
     nperseg: int,
     overlap: float,
     scaling: Literal['density', 'spectrum'],
@@ -166,7 +166,7 @@ $G_{yy} = G_{vv} + G_{nn}$
 | `n_segments` | Raw number of segments averaged. |
 | `n_averages` | Effective number of independent averages $n_\mathrm{d}$. |
 | `resolution_bandwidth` | Effective noise bandwidth $B_\mathrm{e}$, in Hz. |
-| `window` | Taper name. |
+| `window` | The taper, a window name or a tuple of a name and its parameters, as given (a list parameter as a tuple). |
 | `nperseg` | Segment length, in samples. |
 | `overlap` | Segment overlap fraction. |
 | `scaling` | `'density'` or `'spectrum'`. |
@@ -205,7 +205,7 @@ cross_spectral_density(
     y: Signal | ArrayLike,
     fs: float | None = None,
     *,
-    window: str = 'hann',
+    window: str | tuple[ArrayLike, ...] = 'hann',
     nperseg: int | np.integer[Any] | None = None,
     overlap: float = 0.5,
     scaling: Literal['density', 'spectrum'] = 'density',
@@ -229,7 +229,7 @@ with the measured coherence in place of the unknown true value.
 | `x` | First signal, 1-D. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples, so the cross-spectrum and its magnitude come out in Pa²/Hz, or Pa² for `scaling='spectrum'`. The coherence and the phase are ratios and do not move. |
 | `y` | Second signal, 1-D, same length as `x`. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples, so the cross-spectrum and its magnitude come out in Pa²/Hz, or Pa² for `scaling='spectrum'`. The coherence and the phase are ratios and do not move. |
 | `fs` | Sample rate, in Hz. Required when both records are bare arrays; either may be a [`Signal`](/phonometry/reference/api/io/io/#signal) and supply it, and two Signals recorded at different rates are refused rather than arbitrated. |
-| `window` | Segment taper (default Hann). |
+| `window` | Segment taper, a scipy window name or a tuple of a name and its parameters, such as `("kaiser", 8.6)` (default Hann). |
 | `nperseg` | Welch segment length; `None` picks a default. |
 | `overlap` | Segment overlap fraction in [0, 1) (default 0.5). |
 | `scaling` | `'density'` or `'spectrum'`. |
@@ -257,7 +257,7 @@ CrossSpectralDensityResult(
     n_segments: int,
     n_averages: float,
     resolution_bandwidth: float,
-    window: str,
+    window: str | tuple[ArrayLike, ...],
     nperseg: int,
     overlap: float,
     scaling: Literal['density', 'spectrum'],
@@ -283,7 +283,7 @@ estimate, as Bendat & Piersol recommend for measured data (Section 9.2).
 | `n_segments` | Raw number of segments averaged. |
 | `n_averages` | Effective number of independent averages $n_\mathrm{d}$. |
 | `resolution_bandwidth` | Effective noise bandwidth $B_\mathrm{e}$, in Hz. |
-| `window` | Taper name. |
+| `window` | The taper, a window name or a tuple of a name and its parameters, as given (a list parameter as a tuple). |
 | `nperseg` | Segment length, in samples. |
 | `overlap` | Segment overlap fraction. |
 | `scaling` | `'density'` or `'spectrum'`. |
@@ -368,7 +368,7 @@ power_spectral_density(
     x: Signal | ArrayLike,
     fs: float | None = None,
     *,
-    window: str = 'hann',
+    window: str | tuple[ArrayLike, ...] = 'hann',
     nperseg: int | np.integer[Any] | None = None,
     overlap: float = 0.5,
     scaling: Literal['density', 'spectrum'] = 'density',
@@ -395,7 +395,7 @@ resolution-bias error at a resonance peak see
 | :--- | :--- |
 | `x` | Signal, 1-D. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples, so the density and its confidence interval come out in Pa²/Hz, or Pa² for `scaling='spectrum'`. |
 | `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
-| `window` | Segment taper (any scipy window name; default Hann, the B&P Section 11.5.2 recommendation for side-lobe suppression). |
+| `window` | Segment taper, a scipy window name or a tuple of a name and its parameters, such as `("kaiser", 8.6)` (default Hann, the B&P Section 11.5.2 recommendation for side-lobe suppression). |
 | `nperseg` | Welch segment length; `None` picks a length giving a bin spacing of at most 4 Hz (the resolution bandwidth $B_\mathrm{e}$ further depends on the taper; see [`SpectralDensityResult.resolution_bandwidth`](/phonometry/reference/api/signals/spectra/#spectraldensityresult)). |
 | `overlap` | Segment overlap fraction in [0, 1) (default 0.5, which with a Hann taper retrieves most of the stability lost to tapering, B&P Section 11.5.2.2). |
 | `scaling` | `'density'` (units²/Hz) or `'spectrum'` (units² per segment bandwidth). |
@@ -458,7 +458,7 @@ SpectralDensityResult(
     n_averages: float,
     degrees_of_freedom: float,
     resolution_bandwidth: float,
-    window: str,
+    window: str | tuple[ArrayLike, ...],
     nperseg: int,
     overlap: float,
     scaling: Literal['density', 'spectrum'],
@@ -481,7 +481,7 @@ Welch autospectral density with its statistical error (B&P Ch. 8).
 | `n_averages` | Effective number of independent averages $n_\mathrm{d}$ (equals `n_segments` without overlap; smaller with overlap). |
 | `degrees_of_freedom` | Chi-square degrees of freedom $n = 2 n_\mathrm{d}$ of the interior bins (Eq. 8.162; $n_\mathrm{d}$ at DC/Nyquist). |
 | `resolution_bandwidth` | Effective noise bandwidth $B_\mathrm{e}$ of the tapered segment, in Hz (drives the bias error of Eq. 8.139). |
-| `window` | Taper name. |
+| `window` | The taper, a window name or a tuple of a name and its parameters, as given (a list parameter as a tuple). |
 | `nperseg` | Segment length, in samples. |
 | `overlap` | Segment overlap fraction. |
 | `scaling` | `'density'` or `'spectrum'`. |

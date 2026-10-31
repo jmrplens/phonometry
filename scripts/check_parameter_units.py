@@ -2469,10 +2469,11 @@ FREQUENCY_AXES = frozenset(
 )
 
 #: An annotation that says the parameter holds an array of numbers: an
-#: ``ArrayLike``, an ``NDArray`` or a sequence of floats, but not a sequence of
-#: layers or wells, and not a ``tuple[float, float]`` pair such as a band edge.
+#: ``ArrayLike`` (the package's ``NumericArrayLike`` too), an ``NDArray`` or a
+#: sequence of floats, but not a sequence of layers or wells, and not a
+#: ``tuple[float, float]`` pair such as a band edge.
 _NUMERIC_ARRAY = re.compile(
-    r"\b(?:ArrayLike|NDArray|ndarray)\b"
+    r"\b(?:ArrayLike|NumericArrayLike|NDArray|ndarray)\b"
     r"|\b(?:Sequence|list|Iterable)\[(?:float|int|complex)\]"
     r"|\btuple\[(?:float|int), \.\.\.\]"
 )

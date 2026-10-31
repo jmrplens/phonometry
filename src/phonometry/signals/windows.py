@@ -26,6 +26,7 @@ from typing import TYPE_CHECKING, Any, overload
 import numpy as np
 
 from .._internal.frozen import OwnsArrays
+from .._internal.types import own_window
 from .._internal.validation import (
     require_axis_count,
     require_count,
@@ -37,10 +38,10 @@ from .spectra import _positive
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
     from .._i18n import Language
-    from .._internal.types import TwoPanels
+    from .._internal.types import TwoPanels, WindowSpec
 
 __all__ = [
     "WindowMetricsResult",
@@ -95,7 +96,7 @@ class WindowMetricsResult(OwnsArrays):
         lobe, in bins.
     """
 
-    window: str | tuple[ArrayLike, ...]
+    window: WindowSpec
     n: int
     taps: NDArray[np.float64]
     coherent_gain: float
@@ -122,6 +123,7 @@ class WindowMetricsResult(OwnsArrays):
             than the declared length.
         :raises TypeError: if ``taps`` is a single number where an array goes.
         """
+        object.__setattr__(self, "window", own_window(self.window))
         require_ranks(self, taps=1)
         owner = type(self).__name__
         require_equal_counts(
@@ -165,20 +167,6 @@ class WindowMetricsResult(OwnsArrays):
         return plot_window_metrics(self, ax=ax, language=language, **kwargs)
 
 
-def _own_window(window: str | tuple[ArrayLike, ...]) -> str | tuple[ArrayLike, ...]:
-    """The window specification with no parameter the caller can still edit.
-
-    A name, a number or an array is kept as given, and the result makes an
-    array parameter, such as the weights of ``("general_cosine", weights)``,
-    a read-only copy of its own; a list one becomes a tuple here, so editing
-    the caller's weights afterwards does not rename the window the metrics
-    were computed for.
-    """
-    if not isinstance(window, tuple):
-        return window
-    return tuple(tuple(item) if isinstance(item, list) else item for item in window)
-
-
 def _window_spectrum_db(w: NDArray[np.float64], oversample: int) -> NDArray[np.float64]:
     """Magnitude of the window spectrum re its peak, in dB, oversampled.
 
@@ -212,7 +200,7 @@ def _width_3db_bins(level: NDArray[np.float64], oversample: int) -> float:
 
 
 def window_metrics(
-    window: str | tuple[ArrayLike, ...],
+    window: WindowSpec,
     n: int | np.integer[Any] = 1024,
 ) -> WindowMetricsResult:
     """Figures of merit of a spectral-analysis taper (Harris 1978).
@@ -270,7 +258,7 @@ def window_metrics(
     edge = _mainlobe_edge(level)
     highest_sidelobe = float(np.max(level[edge:]))
     return WindowMetricsResult(
-        window=_own_window(window),
+        window=window,
         n=n_v,
         taps=w,
         coherent_gain=coherent_gain,

@@ -1877,7 +1877,7 @@ class Reader:
         if any(word in _CONTAINER_WORDS for word in words):
             return False
         return any(
-            word in {"ndarray", "NDArray", "ArrayLike"}
+            word in {"ndarray", "NDArray", "ArrayLike", "NumericArrayLike"}
             or word in self.tree.array_aliases
             for word in words
         )

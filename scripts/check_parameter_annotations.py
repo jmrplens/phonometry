@@ -69,6 +69,15 @@ extends, an explicit ``__init__`` or ``__call__`` included):
   :data:`COUNTED`), which take a numpy integer as they take an int, admits
   it too. A whole float such as ``3.0``, which ``require_count`` also takes,
   stays a leniency the annotation does not state;
+* a parameter that reaches a function of :mod:`scipy.signal` that reads a
+  window (``get_window``, ``welch``, ``csd``, ``stft`` and the others of
+  :data:`_WINDOW_READERS`), followed through the helpers it is handed to as
+  a conversion is, takes a tuple of the window's name and its parameters
+  (``("kaiser", 8.6)``, ``("general_cosine", weights)``) as it takes the
+  name: ``str | tuple[ArrayLike, ...]``. A tuple of the annotation takes a
+  text first and, after it, any count of items that each take a number and
+  a sequence of numbers, so ``tuple[float, ...]`` and ``tuple[str, float]``
+  refuse a window SciPy reads;
 * the same holds for the fields of a public record that its
   ``__post_init__`` (or a method it calls on ``self``, or ``super()``'s)
   validates: by attribute, by ``getattr``, in a loop over field names (a
@@ -86,7 +95,37 @@ extends, an explicit ``__init__`` or ``__call__`` included):
   stands beside one keyed by ``int`` in the same union (``BandMapping``),
   and one keyed by a union of several members beside one keyed by each
   member. A key of ``Literal`` choices is narrowed by the caller as a
-  ``Literal`` parameter is, and is left as it stands;
+  ``Literal`` parameter is, and is left as it stands. An overload head is
+  read with the keys offered alone by the heads that take every call it
+  takes but for that parameter, which is what such a call reaches. A head
+  takes another's calls when each call of the other, bound as Python binds
+  it, puts every argument in a parameter of the head that takes it (a
+  ``str`` the text a ``Literal`` lists, a ``float`` an ``int``, a
+  ``Sequence[float]`` a ``list[int]``, the items of a standard container
+  read as a type checker reads them), by place, through ``*args`` or by
+  name (a keyword-only parameter or ``**kwargs`` takes one the other gives
+  by place too), never gives one parameter twice, and leaves out only
+  parameters with a default;
+* a union of two or more mappings, one of whose key or value is not a
+  plain number, text or record (a ``Literal``, a mapping, a sequence,
+  ``ArrayLike`` or a union), gives a ``dict`` written in the call no type
+  context: mypy reads such a display against the type it is passed for only
+  when that type holds one mapping, and otherwise on its own, a ``Literal``
+  key as a ``str`` and nested mappings of two key types as ``object``, so a
+  call that runs is refused, unless a mapping of the union takes the
+  ``dict`` as it is read on its own (a ``Mapping[str, float]`` beside a
+  ``Mapping[Literal["rms"], float]``). Each of those mappings is offered
+  alone in an overload head, read alike however it is spelt there (an
+  alias, or what it stands for), the implementation keeping the union, and
+  the heads that offer them take the same other arguments, so that a call
+  one of them takes reaches a head for every mapping; heads that pair each
+  mapping with a value of another parameter on purpose, the run refusing
+  it beside the others, are listed in :data:`PAIRED_MAPPINGS` with the
+  reason. A head that takes two of them, and a union of them below the top
+  of a parameter or in the field of a public record built by the
+  constructor ``dataclass`` writes, where no head can split it, fail; a
+  record that declares its own ``__init__``, under ``if TYPE_CHECKING:`` or
+  not, is read through it;
 * the scalar quantities of the vocabulary (:data:`NAME_FAMILIES`: a sample
   rate ``fs``, ``volume``, ``coverage``, ``confidence``,
   ``energy_fraction``, ``fraction``) keep one family of numbers across the
@@ -100,6 +139,18 @@ extends, an explicit ``__init__`` or ``__call__`` included):
   that is a head that tells the shape of its argument apart (rule A57),
   beside a last head that takes ``ArrayLike``; a head that a ``None``
   selects takes no number;
+* a ``Literal`` of texts and an alternative that takes any text never
+  stand side by side in one union of a parameter, an overload head, a
+  public record's field or the constructor it declares, at the top or
+  inside a container: numpy's ``ArrayLike`` admits any ``str`` and any
+  ``bytes``, and so do ``str``, ``LiteralString``, numpy's ``DTypeLike``,
+  anything, a sequence of texts (a text is a sequence of texts) and a type
+  parameter bound to one of them or to nothing, so ``termination:
+  Literal["rigid", "free"] | ArrayLike`` took ``"rigidd"`` as numbers and
+  only the call refused it. A choice beside numbers takes
+  :data:`NUMERIC_ARRAY_LIKE`, the package's array-like of numbers, which is
+  ``ArrayLike`` without its texts and without arrays typed with another
+  dtype, and is read as ``ArrayLike`` is by every other part of the rule;
 * a parameter whose annotation holds ``list``, ``dict`` or ``set``
   anywhere, at the top or inside (``Mapping[str, dict[str, str]]``),
   fails whatever the body does, on the implementation and on every head:
@@ -110,19 +161,21 @@ extends, an explicit ``__init__`` or ``__call__`` included):
 
 Annotations are read through the package's type aliases and the imports
 that bring them in, as ``scripts/check_return_overloads.py`` reads them
-(an alias of an alias, a renamed import, a type parameter's bound), so a
-parameter typed with an alias is held to what the alias stands for. A
+(an alias of an alias, a renamed import, a type parameter's bound, a
+generic alias with the arguments it is given), so a parameter typed with an
+alias is held to what the alias stands for. A
 parameter of a dataclass's generated ``__init__`` is a field, which the
 record's own contract governs, and is not read by the array part.
 
 :data:`EXEMPT` is the escape hatch of the array part, keyed by file,
 qualified function and parameter, each with its reason; an entry that
-covers nothing fails the check too, as one of :data:`FAMILY_EXEMPT` or
-:data:`CONSTRUCTOR_EXEMPT` does. An ``isinstance`` check whose branch only
-raises, after any assignments that build its message, keeps out what it
-names. A copy of the package read elsewhere (the scratch tree a defect
-is put into to see the check fail) names its files as the repository does,
-so the exemptions read it the same way.
+covers nothing fails the check too, as one of :data:`FAMILY_EXEMPT`,
+:data:`CONSTRUCTOR_EXEMPT` or :data:`PAIRED_MAPPINGS` does. An
+``isinstance`` check whose branch only raises, after any assignments that
+build its message, keeps out what it names. A copy of the package read
+elsewhere (the scratch tree a defect is put into to see the check fail)
+names its files as the repository does, so the exemptions read it the
+same way.
 
 Static and dependency-free, so it runs on its own.
 """
@@ -192,6 +245,38 @@ EXEMPT: dict[tuple[str, str, str], str] = {
 #: its constructor (a ``TYPE_CHECKING`` ``__init__``), so none is listed.
 CONSTRUCTOR_EXEMPT: dict[tuple[str, str, str], str] = {}
 
+#: Mapping parameters whose overload heads pair each mapping of a union with
+#: a value of another parameter on purpose, keyed by file, qualified function
+#: and parameter, each with the reason. The pairing part asks the heads that
+#: offer each mapping alone to take the same other arguments, so that a call
+#: one of them takes reaches a head for every mapping; a function whose run
+#: refuses a mapping beside a value of another parameter offers it beside
+#: that value only, and is listed here.
+PAIRED_MAPPINGS: dict[tuple[str, str, str], str] = {
+    (
+        "src/phonometry/metrology/comparison_calibration.py",
+        "comparison_uncertainty_budget",
+        "standard_uncertainties_db",
+    ): (
+        "the components of IEC 61094-5 Table D.1 go with field='pressure' and "
+        "those of IEC 61094-8 Table 2 with field='free', and the run refuses a "
+        "component of the other table with ValueError; a field held in a "
+        "variable that may be either takes the components both tables list "
+        "(SharedComparisonComponent), the only ones right for both"
+    ),
+    (
+        "src/phonometry/metrology/reciprocity_calibration.py",
+        "reciprocity_uncertainty_budget",
+        "standard_uncertainties_db",
+    ): (
+        "the components of Table 1 of IEC 61094-2 go with field='pressure' "
+        "and those of Table 1 of IEC 61094-3 with field='free', and the run "
+        "refuses a component of the other table with ValueError; a field held "
+        "in a variable that may be either takes the components both tables "
+        "list (SharedReciprocityComponent), the only ones right for both"
+    ),
+}
+
 #: How many calls deep a parameter handed on is followed.
 DEPTH = 6
 
@@ -217,6 +302,53 @@ _ARRAY_LIKE = frozenset(
 
 #: Annotations that admit anything, an array-like among it.
 _ANYTHING = frozenset({"typing.Any", "typing_extensions.Any", "builtins.object"})
+
+#: What a ``str`` is by itself, whatever is asked of its items: a text is a
+#: sequence, an iterable, a collection, a container and a reversible of
+#: texts. One of these whose items take a text takes any text
+#: (``Sequence[str]``, ``Iterable[ArrayLike]``, a bare ``Sequence``).
+_TEXT_CONTAINERS = frozenset(
+    {
+        "typing.Sequence",
+        "typing.Iterable",
+        "typing.Collection",
+        "typing.Container",
+        "typing.Reversible",
+        "collections.abc.Sequence",
+        "collections.abc.Iterable",
+        "collections.abc.Collection",
+        "collections.abc.Container",
+        "collections.abc.Reversible",
+    }
+)
+
+#: The annotations that take any text as they stand, besides ``ArrayLike``
+#: (numpy's admits a ``str`` and a ``bytes``) and anything: ``str``, the
+#: ``LiteralString`` every text written in the source is, numpy's
+#: ``DTypeLike`` (it admits any ``str``, read as the name of a dtype) by the
+#: spellings ``ArrayLike`` has, and the protocols every text satisfies.
+_TEXT_WHOLES = frozenset(
+    {
+        "builtins.str",
+        "typing.LiteralString",
+        "typing_extensions.LiteralString",
+        "numpy.typing.DTypeLike",
+        "numpy._typing.DTypeLike",
+        "numpy._typing._dtype_like.DTypeLike",
+        "typing.Hashable",
+        "typing.Sized",
+        "collections.abc.Hashable",
+        "collections.abc.Sized",
+    }
+)
+
+#: The package's array-like of numbers, by its name below the package:
+#: numpy's ``ArrayLike`` without its texts and without arrays typed with
+#: another dtype. The classes its members name (the protocols of a nested
+#: sequence and of an object that converts itself) are read as ``ArrayLike``
+#: is wherever an array-like of numbers is asked for, and never where a text
+#: is: a window's ``("kaiser", 8.6)`` is no number.
+NUMERIC_ARRAY_LIKE = "_internal.types.NumericArrayLike"
 
 #: The containers whose element type is invariant, by every spelling.
 _INVARIANT = frozenset(
@@ -260,6 +392,21 @@ _CONTAINERS = frozenset(
 
 #: The fixed-length tuple, by both spellings.
 _TUPLES = frozenset({"builtins.tuple", "typing.Tuple"})
+
+#: What takes a ``float``, such as the beta of a Kaiser window, by every
+#: spelling: a ``float`` itself, a ``complex``, which takes one too, and the
+#: abstract numbers and protocol a ``float`` is.
+_FLOATS = frozenset(
+    {
+        "builtins.float",
+        "builtins.complex",
+        "numbers.Number",
+        "numbers.Complex",
+        "numbers.Real",
+        "typing.SupportsFloat",
+        "typing_extensions.SupportsFloat",
+    }
+)
 
 #: The numbers a sequence of numbers holds: the scalars of the return
 #: gate, without the text and the ``Literal`` choices.
@@ -471,6 +618,36 @@ COUNTED = Target(
 #: The scalar parts of the rule.
 SCALAR_TARGETS = (INTEGER, FLAG, COUNTED)
 
+#: The functions of :mod:`scipy.signal` that read a window specification, and
+#: which of their arguments it is: every callable of SciPy 1.18 with a
+#: ``window`` or ``win_param`` it hands to ``get_window``. Each takes a window
+#: name or a tuple of a name and its parameters (``("kaiser", 8.6)``), and
+#: ``firwin_2d`` a name or a pair of them, one per axis; ``firwin`` and
+#: ``firwin2`` take it by keyword only, so their position is one no call fills.
+_WINDOW_READERS: dict[str, tuple[int | None, str | None]] = {
+    "scipy.signal.get_window": (0, "window"),
+    "scipy.signal.windows.get_window": (0, "window"),
+    "scipy.signal.welch": (2, "window"),
+    "scipy.signal.csd": (3, "window"),
+    "scipy.signal.periodogram": (2, "window"),
+    "scipy.signal.coherence": (3, "window"),
+    "scipy.signal.spectrogram": (2, "window"),
+    "scipy.signal.stft": (2, "window"),
+    "scipy.signal.istft": (2, "window"),
+    "scipy.signal.check_COLA": (0, "window"),
+    "scipy.signal.check_NOLA": (0, "window"),
+    "scipy.signal.resample": (4, "window"),
+    "scipy.signal.resample_poly": (4, "window"),
+    "scipy.signal.firwin": (3, "window"),
+    "scipy.signal.firwin2": (4, "window"),
+    "scipy.signal.firwin_2d": (1, "window"),
+    "scipy.signal.ShortTimeFFT.from_window": (0, "win_param"),
+}
+
+#: The window part: a specification :mod:`scipy.signal` reads, which takes a
+#: tuple of a window's name and its parameters as it takes the name.
+WINDOW = Target("window", _WINDOW_READERS)
+
 #: What each scalar kind's annotation must name to admit the numpy scalar.
 _ADMITS: dict[str, frozenset[str]] = {
     "integer": frozenset({"numpy.integer"}) | _INDEX_PROTOCOLS,
@@ -511,7 +688,11 @@ class Finding:
     problem: str
     #: The part of the rule it breaks: ``"array"`` (a conversion, or an
     #: invariant container), ``"integer"`` or ``"flag"`` (a numpy scalar),
-    #: ``"key"`` (a mapping's key) or ``"name"`` (a quantity's family).
+    #: ``"key"`` (a mapping's key), ``"context"`` (a union of mappings a
+    #: written ``dict`` is not read against), ``"pairing"`` (the heads that
+    #: offer each of them take different calls), ``"window"`` (a window SciPy
+    #: reads), ``"choice"`` (a ``Literal`` beside an alternative that takes
+    #: any text) or ``"name"`` (a quantity's family).
     part: str = "array"
     #: Whether it is a field a caller-built record stores the validated value
     #: in, which its constructor, not its field, is to admit.
@@ -572,6 +753,27 @@ class Annotations:
             for node in overloads._statements(tree.body):
                 if isinstance(node, ast.ClassDef):
                     self.classes[f"{module}.{node.name}"] = (module, node)
+        #: The classes the members of :data:`NUMERIC_ARRAY_LIKE` name, by their
+        #: dotted names: what an array-like of numbers is made of.
+        self.numeric = self._numeric_classes()
+
+    def _numeric_classes(self) -> frozenset[str]:
+        root = (
+            min(self.package.trees, key=len).split(".")[0] if self.package.trees else ""
+        )
+        alias = self.package.aliases.get(f"{root}.{NUMERIC_ARRAY_LIKE}")
+        if alias is None:
+            return frozenset()
+        return frozenset(
+            dotted
+            for where, member in self.package.members(*alias)
+            if (dotted := self.resolve(where, member)) in self.classes
+        )
+
+    @property
+    def array_like(self) -> frozenset[str]:
+        """What takes any array-like of numbers: ``ArrayLike`` and the package's own."""
+        return _ARRAY_LIKE | self.numeric
 
     def members(
         self,
@@ -579,9 +781,13 @@ class Annotations:
         node: ast.expr | None,
         bounds: dict[str, ast.expr] | None = None,
     ) -> list[tuple[str, ast.expr]]:
-        """The members of an annotation, aliases and type parameters expanded."""
+        """The members of an annotation, aliases and type parameters expanded.
+
+        A type parameter given to a generic alias is read as *bounds* gives
+        it there too, whatever module defines the alias.
+        """
         found: list[tuple[str, ast.expr]] = []
-        for where, member in self.package.members(module, node):
+        for where, member in self.package.members(module, node, local=bounds):
             if (
                 bounds
                 and isinstance(member, ast.Name)
@@ -601,9 +807,12 @@ class Annotations:
     def admits_array_like(
         self, module: str, node: ast.expr | None, bounds: dict[str, ast.expr]
     ) -> bool:
-        """Whether an annotation lets any array-like through: ``ArrayLike``, or anything."""
+        """Whether an annotation lets any array-like of numbers through.
+
+        ``ArrayLike``, :data:`NUMERIC_ARRAY_LIKE`, or anything.
+        """
         return any(
-            self.resolve(where, member) in _ARRAY_LIKE | _ANYTHING
+            self.resolve(where, member) in self.array_like | _ANYTHING
             for where, member in self.members(module, node, bounds)
         )
 
@@ -614,18 +823,25 @@ class Annotations:
         bounds: dict[str, ast.expr],
         wanted: frozenset[str],
     ) -> str | None:
-        """The member of an annotation that is one of *wanted*, as written, if one is."""
+        """The member of an annotation that is one of *wanted*, as written, if one is.
+
+        A member of the package's array-like of numbers is named by the alias,
+        which is what the annotation writes.
+        """
         for where, member in self.members(module, node, bounds):
-            if self.resolve(where, member) in wanted:
+            dotted = self.resolve(where, member)
+            if dotted in wanted:
+                if dotted in self.numeric:
+                    return NUMERIC_ARRAY_LIKE.rpartition(".")[2]
                 return ast.unparse(member)
         return None
 
     def names_array_like(
         self, module: str, node: ast.expr | None, bounds: dict[str, ast.expr]
     ) -> bool:
-        """Whether an annotation says ``ArrayLike``: what the function converts."""
+        """Whether an annotation says ``ArrayLike``, or the package's array-like of numbers."""
         return any(
-            self.resolve(where, member) in _ARRAY_LIKE
+            self.resolve(where, member) in self.array_like
             for where, member in self.members(module, node, bounds)
         )
 
@@ -705,6 +921,114 @@ class Annotations:
             for where, member in self.members(module, node, bounds)
         )
 
+    def admits_window(
+        self, module: str, node: ast.expr | None, bounds: dict[str, ast.expr]
+    ) -> bool:
+        """Whether an annotation lets every window's ``(name, parameters)`` tuple through.
+
+        ``ArrayLike`` (a tuple of a text and numbers is one) or anything; or a
+        ``tuple`` that takes a name and any count of parameters after it
+        (:meth:`_takes_every_window`). No annotation at all admits it too.
+        """
+        if node is None:
+            return True
+        return any(
+            dotted in _ARRAY_LIKE | _ANYTHING
+            or (dotted in _TUPLES and self._takes_every_window(where, member))
+            for where, member in self.members(module, node, bounds)
+            if (dotted := self.resolve(where, member)) is not None
+        )
+
+    def _takes_every_window(self, module: str, node: ast.expr) -> bool:
+        """Whether a ``tuple`` takes a window's name and as many parameters as it has.
+
+        A window is given as its name and its parameters, one for
+        ``("kaiser", 8.6)``, two for ``("general_gaussian", 1.5, 7.0)``, and
+        a sequence of weights for ``("general_cosine", [0.5, 0.5])``: the
+        first item takes a text, every item after it a number and a sequence
+        of numbers (:meth:`_takes_a_parameter`), and the count is open. A bare
+        ``tuple``, ``tuple[ArrayLike, ...]`` and ``tuple[str,
+        *tuple[ArrayLike, ...]]`` take every window; ``tuple[float, ...]``,
+        whose first item refuses the name, ``tuple[str, float]``, which takes
+        one parameter and no more, and ``tuple[str, *tuple[float, ...]]``,
+        which refuses the weights, do not.
+        """
+        slots = self._tuple_slots(module, node)
+        if slots is None:
+            return True
+        if not any(variadic for _, _, variadic in slots):
+            return False
+        (where, first, variadic), *rest = slots
+        parameters = slots if variadic else rest
+        return self._takes_a_name(where, first) and all(
+            self._takes_a_parameter(at, item) for at, item, _ in parameters
+        )
+
+    def _tuple_slots(
+        self, module: str, node: ast.expr, depth: int = 0
+    ) -> list[tuple[str, ast.expr | None, bool]] | None:
+        """The items of a ``tuple`` annotation, each with where it is written and whether it repeats.
+
+        ``None`` for a bare ``tuple``, which takes any items. ``tuple[X,
+        ...]`` is one item that repeats. An item unpacked from another tuple
+        (``*tuple[X, ...]``, ``Unpack[tuple[X, ...]]``, through an alias)
+        gives that tuple's items, and one unpacked from what is no tuple,
+        such as a ``TypeVarTuple``, an item of any type, ``None``, that
+        repeats.
+        """
+        if not isinstance(node, ast.Subscript):
+            return None
+        items = _items(node)
+        if items and _is_ellipsis(items[-1]):
+            return [(module, items[0], True)]
+        slots: list[tuple[str, ast.expr | None, bool]] = []
+        for item in items:
+            if isinstance(item, ast.Starred):
+                inner: ast.expr | None = item.value
+            elif self.resolve(module, item) in _UNPACK:
+                inner = next(iter(_items(item)), None)
+            else:
+                slots.append((module, item, False))
+                continue
+            members = [] if inner is None else self.members(module, inner)
+            if (
+                len(members) == 1
+                and depth < _NESTING
+                and self.resolve(*members[0]) in _TUPLES
+            ):
+                unpacked = self._tuple_slots(*members[0], depth + 1)
+                slots.extend(
+                    [(members[0][0], None, True)] if unpacked is None else unpacked
+                )
+            else:
+                slots.append((module, None, True))
+        return slots
+
+    def _takes_a_name(self, module: str, item: ast.expr | None) -> bool:
+        """Whether an item of a tuple takes the name of any window."""
+        return item is None or any(
+            self.admits_any_text(where, member)
+            for where, member in self.members(module, item)
+        )
+
+    def _takes_a_parameter(self, module: str, item: ast.expr | None) -> bool:
+        """Whether an item of a tuple takes any parameter of a window.
+
+        A number such as a Kaiser beta and the sequence of weights of
+        ``general_cosine``: an array-like, of numbers or not, or anything,
+        takes both; otherwise a member must take a ``float`` and another a
+        sequence of numbers of any length.
+        """
+        if item is None:
+            return True
+        members = self.members(module, item)
+        dotted = {self.resolve(where, member) for where, member in members}
+        if dotted & (self.array_like | _ANYTHING):
+            return True
+        return bool(dotted & _FLOATS) and any(
+            self._open_numbers(where, member) for where, member in members
+        )
+
     def admits_scalar(
         self,
         kind: str,
@@ -716,13 +1040,13 @@ class Annotations:
 
         ``np.integer[Any]`` (or a protocol every numpy integer satisfies,
         ``SupportsIndex``) for an integer, ``np.bool_`` for a flag; or
-        ``ArrayLike`` or anything, which take every numpy scalar. No
-        annotation at all admits it too.
+        ``ArrayLike``, the package's array-like of numbers or anything, which
+        take every numpy scalar. No annotation at all admits it too.
         """
         if node is None:
             return True
         return any(
-            self.resolve(where, member) in _ADMITS[kind] | _ARRAY_LIKE | _ANYTHING
+            self.resolve(where, member) in _ADMITS[kind] | self.array_like | _ANYTHING
             for where, member in self.members(module, node, bounds)
         )
 
@@ -814,7 +1138,7 @@ class Annotations:
         an array input; inside a sequence it is a row of one.
         """
         dotted = self.resolve(module, node)
-        if dotted in overloads._ARRAYS:
+        if dotted in overloads._ARRAYS or dotted in self.numeric:
             return True
         if dotted not in _CONTAINERS or depth > _NESTING:
             return False
@@ -830,6 +1154,14 @@ class Annotations:
     def _number_or_numbers(self, module: str, node: ast.expr, *, depth: int) -> bool:
         dotted = self.resolve(module, node)
         return dotted in _NUMBERS or self._holds_numbers(module, node, depth=depth)
+
+    def numbers(self, module: str, node: ast.expr) -> bool:
+        """Whether a member is what an array-like of numbers takes.
+
+        A number (a numpy one included), an array, or a container of numbers
+        at any depth: what :data:`NUMERIC_ARRAY_LIKE` admits of a member.
+        """
+        return self._number_or_numbers(module, node, depth=0)
 
     def narrow_items(
         self, module: str, node: ast.expr | None, bounds: dict[str, ast.expr]
@@ -859,7 +1191,8 @@ class Annotations:
     def _takes_an_item(self, module: str, item: ast.expr) -> bool:
         members = self.members(module, item)
         if any(
-            self.resolve(where, m) in _ARRAY_LIKE | _ANYTHING for where, m in members
+            self.resolve(where, m) in self.array_like | _ANYTHING
+            for where, m in members
         ):
             return True
         if not any(self._holds_numbers(where, m, depth=0) for where, m in members):
@@ -906,6 +1239,87 @@ class Annotations:
                     stack.extend(self.members(where, inner))
         return sorted(set(found))
 
+    def admits_any_text(
+        self,
+        module: str,
+        member: ast.expr,
+        bounds: dict[str, ast.expr] | None = None,
+        depth: int = 0,
+    ) -> bool:
+        """Whether one member of an annotation takes any text a caller writes.
+
+        ``ArrayLike`` (numpy's admits a ``str`` and a ``bytes``), anything,
+        ``str``, ``LiteralString``, numpy's ``DTypeLike`` and the protocols
+        a text satisfies, or a sequence, an iterable or a collection whose
+        items take one, since a text is a sequence of texts. A type
+        parameter of the items is read as *bounds* gives it, as one at the
+        top already is by :meth:`members`. The package's array-like of
+        numbers takes none.
+        """
+        dotted = self.resolve(module, member)
+        if dotted in _ARRAY_LIKE | _ANYTHING | _TEXT_WHOLES:
+            return True
+        if dotted not in _TEXT_CONTAINERS or depth > _NESTING:
+            return False
+        items = [item for item in _items(member) if not _is_ellipsis(item)]
+        return not items or any(
+            self.admits_any_text(
+                where, inner, bounds if where == module else None, depth + 1
+            )
+            for item in items
+            for where, inner in self.members(module, item, bounds)
+        )
+
+    def swallowed_choices(
+        self, module: str, node: ast.expr | None, bounds: dict[str, ast.expr]
+    ) -> list[tuple[str, str]]:
+        """The ``Literal`` choices an annotation sets beside an alternative that takes any text.
+
+        Every union of the annotation is read, at the top and inside a
+        container or a mapping (``Sequence[Literal["a"] | ArrayLike]``), its
+        aliases spelt out and each type parameter of *bounds* read as what
+        it stands for, wherever the annotation's own module names it. A
+        ``Literal`` of texts beside ``ArrayLike``, ``str``, ``DTypeLike``,
+        anything or a sequence of texts offers nothing a misspelt choice is
+        refused by: the other alternative takes it. Each comes as the
+        ``Literal`` and the alternative, as written.
+        """
+        found: list[tuple[str, str]] = []
+        stack: list[tuple[str, ast.expr, dict[str, ast.expr]]] = (
+            [] if node is None else [(module, node, bounds)]
+        )
+        seen = 0
+        while stack and seen < _MEMBERS_READ:
+            seen += 1
+            where, union, own = stack.pop()
+            members = self.members(where, union, own)
+            choices = [
+                ast.unparse(member)
+                for inner, member in members
+                if self.resolve(inner, member) in _LITERALS and _offers_texts(member)
+            ]
+            takers = [
+                ast.unparse(member)
+                for inner, member in members
+                if self.admits_any_text(inner, member, own if inner == where else None)
+            ]
+            if choices and takers:
+                found.append((choices[0], takers[0]))
+            for inner, member in members:
+                dotted = self.resolve(inner, member)
+                if dotted in _LITERALS or (
+                    dotted is not None and dotted.partition(".")[0] == "numpy"
+                ):
+                    continue
+                for item in _items(member):
+                    stack.extend(
+                        (inner, each, own if inner == where else {})
+                        for each in (
+                            item.elts if isinstance(item, ast.List) else [item]
+                        )
+                    )
+        return found
+
     def invariant(
         self, module: str, node: ast.expr | None, bounds: dict[str, ast.expr]
     ) -> list[str]:
@@ -927,6 +1341,14 @@ class Annotations:
 
 def _is_none(node: ast.expr) -> bool:
     return isinstance(node, ast.Constant) and node.value is None
+
+
+def _offers_texts(literal: ast.expr) -> bool:
+    """Whether a ``Literal`` lists a text among its choices (a ``str`` or a ``bytes``)."""
+    return any(
+        isinstance(value, ast.Constant) and isinstance(value.value, str | bytes)
+        for value in _items(literal)
+    )
 
 
 def _is_ellipsis(node: ast.expr) -> bool:
@@ -951,6 +1373,24 @@ def _type_bounds(
                 bound = union
             bounds[parameter.name] = bound
     return bounds
+
+
+def _choice_parameters(
+    *nodes: ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef | None,
+) -> dict[str, ast.expr]:
+    """The PEP 695 type parameters of *nodes* as the choice part reads them.
+
+    One with a bound or constraints stands for them, as :func:`_type_bounds`
+    gives them, and one with neither for ``object``: a type checker solves
+    it to ``str`` for a misspelt choice written beside it, so it takes any
+    text.
+    """
+    found: dict[str, ast.expr] = {}
+    for node in nodes:
+        for parameter in getattr(node, "type_params", None) or []:
+            if isinstance(parameter, ast.TypeVar) and parameter.bound is None:
+                found[parameter.name] = ast.Name(id="object", ctx=ast.Load())
+    return {**found, **_type_bounds(*nodes)}
 
 
 def _is_type_parameter(written: ast.expr | None, own: dict[str, ast.expr]) -> bool:
@@ -1556,15 +1996,19 @@ class Reader:
         self._public_records: frozenset[str] | None = None
         self._inputs: frozenset[str] | None = None
 
-    def _bounds(self, function: overloads.Function) -> dict[str, ast.expr]:
-        owner = (
+    def owner(self, function: overloads.Function) -> ast.ClassDef | None:
+        """The class a method is written in, ``None`` for a function."""
+        found = (
             self.annotations.classes.get(
                 f"{function.module}.{function.owner.split('.')[-1]}"
             )
             if function.owner
             else None
         )
-        return _type_bounds(function.implementation, owner[1] if owner else None)
+        return found[1] if found else None
+
+    def _bounds(self, function: overloads.Function) -> dict[str, ast.expr]:
+        return _type_bounds(function.implementation, self.owner(function))
 
     def _method(self, owner: str, name: str, depth: int = 0) -> str | None:
         """A method a class defines or takes from a class of the package it extends."""
@@ -1613,6 +2057,16 @@ class Reader:
                 if method is not None:
                     return method
         return None
+
+    def _typed(self, target: Target) -> frozenset[str]:
+        """The annotations of a callee's parameter that end a route of *target*.
+
+        The array part ends at ``ArrayLike`` and at the package's own
+        array-like of numbers alike: both say the callee converts.
+        """
+        if target is CONVERSION:
+            return target.typed | self.annotations.numeric
+        return target.typed
 
     def _ends(self, target: Target) -> dict[str, tuple[int | None, str | None]]:
         """The calls that end a route of *target*, by their dotted name."""
@@ -2104,7 +2558,9 @@ class Reader:
         annotations = self.annotations
         for name in dict.fromkeys(received):
             field = fields[name]
-            named = annotations.names(field.module, field.annotation, {}, target.typed)
+            named = annotations.names(
+                field.module, field.annotation, {}, self._typed(target)
+            )
             if named is not None and (
                 target is CONVERSION or record in self.public_record_names
             ):
@@ -2146,7 +2602,9 @@ class Reader:
         annotations = self.annotations
         for parameter in dict.fromkeys(received):
             annotation = parameters[parameter].annotation
-            named = annotations.names(callee.module, annotation, bounds, target.typed)
+            named = annotations.names(
+                callee.module, annotation, bounds, self._typed(target)
+            )
             if named is not None and (
                 target is CONVERSION or reached in self.public_names
             ):
@@ -2155,7 +2613,9 @@ class Reader:
             if target is CONVERSION:
                 if not annotations.may_hold_numbers(callee.module, annotation, bounds):
                     continue
-            elif not annotations.may_hold_scalars(callee.module, annotation, bounds):
+            elif target is not WINDOW and not annotations.may_hold_scalars(
+                callee.module, annotation, bounds
+            ):
                 continue
             for deeper, level, hops in self._known_routes(callee, parameter, target):
                 yield (
@@ -2330,11 +2790,16 @@ def findings_in(
             _conversion_findings(reader, function, path, bounds, method=method)
         )
         found.extend(_scalar_findings(reader, function, path, bounds, method=method))
+        found.extend(_window_findings(reader, function, path, bounds, method=method))
         for definition in function.definitions:
             found.extend(
                 _key_findings(reader, function, definition, path, bounds, method=method)
             )
+        found.extend(_context_findings(reader, function, path, bounds, method=method))
+        found.extend(_choice_findings(reader, function, path, bounds, method=method))
     found.extend(_field_findings(reader, root))
+    found.extend(_field_context_findings(reader, root))
+    found.extend(_record_choice_findings(reader, root))
     found.extend(_name_findings(reader, root))
     return sorted(set(found), key=lambda item: (item.path, item.line, item.parameter))
 
@@ -2448,6 +2913,103 @@ def _unconverted(
     return None
 
 
+#: What a finding of the choice part says, after the ``Literal`` and the
+#: alternative that swallows it.
+_SWALLOWED = (
+    "which takes any text, so a misspelt choice type-checks as that "
+    "alternative and only the call refuses it"
+)
+
+
+def _choice_findings(
+    reader: Reader,
+    function: overloads.Function,
+    path: str,
+    bounds: dict[str, ast.expr],
+    *,
+    method: bool,
+) -> list[Finding]:
+    """The parameters that set a ``Literal`` choice beside an alternative that takes any text.
+
+    Each definition a caller can reach is read, the implementation and every
+    overload head: a head is what a type checker matches a call against. A
+    type parameter of the definition or of its class is read as
+    :func:`_choice_parameters` gives it.
+    """
+    found: list[Finding] = []
+    owner = reader.owner(function)
+    for node in function.definitions:
+        own = {**bounds, **_choice_parameters(owner), **_choice_parameters(node)}
+        for parameter in _arguments(node, method=method):
+            for choice, taker in reader.annotations.swallowed_choices(
+                function.module, parameter.annotation, own
+            ):
+                found.append(
+                    Finding(
+                        path,
+                        node.lineno,
+                        function.qualname,
+                        parameter.arg,
+                        f"sets {choice} beside {taker}, {_SWALLOWED}",
+                        part="choice",
+                    )
+                )
+    return found
+
+
+def _record_choice_findings(reader: Reader, root: pathlib.Path) -> list[Finding]:
+    """The fields of public records, and their declared constructors, that swallow a choice.
+
+    A record's generated ``__init__`` takes each field as annotated, and a
+    ``TYPE_CHECKING`` ``__init__`` is what a type checker reads instead: a
+    ``Literal`` beside an alternative that takes any text is read in both,
+    each type parameter of the class that writes it read as
+    :func:`_choice_parameters` gives it.
+    """
+    package = reader.package
+    annotations = reader.annotations
+    found: list[Finding] = []
+    for record in public_records(package, annotations):
+        module, node = annotations.classes[record]
+        path = repository_path(package.paths[module], root)
+        shown = record.removeprefix(f"{module}.")
+        for field in record_fields(package, annotations, record).values():
+            written_in = annotations.classes.get(field.record)
+            for choice, taker in annotations.swallowed_choices(
+                field.module,
+                field.annotation,
+                _choice_parameters(written_in[1] if written_in else None),
+            ):
+                found.append(
+                    Finding(
+                        repository_path(package.paths[field.module], root),
+                        field.line,
+                        record.removeprefix(f"{field.module}."),
+                        field.name,
+                        f"sets {choice} beside {taker}, {_SWALLOWED}",
+                        part="choice",
+                    )
+                )
+        stub = _constructor_stub(annotations, record)
+        if stub is None:
+            continue
+        for parameter in _arguments(stub, method=True):
+            for choice, taker in annotations.swallowed_choices(
+                module, parameter.annotation, _choice_parameters(node, stub)
+            ):
+                found.append(
+                    Finding(
+                        path,
+                        stub.lineno,
+                        f"{shown}.__init__",
+                        parameter.arg,
+                        f"sets {choice} beside {taker}, {_SWALLOWED}",
+                        part="choice",
+                    )
+                )
+    return found
+
+
 def _invariant_findings(
     reader: Reader,
     function: overloads.Function,
@@ -2481,13 +3043,16 @@ def _definitions(
     function: overloads.Function,
     name: str,
     bounds: dict[str, ast.expr],
+    *,
+    heads_only: bool = False,
 ) -> list[
     tuple[ast.FunctionDef | ast.AsyncFunctionDef, ast.expr | None, dict[str, ast.expr]]
 ]:
     """The implementation and each head that names parameter *name*, with its annotation.
 
     A head that takes the parameter as one of its own type parameters tells
-    the shape of its argument apart (rule A57) and is left out.
+    the shape of its argument apart (rule A57) and is left out. With
+    *heads_only*, the implementation is left out too.
     """
     found: list[
         tuple[
@@ -2495,7 +3060,7 @@ def _definitions(
         ]
     ] = []
     node = function.implementation
-    if node is not None and name in overloads._parameters(node):
+    if node is not None and not heads_only and name in overloads._parameters(node):
         found.append((node, overloads._parameters(node)[name].annotation, bounds))
     for head in function.heads:
         parameters = overloads._parameters(head)
@@ -2505,6 +3070,472 @@ def _definitions(
         if not _is_type_parameter(written, own):
             found.append((head, written, {**bounds, **own}))
     return found
+
+
+def _shape(
+    annotations: Annotations,
+    module: str,
+    node: ast.expr | None,
+    bounds: dict[str, ast.expr] | None = None,
+    depth: int = 0,
+) -> object:
+    """An annotation as a value two annotations that read alike share.
+
+    Aliases and type parameters are spelt out, the members of a union and
+    the choices of a ``Literal`` are read in any order, and every name is
+    read as the dotted name it stands for: ``Side`` and ``Literal["left",
+    "right"]`` have one shape, ``Literal["a"]`` and ``Literal["b"]`` two.
+    """
+    if node is None:
+        return None
+    if depth > _NESTING:
+        return ast.unparse(node)
+    if isinstance(node, ast.List):
+        return tuple(
+            _shape(annotations, module, item, bounds, depth + 1) for item in node.elts
+        )
+    found: set[object] = set()
+    for where, member in annotations.members(module, node, bounds):
+        if isinstance(member, ast.Constant):
+            found.add(("constant", repr(member.value)))
+            continue
+        dotted = annotations.resolve(where, member)
+        name = dotted if dotted is not None else ast.unparse(member)
+        if dotted in _LITERALS:
+            for item in _items(member):
+                if isinstance(item, ast.Constant):
+                    # A choice is a value, never a quoted annotation to parse.
+                    found.add(("constant", repr(item.value)))
+                    continue
+                shape = _shape(annotations, where, item, None, depth + 1)
+                found.update(shape if isinstance(shape, frozenset) else {shape})
+            continue
+        items = tuple(
+            _shape(annotations, where, item, None, depth + 1) for item in _items(member)
+        )
+        found.add((name, items))
+    return frozenset(found)
+
+
+#: The shape :func:`_call_shape` gives the parameter it reads apart.
+_ASIDE = "aside"
+
+#: The types a type checker lets an argument of a narrower one stand for:
+#: an ``int`` where a ``float`` or a ``complex`` is asked, a ``float`` where a
+#: ``complex`` is, and a ``bool``, an ``int``, wherever an ``int`` is.
+_PROMOTED: dict[str, frozenset[str]] = {
+    "builtins.bool": frozenset({"builtins.int", "builtins.float", "builtins.complex"}),
+    "builtins.int": frozenset({"builtins.float", "builtins.complex"}),
+    "builtins.float": frozenset({"builtins.complex"}),
+}
+
+#: How many parts a member of a :func:`_shape` has: its name and its items.
+_SHAPE_MEMBER = 2
+
+#: The types that take a choice a ``Literal`` lists, by the type of the choice.
+_CHOICE_TYPES: dict[type, frozenset[str]] = {
+    str: frozenset(
+        {"builtins.str", "typing.LiteralString", "typing_extensions.LiteralString"}
+    ),
+    bytes: frozenset({"builtins.bytes"}),
+    bool: frozenset({"builtins.bool"}) | _PROMOTED["builtins.bool"],
+    int: frozenset({"builtins.int"}) | _PROMOTED["builtins.int"],
+}
+
+
+def _wider(member: object) -> frozenset[str]:
+    """The types besides its own that take every value of one member of a shape.
+
+    A choice a ``Literal`` lists is taken by the type it is a value of
+    (``"a"`` by ``str``), and a number by the types it is promoted to.
+    """
+    if not (isinstance(member, tuple) and len(member) == _SHAPE_MEMBER):
+        return frozenset()
+    name, detail = member
+    if name == "constant" and isinstance(detail, str):
+        try:
+            value = ast.literal_eval(detail)
+        except (ValueError, SyntaxError):
+            return frozenset()
+        return _CHOICE_TYPES.get(type(value), frozenset())
+    if detail == () and isinstance(name, str):
+        return _PROMOTED.get(name, frozenset())
+    return frozenset()
+
+
+#: The one name each spelling of a standard generic container stands for.
+_ORIGINS: dict[str, str] = {
+    "typing.List": "builtins.list",
+    "typing.Dict": "builtins.dict",
+    "typing.Set": "builtins.set",
+    "typing.FrozenSet": "builtins.frozenset",
+    "typing.Tuple": "builtins.tuple",
+    "typing.Type": "builtins.type",
+    "typing.Sequence": "collections.abc.Sequence",
+    "typing.MutableSequence": "collections.abc.MutableSequence",
+    "typing.Mapping": "collections.abc.Mapping",
+    "typing.MutableMapping": "collections.abc.MutableMapping",
+    "typing.AbstractSet": "collections.abc.Set",
+    "typing.MutableSet": "collections.abc.MutableSet",
+    "typing.Collection": "collections.abc.Collection",
+    "typing.Iterable": "collections.abc.Iterable",
+    "typing.Iterator": "collections.abc.Iterator",
+    "typing.Container": "collections.abc.Container",
+    "typing.Reversible": "collections.abc.Reversible",
+}
+
+#: How a type checker reads each argument of a standard generic container,
+#: by the name :data:`_ORIGINS` gives it: ``True`` covariantly (a
+#: ``Sequence[float]`` takes a ``Sequence[int]``), ``False`` invariantly (a
+#: ``list[float]`` refuses a ``list[int]``, a ``Mapping`` a narrower key). A
+#: ``tuple`` reads each of its items covariantly.
+_VARIANCE: dict[str, tuple[bool, ...]] = {
+    "builtins.list": (False,),
+    "builtins.dict": (False, False),
+    "builtins.set": (False,),
+    "builtins.frozenset": (True,),
+    "builtins.type": (True,),
+    "collections.abc.Sequence": (True,),
+    "collections.abc.MutableSequence": (False,),
+    "collections.abc.Mapping": (False, True),
+    "collections.abc.MutableMapping": (False, False),
+    "collections.abc.Set": (True,),
+    "collections.abc.MutableSet": (False,),
+    "collections.abc.Collection": (True,),
+    "collections.abc.Iterable": (True,),
+    "collections.abc.Iterator": (True,),
+    "collections.abc.Container": (True,),
+    "collections.abc.Reversible": (True,),
+}
+
+#: The standard containers each standard container is, with the arguments
+#: it gives them, by the place of its own: a ``list[T]`` is a
+#: ``MutableSequence[T]``, a ``dict[K, V]`` a ``MutableMapping[K, V]``, a
+#: ``Mapping[K, V]`` a ``Collection[K]``.
+_BASES: dict[str, tuple[tuple[str, tuple[int, ...]], ...]] = {
+    "builtins.list": (("collections.abc.MutableSequence", (0,)),),
+    "builtins.dict": (("collections.abc.MutableMapping", (0, 1)),),
+    "builtins.set": (("collections.abc.MutableSet", (0,)),),
+    "builtins.frozenset": (("collections.abc.Set", (0,)),),
+    "collections.abc.MutableSequence": (("collections.abc.Sequence", (0,)),),
+    "collections.abc.Sequence": (
+        ("collections.abc.Reversible", (0,)),
+        ("collections.abc.Collection", (0,)),
+    ),
+    "collections.abc.MutableMapping": (("collections.abc.Mapping", (0, 1)),),
+    "collections.abc.Mapping": (("collections.abc.Collection", (0,)),),
+    "collections.abc.MutableSet": (("collections.abc.Set", (0,)),),
+    "collections.abc.Set": (("collections.abc.Collection", (0,)),),
+    "collections.abc.Collection": (
+        ("collections.abc.Iterable", (0,)),
+        ("collections.abc.Container", (0,)),
+    ),
+    "collections.abc.Iterator": (("collections.abc.Iterable", (0,)),),
+    "collections.abc.Reversible": (("collections.abc.Iterable", (0,)),),
+}
+
+#: The texts a type checker reads as sequences, with the item each holds.
+_TEXT_SEQUENCES: dict[str, str] = {
+    "builtins.str": "builtins.str",
+    "builtins.bytes": "builtins.int",
+}
+
+#: The :func:`_shape` of the ``...`` that makes a ``tuple`` hold any count of one item.
+_ANY_COUNT = frozenset({("constant", "Ellipsis")})
+
+
+def _origin(name: object) -> object:
+    """The one name a spelling of a standard container stands for, any other name as it is."""
+    return _ORIGINS.get(name, name) if isinstance(name, str) else name
+
+
+def _read_as(member: tuple[object, ...]) -> Iterator[tuple[object, tuple[object, ...]]]:
+    """A member of a shape, and every standard container it is, each with its items.
+
+    A ``tuple`` is a ``Sequence`` of what its items hold, a ``str`` a
+    ``Sequence[str]``, a ``bytes`` a ``Sequence[int]``, and a choice a
+    ``Literal`` lists or a number is also each type it is taken by
+    (:func:`_wider`).
+    """
+    queue: list[tuple[object, tuple[object, ...]]] = [
+        (_origin(member[0]), tuple(member[1]) if isinstance(member[1], tuple) else ())
+    ]
+    queue.extend((wider, ()) for wider in _wider(member))
+    seen: set[tuple[object, tuple[object, ...]]] = set()
+    while queue:
+        name, items = queue.pop()
+        if (name, items) in seen:
+            continue
+        seen.add((name, items))
+        yield name, items
+        if name == "builtins.tuple" and items:
+            held = [item for item in items if item != _ANY_COUNT]
+            if all(isinstance(item, frozenset) for item in held):
+                joined = frozenset().union(
+                    *(item for item in held if isinstance(item, frozenset))
+                )
+                queue.append(("collections.abc.Sequence", (joined,)))
+        if name in _TEXT_SEQUENCES and not items:
+            queue.append(
+                (
+                    "collections.abc.Sequence",
+                    (frozenset({(_TEXT_SEQUENCES[str(name)], ())}),),
+                )
+            )
+        for base, places in _BASES.get(str(name), ()):
+            if items and all(place < len(items) for place in places):
+                queue.append((base, tuple(items[place] for place in places)))
+
+
+def _items_take(
+    origin: object, mine: tuple[object, ...], theirs: tuple[object, ...]
+) -> bool:
+    """Whether the items of one standard container take those of another of the same name.
+
+    A bare container holds anything and is held by anything. A ``tuple`` of
+    any count of one item takes a ``tuple`` whose items it takes each.
+    """
+    if not mine or not theirs:
+        return True
+    if origin == "builtins.tuple":
+        if len(mine) == _SHAPE_MEMBER and mine[1] == _ANY_COUNT:
+            held = (
+                theirs[:1]
+                if len(theirs) == _SHAPE_MEMBER and theirs[1] == _ANY_COUNT
+                else theirs
+            )
+            return all(_shape_takes(mine[0], item) for item in held)
+        return len(mine) == len(theirs) and all(
+            _shape_takes(item, other) for item, other in zip(mine, theirs, strict=True)
+        )
+    variance = _VARIANCE[str(origin)]
+    if not len(mine) == len(theirs) == len(variance):
+        return mine == theirs
+    return all(
+        _shape_takes(item, other) and (covariant or _shape_takes(other, item))
+        for item, other, covariant in zip(mine, theirs, variance, strict=True)
+    )
+
+
+def _member_takes(mine: object, theirs: object) -> bool:
+    """Whether one member of a shape takes every value another does.
+
+    The same member; a type a choice is a value of, or a number promoted to
+    (:func:`_wider`); or a standard container that *theirs* is
+    (:func:`_read_as`), whose items take *theirs*' as the container reads
+    them (:data:`_VARIANCE`).
+    """
+    if mine == theirs:
+        return True
+    if not (
+        isinstance(mine, tuple)
+        and isinstance(theirs, tuple)
+        and len(mine) == len(theirs) == _SHAPE_MEMBER
+    ):
+        return False
+    origin = _origin(mine[0])
+    items = tuple(mine[1]) if isinstance(mine[1], tuple) else ()
+    if not items and origin in _wider(theirs):
+        return True
+    if origin != "builtins.tuple" and origin not in _VARIANCE:
+        return False
+    return any(
+        name == origin and _items_take(origin, items, held)
+        for name, held in _read_as(theirs)
+    )
+
+
+def _shape_takes(mine: object, theirs: object) -> bool:
+    """Whether an annotation of shape *mine* takes every value one of shape *theirs* does.
+
+    ``None`` (unannotated), the parameter read apart and anything take every
+    value; otherwise each member of *theirs* is taken by a member of *mine*
+    (:func:`_member_takes`): itself, a type it is a value of (a ``Literal``
+    text of a ``str``) or a number promoted to (an ``int`` of a ``float``),
+    or a standard container it is whose items take its own as a type checker
+    reads them (a ``Sequence[float]`` a ``list[int]``).
+    """
+    if mine is None or mine == _ASIDE:
+        return True
+    if isinstance(mine, frozenset) and any(
+        isinstance(member, tuple) and member[0] in _ANYTHING for member in mine
+    ):
+        return True
+    if isinstance(mine, frozenset) and isinstance(theirs, frozenset):
+        return all(
+            any(_member_takes(member, other) for member in mine) for other in theirs
+        )
+    return bool(mine == theirs)
+
+
+@dataclass(frozen=True)
+class _Slot:
+    """One parameter of a call shape, as a caller fills it."""
+
+    #: ``positional only``, ``positional``, ``*``, ``keyword`` or ``**``.
+    kind: str
+    #: The name a caller gives it by, ``""`` for one no caller names.
+    name: str
+    #: Its annotation's :func:`_shape`, ``None`` unannotated, :data:`_ASIDE`
+    #: for the parameter the shape is read apart from.
+    shape: object
+    #: Whether a call may leave it out.
+    optional: bool
+
+    def lands(self, given: _Slot) -> bool:
+        """Whether this parameter takes the argument a call gives *given*.
+
+        The parameter read apart takes only the argument of the other's,
+        and only it, whatever both are annotated.
+        """
+        if (self.shape == _ASIDE) != (given.shape == _ASIDE):
+            return False
+        return _shape_takes(self.shape, given.shape)
+
+
+@dataclass(frozen=True)
+class _CallShape:
+    """The calls a definition takes, read apart from one of its parameters."""
+
+    positional: tuple[_Slot, ...]
+    star: _Slot | None
+    keywords: tuple[_Slot, ...]
+    double_star: _Slot | None
+
+    def takes(self, other: _CallShape) -> bool:
+        """Whether a definition of this shape takes every call *other*'s takes.
+
+        Each call of the other is read as Python binds it here, for every
+        count of arguments it may give by place (:meth:`_binds`): from the
+        fewest its positional-only parameters ask for to all of them, and
+        past them as far as its ``*args`` reach this shape's ``*args``.
+        """
+        fewest = max(
+            (
+                index + 1
+                for index, slot in enumerate(other.positional)
+                if slot.kind == "positional only" and not slot.optional
+            ),
+            default=0,
+        )
+        most = len(other.positional)
+        if other.star is not None:
+            most = max(most, len(self.positional)) + 1
+        return all(self._binds(other, count) for count in range(fewest, most + 1))
+
+    def _named(self, name: str, count: int) -> _Slot | None:
+        """The parameter an argument given by *name* lands in, past *count* given by place.
+
+        A positional parameter of that name already given by place is given
+        twice, and the call fails: ``None``.
+        """
+        for index, slot in enumerate(self.positional):
+            if slot.kind == "positional" and slot.name == name:
+                return slot if index >= count else None
+        for slot in self.keywords:
+            if slot.name == name:
+                return slot
+        return self.double_star
+
+    def _binds(self, other: _CallShape, count: int) -> bool:
+        """Whether this shape takes every call of *other* that gives *count* arguments by place.
+
+        Each argument given by place lands in the parameter of this shape in
+        that place, or in its ``*args``; each of the other's parameters past
+        them that a call may name lands in the parameter of this shape of
+        that name, or in its ``**kwargs``; a parameter of this shape that no
+        such call always fills has a default; and every name the other's
+        ``**kwargs`` take is one this shape takes too, never a parameter it
+        has already filled by place.
+        """
+        for index in range(count):
+            given = (
+                other.positional[index] if index < len(other.positional) else other.star
+            )
+            placed = (
+                self.positional[index] if index < len(self.positional) else self.star
+            )
+            if given is None or placed is None or not placed.lands(given):
+                return False
+        named = [
+            slot for slot in other.positional[count:] if slot.kind == "positional"
+        ] + list(other.keywords)
+        for slot in named:
+            target = self._named(slot.name, count)
+            if target is None or not target.lands(slot):
+                return False
+        always = {slot.name for slot in named if not slot.optional}
+        if any(
+            not slot.optional and slot.name not in always
+            for slot in [*self.positional[count:], *self.keywords]
+        ):
+            return False
+        spill = other.double_star
+        if spill is None:
+            return True
+        if self.double_star is None or not self.double_star.lands(spill):
+            return False
+        names = {slot.name for slot in other.positional if slot.kind == "positional"}
+        names.update(slot.name for slot in other.keywords)
+        return all(
+            slot.name in names or (index >= count and slot.lands(spill))
+            for index, slot in enumerate(self.positional)
+            if slot.kind == "positional"
+        ) and all(slot.name in names or slot.lands(spill) for slot in self.keywords)
+
+
+def _call_shape(
+    annotations: Annotations,
+    module: str,
+    node: ast.FunctionDef | ast.AsyncFunctionDef,
+    name: str,
+    bounds: dict[str, ast.expr],
+) -> _CallShape:
+    """The calls a definition takes, read apart from its parameter *name*.
+
+    Each parameter by its place, its name, its kind, its annotation's shape
+    (:func:`_shape`) and whether it may be left out. A head whose shape
+    takes every call another's takes (:meth:`_CallShape.takes`) is reached
+    by each of those calls, so a ``dict`` a call hands the other for *name*
+    reaches it too, with every other argument. *name* keeps its place and
+    its kind, and nothing else.
+    """
+    arguments = node.args
+    own = {**bounds, **_type_bounds(node)}
+    positional = [*arguments.posonlyargs, *arguments.args]
+    first_default = len(positional) - len(arguments.defaults)
+
+    def read(parameter: ast.arg, kind: str, *, optional: bool) -> _Slot:
+        named = parameter.arg if kind in {"positional", "keyword"} else ""
+        if parameter.arg == name:
+            return _Slot(kind, named, _ASIDE, optional=True)
+        shape = _shape(annotations, module, parameter.annotation, own)
+        return _Slot(kind, named, shape, optional=optional)
+
+    return _CallShape(
+        positional=tuple(
+            read(
+                parameter,
+                "positional only"
+                if index < len(arguments.posonlyargs)
+                else "positional",
+                optional=index >= first_default,
+            )
+            for index, parameter in enumerate(positional)
+        ),
+        star=None
+        if arguments.vararg is None
+        else read(arguments.vararg, "*", optional=True),
+        keywords=tuple(
+            read(parameter, "keyword", optional=default is not None)
+            for parameter, default in zip(
+                arguments.kwonlyargs, arguments.kw_defaults, strict=True
+            )
+        ),
+        double_star=None
+        if arguments.kwarg is None
+        else read(arguments.kwarg, "**", optional=True),
+    )
 
 
 def _scalar_findings(
@@ -2538,6 +3569,49 @@ def _scalar_findings(
                 path,
             )
         )
+    return found
+
+
+def _window_findings(
+    reader: Reader,
+    function: overloads.Function,
+    path: str,
+    bounds: dict[str, ast.expr],
+    *,
+    method: bool,
+) -> list[Finding]:
+    """The parameters handed to a window reader of SciPy that refuse a tuple.
+
+    ``scipy.signal.get_window`` and the estimators that call it take a
+    window as a name or as a tuple of a name and its parameters
+    (``("kaiser", 8.6)``, ``("general_cosine", weights)``): a parameter
+    that reaches one, through the helpers it is handed to, takes the tuple
+    too, on the implementation and on every head that names it.
+    """
+    node = function.implementation
+    if node is None:
+        return []
+    found: list[Finding] = []
+    for parameter in _arguments(node, method=method):
+        how = reader.conversion(function, parameter.arg, target=WINDOW)
+        if how is None:
+            continue
+        for definition, written, own in _definitions(function, parameter.arg, bounds):
+            if reader.annotations.admits_window(function.module, written, own):
+                continue
+            found.append(
+                Finding(
+                    path,
+                    definition.lineno,
+                    function.qualname,
+                    parameter.arg,
+                    f"annotated {_shown(written)}, which refuses a window given as "
+                    "a tuple of its name and parameters, such as ('kaiser', 8.6), "
+                    f"while {how}",
+                    part="window",
+                )
+            )
+            break
     return found
 
 
@@ -2698,12 +3772,55 @@ def _key(annotations: Annotations, module: str, node: ast.expr) -> str:
     return dotted if dotted is not None else ast.unparse(node)
 
 
+def _keyed_mappings(
+    annotations: Annotations,
+    module: str,
+    node: ast.expr | None,
+    bounds: dict[str, ast.expr],
+) -> list[tuple[ast.expr, list[str]]]:
+    """The mappings at the top of an annotation, each with its key's members.
+
+    A key member that is a ``Literal`` of choices is left out: the caller
+    narrows it as a ``Literal`` parameter is narrowed.
+    """
+    keyed: list[tuple[ast.expr, list[str]]] = []
+    for where, member in annotations.members(module, node, bounds):
+        if annotations.resolve(where, member) not in _MAPPINGS:
+            continue
+        items = _items(member)
+        if not items:
+            continue
+        keys = [
+            _key(annotations, inner_module, inner)
+            for inner_module, inner in annotations.members(where, items[0])
+            if annotations.resolve(inner_module, inner) not in _LITERALS
+        ]
+        keyed.append((member, keys))
+    return keyed
+
+
+def offered_keys(
+    annotations: Annotations,
+    module: str,
+    node: ast.expr | None,
+    bounds: dict[str, ast.expr],
+) -> frozenset[str]:
+    """The keys an annotation offers a mapping keyed by one of them alone."""
+    return frozenset(
+        keys[0]
+        for _, keys in _keyed_mappings(annotations, module, node, bounds)
+        if len(keys) == 1
+    )
+
+
 def key_problems(
     annotations: Annotations,
     module: str,
     node: ast.expr | None,
     bounds: dict[str, ast.expr],
     depth: int = 0,
+    *,
+    offered_beside: frozenset[str] = frozenset(),
 ) -> list[str]:
     """The mappings of an annotation whose key refuses a typed caller's ``dict``.
 
@@ -2716,26 +3833,21 @@ def key_problems(
     ``Literal`` of choices is narrowed by the caller as a ``Literal``
     parameter is, and is left as it stands. Mappings inside the items of a
     container or the values of a mapping are read too.
+
+    *offered_beside* names the keys the other overload heads of the function
+    offer the same parameter alone, those of them that take every call the
+    head read takes but for it: an overloaded function offers each mapping
+    in a head of its own, so that a ``dict`` written in the call is read
+    against one of them, and a caller who gives the same other arguments
+    reaches every such head.
     """
     if node is None or depth > _NESTING:
         return []
     members = annotations.members(module, node, bounds)
-    keyed: list[tuple[str, ast.expr, list[str]]] = []
-    for where, member in members:
-        if annotations.resolve(where, member) not in _MAPPINGS:
-            continue
-        items = _items(member)
-        if not items:
-            continue
-        keys = [
-            _key(annotations, inner_module, inner)
-            for inner_module, inner in annotations.members(where, items[0])
-            if annotations.resolve(inner_module, inner) not in _LITERALS
-        ]
-        keyed.append((where, member, keys))
-    offered = {keys[0] for _, _, keys in keyed if len(keys) == 1}
+    keyed = _keyed_mappings(annotations, module, node, bounds)
+    offered = {keys[0] for _, keys in keyed if len(keys) == 1} | set(offered_beside)
     problems: list[str] = []
-    for _, member, keys in keyed:
+    for member, keys in keyed:
         wanted = set(keys) if len(keys) > 1 else set()
         for key in keys:
             wanted.update(_WIDENED_KEYS.get(key, ()))
@@ -2763,12 +3875,42 @@ def _key_findings(
     *,
     method: bool,
 ) -> list[Finding]:
-    """The parameters of one definition with a mapping a typed caller's ``dict`` cannot match."""
+    """The parameters of one definition with a mapping a typed caller's ``dict`` cannot match.
+
+    A head is read with the keys offered alone for the same parameter by
+    every head that takes each call it takes but for that parameter
+    (:func:`_call_shape`), which is what a caller who gives the head's other
+    arguments reaches. A head whose other parameters are narrower, a
+    ``Literal`` choice of its own for instance, is not reached by every such
+    call, and offers it no key.
+    """
     found: list[Finding] = []
     own = {**bounds, **_type_bounds(node)}
+    is_head = any(node is head for head in function.heads)
+    annotations = reader.annotations
     for parameter in _arguments(node, method=method):
+        beside: frozenset[str] = frozenset()
+        if is_head:
+            call = _call_shape(
+                annotations, function.module, node, parameter.arg, bounds
+            )
+            beside = frozenset().union(
+                *(
+                    offered_keys(annotations, function.module, written, scope)
+                    for head, written, scope in _definitions(
+                        function, parameter.arg, bounds, heads_only=True
+                    )
+                    if _call_shape(
+                        annotations, function.module, head, parameter.arg, bounds
+                    ).takes(call)
+                )
+            )
         problems = key_problems(
-            reader.annotations, function.module, parameter.annotation, own
+            reader.annotations,
+            function.module,
+            parameter.annotation,
+            own,
+            offered_beside=beside,
         )
         if problems:
             found.append(
@@ -2782,6 +3924,467 @@ def _key_findings(
                     part="key",
                 )
             )
+    return found
+
+
+#: What a ``dict`` written in a call holds that it is inferred as on its own:
+#: a number, a text, ``None``, a record. A ``Literal`` choice is inferred as a
+#: ``str``, the numbers of a ``float`` key written ``125`` as an ``int``, a
+#: nested ``dict`` as one of its own, and values of two kinds as what they
+#: share (``object`` for a ``dict[int, float]`` beside a ``dict[float,
+#: float]``), so a key or a value of any other type needs the mapping the
+#: ``dict`` is passed for as its context.
+_CONTEXT_FREE_REFUSED = _LITERALS | _MAPPINGS | _CONTAINERS | _INVARIANT | _ARRAY_LIKE
+
+
+def _needs_context(annotations: Annotations, module: str, node: ast.expr) -> bool:
+    """Whether a key or a value of this type needs the context of its mapping.
+
+    One member besides ``None`` that is a plain type (a number, a text, a
+    record) is inferred the same with or without it; a union of several, a
+    ``Literal``, a mapping, a sequence or ``ArrayLike`` is not.
+    """
+    members = [
+        (where, member)
+        for where, member in annotations.members(module, node)
+        if not _is_none(member)
+    ]
+    if len(members) != 1:
+        return len(members) > 1
+    where, member = members[0]
+    return annotations.resolve(where, member) in _CONTEXT_FREE_REFUSED
+
+
+def _arm_needs_context(annotations: Annotations, module: str, arm: ast.expr) -> bool:
+    """Whether a ``dict`` written for this mapping is inferred wrong without it."""
+    items = [item for item in _items(arm) if not _is_ellipsis(item)]
+    return any(_needs_context(annotations, module, item) for item in items)
+
+
+#: The mappings a ``dict`` is, read covariantly in their values: what a
+#: ``dict`` display read on its own is taken by.
+_READ_MAPPINGS = frozenset({"typing.Mapping", "collections.abc.Mapping"})
+
+#: The types a key written as a number of a narrower one is read as: a
+#: ``float`` key written ``125`` is read as an ``int``.
+_WRITTEN_NARROWER = frozenset({"builtins.float", "builtins.complex"})
+
+#: How many items a mapping takes: its key and its value.
+_MAPPING_ITEMS = 2
+
+
+def _written_member(
+    annotations: Annotations, module: str, member: ast.expr, *, key: bool
+) -> set[object] | None:
+    """The types mypy reads the values written for one member of an annotation as, on their own.
+
+    A choice a ``Literal`` lists is read as its type (``"rms"`` as a
+    ``str``), ``None`` and a plain type as themselves, as members of a
+    :func:`_shape`. A type of items (a mapping, a sequence, an array-like)
+    has none, nor, for a *key*, a ``float`` or a ``complex``, which a caller
+    writes as an ``int`` too: ``None``.
+    """
+    if _is_none(member):
+        return {("constant", "None")}
+    dotted = annotations.resolve(module, member)
+    if dotted in _LITERALS:
+        found: set[object] = set()
+        for choice in _items(member):
+            if not (
+                isinstance(choice, ast.Constant) and type(choice.value) in _CHOICE_TYPES
+            ):
+                return None
+            found.add((f"builtins.{type(choice.value).__name__}", ()))
+        return found
+    if (
+        dotted is None
+        or _items(member)
+        or dotted in _CONTEXT_FREE_REFUSED | _ANYTHING
+        or (key and dotted in _WRITTEN_NARROWER)
+    ):
+        return None
+    return {(dotted, ())}
+
+
+def _written_type(
+    annotations: Annotations,
+    members: Iterable[tuple[str, ast.expr]],
+    *,
+    key: bool,
+) -> frozenset[object] | None:
+    """The one type mypy reads every value written for these members as, on its own.
+
+    The members read by :func:`_written_member` must come to one type:
+    values of two (an ``int`` beside ``None`` for a key, a text beside a
+    number) are read as what each display holds, or as what they share,
+    which is no one type.
+    """
+    found: set[object] = set()
+    for where, member in members:
+        one = _written_member(annotations, where, member, key=key)
+        if one is None:
+            return None
+        found |= one
+    return frozenset(found) if len(found) == 1 else None
+
+
+def _written_taken(
+    annotations: Annotations,
+    module: str,
+    node: ast.expr,
+    taker: object,
+    depth: int = 0,
+) -> bool:
+    """Whether every value written for annotation *node*, as mypy reads it on its own, is one *taker* takes.
+
+    *taker* is a :func:`_shape`. A value of one plain type, or of the type
+    of a ``Literal``'s choices, beside ``None`` or not, is read as that type
+    (:func:`_written_type`), which *taker* takes as a parameter would
+    (:func:`_shape_takes`); a ``dict`` written for one mapping is a ``dict``
+    of its key read alone and its values read so in turn, which a
+    ``Mapping`` of *taker* keyed by that key takes. Values of several types
+    are read as what they share, ``object``, which only anything takes.
+    """
+    if isinstance(taker, frozenset) and any(
+        isinstance(member, tuple) and member[0] in _ANYTHING for member in taker
+    ):
+        return True
+    if depth > _NESTING:
+        return False
+    members = list(annotations.members(module, node))
+    present = [(where, member) for where, member in members if not _is_none(member)]
+    if len(present) < len(members) and not _shape_takes(
+        taker, frozenset({("constant", "None")})
+    ):
+        return False
+    if len(present) == 1 and annotations.resolve(*present[0]) in _MAPPINGS:
+        where, mapping = present[0]
+        items = _items(mapping)
+        key = (
+            _written_type(annotations, annotations.members(where, items[0]), key=True)
+            if len(items) == _MAPPING_ITEMS
+            else None
+        )
+        return (
+            key is not None
+            and isinstance(taker, frozenset)
+            and any(
+                isinstance(member, tuple)
+                and member[0] in _READ_MAPPINGS
+                and isinstance(member[1], tuple)
+                and len(member[1]) == _MAPPING_ITEMS
+                and member[1][0] == key
+                and _written_taken(
+                    annotations, where, items[1], member[1][1], depth + 1
+                )
+                for member in taker
+            )
+        )
+    written = _written_type(annotations, present, key=False)
+    return written is not None and _shape_takes(taker, written)
+
+
+def _covered(
+    annotations: Annotations,
+    module: str,
+    arm: ast.expr,
+    arms: Sequence[tuple[str, ast.expr]],
+) -> bool:
+    """Whether a ``dict`` written for mapping *arm*, as mypy reads it on its own, is one a mapping of *arms* takes.
+
+    ``{"rms": 1.0}`` written for ``Mapping[Literal["rms"], float]`` is a
+    ``dict[str, float]``, which a ``Mapping[str, float]`` beside it takes:
+    the call runs and type checks with no head of its own.
+    """
+    return any(
+        annotations.resolve(where, other) in _READ_MAPPINGS
+        and _written_taken(annotations, module, arm, _shape(annotations, where, other))
+        for where, other in arms
+    )
+
+
+def context_unions(
+    annotations: Annotations,
+    module: str,
+    node: ast.expr | None,
+    bounds: dict[str, ast.expr],
+    depth: int = 0,
+) -> list[tuple[int, tuple[str, ...]]]:
+    """The unions of two or more mappings a ``dict`` written in a call cannot meet.
+
+    mypy reads a ``dict`` display against the type it is passed for when
+    that type holds one mapping; with two or more in a union it reads the
+    display on its own, so a ``Literal`` key is a ``str``, an ``int`` key is
+    not a ``float`` one, and nested displays of two key types join to
+    ``object``: a call that runs is refused. Each union with two or more
+    mappings, one of whose key or value needs the context
+    (:func:`_needs_context`) and whose ``dict`` read on its own no mapping
+    of the union takes (:func:`_covered`), comes with its depth (0 at the
+    top of the annotation) and its mappings as written, aliases spelt out.
+    """
+    if node is None or depth > _NESTING:
+        return []
+    members = annotations.members(module, node, bounds)
+    arms = [
+        (where, member)
+        for where, member in members
+        if annotations.resolve(where, member) in _MAPPINGS
+    ]
+    found: list[tuple[int, tuple[str, ...]]] = []
+    if len(arms) > 1 and any(
+        _arm_needs_context(annotations, where, member)
+        and not _covered(annotations, where, member, arms)
+        for where, member in arms
+    ):
+        found.append((depth, tuple(ast.unparse(member) for _, member in arms)))
+    for where, member in members:
+        if annotations.resolve(where, member) in _LITERALS:
+            continue
+        for item in _items(member):
+            for inner in item.elts if isinstance(item, ast.List) else [item]:
+                found.extend(context_unions(annotations, where, inner, {}, depth + 1))
+    return list(dict.fromkeys(found))
+
+
+def _mapping_arms(
+    annotations: Annotations,
+    module: str,
+    node: ast.expr | None,
+    bounds: dict[str, ast.expr],
+) -> list[tuple[str, object]]:
+    """The mappings at the top of an annotation, each as written and as its :func:`_shape`.
+
+    The shape reads two mappings alike however they are spelt: an alias
+    beside what it stands for, a name imported under another, the choices
+    of a ``Literal`` in another order.
+    """
+    return [
+        (ast.unparse(member), _shape(annotations, where, member))
+        for where, member in annotations.members(module, node, bounds)
+        if annotations.resolve(where, member) in _MAPPINGS
+    ]
+
+
+def _sole_mapping(
+    annotations: Annotations,
+    module: str,
+    node: ast.expr | None,
+    bounds: dict[str, ast.expr],
+) -> object | None:
+    """The :func:`_shape` of the one mapping at the top of an annotation, if it holds one."""
+    arms = _mapping_arms(annotations, module, node, bounds)
+    return arms[0][1] if len(arms) == 1 else None
+
+
+def _unsplit(
+    annotations: Annotations,
+    function: overloads.Function,
+    name: str,
+    arms: Sequence[tuple[str, object]],
+    bounds: dict[str, ast.expr],
+) -> tuple[str, str] | None:
+    """Why the heads of a function do not offer each mapping of a union alone, with the part.
+
+    Every mapping of the union is the one mapping of a head (part
+    ``"context"``), and for every one of those heads, each mapping is the one
+    mapping of a head that takes every call it takes but for parameter
+    *name* (:func:`_call_shape`; part ``"pairing"``): a head whose other
+    parameters are narrower, a ``Literal`` choice of its own for instance,
+    is not reached by a call another head takes, so its mapping is no
+    context for a ``dict`` written in that call. A head narrower than a set
+    that offers every mapping to its calls passes through that set; a head
+    whose calls no head offers some mapping to is refused, even when another
+    group of heads offers them all. Heads that pair each mapping with a value
+    of another parameter on purpose are listed in :data:`PAIRED_MAPPINGS`.
+    *arms* are the union's mappings as written and as their :func:`_shape`,
+    which a head's mapping is matched by.
+    """
+    module = function.module
+    heads: list[tuple[object, _CallShape]] = []
+    for head, written, scope in _definitions(function, name, bounds, heads_only=True):
+        sole = _sole_mapping(annotations, module, written, scope)
+        if sole is not None:
+            heads.append((sole, _call_shape(annotations, module, head, name, bounds)))
+    shown = " | ".join(text for text, _ in arms)
+    offered = [sole for sole, _ in heads]
+    missing = [text for text, shape in arms if shape not in offered]
+    if missing:
+        return "context", (
+            f"takes {shown} with no overload head that takes "
+            f"{' or '.join(missing)} alone, so a dict written in the call is read "
+            "against none of them: a Literal key is read as a str and nested "
+            "mappings of two key types as object, and a call that runs is refused"
+        )
+    if all(
+        all(
+            any(sole == shape and call.takes(first) for sole, call in heads)
+            for _, shape in arms
+        )
+        for _, first in heads
+    ):
+        return None
+    return "pairing", (
+        f"takes {shown}, and the overload heads that take each of them alone "
+        "take different calls but for it, so a dict written in a call one of "
+        "them takes is read against that head's mapping, never against the "
+        "others: offer each mapping alone in heads that take the same other "
+        "arguments"
+    )
+
+
+def _context_findings(
+    reader: Reader,
+    function: overloads.Function,
+    path: str,
+    bounds: dict[str, ast.expr],
+    *,
+    method: bool,
+) -> list[Finding]:
+    """The parameters that offer a ``dict`` written in the call no mapping to be read against.
+
+    A union of two or more mappings at the top of a parameter is offered
+    one mapping at a time, each in an overload head of its own, so that mypy
+    reads the ``dict`` against each in turn: the implementation keeps the
+    union, and every mapping of it is the one mapping of a head. A head that
+    takes two or more of them, or a union of them below the top, where no
+    head can split it, is refused.
+    """
+    annotations = reader.annotations
+    module = function.module
+    found: list[Finding] = []
+    for definition in function.definitions:
+        is_head = any(definition is head for head in function.heads)
+        own = {**bounds, **_type_bounds(definition)}
+        for parameter in _arguments(definition, method=method):
+            for depth, arms in context_unions(
+                annotations, module, parameter.annotation, own
+            ):
+                shown = " | ".join(arms)
+                part = "context"
+                if depth > 0:
+                    problem = (
+                        f"holds {shown} inside, where no overload can give a dict "
+                        "written in the call the one mapping it is read against"
+                    )
+                elif is_head:
+                    problem = (
+                        f"an overload head takes {shown}, which gives a dict "
+                        "written in the call no mapping to be read against"
+                    )
+                else:
+                    unsplit = _unsplit(
+                        annotations,
+                        function,
+                        parameter.arg,
+                        _mapping_arms(annotations, module, parameter.annotation, own),
+                        bounds,
+                    )
+                    if unsplit is None:
+                        continue
+                    part, problem = unsplit
+                found.append(
+                    Finding(
+                        path,
+                        definition.lineno,
+                        function.qualname,
+                        parameter.arg,
+                        problem,
+                        part=part,
+                    )
+                )
+    return found
+
+
+def _declares_constructor(
+    package: overloads.Package, annotations: Annotations, record: str
+) -> bool:
+    """Whether a record is built through an ``__init__`` of its own, not the one ``dataclass`` writes.
+
+    One written in its body, under ``if TYPE_CHECKING:`` or not, which
+    ``dataclass`` keeps and a type checker reads, or none at all
+    (``init=False``): the fields are then what the record holds, not what
+    its constructor takes.
+    """
+    found = annotations.classes.get(record)
+    if found is None:
+        return False
+    module, node = found
+    if any(
+        isinstance(child, ast.FunctionDef | ast.AsyncFunctionDef)
+        and child.name == "__init__"
+        for child in overloads._statements(node.body)
+    ):
+        return True
+    return any(
+        isinstance(decorator, ast.Call)
+        and package.resolve(module, decorator.func) in _DATACLASS
+        and any(
+            keyword.arg == "init"
+            and isinstance(keyword.value, ast.Constant)
+            and keyword.value.value is False
+            for keyword in decorator.keywords
+        )
+        for decorator in node.decorator_list
+    )
+
+
+def _field_context_findings(reader: Reader, root: pathlib.Path) -> list[Finding]:
+    """The fields of public records that offer a ``dict`` written for them no mapping.
+
+    A record's generated ``__init__`` has no overload heads, so a field takes
+    at most one mapping that needs a written ``dict``'s context, at any depth.
+    A record built through an ``__init__`` of its own
+    (:func:`_declares_constructor`) is read through it as a public function
+    is, the one it declares under ``if TYPE_CHECKING:`` too, the keys of a
+    ``TypedDict`` it takes its keywords as read as keywords
+    (:func:`_spelt_out`), and its fields are not.
+    """
+    package = reader.package
+    annotations = reader.annotations
+    found: list[Finding] = []
+    for record in public_records(package, annotations):
+        if _declares_constructor(package, annotations, record):
+            constructor = package.functions.get(f"{record}.__init__")
+            if constructor is not None:
+                implementation = constructor.implementation
+                spelt = overloads.Function(
+                    constructor.module,
+                    constructor.qualname,
+                    constructor.owner,
+                    implementation=None
+                    if implementation is None
+                    else _spelt_out(annotations, record, implementation),
+                    heads=[
+                        _spelt_out(annotations, record, head)
+                        for head in constructor.heads
+                    ],
+                )
+                found.extend(
+                    _context_findings(
+                        reader,
+                        spelt,
+                        repository_path(package.paths[constructor.module], root),
+                        reader._bounds(constructor),
+                        method=True,
+                    )
+                )
+            continue
+        for field in record_fields(package, annotations, record).values():
+            for _, arms in context_unions(
+                annotations, field.module, field.annotation, {}
+            ):
+                found.append(
+                    Finding(
+                        repository_path(package.paths[field.module], root),
+                        field.line,
+                        record.removeprefix(f"{field.module}."),
+                        field.name,
+                        f"holds {' | '.join(arms)}, which gives a dict written "
+                        "for it no mapping to be read against, and a record's "
+                        "constructor has no overload to offer them one at a time",
+                        part="context",
+                    )
+                )
     return found
 
 
@@ -3163,7 +4766,8 @@ def _constructor_stub(
 #: which a type checker reads key by key as it reads keyword parameters.
 MOST_PARAMETERS = 13
 
-#: ``Unpack``, which types a ``**`` parameter as the keys of a ``TypedDict``.
+#: ``Unpack``, which types a ``**`` parameter as the keys of a ``TypedDict``
+#: and gives the items of one tuple to another (``Unpack[tuple[X, ...]]``).
 _UNPACK = frozenset({"typing.Unpack", "typing_extensions.Unpack"})
 
 #: ``TypedDict``, the base of the dictionary a constructor takes its keywords as.
@@ -3500,7 +5104,7 @@ def takes_a_sequence(
 ) -> bool:
     """Whether a constructor parameter takes the sequence a conversion takes."""
     return node is None or any(
-        annotations.resolve(where, member) in _TAKES_A_SEQUENCE
+        annotations.resolve(where, member) in _TAKES_A_SEQUENCE | annotations.numeric
         for where, member in annotations.members(module, node)
     )
 
@@ -3888,11 +5492,16 @@ def _covers_member(
     """Whether one member of a parameter's annotation takes one member of a field's.
 
     The same member as written; ``ArrayLike`` or anything, which take any
-    value; or the same generic whose every argument takes the field's
-    (``Mapping[K, ArrayLike]`` takes a ``Mapping[K, Sequence[float]]``).
+    value; the package's array-like of numbers, which takes a number, an
+    array and a sequence of numbers; or the same generic whose every argument
+    takes the field's (``Mapping[K, ArrayLike]`` takes a ``Mapping[K,
+    Sequence[float]]``).
     """
     (field_module, field_member), (taken_module, taken_member) = field, taken
-    if annotations.resolve(taken_module, taken_member) in _ARRAY_LIKE | _ANYTHING:
+    taker = annotations.resolve(taken_module, taken_member)
+    if taker in _ARRAY_LIKE | _ANYTHING:
+        return True
+    if taker in annotations.numeric and annotations.numbers(field_module, field_member):
         return True
     if ast.unparse(field_member) == ast.unparse(taken_member):
         return True
@@ -4274,7 +5883,7 @@ def family(
         if isinstance(member, ast.Constant) and member.value is None:
             continue
         dotted = annotations.resolve(where, member)
-        if dotted in overloads._ARRAYS | _ARRAY_LIKE | _CONTAINERS:
+        if dotted in overloads._ARRAYS | annotations.array_like | _CONTAINERS:
             kinds.add("array")
         elif dotted in _REALS:
             kinds.add("real")
@@ -4405,9 +6014,10 @@ def judged(
     """The findings no exemption covers, and each exemption that covers none.
 
     :data:`EXEMPT` covers the array part, :data:`FAMILY_EXEMPT` the
-    quantities kept in another family; the numpy-scalar and mapping-key
-    parts have no exemption. A stale exemption comes with the table that
-    lists it.
+    quantities kept in another family, :data:`PAIRED_MAPPINGS` the heads
+    that pair each mapping with a value of another parameter; the
+    numpy-scalar, mapping-key and context parts have no exemption. A stale
+    exemption comes with the table that lists it.
     """
     found, stale = checked([f for f in findings if f.part == "array"], EXEMPT)
     named, stale_named = checked(
@@ -4416,17 +6026,23 @@ def judged(
     built, stale_built = checked(
         [f for f in findings if f.constructor], CONSTRUCTOR_EXEMPT
     )
+    paired, stale_paired = checked(
+        [f for f in findings if f.part == "pairing"], PAIRED_MAPPINGS
+    )
     rest = [
-        f for f in findings if f.part not in {"array", "name"} and not f.constructor
+        f
+        for f in findings
+        if f.part not in {"array", "name", "pairing"} and not f.constructor
     ]
     every = sorted(
-        [*found, *named, *built, *rest],
+        [*found, *named, *built, *paired, *rest],
         key=lambda item: (item.path, item.line, item.parameter),
     )
     return every, [
         *(("EXEMPT", key) for key in stale),
         *(("FAMILY_EXEMPT", key) for key in stale_named),
         *(("CONSTRUCTOR_EXEMPT", key) for key in stale_built),
+        *(("PAIRED_MAPPINGS", key) for key in stale_paired),
     ]
 
 
@@ -4449,8 +6065,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         print(
             "Every public parameter admits what its body converts and the "
             "numpy scalar its body validates, none holds an invariant list, "
-            "dict or set or a mapping a narrower key cannot match, and every "
-            "quantity of the vocabulary keeps its family of numbers."
+            "dict or set or a mapping a narrower key cannot match, each "
+            "mapping a written dict is read against is offered alone, every "
+            "window takes its parameters, no choice stands beside a type that "
+            "takes any text, and every quantity of the vocabulary keeps its "
+            "family of numbers."
         )
         return 0
     if found:
@@ -4467,12 +6086,21 @@ def main(argv: Sequence[str] | None = None) -> int:
             "Mapping[...]; a count a validator takes a numpy integer for with "
             "int | np.integer[Any], a band fraction with BandFraction | "
             "np.integer[Any], a flag with bool | np.bool_; a mapping keyed by "
-            "float beside one keyed by int (BandMapping); a sample rate as the "
-            "float every 'fs' of the API is. A parameter narrower on purpose "
-            "goes in EXEMPT, a quantity of another family in FAMILY_EXEMPT, a "
-            "field a caller-built record stores is admitted by its constructor "
-            "(a TYPE_CHECKING __init__) or goes in CONSTRUCTOR_EXEMPT, at "
-            "the top of scripts/check_parameter_annotations.py with its reason."
+            "float beside one keyed by int (BandMapping), and each mapping of a "
+            "union a dict written in the call needs as its context in an "
+            "overload head of its own, the heads taking the same other "
+            "arguments; a window SciPy reads as a name or a tuple of a name "
+            "and any count of its parameters; a Literal choice beside numbers "
+            "with NumericArrayLike (src/phonometry/_internal/types.py), never "
+            "ArrayLike, str, DTypeLike or a sequence of texts, which take any "
+            "text; a sample rate as the float every 'fs' of the API is. A "
+            "parameter narrower on purpose goes in EXEMPT, a quantity of "
+            "another family in FAMILY_EXEMPT, a field a caller-built record "
+            "stores is admitted by its constructor (a TYPE_CHECKING __init__) "
+            "or goes in CONSTRUCTOR_EXEMPT, and a mapping whose heads pair it "
+            "with a value of another parameter that the run refuses it beside "
+            "goes in PAIRED_MAPPINGS, at the top of "
+            "scripts/check_parameter_annotations.py with its reason."
         )
     for table, key in stale:
         print(f"::error::{table} lists {key}, which needs no exemption any more")

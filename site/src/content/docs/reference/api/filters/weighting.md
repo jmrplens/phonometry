@@ -137,14 +137,14 @@ time_weighting(
     x: Signal,
     fs: float | None = ...,
     mode: Literal['fast', 'slow', 'impulse'] = ...,
-    initial_state: Literal['zero', 'first'] | ArrayLike | None = ...,
+    initial_state: Literal['zero', 'first'] | complex | NestedSequence[complex] | SupportsNumericArray | NestedSequence[SupportsNumericArray] | None = ...,
 ) -> TimeWeightedEnvelope
 
 time_weighting(
     x: ArrayLike,
     fs: float,
     mode: Literal['fast', 'slow', 'impulse'] = ...,
-    initial_state: Literal['zero', 'first'] | ArrayLike | None = ...,
+    initial_state: Literal['zero', 'first'] | complex | NestedSequence[complex] | SupportsNumericArray | NestedSequence[SupportsNumericArray] | None = ...,
 ) -> np.ndarray
 ```
 

@@ -55,6 +55,7 @@ from typing import TYPE_CHECKING, Any, ClassVar, Literal, overload
 import numpy as np
 
 from .._internal.frozen import OwnsArrays
+from .._internal.types import own_window
 from .._internal.validation import (
     require_choice,
     require_count,
@@ -73,7 +74,7 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
-    from .._internal.types import TwoPanels
+    from .._internal.types import TwoPanels, WindowSpec
     from ..io._signal import Signal
 
 Kind = Literal["magnitude", "squared"]
@@ -299,7 +300,9 @@ class EnvelopeSpectrumResult(OwnsArrays):
     :ivar times: Time axis of :attr:`envelope`, in seconds.
     :ivar envelope: The detector output that was transformed, at full rate
         (before mean removal and tapering).
-    :ivar window: Taper name applied before the transform.
+    :ivar window: The taper applied before the transform, a window name or a
+        tuple of a name and its parameters, as given (a list parameter as a
+        tuple).
     :ivar remove_dc: Whether the envelope mean was removed first.
     :ivar fs: Sample rate of the analysed record, in Hz.
     :ivar nfft: FFT length used.
@@ -318,7 +321,7 @@ class EnvelopeSpectrumResult(OwnsArrays):
     kind: Kind
     times: NDArray[np.float64]
     envelope: NDArray[np.float64]
-    window: str
+    window: WindowSpec
     _: KW_ONLY
     remove_dc: bool
     fs: float
@@ -381,6 +384,7 @@ class EnvelopeSpectrumResult(OwnsArrays):
             axis, the envelope with its time axis, or ``mean_level`` with the
             envelope it is the mean of.
         """
+        object.__setattr__(self, "window", own_window(self.window))
         require_ranks(self, frequencies=1, amplitude=1, times=1, envelope=1)
         require_same_length(self, "frequencies", "amplitude", axis="frequency")
         require_same_length(self, "times", "envelope", axis="sample")
@@ -466,7 +470,7 @@ def envelope_spectrum(
     fs: float | None = None,
     *,
     kind: Kind = "magnitude",
-    window: str = "hann",
+    window: WindowSpec = "hann",
     nfft: int | np.integer[Any] | None = None,
     remove_dc: bool = True,
     band: tuple[float, float] | None = None,
@@ -517,8 +521,9 @@ def envelope_spectrum(
         :class:`~phonometry.io.Signal` brings its own, and an explicit value
         that disagrees with it raises instead of silently winning.
     :param kind: ``"magnitude"`` (default) or ``"squared"``.
-    :param window: Taper (any scipy window name; default Hann). The
-        amplitude is corrected for the taper's coherent gain.
+    :param window: Taper, a scipy window name or a tuple of a name and its parameters,
+        such as ``("kaiser", 8.6)`` (default Hann). The amplitude is corrected for the
+        taper's coherent gain.
     :param nfft: FFT length, at least ``x.size`` (default: the record
         length).
     :param remove_dc: Remove the envelope mean before the transform

@@ -674,13 +674,22 @@ def test_the_modules_of_the_cases_import() -> None:
         assert module is not None
 
 
-def _repeated_phrase(text: str, span: int = 7) -> str | None:
-    """A run of ``span`` words of 35 characters or more that ``text`` says twice."""
+#: The shortest run of words a return description may not say twice: five
+#: words of 25 characters or more. A formula left behind beside the sentence
+#: that took its place (``:math:`A_{\text{air}} = 4 m V (1 - \psi)`, m2``) is
+#: a run of five words that short, and no return description of the package
+#: repeats one on purpose.
+_REPEATED_WORDS = 5
+_REPEATED_CHARACTERS = 25
+
+
+def _repeated_phrase(text: str, span: int = _REPEATED_WORDS) -> str | None:
+    """A run of ``span`` words, :data:`_REPEATED_CHARACTERS` long or more, said twice."""
     words = text.split()
     first: dict[str, int] = {}
     for start in range(len(words) - span + 1):
         phrase = " ".join(words[start : start + span])
-        if len(phrase) < 35:
+        if len(phrase) < _REPEATED_CHARACTERS:
             continue
         if phrase in first and start - first[phrase] >= span:
             return phrase
@@ -719,10 +728,10 @@ def test_a_return_description_says_its_rule_once() -> None:
     """A ``:return:`` field states what the function returns once.
 
     Rewriting a return to state the array rule left the old sentence behind
-    it in three places (``room.mean_absorption``,
-    ``vibration.injury_probability`` and the reverberation time of
-    ``room.enclosed_space_absorption``), so their reference pages gave the
-    formula and the rule twice in two wordings.
+    it in four places (``room.mean_absorption``,
+    ``vibration.injury_probability``, and the reverberation time and the air
+    absorption area of ``room.enclosed_space_absorption``), so their
+    reference pages gave the formula and the rule twice in two wordings.
     """
     package = pathlib.Path(phonometry.__file__).parent
     repeated = []

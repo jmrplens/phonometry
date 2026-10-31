@@ -965,7 +965,7 @@ def test_a_published_field_type_is_published_too() -> None:
     from numpy.typing import ArrayLike, NDArray
 
     import phonometry
-    from phonometry._internal.types import BandFraction
+    from phonometry._internal.types import BandFraction, WindowSpec
 
     domains = {
         name
@@ -989,6 +989,7 @@ def test_a_published_field_type_is_published_too() -> None:
         "NDArray": NDArray,
         "Real": numbers.Real,
         "BandFraction": BandFraction,
+        "WindowSpec": WindowSpec,
     }
 
     def parts(annotation: object) -> typing.Iterator[object]:

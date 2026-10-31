@@ -46,7 +46,7 @@ harmonic_analysis(
     n_harmonics: int = 10,
     notch_q: float = 2.0,
     bandwidth: float | None = 20000.0,
-    window: str = 'hann',
+    window: str | tuple[ArrayLike, ...] = 'hann',
 ) -> HarmonicDistortionResult
 ```
 
@@ -65,7 +65,7 @@ conventions), THD+N and SINAD into a plottable result.
 | `n_harmonics` | Highest harmonic order (default 10). |
 | `notch_q` | Effective notch quality factor for THD+N (default 2.0). |
 | `bandwidth` | AES17 measurement bandwidth for THD+N/SINAD, in Hz (default 20 kHz; `None` measures the full Nyquist band). |
-| `window` | FFT window (default `'hann'`). |
+| `window` | FFT window, a scipy window name or a tuple of a name and its parameters (default `'hann'`). |
 
 **Returns:** A [`HarmonicDistortionResult`](/phonometry/reference/api/electroacoustics/distortion/#harmonicdistortionresult).
 
@@ -86,7 +86,7 @@ harmonic_distortion(
     fundamental: float,
     order: int | np.integer[Any],
     n_harmonics: int = 10,
-    window: str = 'hann',
+    window: str | tuple[ArrayLike, ...] = 'hann',
 ) -> float
 ```
 
@@ -104,7 +104,7 @@ amplitude relative to the total RMS.
 | `fundamental` | Fundamental frequency $f_1$, in Hz. |
 | `order` | Harmonic order `n` (an integer >= 2; an integral float such as `3.0` is accepted as its integer). |
 | `n_harmonics` | Highest harmonic order used for the total RMS. |
-| `window` | FFT window (default `'hann'`). |
+| `window` | FFT window, a scipy window name or a tuple of a name and its parameters (default `'hann'`). |
 
 **Returns:** nth-order harmonic distortion, as a ratio.
 
@@ -172,7 +172,7 @@ sinad(
     *,
     notch_q: float = 2.0,
     bandwidth: float | None = 20000.0,
-    window: str = 'hann',
+    window: str | tuple[ArrayLike, ...] = 'hann',
 ) -> float
 ```
 
@@ -195,7 +195,7 @@ measurement (same notch, same measurement bandwidth).
 | `fundamental` | Fundamental frequency, or `None` to auto-detect. |
 | `notch_q` | Effective notch quality factor (AES17: 1.2..3; default 2.0). |
 | `bandwidth` | Upper band-edge frequency of the AES17 chain, in Hz (default 20 kHz); `None` measures the full Nyquist band. |
-| `window` | FFT window used only for fundamental auto-detection. |
+| `window` | FFT window, a scipy window name or a tuple of a name and its parameters, used only for fundamental auto-detection. |
 
 **Returns:** SINAD, in dB.
 
@@ -215,7 +215,7 @@ thd(
     *,
     kind: Literal['F', 'R'] = 'F',
     n_harmonics: int = 10,
-    window: str = 'hann',
+    window: str | tuple[ArrayLike, ...] = 'hann',
 ) -> float
 ```
 
@@ -248,7 +248,7 @@ datasheets; the two agree to first order for small distortion.
 | `fundamental` | Fundamental frequency $f_1$ in Hz, or `None` to take the largest spectral peak. |
 | `kind` | `'F'` (relative to the fundamental, the default) or `'R'` (relative to the total RMS, the 14.12.3.2 quantity). |
 | `n_harmonics` | Highest harmonic order summed (default 10). |
-| `window` | FFT window (default `'hann'`). |
+| `window` | FFT window, a scipy window name or a tuple of a name and its parameters (default `'hann'`). |
 
 **Returns:** Total harmonic distortion, as a ratio (0..).
 
@@ -269,7 +269,7 @@ thd_plus_noise(
     *,
     notch_q: float = 2.0,
     bandwidth: float | None = 20000.0,
-    window: str = 'hann',
+    window: str | tuple[ArrayLike, ...] = 'hann',
     as_db: bool = False,
 ) -> float
 ```
@@ -294,7 +294,7 @@ and out-of-band noise do not inflate the result.
 | `fundamental` | Fundamental frequency, or `None` to auto-detect. |
 | `notch_q` | Effective notch quality factor (AES17: 1.2..3; default 2.0). |
 | `bandwidth` | Upper band-edge frequency of the AES17 chain, in Hz (default 20 kHz, the 5.2.5 standard value; capped at Nyquist). `None` disables the chain and measures the full Nyquist band (20 Hz high-pass included only when the chain is active). |
-| `window` | FFT window used only for fundamental auto-detection. |
+| `window` | FFT window, a scipy window name or a tuple of a name and its parameters, used only for fundamental auto-detection. |
 | `as_db` | Return $20 \log_{10}(\text{ratio})$ in dB instead of the ratio. |
 
 **Returns:** THD+N as a ratio (default) or in dB.
@@ -316,7 +316,7 @@ weighted_thd(
     *,
     notch_q: float = 2.0,
     weighting: Literal['468', 'A', 'C'] = '468',
-    window: str = 'hann',
+    window: str | tuple[ArrayLike, ...] = 'hann',
 ) -> float
 ```
 
@@ -344,7 +344,7 @@ between 31,5 Hz and 400 Hz.
 | `fundamental` | Fundamental frequency, or `None` to auto-detect. |
 | `notch_q` | Effective notch quality factor (default 2.0). |
 | `weighting` | Frequency weighting applied to the residual: `'468'` (ITU-R BS.468-4 / IEC 60268-1, the 14.12.11 default), `'A'` or `'C'`. |
-| `window` | FFT window used only for fundamental auto-detection. |
+| `window` | FFT window, a scipy window name or a tuple of a name and its parameters, used only for fundamental auto-detection. |
 
 **Returns:** Weighted THD, as a ratio.
 

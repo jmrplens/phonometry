@@ -82,7 +82,7 @@ import math
 from collections.abc import Mapping
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Final, Literal
+from typing import TYPE_CHECKING, Any, Final, Literal, overload
 
 import numpy as np
 
@@ -137,7 +137,9 @@ BurstColumns = Mapping[BurstQuantity, float]
 #: The indications by burst length, ``None`` for the continuous row.
 #: ``Mapping`` is invariant in its key, so a ``dict[int, ...]`` that leaves
 #: the continuous row out is not a ``Mapping[int | None, ...]``: each key a
-#: caller may write is named.
+#: caller may write is named. :func:`verify_signal_burst_response` takes each
+#: of them in an overload of its own, so that a ``dict`` written in the call
+#: is read against one of them, its column names as the ``Literal`` they are.
 BurstIndications = (
     Mapping[int, BurstColumns]
     | Mapping[int | None, BurstColumns]
@@ -864,6 +866,36 @@ class SignalBurstVerification(OwnsArrays):
 
         check_language(language)
         return plot_signal_burst_verification(self, ax, language=language, **kwargs)
+
+
+@overload
+def verify_signal_burst_response(
+    application: BurstApplication,
+    name: BurstRow,
+    measured: Mapping[int, BurstColumns],
+    *,
+    amplitude_m_s2: float = 1.0,
+) -> SignalBurstVerification: ...
+
+
+@overload
+def verify_signal_burst_response(
+    application: BurstApplication,
+    name: BurstRow,
+    measured: Mapping[None, BurstColumns],
+    *,
+    amplitude_m_s2: float = 1.0,
+) -> SignalBurstVerification: ...
+
+
+@overload
+def verify_signal_burst_response(
+    application: BurstApplication,
+    name: BurstRow,
+    measured: Mapping[int | None, BurstColumns],
+    *,
+    amplitude_m_s2: float = 1.0,
+) -> SignalBurstVerification: ...
 
 
 def verify_signal_burst_response(

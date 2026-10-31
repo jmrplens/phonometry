@@ -49,7 +49,11 @@ Annotations are read through the package's type aliases (``type X = ...``,
 ``|`` union, a dotted name, or a bare name that stands for a class or for
 another alias), and a name is followed through the imports that bring it
 in, so an alias of an alias, or an axes class imported under another name,
-is read for what it is. A name handed to ``projection=``, ``polar=``,
+is read for what it is. A generic alias (``type Many[P] = tuple[P, ...]``,
+or an assignment generic in a module-level ``TypeVar``) is read as its value
+with each parameter the argument a use gives it, read in the module that
+writes the use, and with ``Any`` for each when it is written bare, as a type
+checker reads it. A name handed to ``projection=``, ``polar=``,
 ``subplot_kw=`` or a ``**`` mapping, when the function does not bind it
 itself, is read through the module constant it names, in its own module or
 imported from another. A call is followed through the imports of its module
@@ -74,6 +78,7 @@ from __future__ import annotations
 import argparse
 import ast
 import builtins
+import copy
 import pathlib
 import re
 import sys
@@ -83,7 +88,7 @@ from typing import TYPE_CHECKING
 from ast_scan import ROOT, exempted, python_files, relative
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable, Iterator, Sequence
+    from collections.abc import Iterable, Iterator, Mapping, Sequence
 
 #: Where the package lives; the default when no path is given.
 SOURCE = ROOT / "src" / "phonometry"
@@ -438,6 +443,26 @@ _SCALARS = frozenset(
 #: What a union is spelled with besides ``|``.
 _UNIONS = frozenset({"typing.Union", "typing.Optional"})
 
+#: What a ``Literal`` is spelled with: what it lists are values, not names.
+_LITERAL_FORMS = frozenset({"typing.Literal", "typing_extensions.Literal"})
+
+#: What makes a module-level name a parameter of an assignment alias generic
+#: in it, the variadic one apart.
+_TYPE_VARIABLES = frozenset(
+    {
+        "typing.TypeVar",
+        "typing_extensions.TypeVar",
+        "typing.ParamSpec",
+        "typing_extensions.ParamSpec",
+    }
+)
+_VARIADIC_TYPE_VARIABLES = frozenset(
+    {"typing.TypeVarTuple", "typing_extensions.TypeVarTuple"}
+)
+
+#: What a generic alias written bare holds for each of its parameters.
+_BARE_PARAMETER = "typing.Any"
+
 #: The decorator that makes a definition an overload head.
 _OVERLOAD = frozenset({"typing.overload", "typing_extensions.overload"})
 
@@ -532,6 +557,99 @@ def _alias(node: ast.stmt) -> tuple[str, ast.expr] | None:
     ):
         return node.targets[0].id, node.value
     return None
+
+
+def _alias_parameters(node: ast.stmt) -> tuple[tuple[str, bool], ...]:
+    """The type parameters a ``type X[...] = ...`` alias declares, each marked variadic or not."""
+    if not isinstance(node, ast.TypeAlias):
+        return ()
+    return tuple(
+        (parameter.name, isinstance(parameter, ast.TypeVarTuple))
+        for parameter in node.type_params
+        if isinstance(parameter, ast.TypeVar | ast.ParamSpec | ast.TypeVarTuple)
+    )
+
+
+def _rewritten(transformer: ast.NodeTransformer, node: ast.expr) -> ast.expr:
+    """*node* as *transformer* rewrites it, an expression still."""
+    rewritten = transformer.visit(node)
+    return rewritten if isinstance(rewritten, ast.expr) else node
+
+
+def _in_order(node: ast.AST) -> Iterator[ast.AST]:
+    """Every node of a tree, each before its children, in the order written."""
+    yield node
+    for child in ast.iter_child_nodes(node):
+        yield from _in_order(child)
+
+
+class _Substituted(ast.NodeTransformer):
+    """An alias's value with each of its parameters replaced by what it is given."""
+
+    def __init__(self, given: dict[str, ast.expr]) -> None:
+        self.given = given
+
+    def visit_Name(self, node: ast.Name) -> ast.expr:
+        if node.id in self.given:
+            return ast.copy_location(copy.deepcopy(self.given[node.id]), node)
+        return node
+
+
+class _Requalified(ast.NodeTransformer):
+    """An argument written in one module, spelled so that another module reads it alike.
+
+    A name that stands for something else, or for nothing, in the module the
+    alias is defined in becomes the dotted name it stands for where it is
+    written (:meth:`Package.resolve` reads one), and a name of *local*, a
+    type parameter of the function that writes it, becomes what *local*
+    gives for it. A quoted annotation is read as the expression it holds;
+    the choices a ``Literal`` lists are values, and stay as written.
+    """
+
+    def __init__(
+        self,
+        package: Package,
+        caller: str,
+        where: str,
+        local: Mapping[str, ast.expr] | None,
+    ) -> None:
+        self.package = package
+        self.caller = caller
+        self.where = where
+        self.local = local or {}
+        self.literal = False
+
+    def visit_Name(self, node: ast.Name) -> ast.expr:
+        if node.id in self.local and not self.literal:
+            inner = _Requalified(self.package, self.caller, self.where, None)
+            return _rewritten(inner, copy.deepcopy(self.local[node.id]))
+        return self._qualified(node)
+
+    def visit_Attribute(self, node: ast.Attribute) -> ast.expr:
+        return self._qualified(node)
+
+    def visit_Subscript(self, node: ast.Subscript) -> ast.expr:
+        literal = self.package.resolve(self.caller, node.value) in _LITERAL_FORMS
+        node.value = _rewritten(self, node.value)
+        before, self.literal = self.literal, self.literal or literal
+        node.slice = _rewritten(self, node.slice)
+        self.literal = before
+        return node
+
+    def visit_Constant(self, node: ast.Constant) -> ast.expr:
+        if self.literal or not isinstance(node.value, str):
+            return node
+        try:
+            parsed = ast.parse(node.value, mode="eval").body
+        except SyntaxError:
+            return node
+        return _rewritten(self, parsed)
+
+    def _qualified(self, node: ast.Name | ast.Attribute) -> ast.expr:
+        dotted = self.package.resolve(self.caller, node)
+        if dotted is None or self.package.resolve(self.where, node) == dotted:
+            return node
+        return ast.copy_location(ast.Name(id=dotted, ctx=ast.Load()), node)
 
 
 def _statements(body: Iterable[ast.stmt]) -> Iterator[ast.stmt]:
@@ -648,6 +766,9 @@ class Package:
         self.defined: dict[str, set[str]] = {}
         #: Type aliases, by their dotted name, with the module that reads them.
         self.aliases: dict[str, tuple[str, ast.expr]] = {}
+        #: The type parameters of each generic alias, by its dotted name, in
+        #: order, each marked variadic (a ``TypeVarTuple``) or not.
+        self.parameters: dict[str, tuple[tuple[str, bool], ...]] = {}
         #: Module-level assignments, by their dotted name, with their module.
         self.constants: dict[str, tuple[str, ast.expr]] = {}
         #: Every class a module defines at its top level, by its dotted name.
@@ -683,6 +804,10 @@ class Package:
                     )
                     into[f"{module}.{found[0]}"] = (module, found[1])
                     self.defined[module].add(found[0])
+                    if _alias_parameters(node):
+                        self.parameters[f"{module}.{found[0]}"] = _alias_parameters(
+                            node
+                        )
                 elif isinstance(
                     node, ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef
                 ):
@@ -691,6 +816,68 @@ class Package:
                         self.classes.add(f"{module}.{node.name}")
             self._read_body(module, package, tree.body, "", None)
         self._keep_type_names(candidates)
+        for dotted, (module, value) in self.aliases.items():
+            if dotted not in self.parameters:
+                free = self._free_type_variables(module, value)
+                if free:
+                    self.parameters[dotted] = free
+
+    def _free_type_variables(
+        self, module: str, value: ast.expr
+    ) -> tuple[tuple[str, bool], ...]:
+        """The module-level type variables an assignment alias is generic in, in order.
+
+        Its parameters, as for a generic class: each ``TypeVar``,
+        ``ParamSpec`` or ``TypeVarTuple`` its value names, in the order they
+        first appear.
+        """
+        found: dict[str, bool] = {}
+        for node in _in_order(value):
+            if not isinstance(node, ast.Name) or node.id in found:
+                continue
+            dotted = self.resolve(module, node)
+            if dotted is None or dotted not in self.constants:
+                continue
+            where, assigned = self.constants[dotted]
+            if not isinstance(assigned, ast.Call):
+                continue
+            maker = self.resolve(where, assigned.func)
+            if maker in _TYPE_VARIABLES or maker in _VARIADIC_TYPE_VARIABLES:
+                found[node.id] = maker in _VARIADIC_TYPE_VARIABLES
+        return tuple(found.items())
+
+    def _bound(
+        self,
+        caller: str,
+        alias: str,
+        arguments: list[ast.expr] | None,
+        local: Mapping[str, ast.expr] | None,
+    ) -> ast.expr:
+        """The value of generic alias *alias* with its parameters read as *arguments*.
+
+        Each argument is read in *caller*, the module that writes the use, and
+        stands for the parameter in its place, up to a variadic parameter,
+        which is left as written with those after it; the arguments of an
+        alias of one ``ParamSpec`` (``Call[int, str]``) stand for it as the
+        list they make. Written bare (*arguments* ``None``), each parameter
+        but a variadic one is ``Any``.
+        """
+        where, value = self.aliases[alias]
+        parameters = self.parameters[alias]
+        given: dict[str, ast.expr] = {}
+        if arguments is None:
+            for name, variadic in parameters:
+                if not variadic:
+                    given[name] = ast.Name(id=_BARE_PARAMETER, ctx=ast.Load())
+            return _rewritten(_Substituted(given), copy.deepcopy(value))
+        if len(parameters) == 1 and len(arguments) > 1:
+            arguments = [ast.List(elts=arguments, ctx=ast.Load())]
+        for (name, variadic), argument in zip(parameters, arguments, strict=False):
+            if variadic:
+                break
+            requalified = _Requalified(self, caller, where, local)
+            given[name] = _rewritten(requalified, copy.deepcopy(argument))
+        return _rewritten(_Substituted(given), copy.deepcopy(value))
 
     def _keep_type_names(self, candidates: dict[str, tuple[str, ast.expr]]) -> None:
         """Keep, as aliases, the bare names that stand for a class or an alias."""
@@ -758,6 +945,10 @@ class Package:
     ) -> str | None:
         """The dotted path a name or an attribute chain stands for."""
         if isinstance(node, ast.Name):
+            if "." in node.id:
+                # A name an argument of a generic alias was spelt with in
+                # another module (``_Requalified``): the path it stands for.
+                return self.canonical(node.id)
             if local and node.id in local:
                 return self.canonical(local[node.id])
             if node.id in self.defined.get(module, ()):
@@ -781,9 +972,19 @@ class Package:
         return dotted if target is None else self.canonical(target, depth + 1)
 
     def members(
-        self, module: str, node: ast.expr | None, seen: frozenset[str] = frozenset()
+        self,
+        module: str,
+        node: ast.expr | None,
+        seen: frozenset[str] = frozenset(),
+        *,
+        local: Mapping[str, ast.expr] | None = None,
     ) -> list[tuple[str, ast.expr]]:
-        """The members of a union, each with the module that reads it, aliases expanded."""
+        """The members of a union, each with the module that reads it, aliases expanded.
+
+        A generic alias is expanded with the arguments it is given
+        (:meth:`_bound`); *local* gives what a type parameter of the function
+        that writes *node* stands for when it is one of those arguments.
+        """
         if node is None:
             return []
         if isinstance(node, ast.Constant) and isinstance(node.value, str):
@@ -791,23 +992,31 @@ class Package:
                 parsed = ast.parse(node.value, mode="eval").body
             except SyntaxError:
                 return [(module, node)]
-            return self.members(module, parsed, seen)
+            return self.members(module, parsed, seen, local=local)
         if isinstance(node, ast.BinOp) and isinstance(node.op, ast.BitOr):
             return [
-                *self.members(module, node.left, seen),
-                *self.members(module, node.right, seen),
+                *self.members(module, node.left, seen, local=local),
+                *self.members(module, node.right, seen, local=local),
             ]
-        if (
-            isinstance(node, ast.Subscript)
-            and self.resolve(module, node.value) in _UNIONS
-        ):
+        if isinstance(node, ast.Subscript):
+            base = self.resolve(module, node.value)
             items = (
                 node.slice.elts if isinstance(node.slice, ast.Tuple) else [node.slice]
             )
-            return [m for item in items for m in self.members(module, item, seen)]
+            if base in _UNIONS:
+                return [
+                    m
+                    for item in items
+                    for m in self.members(module, item, seen, local=local)
+                ]
+            if base in self.parameters and base not in seen:
+                bound = self._bound(module, base, list(items), local)
+                return self.members(self.aliases[base][0], bound, seen | {base})
         dotted = self.resolve(module, node)
         if dotted in self.aliases and dotted not in seen:
             where, value = self.aliases[dotted]
+            if dotted in self.parameters:
+                value = self._bound(module, dotted, None, local)
             return self.members(where, value, seen | {dotted})
         return [(module, node)]
 

@@ -61,11 +61,18 @@ def _package(tmp_path: pathlib.Path, **modules: str) -> pathlib.Path:
     return root
 
 
-def _refused(tmp_path: pathlib.Path, **modules: str) -> dict[str, list[str]]:
-    """The parameters refused, as ``function(parameter)``, with the reasons."""
+def _refused(
+    tmp_path: pathlib.Path, *, part: str | None = None, **modules: str
+) -> dict[str, list[str]]:
+    """The parameters refused, as ``function(parameter)``, with the reasons.
+
+    With *part*, only the findings of that part of the rule.
+    """
     root = _package(tmp_path, **modules)
     found: dict[str, list[str]] = {}
     for finding in cpa.findings_in(sorted(root.rglob("*.py")), root):
+        if part is not None and finding.part != part:
+            continue
         key = f"{finding.function}({finding.parameter})"
         found.setdefault(key, []).append(finding.problem)
     return found
@@ -1322,6 +1329,7 @@ def test_a_mapping_keyed_by_float_is_offered_beside_one_keyed_by_int(
 ) -> None:
     refused = _refused(
         tmp_path,
+        part="key",
         api="""
         from typing import Literal
 
@@ -1374,6 +1382,1087 @@ def test_a_mapping_keyed_by_float_is_offered_beside_one_keyed_by_int(
     ]
 
 
+def test_a_head_is_offered_keys_only_by_heads_that_take_its_other_arguments(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A key offered by a head that a call of this one misses offers it nothing.
+
+    ``rating("b", by_band)`` with a ``dict[int, float]`` matches no head:
+    the head keyed by ``int`` takes ``kind="a"`` only, and the one of
+    ``defaulted`` keyed by ``int`` asks for the ``kind`` the other lets a
+    call leave out. Heads that differ only in the mapping, that spell one
+    ``Literal`` once through an alias and once in full, that name a
+    positional-only parameter apart, or whose head keyed by ``int`` takes
+    more choices than the other, offer each other their keys.
+    """
+    refused = _refused(
+        tmp_path,
+        part="key",
+        api="""
+        from typing import Literal
+
+        Kind = Literal["a", "b"]
+
+        __all__ = ["rating", "spelt", "defaulted", "positional", "wider"]
+
+        @overload
+        def rating(kind: Literal["a"], by_band: Mapping[int, float]) -> float: ...
+        @overload
+        def rating(kind: Literal["b"], by_band: Mapping[float, float]) -> float: ...
+        def rating(
+            kind: Kind, by_band: Mapping[int, float] | Mapping[float, float]
+        ) -> float:
+            return 0.0
+
+        @overload
+        def spelt(kind: Kind, by_band: Mapping[int, float]) -> float: ...
+        @overload
+        def spelt(kind: Literal["b", "a"], by_band: Mapping[float, float]) -> float: ...
+        def spelt(
+            kind: Kind, by_band: Mapping[int, float] | Mapping[float, float]
+        ) -> float:
+            return 0.0
+
+        @overload
+        def defaulted(by_band: Mapping[int, float], *, kind: Kind) -> float: ...
+        @overload
+        def defaulted(
+            by_band: Mapping[float, float], *, kind: Kind = "a"
+        ) -> float: ...
+        def defaulted(
+            by_band: Mapping[int, float] | Mapping[float, float], *, kind: Kind = "a"
+        ) -> float:
+            return 0.0
+
+        @overload
+        def positional(by_band: Mapping[int, float], kind: Kind, /) -> float: ...
+        @overload
+        def positional(by_band: Mapping[float, float], other: Kind, /) -> float: ...
+        def positional(
+            by_band: Mapping[int, float] | Mapping[float, float], kind: Kind, /
+        ) -> float:
+            return 0.0
+
+        @overload
+        def wider(
+            by_band: Mapping[int, float], kind: Kind | None = None
+        ) -> float: ...
+        @overload
+        def wider(by_band: Mapping[float, float], kind: Literal["a"]) -> float: ...
+        def wider(
+            by_band: Mapping[int, float] | Mapping[float, float],
+            kind: Kind | None = None,
+        ) -> float:
+            return 0.0
+        """,
+    )
+    assert sorted(refused) == ["defaulted(by_band)", "rating(by_band)"]
+    assert refused["rating(by_band)"] == [
+        "holds Mapping[float, float] with no mapping keyed by int, which refuses "
+        "a typed caller's dict of the narrower key"
+    ]
+
+
+def test_a_head_that_takes_every_call_of_another_offers_it_its_keys(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A head reached by each call of another is that call's context, however it is written.
+
+    A ``str`` takes the text a ``Literal`` lists, a ``float`` an ``int``, an
+    ``int`` a ``bool``; a positional parameter the other head lacks is one
+    its calls leave out when it has a default, or give by the name a
+    keyword of theirs gives; a positional-only one is taken in its place by
+    a positional one of any name; and ``*args`` take what the other's
+    positional parameters past it hold. In each function below the head
+    keyed by ``int`` takes every call of the head keyed by ``float``, so a
+    ``dict[int, float]`` written in one of those calls reaches it. A head
+    keyed by ``int`` narrower than the other (``narrower``, ``unnamed``)
+    does not, and the other is refused.
+    """
+    refused = _refused(
+        tmp_path,
+        part="key",
+        api="""
+        from typing import Literal
+
+        Kind = Literal["a", "b"]
+
+        __all__ = [
+            "texted", "promoted", "flagged", "trailing", "named", "placed",
+            "starred", "narrower", "unnamed",
+        ]
+
+        @overload
+        def texted(kind: str, by_band: Mapping[int, float]) -> float: ...
+        @overload
+        def texted(kind: Literal["a"], by_band: Mapping[float, float]) -> float: ...
+        def texted(
+            kind: str, by_band: Mapping[int, float] | Mapping[float, float]
+        ) -> float:
+            return 0.0
+
+        @overload
+        def promoted(order: float, by_band: Mapping[int, float]) -> float: ...
+        @overload
+        def promoted(order: int, by_band: Mapping[float, float]) -> float: ...
+        def promoted(
+            order: float, by_band: Mapping[int, float] | Mapping[float, float]
+        ) -> float:
+            return 0.0
+
+        @overload
+        def flagged(times: int, by_band: Mapping[int, float]) -> float: ...
+        @overload
+        def flagged(
+            times: Literal[True], by_band: Mapping[float, float]
+        ) -> float: ...
+        def flagged(
+            times: int, by_band: Mapping[int, float] | Mapping[float, float]
+        ) -> float:
+            return 0.0
+
+        @overload
+        def trailing(
+            by_band: Mapping[int, float], kind: Kind, scale: float = 1.0
+        ) -> float: ...
+        @overload
+        def trailing(by_band: Mapping[float, float], kind: Kind) -> float: ...
+        def trailing(
+            by_band: Mapping[int, float] | Mapping[float, float],
+            kind: Kind,
+            scale: float = 1.0,
+        ) -> float:
+            return 0.0
+
+        @overload
+        def named(
+            by_band: Mapping[int, float], kind: Kind, scale: float
+        ) -> float: ...
+        @overload
+        def named(
+            by_band: Mapping[float, float], kind: Kind, *, scale: float
+        ) -> float: ...
+        def named(
+            by_band: Mapping[int, float] | Mapping[float, float],
+            kind: Kind,
+            scale: float = 1.0,
+        ) -> float:
+            return 0.0
+
+        @overload
+        def placed(by_band: Mapping[int, float], kind: Kind) -> float: ...
+        @overload
+        def placed(by_band: Mapping[float, float], other: Kind, /) -> float: ...
+        def placed(
+            by_band: Mapping[int, float] | Mapping[float, float], kind: Kind
+        ) -> float:
+            return 0.0
+
+        @overload
+        def starred(by_band: Mapping[int, float], *kinds: str) -> float: ...
+        @overload
+        def starred(
+            by_band: Mapping[float, float], kind: Literal["a"], /
+        ) -> float: ...
+        def starred(
+            by_band: Mapping[int, float] | Mapping[float, float], *kinds: str
+        ) -> float:
+            return 0.0
+
+        @overload
+        def narrower(kind: Literal["a"], by_band: Mapping[int, float]) -> float: ...
+        @overload
+        def narrower(kind: str, by_band: Mapping[float, float]) -> float: ...
+        def narrower(
+            kind: str, by_band: Mapping[int, float] | Mapping[float, float]
+        ) -> float:
+            return 0.0
+
+        @overload
+        def unnamed(by_band: Mapping[int, float], kind: Kind, /) -> float: ...
+        @overload
+        def unnamed(by_band: Mapping[float, float], kind: Kind) -> float: ...
+        def unnamed(
+            by_band: Mapping[int, float] | Mapping[float, float], kind: Kind
+        ) -> float:
+            return 0.0
+        """,
+    )
+    assert sorted(refused) == ["narrower(by_band)", "unnamed(by_band)"]
+
+
+def test_a_head_reads_the_items_of_a_container_as_a_type_checker_does(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A container takes a narrower item where it is covariant, and is one of its bases.
+
+    A ``Sequence[float]`` takes a ``Sequence[int]``, an ``Iterable[float]`` a
+    ``list[int]``, a ``Mapping[str, complex]`` a ``dict[str, float]`` spelt
+    through ``typing``, and a ``tuple[float, ...]`` a ``tuple[int, float]``,
+    so the head keyed by ``int`` takes every call of the head keyed by
+    ``float``. A ``list`` is invariant in its item and a ``Mapping`` in its
+    key: ``invariant`` and ``keyed`` are refused.
+    """
+    refused = _refused(
+        tmp_path,
+        part="key",
+        api="""
+        import typing
+        from collections.abc import Iterable
+        from typing import Literal
+
+        __all__ = [
+            "covariant", "listed", "spelt", "homogeneous", "invariant", "keyed",
+        ]
+
+        @overload
+        def covariant(by_band: Mapping[int, float], orders: Sequence[float]) -> float: ...
+        @overload
+        def covariant(by_band: Mapping[float, float], orders: Sequence[int]) -> float: ...
+        def covariant(
+            by_band: Mapping[int, float] | Mapping[float, float], orders: Sequence[float]
+        ) -> float:
+            return 0.0
+
+        @overload
+        def listed(by_band: Mapping[int, float], orders: Iterable[float]) -> float: ...
+        @overload
+        def listed(by_band: Mapping[float, float], orders: list[int]) -> float: ...
+        def listed(
+            by_band: Mapping[int, float] | Mapping[float, float], orders: Iterable[float]
+        ) -> float:
+            return 0.0
+
+        @overload
+        def spelt(
+            by_band: Mapping[int, float], gains: typing.Mapping[str, complex]
+        ) -> float: ...
+        @overload
+        def spelt(by_band: Mapping[float, float], gains: dict[str, float]) -> float: ...
+        def spelt(
+            by_band: Mapping[int, float] | Mapping[float, float],
+            gains: Mapping[str, complex],
+        ) -> float:
+            return 0.0
+
+        @overload
+        def homogeneous(
+            by_band: Mapping[int, float], limits: tuple[float, ...]
+        ) -> float: ...
+        @overload
+        def homogeneous(
+            by_band: Mapping[float, float], limits: tuple[int, float]
+        ) -> float: ...
+        def homogeneous(
+            by_band: Mapping[int, float] | Mapping[float, float],
+            limits: tuple[float, ...],
+        ) -> float:
+            return 0.0
+
+        @overload
+        def invariant(by_band: Mapping[int, float], orders: list[float]) -> float: ...
+        @overload
+        def invariant(by_band: Mapping[float, float], orders: list[int]) -> float: ...
+        def invariant(
+            by_band: Mapping[int, float] | Mapping[float, float], orders: list[float]
+        ) -> float:
+            return 0.0
+
+        @overload
+        def keyed(by_band: Mapping[int, float], gains: Mapping[str, float]) -> float: ...
+        @overload
+        def keyed(
+            by_band: Mapping[float, float], gains: Mapping[Literal["a"], float]
+        ) -> float: ...
+        def keyed(
+            by_band: Mapping[int, float] | Mapping[float, float],
+            gains: Mapping[str, float],
+        ) -> float:
+            return 0.0
+        """,
+    )
+    assert sorted(refused) == ["invariant(by_band)", "keyed(by_band)"]
+
+
+def test_a_head_takes_the_calls_of_another_as_python_binds_them(
+    tmp_path: pathlib.Path,
+) -> None:
+    """Each argument of each call of the other head lands where Python puts it.
+
+    ``starred(d, 2.0)`` puts ``2.0`` in the ``*args`` of the head keyed by
+    ``int`` and ``starred(d, scale=2.0)`` in its keyword-only ``scale``;
+    ``moved(d, 2.0)`` puts it in ``gain`` and ``moved(d, scale=2.0)`` in
+    ``scale``: each head keyed by ``int`` takes every call of the head keyed
+    by ``float``. ``collided(d, scale=1.5)`` hands the ``**options`` of the
+    head keyed by ``float`` a value the ``int`` ``scale`` of the other
+    refuses, and ``doubled(d, 2.0, gain=3.0)`` gives the head keyed by
+    ``int`` its ``gain`` twice: both are refused.
+    """
+    refused = _refused(
+        tmp_path,
+        part="key",
+        api="""
+        __all__ = ["starred", "moved", "collided", "doubled"]
+
+        @overload
+        def starred(
+            by_band: Mapping[int, float], *args: float, scale: float = 1.0
+        ) -> float: ...
+        @overload
+        def starred(by_band: Mapping[float, float], scale: float = 1.0) -> float: ...
+        def starred(
+            by_band: Mapping[int, float] | Mapping[float, float],
+            *args: float,
+            scale: float = 1.0,
+        ) -> float:
+            return 0.0
+
+        @overload
+        def moved(
+            by_band: Mapping[int, float], gain: float = 1.0, *, scale: float = 1.0
+        ) -> float: ...
+        @overload
+        def moved(by_band: Mapping[float, float], scale: float = 1.0) -> float: ...
+        def moved(
+            by_band: Mapping[int, float] | Mapping[float, float],
+            gain: float = 1.0,
+            *,
+            scale: float = 1.0,
+        ) -> float:
+            return 0.0
+
+        @overload
+        def collided(
+            by_band: Mapping[int, float], scale: int = 1, **options: float
+        ) -> float: ...
+        @overload
+        def collided(by_band: Mapping[float, float], **options: float) -> float: ...
+        def collided(
+            by_band: Mapping[int, float] | Mapping[float, float],
+            scale: int = 1,
+            **options: float,
+        ) -> float:
+            return 0.0
+
+        @overload
+        def doubled(
+            by_band: Mapping[int, float], /, gain: float = 1.0, **options: float
+        ) -> float: ...
+        @overload
+        def doubled(
+            by_band: Mapping[float, float], level: float = 1.0, /, **options: float
+        ) -> float: ...
+        def doubled(
+            by_band: Mapping[int, float] | Mapping[float, float],
+            /,
+            gain: float = 1.0,
+            **options: float,
+        ) -> float:
+            return 0.0
+        """,
+    )
+    assert sorted(refused) == ["collided(by_band)", "doubled(by_band)"]
+
+
+def test_heads_that_offer_each_mapping_as_its_implementation_spells_it_split_it(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A head's mapping is the implementation's when they read alike, however spelt.
+
+    ``spelt`` writes one inner mapping in full, its choices in another order,
+    where the implementation names it by an alias, and ``renamed`` imports
+    that alias under a name of its own: each mapping of the union is still
+    the one mapping of a head. In ``widened`` a head with a trailing default
+    takes every call of the head that lacks it, so the heads that offer each
+    mapping take the calls of every head.
+    """
+    refused = _refused(
+        tmp_path,
+        columns="""
+        from typing import Literal
+
+        Columns = Mapping[Literal["rms", "vdv"], float]
+        """,
+        api="""
+        from typing import Literal
+
+        from .columns import Columns
+        from .columns import Columns as Readings
+
+        Kind = Literal["a", "b"]
+
+        __all__ = ["spelt", "renamed", "widened"]
+
+        @overload
+        def spelt(
+            kind: Kind, measured: Mapping[int, Mapping[Literal["vdv", "rms"], float]]
+        ) -> float: ...
+        @overload
+        def spelt(kind: Kind, measured: Mapping[None, Columns]) -> float: ...
+        def spelt(
+            kind: Kind, measured: Mapping[int, Columns] | Mapping[None, Columns]
+        ) -> float:
+            return 0.0
+
+        @overload
+        def renamed(kind: Kind, measured: Mapping[int, Readings]) -> float: ...
+        @overload
+        def renamed(kind: Kind, measured: Mapping[None, Readings]) -> float: ...
+        def renamed(
+            kind: Kind, measured: Mapping[int, Columns] | Mapping[None, Columns]
+        ) -> float:
+            return 0.0
+
+        @overload
+        def widened(kind: Kind, measured: Mapping[int, Columns]) -> float: ...
+        @overload
+        def widened(
+            kind: Kind, measured: Mapping[None, Columns], scale: float = 1.0
+        ) -> float: ...
+        @overload
+        def widened(
+            kind: Kind, measured: Mapping[int, Columns], scale: float = 1.0
+        ) -> float: ...
+        def widened(
+            kind: Kind,
+            measured: Mapping[int, Columns] | Mapping[None, Columns],
+            scale: float = 1.0,
+        ) -> float:
+            return 0.0
+        """,
+    )
+    assert refused == {}
+
+
+def test_a_union_split_across_heads_of_different_calls_offers_no_context(
+    tmp_path: pathlib.Path,
+) -> None:
+    """Each mapping alone in a head, but no call reaches both heads.
+
+    ``split("a", {None: {"rms": 1.0}})`` runs and matches no head; the heads
+    of ``covered`` that take ``Kind`` offer both mappings to every call,
+    and its narrower head beside them changes nothing. In ``half`` the two
+    heads of ``"a"`` offer both mappings, but ``half("b", {None: ...})``
+    still matches no head: one group of heads that offers them all does not
+    excuse another that does not.
+    """
+    refused = _refused(
+        tmp_path,
+        part="pairing",
+        api="""
+        from typing import Literal
+
+        Kind = Literal["a", "b"]
+        Columns = Mapping[Literal["rms", "vdv"], float]
+
+        __all__ = ["split", "covered", "half"]
+
+        @overload
+        def split(kind: Literal["a"], measured: Mapping[int, Columns]) -> float: ...
+        @overload
+        def split(kind: Literal["b"], measured: Mapping[None, Columns]) -> float: ...
+        def split(
+            kind: Kind, measured: Mapping[int, Columns] | Mapping[None, Columns]
+        ) -> float:
+            return 0.0
+
+        @overload
+        def covered(
+            kind: Literal["a"], measured: Mapping[int, Columns]
+        ) -> float: ...
+        @overload
+        def covered(kind: Kind, measured: Mapping[int, Columns]) -> float: ...
+        @overload
+        def covered(kind: Kind, measured: Mapping[None, Columns]) -> float: ...
+        def covered(
+            kind: Kind, measured: Mapping[int, Columns] | Mapping[None, Columns]
+        ) -> float:
+            return 0.0
+
+        @overload
+        def half(kind: Literal["a"], measured: Mapping[int, Columns]) -> float: ...
+        @overload
+        def half(kind: Literal["a"], measured: Mapping[None, Columns]) -> float: ...
+        @overload
+        def half(kind: Literal["b"], measured: Mapping[int, Columns]) -> float: ...
+        def half(
+            kind: Kind, measured: Mapping[int, Columns] | Mapping[None, Columns]
+        ) -> float:
+            return 0.0
+        """,
+    )
+    assert refused == {
+        "half(measured)": [
+            "takes Mapping[int, Columns] | Mapping[None, Columns], and the "
+            "overload heads that take each of them alone take different calls "
+            "but for it, so a dict written in a call one of them takes is read "
+            "against that head's mapping, never against the others: offer each "
+            "mapping alone in heads that take the same other arguments"
+        ],
+        "split(measured)": [
+            "takes Mapping[int, Columns] | Mapping[None, Columns], and the "
+            "overload heads that take each of them alone take different calls "
+            "but for it, so a dict written in a call one of them takes is read "
+            "against that head's mapping, never against the others: offer each "
+            "mapping alone in heads that take the same other arguments"
+        ],
+    }
+
+
+def test_heads_that_pair_each_mapping_with_another_parameter_are_listed(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A run that refuses a mapping beside a value of another parameter.
+
+    ``budget`` takes the components of one table with ``field="pressure"``,
+    those of the other with ``field="free"`` and those both list with a
+    field held in a variable, as the IEC 61094 budgets do: its heads take
+    different calls on purpose, which only :data:`PAIRED_MAPPINGS` can say.
+    Listed, it passes; the listing excuses no mapping that no head offers
+    alone (``unsplit``), and an entry that covers no pairing is stale.
+    """
+    root = _package(
+        tmp_path,
+        api="""
+        from typing import Literal
+
+        Field = Literal["pressure", "free"]
+        Pressure = Literal["impedance", "reference"]
+        Free = Literal["positioning", "reference"]
+        Shared = Literal["reference"]
+
+        __all__ = ["budget", "unsplit"]
+
+        @overload
+        def budget(
+            parts: Mapping[Pressure, float], field: Literal["pressure"] = "pressure"
+        ) -> float: ...
+        @overload
+        def budget(parts: Mapping[Free, float], field: Literal["free"]) -> float: ...
+        @overload
+        def budget(parts: Mapping[Shared, float], field: Field) -> float: ...
+        def budget(
+            parts: Mapping[Pressure, float]
+            | Mapping[Free, float]
+            | Mapping[Shared, float],
+            field: Field = "pressure",
+        ) -> float:
+            return 0.0
+
+        @overload
+        def unsplit(
+            parts: Mapping[Pressure, float], field: Literal["pressure"] = "pressure"
+        ) -> float: ...
+        @overload
+        def unsplit(parts: Mapping[Shared, float], field: Field) -> float: ...
+        def unsplit(
+            parts: Mapping[Pressure, float]
+            | Mapping[Free, float]
+            | Mapping[Shared, float],
+            field: Field = "pressure",
+        ) -> float:
+            return 0.0
+        """,
+    )
+    findings = cpa.findings_in(sorted(root.rglob("*.py")), root)
+    assert sorted((f.function, f.part) for f in findings) == [
+        ("budget", "pairing"),
+        ("unsplit", "context"),
+    ]
+    path = findings[0].path
+    monkeypatch.setattr(
+        cpa,
+        "PAIRED_MAPPINGS",
+        {
+            (path, "budget", "parts"): "each table's components go with its field",
+            (path, "unsplit", "parts"): "a mapping no head offers alone",
+            (path, "gone", "parts"): "a function that no longer exists",
+        },
+    )
+    found, stale = cpa.judged(findings)
+    assert [(f.function, f.part) for f in found] == [("unsplit", "context")]
+    assert [key for table, key in stale if table == "PAIRED_MAPPINGS"] == [
+        (path, "gone", "parts"),
+        (path, "unsplit", "parts"),
+    ]
+
+
+def test_a_union_of_mappings_offers_a_written_dict_one_head_at_a_time(
+    tmp_path: pathlib.Path,
+) -> None:
+    """mypy reads a ``dict`` written in a call against one mapping, not a union.
+
+    With two or more mappings in a union, the ``dict`` is read on its own: a
+    ``Literal`` key becomes a ``str`` and nested mappings of two key types
+    join to ``object``, so a call that runs is refused. Each mapping is
+    offered in an overload head of its own, every head together offering
+    the keys the key rule asks for; a union whose mappings hold only plain
+    numbers, and a head that takes one mapping, pass.
+    """
+    refused = _refused(
+        tmp_path,
+        api="""
+        from typing import Literal
+
+        Quantity = Literal["rms", "vdv"]
+        Columns = Mapping[Quantity, float]
+        BandMapping = Mapping[int, float] | Mapping[float, float]
+        Indications = (
+            Mapping[int, Columns] | Mapping[int | None, Columns] | Mapping[None, Columns]
+        )
+
+        __all__ = [
+            "named", "headed", "missing", "two_in_a_head", "nested", "bands",
+            "directional",
+        ]
+
+        def named(measured: Indications) -> float:
+            return 0.0
+
+        @overload
+        def headed(measured: Mapping[int, Columns]) -> float: ...
+        @overload
+        def headed(measured: Mapping[None, Columns]) -> float: ...
+        @overload
+        def headed(measured: Mapping[int | None, Columns]) -> float: ...
+        def headed(measured: Indications) -> float:
+            return 0.0
+
+        @overload
+        def missing(measured: Mapping[int, Columns]) -> float: ...
+        @overload
+        def missing(measured: Mapping[int | None, Columns]) -> float: ...
+        def missing(measured: Indications) -> float:
+            return 0.0
+
+        @overload
+        def two_in_a_head(measured: Mapping[int, Columns]) -> float: ...
+        @overload
+        def two_in_a_head(
+            measured: Mapping[int | None, Columns] | Mapping[None, Columns],
+        ) -> float: ...
+        def two_in_a_head(measured: Indications) -> float:
+            return 0.0
+
+        def nested(per_direction: Mapping[str, Indications]) -> float:
+            return 0.0
+
+        def bands(values: BandMapping | None = None) -> float:
+            return 0.0
+
+        def directional(
+            *,
+            by_band: Mapping[int, BandMapping]
+            | Mapping[float, BandMapping]
+            | None = None,
+        ) -> float:
+            return 0.0
+        """,
+    )
+    assert sorted(refused) == [
+        "directional(by_band)",
+        "missing(measured)",
+        "named(measured)",
+        "nested(per_direction)",
+        "two_in_a_head(measured)",
+    ]
+    assert refused["named(measured)"] == [
+        "takes Mapping[int, Columns] | Mapping[int | None, Columns] | "
+        "Mapping[None, Columns] with no overload head that takes Mapping[int, "
+        "Columns] or Mapping[int | None, Columns] or Mapping[None, Columns] "
+        "alone, so a dict written in the call is read against none of them: a "
+        "Literal key is read as a str and nested mappings of two key types as "
+        "object, and a call that runs is refused"
+    ]
+    assert sorted(refused["missing(measured)"]) == [
+        "holds Mapping[int | None, Columns] with no mapping keyed by None, which "
+        "refuses a typed caller's dict of the narrower key",
+        "takes Mapping[int, Columns] | Mapping[int | None, Columns] | "
+        "Mapping[None, Columns] with no overload head that takes Mapping[None, "
+        "Columns] alone, so a dict written in the call is read against none of "
+        "them: a Literal key is read as a str and nested mappings of two key "
+        "types as object, and a call that runs is refused",
+    ]
+    head, implementation = refused["two_in_a_head(measured)"]
+    assert head == (
+        "an overload head takes Mapping[int | None, Columns] | Mapping[None, "
+        "Columns], which gives a dict written in the call no mapping to be read "
+        "against"
+    )
+    assert "no overload head that takes Mapping[int | None, Columns] or " in (
+        implementation
+    )
+    assert refused["nested(per_direction)"] == [
+        "holds Mapping[int, Columns] | Mapping[int | None, Columns] | "
+        "Mapping[None, Columns] inside, where no overload can give a dict "
+        "written in the call the one mapping it is read against"
+    ]
+    assert refused["directional(by_band)"][0].startswith(
+        "takes Mapping[int, BandMapping] | Mapping[float, BandMapping] with no "
+        "overload head"
+    )
+
+
+def test_a_union_whose_mapping_takes_a_written_dict_as_read_alone_passes(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A ``dict`` written in the call runs when a mapping of the union takes it as it is read alone.
+
+    mypy reads ``{"rms": 1.0}`` as a ``dict[str, float]``, which the
+    ``Mapping[str, float]`` of ``plain`` takes, as the ``Mapping[str,
+    complex]`` of ``widened`` does; ``{1: {"rms": 1.0}}`` is a ``dict[int,
+    dict[str, float]]``, which ``nested`` takes in its second mapping and
+    ``own`` in the mapping it is written for. ``narrower`` refuses the
+    ``float`` values, in ``mixed`` a text beside a number is read as
+    ``object``, and ``{125: {"a": 1.0}}`` is a ``dict[int, ...]``, which no
+    mapping of ``fractional`` keyed by ``float`` takes.
+    """
+    refused = _refused(
+        tmp_path,
+        part="context",
+        api="""
+        from typing import Literal
+
+        __all__ = [
+            "plain", "widened", "nested", "own", "narrower", "mixed", "fractional",
+        ]
+
+        def plain(
+            by_name: Mapping[Literal["rms", "vdv"], float] | Mapping[str, float],
+        ) -> float:
+            return 0.0
+
+        def widened(
+            by_name: Mapping[Literal["a"], float] | Mapping[str, complex],
+        ) -> float:
+            return 0.0
+
+        def nested(
+            measured: Mapping[int, Mapping[Literal["rms"], float]]
+            | Mapping[int, Mapping[str, float]],
+        ) -> float:
+            return 0.0
+
+        def own(
+            measured: Mapping[int, Mapping[str, float]]
+            | Mapping[None, Mapping[str, float]],
+        ) -> float:
+            return 0.0
+
+        def narrower(by_name: Mapping[Literal["a"], float] | Mapping[str, int]) -> float:
+            return 0.0
+
+        def mixed(
+            by_name: Mapping[str, Literal["x"] | float] | Mapping[int, float],
+        ) -> float:
+            return 0.0
+
+        def fractional(
+            by_band: Mapping[float, Mapping[Literal["a"], float]]
+            | Mapping[float, Mapping[str, float]],
+        ) -> float:
+            return 0.0
+        """,
+    )
+    assert sorted(refused) == [
+        "fractional(by_band)",
+        "mixed(by_name)",
+        "narrower(by_name)",
+    ]
+
+
+def test_a_window_scipy_reads_takes_a_name_and_its_parameters(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``get_window`` takes ``("kaiser", 8.6)`` as it takes ``"hann"``.
+
+    A parameter followed into a helper, on a multiline call, into a SciPy
+    reader by keyword or by position (``resample`` and ``firwin_2d`` among
+    them), and one typed by an alias of ``str``, are refused; one typed with
+    a tuple, or never handed to SciPy, passes.
+    """
+    refused = _refused(
+        tmp_path,
+        part="window",
+        api="""
+        from scipy import signal as sp_signal
+
+        Taper = str
+        Spec = str | tuple[ArrayLike, ...]
+
+        __all__ = [
+            "psd", "taper", "spectrum", "named", "taken", "labelled", "resampled",
+            "resampled_at", "design",
+        ]
+
+        def _segments(x: ArrayLike, window: str) -> float:
+            return float(sp_signal.welch(x, fs=1.0, window=window)[1][0])
+
+        def psd(x: ArrayLike, *, window: str = "hann") -> float:
+            return _segments(
+                x,
+                window,
+            )
+
+        def taper(window: Taper, n: int) -> float:
+            return float(sp_signal.get_window(window, n)[0])
+
+        def spectrum(x: ArrayLike, window: str = "hann") -> float:
+            return float(sp_signal.stft(x, 1.0, window)[2][0, 0])
+
+        def named(window: str) -> str:
+            return window
+
+        def taken(window: Spec = "hann") -> float:
+            return float(sp_signal.get_window(window, 8)[0])
+
+        def labelled(window: tuple[ArrayLike, ...] | str) -> float:
+            return _segments([0.0] * 8, window)  # type: ignore[arg-type]
+
+        def resampled(x: ArrayLike, window: str) -> float:
+            return float(sp_signal.resample(x, 8, window=window)[0])
+
+        def resampled_at(x: ArrayLike, window: str) -> float:
+            return float(sp_signal.resample(x, 8, None, 0, window)[0])
+
+        def design(window: str = "hamming") -> float:
+            return float(sp_signal.firwin_2d((5, 5), window, fc=0.5)[0, 0])
+        """,
+    )
+    assert sorted(refused) == [
+        "design(window)",
+        "psd(window)",
+        "resampled(window)",
+        "resampled_at(window)",
+        "spectrum(window)",
+        "taper(window)",
+    ]
+    assert refused["psd(window)"] == [
+        "annotated str, which refuses a window given as a tuple of its name and "
+        "parameters, such as ('kaiser', 8.6), while handed to _segments(window), "
+        "welch() takes it"
+    ]
+    assert refused["taper(window)"][0].startswith("annotated Taper, which refuses")
+
+
+def test_a_window_tuple_takes_a_name_and_any_count_of_parameters(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A tuple of the annotation takes every window SciPy reads.
+
+    ``("kaiser", 8.6)``, ``("general_gaussian", 1.5, 7.0)`` and
+    ``("general_cosine", [0.5, 0.5])``: a text first, then any count of
+    numbers or sequences of numbers. A tuple of floats refuses the name, one
+    of a fixed length refuses a second parameter, one of a name and floats
+    or integers refuses the weights; a bare tuple, one of ``ArrayLike`` or
+    anything, a name unpacked beside them, or items that take a text, a
+    float and a sequence of numbers take every window.
+    """
+    refused = _refused(
+        tmp_path,
+        part="window",
+        api="""
+        from typing import Unpack
+
+        from scipy import signal as sp_signal
+
+        Parameters = tuple[ArrayLike, ...]
+
+        __all__ = [
+            "floats", "pair", "named", "scalars", "counts", "empty", "bare",
+            "spec", "unpacked", "aliased", "spelt", "anything", "spread",
+        ]
+
+        def floats(window: str | tuple[float, ...]) -> float:
+            return float(sp_signal.get_window(window, 8)[0])
+
+        def pair(window: str | tuple[str, float]) -> float:
+            return float(sp_signal.get_window(window, 8)[0])
+
+        def named(window: str | tuple[str]) -> float:
+            return float(sp_signal.get_window(window, 8)[0])
+
+        def scalars(window: str | tuple[str, *tuple[float, ...]]) -> float:
+            return float(sp_signal.get_window(window, 8)[0])
+
+        def counts(window: str | tuple[str, Unpack[tuple[int, ...]]]) -> float:
+            return float(sp_signal.get_window(window, 8)[0])
+
+        def empty(window: str | tuple[()]) -> float:
+            return float(sp_signal.get_window(window, 8)[0])
+
+        def bare(window: str | tuple) -> float:  # type: ignore[type-arg]
+            return float(sp_signal.get_window(window, 8)[0])
+
+        def spec(window: str | tuple[ArrayLike, ...]) -> float:
+            return float(sp_signal.get_window(window, 8)[0])
+
+        def unpacked(window: str | tuple[str, *tuple[ArrayLike, ...]]) -> float:
+            return float(sp_signal.get_window(window, 8)[0])
+
+        def aliased(window: str | tuple[str, Unpack[Parameters]]) -> float:
+            return float(sp_signal.get_window(window, 8)[0])
+
+        def spelt(window: str | tuple[str | float | Sequence[float], ...]) -> float:
+            return float(sp_signal.get_window(window, 8)[0])
+
+        def anything(window: str | tuple[Any, ...]) -> float:
+            return float(sp_signal.get_window(window, 8)[0])
+
+        def spread[*Ts](window: str | tuple[str, *Ts]) -> float:
+            return float(sp_signal.get_window(window, 8)[0])
+        """,
+    )
+    assert sorted(refused) == [
+        "counts(window)",
+        "empty(window)",
+        "floats(window)",
+        "named(window)",
+        "pair(window)",
+        "scalars(window)",
+    ]
+    assert refused["floats(window)"] == [
+        "annotated str | tuple[float, ...], which refuses a window given as a "
+        "tuple of its name and parameters, such as ('kaiser', 8.6), while "
+        "get_window() takes it"
+    ]
+
+
+def test_every_window_reader_of_scipy_is_listed() -> None:
+    """Each callable of ``scipy.signal`` that takes a window is a reader.
+
+    A ``window`` or ``win_param`` parameter of SciPy goes to ``get_window``;
+    one missing from the list lets a public ``window: str`` handed to it
+    through. Each is listed with its place, or with a place no call fills
+    when SciPy takes it by keyword only.
+    """
+    import inspect
+
+    from scipy import signal
+
+    readers: dict[str, tuple[int | None, str | None]] = {}
+    callables = [
+        (f"scipy.signal.{name}", getattr(signal, name)) for name in dir(signal)
+    ]
+    callables.append(
+        ("scipy.signal.ShortTimeFFT.from_window", signal.ShortTimeFFT.from_window)
+    )
+    for dotted, member in callables:
+        if not inspect.isfunction(member) and not inspect.ismethod(member):
+            continue
+        parameters = list(inspect.signature(member).parameters.values())
+        for index, parameter in enumerate(parameters):
+            if parameter.name in {"window", "win_param"}:
+                readers[dotted] = (index, parameter.name)
+    listed = {
+        dotted: cpa._WINDOW_READERS[dotted]
+        for dotted in readers
+        if dotted in cpa._WINDOW_READERS
+    }
+    assert listed == readers
+
+
+def test_a_record_field_offers_a_written_dict_one_mapping(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A record's generated constructor has no heads to split a union with.
+
+    A record that writes its own ``__init__``, under ``if TYPE_CHECKING:``
+    (``Declared``) or not (``Built``), is built through it, and one of
+    ``init=False`` (``Unbuilt``) takes no field: its fields are what it
+    holds, and the constructor it declares is read as any public method,
+    ``Unsplit.__init__`` refused as a function that takes the union and
+    ``Keyed.__init__`` as one that takes it as a key of the ``TypedDict``
+    of its keywords.
+    """
+    refused = _refused(
+        tmp_path,
+        part="context",
+        api="""
+        from dataclasses import dataclass
+        from typing import Literal, TypedDict, Unpack
+
+        Quantity = Literal["rms", "vdv"]
+        Indications = Mapping[int, Mapping[Quantity, float]] | Mapping[
+            None, Mapping[Quantity, float]
+        ]
+
+        __all__ = [
+            "Readings", "Bands", "Declared", "Built", "Unbuilt", "Unsplit", "Keyed",
+        ]
+
+        @dataclass(frozen=True)
+        class Readings:
+            measured: Mapping[int, Mapping[Quantity, float]] | Mapping[
+                None, Mapping[Quantity, float]
+            ]
+
+        @dataclass(frozen=True)
+        class Bands:
+            values: Mapping[int, float] | Mapping[float, float]
+
+        @dataclass(frozen=True)
+        class Declared:
+            measured: Indications
+
+            if TYPE_CHECKING:
+
+                @overload
+                def __init__(
+                    self, measured: Mapping[int, Mapping[Quantity, float]]
+                ) -> None: ...
+                @overload
+                def __init__(
+                    self, measured: Mapping[None, Mapping[Quantity, float]]
+                ) -> None: ...
+                def __init__(self, measured: Indications) -> None: ...
+
+        @dataclass(frozen=True)
+        class Built:
+            measured: Indications
+
+            @overload
+            def __init__(
+                self, measured: Mapping[int, Mapping[Quantity, float]]
+            ) -> None: ...
+            @overload
+            def __init__(
+                self, measured: Mapping[None, Mapping[Quantity, float]]
+            ) -> None: ...
+            def __init__(self, measured: Indications) -> None:
+                object.__setattr__(self, "measured", measured)
+
+        @dataclass(frozen=True, init=False)
+        class Unbuilt:
+            measured: Indications
+
+        @dataclass(frozen=True)
+        class Unsplit:
+            measured: Indications
+
+            if TYPE_CHECKING:
+
+                def __init__(self, measured: Indications) -> None: ...
+
+        class KeyedWords(TypedDict):
+            measured: Indications
+
+        @dataclass(frozen=True, kw_only=True)
+        class Keyed:
+            measured: Indications
+
+            if TYPE_CHECKING:
+
+                def __init__(self, **words: Unpack[KeyedWords]) -> None: ...
+        """,
+    )
+    assert sorted(refused) == [
+        "Keyed.__init__(measured)",
+        "Readings(measured)",
+        "Unsplit.__init__(measured)",
+    ]
+
+
 def test_a_sample_rate_keeps_one_family_across_the_api(
     tmp_path: pathlib.Path,
 ) -> None:
@@ -1420,3 +2509,300 @@ def test_a_sample_rate_keeps_one_family_across_the_api(
     kept, stale = cpa.checked(findings, exempt)
     assert [f.function for f in kept] == ["level_whole"]
     assert stale == [(path, "Gone", "fs")]
+
+
+_NUMERIC_TYPES = """
+from collections.abc import Iterator
+from typing import Protocol
+
+
+class SupportsNumericArray(Protocol):
+    def __array__(self) -> np.ndarray[Any, np.dtype[np.number[Any] | np.bool_]]: ...
+
+
+class NestedSequence[T](Protocol):
+    def __len__(self, /) -> int: ...
+    def __getitem__(self, index: int, /) -> T | NestedSequence[T]: ...
+    def __contains__(self, value: object, /) -> bool: ...
+    def __iter__(self, /) -> Iterator[T | NestedSequence[T]]: ...
+
+
+NumericArrayLike = (
+    complex
+    | NestedSequence[complex]
+    | SupportsNumericArray
+    | NestedSequence[SupportsNumericArray]
+)
+"""
+
+
+def test_a_choice_beside_an_alternative_that_takes_any_text_is_refused(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``ArrayLike`` admits any ``str``, so a misspelt choice beside it type-checks.
+
+    A ``Literal`` of texts is refused beside ``ArrayLike``, ``str``,
+    ``LiteralString``, numpy's ``DTypeLike``, a sequence of texts or a type
+    parameter that takes a text (one bound to ``str``, or one with no bound,
+    which a type checker solves to ``str``), at the top or inside a
+    container, written or behind an alias of an alias, on an overload head,
+    in a record's field, a generic record's included, and in the constructor
+    a record declares. Beside the package's array-like of numbers, beside a
+    pair, beside a type parameter bound to a number or as a mapping's key,
+    and as integer choices, it passes, and so does a private helper.
+    """
+    refused = _refused(
+        tmp_path,
+        part="choice",
+        **{
+            "_internal.types": _NUMERIC_TYPES,
+            "api": """
+            from dataclasses import dataclass
+            from typing import Literal, LiteralString
+
+            from numpy.typing import DTypeLike
+
+            from ._internal.types import NumericArrayLike
+
+            Termination = Literal["rigid", "free"]
+            Spelt = Termination | ArrayLike
+            Values = Mapping[str, float] | ArrayLike
+
+            __all__ = [
+                "written", "aliased", "banded", "nested", "texts", "text",
+                "headed", "Ground", "Built", "numeric", "paired", "keyed",
+                "whole", "dtyped", "spelt_text", "bound", "bound_inside",
+                "bound_items", "open_parameter", "Held", "bound_numbers",
+            ]
+
+            def written(termination: Literal["rigid", "free"] | ArrayLike) -> None: ...
+
+            def aliased(termination: Spelt = "rigid") -> None: ...
+
+            def banded(values: Literal["auto"] | Values) -> None: ...
+
+            def nested(terms: Sequence[Termination | ArrayLike]) -> None: ...
+
+            def texts(labels: Literal["auto"] | Sequence[str]) -> None: ...
+
+            def text(name: Termination | str | None = None) -> None: ...
+
+            @overload
+            def headed(x: ArrayLike, state: Termination | ArrayLike) -> None: ...
+            @overload
+            def headed(x: None, state: Termination | NumericArrayLike) -> None: ...
+            def headed(
+                x: ArrayLike | None, state: Termination | NumericArrayLike
+            ) -> None: ...
+
+            @dataclass(frozen=True)
+            class Ground:
+                resistivity: Literal["G", "H"] | ArrayLike = "G"
+
+            @dataclass(frozen=True, kw_only=True)
+            class Built:
+                resistivity: float | Literal["G", "H"] | NDArray[np.float64] = "G"
+
+                if TYPE_CHECKING:
+
+                    def __init__(
+                        self, *, resistivity: Literal["G", "H"] | ArrayLike = "G"
+                    ) -> None: ...
+
+            def numeric(termination: Termination | NumericArrayLike) -> None: ...
+
+            def paired(window: Termination | tuple[ArrayLike, ArrayLike]) -> None: ...
+
+            def keyed(by_side: Mapping[Termination, ArrayLike]) -> None: ...
+
+            def whole(fraction: Literal[1, 3] | ArrayLike) -> None: ...
+
+            def dtyped(dtype: Literal["auto"] | DTypeLike = "auto") -> None: ...
+
+            def spelt_text(name: Termination | LiteralString) -> None: ...
+
+            def bound[T: str](state: Termination | T) -> None: ...
+
+            def bound_inside[T: (str, bytes)](terms: Sequence[Termination | T]) -> None: ...
+
+            def bound_items[T: str](labels: Literal["auto"] | Sequence[T]) -> None: ...
+
+            def open_parameter[T](state: Termination | T) -> T: ...
+
+            @dataclass(frozen=True)
+            class Held[T: str]:
+                resistivity: Literal["G", "H"] | T
+
+            def bound_numbers[T: float](state: Termination | T) -> None: ...
+
+            def _helper(termination: Termination | ArrayLike) -> None: ...
+            """,
+        },
+    )
+    assert sorted(refused) == [
+        "Built.__init__(resistivity)",
+        "Ground(resistivity)",
+        "Held(resistivity)",
+        "aliased(termination)",
+        "banded(values)",
+        "bound(state)",
+        "bound_inside(terms)",
+        "bound_items(labels)",
+        "dtyped(dtype)",
+        "headed(state)",
+        "nested(terms)",
+        "open_parameter(state)",
+        "spelt_text(name)",
+        "text(name)",
+        "texts(labels)",
+        "written(termination)",
+    ]
+    assert refused["written(termination)"] == [
+        "sets Literal['rigid', 'free'] beside ArrayLike, which takes any text, so "
+        "a misspelt choice type-checks as that alternative and only the call "
+        "refuses it"
+    ]
+    assert refused["texts(labels)"][0].startswith(
+        "sets Literal['auto'] beside Sequence[str]"
+    )
+    assert len(refused["headed(state)"]) == 1
+
+
+def test_a_generic_alias_is_read_with_the_arguments_it_is_given(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``Values[str]`` is a sequence of texts, whatever module defines ``Values``.
+
+    A generic alias, ``type Values[T] = Sequence[T]`` or an assignment generic
+    in a module-level ``TypeVar``, stands for its value with each parameter
+    read as the argument a use gives it, in the module that writes the use:
+    an alias of that module, or a type parameter of the function read as its
+    bound, reaches an alias defined in another one. A bare one holds ``Any``
+    for each parameter, as a type checker reads it. Each such alternative
+    takes any text beside a choice, and an alias given numbers does not.
+    """
+    refused = _refused(
+        tmp_path,
+        part="choice",
+        **{
+            "_internal.shapes": """
+            from typing import TypeVar
+
+            T = TypeVar("T")
+
+            type Many[V] = Sequence[V]
+            Listed = Sequence[T]
+            type Keyed[K, V] = Mapping[K, V] | Sequence[V]
+            """,
+            "api": """
+            from typing import Literal
+
+            from ._internal.shapes import Keyed, Listed, Many
+
+            Termination = Literal["rigid", "free"]
+            Spelt = Termination | ArrayLike
+
+            type Values[T] = Sequence[T]
+
+            __all__ = [
+                "generic", "imported", "old_style", "caller_alias", "through",
+                "ordered", "bare", "numbers", "swapped",
+            ]
+
+            def generic(value: Literal["auto"] | Values[str]) -> None: ...
+
+            def imported(value: Literal["auto"] | Many[str]) -> None: ...
+
+            def old_style(value: Literal["auto"] | Listed[str]) -> None: ...
+
+            def caller_alias(terms: Many[Spelt]) -> None: ...
+
+            def through[T: str](value: Literal["auto"] | Many[T]) -> None: ...
+
+            def ordered(value: Literal["auto"] | Keyed[float, str]) -> None: ...
+
+            def bare(value: Literal["auto"] | Values) -> None: ...
+
+            def numbers(value: Literal["auto"] | Values[float]) -> None: ...
+
+            def swapped(value: Literal["auto"] | Keyed[str, float]) -> None: ...
+            """,
+        },
+    )
+    assert sorted(refused) == [
+        "bare(value)",
+        "caller_alias(terms)",
+        "generic(value)",
+        "imported(value)",
+        "old_style(value)",
+        "ordered(value)",
+        "through(value)",
+    ]
+    assert refused["generic(value)"][0].startswith(
+        "sets Literal['auto'] beside Sequence[str]"
+    )
+
+
+def test_the_array_like_of_numbers_is_read_as_one(tmp_path: pathlib.Path) -> None:
+    """The package's array-like of numbers converts, as ``ArrayLike`` does.
+
+    A parameter handed to a helper that takes it ends its route there, a
+    record whose constructor takes it for a converted field says what that
+    constructor takes, and the live package names the two classes the alias
+    is made of, so renaming one or the alias cannot silently turn it off.
+    """
+    root = _package(
+        tmp_path,
+        **{
+            "_internal.types": _NUMERIC_TYPES,
+            "api": """
+            from dataclasses import dataclass
+            from typing import Literal
+
+            from ._internal.types import NumericArrayLike
+
+            __all__ = ["level", "Ground"]
+
+            def _state(state: Literal["zero"] | NumericArrayLike) -> float:
+                return 0.0 if isinstance(state, str) else float(np.sum(state))
+
+            def level(state: list[float]) -> float:
+                return _state(state)
+
+            @dataclass(frozen=True, kw_only=True)
+            class Ground:
+                resistivity: float | Literal["G"] | NDArray[np.float64] = "G"
+
+                if TYPE_CHECKING:
+
+                    def __init__(
+                        self, *, resistivity: Literal["G"] | NumericArrayLike = "G"
+                    ) -> None: ...
+
+                def __post_init__(self) -> None:
+                    if not isinstance(self.resistivity, str):
+                        held = np.asarray(self.resistivity, dtype=np.float64)
+                        object.__setattr__(self, "resistivity", held)
+            """,
+        },
+    )
+    package = overloads.Package(sorted(root.rglob("*.py")), root)
+    reader = cpa.Reader(package, frozenset())
+    assert reader.annotations.numeric == {
+        "pkg._internal.types.NestedSequence",
+        "pkg._internal.types.SupportsNumericArray",
+    }
+    findings = cpa.findings_in(sorted(root.rglob("*.py")), root, handed_on=frozenset())
+    assert {(f.function, f.parameter) for f in findings} == {("level", "state")}
+    assert any(
+        "handed to _state(state: NumericArrayLike) converts" in f.problem
+        for f in findings
+    ), [f.problem for f in findings]
+    assert cpa.constructor_problems(reader, "pkg.api.Ground") == []
+    live = cpa.Reader(
+        overloads.Package(ast_scan.python_files([], cpa.SOURCE), cpa.SOURCE)
+    )
+    assert live.annotations.numeric == {
+        "phonometry._internal.types.NestedSequence",
+        "phonometry._internal.types.SupportsNumericArray",
+    }

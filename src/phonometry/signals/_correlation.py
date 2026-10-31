@@ -87,6 +87,7 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
 
     from .._i18n import Language
+    from .._internal.types import WindowSpec
 
 __all__ = [
     "AlignedImpulseResponseResult",
@@ -695,7 +696,7 @@ def _gcc_curve(
     ya: NDArray[np.float64],
     fs: float,
     weighting: str,
-    window: str,
+    window: WindowSpec,
     nperseg: int | np.integer[Any] | None,
     overlap: float,
     max_delay: float | None,
@@ -739,7 +740,7 @@ def time_delay(
     *,
     method: _Method = "gcc",
     weighting: _Weighting = "phat",
-    window: str = "hann",
+    window: WindowSpec = "hann",
     nperseg: int | np.integer[Any] | None = None,
     overlap: float = 0.5,
     max_delay: float | None = None,
@@ -806,7 +807,8 @@ def time_delay(
     :param method: ``'gcc'`` (default), ``'direct'`` or ``'phase'``.
     :param weighting: GCC weighting (default ``'phat'``; ignored
         otherwise).
-    :param window: Welch taper for ``'gcc'``/``'phase'`` (default Hann).
+    :param window: Welch taper for ``'gcc'``/``'phase'``, a scipy window name or a tuple
+        of a name and its parameters (default Hann).
     :param nperseg: Welch segment length for ``'gcc'``/``'phase'``
         (``None`` picks the shared default).
     :param overlap: Welch overlap fraction for ``'gcc'``/``'phase'``.

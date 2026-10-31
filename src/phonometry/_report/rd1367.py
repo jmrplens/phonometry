@@ -67,8 +67,8 @@ from ._layout import (
     build_document,
     document_styles,
     footer_flow,
-    grid_table,
     measurement_basis_style,
+    opening_flow,
     render_figure_drawing,
     result_box,
     stacked_table,
@@ -418,24 +418,31 @@ def render_activity_report(
         language,
     ).format(article=t(article, language))
 
-    flow: list[Any] = [
-        fiche_paragraph(title, title_style),
-        fiche_paragraph(basis, basis_style),
-    ]
-
     header_pairs = _metadata_pairs(result, metadata, language)
-    if header_pairs:
-        flow.append(Spacer(1, 3))
-        flow.append(grid_table(header_pairs))
-    flow.append(Spacer(1, 6))
+    flow = opening_flow(
+        title,
+        basis,
+        header_pairs,
+        title_style=title_style,
+        basis_style=basis_style,
+        gap=6,
+    )
 
-    flow.append(fiche_paragraph(t("Noise phases", language), caption_style))
-    flow.append(_phase_table(result=result, verbose=verbose, language=language))
-    flow.append(Spacer(1, 6))
+    flow.extend(
+        (
+            fiche_paragraph(t("Noise phases", language), caption_style),
+            _phase_table(result=result, verbose=verbose, language=language),
+            Spacer(1, 6),
+        )
+    )
 
-    flow.append(fiche_paragraph(t("Assessment by period", language), caption_style))
-    flow.append(_results_table(result, language))
-    flow.append(Spacer(1, 6))
+    flow.extend(
+        (
+            fiche_paragraph(t("Assessment by period", language), caption_style),
+            _results_table(result, language),
+            Spacer(1, 6),
+        )
+    )
 
     def _assessment_plot(
         ax: Axes | None = None, language: Language = "en", **kwargs: Any

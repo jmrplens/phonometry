@@ -39,7 +39,7 @@ from __future__ import annotations
 
 import html
 import math
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from .._internal.validation import require_count
 from ._i18n import format_number, t
@@ -52,9 +52,9 @@ from ._layout import (
     escaped_pairs,
     fmt_meta,
     footer_flow,
-    grid_table,
     measurement_basis_style,
     metrics_table,
+    opening_flow,
     render_figure_drawing,
     result_box,
     verdict_flow,
@@ -266,23 +266,24 @@ def render_iso3382_3_report(
             language,
         )
 
-    flow: list[Any] = [
-        fiche_paragraph(title, title_style),
-        fiche_paragraph(basis, basis_style),
-    ]
-
-    if metadata is not None and not metadata.is_empty():
-        header_pairs = _metadata_pairs(metadata, language)
-        if header_pairs:
-            flow.append(Spacer(1, 3))
-            flow.append(grid_table(header_pairs))
-    flow.append(Spacer(1, 8))
-
-    flow.append(fiche_paragraph(t("Single-number quantities", language), caption_style))
-    flow.append(
-        metrics_table(_metric_rows(result, language), col_widths=[62 * mm, 26 * mm])
+    header_pairs = (
+        _metadata_pairs(metadata, language)
+        if metadata is not None and not metadata.is_empty()
+        else []
     )
-    flow.append(Spacer(1, 8))
+    flow = opening_flow(
+        title, basis, header_pairs, title_style=title_style, basis_style=basis_style
+    )
+
+    flow.extend(
+        (
+            fiche_paragraph(t("Single-number quantities", language), caption_style),
+            metrics_table(
+                _metric_rows(result, language), col_widths=[62 * mm, 26 * mm]
+            ),
+            Spacer(1, 8),
+        )
+    )
 
     # Full-width, landscape spatial-decay plot (self-scaling level axis). The
     # regression line is defined only when D2,S / Lp,A,S,4m are finite (at least

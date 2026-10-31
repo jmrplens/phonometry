@@ -63,7 +63,7 @@ from ._layout import (
     document_styles,
     exceedance_markup,
     footer_flow,
-    grid_table,
+    opening_flow,
     render_figure_drawing,
     result_box,
     stacked_table,
@@ -451,42 +451,45 @@ def render_human_vibration_report(
     styles, title_style, basis_style, caption_style = document_styles(accent)
     title = t("Daily vibration exposure assessment", language)
 
-    flow: list[Any] = [
-        fiche_paragraph(title, title_style),
-        fiche_paragraph(_basis(result, language), basis_style),
-    ]
-
     header_pairs = _metadata_pairs(metadata, language)
-    if header_pairs:
-        flow.append(Spacer(1, 3))
-        flow.append(grid_table(header_pairs))
-    flow.append(Spacer(1, 8))
+    flow = opening_flow(
+        title,
+        _basis(result, language),
+        header_pairs,
+        title_style=title_style,
+        basis_style=basis_style,
+    )
 
-    flow.append(fiche_paragraph(t("Exposure analysis", language), caption_style))
-    flow.append(_operations_table(result=result, verbose=verbose, language=language))
-    flow.append(Spacer(1, 10))
-    # Full-width, landscape per-operation contribution chart (self-scaling).
-    flow.append(
-        render_figure_drawing(
-            result.plot,
-            174 * mm,
-            y_top=None,
-            figsize=(9.2, 3.3),
-            language=language,
+    flow.extend(
+        (
+            fiche_paragraph(t("Exposure analysis", language), caption_style),
+            _operations_table(result=result, verbose=verbose, language=language),
+            Spacer(1, 10),
+            # Full-width, landscape per-operation contribution chart (self-scaling).
+            render_figure_drawing(
+                result.plot,
+                174 * mm,
+                y_top=None,
+                figsize=(9.2, 3.3),
+                language=language,
+            ),
+            Spacer(1, 8),
         )
     )
-    flow.append(Spacer(1, 8))
 
-    flow.append(result_box(_statement(result, language), styles, accent))
-    flow.append(Spacer(1, 6))
+    flow.extend(
+        (result_box(_statement(result, language), styles, accent), Spacer(1, 6))
+    )
 
-    flow.append(
-        fiche_paragraph(
-            t("Assessment against Directive 2002/44/EC exposure values", language),
-            caption_style,
+    flow.extend(
+        (
+            fiche_paragraph(
+                t("Assessment against Directive 2002/44/EC exposure values", language),
+                caption_style,
+            ),
+            _assessment_table(result, language),
         )
     )
-    flow.append(_assessment_table(result, language))
     text, passed = _verdict(result, language)
     flow.extend(
         verdict_flow(text=text, passed=passed, styles=styles, language=language)

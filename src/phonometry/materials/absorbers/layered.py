@@ -696,7 +696,6 @@ def _stack_blocks(
     k0: Real,
     k0_sin2: Real,
     rc: float,
-    rho0: float,
     fluid: Fluid,
     transverse_wavenumber: Real,
 ) -> list[Any]:
@@ -838,7 +837,6 @@ def layered_absorber(
             k0=k0,
             k0_sin2=k0_sin2,
             rc=rc,
-            rho0=rho0,
             fluid=fluid,
             transverse_wavenumber=np.asarray(k0 * np.sin(theta)),
         )

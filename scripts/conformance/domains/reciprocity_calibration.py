@@ -185,7 +185,7 @@ def _chk_approximation() -> Outcome:
     """The three-term series, at the 33 entries with X above 5."""
     worst = 0.0
     for x, row in ref.IEC61094_2_TABLE_A1.items():
-        if not x > 5.0:
+        if x <= 5.0:
             continue
         for ratio, (real, imag) in zip(
             ref.IEC61094_2_TABLE_A1_RATIOS, row, strict=True

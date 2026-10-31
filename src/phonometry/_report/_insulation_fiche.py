@@ -36,7 +36,7 @@ from ._layout import (
     document_styles,
     fmt_num,
     footer_flow,
-    grid_table,
+    opening_flow,
     render_figure_drawing,
     result_box,
     two_panel_body,
@@ -479,13 +479,9 @@ def compose_insulation_fiche(
     accent = colors.HexColor(_ACCENT_HEX)
 
     styles, title_style, basis_style, caption_style = document_styles(accent)
-    flow: list[Any] = [
-        fiche_paragraph(title, title_style),
-        fiche_paragraph(basis, basis_style),
-    ]
-    if header_pairs:
-        flow.extend([Spacer(1, 3), grid_table(header_pairs)])
-    flow.append(Spacer(1, 8))
+    flow = opening_flow(
+        title, basis, header_pairs, title_style=title_style, basis_style=basis_style
+    )
 
     value_table = band_value_table(
         table.centers,

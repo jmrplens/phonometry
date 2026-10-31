@@ -909,7 +909,12 @@ _RULES: dict[str, _Rule] = {
         "A.6.2.4", "Table 2, Table A.4", "dB", magnitude=False
     ),
     "environmental_frequency": _Rule("5.5", "Table 6, Table A.5", "%", magnitude=False),
-    "field_immunity": _Rule("5.9.4.2", "5.9.4.2, A.7.4.8", "dB", magnitude=False),
+    "field_immunity": _Rule(
+        "5.9.4.2",  # NOSONAR S1313 - IEC 60942:2017 clause number, not an IP address
+        "5.9.4.2, A.7.4.8",
+        "dB",
+        magnitude=False,
+    ),
 }
 
 

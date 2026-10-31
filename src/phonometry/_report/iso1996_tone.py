@@ -58,8 +58,8 @@ from ._layout import (
     display_round,
     document_styles,
     footer_flow,
-    grid_table,
     measurement_basis_style,
+    opening_flow,
     render_figure_drawing,
     result_box,
     stacked_table,
@@ -353,20 +353,18 @@ def render_tone_audibility_report(
             language,
         )
 
-    flow: list[Any] = [
-        fiche_paragraph(title, title_style),
-        fiche_paragraph(basis, basis_style),
-    ]
-
     header_pairs = _metadata_pairs(result, metadata, language)
-    if header_pairs:
-        flow.append(Spacer(1, 3))
-        flow.append(grid_table(header_pairs))
-    flow.append(Spacer(1, 8))
+    flow = opening_flow(
+        title, basis, header_pairs, title_style=title_style, basis_style=basis_style
+    )
 
-    flow.append(fiche_paragraph(t("Detected tones", language), caption_style))
-    flow.append(_key_quantity_table(result=result, verbose=verbose, language=language))
-    flow.append(Spacer(1, 8))
+    flow.extend(
+        (
+            fiche_paragraph(t("Detected tones", language), caption_style),
+            _key_quantity_table(result=result, verbose=verbose, language=language),
+            Spacer(1, 8),
+        )
+    )
 
     # Full-width, landscape level-versus-frequency analysis plot: the tone
     # levels above their critical-band masking noise (a self-scaling dB axis).
@@ -414,48 +412,46 @@ def render_tone_audibility_report(
             "{dl} dB &#8804; 0); no tonal adjustment applies (K = 0 dB).",
             language,
         ).format(dl=_fmt(delta, language))
-    flow.append(fiche_paragraph(prominence, basis_strip_style))
-    flow.append(
-        fiche_paragraph(
-            t(
-                "The tonal audibility &#916;L<sub>ta</sub> = L<sub>pt</sub> "
-                "&#8722; L<sub>pn</sub> &#8722; a<sub>v</sub> is the amount by "
-                "which the tone level rises above the masking threshold of the "
-                "surrounding noise (ISO/PAS 20065:2016, Formula (14)); the "
-                "decisive value is the largest over the detected tones "
-                "(Clause 5.3.8).",
-                language,
+    flow.extend(
+        (
+            fiche_paragraph(prominence, basis_strip_style),
+            fiche_paragraph(
+                t(
+                    "The tonal audibility &#916;L<sub>ta</sub> = L<sub>pt</sub> "
+                    "&#8722; L<sub>pn</sub> &#8722; a<sub>v</sub> is the amount by "
+                    "which the tone level rises above the masking threshold of the "
+                    "surrounding noise (ISO/PAS 20065:2016, Formula (14)); the "
+                    "decisive value is the largest over the detected tones "
+                    "(Clause 5.3.8).",
+                    language,
+                ),
+                basis_strip_style,
             ),
-            basis_strip_style,
-        )
-    )
-    flow.append(
-        fiche_paragraph(
-            t(
-                "L<sub>pn</sub> is the critical-band masking-noise level "
-                "(Formula (12)), &#916;f<sub>c</sub> the critical bandwidth "
-                "about the tone (Formula (2)); an FG entry combines tones "
-                "sharing a critical band (Formula (17)).",
-                language,
+            fiche_paragraph(
+                t(
+                    "L<sub>pn</sub> is the critical-band masking-noise level "
+                    "(Formula (12)), &#916;f<sub>c</sub> the critical bandwidth "
+                    "about the tone (Formula (2)); an FG entry combines tones "
+                    "sharing a critical band (Formula (17)).",
+                    language,
+                ),
+                basis_strip_style,
             ),
-            basis_strip_style,
-        )
-    )
-    # Table J.1 is keyed on the mean audibility over the J staggered spectra of
-    # ISO/PAS 20065 Clause 5.3.9; this fiche assesses the one spectrum supplied,
-    # whose decisive audibility is that mean only for J = 1.
-    flow.append(
-        fiche_paragraph(
-            t(
-                "Table J.1 assigns K from the mean audibility &#916;L, the "
-                "energy mean of the decisive audibilities of the J assessed "
-                "spectra (ISO/PAS 20065:2016, Clause 5.3.9, Formula (20)). "
-                "This fiche assesses a single spectrum, so the K shown follows "
-                "from its decisive audibility; where several staggered spectra "
-                "are assessed, rate their mean audibility instead.",
-                language,
+            # Table J.1 is keyed on the mean audibility over the J staggered spectra of
+            # ISO/PAS 20065 Clause 5.3.9; this fiche assesses the one spectrum supplied,
+            # whose decisive audibility is that mean only for J = 1.
+            fiche_paragraph(
+                t(
+                    "Table J.1 assigns K from the mean audibility &#916;L, the "
+                    "energy mean of the decisive audibilities of the J assessed "
+                    "spectra (ISO/PAS 20065:2016, Clause 5.3.9, Formula (20)). "
+                    "This fiche assesses a single spectrum, so the K shown follows "
+                    "from its decisive audibility; where several staggered spectra "
+                    "are assessed, rate their mean audibility instead.",
+                    language,
+                ),
+                basis_strip_style,
             ),
-            basis_strip_style,
         )
     )
     flow.extend(footer_flow(metadata, language))

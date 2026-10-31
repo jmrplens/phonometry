@@ -193,9 +193,13 @@ def render(glossary: list[dict[str, Any]]) -> str:
         "",
     ]
     for group in glossary:
-        parts.append(f"## {_localized(group['label'])}\n")
-        parts.append("| Symbol | Definition | Unit | Defined in | Computed in |")
-        parts.append("| :--- | :--- | :--- | :--- | :--- |")
+        parts.extend(
+            (
+                f"## {_localized(group['label'])}\n",
+                "| Symbol | Definition | Unit | Defined in | Computed in |",
+                "| :--- | :--- | :--- | :--- | :--- |",
+            )
+        )
         parts.extend(_row(term, titles) for term in group["terms"])
         parts.append("")
     return "\n".join(parts).rstrip() + "\n"

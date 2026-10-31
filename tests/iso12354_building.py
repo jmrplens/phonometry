@@ -175,43 +175,41 @@ def airborne_paths(
         Table L.1 labels its columns (``D1``, ``1d``, ``11``, ...).
     """
     kij = junction_indices()
-    paths = []
+    paths: list[building.BandPath] = []
     for tag, name in enumerate_flanking():
         wall = situ[name]
         lij = COUPLING_LENGTH[name]
         cross, through = junction_paths(name, kij)
-        paths.append(
-            building.airborne_flanking_path(
-                label=f"D{tag}",
-                kind="Df",
-                element_i=situ["floor"],
-                element_j=wall,
-                vibration_reduction_index=cross,
-                coupling_length=lij,
-                separating_area=SEPARATING_AREA,
-                delta_r_i=delta_r,
-            )
-        )
-        paths.append(
-            building.airborne_flanking_path(
-                label=f"{tag}d",
-                kind="Fd",
-                element_i=wall,
-                element_j=situ["floor"],
-                vibration_reduction_index=cross,
-                coupling_length=lij,
-                separating_area=SEPARATING_AREA,
-            )
-        )
-        paths.append(
-            building.airborne_flanking_path(
-                label=f"{tag}{tag}",
-                kind="Ff",
-                element_i=wall,
-                element_j=wall,
-                vibration_reduction_index=through,
-                coupling_length=lij,
-                separating_area=SEPARATING_AREA,
+        paths.extend(
+            (
+                building.airborne_flanking_path(
+                    label=f"D{tag}",
+                    kind="Df",
+                    element_i=situ["floor"],
+                    element_j=wall,
+                    vibration_reduction_index=cross,
+                    coupling_length=lij,
+                    separating_area=SEPARATING_AREA,
+                    delta_r_i=delta_r,
+                ),
+                building.airborne_flanking_path(
+                    label=f"{tag}d",
+                    kind="Fd",
+                    element_i=wall,
+                    element_j=situ["floor"],
+                    vibration_reduction_index=cross,
+                    coupling_length=lij,
+                    separating_area=SEPARATING_AREA,
+                ),
+                building.airborne_flanking_path(
+                    label=f"{tag}{tag}",
+                    kind="Ff",
+                    element_i=wall,
+                    element_j=wall,
+                    vibration_reduction_index=through,
+                    coupling_length=lij,
+                    separating_area=SEPARATING_AREA,
+                ),
             )
         )
     return paths

@@ -34,7 +34,7 @@ reportlab, matplotlib and svglib are soft dependencies imported lazily
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, cast
 
 from ._i18n import format_number, t
 from ._layout import (
@@ -44,8 +44,8 @@ from ._layout import (
     document_styles,
     fmt_num,
     footer_flow,
-    grid_table,
     metrics_table,
+    opening_flow,
     response_decades,
     result_box,
     two_panel_body,
@@ -334,17 +334,18 @@ def render_iec60268_4_report(
     styles, title_style, basis_style, caption_style = document_styles(accent)
     title = t("Microphone characteristics", language)
 
-    flow: list[Any] = [
-        fiche_paragraph(title, title_style),
-        fiche_paragraph(_basis(metadata, language), basis_style),
-    ]
-
-    if metadata is not None and not metadata.is_empty():
-        pairs = _metadata_pairs(metadata, language)
-        if pairs:
-            flow.append(Spacer(1, 3))
-            flow.append(grid_table(pairs))
-    flow.append(Spacer(1, 8))
+    pairs = (
+        _metadata_pairs(metadata, language)
+        if metadata is not None and not metadata.is_empty()
+        else []
+    )
+    flow = opening_flow(
+        title,
+        _basis(metadata, language),
+        pairs,
+        title_style=title_style,
+        basis_style=basis_style,
+    )
 
     left_cell = [
         fiche_paragraph(t("Rated characteristics", language), caption_style),

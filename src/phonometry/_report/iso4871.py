@@ -504,17 +504,17 @@ def render_iso4871_report(
 
     verification_rows = _verification_rows(declaration, language)
     if verification_rows:
-        flow.append(Spacer(1, 8))
-        flow.append(
-            fiche_paragraph(
-                t("Verification (ISO 4871 clause 6.2)", language), caption_style
-            )
-        )
-        flow.append(
-            compliance_table(
-                verification_rows,
-                col_widths=[74 * mm, 34 * mm, 42 * mm, 24 * mm],
-                language=language,
+        flow.extend(
+            (
+                Spacer(1, 8),
+                fiche_paragraph(
+                    t("Verification (ISO 4871 clause 6.2)", language), caption_style
+                ),
+                compliance_table(
+                    verification_rows,
+                    col_widths=[74 * mm, 34 * mm, 42 * mm, 24 * mm],
+                    language=language,
+                ),
             )
         )
 

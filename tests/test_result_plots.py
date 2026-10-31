@@ -308,8 +308,7 @@ def test_plotting_module_has_no_toplevel_matplotlib_import() -> None:
             and node.test.id == "TYPE_CHECKING"
         )
         if is_func or is_typecheck:
-            for sub in ast.walk(node):
-                allowed.add(sub)
+            allowed.update(ast.walk(node))
     for node in ast.walk(tree):
         if isinstance(node, (ast.Import, ast.ImportFrom)):
             module = getattr(node, "module", None) or ""

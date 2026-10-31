@@ -45,8 +45,8 @@ from ._layout import (
     document_styles,
     fmt_num,
     footer_flow,
-    grid_table,
     metrics_table,
+    opening_flow,
     render_figure_drawing,
     result_box,
     two_panel_body,
@@ -237,17 +237,14 @@ def render_iso532_report(
     title = t("Loudness rating", language)
     basis = _basis_line(result, metadata, language)
 
-    flow: list[Any] = [
-        fiche_paragraph(title, title_style),
-        fiche_paragraph(basis, basis_style),
-    ]
-
-    if metadata is not None and not metadata.is_empty():
-        header_pairs = _metadata_pairs(metadata, language)
-        if header_pairs:
-            flow.append(Spacer(1, 3))
-            flow.append(grid_table(header_pairs))
-    flow.append(Spacer(1, 8))
+    header_pairs = (
+        _metadata_pairs(metadata, language)
+        if metadata is not None and not metadata.is_empty()
+        else []
+    )
+    flow = opening_flow(
+        title, basis, header_pairs, title_style=title_style, basis_style=basis_style
+    )
 
     left_cell = [
         fiche_paragraph(t("Loudness results", language), caption_style),
@@ -279,22 +276,22 @@ def render_iso532_report(
                 result, ax=ax, language=language, **kwargs
             )
 
-        flow.append(
-            fiche_paragraph(
-                t("Loudness versus time N(t) (clause 6.4)", language),
-                caption_style,
+        flow.extend(
+            (
+                fiche_paragraph(
+                    t("Loudness versus time N(t) (clause 6.4)", language),
+                    caption_style,
+                ),
+                render_figure_drawing(
+                    _time_plot,
+                    174 * mm,
+                    y_top=None,
+                    figsize=(9.2, 3.4),
+                    language=language,
+                ),
+                Spacer(1, 8),
             )
         )
-        flow.append(
-            render_figure_drawing(
-                _time_plot,
-                174 * mm,
-                y_top=None,
-                figsize=(9.2, 3.4),
-                language=language,
-            )
-        )
-        flow.append(Spacer(1, 8))
 
     flow.append(result_box(_statement(result, language), styles, accent))
     if metadata is not None and metadata.requirement is not None:

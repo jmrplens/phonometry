@@ -36,8 +36,8 @@ from ._layout import (
     document_styles,
     fmt_meta,
     footer_flow,
-    grid_table,
     metrics_table,
+    opening_flow,
     render_figure_drawing,
     result_box,
     two_panel_body,
@@ -143,15 +143,9 @@ def render_frf_fiche(
 
     styles, title_style, basis_style, caption_style = document_styles(accent)
 
-    flow: list[Any] = [
-        fiche_paragraph(title, title_style),
-        fiche_paragraph(basis, basis_style),
-    ]
-
-    if header_pairs:
-        flow.append(Spacer(1, 3))
-        flow.append(grid_table(header_pairs))
-    flow.append(Spacer(1, 8))
+    flow = opening_flow(
+        title, basis, header_pairs, title_style=title_style, basis_style=basis_style
+    )
 
     left_cell = [
         fiche_paragraph(caption, caption_style),

@@ -2623,9 +2623,7 @@ def engine_clips(root: pathlib.Path) -> set[str]:
     }
 
 
-def fingerprint_parts(
-    sources: Sources, clip: str, entry: Symbol
-) -> tuple[list[str], list[str]]:
+def fingerprint_parts(sources: Sources, entry: Symbol) -> tuple[list[str], list[str]]:
     """``(code lines, translation lines)`` a clip's fingerprint is taken over.
 
     :raises FileNotFoundError: when the clip steps an FDTD engine and the tree
@@ -2668,7 +2666,7 @@ def fingerprints(root: pathlib.Path) -> dict[str, str]:
     sources = Sources(root)
     out: dict[str, str] = {}
     for clip, entry in sorted(sources.clips().items()):
-        code, text = fingerprint_parts(sources, clip, entry)
+        code, text = fingerprint_parts(sources, entry)
         digest = hashlib.sha256()
         for line in code:
             digest.update(line.encode("utf-8"))

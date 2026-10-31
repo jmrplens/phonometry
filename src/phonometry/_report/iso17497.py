@@ -57,7 +57,7 @@ from ._layout import (
     document_styles,
     fmt_meta,
     footer_flow,
-    grid_table,
+    opening_flow,
     render_figure_drawing,
     result_box,
     two_panel_body,
@@ -65,7 +65,6 @@ from ._layout import (
 from .metadata import ReportMetadata
 
 if TYPE_CHECKING:
-    from reportlab.lib.styles import ParagraphStyle
     from reportlab.platypus import Table
 
     from .._i18n import Language
@@ -182,29 +181,6 @@ def _basis_line(
             standard=html.escape(measurement_standard)
         )
     return t(without_standard, language)
-
-
-def _header_flow(
-    title: str,
-    basis: str,
-    header_pairs: list[tuple[str, str]],
-    title_style: ParagraphStyle,
-    basis_style: ParagraphStyle,
-) -> list[Any]:
-    """The shared title/basis/metadata-grid opening of an ISO 17497 fiche."""
-    from reportlab.platypus import Spacer
-
-    from ._layout import fiche_paragraph
-
-    flow: list[Any] = [
-        fiche_paragraph(title, title_style),
-        fiche_paragraph(basis, basis_style),
-    ]
-    if header_pairs:
-        flow.append(Spacer(1, 3))
-        flow.append(grid_table(header_pairs))
-    flow.append(Spacer(1, 8))
-    return flow
 
 
 # ---------------------------------------------------------------------------
@@ -328,7 +304,9 @@ def render_scattering_report(
     header_pairs = _common_metadata_pairs(
         metadata, _freq_range(freqs, language), language
     )
-    flow = _header_flow(title, basis, header_pairs, title_style, basis_style)
+    flow = opening_flow(
+        title, basis, header_pairs, title_style=title_style, basis_style=basis_style
+    )
 
     from .._plot.materials import plot_scattering_report
 
@@ -484,7 +462,9 @@ def render_diffusion_spectrum_report(
         language,
         include_room_fields=False,
     )
-    flow = _header_flow(title, basis, header_pairs, title_style, basis_style)
+    flow = opening_flow(
+        title, basis, header_pairs, title_style=title_style, basis_style=basis_style
+    )
 
     from .._plot.materials import plot_diffusion_report
 
@@ -597,7 +577,9 @@ def render_diffusion_polar_report(
     header_pairs = _common_metadata_pairs(
         metadata, None, language, include_room_fields=False
     )
-    flow = _header_flow(title, basis, header_pairs, title_style, basis_style)
+    flow = opening_flow(
+        title, basis, header_pairs, title_style=title_style, basis_style=basis_style
+    )
 
     from .._plot.materials import plot_diffusion_polar_report
 

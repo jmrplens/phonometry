@@ -51,7 +51,7 @@ from ._layout import (
     document_styles,
     fmt_meta,
     footer_flow,
-    grid_table,
+    opening_flow,
     render_figure_drawing,
     result_box,
     two_panel_body,
@@ -429,17 +429,14 @@ def render_iso11654_report(
     else:
         basis = t("Sound absorption rating per ISO 11654:1997.", language)
 
-    flow: list[Any] = [
-        fiche_paragraph(title, title_style),
-        fiche_paragraph(basis, basis_style),
-    ]
-
-    if metadata is not None and not metadata.is_empty():
-        header_pairs = _metadata_pairs(metadata, language)
-        if header_pairs:
-            flow.append(Spacer(1, 3))
-            flow.append(grid_table(header_pairs))
-    flow.append(Spacer(1, 8))
+    header_pairs = (
+        _metadata_pairs(metadata, language)
+        if metadata is not None and not metadata.is_empty()
+        else []
+    )
+    flow = opening_flow(
+        title, basis, header_pairs, title_style=title_style, basis_style=basis_style
+    )
 
     value_table, caption = _left_table(
         result=result,
@@ -457,8 +454,7 @@ def render_iso11654_report(
     plot_drawing = render_figure_drawing(
         result.plot, 116 * mm, y_top=1.0, expand_step=None, language=language
     )
-    flow.append(two_panel_body(left_cell, plot_drawing))
-    flow.append(Spacer(1, 8))
+    flow.extend((two_panel_body(left_cell, plot_drawing), Spacer(1, 8)))
 
     flow.append(
         result_box(

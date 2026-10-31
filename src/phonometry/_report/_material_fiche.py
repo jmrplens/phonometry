@@ -23,7 +23,11 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
 from ._i18n import t
-from ._layout import escaped_pairs, fmt_meta
+from ._layout import (
+    escaped_pairs,
+    fmt_meta,
+    opening_flow,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -148,7 +152,6 @@ def render_material_fiche(
         build_document,
         document_styles,
         footer_flow,
-        grid_table,
         metrics_table,
         render_figure_drawing,
         result_box,
@@ -158,15 +161,13 @@ def render_material_fiche(
     accent = colors.HexColor(_ACCENT_HEX)
     styles, title_style, basis_style, caption_style = document_styles(accent)
 
-    flow: list[Any] = [
-        fiche_paragraph(content.title, title_style),
-        fiche_paragraph(content.basis_line, basis_style),
-    ]
-
-    if content.metadata_pairs:
-        flow.append(Spacer(1, 3))
-        flow.append(grid_table(content.metadata_pairs))
-    flow.append(Spacer(1, 8))
+    flow = opening_flow(
+        content.title,
+        content.basis_line,
+        content.metadata_pairs,
+        title_style=title_style,
+        basis_style=basis_style,
+    )
 
     left_cell = [
         fiche_paragraph(content.caption, caption_style),
@@ -176,8 +177,7 @@ def render_material_fiche(
     plot_drawing = render_figure_drawing(
         plot_fn, 116 * mm, y_top=None, language=language
     )
-    flow.append(two_panel_body(left_cell, plot_drawing))
-    flow.append(Spacer(1, 8))
+    flow.extend((two_panel_body(left_cell, plot_drawing), Spacer(1, 8)))
 
     flow.append(
         result_box(content.statement, styles, accent, extended=content.extended)

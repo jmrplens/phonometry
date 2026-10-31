@@ -429,26 +429,24 @@ class RoomToRoomResult(OwnsArrays):
                     "values": self.source_power_level,
                 }
             )
-        rows.append(
-            {
-                "label": "Source room level",
-                "kind": "source",
-                "values": self.source_level,
-            }
-        )
-        rows.append(
-            {
-                "label": "Partition transmission loss",
-                "kind": "transmission_loss",
-                "values": self.transmission_loss,
-            }
-        )
-        rows.append(
-            {
-                "label": "Receiving-room absorption",
-                "kind": "absorption",
-                "values": self.receiving_absorption,
-            }
+        rows.extend(
+            (
+                {
+                    "label": "Source room level",
+                    "kind": "source",
+                    "values": self.source_level,
+                },
+                {
+                    "label": "Partition transmission loss",
+                    "kind": "transmission_loss",
+                    "values": self.transmission_loss,
+                },
+                {
+                    "label": "Receiving-room absorption",
+                    "kind": "absorption",
+                    "values": self.receiving_absorption,
+                },
+            )
         )
         if self.flanking_penalty:
             rows.append(

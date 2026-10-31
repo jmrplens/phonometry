@@ -38,8 +38,8 @@ from ._layout import (
     escaped_pairs,
     fmt_meta,
     footer_flow,
-    grid_table,
     measurement_basis_style,
+    opening_flow,
     render_figure_drawing,
     result_box,
     verdict_flow,
@@ -508,34 +508,37 @@ def render_sound_power_fiche(
 
     styles, title_style, basis_style, caption_style = document_styles(accent)
 
-    flow: list[Any] = [
-        fiche_paragraph(copy.title, title_style),
-        fiche_paragraph(copy.basis, basis_style),
-    ]
+    header_pairs = (
+        metadata_pairs(metadata, language)
+        if metadata is not None and not metadata.is_empty()
+        else []
+    )
+    flow = opening_flow(
+        copy.title,
+        copy.basis,
+        header_pairs,
+        title_style=title_style,
+        basis_style=basis_style,
+    )
 
-    if metadata is not None and not metadata.is_empty():
-        header_pairs = metadata_pairs(metadata, language)
-        if header_pairs:
-            flow.append(Spacer(1, 3))
-            flow.append(grid_table(header_pairs))
-    flow.append(Spacer(1, 8))
+    flow.extend(
+        (fiche_paragraph(copy.caption, caption_style), value_table, Spacer(1, 8))
+    )
 
-    flow.append(fiche_paragraph(copy.caption, caption_style))
-    flow.append(value_table)
-    flow.append(Spacer(1, 8))
-
-    # Landscape sound-power spectrum drawn by the result's own single-panel
-    # plot(ax=...); the band axis carries nominal labels (not base-ten log).
-    flow.append(
-        render_figure_drawing(
-            result.plot,
-            174 * mm,
-            y_top=None,
-            figsize=figsize,
-            language=language,
+    flow.extend(
+        (
+            # Landscape sound-power spectrum drawn by the result's own single-panel
+            # plot(ax=...); the band axis carries nominal labels (not base-ten log).
+            render_figure_drawing(
+                result.plot,
+                174 * mm,
+                y_top=None,
+                figsize=figsize,
+                language=language,
+            ),
+            Spacer(1, 8),
         )
     )
-    flow.append(Spacer(1, 8))
 
     flow.append(result_box(copy.statement, styles, accent, copy.extended))
     # A caller may supply its own verdict (its quantity symbol and sign rule);

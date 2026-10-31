@@ -140,8 +140,8 @@ def test_a_node_whose_encoders_all_fail_refuses_before_it_steps(
 ) -> None:
     built: list[FDTD2D] = []
 
-    def counted(*args: Any, **kwargs: Any) -> FDTD2D:
-        built.append(FDTD2D(*args, **kwargs))
+    def counted(**kwargs: Any) -> FDTD2D:
+        built.append(FDTD2D(**kwargs))
         return built[-1]
 
     monkeypatch.setattr(fd, "FDTD2D", counted)

@@ -145,7 +145,7 @@ def test_a_result_holds_its_decimation_as_an_int(value: object) -> None:
 
 
 def _run_route(every: object, decimation: object) -> object:
-    return FDTD2D(343.0, 0.01, shape=(8, 8)).run(
+    return FDTD2D(c=343.0, dx=0.01, shape=(8, 8)).run(
         4,
         snapshot_every=every,  # type: ignore[arg-type]
         snapshot_decimation=decimation,  # type: ignore[arg-type]
@@ -153,7 +153,7 @@ def _run_route(every: object, decimation: object) -> object:
 
 
 def _elastic_run_route(every: object, decimation: object) -> object:
-    return ElasticFDTD2D(4000.0, 2300.0, 0.01, rho=2500.0, shape=(8, 8)).run(
+    return ElasticFDTD2D(c_p=4000.0, c_s=2300.0, dx=0.01, rho=2500.0, shape=(8, 8)).run(
         4,
         snapshot_every=every,  # type: ignore[arg-type]
         snapshot_decimation=decimation,  # type: ignore[arg-type]
@@ -478,11 +478,13 @@ def test_a_result_refuses_a_provenance_that_is_not_a_run_provenance(
 
 
 def _acoustic_engine(**kwargs: Any) -> FDTD2D:
-    return FDTD2D(343.0, 0.01, shape=(8, 8), **kwargs)
+    return FDTD2D(c=343.0, dx=0.01, shape=(8, 8), **kwargs)
 
 
 def _elastic_engine(**kwargs: Any) -> ElasticFDTD2D:
-    return ElasticFDTD2D(4000.0, 2300.0, 0.01, rho=2500.0, shape=(8, 8), **kwargs)
+    return ElasticFDTD2D(
+        c_p=4000.0, c_s=2300.0, dx=0.01, rho=2500.0, shape=(8, 8), **kwargs
+    )
 
 
 def _elastic_from_regions(**kwargs: Any) -> ElasticFDTD2D:

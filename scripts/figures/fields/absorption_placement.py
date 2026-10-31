@@ -180,7 +180,11 @@ def _absorption_placement_fields() -> tuple[Any, ...]:
     times = np.zeros(0)
     for edge_imp in edges:
         sim = FDTD2D(
-            _AP_C0, _AP_DX, shape=(ny, nx), edge_impedance=edge_imp, compute=compute
+            c=_AP_C0,
+            dx=_AP_DX,
+            shape=(ny, nx),
+            edge_impedance=edge_imp,
+            compute=compute,
         )
         sim.add_source(
             SignalSource(

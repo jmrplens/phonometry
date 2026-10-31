@@ -100,8 +100,8 @@ def _open_end_fields(
     blank = ~air[::2, ::2]
     for frequency in _OPEN_FREQS:
         sim = FDTD2D(
-            343.0,
-            dx,
+            c=343.0,
+            dx=dx,
             shape=(ny, nx),
             rho=rho_map,
             edge_impedance={

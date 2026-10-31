@@ -842,7 +842,7 @@ def test_an_array_not_handed_over_is_still_copied() -> None:
 def _fdtd() -> object:
     from phonometry import simulation
 
-    sim = simulation.FDTD2D(343.0, 0.02, shape=(100, 100))
+    sim = simulation.FDTD2D(c=343.0, dx=0.02, shape=(100, 100))
     return simulation.fdtd_simulation(
         simulation.FDTDRun(
             c=343.0,
@@ -956,7 +956,7 @@ def test_a_simulation_result_is_not_held_twice_while_it_is_built(
 def _fdtd_engine() -> object:
     from phonometry import simulation
 
-    sim = simulation.FDTD2D(343.0, 0.02, shape=(100, 100))
+    sim = simulation.FDTD2D(c=343.0, dx=0.02, shape=(100, 100))
     sim.add_source(simulation.GaussianPulse(ix=50, iy=50, half_width_s=2e-4))
     return sim
 
@@ -964,7 +964,9 @@ def _fdtd_engine() -> object:
 def _elastic_fdtd_engine() -> object:
     from phonometry import simulation
 
-    sim = simulation.ElasticFDTD2D(5900.0, 3200.0, 0.05, rho=7850.0, shape=(60, 100))
+    sim = simulation.ElasticFDTD2D(
+        c_p=5900.0, c_s=3200.0, dx=0.05, rho=7850.0, shape=(60, 100)
+    )
     pulse = simulation.GaussianPulse(ix=0, iy=0, half_width_s=2e-4)
     sim.add_source(simulation.ExplosionSource(ix=50, iy=30, waveform=pulse.value))
     return sim

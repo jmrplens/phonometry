@@ -119,7 +119,7 @@ def monopole_far_field() -> dict[str, object]:
     field ``p = A H0(2)(k r)`` fitted at an independent probe cell.
     """
     dx, ny, nx = 0.005, 300, 300
-    sim = FDTD2D(C0, dx, shape=(ny, nx), absorbing_layer_cells=40)
+    sim = FDTD2D(c=C0, dx=dx, shape=(ny, nx), absorbing_layer_cells=40)
     cx, cy = nx // 2, ny // 2
     sim.add_source(CWSource(ix=cx, iy=cy, frequency=F0, ramp_cycles=4.0))
     probe = sim.add_contour_probe(cx - 60, cx + 60, cy - 60, cy + 60, frequencies=[F0])
@@ -219,7 +219,7 @@ def test_dipole_pattern_matches_two_source_oracle() -> None:
     # Two antiphase monopoles 3 cm apart: |F| ~ |sin(k s/2 cos a)| with
     # nulls broadside, the two-element array-factor oracle.
     dx, ny, nx = 0.005, 300, 300
-    sim = FDTD2D(C0, dx, shape=(ny, nx), absorbing_layer_cells=40)
+    sim = FDTD2D(c=C0, dx=dx, shape=(ny, nx), absorbing_layer_cells=40)
     cx, cy = nx // 2, ny // 2
     sim.add_source(
         CWSource(ix=cx - 3, iy=cy, frequency=F0, amplitude=1.0, ramp_cycles=4.0)
@@ -271,8 +271,8 @@ def _cw_panel_levels(
     """
     ny, nx = mask.shape
     sim = FDTD2D(
-        C0,
-        dx,
+        c=C0,
+        dx=dx,
         shape=(ny, nx),
         absorbing_layer_cells=sponge,
         cfl=0.9,
@@ -500,7 +500,7 @@ def test_meshed_metadiffuser_far_field_matches_tmm_model(
 # Validation of the probe and transformation APIs.
 # ---------------------------------------------------------------------------
 def test_contour_probe_validation() -> None:
-    sim = FDTD2D(C0, 0.01, shape=(40, 50))
+    sim = FDTD2D(c=C0, dx=0.01, shape=(40, 50))
     with pytest.raises(ValueError, match="open cell on both sides"):
         sim.add_contour_probe(0, 10, 5, 10, frequencies=[F0])
     with pytest.raises(ValueError, match="open cell on both sides"):
@@ -525,14 +525,14 @@ def test_contour_probe_validation() -> None:
 def test_contour_probe_rejects_touching_obstacles() -> None:
     mask = np.zeros((40, 50), dtype=bool)
     mask[18:22, 20:30] = True
-    sim = FDTD2D(C0, 0.01, shape=(40, 50), obstacle_mask=mask)
+    sim = FDTD2D(c=C0, dx=0.01, shape=(40, 50), obstacle_mask=mask)
     with pytest.raises(ValueError, match=r"contour faces touch obstacle cells"):
         sim.add_contour_probe(20, 35, 10, 30, frequencies=[F0])
     sim.add_contour_probe(15, 35, 10, 30, frequencies=[F0])
 
 
 def test_contour_probe_geometry_record() -> None:
-    sim = FDTD2D(C0, 0.01, shape=(40, 50))
+    sim = FDTD2D(c=C0, dx=0.01, shape=(40, 50))
     probe = sim.add_contour_probe(5, 10, 20, 25, frequencies=[F0])
     n_points = 2 * (6 + 6)
     assert probe.positions.shape == (n_points, 2)
@@ -544,7 +544,7 @@ def test_contour_probe_geometry_record() -> None:
 
 
 def test_far_field_input_validation() -> None:
-    sim = FDTD2D(C0, 0.01, shape=(40, 50))
+    sim = FDTD2D(c=C0, dx=0.01, shape=(40, 50))
     probe = sim.add_contour_probe(5, 10, 20, 25, frequencies=[F0])
     sim.run(4)
     phasors = probe.phasors(F0)
@@ -580,7 +580,7 @@ def test_a_fluid_with_no_speed_of_sound_is_refused_by_the_fluid() -> None:
 
 
 def test_contour_phasors_subtract_mismatch() -> None:
-    sim = FDTD2D(C0, 0.01, shape=(40, 50))
+    sim = FDTD2D(c=C0, dx=0.01, shape=(40, 50))
     p1 = sim.add_contour_probe(5, 10, 20, 25, frequencies=[F0, 2.0 * F0])
     p2 = sim.add_contour_probe(5, 11, 20, 25, frequencies=[F0])
     p3 = sim.add_contour_probe(6, 11, 20, 25, frequencies=[F0])

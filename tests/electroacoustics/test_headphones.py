@@ -391,8 +391,11 @@ def test_the_characteristic_voltage_refuses_a_weighting_8_3_5_does_not_apply() -
     levels = np.full(BANDS.size, 80.0)
     with pytest.raises(ValueError, match=_A_OR_Z):
         ea.program_characteristic_voltage(
-            0.05, levels, frequencies=BANDS, weighting="C"
-        )  # type: ignore[arg-type]
+            0.05,
+            levels,
+            frequencies=BANDS,
+            weighting="C",  # type: ignore[arg-type]
+        )
 
 
 def test_a_characteristic_voltage_built_by_hand_refuses_another_weighting() -> None:

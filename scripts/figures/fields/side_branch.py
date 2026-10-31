@@ -117,8 +117,8 @@ def _sbr_rig(compute: Compute) -> FDTD2D:
     air = _sbr_air()
     rho_map = np.where(air, 1.2, 1.2e6)
     return FDTD2D(
-        _SBR_C0,
-        _SBR_DX,
+        c=_SBR_C0,
+        dx=_SBR_DX,
         shape=air.shape,
         rho=rho_map,
         edge_impedance={"left": 1.2 * _SBR_C0, "right": 1.2 * _SBR_C0},

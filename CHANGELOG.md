@@ -3996,6 +3996,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   sides as a read-only mapping of its own, so a run cannot follow the
   caller's later edits to the dictionary.
 
+- **The FDTD engines take every argument by name, as the runs do.**
+  `simulation.FDTD2D(*, c, dx, rho=1.2, ...)` and
+  `simulation.ElasticFDTD2D(*, c_p, c_s, dx, rho, ...)` take the wave
+  speeds and the grid spacing by keyword, where they took them by position:
+  `FDTD2D(343.0, 0.01, shape=(200, 300))` is now
+  `FDTD2D(c=343.0, dx=0.01, shape=(200, 300))`, and a call that gives them
+  by position raises `TypeError`. A speed and a spacing written in the
+  wrong order built an engine: `FDTD2D(0.01, 343.0, shape=...)` stepped
+  cells 343 m wide with a time step of about four hours, and
+  `ElasticFDTD2D(4000.0, 0.01, 2300.0, ...)` read the spacing as the shear
+  speed. `ElasticFDTD2D.from_regions(shape, dx, ...)` keeps its order: a
+  shape and a spacing given the other way round are refused with a
+  `TypeError` naming `shape`.
+
 - **`FDTD2D.kappa`, `ElasticFDTD2D.mu` and `ElasticFDTD2D.lam` are
   read-only.** They are NumPy copies the engine computed from its medium, as
   `c`, `rho`, `c_p` and `c_s` already were. An edit used to reach part of the

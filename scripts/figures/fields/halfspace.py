@@ -142,9 +142,9 @@ def _halfspace_fields() -> tuple[Any, Any, Any, Any, Any, float]:
     times = np.zeros(0)
     for free in (True, False):
         sim = simulation.ElasticFDTD2D(
-            _HS_CP,
-            _HS_CS,
-            dx,
+            c_p=_HS_CP,
+            c_s=_HS_CS,
+            dx=dx,
             rho=_HS_RHO,
             shape=(_HS_NY, _HS_NX),
             absorbing_layer_cells=_HS_SPONGE,

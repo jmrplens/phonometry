@@ -154,7 +154,7 @@ def test_the_reference_runs_on_numpy_whatever_the_environment_asks(
     """``PHONOMETRY_COMPUTE=cupy`` would otherwise make the proof CuPy against CuPy."""
     monkeypatch.setitem(bk.LOADERS, "cupy", _numpy_recorded_as("cupy"))
     monkeypatch.setenv("PHONOMETRY_COMPUTE", "cupy")
-    assert FDTD2D(343.0, 0.01, shape=(8, 8)).provenance.device == "cupy"
+    assert FDTD2D(c=343.0, dx=0.01, shape=(8, 8)).provenance.device == "cupy"
     got = gpu_parity.run_on(_IMPEDANCE, fdtd, gpu_parity.REFERENCE)
     monkeypatch.delenv("PHONOMETRY_COMPUTE")
     want = es.run(_IMPEDANCE, fdtd)

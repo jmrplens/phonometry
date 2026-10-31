@@ -99,8 +99,8 @@ def _expansion_chamber_fields(
     blank = ~air[::2, ::2]
     for f in (f_pass, f_peak):
         sim = FDTD2D(
-            343.0,
-            dx,
+            c=343.0,
+            dx=dx,
             shape=(ny, nx),
             rho=rho_map,
             edge_impedance={"left": 1.2 * 343.0, "right": 1.2 * 343.0},

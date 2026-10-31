@@ -145,7 +145,12 @@ def _plate_junction_fields() -> tuple[Any, Any, Any, Any, int]:
             c_s[r0:r_end, j0 : j0 + 4] = _EL_CS
             rho[r0:r_end, j0 : j0 + 4] = _EL_RHO
         sim = simulation.ElasticFDTD2D(
-            c_p, c_s, dx, rho=rho, absorbing_layer_cells=_EJ_SPONGE, compute=compute
+            c_p=c_p,
+            c_s=c_s,
+            dx=dx,
+            rho=rho,
+            absorbing_layer_cells=_EJ_SPONGE,
+            compute=compute,
         )
         # Vertical force on the top surface (the vy face between the air
         # row r0 - 1 and the first plate row): Lamb-style A0 launcher.
@@ -622,7 +627,12 @@ def _coincidence_fields() -> tuple[Any, Any, Any, list[float], int]:
         c_s[r0 : r0 + 4] = _EL_CS * _EC_CB_TUNE
         rho[r0 : r0 + 4] = _EL_RHO
         sim = simulation.ElasticFDTD2D(
-            c_p, c_s, dx, rho=rho, absorbing_layer_cells=_EC_SPONGE, compute=compute
+            c_p=c_p,
+            c_s=c_s,
+            dx=dx,
+            rho=rho,
+            absorbing_layer_cells=_EC_SPONGE,
+            compute=compute,
         )
         backend = sim._backend
         xp = backend.xp

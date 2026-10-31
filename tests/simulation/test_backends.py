@@ -216,9 +216,9 @@ def test_fallback_warns_once_and_records_numpy(monkeypatch: pytest.MonkeyPatch) 
 _ABSENT_GPU = Compute(device="cupy", fallback=True)
 _ROUTES: dict[str, Callable[[], object]] = {
     "backend_for": lambda: bk.backend_for(_ABSENT_GPU),
-    "FDTD2D": lambda: FDTD2D(343.0, 0.01, shape=(8, 8), compute=_ABSENT_GPU),
+    "FDTD2D": lambda: FDTD2D(c=343.0, dx=0.01, shape=(8, 8), compute=_ABSENT_GPU),
     "ElasticFDTD2D": lambda: ElasticFDTD2D(
-        4000.0, 2300.0, 0.01, rho=2500.0, shape=(8, 8), compute=_ABSENT_GPU
+        c_p=4000.0, c_s=2300.0, dx=0.01, rho=2500.0, shape=(8, 8), compute=_ABSENT_GPU
     ),
     "ElasticFDTD2D.from_regions": lambda: ElasticFDTD2D.from_regions(
         (8, 8), 0.01, background=WATER, compute=_ABSENT_GPU
@@ -496,9 +496,9 @@ def test_an_mps_that_cannot_allocate_is_a_device_error(
 @pytest.mark.parametrize(
     "build",
     [
-        lambda c: FDTD2D(343.0, 0.01, shape=(8, 8), compute=c),
+        lambda c: FDTD2D(c=343.0, dx=0.01, shape=(8, 8), compute=c),
         lambda c: ElasticFDTD2D(
-            4000.0, 2300.0, 0.01, rho=2500.0, shape=(8, 8), compute=c
+            c_p=4000.0, c_s=2300.0, dx=0.01, rho=2500.0, shape=(8, 8), compute=c
         ),
     ],
     ids=["acoustic", "elastic"],
@@ -710,7 +710,7 @@ def _missing_torch_message(route: str, request: Compute) -> str:
     ask: dict[str, Callable[[], object]] = {
         "backend_for": lambda: bk.backend_for(request),
         "loader": lambda: bk.LOADERS[request.device](request),
-        "FDTD2D": lambda: FDTD2D(343.0, 0.01, shape=(8, 8), compute=request),
+        "FDTD2D": lambda: FDTD2D(c=343.0, dx=0.01, shape=(8, 8), compute=request),
     }
     with pytest.raises(ComputeImportError) as caught:
         ask[route]()
@@ -947,13 +947,13 @@ _BAD_ARGUMENTS: dict[str, tuple[Callable[[Compute], object], str]] = {
         "duration_s must cover at least one time step",
     ),
     "acoustic cfl": (
-        lambda c: FDTD2D(343.0, 0.01, shape=(8, 8), cfl=1.5, compute=c),
+        lambda c: FDTD2D(c=343.0, dx=0.01, shape=(8, 8), cfl=1.5, compute=c),
         "cfl must lie in",
     ),
     "acoustic impedance on a sponge": (
         lambda c: FDTD2D(
-            343.0,
-            0.01,
+            c=343.0,
+            dx=0.01,
             shape=(8, 8),
             absorbing_layer_cells=2,
             edge_impedance={"left": 413.0},
@@ -963,15 +963,19 @@ _BAD_ARGUMENTS: dict[str, tuple[Callable[[Compute], object], str]] = {
     ),
     "acoustic obstacle": (
         lambda c: FDTD2D(
-            343.0, 0.01, shape=(8, 8), obstacle_mask=np.zeros((4, 4), bool), compute=c
+            c=343.0,
+            dx=0.01,
+            shape=(8, 8),
+            obstacle_mask=np.zeros((4, 4), bool),
+            compute=c,
         ),
         "obstacle_mask must match",
     ),
     "elastic sides": (
         lambda c: ElasticFDTD2D(
-            4000.0,
-            2300.0,
-            0.01,
+            c_p=4000.0,
+            c_s=2300.0,
+            dx=0.01,
             rho=2500.0,
             shape=(8, 8),
             absorbing_layer_cells=2,
@@ -982,9 +986,9 @@ _BAD_ARGUMENTS: dict[str, tuple[Callable[[Compute], object], str]] = {
     ),
     "elastic obstacle": (
         lambda c: ElasticFDTD2D(
-            4000.0,
-            2300.0,
-            0.01,
+            c_p=4000.0,
+            c_s=2300.0,
+            dx=0.01,
             rho=2500.0,
             shape=(8, 8),
             obstacle_mask=np.ones((8, 8), bool),

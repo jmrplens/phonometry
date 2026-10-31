@@ -152,8 +152,8 @@ def _seabed_fields() -> tuple[Any, ...]:
         c_map[i_bed:, :] = c2
         rho_map[i_bed:, :] = rho2
         sim = FDTD2D(
-            c_map,
-            _SB_DX,
+            c=c_map,
+            dx=_SB_DX,
             rho=rho_map,
             absorbing_layer_cells=_SB_SPONGE,
             compute=compute,

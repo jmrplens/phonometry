@@ -104,7 +104,9 @@ def fluid_grid() -> ElasticFDTD2D:
     c_p[9:15, 12:18] = _LAMBDA_ZERO_C_P
     c_s[9:15, 12:18] = _LAMBDA_ZERO_C_S
     rho[9:15, 12:18] = 2500.0
-    return elastic_fdtd.ElasticFDTD2D(c_p, c_s, 0.01, rho=rho, compute=Compute())
+    return elastic_fdtd.ElasticFDTD2D(
+        c_p=c_p, c_s=c_s, dx=0.01, rho=rho, compute=Compute()
+    )
 
 
 def fluid_energy(seed: int) -> float:

@@ -265,7 +265,9 @@ def _stands_for_an_array(value: object) -> bool:
     )
 
 
-def _owned(value: object, *, always: bool) -> object:
+def _owned(
+    value: object, *, always: bool, within: frozenset[int] = frozenset()
+) -> object:
     """*value* with every array in it replaced by a read-only copy of its own.
 
     An array, and an array inside a tuple, a list, any mapping or an array
@@ -291,20 +293,48 @@ def _owned(value: object, *, always: bool) -> object:
     array of ``uint8``. The record's checks refuse it as text where numbers
     go, as they refuse a ``bytes``, and name it as the caller gave it
     (:func:`given_type`).
+
+    A container that holds itself, at any depth (a list appended to
+    itself, an array of objects that holds itself, a mapping that holds a
+    list that holds the mapping), has no end to copy, and the walk that
+    followed it ran until Python's recursion limit stopped it: it is
+    refused instead (:func:`_entered`), and :func:`_take_ownership` names
+    the field. *within* is the containers the walk is inside, by identity;
+    a container held twice side by side, not inside itself, is copied as
+    any other is.
     """
     if type(value) in _PLAIN_TYPES:
         return value
     if isinstance(value, bytearray):
         return _spelt(value)
     if isinstance(value, np.ndarray):
-        return _owned_array(value, always=always)
+        return _owned_array(value, always=always, within=within)
     if isinstance(value, tuple | list):
-        return _owned_sequence(value, always=always)
+        return _owned_sequence(value, always=always, within=within)
     if isinstance(value, Mapping):
-        return _owned_mapping(value, always=always)
+        return _owned_mapping(value, always=always, within=within)
     if _stands_for_an_array(value):
         return _owned_array(np.asarray(value), always=True)
     return value
+
+
+class _HoldsItself(TypeError):
+    """A container a record was given holds itself, so no copy of it ends."""
+
+
+def _entered(container: object, within: frozenset[int]) -> frozenset[int]:
+    """*within* with *container* in it, or a refusal if the walk is inside it already.
+
+    :param container: A tuple, a list, a mapping or an array of objects the
+        walk of :func:`_owned` is about to go into.
+    :param within: The containers the walk is inside, by identity.
+    :return: *within* and *container*.
+    :raises TypeError: if *container* is among them, so holds itself.
+    """
+    if id(container) in within:
+        msg = "a record holds no container that holds itself, which has no end to copy"
+        raise _HoldsItself(msg)
+    return within | {id(container)}
 
 
 #: The ``bytes`` a record being built holds for each ``bytearray`` its caller
@@ -412,7 +442,9 @@ def _as_given(value: object) -> object:
     return value
 
 
-def _owned_array(value: np.ndarray, *, always: bool) -> np.ndarray:
+def _owned_array(
+    value: np.ndarray, *, always: bool, within: frozenset[int] = frozenset()
+) -> np.ndarray:
     """*value*, or a read-only C-ordered copy of it when one is due.
 
     An array passed through :func:`handed_over` is sealed as it is instead.
@@ -421,13 +453,15 @@ def _owned_array(value: np.ndarray, *, always: bool) -> np.ndarray:
     if adopted is not None:
         return adopted
     if value.dtype == object:
-        return _owned_objects(value, always=always)
+        return _owned_objects(value, always=always, within=within)
     if always or not _sealed(value):
         return read_only(np.array(value, order="C"))
     return value
 
 
-def _owned_objects(value: np.ndarray, *, always: bool) -> np.ndarray:
+def _owned_objects(
+    value: np.ndarray, *, always: bool, within: frozenset[int] = frozenset()
+) -> np.ndarray:
     """An array of objects, with every array it holds owned as a tuple's is.
 
     Copying an array of objects copies its references, not the objects, so
@@ -438,7 +472,8 @@ def _owned_objects(value: np.ndarray, *, always: bool) -> np.ndarray:
     *always* false it is kept as it is when it is sealed and none of its
     members was copied.
     """
-    members = [_owned(member, always=always) for member in value.flat]
+    within = _entered(value, within)
+    members = [_owned(member, always=always, within=within) for member in value.flat]
     if (
         not always
         and _sealed(value)
@@ -454,10 +489,14 @@ def _owned_objects(value: np.ndarray, *, always: bool) -> np.ndarray:
 
 
 def _owned_sequence(
-    value: tuple[object, ...] | list[object], *, always: bool
+    value: tuple[object, ...] | list[object],
+    *,
+    always: bool,
+    within: frozenset[int] = frozenset(),
 ) -> object:
     """*value* rebuilt around its owned items, or itself when none was copied."""
-    items = [_owned(item, always=always) for item in value]
+    within = _entered(value, within)
+    items = [_owned(item, always=always, within=within) for item in value]
     if all(new is old for new, old in zip(items, value, strict=True)):
         return value
     if isinstance(value, list):
@@ -466,9 +505,17 @@ def _owned_sequence(
     return make(items) if make is not None else tuple(items)
 
 
-def _owned_mapping(value: Mapping[object, object], *, always: bool) -> object:
+def _owned_mapping(
+    value: Mapping[object, object],
+    *,
+    always: bool,
+    within: frozenset[int] = frozenset(),
+) -> object:
     """*value* rebuilt around its owned values, or itself when none was copied."""
-    pairs = {key: _owned(item, always=always) for key, item in value.items()}
+    within = _entered(value, within)
+    pairs = {
+        key: _owned(item, always=always, within=within) for key, item in value.items()
+    }
     if all(pairs[key] is item for key, item in value.items()):
         return value
     return MappingProxyType(pairs) if isinstance(value, MappingProxyType) else pairs
@@ -510,7 +557,8 @@ def _take_ownership(
     ``np.asarray(self.levels)`` is that copy, and ``read_only`` on it
     touches nobody else's array. A ``bytearray`` is held as the ``bytes``
     it spells, which a refusal names as the caller gave it while the checks
-    run (:func:`given_type`). After,
+    run (:func:`given_type`), and a field that holds itself is refused,
+    named (:func:`_owned_field`). After,
     every field is looked at once more, and an array somebody can still
     write into, one the class built and stored without sealing it or one it
     took from elsewhere, is copied too.
@@ -522,7 +570,7 @@ def _take_ownership(
     try:
         for name in init:
             value = getattr(record, name, _MISSING)
-            kept = _owned(value, always=True)
+            kept = _owned_field(record, name, value)
             if kept is not value:
                 object.__setattr__(record, name, kept)
         if hook is not None:
@@ -534,6 +582,21 @@ def _take_ownership(
         kept = _owned(value, always=False)
         if kept is not value:
             object.__setattr__(record, name, kept)
+
+
+def _owned_field(record: object, name: str, value: object) -> object:
+    """The init field *name* of *record* as :func:`_owned` holds it, refused by name.
+
+    :raises TypeError: if *value* holds itself, naming the field.
+    """
+    try:
+        return _owned(value, always=True)
+    except _HoldsItself:
+        msg = (
+            f"{type(record).__name__}: '{name}' holds a container that holds "
+            "itself, which has no end to copy."
+        )
+        raise TypeError(msg) from None
 
 
 def _composed(hook: Callable[..., None]) -> Callable[..., None]:

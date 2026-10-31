@@ -89,23 +89,43 @@ def encode_arguments(
         a callable other than the ``value`` of a GaussianPulse, CWSource or
         SignalSource, a subclass of a library record, an integer outside
         the 64-bit range, an array of anything but booleans, integers or
-        floats of up to 64 bits, a mapping with a key that is not text, or
-        any other object a node could not rebuild.
+        floats of up to 64 bits, a mapping with a key that is not text, a
+        container that holds itself, or any other object a node could not
+        rebuild.
     """
     buffers: list[memoryview] = []
     tree = {name: _encode(value, name, buffers) for name, value in arguments.items()}
     return tree, buffers
 
 
-def _encode(value: object, where: str, buffers: list[memoryview]) -> object:
+def _encode(
+    value: object,
+    where: str,
+    buffers: list[memoryview],
+    within: frozenset[int] = frozenset(),
+) -> object:
+    """*value* as data, *within* the containers and records that hold it, by identity.
+
+    A container that holds itself, at any depth, is no data a node can
+    rebuild, and the walk that followed it ran until Python's recursion
+    limit stopped it: it is refused instead, by where it sits. A value
+    held twice side by side, not inside itself, travels twice.
+    """
     leaf = _leaf(value, where, buffers)
     if leaf is not _NOT_A_LEAF:
         return leaf
+    if id(value) in within:
+        msg = (
+            f"{where} cannot travel to a node: it is a container that holds "
+            "itself, and data a node rebuilds has an end"
+        )
+        raise TypeError(msg)
+    within = within | {id(value)}
     if _is_record(value, where):
-        return _record(value, where, buffers)
+        return _record(value, where, buffers, within)
     if callable(value):
-        return _waveform(value, where, buffers)
-    return _container(value, where, buffers)
+        return _waveform(value, where, buffers, within)
+    return _container(value, where, buffers, within)
 
 
 def _leaf(value: object, where: str, buffers: list[memoryview]) -> object:
@@ -181,9 +201,14 @@ def _is_record(value: object, where: str) -> bool:
     return False
 
 
-def _record(value: object, where: str, buffers: list[memoryview]) -> _Form:
+def _record(
+    value: object,
+    where: str,
+    buffers: list[memoryview],
+    within: frozenset[int] = frozenset(),
+) -> _Form:
     fields = {
-        f.name: _encode(getattr(value, f.name), f"{where}.{f.name}", buffers)
+        f.name: _encode(getattr(value, f.name), f"{where}.{f.name}", buffers, within)
         for f in dataclasses.fields(value)  # type: ignore[arg-type]
         if f.init
     }
@@ -191,7 +216,10 @@ def _record(value: object, where: str, buffers: list[memoryview]) -> _Form:
 
 
 def _waveform(
-    value: Callable[..., object], where: str, buffers: list[memoryview]
+    value: Callable[..., object],
+    where: str,
+    buffers: list[memoryview],
+    within: frozenset[int] = frozenset(),
 ) -> _Form:
     owner = getattr(value, "__self__", None)
     if (
@@ -199,7 +227,10 @@ def _waveform(
         and type(owner) in _WAVEFORM_OWNERS
         and value.__func__ is getattr(type(owner), "value", None)
     ):
-        return {"$": "waveform", "of": _record(owner, f"{where}.__self__", buffers)}
+        return {
+            "$": "waveform",
+            "of": _record(owner, f"{where}.__self__", buffers, within),
+        }
     msg = (
         f"{where} cannot travel to a node: only the .value of a GaussianPulse, "
         f"CWSource or SignalSource can, and {value!r} is not one; run it here, "
@@ -208,14 +239,19 @@ def _waveform(
     raise TypeError(msg)
 
 
-def _container(value: object, where: str, buffers: list[memoryview]) -> _Form:
+def _container(
+    value: object,
+    where: str,
+    buffers: list[memoryview],
+    within: frozenset[int] = frozenset(),
+) -> _Form:
     if isinstance(value, Mapping):
         items = []
         for key, item in value.items():
             if not isinstance(key, str):
                 msg = f"{where} cannot travel to a node: its key {key!r} is not a text"
                 raise TypeError(msg)
-            items.append([key, _encode(item, f"{where}[{key!r}]", buffers)])
+            items.append([key, _encode(item, f"{where}[{key!r}]", buffers, within)])
         return {"$": "dict", "items": items}
     if isinstance(value, Sequence) and not isinstance(
         value, bytes | bytearray | memoryview
@@ -224,7 +260,8 @@ def _container(value: object, where: str, buffers: list[memoryview]) -> _Form:
         return {
             "$": tag,
             "items": [
-                _encode(item, f"{where}[{k}]", buffers) for k, item in enumerate(value)
+                _encode(item, f"{where}[{k}]", buffers, within)
+                for k, item in enumerate(value)
             ],
         }
     msg = (

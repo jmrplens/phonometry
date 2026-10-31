@@ -630,6 +630,53 @@ def test_a_choice_beside_numbers_refuses_what_is_no_number_by_name(
         call(PROBES[probe])
 
 
+def _list_holding_itself() -> list[object]:
+    held: list[object] = []
+    held.append(held)
+    return held
+
+
+def _number_beside_its_list() -> list[object]:
+    held: list[object] = [400.0]
+    held.append(held)
+    return held
+
+
+def _objects_holding_themselves() -> np.ndarray:
+    held = np.empty(1, dtype=object)
+    held[0] = held
+    return held
+
+
+#: A container that holds itself where a choice's numbers go. The walk
+#: that looks for a ``bytearray`` in a sequence, and the copy a record makes
+#: of what it is given, went into each one without end, until Python's
+#: recursion limit raised a ``RecursionError`` that named no parameter.
+HOLDING_ITSELF: dict[str, object] = {
+    "list-that-holds-itself": _list_holding_itself(),
+    "number-beside-the-list-that-holds-it": _number_beside_its_list(),
+    "array-of-objects-that-holds-itself": _objects_holding_themselves(),
+}
+
+_CYCLE_CASES = [
+    (_key(member), probe) for member in sorted(_FOUND) for probe in HOLDING_ITSELF
+]
+
+
+@pytest.mark.parametrize(
+    ("key", "probe"),
+    _CYCLE_CASES,
+    ids=[f"{key[1]}.{key[2]}-{probe}" for key, probe in _CYCLE_CASES],
+)
+def test_a_choice_beside_numbers_refuses_what_holds_itself_by_name(
+    key: tuple[str, str, str], probe: str
+) -> None:
+    """Refused as the other probes are, or by the record's copy, which names the field."""
+    call, named = CALLS[key]
+    with pytest.raises(TypeError, match=f"{named}|'{key[2]}'"):
+        call(HOLDING_ITSELF[probe])
+
+
 def test_the_walk_reads_a_choice_beside_numbers_wherever_the_union_is() -> None:
     """At the top, through an alias spelt out, and inside a mapping's values."""
     read = [

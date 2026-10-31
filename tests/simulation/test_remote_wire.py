@@ -300,6 +300,48 @@ def test_what_cannot_travel_is_refused_by_name(
         wire.encode_arguments(arguments)
 
 
+def _holding_itself(kind: str) -> object:
+    """A list, a mapping or a tuple in a list, holding the container that holds it."""
+    if kind == "mapping":
+        table: dict[str, object] = {}
+        table["self"] = table
+        return table
+    held: list[object] = [1.0]
+    held.append(held if kind == "list" else (2.0, held))
+    return held
+
+
+@pytest.mark.parametrize(
+    ("kind", "where"),
+    [
+        ("list", r"receivers\[1\]"),
+        ("mapping", r"receivers\['self'\]"),
+        ("tuple-in-a-list", r"receivers\[1\]\[1\]"),
+    ],
+    ids=["list", "mapping", "tuple-in-a-list"],
+)
+def test_a_container_that_holds_itself_is_refused_by_where_it_sits(
+    kind: str, where: str
+) -> None:
+    """A cycle is no data a node rebuilds, and the walk that followed it never ended.
+
+    The encoder went into every list, tuple and mapping it met with no
+    bound, so a container that holds itself took it on until Python's
+    recursion limit raised a ``RecursionError`` that named no argument.
+    """
+    arguments = {"receivers": _holding_itself(kind)}
+    with pytest.raises(
+        TypeError,
+        match=f"{where} cannot travel to a node: it is a container that holds itself",
+    ):
+        wire.encode_arguments(arguments)
+
+
+def test_a_container_held_twice_side_by_side_travels_twice() -> None:
+    row = [1.0, 2.0]
+    assert _round_trip({"receivers": [row, row]})["receivers"] == [row, row]
+
+
 def test_an_integer_json_cannot_carry_is_refused_by_name_before_it_is_written() -> None:
     # A run takes a snapshot interval of any size; JSON writes no integer of
     # more than 4300 digits, and a node reads none outside an int64.

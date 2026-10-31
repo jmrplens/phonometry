@@ -617,6 +617,76 @@ def test_what_holds_no_text_is_left_to_the_numbers(value: object) -> None:
     refuse_text_beside_choice(value, "termination", ("rigid", "free"))
 
 
+def _holding_itself() -> list[object]:
+    """A list of a number and of itself."""
+    held: list[object] = [400.0]
+    held.append(held)
+    return held
+
+
+def _objects_holding_themselves(shape: tuple[int, ...]) -> np.ndarray:
+    """An array of objects whose one member is the array itself."""
+    held = np.empty(shape, dtype=object)
+    held[(0,) * len(shape)] = held
+    return held
+
+
+def _nested(depth: int) -> object:
+    """``400.0`` inside *depth* lists, one in the other."""
+    value: object = 400.0
+    for _ in range(depth):
+        value = [value]
+    return value
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        _holding_itself(),
+        [[_holding_itself()]],
+        _objects_holding_themselves((1,)),
+        _objects_holding_themselves(()),
+        _objects(_holding_itself()),
+        _nested(33),
+    ],
+    ids=[
+        "list",
+        "list-in-lists",
+        "array-of-objects",
+        "zero-dimensional-array-of-objects",
+        "list-in-an-array-of-objects",
+        "nested-33-deep",
+    ],
+)
+def test_a_sequence_that_holds_itself_is_refused_naming_the_options(
+    value: object,
+) -> None:
+    """A sequence nested deeper than any array holds no numbers, and the walk ends.
+
+    The walk that looks for a ``bytearray`` went into every member of a
+    sequence with no bound, so a list that holds itself took it on until
+    Python's recursion limit raised a ``RecursionError``, which names no
+    parameter, where the parameter refuses what is not its numbers by name.
+    It goes no deeper than the 32 axes the text check after it can read.
+    """
+    with pytest.raises(
+        TypeError,
+        match=(
+            r"'termination' must be one of \('rigid', 'free'\) as a str, or "
+            "numbers, not a sequence nested more than 32 deep"
+        ),
+    ):
+        refuse_text_beside_choice(value, "termination", ("rigid", "free"))
+
+
+def test_numbers_as_deep_as_an_array_and_a_row_held_twice_pass() -> None:
+    """32 axes is as deep as the text check reads, and a row held twice holds no cycle."""
+    refuse_text_beside_choice(_nested(32), "termination", ("rigid", "free"))
+    row = [400.0, 410.0]
+    refuse_text_beside_choice([row, row], "termination", ("rigid", "free"))
+    refuse_text_beside_choice(_objects(row, row), "termination", ("rigid", "free"))
+
+
 @pytest.mark.parametrize(
     ("members", "message"),
     [

@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import math
 from collections.abc import Iterable, Mapping, Sequence, Set
-from typing import TYPE_CHECKING, Any, TypeGuard, cast
+from typing import TYPE_CHECKING, Any, Literal, TypeGuard, cast
 
 import numpy as np
 
@@ -187,26 +187,63 @@ def refuse_complex(value: object, msg: str) -> None:
         raise TypeError(msg)
 
 
-def _holds_a_bytearray(value: object) -> bool:
-    """Whether *value* is a ``bytearray``, or holds one at any depth.
+#: The most axes the text check that follows the walk can read: it reads an
+#: array of objects through ``.flat``, which NumPy refuses for an array of
+#: more than 32 (``RuntimeError: this function only supports up to 32
+#: dimensions``), and ``np.asarray(value, dtype=object)`` gives a sequence
+#: nested deeper that many axes. An array of numbers a choice takes has a
+#: handful, and a sequence that holds itself is nested without end.
+_MOST_AXES = 32
 
-    Inside a sequence (a tuple, a list, a deque) or an array of objects, to
-    any depth. :func:`refuse_text` cannot see one there: it reads a
-    sequence as ``np.asarray(value, dtype=object)`` does, and numpy reads a
-    ``bytearray`` inside a sequence as a row of the codes of its
-    characters, numbers, so that ``[bytearray(b"12")]`` is
+
+def _misread_member(
+    value: object, depth: int = 0
+) -> Literal["bytearray", "nesting"] | None:
+    """What in *value* no text check sees: a ``bytearray``, or a nesting without end.
+
+    A ``bytearray`` inside a sequence (a tuple, a list, a deque) or an
+    array of objects, at any depth. :func:`refuse_text` cannot see one
+    there: it reads a sequence as ``np.asarray(value, dtype=object)`` does,
+    and numpy reads a ``bytearray`` inside a sequence as a row of the codes
+    of its characters, numbers, so that ``[bytearray(b"12")]`` is
     ``[[49, 50]]``. A ``str`` and a ``bytes`` are texts, not sequences of
     members, and are passed over here.
+
+    The walk goes no deeper than an array of numbers can: a sequence or an
+    array of objects nested more than :data:`_MOST_AXES` deep is a nesting
+    no array holds, and one that holds itself, or holds a sequence that
+    holds it, is the same nesting without end, which a walk with no bound
+    followed until Python's recursion limit stopped it.
+
+    :param value: The caller's value, or a member of it.
+    :param depth: How many sequences and axes of arrays of objects hold
+        *value*.
+    :return: ``"bytearray"`` or ``"nesting"`` for the first found, ``None``
+        for neither.
     """
     if isinstance(value, bytearray):
-        return True
+        return "bytearray"
+    members: Iterable[object]
     if isinstance(value, np.ndarray):
-        return value.dtype == object and any(
-            _holds_a_bytearray(member) for member in value.flat
-        )
-    if isinstance(value, Sequence) and not isinstance(value, str | bytes | memoryview):
-        return any(_holds_a_bytearray(member) for member in value)
-    return False
+        if value.dtype != object:
+            return None
+        members = value.flat
+        # A zero-dimensional array of objects still holds its member a level down.
+        depth += max(value.ndim, 1)
+    elif isinstance(value, Sequence) and not isinstance(
+        value, str | bytes | memoryview
+    ):
+        members = value
+        depth += 1
+    else:
+        return None
+    if depth > _MOST_AXES:
+        return "nesting"
+    for member in members:
+        found = _misread_member(member, depth)
+        if found is not None:
+            return found
+    return None
 
 
 def refuse_text_beside_choice(
@@ -223,17 +260,29 @@ def refuse_text_beside_choice(
     ``bytearray`` as the codes of its characters, or fails with an error
     that names no parameter. It is the wrong type whatever it reads as, so
     it is refused before the numbers are read; a ``str`` is the choice, and
-    is checked as one by the caller.
+    is checked as one by the caller. A sequence nested deeper than any
+    array, one that holds itself included, holds no numbers either, and is
+    refused by name before the walk that looks for a ``bytearray`` in it
+    could run without end.
 
     :param value: The caller's value, one that is not a ``str``.
     :param name: The parameter's name, for the message.
     :param options: The words the parameter offers.
     :raises TypeError: if *value* is a ``bytes`` or a ``bytearray``, or a
         sequence or an array that holds a text, a ``bytearray`` at any
-        depth included.
+        depth included, or a sequence nested more than 32 deep, as one that
+        holds itself is.
     """
     msg = f"'{name}' must be one of {options} as a str, or numbers, not text."
-    if _holds_a_bytearray(value):
+    found = _misread_member(value)
+    if found == "nesting":
+        nested = (
+            f"'{name}' must be one of {options} as a str, or numbers, not a "
+            f"sequence nested more than {_MOST_AXES} deep, as one that holds "
+            "itself is."
+        )
+        raise TypeError(nested)
+    if found == "bytearray":
         raise TypeError(msg)
     refuse_text(value, msg)
 

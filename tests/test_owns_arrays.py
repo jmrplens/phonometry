@@ -663,6 +663,67 @@ def test_a_record_held_in_a_field_is_left_as_it_is() -> None:
     assert outer.steps[0] is inner
 
 
+def _holds_itself(kind: str) -> object:
+    """A container that holds itself, directly or through another container."""
+    if kind == "list":
+        held: list[object] = [_writeable([1.0])]
+        held.append(held)
+        return held
+    if kind == "tuple-in-a-list":
+        outer: list[object] = []
+        outer.append((_writeable([1.0]), outer))
+        return outer
+    if kind == "mapping":
+        table: dict[str, object] = {"levels": _writeable([1.0])}
+        table["self"] = table
+        return table
+    if kind == "list-in-a-mapping":
+        mapping: dict[str, object] = {}
+        mapping["rows"] = [mapping]
+        return mapping
+    objects = np.empty(2, dtype=object)
+    objects[0] = _writeable([1.0])
+    objects[1] = objects
+    return objects
+
+
+@pytest.mark.parametrize(
+    "kind",
+    ["list", "tuple-in-a-list", "mapping", "list-in-a-mapping", "array-of-objects"],
+)
+def test_a_field_that_holds_itself_is_refused_naming_the_field(kind: str) -> None:
+    """A container that holds itself has no end to copy.
+
+    The copy went into every tuple, list, mapping and array of objects it
+    met, with no bound, so a field that held itself took it on until
+    Python's recursion limit raised a ``RecursionError`` that named no
+    field, before the record's own checks ran.
+    """
+    endless = _holds_itself(kind)
+    with pytest.raises(
+        TypeError, match=r"_Plain: 'levels' holds a container that holds itself"
+    ):
+        _Plain(levels=endless)  # type: ignore[arg-type]
+
+
+def test_an_init_var_that_holds_itself_is_refused() -> None:
+    levels = _writeable([1.0, 2.0])
+    endless = _holds_itself("list")
+    with pytest.raises(TypeError, match="holds itself"):
+        _WithInitVar(levels=levels, offset_db=endless)  # type: ignore[arg-type]
+
+
+def test_a_container_held_twice_side_by_side_is_copied_as_any_other() -> None:
+    """Only a container inside itself is refused: one held twice holds no cycle."""
+    row = [_writeable([1.0, 2.0])]
+    record = _Plain(levels=[row, row])  # type: ignore[arg-type]
+    held = cast("list[list[np.ndarray]]", record.levels)
+    for copy in (held[0][0], held[1][0]):
+        assert not copy.flags.writeable
+        assert not np.shares_memory(copy, row[0])
+        np.testing.assert_array_equal(copy, [1.0, 2.0])
+
+
 def test_the_argument_of_an_init_var_is_copied_before_the_hook() -> None:
     """The hook seals the argument it keeps; the caller's array keeps its flag."""
     offset = _writeable([0.5, 0.25])

@@ -9,10 +9,12 @@ import pinned_stack
 import pytest
 
 # pytest's limit on a test's time (faulthandler_timeout in pyproject.toml),
-# set again once a test has failed, so that its teardown has one too; and
+# set again once a test has failed, so that its teardown has one too;
 # matplotlib's settings, which a test must leave as it found them and which
-# are put back after each test module is imported.
-pytest_plugins = ("hang_guard", "matplotlib_guard")
+# are put back after each test module is imported; and the fixtures of the
+# simulation engine tests, which live in a module of their own name because a
+# second `conftest.py` would share this one's module name.
+pytest_plugins = ("engine_fixtures", "hang_guard", "matplotlib_guard")
 
 # Select a non-interactive matplotlib backend for the headless test suite.
 # The library no longer forces a backend (see issue #52), so the test harness

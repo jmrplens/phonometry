@@ -1,5 +1,12 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
-"""The strict array backend the engine tests step on, with one guard for all, and a node on this machine."""
+"""The strict array backend the engine tests step on, with one guard for all, and a node on this machine.
+
+A plugin rather than ``tests/simulation/conftest.py``: two files named
+``conftest.py`` are one module name to a type checker, which then refuses to
+read either. ``tests/conftest.py`` loads it, which makes its fixtures visible
+to every test; it has no hooks and nothing autouse, so only a test that names
+one of them gets it.
+"""
 
 from __future__ import annotations
 
@@ -16,7 +23,7 @@ from phonometry.simulation._remote import bootstrap, command
 if TYPE_CHECKING:
     from collections.abc import Callable
 
-_FAKE_SSH = Path(__file__).with_name("fake_ssh.py")
+_FAKE_SSH = Path(__file__).parent / "simulation" / "fake_ssh.py"
 #: The longest a run on the node may take in these tests [s]: the hosts
 #: file's timeout, far above what a run here takes, so no test can hang.
 _NODE_TIMEOUT_S = 120

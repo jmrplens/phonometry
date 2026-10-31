@@ -113,7 +113,7 @@ def test_annex_b_full_tables_reproduce() -> None:
             assert got == pytest.approx(printed, rel=1e-3), (name, n)
 
 
-def _tolerance_region(freq: float, name: str) -> int:
+def _tolerance_region(freq: float, name: hv.WeightingName) -> int:
     """Table 5 tolerance region index of ``freq`` for weighting ``name``."""
     ft1, ft2, ft3, ft4 = ISO8041_1_TABLE4_TRANSITIONS[name]
     if freq <= ft1:

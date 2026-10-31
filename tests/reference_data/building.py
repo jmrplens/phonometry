@@ -18,6 +18,11 @@ single worked example in two files.
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from phonometry.building.measurement.ratings import BasicElement, ReferenceFloor
+
 # ---------------------------------------------------------------------------
 # ISO 717-1 Annex C, Table C.1 - measured airborne sound reduction index R
 # (100-3150 Hz, one-third-octave). The worked example gives
@@ -748,7 +753,7 @@ ISO9611_FREE_VELOCITY_REFERENCE = 5.0e-8  # m/s
 # ISO 10140-5:2010+A1:2014 Table B.1 printed the same curves with the same
 # integer ratings; its 2021 edition refers to ISO 717-1 for them.
 # ---------------------------------------------------------------------------
-ISO717_1_TABLE_E1_PRINTED: dict[str, dict[str, tuple[int, float]]] = {
+ISO717_1_TABLE_E1_PRINTED: dict[BasicElement, dict[str, tuple[int, float]]] = {
     "heavy_wall": {
         "rating": (53, 53.4),
         "c": (-1, -1.6),
@@ -789,7 +794,9 @@ ISO717_1_TABLE_E1_PRINTED: dict[str, dict[str, tuple[int, float]]] = {
 # decimal), (integer, one decimal)). The lightweight floors No 1 and No 2 share
 # the column "C1 and C2". ISO 10140-5:2010+A1:2014 Table C.1 printed the same
 # integer values; its 2021 edition refers to ISO 717-2 for them.
-ISO717_2_TABLE4_PRINTED: dict[str, tuple[tuple[int, float], tuple[int, float]]] = {
+ISO717_2_TABLE4_PRINTED: dict[
+    ReferenceFloor, tuple[tuple[int, float], tuple[int, float]]
+] = {
     "heavyweight": ((78, 77.6), (-11, -10.3)),
     "lightweight_1": ((72, 71.8), (0, 0.0)),
     "lightweight_2": ((72, 71.8), (0, 0.0)),
@@ -850,7 +857,7 @@ ISO717_1_TABLE_E1_BANDS: tuple[float, ...] = (
     4000.0,
     5000.0,
 )
-ISO717_1_TABLE_E1_CURVES: dict[str, tuple[float, ...]] = {
+ISO717_1_TABLE_E1_CURVES: dict[BasicElement, tuple[float, ...]] = {
     "heavy_wall": (
         *(35.3, 37.3, 39.4, 40.0, 40.0, 40.0, 40.0, 41.0, 43.5, 46.1, 48.5),
         *(51.0, 53.6, 56.0, 58.4, 61.1, 63.6, 65.0, 65.0, 65.0, 65.0),
@@ -954,7 +961,7 @@ ISO717_2_SLOPED_DELTA_L: tuple[float, ...] = (
 )
 # (weighted reduction, adaptation term, Ln,r,w of the covered reference curve,
 # its CI,r), per floor.
-ISO717_2_SLOPED_EXPECTED: dict[str, tuple[int, int, int, int]] = {
+ISO717_2_SLOPED_EXPECTED: dict[ReferenceFloor, tuple[int, int, int, int]] = {
     "heavyweight": (20, -10, 58, -1),
     "lightweight_1": (6, -1, 66, 1),
     "lightweight_2": (6, -1, 66, 1),
@@ -967,7 +974,7 @@ ISO717_1_SLOPED_DELTA_R: tuple[float, ...] = (
 )
 # Delta of Rw, Rw + C, Rw + Ctr, Rw + C50-3150, Rw + C50-5000, Rw + C100-5000,
 # Rw + Ctr,50-3150, Rw + Ctr,50-5000 and Rw + Ctr,100-5000, per element.
-ISO717_1_SLOPED_EXPECTED: dict[str, tuple[int, ...]] = {
+ISO717_1_SLOPED_EXPECTED: dict[BasicElement, tuple[int, ...]] = {
     "heavy_wall": (6, 5, 4, 4, 4, 5, 1, 1, 4),
     "heavy_floor": (6, 5, 4, 5, 5, 5, 1, 1, 4),
     "lightweight_wall": (10, 10, 7, 9, 9, 10, 5, 5, 7),
@@ -983,7 +990,7 @@ ISO717_1_DIPPED_DELTA_R: tuple[float, ...] = (
     *(1.0, 1.0, 1.0, -7.0, -3.0, 1.0, 5.0, 9.0, 13.0, 14.0, 14.0),
     *(14.0, 14.0, 14.0, 14.0, 14.0, 14.0, 6.0, -3.0, -11.0, -3.0),
 )
-ISO717_1_DIPPED_EXPECTED: dict[str, tuple[int, ...]] = {
+ISO717_1_DIPPED_EXPECTED: dict[BasicElement, tuple[int, ...]] = {
     "heavy_wall": (7, 5, 2, 4, 3, 4, 1, 1, 2),
     "heavy_floor": (7, 5, 3, 5, 4, 4, 2, 2, 3),
     "lightweight_wall": (11, 10, 6, 9, 8, 8, 6, 5, 5),

@@ -2152,6 +2152,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **The type check reads the conformance scripts against the oracle tables
+  they compare with, and every place that gives the command runs the same
+  one.** The conformance scripts import their oracle tables from `tests/`,
+  where the type checker never looked, and a global switch let it turn each
+  such import into `Any`, so 62 type errors in the scripts and the shared
+  test fixtures went unseen; fixing them changed no conformance row. `mypy`
+  now finds `tests/` and `scripts/` through `mypy_path`, and an ignore must
+  name the error it silences. Only the packages it cannot read types for,
+  here or in CI, are exempt from having stubs: six that ship no type
+  information (scipy, reportlab, pypdfium2, soundfile, mpl_toolkits and
+  fontTools) and four the CI quality job does not install (numba, cupy,
+  torch and array_api_compat). Bare `mypy` checks the paths listed under
+  `[tool.mypy]` in `pyproject.toml`, which now include the script that
+  writes the pull request comment. CI, `make lint`, `AGENTS.md`,
+  `CONTRIBUTING.md` and the pull request template all run it that way,
+  where the Makefile and the template had lost `stub/src`, and a test fails
+  on any workflow, script, page or Makefile variable that gives it paths
+  again, however the program is spelled.
+
 - **A run on a node passes over an ssh in the Windows working directory, and
   opens no console window.** On Windows, which looks for a program in the
   working directory before `PATH`, an `ssh.exe` or `ssh.bat` left in a

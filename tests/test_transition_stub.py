@@ -57,6 +57,7 @@ _SHIM = _STUB / "src" / "pyoctaveband" / "__init__.py"
 _README = _STUB / "README.md"
 _PYPROJECT = _STUB / "pyproject.toml"
 _WORKFLOW = _ROOT / ".github" / "workflows" / "python-app.yml"
+_ROOT_PYPROJECT = _ROOT / "pyproject.toml"
 _GUIDE = _ROOT / "docs" / "start" / "upgrading.md"
 
 # A claim that some gate never reached the shim, made in the same sentence as
@@ -115,6 +116,18 @@ def _gate(tool: str) -> tuple[str, str]:
         return command, " ".join(reversed(comment))
     msg = f"no step in {_WORKFLOW.name} runs {tool}"
     raise AssertionError(msg)
+
+
+def _type_checked_paths() -> list[str]:
+    """The paths bare ``mypy`` checks: ``files`` under ``[tool.mypy]``.
+
+    The CI step runs ``mypy`` with no arguments, so the list it checks is the
+    one in ``pyproject.toml``, not anything on the command line.
+    """
+    with _ROOT_PYPROJECT.open("rb") as handle:
+        files = tomllib.load(handle)["tool"]["mypy"]["files"]
+    assert isinstance(files, list)
+    return [str(path) for path in files]
 
 
 def _stub_project() -> dict[str, object]:
@@ -351,8 +364,12 @@ def test_the_type_check_step_does_not_claim_the_shim_went_unlinted() -> None:
     third gate that never had it makes the comment argue for the change on a
     false premise.
     """
-    command, comment = _gate("mypy")
-    assert "stub/src" in command, "the type check must still cover the shim"
+    _, comment = _gate("mypy")
+    shim = pathlib.PurePosixPath("stub/src").parts
+    assert any(
+        shim[: len(entry.parts)] == entry.parts
+        for entry in map(pathlib.PurePosixPath, _type_checked_paths())
+    ), "the type check must still cover the shim"
     assert "stub/src" in comment, "the comment must still explain why it does"
     overstated = _UNLINTED_CLAIM.search(comment)
     assert overstated is None, (

@@ -1073,7 +1073,7 @@ def _chk_validation_correlation() -> Outcome:
             validation_uncertainty_db=np.array([expanded]),
             validation="comparison",
             unvalidated_frequencies_hz=np.array([]),
-            shared_standard_uncertainty_db=scale * standard,
+            shared_standard_uncertainty_db=np.array([scale * standard]),
         )
         coefficient = round(float(result.correlation_coefficient[0]), decimals)
         matching += int(math.isclose(coefficient, printed, abs_tol=1e-12))

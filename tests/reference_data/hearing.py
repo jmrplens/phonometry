@@ -24,7 +24,9 @@ from __future__ import annotations
 # because this module is stdlib-only). Mirrors
 # tests/hearing/test_occupational_exposure.py.
 # ---------------------------------------------------------------------------
-ISO9612_ANNEX_D_TASKS: tuple[tuple, ...] = (
+ISO9612_ANNEX_D_TASKS: tuple[
+    tuple[tuple[float, ...], float, tuple[float, float] | None], ...
+] = (
     ((70.0,), 1.5, None),
     ((80.1, 82.2, 79.6), 5.0, (4.0, 6.0)),
     ((86.5, 92.4, 89.3, 93.2, 87.8, 86.2), 1.5, (1.0, 2.0)),

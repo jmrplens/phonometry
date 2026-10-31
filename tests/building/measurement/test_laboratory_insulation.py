@@ -33,6 +33,8 @@ from phonometry.building.measurement.laboratory_insulation import (
 if TYPE_CHECKING:  # pragma: no cover - typing only
     from collections.abc import Callable
 
+    from phonometry.building.measurement.ratings import BasicElement, ReferenceFloor
+
 # ISO 717-1 Table 3 airborne reference (100-3150 Hz, 16 bands).
 _REF_AIRBORNE = np.array(
     [33, 36, 39, 42, 45, 48, 51, 52, 53, 54, 55, 56, 56, 56, 56, 56],
@@ -424,7 +426,7 @@ def test_plot_without_rating_raises() -> None:
 
 
 @pytest.mark.parametrize("element", sorted(ref.ISO717_1_TABLE_E1_PRINTED))
-def test_reference_element_airborne_end_to_end(element: str) -> None:
+def test_reference_element_airborne_end_to_end(element: BasicElement) -> None:
     """The published basic-element curves reproduce their printed Rw (C; Ctr).
 
     End to end: with S = A (S = 10 m2, A = 0,16*50/0,8 = 10 m2) the level
@@ -448,7 +450,7 @@ def test_reference_element_airborne_end_to_end(element: str) -> None:
 
 
 @pytest.mark.parametrize("floor", ["lightweight_1", "lightweight_3"])
-def test_reference_floor_impact_end_to_end(floor: str) -> None:
+def test_reference_floor_impact_end_to_end(floor: ReferenceFloor) -> None:
     """The published lightweight floors reproduce their printed Ln,t,r,0,w (CI).
 
     End to end: with A = A0 (V = 31,25 m3, T = 0,5 s -> A = 10 m2) the

@@ -376,6 +376,23 @@ def residue_text(value: float, unit: str = "", spec: str = ".3g") -> str:
     return f"{text} {unit}".rstrip()
 
 
+def printed_cell(cell: float | None) -> float:
+    """The value of a table cell the check reads, which the print fills.
+
+    The oracle tables keep a printed blank as ``None``, so a row of one types
+    every cell ``float | None``; a check that reads a cell the standard fills
+    says so here instead of trusting the position.
+
+    :param cell: The cell as the oracle table stores it.
+    :return: Its value.
+    :raises ValueError: If the table leaves that cell blank.
+    """
+    if cell is None:
+        msg = "the check reads a cell its table leaves blank"
+        raise ValueError(msg)
+    return cell
+
+
 def numeric(
     expected: float,
     computed: float,

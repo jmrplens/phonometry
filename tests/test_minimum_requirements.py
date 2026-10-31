@@ -11,10 +11,10 @@ import subprocess  # nosec B404 - runs this interpreter's pytest
 import sys
 import tomllib
 from pathlib import Path
-from types import SimpleNamespace
 from typing import TYPE_CHECKING
 
 import child_process
+import conftest
 import pinned_stack
 import pytest
 import yaml
@@ -34,23 +34,6 @@ def _module() -> ModuleType:
     assert spec.loader is not None
     module = importlib.util.module_from_spec(spec)
     sys.modules["minimum_requirements"] = module
-    spec.loader.exec_module(module)
-    return module
-
-
-def _root_conftest() -> ModuleType:
-    """The suite's own ``tests/conftest.py``, read from its file.
-
-    ``import conftest`` gives whichever conftest pytest imported last under
-    that name: a directory below with a ``conftest.py`` of its own (the
-    simulation tests have one) takes the name once it is collected.
-    """
-    spec = importlib.util.spec_from_file_location(
-        "_root_conftest", _ROOT / "tests" / "conftest.py"
-    )
-    assert spec is not None
-    assert spec.loader is not None
-    module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
 
@@ -352,12 +335,6 @@ def test_the_declaration_is_read_from_the_module_level_pytestmark(
     assert pinned_stack.declares(f"import pytest\n{declaration}\n") is declared
 
 
-def _options(*, without_pinned_stack: bool) -> SimpleNamespace:
-    return SimpleNamespace(
-        getoption=lambda name: {"without_pinned_stack": without_pinned_stack}[name]
-    )
-
-
 def _two_modules(directory: Path) -> tuple[Path, Path]:
     """A tooling module that fails on import, as at the floors, and a library one."""
     tooling = directory / "test_tooling.py"
@@ -373,16 +350,16 @@ def _two_modules(directory: Path) -> tuple[Path, Path]:
 
 
 def test_a_pinned_stack_module_is_left_out_before_it_is_imported(
-    tmp_path: Path,
+    tmp_path: Path, pytestconfig: pytest.Config, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """The hook reads the mark from the source: the module would raise if imported."""
     tooling, library = _two_modules(tmp_path)
-    on, off = _options(without_pinned_stack=True), _options(without_pinned_stack=False)
-    conftest = _root_conftest()
 
-    assert conftest.pytest_ignore_collect(tooling, on) is True
-    assert conftest.pytest_ignore_collect(library, on) is None
-    assert conftest.pytest_ignore_collect(tooling, off) is None
+    monkeypatch.setattr(pytestconfig.option, "without_pinned_stack", True)
+    assert conftest.pytest_ignore_collect(tooling, pytestconfig) is True
+    assert conftest.pytest_ignore_collect(library, pytestconfig) is None
+    monkeypatch.setattr(pytestconfig.option, "without_pinned_stack", False)
+    assert conftest.pytest_ignore_collect(tooling, pytestconfig) is None
 
 
 def _collect(directory: Path, *options: str) -> subprocess.CompletedProcess[str]:

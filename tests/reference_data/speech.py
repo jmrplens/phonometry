@@ -12,6 +12,11 @@ Annex M example is a full 7x14 MTF matrix with the MTI and STI it yields.
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from phonometry.speech.sii import Method
+
 # ---------------------------------------------------------------------------
 # ANSI S3.5-1997 Speech Intelligibility Index (one-third-octave method).
 # Primary oracle: the reference implementation of ASA Working Group S3-79
@@ -502,7 +507,7 @@ ANSIS3_5_OCTAVE_TABLE4 = (
 #   "loud"  (80 / 20 dB): the clause 5.7 level-distortion factor is below
 #       unity in every band, so every Ui cell moves the answer.
 #   "mid"   (40 / -50 dB): both mechanisms partly active.
-ANSIS3_5_WG_FLAT_CASES = (
+ANSIS3_5_WG_FLAT_CASES: tuple[tuple[Method, str, float, float, float], ...] = (
     ("critical-band", "quiet", 0.0, -80.0, 0.9243383333),
     ("critical-band", "loud", 80.0, 20.0, 0.6892747063),
     ("critical-band", "mid", 40.0, -50.0, 0.9342973562),

@@ -311,7 +311,7 @@ _SPB_ROAD = spb.ANNEX_E_ROAD_SPEED_CATEGORY
 def _given(value: float | None) -> float:
     """A value the call was given the inputs for, which cannot be missing."""
     if value is None:
-        msg = "the corrected levels were passed, so the corrected value exists."
+        msg = "the corrected value is missing, though the corrected levels were passed"
         raise ValueError(msg)
     return value
 

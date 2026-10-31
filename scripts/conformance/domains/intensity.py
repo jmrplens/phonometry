@@ -29,6 +29,7 @@ from ..registry import (
     aircraft_test_data,
     count,
     numeric,
+    printed_cell,
     record,
     register,
     residue_text,
@@ -448,7 +449,7 @@ def _chk_iso9614_1_table_b2() -> Outcome:
             grade, frequency, fraction=fraction
         )
         worst = max(worst, abs(computed - value))
-    a_weighted = ref.ISO9614_1_TABLE_B2_C_A_WEIGHTED[2]
+    a_weighted = printed_cell(ref.ISO9614_1_TABLE_B2_C_A_WEIGHTED[2])
     worst = max(worst, abs(ph.emission.position_count_factor("survey") - a_weighted))
     # An exact printed table, so the tolerance is zero: the question is whether
     # every cell is reproduced, not how closely.
@@ -476,7 +477,7 @@ def _chk_iso9614_1_table_2() -> Outcome:
             grade, frequency, fraction=fraction
         )
         worst = max(worst, abs(computed - value))
-    a_weighted = ref.ISO9614_1_TABLE_2_S_A_WEIGHTED[2]
+    a_weighted = printed_cell(ref.ISO9614_1_TABLE_2_S_A_WEIGHTED[2])
     worst = max(
         worst,
         abs(ph.emission.determination_standard_deviation("survey") - a_weighted),
@@ -500,16 +501,16 @@ def _chk_iso9614_1_table_2() -> Outcome:
 def _chk_iso9614_1_table_b1() -> Outcome:
     """The three cells Table B.1 fills, and only those three."""
     expected = {
-        "precision (all bands)": ref.ISO9614_1_TABLE_B1_ALL_BANDS[0],
-        "engineering (all bands)": ref.ISO9614_1_TABLE_B1_ALL_BANDS[1],
-        "survey (A-weighted)": ref.ISO9614_1_TABLE_B1_A_WEIGHTED[2],
+        "precision (all bands)": printed_cell(ref.ISO9614_1_TABLE_B1_ALL_BANDS[0]),
+        "engineering (all bands)": printed_cell(ref.ISO9614_1_TABLE_B1_ALL_BANDS[1]),
+        "survey (A-weighted)": printed_cell(ref.ISO9614_1_TABLE_B1_A_WEIGHTED[2]),
     }
     computed = {
         "precision (all bands)": ph.emission.error_factor("precision"),
         "engineering (all bands)": ph.emission.error_factor("engineering"),
         "survey (A-weighted)": ph.emission.error_factor("survey", a_weighted=True),
     }
-    return record({k: float(v) for k, v in expected.items()}, computed)
+    return record(expected, computed)
 
 
 @register(
@@ -642,7 +643,7 @@ def _chk_iso9614_1_additional_positions() -> Outcome:
     alpha = float(np.sum(subset)) / float(np.sum(intensity))
     f4_subset = float(np.std(subset, ddof=1) / np.mean(subset))
     f4_remainder = float(np.std(remainder, ddof=1) / np.mean(remainder))
-    delta = ref.ISO9614_1_TABLE_B1_ALL_BANDS[1]
+    delta = printed_cell(ref.ISO9614_1_TABLE_B1_ALL_BANDS[1])
     delta_alpha = (
         delta - (1.0 - alpha) * (2.0 / math.sqrt(remainder.size)) * f4_remainder
     ) / alpha

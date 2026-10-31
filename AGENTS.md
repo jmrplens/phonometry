@@ -35,7 +35,7 @@ pip install -e ".[full]"
 ```bash
 ruff check .
 ruff format --check .
-mypy src scripts stub/src tests/static_typing
+mypy
 bandit -q -r src
 zizmor --config .github/zizmor.yml .github/
 pytest -n 8

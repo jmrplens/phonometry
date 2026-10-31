@@ -32,6 +32,7 @@ Oracles:
 from __future__ import annotations
 
 import itertools
+from typing import TYPE_CHECKING
 
 import numpy as np
 import pytest
@@ -42,6 +43,9 @@ from phonometry.building.measurement.laboratory_improvement import (
     LaboratoryFloorCoveringImprovementResult,
     LaboratoryLiningImprovementResult,
 )
+
+if TYPE_CHECKING:
+    from phonometry.building.measurement.ratings import BasicElement, ReferenceFloor
 
 #: The 16 rating bands, 100 Hz to 3150 Hz.
 _CORE = [float(f) for f in ref.ISO717_2_REFERENCE_FLOOR_FREQ]
@@ -63,7 +67,7 @@ def _curve(table: object, bands: list[float]) -> np.ndarray:
 @pytest.mark.parametrize("element", sorted(ref.ISO717_1_TABLE_E1_PRINTED))
 @pytest.mark.parametrize("one_decimal", [False, True])
 def test_table_e1_curves_reproduce_every_printed_term(
-    element: str, *, one_decimal: bool
+    element: BasicElement, *, one_decimal: bool
 ) -> None:
     """ISO 717-1:2020 Table E.1: Rw and all eight adaptation terms, both forms."""
     printed = ref.ISO717_1_TABLE_E1_PRINTED[element]
@@ -79,7 +83,7 @@ def test_table_e1_curves_reproduce_every_printed_term(
 @pytest.mark.parametrize("floor", sorted(ref.ISO717_2_TABLE4_PRINTED))
 @pytest.mark.parametrize("one_decimal", [False, True])
 def test_table_4_curves_reproduce_their_printed_ratings(
-    floor: str, *, one_decimal: bool
+    floor: ReferenceFloor, *, one_decimal: bool
 ) -> None:
     """ISO 717-2:2020 Table 4: Ln,r,0,w and CI,r,0 of every floor, both forms."""
     (rating, rating_1dp), (ci, ci_1dp) = ref.ISO717_2_TABLE4_PRINTED[floor]
@@ -91,7 +95,7 @@ def test_table_4_curves_reproduce_their_printed_ratings(
 
 
 @pytest.mark.parametrize("element", sorted(ref.ISO717_1_TABLE_E1_CURVES))
-def test_table_e1_curves_are_the_printed_bands(element: str) -> None:
+def test_table_e1_curves_are_the_printed_bands(element: BasicElement) -> None:
     """ISO 717-1:2020 Table E.1, all 21 bands of each element as printed."""
     table = building.LINING_REFERENCE_ELEMENTS[element]
     assert tuple(table) == ref.ISO717_1_TABLE_E1_BANDS
@@ -159,7 +163,7 @@ def test_flat_improvement_to_one_decimal_is_exact(floor: str) -> None:
 
 
 @pytest.mark.parametrize("floor", sorted(ref.ISO717_2_SLOPED_EXPECTED))
-def test_sloped_improvement_is_rated_on_each_floor(floor: str) -> None:
+def test_sloped_improvement_is_rated_on_each_floor(floor: ReferenceFloor) -> None:
     """ISO 717-2 Clauses 5 and 6 on a sloped ΔL, rated independently."""
     dl = np.asarray(ref.ISO717_2_SLOPED_DELTA_L)
     delta_lw, ci_delta, ln_r_w, ci_r = ref.ISO717_2_SLOPED_EXPECTED[floor]
@@ -273,7 +277,7 @@ def test_flat_lining_improvement_to_one_decimal_is_exact(element: str) -> None:
 
 
 @pytest.mark.parametrize("element", sorted(ref.ISO717_1_SLOPED_EXPECTED))
-def test_sloped_lining_is_rated_on_each_element(element: str) -> None:
+def test_sloped_lining_is_rated_on_each_element(element: BasicElement) -> None:
     """ISO 717-1 Annex D on a sloped ΔR over 21 bands, rated independently."""
     rating = building.weighted_reduction_improvement(
         ref.ISO717_1_SLOPED_DELTA_R, frequencies=_TABLE_E1, basic_element=element
@@ -306,7 +310,7 @@ _NINE_TERMS = (
 
 
 @pytest.mark.parametrize("element", sorted(ref.ISO717_1_DIPPED_EXPECTED))
-def test_dipped_lining_tells_every_term_apart(element: str) -> None:
+def test_dipped_lining_tells_every_term_apart(element: BasicElement) -> None:
     """ISO 717-1 Annex D on a ΔR with a resonance dip and a coincidence dip.
 
     The bands 50 Hz to 80 Hz and 4 000 Hz to 5 000 Hz that set the enlarged

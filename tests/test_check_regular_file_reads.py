@@ -13,8 +13,12 @@ let through: a writer's modes, a method of another object called ``open``, and
 a reader of another library that a check of the library comes before, however
 many helpers deep the check is. And so are the shapes the gate first missed: a
 file object opened by its name with ``io.FileIO``, a reader imported under its
-own name or another, or bound to another by an assignment, and a copy of
-``shutil``, which reads its source by its name.
+own name or another, or bound to another by an assignment, a copy of
+``shutil``, which reads its source by its name, and a call that only shares a
+check's name (``np.info`` beside the library's ``info``), which the gate took
+for the check. A check is known by the module that defines it, and reached
+through a relative import, a module, a package that imports it, ``self`` or a
+function around the call.
 """
 
 from __future__ import annotations
@@ -150,6 +154,7 @@ def test_a_reader_of_another_library_needs_a_check_of_the_same_name_before_it(
     assert _found(
         tmp_path,
         """
+        from check import require_regular
         from scipy.io import wavfile
 
         def described(sf, path):
@@ -238,6 +243,7 @@ def test_a_reader_is_known_by_what_its_module_binds_it_to(
         """
         import soundfile
         import soundfile as snd
+        from check import require_regular
         from numpy import load
         from scipy.io.wavfile import read as wav_read
 
@@ -273,6 +279,8 @@ def test_a_copy_reads_its_source_by_its_name(tmp_path: pathlib.Path) -> None:
         """
         import shutil
         from shutil import copy2 as keep
+
+        from check import require_regular
 
         def copied(path, target):
             shutil.copyfile(path, target)
@@ -330,6 +338,8 @@ def test_a_check_counts_through_helpers_that_hand_it_their_first_parameter(
     assert _found(
         tmp_path,
         """
+        from check import not_a_check, sniff
+
         def read(sf, path):
             sniff(path)
             return sf.read(str(path))
@@ -340,6 +350,143 @@ def test_a_check_counts_through_helpers_that_hand_it_their_first_parameter(
         """,
         helpers=helpers,
     ) == [("unchecked", _FOREIGN)]
+
+
+#: A module of checks with the short names of the library's own: ``info``
+#: asks what the name holds, as ``io.info`` does, and ``described`` hands its
+#: name to NumPy's ``info``, which asks nothing.
+_NAMESAKES = """
+import numpy as np
+from phonometry._internal.json_input import not_regular_at
+
+def info(path):
+    if not_regular_at(Path(path)) is not None:
+        raise ValueError(path)
+
+def require_regular(path):
+    info(path)
+
+def described(path):
+    return np.info(path)
+"""
+
+
+def test_a_call_that_shares_a_check_s_name_is_no_check(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A check is known by the module that defines it, not by the last part of its name.
+
+    ``np.info(path)`` before ``np.load(path)`` asks nothing of the name,
+    though the library's ``info`` is a check; nor does a method of another
+    object called ``read_at_most``, nor a function of the reader's own module
+    that is called ``require_regular`` and checks nothing.
+    """
+    assert _found(
+        tmp_path,
+        """
+        import numpy as np
+
+        def numpy_info(path):
+            np.info(path)
+            return np.load(path)
+
+        def a_method(handle, sf, path):
+            handle.read_at_most(path)
+            return sf.read(str(path))
+
+        def require_regular(path):
+            return None
+
+        def own_namesake(sf, path):
+            require_regular(path)
+            return sf.info(str(path))
+        """,
+        helpers=_NAMESAKES,
+    ) == [
+        ("numpy_info", _FOREIGN),
+        ("a_method", _FOREIGN),
+        ("own_namesake", _FOREIGN),
+    ]
+
+
+def test_a_helper_that_hands_its_name_to_a_namesake_of_a_check_is_no_check(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``described`` hands its name to ``np.info``, which is not the library's ``info``."""
+    assert _found(
+        tmp_path,
+        """
+        from check import described, require_regular
+
+        def unchecked(sf, path):
+            described(path)
+            return sf.read(str(path))
+
+        def checked(sf, path):
+            require_regular(path)
+            return sf.read(str(path))
+        """,
+        helpers=_NAMESAKES,
+    ) == [("unchecked", _FOREIGN)]
+
+
+def test_a_check_is_found_however_the_module_reaches_it(tmp_path: pathlib.Path) -> None:
+    """Through a relative import, a module, a package that imports it, ``self``, a nested function."""
+    package = tmp_path / "phonometry" / "io"
+    package.mkdir(parents=True)
+    sources = {
+        "__init__.py": "from ._audio_file import require_regular_audio\n",
+        "_audio_file.py": """
+            from .._internal.json_input import not_regular_at
+
+            def require_regular_audio(path):
+                if not_regular_at(Path(path)) is not None:
+                    raise ValueError(path)
+            """,
+        "_backends.py": """
+            from . import _audio_file
+            from ._audio_file import require_regular_audio
+            from phonometry import io
+            from phonometry._internal import json_input
+            from phonometry.io import require_regular_audio as exported
+
+            def relative(sf, path):
+                require_regular_audio(path)
+                return sf.read(str(path))
+
+            def through_the_module(sf, path):
+                _audio_file.require_regular_audio(path)
+                return sf.info(str(path))
+
+            def through_the_package(sf, path):
+                exported(path)
+                io.require_regular_audio(path)
+                return sf.blocks(str(path))
+
+            def shared(sf, path):
+                json_input.not_regular_at(Path(path))
+                return sf.read(str(path))
+
+            def nested(sf, path):
+                def ask(name):
+                    require_regular_audio(name)
+
+                ask(path)
+                return sf.read(str(path))
+
+            class Reader:
+                def _ask(self, path):
+                    require_regular_audio(path)
+
+                def read(self, sf, path):
+                    self._ask(path)
+                    return sf.read(str(path))
+            """,
+    }
+    for name, source in sources.items():
+        (package / name).write_text(textwrap.dedent(source), encoding="utf-8")
+    findings, _stale = crf.check(sorted(package.iterdir()))
+    assert [finding.describe() for finding in findings] == []
 
 
 def test_the_shared_module_is_the_check_and_is_not_read(tmp_path: pathlib.Path) -> None:

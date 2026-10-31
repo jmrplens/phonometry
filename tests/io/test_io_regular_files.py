@@ -183,6 +183,10 @@ def test_the_shared_open_hands_back_the_file_at_its_start(tmp_path: Path) -> Non
         json_input.open_regular(tmp_path / "missing.bin")
 
 
+@pytest.mark.skipif(
+    sys.platform == "win32",
+    reason="a Windows file name is UTF-16, so no name fails UTF-8",
+)
 def test_a_file_name_that_is_not_utf8_is_named_by_its_escapes(tmp_path: Path) -> None:
     """Each refusal named the file as Python holds it, which no UTF-8 stream writes."""
     path = tmp_path / os.fsdecode(b"\xff-noise.bin")

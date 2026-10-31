@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import os
 import re
+import sys
 import tomllib
 from pathlib import Path
 
@@ -184,6 +185,10 @@ def test_a_file_no_node_would_take_is_refused_here_by_name(tmp_path: Path) -> No
         package.package_from(root)
 
 
+@pytest.mark.skipif(
+    sys.platform == "win32",
+    reason="a Windows file name is UTF-16, so no name fails UTF-8",
+)
 def test_a_file_name_that_is_not_utf8_is_named_by_its_escapes(tmp_path: Path) -> None:
     """The refusal named the file as Python holds it, which no UTF-8 stream writes."""
     root = tmp_path / "phonometry"

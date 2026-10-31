@@ -14,14 +14,17 @@ from ._fluctuation_strength import (
     fluctuation_strength_am_noise,
 )
 from ._fluctuation_strength_ecma import (
+    PROMINENT_FLUCTUATION_STRENGTH_VACIL_HMS,
     EcmaFluctuationStrength,
     fluctuation_strength_ecma,
 )
 from ._roughness_ecma import (
+    PROMINENT_ROUGHNESS_ASPER,
     EcmaRoughness,
     roughness_ecma,
 )
 from ._tonality_ecma import (
+    PROMINENT_TONALITY_TU_HMS,
     EcmaTonality,
     tonality_ecma,
 )
@@ -66,6 +69,9 @@ from .tonality import (
 __all__ = [
     "HANNING_BANDWIDTH_FACTOR",
     "NO_TONE_AUDIBILITY_DB",
+    "PROMINENT_FLUCTUATION_STRENGTH_VACIL_HMS",
+    "PROMINENT_ROUGHNESS_ASPER",
+    "PROMINENT_TONALITY_TU_HMS",
     "EcmaFluctuationStrength",
     "EcmaRoughness",
     "EcmaTonality",

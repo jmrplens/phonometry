@@ -23,7 +23,7 @@ import reference_data as ref
 import phonometry as ph
 from phonometry.psychoacoustics.quality.sharpness import _reference_sound
 
-from ..registry import _DATA, Outcome, numeric, register
+from ..registry import _DATA, Outcome, numeric, record, register
 from .levels import _FS
 
 
@@ -335,4 +335,79 @@ def _chk_ecma_fluctuation_strength() -> Outcome:
         0.01,
         unit="vacil_HMS",
         places=4,
+    )
+
+
+# ---------------------------------------------------------------------------
+# ECMA-418-2:2025 decision criteria. Oracle: the number each clause prints,
+# read on the page (Clause 5.1.9 on PDF page 23, folio 13; 6.3 on page 34,
+# folio 24; 7.2 on page 46, folio 36; 9.2 on page 61, folio 51). No function
+# applies them: a caller compares a result with the published constant, so
+# the comparison is exact, the float published has to be the float the
+# printed decimal is.
+# ---------------------------------------------------------------------------
+def _ecma_criterion(name: str, expected: float, held: float, unit: str) -> Outcome:
+    """One printed ECMA-418-2 criterion against the constant published for it."""
+    return record(
+        {name: expected},
+        {name: held},
+        unit=unit,
+        label=f"{expected:g} {unit}",
+        computed_label=f"{held:g} {unit} (psychoacoustics.{name})",
+    )
+
+
+@register(
+    "Psychoacoustics",
+    "ECMA-418-2:2025 Clause 5.1.9",
+    "Audibility criterion on the total basis loudness (0.01 sone_HMS)",
+)
+def _chk_ecma_audibility_criterion() -> Outcome:
+    return _ecma_criterion(
+        "AUDIBILITY_THRESHOLD_SONE_HMS",
+        ref.ECMA418_2_AUDIBILITY_THRESHOLD_SONE,
+        ph.psychoacoustics.AUDIBILITY_THRESHOLD_SONE_HMS,
+        "sone_HMS",
+    )
+
+
+@register(
+    "Psychoacoustics",
+    "ECMA-418-2:2025 Clause 6.3",
+    "Prominent tonality criterion (0.4 tu_HMS)",
+)
+def _chk_ecma_prominent_tonality() -> Outcome:
+    return _ecma_criterion(
+        "PROMINENT_TONALITY_TU_HMS",
+        ref.ECMA418_2_PROMINENT_TONALITY_TU,
+        ph.psychoacoustics.PROMINENT_TONALITY_TU_HMS,
+        "tu_HMS",
+    )
+
+
+@register(
+    "Psychoacoustics",
+    "ECMA-418-2:2025 Clause 7.2",
+    "Prominent roughness criterion (0.2 asper)",
+)
+def _chk_ecma_prominent_roughness() -> Outcome:
+    return _ecma_criterion(
+        "PROMINENT_ROUGHNESS_ASPER",
+        ref.ECMA418_2_PROMINENT_ROUGHNESS_ASPER,
+        ph.psychoacoustics.PROMINENT_ROUGHNESS_ASPER,
+        "asper",
+    )
+
+
+@register(
+    "Psychoacoustics",
+    "ECMA-418-2:2025 Clause 9.2",
+    "Prominent fluctuation strength criterion (0.2 vacil_HMS)",
+)
+def _chk_ecma_prominent_fluctuation_strength() -> Outcome:
+    return _ecma_criterion(
+        "PROMINENT_FLUCTUATION_STRENGTH_VACIL_HMS",
+        ref.ECMA418_2_PROMINENT_FLUCTUATION_VACIL,
+        ph.psychoacoustics.PROMINENT_FLUCTUATION_STRENGTH_VACIL_HMS,
+        "vacil_HMS",
     )

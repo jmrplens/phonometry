@@ -17,6 +17,7 @@ from .contours import (
     loudness_level,
 )
 from .ecma import (
+    AUDIBILITY_THRESHOLD_SONE_HMS,
     EcmaLoudness,
     loudness_ecma,
 )
@@ -37,6 +38,7 @@ from .zwicker import (
 )
 
 __all__ = [
+    "AUDIBILITY_THRESHOLD_SONE_HMS",
     "EcmaLoudness",
     "EqualLoudnessContours",
     "MooreGlasbergLoudness",

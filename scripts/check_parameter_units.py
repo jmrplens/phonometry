@@ -215,7 +215,12 @@ PACKAGE_WORD_QUANTITIES: dict[str, frozenset[str]] = {
 #: minimum (``f_min``, ``kij_min``): a period that ends in ``_min`` names no
 #: unit, and the rule reports it. A minute under ``per`` is the denominator
 #: of a rate and reads as one, as in the feet per minute of the ANP climb
-#: rates (``_ft_per_min``).
+#: rates (``_ft_per_min``). The units of the Sottek Hearing Model carry the
+#: model in their name as ECMA-418-2 prints them (sone_HMS, tu_HMS,
+#: vacil_HMS), so ``_hms`` is part of the unit and no factor, while its
+#: roughness is printed in plain asper; a plain vacil is the unit of the
+#: Osses fluctuation strength beside it, which is why the one suffix the
+#: tree writes is ``_vacil_hms``.
 UNITS = (
     "_kpa",
     "_pa",
@@ -282,6 +287,10 @@ UNITS = (
     "_pa_s_m2",
     "_kpa_s_m2",
     "_pa2_s",
+    "_sone_hms",
+    "_tu_hms",
+    "_asper",
+    "_vacil_hms",
 )
 
 #: Single letters that are a unit on some names and a subscript of the

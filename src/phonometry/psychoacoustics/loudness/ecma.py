@@ -73,6 +73,7 @@ from ..._internal.validation import (
 from ...metrology.reference_values import REFERENCE_VALUES
 
 __all__ = [
+    "AUDIBILITY_THRESHOLD_SONE_HMS",
     "EcmaLoudness",
     "loudness_ecma",
 ]
@@ -88,10 +89,12 @@ _EPS = 1e-12  # additive constant used throughout the standard
 
 _N_FADE = 240  # 5 ms fade-in, n_fadein = 0.005 * 48000 (Formula 1)
 
-#: Audibility criterion (Clause 5.1.9): a signal is considered audible when
-#: its total basis loudness (sum of the specific basis loudness over the 53
-#: bands with dz = 0.5) exceeds this value, in sone_HMS.
-_AUDIBILITY_THRESHOLD_SONE_HMS = 0.01
+#: Audibility criterion of Clause 5.1.9 (PDF page 23, folio 13), in
+#: sone_HMS: a signal is considered audible when its total basis loudness, the
+#: specific basis loudness of Formula (25) summed over the 53 bands with
+#: dz = 0.5 (Formula 26), exceeds it. Published by the package; no function
+#: applies it, and no result carries that total.
+AUDIBILITY_THRESHOLD_SONE_HMS = 0.01
 
 # Auditory filter bank (Clause 5.1.4)
 _DF0 = 81.9289  # delta f at f = 0 [Hz] (below Formula 10)

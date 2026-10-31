@@ -3809,7 +3809,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   was read as its real part, while
   `electroacoustics.neck_loop_characteristics` reads it as the magnitudes of
   a complex impedance, as it reads a complex array, where it refused it. A
-  `str`, a number and an array of numbers work as before. `tests/test_choices_beside_numbers.py` finds every choice beside
+  sequence that holds itself, or is nested more than 32 deep, is a
+  `TypeError` naming the parameter too, where numpy failed with an error
+  that named nothing; any record given a tuple, a list, a mapping or an
+  array of objects that holds itself refuses it naming the field, and an
+  argument of a remote simulation run names where it sits, where both
+  recursed until Python stopped them with a `RecursionError`. A `str`, a
+  number and an array of numbers work as before.
+  `tests/test_choices_beside_numbers.py` finds every choice beside
   numbers from its annotation and calls each with a text in every other
   form, `None` and an object, and reads every body for a `str` taken as a
   choice that no annotation states; rule A59 of the contributor guide

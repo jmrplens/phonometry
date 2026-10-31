@@ -1,5 +1,5 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
-"""Hold the built PyOctaveBand stub to the pin its README promises.
+"""Hold the built PyOctaveBand stub to its pin and to the licence it declares.
 
 ``stub/`` builds the final ``PyOctaveBand`` release: a shim that installs
 ``phonometry`` and re-exports it under the old ``pyoctaveband`` module name.
@@ -9,28 +9,35 @@ while the resolved ``phonometry`` still exports the names the last release
 under the old name exported, and a major release is exactly where those go, so
 the requirement has to be capped below the next major.
 
-``tests/test_transition_stub.py`` asserts the cap in ``stub/pyproject.toml``.
-This asserts it in the artifact, because ``pyproject.toml`` is not what a
-resolver reads: pip reads ``Requires-Dist`` out of the built metadata, and a
-build backend or a packaging config can put something else there. The two
-checks are deliberately at opposite ends of the build.
+The same files carry the licence: ``License-Expression`` and ``License-File``
+in the metadata, and the text where PEP 639 puts it. PyOctaveBand 2.2.0
+shipped neither, only a licence classifier. ``built_license.py`` reads the
+files and checks the licence, as it does for phonometry's own release.
+
+``tests/test_transition_stub.py`` asserts the cap in ``stub/pyproject.toml`` and
+that ``stub/LICENSE`` is the repository's ``LICENSE``. This asserts both in the
+artifact, because ``pyproject.toml`` is not what a resolver or a user reads:
+pip reads ``Requires-Dist`` out of the built metadata, the licence is read out
+of the files that were uploaded, and a build backend or a packaging config can
+put something else in either. The two checks are deliberately at opposite ends
+of the build.
 
 Run after ``python -m build stub/``::
 
     python scripts/check_stub_metadata.py
 
-CI runs it in the ``transition-stub`` job, right after ``twine check``.
+CI runs it in the ``transition-stub`` job, right after ``twine check``, and
+``publish-stub.yml`` runs it on the files it is about to upload.
 """
 
 from __future__ import annotations
 
+import argparse
 import pathlib
 import sys
-import tarfile
-import zipfile
-from email import message_from_string
 from typing import TYPE_CHECKING
 
+from built_license import Built, license_problems
 from packaging.requirements import Requirement
 from packaging.version import Version
 
@@ -55,31 +62,12 @@ _OLDEST_SUPPORTED = Version("3.0.0")
 #: open (``==3.0.*``, say, or a stray ``<3.1``).
 _LATEST_SUPPORTED_LINE = Version("3.99.0")
 
+#: The SPDX expression the stub declares: the project's own licence.
+_LICENSE_EXPRESSION = "MIT"
 
-def _metadata_of_wheel(path: pathlib.Path) -> Message:
-    with zipfile.ZipFile(path) as archive:
-        names = [
-            name for name in archive.namelist() if name.endswith(".dist-info/METADATA")
-        ]
-        if len(names) != 1:
-            msg = f"{path.name}: expected one METADATA, found {names}"
-            raise SystemExit(msg)
-        return message_from_string(archive.read(names[0]).decode("utf-8"))
-
-
-def _metadata_of_sdist(path: pathlib.Path) -> Message:
-    with tarfile.open(path) as archive:
-        names = [name for name in archive.getnames() if name.endswith("/PKG-INFO")]
-        # The top-level PKG-INFO, not one belonging to a vendored tree.
-        names = [name for name in names if name.count("/") == 1]
-        if len(names) != 1:
-            msg = f"{path.name}: expected one PKG-INFO, found {names}"
-            raise SystemExit(msg)
-        handle = archive.extractfile(names[0])
-        if handle is None:
-            msg = f"{path.name}: {names[0]} is not a regular file"
-            raise SystemExit(msg)
-        return message_from_string(handle.read().decode("utf-8"))
+#: The licence files the stub declares, by the path PEP 639 records. Each has
+#: to carry the text of the repository's file of the same name.
+_LICENSE_FILES = ("LICENSE",)
 
 
 def _phonometry_requirement(metadata: Message, label: str) -> Requirement:
@@ -125,26 +113,43 @@ def _problems(requirement: Requirement, label: str) -> list[str]:
     return found
 
 
-def main() -> int:
-    artifacts = sorted(_DIST.glob("*.whl")) + sorted(_DIST.glob("*.tar.gz"))
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=(__doc__ or "").splitlines()[0])
+    parser.add_argument(
+        "--dist",
+        type=pathlib.Path,
+        default=_DIST,
+        help="the directory python -m build stub/ wrote to (default: stub/dist)",
+    )
+    args = parser.parse_args(argv)
+    dist: pathlib.Path = args.dist
+    artifacts = sorted(dist.glob("*.whl")) + sorted(dist.glob("*.tar.gz"))
     if not artifacts:
-        msg = (
-            f"no built artifacts in {_DIST.relative_to(_ROOT)}; "
-            f"run 'python -m build stub/' first"
-        )
+        msg = f"no built artifacts in {dist}; run 'python -m build stub/' first"
         raise SystemExit(msg)
+    license_files = {name: (_ROOT / name).read_bytes() for name in _LICENSE_FILES}
 
     problems: list[str] = []
     for artifact in artifacts:
-        label = artifact.name
-        metadata = (
-            _metadata_of_wheel(artifact)
-            if artifact.suffix == ".whl"
-            else _metadata_of_sdist(artifact)
+        try:
+            built = Built(artifact)
+        except ValueError as error:
+            raise SystemExit(str(error)) from None
+        requirement = _phonometry_requirement(built.metadata, built.label)
+        print(f"{built.label}: Requires-Dist: {requirement}")
+        problems.extend(_problems(requirement, built.label))
+        print(
+            f"{built.label}: License-Expression: "
+            f"{built.metadata.get('License-Expression', 'missing')}"
         )
-        requirement = _phonometry_requirement(metadata, label)
-        print(f"{label}: Requires-Dist: {requirement}")
-        problems.extend(_problems(requirement, label))
+        problems.extend(
+            license_problems(
+                built,
+                expression=_LICENSE_EXPRESSION,
+                files=license_files,
+                config="stub/pyproject.toml",
+            )
+        )
 
     for problem in problems:
         print(f"::error::{problem}", file=sys.stderr)

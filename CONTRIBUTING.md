@@ -667,7 +667,8 @@ Releases are fully automated from the repository-root `VERSION` file:
    hand on the PR's branch (Actions, Release, Run workflow). A manual run is
    always a rehearsal and no input turns it into a release. It reads the
    version and its CHANGELOG section, waits for the PR's CI, builds the sdist
-   and the wheel, checks both against git, installs the wheel with every extra
+   and the wheel, checks both against git and checks the licence each declares
+   and carries, installs the wheel with every extra
    on Linux, macOS and Windows with each supported Python and runs the
    conformance report on it, writes the SBOM and the release notes, and asks
    PyPI for an upload token with this workflow's identity, which proves the
@@ -685,8 +686,12 @@ Releases are fully automated from the repository-root `VERSION` file:
 Never push tags manually; the workflow is idempotent (an existing tag is
 skipped). The trusted publisher is configured on pypi.org, in the project's
 publishing settings: owner `jmrplens`, repository `phonometry`, workflow
-`release.yml`, no environment. The PyOctaveBand bridge is published the same
-way from `publish-stub.yml`.
+`release.yml`, no environment. The PyOctaveBand bridge is published by hand
+from `publish-stub.yml` (Actions, Publish PyOctaveBand transition stub, Run
+workflow on `main`), through its own trusted publisher, which names that
+workflow. It waits for Python CI on the commit as the release does, checks the
+pin and the licence of the built files with `scripts/check_stub_metadata.py`,
+and only then uploads.
 
 ## 🚀 How to Contribute
 

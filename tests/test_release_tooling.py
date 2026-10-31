@@ -4,7 +4,8 @@
 A release cannot be rehearsed against PyPI twice with the same version, so the
 checks it runs on the way have to be right before they are needed: the notes
 come from the changelog section and nowhere else, a built file the package is
-missing stops the release, the SBOM names what ``pip install phonometry``
+missing stops the release, so does a built file that does not declare the
+licence or carry its text, the SBOM names what ``pip install phonometry``
 resolves, and the package the verification imports is the installed wheel.
 """
 
@@ -164,6 +165,16 @@ _TRACKED = [
     "phonometry/building/data/rows.json",
 ]
 
+#: The licence text the built files carry: the repository's.
+_LICENSE = (_ROOT / "LICENSE").read_bytes()
+
+#: The licence headers setuptools writes from ``pyproject.toml``.
+_LICENSE_HEADERS = "License-Expression: MIT\nLicense-File: LICENSE\n"
+
+
+def _metadata(version: str, license_headers: str) -> str:
+    return f"Metadata-Version: 2.4\nName: phonometry\nVersion: {version}\n{license_headers}"
+
 
 def _wheel(
     path: pathlib.Path,
@@ -171,25 +182,37 @@ def _wheel(
     names: list[str],
     *,
     metadata_version: str | None = None,
+    license_headers: str = _LICENSE_HEADERS,
+    license_text: bytes | None = _LICENSE,
 ) -> None:
+    dist_info = f"phonometry-{version}.dist-info/"
     with zipfile.ZipFile(path, "w") as archive:
         for name in names:
             archive.writestr(name, "x")
         archive.writestr(
-            f"phonometry-{version}.dist-info/METADATA",
-            f"Metadata-Version: 2.4\nName: phonometry\nVersion: {metadata_version or version}\n",
+            f"{dist_info}METADATA",
+            _metadata(metadata_version or version, license_headers),
         )
+        if license_text is not None:
+            archive.writestr(f"{dist_info}licenses/LICENSE", license_text)
 
 
-def _sdist(path: pathlib.Path, version: str, names: list[str]) -> None:
+def _sdist(
+    path: pathlib.Path,
+    version: str,
+    names: list[str],
+    *,
+    license_headers: str = _LICENSE_HEADERS,
+) -> None:
     top = f"phonometry-{version}/"
     with tarfile.open(path, "w:gz") as archive:
         for name in names:
-            data = (
-                f"Metadata-Version: 2.4\nName: phonometry\nVersion: {version}\n"
-                if name == "PKG-INFO"
-                else "x"
-            ).encode()
+            if name == "PKG-INFO":
+                data = _metadata(version, license_headers).encode()
+            elif name == "LICENSE":
+                data = _LICENSE
+            else:
+                data = b"x"
             info = tarfile.TarInfo(top + name)
             info.size = len(data)
             archive.addfile(info, io.BytesIO(data))
@@ -202,7 +225,12 @@ def _good_dist(tmp_path: pathlib.Path, version: str = "2.0.0") -> pathlib.Path:
     _sdist(
         dist / f"phonometry-{version}.tar.gz",
         version,
-        ["PKG-INFO", *artifacts.SDIST_SUPPORT, *(f"src/{path}" for path in _TRACKED)],
+        [
+            "PKG-INFO",
+            *artifacts.SDIST_SUPPORT,
+            *artifacts.LICENSE_FILES,
+            *(f"src/{path}" for path in _TRACKED),
+        ],
     )
     return dist
 
@@ -260,6 +288,110 @@ def test_an_sdist_that_cannot_rebuild_the_wheel_is_reported(
         "the sdist lacks phonometry-2.0.0/src/phonometry/py.typed",
         "the sdist lacks phonometry-2.0.0/src/phonometry/building/data/rows.json",
     ]
+
+
+@pytest.mark.parametrize(
+    ("license_headers", "license_text", "expected"),
+    [
+        pytest.param(
+            "License-File: LICENSE\n",
+            _LICENSE,
+            "License-Expression is missing, expected 'MIT'. "
+            'Declare license = "MIT" in pyproject.toml.',
+            id="no-expression",
+        ),
+        pytest.param(
+            "License-Expression: Apache-2.0\nLicense-File: LICENSE\n",
+            _LICENSE,
+            "License-Expression is ['Apache-2.0'], expected 'MIT'.",
+            id="another-expression",
+        ),
+        pytest.param(
+            "License-Expression: MIT\n",
+            _LICENSE,
+            "License-File is missing, expected ['LICENSE'].",
+            id="no-license-file",
+        ),
+        pytest.param(
+            _LICENSE_HEADERS,
+            None,
+            "phonometry-2.0.0.dist-info/licenses/LICENSE is missing.",
+            id="no-license-text",
+        ),
+    ],
+)
+def test_a_wheel_that_does_not_declare_or_carry_the_licence_is_reported(
+    tmp_path: pathlib.Path,
+    license_headers: str,
+    license_text: bytes | None,
+    expected: str,
+) -> None:
+    """What PyOctaveBand 2.2.0 shipped, one part at a time, in phonometry's wheel.
+
+    Each can happen to phonometry. A build of this repository without
+    ``license = "MIT"`` in ``pyproject.toml`` declares no expression, and one
+    with ``license-files = []`` declares no licence file and carries none;
+    setuptools builds both without a word.
+    """
+    wheel = tmp_path / "phonometry-2.0.0-py3-none-any.whl"
+    _wheel(
+        wheel,
+        "2.0.0",
+        _TRACKED,
+        license_headers=license_headers,
+        license_text=license_text,
+    )
+    problems = artifacts.wheel_problems(wheel, "2.0.0", _TRACKED)
+    assert len(problems) == 1, problems
+    assert problems[0].startswith(f"{wheel.name}: ")
+    assert expected in problems[0]
+
+
+@pytest.mark.parametrize(
+    ("license_headers", "names", "expected"),
+    [
+        pytest.param(
+            "License-File: LICENSE\n",
+            ["LICENSE"],
+            "License-Expression is missing, expected 'MIT'.",
+            id="no-expression",
+        ),
+        pytest.param(
+            "License-Expression: MIT\n",
+            ["LICENSE"],
+            "License-File is missing, expected ['LICENSE'].",
+            id="no-license-file",
+        ),
+        pytest.param(
+            _LICENSE_HEADERS,
+            [],
+            "phonometry-2.0.0/LICENSE is missing.",
+            id="no-license-text",
+        ),
+    ],
+)
+def test_an_sdist_that_does_not_declare_or_carry_the_licence_is_reported(
+    tmp_path: pathlib.Path,
+    license_headers: str,
+    names: list[str],
+    expected: str,
+) -> None:
+    sdist = tmp_path / "phonometry-2.0.0.tar.gz"
+    _sdist(
+        sdist,
+        "2.0.0",
+        [
+            "PKG-INFO",
+            *artifacts.SDIST_SUPPORT,
+            *names,
+            *(f"src/{path}" for path in _TRACKED),
+        ],
+        license_headers=license_headers,
+    )
+    problems = artifacts.sdist_problems(sdist, "2.0.0", _TRACKED)
+    assert len(problems) == 1, problems
+    assert problems[0].startswith(f"{sdist.name}: ")
+    assert expected in problems[0]
 
 
 def test_a_stray_file_in_the_build_directory_is_reported(

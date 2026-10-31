@@ -236,4 +236,9 @@ as set out in the
 
 ## 📄 License
 
-[MIT](https://github.com/jmrplens/phonometry/blob/main/LICENSE)
+[MIT](https://github.com/jmrplens/phonometry/blob/main/LICENSE).
+Data bundled from a third party keeps its source's terms: the EASA Aircraft
+Noise and Performance (ANP) tables, for one, are reproduced under EASA's notice
+that authorises reproduction provided the source is acknowledged, as their
+[provenance note](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/aircraft/data/anp/PROVENANCE.md)
+records.

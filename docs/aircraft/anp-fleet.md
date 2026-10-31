@@ -326,7 +326,9 @@ Pages elsewhere on the site that this section leans on:
 ## References
 
 - EASA and EUROCONTROL, *Aircraft Noise and Performance (ANP) database*, version
-  2.3 (2020). <https://www.aircraftnoisemodel.org/>. The provenance of the copy
-  shipped with the package is recorded in `aircraft/data/anp/PROVENANCE.md`.
+  2.3 (2020).
+  <https://www.easa.europa.eu/en/domains/environment/policy-support-and-research/aircraft-noise-and-performance-anp-data>.
+  The provenance of the copy shipped with the package is recorded in
+  `aircraft/data/anp/PROVENANCE.md`.
 - ECAC, *Report on standard method of computing noise contours around civil
   airports*, Volume 2: Technical guide, Doc 29 4th ed. (2016).

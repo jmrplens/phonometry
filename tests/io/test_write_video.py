@@ -429,7 +429,7 @@ def test_a_finished_video_that_cannot_take_the_place_of_path_says_where_it_is(
 #: the lone surrogate Python holds for a byte that is not UTF-8 (a Windows
 #: file name is UTF-16, so no name holds one there).
 _UNPRINTABLE_MARKS = [
-    "‮",
+    "\u202e",
     "\x1b",
     pytest.param(
         "\udcff",
@@ -475,12 +475,12 @@ def test_what_ffmpeg_wrote_is_quoted_with_its_unprintable_characters_escaped(
     )
     pipe._tail.extend(
         [
-            "Error opening output .w‮\x1b[2J.webm.partial: Permission denied",
+            "Error opening output .w\u202e\x1b[2J.webm.partial: Permission denied",
             "\x9b31m\tthe end",
         ]
     )
     message = str(pipe._failure("ffmpeg exited with status 1"))
-    for mark in ("‮", "\x1b", "\x9b"):
+    for mark in ("\u202e", "\x1b", "\x9b"):
         assert mark not in message
     assert message.endswith(
         "ffmpeg said:\nError opening output .w\\u202e\\x1b[2J.webm.partial: "

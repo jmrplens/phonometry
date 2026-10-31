@@ -184,14 +184,14 @@ def test_windows_names_the_ffmpeg_it_passes_over_and_runs_by_their_escapes(
     """The working directory, the program's name and ``PATH`` are the caller's, so are the names."""
     import matplotlib as mpl
 
-    (windows / "ff‮mpeg.exe").write_bytes(b"")
-    monkeypatch.setitem(mpl.rcParams, "animation.ffmpeg_path", "ff‮mpeg")
+    (windows / "ff\u202empeg.exe").write_bytes(b"")
+    monkeypatch.setitem(mpl.rcParams, "animation.ffmpeg_path", "ff\u202empeg")
     with pytest.raises(ve.FFmpegNotFoundError) as caught:
         ve.find_ffmpeg()
     message = str(caught.value)
-    assert "‮" not in message
+    assert "\u202e" not in message
     assert f"working directory ({os.curdir}{os.sep}ff\\u202empeg.exe)" in message
-    installed = windows / "else‮where" / "ff‮mpeg.exe"
+    installed = windows / "else\u202ewhere" / "ff\u202empeg.exe"
     installed.parent.mkdir()
     installed.write_bytes(b"")
     monkeypatch.setenv("PATH", str(installed.parent))
@@ -199,7 +199,7 @@ def test_windows_names_the_ffmpeg_it_passes_over_and_runs_by_their_escapes(
         assert ve.find_ffmpeg() == str(installed)
     (record,) = caplog.records
     logged = record.getMessage()
-    assert "‮" not in logged
+    assert "\u202e" not in logged
     assert f"{windows}{os.sep}else\\u202ewhere{os.sep}ff\\u202empeg.exe" in logged
 
 
@@ -317,7 +317,7 @@ def test_what_a_failing_ffmpeg_wrote_is_quoted_with_its_control_characters_escap
 def test_an_ffmpeg_with_no_encoder_for_the_video_is_named_by_its_escapes() -> None:
     """The path of the ffmpeg is the caller's or ``PATH``'s, and its version line is its own."""
     ffmpeg = ve.FFmpeg(
-        path="/opt/ff‮mpeg/bin/ffmpeg",
+        path="/opt/ff\u202empeg/bin/ffmpeg",
         version="ffmpeg version 7.1\x1b[2J",
         encoders=frozenset(),
     )
@@ -334,7 +334,7 @@ def test_an_ffmpeg_with_no_encoder_for_the_video_is_named_by_its_escapes() -> No
             vaapi_device=ve.DEFAULT_VAAPI_DEVICE,
         )
     message = str(caught.value)
-    assert "‮" not in message
+    assert "\u202e" not in message
     assert "\x1b" not in message
     assert (
         "with /opt/ff\\u202empeg/bin/ffmpeg (ffmpeg version 7.1\\x1b[2J); " in message

@@ -479,6 +479,11 @@ def test_a_docstring_and_its_page_read_the_same() -> None:
             False,
         ),
         "doctest": (">>> run('--count')\n'--'\n", False),
+        "code directive that shows a fence": (
+            ".. code-block:: markdown\n\n   ```bash\n   ls\n   ```\n\n"
+            "   python x.py --count\n",
+            False,
+        ),
         "math directive": (".. math::\n\n   a -- b\n", False),
         "math role": ("The term :math:`c^{--}` here.\n", False),
         "prose": ("The level rises -- and falls.\n", True),

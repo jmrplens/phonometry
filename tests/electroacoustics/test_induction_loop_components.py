@@ -633,6 +633,62 @@ def test_neck_loop_takes_a_complex_impedance_held_as_objects() -> None:
     assert result.min_impedance_ohm == pytest.approx(5.0)
 
 
+def _complex_beside(member: object) -> np.ndarray:
+    """An array of objects that holds a NumPy complex impedance beside *member*."""
+    impedance = np.empty(3, dtype=object)
+    impedance[0] = np.complex128(3 + 4j)
+    impedance[1] = member
+    impedance[2] = 9.0
+    return impedance
+
+
+@pytest.mark.parametrize(
+    "impedance",
+    [[3 + 4j, None, 9.0], _complex_beside(None), _complex_beside(object())],
+    ids=["none-in-a-list", "none-in-an-array-of-objects", "object"],
+)
+def test_neck_loop_names_an_element_of_a_complex_impedance_that_is_no_number(
+    impedance: object,
+) -> None:
+    """A complex impedance is read as its magnitude, which an element that is no number lacks.
+
+    The magnitude was taken after the guard that names the parameter, so
+    ``abs(None)`` reached the caller as numpy's ``bad operand type for
+    abs()``, which names nothing.
+    """
+    with pytest.raises(TypeError, match="'impedance_ohm' must be numeric"):
+        ea.neck_loop_characteristics(
+            frequencies=[100.0, 1000.0, 5000.0],
+            field_strength_level=[0.0, 0.0, 0.0],
+            impedance_ohm=impedance,  # type: ignore[arg-type]
+            input_voltage_v=1.0,
+        )
+
+
+def test_neck_loop_reads_an_array_of_objects_as_the_list_of_its_members() -> None:
+    """A real element beside a complex one is read as numpy reads the list of them.
+
+    ``[3 + 4j, -8.0, 9.0]`` is a complex array, whose element ``-8 + 0j``
+    is a complex impedance of magnitude 8, and the array of objects that
+    holds the same members is read as that complex array, not refused for
+    an element a list of them would take.
+    """
+    from_list = ea.neck_loop_characteristics(
+        frequencies=[100.0, 1000.0, 5000.0],
+        field_strength_level=[0.0, 0.0, 0.0],
+        impedance_ohm=[3 + 4j, -8.0, 9.0],
+        input_voltage_v=1.0,
+    )
+    from_objects = ea.neck_loop_characteristics(
+        frequencies=[100.0, 1000.0, 5000.0],
+        field_strength_level=[0.0, 0.0, 0.0],
+        impedance_ohm=_complex_beside(-8.0),
+        input_voltage_v=1.0,
+    )
+    np.testing.assert_array_equal(from_objects.impedance_ohm, from_list.impedance_ohm)
+    np.testing.assert_array_equal(from_list.impedance_ohm, [5.0, 8.0, 9.0])
+
+
 def test_neck_loop_types_are_the_draft_ones() -> None:
     assert isinstance(ea.NECK_LOOP_TYPES, MappingProxyType)
     one = ea.NECK_LOOP_TYPES[1]

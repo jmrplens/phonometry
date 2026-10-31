@@ -1693,20 +1693,20 @@ def neck_loop_characteristics(
     refuse_text(impedance_ohm, "'impedance_ohm' must be numbers, not text.")
     try:
         given = np.asarray(impedance_ohm)
+        # An array of objects that holds a NumPy complex number is complex
+        # too, though its dtype does not say so, and is read as its
+        # magnitude, as a complex array is, not refused as a complex value a
+        # real one replaces. Its magnitude is taken element by element, so
+        # inside the guard: an element that has none (``None``, an object
+        # that is no number) is refused here, by name.
+        read = np.abs(given) if holds_complex(given) else impedance_ohm
     except TypeError as exc:
         msg = "'impedance_ohm' must be numeric."
         raise TypeError(msg) from exc
     except ValueError as exc:
         msg = "'impedance_ohm' must be numeric."
         raise ValueError(msg) from exc
-    # An array of objects that holds a NumPy complex number is complex too,
-    # though its dtype does not say so, and is read as its magnitude, as a
-    # complex array is, not refused as a complex value a real one replaces.
-    complex_input = holds_complex(given)
-    z = require_positive_array(
-        np.abs(given) if complex_input else impedance_ohm,
-        "impedance_ohm",
-    )
+    z = require_positive_array(read, "impedance_ohm")
     if not f.size == level.size == z.size:
         msg = (
             "'frequencies', 'field_strength_level' and 'impedance_ohm' "

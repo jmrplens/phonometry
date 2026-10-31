@@ -18,7 +18,8 @@ could see it.
 So the list is not kept by hand. :func:`_numpy_free_scripts` reads it from the
 workflows: every script a job runs (directly or through a ``make`` target)
 when that job installs nothing, or installs only named tools that are not the
-project and not a requirements file. :data:`_DECLARED` adds the scripts that
+project and not a requirements file other than the release tooling's.
+:data:`_DECLARED` adds the scripts that
 promise the same outside CI. Each is imported in a fresh interpreter that
 refuses NumPy. Where the job installs nothing, that interpreter also starts
 with ``-S``, which leaves out site-packages entirely, so what is importable is
@@ -79,6 +80,20 @@ _PULLS_NUMPY = re.compile(
     r"(?:^|\s)[\"']?(?:-r|-e|\.|phonometry|numpy|[^\s\"']*/phonometry-[^\s\"']*\.whl)"
 )
 
+#: The release tooling: what every job that builds a package installs, from
+#: the checkout or from a clone of it, and only these. None of them needs
+#: NumPy, so a job that installs this file and nothing else still runs its
+#: scripts without NumPy, and is probed like a job that installs named tools.
+_RELEASE_TOOLING = re.compile(
+    r"(?:^|\s)-r\s+[\"']?(?:\S*/)?requirements-release\.txt[\"']?(?=\s|$)"
+)
+#: The distributions requirements-release.txt installs, none of which depends
+#: on NumPy. A new one is read before it joins: if it brings NumPy, the jobs
+#: that install the file are no longer NumPy-free.
+_RELEASE_TOOLS = frozenset(
+    {"build", "setuptools", "twine", "check-wheel-contents", "cyclonedx-bom"}
+)
+
 #: Imports one script by path, as ``__name__ != "__main__"`` so its entry
 #: point does not run, with the scripts directory on the path as every
 #: script arranges for itself, then runs *then* against it. NumPy is refused
@@ -137,7 +152,10 @@ def _numpy_free_scripts() -> dict[str, bool]:
                 if isinstance(step, dict)
             )
             installs = _PIP_INSTALL.findall(text)
-            if any(_PULLS_NUMPY.search(arguments) for arguments in installs):
+            if any(
+                _PULLS_NUMPY.search(_RELEASE_TOOLING.sub(" ", arguments))
+                for arguments in installs
+            ):
                 continue
             ran = set(_INVOCATION.findall(text))
             for target in _MAKE.findall(text):
@@ -184,6 +202,41 @@ def test_the_workflows_are_read_and_not_found_empty() -> None:
     assert _FOUND.get("scripts/generate_llms.py") is True
     assert _FOUND.get("scripts/check_stub_metadata.py") is False
     assert "scripts/check_figures.py" not in _FOUND
+
+
+def test_the_release_tooling_brings_no_numpy() -> None:
+    """requirements-release.txt names the release tools and nothing else.
+
+    The jobs that install it are read as NumPy-free, so a requirement that
+    brings NumPy, another requirements file or the project itself would make
+    every one of them a job whose scripts are no longer held to that.
+    """
+    names = set()
+    for line in (
+        (_ROOT / "requirements-release.txt").read_text(encoding="utf-8").splitlines()
+    ):
+        line = line.split("#", 1)[0].strip()
+        if not line:
+            continue
+        assert not line.startswith(("-", ".")), f"requirements-release.txt: {line}"
+        names.add(re.split(r"[=<>!~;\[ ]", line, maxsplit=1)[0].lower())
+    assert names == _RELEASE_TOOLS
+
+
+def test_installing_the_release_tooling_alone_keeps_a_job_numpy_free() -> None:
+    """From the checkout or from a clone, and only that file."""
+    for arguments in (
+        "-r requirements-release.txt",
+        '-r "source/requirements-release.txt"',
+    ):
+        assert not _PULLS_NUMPY.search(_RELEASE_TOOLING.sub(" ", arguments))
+    for arguments in (
+        "-r requirements-release.txt -r requirements.txt",
+        "-r requirements-release.txt numpy",
+        "-r requirements-release.txt.bak",
+        "-r requirements.txt",
+    ):
+        assert _PULLS_NUMPY.search(_RELEASE_TOOLING.sub(" ", arguments)), arguments
 
 
 @pytest.mark.parametrize("script", sorted(_FOUND))

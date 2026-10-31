@@ -149,28 +149,56 @@ the top level at all.
 
 ## Verifying a release
 
-Every release from 4.0.0 on is uploaded to PyPI through trusted publishing: no
-token is stored anywhere, and PyPI attaches to each file a
-[PEP 740](https://peps.python.org/pep-0740/) attestation signed with Sigstore
-for the identity of the workflow run that built it. The GitHub Release carries
-the same wheel and sdist, a `SHA256SUMS` file and a CycloneDX SBOM of what
-`pip install phonometry` resolved on the day, and GitHub keeps a build
-provenance attestation for each file and one for the SBOM.
+Every release from 4.0.0 on is built, checked and published by
+`.github/workflows/release.yml`, run by a push to `main` on a runner GitHub
+hosts. It is uploaded to PyPI through trusted publishing: no token is stored
+anywhere, and PyPI attaches to each file a
+[PEP 740](https://peps.python.org/pep-0740/) attestation, which the file's
+page on PyPI shows under Provenance. The GitHub Release carries the same wheel
+and sdist, a checksum file, `phonometry-<version>.sha256`, and a CycloneDX
+SBOM, `phonometry-<version>.cdx.json`, of what `pip install phonometry`
+resolved on the day. GitHub keeps a build provenance attestation for each of
+those four files, and an SBOM attestation that ties the SBOM to the wheel.
 
-To check that a file is the one this repository's release workflow built:
+The signing is keyless, so there is no key file to fetch or to trust: each
+attestation is signed with a short-lived Sigstore certificate issued to the
+run of the workflow, and a verification checks the identity that certificate
+names.
+
+- Issuer: `https://token.actions.githubusercontent.com`.
+- Identity: `https://github.com/jmrplens/phonometry/.github/workflows/release.yml@refs/heads/main`.
+- Runner: one GitHub hosts, never a self-hosted one.
+- On PyPI, the trusted publisher of phonometry: owner `jmrplens`, repository
+  `phonometry`, workflow `release.yml`, no environment.
+
+To check that a file is one this repository's release workflow built:
 
 ```bash
-# A wheel or sdist downloaded from PyPI or from the GitHub Release.
-gh attestation verify phonometry-4.0.0-py3-none-any.whl --repo jmrplens/phonometry
+# The wheel, the sdist, the checksum file or the SBOM, from PyPI or the GitHub Release.
+gh attestation verify phonometry-4.0.0-py3-none-any.whl --repo jmrplens/phonometry \
+    --signer-workflow jmrplens/phonometry/.github/workflows/release.yml \
+    --source-ref refs/heads/main --deny-self-hosted-runners
+
+# The SBOM attestation, made for the wheel.
+gh attestation verify phonometry-4.0.0-py3-none-any.whl --repo jmrplens/phonometry \
+    --predicate-type https://cyclonedx.org/bom \
+    --signer-workflow jmrplens/phonometry/.github/workflows/release.yml \
+    --source-ref refs/heads/main --deny-self-hosted-runners
 
 # The PEP 740 attestation PyPI serves, without downloading anything first.
 python -m pip install pypi-attestations
 python -m pypi_attestations verify pypi --repository https://github.com/jmrplens/phonometry \
     pypi:phonometry-4.0.0-py3-none-any.whl
 
-# The checksums published with the release.
-sha256sum --check SHA256SUMS
+# The files of the GitHub Release against the checksum file it carries.
+sha256sum --check phonometry-4.0.0.sha256
 ```
+
+The signed source of a release is its sdist: the source the wheel was built
+from, attested like the wheel. The "Source code" archives GitHub offers on
+every release are made from the tag when they are downloaded and carry no
+signature, and neither does the zip Zenodo keeps, which is made from one of
+them.
 
 The SBOM lists the runtime dependencies at the versions the release resolved
 (`numpy` and `scipy`); the optional extras are not in it, because a plain
@@ -181,6 +209,51 @@ libraries: `docs/CONFORMANCE.md` is regenerated in CI from the library's own
 computations against reference values and the build fails if the committed
 report drifts, so a change that quietly moves a standards-conformant result
 cannot reach a release unnoticed.
+
+## Rebuilding a release
+
+Every release from 4.0.0 on rebuilds from its tag to the bytes PyPI and the
+GitHub Release hold, on Linux and on macOS. The release workflow builds every
+release twice before it publishes and refuses one whose builds differ, and
+once it has published it clones the tag on macOS, rebuilds it as below and
+compares the files with PyPI's; a rehearsal does the same with the commit it
+builds and its own files, and so does every pull request. To rebuild one
+yourself, with Python 3.13, which the release builds with:
+
+```bash
+git clone --depth 1 --branch v4.0.0 --config core.autocrlf=false \
+    https://github.com/jmrplens/phonometry.git
+cd phonometry
+python3.13 -m venv ../phonometry-build
+../phonometry-build/bin/python -m pip install -r requirements-release.txt
+../phonometry-build/bin/python scripts/build_release.py --outdir ../rebuilt --check-pypi
+```
+
+`scripts/build_release.py` builds the sdist with the setuptools that
+`requirements-release.txt` pins, without build isolation, and with every
+time stamp set to the commit's. It writes the sdist again without the time of
+the build, the builder's user or the checkout's modes, builds the wheel from
+that sdist under umask 022, and compares both files with the digests PyPI
+publishes for the version; `--check phonometry-4.0.0.sha256` compares them
+with the release's checksum file instead. It refuses a checkout that differs
+from its commit, and an environment in which another package installs a
+setuptools plugin that could change what is packed, which is why the build
+gets a virtual environment of its own. `core.autocrlf=false` keeps the files
+as the commit holds them, and `.gitattributes` checks out every file the sdist
+carries with LF whatever `core.autocrlf` or `core.eol` the cloner has set.
+
+The script refuses to build on Windows, where the operating system reaches
+the bytes: zipfile records the system that wrote each member of the wheel,
+setuptools gives the wheel's modules the mode Windows reports, and it writes
+the sdist's `PKG-INFO` and `setup.cfg` with CRLF. On Windows, run the commands
+above inside WSL, from a clone made in WSL's own filesystem (under `~`, not
+under `/mnt/c`, where the files carry no Unix modes and every one of them
+looks executable).
+
+The compressed bytes of both files come from the zlib that Python is linked
+against. The release compares a build on Linux with one on macOS; a Python
+linked against another implementation of it, such as zlib-ng, compresses the
+same files to other bytes.
 
 ## Credit
 

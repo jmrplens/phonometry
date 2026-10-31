@@ -10,19 +10,25 @@ name: Release
 # A manual run is always a rehearsal, from any branch, and no input turns it
 # into a release. It does everything up to the upload and stops there: the
 # preflight, the build, the checks on the built files, the installed wheel on
-# the whole matrix, the SBOM, the release notes, and the exchange with PyPI
-# that proves the trusted publisher is configured for this workflow. Nothing
-# is uploaded, tagged or attested, so a rehearsal can run as often as needed,
-# for a version already released as well.
+# the whole matrix, the SBOM, the release notes, the exchange with PyPI that
+# proves the trusted publisher is configured for this workflow, and the
+# rebuild on macOS, compared with this run's own files, since there is no tag
+# and nothing on PyPI yet. Nothing is uploaded, tagged or attested, so a
+# rehearsal can run as often as needed, for a version already released as
+# well.
 #
 # Jobs, in order:
 #   preflight       the version, its changelog section, a green CI on this commit
-#   build           one sdist and one wheel, made once and checked against git
+#   build           one sdist and one wheel, built twice to the same bytes and
+#                   checked against git
 #   verify          the wheel installed with every extra on 3 OS x 3 Pythons,
 #                   every module imported and the conformance report run on it
 #   publish         PyPI through trusted publishing (PEP 740 attestations)
-#   github-release  the tag, the notes, the files with checksums, SBOM and
-#                   build provenance, then the GitLab mirror
+#   github-release  the tag, the notes, the files with their checksum file and
+#                   SBOM, build provenance for every one
+#   mirror          the GitLab mirror dispatched, once the release exists
+#   rebuild         the tag cloned and built again on macOS, as SECURITY.md
+#                   tells anyone to, and compared with the files on PyPI
 #   confirm         the published version installed back from PyPI
 #
 # Every job states the tokens it needs and no other: nothing is granted at the
@@ -205,21 +211,32 @@ jobs:
       - name: Install the release tooling
         run: python -m pip install -r requirements-release.txt
 
-      # The sdist first, and the wheel from the sdist, which is what `build`
-      # does with no flag: a wheel that only builds from the checkout would
-      # pass here and fail for everyone who installs from source. The commit
-      # time stamps every file, so the wheel is the same bytes on any day.
+      # The sdist first, and the wheel from the sdist, as pip builds one for
+      # anyone who installs from source: a wheel that only builds from the
+      # checkout would pass here and fail for them. scripts/build_release.py
+      # is the recipe SECURITY.md gives anyone who rebuilds a release: the
+      # setuptools requirements-release.txt pins, the commit's time on every
+      # file, and an sdist written again without the builder's clock, user
+      # or umask in it.
       - name: Build the sdist and the wheel
+        run: python scripts/build_release.py --outdir dist
+
+      # Named for the version, so a download beside another release's never
+      # takes its name. The checksum file and the SBOM are written under the
+      # runner's temporary directory, because the build refuses a checkout
+      # that holds a file its commit does not.
+      - name: Write the checksum file
         run: |
-          SOURCE_DATE_EPOCH=$(git log -1 --format=%ct)
-          export SOURCE_DATE_EPOCH
-          python -m build --outdir dist .
-          python -m build --outdir rebuild .
-          if ! cmp -s "dist/phonometry-$VERSION-py3-none-any.whl" "rebuild/phonometry-$VERSION-py3-none-any.whl"; then
-            echo "::error::two builds of the same commit gave two different wheels; the build is not reproducible"
-            exit 1
-          fi
-          echo "The wheel rebuilds to the same bytes."
+          mkdir "$RUNNER_TEMP/extras"
+          (cd dist && sha256sum -- *) > "$RUNNER_TEMP/extras/phonometry-$VERSION.sha256"
+          cat "$RUNNER_TEMP/extras/phonometry-$VERSION.sha256"
+
+      # A second build of the same commit, held to the checksum file the
+      # release publishes: anything that lets the clock, the user or the
+      # machine into the files fails here, before a byte is published, rather
+      # than in the rebuild on macOS after it.
+      - name: Build both again and compare them with the checksum file
+        run: python scripts/build_release.py --outdir "$RUNNER_TEMP/rebuild" --check "$RUNNER_TEMP/extras/phonometry-$VERSION.sha256"
 
       - name: Check the metadata, the long description and the contents
         run: |
@@ -231,15 +248,10 @@ jobs:
         run: |
           python -m venv --without-pip "$RUNNER_TEMP/sbom-env"
           python -m pip --python "$RUNNER_TEMP/sbom-env/bin/python" install --no-cache-dir "dist/phonometry-$VERSION-py3-none-any.whl"
+          sbom="$RUNNER_TEMP/extras/phonometry-$VERSION.cdx.json"
           cyclonedx-py environment --pyproject pyproject.toml --mc-type library \
-            --output-reproducible --of JSON -o "phonometry-$VERSION.cdx.json" "$RUNNER_TEMP/sbom-env/bin/python"
-          python scripts/release_sbom.py "phonometry-$VERSION.cdx.json" --version "$VERSION"
-
-      - name: Write the checksums
-        run: |
-          cd dist
-          sha256sum -- * > ../SHA256SUMS
-          cat ../SHA256SUMS
+            --output-reproducible --of JSON -o "$sbom" "$RUNNER_TEMP/sbom-env/bin/python"
+          python scripts/release_sbom.py "$sbom" --version "$VERSION"
 
       - uses: actions/upload-artifact@v7
         with:
@@ -251,9 +263,7 @@ jobs:
       - uses: actions/upload-artifact@v7
         with:
           name: release-extras
-          path: |
-            SHA256SUMS
-            phonometry-*.cdx.json
+          path: ${{ runner.temp }}/extras/
           if-no-files-found: error
           retention-days: 7
 
@@ -364,7 +374,6 @@ jobs:
       contents: write # the tag and the release
       id-token: write # Sigstore signing of the attestations
       attestations: write # the attestation store
-      actions: write # dispatching the GitLab mirror
     env:
       VERSION: ${{ needs.preflight.outputs.version }}
       TAG: ${{ needs.preflight.outputs.tag }}
@@ -385,14 +394,18 @@ jobs:
           name: release-notes
           path: notes
 
-      # SLSA build provenance for the sdist and the wheel, in GitHub's
-      # attestation store: `gh attestation verify <file> -R jmrplens/phonometry`
-      # answers which workflow run built the file, from which commit.
+      # SLSA build provenance in GitHub's attestation store for every file
+      # the release carries: the sdist, the wheel, the checksum file and the
+      # SBOM. `gh attestation verify <file>` (SECURITY.md) answers which run
+      # of this workflow built the file, and from which commit. The release
+      # below uploads these same two globs, so no file goes out unattested.
       - name: Attest the build provenance
         if: env.REHEARSAL != 'true'
         uses: actions/attest-build-provenance@v4
         with:
-          subject-path: dist/*
+          subject-path: |
+            dist/*
+            extras/*
 
       - name: Attest the SBOM
         if: env.REHEARSAL != 'true'
@@ -420,17 +433,7 @@ jobs:
             --title "Release $TAG" \
             --notes-file notes/release-notes.md \
             "${flags[@]}" \
-            dist/* extras/SHA256SUMS "extras/phonometry-$VERSION.cdx.json"
-
-      # The mirror links the GitLab release to these files. A workflow_run
-      # trigger on this workflow would run the mirror with its secrets in the
-      # context of whatever finished; a dispatch names it, from main, and only
-      # after a release exists.
-      - name: Dispatch the GitLab mirror
-        if: env.REHEARSAL != 'true'
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: gh workflow run gitlab-mirror.yml --repo "$GITHUB_REPOSITORY" --ref main
+            dist/* extras/*
 
       - name: Describe the rehearsal
         if: env.REHEARSAL == 'true'
@@ -444,6 +447,102 @@ jobs:
             ls -l dist extras
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
+
+  # The mirror links the GitLab release to the files of this one. A
+  # workflow_run trigger on this workflow would run the mirror with its
+  # secrets in the context of whatever finished; a dispatch names it, from
+  # main, and only after a release exists. It is a job of its own so that a
+  # failed dispatch fails here alone: inside the GitHub Release job it failed
+  # that job after the release was made, which kept the rebuild below from
+  # running, and running the failed jobs again could not bring it back,
+  # because the release step then refuses a tag that already has a release.
+  # A rehearsal makes no release and dispatches nothing. The workflow's env
+  # is not available to a job's if, hence the event name.
+  mirror:
+    name: Dispatch the GitLab mirror
+    needs: [preflight, github-release]
+    if: github.event_name != 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      actions: write # dispatching the GitLab mirror
+    steps:
+      - name: Dispatch the GitLab mirror
+        if: env.REHEARSAL != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run gitlab-mirror.yml --repo "$GITHUB_REPOSITORY" --ref main
+
+  # Anyone on Linux or macOS can rebuild a release from its tag and get the
+  # bytes PyPI holds (SECURITY.md, "Rebuilding a release"); this job does it
+  # the way the page says, on another operating system than the build's, so
+  # a file that depends on the machine it was built on is found by the
+  # release itself rather than by the first person who checks. It runs after
+  # the release because before it there is no tag to clone and nothing on
+  # PyPI to compare with, and it needs the release and not the mirror, so a
+  # failed dispatch does not keep it from running. A rehearsal has neither a
+  # tag nor files on PyPI, so it fetches the commit the run built and
+  # compares with the checksum file the build job wrote, which proves the
+  # recipe and the comparison across operating systems before a release
+  # needs them. It holds no token: the clone and PyPI are public.
+  rebuild:
+    name: Rebuild on macOS and compare
+    needs: [preflight, github-release]
+    runs-on: macos-latest
+    timeout-minutes: 20
+    permissions: {}
+    env:
+      VERSION: ${{ needs.preflight.outputs.version }}
+      TAG: ${{ needs.preflight.outputs.tag }}
+    steps:
+      # The Python the build job uses: the deflate stream in both files
+      # comes from the zlib Python is linked against.
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+
+      - name: Clone the source of the release
+        run: |
+          set -euo pipefail
+          if [ "$REHEARSAL" = "true" ]; then
+            git init --quiet source
+            git -C source config core.autocrlf false
+            git -C source fetch --quiet --depth 1 "https://github.com/$GITHUB_REPOSITORY.git" "$GITHUB_SHA"
+            git -C source checkout --quiet --detach FETCH_HEAD
+          else
+            git clone --quiet --depth 1 --branch "$TAG" --config core.autocrlf=false \
+              "https://github.com/$GITHUB_REPOSITORY.git" source
+          fi
+          if [ "$(git -C source rev-parse HEAD)" != "$GITHUB_SHA" ]; then
+            echo "::error::the clone holds $(git -C source rev-parse HEAD), not $GITHUB_SHA, the commit this run built"
+            exit 1
+          fi
+
+      - name: Install the release tooling the source pins
+        run: |
+          python -m venv "$RUNNER_TEMP/build-env"
+          "$RUNNER_TEMP/build-env/bin/python" -m pip install -r source/requirements-release.txt
+
+      - name: Fetch the checksum file this run wrote
+        if: env.REHEARSAL == 'true'
+        uses: actions/download-artifact@v8
+        with:
+          name: release-extras
+          path: extras
+
+      - name: Rebuild and compare with this run's files
+        if: env.REHEARSAL == 'true'
+        working-directory: source
+        run: |
+          "$RUNNER_TEMP/build-env/bin/python" scripts/build_release.py --outdir "$RUNNER_TEMP/rebuilt" \
+            --check "$GITHUB_WORKSPACE/extras/phonometry-$VERSION.sha256"
+
+      - name: Rebuild and compare with the files on PyPI
+        if: env.REHEARSAL != 'true'
+        working-directory: source
+        run: |
+          "$RUNNER_TEMP/build-env/bin/python" scripts/build_release.py --outdir "$RUNNER_TEMP/rebuilt" \
+            --check-pypi
 
   confirm:
     name: Install from PyPI (${{ matrix.os }}, Python ${{ matrix.python-version }})

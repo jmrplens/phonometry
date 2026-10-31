@@ -4,6 +4,12 @@
 # a rehearsal instead of a release picking up whatever came out that morning.
 #
 # - build: the sdist, then the wheel from the sdist.
+# - setuptools: the build back end itself. scripts/build_release.py builds
+#   with --no-isolation, so the release, a rehearsal and anyone rebuilding a
+#   release from its tag (SECURITY.md) all use this one version rather than
+#   whatever setuptools is newest on the day, and get the same bytes.
+#   pyproject.toml keeps the measured floor, so a distribution packager is not
+#   bound to this pin.
 # - twine: `twine check --strict`, the long description PyPI will render.
 # - check-wheel-contents: a wheel with stray or duplicated files.
 # - cyclonedx-bom: the SBOM of the environment `pip install phonometry` makes.
@@ -11,6 +17,7 @@
 # The upload itself is pypa/gh-action-pypi-publish, not twine: it holds the
 # trusted-publishing exchange and writes the PEP 740 attestations.
 build==1.6.1
+setuptools==84.2.1
 twine==7.0.0
 check-wheel-contents==0.6.3
 cyclonedx-bom==7.5.0

@@ -140,11 +140,15 @@ jobs:
       uses: actions/setup-python@v7
       with:
         python-version: "3.13"
+    # With the setuptools requirements-release.txt pins, used in place
+    # (--no-isolation), as publish-stub.yml builds the stub it uploads: a
+    # Dependabot bump of that pin, or of build, that breaks the build of the
+    # stub fails here rather than the day it is published.
     - name: Build the stub and check its long description
       run: |
-        python -m pip install --upgrade pip build twine
-        python -m build stub/
-        twine check stub/dist/*
+        python -m pip install -r requirements-release.txt
+        python -m build --no-isolation stub/
+        python -m twine check --strict stub/dist/*
     # The resolver reads the built metadata, not stub/pyproject.toml, so the
     # cap that keeps `pip install -U PyOctaveBand` on the line whose API the
     # shim re-exports is asserted where it will actually be enforced. The
@@ -152,6 +156,94 @@ jobs:
     # LICENSE text the wheel and the sdist carry.
     - name: Fail if the built stub does not cap phonometry below the next major or carry its licence
       run: python scripts/check_stub_metadata.py
+
+  # The release builds the files it publishes with scripts/build_release.py,
+  # twice, and after publishing rebuilds the tag on macOS and compares the
+  # files with PyPI's (release.yml). Nothing ran that build before a release
+  # depended on it, so a Dependabot bump of setuptools or build in
+  # requirements-release.txt that broke the build without isolation, or let
+  # the machine into the files, and a new file setuptools packs that
+  # .gitattributes does not pin to LF, would have shown for the first time
+  # in a rehearsal or in the release itself. This job builds the commit as
+  # the release does, twice, holds the second build to the checksum file of
+  # the first and checks the files against git; the next one rebuilds it on
+  # macOS and holds that build to the same checksum file, so a difference
+  # between the two operating systems shows here and not after publishing.
+  # The checksum file is written under the runner's temporary directory: the
+  # build refuses a checkout holding a file its commit does not.
+  release-build:
+    name: The release build gives the same bytes twice
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+    - uses: actions/checkout@v7
+      with:
+        persist-credentials: false
+    - name: Set up Python 3.13
+      uses: actions/setup-python@v7
+      with:
+        python-version: "3.13"
+    - name: Install the release tooling
+      run: python -m pip install -r requirements-release.txt
+    - name: Build the sdist and the wheel
+      run: python scripts/build_release.py --outdir dist
+    - name: Write the checksum file
+      run: |
+        VERSION=$(tr -d ' \n' < VERSION)
+        mkdir "$RUNNER_TEMP/extras"
+        (cd dist && sha256sum -- *) > "$RUNNER_TEMP/extras/phonometry-$VERSION.sha256"
+        cat "$RUNNER_TEMP/extras/phonometry-$VERSION.sha256"
+    - name: Build both again and compare them with the checksum file
+      run: |
+        VERSION=$(tr -d ' \n' < VERSION)
+        python scripts/build_release.py --outdir "$RUNNER_TEMP/rebuild" --check "$RUNNER_TEMP/extras/phonometry-$VERSION.sha256"
+    - name: Check the metadata, the long description and the contents
+      run: |
+        VERSION=$(tr -d ' \n' < VERSION)
+        python -m twine check --strict dist/*
+        check-wheel-contents dist/*.whl
+        python scripts/check_release_artifacts.py dist --version "$VERSION"
+    - uses: actions/upload-artifact@v7
+      with:
+        name: release-checksums
+        path: ${{ runner.temp }}/extras/
+        if-no-files-found: error
+        retention-days: 7
+
+  release-rebuild-macos:
+    name: The release build gives the same bytes on macOS
+    needs: release-build
+    runs-on: macos-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+    - uses: actions/checkout@v7
+      with:
+        persist-credentials: false
+    # The Python of the release build: the deflate stream in both files comes
+    # from the zlib Python is linked against.
+    - name: Set up Python 3.13
+      uses: actions/setup-python@v7
+      with:
+        python-version: "3.13"
+    # In a virtual environment of its own, as SECURITY.md has anyone rebuild
+    # a release and as the release's own rebuild does.
+    - name: Install the release tooling
+      run: |
+        python -m venv "$RUNNER_TEMP/build-env"
+        "$RUNNER_TEMP/build-env/bin/python" -m pip install -r requirements-release.txt
+    - uses: actions/download-artifact@v8
+      with:
+        name: release-checksums
+        path: ${{ runner.temp }}/extras
+    - name: Rebuild and compare with the build on Linux
+      run: |
+        VERSION=$(tr -d ' \n' < VERSION)
+        "$RUNNER_TEMP/build-env/bin/python" scripts/build_release.py --outdir "$RUNNER_TEMP/rebuilt" \
+          --check "$RUNNER_TEMP/extras/phonometry-$VERSION.sha256"
 
   # Fast gate (runtime deps only, no pytest): the committed
   # docs/conformance.json, the docs/CONFORMANCE.md rendered from it, and every
@@ -1863,8 +1955,12 @@ jobs:
       uses: actions/setup-python@v7
       with:
         python-version: "3.13"
+    # The wheel the release would publish, built as the release builds it,
+    # with the setuptools requirements-release.txt pins.
     - name: Build the wheel
-      run: python -m pip wheel --no-deps --wheel-dir dist .
+      run: |
+        python -m pip install -r requirements-release.txt
+        python scripts/build_release.py --outdir dist
     - uses: actions/setup-node@v7
       with:
         node-version: 24

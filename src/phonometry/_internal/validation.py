@@ -9,7 +9,7 @@ through these helpers; existing modules migrate as they are touched.
 from __future__ import annotations
 
 import math
-from collections.abc import Iterable, Mapping, Set
+from collections.abc import Iterable, Mapping, Sequence, Set
 from typing import TYPE_CHECKING, Any, TypeGuard, cast
 
 import numpy as np
@@ -17,8 +17,6 @@ import numpy as np
 from .frozen import given_repr, given_type, owned_members
 
 if TYPE_CHECKING:
-    from collections.abc import Sequence
-
     from numpy.typing import ArrayLike, NDArray
 
     from .types import BandFraction, ReportEngine
@@ -86,11 +84,14 @@ def holds_text(value: object) -> bool:
     """True when *value* is text, or an array that holds text.
 
     A ``str`` or ``bytes``, a numpy array of a string dtype, or an object
-    array with a ``str`` or ``bytes`` element. Text is the wrong type where a
-    number belongs, whatever it reads as: :func:`float` and ``np.asarray(...,
-    dtype=float)`` parse it, which is what they are for, but a guard is not a
-    parser, and ``math.sqrt("4")`` and ``np.sqrt("4")`` refuse it with
-    :class:`TypeError` as a numerical function does.
+    array with a ``str``, ``bytes`` or ``bytearray`` element. Text is the
+    wrong type where a number belongs, whatever it reads as: :func:`float`
+    and ``np.asarray(..., dtype=float)`` parse it, which is what they are
+    for, but a guard is not a parser, and ``math.sqrt("4")`` and
+    ``np.sqrt("4")`` refuse it with :class:`TypeError` as a numerical
+    function does. An element of an object array is converted by
+    :func:`float`, which parses a ``bytearray`` as it parses a ``bytes``
+    (``float(bytearray(b"94"))`` is ``94.0``), so there it is text too.
 
     :param value: The value to test, of any type.
     :return: Whether *value* is or holds text.
@@ -102,7 +103,9 @@ def holds_text(value: object) -> bool:
     kind = value.dtype.kind
     if kind in "SU":
         return True
-    return kind == "O" and any(isinstance(item, (str, bytes)) for item in value.flat)
+    return kind == "O" and any(
+        isinstance(item, str | bytes | bytearray) for item in value.flat
+    )
 
 
 def refuse_text(value: object, msg: str) -> None:
@@ -184,6 +187,28 @@ def refuse_complex(value: object, msg: str) -> None:
         raise TypeError(msg)
 
 
+def _holds_a_bytearray(value: object) -> bool:
+    """Whether *value* is a ``bytearray``, or holds one at any depth.
+
+    Inside a sequence (a tuple, a list, a deque) or an array of objects, to
+    any depth. :func:`refuse_text` cannot see one there: it reads a
+    sequence as ``np.asarray(value, dtype=object)`` does, and numpy reads a
+    ``bytearray`` inside a sequence as a row of the codes of its
+    characters, numbers, so that ``[bytearray(b"12")]`` is
+    ``[[49, 50]]``. A ``str`` and a ``bytes`` are texts, not sequences of
+    members, and are passed over here.
+    """
+    if isinstance(value, bytearray):
+        return True
+    if isinstance(value, np.ndarray):
+        return value.dtype == object and any(
+            _holds_a_bytearray(member) for member in value.flat
+        )
+    if isinstance(value, Sequence) and not isinstance(value, str | bytes | memoryview):
+        return any(_holds_a_bytearray(member) for member in value)
+    return False
+
+
 def refuse_text_beside_choice(
     value: object, name: str, options: tuple[str, ...]
 ) -> None:
@@ -192,21 +217,23 @@ def refuse_text_beside_choice(
     A parameter that takes one of a few words or numbers reads a ``str`` as
     the choice and anything else as the numbers. A ``bytes`` or a
     ``bytearray`` (``b"rigid"``), or a text inside a sequence or an array
-    (``["400"]``, ``np.array("400")``), is no ``str``, and so it reached the
-    conversion of the numbers, which parses it (``np.asarray(["400"],
-    dtype=complex)`` is ``400+0j``), reads a ``bytearray`` as the codes of
-    its characters, or fails with an error that names no parameter. It is
-    the wrong type whatever it reads as, so it is refused before the numbers
-    are read; a ``str`` is the choice, and is checked as one by the caller.
+    (``["400"]``, ``np.array("400")``, ``[bytearray(b"400")]``), is no
+    ``str``, and so it reached the conversion of the numbers, which parses
+    it (``np.asarray(["400"], dtype=complex)`` is ``400+0j``), reads a
+    ``bytearray`` as the codes of its characters, or fails with an error
+    that names no parameter. It is the wrong type whatever it reads as, so
+    it is refused before the numbers are read; a ``str`` is the choice, and
+    is checked as one by the caller.
 
     :param value: The caller's value, one that is not a ``str``.
     :param name: The parameter's name, for the message.
     :param options: The words the parameter offers.
     :raises TypeError: if *value* is a ``bytes`` or a ``bytearray``, or a
-        sequence or an array that holds a text.
+        sequence or an array that holds a text, a ``bytearray`` at any
+        depth included.
     """
     msg = f"'{name}' must be one of {options} as a str, or numbers, not text."
-    if isinstance(value, bytearray):
+    if _holds_a_bytearray(value):
         raise TypeError(msg)
     refuse_text(value, msg)
 

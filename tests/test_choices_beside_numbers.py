@@ -526,14 +526,28 @@ CALLS: dict[tuple[str, str, str], tuple[Callable[[object], object], str]] = {
     ),
 }
 
+
+def _bytearrays_in_objects() -> np.ndarray:
+    """An array of objects that holds two ``bytearray``, as given, not spread over rows."""
+    held = np.empty(2, dtype=object)
+    held[0] = bytearray(b"400")
+    held[1] = bytearray(b"400")
+    return held
+
+
 #: What a caller writes where a choice's numbers go that is no number: a
 #: text in every form but a ``str`` (which is the choice), ``None`` and an
-#: object. ``None`` is passed over where the annotation offers it.
+#: object. ``None`` is passed over where the annotation offers it. A
+#: ``bytearray`` inside a sequence is a row of the codes of its characters
+#: to numpy, and :func:`float` parses one inside an array of objects.
 PROBES: dict[str, object] = {
     "bytes": b"1",
     "numpy-bytes": np.bytes_(b"1"),
     "bytearray": bytearray(b"1"),
     "bytes-in-a-list": [b"1"],
+    "bytearray-in-a-list": [bytearray(b"1")],
+    "bytearrays-in-a-list": [bytearray(b"400"), bytearray(b"400")],
+    "bytearrays-in-an-array-of-objects": _bytearrays_in_objects(),
     "text-in-a-list": ["1"],
     "texts-in-a-list": ["400", "400"],
     "array-of-text": np.array(["1"]),

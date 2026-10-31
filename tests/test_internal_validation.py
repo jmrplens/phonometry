@@ -22,6 +22,7 @@ refused according to a coincidence between its bands.
 from __future__ import annotations
 
 import warnings
+from collections import deque
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
@@ -35,6 +36,7 @@ from phonometry._internal.validation import (
     arrays_of,
     check_engine,
     floats_of,
+    holds_text,
     indices_of,
     is_integer,
     pair_of_arrays,
@@ -360,6 +362,20 @@ def test_a_scalar_guard_refuses_a_complex_number(
         require_real(complex_number, "no complex here")
 
 
+def test_an_array_of_objects_that_holds_a_bytearray_holds_text() -> None:
+    """A ``bytearray`` element is parsed as a ``bytes`` one is, so it is text.
+
+    numpy converts an element of an array of objects with :func:`float`,
+    and ``float(bytearray(b"94"))`` is ``94.0``: the array guards read the
+    array as ``[94.0, 0.5]``.
+    """
+    objects = _objects(bytearray(b"94"), bytearray(b"0.5"))
+    assert holds_text(objects)
+    with pytest.raises(TypeError, match="'x' must be numbers, not text"):
+        require_finite_array(objects, "x")
+    assert not holds_text(_objects(94.0, 0.5))
+
+
 def test_an_array_of_objects_that_holds_a_complex_number_is_refused() -> None:
     """An object array is read item by item, and a NumPy complex item is refused.
 
@@ -540,19 +556,51 @@ def test_indices_are_integers_in_a_sequence_or_a_one_dimensional_integer_array()
             indices_of(bad, "rows")
 
 
+def _objects(*members: object) -> np.ndarray:
+    """An array of objects holding *members* as they are, none spread over a row."""
+    held = np.empty(len(members), dtype=object)
+    for index, member in enumerate(members):
+        held[index] = member
+    return held
+
+
 @pytest.mark.parametrize(
     "value",
-    [b"rigid", np.bytes_(b"rigid"), bytearray(b"rigid"), ["400"], np.array("400")],
+    [
+        b"rigid",
+        np.bytes_(b"rigid"),
+        bytearray(b"rigid"),
+        ["400"],
+        np.array("400"),
+        [bytearray(b"400")],
+        (400.0, bytearray(b"410")),
+        [[bytearray(b"4")], [bytearray(b"4")]],
+        deque([bytearray(b"400")]),
+        _objects(bytearray(b"400"), 410.0),
+        _objects([bytearray(b"400")]),
+    ],
     ids=[
         "bytes",
         "numpy-bytes",
         "bytearray",
         "text-in-a-list",
         "zero-dimensional-text",
+        "bytearray-in-a-list",
+        "bytearray-in-a-tuple",
+        "bytearray-nested",
+        "bytearray-in-a-deque",
+        "bytearray-in-an-array-of-objects",
+        "bytearray-in-a-list-in-an-array-of-objects",
     ],
 )
 def test_a_text_beside_a_choice_is_refused_naming_the_options(value: object) -> None:
-    """A text that is not a ``str`` is neither the choice nor its numbers."""
+    """A text that is not a ``str`` is neither the choice nor its numbers.
+
+    A ``bytearray`` inside a sequence was let through: numpy reads it as a
+    row of the codes of its characters, so ``[bytearray(b"400")]`` reached
+    the numbers as ``[[52, 48, 48]]``, and :func:`float` parses one inside
+    an array of objects as the number it spells.
+    """
     with pytest.raises(
         TypeError, match=r"'termination' must be one of \('rigid', 'free'\)"
     ):

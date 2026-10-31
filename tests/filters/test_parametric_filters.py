@@ -250,6 +250,14 @@ def test_time_weighting_refuses_a_starting_state_written_as_text(state: object) 
         filters.time_weighting(two_channels, 48000, initial_state=state)  # type: ignore[call-overload]
 
 
+def _objects(*members: object) -> np.ndarray:
+    """An array of objects holding *members* as they are, none spread over a row."""
+    held = np.empty(len(members), dtype=object)
+    for index, member in enumerate(members):
+        held[index] = member
+    return held
+
+
 @pytest.mark.parametrize(
     "state",
     [np.complex128(0.5 + 0.1j), [0.5 + 0.1j, 0.5], np.array(0.5 + 0j)],
@@ -260,6 +268,26 @@ def test_time_weighting_refuses_a_complex_starting_state(state: object) -> None:
     two_channels = np.ones((2, 10))
     with pytest.raises(TypeError, match="'initial_state' must be real, not complex"):
         filters.time_weighting(two_channels, 48000, initial_state=state)  # type: ignore[call-overload]
+
+
+@pytest.mark.parametrize(
+    "state",
+    [
+        [bytearray(b"12")],
+        _objects(bytearray(b"0.5"), bytearray(b"0.5")),
+    ],
+    ids=["bytearray-in-a-list", "bytearrays-in-an-array-of-objects"],
+)
+def test_time_weighting_refuses_a_starting_state_of_bytearrays(state: object) -> None:
+    """A ``bytearray`` among the numbers is a text, not the numbers numpy made of it.
+
+    ``[bytearray(b"12")]`` was read as the codes ``[[49, 50]]`` and started
+    each of the three pairs of channels from 49 and 50, and an array of
+    objects that holds ``bytearray(b"0.5")`` was parsed into 0.5.
+    """
+    three_pairs = np.ones((3, 2, 10))
+    with pytest.raises(TypeError, match=r"'initial_state' must be one of .* not text"):
+        filters.time_weighting(three_pairs, 48000, initial_state=state)  # type: ignore[call-overload]
 
 
 def test_time_weighting_names_a_ragged_starting_state() -> None:

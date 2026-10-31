@@ -35,6 +35,7 @@ import dataclasses
 import functools
 import weakref
 from collections.abc import Buffer, Mapping
+from contextvars import ContextVar
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, cast, overload
 
@@ -288,12 +289,13 @@ def _owned(value: object, *, always: bool) -> object:
     characters, and a frozen record holds it immutable: as the ``bytes`` it
     spells, never the caller's ``bytearray``, which can still change, nor an
     array of ``uint8``. The record's checks refuse it as text where numbers
-    go, as they refuse a ``bytes``.
+    go, as they refuse a ``bytes``, and name it as the caller gave it
+    (:func:`given_type`).
     """
     if type(value) in _PLAIN_TYPES:
         return value
     if isinstance(value, bytearray):
-        return bytes(value)
+        return _spelt(value)
     if isinstance(value, np.ndarray):
         return _owned_array(value, always=always)
     if isinstance(value, tuple | list):
@@ -303,6 +305,75 @@ def _owned(value: object, *, always: bool) -> object:
     if _stands_for_an_array(value):
         return _owned_array(np.asarray(value), always=True)
     return value
+
+
+#: The ``bytes`` a record being built holds for each ``bytearray`` its caller
+#: gave, keyed by identity, while the record's own checks run, and those of
+#: the records being built around it: what :func:`given_type` reads. Each
+#: one is held here too, so that no other object takes its identity while
+#: the checks run.
+_SPELT: ContextVar[dict[int, bytes] | None] = ContextVar(
+    "phonometry_spelt_bytearrays", default=None
+)
+
+
+def _spelt(value: bytearray) -> bytes:
+    """The ``bytes`` *value* spells, known as a caller's ``bytearray`` to the checks."""
+    held = bytes(value)
+    spelt = _SPELT.get()
+    if spelt is not None:
+        spelt[id(held)] = held
+    return held
+
+
+def _held_for_a_bytearray(value: object) -> bool:
+    """Whether *value* is the ``bytes`` a record holds for a caller's ``bytearray``."""
+    spelt = _SPELT.get()
+    return spelt is not None and spelt.get(id(value)) is value
+
+
+def given_type(value: object) -> str:
+    """The name of the type *value* was given as, for a refusal to name.
+
+    A record holds a ``bytearray`` it is given as the ``bytes`` it spells
+    before its own checks run, so that they refuse it as the text it is
+    and the record never keeps the caller's ``bytearray``, which can still
+    change. The checks read a ``bytes``, then, and a refusal that named its
+    type would say the caller gave a ``bytes``: while the checks run, this
+    names it ``bytearray``, as the caller wrote it. Anything else, and a
+    ``bytes`` the caller gave, is named by its own type. An empty
+    ``bytearray`` is held as the one empty ``bytes`` Python keeps, so while
+    a record that was given one runs its checks, an empty ``bytes`` it was
+    given too is named ``bytearray`` as well.
+
+    :param value: A value a check refuses.
+    :return: The name of its type as the caller gave it.
+    """
+    if _held_for_a_bytearray(value):
+        return "bytearray"
+    return type(value).__name__
+
+
+def given_repr(value: object) -> str:
+    """The ``repr`` of *value* as it was given, for a refusal to quote.
+
+    :func:`given_type` for a quotation: the ``bytes`` a record holds for a
+    caller's ``bytearray`` while its checks run is quoted as the
+    ``bytearray`` the caller wrote (``bytearray(b'1k')``), and so is one
+    among the members of a tuple or a list (``(bytearray(b'1k'), 400.0)``);
+    anything else is quoted as ``repr`` quotes it.
+
+    :param value: A value a check refuses.
+    :return: Its ``repr`` as the caller gave it.
+    """
+    if _held_for_a_bytearray(value):
+        return f"bytearray({value!r})"
+    if _SPELT.get() and type(value) in {tuple, list}:
+        members = [given_repr(member) for member in cast("Iterable[object]", value)]
+        if type(value) is list:
+            return f"[{', '.join(members)}]"
+        return f"({members[0]},)" if len(members) == 1 else f"({', '.join(members)})"
+    return repr(value)
 
 
 def _owned_array(value: np.ndarray, *, always: bool) -> np.ndarray:
@@ -401,19 +472,27 @@ def _take_ownership(
     read-only copy (or, handed over, sealed as it is), so the class
     validates and normalises the record's own arrays:
     ``np.asarray(self.levels)`` is that copy, and ``read_only`` on it
-    touches nobody else's array. After,
+    touches nobody else's array. A ``bytearray`` is held as the ``bytes``
+    it spells, which a refusal names as the caller gave it while the checks
+    run (:func:`given_type`). After,
     every field is looked at once more, and an array somebody can still
     write into, one the class built and stored without sealing it or one it
     took from elsewhere, is copied too.
     """
     init, every = _field_names(type(record))
-    for name in init:
-        value = getattr(record, name, _MISSING)
-        kept = _owned(value, always=True)
-        if kept is not value:
-            object.__setattr__(record, name, kept)
-    if hook is not None:
-        hook(record, *(_owned(arg, always=True) for arg in args))
+    # The bytes held for a caller's bytearray, known while the checks run.
+    outer = _SPELT.get()
+    spelt = _SPELT.set({} if outer is None else dict(outer))
+    try:
+        for name in init:
+            value = getattr(record, name, _MISSING)
+            kept = _owned(value, always=True)
+            if kept is not value:
+                object.__setattr__(record, name, kept)
+        if hook is not None:
+            hook(record, *(_owned(arg, always=True) for arg in args))
+    finally:
+        _SPELT.reset(spelt)
     for name in every:
         value = getattr(record, name, _MISSING)
         kept = _owned(value, always=False)

@@ -56,7 +56,7 @@ from typing import TYPE_CHECKING, Any, ClassVar, Literal
 import numpy as np
 
 from ..._internal.boundary import settled
-from ..._internal.frozen import OwnsArrays, read_only
+from ..._internal.frozen import OwnsArrays, given_repr, read_only
 from ..._internal.validation import (
     check_engine,
     require_choice,
@@ -385,7 +385,7 @@ class FloorCoveringImprovementResult(OwnsArrays):
                 msg = (
                     f"FloorCoveringImprovementResult: '{name}' must be an "
                     f"integer number of decibels (ISO 717-2 ratings are "
-                    f"rounded to whole dB) or None; got {value!r}."
+                    f"rounded to whole dB) or None; got {given_repr(value)}."
                 )
                 raise TypeError(msg)
         if self.delta_lw is None and self.ci_delta is not None:

@@ -472,6 +472,92 @@ def test_a_bytearray_is_held_as_the_bytes_it_spells() -> None:
         assert kept == spelt
 
 
+def _texts(value: object) -> Iterator[bytes]:
+    """Each ``bytes`` in *value*, or among its members or its mapping's values."""
+    if isinstance(value, bytes):
+        yield value
+    elif isinstance(value, tuple | list):
+        for member in value:
+            yield from _texts(member)
+    elif isinstance(value, Mapping):
+        for member in value.values():
+            yield from _texts(member)
+
+
+@dataclasses.dataclass(frozen=True)
+class _RefusesText(OwnsArrays):
+    first: object
+    second: object = None
+
+    def __post_init__(self) -> None:
+        # Refuses a text as a check of the library does, naming its type and
+        # quoting it.
+        named = [
+            f"{frozen.given_type(text)} {frozen.given_repr(text)}"
+            for text in _texts((self.first, self.second))
+        ]
+        if named:
+            raise TypeError(", ".join(named))
+
+
+@dataclasses.dataclass(frozen=True)
+class _HandsOn(OwnsArrays):
+    text: object
+
+    def __post_init__(self) -> None:
+        # Builds a record of its own from what it holds, as a factory does.
+        _RefusesText(self.text)
+
+
+@pytest.mark.parametrize(
+    ("first", "second", "refusal"),
+    [
+        (bytearray(b"ab"), None, "bytearray bytearray(b'ab')"),
+        (b"ab", None, "bytes b'ab'"),
+        ((bytearray(b"ab"), 1.0), None, "bytearray bytearray(b'ab')"),
+        ({"k": bytearray(b"ab")}, None, "bytearray bytearray(b'ab')"),
+        (bytearray(b"1"), None, "bytearray bytearray(b'1')"),
+        (bytearray(), None, "bytearray bytearray(b'')"),
+        (b"ab", bytearray(b"cd"), "bytes b'ab', bytearray bytearray(b'cd')"),
+    ],
+    ids=[
+        "bytearray",
+        "bytes",
+        "member",
+        "mapping-value",
+        "one-byte",
+        "empty",
+        "bytes-beside-a-bytearray",
+    ],
+)
+def test_a_refusal_names_a_bytearray_as_the_caller_gave_it(
+    first: object, second: object, refusal: str
+) -> None:
+    """The checks read the ``bytes`` a ``bytearray`` spells, and name it as the caller wrote it.
+
+    A refusal that named the type of what the checks read, or quoted it,
+    said the caller gave a ``bytes``; the record still holds no
+    ``bytearray``, and a ``bytes`` the caller gave is named as one.
+    """
+    with pytest.raises(TypeError) as refused:
+        _RefusesText(first, second)
+    assert str(refused.value) == refusal
+
+
+def test_a_record_built_by_the_checks_names_the_bytearray_too() -> None:
+    """A record a hook builds from what it holds names the caller's ``bytearray`` as well."""
+    with pytest.raises(TypeError, match=r"^bytearray bytearray\(b'ab'\)$"):
+        _HandsOn(bytearray(b"ab"))
+
+
+def test_the_bytes_a_record_holds_are_named_bytes_once_it_is_built() -> None:
+    """The caller's type is known while the checks run, and only then."""
+    record = _Plain(levels=_writeable([1.0]), label=bytearray(b"abc"))  # type: ignore[arg-type]
+    assert type(record.label) is bytes
+    assert frozen.given_type(record.label) == "bytes"
+    assert frozen.given_repr(record.label) == "b'abc'"
+
+
 def test_every_copy_is_c_ordered_whatever_it_was_made_from() -> None:
     """A broadcast row and a transposed grid come out C-ordered, values kept."""
     row = _writeable([1.0, 2.0, 3.0])

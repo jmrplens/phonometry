@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING, Any, TypeGuard, cast
 
 import numpy as np
 
-from .frozen import owned_members
+from .frozen import given_repr, given_type, owned_members
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -294,7 +294,7 @@ def _one_number(value: object, name: str) -> float:
     :raises ValueError: for a number too large for a float.
     """
     require_scalar(value, name)
-    return require_real(value, f"'{name}' must be a number, got {value!r}.")
+    return require_real(value, f"'{name}' must be a number, got {given_repr(value)}.")
 
 
 def require_positive(value: float, name: str) -> float:
@@ -450,7 +450,7 @@ def require_count(value: object, name: str, *, at_least: int | None = 1) -> int:
     if isinstance(value, bool) or not isinstance(
         value, (int, float, np.integer, np.floating)
     ):
-        msg = f"'{name}' must be a whole number, got {value!r}."
+        msg = f"'{name}' must be a whole number, got {given_repr(value)}."
         raise TypeError(msg)
     floor = -math.inf if at_least is None else at_least
     if isinstance(value, (int, np.integer)):
@@ -458,15 +458,13 @@ def require_count(value: object, name: str, *, at_least: int | None = 1) -> int:
         # would overflow before the bound could name it.
         whole = int(value)
         if whole < floor:
-            msg = (
-                f"'{name}' must be a whole number, at least {at_least}, got {value!r}."
-            )
+            msg = f"'{name}' must be a whole number, at least {at_least}, got {given_repr(value)}."
             raise ValueError(msg)
         return whole
     number = float(value)
     if not math.isfinite(number) or not number.is_integer() or number < floor:
         least = "" if at_least is None else f", at least {at_least}"
-        msg = f"'{name}' must be a whole number{least}, got {value!r}."
+        msg = f"'{name}' must be a whole number{least}, got {given_repr(value)}."
         raise ValueError(msg)
     return int(number)
 
@@ -493,10 +491,10 @@ def require_choice[T](value: object, name: str, options: tuple[T, ...]) -> T:
     if not isinstance(value, str) and all(
         isinstance(option, str) for option in options
     ):
-        msg = f"'{name}' must be one of {options}, a text; got {value!r}."
+        msg = f"'{name}' must be one of {options}, a text; got {given_repr(value)}."
         raise TypeError(msg)
     if value not in options:
-        msg = f"'{name}' must be one of {options}; got {value!r}."
+        msg = f"'{name}' must be one of {options}; got {given_repr(value)}."
         raise ValueError(msg)
     return value
 
@@ -547,7 +545,9 @@ def require_band_fraction(value: object, name: str) -> BandFraction:
         a float.
     :raises ValueError: for an integer other than 1 and 3.
     """
-    msg = f"'{name}' must be 1 (octave) or 3 (one-third octave); got {value!r}."
+    msg = (
+        f"'{name}' must be 1 (octave) or 3 (one-third octave); got {given_repr(value)}."
+    )
     if isinstance(value, bool) or not isinstance(value, int | np.integer):
         raise TypeError(msg)
     if int(value) not in _BAND_FRACTIONS:
@@ -571,11 +571,11 @@ def check_engine(engine: object) -> ReportEngine:
     :raises ValueError: for any text other than ``"reportlab"``.
     """
     if not isinstance(engine, str):
-        msg = f"'engine' must be 'reportlab', a text; got {engine!r}."
+        msg = f"'engine' must be 'reportlab', a text; got {given_repr(engine)}."
         raise TypeError(msg)
     if engine == "reportlab":
         return "reportlab"
-    msg = f"Unknown report engine {engine!r}; only 'reportlab' is supported."
+    msg = f"Unknown report engine {given_repr(engine)}; only 'reportlab' is supported."
     raise ValueError(msg)
 
 
@@ -870,7 +870,7 @@ def require_equal_counts(
     """
     if len(set(counts.values())) <= 1:
         return
-    listed = ", ".join(f"'{label}' ({n})" for label, n in counts.items())
+    listed = ", ".join(f"'{label}' ({given_repr(n)})" for label, n in counts.items())
     msg = f"{owner}: {listed} must each carry one value per {axis}."
     raise ValueError(msg)
 
@@ -1128,12 +1128,14 @@ def indices_of(value: object, name: str) -> tuple[int, ...]:
             raise TypeError(msg)
         return tuple(int(item) for item in value)
     if isinstance(value, str | bytes) or not isinstance(value, Iterable):
-        msg = f"'{name}' must be a sequence of integer indices, got {value!r}."
+        msg = (
+            f"'{name}' must be a sequence of integer indices, got {given_repr(value)}."
+        )
         raise TypeError(msg)
     items = tuple(value)
     for item in items:
         if not is_integer(item):
-            msg = f"'{name}' must hold integer indices, got {item!r}."
+            msg = f"'{name}' must hold integer indices, got {given_repr(item)}."
             raise TypeError(msg)
     return tuple(int(item) for item in items)
 
@@ -1215,7 +1217,7 @@ def _members_of(value: object, msg: str, *, owned: bool = False) -> Sequence[obj
     :raises TypeError: for a text in any form, a mapping, a set, or a value
         that is not a sequence at all.
     """
-    refusal = f"{msg}, not {type(value).__name__}."
+    refusal = f"{msg}, not {given_type(value)}."
     if holds_text(value) or isinstance(value, bytearray | Mapping | Set):
         raise TypeError(refusal)
     try:
@@ -1332,7 +1334,7 @@ def floats_of(
         msg += f", not {len(items)} of them."
         raise ValueError(msg)
     return tuple(
-        require_real(item, f"{msg}; one member is {type(item).__name__}.")
+        require_real(item, f"{msg}; one member is {given_type(item)}.")
         for item in items
     )
 

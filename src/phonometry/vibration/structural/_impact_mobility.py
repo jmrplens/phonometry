@@ -95,7 +95,7 @@ from typing import TYPE_CHECKING, Any, ClassVar, Literal, overload
 
 import numpy as np
 
-from ..._internal.frozen import OwnsArrays
+from ..._internal.frozen import OwnsArrays, given_repr
 from ..._internal.validation import (
     require_choice,
     require_count,
@@ -1649,7 +1649,8 @@ def _pair(value: object, name: str) -> tuple[float, float]:
     and a bare number with a TypeError, neither of which names the argument.
     """
     msg = (
-        f"'{name}' must be a pair of numbers (f_low, f_high), in hertz; got {value!r}."
+        f"'{name}' must be a pair of numbers (f_low, f_high), in hertz; got "
+        f"{given_repr(value)}."
     )
     if isinstance(value, (str, bytes, bytearray)) or not isinstance(value, Iterable):
         raise TypeError(msg)
@@ -2441,7 +2442,7 @@ def _exclusions(exclude_hz: object) -> list[tuple[float, float]]:
     """
     msg = (
         "'exclude_hz' must be a sequence of (f_low, f_high) pairs, such as "
-        f"[(40.0, 50.0)]; got {exclude_hz!r}."
+        f"[(40.0, 50.0)]; got {given_repr(exclude_hz)}."
     )
     if isinstance(exclude_hz, (str, bytes, bytearray)) or not isinstance(
         exclude_hz, Iterable

@@ -29,7 +29,7 @@ from typing import TYPE_CHECKING, Any, ClassVar, Literal
 import numpy as np
 
 from .._internal.boundary import settled
-from .._internal.frozen import OwnsArrays, read_only
+from .._internal.frozen import OwnsArrays, given_repr, read_only
 from .._internal.validation import (
     check_engine,
     require_choice,
@@ -521,7 +521,7 @@ class EPNLIntegration(OwnsArrays):
         limits = tuple(self.band_limits)
         msg = (
             "EPNLIntegration: 'band_limits' must be a pair of 0-based "
-            f"record indices (kF, kL); got {self.band_limits!r}."
+            f"record indices (kF, kL); got {given_repr(self.band_limits)}."
         )
         if not all(
             isinstance(k, (int, np.integer)) and not isinstance(k, bool) for k in limits
@@ -534,7 +534,7 @@ class EPNLIntegration(OwnsArrays):
         if not 0 <= kf <= kl:
             msg = (
                 "EPNLIntegration: 'band_limits' must satisfy 0 <= kF <= kL; "
-                f"got {self.band_limits!r}."
+                f"got {given_repr(self.band_limits)}."
             )
             raise ValueError(msg)
         object.__setattr__(self, "band_limits", (kf, kl))
@@ -754,7 +754,7 @@ class EPNLResult(OwnsArrays):
         records = int(np.size(self.times))
         msg = (
             "EPNLResult: 'band_limits' must be a pair of 0-based record "
-            f"indices (kF, kL); got {self.band_limits!r}."
+            f"indices (kF, kL); got {given_repr(self.band_limits)}."
         )
         if not all(
             isinstance(k, (int, np.integer)) and not isinstance(k, bool) for k in limits
@@ -767,7 +767,7 @@ class EPNLResult(OwnsArrays):
             msg = (
                 "EPNLResult: 'band_limits' must satisfy 0 <= kF <= kL < "
                 f"{records} (the record count of 'times'); got "
-                f"{self.band_limits!r}."
+                f"{given_repr(self.band_limits)}."
             )
             raise ValueError(msg)
         object.__setattr__(self, "band_limits", (kf, kl))

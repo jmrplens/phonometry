@@ -187,7 +187,7 @@ Each rule on a page has the same parts:
 | [X7](numerics.md#x7) | Read a whole-number parameter through `require_count`, never through `int()` | `tests/test_error_kinds.py::test_a_whole_number_goes_through_require_count` |
 | [X8](numerics.md#x8) | Refuse a 2-D signal in a single-channel analysis; never ravel it | `tests/test_multichannel_rejection.py`, review |
 | [X9](numerics.md#x9) | Say in every `zip()` whether its inputs must be the same length | `ruff B905` |
-| [X10](numerics.md#x10) | Keep your own read-only copy of every array a result or object holds | `scripts/check_array_aliasing.py`, `make array-aliasing`, `CI: Every result keeps its own copy of the arrays it was given`, `tests/test_owns_arrays.py` |
+| [X10](numerics.md#x10) | Keep your own read-only copy of every array a result or object holds | `scripts/check_array_aliasing.py`, `make array-aliasing`, `CI: Every result keeps its own copy of the arrays it was given`, `tests/test_owns_arrays.py`, `tests/test_bytearray_refusals.py` |
 | [X11](numerics.md#x11) | Hand a record its array as it is; never copy it first | `scripts/check_array_aliasing.py`, `make array-aliasing`, `CI: Every result keeps its own copy of the arrays it was given` |
 | [X12](numerics.md#x12) | Use `handed_over` only for a new array the factory built and returns at once | `scripts/check_array_aliasing.py`, `make array-aliasing`, `CI: Every result keeps its own copy of the arrays it was given` |
 | [X13](numerics.md#x13) | Take the caller's unit and convert inside, keeping the source's printed constants literal | `tests/test_package_architecture.py::test_clause_poles_are_not_migrated_to_the_physical_bound`, review |

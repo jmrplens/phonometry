@@ -69,7 +69,7 @@ from typing import TYPE_CHECKING, Any, ClassVar, Literal
 
 import numpy as np
 
-from .._internal.frozen import OwnsArrays
+from .._internal.frozen import OwnsArrays, given_repr
 from .._internal.validation import (
     check_engine,
     require_choice,
@@ -205,7 +205,7 @@ def _check_device(device: str) -> tuple[int, int]:
     if columns is None:
         msg = (
             "'device' must be 'probe', 'processor' or 'instrument' "
-            f"(IEC 61043 Table 2 columns), got {device!r}."
+            f"(IEC 61043 Table 2 columns), got {given_repr(device)}."
         )
         raise ValueError(msg)
     return columns

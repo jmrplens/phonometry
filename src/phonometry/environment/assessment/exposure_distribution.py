@@ -82,7 +82,7 @@ from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 
-from ..._internal.frozen import OwnsArrays, read_only
+from ..._internal.frozen import OwnsArrays, given_repr, read_only
 from ..._internal.types import as_float_if_reduced, as_float_or_array
 from ..._internal.validation import (
     _as_float64,
@@ -484,8 +484,8 @@ class SELDistribution(OwnsArrays):
         if np.shape(self.subclass_center_levels) != (count, self.n_subclasses):
             msg = (
                 "SELDistribution: 'subclass_center_levels' must have one row of "
-                f"'n_subclasses' ({self.n_subclasses}) centres per class; got "
-                f"{np.shape(self.subclass_center_levels)}."
+                f"'n_subclasses' ({given_repr(self.n_subclasses)}) centres per "
+                f"class; got {np.shape(self.subclass_center_levels)}."
             )
             raise ValueError(msg)
         if len(self.replicas) != count:

@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from .._internal.frozen import OwnsArrays, read_only
+from .._internal.frozen import OwnsArrays, given_repr, read_only
 from .._internal.validation import require_count, require_positive
 from ._warnings import FilterBankWarning
 
@@ -80,7 +80,7 @@ class FractionalOctaveBands(OwnsArrays):
         if isinstance(self.labels, (str, bytes, bytearray)):
             msg = (
                 "FractionalOctaveBands: 'labels' must hold one label per band, "
-                f"not a single string; got {self.labels!r}."
+                f"not a single string; got {given_repr(self.labels)}."
             )
             raise TypeError(msg)
         columns = {}

@@ -484,6 +484,27 @@ def test_edge_impedance_validation(
         FDTD2D(C0, 0.05, shape=(30, 30), edge_impedance=impedance)
 
 
+@pytest.mark.parametrize(
+    ("impedance", "given"),
+    [(bytearray(b"415"), "bytearray"), (b"415", "bytes")],
+    ids=["bytearray", "bytes"],
+)
+def test_a_boundary_names_the_text_it_refuses_as_the_caller_gave_it(
+    impedance: object, given: str
+) -> None:
+    """A boundary holds a ``bytearray`` as the ``bytes`` it spells and refuses it as text.
+
+    The refusal names the ``bytearray`` the caller gave, not the ``bytes``
+    the boundary's checks read.
+    """
+    with pytest.raises(
+        TypeError,
+        match=rf"impedance for side 'left' must be a real number \[Pa s/m\] or an "
+        rf"array of them; got {given}$",
+    ):
+        FDTDBoundaries(sides={"left": impedance})  # type: ignore[dict-item]
+
+
 def test_side_cannot_be_absorbing_and_impedance() -> None:
     with pytest.raises(
         ValueError,

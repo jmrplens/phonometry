@@ -88,7 +88,7 @@ import numpy as np
 
 from ..._internal.boundary import settled
 from ..._internal.display import RichDisplay
-from ..._internal.frozen import OwnsArrays
+from ..._internal.frozen import OwnsArrays, given_repr
 from ..._internal.validation import require_choice, require_positive, require_scalar
 from .exposure import (
     WeightingName,
@@ -776,8 +776,8 @@ class SignalBurstVerification(OwnsArrays):
             if cells is None or any(q not in cells for q in self.quantities):
                 msg = (
                     "SignalBurstVerification: Tables 7 to 9 print no cell for "
-                    f"{self.application!r}, {self.weighting!r}, {n_cycles} cycles "
-                    f"and {self.quantities}."
+                    f"{given_repr(self.application)}, {given_repr(self.weighting)}, "
+                    f"{given_repr(n_cycles)} cycles and {given_repr(self.quantities)}."
                 )
                 raise ValueError(msg)
         shape = (len(self.cycle_counts), len(self.quantities))

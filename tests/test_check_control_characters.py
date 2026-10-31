@@ -63,6 +63,12 @@ def test_a_carriage_return_is_in_the_class(tmp_path: pathlib.Path) -> None:
     assert ccc.offences(path) == [(1, 6, "carriage return")]
 
 
+def test_a_bidirectional_control_is_in_the_class(tmp_path: pathlib.Path) -> None:
+    """An override reorders what a reviewer reads; a test writes its escape."""
+    path = _write(tmp_path, 'name = "ff\u202empeg"\nescaped = "ff\\u202empeg"\n')
+    assert ccc.offences(path) == [(1, 11, "right-to-left override")]
+
+
 def test_every_offence_in_a_file_is_reported(tmp_path: pathlib.Path) -> None:
     """Not just the first: a paste can carry more than one."""
     path = _write(tmp_path, "\x0ca\nb\x00\n")

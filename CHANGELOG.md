@@ -3762,9 +3762,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   any other object as given and read `["20000"]` as 20000 Pa s/m², and
   `terrain_screening_adjustment` answered a `bytes` with the `ValueError` of
   `float()` and `None` as a resistivity that is not finite. Each refuses a
-  `bytes`, a `bytearray`, and a sequence or an array that holds a text, with
-  `TypeError` naming the parameter and its options, whatever the text reads
-  as; `None` where it is no option and an object that is no number are a
+  `bytes`, a `bytearray`, and a sequence or an array that holds a text, a
+  `bytearray` at any depth included, which numpy read as the codes of its
+  characters (`[bytearray(b"12")]` as `[[49, 50]]`), with `TypeError` naming
+  the parameter and its options, whatever the text reads as; `None` where it
+  is no option and an object that is no number are a
   `TypeError` naming the parameter as well, and a `target` of three arrays,
   whose third was left unread, is a `ValueError`. A misspelt vocal effort
   names `speech_spectrum` rather than a `vocal_effort` the function does not
@@ -3794,11 +3796,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   record holds a `bytearray` it is given as the `bytes` it spells, a text
   as a `bytes` is, so a later write to the caller's `bytearray` does not
   reach it and a field of numbers refuses it as text, and its refusal names
-  and quotes the `bytearray` the caller gave. A
-  complex `initial_state`, read as its real part with no more than a
-  `ComplexWarning`, is a `TypeError`, and a ragged one is a `ValueError`, as
-  a ragged `termination` is. A `str`, a number and an array of numbers work
-  as before. `tests/test_choices_beside_numbers.py` finds every choice beside
+  and quotes the `bytearray` the caller gave, inside a mapping, a named
+  tuple or an array of objects as inside a tuple or a list. An array of
+  objects that holds a `bytearray` where numbers belong is refused as text
+  by the shared guards, where `float()` parsed it (`bytearray(b"94")` as
+  94.0). A complex `initial_state`, read as its real part with no more than
+  a `ComplexWarning`, is a `TypeError`, an array of objects that holds a
+  NumPy complex number included, and a ragged one is a `ValueError`, as a
+  ragged `termination` is. The scale values and the correlated variables
+  of the ISO/TS 12913 soundscape functions refuse such an array too, and
+  `environment.method_a_scale_values` any complex position, each of which
+  was read as its real part, while
+  `electroacoustics.neck_loop_characteristics` reads it as the magnitudes of
+  a complex impedance, as it reads a complex array, where it refused it. A
+  `str`, a number and an array of numbers work as before. `tests/test_choices_beside_numbers.py` finds every choice beside
   numbers from its annotation and calls each with a text in every other
   form, `None` and an object, and reads every body for a `str` taken as a
   choice that no annotation states; rule A59 of the contributor guide

@@ -154,6 +154,7 @@ are 5 and the value is `6 - position`.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a part other than 1 to 4 or a position that is not a whole number from 1 to 5. |
+| TypeError | if `positions` holds a complex value, a NumPy one or one held in an array of objects included. |
 
 ## METHOD_A_SCALES
 
@@ -188,6 +189,7 @@ Median and range of the Method A scale values per site and item
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a part other than 1 to 4, a scale value that is not a whole number from 1 to 5, or sites that do not match the responses. |
+| TypeError | if `scale_values` holds a complex value, a NumPy one held in an array of objects included. |
 
 ## METHOD_B_MAX_SOURCES
 
@@ -308,7 +310,7 @@ the sample standard deviation and $\gamma$ the confidence level,
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a value outside 1 to 5, a confidence level not strictly between 0 and 1, or sites that do not match the responses. |
-| TypeError | if `confidence` is not a single number. |
+| TypeError | if `confidence` is not a single number, or `scale_values` holds a complex value. |
 
 ## MethodASummary
 
@@ -473,7 +475,7 @@ exact for bivariate normal data.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for variables of different lengths, fewer than three pairs, a non-finite value or a constant variable. |
-| TypeError | if `alternative` is not a text. |
+| TypeError | if `alternative` is not a text, or `x` or `y` holds a complex value, a NumPy one held in an array of objects included. |
 
 ## PERCEIVED_AFFECTIVE_QUALITY_ATTRIBUTES
 
@@ -528,7 +530,7 @@ attributes they name are part 2, and that is what they are applied to
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a mapping that does not name the eight attributes, a value outside 1 to 5, or sites that do not match the respondents. |
-| TypeError | if `central_tendency` or a key of `scale_values` is not a text. |
+| TypeError | if `central_tendency` or a key of `scale_values` is not a text, or `scale_values` holds a complex value. |
 
 ## PLEASANTNESS_EVENTFULNESS_RANGE
 
@@ -958,4 +960,4 @@ reported without naming a test.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for variables of different lengths, fewer than three pairs, a non-finite value or a constant variable. |
-| TypeError | if `alternative` is not a text. |
+| TypeError | if `alternative` is not a text, or `x` or `y` holds a complex value, a NumPy one held in an array of objects included. |

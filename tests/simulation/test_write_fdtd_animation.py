@@ -657,11 +657,12 @@ def test_a_raw_encoder_this_ffmpeg_lacks_names_the_ffmpeg_by_its_escapes(
             path=path, version="ffmpeg version 7.1\x1b[2J", encoders=frozenset()
         ),
     )
+    run = _run()
     video = VideoOptions(ffmpeg_encoder="libnothing")
     with pytest.raises(
         io.VideoEncoderError, match="has no encoder 'libnothing'"
     ) as caught:
-        write_fdtd_animation(tmp_path / "r.webm", _run(), frame=_SMALL, video=video)
+        write_fdtd_animation(tmp_path / "r.webm", run, frame=_SMALL, video=video)
     message = str(caught.value)
     assert "\u202e" not in message
     assert "\x1b" not in message

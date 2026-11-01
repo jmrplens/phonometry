@@ -1112,7 +1112,9 @@ def write_fdtd_animation(
         :class:`Compute`, or ``path`` neither a text nor a path; or, when
         ``compute`` names a host, a part of the run that cannot travel to a
         node: a waveform other than the ``value`` of a
-        :class:`GaussianPulse`, :class:`CWSource` or :class:`SignalSource`.
+        :class:`GaussianPulse`, :class:`CWSource` or :class:`SignalSource`;
+        or, as a run written here steps, the waveform of a
+        :class:`PlaneWaveSource` that returns a complex number or a text.
     :raises ValueError: If the run records no snapshots
         (``run.recording`` is ``None``, or its ``snapshot_every`` is), the
         frame is narrower than the title of the run's last frame needs (a
@@ -1138,22 +1140,22 @@ def write_fdtd_animation(
         video as they arrive (it is full, say), or the finished video cannot
         take the place of ``path`` (the message says where it was left).
     :raises ComputeImportError: When the device's library is not installed
-        or does not import.
+        or does not import, unless ``fallback=True``.
     :raises ComputeDeviceError: When the device is not present or not
-        usable; with ``fallback=True`` the run warns once with
-        :class:`ComputeFallbackWarning` and steps on NumPy instead.
+        usable, unless ``fallback=True``.
     :raises KeyError: For a ``host`` the hosts file does not name.
     :raises ComputeRemoteError: For a failure of the connection or of the
         node (one without matplotlib or the font every frame is drawn in,
         without ffmpeg, without an encoder that writes this video or the raw
         ``ffmpeg_encoder``, or whose ffmpeg refuses the ``ffmpeg_options``), or
         video bytes back that are more than the frames can take, too few to
-        be a video, or not the container ``path`` names; with
-        ``fallback=True`` the run warns once with
-        :class:`ComputeFallbackWarning` and writes the video here on NumPy
-        instead.
+        be a video, or not the container ``path`` names, unless
+        ``fallback=True``.
     :raises ImportError: If matplotlib is not installed, for a video written
         here.
+    :warns ComputeFallbackWarning: Once, with ``fallback=True``, for any of
+        the three failures above; the run then steps on NumPy and writes the
+        video here.
     """
     call = _checked_call(
         path,
@@ -1328,7 +1330,8 @@ def write_elastic_fdtd_animation(
         waveform is a callable other than the ``value`` of a
         :class:`~phonometry.simulation.GaussianPulse`,
         :class:`~phonometry.simulation.CWSource` or
-        :class:`~phonometry.simulation.SignalSource`.
+        :class:`~phonometry.simulation.SignalSource`; or, as a run written
+        here steps, a waveform that returns a complex number or a text.
     :raises ValueError: If the run records no snapshots
         (``run.recording`` is ``None``, or its ``snapshot_every`` is), the
         frame is narrower than the title of the run's last frame needs (a
@@ -1354,22 +1357,22 @@ def write_elastic_fdtd_animation(
         video as they arrive (it is full, say), or the finished video cannot
         take the place of ``path`` (the message says where it was left).
     :raises ComputeImportError: When the device's library is not installed
-        or does not import.
+        or does not import, unless ``fallback=True``.
     :raises ComputeDeviceError: When the device is not present or not
-        usable; with ``fallback=True`` the run warns once with
-        :class:`ComputeFallbackWarning` and steps on NumPy instead.
+        usable, unless ``fallback=True``.
     :raises KeyError: For a ``host`` the hosts file does not name.
     :raises ComputeRemoteError: For a failure of the connection or of the
         node (one without matplotlib or the font every frame is drawn in,
         without ffmpeg, without an encoder that writes this video or the raw
         ``ffmpeg_encoder``, or whose ffmpeg refuses the ``ffmpeg_options``), or
         video bytes back that are more than the frames can take, too few to
-        be a video, or not the container ``path`` names; with
-        ``fallback=True`` the run warns once with
-        :class:`ComputeFallbackWarning` and writes the video here on NumPy
-        instead.
+        be a video, or not the container ``path`` names, unless
+        ``fallback=True``.
     :raises ImportError: If matplotlib is not installed, for a video written
         here.
+    :warns ComputeFallbackWarning: Once, with ``fallback=True``, for any of
+        the three failures above; the run then steps on NumPy and writes the
+        video here.
     """
     call = _checked_call(
         path,

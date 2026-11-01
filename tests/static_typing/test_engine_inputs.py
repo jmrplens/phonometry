@@ -114,6 +114,37 @@ def test_an_engine_takes_its_medium_by_name_only() -> None:
         assert kinds == {inspect.Parameter.KEYWORD_ONLY}, built.__name__
 
 
+def test_from_regions_takes_the_options_of_the_engine_by_name() -> None:
+    """``from_regions`` names every option it hands the engine, for mypy too.
+
+    It forwarded ``**kwargs: Any``, so a misspelt option passed the type
+    check and failed only when the engine was built, in a message that named
+    ``ElasticFDTD2D.__init__`` and not the call the caller wrote. It takes the
+    engine's own options now, keyword-only, with the engine's annotations and
+    defaults.
+    """
+    with pytest.raises(
+        TypeError,
+        match=r"from_regions\(\) got an unexpected keyword argument 'absorbing_layer'",
+    ):
+        ElasticFDTD2D.from_regions(
+            (_NY, _NX),
+            0.01,
+            background=(4000.0, 2300.0, 2700.0),
+            absorbing_layer=4,  # type: ignore[call-arg]
+        )
+    engine = inspect.signature(ElasticFDTD2D).parameters
+    sugar = inspect.signature(ElasticFDTD2D.from_regions).parameters
+    painted = {"c_p", "c_s", "rho", "dx", "shape"}
+    options = [name for name in engine if name not in painted]
+    assert [name for name in sugar if name in engine and name not in painted] == options
+    for name in options:
+        assert sugar[name].kind is inspect.Parameter.KEYWORD_ONLY, name
+        assert sugar[name].default == engine[name].default, name
+        assert sugar[name].annotation == engine[name].annotation, name
+    assert all(p.kind is not inspect.Parameter.VAR_KEYWORD for p in sugar.values())
+
+
 def test_a_float32_map_is_held_as_given() -> None:
     """A float32 map stays float32 in the run: ``Field2D`` admits any float dtype."""
     c: NDArray[np.float32] = np.full((_NY, _NX), 343.0, dtype=np.float32)

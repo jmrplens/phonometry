@@ -1728,6 +1728,90 @@ def test_a_docstring_lists_a_warning_under_warns() -> None:
     assert not found, "warnings documented as raised:\n  " + "\n  ".join(found)
 
 
+#: The start of a field of a docstring's field list: its kind and its name. A
+#: role that opens a line (``:class:`X```) is no field.
+_FIELD = re.compile(r"^:(?P<kind>\w+)(?:\s+(?P<name>[^:`]+))?:(?!`)")
+
+
+def raises_fields_naming_a_warning(source: str, where: str) -> list[str]:
+    """Each ``:raises`` field of *source*'s docstrings whose text names a warning.
+
+    A field runs from its ``:kind ...:`` line over the lines indented under
+    it, a line that opens with a role such as ``:class:`` among them, and
+    ends at a blank line or at the next field.
+
+    :param source: The text of a Python module.
+    :param where: How a finding names the module.
+    :return: ``<where>:<line> <exception> names <Warning>`` for each one.
+    """
+    found: list[str] = []
+    for node in ast.walk(ast.parse(source)):
+        if not isinstance(
+            node, ast.Module | ast.ClassDef | ast.FunctionDef | ast.AsyncFunctionDef
+        ):
+            continue
+        doc = ast.get_docstring(node, clean=False)
+        if not doc or not node.body:
+            continue
+        first = node.body[0].lineno
+        kind = name = ""
+        indent = 0
+        for offset, line in enumerate(doc.splitlines()):
+            text = line.strip()
+            depth = len(line) - len(line.lstrip())
+            field = _FIELD.match(text)
+            if field and (not kind or depth <= indent):
+                kind, name = field["kind"], (field["name"] or "").strip()
+                indent = depth
+                text = text[field.end() :]
+            elif not text:
+                kind = ""
+            if kind == "raises":
+                found.extend(
+                    f"{where}:{first + offset} {name} names {warning}"
+                    for warning in re.findall(r"\b(\w+Warning)\b", text)
+                )
+    return found
+
+
+def test_a_raises_field_never_names_a_warning() -> None:
+    """A warning a call may emit has its own ``:warns`` field, never a clause of a ``:raises`` one.
+
+    The FDTD engines, the simulation functions, the video writers and the
+    backend loader said under ``:raises ComputeDeviceError:`` that with
+    ``fallback=True`` the run warns with ``ComputeFallbackWarning``; the API
+    reference then listed the warning in no table of warnings, where a
+    reader looking for what to filter looks.
+    """
+    found = [
+        finding
+        for path in sorted(SRC.rglob("*.py"))
+        if "Warning" in (text := path.read_text(encoding="utf-8"))
+        for finding in raises_fields_naming_a_warning(
+            text, path.relative_to(SRC).as_posix()
+        )
+    ]
+    assert not found, "warnings named under :raises:\n  " + "\n  ".join(found)
+
+
+def test_the_raises_field_reader_ends_a_field_where_the_field_list_does() -> None:
+    """A warning named in prose after the field list, or under ``:warns``, is no finding."""
+    source = (
+        "def f():\n"
+        '    """Lead.\n'
+        "\n"
+        "    :raises ValueError: for a bad level; a quiet one warns with\n"
+        "        :class:`LevelWarning` instead.\n"
+        "    :warns OtherWarning: when it is late.\n"
+        "\n"
+        "    Outside its range it runs, and a :class:`RangeWarning` says so.\n"
+        '    """\n'
+    )
+    assert raises_fields_naming_a_warning(source, "m.py") == [
+        "m.py:5 ValueError names LevelWarning"
+    ]
+
+
 #: Logger calls louder than INFO: an advisory is a warning (A52), and a
 #: logger at WARNING or above prints to standard error by default.
 _LOUD = frozenset({"warning", "warn", "error", "critical", "exception", "fatal", "log"})

@@ -344,7 +344,7 @@ def band_energy_mean(levels, *, fraction=3):
 <a id="d12"></a>
 ### D12. List a warning under `:warns`, never under `:raises`
 
-**Why.** `:raises UserWarning:` put `HumanVibrationWarning` in the exceptions table of the API reference, under its base class, where a reader looking for what to filter found a class that filters every advisory. A warning is emitted, not raised, and `:warns` gives it a table of its own, by name.
+**Why.** `:raises UserWarning:` put `HumanVibrationWarning` in the exceptions table of the API reference, under its base class, where a reader looking for what to filter found a class that filters every advisory. A warning is emitted, not raised, and `:warns` gives it a table of its own, by name. A warning named in the text of a `:raises` field is hidden the same way: the FDTD engines said under `:raises ComputeDeviceError:` that with `fallback=True` the run warns with `ComputeFallbackWarning`, and no table of warnings listed it. The exception's field says when it is not raised (`unless fallback=True`), and the warning has its own `:warns` field.
 
 **Do**
 
@@ -367,7 +367,7 @@ def room_criterion_rating(levels):
     """
 ```
 
-**Enforced by:** `tests/test_package_architecture.py::test_a_docstring_lists_a_warning_under_warns`
+**Enforced by:** `tests/test_package_architecture.py::test_a_docstring_lists_a_warning_under_warns`, `tests/test_package_architecture.py::test_a_raises_field_never_names_a_warning`
 
 <a id="d13"></a>
 ### D13. Cite a standard by clause, table or formula; a book also by PDF page and folio

@@ -552,7 +552,7 @@ def test_indices_are_integers_in_a_sequence_or_a_one_dimensional_integer_array()
     for bad in ([0.5], [1.0], [True], ["1"], [np.array(1)], [None]):
         with pytest.raises(TypeError, match="'rows' must hold integer indices"):
             indices_of(bad, "rows")
-    for bad in ("01", b"01", 3, None):
+    for bad in ("01", b"01", bytearray(b"\x00\x01"), 3, None):
         with pytest.raises(TypeError, match="'rows' must be a sequence of integer"):
             indices_of(bad, "rows")
     for bad in (np.array(1), np.array([[0, 1]]), np.array([1.0]), np.array([True])):

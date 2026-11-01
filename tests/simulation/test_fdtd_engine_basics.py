@@ -129,6 +129,9 @@ def test_constructor_rejects_invalid_arguments(
         # complex medium are each the wrong type.
         ({"shape": 10}, "shape must be a pair of positive integers"),
         ({"shape": (10, "10")}, "shape must be a pair of positive integers"),
+        # A bytearray is a text, as a bytes is, never the codes of its
+        # characters read as the two counts (16, 16).
+        ({"shape": bytearray(b"\x10\x10")}, "shape must be a pair of positive"),
         ({"c": 343.0 + 50.0j}, "c must be real"),
         ({"c": np.full((10, 10), 343.0 + 50.0j)}, "c must be real"),
         ({"rho": 1.2 + 3.0j}, "rho must be real"),

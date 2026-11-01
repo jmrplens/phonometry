@@ -142,12 +142,18 @@ $1/\sqrt{r}$ amplitude spreading.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | For a `run` that is not an [`ElasticRun`](/phonometry/reference/api/simulation/elastic-fdtd/#elasticrun), a `compute` that is neither a [`Compute`](/phonometry/reference/api/simulation/compute/#compute) nor `None`, or, when `compute` names a host, a run that cannot travel to a node: an [`ExplosionSource`](/phonometry/reference/api/simulation/elastic-fdtd/#explosionsource) or a [`ForceSource`](/phonometry/reference/api/simulation/elastic-fdtd/#forcesource) whose waveform is a callable other than the `value` of a [`GaussianPulse`](/phonometry/reference/api/simulation/fdtd/#gaussianpulse), [`CWSource`](/phonometry/reference/api/simulation/fdtd/#cwsource) or [`SignalSource`](/phonometry/reference/api/simulation/fdtd/#signalsource), or a whole number outside the range of an int64. |
+| TypeError | For a `run` that is not an [`ElasticRun`](/phonometry/reference/api/simulation/elastic-fdtd/#elasticrun), a `compute` that is neither a [`Compute`](/phonometry/reference/api/simulation/compute/#compute) nor `None`, or, when `compute` names a host, a run that cannot travel to a node: an [`ExplosionSource`](/phonometry/reference/api/simulation/elastic-fdtd/#explosionsource) or a [`ForceSource`](/phonometry/reference/api/simulation/elastic-fdtd/#forcesource) whose waveform is a callable other than the `value` of a [`GaussianPulse`](/phonometry/reference/api/simulation/fdtd/#gaussianpulse), [`CWSource`](/phonometry/reference/api/simulation/fdtd/#cwsource) or [`SignalSource`](/phonometry/reference/api/simulation/fdtd/#signalsource), or a whole number outside the range of an int64; and, as the run steps, for a waveform that returns a complex number or a text. |
 | ValueError | For a `PHONOMETRY_COMPUTE` that does not parse, or a hosts file that cannot be read or is malformed. |
 | KeyError | For a `host` the hosts file does not name. |
-| ComputeImportError | When the device's library is not installed or does not import. |
-| ComputeDeviceError | When the device is not present, or fails a first small computation; with `fallback=True` the run warns with [`ComputeFallbackWarning`](/phonometry/reference/api/simulation/compute/#computefallbackwarning) and steps on NumPy instead. |
-| ComputeRemoteError | For a failure of the connection or of the node; with `fallback=True` the run warns with [`ComputeFallbackWarning`](/phonometry/reference/api/simulation/compute/#computefallbackwarning) and steps on NumPy here instead. |
+| ComputeImportError | When the device's library is not installed or does not import, unless `fallback=True`. |
+| ComputeDeviceError | When the device is not present, or fails a first small computation, unless `fallback=True`. |
+| ComputeRemoteError | For a failure of the connection or of the node, unless `fallback=True`. |
+
+**Warns**
+
+| Warning | When |
+| :--- | :--- |
+| ComputeFallbackWarning | With `fallback=True`, for any of the three failures above; the run then steps on NumPy, here. |
 
 ## ElasticBoundaries
 
@@ -245,9 +251,15 @@ interfaces converge to the physical traction continuity.
 | Exception | When |
 | :--- | :--- |
 | TypeError | if `cfl`, `dx` or `absorbing_layer_reflection` is not a single real number, `c_p`, `c_s`, `rho` or `damping` holds a complex number or a text, `absorbing_layer_cells` is a flag, a text or an array where a count goes, `shape` is not a pair or holds a count that is not a number, a side of `absorbing_sides` or `free_sides` is not a text, or `compute` is neither a [`Compute`](/phonometry/reference/api/simulation/compute/#compute) nor `None`. |
-| ValueError | for an argument out of its range, a `shape` given beside a map of another shape, a side that is not `"left"`, `"right"`, `"top"` or `"bottom"`, and for a `compute` that names a host: an engine steps in this process, and only [`elastic_fdtd_simulation`](/phonometry/reference/api/simulation/elastic-fdtd/#elastic_fdtd_simulation) runs on a node. |
-| ComputeImportError | when the library of the device `compute` asks for is not installed or does not import. |
-| ComputeDeviceError | when that device is not present, or fails a first small computation; with `fallback=True` the engine warns with [`ComputeFallbackWarning`](/phonometry/reference/api/simulation/compute/#computefallbackwarning) and steps on NumPy instead. |
+| ValueError | for an argument out of its range, a `shape` given beside a map of another shape, a side that is not `"left"`, `"right"`, `"top"` or `"bottom"`, and for a `compute` that names a host: an engine steps in this process, and only [`elastic_fdtd_simulation`](/phonometry/reference/api/simulation/elastic-fdtd/#elastic_fdtd_simulation) and [`write_elastic_fdtd_animation`](/phonometry/reference/api/simulation/video/#write_elastic_fdtd_animation) run on a node. |
+| ComputeImportError | when the library of the device `compute` asks for is not installed or does not import, unless `fallback=True`. |
+| ComputeDeviceError | when that device is not present, or fails a first small computation, unless `fallback=True`. |
+
+**Warns**
+
+| Warning | When |
+| :--- | :--- |
+| ComputeFallbackWarning | with `fallback=True`, when the device's library does not import or the device is absent or fails its first computation; the engine then steps on NumPy. |
 
 ### ElasticFDTD2D.add_source()
 
@@ -308,7 +320,14 @@ ElasticFDTD2D.from_regions(
     *,
     background: Material | CatalogueRow | tuple[float, float, float],
     regions: Iterable[tuple[Any, Material | CatalogueRow | tuple[float, float, float]]] = (),
-    **kwargs: Any,
+    cfl: float = 0.6,
+    absorbing_layer_cells: int | np.integer[Any] = 0,
+    absorbing_sides: Literal['left', 'right', 'top', 'bottom'] | Iterable[Literal['left', 'right', 'top', 'bottom']] | None = None,
+    absorbing_layer_reflection: float = 0.0001,
+    damping: ArrayLike = 0.0,
+    free_sides: Literal['left', 'right', 'top', 'bottom'] | Iterable[Literal['left', 'right', 'top', 'bottom']] | None = None,
+    obstacle_mask: ArrayLike | None = None,
+    compute: Compute | None = None,
 ) -> ElasticFDTD2D
 ```
 
@@ -338,7 +357,14 @@ or `numpy.s_[120:, :]` for the same thing spelled as a slice.
 | `dx` | Grid spacing [m] (square cells). |
 | `background` | The material filling the whole grid first: a [`Material`](/phonometry/reference/api/simulation/elastic-fdtd/#material), a `(c_p, c_s, rho)` triple, e.g. [`WATER`](/phonometry/reference/api/simulation/elastic-fdtd/#water), or a solid's catalogue row ([`SolidMaterial`](/phonometry/reference/api/solids/catalogue/#solidmaterial)), whose bulk longitudinal speed, transverse speed and density are read through [`printed`](/phonometry/reference/api/io/io/#cataloguerowprinted). |
 | `regions` | `(where, material)` pairs painted in order, each material taken in any of the forms `background` takes. |
-| `kwargs` | Forwarded to [`ElasticFDTD2D`](/phonometry/reference/api/simulation/elastic-fdtd/#elasticfdtd2d) (`cfl`, `absorbing_layer_cells`, `absorbing_sides`, `absorbing_layer_reflection`, `damping`, `free_sides`, `obstacle_mask`, `compute`). |
+| `cfl` | Courant number, as [`ElasticFDTD2D`](/phonometry/reference/api/simulation/elastic-fdtd/#elasticfdtd2d) takes it. |
+| `absorbing_layer_cells` | Thickness of the absorbing (sponge) layer, in cells (default 0, no layer). |
+| `absorbing_sides` | Which sides absorb, as [`ElasticFDTD2D`](/phonometry/reference/api/simulation/elastic-fdtd/#elasticfdtd2d) takes them. |
+| `absorbing_layer_reflection` | Target round-trip amplitude reflection of the sponge layer. |
+| `damping` | Bulk amplitude decay rate [1/s], a scalar or an `(ny, nx)` map. |
+| `free_sides` | Sides carrying a traction-free surface. |
+| `obstacle_mask` | Boolean `(ny, nx)` map of rigid cells. |
+| `compute` | Where the engine steps ([`Compute`](/phonometry/reference/api/simulation/compute/#compute)). |
 
 **Returns:** The configured stepping engine.
 
@@ -346,10 +372,16 @@ or `numpy.s_[120:, :]` for the same thing spelled as a slice.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If `shape` is not two whole numbers of two cells or more, a mask does not match `shape` or a material spec is invalid, a catalogue row's refusal among them, or a `compute` keyword names a host: the engine steps in this process. |
-| TypeError | For a `shape` that is not a pair or holds a count that is not a number, a `dx` that is not one real number, a material's speed or density that is a complex number or a text, a mask array that is not boolean, a catalogue row of a class that lacks any of the bulk longitudinal speed, the transverse speed and the density, or a `compute` keyword that is neither a [`Compute`](/phonometry/reference/api/simulation/compute/#compute) nor `None`. |
-| ComputeImportError | When the library of the device a `compute` keyword asks for is not installed or does not import. |
-| ComputeDeviceError | When that device is not present, or fails a first small computation; with `fallback=True` the engine warns with [`ComputeFallbackWarning`](/phonometry/reference/api/simulation/compute/#computefallbackwarning), pointing at the line that called this method, and steps on NumPy instead. |
+| ValueError | If `shape` is not two whole numbers of two cells or more, a mask does not match `shape` or a material spec is invalid, a catalogue row's refusal among them, an option out of the range [`ElasticFDTD2D`](/phonometry/reference/api/simulation/elastic-fdtd/#elasticfdtd2d) takes, or `compute` names a host: the engine steps in this process. |
+| TypeError | For a `shape` that is not a pair or holds a count that is not a number (a text, a `bytes` or a `bytearray` among them), a `dx` that is not one real number, a material's speed or density that is a complex number or a text, a mask array that is not boolean, a catalogue row of a class that lacks any of the bulk longitudinal speed, the transverse speed and the density, an option of a type [`ElasticFDTD2D`](/phonometry/reference/api/simulation/elastic-fdtd/#elasticfdtd2d) refuses (`cfl`, `absorbing_layer_cells`, `absorbing_sides`, `absorbing_layer_reflection`, `damping`, `free_sides`), or a `compute` that is neither a [`Compute`](/phonometry/reference/api/simulation/compute/#compute) nor `None`. |
+| ComputeImportError | When the library of the device `compute` asks for is not installed or does not import, unless `fallback=True`. |
+| ComputeDeviceError | When that device is not present, or fails a first small computation, unless `fallback=True`. |
+
+**Warns**
+
+| Warning | When |
+| :--- | :--- |
+| ComputeFallbackWarning | With `fallback=True`, when the device's library does not import or the device is absent or fails its first computation, pointing at the line that called this method; the engine then steps on NumPy. |
 
 ### ElasticFDTD2D.numpy_field()
 
@@ -419,7 +451,7 @@ with `numpy_field`). The two counts are taken by name, as
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `snapshot_decimation`, `n_steps` or `snapshot_every` is a flag, a text or an array where a count goes. |
+| TypeError | if `snapshot_decimation`, `n_steps` or `snapshot_every` is a flag, a text or an array where a count goes, or the waveform of an [`ExplosionSource`](/phonometry/reference/api/simulation/elastic-fdtd/#explosionsource) or a [`ForceSource`](/phonometry/reference/api/simulation/elastic-fdtd/#forcesource) returns a complex number or a text. |
 | ValueError | if `n_steps` is not a whole number of 0 or more, or `snapshot_every` or `snapshot_decimation` is not a whole number of 1 or more. |
 
 ### ElasticFDTD2D.step()
@@ -429,6 +461,12 @@ ElasticFDTD2D.step() -> None
 ```
 
 Advance the leapfrog scheme by one time step (Virieux Eq. 5).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if the waveform of an [`ExplosionSource`](/phonometry/reference/api/simulation/elastic-fdtd/#explosionsource) or a [`ForceSource`](/phonometry/reference/api/simulation/elastic-fdtd/#forcesource) returns a complex number or a text. |
 
 ### ElasticFDTD2D.time
 

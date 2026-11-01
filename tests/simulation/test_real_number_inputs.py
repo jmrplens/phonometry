@@ -143,6 +143,9 @@ _OWNERS: dict[str, Callable[..., object]] = {
     "add_plane_wave": FDTD2D.add_plane_wave,
     "scholte_speed": scholte_speed,
     "from_regions": ElasticFDTD2D.from_regions,
+    "GaussianPulse.value": GaussianPulse.value,
+    "CWSource.value": CWSource.value,
+    "SignalSource.value": SignalSource.value,
     "ContourProbe": ContourProbe,
     "add_contour_probe": FDTD2D.add_contour_probe,
     "phasors": ContourProbe.phasors,
@@ -373,6 +376,38 @@ def _triple_cases() -> Iterator[Case]:
             ),
             rf"'?dx'? must be .*(?:{said})",
         )
+    # The options from_regions hands the engine, each refused as the engine
+    # refuses it.
+    for name in ("cfl", "absorbing_layer_reflection", "damping"):
+        spellings = _spellings(_REALS[name], is_map=name in _MAPS)
+        for spelling, (value, said) in spellings.items():
+            yield (
+                f"from_regions({name}={spelling})",
+                lambda name=name, value=value: ElasticFDTD2D.from_regions(
+                    (_NY, _NX),
+                    0.01,
+                    background=STEEL,
+                    absorbing_layer_cells=2,
+                    **{name: value},
+                ),
+                rf"'?{name}'? must be .*(?:{said})",
+            )
+
+
+def _time_cases() -> Iterator[Case]:
+    """The time each point source's waveform is asked for, ``value(t)``."""
+    sources: dict[str, object] = {
+        "GaussianPulse.value": GaussianPulse(ix=8, iy=8, half_width_s=1e-4),
+        "CWSource.value": CWSource(ix=8, iy=8, frequency=1000.0),
+        "SignalSource.value": SignalSource(ix=8, iy=8, samples=np.ones(8), fs=48000.0),
+    }
+    for owner, source in sources.items():
+        for spelling, (value, said) in _spellings(5e-5, is_map=False).items():
+            yield (
+                f"{owner}(t={spelling})",
+                lambda source=source, value=value: source.value(value),  # type: ignore[attr-defined]
+                rf"'?t'? must be .*(?:{said})",
+            )
 
 
 _POSITIONS = np.array([[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]])
@@ -500,7 +535,7 @@ def _contour_cases() -> Iterator[Case]:
         )
 
 
-_CASES = [*_engine_cases(), *_record_cases(), *_contour_cases()]
+_CASES = [*_engine_cases(), *_record_cases(), *_contour_cases(), *_time_cases()]
 
 
 @pytest.mark.parametrize(
@@ -551,3 +586,76 @@ def test_every_real_input_is_held_to_both_refusals() -> None:
     ]
     assert missing == []
     assert untexted == []
+
+
+#: The samples a waveform may wrongly return, by how a caller writes them.
+_WRONG_SAMPLES: dict[str, object] = {
+    "python complex": 1.0 + 1.0j,
+    "numpy complex": np.complex128(1.0 + 1.0j),
+    "complex64": np.complex64(1.0 + 1.0j),
+    "zero-dimensional complex array": np.asarray(1.0 + 1.0j),
+    "text": "1.0",
+}
+
+
+def _step_plane_wave(sample: object) -> None:
+    sim = FDTD2D(c=343.0, dx=0.01, shape=(_NY, _NX), absorbing_layer_cells=4)
+    sim.add_source(PlaneWaveSource(direction="right", waveform=lambda t: sample))
+    sim.step()
+
+
+def _step_explosion(sample: object) -> None:
+    sim = ElasticFDTD2D(c_p=2000.0, c_s=1000.0, dx=0.01, rho=1000.0, shape=(_NY, _NX))
+    sim.add_source(ExplosionSource(ix=8, iy=8, waveform=lambda t: sample))
+    sim.step()
+
+
+def _step_force(sample: object) -> None:
+    sim = ElasticFDTD2D(c_p=2000.0, c_s=1000.0, dx=0.01, rho=1000.0, shape=(_NY, _NX))
+    sim.add_source(ForceSource(ix=8, iy=8, direction="y", waveform=lambda t: sample))
+    sim.step()
+
+
+def _run_explosion(sample: object) -> None:
+    from phonometry.simulation import elastic_fdtd_simulation
+
+    blast = ExplosionSource(ix=8, iy=8, waveform=lambda t: sample)
+    elastic_fdtd_simulation(
+        ElasticRun(
+            c_p=2000.0,
+            c_s=1000.0,
+            dx=0.01,
+            rho=1000.0,
+            shape=(_NY, _NX),
+            duration_s=1e-5,
+            sources=[blast],
+        )
+    )
+
+
+_STEPPERS: dict[str, Callable[[object], None]] = {
+    "PlaneWaveSource": _step_plane_wave,
+    "ExplosionSource": _step_explosion,
+    "ForceSource": _step_force,
+    "elastic_fdtd_simulation": _run_explosion,
+}
+
+
+@pytest.mark.parametrize("spelling", sorted(_WRONG_SAMPLES))
+@pytest.mark.parametrize("stepper", sorted(_STEPPERS))
+def test_a_waveform_that_returns_no_real_number_is_refused_by_name(
+    stepper: str, spelling: str
+) -> None:
+    """A complex sample or a text from a waveform stops the step, naming the waveform.
+
+    The engines add each sample into their real fields: the elastic engine
+    stepped the real part of a complex sample with no more than a
+    ``ComplexWarning``, and the plane wave of the acoustic engine failed with
+    NumPy's casting error, which names nothing the caller wrote.
+    """
+    import warnings
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", np.exceptions.ComplexWarning)
+        with pytest.raises(TypeError, match=r"waveform of .* must return a real"):
+            _STEPPERS[stepper](_WRONG_SAMPLES[spelling])

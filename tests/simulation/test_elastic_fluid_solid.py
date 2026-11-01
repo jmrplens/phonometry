@@ -588,3 +588,23 @@ def test_from_regions_and_material_validation() -> None:
     assert not ALUMINUM.is_fluid
     coerced = Material(c_p=1480, c_s=0, rho=1000)
     assert all(isinstance(v, float) for v in (coerced.c_p, coerced.c_s, coerced.rho))
+
+
+def test_a_bytearray_is_no_grid_shape() -> None:
+    """A ``bytearray`` given as the shape is a text, as a ``bytes`` is.
+
+    It was read as the codes of its characters, so a ``bytearray`` of the two
+    bytes 16 and 16 built a 16 x 16 grid, where the same ``bytes`` and
+    ``"ab"`` raised.
+    """
+    shape = bytearray(b"\x10\x10")
+    with pytest.raises(TypeError, match="shape must be a pair of positive integers"):
+        ElasticFDTD2D.from_regions(shape, 0.01, background=WATER)
+    with pytest.raises(TypeError, match="shape must be a pair of positive integers"):
+        ElasticFDTD2D(
+            c_p=4000.0,
+            c_s=2300.0,
+            dx=0.01,
+            rho=2500.0,
+            shape=shape,
+        )

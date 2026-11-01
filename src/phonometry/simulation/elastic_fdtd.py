@@ -132,6 +132,7 @@ from .fdtd import (
     _probe_indices,
     _probe_pairs,
     _real_numbers,
+    _real_sample,
     _recording_or_empty,
     _require_courant,
     _require_grid_axes,
@@ -871,12 +872,17 @@ class ElasticFDTD2D:
         beside a map of another shape, a side that is not ``"left"``,
         ``"right"``, ``"top"`` or ``"bottom"``, and for a ``compute`` that
         names a host: an engine steps in this process, and only
-        :func:`elastic_fdtd_simulation` runs on a node.
+        :func:`elastic_fdtd_simulation` and
+        :func:`~phonometry.simulation.write_elastic_fdtd_animation` run on a
+        node.
     :raises ComputeImportError: when the library of the device ``compute``
-        asks for is not installed or does not import.
+        asks for is not installed or does not import, unless
+        ``fallback=True``.
     :raises ComputeDeviceError: when that device is not present, or fails a
-        first small computation; with ``fallback=True`` the engine warns
-        with :class:`ComputeFallbackWarning` and steps on NumPy instead.
+        first small computation, unless ``fallback=True``.
+    :warns ComputeFallbackWarning: with ``fallback=True``, when the device's
+        library does not import or the device is absent or fails its first
+        computation; the engine then steps on NumPy.
     """
 
     def __init__(
@@ -1001,7 +1007,14 @@ class ElasticFDTD2D:
         regions: Iterable[
             tuple[Any, Material | CatalogueRow | tuple[float, float, float]]
         ] = (),
-        **kwargs: Any,
+        cfl: float = 0.6,
+        absorbing_layer_cells: int | np.integer[Any] = 0,
+        absorbing_sides: Side | Iterable[Side] | None = None,
+        absorbing_layer_reflection: float = _DEFAULT_SPONGE_REFLECTION,
+        damping: ArrayLike = 0.0,
+        free_sides: Side | Iterable[Side] | None = None,
+        obstacle_mask: ArrayLike | None = None,
+        compute: Compute | None = None,
     ) -> ElasticFDTD2D:
         """Build the engine from named materials painted over a background.
 
@@ -1032,29 +1045,43 @@ class ElasticFDTD2D:
             through :meth:`~phonometry.io.CatalogueRow.printed`.
         :param regions: ``(where, material)`` pairs painted in order, each
             material taken in any of the forms ``background`` takes.
-        :param kwargs: Forwarded to :class:`ElasticFDTD2D` (``cfl``,
-            ``absorbing_layer_cells``, ``absorbing_sides``,
-            ``absorbing_layer_reflection``, ``damping``, ``free_sides``,
-            ``obstacle_mask``, ``compute``).
+        :param cfl: Courant number, as :class:`ElasticFDTD2D` takes it.
+        :param absorbing_layer_cells: Thickness of the absorbing (sponge)
+            layer, in cells (default 0, no layer).
+        :param absorbing_sides: Which sides absorb, as
+            :class:`ElasticFDTD2D` takes them.
+        :param absorbing_layer_reflection: Target round-trip amplitude
+            reflection of the sponge layer.
+        :param damping: Bulk amplitude decay rate [1/s], a scalar or an
+            ``(ny, nx)`` map.
+        :param free_sides: Sides carrying a traction-free surface.
+        :param obstacle_mask: Boolean ``(ny, nx)`` map of rigid cells.
+        :param compute: Where the engine steps (:class:`Compute`).
         :return: The configured stepping engine.
         :raises ValueError: If ``shape`` is not two whole numbers of two
             cells or more, a mask does not match ``shape`` or a material
-            spec is invalid, a catalogue row's refusal among them, or a
-            ``compute`` keyword names a host: the engine steps in this
-            process.
+            spec is invalid, a catalogue row's refusal among them, an option
+            out of the range :class:`ElasticFDTD2D` takes, or ``compute``
+            names a host: the engine steps in this process.
         :raises TypeError: For a ``shape`` that is not a pair or holds a
-            count that is not a number, a ``dx`` that is not one real number,
+            count that is not a number (a text, a ``bytes`` or a
+            ``bytearray`` among them), a ``dx`` that is not one real number,
             a material's speed or density that is a complex number or a text,
             a mask array that is not boolean, a catalogue row of a class that
             lacks any of the bulk longitudinal speed, the transverse speed and
-            the density, or a ``compute`` keyword that is neither a
-            :class:`Compute` nor ``None``.
-        :raises ComputeImportError: When the library of the device a
-            ``compute`` keyword asks for is not installed or does not import.
+            the density, an option of a type :class:`ElasticFDTD2D` refuses
+            (``cfl``, ``absorbing_layer_cells``, ``absorbing_sides``,
+            ``absorbing_layer_reflection``, ``damping``, ``free_sides``), or
+            a ``compute`` that is neither a :class:`Compute` nor ``None``.
+        :raises ComputeImportError: When the library of the device
+            ``compute`` asks for is not installed or does not import, unless
+            ``fallback=True``.
         :raises ComputeDeviceError: When that device is not present, or fails
-            a first small computation; with ``fallback=True`` the engine warns
-            with :class:`ComputeFallbackWarning`, pointing at the line that
-            called this method, and steps on NumPy instead.
+            a first small computation, unless ``fallback=True``.
+        :warns ComputeFallbackWarning: With ``fallback=True``, when the
+            device's library does not import or the device is absent or fails
+            its first computation, pointing at the line that called this
+            method; the engine then steps on NumPy.
         """
         ny, nx = _grid_shape(shape)
         if ny < _MIN_GRID_CELLS or nx < _MIN_GRID_CELLS:
@@ -1076,7 +1103,20 @@ class ElasticFDTD2D:
             c_p[index] = mat.c_p
             c_s[index] = mat.c_s
             rho[index] = mat.rho
-        return cls(c_p=c_p, c_s=c_s, dx=dx, rho=rho, **kwargs)
+        return cls(
+            c_p=c_p,
+            c_s=c_s,
+            dx=dx,
+            rho=rho,
+            cfl=cfl,
+            absorbing_layer_cells=absorbing_layer_cells,
+            absorbing_sides=absorbing_sides,
+            absorbing_layer_reflection=absorbing_layer_reflection,
+            damping=damping,
+            free_sides=free_sides,
+            obstacle_mask=obstacle_mask,
+            compute=compute,
+        )
 
     @staticmethod
     def _corner_mu(mu: Field2D) -> Field2D:
@@ -1191,7 +1231,11 @@ class ElasticFDTD2D:
         self._sources.append(source)
 
     def step(self) -> None:
-        """Advance the leapfrog scheme by one time step (Virieux Eq. 5)."""
+        """Advance the leapfrog scheme by one time step (Virieux Eq. 5).
+
+        :raises TypeError: if the waveform of an :class:`ExplosionSource` or
+            a :class:`ForceSource` returns a complex number or a text.
+        """
         with self._backend.context():
             self._step()
 
@@ -1240,7 +1284,7 @@ class ElasticFDTD2D:
         t_next = (self.n + 1) * self.dt
         for src in self._sources:
             if isinstance(src, ExplosionSource):
-                inj = src.amplitude * src.waveform(t_next)
+                inj = src.amplitude * _real_sample(src.waveform(t_next), src)
                 self.txx[src.iy, src.ix] -= inj
                 self.tyy[src.iy, src.ix] -= inj
         self.txx *= self._decay_c
@@ -1370,7 +1414,7 @@ class ElasticFDTD2D:
         rounds as the float64 element it is read from, so the increment is
         the same IEEE double arithmetic on every device.
         """
-        f = src.amplitude * src.waveform(t)
+        f = src.amplitude * _real_sample(src.waveform(t), src)
         if src.direction == "x":
             rho = float(self._rho_x_host[src.iy, src.ix])
             self.vx[src.iy, src.ix] += self.dt * f / (rho * self.dx**2)
@@ -1465,7 +1509,9 @@ class ElasticFDTD2D:
         :class:`ElasticRecording` takes them.
 
         :raises TypeError: if ``snapshot_decimation``, ``n_steps`` or
-            ``snapshot_every`` is a flag, a text or an array where a count goes.
+            ``snapshot_every`` is a flag, a text or an array where a count
+            goes, or the waveform of an :class:`ExplosionSource` or a
+            :class:`ForceSource` returns a complex number or a text.
         :raises ValueError: if ``n_steps`` is not a whole number of 0 or more,
             or ``snapshot_every`` or ``snapshot_decimation`` is not a whole
             number of 1 or more.
@@ -2302,18 +2348,19 @@ def elastic_fdtd_simulation(
         :class:`~phonometry.simulation.GaussianPulse`,
         :class:`~phonometry.simulation.CWSource` or
         :class:`~phonometry.simulation.SignalSource`, or a whole number
-        outside the range of an int64.
+        outside the range of an int64; and, as the run steps, for a waveform
+        that returns a complex number or a text.
     :raises ValueError: For a ``PHONOMETRY_COMPUTE`` that does not parse, or
         a hosts file that cannot be read or is malformed.
     :raises KeyError: For a ``host`` the hosts file does not name.
     :raises ComputeImportError: When the device's library is not installed
-        or does not import.
+        or does not import, unless ``fallback=True``.
     :raises ComputeDeviceError: When the device is not present, or fails a
-        first small computation; with ``fallback=True`` the run warns with
-        :class:`ComputeFallbackWarning` and steps on NumPy instead.
+        first small computation, unless ``fallback=True``.
     :raises ComputeRemoteError: For a failure of the connection or of the
-        node; with ``fallback=True`` the run warns with
-        :class:`ComputeFallbackWarning` and steps on NumPy here instead.
+        node, unless ``fallback=True``.
+    :warns ComputeFallbackWarning: With ``fallback=True``, for any of the
+        three failures above; the run then steps on NumPy, here.
     """
     if not isinstance(run, ElasticRun):
         msg = f"'run' must be an ElasticRun, got {type(run).__name__}."

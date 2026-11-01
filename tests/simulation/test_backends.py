@@ -1024,8 +1024,20 @@ def test_a_bad_argument_raises_its_own_error_before_the_device_is_asked_for(
 
 
 def test_the_backend_of_an_engine_is_never_on_a_node() -> None:
+    """The refusal names every library function that does run on a node.
+
+    It named the two simulation functions alone, though the two video writers
+    have run on a node too since they first took a host.
+    """
+    from typing import get_args
+
+    from phonometry.simulation._remote.client import RemoteFunction
+
     request = Compute(device="cupy", host="nas")
     with pytest.raises(
         ValueError, match="host 'nas' reached the backend of an engine built here"
-    ):
+    ) as refused:
         bk.backend_for(request)
+    message = str(refused.value)
+    missing = [name for name in get_args(RemoteFunction) if name not in message]
+    assert missing == [], message

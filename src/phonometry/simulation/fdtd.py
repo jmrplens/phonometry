@@ -189,6 +189,46 @@ def _finite(name: str, value: float) -> float:
     return out
 
 
+def _real_time(t: float) -> float:
+    """The time a source's waveform is asked for, refused when it is no real number.
+
+    A Python or NumPy float, what an engine's step hands over, passes as it
+    is. NumPy reads a complex time as its real part with no more than a
+    ``ComplexWarning``, and a text fails where it first meets a number, in a
+    message that names nothing.
+
+    :raises TypeError: for a complex time or a text.
+    """
+    if isinstance(t, float | int):
+        return t
+    _real_numbers("t", t, "t must be a real time, not complex")
+    return t
+
+
+def _real_sample(value: float, source: object) -> float:
+    """A sample a source's waveform returned, refused when it is no real number.
+
+    The engines add each sample into their real fields, which keep only the
+    real part of a complex one (with no more than a ``ComplexWarning``) or
+    fail with a casting error that names nothing, and they multiply a text
+    by the amplitude. A Python or NumPy float, what a waveform returns,
+    passes after one ``isinstance``, so the step pays nothing more.
+
+    :param source: The source whose waveform returned *value*, which the
+        refusal names by its class.
+    :raises TypeError: for a complex sample or a text.
+    """
+    if isinstance(value, float | int):
+        return value
+    msg = (
+        f"the waveform of the {type(source).__name__} must return a real number, "
+        f"got {given_repr(value)}"
+    )
+    refuse_complex(value, msg)
+    refuse_text(value, msg)
+    return value
+
+
 def _integer(name: str, value: object) -> int:
     """Validate that *value* is an integral scalar (bool is rejected).
 
@@ -278,7 +318,11 @@ class GaussianPulse(RichDisplay):
             _finite("t0", self.t0)
 
     def value(self, t: float) -> float:
-        """Source waveform at time ``t`` (seconds)."""
+        """Source waveform at time ``t`` (seconds).
+
+        :raises TypeError: if ``t`` is a complex number or a text.
+        """
+        t = _real_time(t)
         t0 = 4.0 * self.half_width_s if self.t0 is None else self.t0
         return self.amplitude * float(np.exp(-(((t - t0) / self.half_width_s) ** 2)))
 
@@ -335,7 +379,11 @@ class CWSource(RichDisplay):
             raise ValueError(msg)
 
     def value(self, t: float) -> float:
-        """Source waveform at time ``t`` (seconds)."""
+        """Source waveform at time ``t`` (seconds).
+
+        :raises TypeError: if ``t`` is a complex number or a text.
+        """
+        t = _real_time(t)
         ramp_time = self.ramp_cycles / self.frequency
         if t < ramp_time and ramp_time > 0.0:
             envelope = 0.5 * (1.0 - float(np.cos(np.pi * t / ramp_time)))
@@ -410,8 +458,11 @@ class SignalSource(OwnsArrays):
         object.__setattr__(self, "samples", arr)
 
     def value(self, t: float) -> float:
-        """Source waveform at time ``t`` (seconds), zero outside the span."""
-        pos = t * self.fs
+        """Source waveform at time ``t`` (seconds), zero outside the span.
+
+        :raises TypeError: if ``t`` is a complex number or a text.
+        """
+        pos = _real_time(t) * self.fs
         last = self.samples.size - 1
         if pos < 0.0 or pos > last:
             return 0.0
@@ -679,10 +730,11 @@ def _grid_shape(shape: object) -> tuple[int, int]:
     """The ``(ny, nx)`` grid a scalar sound speed is spread over.
 
     Any sequence of the two counts is read, and a one-dimensional array as
-    the sequence of its items. A value that is not a sequence, a text, or a
-    cell count that is not a number, is the wrong type; a sequence of another
-    length, or a count that is not a whole number of one cell or more, is a
-    wrong value. A whole float is kept as the count it names.
+    the sequence of its items. A value that is not a sequence, a text (a
+    ``bytes`` or a ``bytearray`` too, never the codes of its characters), or
+    a cell count that is not a number, is the wrong type; a sequence of
+    another length, or a count that is not a whole number of one cell or
+    more, is a wrong value. A whole float is kept as the count it names.
 
     :raises TypeError: for a value that is neither a sequence nor a
         one-dimensional array, a text, or a count that is not a number.
@@ -692,7 +744,7 @@ def _grid_shape(shape: object) -> tuple[int, int]:
     msg = f"shape must be a pair of positive integers (ny, nx); got {given_repr(shape)}"
     if isinstance(shape, np.ndarray) and shape.ndim == 1:
         shape = shape.tolist()
-    if not isinstance(shape, Sequence) or isinstance(shape, str | bytes):
+    if not isinstance(shape, Sequence) or isinstance(shape, str | bytes | bytearray):
         raise TypeError(msg)
     # The length of a fixed-size argument, not a quantity.
     if len(shape) != 2:  # noqa: PLR2004
@@ -1152,7 +1204,9 @@ class _ImpedanceEdge:
 class ContourProbe:
     r"""On-the-fly DFT of ``p`` and ``v_n`` on a closed rectangular contour.
 
-    Created by :meth:`FDTD2D.add_contour_probe`. The contour is the closed
+    Created by :meth:`FDTD2D.add_contour_probe`, or by hand: a probe
+    registers itself with the engine it is built for, so either way the
+    engine samples it from its next step. The contour is the closed
     rectangle of cell faces around the cell block ``ix0..ix1`` x
     ``iy0..iy1`` (inclusive); on each face the engine samples the outward
     normal velocity (which lives exactly there on the staggered grid) and
@@ -1284,6 +1338,9 @@ class ContourProbe:
         # broadcast over the parts and filled in place every step.
         self._now = b.zeros((2, 1, n_points))
         self._n_samples = 0
+        # Registered last, once every check has passed, so a refused probe
+        # never reaches the engine's step.
+        engine._contour_probes.append(self)
 
     @property
     def n_samples(self) -> int:
@@ -1479,12 +1536,16 @@ class FDTD2D:
         beside a map of another shape, a side that is not ``"left"``,
         ``"right"``, ``"top"`` or ``"bottom"``, and for a ``compute`` that
         names a host: an engine steps in this process, and only
-        :func:`fdtd_simulation` runs on a node.
+        :func:`fdtd_simulation` and
+        :func:`~phonometry.simulation.write_fdtd_animation` run on a node.
     :raises ComputeImportError: when the library of the device ``compute``
-        asks for is not installed or does not import.
+        asks for is not installed or does not import, unless
+        ``fallback=True``.
     :raises ComputeDeviceError: when that device is not present, or fails a
-        first small computation; with ``fallback=True`` the engine warns
-        with :class:`ComputeFallbackWarning` and steps on NumPy instead.
+        first small computation, unless ``fallback=True``.
+    :warns ComputeFallbackWarning: with ``fallback=True``, when the device's
+        library does not import or the device is absent or fails its first
+        computation; the engine then steps on NumPy.
     """
 
     def __init__(
@@ -1825,12 +1886,14 @@ class FDTD2D:
         :raises TypeError: For a cell index that is a flag, a text or an
             array, or ``frequencies`` that hold a complex number or a text.
         """
-        probe = ContourProbe(self, ix0, ix1, iy0, iy1, frequencies)
-        self._contour_probes.append(probe)
-        return probe
+        return ContourProbe(self, ix0, ix1, iy0, iy1, frequencies)
 
     def step(self) -> None:
-        """Advance the leapfrog scheme by one time step."""
+        """Advance the leapfrog scheme by one time step.
+
+        :raises TypeError: if the waveform of a :class:`PlaneWaveSource`
+            returns a complex number or a text.
+        """
         with self._backend.context():
             self._step()
 
@@ -1878,8 +1941,10 @@ class FDTD2D:
         """
         c_ref = self._c_ref
         gain = plane.amplitude * self.dt / (self.dx / c_ref)
-        value_p = plane.waveform(t_next)
-        value_v = plane.waveform(t_next - 0.5 * self.dt + 0.5 * self.dx / c_ref)
+        value_p = _real_sample(plane.waveform(t_next), plane)
+        value_v = _real_sample(
+            plane.waveform(t_next - 0.5 * self.dt + 0.5 * self.dx / c_ref), plane
+        )
         direction = plane.direction
         k = plane.offset
         if direction == "down":
@@ -1927,7 +1992,9 @@ class FDTD2D:
         :class:`FDTDRecording` takes them.
 
         :raises TypeError: if ``snapshot_decimation``, ``n_steps`` or
-            ``snapshot_every`` is a flag, a text or an array where a count goes.
+            ``snapshot_every`` is a flag, a text or an array where a count
+            goes, or the waveform of a :class:`PlaneWaveSource` returns a
+            complex number or a text.
         :raises ValueError: if ``n_steps`` is not a whole number of 0 or more,
             or ``snapshot_every`` or ``snapshot_decimation`` is not a whole
             number of 1 or more.
@@ -2885,18 +2952,20 @@ def fdtd_simulation(run: FDTDRun, *, compute: Compute | None = None) -> FDTDResu
         when ``compute`` names a host, a run that cannot travel to a node: a
         source whose waveform is a callable other than the ``value`` of a
         :class:`GaussianPulse`, :class:`CWSource` or :class:`SignalSource`,
-        or a whole number outside the range of an int64.
+        or a whole number outside the range of an int64; and, as the run
+        steps, for the waveform of a :class:`PlaneWaveSource` that returns a
+        complex number or a text.
     :raises ValueError: For a ``PHONOMETRY_COMPUTE`` that does not parse, or
         a hosts file that cannot be read or is malformed.
     :raises KeyError: For a ``host`` the hosts file does not name.
     :raises ComputeImportError: When the device's library is not installed
-        or does not import.
+        or does not import, unless ``fallback=True``.
     :raises ComputeDeviceError: When the device is not present, or fails a
-        first small computation; with ``fallback=True`` the run warns with
-        :class:`ComputeFallbackWarning` and steps on NumPy instead.
+        first small computation, unless ``fallback=True``.
     :raises ComputeRemoteError: For a failure of the connection or of the
-        node; with ``fallback=True`` the run warns with
-        :class:`ComputeFallbackWarning` and steps on NumPy here instead.
+        node, unless ``fallback=True``.
+    :warns ComputeFallbackWarning: With ``fallback=True``, for any of the
+        three failures above; the run then steps on NumPy, here.
     """
     if not isinstance(run, FDTDRun):
         msg = f"'run' must be an FDTDRun, got {type(run).__name__}."

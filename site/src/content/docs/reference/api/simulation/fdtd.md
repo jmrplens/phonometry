@@ -73,7 +73,9 @@ ContourProbe(
 
 On-the-fly DFT of `p` and `v_n` on a closed rectangular contour.
 
-Created by [`FDTD2D.add_contour_probe`](/phonometry/reference/api/simulation/fdtd/#fdtd2dadd_contour_probe). The contour is the closed
+Created by [`FDTD2D.add_contour_probe`](/phonometry/reference/api/simulation/fdtd/#fdtd2dadd_contour_probe), or by hand: a probe
+registers itself with the engine it is built for, so either way the
+engine samples it from its next step. The contour is the closed
 rectangle of cell faces around the cell block `ix0..ix1` x
 `iy0..iy1` (inclusive); on each face the engine samples the outward
 normal velocity (which lives exactly there on the staggered grid) and
@@ -185,6 +187,12 @@ CWSource.value(t: float) -> float
 
 Source waveform at time `t` (seconds).
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `t` is a complex number or a text. |
+
 ## FDTD2D
 
 ```python
@@ -238,9 +246,15 @@ sides into absorbing or locally reacting boundaries. Sources are soft
 | Exception | When |
 | :--- | :--- |
 | TypeError | if `cfl`, `dx` or `absorbing_layer_reflection` is not a single real number, `c`, `rho` or `damping` holds a complex number or a text, `absorbing_layer_cells` is a flag, a text or an array where a count goes, `shape` is not a pair or holds a count that is not a number, a side of `absorbing_sides` or `edge_impedance` is not a text, an impedance of `edge_impedance` is not a real number or an array of them (a flag, `None` or a text among them), or `compute` is neither a [`Compute`](/phonometry/reference/api/simulation/compute/#compute) nor `None`. |
-| ValueError | for an argument out of its range, a `shape` given beside a map of another shape, a side that is not `"left"`, `"right"`, `"top"` or `"bottom"`, and for a `compute` that names a host: an engine steps in this process, and only [`fdtd_simulation`](/phonometry/reference/api/simulation/fdtd/#fdtd_simulation) runs on a node. |
-| ComputeImportError | when the library of the device `compute` asks for is not installed or does not import. |
-| ComputeDeviceError | when that device is not present, or fails a first small computation; with `fallback=True` the engine warns with [`ComputeFallbackWarning`](/phonometry/reference/api/simulation/compute/#computefallbackwarning) and steps on NumPy instead. |
+| ValueError | for an argument out of its range, a `shape` given beside a map of another shape, a side that is not `"left"`, `"right"`, `"top"` or `"bottom"`, and for a `compute` that names a host: an engine steps in this process, and only [`fdtd_simulation`](/phonometry/reference/api/simulation/fdtd/#fdtd_simulation) and [`write_fdtd_animation`](/phonometry/reference/api/simulation/video/#write_fdtd_animation) run on a node. |
+| ComputeImportError | when the library of the device `compute` asks for is not installed or does not import, unless `fallback=True`. |
+| ComputeDeviceError | when that device is not present, or fails a first small computation, unless `fallback=True`. |
+
+**Warns**
+
+| Warning | When |
+| :--- | :--- |
+| ComputeFallbackWarning | with `fallback=True`, when the device's library does not import or the device is absent or fails its first computation; the engine then steps on NumPy. |
 
 ### FDTD2D.add_contour_probe()
 
@@ -450,7 +464,7 @@ returned and only the final state is kept (read it with
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `snapshot_decimation`, `n_steps` or `snapshot_every` is a flag, a text or an array where a count goes. |
+| TypeError | if `snapshot_decimation`, `n_steps` or `snapshot_every` is a flag, a text or an array where a count goes, or the waveform of a [`PlaneWaveSource`](/phonometry/reference/api/simulation/fdtd/#planewavesource) returns a complex number or a text. |
 | ValueError | if `n_steps` is not a whole number of 0 or more, or `snapshot_every` or `snapshot_decimation` is not a whole number of 1 or more. |
 
 ### FDTD2D.step()
@@ -460,6 +474,12 @@ FDTD2D.step() -> None
 ```
 
 Advance the leapfrog scheme by one time step.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if the waveform of a [`PlaneWaveSource`](/phonometry/reference/api/simulation/fdtd/#planewavesource) returns a complex number or a text. |
 
 ### FDTD2D.time
 
@@ -514,12 +534,18 @@ spreading rather than the 3D spherical $1/r$.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | For a `run` that is not an [`FDTDRun`](/phonometry/reference/api/simulation/fdtd/#fdtdrun), a `compute` that is neither a [`Compute`](/phonometry/reference/api/simulation/compute/#compute) nor `None`, or, when `compute` names a host, a run that cannot travel to a node: a source whose waveform is a callable other than the `value` of a [`GaussianPulse`](/phonometry/reference/api/simulation/fdtd/#gaussianpulse), [`CWSource`](/phonometry/reference/api/simulation/fdtd/#cwsource) or [`SignalSource`](/phonometry/reference/api/simulation/fdtd/#signalsource), or a whole number outside the range of an int64. |
+| TypeError | For a `run` that is not an [`FDTDRun`](/phonometry/reference/api/simulation/fdtd/#fdtdrun), a `compute` that is neither a [`Compute`](/phonometry/reference/api/simulation/compute/#compute) nor `None`, or, when `compute` names a host, a run that cannot travel to a node: a source whose waveform is a callable other than the `value` of a [`GaussianPulse`](/phonometry/reference/api/simulation/fdtd/#gaussianpulse), [`CWSource`](/phonometry/reference/api/simulation/fdtd/#cwsource) or [`SignalSource`](/phonometry/reference/api/simulation/fdtd/#signalsource), or a whole number outside the range of an int64; and, as the run steps, for the waveform of a [`PlaneWaveSource`](/phonometry/reference/api/simulation/fdtd/#planewavesource) that returns a complex number or a text. |
 | ValueError | For a `PHONOMETRY_COMPUTE` that does not parse, or a hosts file that cannot be read or is malformed. |
 | KeyError | For a `host` the hosts file does not name. |
-| ComputeImportError | When the device's library is not installed or does not import. |
-| ComputeDeviceError | When the device is not present, or fails a first small computation; with `fallback=True` the run warns with [`ComputeFallbackWarning`](/phonometry/reference/api/simulation/compute/#computefallbackwarning) and steps on NumPy instead. |
-| ComputeRemoteError | For a failure of the connection or of the node; with `fallback=True` the run warns with [`ComputeFallbackWarning`](/phonometry/reference/api/simulation/compute/#computefallbackwarning) and steps on NumPy here instead. |
+| ComputeImportError | When the device's library is not installed or does not import, unless `fallback=True`. |
+| ComputeDeviceError | When the device is not present, or fails a first small computation, unless `fallback=True`. |
+| ComputeRemoteError | For a failure of the connection or of the node, unless `fallback=True`. |
+
+**Warns**
+
+| Warning | When |
+| :--- | :--- |
+| ComputeFallbackWarning | With `fallback=True`, for any of the three failures above; the run then steps on NumPy, here. |
 
 ## FDTDBoundaries
 
@@ -753,6 +779,12 @@ GaussianPulse.value(t: float) -> float
 
 Source waveform at time `t` (seconds).
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `t` is a complex number or a text. |
+
 ## PlaneWaveSource
 
 ```python
@@ -827,3 +859,9 @@ SignalSource.value(t: float) -> float
 ```
 
 Source waveform at time `t` (seconds), zero outside the span.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `t` is a complex number or a text. |

@@ -34,7 +34,7 @@ from phonometry.simulation import (
 from phonometry.simulation import video as video_module
 
 if TYPE_CHECKING:
-    from collections.abc import Generator
+    from collections.abc import Generator, Iterator
 
     from matplotlib.backend_bases import RendererBase
     from matplotlib.figure import Figure
@@ -588,6 +588,31 @@ def test_the_floor_is_as_low_as_the_matplotlib_with_the_tallest_text_allows(
 def test_a_frame_under_the_floor_is_refused_naming_it(size: tuple[int, int]) -> None:
     with pytest.raises(ValueError, match=r"at least 479 by 245 pixels"):
         AnimationFrame(size=size)
+
+
+class _CountedArray(np.ndarray):
+    """A one-axis array that counts the sides read out of it."""
+
+    read = 0
+
+    def __iter__(self) -> Iterator[object]:
+        _CountedArray.read += 1
+        return super().__iter__()
+
+
+def test_an_array_of_sides_is_measured_before_any_side_is_read() -> None:
+    """A size given as an array is refused by its length, before it is copied.
+
+    The array was turned into a list first, side by side, and only then
+    measured, so a long array was copied whole to be refused for its length.
+    """
+    _CountedArray.read = 0
+    long = np.arange(10_000).view(_CountedArray)
+    with pytest.raises(ValueError, match=r"must be a pair \(width, height\)"):
+        video_module._frame_pixels(long)
+    assert _CountedArray.read == 0
+    pair = np.array([480, 246]).view(_CountedArray)
+    assert video_module._frame_pixels(pair) == (480, 246)
 
 
 def test_a_frame_at_the_floor_is_built() -> None:

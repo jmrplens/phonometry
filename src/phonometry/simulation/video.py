@@ -76,7 +76,7 @@ from __future__ import annotations
 import contextlib
 import math
 from collections import deque
-from collections.abc import Sequence
+from collections.abc import Collection, Sequence
 from dataclasses import dataclass, replace
 from fractions import Fraction
 from types import MappingProxyType
@@ -215,14 +215,17 @@ def _frame_pixels(size: object) -> tuple[int, int]:
     return width, height
 
 
-def _frame_sides(size: object) -> Sequence[object]:
-    """The sides *size* holds: a sequence's items, or a one-axis array's.
+def _frame_sides(size: object) -> Collection[object]:
+    """The sides *size* holds: a sequence, or a one-axis array, as it is.
+
+    An array is not copied into a list: its length is read first, so one of
+    any length other than two is refused before any of it is read.
 
     :raises TypeError: for a text, which Python counts a sequence too, or
         anything else that is no sequence.
     """
     if isinstance(size, np.ndarray) and size.ndim == 1:
-        return list(size)
+        return size
     if isinstance(size, Sequence) and not isinstance(size, str | bytes | bytearray):
         return size
     msg = f"'size' must be a pair (width, height) in pixels, got {size!r}"

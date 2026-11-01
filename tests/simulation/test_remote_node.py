@@ -990,21 +990,55 @@ def _through_a_node(
     return kinds, header, buffers, code, b"".join(said)
 
 
+#: The record field each job sends first, and how the run here makes it.
+_FIRST_ARRAY: dict[str, tuple[str, Callable[[], np.ndarray]]] = {
+    "fdtd_simulation": ("pressures", lambda: fdtd_simulation(_ACOUSTIC).pressures),
+    "elastic_fdtd_simulation": (
+        "signals",
+        lambda: elastic_fdtd_simulation(_ELASTIC_FILMED).signals,
+    ),
+    "write_fdtd_animation": (
+        "pressures",
+        lambda: fdtd_simulation(_ACOUSTIC).pressures,
+    ),
+    "write_elastic_fdtd_animation": (
+        "signals",
+        lambda: elastic_fdtd_simulation(_ELASTIC_FILMED).signals,
+    ),
+}
+#: The bytes a video job's stream begins with, by its container.
+_HEADS = {"webm": b"\x1aE\xdf\xa3", "gif": b"GIF8"}
+
+
+@pytest.mark.parametrize("name", sorted(node.FUNCTIONS))
 def test_the_bootstrap_hands_the_shipped_package_to_the_node_and_the_job_runs(
-    tmp_path: Path,
+    name: str, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    # Every job a node runs, through the bootstrap in a process of its own,
+    # as a client's ssh starts it: the video jobs import the shipped
+    # package's drawing and encoding code there, which no job here reaches.
+    arguments = _EVERY_JOB[name]
+    if name.startswith("write_"):
+        pytest.importorskip("matplotlib")
+        (tmp_path / "ffmpeg").mkdir()
+        fake_ffmpeg.install(tmp_path / "ffmpeg", monkeypatch)  # on the node's PATH
+    cache = tmp_path / "cache"
     kinds, header, buffers, code, log = _through_a_node(
-        tmp_path,
-        _job("fdtd_simulation", {"run": _ACOUSTIC}, version=_SENT_VERSION),
+        cache, _job(name, arguments, version=_SENT_VERSION)
     )
     assert kinds == ["hello", "stored", "ready", "result"], log
     assert code == 0, log
     assert f"{bootstrap.PROGRESS} ".encode() in log
-    here = fdtd_simulation(_ACOUSTIC)
-    assert np.array_equal(_array(header["arrays"][0], buffers[0]), here.pressures)  # type: ignore[index]
+    described: list[dict[str, object]] = header["arrays"]  # type: ignore[assignment]
+    field, here = _FIRST_ARRAY[name]
+    assert described[0]["name"] == field
+    assert np.array_equal(_array(described[0], buffers[0]), here())
+    if name.startswith("write_"):
+        assert described[-1]["name"] == "video"
+        assert buffers[-1].startswith(_HEADS[str(arguments["container"])])
     assert header["provenance"]["phonometry_version"] == _SENT_VERSION  # type: ignore[index]
     assert (
-        tmp_path
+        cache
         / installed_package().digest
         / "phonometry"
         / "simulation"

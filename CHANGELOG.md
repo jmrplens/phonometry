@@ -2306,6 +2306,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `RecursionError`. Each is now the `TypeError` an init field gives,
   `Record: 'name' holds a container that holds itself`, or `'name' holds a
   container that holds itself` from the shared check of a pair or a grid.
+  `aircraft.ANPDatabase` names the table that holds an array of objects
+  holding itself the same way, where it gave the records' wording and no
+  name.
 
 - **`io.write_sidecar` takes for a type checker the NumPy numbers it takes
   when it runs, and `simulation.AnimationFrame` takes its size as any

@@ -814,6 +814,33 @@ def test_a_sequence_the_record_reads_member_by_member_names_its_field() -> None:
     np.testing.assert_array_equal(pair[1], [1.0, 2.0])
 
 
+def test_a_plain_class_names_the_argument_that_holds_itself() -> None:
+    """``read_only_copy`` refuses an array of objects that holds itself by name.
+
+    A plain class keeps an array through ``read_only_copy``, which copies an
+    array of objects member by member as a record does; one that held
+    itself was refused with the record's wording and no name, though no
+    record was being built. The fleet database names the table it was
+    given.
+    """
+    endless = np.empty(2, dtype=object)
+    endless[0] = 1.0
+    endless[1] = endless
+    with pytest.raises(
+        TypeError,
+        match=r"^ANPDatabase: 'distances_m' holds a container that holds itself",
+    ):
+        phonometry.aircraft.ANPDatabase({}, {}, endless, {})
+    with pytest.raises(
+        TypeError, match=r"^ANPDatabase: 'npd' holds a container that holds itself"
+    ):
+        phonometry.aircraft.ANPDatabase(
+            {}, {("a", "b", "c"): (endless, np.zeros(2))}, [1.0], {}
+        )
+    with pytest.raises(TypeError, match="no container that holds itself"):
+        frozen.read_only_copy(endless)
+
+
 def test_a_container_held_twice_side_by_side_is_copied_as_any_other() -> None:
     """Only a container inside itself is refused: one held twice holds no cycle."""
     row = [_writeable([1.0, 2.0])]

@@ -973,11 +973,17 @@ class ANPDatabase:
         # database's own, so editing the arrays a database was built from
         # moves nothing it returns.
         self._npd = {
-            key: (read_only_copy(powers), read_only_copy(levels))
+            key: (
+                read_only_copy(powers, name="npd", owner=self),
+                read_only_copy(levels, name="npd", owner=self),
+            )
             for key, (powers, levels) in npd.items()
         }
-        self._distances = read_only_copy(distances_m)
-        self._profiles = {key: read_only_copy(path) for key, path in profiles.items()}
+        self._distances = read_only_copy(distances_m, name="distances_m", owner=self)
+        self._profiles = {
+            key: read_only_copy(path, name="profiles", owner=self)
+            for key, path in profiles.items()
+        }
         # Only an export carries the performance tables, and only
         # load_anp_database reads one (through _from_export); a database built
         # here flies fixed-point profiles and refuses a procedural one.

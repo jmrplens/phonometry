@@ -70,17 +70,31 @@ def read_only[A: np.ndarray](array: A) -> A:
 
 
 @overload
-def read_only_copy(array: None, dtype: DTypeLike | None = None) -> None: ...
+def read_only_copy(
+    array: None,
+    dtype: DTypeLike | None = None,
+    *,
+    name: str | None = None,
+    owner: object = None,
+) -> None: ...
 
 
 @overload
 def read_only_copy(
-    array: ArrayLike, dtype: DTypeLike | None = None
+    array: ArrayLike,
+    dtype: DTypeLike | None = None,
+    *,
+    name: str | None = None,
+    owner: object = None,
 ) -> NDArray[Any]: ...
 
 
 def read_only_copy(
-    array: ArrayLike | None, dtype: DTypeLike | None = None
+    array: ArrayLike | None,
+    dtype: DTypeLike | None = None,
+    *,
+    name: str | None = None,
+    owner: object = None,
 ) -> NDArray[Any] | None:
     """A copy of *array* that refuses in-place writes, for an object to keep.
 
@@ -106,16 +120,26 @@ def read_only_copy(
     :param array: The array, or anything ``np.array`` reads as one, that an
         object keeps from its arguments.
     :param dtype: The type to copy into; the array's own when omitted.
+    :param name: The argument the array was given as, to name in the
+        refusal of an array of objects that holds itself.
+    :param owner: The object that keeps it, named in that refusal too.
     :return: A new read-only array, or ``None``.
+    :raises TypeError: if an array of objects holds itself, naming *name*
+        when it is given.
     """
     if array is None:
         return None
     if _stands_for_an_array(array):
         array = np.asarray(array, dtype=dtype)
     copied = np.array(array, dtype=dtype)
-    if copied.dtype == object:
+    if copied.dtype != object:
+        return read_only(copied)
+    try:
         return _owned_objects(copied, always=True)
-    return read_only(copied)
+    except _HoldsItself:
+        if name is None:
+            raise
+        raise _holds_itself(owner, name) from None
 
 
 def owned_members(

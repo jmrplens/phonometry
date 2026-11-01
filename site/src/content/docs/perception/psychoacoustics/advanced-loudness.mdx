@@ -523,6 +523,16 @@ Returns an `EcmaLoudness`: `loudness` ($N$, sone_HMS), `specific_loudness`
 ($N'(z)$, 53 bands), `bark`, `frequencies`, `times`, `loudness_vs_time`
 ($N(l)$ at 187.5 Hz), `field`.
 
+**Is the sound audible?** Clause 5.1.9 calls a signal audible when its total
+basis loudness exceeds 0.01 sone_HMS, the
+`psychoacoustics.AUDIBILITY_THRESHOLD_SONE_HMS` the package publishes. That
+total is the specific basis loudness $N'_\text{basis}$ of Formula (25), the
+output of the front-end before any tonal or noise split, summed over the 53
+bands with $\Delta z = 0.5$ (Formula 26). No function applies the criterion,
+and no result carries that total: `loudness` is the $N$ of Formula (117),
+assembled from the tonal and noise loudness of Clause 8, which is not the
+sum the criterion reads.
+
 ## What this guide covers
 
 <Scope>
@@ -541,7 +551,9 @@ Hearing Model): the loudness assembly of Clause 8, via `loudness_ecma()`.
 <ScopeClaim status="not-covered" label="Not covered">
 ECMA-418-2's binaural combination (Formula 118, Clause 8.1.5) is not
 implemented: `loudness_ecma()` is monaural, so analyse each ear channel
-separately. ISO 532-3 Clause 5 prescribes resampling the input to 32 kHz
+separately. The audibility criterion of Clause 5.1.9 is published as a
+constant and applied by no function, and the total basis loudness it reads
+is not returned. ISO 532-3 Clause 5 prescribes resampling the input to 32 kHz
 before the running FFT analysis. This implementation processes at the native
 sampling rate instead, a documented deviation that stays inside the standard's
 expanded uncertainty. Resample to 32 kHz first if strict clause-by-clause

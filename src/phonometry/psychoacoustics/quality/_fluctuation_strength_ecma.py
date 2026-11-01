@@ -151,10 +151,12 @@ _TAU = 0.75  # smoothing time constant tau (Formula 168) [s]
 # Calibration constant c_F (Formula 163, tabulated; adjustable +/- 0.25 %).
 _C_F = 0.003840572
 
-#: Prominence criterion (Clause 9.2): a signal has a prominent fluctuation
-#: strength when the single value F (Clause 9.1.14) exceeds this value, in
-#: vacil_HMS.
-PROMINENT_FLUCTUATION_STRENGTH_VACIL = 0.2
+#: Prominence criterion of Clause 9.2 (PDF page 61, folio 51), in vacil_HMS:
+#: a signal has a prominent fluctuation strength when the single value F
+#: (Clause 9.1.14) exceeds it. The unit keeps its _HMS because the package
+#: also publishes the Osses fluctuation strength, in plain vacil. Published by
+#: the package; no function applies it.
+PROMINENT_FLUCTUATION_STRENGTH_VACIL_HMS = 0.2
 _A_THRESHOLD = 5.2519  # amplitude gate below Formula (161)
 
 # The standard's epsilon_0: the smallest positive number with 1 + eps > 1

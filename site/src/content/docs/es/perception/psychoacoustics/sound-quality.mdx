@@ -333,7 +333,9 @@ patrón plano y bajo. Llamar a `.plot()` sin ejes añade el panel de $T(l)$
 dependiente del tiempo, que es donde aparece un tono intermitente.
 
 **Cómo se lee una tonalidad.** El apartado 6.3 de ECMA-418-2 da dos criterios
-de prominencia, ambos de 0,4 tu_HMS, y `tonality_ecma()` no aplica ninguno:
+de prominencia, ambos con los 0,4 tu_HMS que guarda
+`psychoacoustics.PROMINENT_TONALITY_TU_HMS`, y `tonality_ecma()` no aplica
+ninguno:
 devuelve los valores de los que se leen. En un sonido estacionario, una
 componente tonal en la banda $z_\text{tonal}$ cuenta como prominente cuando la
 tonalidad específica $T'(z_\text{tonal})$ supera 0,4 tu_HMS, es un máximo local
@@ -386,6 +388,7 @@ x *= 2e-5 * 10 ** (60 / 20) / np.sqrt(np.mean(x**2))   # nivel global de 60 dB S
 
 res = psychoacoustics.roughness_ecma(x, fs, field="free")
 print(f"R = {res.roughness:.4f} asper")   # 0.9999 asper (referencia: 1 asper)
+print(res.roughness > psychoacoustics.PROMINENT_ROUGHNESS_ASPER)   # True: prominente (apartado 7.2)
 
 res.plot()   # aspereza R(l50) dependiente del tiempo + mapa de calor de aspereza específica
 ```
@@ -446,14 +449,15 @@ plt.show()
 
 </details>
 
-**Cómo se lee una aspereza.** El apartado 7.2 da el criterio que la sección de
-tonalidad se guarda: una señal tiene una aspereza *prominente* cuando el valor
-único $R$, el percentil 90 de la $R(l_{50})$ dependiente del tiempo, no su
-media, supera 0,2 asper. El percentil importa: las rachas breves de dureza no
-se promedian hasta desaparecer, lo que también significa que el registro tiene
-que ser lo bastante largo como para que ese percentil se asiente. La figura de
-abajo es el sonido de referencia visto de las dos maneras en que lo lleva el
-objeto de resultado.
+**Cómo se lee una aspereza.** El apartado 7.2 da un único criterio: una señal
+tiene una aspereza *prominente* cuando el valor único $R$, el percentil 90 de
+la $R(l_{50})$ dependiente del tiempo, no su media, supera 0,2 asper, el
+`psychoacoustics.PROMINENT_ROUGHNESS_ASPER` con el que lo compara el fragmento
+de arriba; ninguna función lo aplica. El percentil importa: las rachas breves
+de dureza no se promedian hasta desaparecer, lo que también significa que el
+registro tiene que ser lo bastante largo como para que ese percentil se
+asiente. La figura de abajo es el sonido de referencia visto de las dos
+maneras en que lo lleva el objeto de resultado.
 
 <ThemeImage
   src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sottek_specific_roughness.svg"
@@ -518,8 +522,10 @@ global de 60 dB SPL) se define como 1 vacil_HMS; esta implementación de
 sala limpia converge a 0,9958 vacil_HMS a los 12 s con la constante de
 calibración tabulada $c_\mathrm{F}$ (fórmula 163) usada **sin** reajustarla al objetivo
 (el ejemplo de 8 s de abajo imprime 0,9957). Una señal cuyo valor único $F$
-supera 0,2 vacil_HMS tiene una intensidad de fluctuación *prominente*
-(apartado 9.2).
+supera 0,2 vacil_HMS, `psychoacoustics.PROMINENT_FLUCTUATION_STRENGTH_VACIL_HMS`,
+tiene una intensidad de fluctuación *prominente* (apartado 9.2); ninguna
+función aplica el criterio, que vale solo para esta métrica y no para la
+`fluctuation_strength()` de Osses, en vacil a secas.
 
 ```python
 import numpy as np
@@ -532,6 +538,7 @@ x *= 2e-5 * 10 ** (60 / 20) / np.sqrt(np.mean(x**2))   # 60 dB SPL globales
 
 res = psychoacoustics.fluctuation_strength_ecma(x, fs, field="free")
 print(f"F = {res.fluctuation_strength:.4f} vacil_HMS")   # 0.9957 vacil_HMS (referencia: 1 vacil_HMS)
+print(res.fluctuation_strength > psychoacoustics.PROMINENT_FLUCTUATION_STRENGTH_VACIL_HMS)   # True: prominente (apartado 9.2)
 
 res.plot()   # F(l50) temporal + mapa de calor de la específica
 ```

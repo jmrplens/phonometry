@@ -604,6 +604,12 @@ _RESPELLED_4_0_NAMES = [
     ("signals", "minimum_phase", "min_phase"),
     ("room", "minimum_reliable_reverberation_time", "min_reliable_reverberation_time"),
     ("noise_control", "EnclosureResult", "EnclosureInsertionLossResult"),
+    # The ECMA-418-2 criterion is in vacil_HMS; plain vacil is the Osses unit.
+    (
+        "psychoacoustics",
+        "PROMINENT_FLUCTUATION_STRENGTH_VACIL",
+        "PROMINENT_FLUCTUATION_STRENGTH_VACIL_HMS",
+    ),
 ]
 
 

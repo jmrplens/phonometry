@@ -809,8 +809,8 @@ class _Flow:
             # A check handed NumPy's reading of the value reads a bytearray's
             # codes as numbers: the reading is a conversion no check precedes.
             if "text" in refused and self._numpy_reading(argument, env):
-                kind: Kind = "real" if "complex" in refused else "complex"
-                self._record(call, argument, kind, "unchecked")
+                read: Kind = "real" if "complex" in refused else "complex"
+                self._record(call, argument, read, "unchecked")
         if sure:
             self.check(call, env)
 

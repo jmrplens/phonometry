@@ -1160,6 +1160,22 @@ with tempfile.TemporaryDirectory() as folder:
 # is a directory, and audio is read only from a regular file
 ```
 
+## A path of another library reaches the file it names
+
+`io.write`, `io.read`, `io.info`, `io.read_blocks` and `io.convert` handed a
+path to SciPy and python-soundfile as `str(path)`. For a `str` or a
+`pathlib.Path` that is the path; for any other `os.PathLike`, an `os.DirEntry`
+or a path class of another library, it is the object's repr. In 4.0 each of
+them takes the path the object names, the messages print it, and the
+annotations say `str | os.PathLike[str]`, as the video writers' did. A `str`
+or a `pathlib.Path` behaves as before.
+
+| Passed | 4.0.0rc1 | 4.0 |
+| --- | --- | --- |
+| an `os.PathLike` that is neither a `str` nor a `pathlib.Path`, to `io.write` (a WAV of 16 or 32 bits, a float WAV, a FLAC, or `bext="loudness"`) | the file went to a name made of the object's repr, `<... object at 0x...>`, in the working directory | the file the object names |
+| the same to `io.read`, or as the source of `io.convert`, and a FLAC to `io.info` or `io.read_blocks` | `FileNotFoundError` naming the repr, or python-soundfile's `LibsndfileError` for a FLAC | the file the object names is read |
+| the same to `io.info` | `AudioFileInfo.path` held the repr | `AudioFileInfo.path` is the path |
+
 ## The seventy-eight names that are gone
 
 Everything else moved. These seventy-eight exist in no public module:

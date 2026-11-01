@@ -752,7 +752,7 @@ Plot the trajectory altitude versus along-track distance.
 ## load_anp_database
 
 ```python
-load_anp_database(path: Path | str | None = None) -> ANPDatabase
+load_anp_database(path: str | os.PathLike[str] | None = None) -> ANPDatabase
 ```
 
 Load an EASA ANP database (aircraft, NPD curves and default profiles).

@@ -21,9 +21,11 @@ The environment variable is read when a computation resolves its placement,
 never at import. Its grammar is `device[:index][@host][,option...]` with the
 options `float32`, `float64` and `fallback`: `cupy`, `cupy:1`,
 `torch:cuda:1,fallback`, `torch:mps,float32`, `cupy@nas`. A host is a
-name in the hosts file (see the guide on remote nodes); only
-[`fdtd_simulation`](/phonometry/reference/api/simulation/fdtd/#fdtd_simulation) and
-[`elastic_fdtd_simulation`](/phonometry/reference/api/simulation/elastic-fdtd/#elastic_fdtd_simulation) run on one.
+name in the hosts file (see the guide on remote nodes); only the two
+simulation functions, [`fdtd_simulation`](/phonometry/reference/api/simulation/fdtd/#fdtd_simulation) and
+[`elastic_fdtd_simulation`](/phonometry/reference/api/simulation/elastic-fdtd/#elastic_fdtd_simulation), and the two video
+writers, [`write_fdtd_animation`](/phonometry/reference/api/simulation/video/#write_fdtd_animation) and
+[`write_elastic_fdtd_animation`](/phonometry/reference/api/simulation/video/#write_elastic_fdtd_animation), run on one.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
@@ -51,7 +53,7 @@ Where an FDTD simulation steps, in which dtype, and whether it may fall back.
 | `device_index` | Which GPU, for `"cupy"` and `"torch:cuda"`. |
 | `dtype` | `"float64"` (default) or `"float32"`. |
 | `fallback` | Run on NumPy, with a [`ComputeFallbackWarning`](/phonometry/reference/api/simulation/compute/#computefallbackwarning), when the device is not available, instead of raising. |
-| `host` | The node the run goes to, by its name in the hosts file, or `None` (default) to run on this machine. Only [`fdtd_simulation`](/phonometry/reference/api/simulation/fdtd/#fdtd_simulation) and [`elastic_fdtd_simulation`](/phonometry/reference/api/simulation/elastic-fdtd/#elastic_fdtd_simulation) run on a node; an engine built here refuses a host. |
+| `host` | The node the run goes to, by its name in the hosts file, or `None` (default) to run on this machine. Only [`fdtd_simulation`](/phonometry/reference/api/simulation/fdtd/#fdtd_simulation), [`elastic_fdtd_simulation`](/phonometry/reference/api/simulation/elastic-fdtd/#elastic_fdtd_simulation) and the two video writers, [`write_fdtd_animation`](/phonometry/reference/api/simulation/video/#write_fdtd_animation) and [`write_elastic_fdtd_animation`](/phonometry/reference/api/simulation/video/#write_elastic_fdtd_animation), run on a node; an engine built here refuses a host. |
 | `timeout_s` | The longest a remote run may take, from connecting to the result [s], or `None` for the hosts file's value (no limit when the file names none). Only with a `host`. |
 
 **Raises**

@@ -450,7 +450,6 @@ and never filled from its neighbours.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a frequency that is not finite and positive, for one that matches none of the bands, naming the nearest, and for a band this row does not print, naming the row, the band and what the page had in that cell. |
-| TypeError | if `frequencies` holds a text or a value that is not a real number. |
 
 ### BandedRow.why_missing()
 
@@ -1103,8 +1102,8 @@ Warns that samples exceeded full scale and were saturated on write.
 
 ```python
 convert(
-    src: str | Path,
-    dst: str | Path,
+    src: str | os.PathLike[str],
+    dst: str | os.PathLike[str],
     *,
     subtype: Literal['PCM_16', 'PCM_24', 'PCM_32', 'FLOAT', 'DOUBLE'] | None = None,
     block_size: int | np.integer[Any] = 1048576,
@@ -1165,7 +1164,7 @@ ffmpeg is not where matplotlib looks for it, or cannot run here.
 ## info
 
 ```python
-info(path: str | Path) -> AudioFileInfo
+info(path: str | os.PathLike[str]) -> AudioFileInfo
 ```
 
 Describe an audio file without reading its samples.
@@ -1347,7 +1346,11 @@ PROVENANCE_KINDS = ('datasheet', 'declaration_of_performance', 'test_report', 'm
 ## read
 
 ```python
-read(path: str | Path, *, calibration_factor: float | None = None) -> Signal
+read(
+    path: str | os.PathLike[str],
+    *,
+    calibration_factor: float | None = None,
+) -> Signal
 ```
 
 Read an audio file into a [`Signal`](/phonometry/reference/api/io/io/#signal).
@@ -1399,7 +1402,7 @@ derived from the file's channel mask.
 
 ```python
 read_blocks(
-    path: str | Path,
+    path: str | os.PathLike[str],
     block_size: int | np.integer[Any],
     *,
     overlap: int | np.integer[Any] = 0,
@@ -1509,7 +1512,9 @@ ever imported.
 ## read_sidecar
 
 ```python
-read_sidecar(audio_path: str | Path) -> CalibrationSidecar | None
+read_sidecar(
+    audio_path: str | os.PathLike[str],
+) -> CalibrationSidecar | None
 ```
 
 Read an audio file's calibration sidecar, if one exists.
@@ -1538,7 +1543,7 @@ dropping it would silently drop the calibration).
 ## sidecar_path
 
 ```python
-sidecar_path(audio_path: str | Path) -> Path
+sidecar_path(audio_path: str | os.PathLike[str]) -> Path
 ```
 
 The sidecar filename of an audio file (see the module docstring).
@@ -1589,7 +1594,7 @@ held as a tuple, whatever sequence of texts they were given as.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `calibration_factor` or `fs` is not a single number, or `channel_labels` is one text rather than a sequence of them, or `data` holds a text or a value that is not a real number. |
+| TypeError | if `calibration_factor` or `fs` is not a single number, or `channel_labels` is one text rather than a sequence of them. |
 
 ### Signal.crop()
 
@@ -1839,7 +1844,7 @@ checked when the path is known, still before anything starts.
 
 ```python
 write(
-    path: str | Path,
+    path: str | os.PathLike[str],
     x: Signal | ArrayLike,
     fs: float | np.integer[Any] | None = ...,
     *,
@@ -1851,7 +1856,7 @@ write(
 ) -> None
 
 write(
-    path: str | Path,
+    path: str | os.PathLike[str],
     x: Signal | ArrayLike,
     fs: float | np.integer[Any] | None = ...,
     *,
@@ -2005,11 +2010,11 @@ the reader's own words and naming the file.
 
 ```python
 write_sidecar(
-    audio_path: str | Path,
-    calibration_factor: float | np.floating[Any] | np.integer[Any] | NDArray[np.floating[Any] | np.integer[Any]],
+    audio_path: str | os.PathLike[str],
+    calibration_factor: float,
     *,
-    reference_spl: float | np.floating[Any] | np.integer[Any] | NDArray[np.floating[Any] | np.integer[Any]] | None = None,
-    calibrator_frequency: float | np.floating[Any] | np.integer[Any] | NDArray[np.floating[Any] | np.integer[Any]] | None = None,
+    reference_spl: float | None = None,
+    calibrator_frequency: float | None = None,
     calibrator_model: str | None = None,
     channel_labels: tuple[str, ...] | list[str] | None = None,
 ) -> Path
@@ -2038,9 +2043,9 @@ is at *audio_path* and its channels can be read.
 | Name | Description |
 | :--- | :--- |
 | `audio_path` | The audio file the sidecar belongs to (it need not exist yet; writing the sidecar first is fine). |
-| `calibration_factor` | Digital-to-pascal multiplier (required, a real number as [`CalibrationSidecar`](/phonometry/reference/api/io/io/#calibrationsidecar) takes one, finite and positive). |
-| `reference_spl` | The calibrator's known SPL, dB (e.g. 94.0), a real number as [`CalibrationSidecar`](/phonometry/reference/api/io/io/#calibrationsidecar) takes one. |
-| `calibrator_frequency` | The calibrator tone's nominal frequency, Hz (e.g. 1000.0), a real number as [`CalibrationSidecar`](/phonometry/reference/api/io/io/#calibrationsidecar) takes one. |
+| `calibration_factor` | Digital-to-pascal multiplier (required, a real number, finite and positive). |
+| `reference_spl` | The calibrator's known SPL, dB (e.g. 94.0), a real number. |
+| `calibrator_frequency` | The calibrator tone's nominal frequency, Hz (e.g. 1000.0), a real number. |
 | `calibrator_model` | Free-text calibrator identification. |
 | `channel_labels` | One label per channel of the audio file, a tuple or a list of texts. |
 

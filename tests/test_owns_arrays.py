@@ -792,24 +792,28 @@ def test_a_sequence_the_record_reads_member_by_member_names_its_field() -> None:
     wrong type, which a deque of two arrays is not.
     """
     endless = _holds_itself("list")
+    levels = np.zeros(1)
+    bands = deque([endless])
     with pytest.raises(
         TypeError,
         match=r"OctaveFilterResult: 'bands' holds a container that holds itself",
     ):
         phonometry.filters.OctaveFilterResult(
-            levels=np.zeros(1),
+            levels=levels,
             frequencies=(1000.0,),
-            bands=deque([endless]),  # type: ignore[arg-type]
+            bands=bands,  # type: ignore[arg-type]
         )
     pattern = "a pair (angles_deg, relative_db) of two arrays"
+    endless_pair = deque([endless, [1.0]])
     with pytest.raises(
         TypeError, match=r"^'directivity' holds a container that holds itself"
     ):
-        arrays_of(deque([endless, [1.0]]), "directivity", pattern, 2)
+        arrays_of(endless_pair, "directivity", pattern, 2)
+    polar = deque([endless, [0.0]])
     with pytest.raises(
         TypeError, match=r"^'polar' holds a container that holds itself"
     ):
-        MicrophoneDirectivity(polar=deque([endless, [0.0]]))  # type: ignore[arg-type]
+        MicrophoneDirectivity(polar=polar)  # type: ignore[arg-type]
     pair = arrays_of(deque([[0.0, 1.0], [1.0, 2.0]]), "directivity", pattern, 2)
     np.testing.assert_array_equal(pair[1], [1.0, 2.0])
 
@@ -831,12 +835,11 @@ def test_a_plain_class_names_the_argument_that_holds_itself() -> None:
         match=r"^ANPDatabase: 'distances_m' holds a container that holds itself",
     ):
         phonometry.aircraft.ANPDatabase({}, {}, endless, {})
+    npd = {("a", "b", "c"): (endless, np.zeros(2))}
     with pytest.raises(
         TypeError, match=r"^ANPDatabase: 'npd' holds a container that holds itself"
     ):
-        phonometry.aircraft.ANPDatabase(
-            {}, {("a", "b", "c"): (endless, np.zeros(2))}, [1.0], {}
-        )
+        phonometry.aircraft.ANPDatabase({}, npd, [1.0], {})
     with pytest.raises(TypeError, match="no container that holds itself"):
         frozen.read_only_copy(endless)
 

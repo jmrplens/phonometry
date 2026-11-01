@@ -1737,7 +1737,7 @@ _FIELD = re.compile(r"^:(?P<kind>\w+)(?:\s+(?P<name>[^:`]+))?:(?!`)")
 _WARNING_CLASS = re.compile(r"\b(\w+Warning)\b")
 
 #: The verb or the noun that says a warning is emitted, its class unnamed.
-_WARNING_WORD = re.compile(r"\b(warn(?:s|ed|ing)?)\b", re.IGNORECASE)
+_WARNING_WORD = re.compile(r"\b(warn(?:s|ed|ings?)?)\b", re.IGNORECASE)
 
 
 def _raises_findings(doc: str, first_line: int, where: str) -> list[str]:
@@ -1782,8 +1782,8 @@ def raises_fields_naming_a_warning(source: str, where: str) -> list[str]:
     """Each ``:raises`` field of *source*'s docstrings whose text names or says a warning.
 
     The field's text is read as :func:`_raises_findings` bounds it; a
-    warning's class or the word ``warn``, ``warns``, ``warned`` or
-    ``warning`` anywhere in it is a finding.
+    warning's class or the word ``warn``, ``warns``, ``warned``, ``warning``
+    or ``warnings`` anywhere in it is a finding.
 
     :param source: The text of a Python module.
     :param where: How a finding names the module.
@@ -1813,7 +1813,7 @@ def test_a_raises_field_never_names_a_warning() -> None:
     found = [
         finding
         for path in sorted(SRC.rglob("*.py"))
-        if "Warning" in (text := path.read_text(encoding="utf-8"))
+        if "warn" in (text := path.read_text(encoding="utf-8")).lower()
         for finding in raises_fields_naming_a_warning(
             text, path.relative_to(SRC).as_posix()
         )
@@ -1877,6 +1877,28 @@ def test_the_raises_field_reader_finds_a_warning_its_class_unnamed() -> None:
     )
     assert raises_fields_naming_a_warning(source, "m.py") == [
         "m.py:5 ValueError says warns"
+    ]
+
+
+def test_the_raises_field_reader_reads_the_plural_of_the_word() -> None:
+    """A ``:raises`` field that says a call emits warnings is a finding too.
+
+    The word was read as ``warn``, ``warns``, ``warned`` and ``warning``, so
+    a field that said the run goes on with its warnings, in the plural and
+    with no class, passed; and a module was read only when it held the
+    capitalised ``Warning`` somewhere, so a module that wrote the word in
+    lower case alone was not read at all.
+    """
+    source = (
+        "def f():\n"
+        '    """Lead.\n'
+        "\n"
+        "    :raises ValueError: for a bad level; a quiet one passes with two\n"
+        "        warnings.\n"
+        '    """\n'
+    )
+    assert raises_fields_naming_a_warning(source, "m.py") == [
+        "m.py:5 ValueError says warnings"
     ]
 
 

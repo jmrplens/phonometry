@@ -566,6 +566,133 @@ def test_a_check_is_found_however_the_module_reaches_it(tmp_path: pathlib.Path) 
     assert [finding.describe() for finding in findings] == []
 
 
+def test_a_function_defined_inside_a_block_is_read(tmp_path: pathlib.Path) -> None:
+    """A reader written for one version of Python, or as a fallback, is read too.
+
+    The walk of the functions went from a module, a class or a function only
+    to the definitions directly in it, and the walk of a function's own code
+    stops at the definitions in it, so a function written inside an ``if``,
+    a ``try`` or a ``with`` was read by neither: its open passed unseen, and
+    a check written that way counted for no reader.
+    """
+    assert _found(
+        tmp_path,
+        """
+        import sys
+
+        import numpy as np
+
+        from phonometry._internal.json_input import not_regular_at
+
+        if sys.version_info >= (3, 13):
+            def _sniff(path):
+                return open(path, "rb").read(12)
+        else:
+            def _sniff(path):
+                with Path(path).open("rb") as fh:
+                    return fh.read(12)
+
+        try:
+            import soundfile as sf
+        except ImportError:
+            sf = None
+        else:
+            def _probe(path):
+                return sf.info(str(path))
+
+        class Reader:
+            if sys.platform == "win32":
+                def load(self, path):
+                    return np.load(path)
+
+        def opener(path):
+            with Path(path).parent as folder:
+                def inner(name):
+                    return (folder / name).read_bytes()
+            return inner
+
+        if sys.version_info >= (3, 12):
+            def require(path):
+                if not_regular_at(Path(path)) is not None:
+                    raise ValueError(path)
+
+        def checked(path):
+            require(path)
+            return np.load(path)
+        """,
+    ) == [
+        ("_sniff", _OWN),
+        ("_sniff", _OWN),
+        ("_probe", _FOREIGN),
+        ("Reader.load", _FOREIGN),
+        ("opener.inner", _OWN),
+    ]
+
+
+#: A module whose own check is called ``info``, and readers in which that name
+#: is bound to something else before the call.
+_SHADOWED = """
+import numpy as np
+
+from phonometry._internal.json_input import not_regular_at
+
+def info(path):
+    if not_regular_at(Path(path)) is not None:
+        raise ValueError(path)
+
+def checked(path):
+    info(path)
+    return np.load(path)
+
+def by_an_import(path):
+    from numpy import info
+    info(path)
+    return np.load(path)
+
+def by_a_parameter(info, path):
+    info(path)
+    return np.load(path)
+
+def by_an_assignment(path):
+    info = make_describer()
+    info(path)
+    return np.load(path)
+
+def by_a_loop(path, describers):
+    for info in describers:
+        info(path)
+    return np.load(path)
+
+def outer(path):
+    from numpy import info
+
+    def inner():
+        info(path)
+        return np.load(path)
+
+    return inner
+"""
+
+
+def test_a_name_bound_in_the_reader_s_own_scope_hides_the_module_s_check(
+    tmp_path: pathlib.Path,
+) -> None:
+    """Python looks a name up in the function first, then around it, then the module.
+
+    The module's own functions were looked at before the reader's imports,
+    parameters and assignments, so ``info(path)`` counted as the module's
+    check ``info`` even where the reader had bound ``info`` to ``numpy.info``,
+    to a parameter or to anything else, and the ``np.load`` after it passed.
+    """
+    assert _found(tmp_path, _SHADOWED) == [
+        ("by_an_import", _FOREIGN),
+        ("by_a_parameter", _FOREIGN),
+        ("by_an_assignment", _FOREIGN),
+        ("by_a_loop", _FOREIGN),
+        ("outer.inner", _FOREIGN),
+    ]
+
+
 def test_the_shared_module_is_the_check_and_is_not_read(tmp_path: pathlib.Path) -> None:
     owner = tmp_path / "phonometry" / "_internal" / "json_input.py"
     owner.parent.mkdir(parents=True)

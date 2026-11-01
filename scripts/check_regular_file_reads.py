@@ -369,10 +369,47 @@ def _parameters(scope: ast.AST) -> set[str]:
     return {parameter.arg for parameter in named}
 
 
+def _stored(scope: ast.AST) -> set[str]:
+    """The names *scope* stores a value in by its own code, a definition aside.
+
+    An assignment, a loop, a ``with ... as``, an ``except ... as`` and the
+    other statements that bind a name; the imports are read by
+    :func:`_imported`, and the functions and classes defined in *scope* are
+    the module's definitions (:func:`_definitions`).
+    """
+    stored = {
+        node.id
+        for node in _own_nodes(scope)
+        if isinstance(node, ast.Name) and isinstance(node.ctx, ast.Store)
+    }
+    stored.update(
+        node.name
+        for node in _own_nodes(scope)
+        if isinstance(node, ast.ExceptHandler) and node.name
+    )
+    return stored
+
+
+def _bound_here(scope: ast.AST) -> frozenset[str]:
+    """The names *scope* binds by anything but a definition, its parameters included.
+
+    What makes a name of the scope its own, so that a function of the module
+    of the same name around it is not the one a call reaches.
+    """
+    imported = {
+        name
+        for node in _own_nodes(scope)
+        if isinstance(node, ast.Import | ast.ImportFrom)
+        for name in _imported(node)
+    }
+    return frozenset(_parameters(scope) | _stored(scope) | imported)
+
+
 def _bound(scope: ast.AST, package: str, outer: Mapping[str, str]) -> dict[str, str]:
     """What each name stands for inside *scope*, given what it stands for around it.
 
-    A parameter hides the name around it; then the imports of the scope as
+    A parameter hides the name around it, and so does a name the scope
+    stores anything in (:func:`_stored`); then the imports of the scope as
     :func:`_imported` reads them, the relative ones from *package*; then a
     name bound by an assignment to a dotted name (``snd = soundfile``,
     ``reader = sf.read``) stands for what that name stands for, the
@@ -380,7 +417,7 @@ def _bound(scope: ast.AST, package: str, outer: Mapping[str, str]) -> dict[str, 
     classes in *scope* bind is theirs.
     """
     aliases = dict(outer)
-    for name in _parameters(scope):
+    for name in _parameters(scope) | _stored(scope):
         aliases.pop(name, None)
     assignments: list[tuple[str, list[str], tuple[int, int]]] = []
     for node in _own_nodes(scope):
@@ -476,7 +513,12 @@ def _foreign_read(call: ast.Call, aliases: Mapping[str, str]) -> bool:
 
 
 def _functions(tree: ast.AST) -> Iterator[tuple[str, ast.AST]]:
-    """Every function and class body with its qualified name, and the module as ``<module>``."""
+    """Every function and class body with its qualified name, and the module as ``<module>``.
+
+    A function written inside an ``if``, a ``try``, a ``with`` or a loop
+    (one for a version of Python, or a fallback) is read as well, named as
+    Python names it, by the functions and classes around it alone.
+    """
 
     def walk(node: ast.AST, scope: str) -> Iterator[tuple[str, ast.AST]]:
         for child in ast.iter_child_nodes(node):
@@ -484,6 +526,10 @@ def _functions(tree: ast.AST) -> Iterator[tuple[str, ast.AST]]:
                 inner = f"{scope}.{child.name}" if scope else child.name
                 yield inner, child
                 yield from walk(child, inner)
+            else:
+                # An ``if``, a ``try`` or a ``with`` opens no scope: a
+                # function written in one is the scope's own.
+                yield from walk(child, scope)
 
     yield "<module>", tree
     yield from walk(tree, "")
@@ -513,6 +559,10 @@ class _Scope:
     #: The functions and classes the module defines, by their qualified
     #: names, ``True`` for a class.
     defined: Mapping[str, bool] = field(default_factory=dict)
+    #: The names each scope of the module binds by anything but a
+    #: definition (:func:`_bound_here`), by the qualified name of the scope,
+    #: empty for the module.
+    bound: Mapping[str, frozenset[str]] = field(default_factory=dict)
 
     @property
     def qualified(self) -> str:
@@ -543,7 +593,11 @@ def _package_of(path: pathlib.Path, module: str) -> str:
 
 
 def _definitions(tree: ast.AST) -> dict[str, bool]:
-    """Each function and class *tree* defines, by its qualified name, ``True`` for a class."""
+    """Each function and class *tree* defines, by its qualified name, ``True`` for a class.
+
+    One written inside an ``if``, a ``try`` or a ``with`` too, as
+    :func:`_functions` reads it.
+    """
     defined: dict[str, bool] = {}
 
     def walk(node: ast.AST, scope: str) -> None:
@@ -552,6 +606,8 @@ def _definitions(tree: ast.AST) -> dict[str, bool]:
                 inner = f"{scope}.{child.name}" if scope else child.name
                 defined[inner] = isinstance(child, ast.ClassDef)
                 walk(child, inner)
+            else:
+                walk(child, scope)
 
     walk(tree, "")
     return defined
@@ -612,7 +668,10 @@ def _local(name: str, scope: _Scope) -> str | None:
 
     Looked up as Python looks a name up: in the function or class body
     itself, in the functions around it (a class around it is skipped, as
-    Python skips it), then at the top of the module.
+    Python skips it), then at the top of the module. A scope that binds the
+    name otherwise, by a parameter, an import or an assignment, ends the
+    search with none: the name is that binding's, which *scope*'s aliases
+    say, not a function of the module further out.
     """
     parts = [] if scope.name == "<module>" else scope.name.split(".")
     for end in range(len(parts), -1, -1):
@@ -622,6 +681,8 @@ def _local(name: str, scope: _Scope) -> str | None:
         candidate = f"{prefix}.{name}" if prefix else name
         if candidate in scope.defined:
             return f"{scope.module}.{candidate}"
+        if name in scope.bound.get(prefix, frozenset()):
+            return None
     return None
 
 
@@ -638,8 +699,11 @@ def qualified_callee(
 
     ``self.f()`` and ``cls.f()`` in a method reach ``f`` of its class; a bare
     or dotted name is read through the functions of the module and the
-    functions around the call, then through what the module imports, and
-    followed through :func:`exports_of`. A call that starts from anything
+    functions around the call, as far as the nearest scope that binds the
+    name otherwise (:func:`_local`), then through what that scope's imports
+    and assignments make it, and followed through :func:`exports_of`; a
+    parameter, or a name stored from a call, is no function of the library.
+    A call that starts from anything
     else (``handle.read_at_most(path)``, ``np.info(path)`` once ``np`` is
     NumPy) reaches no function of the library.
     """
@@ -663,9 +727,16 @@ def _scopes(path: pathlib.Path, tree: ast.AST) -> list[_Scope]:
     module = module_name(path)
     aliases = aliases_of(tree, _package_of(path, module))
     defined = _definitions(tree)
+    functions = list(_functions(tree))
+    bound = {
+        "" if name == "<module>" else name: _bound_here(node)
+        for name, node in functions
+    }
     return [
-        _Scope(path, name, node, _own_calls(node), aliases[node], module, defined)
-        for name, node in _functions(tree)
+        _Scope(
+            path, name, node, _own_calls(node), aliases[node], module, defined, bound
+        )
+        for name, node in functions
     ]
 
 

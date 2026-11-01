@@ -7,12 +7,13 @@ A weighting filter designed by phonometry is the same filter, byte for byte,
 on every machine that shares a C library: any CPU, with or without AVX-512;
 any BLAS kernel set; any thread count; any hash seed. Across C libraries it
 is not, yet: Linux, macOS and Windows each design their own bytes for the
-same filter, because a handful of transcendentals still come from the
-platform's `math`, and this page names them and measures what they do. On one
-platform the coefficients a laptop designs are the coefficients a cluster
-designs, so a conformance verdict, a published figure or a filter shipped
-inside a measurement chain is a reproducible artifact rather than one
-machine's account of itself.
+same filter, because one transcendental still comes from the platform's
+`math`: every other routine the design takes is spelled in arithmetic
+IEEE&nbsp;754 fixes, and this page names the one left and measures what it
+does. On one platform the coefficients a laptop designs are the
+coefficients a cluster designs, so a conformance verdict, a published figure
+or a filter shipped inside a measurement chain is a reproducible artifact
+rather than one machine's account of itself.
 
 That sentence is not how scientific Python normally behaves, and this page
 records what it cost, with the numbers.
@@ -50,13 +51,15 @@ every step downstream inherited it.
 half an ulp, which means that on a handful of inputs they legitimately round
 to *opposite* neighbours, so a design loop built on `math.log` returned
 different filters on macOS than on Linux with nothing anywhere to say so.
-The same holds for every other transcendental the C library ships, which is
-why the evidence below still finds three sets of bytes.
+The same held for every other transcendental the C library ships, which is
+why the A weighting at 48&nbsp;kHz once hashed to three values on the three
+platforms the CI matrix runs.
 
 ## What phonometry pins
 
 The deterministic design path answers each door in kind, in
-`filters._weighting_design` and `filters._pinned_log`:
+`filters._weighting_design` and the pinned modules beside it,
+`filters._pinned_log`, `filters._pinned_exp` and `filters._pinned_trig`:
 
 - **Its own reductions.** Every sum the fit compares or solves with is folded
   pairwise in a shape fixed by the code, and the normal equations are solved
@@ -68,29 +71,24 @@ The deterministic design path answers each door in kind, in
   and complex magnitude fuse operations differently per CPU, so the two
   places the path handed numpy a complex expression are written out in real
   arithmetic.
-- **Pinned transcendentals.** Every transcendental but the logarithm inside
-  the fit is taken from the C library one element at a time, so no CPU's
-  kernel chooses it. Most of those functions run once per design: an `atan`
-  and a `pow` for each point of the frequency grid, three `tan`, two
-  `log10`, five `log`, two `sin`, and an `exp` of each fitted parameter when
-  the factors become roots, about thirty calls. Two run inside the iteration
-  as well, on far fewer elements than the logarithm: `exp` of the fitted
-  parameters at every evaluation of the response, about ten thousand calls a
-  design, and `pow` of the residual in every Lawson round, about two
-  thousand. The Lawson exponent is 1, for which glibc's `pow` returns its
-  argument unchanged (macOS and Windows were not measured), so that `pow`
-  cannot separate platforms whose C library does the same. The others are
-  the one place a platform's libm still enters a design, and they are enough
-  to separate the platforms: the evidence below has the three digests.
-  Spelling them in pinned numpy the way the logarithm is spelled is the
-  remaining step to one digest everywhere. Inside the iteration, the
-  logarithm runs three quarters of a million times per design, and the loop
-  that once pinned it cost a factor of four; it is now glibc's own
-  table-driven `log` algorithm spelled in numpy operations IEEE&nbsp;754
-  fixes exactly, plain arithmetic, integer bit work and table lookups, with
-  the fused multiply-adds of the original reproduced through exact
-  error-free transformations. Its bits are its own on every machine, which
-  is stronger than calling anyone's libm.
+- **Pinned transcendentals.** Inside the iteration, the logarithm runs three
+  quarters of a million times per design, the exponential once per factor
+  per evaluation, and the power once per grid point in every Lawson round.
+  Each is glibc's own routine spelled in numpy operations IEEE&nbsp;754 fixes
+  exactly, plain arithmetic, integer bit work and table lookups: the
+  table-driven `log` and the `log10` built on it, and the `exp` and `pow` of
+  ARM's optimized-routines as glibc compiles them for a processor with a
+  fused multiply-add, every multiply-add that build fuses reproduced by an
+  exact emulation (rounding to odd, after Boldo and Melquiond). The sine,
+  taken twice per design, the tangent, three times, and the magnitude of a
+  complex root are correctly rounded, in exact integer arithmetic. Their bits
+  are their own on every machine, which is stronger than calling anyone's
+  libm. One call is still the platform's: the arctangent, once per design
+  over the 257 points of the frequency grid. Spelling it the same way is the
+  remaining step to one digest everywhere, and the correctly rounded value
+  will not do it alone: glibc's own arctangent rounds 19 of the
+  15&nbsp;866 arctangents the corpus evaluates the other way, so only its
+  own routine keeps the shipped Linux coefficients where they are.
 - **The grid spelled out.** The geometric frequency grid is generated term
   for term with the endpoints pinned, so the fit evaluates the same
   frequencies everywhere.
@@ -111,23 +109,51 @@ run in CI:
   design, because on the design path the pinned routine *is* the definition.
 - **The corpus is byte-identical.** The designs of seven curves at nineteen
   sampling rates, 133 in all, hash to the same single SHA-256 before and
-  after the logarithm was vectorised: no shipped coefficient, figure or
-  conformance value moved.
+  after the logarithm was vectorised, and again after the exponential, the
+  power, the base-10 logarithm, the sine, the tangent and the complex
+  magnitudes were pinned: no shipped coefficient, figure or conformance value
+  moved.
+- **The exponential and the power, bit for bit.** Every distinct value the
+  corpus hands `exp` (677&nbsp;596 of them) and `pow` (580&nbsp;455) returns
+  glibc's bits, and so does each of 120 million draws over each routine's
+  domain, the edges of overflow and underflow and the subnormal results
+  included. The fused multiply-add emulation returns the C library's `fma`
+  on every one of 30 million draws, half of them nearly cancelling.
+- **Correctly rounded where glibc is.** On the 70 sines, 105 tangents and 67
+  complex magnitudes the corpus evaluates, glibc returns the correctly
+  rounded value, so the correctly rounded routines return its bits there.
+  Away from the corpus that rests on glibc's accuracy rather than on a
+  proof: over every integer sampling rate from 100&nbsp;Hz to 200&nbsp;kHz,
+  2&nbsp;933 of the 799&nbsp;604 (rate, curve) designs meet a sine or a
+  tangent glibc rounds the other way, and those designs moved when the two
+  were pinned, by what one ulp of a start grows into through the fit. None is
+  at a rate the library is checked at; of the common rates, only 50&nbsp;kHz,
+  for A, B, C and D.
+- **No C library left but the arctangent's.** With every result the C
+  library returns to a design pushed one unit in the last place, by a shim
+  between Python and the C library, the designs do not move, except when the
+  arctangent's is pushed, which moves them all. Under musl, another C
+  library, the whole corpus hashes to glibc's SHA-256 once the arctangent
+  agrees, and so do the A and D weightings at 48&nbsp;kHz under glibc and
+  musl on 64-bit ARM, the processor family of the macOS leg of the CI
+  matrix, run in emulation.
 - **Digest for digest across environments.** The designs are bit-identical
   between this host and the same host under AVX-512 emulation, under every
   selectable OpenBLAS kernel set, every thread count and every hash seed;
   the environment-versus-environment comparisons are pinned as tests.
-- **Each platform its own bytes, measured.** With the logarithm pinned, a
-  design no longer depends on which `log` the C library ships, but the
-  other transcendentals still do, and they are enough: the A weighting at
-  48&nbsp;kHz hashes to `991833ff389afe91` on Linux (glibc, x86-64),
-  `4efa1818bd80e23a` on macOS (arm64) and `79852a57e60961c8` on Windows
-  (x86-64), the same value under Python 3.13 and 3.14 on each. The three
-  digests are pinned as a test in the CI matrix, so a platform that drifts
-  from its own value turns CI red. The response tests that run on the same
-  three platforms hold the A design within 0.013&nbsp;dB of its analog
-  prototype everywhere in its fit band, which bounds what the three byte
-  strings can differ by in response.
+- **One digest on three platforms, the arctangent aside.** With only the
+  logarithm pinned, the A weighting at 48&nbsp;kHz hashed to
+  `991833ff389afe91` on Linux (glibc, x86-64), `4efa1818bd80e23a` on macOS
+  (arm64) and `79852a57e60961c8` on Windows (x86-64). Now a test in the CI
+  matrix designs it with a correctly rounded arctangent of its own, which is
+  glibc's on all 257 points of that grid, and holds `991833ff389afe91` on all
+  three platforms: nothing else of the platform reaches the design. The
+  design a macOS or Windows machine ships still takes its arctangent from the
+  platform, so its bytes are Linux's wherever that arctangent agrees with
+  glibc's on the grid. The response tests that run on the same three
+  platforms hold the A design within 0.013&nbsp;dB of its analog prototype
+  everywhere in its fit band, which bounds what any difference left can
+  amount to in response.
 
 ## See it yourself
 
@@ -146,9 +172,9 @@ print(digest[:16])                                       # 991833ff389afe91 on L
 
 The second line is the point: those sixteen hex digits, the head of the
 SHA-256, are not "what my machine got", they are the digest of this release's
-A weighting at 48&nbsp;kHz on any glibc Linux machine on x86-64, the leg the
-CI matrix pins, and the evidence above gives the macOS and Windows values to
-expect. If a future release moves a
+A weighting at 48&nbsp;kHz on any glibc Linux machine, the leg the CI matrix
+pins, and on any other platform whose arctangent agrees with glibc's on the
+grid. If a future release moves a
 coefficient deliberately, the digest moves with it and the change is a
 documented event, never a property of your hardware.
 
@@ -162,14 +188,24 @@ ordinary form remain reproducible on one machine but may differ in the last
 bits across CPUs, which is the normal condition of scientific Python; the
 deterministic treatment is applied where a filter's identity matters.
 
+Two steps of the realised cascade go through a library rather than the C
+library: the poles of the BS.468-4 prototype are numpy's polynomial roots,
+which LAPACK computes, and the second-order sections are formed by SciPy,
+whose polynomial products go through the BLAS. Both give the same bytes under
+every OpenBLAS kernel set and on the 64-bit ARM and musl builds measured; a
+BLAS that fused those products would move the D and G designs, measured by
+fusing them on purpose, and the Accelerate framework the macOS build of numpy
+links is not measured here.
+
 The full engineering account lives with the code, in the module docstrings of
-[`filters/_weighting_design.py`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/filters/_weighting_design.py)
-and
+[`filters/_weighting_design.py`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/filters/_weighting_design.py),
 [`filters/_pinned_log.py`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/filters/_pinned_log.py),
+[`filters/_pinned_exp.py`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/filters/_pinned_exp.py)
+and
+[`filters/_pinned_trig.py`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/filters/_pinned_trig.py),
 and the tests that hold it are in
 [`tests/filters/test_weighting_design.py`](https://github.com/jmrplens/phonometry/blob/main/tests/filters/test_weighting_design.py)
-and
-[`tests/filters/test_pinned_log.py`](https://github.com/jmrplens/phonometry/blob/main/tests/filters/test_pinned_log.py).
+and the three `tests/filters/test_pinned_*.py` beside it.
 
 ## See also
 

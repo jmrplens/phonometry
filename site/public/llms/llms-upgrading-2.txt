@@ -1234,6 +1234,7 @@ up to 0.07 dB on white noise: the section on filter classes above says how.
 | `room.open_plan_metrics` where the STI never falls to the threshold | a distraction or privacy distance of 10¹⁵ m or more | NaN |
 | `effective_kappa` and `thermal_boundary_layer_thickness` left at their default air | the five values ISO 9053-2 Annex A.3 prints | the air of IEC 61094-2 at the same state, which moves the correction in its fifth figure, as the section on `fluid=` says |
 | a value that lands exactly on a limit a standard prints | judged by the last bits of its floating-point value | settled to nine decimal places first, the same on every machine |
+| `WeightingFilter.sos` on macOS and Windows, and on Linux at a few rates the library is not checked at | each platform's C library rounded the design's exponentials, powers, logarithms, sines and tangents its own way, so the A weighting at 48 kHz had a digest per platform (4.0.0rc1) | only the arctangent is still the C library's, so the bytes are Linux's wherever the platform's arctangent agrees with glibc's on the frequency grid, and within the same 0.013 dB in response where it does not; on Linux no design the library is checked at moves, and of 799 604 (rate, curve) designs at integer rates from 100 Hz to 200 kHz, 2 933 move, 50 kHz for A, B, C and D the only common rate among them |
 
 The ISO 3382 fiche of a one-third-octave analysis takes its single-number
 reverberation time over the six bands from 400 Hz to 1250 Hz, as clause 9.1

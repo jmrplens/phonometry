@@ -20,7 +20,7 @@ import numpy as np
 import pytest
 
 from phonometry.filters import _weighting_design
-from phonometry.filters._pinned_log import _fused_multiply_add, pinned_log
+from phonometry.filters._pinned_log import _fused_multiply_add, pinned_log, pinned_log10
 from phonometry.filters.weighting import _analog_weighting_zpk, _fit_band
 
 
@@ -219,3 +219,67 @@ def test_within_one_ulp_of_the_local_libm_everywhere() -> None:
         sign_reference, -(ordered_reference & 0x7FFFFFFFFFFFFFFF), ordered_reference
     )
     assert int(np.abs(ordered_mine - ordered_reference).max()) <= 1
+
+
+def _log10_reference(values: np.ndarray) -> np.ndarray:
+    return np.fromiter(map(math.log10, values.tolist()), np.float64, values.size)
+
+
+@_same_libm_only
+def test_log10_bits_match_over_every_binade() -> None:
+    """glibc's ``log10`` over the full positive range, the subnormals included.
+
+    The routine is the SunPro one on top of glibc's ``log``: on a machine whose
+    ``log`` is the routine :func:`pinned_log` spells, the two agree bit for bit.
+    """
+    rng = np.random.default_rng(6)
+    values = np.concatenate(
+        [
+            rng.integers(1, 0x7FF0000000000000, 200_000, dtype=np.uint64).view(
+                np.float64
+            ),
+            np.exp(rng.uniform(-10.0, 30.0, 100_000)),
+            rng.integers(1, 1 << 52, 20_000, dtype=np.uint64).view(np.float64),
+            np.array([1.0, 10.0, 100.0, 0.1, 2.0, 0.5]),
+        ]
+    )
+    mine = pinned_log10(values)
+    reference = _log10_reference(values)
+    assert not (mine.view(np.uint64) != reference.view(np.uint64)).any()
+
+
+@_same_libm_only
+def test_every_log10_input_of_a_real_design_matches(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The two ends of the frequency grid, as an actual design takes them."""
+    captured: list[np.ndarray] = []
+    original = pinned_log10
+
+    def spy(values: np.ndarray) -> np.ndarray:
+        captured.append(np.asarray(values, dtype=np.float64).reshape(-1).copy())
+        return original(values)
+
+    monkeypatch.setattr(_weighting_design, "pinned_log10", spy)
+    zeros, poles, _ = _analog_weighting_zpk("A")
+    band = _fit_band("A", 48000)
+    _weighting_design.design_sos(zeros, poles, 48000.0, band, 4, 1000.0)
+    assert captured, "the design evaluated no base-10 logarithm"
+    values = np.concatenate(captured)
+    mine = pinned_log10(values)
+    np.testing.assert_array_equal(
+        mine.view(np.uint64), _log10_reference(values).view(np.uint64)
+    )
+
+
+def test_log10_specials_follow_math_log10() -> None:
+    """Exact powers of ten, ``inf`` and ``nan``; zero and negatives raise."""
+    np.testing.assert_array_equal(
+        pinned_log10(np.array([1.0, 10.0, 1000.0])), [0.0, 1.0, 3.0]
+    )
+    assert pinned_log10(np.array([np.inf]))[0] == np.inf
+    assert math.isnan(pinned_log10(np.array([np.nan]))[0])
+    for bad in (0.0, -1.0, -np.inf):
+        with pytest.raises(ValueError, match="math domain error"):
+            pinned_log10(np.array([1.0, bad]))
+    assert pinned_log10(np.empty((0, 2))).shape == (0, 2)

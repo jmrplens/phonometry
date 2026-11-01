@@ -85,7 +85,7 @@ import numpy as np
 
 from .._internal.validation import real_array
 
-__all__ = ["pinned_log"]
+__all__ = ["pinned_log", "pinned_log10"]
 
 # The table and polynomial constants below are copied from ARM's
 # optimized-routines, math/log_data.c, and are redistributed under that
@@ -612,3 +612,63 @@ def pinned_log(values: np.ndarray) -> np.ndarray:
     if not finite.all():
         out[~finite] = np.where(np.isnan(flat[~finite]), np.nan, np.inf)
     return out.reshape(np.shape(values))
+
+
+# pinned_log10 below is glibc's e_log10.c, which carries this notice:
+#
+#   Copyright (C) 1993 by Sun Microsystems, Inc. All rights reserved.
+#
+#   Developed at SunPro, a Sun Microsystems, Inc. business.
+#   Permission to use, copy, modify, and distribute this
+#   software is freely granted, provided that this notice
+#   is preserved.
+
+#: ``1 / ln 10`` and ``log10(2)`` split high and low, from e_log10.c.
+_INV_LN10 = float.fromhex("0x1.bcb7b1526e50ep-2")
+_LOG10_2_HI = float.fromhex("0x1.34413509f6000p-2")
+_LOG10_2_LO = float.fromhex("0x1.9fef311f12b36p-42")
+
+
+def pinned_log10(values: np.ndarray) -> np.ndarray:
+    """``log10`` elementwise, the bits glibc returns, on every machine.
+
+    glibc's ``log10`` is the SunPro routine: the exponent ``k`` is split off,
+    the mantissa is brought into ``[0.5, 1)`` when ``k`` is negative and
+    ``[1, 2)`` otherwise, and ``log10 x = k log10(2) + log(m) / ln 10`` with
+    ``log10(2)`` in two parts. Its logarithm is the C library's ``log``, which
+    :func:`pinned_log` spells, and the routine itself is compiled without a
+    fused multiply-add, so the three products and two sums here are its own,
+    in its order. Domain errors follow :func:`math.log10`.
+
+    :param values: Any real array-like of positive values.
+    :return: The base-10 logarithm, elementwise, in the same shape.
+    :raises ValueError: If any element is zero or negative.
+    """
+    x = np.asarray(values, dtype=np.float64)
+    flat = np.ascontiguousarray(x).reshape(-1)
+    if not flat.size:
+        return np.empty(x.shape, dtype=np.float64)
+    if ((flat <= 0.0) & ~np.isnan(flat)).any():
+        message = "math domain error"
+        raise ValueError(message)
+    out = np.empty(flat.size, dtype=np.float64)
+    special = ~np.isfinite(flat)
+    out[special] = flat[special] + flat[special]
+    work = flat[~special]
+    k = np.zeros(work.size, dtype=np.int64)
+    subnormal = work < np.finfo(np.float64).tiny
+    if subnormal.any():
+        work = work.copy()
+        work[subnormal] *= float.fromhex("0x1p54")
+        k[subnormal] -= 54
+    bits = work.view(np.int64)
+    k += (bits >> np.int64(52)) - 1023
+    negative = (k < 0).astype(np.int64)
+    mantissa = (
+        (bits & np.int64(0x000FFFFFFFFFFFFF))
+        | ((np.int64(0x3FF) - negative) << np.int64(52))
+    ).view(np.float64)
+    y = (k + negative).astype(np.float64)
+    z = _INV_LN10 * pinned_log(mantissa) + y * _LOG10_2_LO
+    out[~special] = z + y * _LOG10_2_HI
+    return out.reshape(x.shape)

@@ -7,13 +7,15 @@ Un filtro de ponderación diseñado por phonometry es el mismo filtro, byte a
 byte, en cualquier máquina que comparta biblioteca C: cualquier CPU, con o
 sin AVX-512; cualquier juego de kernels BLAS; cualquier número de hilos;
 cualquier semilla de hash. Entre bibliotecas C todavía no: Linux, macOS y
-Windows diseñan cada uno sus propios bytes para el mismo filtro, porque un
-puñado de trascendentes sigue saliendo del `math` de la plataforma, y esta
-página las nombra y mide lo que hacen. Dentro de una plataforma, los
-coeficientes que diseña un portátil son los que diseña un clúster, así que un
-veredicto de conformidad, una figura publicada o un filtro embarcado en una
-cadena de medida es un artefacto reproducible y no el relato de una máquina
-sobre sí misma.
+Windows diseñan cada uno sus propios bytes para el mismo filtro, porque una
+trascendente sigue saliendo del `math` de la plataforma: cada una de las
+demás rutinas que toma el diseño está escrita en aritmética que
+IEEE&nbsp;754 fija, y esta página nombra la que queda y mide lo que hace.
+Dentro de una
+plataforma, los coeficientes que diseña un portátil son los que diseña un
+clúster, así que un veredicto de conformidad, una figura publicada o un
+filtro embarcado en una cadena de medida es un artefacto reproducible y no
+el relato de una máquina sobre sí misma.
 
 Esa frase no es el comportamiento normal del Python científico, y esta página
 registra lo que costó, con los números.
@@ -53,14 +55,16 @@ bajo AVX-512, y todos los pasos aguas abajo la heredaban.
 hasta cerca de media ulp, lo que significa que en un puñado de entradas
 redondean legítimamente a vecinos *opuestos*, así que un bucle de diseño
 construido sobre `math.log` devolvía filtros distintos en macOS y en Linux
-sin nada en ningún sitio que lo dijera. Lo mismo vale para cualquier otra
-trascendente que traiga la biblioteca C, y por eso la evidencia de abajo
-sigue encontrando tres juegos de bytes.
+sin nada en ningún sitio que lo dijera. Lo mismo valía para cualquier otra
+trascendente que traiga la biblioteca C, y por eso la ponderación A a
+48&nbsp;kHz llegó a dar tres digests en las tres plataformas de la matriz de
+CI.
 
 ## Qué fija phonometry
 
 El camino de diseño determinista responde a cada puerta en su terreno, en
-`filters._weighting_design` y `filters._pinned_log`:
+`filters._weighting_design` y los módulos fijados que lo acompañan,
+`filters._pinned_log`, `filters._pinned_exp` y `filters._pinned_trig`:
 
 - **Sus propias reducciones.** Cada suma que el ajuste compara o con la que
   resuelve se pliega por pares en una forma que fija el código, y las
@@ -74,30 +78,26 @@ El camino de diseño determinista responde a cada puerta en su terreno, en
   el módulo complejo fusionan operaciones de forma distinta por CPU, así que
   los dos puntos donde el camino entregaba a numpy una expresión compleja
   están escritos en aritmética real.
-- **Trascendentes fijadas.** Toda trascendente salvo el logaritmo dentro del
-  ajuste se toma de la biblioteca C elemento a elemento, así que ningún
-  kernel de CPU la elige. Casi todas esas funciones corren una vez por
-  diseño: una `atan` y una `pow` por cada punto de la rejilla de
-  frecuencias, tres `tan`, dos `log10`, cinco `log`, dos `sin` y una `exp`
-  de cada parámetro ajustado al convertir los factores en raíces, unas
-  treinta llamadas. Dos corren también dentro de la iteración, sobre muchos
-  menos elementos que el logaritmo: `exp` de los parámetros ajustados en
-  cada evaluación de la respuesta, unas diez mil llamadas por diseño, y
-  `pow` del residuo en cada ronda de Lawson, unas dos mil. El exponente de
-  Lawson es 1, con el que la `pow` de glibc devuelve su argumento sin cambio
-  (macOS y Windows no se midieron), así que esa `pow` no puede separar
-  plataformas cuya biblioteca C haga lo mismo. Las demás son el único punto
-  por el que la libm de la plataforma sigue entrando en un diseño, y bastan
-  para separar las plataformas: la evidencia de abajo trae los tres digests.
-  Deletrearlas en numpy fijado como está deletreado el logaritmo es el paso
-  que falta para un único digest en todas partes. Dentro de la iteración, el
-  logaritmo corre tres cuartos de millón de veces por diseño, y el bucle que
-  lo fijaba costó un factor cuatro; ahora es el propio algoritmo de `log` de
-  glibc, el de tablas, deletreado en operaciones numpy que IEEE&nbsp;754
-  fija exactamente, aritmética simple, trabajo de bits enteros y consultas
-  de tabla, con los multiply-add fusionados del original reproducidos por
-  transformaciones exactas libres de error. Sus bits son suyos en toda
-  máquina, que es más fuerte que llamar a la libm de nadie.
+- **Trascendentes fijadas.** Dentro de la iteración, el logaritmo corre tres
+  cuartos de millón de veces por diseño, la exponencial una vez por factor y
+  por evaluación, y la potencia una vez por punto de la rejilla en cada
+  ronda de Lawson. Cada una es la propia rutina de glibc deletreada en
+  operaciones numpy que IEEE&nbsp;754 fija exactamente, aritmética simple,
+  trabajo de bits enteros y consultas de tabla: el `log` de tablas y el
+  `log10` construido sobre él, y el `exp` y la `pow` de optimized-routines de
+  ARM tal como glibc los compila para un procesador con multiply-add
+  fusionado, cada multiply-add que fusiona esa compilación reproducido por
+  una emulación exacta (redondeo a impar, según Boldo y Melquiond). El `sin`,
+  que se toma dos veces por diseño, la `tan`, tres, y el módulo de una
+  raíz compleja salen correctamente redondeados, en aritmética entera
+  exacta. Sus bits son suyos en toda máquina, que es más fuerte que llamar a
+  la libm de nadie. Una llamada sigue siendo de la plataforma: la
+  arcotangente, una vez por diseño sobre los 257 puntos de la rejilla de
+  frecuencias. Deletrearla igual es el paso que falta para un único digest en
+  todas partes, y el valor correctamente redondeado no basta por sí solo: la
+  arcotangente de glibc redondea al otro lado 19 de las 15&nbsp;866
+  arcotangentes que evalúa el corpus, así que solo su propia rutina deja los
+  coeficientes publicados en Linux donde están.
 - **La rejilla deletreada.** La rejilla geométrica de frecuencias se genera
   término a término con los extremos fijados, así que el ajuste evalúa las
   mismas frecuencias en todas partes.
@@ -121,23 +121,53 @@ corren en CI:
   definición.
 - **El corpus es byte-idéntico.** Los diseños de siete curvas a diecinueve
   frecuencias de muestreo, 133 en total, dan el mismo SHA-256 único antes y
-  después de vectorizar el logaritmo: ningún coeficiente, figura ni valor de
-  conformidad publicado se movió.
+  después de vectorizar el logaritmo, y otra vez después de fijar la
+  exponencial, la potencia, el logaritmo decimal, `sin`, `tan` y los
+  módulos complejos: ningún coeficiente, figura ni valor de conformidad
+  publicado se movió.
+- **La exponencial y la potencia, bit a bit.** Cada valor distinto que el
+  corpus pasa a `exp` (677&nbsp;596) y a `pow` (580&nbsp;455) devuelve los
+  bits de glibc, y también cada uno de 120 millones de sorteos sobre el
+  dominio de cada rutina, con los bordes del desbordamiento y del
+  subdesbordamiento y los resultados subnormales. La emulación del
+  multiply-add fusionado devuelve el `fma` de la biblioteca C en cada uno de
+  30 millones de sorteos, la mitad casi cancelándose.
+- **Correctamente redondeado donde glibc lo está.** En los 70 valores de `sin`,
+  los 105 de `tan` y los 67 módulos complejos que evalúa el corpus, glibc devuelve
+  el valor correctamente redondeado, así que las rutinas correctamente
+  redondeadas devuelven ahí sus bits. Fuera del corpus eso descansa en la
+  precisión de glibc y no en una prueba: de todas las frecuencias de
+  muestreo enteras entre 100&nbsp;Hz y 200&nbsp;kHz, 2&nbsp;933 de los
+  799&nbsp;604 diseños (frecuencia, curva) encuentran un `sin` o una `tan`
+  que glibc redondea al otro lado, y esos diseños se movieron al fijarlos, en
+  lo que una ulp del arranque crece a través del ajuste. Ninguno está en una
+  frecuencia con la que se comprueba la biblioteca; de las frecuencias
+  habituales, solo 50&nbsp;kHz, para A, B, C y D.
+- **Ninguna biblioteca C salvo la de la arcotangente.** Con cada resultado que
+  la biblioteca C devuelve a un diseño empujado una unidad en el último
+  lugar, mediante una capa entre Python y la biblioteca C, los diseños no se
+  mueven, salvo cuando se empuja el de la arcotangente, que los mueve todos.
+  Con musl, otra biblioteca C, el corpus entero da el SHA-256 de glibc en
+  cuanto la arcotangente coincide, y lo mismo las ponderaciones A y D a
+  48&nbsp;kHz con glibc y con musl en ARM de 64 bits, la familia de
+  procesadores de la pata de macOS de la matriz de CI, en emulación.
 - **Digest a digest entre entornos.** Los diseños son bit-idénticos entre
   este host y el mismo host bajo emulación AVX-512, bajo cada juego de
   kernels de OpenBLAS seleccionable, cada número de hilos y cada semilla de
   hash; las comparaciones entorno contra entorno están fijadas como tests.
-- **Cada plataforma sus bytes, medidos.** Con el logaritmo fijado, un diseño
-  ya no depende de qué `log` traiga la biblioteca C, pero las demás
-  trascendentes sí, y bastan: la ponderación A a 48&nbsp;kHz da
-  `991833ff389afe91` en Linux (glibc, x86-64), `4efa1818bd80e23a` en macOS
-  (arm64) y `79852a57e60961c8` en Windows (x86-64), el mismo valor con
-  Python 3.13 y 3.14 en cada una. Los tres digests están fijados como test
-  en la matriz de CI, así que una plataforma que derive de su propio valor
-  pone el CI en rojo. Los tests de respuesta que corren en esas tres
-  plataformas sujetan el diseño A a 0,013&nbsp;dB de su prototipo analógico
-  en toda su banda de ajuste, lo que acota en cuánto pueden diferir en
-  respuesta los tres juegos de bytes.
+- **Un digest en tres plataformas, salvo la arcotangente.** Con solo el
+  logaritmo fijado, la ponderación A a 48&nbsp;kHz daba `991833ff389afe91` en
+  Linux (glibc, x86-64), `4efa1818bd80e23a` en macOS (arm64) y
+  `79852a57e60961c8` en Windows (x86-64). Ahora un test de la matriz de CI la
+  diseña con una arcotangente correctamente redondeada propia, que es la de
+  glibc en los 257 puntos de esa rejilla, y sostiene `991833ff389afe91` en
+  las tres plataformas: nada más de la plataforma llega al diseño. El diseño
+  que entrega una máquina macOS o Windows sigue tomando la arcotangente de
+  la plataforma, así que sus bytes son los de Linux allí donde esa
+  arcotangente coincide con la de glibc en la rejilla. Los tests de respuesta
+  que corren en esas tres plataformas sujetan el diseño A a 0,013&nbsp;dB de
+  su prototipo analógico en toda su banda de ajuste, lo que acota lo que
+  pueda suponer en respuesta cualquier diferencia que quede.
 
 ## Compruébalo tú
 
@@ -157,8 +187,8 @@ print(digest[:16])                                       # 991833ff389afe91 en L
 La segunda línea es la clave: esos dieciséis dígitos hexadecimales, la
 cabeza del SHA-256, no son «lo que salió en mi máquina», son el digest de la
 ponderación A a 48&nbsp;kHz de esta versión en cualquier máquina Linux con
-glibc en x86-64, la pata que fija la matriz de CI, y la evidencia de arriba da
-los valores que esperar en macOS y Windows. Si una
+glibc, la pata que fija la matriz de CI, y en cualquier otra plataforma cuya
+arcotangente coincida con la de glibc en la rejilla. Si una
 versión futura mueve un coeficiente a propósito, el digest se mueve con ella
 y el cambio es un suceso documentado, nunca una propiedad de tu hardware.
 
@@ -175,15 +205,26 @@ siguen siendo reproducibles en una misma máquina pero pueden diferir en los
 el tratamiento determinista se aplica donde importa la identidad de un
 filtro.
 
+Dos pasos de la cascada realizada pasan por una biblioteca y no por la
+biblioteca C: los polos del prototipo de BS.468-4 son las raíces
+polinómicas de numpy, que calcula LAPACK, y las secciones de segundo orden
+las forma SciPy, cuyos productos de polinomios pasan por el BLAS. Los dos
+dan los mismos bytes con cada juego de kernels de OpenBLAS y en las
+compilaciones de ARM de 64 bits y de musl medidas; un BLAS que fusionara
+esos productos movería los diseños D y G, medido fusionándolos a propósito,
+y el framework Accelerate que enlaza la compilación de numpy para macOS no se
+mide aquí.
+
 El relato de ingeniería completo vive con el código, en los docstrings de
 módulo de
-[`filters/_weighting_design.py`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/filters/_weighting_design.py)
-y
+[`filters/_weighting_design.py`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/filters/_weighting_design.py),
 [`filters/_pinned_log.py`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/filters/_pinned_log.py),
+[`filters/_pinned_exp.py`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/filters/_pinned_exp.py)
+y
+[`filters/_pinned_trig.py`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/filters/_pinned_trig.py),
 y los tests que lo sostienen están en
 [`tests/filters/test_weighting_design.py`](https://github.com/jmrplens/phonometry/blob/main/tests/filters/test_weighting_design.py)
-y
-[`tests/filters/test_pinned_log.py`](https://github.com/jmrplens/phonometry/blob/main/tests/filters/test_pinned_log.py).
+y los tres `tests/filters/test_pinned_*.py` que lo acompañan.
 
 ## Véase también
 

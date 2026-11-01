@@ -15,7 +15,9 @@ three things that makes it a design rather than an optimiser's leftovers:
 
 from __future__ import annotations
 
+import ast
 import hashlib
+import inspect
 import math
 import os
 import platform
@@ -30,6 +32,9 @@ from reference_data import IEC61672_TABLE3 as TABLE3
 from scipy import signal as sg
 
 from phonometry import filters
+from phonometry.filters import _weighting_design
+from phonometry.filters import weighting as weighting_module
+from phonometry.filters._pinned_trig import _PI, _PI_BITS, _fixed_argument
 from phonometry.filters._weighting_design import (
     _CORNER_DECADES,
     _cascade_magnitude,
@@ -78,8 +83,8 @@ _RATES = (32000, 44100, 48000, 88200, 96000, 192000)
 #: either, which is what makes the design the same on every CPU; see
 #: :func:`~phonometry.filters._weighting_design._ordered_sum` and
 #: :func:`~phonometry.filters._weighting_design._log_distance2`. What is left
-#: is numpy's own ``exp`` and ``log``, and a release that retunes one of them
-#: still moves the last bit, so this table has to outlive that. Perturbing
+#: is the C library's arctangent, and a C library that retunes it still moves
+#: the last bit, so this table has to outlive that. Perturbing
 #: every solve by a relative 1e-12 moves the C row from 0.00220 dB to 0.00324
 #: and the AU row from 0.00590 to 0.00666. Rounded up, those two rows read
 #: 0.003 and 0.006, so a gate written that way is already failing on a release
@@ -1008,7 +1013,7 @@ def test_a_and_c_earn_class_1_at_every_rate_the_library_claims(
 def test_the_design_is_paid_for_once_per_curve_rate_and_mode() -> None:
     """The fit runs once and is shared, which is what makes it affordable.
 
-    It costs about 150 ms, against 0.007 ms to hand back a cached copy, so a
+    It costs about 270 ms, against 0.007 ms to hand back a cached copy, so a
     caller that constructs a filter per block would pay four orders of
     magnitude more for the same coefficients. A rate no other test uses, so
     the counters mean what they say however this file is sharded.
@@ -1024,34 +1029,260 @@ def test_the_design_is_paid_for_once_per_curve_rate_and_mode() -> None:
     assert first.sos is not second.sos
 
 
-#: The head of the SHA-256 of the A weighting designed at 48 kHz, per platform
-#: the CI matrix runs, keyed by ``platform.system()``, ``platform.machine()`` and
-#: the C library ``platform.libc_ver()`` names (glibc on the Linux image; the
-#: other two report no name). Within one C library the bytes are the same on
-#: every machine, which is what the rest of this module pins; across C libraries
-#: they differ, because the transcendentals other than the fit's logarithm are
-#: still taken from the C library, `exp` inside the iteration among them, and
-#: this table is that measurement. A musl Linux
-#: is not in the table and skips rather than being held to glibc's value. The
-#: Linux value is the one the determinism guide prints.
-_DOCUMENTED_A48K_DIGESTS = {
-    ("Linux", "x86_64", "glibc"): "991833ff389afe91",
-    ("Darwin", "arm64", ""): "4efa1818bd80e23a",
-    ("Windows", "AMD64", ""): "79852a57e60961c8",
-}
+#: The head of the SHA-256 of the A weighting designed at 48 kHz on glibc, the
+#: digest the determinism guide prints and the Linux leg of the CI matrix runs.
+_A48K_DIGEST = "991833ff389afe91"
 
 
-def test_the_documented_a_weighting_digest_is_the_platforms_own() -> None:
-    """The digest the determinism guide tabulates is the one this platform designs.
-
-    A platform that drifts from its own value here has changed a ``math`` call
-    the design still takes from the C library, and that is worth a red build
-    rather than a silently different filter.
-    """
-    key = (platform.system(), platform.machine(), platform.libc_ver()[0])
-    if key not in _DOCUMENTED_A48K_DIGESTS:
-        pytest.skip(f"no pinned digest for {key}")
+def _a48k_digest() -> str:
+    _cached_weighting_sos.cache_clear()
     sos = filters.WeightingFilter(48000, "A").sos
-    assert (
-        hashlib.sha256(sos.tobytes()).hexdigest()[:16] == _DOCUMENTED_A48K_DIGESTS[key]
+    return hashlib.sha256(sos.tobytes()).hexdigest()[:16]
+
+
+@pytest.mark.skipif(
+    platform.libc_ver()[0] != "glibc",
+    reason="the production design still takes its arctangent from the C library",
+)
+def test_the_documented_a_weighting_digest_is_glibcs() -> None:
+    """The digest the determinism guide prints is the one a glibc machine designs.
+
+    A drift here means a routine the design takes, pinned or not, has moved,
+    and that is worth a red build rather than a silently different filter.
+    """
+    assert _a48k_digest() == _A48K_DIGEST
+
+
+def _atan_fixed(x: float, scale: int) -> tuple[int, int]:
+    """``atan(x) * 2**scale`` for ``x > 0`` in exact integers, and an error bound.
+
+    Two half-angle steps bring the argument under ``tan(pi/16)`` and the
+    alternating series does the rest; an argument above one goes through
+    ``pi/2 - atan(1/x)``. The guard bits make every truncation's share of the
+    error a fraction of a unit at *scale*.
+    """
+    guard = 32
+    wide = scale + guard
+    one = 1 << wide
+    t = _fixed_argument(x, wide)
+    invert = t > one
+    if invert:
+        t = (one << wide) // t
+    for _ in range(2):
+        t = (t << wide) // (one + math.isqrt(one * one + t * t))
+    square = (t * t) >> wide
+    power = total = t
+    k = 0
+    while power:
+        power = (power * square) >> wide
+        k += 1
+        term = power // (2 * k + 1)
+        total += -term if k % 2 else term
+    value = 4 * total
+    if invert:
+        value = (_PI >> (_PI_BITS - wide + 1)) - value
+    return value >> guard, ((4 * (k + 16)) >> guard) + 3
+
+
+def _atan_correctly_rounded(x: float) -> float:
+    """The arctangent rounded once, by Ziv's loop: an oracle with no platform in it."""
+    if x == 0.0:
+        return x
+    magnitude = math.fabs(x)
+    precision = 96
+    while True:
+        scale = precision + max(0, -math.frexp(magnitude)[1])
+        value, error = _atan_fixed(magnitude, scale)
+        low = (value - error) / (1 << scale)
+        high = (value + error) / (1 << scale)
+        if low == high:
+            return math.copysign(low, x)
+        precision *= 2
+
+
+def _correctly_rounded_arctan(values: np.ndarray) -> np.ndarray:
+    flat = np.asarray(values, dtype=np.float64).reshape(-1).tolist()
+    out = np.array([_atan_correctly_rounded(v) for v in flat], dtype=np.float64)
+    return out.reshape(np.shape(values))
+
+
+def test_with_a_platform_free_arctangent_every_platform_designs_the_same_bytes(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Everything the design computes but its arctangent is the same on every machine.
+
+    The arctangent is the one routine the design still takes from the C
+    library. Swap in a correctly rounded one, computed here in exact integers,
+    and what is left is the pinned routines and IEEE 754 arithmetic, so this
+    digest is held on every platform the CI matrix runs, not only on glibc.
+    On glibc the swap changes nothing, because glibc's arctangent is correctly
+    rounded on all 257 points of this design's grid, which is the second
+    assertion and the reason the digest is the production one.
+    """
+    captured: list[np.ndarray] = []
+    original = _weighting_design._scalar_arctan
+
+    def spy(values: np.ndarray) -> np.ndarray:
+        captured.append(np.asarray(values, dtype=np.float64).reshape(-1).copy())
+        return _correctly_rounded_arctan(values)
+
+    monkeypatch.setattr(_weighting_design, "_scalar_arctan", spy)
+    assert _a48k_digest() == _A48K_DIGEST
+    grid = np.concatenate(captured)
+    assert grid.size == 257
+    if platform.libc_ver()[0] == "glibc":
+        np.testing.assert_array_equal(original(grid), _correctly_rounded_arctan(grid))
+
+
+#: The :mod:`math` functions the design path may name: IEEE 754 fixes every one
+#: (or, for ``fsum``, CPython computes it exactly), so none depends on the C
+#: library. ``atan`` is the documented exception, allowed in one function only.
+_MATH_ALLOWED = frozenset({"fsum", "fabs", "sqrt", "isfinite"})
+
+#: numpy names that are a transcendental, a power, or a complex magnitude, each
+#: of which numpy computes with a dispatched kernel or the C library.
+_NUMPY_FORBIDDEN = frozenset(
+    {
+        "exp", "exp2", "expm1", "log", "log2", "log10", "log1p", "power",
+        "float_power", "sin", "cos", "tan", "arcsin", "arccos", "arctan",
+        "arctan2", "sinh", "cosh", "tanh", "arcsinh", "arccosh", "arctanh",
+        "hypot", "cbrt", "geomspace", "logspace", "angle",
+    }
+)  # fmt: skip
+
+#: The prototype builders of ``weighting.py`` that feed the design.
+_PROTOTYPE_BUILDERS = frozenset(
+    {
+        "_a_weighting_zpk", "_b_weighting_zpk", "_c_weighting_zpk",
+        "_d_weighting_zpk", "_g_weighting_zpk", "_u_poles", "_itu_r_468_zpk",
+        "_itu_r_468_prototype", "_abcd_product", "_fit_band",
+    }
+)  # fmt: skip
+
+
+class _PlatformOperations(ast.NodeVisitor):
+    """Collect every node that hands arithmetic to the platform, as ``line: what``."""
+
+    def __init__(self, atan_owner: str | None) -> None:
+        self.atan_owner = atan_owner
+        self.functions: list[str] = []
+        self.found: set[str] = set()
+
+    def visit_FunctionDef(self, node: ast.FunctionDef) -> None:  # noqa: N802 - ast.NodeVisitor's name
+        self.functions.append(node.name)
+        self.generic_visit(node)
+        self.functions.pop()
+
+    def visit_BinOp(self, node: ast.BinOp) -> None:  # noqa: N802 - ast.NodeVisitor's name
+        if isinstance(node.op, ast.Pow):
+            self.found.add(f"{node.lineno}: the ** operator")
+        self.generic_visit(node)
+
+    def visit_Call(self, node: ast.Call) -> None:  # noqa: N802 - ast.NodeVisitor's name
+        if isinstance(node.func, ast.Name) and node.func.id in {"abs", "pow"}:
+            self.found.add(f"{node.lineno}: builtin {node.func.id}()")
+        self.generic_visit(node)
+
+    def visit_Attribute(self, node: ast.Attribute) -> None:  # noqa: N802 - ast.NodeVisitor's name
+        if isinstance(node.value, ast.Name):
+            owner, name = node.value.id, node.attr
+            inside = self.functions[-1] if self.functions else None
+            exempt = name == "atan" and inside is not None and inside == self.atan_owner
+            if owner == "math" and name not in _MATH_ALLOWED and not exempt:
+                self.found.add(f"{node.lineno}: math.{name}")
+            elif owner == "np" and name in _NUMPY_FORBIDDEN:
+                self.found.add(f"{node.lineno}: np.{name}")
+        self.generic_visit(node)
+
+
+def _platform_operations(tree: ast.AST, *, atan_owner: str | None) -> list[str]:
+    """Every node of *tree* that hands arithmetic to the platform, sorted."""
+    visitor = _PlatformOperations(atan_owner)
+    visitor.visit(tree)
+    return sorted(visitor.found)
+
+
+def test_the_design_path_hands_no_arithmetic_to_the_platform() -> None:
+    """No transcendental, power or complex magnitude is left to the C library.
+
+    Read off the source rather than trusted: on the design path a ``**``, a
+    builtin ``abs`` or ``pow`` (a complex magnitude is the C library's
+    ``hypot``, a float power its ``pow``), a :mod:`math` transcendental or a
+    numpy one is a platform's answer standing in for the design's, and each
+    has a pinned spelling in ``_pinned_exp``, ``_pinned_log`` or
+    ``_pinned_trig``. The arctangent of :func:`_scalar_arctan` is the one
+    documented exception.
+    """
+    design = ast.parse(inspect.getsource(_weighting_design))
+    assert _platform_operations(design, atan_owner="_scalar_arctan") == []
+    weighting_tree = ast.parse(inspect.getsource(weighting_module))
+    builders = [
+        node
+        for node in weighting_tree.body
+        if isinstance(node, ast.FunctionDef) and node.name in _PROTOTYPE_BUILDERS
+    ]
+    assert {node.name for node in builders} == _PROTOTYPE_BUILDERS
+    for builder in builders:
+        assert _platform_operations(builder, atan_owner=None) == [], builder.name
+
+
+def test_the_guard_sees_each_kind_of_platform_operation() -> None:
+    """The source check above finds what it is for, so its silence means something."""
+    source = textwrap.dedent(
+        """
+        def f(x, z):
+            a = x ** 2
+            b = abs(z)
+            c = math.exp(x) + math.atan(x)
+            d = np.tan(x)
+            return math.fsum([a, b, c, d]) + math.sqrt(x)
+        """
     )
+    found = _platform_operations(ast.parse(source), atan_owner=None)
+    assert found == [
+        "3: the ** operator",
+        "4: builtin abs()",
+        "5: math.atan",
+        "5: math.exp",
+        "6: np.tan",
+    ]
+    assert "5: math.atan" not in _platform_operations(ast.parse(source), atan_owner="f")
+
+
+_TRANSCENDENTALS = (
+    "exp", "expm1", "log", "log2", "log10", "log1p", "pow", "sin", "cos",
+    "tan", "asin", "acos", "atan2", "sinh", "cosh", "tanh", "hypot", "cbrt",
+)  # fmt: skip
+
+
+@pytest.mark.parametrize("curve", ["A", "D", "468", "AU"])
+def test_a_design_calls_no_math_transcendental_but_the_arctangent(
+    curve: str, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Every :mod:`math` transcendental made to raise, and the design still runs.
+
+    The run-time half of the source check: whatever the design calls through
+    :mod:`math`, in its own module or in the prototype builders, would raise
+    here. D and 468 carry complex poles and zeros, so their magnitudes are
+    exercised as well; AU at a rate below twice the reference frequency takes
+    every spare placement.
+    """
+
+    def refuse(*_: object) -> float:
+        message = "a math transcendental reached the design"
+        raise AssertionError(message)
+
+    for name in _TRANSCENDENTALS:
+        monkeypatch.setattr(math, name, refuse)
+    _weighting_design._exponentials.cache_clear()
+    fs = 1000 if curve == "AU" else 48000
+    zeros, poles, _ = _analog_weighting_zpk(curve)
+    sos = design_sos(
+        zeros,
+        poles,
+        float(fs),
+        _fit_band(curve, fs),
+        _FIT_SECTIONS[curve],
+        _REFERENCE_HZ.get(curve, 1000.0),
+    )
+    assert np.isfinite(sos).all()

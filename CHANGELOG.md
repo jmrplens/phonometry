@@ -4004,6 +4004,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- **The weighting design takes its exponentials, powers, base-10 logarithms,
+  sines, tangents and complex magnitudes from routines that return the same
+  bits on every platform, so the macOS and Windows coefficients move toward
+  the Linux bytes.** `filters.WeightingFilter` and `filters.weighting_filter`
+  took them from the C library, and glibc, Apple's libm and the Windows
+  runtime each round some inputs to the other neighbour, which the fit grows
+  into a different filter: the A weighting at 48 kHz had three digests on the
+  three platforms of the CI matrix. `exp` and `pow` are now glibc's own
+  routines spelled in arithmetic IEEE 754 fixes (`filters._pinned_exp`, with
+  every multiply-add glibc's build fuses emulated exactly), `log10` is
+  glibc's built on the pinned `log`, and the sine, the tangent and the
+  magnitude of a complex root are correctly rounded (`filters._pinned_trig`).
+  The Linux coefficients do not move at any of the 133 (curve, rate) designs
+  the library is checked at, and the A weighting at 48 kHz still hashes to
+  `991833ff389afe91`. The macOS and Windows coefficients become the Linux
+  bytes wherever the platform's arctangent, the one routine still taken from
+  the C library, agrees with glibc's on the 257-point frequency grid, and stay
+  within the 0.013 dB the response tests allow where it does not; a test in
+  the CI matrix holds the A weighting at 48 kHz to the Linux digest on all
+  three platforms with a correctly rounded arctangent of its own. Of the
+  799 604 (rate, curve) designs at integer rates from 100 Hz to 200 kHz,
+  2 933 meet a sine or a tangent that glibc does not round correctly and move
+  on Linux too, none at a rate the library is checked at and, of the common
+  rates, only 50 kHz for A, B, C and D. The arctangent stays on the C library
+  for now: only glibc's own routine keeps the Linux bytes, since the correctly
+  rounded value differs from it in 32 of the 133 designs, and the determinism
+  guide says what is left. A design costs about 270 ms where it cost about
+  200, once per curve, rate and mode as before.
+
 - **`vibration.evaluate_train_passage`, `signals.resample_signal` handed a
   Signal and the EN 15610 Method B bank of `environment` run at a fractional
   rate.** They refused one on the grounds that the filter bank needed a whole

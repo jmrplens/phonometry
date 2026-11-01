@@ -147,8 +147,10 @@ jobs:
         twine check stub/dist/*
     # The resolver reads the built metadata, not stub/pyproject.toml, so the
     # cap that keeps `pip install -U PyOctaveBand` on the line whose API the
-    # shim re-exports is asserted where it will actually be enforced.
-    - name: Fail if the built metadata does not cap phonometry below the next major
+    # shim re-exports is asserted where it will actually be enforced. The
+    # licence is read there too: the expression the metadata declares and the
+    # LICENSE text the wheel and the sdist carry.
+    - name: Fail if the built stub does not cap phonometry below the next major or carry its licence
       run: python scripts/check_stub_metadata.py
 
   # Fast gate (runtime deps only, no pytest): the committed

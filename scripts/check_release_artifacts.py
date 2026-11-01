@@ -19,7 +19,12 @@ published:
 - the wheel holds nothing else but its ``.dist-info``: no byte-compiled file,
   no test, no second top-level package;
 - the sdist carries what building the wheel from it needs: ``pyproject.toml``,
-  ``VERSION`` (the version is read from it), ``LICENSE`` and the PyPI readme.
+  ``VERSION`` (the version is read from it) and the PyPI readme;
+- both declare the licence, ``License-Expression: MIT`` and ``License-File:
+  LICENSE`` in their metadata, and both carry the repository's ``LICENSE``
+  where PEP 639 puts it, under ``.dist-info/licenses/`` in the wheel and at the
+  root of the sdist. ``built_license.py`` reads it, as it does for the
+  PyOctaveBand bridge, whose 2.2.0 shipped a licence classifier and no text.
 """
 
 from __future__ import annotations
@@ -32,10 +37,18 @@ import sys
 import tarfile
 import zipfile
 
+from built_license import Built, license_problems
+
 _ROOT = pathlib.Path(__file__).resolve().parent.parent
 _PACKAGE = "phonometry"
-#: What building the wheel from the sdist reads, beside the package itself.
-SDIST_SUPPORT = ("pyproject.toml", "VERSION", "LICENSE", "README_PYPI.md")
+#: What building the wheel from the sdist reads, beside the package itself and
+#: the licence files, which :data:`LICENSE_FILES` names.
+SDIST_SUPPORT = ("pyproject.toml", "VERSION", "README_PYPI.md")
+#: The SPDX expression phonometry declares.
+LICENSE_EXPRESSION = "MIT"
+#: The licence files it declares, by the path PEP 639 records. Each carries the
+#: text of the repository's file of the same name.
+LICENSE_FILES = ("LICENSE",)
 
 
 def tracked_package_files(root: pathlib.Path = _ROOT) -> list[str]:
@@ -56,6 +69,20 @@ def _metadata_version(raw: bytes) -> str | None:
     return email.parser.BytesParser().parsebytes(raw).get("Version")
 
 
+def _license_problems(path: pathlib.Path) -> list[str]:
+    """What is wrong with the licence a wheel or an sdist declares and carries."""
+    try:
+        built = Built(path)
+    except ValueError as error:
+        return [str(error)]
+    return license_problems(
+        built,
+        expression=LICENSE_EXPRESSION,
+        files={name: (_ROOT / name).read_bytes() for name in LICENSE_FILES},
+        config="pyproject.toml",
+    )
+
+
 def wheel_problems(wheel: pathlib.Path, version: str, tracked: list[str]) -> list[str]:
     """What is wrong with the wheel, one sentence per problem.
 
@@ -63,7 +90,8 @@ def wheel_problems(wheel: pathlib.Path, version: str, tracked: list[str]) -> lis
     :param version: The version being released.
     :param tracked: The package files git tracks, as :func:`tracked_package_files`
         returns them.
-    :return: The problems found; empty when the wheel is the package.
+    :return: The problems found; empty when the wheel is the package and
+        carries its licence.
     """
     dist_info = f"{_PACKAGE}-{version}.dist-info/"
     with zipfile.ZipFile(wheel) as archive:
@@ -76,10 +104,12 @@ def wheel_problems(wheel: pathlib.Path, version: str, tracked: list[str]) -> lis
     problems = []
     if not metadata:
         problems.append(f"the wheel has no {dist_info}METADATA")
-    elif _metadata_version(metadata) != version:
-        problems.append(
-            f"the wheel's METADATA says version {_metadata_version(metadata)}, not {version}"
-        )
+    else:
+        if _metadata_version(metadata) != version:
+            problems.append(
+                f"the wheel's METADATA says version {_metadata_version(metadata)}, not {version}"
+            )
+        problems += _license_problems(wheel)
     present = set(names)
     problems += [f"the wheel lacks {path}" for path in tracked if path not in present]
     expected = set(tracked)
@@ -98,7 +128,8 @@ def sdist_problems(sdist: pathlib.Path, version: str, tracked: list[str]) -> lis
     :param version: The version being released.
     :param tracked: The package files git tracks, as :func:`tracked_package_files`
         returns them.
-    :return: The problems found; empty when the sdist can rebuild the wheel.
+    :return: The problems found; empty when the sdist can rebuild the wheel
+        and carries its licence.
     """
     top = f"{_PACKAGE}-{version}/"
     with tarfile.open(sdist) as archive:
@@ -111,10 +142,12 @@ def sdist_problems(sdist: pathlib.Path, version: str, tracked: list[str]) -> lis
     problems = []
     if not pkg_info:
         problems.append(f"the sdist has no {top}PKG-INFO")
-    elif _metadata_version(pkg_info) != version:
-        problems.append(
-            f"the sdist's PKG-INFO says version {_metadata_version(pkg_info)}, not {version}"
-        )
+    else:
+        if _metadata_version(pkg_info) != version:
+            problems.append(
+                f"the sdist's PKG-INFO says version {_metadata_version(pkg_info)}, not {version}"
+            )
+        problems += _license_problems(sdist)
     problems += [
         f"the sdist lacks {top}{name}"
         for name in SDIST_SUPPORT
@@ -170,7 +203,7 @@ def main(argv: list[str] | None = None) -> int:
     if problems:
         return 1
     print(
-        f"The sdist and the wheel of {version} carry the {len(tracked)} files git tracks under src/{_PACKAGE}, and nothing else."
+        f"The sdist and the wheel of {version} carry the {len(tracked)} files git tracks under src/{_PACKAGE}, and nothing else, and declare and carry the {LICENSE_EXPRESSION} licence."
     )
     return 0
 

@@ -924,9 +924,10 @@ def test_a_build_into_a_directory_that_holds_files_is_refused(
     outdir.mkdir()
     (outdir / f"{_TOP}-py3-none-any.whl").write_bytes(b"an older wheel")
     builder = _Builder(outdir)
+    root = _checkout(tmp_path)
     with pytest.raises(ValueError, match="already holds files"):
         build_release.build(
-            outdir, version="2.0.0", epoch=_EPOCH, root=_checkout(tmp_path), run=builder
+            outdir, version="2.0.0", epoch=_EPOCH, root=root, run=builder
         )
     assert builder.calls == []
 
@@ -934,9 +935,10 @@ def test_a_build_into_a_directory_that_holds_files_is_refused(
 def test_a_build_that_leaves_another_file_is_refused(tmp_path: pathlib.Path) -> None:
     outdir = tmp_path / "dist"
     builder = _Builder(outdir, extra=f"{_TOP}-cp313-cp313-linux_x86_64.whl")
+    root = _checkout(tmp_path)
     with pytest.raises(ValueError, match="cp313"):
         build_release.build(
-            outdir, version="2.0.0", epoch=_EPOCH, root=_checkout(tmp_path), run=builder
+            outdir, version="2.0.0", epoch=_EPOCH, root=root, run=builder
         )
 
 

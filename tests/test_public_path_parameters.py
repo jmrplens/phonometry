@@ -19,6 +19,7 @@ import inspect
 import os
 import pkgutil
 import re
+import sys
 from typing import TYPE_CHECKING, Literal
 
 import numpy as np
@@ -179,3 +180,32 @@ def test_a_refusal_names_a_path_of_another_library_by_its_path(
     with pytest.raises(FileNotFoundError, match="no .csv ANP tables") as empty:
         aircraft.load_anp_database(elsewhere)
     assert f"'{tmp_path}{os.sep}elsewhere'" in str(empty.value)
+
+
+@pytest.mark.parametrize(
+    "mark",
+    [
+        "\x1b[2J",
+        "\u202e",
+        pytest.param(
+            "\udcff",
+            marks=pytest.mark.skipif(
+                sys.platform == "win32",
+                reason="a Windows file name is UTF-16, so no name fails UTF-8",
+            ),
+        ),
+    ],
+)
+@pytest.mark.parametrize("kind", [str, _Elsewhere])
+def test_an_anp_directory_is_named_by_its_escapes_once(
+    mark: str, kind: Callable[[Path], str | os.PathLike[str]], tmp_path: Path
+) -> None:
+    # The name was escaped and then quoted by repr, which doubled the
+    # backslash of each escape.
+    missing = kind(tmp_path / f"b{mark}")
+    with pytest.raises(NotADirectoryError) as caught:
+        aircraft.load_anp_database(missing)
+    escape = ascii(mark)[1:-1]
+    assert str(caught.value) == (
+        f"ANP database path '{tmp_path}{os.sep}b{escape}' is not a directory."
+    )

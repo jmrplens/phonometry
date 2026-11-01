@@ -153,6 +153,21 @@ def test_a_level_that_is_no_number_is_refused_with_its_place(tmp_path: Path) -> 
         load_anp_database(root)
 
 
+@pytest.mark.parametrize(
+    ("cell", "named"),
+    [("1\x1b2", "1\\x1b2"), ("1\u202e2", "1\\u202e2"), ("1\x072", "1\\x072")],
+)
+def test_a_cell_that_holds_a_control_character_is_named_by_its_escape_once(
+    cell: str, named: str, tmp_path: Path
+) -> None:
+    """The cell's text was escaped and then quoted by repr, which doubled each escape's backslash."""
+    root = _export(tmp_path, NPD_data_csv=_npd_with(cell))
+    refusal = f"ANP table 'NPD_data.csv', line 14, column 'L_200ft': '{named}' is not a number"
+    with pytest.raises(ValueError, match="is not a number") as caught:
+        load_anp_database(root)
+    assert str(caught.value) == refusal
+
+
 def test_a_distance_heading_that_is_no_finite_number_is_refused(tmp_path: Path) -> None:
     """An infinite last distance passed the check that the distances increase."""
     npd = files("phonometry.aircraft.data.anp").joinpath("NPD_data.csv").read_text()

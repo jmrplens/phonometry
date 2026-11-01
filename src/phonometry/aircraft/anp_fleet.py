@@ -238,7 +238,7 @@ def _rows(table: _Table) -> list[_Row]:
 def _cell_place(row: Mapping[str, str], column: str) -> str:
     """Where a cell of *row* is, as a refusal names it."""
     if isinstance(row, _Row):
-        return f"ANP table {escaped(row.table)!r}, line {row.line}, column {column!r}"
+        return f"ANP table '{escaped(row.table)}', line {row.line}, column {column!r}"
     return f"ANP column {column!r}"
 
 
@@ -259,11 +259,11 @@ def _number(row: Mapping[str, str], column: str) -> float:
     try:
         value = float(text)
     except ValueError:
-        msg = f"{_cell_place(row, column)}: {escaped(text)!r} is not a number"
+        msg = f"{_cell_place(row, column)}: '{escaped(text)}' is not a number"
         raise ValueError(msg) from None
     if not math.isfinite(value):
         msg = (
-            f"{_cell_place(row, column)}: {escaped(text)!r} is not a finite "
+            f"{_cell_place(row, column)}: '{escaped(text)}' is not a finite "
             "number, and an ANP table holds finite numbers only"
         )
         raise ValueError(msg)
@@ -282,7 +282,7 @@ def _whole(row: Mapping[str, str], column: str, value: float) -> int:
     """
     if not value.is_integer():
         msg = (
-            f"{_cell_place(row, column)}: {escaped(row[column])!r} is not a whole "
+            f"{_cell_place(row, column)}: '{escaped(row[column])}' is not a whole "
             "number, and the column counts in whole numbers"
         )
         raise ValueError(msg)
@@ -320,7 +320,7 @@ def _stage_cell(row: Mapping[str, str]) -> str:
     value = _number(row, _COL_STAGE_LENGTH)
     if not value.is_integer():
         msg = (
-            f"{_cell_place(row, _COL_STAGE_LENGTH)}: {escaped(text)!r} falls "
+            f"{_cell_place(row, _COL_STAGE_LENGTH)}: '{escaped(text)}' falls "
             "between two ANP bins"
         )
         raise ValueError(msg)
@@ -1814,15 +1814,15 @@ def _read_tables(path: str | os.PathLike[str] | None) -> dict[str, Traversable]:
             if entry.name.lower().endswith(".csv")
         }
     directory = Path(path)
-    # The name as the caller wrote it, a path of any library: its repr would
-    # be the object's, and a str's would print its marks unescaped.
+    # os.fspath, since the repr of an os.PathLike of another library is the
+    # object's; escaped and quoted by hand, as repr would escape it again.
     named = escaped(os.fspath(path))
     if not directory.is_dir():
-        msg = f"ANP database path {named!r} is not a directory."
+        msg = f"ANP database path '{named}' is not a directory."
         raise NotADirectoryError(msg)
     files_found = sorted(directory.glob("*.csv")) + sorted(directory.glob("*.CSV"))
     if not files_found:
-        msg = f"no .csv ANP tables found in {named!r}."
+        msg = f"no .csv ANP tables found in '{named}'."
         raise FileNotFoundError(msg)
     return {f.name: f for f in files_found}
 

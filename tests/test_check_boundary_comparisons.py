@@ -729,6 +729,72 @@ def test_the_validation_predicates_are_comparisons(tmp_path: pathlib.Path) -> No
     ]
 
 
+def test_a_name_is_looked_up_in_the_scopes_the_call_runs_in(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A comprehension's loop target is its own, and ``global`` sends a name out.
+
+    The names a function binds itself were read with the loop targets of
+    its comprehensions among them, so a module function called beside a
+    comprehension that reuses its name was taken for a binding of the
+    caller, and the difference it returns was never compared. A name a
+    nested function declares ``global`` was looked up in the function
+    around it, whose namesake hands back a constant.
+    """
+    source = """
+    _SPREAD_DB = 3.0
+    def _spread(levels):
+        return max(levels) - min(levels)
+    def beside_a_comprehension(levels, others):
+        names = [_spread.name for _spread in others]
+        return _spread(levels) <= _SPREAD_DB, names
+    def outer(levels):
+        def _spread(levels):
+            return 0.0
+        def inner():
+            global _spread
+            return _spread(levels) <= _SPREAD_DB
+        return inner
+    """
+    assert _texts(source, tmp_path) == [
+        "_spread(levels) <= _SPREAD_DB",
+        "_spread(levels) <= _SPREAD_DB",
+    ]
+
+
+def test_a_name_the_caller_binds_is_not_the_module_s_import(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A parameter or an assignment hides an imported function of the same name.
+
+    The functions of the file were looked up past the caller's own
+    bindings, but the imports of the module were then looked up anyway, so
+    a parameter called like the imported helper was read as the helper.
+    """
+    package = tmp_path / "package"
+    package.mkdir()
+    (package / "__init__.py").write_text("", encoding="utf-8")
+    (package / "helpers.py").write_text(
+        "def spread(levels):\n    return max(levels) - min(levels)\n", encoding="utf-8"
+    )
+    (package / "verdict.py").write_text(
+        "from .helpers import spread\n"
+        "_SPREAD_DB = 3.0\n"
+        "def by_a_parameter(levels, spread):\n"
+        "    return spread(levels) <= _SPREAD_DB\n"
+        "def by_an_assignment(levels, make):\n"
+        "    spread = make()\n"
+        "    return spread(levels) <= _SPREAD_DB\n"
+        "def through_the_import(levels):\n"
+        "    return spread(levels) <= _SPREAD_DB\n",
+        encoding="utf-8",
+    )
+    found = cbc.scan(package)
+    assert [(f.path, f.scope, f.text) for f in found] == [
+        ("verdict.py", "through_the_import", "spread(levels) <= _SPREAD_DB")
+    ]
+
+
 def test_a_value_computed_in_a_sibling_module_is_followed(
     tmp_path: pathlib.Path,
 ) -> None:

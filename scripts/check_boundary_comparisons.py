@@ -126,6 +126,8 @@ import re
 import sys
 from typing import TYPE_CHECKING
 
+from ast_scan import binding_of, own_names
+
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
 
@@ -745,17 +747,18 @@ class Module:
     ) -> tuple[Function, ...]:
         """The functions of this file a call can reach, none when it reaches none.
 
-        A bare name is looked up as Python looks it up: among the functions
-        the calling function and those around it define (inside an ``if``,
-        a ``try`` or a ``with`` too), as far as the nearest of them that
-        binds the name otherwise, by a parameter, an import or an
-        assignment, which reaches no function of the module; then at the
-        top of the module. A name defined in each branch of an ``if`` reaches
-        every definition of it, as a method a class defines that way does.
+        A bare name is looked up as Python looks it up (:meth:`lookup`): among
+        the functions the calling function and those around it define
+        (inside an ``if``, a ``try`` or a ``with`` too), as far as the
+        nearest of them that binds the name otherwise, by a parameter, an
+        import or an assignment, which reaches no function of the module;
+        then at the top of the module. A name defined in each branch of an
+        ``if`` reaches every definition of it, as a method a class defines
+        that way does.
         """
         func = call.func
         if isinstance(func, ast.Name):
-            return self.named_functions(func.id, scope)
+            return self.lookup(func.id, scope, call) or ()
         if (
             isinstance(func, ast.Attribute)
             and isinstance(func.value, ast.Name)
@@ -781,45 +784,59 @@ class Module:
                 if owner is not None:
                     self.constructions.setdefault(owner.name, []).append((node, scope))
 
-    def named_functions(
-        self, name: str, scope: Function | None
-    ) -> tuple[Function, ...]:
-        """The functions of this file *name* stands for, called from *scope*.
+    def lookup(
+        self, name: str, scope: Function | None, node: ast.AST | None = None
+    ) -> tuple[Function, ...] | None:
+        """The functions of this file *name* stands for at *node*, in *scope*.
 
-        Read from the calling function outwards (:meth:`resolve_functions`):
-        those one of them defines, none past the nearest that binds the name
-        otherwise, then those at the top of the module.
+        Read as Python reads it (:func:`ast_scan.own_names`), from the
+        calling function outwards: a comprehension, a lambda or a class body
+        around *node* inside *scope* that binds the name hides every
+        function; then the nearest function that binds it says what it is,
+        the functions of that name it defines, none for an import (which the
+        package follows), and ``None`` for a parameter or an assignment, or
+        a definition and another binding both, which may stand for either. A
+        function that declares the name ``global`` sends it to the top of
+        the module, whose functions of that name come last. ``None`` means a
+        binding hides the name, so that no import of the module stands for
+        it either.
         """
+        if scope is not None and node is not None:
+            how, binder = binding_of(scope, node, name)
+            if how == "global":
+                return self.top_functions.get(name, ())
+            if binder is not None and binder is not scope:
+                return None
         current = scope
         while current is not None:
-            defined = _by_name(_own_definitions(current)).get(name, ())
-            if defined:
-                return defined
-            if self.binds(current, name):
-                return ()
+            names = own_names(current)
+            if name in names.declared_global:
+                break
+            if names.binds(name):
+                return self._bound_as(current, name)
             current = self.enclosing(current)
         return self.top_functions.get(name, ())
 
-    def binds(self, function: Function, name: str) -> bool:
-        """Whether *function* binds *name* itself, otherwise than by a definition.
+    def _bound_as(self, function: Function, name: str) -> tuple[Function, ...] | None:
+        """The functions *name* stands for in *function*, which binds it itself.
 
-        By a parameter, an import or any assignment of its own
-        (:meth:`local_bindings`): the name is then the function's, and a
-        function of the module that shares it is not the one it calls.
+        The functions of that name it defines (inside an ``if``, a ``try`` or
+        a ``with`` too); none for an import, which the package follows; and
+        ``None`` for any other binding: the name is then the function's, and
+        no function of the module or of an import is the one it calls.
         """
-        arguments = function.args
-        named = [*arguments.posonlyargs, *arguments.args, *arguments.kwonlyargs]
-        named.extend(each for each in (arguments.vararg, arguments.kwarg) if each)
-        if any(parameter.arg == name for parameter in named):
-            return True
-        if name in self.local_bindings(function):
-            return True
-        return any(
-            (alias.asname or alias.name.partition(".")[0]) == name
-            for node in _walk_own(function)
-            if isinstance(node, ast.Import | ast.ImportFrom)
-            for alias in node.names
-        )
+        how = own_names(function).how(name)
+        if how == "definition":
+            return _by_name(_own_definitions(function)).get(name, ())
+        if how == "import":
+            return ()
+        return None
+
+    def named_functions(
+        self, name: str, scope: Function | None
+    ) -> tuple[Function, ...]:
+        """The functions of this file *name* stands for, called from *scope* (:meth:`lookup`)."""
+        return self.lookup(name, scope) or ()
 
     def local_bindings(
         self, function: Function
@@ -1371,7 +1388,13 @@ class Module:
                 self.returns(target, self.bind(target, node, context))
                 for target in targets
             )
-        if isinstance(func, ast.Name) and self.package is not None:
+        if (
+            isinstance(func, ast.Name)
+            and self.package is not None
+            # A name the caller, or a scope around the call, binds is not
+            # the module's import of it.
+            and self.lookup(func.id, context.function, node) is not None
+        ):
             found = self.package.functions(self, func.id)
             if found is not None:
                 owner, functions = found

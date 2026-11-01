@@ -204,7 +204,7 @@ Dual-number verification reference `(L + K)` (clauses 3.16, 6.2).
 The dual-number form declares `L` and `K` each rounded to the
 nearest decibel (clause 3.16), and clause 6.2 verifies that form
 against their sum `(L + K)`; the limit is therefore
-`round(L_WA) + round(K_WA)` -- not the single-number `L_WAd`
+`round(L_WA) + round(K_WA)`, not the single-number `L_WAd`
 (the unrounded sum rounded once), which can differ by one decibel.
 
 ### OperatingModeDeclaration.verified

@@ -2236,8 +2236,8 @@ def _draw_fault_lines(
 
     Each family contributes a single legend entry, so shaft harmonics never
     read as bearing evidence. The lines stop where their names begin, so a
-    crowded group -- gear sidebands sit a shaft rate apart, a few points on a
-    kilohertz axis -- reads as a strip of names above a strip of lines instead
+    crowded group (gear sidebands sit a shaft rate apart, a few points on a
+    kilohertz axis) reads as a strip of names above a strip of lines instead
     of names struck through by their neighbours' lines. The strip start is
     returned as an axes fraction, for the caller to keep the spectrum and its
     legend below it.

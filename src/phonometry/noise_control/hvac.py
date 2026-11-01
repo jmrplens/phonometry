@@ -34,8 +34,8 @@ Both references trace back to the same ASHRAE data for the elbows: Bies
 Table 8.11 is indexed by :math:`W / \lambda` and Long Tables 14.5-14.7 by the
 frequency-width product ``f w`` (kHz times inches), and the two indexings agree
 band by band (:math:`W / \lambda = 0.074 f w`), so :func:`elbow_insertion_loss`
-serves both. Where they genuinely differ -- the end reflection, tabulated by
-Bies and given in closed form by Long -- both are selectable
+serves both. Where they genuinely differ (the end reflection, tabulated by
+Bies and given in closed form by Long), both are selectable
 (``method="bies"`` or ``method="long"``) and neither replaces the other.
 
 :func:`phonometry.noise_control.duct_path` chains these elements into the
@@ -700,7 +700,7 @@ class HVACSpectrumResult(OwnsArrays):
 
         The ``quantity`` tag is pinned here as well, because everything the
         fiche says hangs off it: the basis line, the caption, the boxed
-        figure and -- decisively -- the verdict's direction. The tag is a
+        figure and, decisively, the verdict's direction. The tag is a
         ``Literal`` for the type checker only; at run time an unexpected
         string used to fall through every ``== "sound_power_level"`` test and
         render a regenerated-noise spectrum as an attenuation sheet whose

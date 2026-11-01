@@ -4,7 +4,7 @@ r"""RIFF/RF64 chunk walker for WAVE measurement files, in pure ``struct``.
 :mod:`scipy.io.wavfile` decodes the samples of every WAV variant a
 measurement chain produces (PCM 1-64 bit, IEEE float, WAVE_FORMAT_EXTENSIBLE,
 RF64), but it steps over every chunk it does not need with a
-``WavFileWarning`` -- and the skipped chunks are exactly where a recording's
+``WavFileWarning``, and the skipped chunks are exactly where a recording's
 metadata lives. The ``bext`` broadcast extension that field recorders and
 broadcast tools write (originator, sample-accurate midnight timecode, coding
 history) is the only standardised provenance vehicle measurement equipment
@@ -40,7 +40,7 @@ Layout facts and their sources:
   64-bit integers (``riffSize, dataSize, sampleCount`` then a table of
   further oversized chunks); the 32-bit size fields it replaces are set to
   0xFFFFFFFF. Field recorders auto-promote to RF64 when a take passes
-  4 GiB -- under 4 h of stereo 24-bit/48 kHz -- so a long environmental
+  4 GiB (under 4 h of stereo 24-bit/48 kHz), so a long environmental
   recording is RF64, not an exotic case.
 * **``fact``**: a single ``uint32`` number of frames (samples per channel),
   mandatory for compressed formats where ``data size / block align`` no
@@ -220,7 +220,7 @@ class FormatChunk:
     header :attr:`resolved_tag` is the codec extracted from the SubFormat
     GUID, and equals ``format_tag`` otherwise. ``bits_per_sample`` is the
     container width; ``valid_bits`` (EXTENSIBLE only) how many of those bits
-    carry signal -- e.g. a 20-bit converter recorded into a 24-bit container
+    carry signal: e.g. a 20-bit converter recorded into a 24-bit container
     reports ``bits_per_sample=24, valid_bits=20``.
     """
 

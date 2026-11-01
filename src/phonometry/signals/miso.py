@@ -319,13 +319,13 @@ def _condition(
     Pivots on the inputs in ``order``, output last. Returns, indexed by the
     *original* input index:
 
-    * ``partial`` - partial coherence :math:`\gamma^2_{iy \cdot (i-1)!}`
+    * ``partial``: partial coherence :math:`\gamma^2_{iy \cdot (i-1)!}`
       (Eq. 7.87, total :math:`G_{yy}` denominator so the values sum to the
       multiple coherence, Eq. 7.116);
-    * ``coherent`` - partial coherent output spectrum :math:`G_{v_i}`
+    * ``coherent``: partial coherent output spectrum :math:`G_{v_i}`
       (Eq. 7.86);
 
-    and, shared, ``noise`` - the residual output autospectrum
+    and, shared, ``noise``: the residual output autospectrum
     :math:`G_{yy \cdot q!}` after all inputs are removed (Eq. 7.121).
     """
     q = len(order)
@@ -491,7 +491,7 @@ class MISOCoherenceResult(OwnsArrays):
         (``boolean index did not match indexed array along axis 0; size of
         axis is 257 but size of corresponding boolean axis is 256``), naming
         neither the field nor the result, on the short array and the long one
-        alike -- but only for the arrays it draws. :attr:`ordinary_coherence`,
+        alike, but only for the arrays it draws. :attr:`ordinary_coherence`,
         :attr:`multiple_coherence_random_error` and
         :attr:`coherent_output_random_error` are on no panel, so a mismatch
         there reaches the reader untouched: a random error quoted per band

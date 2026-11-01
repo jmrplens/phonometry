@@ -15,23 +15,23 @@ event chain that call them.
 This module provides the propagation primitives of the method (clean-room, from
 the NORAH2 guidance SC01.D1.5d, the basis of ECAC Doc 32):
 
-* :func:`spherical_spreading_adjustment` --
+* :func:`spherical_spreading_adjustment`:
   :math:`\Delta L_\mathrm{s} = -20 \cdot \log_{10}(r/60)` (Eq. 24).
-* :func:`atmospheric_adjustment` --
+* :func:`atmospheric_adjustment`:
   :math:`\Delta L_\mathrm{a} = -\alpha(f) \cdot (r - 60)` with the ISO 9613-1
   pure-tone coefficient (Eq. 26/27), reusing
   :func:`~phonometry.environment.propagation.air_absorption.air_attenuation`.
-* :func:`ground_effect_adjustment` -- ``ΔLg`` for a point source over an impedance
+* :func:`ground_effect_adjustment`: ``ΔLg`` for a point source over an impedance
   plane (Chien-Soroka, Eq. 28-35) with the Delany-Bazley one-parameter impedance
   and the CNOSSOS flow-resistivity classes.
-* :func:`mean_ground_plane` -- the least-squares plane through a terrain section
+* :func:`mean_ground_plane`: the least-squares plane through a terrain section
   (Eq. 36-40), whose equivalent orthogonal heights carry a varying profile into
   the flat-ground equations.
-* :func:`mean_flow_resistivity` -- the log-mean flow resistivity of a path that
+* :func:`mean_flow_resistivity`: the log-mean flow resistivity of a path that
   crosses several ground types (Eq. 41).
-* :func:`diffraction_attenuation` -- the pure diffraction attenuation ``ΔLd`` of
+* :func:`diffraction_attenuation`: the pure diffraction attenuation ``ΔLd`` of
   a path difference (Eq. 42-44).
-* :func:`terrain_screening_adjustment` -- the combined ground-and-screening
+* :func:`terrain_screening_adjustment`: the combined ground-and-screening
   adjustment over a vertical section (§A.4.4-A.4.5, Eq. 45-47): the
   mean-ground-plane ground effect while the line of sight is clear, the
   rubber-band diffraction over the terrain once it is blocked.

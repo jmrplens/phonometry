@@ -55,7 +55,7 @@ with the inside-field diffusivity term `Cd` (Annex B; -6 dB ideal diffuse,
 -5 dB average industrial). An opening is modelled here as an element whose "R"
 is the silencer insertion loss `D` (a bare opening is $D = 0$),
 combined in the *same* energy sum as the structural elements over the segment
-area `S` -- a practical extension for a mixed wall-plus-opening segment.
+area `S`: a practical extension for a mixed wall-plus-opening segment.
 This is NOT the standard's Formula (4), which treats a segment made up *only*
 of openings with a different area normalization (`S` = the opening area) and
 sums its `LW` with the envelope segments only at the final energetic stage.
@@ -173,7 +173,7 @@ One façade element as a transmission path (EN 12354-3/-4).
 Provide exactly one of `r` (an area element, Formula 15 / Part 4 Formula 3),
 `dn_e` (a small element or air path, Formula 14) or `insertion_loss` (an
 opening in Part 4, modelled as an element whose reduction is the silencer's
-insertion loss `D` and combined in the same energy sum -- a practical
+insertion loss `D` and combined in the same energy sum: a practical
 extension, not the standard's separate segment-of-openings Formula 4). Per-band
 values may be scalars or equal-length arrays.
 

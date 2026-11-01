@@ -219,8 +219,8 @@ class IntensityReductionResult(OwnsArrays):
         against the reported band count before admitting them, because the
         caller passes those to :meth:`report`; the modified index arrives on
         the result itself and is admitted unmeasured. So the one column that
-        invites a comparison band by band -- the same index before and after
-        the ``Kc`` adaptation -- is the one nothing lines up, and the surplus
+        invites a comparison band by band (the same index before and after
+        the ``Kc`` adaptation) is the one nothing lines up, and the surplus
         entries of a longer array are dropped by the table without a word.
 
         The retained areas are pinned with the same predicate

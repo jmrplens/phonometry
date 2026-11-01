@@ -432,9 +432,9 @@ def plot_duct_modes(
     """Cut-on frequency of each higher-order duct mode, with and without flow.
 
     The still-air cut-on of every mode is drawn beside the value the mean flow
-    shifts it to, and the band below the first cut-on -- where the duct carries
-    plane waves only, and where the plane-wave methods of the library are valid
-    -- is shaded.
+    shifts it to, and the band below the first cut-on, where the duct carries
+    plane waves only and where the plane-wave methods of the library are valid,
+    is shaded.
 
     :param result: A
         :class:`~phonometry.noise_control.duct_modes.DuctModeResult`.

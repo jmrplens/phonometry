@@ -17,7 +17,7 @@ Schroeder backward integration, reverberation time) consumes this IR.
 
 Two excitation families are implemented:
 
-* **Swept-sine (Annex B)** -- an exponential sine sweep (ESS). The frequency
+* **Swept-sine (Annex B)**: an exponential sine sweep (ESS). The frequency
   rises exponentially with time, which mimics a pink-noise source
   (ISO 18233:2006, B.3.2) and is the recommended broadband excitation. The
   IR is recovered by linear (zero-padded, non-circular) spectral
@@ -32,7 +32,7 @@ Two excitation families are implemented:
   THD(f) from the same recording), see
   [`phonometry.electroacoustics.swept_sine_distortion`](/phonometry/reference/api/electroacoustics/swept-sine/#swept_sine_distortion).
 
-* **Maximum-length sequence (Annex A)** -- an order-`N` binary sequence of
+* **Maximum-length sequence (Annex A)**: an order-`N` binary sequence of
   length $2^N - 1$ generated with a linear-feedback shift register
   (LFSR). Its circular autocorrelation is a near-perfect delta (A.1), so the
   IR of a periodically excited linear system is recovered by circular
@@ -42,7 +42,7 @@ Two excitation families are implemented:
 Two further excitations from the transfer-function measurement literature
 complete the family:
 
-* **Complementary Golay pair** -- two binary sequences of length
+* **Complementary Golay pair**: two binary sequences of length
   $L = 2^n$ whose periodic autocorrelations sum to an *exact* delta of
   height $2L$ (Golay 1961; Havelock, Kuwano & Vorlaender (eds.), Handbook
   of Signal Processing in Acoustics, Springer 2008, Part I Ch. 6 by
@@ -53,7 +53,7 @@ complete the family:
   remains (Xiang Eq. (4)). See [`golay_pair`](/phonometry/reference/api/rooms/impulse-response/#golay_pair) and
   [`golay_impulse_response`](/phonometry/reference/api/rooms/impulse-response/#golay_impulse_response).
 
-* **Sweep with an arbitrary magnitude spectrum** -- a swept sine synthesized
+* **Sweep with an arbitrary magnitude spectrum**: a swept sine synthesized
   in the frequency domain by shaping its group delay so the dwell time at
   each frequency is proportional to the desired spectral power
   (Mueller & Massarani, "Transfer-Function Measurement with Sweeps", JAES
@@ -66,7 +66,7 @@ complete the family:
 
 The recovered IR is broadband; ISO 18233 6.3.2 requires subsequent
 fractional-octave-band weighting (IEC 61260) before computing levels or
-decay curves -- that step belongs to downstream room-acoustics modules.
+decay curves; that step belongs to downstream room-acoustics modules.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
@@ -137,7 +137,7 @@ Built with the append recursion of Golay (1961): starting from
 and `-b` to `a` (Havelock, Handbook of Signal Processing in
 Acoustics, Springer 2008, Part I Ch. 6 (N. Xiang), Eq. (1)). The pair is
 *complementary*: the sum of the two periodic autocorrelations is exactly
-$2L$ at zero lag and exactly zero everywhere else (Xiang Eq. (2)) --
+$2L$ at zero lag and exactly zero everywhere else (Xiang Eq. (2)):
 an algebraic identity, not an approximation, unlike the near-delta
 autocorrelation of an MLS.
 
@@ -484,7 +484,7 @@ $$
 
 so the sweep dwells on each frequency for a time proportional to the
 energy it must radiate there and its temporal envelope stays nearly
-constant -- the crest factor stays close to a swept sine's ideal
+constant: the crest factor stays close to a swept sine's ideal
 3.01 dB regardless of the spectral shape (Sec. 4.3). The phase is the
 integral of the group delay, corrected to land on a real spectrum at
 Nyquist (Eq. (10)), and the sweep is obtained by inverse FFT over a
@@ -537,10 +537,10 @@ A sweep synthesized to follow an arbitrary target magnitude spectrum.
 Returned by [`shaped_sweep_signal`](/phonometry/reference/api/rooms/impulse-response/#shaped_sweep_signal). The playable samples live in
 `signal`; the object implements `__array__`, so it can be passed
 straight to a sound-card writer or as the `reference` of
-[`impulse_response`](/phonometry/reference/api/rooms/impulse-response/#impulse_response) (spectral method). The synthesis metadata --
-the frequency grid, the band-limited magnitude actually imposed on the
+[`impulse_response`](/phonometry/reference/api/rooms/impulse-response/#impulse_response) (spectral method). The synthesis metadata
+(the frequency grid, the band-limited magnitude actually imposed on the
 spectrum and the group delay that encodes the sweep's time-frequency
-trajectory (Mueller & Massarani 2001, Secs. 4.2-4.3) -- travels with
+trajectory, Mueller & Massarani 2001, Secs. 4.2-4.3) travels with
 the result, together with the achieved crest factor.
 
 **Attributes**

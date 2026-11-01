@@ -73,8 +73,8 @@ wavelength. `source_model` selects which of the three
 **Schroeder frequency** $f_\mathrm{s} = 2000 \sqrt{T / V}$ (Kuttruff Equation
 (3.44),
 `V` in cubic metres, `T` in seconds) marks the boundary between the
-modal low-frequency regime -- where discrete room modes rule and the diffuse
-assumption of `R` and `rc` fails -- and the high-frequency regime of
+modal low-frequency regime, where discrete room modes rule and the diffuse
+assumption of `R` and `rc` fails, and the high-frequency regime of
 overlapping modes where the statistical field of this module applies.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.

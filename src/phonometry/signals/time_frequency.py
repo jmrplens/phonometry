@@ -178,7 +178,7 @@ class SpectrogramResult(OwnsArrays):
 
         The two axes are pinned separately and the segment axis of
         :attr:`power` is its second one, because the array is stored as
-        ``(frequencies, times)`` -- one row per bin, one column per segment.
+        ``(frequencies, times)``: one row per bin, one column per segment.
 
         :raises ValueError: if the power grid disagrees with either axis of
             the time-frequency plane.

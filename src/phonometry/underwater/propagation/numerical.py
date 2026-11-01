@@ -6,21 +6,21 @@ Four complementary numerical solvers for the acoustic field in a
 horizontally-stratified ocean waveguide, complementing the closed-form
 propagation loss of :mod:`phonometry.underwater.propagation.closed_form`:
 
-* :func:`normal_modes` -- the normal-mode expansion. Solves the depth-separated
+* :func:`normal_modes`: the normal-mode expansion. Solves the depth-separated
   Sturm-Liouville eigenvalue problem by finite differences and assembles the
   propagation loss from the propagating modes.
-* :func:`ray_trace` -- ray tracing. Integrates the ray-trajectory equations
+* :func:`ray_trace`: ray tracing. Integrates the ray-trajectory equations
   through a sound-speed profile (Runge-Kutta), returning the ray paths and the
   travel time accumulated along each of them, and no amplitude.
-* :func:`gaussian_beams` -- Gaussian beam tracing. Hangs a beam on each of those
+* :func:`gaussian_beams`: Gaussian beam tracing. Hangs a beam on each of those
   rays and sums them into a propagation-loss field, which is finite at a caustic
   and decays smoothly into a shadow zone where ray theory has nothing to say.
-* :func:`eigenrays` -- the arrival structure. Takes a traced fan and a receiver
+* :func:`eigenrays`: the arrival structure. Takes a traced fan and a receiver
   and refines, by bisection on fresh traces, the rays that actually connect the
   source to that receiver, each with its travel time, launch and arrival
   angles, boundary-touch counts and classical complex amplitude: the list the
   sonar equation, a channel impulse response and communications work consume.
-* :func:`parabolic_equation` -- the standard (Tappert) parabolic equation, solved
+* :func:`parabolic_equation`: the standard (Tappert) parabolic equation, solved
   with the split-step Fourier algorithm, returning the propagation-loss field.
 
 All four are implemented clean-room from Jensen, Kuperman, Porter & Schmidt,
@@ -885,7 +885,7 @@ def ray_trace(
     past the vertical runs backward in range, which a marcher whose
     independent variable is range cannot carry (the same one-way surgery the
     parabolic equation performs), so such a ray is terminated at that bounce
-    and its samples are ``NaN`` from there on -- see
+    and its samples are ``NaN`` from there on; see
     :attr:`RayTraceResult.bathymetry_ranges`. The polyline continues level
     past its last node exactly as :func:`numpy.interp` clamps the sound-speed
     profile; a bathymetric feature narrower than one range step can hide
@@ -2048,7 +2048,7 @@ def _default_beam_widths(
     it costs +0.17 dB against the exact modal sum where the floor's 300 m
     measures -0.001 dB. What survives of the water-depth intuition is its
     geometry, made per-angle: the guide term holds every beam's *vertical
-    footprint* at :math:`4D/\pi`, about the water depth -- the cap misread
+    footprint* at :math:`4D/\pi`, about the water depth; the cap misread
     that footprint as the width itself, and charged the steep beams, which
     fit the column many times over, the same toll as the flat ones.
     """
@@ -2244,7 +2244,7 @@ def _fold_margins(
     the image in depth alone. Sloping columns get **no** floor at all, and
     the reason is worth a sentence: a fold of the fan displaces the image in
     range as much as in depth, and an image kilometres away *along* a beam's
-    axis is at zero transverse distance -- it is exactly how a wrapped tail
+    axis is at zero transverse distance: it is exactly how a wrapped tail
     represents an arrival that went up the slope, turned past the vertical
     and came back, which the marched axis cannot do but the analytic tail
     does. An earlier chord-distance floor here silently pruned those
@@ -3130,7 +3130,7 @@ def gaussian_beams(
     * **Ray theory's own regime** (Sect. 3.4.2): "the wavelength should be
       substantially smaller than any physical scale in the problem". This is
       the limit that bites hardest and the one a plausible-looking answer
-      hides best -- and one earlier version of this paragraph blamed it for an
+      hides best, and one earlier version of this paragraph blamed it for an
       error that was really the beam width's. At 20 Hz in 100 m of water the
       depth is 1.3 wavelengths and two modes propagate; the quarter-depth cap
       this module used to put on :math:`W_0` left a beam a third of a
@@ -3256,7 +3256,7 @@ def gaussian_beams(
     bottom with the same
     piecewise-linear ``depth(r)`` polyline :func:`ray_trace` takes, and it is
     the first range dependence in this module; the sound-speed profile stays
-    range independent, deliberately -- see :func:`ray_trace`'s scope note for
+    range independent, deliberately; see :func:`ray_trace`'s scope note for
     why full :math:`c(r, z)` is excluded (no exact oracle exists to hold it
     to). Four things follow from the slope, each stated with its cost:
 

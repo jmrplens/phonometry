@@ -68,8 +68,8 @@ each of them used to be a documented limitation of this module:
 * the anti-alias filter of those resampling stages had its transition band on
   the input Nyquist frequency and the signal crossed it twice, which put a
   floor of about 1.7 dB on everything above 0.9 of Nyquist whatever the design
-  rate. That floor is gone, so the rows near Nyquist -- the 15 848.9 Hz row at
-  32 kHz, the 20 kHz row of BS.468-4 Table 1 at 44.1 kHz -- are inside their
+  rate. That floor is gone, so the rows near Nyquist (the 15 848.9 Hz row at
+  32 kHz, the 20 kHz row of BS.468-4 Table 1 at 44.1 kHz) are inside their
   masks instead of over them, and A and C verify to class 1 at every sample
   rate from 8 kHz up;
 * block processing was incompatible with the accurate design, because a
@@ -577,7 +577,7 @@ def _weighting_sos(
     design takes about 3 s instead. That is common below about 2 kHz, and it
     also happens at scattered rates inside the audio band: measured over every
     rate from 2 Hz to 200 kHz, 52 of them at or above 2 kHz take the retry, of
-    which five are at or above 8 kHz -- 468 at nine rates between 45 and
+    which five are at or above 8 kHz: 468 at nine rates between 45 and
     64 kHz, AU at two near 34 kHz. None of the thirteen standard rates does,
     and where it fires it always improves the fit. It is the same cache and the
     same once.
@@ -628,7 +628,7 @@ class WeightingFilter:
             (:mod:`phonometry.filters._weighting_design`). Measured against
             the prototype over the standard's own band, the worst deviation is
             0.008 dB for A at 32 kHz and 0.0003 dB at 48 kHz, and at most
-            0.06 dB for any curve at any rate in this corpus -- the 0.06
+            0.06 dB for any curve at any rate in this corpus, the 0.06
             belonging to the 468 curve at 44.1 and 48 kHz, where a
             -30 dB/octave skirt has to flatten inside the last half percent
             below the Nyquist frequency. A and C verify to class 1 at every
@@ -640,7 +640,7 @@ class WeightingFilter:
             ``False`` is the plain bilinear transform of the printed
             prototype: the closed-form design a reader can check against the
             standard term by term, at the cost of the warping. That cost grows
-            quadratically toward the Nyquist frequency -- for A at 48 kHz it
+            quadratically toward the Nyquist frequency: for A at 48 kHz it
             reads 15.7 dB below the design goal at the 19 952.6 Hz row, which
             the class 1 mask does not see because its lower limit there is
             -inf, and 61.4 dB below it at 15 848.9 Hz when fs = 32 kHz, which

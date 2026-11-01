@@ -6,12 +6,12 @@ airborne acoustics) and a reference sound exposure of **1 µPa²·s**. This modu
 realises the ISO 18405 terminology as the shared level primitives used by the
 ship-radiated-noise and pile-driving modules:
 
-* :func:`sound_pressure_level` -- the mean-square sound pressure level,
+* :func:`sound_pressure_level`: the mean-square sound pressure level,
   :math:`\mathrm{SPL} = 10 \log_{10}(\langle p^2 \rangle / p_0^2)` dB re 1 µPa.
-* :func:`sound_exposure_level` -- the time-integrated exposure level,
+* :func:`sound_exposure_level`: the time-integrated exposure level,
   :math:`\mathrm{SEL} = 10 \log_{10}\!\left( \int p^2 \, dt / E_0 \right)` dB re
   1 µPa²·s.
-* :func:`peak_sound_pressure_level` -- the zero-to-peak level
+* :func:`peak_sound_pressure_level`: the zero-to-peak level
   :math:`20 \log_{10}(\max \lvert p \rvert / p_0)` dB re 1 µPa.
 
 :func:`underwater_to_in_air_spl` / :func:`in_air_to_underwater_spl` convert a
@@ -201,7 +201,7 @@ def underwater_to_in_air_spl(level: float) -> float:
     reference.
 
     Subtracts :math:`20 \log_{10}(20) \approx 26.02` dB. This is a
-    **reference-pressure change only** -- it is not the in-water/in-air
+    **reference-pressure change only**: it is not the in-water/in-air
     intensity equivalence, which also involves the media characteristic
     impedances.
 

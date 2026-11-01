@@ -1,16 +1,16 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
 r"""The sonar equation (passive and active), in decibels.
 
-Combines the sonar performance terms -- source level ``SL``, propagation loss
+Combines the sonar performance terms (source level ``SL``, propagation loss
 ``PL``, noise level ``NL``, directivity index ``DI``, detection threshold ``DT``,
-target strength ``TS`` and reverberation level ``RL`` -- into the signal excess
+target strength ``TS`` and reverberation level ``RL``) into the signal excess
 ``SE``, the signal-to-noise ratio and the figure of merit (the maximum allowable
 propagation loss at the detection limit :math:`\mathrm{SE} = 0`):
 
-* :func:`passive_sonar_equation` --
+* :func:`passive_sonar_equation`:
   :math:`\mathrm{SE} = \mathrm{SL} - \mathrm{PL} -
   (\mathrm{NL} - \mathrm{DI}) - \mathrm{DT}`.
-* :func:`active_sonar_equation` -- monostatic, noise-limited
+* :func:`active_sonar_equation`: monostatic, noise-limited
   :math:`\mathrm{SE} = \mathrm{SL} - 2\,\mathrm{PL} + \mathrm{TS} -
   (\mathrm{NL} - \mathrm{DI}) - \mathrm{DT}` or, when a reverberation level
   is given, reverberation-limited
@@ -39,7 +39,7 @@ range at which the detection probability is 50 %:
   :mod:`phonometry.underwater.propagation.closed_form` (spreading plus volume absorption),
   which is strictly increasing with range and therefore has a single crossing;
 * :func:`detection_range_from_curve` reads the crossing off any computed loss
-  curve -- a normal-mode, parabolic-equation or Weston-regime prediction --
+  curve (a normal-mode, parabolic-equation or Weston-regime prediction),
   where the oscillatory loss of a real waveguide can cross the figure of merit
   more than once (Ainslie, *Principles of Sonar Performance Modelling*, §11.2.8
   makes exactly that point about convergence zones).
@@ -171,7 +171,7 @@ class SonarEquationResult(OwnsArrays):
         3``, an axis and a size, naming neither the field nor the result it
         came from. A long one says nothing at all. The sort order holds one
         entry per loss, so the curve is drawn from as many signal-excess
-        values as there are losses and the tail is dropped in silence -- and
+        values as there are losses and the tail is dropped in silence, and
         the tail is the half that matters, because signal excess falls as
         loss grows and its last values are the negative ones. Five excesses
         from 20 dB down to -20 dB plotted against three losses drew

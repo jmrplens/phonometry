@@ -14,10 +14,10 @@ infinite path, tabulated over a grid of engine power settings and slant
 distances at reference conditions. Placing an aircraft's noise at a receiver
 starts by reading a level from this table for an arbitrary power and distance.
 
-* [`npd_level`](/phonometry/reference/api/aeroacoustics/airport-noise/#npd_level) -- the interpolated event level `L(P, d)`, linear in power
+* [`npd_level`](/phonometry/reference/api/aeroacoustics/airport-noise/#npd_level): the interpolated event level `L(P, d)`, linear in power
   and log-linear in distance (Eqs. 4-3/4-4), with extrapolation beyond the
   tabulated envelope.
-* [`npd_curve`](/phonometry/reference/api/aeroacoustics/airport-noise/#npd_curve) -- the level over a distance sweep at one power, returned as
+* [`npd_curve`](/phonometry/reference/api/aeroacoustics/airport-noise/#npd_curve): the level over a distance sweep at one power, returned as
   an [`NPDLevelResult`](/phonometry/reference/api/aeroacoustics/airport-noise/#npdlevelresult) with a `.plot()`.
 
 The single-event stage segments a flight path and adjusts the NPD baseline per

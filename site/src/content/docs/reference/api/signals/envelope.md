@@ -43,8 +43,8 @@ narrowband.
 The **envelope spectrum** ([`envelope_spectrum`](/phonometry/reference/api/signals/envelope/#envelope_spectrum)) transforms the
 detected envelope itself: Section 13.3 of the book runs a band-pass
 filter and a square-law envelope detector into a DC remover before
-correlating (Figure 13.11), because the spectral content of the envelope
-- not of the signal - is where amplitude modulations show as discrete
+correlating (Figure 13.11), because the spectral content of the envelope,
+not of the signal, is where amplitude modulations show as discrete
 lines. The optional `band` argument reproduces the figure's band-pass
 front end (the classical bearing-envelope chain: isolate the resonance
 band, then envelope it). An AM tone with modulation frequency $f_\mathrm{m}$
@@ -134,8 +134,8 @@ removed
 is tapered and transformed once, scaled by the taper's coherent gain
 so a sinusoidal modulation whose frequency falls on an analysis bin
 reads out as a line at its exact amplitude. An off-bin modulation
-frequency reads low by the taper's scalloping loss -- up to about
-1.4 dB (~15 %) for the default Hann midway between bins -- like any
+frequency reads low by the taper's scalloping loss (up to about
+1.4 dB, ~15 %, for the default Hann midway between bins), like any
 single-record amplitude spectrum.
 
 Closed forms for an AM tone
@@ -152,8 +152,8 @@ Amplitude modulation of rotating machinery (bearing and gear defect
 frequencies), mains hum and wind-turbine amplitude modulation appear
 the same way: lines at the modulation frequency and its harmonics,
 separated from the carrier's own spectrum. For the classical bearing
-chain -- isolate a structural-resonance band excited by the defect
-impacts, then envelope it -- pass the resonance band as `band`: the
+chain (isolate a structural-resonance band excited by the defect
+impacts, then envelope it) pass the resonance band as `band`: the
 record is band-pass filtered (zero-phase, so the modulation phase is
 untouched) before the detector, the Figure 13.11 front end.
 

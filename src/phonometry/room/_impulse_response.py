@@ -9,7 +9,7 @@ Schroeder backward integration, reverberation time) consumes this IR.
 
 Two excitation families are implemented:
 
-* **Swept-sine (Annex B)** -- an exponential sine sweep (ESS). The frequency
+* **Swept-sine (Annex B)**: an exponential sine sweep (ESS). The frequency
   rises exponentially with time, which mimics a pink-noise source
   (ISO 18233:2006, B.3.2) and is the recommended broadband excitation. The
   IR is recovered by linear (zero-padded, non-circular) spectral
@@ -24,7 +24,7 @@ Two excitation families are implemented:
   THD(f) from the same recording), see
   :func:`phonometry.electroacoustics.swept_sine_distortion`.
 
-* **Maximum-length sequence (Annex A)** -- an order-``N`` binary sequence of
+* **Maximum-length sequence (Annex A)**: an order-``N`` binary sequence of
   length :math:`2^N - 1` generated with a linear-feedback shift register
   (LFSR). Its circular autocorrelation is a near-perfect delta (A.1), so the
   IR of a periodically excited linear system is recovered by circular
@@ -34,7 +34,7 @@ Two excitation families are implemented:
 Two further excitations from the transfer-function measurement literature
 complete the family:
 
-* **Complementary Golay pair** -- two binary sequences of length
+* **Complementary Golay pair**: two binary sequences of length
   :math:`L = 2^n` whose periodic autocorrelations sum to an *exact* delta of
   height :math:`2L` (Golay 1961; Havelock, Kuwano & Vorlaender (eds.), Handbook
   of Signal Processing in Acoustics, Springer 2008, Part I Ch. 6 by
@@ -45,7 +45,7 @@ complete the family:
   remains (Xiang Eq. (4)). See :func:`golay_pair` and
   :func:`golay_impulse_response`.
 
-* **Sweep with an arbitrary magnitude spectrum** -- a swept sine synthesized
+* **Sweep with an arbitrary magnitude spectrum**: a swept sine synthesized
   in the frequency domain by shaping its group delay so the dwell time at
   each frequency is proportional to the desired spectral power
   (Mueller & Massarani, "Transfer-Function Measurement with Sweeps", JAES
@@ -58,7 +58,7 @@ complete the family:
 
 The recovered IR is broadband; ISO 18233 6.3.2 requires subsequent
 fractional-octave-band weighting (IEC 61260) before computing levels or
-decay curves -- that step belongs to downstream room-acoustics modules.
+decay curves; that step belongs to downstream room-acoustics modules.
 """
 
 from __future__ import annotations
@@ -752,7 +752,7 @@ def golay_pair(order: int | np.integer[Any]) -> tuple[np.ndarray, np.ndarray]:
     and ``-b`` to ``a`` (Havelock, Handbook of Signal Processing in
     Acoustics, Springer 2008, Part I Ch. 6 (N. Xiang), Eq. (1)). The pair is
     *complementary*: the sum of the two periodic autocorrelations is exactly
-    :math:`2L` at zero lag and exactly zero everywhere else (Xiang Eq. (2)) --
+    :math:`2L` at zero lag and exactly zero everywhere else (Xiang Eq. (2)):
     an algebraic identity, not an approximation, unlike the near-delta
     autocorrelation of an MLS.
 
@@ -882,10 +882,10 @@ class ShapedSweepResult(OwnsArrays):
     Returned by :func:`shaped_sweep_signal`. The playable samples live in
     ``signal``; the object implements :meth:`__array__`, so it can be passed
     straight to a sound-card writer or as the ``reference`` of
-    :func:`impulse_response` (spectral method). The synthesis metadata --
-    the frequency grid, the band-limited magnitude actually imposed on the
+    :func:`impulse_response` (spectral method). The synthesis metadata
+    (the frequency grid, the band-limited magnitude actually imposed on the
     spectrum and the group delay that encodes the sweep's time-frequency
-    trajectory (Mueller & Massarani 2001, Secs. 4.2-4.3) -- travels with
+    trajectory, Mueller & Massarani 2001, Secs. 4.2-4.3) travels with
     the result, together with the achieved crest factor.
 
     :ivar signal: The sweep samples (peak ``amplitude``).
@@ -928,7 +928,7 @@ class ShapedSweepResult(OwnsArrays):
         applying that mask to the dB curve built from :attr:`magnitude`.
         A grid and a magnitude of different lengths stop there, in either
         direction, with numpy's ``IndexError`` about a boolean index and two
-        axis sizes -- a message that names neither field nor the result they
+        axis sizes, a message that names neither field nor the result they
         came from. :attr:`group_delay` has no reader at all: the plot never
         opens it, so a trajectory of the wrong length raises nothing anywhere
         and travels out to the caller, whose own pairing of it against
@@ -938,7 +938,7 @@ class ShapedSweepResult(OwnsArrays):
         The rank half is the silent one. A magnitude of shape ``(bin, 2)``
         carries one row per bin and so passes every length check above, and
         the plot draws its second column as a second dashed curve under the
-        single "Synthesis target" legend entry -- having first normalised both
+        single "Synthesis target" legend entry, having first normalised both
         by the larger of the two, which pushes the genuine target down by the
         distance between the columns (12 dB for a second column four times the
         first) while the Welch spectrum, normalised on its own, stays put. The
@@ -1111,7 +1111,7 @@ def shaped_sweep_signal(
 
     so the sweep dwells on each frequency for a time proportional to the
     energy it must radiate there and its temporal envelope stays nearly
-    constant -- the crest factor stays close to a swept sine's ideal
+    constant: the crest factor stays close to a swept sine's ideal
     3.01 dB regardless of the spectral shape (Sec. 4.3). The phase is the
     integral of the group delay, corrected to land on a real spectrum at
     Nyquist (Eq. (10)), and the sweep is obtained by inverse FFT over a

@@ -51,8 +51,8 @@ Turned around, the same equation answers the question a designer actually asks:
 That is :func:`enclosure_required_transmission_loss`, which returns the required
 ``R`` per band in the same :class:`EnclosureInsertionLossResult`.
 
-**The panel transmission loss ``R`` is supplied by the caller** -- measured, or
-predicted by a panel model -- as a per-band array, a callable of frequency, or
+**The panel transmission loss ``R`` is supplied by the caller** (measured, or
+predicted by a panel model) as a per-band array, a callable of frequency, or
 a panel prediction result (a :class:`phonometry.building.SoundReductionResult`
 or :class:`phonometry.building.ApertureTransmissionResult`, matched structurally
 so no dependency on ``building`` is introduced). This module never predicts
@@ -140,24 +140,24 @@ class EnclosureInsertionLossResult(OwnsArrays):
     def __post_init__(self) -> None:
         """Reject a sheet whose columns do not all run over the same bands.
 
-        The enclosure fiche prints one row per band -- nominal frequency, panel
+        The enclosure fiche prints one row per band (nominal frequency, panel
         ``R``, correction ``C`` and net ``IL`` side by side, with the interior
-        room constant ``R_i`` added in the verbose table -- and it sizes that
+        room constant ``R_i`` added in the verbose table), and it sizes that
         table from ``insertion_loss`` alone. Of those columns only ``R_i``
         stays out of the embedded figure, which is what makes it the one that
         hides: the sheet draws this result's own plot, where ``R``, ``C`` and
         ``IL`` share a single x axis, so one of them off the ``IL`` length
         raises from matplotlib as the figure is drawn and no PDF is written at
         all. An ``R_i`` one entry *long* fills every printed row from a column
-        that runs over other bands -- carry an extra band at the front and
-        each row states the previous band's ``R_i`` -- while one entry *short*
+        that runs over other bands (carry an extra band at the front and
+        each row states the previous band's ``R_i``), while one entry *short*
         renders an ordinary-looking plain sheet and fails only when someone
         asks for the verbose one.
 
         The two area scalars are held positive and finite beside the length
         checks: both producers (:func:`enclosure_insertion_loss` and
         :func:`enclosure_required_transmission_loss`) validate them on the way
-        in, so a NaN here can only be planted by hand -- and the fiche would
+        in, so a NaN here can only be planted by hand, and the fiche would
         print it verbatim in the accredited extended-result line
         (``External surface area SE = nan m2``) without a word.
 

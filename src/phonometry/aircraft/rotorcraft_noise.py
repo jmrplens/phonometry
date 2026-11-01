@@ -17,26 +17,26 @@ This module provides the source primitives and the single-event method built on
 them (clean-room, from the NORAH2 guidance SC01.D1.5d, the basis of ECAC
 Doc 32):
 
-* :func:`hemisphere_source_level` -- the interpolated source level ``L(fc, φ, θ)``
+* :func:`hemisphere_source_level`: the interpolated source level ``L(fc, φ, θ)``
   from a :class:`RotorcraftHemisphere`, bilinear over the 10° grid (Eq. 13) with
   nearest-bin fill outside the measured coverage (Eq. 14/15).
-* :func:`hover_ring_hemisphere` / :func:`hover_derived_hemisphere` -- the
+* :func:`hover_ring_hemisphere` / :func:`hover_derived_hemisphere`: the
   hover/idle source derivation of guidance §A.3.5 (Table 3): the ground-ring
   measurement of in-ground hover extended to a hemisphere assuming constant
   directivity in ``φ``, and the out-of-ground-hover and idle hemispheres
   derived from it by the published offsets or a measured 0°-direction
   difference.
-* :func:`flight_condition_weights` / :func:`interpolated_source_level` -- the
+* :func:`flight_condition_weights` / :func:`interpolated_source_level`: the
   flight-condition interpolation across a hemisphere set: distance-scaled
   triangulation inside the convex hull of the normalised ``(V̄, γ̄)`` database
   conditions, nearest neighbour outside (Eq. 3-10).
-* :func:`flight_path_kinematics` -- track kinematics by central finite
+* :func:`flight_path_kinematics`: track kinematics by central finite
   differences: ground speed, airspeed, heading, curvature, bank and path angle
   (Eq. 16-21 / Doc 32 Eq. 8-10).
-* :func:`rotorcraft_event_level` -- the received one-third-octave time history of
+* :func:`rotorcraft_event_level`: the received one-third-octave time history of
   a single event at recorded time (Eq. 1/22/23) and its integrated metrics:
   ``LASmax``, ``SEL`` (Doc 32 Eq. 27) and ``EPNL`` (Doc 32 Eq. 28, ICAO Annex 16).
-* :func:`rotorcraft_noise_contour` -- the single-event ``SEL``/``LASmax`` ground
+* :func:`rotorcraft_noise_contour`: the single-event ``SEL``/``LASmax`` ground
   grid.
 
 Source (clean-room): ECAC Doc 32, 1st ed.; NORAH2 rotorcraft-noise modelling
@@ -480,7 +480,7 @@ def hover_ring_hemisphere(
     - ``"bearing"``: the level depends only on the horizontal bearing of the
       emission direction, ``β = atan2(sin θ sin φ, cos θ)`` (constant
       directivity in elevation instead of in azimuth). This is what the
-      NORAH2 reference implementation evaluates -- its out-of-ground-hover
+      NORAH2 reference implementation evaluates: its out-of-ground-hover
       verification case is reproduced with this mapping (and diverges from
       ``"constant_phi"`` by several dB at steep emission angles, where the
       two readings part).
@@ -637,7 +637,7 @@ def flight_condition_weights(
     / (\gamma_{\mathrm{max}} - \gamma_{\mathrm{min}})` with
     the empirical flight-condition scaling factor :math:`F_\mathrm{fc} = 2`: the
     guidance's
-    normalisation (Eq. 3-6), which subtracts no minima -- a shared offset
+    normalisation (Eq. 3-6), which subtracts no minima: a shared offset
     cancels in the distances ``δ_j`` (Eq. 7) either way. Inside the
     convex hull of the database conditions the enveloping Delaunay triangle
     contributes with inverse-distance weights

@@ -185,7 +185,7 @@ passes above the top edge (`Barrier(line_of_sight_clear=True)`) `z`
 takes a negative sign (ISO 9613-2:1996, text after Eq. (16)) and Eq. (14)
 still applies: `Dz` falls continuously from $10 \log_{10} 3 = 4.8$ dB
 at grazing ($z = 0$) towards 0 as the clearance deepens, clamped at
-0 (the logarithm's argument is floored at 1 -- a barrier below the sight
+0 (the logarithm's argument is floored at 1: a barrier below the sight
 line never amplifies).
 
 **Parameters**

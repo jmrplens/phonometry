@@ -13,7 +13,7 @@ The signal toolbox of the metrology domain: deterministic test signals and
 the two sample-rate operations every measurement chain eventually needs,
 with their accuracy stated instead of implied.
 
-* [`noise_signal`](/phonometry/reference/api/signals/test-signals/#noise_signal) - Gaussian noise with an exact power-law spectral
+* [`noise_signal`](/phonometry/reference/api/signals/test-signals/#noise_signal): Gaussian noise with an exact power-law spectral
   slope: white (0 dB/octave), pink (-3.01), red (-6.02, also called
   Brownian), blue (+3.01) and violet (+6.02). The autospectral density
   follows $G_{xx}(f) \propto f^\alpha$ with $\alpha$ = 0,
@@ -32,7 +32,7 @@ with their accuracy stated instead of implied.
   to the requested RMS exactly. With the same `seed` the generator is
   fully deterministic across runs.
 
-* [`tone_burst`](/phonometry/reference/api/signals/test-signals/#tone_burst) - the gated sine burst of IEC 60268-1:1985 (Annex A,
+* [`tone_burst`](/phonometry/reference/api/signals/test-signals/#tone_burst): the gated sine burst of IEC 60268-1:1985 (Annex A,
   Clause A2): the tone starts at a zero crossing and lasts an integral
   number of full periods, either as a single burst or as a repetitive train
   with a stated repetition rate. The result records the rectangular gating
@@ -40,7 +40,7 @@ with their accuracy stated instead of implied.
   dynamic-response tests can state their stimulus instead of hand-rolling
   it.
 
-* [`resample_signal`](/phonometry/reference/api/signals/test-signals/#resample_signal) - polyphase resampling behind an explicit
+* [`resample_signal`](/phonometry/reference/api/signals/test-signals/#resample_signal): polyphase resampling behind an explicit
   anti-alias specification. The lowpass FIR is designed here (Kaiser
   window method) from two numbers the caller controls - the stopband
   attenuation in dB and the transition-band fraction of the target
@@ -48,7 +48,7 @@ with their accuracy stated instead of implied.
   alias rejection of a resampled record is a documented property, not a
   library default.
 
-* [`fractional_delay`](/phonometry/reference/api/signals/test-signals/#fractional_delay) - band-limited delay by an arbitrary
+* [`fractional_delay`](/phonometry/reference/api/signals/test-signals/#fractional_delay): band-limited delay by an arbitrary
   (sub-sample) number of samples via a frequency-domain phase ramp,
   `linear` (zero-padded, for transients and impulse responses; the same
   kernel [`align_impulse_responses`](/phonometry/reference/api/signals/correlation/#align_impulse_responses)
@@ -241,7 +241,7 @@ can be verified against the filter itself.
 | `filter_taps` | Anti-alias FIR taps (unit passband gain; the polyphase engine applies the `up` interpolation gain), designed at the intermediate rate `original_fs * up`. A single `1.0` tap when the ratio is 1 (no filtering). |
 | `passband_edge_hz` | Passband edge of the design, in Hz. |
 | `stopband_edge_hz` | Stopband edge of the design (the smaller of the two Nyquist frequencies), in Hz. |
-| `stopband_attenuation` | Designed stopband attenuation, in dB (also the passband ripple bound: the Kaiser window method holds the ripple of both bands within the same $\delta = 10^{-A/20}$, though -- unlike a true equiripple design -- its ripple decays away from the band edges rather than staying at the bound). |
+| `stopband_attenuation` | Designed stopband attenuation, in dB (also the passband ripple bound: the Kaiser window method holds the ripple of both bands within the same $\delta = 10^{-A/20}$, though, unlike a true equiripple design, its ripple decays away from the band edges rather than staying at the bound). |
 | `transition_width` | Transition-band width as a fraction of the smaller Nyquist frequency. |
 
 ### ResampledSignalResult.n_taps

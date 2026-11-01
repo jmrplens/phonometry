@@ -5,7 +5,7 @@
 :mod:`phonometry.noise_control.room_to_room` are the two calculations in the
 library that walk a whole path and end by laying the received octave-band
 spectrum against a room criterion. They differ in everything between the ends
--- one cascades duct elements, the other crosses a partition -- but the ends
+(one cascades duct elements, the other crosses a partition), but the ends
 themselves are the same: coerce a per-band decibel spectrum, validate a
 criterion family and its target, and answer the four questions a design sheet
 asks of the result. Those live here so both results answer them identically.

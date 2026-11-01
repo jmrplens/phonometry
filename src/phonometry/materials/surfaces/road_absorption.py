@@ -4,7 +4,7 @@ r"""In-situ sound absorption of road surfaces (ISO 13472-1 / ISO 13472-2).
 Two complementary standardised in-situ methods are supported here. They target
 opposite ends of the absorption scale and are **not** interchangeable:
 
-* **BS ISO 13472-1:2002** - *extended surface method*. A free-field impulse
+* **BS ISO 13472-1:2002**: the *extended surface method*. A free-field impulse
   response is measured over the road, the direct (incident) and surface
   (reflected) components are separated in the time domain by the subtraction
   technique and an **Adrienne-type temporal window** (Clause 6.4), transformed
@@ -28,8 +28,9 @@ opposite ends of the absorption scale and are **not** interchangeable:
   error and the geometry factor by a ratio (Annex B), and non-normal incidence
   uses :math:`K_{\mathrm{r},\theta}` (Annex F).
 
-* **BS ISO 13472-2:2010** - *spot method*. This is an **in-situ application of
-  the ISO 10534-2 two-microphone impedance tube** for reflective surfaces
+* **BS ISO 13472-2:2010**: the *spot method*. This is an **in-situ
+  application of the ISO 10534-2 two-microphone impedance tube** for reflective
+  surfaces
   (measured ``alpha`` below ~0.15). Part 2 does not restate the
   transfer-function / reflection-factor / absorption mathematics; Clauses 4,
   5.7 and 6.6 defer it to ISO 10534-2. The core computation therefore lives in

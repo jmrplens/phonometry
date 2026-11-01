@@ -864,7 +864,7 @@ class OctaveFilterBank:
         Its calibration is honoured only when the bank carries none of its
         own: the bank's ``LevelCalibration`` is the explicit knob, and
         applying both would square the factor. A dBFS bank ignores it
-        outright -- dBFS is referenced to digital full scale, so converting
+        outright: dBFS is referenced to digital full scale, so converting
         the samples to pascals first would offset every band by
         ``20*log10(factor)`` while still calling the result dBFS.
         """

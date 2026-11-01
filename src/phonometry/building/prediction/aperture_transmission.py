@@ -157,8 +157,8 @@ class ApertureTransmissionResult(OwnsArrays):
         The kept shape has to be the shape ``kind`` names, too. The section is
         drawn from whichever of the two is present and nothing in it says which
         kind it belongs to, so a ``"circular"`` result that kept a ``width_m``
-        draws the slit section of that width -- pixel for pixel the figure of a
-        slit, under a curve the same result labels a circular aperture -- and a
+        draws the slit section of that width (pixel for pixel the figure of a
+        slit, under a curve the same result labels a circular aperture), and a
         ``"slit"`` that kept a ``radius`` draws the hole section of the doubled
         opening.
 

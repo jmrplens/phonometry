@@ -8,7 +8,7 @@ sidebar:
 Reactive silencers by the four-pole (transmission-matrix) method.
 
 A reactive silencer controls noise by *reflecting* it back to the source with
-impedance discontinuities -- sudden area changes and side branches -- rather
+impedance discontinuities (sudden area changes and side branches) rather
 than by dissipating it in absorptive material. The one-dimensional plane-wave
 theory represents each acoustic element by a 2x2 **transfer (four-pole)
 matrix** relating the sound pressure `p` and volume velocity `S u` at its

@@ -152,7 +152,7 @@ class MultitaperSpectralDensityResult(OwnsArrays):
         :attr:`confidence_lower` and :attr:`confidence_upper`, so a length that disagrees
         raises numpy's ``boolean index did not match indexed array along
         axis 0; size of axis is 513 but size of corresponding boolean
-        axis is 512`` -- which names sizes and never a field, and quotes
+        axis is 512``, which names sizes and never a field, and quotes
         them for whichever array is being indexed rather than for the one
         that is wrong, so a short :attr:`frequencies` is reported against
         the confidence bound the mask reached first.
@@ -164,7 +164,7 @@ class MultitaperSpectralDensityResult(OwnsArrays):
         :attr:`confidence_lower` and :attr:`confidence_upper` is labelled
         :math:`\bar\nu` = 5.2 where the interval it shows carries 10.6, on
         a figure that is otherwise complete. One entry too many is quieter
-        still -- the mean barely moves -- but the halved bin documented
+        still (the mean barely moves), but the halved bin documented
         above as the Nyquist one is then no longer the last.
         :attr:`random_error` and :attr:`weights` are drawn by nothing at
         all: they are further columns of the same table,

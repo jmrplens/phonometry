@@ -22,7 +22,7 @@ convention (divide by :math:`2^{B-1}`, unsigned 8-bit re-centred, 24-bit
 assembled from its three little-endian bytes and sign-extended). No
 memory map is involved: a map of a 100 GiB RF64 costs address space and
 page-cache churn, while a seek-and-read of ``block x block_align`` bytes
-costs precisely that many bytes, 24-bit included -- the depth no numpy
+costs precisely that many bytes, 24-bit included: the depth no numpy
 dtype can map. Everything else (compressed WAV, FLAC, Ogg, MP3) streams
 through ``soundfile.blocks`` from the ``[audio]`` extra, with the same
 lossy warning :func:`phonometry.io.read` gives: chopping an approximation
@@ -204,7 +204,7 @@ def read_blocks(
 
     Yields what :func:`phonometry.io.read` would return for the same
     file, cut into consecutive pieces of ``block_size`` frames (the last
-    piece may be shorter), while holding only one block in memory -- the
+    piece may be shorter), while holding only one block in memory, the
     way an overnight RF64 flows through ``BlockProcessing(stateful=True)``
     filters without ever existing as an array. Each block is a ``Signal``
     carrying what the whole-file read would carry: the rate, the

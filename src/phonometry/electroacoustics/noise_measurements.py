@@ -2,14 +2,14 @@
 """Noise measurements of audio equipment (AES17-2015 6.4).
 
 The two levels that say how quiet a device is, both measured through the
-AES17 measurement chain -- the standard notch (5.2.8) where a test tone has
+AES17 measurement chain: the standard notch (5.2.8) where a test tone has
 to be removed, the CCIR-RMS weighting (5.2.7, the ITU-R BS.468-4 curve with
 the flat -5,63 dB gain that puts unity at 2 kHz) and the 20 Hz to 20 kHz
 band (5.2.5):
 
 * **Dynamic range** (6.4.1), the ratio of the maximum output level to the
   weighted noise-plus-distortion residual left when the device is driven
-  with a 997 Hz sine 60 dB below full scale -- what the standard's own note
+  with a 997 Hz sine 60 dB below full scale, what the standard's own note
   also calls the signal-to-noise ratio, since it includes every harmonic,
   inharmonic and noise component.
 * **Idle channel noise** (6.4.2), the weighted output level, relative to

@@ -1189,8 +1189,8 @@ class PeriodAssessment(RichDisplay):
 
         :attr:`period` is a tag, not free text: the *acta* reads its heading
         out of a table keyed by ``"day"``, ``"evening"`` and ``"night"``, and
-        the assessment plot labels its bars the same way. Anything else --
-        a capitalised ``"Day"``, the Spanish ``"dia"`` -- builds a period
+        the assessment plot labels its bars the same way. Anything else
+        (a capitalised ``"Day"``, the Spanish ``"dia"``) builds a period
         that looks assessed and dies later as a bare ``KeyError: 'Day'``,
         naming neither the field, nor the owner, nor the three names it had
         to be one of. :func:`assess_activity` only ever writes the canonical
@@ -1304,7 +1304,7 @@ class ActivityAssessment(RichDisplay):
         an assessment that never happened, and every reader of it says the
         opposite: :attr:`passes` is an ``all()`` over nothing and answers
         ``True``, and the *acta* renders its title, its limit row, its
-        conclusion and its PASS verdict over a phase table with no rows --
+        conclusion and its PASS verdict over a phase table with no rows:
         a complete inspection report of a measurement campaign that does not
         exist. What stops the sheet, when it stops at all, is the assessment
         figure, with ``IndexError: index 0 is out of bounds for axis 0 with

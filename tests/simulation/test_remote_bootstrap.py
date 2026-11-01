@@ -339,7 +339,9 @@ def test_a_package_a_run_holds_is_never_pruned(tmp_path: Path) -> None:
 
 
 def _locks(cache: Path) -> list[str]:
-    return sorted(entry.name for entry in cache.iterdir() if entry.name.endswith(".lock"))
+    return sorted(
+        entry.name for entry in cache.iterdir() if entry.name.endswith(".lock")
+    )
 
 
 @pytest.mark.skipif(

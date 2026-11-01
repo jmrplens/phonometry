@@ -116,7 +116,9 @@ def test_a_dotted_name_is_read_from_a_quoted_header_and_a_bare_one_is_a_table(
         encoding="utf-8",
     )
     assert hosts.load_host("nas.local").ssh == "root@192.168.0.40"
-    with pytest.raises(ValueError, match=r"\[hosts\.lab\]: unknown key\(s\) \['local'\]"):
+    with pytest.raises(
+        ValueError, match=r"\[hosts\.lab\]: unknown key\(s\) \['local'\]"
+    ):
         hosts.load_host("lab")
     with pytest.raises(KeyError, match="no host 'lab.local'.*it names lab, nas.local"):
         hosts.load_host("lab.local")

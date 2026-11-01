@@ -575,10 +575,16 @@ def _git(root: pathlib.Path, *args: str, **options: Any) -> None:
 
 
 def _repository(tmp_path: pathlib.Path, files: dict[str, str]) -> pathlib.Path:
-    """A repository holding *files*, committed at :data:`_EPOCH`."""
+    """A repository holding *files*, committed at :data:`_EPOCH`.
+
+    ``core.autocrlf`` is off, as the release and SECURITY.md clone a tag: Git
+    for Windows turns it on for every repository, and an export of the
+    commit would then write CRLF into every file that no attribute pins.
+    """
     root = tmp_path / "repository"
     root.mkdir()
     _git(root, "init", "--quiet")
+    _git(root, "config", "core.autocrlf", "false")
     for name, text in files.items():
         (root / name).parent.mkdir(parents=True, exist_ok=True)
         (root / name).write_text(text, encoding="utf-8", newline="\n")

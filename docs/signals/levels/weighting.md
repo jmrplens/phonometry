@@ -426,8 +426,9 @@ Not with a plain bilinear design: at $f_\mathrm{s} = 48$ kHz the A-curve error r
   the infrasound G curve, the historical B and D, and AU for audible sound
   in the presence of ultrasound.
 - [Same bits on every machine](../../reference/determinism.md): why the
-  designed filter is byte-identical on any CPU, BLAS, thread count or
-  platform, with the measured evidence.
+  designed filter is byte-identical whatever the C library, the processor's
+  vector units or the thread count, which library steps it still depends on,
+  and the measured evidence.
 - API reference: [`filters.weighting`](https://docs.jmrp.io/phonometry/reference/api/filters/weighting/) and [`filters.compliance`](https://docs.jmrp.io/phonometry/reference/api/filters/compliance/).
 - Theory: [Weighting Curves (IEC 61672-1)](../../reference/theory/signal-analysis.md#weighting-curves-iec-61672-1): the pole-zero definition of the A, C and Z curves and the bilinear warping the fitted design cancels.
 

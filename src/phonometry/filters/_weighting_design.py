@@ -534,14 +534,16 @@ def _scalar_arctan(values: np.ndarray) -> np.ndarray:
     residual through the target. It was the last routine of the path taken
     from the C library, and the one the C libraries split on where the
     checked designs reach: glibc's ``atan`` is not correctly rounded on 19 of
-    the 15 866 arctangents the 133 checked designs evaluate, in 32 of those
-    designs, and its two x86-64 builds, with fused multiply-adds and without,
-    round some inputs differently from each other. The correctly rounded value
-    has one definition and no platform in it, so that is the arctangent here,
-    in this package's own exact integer arithmetic, and those 32 designs moved
-    on Linux by their last bits, inside the response the tests allow.
-    glibc's routine, which would have kept them where they were, is the IBM
-    Accurate Mathematical Library, under LGPL-2.1-or-later, and is not
+    the 15 866 arctangents the 133 checked designs evaluate, which reach 32
+    of those designs, and its two x86-64 builds, with fused multiply-adds and
+    without, round some inputs differently from each other. The correctly
+    rounded value has one definition and no platform in it, so that is the
+    arctangent here, in this package's own exact integer arithmetic. Six of
+    those 32 designs moved on Linux by their last bits, inside the response
+    the tests allow; in the other 26 the frequency that differs by one ulp
+    gives the same target level to the last bit, so the fit never sees it.
+    glibc's routine, which would have kept the six where they were, is the
+    IBM Accurate Mathematical Library, under LGPL-2.1-or-later, and is not
     transcribed into this MIT package.
 
     :param values: Any real array.

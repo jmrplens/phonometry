@@ -4,22 +4,24 @@ description: "Determinismo: por qué deriva la coma flotante, cómo un filtro si
 ---
 
 Un filtro de ponderación diseñado por phonometry es el mismo filtro, byte a
-byte, sea cual sea la máquina que lo diseñe: cualquier biblioteca C,
-cualquier juego de kernels BLAS, cualquier número de hilos, cualquier
-semilla de hash y cualquier CPU, con o sin AVX-512 o multiply-add
-fusionado. En el ajuste del diseño de ponderaciones no queda ninguna rutina
-de la biblioteca C: cada trascendente que toma está escrita en aritmética
-que IEEE&nbsp;754 fija o calculada correctamente redondeada en aritmética
-entera exacta, así que glibc, la libm de Apple, musl y el runtime de
-Windows, y las dos compilaciones que glibc lleva para x86-64, no tienen voz
-en sus bits. La única reserva son dos pasos de la cascada realizada que
-pasan por una biblioteca numérica y no por la biblioteca C, las raíces
-polinómicas de LAPACK y los productos BLAS que forma SciPy; Alcance, más
-abajo, los nombra y dice qué se midió. Esta página registra lo que se fijó
-y mide lo que hace. Los coeficientes que diseña un portátil son los que
-diseña un clúster, así que un veredicto de conformidad, una figura
-publicada o un filtro embarcado en una cadena de medida es un artefacto
-reproducible y no el relato de una máquina sobre sí misma.
+byte, sean cuales sean la biblioteca C, el número de hilos o la semilla de
+hash con que se diseñe, y en cualquier procesador x86-64, con o sin AVX-512
+o multiply-add fusionado, corra allí el juego de kernels de OpenBLAS que
+corra. La única reserva son dos pasos de la cascada realizada que pasan por
+una biblioteca numérica y no por la biblioteca C, las raíces polinómicas de
+LAPACK y los productos BLAS que forma SciPy, que en ARM de 64 bits, según se
+midió, separan algunos diseños de las otras curvas y ninguno de la
+ponderación A; Alcance, más abajo, los nombra y dice qué se midió. En el
+ajuste del diseño de ponderaciones no queda ninguna rutina de la biblioteca
+C: cada trascendente que toma está escrita en aritmética que IEEE&nbsp;754
+fija o calculada correctamente redondeada en aritmética entera exacta, así
+que glibc, la libm de Apple, musl y el runtime de Windows, y las dos
+compilaciones que glibc lleva para x86-64, no tienen voz en sus bits. Esta
+página registra lo que se fijó y mide lo que hace. Los coeficientes que
+diseña un portátil son los que diseña un clúster, así que un veredicto de
+conformidad, una figura publicada o un filtro embarcado en una cadena de
+medida es un artefacto reproducible y no el relato de una máquina sobre sí
+misma.
 
 Esa frase no es el comportamiento normal del Python científico, y esta página
 registra lo que costó, con los números.
@@ -152,8 +154,10 @@ corren en CI:
   comprobados, en 572&nbsp;386 valores de borde (cada potencia de dos desde
   el subnormal más pequeño hasta el double más grande con 64 vecinos a cada
   lado, los ceros con signo, los infinitos, NaN y las dos bandas donde la
-  respuesta deja de ser el argumento o el double más cercano a &pi;/2) y en
-  210 millones de sorteos aleatorios sobre toda la recta de los doubles. Con
+  respuesta deja de ser el argumento o el double más cercano a &pi;/2), en
+  60 millones de patrones de bits aleatorios sobre toda la recta de los
+  doubles y en 150 millones de sorteos cuya magnitud está entre 2⁻⁶² y 2⁶²,
+  donde la rutina hace su trabajo de verdad. Con
   la primera pasada recortada a 56 bits, donde entre un cuarto y un tercio
   de las entradas necesita una segunda y solo la cota de error decide, otros
   60 millones de sorteos salen también correctamente redondeados, y esa

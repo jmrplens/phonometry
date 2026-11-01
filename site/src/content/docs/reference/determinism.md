@@ -4,21 +4,22 @@ description: "Determinism: why floating point drifts, how a designed filter stay
 ---
 
 A weighting filter designed by phonometry is the same filter, byte for byte,
-whatever machine designs it: any C library, any BLAS kernel set, any thread
-count, any hash seed, and any CPU, with or without AVX-512 or fused
-multiply-adds. No routine of the C library is left in the weighting
-design's fit: every transcendental it takes is spelled in arithmetic
-IEEE&nbsp;754 fixes or computed correctly rounded in exact integer
-arithmetic, so glibc, Apple's libm, musl and the Windows runtime, and the
-two builds glibc carries for x86-64, have no say in its bits. The one
-reservation is two steps of the realised cascade that go through a
-numerical library rather than the C library, LAPACK's polynomial roots and
-the BLAS products SciPy forms; Scope below names them and says what was
-measured. This page records what was pinned and measures what it does. The
-coefficients a laptop designs are the coefficients a cluster designs, so a
-conformance verdict, a published figure or a filter shipped inside a
-measurement chain is a reproducible artifact rather than one machine's
-account of itself.
+whatever C library, thread count or hash seed it is designed under, and on
+any x86-64 processor, with or without AVX-512 or fused multiply-adds,
+whichever OpenBLAS kernel set runs there. The one reservation is two steps
+of the realised cascade that go through a numerical library rather than the
+C library, LAPACK's polynomial roots and the BLAS products SciPy forms,
+which on 64-bit ARM, as measured, part some designs of the other curves and
+none of the A weighting's; Scope below names them and says what was
+measured. No routine of the C library is left in the weighting design's fit:
+every transcendental it takes is spelled in arithmetic IEEE&nbsp;754 fixes
+or computed correctly rounded in exact integer arithmetic, so glibc, Apple's
+libm, musl and the Windows runtime, and the two builds glibc carries for
+x86-64, have no say in its bits. This page records what was pinned and
+measures what it does. The coefficients a laptop designs are the
+coefficients a cluster designs, so a conformance verdict, a published figure
+or a filter shipped inside a measurement chain is a reproducible artifact
+rather than one machine's account of itself.
 
 That sentence is not how scientific Python normally behaves, and this page
 records what it cost, with the numbers.
@@ -141,8 +142,10 @@ run in CI:
   572&nbsp;386 edge values (every power of two from the smallest subnormal
   to the largest double with 64 neighbours on each side, the signed zeros,
   the infinities, NaN, and the two bands where the answer stops being the
-  argument or the double nearest &pi;/2) and on 210 million random draws
-  over the whole line of doubles. With its first pass cut to 56 bits, where
+  argument or the double nearest &pi;/2), on 60 million random bit
+  patterns over the whole line of doubles, and on 150 million draws whose
+  magnitude lies between 2⁻⁶² and 2⁶², where the routine does its real
+  work. With its first pass cut to 56 bits, where
   a quarter to a third of the inputs need a second one and the error bound
   alone decides, 60 million more draws come back correctly rounded as well,
   and that bound, set against the exact value on a million evaluations at

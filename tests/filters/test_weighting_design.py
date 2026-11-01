@@ -85,12 +85,12 @@ _RATES = (32000, 44100, 48000, 88200, 96000, 192000)
 #: :func:`~phonometry.filters._weighting_design._log_distance2`, and no
 #: routine of the C library is left on it either. What is left is any change
 #: to the arithmetic itself, such as the arctangent moving from the C
-#: library's rounding to the correct one, which moved 32 of the checked
-#: designs by their last bits, so this table has to outlive that. Perturbing
-#: every solve by a relative 1e-12 moves the C row from 0.00220 dB to 0.00324
-#: and the AU row from 0.00590 to 0.00666. Rounded up, those two rows read
-#: 0.003 and 0.006, so a gate written that way is already failing on a release
-#: that has not happened yet.
+#: library's rounding to the correct one, which reached 32 of the checked
+#: designs and moved six of them by their last bits, so this table has to
+#: outlive that. Perturbing every solve by a relative 1e-12 moves the C row
+#: from 0.00220 dB to 0.00324 and the AU row from 0.00590 to 0.00666. Rounded
+#: up, those two rows read 0.003 and 0.006, so a gate written that way is
+#: already failing on a release that has not happened yet.
 #:
 #: Each bound is therefore at least half again above what the routine reaches
 #: under that perturbation, and still inside 2.5 times the unperturbed
@@ -1072,20 +1072,33 @@ def test_with_an_independent_arctangent_the_design_is_the_same(
     local C library's answer and walks to the correctly rounded double by
     exact rational bounds on the tangent, so neither the pinned routine nor
     its algorithm has a part in it. The design lands on the production test's
-    digest, which is what makes the pinned arctangent the correctly rounded
-    one on every point of the grid, on every platform.
+    digest.
+
+    The digest alone would not vouch for every point: the fit absorbs a
+    one-ulp change at most points of the grid taken one at a time, so an
+    arctangent wrong at one of them would still land on it. The production
+    arctangent is therefore also held, bit for bit, to the oracle's answers
+    on the 257 points the design handed it, which is what makes it the
+    correctly rounded one on every point of the grid, on every platform.
     """
+    production = _weighting_design._scalar_arctan
     captured: list[float] = []
+    answers: list[float] = []
 
     def independent(values: np.ndarray) -> np.ndarray:
         flat = np.asarray(values, dtype=np.float64).reshape(-1).tolist()
+        out = [correctly_rounded_arctangent(v) for v in flat]
         captured.extend(flat)
-        out = np.array([correctly_rounded_arctangent(v) for v in flat])
-        return out.reshape(np.shape(values))
+        answers.extend(out)
+        return np.array(out).reshape(np.shape(values))
 
     monkeypatch.setattr(_weighting_design, "_scalar_arctan", independent)
     assert _a_digest(fs) == _A_DIGESTS[fs]
     assert len(captured) == 257
+    np.testing.assert_array_equal(
+        production(np.array(captured)).view(np.uint64),
+        np.array(answers).view(np.uint64),
+    )
 
 
 @pytest.mark.skipif(

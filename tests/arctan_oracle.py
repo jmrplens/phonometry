@@ -86,7 +86,11 @@ def is_correctly_rounded_arctangent(x: float, r: float) -> bool:
 
     A signed zero must come back with its sign, a NaN as a NaN, and an
     infinity as the double nearest :math:`\pm\pi/2`, the one whose
-    midpoints bracket :math:`\pi/2`, where the cosine changes sign.
+    midpoints bracket :math:`\pi/2`, where the cosine changes sign. An
+    answer of magnitude 2 or more is refused before anything is enclosed:
+    no arctangent reaches it, the sign of the cosine places a midpoint short
+    of :math:`\pi/2` only below 2 (it is positive again one period up), and
+    the enclosures of :func:`_cosine_is_positive` never decide far out.
     """
     if math.isnan(x):
         return math.isnan(r)
@@ -96,6 +100,11 @@ def is_correctly_rounded_arctangent(x: float, r: float) -> bool:
     if not same_sign or not r or not math.isfinite(r):
         return False
     x, r = math.fabs(x), math.fabs(r)
+    if r >= 2.0:
+        # No arctangent reaches 2, and the enclosures below hold only short of
+        # it: one period up the cosine is positive again, and far out they
+        # never decide.
+        return False
     low, high = _midpoints(r)
     if math.isinf(x):
         return _cosine_is_positive(low) and not _cosine_is_positive(high)

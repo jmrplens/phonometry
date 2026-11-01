@@ -120,13 +120,29 @@ def test_hypot_is_the_exact_square_root_rounded_once() -> None:
     assert pinned_hypot(0.0, -0.0) == 0.0
 
 
-def _arctangent_draws() -> list[float]:
-    r"""Doubles from the whole line: random bit patterns and a log-uniform band.
+#: The classes random bit patterns all but never draw, each one pattern in
+#: 2 048, so 150 of them hold none: the signed zeros, subnormals at both ends
+#: and in the middle of their range, the infinities and NaN.
+_ARCTANGENT_SPECIALS = (
+    0.0,
+    -0.0,
+    float.fromhex("0x0.0000000000001p-1022"),
+    -float.fromhex("0x0.8000000000001p-1022"),
+    float.fromhex("0x0.fffffffffffffp-1022"),
+    math.inf,
+    -math.inf,
+    math.nan,
+)
 
-    Random bit patterns reach every exponent alike, subnormals, NaNs and
-    infinities among them; the band from :math:`2^{-62}` to :math:`2^{62}`
-    holds every argument whose arctangent is neither the argument itself nor
-    the double nearest :math:`\pi/2`, where the routine does its real work.
+
+def _arctangent_draws() -> list[float]:
+    r"""Doubles from the whole line: random bit patterns, a log-uniform band, the rest.
+
+    Random bit patterns reach every exponent alike; the band from
+    :math:`2^{-62}` to :math:`2^{62}` holds every argument whose arctangent is
+    neither the argument itself nor the double nearest :math:`\pi/2`, where
+    the routine does its real work; and the classes the patterns all but
+    never draw, :data:`_ARCTANGENT_SPECIALS`, are added by hand.
     """
     rng = np.random.default_rng(29)
     patterns = rng.integers(0, 2**64, 150, dtype=np.uint64).view(np.float64)
@@ -136,7 +152,12 @@ def _arctangent_draws() -> list[float]:
     band = ((signs << np.uint64(63)) | (exponents << np.uint64(52)) | mantissas).view(
         np.float64
     )
-    return [*patterns.tolist(), *band.tolist()]
+    return [*patterns.tolist(), *band.tolist(), *_ARCTANGENT_SPECIALS]
+
+
+def _neighbours(r: float) -> tuple[float, float]:
+    """The doubles on either side of ``r``."""
+    return math.nextafter(r, -math.inf), math.nextafter(r, math.inf)
 
 
 def test_arctangent_is_correctly_rounded_by_rational_bounds() -> None:
@@ -145,20 +166,41 @@ def test_arctangent_is_correctly_rounded_by_rational_bounds() -> None:
     :mod:`arctan_oracle` brackets the exact value between the midpoints around
     the answer through the tangent of each midpoint, enclosed in exact
     rational arithmetic, so the verdict owes nothing to the routine under test
-    or to the C library. The oracle is shown to refuse as well: glibc's own
-    answer on each of the hard cases above, and each answer's neighbour.
+    or to the C library. The oracle is shown to refuse as well: the doubles on
+    both sides of every answer but a NaN's, and of each hard case's answer
+    above, which takes in glibc's own answer there whichever side it falls on
+    (below on 8 of the 19, above on the other 11).
     """
     for x in _arctangent_draws():
         answer = _atan_scalar(x)
         assert is_correctly_rounded_arctangent(x, answer), x.hex()
-        if math.isfinite(x) and x:
-            neighbour = math.nextafter(answer, 0.0)
-            assert not is_correctly_rounded_arctangent(x, neighbour), x.hex()
+        if not math.isnan(x):
+            for neighbour in _neighbours(answer):
+                assert not is_correctly_rounded_arctangent(x, neighbour), x.hex()
     for argument, expected in _ATAN_HARD:
         x = float.fromhex(argument)
         assert is_correctly_rounded_arctangent(x, float.fromhex(expected))
-        other = math.nextafter(float.fromhex(expected), math.inf)
-        assert not is_correctly_rounded_arctangent(x, other)
+        for neighbour in _neighbours(float.fromhex(expected)):
+            assert not is_correctly_rounded_arctangent(x, neighbour), argument
+
+
+@pytest.mark.parametrize(
+    ("x", "r"),
+    [(1.0, math.pi / 4 + 2 * math.pi), (0.5, 6.746832916180392), (1.0, 1e300)],
+    ids=["pi-over-4-a-period-up", "atan-of-a-half-a-period-up", "far-out"],
+)
+def test_the_oracle_refuses_what_no_arctangent_reaches(x: float, r: float) -> None:
+    r"""An answer a period away, or far out, is refused, and at once.
+
+    The sign of the cosine that places a midpoint short of :math:`\pi/2`
+    is positive again one period up, so the double nearest
+    :math:`\pi/4 + 2\pi` passed for the arctangent of one, and that nearest
+    :math:`\arctan(1/2) + 2\pi` for the arctangent of a half; and for an
+    answer of 1e300 the enclosures never decided, so a broken routine would
+    have hung the test instead of failing it.
+    """
+    assert not is_correctly_rounded_arctangent(x, r)
+    assert not is_correctly_rounded_arctangent(-x, -r)
 
 
 @pytest.mark.parametrize(
@@ -325,14 +367,33 @@ def test_hypot_refuses_infinities() -> None:
         pinned_hypot(np.inf, 1.0)
 
 
+@pytest.mark.parametrize(
+    "value",
+    ["3", True, 3, np.float32(3.0), 3 + 0j],
+    ids=["text", "flag", "integer", "single", "complex"],
+)
+def test_hypot_refuses_anything_but_a_python_float_by_name(value: object) -> None:
+    """A text, a flag, an integer, a narrower float or a complex is refused.
+
+    Each argument used to go through :func:`float` first, so ``'3'`` read as
+    3.0 and ``True`` as 1.0; the refusal names the argument, as the
+    elementwise routines name theirs.
+    """
+    with pytest.raises(TypeError, match="'x' must be a Python float"):
+        pinned_hypot(value, 4.0)  # type: ignore[arg-type]
+    with pytest.raises(TypeError, match="'y' must be a Python float"):
+        pinned_hypot(4.0, value)  # type: ignore[arg-type]
+
+
 @pytest.mark.parametrize("value", [1, np.float32(0.5), True])
 def test_the_scalar_routines_take_a_python_float_and_nothing_else(
     value: object,
 ) -> None:
     """Each routine settles what it was handed before it reads it as a number.
 
-    The public functions always hand over a Python float (``tolist`` of a
-    float64 array, or ``float()``), so this refusal only fences the private
+    The elementwise functions always hand over a Python float (``tolist`` of
+    a float64 array), and :func:`pinned_hypot` refuses anything else by name
+    before it hands its arguments on, so this refusal only fences the private
     routines: an integer or a single-precision value would otherwise be read
     at a precision nobody chose.
     """

@@ -29,11 +29,12 @@ reaches: over the 133 designs of the corpus (70 distinct sines, 105 tangents
 and 67 magnitudes) glibc is correctly rounded on every one, so the shipped
 Linux coefficients did not move. For the arctangent it is not: glibc rounds 19
 of the 15 866 distinct arctangents those designs evaluate to the other
-neighbour, and pinning the arctangent here moved six of them on Linux by their
-last bits. Away from the corpus the agreement is the C library's accuracy, not
-a guarantee: ``tests/filters/test_pinned_trig.py`` holds the agreement on the
-inputs a design evaluates, measures it on draws across the domain, and checks
-the arctangent against exact rational bounds that evaluate no arctangent.
+neighbour, those 19 reach 32 of the designs, and pinning the arctangent here
+moved six of those designs on Linux by their last bits. Away from the corpus
+the agreement is the C library's accuracy, not a guarantee:
+``tests/filters/test_pinned_trig.py`` holds the agreement on the inputs a
+design evaluates, measures it on draws across the domain, and checks the
+arctangent against exact rational bounds that evaluate no arctangent.
 
 The domain is what the design needs and a margin: ``|x| < 1024`` for the sine
 and the tangent (the design never passes more than :math:`\pi`) and finite
@@ -373,9 +374,19 @@ def pinned_atan(values: np.ndarray | float) -> np.ndarray:
 def pinned_hypot(x: float, y: float) -> float:
     r"""``hypot(x, y)``, correctly rounded, the same bits on every machine.
 
-    :param x: A finite real value.
-    :param y: A finite real value.
+    Each argument is a Python float, as the real and imaginary parts of a
+    Python complex are: anything else is refused by name rather than handed
+    to :func:`float`, which would read a text as the number it spells and a
+    flag as one.
+
+    :param x: A finite Python float.
+    :param y: A finite Python float.
     :return: :math:`\sqrt{x^2 + y^2}` rounded once.
+    :raises TypeError: If ``x`` or ``y`` is not a Python float.
     :raises ValueError: If either argument is not finite.
     """
-    return _hypot_scalar(float(x), float(y))
+    for name, value in (("x", x), ("y", y)):
+        if not isinstance(value, float):
+            message = f"'{name}' must be a Python float; got {type(value).__name__}."
+            raise TypeError(message)
+    return _hypot_scalar(x, y)

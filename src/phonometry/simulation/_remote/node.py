@@ -28,6 +28,7 @@ remote nodes says how to set it.
 
 from __future__ import annotations
 
+import builtins
 import contextlib
 import dataclasses
 import errno
@@ -101,6 +102,14 @@ _GRACE_S = 30.0
 _PROGRESS_EVERY_S = 1.0
 #: The most warnings a job sends back, as many as the client takes.
 _MAX_WARNINGS = bootstrap._MAX_WARNINGS
+#: The warning classes of Python's own, the classes themselves: a class made
+#: by ``exec`` with no ``__name__`` in its globals says it is of ``builtins``
+#: too, and may take one of their names.
+_BUILTIN_WARNINGS = frozenset(
+    value
+    for value in vars(builtins).values()
+    if isinstance(value, type) and issubclass(value, Warning)
+)
 
 
 class _Watcher:
@@ -213,10 +222,9 @@ def _builtin_base(category: type[Warning]) -> str:
     there as they would here: a ``UserWarning`` of a library stays a
     ``UserWarning``, a ``DeprecationWarning`` a ``DeprecationWarning``.
     """
+    # ``Warning`` itself is one of them, so the search never runs dry.
     return next(
-        klass.__name__
-        for klass in category.__mro__
-        if klass.__module__ == "builtins" and issubclass(klass, Warning)
+        klass.__name__ for klass in category.__mro__ if klass in _BUILTIN_WARNINGS
     )
 
 

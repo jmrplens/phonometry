@@ -529,6 +529,49 @@ def test_the_warnings_of_a_run_travel_once_each_with_their_class(
     ]
 
 
+#: A warning class made by ``exec`` with no ``__name__`` in its globals: its
+#: ``__module__`` is ``"builtins"`` though it is no class of Python's own.
+_EXEC_MADE: dict[str, type[Warning]] = {}
+exec("class LibWarning(UserWarning): pass", _EXEC_MADE)  # noqa: S102 - the literal above, nothing a caller gives
+
+
+def _warns_exec_made_and_returns(**arguments: object) -> tuple[object, None]:
+    warnings.warn("made by exec", _EXEC_MADE["LibWarning"], stacklevel=1)
+    here = fdtd_simulation(_ACOUSTIC)
+    return SimpleNamespace(
+        pressures=here.pressures, snapshots=None, provenance=here.provenance
+    ), None
+
+
+def test_a_warning_class_that_says_it_is_of_builtins_travels_with_a_real_builtin_base(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # Its module says builtins, so the base was its own name, which no client
+    # has as a warning of Python's own: the client refused a finished run.
+    monkeypatch.setattr(
+        node,
+        "FUNCTIONS",
+        MappingProxyType(
+            {
+                "fdtd_simulation": (
+                    _warns_exec_made_and_returns,
+                    ("pressures", "snapshots"),
+                )
+            }
+        ),
+    )
+    code, frames = _serve(_job("fdtd_simulation", {"run": _ACOUSTIC}))
+    ((header, _),) = frames
+    assert code == 0
+    assert header["warnings"] == [
+        {
+            "category": "builtins:LibWarning",
+            "base": "UserWarning",
+            "message": "made by exec",
+        }
+    ]
+
+
 def _warns_long_and_returns(**arguments: object) -> tuple[object, None]:
     # Two messages that differ only past the length an error frame carries.
     long = "x" * (2 * bootstrap._MAX_MESSAGE)

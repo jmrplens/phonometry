@@ -20,7 +20,7 @@ import sys
 import threading
 import types
 import warnings
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 import pytest
@@ -1005,22 +1005,42 @@ def test_a_node_s_warning_reaches_the_caller_escaped() -> None:
     ("base", "match"),
     [
         ("ValueError", "names 'ValueError' as a warning's base, which is no warning"),
-        ("PhonometryWarning", "names 'PhonometryWarning' as a warning's base"),
         ("open", "names 'open' as a warning's base"),
         (None, "'base'"),
+        (7, "'base'"),
     ],
 )
 def test_a_node_s_warning_whose_base_is_no_builtin_warning_breaks_the_protocol(
-    base: str | None, match: str
+    base: object, match: str
 ) -> None:
-    # The node names the base from its class's own; anything else is a node
-    # that does not speak this package's protocol.
-    entry = {"category": "some.module.nobody.imported:Odd", "message": "strange"}
+    # The node names the base from its class's own; a name Python here holds
+    # as something else, or no name at all, is a node that does not speak
+    # this package's protocol.
+    entry: dict[str, Any] = {
+        "category": "some.module.nobody.imported:Odd",
+        "message": "strange",
+    }
     if base is not None:
         entry["base"] = base
     stdout = _result(caught=[entry])
     with pytest.raises(ComputeRemoteError, match=match):
         _receive(stdout)
+
+
+@pytest.mark.parametrize("base", ["WarningOfALaterPython", "PhonometryWarning"])
+def test_a_node_s_warning_whose_base_this_python_lacks_comes_back_as_a_runtime_warning(
+    base: str,
+) -> None:
+    # A newer Python on the node may have a warning class of its own this one
+    # lacks; the run it finished is not thrown away for the name.
+    path = "some.module.nobody.imported:Odd"
+    stdout = _result(caught=[{"category": path, "base": base, "message": "strange"}])
+    with warnings.catch_warnings(record=True) as record:
+        warnings.simplefilter("always")
+        _receive(stdout)
+    assert [(w.category, str(w.message)) for w in record] == [
+        (RuntimeWarning, f"{path}: strange")
+    ]
 
 
 # A video's own checks on the stream: the bytes its container begins with.

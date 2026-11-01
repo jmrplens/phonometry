@@ -798,14 +798,21 @@ def _built(category: type[Warning], message: str) -> Warning | None:
 def _builtin_base(session: Session, entry: Mapping[str, object]) -> type[Warning]:
     """The warning of Python's own that a node's warning derives from, as the node names it.
 
-    :raises ComputeRemoteError: for a name that is no warning of Python's own.
+    A name this Python does not have, as a later Python's own warning class
+    would be, is read as :class:`RuntimeWarning`, so the run the node
+    finished is not lost for it.
+
+    :raises ComputeRemoteError: for a base that is no text, or a name this
+        Python holds as something other than a warning.
     """
     name = session.field(entry, "base", str)
     base = _BUILTIN_WARNINGS.get(name)
-    if base is None:
+    if base is not None:
+        return base
+    if hasattr(builtins, name):
         msg = f"the node names {_quoted(name)} as a warning's base, which is no warning of Python's own"
         raise session.failure(msg)
-    return base
+    return RuntimeWarning
 
 
 def _warnings_of(session: Session, header: Mapping[str, object]) -> list[Warning]:
@@ -814,7 +821,8 @@ def _warnings_of(session: Session, header: Mapping[str, object]) -> list[Warning
     In its own class when this process has it and the class takes the
     message as its text; otherwise in the nearest warning class of Python's
     own that its class derives from (a ``UserWarning``, a
-    ``DeprecationWarning``, a ``RuntimeWarning``), led by the class path.
+    ``DeprecationWarning``, a ``RuntimeWarning``), led by the class path;
+    a ``RuntimeWarning`` when this Python lacks the class the node names.
     """
     caught: list[Warning] = []
     for item in session.field(header, "warnings", list)[: bootstrap._MAX_WARNINGS]:

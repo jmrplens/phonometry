@@ -322,7 +322,9 @@ construir a partir de su mensaje, vuelve como la clase de aviso propia de
 Python de la que deriva su clase, entre ellas `UserWarning`,
 `DeprecationWarning` y `RuntimeWarning`, con un mensaje que empieza por la
 ruta de la clase: un filtro sobre esa clase lo alcanza aquí como lo haría en
-el nodo.
+el nodo. Una clase de aviso propia de Python que solo tiene un Python más
+reciente en el nodo vuelve como `RuntimeWarning`, con el mensaje encabezado
+también por la ruta de la clase.
 
 Una interrupción, Ctrl-C o el botón de parada de un cuaderno, detiene ssh en
 el acto y llega a tu código como `KeyboardInterrupt`, con `fallback=True` o

@@ -761,19 +761,21 @@ def test_a_field_the_hook_fills_with_a_loop_is_refused_naming_the_field() -> Non
     It called the copy without the name of the field, so the refusal of a
     container that holds itself said only that a record holds none.
     """
+    levels = _writeable([1.0])
     with pytest.raises(
         TypeError, match=r"_StoresALoop: 'rows' holds a container that holds itself"
     ):
-        _StoresALoop(levels=_writeable([1.0]))
+        _StoresALoop(levels=levels)
 
 
 def test_a_restored_field_that_holds_itself_is_refused_naming_the_field() -> None:
     """A pickled state is copied on its way back in, and refused by name too."""
     record = _Plain(levels=_writeable([1.0]))
+    state = {"levels": _holds_itself("list")}
     with pytest.raises(
         TypeError, match=r"_Plain: 'levels' holds a container that holds itself"
     ):
-        record.__setstate__({"levels": _holds_itself("list")})
+        record.__setstate__(state)
 
 
 def test_a_container_held_twice_side_by_side_is_copied_as_any_other() -> None:

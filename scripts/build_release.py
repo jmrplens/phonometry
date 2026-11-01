@@ -358,9 +358,13 @@ def read_checksums(text: str) -> dict[str, str]:
     :param text: Lines as ``sha256sum`` writes them: the digest, a space, a
         space or an asterisk, and the name.
     :return: ``{name: digest}``.
-    :raises ValueError: On a line that is not a SHA-256 digest and a name.
+    :raises ValueError: On a line that is not a SHA-256 digest and a name, and
+        on one that names a file an earlier line names: kept, the last digest
+        would be the one compared, and a file listed with a wrong digest and
+        then with the right one would pass, where ``sha256sum --check``
+        fails it.
     """
-    listed = {}
+    listed: dict[str, str] = {}
     for number, line in enumerate(text.splitlines(), start=1):
         if not line.strip():
             continue
@@ -368,6 +372,9 @@ def read_checksums(text: str) -> dict[str, str]:
         name = name.removeprefix(" ").removeprefix("*")
         if len(digest) != 64 or not name or digest.strip("0123456789abcdef"):
             msg = f"line {number} of the checksum file is not a SHA-256 digest and a file name: {line!r}"
+            raise ValueError(msg)
+        if name in listed:
+            msg = f"line {number} of the checksum file lists {name!r} again"
             raise ValueError(msg)
         listed[name] = digest
     return listed

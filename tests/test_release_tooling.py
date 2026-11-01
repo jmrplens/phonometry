@@ -926,6 +926,24 @@ def test_a_checksum_file_is_read_as_sha256sum_writes_it() -> None:
         build_release.read_checksums(f"{sdist}  {_TOP}.tar.gz\nnot a digest\n")
 
 
+def test_a_checksum_file_that_lists_a_file_twice_is_refused() -> None:
+    """Keeping the last digest would pass a wheel listed wrong, then right.
+
+    ``sha256sum --check`` checks every line and fails on the first; the
+    rebuild compares one digest per file, so it refuses the file instead,
+    whether the two digests differ or not.
+    """
+    wrong, right = "0" * 64, "a" * 64
+    wheel = f"{_TOP}-py3-none-any.whl"
+    for first in (wrong, right):
+        with pytest.raises(
+            ValueError, match=f"line 3 of the checksum file lists '{wheel}' again"
+        ):
+            build_release.read_checksums(
+                f"{'1' * 64}  {_TOP}.tar.gz\n{first}  {wheel}\n{right} *{wheel}\n"
+            )
+
+
 def test_a_rebuild_is_compared_file_by_file() -> None:
     built = {"a.tar.gz": "1" * 64, "a.whl": "2" * 64}
     assert build_release.mismatches(built, dict(built), "SUMS") == []
@@ -1155,8 +1173,12 @@ def test_a_build_on_windows_is_refused_before_anything_else(
         ("", "lists no file"),
         ("not a digest  phonometry-2.0.0.tar.gz\n", "line 1 of the checksum file"),
         (b"\xff\xfe", "can't decode"),
+        (
+            f"{'0' * 64}  phonometry-2.0.0.tar.gz\n{'1' * 64}  phonometry-2.0.0.tar.gz\n",
+            "lists 'phonometry-2.0.0.tar.gz' again",
+        ),
     ],
-    ids=["missing", "empty", "malformed", "not-utf-8"],
+    ids=["missing", "empty", "malformed", "not-utf-8", "a-file-twice"],
 )
 def test_a_checksum_file_that_cannot_be_used_is_refused_before_the_build(
     tmp_path: pathlib.Path,
@@ -1165,7 +1187,10 @@ def test_a_checksum_file_that_cannot_be_used_is_refused_before_the_build(
     text: str | bytes | None,
     message: str,
 ) -> None:
-    """A missing, empty or malformed checksum file costs no build to find."""
+    """A missing, empty or malformed checksum file costs no build to find.
+
+    So does one that lists a file twice.
+    """
     _fake_build(monkeypatch, changes=[])
 
     def build(*args: object, **kwargs: object) -> None:

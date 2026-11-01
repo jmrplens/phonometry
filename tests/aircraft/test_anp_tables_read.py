@@ -307,3 +307,23 @@ def test_a_count_that_is_no_whole_number_is_refused_with_its_place(
     )
     with pytest.raises(ValueError, match=f"^{re.escape(expected)}$"):
         load_anp_database(root)
+
+
+@pytest.mark.parametrize(("name", "column", "old", "new"), _COUNTS)
+def test_a_count_left_blank_is_refused_with_its_place(
+    name: str, column: str, old: str, new: str, tmp_path: Path
+) -> None:
+    """A blank number of engines was read as no engine at all; no count is left blank.
+
+    Every other count column already refused a blank as a cell that holds no
+    number; the number of engines let it through the load and the aircraft
+    came out with ``n_engines`` 0.
+    """
+    extra = () if name in _REQUIRED else (name,)
+    blank = new.replace("1.5", "", 1)
+    root = _export(
+        tmp_path, *extra, **{name.replace(".", "_"): _first_row_with(name, old, blank)}
+    )
+    expected = f"ANP table {name!r}, line 2, column {column!r}: '' is not a number"
+    with pytest.raises(ValueError, match=f"^{re.escape(expected)}$"):
+        load_anp_database(root)

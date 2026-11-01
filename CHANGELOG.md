@@ -30,13 +30,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   the line and the column, where a `nan` level went into the NPD curve as it
   was and came out of every event level after it; a count (a stage length, a
   point or step number, a number of engines) that is no whole number is
-  refused the same way, where `int()` took `1.5` for `1`. The remote runs,
-  new in this release, hold to the same from their first version: the hosts
-  file, which `PHONOMETRY_HOSTS_FILE` may name, is read only from a regular
-  file and only up to 1 MiB, an `ssh` destination in it holding a mark that
-  reorders text (U+202A to U+202E, U+2066 to U+2069) is refused as a control
-  character is, and text a node sends reaches the caller's terminal, log and
-  warnings with those marks and lone surrogates escaped as well as its
+  refused the same way, where `int()` took `1.5` for `1`, and so is a number
+  of engines left blank, which came out of the aircraft as `0`. The remote
+  runs, new in this release, hold to the same from their first version: the
+  hosts file, which `PHONOMETRY_HOSTS_FILE` may name, is read only from a
+  regular file and only up to 1 MiB, an `ssh` destination in it holding a mark
+  that reorders text (U+202A to U+202E, U+2066 to U+2069) is refused as a
+  control character is, and text a node sends reaches the caller's terminal,
+  log and warnings with those marks and lone surrogates escaped as well as its
   control characters, a node's provenance holding any of them being refused.
   A message that names a file a caller or the environment gave (those of the
   `io` readers and writers, of the video encoder and the partial file it

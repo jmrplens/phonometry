@@ -2779,7 +2779,7 @@ leyendo.
 | una tabla ANP de más de 32 MiB | se leía entera | `ValueError`, antes de leer un byte |
 | una celda ANP con `nan`, `inf`, `-Infinity` o `1e999`, una cabecera como `L_infft`, o una celda que no guarda ningún número | una celda no finita se tomaba tal cual y salía como NaN en cada nivel de evento; una celda sin número lanzaba el `ValueError` de Python, que no nombraba ni la tabla ni la línea | `ValueError` que nombra la tabla, la línea y la columna |
 | una tabla ANP que no es UTF-8 | `UnicodeDecodeError`, sin nombrar el fichero | `ValueError` que nombra la tabla y el byte |
-| un recuento ANP (una longitud de etapa, un número de punto o de paso, un número de motores) de `1.5` | se tomaba como `1`; una longitud de etapa de los pesos o de los pasos de despegue, escrita así o `nan`, lanzaba el `ValueError` de un argumento `stage_length`, que no nombraba ninguna tabla | `ValueError` que nombra la tabla, la línea y la columna |
+| un recuento ANP (una longitud de etapa, un número de punto o de paso, un número de motores) de `1.5`, o un número de motores en blanco | se tomaba como `1`, y el número de motores en blanco como `0`; una longitud de etapa de los pesos o de los pasos de despegue, escrita así o `nan`, lanzaba el `ValueError` de un argumento `stage_length`, que no nombraba ninguna tabla | `ValueError` que nombra la tabla, la línea y la columna |
 
 ```python
 import tempfile

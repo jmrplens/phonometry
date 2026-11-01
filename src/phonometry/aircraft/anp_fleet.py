@@ -1822,15 +1822,18 @@ def _parse_aircraft(table: _Table) -> dict[str, _Row]:
 
     The rows are kept as they are, since :class:`ANPAircraft` reads them when it
     is asked for; the cells of :data:`_AIRCRAFT_NUMBERS` are checked here, so a
-    cell that is no finite number, or a number of engines that is no whole
-    one, is refused at the load with its place.
+    cell that is no finite number, or a number of engines that is left blank
+    or is no whole one, is refused at the load with its place. A blank number
+    of engines came out of the aircraft as no engine at all; a table without
+    the column, which some exports leave out, is still read.
     """
     rows = _rows(table)
     for row in rows:
         for column in _AIRCRAFT_NUMBERS:
-            value = _optional(row, column, absent_is_blank=True)
-            if column == _COL_ENGINES and value is not None:
-                _whole(row, column, value)
+            if column == _COL_ENGINES and column in row:
+                _whole_cell(row, column)
+            else:
+                _optional(row, column, absent_is_blank=True)
     return {row["ACFT_ID"]: row for row in rows}
 
 

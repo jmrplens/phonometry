@@ -1136,7 +1136,7 @@ still raises `FileNotFoundError`, and a link to a regular file is still read.
 | an ANP table of more than 32 MiB | read whole | `ValueError`, before a byte of it is read |
 | an ANP cell of `nan`, `inf`, `-Infinity` or `1e999`, a heading such as `L_infft`, or a cell that holds no number | a non-finite cell was taken as it was and came out of every event level as NaN; a cell with no number raised Python's own `ValueError`, which named neither the table nor the line | `ValueError` naming the table, the line and the column |
 | an ANP table that is not UTF-8 | `UnicodeDecodeError`, naming no file | `ValueError` naming the table and the byte |
-| an ANP count (a stage length, a point or step number, a number of engines) of `1.5` | taken as `1`; a stage length of the weights or the departure steps, so written or `nan`, raised the `ValueError` of a `stage_length` argument, which named no table | `ValueError` naming the table, the line and the column |
+| an ANP count (a stage length, a point or step number, a number of engines) of `1.5`, or a number of engines left blank | taken as `1`, and the blank number of engines as `0`; a stage length of the weights or the departure steps, so written or `nan`, raised the `ValueError` of a `stage_length` argument, which named no table | `ValueError` naming the table, the line and the column |
 
 ```python
 import tempfile

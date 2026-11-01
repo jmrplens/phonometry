@@ -702,7 +702,7 @@ if not t > 0:  # NOSONAR
 
 **Enforced by:** review
 
-**Exceptions.** Where the analyzer's rule is right, change the code. Where it is wrong but the code can be written another way that satisfies it with the same meaning, write that: `math.isnan(t) or t <= 0.0` for `not t > 0`, which keeps the refusal of NaN. Where neither works, leave the issue open.
+**Exceptions.** Where the analyzer's rule is right, change the code. Where it is wrong but the code can be written another way that satisfies it with the same meaning, write that: `math.isnan(t) or t <= 0.0` for `not t > 0`, which keeps the refusal of NaN. Where neither works and the rule misreads the code, as S1313 reads the printed clause number `"5.9.4.2"` as an IP address, the line carries `# NOSONAR <rule> - <reason>`, so the decision lives in the repository beside the code it excuses and review sees it; a finding is never closed in the SonarCloud panel, where the repository cannot see it. Every other finding that neither fix reaches stays open.
 
 ## Module length
 

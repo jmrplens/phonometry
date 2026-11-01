@@ -371,12 +371,16 @@ def test_every_committed_catalogue_row_is_exercised_unmasked() -> None:
         if case["condition"] == "idling":
             exposed.add(("traction_idling", vehicle["traction"]))
         elif case["source_height"] == "A":
-            exposed.add(("wheel_roughness", vehicle["wheel_roughness"]))
-            exposed.add(("contact_filter", vehicle["contact_filter"]))
-            exposed.add(("wheel_transfer", vehicle["wheel_transfer"]))
-            exposed.add(("rail_roughness", case["rail_roughness"]))
-            exposed.add(("track_transfer", case["track_transfer"]))
-            exposed.add(("superstructure_transfer", case["superstructure_transfer"]))
+            exposed.update(
+                (
+                    ("wheel_roughness", vehicle["wheel_roughness"]),
+                    ("contact_filter", vehicle["contact_filter"]),
+                    ("wheel_transfer", vehicle["wheel_transfer"]),
+                    ("rail_roughness", case["rail_roughness"]),
+                    ("track_transfer", case["track_transfer"]),
+                    ("superstructure_transfer", case["superstructure_transfer"]),
+                )
+            )
             if case["impact_roughness"]:
                 exposed.add(("impact_roughness", case["impact_roughness"]))
             if fast:

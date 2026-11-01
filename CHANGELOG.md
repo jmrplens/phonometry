@@ -3622,6 +3622,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   printing; the stamps already committed hold on all four versions, and
   `tests/test_animation_fingerprint.py` pins the print of a fragment that
   carries each kind of empty list, printed the way the older versions print.
+- **SonarCloud counts as new the code written since the last release, and its
+  findings are fixed rather than outgrown.** The scan named no project version,
+  so every analysis since the first, in January 2026, recorded it as "not
+  provided", and SonarCloud's new-code period, which starts where the version
+  last changed, never moved: every finding ever written counted as new, and
+  the gate on main had failed since 6 September on findings months old. The
+  scan now reads `VERSION`, held to the PEP 440 form the release workflow
+  holds it to, and passes it as `sonar.projectVersion`; `VERSION` changes only
+  in a release commit, so each release opens a new period.
+  `tests/test_repository_config.py` runs the step that reads it and holds its
+  pattern equal to the release workflow's. The findings went first: the fiche
+  builders and the conformance report add consecutive items with one `extend`
+  instead of runs of `append` (and the fiches that opened with the same title,
+  basis line, header grid and gap now take them from one helper), the
+  airflow-resistivity guards of `materials.installed_dynamic_stiffness` and
+  `materials.ResilientLayer` ask `is_positive` instead of inverting a
+  comparison, still refusing NaN and taking an infinite resistivity, and five
+  private helpers lose a parameter they never read. Sonar reads the clause
+  number 5.9.4.2 of IEC 60942 in the calibrator rules as an IP address; the
+  clause stays as printed, and its line carries `# NOSONAR S1313` with the
+  reason beside it, so the finding is excused in the repository, where
+  review sees it, and never closed in the SonarCloud panel. Rule C5 of the
+  contributor guide says so for any finding the analyzer misreads and no
+  honest rewrite satisfies.
 
 ### Changed
 

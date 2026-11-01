@@ -56,8 +56,8 @@ from ._layout import (
     display_round,
     document_styles,
     footer_flow,
-    grid_table,
     measurement_basis_style,
+    opening_flow,
     render_figure_drawing,
     result_box,
     stacked_table,
@@ -388,33 +388,37 @@ def render_impulse_prominence_report(
         metadata.measurement_standard if metadata is not None else None
     )
 
-    flow: list[Any] = [
-        fiche_paragraph(title, title_style),
-        fiche_paragraph(_basis_line(measurement_standard, language), basis_style),
-    ]
-
     header_pairs = _metadata_pairs(result, metadata, language)
-    if header_pairs:
-        flow.append(Spacer(1, 3))
-        flow.append(grid_table(header_pairs))
-    flow.append(Spacer(1, 8))
+    flow = opening_flow(
+        title,
+        _basis_line(measurement_standard, language),
+        header_pairs,
+        title_style=title_style,
+        basis_style=basis_style,
+    )
 
-    flow.append(fiche_paragraph(t("Candidate impulses", language), caption_style))
-    flow.append(_per_impulse_table(result, language))
-    flow.append(Spacer(1, 8))
-
-    # Full-width, landscape adjustment-curve plot KI(P) with the impulses marked
-    # (the result's own self-scaling plot).
-    flow.append(
-        render_figure_drawing(
-            result.plot,
-            174 * mm,
-            y_top=None,
-            figsize=(9.2, 3.1),
-            language=language,
+    flow.extend(
+        (
+            fiche_paragraph(t("Candidate impulses", language), caption_style),
+            _per_impulse_table(result, language),
+            Spacer(1, 8),
         )
     )
-    flow.append(Spacer(1, 8))
+
+    flow.extend(
+        (
+            # Full-width, landscape adjustment-curve plot KI(P) with the impulses marked
+            # (the result's own self-scaling plot).
+            render_figure_drawing(
+                result.plot,
+                174 * mm,
+                y_top=None,
+                figsize=(9.2, 3.1),
+                language=language,
+            ),
+            Spacer(1, 8),
+        )
+    )
 
     statement, extended = _statement(result, language)
     flow.append(result_box(statement, styles, accent, extended))
@@ -426,31 +430,31 @@ def render_impulse_prominence_report(
         )
 
     basis_strip_style = measurement_basis_style()
-    flow.append(fiche_paragraph(_prominence_note(result, language), basis_strip_style))
-    flow.append(
-        fiche_paragraph(
-            t(
-                "The predicted prominence P = 3 lg(OR) + 2 lg(LD) combines the "
-                "onset rate OR (dB/s) and the level difference LD (dB) of each "
-                "impulse (NT ACOU 112:2002, clause 7, Formula 1); the governing "
-                "value is the highest P over the assessment period among "
-                "impulses with an onset rate above 10 dB/s (clauses 4.5/8).",
-                language,
+    flow.extend(
+        (
+            fiche_paragraph(_prominence_note(result, language), basis_strip_style),
+            fiche_paragraph(
+                t(
+                    "The predicted prominence P = 3 lg(OR) + 2 lg(LD) combines the "
+                    "onset rate OR (dB/s) and the level difference LD (dB) of each "
+                    "impulse (NT ACOU 112:2002, clause 7, Formula 1); the governing "
+                    "value is the highest P over the assessment period among "
+                    "impulses with an onset rate above 10 dB/s (clauses 4.5/8).",
+                    language,
+                ),
+                basis_strip_style,
             ),
-            basis_strip_style,
-        )
-    )
-    flow.append(
-        fiche_paragraph(
-            t(
-                "The L<sub>Aeq</sub> adjustment K<sub>I</sub> = 1.8 (P &#8722; "
-                "5) dB for P &gt; 5, else 0 dB, is applied to the "
-                "L<sub>Aeq</sub> of the assessment period on the basis of the "
-                "single impulse with the highest prominence (clause 8, "
-                "Formula 2).",
-                language,
+            fiche_paragraph(
+                t(
+                    "The L<sub>Aeq</sub> adjustment K<sub>I</sub> = 1.8 (P &#8722; "
+                    "5) dB for P &gt; 5, else 0 dB, is applied to the "
+                    "L<sub>Aeq</sub> of the assessment period on the basis of the "
+                    "single impulse with the highest prominence (clause 8, "
+                    "Formula 2).",
+                    language,
+                ),
+                basis_strip_style,
             ),
-            basis_strip_style,
         )
     )
     flow.extend(footer_flow(metadata, language))

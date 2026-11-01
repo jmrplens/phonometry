@@ -1869,11 +1869,31 @@ jobs:
       uses: actions/download-artifact@v8
       with:
         name: test-results-ubuntu-latest-3.13
+    # SonarCloud counts as new code everything since the version changed, and
+    # a scan that names no version leaves it "not provided" for ever: every
+    # analysis from the first one on carried that, so the new-code period never
+    # moved and every smell ever written counted as new. VERSION names the last
+    # release and changes only in a release commit, so the analysis of each
+    # release commit records a new version and opens a new period. The value
+    # is held to the PEP 440 form release.yml holds it to before the scanner
+    # reads it (tests/test_repository_config.py holds the two patterns equal),
+    # and it reaches the scan as an input, never through a shell.
+    - name: Read the version in VERSION (the last release until a release commit bumps it)
+      id: version
+      run: |
+        version=$(tr -d ' \n' < VERSION)
+        if ! printf '%s\n' "$version" | grep -Eq '^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)((a|b|rc)(0|[1-9][0-9]*))?(\.post(0|[1-9][0-9]*))?(\.dev(0|[1-9][0-9]*))?$'; then
+          echo "::error::VERSION is not a PEP 440 normal-form version: '$version'"
+          exit 1
+        fi
+        echo "version=$version" >> "$GITHUB_OUTPUT"
     - name: SonarCloud Scan
       uses: SonarSource/sonarqube-scan-action@v8
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      with:
+        args: -Dsonar.projectVersion=${{ steps.version.outputs.version }}
 
   pr-comment:
     needs: [quality, tests]

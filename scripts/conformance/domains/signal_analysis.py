@@ -629,7 +629,8 @@ def _chk_tsa_node_selection() -> Outcome:
     freq = np.array([32.05 / period_s])
     c20 = float(ph.signals.comb_filter_response(freq, period_s, 20)[0])
     c32 = float(ph.signals.comb_filter_response(freq, period_s, 32)[0])
-    if not c32 > 0.15:  # sanity: the power-of-two choice does not reject it
+    # Sanity: the power-of-two choice does not reject it (a NaN fails too).
+    if math.isnan(c32) or c32 <= 0.15:
         return numeric(0.0, c32, 0.0, places=8)
     return numeric(0.0, c20, 1e-10, places=10)
 

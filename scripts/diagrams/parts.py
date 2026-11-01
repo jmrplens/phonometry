@@ -63,7 +63,6 @@ def _box_solid(
 
 def _box_wire(
     s: SVG,
-    th: Theme,
     bx: float,
     gy: float,
     hw: float,

@@ -51,8 +51,8 @@ from ._layout import (
     document_styles,
     fmt_num,
     footer_flow,
-    grid_table,
     metrics_table,
+    opening_flow,
     render_figure_drawing,
     result_box,
     two_panel_body,
@@ -190,20 +190,20 @@ def _render_prediction_fiche(
     basis_text = t(basis_key, language)
     if basis_values is not None:
         basis_text = basis_text.format(**basis_values)
-    flow: list[Any] = [
-        fiche_paragraph(title_text, title_style),
-        fiche_paragraph(basis_text, basis_style),
-    ]
 
     # Metadata header grid (the same room/element grid the insulation fiches
     # share; only the supplied fields render).
+    header_pairs: list[tuple[str, str]] = []
     if metadata is not None and not metadata.is_empty():
         identity, conditions = _metadata_pairs(metadata, language)
         header_pairs = identity + conditions
-        if header_pairs:
-            flow.append(Spacer(1, 3))
-            flow.append(grid_table(header_pairs))
-    flow.append(Spacer(1, 8))
+    flow = opening_flow(
+        title_text,
+        basis_text,
+        header_pairs,
+        title_style=title_style,
+        basis_style=basis_style,
+    )
 
     # Two-panel body: the model-term metrics table on the left, the result's own
     # vector plot (self-scaling bar chart) on the right.

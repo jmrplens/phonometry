@@ -55,7 +55,7 @@ from ._layout import (
     document_styles,
     escaped_pairs,
     footer_flow,
-    grid_table,
+    opening_flow,
     render_figure_drawing,
     result_box,
     stacked_table,
@@ -423,53 +423,55 @@ def render_iso2631_5_report(
     styles, title_style, basis_style, caption_style = document_styles(accent)
     title = t("Whole-body multiple-shock health risk", language)
 
-    flow: list[Any] = [
-        fiche_paragraph(title, title_style),
-        fiche_paragraph(
-            t(
-                "Assessment of adverse health effects from whole-body vibration "
-                "containing multiple shocks per ISO 2631-5:2018 (Clause 5 spinal "
-                "response and Annex C risk model).",
-                language,
-            ),
-            basis_style,
-        ),
-    ]
-
     # The identity metadata (if any) and the always-present exposure scenario
     # share one header grid, so the sheet stays on a single page.
     header_pairs = _metadata_pairs(metadata, language) + _scenario_pairs(
         result, language
     )
-    flow.append(Spacer(1, 3))
-    flow.append(grid_table(header_pairs))
-    flow.append(Spacer(1, 6))
+    flow = opening_flow(
+        title,
+        t(
+            "Assessment of adverse health effects from whole-body vibration "
+            "containing multiple shocks per ISO 2631-5:2018 (Clause 5 spinal "
+            "response and Annex C risk model).",
+            language,
+        ),
+        header_pairs,
+        title_style=title_style,
+        basis_style=basis_style,
+        gap=6,
+    )
 
-    flow.append(fiche_paragraph(t("Dose and stress analysis", language), caption_style))
-    flow.append(_analysis_table(result, language))
-    flow.append(Spacer(1, 4))
-    # Full-width, landscape injury-probability curve (self-scaling 0-100 % axis).
-    flow.append(
-        render_figure_drawing(
-            result.plot,
-            174 * mm,
-            y_top=None,
-            figsize=(9.2, 2.5),
-            language=language,
+    flow.extend(
+        (
+            fiche_paragraph(t("Dose and stress analysis", language), caption_style),
+            _analysis_table(result, language),
+            Spacer(1, 4),
+            # Full-width, landscape injury-probability curve (self-scaling 0-100 % axis).
+            render_figure_drawing(
+                result.plot,
+                174 * mm,
+                y_top=None,
+                figsize=(9.2, 2.5),
+                language=language,
+            ),
+            Spacer(1, 4),
         )
     )
-    flow.append(Spacer(1, 4))
 
-    flow.append(result_box(_statement(result, language), styles, accent))
-    flow.append(Spacer(1, 4))
+    flow.extend(
+        (result_box(_statement(result, language), styles, accent), Spacer(1, 4))
+    )
 
-    flow.append(
-        fiche_paragraph(
-            t("Annex C risk classification (Table C.2)", language), caption_style
+    flow.extend(
+        (
+            fiche_paragraph(
+                t("Annex C risk classification (Table C.2)", language), caption_style
+            ),
+            _classification_table(result, language),
+            _zone_row(result, language),
         )
     )
-    flow.append(_classification_table(result, language))
-    flow.append(_zone_row(result, language))
 
     note_style = ParagraphStyle(
         "iso26315_notes",

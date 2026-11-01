@@ -52,8 +52,8 @@ from ._layout import (
     escaped_pairs,
     fmt_meta,
     footer_flow,
-    grid_table,
     measurement_basis_style,
+    opening_flow,
     render_figure_drawing,
     result_box,
     two_panel_body,
@@ -204,20 +204,18 @@ def _target_line(
     ]
 
 
-def _header_grid(
+def _header_pairs(
     volume: float,
     extra_pairs: Sequence[tuple[str, str | None]],
     metadata: ReportMetadata | None,
     language: Language,
-) -> list[Any]:
-    """Build the metadata header grid (volume plus room-identity fields).
+) -> list[tuple[str, str]]:
+    """The metadata header pairs (volume plus room-identity fields).
 
-    Returns the flowables (a spacer and the grid table) or an empty list when no
-    field is supplied. The room volume is authoritative from the result itself;
-    the descriptive fields come from the :class:`ReportMetadata` when given.
+    Only the supplied fields are kept. The room volume is authoritative from
+    the result itself; the descriptive fields come from the
+    :class:`ReportMetadata` when given.
     """
-    from reportlab.platypus import Spacer
-
     client = metadata.client if metadata is not None else None
     test_room = metadata.test_room if metadata is not None else None
     specimen = metadata.specimen if metadata is not None else None
@@ -248,10 +246,7 @@ def _header_grid(
         ),
         (t("Date of prediction", language), test_date),
     ]
-    pairs = escaped_pairs(specs)
-    if not pairs:
-        return []
-    return [Spacer(1, 3), grid_table(pairs)]
+    return escaped_pairs(specs)
 
 
 # ---------------------------------------------------------------------------
@@ -340,27 +335,24 @@ def render_reverberation_models_report(
     accent = colors.HexColor(_ACCENT_HEX)
 
     styles, title_style, basis_style, caption_style = document_styles(accent)
-    flow: list[Any] = [
-        fiche_paragraph(t("Reverberation-time prediction", language), title_style),
-        fiche_paragraph(
-            t(
-                "Design-stage prediction of the reverberation time by five "
-                "statistical-acoustics models (Sabine, Eyring, "
-                "Millington-Sette, Fitzroy and Arau-Puchades).",
-                language,
-            ),
-            basis_style,
-        ),
-    ]
-
     extra = [
         (
             t("Total surface area S [m<super>2</super>]", language),
             fmt_meta(result.surface_area, language),
         )
     ]
-    flow.extend(_header_grid(result.volume, extra, metadata, language))
-    flow.append(Spacer(1, 8))
+    flow = opening_flow(
+        t("Reverberation-time prediction", language),
+        t(
+            "Design-stage prediction of the reverberation time by five "
+            "statistical-acoustics models (Sabine, Eyring, "
+            "Millington-Sette, Fitzroy and Arau-Puchades).",
+            language,
+        ),
+        _header_pairs(result.volume, extra, metadata, language),
+        title_style=title_style,
+        basis_style=basis_style,
+    )
 
     from reportlab.lib.units import mm
 
@@ -521,21 +513,19 @@ def render_enclosed_space_report(
             "enclosed space per EN 12354-6:2003.",
             language,
         )
-    flow: list[Any] = [
-        fiche_paragraph(
-            t("Sound absorption in an enclosed space", language), title_style
-        ),
-        fiche_paragraph(basis, basis_style),
-    ]
-
     extra = [
         (
             t("Object fraction &#968;", language),
             fmt_meta(result.object_fraction, language),
         )
     ]
-    flow.extend(_header_grid(result.volume, extra, metadata, language))
-    flow.append(Spacer(1, 8))
+    flow = opening_flow(
+        t("Sound absorption in an enclosed space", language),
+        basis,
+        _header_pairs(result.volume, extra, metadata, language),
+        title_style=title_style,
+        basis_style=basis_style,
+    )
 
     from reportlab.lib.units import mm
 

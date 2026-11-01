@@ -90,6 +90,7 @@ from ..._internal.display import RichDisplay
 from ..._internal.types import ReportEngine, as_float_or_array
 from ..._internal.validation import (
     check_engine,
+    is_positive,
     require_non_negative,
     require_positive,
     require_scalar,
@@ -309,9 +310,9 @@ def installed_dynamic_stiffness(
     apparent_stiffness_n_m3 = require_positive(
         apparent_stiffness_n_m3, "apparent_stiffness_n_m3"
     )
-    # Written so that a NaN fails it too: an infinite resistivity is the
-    # non-porous limit and is allowed, a NaN is no resistivity at all.
-    if not airflow_resistivity_kpa_s_m2 > 0.0:
+    # A NaN is no resistivity at all and fails; an infinite resistivity is the
+    # non-porous limit and passes.
+    if not is_positive(airflow_resistivity_kpa_s_m2):
         msg = "'airflow_resistivity_kpa_s_m2' must be positive."
         raise ValueError(msg)
     if gas_stiffness_n_m3 is not None:
@@ -646,8 +647,7 @@ class ResilientLayer(CatalogueRow):
                 f"stiffness s'a of Formula 7 ({self.source})."
             )
             raise ValueError(msg)
-        # Written so that a NaN fails it too.
-        if not airflow_resistivity_pa_s_m2 > 0.0:
+        if not is_positive(airflow_resistivity_pa_s_m2):
             msg = "'airflow_resistivity_pa_s_m2' must be positive."
             raise ValueError(msg)
         return installed_dynamic_stiffness(

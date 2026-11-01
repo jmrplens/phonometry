@@ -60,7 +60,7 @@ from ._layout import (
     document_styles,
     exceedance_markup,
     footer_flow,
-    grid_table,
+    opening_flow,
     render_figure_drawing,
     result_box,
     stacked_table,
@@ -457,29 +457,29 @@ def render_iso9612_report(
     styles, title_style, basis_style, caption_style = document_styles(accent)
     title = t("Occupational noise exposure determination", language)
 
-    flow: list[Any] = [
-        fiche_paragraph(title, title_style),
-        fiche_paragraph(_basis(result, language), basis_style),
-    ]
-
     header_pairs = _metadata_pairs(result, metadata, language)
-    if header_pairs:
-        flow.append(Spacer(1, 3))
-        flow.append(grid_table(header_pairs))
-    flow.append(Spacer(1, 8))
+    flow = opening_flow(
+        title,
+        _basis(result, language),
+        header_pairs,
+        title_style=title_style,
+        basis_style=basis_style,
+    )
 
     if result.tasks:
-        flow.append(fiche_paragraph(t("Work analysis", language), caption_style))
-        flow.append(_task_table(result=result, verbose=verbose, language=language))
-        flow.append(Spacer(1, 6))
-        # Full-width, landscape per-task contribution chart (self-scaling axis).
-        flow.append(
-            render_figure_drawing(
-                result.plot,
-                174 * mm,
-                y_top=None,
-                figsize=(9.2, 2.55),
-                language=language,
+        flow.extend(
+            (
+                fiche_paragraph(t("Work analysis", language), caption_style),
+                _task_table(result=result, verbose=verbose, language=language),
+                Spacer(1, 6),
+                # Full-width, landscape per-task contribution chart (self-scaling axis).
+                render_figure_drawing(
+                    result.plot,
+                    174 * mm,
+                    y_top=None,
+                    figsize=(9.2, 2.55),
+                    language=language,
+                ),
             )
         )
     else:
@@ -488,16 +488,17 @@ def render_iso9612_report(
     flow.append(Spacer(1, 8))
 
     statement, extended = _statement(result, language)
-    flow.append(result_box(statement, styles, accent, extended))
-    flow.append(Spacer(1, 6))
+    flow.extend((result_box(statement, styles, accent, extended), Spacer(1, 6)))
 
-    flow.append(
-        fiche_paragraph(
-            t("Assessment against Directive 2003/10/EC exposure values", language),
-            caption_style,
+    flow.extend(
+        (
+            fiche_paragraph(
+                t("Assessment against Directive 2003/10/EC exposure values", language),
+                caption_style,
+            ),
+            _assessment_table(result, language),
         )
     )
-    flow.append(_assessment_table(result, language))
     text, passed = _verdict(result, language)
     flow.extend(
         verdict_flow(text=text, passed=passed, styles=styles, language=language)

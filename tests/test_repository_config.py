@@ -19,9 +19,11 @@ from __future__ import annotations
 
 import builtins
 import io
+import os
 import pathlib
 import re
 import shlex
+import shutil
 import sys
 import tomllib
 from typing import TYPE_CHECKING
@@ -250,6 +252,121 @@ def test_the_engine_digests_test_names_a_moved_digest_after_the_measurement_fail
         if str(step.get("uses", "")).startswith("actions/upload-artifact@")
     ]
     assert [step.get("if") for step in upload] == ["always()"]
+
+
+#: What the scan is told the project version is: the output of the step that
+#: reads VERSION, expanded by the runner into an input of the scan action.
+_SONAR_VERSION_ARGS = "-Dsonar.projectVersion=${{ steps.version.outputs.version }}"
+
+
+def _sonar_steps() -> tuple[dict[str, object], dict[str, object], int, int]:
+    """The step that reads VERSION and the scan step, with their positions."""
+    workflow = yaml.safe_load(_PYTHON_WORKFLOW.read_text(encoding="utf-8"))
+    steps: list[dict[str, object]] = workflow["jobs"]["sonar"]["steps"]
+    read = [i for i, step in enumerate(steps) if step.get("id") == "version"]
+    scan = [
+        i
+        for i, step in enumerate(steps)
+        if str(step.get("uses", "")).startswith("SonarSource/sonarqube-scan-action@")
+    ]
+    assert len(read) == 1, f"the sonar job has {len(read)} steps with id 'version'"
+    assert len(scan) == 1, f"the sonar job has {len(scan)} scan steps"
+    return steps[read[0]], steps[scan[0]], read[0], scan[0]
+
+
+def test_the_sonar_scan_is_told_the_version_in_VERSION() -> None:
+    """The scan names the project version, so a release opens a new-code period.
+
+    SonarCloud counts as new code everything written since the project version
+    last changed. A scan that names no version records it as "not provided",
+    and every analysis from the first one on did, so the period never moved
+    and every smell ever written counted as new. The version is read from
+    VERSION by the step before the scan and handed to the scan action as an
+    input, never written out by hand and never put through a shell, and
+    ``sonar-project.properties`` fixes none of its own.
+    """
+    read, scan, read_at, scan_at = _sonar_steps()
+    assert read_at < scan_at
+    assert "VERSION" in str(read.get("run", ""))
+    given = scan.get("with")
+    assert isinstance(given, dict)
+    assert given.get("args") == _SONAR_VERSION_ARGS
+    properties = (_ROOT / "sonar-project.properties").read_text(encoding="utf-8")
+    assert not re.search(r"^\s*sonar\.projectVersion\s*=", properties, re.MULTILINE)
+
+
+def _version_patterns(script: str) -> list[str]:
+    """The regexes a workflow script hands to ``grep -Eq``, in order."""
+    return re.findall(r"grep -Eq '([^']+)'", script)
+
+
+def test_the_version_step_holds_version_to_the_pattern_the_release_holds_it_to() -> (
+    None
+):
+    """The scan and the release accept the same versions, written once each.
+
+    The PEP 440 normal form is written out in two workflows: the release reads
+    VERSION into the artefact names, the scan into the project version. If one
+    copy is edited and the other is not, the scan can record a version the
+    release refuses, or refuse one the release publishes, and the comment above
+    the step goes false without a sound.
+    """
+    read, _, _, _ = _sonar_steps()
+    release = (_ROOT / ".github" / "workflows" / "release.yml").read_text(
+        encoding="utf-8"
+    )
+    scan_patterns = _version_patterns(str(read["run"]))
+    release_patterns = _version_patterns(release)
+    assert len(scan_patterns) == 1, f"the version step has {len(scan_patterns)} regexes"
+    assert release_patterns, "release.yml checks VERSION with no grep -Eq"
+    assert scan_patterns[0] == release_patterns[0]
+
+
+@pytest.mark.skipif(
+    sys.platform == "win32" or shutil.which("bash") is None,
+    reason="the step is a bash script that runs on ubuntu-latest",
+)
+@pytest.mark.parametrize(
+    ("version", "accepted"),
+    [
+        ((_ROOT / "VERSION").read_text(encoding="utf-8").strip(), True),
+        ("4.0.0", True),
+        ("4.0.1rc2", True),
+        ("4.0.0.post1", True),
+        ("4.0.0 -Dsonar.host.url=https://example.org", False),
+        ("v4.0.0", False),
+        ("4.0", False),
+        ("", False),
+    ],
+)
+def test_the_version_step_hands_on_a_release_version_and_nothing_else(
+    tmp_path: pathlib.Path, version: str, *, accepted: bool
+) -> None:
+    """The step's own script, run as the runner runs it, against a VERSION file.
+
+    A release version goes to the step's output as it is written; anything
+    else, a second scanner argument above all, stops the job before the
+    scanner reads it.
+    """
+    read, _, _, _ = _sonar_steps()
+    (tmp_path / "VERSION").write_text(f"{version}\n", encoding="utf-8")
+    output = tmp_path / "github-output"
+    output.touch()
+    done = child_process.run(
+        ["bash", "--noprofile", "--norc", "-eo", "pipefail", "-c", str(read["run"])],
+        cwd=tmp_path,
+        env={**os.environ, "GITHUB_OUTPUT": str(output)},
+        capture_output=True,
+        text=True,
+        timeout=60,
+    )
+    if accepted:
+        assert done.returncode == 0, done.stdout + done.stderr
+        assert output.read_text(encoding="utf-8") == f"version={version}\n"
+    else:
+        assert done.returncode != 0
+        assert "VERSION is not a PEP 440 normal-form version" in done.stdout
+        assert output.read_text(encoding="utf-8") == ""
 
 
 @pytest.mark.parametrize(

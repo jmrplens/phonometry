@@ -137,7 +137,7 @@ def _d_surfaces(s: SVG, th: Theme) -> None:
 
     # Source box (solid) enclosed by the measurement box (dashed wireframe).
     _box_solid(s, th, bx2, gy2, 46, 40, 58)
-    _box_wire(s, th, bx2, gy2, 96, 90, 108, th.accent)
+    _box_wire(s, bx2, gy2, 96, 90, 108, th.accent)
     s.text(bx2, gy2 + 40, "Measurement surface", 15, th.muted)
     s.text(bx2, gy2 + 64, "one plane · $S = 4(a·b+b·c+c·a)$", 15, th.accent, bold=True)
 
@@ -596,7 +596,7 @@ def _d_intensity_scan(s: SVG, th: Theme) -> None:
     gy, bx = 470.0, 360.0
 
     # Measurement surface (dashed wireframe) enclosing the source.
-    _box_wire(s, th, bx, gy, 150, 120, 240, th.primary)
+    _box_wire(s, bx, gy, 150, 120, 240, th.primary)
     _box_solid(s, th, bx, gy, 45, 34, 70)
     # Above the box's back edge, which ran through the word 12 px lower.
     s.text(bx, gy - 94, "Source", 15, th.fg, bold=True)
@@ -1517,7 +1517,7 @@ def _d_radiation_factor(s: SVG, th: Theme) -> None:
 
     # The ISO 9614 measurement surface, offset 0,25 m from the casing.
     off = 44.0
-    _box_wire(s, th, bx, gy, hw + off, dp + off * 0.8, ht + off, th.primary)
+    _box_wire(s, bx, gy, hw + off, dp + off * 0.8, ht + off, th.primary)
     s.dim(fx1, fy - 26, fx1 + off, fy - 26, "0,25 m", offset=-30, size=14)
     s.text(bx, 84, "ISO 9614 measurement surface", 15, th.primary, bold=True)
 

@@ -408,8 +408,7 @@ def render_iec61260_report(
             ),
             metrics_table(requirement_rows, col_widths=[56 * mm, 58 * mm]),
         ]
-    flow.append(two_panel_body(left_cell, right_cell))
-    flow.append(Spacer(1, 8))
+    flow.extend((two_panel_body(left_cell, right_cell), Spacer(1, 8)))
 
     flow.append(result_box(_statement(result, language), styles, accent))
     if getattr(result, "range_limited", False):

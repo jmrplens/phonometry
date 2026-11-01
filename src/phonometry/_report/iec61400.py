@@ -42,7 +42,7 @@ matplotlib in ``phonometry[plot]``); each is guarded with an actionable
 from __future__ import annotations
 
 import html
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from ._i18n import format_number, t
 from ._layout import (
@@ -55,9 +55,9 @@ from ._layout import (
     display_round,
     document_styles,
     footer_flow,
-    grid_table,
     measurement_basis_style,
     metrics_table,
+    opening_flow,
     render_figure_drawing,
     result_box,
     two_panel_body,
@@ -305,16 +305,14 @@ def render_wind_turbine_tonality_report(
         metadata.measurement_standard if metadata is not None else None
     )
 
-    flow: list[Any] = [
-        fiche_paragraph(title, title_style),
-        fiche_paragraph(_basis_line(measurement_standard, language), basis_style),
-    ]
-
     header_pairs = _metadata_pairs(metadata, language)
-    if header_pairs:
-        flow.append(Spacer(1, 3))
-        flow.append(grid_table(header_pairs))
-    flow.append(Spacer(1, 8))
+    flow = opening_flow(
+        title,
+        _basis_line(measurement_standard, language),
+        header_pairs,
+        title_style=title_style,
+        basis_style=basis_style,
+    )
 
     left_cell = [
         fiche_paragraph(t("Critical-band analysis", language), caption_style),

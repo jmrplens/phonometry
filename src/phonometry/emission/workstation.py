@@ -11,6 +11,8 @@ Five standards determine it, and they differ only in how they get rid of the
 room:
 
 ======================  =====================================================
+Part                    How it gets rid of the room
+======================  =====================================================
 ISO 11201:2010          Free field over a reflecting plane, so there is no
                         room to get rid of and :math:`K_3 = 0`.
 ISO 11202:2010          Two approximate routes to :math:`K_3`, one for a

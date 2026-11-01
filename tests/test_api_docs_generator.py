@@ -454,6 +454,106 @@ def test_no_role_reaches_a_published_page() -> None:
     assert leaks == []
 
 
+_JUNCTION_TABLE = """\
+**Junction constants.** The corner and straight coefficients:
+
+===============  ====  =====  =====
+Junction         J1    J2     J3
+===============  ====  =====  =====
+X                1     1      1
+T-junction (2)   2     2      n/a
+L                4     1      n/a
+===============  ====  =====  =====
+
+For T-junction (2) plates 2 and 4 are identical.
+"""
+
+
+def test_a_simple_table_becomes_a_pipe_table() -> None:
+    """The junction table once reached its page as one run-on paragraph."""
+    out = gad.render_prose(_JUNCTION_TABLE, {}, gad.RoleStats())
+    assert "| Junction | J1 | J2 | J3 |\n| :--- | :--- | :--- | :--- |\n" in out
+    assert "| T-junction (2) | 2 | 2 | n/a |" in out
+    assert "=====" not in out
+    # The paragraphs either side stay paragraphs.
+    assert out.startswith("**Junction constants.**")
+    assert out.endswith("plates 2 and 4 are identical.")
+
+
+def test_a_simple_table_folds_continuation_lines_and_renders_its_cells() -> None:
+    """A row whose first cell is blank continues the row above it, as docutils reads it."""
+    text = "\n".join(
+        [
+            "======  ==========================  ===============",
+            "Clause  Correction for              Maximum, dB",
+            "======  ==========================  ===============",
+            "10      the microphone's response   0,25 to 4 kHz;",
+            "        (:math:`|H|` in ``dB``)     0,35 above",
+            "12-14   a coupler                   0,25",
+            "======  ==========================  ===============",
+        ]
+    )
+    out = gad.render_prose(text, {}, gad.RoleStats())
+    assert (
+        "| 10 | the microphone's response ($\\vert H\\vert $ in `dB`) "
+        "| 0,25 to 4 kHz; 0,35 above |"
+    ) in out
+    assert "| 12-14 | a coupler | 0,25 |" in out
+
+
+def test_a_simple_table_with_no_header_gets_an_empty_one() -> None:
+    text = "\n".join(
+        [
+            "==============  ==========================",
+            "ISO 11201:2010  Free field over a plane.",
+            "ISO 11205:2003  By sound intensity.",
+            "==============  ==========================",
+        ]
+    )
+    out = gad.render_prose(text, {}, gad.RoleStats())
+    assert out.splitlines()[:3] == [
+        "|  |  |",
+        "| :--- | :--- |",
+        "| ISO 11201:2010 | Free field over a plane. |",
+    ]
+
+
+def test_a_table_the_converter_cannot_read_is_reported() -> None:
+    """Text between two columns belongs to neither; the table stays, and is named."""
+    text = "\n".join(
+        [
+            "=====  =====",
+            "Left   Right",
+            "=====  =====",
+            "a  spills  b",
+            "=====  =====",
+        ]
+    )
+    out = gad.render_prose(text, {}, gad.RoleStats())
+    leaks = gad.leaked_tables("vibration/junction-transmission.md", out)
+    assert len(leaks) == 3
+    assert leaks[0] == "vibration/junction-transmission.md:1: =====  ====="
+
+
+def test_a_table_inside_fenced_code_is_an_example() -> None:
+    rendered = (
+        "Shown as written:\n\n```text\n=====  =====\nA      B\n=====  =====\n```\n"
+    )
+    assert gad.leaked_tables("io/io.md", rendered) == []
+
+
+def test_no_simple_table_reaches_a_published_page_as_text() -> None:
+    pages, xref, _ = gad.build_model()
+    stats = gad.RoleStats()
+    failures: list[str] = []
+    leaks: list[str] = []
+    for page in pages:
+        leaks += gad.leaked_tables(
+            page.relpath, gad.render_module_page(page, xref, stats, failures)
+        )
+    assert leaks == []
+
+
 def test_generated_pages_have_valid_frontmatter(
     generated: pathlib.Path,
 ) -> None:
@@ -1155,6 +1255,47 @@ def test_a_lead_with_no_opening_sentence_that_fits_fails_the_run(lead: str) -> N
     problem = gad._description_problem(page)
     assert problem is not None
     assert problem.startswith("phonometry.emission.sound_power: ")
+
+
+def test_a_page_whose_lead_is_the_placeholder_fails_the_run() -> None:
+    """A lead that only says where to look is no description, at any length."""
+    page = _page_with_lead("emission domain of phonometry (see module docstrings).")
+    assert len(gad._page_description(page)) <= gad._MAX_DESCRIPTION
+    problems = gad.placeholder_leads([page])
+    mine = [p for p in problems if p.startswith("phonometry.emission.sound_power: ")]
+    assert len(mine) == 1
+    assert "(see module docstrings)" in mine[0]
+
+
+def test_a_package_with_no_page_is_read_for_the_placeholder_too(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """``help()`` shows a package's lead whether or not a page is made from it."""
+    import phonometry.speech
+
+    monkeypatch.setattr(
+        phonometry.speech,
+        "__doc__",
+        "speech domain of phonometry (see module docstrings).",
+    )
+    problems = gad.placeholder_leads([])
+    assert any(problem.startswith("phonometry.speech: ") for problem in problems)
+
+
+def test_no_module_opens_with_the_placeholder() -> None:
+    pages, _, _ = gad.build_model()
+    assert gad.placeholder_leads(pages) == []
+
+
+def test_every_domain_package_lead_fits_a_description() -> None:
+    """A package's lead becomes a page's description the day a page is made from it."""
+    long = {
+        name: len(lead)
+        for name in phonometry.__all__
+        if inspect.ismodule(module := getattr(phonometry, name))
+        and len(lead := gad._lead_paragraph(module.__doc__)) > gad._MAX_DESCRIPTION
+    }
+    assert long == {}
 
 
 def test_every_api_page_has_a_description_short_enough_to_show_whole() -> None:

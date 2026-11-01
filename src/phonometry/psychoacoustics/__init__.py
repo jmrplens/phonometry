@@ -1,5 +1,6 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
-"""psychoacoustics domain of phonometry (see module docstrings).
+"""Psychoacoustics: how loud a sound is, by four loudness models and the equal-loudness
+contours, and what it is like once its loudness is known.
 
 Two families since 4.0, along the split every textbook on sound quality
 makes: :mod:`~phonometry.psychoacoustics.loudness` for how loud a sound is

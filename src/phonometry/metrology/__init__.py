@@ -1,5 +1,6 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
-"""metrology domain of phonometry (see module docstrings).
+"""Acoustic metrology: calibration, measurement uncertainty, reference values, and the
+verification of sound level meters, calibrators and microphones.
 
 Narrowed in 4.0 to the transverse metrology: calibration, GUM uncertainty,
 data qualification, the ISO 1683 reference values every level is counted

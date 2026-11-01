@@ -1,5 +1,7 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
-"""simulation domain of phonometry: FDTD engines, their placement, and videos of a run (see module docstrings)."""
+"""Wave simulation: the acoustic and elastic FDTD engines, where a run is computed
+(this machine, a GPU or a node) and videos written from a run.
+"""
 
 from __future__ import annotations
 

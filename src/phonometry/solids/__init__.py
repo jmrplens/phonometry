@@ -1,7 +1,6 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
-"""solids domain of phonometry (see module docstrings).
+"""The elastic constants of a solid and the wave speeds that follow from them.
 
-The elastic constants of a solid and the wave speeds that follow from them.
 Like :mod:`phonometry.fluids`, this is not a domain of application but
 something the domains need: twenty-one public parameters across
 :mod:`phonometry.building`, :mod:`phonometry.vibration` and

@@ -1,5 +1,7 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
-"""signal domain of phonometry (see module docstrings)."""
+"""Signal analysis for acoustics: sound levels, calibrated spectra, windows, phase,
+cepstrum, correlation, envelopes, coherence and test signals.
+"""
 
 from __future__ import annotations
 

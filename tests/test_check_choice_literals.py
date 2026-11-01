@@ -313,9 +313,17 @@ def test_a_helper_that_classifies_the_value_is_no_cleaned_up_copy_of_it() -> Non
     """
     constants = ccl._module_constants(sys.modules[__name__])
     assert (
-        ccl.code_evidence(_tree(_classified), ccl._the_name("values"), constants) == []
+        ccl.code_evidence(
+            _tree(_classified),
+            ccl._the_name("values"),
+            constants,
+            module_name=__name__,
+        )
+        == []
     )
-    assert ccl.code_evidence(_tree(_derived), ccl._the_name("mode"), constants)
+    assert ccl.code_evidence(
+        _tree(_derived), ccl._the_name("mode"), constants, module_name=__name__
+    )
 
 
 def test_a_set_difference_or_subset_against_strings_is_a_choice() -> None:

@@ -424,6 +424,34 @@ def test_a_finished_video_that_cannot_take_the_place_of_path_says_where_it_is(
     assert left.read_bytes().startswith(b"\x1a\x45\xdf\xa3")
 
 
+def test_an_interrupt_once_the_video_is_finished_leaves_no_partial_file(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """An interrupt after ffmpeg has finished, before the rename, takes the hidden file with it.
+
+    Only the rename's own refusal keeps the finished file, at the name its
+    message gives; an interrupt there left it under its hidden name.
+    """
+    from phonometry.io import _video as pipe_module
+
+    fake_ffmpeg.install(tmp_path, monkeypatch)
+    target = tmp_path / "kept.webm"
+    target.write_bytes(b"the video that was there")
+
+    def interrupted_settle(partial: Path, path: Path) -> None:
+        assert partial.read_bytes().startswith(
+            b"\x1a\x45\xdf\xa3"
+        )  # finished, not yet moved
+        raise KeyboardInterrupt
+
+    monkeypatch.setattr(pipe_module, "settle", interrupted_settle)
+    animation = _animation()
+    with pytest.raises(KeyboardInterrupt):
+        io.write_video(target, animation)
+    assert target.read_bytes() == b"the video that was there"
+    assert [p.name for p in tmp_path.iterdir() if p.name.endswith(".partial")] == []
+
+
 #: Marks a caller's file name can hold that no message prints as they are:
 #: one that reorders text, the escape that opens a terminal's commands, and
 #: the lone surrogate Python holds for a byte that is not UTF-8 (a Windows

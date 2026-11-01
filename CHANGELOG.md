@@ -2406,6 +2406,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `aircraft.load_anp_database`, the public parameters whose annotation
   named `pathlib.Path`, say `str | os.PathLike[str]`, as the video writers'
   did.
+
+- **A video interrupted once it is finished leaves no hidden file behind,
+  and the ffmpeg install hint names one winget package.** An interrupt
+  (Ctrl-C, a notebook's stop button) that came after ffmpeg, or the node,
+  had finished the video and before it took the place of `path` left it
+  under its hidden partial name, from `io.write_video` and from the two
+  simulation writers on a node. It now goes as a failed write's file goes;
+  only the rename's own refusal (a player holding `path` open on Windows)
+  keeps it, at the name its message gives. `io.FFmpegNotFoundError` and the
+  video guide say `winget install --exact --id Gyan.FFmpeg`, where
+  `winget install ffmpeg` matches more than one package.
+
 - **The API reference and `help()` show no double hyphen where a sentence
   wanted a colon, and the `fluids` package says what it holds.** Docstrings
   spelt a dash as `--`, which `help()` prints as it is and the site published

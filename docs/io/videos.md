@@ -17,7 +17,7 @@ nodes and the encoders in one place.
 
 ffmpeg is a program, not a Python package, so it is installed apart from
 phonometry: `conda install ffmpeg`, `apt install ffmpeg`,
-`brew install ffmpeg` or `winget install ffmpeg`. phonometry runs the ffmpeg
+`brew install ffmpeg` or `winget install --exact --id Gyan.FFmpeg`. phonometry runs the ffmpeg
 matplotlib would run, the one `rcParams["animation.ffmpeg_path"]` names
 (`"ffmpeg"`, looked up on `PATH`, unless you set it), and raises
 `io.FFmpegNotFoundError` with those install commands when it is not there.

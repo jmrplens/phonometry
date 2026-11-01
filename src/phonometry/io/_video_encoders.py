@@ -134,7 +134,7 @@ NO_WINDOW: Final[int] = getattr(subprocess, "CREATE_NO_WINDOW", 0)
 
 _INSTALL_HINT = (
     "install ffmpeg (conda install ffmpeg, apt install ffmpeg, brew install "
-    "ffmpeg, winget install ffmpeg) or point that rcParam at it"
+    "ffmpeg, winget install --exact --id Gyan.FFmpeg) or point that rcParam at it"
 )
 
 #: A line of ``ffmpeg -encoders`` that names a video encoder.

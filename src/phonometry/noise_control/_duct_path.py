@@ -62,6 +62,7 @@ from .._internal.validation import (
     require_equal_counts,
     require_ranks,
     require_same_length,
+    require_scalar,
 )
 from ._criterion import (
     CRITERION_FAMILIES,
@@ -534,9 +535,14 @@ def duct_path(
         criterion family is unknown, or a key of ``section`` is not one of
         ``diameter_m``, ``width_m``, ``height_m`` or ``area``.
     :raises TypeError: If an entry of ``elements`` is not a :class:`DuctElement`, or
-        ``criterion`` or a key of ``section`` is not a text, or ``frequencies`` holds a
-        text or a value that is not a real number.
+        ``criterion`` or a key of ``section`` is not a text, or ``frequencies``,
+        ``room_effect`` or ``source_level`` holds a text or a value that is not a real
+        number, or ``flow_velocity``, ``self_noise_floor`` or ``speed_of_sound`` is not
+        a single number.
     """
+    require_scalar(flow_velocity, "flow_velocity")
+    require_scalar(self_noise_floor, "self_noise_floor")
+    require_scalar(speed_of_sound, "speed_of_sound")
     f = np.atleast_1d(real_array(frequencies, "frequencies"))
     if f.ndim != 1 or f.size == 0:
         msg = "'frequencies' must be a non-empty 1-D array."

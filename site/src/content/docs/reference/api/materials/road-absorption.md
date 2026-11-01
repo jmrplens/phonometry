@@ -101,6 +101,12 @@ to have absorption \< 0.05, Annex B).
 
 **Returns:** Reference-corrected road absorption coefficient `alpha_road(f)`.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `reference_reflection` or `road_reflection` holds a text or a value that is not a number. |
+
 ## adrienne_window
 
 ```python
@@ -321,6 +327,12 @@ $1 / K_\mathrm{r}$ factor
 | `reflection` | Complex reflection factor `r`. |
 
 **Returns:** Absorption coefficient `alpha` (real).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `reflection` holds a text or a value that is not a number. |
 
 ## in_situ_absorption_spectrum
 
@@ -608,7 +620,7 @@ Clause 6.6 step 5); Part 1 does not mandate clipping, so pass
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `frequencies` and `absorption` differ in shape or are empty. |
-| TypeError | if `absorption` or `frequencies` holds a text or a value that is not a real number. |
+| TypeError | if `absorption` or `frequencies` holds a text or a value that is not a real number, or `f_max` or `f_min` is not a single number. |
 
 ## OneThirdOctaveAbsorption
 

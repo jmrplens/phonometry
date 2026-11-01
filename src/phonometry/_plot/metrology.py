@@ -58,6 +58,7 @@ if TYPE_CHECKING:
     )
     from ..metrology.uncertainty import MonteCarloResult, UncertaintyResult
 
+from .._internal.validation import real_array
 from .common import (
     _C_MUTED,
     _C_PRIMARY,
@@ -3465,6 +3466,8 @@ def plot_time_selective_response(
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the windowed curve.
     :return: The axes.
+    :raises TypeError: if ``frequencies`` holds a text or a value that is not a real
+        number.
     """
     from .._i18n import localize_axes
 
@@ -3535,7 +3538,7 @@ def _draw_windowed_response(
             result.frequency_resolution_hz, top, _RESPONSE_POINTS
         )
     else:
-        frequencies = np.asarray(frequencies, dtype=np.float64)
+        frequencies = real_array(frequencies, "frequencies")
     windowed = np.abs(result.response_at(frequencies))
     record = np.abs(result.record_response_at(frequencies))
     peak = float(np.max(windowed))

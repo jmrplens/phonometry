@@ -7,10 +7,7 @@ from typing import TYPE_CHECKING, Any, overload
 
 import numpy as np
 
-from .._internal.validation import (
-    real_array,
-    require_equal_shapes,
-)
+from .._internal.validation import complex_array, real_array, require_equal_shapes
 from .common import (
     _ABSORPTION_QUANTITY_LABELS,
     _C_MUTED,
@@ -887,7 +884,7 @@ def _absorption_reflection_axes(
     # would reset its scale and put matplotlib's 10^2, 10^3 labels back.
     ax.plot(
         freqs,
-        np.abs(np.asarray(reflection, dtype=np.complex128)),
+        np.abs(complex_array(reflection, "reflection")),
         ls="--",
         color=_C_MUTED,
         label=_t("Reflection factor $|R|$", language),

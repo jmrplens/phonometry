@@ -1,39 +1,61 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
-"""Fail on a conversion to floats that reads a caller's complex value as its real part.
+"""Fail on a conversion of a caller's numbers that reads a complex value or a text as numbers.
 
 ``np.asarray(x, dtype=np.float64)`` takes a complex value and gives back its
 real part, with no more than a ``ComplexWarning``: ``[1 + 2j]`` comes back as
 ``[1.0]``, and so does a NumPy complex number held in a list or an array of
-objects. A function that converts what its caller gave it that way checks,
-computes and returns from a value the caller never gave, and ISO/TS
-12913-3's ``method_b_scale_values`` rated ``0.5 + 0.3j`` as the mark at 0.5.
-The library reads a caller's numbers through the shared reader of
-``src/phonometry/_internal/validation.py``, :func:`real_array`, which refuses
-a complex value, a text and a ``bytearray`` by the parameter's name, or asks
-one of the shared checks first (:data:`CHECKS`).
+objects. It parses a text (``["94"]`` as ``[94.0]``) and reads a
+``bytearray`` as the codes of its characters. ``np.asarray(x,
+dtype=complex)`` parses a text the same way. A function that converts what its
+caller gave it that way checks, computes and returns from a value the caller
+never gave, and ISO/TS 12913-3's ``method_b_scale_values`` rated
+``np.complex128(0.5 + 0.3j)`` as the mark at 0.5. The library reads a caller's
+numbers through the shared readers of ``src/phonometry/_internal/validation.py``,
+:func:`real_array` and, where a complex value belongs, :func:`complex_array`,
+which refuse what they cannot read by the parameter's name, or asks one of the
+shared checks first (:data:`CHECKS`).
 
-This reads every module under ``src/phonometry`` and reports a conversion to
-floats of a caller's value that no check precedes in the same function:
+This reads every module under ``src/phonometry`` and reports a conversion of
+a caller's value that no check has read on every path to it:
 
 - **A conversion to floats**: ``np.asarray``, ``np.array``,
-  ``np.asanyarray``, ``np.ascontiguousarray`` or ``np.asfortranarray`` with a
-  real floating dtype (``float``, ``np.float64``, ``np.float32``, ``"float64"``
-  and the rest), given by keyword or in second place; ``.astype()`` of one;
-  and ``np.float64()`` and ``np.float32()`` of a value.
+  ``np.asanyarray``, ``np.ascontiguousarray``, ``np.asfortranarray``,
+  ``np.require`` and ``np.fromiter`` with a real floating dtype, given by
+  keyword or in second place; the fill value of ``np.full`` and
+  ``np.full_like`` with one; ``.astype()`` of one; and ``np.float64()`` and
+  its kin of a value. A real floating dtype is ``float``, ``np.float64`` and
+  the rest, a text that names one (``"f8"``, ``"<f8"``, ``"float64"``),
+  ``np.dtype()`` of one, or a name bound to one; a constructor imported from
+  NumPy by name counts as one called through ``np``.
+- **A conversion to complex numbers**: the same calls with a complex dtype
+  (``complex``, ``np.complex128``, ``"c16"`` and the rest), and
+  ``np.complex128()`` and its kin of a value. A complex value is what these
+  read, but a text is parsed and a ``bytearray`` read as codes all the same.
 - **A caller's value**: a parameter of the function that holds the
-  conversion, read bare or through what keeps it the caller's (an item of it,
-  ``x[0]``; ``np.atleast_1d(x)``, ``np.ravel(x)``, ``list(x)`` and the other
-  conversions that keep its dtype; arithmetic on it), a name bound to one of
-  those, or a name a ``for`` loop or a comprehension takes from one; and, in a
-  record's ``__post_init__``, a field, ``self.x``, which the caller set. A
-  private function's parameter counts as much as a public one's: a public
-  function hands its caller's value on to the helper that converts it.
-- **A check**: a call of one of :data:`CHECKS` with the value (or what it is
-  read from) among its arguments, or of a function of the library that hands
-  its first parameter to one (found by following such calls through the
-  package until no new one turns up), earlier in the source than the
-  conversion; or a name rebound to what a check returns. The order is read
-  from the source, not from the paths the function can take.
+  conversion, a nested function's included, read bare or through what keeps
+  it the caller's (an item of it, ``x[0]``; ``np.atleast_1d(x)``,
+  ``np.ravel(x)``, ``list(x)``, ``np.concatenate([x, y])``, ``x.T`` and the
+  other calls and attributes that keep its values;
+  ``getattr(x, name, x)``, whose default is the value itself), a tuple or a
+  list that holds one, a name bound to one of those, or a name a ``for``
+  loop or a comprehension takes from one, and a comprehension whose element
+  is so read; and, in a record's ``__post_init__``, a field, ``self.x``,
+  which the caller set. A private function's parameter counts as much as a
+  public one's: a public function hands its caller's value on to the helper
+  that converts it.
+- **A check**: a call of one of :data:`CHECKS` with the value among its
+  arguments, or of a function of the library that hands that parameter to
+  one wherever it returns (found by following such calls through the
+  package until no new one turns up); or a name rebound to what a check
+  returns. What each check refuses is listed, a complex value, a text or
+  both: a conversion to floats needs both refused, one to complex numbers a
+  text. A check of an item (``x[0]``) reads that item, not the sequence it
+  was taken from.
+- **On every path**: the function is read the way it runs. A check inside
+  an ``if`` holds after it only when the other branch checks too or leaves
+  the function; a check in one branch does not reach the other; a check in
+  a loop's body, a conditional expression, the right side of ``and`` or
+  ``or``, or a comprehension may not run, and holds only inside it.
 
 A value the function computed (a local of its own arithmetic, a field of a
 record it was handed, which the record read when it was built) is no
@@ -41,14 +63,15 @@ caller's, and the census lists it as computed. A field a record's method
 reads outside ``__post_init__`` is listed apart: the record's constructor is
 where its caller's value was read.
 
-``--census`` prints every conversion to floats in the tree with what it
-reads, so that the class is listed whole and not only what is left of it.
+``--census`` prints every conversion in the tree with what it reads, so that
+the class is listed whole and not only what is left of it. ``--source``
+reads another copy of the library, with that copy's own checks.
 
 A conversion of a value that is no caller's number but that the rule cannot
 tell from one (the samples SciPy decoded from a file, a mask the engine
 builds, an array of objects an ``isinstance`` test has read item by item, the
-quick path of the reader itself, the drawing helpers whose source the published
-clips fingerprint, which draw what a result holds) is listed in
+quick path of the readers themselves, the drawing helpers whose source the
+published clips fingerprint, which draw what a result holds) is listed in
 :data:`EXEMPT`, keyed by file and function with the reason; an entry that
 covers nothing is reported too.
 """
@@ -57,14 +80,14 @@ from __future__ import annotations
 
 import argparse
 import ast
+import pathlib
 import sys
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, Any, Literal
 
 from ast_scan import ROOT, exempted, python_files, relative
 
 if TYPE_CHECKING:
-    import pathlib
     from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
 
 #: The library this reads, the default when no path is given.
@@ -74,66 +97,110 @@ PACKAGE = "phonometry"
 #: The module that holds :data:`CHECKS`, by the name it is imported by.
 SHARED = f"{PACKAGE}._internal.validation"
 
-#: The shared checks of ``_internal/validation.py`` that refuse a complex value
-#: given to them, by name. ``tests/test_check_real_conversions.py`` calls each
-#: with one and wants the refusal.
-CHECKS = frozenset(
+#: What a check refuses: a complex value, a text (a ``bytearray`` included).
+Refusal = Literal["complex", "text"]
+#: What a conversion is to.
+Kind = Literal["real", "complex"]
+
+_BOTH: frozenset[Refusal] = frozenset({"complex", "text"})
+_TEXT: frozenset[Refusal] = frozenset({"text"})
+_COMPLEX: frozenset[Refusal] = frozenset({"complex"})
+
+#: What a conversion of each kind needs refused before it reads a caller's value.
+NEEDS: dict[Kind, frozenset[Refusal]] = {"real": _BOTH, "complex": _TEXT}
+
+#: The shared checks of ``_internal/validation.py``, by name, with what each
+#: refuses of every argument it is given.
+#: ``tests/test_check_real_conversions.py`` calls each with a complex value
+#: and with a text and wants the refusals listed here.
+CHECKS: dict[str, frozenset[Refusal]] = {
+    "real_array": _BOTH,
+    "complex_array": _TEXT,
+    "refuse_complex": _COMPLEX,
+    "refuse_text": _TEXT,
+    "refuse_text_beside_choice": _TEXT,
+    "require_real": _BOTH,
+    "require_scalar": _BOTH,
+    "require_positive": _BOTH,
+    "require_non_negative": _BOTH,
+    "require_finite": _BOTH,
+    "require_fraction": _BOTH,
+    "require_count": _BOTH,
+    "require_above_absolute_zero": _BOTH,
+    "require_above_absolute_zero_array": _BOTH,
+    "require_positive_array": _BOTH,
+    "require_finite_array": _BOTH,
+    "require_finite_matrix": _BOTH,
+    "require_1d_signal": _BOTH,
+    "require_per_band": _BOTH,
+    "arrays_of": _BOTH,
+    "pair_of_arrays": _BOTH,
+    "floats_of": _BOTH,
+    "pair_of_floats": _BOTH,
+}
+
+#: The NumPy constructors that convert their first argument to the dtype they
+#: are given, in second place or by keyword.
+_ARRAY_CONVERSIONS = frozenset(
     {
-        "real_array",
-        "refuse_complex",
-        "holds_complex",
-        "require_real",
-        "require_scalar",
-        "require_positive",
-        "require_non_negative",
-        "require_finite",
-        "require_fraction",
-        "require_count",
-        "require_above_absolute_zero",
-        "require_above_absolute_zero_array",
-        "require_positive_array",
-        "require_finite_array",
-        "require_finite_matrix",
-        "require_1d_signal",
-        "require_per_band",
-        "arrays_of",
-        "pair_of_arrays",
-        "floats_of",
-        "pair_of_floats",
+        "asarray",
+        "array",
+        "asanyarray",
+        "ascontiguousarray",
+        "asfortranarray",
+        "require",
+        "fromiter",
     }
 )
-
-#: The NumPy constructors that convert to the dtype they are given.
-_ARRAY_CONVERSIONS = frozenset(
-    {"asarray", "array", "asanyarray", "ascontiguousarray", "asfortranarray"}
-)
-#: The real floating dtypes, by the last part of their name or as a text.
-_REAL_DTYPES = frozenset(
+#: The NumPy constructors that convert a fill value, second, to the dtype
+#: they are given, third or by keyword.
+_FILLS = frozenset({"full", "full_like"})
+#: The floating dtypes by the name of their type.
+_REAL_TYPES = frozenset(
     {
         "float",
         "float16",
         "float32",
         "float64",
+        "float128",
+        "float_",
         "double",
         "single",
         "half",
         "longdouble",
-        "f2",
-        "f4",
-        "f8",
-        "d",
     }
 )
-#: The NumPy scalar types whose call converts one value to a real float.
-_SCALAR_CONVERSIONS = frozenset({"float16", "float32", "float64", "double", "single"})
-#: The calls that keep their argument the caller's: same values, same dtype
-#: or one that still holds a complex number.
+_COMPLEX_TYPES = frozenset(
+    {
+        "complex",
+        "complex64",
+        "complex128",
+        "complex256",
+        "complex_",
+        "cdouble",
+        "csingle",
+        "clongdouble",
+    }
+)
+#: The dtypes by a text NumPy reads, after its byte order (``<``, ``>``,
+#: ``=``, ``|``).
+_REAL_TEXTS = _REAL_TYPES | {"f2", "f4", "f8", "f16", "d", "f", "e", "g"}
+_COMPLEX_TEXTS = _COMPLEX_TYPES | {"c8", "c16", "c32", "D", "F", "G"}
+#: The NumPy scalar types whose call converts one value.
+_SCALARS: dict[str, Kind] = {
+    **dict.fromkeys(_REAL_TYPES - {"float", "float_"}, "real"),
+    **dict.fromkeys(_COMPLEX_TYPES - {"complex", "complex_"}, "complex"),
+}
+#: The calls that keep their argument's values the caller's, as a method of
+#: it (``x.ravel()``) or a function of their first argument
+#: (``np.atleast_1d(x)``).
 _KEEPING_CALLS = frozenset(
     {
         "asarray",
         "array",
         "asanyarray",
         "ascontiguousarray",
+        "asfortranarray",
         "atleast_1d",
         "atleast_2d",
         "atleast_3d",
@@ -145,12 +212,35 @@ _KEEPING_CALLS = frozenset(
         "sorted",
         "reversed",
         "enumerate",
-        "zip",
         "flatten",
         "reshape",
         "transpose",
+        "concatenate",
+        "stack",
+        "vstack",
+        "hstack",
+        "dstack",
+        "column_stack",
+        "row_stack",
+        "broadcast_to",
+        "expand_dims",
+        "tile",
+        "repeat",
+        "flip",
+        "fliplr",
+        "flipud",
+        "roll",
+        "moveaxis",
+        "swapaxes",
     }
 )
+#: The calls that keep the values of every argument they are given.
+_KEEPING_ALL = frozenset({"zip", "append", "chain"})
+#: The arguments of ``getattr(value, name, default)``, whose default is read
+#: when the attribute is missing.
+_GETATTR_WITH_DEFAULT = 3
+#: The attributes of an array that keep its values.
+_KEEPING_ATTRIBUTES = frozenset({"T", "mT"})
 
 #: The conversions of a value that is no caller's number, which the rule
 #: cannot tell, keyed by the file relative to the repository and the function
@@ -181,6 +271,10 @@ EXEMPT: dict[tuple[str, str], str] = {
         "the shared reader itself, whose quick path converts only an array of "
         "truth values, integers or floats, which holds no complex number"
     ),
+    ("src/phonometry/_internal/validation.py", "complex_array"): (
+        "the shared reader itself, which converts only after it has refused a "
+        "text at any depth"
+    ),
     ("src/phonometry/_internal/display.py", "_sequence_summary"): (
         "a record's display, after an isinstance test that every item is an int "
         "or a float; reading it through real_array would import the validation "
@@ -194,6 +288,21 @@ EXEMPT: dict[tuple[str, str], str] = {
         "a boolean mask the engine builds from the grid, sent to the device as "
         "zeros and ones; no caller hands it"
     ),
+    ("src/phonometry/simulation/fdtd.py", "_held_map"): (
+        "a map converted only when holds_complex and holds_text have found "
+        "neither in it; anything else is handed back as given, for the checks "
+        "of the medium to refuse in their own words"
+    ),
+    ("src/phonometry/filters/weighting_compliance.py", "_edition_masks"): (
+        "the tolerance table of a published edition, the module's own "
+        "_WEIGHTING_EDITIONS that every caller looks up by the edition's name; "
+        "no caller hands it"
+    ),
+    ("src/phonometry/materials/absorbers/uncertainty.py", "_table_constants"): (
+        "the m and n of the standard's Tables 1 and 2, the module's own tables, "
+        "looked up per band; the caller's frequencies, read through "
+        "_finite_bands first, are only the keys"
+    ),
     ("src/phonometry/simulation/fdtd.py", "_real_objects"): (
         "an array of objects converted only after an isinstance test that every "
         "item is a real number and no truth value"
@@ -202,28 +311,38 @@ EXEMPT: dict[tuple[str, str], str] = {
 
 #: What a conversion reads, as the census lists it.
 Verdict = Literal["unchecked", "checked", "computed", "field"]
+#: How bad each verdict is, for a conversion a loop reads twice.
+_SEVERITY: dict[Verdict, int] = {
+    "computed": 0,
+    "field": 1,
+    "checked": 2,
+    "unchecked": 3,
+}
 
 
 @dataclass(frozen=True)
 class Conversion:
-    """One conversion to floats, with what it reads."""
+    """One conversion of a value, with what it reads."""
 
     path: pathlib.Path
     line: int
     function: str
     source: str
     verdict: Verdict
+    kind: Kind = "real"
+    file: str = ""
 
     @property
     def key(self) -> tuple[str, str]:
         """The file relative to the repository, and the function, as EXEMPT keys them."""
-        return relative(self.path), self.function
+        return self.file or relative(self.path), self.function
 
     def describe(self) -> str:
         """One line naming the place, the verdict and the code."""
+        to = "" if self.kind == "real" else " (to complex)"
         return (
-            f"{relative(self.path)}:{self.line}  {self.function}  "
-            f"{self.verdict}: {self.source}"
+            f"{self.key[0]}:{self.line}  {self.function}  "
+            f"{self.verdict}{to}: {self.source}"
         )
 
 
@@ -236,90 +355,150 @@ def _last_name(node: ast.expr) -> str | None:
     return None
 
 
-def _is_real_dtype(node: ast.expr | None) -> bool:
-    """Whether *node* names a real floating dtype (``float``, ``np.float64``, ``"f8"``)."""
-    if node is None:
-        return False
-    if isinstance(node, ast.Constant) and isinstance(node.value, str):
-        return node.value in _REAL_DTYPES
-    return _last_name(node) in _REAL_DTYPES
-
-
 def _keyword(call: ast.Call, name: str) -> ast.expr | None:
     return next((k.value for k in call.keywords if k.arg == name), None)
 
 
-def _array_conversion(call: ast.Call) -> ast.expr | None:
-    """The value a NumPy constructor converts, when its dtype is a real float."""
-    dtype = _keyword(call, "dtype")
-    if dtype is None and len(call.args) > 1:
-        dtype = call.args[1]
-    return call.args[0] if call.args and _is_real_dtype(dtype) else None
+def _argument(call: ast.Call, place: int, name: str) -> ast.expr | None:
+    """The argument of *call* given in *place* or by *name*."""
+    if len(call.args) > place:
+        return call.args[place]
+    return _keyword(call, name)
 
 
-def converted(call: ast.Call) -> ast.expr | None:
-    """The value *call* converts to floats, or ``None`` when it converts none."""
-    if not isinstance(call.func, ast.Attribute):
+def _text_kind(text: str) -> Kind | None:
+    bare = text.lstrip("<>=|")
+    if bare in _REAL_TEXTS:
+        return "real"
+    if bare in _COMPLEX_TEXTS:
+        return "complex"
+    return None
+
+
+@dataclass(frozen=True)
+class _Names:
+    """How a module spells NumPy: the names it imports from it, and the names
+    bound to a dtype, by kind.
+    """
+
+    numpy: frozenset[str] = frozenset()
+    dtypes: Mapping[str, Kind] = field(default_factory=dict)
+
+    def callee(self, func: ast.expr) -> str | None:
+        """The NumPy name a call reaches: any attribute, or a name imported from NumPy."""
+        if isinstance(func, ast.Attribute):
+            return func.attr
+        if isinstance(func, ast.Name) and func.id in self.numpy:
+            return func.id
         return None
-    name = call.func.attr
+
+    def kind(self, node: ast.expr | None) -> Kind | None:
+        """The kind of dtype *node* names, ``None`` when it names none."""
+        if node is None:
+            return None
+        if isinstance(node, ast.Constant) and isinstance(node.value, str):
+            return _text_kind(node.value)
+        if isinstance(node, ast.Name) and node.id in self.dtypes:
+            return self.dtypes[node.id]
+        if (
+            isinstance(node, ast.Call)
+            and _last_name(node.func) == "dtype"
+            and node.args
+        ):
+            return self.kind(node.args[0])
+        name = _last_name(node)
+        if name in _REAL_TYPES:
+            return "real"
+        if name in _COMPLEX_TYPES:
+            return "complex"
+        return None
+
+
+#: A module that imports nothing from NumPy and binds no dtype.
+_PLAIN = _Names()
+
+
+def converted(call: ast.Call, names: _Names = _PLAIN) -> tuple[ast.expr, Kind] | None:
+    """The value *call* converts and to what, or ``None`` when it converts none."""
+    name = names.callee(call.func)
     if name in _ARRAY_CONVERSIONS:
-        return _array_conversion(call)
-    if name == "astype":
-        dtype = call.args[0] if call.args else _keyword(call, "dtype")
-        return call.func.value if _is_real_dtype(dtype) else None
-    if name in _SCALAR_CONVERSIONS and len(call.args) == 1:
-        return call.args[0]
-    return None
-
-
-def root(node: ast.expr, *, fields: bool) -> str | None:
-    """The name a value is read from, through what keeps it the same value.
-
-    ``x`` for ``x``, ``x[0]``, ``np.atleast_1d(x)`` and ``x.ravel()``;
-    ``self.f`` for a field when *fields* (in ``__post_init__``); ``None`` for a
-    value that is not read from one name.
-    """
-    if isinstance(node, ast.Name):
-        return node.id
-    if isinstance(node, ast.Attribute):
-        if fields and isinstance(node.value, ast.Name) and node.value.id == "self":
-            return f"self.{node.attr}"
+        kind = names.kind(_argument(call, 1, "dtype"))
+        value = _argument(call, 0, "a")
+    elif name in _FILLS:
+        kind = names.kind(_argument(call, 2, "dtype"))
+        value = _argument(call, 1, "fill_value")
+    elif name == "astype" and isinstance(call.func, ast.Attribute):
+        kind = names.kind(_argument(call, 0, "dtype"))
+        value = call.func.value
+    elif name in _SCALARS and len(call.args) == 1:
+        kind, value = _SCALARS[name], call.args[0]
+    else:
         return None
-    if isinstance(node, ast.Subscript | ast.Starred):
-        return root(node.value, fields=fields)
-    if isinstance(node, ast.Call):
-        return _kept_root(node, fields=fields)
-    return None
+    return None if kind is None or value is None else (value, kind)
 
 
-def _kept_root(call: ast.Call, *, fields: bool) -> str | None:
-    """The name a call that keeps its argument's values reads them from.
-
-    A conversion to floats gives floats and is a site of its own, so it keeps
-    nothing; a method (``x.ravel()``) keeps its object, a function
-    (``np.atleast_1d(x)``, ``list(x)``) its first argument.
+def _dtype_names(
+    nodes: Iterable[ast.AST], names: _Names, function: ast.AST | None = None
+) -> dict[str, Kind]:
+    """The names *nodes* bind to a dtype, and the parameters of *function* whose
+    default is one.
     """
-    if converted(call) is not None or _last_name(call.func) not in _KEEPING_CALLS:
-        return None
-    func = call.func
-    if isinstance(func, ast.Attribute) and not (
-        isinstance(func.value, ast.Name) and func.value.id == "np"
-    ):
-        return root(func.value, fields=fields)
-    return root(call.args[0], fields=fields) if call.args else None
+    found: dict[str, Kind] = {}
+    for node in nodes:
+        if isinstance(node, ast.Assign | ast.AnnAssign) and node.value is not None:
+            kind = names.kind(node.value)
+            targets = node.targets if isinstance(node, ast.Assign) else [node.target]
+            for target in targets:
+                if kind is not None and isinstance(target, ast.Name):
+                    found[target.id] = kind
+    if isinstance(function, ast.FunctionDef | ast.AsyncFunctionDef):
+        arguments = function.args
+        positional = [*arguments.posonlyargs, *arguments.args]
+        pairs = [
+            *zip(
+                positional[len(positional) - len(arguments.defaults) :],
+                arguments.defaults,
+                strict=True,
+            ),
+            *zip(arguments.kwonlyargs, arguments.kw_defaults, strict=True),
+        ]
+        for parameter, default in pairs:
+            if default is not None and (kind := names.kind(default)) is not None:
+                found[parameter.arg] = kind
+    return found
 
 
-def _roots(node: ast.expr, *, fields: bool) -> list[str]:
-    """Every name *node* reads a value from as it is: either branch of a
-    conditional, each member of a tuple or a list. Arithmetic computes a
-    value of its own, and reads none as it is.
+#: What a name holds at a place: ``None`` for no caller's value, or the
+#: refusals checks have made of the caller's value it holds (empty when none).
+State = frozenset[Refusal] | None
+
+
+def join(first: State, second: State) -> State:
+    """What a name holds where two paths meet: a caller's value if either path
+    holds one, with only the refusals both made.
     """
-    if isinstance(node, ast.IfExp):
-        return _roots(node.body, fields=fields) + _roots(node.orelse, fields=fields)
-    if isinstance(node, ast.Tuple | ast.List):
-        return [name for item in node.elts for name in _roots(item, fields=fields)]
-    found = root(node, fields=fields)
-    return [] if found is None else [found]
+    if first is None:
+        return second
+    if second is None:
+        return first
+    return first & second
+
+
+#: What each name holds at a place.
+Env = dict[str, State]
+
+
+def _join_envs(envs: Sequence[Env], default: Callable[[str], State]) -> Env:
+    if not envs:
+        return {}
+    keys = set().union(*envs)
+    joined: Env = {}
+    for key in keys:
+        state = envs[0].get(key, default(key))
+        for env in envs[1:]:
+            state = join(state, env.get(key, default(key)))
+        joined[key] = state
+    return joined
 
 
 def _parameters(function: ast.FunctionDef | ast.AsyncFunctionDef) -> list[str]:
@@ -328,67 +507,6 @@ def _parameters(function: ast.FunctionDef | ast.AsyncFunctionDef) -> list[str]:
     named = [*arguments.posonlyargs, *arguments.args, *arguments.kwonlyargs]
     named.extend(each for each in (arguments.vararg, arguments.kwarg) if each)
     return [p.arg for p in named if p.arg not in {"self", "cls"}]
-
-
-def _own_nodes(function: ast.AST) -> Iterator[ast.AST]:
-    """The nodes of *function*, leaving out the functions, lambdas and classes in it."""
-    pending = list(ast.iter_child_nodes(function))
-    while pending:
-        node = pending.pop()
-        if isinstance(
-            node, ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef | ast.Lambda
-        ):
-            continue
-        yield node
-        pending.extend(ast.iter_child_nodes(node))
-
-
-def _end(node: ast.AST) -> tuple[int, int]:
-    return (
-        getattr(node, "end_lineno", 0) or 0,
-        getattr(node, "end_col_offset", 0) or 0,
-    )
-
-
-def _start(node: ast.AST) -> tuple[int, int]:
-    return (getattr(node, "lineno", 0), getattr(node, "col_offset", 0))
-
-
-#: A state a name takes at a place in the source: the caller's value, a value
-#: a check has read, or anything else.
-State = Literal["caller", "checked", "other"]
-
-
-@dataclass
-class _Function:
-    """What a function's names hold, place by place, in the order of the source."""
-
-    function: ast.FunctionDef | ast.AsyncFunctionDef
-    checked_by: Callable[[ast.Call], list[ast.expr]]
-    fields: bool
-    events: dict[str, list[tuple[tuple[int, int], State]]] = field(default_factory=dict)
-    parameters: frozenset[str] = frozenset()
-
-    def __post_init__(self) -> None:
-        self.parameters = frozenset(_parameters(self.function))
-
-    def state(self, name: str, place: tuple[int, int]) -> State | None:
-        """What *name* holds just before *place*, ``None`` when nothing binds it."""
-        before = [event for event in self.events.get(name, ()) if event[0] < place]
-        if before:
-            return max(before)[1]
-        if name in self.parameters or (self.fields and name.startswith("self.")):
-            return "caller"
-        return None
-
-    def classify(self, value: ast.expr, place: tuple[int, int]) -> State:
-        """What a name bound to *value* at *place* holds."""
-        if isinstance(value, ast.Call) and self.checked_by(value):
-            return "checked"
-        states = {self.state(name, place) for name in _roots(value, fields=self.fields)}
-        if "caller" in states:
-            return "caller"
-        return "checked" if "checked" in states else "other"
 
 
 def _targets(target: ast.expr) -> list[str]:
@@ -401,49 +519,423 @@ def _targets(target: ast.expr) -> list[str]:
     return []
 
 
-def _bindings(node: ast.AST) -> Iterator[tuple[list[str], ast.expr, tuple[int, int]]]:
-    """The names *node* binds, the value they are read from, and where."""
-    if isinstance(node, ast.Assign):
-        for target in node.targets:
-            yield _targets(target), node.value, _end(node)
-    elif isinstance(node, ast.AnnAssign | ast.NamedExpr) and node.value is not None:
-        yield _targets(node.target), node.value, _end(node)
-    elif isinstance(node, ast.For | ast.AsyncFor):
-        yield _targets(node.target), node.iter, _start(node.target)
-    elif isinstance(node, ast.ListComp | ast.SetComp | ast.GeneratorExp | ast.DictComp):
-        # The element is written first and read after its loops have bound
-        # their names, so the names hold from where the comprehension opens.
-        for generator in node.generators:
-            yield _targets(generator.target), generator.iter, _start(node)
-    elif isinstance(node, ast.withitem) and node.optional_vars is not None:
-        yield _targets(node.optional_vars), node.context_expr, _end(node.context_expr)
-
-
-def _events(scope: _Function, nodes: Sequence[ast.AST]) -> None:
-    """Fill *scope*'s events from its *nodes*, in source order: each binding,
-    then each check.
+def _kept(call: ast.Call, names: _Names) -> list[ast.expr]:
+    """The values a call that keeps them reads: its object as a method, its
+    first argument as a function, every argument for ``zip`` and its kin;
+    nothing for a call that keeps none, a conversion included.
     """
-    for node in nodes:
-        for names, value, place in _bindings(node):
-            state = scope.classify(value, place)
-            for name in names:
-                scope.events.setdefault(name, []).append((place, state))
-        if not isinstance(node, ast.Call):
-            continue
-        for argument in scope.checked_by(node):
-            for name in _roots(argument, fields=scope.fields):
-                scope.events.setdefault(name, []).append((_end(node), "checked"))
+    callee = _last_name(call.func)
+    if converted(call, names) is not None:
+        return []
+    if callee == "getattr" and len(call.args) == _GETATTR_WITH_DEFAULT:
+        return [call.args[2]]
+    if callee in _KEEPING_ALL:
+        return list(call.args)
+    if callee not in _KEEPING_CALLS:
+        return []
+    func = call.func
+    if isinstance(func, ast.Attribute) and not (
+        isinstance(func.value, ast.Name) and func.value.id in {"np", "numpy"}
+    ):
+        return [func.value]
+    return call.args[:1]
 
 
-def _verdict(scope: _Function, value: ast.expr, place: tuple[int, int]) -> Verdict:
-    """What a conversion of *value* at *place* reads."""
-    states = {scope.state(name, place) for name in _roots(value, fields=scope.fields)}
-    if "caller" in states:
-        return "unchecked"
-    if "checked" in states:
-        return "checked"
-    read = root(value, fields=True)
-    return "field" if read is not None and read.startswith("self.") else "computed"
+def _ends(block: Sequence[ast.stmt]) -> bool:
+    """Whether *block* leaves the function or the loop at its end on every path."""
+    if not block:
+        return False
+    last = block[-1]
+    if isinstance(last, ast.Return | ast.Raise | ast.Continue | ast.Break):
+        return True
+    if isinstance(last, ast.If):
+        return _ends(last.body) and _ends(last.orelse)
+    return False
+
+
+def _raises(block: Sequence[ast.stmt]) -> bool:
+    """Whether *block* ends in a ``raise`` on every path."""
+    if not block:
+        return False
+    last = block[-1]
+    if isinstance(last, ast.Raise):
+        return True
+    if isinstance(last, ast.If):
+        return _raises(last.body) and _raises(last.orelse)
+    return False
+
+
+_SCOPES = (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef, ast.Lambda)
+_COMPREHENSIONS = (ast.ListComp, ast.SetComp, ast.GeneratorExp, ast.DictComp)
+
+
+@dataclass
+class _Flow:
+    """A function read the way it runs, with what each name holds at each
+    conversion of a value.
+    """
+
+    checks: Callable[[ast.Call], list[tuple[ast.expr, frozenset[Refusal]]]]
+    names: _Names
+    fields: bool
+    found: dict[int, tuple[ast.Call, ast.expr, Kind, Verdict]] = field(
+        default_factory=dict
+    )
+    breaks: list[list[Env]] = field(default_factory=list)
+
+    # What a value holds.
+
+    def default(self, name: str) -> State:
+        """What a name no binding reached holds: a field in ``__post_init__``
+        the caller's value, anything else none.
+        """
+        return frozenset() if self.fields and name.startswith("self.") else None
+
+    def lookup(self, env: Env, name: str) -> State:
+        return env[name] if name in env else self.default(name)
+
+    def state(self, node: ast.expr, env: Env) -> State:
+        """What *node* holds: the caller's value, with its refusals, or none."""
+        if isinstance(node, ast.Name):
+            return self.lookup(env, node.id)
+        if isinstance(node, ast.Attribute):
+            return self._attribute(node, env)
+        if isinstance(node, ast.Subscript):
+            key = ast.unparse(node)
+            return env[key] if key in env else self.state(node.value, env)
+        if isinstance(node, ast.Starred | ast.NamedExpr):
+            return self.state(node.value, env)
+        if isinstance(node, ast.IfExp):
+            return join(self.state(node.body, env), self.state(node.orelse, env))
+        if isinstance(node, ast.Tuple | ast.List | ast.Set):
+            return self._joined(node.elts, env)
+        if isinstance(node, ast.Call):
+            return self._call(node, env)
+        if isinstance(node, ast.ListComp | ast.SetComp | ast.GeneratorExp):
+            inner = self._comprehension_env(node, env, record=False)
+            return self.state(node.elt, inner)
+        return None
+
+    def _attribute(self, node: ast.Attribute, env: Env) -> State:
+        if self.fields and isinstance(node.value, ast.Name) and node.value.id == "self":
+            return self.lookup(env, f"self.{node.attr}")
+        if node.attr in _KEEPING_ATTRIBUTES:
+            return self.state(node.value, env)
+        return None
+
+    def _joined(self, nodes: Iterable[ast.expr], env: Env) -> State:
+        state: State = None
+        for node in nodes:
+            state = join(state, self.state(node, env))
+        return state
+
+    def _call(self, call: ast.Call, env: Env) -> State:
+        read = self.checks(call)
+        if read:
+            refusals: frozenset[Refusal] = frozenset()
+            for _, refused in read:
+                refusals |= refused
+            return refusals
+        return self._joined(_kept(call, self.names), env)
+
+    def names_read(self, node: ast.expr) -> list[str]:
+        """The names *node* holds the value of as it is, as a check reads them."""
+        if isinstance(node, ast.Name):
+            return [node.id]
+        if isinstance(node, ast.Attribute):
+            if (
+                self.fields
+                and isinstance(node.value, ast.Name)
+                and node.value.id == "self"
+            ):
+                return [f"self.{node.attr}"]
+            return (
+                self.names_read(node.value) if node.attr in _KEEPING_ATTRIBUTES else []
+            )
+        if isinstance(node, ast.Subscript) and isinstance(node.value, ast.Name):
+            return [ast.unparse(node)]
+        if isinstance(node, ast.Starred | ast.NamedExpr):
+            return self.names_read(node.value)
+        if isinstance(node, ast.Tuple | ast.List):
+            return [name for item in node.elts for name in self.names_read(item)]
+        if isinstance(node, ast.IfExp):
+            return self.names_read(node.body) + self.names_read(node.orelse)
+        if isinstance(node, ast.Call):
+            kept = _kept(node, self.names)
+            return [name for item in kept for name in self.names_read(item)]
+        return []
+
+    # Bindings and checks.
+
+    def bind(
+        self, target: ast.expr, value: ast.expr | None, state: State, env: Env
+    ) -> None:
+        """Bind *target* to *value*, which holds *state*, member by member
+        where both are tuples of the same length.
+        """
+        if (
+            isinstance(target, ast.Tuple | ast.List)
+            and isinstance(value, ast.Tuple | ast.List)
+            and len(target.elts) == len(value.elts)
+            and not any(isinstance(e, ast.Starred) for e in (*target.elts, *value.elts))
+        ):
+            for inner, item in zip(target.elts, value.elts, strict=True):
+                self.bind(inner, item, self.state(item, env), env)
+            return
+        if self.fields and isinstance(target, ast.Attribute):
+            if isinstance(target.value, ast.Name) and target.value.id == "self":
+                env[f"self.{target.attr}"] = state
+            return
+        for name in _targets(target):
+            self._set(env, name, state)
+
+    @staticmethod
+    def _set(env: Env, name: str, state: State) -> None:
+        for key in [k for k in env if k.startswith(f"{name}[")]:
+            del env[key]
+        env[name] = state
+
+    def check(self, call: ast.Call, env: Env) -> None:
+        """Add to what each argument *call* checks holds the refusals it makes."""
+        for argument, refused in self.checks(call):
+            for name in self.names_read(argument):
+                held = (
+                    self.lookup(env, name)
+                    if "[" not in name
+                    else self.state(argument, env)
+                )
+                if held is not None:
+                    env[name] = held | refused
+
+    # Expressions.
+
+    def expression(self, node: ast.AST, env: Env, *, sure: bool = True) -> None:
+        """Read *node* in the order it runs: record each conversion with what
+        its value holds, and, where it surely runs, each check and binding.
+        """
+        if isinstance(node, _SCOPES):
+            return
+        if isinstance(node, ast.IfExp):
+            self.expression(node.test, env, sure=sure)
+            self.expression(node.body, env, sure=False)
+            self.expression(node.orelse, env, sure=False)
+        elif isinstance(node, ast.BoolOp):
+            self.expression(node.values[0], env, sure=sure)
+            for value in node.values[1:]:
+                self.expression(value, env, sure=False)
+        elif isinstance(node, _COMPREHENSIONS):
+            self._comprehension_env(node, env, record=True)
+        elif isinstance(node, ast.NamedExpr):
+            self.expression(node.value, env, sure=sure)
+            state = self.state(node.value, env)
+            held = state if sure else join(state, self.lookup(env, node.target.id))
+            self._set(env, node.target.id, held)
+        else:
+            for child in ast.iter_child_nodes(node):
+                self.expression(child, env, sure=sure)
+            if isinstance(node, ast.Call):
+                self._at_call(node, env, sure=sure)
+
+    def _at_call(self, call: ast.Call, env: Env, *, sure: bool) -> None:
+        if (found := converted(call, self.names)) is not None:
+            value, kind = found
+            self._record(call, value, kind, self._verdict(value, kind, env))
+        elif sure:
+            self.check(call, env)
+
+    def _verdict(self, value: ast.expr, kind: Kind, env: Env) -> Verdict:
+        state = self.state(value, env)
+        if state is not None:
+            return "checked" if NEEDS[kind] <= state else "unchecked"
+        return "field" if self._reads_field(value) else "computed"
+
+    def _reads_field(self, node: ast.expr) -> bool:
+        if isinstance(node, ast.Attribute):
+            return isinstance(node.value, ast.Name) and node.value.id == "self"
+        if isinstance(node, ast.Subscript | ast.Starred):
+            return self._reads_field(node.value)
+        if isinstance(node, ast.Call):
+            return any(self._reads_field(item) for item in _kept(node, self.names))
+        return False
+
+    def _record(
+        self, call: ast.Call, value: ast.expr, kind: Kind, verdict: Verdict
+    ) -> None:
+        previous = self.found.get(id(call))
+        if previous is None or _SEVERITY[verdict] > _SEVERITY[previous[3]]:
+            self.found[id(call)] = (call, value, kind, verdict)
+
+    def _comprehension_env(
+        self,
+        node: ast.ListComp | ast.SetComp | ast.GeneratorExp | ast.DictComp,
+        env: Env,
+        *,
+        record: bool,
+    ) -> Env:
+        """The names a comprehension's loops bind, over *env*; with *record*,
+        its parts read as well, none of which surely runs.
+        """
+        inner = dict(env)
+        for number, generator in enumerate(node.generators):
+            if record:
+                self.expression(generator.iter, inner, sure=number == 0)
+            self.bind(generator.target, None, self.state(generator.iter, inner), inner)
+            for condition in generator.ifs if record else ():
+                self.expression(condition, inner, sure=False)
+        if record:
+            parts = (
+                (node.key, node.value)
+                if isinstance(node, ast.DictComp)
+                else (node.elt,)
+            )
+            for part in parts:
+                self.expression(part, inner, sure=False)
+        return inner
+
+    # Statements.
+
+    def block(self, statements: Sequence[ast.stmt], env: Env) -> tuple[Env, bool]:
+        """Read *statements* from *env*: what each name holds at the end, and
+        whether every path leaves before it.
+        """
+        for statement in statements:
+            env, ends = self.statement(statement, env)
+            if ends:
+                return env, True
+        return env, False
+
+    def statement(self, node: ast.stmt, env: Env) -> tuple[Env, bool]:
+        handler = _STATEMENTS.get(type(node))
+        if handler is not None:
+            return handler(self, node, env)
+        if isinstance(node, _SCOPES):
+            return env, False
+        for child in ast.iter_child_nodes(node):
+            self.expression(child, env)
+        return env, isinstance(node, ast.Return | ast.Raise | ast.Continue)
+
+    def _assign(
+        self, node: ast.Assign | ast.AnnAssign | ast.AugAssign, env: Env
+    ) -> tuple[Env, bool]:
+        if node.value is None:
+            return env, False
+        self.expression(node.value, env)
+        if isinstance(node, ast.AugAssign):
+            return env, False
+        state = self.state(node.value, env)
+        targets = node.targets if isinstance(node, ast.Assign) else [node.target]
+        for target in targets:
+            self.bind(target, node.value, state, env)
+        return env, False
+
+    def _if(self, node: ast.If, env: Env) -> tuple[Env, bool]:
+        self.expression(node.test, env)
+        body, body_ends = self.block(node.body, dict(env))
+        other, other_ends = self.block(node.orelse, dict(env))
+        reached = [
+            e for e, ends in ((body, body_ends), (other, other_ends)) if not ends
+        ]
+        if not reached:
+            return env, True
+        return _join_envs(reached, self.default), False
+
+    def _loop(
+        self, node: ast.For | ast.AsyncFor | ast.While, env: Env
+    ) -> tuple[Env, bool]:
+        """A loop's body may run any number of times, none included: it is
+        read twice, the second time from what the first left joined with
+        what came in, and what follows sees every way out.
+        """
+        head = dict(env)
+        if isinstance(node, ast.While):
+            self.expression(node.test, head)
+        else:
+            self.expression(node.iter, head)
+        self.breaks.append([])
+        entry = head
+        for _ in range(2):
+            inner = dict(entry)
+            if not isinstance(node, ast.While):
+                self.bind(node.target, None, self.state(node.iter, inner), inner)
+            end, _ = self.block(node.body, inner)
+            entry = _join_envs([head, end], self.default)
+        breaks = self.breaks.pop()
+        after, ends = self.block(node.orelse, entry)
+        reached = [*([] if ends else [after]), *breaks]
+        if not reached:
+            return after, True
+        return _join_envs(reached, self.default), False
+
+    def _break(self, node: ast.Break, env: Env) -> tuple[Env, bool]:
+        del node
+        if self.breaks:
+            self.breaks[-1].append(dict(env))
+        return env, True
+
+    def _with(self, node: ast.With | ast.AsyncWith, env: Env) -> tuple[Env, bool]:
+        for item in node.items:
+            self.expression(item.context_expr, env)
+            if item.optional_vars is not None:
+                state = self.state(item.context_expr, env)
+                self.bind(item.optional_vars, None, state, env)
+        return self.block(node.body, env)
+
+    def _try(self, node: ast.Try | ast.TryStar, env: Env) -> tuple[Env, bool]:
+        start = dict(env)
+        body, body_ends = self.block(node.body, dict(env))
+        caught = _join_envs([start, body], self.default)
+        reached: list[Env] = []
+        for handler in node.handlers:
+            inner, ends = self.block(handler.body, dict(caught))
+            if not ends:
+                reached.append(inner)
+        if not body_ends:
+            other, other_ends = self.block(node.orelse, body)
+            if not other_ends:
+                reached.append(other)
+        if not reached:
+            final, _ = self.block(node.finalbody, caught)
+            return final, True
+        return self.block(node.finalbody, _join_envs(reached, self.default))
+
+    def _match(self, node: ast.Match, env: Env) -> tuple[Env, bool]:
+        self.expression(node.subject, env)
+        subject = self.state(node.subject, env)
+        reached: list[Env] = []
+        for case in node.cases:
+            inner = dict(env)
+            for capture in ast.walk(case.pattern):
+                name = getattr(capture, "name", None)
+                if isinstance(name, str):
+                    self._set(inner, name, subject)
+            if case.guard is not None:
+                self.expression(case.guard, inner)
+            end, ends = self.block(case.body, inner)
+            if not ends:
+                reached.append(end)
+        last = node.cases[-1].pattern if node.cases else None
+        if not (isinstance(last, ast.MatchAs) and last.pattern is None):
+            reached.append(env)
+        if not reached:
+            return env, True
+        return _join_envs(reached, self.default), False
+
+
+_STATEMENTS: dict[type[ast.stmt], Callable[[_Flow, Any, Env], tuple[Env, bool]]] = {
+    ast.Assign: _Flow._assign,
+    ast.AnnAssign: _Flow._assign,
+    ast.AugAssign: _Flow._assign,
+    ast.If: _Flow._if,
+    ast.For: _Flow._loop,
+    ast.AsyncFor: _Flow._loop,
+    ast.While: _Flow._loop,
+    ast.Break: _Flow._break,
+    ast.With: _Flow._with,
+    ast.AsyncWith: _Flow._with,
+    ast.Try: _Flow._try,
+    ast.TryStar: _Flow._try,
+    ast.Match: _Flow._match,
+}
 
 
 def _functions(
@@ -488,16 +980,13 @@ def _imports(tree: ast.Module, module: str, *, is_package: bool) -> dict[str, st
     return found
 
 
-@dataclass(frozen=True)
-class _Body:
-    """A function of a module, with its qualified name and its own nodes in
-    the order of the source, read once.
-    """
-
-    qualified: str
-    function: ast.FunctionDef | ast.AsyncFunctionDef
-    nodes: tuple[ast.AST, ...]
-    calls: tuple[ast.Call, ...]
+def _numpy_names(tree: ast.Module, imports: Mapping[str, str]) -> _Names:
+    """How the module of *tree* spells NumPy's constructors and dtypes."""
+    numpy = frozenset(
+        name for name, dotted in imports.items() if dotted.startswith("numpy.")
+    )
+    plain = _Names(numpy)
+    return _Names(numpy, _dtype_names(tree.body, plain))
 
 
 @dataclass(frozen=True, eq=False)
@@ -506,25 +995,102 @@ class _Module:
 
     path: pathlib.Path
     name: str
+    tree: ast.Module
     imports: dict[str, str]
-    bodies: tuple[_Body, ...]
+    numpy: _Names
 
 
 def _module(path: pathlib.Path) -> _Module:
     tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
     name = _module_name(path)
-    bodies = []
-    for qualified, function in _functions(tree):
-        nodes = tuple(sorted(_own_nodes(function), key=_start))
-        calls = tuple(node for node in nodes if isinstance(node, ast.Call))
-        bodies.append(_Body(qualified, function, nodes, calls))
     imports = _imports(tree, name, is_package=path.stem == "__init__")
-    return _Module(path, name, imports, tuple(bodies))
+    return _Module(path, name, tree, imports, _numpy_names(tree, imports))
+
+
+def _sure_calls(
+    statements: Sequence[ast.stmt], *, sure: bool = True
+) -> Iterator[tuple[ast.Call, bool]]:
+    """Each call of *statements*, and whether it runs on every path that
+    leaves them by their end or a ``return``.
+    """
+    for statement in statements:
+        yield from _statement_calls(statement, sure=sure)
+
+
+def _statement_calls(node: ast.stmt, *, sure: bool) -> Iterator[tuple[ast.Call, bool]]:
+    if isinstance(node, ast.If):
+        yield from _expression_calls(node.test, sure=sure)
+        yield from _sure_calls(node.body, sure=sure and _raises(node.orelse))
+        yield from _sure_calls(node.orelse, sure=sure and _raises(node.body))
+    elif isinstance(node, ast.For | ast.AsyncFor | ast.While | ast.Match):
+        header = (
+            node.test
+            if isinstance(node, ast.While)
+            else (node.subject if isinstance(node, ast.Match) else node.iter)
+        )
+        yield from _expression_calls(header, sure=sure)
+        for child in ast.iter_child_nodes(node):
+            if isinstance(child, ast.stmt | ast.match_case):
+                yield from _nested_calls(child)
+    elif isinstance(node, ast.Try | ast.TryStar):
+        yield from _sure_calls(node.body, sure=sure)
+        for handler in node.handlers:
+            yield from _nested_calls(handler)
+        yield from _sure_calls(node.orelse, sure=False)
+        yield from _sure_calls(node.finalbody, sure=sure)
+    elif isinstance(node, ast.With | ast.AsyncWith):
+        for item in node.items:
+            yield from _expression_calls(item.context_expr, sure=sure)
+        yield from _sure_calls(node.body, sure=sure)
+    elif not isinstance(node, _SCOPES):
+        for child in ast.iter_child_nodes(node):
+            yield from _expression_calls(child, sure=sure)
+
+
+def _nested_calls(node: ast.AST) -> Iterator[tuple[ast.Call, bool]]:
+    """Each call under *node*, none of which surely runs."""
+    for child in ast.walk(node):
+        if isinstance(child, ast.Call):
+            yield child, False
+
+
+def _first_part(node: ast.expr) -> ast.expr | None:
+    """The part of a conditional expression that surely runs: the test of an
+    ``if`` expression, the first operand of ``and`` and ``or``, the first
+    iterable of a comprehension; ``None`` for an expression that runs whole.
+    """
+    if isinstance(node, ast.IfExp):
+        return node.test
+    if isinstance(node, ast.BoolOp):
+        return node.values[0]
+    if isinstance(node, _COMPREHENSIONS):
+        return node.generators[0].iter
+    return None
+
+
+def _expression_calls(node: ast.AST, *, sure: bool) -> Iterator[tuple[ast.Call, bool]]:
+    if isinstance(node, _SCOPES):
+        return
+    first = _first_part(node) if isinstance(node, ast.expr) else None
+    if first is not None:
+        yield from _expression_calls(first, sure=sure)
+        for call, _ in _nested_calls(node):
+            if not _within(call, first):
+                yield call, False
+        return
+    for child in ast.iter_child_nodes(node):
+        yield from _expression_calls(child, sure=sure)
+    if isinstance(node, ast.Call):
+        yield node, sure
+
+
+def _within(node: ast.AST, outer: ast.AST) -> bool:
+    return any(child is node for child in ast.walk(outer))
 
 
 @dataclass(frozen=True)
 class _Call:
-    """A call a function makes by a plain name, kept without its tree.
+    """A call a function makes by a plain name on every path, kept without its tree.
 
     The function it reaches, by the module that defines it, and the names
     each argument is read from: in order for the positional ones, by keyword
@@ -546,37 +1112,36 @@ class _Signature:
     calls: tuple[_Call, ...]
 
 
-def _names_of(argument: ast.expr) -> frozenset[str]:
-    return frozenset(_roots(argument, fields=False))
-
-
 def _signatures(path: pathlib.Path) -> list[_Signature]:
     """The functions at the top of the module at *path*, each without its tree.
 
     A method is called through an object the rule does not follow, so only
-    a function at the top of a module can be a check of its own.
+    a function at the top of a module can be a check of its own; and only a
+    call that runs on every path through it makes it one.
     """
-    tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
-    name = _module_name(path)
-    imports = _imports(tree, name, is_package=path.stem == "__init__")
+    module = _module(path)
+    reader = _Flow(lambda _: [], module.numpy, fields=False)
     found = []
-    for node in tree.body:
+    for node in module.tree.body:
         if not isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef):
             continue
         calls = tuple(
             _Call(
-                imports.get(call.func.id, f"{name}.{call.func.id}"),
-                tuple(_names_of(argument) for argument in call.args),
-                tuple((k.arg, _names_of(k.value)) for k in call.keywords),
+                module.imports.get(call.func.id, f"{module.name}.{call.func.id}"),
+                tuple(frozenset(reader.names_read(a)) for a in call.args),
+                tuple(
+                    (k.arg, frozenset(reader.names_read(k.value)))
+                    for k in call.keywords
+                ),
             )
-            for call in _own_nodes(node)
-            if isinstance(call, ast.Call) and isinstance(call.func, ast.Name)
+            for call, sure in _sure_calls(node.body)
+            if sure and isinstance(call.func, ast.Name)
         )
         arguments = node.args
         positional = tuple(a.arg for a in arguments.posonlyargs + arguments.args)
         found.append(
             _Signature(
-                f"{name}.{node.name}",
+                f"{module.name}.{node.name}",
                 positional,
                 frozenset(_parameters(node)),
                 calls,
@@ -587,50 +1152,64 @@ def _signatures(path: pathlib.Path) -> list[_Signature]:
 
 @dataclass(frozen=True)
 class Check:
-    """A function that checks some of its parameters for a complex value.
+    """A function that refuses a complex value or a text in some of its parameters.
 
-    A shared check of :data:`CHECKS` lists no parameters, and checks every
-    argument it is given (the value; the name or the message beside it is
-    no caller's number). A function of the library lists its positional
-    parameters in order and the ones it hands to a check.
+    A shared check of :data:`CHECKS` refuses *every* in every argument it
+    is given (the value; the name or the message beside it is no caller's
+    number). A function of the library lists its positional parameters in
+    order, none for one whose parameters are all keyword-only, and what it
+    refuses in each it hands to a check.
     """
 
     parameters: tuple[str, ...] = ()
-    checked: frozenset[str] = frozenset()
+    every: frozenset[Refusal] = frozenset()
+    refused: Mapping[str, frozenset[Refusal]] = field(default_factory=dict)
+    shared: bool = False
 
-    def arguments(self, call: ast.Call) -> list[ast.expr]:
-        """The arguments of *call* this check reads."""
-        if not self.parameters:
-            return [*call.args, *(k.value for k in call.keywords)]
-        found = [
-            argument
-            for name, argument in zip(self.parameters, call.args, strict=False)
-            if name in self.checked
-        ]
-        return found + [k.value for k in call.keywords if k.arg in self.checked]
-
-    def names(self, call: _Call) -> frozenset[str]:
-        """The names the arguments of *call* this check reads are read from."""
-        if not self.parameters:
-            read = [*call.positional, *(names for _, names in call.keywords)]
-        else:
-            read = [
-                names
-                for name, names in zip(self.parameters, call.positional, strict=False)
-                if name in self.checked
+    def arguments(self, call: ast.Call) -> list[tuple[ast.expr, frozenset[Refusal]]]:
+        """The arguments of *call* this check reads, with what it refuses in each."""
+        if self.shared:
+            return [
+                (a, self.every) for a in (*call.args, *(k.value for k in call.keywords))
             ]
-            read += [names for name, names in call.keywords if name in self.checked]
-        return frozenset().union(*read)
+        found = [
+            (argument, self.refused[name])
+            for name, argument in zip(self.parameters, call.args, strict=False)
+            if name in self.refused
+        ]
+        return found + [
+            (k.value, self.refused[k.arg])
+            for k in call.keywords
+            if k.arg is not None and k.arg in self.refused
+        ]
+
+    def names(self, call: _Call) -> list[tuple[frozenset[str], frozenset[Refusal]]]:
+        """The names the arguments of *call* this check reads are read from,
+        with what it refuses in each.
+        """
+        if self.shared:
+            read = [*call.positional, *(names for _, names in call.keywords)]
+            return [(names, self.every) for names in read]
+        found = [
+            (names, self.refused[name])
+            for name, names in zip(self.parameters, call.positional, strict=False)
+            if name in self.refused
+        ]
+        return found + [
+            (names, self.refused[name])
+            for name, names in call.keywords
+            if name is not None and name in self.refused
+        ]
 
 
 def _checker(
     module: _Module, checks: Mapping[str, Check]
-) -> Callable[[ast.Call], list[ast.expr]]:
+) -> Callable[[ast.Call], list[tuple[ast.expr, frozenset[Refusal]]]]:
     """The arguments a call made in *module* hands to a check, by the module
-    that defines the check.
+    that defines the check, with what it refuses in each.
     """
 
-    def checked_by(call: ast.Call) -> list[ast.expr]:
+    def checked_by(call: ast.Call) -> list[tuple[ast.expr, frozenset[Refusal]]]:
         if not isinstance(call.func, ast.Name):
             return []
         name = call.func.id
@@ -644,9 +1223,13 @@ def package_checks(signatures: Sequence[_Signature]) -> dict[str, Check]:
     """Every check of the package, shared and local, by the module that defines it.
 
     The shared :data:`CHECKS`, then each function of *signatures* that hands
-    a parameter to a check already found, until no new one turns up.
+    a parameter to a check already found on every path, until no new one
+    turns up.
     """
-    checks = {f"{SHARED}.{name}": Check() for name in CHECKS}
+    checks = {
+        f"{SHARED}.{name}": Check(every=refused, shared=True)
+        for name, refused in CHECKS.items()
+    }
     grown = True
     while grown:
         grown = False
@@ -663,62 +1246,97 @@ def _grow(signature: _Signature, checks: dict[str, Check]) -> bool:
     :return: Whether a check was added or widened.
     """
     previous = checks.get(signature.dotted)
-    if previous is not None and not previous.parameters:
+    if previous is not None and previous.shared:
         return False
-    read = [checks[c.target].names(c) for c in signature.calls if c.target in checks]
-    checked = frozenset().union(*read) & signature.parameters
-    if not checked or (previous is not None and checked == previous.checked):
+    refused: dict[str, frozenset[Refusal]] = {}
+    for call in signature.calls:
+        check = checks.get(call.target)
+        for names, refusals in check.names(call) if check is not None else ():
+            for name in names & signature.parameters:
+                refused[name] = refused.get(name, frozenset()) | refusals
+    if not refused or (previous is not None and refused == dict(previous.refused)):
         return False
-    checks[signature.dotted] = Check(signature.positional, checked)
+    checks[signature.dotted] = Check(signature.positional, frozenset(), refused)
     return True
 
 
-def conversions_in(module: _Module, checks: Mapping[str, Check]) -> list[Conversion]:
-    """Every conversion to floats in *module*, with what it reads."""
+def _function_names(
+    module: _Module, function: ast.FunctionDef | ast.AsyncFunctionDef
+) -> _Names:
+    """How *function* spells NumPy: its module's names and the dtypes it binds."""
+    own = _dtype_names(ast.walk(function), module.numpy, function)
+    if not own:
+        return module.numpy
+    return _Names(module.numpy.numpy, {**module.numpy.dtypes, **own})
+
+
+def conversions_in(
+    module: _Module, checks: Mapping[str, Check], file: str = ""
+) -> list[Conversion]:
+    """Every conversion in *module*, with what it reads."""
     checked_by = _checker(module, checks)
     found: list[Conversion] = []
-    for body in module.bodies:
-        function = body.function
-        scope = _Function(function, checked_by, fields=function.name == "__post_init__")
-        _events(scope, body.nodes)
-        for node in body.calls:
-            if (value := converted(node)) is None:
-                continue
-            verdict = _verdict(scope, value, _start(node))
+    for qualified, function in _functions(module.tree):
+        names = _function_names(module, function)
+        flow = _Flow(checked_by, names, fields=function.name == "__post_init__")
+        env: Env = dict.fromkeys(_parameters(function), frozenset())
+        flow.block(function.body, env)
+        for call, value, kind, verdict in flow.found.values():
             found.append(
                 Conversion(
                     module.path,
-                    node.lineno,
-                    body.qualified,
+                    call.lineno,
+                    qualified,
                     ast.unparse(value),
                     verdict,
+                    kind,
+                    file,
                 )
             )
-    return sorted(found, key=lambda c: (relative(c.path), c.line, c.source))
+    return sorted(found, key=lambda c: (c.key[0], c.line, c.source))
 
 
-def census(paths: Iterable[pathlib.Path], *, library: bool = True) -> list[Conversion]:
-    """Every conversion to floats under *paths*, with what each reads.
+def _spelled(path: pathlib.Path, source: pathlib.Path | None) -> str:
+    """*path* as the repository that holds *source* spells it."""
+    if source is not None:
+        top = source.resolve().parent.parent
+        if path.is_relative_to(top):
+            return path.relative_to(top).as_posix()
+    return relative(path)
 
-    The checks are found across the files read and, with *library*, across
-    the whole library too, so that a file read alone still knows the checks
-    the package defines. Each module is parsed twice, once for the checks it
+
+def census(
+    paths: Iterable[pathlib.Path], *, source: pathlib.Path | None = SOURCE
+) -> list[Conversion]:
+    """Every conversion under *paths*, with what each reads.
+
+    The checks are found across the files read and, with *source*, across
+    every module of the library there, so that a file read alone still knows
+    the checks its package defines; another copy of the library is read with
+    its own checks only. Each module is parsed twice, once for the checks it
     defines and once for its conversions, and one at a time, so that no more
     than one tree is held at once.
     """
     read = [path.resolve() for path in paths]
     sources = set(read)
-    if library:
-        sources |= {path.resolve() for path in SOURCE.rglob("*.py")}
+    if source is not None:
+        sources |= {path.resolve() for path in source.rglob("*.py")}
     checks = package_checks([s for path in sorted(sources) for s in _signatures(path)])
-    return [c for path in read for c in conversions_in(_module(path), checks)]
+    return [
+        c
+        for path in read
+        for c in conversions_in(_module(path), checks, _spelled(path, source))
+    ]
 
 
 def unchecked(
-    paths: Iterable[pathlib.Path], exempt: Mapping[tuple[str, str], str] | None = None
+    paths: Iterable[pathlib.Path],
+    exempt: Mapping[tuple[str, str], str] | None = None,
+    *,
+    source: pathlib.Path | None = SOURCE,
 ) -> tuple[list[Conversion], list[tuple[str, str]]]:
     """The conversions of a caller's value no check precedes, and stale exemptions."""
-    found = [c for c in census(paths) if c.verdict == "unchecked"]
+    found = [c for c in census(paths, source=source) if c.verdict == "unchecked"]
     return exempted(found, EXEMPT if exempt is None else exempt)
 
 
@@ -729,22 +1347,30 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument(
         "--census", action="store_true", help="print every conversion and what it reads"
     )
+    parser.add_argument(
+        "--source",
+        type=pathlib.Path,
+        default=SOURCE,
+        help="the library to read, another copy of src/phonometry with its own checks",
+    )
     arguments = parser.parse_args(argv)
-    files = python_files(arguments.paths, SOURCE)
+    source: pathlib.Path = arguments.source
+    files = python_files(arguments.paths, source)
     if arguments.census:
-        for conversion in census(files):
+        for conversion in census(files, source=source):
             print(conversion.describe())
         return 0
-    left, stale = unchecked(files, EXEMPT if not arguments.paths else {})
+    left, stale = unchecked(files, EXEMPT if not arguments.paths else {}, source=source)
     for conversion in left:
         print(conversion.describe())
     for key in stale:
         print(f"{key[0]}  {key[1]}  exemption that covers nothing")
     if left or stale:
         print(
-            f"{len(left)} conversion(s) to floats read a caller's value no check "
-            "has read: read it through real_array(value, name) of "
-            "phonometry._internal.validation, or check it first.",
+            f"{len(left)} conversion(s) read a caller's value no check has read "
+            "on every path: read it through real_array(value, name) or "
+            "complex_array(value, name) of phonometry._internal.validation, or "
+            "check it first.",
             file=sys.stderr,
         )
         return 1

@@ -35,6 +35,7 @@ if TYPE_CHECKING:
 from phonometry._internal.validation import (
     arrays_of,
     check_engine,
+    complex_array,
     floats_of,
     holds_text,
     indices_of,
@@ -826,6 +827,45 @@ def test_the_shared_reader_converts_numbers_as_numpy_does() -> None:
     copied = real_array(given, "x", copy=True)
     assert copied is not given
     np.testing.assert_array_equal(copied, given)
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        ["1+2j"],
+        "80",
+        b"80",
+        [bytearray(b"12")],
+        [np.array([1.0 + 1j]), [bytearray(b"1")]],
+        np.array(["0.5"]),
+    ],
+    ids=["text-in-list", "text", "bytes", "bytearray-in-list", "nested", "text-array"],
+)
+def test_the_complex_reader_refuses_text_by_name(value: object) -> None:
+    """``np.asarray(x, dtype=np.complex128)`` parses a text and reads a
+    ``bytearray`` as the codes of its characters; the reader refuses both.
+    """
+    with pytest.raises(TypeError, match="'reflection' must be numbers, not text"):
+        complex_array(value, "reflection")  # type: ignore[arg-type]
+
+
+def test_the_complex_reader_reads_numbers_of_every_kind() -> None:
+    """A real number is a complex one with no imaginary part; an array of
+    ``complex128`` comes back as itself unless a copy is asked for; numpy's
+    anonymous refusals are given the parameter's name.
+    """
+    assert complex_array([1, 2.5, 1 + 2j], "z").tolist() == [1 + 0j, 2.5 + 0j, 1 + 2j]
+    assert complex_array(np.float64(2.0), "z") == 2.0 + 0j
+    assert complex_array([np.complex64(1j)], "z").dtype == np.complex128
+    given = np.array([1.0 + 1j])
+    assert complex_array(given, "z") is given
+    copied = complex_array(given, "z", copy=True)
+    assert copied is not given
+    np.testing.assert_array_equal(copied, given)
+    with pytest.raises(TypeError, match="'z' must be numeric"):
+        complex_array([object()], "z")
+    with pytest.raises(ValueError, match="'z' must be numeric"):
+        complex_array([[1.0], [1.0, 2.0]], "z")
 
 
 @pytest.mark.parametrize(

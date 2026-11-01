@@ -390,8 +390,10 @@ def verify_intensity_class(
         tabulated band, a band is repeated, or ``device``/``spacing_m`` are
         invalid.
     :raises TypeError: if ``device`` is not a text, or ``frequencies`` or
-        ``residual_index`` holds a text or a value that is not a real number.
+        ``residual_index`` holds a text or a value that is not a real number, or
+        ``spacing_m`` is not a single number.
     """
+    require_scalar(spacing_m, "spacing_m")
     require_choice(device, "device", ("probe", "processor", "instrument"))
     measured = np.atleast_1d(real_array(residual_index, "residual_index"))
     supplied = np.atleast_1d(real_array(frequencies, "frequencies"))
@@ -714,7 +716,9 @@ def _plane_wave_phase_deg(
     r"""Plane-wave phase difference :math:`k d` across the spacer, in
     degrees.
     """
-    require_scalar(c, "c")
+    # The caller's names: both public functions hand on their own
+    # ``speed_of_sound`` and ``spacing_m``.
+    require_scalar(c, "speed_of_sound")
     require_scalar(spacing, "spacing_m")
     if not np.isfinite(spacing) or spacing <= 0.0:
         msg = "'spacing_m' must be a positive, finite distance in metres."

@@ -393,6 +393,7 @@ def absorption_coefficient(
         ``m1``, ``m2``, ``t1`` or ``t2`` holds a text or a value that is not a real
         number.
     """
+    require_scalar(temperature1_c, "temperature1_c")
     require_scalar(sample_area, "sample_area")
     require_scalar(volume, "volume")
     if sample_area <= 0.0:

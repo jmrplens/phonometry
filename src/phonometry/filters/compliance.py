@@ -326,21 +326,19 @@ def class_limits(
     :return: Tuple (minimum, maximum) relative attenuation in dB per point;
         the maximum is ``+inf`` outside the pass-band.
     :raises TypeError: if ``fraction`` is not a single number, or ``omega`` holds a text
-        or a value that is not a real number.
-
-    .. note::
-        The exact band-edge point :math:`\Omega = G^{1/2}` is treated as
-        pass-band.
-        The 1995 edition's Table 1 prints a dedicated minimum (+2.3/+2.0/
-        +1.6 dB) *at* that single frequency, which this convention relaxes to
-        the pass-band minimum; the discrepancy has measure zero: any
-        continuous response violating the edge row is caught at
+        or a value that is not a real number. .. note:: The exact band-edge point
+        :math:`\Omega = G^{1/2}` is treated as pass-band. The 1995 edition's Table 1
+        prints a dedicated minimum (+2.3/+2.0/ +1.6 dB) *at* that single frequency,
+        which this convention relaxes to the pass-band minimum; the discrepancy has
+        measure zero: any continuous response violating the edge row is caught at, or
+        ``filter_class`` is not a single number.
         :math:`\text{edge} + \epsilon`
         by the interpolated stop-band mask. The 2014 edition defines only
         the :math:`G^{1/2} - \epsilon` and :math:`G^{1/2} + \epsilon`
         rows, which the masks match
         exactly.
     """
+    require_scalar(filter_class, "filter_class")
     require_scalar(fraction, "fraction")
     spec = _edition_spec(edition)
     if filter_class not in spec["classes"]:

@@ -309,11 +309,13 @@ regular-file-reads:
 
 # np.asarray(x, dtype=np.float64) gives back the real part of a complex value
 # with no more than a ComplexWarning, parses a text and reads a bytearray in a
-# list as the codes of its characters. Every caller's value the library
-# converts to floats goes through real_array of _internal/validation.py, or a
-# check of it first; this fails on a conversion that does neither, and
-# --census lists every conversion to floats with what it reads. Run on the
-# tree before the sweep it found 953. Stdlib only.
+# list as the codes of its characters; its complex twin parses the text too.
+# Every caller's value the library converts goes through real_array or
+# complex_array of _internal/validation.py, or a check of it on every path
+# first; this fails on a conversion that does neither, and --census lists
+# every conversion with what it reads (--source reads another copy of the
+# library with its own checks). Run on the tree before the sweep it found
+# 1049. Stdlib only.
 real-conversions:
 	$(PYTHON) scripts/check_real_conversions.py
 

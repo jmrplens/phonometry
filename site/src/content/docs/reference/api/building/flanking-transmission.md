@@ -762,7 +762,7 @@ is used.
 | Exception | When |
 | :--- | :--- |
 | ValueError | On incompatible band counts, non-positive geometry, or if only one of the two structural reverberation times is supplied. |
-| TypeError | if `area_i`, `area_j` or `junction_length` is not a single number, or `frequencies`, `modal_overlap` or `velocity_level_difference` holds a text or a value that is not a real number. |
+| TypeError | if `area_i`, `area_j` or `junction_length` is not a single number, or `frequencies`, `modal_overlap` or `velocity_level_difference` holds a text or a value that is not a real number, or `speed_of_sound` is not a single number. |
 
 ## vibration_reduction_index_from_flanking
 

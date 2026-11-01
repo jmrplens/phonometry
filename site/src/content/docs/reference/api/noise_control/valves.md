@@ -335,7 +335,7 @@ computed as supersonic is computed at Mach one instead.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a physical quantity is not positive and finite, if the two signed dB corrections are not finite, or if the throat is wider than the pipe. The efficiency correction of Table 4 and the velocity correction of Equation (16) are both signed, and the expander's own row prints $A_\eta = -3{,}0$. |
-| TypeError | if `downstream_density`, `downstream_sound_speed`, `internal_diameter_m`, `mass_flow` or `throat_diameter_m` is not a single number, or `frequencies` holds a text or a value that is not a real number. |
+| TypeError | if `downstream_density`, `downstream_sound_speed`, `internal_diameter_m`, `mass_flow` or `throat_diameter_m` is not a single number, or `frequencies` holds a text or a value that is not a real number, or `velocity_correction` is not a single number. |
 
 ## EXPANDER_PIPE_MACH_LIMIT
 
@@ -501,7 +501,7 @@ puts 3 dB there for octave bands instead.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the peak frequency is not positive and finite, or a band centre is not. |
-| TypeError | if `peak_frequency` is not a single number, or `frequencies` holds a text or a value that is not a real number. |
+| TypeError | if `peak_frequency` is not a single number, or `frequencies` holds a text or a value that is not a real number, or `internal_level` is not a single number. |
 
 ## jet_diameter_m
 

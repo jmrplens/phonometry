@@ -485,7 +485,7 @@ def _as_responses(
     """
     refuse_complex(values, f"'{name}' must hold real scale values.")
     try:
-        array = np.asarray(values, dtype=np.float64).ravel()
+        array = real_array(values, name).ravel()
     except TypeError as exc:
         msg = f"'{name}' must hold numeric scale values."
         raise TypeError(msg) from exc
@@ -645,14 +645,15 @@ def method_a_scale_values(
         view of *positions*.
     :raises ValueError: for a part other than 1 to 4 or a position that is
         not a whole number from 1 to 5.
-    :raises TypeError: if ``positions`` holds a complex value, a NumPy one or
-        one held in an array of objects included.
+    :raises TypeError: if ``positions`` holds a text or a value that is not a real
+        number, or ``part`` is not a single number.
     """
+    require_scalar(part, "part")
     scale = _method_a_scale(part)
     # Before the conversion, which keeps the real part of a NumPy complex
     # position, so that the refusal of a complex one reaches it.
     refuse_complex(positions, "'positions' must hold real scale values.")
-    array = np.asarray(positions, dtype=np.float64)
+    array = real_array(positions, "positions")
     checked = _as_responses(array, "positions", integer=True).reshape(array.shape)
     # Parts 1 and 4 keep the position as the value; copy it so the caller's
     # positions and the returned values never share memory.
@@ -1089,7 +1090,7 @@ def _paired(
         # A copy, so the result never shares memory with the caller's array:
         # a later change to it would otherwise rewrite the result's x and y
         # and leave its coefficient and ranks describing other data.
-        array = np.array(values, dtype=np.float64).ravel()
+        array = real_array(values, name, copy=True).ravel()
         if not np.all(np.isfinite(array)):
             msg = f"'{name}' must be finite; drop the incomplete pairs first."
             raise ValueError(msg)

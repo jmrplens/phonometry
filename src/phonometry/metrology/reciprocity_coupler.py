@@ -109,6 +109,7 @@ from .._internal.boundary import settled
 from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, read_only, reduce_with_plain_rows
 from .._internal.validation import (
+    complex_array,
     real_array,
     require_choice,
     require_count,
@@ -869,10 +870,14 @@ def microphone_acoustic_impedance(
     :return: :math:`Z_\mathrm{a}`, complex, in Pa·s/m³.
     :raises ValueError: for an admittance or a sensitivity of zero, or a value
         that is not finite.
+    :raises TypeError: if ``blocked_impedance_ohm``, ``electrical_admittance_s`` or
+        ``pressure_sensitivity_v_per_pa`` holds a text or a value that is not a number.
     """
-    admittance = np.asarray(electrical_admittance_s, dtype=np.complex128)
-    blocked = np.asarray(blocked_impedance_ohm, dtype=np.complex128)
-    sensitivity = np.asarray(pressure_sensitivity_v_per_pa, dtype=np.complex128)
+    admittance = complex_array(electrical_admittance_s, "electrical_admittance_s")
+    blocked = complex_array(blocked_impedance_ohm, "blocked_impedance_ohm")
+    sensitivity = complex_array(
+        pressure_sensitivity_v_per_pa, "pressure_sensitivity_v_per_pa"
+    )
     for name, value in (
         ("electrical_admittance_s", admittance),
         ("blocked_impedance_ohm", blocked),

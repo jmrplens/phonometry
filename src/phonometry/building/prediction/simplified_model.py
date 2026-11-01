@@ -890,7 +890,24 @@ def flanking_element(
     :return: The ``(Ff, Df, Fd)`` :class:`FlankingPath` triple.
     :raises ValueError: If a geometry value is not positive or an input is
         non-finite.
+    :raises TypeError: if ``coupling_length``, ``delta_r_df``, ``delta_r_fd``,
+        ``delta_r_ff``, ``flanking_area``, ``k_df``, ``k_fd``, ``k_ff``,
+        ``r_flanking``, ``r_separating`` or ``separating_area`` is not a single
+        number.
     """
+    # Each is read here under its own name: flanking_path, which takes them
+    # next, knows them as r_source, k_ij and delta_r.
+    for name, value in (
+        ("r_flanking", r_flanking),
+        ("r_separating", r_separating),
+        ("k_ff", k_ff),
+        ("k_fd", k_fd),
+        ("k_df", k_df),
+        ("delta_r_ff", delta_r_ff),
+        ("delta_r_fd", delta_r_fd),
+        ("delta_r_df", delta_r_df),
+    ):
+        _check_finite(value, name)
     kij_min_ff: float | None = None
     kij_min_cross: float | None = None
     if flanking_area is not None:

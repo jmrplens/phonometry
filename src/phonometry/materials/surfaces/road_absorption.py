@@ -71,6 +71,7 @@ from numpy.typing import ArrayLike, NDArray
 
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
+    complex_array,
     real_array,
     require_choice,
     require_equal_shapes,
@@ -504,8 +505,9 @@ def in_situ_absorption_from_reflection(reflection: ArrayLike) -> Real:
 
     :param reflection: Complex reflection factor ``r``.
     :return: Absorption coefficient ``alpha`` (real).
+    :raises TypeError: if ``reflection`` holds a text or a value that is not a number.
     """
-    r = np.asarray(reflection, dtype=np.complex128)
+    r = complex_array(reflection, "reflection")
     return np.asarray(1.0 - np.abs(r) ** 2, dtype=np.float64)
 
 
@@ -625,9 +627,11 @@ def absorption_reference_corrected(
     :param reference_reflection: Measured reference pressure reflection factor
         ``Qp,ref,meas`` (complex, same geometry and chain).
     :return: Reference-corrected road absorption coefficient ``alpha_road(f)``.
+    :raises TypeError: if ``reference_reflection`` or ``road_reflection`` holds a text
+        or a value that is not a number.
     """
-    q_road = np.asarray(road_reflection, dtype=np.complex128)
-    q_ref = np.asarray(reference_reflection, dtype=np.complex128)
+    q_road = complex_array(road_reflection, "road_reflection")
+    q_ref = complex_array(reference_reflection, "reference_reflection")
     return np.asarray(1.0 - np.abs(q_road / q_ref) ** 2, dtype=np.float64)
 
 
@@ -699,8 +703,10 @@ def one_third_octave_absorption(
     :raises ValueError: If ``frequencies`` and ``absorption`` differ in shape or
         are empty.
     :raises TypeError: if ``absorption`` or ``frequencies`` holds a text or a value that
-        is not a real number.
+        is not a real number, or ``f_max`` or ``f_min`` is not a single number.
     """
+    require_scalar(f_max, "f_max")
+    require_scalar(f_min, "f_min")
     freq = np.atleast_1d(real_array(frequencies, "frequencies"))
     alpha = np.atleast_1d(real_array(absorption, "absorption"))
     require_equal_shapes(

@@ -83,6 +83,7 @@ from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays
 from .._internal.levels_math import energy_mean
 from .._internal.validation import (
+    real_array,
     require_count,
     require_finite,
     require_finite_array,
@@ -830,7 +831,7 @@ def _per_band(
     if values.size != 1 and values.shape != shape:
         msg = f"'{name}' must be one value or match the level difference band for band."
         raise ValueError(msg)
-    return np.array(np.broadcast_to(values, shape), dtype=np.float64)
+    return np.array(np.broadcast_to(real_array(values, name), shape))
 
 
 def _loss(

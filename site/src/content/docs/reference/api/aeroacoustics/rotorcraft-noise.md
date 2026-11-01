@@ -110,7 +110,7 @@ as the database conditions.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
-| TypeError | if `scaling_factor` is not a single number, or `airspeeds` or `path_angles_deg` holds a text or a value that is not a real number. |
+| TypeError | if `scaling_factor` is not a single number, or `airspeeds` or `path_angles_deg` holds a text or a value that is not a real number, or `airspeed` or `path_angle_deg` is not a single number. |
 
 ## flight_path_kinematics
 

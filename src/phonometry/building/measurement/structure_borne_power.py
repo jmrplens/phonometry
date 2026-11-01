@@ -88,6 +88,7 @@ if TYPE_CHECKING:
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     check_engine,
+    complex_array,
     real_array,
     require_finite_array,
     require_per_band,
@@ -466,13 +467,13 @@ def equivalent_blocked_force_level(
         ``Re{plate_mobility}`` is not positive and finite, or the two shapes
         do not broadcast together.
     :raises TypeError: if ``power_level`` holds a text or a value that is not a real
-        number.
+        number, or ``plate_mobility`` holds a text or a value that is not a number.
     """
     lw = real_array(power_level, "power_level")
     if not np.all(np.isfinite(lw)):
         msg = "'power_level' must contain only finite values."
         raise ValueError(msg)
-    y = np.asarray(plate_mobility, dtype=np.complex128)
+    y = complex_array(plate_mobility, "plate_mobility")
     y_re = np.real(y)
     if (
         not np.all(np.isfinite(y.real))
@@ -553,13 +554,13 @@ def equivalent_free_velocity_level(
         ``Re{plate_mobility}`` is not positive and finite, or the two shapes
         do not broadcast together.
     :raises TypeError: if ``power_level`` holds a text or a value that is not a real
-        number.
+        number, or ``plate_mobility`` holds a text or a value that is not a number.
     """
     lw = real_array(power_level, "power_level")
     if not np.all(np.isfinite(lw)):
         msg = "'power_level' must contain only finite values."
         raise ValueError(msg)
-    y = np.asarray(plate_mobility, dtype=np.complex128)
+    y = complex_array(plate_mobility, "plate_mobility")
     y_re = np.real(y)
     if (
         not np.all(np.isfinite(y.real))

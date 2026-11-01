@@ -1359,12 +1359,53 @@ def test_the_compared_rule_reads_a_lookup_that_returns_and_then_raises() -> None
 # Every public scalar parameter, called
 # ---------------------------------------------------------------------------
 
-#: The annotations of a parameter that takes one number.
+#: The annotations of a parameter that takes one number, part by part.
 _ONE_NUMBER = frozenset({"float", "int"})
+#: The parts of an annotation that still promise one number of that kind.
+_NUMBER_PARTS = {"np.integer[Any]": "int", "np.floating[Any]": "float"}
+#: The annotations of a parameter that takes numbers, one or many, which the
+#: probe fills with an array so that it reaches the one-number parameters
+#: beside it.
+_ARRAYS = frozenset(
+    {
+        "ArrayLike",
+        "Signal | ArrayLike",
+        "SignalInput",
+        "Sequence[float]",
+        "BandValues",
+        "RealValues",
+        "NDArray[np.float64]",
+    }
+)
 #: Values tried, in turn, until a call with every required parameter set to one
 #: of them goes through; a function no value of these satisfies is not probed.
 _FLOAT_TRIES = (1.0, 0.5, 2.0, 10.0, 100.0, 1000.0, 0.1, 3.0, 20.0, 50.0, 0.0)
 _INT_TRIES = (1, 2, 3, 10, 4, 100, 0)
+#: The arrays tried for a parameter that takes many numbers: one value, the
+#: octave bands, the one-third-octave bands of building acoustics, and a
+#: second of a signal, each beside every value of :data:`_FLOAT_TRIES`.
+_OCTAVES = np.array([63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0])
+_THIRDS = np.array(
+    [100.0, 125.0, 160.0, 200.0, 250.0, 315.0, 400.0, 500.0, 630.0, 800.0]
+    + [1000.0, 1250.0, 1600.0, 2000.0, 2500.0, 3150.0]
+)
+_SIGNAL = np.sin(2.0 * np.pi * 1000.0 * np.arange(48_000) / 48_000.0)
+
+
+#: The kinds of a required parameter the probe fills but does not probe.
+_FILLED = frozenset({"array", "text", "empty"})
+
+
+def _array_tries(value: float) -> tuple[np.ndarray, ...]:
+    """The arrays tried beside *value* for a parameter that takes many numbers."""
+    return (
+        np.array([value]),
+        np.full(_OCTAVES.size, value),
+        _OCTAVES,
+        np.full(_THIRDS.size, value),
+        _THIRDS,
+        _SIGNAL,
+    )
 
 
 def _one_number(annotation: object) -> str | None:
@@ -1376,10 +1417,30 @@ def _one_number(annotation: object) -> str | None:
         if isinstance(annotation, str)
         else getattr(annotation, "__name__", "")
     )
-    kept = [part.strip() for part in str(text).split("|") if part.strip() != "None"]
+    kept = [
+        _NUMBER_PARTS.get(part.strip(), part.strip())
+        for part in str(text).split("|")
+        if part.strip() != "None"
+    ]
     if kept and all(part in _ONE_NUMBER for part in kept):
         return kept[0]
     return None
+
+
+def _kind(annotation: object) -> str | None:
+    """``"float"``, ``"int"``, ``"array"``, ``"text"`` or ``"empty"``: what the
+    probe can give a parameter (a text for one annotated ``str``, a label or a
+    name; no member for a sequence of records).
+    """
+    one = _one_number(annotation)
+    if one is not None:
+        return one
+    text = annotation if isinstance(annotation, str) else ""
+    if text == "str":
+        return "text"
+    if text.startswith("Sequence[") and text not in _ARRAYS:
+        return "empty"
+    return "array" if text in _ARRAYS else None
 
 
 def _quietly(function: Callable[..., object], arguments: dict[str, object]) -> object:
@@ -1401,17 +1462,21 @@ def _public_functions() -> Iterator[tuple[str, Callable[..., object]]]:
                 yield f"{info.name}.{name}", function
 
 
+def _attempts(required: dict[str, str]) -> Iterator[dict[str, object]]:
+    """Arguments for the required parameters, one set after another."""
+    arrays = any(kind == "array" for kind in required.values())
+    for attempt, value in enumerate(_FLOAT_TRIES):
+        count = _INT_TRIES[attempt % len(_INT_TRIES)]
+        for array in _array_tries(value) if arrays else (None,):
+            fill = {"int": count, "array": array, "text": "probe", "empty": ()}
+            yield {name: fill.get(kind, value) for name, kind in required.items()}
+
+
 def _baseline(
     function: Callable[..., object], required: dict[str, str]
 ) -> dict[str, object] | None:
     """Arguments for the required parameters that the function takes, if any."""
-    for attempt in range(len(_FLOAT_TRIES)):
-        arguments: dict[str, object] = {
-            name: _INT_TRIES[attempt % len(_INT_TRIES)]
-            if kind == "int"
-            else _FLOAT_TRIES[attempt]
-            for name, kind in required.items()
-        }
+    for arguments in _attempts(required):
         try:
             _quietly(function, arguments)
         # Any refusal means: try the next value
@@ -1424,27 +1489,30 @@ def _baseline(
 def _scalar_parameters(
     function: Callable[..., object],
 ) -> tuple[dict[str, str], dict[str, float]] | None:
-    """The required one-number parameters and the optional ones with a number.
+    """The required parameters the probe can fill and the optional ones with a number.
 
-    ``None`` when a required parameter takes something else, which the probe
-    cannot build.
+    A required parameter takes one number, or numbers the probe fills with an
+    array; ``None`` when one takes something else, which the probe cannot
+    build, or when no parameter takes one number.
     """
     required: dict[str, str] = {}
     optional: dict[str, float] = {}
     for parameter in inspect.signature(function).parameters.values():
         if parameter.kind in (parameter.VAR_POSITIONAL, parameter.VAR_KEYWORD):
             continue
-        kind = _one_number(parameter.annotation)
         if parameter.default is inspect.Parameter.empty:
+            kind = _kind(parameter.annotation)
             if kind is None:
                 return None
             required[parameter.name] = kind
         elif (
-            kind is not None
+            _one_number(parameter.annotation) is not None
             and isinstance(parameter.default, (int, float))
             and not isinstance(parameter.default, bool)
         ):
             optional[parameter.name] = parameter.default
+    if not optional and all(kind in _FILLED for kind in required.values()):
+        return None
     return required, optional
 
 
@@ -1487,7 +1555,12 @@ def _array_refusals() -> tuple[list[str], int]:
         baseline = _baseline(function, required)
         if baseline is None:
             continue
-        for name, value in {**baseline, **optional}.items():
+        numbers = {
+            name: value
+            for name, value in {**baseline, **optional}.items()
+            if required.get(name) not in _FILLED
+        }
+        for name, value in numbers.items():
             probed += 1
             for wrapped in _wrong_types(value):
                 try:

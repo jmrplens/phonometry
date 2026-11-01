@@ -178,6 +178,7 @@ from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, read_only
 from .._internal.types import A_OR_Z_WEIGHTINGS, AOrZWeighting
 from .._internal.validation import (
+    complex_array,
     real_array,
     require_choice,
     require_count,
@@ -697,10 +698,11 @@ def verify_rated_impedance(
     :raises ValueError: If the inputs differ in length, are not positive and
         finite, or no measurement frequency falls in the rated range.
     :raises TypeError: if ``rated_impedance_ohm`` is not a single number, or
-        ``frequencies`` holds a text or a value that is not a real number.
+        ``frequencies`` holds a text or a value that is not a real number, or
+        ``impedance_ohm`` holds a text or a value that is not a number.
     """
     f = _frequencies(frequencies)
-    z = np.abs(np.atleast_1d(np.asarray(impedance_ohm, dtype=np.complex128)))
+    z = np.abs(np.atleast_1d(complex_array(impedance_ohm, "impedance_ohm")))
     if z.shape != f.shape:
         msg = "'frequencies' and 'impedance_ohm' must have the same length."
         raise ValueError(msg)

@@ -363,6 +363,12 @@ near-field energy.
 
 **Returns:** The injected power `W`, in W.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `force_n` or `mobility` holds a text or a value that is not a number. |
+
 ## longitudinal_rod_impedance
 
 ```python

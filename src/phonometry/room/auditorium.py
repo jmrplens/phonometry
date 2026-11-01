@@ -526,8 +526,10 @@ def directivity_energy_average(
         an array with ``axis`` removed for several.
     :raises ValueError: If fewer than ``ceil(360 / 12,5) = 29`` bearings lie
         along ``axis``, or the levels are empty or non-finite.
-    :raises TypeError: if ``levels`` holds a text or a value that is not a real number.
+    :raises TypeError: if ``levels`` holds a text or a value that is not a real number,
+        or ``axis`` is not a single number.
     """
+    require_scalar(axis, "axis")
     values = real_array(levels, "levels")
     if values.size == 0 or not np.all(np.isfinite(values)):
         msg = "'levels' must be a non-empty array of finite decibel values."

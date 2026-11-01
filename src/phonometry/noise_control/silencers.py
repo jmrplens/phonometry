@@ -119,12 +119,14 @@ from numpy.typing import ArrayLike, NDArray
 from .._internal.frozen import OwnsArrays, read_only_copy, reduce_with_plain_rows
 from .._internal.validation import (
     check_engine,
+    complex_array,
     real_array,
     require_non_negative,
     require_positive,
     require_present,
     require_ranks,
     require_same_length,
+    require_scalar,
 )
 from .duct_modes import _warn_above_plane_wave_limit
 from .duct_modes import plane_wave_limit as _plane_wave_limit
@@ -202,7 +204,7 @@ def _per_frequency(impedance: ArrayLike, name: str, n_freq: int) -> _Complex:
     A scalar is held constant over the grid; anything else must already be
     the ``(n_freq,)`` per-frequency array.
     """
-    z = np.asarray(impedance, dtype=np.complex128)
+    z = complex_array(impedance, name)
     if z.ndim == 0:
         return np.full(n_freq, z, dtype=np.complex128)
     if z.shape != (n_freq,):
@@ -257,8 +259,10 @@ def shunt_matrix(branch_impedance: ArrayLike) -> _Complex:
     :param branch_impedance: Acoustic impedance ``Z_b`` of the branch,
         Pa s/m3 (1-D complex array over frequency).
     :return: A ``(n_freq, 2, 2)`` complex transfer-matrix array.
+    :raises TypeError: if ``branch_impedance`` holds a text or a value that is not a
+        number.
     """
-    zb = np.atleast_1d(np.asarray(branch_impedance, dtype=np.complex128))
+    zb = np.atleast_1d(complex_array(branch_impedance, "branch_impedance"))
     if zb.ndim != 1 or zb.size == 0:
         msg = "'branch_impedance' must be a non-empty 1-D array."
         raise ValueError(msg)
@@ -313,7 +317,7 @@ def cascade(*matrices: ArrayLike) -> _Complex:
         raise ValueError(msg)
     arrays: list[_Complex] = []
     for i, matrix in enumerate(matrices):
-        arr = np.asarray(matrix, dtype=np.complex128)
+        arr = complex_array(matrix, "matrices")
         if arr.ndim != _FOUR_POLE_NDIM or arr.shape[1:] != (2, 2):
             msg = (
                 f"'matrices'[{i}] must be a (n_freq, 2, 2) four-pole array; "
@@ -405,6 +409,8 @@ def insertion_loss(
     :return: The insertion loss per frequency, dB.
     :raises ValueError: If an impedance is neither a scalar nor one value per
         analysis frequency.
+    :raises TypeError: if ``radiation_impedance`` or ``source_impedance`` holds a text
+        or a value that is not a number.
     """
     n = transfer_matrix.shape[0]
     zs = _per_frequency(source_impedance, "source_impedance", n)
@@ -990,8 +996,9 @@ def quarter_wave_resonator(
         multiples of :math:`f = c / (4 l_\mathrm{e})` within the frequency range.
     :raises TypeError: if ``density``, ``duct_area``, ``length`` or ``speed_of_sound``
         is not a single number, or ``frequencies`` holds a text or a value that is not a
-        real number.
+        real number, or ``branch_area`` is not a single number.
     """
+    require_scalar(branch_area, "branch_area")
     f = _frequencies(frequencies)
     c = require_positive(speed_of_sound, "speed_of_sound")
     rho = require_positive(density, "density")
@@ -1302,6 +1309,8 @@ class SilencerChain:
         :return: The chain, so the calls can be written one after another.
         :raises ValueError: If ``branch_impedance`` is neither a scalar nor one
             value per analysis frequency.
+        :raises TypeError: if ``branch_impedance`` holds a text or a value that is not a
+            number.
         """
         zb = _per_frequency(
             branch_impedance, "branch_impedance", self._frequencies.size

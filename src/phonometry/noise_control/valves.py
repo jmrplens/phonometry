@@ -647,8 +647,10 @@ def internal_spectrum(
     :raises ValueError: If the peak frequency is not positive and finite, or
         a band centre is not.
     :raises TypeError: if ``peak_frequency`` is not a single number, or ``frequencies``
-        holds a text or a value that is not a real number.
+        holds a text or a value that is not a real number, or ``internal_level`` is not
+        a single number.
     """
+    require_scalar(internal_level, "internal_level")
     peak = require_positive(peak_frequency, "peak_frequency")
     bands = real_array(frequencies, "frequencies")
     if not math.isfinite(peak):
@@ -1212,8 +1214,10 @@ def expander_noise(
         expander's own row prints :math:`A_\eta = -3{,}0`.
     :raises TypeError: if ``downstream_density``, ``downstream_sound_speed``,
         ``internal_diameter_m``, ``mass_flow`` or ``throat_diameter_m`` is not a single
-        number, or ``frequencies`` holds a text or a value that is not a real number.
+        number, or ``frequencies`` holds a text or a value that is not a real number, or
+        ``velocity_correction`` is not a single number.
     """
+    require_scalar(velocity_correction, "velocity_correction")
     bands = real_array(frequencies, "frequencies")
     flow = require_positive(mass_flow, "mass_flow")
     rho2 = require_positive(downstream_density, "downstream_density")

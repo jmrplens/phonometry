@@ -150,7 +150,7 @@ text asks for.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for columns that do not hold one value per frequency, a value that is not finite, a tolerance that is not positive or finite nowhere, or a check frequency that is not among the frequencies. |
-| TypeError | if `calibrator_indicated_level_before` or `calibrator_level` is not a single number, or `free_field_indicated_level`, `frequencies`, `incident_level`, `pressure_indicated_level` or `tolerance_db` holds a text or a value that is not a real number. |
+| TypeError | if `calibrator_indicated_level_before` or `calibrator_level` is not a single number, or `free_field_indicated_level`, `frequencies`, `incident_level`, `pressure_indicated_level` or `tolerance_db` holds a text or a value that is not a real number, or `check_frequency_hz` is not a single number. |
 
 ## AdjustmentValue
 

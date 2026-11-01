@@ -832,6 +832,8 @@ def end_reflection_loss(
         ``termination`` is not a text, or ``frequencies`` holds a text or a value that
         is not a real number.
     """
+    require_scalar(aspect_ratio, "aspect_ratio")
+    require_scalar(max_reduction, "max_reduction")
     require_choice(
         termination, "termination", ("flush", "room", "wall", "edge", "corner", "free")
     )
@@ -2046,6 +2048,7 @@ def unlined_rectangular_duct_attenuation(
         ``width_m`` is not a single number, or ``frequencies`` holds a text or a value
         that is not a real number.
     """
+    require_scalar(width_m, "width_m")
     scheme = require_choice(model, "model", ("ashrae", "vdi2081"))
     f = _frequencies(frequencies)
     if scheme == "vdi2081":

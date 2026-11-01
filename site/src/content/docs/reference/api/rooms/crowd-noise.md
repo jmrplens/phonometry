@@ -172,7 +172,7 @@ Equation (17.50) at the listener across the table.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `directivity` or `distance` is not a single number, or `absorption_areas` or `talkers` holds a text or a value that is not a real number. |
+| TypeError | if `directivity` or `distance` is not a single number, or `absorption_areas` or `talkers` holds a text or a value that is not a real number, or `sound_power_level` is not a single number. |
 
 ## crowd_noise_level
 
@@ -227,7 +227,7 @@ counted per occupied table).
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `absorption_area` or `talkers` holds a text or a value that is not a real number. |
+| TypeError | if `absorption_area` or `talkers` holds a text or a value that is not a real number, or `sound_power_level` is not a single number. |
 
 ## CrowdNoiseResult
 
@@ -346,7 +346,7 @@ across the table receives.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `directivity` is not a single number, or `distance` holds a text or a value that is not a real number. |
+| TypeError | if `directivity` is not a single number, or `distance` holds a text or a value that is not a real number, or `sound_power_level` is not a single number. |
 
 ## speech_to_noise_ratio
 

@@ -54,6 +54,12 @@ ASTM E2611-19 Eq. (28).
 
 **Returns:** Absorption coefficient `alpha` (real).
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `reflection` holds a text or a value that is not a number. |
+
 ## air_density_iso10534
 
 ```python
@@ -107,6 +113,12 @@ $H_{12} = H_{12,\text{uncorrected}} / H_\mathrm{c}$.
 | `calibration_factor` | Calibration factor `Hc` from [`microphone_calibration_factor`](/phonometry/reference/api/materials/impedance-tube/#microphone_calibration_factor). |
 
 **Returns:** Corrected transfer function `H12`.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `calibration_factor` or `h12_uncorrected` holds a text or a value that is not a number. |
 
 ## hydraulic_diameter
 
@@ -280,6 +292,12 @@ microphones physically interchanged (II) - the cabling to the analyser is
 
 **Returns:** Complex calibration factor `Hc`.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `h12_config1` or `h12_config2` holds a text or a value that is not a number. |
+
 ## normalized_surface_admittance
 
 ```python
@@ -300,6 +318,12 @@ $G \rho c_0 = (\rho c_0) / Z = (1 - r) / (1 + r)$.
 
 **Returns:** Normalised surface admittance (complex).
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `reflection` holds a text or a value that is not a number. |
+
 ## normalized_surface_impedance
 
 ```python
@@ -319,6 +343,12 @@ $Z / (\rho c_0) = (1 + r) / (1 - r)$.
 | `reflection` | Complex reflection factor `r`. |
 
 **Returns:** Normalised surface impedance $Z/(\rho c_0)$ (complex).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `reflection` holds a text or a value that is not a number. |
 
 ## plane_wave_frequency_range
 
@@ -498,7 +528,7 @@ the sample to the **farther** microphone (Clause 7.7).
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `spacing_m` or `x1` is not a single number. |
+| TypeError | if `spacing_m` or `x1` is not a single number, or `h12` or `wavenumber` holds a text or a value that is not a number. |
 
 ## speed_of_sound_iso10534
 
@@ -663,4 +693,4 @@ supplied, frequencies outside the plane-wave range (Eqs. (1)-(4)) raise an
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `shape` is not a text, or `frequency` holds a text or a value that is not a real number. |
+| TypeError | if `shape` is not a text, or `frequency` holds a text or a value that is not a real number, or `h12` holds a text or a value that is not a number. |

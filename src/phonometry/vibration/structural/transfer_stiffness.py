@@ -97,6 +97,7 @@ from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays, read_only
 from ..._internal.validation import (
     check_engine,
+    complex_array,
     real_array,
     require_choice,
     require_finite,
@@ -258,10 +259,11 @@ def transfer_stiffness_level(
     :return: The level ``L_k``, in dB re ``k0``.
     :raises ValueError: for a non-positive reference, a non-finite stiffness,
         or a zero stiffness magnitude (a dead channel has no level).
-    :raises TypeError: if ``reference`` is not a single number.
+    :raises TypeError: if ``reference`` is not a single number, or ``stiffness`` holds a
+        text or a value that is not a number.
     """
     reference = require_positive(reference, "reference")
-    magnitude = np.abs(np.asarray(stiffness, dtype=np.complex128))
+    magnitude = np.abs(complex_array(stiffness, "stiffness"))
     # Two refusals, because they are two mistakes and the diagnosis has to be
     # true: a NaN compares False against the bound below, so folded into it it
     # was reported as a dead channel, which is a measurement that happened and
@@ -295,8 +297,9 @@ def loss_factor(stiffness: ArrayLike) -> np.ndarray:
     :raises ValueError: for a purely imaginary stiffness
         (:math:`\operatorname{Re}(k_{2,1}) = 0`), for which the loss factor
         is undefined.
+    :raises TypeError: if ``stiffness`` holds a text or a value that is not a number.
     """
-    k = np.asarray(stiffness, dtype=np.complex128)
+    k = complex_array(stiffness, "stiffness")
     if not np.all(np.abs(k.real) > 0.0):
         msg = (
             "'stiffness' contains purely imaginary values (Re = 0); the loss "
@@ -319,9 +322,11 @@ def transfer_stiffness_direct(
         non-zero), in m.
     :return: The dynamic transfer stiffness :math:`k_{2,1}`, in N/m.
     :raises ValueError: for a zero input displacement (dead input channel).
+    :raises TypeError: if ``blocking_force`` or ``input_displacement`` holds a text or a
+        value that is not a number.
     """
-    f2b = np.asarray(blocking_force, dtype=np.complex128)
-    u1 = np.asarray(input_displacement, dtype=np.complex128)
+    f2b = complex_array(blocking_force, "blocking_force")
+    u1 = complex_array(input_displacement, "input_displacement")
     if not np.all(np.abs(u1) > 0.0):
         msg = (
             "'input_displacement' contains zeros (dead input channel); the "
@@ -373,7 +378,8 @@ def transfer_stiffness_indirect(
     :return: The dynamic transfer stiffness :math:`k_{2,1}`, in N/m.
     :raises ValueError: for a non-positive frequency or blocking mass.
     :raises TypeError: if ``blocking_mass`` or ``flange_mass`` is not a single number,
-        or ``frequency`` holds a text or a value that is not a real number.
+        or ``frequency`` holds a text or a value that is not a real number, or
+        ``transmissibility`` holds a text or a value that is not a number.
     :warns TransferStiffnessWarning: where any :math:`\lvert T\rvert > 0.1`
         (Inequality (2) violated).
     """
@@ -393,7 +399,7 @@ def _indirect_stiffness(
     blocking_mass = require_positive(blocking_mass, "blocking_mass")
     flange_mass = require_non_negative(flange_mass, "flange_mass")
     omega = _omega(frequency, name)
-    t = np.asarray(transmissibility, dtype=np.complex128)
+    t = complex_array(transmissibility, "transmissibility")
     magnitude = np.abs(t)
     if np.any(magnitude > TRANSMISSIBILITY_LIMIT):
         worst = float(np.max(magnitude))
@@ -440,9 +446,11 @@ def blocking_force_ratio(
         receiving structure (complex, scalar or array, non-zero), in N/m.
     :return: The complex ratio ``F2/F2,b``.
     :raises ValueError: for a zero termination stiffness.
+    :raises TypeError: if ``driving_point_stiffness`` or ``termination_stiffness`` holds
+        a text or a value that is not a number.
     """
-    k22 = np.asarray(driving_point_stiffness, dtype=np.complex128)
-    kt = np.asarray(termination_stiffness, dtype=np.complex128)
+    k22 = complex_array(driving_point_stiffness, "driving_point_stiffness")
+    kt = complex_array(termination_stiffness, "termination_stiffness")
     if not np.all(np.abs(kt) > 0.0):
         msg = "'termination_stiffness' must be non-zero."
         raise ValueError(msg)
@@ -772,7 +780,8 @@ def indirect_transfer_stiffness_result(
     :param flange_mass: Output-flange mass ``mf``, in kg (Default: 0.0).
     :return: The :class:`TransferStiffnessResult` (indirect method).
     :raises TypeError: if ``blocking_mass`` or ``flange_mass`` is not a single number,
-        or ``frequencies`` holds a text or a value that is not a real number.
+        or ``frequencies`` holds a text or a value that is not a real number, or
+        ``transmissibility`` holds a text or a value that is not a number.
     :warns TransferStiffnessWarning: where any :math:`\lvert T\rvert > 0.1`
         (Inequality (2) violated).
     """
@@ -780,7 +789,7 @@ def indirect_transfer_stiffness_result(
     k = _indirect_stiffness(
         freq, transmissibility, blocking_mass, flange_mass, "frequencies"
     )
-    measured = np.asarray(transmissibility, dtype=np.complex128)
+    measured = complex_array(transmissibility, "transmissibility")
     return TransferStiffnessResult(
         frequencies=freq,
         transfer_stiffness=k,
@@ -1012,7 +1021,8 @@ def band_averaged_stiffness(
         (Default: ``None``, every line).
     :return: The :class:`BandAveragedStiffness`.
     :raises TypeError: for a mask that is not boolean, or ``frequencies`` holds a text
-        or a value that is not a real number.
+        or a value that is not a real number, or ``stiffness`` holds a text or a value
+        that is not a number.
     :raises ValueError: for frequencies that are not one-dimensional, finite,
         positive and distinct, a stiffness of another length or not finite, a
         mask of another length, or no valid line.
@@ -1043,7 +1053,7 @@ def _band_average(
     if np.unique(freq).size != freq.size:
         msg = f"{owner}: 'frequencies' must be distinct, one line per frequency."
         raise ValueError(msg)
-    k = np.asarray(stiffness, dtype=np.complex128)
+    k = complex_array(stiffness, "stiffness")
     if k.shape != freq.shape:
         msg = (
             f"{owner}: 'stiffness' must carry one value per frequency; got "
@@ -1797,15 +1807,17 @@ def effective_blocking_mass(
         strictly increasing, phasors of another length, a zero or non-finite
         effective mass, or a non-positive ``m2``.
     :raises TypeError: if ``blocking_mass`` is not a single number, or ``frequencies``
-        holds a text or a value that is not a real number.
+        holds a text or a value that is not a real number, or
+        ``first_acceleration_m_s2``, ``force_n`` or ``second_acceleration_m_s2`` holds a
+        text or a value that is not a number.
     """
     owner = "effective_blocking_mass"
     blocking_mass = require_positive(blocking_mass, "blocking_mass")
     freq = _frequency_axis(frequencies, owner)
     _require_increasing(freq, owner)
-    force_n = np.asarray(force_n, dtype=np.complex128)
-    first = np.asarray(first_acceleration_m_s2, dtype=np.complex128)
-    second = np.asarray(second_acceleration_m_s2, dtype=np.complex128)
+    force_n = complex_array(force_n, "force_n")
+    first = complex_array(first_acceleration_m_s2, "first_acceleration_m_s2")
+    second = complex_array(second_acceleration_m_s2, "second_acceleration_m_s2")
     if (
         force_n.shape != freq.shape
         or first.shape != freq.shape
@@ -2097,7 +2109,7 @@ def _acceleration_level(
     value: ArrayLike, shape: tuple[int, ...], owner: str, name: str
 ) -> NDArray[np.float64]:
     """Level re 1 µm/s² of acceleration phasors, ``-inf`` where they are zero."""
-    acceleration = np.abs(np.asarray(value, dtype=np.complex128))
+    acceleration = np.abs(complex_array(value, name))
     if (
         acceleration.ndim not in (1, 2)
         or acceleration.shape[-1:] != shape
@@ -2146,14 +2158,16 @@ def driving_point_stiffness(
         frequency, a zero input acceleration, or no adequate line from 1 Hz to
         20 Hz.
     :raises TypeError: if ``frequencies`` holds a text or a value that is not a real
-        number.
+        number, or ``input_acceleration_m_s2``, ``input_force_n``,
+        ``output_acceleration_m_s2`` or ``unwanted_acceleration_m_s2`` holds a text or a
+        value that is not a number.
     :warns TransferStiffnessWarning: where Inequality (1) or (2) fails.
     """
     owner = "driving_point_stiffness"
     freq = _frequency_axis(frequencies, owner)
     _require_increasing(freq, owner)
-    force = np.asarray(input_force_n, dtype=np.complex128)
-    a1 = np.asarray(input_acceleration_m_s2, dtype=np.complex128)
+    force = complex_array(input_force_n, "input_force_n")
+    a1 = complex_array(input_acceleration_m_s2, "input_acceleration_m_s2")
     if force.shape != freq.shape or a1.shape != freq.shape:
         msg = (
             f"{owner}: the input force and acceleration must carry one phasor "

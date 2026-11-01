@@ -674,8 +674,11 @@ def flight_condition_weights(
     :return: The ``(index, weight)`` pairs, weights summing to 1.
     :raises ValueError: If the inputs are invalid.
     :raises TypeError: if ``scaling_factor`` is not a single number, or ``airspeeds`` or
-        ``path_angles_deg`` holds a text or a value that is not a real number.
+        ``path_angles_deg`` holds a text or a value that is not a real number, or
+        ``airspeed`` or ``path_angle_deg`` is not a single number.
     """
+    require_scalar(airspeed, "airspeed")
+    require_scalar(path_angle_deg, "path_angle_deg")
     v = np.atleast_1d(real_array(airspeeds, "airspeeds"))
     g = np.atleast_1d(real_array(path_angles_deg, "path_angles_deg"))
     require_equal_shapes(
@@ -1729,7 +1732,7 @@ def _setup_resistivity(
         )
         raise ValueError(msg)
     return require_positive_array(
-        np.asarray(flow_resistivity, dtype=np.float64).ravel(), "flow_resistivity"
+        real_array(flow_resistivity, "flow_resistivity").ravel(), "flow_resistivity"
     )
 
 

@@ -40,6 +40,7 @@ from numpy.typing import ArrayLike, NDArray
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     check_engine,
+    complex_array,
     real_array,
     require_above_absolute_zero_array,
     require_choice,
@@ -303,7 +304,7 @@ def _require_h12_per_band(
     transfer function. Without it, a length mismatch dies in the arithmetic
     as numpy's two-shapes broadcast error, naming neither argument.
     """
-    h = np.asarray(h12, dtype=np.complex128)
+    h = complex_array(h12, "h12")
     if h.ndim != 0 and bands.ndim != 0 and h.shape != bands.shape:
         msg = (
             f"'h12' must be a scalar or carry one value per band "
@@ -344,7 +345,8 @@ def reflection_factor(
     :param wavenumber: Complex wavenumber ``k0`` (from :func:`tube_wavenumber`),
         scalar or per band.
     :return: Complex reflection factor ``r`` at the reference plane.
-    :raises TypeError: if ``spacing_m`` or ``x1`` is not a single number.
+    :raises TypeError: if ``spacing_m`` or ``x1`` is not a single number, or ``h12`` or
+        ``wavenumber`` holds a text or a value that is not a number.
     """
     require_scalar(spacing_m, "spacing_m")
     require_scalar(x1, "x1")
@@ -354,7 +356,7 @@ def reflection_factor(
     if x1 <= 0.0:
         msg = "'x1' must be positive."
         raise ValueError(msg)
-    k0 = np.asarray(wavenumber, dtype=np.complex128)
+    k0 = complex_array(wavenumber, "wavenumber")
     h = _require_h12_per_band(h12, k0, "wavenumber")
     h_i = np.exp(-1j * k0 * spacing_m)
     h_r = np.exp(1j * k0 * spacing_m)
@@ -369,8 +371,9 @@ def normalized_surface_impedance(reflection: ArrayLike) -> Complex:
 
     :param reflection: Complex reflection factor ``r``.
     :return: Normalised surface impedance :math:`Z/(\rho c_0)` (complex).
+    :raises TypeError: if ``reflection`` holds a text or a value that is not a number.
     """
-    r = np.asarray(reflection, dtype=np.complex128)
+    r = complex_array(reflection, "reflection")
     return np.asarray((1.0 + r) / (1.0 - r), dtype=np.complex128)
 
 
@@ -404,8 +407,9 @@ def normalized_surface_admittance(reflection: ArrayLike) -> Complex:
 
     :param reflection: Complex reflection factor ``r``.
     :return: Normalised surface admittance (complex).
+    :raises TypeError: if ``reflection`` holds a text or a value that is not a number.
     """
-    r = np.asarray(reflection, dtype=np.complex128)
+    r = complex_array(reflection, "reflection")
     return np.asarray((1.0 - r) / (1.0 + r), dtype=np.complex128)
 
 
@@ -417,8 +421,9 @@ def absorption_from_reflection(reflection: ArrayLike) -> Real:
 
     :param reflection: Complex reflection factor ``r``.
     :return: Absorption coefficient ``alpha`` (real).
+    :raises TypeError: if ``reflection`` holds a text or a value that is not a number.
     """
-    r = np.asarray(reflection, dtype=np.complex128)
+    r = complex_array(reflection, "reflection")
     return np.asarray(1.0 - np.abs(r) ** 2, dtype=np.float64)
 
 
@@ -435,9 +440,11 @@ def microphone_calibration_factor(
     :param h12_config1: Transfer function ``H12^I`` in the standard configuration.
     :param h12_config2: Transfer function ``H12^II`` with microphones swapped.
     :return: Complex calibration factor ``Hc``.
+    :raises TypeError: if ``h12_config1`` or ``h12_config2`` holds a text or a value
+        that is not a number.
     """
-    h1 = np.asarray(h12_config1, dtype=np.complex128)
-    h2 = np.asarray(h12_config2, dtype=np.complex128)
+    h1 = complex_array(h12_config1, "h12_config1")
+    h2 = complex_array(h12_config2, "h12_config2")
     return np.asarray(np.sqrt(h1 / h2), dtype=np.complex128)
 
 
@@ -452,9 +459,11 @@ def apply_microphone_calibration(
     :param calibration_factor: Calibration factor ``Hc`` from
         :func:`microphone_calibration_factor`.
     :return: Corrected transfer function ``H12``.
+    :raises TypeError: if ``calibration_factor`` or ``h12_uncorrected`` holds a text or
+        a value that is not a number.
     """
-    h = np.asarray(h12_uncorrected, dtype=np.complex128)
-    hc = np.asarray(calibration_factor, dtype=np.complex128)
+    h = complex_array(h12_uncorrected, "h12_uncorrected")
+    hc = complex_array(calibration_factor, "calibration_factor")
     return np.asarray(h / hc, dtype=np.complex128)
 
 
@@ -768,9 +777,9 @@ def two_microphone_impedance(
         ``"square"``.
     :return: An :class:`ImpedanceTubeResult` (the tube geometry is retained on
         the result).
-
     :raises TypeError: if ``shape`` is not a text, or ``frequency`` holds a text or a
-        value that is not a real number.
+        value that is not a real number, or ``h12`` holds a text or a value that is not
+        a number.
     """
     require_choice(shape, "shape", ("circular", "rectangular", "square"))
     # At least 1-D: a single-frequency reduction is legitimate, and the result

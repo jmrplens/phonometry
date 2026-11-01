@@ -747,8 +747,10 @@ def energy_average_level(
         result is zero-dimensional, otherwise an array.
     :raises ValueError: If ``levels`` is empty or contains non-finite
         values.
-    :raises TypeError: if ``levels`` holds a text or a value that is not a real number.
+    :raises TypeError: if ``levels`` holds a text or a value that is not a real number,
+        or ``axis`` is not a single number.
     """
+    require_scalar(axis, "axis")
     data = real_array(levels, "levels")
     if data.size == 0:
         msg = "'levels' must not be empty."

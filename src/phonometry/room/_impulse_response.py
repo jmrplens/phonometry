@@ -544,8 +544,10 @@ def impulse_response(
         response. It behaves like the raw IR array (``np.asarray(result)``,
         indexing, ``.size``) for every downstream consumer and adds
         :meth:`ImpulseResponseResult.plot`.
-    :raises TypeError: if ``method`` is not a text.
+    :raises TypeError: if ``method`` is not a text, or ``regularization`` is not a
+        single number.
     """
+    require_scalar(regularization, "regularization")
     require_choice(method, "method", ("spectral", "farina"))
     fs = resolve_optional_pair_fs(
         recorded, reference, fs, names=("recorded", "reference")

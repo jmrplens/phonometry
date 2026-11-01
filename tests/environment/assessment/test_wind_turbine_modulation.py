@@ -906,3 +906,38 @@ def test_each_set_of_lines_is_transformed_back_once(
     )
     assert block.modulation_depth_db == pytest.approx(case[5], abs=1e-10)
     assert len(calls) == len(set(calls)), calls
+
+
+def test_a_fundamental_over_1_5_db_with_no_harmonic_is_transformed_back_once(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A sinusoidal swing of about 4 dB at one line, with no harmonic content.
+
+    The fundamental's three lines clear 1.5 dB, so the harmonics are looked
+    for, and none is there to keep: the series of those three lines is the
+    result, transformed back once. The IOA cases above either stop under
+    1.5 dB or keep a harmonic, so they leave this path to this block.
+    """
+    calls: list[tuple[int, ...]] = []
+    reconstruct = wtm._reconstruct
+
+    def counted(
+        transform: np.ndarray, lines: tuple[int, ...] | list[int]
+    ) -> np.ndarray:
+        calls.append(tuple(lines))
+        return reconstruct(transform, lines)
+
+    monkeypatch.setattr(wtm, "_reconstruct", counted)
+    samples = np.arange(wtm.AM_BLOCK_SAMPLES)
+    levels = 40.0 + 2.0 * np.sin(2.0 * np.pi * 8 * samples / wtm.AM_BLOCK_SAMPLES)
+    block = env.amplitude_modulation_block(
+        levels, modulation_frequency_range_hz=(0.5, 1.5)
+    )
+    assert block.fundamental_frequency_hz == pytest.approx(0.8)
+    assert block.harmonic_frequencies_hz == ()
+    assert calls == [(7, 8, 9)]
+    expected = reconstruct(np.fft.fft(block.detrended_levels), (7, 8, 9))
+    np.testing.assert_array_equal(block.reconstructed_levels, expected)
+    assert block.modulation_depth_db == pytest.approx(
+        np.percentile(expected, 95.0) - np.percentile(expected, 5.0), abs=1e-12
+    )

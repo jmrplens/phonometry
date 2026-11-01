@@ -299,6 +299,7 @@ stay within Clause 4.4.2.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a geometry value is not positive or an input is non-finite. |
+| TypeError | if `coupling_length`, `delta_r_df`, `delta_r_fd`, `delta_r_ff`, `flanking_area`, `k_df`, `k_fd`, `k_ff`, `r_flanking`, `r_separating` or `separating_area` is not a single number. |
 
 ## flanking_path
 

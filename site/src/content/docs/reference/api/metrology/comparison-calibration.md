@@ -276,7 +276,7 @@ given `coupling_impedance_pa_s_m3` = $Z_x$, exactly.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for frequencies that are not positive and increasing, a length or radius that is not positive, conditions Annex F refuses, or a gas at another pressure. |
-| TypeError | if `gap_length_m`, `gap_radius_m` or `static_pressure_kpa` is not a single number. |
+| TypeError | if `gap_length_m`, `gap_radius_m` or `static_pressure_kpa` is not a single number, or `relative_humidity_percent` is not a single number. |
 
 ## comparison_uncertainty_budget
 
@@ -2420,7 +2420,7 @@ $H(f)$ with and without the window.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an unknown quantity. |
-| TypeError | if `quantity` is not a text. |
+| TypeError | if `quantity` is not a text, or `frequencies` holds a text or a value that is not a real number. |
 
 ### TimeSelectiveResponse.record_response_at()
 

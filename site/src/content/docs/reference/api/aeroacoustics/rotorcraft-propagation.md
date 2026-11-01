@@ -172,7 +172,7 @@ $c = 346.1$ m/s.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
-| TypeError | if `edge_height_m` or `edge_span` is not a single number, or `frequencies` holds a text or a value that is not a real number. |
+| TypeError | if `edge_height_m` or `edge_span` is not a single number, or `frequencies` holds a text or a value that is not a real number, or `path_difference` is not a single number. |
 
 ## ground_effect_adjustment
 

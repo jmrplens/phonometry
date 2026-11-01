@@ -70,6 +70,7 @@ from ..._internal.validation import (
     require_finite_array,
     require_non_negative,
     require_positive,
+    require_scalar,
 )
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
@@ -652,8 +653,9 @@ def machine_count_correction(
     :raises ValueError: For a count outside the figure or a reference the
         figure has no curve for.
     :raises TypeError: if ``n_machines`` holds a text or a value that is not a real
-        number.
+        number, or ``n_reference_machines`` is not a single number.
     """
+    require_scalar(n_reference_machines, "n_reference_machines")
     counts = require_finite_array(n_machines, "n_machines")
     grid = np.asarray(MACHINE_COUNT_AXIS, dtype=np.float64)
     if n_reference_machines not in MACHINE_COUNT_CORRECTION:
@@ -687,8 +689,10 @@ def machine_hall_velocity_mm_s(
     :raises ValueError: For a negative velocity, or a count or reference
         outside Figure 3.
     :raises TypeError: if ``reference_velocity_mm_s`` is not a single number, or
-        ``n_machines`` holds a text or a value that is not a real number.
+        ``n_machines`` holds a text or a value that is not a real number, or
+        ``n_reference_machines`` is not a single number.
     """
+    require_scalar(n_reference_machines, "n_reference_machines")
     velocity = require_non_negative(reference_velocity_mm_s, "reference_velocity_mm_s")
     counts = require_finite_array(n_machines, "n_machines")
     chi = machine_count_correction(counts, n_reference_machines=n_reference_machines)

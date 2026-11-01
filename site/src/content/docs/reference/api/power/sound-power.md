@@ -215,7 +215,7 @@ with that shape; scalar inputs return a scalar, unchanged.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `room_surface`, `surface_area` or `volume` is not a single number, or `mean_absorption_coefficient` or `reverberation_time` holds a text or a value that is not a real number. |
+| TypeError | if `room_surface`, `surface_area` or `volume` is not a single number, or `mean_absorption_coefficient` or `reverberation_time` holds a text or a value that is not a real number, or `absorption_area` holds a text or a value that is not a real number. |
 
 ## mean_single_event_level
 

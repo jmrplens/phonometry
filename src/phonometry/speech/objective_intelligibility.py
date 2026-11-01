@@ -305,9 +305,9 @@ def _segments(bands: NDArray[np.float64]) -> NDArray[np.float64]:
     frames ``m-_N_SEGMENT .. m``.
     """
     n_frames = bands.shape[1]
+    # The band matrix the function computed, float already: the windows keep it.
     return np.array(
-        [bands[:, m - _N_SEGMENT : m] for m in range(_N_SEGMENT, n_frames + 1)],
-        dtype=np.float64,
+        [bands[:, m - _N_SEGMENT : m] for m in range(_N_SEGMENT, n_frames + 1)]
     )
 
 

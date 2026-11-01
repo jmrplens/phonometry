@@ -97,6 +97,7 @@ import numpy as np
 
 from ..._internal.frozen import OwnsArrays, given_repr
 from ..._internal.validation import (
+    complex_array,
     real_array,
     require_choice,
     require_count,
@@ -1344,8 +1345,10 @@ def exponential_window_correction(
     :raises ValueError: for mismatched or invalid inputs, or a window whose
         damping reaches a mode's apparent damping.
     :raises TypeError: if ``apparent_damping_ratio`` or ``damped_natural_frequency_hz``
-        holds a text or a value that is not a real number.
+        holds a text or a value that is not a real number, or
+        ``exponential_decay_rate_per_s`` is not a single number.
     """
+    require_scalar(exponential_decay_rate_per_s, "exponential_decay_rate_per_s")
     return ExponentialWindowCorrection(
         damped_natural_frequency_hz=np.atleast_1d(
             real_array(damped_natural_frequency_hz, "damped_natural_frequency_hz")
@@ -1582,10 +1585,11 @@ def single_mode_fit(
         unknown kind, or a band whose data hold no lightly damped mode.
     :raises TypeError: if ``exponential_decay_rate_per_s`` is not a single number,
         ``kind`` is not a text, or ``band_hz`` is not a pair of numbers, or
-        ``frequencies`` holds a text or a value that is not a real number.
+        ``frequencies`` holds a text or a value that is not a real number, or ``frf``
+        holds a text or a value that is not a number.
     """
     freqs = real_array(frequencies, "frequencies")
-    values = np.asarray(frf, dtype=np.complex128)
+    values = complex_array(frf, "frf")
     if freqs.ndim != 1 or values.shape != freqs.shape:
         msg = "'frequencies' and 'frf' must be one-dimensional and of one length."
         raise ValueError(msg)
@@ -2596,10 +2600,11 @@ def verify_channel_match(
     :raises ValueError: for mismatched or non-finite data, or a range that
         holds none of the frequencies.
     :raises TypeError: if ``frequency_range_hz`` is not a pair of numbers, or
-        ``frequencies`` holds a text or a value that is not a real number.
+        ``frequencies`` holds a text or a value that is not a real number, or
+        ``response`` holds a text or a value that is not a number.
     """
     freqs = real_array(frequencies, "frequencies")
-    values = np.asarray(response, dtype=np.complex128)
+    values = complex_array(response, "response")
     if freqs.ndim != 1 or values.shape != freqs.shape:
         msg = "'frequencies' and 'response' must be one-dimensional and of one length."
         raise ValueError(msg)

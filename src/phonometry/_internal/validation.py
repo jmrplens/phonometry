@@ -727,6 +727,77 @@ def real_array(x: ArrayLike, name: str, *, copy: bool = False) -> NDArray[np.flo
         return x.astype(np.float64, copy=copy)
     if type(x) in _PLAIN_REALS:
         return np.asarray(x, dtype=np.float64)
+    array = _numbers_read(x, name)
+    if holds_complex(array):
+        msg = f"'{name}' must be real, not complex."
+        raise TypeError(msg)
+    try:
+        return array.astype(np.float64, copy=copy)
+    except TypeError as exc:
+        msg = f"'{name}' must be numeric."
+        raise TypeError(msg) from exc
+    except ValueError as exc:
+        msg = f"'{name}' must be numeric."
+        raise ValueError(msg) from exc
+
+
+#: The dtype kinds of an array of numbers, complex ones included.
+_NUMBER_KINDS = frozenset("biufc")
+#: The types of one number the complex reader converts at once.
+_PLAIN_NUMBERS_OF_ANY_KIND = frozenset({float, int, complex, np.float64, np.complex128})
+
+
+def complex_array(
+    x: ArrayLike, name: str, *, copy: bool = False
+) -> NDArray[np.complex128]:
+    """A caller's numbers as a ``complex128`` array, refused by name when they are not.
+
+    The reading of a caller's value where a complex number belongs (a
+    reflection factor, an impedance, a transfer function, a mobility), the
+    companion of :func:`real_array`. ``np.asarray(x, dtype=np.complex128)``
+    is not this reading: it parses a text (``["1+2j"]`` as ``[1+2j]``, and
+    ``["80"]`` as ``[80+0j]``), so a column of readings left as text passed
+    for numbers, and it reads a ``bytearray``, on its own or at any depth of
+    a sequence, as the codes of its characters (``[bytearray(b"12")]`` as
+    ``[[49+0j, 50+0j]]``). Each is refused with :class:`TypeError` naming
+    the parameter, and so is an element that is no number, which numpy would
+    refuse without a name; a ragged nesting, to which numpy gives no shape,
+    is a :class:`ValueError` naming it. A real number is a complex one with
+    no imaginary part, and is read as one.
+
+    :param x: The caller's value, of any type.
+    :param name: The parameter's name, for the message.
+    :param copy: Give a new array even when *x* is a ``complex128`` array
+        already, for a caller that writes into what it reads.
+    :return: The numbers, as ``complex128``, of the shape numpy gives them.
+    :raises TypeError: for a text in any form (a ``bytearray`` at any depth
+        included), an element that is not a number, or a sequence nested
+        more than 32 deep, as one that holds itself is.
+    :raises ValueError: for a ragged nesting, to which numpy gives no shape.
+    """
+    if isinstance(x, np.ndarray) and x.dtype.kind in _NUMBER_KINDS:
+        # An array of numbers holds no text and no member.
+        return x.astype(np.complex128, copy=copy)
+    if type(x) in _PLAIN_NUMBERS_OF_ANY_KIND:
+        return np.asarray(x, dtype=np.complex128)
+    array = _numbers_read(x, name)
+    try:
+        return array.astype(np.complex128, copy=copy)
+    except TypeError as exc:
+        msg = f"'{name}' must be numeric."
+        raise TypeError(msg) from exc
+    except ValueError as exc:
+        msg = f"'{name}' must be numeric."
+        raise ValueError(msg) from exc
+
+
+def _numbers_read(x: object, name: str) -> np.ndarray:
+    """*x* as numpy reads it, refused by name when it holds a text.
+
+    What both readers do before they convert: a ``bytearray`` at any depth,
+    a nesting without end, a ragged nesting and a text are each refused
+    naming the parameter.
+    """
     found = _misread_member(x)
     if found == "bytearray":
         msg = f"'{name}' must be numbers, not text."
@@ -742,20 +813,10 @@ def real_array(x: ArrayLike, name: str, *, copy: bool = False) -> NDArray[np.flo
     except ValueError as exc:
         msg = f"'{name}' must be numeric."
         raise ValueError(msg) from exc
-    if holds_complex(array):
-        msg = f"'{name}' must be real, not complex."
-        raise TypeError(msg)
     if holds_text(array):
         msg = f"'{name}' must be numbers, not text."
         raise TypeError(msg)
-    try:
-        return array.astype(np.float64, copy=copy)
-    except TypeError as exc:
-        msg = f"'{name}' must be numeric."
-        raise TypeError(msg) from exc
-    except ValueError as exc:
-        msg = f"'{name}' must be numeric."
-        raise ValueError(msg) from exc
+    return array
 
 
 def require_positive_array(x: ArrayLike, name: str) -> np.ndarray:

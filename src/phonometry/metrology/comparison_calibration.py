@@ -3810,8 +3810,9 @@ def air_gap_series_impedance_pa_s_m3(
         a length or radius that is not positive, conditions Annex F refuses,
         or a gas at another pressure.
     :raises TypeError: if ``gap_length_m``, ``gap_radius_m`` or ``static_pressure_kpa``
-        is not a single number.
+        is not a single number, or ``relative_humidity_percent`` is not a single number.
     """
+    require_scalar(relative_humidity_percent, "relative_humidity_percent")
     frequencies = _frequency_axis(frequencies)
     length = require_positive(gap_length_m, "gap_length_m")
     radius = require_positive(gap_radius_m, "gap_radius_m")
@@ -4301,7 +4302,8 @@ class TimeSelectiveResponse(OwnsArrays):
         :return: The axes. Requires matplotlib
             (``pip install "phonometry[plot]"``).
         :raises ValueError: for an unknown quantity.
-        :raises TypeError: if ``quantity`` is not a text.
+        :raises TypeError: if ``quantity`` is not a text, or ``frequencies`` holds a
+            text or a value that is not a real number.
         """
         from .._i18n import check_language
         from .._plot.metrology import plot_time_selective_response

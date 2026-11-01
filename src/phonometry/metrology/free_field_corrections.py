@@ -863,8 +863,10 @@ def adjustment_value(
     :raises TypeError: if ``calibrator_indicated_level_before`` or ``calibrator_level``
         is not a single number, or ``free_field_indicated_level``, ``frequencies``,
         ``incident_level``, ``pressure_indicated_level`` or ``tolerance_db`` holds a
-        text or a value that is not a real number.
+        text or a value that is not a real number, or ``check_frequency_hz`` is not a
+        single number.
     """
+    require_scalar(check_frequency_hz, "check_frequency_hz")
     frequencies = _frequency_axis(frequencies)
     count = frequencies.size
     indicated = _band_column(

@@ -308,7 +308,7 @@ $L = 10 \log_{10}\left( \frac{1}{n} \sum_j 10^{L_j/10} \right)$.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `levels` is empty or contains non-finite values. |
-| TypeError | if `levels` holds a text or a value that is not a real number. |
+| TypeError | if `levels` holds a text or a value that is not a real number, or `axis` is not a single number. |
 
 ## facade_insulation
 

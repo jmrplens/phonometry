@@ -204,7 +204,7 @@ model identifies the general features rather than replacing a measurement.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If an input is not positive and finite, or `fraction` is not 1 or 3. |
-| TypeError | if `fraction` is not an integer (a word, a flag or a float), `impact_rate` is not a single number, or `frequencies` holds a text or a value that is not a real number. |
+| TypeError | if `fraction` is not an integer (a word, a flag or a float), `impact_rate` is not a single number, or `frequencies` holds a text or a value that is not a real number, or `covering_stiffness` or `plate_stiffness` is not a single number. |
 
 ## CoveringImprovementResult
 

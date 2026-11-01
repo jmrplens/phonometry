@@ -154,7 +154,7 @@ are 5 and the value is `6 - position`.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a part other than 1 to 4 or a position that is not a whole number from 1 to 5. |
-| TypeError | if `positions` holds a complex value, a NumPy one or one held in an array of objects included. |
+| TypeError | if `positions` holds a text or a value that is not a real number, or `part` is not a single number. |
 
 ## METHOD_A_SCALES
 

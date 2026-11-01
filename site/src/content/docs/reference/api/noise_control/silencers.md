@@ -386,6 +386,7 @@ $$
 | Exception | When |
 | :--- | :--- |
 | ValueError | If an impedance is neither a scalar nor one value per analysis frequency. |
+| TypeError | if `radiation_impedance` or `source_impedance` holds a text or a value that is not a number. |
 
 ## plot_silencer_geometry
 
@@ -503,7 +504,7 @@ Closed quarter-wave side-branch tube on a duct (Bies Eqs. (8.144), (8.146)).
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `density`, `duct_area`, `length` or `speed_of_sound` is not a single number, or `frequencies` holds a text or a value that is not a real number. |
+| TypeError | if `density`, `duct_area`, `length` or `speed_of_sound` is not a single number, or `frequencies` holds a text or a value that is not a real number, or `branch_area` is not a single number. |
 
 ## ReactiveSilencerResult
 
@@ -649,6 +650,12 @@ Four-pole matrix of a side branch of impedance `Z_b` (Bies Eq. (8.144)).
 | `branch_impedance` | Acoustic impedance `Z_b` of the branch, Pa s/m3 (1-D complex array over frequency). |
 
 **Returns:** A `(n_freq, 2, 2)` complex transfer-matrix array.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `branch_impedance` holds a text or a value that is not a number. |
 
 ## SilencerChain
 
@@ -846,6 +853,7 @@ it is the only one the drawing cannot identify by its dimensions.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `branch_impedance` is neither a scalar nor one value per analysis frequency. |
+| TypeError | if `branch_impedance` holds a text or a value that is not a number. |
 
 ### SilencerChain.transfer_matrix
 

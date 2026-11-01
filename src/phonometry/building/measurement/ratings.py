@@ -1497,7 +1497,8 @@ def weighted_rating_extended(
     rating = float(_REF_THIRD_OCTAVE[_INDEX_500_THIRD]) + shift
 
     def _term(bands: np.ndarray, spectrum: Sequence[int]) -> float:
-        x_aj = -energy_sum(real_array(spectrum, "spectrum") - bands)
+        # The C and Ctr spectra of the standard, a library table no caller hands.
+        x_aj = -energy_sum(np.subtract(spectrum, bands))
         return _reduce(value=float(x_aj), one_decimal=one_decimal) - rating
 
     c = _term(core_measured, _SPECTRUM1_THIRD)

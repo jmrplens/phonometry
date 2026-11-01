@@ -356,9 +356,10 @@ def _encode_frames(data: np.ndarray, subtype: str) -> bytes:
         return _pack_pcm24(interleaved)
     if subtype == "PCM_32":
         return interleaved.astype("<i4").tobytes()
+    samples = real_array(interleaved, "x")
     if subtype == "FLOAT":
-        return interleaved.astype("<f4").tobytes()
-    return interleaved.astype("<f8").tobytes()
+        return samples.astype("<f4").tobytes()
+    return samples.astype("<f8").tobytes()
 
 
 def frame_riff_chunk(chunk_id: bytes, payload: bytes) -> bytes:

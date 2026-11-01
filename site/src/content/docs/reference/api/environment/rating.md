@@ -37,6 +37,13 @@ $$
 
 **Returns:** Composite rating level in dB.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | for no period, a period that is not three numbers, a duration that is not positive and finite, or durations that do not sum to 24 h. |
+| TypeError | if `periods` holds a text or a value that is not a real number. |
+
 ## lden
 
 ```python

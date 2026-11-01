@@ -695,7 +695,7 @@ def sound_power_intensity(
             stacklevel=2,
         )
 
-    freqs = None if frequencies is None else np.asarray(frequencies, dtype=np.float64)
+    freqs = None if frequencies is None else real_array(frequencies, "frequencies")
     # The per-band grade (clause 8.4), the A-weighted screening (10.6 b) and
     # the A-weighted total are read by the result from these fields.
     result = SoundPowerIntensityResult(

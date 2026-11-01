@@ -37,6 +37,7 @@ from numpy.typing import ArrayLike, NDArray
 
 from ..._internal.frozen import OwnsArrays, read_only
 from ..._internal.validation import (
+    complex_array,
     real_array,
     require_above_absolute_zero_array,
     require_choice,
@@ -226,7 +227,7 @@ def _warn_astm_plane_wave(
         raise ValueError(msg)
     if diameter_m <= 0.0:
         raise ValueError(_DIAMETER_POSITIVE)
-    k = np.real(np.asarray(wavenumber, dtype=np.complex128))
+    k = np.real(complex_array(wavenumber, "wavenumber"))
     ku = _ASTM_KU_CIRCULAR if shape == "circular" else _ASTM_KU_RECTANGULAR
     two_pi = 2.0 * np.pi
     k_upper = min(
@@ -344,8 +345,12 @@ def wave_decomposition(
         ``"square"``.
     :return: The four complex amplitudes, as a :class:`WaveAmplitudes`.
     :raises TypeError: if ``diameter_m``, ``s1`` or ``s2`` is not a single number, or
-        ``shape`` is not a text.
+        ``shape`` is not a text, or ``l1`` or ``l2`` is not a single number, or ``h1``,
+        ``h2``, ``h3``, ``h4`` or ``wavenumber`` holds a text or a value that is not a
+        number.
     """
+    require_scalar(l1, "l1")
+    require_scalar(l2, "l2")
     require_choice(shape, "shape", ("circular", "rectangular", "square"))
     require_scalar(s1, "s1")
     require_scalar(s2, "s2")
@@ -362,11 +367,11 @@ def wave_decomposition(
             shape=canonical,
             stacklevel=2,
         )
-    ha = np.asarray(h1, dtype=np.complex128)
-    hb = np.asarray(h2, dtype=np.complex128)
-    hc = np.asarray(h3, dtype=np.complex128)
-    hd = np.asarray(h4, dtype=np.complex128)
-    k = np.asarray(wavenumber, dtype=np.complex128)
+    ha = complex_array(h1, "h1")
+    hb = complex_array(h2, "h2")
+    hc = complex_array(h3, "h3")
+    hd = complex_array(h4, "h4")
+    k = complex_array(wavenumber, "wavenumber")
     two_sin1 = 2.0 * np.sin(k * s1)
     two_sin2 = 2.0 * np.sin(k * s2)
     a = 1j * (ha * np.exp(-1j * k * l1) - hb * np.exp(-1j * k * (l1 + s1))) / two_sin1
@@ -410,15 +415,16 @@ def face_quantities(
     :param characteristic_impedance: Characteristic impedance ``rho c``, in rayls.
     :return: The face pressures and velocities, as a :class:`FaceQuantities`.
     :raises TypeError: if ``characteristic_impedance`` or ``thickness_m`` is not a
-        single number.
+        single number, or ``b``, ``c``, ``d`` or ``wavenumber`` holds a text or a value
+        that is not a number.
     """
     require_positive(characteristic_impedance, "characteristic_impedance")
     thickness_m = require_positive(thickness_m, "thickness_m")
-    av = np.asarray(a, dtype=np.complex128)
-    bv = np.asarray(b, dtype=np.complex128)
-    cv = np.asarray(c, dtype=np.complex128)
-    dv = np.asarray(d, dtype=np.complex128)
-    k = np.asarray(wavenumber, dtype=np.complex128)
+    av = complex_array(a, "a")
+    bv = complex_array(b, "b")
+    cv = complex_array(c, "c")
+    dv = complex_array(d, "d")
+    k = complex_array(wavenumber, "wavenumber")
     ep = np.exp(-1j * k * thickness_m)
     em = np.exp(1j * k * thickness_m)
     p0 = av + bv
@@ -704,7 +710,7 @@ def air_layer_transfer_matrix(
     :param characteristic_impedance: Characteristic impedance ``rho c``, in rayls.
     :return: The air-layer :class:`TransferMatrix`.
     :raises TypeError: if ``characteristic_impedance`` or ``thickness_m`` is not a
-        single number.
+        single number, or ``wavenumber`` holds a text or a value that is not a number.
     """
     require_scalar(thickness_m, "thickness_m")
     require_positive(characteristic_impedance, "characteristic_impedance")
@@ -712,7 +718,7 @@ def air_layer_transfer_matrix(
         msg = "'thickness_m' must be positive."
         raise ValueError(msg)
     rc = characteristic_impedance
-    k = np.asarray(wavenumber, dtype=np.complex128)
+    k = complex_array(wavenumber, "wavenumber")
     kd = k * thickness_m
     cos = np.asarray(np.cos(kd), dtype=np.complex128)
     sin = np.asarray(np.sin(kd), dtype=np.complex128)
@@ -785,7 +791,7 @@ def _warn_ill_conditioned(
     stacklevel: int,
 ) -> None:
     """Flag a near-singular transfer-matrix solve (poor conditioning)."""
-    den_mag = np.abs(np.asarray(den, dtype=np.complex128))
+    den_mag = np.abs(complex_array(den, "den"))
     bad = den_mag < _MATRIX_COND_EPS * real_array(scale, "scale")
     n = int(np.count_nonzero(bad))
     if n:
@@ -877,7 +883,7 @@ def transfer_matrix_two_load(
         retained on the result).
     :raises TypeError: if ``diameter_m``, ``s1`` or ``s2`` is not a single number, or
         ``shape`` is not a text, or ``frequencies`` holds a text or a value that is not
-        a real number.
+        a real number, or ``wavenumber`` holds a text or a value that is not a number.
     """
     require_choice(shape, "shape", ("circular", "rectangular", "square"))
     canonical = _canonical_shape(shape)
@@ -986,7 +992,7 @@ def transfer_matrix_one_load(
         retained on the result).
     :raises TypeError: if ``diameter_m``, ``s1`` or ``s2`` is not a single number, or
         ``shape`` is not a text, or ``frequencies`` holds a text or a value that is not
-        a real number.
+        a real number, or ``wavenumber`` holds a text or a value that is not a number.
     """
     require_choice(shape, "shape", ("circular", "rectangular", "square"))
     canonical = _canonical_shape(shape)

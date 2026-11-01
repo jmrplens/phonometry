@@ -557,4 +557,4 @@ clause's and is not a parameter.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an unknown quantity, non-positive mass or frequency, or mismatched shapes. |
-| TypeError | if `mass` is not a single number, or `quantity` is not a text, or `frequencies` holds a text or a value that is not a real number. |
+| TypeError | if `mass` is not a single number, or `quantity` is not a text, or `frequencies` holds a text or a value that is not a real number, or `frf` holds a text or a value that is not a number. |

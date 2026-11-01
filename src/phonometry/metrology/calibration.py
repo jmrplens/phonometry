@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Literal, overload
 
 import numpy as np
 
-from .._internal.validation import real_array
+from .._internal.validation import real_array, require_scalar
 from .._internal.warnings import PhonometryWarning
 from ..io._resolve import SignalInput, resolve_optional_fs, resolve_samples
 from .reference_values import REFERENCE_VALUES
@@ -163,8 +163,12 @@ def sensitivity(
         The default (False) keeps the exact legacy broadband-RMS behaviour;
         enable it for noisy coupler recordings.
     :return: Calibration factor (sensitivity multiplier).
-    :raises TypeError: if ``calibrator_class`` is not a text.
+    :raises TypeError: if ``calibrator_class`` is not a text, or ``frequency``,
+        ``reference_pressure_pa`` or ``target_spl`` is not a single number.
     """
+    require_scalar(frequency, "frequency")
+    require_scalar(reference_pressure_pa, "reference_pressure_pa")
+    require_scalar(target_spl, "target_spl")
     fs = resolve_optional_fs(reference_signal, fs)
     # calibrate=False: this function *derives* the digital-to-pascal factor
     # from a calibrator take, so scaling the samples by a factor the object

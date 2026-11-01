@@ -91,6 +91,7 @@ from ..._internal.boundary import settled_ratio
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     check_engine,
+    complex_array,
     real_array,
     require_choice,
     require_count,
@@ -249,7 +250,7 @@ def convert_frf(
             msg = f"unknown {role} FRF {name!r}; choose from {tuple(_FRF_TYPES)}."
             raise ValueError(msg)
     omega = _omega(frequency)
-    val = np.asarray(value, dtype=np.complex128)
+    val = complex_array(value, "value")
     if (_FRF_TYPES[source][1] or _FRF_TYPES[target][1]) and not np.all(
         np.abs(val) > 0.0
     ):
@@ -498,12 +499,13 @@ def verify_rigid_mass_calibration(
     :raises ValueError: for an unknown quantity, non-positive mass or
         frequency, or mismatched shapes.
     :raises TypeError: if ``mass`` is not a single number, or ``quantity`` is not a
-        text, or ``frequencies`` holds a text or a value that is not a real number.
+        text, or ``frequencies`` holds a text or a value that is not a real number, or
+        ``frf`` holds a text or a value that is not a number.
     """
     require_choice(quantity, "quantity", _RIGID_MASS_QUANTITIES)
     mass = require_positive(mass, "mass")
     freq = np.atleast_1d(real_array(frequencies, "frequencies"))
-    measured = np.abs(np.atleast_1d(np.asarray(frf, dtype=np.complex128)))
+    measured = np.abs(np.atleast_1d(complex_array(frf, "frf")))
     require_equal_shapes(
         "verify_rigid_mass_calibration",
         {"frf": measured.shape, "frequencies": freq.shape},

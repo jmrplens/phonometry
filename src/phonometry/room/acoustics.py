@@ -713,8 +713,10 @@ def filter_bandwidth(
         an array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: If ``fraction`` is not one the clause prints a
         coefficient for, or a centre frequency is not positive and finite.
-    :raises TypeError: if ``center`` holds a text or a value that is not a real number.
+    :raises TypeError: if ``center`` holds a text or a value that is not a real number,
+        or ``fraction`` is not a single number.
     """
+    require_scalar(fraction, "fraction")
     if fraction not in FILTER_BANDWIDTH_FRACTION:
         msg = (
             f"ISO 3382-1:2009, 7.1 prints a bandwidth for the octave and "

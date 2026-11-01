@@ -249,7 +249,7 @@ exactly one.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for invalid geometry, or if not exactly one of `depths` and `reflection` is supplied. |
-| TypeError | if `frequency`, `source_angle_deg`, `speed_of_sound` or `well_width` is not a single number, or `n_repetitions` is a flag, a text or an array where a count goes, or `angles_deg` or `depths` holds a text or a value that is not a real number. |
+| TypeError | if `frequency`, `source_angle_deg`, `speed_of_sound` or `well_width` is not a single number, or `n_repetitions` is a flag, a text or an array where a count goes, or `angles_deg` or `depths` holds a text or a value that is not a real number, or `reflection` holds a text or a value that is not a number. |
 
 ## predicted_diffusion_spectrum
 

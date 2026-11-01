@@ -193,7 +193,7 @@ band per row when it is handed a two-dimensional survey.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If fewer than `ceil(360 / 12,5) = 29` bearings lie along `axis`, or the levels are empty or non-finite. |
-| TypeError | if `levels` holds a text or a value that is not a real number. |
+| TypeError | if `levels` holds a text or a value that is not a real number, or `axis` is not a single number. |
 
 ## DIRECTIVITY_STEP_DEG
 

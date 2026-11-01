@@ -211,7 +211,7 @@ causal part (B.5).
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `method` is not a text. |
+| TypeError | if `method` is not a text, or `regularization` is not a single number. |
 
 ## ImpulseResponseResult
 
@@ -448,7 +448,7 @@ bipolar sequence and its (flat) magnitude spectrum.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an unknown `kind`, or an empty signal. |
-| TypeError | if `kind` is not a text, or `x` holds a text or a value that is not a real number. |
+| TypeError | if `kind` is not a text, or `x` holds a text or a value that is not a real number, or `fs` is not a single number. |
 
 ## shaped_sweep_signal
 

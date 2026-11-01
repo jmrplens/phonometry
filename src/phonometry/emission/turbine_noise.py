@@ -619,11 +619,12 @@ def _outline(edges: np.ndarray, levels: np.ndarray, base: float) -> np.ndarray:
     the front end, across the top with every step, and down the rear end to
     key position 5.
     """
-    points = [(float(edges[0]), base)]
-    for i, level in enumerate(levels):
-        points.extend(((edges[i], level), (edges[i + 1], level)))
-    points.append((float(edges[-1]), base))
-    return real_array(points, "base", copy=True)
+    # Every edge twice, each level on the run between two edges, and the base
+    # at both ends: the vertices (e0, base), (e0, l0), (e1, l0), (e1, l1), ...,
+    # (en, base) of the values the caller of this helper computed.
+    x = np.repeat(edges, 2)
+    y = np.concatenate(([base], np.repeat(levels, 2), [base]))
+    return np.column_stack((x, y))
 
 
 def _arc_lengths(polyline: np.ndarray) -> np.ndarray:

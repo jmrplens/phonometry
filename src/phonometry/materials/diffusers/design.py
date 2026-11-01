@@ -67,6 +67,7 @@ from numpy.typing import ArrayLike, NDArray
 
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
+    complex_array,
     real_array,
     require_count,
     require_present,
@@ -225,7 +226,7 @@ def _scattered_pressure(
     up to the overall constant ``A``; only relative levels matter for the
     diffusion coefficient.
     """
-    r_period = np.asarray(reflection, dtype=np.complex128)
+    r_period = complex_array(reflection, "reflection")
     r_all = np.tile(r_period, n_repetitions)
     m = r_all.size
     k = 2.0 * np.pi * frequency / speed_of_sound
@@ -257,7 +258,7 @@ def _polar_levels(pressure: Complex) -> Real:
     ratio of energies. A magnitude of exactly zero maps to a large negative
     finite level rather than ``-inf`` so the coefficient stays defined.
     """
-    magnitude = np.abs(np.asarray(pressure, dtype=np.complex128))
+    magnitude = np.abs(complex_array(pressure, "pressure"))
     peak = float(np.max(magnitude))
     if peak <= 0.0:
         msg = "The predicted polar response carries no energy; check the inputs."
@@ -355,7 +356,7 @@ def _resolve_reflection(
         msg = "Provide exactly one of 'depths' or 'reflection'."
         raise ValueError(msg)
     if reflection is not None:
-        r = np.atleast_1d(np.asarray(reflection, dtype=np.complex128))
+        r = np.atleast_1d(complex_array(reflection, "reflection"))
         if r.ndim != 1 or r.size < _MIN_WELLS:
             msg = "'reflection' must be a 1-D sequence of at least two wells."
             raise ValueError(msg)
@@ -486,7 +487,8 @@ def predict_diffuser_polar_response(
     :raises TypeError: if ``frequency``, ``source_angle_deg``, ``speed_of_sound`` or
         ``well_width`` is not a single number, or ``n_repetitions`` is a flag, a text or
         an array where a count goes, or ``angles_deg`` or ``depths`` holds a text or a
-        value that is not a real number.
+        value that is not a real number, or ``reflection`` holds a text or a value that
+        is not a number.
     """
     w, f, ang, psi, n_periods, c = _prepare_geometry(
         well_width,

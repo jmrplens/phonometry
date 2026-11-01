@@ -141,7 +141,7 @@ arithmetic mean of Re{Y} over the contact points, Formula 16).
 | Exception | When |
 | :--- | :--- |
 | ValueError | if `power_level` is not finite, `Re{plate_mobility}` is not positive and finite, or the two shapes do not broadcast together. |
-| TypeError | if `power_level` holds a text or a value that is not a real number. |
+| TypeError | if `power_level` holds a text or a value that is not a real number, or `plate_mobility` holds a text or a value that is not a number. |
 
 ## equivalent_free_velocity_level
 
@@ -176,7 +176,7 @@ combine through Formula (19) into $|Y_\mathrm{S,eq}| = v_\mathrm{f} / F_\mathrm{
 | Exception | When |
 | :--- | :--- |
 | ValueError | if `power_level` is not finite, `Re{plate_mobility}` is not positive and finite, or the two shapes do not broadcast together. |
-| TypeError | if `power_level` holds a text or a value that is not a real number. |
+| TypeError | if `power_level` holds a text or a value that is not a real number, or `plate_mobility` holds a text or a value that is not a number. |
 
 ## mean_free_velocity_level
 

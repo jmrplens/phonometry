@@ -919,8 +919,11 @@ def covering_improvement(
         ``fraction`` is not 1 or 3.
     :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a float),
         ``impact_rate`` is not a single number, or ``frequencies`` holds a text or a
-        value that is not a real number.
+        value that is not a real number, or ``covering_stiffness`` or
+        ``plate_stiffness`` is not a single number.
     """
+    require_scalar(covering_stiffness, "covering_stiffness")
+    require_scalar(plate_stiffness, "plate_stiffness")
     f = require_positive_array(frequencies, "frequencies")
     fi = require_positive(impact_rate, "impact_rate")
     fraction = require_band_fraction(fraction, "fraction")

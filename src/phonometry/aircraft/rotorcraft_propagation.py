@@ -70,6 +70,7 @@ from .._internal.validation import (
     require_positive_array,
     require_ranks,
     require_same_length,
+    require_scalar,
 )
 
 if TYPE_CHECKING:
@@ -597,8 +598,10 @@ def diffraction_attenuation(
     :return: The attenuation ``ΔLd`` per band, in dB (``≥ 0``).
     :raises ValueError: If the inputs are invalid.
     :raises TypeError: if ``edge_height_m`` or ``edge_span`` is not a single number, or
-        ``frequencies`` holds a text or a value that is not a real number.
+        ``frequencies`` holds a text or a value that is not a real number, or
+        ``path_difference`` is not a single number.
     """
+    require_scalar(path_difference, "path_difference")
     f = require_positive_array(frequencies, "frequencies")
     if not np.isfinite(path_difference):
         msg = "'path_difference' must be finite."

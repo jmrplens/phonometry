@@ -881,7 +881,8 @@ def reverberation_time_models(
         n_bands = freq.size
 
     def _fit(arr: np.ndarray) -> np.ndarray:
-        return np.broadcast_to(arr, (n_bands,)).astype(np.float64)
+        # The five curves are float arrays the function computed above.
+        return np.array(np.broadcast_to(arr, (n_bands,)))
 
     return ReverberationModelResult(
         frequencies=freq,

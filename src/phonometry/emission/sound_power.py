@@ -844,17 +844,20 @@ def environmental_correction(
         read does not shape the result.
     :raises TypeError: if ``room_surface``, ``surface_area`` or ``volume`` is not a
         single number, or ``mean_absorption_coefficient`` or ``reverberation_time``
-        holds a text or a value that is not a real number.
+        holds a text or a value that is not a real number, or ``absorption_area`` holds
+        a text or a value that is not a real number.
     """
     surface_area = require_positive(surface_area, "surface_area")
-    area = absorption_area
     read = absorption_area
-    if area is None:
-        area = _room_absorption_area(
+    if absorption_area is not None:
+        area = real_array(absorption_area, "absorption_area")
+    else:
+        derived = _room_absorption_area(
             reverberation_time, volume, mean_absorption_coefficient, room_surface
         )
-        if area is None:
+        if derived is None:
             return 0.0  # no room data at all: the field is treated as free
+        area = derived
         # Both pairs are whole by now, and the reverberation time comes first.
         read = (
             reverberation_time

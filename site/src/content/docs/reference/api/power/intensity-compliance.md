@@ -534,4 +534,4 @@ intervals across the whole 50 Hz to 6.3 kHz range.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs disagree in length, a frequency is not a tabulated band, a band is repeated, or `device`/`spacing_m` are invalid. |
-| TypeError | if `device` is not a text, or `frequencies` or `residual_index` holds a text or a value that is not a real number. |
+| TypeError | if `device` is not a text, or `frequencies` or `residual_index` holds a text or a value that is not a real number, or `spacing_m` is not a single number. |

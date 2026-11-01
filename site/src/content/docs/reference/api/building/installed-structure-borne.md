@@ -108,6 +108,7 @@ connection, Formula 19b).
 | Exception | When |
 | :--- | :--- |
 | ValueError | if `Y_s` is zero/non-finite or `Re{Y_i}` is not positive and finite. |
+| TypeError | if `receiver_mobility`, `source_mobility` or `transfer_mobility` holds a text or a value that is not a number. |
 
 ## coupling_term_force_source
 
@@ -138,6 +139,7 @@ $$
 | Exception | When |
 | :--- | :--- |
 | ValueError | if `Y_s` is zero/non-finite or `Re{Y_i}` is not positive and finite. |
+| TypeError | if `receiver_mobility` or `source_mobility` holds a text or a value that is not a number. |
 
 ## coupling_term_velocity_source
 
@@ -168,6 +170,7 @@ $$
 | Exception | When |
 | :--- | :--- |
 | ValueError | if `Y_s` is zero/non-finite or `Re{Z_i}` is not positive and finite. |
+| TypeError | if `receiver_impedance` holds a text or a value that is not a real number, or `source_mobility` holds a text or a value that is not a number. |
 
 ## installed_power_from_reception_plate
 
@@ -208,7 +211,7 @@ mobility instead of `Y_inf,i` yields the characteristic level
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive receiver or plate mobility. |
-| TypeError | if `plate_mobility` is not a single number, or `reception_plate_level` holds a text or a value that is not a real number. |
+| TypeError | if `plate_mobility` is not a single number, or `reception_plate_level` holds a text or a value that is not a real number, or `receiver_mobility` holds a text or a value that is not a number. |
 
 ## installed_source_prediction
 

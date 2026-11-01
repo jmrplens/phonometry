@@ -82,6 +82,7 @@ stable causal inverse filter.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
+| TypeError | if `response` holds a text or a value that is not a number. |
 
 ## group_delay
 
@@ -113,7 +114,7 @@ impulse response must fit the record the grid implies.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
-| TypeError | if `fs` is not a single number. |
+| TypeError | if `fs` is not a single number, or `response` holds a text or a value that is not a number. |
 
 ## min_phase
 
@@ -151,13 +152,7 @@ ignored: passing a plain magnitude array works.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
-| TypeError | if `oversample` is a flag, a text or an array where a count goes. |
-
-:::note
-Magnitude zeros cannot be represented by a minimum-phase system;
-they are floored at 1e-15 of the peak and the phase near them is
-not reliable (see the module docstring).
-:::
+| TypeError | if `oversample` is a flag, a text or an array where a count goes. .. note:: Magnitude zeros cannot be represented by a minimum-phase system; they are floored at 1e-15 of the peak and the phase near them is not reliable (see the module docstring), or `response` holds a text or a value that is not a number. |
 
 ## phase_decomposition
 
@@ -193,7 +188,7 @@ delays quantify both in seconds.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
-| TypeError | if `fs` is not a single number. |
+| TypeError | if `fs` is not a single number, or `response` holds a text or a value that is not a number. |
 
 ## PhaseDecompositionResult
 

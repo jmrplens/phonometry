@@ -79,7 +79,7 @@ $\mathrm{PL} = \text{spreading} + \alpha R$ versus range.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
-| TypeError | if `frequency_hz` is not a single number, or `law` or `model` is not a text, or `range_m` holds a text or a value that is not a real number. |
+| TypeError | if `frequency_hz` is not a single number, or `law` or `model` is not a text, or `range_m` holds a text or a value that is not a real number, or `ph` is not a single number. |
 
 ## PropagationLossResult
 
@@ -158,7 +158,7 @@ Volume absorption coefficient $\alpha$, in dB/km.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `model` is unknown or an input is invalid. |
-| TypeError | if `depth`, `salinity` or `temperature_c` is not a single number, or `model` is not a text, or `frequency_hz` holds a text or a value that is not a real number. |
+| TypeError | if `depth`, `salinity` or `temperature_c` is not a single number, or `model` is not a text, or `frequency_hz` holds a text or a value that is not a real number, or `ph` is not a single number. |
 
 ## spreading_loss
 

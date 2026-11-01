@@ -7,10 +7,7 @@ from typing import TYPE_CHECKING, Any, Literal, cast, overload
 
 import numpy as np
 
-from .._internal.validation import (
-    real_array,
-    require_choice,
-)
+from .._internal.validation import real_array, require_choice, require_scalar
 from .common import (
     _C_EDGE,
     _C_MUTED,
@@ -1277,8 +1274,9 @@ def plot_excitation(
     :return: The time-domain axes (``ax`` given) or the tuple of two axes.
     :raises ValueError: for an unknown ``kind``, or an empty signal.
     :raises TypeError: if ``kind`` is not a text, or ``x`` holds a text or a value that
-        is not a real number.
+        is not a real number, or ``fs`` is not a single number.
     """
+    require_scalar(fs, "fs")
     from .._i18n import check_language, localize_axes
 
     check_language(language)

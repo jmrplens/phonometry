@@ -63,6 +63,7 @@ from typing import TYPE_CHECKING, Literal
 import numpy as np
 
 from ..._internal.validation import (
+    complex_array,
     real_array,
     require_choice,
     require_positive,
@@ -387,9 +388,11 @@ def injected_power(force_n: ArrayLike, mobility: ArrayLike) -> NDArray[np.float6
     :param mobility: Complex point mobility ``Y`` (broadcast with *force_n*),
         in m/(N.s).
     :return: The injected power ``W``, in W.
+    :raises TypeError: if ``force_n`` or ``mobility`` holds a text or a value that is
+        not a number.
     """
-    f = np.asarray(force_n, dtype=np.complex128)
-    y = np.asarray(mobility, dtype=np.complex128)
+    f = complex_array(force_n, "force_n")
+    y = complex_array(mobility, "mobility")
     return np.asarray(0.5 * np.abs(f) ** 2 * y.real, dtype=np.float64)
 
 

@@ -129,7 +129,7 @@ without a warning, since its lines were excluded rather than missing.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | for a mask that is not boolean, or `frequencies` holds a text or a value that is not a real number. |
+| TypeError | for a mask that is not boolean, or `frequencies` holds a text or a value that is not a real number, or `stiffness` holds a text or a value that is not a number. |
 | ValueError | for frequencies that are not one-dimensional, finite, positive and distinct, a stiffness of another length or not finite, a mask of another length, or no valid line. |
 
 **Warns**
@@ -303,6 +303,7 @@ blocked transfer stiffness alone.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a zero termination stiffness. |
+| TypeError | if `driving_point_stiffness` or `termination_stiffness` holds a text or a value that is not a number. |
 
 ## check_blocked_output
 
@@ -500,7 +501,7 @@ valid lines into bands (Formulas (6), (7)).
 | Exception | When |
 | :--- | :--- |
 | ValueError | for frequencies that are not finite, positive and strictly increasing, phasors that do not carry one value per frequency, a zero input acceleration, or no adequate line from 1 Hz to 20 Hz. |
-| TypeError | if `frequencies` holds a text or a value that is not a real number. |
+| TypeError | if `frequencies` holds a text or a value that is not a real number, or `input_acceleration_m_s2`, `input_force_n`, `output_acceleration_m_s2` or `unwanted_acceleration_m_s2` holds a text or a value that is not a number. |
 
 **Warns**
 
@@ -858,7 +859,7 @@ follow ISO 7626-1 and ISO 7626-2. See [`EffectiveBlockingMass`](/phonometry/refe
 | Exception | When |
 | :--- | :--- |
 | ValueError | for frequencies that are not finite, positive and strictly increasing, phasors of another length, a zero or non-finite effective mass, or a non-positive `m2`. |
-| TypeError | if `blocking_mass` is not a single number, or `frequencies` holds a text or a value that is not a real number. |
+| TypeError | if `blocking_mass` is not a single number, or `frequencies` holds a text or a value that is not a real number, or `first_acceleration_m_s2`, `force_n` or `second_acceleration_m_s2` holds a text or a value that is not a number. |
 
 ## EffectiveBlockingMass
 
@@ -995,7 +996,7 @@ not [`valid`](/phonometry/reference/api/vibration/transfer-stiffness/#transferst
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `blocking_mass` or `flange_mass` is not a single number, or `frequencies` holds a text or a value that is not a real number. |
+| TypeError | if `blocking_mass` or `flange_mass` is not a single number, or `frequencies` holds a text or a value that is not a real number, or `transmissibility` holds a text or a value that is not a number. |
 
 **Warns**
 
@@ -1112,6 +1113,7 @@ negligible; it is the tangent of the phase angle of the transfer stiffness.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a purely imaginary stiffness ($\operatorname{Re}(k_{2,1}) = 0$), for which the loss factor is undefined. |
+| TypeError | if `stiffness` holds a text or a value that is not a number. |
 
 ## MIN_FREQUENCIES_PER_BAND
 
@@ -1270,6 +1272,7 @@ the input displacement phasor.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a zero input displacement (dead input channel). |
+| TypeError | if `blocking_force` or `input_displacement` holds a text or a value that is not a number. |
 
 ## transfer_stiffness_indirect
 
@@ -1325,7 +1328,7 @@ $|10 \log_{10}(m_{2,\mathrm{eff}}^2 / m_2^2)| \le 1$ dB
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive frequency or blocking mass. |
-| TypeError | if `blocking_mass` or `flange_mass` is not a single number, or `frequency` holds a text or a value that is not a real number. |
+| TypeError | if `blocking_mass` or `flange_mass` is not a single number, or `frequency` holds a text or a value that is not a real number, or `transmissibility` holds a text or a value that is not a number. |
 
 **Warns**
 
@@ -1362,7 +1365,7 @@ stiffness.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive reference, a non-finite stiffness, or a zero stiffness magnitude (a dead channel has no level). |
-| TypeError | if `reference` is not a single number. |
+| TypeError | if `reference` is not a single number, or `stiffness` holds a text or a value that is not a number. |
 
 ## TransferStiffnessResult
 

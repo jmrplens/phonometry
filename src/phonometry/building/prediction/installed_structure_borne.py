@@ -92,6 +92,7 @@ if TYPE_CHECKING:
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     check_engine,
+    complex_array,
     real_array,
     require_band_fraction,
     require_choice,
@@ -138,7 +139,7 @@ _REFERENCE_PLATE_MOBILITY: float = 5.0e-6
 
 def _positive_real_part(values: ArrayLike, name: str) -> np.ndarray:
     """Validate that the real part of a mobility/impedance is positive."""
-    arr = np.asarray(values, dtype=np.complex128)
+    arr = complex_array(values, name)
     re = np.real(arr)
     if (
         not np.all(np.isfinite(arr.real))
@@ -172,7 +173,7 @@ def _positive_values(values: ArrayLike, name: str) -> np.ndarray:
 
 def _nonzero_magnitude(values: ArrayLike, name: str) -> np.ndarray:
     """Validate a finite, non-zero (complex) mobility magnitude."""
-    arr = np.asarray(values, dtype=np.complex128)
+    arr = complex_array(values, name)
     mag = np.abs(arr)
     if not np.all(np.isfinite(mag)) or not np.all(mag > 0.0):
         msg = f"'{name}' must be finite and non-zero."
@@ -212,10 +213,12 @@ def coupling_term(
         :math:`D_\mathrm{C} \approx -10` dB).
     :raises ValueError: if ``Y_s`` is zero/non-finite or ``Re{Y_i}`` is not
         positive and finite.
+    :raises TypeError: if ``receiver_mobility``, ``source_mobility`` or
+        ``transfer_mobility`` holds a text or a value that is not a number.
     """
     ys = _nonzero_magnitude(source_mobility, "source_mobility")
     yi = _positive_real_part(receiver_mobility, "receiver_mobility")
-    yk = np.asarray(transfer_mobility, dtype=np.complex128)
+    yk = complex_array(transfer_mobility, "transfer_mobility")
     numerator = np.abs(ys + yi + yk) ** 2
     denominator = np.abs(ys) * np.real(yi)
     return np.asarray(10.0 * np.log10(numerator / denominator), dtype=np.float64)
@@ -236,6 +239,8 @@ def coupling_term_force_source(
     :return: The coupling term ``D_C``, in dB.
     :raises ValueError: if ``Y_s`` is zero/non-finite or ``Re{Y_i}`` is not
         positive and finite.
+    :raises TypeError: if ``receiver_mobility`` or ``source_mobility`` holds a text or a
+        value that is not a number.
     """
     ys = np.abs(_nonzero_magnitude(source_mobility, "source_mobility"))
     yi = np.real(_positive_real_part(receiver_mobility, "receiver_mobility"))
@@ -257,6 +262,9 @@ def coupling_term_velocity_source(
     :return: The coupling term ``D_C``, in dB.
     :raises ValueError: if ``Y_s`` is zero/non-finite or ``Re{Z_i}`` is not
         positive and finite.
+    :raises TypeError: if ``receiver_impedance`` holds a text or a value that is not a
+        real number, or ``source_mobility`` holds a text or a value that is not a
+        number.
     """
     ys = np.abs(_nonzero_magnitude(source_mobility, "source_mobility"))
     zi = np.real(_positive_real_part(receiver_impedance, "receiver_impedance"))
@@ -963,11 +971,12 @@ def installed_power_from_reception_plate(
     :return: The mobility-corrected power level, in dB re 1 pW.
     :raises ValueError: for a non-positive receiver or plate mobility.
     :raises TypeError: if ``plate_mobility`` is not a single number, or
-        ``reception_plate_level`` holds a text or a value that is not a real number.
+        ``reception_plate_level`` holds a text or a value that is not a real number, or
+        ``receiver_mobility`` holds a text or a value that is not a number.
     """
     plate_mobility = require_positive(plate_mobility, "plate_mobility")
     lw = real_array(reception_plate_level, "reception_plate_level")
-    y_i = np.abs(np.asarray(receiver_mobility, dtype=np.complex128))
+    y_i = np.abs(complex_array(receiver_mobility, "receiver_mobility"))
     if not np.all(np.isfinite(y_i)) or np.any(y_i <= 0.0):
         msg = "'receiver_mobility' must be finite and non-zero."
         raise ValueError(msg)

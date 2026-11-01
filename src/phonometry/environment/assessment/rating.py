@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
-from ..._internal.validation import require_scalar
+from ..._internal.validation import real_array, require_scalar
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -26,6 +26,12 @@ __all__ = [
 # (ISO 1996-1:2016, 6.5): pure FP-accumulation slack, not a quantity
 # from the standard.
 _HOURS_SUM_TOL = 1e-9
+
+
+#: A period table has one row per period and three columns: level, hours
+#: and adjustment.
+_PERIOD_TABLE_RANK = 2
+_PERIOD_FIELDS = 3
 
 
 def composite_rating_level(periods: Iterable[tuple[float, float, float]]) -> float:
@@ -45,12 +51,21 @@ def composite_rating_level(periods: Iterable[tuple[float, float, float]]) -> flo
         source adjustment K (e.g. ISO 1996-1 Table A.1: evening 5 dB,
         night 10 dB). Hours must be positive and sum to 24.
     :return: Composite rating level in dB.
+    :raises ValueError: for no period, a period that is not three numbers, a
+        duration that is not positive and finite, or durations that do not
+        sum to 24 h.
+    :raises TypeError: if ``periods`` holds a text or a value that is not a
+        real number.
     """
     periods = list(periods)
     if not periods:
         msg = "At least one period is required."
         raise ValueError(msg)
-    hours = np.array([h for _, h, _ in periods], dtype=np.float64)
+    table = real_array(periods, "periods")
+    if table.ndim != _PERIOD_TABLE_RANK or table.shape[1] != _PERIOD_FIELDS:
+        msg = "Every period must be a (level, hours, adjustment) tuple."
+        raise ValueError(msg)
+    hours = table[:, 1]
     if not np.all(np.isfinite(hours)) or np.any(hours <= 0):
         msg = "Every period duration must be a positive, finite number."
         raise ValueError(msg)
@@ -58,7 +73,7 @@ def composite_rating_level(periods: Iterable[tuple[float, float, float]]) -> flo
     if abs(total - 24.0) > _HOURS_SUM_TOL:
         msg = f"Period durations must sum to 24 h; got {total!r}."
         raise ValueError(msg)
-    acc = sum(h / 24.0 * 10 ** (0.1 * (level + k)) for level, h, k in periods)
+    acc = sum(h / 24.0 * 10 ** (0.1 * (level + k)) for level, h, k in table.tolist())
     return float(10 * np.log10(acc))
 
 

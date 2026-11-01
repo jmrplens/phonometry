@@ -165,7 +165,7 @@ those two figures sit against the exact IEC 61260 band edges.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `fraction` is not one the clause prints a coefficient for, or a centre frequency is not positive and finite. |
-| TypeError | if `center` holds a text or a value that is not a real number. |
+| TypeError | if `center` holds a text or a value that is not a real number, or `fraction` is not a single number. |
 
 ## FILTER_BANDWIDTH_FRACTION
 

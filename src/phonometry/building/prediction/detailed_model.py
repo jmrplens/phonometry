@@ -1087,7 +1087,7 @@ def resonant_sound_reduction_index(
     *,
     frequencies: ArrayLike,
     critical_frequency: float,
-    correction: float = 8.0,
+    correction: ArrayLike = 8.0,
 ) -> np.ndarray:
     r"""Correct a measured ``R`` to resonant transmission only (Formula B.1).
 
@@ -1103,9 +1103,10 @@ def resonant_sound_reduction_index(
     :param sound_reduction_index: Measured index ``R`` per band, in dB.
     :param frequencies: Band centre frequencies, in Hz.
     :param critical_frequency: Critical frequency ``fc``, in Hz.
-    :param correction: Correction applied below ``fc``, in dB (Default: 8 dB;
-        Annex B.2 caps the estimate of Formula (B.8) at this value, and the
-        Annex L lightweight example reduces it around the cavity resonance).
+    :param correction: Correction applied below ``fc``, in dB, one value or
+        one per band (Default: 8 dB; Annex B.2 caps the estimate of Formula
+        (B.8) at this value, and the Annex L lightweight example reduces it
+        around the cavity resonance).
     :return: The resonant-only index ``R*`` per band, in dB.
     :raises ValueError: If an input is not positive/finite or the band counts
         disagree.

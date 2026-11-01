@@ -1039,6 +1039,7 @@ $Z_\mathrm{a}$: alternate this with
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an admittance or a sensitivity of zero, or a value that is not finite. |
+| TypeError | if `blocked_impedance_ohm`, `electrical_admittance_s` or `pressure_sensitivity_v_per_pa` holds a text or a value that is not a number. |
 
 ## PlaneWaveCoupler
 

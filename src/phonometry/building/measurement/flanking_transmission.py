@@ -346,6 +346,7 @@ def equivalent_absorption_length(
 def _broadcast(values: np.ndarray, n_bands: int, name: str) -> np.ndarray:
     """Broadcast a scalar-per-band array to ``n_bands``, or validate the count."""
     require_scalar(n_bands, "n_bands")
+    values = real_array(values, name)
     if values.size == 1:
         return np.full(n_bands, values[0], dtype=np.float64)
     if values.size != n_bands:
@@ -653,8 +654,10 @@ def vibration_reduction_index(
         if only one of the two structural reverberation times is supplied.
     :raises TypeError: if ``area_i``, ``area_j`` or ``junction_length`` is not a single
         number, or ``frequencies``, ``modal_overlap`` or ``velocity_level_difference``
-        holds a text or a value that is not a real number.
+        holds a text or a value that is not a real number, or ``speed_of_sound`` is not
+        a single number.
     """
+    require_scalar(speed_of_sound, "speed_of_sound")
     dv = _as_1d(velocity_level_difference, "velocity_level_difference")
     lij = _positive(junction_length, "junction_length")
     s_i = _positive(area_i, "area_i")

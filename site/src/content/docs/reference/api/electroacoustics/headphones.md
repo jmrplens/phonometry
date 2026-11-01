@@ -1602,7 +1602,7 @@ measurement covered 20 Hz to 20 kHz as 8.2.2.2 c) requires.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs differ in length, are not positive and finite, or no measurement frequency falls in the rated range. |
-| TypeError | if `rated_impedance_ohm` is not a single number, or `frequencies` holds a text or a value that is not a real number. |
+| TypeError | if `rated_impedance_ohm` is not a single number, or `frequencies` holds a text or a value that is not a real number, or `impedance_ohm` holds a text or a value that is not a number. |
 
 ## working_sound_pressure_level
 

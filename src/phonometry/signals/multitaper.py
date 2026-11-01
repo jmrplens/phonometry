@@ -16,9 +16,9 @@ one step further: the chi-square confidence interval keeps the form of
 Bendat & Piersol Eq. 8.163, but its degrees of freedom are
 per-frequency, because Thomson's adaptive weights (P&W Eq. 368a)
 downweight leakage-prone tapers wherever the spectrum is locally weak
-and that costs degrees of freedom there (P&W Eq. 370b). Calibration -
-no detrending, one-sided ``'density'`` scaling integrating to the signal
-power, ``'spectrum'`` scaling reading :math:`A^2/2` at a tone's peak -
+and that costs degrees of freedom there (P&W Eq. 370b). Calibration
+(no detrending, one-sided ``'density'`` scaling integrating to the signal
+power, ``'spectrum'`` scaling reading :math:`A^2/2` at a tone's peak)
 matches :mod:`phonometry.signals.spectra` exactly, so the two estimators
 of the same record are directly comparable.
 """
@@ -110,10 +110,9 @@ class MultitaperSpectralDensityResult(OwnsArrays):
         is locally white (exactly uniform weights would be
         :math:`\lambda_k / \sum \lambda_j`).
     :ivar eigenvalues: Concentration ratios :math:`\lambda_k(N, W)` of
-        the tapers -
-        the fraction of each taper's spectral-window energy inside the
-        design band :math:`[-W, W]` (P&W Section 7.1; near unity for
-        :math:`k < 2NW`).
+        the tapers: the fraction of each taper's spectral-window energy
+        inside the design band :math:`[-W, W]` (P&W Section 7.1; near
+        unity for :math:`k < 2NW`).
     :ivar time_half_bandwidth: The duration x half-bandwidth product
         ``NW`` (dimensionless; :math:`W = NW/(N \Delta t)`).
     :ivar n_tapers: Number of tapers ``K`` averaged.

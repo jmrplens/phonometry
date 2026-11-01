@@ -455,7 +455,7 @@ class EQResponseResult(OwnsArrays):
     :ivar magnitude_db: Cascade magnitude, in dB.
     :ivar phase_rad: Cascade phase, unwrapped, in radians.
     :ivar section_magnitude_db: Per-section magnitude, in dB, shape
-        ``(n_sections, n_frequencies)`` - the cascade magnitude is their sum.
+        ``(n_sections, n_frequencies)``; the cascade magnitude is their sum.
     :ivar sos: The designed cascade, shape ``(n_sections, 6)`` (scipy SOS
         layout, normalized so every section's ``a0`` is 1).
     :ivar fs: Sample rate, in Hz.

@@ -573,7 +573,7 @@ class MooreGlasbergLoudness(OwnsArrays):
 
         The three arrays are one axis read three ways: the sample i of the
         ERB-number scale, the centre frequency fc(i) of the auditory filter
-        sitting there, and the specific loudness N'(i) that filter produced -
+        sitting there, and the specific loudness N'(i) that filter produced,
         so they mean something only index for index. The chart pairs the
         scale with the pattern and takes the ends of the scale for its x
         limits, so a disagreement between those two surfaces late and

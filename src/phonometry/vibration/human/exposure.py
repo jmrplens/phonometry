@@ -1067,7 +1067,7 @@ def vibration_total_value(
 def wbv_exposure_basis(a_wx: float, a_wy: float, a_wz: float) -> float:
     r"""Whole-body exposure basis of Directive 2002/44/EC (Annex, Part B).
 
-    :math:`\max(1.4 a_{\mathrm{w}x}, 1.4 a_{\mathrm{w}y}, a_{\mathrm{w}z})` - the Directive bases
+    :math:`\max(1.4 a_{\mathrm{w}x}, 1.4 a_{\mathrm{w}y}, a_{\mathrm{w}z})`: the Directive bases
     the whole-body daily exposure ``A(8)`` on the *highest* of the
     frequency-weighted axis values :math:`1.4 a_{\mathrm{w}x}`,
     :math:`1.4 a_{\mathrm{w}y}`, :math:`a_{\mathrm{w}z}` for a seated or standing worker
@@ -1216,7 +1216,7 @@ def hav_vwf_lifetime_years(a8: float) -> float:
     r"""Years to 10 % vibration-white-finger prevalence (ISO 5349-1
     Eq. (C.1)).
 
-    :math:`D_\mathrm{y} = 31.8 \, A(8)^{-1.06}` - the group-mean lifetime exposure
+    :math:`D_\mathrm{y} = 31.8 \, A(8)^{-1.06}`: the group-mean lifetime exposure
     that produces finger blanching in 10 % of an exposed group
     (informative Annex C).
 

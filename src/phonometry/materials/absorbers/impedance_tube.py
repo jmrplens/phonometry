@@ -571,7 +571,7 @@ class ImpedanceTubeResult(OwnsArrays):
     The trailing fields retain the tube geometry the reduction was run with
     (microphone ``spacing_m`` ``s``, distance ``x1`` from the sample to the
     farther microphone, tube ``diameter_m`` and cross-section ``shape``, stored
-    canonically as ``"circular"``/``"rectangular"`` - a ``"square"`` input is
+    canonically as ``"circular"``/``"rectangular"``; a ``"square"`` input is
     kept as ``"rectangular"``). The diameter and the shape are ``None`` when
     they were not supplied to :func:`two_microphone_impedance`; the spacing
     and ``x1`` are always there, because the reduction cannot run without
@@ -597,7 +597,7 @@ class ImpedanceTubeResult(OwnsArrays):
         frequency axis and reads every other field at each entry, so a 0-d
         field died in its ``zip`` as numpy's "iteration over a 0-d array" and
         an all-empty result sailed through to the figure, which stopped at
-        ``freqs.min()`` with "zero-size array to reduction operation minimum" -
+        ``freqs.min()`` with "zero-size array to reduction operation minimum",
         neither message naming a field of this result. Length disagreements
         were caught by the renderer, but only there; :meth:`plot` and any other
         reader met them raw.

@@ -604,7 +604,7 @@ def _curve_design_and_limits(
     The mask is the edition's own tolerance table, with one exception: under
     the 2013 edition B has no mask of its own there (IEC 61672-1 dropped the
     weighting), so it borrows ANSI S1.4-1983 Table V, whose Types 1 and 2 fill
-    the class 1 / class 2 slots. Under the 1979 edition B needs no exception -
+    the class 1 / class 2 slots. Under the 1979 edition B needs no exception:
     the Table V footnote makes that one mask govern every weighting
     characteristic.
     """

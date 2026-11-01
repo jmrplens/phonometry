@@ -744,7 +744,7 @@ def sti_from_impulse_response(
 ) -> STIResult:
     r"""Full STI from a room/system impulse response (indirect method).
 
-    The impulse response is filtered into the seven octave bands 125 Hz -
+    The impulse response is filtered into the seven octave bands 125 Hz to
     8 kHz (IEC 61260-1 filters) and the modulation transfer function is
     obtained from the Schroeder integral (IEC 60268-16, indirect method):
 
@@ -1072,7 +1072,7 @@ def stipa_signal(
     the seven octave-band frequencies (clause A.4), set to the Ed.5 male
     speech spectrum of clause A.6.1 (``-2,5; 0,5; 0; -6; -12; -18; -24``
     dB re the 500 Hz band) and intensity-modulated with
-    ``0,5 (1 + 0,55 (sin 2 pi f1 t - sin 2 pi f2 t))`` - the Table B.1
+    ``0,5 (1 + 0,55 (sin 2 pi f1 t - sin 2 pi f2 t))``: the Table B.1
     frequency pair of each band, 180 degrees between components, applied
     in amplitude through its square root (Annex B).
 

@@ -19,7 +19,7 @@ Fine-band time-frequency views of a record, following Bendat & Piersol,
   normalized random error of :math:`1/\sqrt{n_\mathrm{d}} = 1` with
   :math:`n_\mathrm{d} = 1` (Eq. 8.158),
   and the magnitude display an error of
-  :math:`\sqrt{2}/1.25 \approx 1.13` - the
+  :math:`\sqrt{2}/1.25 \approx 1.13`, the
   Rayleigh-ratio result Bendat & Piersol quote in Section 12.6.4.2.
   Deterministic structure (tones, sweeps, transients) is unaffected by
   that caveat and is what the spectrogram is for.
@@ -309,7 +309,7 @@ class ZoomFFTResult(OwnsArrays):
         :math:`\lvert \text{spectrum} \rvert = A` (calibration
         :math:`2 X(f) / \sum w`; no one-sided
         doubling at exactly 0 Hz or the Nyquist frequency).
-    :ivar amplitude: :math:`\lvert \text{spectrum} \rvert` -
+    :ivar amplitude: :math:`\lvert \text{spectrum} \rvert`, the
         peak-amplitude spectrum.
     :ivar power: Mean-square spectrum :math:`\text{amplitude}^2/2`
         (:math:`\text{amplitude}^2`

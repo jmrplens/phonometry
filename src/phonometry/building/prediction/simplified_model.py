@@ -356,7 +356,7 @@ class ImpactPredictionResult(RichDisplay):
         """Refuse a non-finite predicted level or Formula (21) term.
 
         :func:`predicted_impact_insulation` checks every term finite before
-        forming ``L'n,w``, so a NaN here is a direct-construction mistake -
+        forming ``L'n,w``, so a NaN here is a direct-construction mistake,
         and the fiche rounds the boxed rating for display, where
         ``math.floor`` answered a NaN with "cannot convert float NaN to
         integer", naming no field.

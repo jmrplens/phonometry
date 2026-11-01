@@ -392,7 +392,7 @@ class HTLANResult(OwnsArrays):
         are the listener and exposure conditions the prediction is stated
         for, and the fiche prints all four verbatim: "Listener: male, age
         nan years", an exposure line, and the population as ISO 1999's
-        ``Q = 100 (1 - fractile)`` - as does the plot title. Left unguarded
+        ``Q = 100 (1 - fractile)`` (and so does the plot title). Left unguarded
         they publish a finished, internally consistent-looking accredited
         sheet whose stated conditions are nonsense. As in
         :class:`NIPTSResult`, only finiteness is construction's business: the

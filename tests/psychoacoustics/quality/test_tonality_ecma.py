@@ -174,7 +174,7 @@ def test_loudness_and_tonality_share_the_tonal_split(
 
     def spy(
         x: np.ndarray, field: str
-    ) -> tuple[np.ndarray, np.ndarray, np.ndarray, int, int]:
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray, int, int, np.ndarray]:
         out = orig(x, field)
         recorded.append(out[0].copy())  # N'_tonal(l, z)
         return out

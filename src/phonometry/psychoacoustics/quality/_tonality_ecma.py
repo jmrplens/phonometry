@@ -61,6 +61,7 @@ from ..loudness.ecma import (
     _FS,
     _R_SD,
     _Z,
+    _last_evaluated_block,
     _tonal_noise_split,
 )
 
@@ -253,7 +254,7 @@ def _assemble_tonality(
     t_spec_lz = _C_T * q[:, None] * n_tonal  # Formula 51: T'(l, z)
 
     # Averaging window: discard transient, bound by l_end (Formulae 40, 54).
-    l_end = min(math.ceil(n_samples / _FS * _R_SD), n_blocks - 1)
+    l_end = _last_evaluated_block(n_samples, n_blocks)
     keep = slice(_TRANSIENT_BLOCKS + 1, l_end + 1)
     if t_spec_lz[keep].shape[0] == 0:  # very short signals: fall back to all
         keep = slice(0, n_blocks)  # (matches loudness_ecma's fallback)
@@ -334,7 +335,7 @@ def tonality_ecma(
         samples = signal.resample(samples, round(samples.size * _FS / fs))
 
     z_lo, z_hi = _band_range(f_low, f_high)
-    n_tonal, n_noise, f_ton, _, n_samples = _tonal_noise_split(samples, field)
+    n_tonal, n_noise, f_ton, _, n_samples, _ = _tonal_noise_split(samples, field)
     t_single, t_spec, f_spec, t_time, f_time, time = _assemble_tonality(
         n_tonal, n_noise, f_ton, n_samples, z_lo, z_hi
     )

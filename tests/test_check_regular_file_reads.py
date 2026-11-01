@@ -16,9 +16,11 @@ file object opened by its name with ``io.FileIO``, a reader imported under its
 own name or another, or bound to another by an assignment, a copy of
 ``shutil``, which reads its source by its name, and a call that only shares a
 check's name (``np.info`` beside the library's ``info``), which the gate took
-for the check. A check is known by the module that defines it, and reached
-through a relative import, a module, a package that imports it, ``self`` or a
-function around the call.
+for the check, and an import in one function, which the gate let rename a
+reader in every other. A check is known by the module that defines it, and
+reached through a relative import, a module, a package that imports it,
+``self`` or a function around the call; a name stands for what its own scope
+binds it to.
 """
 
 from __future__ import annotations
@@ -269,6 +271,81 @@ def test_a_reader_is_known_by_what_its_module_binds_it_to(
         ("by_alias", _FOREIGN),
         ("by_assignment", _FOREIGN),
         ("bare", _FOREIGN),
+    ]
+
+
+def test_a_name_stands_for_what_its_own_scope_binds_it_to(
+    tmp_path: pathlib.Path,
+) -> None:
+    """An import or a parameter binds a name in its own scope, as Python reads it.
+
+    A function that imports another module under ``np`` or ``snd`` leaves the
+    name of every other function as it was; a class body's import is not seen
+    by the class's methods; a parameter hides the module's name; a function
+    nested in another sees what the other binds; and a check imported in one
+    function counts in that function only.
+    """
+    assert _found(
+        tmp_path,
+        """
+        import math as sf
+        import numpy as np
+
+        def unrelated():
+            import math as np
+            return np.pi
+
+        def loaded(path):
+            return np.load(path)
+
+        class Holder:
+            import math as np
+
+            def load(self, path):
+                return np.load(path)
+
+        class Table:
+            import soundfile as snd
+
+            DATA = snd.read("table.wav")
+
+        def given(sf, path):
+            return sf.info(str(path))
+
+        def outer(path):
+            import soundfile as snd
+
+            def inner():
+                return snd.info(str(path))
+
+            return inner
+
+        def checked(sf, path):
+            from check import require_regular
+
+            require_regular(path)
+            return sf.read(str(path))
+
+        def unchecked(sf, path):
+            require_regular(path)
+            return sf.read(str(path))
+
+        def first(path):
+            import soundfile as snd
+            return snd.read(str(path))
+
+        def second(path):
+            import pickle as snd
+            return snd.load(path)
+        """,
+    ) == [
+        ("loaded", _FOREIGN),
+        ("Holder.load", _FOREIGN),
+        ("Table", _FOREIGN),
+        ("given", _FOREIGN),
+        ("outer.inner", _FOREIGN),
+        ("unchecked", _FOREIGN),
+        ("first", _FOREIGN),
     ]
 
 

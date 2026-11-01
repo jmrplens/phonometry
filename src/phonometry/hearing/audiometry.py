@@ -95,7 +95,7 @@ import numpy as np
 
 from .._internal.boundary import round_half_up, settled
 from .._internal.display import RichDisplay
-from .._internal.frozen import OwnsArrays, read_only
+from .._internal.frozen import OwnsArrays, given_repr, read_only
 from .._internal.validation import require_choice, require_scalar
 from .sound_field_audiometry import (
     SOUND_FIELD_AMBIENT_BANDS_HZ as _SOUND_FIELD_BANDS_HZ,
@@ -397,7 +397,7 @@ def _table_for(
         return BONE_CONDUCTION_AMBIENT_LIMITS_DB, AMBIENT_NOISE_BANDS_HZ
     if presentation == "sound field":
         return _SOUND_FIELD_LIMITS_DB, _SOUND_FIELD_BANDS_HZ
-    msg = f"'presentation' must be one of {_PRESENTATIONS}; got {presentation!r}."
+    msg = f"'presentation' must be one of {_PRESENTATIONS}; got {given_repr(presentation)}."
     raise ValueError(msg)
 
 

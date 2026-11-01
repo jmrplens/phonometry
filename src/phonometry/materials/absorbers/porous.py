@@ -80,7 +80,9 @@ from ..._internal.boundary import settled
 from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
+    floats_of,
     pair_of_floats,
+    refuse_text_beside_choice,
     require_choice,
     require_non_negative,
     require_positive,
@@ -95,7 +97,7 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
     from ..._i18n import Language
-    from ..._internal.types import Real
+    from ..._internal.types import NumericArrayLike, Real
 
 Criterion = Literal["beranek", "doutres"]
 
@@ -351,7 +353,7 @@ def delany_bazley(
     frequency: ArrayLike,
     flow_resistivity_pa_s_m2: float,
     *,
-    coefficients: DelanyBazleyPreset | tuple[float, ...] = "delany_bazley",
+    coefficients: DelanyBazleyPreset | NumericArrayLike = "delany_bazley",
     fluid: Fluid = ABSORBER_AIR,
 ) -> PorousMediumResult:
     r"""Delany-Bazley one-parameter porous model (power laws in ``X``).
@@ -369,16 +371,17 @@ def delany_bazley(
     :param flow_resistivity_pa_s_m2: Airflow resistivity ``sigma``, in Pa s/m2.
     :param coefficients: Preset name from :data:`DELANY_BAZLEY_COEFFICIENTS`
         (``"delany_bazley"`` rockwool/fibreglass default, ``"garai_pompoli"``
-        polyester, ``"dunn_davern"`` / ``"wu"`` foams) or an explicit
-        ``(C1..C8)`` tuple.
+        polyester, ``"dunn_davern"`` / ``"wu"`` foams) or the eight
+        coefficients ``(C1..C8)`` as a sequence or an array of numbers.
     :param fluid: The medium, a :class:`~phonometry.fluids.Fluid`
         (Default: :data:`ABSORBER_AIR`, dry air at 20 degC at textbook
         values). Pass a computed one, such as ``fluids.air(temperature_c=30.0,
         relative_humidity_percent=70.0)``, to work in the air of the room.
     :return: A :class:`PorousMediumResult`.
-    :raises TypeError: if ``flow_resistivity_pa_s_m2`` is not a single number, or
+    :raises TypeError: if ``flow_resistivity_pa_s_m2`` is not a single number,
         ``frequency`` holds a text or a value that is not a real number, or
-        ``coefficients`` is not a text.
+        ``coefficients`` is neither a preset name nor a sequence of numbers (a
+        ``bytes``, ``None``, a text among the numbers).
     """
     f = require_positive_array(frequency, "frequency")
     sigma = require_positive(flow_resistivity_pa_s_m2, "flow_resistivity_pa_s_m2")
@@ -391,7 +394,12 @@ def delany_bazley(
         coeffs = DELANY_BAZLEY_COEFFICIENTS[preset]
         model = f"delany_bazley[{preset}]"
     else:
-        coeffs = tuple(float(v) for v in coefficients)
+        refuse_text_beside_choice(
+            coefficients, "coefficients", tuple(DELANY_BAZLEY_COEFFICIENTS)
+        )
+        coeffs = floats_of(
+            coefficients, "coefficients", "a preset name or the numbers C1..C8"
+        )
         model = "delany_bazley[custom]"
     if len(coeffs) != _DELANY_BAZLEY_COEFFICIENT_COUNT:
         msg = "'coefficients' must provide exactly 8 values C1..C8."

@@ -95,6 +95,7 @@ from .._internal.catalogue import CatalogueRow
 from .._internal.display import RichDisplay
 from .._internal.frozen import (
     OwnsArrays,
+    given_type,
     handed_over,
     read_only,
     read_only_copy,
@@ -1919,7 +1920,7 @@ def _boundaries_or_rigid(boundaries: object) -> ElasticBoundaries:
     if boundaries is None:
         return ElasticBoundaries()
     if not isinstance(boundaries, ElasticBoundaries):
-        msg = f"'boundaries' must be an ElasticBoundaries or None, got {type(boundaries).__name__}."
+        msg = f"'boundaries' must be an ElasticBoundaries or None, got {given_type(boundaries)}."
         raise TypeError(msg)
     return boundaries
 

@@ -241,7 +241,7 @@ fixed disclaimer.
 
 ```python
 speech_intelligibility_index(
-    speech_spectrum: ArrayLike,
+    speech_spectrum: Literal['normal', 'raised', 'loud', 'shout'] | complex | NestedSequence[complex] | SupportsNumericArray | NestedSequence[SupportsNumericArray],
     noise_spectrum: ArrayLike | None = None,
     *,
     threshold: ArrayLike | None = None,
@@ -261,7 +261,7 @@ equally-contributing critical bands or the 6 octave bands.
 
 | Name | Description |
 | :--- | :--- |
-| `speech_spectrum` | Equivalent speech spectrum level `Ei'`, in dB SPL. A vocal-effort name (`"normal"`, `"raised"`, `"loud"` or `"shout"`) selects the corresponding standard speech spectrum; only `"normal"` is tabulated outside the one-third-octave procedure. |
+| `speech_spectrum` | Equivalent speech spectrum level `Ei'`, in dB SPL. A vocal-effort name (`"normal"`, `"raised"`, `"loud"` or `"shout"`) selects the corresponding standard speech spectrum; only `"normal"` is tabulated outside the one-third-octave procedure. A name is a `str`: a text in any other form (a `bytes`, a text among the levels) is refused, and not read as the levels it spells. |
 | `noise_spectrum` | Equivalent noise spectrum level `Ni'`, in dB SPL; `None` uses a quiet field (`-80` dB in every band). |
 | `threshold` | Equivalent hearing threshold `Ti'`, in dB HL; `None` uses normal hearing (`0` in every band). |
 | `method` | The band procedure, one of [`SII_METHODS`](/phonometry/reference/api/speech/sii/#sii_methods): `"critical-band"` (21 bands, Table 1), `"equally-contributing"` (17 bands, Table 2), `"one-third-octave"` (18 bands, Table 3, the default) or `"octave"` (6 bands, Table 4). |
@@ -274,7 +274,7 @@ equally-contributing critical bands or the 6 octave bands.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if a spectrum has the wrong length or carries a non-finite value, or the method or effort name is unknown. |
-| TypeError | if `method` is not a text. |
+| TypeError | if `method` is not a text, `speech_spectrum` is neither a vocal-effort name nor numbers (a `bytes`, `None`, a text among the levels), or a spectrum, the threshold or the band importance holds a text, a complex value or anything that is not a number. |
 
 ## standard_speech_spectra
 

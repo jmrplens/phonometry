@@ -51,7 +51,7 @@ from __future__ import annotations
 import math
 from dataclasses import KW_ONLY, dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, ClassVar, Final, Literal
+from typing import TYPE_CHECKING, Any, ClassVar, Final, Literal, cast
 
 import numpy as np
 
@@ -62,9 +62,13 @@ from .._internal.frozen import OwnsArrays, read_only
 # flow_resistivity field of RotorcraftGround in this module's namespace.
 from .._internal.types import GroundClass  # noqa: TC001
 from .._internal.validation import (
+    _as_float64,
     arrays_of,
+    is_scalar,
+    refuse_text_beside_choice,
     require_choice,
     require_equal_shapes,
+    require_finite,
     require_positive,
     require_positive_array,
     require_ranks,
@@ -73,6 +77,7 @@ from .._internal.validation import (
 )
 from .rotorcraft_propagation import (
     _C,
+    _GROUND_CLASSES,
     _RH,
     _absorption_coefficient,
     _ground_effect,
@@ -1404,32 +1409,43 @@ class RotorcraftGround(OwnsArrays):
         ) -> None: ...
 
     def __post_init__(self) -> None:
-        """Refuse a choice its ``Literal`` does not list, and hold every map read-only.
+        """Refuse a choice its ``Literal`` does not list, or a value that is no number, and hold every map read-only.
 
         A ground elevation or a flow resistivity given per receiver, and the
         three axes of an elevation model, are held as read-only ``float64``
         arrays whatever sequence they were given as; a single number or a
-        class letter is held as it was given. An elevation model of other
-        than three axes is refused here, where it is given, rather than when
-        an event reads it.
+        class letter is held as it was given. A flow resistivity that is
+        neither a class letter nor numbers (a ``bytes``, ``None``, a text
+        among numbers), a single one that is not positive and finite, a
+        ground elevation that is not numbers, and an elevation model of other
+        than three axes or that holds a text are refused here, where they are
+        given, rather than when an event reads them.
 
-        :raises TypeError: if ``flow_resistivity`` is not a text, or
-            ``terrain`` is a text or not a sequence at all, or an axis of it
-            holds a complex number or a text.
+        :raises TypeError: if ``flow_resistivity`` is neither a text nor
+            numbers, ``ground_elevation`` or an axis of ``terrain`` holds a
+            text or a value that is not a real number, or ``terrain`` is a
+            text or not a sequence at all.
         :raises ValueError: if ``flow_resistivity`` is a text that is not a
-            class letter, or ``terrain`` holds other than three axes.
+            class letter or one number that is not positive and finite,
+            ``ground_elevation`` is one number that is not finite, or
+            ``terrain`` holds other than three axes.
         """
         if isinstance(self.flow_resistivity, str):
-            require_choice(
-                self.flow_resistivity,
-                "flow_resistivity",
-                ("A", "B", "C", "D", "E", "F", "G", "H"),
+            require_choice(self.flow_resistivity, "flow_resistivity", _GROUND_CLASSES)
+        else:
+            refuse_text_beside_choice(
+                self.flow_resistivity, "flow_resistivity", _GROUND_CLASSES
             )
+            if is_scalar(self.flow_resistivity):
+                require_positive(
+                    cast("float", self.flow_resistivity), "flow_resistivity"
+                )
+        if is_scalar(self.ground_elevation):
+            require_finite(cast("float", self.ground_elevation), "ground_elevation")
         for name in ("ground_elevation", "flow_resistivity"):
             value = getattr(self, name)
-            if not isinstance(value, str) and np.ndim(value) > 0:
-                held = np.asarray(value, dtype=np.float64)
-                object.__setattr__(self, name, read_only(held))
+            if not isinstance(value, str) and not is_scalar(value):
+                object.__setattr__(self, name, read_only(_as_float64(value, name)))
         if self.terrain is not None:
             x, y, z = arrays_of(
                 self.terrain, "terrain", "an (x, y, z) elevation model of three axes", 3
@@ -1700,8 +1716,8 @@ def _setup_resistivity(
     """The scalar (or per-receiver) flow resistivity of an event run."""
     if isinstance(flow_resistivity, str):
         return _resolve_flow_resistivity(flow_resistivity)
-    if np.ndim(flow_resistivity) == 0:
-        return _resolve_flow_resistivity(float(np.asarray(flow_resistivity)))
+    if is_scalar(flow_resistivity):
+        return require_positive(cast("float", flow_resistivity), "flow_resistivity")
     if dem is not None:
         msg = (
             "With 'terrain', 'flow_resistivity' must be a single "
@@ -1718,14 +1734,9 @@ def _setup_ground_elevation(
     dem: tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]] | None,
 ) -> float | NDArray[np.float64]:
     """The scalar (or per-receiver) ground elevation of an event run."""
-    if np.isscalar(ground_elevation):
-        if not np.isfinite(ground_elevation):
-            msg = "'ground_elevation' must be finite."
-            raise ValueError(msg)
-        # unused-ignore: NumPy 2.5.4's stubs narrow isscalar() to float and the
-        # ignore is unnecessary; older stubs leave complex in and need it.
-        return float(ground_elevation)  # type: ignore[arg-type, unused-ignore]
-    arr = np.asarray(ground_elevation, dtype=np.float64).ravel()
+    if is_scalar(ground_elevation):
+        return require_finite(cast("float", ground_elevation), "ground_elevation")
+    arr = _as_float64(ground_elevation, "ground_elevation").ravel()
     if not np.all(np.isfinite(arr)):
         msg = "'ground_elevation' must be finite."
         raise ValueError(msg)

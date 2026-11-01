@@ -98,7 +98,7 @@ from typing import TYPE_CHECKING, Any, Literal
 import numpy as np
 
 from .._internal.display import RichDisplay
-from .._internal.frozen import OwnsArrays, read_only
+from .._internal.frozen import OwnsArrays, given_repr, read_only
 from .._internal.validation import (
     _as_float64,
     check_engine,
@@ -495,7 +495,7 @@ def _microphone_labels(
         than the number of determinations.
     """
     require_scalar(determinations, "determinations")
-    if isinstance(microphones, (str, bytes)):
+    if isinstance(microphones, (str, bytes, bytearray)):
         msg = (
             "'microphones' must hold one label per determination, not a single string."
         )
@@ -1820,7 +1820,7 @@ def _clause(clause: object) -> int:
     """
     msg = (
         "'clause' must be one of the IEC 62585 clauses that state a maximum "
-        f"expanded uncertainty, {tuple(_MAXIMUM_UNCERTAINTY_DB)}; got {clause!r}."
+        f"expanded uncertainty, {tuple(_MAXIMUM_UNCERTAINTY_DB)}; got {given_repr(clause)}."
     )
     try:
         number = require_count(clause, "clause", at_least=None)

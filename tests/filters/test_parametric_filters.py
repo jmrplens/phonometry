@@ -223,15 +223,100 @@ def test_time_weighting_class_rejects_non_string_mode() -> None:
 def test_time_weighting_rejects_non_numeric_initial_state() -> None:
     """A dict used to get numpy's float() message, which names nothing."""
     x = np.ones(10)
-    with pytest.raises(TypeError, match="initial_state must be None"):
+    with pytest.raises(TypeError, match="'initial_state' must be None"):
         filters.time_weighting(x, 48000, mode="fast", initial_state={"a": 1})  # type: ignore[arg-type]
 
 
 def test_time_weighting_rejects_unconvertible_initial_state_array() -> None:
-    """A string array used to get numpy's ValueError, which names nothing."""
+    """A text among the numbers is refused as text, before numpy reads it."""
     x = np.ones(10)
-    with pytest.raises(TypeError, match="initial_state must be None"):
+    with pytest.raises(TypeError, match=r"'initial_state' must be one of .* not text"):
         filters.time_weighting(x, 48000, mode="fast", initial_state=["invalid"])  # type: ignore[arg-type]
+
+
+@pytest.mark.parametrize(
+    "state",
+    [["0.5", "0.5"], np.array("0.5"), [b"0.5", b"0.5"], b"zero", bytearray(b"zero")],
+    ids=["texts", "zero-dimensional-text", "bytes-in-a-list", "bytes", "bytearray"],
+)
+def test_time_weighting_refuses_a_starting_state_written_as_text(state: object) -> None:
+    """A state is numbers, and a text among them is none, whatever it reads as.
+
+    ``["0.5", "0.5"]`` started two channels from 0.5 and ``np.array("0.5")``
+    one; a name is a ``str``, so ``b"zero"`` is no name either.
+    """
+    two_channels = np.ones((2, 10))
+    with pytest.raises(TypeError, match="'initial_state'"):
+        filters.time_weighting(two_channels, 48000, initial_state=state)  # type: ignore[call-overload]
+
+
+def _objects(*members: object) -> np.ndarray:
+    """An array of objects holding *members* as they are, none spread over a row."""
+    held = np.empty(len(members), dtype=object)
+    for index, member in enumerate(members):
+        held[index] = member
+    return held
+
+
+@pytest.mark.parametrize(
+    "state",
+    [
+        np.complex128(0.5 + 0.1j),
+        [0.5 + 0.1j, 0.5],
+        np.array(0.5 + 0j),
+        _objects(np.complex128(0.5 + 0.1j), np.complex128(0.5)),
+        _objects(np.complex64(0.5 + 0.1j), 0.5),
+        _objects(0.5 + 0.1j, 0.5),
+    ],
+    ids=[
+        "numpy-complex",
+        "complex-in-a-list",
+        "zero-dimensional-complex",
+        "numpy-complex-in-an-array-of-objects",
+        "complex64-in-an-array-of-objects",
+        "complex-in-an-array-of-objects",
+    ],
+)
+@pytest.mark.filterwarnings("error::numpy.exceptions.ComplexWarning")
+def test_time_weighting_refuses_a_complex_starting_state(state: object) -> None:
+    """numpy kept the real part of a complex state, with a ``ComplexWarning``.
+
+    An array of objects has no complex dtype to ask for, and numpy read a
+    NumPy complex number held in one as its real part too: two channels
+    started from 0.5, the 0.1j dropped.
+    """
+    two_channels = np.ones((2, 10))
+    with pytest.raises(TypeError, match="'initial_state' must be real, not complex"):
+        filters.time_weighting(two_channels, 48000, initial_state=state)  # type: ignore[call-overload]
+
+
+@pytest.mark.parametrize(
+    "state",
+    [
+        [bytearray(b"12")],
+        _objects(bytearray(b"0.5"), bytearray(b"0.5")),
+    ],
+    ids=["bytearray-in-a-list", "bytearrays-in-an-array-of-objects"],
+)
+def test_time_weighting_refuses_a_starting_state_of_bytearrays(state: object) -> None:
+    """A ``bytearray`` among the numbers is a text, not the numbers numpy made of it.
+
+    ``[bytearray(b"12")]`` was read as the codes ``[[49, 50]]`` and started
+    each of the three pairs of channels from 49 and 50, and an array of
+    objects that holds ``bytearray(b"0.5")`` was parsed into 0.5.
+    """
+    three_pairs = np.ones((3, 2, 10))
+    with pytest.raises(TypeError, match=r"'initial_state' must be one of .* not text"):
+        filters.time_weighting(three_pairs, 48000, initial_state=state)  # type: ignore[call-overload]
+
+
+def test_time_weighting_names_a_ragged_starting_state() -> None:
+    """A nesting with no shape is a wrong value, as for a layered termination."""
+    two_channels = np.ones((2, 10))
+    with pytest.raises(
+        ValueError, match="'initial_state' must be numbers of one shape"
+    ):
+        filters.time_weighting(two_channels, 48000, initial_state=[[0.5], [0.5, 0.5]])
 
 
 def test_time_weighting_fast() -> None:
@@ -340,7 +425,7 @@ def test_time_weighting_initial_state_invalid() -> None:
     two_channels = np.ones((2, 10))
     mismatched_state = np.ones(3)
     with pytest.raises(
-        ValueError, match=r"initial_state must be scalar or broadcastable"
+        ValueError, match=r"'initial_state' must be one number or broadcastable"
     ):
         filters.time_weighting(
             two_channels, fs, mode="fast", initial_state=mismatched_state
@@ -350,7 +435,7 @@ def test_time_weighting_initial_state_invalid() -> None:
 def test_time_weighting_initial_state_first_rejects_empty_input() -> None:
     """Verify initial_state='first' requires at least one sample."""
     empty = np.array([])
-    with pytest.raises(ValueError, match=r"initial_state must be None"):
+    with pytest.raises(ValueError, match=r"'initial_state' must be None"):
         filters.time_weighting(empty, 1000, mode="fast", initial_state="first")
 
 

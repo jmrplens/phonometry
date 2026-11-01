@@ -48,7 +48,9 @@ import numpy as np
 
 from .._internal.frozen import OwnsArrays, read_only
 from .._internal.validation import (
+    _as_float64,
     check_engine,
+    refuse_text_beside_choice,
     require_axis_count,
     require_choice,
     require_equal_counts,
@@ -64,7 +66,7 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike
 
     from .._i18n import Language
-    from .._internal.types import ReportEngine
+    from .._internal.types import NumericArrayLike, ReportEngine
     from .._report.metadata import ReportMetadata
 
 Method = Literal["critical-band", "equally-contributing", "one-third-octave", "octave"]
@@ -1056,11 +1058,15 @@ def _as_band_vector(
     Finiteness is required alongside the shape, as the STOI and STI entry
     points already require of their inputs: one NaN band poisons the upward
     spread of masking of every band above it, and the index, the title of the
-    plot and its bar scaling all compute through it in silence.
+    plot and its bar scaling all compute through it in silence. The values
+    are converted as :func:`_as_float64` converts, so a text among them is
+    refused whatever it reads as (``["60"] * 18`` was parsed into the levels
+    of ``[60.0] * 18``), and so are a complex value, whose imaginary part the
+    conversion dropped, and an object that is no number, each by name.
     """
     proc = _PROCEDURES["one-third-octave"] if procedure is None else procedure
     expected = proc.band_importance.size
-    arr = np.atleast_1d(np.asarray(values, dtype=np.float64))
+    arr = np.atleast_1d(_as_float64(values, name))
     if arr.ndim != 1 or arr.size != expected:
         # The nominal centre frequencies, not the band limits: for the
         # one-third-octave procedure the limits are the computed 2**(-+1/6) fi,
@@ -1116,7 +1122,7 @@ def _equivalent_masking(
 
 
 def _procedure_speech_spectrum(
-    vocal_effort: str, procedure: _BandProcedure
+    vocal_effort: VocalEffort, procedure: _BandProcedure
 ) -> np.ndarray:
     """Standard speech spectrum level ``Ui`` of a procedure, by vocal effort.
 
@@ -1124,14 +1130,8 @@ def _procedure_speech_spectrum(
     only their normal-effort column is carried here, which is the one the
     level-distortion factor of clause 5.7 needs; the four vocal-effort spectra
     of Table 3 are available on the one-third-octave procedure through
-    :func:`standard_speech_spectrum`.
+    :func:`standard_speech_spectrum`. The caller has checked the name.
     """
-    if vocal_effort not in _VOCAL_EFFORTS:
-        msg = (
-            f"Unknown vocal_effort {vocal_effort!r}; choose from "
-            f"{', '.join(_VOCAL_EFFORTS)}."
-        )
-        raise ValueError(msg)
     if procedure.method == "one-third-octave":
         return standard_speech_spectrum(vocal_effort)
     if vocal_effort == "normal":
@@ -1146,7 +1146,7 @@ def _procedure_speech_spectrum(
 
 
 def speech_intelligibility_index(
-    speech_spectrum: ArrayLike,
+    speech_spectrum: VocalEffort | NumericArrayLike,
     noise_spectrum: ArrayLike | None = None,
     *,
     threshold: ArrayLike | None = None,
@@ -1163,7 +1163,9 @@ def speech_intelligibility_index(
     :param speech_spectrum: Equivalent speech spectrum level ``Ei'``, in dB SPL.
         A vocal-effort name (``"normal"``, ``"raised"``, ``"loud"`` or
         ``"shout"``) selects the corresponding standard speech spectrum; only
-        ``"normal"`` is tabulated outside the one-third-octave procedure.
+        ``"normal"`` is tabulated outside the one-third-octave procedure. A
+        name is a ``str``: a text in any other form (a ``bytes``, a text
+        among the levels) is refused, and not read as the levels it spells.
     :param noise_spectrum: Equivalent noise spectrum level ``Ni'``, in dB SPL;
         ``None`` uses a quiet field (``-80`` dB in every band).
     :param threshold: Equivalent hearing threshold ``Ti'``, in dB HL; ``None``
@@ -1179,7 +1181,11 @@ def speech_intelligibility_index(
     :return: An :class:`SIIResult` with the overall index and its ``.plot()``.
     :raises ValueError: if a spectrum has the wrong length or carries a
         non-finite value, or the method or effort name is unknown.
-    :raises TypeError: if ``method`` is not a text.
+    :raises TypeError: if ``method`` is not a text, ``speech_spectrum`` is
+        neither a vocal-effort name nor numbers (a ``bytes``, ``None``, a text
+        among the levels), or a spectrum, the threshold or the band
+        importance holds a text, a complex value or anything that is not a
+        number.
     """
     require_choice(
         method,
@@ -1189,8 +1195,16 @@ def speech_intelligibility_index(
     proc = _procedure(method)
     n_bands = proc.band_importance.size
     if isinstance(speech_spectrum, str):
-        e = _procedure_speech_spectrum(speech_spectrum, proc)
+        effort = require_choice(speech_spectrum, "speech_spectrum", _VOCAL_EFFORTS)
+        e = _procedure_speech_spectrum(effort, proc)
     else:
+        refuse_text_beside_choice(speech_spectrum, "speech_spectrum", _VOCAL_EFFORTS)
+        if speech_spectrum is None:
+            msg = (
+                f"'speech_spectrum' must be one of {_VOCAL_EFFORTS} or the "
+                "equivalent speech spectrum levels in dB SPL; got None."
+            )
+            raise TypeError(msg)
         e = _as_band_vector(speech_spectrum, "speech_spectrum", proc)
     n = (
         np.full(n_bands, -80.0)

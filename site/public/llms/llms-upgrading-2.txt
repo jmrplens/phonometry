@@ -7,55 +7,6 @@ Part of https://docs.jmrp.io/phonometry/llms.txt. One page in 2 parts, cut at it
 <!-- source: docs/start/upgrading.md | canonical: https://docs.jmrp.io/phonometry/start/upgrading/ -->
 Source: https://docs.jmrp.io/phonometry/start/upgrading/
 
-## A record's fields are required
-
-Several records carried fields that defaulted to `None`, so that a result
-built by hand from a few of its numbers would still construct. Every reader
-then had to ask whether the field was there: the fiche refused a bare rating
-only once a report was asked for, and a plot of the geometry raised that the
-result "does not retain its geometry". The fields are required now, and a
-record built without one, or with `None` for one (`dataclasses.replace`
-included), raises `TypeError` naming it.
-
-| Record | Required now |
-| --- | --- |
-| `building.AirborneInsulationResult` | `l1`, `l2`, `t2`, `t0` |
-| `building.ImpactInsulationResult` | `li`, `t2`, `t0` |
-| `building.WeightedRatingResult`, `building.ImpactRatingResult` | `frequencies`, `measured`, `shifted_reference` |
-| `building.ExtendedWeightedRatingResult`, `building.ExtendedImpactRatingResult` | `frequencies`, `measured` |
-| `building.ApertureTransmissionResult` | `depth`, now the fourth field; and `width_m` for a slit or `radius` for a circular aperture |
-| `building.FacadePredictionResult` | `elements`, now the sixth field |
-| `emission.IntensityResult` | `spacing_m`, keyword-only |
-| `environment.BarrierInsertionLoss` | `source_height_m`, `barrier_distance`, `barrier_height_m`, `receiver_distance`, `receiver_height_m`, keyword-only |
-| `psychoacoustics.ZwickerLoudness` | `field` (`"free"` or `"diffuse"`), now the fourth field, before `n5` |
-| `room.OpenPlanResult` | `positions_m`, the distances the metrics were fitted on |
-| `materials.LayeredAbsorberResult` | `layers`, the stack the prediction was solved for |
-| `materials.DiffuserPolarResponse` | `well_width` and `n_repetitions`, keyword-only; `depths` stays optional, because a response predicted from an explicit `reflection` has none |
-| `materials.MetadiffuserResult` | `wells`, `depth_m` and `period_m`, the panel the reflection was solved for, keyword-only |
-| `materials.SlitResonatorAbsorberResult` | `resonators`, `slit_height_m`, `lattice_step_m` and `period_m`, the panel the prediction was solved for, keyword-only |
-| `materials.ImpedanceTubeResult` | `spacing_m` and `x1`, the microphone spacing and the distance from the sample to the farther microphone, which the reduction cannot run without, keyword-only; `diameter_m` stays optional, because it need not be supplied |
-| `materials.InSituAbsorptionResult` | `source_height_m` and `microphone_height_m`, the set-up the absorption was measured with, keyword-only |
-| `vibration.JunctionTransmissionResult` | `thickness1_m` and `thickness2_m`, the plates of the junction, keyword-only |
-| `noise_control.ReactiveSilencerResult` | `plane_wave_limit`, and exactly one of `geometry` (a named device) and `chain` (a `SilencerChain`); `resonances`, `geometry`, `plane_wave_limit` and `chain` are keyword-only |
-
-`simulation.FDTDResult` and `simulation.ElasticFDTDResult` take two more
-fields, after the others: `snapshot_decimation`, every how many cells a
-snapshot keeps along each axis (1 for every cell, as before), and
-`provenance`, the `simulation.RunProvenance` of where the run stepped. A
-result built by hand passes both, and leaving one out raises `TypeError`
-naming it; the results the simulation functions return carry both already.
-
-`filters.WeightingFilter(..., high_accuracy=None)` used to select the
-default. `high_accuracy` is a plain `bool` now, `True` by default, and `None`
-raises `TypeError` rather than being read as false, which would pick the plain
-design.
-
-`building.CeilingAttenuationResult.rounded` was a field the caller passed in.
-It is read from `measured` now, rounded to the nearest integer as ASTM E413
-clause 5.2 asks (the clause leaves a half open, and the library rounds
-it up), so it cannot disagree with the data;
-leave it out when building the record by hand.
-
 ## Waveforms inside results come back as the `Signal` they came from
 
 A transform handed a `Signal` has returned a `Signal` since the contract was
@@ -687,8 +638,11 @@ ValueError` to absorb any bad input should catch `(TypeError, ValueError)`.
 | Passed | 3.3.0 or 4.0.0rc1 | 4.0 |
 | --- | --- | --- |
 | an array, `None`, a text or an object that is not a number where one number belongs, on any scalar parameter | `ValueError`, and a text that reads as a number, such as `"20"`, was taken as that number | `TypeError`, naming the parameter, for `"20"` and `"fifty"` alike: a text is the wrong type where a number belongs, whatever it reads as |
-| an element that is not a number inside an array of numbers (`[None, 1.0]`, `["94.0", "94.1"]`) | `ValueError`, and text numpy reads as numbers was taken as them | `TypeError`, for text whatever it reads as |
-| a complex number or array where a real one belongs, on any parameter the shared guards read | `ValueError` | `TypeError`, saying it must be real |
+| an element that is not a number inside an array of numbers (`[None, 1.0]`, `["94.0", "94.1"]`, a `bytearray` in an array of objects) | `ValueError`, and text numpy reads as numbers was taken as them | `TypeError`, for text whatever it reads as |
+| a text in any form but a `str` (a `bytes`, a `bytearray`, a text or a `bytearray` in a sequence or an array), `None` where it is no option, or an object that is no number, where a choice beside numbers takes its numbers: `termination=` of `materials.layered_absorber` and `materials.diffuse_field_absorption`, `initial_state=` of `filters.time_weighting`, `coefficients=` of `materials.delany_bazley`, `target=` of `room.shaped_sweep_signal`, `flow_resistivity=` of `aircraft.terrain_screening_adjustment` and `aircraft.RotorcraftGround`, `speech_spectrum=` of `speech.speech_intelligibility_index` | a text that read as a number was taken as it (`termination=["400", "400"]` as an impedance of 400 Pa s/m, `coefficients=b"12345678"` as the codes of its eight characters, `speech_spectrum=["60"] * 18` as eighteen levels of 60 dB), and the rest failed with an error that named nothing, `None` was read as `nan`, or the record stored it | `TypeError`, naming the parameter and its options; `RotorcraftGround` refuses it when built. Write the option as a `str` (`"rigid"`) and the numbers as numbers (`[400.0, 400.0]`) |
+| a ragged nesting as `initial_state=` of `filters.time_weighting` | `TypeError` | `ValueError`, naming the parameter, as for the `termination=` of `materials.layered_absorber` |
+| a `target=` of `room.shaped_sweep_signal` that holds other than two arrays | the arrays after the second were left unread | `ValueError`, naming the parameter, when the call starts |
+| a complex number or array where a real one belongs, on any parameter the shared guards read, `initial_state=` of `filters.time_weighting` included, an array of objects that holds a NumPy complex number among them; such an array among the scale values or the correlated variables of the soundscape functions of `environment`, and a complex position of `environment.method_a_scale_values` | `ValueError`, and a complex state, such an array and a NumPy complex position were read as their real part with no more than a `ComplexWarning` | `TypeError`, saying it must be real |
 | a NumPy complex number where one real number belongs (`np.complex128(343 + 50j)`), on any parameter the shared guards read, or inside an array of objects; a complex value or a text on a real input of the FDTD engines: a map of `simulation.FDTD2D` or `simulation.ElasticFDTD2D` (`c`, `rho`, `c_p`, `c_s`, `damping`), `dx`, `cfl`, the numbers of the sources and of `simulation.Material`, `simulation.ContourProbe`, `simulation.ContourPhasors` and `simulation.far_field_from_contour` | read as its real part with no more than a `ComplexWarning`: the elastic engine stepped the real part of a complex `c_p`, `c_s` or `rho`, and every map of both engines took a text as the number it spells (`c="343"`) | `TypeError`, saying it must be real, or that it must be numbers and not text |
 | an index that is not an integer (a flag, a float, a fraction, a text, or an array of another dtype): `order=` of `signals.miso_coherence`, the channels of `io.Signal.pick` | read through `int()`: `order=(0.5, 1.7)` conditioned the inputs as `(0, 1)` and `order="10"` as `(1, 0)`, `pick([1.5])` picked channel 1 and `pick("01")` channels 0 and 1 | `TypeError`, naming the parameter |
 | an array of the wrong kind: a mask that is not boolean (`obstacle_mask=` of `simulation.FDTD2D` and `simulation.fdtd_simulation`, the region masks of `simulation.ElasticFDTD2D.from_regions`, `valid=` of `vibration.band_averaged_stiffness`), `line_counts` of `vibration.BandAveragedStiffness` that are not integers, exclusion flags that are neither booleans nor integers (`excluded_blocks=` of `environment.amplitude_modulation_period`, `excluded=` of `environment.bin_amplitude_modulation`), text where the readings, distances and durations of the service equipment functions of `building` belong (`building.verify_calibration_deviation`, `building.check_background_duration` and the rest) | `ValueError` | `TypeError` |
@@ -698,6 +652,7 @@ ValueError` to absorb any bad input should catch `(TypeError, ValueError)`.
 | a name that is not a text: the area types, uses and periods of the RD 1367/2007 and DB-HR functions (`environment.activity_limits` and the rest), the Annex A items of `environment.SoundscapeAcousticEnvironment`, the descriptions of `emission.turbine_noise_declaration`, and any choice among named options given as something other than a text (`period=5`) | `ValueError` | `TypeError`; an empty text, or a text that names none of the options, stays a `ValueError` |
 | an object of the wrong class: the boxes of `emission.turbine_measurement_surface`, `surface=` of `emission.turbine_microphone_positions`, `correction=` of `emission.check_turbine_test_environment`, the determinations of `emission.turbine_noise_declaration`, the parts of `environment.SoundscapeReport`, a material of the elastic FDTD that is no `Material`, catalogue row or triple, a `waveform` that is not callable, a bare array to `io.write(..., sidecar=True)`, a band calibration where `emission.high_frequency_sound_power_comparison` compares tones | `ValueError` | `TypeError` |
 | a text where a sequence belongs, a number where a pair or a list does, or a pair holding an array: `rankings` of `environment.method_b_source_ranking`, `bands=` of `environment.bin_amplitude_modulation`, `exclude_hz=` and the frequency pairs of the ISO 7626-5 mobility, `microphones=` of the IEC 61094-8 corrections, the limits of a filter bank, `shape=` of `simulation.FDTD2D`, the band edges of `electroacoustics.LoudspeakerCharacteristics` and `electroacoustics.MicrophoneCharacteristics` | `ValueError` | `TypeError` |
+| a `bytearray` given whole where a pair, a list of labels or of indices, or a sequence of numbers or of arrays belongs: `labels` of `filters.FractionalOctaveBands`, `excluded=` of `building.loudest_corner`, `band_hz=` and the frequency pairs of the ISO 7626-5 mobility, `microphones=` of the IEC 61094-8 corrections, the band edges of `electroacoustics.LoudspeakerCharacteristics` and `electroacoustics.MicrophoneCharacteristics`, the curves of `electroacoustics.LoudspeakerDirectivity`, `MicrophoneDirectivity`, `MicrophoneNoise` and `MicrophoneOverload`, `terrain=` of `aircraft.RotorcraftGround`, `coefficients=` of `materials.delany_bazley`; and a mapping or a set where those curves, that terrain or those coefficients go | read as the codes of its characters (`labels=bytearray(b"1k")` as the labels `"49"` and `"107"`), as the keys of the mapping (`coefficients={0: 1.0, ...}` as C1 to C8 of 0 to 7), or as the members of the set in no order | `TypeError`, naming the parameter |
 | a performance of `hearing.assumed_protection_value` or `hearing.hml_rating` that is not a number, a `clause=` of `metrology.max_expanded_uncertainty` that is not a number, a `part=` of `environment.method_a_scale_values` that is a bool | `ValueError` | `TypeError`; a number Table 1 does not tabulate, or a clause or part that does not exist, stays a `ValueError` |
 
 A lookup that misses raises what a mapping raises when the result is read
@@ -996,7 +951,7 @@ write the option as its `Literal` lists it where the record is built.
 | `aircraft.ANPNPDCurves(metric=, operation=)` | stored any value, refused later or not at all | refused when built |
 | `aircraft.SpectralClass(operation=)` | stored any value, refused later or not at all | refused when built |
 | `aircraft.RotorcraftAtmosphere(atmospheric_method=)` | stored any value, refused later or not at all | refused when built |
-| `aircraft.RotorcraftGround(flow_resistivity=)` | stored any value, refused later or not at all | refused when built |
+| `aircraft.RotorcraftGround(flow_resistivity=)` | stored any value, refused later or not at all | `ValueError` for a letter it does not offer and for one number that is not positive and finite, `TypeError` for a value that is neither a letter nor numbers (a `bytes`, `None`, a complex value, a text among numbers), when built |
 | `building.BandPath(kind=)` | stored any value, refused later or not at all | refused when built |
 | `building.FlankingPath(kind=)` | stored any value, refused later or not at all | refused when built |
 | `electroacoustics.MicrophoneNoise(weighting=)` | stored any value, refused later or not at all | refused when built |
@@ -1109,13 +1064,13 @@ record converts one.
 | `aircraft.FlightSegmentState(ground_roll=, landing_roll=, bank=)` | kept a list as given | read-only arrays, the masks `bool` and the bank `float64` |
 | `aircraft.FlightConditionInterpolation(triangles=)` | kept a list of rows as given | a read-only integer array |
 | `aircraft.PerformanceAircraft(jet_coefficients=, propeller_coefficients=, aerodynamic_coefficients=)` | kept the dictionaries as given, the database's own included, so a table could be edited after the aeroplane was checked | read-only copies (`dict(aircraft.jet_coefficients)` gives one to edit) |
-| `aircraft.RotorcraftGround(ground_elevation=, flow_resistivity=, terrain=)` | kept a list as given; an elevation model of other than three axes was refused when an event read it | a value per receiver as a read-only `float64` array and the elevation model as its three axes, each a read-only `float64` array; an elevation model of other than three axes refused with `ValueError` when built; one number or a class letter as given |
+| `aircraft.RotorcraftGround(ground_elevation=, flow_resistivity=, terrain=)` | kept a list as given; an elevation model of other than three axes was refused when an event read it | a value per receiver as a read-only `float64` array and the elevation model as its three axes, each a read-only `float64` array; an elevation model of other than three axes refused with `ValueError` when built; one number or a class letter as given; a text among the numbers of any of them refused with `TypeError`, and one ground elevation that is not finite with `ValueError`, when built |
 | `aircraft.RotorcraftHemisphere(frequencies=, azimuth_deg=, polar_deg=, levels=)` | kept a list as given | read-only `float64` arrays |
 | `aircraft.RotorcraftTrackState(airspeed=, path_angle_deg=, heading=, bank_angle_deg=)` | kept a list as given | a sequence as a read-only `float64` array; one number as given |
 | `building.BandPath(values=)` | kept a list as given | a read-only `float64` array |
 | `building.FacadeElement(r=, dn_e=, insertion_loss=)` | kept a list as given | a value per band as a read-only `float64` array; one number as given |
 | `building.LowFrequencyProcedure(corner_levels=)` | kept the list as given | a read-only `float64` array |
-| `electroacoustics.LoudspeakerDirectivity(polar=)`, `electroacoustics.MicrophoneDirectivity(polar=)`, `electroacoustics.MicrophoneNoise(spectrum=)`, `electroacoustics.MicrophoneOverload(distortion=)` | kept the pair as given, a list included; anything but a pair failed when it was read | a tuple of two read-only `float64` arrays; `TypeError` for a number or a text and `ValueError` for other than two members, when built |
+| `electroacoustics.LoudspeakerDirectivity(polar=)`, `electroacoustics.MicrophoneDirectivity(polar=)`, `electroacoustics.MicrophoneNoise(spectrum=)`, `electroacoustics.MicrophoneOverload(distortion=)` | kept the pair as given, a list included; anything but a pair failed when it was read | a tuple of two read-only `float64` arrays; `TypeError` for a number or a text, or for a text or a complex value among the numbers of a member, and `ValueError` for other than two members, when built |
 | `electroacoustics.LoudspeakerRatings(frequency_range=)` | kept the pair as given, checked when it was read | a `(low, high)` pair of floats, checked when built as the other frequency pairs are (`TypeError`, `ValueError`) |
 | `emission.RoomEnvironment(absorption_area=, reverberation_time=, mean_absorption_coefficient=)` | kept a list as given | a value per band as a read-only `float64` array; one number as given |
 | `environment.AtmosphericAttenuation(frequencies, attenuation_db_per_m, ...)` | kept a list as given | read-only `float64` arrays |

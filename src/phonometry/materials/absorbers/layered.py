@@ -51,6 +51,7 @@ import numpy as np
 from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
+    refuse_text_beside_choice,
     require_choice,
     require_count,
     require_non_negative,
@@ -138,6 +139,9 @@ class _DrawableLayer(RichDisplay):
 #: A termination of the layer stack by name: ``"rigid"`` for a hard wall,
 #: ``"free"`` for free air behind the last layer.
 TerminationName = Literal["rigid", "free"]
+
+#: The two terminations a stack may be closed by name.
+_TERMINATIONS: tuple[TerminationName, ...] = ("rigid", "free")
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -458,7 +462,49 @@ def _layer_terms(
 
 def _termination_name(termination: object) -> TerminationName:
     """The named termination, checked as written."""
-    return require_choice(termination, "termination", ("rigid", "free"))
+    return require_choice(termination, "termination", _TERMINATIONS)
+
+
+def _check_termination(termination: object) -> None:
+    """Refuse a termination that is neither one of its names nor an impedance.
+
+    Read where the call starts, before any layer is evaluated: a name is
+    checked as written, and anything else is read as the impedance numbers
+    it must be.
+    """
+    if isinstance(termination, str):
+        _termination_name(termination)
+    else:
+        _termination_numbers(termination)
+
+
+def _termination_numbers(termination: object) -> Complex:
+    """The impedance a termination given as numbers holds, refused by name if it is none.
+
+    A text that is not a ``str`` (``b"rigid"``, ``["400", "400"]``,
+    ``np.array("400")``) is refused before the numbers are read, where
+    ``np.asarray(..., dtype=complex)`` parsed ``["400", "400"]`` into the
+    impedance of ``[400.0, 400.0]``; ``None``, which it read as ``nan``, and
+    an object that is no number are refused with the parameter's name.
+
+    :raises TypeError: for a text that is not a ``str``, ``None``, or a value
+        that is not a number or an array of numbers.
+    :raises ValueError: for a ragged nesting, which has no shape.
+    """
+    refuse_text_beside_choice(termination, "termination", _TERMINATIONS)
+    refusal = (
+        f"'termination' must be one of {_TERMINATIONS} or an impedance in "
+        f"Pa s/m, a number or an array of them; got {type(termination).__name__}."
+    )
+    if termination is None:
+        raise TypeError(refusal)
+    try:
+        return np.asarray(termination, dtype=np.complex128)
+    except TypeError:
+        raise TypeError(refusal) from None
+    except ValueError:
+        msg = "'termination' impedance must be numbers of one shape, not a ragged nesting."
+        raise ValueError(msg) from None
 
 
 def _termination_admittance(
@@ -503,7 +549,7 @@ def _termination_impedance(
         if _termination_name(termination) == "rigid":
             return None
         return np.full(f.shape, rc / cos_t, dtype=np.complex128)
-    zl_arr = np.asarray(termination, dtype=np.complex128)
+    zl_arr = _termination_numbers(termination)
     if zl_arr.ndim > 0 and zl_arr.shape != f.shape:
         msg = (
             "'termination' impedance array must be scalar or match the shape "
@@ -757,8 +803,10 @@ def layered_absorber(
         values). Pass a computed one, such as ``fluids.air(temperature_c=30.0,
         relative_humidity_percent=70.0)``, to work in the air of the room.
     :return: A :class:`LayeredAbsorberResult`.
-    :raises TypeError: if ``angle_rad`` is not a single number, or ``frequency`` holds a
-        text or a value that is not a real number, or ``termination`` is not a text.
+    :raises TypeError: if ``angle_rad`` is not a single number, ``frequency``
+        holds a text or a value that is not a real number, or ``termination``
+        is neither one of its names nor an impedance (a ``bytes``, ``None``, a
+        text among numbers).
     """
     f = require_positive_array(frequency, "frequency")
     if not layers:
@@ -772,8 +820,7 @@ def layered_absorber(
     if not 0.0 <= theta < np.pi / 2.0 - 1e-6:
         msg = "'angle_rad' must satisfy 0 <= angle < pi/2 - 1e-6."
         raise ValueError(msg)
-    if isinstance(termination, str):
-        _termination_name(termination)
+    _check_termination(termination)
     c0 = fluid.speed_of_sound
     rho0 = fluid.density
 
@@ -876,11 +923,11 @@ def diffuse_field_absorption(
     :raises TypeError: if ``angle_limit_rad`` is not a single number,
         ``n_quadrature_points`` is a flag, a text or an array where a count goes, or
         ``frequency`` holds a text or a value that is not a real number, or
-        ``termination`` is not a text.
+        ``termination`` is neither one of its names nor an impedance (a
+        ``bytes``, ``None``, a text among numbers).
     """
     f = require_positive_array(frequency, "frequency")
-    if isinstance(termination, str):
-        _termination_name(termination)
+    _check_termination(termination)
     require_scalar(angle_limit_rad, "angle_limit_rad")
     lim = float(angle_limit_rad)
     if not 0.0 < lim <= np.pi / 2.0:

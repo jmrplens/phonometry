@@ -73,6 +73,8 @@ from scipy import signal
 from .._internal.frozen import OwnsArrays, read_only
 from .._internal.utils import _typesignal
 from .._internal.validation import (
+    arrays_of,
+    refuse_text_beside_choice,
     require_choice,
     require_count,
     require_equal_shapes,
@@ -1010,20 +1012,28 @@ def _shaped_target_db(
     magnitude (:math:`-10 \log_{10}(f/f_1)`), the spectrum of the classical
     logarithmic sweep (Mueller & Massarani 2001, Sec. 4). An arbitrary
     target is a ``(frequencies, magnitude_db)`` pair, interpolated
-    linearly in dB over log-frequency and held constant beyond its ends.
+    linearly in dB over log-frequency and held constant beyond its ends. A
+    text that is not a ``str`` (``b"pink"``, a text among the numbers of the
+    pair) is refused before the numbers are read, and so is anything that is
+    not a pair of arrays, each with the parameter's name.
     """
     safe = np.maximum(freqs, freqs[1] if freqs.size > 1 else 1.0)
     if isinstance(target, str):
         if require_choice(target, "target", ("white", "pink")) == "white":
             return np.zeros_like(freqs)
         return np.asarray(-10.0 * np.log10(safe / f_range[0]))
-    t_freq = np.asarray(target[0], dtype=np.float64)
-    t_db = np.asarray(target[1], dtype=np.float64)
+    refuse_text_beside_choice(target, "target", ("white", "pink"))
+    t_freq, t_db = arrays_of(
+        target,
+        "target",
+        "one of ('white', 'pink') or a (frequencies, magnitude_db) pair of two arrays",
+        2,
+    )
     # The number is a count of array axes, not a quantity.
     if t_freq.ndim != 1 or t_freq.size < 2:  # noqa: PLR2004
         msg = (
-            "an array target must be a (frequencies, magnitude_db) pair "
-            "of 1-D arrays with at least 2 points"
+            "'target' must be a (frequencies, magnitude_db) pair of 1-D "
+            "arrays with at least 2 points."
         )
         raise ValueError(msg)
     require_equal_shapes(
@@ -1143,7 +1153,9 @@ def shaped_sweep_signal(
         the synthesis metadata (grid, imposed magnitude, group delay,
         crest factor).
     :raises TypeError: if ``amplitude``, ``duration_s``, ``f1``, ``f2``, ``fade`` or
-        ``fs`` is not a single number, or ``target`` is not a text.
+        ``fs`` is not a single number, or ``target`` is neither a text nor a
+        pair of arrays of numbers (a ``bytes``, ``None``, a text among the
+        numbers).
     """
     require_scalar(amplitude, "amplitude")
     require_scalar(fade, "fade")

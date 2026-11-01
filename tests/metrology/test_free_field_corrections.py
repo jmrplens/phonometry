@@ -803,6 +803,9 @@ def test_microphones_need_one_label_per_determination() -> None:
 def test_microphones_are_labels_not_a_string() -> None:
     with pytest.raises(TypeError, match="single string"):
         _three_microphones_on_three_calibrators(microphones="111222333")
+    # A bytearray was read as one label per character code.
+    with pytest.raises(TypeError, match="single string"):
+        _three_microphones_on_three_calibrators(microphones=bytearray(b"111222333"))
 
 
 def test_determinations_must_agree_in_number() -> None:

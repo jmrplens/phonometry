@@ -41,6 +41,8 @@ from phonometry import environment
 from phonometry.environment.assessment import soundscape as sc
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from matplotlib.axes import Axes
 
 _ATTRIBUTES = sc.PERCEIVED_AFFECTIVE_QUALITY_ATTRIBUTES
@@ -228,6 +230,37 @@ def test_method_a_summary_refuses_a_value_between_boxes() -> None:
     values = [1.5, 2.0]
     with pytest.raises(ValueError, match="whole scale values"):
         sc.method_a_summary(values, part=4)
+
+
+def _objects(*members: object) -> np.ndarray:
+    """An array of objects holding *members* as they are."""
+    held = np.empty(len(members), dtype=object)
+    for index, member in enumerate(members):
+        held[index] = member
+    return held
+
+
+@pytest.mark.filterwarnings("error::numpy.exceptions.ComplexWarning")
+def test_a_complex_scale_value_is_refused_in_an_array_of_objects_too() -> None:
+    """A NumPy complex number held in an array of objects is complex too.
+
+    The check asked the dtype, which an array of objects does not give,
+    and the conversion kept the real part with no more than a
+    ``ComplexWarning``; a position was converted before the check ran, so
+    no complex position was refused at all.
+    """
+    values = _objects(np.complex128(4 + 1j), np.complex128(2), np.complex128(3))
+    with pytest.raises(TypeError, match="'scale_values' must hold real scale values"):
+        sc.method_a_summary(values, part=3)
+    with pytest.raises(TypeError, match=r"'scale_values\['calm'\]' must hold real"):
+        sc.method_a_summary({"calm": values}, part=2)
+    for positions in (
+        np.complex128(3 + 1j),
+        [np.complex128(3 + 1j), 2.0],
+        _objects(np.complex128(3 + 1j), 2.0),
+    ):
+        with pytest.raises(TypeError, match="'positions' must hold real scale values"):
+            sc.method_a_scale_values(positions, part=1)  # type: ignore[call-overload]
 
 
 # ---------------------------------------------------------------------------
@@ -484,6 +517,27 @@ def test_one_sided_probabilities_split_the_two_sided_one() -> None:
     less = sc.spearman_rank_correlation(x, y, alternative="less")
     assert greater.p_value == pytest.approx(0.5 * both.p_value, rel=1e-12)
     assert greater.p_value + less.p_value == pytest.approx(1.0, rel=1e-12)
+
+
+@pytest.mark.parametrize(
+    "correlation",
+    [sc.pearson_correlation, sc.spearman_rank_correlation],
+    ids=["pearson", "spearman"],
+)
+@pytest.mark.filterwarnings("error::numpy.exceptions.ComplexWarning")
+def test_a_correlation_refuses_a_complex_variable_held_as_objects(
+    correlation: Callable[..., object],
+) -> None:
+    """An array of objects that holds a NumPy complex number is no real variable.
+
+    Its dtype says nothing of what it holds, and the conversion kept the
+    real parts, ``[4, 2, 3]`` for ``[4+1j, 2, 3]``.
+    """
+    x = _objects(np.complex128(4 + 1j), np.complex128(2), np.complex128(3))
+    with pytest.raises(TypeError, match="'x' must be real"):
+        correlation(x, [1.0, 2.0, 3.0])
+    with pytest.raises(TypeError, match="'y' must be real"):
+        correlation([1.0, 2.0, 3.0], x)
 
 
 def test_pearson_is_formulas_b1_and_b2() -> None:

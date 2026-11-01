@@ -66,6 +66,8 @@ from numpy.typing import ArrayLike, NDArray
 from .._internal.display import RichDisplay
 from .._internal.frozen import (
     OwnsArrays,
+    given_repr,
+    given_type,
     handed_over,
     read_only,
     read_only_copy,
@@ -687,7 +689,7 @@ def _grid_shape(shape: object) -> tuple[int, int]:
     :raises ValueError: for a sequence of another length than two, or a count
         that is not a whole number of at least one.
     """
-    msg = f"shape must be a pair of positive integers (ny, nx); got {shape!r}"
+    msg = f"shape must be a pair of positive integers (ny, nx); got {given_repr(shape)}"
     if isinstance(shape, np.ndarray) and shape.ndim == 1:
         shape = shape.tolist()
     if not isinstance(shape, Sequence) or isinstance(shape, str | bytes):
@@ -810,7 +812,7 @@ def _impedance_numbers(side: str, value: object) -> NDArray[Any]:
     if read is None or read.dtype.kind not in _REAL_KINDS:
         msg = (
             f"impedance for side {side!r} must be a real number [Pa s/m] or an "
-            f"array of them; got {type(value).__name__}"
+            f"array of them; got {given_type(value)}"
         )
         raise TypeError(msg)
     return read
@@ -2023,7 +2025,7 @@ def _require_provenance(owner: str, provenance: object) -> None:
     if not isinstance(provenance, RunProvenance):
         msg = (
             f"{owner}: 'provenance' must be a RunProvenance, got "
-            f"{type(provenance).__name__}."
+            f"{given_type(provenance)}."
         )
         raise TypeError(msg)
 
@@ -2492,7 +2494,7 @@ def _acoustic_boundaries_or_rigid(boundaries: object) -> FDTDBoundaries:
     if boundaries is None:
         return FDTDBoundaries()
     if not isinstance(boundaries, FDTDBoundaries):
-        msg = f"'boundaries' must be an FDTDBoundaries or None, got {type(boundaries).__name__}."
+        msg = f"'boundaries' must be an FDTDBoundaries or None, got {given_type(boundaries)}."
         raise TypeError(msg)
     return boundaries
 
@@ -2711,7 +2713,7 @@ def _recording_or_empty[R: RichDisplay](recording: object, record: type[R]) -> R
     if not isinstance(recording, record):
         msg = (
             f"'recording' must be an {record.__name__} or None, got "
-            f"{type(recording).__name__}."
+            f"{given_type(recording)}."
         )
         raise TypeError(msg)
     return recording

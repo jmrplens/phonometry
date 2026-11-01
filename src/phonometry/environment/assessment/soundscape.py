@@ -114,7 +114,12 @@ from scipy import stats
 from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays, read_only, reduce_with_plain_rows
 from ..._internal.types import as_float_or_array
-from ..._internal.validation import require_choice, require_real, require_scalar
+from ..._internal.validation import (
+    refuse_complex,
+    require_choice,
+    require_real,
+    require_scalar,
+)
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -469,12 +474,15 @@ def _as_responses(
 ) -> NDArray[np.float64]:
     """A 1-D array of scale values, ``NaN`` where a question was left blank.
 
+    A complex value is refused before the conversion, which keeps the real
+    part of a NumPy complex number with no more than a ``ComplexWarning``,
+    one held in an array of objects included (:func:`refuse_complex`).
+
+    :raises TypeError: for a complex value.
     :raises ValueError: for a value outside 1 to 5, an infinite value, or,
         when *integer*, a value between two categories.
     """
-    if np.iscomplexobj(values):
-        msg = f"'{name}' must hold real scale values."
-        raise TypeError(msg)
+    refuse_complex(values, f"'{name}' must hold real scale values.")
     try:
         array = np.asarray(values, dtype=np.float64).ravel()
     except TypeError as exc:
@@ -636,8 +644,13 @@ def method_a_scale_values(
         view of *positions*.
     :raises ValueError: for a part other than 1 to 4 or a position that is
         not a whole number from 1 to 5.
+    :raises TypeError: if ``positions`` holds a complex value, a NumPy one or
+        one held in an array of objects included.
     """
     scale = _method_a_scale(part)
+    # Before the conversion, which keeps the real part of a NumPy complex
+    # position, so that the refusal of a complex one reaches it.
+    refuse_complex(positions, "'positions' must hold real scale values.")
     array = np.asarray(positions, dtype=np.float64)
     checked = _as_responses(array, "positions", integer=True).reshape(array.shape)
     # Parts 1 and 4 keep the position as the value; copy it so the caller's
@@ -736,6 +749,8 @@ def method_a_summary(
     :raises ValueError: for a part other than 1 to 4, a scale value that is
         not a whole number from 1 to 5, or sites that do not match the
         responses.
+    :raises TypeError: if ``scale_values`` holds a complex value, a NumPy one
+        held in an array of objects included.
     """
     scale = _method_a_scale(part)
     defaults = [scale.items] if scale.items else []
@@ -925,7 +940,7 @@ def pleasantness_eventfulness(
         attributes, a value outside 1 to 5, or sites that do not match the
         respondents.
     :raises TypeError: if ``central_tendency`` or a key of ``scale_values`` is
-        not a text.
+        not a text, or ``scale_values`` holds a complex value.
     """
     require_choice(central_tendency, "central_tendency", _CENTRAL_TENDENCIES)
     if isinstance(scale_values, Mapping):
@@ -1067,9 +1082,9 @@ def _paired(
     """Two finite 1-D arrays of one length, at least three pairs, not constant."""
     arrays = []
     for name, values in (("x", x), ("y", y)):
-        if np.iscomplexobj(values):
-            msg = f"'{name}' must be real."
-            raise TypeError(msg)
+        # An array of objects that holds a NumPy complex number has no
+        # complex dtype to ask for, and its conversion keeps the real part.
+        refuse_complex(values, f"'{name}' must be real.")
         # A copy, so the result never shares memory with the caller's array:
         # a later change to it would otherwise rewrite the result's x and y
         # and leave its coefficient and ranks describing other data.
@@ -1157,7 +1172,9 @@ def spearman_rank_correlation(
     :return: A :class:`SoundscapeCorrelation`.
     :raises ValueError: for variables of different lengths, fewer than three
         pairs, a non-finite value or a constant variable.
-    :raises TypeError: if ``alternative`` is not a text.
+    :raises TypeError: if ``alternative`` is not a text, or ``x`` or ``y``
+        holds a complex value, a NumPy one held in an array of objects
+        included.
     """
     require_choice(alternative, "alternative", _ALTERNATIVES)
     x_arr, y_arr = _paired(x, y)
@@ -1222,7 +1239,9 @@ def pearson_correlation(
     :return: A :class:`SoundscapeCorrelation`.
     :raises ValueError: for variables of different lengths, fewer than three
         pairs, a non-finite value or a constant variable.
-    :raises TypeError: if ``alternative`` is not a text.
+    :raises TypeError: if ``alternative`` is not a text, or ``x`` or ``y``
+        holds a complex value, a NumPy one held in an array of objects
+        included.
     """
     require_choice(alternative, "alternative", _ALTERNATIVES)
     x_arr, y_arr = _paired(x, y)
@@ -1395,7 +1414,8 @@ def method_b_summary(
     :return: A :class:`MethodBSummary`.
     :raises ValueError: for a value outside 1 to 5, a confidence level not
         strictly between 0 and 1, or sites that do not match the responses.
-    :raises TypeError: if ``confidence`` is not a single number.
+    :raises TypeError: if ``confidence`` is not a single number, or
+        ``scale_values`` holds a complex value.
     """
     require_scalar(confidence, "confidence")
     if not 0.0 < confidence < 1.0:

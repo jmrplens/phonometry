@@ -331,6 +331,64 @@ def test_invalid_inputs_raise() -> None:
         sii.standard_speech_spectrum("whisper")
 
 
+@pytest.mark.parametrize(
+    "spectrum",
+    [
+        ["60"] * 18,
+        np.array(["60"] * 18),
+        [b"60"] * 18,
+        b"normal",
+        np.bytes_(b"normal"),
+        bytearray(b"normal"),
+        None,
+    ],
+    ids=[
+        "texts",
+        "array-of-text",
+        "bytes-in-a-list",
+        "bytes",
+        "numpy-bytes",
+        "bytearray",
+        "none",
+    ],
+)
+def test_a_speech_spectrum_that_is_no_effort_name_or_levels_is_refused(
+    spectrum: object,
+) -> None:
+    """A vocal effort is a ``str``; anything else is the levels, and a text is none.
+
+    ``["60"] * 18`` was parsed into the levels of ``[60.0] * 18``,
+    ``b"normal"`` failed with a ``ValueError`` that named nothing, ``None``
+    became ``nan`` and was refused as a vector of the wrong length, and a
+    ``bytearray`` was read as the codes of its characters.
+    """
+    with pytest.raises(TypeError, match="'speech_spectrum' must be one of"):
+        sii.speech_intelligibility_index(spectrum)  # type: ignore[arg-type]
+
+
+@pytest.mark.parametrize("name", ["noise_spectrum", "threshold", "band_importance"])
+def test_a_band_vector_written_as_text_is_refused_by_name(name: str) -> None:
+    """``["40"] * 18`` was parsed into the numbers it reads as."""
+    with pytest.raises(TypeError, match=rf"'{name}' must be numbers, not text"):
+        sii.speech_intelligibility_index("normal", **{name: ["40"] * 18})
+
+
+@pytest.mark.parametrize(
+    ("spectrum", "refusal"),
+    [
+        (np.full(18, 60.0 + 1.0j), "'speech_spectrum' must be real, not complex"),
+        (object(), "'speech_spectrum' must be numeric"),
+    ],
+    ids=["complex", "object"],
+)
+def test_speech_levels_that_are_no_real_numbers_are_refused_by_name(
+    spectrum: object, refusal: str
+) -> None:
+    """The conversion kept the real part of a complex level and named no parameter."""
+    with pytest.raises(TypeError, match=refusal):
+        sii.speech_intelligibility_index(spectrum)  # type: ignore[arg-type]
+
+
 @pytest.mark.parametrize("bad", ["critical band", "third-octave", "CRITICAL-BAND"])
 def test_a_result_procedure_outside_the_standard_is_refused(bad: str) -> None:
     """The procedure tag decides what the fiche says the sheet is.
@@ -950,7 +1008,7 @@ def test_vocal_effort_names_outside_the_one_third_octave_procedure() -> None:
         np.testing.assert_allclose(quiet.speech_spectrum, proc.speech_spectrum)
         with pytest.raises(ValueError, match="normal vocal effort only"):
             sii.speech_intelligibility_index("shout", method=method)
-        with pytest.raises(ValueError, match="Unknown vocal_effort"):
+        with pytest.raises(ValueError, match="'speech_spectrum' must be one of"):
             sii.speech_intelligibility_index("whisper", method=method)
 
 

@@ -410,7 +410,7 @@ def _require_frequency_pair(owner: object, name: str) -> None:
     except ValueError:
         # A ragged pair, one member an array: numpy has no shape to give.
         shape = None
-    if shape is None or len(shape) != 1 or isinstance(value, (str, bytes)):
+    if shape is None or len(shape) != 1 or isinstance(value, (str, bytes, bytearray)):
         # Not a flat sequence of two numbers at all: a number, a text, or a
         # pair with an array inside it is the wrong type for a pair.
         described = "a ragged sequence" if shape is None else f"shape {shape}"

@@ -99,7 +99,7 @@ truncate the integral at 75-87 degrees instead of 90 (Sect. D.5); set
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `angle_limit_rad` is not a single number, `n_quadrature_points` is a flag, a text or an array where a count goes, or `frequency` holds a text or a value that is not a real number, or `termination` is not a text. |
+| TypeError | if `angle_limit_rad` is not a single number, `n_quadrature_points` is a flag, a text or an array where a count goes, or `frequency` holds a text or a value that is not a real number, or `termination` is neither one of its names nor an impedance (a `bytes`, `None`, a text among numbers). |
 
 ## DiffuseFieldAbsorptionResult
 
@@ -190,7 +190,7 @@ extremely attenuating layers); the raw chain matrix is still returned in
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `angle_rad` is not a single number, or `frequency` holds a text or a value that is not a real number, or `termination` is not a text. |
+| TypeError | if `angle_rad` is not a single number, `frequency` holds a text or a value that is not a real number, or `termination` is neither one of its names nor an impedance (a `bytes`, `None`, a text among numbers). |
 
 ## LayeredAbsorberResult
 

@@ -715,3 +715,19 @@ def test_a_data_module_is_read_with_the_escapes_of_javascript(
         encoding="utf-8",
     )
     assert ced.scan(labels) == [3]
+
+
+def test_a_clean_run_names_every_form_it_refuses(
+    tmp_path: pathlib.Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """A green run once named two of the three forms the guard refuses."""
+    page = tmp_path / "page.md"
+    page.write_text("* ``peaking``: the bell of a parametric EQ.\n", encoding="utf-8")
+    monkeypatch.setattr(sys, "argv", ["check_em_dashes.py", str(page)])
+    assert ced.main() == 0
+    said = capsys.readouterr().out
+    assert "em dash" in said
+    assert "double hyphen" in said
+    assert "list item's head" in said

@@ -6,6 +6,7 @@ from __future__ import annotations
 import contextlib
 import dataclasses
 import errno
+import os
 import pathlib
 import re
 import shutil
@@ -639,6 +640,36 @@ def test_a_raw_encoder_this_ffmpeg_lacks_is_refused_before_a_step(
         write_fdtd_animation(tmp_path / "r.webm", run, frame=_SMALL, video=video)
     assert engines == []
     assert fake.encodes() == []
+
+
+def test_a_raw_encoder_this_ffmpeg_lacks_names_the_ffmpeg_by_its_escapes(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, engines: list[FDTD2D]
+) -> None:
+    """The ffmpeg is named by ``rcParams`` or ``PATH``, and its version line is its own."""
+    from phonometry.io import _video_encoders as ve
+
+    named = f"{tmp_path}{os.sep}ff\u202empeg"
+    monkeypatch.setattr(ve, "find_ffmpeg", lambda: named)
+    monkeypatch.setattr(
+        ve,
+        "describe",
+        lambda path: ve.FFmpeg(
+            path=path, version="ffmpeg version 7.1\x1b[2J", encoders=frozenset()
+        ),
+    )
+    run = _run()
+    video = VideoOptions(ffmpeg_encoder="libnothing")
+    with pytest.raises(
+        io.VideoEncoderError, match="has no encoder 'libnothing'"
+    ) as caught:
+        write_fdtd_animation(tmp_path / "r.webm", run, frame=_SMALL, video=video)
+    message = str(caught.value)
+    assert "\u202e" not in message
+    assert "\x1b" not in message
+    assert message.startswith(
+        f"{tmp_path}{os.sep}ff\\u202empeg (ffmpeg version 7.1\\x1b[2J) has no encoder"
+    )
+    assert engines == []
 
 
 def test_the_encoder_is_tried_once_before_the_first_step(

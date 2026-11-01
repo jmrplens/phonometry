@@ -83,6 +83,8 @@ _STREAMED = client.Expected(
 )
 #: An OSC 52 sequence, which some terminals take as a write to the clipboard.
 _ESCAPE = "\x1b]52;c;ZXZpbA==\x07"
+#: The right-to-left override, which makes a text show one thing and hold another.
+_REORDER = "\u202e"
 #: The longest a test waits on a thread of the session [s].
 _WAIT_S = 5.0
 
@@ -371,6 +373,32 @@ def test_control_characters_from_a_node_reach_the_caller_escaped(
     assert any("\\x1b]52" in note for note in tail.__notes__)
 
 
+def test_marks_that_reorder_text_and_lone_surrogates_reach_the_caller_escaped() -> None:
+    """A node's text shows what it holds, and printing it cannot fail."""
+    error = _frame(
+        {
+            "type": "error",
+            "stage": "job",
+            "message": f"ValueError: {_REORDER}gnp.exe and \ud800",
+            "traceback": f"Traceback {_REORDER}\u2066\u2069",
+        }
+    )
+    session = _session(stdout=error, stderr=b"", returncode=1)
+    with pytest.raises(ComputeRemoteError) as caught:
+        session.receive()
+    shown = [str(caught.value), caught.value.node_traceback or ""]
+    assert not any(
+        character in text
+        for text in shown
+        for character in (_REORDER, "\u2066", "\u2069", "\ud800")
+    )
+    assert "\\u202egnp.exe" in str(caught.value)
+    assert "\\ud800" in str(caught.value)
+    for text in shown:
+        text.encode("utf-8")
+    session.close()
+
+
 # What a result must be before a byte of it is read.
 
 
@@ -463,6 +491,10 @@ def test_a_result_that_is_not_what_the_request_implies_is_refused_before_it_is_r
             {"phonometry_version": "3.3.0"},
             "reports a run of phonometry 3.3.0; the job sent phonometry ",
         ),
+        # A text that shows one thing and holds another, and one no UTF-8
+        # stream can write.
+        ({"gpu": f"RTX {_REORDER}0604"}, "marks that reorder text"),
+        ({"gpu": "RTX \ud800"}, "lone surrogates"),
     ],
 )
 def test_a_provenance_no_run_on_the_node_could_write_is_refused(

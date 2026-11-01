@@ -34,6 +34,8 @@ import shutil
 import struct
 from pathlib import Path
 
+from .._internal.json_input import escaped
+from ._audio_file import open_audio
 from ._chunks import _BEXT_CHUNK, BroadcastMetadata, _parse_bext
 
 #: The FLAC stream marker (RFC 9639 section 8): the four bytes every
@@ -66,9 +68,9 @@ def read_flac_bext(path: str | Path) -> BroadcastMetadata | None:
     no block carries a ``bext`` chunk: an ordinary FLAC, or one whose
     foreign metadata is some other chunk.
     """
-    with Path(path).open("rb") as fh:
+    with open_audio(path) as fh:
         if fh.read(4) != _FLAC_MAGIC:
-            msg = f"{path}: not a FLAC file"
+            msg = f"{escaped(str(path))}: not a FLAC file"
             raise ValueError(msg)
         while True:
             header = fh.read(4)
@@ -121,22 +123,22 @@ def embed_flac_bext(path: str | Path, bext_payload: bytes) -> None:
     )
     if len(chunk) >= 1 << 24:
         msg = (
-            f"{path}: bext chunk of {len(bext_payload)} bytes exceeds the "
+            f"{escaped(str(path))}: bext chunk of {len(bext_payload)} bytes exceeds the "
             "24-bit FLAC metadata block length"
         )
         raise ValueError(msg)
     source = Path(path)
     staging = source.with_name(source.name + ".phonometry-tmp")
-    with source.open("rb") as src, staging.open("wb") as dst:
+    with open_audio(source) as src, staging.open("wb") as dst:
         magic = src.read(4)
         if magic != _FLAC_MAGIC:
-            msg = f"{path}: not a FLAC file"
+            msg = f"{escaped(str(path))}: not a FLAC file"
             raise ValueError(msg)
         dst.write(magic)
         while True:
             header = src.read(4)
             if len(header) < _METADATA_BLOCK_HEADER_BYTES:
-                msg = f"{path}: truncated FLAC metadata chain"
+                msg = f"{escaped(str(path))}: truncated FLAC metadata chain"
                 raise ValueError(msg)
             body = src.read(int.from_bytes(header[1:4], "big"))
             last = bool(header[0] & 0x80)

@@ -15,7 +15,9 @@ The file is ``$PHONOMETRY_HOSTS_FILE`` when that is set; otherwise
 ``%APPDATA%\phonometry\hosts.toml`` on Windows and
 ``$XDG_CONFIG_HOME/phonometry/hosts.toml`` elsewhere, macOS included, with
 ``~/.config`` when the variable is unset or relative. It is read each time a
-run names a host, never at import.
+run names a host, never at import, and only when it is a regular file of at
+most 1 MiB: a named pipe at its name would keep the read waiting for a writer,
+and a device would keep it reading without end.
 """
 
 from __future__ import annotations
@@ -30,6 +32,14 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal
 
+from ..._internal.json_input import (
+    UNSAFE,
+    NotRegularError,
+    TooLargeError,
+    escaped,
+    read_at_most,
+)
+
 #: The environment variable that points at another hosts file.
 HOSTS_FILE_VAR = "PHONOMETRY_HOSTS_FILE"
 
@@ -40,8 +50,11 @@ _RUNNERS: tuple[Runner, ...] = ("docker", "python")
 _KEYS = frozenset({"ssh", "runner", "image", "python", "label", "timeout_s"})
 #: A Docker image reference: no whitespace, no quote, nothing a shell reads.
 _IMAGE = re.compile(r"[A-Za-z0-9][A-Za-z0-9._/:@-]*")
-#: C0 and C1 control characters, which no ssh destination holds.
-_CONTROL = re.compile(r"[\x00-\x1f\x7f-\x9f]")
+#: The most bytes the hosts file may hold: 1 MiB. An entry takes some two
+#: hundred bytes, so a thousand nodes fill a fifth of it; the bound keeps a
+#: file that grows while it is read, or a device behind the name, from being
+#: read without end.
+_MAX_BYTES = 1024 * 1024
 
 
 @dataclass(frozen=True)
@@ -83,20 +96,42 @@ def load_host(name: str) -> HostEntry:
     """The entry *name* of the hosts file, checked.
 
     :raises KeyError: when the file does not exist or names no such host.
-    :raises ValueError: naming the file, when it cannot be read (a
-        directory, a file this user may not read), is not TOML, its
-        ``hosts`` is not a table, or the entry is malformed.
+    :raises ValueError: naming the file, when it is a named pipe, a device, a
+        socket or a directory (refused before it is opened), holds more than
+        1 MiB, cannot be read (a file this user may not read), is not TOML,
+        its ``hosts`` is not a table, or the entry is malformed.
     """
     path = hosts_file()
+    # The name as every message prints it: a name the environment gives may
+    # hold bytes that are not UTF-8, which Python keeps as lone surrogates and
+    # no UTF-8 stream can write, and the marks that reorder text.
+    named = escaped(str(path))
     try:
-        raw = path.read_bytes()
+        raw = read_at_most(path, _MAX_BYTES)
     # A path under a file names no file there: Windows reports it as missing,
     # POSIX as a component that is not a directory, and both mean no file.
     except (FileNotFoundError, NotADirectoryError):
-        msg = f"no host {name!r}: the hosts file {path} does not exist"
+        msg = f"no host {name!r}: the hosts file {named} does not exist"
         raise KeyError(msg) from None
+    except NotRegularError as exc:
+        msg = (
+            f"{named}: the hosts file is {exc.kind}, and it is read only from a "
+            "regular file"
+        )
+        raise ValueError(msg) from None
+    except TooLargeError as exc:
+        held = (
+            f"is {exc.size} bytes"
+            if exc.size is not None
+            else f"runs past {_MAX_BYTES} bytes"
+        )
+        msg = (
+            f"{named}: the hosts file {held}, and a hosts file is at most "
+            f"{_MAX_BYTES} bytes (1 MiB)"
+        )
+        raise ValueError(msg) from None
     except OSError as exc:
-        msg = f"{path}: the hosts file cannot be read: {exc.strerror or exc}"
+        msg = f"{named}: the hosts file cannot be read: {exc.strerror or exc}"
         raise ValueError(msg) from None
     try:
         # utf-8-sig: Windows Notepad saves UTF-8 with a byte-order mark.
@@ -105,17 +140,17 @@ def load_host(name: str) -> HostEntry:
     # of an integer longer than 4300 digits; RecursionError a value nested
     # deeper than the interpreter's limit.
     except (ValueError, RecursionError) as exc:
-        msg = f"{path}: not a TOML file: {exc}"
+        msg = f"{named}: not a TOML file: {exc}"
         raise ValueError(msg) from None
     table = document.get("hosts", {})
     if not isinstance(table, dict):
-        msg = f"{path}: 'hosts' must be a table of [hosts.<name>] entries"
+        msg = f"{named}: 'hosts' must be a table of [hosts.<name>] entries"
         raise ValueError(msg)
     if name not in table:
-        named = ", ".join(sorted(table)) or "none"
-        msg = f"no host {name!r} in {path}; it names {named}"
+        listed = ", ".join(sorted(table)) or "none"
+        msg = f"no host {name!r} in {named}; it names {listed}"
         raise KeyError(msg)
-    return _entry(f"{path}: [hosts.{name}]", name, table[name])
+    return _entry(f"{named}: [hosts.{name}]", name, table[name])
 
 
 def _entry(where: str, name: str, table: object) -> HostEntry:
@@ -129,11 +164,13 @@ def _entry(where: str, name: str, table: object) -> HostEntry:
         raise ValueError(msg)
     ssh = _required_text(where, table, "ssh")
     # A control character would reach the ssh command line, where a NUL
-    # stops the process from starting with an error that names no file.
+    # stops the process from starting with an error that names no file, and a
+    # mark that reorders text would show one destination in a message and
+    # hold another.
     if (
         ssh.startswith("-")
         or any(character.isspace() for character in ssh)
-        or _CONTROL.search(ssh) is not None
+        or UNSAFE.search(ssh) is not None
     ):
         msg = (
             f"{where}: 'ssh' must be a destination such as user@address or an "

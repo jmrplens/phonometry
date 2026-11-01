@@ -17,7 +17,8 @@ one row at a time into host arrays the caller allocated, and a stream after
 them (a video) is checked against its cap, and its first bytes against the
 ones its file must begin with, and written to the caller's sink a chunk at a
 time. Text the node sends reaches the caller's terminal, log and
-warnings with its control characters escaped (:func:`_printable`). A
+warnings with its control characters, its marks that reorder text and its
+lone surrogates escaped (:func:`_printable`). A
 failure of the transport or of the node is a :class:`ComputeRemoteError`
 carrying the node's traceback and the end of its standard error; with
 ``fallback=True`` it is a :class:`ComputeFallbackWarning` instead, and the
@@ -48,6 +49,7 @@ from typing import IO, TYPE_CHECKING, Any, Literal, cast, overload
 
 import numpy as np
 
+from ..._internal.json_input import LONE_SURROGATE, UNSAFE, escaped
 from .._backends import _PACKAGE_PREFIX
 from ..compute import (
     ComputeFallbackWarning,
@@ -102,9 +104,12 @@ _EXIT_WAIT_S = 10.0
 #: The most a stream's chunk holds on its way to the sink [bytes]: the chunk a
 #: node copies it in.
 _STREAM_CHUNK = bootstrap._CHUNK
-#: C0 and C1 control characters, the newline and the tab apart: what a
-#: terminal could take as an escape sequence.
-_CONTROL = re.compile(r"[\x00-\x08\x0b-\x1f\x7f-\x9f]")
+#: What a node's text may not hold where it is kept as it is: the C0 and C1
+#: control characters, the newline and the tab apart, which a terminal could
+#: take as an escape sequence, and the marks that reorder what a reader sees
+#: (U+202A to U+202E, U+2066 to U+2069), which make a text show one thing and
+#: hold another. The file readers refuse the same characters.
+_CONTROL = UNSAFE
 #: A node's progress line: the prefix, the steps done, the steps in the run.
 #: ASCII digits only: ``str.isdigit`` takes a ``"²"`` that ``int`` refuses.
 _PROGRESS_LINE = re.compile(
@@ -154,13 +159,16 @@ _HINTS: tuple[tuple[str, str | None, str], ...] = (
 
 
 def _printable(text: str) -> str:
-    """*text* from a node, every control character but newline and tab written as an escape.
+    """*text* from a node, every character of :data:`_CONTROL` written as an escape.
 
     A node's words reach the caller's terminal through an exception, a log
     line or a warning; a compromised node must not write escape sequences
-    there (an OSC 52 write to the clipboard, a line erased or overwritten).
+    there (an OSC 52 write to the clipboard, a line erased or overwritten),
+    nor reorder what the caller reads with a bidirectional mark. A lone
+    surrogate, which a JSON escape can spell and no UTF-8 stream can write, is
+    written as its escape too, so that printing the text cannot fail.
     """
-    return _CONTROL.sub(lambda match: f"\\x{ord(match.group()):02x}", text)
+    return escaped(text)
 
 
 def _quoted(value: object) -> str:
@@ -691,10 +699,16 @@ def _provenance(
         msg = f"the node's provenance holds {_quoted(sorted(fields))}, not {sorted(names)}"
         raise session.failure(msg)
     if any(
-        isinstance(value, str) and _CONTROL.search(value) for value in fields.values()
+        isinstance(value, str)
+        and (_CONTROL.search(value) or LONE_SURROGATE.search(value))
+        for value in fields.values()
     ):
-        # The record goes back to the caller, who prints it: no run writes these.
-        msg = "the node's provenance holds control characters, which no run writes"
+        # The record goes back to the caller, who prints it and may write it
+        # out as UTF-8, which a lone surrogate stops: no run writes these.
+        msg = (
+            "the node's provenance holds control characters, marks that reorder "
+            "text or lone surrogates, which no run writes"
+        )
         raise session.failure(msg)
     try:
         ran = RunProvenance(**cast("dict[str, Any]", fields))

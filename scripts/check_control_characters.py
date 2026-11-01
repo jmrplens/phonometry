@@ -13,7 +13,8 @@ break Markdown does not make, and a vertical tab or a stray escape is the same
 defect wearing another number.
 
 So the rule is the whole class rather than the one byte that was found: no C0
-control character other than tab and newline, and no delete. Carriage return
+control character other than tab and newline, no delete, and no bidirectional
+control, whose reordering hides what a line holds the same way. Carriage return
 is in the class deliberately -- this tree is LF throughout, and a CRLF line
 that slipped in would break the hard-wrap checks that read line ends.
 
@@ -134,6 +135,22 @@ FORBIDDEN: dict[int, str] = {
     0x1E: "record separator",
     0x1F: "unit separator",
     0x7F: "delete",
+    # The bidirectional controls: each reorders the text an editor, a diff
+    # or a review shows without changing the bytes a parser reads, so a line
+    # can read one way to a reviewer and run another (CVE-2021-42574). A test
+    # that needs one writes its escape.
+    0x061C: "arabic letter mark",
+    0x200E: "left-to-right mark",
+    0x200F: "right-to-left mark",
+    0x202A: "left-to-right embedding",
+    0x202B: "right-to-left embedding",
+    0x202C: "pop directional formatting",
+    0x202D: "left-to-right override",
+    0x202E: "right-to-left override",
+    0x2066: "left-to-right isolate",
+    0x2067: "right-to-left isolate",
+    0x2068: "first strong isolate",
+    0x2069: "pop directional isolate",
 }
 
 

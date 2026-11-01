@@ -87,6 +87,7 @@ import numpy as np
 # annotations resolve from this module's globals.
 from .._i18n import Language, check_language
 from .._internal.display import RichDisplay
+from .._internal.json_input import escaped
 from .._internal.validation import require_count, require_positive, require_scalar
 from .compute import Compute, _requested
 from .elastic_fdtd import (
@@ -332,7 +333,10 @@ def _preflight(request: VideoRequest, size: tuple[int, int]) -> _Encoding:
         return _Encoding(ffmpeg, None)
     if options.ffmpeg_encoder is not None:
         if options.ffmpeg_encoder not in ffmpeg.encoders:
-            msg = f"{ffmpeg.path} ({ffmpeg.version}) has no encoder {options.ffmpeg_encoder!r}"
+            msg = (
+                f"{escaped(ffmpeg.path)} ({escaped(ffmpeg.version)}) has no encoder "
+                f"{options.ffmpeg_encoder!r}"
+            )
             raise VideoEncoderError(msg)
         return _Encoding(ffmpeg, None)
     width, height = size

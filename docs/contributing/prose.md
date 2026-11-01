@@ -148,7 +148,7 @@ The level is energy-averaged <U+2014> each band is summed in power.
 <a id="p7"></a>
 ### P7. Use no control character but tab and newline in a tracked text file
 
-**Why.** A form feed pasted into a raw docstring is one invisible byte that ate the backslash and the f of `\frac`: the API reference published a formula as `10 \log_{10} rac{...}`, with the fraction gone and no error anywhere. A vertical tab or a stray escape is the same defect, and a carriage return breaks the checks that read line ends: the tree is LF throughout.
+**Why.** A form feed pasted into a raw docstring is one invisible byte that ate the backslash and the f of `\frac`: the API reference published a formula as `10 \log_{10} rac{...}`, with the fraction gone and no error anywhere. A vertical tab or a stray escape is the same defect, and a carriage return breaks the checks that read line ends: the tree is LF throughout. A bidirectional control (U+202E and its kin) reorders what an editor or a review shows without changing what a parser reads, so a test that needs one writes its escape, `"\u202e"`.
 
 **Do**
 

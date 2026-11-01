@@ -216,3 +216,16 @@ def test_the_scalar_routines_take_a_python_float_and_nothing_else(
         _hypot_scalar(value, 1.0)  # type: ignore[arg-type]
     with pytest.raises(TypeError, match="Python floats"):
         _hypot_scalar(1.0, value)  # type: ignore[arg-type]
+
+
+@pytest.mark.parametrize(
+    "value",
+    [np.array([1.0 + 2.0j]), ["0.5"], [bytearray(b"1")]],
+    ids=["complex", "text", "bytes"],
+)
+def test_sin_and_tan_refuse_what_holds_no_real_number_by_name(value: object) -> None:
+    """A complex value, a text or a bytearray is refused, not read as numbers."""
+    with pytest.raises(TypeError, match="'values'"):
+        pinned_sin(value)  # type: ignore[arg-type]
+    with pytest.raises(TypeError, match="'values'"):
+        pinned_tan(value)  # type: ignore[arg-type]

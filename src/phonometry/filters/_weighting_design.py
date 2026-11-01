@@ -446,7 +446,7 @@ def _coefficients(theta: np.ndarray) -> np.ndarray:
     :param theta: The parameter vector.
     :return: Its exponential, read-only, in the same shape.
     """
-    flat = np.ascontiguousarray(theta, dtype=np.float64)
+    flat = np.ascontiguousarray(real_array(theta, "theta"))
     return _exponentials(flat.tobytes()).reshape(flat.shape)
 
 

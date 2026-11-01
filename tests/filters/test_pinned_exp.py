@@ -258,3 +258,22 @@ def test_within_one_ulp_of_the_local_libm_everywhere() -> None:
     )
     assert int(gap_exp.max()) <= 1
     assert int(gap_pow.max()) <= 1
+
+
+@pytest.mark.parametrize(
+    "value",
+    [np.array([1.0 + 2.0j]), ["0.5"], [bytearray(b"1")]],
+    ids=["complex", "text", "bytes"],
+)
+def test_exp_and_pow_refuse_what_holds_no_real_number_by_name(value: object) -> None:
+    """A complex value, a text or a bytearray is refused, not read as numbers.
+
+    ``np.asarray(value, dtype=np.float64)`` kept a complex value's real part,
+    parsed a text and read a bytearray as the codes of its characters.
+    """
+    with pytest.raises(TypeError, match="'values'"):
+        pinned_exp(value)  # type: ignore[arg-type]
+    with pytest.raises(TypeError, match="'base'"):
+        pinned_pow(value, 1.0)  # type: ignore[arg-type]
+    with pytest.raises(TypeError, match="'exponent'"):
+        pinned_pow(2.0, value)  # type: ignore[arg-type]

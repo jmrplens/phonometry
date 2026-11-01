@@ -44,6 +44,7 @@ from __future__ import annotations
 
 import numpy as np
 
+from .._internal.validation import real_array
 from ._pinned_log import _two_product
 
 __all__ = ["pinned_exp", "pinned_pow"]
@@ -403,7 +404,7 @@ def _fused_multiply_add(
     :param c: Addend.
     :return: The fused multiply-add, correctly rounded once.
     """
-    product, product_error = _two_product(a, np.asarray(b, dtype=np.float64))
+    product, product_error = _two_product(a, real_array(b, "b"))
     high = c + product
     back = high - c
     low = (c - (high - back)) + (product - back)
@@ -558,8 +559,9 @@ def pinned_exp(values: np.ndarray | float) -> np.ndarray:
 
     :param values: Any real array-like.
     :return: The exponential, elementwise, in the same shape.
+    :raises TypeError: if ``values`` holds a text or a value that is not a real number.
     """
-    x = np.asarray(values, dtype=np.float64)
+    x = real_array(values, "values")
     flat = np.ascontiguousarray(x).reshape(-1)
     if not flat.size:
         return np.empty(x.shape, dtype=np.float64)
@@ -623,9 +625,11 @@ def pinned_pow(base: np.ndarray | float, exponent: np.ndarray | float) -> np.nda
     :return: The power, elementwise, in the broadcast shape.
     :raises ValueError: If a base is not positive and finite, or an exponent
         is not finite.
+    :raises TypeError: if ``base`` or ``exponent`` holds a text or a value that
+        is not a real number.
     """
     x, y = np.broadcast_arrays(
-        np.asarray(base, dtype=np.float64), np.asarray(exponent, dtype=np.float64)
+        real_array(base, "base"), real_array(exponent, "exponent")
     )
     shape = x.shape
     x = np.ascontiguousarray(x).reshape(-1)

@@ -41,6 +41,8 @@ import math
 
 import numpy as np
 
+from .._internal.validation import real_array
+
 __all__ = ["pinned_hypot", "pinned_sin", "pinned_tan"]
 
 #: Bits of :math:`\pi` kept in fixed point. The reduction uses it to the
@@ -237,7 +239,7 @@ def _hypot_scalar(x: float, y: float) -> float:
 
 
 def _elementwise(function: object, values: np.ndarray | float) -> np.ndarray:
-    array = np.asarray(values, dtype=np.float64)
+    array = real_array(values, "values")
     flat = array.reshape(-1).tolist()
     out = np.fromiter((function(v) for v in flat), np.float64, len(flat))  # type: ignore[operator]
     return out.reshape(array.shape)
@@ -249,6 +251,7 @@ def pinned_sin(values: np.ndarray | float) -> np.ndarray:
     :param values: Real values with ``|x| < 1024``.
     :return: The sine, elementwise, in the same shape.
     :raises ValueError: If a value is not finite or ``|x| >= 1024``.
+    :raises TypeError: if ``values`` holds a text or a value that is not a real number.
     """
     return _elementwise(_sin_scalar, values)
 
@@ -259,6 +262,7 @@ def pinned_tan(values: np.ndarray | float) -> np.ndarray:
     :param values: Real values with ``|x| < 1024``.
     :return: The tangent, elementwise, in the same shape.
     :raises ValueError: If a value is not finite or ``|x| >= 1024``.
+    :raises TypeError: if ``values`` holds a text or a value that is not a real number.
     """
     return _elementwise(_tan_scalar, values)
 

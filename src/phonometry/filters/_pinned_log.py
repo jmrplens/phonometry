@@ -643,8 +643,9 @@ def pinned_log10(values: np.ndarray) -> np.ndarray:
     :param values: Any real array-like of positive values.
     :return: The base-10 logarithm, elementwise, in the same shape.
     :raises ValueError: If any element is zero or negative.
+    :raises TypeError: if ``values`` holds a text or a value that is not a real number.
     """
-    x = np.asarray(values, dtype=np.float64)
+    x = real_array(values, "values")
     flat = np.ascontiguousarray(x).reshape(-1)
     if not flat.size:
         return np.empty(x.shape, dtype=np.float64)

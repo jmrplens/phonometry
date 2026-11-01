@@ -262,3 +262,14 @@ def test_log10_specials_follow_math_log10() -> None:
         with pytest.raises(ValueError, match="math domain error"):
             pinned_log10(np.array([1.0, bad]))
     assert pinned_log10(np.empty((0, 2))).shape == (0, 2)
+
+
+@pytest.mark.parametrize(
+    "value",
+    [np.array([1.0 + 2.0j]), ["0.5"], [bytearray(b"1")]],
+    ids=["complex", "text", "bytes"],
+)
+def test_log10_refuses_what_holds_no_real_number_by_name(value: object) -> None:
+    """A complex value, a text or a bytearray is refused, as the logarithm refuses it."""
+    with pytest.raises(TypeError, match="'values'"):
+        pinned_log10(value)  # type: ignore[arg-type]

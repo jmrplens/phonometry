@@ -543,6 +543,22 @@ def _simple_table(
     return bottom + 1, table
 
 
+def _table_block(
+    lines: list[str], start: int, code: list[str], cell: Callable[[str], str]
+) -> tuple[int, list[str]] | None:
+    """A simple table at ``lines[start]`` stored in ``code``, or None.
+
+    Returns the index just past the table and the placeholder that stands
+    for it, the shape :func:`_code_directive` returns.
+    """
+    table = _simple_table(lines, start, cell)
+    if table is None:
+        return None
+    end, rows = table
+    code.append("\n".join(rows))
+    return end, ["", f"\x00CODE{len(code) - 1}\x00", ""]
+
+
 def rest_blocks_to_markdown(
     text: str, code: list[str], cell: Callable[[str], str] = _plain_cell
 ) -> str:
@@ -564,16 +580,14 @@ def rest_blocks_to_markdown(
     i = 0
     while i < len(lines):
         line = lines[i]
-        fenced = _code_directive(lines, i, code) or _doctest_run(lines, i, code)
+        fenced = (
+            _code_directive(lines, i, code)
+            or _doctest_run(lines, i, code)
+            or _table_block(lines, i, code, cell)
+        )
         if fenced is not None:
             i, rendered = fenced
             out.extend(rendered)
-            continue
-        table = _simple_table(lines, i, cell)
-        if table is not None:
-            i, rows = table
-            code.append("\n".join(rows))
-            out.extend(["", f"\x00CODE{len(code) - 1}\x00", ""])
             continue
         math = _MATH_DIRECTIVE_RE.match(line)
         if math:
@@ -2106,7 +2120,7 @@ def _description_problem(page: ModuleDoc) -> str | None:
     )
 
 
-#: The placeholder eighteen package docstrings opened with before each had a
+#: The placeholder nineteen package docstrings opened with before each had a
 #: lead of its own. It says nothing a reader can use, yet ``help()`` shows it
 #: and a page made from the package would take it for its description, as one
 #: did for fluids.
@@ -2431,13 +2445,30 @@ def leaked_roles(relpath: str, rendered: str) -> list[str]:
     ]
 
 
+#: A border of a reST simple table run into a line of text: two or more runs
+#: of ``=`` with only spaces between them, at least one run longer than one.
+_INLINE_TABLE_RULE_RE = re.compile(r"(?<!\S)=+(?: +=+)+(?!\S)")
+
+
+def _holds_table_rule(line: str) -> bool:
+    """Whether a rendered line holds a simple table's border, alone or in text."""
+    if _SIMPLE_TABLE_RULE_RE.match(line):
+        return True
+    return any(
+        max(len(run) for run in rule.group().split()) > 1
+        for rule in _INLINE_TABLE_RULE_RE.finditer(line)
+    )
+
+
 def leaked_tables(relpath: str, rendered: str) -> list[str]:
     """Report every border of a reST simple table left standing in one page.
 
     A table :func:`_simple_table` cannot read (text between two columns, or
     a header two rows deep) stays as it was written, and the page shows it as
-    one run-on paragraph. A border inside fenced code is an example and is
-    left alone.
+    one run-on paragraph. A table written under a field (``:param x:``)
+    cannot be read at all: the field's body is joined into one line of its
+    cell, borders and rows together, and that line is reported too. A border
+    inside fenced code is an example and is left alone.
     """
     lines = rendered.splitlines()
     return [
@@ -2445,7 +2476,7 @@ def leaked_tables(relpath: str, rendered: str) -> list[str]:
         for number, (line, code) in enumerate(
             zip(lines, code_lines(lines), strict=True), start=1
         )
-        if not code and _SIMPLE_TABLE_RULE_RE.match(line)
+        if not code and _holds_table_rule(line)
     ]
 
 
@@ -2519,32 +2550,31 @@ def main() -> int:
         for failure in report.failures:
             print(f"  - {failure}")
     status = 0
-    if report.leaked_roles:
-        print(
+    for heading, problems in (
+        (
             "reST roles and directives this generator does not convert, so they "
-            "ship as text:"
-        )
-        for leak in report.leaked_roles:
-            print(f"  - {leak}")
-        status = 1
-    if report.leaked_tables:
-        print("reST simple tables this generator could not read, so they ship as text:")
-        for leak in report.leaked_tables:
-            print(f"  - {leak}")
-        status = 1
-    if report.long_descriptions:
-        print(
+            "ship as text:",
+            report.leaked_roles,
+        ),
+        (
+            "reST simple tables this generator could not read, so they ship as text:",
+            report.leaked_tables,
+        ),
+        (
             f"Pages with no description of {_MAX_DESCRIPTION} characters or fewer "
-            "(the generator never cuts one mid-sentence):"
-        )
-        for problem in report.long_descriptions:
-            print(f"  - {problem}")
-        status = 1
-    if report.placeholder_leads:
-        print("Modules that open with a placeholder instead of a lead:")
-        for problem in report.placeholder_leads:
-            print(f"  - {problem}")
-        status = 1
+            "(the generator never cuts one mid-sentence):",
+            report.long_descriptions,
+        ),
+        (
+            "Modules that open with a placeholder instead of a lead:",
+            report.placeholder_leads,
+        ),
+    ):
+        if problems:
+            print(heading)
+            for problem in problems:
+                print(f"  - {problem}")
+            status = 1
     return status
 
 

@@ -1,7 +1,5 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
-"""Noise emission of machines: sound power from pressure, intensity or surface
-vibration, emission at the work station, and the declared values.
-"""
+"""Noise emission of machines: sound power from pressure, intensity or surface vibration, emission at the work station, and the declared values."""
 
 from __future__ import annotations
 

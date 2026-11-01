@@ -1,7 +1,5 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
-"""Filters for acoustic measurement: fractional-octave filter banks, frequency
-weightings, the class checks of both and a parametric equalizer.
-"""
+"""Filters for acoustic measurement: fractional-octave filter banks, frequency weightings, the class checks of both and a parametric equalizer."""
 
 from __future__ import annotations
 

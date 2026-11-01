@@ -1,6 +1,5 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
-"""Underwater acoustics: what makes the sound, how it gets there and who hears it, in
-the quantities of ISO 18405 and the terms of the sonar equation.
+"""Underwater acoustics: what makes the sound, how it gets there and who hears it, in the quantities of ISO 18405 and the terms of the sonar equation.
 
 Three families since 4.0, along the three questions an underwater problem
 asks: :mod:`~phonometry.underwater.sources` for what makes the sound,

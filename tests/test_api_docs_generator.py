@@ -12,9 +12,12 @@ from __future__ import annotations
 
 import ast
 import dataclasses
+import importlib
 import inspect
 import json
 import pathlib
+import pkgutil
+import pydoc
 import re
 import sys
 
@@ -533,6 +536,34 @@ def test_a_table_the_converter_cannot_read_is_reported() -> None:
     leaks = gad.leaked_tables("vibration/junction-transmission.md", out)
     assert len(leaks) == 3
     assert leaks[0] == "vibration/junction-transmission.md:1: =====  ====="
+
+
+def test_a_table_under_a_field_is_reported() -> None:
+    """A field's body is joined into one cell, so a table written there is lost."""
+    doc = "\n".join(
+        [
+            "Hearing threshold levels.",
+            "",
+            ":param frequencies: Optional subset, in hertz.",
+            "",
+            "    =====  =====",
+            "    Band   Use",
+            "    =====  =====",
+            "    125    yes",
+            "    250    no",
+            "    =====  =====",
+            ":return: The threshold levels, in decibels.",
+        ]
+    )
+    failures: list[str] = []
+    rendered = "\n".join(
+        gad._render_docbody("threshold", doc, {}, gad.RoleStats(), failures)
+    )
+    assert failures == []
+    leaks = gad.leaked_tables("hearing/threshold.md", rendered)
+    assert len(leaks) == 1
+    assert leaks[0].startswith("hearing/threshold.md:")
+    assert "=====  ===== Band" in leaks[0]
 
 
 def test_a_table_inside_fenced_code_is_an_example() -> None:
@@ -1296,6 +1327,24 @@ def test_every_domain_package_lead_fits_a_description() -> None:
         and len(lead := gad._lead_paragraph(module.__doc__)) > gad._MAX_DESCRIPTION
     }
     assert long == {}
+
+
+def test_every_public_package_lead_is_what_help_shows_first() -> None:
+    """``help()`` and ``pydoc`` take the first physical line for the summary.
+
+    A lead wrapped over two lines leaves ``pydoc.splitdoc`` no summary at all
+    and ``pydoc.synopsis`` half a sentence, so each lead stands on one line
+    with a blank line under it.
+    """
+    split = sorted(
+        info.name
+        for info in pkgutil.walk_packages(phonometry.__path__, "phonometry.")
+        if info.ispkg
+        and gad._is_public_module(info.name)
+        and pydoc.splitdoc(doc := importlib.import_module(info.name).__doc__ or "")[0]
+        != gad._lead_paragraph(doc)
+    )
+    assert split == []
 
 
 def test_every_api_page_has_a_description_short_enough_to_show_whole() -> None:

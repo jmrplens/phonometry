@@ -1,7 +1,5 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
-"""Noise control: enclosures, cabins, screens and silencers, the duct path from fan
-to room, room-to-room reduction and control valve noise.
-"""
+"""Noise control: enclosures, cabins, screens and silencers, the duct path from fan to room, room-to-room reduction and control valve noise."""
 
 from __future__ import annotations
 

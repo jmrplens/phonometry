@@ -1,7 +1,5 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
-"""Signal analysis for acoustics: sound levels, calibrated spectra, windows, phase,
-cepstrum, correlation, envelopes, coherence and test signals.
-"""
+"""Signal analysis for acoustics: sound levels, calibrated spectra, windows, phase, cepstrum, correlation, envelopes, coherence and test signals."""
 
 from __future__ import annotations
 

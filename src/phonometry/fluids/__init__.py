@@ -1,6 +1,5 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
-"""The media sound travels through: humid air by IEC 61094-2 Annex F, sea water,
-ideal gases, and the fluid states and nonlinearity parameters books print.
+"""The media sound travels through: humid air by IEC 61094-2 Annex F, sea water, ideal gases, and the fluid states and nonlinearity parameters books print.
 
 Each state is computed from the conditions that were measured rather than
 assumed, or read from the page that prints it. Every other package may import

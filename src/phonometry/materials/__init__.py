@@ -1,6 +1,5 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
-"""Acoustic materials: absorbers, diffusers, resilient layers and surfaces measured
-where they lie, each with the test methods that characterise it.
+"""Acoustic materials: absorbers, diffusers, resilient layers and surfaces measured where they lie, each with the test methods that characterise it.
 
 Four families since 4.0, by what the material does:
 :mod:`~phonometry.materials.absorbers`, :mod:`~phonometry.materials.diffusers`

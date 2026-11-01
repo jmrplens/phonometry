@@ -2158,8 +2158,9 @@ def load_anp_database(path: Path | str | None = None) -> ANPDatabase:
         recalculate the NPD curves for another atmosphere). If ``None``
         (default), loads the full EASA ANP database v2.3 shipped with the
         package (see ``aircraft/data/anp/PROVENANCE.md``).
-        Every table is read from a regular file of at most 32 MiB, and every
-        number in it is a finite one.
+        Every table is read from a regular file of at most 32 MiB (the copy
+        shipped with a package run from inside a zip archive is read as the
+        archive holds it), and every number in it is a finite one.
     :return: An :class:`ANPDatabase`.
     :raises FileNotFoundError: If a required table is missing, or the file of
         a table the export carries is gone when it is read (a link to

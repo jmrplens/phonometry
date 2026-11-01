@@ -35,7 +35,10 @@ audio, where the audio formats themselves have no field for it. Every reader
 here refuses a name that holds no regular file, a named pipe, a device, a
 socket or a directory, with a :class:`ValueError` that says which, before it
 opens it: opening a pipe waits for a writer that may never come, and reading a
-device may never end.
+device may never end. A file the library opens itself is asked again once it
+is open, so a pipe put in its place after the look is refused too; where SciPy
+or python-soundfile opens the name, the look comes just before that open, and
+a pipe put at the name in between is not seen.
 
 :func:`write_video` writes any matplotlib animation to WebM, MP4 or GIF
 through ffmpeg, the program matplotlib already knows where to find: every

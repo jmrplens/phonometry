@@ -761,7 +761,7 @@ Load an EASA ANP database (aircraft, NPD curves and default profiles).
 
 | Name | Description |
 | :--- | :--- |
-| `path` | Directory of an ANP CSV export (the `*Aircraft.csv`, `*NPD_data.csv`, `*fixed_point_profiles.csv` tables, plus the optional performance tables the procedural-step model reads: `*engine_coefficients.csv`, `*Aerodynamic_coefficients.csv`, `*weights.csv` and the two `*procedural_steps.csv`, and the `*Spectral_classes.csv` table ECAC Doc 29 Vol. 2 Appendix D reads to recalculate the NPD curves for another atmosphere). If `None` (default), loads the full EASA ANP database v2.3 shipped with the package (see `aircraft/data/anp/PROVENANCE.md`). Every table is read from a regular file of at most 32 MiB, and every number in it is a finite one. |
+| `path` | Directory of an ANP CSV export (the `*Aircraft.csv`, `*NPD_data.csv`, `*fixed_point_profiles.csv` tables, plus the optional performance tables the procedural-step model reads: `*engine_coefficients.csv`, `*Aerodynamic_coefficients.csv`, `*weights.csv` and the two `*procedural_steps.csv`, and the `*Spectral_classes.csv` table ECAC Doc 29 Vol. 2 Appendix D reads to recalculate the NPD curves for another atmosphere). If `None` (default), loads the full EASA ANP database v2.3 shipped with the package (see `aircraft/data/anp/PROVENANCE.md`). Every table is read from a regular file of at most 32 MiB (the copy shipped with a package run from inside a zip archive is read as the archive holds it), and every number in it is a finite one. |
 
 **Returns:** An [`ANPDatabase`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpdatabase).
 

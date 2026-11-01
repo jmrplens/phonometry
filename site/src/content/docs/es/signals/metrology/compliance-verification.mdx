@@ -66,7 +66,7 @@ import Scope from '../../../../../components/Scope.astro';
 import ScopeClaim from '../../../../../components/ScopeClaim.astro';
 import SeeAlso from '../../../../../components/SeeAlso.astro';
 import ThemeImage from '../../../../../components/ThemeImage.astro';
-import { totalChecks, domains, standards } from '../../../../../data/conformance-stats.mjs';
+import { totalChecks, domains, designations, sources } from '../../../../../data/conformance-stats.mjs';
 
 Tres clases de evidencia respaldan un número calculado con esta biblioteca, y
 viven en páginas distintas. Los **verificadores** son funciones públicas que
@@ -430,8 +430,9 @@ IEC 61260-3:2016, como muestra
 
 Los verificadores califican *tu* configuración. El
 [informe de conformidad](/phonometry/es/reference/conformance/) es la
-evidencia complementaria: {totalChecks} comprobaciones numéricas a través de
-{domains} dominios y {standards} normas, cada fila anclando una magnitud
+evidencia complementaria: {totalChecks} comprobaciones numéricas sobre
+{domains} dominios, frente a {designations} designaciones normativas y
+{sources} fuentes publicadas adicionales, cada fila anclando una magnitud
 implementada al valor esperado de la propia norma de referencia, con el
 valor calculado, la diferencia con signo y un veredicto de pasa/falla al
 lado. Se regenera con cada pull request y la construcción falla si deriva

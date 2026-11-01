@@ -2,7 +2,8 @@
 
 Same author, same project, grown well past what the old name described. The
 package you installed for fractional octave-band filtering now runs
-1897 conformance checks across 111 domains and 523 standards, and reaches
+1897 conformance checks across 111 domains, against
+227 normative designations and 125 further published sources, and reaches
 from filters, weighting and sound level metrology to psychoacoustics, rooms
 and buildings, materials, vibration, environmental, aircraft and underwater
 acoustics, electroacoustics and wave simulation. Every metric is implemented

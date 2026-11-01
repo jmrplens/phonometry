@@ -409,7 +409,8 @@ def render_markdown(document: Mapping[str, Any] | None = None) -> tuple[str, int
     # claims no bar can state.
     summary = (
         f"**{passed}/{total} conformance checks pass** across "
-        f"{counts['domains']} domains and {counts['standards']} standards"
+        f"{counts['domains']} domains, against {counts['designations']} normative "
+        f"designations and {counts['sources']} further published sources"
     )
     if filters_ok:
         summary += " - filters class 1 - weightings within IEC 61672-1 class 1"

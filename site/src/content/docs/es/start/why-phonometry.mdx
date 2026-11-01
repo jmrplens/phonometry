@@ -5,7 +5,7 @@ description: "Conformidad primero: un caso de ponderación temporal IEC 61672-1,
 
 import ThemeImage from '../../../../components/ThemeImage.astro';
 import Video from '../../../../components/Video.astro';
-import { totalChecks, domains, standards, errataEntries } from '../../../../data/conformance-stats.mjs';
+import { totalChecks, domains, designations, sources, errataEntries } from '../../../../data/conformance-stats.mjs';
 
 phonometry es un conjunto de herramientas de medición acústica basado en
 normas. Su elemento diferenciador no es la lista de funcionalidades, sino cómo
@@ -206,9 +206,9 @@ metrología:
 | IEC 61252:1993 | Las magnitudes de exposición sonora personal, `sound_exposure()` y el nivel normalizado a 8 h `lex_8h()`; IEC 61252:2025 ha sustituido desde entonces esa impresión, y la transcripción sigue apuntando al texto de 1993+A2 | `tests/signals/test_levels.py` |
 
 La misma disciplina se aplica mucho más allá del núcleo de metrología: hoy la
-batería ejecuta {totalChecks} comprobaciones numéricas de conformidad en
-{domains} dominios y
-{standards} normas, que abarcan la psicoacústica y la inteligibilidad del
+batería ejecuta {totalChecks} comprobaciones numéricas de conformidad sobre
+{domains} dominios, frente a {designations} designaciones normativas y
+{sources} fuentes publicadas adicionales, que abarcan la psicoacústica y la inteligibilidad del
 habla, la acústica de salas, edificación y materiales, la vibración humana y de
 máquinas, el ruido ambiental, el de aeronaves y helicópteros y el submarino, la
 electroacústica, la sonoridad de programa, el control de ruido industrial, el

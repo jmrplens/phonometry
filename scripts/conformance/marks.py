@@ -199,17 +199,37 @@ def outcome_mark(*, ok: bool, ref: str, html: bool = False) -> str:
 def plural(count: int, singular: str) -> str:
     """``singular`` agreeing with ``count``.
 
-    Both nouns the banner names take a plain ``-s``. The sentence is read by
-    people, and a fixture with one domain in it should not be captioned
-    "1 domains".
+    Every noun the banner names takes a plain ``-s`` on its last word. The
+    sentence is read by people, and a fixture with one domain in it should not
+    be captioned "1 domains".
     """
     return singular if count == 1 else f"{singular}s"
+
+
+def banner_stats(
+    counts: Mapping[str, Any],
+) -> tuple[tuple[int, str], tuple[int, str], tuple[int, str]]:
+    """The counts the banner states under its headline, each with its noun.
+
+    The domains, the normative designations and the further published sources
+    the citations name, in that order. Not the citation groups: they count
+    citation strings, so a book cited at seven clauses is seven of them, and
+    the banner published that figure as a count of standards.
+    """
+    domains = counts["domains"]
+    designations = counts["designations"]
+    sources = counts["sources"]
+    return (
+        (domains, plural(domains, "domain")),
+        (designations, plural(designations, "normative designation")),
+        (sources, plural(sources, "further published source")),
+    )
 
 
 def banner_alt(counts: Mapping[str, Any]) -> str:
     """What the summary banner says, in words.
 
-    The banner is a picture of four numbers; this is the same four numbers as
+    The banner is a picture of five numbers; this is the same five numbers as
     a sentence. It is the ``<title>`` inside the file, the ``alt`` on every
     embedding of it, and what a reader gets when the image does not arrive, so
     the three cannot drift apart.
@@ -222,10 +242,12 @@ def banner_alt(counts: Mapping[str, Any]) -> str:
         else f"All {total} conformance checks pass"
     )
     tail = f", {failing} failing" if failing else ""
-    domains, standards = counts["domains"], counts["standards"]
+    (domains, domain), (designations, designation), (sources, source) = banner_stats(
+        counts
+    )
     return (
-        f"{verdict}{tail}, across {domains} {plural(domains, 'domain')} "
-        f"and {standards} {plural(standards, 'standard')}"
+        f"{verdict}{tail}, across {domains} {domain}, against {designations} "
+        f"{designation} and {sources} {source}"
     )
 
 

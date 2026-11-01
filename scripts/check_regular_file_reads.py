@@ -617,9 +617,17 @@ def _defined_here(scope: ast.AST) -> frozenset[str]:
 
 
 def _names_of(scope: ast.AST) -> _Names:
-    """What *scope* binds, as :class:`_Names` keeps it."""
+    """What *scope* binds, as :class:`_Names` keeps it.
+
+    A name it declares ``global`` and binds all the same is bound otherwise:
+    at a call it may be what the module bound or what the scope put there.
+    """
+    names = own_names(scope)
+    rebound = frozenset(name for name in names.declared_global if names.rebinds(name))
     return _Names(
-        _defined_here(scope), _bound_here(scope), own_names(scope).declared_global
+        _defined_here(scope) - rebound,
+        _bound_here(scope) | rebound,
+        names.declared_global - rebound,
     )
 
 

@@ -105,6 +105,17 @@ def test_a_name_reaches_the_scope_python_reads_it_in() -> None:
     assert ast_scan.binding_of(outer, nonlocal_call, "x") == ("binding", outer)
 
 
+def test_a_global_name_the_scope_rebinds_is_no_module_function() -> None:
+    """``global keep`` with ``keep = make()`` in the same scope rebinds the module's
+    name: a call may reach what the scope put there, not the module's function.
+    """
+    tree = ast.parse("def f():\n    global keep\n    keep = make()\n    keep()\n")
+    function = tree.body[0]
+    (call,) = _calls(function, "keep")
+    assert ast_scan.own_names(function).rebinds("keep")
+    assert ast_scan.binding_of(function, call, "keep") == ("binding", function)
+
+
 def test_a_name_bound_two_ways_names_no_one_binding() -> None:
     tree = ast.parse("def f():\n    def g(): pass\n    g = make()\n")
     function = tree.body[0]

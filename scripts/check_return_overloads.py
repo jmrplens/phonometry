@@ -1241,6 +1241,8 @@ class Package:
             return ()
         for scope, node in self._scopes_around(function):
             names = own_names(node)
+            if names.rebinds(head.id):
+                return ()
             if head.id in names.declared_global:
                 break
             if names.binds(head.id):

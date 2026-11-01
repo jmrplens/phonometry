@@ -147,6 +147,15 @@ class OwnNames:
             or name in self.stored
         )
 
+    def rebinds(self, name: str) -> bool:
+        """Whether the scope declares *name* ``global`` and binds it all the
+        same, so that the module's name stands, at a call, for what the
+        module bound or for what the scope put there.
+        """
+        return name in self.declared_global and (
+            name in self.defined or name in self.imported or name in self.stored
+        )
+
     def how(self, name: str) -> Literal["definition", "import", "binding"]:
         """How the scope binds *name*, which :meth:`binds` says it does.
 
@@ -404,12 +413,15 @@ def binding_of(
 
     The scopes around *node* are read innermost first (:func:`scopes_around`):
     the first that binds the name says how (:meth:`OwnNames.how`); one that
-    declares it ``global`` sends it to the module (``"global"``), and one
-    that declares it ``nonlocal`` passes it on outwards. ``"outside"`` when
-    no scope up to *root* binds it.
+    declares it ``global`` sends it to the module (``"global"``), unless it
+    binds it too (:meth:`OwnNames.rebinds`), and one that declares it
+    ``nonlocal`` passes it on outwards. ``"outside"`` when no scope up to
+    *root* binds it.
     """
     for scope in scopes_around(root, node):
         names = own_names(scope)
+        if names.rebinds(name):
+            return "binding", scope
         if name in names.declared_global:
             return "global", None
         if names.binds(name):

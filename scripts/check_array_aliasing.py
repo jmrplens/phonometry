@@ -1527,6 +1527,8 @@ class Reader:
         scope: FunctionInfo | None = self.function
         while scope is not None:
             names = own_names(scope.node)
+            if names.rebinds(name):
+                return None
             if name in names.declared_global:
                 break
             if names.binds(name):

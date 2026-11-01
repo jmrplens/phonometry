@@ -810,6 +810,8 @@ class Module:
         current = scope
         while current is not None:
             names = own_names(current)
+            if names.rebinds(name):
+                return None
             if name in names.declared_global:
                 break
             if names.binds(name):

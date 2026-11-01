@@ -368,8 +368,9 @@ def test_a_name_declared_global_or_imported_elsewhere_is_read_as_python_reads_it
 
     A name a function declares ``global`` was taken for the function's own
     binding, so a call through it reached no function and the caller's
-    array it hands back passed; a ``nonlocal`` name stopped the lookup the
-    same way. The imports of a module were read from every node of it, so
+    array it hands back passed, though a name the function rebinds after
+    declaring it ``global`` is what the function put there; a ``nonlocal``
+    name stopped the lookup the same way. The imports of a module were read from every node of it, so
     an import written inside one function replaced the module's own import
     of the name for every other function.
     """
@@ -388,6 +389,12 @@ def test_a_name_declared_global_or_imported_elsewhere_is_read_as_python_reads_it
 
         def through_global(frequencies, levels):
             global hand
+            f = hand(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        def through_a_rebound_global(frequencies, levels):
+            global hand
+            hand = np.array
             f = hand(frequencies)
             return BandResult(frequencies=f, levels=f * 0.0)
 

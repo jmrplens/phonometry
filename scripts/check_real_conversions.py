@@ -32,7 +32,10 @@ a caller's value that no check has read on every path to it:
   ``np.complex128()`` and its kin of a value. A complex value is what these
   read, but a text is parsed and a ``bytearray`` read as codes all the same.
 - **A caller's value**: a parameter of the function that holds the
-  conversion, a nested function's included, read bare or through what keeps
+  conversion, a nested function's included, or a name a nested function or
+  a ``lambda`` shares with the function around it, as that function holds
+  it where it uses the nested one (or, used nowhere, where it defines it),
+  read bare or through what keeps
   it the caller's (an item of it, ``x[0]``; ``np.atleast_1d(x)``,
   ``np.ravel(x)``, ``list(x)``, ``np.concatenate([x, y])``, ``x.T`` and the
   other calls and attributes that keep its values;
@@ -45,9 +48,11 @@ a caller's value that no check has read on every path to it:
   that converts it.
 - **A check**: a call of one of :data:`CHECKS` with the value among its
   arguments, or of a function of the library that hands that parameter to
-  one wherever it returns (found by following such calls through the
-  package until no new one turns up); or a name rebound to what a check
-  returns. What each check refuses is listed, a complex value, a text or
+  one on every path that leaves it by its end or a ``return`` (found by
+  following such calls through the package until no new one turns up): a
+  call after an earlier ``return``, in the body of a ``try`` a handler of
+  which goes on, or of a parameter rebound before it to another value
+  counts for nothing; or a name rebound to what a check returns. What each check refuses is listed, a complex value, a text or
   both: a conversion to floats needs both refused, one to complex numbers a
   text. A check of an item (``x[0]``) reads that item, not the sequence it
   was taken from.
@@ -512,7 +517,9 @@ def _join_envs(envs: Sequence[Env], default: Callable[[str], State]) -> Env:
     return joined
 
 
-def _parameters(function: ast.FunctionDef | ast.AsyncFunctionDef) -> list[str]:
+def _parameters(
+    function: ast.FunctionDef | ast.AsyncFunctionDef | ast.Lambda,
+) -> list[str]:
     """The parameters of *function*, in order, ``self`` and ``cls`` left out."""
     arguments = function.args
     named = [*arguments.posonlyargs, *arguments.args, *arguments.kwonlyargs]
@@ -593,6 +600,15 @@ class _Flow:
         default_factory=dict
     )
     breaks: list[list[Env]] = field(default_factory=list)
+    #: What the names hold where each nested function is defined, and where
+    #: it is used (called, handed on or returned), by the definition's id.
+    defined: dict[int, list[Env]] = field(default_factory=dict)
+    used: dict[int, list[Env]] = field(default_factory=dict)
+    nested: dict[str, ast.FunctionDef | ast.AsyncFunctionDef] = field(
+        default_factory=dict
+    )
+    #: Each ``lambda`` met, with what the names hold where it is written.
+    lambdas: list[tuple[ast.Lambda, Env]] = field(default_factory=list)
 
     # What a value holds.
 
@@ -724,7 +740,7 @@ class _Flow:
         """Read *node* in the order it runs: record each conversion with what
         its value holds, and, where it surely runs, each check and binding.
         """
-        if isinstance(node, _SCOPES):
+        if self._scope(node, env):
             return
         if isinstance(node, ast.IfExp):
             self.expression(node.test, env, sure=sure)
@@ -746,6 +762,16 @@ class _Flow:
                 self.expression(child, env, sure=sure)
             if isinstance(node, ast.Call):
                 self._at_call(node, env, sure=sure)
+
+    def _scope(self, node: ast.AST, env: Env) -> bool:
+        """Keep what the names hold at a ``lambda`` or at a use of a nested
+        function; whether *node* is a scope of its own, read apart.
+        """
+        if isinstance(node, ast.Lambda):
+            self.lambdas.append((node, dict(env)))
+        elif isinstance(node, ast.Name) and node.id in self.nested:
+            self.used.setdefault(id(self.nested[node.id]), []).append(dict(env))
+        return isinstance(node, _SCOPES)
 
     def _at_call(self, call: ast.Call, env: Env, *, sure: bool) -> None:
         if (found := converted(call, self.names)) is not None:
@@ -819,6 +845,10 @@ class _Flow:
         handler = _STATEMENTS.get(type(node))
         if handler is not None:
             return handler(self, node, env)
+        if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef):
+            self.nested[node.name] = node
+            self.defined.setdefault(id(node), []).append(dict(env))
+            return env, False
         if isinstance(node, _SCOPES):
             return env, False
         for child in ast.iter_child_nodes(node):
@@ -876,6 +906,13 @@ class _Flow:
         if not reached:
             return after, True
         return _join_envs(reached, self.default), False
+
+    def captured(self, function: ast.FunctionDef | ast.AsyncFunctionDef) -> Env:
+        """What the names a nested *function* shares with this one hold for
+        it: where it is used, or, used nowhere here, where it is defined.
+        """
+        envs = self.used.get(id(function)) or self.defined.get(id(function), [])
+        return _join_envs(envs, self.default)
 
     def _break(self, node: ast.Break, env: Env) -> tuple[Env, bool]:
         del node
@@ -1018,52 +1055,121 @@ def _module(path: pathlib.Path) -> _Module:
     return _Module(path, name, tree, imports, _numpy_names(tree, imports))
 
 
-def _sure_calls(
-    statements: Sequence[ast.stmt], *, sure: bool = True
-) -> Iterator[tuple[ast.Call, bool]]:
-    """Each call of *statements*, and whether it runs on every path that
-    leaves them by their end or a ``return``.
+def _returns(node: ast.AST) -> bool:
+    """Whether *node* holds a ``return`` of the function it runs in."""
+    if isinstance(node, ast.Return):
+        return True
+    if isinstance(node, _SCOPES):
+        return False
+    return any(_returns(child) for child in ast.iter_child_nodes(node))
+
+
+def _swallows(node: ast.Try | ast.TryStar) -> bool:
+    """Whether a handler of *node* can take an exception and go on, so that a
+    check in its body that raised leaves no refusal behind.
     """
-    for statement in statements:
-        yield from _statement_calls(statement, sure=sure)
+    return not all(_raises(handler.body) for handler in node.handlers)
 
 
-def _statement_calls(node: ast.stmt, *, sure: bool) -> Iterator[tuple[ast.Call, bool]]:
-    if isinstance(node, ast.If):
-        yield from _expression_calls(node.test, sure=sure)
-        yield from _sure_calls(node.body, sure=sure and _raises(node.orelse))
-        yield from _sure_calls(node.orelse, sure=sure and _raises(node.body))
-    elif isinstance(node, ast.For | ast.AsyncFor | ast.While | ast.Match):
-        yield from _loop_calls(node, sure=sure)
-    elif isinstance(node, ast.Try | ast.TryStar):
-        yield from _sure_calls(node.body, sure=sure)
-        for handler in node.handlers:
-            yield from _nested_calls(handler)
-        yield from _sure_calls(node.orelse, sure=False)
-        yield from _sure_calls(node.finalbody, sure=sure)
-    elif isinstance(node, ast.With | ast.AsyncWith):
-        for item in node.items:
-            yield from _expression_calls(item.context_expr, sure=sure)
-        yield from _sure_calls(node.body, sure=sure)
-    elif not isinstance(node, _SCOPES):
-        for child in ast.iter_child_nodes(node):
-            yield from _expression_calls(child, sure=sure)
+class _Sure:
+    """The calls of a function's body that run on every path that leaves it
+    by its end or a ``return``, each with the names bound before it.
+
+    A ``return`` ends what is sure: what follows it in the source runs on the
+    other paths only. A call in the body of a ``try`` whose handler can take
+    the exception and go on may have raised for nothing, and a call in a
+    loop's body or a ``match`` case may not run. A name bound before a call
+    holds what it was bound to there, and no longer the caller's value,
+    unless it was bound to what keeps that value (``x = np.atleast_1d(x)``).
+    """
+
+    def __init__(self, reader: _Flow) -> None:
+        self.reader = reader
+        self.bound: set[str] = set()
+        self.found: list[tuple[ast.Call, frozenset[str]]] = []
+
+    def block(self, statements: Sequence[ast.stmt], *, sure: bool) -> None:
+        for statement in statements:
+            self.statement(statement, sure=sure)
+            self.bound |= self._binds(statement)
+            sure = sure and not _returns(statement)
+
+    def statement(self, node: ast.stmt, *, sure: bool) -> None:
+        if isinstance(node, ast.If):
+            self.calls(node.test, sure=sure)
+            self.block(node.body, sure=sure and _raises(node.orelse))
+            self.block(node.orelse, sure=sure and _raises(node.body))
+        elif isinstance(node, ast.Try | ast.TryStar):
+            kept = sure and not _swallows(node)
+            self.block(node.body, sure=kept)
+            self.block(node.orelse, sure=kept)
+            self.block(node.finalbody, sure=sure)
+        elif isinstance(node, ast.With | ast.AsyncWith):
+            for item in node.items:
+                self.calls(item.context_expr, sure=sure)
+            self.block(node.body, sure=sure)
+        elif isinstance(node, ast.For | ast.AsyncFor | ast.While | ast.Match):
+            self.calls(_header(node), sure=sure)
+        elif not isinstance(node, _SCOPES):
+            for child in ast.iter_child_nodes(node):
+                self.calls(child, sure=sure)
+
+    def calls(self, node: ast.AST, *, sure: bool) -> None:
+        """Keep the calls of *node* that surely run, with the names bound so far."""
+        if not sure:
+            return
+        bound = frozenset(self.bound)
+        self.found.extend(
+            (call, bound) for call, runs in _expression_calls(node, sure=True) if runs
+        )
+
+    def _binds(self, node: ast.stmt) -> set[str]:
+        """The names *node* binds in its function, but a name bound to what
+        keeps the value it held.
+        """
+        if (
+            isinstance(node, ast.Assign | ast.AnnAssign)
+            and node.value is not None
+            and len(targets := _assigned(node)) == 1
+            and isinstance(targets[0], ast.Name)
+            and targets[0].id in self.reader.names_read(node.value)
+        ):
+            return set()
+        return _bound_names(node)
 
 
-def _loop_calls(
-    node: ast.For | ast.AsyncFor | ast.While | ast.Match, *, sure: bool
-) -> Iterator[tuple[ast.Call, bool]]:
-    """The calls of a loop or a ``match``: its header surely, its body maybe."""
+def _assigned(node: ast.Assign | ast.AnnAssign) -> list[ast.expr]:
+    return node.targets if isinstance(node, ast.Assign) else [node.target]
+
+
+def _header(node: ast.For | ast.AsyncFor | ast.While | ast.Match) -> ast.expr:
+    """The part of a loop or a ``match`` that surely runs."""
     if isinstance(node, ast.While):
-        header: ast.expr = node.test
-    elif isinstance(node, ast.Match):
-        header = node.subject
-    else:
-        header = node.iter
-    yield from _expression_calls(header, sure=sure)
-    for child in ast.iter_child_nodes(node):
-        if isinstance(child, ast.stmt | ast.match_case):
-            yield from _nested_calls(child)
+        return node.test
+    if isinstance(node, ast.Match):
+        return node.subject
+    return node.iter
+
+
+def _bound_names(node: ast.AST) -> set[str]:
+    """The names *node* binds in the scope it runs in: an assignment's, a
+    loop's, a ``with``'s and a handler's targets, a ``match``'s captures and a
+    nested definition's name, but not what a nested scope or a comprehension
+    binds of its own.
+    """
+    found: set[str] = set()
+    pending: list[ast.AST] = [node]
+    while pending:
+        current = pending.pop()
+        if isinstance(current, ast.Name) and not isinstance(current.ctx, ast.Load):
+            found.add(current.id)
+        elif isinstance(current, ast.alias):
+            found.add((current.asname or current.name).partition(".")[0])
+        elif isinstance(name := getattr(current, "name", None), str):
+            found.add(name)
+        if not isinstance(current, (*_SCOPES, *_COMPREHENSIONS)):
+            pending.extend(ast.iter_child_nodes(current))
+    return found
 
 
 def _nested_calls(node: ast.AST) -> Iterator[tuple[ast.Call, bool]]:
@@ -1136,7 +1242,9 @@ def _signatures(path: pathlib.Path) -> list[_Signature]:
 
     A method is called through an object the rule does not follow, so only
     a function at the top of a module can be a check of its own; and only a
-    call that runs on every path through it makes it one.
+    call that runs on every path that leaves it by its end or a ``return``,
+    and is not in the body of a ``try`` a handler of which goes on, makes it
+    one, of a parameter the call reads before anything rebinds it.
     """
     module = _module(path)
     reader = _Flow(lambda _: [], module.numpy, fields=False)
@@ -1144,17 +1252,16 @@ def _signatures(path: pathlib.Path) -> list[_Signature]:
     for node in module.tree.body:
         if not isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef):
             continue
+        sure = _Sure(reader)
+        sure.block(node.body, sure=True)
         calls = tuple(
             _Call(
                 module.imports.get(call.func.id, f"{module.name}.{call.func.id}"),
-                tuple(frozenset(reader.names_read(a)) for a in call.args),
-                tuple(
-                    (k.arg, frozenset(reader.names_read(k.value)))
-                    for k in call.keywords
-                ),
+                tuple(_held(reader, a, bound) for a in call.args),
+                tuple((k.arg, _held(reader, k.value, bound)) for k in call.keywords),
             )
-            for call, sure in _sure_calls(node.body)
-            if sure and isinstance(call.func, ast.Name)
+            for call, bound in sure.found
+            if isinstance(call.func, ast.Name)
         )
         arguments = node.args
         positional = tuple(a.arg for a in arguments.posonlyargs + arguments.args)
@@ -1167,6 +1274,15 @@ def _signatures(path: pathlib.Path) -> list[_Signature]:
             )
         )
     return found
+
+
+def _held(reader: _Flow, argument: ast.expr, bound: frozenset[str]) -> frozenset[str]:
+    """The names *argument* reads the value of as it is, but those bound before."""
+    return frozenset(
+        name
+        for name in reader.names_read(argument)
+        if name.partition("[")[0] not in bound
+    )
 
 
 @dataclass(frozen=True)
@@ -1293,26 +1409,96 @@ def conversions_in(
     module: _Module, checks: Mapping[str, Check], file: str = ""
 ) -> list[Conversion]:
     """Every conversion in *module*, with what it reads."""
-    checked_by = _checker(module, checks)
-    found: list[Conversion] = []
+    reading = _Reading(module, _checker(module, checks), file)
     for qualified, function in _functions(module.tree):
-        names = _function_names(module, function)
-        flow = _Flow(checked_by, names, fields=function.name == "__post_init__")
-        env: Env = dict.fromkeys(_parameters(function), frozenset())
+        reading.function(qualified, function)
+    return sorted(reading.found, key=lambda c: (c.key[0], c.line, c.source))
+
+
+@dataclass
+class _Reading:
+    """The functions of a module read one after the other, each nested one
+    with what the names it shares with the function around it hold for it.
+    """
+
+    module: _Module
+    checks: Callable[[ast.Call], list[tuple[ast.expr, frozenset[Refusal]]]]
+    file: str
+    found: list[Conversion] = field(default_factory=list)
+    #: What a nested function's enclosing names hold, and whether it reads a
+    #: record's fields, by the definition's id, kept until it is read.
+    enclosed: dict[int, tuple[Env, bool]] = field(default_factory=dict)
+
+    def function(
+        self, qualified: str, function: ast.FunctionDef | ast.AsyncFunctionDef
+    ) -> None:
+        captured, fields = self.enclosed.pop(id(function), ({}, False))
+        flow = _Flow(
+            self.checks,
+            _function_names(self.module, function),
+            fields=fields or function.name == "__post_init__",
+        )
+        env = _scope_env(captured, function, function.body)
         flow.block(function.body, env)
+        self._keep(qualified, flow)
+        for inner in flow.nested.values():
+            self.enclosed[id(inner)] = (flow.captured(inner), flow.fields)
+
+    def _lambda(
+        self, qualified: str, node: ast.Lambda, captured: Env, outer: _Flow
+    ) -> None:
+        flow = _Flow(self.checks, outer.names, fields=outer.fields)
+        env = _scope_env(captured, node, [node.body])
+        flow.expression(node.body, env)
+        self._keep(qualified, flow)
+
+    def _keep(self, qualified: str, flow: _Flow) -> None:
         for call, value, kind, verdict in flow.found.values():
-            found.append(
+            self.found.append(
                 Conversion(
-                    module.path,
+                    self.module.path,
                     call.lineno,
                     qualified,
                     ast.unparse(value),
                     verdict,
                     kind,
-                    file,
+                    self.file,
                 )
             )
-    return sorted(found, key=lambda c: (c.key[0], c.line, c.source))
+        for node, captured in flow.lambdas:
+            self._lambda(f"{qualified}.<lambda>", node, captured, flow)
+
+
+def _scope_env(
+    captured: Env,
+    scope: ast.FunctionDef | ast.AsyncFunctionDef | ast.Lambda,
+    body: Sequence[ast.AST],
+) -> Env:
+    """What a function's names hold where it starts: its parameters the
+    caller's values, and what it shares with the function around it as that
+    function holds it, but a name it binds of its own.
+    """
+    shared = _declared_shared(body)
+    own = {name for node in body for name in _bound_names(node)} - shared
+    own |= set(_parameters(scope))
+    env = {
+        name: state
+        for name, state in captured.items()
+        if name.partition("[")[0].partition(".")[0] not in own
+    }
+    env.update(dict.fromkeys(_parameters(scope), frozenset()))
+    return env
+
+
+def _declared_shared(body: Sequence[ast.AST]) -> set[str]:
+    """The names a function declares ``nonlocal`` or ``global``."""
+    return {
+        name
+        for node in body
+        for child in ast.walk(node)
+        if isinstance(child, ast.Nonlocal | ast.Global)
+        for name in child.names
+    }
 
 
 def _spelled(path: pathlib.Path, source: pathlib.Path | None) -> str:

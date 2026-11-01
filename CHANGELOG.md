@@ -2371,8 +2371,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   of them, refuses `np.complex128(v + 1j)` by name.
   `scripts/check_real_conversions.py` lists every conversion of the tree with
   what it reads (`--census`) and fails on one that converts a caller's value,
-  a parameter or a field a record is built with, that no check has read on
-  every path to it (rule A61); on the tree before this change it reports all
+  a parameter, a field a record is built with or a name a nested function or
+  a `lambda` shares with the function around it, that no check has read on
+  every path to it, a function of the library counting as a check only when
+  it checks on every path that leaves it (rule A61); on the tree before this
+  change it reports all
   1049, and the GPU-fingerprinted engines needed none of theirs changed. Each
   refusal is documented in the `:raises TypeError:` field of the function, and
   so in the API reference.

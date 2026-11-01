@@ -434,6 +434,69 @@ _PLANTED_UNCHECKED = {
             _maybe(levels, flag)
             return np.asarray(levels, dtype=np.float64)
     """,
+    "a_helper_that_returns_before_its_check": """
+        def _maybe(levels, flag):
+            if flag:
+                return levels
+            real_array(levels, "levels")
+            return levels
+
+        def f(levels, flag):
+            _maybe(levels, flag)
+            return np.asarray(levels, dtype=np.float64)
+    """,
+    "a_helper_that_returns_from_a_loop_before_its_check": """
+        def _first(levels, rows):
+            for row in rows:
+                if row:
+                    return row
+            real_array(levels, "levels")
+            return None
+
+        def f(levels, rows):
+            _first(levels, rows)
+            return np.asarray(levels, dtype=np.float64)
+    """,
+    "a_helper_whose_handler_swallows_its_check": """
+        def _quiet(levels):
+            try:
+                real_array(levels, "levels")
+            except TypeError:
+                pass
+
+        def f(levels):
+            _quiet(levels)
+            return np.asarray(levels, dtype=np.float64)
+    """,
+    "a_helper_that_checks_a_rebound_parameter": """
+        def _other(levels, default):
+            levels = default
+            real_array(levels, "levels")
+
+        def f(levels, default):
+            _other(levels, default)
+            return np.asarray(levels, dtype=np.float64)
+    """,
+    "captured_by_a_nested_function": """
+        def f(levels):
+            def g():
+                return np.asarray(levels, dtype=np.float64)
+
+            return g()
+    """,
+    "captured_by_a_lambda": """
+        def f(levels, apply):
+            return apply(lambda: np.asarray(levels, dtype=np.float64))
+    """,
+    "captured_and_used_before_the_check": """
+        def f(levels):
+            def g():
+                return np.asarray(levels, dtype=np.float64)
+
+            first = g()
+            levels = real_array(levels, "levels")
+            return first, g()
+    """,
 }
 
 #: The shapes that answer one: a check on every path, or no caller's value.
@@ -500,6 +563,51 @@ _PLANTED_ANSWERED = {
         def f(levels):
             levels = real_array(levels, "levels")
             return levels.astype(np.complex128)
+    """,
+    "a_helper_that_rebinds_to_what_keeps_the_value": """
+        def _read(levels):
+            levels = np.atleast_1d(levels)
+            real_array(levels, "levels")
+
+        def f(levels):
+            _read(levels)
+            return np.asarray(levels, dtype=np.float64)
+    """,
+    "a_helper_whose_handler_raises": """
+        def _read(levels):
+            try:
+                real_array(levels, "levels")
+            except ValueError:
+                raise TypeError("no") from None
+
+        def f(levels):
+            _read(levels)
+            return np.asarray(levels, dtype=np.float64)
+    """,
+    "captured_after_the_check": """
+        def f(levels):
+            levels = real_array(levels, "levels")
+
+            def g():
+                return np.asarray(levels, dtype=np.float64)
+
+            return g()
+    """,
+    "captured_and_checked_before_the_use": """
+        def f(levels):
+            def g():
+                return np.asarray(levels, dtype=np.float64)
+
+            levels = real_array(levels, "levels")
+            return g()
+    """,
+    "a_nested_function_s_own_binding": """
+        def f(levels):
+            def g():
+                levels = [1.0, 2.0]
+                return np.asarray(levels, dtype=np.float64)
+
+            return g(), real_array(levels, "levels")
     """,
 }
 

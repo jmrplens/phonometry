@@ -30,6 +30,7 @@ audio is byte-identical.
 
 from __future__ import annotations
 
+import os
 import shutil
 import struct
 from pathlib import Path
@@ -60,7 +61,7 @@ _RIFF_APP_ID = b"riff"
 _FOREIGN_CHUNK_HEADER_BYTES = 12
 
 
-def read_flac_bext(path: str | Path) -> BroadcastMetadata | None:
+def read_flac_bext(path: str | os.PathLike[str]) -> BroadcastMetadata | None:
     """Extract a ``bext`` carried in a FLAC APPLICATION ``riff`` block.
 
     Walks the metadata chain reading only the block headers and the
@@ -70,7 +71,7 @@ def read_flac_bext(path: str | Path) -> BroadcastMetadata | None:
     """
     with open_audio(path) as fh:
         if fh.read(4) != _FLAC_MAGIC:
-            msg = f"{escaped(str(path))}: not a FLAC file"
+            msg = f"{escaped(os.fspath(path))}: not a FLAC file"
             raise ValueError(msg)
         while True:
             header = fh.read(4)
@@ -98,7 +99,7 @@ def read_flac_bext(path: str | Path) -> BroadcastMetadata | None:
                 return None
 
 
-def embed_flac_bext(path: str | Path, bext_payload: bytes) -> None:
+def embed_flac_bext(path: str | os.PathLike[str], bext_payload: bytes) -> None:
     """Insert the ``bext`` chunk into a finished FLAC file's metadata.
 
     Rewrites the metadata chain (STREAMINFO and friends copied as they
@@ -123,7 +124,7 @@ def embed_flac_bext(path: str | Path, bext_payload: bytes) -> None:
     )
     if len(chunk) >= 1 << 24:
         msg = (
-            f"{escaped(str(path))}: bext chunk of {len(bext_payload)} bytes exceeds the "
+            f"{escaped(os.fspath(path))}: bext chunk of {len(bext_payload)} bytes exceeds the "
             "24-bit FLAC metadata block length"
         )
         raise ValueError(msg)
@@ -132,13 +133,13 @@ def embed_flac_bext(path: str | Path, bext_payload: bytes) -> None:
     with open_audio(source) as src, staging.open("wb") as dst:
         magic = src.read(4)
         if magic != _FLAC_MAGIC:
-            msg = f"{escaped(str(path))}: not a FLAC file"
+            msg = f"{escaped(os.fspath(path))}: not a FLAC file"
             raise ValueError(msg)
         dst.write(magic)
         while True:
             header = src.read(4)
             if len(header) < _METADATA_BLOCK_HEADER_BYTES:
-                msg = f"{escaped(str(path))}: truncated FLAC metadata chain"
+                msg = f"{escaped(os.fspath(path))}: truncated FLAC metadata chain"
                 raise ValueError(msg)
             body = src.read(int.from_bytes(header[1:4], "big"))
             last = bool(header[0] & 0x80)

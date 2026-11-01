@@ -32,12 +32,9 @@ and the EXTENSIBLE channel labels ride along on the returned signal.
 
 from __future__ import annotations
 
+import os
 import warnings
 from dataclasses import replace
-
-# Imported to run, not only to type: typing.get_type_hints resolves the path
-# parameter of read and info in this module's namespace.
-from pathlib import Path  # noqa: TC003
 from typing import TYPE_CHECKING, NamedTuple
 
 import numpy as np
@@ -124,7 +121,7 @@ _SUBTYPE_BITS = {
 _AUDIO_EXTRA_HINT = 'Install the [audio] extra with: pip install "phonometry[audio]"'
 
 
-def _sniff(path: str | Path) -> str | None:
+def _sniff(path: str | os.PathLike[str]) -> str | None:
     """Identify a file by its magic bytes: ``None`` for the WAV family.
 
     :raises ValueError: If the leading bytes match no known audio format.
@@ -144,7 +141,7 @@ def _sniff(path: str | Path) -> str | None:
         and head[1] & _MPEG_SYNC_BYTE_2_MASK == _MPEG_SYNC_BYTE_2_MASK
     ):
         return "MPEG audio (MP3)"
-    msg = f"{escaped(str(path))}: not a recognised audio file"
+    msg = f"{escaped(os.fspath(path))}: not a recognised audio file"
     raise ValueError(msg)
 
 
@@ -163,10 +160,10 @@ def _import_soundfile(format_name: str) -> ModuleType:
     return soundfile  # type: ignore[no-any-return]
 
 
-def _warn_lossy(format_name: str, path: str | Path) -> None:
+def _warn_lossy(format_name: str, path: str | os.PathLike[str]) -> None:
     """Emit the metrology warning for a lossy source."""
     warnings.warn(
-        f"{escaped(str(path))}: {format_name} is a lossy format; the decoder reconstructs "
+        f"{escaped(os.fspath(path))}: {format_name} is a lossy format; the decoder reconstructs "
         "an approximation of the recorded waveform, so levels computed from "
         "it are not metrologically defensible. Use the linear PCM recording "
         "for analysis; lossy copies are for listening.",
@@ -195,7 +192,7 @@ class SoundfileStamp(NamedTuple):
 
 def soundfile_stamp(
     sf: ModuleType,
-    path: str | Path,
+    path: str | os.PathLike[str],
     format_name: str,
     chunks: WavChunks | None = None,
 ) -> SoundfileStamp:
@@ -213,7 +210,7 @@ def soundfile_stamp(
     :return: The stamp both readers attach to what they decode.
     """
     require_regular_audio(path)
-    file_info = sf.info(str(path))
+    file_info = sf.info(os.fspath(path))
     lossy = _soundfile_lossy(str(file_info.subtype))
     if chunks is not None:
         provenance = chunks.bext
@@ -228,7 +225,7 @@ def soundfile_stamp(
         channel_labels=chunks.fmt.channel_labels() if chunks is not None else None,
         provenance=provenance,
         source=SignalOrigin(
-            path=str(path),
+            path=os.fspath(path),
             container=chunks.container if chunks is not None else str(file_info.format),
             format_name=str(file_info.subtype),
             bit_depth=_SUBTYPE_BITS.get(str(file_info.subtype)),
@@ -238,7 +235,7 @@ def soundfile_stamp(
 
 
 def _read_soundfile(
-    path: str | Path,
+    path: str | os.PathLike[str],
     format_name: str,
     *,
     calibration_factor: float | None,
@@ -250,7 +247,7 @@ def _read_soundfile(
     if stamp.source.lossy:
         _warn_lossy(f"{format_name} ({stamp.source.format_name})", path)
     require_regular_audio(path)
-    data, fs = sf.read(str(path), dtype="float64", always_2d=True)
+    data, fs = sf.read(os.fspath(path), dtype="float64", always_2d=True)
     return Signal(
         data=np.ascontiguousarray(data.T),
         fs=int(fs),
@@ -261,7 +258,9 @@ def _read_soundfile(
     )
 
 
-def read(path: str | Path, *, calibration_factor: float | None = None) -> Signal:
+def read(
+    path: str | os.PathLike[str], *, calibration_factor: float | None = None
+) -> Signal:
     """Read an audio file into a :class:`~phonometry.io.Signal`.
 
     The samples come back float64, at the file's native rate, in the
@@ -334,7 +333,7 @@ def read(path: str | Path, *, calibration_factor: float | None = None) -> Signal
     return signal
 
 
-def info(path: str | Path) -> AudioFileInfo:
+def info(path: str | os.PathLike[str]) -> AudioFileInfo:
     """Describe an audio file without reading its samples.
 
     For the WAV family this is a single pass over the chunk headers on the
@@ -359,11 +358,11 @@ def info(path: str | Path) -> AudioFileInfo:
     if format_name is None:
         return wav_info(path)
     sf = _import_soundfile(format_name)
-    file_info = sf.info(str(path))
+    file_info = sf.info(os.fspath(path))
     frames = int(file_info.frames)
     fs = int(file_info.samplerate)
     return AudioFileInfo(
-        path=str(path),
+        path=os.fspath(path),
         container=str(file_info.format),
         format_name=str(file_info.subtype),
         fs=fs,

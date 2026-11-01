@@ -51,11 +51,13 @@ not the library, accepts that narrowing.
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from .._internal.json_input import escaped
 from .._internal.validation import require_choice
 from ._audio_file import require_regular_audio
 from ._backends import _FLAC_NAME, _import_soundfile, _sniff, info
@@ -110,7 +112,7 @@ _FLAC_MAX_PCM_BITS = 24
 
 
 def _source_traits(
-    path: str | Path,
+    path: str | os.PathLike[str],
 ) -> tuple[str, int, BroadcastMetadata | None, int, int, int]:
     """What the target choice needs to know about the source.
 
@@ -133,7 +135,7 @@ def _source_traits(
         return kind, bits, chunks.bext, fmt.fs, fmt.channels, chunks.frames
     sf = _import_soundfile(format_name)
     require_regular_audio(path)
-    file_info = sf.info(str(path))
+    file_info = sf.info(os.fspath(path))
     kind, bits = _SF_SUBTYPE_TRAITS.get(str(file_info.subtype), ("decoded", 0))
     bext = read_flac_bext(path) if format_name == _FLAC_NAME else None
     return (
@@ -177,8 +179,8 @@ def _default_subtype(kind: str, bits: int, *, flac: bool) -> str:
 
 
 def _quantised_blocks(
-    src: str | Path,
-    dst: str | Path,
+    src: str | os.PathLike[str],
+    dst: str | os.PathLike[str],
     subtype: str,
     block_size: int | np.integer[Any],
     total_samples: int,
@@ -208,26 +210,28 @@ def _quantised_blocks(
         _warn_clipped(dst, subtype, clipped_total, total_samples, peak_dbfs)
 
 
-def _check_conversion_paths(src: str | Path, dst: str | Path) -> None:
+def _check_conversion_paths(
+    src: str | os.PathLike[str], dst: str | os.PathLike[str]
+) -> None:
     """Refuse lossy and unknown targets, and a self-overwriting pair."""
     source, target = Path(src), Path(dst)
     suffix = target.suffix.lower()
     if suffix in _LOSSY_TARGET_SUFFIXES:
         msg = (
-            f"{dst}: writing lossy formats is outside this API by policy; "
+            f"{escaped(os.fspath(dst))}: writing lossy formats is outside this API by policy; "
             "a metrology library does not export approximations of its "
             "own data. Convert to WAV or FLAC instead."
         )
         raise ValueError(msg)
     if suffix not in _WAV_SUFFIXES and suffix != ".flac":
         msg = (
-            f"{dst}: unsupported target {target.suffix!r}; convert() "
+            f"{escaped(os.fspath(dst))}: unsupported target {target.suffix!r}; convert() "
             "produces the WAV family (.wav, .wave, .bwf) and, with the "
             "[audio] extra, FLAC."
         )
         raise ValueError(msg)
     if source.resolve() == target.resolve():
-        msg = f"{src}: source and destination are the same file"
+        msg = f"{escaped(os.fspath(src))}: source and destination are the same file"
         raise ValueError(msg)
 
 
@@ -258,7 +262,7 @@ def _stream_to_flac(
     """Stream quantised blocks into a FLAC file, then embed the bext."""
     sf = _import_soundfile("FLAC")
     with sf.SoundFile(
-        str(target),
+        os.fspath(target),
         "w",
         samplerate=fs,
         channels=channels,
@@ -277,8 +281,8 @@ def _stream_to_flac(
 
 
 def convert(
-    src: str | Path,
-    dst: str | Path,
+    src: str | os.PathLike[str],
+    dst: str | os.PathLike[str],
     *,
     subtype: Subtype | None = None,
     block_size: int | np.integer[Any] = 1 << 20,

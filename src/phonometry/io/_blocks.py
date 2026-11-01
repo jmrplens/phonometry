@@ -39,10 +39,7 @@ left over are only ones already delivered (``remaining <= overlap``).
 from __future__ import annotations
 
 import math
-
-# Imported to run, not only to type: typing.get_type_hints resolves the path
-# parameter of read_blocks in this module's namespace.
-from pathlib import Path  # noqa: TC003
+import os
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -109,7 +106,7 @@ def _decode_linear_frames(raw: bytes, fmt: FormatChunk) -> NDArray[np.float64]:
 
 
 def _iter_wav_blocks(
-    path: str | Path,
+    path: str | os.PathLike[str],
     chunks: WavChunks,
     block_size: int,
     overlap: int,
@@ -131,7 +128,7 @@ def _iter_wav_blocks(
             raw = fh.read(n * fmt.block_align)
             if len(raw) < n * fmt.block_align:
                 msg = (
-                    f"{escaped(str(path))}: data chunk ends {n * fmt.block_align - len(raw)} "
+                    f"{escaped(os.fspath(path))}: data chunk ends {n * fmt.block_align - len(raw)} "
                     f"bytes short of frame {start + n}"
                 )
                 raise ValueError(msg)
@@ -147,7 +144,7 @@ def _iter_wav_blocks(
 
 
 def _iter_soundfile_blocks(
-    path: str | Path,
+    path: str | os.PathLike[str],
     format_name: str,
     block_size: int,
     overlap: int,
@@ -164,7 +161,7 @@ def _iter_soundfile_blocks(
     labels = channel_labels if channel_labels is not None else stamp.channel_labels
     require_regular_audio(path)
     for block in sf.blocks(
-        str(path),
+        os.fspath(path),
         blocksize=block_size,
         overlap=overlap,
         dtype="float64",
@@ -181,7 +178,9 @@ def _iter_soundfile_blocks(
 
 
 def _sidecar_labels(
-    path: str | Path, sidecar: CalibrationSidecar | None, channels: int | None
+    path: str | os.PathLike[str],
+    sidecar: CalibrationSidecar | None,
+    channels: int | None,
 ) -> tuple[str, ...] | None:
     """The sidecar's channel labels, refused at the call when they do not fit.
 
@@ -200,7 +199,7 @@ def _sidecar_labels(
 
 
 def read_blocks(
-    path: str | Path,
+    path: str | os.PathLike[str],
     block_size: int | np.integer[Any],
     *,
     overlap: int | np.integer[Any] = 0,

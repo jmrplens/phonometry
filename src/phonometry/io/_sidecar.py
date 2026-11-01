@@ -272,16 +272,16 @@ def _check_text(name: str, text: object, *, optional: bool) -> None:
 
 def _named(path: Path) -> str:
     """*path* as a message names it: a name that is not UTF-8 by its escapes."""
-    return escaped(str(path))
+    return escaped(os.fspath(path))
 
 
-def sidecar_path(audio_path: str | Path) -> Path:
+def sidecar_path(audio_path: str | os.PathLike[str]) -> Path:
     """The sidecar filename of an audio file (see the module docstring)."""
     audio = Path(audio_path)
     return audio.with_name(audio.name + _SIDECAR_TAIL)
 
 
-def writable_sidecar(audio_path: str | Path) -> Path:
+def writable_sidecar(audio_path: str | os.PathLike[str]) -> Path:
     """The file a sidecar of *audio_path* is written to, refused if it cannot be.
 
     A link at the sidecar's name is followed, so that a sidecar kept once and
@@ -307,7 +307,7 @@ def writable_sidecar(audio_path: str | Path) -> Path:
     return Path(os.path.realpath(target)) if target.is_symlink() else target
 
 
-def put_sidecar(audio_path: str | Path, data: bytes) -> Path:
+def put_sidecar(audio_path: str | os.PathLike[str], data: bytes) -> Path:
     """Put the bytes of a sidecar at *audio_path*'s, never opening the name.
 
     The bytes go to a new file beside the sidecar's file, renamed into place,
@@ -427,7 +427,7 @@ def _refuse_labels_the_audio_lacks(
 
 
 def check_sidecar_labels(
-    audio_path: str | Path, labels: tuple[str, ...] | None, channels: int
+    audio_path: str | os.PathLike[str], labels: tuple[str, ...] | None, channels: int
 ) -> None:
     """Refuse a sidecar's channel labels that do not fit its audio, naming it.
 
@@ -452,7 +452,7 @@ def check_sidecar_labels(
 
 
 def write_sidecar(
-    audio_path: str | Path,
+    audio_path: str | os.PathLike[str],
     calibration_factor: RealScalar | NDArray[np.floating[Any] | np.integer[Any]],
     *,
     reference_spl: RealScalar
@@ -706,7 +706,7 @@ def _record(source: Path, raw: bytes) -> CalibrationSidecar:
         raise ValueError(msg) from exc
 
 
-def sidecar_bytes(audio_path: str | Path, channels: int) -> bytes | None:
+def sidecar_bytes(audio_path: str | os.PathLike[str], channels: int) -> bytes | None:
     """The bytes of an audio file's sidecar, read and checked, or ``None``.
 
     Read once and checked as :func:`read_sidecar` checks them, and its labels
@@ -724,7 +724,7 @@ def sidecar_bytes(audio_path: str | Path, channels: int) -> bytes | None:
     return raw
 
 
-def read_sidecar(audio_path: str | Path) -> CalibrationSidecar | None:
+def read_sidecar(audio_path: str | os.PathLike[str]) -> CalibrationSidecar | None:
     """Read an audio file's calibration sidecar, if one exists.
 
     Returns ``None`` when there is no sidecar: the common case, never an

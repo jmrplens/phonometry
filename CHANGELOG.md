@@ -2390,6 +2390,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   keeps the first series and transforms the set again only when a harmonic
   widens it.
 
+- **A path of another library reaches the file it names.** `io.write`,
+  `io.read`, `io.info`, `io.read_blocks` and `io.convert` handed SciPy and
+  python-soundfile `str(path)`, which for an `os.PathLike` that is neither a
+  `str` nor a `pathlib.Path` (an `os.DirEntry`, a path class of another
+  library) is the object's repr: a WAV of 16 or 32 bits, a float WAV, a FLAC
+  or a WAV with `bext="loudness"` was written to a file named
+  `<... object at 0x...>` in the working directory, a read raised
+  `FileNotFoundError` naming that repr, and `AudioFileInfo.path` held it. Each
+  now takes the path the object names, and so do their messages and those of
+  `aircraft.load_anp_database`; `convert`'s refusals of a lossy or unknown
+  target escape the name as every other reader's do. The annotations of
+  `io.write`, `io.read`, `io.info`, `io.read_blocks`, `io.convert`,
+  `io.write_sidecar`, `io.read_sidecar`, `io.sidecar_path` and
+  `aircraft.load_anp_database`, the public parameters whose annotation
+  named `pathlib.Path`, say `str | os.PathLike[str]`, as the video writers'
+  did.
 - **The API reference and `help()` show no double hyphen where a sentence
   wanted a colon, and the `fluids` package says what it holds.** Docstrings
   spelt a dash as `--`, which `help()` prints as it is and the site published

@@ -474,8 +474,9 @@ def backend_for(compute: Compute | None) -> Backend:
         in Pyodide, unless ``fallback=True``.
     :raises ValueError: when the request names a host: a backend is always
         this machine's.
-    :warns ComputeFallbackWarning: with ``fallback=True``, for either of the
-        failures above, before the run goes to NumPy.
+    :warns ComputeFallbackWarning: with ``fallback=True``, when it turns a
+        :class:`ComputeImportError` or a :class:`ComputeDeviceError` into a
+        run on NumPy.
     """
     request = _requested(compute)
     if request.host is not None:

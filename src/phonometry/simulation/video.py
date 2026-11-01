@@ -1114,7 +1114,7 @@ def write_fdtd_animation(
         node: a waveform other than the ``value`` of a
         :class:`GaussianPulse`, :class:`CWSource` or :class:`SignalSource`;
         or, as a run written here steps, the waveform of a
-        :class:`PlaneWaveSource` that returns a complex number or a text.
+        :class:`PlaneWaveSource` that returns anything but one real number.
     :raises ValueError: If the run records no snapshots
         (``run.recording`` is ``None``, or its ``snapshot_every`` is), the
         frame is narrower than the title of the run's last frame needs (a
@@ -1153,8 +1153,9 @@ def write_fdtd_animation(
         ``fallback=True``.
     :raises ImportError: If matplotlib is not installed, for a video written
         here.
-    :warns ComputeFallbackWarning: Once, with ``fallback=True``, for any of
-        the three failures above; the run then steps on NumPy and writes the
+    :warns ComputeFallbackWarning: Once, when ``fallback=True`` turns a
+        :class:`ComputeImportError`, a :class:`ComputeDeviceError` or a
+        :class:`ComputeRemoteError` into a run on NumPy that writes the
         video here.
     """
     call = _checked_call(
@@ -1331,7 +1332,7 @@ def write_elastic_fdtd_animation(
         :class:`~phonometry.simulation.GaussianPulse`,
         :class:`~phonometry.simulation.CWSource` or
         :class:`~phonometry.simulation.SignalSource`; or, as a run written
-        here steps, a waveform that returns a complex number or a text.
+        here steps, a waveform that returns anything but one real number.
     :raises ValueError: If the run records no snapshots
         (``run.recording`` is ``None``, or its ``snapshot_every`` is), the
         frame is narrower than the title of the run's last frame needs (a
@@ -1370,8 +1371,9 @@ def write_elastic_fdtd_animation(
         ``fallback=True``.
     :raises ImportError: If matplotlib is not installed, for a video written
         here.
-    :warns ComputeFallbackWarning: Once, with ``fallback=True``, for any of
-        the three failures above; the run then steps on NumPy and writes the
+    :warns ComputeFallbackWarning: Once, when ``fallback=True`` turns a
+        :class:`ComputeImportError`, a :class:`ComputeDeviceError` or a
+        :class:`ComputeRemoteError` into a run on NumPy that writes the
         video here.
     """
     call = _checked_call(

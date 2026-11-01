@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import os
+import re
 import subprocess
 import sys
 import types
@@ -1039,5 +1040,10 @@ def test_the_backend_of_an_engine_is_never_on_a_node() -> None:
     ) as refused:
         bk.backend_for(request)
     message = str(refused.value)
-    missing = [name for name in get_args(RemoteFunction) if name not in message]
+    # Whole names: ``fdtd_simulation`` is a part of ``elastic_fdtd_simulation``.
+    missing = [
+        name
+        for name in get_args(RemoteFunction)
+        if not re.search(rf"(?<!\w){re.escape(name)}(?!\w)", message)
+    ]
     assert missing == [], message

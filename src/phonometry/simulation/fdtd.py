@@ -83,6 +83,7 @@ from .._internal.validation import (
     require_equal_counts,
     require_positive,
     require_ranks,
+    require_real,
     require_same_length,
     require_scalar,
 )
@@ -189,44 +190,78 @@ def _finite(name: str, value: float) -> float:
     return out
 
 
-def _real_time(t: float) -> float:
-    """The time a source's waveform is asked for, refused when it is no real number.
+#: What is surely one real number, handed back after one ``isinstance``: a
+#: Python or NumPy float or integer of any width. A NumPy complex number is
+#: no ``np.floating`` and a NumPy flag no ``np.integer``, so neither passes.
+_SURELY_REAL = float | int | np.floating | np.integer
 
-    A Python or NumPy float, what an engine's step hands over, passes as it
-    is. NumPy reads a complex time as its real part with no more than a
-    ``ComplexWarning``, and a text fails where it first meets a number, in a
-    message that names nothing.
 
-    :raises TypeError: for a complex time or a text.
+def _one_real(value: object, refusal: Callable[[], str]) -> float:
+    """*value* as a ``float`` through :func:`require_real`, its refusal worded only if raised.
+
+    The refusal is worded only when it is raised: showing the value costs
+    more than checking it when the value is an array (a zero-dimensional
+    one included), and a waveform's sample is checked at every step.
+
+    :param refusal: Words the refusal, given nothing.
+    :raises TypeError: for anything but one real number.
+    :raises ValueError: for a number too large for a float.
     """
-    if isinstance(t, float | int):
+    try:
+        return require_real(value, "")
+    except TypeError:
+        raise TypeError(refusal()) from None
+    except ValueError:
+        raise ValueError(refusal()) from None
+
+
+def _real_time(t: float) -> float:
+    """The time a source's waveform is asked for, refused when it is not one real number.
+
+    A Python or NumPy float or integer, what an engine's step hands over,
+    passes as it is after one ``isinstance``. Anything else goes through
+    :func:`require_real`: NumPy reads a complex time as its real part with
+    no more than a ``ComplexWarning``, and a text, an array or ``None``
+    fails where it first meets a number, in a message that names nothing.
+
+    :raises TypeError: for anything but one real number: a complex number,
+        a text, an array (a ``bytearray`` included) or ``None``.
+    :raises ValueError: for a number too large for a float.
+    """
+    if isinstance(t, _SURELY_REAL):
         return t
-    _real_numbers("t", t, "t must be a real time, not complex")
-    return t
+    return _one_real(
+        t, lambda: f"t must be one real number of seconds, got {given_repr(t)}"
+    )
 
 
 def _real_sample(value: float, source: object) -> float:
-    """A sample a source's waveform returned, refused when it is no real number.
+    """A sample a source's waveform returned, refused when it is not one real number.
 
     The engines add each sample into their real fields, which keep only the
     real part of a complex one (with no more than a ``ComplexWarning``) or
-    fail with a casting error that names nothing, and they multiply a text
-    by the amplitude. A Python or NumPy float, what a waveform returns,
-    passes after one ``isinstance``, so the step pays nothing more.
+    fail with a casting error that names nothing; they multiply a text by
+    the amplitude, broadcast an array into the field, and fail on ``None``
+    in a message that names nothing. A Python or NumPy float or integer,
+    what a waveform returns, passes as it is after one ``isinstance``, so
+    the step pays nothing more; anything else goes through
+    :func:`require_real` and steps as the float it reads as.
 
     :param source: The source whose waveform returned *value*, which the
         refusal names by its class.
-    :raises TypeError: for a complex sample or a text.
+    :raises TypeError: for anything but one real number: a complex number,
+        a text, an array (a ``bytearray`` included) or ``None``.
+    :raises ValueError: for a number too large for a float.
     """
-    if isinstance(value, float | int):
+    if isinstance(value, _SURELY_REAL):
         return value
-    msg = (
-        f"the waveform of the {type(source).__name__} must return a real number, "
-        f"got {given_repr(value)}"
+    return _one_real(
+        value,
+        lambda: (
+            f"the waveform of the {type(source).__name__} must return a real "
+            f"number, got {given_repr(value)}"
+        ),
     )
-    refuse_complex(value, msg)
-    refuse_text(value, msg)
-    return value
 
 
 def _integer(name: str, value: object) -> int:
@@ -320,7 +355,8 @@ class GaussianPulse(RichDisplay):
     def value(self, t: float) -> float:
         """Source waveform at time ``t`` (seconds).
 
-        :raises TypeError: if ``t`` is a complex number or a text.
+        :raises TypeError: if ``t`` is anything but one real number: a
+            complex number, a text, an array or ``None``.
         """
         t = _real_time(t)
         t0 = 4.0 * self.half_width_s if self.t0 is None else self.t0
@@ -381,7 +417,8 @@ class CWSource(RichDisplay):
     def value(self, t: float) -> float:
         """Source waveform at time ``t`` (seconds).
 
-        :raises TypeError: if ``t`` is a complex number or a text.
+        :raises TypeError: if ``t`` is anything but one real number: a
+            complex number, a text, an array or ``None``.
         """
         t = _real_time(t)
         ramp_time = self.ramp_cycles / self.frequency
@@ -460,7 +497,8 @@ class SignalSource(OwnsArrays):
     def value(self, t: float) -> float:
         """Source waveform at time ``t`` (seconds), zero outside the span.
 
-        :raises TypeError: if ``t`` is a complex number or a text.
+        :raises TypeError: if ``t`` is anything but one real number: a
+            complex number, a text, an array or ``None``.
         """
         pos = _real_time(t) * self.fs
         last = self.samples.size - 1
@@ -1235,9 +1273,9 @@ class ContourProbe:
         ``(n_points, 2)``, ordered left, right, top, bottom face.
     :ivar normals: Outward unit normals of each sample, same shape.
     :ivar frequencies: The tracked frequencies [Hz].
-    :raises TypeError: if ``ix0``, ``ix1``, ``iy0`` or ``iy1`` is a flag, a text or an
-        array where a count goes, or ``frequencies`` holds a complex number
-        or a text.
+    :raises TypeError: if ``engine`` is not an :class:`FDTD2D`, ``ix0``,
+        ``ix1``, ``iy0`` or ``iy1`` is a flag, a text or an array where a
+        count goes, or ``frequencies`` holds a complex number or a text.
     """
 
     def __init__(
@@ -1249,6 +1287,9 @@ class ContourProbe:
         iy1: int | np.integer[Any],
         frequencies: ArrayLike,
     ) -> None:
+        if not isinstance(engine, FDTD2D):
+            msg = f"'engine' must be an FDTD2D, got {type(engine).__name__}"
+            raise TypeError(msg)
         require_scalar(ix0, "ix0")
         require_scalar(ix1, "ix1")
         require_scalar(iy0, "iy0")
@@ -1892,7 +1933,7 @@ class FDTD2D:
         """Advance the leapfrog scheme by one time step.
 
         :raises TypeError: if the waveform of a :class:`PlaneWaveSource`
-            returns a complex number or a text.
+            returns anything but one real number.
         """
         with self._backend.context():
             self._step()
@@ -1993,8 +2034,8 @@ class FDTD2D:
 
         :raises TypeError: if ``snapshot_decimation``, ``n_steps`` or
             ``snapshot_every`` is a flag, a text or an array where a count
-            goes, or the waveform of a :class:`PlaneWaveSource` returns a
-            complex number or a text.
+            goes, or the waveform of a :class:`PlaneWaveSource` returns
+            anything but one real number.
         :raises ValueError: if ``n_steps`` is not a whole number of 0 or more,
             or ``snapshot_every`` or ``snapshot_decimation`` is not a whole
             number of 1 or more.
@@ -2953,8 +2994,8 @@ def fdtd_simulation(run: FDTDRun, *, compute: Compute | None = None) -> FDTDResu
         source whose waveform is a callable other than the ``value`` of a
         :class:`GaussianPulse`, :class:`CWSource` or :class:`SignalSource`,
         or a whole number outside the range of an int64; and, as the run
-        steps, for the waveform of a :class:`PlaneWaveSource` that returns a
-        complex number or a text.
+        steps, for the waveform of a :class:`PlaneWaveSource` that returns
+        anything but one real number.
     :raises ValueError: For a ``PHONOMETRY_COMPUTE`` that does not parse, or
         a hosts file that cannot be read or is malformed.
     :raises KeyError: For a ``host`` the hosts file does not name.
@@ -2964,8 +3005,9 @@ def fdtd_simulation(run: FDTDRun, *, compute: Compute | None = None) -> FDTDResu
         first small computation, unless ``fallback=True``.
     :raises ComputeRemoteError: For a failure of the connection or of the
         node, unless ``fallback=True``.
-    :warns ComputeFallbackWarning: With ``fallback=True``, for any of the
-        three failures above; the run then steps on NumPy, here.
+    :warns ComputeFallbackWarning: When ``fallback=True`` turns a
+        :class:`ComputeImportError`, a :class:`ComputeDeviceError` or a
+        :class:`ComputeRemoteError` into a run on NumPy here.
     """
     if not isinstance(run, FDTDRun):
         msg = f"'run' must be an FDTDRun, got {type(run).__name__}."

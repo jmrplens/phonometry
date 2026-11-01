@@ -1234,7 +1234,7 @@ class ElasticFDTD2D:
         """Advance the leapfrog scheme by one time step (Virieux Eq. 5).
 
         :raises TypeError: if the waveform of an :class:`ExplosionSource` or
-            a :class:`ForceSource` returns a complex number or a text.
+            a :class:`ForceSource` returns anything but one real number.
         """
         with self._backend.context():
             self._step()
@@ -1511,7 +1511,7 @@ class ElasticFDTD2D:
         :raises TypeError: if ``snapshot_decimation``, ``n_steps`` or
             ``snapshot_every`` is a flag, a text or an array where a count
             goes, or the waveform of an :class:`ExplosionSource` or a
-            :class:`ForceSource` returns a complex number or a text.
+            :class:`ForceSource` returns anything but one real number.
         :raises ValueError: if ``n_steps`` is not a whole number of 0 or more,
             or ``snapshot_every`` or ``snapshot_decimation`` is not a whole
             number of 1 or more.
@@ -2349,7 +2349,7 @@ def elastic_fdtd_simulation(
         :class:`~phonometry.simulation.CWSource` or
         :class:`~phonometry.simulation.SignalSource`, or a whole number
         outside the range of an int64; and, as the run steps, for a waveform
-        that returns a complex number or a text.
+        that returns anything but one real number.
     :raises ValueError: For a ``PHONOMETRY_COMPUTE`` that does not parse, or
         a hosts file that cannot be read or is malformed.
     :raises KeyError: For a ``host`` the hosts file does not name.
@@ -2359,8 +2359,9 @@ def elastic_fdtd_simulation(
         first small computation, unless ``fallback=True``.
     :raises ComputeRemoteError: For a failure of the connection or of the
         node, unless ``fallback=True``.
-    :warns ComputeFallbackWarning: With ``fallback=True``, for any of the
-        three failures above; the run then steps on NumPy, here.
+    :warns ComputeFallbackWarning: When ``fallback=True`` turns a
+        :class:`ComputeImportError`, a :class:`ComputeDeviceError` or a
+        :class:`ComputeRemoteError` into a run on NumPy here.
     """
     if not isinstance(run, ElasticRun):
         msg = f"'run' must be an ElasticRun, got {type(run).__name__}."

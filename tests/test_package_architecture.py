@@ -1733,16 +1733,61 @@ def test_a_docstring_lists_a_warning_under_warns() -> None:
 _FIELD = re.compile(r"^:(?P<kind>\w+)(?:\s+(?P<name>[^:`]+))?:(?!`)")
 
 
-def raises_fields_naming_a_warning(source: str, where: str) -> list[str]:
-    """Each ``:raises`` field of *source*'s docstrings whose text names a warning.
+#: A warning's class, by the name every warning of the package ends with.
+_WARNING_CLASS = re.compile(r"\b(\w+Warning)\b")
 
-    A field runs from its ``:kind ...:`` line over the lines indented under
-    it, a line that opens with a role such as ``:class:`` among them, and
-    ends at a blank line or at the next field.
+#: The verb or the noun that says a warning is emitted, its class unnamed.
+_WARNING_WORD = re.compile(r"\b(warn(?:s|ed|ing)?)\b", re.IGNORECASE)
+
+
+def _raises_findings(doc: str, first_line: int, where: str) -> list[str]:
+    """Each line of a ``:raises`` field of *doc* that names a warning or says one.
+
+    A field runs from its ``:kind ...:`` line over every line indented
+    deeper than it, a line that opens with a role such as ``:class:`` and
+    a further paragraph after a blank line among them. It ends at a line
+    no deeper than its own that opens another field or none, as the prose
+    after the field list does.
+
+    :param doc: A docstring, as written, its indentation kept.
+    :param first_line: The line of the module the docstring opens on.
+    :param where: How a finding names the module.
+    :return: ``<where>:<line> <exception> names <Warning>`` for a warning's
+        class, ``<where>:<line> <exception> says <word>`` for the word.
+    """
+    found: list[str] = []
+    kind = name = ""
+    indent = 0
+    for offset, line in enumerate(doc.splitlines()):
+        text = line.strip()
+        if not text:
+            continue
+        depth = len(line) - len(line.lstrip())
+        field = _FIELD.match(text)
+        if field and (not kind or depth <= indent):
+            kind, name = field["kind"], (field["name"] or "").strip()
+            indent = depth
+            text = text[field.end() :]
+        elif depth <= indent:
+            kind = ""
+        if kind != "raises":
+            continue
+        at = f"{where}:{first_line + offset} {name}"
+        found.extend(f"{at} names {cls}" for cls in _WARNING_CLASS.findall(text))
+        found.extend(f"{at} says {word}" for word in _WARNING_WORD.findall(text))
+    return found
+
+
+def raises_fields_naming_a_warning(source: str, where: str) -> list[str]:
+    """Each ``:raises`` field of *source*'s docstrings whose text names or says a warning.
+
+    The field's text is read as :func:`_raises_findings` bounds it; a
+    warning's class or the word ``warn``, ``warns``, ``warned`` or
+    ``warning`` anywhere in it is a finding.
 
     :param source: The text of a Python module.
     :param where: How a finding names the module.
-    :return: ``<where>:<line> <exception> names <Warning>`` for each one.
+    :return: One line per finding, as :func:`_raises_findings` words it.
     """
     found: list[str] = []
     for node in ast.walk(ast.parse(source)):
@@ -1751,26 +1796,8 @@ def raises_fields_naming_a_warning(source: str, where: str) -> list[str]:
         ):
             continue
         doc = ast.get_docstring(node, clean=False)
-        if not doc or not node.body:
-            continue
-        first = node.body[0].lineno
-        kind = name = ""
-        indent = 0
-        for offset, line in enumerate(doc.splitlines()):
-            text = line.strip()
-            depth = len(line) - len(line.lstrip())
-            field = _FIELD.match(text)
-            if field and (not kind or depth <= indent):
-                kind, name = field["kind"], (field["name"] or "").strip()
-                indent = depth
-                text = text[field.end() :]
-            elif not text:
-                kind = ""
-            if kind == "raises":
-                found.extend(
-                    f"{where}:{first + offset} {name} names {warning}"
-                    for warning in re.findall(r"\b(\w+Warning)\b", text)
-                )
+        if doc and node.body:
+            found.extend(_raises_findings(doc, node.body[0].lineno, where))
     return found
 
 
@@ -1808,7 +1835,48 @@ def test_the_raises_field_reader_ends_a_field_where_the_field_list_does() -> Non
         '    """\n'
     )
     assert raises_fields_naming_a_warning(source, "m.py") == [
-        "m.py:5 ValueError names LevelWarning"
+        "m.py:4 ValueError says warns",
+        "m.py:5 ValueError names LevelWarning",
+    ]
+
+
+def test_the_raises_field_reader_reads_every_paragraph_of_a_field() -> None:
+    """A warning named in a later paragraph of a ``:raises`` field is a finding.
+
+    The reader ended a field at its first blank line, so a field written in
+    two paragraphs, as the package writes some, hid a warning in its second.
+    """
+    source = (
+        "def f():\n"
+        '    """Lead.\n'
+        "\n"
+        "    :raises ValueError: for a bad level.\n"
+        "\n"
+        "        A quiet one is let through with a :class:`LevelWarning`.\n"
+        "    :returns: The level.\n"
+        '    """\n'
+    )
+    assert raises_fields_naming_a_warning(source, "m.py") == [
+        "m.py:6 ValueError names LevelWarning"
+    ]
+
+
+def test_the_raises_field_reader_finds_a_warning_its_class_unnamed() -> None:
+    """A ``:raises`` field that says a call warns, naming no class, is a finding.
+
+    The reader looked only for a name ending in ``Warning``, so a field
+    that said the run warns and goes on, without the class, passed.
+    """
+    source = (
+        "def f():\n"
+        '    """Lead.\n'
+        "\n"
+        "    :raises ValueError: for a bad level, unless ``quiet``, when the\n"
+        "        call only warns.\n"
+        '    """\n'
+    )
+    assert raises_fields_naming_a_warning(source, "m.py") == [
+        "m.py:5 ValueError says warns"
     ]
 
 

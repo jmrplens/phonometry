@@ -2492,21 +2492,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `weighting_filter(x, fs, high_accuracy=True)`, `high_accuracy=1` was. Each
   is now checked before the store is asked.
 
-- **A contour probe built by hand samples, and the FDTD engines refuse a
-  complex time, a complex waveform sample and a `bytearray` grid by name.**
-  `simulation.ContourProbe(engine, ...)` joined its engine only when
-  `FDTD2D.add_contour_probe` built it: one built through the class never
-  sampled, its `n_samples` stayed at zero however long the engine ran and its
-  `phasors` refused for want of samples. A probe now registers itself with the
-  engine it is built for, once every check has passed, and `add_contour_probe`
-  returns the probe the class built. The `value(t)` of `GaussianPulse`,
-  `CWSource` and `SignalSource` read a complex time as its real part, with no
-  more than a `ComplexWarning`, and a waveform that returned a complex sample
-  stepped its real part in the elastic engine (an `ExplosionSource` or a
-  `ForceSource`) or failed in the acoustic one (a `PlaneWaveSource`) with
-  NumPy's casting error, which names nothing the caller wrote; each now raises
-  `TypeError` naming `t` or the source's waveform, and a text the same way. A
-  `bytearray` given as `shape=` to `FDTD2D`, `ElasticFDTD2D` or
+- **A contour probe built by hand samples, and the FDTD engines refuse by
+  name a time or a waveform sample that is not one real number, and a
+  `bytearray` grid.** `simulation.ContourProbe(engine, ...)` joined its engine
+  only when `FDTD2D.add_contour_probe` built it: one built through the class
+  never sampled, its `n_samples` stayed at zero however long the engine ran
+  and its `phasors` refused for want of samples. A probe now registers itself
+  with the engine it is built for, once every check has passed, and
+  `add_contour_probe` returns the probe the class built; anything but an
+  `FDTD2D` as `engine` raises `TypeError` naming `engine`, where an
+  `ElasticFDTD2D` or another object failed with an `AttributeError` naming a
+  private attribute. The `value(t)` of `GaussianPulse`, `CWSource` and
+  `SignalSource` read a complex time as its real part, with no more than a
+  `ComplexWarning`, and a waveform that returned a complex sample stepped its
+  real part in the elastic engine (an `ExplosionSource` or a `ForceSource`) or
+  failed in the acoustic one (a `PlaneWaveSource`) with NumPy's casting error,
+  which names nothing the caller wrote; `None`, a list, an array or a
+  `bytearray` as a time or a sample failed with an error of Python's or
+  NumPy's that named nothing either. Each now raises `TypeError` naming `t` or
+  the source's waveform for anything but one real number, a text included,
+  and a `Decimal` time or sample, which failed, is read as the float it holds.
+  A `bytearray` given as `shape=` to `FDTD2D`, `ElasticFDTD2D` or
   `ElasticFDTD2D.from_regions` was read as the codes of its characters (two
   bytes of 16 built a grid of 16 by 16 cells) where a `bytes` was refused; it
   is a text there now, and so it is where `io.Signal.pick`,
@@ -2521,9 +2527,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   on a node, as the engines' docstrings now do, and the engines, the
   simulation functions, the video writers and the backend loader list
   `ComputeFallbackWarning` under `:warns`, where a sentence of their
-  `:raises ComputeDeviceError:` hid it from the tables of warnings; a check in
-  `tests/test_package_architecture.py` refuses a warning named inside a
-  `:raises` field anywhere in the package (rule D12).
+  `:raises ComputeDeviceError:` hid it from the tables of warnings, and each
+  `:warns` field names the exceptions the fallback turns into a run on NumPy;
+  a check in `tests/test_package_architecture.py` refuses a warning named, or
+  said in words, in any paragraph of a `:raises` field anywhere in the package
+  (rule D12).
 
 - **The FDTD plots document the keywords their figure refuses.**
   `FDTDResult.plot` and `ElasticFDTDResult.plot` raise `TypeError` for a

@@ -112,7 +112,7 @@ float32 with Neumaier's compensated summation.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `ix0`, `ix1`, `iy0` or `iy1` is a flag, a text or an array where a count goes, or `frequencies` holds a complex number or a text. |
+| TypeError | if `engine` is not an [`FDTD2D`](/phonometry/reference/api/simulation/fdtd/#fdtd2d), `ix0`, `ix1`, `iy0` or `iy1` is a flag, a text or an array where a count goes, or `frequencies` holds a complex number or a text. |
 
 ### ContourProbe.n_samples
 
@@ -191,7 +191,7 @@ Source waveform at time `t` (seconds).
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `t` is a complex number or a text. |
+| TypeError | if `t` is anything but one real number: a complex number, a text, an array or `None`. |
 
 ## FDTD2D
 
@@ -464,7 +464,7 @@ returned and only the final state is kept (read it with
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `snapshot_decimation`, `n_steps` or `snapshot_every` is a flag, a text or an array where a count goes, or the waveform of a [`PlaneWaveSource`](/phonometry/reference/api/simulation/fdtd/#planewavesource) returns a complex number or a text. |
+| TypeError | if `snapshot_decimation`, `n_steps` or `snapshot_every` is a flag, a text or an array where a count goes, or the waveform of a [`PlaneWaveSource`](/phonometry/reference/api/simulation/fdtd/#planewavesource) returns anything but one real number. |
 | ValueError | if `n_steps` is not a whole number of 0 or more, or `snapshot_every` or `snapshot_decimation` is not a whole number of 1 or more. |
 
 ### FDTD2D.step()
@@ -479,7 +479,7 @@ Advance the leapfrog scheme by one time step.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if the waveform of a [`PlaneWaveSource`](/phonometry/reference/api/simulation/fdtd/#planewavesource) returns a complex number or a text. |
+| TypeError | if the waveform of a [`PlaneWaveSource`](/phonometry/reference/api/simulation/fdtd/#planewavesource) returns anything but one real number. |
 
 ### FDTD2D.time
 
@@ -534,7 +534,7 @@ spreading rather than the 3D spherical $1/r$.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | For a `run` that is not an [`FDTDRun`](/phonometry/reference/api/simulation/fdtd/#fdtdrun), a `compute` that is neither a [`Compute`](/phonometry/reference/api/simulation/compute/#compute) nor `None`, or, when `compute` names a host, a run that cannot travel to a node: a source whose waveform is a callable other than the `value` of a [`GaussianPulse`](/phonometry/reference/api/simulation/fdtd/#gaussianpulse), [`CWSource`](/phonometry/reference/api/simulation/fdtd/#cwsource) or [`SignalSource`](/phonometry/reference/api/simulation/fdtd/#signalsource), or a whole number outside the range of an int64; and, as the run steps, for the waveform of a [`PlaneWaveSource`](/phonometry/reference/api/simulation/fdtd/#planewavesource) that returns a complex number or a text. |
+| TypeError | For a `run` that is not an [`FDTDRun`](/phonometry/reference/api/simulation/fdtd/#fdtdrun), a `compute` that is neither a [`Compute`](/phonometry/reference/api/simulation/compute/#compute) nor `None`, or, when `compute` names a host, a run that cannot travel to a node: a source whose waveform is a callable other than the `value` of a [`GaussianPulse`](/phonometry/reference/api/simulation/fdtd/#gaussianpulse), [`CWSource`](/phonometry/reference/api/simulation/fdtd/#cwsource) or [`SignalSource`](/phonometry/reference/api/simulation/fdtd/#signalsource), or a whole number outside the range of an int64; and, as the run steps, for the waveform of a [`PlaneWaveSource`](/phonometry/reference/api/simulation/fdtd/#planewavesource) that returns anything but one real number. |
 | ValueError | For a `PHONOMETRY_COMPUTE` that does not parse, or a hosts file that cannot be read or is malformed. |
 | KeyError | For a `host` the hosts file does not name. |
 | ComputeImportError | When the device's library is not installed or does not import, unless `fallback=True`. |
@@ -545,7 +545,7 @@ spreading rather than the 3D spherical $1/r$.
 
 | Warning | When |
 | :--- | :--- |
-| ComputeFallbackWarning | With `fallback=True`, for any of the three failures above; the run then steps on NumPy, here. |
+| ComputeFallbackWarning | When `fallback=True` turns a [`ComputeImportError`](/phonometry/reference/api/simulation/compute/#computeimporterror), a [`ComputeDeviceError`](/phonometry/reference/api/simulation/compute/#computedeviceerror) or a [`ComputeRemoteError`](/phonometry/reference/api/simulation/compute/#computeremoteerror) into a run on NumPy here. |
 
 ## FDTDBoundaries
 
@@ -783,7 +783,7 @@ Source waveform at time `t` (seconds).
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `t` is a complex number or a text. |
+| TypeError | if `t` is anything but one real number: a complex number, a text, an array or `None`. |
 
 ## PlaneWaveSource
 
@@ -864,4 +864,4 @@ Source waveform at time `t` (seconds), zero outside the span.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `t` is a complex number or a text. |
+| TypeError | if `t` is anything but one real number: a complex number, a text, an array or `None`. |

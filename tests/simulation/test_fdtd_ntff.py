@@ -71,6 +71,7 @@ from phonometry.simulation import (
     ContourPhasors,
     ContourProbe,
     CWSource,
+    ElasticFDTD2D,
     PlaneWaveSource,
     far_field_from_contour,
 )
@@ -541,6 +542,29 @@ def test_a_contour_probe_built_by_hand_samples_as_one_the_engine_adds() -> None:
     assert np.array_equal(built.pressure, registered.pressure)
     assert np.array_equal(built.normal_velocity, registered.normal_velocity)
     assert np.any(built.pressure != 0.0)
+
+
+@pytest.mark.parametrize(
+    "engine",
+    [
+        pytest.param(
+            ElasticFDTD2D(c_p=2000.0, c_s=1000.0, dx=0.01, rho=1000.0, shape=(40, 50)),
+            id="elastic engine",
+        ),
+        pytest.param(None, id="None"),
+        pytest.param(object(), id="object"),
+    ],
+)
+def test_a_contour_probe_refuses_what_is_no_acoustic_engine(engine: object) -> None:
+    """``ContourProbe`` names ``engine`` when it is given anything but an ``FDTD2D``.
+
+    The class is the one public callable that takes an engine object. An
+    elastic engine failed with an ``AttributeError`` naming the private list
+    of probes it lacks, and ``None`` or any other object with one naming
+    ``p``, its pressure field: none of them said which argument was wrong.
+    """
+    with pytest.raises(TypeError, match=r"'engine' must be an FDTD2D, got "):
+        ContourProbe(engine, 15, 35, 10, 30, [F0])  # type: ignore[arg-type]
 
 
 def test_contour_probe_rejects_touching_obstacles() -> None:

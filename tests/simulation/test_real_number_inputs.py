@@ -401,8 +401,14 @@ def _time_cases() -> Iterator[Case]:
         "CWSource.value": CWSource(ix=8, iy=8, frequency=1000.0),
         "SignalSource.value": SignalSource(ix=8, iy=8, samples=np.ones(8), fs=48000.0),
     }
+    #: What is no time at all: nothing, and a buffer NumPy reads as an array.
+    not_numbers: dict[str, tuple[object, str]] = {
+        "None": (None, "real number"),
+        "bytearray": (bytearray(b"1"), "real number"),
+    }
     for owner, source in sources.items():
-        for spelling, (value, said) in _spellings(5e-5, is_map=False).items():
+        spellings = _spellings(5e-5, is_map=False) | not_numbers
+        for spelling, (value, said) in spellings.items():
             yield (
                 f"{owner}(t={spelling})",
                 lambda source=source, value=value: source.value(value),  # type: ignore[attr-defined]
@@ -595,6 +601,10 @@ _WRONG_SAMPLES: dict[str, object] = {
     "complex64": np.complex64(1.0 + 1.0j),
     "zero-dimensional complex array": np.asarray(1.0 + 1.0j),
     "text": "1.0",
+    "None": None,
+    "list of one number": [1.0],
+    "array of two numbers": np.array([1.0, 2.0]),
+    "bytearray": bytearray(b"1"),
 }
 
 
@@ -646,12 +656,15 @@ _STEPPERS: dict[str, Callable[[object], None]] = {
 def test_a_waveform_that_returns_no_real_number_is_refused_by_name(
     stepper: str, spelling: str
 ) -> None:
-    """A complex sample or a text from a waveform stops the step, naming the waveform.
+    """A sample that is not one real number stops the step, naming the waveform.
 
     The engines add each sample into their real fields: the elastic engine
     stepped the real part of a complex sample with no more than a
     ``ComplexWarning``, and the plane wave of the acoustic engine failed with
-    NumPy's casting error, which names nothing the caller wrote.
+    NumPy's casting error, which names nothing the caller wrote. ``None``, a
+    list, an array or a ``bytearray`` failed with a ``TypeError`` or a
+    ``ValueError`` of NumPy's or Python's that named nothing either, or
+    broadcast an array into the field.
     """
     import warnings
 
@@ -659,3 +672,40 @@ def test_a_waveform_that_returns_no_real_number_is_refused_by_name(
         warnings.simplefilter("error", np.exceptions.ComplexWarning)
         with pytest.raises(TypeError, match=r"waveform of .* must return a real"):
             _STEPPERS[stepper](_WRONG_SAMPLES[spelling])
+
+
+#: What a waveform returns, and what an engine hands ``value(t)``, when it is
+#: right: a NumPy scalar of another width among them.
+_FAST_SAMPLES: dict[str, object] = {
+    "python float": 0.5,
+    "python int": 1,
+    "float64": np.float64(0.5),
+    "float32": np.float32(0.5),
+    "int64": np.int64(1),
+}
+
+
+@pytest.mark.parametrize("spelling", sorted(_FAST_SAMPLES))
+def test_a_real_number_of_any_numpy_width_passes_without_the_slow_check(
+    spelling: str, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A NumPy float32 or int64 sample or time is handed back as it is, unchecked.
+
+    The engines check every sample a waveform returns, each step, so the
+    check of what is surely one real number is one ``isinstance``. It named
+    only ``float`` and ``int``, so a ``np.float32`` or a ``np.int64`` went
+    through the full check, some twenty times slower, though it is as
+    surely one real number as a ``np.float64``.
+    """
+    from phonometry.simulation import fdtd
+
+    def slow(*args: object, **kwargs: object) -> None:
+        msg = "the slow check was reached"
+        raise AssertionError(msg)
+
+    source = _blast()
+    for name in ("require_real", "refuse_complex", "refuse_text", "_real_numbers"):
+        monkeypatch.setattr(fdtd, name, slow, raising=False)
+    value = _FAST_SAMPLES[spelling]
+    assert fdtd._real_sample(value, source) is value  # type: ignore[arg-type]
+    assert fdtd._real_time(value) is value  # type: ignore[arg-type]

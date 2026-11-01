@@ -551,8 +551,10 @@ def _apart(axis: Axis) -> list[float]:
     stay as they are. Otherwise every second tick in view is kept, counting
     from the first, then every third, and so on, the first step at which no
     two neighbouring labels overlap; an axis too short for even its first
-    and last labels side by side keeps the first alone. So a narrow field's
-    axis is never labelled with one number written over another.
+    and last labels side by side keeps the last alone, whose number, at its
+    place, gives the axis' scale where the first, ``0``, would give none.
+    So a narrow field's axis is never labelled with one number written over
+    another.
     """
     locs: list[float] = axis.get_majorticklocs().tolist()
     low, high = sorted(axis.get_view_interval())
@@ -566,7 +568,7 @@ def _apart(axis: Axis) -> list[float]:
         kept = shown[::step]
         if not _crowded(axis, kept, [True] * len(kept)):
             return kept
-    return shown[:1]
+    return shown[-1:]
 
 
 def _hold_ticks(ax: Axes, colorbar: Colorbar) -> None:

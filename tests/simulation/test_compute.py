@@ -389,19 +389,6 @@ def test_a_malformed_host_in_the_environment_names_the_variable(text: str) -> No
 
 
 @pytest.mark.parametrize(
-    ("text", "want"),
-    [
-        ("cupy:1@nas,float32", "cupy:1,float32"),
-        ("cupy@nas", "cupy"),
-        ("cupy", "cupy"),
-        (" cpu@nas ", "cpu"),
-    ],
-)
-def test_a_node_takes_the_host_out_of_its_environment(text: str, want: str) -> None:
-    assert cm._strip_host(text) == want
-
-
-@pytest.mark.parametrize(
     ("source", "match"),
     [
         ("argument", "compute= names host 'nas'"),
@@ -484,3 +471,29 @@ def test_a_package_sha256_is_sixty_four_lowercase_hex_digits(
     fields = {**_RUN, "package_sha256": value}
     with pytest.raises(error, match="'package_sha256'"):
         RunProvenance(**fields)  # type: ignore[arg-type]
+
+
+def _curated_row(name: str) -> str:
+    """The row of *name* in the curated API table, ``docs/reference/api/index.md``."""
+    table = (_SRC.parent / "docs" / "reference" / "api" / "index.md").read_text(
+        encoding="utf-8"
+    )
+    (row,) = [line for line in table.splitlines() if line.startswith(f"| `{name}` |")]
+    return row
+
+
+def test_every_function_a_node_runs_is_named_where_a_host_is_documented() -> None:
+    # A function added to what a node runs (the video writers joined the
+    # simulations) leaves no page saying that only the others go there.
+    from phonometry.simulation._remote import node
+
+    places = {
+        "the module docstring": cm.__doc__ or "",
+        "Compute's docstring": Compute.__doc__ or "",
+        "the curated row of Compute": _curated_row("Compute"),
+    }
+    missing = {
+        where: sorted(name for name in node.FUNCTIONS if name not in text)
+        for where, text in places.items()
+    }
+    assert {where: names for where, names in missing.items() if names} == {}

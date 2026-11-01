@@ -417,29 +417,44 @@ def _as_given(value: object) -> object:
     if _held_for_a_bytearray(value):
         return bytearray(cast("bytes", value))
     if isinstance(value, tuple | list):
-        members = [_as_given(member) for member in value]
-        if all(new is old for new, old in zip(members, value, strict=True)):
-            return value
-        if isinstance(value, list):
-            return members
-        make = getattr(type(value), "_make", None)
-        return make(members) if make is not None else tuple(members)
+        return _sequence_as_given(value)
     if isinstance(value, Mapping):
-        pairs = {key: _as_given(item) for key, item in value.items()}
-        if all(pairs[key] is item for key, item in value.items()):
-            return value
-        return MappingProxyType(pairs) if isinstance(value, MappingProxyType) else pairs
+        return _mapping_as_given(value)
     if isinstance(value, np.ndarray) and value.dtype == object:
-        members = [_as_given(member) for member in value.flat]
-        if all(new is old for new, old in zip(members, value.flat, strict=True)):
-            return value
-        held = np.empty(value.shape, dtype=object)
-        # One element at a time, as _owned_objects does: an array assigned
-        # to a slice would be spread over it instead of held whole.
-        for index, member in zip(np.ndindex(value.shape), members, strict=True):
-            held[index] = member
-        return held
+        return _objects_as_given(value)
     return value
+
+
+def _sequence_as_given(value: tuple[object, ...] | list[object]) -> object:
+    """A tuple, named tuple or list for :func:`_as_given`, rebuilt as it was."""
+    members = [_as_given(member) for member in value]
+    if all(new is old for new, old in zip(members, value, strict=True)):
+        return value
+    if isinstance(value, list):
+        return members
+    make = getattr(type(value), "_make", None)
+    return make(members) if make is not None else tuple(members)
+
+
+def _mapping_as_given(value: Mapping[object, object]) -> object:
+    """A mapping or a read-only one for :func:`_as_given`, rebuilt as it was."""
+    pairs = {key: _as_given(item) for key, item in value.items()}
+    if all(pairs[key] is item for key, item in value.items()):
+        return value
+    return MappingProxyType(pairs) if isinstance(value, MappingProxyType) else pairs
+
+
+def _objects_as_given(value: np.ndarray) -> object:
+    """An array of objects for :func:`_as_given`, rebuilt with its shape."""
+    members = [_as_given(member) for member in value.flat]
+    if all(new is old for new, old in zip(members, value.flat, strict=True)):
+        return value
+    held = np.empty(value.shape, dtype=object)
+    # One element at a time, as _owned_objects does: an array assigned
+    # to a slice would be spread over it instead of held whole.
+    for index, member in zip(np.ndindex(value.shape), members, strict=True):
+        held[index] = member
+    return held
 
 
 def _owned_array(

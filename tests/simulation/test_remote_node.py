@@ -532,7 +532,8 @@ def test_the_warnings_of_a_run_travel_once_each_with_their_class(
 #: A warning class made by ``exec`` with no ``__name__`` in its globals: its
 #: ``__module__`` is ``"builtins"`` though it is no class of Python's own.
 _EXEC_MADE: dict[str, type[Warning]] = {}
-exec("class LibWarning(UserWarning): pass", _EXEC_MADE)  # noqa: S102 - the literal above, nothing a caller gives
+# S102: the code run is the literal on this line, nothing a caller gives.
+exec("class LibWarning(UserWarning): pass", _EXEC_MADE)  # noqa: S102
 
 
 def _warns_exec_made_and_returns(**arguments: object) -> tuple[object, None]:

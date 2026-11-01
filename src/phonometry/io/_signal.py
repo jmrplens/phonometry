@@ -39,7 +39,8 @@ from .._internal.validation import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import Sequence
+    from collections.abc import Callable, Sequence
+    from typing import Concatenate
 
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, DTypeLike, NDArray
@@ -331,6 +332,41 @@ class Signal(RichDisplay):
             provenance=self.provenance,
             source=self.source,
         )
+
+    def pipe[**P, R](
+        self,
+        func: Callable[Concatenate[Signal, P], R],
+        /,
+        *args: P.args,
+        **kwargs: P.kwargs,
+    ) -> R:
+        """The result of ``func(self, *args, **kwargs)``, written as a step of a chain.
+
+        A function of the library takes the Signal first and hands back a
+        new one, so a chain of them reads inside out:
+        ``signals.leq(filters.weighting_filter(take.pick(0)).crop(10.0, 30.0))``.
+        With ``pipe`` the same chain reads in the order it runs,
+        ``take.pick(0).pipe(filters.weighting_filter).crop(10.0, 30.0).pipe(signals.leq)``,
+        and the arguments after *func* go to it, by position or by name. It
+        is the ``pipe`` of pandas without its ``(func, keyword)`` form, so a
+        function that takes the Signal elsewhere than first goes in a
+        ``lambda``. Nothing is computed here, and what *func* returns comes
+        back as it is, a Signal to chain further or anything else to end the
+        chain.
+
+        :param func: A function that takes the Signal as its first argument.
+        :param args: Its further positional arguments.
+        :param kwargs: Its keyword arguments.
+        :return: What *func* returns.
+        :raises TypeError: for a ``func`` that cannot be called.
+        """
+        if not callable(func):
+            msg = (
+                "'func' must be a function that takes the Signal first, got "
+                f"{type(func).__name__}; one that takes it elsewhere goes in a lambda"
+            )
+            raise TypeError(msg)
+        return func(self, *args, **kwargs)
 
     def plot(
         self,

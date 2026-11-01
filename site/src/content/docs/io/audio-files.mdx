@@ -175,6 +175,44 @@ print(meta.container, meta.format_name, meta.bit_depth)   # WAV PCM 24
 print(meta.n_samples, f"{meta.duration_s:.1f} s")         # 480000 10.0 s
 ```
 
+### One channel, a stretch of the record, a chain of steps
+
+Indexing a `Signal` hands back its samples, which is what lets it stand in
+for the array, and the rate and the calibration stay behind. Two methods
+narrow the record and keep them: `pick(channels)` takes channels by index,
+in the order given, and `crop(tmin, tmax)` keeps the samples between two
+times in seconds, half-open like a Python slice, so `crop(0.0, t)` and
+`crop(t)` split the record with nothing counted twice. A third,
+`pipe(func, *args, **kwargs)`, is `func(sig, *args, **kwargs)`: the
+functions of the library take the `Signal` first and hand a new one back,
+and `pipe` writes a chain of them in the order it runs instead of inside
+out. What `func` returns comes back as it is, a `Signal` to go on with or a
+number that ends the chain; a function that takes the `Signal` elsewhere
+than first goes in a `lambda`.
+
+```python
+from phonometry import filters, signals
+
+# take: a two-channel stand-in for a calibrated take (Pa), synthesized so
+#   the guide runs; in a real measurement it comes from io.read.
+take = io.Signal(
+    np.vstack([recording, 0.5 * recording]), fs,
+    calibration_factor=1.0, channel_labels=("front", "rear"),
+)
+print(take.pick(1).channel_labels, take.crop(2.0, 6.0).duration_s)  # ('rear',) 4.0
+
+nested = signals.leq(
+    filters.weighting_filter(take.pick(0), weighting="A").crop(2.0, 6.0)
+)
+chained = (
+    take.pick(0)
+    .pipe(filters.weighting_filter, weighting="A")
+    .crop(2.0, 6.0)
+    .pipe(signals.leq)
+)
+print(f"{chained:.2f} dB", chained == nested)   # 57.25 dB True
+```
+
 ## Calibrating from the calibrator take
 
 The [calibration guide](/phonometry/signals/metrology/calibration/) derives

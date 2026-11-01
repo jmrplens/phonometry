@@ -1669,6 +1669,47 @@ under test and stay a measurement.
 | IndexError | If a channel is out of range. |
 | TypeError | If a channel is not an integer (a flag, a float, a fraction or a text), or *channels* is a text, or an array of two dimensions or more or of a dtype that is not an integer one. |
 
+### Signal.pipe()
+
+```python
+Signal.pipe(
+    func: Callable[Concatenate[Signal, P], R],
+    /,
+    *args: P.args,
+    **kwargs: P.kwargs,
+) -> R
+```
+
+The result of `func(self, *args, **kwargs)`, written as a step of a chain.
+
+A function of the library takes the Signal first and hands back a
+new one, so a chain of them reads inside out:
+`signals.leq(filters.weighting_filter(take.pick(0)).crop(10.0, 30.0))`.
+With `pipe` the same chain reads in the order it runs,
+`take.pick(0).pipe(filters.weighting_filter).crop(10.0, 30.0).pipe(signals.leq)`,
+and the arguments after *func* go to it, by position or by name. It
+is the `pipe` of pandas without its `(func, keyword)` form, so a
+function that takes the Signal elsewhere than first goes in a
+`lambda`. Nothing is computed here, and what *func* returns comes
+back as it is, a Signal to chain further or anything else to end the
+chain.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `func` | A function that takes the Signal as its first argument. |
+| `args` | Its further positional arguments. |
+| `kwargs` | Its keyword arguments. |
+
+**Returns:** What *func* returns.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | for a `func` that cannot be called. |
+
 ### Signal.plot()
 
 ```python

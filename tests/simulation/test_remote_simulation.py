@@ -251,6 +251,7 @@ def test_the_remote_route_sends_every_parameter(
             device="cpu",
             device_index=0,
             dtype="float64",
+            phonometry_version="4.0.0",
             numpy_version=np.__version__,
             array_library=None,
             cuda_runtime=None,

@@ -12,14 +12,20 @@ import subprocess
 import sys
 import threading
 import time
+import types
 import warnings
 from types import MappingProxyType, SimpleNamespace
 from typing import IO, TYPE_CHECKING, Any
 
+import fake_ffmpeg
 import numpy as np
 import pytest
 
+import phonometry
+from phonometry.io import VideoOptions
 from phonometry.simulation import (
+    AnimationFrame,
+    Compute,
     ComputeFallbackWarning,
     ElasticRecording,
     ElasticRun,
@@ -70,7 +76,10 @@ _NODE_S = 360.0
 
 
 def _job(
-    function: str, arguments: dict[str, Any], compute: dict[str, object] = _CPU
+    function: str,
+    arguments: dict[str, Any],
+    compute: dict[str, object] = _CPU,
+    version: str = phonometry.__version__,
 ) -> bytes:
     tree, buffers = wire.encode_arguments(arguments)
     out = io.BytesIO()
@@ -78,6 +87,7 @@ def _job(
         "type": "job",
         "function": function,
         "compute": compute,
+        "phonometry_version": version,
         "arguments": tree,
     }
     bootstrap.write_frame(out, header, buffers)
@@ -182,6 +192,95 @@ def test_a_job_comes_back_as_the_run_here() -> None:
     assert np.array_equal(_array(pressures, buffers[0]), here.pressures)
     assert np.array_equal(_array(snapshots, buffers[1]), here.snapshots)
     assert RunProvenance(**header["provenance"]) == here.provenance  # type: ignore[arg-type]
+
+
+#: A version no package here has, so that a record holding it can only have
+#: come from the job.
+_SENT_VERSION = "0.0.0.post7"
+
+
+def test_a_node_records_the_version_the_job_was_sent_with() -> None:
+    code, frames = _serve(
+        _job("fdtd_simulation", {"run": _ACOUSTIC}, version=_SENT_VERSION)
+    )
+    ((header, _),) = frames
+    assert code == 0
+    assert header["provenance"]["phonometry_version"] == _SENT_VERSION  # type: ignore[index]
+
+
+class _Gone(types.ModuleType):
+    """A ``phonometry._version`` as a node has it: its version cannot be read."""
+
+    def __getattr__(self, name: str) -> object:
+        if name == "__version__":
+            msg = "the node read a version of its own"
+            raise ImportError(msg)
+        raise AttributeError(name)
+
+
+#: An elastic run with snapshots, which an elastic video draws.
+_ELASTIC_FILMED = ElasticRun(
+    c_p=4000.0,
+    c_s=2300.0,
+    dx=0.01,
+    duration_s=5e-4,
+    rho=2500.0,
+    shape=(20, 24),
+    sources=[
+        ExplosionSource(
+            ix=12, iy=10, waveform=GaussianPulse(ix=0, iy=0, half_width_s=2e-5).value
+        )
+    ],
+    recording=ElasticRecording(probes=[(4, 4)], snapshot_every=60),
+)
+#: The arguments of a job of each function a node runs, but its placement.
+_EVERY_JOB: dict[str, dict[str, Any]] = {
+    "fdtd_simulation": {"run": _ACOUSTIC},
+    "elastic_fdtd_simulation": {"run": _ELASTIC_FILMED},
+    "write_fdtd_animation": {
+        "run": _ACOUSTIC,
+        "frame": AnimationFrame(size=(480, 246), color_limit=1.0),
+        "video": VideoOptions(),
+        "container": "webm",
+    },
+    "write_elastic_fdtd_animation": {
+        "run": _ELASTIC_FILMED,
+        "frame": AnimationFrame(size=(480, 246), color_limit=1e-6),
+        "video": VideoOptions(),
+        "container": "gif",
+    },
+}
+
+
+@pytest.mark.parametrize("name", sorted(node.FUNCTIONS))
+def test_a_node_never_reads_a_version_of_its_own(
+    name: str, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # A node runs the package it was sent from its cache, where neither
+    # installed metadata nor the source tree's VERSION file names it: a read
+    # of phonometry.__version__ there fails, as this stand-in does. Each
+    # function reads one when run outside a job, so each is held here.
+    arguments = _EVERY_JOB[name]
+    if name.startswith("write_"):
+        pytest.importorskip("matplotlib")
+        fake_ffmpeg.install(tmp_path, monkeypatch)
+    function, _ = node.FUNCTIONS[name]
+    here = Compute()
+    monkeypatch.setitem(sys.modules, "phonometry._version", _Gone("gone"))
+    with pytest.raises(ImportError, match="the node read a version of its own"):
+        function(**arguments, compute=here)
+    code, frames = _serve(_job(name, arguments, version=_SENT_VERSION))
+    ((header, _),) = frames
+    assert (code, header["type"]) == (0, "result"), header.get("message")
+    assert header["provenance"]["phonometry_version"] == _SENT_VERSION  # type: ignore[index]
+
+
+def test_a_job_that_names_no_version_breaks_the_frame() -> None:
+    job = _job("fdtd_simulation", {"run": _ACOUSTIC}).replace(
+        b'"phonometry_version"', b'"phonometry_versioN"'
+    )
+    with pytest.raises(bootstrap.FrameError, match="'phonometry_version' of a frame"):
+        _serve(job)
 
 
 def test_an_elastic_job_without_snapshots_sends_only_its_signals() -> None:
@@ -304,6 +403,7 @@ def _raw_job(
         "type": kind,
         "function": "fdtd_simulation",
         "compute": compute,
+        "phonometry_version": phonometry.__version__,
         "arguments": arguments,
     }
     bootstrap.write_frame(out, header)
@@ -861,13 +961,15 @@ def test_the_bootstrap_hands_the_shipped_package_to_the_node_and_the_job_runs(
     tmp_path: Path,
 ) -> None:
     kinds, header, buffers, code, log = _through_a_node(
-        tmp_path, _job("fdtd_simulation", {"run": _ACOUSTIC})
+        tmp_path,
+        _job("fdtd_simulation", {"run": _ACOUSTIC}, version=_SENT_VERSION),
     )
     assert kinds == ["hello", "stored", "ready", "result"], log
     assert code == 0, log
     assert f"{bootstrap.PROGRESS} ".encode() in log
     here = fdtd_simulation(_ACOUSTIC)
     assert np.array_equal(_array(header["arrays"][0], buffers[0]), here.pressures)  # type: ignore[index]
+    assert header["provenance"]["phonometry_version"] == _SENT_VERSION  # type: ignore[index]
     assert (
         tmp_path
         / installed_package().digest

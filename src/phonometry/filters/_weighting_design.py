@@ -539,7 +539,11 @@ def _scalar_arctan(values: np.ndarray) -> np.ndarray:
     designs), so a correctly rounded routine would move shipped Linux
     coefficients, and glibc's own routine, the one that would not, is the IBM
     Accurate Mathematical Library, under the LGPL rather than this package's
-    licence.
+    licence. A transcription would also have to spell the build glibc picks
+    for a processor with fused multiply-adds, as :func:`_scalar_exp` does,
+    because glibc's arctangent, like its sine and tangent, rounds some inputs
+    differently in the build without them, which is why a glibc machine
+    without FMA designs some filters differently from one with it.
 
     :param values: Any real array.
     :return: Its arctangent, elementwise, in the same shape.
@@ -737,7 +741,7 @@ def _solve_dense(matrix: np.ndarray, vector: np.ndarray) -> np.ndarray:
     right = real_array(vector, "vector", copy=True)
     order = right.size
     for column in range(order - 1):
-        pivot = column + int(np.argmax(np.abs(rows[column:, column])))
+        pivot = column + int(np.argmax(np.fabs(rows[column:, column])))
         if pivot != column:
             rows[[column, pivot]] = rows[[pivot, column]]
             right[[column, pivot]] = right[[pivot, column]]
@@ -900,10 +904,10 @@ def _lawson_fit(
     for _ in range(_LAWSON_ROUNDS):
         theta = _lm_round(theta, layout, grid, weights, bounds)
         residual = _residual_db(theta, layout, omega, omega_ref, target_db)
-        peak = float(np.max(np.abs(residual)))
+        peak = float(np.max(np.fabs(residual)))
         if peak < best_peak:
             best_peak, best = peak, theta
-        magnitude = np.maximum(np.abs(residual), _LAWSON_RESIDUAL_FLOOR)
+        magnitude = np.maximum(np.fabs(residual), _LAWSON_RESIDUAL_FLOOR)
         weights = weights * _scalar_pow(magnitude, _LAWSON_EXPONENT)
         weights = weights / np.max(weights)
     return best
@@ -994,7 +998,7 @@ def _start_parameters(
     :param placement: Where the spare factors start; see
         :func:`_spare_placements`.
     """
-    away_from_origin = np.asarray(zeros) != 0.0
+    away_from_origin = np.asarray(zeros).astype(bool)
     at_origin = int(np.count_nonzero(~away_from_origin))
     finite = np.asarray(zeros)[away_from_origin]
     num, num_quad, num_lin = _padded_factors(finite, degree, placement, at_origin)
@@ -1197,7 +1201,7 @@ def _fit_from(
     bounds = _corner_bounds(layout, span)
     fitted = _lawson_fit(np.clip(theta, *bounds), layout, grid, bounds)
     residual = _residual_db(fitted, layout, grid[0], grid[1], grid[2])
-    return float(np.max(np.abs(residual))), fitted, layout
+    return float(np.max(np.fabs(residual))), fitted, layout
 
 
 def fit_prototype(

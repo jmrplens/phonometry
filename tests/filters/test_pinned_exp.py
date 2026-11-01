@@ -18,6 +18,7 @@ import sys
 
 import numpy as np
 import pytest
+from libm_identity import on_the_pinned_libm
 
 from phonometry.filters import _weighting_design
 from phonometry.filters._pinned_exp import (
@@ -64,29 +65,7 @@ def _probe() -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     return x, base, exponent
 
 
-def _libm_is_the_pinned_routine() -> bool:
-    x, base, exponent = _probe()
-    same_exp = not _mismatches(pinned_exp(x), _exp_reference(x)).any()
-    same_pow = not _mismatches(
-        pinned_pow(base, exponent), _pow_reference(base, exponent)
-    ).any()
-    return same_exp and same_pow
-
-
-#: True where the platform's ``math.exp`` and ``math.pow`` are the very
-#: routines ``_pinned_exp`` spells: glibc's, on a machine with a fused
-#: multiply-add unit. Elsewhere the contract is the pinned routines' bits, not
-#: the local library's, and only the one-ulp test below holds.
-_SAME_LIBM = _libm_is_the_pinned_routine()
-
-_same_libm_only = pytest.mark.skipif(
-    not _SAME_LIBM,
-    reason="the platform libm is not the routine _pinned_exp spells; "
-    "its bits are the contract, the local library's are not",
-)
-
-
-@_same_libm_only
+@on_the_pinned_libm
 def test_exp_bits_match_over_the_whole_domain() -> None:
     """Every regime: the fast path, the scaled edges near overflow and underflow, tiny."""
     rng = np.random.default_rng(0)
@@ -100,7 +79,7 @@ def test_exp_bits_match_over_the_whole_domain() -> None:
     assert not _mismatches(pinned_exp(x), _exp_reference(x)).any()
 
 
-@_same_libm_only
+@on_the_pinned_libm
 def test_pow_bits_match_over_the_bases_and_exponents_the_design_uses() -> None:
     """Powers of ten, powers of one, small integer powers, and wide random draws."""
     rng = np.random.default_rng(1)
@@ -126,7 +105,7 @@ def test_pow_bits_match_over_the_bases_and_exponents_the_design_uses() -> None:
     ).any()
 
 
-@_same_libm_only
+@on_the_pinned_libm
 def test_every_exp_and_pow_input_of_a_real_design_matches(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

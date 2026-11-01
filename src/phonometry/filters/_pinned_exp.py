@@ -378,7 +378,7 @@ def _round_to_odd_sum(a: np.ndarray, b: np.ndarray) -> np.ndarray:
     back = total - a
     error = (a - (total - back)) + (b - back)
     bits = total.view(np.uint64)
-    inexact_even = (error != 0.0) & ((bits & _U1) == 0)
+    inexact_even = error.astype(bool) & ((bits & _U1) == 0)
     if not inexact_even.any():
         return total
     away = np.signbit(error) == np.signbit(total)
@@ -507,7 +507,7 @@ def _special_case_down(tmp: np.ndarray, sbits: np.ndarray) -> np.ndarray:
     lo = ((one - hi) + y) + lo
     narrowed = (hi + lo) - one
     signed_zero = (shifted & _SIGN).view(np.float64)
-    narrowed = np.where(narrowed == 0.0, signed_zero, narrowed)
+    narrowed = np.where(narrowed.astype(bool), narrowed, signed_zero)
     return np.where(np.abs(y) < 1.0, narrowed, y) * float.fromhex("0x1p-1022")
 
 

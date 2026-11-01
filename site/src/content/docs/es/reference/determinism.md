@@ -4,14 +4,21 @@ description: "Determinismo: por qué deriva la coma flotante, cómo un filtro si
 ---
 
 Un filtro de ponderación diseñado por phonometry es el mismo filtro, byte a
-byte, en cualquier máquina que comparta biblioteca C: cualquier CPU, con o
-sin AVX-512; cualquier juego de kernels BLAS; cualquier número de hilos;
-cualquier semilla de hash. Entre bibliotecas C todavía no: Linux, macOS y
-Windows diseñan cada uno sus propios bytes para el mismo filtro, porque una
-trascendente sigue saliendo del `math` de la plataforma: cada una de las
-demás rutinas que toma el diseño está escrita en aritmética que
-IEEE&nbsp;754 fija, y esta página nombra la que queda y mide lo que hace.
-Dentro de una
+byte, en cualquier máquina que ejecute las mismas rutinas de la biblioteca
+C: cualquier juego de kernels BLAS, cualquier número de hilos, cualquier
+semilla de hash y cualquier CPU, con o sin AVX-512, salvo por una elección
+que hace la propia biblioteca C. glibc en x86-64 lleva su arcotangente dos
+veces, compilada con multiply-add fusionado y sin él, y elige una según el
+procesador; las dos redondean unas pocas entradas hacia vecinos opuestos,
+así que un procesador sin FMA diseña algunos filtros de otra manera, entre
+ellos la ponderación A a 44,1&nbsp;kHz, aunque no las ponderaciones A, D ni
+468 a 48&nbsp;kHz. Entre bibliotecas C los bytes todavía no coinciden, por
+la misma razón: la arcotangente es la única trascendente que el diseño sigue
+tomando del `math` de la plataforma. Cada una de las demás trascendentes
+está escrita en aritmética que IEEE&nbsp;754 fija, y los dos pasos que
+pasan por una biblioteca numérica, las raíces polinómicas de LAPACK y los
+productos BLAS que forma SciPy, se nombran más abajo, en Alcance. Esta
+página nombra lo que queda y mide lo que hace. Dentro de una
 plataforma, los coeficientes que diseña un portátil son los que diseña un
 clúster, así que un veredicto de conformidad, una figura publicada o un
 filtro embarcado en una cadena de medida es un artefacto reproducible y no
@@ -97,7 +104,10 @@ El camino de diseño determinista responde a cada puerta en su terreno, en
   todas partes, y el valor correctamente redondeado no basta por sí solo: la
   arcotangente de glibc redondea al otro lado 19 de las 15&nbsp;866
   arcotangentes que evalúa el corpus, así que solo su propia rutina deja los
-  coeficientes publicados en Linux donde están.
+  coeficientes publicados en Linux donde están, y además su compilación con
+  multiply-add fusionado, la que deletrean `exp` y `pow`: la arcotangente de
+  glibc, como su `sin` y su `tan`, redondea distinto en sus dos
+  compilaciones.
 - **La rejilla deletreada.** La rejilla geométrica de frecuencias se genera
   término a término con los extremos fijados, así que el ajuste evalúa las
   mismas frecuencias en todas partes.
@@ -137,12 +147,13 @@ corren en CI:
   el valor correctamente redondeado, así que las rutinas correctamente
   redondeadas devuelven ahí sus bits. Fuera del corpus eso descansa en la
   precisión de glibc y no en una prueba: de todas las frecuencias de
-  muestreo enteras entre 100&nbsp;Hz y 200&nbsp;kHz, 2&nbsp;933 de los
-  799&nbsp;604 diseños (frecuencia, curva) encuentran un `sin` o una `tan`
-  que glibc redondea al otro lado, y esos diseños se movieron al fijarlos, en
-  lo que una ulp del arranque crece a través del ajuste. Ninguno está en una
-  frecuencia con la que se comprueba la biblioteca; de las frecuencias
-  habituales, solo 50&nbsp;kHz, para A, B, C y D.
+  muestreo enteras entre 100&nbsp;Hz y 200&nbsp;kHz, 5&nbsp;864 de los
+  1&nbsp;399&nbsp;307 diseños (frecuencia, curva) encuentran un `sin` o una
+  `tan` que glibc redondea al otro lado, y esos diseños pueden moverse al
+  fijarlos, en lo que una ulp del arranque crece a través del ajuste.
+  Ninguno está en una frecuencia con la que se comprueba la biblioteca; de
+  las frecuencias habituales, 50&nbsp;kHz para A, B, C y D y 100&nbsp;kHz
+  para AU, que pasa de `7ee0fe06b2a91373` a `ec6c060d4b27d1b9`.
 - **Ninguna biblioteca C salvo la de la arcotangente.** Con cada resultado que
   la biblioteca C devuelve a un diseño empujado una unidad en el último
   lugar, mediante una capa entre Python y la biblioteca C, los diseños no se
@@ -161,10 +172,15 @@ corren en CI:
   `79852a57e60961c8` en Windows (x86-64). Ahora un test de la matriz de CI la
   diseña con una arcotangente correctamente redondeada propia, que es la de
   glibc en los 257 puntos de esa rejilla, y sostiene `991833ff389afe91` en
-  las tres plataformas: nada más de la plataforma llega al diseño. El diseño
-  que entrega una máquina macOS o Windows sigue tomando la arcotangente de
-  la plataforma, así que sus bytes son los de Linux allí donde esa
-  arcotangente coincide con la de glibc en la rejilla. Los tests de respuesta
+  las tres plataformas: ninguna otra rutina de la biblioteca C llega al
+  diseño, y los pasos de BLAS y LAPACK están en Alcance. El diseño que
+  entrega una máquina sigue tomando la arcotangente de la plataforma, así
+  que un segundo test lo diseña así y sostiene el mismo digest allí donde la
+  arcotangente de la plataforma está correctamente redondeada en los 257
+  puntos, como lo está la de glibc, y el digest propio medido de la
+  plataforma donde no. Con glibc en x86-64 sin FMA el diseño que se entrega
+  daba `43f786ffab5c4dd4` antes de fijarlo y da ahora `991833ff389afe91`.
+  Los tests de respuesta
   que corren en esas tres plataformas sujetan el diseño A a 0,013&nbsp;dB de
   su prototipo analógico en toda su banda de ajuste, lo que acota lo que
   pueda suponer en respuesta cualquier diferencia que quede.
@@ -213,7 +229,12 @@ dan los mismos bytes con cada juego de kernels de OpenBLAS y en las
 compilaciones de ARM de 64 bits y de musl medidas; un BLAS que fusionara
 esos productos movería los diseños D y G, medido fusionándolos a propósito,
 y el framework Accelerate que enlaza la compilación de numpy para macOS no se
-mide aquí.
+mide aquí. El `zpk2sos` de SciPy toma también módulos complejos, a través
+del valor absoluto complejo propio de numpy, un bucle que numpy elige según
+el procesador y no el `hypot` de la biblioteca C, pero solo para emparejar
+polos con ceros y compararlos con una tolerancia: empujados una ulp, todos
+ellos, no mueven ninguna de las ponderaciones A, D, 468 ni AU a
+48&nbsp;kHz, la C a 44,1&nbsp;kHz ni la G a 1&nbsp;kHz.
 
 El relato de ingeniería completo vive con el código, en los docstrings de
 módulo de

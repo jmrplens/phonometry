@@ -4012,23 +4012,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   runtime each round some inputs to the other neighbour, which the fit grows
   into a different filter: the A weighting at 48 kHz had three digests on the
   three platforms of the CI matrix. `exp` and `pow` are now glibc's own
-  routines spelled in arithmetic IEEE 754 fixes (`filters._pinned_exp`, with
-  every multiply-add glibc's build fuses emulated exactly), `log10` is
-  glibc's built on the pinned `log`, and the sine, the tangent and the
-  magnitude of a complex root are correctly rounded (`filters._pinned_trig`).
-  The Linux coefficients do not move at any of the 133 (curve, rate) designs
-  the library is checked at, and the A weighting at 48 kHz still hashes to
-  `991833ff389afe91`. The macOS and Windows coefficients become the Linux
-  bytes wherever the platform's arctangent, the one routine still taken from
-  the C library, agrees with glibc's on the 257-point frequency grid, and stay
-  within the 0.013 dB the response tests allow where it does not; a test in
-  the CI matrix holds the A weighting at 48 kHz to the Linux digest on all
-  three platforms with a correctly rounded arctangent of its own. Of the
-  799 604 (rate, curve) designs at integer rates from 100 Hz to 200 kHz,
-  2 933 meet a sine or a tangent that glibc does not round correctly and move
-  on Linux too, none at a rate the library is checked at and, of the common
-  rates, only 50 kHz for A, B, C and D. The arctangent stays on the C library
-  for now: only glibc's own routine keeps the Linux bytes, since the correctly
+  routines spelled in arithmetic IEEE 754 fixes (`filters._pinned_exp`, in
+  the build glibc picks for a processor with fused multiply-adds, every
+  multiply-add that build fuses emulated exactly), `log10` is glibc's built on
+  the pinned `log`, and the sine, the tangent and the magnitude of a complex
+  root are correctly rounded (`filters._pinned_trig`). On glibc with a
+  processor that has FMA, the Linux leg of the CI matrix, the coefficients do
+  not move at any of the 133 (curve, rate) designs the library is checked at,
+  and the A weighting at 48 kHz still hashes to `991833ff389afe91`. glibc on
+  x86-64 without FMA runs another build of each routine, and there this
+  change moves the coefficients toward those bytes: the A weighting at 48 kHz
+  from `43f786ffab5c4dd4` to `991833ff389afe91`, while the arctangent, whose
+  two builds differ too, still separates 9 of the 133 designs, the A
+  weighting at 44.1 kHz among them. The macOS and Windows coefficients become
+  the Linux bytes wherever the platform's arctangent, the one routine still
+  taken from the C library, is correctly rounded on the 257-point frequency
+  grid, as glibc's is for the A weighting at 48 kHz, and stay within the
+  0.013 dB the response tests allow where it is not; for D, G and 468 that
+  also takes the BLAS and LAPACK steps of the cascade (the products SciPy
+  forms, the roots of the 468 prototype) giving OpenBLAS's bytes, which
+  Apple's Accelerate is not measured to do. Tests in the CI matrix hold the A
+  weighting at 48 kHz to the Linux digest on all three platforms with a
+  correctly rounded arctangent of their own, and as shipped wherever the
+  platform's arctangent is correctly rounded on the grid. Of the 1 399 307
+  (rate, curve) designs at integer rates from 100 Hz to 200 kHz, 5 864 meet a
+  sine or a tangent glibc does not round correctly and can move on Linux too,
+  none at a rate the library is checked at; among the common rates, 50 kHz
+  for A, B, C and D and 100 kHz for AU. The plain bilinear design
+  (`high_accuracy=False`) takes the complex magnitude behind its gain from the
+  pinned `hypot` too, which moves the B, C and G designs on Linux by one unit
+  in the last place of that gain. The arctangent stays on the C library for
+  now: only glibc's own routine keeps the Linux bytes, since the correctly
   rounded value differs from it in 32 of the 133 designs, and the determinism
   guide says what is left. A design costs about 270 ms where it cost about
   200, once per curve, rate and mode as before.

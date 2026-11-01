@@ -2815,7 +2815,14 @@ up to 0.07 dB on white noise: the section on filter classes above says how.
 | `room.open_plan_metrics` where the STI never falls to the threshold | a distraction or privacy distance of 10¹⁵ m or more | NaN |
 | `effective_kappa` and `thermal_boundary_layer_thickness` left at their default air | the five values ISO 9053-2 Annex A.3 prints | the air of IEC 61094-2 at the same state, which moves the correction in its fifth figure, as the section on `fluid=` says |
 | a value that lands exactly on a limit a standard prints | judged by the last bits of its floating-point value | settled to nine decimal places first, the same on every machine |
-| `WeightingFilter.sos` on macOS and Windows, and on Linux at a few rates the library is not checked at | each platform's C library rounded the design's exponentials, powers, logarithms, sines and tangents its own way, so the A weighting at 48 kHz had a digest per platform (4.0.0rc1) | only the arctangent is still the C library's, so the bytes are Linux's wherever the platform's arctangent agrees with glibc's on the frequency grid, and within the same 0.013 dB in response where it does not; on Linux no design the library is checked at moves, and of 799 604 (rate, curve) designs at integer rates from 100 Hz to 200 kHz, 2 933 move, 50 kHz for A, B, C and D the only common rate among them |
+
+The weighting design module is itself new in 4.0.0rc1, so two of its changes
+are measured against the release candidate rather than against 3.3.0:
+
+| What moved | 4.0.0rc1 | 4.0 |
+| --- | --- | --- |
+| `WeightingFilter.sos` on macOS and Windows, on glibc x86-64 without FMA, and on Linux at a few rates the library is not checked at | each platform's C library rounded the design's exponentials, powers, logarithms, sines and tangents its own way, so the A weighting at 48 kHz had a digest per platform, `43f786ffab5c4dd4` on glibc without FMA among them | only the arctangent is still the C library's: the bytes are those of glibc with FMA wherever the platform's arctangent is correctly rounded on the frequency grid, and within the same 0.013 dB in response where it is not, for D, G and 468 provided the BLAS and LAPACK steps give OpenBLAS's bytes, which Apple's Accelerate is not measured to do; on glibc without FMA the A weighting at 48 kHz is `991833ff389afe91` and the arctangent still separates 9 of the 133 checked designs; on glibc with FMA no checked design moves, and of 1 399 307 (rate, curve) designs at integer rates from 100 Hz to 200 kHz, 5 864 meet a sine or a tangent glibc rounds the other way and can move, 50 kHz for A, B, C and D and 100 kHz for AU among the common rates |
+| `WeightingFilter(fs, "B", high_accuracy=False).sos`, and the same for C and G | the complex magnitude behind the gain from numpy's own complex absolute | from the pinned `hypot`: one unit in the last place of the gain on Linux |
 
 The ISO 3382 fiche of a one-third-octave analysis takes its single-number
 reverberation time over the six bands from 400 Hz to 1250 Hz, as clause 9.1

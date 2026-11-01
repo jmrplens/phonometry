@@ -21,7 +21,14 @@ import numpy as np
 import pytest
 
 from phonometry.filters import _weighting_design
-from phonometry.filters._pinned_trig import pinned_hypot, pinned_sin, pinned_tan
+from phonometry.filters._pinned_trig import (
+    _hypot_scalar,
+    _sin_scalar,
+    _tan_scalar,
+    pinned_hypot,
+    pinned_sin,
+    pinned_tan,
+)
 from phonometry.filters.weighting import _analog_weighting_zpk, _fit_band
 
 #: ``(x, correctly rounded sin x)``, both as hex, at inputs where glibc 2.41's
@@ -188,3 +195,24 @@ def test_hypot_refuses_infinities() -> None:
     """The design never asks for the magnitude of an infinite root."""
     with pytest.raises(ValueError, match="finite arguments"):
         pinned_hypot(np.inf, 1.0)
+
+
+@pytest.mark.parametrize("value", [1, np.float32(0.5), True])
+def test_the_scalar_routines_take_a_python_float_and_nothing_else(
+    value: object,
+) -> None:
+    """Each routine settles what it was handed before it reads it as a number.
+
+    The public functions always hand over a Python float (``tolist`` of a
+    float64 array, or ``float()``), so this refusal only fences the private
+    routines: an integer or a single-precision value would otherwise be read
+    at a precision nobody chose.
+    """
+    with pytest.raises(TypeError, match="Python float"):
+        _sin_scalar(value)  # type: ignore[arg-type]
+    with pytest.raises(TypeError, match="Python float"):
+        _tan_scalar(value)  # type: ignore[arg-type]
+    with pytest.raises(TypeError, match="Python floats"):
+        _hypot_scalar(value, 1.0)  # type: ignore[arg-type]
+    with pytest.raises(TypeError, match="Python floats"):
+        _hypot_scalar(1.0, value)  # type: ignore[arg-type]

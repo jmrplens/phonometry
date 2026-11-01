@@ -155,6 +155,10 @@ def _sin_cos(r: int, scale: int) -> tuple[int, int, int]:
 
 
 def _check_trig_argument(x: float) -> None:
+    """Refuse anything but a finite double inside the domain the routines are proved on."""
+    if not isinstance(x, float):
+        message = f"pinned trigonometry takes a Python float; got {type(x).__name__}."
+        raise TypeError(message)
     if not (math.isfinite(x) and -_TRIG_LIMIT < x < _TRIG_LIMIT):
         message = f"pinned trigonometry takes |x| < {_TRIG_LIMIT:g}; got {x!r}."
         raise ValueError(message)
@@ -163,7 +167,7 @@ def _check_trig_argument(x: float) -> None:
 def _sin_scalar(x: float) -> float:
     """``sin(x)`` correctly rounded, by Ziv's loop."""
     _check_trig_argument(x)
-    if x == 0.0:
+    if not x:
         return x
     precision = _FIRST_PRECISION
     while precision <= _LAST_PRECISION:
@@ -182,7 +186,7 @@ def _sin_scalar(x: float) -> float:
 def _tan_scalar(x: float) -> float:
     """``tan(x)`` correctly rounded, by Ziv's loop over a fixed-point quotient."""
     _check_trig_argument(x)
-    if x == 0.0:
+    if not x:
         return x
     precision = _FIRST_PRECISION
     while precision <= _LAST_PRECISION:
@@ -210,6 +214,12 @@ def _hypot_scalar(x: float, y: float) -> float:
     64 significant bits, and the last bit of the bracket records whether the
     root was exact, so the one rounding that follows is the correct one.
     """
+    if not (isinstance(x, float) and isinstance(y, float)):
+        message = (
+            "pinned hypot takes two Python floats; got "
+            f"({type(x).__name__}, {type(y).__name__})."
+        )
+        raise TypeError(message)
     if not (math.isfinite(x) and math.isfinite(y)):
         message = f"pinned hypot takes finite arguments; got ({x!r}, {y!r})."
         raise ValueError(message)

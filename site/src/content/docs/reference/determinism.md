@@ -4,16 +4,23 @@ description: "Determinism: why floating point drifts, how a designed filter stay
 ---
 
 A weighting filter designed by phonometry is the same filter, byte for byte,
-on every machine that shares a C library: any CPU, with or without AVX-512;
-any BLAS kernel set; any thread count; any hash seed. Across C libraries it
-is not, yet: Linux, macOS and Windows each design their own bytes for the
-same filter, because one transcendental still comes from the platform's
-`math`: every other routine the design takes is spelled in arithmetic
-IEEE&nbsp;754 fixes, and this page names the one left and measures what it
-does. On one platform the coefficients a laptop designs are the
-coefficients a cluster designs, so a conformance verdict, a published figure
-or a filter shipped inside a measurement chain is a reproducible artifact
-rather than one machine's account of itself.
+on every machine that runs the same C library routines: any BLAS kernel set,
+any thread count, any hash seed, and any CPU, with or without AVX-512, save
+for a choice the C library makes itself. glibc on x86-64 carries its
+arctangent twice, built with fused multiply-adds and without, and picks one
+by the processor; the two round a few inputs to opposite neighbours, so a
+processor without FMA designs some filters differently, the A weighting at
+44.1&nbsp;kHz among them, though not the A, D or 468 weightings at
+48&nbsp;kHz. Across C libraries the bytes are not the same, yet, for the
+same reason: the arctangent is the one transcendental the design still
+takes from the platform's `math`. Every other transcendental is spelled in
+arithmetic IEEE&nbsp;754 fixes, and the two steps that go through a
+numerical library instead, LAPACK's polynomial roots and the BLAS products
+SciPy forms, are named under Scope below. This page names what is left and
+measures what it does. On one platform the coefficients a laptop designs are
+the coefficients a cluster designs, so a conformance verdict, a published
+figure or a filter shipped inside a measurement chain is a reproducible
+artifact rather than one machine's account of itself.
 
 That sentence is not how scientific Python normally behaves, and this page
 records what it cost, with the numbers.
@@ -88,7 +95,10 @@ The deterministic design path answers each door in kind, in
   remaining step to one digest everywhere, and the correctly rounded value
   will not do it alone: glibc's own arctangent rounds 19 of the
   15&nbsp;866 arctangents the corpus evaluates the other way, so only its
-  own routine keeps the shipped Linux coefficients where they are.
+  own routine keeps the shipped Linux coefficients where they are, and its
+  build with fused multiply-adds at that, the one `exp` and `pow` spell:
+  glibc's arctangent, like its sine and tangent, rounds differently in its
+  two builds.
 - **The grid spelled out.** The geometric frequency grid is generated term
   for term with the endpoints pinned, so the fit evaluates the same
   frequencies everywhere.
@@ -124,11 +134,12 @@ run in CI:
   rounded value, so the correctly rounded routines return its bits there.
   Away from the corpus that rests on glibc's accuracy rather than on a
   proof: over every integer sampling rate from 100&nbsp;Hz to 200&nbsp;kHz,
-  2&nbsp;933 of the 799&nbsp;604 (rate, curve) designs meet a sine or a
-  tangent glibc rounds the other way, and those designs moved when the two
-  were pinned, by what one ulp of a start grows into through the fit. None is
-  at a rate the library is checked at; of the common rates, only 50&nbsp;kHz,
-  for A, B, C and D.
+  5&nbsp;864 of the 1&nbsp;399&nbsp;307 (rate, curve) designs meet a sine or
+  a tangent glibc rounds the other way, and those designs can move with the
+  pin, by what one ulp of a start grows into through the fit. None is at a
+  rate the library is checked at; of the common rates, 50&nbsp;kHz for A, B,
+  C and D and 100&nbsp;kHz for AU, which moves from `7ee0fe06b2a91373` to
+  `ec6c060d4b27d1b9`.
 - **No C library left but the arctangent's.** With every result the C
   library returns to a design pushed one unit in the last place, by a shim
   between Python and the C library, the designs do not move, except when the
@@ -147,10 +158,14 @@ run in CI:
   (arm64) and `79852a57e60961c8` on Windows (x86-64). Now a test in the CI
   matrix designs it with a correctly rounded arctangent of its own, which is
   glibc's on all 257 points of that grid, and holds `991833ff389afe91` on all
-  three platforms: nothing else of the platform reaches the design. The
-  design a macOS or Windows machine ships still takes its arctangent from the
-  platform, so its bytes are Linux's wherever that arctangent agrees with
-  glibc's on the grid. The response tests that run on the same three
+  three platforms: no other routine of the C library reaches the design, and
+  the BLAS and LAPACK steps are under Scope. The design a machine ships
+  still takes its arctangent from the platform, so a second test designs it
+  that way and holds the same digest wherever the platform's arctangent is
+  correctly rounded on all 257 points, as glibc's is, and the platform's own
+  measured digest where it is not. On glibc x86-64 without FMA the shipped
+  design hashed to `43f786ffab5c4dd4` before the pin and hashes to
+  `991833ff389afe91` now. The response tests that run on the same three
   platforms hold the A design within 0.013&nbsp;dB of its analog prototype
   everywhere in its fit band, which bounds what any difference left can
   amount to in response.
@@ -195,7 +210,12 @@ whose polynomial products go through the BLAS. Both give the same bytes under
 every OpenBLAS kernel set and on the 64-bit ARM and musl builds measured; a
 BLAS that fused those products would move the D and G designs, measured by
 fusing them on purpose, and the Accelerate framework the macOS build of numpy
-links is not measured here.
+links is not measured here. SciPy's `zpk2sos` also takes complex
+magnitudes, through numpy's own complex absolute, a loop numpy picks by
+processor rather than the C library's `hypot`, but only to pair poles with
+zeros and to test them against a tolerance: pushed one ulp, every one of
+them, they move none of the A, D, 468 or AU weightings at 48&nbsp;kHz, the C
+weighting at 44.1&nbsp;kHz or the G weighting at 1&nbsp;kHz.
 
 The full engineering account lives with the code, in the module docstrings of
 [`filters/_weighting_design.py`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/filters/_weighting_design.py),

@@ -28,6 +28,7 @@ import warnings
 
 import numpy as np
 import pytest
+from libm_identity import TUNABLES, WITHOUT_FMA, glibc_on_x86_64_with_fma
 from reference_data import IEC61672_TABLE3 as TABLE3
 from scipy import signal as sg
 
@@ -1029,28 +1030,25 @@ def test_the_design_is_paid_for_once_per_curve_rate_and_mode() -> None:
     assert first.sos is not second.sos
 
 
-#: The head of the SHA-256 of the A weighting designed at 48 kHz on glibc, the
-#: digest the determinism guide prints and the Linux leg of the CI matrix runs.
+#: The head of the SHA-256 of the A weighting designed at 48 kHz wherever the
+#: arctangent the design still takes from the C library is correctly rounded
+#: on the 257 points of its grid: the digest the determinism guide prints, and
+#: the one glibc designs on every machine measured, with or without its FMA
+#: variant.
 _A48K_DIGEST = "991833ff389afe91"
+
+#: The same digest where the local arctangent rounds some of those points to
+#: the other neighbour, keyed by ``platform.system()``, ``platform.machine()``
+#: and the C library ``platform.libc_ver()`` names. A platform missing here
+#: fails and names the digest it designed, which is the measurement that
+#: fills its entry, so no value is pinned before it has been measured.
+_A48K_DIGEST_OFF_THE_CORRECT_ARCTANGENT: dict[tuple[str, str, str], str] = {}
 
 
 def _a48k_digest() -> str:
     _cached_weighting_sos.cache_clear()
     sos = filters.WeightingFilter(48000, "A").sos
     return hashlib.sha256(sos.tobytes()).hexdigest()[:16]
-
-
-@pytest.mark.skipif(
-    platform.libc_ver()[0] != "glibc",
-    reason="the production design still takes its arctangent from the C library",
-)
-def test_the_documented_a_weighting_digest_is_glibcs() -> None:
-    """The digest the determinism guide prints is the one a glibc machine designs.
-
-    A drift here means a routine the design takes, pinned or not, has moved,
-    and that is worth a red build rather than a silently different filter.
-    """
-    assert _a48k_digest() == _A48K_DIGEST
 
 
 def _atan_fixed(x: float, scale: int) -> tuple[int, int]:
@@ -1115,12 +1113,10 @@ def test_with_a_platform_free_arctangent_every_platform_designs_the_same_bytes(
     library. Swap in a correctly rounded one, computed here in exact integers,
     and what is left is the pinned routines and IEEE 754 arithmetic, so this
     digest is held on every platform the CI matrix runs, not only on glibc.
-    On glibc the swap changes nothing, because glibc's arctangent is correctly
-    rounded on all 257 points of this design's grid, which is the second
-    assertion and the reason the digest is the production one.
+    Whether the production design, with the platform's own arctangent, lands
+    on the same bytes is the next test's question.
     """
     captured: list[np.ndarray] = []
-    original = _weighting_design._scalar_arctan
 
     def spy(values: np.ndarray) -> np.ndarray:
         captured.append(np.asarray(values, dtype=np.float64).reshape(-1).copy())
@@ -1128,10 +1124,95 @@ def test_with_a_platform_free_arctangent_every_platform_designs_the_same_bytes(
 
     monkeypatch.setattr(_weighting_design, "_scalar_arctan", spy)
     assert _a48k_digest() == _A48K_DIGEST
+    assert np.concatenate(captured).size == 257
+
+
+def test_the_production_design_is_the_documented_one_where_its_arctangent_agrees(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The shipped A weighting at 48 kHz, as each platform of the matrix designs it.
+
+    The production path, nothing replaced: a spy records the 257 grid points
+    the design hands the C library's arctangent and lets each one through.
+    Where that arctangent is correctly rounded on all of them, everything else
+    the design takes is pinned, so the bytes are the documented ones on that
+    machine, whatever its C library; that is the claim the changelog makes.
+    Where it is not, the platform's own digest is held to a table, so a drift
+    there still turns a build red, and a platform with no entry fails naming
+    the digest it designed.
+    """
+    captured: list[np.ndarray] = []
+    original = _weighting_design._scalar_arctan
+
+    def spy(values: np.ndarray) -> np.ndarray:
+        captured.append(np.asarray(values, dtype=np.float64).reshape(-1).copy())
+        return original(values)
+
+    monkeypatch.setattr(_weighting_design, "_scalar_arctan", spy)
+    digest = _a48k_digest()
     grid = np.concatenate(captured)
     assert grid.size == 257
-    if platform.libc_ver()[0] == "glibc":
-        np.testing.assert_array_equal(original(grid), _correctly_rounded_arctan(grid))
+    local = original(grid).view(np.uint64)
+    correct = _correctly_rounded_arctan(grid).view(np.uint64)
+    disagreements = int(np.count_nonzero(local != correct))
+    if disagreements == 0:
+        assert digest == _A48K_DIGEST
+        return
+    key = (platform.system(), platform.machine(), platform.libc_ver()[0])
+    assert key in _A48K_DIGEST_OFF_THE_CORRECT_ARCTANGENT, (
+        f"{key} rounds {disagreements} of the 257 arctangents to the other "
+        f"neighbour and designed {digest}; pin that digest for it here"
+    )
+    assert digest == _A48K_DIGEST_OFF_THE_CORRECT_ARCTANGENT[key]
+
+
+@pytest.mark.skipif(
+    not glibc_on_x86_64_with_fma(),
+    reason="needs glibc on an x86-64 processor with FMA, whose other variant "
+    "the child process is handed",
+)
+def test_glibc_without_its_fma_variant_designs_the_documented_bytes() -> None:
+    """glibc picks its routines by processor; the design no longer follows it.
+
+    On x86-64 glibc carries ``exp``, ``log``, ``pow``, ``sin``, ``tan`` and
+    ``atan`` twice, built with fused multiply-adds and without, and picks a
+    set by what the processor reports. A child process with FMA masked runs
+    the other set, which it shows by its ``exp`` parting from this process's
+    on the same draws. Before the pinned routines it designed 43f786ffab5c4dd4 for
+    A at 48 kHz; now it designs the documented bytes, because the arctangent,
+    the one routine still taken from glibc, is correctly rounded on this
+    design's grid in both variants.
+    """
+    script = textwrap.dedent(
+        """
+        import hashlib
+        import math
+        import numpy as np
+        from phonometry import filters
+        x = np.random.default_rng(1).uniform(-700.0, 700.0, 20000).tolist()
+        exp = np.array([math.exp(v) for v in x])
+        sos = filters.WeightingFilter(48000, "A").sos
+        print(hashlib.sha256(exp.tobytes()).hexdigest()[:16])
+        print(hashlib.sha256(sos.tobytes()).hexdigest()[:16])
+        """
+    )
+    draws = np.random.default_rng(1).uniform(-700.0, 700.0, 20000).tolist()
+    here = np.array([math.exp(v) for v in draws])
+    environment = {**os.environ, TUNABLES: WITHOUT_FMA}
+    # Fixed argv, no shell, no user input
+    finished = subprocess.run(
+        [sys.executable, "-c", script],
+        check=True,
+        capture_output=True,
+        text=True,
+        env=environment,
+        timeout=300,
+    )
+    child_exp, digest = finished.stdout.split()
+    assert child_exp != hashlib.sha256(here.tobytes()).hexdigest()[:16], (
+        "the child still ran glibc's FMA variant"
+    )
+    assert digest == _A48K_DIGEST
 
 
 #: The :mod:`math` functions the design path may name: IEEE 754 fixes every one
@@ -1139,25 +1220,83 @@ def test_with_a_platform_free_arctangent_every_platform_designs_the_same_bytes(
 #: library. ``atan`` is the documented exception, allowed in one function only.
 _MATH_ALLOWED = frozenset({"fsum", "fabs", "sqrt", "isfinite"})
 
-#: numpy names that are a transcendental, a power, or a complex magnitude, each
-#: of which numpy computes with a dispatched kernel or the C library.
+#: numpy names that are a transcendental, a power, or a magnitude that may be
+#: complex, each of which numpy computes with a dispatched kernel or the C
+#: library. A real magnitude is ``np.fabs``, which IEEE 754 fixes and which
+#: refuses a complex value.
 _NUMPY_FORBIDDEN = frozenset(
     {
         "exp", "exp2", "expm1", "log", "log2", "log10", "log1p", "power",
         "float_power", "sin", "cos", "tan", "arcsin", "arccos", "arctan",
         "arctan2", "sinh", "cosh", "tanh", "arcsinh", "arccosh", "arctanh",
-        "hypot", "cbrt", "geomspace", "logspace", "angle",
+        "hypot", "cbrt", "geomspace", "logspace", "angle", "abs", "absolute",
+        "emath",
     }
 )  # fmt: skip
 
-#: The prototype builders of ``weighting.py`` that feed the design.
-_PROTOTYPE_BUILDERS = frozenset(
+#: The names numpy is reached by: its alias and its own.
+_NUMPY_OWNERS = frozenset({"np", "numpy"})
+
+#: Modules every name of which is a platform's answer: complex math, SciPy's
+#: special functions and numpy's complex-domain math.
+_FORBIDDEN_MODULES = frozenset(
     {
-        "_a_weighting_zpk", "_b_weighting_zpk", "_c_weighting_zpk",
-        "_d_weighting_zpk", "_g_weighting_zpk", "_u_poles", "_itu_r_468_zpk",
-        "_itu_r_468_prototype", "_abcd_product", "_fit_band",
+        "cmath", "scipy.special", "special", "np.emath", "numpy.emath",
+        "np.lib.scimath", "numpy.lib.scimath",
     }
 )  # fmt: skip
+
+#: The :mod:`operator` spellings of a power and of a magnitude.
+_OPERATOR_FORBIDDEN = frozenset(
+    {"pow", "ipow", "abs", "__pow__", "__ipow__", "__abs__"}
+)
+
+#: How each module may be imported on the design path: ``math`` and ``numpy``
+#: under the one name the attribute rules read, the rest not at all.
+_IMPORT_NAMES = {"math": "math", "numpy": "np"}
+
+
+def _attribute_finding(owner: str, name: str, *, exempt: bool) -> str | None:
+    """What ``owner.name`` hands the platform, or ``None`` if nothing."""
+    if owner == "math":
+        return None if name in _MATH_ALLOWED or exempt else f"math.{name}"
+    forbidden = (
+        (owner in _NUMPY_OWNERS and name in _NUMPY_FORBIDDEN)
+        or owner in _FORBIDDEN_MODULES
+        or owner.startswith("scipy.special.")
+        or (owner == "operator" and name in _OPERATOR_FORBIDDEN)
+    )
+    return f"{owner}.{name}" if forbidden else None
+
+
+def _import_from_finding(node: ast.ImportFrom) -> str | None:
+    """What a ``from ... import`` brings in that the attribute rules cannot see."""
+    module = node.module or ""
+    names = {alias.name for alias in node.names}
+    hidden = (
+        module in {"math", "cmath"}
+        or module in _FORBIDDEN_MODULES
+        or module.startswith("scipy.special")
+        or (module == "scipy" and "special" in names)
+        or (module in _NUMPY_OWNERS and bool(names & _NUMPY_FORBIDDEN))
+        or (module == "operator" and bool(names & _OPERATOR_FORBIDDEN))
+    )
+    return f"from {module} import {', '.join(sorted(names))}" if hidden else None
+
+
+def _import_finding(node: ast.Import) -> list[str]:
+    """Each ``import`` that renames ``math`` or numpy, or brings in a forbidden module."""
+    found = []
+    for alias in node.names:
+        bound = alias.asname or alias.name
+        renamed = alias.name in _IMPORT_NAMES and bound != _IMPORT_NAMES[alias.name]
+        if (
+            renamed
+            or alias.name in _FORBIDDEN_MODULES
+            or alias.name.startswith("scipy.special")
+        ):
+            found.append(f"import {alias.name} as {bound}")
+    return found
 
 
 class _PlatformOperations(ast.NodeVisitor):
@@ -1168,31 +1307,55 @@ class _PlatformOperations(ast.NodeVisitor):
         self.functions: list[str] = []
         self.found: set[str] = set()
 
-    def visit_FunctionDef(self, node: ast.FunctionDef) -> None:  # noqa: N802 - ast.NodeVisitor's name
+    # ast.NodeVisitor dispatches on this name.
+    def visit_FunctionDef(self, node: ast.FunctionDef) -> None:  # noqa: N802
         self.functions.append(node.name)
         self.generic_visit(node)
         self.functions.pop()
 
-    def visit_BinOp(self, node: ast.BinOp) -> None:  # noqa: N802 - ast.NodeVisitor's name
+    # ast.NodeVisitor dispatches on this name.
+    def visit_BinOp(self, node: ast.BinOp) -> None:  # noqa: N802
         if isinstance(node.op, ast.Pow):
             self.found.add(f"{node.lineno}: the ** operator")
         self.generic_visit(node)
 
-    def visit_Call(self, node: ast.Call) -> None:  # noqa: N802 - ast.NodeVisitor's name
+    # ast.NodeVisitor dispatches on this name.
+    def visit_AugAssign(self, node: ast.AugAssign) -> None:  # noqa: N802
+        if isinstance(node.op, ast.Pow):
+            self.found.add(f"{node.lineno}: the **= operator")
+        self.generic_visit(node)
+
+    # ast.NodeVisitor dispatches on this name.
+    def visit_Call(self, node: ast.Call) -> None:  # noqa: N802
         if isinstance(node.func, ast.Name) and node.func.id in {"abs", "pow"}:
             self.found.add(f"{node.lineno}: builtin {node.func.id}()")
         self.generic_visit(node)
 
-    def visit_Attribute(self, node: ast.Attribute) -> None:  # noqa: N802 - ast.NodeVisitor's name
-        if isinstance(node.value, ast.Name):
-            owner, name = node.value.id, node.attr
+    # ast.NodeVisitor dispatches on this name.
+    def visit_Attribute(self, node: ast.Attribute) -> None:  # noqa: N802
+        if isinstance(node.value, (ast.Name, ast.Attribute)):
             inside = self.functions[-1] if self.functions else None
-            exempt = name == "atan" and inside is not None and inside == self.atan_owner
-            if owner == "math" and name not in _MATH_ALLOWED and not exempt:
-                self.found.add(f"{node.lineno}: math.{name}")
-            elif owner == "np" and name in _NUMPY_FORBIDDEN:
-                self.found.add(f"{node.lineno}: np.{name}")
+            exempt = (
+                node.attr == "atan"
+                and self.atan_owner is not None
+                and inside == self.atan_owner
+            )
+            finding = _attribute_finding(
+                ast.unparse(node.value), node.attr, exempt=exempt
+            )
+            if finding is not None:
+                self.found.add(f"{node.lineno}: {finding}")
         self.generic_visit(node)
+
+    # ast.NodeVisitor dispatches on this name.
+    def visit_ImportFrom(self, node: ast.ImportFrom) -> None:  # noqa: N802
+        finding = _import_from_finding(node)
+        if finding is not None:
+            self.found.add(f"{node.lineno}: {finding}")
+
+    # ast.NodeVisitor dispatches on this name.
+    def visit_Import(self, node: ast.Import) -> None:  # noqa: N802
+        self.found.update(f"{node.lineno}: {what}" for what in _import_finding(node))
 
 
 def _platform_operations(tree: ast.AST, *, atan_owner: str | None) -> list[str]:
@@ -1202,51 +1365,139 @@ def _platform_operations(tree: ast.AST, *, atan_owner: str | None) -> list[str]:
     return sorted(visitor.found)
 
 
+def _module_definitions(module: ast.Module) -> dict[str, ast.stmt]:
+    """Each module-level function and constant of *module*, by the name it binds."""
+    definitions: dict[str, ast.stmt] = {}
+    for node in module.body:
+        if isinstance(node, ast.FunctionDef):
+            definitions[node.name] = node
+            continue
+        targets: list[ast.expr] = []
+        if isinstance(node, ast.Assign):
+            targets = node.targets
+        elif isinstance(node, ast.AnnAssign):
+            targets = [node.target]
+        definitions.update(
+            (target.id, node) for target in targets if isinstance(target, ast.Name)
+        )
+    return definitions
+
+
+def _reached_from(module: ast.Module, root: str) -> dict[str, ast.stmt]:
+    """The module-level functions and constants *root* names, transitively.
+
+    Read off the source, so a builder added to the prototype dictionary, a
+    helper one of them calls, or a module constant one of them reads is
+    scanned without anyone listing it.
+    """
+    definitions = _module_definitions(module)
+    reached: dict[str, ast.stmt] = {}
+    pending = [root]
+    while pending:
+        name = pending.pop()
+        if name in reached or name not in definitions:
+            continue
+        reached[name] = definitions[name]
+        pending.extend(
+            node.id
+            for node in ast.walk(definitions[name])
+            if isinstance(node, ast.Name)
+        )
+    return reached
+
+
 def test_the_design_path_hands_no_arithmetic_to_the_platform() -> None:
-    """No transcendental, power or complex magnitude is left to the C library.
+    """No transcendental, power or complex magnitude is left to the platform.
 
     Read off the source rather than trusted: on the design path a ``**``, a
     builtin ``abs`` or ``pow`` (a complex magnitude is the C library's
-    ``hypot``, a float power its ``pow``), a :mod:`math` transcendental or a
-    numpy one is a platform's answer standing in for the design's, and each
-    has a pinned spelling in ``_pinned_exp``, ``_pinned_log`` or
-    ``_pinned_trig``. The arctangent of :func:`_scalar_arctan` is the one
-    documented exception.
+    ``hypot`` or numpy's own dispatched loop, a float power the C library's
+    ``pow``), a :mod:`math`, :mod:`cmath`, numpy or SciPy special function, or
+    an import that hides one under another name, is a platform's answer
+    standing in for the design's, and each has a pinned spelling in
+    ``_pinned_exp``, ``_pinned_log`` or ``_pinned_trig``. The arctangent of
+    :func:`_scalar_arctan` is the one documented exception. In
+    ``weighting.py`` the scan covers the imports and everything the cached
+    design reaches by name, the prototypes and their helpers included.
     """
     design = ast.parse(inspect.getsource(_weighting_design))
     assert _platform_operations(design, atan_owner="_scalar_arctan") == []
     weighting_tree = ast.parse(inspect.getsource(weighting_module))
-    builders = [
+    reached = _reached_from(weighting_tree, "_cached_weighting_sos")
+    assert {
+        "_analog_weighting_zpk", "_itu_r_468_prototype", "_abcd_product",
+        "_u_poles", "_fit_band", "_ITU_R_468_LADDER",
+    } <= set(reached)  # fmt: skip
+    imports = [
         node
         for node in weighting_tree.body
-        if isinstance(node, ast.FunctionDef) and node.name in _PROTOTYPE_BUILDERS
+        if isinstance(node, (ast.Import, ast.ImportFrom))
     ]
-    assert {node.name for node in builders} == _PROTOTYPE_BUILDERS
-    for builder in builders:
-        assert _platform_operations(builder, atan_owner=None) == [], builder.name
+    for node in [*imports, *reached.values()]:
+        assert _platform_operations(node, atan_owner=None) == [], ast.unparse(node)[:80]
 
 
 def test_the_guard_sees_each_kind_of_platform_operation() -> None:
     """The source check above finds what it is for, so its silence means something."""
     source = textwrap.dedent(
         """
+        import cmath
+        import numpy
+        import scipy.special as sc
+        from math import exp
+        from scipy import special
         def f(x, z):
             a = x ** 2
             b = abs(z)
             c = math.exp(x) + math.atan(x)
-            d = np.tan(x)
-            return math.fsum([a, b, c, d]) + math.sqrt(x)
+            d = np.tan(x) + np.abs(z) + numpy.absolute(z)
+            e = cmath.phase(z) + special.erf(x) + scipy.special.gamma(x)
+            x **= 2
+            g = np.emath.log(x) + operator.pow(x, 2) + np.fabs(x)
+            return math.fsum([a, b, c, d, e, g]) + math.sqrt(x)
         """
     )
     found = _platform_operations(ast.parse(source), atan_owner=None)
     assert found == [
-        "3: the ** operator",
-        "4: builtin abs()",
-        "5: math.atan",
-        "5: math.exp",
-        "6: np.tan",
+        "10: math.atan",
+        "10: math.exp",
+        "11: np.abs",
+        "11: np.tan",
+        "11: numpy.absolute",
+        "12: cmath.phase",
+        "12: scipy.special.gamma",
+        "12: special.erf",
+        "13: the **= operator",
+        "14: np.emath",
+        "14: np.emath.log",
+        "14: operator.pow",
+        "2: import cmath as cmath",
+        "3: import numpy as numpy",
+        "4: import scipy.special as sc",
+        "5: from math import exp",
+        "6: from scipy import special",
+        "8: the ** operator",
+        "9: builtin abs()",
     ]
-    assert "5: math.atan" not in _platform_operations(ast.parse(source), atan_owner="f")
+    assert "10: math.atan" not in _platform_operations(
+        ast.parse(source), atan_owner="f"
+    )
+    module = ast.parse(
+        textwrap.dedent(
+            """
+            _K = 2.0
+            def root():
+                return {"a": leaf}["a"]() * _K
+            def leaf():
+                return helper()
+            def helper():
+                return 1.0
+            def unrelated():
+                return 0.0
+            """
+        )
+    )
+    assert set(_reached_from(module, "root")) == {"root", "leaf", "helper", "_K"}
 
 
 _TRANSCENDENTALS = (

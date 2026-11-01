@@ -588,6 +588,7 @@ These took a condition or a calibration factor by position until now:
 | `noise_control.LiquidPipe(d, t, rho, c, rho_air, c_air)` | `LiquidPipe(internal_diameter_m=d, wall_thickness_m=t, density=rho, speed_of_sound=c, air_density=rho_air, air_sound_speed=c_air)` |
 | `underwater.FluidSeabed(rho, c, rho_water)` | `FluidSeabed(density=rho, speed_of_sound=c, water_density=rho_water)` |
 | `io.Signal(data, fs, cal)` | `io.Signal(data, fs, calibration_factor=cal)`, and `channel_labels`, `provenance` and `source` by name |
+| `simulation.FDTD2D(c, dx, ...)` (3.3.0) and `simulation.ElasticFDTD2D(c_p, c_s, dx, rho=..., ...)` (4.0.0rc1) | `FDTD2D(c=c, dx=dx, ...)` and `ElasticFDTD2D(c_p=c_p, c_s=c_s, dx=dx, rho=..., ...)`: every argument by name, as `FDTDRun` and `ElasticRun` take theirs. `FDTD2D(0.01, 343.0, shape=...)`, the speed and the spacing swapped, built an engine with cells 343 m wide and a time step of about four hours |
 
 A parameter whose name carries its unit and that has a default is written by
 name too. `noise_signal(fs, 2.0)` reads as two seconds only to someone who

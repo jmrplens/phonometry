@@ -97,8 +97,8 @@ def _barrier_fields(n_frames: int = _BARRIER_FRAMES) -> tuple[Any, Any, Any, Any
         rms_patch = []
         for rho_map in (rho, None):
             sim = FDTD2D(
-                c0,
-                dx,
+                c=c0,
+                dx=dx,
                 shape=(ny, nx),
                 rho=1.2 if rho_map is None else rho_map,
                 absorbing_layer_cells=40,

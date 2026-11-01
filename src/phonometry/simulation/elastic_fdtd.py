@@ -881,10 +881,10 @@ class ElasticFDTD2D:
 
     def __init__(
         self,
+        *,
         c_p: ArrayLike,
         c_s: ArrayLike,
         dx: float,
-        *,
         rho: ArrayLike,
         cfl: float = 0.6,
         absorbing_layer_cells: int | np.integer[Any] = 0,
@@ -1076,7 +1076,7 @@ class ElasticFDTD2D:
             c_p[index] = mat.c_p
             c_s[index] = mat.c_s
             rho[index] = mat.rho
-        return cls(c_p, c_s, dx, rho=rho, **kwargs)
+        return cls(c_p=c_p, c_s=c_s, dx=dx, rho=rho, **kwargs)
 
     @staticmethod
     def _corner_mu(mu: Field2D) -> Field2D:
@@ -1987,9 +1987,9 @@ def _elastic_engine(run: ElasticRun, compute: Compute | None) -> ElasticFDTD2D:
     """
     checks = run._checked
     sim = ElasticFDTD2D(
-        run.c_p,
-        run.c_s,
-        run.dx,
+        c_p=run.c_p,
+        c_s=run.c_s,
+        dx=run.dx,
         rho=run.rho,
         cfl=run.cfl,
         absorbing_layer_cells=checks.absorbing_layer_cells,

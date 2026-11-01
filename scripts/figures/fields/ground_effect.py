@@ -79,8 +79,8 @@ def _ground_effect_fields(
     c0, dx = 343.0, 0.02
     ny, nx = 400, 700  # 8 m x 14 m
     sim = FDTD2D(
-        c0,
-        dx,
+        c=c0,
+        dx=dx,
         shape=(ny, nx),
         absorbing_layer_cells=40,
         absorbing_sides=("left", "right", "bottom"),

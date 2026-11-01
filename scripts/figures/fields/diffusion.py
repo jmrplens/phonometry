@@ -131,7 +131,12 @@ def _diffusion_fields(
     sims = []
     for rho in (rho_flat, rho_qrd, rho_ref):
         sim = FDTD2D(
-            c0, dx, rho=rho, shape=(ny, nx), absorbing_layer_cells=40, compute=compute
+            c=c0,
+            dx=dx,
+            rho=rho,
+            shape=(ny, nx),
+            absorbing_layer_cells=40,
+            compute=compute,
         )
         # One-way carrier-under-Gaussian packet toward the panel, the
         # leapfrog-consistent initial condition the solver now provides.

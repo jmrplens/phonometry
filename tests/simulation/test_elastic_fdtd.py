@@ -296,9 +296,9 @@ def test_flexural_dispersion_of_thin_plate_strip() -> None:
     sig[:, :wd] = 4e4 * (ramp[::-1] ** 2)[np.newaxis, :]
     sig[:, -wd:] = 4e4 * (ramp**2)[np.newaxis, :]
     sim = ElasticFDTD2D(
-        CP_ST,
-        CS_ST,
-        dx,
+        c_p=CP_ST,
+        c_s=CS_ST,
+        dx=dx,
         rho=RHO_ST,
         shape=(ny, nx),
         free_sides=("top", "bottom"),
@@ -387,7 +387,7 @@ def test_fluid_solid_normal_incidence_reflection_transmission(
     c_s = np.zeros((ny, nx))
     rho = np.full((ny, nx), RHO_W)
     c_p[1200:], c_s[1200:], rho[1200:] = cp2, cs2, rho2
-    sim = ElasticFDTD2D(c_p, c_s, dx, rho=rho)
+    sim = ElasticFDTD2D(c_p=c_p, c_s=c_s, dx=dx, rho=rho)
     y = (np.arange(ny) + 0.5) * dx
     p0 = np.exp(-(((y - 3.0) / 0.15) ** 2))
     sim.txx[:] = -p0[:, np.newaxis]
@@ -439,7 +439,7 @@ def test_immersed_plate_reproduces_normal_incidence_mass_law() -> None:
             c_p[1300:1303] = CP_ST
             c_s[1300:1303] = CS_ST
             rho[1300:1303] = RHO_ST
-        sim = ElasticFDTD2D(c_p, c_s, dx, rho=rho)
+        sim = ElasticFDTD2D(c_p=c_p, c_s=c_s, dx=dx, rho=rho)
         y = (np.arange(ny) + 0.5) * dx
         p0 = np.exp(-(((y - 0.6) / 0.06) ** 2)) * np.sin(
             2.0 * np.pi * f0 * (y - 0.6) / CP_W
@@ -489,17 +489,17 @@ def test_mu_zero_everywhere_reproduces_acoustic_fdtd() -> None:
     mask = np.zeros((ny, nx), dtype=bool)
     mask[25:32, 40:44] = True
     acoustic = FDTD2D(
-        c,
-        0.01,
+        c=c,
+        dx=0.01,
         rho=rho,
         absorbing_layer_cells=10,
         absorbing_sides=("left", "top"),
         obstacle_mask=mask,
     )
     elastic = ElasticFDTD2D(
-        c,
-        0.0,
-        0.01,
+        c_p=c,
+        c_s=0.0,
+        dx=0.01,
         rho=rho,
         absorbing_layer_cells=10,
         absorbing_sides=("left", "top"),
@@ -530,7 +530,7 @@ def test_energy_is_conserved_in_a_closed_domain() -> None:
     # Shear-free rigid walls do no work: after the sources die out the
     # total energy stays constant (measured drift: 0.2 %, the usual
     # leapfrog energy oscillation).
-    sim = ElasticFDTD2D(CP_AL, CS_AL, 0.002, rho=RHO_AL, shape=(120, 120))
+    sim = ElasticFDTD2D(c_p=CP_AL, c_s=CS_AL, dx=0.002, rho=RHO_AL, shape=(120, 120))
     sim.add_source(
         ExplosionSource(
             ix=60, iy=60, waveform=GaussianPulse(ix=0, iy=0, half_width_s=1e-6).value
@@ -617,7 +617,7 @@ def test_engine_rejects_invalid_parameters(
     c_p = full.pop("c_p")
     c_s = full.pop("c_s")
     with pytest.raises(ValueError, match=match):
-        ElasticFDTD2D(c_p, c_s, 0.01, **full)  # type: ignore[arg-type]
+        ElasticFDTD2D(c_p=c_p, c_s=c_s, dx=0.01, **full)  # type: ignore[arg-type]
 
 
 def test_lambda_zero_medium_is_accepted() -> None:
@@ -625,7 +625,7 @@ def test_lambda_zero_medium_is_accepted() -> None:
     # including when the ratio is given in rounded floats.
     c_s = 3000.0
     sim = ElasticFDTD2D(
-        float(np.sqrt(2.0)) * c_s, c_s, 0.01, rho=2700.0, shape=(10, 10)
+        c_p=float(np.sqrt(2.0)) * c_s, c_s=c_s, dx=0.01, rho=2700.0, shape=(10, 10)
     )
     assert float(np.abs(sim.lam).max()) == pytest.approx(0.0, abs=1e-3)
 
@@ -634,7 +634,7 @@ def test_source_validation() -> None:
     mask = np.zeros((20, 20), dtype=bool)
     mask[8:12, 8:12] = True
     sim = ElasticFDTD2D(
-        6000.0, 3000.0, 0.01, rho=2700.0, shape=(20, 20), obstacle_mask=mask
+        c_p=6000.0, c_s=3000.0, dx=0.01, rho=2700.0, shape=(20, 20), obstacle_mask=mask
     )
     with pytest.raises(ValueError, match="'direction' must be one of"):
         ForceSource(ix=1, iy=1, direction="z", waveform=lambda t: 0.0)
@@ -670,7 +670,7 @@ def test_a_whole_float_cell_index_is_held_as_an_int_and_steps(kind: str) -> None
     )
     assert type(source.ix) is int
     assert type(source.iy) is int
-    sim = ElasticFDTD2D(6000.0, 3000.0, 0.01, rho=2700.0, shape=(20, 20))
+    sim = ElasticFDTD2D(c_p=6000.0, c_s=3000.0, dx=0.01, rho=2700.0, shape=(20, 20))
     sim.add_source(source)
     sim.run(2)
     assert np.any(np.asarray(sim.txx) != 0.0) or np.any(np.asarray(sim.vx) != 0.0)
@@ -898,7 +898,7 @@ def test_each_snapshot_is_the_field_of_its_own_step(field: str) -> None:
 def test_positive_waveform_injects_positive_pressure() -> None:
     # The explosion convention is pressure-like: a positive waveform
     # raises the synthetic pressure at the source cell.
-    sim = ElasticFDTD2D(6000.0, 3000.0, 0.01, rho=2700.0, shape=(30, 30))
+    sim = ElasticFDTD2D(c_p=6000.0, c_s=3000.0, dx=0.01, rho=2700.0, shape=(30, 30))
     sim.add_source(
         ExplosionSource(
             ix=15,
@@ -915,9 +915,9 @@ def test_orthogonal_free_sides_pin_both_corner_stresses() -> None:
     # planes: both normal stresses stay pinned to zero and the run stays
     # stable (a free-free-free-free block is a legitimate configuration).
     sim = ElasticFDTD2D(
-        6000.0,
-        3000.0,
-        0.01,
+        c_p=6000.0,
+        c_s=3000.0,
+        dx=0.01,
         rho=2700.0,
         shape=(40, 40),
         free_sides=("top", "bottom", "left", "right"),
@@ -940,7 +940,7 @@ def test_orthogonal_free_sides_pin_both_corner_stresses() -> None:
 
 
 def test_collocated_rejects_unknown_field() -> None:
-    sim = ElasticFDTD2D(6000.0, 3000.0, 0.01, rho=2700.0, shape=(10, 10))
+    sim = ElasticFDTD2D(c_p=6000.0, c_s=3000.0, dx=0.01, rho=2700.0, shape=(10, 10))
     with pytest.raises(ValueError, match=r"'field' must be one of"):
         sim.collocated("txy")
 
@@ -1037,7 +1037,7 @@ def test_the_elastic_simulation_keeps_maps_of_its_own() -> None:
 
 def test_the_snapshot_counts_of_run_are_taken_by_name() -> None:
     """``run(4, 2)`` read the 2 as a cadence; the records take both counts by name."""
-    sim = ElasticFDTD2D(6000.0, 3000.0, 0.01, rho=2700.0, shape=(12, 12))
+    sim = ElasticFDTD2D(c_p=6000.0, c_s=3000.0, dx=0.01, rho=2700.0, shape=(12, 12))
     with pytest.raises(TypeError, match="positional argument"):
         sim.run(4, 2)  # type: ignore[misc]
     assert sim.n == 0
@@ -1054,14 +1054,16 @@ def test_the_engine_refuses_the_old_names_of_its_absorbing_layer(
     old: str, value: object
 ) -> None:
     with pytest.raises(TypeError, match=old):
-        ElasticFDTD2D(6000.0, 3000.0, 0.01, rho=2700.0, shape=(12, 12), **{old: value})
+        ElasticFDTD2D(
+            c_p=6000.0, c_s=3000.0, dx=0.01, rho=2700.0, shape=(12, 12), **{old: value}
+        )
 
 
 def test_the_engine_names_its_absorbing_layer_as_the_run_does() -> None:
     sim = ElasticFDTD2D(
-        6000.0,
-        3000.0,
-        0.01,
+        c_p=6000.0,
+        c_s=3000.0,
+        dx=0.01,
         rho=2700.0,
         shape=(20, 20),
         absorbing_layer_cells=4,
@@ -1076,9 +1078,9 @@ def test_the_engine_names_its_absorbing_layer_as_the_run_does() -> None:
     assert not hasattr(sim, "sponge_sides")
     with pytest.raises(ValueError, match="'absorbing_sides' must be one of"):
         ElasticFDTD2D(
-            6000.0,
-            3000.0,
-            0.01,
+            c_p=6000.0,
+            c_s=3000.0,
+            dx=0.01,
             rho=2700.0,
             shape=(20, 20),
             absorbing_layer_cells=4,

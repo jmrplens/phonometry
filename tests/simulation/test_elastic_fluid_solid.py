@@ -508,7 +508,7 @@ def test_from_regions_matches_manual_maps() -> None:
     c_s = np.zeros((ny, nx))
     rho = np.full((ny, nx), WATER.rho)
     c_p[20:], c_s[20:], rho[20:] = STEEL.c_p, STEEL.c_s, STEEL.rho
-    manual = ElasticFDTD2D(c_p, c_s, 0.01, rho=rho)
+    manual = ElasticFDTD2D(c_p=c_p, c_s=c_s, dx=0.01, rho=rho)
     sugar = ElasticFDTD2D.from_regions(
         (ny, nx),
         0.01,

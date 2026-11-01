@@ -1459,7 +1459,7 @@ from figures.fields._core import _host
 
 from phonometry.simulation import FDTD2D
 
-sim = FDTD2D(..., compute=clip_placement.compute_for("anim_fdtd_open_end"))
+sim = FDTD2D(c=..., dx=..., compute=clip_placement.compute_for("anim_fdtd_open_end"))
 xp = sim._backend.xp
 row, omega, phase, beta, steps, every = 40, 2.0 * np.pi * 500.0, 0.0, 0.98, 600, 6
 taper = sim._backend.asarray(np.hanning(sim.p.shape[1]))   # once, before the loop
@@ -1476,7 +1476,7 @@ for i in range(steps):
 **Don't**
 
 ```py
-sim = FDTD2D(...)                     # no compute=: PHONOMETRY_COMPUTE decides
+sim = FDTD2D(c=..., dx=...)           # no compute=: PHONOMETRY_COMPUTE decides
 ms = np.zeros_like(sim.p)
 for i in range(steps):
     sim.step()

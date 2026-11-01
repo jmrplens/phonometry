@@ -42,7 +42,7 @@ def test_every_acoustic_scenario_runs_on_the_strict_backend(
 def test_the_strict_guard_refuses_a_numpy_call_on_a_device_array(
     on_strict: None,
 ) -> None:
-    sim = FDTD2D(343.0, 0.01, shape=(8, 8))
+    sim = FDTD2D(c=343.0, dx=0.01, shape=(8, 8))
     with pytest.raises(TypeError, match="through __array__ or the buffer protocol"):
         np.concatenate((sim.p, sim.p))
 
@@ -165,7 +165,7 @@ def test_a_contour_probe_resets_on_the_strict_backend(
             "cpu",
             lambda c: dataclasses.replace(loader(c), accumulator_dtype="float32"),
         )
-    sim = FDTD2D(343.0, 0.01, shape=(20, 20), compute=Compute(dtype="float32"))
+    sim = FDTD2D(c=343.0, dx=0.01, shape=(20, 20), compute=Compute(dtype="float32"))
     sim.add_source(GaussianPulse(ix=10, iy=10, half_width_s=4e-5))
     probe = sim.add_contour_probe(5, 14, 5, 14, frequencies=[1000.0])
     sim.run(20)
@@ -181,7 +181,7 @@ def test_a_contour_probe_resets_on_the_strict_backend(
 
 
 def test_a_write_into_the_field_from_outside_is_stepped(on_strict: None) -> None:
-    sim = FDTD2D(343.0, 0.01, shape=(20, 20))
+    sim = FDTD2D(c=343.0, dx=0.01, shape=(20, 20))
     ref = sim.p
     sim.p[10, 10] = 1.0
     sim.step()
@@ -190,7 +190,7 @@ def test_a_write_into_the_field_from_outside_is_stepped(on_strict: None) -> None
 
 
 def test_numpy_field_is_a_copy_in_numpy() -> None:
-    sim = FDTD2D(343.0, 0.01, shape=(8, 8))
+    sim = FDTD2D(c=343.0, dx=0.01, shape=(8, 8))
     got = sim.numpy_field("vx")
     assert isinstance(got, np.ndarray)
     got[...] = 7.0
@@ -198,27 +198,27 @@ def test_numpy_field_is_a_copy_in_numpy() -> None:
 
 
 def test_numpy_field_refuses_a_field_it_does_not_store() -> None:
-    sim = FDTD2D(343.0, 0.01, shape=(8, 8))
+    sim = FDTD2D(c=343.0, dx=0.01, shape=(8, 8))
     with pytest.raises(ValueError, match="'field' must be one of"):
         sim.numpy_field("txx")  # type: ignore[arg-type]
 
 
 def test_the_engine_records_where_it_ran() -> None:
-    sim = FDTD2D(343.0, 0.01, shape=(8, 8), compute=Compute(dtype="float32"))
+    sim = FDTD2D(c=343.0, dx=0.01, shape=(8, 8), compute=Compute(dtype="float32"))
     assert sim.provenance.device == "cpu"
     assert sim.provenance.dtype == "float32"
     assert sim.p.dtype == np.float32
 
 
 def test_run_takes_the_snapshot_names() -> None:
-    sim = FDTD2D(343.0, 0.01, shape=(20, 21))
+    sim = FDTD2D(c=343.0, dx=0.01, shape=(20, 21))
     sim.add_source(GaussianPulse(ix=5, iy=5, half_width_s=4e-5))
     frames = sim.run(12, snapshot_every=4, snapshot_decimation=4)
     assert frames.shape == (4, 5, 6)
 
 
 def test_the_material_maps_are_read_only_numpy_copies() -> None:
-    sim = FDTD2D(343.0, 0.01, shape=(8, 8))
+    sim = FDTD2D(c=343.0, dx=0.01, shape=(8, 8))
     assert isinstance(sim.kappa, np.ndarray)
     with pytest.raises(ValueError, match="read-only"):
         sim.kappa[0, 0] = 1.0

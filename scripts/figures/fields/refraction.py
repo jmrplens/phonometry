@@ -146,8 +146,8 @@ def _refraction_fields(
         # Row 0 is the ground (rigid, no sponge); "bottom" is the sky in
         # the low-row-origin naming of the engine, as in the barrier clip.
         sim = FDTD2D(
-            c_map,
-            dx,
+            c=c_map,
+            dx=dx,
             absorbing_layer_cells=40,
             absorbing_sides=("left", "right", "bottom"),
             compute=compute,

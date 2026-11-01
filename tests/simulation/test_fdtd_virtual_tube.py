@@ -70,8 +70,8 @@ def _run_tube(
     if right_impedance is not None:
         boundaries["right"] = right_impedance
     sim = FDTD2D(
-        c_map,
-        DX,
+        c=c_map,
+        dx=DX,
         rho=rho_map,
         damping=damping,
         edge_impedance=boundaries,
@@ -123,7 +123,7 @@ def test_virtual_iso10534_recovers_analytic_absorption() -> None:
         probe_cells=(mic1, mic2),
         steps=9000,
     )
-    sim_dt = FDTD2D(C0, DX, shape=(NY, 8)).dt
+    sim_dt = FDTD2D(c=C0, dx=DX, shape=(NY, 8)).dt
     freqs, spec = _spectra(records, sim_dt)
     h12 = _band_ratio(freqs, spec[1], spec[0])
     result = two_microphone_impedance(
@@ -156,7 +156,7 @@ def test_virtual_iso10534_empty_tube_is_rigid() -> None:
         probe_cells=(mic1, mic2),
         steps=2600,
     )
-    sim_dt = FDTD2D(C0, DX, shape=(NY, 8)).dt
+    sim_dt = FDTD2D(c=C0, dx=DX, shape=(NY, 8)).dt
     freqs, spec = _spectra(records, sim_dt)
     h12 = _band_ratio(freqs, spec[1], spec[0])
     result = two_microphone_impedance(
@@ -191,7 +191,7 @@ def test_virtual_astm_one_load_recovers_layer_tl() -> None:
         steps=7000,
         right_impedance=RHO0 * C0,
     )
-    sim_dt = FDTD2D(C0, DX, shape=(NY, 8)).dt
+    sim_dt = FDTD2D(c=C0, dx=DX, shape=(NY, 8)).dt
     freqs, spec = _spectra(records, sim_dt)
     reference = spec[1]
     loads = tuple(_band_ratio(freqs, spec[k], reference) for k in range(4))
@@ -230,7 +230,7 @@ def test_virtual_astm_empty_tube_tl_is_zero() -> None:
         steps=3600,
         right_impedance=RHO0 * C0,
     )
-    sim_dt = FDTD2D(C0, DX, shape=(NY, 8)).dt
+    sim_dt = FDTD2D(c=C0, dx=DX, shape=(NY, 8)).dt
     freqs, spec = _spectra(records, sim_dt)
     loads = tuple(_band_ratio(freqs, spec[k], spec[1]) for k in range(4))
     k_air = 2.0 * np.pi * BAND / C0
@@ -252,6 +252,6 @@ def test_damping_map_validation() -> None:
     one_dimensional = np.zeros(8)
     wrong_shape = np.zeros((NY, 9))
     with pytest.raises(ValueError, match="scalar or an"):
-        FDTD2D(C0, DX, shape=(NY, 8), damping=one_dimensional)
+        FDTD2D(c=C0, dx=DX, shape=(NY, 8), damping=one_dimensional)
     with pytest.raises(ValueError, match="does not match the"):
-        FDTD2D(C0, DX, shape=(NY, 8), damping=wrong_shape)
+        FDTD2D(c=C0, dx=DX, shape=(NY, 8), damping=wrong_shape)

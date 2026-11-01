@@ -169,7 +169,7 @@ def test_a_recorded_acoustic_run_agrees_with_numpy(
 
 
 def test_a_stress_written_from_outside_is_stepped(on_strict: None) -> None:
-    sim = ElasticFDTD2D(4000.0, 2300.0, 0.01, rho=2500.0, shape=(20, 20))
+    sim = ElasticFDTD2D(c_p=4000.0, c_s=2300.0, dx=0.01, rho=2500.0, shape=(20, 20))
     sim.txx[10, 4:8] -= 1.0
     sim.step()
     assert np.abs(sim.numpy_field("vx")).max() > 0.0
@@ -184,14 +184,14 @@ def test_from_regions_takes_the_placement() -> None:
 
 
 def test_numpy_field_reads_the_stresses_as_stored() -> None:
-    sim = ElasticFDTD2D(4000.0, 2300.0, 0.01, rho=2500.0, shape=(10, 12))
+    sim = ElasticFDTD2D(c_p=4000.0, c_s=2300.0, dx=0.01, rho=2500.0, shape=(10, 12))
     assert sim.numpy_field("txy").shape == (9, 11)
     with pytest.raises(ValueError, match="'field' must be one of"):
         sim.numpy_field("p")  # type: ignore[arg-type]
 
 
 def test_the_lame_maps_are_read_only_numpy_copies() -> None:
-    sim = ElasticFDTD2D(4000.0, 2300.0, 0.01, rho=2500.0, shape=(10, 12))
+    sim = ElasticFDTD2D(c_p=4000.0, c_s=2300.0, dx=0.01, rho=2500.0, shape=(10, 12))
     for name in ("mu", "lam"):
         with pytest.raises(ValueError, match="read-only"):
             getattr(sim, name)[0, 0] = 1.0

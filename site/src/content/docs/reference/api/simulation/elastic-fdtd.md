@@ -182,10 +182,10 @@ is why it travels with the sides rather than beside them.
 
 ```python
 ElasticFDTD2D(
+    *,
     c_p: ArrayLike,
     c_s: ArrayLike,
     dx: float,
-    *,
     rho: ArrayLike,
     cfl: float = 0.6,
     absorbing_layer_cells: int | np.integer[Any] = 0,

@@ -47,7 +47,7 @@ def _poster_ss_for(webm: str) -> float | None:
     if _PILLAR_STEM in name:
         from phonometry.simulation import FDTD2D, Compute
 
-        dt = FDTD2D(343.0, _PILLAR_DX, shape=(3, 8), compute=Compute()).dt
+        dt = FDTD2D(c=343.0, dx=_PILLAR_DX, shape=(3, 8), compute=Compute()).dt
         dt_frame = _PILLAR_EVERY * dt
         return float((6.0e-3 / dt_frame - _PILLAR_WARM) / _PILLAR_FPS)
     if "anim_fdtd_transmission_tube" in name:
@@ -158,8 +158,8 @@ def _pillar_fields(n_frames: int = _PILLAR_FRAMES) -> tuple[Any, Any]:
     from phonometry.simulation import FDTD2D
 
     sim = FDTD2D(
-        343.0,
-        _PILLAR_DX,
+        c=343.0,
+        dx=_PILLAR_DX,
         shape=(_PILLAR_NY, _PILLAR_NX),
         absorbing_layer_cells=80,
         absorbing_sides=("left", "right"),

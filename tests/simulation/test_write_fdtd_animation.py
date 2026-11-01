@@ -83,8 +83,8 @@ def engines(monkeypatch: pytest.MonkeyPatch) -> list[FDTD2D]:
     """Every engine a writer builds, in order (they are built in fdtd._acoustic_engine)."""
     built: list[FDTD2D] = []
 
-    def counted(*args: Any, **kwargs: Any) -> FDTD2D:
-        sim = FDTD2D(*args, **kwargs)
+    def counted(**kwargs: Any) -> FDTD2D:
+        sim = FDTD2D(**kwargs)
         built.append(sim)
         return sim
 
@@ -334,7 +334,7 @@ def test_a_field_that_never_leaves_the_source_has_nothing_to_scale_by(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     fake = fake_ffmpeg.install(tmp_path, monkeypatch)
-    one_step = FDTD2D(343.0, 0.01, shape=(30, 40)).dt
+    one_step = FDTD2D(c=343.0, dx=0.01, shape=(30, 40)).dt
     run = _run(one_step, recording=FDTDRecording(probes=_PROBES, snapshot_every=1))
     with pytest.raises(
         ValueError,

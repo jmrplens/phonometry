@@ -115,8 +115,8 @@ def generate_fdtd_domain_geometry(output_dir: str) -> None:
     mask = np.zeros((60, 90), dtype=bool)
     mask[25:35, 40:44] = True
     sim = FDTD2D(
-        343.0,
-        0.05,
+        c=343.0,
+        dx=0.05,
         shape=(60, 90),
         absorbing_layer_cells=8,
         absorbing_sides=("left", "right"),
@@ -443,8 +443,8 @@ def generate_fdtd_plane_wave_launch(output_dir: str) -> None:
 
     dx, offset, sponge = 0.01, 22, 20
     sim = FDTD2D(
-        343.0,
-        dx,
+        c=343.0,
+        dx=dx,
         shape=(160, 80),
         absorbing_layer_cells=sponge,
         absorbing_sides=("top", "bottom"),

@@ -87,8 +87,8 @@ def _aperture_fields(
         mask[:, wall_c[0] : wall_c[1]] = True
         mask[(ny - gap) // 2 : (ny + gap) // 2, wall_c[0] : wall_c[1]] = False
         sim = FDTD2D(
-            343.0,
-            dx,
+            c=343.0,
+            dx=dx,
             shape=(ny, nx),
             absorbing_layer_cells=40,
             absorbing_sides=("top", "bottom", "right"),

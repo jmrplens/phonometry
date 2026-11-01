@@ -226,8 +226,8 @@ def _impedance_tube_fields(
             rho_map[:, nx - sample_cells :] = _VTUBE_RHO2
             damping[:, nx - sample_cells :] = _VTUBE_SIGMA
         sim = FDTD2D(
-            c_map,
-            dx,
+            c=c_map,
+            dx=dx,
             rho=rho_map,
             damping=damping,
             edge_impedance={"left": 1.2 * 343.0},
@@ -477,8 +477,8 @@ def _transmission_tube_fields(
             rho_map[:, sl] = _VTUBE_RHO2
             damping[:, sl] = _VTUBE_SIGMA
         sim = FDTD2D(
-            c_map,
-            dx,
+            c=c_map,
+            dx=dx,
             rho=rho_map,
             damping=damping,
             edge_impedance={"left": 1.2 * 343.0, "right": 1.2 * 343.0},

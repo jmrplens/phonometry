@@ -157,7 +157,7 @@ plane wavefront. Two tools cover it, each one-way through its own mechanism:
 ```python
 from phonometry.simulation import FDTD2D, CWSource, PlaneWaveSource
 
-sim = FDTD2D(343.0, 0.01, shape=(160, 80), absorbing_layer_cells=20,
+sim = FDTD2D(c=343.0, dx=0.01, shape=(160, 80), absorbing_layer_cells=20,
              absorbing_sides=("top", "bottom"))
 tone = CWSource(ix=0, iy=0, frequency=1000.0)          # reused as a waveform
 sim.add_source(PlaneWaveSource(direction="down", waveform=tone.value, offset=22))
@@ -200,7 +200,7 @@ import numpy as np
 from phonometry import simulation
 
 rho, c, dx = 1.2, 343.0, 0.01
-sim = simulation.FDTD2D(c, dx, rho=rho, shape=(3, 1200),
+sim = simulation.FDTD2D(c=c, dx=dx, rho=rho, shape=(3, 1200),
                         edge_impedance={"right": 3.0 * rho * c})
 x = (np.arange(1200) + 0.5) * dx
 sim.p[:] = np.exp(-(((x - 6.0) / 0.15) ** 2))[None, :]   # plane pulse
@@ -242,7 +242,7 @@ from phonometry import simulation
 
 mask = np.zeros((60, 90), dtype=bool)
 mask[25:35, 40:44] = True
-sim = simulation.FDTD2D(343.0, 0.05, shape=(60, 90), absorbing_layer_cells=8,
+sim = simulation.FDTD2D(c=343.0, dx=0.05, shape=(60, 90), absorbing_layer_cells=8,
                         absorbing_sides=("left", "right"),
                         edge_impedance={"top": 413.0}, obstacle_mask=mask)
 sim.add_source(simulation.GaussianPulse(ix=10, iy=30, half_width_s=1e-3))
@@ -289,7 +289,7 @@ import numpy as np
 from phonometry import simulation
 
 c0, dx, f0 = 343.0, 0.005, 2000.0
-sim = simulation.FDTD2D(c0, dx, shape=(300, 300), absorbing_layer_cells=40)
+sim = simulation.FDTD2D(c=c0, dx=dx, shape=(300, 300), absorbing_layer_cells=40)
 sim.add_source(simulation.CWSource(ix=150, iy=150, frequency=f0))
 probe = sim.add_contour_probe(90, 210, 90, 210, frequencies=[f0])
 sim.run(round(4.5e-3 / sim.dt))            # run the transient out
@@ -372,7 +372,7 @@ for n, (h, ln, lc, wn, wc) in enumerate(rows):
         mask[r0:r1, lat + round((xn + ln * 1e-3) / dx):
              lat + round((xn + (ln + lc) * 1e-3) / dx)] = False
 
-sim = simulation.FDTD2D(c0, dx, shape=mask.shape, absorbing_layer_cells=sponge,
+sim = simulation.FDTD2D(c=c0, dx=dx, shape=mask.shape, absorbing_layer_cells=sponge,
                         cfl=0.9, obstacle_mask=mask)   # 340 cells/lambda:
 sim.add_source(simulation.PlaneWaveSource(           # dispersion negligible
     direction="down", waveform=simulation.CWSource(ix=0, iy=0, frequency=f0).value, offset=sponge))

@@ -38,7 +38,7 @@ def _centroid(sim: FDTD2D, axis: int) -> float:
 def test_packet_travels_at_phase_speed_one_way(
     direction: str, axis: int, sign: float
 ) -> None:
-    sim = FDTD2D(C0, DX, shape=(120, 120))
+    sim = FDTD2D(c=C0, dx=DX, shape=(120, 120))
     sim.add_plane_wave(direction, center_m=0.6, half_width_m=0.08)
     start = _centroid(sim, axis)
     steps = 30
@@ -57,7 +57,7 @@ def test_packet_travels_at_phase_speed_one_way(
 
 
 def test_packet_stays_plane_and_supports_carrier() -> None:
-    sim = FDTD2D(C0, DX, shape=(100, 60))
+    sim = FDTD2D(c=C0, dx=DX, shape=(100, 60))
     sim.add_plane_wave("down", center_m=0.35, half_width_m=0.10, wavelength_m=0.20)
     for _ in range(25):
         sim.step()
@@ -70,7 +70,7 @@ def test_packet_stays_plane_and_supports_carrier() -> None:
 
 
 def test_packet_validation() -> None:
-    sim = FDTD2D(C0, DX, shape=(20, 20))
+    sim = FDTD2D(c=C0, dx=DX, shape=(20, 20))
     with pytest.raises(ValueError, match=r"'direction' must be"):
         sim.add_plane_wave("north", center_m=0.1, half_width_m=0.02)
     with pytest.raises(ValueError, match="'half_width_m' must be positive"):
@@ -81,7 +81,7 @@ def test_packet_validation() -> None:
 
 @pytest.mark.parametrize("old", ["center", "width", "wavelength"])
 def test_the_packet_refuses_its_lengths_without_their_unit(old: str) -> None:
-    sim = FDTD2D(C0, DX, shape=(20, 20))
+    sim = FDTD2D(c=C0, dx=DX, shape=(20, 20))
     lengths = {"center_m": 0.1, "half_width_m": 0.02, old: 0.05}
     with pytest.raises(TypeError, match=f"'{old}'"):
         sim.add_plane_wave("down", **lengths)  # type: ignore[arg-type]
@@ -91,7 +91,7 @@ def test_packet_rejects_non_finite_parameters() -> None:
     # A NaN width or centre used to be accepted and silently turn the whole
     # pressure field into NaN; an infinite width painted a uniform amplitude
     # over the entire domain.
-    sim = FDTD2D(C0, DX, shape=(20, 20))
+    sim = FDTD2D(c=C0, dx=DX, shape=(20, 20))
     with pytest.raises(ValueError, match="'half_width_m' must be positive"):
         sim.add_plane_wave("down", center_m=0.1, half_width_m=np.nan)
     with pytest.raises(ValueError, match="'half_width_m' must be positive"):
@@ -117,7 +117,7 @@ def test_plane_wave_source_rejects_bad_waveform_and_amplitude() -> None:
 
 def test_rigid_wall_doubles_incident_pressure() -> None:
     # A packet hitting the rigid bottom edge doubles while reflecting.
-    sim = FDTD2D(C0, DX, shape=(160, 40))
+    sim = FDTD2D(c=C0, dx=DX, shape=(160, 40))
     sim.add_plane_wave("down", center_m=0.6, half_width_m=0.06)
     peak_free = float(np.abs(sim.p).max())
     best = 0.0
@@ -129,8 +129,8 @@ def test_rigid_wall_doubles_incident_pressure() -> None:
 
 def test_plane_source_steady_state_is_plane_and_one_way() -> None:
     sim = FDTD2D(
-        C0,
-        DX,
+        c=C0,
+        dx=DX,
         shape=(160, 80),
         absorbing_layer_cells=20,
         absorbing_sides=("top", "bottom"),
@@ -151,7 +151,7 @@ def test_plane_source_steady_state_is_plane_and_one_way() -> None:
 
 
 def test_plane_source_validation_and_geometry_preview() -> None:
-    sim = FDTD2D(C0, DX, shape=(40, 40))
+    sim = FDTD2D(c=C0, dx=DX, shape=(40, 40))
     with pytest.raises(ValueError, match=r"'direction' must be one of"):
         PlaneWaveSource(direction="sideways", waveform=lambda t: 0.0)  # type: ignore[arg-type]
     with pytest.raises(TypeError, match=r"'direction' must be one of .*, a text"):
@@ -164,7 +164,7 @@ def test_plane_source_validation_and_geometry_preview() -> None:
     # An injection line may not cross an obstacle.
     mask = np.zeros((40, 40), dtype=bool)
     mask[5, 10:20] = True
-    blocked = FDTD2D(C0, DX, shape=(40, 40), obstacle_mask=mask)
+    blocked = FDTD2D(c=C0, dx=DX, shape=(40, 40), obstacle_mask=mask)
     on_obstacle = PlaneWaveSource(direction="down", waveform=lambda t: 0.0, offset=5)
     with pytest.raises(
         ValueError, match=r"plane-wave injection line crosses an obstacle"

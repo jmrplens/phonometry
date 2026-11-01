@@ -3999,48 +3999,54 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
-- **The weighting design takes its exponentials, powers, base-10 logarithms,
-  sines, tangents and complex magnitudes from routines that return the same
-  bits on every platform, so the macOS and Windows coefficients move toward
-  the Linux bytes.** `filters.WeightingFilter` and `filters.weighting_filter`
-  took them from the C library, and glibc, Apple's libm and the Windows
-  runtime each round some inputs to the other neighbour, which the fit grows
-  into a different filter: the A weighting at 48 kHz had three digests on the
-  three platforms of the CI matrix. `exp` and `pow` are now glibc's own
-  routines spelled in arithmetic IEEE 754 fixes (`filters._pinned_exp`, in
-  the build glibc picks for a processor with fused multiply-adds, every
-  multiply-add that build fuses emulated exactly), `log10` is glibc's built on
-  the pinned `log`, and the sine, the tangent and the magnitude of a complex
-  root are correctly rounded (`filters._pinned_trig`). On glibc with a
-  processor that has FMA, the Linux leg of the CI matrix, the coefficients do
-  not move at any of the 133 (curve, rate) designs the library is checked at,
-  and the A weighting at 48 kHz still hashes to `991833ff389afe91`. glibc on
-  x86-64 without FMA runs another build of each routine, and there this
-  change moves the coefficients toward those bytes: the A weighting at 48 kHz
-  from `43f786ffab5c4dd4` to `991833ff389afe91`, while the arctangent, whose
-  two builds differ too, still separates 9 of the 133 designs, the A
-  weighting at 44.1 kHz among them. The macOS and Windows coefficients become
-  the Linux bytes wherever the platform's arctangent, the one routine still
-  taken from the C library, is correctly rounded on the 257-point frequency
-  grid, as glibc's is for the A weighting at 48 kHz, and stay within the
-  0.013 dB the response tests allow where it is not; for D, G and 468 that
-  also takes the BLAS and LAPACK steps of the cascade (the products SciPy
-  forms, the roots of the 468 prototype) giving OpenBLAS's bytes, which
-  Apple's Accelerate is not measured to do. Tests in the CI matrix hold the A
-  weighting at 48 kHz to the Linux digest on all three platforms with a
-  correctly rounded arctangent of their own, and as shipped wherever the
-  platform's arctangent is correctly rounded on the grid. Of the 1 399 307
-  (rate, curve) designs at integer rates from 100 Hz to 200 kHz, 5 864 meet a
-  sine or a tangent glibc does not round correctly and can move on Linux too,
-  none at a rate the library is checked at; among the common rates, 50 kHz
-  for A, B, C and D and 100 kHz for AU. The plain bilinear design
-  (`high_accuracy=False`) takes the complex magnitude behind its gain from the
-  pinned `hypot` too, which moves the B, C and G designs on Linux by one unit
-  in the last place of that gain. The arctangent stays on the C library for
-  now: only glibc's own routine keeps the Linux bytes, since the correctly
-  rounded value differs from it in 32 of the 133 designs, and the determinism
-  guide says what is left. A design costs about 270 ms where it cost about
-  200, once per curve, rate and mode as before.
+- **The weighting design takes every transcendental from routines that
+  return the same bits on every platform, so the macOS and Windows
+  coefficients move to the Linux bytes.** `filters.WeightingFilter` and
+  `filters.weighting_filter` took them from the C library, and glibc, Apple's
+  libm and the Windows runtime each round some inputs to the other neighbour,
+  which the fit grows into a different filter: the A weighting at 48 kHz had
+  three digests on the three platforms of the CI matrix. `exp` and `pow` are
+  now glibc's own routines spelled in arithmetic IEEE 754 fixes
+  (`filters._pinned_exp`, in the build glibc picks for a processor with fused
+  multiply-adds, every multiply-add that build fuses emulated exactly),
+  `log10` is glibc's built on the pinned `log`, and the sine, the tangent, the
+  arctangent and the magnitude of a complex root are correctly rounded, in
+  the package's own exact integer arithmetic (`filters._pinned_trig`). No
+  routine of the C library is left in the fit, so macOS, Windows and glibc on
+  x86-64 without FMA, which runs another build of each routine, design the
+  Linux bytes: the A weighting at 48 kHz moves there from `43f786ffab5c4dd4`
+  on glibc without FMA to `991833ff389afe91`. Tests in the CI matrix hold the
+  A weighting at 48 and 44.1 kHz to one digest on all three platforms. For
+  the other curves the same bytes also take the two library steps of the
+  cascade, the sections SciPy forms through the BLAS and the roots LAPACK
+  finds for the 468 prototype, giving the bytes they give on x86-64: the
+  OpenBLAS of 64-bit ARM, measured in emulation, does so for 100 of the 133
+  checked designs, every A design among them, and not for the other 33 (the
+  nineteen 468 designs and fourteen of B, C, D, G and AU), and Apple's
+  Accelerate is not measured. On Linux,
+  127 of the 133 (curve, rate) designs the library is checked at do not move,
+  the A weighting at 48 kHz among them, and six move by their last bits,
+  because glibc's arctangent is not correctly rounded on 19 of the
+  15 866 arctangents those designs evaluate: the A and C weightings at 44.1
+  and 88.2 kHz, the D weighting at 88.2 kHz and the G weighting at 1.5 kHz
+  (the A weighting at 44.1 kHz from `74d1e53f498988c5` to
+  `dbea4b7fc4ad972b`). The 19 arctangents reach 32 of the checked designs; in
+  the other 26 the target level the fit aims at comes out the same to the
+  last bit, so the fit never sees them. glibc's own arctangent, which would
+  have kept those six designs where they were, is the IBM Accurate
+  Mathematical Library, under LGPL-2.1-or-later, and is not transcribed. Of
+  the 1 399 307 (rate, curve) designs at integer rates from 100 Hz to
+  200 kHz, 5 864 meet a sine or a tangent glibc does not round correctly and
+  45 526 read a target level glibc's arctangent changes, the six checked
+  designs among them, and those can move on Linux too; among the common rates
+  the checked set leaves out, 50 kHz for A, B, C and D and 100 kHz for AU
+  through a sine or a tangent, and 176.4 kHz for A, B and C through the
+  arctangent. The six checked designs that moved stay within the response
+  the tests allow, 0.013 dB for A. The plain bilinear design
+  (`high_accuracy=False`) takes the complex magnitude behind its gain from
+  the pinned `hypot` too, which moves the B, C and G designs on Linux by one
+  unit in the last place of that gain. A design costs about 270 ms where it
+  cost about 200, once per curve, rate and mode as before.
 
 - **`vibration.evaluate_train_passage`, `signals.resample_signal` handed a
   Signal and the EN 15610 Method B bank of `environment` run at a fractional
@@ -11047,8 +11053,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   batches each evaluation's logarithms into one call and reuses the normal
   equations' index pattern across steps, which is where the rest of the
   recovery comes from. The other transcendentals stayed on the `math` loop
-  with this change; the entry on the pinned exponentials, powers, sines and
-  tangents takes all of them but the arctangent off it.
+  with this change; the entry on the pinned exponentials, powers, sines,
+  tangents and arctangents takes all of them off it.
 
   On platforms whose C library is not glibc the byte-for-byte clause reads
   the other way round, and it is an improvement: Apple's and musl's `log`
@@ -11058,9 +11064,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   separates the platforms. The other transcendentals the design took from
   the C library still did, and the three CI platforms designed three
   different byte strings for the same filter; the entry on the pinned
-  exponentials, powers, sines and tangents spells all of them but the
-  arctangent the way the logarithm is spelled, and the determinism guide says
-  what is left.
+  exponentials, powers, sines, tangents and arctangents pins every one of
+  them, so the three platforms design one, and the determinism guide says
+  how.
 
 - The frequency weightings are designed at the sample rate instead of being
   outrun at eight times it. Every curve in `filters.weighting` starts as poles

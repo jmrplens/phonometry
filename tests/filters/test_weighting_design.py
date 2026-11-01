@@ -20,7 +20,6 @@ import hashlib
 import inspect
 import math
 import os
-import platform
 import subprocess
 import sys
 import textwrap
@@ -28,6 +27,7 @@ import warnings
 
 import numpy as np
 import pytest
+from arctan_oracle import correctly_rounded_arctangent
 from libm_identity import TUNABLES, WITHOUT_FMA, glibc_on_x86_64_with_fma
 from reference_data import IEC61672_TABLE3 as TABLE3
 from scipy import signal as sg
@@ -35,7 +35,6 @@ from scipy import signal as sg
 from phonometry import filters
 from phonometry.filters import _weighting_design
 from phonometry.filters import weighting as weighting_module
-from phonometry.filters._pinned_trig import _PI, _PI_BITS, _fixed_argument
 from phonometry.filters._weighting_design import (
     _CORNER_DECADES,
     _cascade_magnitude,
@@ -83,9 +82,11 @@ _RATES = (32000, 44100, 48000, 88200, 96000, 192000)
 #: reductions any more, and nothing on the path fuses a multiply into an add
 #: either, which is what makes the design the same on every CPU; see
 #: :func:`~phonometry.filters._weighting_design._ordered_sum` and
-#: :func:`~phonometry.filters._weighting_design._log_distance2`. What is left
-#: is the C library's arctangent, and a C library that retunes it still moves
-#: the last bit, so this table has to outlive that. Perturbing
+#: :func:`~phonometry.filters._weighting_design._log_distance2`, and no
+#: routine of the C library is left on it either. What is left is any change
+#: to the arithmetic itself, such as the arctangent moving from the C
+#: library's rounding to the correct one, which moved 32 of the checked
+#: designs by their last bits, so this table has to outlive that. Perturbing
 #: every solve by a relative 1e-12 moves the C row from 0.00220 dB to 0.00324
 #: and the AU row from 0.00590 to 0.00666. Rounded up, those two rows read
 #: 0.003 and 0.006, so a gate written that way is already failing on a release
@@ -1030,140 +1031,61 @@ def test_the_design_is_paid_for_once_per_curve_rate_and_mode() -> None:
     assert first.sos is not second.sos
 
 
-#: The head of the SHA-256 of the A weighting designed at 48 kHz wherever the
-#: arctangent the design still takes from the C library is correctly rounded
-#: on the 257 points of its grid: the digest the determinism guide prints, and
-#: the one glibc designs on every machine measured, with or without its FMA
-#: variant.
-_A48K_DIGEST = "991833ff389afe91"
-
-#: The same digest where the local arctangent rounds some of those points to
-#: the other neighbour, keyed by ``platform.system()``, ``platform.machine()``
-#: and the C library ``platform.libc_ver()`` names. A platform missing here
-#: fails and names the digest it designed, which is the measurement that
-#: fills its entry, so no value is pinned before it has been measured.
-_A48K_DIGEST_OFF_THE_CORRECT_ARCTANGENT: dict[tuple[str, str, str], str] = {}
+#: The head of the SHA-256 of the A weighting designed at each rate, on every
+#: platform: every transcendental the design takes is pinned, so the bytes are
+#: one digest whatever the C library. At 48 kHz it is the digest the
+#: determinism guide prints, which the correctly rounded arctangent did not
+#: move, since glibc's is correctly rounded on all 257 points of that grid. At
+#: 44.1 kHz glibc's arctangent rounds two of its 257 points to the other
+#: neighbour, and the design moved from the 74d1e53f498988c5 glibc with FMA
+#: gave to this.
+_A_DIGESTS = {48000: "991833ff389afe91", 44100: "dbea4b7fc4ad972b"}
 
 
-def _a48k_digest() -> str:
+def _a_digest(fs: int) -> str:
     _cached_weighting_sos.cache_clear()
-    sos = filters.WeightingFilter(48000, "A").sos
+    sos = filters.WeightingFilter(fs, "A").sos
     return hashlib.sha256(sos.tobytes()).hexdigest()[:16]
 
 
-def _atan_fixed(x: float, scale: int) -> tuple[int, int]:
-    """``atan(x) * 2**scale`` for ``x > 0`` in exact integers, and an error bound.
+@pytest.mark.parametrize("fs", sorted(_A_DIGESTS))
+def test_the_design_is_the_documented_one_on_every_platform(fs: int) -> None:
+    """The shipped A weighting, designed as every platform of the matrix ships it.
 
-    Two half-angle steps bring the argument under ``tan(pi/16)`` and the
-    alternating series does the rest; an argument above one goes through
-    ``pi/2 - atan(1/x)``. The guard bits make every truncation's share of the
-    error a fraction of a unit at *scale*.
+    The production path, nothing replaced. No routine of the C library is
+    left on it: the exponential, the power and the logarithms are glibc's own
+    routines spelled in arithmetic IEEE 754 fixes, and the sine, the tangent,
+    the arctangent and the complex magnitudes are correctly rounded in exact
+    integer arithmetic, so macOS, Windows and Linux design the same bytes.
     """
-    guard = 32
-    wide = scale + guard
-    one = 1 << wide
-    t = _fixed_argument(x, wide)
-    invert = t > one
-    if invert:
-        t = (one << wide) // t
-    for _ in range(2):
-        t = (t << wide) // (one + math.isqrt(one * one + t * t))
-    square = (t * t) >> wide
-    power = total = t
-    k = 0
-    while power:
-        power = (power * square) >> wide
-        k += 1
-        term = power // (2 * k + 1)
-        total += -term if k % 2 else term
-    value = 4 * total
-    if invert:
-        value = (_PI >> (_PI_BITS - wide + 1)) - value
-    return value >> guard, ((4 * (k + 16)) >> guard) + 3
+    assert _a_digest(fs) == _A_DIGESTS[fs]
 
 
-def _atan_correctly_rounded(x: float) -> float:
-    """The arctangent rounded once, by Ziv's loop: an oracle with no platform in it."""
-    if x == 0.0:
-        return x
-    magnitude = math.fabs(x)
-    precision = 96
-    while True:
-        scale = precision + max(0, -math.frexp(magnitude)[1])
-        value, error = _atan_fixed(magnitude, scale)
-        low = (value - error) / (1 << scale)
-        high = (value + error) / (1 << scale)
-        if low == high:
-            return math.copysign(low, x)
-        precision *= 2
-
-
-def _correctly_rounded_arctan(values: np.ndarray) -> np.ndarray:
-    flat = np.asarray(values, dtype=np.float64).reshape(-1).tolist()
-    out = np.array([_atan_correctly_rounded(v) for v in flat], dtype=np.float64)
-    return out.reshape(np.shape(values))
-
-
-def test_with_a_platform_free_arctangent_every_platform_designs_the_same_bytes(
-    monkeypatch: pytest.MonkeyPatch,
+@pytest.mark.parametrize("fs", sorted(_A_DIGESTS))
+def test_with_an_independent_arctangent_the_design_is_the_same(
+    fs: int, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """Everything the design computes but its arctangent is the same on every machine.
+    """The design's arctangent is the correctly rounded one, found another way.
 
-    The arctangent is the one routine the design still takes from the C
-    library. Swap in a correctly rounded one, computed here in exact integers,
-    and what is left is the pinned routines and IEEE 754 arithmetic, so this
-    digest is held on every platform the CI matrix runs, not only on glibc.
-    Whether the production design, with the platform's own arctangent, lands
-    on the same bytes is the next test's question.
+    The arctangent is swapped for
+    :func:`arctan_oracle.correctly_rounded_arctangent`, which starts from the
+    local C library's answer and walks to the correctly rounded double by
+    exact rational bounds on the tangent, so neither the pinned routine nor
+    its algorithm has a part in it. The design lands on the production test's
+    digest, which is what makes the pinned arctangent the correctly rounded
+    one on every point of the grid, on every platform.
     """
-    captured: list[np.ndarray] = []
+    captured: list[float] = []
 
-    def spy(values: np.ndarray) -> np.ndarray:
-        captured.append(np.asarray(values, dtype=np.float64).reshape(-1).copy())
-        return _correctly_rounded_arctan(values)
+    def independent(values: np.ndarray) -> np.ndarray:
+        flat = np.asarray(values, dtype=np.float64).reshape(-1).tolist()
+        captured.extend(flat)
+        out = np.array([correctly_rounded_arctangent(v) for v in flat])
+        return out.reshape(np.shape(values))
 
-    monkeypatch.setattr(_weighting_design, "_scalar_arctan", spy)
-    assert _a48k_digest() == _A48K_DIGEST
-    assert np.concatenate(captured).size == 257
-
-
-def test_the_production_design_is_the_documented_one_where_its_arctangent_agrees(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    """The shipped A weighting at 48 kHz, as each platform of the matrix designs it.
-
-    The production path, nothing replaced: a spy records the 257 grid points
-    the design hands the C library's arctangent and lets each one through.
-    Where that arctangent is correctly rounded on all of them, everything else
-    the design takes is pinned, so the bytes are the documented ones on that
-    machine, whatever its C library; that is the claim the changelog makes.
-    Where it is not, the platform's own digest is held to a table, so a drift
-    there still turns a build red, and a platform with no entry fails naming
-    the digest it designed.
-    """
-    captured: list[np.ndarray] = []
-    original = _weighting_design._scalar_arctan
-
-    def spy(values: np.ndarray) -> np.ndarray:
-        captured.append(np.asarray(values, dtype=np.float64).reshape(-1).copy())
-        return original(values)
-
-    monkeypatch.setattr(_weighting_design, "_scalar_arctan", spy)
-    digest = _a48k_digest()
-    grid = np.concatenate(captured)
-    assert grid.size == 257
-    local = original(grid).view(np.uint64)
-    correct = _correctly_rounded_arctan(grid).view(np.uint64)
-    disagreements = int(np.count_nonzero(local != correct))
-    if disagreements == 0:
-        assert digest == _A48K_DIGEST
-        return
-    key = (platform.system(), platform.machine(), platform.libc_ver()[0])
-    assert key in _A48K_DIGEST_OFF_THE_CORRECT_ARCTANGENT, (
-        f"{key} rounds {disagreements} of the 257 arctangents to the other "
-        f"neighbour and designed {digest}; pin that digest for it here"
-    )
-    assert digest == _A48K_DIGEST_OFF_THE_CORRECT_ARCTANGENT[key]
+    monkeypatch.setattr(_weighting_design, "_scalar_arctan", independent)
+    assert _a_digest(fs) == _A_DIGESTS[fs]
+    assert len(captured) == 257
 
 
 @pytest.mark.skipif(
@@ -1178,10 +1100,10 @@ def test_glibc_without_its_fma_variant_designs_the_documented_bytes() -> None:
     ``atan`` twice, built with fused multiply-adds and without, and picks a
     set by what the processor reports. A child process with FMA masked runs
     the other set, which it shows by its ``exp`` parting from this process's
-    on the same draws. Before the pinned routines it designed 43f786ffab5c4dd4 for
-    A at 48 kHz; now it designs the documented bytes, because the arctangent,
-    the one routine still taken from glibc, is correctly rounded on this
-    design's grid in both variants.
+    on the same draws. Before the pinned routines it designed 43f786ffab5c4dd4
+    for A at 48 kHz, and before the pinned arctangent it designed A at
+    44.1 kHz differently from this process; now it designs the documented
+    bytes at both rates, because no routine of glibc's is left on the path.
     """
     script = textwrap.dedent(
         """
@@ -1191,9 +1113,10 @@ def test_glibc_without_its_fma_variant_designs_the_documented_bytes() -> None:
         from phonometry import filters
         x = np.random.default_rng(1).uniform(-700.0, 700.0, 20000).tolist()
         exp = np.array([math.exp(v) for v in x])
-        sos = filters.WeightingFilter(48000, "A").sos
         print(hashlib.sha256(exp.tobytes()).hexdigest()[:16])
-        print(hashlib.sha256(sos.tobytes()).hexdigest()[:16])
+        for fs in (48000, 44100):
+            sos = filters.WeightingFilter(fs, "A").sos
+            print(hashlib.sha256(sos.tobytes()).hexdigest()[:16])
         """
     )
     draws = np.random.default_rng(1).uniform(-700.0, 700.0, 20000).tolist()
@@ -1208,16 +1131,17 @@ def test_glibc_without_its_fma_variant_designs_the_documented_bytes() -> None:
         env=environment,
         timeout=300,
     )
-    child_exp, digest = finished.stdout.split()
+    child_exp, at_48k, at_44k = finished.stdout.split()
     assert child_exp != hashlib.sha256(here.tobytes()).hexdigest()[:16], (
         "the child still ran glibc's FMA variant"
     )
-    assert digest == _A48K_DIGEST
+    assert (at_48k, at_44k) == (_a_digest(48000), _a_digest(44100))
+    assert (at_48k, at_44k) == (_A_DIGESTS[48000], _A_DIGESTS[44100])
 
 
 #: The :mod:`math` functions the design path may name: IEEE 754 fixes every one
 #: (or, for ``fsum``, CPython computes it exactly), so none depends on the C
-#: library. ``atan`` is the documented exception, allowed in one function only.
+#: library.
 _MATH_ALLOWED = frozenset({"fsum", "fabs", "sqrt", "isfinite"})
 
 #: numpy names that are a transcendental, a power, or a magnitude that may be
@@ -1256,10 +1180,10 @@ _OPERATOR_FORBIDDEN = frozenset(
 _IMPORT_NAMES = {"math": "math", "numpy": "np"}
 
 
-def _attribute_finding(owner: str, name: str, *, exempt: bool) -> str | None:
+def _attribute_finding(owner: str, name: str) -> str | None:
     """What ``owner.name`` hands the platform, or ``None`` if nothing."""
     if owner == "math":
-        return None if name in _MATH_ALLOWED or exempt else f"math.{name}"
+        return None if name in _MATH_ALLOWED else f"math.{name}"
     forbidden = (
         (owner in _NUMPY_OWNERS and name in _NUMPY_FORBIDDEN)
         or owner in _FORBIDDEN_MODULES
@@ -1302,16 +1226,8 @@ def _import_finding(node: ast.Import) -> list[str]:
 class _PlatformOperations(ast.NodeVisitor):
     """Collect every node that hands arithmetic to the platform, as ``line: what``."""
 
-    def __init__(self, atan_owner: str | None) -> None:
-        self.atan_owner = atan_owner
-        self.functions: list[str] = []
+    def __init__(self) -> None:
         self.found: set[str] = set()
-
-    # ast.NodeVisitor dispatches on this name.
-    def visit_FunctionDef(self, node: ast.FunctionDef) -> None:  # noqa: N802
-        self.functions.append(node.name)
-        self.generic_visit(node)
-        self.functions.pop()
 
     # ast.NodeVisitor dispatches on this name.
     def visit_BinOp(self, node: ast.BinOp) -> None:  # noqa: N802
@@ -1334,15 +1250,7 @@ class _PlatformOperations(ast.NodeVisitor):
     # ast.NodeVisitor dispatches on this name.
     def visit_Attribute(self, node: ast.Attribute) -> None:  # noqa: N802
         if isinstance(node.value, (ast.Name, ast.Attribute)):
-            inside = self.functions[-1] if self.functions else None
-            exempt = (
-                node.attr == "atan"
-                and self.atan_owner is not None
-                and inside == self.atan_owner
-            )
-            finding = _attribute_finding(
-                ast.unparse(node.value), node.attr, exempt=exempt
-            )
+            finding = _attribute_finding(ast.unparse(node.value), node.attr)
             if finding is not None:
                 self.found.add(f"{node.lineno}: {finding}")
         self.generic_visit(node)
@@ -1358,9 +1266,9 @@ class _PlatformOperations(ast.NodeVisitor):
         self.found.update(f"{node.lineno}: {what}" for what in _import_finding(node))
 
 
-def _platform_operations(tree: ast.AST, *, atan_owner: str | None) -> list[str]:
+def _platform_operations(tree: ast.AST) -> list[str]:
     """Every node of *tree* that hands arithmetic to the platform, sorted."""
-    visitor = _PlatformOperations(atan_owner)
+    visitor = _PlatformOperations()
     visitor.visit(tree)
     return sorted(visitor.found)
 
@@ -1415,13 +1323,12 @@ def test_the_design_path_hands_no_arithmetic_to_the_platform() -> None:
     ``pow``), a :mod:`math`, :mod:`cmath`, numpy or SciPy special function, or
     an import that hides one under another name, is a platform's answer
     standing in for the design's, and each has a pinned spelling in
-    ``_pinned_exp``, ``_pinned_log`` or ``_pinned_trig``. The arctangent of
-    :func:`_scalar_arctan` is the one documented exception. In
-    ``weighting.py`` the scan covers the imports and everything the cached
+    ``_pinned_exp``, ``_pinned_log`` or ``_pinned_trig``, with no exception.
+    In ``weighting.py`` the scan covers the imports and everything the cached
     design reaches by name, the prototypes and their helpers included.
     """
     design = ast.parse(inspect.getsource(_weighting_design))
-    assert _platform_operations(design, atan_owner="_scalar_arctan") == []
+    assert _platform_operations(design) == []
     weighting_tree = ast.parse(inspect.getsource(weighting_module))
     reached = _reached_from(weighting_tree, "_cached_weighting_sos")
     assert {
@@ -1434,7 +1341,7 @@ def test_the_design_path_hands_no_arithmetic_to_the_platform() -> None:
         if isinstance(node, (ast.Import, ast.ImportFrom))
     ]
     for node in [*imports, *reached.values()]:
-        assert _platform_operations(node, atan_owner=None) == [], ast.unparse(node)[:80]
+        assert _platform_operations(node) == [], ast.unparse(node)[:80]
 
 
 def test_the_guard_sees_each_kind_of_platform_operation() -> None:
@@ -1457,7 +1364,7 @@ def test_the_guard_sees_each_kind_of_platform_operation() -> None:
             return math.fsum([a, b, c, d, e, g]) + math.sqrt(x)
         """
     )
-    found = _platform_operations(ast.parse(source), atan_owner=None)
+    found = _platform_operations(ast.parse(source))
     assert found == [
         "10: math.atan",
         "10: math.exp",
@@ -1479,9 +1386,6 @@ def test_the_guard_sees_each_kind_of_platform_operation() -> None:
         "8: the ** operator",
         "9: builtin abs()",
     ]
-    assert "10: math.atan" not in _platform_operations(
-        ast.parse(source), atan_owner="f"
-    )
     module = ast.parse(
         textwrap.dedent(
             """
@@ -1502,12 +1406,13 @@ def test_the_guard_sees_each_kind_of_platform_operation() -> None:
 
 _TRANSCENDENTALS = (
     "exp", "expm1", "log", "log2", "log10", "log1p", "pow", "sin", "cos",
-    "tan", "asin", "acos", "atan2", "sinh", "cosh", "tanh", "hypot", "cbrt",
+    "tan", "asin", "acos", "atan", "atan2", "sinh", "cosh", "tanh", "hypot",
+    "cbrt",
 )  # fmt: skip
 
 
 @pytest.mark.parametrize("curve", ["A", "D", "468", "AU"])
-def test_a_design_calls_no_math_transcendental_but_the_arctangent(
+def test_a_design_calls_no_math_transcendental(
     curve: str, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """Every :mod:`math` transcendental made to raise, and the design still runs.

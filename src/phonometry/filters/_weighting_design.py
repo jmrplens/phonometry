@@ -97,11 +97,12 @@ output:
   754 pins: ``log`` and ``log10`` in
   :mod:`~phonometry.filters._pinned_log`, ``exp`` and ``pow`` in
   :mod:`~phonometry.filters._pinned_exp` (both glibc's own routines, bit for
-  bit), and ``sin``, ``tan`` and the magnitude of a complex root, correctly
-  rounded, in :mod:`~phonometry.filters._pinned_trig`. One remains on
-  :mod:`math`: the arctangent of :func:`_scalar_arctan`, which says why. What
-  is left of ``numpy`` on the path is arithmetic IEEE 754 pins, and ``sqrt``,
-  which the standard correctly rounds and which does not move.
+  bit), and ``sin``, ``tan``, ``atan`` and the magnitude of a complex root,
+  correctly rounded, in :mod:`~phonometry.filters._pinned_trig`. No routine
+  of the C library is left in the fit; :func:`_scalar_arctan` says what the
+  last of them cost. What is left of ``numpy`` on the path is arithmetic
+  IEEE 754 pins, and ``sqrt``, which the standard correctly rounds and which
+  does not move.
 
   The root of it sat *before* the loop rather than inside it.
   :func:`numpy.geomspace` is ``10 ** linspace(...)``, so the grid every
@@ -148,7 +149,7 @@ from .._internal.validation import (
 )
 from ._pinned_exp import pinned_exp, pinned_pow
 from ._pinned_log import pinned_log, pinned_log10
-from ._pinned_trig import pinned_hypot, pinned_sin, pinned_tan
+from ._pinned_trig import pinned_atan, pinned_hypot, pinned_sin, pinned_tan
 
 
 def _log_of(value: float) -> float:
@@ -526,33 +527,27 @@ def _residual_db(
 
 
 def _scalar_arctan(values: np.ndarray) -> np.ndarray:
-    """``arctan`` elementwise, from the C library: the one transcendental still there.
+    """``arctan`` elementwise, correctly rounded, from :mod:`~phonometry.filters._pinned_trig`.
 
     It maps the warped grid back to real frequencies for the target curve, so
     it runs once per design, on the 257 grid points, and reaches every
-    residual through the target. It is taken from :mod:`math` rather than
-    numpy for the reason :func:`_scalar_log` gives, and it is the one routine
-    on the path not yet spelled in pinned arithmetic. Spelling it is what
-    stands between the platforms and one digest, and how to spell it is the
-    open question: glibc's ``atan`` is not correctly rounded on 19 of the
-    15 866 arctangents the 133-design corpus evaluates (in 32 of those
-    designs), so a correctly rounded routine would move shipped Linux
-    coefficients, and glibc's own routine, the one that would not, is the IBM
-    Accurate Mathematical Library, under the LGPL rather than this package's
-    licence. A transcription would also have to spell the build glibc picks
-    for a processor with fused multiply-adds, as :func:`_scalar_exp` does,
-    because glibc's arctangent, like its sine and tangent, rounds some inputs
-    differently in the build without them, which is why a glibc machine
-    without FMA designs some filters differently from one with it.
+    residual through the target. It was the last routine of the path taken
+    from the C library, and the one the C libraries split on where the
+    checked designs reach: glibc's ``atan`` is not correctly rounded on 19 of
+    the 15 866 arctangents the 133 checked designs evaluate, in 32 of those
+    designs, and its two x86-64 builds, with fused multiply-adds and without,
+    round some inputs differently from each other. The correctly rounded value
+    has one definition and no platform in it, so that is the arctangent here,
+    in this package's own exact integer arithmetic, and those 32 designs moved
+    on Linux by their last bits, inside the response the tests allow.
+    glibc's routine, which would have kept them where they were, is the IBM
+    Accurate Mathematical Library, under LGPL-2.1-or-later, and is not
+    transcribed into this MIT package.
 
     :param values: Any real array.
     :return: Its arctangent, elementwise, in the same shape.
     """
-    flat = real_array(values, "values").reshape(-1)
-    out = np.empty(flat.size, dtype=np.float64)
-    for index in range(flat.size):
-        out[index] = math.atan(flat[index])
-    return out.reshape(np.shape(values))
+    return pinned_atan(values)
 
 
 def _scalar_geomspace(start: float, stop: float, count: int) -> np.ndarray:
@@ -626,7 +621,7 @@ def _scalar_log(values: np.ndarray) -> np.ndarray:
     The exponential follows it into the iteration (once per factor per
     evaluation, through :func:`_coefficients`) and the power into every Lawson
     round; the rest run a few times per design. All of them are now pinned
-    the same way except the arctangent; see :func:`_scalar_arctan`.
+    the same way, the arctangent last; see :func:`_scalar_arctan`.
 
     :param values: Any real array of positive values.
     :return: Its natural logarithm, elementwise, in the same shape.
@@ -875,10 +870,11 @@ def _lawson_fit(
     the two complex expressions replaced by :func:`_log_distance2` and
     :func:`_cascade_magnitude`.
 
-    What is left rests on IEEE 754 and on libm. Every arithmetic step on the
-    path is one addition, subtraction, multiplication, division or square root
-    of two doubles, each of which the standard rounds to a single answer, or a
-    :func:`math.fsum` that is correctly rounded whatever order it is handed.
+    What is left rests on IEEE 754, and for a while rested on libm too. Every
+    arithmetic step on the path is one addition, subtraction, multiplication,
+    division or square root of two doubles, each of which the standard rounds
+    to a single answer, or a :func:`math.fsum` that is correctly rounded
+    whatever order it is handed.
     What the standard does not pin is ``exp``, ``log``, ``tan`` and ``**``, and
     this docstring used to say that measurement showed them not moving between
     numpy's SIMD kernel sets. That measurement was taken on a machine with no
@@ -892,10 +888,11 @@ def _lawson_fit(
     came out with one digest on glibc, another on macOS and a third on
     Windows. That claim, once the one here that was argued rather than
     measured, is now settled the other way round: each of these routines is
-    spelled in arithmetic IEEE 754 pins (see :func:`_scalar_log`), with every
-    libm result perturbed by one unit in the last place the shipped designs do
-    not move, and the arctangent of :func:`_scalar_arctan` is the one call
-    left to the C library.
+    spelled in arithmetic IEEE 754 pins or correctly rounded (see
+    :func:`_scalar_log` and :func:`_scalar_arctan`), and with every libm
+    result perturbed by one unit in the last place, the arctangent's
+    included, the shipped designs do not move: no call is left to the C
+    library.
     """
     omega, omega_ref, target_db = grid
     weights = np.ones(omega.size)

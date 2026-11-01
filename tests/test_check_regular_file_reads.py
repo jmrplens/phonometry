@@ -693,6 +693,103 @@ def test_a_name_bound_in_the_reader_s_own_scope_hides_the_module_s_check(
     ]
 
 
+#: A module that defines one reader in each branch of an ``if``, and one in
+#: each block of a ``try``, where only one of the two binds ``info`` itself.
+_TWO_BRANCHES = """
+import sys
+
+import numpy as np
+
+from phonometry._internal.json_input import not_regular_at
+
+def info(path):
+    if not_regular_at(Path(path)) is not None:
+        raise ValueError(path)
+
+if sys.version_info >= (3, 13):
+    def by_version(path):
+        from numpy import info
+        info(path)
+        return np.load(path)
+else:
+    def by_version(path):
+        return np.load(path)
+
+try:
+    def by_fallback(path):
+        from numpy import info
+        info(path)
+        return np.load(path)
+except ImportError:
+    def by_fallback(path):
+        info(path)
+        return np.load(path)
+"""
+
+
+def test_each_definition_of_a_name_binds_its_own_names(
+    tmp_path: pathlib.Path,
+) -> None:
+    """Two readers of one name, one in each branch, are two scopes.
+
+    The names each scope binds were kept by its qualified name, so the
+    second definition's stood for both: the ``if`` reader that binds
+    ``info`` to ``numpy.info`` was read with the ``else`` reader's names,
+    in which ``info`` is the module's check, and its ``np.load`` passed; the
+    ``try`` reader passed the same way behind the ``except`` one.
+    """
+    assert sorted(_found(tmp_path, _TWO_BRANCHES)) == [
+        ("by_fallback", _FOREIGN),
+        ("by_version", _FOREIGN),
+        ("by_version", _FOREIGN),
+    ]
+
+
+def test_a_check_defined_in_two_branches_counts_only_when_both_check(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A name is a check only when every definition of it checks its name.
+
+    A check that asks what the name holds on one version of Python and hands
+    the name back untouched on the other leaves the read unchecked on that
+    one; the gate counted it as a check because one of its two definitions
+    is.
+    """
+    source = """
+        import sys
+
+        import numpy as np
+
+        from check import require_regular
+        from phonometry._internal.json_input import not_regular_at
+
+        if sys.version_info >= (3, 13):
+            def check(path):
+                if not_regular_at(Path(path)) is not None:
+                    raise ValueError(path)
+        else:
+            def check(path):
+                return path
+
+        if sys.version_info >= (3, 13):
+            def both(path):
+                if not_regular_at(Path(path)) is not None:
+                    raise ValueError(path)
+        else:
+            def both(path):
+                require_regular(path)
+
+        def reader(path):
+            check(path)
+            return np.load(path)
+
+        def checked(path):
+            both(path)
+            return np.load(path)
+        """
+    assert _found(tmp_path, source, helpers=_CHECK) == [("reader", _FOREIGN)]
+
+
 def test_the_shared_module_is_the_check_and_is_not_read(tmp_path: pathlib.Path) -> None:
     owner = tmp_path / "phonometry" / "_internal" / "json_input.py"
     owner.parent.mkdir(parents=True)

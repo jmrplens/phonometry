@@ -675,8 +675,9 @@ class Module:
                 self.module_names.setdefault(target, []).append(value)
         self.imports = _imported_names(self.tree, path)
         # A function written inside an ``if``, a ``try`` or a ``with`` at the
-        # top of the module is the module's own as well.
-        self.top_functions = {node.name: node for node in _own_definitions(self.tree)}
+        # top of the module is the module's own as well, and one written in
+        # each branch is either at run time.
+        self.top_functions = _by_name(_own_definitions(self.tree))
         self.classes = {
             node.name: node
             for node in ast.walk(self.tree)
@@ -703,15 +704,29 @@ class Module:
             current = self.parent.get(current)
         return None
 
+    def holder(self, node: ast.AST) -> ast.AST | None:
+        """The function or class a node is written in, through the ``if``, the
+        ``try`` and the ``with`` around it, which open no scope of their own.
+        """
+        current = self.parent.get(node)
+        while current is not None and not isinstance(
+            current, ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef
+        ):
+            current = self.parent.get(current)
+        return current
+
     def owner_class(self, function: Function | None) -> ast.ClassDef | None:
         """The class whose method a function is, or is nested in."""
-        current = function
+        current: ast.AST | None = function
         while current is not None:
-            parent = self.parent.get(current)
-            if isinstance(parent, ast.ClassDef):
-                return parent
-            current = self.enclosing(current)
+            current = self.holder(current)
+            if isinstance(current, ast.ClassDef):
+                return current
         return None
+
+    def is_method(self, function: Function) -> bool:
+        """Whether *function* is written in a class body: an ``if`` in it too."""
+        return isinstance(self.holder(function), ast.ClassDef)
 
     def qualname(self, node: ast.AST) -> str:
         """``Class.method.inner`` for the function a node sits in."""
@@ -725,21 +740,22 @@ class Module:
             current = self.parent.get(current)
         return ".".join(reversed(parts)) or "<module>"
 
-    def resolve_function(
+    def resolve_functions(
         self, call: ast.Call, scope: Function | None
-    ) -> Function | None:
-        """The function of this file a call reaches, if it reaches one.
+    ) -> tuple[Function, ...]:
+        """The functions of this file a call can reach, none when it reaches none.
 
         A bare name is looked up as Python looks it up: among the functions
         the calling function and those around it define (inside an ``if``,
         a ``try`` or a ``with`` too), as far as the nearest of them that
         binds the name otherwise, by a parameter, an import or an
         assignment, which reaches no function of the module; then at the
-        top of the module.
+        top of the module. A name defined in each branch of an ``if`` reaches
+        every definition of it, as a method a class defines that way does.
         """
         func = call.func
         if isinstance(func, ast.Name):
-            return self.named_function(func.id, scope)
+            return self.named_functions(func.id, scope)
         if (
             isinstance(func, ast.Attribute)
             and isinstance(func.value, ast.Name)
@@ -747,16 +763,15 @@ class Module:
         ):
             owner = self.owner_class(scope)
             if owner is not None:
-                return _method(owner, func.attr)
-        return None
+                return _methods(owner, func.attr)
+        return ()
 
     def _index_calls(self) -> None:
         for node in ast.walk(self.tree):
             if not isinstance(node, ast.Call):
                 continue
             scope = self.enclosing(node)
-            target = self.resolve_function(node, scope)
-            if target is not None:
+            for target in self.resolve_functions(node, scope):
                 self.calls.setdefault(target, []).append((node, scope))
             name = node.func.id if isinstance(node.func, ast.Name) else None
             if name in self.classes:
@@ -766,22 +781,24 @@ class Module:
                 if owner is not None:
                     self.constructions.setdefault(owner.name, []).append((node, scope))
 
-    def named_function(self, name: str, scope: Function | None) -> Function | None:
-        """The function of this file *name* stands for, called from *scope*.
+    def named_functions(
+        self, name: str, scope: Function | None
+    ) -> tuple[Function, ...]:
+        """The functions of this file *name* stands for, called from *scope*.
 
-        Read from the calling function outwards (:meth:`resolve_function`):
-        a function one of them defines, none past the nearest that binds the
-        name otherwise, then one at the top of the module.
+        Read from the calling function outwards (:meth:`resolve_functions`):
+        those one of them defines, none past the nearest that binds the name
+        otherwise, then those at the top of the module.
         """
         current = scope
         while current is not None:
-            defined = {node.name: node for node in _own_definitions(current)}
-            if name in defined:
-                return defined[name]
+            defined = _by_name(_own_definitions(current)).get(name, ())
+            if defined:
+                return defined
             if self.binds(current, name):
-                return None
+                return ()
             current = self.enclosing(current)
-        return self.top_functions.get(name)
+        return self.top_functions.get(name, ())
 
     def binds(self, function: Function, name: str) -> bool:
         """Whether *function* binds *name* itself, otherwise than by a definition.
@@ -1096,10 +1113,7 @@ class Module:
     ) -> tuple[tuple[str, Value], ...]:
         """The parameters of ``function`` bound to what ``call`` passes."""
         arguments = function.args
-        method = self.owner_class(function) is not None and self.parent.get(
-            function
-        ) is self.owner_class(function)
-        skip = 1 if method and not _is_static(function) else 0
+        skip = 1 if self.is_method(function) and not _is_static(function) else 0
         positional = [arg.arg for arg in [*arguments.posonlyargs, *arguments.args]][
             skip:
         ]
@@ -1226,10 +1240,7 @@ class Module:
         sites = self.calls.get(function, [])
         if public or not sites:
             return None
-        method = self.owner_class(function) is not None and self.parent.get(
-            function
-        ) is self.owner_class(function)
-        skip = 1 if method and not _is_static(function) else 0
+        skip = 1 if self.is_method(function) and not _is_static(function) else 0
         arguments = function.args
         positional = [arg.arg for arg in [*arguments.posonlyargs, *arguments.args]][
             skip:
@@ -1248,9 +1259,12 @@ class Module:
 
     def member(self, owner: ast.ClassDef, attr: str) -> Value:
         """``self.attr``: a property's result, or what the file builds the field from."""
-        method = _method(owner, attr)
-        if method is not None:
-            return self.returns(method, None) if _is_property(method) else OPAQUE
+        methods = _methods(owner, attr)
+        if methods:
+            return join(
+                self.returns(method, None) if _is_property(method) else OPAQUE
+                for method in methods
+            )
         fields = _fields(owner)
         if attr not in fields:
             return OPAQUE
@@ -1351,14 +1365,20 @@ class Module:
                 if inner.decimal
                 else OPAQUE
             )
-        target = self.resolve_function(node, context.function)
-        if target is not None:
-            return self.returns(target, self.bind(target, node, context))
+        targets = self.resolve_functions(node, context.function)
+        if targets:
+            return join(
+                self.returns(target, self.bind(target, node, context))
+                for target in targets
+            )
         if isinstance(func, ast.Name) and self.package is not None:
-            found = self.package.function(self, func.id)
+            found = self.package.functions(self, func.id)
             if found is not None:
-                owner, function = found
-                return owner.returns(function, self.bind(function, node, context))
+                owner, functions = found
+                return join(
+                    owner.returns(function, self.bind(function, node, context))
+                    for function in functions
+                )
         return OPAQUE
 
     def selected(self, node: ast.Call, name: str, context: Context) -> list[Value]:
@@ -1663,14 +1683,19 @@ def _is_static(function: Function) -> bool:
     return "staticmethod" in _decorator_names(function)
 
 
-def _method(owner: ast.ClassDef, name: str) -> Function | None:
-    for node in owner.body:
-        if (
-            isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef)
-            and node.name == name
-        ):
-            return node
-    return None
+def _methods(owner: ast.ClassDef, name: str) -> tuple[Function, ...]:
+    """The methods *owner* defines by *name*: one in each branch of an ``if``
+    in its body too, which is either at run time.
+    """
+    return _by_name(_own_definitions(owner)).get(name, ())
+
+
+def _by_name(functions: Iterable[Function]) -> dict[str, tuple[Function, ...]]:
+    """*functions* by their names, each name with every definition of it."""
+    found: dict[str, tuple[Function, ...]] = {}
+    for function in functions:
+        found[function.name] = (*found.get(function.name, ()), function)
+    return found
 
 
 def _fields(owner: ast.ClassDef) -> list[str]:
@@ -1749,10 +1774,12 @@ class Package:
             self.modules[path] = Module(path, relative, self, self.sources.get(path))
         return self.modules[path]
 
-    def function(
+    def functions(
         self, importer: Module, name: str, hops: int = 3
-    ) -> tuple[Module, Function] | None:
-        """The function a name imported into ``importer`` is, through re-exports."""
+    ) -> tuple[Module, tuple[Function, ...]] | None:
+        """The functions a name imported into ``importer`` can be, through
+        re-exports: every definition of it in the module that defines it.
+        """
         if name not in importer.imports or hops == 0:
             return None
         source, original = importer.imports[name]
@@ -1761,7 +1788,7 @@ class Package:
             return None
         if original in owner.top_functions:
             return owner, owner.top_functions[original]
-        return self.function(owner, original, hops - 1)
+        return self.functions(owner, original, hops - 1)
 
 
 def scan(

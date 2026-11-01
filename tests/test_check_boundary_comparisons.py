@@ -468,6 +468,62 @@ def test_a_name_the_caller_binds_itself_reaches_no_function_of_the_module(
     assert _texts(source, tmp_path) == []
 
 
+def test_every_definition_of_a_helper_written_in_two_branches_is_followed(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A helper defined in each branch of an ``if`` is either one at run time.
+
+    The functions of a module, and those of a function, were kept by their
+    name, so the last definition stood for both: a call read only what the
+    second returns, and only the second was handed what the calls pass, so
+    a difference that the first returns unsettled, or that the first
+    compares, passed unseen.
+    """
+    returned = """
+    import sys
+    from phonometry._internal.boundary import settled
+    _LIMIT_DB = 10.0
+    if sys.version_info >= (3, 13):
+        def _margin(signal, background):
+            return signal - background
+    else:
+        def _margin(signal, background):
+            return settled(signal - background)
+    def public(signal, background):
+        return _margin(signal, background) > _LIMIT_DB
+    """
+    assert _texts(returned, tmp_path) == ["_margin(signal, background) > _LIMIT_DB"]
+    compared = """
+    import sys
+    _LIMIT_DB = 10.0
+    def public(signal, background):
+        if sys.version_info >= (3, 13):
+            def _exceeds(margin):
+                return margin > _LIMIT_DB
+        else:
+            def _exceeds(margin):
+                return False
+        return _exceeds(signal - background)
+    """
+    assert _texts(compared, tmp_path) == ["margin > _LIMIT_DB"]
+    in_a_class = """
+    import sys
+    _LIMIT_DB = 10.0
+    class _Judge:
+        if sys.version_info >= (3, 13):
+            def _exceeds(self, margin):
+                return margin > _LIMIT_DB
+        else:
+            def _exceeds(self, margin):
+                return False
+        def judge(self, signal, background):
+            return self._exceeds(signal - background)
+    def public(signal, background):
+        return _Judge().judge(signal, background)
+    """
+    assert _texts(in_a_class, tmp_path) == ["margin > _LIMIT_DB"]
+
+
 def test_a_converting_helper_is_read_per_call(tmp_path: pathlib.Path) -> None:
     # Read once for all its callers, _as_float would make the reading look
     # computed because another caller passes it a difference.

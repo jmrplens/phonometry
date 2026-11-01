@@ -688,6 +688,12 @@ def _holds_itself(kind: str) -> object:
         rows: list[object] = []
         rows.append(_ColumnOf(rows))
         return rows
+    if kind == "array-like-that-holds-itself":
+        # numpy reads the column as a new array of objects each time, and
+        # each holds the column again.
+        column = _ColumnOf(None)
+        column._held = column
+        return column
     objects = np.empty(2, dtype=object)
     objects[0] = _writeable([1.0])
     objects[1] = objects
@@ -716,6 +722,7 @@ class _ColumnOf:
         "mapping",
         "list-in-a-mapping",
         "array-like-in-a-list",
+        "array-like-that-holds-itself",
         "array-of-objects",
     ],
 )
@@ -728,7 +735,9 @@ def test_a_field_that_holds_itself_is_refused_naming_the_field(kind: str) -> Non
     field, before the record's own checks ran. An object numpy reads as an
     array is a way in too: the array of objects its ``__array__`` hands back
     can hold the list the object sits in, and the walk that went into it
-    starting afresh met the list as new each time round.
+    starting afresh met the list as new each time round; it can hold the
+    object itself, too, in a new array each time numpy reads it, so the
+    object is entered as a container is.
     """
     endless = _holds_itself(kind)
     with pytest.raises(
@@ -842,6 +851,13 @@ def test_a_plain_class_names_the_argument_that_holds_itself() -> None:
         phonometry.aircraft.ANPDatabase({}, npd, [1.0], {})
     with pytest.raises(TypeError, match="no container that holds itself"):
         frozen.read_only_copy(endless)
+    # A column numpy reads as a new array that holds the column, each time.
+    column = _holds_itself("array-like-that-holds-itself")
+    with pytest.raises(
+        TypeError,
+        match=r"^ANPDatabase: 'distances_m' holds a container that holds itself",
+    ):
+        phonometry.aircraft.ANPDatabase({}, {}, column, {})
 
 
 def test_a_container_held_twice_side_by_side_is_copied_as_any_other() -> None:

@@ -2302,7 +2302,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `TypeError` that named neither the record nor the field, a pair or a grid
   of arrays given as such a deque was refused as a value of the wrong type,
   and a list that held a column whose `__array__` handed back an array of
-  objects holding the list again ran until Python stopped it with a
+  objects holding the list again, or a column whose `__array__` handed back
+  a new array holding the column itself, ran until Python stopped it with a
   `RecursionError`. Each is now the `TypeError` an init field gives,
   `Record: 'name' holds a container that holds itself`, or `'name' holds a
   container that holds itself` from the shared check of a pair or a grid.

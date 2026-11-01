@@ -335,10 +335,11 @@ def _owned(
     followed it ran until Python's recursion limit stopped it: it is
     refused instead (:func:`_entered`), and :func:`_take_ownership` names
     the field. *within* is the containers the walk is inside, by identity,
-    and it goes on inside an object numpy reads as an array as well, since
-    the array of objects its ``__array__`` hands back can hold the list the
-    object sits in; a container held twice side by side, not inside itself,
-    is copied as any other is.
+    and it goes on inside an object numpy reads as an array as well, which
+    is entered as a container is, since the array of objects its
+    ``__array__`` hands back can hold the list the object sits in, or the
+    object itself, in a new array each time it is read; a container held
+    twice side by side, not inside itself, is copied as any other is.
     """
     if type(value) in _PLAIN_TYPES:
         return value
@@ -352,7 +353,9 @@ def _owned(
         return _owned_mapping(value, always=always, within=within)
     if _stands_for_an_array(value):
         # The walk goes on inside what numpy read: the array of objects an
-        # ``__array__`` hands back can hold the container this one sits in.
+        # ``__array__`` hands back can hold the container this one sits in,
+        # or this very object, read afresh into a new array each time.
+        within = _entered(value, within)
         return _owned_array(np.asarray(value), always=True, within=within)
     return value
 

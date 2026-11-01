@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import contextlib
 import dataclasses
+import errno
 import inspect
 import json
 import logging
@@ -27,7 +28,7 @@ import sys
 import time
 from pathlib import Path
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 import pytest
@@ -138,15 +139,49 @@ def _assert_same_result(there: object, here: object) -> None:
 
 
 def _alive(pid: int) -> bool:
-    """Whether process *pid* still runs; a zombie waiting for its parent does not."""
-    stat = Path(f"/proc/{pid}/stat")
-    if stat.exists():
-        return stat.read_text(encoding="utf-8").rsplit(") ", 1)[1][:1] != "Z"
+    """Whether process *pid* still runs; a zombie waiting for its parent does not.
+
+    Linux says so in ``/proc``, read without looking first: a process reaped
+    between a look and the read is gone by then, and the read raises
+    ``ProcessLookupError`` (or ``FileNotFoundError``) rather than return its
+    state. Elsewhere, or with ``/proc`` silent, only a process that no longer
+    exists counts as gone.
+    """
+    try:
+        stat = Path(f"/proc/{pid}/stat").read_text(encoding="utf-8")
+    except ProcessLookupError:
+        return False
+    except OSError:
+        stat = ""
+    # "pid (name) state ...": the name may hold spaces and parentheses.
+    state = stat.rpartition(") ")[2][:1]
+    if state:
+        return state not in {"Z", "X"}
     try:
         os.kill(pid, 0)
     except ProcessLookupError:
         return False
     return True
+
+
+@pytest.mark.skipif(os.name != "posix", reason="the helper signals a pid only on POSIX")
+@pytest.mark.parametrize("raised", [ProcessLookupError, FileNotFoundError])
+def test_a_process_reaped_between_a_look_and_the_read_is_gone(
+    raised: type[OSError], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # A process that ends and is reaped as its /proc entry is read: the entry
+    # was there at the look and is gone at the read, as seen twice in CI.
+    pid = 2**22 + 1  # a pid no process holds: above the largest Linux allows
+    real_read = Path.read_text
+
+    def reaped(path: Path, *args: Any, **kwargs: Any) -> str:
+        if str(path) == f"/proc/{pid}/stat":
+            raise raised(errno.ESRCH, "No such process", str(path))
+        return real_read(path, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "exists", lambda path: True)
+    monkeypatch.setattr(Path, "read_text", reaped)
+    assert not _alive(pid)
 
 
 def _written(pidfile: Path) -> bool:

@@ -158,6 +158,116 @@ def test_a_validation_helper_carries_the_caller_s_array(tmp_path: pathlib.Path) 
     assert found == {("rating", "BandResult.frequencies", "frequencies")}
 
 
+def test_a_helper_the_function_defines_itself_is_followed(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A bare name is looked up as Python looks it up: the function first.
+
+    A call through a bare name was looked up in the module alone, so a
+    helper written inside the function was followed by no call, and what it
+    hands back of the caller's array reached the record unseen.
+    """
+    found = _findings(
+        tmp_path,
+        rating="""
+        import numpy as np
+
+        from .results import BandResult
+
+        def rating(frequencies, levels):
+            def keep(a):
+                return np.asarray(a, dtype=np.float64)
+
+            f = keep(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+        """,
+    )
+    assert found == {("rating", "BandResult.frequencies", "frequencies")}
+
+
+def test_every_definition_of_a_name_written_in_two_branches_is_read(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A function written in each branch of an ``if`` is either at run time.
+
+    The functions were kept by their qualified name, so the second
+    definition stood for both and the first was never read: the record it
+    builds from the caller's own array passed unseen.
+    """
+    found = _findings(
+        tmp_path,
+        rating="""
+        import sys
+
+        import numpy as np
+
+        from .results import BandResult
+
+        if sys.version_info >= (3, 13):
+            def rating(frequencies, levels):
+                f = np.asarray(frequencies, dtype=np.float64)
+                return BandResult(frequencies=f, levels=f * 0.0)
+        else:
+            def rating(frequencies, levels):
+                f = np.array(frequencies, dtype=np.float64)
+                return BandResult(frequencies=f, levels=f * 0.0)
+
+        if sys.version_info >= (3, 13):
+            def keep(a):
+                return np.array(a)
+        else:
+            def keep(a):
+                return np.asarray(a)
+
+        def kept(frequencies, levels):
+            f = keep(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+        """,
+    )
+    assert found == {
+        ("rating", "BandResult.frequencies", "frequencies"),
+        ("kept", "BandResult.frequencies", "frequencies"),
+    }
+
+
+def test_a_name_the_function_imports_itself_hides_the_module_s(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A name the function binds itself is not the module's function of that name.
+
+    The function imports the validation helper as ``keep``, which hands back
+    the caller's array, and the module defines a ``keep`` of its own that
+    copies: the call was followed to the module's, and the record seemed to
+    keep a copy.
+    """
+    found = _findings(
+        tmp_path,
+        rating="""
+        import numpy as np
+
+        from .results import BandResult
+
+        def keep(a):
+            return np.array(a)
+
+        def rating(frequencies, levels):
+            from ._internal.validation import require_finite_array as keep
+
+            f = keep(frequencies, "frequencies")
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        def copied(frequencies, levels):
+            f = keep(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        def handed(frequencies, levels, keep):
+            f = keep(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+        """,
+    )
+    assert found == {("rating", "BandResult.frequencies", "frequencies")}
+
+
 def test_a_record_that_freezes_the_caller_s_column_is_refused(
     tmp_path: pathlib.Path,
 ) -> None:

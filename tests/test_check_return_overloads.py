@@ -634,6 +634,83 @@ def test_a_polar_axes_reached_through_other_functions_is_refused(
     ]
 
 
+def test_a_name_the_function_binds_itself_reaches_no_function_of_the_package(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A call is looked up as Python looks it up: the function first.
+
+    A call through a parameter, an assignment or a function defined inside
+    the caller was followed to the module's function of the same name, so a
+    function that never reaches it was refused for the polar axes it makes.
+    """
+    refused = _refused(
+        tmp_path,
+        plots="""
+        import matplotlib.pyplot as plt
+
+        def new_polar() -> PolarAxes:
+            return plt.subplots(subplot_kw={"projection": "polar"})[1]
+
+        def by_a_parameter(result: object, new_polar: Any) -> Axes:
+            return new_polar()
+
+        def by_an_assignment(result: object) -> Axes:
+            new_polar = plt.gca
+            return new_polar()
+
+        def by_a_nested_function(result: object) -> Axes:
+            def new_polar() -> Axes:
+                return plt.subplots()[1]
+
+            return new_polar()
+
+        def through_the_module(result: object) -> Axes:
+            return new_polar()
+        """,
+    )
+    assert sorted(refused) == ["through_the_module"]
+
+
+def test_every_definition_of_a_function_written_in_two_branches_is_read(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A function written in each branch of an ``if`` is either at run time.
+
+    The functions were kept by their dotted name and the second definition
+    took the place of the first, so a union the first returns without
+    overloads passed, and a helper that makes a polar axes in one branch
+    only made no caller of it reach one.
+    """
+    refused = _refused(
+        tmp_path,
+        plots="""
+        import sys
+
+        import matplotlib.pyplot as plt
+
+        if sys.version_info >= (3, 13):
+            def plot_pair(
+                result: object, ax: Axes | None = None
+            ) -> Axes | tuple[Axes, Axes]:
+                return ax
+        else:
+            def plot_pair(result: object, ax: Axes | None = None) -> Axes:
+                return ax
+
+        if sys.version_info >= (3, 13):
+            def _new_axes():
+                return plt.subplots(subplot_kw={"projection": "polar"})[1]
+        else:
+            def _new_axes():
+                return plt.subplots()[1]
+
+        def plot_polar(result: object) -> Axes:
+            return _new_axes()
+        """,
+    )
+    assert sorted(refused) == ["plot_pair", "plot_polar"]
+
+
 def test_a_polar_axes_typed_polar_or_overloaded_on_it_is_let_through(
     tmp_path: pathlib.Path,
 ) -> None:

@@ -2114,12 +2114,7 @@ class Reader:
                 return None
             node = self.package.functions[method].implementation
             return method, node is not None and not _is_static(node)
-        local = (
-            self.package.local_imports.get(function.implementation, {})
-            if function.implementation is not None
-            else {}
-        )
-        target = self.package.resolve(function.module, func, local)
+        target = self.package.call_target(function, func)
         if target is None:
             return None
         if target in ends or target == "builtins.isinstance":
@@ -2708,12 +2703,15 @@ def public_functions(package: overloads.Package) -> Iterator[overloads.Function]
             target = package.canonical(f"{module}.{name}")
             if target in package.functions and target not in seen:
                 seen.add(target)
-                yield package.functions[target]
+                # Every definition of a name written in two branches.
+                for key in package.every_definition(target):
+                    yield package.functions[key]
             elif target in annotations.classes:
                 for method in _methods(package, annotations, target):
                     if method not in seen:
                         seen.add(method)
-                        yield package.functions[method]
+                        for key in package.every_definition(method):
+                            yield package.functions[key]
 
 
 def _exported(tree: ast.Module) -> list[str]:
@@ -5393,12 +5391,7 @@ def _given_back(
             return True
         if not (isinstance(value, ast.Call) and value.args):
             return False
-        local = (
-            reader.package.local_imports.get(function.implementation, {})
-            if function.implementation is not None
-            else {}
-        )
-        dotted = reader.package.resolve(function.module, value.func, local)
+        dotted = reader.package.call_target(function, value.func)
         if dotted is None:
             return False
         below = dotted.removeprefix(f"{reader.root}.")

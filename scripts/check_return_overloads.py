@@ -79,6 +79,7 @@ import argparse
 import ast
 import builtins
 import copy
+import functools
 import pathlib
 import re
 import sys
@@ -755,6 +756,46 @@ def _bound(node: ast.FunctionDef | ast.AsyncFunctionDef) -> frozenset[str]:
     return frozenset(names)
 
 
+#: Nodes whose body is a scope of its own, whose names are not the function's.
+_INNER_SCOPES = (
+    ast.FunctionDef,
+    ast.AsyncFunctionDef,
+    ast.Lambda,
+    ast.ClassDef,
+    ast.ListComp,
+    ast.SetComp,
+    ast.DictComp,
+    ast.GeneratorExp,
+)
+
+
+@functools.lru_cache(maxsize=4096)
+def _bound_here(node: ast.FunctionDef | ast.AsyncFunctionDef) -> frozenset[str]:
+    """The names a function binds in its own scope: its parameters and what it
+    stores, not what a function, a class or a comprehension inside it binds.
+    """
+    arguments = node.args
+    names = {
+        argument.arg
+        for argument in (
+            *arguments.posonlyargs,
+            *arguments.args,
+            *arguments.kwonlyargs,
+            arguments.vararg,
+            arguments.kwarg,
+        )
+        if argument is not None
+    }
+    pending: list[ast.AST] = list(node.body)
+    while pending:
+        child = pending.pop()
+        if isinstance(child, ast.Name) and isinstance(child.ctx, ast.Store | ast.Del):
+            names.add(child.id)
+        if not isinstance(child, _INNER_SCOPES):
+            pending.extend(ast.iter_child_nodes(child))
+    return frozenset(names)
+
+
 class Package:
     """Every function of the package, its aliases, and how its names resolve."""
 
@@ -775,6 +816,11 @@ class Package:
         self.classes: set[str] = set()
         #: Every function, by its dotted name.
         self.functions: dict[str, Function] = {}
+        #: Each function written more than once, one definition in each branch
+        #: of an ``if`` or a ``try``, by its dotted name, with the key of every
+        #: definition in :attr:`functions`: the first under the name, each
+        #: later one under the name and its place (``name#2``).
+        self.variants: dict[str, list[str]] = {}
         #: The imports a function makes in its own body.
         self.local_imports: dict[ast.AST, dict[str, str]] = {}
         for path in files:
@@ -921,15 +967,31 @@ class Package:
                 self._read_body(module, package, node.body, inner, inner)
             elif isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef):
                 qualname = f"{scope}.{node.name}" if scope else node.name
+                dotted = f"{module}.{qualname}"
                 function = self.functions.setdefault(
-                    f"{module}.{qualname}", Function(module, qualname, owner)
+                    dotted, Function(module, qualname, owner)
                 )
                 if self.overload(module, node):
                     function.heads.append(node)
-                else:
+                elif function.implementation is None:
                     function.implementation = node
+                else:
+                    self._another_definition(dotted, Function(module, qualname, owner))
+                    self.functions[self.variants[dotted][-1]].implementation = node
                 self.local_imports[node] = _imports(ast.walk(node), package, into={})
                 self._read_body(module, package, node.body, qualname, None)
+
+    def _another_definition(self, dotted: str, function: Function) -> None:
+        """Keep a later definition of *dotted*, written in another branch, as
+        a function of its own, so that each is read.
+        """
+        keys = self.variants.setdefault(dotted, [dotted])
+        keys.append(f"{dotted}#{len(keys) + 1}")
+        self.functions[keys[-1]] = function
+
+    def every_definition(self, dotted: str) -> list[str]:
+        """The key of every definition of *dotted* in :attr:`functions`."""
+        return self.variants.get(dotted, [dotted])
 
     def overload(
         self, module: str, node: ast.FunctionDef | ast.AsyncFunctionDef
@@ -1103,12 +1165,56 @@ class Package:
                 several.append(ast.unparse(member))
         return single, several
 
+    def call_target(self, function: Function, func: ast.expr) -> str | None:
+        """The dotted name a call written in *function* reaches, if any.
+
+        A bare name, or the first name of a dotted one, is looked up as
+        Python looks it up: in the function, then in the functions around
+        it (a class body around it is skipped, as Python skips it), then in
+        the module. A scope that imports the name reads it through that
+        import; one that defines a function of that name reaches it; one
+        that binds the name otherwise, by a parameter or an assignment,
+        reaches no function of the package.
+        """
+        head = func
+        while isinstance(head, ast.Attribute):
+            head = head.value
+        if not isinstance(head, ast.Name):
+            return None
+        for prefix, node in self._scopes_around(function):
+            local = self.local_imports.get(node, {})
+            if head.id in local:
+                return self.resolve(function.module, func, local)
+            nested = f"{function.module}.{prefix}.{head.id}"
+            if func is head and nested in self.functions:
+                return nested
+            if head.id in _bound_here(node):
+                return None
+        return self.resolve(function.module, func)
+
+    def _scopes_around(
+        self, function: Function
+    ) -> Iterator[tuple[str, ast.FunctionDef | ast.AsyncFunctionDef]]:
+        """*function* and the functions around it, innermost first, each with
+        its qualified name; a class body around it is skipped, as Python
+        skips it.
+        """
+        parts = function.qualname.split(".")
+        for end in range(len(parts), 0, -1):
+            prefix = ".".join(parts[:end])
+            scope = (
+                function
+                if end == len(parts)
+                else self.functions.get(f"{function.module}.{prefix}")
+            )
+            if scope is not None and scope.implementation is not None:
+                yield prefix, scope.implementation
+
     def callees(self, function: Function) -> Iterator[str]:
         """The functions of the package a function's implementation calls."""
         node = function.implementation
         if node is None:
             return
-        local = self.local_imports.get(node, {})
         for call in ast.walk(node):
             if not isinstance(call, ast.Call):
                 continue
@@ -1122,9 +1228,10 @@ class Package:
             ):
                 target = f"{function.module}.{function.owner}.{func.attr}"
             else:
-                target = self.resolve(function.module, func, local)
+                target = self.call_target(function, func)
             if target is not None and target in self.functions:
-                yield target
+                # A name defined in each branch of an ``if`` may be either.
+                yield from self.every_definition(target)
 
     def makes_polar(self, function: Function) -> bool:
         """Whether a function's implementation makes a polar axes itself, or may."""

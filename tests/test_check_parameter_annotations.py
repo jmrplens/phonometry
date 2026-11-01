@@ -114,6 +114,33 @@ def test_a_dict_parameter_is_refused_and_a_mapping_is_not(
     assert "holds dict[str, float]" in refused["duct(section)"][0]
 
 
+def test_every_definition_of_a_function_written_in_two_branches_is_read(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A public function written in each branch of an ``if`` is either at run time.
+
+    The functions were kept by their dotted name and the second definition
+    took the place of the first, so a ``dict`` parameter of the first passed
+    the rules unread.
+    """
+    refused = _refused(
+        tmp_path,
+        api="""
+        import sys
+
+        __all__ = ["duct"]
+
+        if sys.version_info >= (3, 13):
+            def duct(section: dict[str, float] | None = None) -> float:
+                return 0.0 if section is None else sum(section.values())
+        else:
+            def duct(section: Mapping[str, float] | None = None) -> float:
+                return 0.0 if section is None else sum(section.values())
+        """,
+    )
+    assert list(refused) == ["duct(section)"]
+
+
 def test_a_container_nested_inside_another_is_refused(tmp_path: pathlib.Path) -> None:
     refused = _refused(
         tmp_path,

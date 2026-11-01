@@ -147,6 +147,7 @@ from __future__ import annotations
 
 import argparse
 import ast
+import functools
 import pathlib
 import re
 import sys
@@ -156,7 +157,7 @@ from typing import TYPE_CHECKING
 from ast_scan import ROOT, exempted, python_files, relative
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable, Mapping, Sequence
+    from collections.abc import Iterable, Iterator, Mapping, Sequence
 
 #: Where the package lives; the default when no path is given.
 SOURCE = ROOT / "src" / "phonometry"
@@ -602,6 +603,10 @@ class Tree:
         self.classes: dict[tuple[str, str], ClassInfo] = {}
         self.class_by_name: dict[str, list[ClassInfo]] = {}
         self.functions: dict[tuple[str, str], FunctionInfo] = {}
+        #: Every definition of each function, by the key of :attr:`functions`:
+        #: one written in each branch of an ``if`` or a ``try`` is either at
+        #: run time, and each is read. :attr:`functions` holds the last.
+        self.definitions: dict[tuple[str, str], list[FunctionInfo]] = {}
         self.imports: dict[str, dict[str, tuple[str, str | None]]] = {}
         self.numpy_names: dict[str, set[str]] = {}
         self.numpy_functions: dict[str, dict[str, str]] = {}
@@ -650,7 +655,6 @@ class Tree:
         imports: dict[str, tuple[str, str | None]] = {}
         numpy_names: set[str] = set()
         numpy_functions: dict[str, str] = {}
-        package = module if module in self.packages else module.rpartition(".")[0]
         for node in ast.walk(tree):
             if isinstance(node, ast.Import):
                 for alias in node.names:
@@ -659,12 +663,7 @@ class Tree:
                     elif _inside(alias.name, self.package) and alias.asname:
                         imports[alias.asname] = (alias.name, None)
             elif isinstance(node, ast.ImportFrom):
-                if node.level:
-                    base = package.split(".")
-                    base = base[: len(base) - node.level + 1]
-                    source = ".".join([*base, node.module] if node.module else base)
-                else:
-                    source = node.module or ""
+                source = self.source_of(module, node)
                 if source.startswith("numpy"):
                     for alias in node.names:
                         numpy_functions[alias.asname or alias.name] = alias.name
@@ -760,9 +759,11 @@ class Tree:
                         name = _base_name(decorator)
                         if name in {"classmethod", "staticmethod"}:
                             kind = name
-                self.functions[(module, qualname)] = FunctionInfo(
+                function = FunctionInfo(
                     module, qualname, node, path, owner, kind, nested=nested
                 )
+                self.functions[(module, qualname)] = function
+                self.definitions.setdefault((module, qualname), []).append(function)
                 if owner is not None and not owner.record:
                     # ``self.p: Field2D = ...`` in a method annotates the
                     # attribute for every method of a plain class.
@@ -781,6 +782,35 @@ class Tree:
                 self._read_body(
                     module, _nested_statements(node), scope, owner, nested=nested
                 )
+
+    def source_of(self, module: str, node: ast.ImportFrom) -> str:
+        """The module an ``from ... import`` written in *module* reads from."""
+        if not node.level:
+            return node.module or ""
+        package = module if module in self.packages else module.rpartition(".")[0]
+        base = package.split(".")
+        base = base[: len(base) - node.level + 1]
+        return ".".join([*base, node.module] if node.module else base)
+
+    def imported(self, module: str, node: ast.AST, name: str) -> tuple[str, str] | None:
+        """The function or class of the package an import in *module* binds
+        *name* to, when *node* is a ``from ... import`` that binds it.
+        """
+        if not isinstance(node, ast.ImportFrom):
+            return None
+        source = self.source_of(module, node)
+        for alias in node.names:
+            if (alias.asname or alias.name) != name:
+                continue
+            if f"{source}.{alias.name}" in self.modules:
+                return None
+            return self.resolve(source, alias.name)
+        return None
+
+    def every_definition(self) -> Iterator[FunctionInfo]:
+        """Every definition of every function, two of one name included."""
+        for found in self.definitions.values():
+            yield from found
 
     def resolve(self, module: str, name: str, depth: int = 0) -> tuple[str, str] | None:
         """The ``(module, qualname)`` a bare name of *module* stands for."""
@@ -1217,11 +1247,10 @@ class Reader:
         if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef):
             # A nested function is read where it is defined, with what its
             # closure holds there.
-            inner = self.tree.functions.get(
-                (self.module, f"{self.function.qualname}.{node.name}")
-            )
-            if inner is not None and inner.node is node:
-                Reader(self.tree, inner, self.summaries, self.findings, env).run()
+            key = (self.module, f"{self.function.qualname}.{node.name}")
+            for inner in self.tree.definitions.get(key, ()):
+                if inner.node is node:
+                    Reader(self.tree, inner, self.summaries, self.findings, env).run()
             return env
         if isinstance(node, ast.Delete):
             for target in node.targets:
@@ -1395,10 +1424,38 @@ class Reader:
         info = self.tree.classes.get(key) if key is not None else None
         return info if info is not None and info.record else None
 
+    def resolve_name(self, name: str) -> tuple[str, str] | None:
+        """The function or class of the package a bare name stands for, here.
+
+        Looked up as Python looks it up: a function or a class this function,
+        or one around it, defines (a class body around it is skipped, as
+        Python skips it), as far as the nearest of them that binds the name
+        otherwise, by a parameter, an import or an assignment; an import there
+        is read through its own target, and any other binding reaches no
+        function of the package. Then the module.
+        """
+        parts = self.function.qualname.split(".")
+        for end in range(len(parts), 0, -1):
+            prefix = ".".join(parts[:end])
+            scope = (
+                self.function
+                if end == len(parts)
+                else self.tree.functions.get((self.module, prefix))
+            )
+            if scope is None:
+                continue
+            own = (self.module, f"{prefix}.{name}")
+            if own in self.tree.functions or own in self.tree.classes:
+                return own
+            binding = _own_binding(scope.node, name)
+            if binding is not None:
+                return self.tree.imported(self.module, binding, name)
+        return self.tree.resolve(self.module, name)
+
     def callee(self, func: ast.expr) -> tuple[str, str] | None:
         """The function or class of the package a call names, if it names one."""
         if isinstance(func, ast.Name):
-            return self.tree.resolve(self.module, func.id)
+            return self.resolve_name(func.id)
         if isinstance(func, ast.Attribute):
             target = self.method_target(func)
             if target is not None:
@@ -1685,7 +1742,7 @@ class Reader:
                 )
             if name == "replace" and name not in self.tree.functions_named(self.module):
                 return self.replace_sink(node, arguments, keywords)
-            resolved = self.tree.resolve(self.module, name)
+            resolved = self.resolve_name(name)
             if resolved is not None:
                 if name == "read_only" or resolved[1] == "read_only":
                     self.flag(node, "read_only(...)", first)
@@ -2660,6 +2717,80 @@ def _binds_unknown(
     return False
 
 
+#: Nodes whose body is a scope of its own, whose bindings are not the
+#: function's.
+_OWN_SCOPES = (
+    ast.FunctionDef,
+    ast.AsyncFunctionDef,
+    ast.Lambda,
+    ast.ClassDef,
+    ast.ListComp,
+    ast.SetComp,
+    ast.DictComp,
+    ast.GeneratorExp,
+)
+
+
+def _own_binding(
+    function: ast.FunctionDef | ast.AsyncFunctionDef, name: str
+) -> ast.AST | None:
+    """What binds *name* in the function's own scope, or ``None``.
+
+    A parameter, an assignment (annotated too), an import, a loop, ``with``
+    or ``except`` target, ``global`` or ``nonlocal``, or a definition: the
+    first one met (:func:`_own_bindings`).
+    """
+    return _own_bindings(function).get(name)
+
+
+@functools.cache
+def _own_bindings(
+    function: ast.FunctionDef | ast.AsyncFunctionDef,
+) -> Mapping[str, ast.AST]:
+    """Every name the function binds in its own scope, with what binds it first.
+
+    Not what a nested function, a lambda, a class body or a comprehension
+    binds, which is theirs. Read once for each function, as every bare call
+    of it asks.
+    """
+    arguments = function.args
+    found: dict[str, ast.AST] = {}
+    for argument in (
+        *arguments.posonlyargs,
+        *arguments.args,
+        *arguments.kwonlyargs,
+        arguments.vararg,
+        arguments.kwarg,
+    ):
+        if argument is not None:
+            found.setdefault(argument.arg, argument)
+    pending: list[ast.AST] = list(reversed(function.body))
+    while pending:
+        node = pending.pop()
+        for name in _names_bound_by(node, function):
+            found.setdefault(name, node)
+        if not isinstance(node, _OWN_SCOPES):
+            pending.extend(reversed(list(ast.iter_child_nodes(node))))
+    return found
+
+
+def _names_bound_by(
+    node: ast.AST, function: ast.FunctionDef | ast.AsyncFunctionDef
+) -> tuple[str, ...]:
+    """The names *node* binds in the scope of *function*, by any binding."""
+    if isinstance(node, ast.Name) and isinstance(node.ctx, ast.Store | ast.Del):
+        return (node.id,)
+    if isinstance(node, ast.Import | ast.ImportFrom):
+        return tuple((alias.asname or alias.name).split(".")[0] for alias in node.names)
+    if isinstance(node, ast.Global | ast.Nonlocal):
+        return tuple(node.names)
+    if isinstance(node, ast.ExceptHandler):
+        return (node.name,) if node.name else ()
+    if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef):
+        return () if node is function else (node.name,)
+    return ()
+
+
 def _bound_parameter(
     function: FunctionInfo, call: ast.Call, node: ast.expr, keyword: str | None
 ) -> str | None:
@@ -2783,12 +2914,12 @@ def find_positions(tree: Tree) -> None:
     empty = {key: Summary() for key in tree.functions}
     for _ in range(20):
         found: set[tuple[str, str]] = set()
-        for key, function in tree.functions.items():
-            if function.nested:
+        for key, definitions in tree.definitions.items():
+            if definitions[-1].nested:
                 continue
-            reader = Reader(tree, function, empty, None)
-            reader.run()
-            if reader.index_returns and all(reader.index_returns):
+            # A name defined twice hands out positions only when each
+            # definition of it does.
+            if all(_returns_positions(tree, d, empty) for d in definitions):
                 found.add(key)
         if found == tree.positions:
             break
@@ -2801,15 +2932,29 @@ def find_positions(tree: Tree) -> None:
     tree.typed_cache.clear()
 
 
+def _returns_positions(
+    tree: Tree, function: FunctionInfo, summaries: Mapping[tuple[str, str], Summary]
+) -> bool:
+    """Whether every ``return`` of *function* hands out a mask or positions."""
+    reader = Reader(tree, function, summaries, None)
+    reader.run()
+    return bool(reader.index_returns) and all(reader.index_returns)
+
+
 def summarise(tree: Tree) -> dict[tuple[str, str], Summary]:
-    """What each function's return carries of its parameters, to a fixed point."""
+    """What each function's return carries of its parameters, to a fixed point.
+
+    A name defined in each branch of an ``if`` carries what any of its
+    definitions does.
+    """
     summaries = {key: Summary() for key in tree.functions}
     for _ in range(20):
         changed = False
-        for key, function in tree.functions.items():
-            if function.nested:
-                continue
-            value = Reader(tree, function, summaries, None).run()
+        for key, definitions in tree.definitions.items():
+            # A nested function is summarised too, as a helper of the module
+            # is, for the calls the function around it makes to it.
+            values = [Reader(tree, d, summaries, None).run() for d in definitions]
+            value = values[0] if len(values) == 1 else union(*values)
             grown = union(summaries[key].value, value)
             if grown != summaries[key].value:
                 summaries[key] = Summary(grown)
@@ -2839,12 +2984,12 @@ def findings_in(
     for info in tree.classes.values():
         info.owned.clear()
         info.sealed.clear()
-    for function in tree.functions.values():
+    for function in tree.every_definition():
         if function.node.name == "__post_init__":
             Reader(tree, function, summaries, None).run()
     tree.typed_cache.clear()
     found: list[Finding] = []
-    for function in tree.functions.values():
+    for function in tree.every_definition():
         if not function.nested:
             Reader(tree, function, summaries, found).run()
     return sorted(set(found), key=lambda f: (f.path, f.line, f.sink))
@@ -2912,7 +3057,7 @@ def handovers_in(
     if tree is None:
         tree = Tree(files, root)
     target = (f"{tree.package}._internal.frozen", HANDOVER)
-    by_node = {function.node: function for function in tree.functions.values()}
+    by_node = {function.node: function for function in tree.every_definition()}
     found: list[Finding] = []
     for module, syntax in tree.modules.items():
         named = [

@@ -450,6 +450,7 @@ and never filled from its neighbours.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a frequency that is not finite and positive, for one that matches none of the bands, naming the nearest, and for a band this row does not print, naming the row, the band and what the page had in that cell. |
+| TypeError | if `frequencies` holds a text or a value that is not a real number. |
 
 ### BandedRow.why_missing()
 
@@ -1594,7 +1595,7 @@ held as a tuple, whatever sequence of texts they were given as.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `calibration_factor` or `fs` is not a single number, or `channel_labels` is one text rather than a sequence of them. |
+| TypeError | if `calibration_factor` or `fs` is not a single number, or `channel_labels` is one text rather than a sequence of them, or `data` holds a text or a value that is not a real number. |
 
 ### Signal.crop()
 
@@ -2011,10 +2012,10 @@ the reader's own words and naming the file.
 ```python
 write_sidecar(
     audio_path: str | os.PathLike[str],
-    calibration_factor: float,
+    calibration_factor: float | np.floating[Any] | np.integer[Any] | NDArray[np.floating[Any] | np.integer[Any]],
     *,
-    reference_spl: float | None = None,
-    calibrator_frequency: float | None = None,
+    reference_spl: float | np.floating[Any] | np.integer[Any] | NDArray[np.floating[Any] | np.integer[Any]] | None = None,
+    calibrator_frequency: float | np.floating[Any] | np.integer[Any] | NDArray[np.floating[Any] | np.integer[Any]] | None = None,
     calibrator_model: str | None = None,
     channel_labels: tuple[str, ...] | list[str] | None = None,
 ) -> Path
@@ -2043,9 +2044,9 @@ is at *audio_path* and its channels can be read.
 | Name | Description |
 | :--- | :--- |
 | `audio_path` | The audio file the sidecar belongs to (it need not exist yet; writing the sidecar first is fine). |
-| `calibration_factor` | Digital-to-pascal multiplier (required, a real number, finite and positive). |
-| `reference_spl` | The calibrator's known SPL, dB (e.g. 94.0), a real number. |
-| `calibrator_frequency` | The calibrator tone's nominal frequency, Hz (e.g. 1000.0), a real number. |
+| `calibration_factor` | Digital-to-pascal multiplier (required, a real number as [`CalibrationSidecar`](/phonometry/reference/api/io/io/#calibrationsidecar) takes one, finite and positive). |
+| `reference_spl` | The calibrator's known SPL, dB (e.g. 94.0), a real number as [`CalibrationSidecar`](/phonometry/reference/api/io/io/#calibrationsidecar) takes one. |
+| `calibrator_frequency` | The calibrator tone's nominal frequency, Hz (e.g. 1000.0), a real number as [`CalibrationSidecar`](/phonometry/reference/api/io/io/#calibrationsidecar) takes one. |
 | `calibrator_model` | Free-text calibrator identification. |
 | `channel_labels` | One label per channel of the audio file, a tuple or a list of texts. |
 

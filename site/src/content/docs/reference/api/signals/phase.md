@@ -152,7 +152,13 @@ ignored: passing a plain magnitude array works.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
-| TypeError | if `oversample` is a flag, a text or an array where a count goes. .. note:: Magnitude zeros cannot be represented by a minimum-phase system; they are floored at 1e-15 of the peak and the phase near them is not reliable (see the module docstring), or `response` holds a text or a value that is not a number. |
+| TypeError | if `oversample` is a flag, a text or an array where a count goes, or `response` holds a text or a value that is not a number. |
+
+:::note
+Magnitude zeros cannot be represented by a minimum-phase system;
+they are floored at 1e-15 of the peak and the phase near them is
+not reliable (see the module docstring).
+:::
 
 ## phase_decomposition
 

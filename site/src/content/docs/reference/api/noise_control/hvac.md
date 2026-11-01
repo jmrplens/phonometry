@@ -54,37 +54,38 @@ that table and interpolates it. Rectangular ducts use the equivalent
 diameter $D = \sqrt{4S/\pi}$.
 :::
 
-.. warning::
-   Long's worked duct-borne sheet (Table 14.9) was produced by a commercial
-   computer program, not by hand from the tables printed alongside it, and
-   several of its element rows do **not** follow from the book's own data.
-   The functions here implement the *printed* equations and tables, so they
-   reproduce some rows of that sheet and not others. Verified band by band:
+:::caution
+Long's worked duct-borne sheet (Table 14.9) was produced by a commercial
+computer program, not by hand from the tables printed alongside it, and
+several of its element rows do **not** follow from the book's own data.
+The functions here implement the *printed* equations and tables, so they
+reproduce some rows of that sheet and not others. Verified band by band:
 
-   * `split_loss` reproduces the 25 per cent split row (-6 dB) exactly, and
-     [`elbow_insertion_loss`](/phonometry/reference/api/noise_control/hvac/#elbow_insertion_loss) reproduces the unlined-elbow row exactly
-     when the elbow is read as round (Table 14.7) at $w = 24$ in;
-   * [`lined_rectangular_duct_attenuation`](/phonometry/reference/api/noise_control/hvac/#lined_rectangular_duct_attenuation) with `include_unlined=True`
-     reproduces the 18 x 12 in run from 500 Hz up (11/25/22/16/13 dB) and the
-     36 x 24 in run at 500 Hz and 8 kHz, but is 1-2 dB low at 63-250 Hz on
-     one run and 2 dB high on the other;
-   * the fan row (90/86/82/79/77/75/71/61 dB) is **not** reproducible from
-     Eq. 13.1 with the Table 13.5 forward-curved constants, which give
-     99/99/89/84/82/77/72/67 dB at the same duty; the printed spectrum is not
-     a level shift of the tabulated one, so it comes from other data;
-   * the flexible-duct row (14/14/16/15/17/22/16/13 dB) is **not** the
-     Table 14.4 entry for 12 in by 6 ft (3/5/10/15/17/16/9 dB);
-   * [`diffuser_sound_power`](/phonometry/reference/api/noise_control/hvac/#diffuser_sound_power) reproduces the supply diffuser row
-     (33/32/29/23/15/4/0/0 dB) to better than 1 dB in five of the six bands
-     that carry it (+0.4/+0.4/+0.2/+0.7/+0.9 dB from 63 Hz to 1 kHz) and to
-     1.9 dB in the sixth (2 kHz), reading the device as a 24 x 24 in
-     rectangular diffuser;
-   * the silencer and grille rows are manufacturer data, which is what a
-     real sheet uses and what [`DuctElement`](/phonometry/reference/api/noise_control/duct-path/#ductelement) accepts.
+* `split_loss` reproduces the 25 per cent split row (-6 dB) exactly, and
+  [`elbow_insertion_loss`](/phonometry/reference/api/noise_control/hvac/#elbow_insertion_loss) reproduces the unlined-elbow row exactly
+  when the elbow is read as round (Table 14.7) at $w = 24$ in;
+* [`lined_rectangular_duct_attenuation`](/phonometry/reference/api/noise_control/hvac/#lined_rectangular_duct_attenuation) with `include_unlined=True`
+  reproduces the 18 x 12 in run from 500 Hz up (11/25/22/16/13 dB) and the
+  36 x 24 in run at 500 Hz and 8 kHz, but is 1-2 dB low at 63-250 Hz on
+  one run and 2 dB high on the other;
+* the fan row (90/86/82/79/77/75/71/61 dB) is **not** reproducible from
+  Eq. 13.1 with the Table 13.5 forward-curved constants, which give
+  99/99/89/84/82/77/72/67 dB at the same duty; the printed spectrum is not
+  a level shift of the tabulated one, so it comes from other data;
+* the flexible-duct row (14/14/16/15/17/22/16/13 dB) is **not** the
+  Table 14.4 entry for 12 in by 6 ft (3/5/10/15/17/16/9 dB);
+* [`diffuser_sound_power`](/phonometry/reference/api/noise_control/hvac/#diffuser_sound_power) reproduces the supply diffuser row
+  (33/32/29/23/15/4/0/0 dB) to better than 1 dB in five of the six bands
+  that carry it (+0.4/+0.4/+0.2/+0.7/+0.9 dB from 63 Hz to 1 kHz) and to
+  1.9 dB in the sixth (2 kHz), reading the device as a 24 x 24 in
+  rectangular diffuser;
+* the silencer and grille rows are manufacturer data, which is what a
+  real sheet uses and what [`DuctElement`](/phonometry/reference/api/noise_control/duct-path/#ductelement) accepts.
 
-   The cascade arithmetic of that sheet is reproduced exactly (see the
-   duct-path tests, which feed it its own printed element rows), and the
-   sheet's own internal rounding is 1 dB.
+The cascade arithmetic of that sheet is reproduced exactly (see the
+duct-path tests, which feed it its own printed element rows), and the
+sheet's own internal rounding is 1 dB.
+:::
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 

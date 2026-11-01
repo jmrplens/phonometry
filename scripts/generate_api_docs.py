@@ -96,7 +96,26 @@ ROLE_RE = re.compile(
     r":(?:class|func|meth|mod|attr|data|obj|exc|ref|term):"
     r"`(~?)([^`<]+?)(?:\s*<([^>]+)>)?`"
 )
-_NOTE_RE = re.compile(r"^(\s*)\.\. note::\s?(.*)$")
+_NOTE_RE = re.compile(
+    r"^(\s*)\.\. (note|tip|hint|important|attention|warning|caution|danger|error)::"
+    r"\s?(.*)$"
+)
+#: The Starlight aside each reST admonition becomes: Starlight has four kinds,
+#: so the admonitions that ask for care share ``caution`` and the two that
+#: warn of harm share ``danger``.
+_ASIDES = MappingProxyType(
+    {
+        "note": "note",
+        "tip": "tip",
+        "hint": "tip",
+        "important": "caution",
+        "attention": "caution",
+        "warning": "caution",
+        "caution": "caution",
+        "danger": "danger",
+        "error": "danger",
+    }
+)
 _MATH_DIRECTIVE_RE = re.compile(r"^(\s*)\.\. math::\s?(.*)$")
 _MATH_ROLE_RE = re.compile(r":math:`([^`]+)`")
 #: A rendered inline-math span, once the role has become ``$...$``.
@@ -121,6 +140,12 @@ _BACKTICK_RUN_RE = re.compile(r"`+")
 #: consume the ones this generator understands, so whatever still matches is a
 #: role no converter claims and it reaches the published page as literal text.
 _LEAKED_ROLE_RE = re.compile(r":[a-z]+:`")
+#: Any reST directive that survived rendering. A directive opens its own line
+#: and the block converters consume the ones this generator understands, so a
+#: marker still standing is one folded into the text of a paragraph or a field
+#: (``... a real number. .. note:: The exact band-edge point ...``), which the
+#: published page shows as literal text inside that paragraph or table cell.
+_LEAKED_DIRECTIVE_RE = re.compile(r"(?<![\w.])\.\. [a-z][a-z-]*::")
 _HEX_ADDR_RE = re.compile(r"0x[0-9a-fA-F]+")
 
 _MAX_CONST_REPR = 1500
@@ -393,7 +418,9 @@ def _doctest_run(
 def rest_blocks_to_markdown(text: str, code: list[str]) -> str:
     """Convert reST block constructs to Markdown structure.
 
-    ``.. note::`` directives become Starlight ``:::note`` asides, ``::``
+    ``.. note::`` directives and the other admonitions (``.. warning::``,
+    ``.. important::`` and their kin) become Starlight asides of the kind
+    :data:`_ASIDES` gives, ``::``
     literal blocks, code directives (``.. code-block::`` and its kin) and
     doctests become fenced code blocks and ``.. math::`` directives
     become ``$$`` display-math blocks (one per blank-line-separated equation,
@@ -437,10 +464,10 @@ def rest_blocks_to_markdown(text: str, code: list[str]) -> str:
             indent = len(note.group(1))
             end = _consume_indented(lines, i + 1, indent)
             content = _dedent_block(lines[i + 1 : end])
-            if note.group(2).strip():
-                content = [note.group(2).strip(), *content]
+            if note.group(3).strip():
+                content = [note.group(3).strip(), *content]
             inner = rest_blocks_to_markdown("\n".join(content).strip("\n"), code)
-            out.extend(["", ":::note", inner, ":::", ""])
+            out.extend(["", f":::{_ASIDES[note.group(2)]}", inner, ":::", ""])
             i = end
             continue
         stripped = line.rstrip()
@@ -2216,16 +2243,19 @@ def render_sidebar(pages: list[ModuleDoc]) -> str:
 
 
 def leaked_roles(relpath: str, rendered: str) -> list[str]:
-    """Report every reST role this generator left standing in one page.
+    """Report every reST role or directive this generator left standing in one page.
 
     A role it does not convert reaches the published page verbatim, prefix
-    and all, which is how ``:doc:`` and ``:sup:`` once shipped. Nothing but
-    a docstring can put one there, so the fix is always in the docstring.
+    and all, which is how ``:doc:`` and ``:sup:`` once shipped, and so does
+    a directive folded into the text of a paragraph or a field, which is how
+    two ``.. note::`` blocks once shipped inside the ``TypeError`` row of a
+    table. Nothing but a docstring can put one there, so the fix is always in
+    the docstring.
     """
     return [
         f"{relpath}:{number}: {line.strip()}"
         for number, line in enumerate(rendered.splitlines(), start=1)
-        if _LEAKED_ROLE_RE.search(line)
+        if _LEAKED_ROLE_RE.search(line) or _LEAKED_DIRECTIVE_RE.search(line)
     ]
 
 
@@ -2294,7 +2324,10 @@ def main() -> int:
             print(f"  - {failure}")
     status = 0
     if report.leaked_roles:
-        print("reST roles this generator does not convert, so they ship as text:")
+        print(
+            "reST roles and directives this generator does not convert, so they "
+            "ship as text:"
+        )
         for leak in report.leaked_roles:
             print(f"  - {leak}")
         status = 1

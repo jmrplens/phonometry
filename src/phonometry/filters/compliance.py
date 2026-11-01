@@ -329,13 +329,16 @@ def class_limits(
         (IEC 61260:1995 / ANSI S1.11-2004, classes 0/1/2).
     :return: Tuple (minimum, maximum) relative attenuation in dB per point;
         the maximum is ``+inf`` outside the pass-band.
-    :raises TypeError: if ``fraction`` is not a single number, or ``omega`` holds a text
-        or a value that is not a real number. .. note:: The exact band-edge point
-        :math:`\Omega = G^{1/2}` is treated as pass-band. The 1995 edition's Table 1
-        prints a dedicated minimum (+2.3/+2.0/ +1.6 dB) *at* that single frequency,
-        which this convention relaxes to the pass-band minimum; the discrepancy has
-        measure zero: any continuous response violating the edge row is caught at, or
-        ``filter_class`` is not a single number.
+    :raises TypeError: if ``fraction`` or ``filter_class`` is not a single number, or
+        ``omega`` holds a text or a value that is not a real number.
+
+    .. note::
+        The exact band-edge point :math:`\Omega = G^{1/2}` is treated as
+        pass-band.
+        The 1995 edition's Table 1 prints a dedicated minimum (+2.3/+2.0/
+        +1.6 dB) *at* that single frequency, which this convention relaxes to
+        the pass-band minimum; the discrepancy has measure zero: any
+        continuous response violating the edge row is caught at
         :math:`\text{edge} + \epsilon`
         by the interpolated stop-band mask. The 2014 edition defines only
         the :math:`G^{1/2} - \epsilon` and :math:`G^{1/2} + \epsilon`

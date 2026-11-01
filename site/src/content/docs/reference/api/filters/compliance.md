@@ -142,7 +142,21 @@ Acceptance limits on relative attenuation at normalized frequencies.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `fraction` is not a single number, or `omega` holds a text or a value that is not a real number. .. note:: The exact band-edge point $\Omega = G^{1/2}$ is treated as pass-band. The 1995 edition's Table 1 prints a dedicated minimum (+2.3/+2.0/ +1.6 dB) *at* that single frequency, which this convention relaxes to the pass-band minimum; the discrepancy has measure zero: any continuous response violating the edge row is caught at, or `filter_class` is not a single number. $\text{edge} + \epsilon$ by the interpolated stop-band mask. The 2014 edition defines only the $G^{1/2} - \epsilon$ and $G^{1/2} + \epsilon$ rows, which the masks match exactly. |
+| TypeError | if `fraction` or `filter_class` is not a single number, or `omega` holds a text or a value that is not a real number. |
+
+:::note
+The exact band-edge point $\Omega = G^{1/2}$ is treated as
+pass-band.
+The 1995 edition's Table 1 prints a dedicated minimum (+2.3/+2.0/
++1.6 dB) *at* that single frequency, which this convention relaxes to
+the pass-band minimum; the discrepancy has measure zero: any
+continuous response violating the edge row is caught at
+$\text{edge} + \epsilon$
+by the interpolated stop-band mask. The 2014 edition defines only
+the $G^{1/2} - \epsilon$ and $G^{1/2} + \epsilon$
+rows, which the masks match
+exactly.
+:::
 
 ## FilterComplianceResult
 

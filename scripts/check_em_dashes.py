@@ -99,6 +99,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from markdown_fences import code_lines
+from markdown_spans import blank_inline_spans, drop_inline_spans
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -144,8 +145,6 @@ _QUOTE_PAIRS = {'"': '"', "«": "»", "“": "”"}
 #: quote is the one mark that opens and closes with the same character, so it
 #: is read as an opening one only where an opening one can stand.
 _BEFORE_OPENING = ("", " ", "\t", "(", "[", "{")
-#: An inline code span.
-_CODE_SPAN = re.compile(r"`[^`\n]*`")
 #: A row of a pipe table.
 _TABLE_ROW = re.compile(r"^\s*\|.*\|")
 #: A dash that fills a whole cell, or a whole slash-separated item of one: the
@@ -167,8 +166,16 @@ _EM_DASH_ENTITY = re.compile(r"&(?:mdash|#0*8212|#[xX]0*2014);")
 #: Python's ``\U00002014`` and ``\N{EM DASH}`` (a name Python reads in any
 #: case), and JavaScript's ``\u{2014}``. The letter of an escape is read as
 #: written: ``\U2014`` is no escape of either language, and ``\u00002014`` is
-#: the NUL character and four digits.
+#: the NUL character and four digits. A line that holds none of them holds no
+#: escaped dash in either language; one that does is decoded with the escapes
+#: of its own language alone.
 _EM_DASH_ESCAPE = re.compile(r"\\(?:u2014|U00002014|N\{(?i:em dash)\}|u\{0*2014\})")
+#: The escapes a Python string decodes to the em dash.
+_PYTHON_EM_DASH_ESCAPE = re.compile(r"\\(?:u2014|U00002014|N\{(?i:em dash)\})")
+#: The escapes a JavaScript or TypeScript string decodes to the em dash. It
+#: reads ``\U`` and ``\N`` as the letters themselves, so ``\U00002014`` and
+#: ``\N{EM DASH}`` publish letters and digits, never the dash.
+_JS_EM_DASH_ESCAPE = re.compile(r"\\(?:u2014|u\{0*2014\})")
 #: The escapes a double-quoted YAML value decodes to the em dash. ``\N`` is
 #: YAML's next-line character there, not a named escape.
 _YAML_EM_DASH_ESCAPE = re.compile(r"\\(?:u2014|U00002014)")
@@ -188,7 +195,7 @@ def _decode_entities(text: str) -> str:
     return _EM_DASH_ENTITY.sub(EM_DASH, text)
 
 
-def _decode_escapes(text: str, escape: re.Pattern[str] = _EM_DASH_ESCAPE) -> str:
+def _decode_escapes(text: str, escape: re.Pattern[str]) -> str:
     r"""The text with each escape of the em dash read as the character.
 
     The text is read from left to right as a string literal is: a backslash
@@ -212,9 +219,13 @@ def _decode_escapes(text: str, escape: re.Pattern[str] = _EM_DASH_ESCAPE) -> str
     return "".join(pieces)
 
 
-def _decode_spellings(text: str) -> str:
-    """The text with each entity and each escape of the em dash read as the character."""
-    return _decode_escapes(_decode_entities(text))
+def _decode_spellings(text: str, escape: re.Pattern[str]) -> str:
+    """The text with each entity and each escape of the em dash read as the character.
+
+    :param escape: The escapes of the em dash in the language the text is
+        written in.
+    """
+    return _decode_escapes(_decode_entities(text), escape)
 
 
 def _decode_json_strings(line: str) -> str:
@@ -531,7 +542,7 @@ def _strip_exempt_markdown(
     """The line with every exempt use of the dash removed, and the carried state."""
     if _TITLE_LINE.match(line):
         return "", italic_open, quote_closer
-    line = _CODE_SPAN.sub("", line)
+    line = drop_inline_spans(line)
     if _TABLE_ROW.match(line):
         line = "|".join(_PLACEHOLDER_ITEM.sub("", cell) for cell in line.split("|"))
     line, quote_closer = _outside_quotations(line, closer=quote_closer)
@@ -645,7 +656,7 @@ def _token_hits(token: tokenize.TokenInfo, *, raw: bool) -> list[int]:
     if token.type == _FSTRING_MIDDLE:
         middle = _decode_entities(token.string)
         if not raw:
-            middle = _decode_escapes(middle)
+            middle = _decode_escapes(middle, _PYTHON_EM_DASH_ESCAPE)
         return [token.start[0]] if EM_DASH in middle else []
     return []
 
@@ -658,7 +669,7 @@ def python_hits(text: str) -> list[int]:
         return [
             n
             for n, line in enumerate(text.splitlines(), 1)
-            if EM_DASH in _decode_spellings(line)
+            if EM_DASH in _decode_spellings(line, _PYTHON_EM_DASH_ESCAPE)
         ]
     hits: set[int] = set()
     raw_fstrings: list[bool] = []
@@ -674,11 +685,12 @@ def data_hits(text: str) -> list[int]:
     """The 1-based lines of a data module (glossary, home page) whose text has a dash.
 
     A comment is not published and keeps its dash; a standard's title is
-    exempt as everywhere else.
+    exempt as everywhere else. A string is read with JavaScript's escapes,
+    the language of the module (:data:`_JS_EM_DASH_ESCAPE`).
     """
     hits: list[int] = []
     for number, written in enumerate(text.splitlines(), start=1):
-        line = _decode_spellings(written)
+        line = _decode_spellings(written, _JS_EM_DASH_ESCAPE)
         if EM_DASH not in line or line.lstrip().startswith(("//", "*", "/*")):
             continue
         if _PART_AFTER_DASH.search(line):
@@ -765,11 +777,6 @@ _ADDRESSES = (
 _ADDRESS_ATTRIBUTE = re.compile(
     r"\b(?:href|src|style|id|class|className)=(?:\"[^\"]*\"|'[^']*'|\{[^}]*\})"
 )
-#: A run of backticks, which opens or closes a code span of a page.
-_BACKTICK_RUN = re.compile(r"`+")
-#: A run of dollar signs no backslash escapes, which opens or closes a math
-#: span of a page: remark-math reads ``$...$`` as CommonMark reads a code span.
-_DOLLAR_RUN = re.compile(r"(?<!\\)\$+")
 #: The line that opens a display-math block of a page, and the one that
 #: closes it: two dollar signs or more, and no other dollar sign after them.
 _MATH_FENCE = re.compile(r"^\s*\${2,}[^$]*$")
@@ -795,49 +802,16 @@ def _blank_out(match: re.Match[str]) -> str:
     return re.sub(r"[^\n]", " ", match.group())
 
 
-def _blank_code_spans(text: str) -> str:
-    """The text of a page with every code span blanked (CommonMark 6.1)."""
-    return _blank_runs(text, _BACKTICK_RUN)
-
-
 def _blank_page_spans(text: str) -> str:
-    """The text of a page with every code span, then every math span, blanked.
+    """The text of a page with every code span and every maths span blanked.
 
-    The code goes first: a dollar sign in a code span is the character, and
-    opens no math.
+    Read as the site reads them (:mod:`markdown_spans`): left to right, the
+    first run of backticks or dollar signs that a run of the same length
+    closes is the span, a backslash before an opening run shows its first
+    character as written, and one inside a span escapes nothing. remark-math
+    reads ``$...$`` as CommonMark reads a code span.
     """
-    return _blank_runs(_blank_code_spans(text), _DOLLAR_RUN)
-
-
-def _blank_runs(text: str, run: re.Pattern[str]) -> str:
-    """The text with every span between two matching runs blanked.
-
-    A span opens on a run (of backticks, or of dollar signs) and closes on
-    the next run of the same length; a run that no later run matches opens
-    nothing. Read run by run rather than with one pattern, because a pattern
-    that has to find the matching run backtracks over everything between.
-    """
-    runs = list(run.finditer(text))
-    pieces: list[str] = []
-    done = 0
-    index = 0
-    while index < len(runs):
-        opening = runs[index]
-        width = len(opening.group())
-        closing = next(
-            (k for k in range(index + 1, len(runs)) if len(runs[k].group()) == width),
-            None,
-        )
-        if closing is None:
-            index += 1
-            continue
-        end = runs[closing].end()
-        pieces.append(text[done : opening.start()])
-        pieces.append(re.sub(r"[^\n]", " ", text[opening.start() : end]))
-        done = end
-        index = closing + 1
-    pieces.append(text[done:])
-    return "".join(pieces)
+    return blank_inline_spans(text, "`$")
 
 
 def _blank_docstring_code_spans(text: str) -> str:

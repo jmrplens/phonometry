@@ -287,6 +287,13 @@ def test_counting_skips_escaped_display_and_code_dollars() -> None:
     assert cmh._unescaped_dollars("a ``$x` b``") == 0
 
 
+def test_an_escaped_backtick_opens_no_code_span_around_a_dollar() -> None:
+    """A backslash shows the backtick after it, so the dollar between is prose."""
+    assert cmh._unescaped_dollars("a \\`$x\\` b") == 1
+    # Inside a span a backslash escapes nothing: the span closes behind it.
+    assert cmh._unescaped_dollars("`C:\\` then $x") == 1
+
+
 def test_a_wrapped_greater_than_sign_is_refused() -> None:
     problems = cmh.check_text("The level is always\n> 5 dB above it.\n", "p.md")
     assert len(problems) == 1

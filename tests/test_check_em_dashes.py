@@ -237,6 +237,33 @@ def test_a_code_span_that_wraps_keeps_its_option() -> None:
     assert ced.markdown_double_hyphen_hits(text) == []
 
 
+def test_an_escaped_backtick_opens_no_code_span() -> None:
+    r"""``\`x -- y\``` is prose a reader sees, backticks and all.
+
+    A backslash shows the backtick after it and opens nothing, so the double
+    hyphen between two escaped backticks is published as a dash. The page
+    reader counted every backtick as a code marker and hid it. Inside a span
+    a backslash escapes nothing, so a span still closes on a backtick behind
+    one (``%APPDATA%\phonometry\``), and the prose after it is read.
+    """
+    assert ced.markdown_double_hyphen_hits("Write \\`x -- y\\` here.\n") == [1]
+    assert ced.markdown_hits("Write \\`x — y\\` here.\n") == [1]
+    closed = "Kept in `%APPDATA%\\phonometry\\` -- and read.\n"
+    assert ced.markdown_double_hyphen_hits(closed) == [1]
+    assert ced.markdown_double_hyphen_hits("Kept in `a\\` b --x` here.\n") == [1]
+
+
+def test_a_maths_span_closes_on_a_dollar_behind_a_backslash() -> None:
+    r"""Inside ``$...$`` a backslash escapes nothing, as inside a code span.
+
+    remark-math closes the span on the next dollar sign, so ``$a\$`` is the
+    whole of it and the prose after it is shown; the page reader took the
+    dollar behind the backslash for an escaped one and ran the span on.
+    """
+    assert ced.markdown_double_hyphen_hits("Set $a\\$ -- and $b$ here.\n") == [1]
+    assert ced.markdown_double_hyphen_hits("Costs \\$5 -- \\$10.\n") == [1]
+
+
 def test_a_link_fragment_keeps_the_double_hyphen_of_its_slug() -> None:
     text = (
         "See [the bands](#octave-band-frequencies-ansi-s111--iec-61260) and\n"
@@ -668,3 +695,23 @@ def test_an_escape_in_a_json_string_or_a_data_module_is_the_dash(
         encoding="utf-8",
     )
     assert ced.scan(home) == [2, 3]
+
+
+def test_a_data_module_is_read_with_the_escapes_of_javascript(
+    tmp_path: pathlib.Path,
+) -> None:
+    r"""``\U00002014`` and ``\N{EM DASH}`` are Python's, not JavaScript's.
+
+    JavaScript reads ``\U`` and ``\N`` as the letters themselves, so a
+    string that writes either publishes the letters and digits, never the
+    dash; the data reader decoded them with Python's escapes and refused a
+    string that publishes none.
+    """
+    labels = tmp_path / "labels.mjs"
+    labels.write_text(
+        "export const LONG = 'Write \\U00002014 here';\n"
+        "export const NAMED = 'Write \\N{EM DASH} here';\n"
+        "export const SHORT = 'Write \\u2014 here';\n",
+        encoding="utf-8",
+    )
+    assert ced.scan(labels) == [3]

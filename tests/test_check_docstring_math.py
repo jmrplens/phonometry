@@ -173,6 +173,14 @@ def test_code_on_a_page_is_not_read(tmp_path: pathlib.Path) -> None:
     assert cdm._page_bare_scripts(page) == []
 
 
+def test_an_escaped_backtick_opens_no_code_span(tmp_path: pathlib.Path) -> None:
+    """A backslash shows the backtick after it, so the maths between is read."""
+    page = tmp_path / "page.md"
+    page.write_text("Shown \\`$|dL_n|_\\max$\\` as written.\n", encoding="utf-8")
+    found = cdm._page_bare_scripts(page)
+    assert [(line, command) for line, command, _ in found] == [(1, "max")]
+
+
 def test_a_fence_closes_only_on_its_own_marker(tmp_path: pathlib.Path) -> None:
     """A fence shown inside a tilde fence closes nothing, so what follows is prose."""
     page = tmp_path / "page.md"

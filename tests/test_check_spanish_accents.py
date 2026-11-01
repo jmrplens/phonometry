@@ -419,6 +419,18 @@ def test_mathematics_and_inline_code_are_not_read_in_a_page() -> None:
     assert _departures("$\\mathrm{seno}$ y `seno` del código", page=True) == []
 
 
+def test_an_escaped_backtick_or_dollar_hides_no_word_of_a_page() -> None:
+    r"""A page shows an escaped backtick or dollar sign, and opens nothing on it.
+
+    Inside a span a backslash escapes nothing, so ``$a\$`` is the whole of a
+    span, as remark-math reads it, and the word after it is prose.
+    """
+    assert _departures("un \\`seno\\` de 1 kHz", page=True) == [("seno", "sinusoide")]
+    assert _departures("$a\\$ un seno de 1 kHz $b$", page=True) == [
+        ("seno", "sinusoide")
+    ]
+
+
 def test_a_context_exempts_only_its_own_seno() -> None:
     """The function in a sentence does not let the waveform beside it through."""
     text = "el seno del ángulo y un seno de 1 kHz"

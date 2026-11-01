@@ -119,6 +119,7 @@ import re
 import sys
 
 from markdown_fences import code_lines
+from markdown_spans import drop_inline_spans
 
 _ROOT = pathlib.Path(__file__).resolve().parent.parent
 
@@ -221,17 +222,16 @@ _MDX_READING = re.compile(
 _JSX_VALUE = re.compile(r"\"[^\"]*\"|'[^']*'")
 
 
-#: An inline code span: a run of backticks, its text, and a run of the same
-#: length again. Each run is a whole run, as CommonMark reads it, so one tick
-#: of a longer run never closes a shorter one. A ``$`` inside a span is code
-#: (the ``$schema`` key of a JSON document), and CommonMark reads the span
-#: before any maths could open in it.
-_CODE_SPAN = re.compile(r"(?<!`)(`+)(?!`)(.+?)(?<!`)\1(?!`)")
-
-
 def _unescaped_dollars(line: str) -> int:
-    r"""Inline ``$`` delimiters on a line, ignoring ``\$``, ``$$`` and code spans."""
-    prose = _CODE_SPAN.sub("", line)
+    r"""Inline ``$`` delimiters on a line, ignoring ``\$``, ``$$`` and code spans.
+
+    A code span is a run of backticks, its text, and a run of the same length
+    again, read by :mod:`markdown_spans`: one tick of a longer run never
+    closes a shorter one, and a backtick behind a backslash opens no span. A
+    ``$`` inside a span is code (the ``$schema`` key of a JSON document), and
+    CommonMark reads the span before any maths could open in it.
+    """
+    prose = drop_inline_spans(line)
     return len(re.findall(r"(?<!\\)\$", re.sub(r"\$\$", "", prose)))
 
 

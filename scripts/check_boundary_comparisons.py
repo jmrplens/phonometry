@@ -739,15 +739,7 @@ class Module:
         """
         func = call.func
         if isinstance(func, ast.Name):
-            current = scope
-            while current is not None:
-                for node in _own_definitions(current):
-                    if node.name == func.id:
-                        return node
-                if self.binds(current, func.id):
-                    return None
-                current = self.enclosing(current)
-            return self.top_functions.get(func.id)
+            return self.named_function(func.id, scope)
         if (
             isinstance(func, ast.Attribute)
             and isinstance(func.value, ast.Name)
@@ -773,6 +765,23 @@ class Module:
                 owner = self.owner_class(scope)
                 if owner is not None:
                     self.constructions.setdefault(owner.name, []).append((node, scope))
+
+    def named_function(self, name: str, scope: Function | None) -> Function | None:
+        """The function of this file *name* stands for, called from *scope*.
+
+        Read from the calling function outwards (:meth:`resolve_function`):
+        a function one of them defines, none past the nearest that binds the
+        name otherwise, then one at the top of the module.
+        """
+        current = scope
+        while current is not None:
+            defined = {node.name: node for node in _own_definitions(current)}
+            if name in defined:
+                return defined[name]
+            if self.binds(current, name):
+                return None
+            current = self.enclosing(current)
+        return self.top_functions.get(name)
 
     def binds(self, function: Function, name: str) -> bool:
         """Whether *function* binds *name* itself, otherwise than by a definition.

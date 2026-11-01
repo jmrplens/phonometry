@@ -113,7 +113,7 @@ import sys
 import textwrap
 import typing
 from types import MappingProxyType
-from typing import TYPE_CHECKING, NamedTuple
+from typing import TYPE_CHECKING, Any, NamedTuple
 
 import phonometry
 from phonometry._internal.catalogue import CatalogueRow
@@ -3966,15 +3966,7 @@ def _holds_none(test: ast.expr, subject: _Subject, *, truth: bool) -> bool:
         # A collection that tests false is empty.
         return not truth
     if isinstance(test, ast.Compare):
-        sides = [test.left, *test.comparators]
-        if (
-            len(test.ops) == 1
-            and isinstance(test.ops[0], ast.Is | ast.IsNot)
-            and any(subject.raw(side) for side in sides)
-            and any(_is_none(side) for side in sides)
-        ):
-            return subject.nontext and truth == isinstance(test.ops[0], ast.Is)
-        return False
+        return _none_holds_none(test, subject, truth=truth)
     if not (
         isinstance(test, ast.Call)
         and isinstance(test.func, ast.Name)
@@ -3989,6 +3981,23 @@ def _holds_none(test: ast.expr, subject: _Subject, *, truth: bool) -> bool:
         and classes is not None
         and _form_holds_none(subject.forms(test.args[0]), classes, truth=truth)
     )
+
+
+def _none_holds_none(test: ast.Compare, subject: _Subject, *, truth: bool) -> bool:
+    """:func:`_holds_none` for a comparison: ``text is None`` holding, or
+    ``text is not None`` failing, leaves with ``None``, which holds nothing
+    to check when the annotation lists it (*nontext*); any other comparison
+    is no test of the form.
+    """
+    sides = [test.left, *test.comparators]
+    if (
+        len(test.ops) == 1
+        and isinstance(test.ops[0], ast.Is | ast.IsNot)
+        and any(subject.raw(side) for side in sides)
+        and any(_is_none(side) for side in sides)
+    ):
+        return subject.nontext and truth == isinstance(test.ops[0], ast.Is)
+    return False
 
 
 def _texts_of(node: ast.expr) -> frozenset[str]:
@@ -4600,9 +4609,24 @@ def _choice_verdict(
             depth=0,
             options=_literal_options(annotation),
             forms=_forms(annotation, None, collection=collection),
-            nontext=_lists_nontext(annotation),
+            # A collection is read item by item, each a text or no item.
+            nontext=collection or _lists_nontext(annotation),
         )
     )
+
+
+def _as_handed(
+    forms: tuple[type, ...] | None, *, nontext: bool, whole: bool
+) -> dict[str, Any]:
+    """What a function handed the choice knows of it from its caller.
+
+    The value itself, handed on whole, takes the forms it took there and the
+    values its annotation lists (:func:`_checks_of`); a copy or a part of it
+    takes its own, and any value that is no text is the callee's to pass by.
+    """
+    if whole:
+        return {"forms": forms, "nontext": nontext}
+    return {"forms": None, "nontext": True}
 
 
 def _lists_nontext(annotation: str) -> bool:
@@ -4723,7 +4747,7 @@ def _checks_of(
         target if part in {_ITEMS, _VALUES} else _never,
         forms_of,
         classes_of,
-        nontext=nontext or not (part is None and not collection),
+        nontext=nontext,
     )
     root = tree.body[0] if isinstance(tree, ast.Module) and tree.body else tree
     parents = _parents(tree)
@@ -4789,8 +4813,11 @@ def _checks_of(
                     # The value itself, handed on whole, takes the forms it
                     # took here, and the values its annotation lists; a copy
                     # or a part of it, its own.
-                    forms=forms if base(value) and handed_part == part else None,
-                    nontext=nontext or not (base(value) and handed_part == part),
+                    **_as_handed(
+                        forms,
+                        nontext=nontext,
+                        whole=base(value) and handed_part == part,
+                    ),
                 )
             )
         if inner:

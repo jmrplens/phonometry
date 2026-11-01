@@ -1684,6 +1684,89 @@ def test_a_head_reads_the_items_of_a_container_as_a_type_checker_does(
     assert sorted(refused) == ["invariant(by_band)", "keyed(by_band)"]
 
 
+def test_a_head_reads_a_callable_as_a_type_checker_does(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A callable is read contravariantly in its parameters, covariantly in its return.
+
+    A ``Callable[[int], float]`` takes a ``Callable[[float], float]``, which
+    accepts every ``int`` it is called with, and a ``Callable[[int],
+    complex]`` a ``Callable[[int], float]``, whose ``float`` is a
+    ``complex``; a ``Callable[..., float]`` takes any callable that returns
+    a ``float``. So in ``wider``, ``returned`` and ``loose`` the head keyed
+    by ``int`` takes every call of the head keyed by ``float``. The guard
+    compared two callables only for equality and refused all three. A
+    ``Callable[[float], float]`` refuses a ``Callable[[int], float]``, which
+    a ``float`` cannot be handed to, and ``narrower`` stays refused.
+    """
+    refused = _refused(
+        tmp_path,
+        part="key",
+        api="""
+        from collections.abc import Callable
+
+        __all__ = ["wider", "returned", "loose", "narrower"]
+
+        @overload
+        def wider(
+            by_band: Mapping[int, float], weigh: Callable[[int], float]
+        ) -> float: ...
+        @overload
+        def wider(
+            by_band: Mapping[float, float], weigh: Callable[[float], float]
+        ) -> float: ...
+        def wider(
+            by_band: Mapping[int, float] | Mapping[float, float],
+            weigh: Callable[[int], float],
+        ) -> float:
+            return 0.0
+
+        @overload
+        def returned(
+            by_band: Mapping[int, float], weigh: Callable[[int], complex]
+        ) -> float: ...
+        @overload
+        def returned(
+            by_band: Mapping[float, float], weigh: Callable[[int], float]
+        ) -> float: ...
+        def returned(
+            by_band: Mapping[int, float] | Mapping[float, float],
+            weigh: Callable[[int], complex],
+        ) -> float:
+            return 0.0
+
+        @overload
+        def loose(
+            by_band: Mapping[int, float], weigh: Callable[..., float]
+        ) -> float: ...
+        @overload
+        def loose(
+            by_band: Mapping[float, float], weigh: Callable[[int, str], float]
+        ) -> float: ...
+        def loose(
+            by_band: Mapping[int, float] | Mapping[float, float],
+            weigh: Callable[..., float],
+        ) -> float:
+            return 0.0
+
+        @overload
+        def narrower(
+            by_band: Mapping[int, float], weigh: Callable[[float], float]
+        ) -> float: ...
+        @overload
+        def narrower(
+            by_band: Mapping[float, float], weigh: Callable[[int], float]
+        ) -> float: ...
+        def narrower(
+            by_band: Mapping[int, float] | Mapping[float, float],
+            weigh: Callable[[float], float],
+        ) -> float:
+            return 0.0
+        """,
+    )
+    assert sorted(refused) == ["narrower(by_band)"]
+
+
 def test_a_head_takes_the_calls_of_another_as_python_binds_them(
     tmp_path: pathlib.Path,
 ) -> None:
@@ -2171,6 +2254,48 @@ def test_a_union_whose_mapping_takes_a_written_dict_as_read_alone_passes(
     ]
 
 
+def test_a_mutable_mapping_takes_a_written_dict_of_its_own_types(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A ``dict`` is a ``MutableMapping`` of its own key and value, and only of them.
+
+    ``{"rms": 1.0}`` read on its own is a ``dict[str, float]``, which the
+    ``MutableMapping[str, float]`` of ``mutable`` takes, spelt through
+    ``typing`` in ``spelt`` too, as a ``Mapping[str, float]`` would: the call
+    runs and type checks with no head of its own. The guard read only a
+    ``Mapping`` as taking it and refused both. A ``MutableMapping`` is
+    invariant in its value, so the ``MutableMapping[str, complex]`` of
+    ``widened`` refuses the ``float`` values, as a type checker does.
+    """
+    refused = _refused(
+        tmp_path,
+        part="context",
+        api="""
+        import typing
+        from collections.abc import MutableMapping
+        from typing import Literal
+
+        __all__ = ["mutable", "spelt", "widened"]
+
+        def mutable(
+            by_name: Mapping[Literal["rms"], float] | MutableMapping[str, float],
+        ) -> float:
+            return 0.0
+
+        def spelt(
+            by_name: Mapping[Literal["rms"], float] | typing.MutableMapping[str, float],
+        ) -> float:
+            return 0.0
+
+        def widened(
+            by_name: Mapping[Literal["rms"], float] | MutableMapping[str, complex],
+        ) -> float:
+            return 0.0
+        """,
+    )
+    assert sorted(refused) == ["widened(by_name)"]
+
+
 def test_a_window_scipy_reads_takes_a_name_and_its_parameters(
     tmp_path: pathlib.Path,
 ) -> None:
@@ -2461,6 +2586,52 @@ def test_a_record_field_offers_a_written_dict_one_mapping(
         "Readings(measured)",
         "Unsplit.__init__(measured)",
     ]
+
+
+def test_a_constructor_declared_for_the_type_checker_is_read_by_the_function_rules(
+    tmp_path: pathlib.Path,
+) -> None:
+    """The ``__init__`` a record writes under ``if TYPE_CHECKING:`` is a method.
+
+    The walk of a class's methods read only the statements directly in its
+    body, so the constructor in the ``if`` was never read: a list it held,
+    invariant in its item, passed, and so did a writer that annotated
+    ``float`` a number it hands to that constructor, which takes a NumPy
+    integer too.
+    """
+    refused = _refused(
+        tmp_path,
+        api="""
+        from dataclasses import dataclass
+
+        __all__ = ["Calibration", "write"]
+
+        def _real(value: object) -> float:
+            return float(require_real(value, "factor"))
+
+        @dataclass(frozen=True)
+        class Calibration:
+            factor: float
+            labels: tuple[str, ...] = ()
+
+            if TYPE_CHECKING:
+
+                def __init__(
+                    self,
+                    factor: float | np.integer[Any],
+                    labels: list[str] = ...,
+                ) -> None: ...
+
+        def write(factor: float) -> Calibration:
+            return Calibration(factor)
+        """,
+    )
+    assert "Calibration.__init__(labels)" in refused
+    assert any("holds list[str]" in p for p in refused["Calibration.__init__(labels)"])
+    assert any(
+        "handed to Calibration.__init__(factor: np.integer[Any])" in p
+        for p in refused["write(factor)"]
+    )
 
 
 def test_a_sample_rate_keeps_one_family_across_the_api(

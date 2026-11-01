@@ -324,10 +324,14 @@ def put_sidecar(audio_path: str | Path, data: bytes) -> Path:
 
 
 def sidecar_file(
-    calibration_factor: float,
+    calibration_factor: RealScalar | NDArray[np.floating[Any] | np.integer[Any]],
     *,
-    reference_spl: float | None = None,
-    calibrator_frequency: float | None = None,
+    reference_spl: RealScalar
+    | NDArray[np.floating[Any] | np.integer[Any]]
+    | None = None,
+    calibrator_frequency: RealScalar
+    | NDArray[np.floating[Any] | np.integer[Any]]
+    | None = None,
     calibrator_model: str | None = None,
     channel_labels: tuple[str, ...] | list[str] | None = None,
 ) -> bytes:
@@ -449,10 +453,14 @@ def check_sidecar_labels(
 
 def write_sidecar(
     audio_path: str | Path,
-    calibration_factor: float,
+    calibration_factor: RealScalar | NDArray[np.floating[Any] | np.integer[Any]],
     *,
-    reference_spl: float | None = None,
-    calibrator_frequency: float | None = None,
+    reference_spl: RealScalar
+    | NDArray[np.floating[Any] | np.integer[Any]]
+    | None = None,
+    calibrator_frequency: RealScalar
+    | NDArray[np.floating[Any] | np.integer[Any]]
+    | None = None,
     calibrator_model: str | None = None,
     channel_labels: tuple[str, ...] | list[str] | None = None,
 ) -> Path:
@@ -477,11 +485,13 @@ def write_sidecar(
     :param audio_path: The audio file the sidecar belongs to (it need not
         exist yet; writing the sidecar first is fine).
     :param calibration_factor: Digital-to-pascal multiplier (required, a
-        real number, finite and positive).
+        real number as :class:`CalibrationSidecar` takes one, finite and
+        positive).
     :param reference_spl: The calibrator's known SPL, dB (e.g. 94.0), a real
-        number.
+        number as :class:`CalibrationSidecar` takes one.
     :param calibrator_frequency: The calibrator tone's nominal frequency,
-        Hz (e.g. 1000.0), a real number.
+        Hz (e.g. 1000.0), a real number as :class:`CalibrationSidecar` takes
+        one.
     :param calibrator_model: Free-text calibrator identification.
     :param channel_labels: One label per channel of the audio file, a tuple
         or a list of texts.

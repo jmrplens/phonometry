@@ -2304,6 +2304,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `TypeError` an init field gives, `Record: 'name' holds a container that
   holds itself`.
 
+- **`io.write_sidecar` takes for a type checker the NumPy numbers it takes
+  when it runs, and `simulation.AnimationFrame` takes its size as any
+  sequence of two whole numbers.** The calibration factor, the reference
+  level and the calibrator frequency of `write_sidecar` were annotated
+  `float`, while the `CalibrationSidecar` they build takes a NumPy integer
+  or a 0-d array of one too, so `write_sidecar(path, np.int64(2))` ran and
+  failed the type check. The size of an `AnimationFrame` was annotated a
+  pair or a `list[int | np.integer]`, which a `list[int]` is not, since a
+  list is invariant in its item; it is a `Sequence[int | np.integer]` now,
+  and the frame takes any sequence of the two pixel counts when it runs as
+  well, where it took a tuple or a list alone. A text is refused as before.
+
 - **The API reference and `help()` show no double hyphen where a sentence
   wanted a colon, and the `fluids` package says what it holds.** Docstrings
   spelt a dash as `--`, which `help()` prints as it is and the site published

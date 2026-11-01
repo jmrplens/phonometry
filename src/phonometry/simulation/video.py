@@ -76,6 +76,7 @@ from __future__ import annotations
 import contextlib
 import math
 from collections import deque
+from collections.abc import Sequence
 from dataclasses import dataclass, replace
 from fractions import Fraction
 from types import MappingProxyType
@@ -192,8 +193,12 @@ _SIDE_BANDS: Final[Mapping[str, Callable[[int], tuple[slice, slice]]]] = (
 
 
 def _frame_pixels(size: object) -> tuple[int, int]:
-    """The frame's width and height, whole numbers of pixels, at least 479 by 245."""
-    if not isinstance(size, (tuple, list)):
+    """The frame's width and height, whole numbers of pixels, at least 479 by 245.
+
+    Any sequence of the two is taken, a tuple, a list or any other; a text is
+    refused, though Python counts it a sequence too.
+    """
+    if not isinstance(size, Sequence) or isinstance(size, str | bytes | bytearray):
         msg = f"'size' must be a pair (width, height) in pixels, got {size!r}"
         raise TypeError(msg)
     # The length of a fixed-size argument, not a quantity.
@@ -216,7 +221,8 @@ class AnimationFrame(RichDisplay):
     """How each frame of a simulation video is drawn: in which language, at what size, on what scale.
 
     :param language: Label language, ``"en"`` (default) or ``"es"``.
-    :param size: ``(width, height)`` of a frame in pixels, at least 479 by
+    :param size: ``(width, height)`` of a frame in pixels, a tuple, a list
+        or any other sequence of the two whole numbers, at least 479 by
         245, the smallest frame in which every text, at its own size, stays
         clear of the frame's margin and the field still shows (for a grid up
         to ten times longer one way than the other), on every matplotlib
@@ -250,10 +256,7 @@ class AnimationFrame(RichDisplay):
             self,
             *,
             language: Language = "en",
-            size: (
-                tuple[int | np.integer[Any], int | np.integer[Any]]
-                | list[int | np.integer[Any]]
-            ) = (960, 540),
+            size: Sequence[int | np.integer[Any]] = (960, 540),
             color_limit: float | None = None,
         ) -> None: ...
 

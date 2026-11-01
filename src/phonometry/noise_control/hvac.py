@@ -2956,7 +2956,7 @@ def _room_measure(
             f"and 'absorption_area' (A = S alpha); got {got}."
         )
         raise ValueError(msg)
-    arr = real_array(value, "absorption_area")
+    arr = real_array(value, name)
     if arr.ndim > 1 or arr.size == 0:
         msg = f"'{name}' must be a scalar or a non-empty 1-D array."
         raise ValueError(msg)

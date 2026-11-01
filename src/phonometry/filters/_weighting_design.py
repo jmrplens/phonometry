@@ -1193,7 +1193,7 @@ def fit_prototype(
         )
         raise ValueError(msg)
     anchor = _anchor_hz(fs, band, reference_frequency_hz)
-    edges = _warped(np.array([low, high]), fs)
+    edges = _warped(real_array([low, high], "band"), fs)
     span = (float(edges[0]), float(edges[1]))
     omega = _scalar_geomspace(span[0], span[1], _GRID_POINTS)
     omega_ref = _warped(np.array([anchor]), fs)

@@ -282,8 +282,8 @@ def _absorption_area(
     what the public caller calls these two arguments, so a rejection names the
     parameter that was actually passed.
     """
-    t = real_array(t60, "t60")
-    m_arr = real_array(m, "m")
+    t = real_array(t60, t_name)
+    m_arr = real_array(m, m_name)
     _validate_area_inputs(t, volume, m_arr, t_name=t_name, m_name=m_name)
     c = _resolve_speed(temperature_c, speed_of_sound)
     return _SABINE * volume / (c * t) - 4.0 * volume * m_arr

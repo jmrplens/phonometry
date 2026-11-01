@@ -25,6 +25,7 @@ from phonometry import (
     building,
     emission,
     environment,
+    io,
     materials,
     noise_control,
     psychoacoustics,
@@ -36,6 +37,7 @@ from phonometry import (
 
 if TYPE_CHECKING:
     from collections.abc import Callable
+    from pathlib import Path
 
 #: A public call per domain, given the numbers it reads, and the name of the
 #: parameter that takes them.
@@ -369,3 +371,101 @@ def test_a_value_read_off_every_checked_path_is_refused_by_name(
     del label
     with pytest.raises(TypeError, match=message):
         call()
+
+
+_SCAN_AREAS = np.full(4, 0.5)
+_SCAN = np.full((4, 1), 5.0e-4)
+_SCAN_KEYWORDS: dict[str, object] = {"frequencies": np.array([1000.0]), "fraction": 1}
+
+
+def _indicators() -> emission.PrecisionFieldIndicators:
+    return emission.precision_field_indicators(
+        np.full((4, 1), 2.0e-6), np.full((4, 1), 60.0)
+    )
+
+
+#: Calls whose numbers a private helper reads: each refusal names the public
+#: parameter, not the helper's own (``'arr'``, ``'value'``,
+#: ``'absorption_area'``), and a ``bytearray`` reaches the reader as text,
+#: not as the codes ``np.asarray`` made of it before the reader saw it.
+_HANDED_ON: list[tuple[str, Callable[[], object], str]] = [
+    (
+        "sound_power_intensity: a complex second scan",
+        lambda: emission.sound_power_intensity(
+            _SCAN, _SCAN_AREAS, normal_intensity_2=_SCAN + 0.5j, **_SCAN_KEYWORDS
+        ),
+        "'normal_intensity_2' must be real, not complex",
+    ),
+    (
+        "sound_power_intensity: a second scan of bytearrays",
+        lambda: emission.sound_power_intensity(
+            _SCAN,
+            _SCAN_AREAS,
+            normal_intensity_2=[bytearray(b"1")] * 4,
+            **_SCAN_KEYWORDS,
+        ),
+        "'normal_intensity_2' must be numbers, not text",
+    ),
+    (
+        "sound_power_intensity: complex pressure levels",
+        lambda: emission.sound_power_intensity(
+            _SCAN, _SCAN_AREAS, pressure_levels=_SCAN + 0.5j, **_SCAN_KEYWORDS
+        ),
+        "'pressure_levels' must be real, not complex",
+    ),
+    (
+        "sound_power_intensity: pressure levels of bytearrays",
+        lambda: emission.sound_power_intensity(
+            _SCAN, _SCAN_AREAS, pressure_levels=[bytearray(b"_")] * 4, **_SCAN_KEYWORDS
+        ),
+        "'pressure_levels' must be numbers, not text",
+    ),
+    (
+        "precision_qualification: a complex first field non-uniformity",
+        lambda: emission.precision_qualification(
+            _indicators(),
+            field_nonuniformity_1=np.array([1.0 + 1.0j]),
+            field_nonuniformity_2=np.array([1.0]),
+        ),
+        "'field_nonuniformity_1' must be real, not complex",
+    ),
+    (
+        "precision_qualification: a complex second field non-uniformity",
+        lambda: emission.precision_qualification(
+            _indicators(),
+            field_nonuniformity_1=np.array([1.0]),
+            field_nonuniformity_2=np.array([1.0 + 1.0j]),
+        ),
+        "'field_nonuniformity_2' must be real, not complex",
+    ),
+    (
+        "room_effect: a complex room constant",
+        lambda: noise_control.room_effect(2.0, room_constant=np.array([4.0 + 1.0j])),
+        "'room_constant' must be real, not complex",
+    ),
+]
+
+
+@pytest.mark.parametrize(
+    ("label", "call", "message"), _HANDED_ON, ids=[case[0] for case in _HANDED_ON]
+)
+def test_a_value_a_helper_reads_is_refused_by_the_public_name(
+    label: str, call: Callable[[], object], message: str
+) -> None:
+    """Each refusal named the helper's parameter; two scans of bytearrays
+    were read as the codes of their characters and gave a result.
+    """
+    del label
+    with pytest.raises(TypeError, match=message):
+        call()
+
+
+def test_a_bytearray_given_as_samples_is_not_written(tmp_path: Path) -> None:
+    """``np.asarray`` read a list of ``bytearray`` as an integer array of the
+    codes of its characters, which the writer passed through as samples: the
+    file held 97, 98, 99 and 100.
+    """
+    target = tmp_path / "codes.wav"
+    with pytest.raises(TypeError, match="'x' must be numbers, not text"):
+        io.write(target, [bytearray(b"abcd")], fs=8000)
+    assert not target.exists()

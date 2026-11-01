@@ -792,9 +792,7 @@ def _hemisphere_levels(
         ("background_levels", background_levels),
         ("max_levels", max_levels),
     ):
-        if extra is not None and not np.all(
-            np.isfinite(real_array(extra, "background_levels"))
-        ):
+        if extra is not None and not np.all(np.isfinite(real_array(extra, name))):
             msg = f"'{name}' must be finite."
             raise ValueError(msg)
     if background_levels is None:

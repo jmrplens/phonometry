@@ -500,7 +500,7 @@ def predict_floor_spectrum(
         ("floor_level_difference", floor_level_difference),
         ("mitigation_level_difference", mitigation_level_difference),
     ):
-        values = real_array(term, "ground_level_difference")
+        values = real_array(term, name)
         if not np.all(np.isfinite(values)):
             msg = f"'{name}' must be finite."
             raise ValueError(msg)

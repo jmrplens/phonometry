@@ -216,6 +216,8 @@ def _sabine_absorption(
     area: float,
     situation_a: tuple[ArrayLike, ArrayLike, ArrayLike],
     situation_b: tuple[ArrayLike, ArrayLike, ArrayLike],
+    *,
+    labels: tuple[str, str],
 ) -> Real:
     r"""Sabine-form absorption difference between two measurement situations.
 
@@ -230,16 +232,20 @@ def _sabine_absorption(
     Each situation is the tuple ``(c, T, m)`` of speed of sound (m/s),
     reverberation time (s) and energy attenuation coefficient (1/m). ``V`` and
     ``S`` are the room volume and sample area; the difference is taken as
-    "situation b minus situation a" to match the printed equations.
+    "situation b minus situation a" to match the printed equations. *labels*
+    are the numbers the caller gives the two situations (``("1", "2")`` for
+    ``c1``, ``t1``, ``m1`` and ``c2``, ``t2``, ``m2``), so a refusal names the
+    parameter that was passed.
     """
+    a, b = labels
     vol = _positive_scalar(volume, "volume")
     surf = _positive_scalar(area, "area")
-    c_a = _positive_array(situation_a[0], "c")
-    t_a = _positive_array(situation_a[1], "T")
-    m_a = _nonneg_array(situation_a[2], "m")
-    c_b = _positive_array(situation_b[0], "c")
-    t_b = _positive_array(situation_b[1], "T")
-    m_b = _nonneg_array(situation_b[2], "m")
+    c_a = _positive_array(situation_a[0], f"c{a}")
+    t_a = _positive_array(situation_a[1], f"t{a}")
+    m_a = _nonneg_array(situation_a[2], f"m{a}")
+    c_b = _positive_array(situation_b[0], f"c{b}")
+    t_b = _positive_array(situation_b[1], f"t{b}")
+    m_b = _nonneg_array(situation_b[2], f"m{b}")
     ratio = vol / surf
     absorption = _SABINE_CONSTANT * ratio * (
         1.0 / (c_b * t_b) - 1.0 / (c_a * t_a)
@@ -282,9 +288,13 @@ def random_incidence_absorption(
     :param m2: Energy attenuation coefficient during ``t2``, in 1/m; defaults to 0.
     :return: Random-incidence absorption coefficient ``alpha_s`` (per band).
     :raises ValueError: for non-positive ``V``, ``S``, ``c`` or ``T``.
-    :raises TypeError: if ``area`` or ``volume`` is not a single number.
+    :raises TypeError: if ``area`` or ``volume`` is not a single number, or ``c1``,
+        ``t1``, ``m1``, ``c2``, ``t2`` or ``m2`` holds a text or a value that is not a
+        real number.
     """
-    return _sabine_absorption(volume, area, (c1, t1, m1), (c2, t2, m2))
+    return _sabine_absorption(
+        volume, area, (c1, t1, m1), (c2, t2, m2), labels=("1", "2")
+    )
 
 
 def specular_absorption_coefficient(
@@ -320,9 +330,13 @@ def specular_absorption_coefficient(
     :param m4: Energy attenuation coefficient during ``t4``, in 1/m; defaults to 0.
     :return: Specular absorption coefficient ``alpha_spec`` (per band).
     :raises ValueError: for non-positive ``V``, ``S``, ``c`` or ``T``.
-    :raises TypeError: if ``area`` or ``volume`` is not a single number.
+    :raises TypeError: if ``area`` or ``volume`` is not a single number, or ``c3``,
+        ``t3``, ``m3``, ``c4``, ``t4`` or ``m4`` holds a text or a value that is not a
+        real number.
     """
-    return _sabine_absorption(volume, area, (c3, t3, m3), (c4, t4, m4))
+    return _sabine_absorption(
+        volume, area, (c3, t3, m3), (c4, t4, m4), labels=("3", "4")
+    )
 
 
 def scattering_coefficient(
@@ -572,9 +586,13 @@ def base_plate_scattering(
     :param m3: Energy attenuation coefficient during ``t3``, in 1/m; defaults to 0.
     :return: Base-plate scattering coefficient ``s_base`` (per band).
     :raises ValueError: for non-positive ``V``, ``S``, ``c`` or ``T``.
-    :raises TypeError: if ``area`` or ``volume`` is not a single number.
+    :raises TypeError: if ``area`` or ``volume`` is not a single number, or ``c1``,
+        ``t1``, ``m1``, ``c3``, ``t3`` or ``m3`` holds a text or a value that is not a
+        real number.
     """
-    return _sabine_absorption(volume, area, (c1, t1, m1), (c3, t3, m3))
+    return _sabine_absorption(
+        volume, area, (c1, t1, m1), (c3, t3, m3), labels=("1", "3")
+    )
 
 
 @dataclass(frozen=True)

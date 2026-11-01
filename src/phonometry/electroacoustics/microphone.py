@@ -919,7 +919,12 @@ def microphone_characteristics(
     :raises TypeError: if ``reference_frequency_hz``, ``sensitivity_mv_per_pa`` or
         ``tolerance_db`` is not a single number.
     """
-    f, resp = _as_curve(frequencies, response_db, "frequency response")
+    f, resp = _as_curve(
+        frequencies,
+        response_db,
+        "frequency response",
+        names=("frequencies", "response_db"),
+    )
     m_mv = require_positive(sensitivity_mv_per_pa, "sensitivity_mv_per_pa")
     f_ref = require_positive(reference_frequency_hz, "reference_frequency_hz")
     tol = require_positive(tolerance_db, "tolerance_db")

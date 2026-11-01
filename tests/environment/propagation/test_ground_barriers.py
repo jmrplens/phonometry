@@ -223,7 +223,7 @@ def test_ground_effect_rejects_non_finite_impedance() -> None:
     with pytest.raises(ValueError, match=r"'impedance' must be finite"):
         environment.ground_effect(_BANDS, 1.0, 1.0, 20.0, impedance=np.inf)
     inf_z = complex(np.inf, 0.0)
-    with pytest.raises(ValueError, match=r"'impedance' must be finite"):
+    with pytest.raises(ValueError, match=r"'normalized_impedance' must be finite"):
         environment.spherical_reflection_coefficient(
             frequencies=_BANDS,
             normalized_impedance=inf_z,
@@ -242,7 +242,9 @@ def test_impedance_is_a_scalar_or_one_value_per_frequency() -> None:
     assert broadcast.normalized_impedance.shape == _BANDS.shape
     with pytest.raises(ValueError, match=r"'impedance' must be a scalar or match"):
         environment.ground_effect(_BANDS, 1.0, 1.0, 20.0, impedance=_BANDS[:3] * 1j)
-    with pytest.raises(ValueError, match=r"'impedance' must be a scalar or match"):
+    with pytest.raises(
+        ValueError, match=r"'normalized_impedance' must be a scalar or match"
+    ):
         environment.spherical_reflection_coefficient(
             frequencies=_BANDS,
             normalized_impedance=_BANDS[:3] * 1j,

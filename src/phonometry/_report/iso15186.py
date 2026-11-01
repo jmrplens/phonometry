@@ -113,7 +113,7 @@ def _qualification_columns(
     ):
         if values is None:
             continue
-        arr = real_array(values, "fpi")
+        arr = real_array(values, name)
         if arr.shape != (n_bands,):
             msg = (
                 f"'{name}' must carry one value per reported band "

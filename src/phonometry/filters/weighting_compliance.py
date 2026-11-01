@@ -631,7 +631,7 @@ def _weighting_response_db(wf: WeightingFilter, frequencies: np.ndarray) -> np.n
     """
     if wf.weighting == "Z" or wf.sos.size == 0:
         return np.zeros_like(frequencies)
-    worn = np.concatenate([frequencies, [1000.0]])
+    worn = np.concatenate([real_array(frequencies, "frequencies"), [1000.0]])
     h = _runtime_frequency_response(wf, worn)
     gain_db = 20.0 * np.log10(np.abs(h) + np.finfo(float).eps)
     return np.asarray(gain_db[:-1] - gain_db[-1], dtype=np.float64)  # relative to 1 kHz

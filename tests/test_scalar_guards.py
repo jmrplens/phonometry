@@ -1611,3 +1611,99 @@ def test_every_public_scalar_parameter_refuses_an_array_or_a_text_by_name() -> N
     offences, probed = _array_refusals()
     assert probed > 500, f"only {probed} parameters were probed"
     assert offences == [], "\n".join(offences)
+
+
+def _array_parameters(function: Callable[..., object]) -> dict[str, str] | None:
+    """The required parameters the probe can fill, when one of them takes numbers."""
+    required: dict[str, str] = {}
+    for parameter in inspect.signature(function).parameters.values():
+        if parameter.kind in (parameter.VAR_POSITIONAL, parameter.VAR_KEYWORD):
+            continue
+        if parameter.default is inspect.Parameter.empty:
+            kind = _kind(parameter.annotation)
+            if kind is None:
+                return None
+            required[parameter.name] = kind
+    return required if "array" in required.values() else None
+
+
+def _array_offence(
+    function: Callable[..., object],
+    arguments: dict[str, object],
+    name: str,
+    *,
+    may_accept: bool,
+) -> str | None:
+    """What a call does with a value no number in the parameter *name*:
+    ``None`` for a ``TypeError`` that names it, or for an acceptance the
+    value may have, the offence otherwise.
+    """
+    try:
+        _quietly(function, arguments)
+    except TypeError as refusal:
+        if name in str(refusal):
+            return None
+        return f"a TypeError that names another parameter ({refusal})"
+    # Reported, not hidden
+    except Exception as refusal:
+        return f"{type(refusal).__name__} ({refusal})"
+    return None if may_accept else "accepted"
+
+
+def _public_array_offences() -> tuple[list[str], int]:
+    """Each public parameter that takes numbers, given a complex array or a
+    list of ``bytearray``, refused by another name than its own or not refused.
+
+    A complex array may be taken, as a mobility, an impedance or a transfer
+    function is complex; refused, it is refused by the parameter's own name.
+    A ``bytearray`` is never numbers and is always refused that way.
+    """
+    offences: list[str] = []
+    probed = 0
+    for qualified, function in _public_functions():
+        required = _array_parameters(function)
+        baseline = _baseline(function, required) if required else None
+        if required is None or baseline is None:
+            continue
+        for name in (name for name, kind in required.items() if kind == "array"):
+            probed += 1
+            offences.extend(_parameter_offences(qualified, function, baseline, name))
+    return offences, probed
+
+
+def _parameter_offences(
+    qualified: str,
+    function: Callable[..., object],
+    baseline: dict[str, object],
+    name: str,
+) -> list[str]:
+    """The offences of one parameter given a complex array and bytearrays."""
+    numbers = np.asarray(baseline[name], dtype=np.float64)
+    found = []
+    for label, wrong, may_accept in (
+        ("a complex array", numbers + 0.5j, True),
+        ("bytearrays", [bytearray(b"12")] * max(numbers.size, 1), False),
+    ):
+        offence = _array_offence(
+            function, {**baseline, name: wrong}, name, may_accept=may_accept
+        )
+        if offence is not None:
+            found.append(f"{qualified}({name}) given {label}: {offence}")
+    return found
+
+
+def test_every_public_array_parameter_refuses_what_is_no_number_by_its_own_name() -> (
+    None
+):
+    """A parameter that takes numbers refuses a complex value or a text by its own name.
+
+    A private helper the public function hands its numbers to read them under
+    the helper's own name, or under the name of the first of a list of
+    parameters read in a loop: ``check_output_mass`` refused a complex
+    ``output_acceleration_level`` as ``output_force_level``,
+    ``random_incidence_absorption`` its ``t1`` as ``T`` and
+    ``loudspeaker_characteristics`` its ``spl`` as ``values``.
+    """
+    offences, probed = _public_array_offences()
+    assert probed > 900, f"only {probed} parameters were probed"
+    assert offences == [], "\n".join(offences)

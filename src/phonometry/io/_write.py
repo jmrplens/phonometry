@@ -80,6 +80,7 @@ from scipy.io import wavfile
 from .._internal.json_input import escaped
 from .._internal.validation import (
     real_array,
+    refuse_text,
     require_choice,
     require_count,
     require_scalar,
@@ -172,6 +173,9 @@ def _resolve_input(
         # The header holds a whole number of samples per second: a Signal
         # whose own rate is fractional is refused here, as a bare rate is.
         return x.data, require_count(x.fs, "fs", at_least=None)
+    # NumPy reads a bytearray as the codes of its characters, an integer
+    # array the writer would pass through as samples: a text is refused first.
+    refuse_text(x, "'x' must be numbers, not text.")
     data = np.asarray(x)
     if fs is None:
         msg = "fs is required when writing a bare array"

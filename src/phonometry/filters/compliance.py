@@ -456,7 +456,9 @@ def _reference_attenuation_db(
     The reference attenuation of Formula (8) of IEC 61260-1:2014 and of
     equation (8) of IEC 61260:1995, as :func:`verify_filter_class` takes it.
     """
-    gain = float(_band_gain(sos, factor, fs_hz, np.array([mid_hz]))[0])
+    gain = float(
+        _band_gain(sos, factor, fs_hz, np.atleast_1d(real_array(mid_hz, "mid_hz")))[0]
+    )
     return -20.0 * math.log10(gain + _EPS)
 
 

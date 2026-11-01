@@ -142,7 +142,7 @@ must not exceed the Table 1 limits (Clause 6.2). See
 | Exception | When |
 | :--- | :--- |
 | ValueError | for non-positive `V`, `S`, `c` or `T`. |
-| TypeError | if `area` or `volume` is not a single number. |
+| TypeError | if `area` or `volume` is not a single number, or `c1`, `t1`, `m1`, `c3`, `t3` or `m3` holds a text or a value that is not a real number. |
 
 ## BasePlateScatteringCheck
 
@@ -305,7 +305,7 @@ situation 2 adds the test sample, still without turntable rotation
 | Exception | When |
 | :--- | :--- |
 | ValueError | for non-positive `V`, `S`, `c` or `T`. |
-| TypeError | if `area` or `volume` is not a single number. |
+| TypeError | if `area` or `volume` is not a single number, or `c1`, `t1`, `m1`, `c2`, `t2` or `m2` holds a text or a value that is not a real number. |
 
 ## reverberation_time_uncertainty
 
@@ -601,7 +601,7 @@ apparent (specular) absorption includes the energy lost to scattering.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for non-positive `V`, `S`, `c` or `T`. |
-| TypeError | if `area` or `volume` is not a single number. |
+| TypeError | if `area` or `volume` is not a single number, or `c3`, `t3`, `m3`, `c4`, `t4` or `m4` holds a text or a value that is not a real number. |
 
 ## speed_of_sound_iso17497
 

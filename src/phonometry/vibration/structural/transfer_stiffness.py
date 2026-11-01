@@ -1581,7 +1581,7 @@ def check_output_mass(
         ("output_force_level", output_force_level),
         ("output_acceleration_level", output_acceleration_level),
     ):
-        level = real_array(value, "output_force_level")
+        level = real_array(value, name)
         if level.shape != freq.shape or not np.all(np.isfinite(level)):
             msg = f"{owner}: '{name}' must carry one finite level per frequency."
             raise ValueError(msg)

@@ -206,10 +206,14 @@ def _normalized_ground_impedance(
         impedance = np.conj(impedance.normalized_impedance)
     # Exactly one of the two is given, and flow_resistivity is not: the
     # impedance is.
-    return _resolve_impedance_array(cast("ArrayLike", impedance), frequency)
+    return _resolve_impedance_array(
+        cast("ArrayLike", impedance), frequency, "impedance"
+    )
 
 
-def _resolve_impedance_array(impedance: ArrayLike, frequency: Real) -> Complex:
+def _resolve_impedance_array(
+    impedance: ArrayLike, frequency: Real, name: str
+) -> Complex:
     r"""Broadcast a scalar/array normalized impedance to the frequency shape.
 
     The impedance is in the :math:`\mathrm{e}^{-i \omega t}` convention (a passive
@@ -217,21 +221,22 @@ def _resolve_impedance_array(impedance: ArrayLike, frequency: Real) -> Complex:
     impedance is rejected because :math:`1/Z`
     enters the numerical distance (an infinite ``Z`` would give ``inf/inf`` NaN
     rather than the intended hard-ground limit, which is a large finite ``Z``).
+    *name* is the caller's parameter, for the messages.
     """
-    z = np.atleast_1d(complex_array(impedance, "impedance"))
+    z = np.atleast_1d(complex_array(impedance, name))
     if z.size == 1:
         z = np.full(frequency.shape, z[0], dtype=np.complex128)
     if z.shape != frequency.shape:
         msg = (
-            "'impedance' must be a scalar or match the frequency vector "
+            f"'{name}' must be a scalar or match the frequency vector "
             f"(got {z.shape}, expected {frequency.shape})."
         )
         raise ValueError(msg)
     if not np.all(np.isfinite(z)):
-        msg = "'impedance' must be finite."
+        msg = f"'{name}' must be finite."
         raise ValueError(msg)
     if not np.all(np.abs(z) > 0.0):
-        msg = "'impedance' must be non-zero."
+        msg = f"'{name}' must be non-zero."
         raise ValueError(msg)
     return z
 
@@ -331,7 +336,7 @@ def spherical_reflection_coefficient(
         raise ValueError(msg)
     speed_of_sound = require_positive(speed_of_sound, "speed_of_sound")
     f = require_positive_array(frequencies, "frequencies")
-    z = _resolve_impedance_array(normalized_impedance, f)
+    z = _resolve_impedance_array(normalized_impedance, f, "normalized_impedance")
     k = 2.0 * np.pi * f / speed_of_sound
     r2 = float(np.hypot(distance, source_height_m + receiver_height_m))
     cos_theta = (source_height_m + receiver_height_m) / r2

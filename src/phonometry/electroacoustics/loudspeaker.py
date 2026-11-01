@@ -104,11 +104,22 @@ _MIN_CURVE_POINTS = 2
 
 
 def _as_curve(
-    frequencies: ArrayLike, values: ArrayLike, name: str
+    frequencies: ArrayLike,
+    values: ArrayLike,
+    name: str,
+    *,
+    names: tuple[str, str] | None = None,
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
-    """Validate a paired (frequencies, values) curve and sort it by frequency."""
-    f = np.atleast_1d(real_array(frequencies, name))
-    v = np.atleast_1d(real_array(values, "values"))
+    """Validate a paired (frequencies, values) curve and sort it by frequency.
+
+    *name* is the curve's in the messages about its shape; *names* are the
+    parameters the frequencies and the values are read from, for a refusal of
+    what they hold, and the two items of *name* (``"impedance[0]"``) when the
+    curve came as one pair.
+    """
+    f_name, v_name = names if names is not None else (f"{name}[0]", f"{name}[1]")
+    f = np.atleast_1d(real_array(frequencies, f_name))
+    v = np.atleast_1d(real_array(values, v_name))
     if f.ndim != 1 or v.ndim != 1 or f.shape != v.shape:
         msg = f"'{name}' frequencies and values must be 1-D and equal length."
         raise ValueError(msg)
@@ -913,7 +924,9 @@ def loudspeaker_characteristics(
         ``tolerance_db`` is not a single number, or ``frequencies`` or ``spl`` holds a
         text or a value that is not a real number.
     """
-    f, spl = _as_curve(frequencies, spl, "on-axis response")
+    f, spl = _as_curve(
+        frequencies, spl, "on-axis response", names=("frequencies", "spl")
+    )
     r = require_positive(rated_impedance_ohm, "rated_impedance_ohm")
     u = (
         require_positive(input_voltage_v, "input_voltage_v")

@@ -483,8 +483,8 @@ def _level_magnitude(values: np.ndarray) -> np.ndarray:
     return np.asarray(10.0 * np.log10(guarded / _W0), dtype=np.float64)
 
 
-def _as_2d(name: str, arr: np.ndarray, n_seg: int, n_bands: int) -> np.ndarray:
-    a = np.atleast_2d(real_array(arr, "arr"))
+def _as_2d(name: str, arr: ArrayLike, n_seg: int, n_bands: int) -> np.ndarray:
+    a = np.atleast_2d(real_array(arr, name))
     if a.shape == (1, n_seg) and n_bands != n_seg:
         a = a.T  # a 1D (N_seg,) input arrives as (1, N_seg)
     if a.shape != (n_seg, n_bands):
@@ -617,9 +617,7 @@ def sound_power_intensity(
     # --- partial powers, using the mean of the two sweeps when available -----
     repeatability: np.ndarray | None = None
     if normal_intensity_2 is not None:
-        scan2 = _as_2d(
-            "normal_intensity_2", np.asarray(normal_intensity_2), n_seg, n_bands
-        )
+        scan2 = _as_2d("normal_intensity_2", normal_intensity_2, n_seg, n_bands)
         pi1 = intensity * seg[:, None]
         pi2 = scan2 * seg[:, None]
         repeatability = np.abs(_level_magnitude(pi1) - _level_magnitude(pi2))
@@ -650,7 +648,7 @@ def sound_power_intensity(
 
     fpi: np.ndarray | None = None
     if pressure_levels is not None:
-        lp = _as_2d("pressure_levels", np.asarray(pressure_levels), n_seg, n_bands)
+        lp = _as_2d("pressure_levels", pressure_levels, n_seg, n_bands)
         # Eq. A.1: area-weighted surface pressure level [Lp].
         lp_surface = weighted_energy_mean(lp, seg[:, None], axis=0)
         fpi = np.asarray(
@@ -1508,7 +1506,7 @@ def _checked_band_centres(
     return freqs
 
 
-def _spread_over_bands(value: ArrayLike, n_bands: int) -> np.ndarray:
+def _spread_over_bands(value: ArrayLike, n_bands: int, name: str) -> np.ndarray:
     """Put a field non-uniformity on the band axis without inventing values.
 
     A bare number states one figure that holds for every band, so it is spread
@@ -1518,7 +1516,7 @@ def _spread_over_bands(value: ArrayLike, n_bands: int) -> np.ndarray:
     behind numpy's broadcast message instead of letting it reach the per-band
     check on the result, which names the criterion that does not fit.
     """
-    spectrum = real_array(value, "value")
+    spectrum = real_array(value, name)
     if spectrum.ndim == 0:
         return np.broadcast_to(spectrum, (n_bands,))
     return spectrum
@@ -1621,8 +1619,12 @@ def precision_qualification(
     # Criterion 5 reads FS(1)/FS(2).
     fs1 = fs2 = None
     if field_nonuniformity_1 is not None and field_nonuniformity_2 is not None:
-        fs1 = _spread_over_bands(field_nonuniformity_1, n_bands)
-        fs2 = _spread_over_bands(field_nonuniformity_2, n_bands)
+        fs1 = _spread_over_bands(
+            field_nonuniformity_1, n_bands, "field_nonuniformity_1"
+        )
+        fs2 = _spread_over_bands(
+            field_nonuniformity_2, n_bands, "field_nonuniformity_2"
+        )
 
     return PrecisionCriteria(
         indicators=indicators,

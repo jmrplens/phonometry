@@ -2319,8 +2319,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   failed the type check. The size of an `AnimationFrame` was annotated a
   pair or a `list[int | np.integer]`, which a `list[int]` is not, since a
   list is invariant in its item; it is a `Sequence[int | np.integer]` now,
-  and the frame takes any sequence of the two pixel counts when it runs as
-  well, where it took a tuple or a list alone. A text is refused as before.
+  and the frame takes any sequence of the two pixel counts, or a NumPy array
+  of them, when it runs as well, where it took a tuple or a list alone. A
+  text is refused as before.
 
 - **`emission.reference_source_calibration` refuses an `arrangement` that is
   no text with `TypeError`.** It handed the arrangement to the helper that

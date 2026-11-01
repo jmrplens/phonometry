@@ -8,8 +8,9 @@ method. A sidecar's numbers were annotated ``float`` on the writers while the
 record they build takes a NumPy integer, so ``write_sidecar(path,
 np.int64(2))`` ran and failed the type check; a frame's size was a list of
 ``int | np.integer``, which a ``list[int]`` is not, since a list is
-invariant in its item. These calls run, and CI type checks every file in this
-directory alongside ``src`` and ``scripts``.
+invariant in its item, and no array of the two counts. These calls run, and
+CI type checks every file in this directory alongside ``src`` and
+``scripts``.
 """
 
 from __future__ import annotations
@@ -44,9 +45,12 @@ def test_a_sidecar_is_written_with_the_numbers_its_record_takes(
 
 
 def test_a_frame_takes_its_size_as_any_sequence_of_two_counts() -> None:
-    """A typed list of either kind of count, a tuple and any other sequence."""
+    """A typed list of either kind of count, a tuple, any other sequence and
+    the NumPy array of the two, which the frame reads as the counts it holds.
+    """
     pixels: list[int] = [960, 540]
     counts: list[np.int64] = [np.int64(960), np.int64(540)]
-    for size in (pixels, counts, (960, 540), deque(pixels)):
+    row = np.array(pixels)
+    for size in (pixels, counts, (960, 540), deque(pixels), row):
         frame = simulation.AnimationFrame(size=size)
         assert frame.size == (960, 540)

@@ -11,6 +11,7 @@ import { join, relative, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { prose } from "../src/lib/markdown-fences.mjs";
+import { dropInlineSpansByLine } from "./shared/markdown-spans.mjs";
 
 const docsDir = fileURLToPath(new URL("../src/content/docs", import.meta.url));
 const esDir = join(docsDir, "es");
@@ -88,10 +89,12 @@ if (missingEs.length || orphanEs.length) {
 // the build if the plugin ever renames it, so every figure goes through it.
 const figures = [];
 for (const page of esPages) {
-	// Fenced blocks and inline code are samples of markup, not markup.
-	const source = prose(readFileSync(join(esDir, page), "utf8")).replace(
-		/`[^`\n]*`/g,
-		"",
+	// Fenced blocks and inline code are samples of markup, not markup. The
+	// code spans are read as the site reads them (shared/markdown-spans.mjs):
+	// a backtick behind a backslash is shown and opens none, so it hides no
+	// figure written after it.
+	const source = dropInlineSpansByLine(
+		prose(readFileSync(join(esDir, page), "utf8")),
 	);
 	// Every markdown image opens with the same two characters, whatever comes
 	// after them: the inline `![alt](src)`, the two reference forms

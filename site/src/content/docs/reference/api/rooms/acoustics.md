@@ -130,17 +130,17 @@ EDT/T20/T30 fit lines.
 ```python
 filter_bandwidth(
     center: float | np.floating[Any] | np.integer[Any],
-    fraction: int = 1,
+    fraction: int | np.integer[Any] = 1,
 ) -> float
 
 filter_bandwidth(
     center: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
-    fraction: int = 1,
+    fraction: int | np.integer[Any] = 1,
 ) -> NDArray[np.float64]
 
 filter_bandwidth(
     center: ArrayLike,
-    fraction: int = 1,
+    fraction: int | np.integer[Any] = 1,
 ) -> float | NDArray[np.float64]
 ```
 

@@ -41,7 +41,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, overload
+from typing import TYPE_CHECKING, Any, cast, overload
 
 import numpy as np
 
@@ -681,23 +681,25 @@ MIN_DETECTOR_MULTIPLE = 2.0
 
 
 @overload
-def filter_bandwidth[S: RealScalar](center: S, fraction: int = 1) -> float: ...
+def filter_bandwidth[S: RealScalar](
+    center: S, fraction: int | np.integer[Any] = 1
+) -> float: ...
 
 
 @overload
 def filter_bandwidth[V: RealValues](
-    center: V, fraction: int = 1
+    center: V, fraction: int | np.integer[Any] = 1
 ) -> NDArray[np.float64]: ...
 
 
 @overload
 def filter_bandwidth[A: ArrayLike](
-    center: A, fraction: int = 1
+    center: A, fraction: int | np.integer[Any] = 1
 ) -> float | NDArray[np.float64]: ...
 
 
 def filter_bandwidth(
-    center: ArrayLike, fraction: int = 1
+    center: ArrayLike, fraction: int | np.integer[Any] = 1
 ) -> float | NDArray[np.float64]:
     """Bandwidth of a fractional-octave filter (ISO 3382-1:2009, 7.1).
 
@@ -729,7 +731,7 @@ def filter_bandwidth(
         msg = "'center' must be a positive, finite frequency in Hz."
         raise ValueError(msg)
     width = np.asarray(
-        FILTER_BANDWIDTH_FRACTION[fraction] * frequencies, dtype=np.float64
+        FILTER_BANDWIDTH_FRACTION[cast("int", fraction)] * frequencies, dtype=np.float64
     )
     return as_float_or_array(width, like=(center,))
 

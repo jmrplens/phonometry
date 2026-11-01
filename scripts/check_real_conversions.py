@@ -448,23 +448,34 @@ def _dtype_names(
         if isinstance(node, ast.Assign | ast.AnnAssign) and node.value is not None:
             kind = names.kind(node.value)
             targets = node.targets if isinstance(node, ast.Assign) else [node.target]
-            for target in targets:
-                if kind is not None and isinstance(target, ast.Name):
-                    found[target.id] = kind
+            found.update(
+                (target.id, kind)
+                for target in targets
+                if kind is not None and isinstance(target, ast.Name)
+            )
     if isinstance(function, ast.FunctionDef | ast.AsyncFunctionDef):
-        arguments = function.args
-        positional = [*arguments.posonlyargs, *arguments.args]
-        pairs = [
-            *zip(
-                positional[len(positional) - len(arguments.defaults) :],
-                arguments.defaults,
-                strict=True,
-            ),
-            *zip(arguments.kwonlyargs, arguments.kw_defaults, strict=True),
-        ]
-        for parameter, default in pairs:
-            if default is not None and (kind := names.kind(default)) is not None:
-                found[parameter.arg] = kind
+        found.update(_default_dtypes(function, names))
+    return found
+
+
+def _default_dtypes(
+    function: ast.FunctionDef | ast.AsyncFunctionDef, names: _Names
+) -> dict[str, Kind]:
+    """The parameters of *function* whose default names a dtype, by kind."""
+    arguments = function.args
+    positional = [*arguments.posonlyargs, *arguments.args]
+    pairs = [
+        *zip(
+            positional[len(positional) - len(arguments.defaults) :],
+            arguments.defaults,
+            strict=True,
+        ),
+        *zip(arguments.kwonlyargs, arguments.kw_defaults, strict=True),
+    ]
+    found: dict[str, Kind] = {}
+    for parameter, default in pairs:
+        if default is not None and (kind := names.kind(default)) is not None:
+            found[parameter.arg] = kind
     return found
 
 
@@ -643,26 +654,26 @@ class _Flow:
         if isinstance(node, ast.Name):
             return [node.id]
         if isinstance(node, ast.Attribute):
-            if (
-                self.fields
-                and isinstance(node.value, ast.Name)
-                and node.value.id == "self"
-            ):
-                return [f"self.{node.attr}"]
-            return (
-                self.names_read(node.value) if node.attr in _KEEPING_ATTRIBUTES else []
-            )
+            return self._attribute_names(node)
         if isinstance(node, ast.Subscript) and isinstance(node.value, ast.Name):
             return [ast.unparse(node)]
+        return [name for part in self._parts(node) for name in self.names_read(part)]
+
+    def _attribute_names(self, node: ast.Attribute) -> list[str]:
+        if self.fields and isinstance(node.value, ast.Name) and node.value.id == "self":
+            return [f"self.{node.attr}"]
+        return self.names_read(node.value) if node.attr in _KEEPING_ATTRIBUTES else []
+
+    def _parts(self, node: ast.expr) -> list[ast.expr]:
+        """The parts of *node* that hold its value as they are."""
         if isinstance(node, ast.Starred | ast.NamedExpr):
-            return self.names_read(node.value)
+            return [node.value]
         if isinstance(node, ast.Tuple | ast.List):
-            return [name for item in node.elts for name in self.names_read(item)]
+            return list(node.elts)
         if isinstance(node, ast.IfExp):
-            return self.names_read(node.body) + self.names_read(node.orelse)
+            return [node.body, node.orelse]
         if isinstance(node, ast.Call):
-            kept = _kept(node, self.names)
-            return [name for item in kept for name in self.names_read(item)]
+            return _kept(node, self.names)
         return []
 
     # Bindings and checks.
@@ -1023,15 +1034,7 @@ def _statement_calls(node: ast.stmt, *, sure: bool) -> Iterator[tuple[ast.Call, 
         yield from _sure_calls(node.body, sure=sure and _raises(node.orelse))
         yield from _sure_calls(node.orelse, sure=sure and _raises(node.body))
     elif isinstance(node, ast.For | ast.AsyncFor | ast.While | ast.Match):
-        header = (
-            node.test
-            if isinstance(node, ast.While)
-            else (node.subject if isinstance(node, ast.Match) else node.iter)
-        )
-        yield from _expression_calls(header, sure=sure)
-        for child in ast.iter_child_nodes(node):
-            if isinstance(child, ast.stmt | ast.match_case):
-                yield from _nested_calls(child)
+        yield from _loop_calls(node, sure=sure)
     elif isinstance(node, ast.Try | ast.TryStar):
         yield from _sure_calls(node.body, sure=sure)
         for handler in node.handlers:
@@ -1045,6 +1048,22 @@ def _statement_calls(node: ast.stmt, *, sure: bool) -> Iterator[tuple[ast.Call, 
     elif not isinstance(node, _SCOPES):
         for child in ast.iter_child_nodes(node):
             yield from _expression_calls(child, sure=sure)
+
+
+def _loop_calls(
+    node: ast.For | ast.AsyncFor | ast.While | ast.Match, *, sure: bool
+) -> Iterator[tuple[ast.Call, bool]]:
+    """The calls of a loop or a ``match``: its header surely, its body maybe."""
+    if isinstance(node, ast.While):
+        header: ast.expr = node.test
+    elif isinstance(node, ast.Match):
+        header = node.subject
+    else:
+        header = node.iter
+    yield from _expression_calls(header, sure=sure)
+    for child in ast.iter_child_nodes(node):
+        if isinstance(child, ast.stmt | ast.match_case):
+            yield from _nested_calls(child)
 
 
 def _nested_calls(node: ast.AST) -> Iterator[tuple[ast.Call, bool]]:

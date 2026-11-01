@@ -41,7 +41,7 @@ import re
 import types
 import warnings
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 import numpy as np
 import pytest
@@ -1533,48 +1533,67 @@ def _wrong_types(value: float) -> tuple[object, ...]:
     )
 
 
+def _outcome(
+    function: Callable[..., object], arguments: dict[str, object], name: str
+) -> str | None:
+    """What a call does with a wrong value in *name*: ``None`` for a
+    ``TypeError`` that names it, the offence otherwise.
+    """
+    try:
+        _quietly(function, arguments)
+    except TypeError as refusal:
+        if name in str(refusal):
+            return None
+        return f"an anonymous TypeError ({refusal})"
+    # Reported, not hidden
+    except Exception as refusal:
+        return f"{type(refusal).__name__} ({refusal})"
+    return "accepted"
+
+
+def _probed_numbers(
+    function: Callable[..., object],
+) -> tuple[dict[str, object], dict[str, object]] | None:
+    """A call the function takes, and the one-number parameters to probe in it."""
+    parameters = _scalar_parameters(function)
+    if parameters is None:
+        return None
+    required, optional = parameters
+    baseline = _baseline(function, required) if required or optional else None
+    if baseline is None:
+        return None
+    numbers = {
+        name: value
+        for name, value in {**baseline, **optional}.items()
+        if required.get(name) not in _FILLED
+    }
+    return baseline, numbers
+
+
 def _array_refusals() -> tuple[list[str], int]:
     """Each public one-number parameter an array, a text or a complex number reaches unrefused.
 
-    For every public function whose required parameters all take one number,
-    a call that goes through is found first; then each one-number parameter,
-    required or defaulted, is given a one-element and a two-element array, the
-    text of its own number, a text that reads as none and its number as a
-    Python and as a NumPy complex number, in turn, and must be refused with a
-    ``TypeError`` that names it.
+    For every public function whose required parameters the probe can fill (one
+    number, numbers, a text label or a sequence of records), a call that goes
+    through is found first; then each one-number parameter, required or
+    defaulted, is given a one-element and a two-element array, the text of its
+    own number, a text that reads as none and its number as a Python and as a
+    NumPy complex number, in turn, and must be refused with a ``TypeError``
+    that names it.
     """
     offences: list[str] = []
     probed = 0
     for qualified, function in _public_functions():
-        parameters = _scalar_parameters(function)
-        if parameters is None:
+        found = _probed_numbers(function)
+        if found is None:
             continue
-        required, optional = parameters
-        if not (required or optional):
-            continue
-        baseline = _baseline(function, required)
-        if baseline is None:
-            continue
-        numbers = {
-            name: value
-            for name, value in {**baseline, **optional}.items()
-            if required.get(name) not in _FILLED
-        }
+        baseline, numbers = found
         for name, value in numbers.items():
             probed += 1
-            for wrapped in _wrong_types(value):
-                try:
-                    _quietly(function, {**baseline, name: wrapped})
-                except TypeError as refusal:
-                    if name in str(refusal):
-                        continue
-                    outcome = f"an anonymous TypeError ({refusal})"
-                # Reported, not hidden
-                except Exception as refusal:
-                    outcome = f"{type(refusal).__name__} ({refusal})"
-                else:
-                    outcome = "accepted"
-                offences.append(f"{qualified}({name}) given {wrapped!r}: {outcome}")
+            for wrapped in _wrong_types(cast("float", value)):
+                outcome = _outcome(function, {**baseline, name: wrapped}, name)
+                if outcome is not None:
+                    offences.append(f"{qualified}({name}) given {wrapped!r}: {outcome}")
     return offences, probed
 
 

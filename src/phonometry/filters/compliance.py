@@ -312,7 +312,11 @@ def _edition_spec(edition: object) -> dict[str, Any]:
 
 
 def class_limits(
-    fraction: float, filter_class: int, omega: ArrayLike, *, edition: Edition = "2014"
+    fraction: float,
+    filter_class: int | np.integer[Any],
+    omega: ArrayLike,
+    *,
+    edition: Edition = "2014",
 ) -> tuple[np.ndarray, np.ndarray]:
     r"""Acceptance limits on relative attenuation at normalized frequencies.
 

@@ -116,19 +116,19 @@ $x_i$. Both slips are in `docs/ERRATA.md`.
 method_a_scale_values(
     positions: float | np.floating[Any] | np.integer[Any],
     *,
-    part: int,
+    part: int | np.integer[Any],
 ) -> float
 
 method_a_scale_values(
     positions: Sequence[float] | Sequence[np.floating[Any]] | Sequence[np.integer[Any]] | NDArray[Any],
     *,
-    part: int,
+    part: int | np.integer[Any],
 ) -> NDArray[np.float64]
 
 method_a_scale_values(
     positions: ArrayLike,
     *,
-    part: int,
+    part: int | np.integer[Any],
 ) -> float | NDArray[np.float64]
 ```
 

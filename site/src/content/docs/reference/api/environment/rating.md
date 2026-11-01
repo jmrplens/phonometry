@@ -16,7 +16,7 @@ and composite whole-day rating levels (6.5, Formulae 5-6).
 
 ```python
 composite_rating_level(
-    periods: Iterable[tuple[float, float, float]],
+    periods: Iterable[tuple[float, float, float]] | ArrayLike,
 ) -> float
 ```
 
@@ -33,7 +33,7 @@ $$
 
 | Name | Description |
 | :--- | :--- |
-| `periods` | Iterable of `(level, hours, adjustment)` tuples. `level` is the period's (rating) equivalent continuous level, `hours` its duration and `adjustment` the time-of-day or source adjustment K (e.g. ISO 1996-1 Table A.1: evening 5 dB, night 10 dB). Hours must be positive and sum to 24. |
+| `periods` | Iterable of `(level, hours, adjustment)` tuples, or an array of one such row per period. `level` is the period's (rating) equivalent continuous level, `hours` its duration and `adjustment` the time-of-day or source adjustment K (e.g. ISO 1996-1 Table A.1: evening 5 dB, night 10 dB). Hours must be positive and sum to 24. |
 
 **Returns:** Composite rating level in dB.
 

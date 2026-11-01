@@ -118,7 +118,7 @@ network applied to the whole signal against a design-goal response, live in
 ```python
 class_limits(
     fraction: float,
-    filter_class: int,
+    filter_class: int | np.integer[Any],
     omega: ArrayLike,
     *,
     edition: Literal['2014', '1995'] = '2014',

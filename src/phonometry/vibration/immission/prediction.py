@@ -60,7 +60,7 @@ from __future__ import annotations
 
 import math
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, cast
 
 import numpy as np
 
@@ -638,7 +638,7 @@ def track_excitation_frequency(
 
 
 def machine_count_correction(
-    n_machines: ArrayLike, *, n_reference_machines: int
+    n_machines: ArrayLike, *, n_reference_machines: int | np.integer[Any]
 ) -> NDArray[np.float64]:
     r"""The correction :math:`\chi` of Formula (7), Figure 3.
 
@@ -667,12 +667,15 @@ def machine_count_correction(
     if np.any(counts < grid[0]) or np.any(counts > grid[-1]):
         msg = f"Figure 3 runs from {grid[0]:g} to {grid[-1]:g} machines."
         raise ValueError(msg)
-    curve = MACHINE_COUNT_CORRECTION[n_reference_machines]
+    curve = MACHINE_COUNT_CORRECTION[cast("int", n_reference_machines)]
     return np.asarray(np.interp(counts, grid, curve), dtype=np.float64)
 
 
 def machine_hall_velocity_mm_s(
-    reference_velocity_mm_s: float, n_machines: ArrayLike, *, n_reference_machines: int
+    reference_velocity_mm_s: float,
+    n_machines: ArrayLike,
+    *,
+    n_reference_machines: int | np.integer[Any],
 ) -> NDArray[np.float64]:
     r"""The peak velocity outside a hall of similar machines, Formula (7).
 

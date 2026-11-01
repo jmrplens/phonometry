@@ -388,7 +388,7 @@ MACHINE_COUNT_CORRECTION = {3: (0.551, 0.537, 0.519, 0.496, 0.471, 0.423, 0.383,
 machine_count_correction(
     n_machines: ArrayLike,
     *,
-    n_reference_machines: int,
+    n_reference_machines: int | np.integer[Any],
 ) -> NDArray[np.float64]
 ```
 
@@ -430,7 +430,7 @@ machine_hall_velocity_mm_s(
     reference_velocity_mm_s: float,
     n_machines: ArrayLike,
     *,
-    n_reference_machines: int,
+    n_reference_machines: int | np.integer[Any],
 ) -> NDArray[np.float64]
 ```
 

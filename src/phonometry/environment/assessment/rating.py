@@ -7,7 +7,7 @@ and composite whole-day rating levels (6.5, Formulae 5-6).
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 import numpy as np
 
@@ -15,6 +15,8 @@ from ..._internal.validation import real_array, require_scalar
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
+
+    from numpy.typing import ArrayLike
 
 __all__ = [
     "composite_rating_level",
@@ -34,7 +36,9 @@ _PERIOD_TABLE_RANK = 2
 _PERIOD_FIELDS = 3
 
 
-def composite_rating_level(periods: Iterable[tuple[float, float, float]]) -> float:
+def composite_rating_level(
+    periods: Iterable[tuple[float, float, float]] | ArrayLike,
+) -> float:
     r"""Composite whole-day rating level (ISO 1996-1:2016, 6.5).
 
     Generalizes Formulae (5) and (6): each period contributes its rating
@@ -45,7 +49,8 @@ def composite_rating_level(periods: Iterable[tuple[float, float, float]]) -> flo
        10 \log_{10}\left[ \sum_i \frac{h_i}{24} \cdot
        10^{0.1 (L_i + K_i)} \right]
 
-    :param periods: Iterable of ``(level, hours, adjustment)`` tuples.
+    :param periods: Iterable of ``(level, hours, adjustment)`` tuples, or an
+        array of one such row per period.
         ``level`` is the period's (rating) equivalent continuous level,
         ``hours`` its duration and ``adjustment`` the time-of-day or
         source adjustment K (e.g. ISO 1996-1 Table A.1: evening 5 dB,
@@ -57,7 +62,7 @@ def composite_rating_level(periods: Iterable[tuple[float, float, float]]) -> flo
     :raises TypeError: if ``periods`` holds a text or a value that is not a
         real number.
     """
-    periods = list(periods)
+    periods = list(cast("Iterable[tuple[float, float, float]]", periods))
     if not periods:
         msg = "At least one period is required."
         raise ValueError(msg)

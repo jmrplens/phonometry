@@ -284,7 +284,7 @@ verdict row and a footer with the identity block and disclaimer.
 energy_average_level(
     levels: ArrayLike,
     *,
-    axis: int = -1,
+    axis: int | np.integer[Any] = -1,
 ) -> float | NDArray[np.float64]
 ```
 

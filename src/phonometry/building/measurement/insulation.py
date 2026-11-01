@@ -87,7 +87,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Literal, overload
+from typing import TYPE_CHECKING, Any, Literal, cast, overload
 
 import numpy as np
 
@@ -730,7 +730,7 @@ def _render_iso16283_facade(
 
 
 def energy_average_level(
-    levels: ArrayLike, *, axis: int = -1
+    levels: ArrayLike, *, axis: int | np.integer[Any] = -1
 ) -> float | NDArray[np.float64]:
     r"""Energy-average sound pressure level (ISO 16283-1:2014, Formula (9)).
 
@@ -758,7 +758,7 @@ def energy_average_level(
     if not np.all(np.isfinite(data)):
         msg = "'levels' must contain only finite values."
         raise ValueError(msg)
-    return as_float_if_reduced(energy_mean(data, axis=axis))
+    return as_float_if_reduced(energy_mean(data, axis=cast("int", axis)))
 
 
 def _as_band_levels(levels: ArrayLike, name: str) -> np.ndarray:

@@ -2360,8 +2360,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `underwater.seawater_absorption`, the `sound_power_level` of
   `room.crowd_noise_level`, `environment.fresnel_number` and the rest);
   `building.flanking_element` names its own parameters where it named those
-  of `flanking_path`, and `building.resonant_sound_reduction_index` annotates
-  `correction` as the one value or one per band it reads. Every one-number
+  of `flanking_path`; `building.resonant_sound_reduction_index` annotates
+  `correction` as the one value or one per band it reads,
+  `environment.composite_rating_level` its `periods` as the rows of numbers
+  it reads, and the integers those checks admit as NumPy integers too are
+  annotated so (`axis`, `part`, `fraction`, `filter_class`,
+  `n_reference_machines`). Every one-number
   parameter the public probe of `tests/test_scalar_guards.py` can call, 1625
   of them, refuses `np.complex128(v + 1j)` by name.
   `scripts/check_real_conversions.py` lists every conversion of the tree with

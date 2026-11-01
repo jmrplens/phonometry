@@ -106,7 +106,7 @@ import math
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Literal, overload
+from typing import TYPE_CHECKING, Any, Literal, cast, overload
 
 import numpy as np
 from scipy import stats
@@ -611,23 +611,25 @@ def _method_a_scale(part: int) -> QuestionnaireScale:
 
 
 @overload
-def method_a_scale_values[S: RealScalar](positions: S, *, part: int) -> float: ...
+def method_a_scale_values[S: RealScalar](
+    positions: S, *, part: int | np.integer[Any]
+) -> float: ...
 
 
 @overload
 def method_a_scale_values[V: RealValues](
-    positions: V, *, part: int
+    positions: V, *, part: int | np.integer[Any]
 ) -> NDArray[np.float64]: ...
 
 
 @overload
 def method_a_scale_values[A: ArrayLike](
-    positions: A, *, part: int
+    positions: A, *, part: int | np.integer[Any]
 ) -> float | NDArray[np.float64]: ...
 
 
 def method_a_scale_values(
-    positions: ArrayLike, *, part: int
+    positions: ArrayLike, *, part: int | np.integer[Any]
 ) -> float | NDArray[np.float64]:
     """The scale value of a ticked box of Method A (ISO/TS 12913-3 Table A.1).
 
@@ -649,7 +651,7 @@ def method_a_scale_values(
         number, or ``part`` is not a single number.
     """
     require_scalar(part, "part")
-    scale = _method_a_scale(part)
+    scale = _method_a_scale(cast("int", part))
     # Before the conversion, which keeps the real part of a NumPy complex
     # position, so that the refusal of a complex one reaches it.
     refuse_complex(positions, "'positions' must hold real scale values.")
@@ -1090,7 +1092,7 @@ def _paired(
         # A copy, so the result never shares memory with the caller's array:
         # a later change to it would otherwise rewrite the result's x and y
         # and leave its coefficient and ranks describing other data.
-        array = real_array(values, name, copy=True).ravel()
+        array = np.array(real_array(values, name)).ravel()
         if not np.all(np.isfinite(array)):
             msg = f"'{name}' must be finite; drop the incomplete pairs first."
             raise ValueError(msg)

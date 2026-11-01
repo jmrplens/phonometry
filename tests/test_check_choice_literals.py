@@ -294,6 +294,30 @@ def test_a_literal_inside_a_collection_is_a_literal() -> None:
     assert not ccl._is_literal("Sequence[str]")
 
 
+def _classified(values: str | list[float]) -> None:
+    found = _misread_member(values)
+    if found not in ("bytearray", "nesting"):
+        return
+    msg = "text"
+    raise TypeError(msg)
+
+
+def _misread_member(value: object) -> str | None:
+    return None if value else "bytearray"
+
+
+def test_a_helper_that_classifies_the_value_is_no_cleaned_up_copy_of_it() -> None:
+    """What ``_misread_member`` answers is a word of its own about the value,
+    not the value: comparing it with a text compares no option. A private
+    helper that hands the value back cleaned up is still followed.
+    """
+    constants = ccl._module_constants(sys.modules[__name__])
+    assert (
+        ccl.code_evidence(_tree(_classified), ccl._the_name("values"), constants) == []
+    )
+    assert ccl.code_evidence(_tree(_derived), ccl._the_name("mode"), constants)
+
+
 def test_a_set_difference_or_subset_against_strings_is_a_choice() -> None:
     """What is left once the options are taken away is refused, or the
     collection is tested as a subset of them: either way its strings are a

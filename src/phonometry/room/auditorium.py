@@ -486,7 +486,7 @@ def free_field_reference_level(
 
 
 def directivity_energy_average(
-    levels: ArrayLike, *, axis: int = -1
+    levels: ArrayLike, *, axis: int | np.integer[Any] = -1
 ) -> float | NDArray[np.float64]:
     r"""Average a free-field measurement over bearings around the source.
 
@@ -546,7 +546,7 @@ def directivity_energy_average(
         )
         raise ValueError(msg)
     mean = np.asarray(
-        10.0 * np.log10(np.mean(10.0 ** (values / 10.0), axis=axis)),
+        10.0 * np.log10(np.mean(10.0 ** (values / 10.0), axis=cast("int", axis))),
         dtype=np.float64,
     )
     return as_float_if_reduced(mean)

@@ -693,6 +693,75 @@ def test_a_name_bound_in_the_reader_s_own_scope_hides_the_module_s_check(
     ]
 
 
+#: A module whose own check is called ``info``, and readers in which a scope
+#: inside the reader binds that name for itself, or the reader declares it
+#: ``global``, or binds it twice.
+_SCOPED = """
+import numpy as np
+
+from phonometry._internal.json_input import not_regular_at
+
+def info(path):
+    if not_regular_at(Path(path)) is not None:
+        raise ValueError(path)
+
+def beside_a_comprehension(path, describers):
+    info(path)
+    names = [info.name for info in describers]
+    return np.load(path), names
+
+def beside_a_nested_store(path):
+    info(path)
+
+    def describe():
+        info = make_describer()
+        return info
+
+    return np.load(path), describe
+
+def beside_a_lambda(path):
+    info(path)
+    show = lambda: (info := make_describer())
+    return np.load(path), show
+
+def outer(path):
+    def info(name):
+        return name
+
+    def inner():
+        global info
+        info(path)
+        return np.load(path)
+
+    return inner
+
+def defined_then_rebound(path):
+    def info(name):
+        if not_regular_at(Path(name)) is not None:
+            raise ValueError(name)
+
+    info = make_describer()
+    info(path)
+    return np.load(path)
+"""
+
+
+def test_a_name_is_looked_up_in_the_scope_the_call_runs_in(
+    tmp_path: pathlib.Path,
+) -> None:
+    """Only the scopes a call runs in, and what each binds of its own, say what a name is.
+
+    A comprehension's loop target, a name a nested function or a lambda
+    stores in, hid the module's check ``info`` in the reader around them,
+    and a name the reader declares ``global`` was looked up in the function
+    around it, which defines a namesake that checks nothing: the check
+    before ``np.load`` was not seen and the read was refused. A name a
+    scope both defines and rebinds was read as the definition, which the
+    rebinding replaced before the call, and the unchecked read passed.
+    """
+    assert _found(tmp_path, _SCOPED) == [("defined_then_rebound", _FOREIGN)]
+
+
 #: A module that defines one reader in each branch of an ``if``, and one in
 #: each block of a ``try``, where only one of the two binds ``info`` itself.
 _TWO_BRANCHES = """

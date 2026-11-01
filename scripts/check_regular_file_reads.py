@@ -80,7 +80,7 @@ import sys
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, NamedTuple
 
-from ast_scan import ROOT, exempted, python_files, relative
+from ast_scan import ROOT, exempted, own_names, python_files, relative
 
 if TYPE_CHECKING:
     import pathlib
@@ -363,53 +363,48 @@ def _parameters(scope: ast.AST) -> set[str]:
     """The names a function binds as its parameters; none for a class or a module."""
     if not isinstance(scope, ast.FunctionDef | ast.AsyncFunctionDef):
         return set()
-    arguments = scope.args
-    named = [*arguments.posonlyargs, *arguments.args, *arguments.kwonlyargs]
-    named.extend(each for each in (arguments.vararg, arguments.kwarg) if each)
-    return {parameter.arg for parameter in named}
+    return set(own_names(scope).parameters)
 
 
 def _stored(scope: ast.AST) -> set[str]:
     """The names *scope* stores a value in by its own code, a definition aside.
 
     An assignment, a loop, a ``with ... as``, an ``except ... as`` and the
-    other statements that bind a name; the imports are read by
-    :func:`_imported`, and the functions and classes defined in *scope* are
-    the scope's definitions (:func:`_defined_here`).
+    other statements that bind a name, read as Python reads the scope
+    (:func:`ast_scan.own_names`): a comprehension's loop target is the
+    comprehension's, and what a lambda binds is the lambda's. The imports
+    are read by :func:`_imported`, and the functions and classes defined
+    in *scope* are the scope's definitions (:func:`_defined_here`).
     """
-    stored = {
-        node.id
-        for node in _own_nodes(scope)
-        if isinstance(node, ast.Name) and isinstance(node.ctx, ast.Store)
-    }
-    stored.update(
-        node.name
-        for node in _own_nodes(scope)
-        if isinstance(node, ast.ExceptHandler) and node.name
-    )
-    return stored
+    return set(own_names(scope).stored)
 
 
 def _bound_here(scope: ast.AST) -> frozenset[str]:
     """The names *scope* binds by anything but a definition, its parameters included.
 
     What makes a name of the scope its own, so that a function of the module
-    of the same name around it is not the one a call reaches.
+    of the same name around it is not the one a call reaches. A name the
+    scope declares ``global`` or ``nonlocal`` and stores nothing in is not
+    its own; one it stores in is still taken as bound, to what the guard
+    cannot tell.
     """
-    imported = {
-        name
-        for node in _own_nodes(scope)
-        if isinstance(node, ast.Import | ast.ImportFrom)
-        for name in _imported(node)
-    }
-    return frozenset(_parameters(scope) | _stored(scope) | imported)
+    names = own_names(scope)
+    sent_out = names.declared_global | names.declared_nonlocal
+    return frozenset(names.parameters | names.stored | (names.imported - sent_out))
 
 
-def _bound(scope: ast.AST, package: str, outer: Mapping[str, str]) -> dict[str, str]:
+def _bound(
+    scope: ast.AST,
+    package: str,
+    outer: Mapping[str, str],
+    top: Mapping[str, str] | None = None,
+) -> dict[str, str]:
     """What each name stands for inside *scope*, given what it stands for around it.
 
     A parameter hides the name around it, and so does a name the scope
-    stores anything in (:func:`_stored`); then the imports of the scope as
+    stores anything in (:func:`_stored`); a name the scope declares
+    ``global`` and stores nothing in stands for what it stands for at the
+    top of the module, *top*; then the imports of the scope as
     :func:`_imported` reads them, the relative ones from *package*; then a
     name bound by an assignment to a dotted name (``snd = soundfile``,
     ``reader = sf.read``) stands for what that name stands for, the
@@ -417,6 +412,10 @@ def _bound(scope: ast.AST, package: str, outer: Mapping[str, str]) -> dict[str, 
     classes in *scope* bind is theirs.
     """
     aliases = dict(outer)
+    for name in own_names(scope).declared_global:
+        aliases.pop(name, None)
+        if top is not None and name in top:
+            aliases[name] = top[name]
     for name in _parameters(scope) | _stored(scope):
         aliases.pop(name, None)
     assignments: list[tuple[str, list[str], tuple[int, int]]] = []
@@ -443,7 +442,7 @@ def aliases_of(tree: ast.AST, package: str = "") -> dict[ast.AST, dict[str, str]
     it bind and, at the top, the module (:func:`_bound`). A class body is
     skipped by the functions in it, as Python skips it: an import in a class
     body is not seen by the class's methods. A name a function declares
-    ``global`` is still taken as the function's own.
+    ``global`` is the module's, unless the function stores in it.
     """
     module = _bound(tree, package, {})
     found: dict[ast.AST, dict[str, str]] = {tree: module}
@@ -454,7 +453,7 @@ def aliases_of(tree: ast.AST, package: str = "") -> dict[ast.AST, dict[str, str]
             if not isinstance(child, _SCOPES):
                 pending.append((child, outer))
                 continue
-            found[child] = _bound(child, package, outer)
+            found[child] = _bound(child, package, outer, module)
             inner = outer if isinstance(child, ast.ClassDef) else found[child]
             pending.append((child, inner))
     return found
@@ -551,12 +550,14 @@ def _own_calls(scope: ast.AST) -> list[ast.Call]:
 
 
 class _Names(NamedTuple):
-    """What one scope binds: the functions and classes it defines, and the
-    names it binds otherwise (:func:`_bound_here`).
+    """What one scope binds: the functions and classes it defines, the
+    names it binds otherwise (:func:`_bound_here`), and those it declares
+    ``global``, which the module's own binding stands for.
     """
 
     defines: frozenset[str]
     binds: frozenset[str]
+    declared_global: frozenset[str] = frozenset()
 
 
 @dataclass(frozen=True)
@@ -612,15 +613,14 @@ def _defined_here(scope: ast.AST) -> frozenset[str]:
     One written inside an ``if``, a ``try`` or a ``with`` too, as
     :func:`_functions` reads it; not those defined inside them.
     """
-    found: set[str] = set()
-    pending = list(ast.iter_child_nodes(scope))
-    while pending:
-        node = pending.pop()
-        if isinstance(node, _SCOPES):
-            found.add(node.name)
-        else:
-            pending.extend(ast.iter_child_nodes(node))
-    return frozenset(found)
+    return own_names(scope).defined
+
+
+def _names_of(scope: ast.AST) -> _Names:
+    """What *scope* binds, as :class:`_Names` keeps it."""
+    return _Names(
+        _defined_here(scope), _bound_here(scope), own_names(scope).declared_global
+    )
 
 
 def _top_level_imports(tree: ast.Module) -> Iterator[ast.Import | ast.ImportFrom]:
@@ -681,7 +681,10 @@ def _local(name: str, scope: _Scope) -> str | None:
     Python skips it), then at the top of the module. A scope that binds the
     name otherwise, by a parameter, an import or an assignment, ends the
     search with none: the name is that binding's, which *scope*'s aliases
-    say, not a function of the module further out.
+    say, not a function of the module further out. So does a scope that
+    both defines the name and binds it otherwise, which may stand for
+    either at the call. A scope that declares the name ``global`` sends
+    the search to the top of the module.
     """
     parts = [] if scope.name == "<module>" else scope.name.split(".")
     for end in range(len(scope.around) - 1, -1, -1):
@@ -689,10 +692,20 @@ def _local(name: str, scope: _Scope) -> str | None:
         if end < len(parts) and isinstance(holder, ast.ClassDef):
             continue
         own = scope.names.get(holder, _Names(frozenset(), frozenset()))
-        if name in own.defines:
-            return ".".join([scope.module, *parts[:end], name])
+        if name in own.declared_global:
+            return _at_the_top(name, scope)
         if name in own.binds:
             return None
+        if name in own.defines:
+            return ".".join([scope.module, *parts[:end], name])
+    return None
+
+
+def _at_the_top(name: str, scope: _Scope) -> str | None:
+    """The function or class of the module *name* is at its top, from *scope*."""
+    own = scope.names.get(scope.around[0], _Names(frozenset(), frozenset()))
+    if name in own.defines and name not in own.binds:
+        return f"{scope.module}.{name}"
     return None
 
 
@@ -738,10 +751,7 @@ def _scopes(path: pathlib.Path, tree: ast.AST) -> list[_Scope]:
     module = module_name(path)
     aliases = aliases_of(tree, _package_of(path, module))
     functions = list(_functions(tree))
-    names = {
-        node: _Names(_defined_here(node), _bound_here(node))
-        for _name, node, _around in functions
-    }
+    names = {node: _names_of(node) for _name, node, _around in functions}
     return [
         _Scope(path, name, node, _own_calls(node), aliases[node], module, around, names)
         for name, node, around in functions

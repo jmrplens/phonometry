@@ -3334,17 +3334,23 @@ def _items_take(
 _CALLABLES = frozenset({"collections.abc.Callable", "typing.Callable"})
 
 
+#: A bare ``Callable``, as a type checker reads it: ``Callable[..., Any]``.
+_ANY_CALLABLE: tuple[object, ...] = (_ANY_COUNT, frozenset({("typing.Any", ())}))
+
+
 def _callable_takes(mine: tuple[object, ...], theirs: tuple[object, ...]) -> bool:
     """Whether a callable of items *mine* takes every callable of items *theirs*.
 
-    As a type checker reads one: its return covariantly, so a callable that
-    returns a ``float`` is one that returns a ``complex``, and its
-    parameters contravariantly, so one that takes a ``float`` is one that
-    takes an ``int``, the count of them the same. A bare ``Callable`` takes
-    any callable, and ``...`` for the parameters takes or is taken by any.
+    Its return covariantly, so a callable that returns a ``float`` is one
+    that returns a ``complex``, and its parameters contravariantly, so one
+    that takes a ``float`` is one that takes an ``int``, the count of them
+    the same; ``...`` for the parameters takes or is taken by any. A bare
+    ``Callable`` is ``Callable[..., Any]`` on either side, and a return of
+    ``Any`` is taken only by a return of ``Any`` or ``object``, as the rest
+    of the guard reads ``Any``, where a type checker takes it anywhere.
     """
-    if not mine or not theirs:
-        return not mine
+    mine = mine or _ANY_CALLABLE
+    theirs = theirs or _ANY_CALLABLE
     if len(mine) != _SHAPE_MEMBER or len(theirs) != _SHAPE_MEMBER:
         return mine == theirs
     (my_parameters, my_return), (their_parameters, their_return) = mine, theirs

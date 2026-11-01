@@ -2281,6 +2281,37 @@ def test_a_union_whose_mapping_takes_a_written_dict_as_read_alone_passes(
     ]
 
 
+def test_a_bare_callable_is_one_of_any_parameters_returning_anything() -> None:
+    """A bare ``Callable`` is ``Callable[..., Any]``, read the same way spelt out.
+
+    The comparison took a bare ``Callable`` as taking any callable and taken
+    by none, so ``Callable[..., Any]`` and ``Callable[[int], Any]`` refused
+    it while they took the ``Callable[..., Any]`` it is. A return of ``Any``
+    is taken only by a return of ``Any`` or ``object``, as the guard reads
+    ``Any`` everywhere else.
+    """
+    anything = frozenset({("typing.Any", ())})
+    whole = frozenset({("builtins.int", ())})
+    real = frozenset({("builtins.float", ())})
+    everything = frozenset({("builtins.object", ())})
+
+    def callable_of(*items: object) -> tuple[str, tuple[object, ...]]:
+        return ("collections.abc.Callable", items)
+
+    bare = callable_of()
+    for spelt in (
+        callable_of(cpa._ANY_COUNT, anything),
+        callable_of((whole,), anything),
+        callable_of((whole,), everything),
+        callable_of(cpa._ANY_COUNT, everything),
+    ):
+        assert cpa._member_takes(spelt, bare), spelt
+        assert cpa._member_takes(spelt, callable_of(cpa._ANY_COUNT, anything)), spelt
+    assert cpa._member_takes(bare, callable_of((whole,), real))
+    assert cpa._member_takes(bare, bare)
+    assert not cpa._member_takes(callable_of((whole,), real), bare)
+
+
 def test_a_mutable_mapping_takes_a_written_dict_of_its_own_types(
     tmp_path: pathlib.Path,
 ) -> None:

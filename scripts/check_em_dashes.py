@@ -52,15 +52,16 @@ the double hyphen it is. It is looked for where it is published:
   is not prose keeps it: fenced and inline code, a literal block after ``::``,
   the body of a ``.. math::`` or ``.. code-block::`` directive, a doctest,
   math on a page (``$...$`` and a ``$$`` block, which remark-math keeps from
-  smartypants), a link destination, a URL, an HTML comment, the value of an
-  ``href``, ``src``,
-  ``style``, ``id`` or ``class`` attribute (``var(--sl-color-accent)``), and a
-  line that is only a rule: a docstring's heading underline, a table's
-  separator row, a horizontal rule, a frontmatter fence. A run that fills a
-  whole table cell, or a whole slash-separated item of one, is the empty-cell
-  mark, as the em dash is. A docstring and the page generated from it read
-  the same: ``scripts/generate_api_docs.py`` fences a code directive's body
-  and a doctest as code, and turns the math into ``$`` and ``$$`` spans.
+  smartypants), a link destination, a URL, a comment the page does not show
+  (an HTML comment, an MDX comment ``{/* ... */}`` on an MDX page and a
+  comment of the frontmatter), the value of an ``href``, ``src``, ``style``,
+  ``id`` or ``class`` attribute (``var(--sl-color-accent)``), and a line that
+  is only a rule: a docstring's heading underline, a table's separator row, a
+  horizontal rule, a frontmatter fence. A run that fills a whole table cell,
+  or a whole slash-separated item of one, is the empty-cell mark, as the em
+  dash is. A docstring and the page generated from it read the same:
+  ``scripts/generate_api_docs.py`` fences a code directive's body and a
+  doctest as code, and turns the math into ``$`` and ``$$`` spans.
 - **Any other string of a module, and the site's data modules**, are refused
   a double hyphen that stands between spaces (`` -- ``), the one form that is
   a dash there and not an option of a command line (``--keep``) or a
@@ -73,12 +74,13 @@ the double hyphen it is. It is looked for where it is published:
 One more spelling of the dash is read in one place only: a single hyphen
 between spaces that joins a list item's head to its text, as in
 ``* :func:`npd_level` - the interpolated event level``, in a page or a
-package docstring. The head is an inline literal, a role, an interpreted
-span, a bold span or a link, alone or several joined by a slash, a comma,
-"and" or "or", with one parenthesis after them at most; the hyphen has to
-follow it, so a minus inside a role (``:math:`445.2 F - 344.3```) is never
-read. Elsewhere a spaced hyphen is also a minus (``32,3 - 26,3 dB``), and the
-rule holds there by review.
+package docstring, outside code and outside the comments a page does not
+show. The head is an inline literal, a role, an interpreted span, a bold span
+or a link, alone or several joined by a slash, a comma, "and" or "or", with
+one parenthesis after them at most; the hyphen has to follow it, so a minus
+inside a role (``:math:`445.2 F - 344.3```) is never read. Elsewhere a spaced
+hyphen is also a minus (``32,3 - 26,3 dB``), and the rule holds there by
+review.
 
 Exit status 0 when the prose is clean, 1 otherwise, naming every file and line.
 """
@@ -257,21 +259,36 @@ class _Frontmatter:
     JSON-LD of the head, which a search engine reads as JSON. What one line
     leaves open is carried to the next: a quoted value that wraps, a block
     of text and a plain value that wraps.
+
+    The readings of the hyphens read the frontmatter for its comments
+    instead: they leave the escapes as written and blank a comment, which
+    the page does not show (see :attr:`decode_escapes` and
+    :attr:`blank_comments`).
     """
 
     #: The quote of a value still open at the end of the last line.
     quote: str = ""
     #: The column a line of an open block of text is indented past.
     block: int | None = None
-    #: Whether that block is the JSON-LD of a ``content`` key.
+    #: Whether that block is the JSON-LD of a ``content`` key, read with its
+    #: escapes decoded.
     json_block: bool = False
     #: The column a line that wraps an open plain value is indented past.
     plain: int | None = None
     #: How deep the line is inside a flow collection (``[...]``, ``{...}``).
     flow: int = 0
+    #: Whether an escape of the em dash is read as the character where YAML
+    #: decodes it, or left as written.
+    decode_escapes: bool = True
+    #: Whether a comment is blanked, its columns kept, or returned as written.
+    blank_comments: bool = False
 
     def decode(self, line: str) -> str:
-        """The line with each escape of the em dash read where YAML decodes it."""
+        """The line with each escape of the em dash read where YAML decodes it.
+
+        So it is unless :attr:`decode_escapes` is off; a comment is blanked
+        if :attr:`blank_comments` is on.
+        """
         indent = len(line) - len(line.lstrip(" "))
         if self.block is not None:
             if not line.strip() or indent > self.block:
@@ -296,7 +313,9 @@ class _Frontmatter:
         self.quote = "" if found is not None else quote
         value = line[start:end]
         pieces.append(
-            _decode_escapes(value, _YAML_EM_DASH_ESCAPE) if quote == '"' else value
+            _decode_escapes(value, _YAML_EM_DASH_ESCAPE)
+            if quote == '"' and self.decode_escapes
+            else value
         )
         return end
 
@@ -319,7 +338,8 @@ class _Frontmatter:
             pieces.append(char)
             return at + 1
         if char == "#" and (at == 0 or line[at - 1] in " \t"):
-            pieces.append(line[at:])
+            comment = line[at:]
+            pieces.append(" " * len(comment) if self.blank_comments else comment)
             node.done = True
             return len(line)
         if node.open:
@@ -343,7 +363,8 @@ class _Frontmatter:
             node.owner = at
             return at + 1
         if char in "|>" and not self.flow:
-            self.block, self.json_block = node.owner, node.key == "content"
+            self.block = node.owner
+            self.json_block = node.key == "content" and self.decode_escapes
             pieces.append(line[at:])
             node.done = True
             return len(line)
@@ -400,13 +421,22 @@ def _decode_page(text: str) -> str:
     the body of the page a backslash escape is shown as written.
     """
     lines = _decode_entities(text).split("\n")
-    if lines and lines[0].strip() == "---":
-        reader = _Frontmatter()
-        for index in range(1, len(lines)):
-            if lines[index].strip() == "---":
-                break
-            lines[index] = reader.decode(lines[index])
+    _read_frontmatter(lines, _Frontmatter())
     return "\n".join(lines)
+
+
+def _read_frontmatter(lines: list[str], reader: _Frontmatter) -> None:
+    """Pass each line of a page's frontmatter through ``reader``, in place.
+
+    A frontmatter opens on the page's first line and closes on the next
+    ``---``; a page that opens on a ``---`` no later line closes has none, as
+    Astro reads it, and its lines are the body's.
+    """
+    if not lines or lines[0].strip() != "---":
+        return
+    end = next((n for n in range(1, len(lines)) if lines[n].strip() == "---"), 0)
+    for index in range(1, end):
+        lines[index] = reader.decode(lines[index])
 
 
 def _outside_italics(line: str, *, italic_open: bool) -> tuple[str, bool]:
@@ -720,6 +750,9 @@ _RULE_LINE = re.compile(r"^[\s\-=~^+*_#|:]*(?:\||([\-=~^+*_#])\1\1)[\s\-=~^+*_#|
 _HYPHEN_PLACEHOLDER = re.compile(r"(?:^|(?<=/))\s*-{2,}\s*(?=/|$)")
 #: An HTML comment, which the page does not show.
 _HTML_COMMENT = re.compile(r"<!--.*?-->", re.DOTALL)
+#: An MDX comment, an expression that holds nothing but a comment: an MDX page
+#: does not show it, and a markdown page shows it as written.
+_MDX_COMMENT = re.compile(r"\{\s*/\*.*?\*/\s*\}", re.DOTALL)
 #: A link destination, a reference definition's target and a URL, which are
 #: addresses: a heading's anchor keeps the double hyphen its slug was given.
 _ADDRESSES = (
@@ -873,20 +906,36 @@ def _page_code_lines(lines: list[str]) -> list[bool]:
     return [a or b for a, b in zip(code, _math_lines(lines, code), strict=True)]
 
 
-def markdown_double_hyphen_hits(text: str) -> list[int]:
+def _page_without_code_or_comments(written: list[str], *, mdx: bool) -> str:
+    """The text of a page with its code, its display math and its comments blanked.
+
+    The comments are the ones the page does not show: an HTML comment, an MDX
+    comment on an MDX page and a comment of the frontmatter. Every line keeps
+    its place, so that a line still counts as the one written.
+
+    :param mdx: Whether the page is MDX, the one kind that hides an MDX comment.
+    """
+    lines = [
+        "" if code else line
+        for line, code in zip(written, _page_code_lines(written), strict=True)
+    ]
+    _read_frontmatter(lines, _Frontmatter(decode_escapes=False, blank_comments=True))
+    text = _HTML_COMMENT.sub(_blank_out, "\n".join(lines))
+    return _MDX_COMMENT.sub(_blank_out, text) if mdx else text
+
+
+def markdown_double_hyphen_hits(text: str, *, mdx: bool = False) -> list[int]:
     """The 1-based lines of a page whose prose spells a dash as ``--``.
 
     Smartypants converts any run of two hyphens in the text of a page, spaced
     or not, so any such run is looked for, once the code, the math, the
-    addresses, the HTML comments, the address and style attributes and the
-    rules are out.
+    addresses, the comments, the address and style attributes and the rules
+    are out.
+
+    :param mdx: Whether the page is MDX, whose MDX comments are not shown.
     """
     written = text.split("\n")
-    text = "\n".join(
-        "" if code else line
-        for line, code in zip(written, _page_code_lines(written), strict=True)
-    )
-    text = _HTML_COMMENT.sub(_blank_out, text)
+    text = _page_without_code_or_comments(written, mdx=mdx)
     for address in _ADDRESSES:
         text = address.sub(_blank_out, text)
     text = _ADDRESS_ATTRIBUTE.sub(_blank_out, text)
@@ -1101,15 +1150,18 @@ def _joins_head_with_hyphen(line: str, heads: tuple[re.Pattern[str], ...]) -> bo
     return _SPACED_HYPHEN.match(line, at) is not None
 
 
-def markdown_bullet_hyphen_hits(text: str) -> list[int]:
-    """The 1-based lines of a page whose list item joins its head to its text with ``-``."""
-    lines = text.split("\n")
+def markdown_bullet_hyphen_hits(text: str, *, mdx: bool = False) -> list[int]:
+    """The 1-based lines of a page whose list item joins its head to its text with ``-``.
+
+    A list item in code or in a comment the page does not show is not read.
+
+    :param mdx: Whether the page is MDX, whose MDX comments are not shown.
+    """
+    prose = _page_without_code_or_comments(text.split("\n"), mdx=mdx)
     return [
         number
-        for number, (line, code) in enumerate(
-            zip(lines, _page_code_lines(lines), strict=True), start=1
-        )
-        if not code and _joins_head_with_hyphen(line, _PAGE_HEADS)
+        for number, line in enumerate(prose.split("\n"), start=1)
+        if _joins_head_with_hyphen(line, _PAGE_HEADS)
     ]
 
 
@@ -1139,10 +1191,9 @@ def python_bullet_hyphen_hits(text: str) -> list[int]:
 _PACKAGE = pathlib.Path(__file__).resolve().parent.parent / "src" / "phonometry"
 
 #: The suffixes the double-hyphen reading covers, each with its reader. A
-#: module is read by :func:`scan_double_hyphens`, which knows where it sits.
+#: module and a page are read by :func:`scan_double_hyphens`, which knows
+#: where a module sits and which kind a page is.
 _DOUBLE_HYPHEN_READERS = {
-    ".md": markdown_double_hyphen_hits,
-    ".mdx": markdown_double_hyphen_hits,
     ".mjs": data_double_hyphen_hits,
     ".ts": data_double_hyphen_hits,
     ".json": json_double_hyphen_hits,
@@ -1155,6 +1206,8 @@ def scan_double_hyphens(path: pathlib.Path) -> list[int]:
     if path.suffix == ".py":
         published = path.resolve().is_relative_to(_PACKAGE)
         return python_double_hyphen_hits(text, docstrings=published)
+    if path.suffix in (".md", ".mdx"):
+        return markdown_double_hyphen_hits(text, mdx=path.suffix == ".mdx")
     reader = _DOUBLE_HYPHEN_READERS.get(path.suffix)
     return reader(text) if reader is not None else []
 
@@ -1166,7 +1219,8 @@ def scan_bullet_hyphens(path: pathlib.Path) -> list[int]:
     a generator's docstring is not.
     """
     if path.suffix in (".md", ".mdx"):
-        return markdown_bullet_hyphen_hits(path.read_text(encoding="utf-8"))
+        text = path.read_text(encoding="utf-8")
+        return markdown_bullet_hyphen_hits(text, mdx=path.suffix == ".mdx")
     if path.suffix == ".py" and path.resolve().is_relative_to(_PACKAGE):
         return python_bullet_hyphen_hits(path.read_text(encoding="utf-8"))
     return []

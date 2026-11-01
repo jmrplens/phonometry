@@ -424,6 +424,48 @@ def test_a_page_list_item_joined_by_a_spaced_hyphen_is_refused() -> None:
     assert ced.markdown_bullet_hyphen_hits(text) == [1, 2, 3]
 
 
+def test_a_comment_the_page_does_not_show_is_not_read_for_the_hyphens(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A comment is published nowhere, so neither hyphen reading reads it.
+
+    An HTML comment, an MDX comment on an MDX page and a comment of the
+    frontmatter are not shown, and their lines keep their place; a markdown
+    page shows an MDX comment as written, a hash inside a quoted value of the
+    frontmatter opens no comment, and a frontmatter never closed is none.
+    """
+    head = (
+        "---\n"
+        "title: A page\n"
+        "# Kept as written -- the page does not show it.\n"
+        "description: A guide # and its comment -- not shown\n"
+        'summary: "Not # a comment -- shown"\n'
+        "---\n"
+    )
+    body = (
+        "<!--\n"
+        "* `x` - an old wording -- kept\n"
+        "-->\n"
+        "Text <!-- an aside -- on its line --> goes on.\n"
+        "{/*\n"
+        "* `y` - an old wording -- kept\n"
+        "*/}\n"
+        "* `z` - shown wording\n"
+        "Shown -- prose.\n"
+    )
+    mdx = tmp_path / "page.mdx"
+    md = tmp_path / "page.md"
+    mdx.write_text(head + body, encoding="utf-8")
+    md.write_text(head + body, encoding="utf-8")
+    assert ced.scan_double_hyphens(mdx) == [5, 15]
+    assert ced.scan_bullet_hyphens(mdx) == [14]
+    assert ced.scan_double_hyphens(md) == [5, 12, 15]
+    assert ced.scan_bullet_hyphens(md) == [12, 14]
+    # A page that opens on a rule no later line closes has no frontmatter, so
+    # its heading is no comment.
+    assert ced.markdown_double_hyphen_hits("---\n# A heading -- shown\n") == [2]
+
+
 def test_only_the_package_docstrings_and_the_pages_are_read_for_the_bullet(
     tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

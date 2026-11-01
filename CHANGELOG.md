@@ -2226,17 +2226,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   longer shows a stray list item where a wrapped line of its docstring opened
   on such a hyphen. `scripts/check_em_dashes.py` refuses the double hyphen in
   a docstring and in the prose of every page, outside code, math, link
-  destinations and HTML comments, the spaced form in any other published
-  string, and the spaced single hyphen after a list item's head, so none can
-  come back (rule P6); it also reads the entities and the escapes of the em
-  dash (`&mdash;`, `\u2014`) as the character they publish, where they are
-  decoded: an escape in a frontmatter counts in a double-quoted value only,
-  as YAML has it. The API reference fences a code directive's body and a
-  doctest as code, under a fence longer than any run of backticks the example
-  shows, as the check reads them in the docstring. The `fluids` package opens
-  with a sentence naming humid air by IEC 61094-2 Annex F, sea water, ideal
-  gases and the fluid states and nonlinearity parameters books print, where
-  its API page read "fluids domain of phonometry (see module docstrings)".
+  destinations and the comments a page does not show (HTML, MDX and
+  frontmatter comments), the spaced form in any other published string, and
+  the spaced single hyphen after a list item's head outside code and those
+  comments, so none can come back (rule P6); it also reads the entities and
+  the escapes of the em dash (`&mdash;`, `\u2014`) as the character they
+  publish, where they are decoded: an escape in a frontmatter counts in a
+  double-quoted value only, as YAML has it. The API reference fences a code
+  directive's body and a doctest as code, under a fence longer than any run
+  of backticks the example shows, as the check reads them in the docstring.
+  The `fluids` package opens with a sentence naming humid air by IEC 61094-2
+  Annex F, sea water, ideal gases and the fluid states and nonlinearity
+  parameters books print, where its API page read "fluids domain of
+  phonometry (see module docstrings)".
 
 - **A record that holds a read-only mapping pickles and deep-copies.**
   `MappingProxyType` can be neither pickled nor deep-copied, and 48 of the

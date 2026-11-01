@@ -25,7 +25,7 @@ import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { codeLines, splitLines } from '../src/lib/markdown-fences.mjs';
-import { dropInlineSpans } from './shared/markdown-spans.mjs';
+import { strayDelimiter } from './shared/page-prose.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const SITE = resolve(HERE, '..');
@@ -88,13 +88,9 @@ function delimiterProblems(sourceDirs) {
       lines.forEach((line, index) => {
         if (code[index]) return;
         // Prose that talks *about* `$$` writes it inside a code span, read as
-        // the site reads one (shared/markdown-spans.mjs): an escaped backtick
-        // opens none and hides no delimiter.
-        const trimmed = dropInlineSpans(line).trim();
-        if (!trimmed.includes('$$')) return;
-        const only = trimmed === '$$';
-        const complete = /^\$\$.*\$\$$/.test(trimmed) && trimmed.length > 4;
-        if (only || complete) return;
+        // the site reads one (shared/page-prose.mjs).
+        const trimmed = strayDelimiter(line);
+        if (trimmed === null) return;
         problems.push({
           file: relative(REPO, file),
           line: index + 1,

@@ -93,12 +93,20 @@ def blank_inline_spans(text: str, markers: str = "`") -> str:
     return "".join(pieces)
 
 
+#: What a span taken out leaves in its place: the object replacement
+#: character, which no check reads as a letter, a digit, a space or markup.
+#: The text on either side of a span stays apart, as the page shows it apart:
+#: ``&`x`mdash;`` is no entity, ``1`x`000`` no number and ``x_`c`\sqrt`` no
+#: subscript.
+SPAN_MARK = "\ufffc"
+
+
 def drop_inline_spans(text: str, markers: str = "`") -> str:
-    """*text* with every span of :func:`inline_spans` taken out."""
+    """*text* with every span of :func:`inline_spans` taken out, each leaving :data:`SPAN_MARK`."""
     pieces: list[str] = []
     done = 0
     for start, end in inline_spans(text, markers):
-        pieces.append(text[done:start])
+        pieces.extend((text[done:start], SPAN_MARK))
         done = end
     pieces.append(text[done:])
     return "".join(pieces)

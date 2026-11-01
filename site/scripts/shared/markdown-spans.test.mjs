@@ -3,16 +3,15 @@
 //
 // check-i18n-parity.mjs and check-math-render.mjs took every backtick for a
 // code marker, so an escaped backtick, which the page shows and which opens
-// nothing, hid the prose up to the next one: a figure written between two
-// escaped backticks on a Spanish page, or a `$$` delimiter on a content line,
-// passed unseen. The cases are those of tests/test_markdown_spans.py, which
-// holds the Python reader to the same rules, and the two the checks missed.
+// nothing, hid the prose up to the next one. The cases are those of
+// tests/test_markdown_spans.py, which holds the Python reader to the same
+// rules; page-prose.test.mjs holds the two checks' readings of a page.
 //
 // Usage: node --test 'scripts/**/*.test.mjs'
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { dropInlineSpans, dropInlineSpansByLine, inlineSpans } from './markdown-spans.mjs';
+import { dropInlineSpans, dropInlineSpansByLine, inlineSpans, SPAN_MARK } from './markdown-spans.mjs';
 
 const spans = (text, markers = '`') =>
   inlineSpans(text, markers).map(([start, end]) => text.slice(start, end));
@@ -39,18 +38,18 @@ test('a span is read as the site reads it', () => {
   }
 });
 
-test('an escaped backtick hides no figure from the Spanish figure check', () => {
-  const page = 'Texto \\`![alt](x.png)\\` aquí.';
-  assert.ok(dropInlineSpansByLine(page).includes('!['));
-  assert.ok(!dropInlineSpansByLine('Texto `![alt](x.png)` aquí.').includes('!['));
-});
-
-test('an escaped backtick hides no display delimiter from the maths check', () => {
-  assert.ok(dropInlineSpans('Un \\`$$ x\\` texto').includes('$$'));
-  assert.ok(!dropInlineSpans('Un `$$ x` texto').includes('$$'));
+test('the text either side of a span taken out stays apart', () => {
+  // The two sides were joined, so a figure, an entity or a display delimiter
+  // the page never shows read as written.
+  assert.ok(!dropInlineSpans('!``x``[alt](a.png)').includes('!['));
+  assert.ok(!dropInlineSpans('&`x`mdash;').includes('&mdash;'));
+  assert.ok(!dropInlineSpans('$`x`$', '`').includes('$$'));
 });
 
 test('a span is read within its line, as the checks read a page', () => {
   assert.equal(dropInlineSpansByLine('a `x\ny` b'), 'a `x\ny` b');
-  assert.equal(dropInlineSpansByLine('a `x` b\nc `y` d'), 'a  b\nc  d');
+  assert.equal(
+    dropInlineSpansByLine('a `x` b\nc `y` d'),
+    `a ${SPAN_MARK} b\nc ${SPAN_MARK} d`,
+  );
 });

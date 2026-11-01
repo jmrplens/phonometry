@@ -22,7 +22,12 @@ _SCRIPTS = str(_ROOT / "scripts")
 if _SCRIPTS not in sys.path:
     sys.path.insert(0, _SCRIPTS)
 
-from markdown_spans import blank_inline_spans, drop_inline_spans, inline_spans
+from markdown_spans import (
+    SPAN_MARK,
+    blank_inline_spans,
+    drop_inline_spans,
+    inline_spans,
+)
 
 
 def _spans(text: str, markers: str = "`") -> list[str]:
@@ -77,5 +82,24 @@ def test_blanking_keeps_every_column_and_line() -> None:
 
 
 def test_dropping_takes_the_spans_out() -> None:
-    assert drop_inline_spans("a `x` b `y`") == "a  b "
+    assert drop_inline_spans("a `x` b `y`") == f"a {SPAN_MARK} b {SPAN_MARK}"
     assert drop_inline_spans(r"a \`x -- y\` b") == r"a \`x -- y\` b"
+
+
+@pytest.mark.parametrize(
+    ("text", "joined"),
+    [
+        pytest.param("!``x``[alt](a.png)", "![", id="a figure"),
+        pytest.param("&`x`mdash;", "&mdash;", id="an entity"),
+        pytest.param("x_`c`\\sqrt", "_\\sqrt", id="a subscript"),
+        pytest.param("$`x`$", "$$", id="a display delimiter"),
+    ],
+)
+def test_the_text_either_side_of_a_span_stays_apart(text: str, joined: str) -> None:
+    """A span taken out leaves a mark no check reads, never the two sides joined.
+
+    The sides of a dropped span were joined, so ``!``x``[alt](a.png)`` read
+    as a figure, ``&`x`mdash;`` as the entity of an em dash and ``$`x`$`` as
+    a display delimiter, none of which the page shows.
+    """
+    assert joined not in drop_inline_spans(text)

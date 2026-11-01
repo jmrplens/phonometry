@@ -78,12 +78,20 @@ export function inlineSpans(text, markers = '`') {
   return spans;
 }
 
-/** `text` with every span of {@link inlineSpans} taken out. */
+/**
+ * What a span taken out leaves in its place: the object replacement
+ * character, which no check reads as a letter, a digit, a space or markup.
+ * The text on either side of a span stays apart, as the page shows it apart:
+ * "!``x``[alt](a.png)" is no figure, and "$`x`$" no display delimiter.
+ */
+export const SPAN_MARK = '\uFFFC';
+
+/** `text` with every span of {@link inlineSpans} taken out, each leaving {@link SPAN_MARK}. */
 export function dropInlineSpans(text, markers = '`') {
   let kept = '';
   let done = 0;
   for (const [start, end] of inlineSpans(text, markers)) {
-    kept += text.slice(done, start);
+    kept += text.slice(done, start) + SPAN_MARK;
     done = end;
   }
   return kept + text.slice(done);

@@ -429,6 +429,11 @@ def test_an_escaped_backtick_or_dollar_hides_no_word_of_a_page() -> None:
     assert _departures("$a\\$ un seno de 1 kHz $b$", page=True) == [
         ("seno", "sinusoide")
     ]
+    # An escaped dollar sign opens nothing either, so the word after it and
+    # before the next maths span is prose.
+    assert _departures("10 \\$ de un seno de 1 kHz $x$", page=True) == [
+        ("seno", "sinusoide")
+    ]
 
 
 def test_a_context_exempts_only_its_own_seno() -> None:

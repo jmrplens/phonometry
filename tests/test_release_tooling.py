@@ -36,6 +36,7 @@ from typing import Any
 
 import child_process
 import pytest
+from special_files import SPECIAL_KINDS, make_special, raised_within
 
 _ROOT = pathlib.Path(__file__).resolve().parent.parent
 _SCRIPTS = str(_ROOT / "scripts")
@@ -457,6 +458,24 @@ def test_a_stray_file_in_the_build_directory_is_reported(
         "not exactly phonometry-2.0.0.tar.gz and phonometry-2.0.0-py3-none-any.whl"
         in problems[0]
     )
+
+
+@pytest.mark.parametrize("kind", SPECIAL_KINDS)
+def test_a_build_file_that_is_no_regular_file_is_reported(
+    tmp_path: pathlib.Path, kind: str
+) -> None:
+    """At the sdist's name, a pipe, a device or a directory passed as no problem.
+
+    The listing of the directory matched, and the sdist's checks, which run
+    on a regular file, were skipped, so the check said the release was right.
+    """
+    dist = _good_dist(tmp_path)
+    sdist = dist / "phonometry-2.0.0.tar.gz"
+    sdist.unlink()
+    make_special(kind, sdist)
+    assert artifacts.dist_problems(dist, "2.0.0", _TRACKED) == [
+        f"{dist} holds {sdist.name}, which is not a regular file"
+    ]
 
 
 def test_git_tracks_the_package_data_the_wheel_has_to_carry() -> None:
@@ -1208,6 +1227,43 @@ def test_a_checksum_file_that_cannot_be_used_is_refused_before_the_build(
     assert err.startswith("::error::")
     assert message in err
     assert "Traceback" not in err
+
+
+@_REBUILDS_HERE
+@pytest.mark.parametrize("kind", SPECIAL_KINDS)
+def test_a_checksum_file_that_is_no_regular_file_is_refused_before_it_is_opened(
+    tmp_path: pathlib.Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    kind: str,
+) -> None:
+    """A named pipe no one writes to kept the open waiting, and a device a read going.
+
+    Neither ended, and neither said a word; a directory raised whatever the
+    open met first. Each is now named in one annotation, within seconds.
+    """
+    _fake_build(monkeypatch, changes=[])
+
+    def build(*args: object, **kwargs: object) -> None:
+        pytest.fail("the script built before reading the checksum file")
+
+    monkeypatch.setattr(build_release, "build", build)
+    sums = tmp_path / "phonometry.sha256"
+    what = make_special(kind, sums)
+    outdir = tmp_path / "rebuilt"
+    statuses: list[int] = []
+    error = raised_within(
+        lambda: statuses.append(
+            build_release.main(["--outdir", str(outdir), "--check", str(sums)])
+        ),
+        pipe=sums if kind == "pipe" else None,
+    )
+    assert error is None
+    assert statuses == [1]
+    assert capsys.readouterr().err == (
+        f"::error::the checksum file {sums} is {what}, and a checksum file is "
+        "read only from a regular file\n"
+    )
 
 
 @_REBUILDS_HERE

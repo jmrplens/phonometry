@@ -61,6 +61,7 @@ import io
 import json
 import os
 import pathlib
+import stat
 import subprocess  # nosec B404 - git and the build front end, with fixed arguments
 import sys
 import tarfile
@@ -109,6 +110,15 @@ GIT_S = 60.0
 BUILD_S = 900.0
 #: How long one request to PyPI may take [s].
 FETCH_S = 30.0
+#: What a name holds when it is not a regular file, as a refusal says it: the
+#: words the library's readers use (``phonometry._internal.json_input``).
+SPECIAL_FILES = (
+    (stat.S_ISFIFO, "a named pipe (FIFO)"),
+    (stat.S_ISCHR, "a character device"),
+    (stat.S_ISBLK, "a block device"),
+    (stat.S_ISSOCK, "a socket"),
+    (stat.S_ISDIR, "a directory"),
+)
 #: Why the script does not build on Windows, and where to build instead.
 WINDOWS_REFUSAL = (
     "a release rebuilds on Linux and macOS, not on Windows, where zipfile, the "
@@ -455,14 +465,44 @@ def mismatches(
     return problems
 
 
+def _not_regular(mode: int) -> str | None:
+    """What a file of *mode* is when it is not a regular file, or ``None``."""
+    if stat.S_ISREG(mode):
+        return None
+    return next((kind for test, kind in SPECIAL_FILES if test(mode)), "a special file")
+
+
 def _read_check_file(path: pathlib.Path) -> dict[str, str]:
     """The digests the checksum file at *path* lists, read before anything is built.
 
-    :raises ValueError: When the file is not text in the format ``sha256sum``
-        writes, or lists no file.
+    The name is asked what it holds before it is opened, as the library's
+    readers ask (rule A60 of ``docs/contributing/api.md``): a named pipe no
+    one writes to would keep the open waiting for a writer, and a device
+    such as ``/dev/zero`` a read going without end, with no build started
+    and nothing reported. The file is then opened without waiting and asked
+    again, so that a pipe put at the name in between is refused too.
+
+    :raises ValueError: When the name holds anything but a regular file
+        (behind a link or not), or the file is not text in the format
+        ``sha256sum`` writes, or lists no file.
     :raises OSError: When it cannot be read.
     """
-    listed = read_checksums(path.read_text(encoding="utf-8"))
+    kind = _not_regular(path.stat().st_mode)
+    raw = b""
+    if kind is None:
+        descriptor = os.open(path, os.O_RDONLY | os.O_NONBLOCK | os.O_NOCTTY)
+        with os.fdopen(descriptor, "rb") as handle:
+            kind = _not_regular(os.fstat(descriptor).st_mode)
+            if kind is None:
+                os.set_blocking(descriptor, True)
+                raw = handle.read()
+    if kind is not None:
+        msg = (
+            f"the checksum file {path} is {kind}, and a checksum file is read "
+            "only from a regular file"
+        )
+        raise ValueError(msg)
+    listed = read_checksums(raw.decode("utf-8"))
     if not listed:
         msg = f"the checksum file {path} lists no file"
         raise ValueError(msg)

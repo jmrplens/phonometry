@@ -272,7 +272,7 @@ def dist_problems(
     :param tracked: The package files git tracks.
     :param root: The repository checkout whose ``.gitattributes`` is read.
     :return: The problems found; empty when the directory holds exactly the
-        release's sdist and wheel and both are right.
+        release's sdist and wheel, both regular files, and both are right.
     """
     sdist = dist / f"{_PACKAGE}-{version}.tar.gz"
     wheel = dist / f"{_PACKAGE}-{version}-py3-none-any.whl"
@@ -282,6 +282,13 @@ def dist_problems(
         problems.append(
             f"{dist} holds {found}, not exactly {sdist.name} and {wheel.name}"
         )
+    # A pipe, a device, a directory or a dangling link at either name passes
+    # the listing above and is no file the checks below can read.
+    problems += [
+        f"{dist} holds {path.name}, which is not a regular file"
+        for path in (sdist, wheel)
+        if path.name in found and not path.is_file()
+    ]
     if wheel.is_file():
         problems += wheel_problems(wheel, version, tracked)
     if sdist.is_file():

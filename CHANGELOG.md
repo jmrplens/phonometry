@@ -2351,9 +2351,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   a complex value belongs (a reflection factor, an impedance, a mobility, a
   transfer function), `complex_array` of `_internal/validation.py`, which
   refuse them with a `TypeError` naming the parameter ("must be real, not
-  complex", "must be numbers, not text"), and the shared readers and text
-  checks find a `bytearray` at any depth of a sequence, as the choices beside
-  numbers already did. The rank check every scalar guard opens with refuses a
+  complex", "must be numbers, not text"), read a matrix or a masked array as
+  the plain array of its values, as `np.asarray` did, and the shared readers
+  and text checks find a `bytearray` at any depth of a sequence, as the
+  choices beside numbers already did. The rank check every scalar guard opens with refuses a
   complex number of either kind as well, where `float()` kept the real part of
   a NumPy one, and 35 public functions whose one-number parameters reached
   `float()` or arithmetic without it open with it now (the `ph` of

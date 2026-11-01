@@ -945,8 +945,10 @@ def reference_source_calibration(
         or ``radiation`` is not a text.
     """
     require_choice(radiation, "radiation", ("monopole", "dipole", "unknown"))
+    # Checked here as the text it must be: the column helper also serves the
+    # reverberation room, where None is an arrangement.
+    require_choice(arrangement, "arrangement", ("paths", "fixed"))
     freqs, ks = _calibration_bands(frequencies)
-    _column("hemi-anechoic", arrangement)
     air = CalibrationConditions() if conditions is None else conditions
     k = require_positive(coverage_factor, "coverage_factor")
     precision = _hemisphere_levels(levels, freqs, background_levels, max_levels)

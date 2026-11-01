@@ -3790,8 +3790,12 @@ class _Subject(NamedTuple):
     the whole value, which hold none of them when they equal a text
     (*textless*), the classes of the values an expression that holds the
     choice takes that hold what the check reads (*forms*: a text for one
-    choice, a mapping for the keys of ``Mapping[Side, ...]``), and the
-    classes a test of the form names (*classes*).
+    choice, a mapping for the keys of ``Mapping[Side, ...]``), the classes
+    a test of the form names (*classes*), and whether a value that holds
+    nothing to check is one the annotation lists (*nontext*): a single
+    choice of texts alone takes no other value, so one that is no text is
+    refused with ``TypeError`` by the check (rule A45) and is no value to
+    leave with before it.
     """
 
     raw: Callable[[ast.expr], bool]
@@ -3800,6 +3804,7 @@ class _Subject(NamedTuple):
     textless: Callable[[ast.expr], bool] = _never
     forms: Callable[[ast.expr], tuple[type, ...]] = _one_text
     classes: Callable[[ast.expr], tuple[type, ...] | None] = _classes_named
+    nontext: bool = True
 
 
 def _overlaps(form: type, cls: type) -> bool:
@@ -3842,7 +3847,11 @@ def _holds_none(test: ast.expr, subject: _Subject, *, truth: bool) -> bool:
     text is not None: check``, ``if text is None: return``, ``if not
     isinstance(text, str): return``, ``if not texts: return`` (of a
     collection, which holds nothing to check when it is empty), and ``not``,
-    ``and`` and ``or`` of such tests. The way the test comes out is what
+    ``and`` and ``or`` of such tests. A path that holds no text holds
+    nothing to check only when the annotation lists such a value
+    (*nontext* of :class:`_Subject`): for a ``Literal`` of texts alone, a
+    number or ``None`` is refused with ``TypeError`` by the check, and a
+    path that leaves with it before the check leaves it unrefused. The way the test comes out is what
     counts: ``if text is not None: return`` and ``if isinstance(text, str):
     return`` leave with the text, ``if texts: return`` with the items, and
     ``if isinstance(sides, Mapping): return`` with the keys of the mapping
@@ -3870,7 +3879,7 @@ def _holds_none(test: ast.expr, subject: _Subject, *, truth: bool) -> bool:
             and any(subject.raw(side) for side in sides)
             and any(_is_none(side) for side in sides)
         ):
-            return truth == isinstance(test.ops[0], ast.Is)
+            return subject.nontext and truth == isinstance(test.ops[0], ast.Is)
         return False
     if not (
         isinstance(test, ast.Call)
@@ -3881,8 +3890,10 @@ def _holds_none(test: ast.expr, subject: _Subject, *, truth: bool) -> bool:
     ):
         return False
     classes = subject.classes(test.args[1])
-    return classes is not None and _form_holds_none(
-        subject.forms(test.args[0]), classes, truth=truth
+    return (
+        subject.nontext
+        and classes is not None
+        and _form_holds_none(subject.forms(test.args[0]), classes, truth=truth)
     )
 
 
@@ -3953,7 +3964,8 @@ def _pattern_holds_none(
 ) -> bool:
     """Whether a value *pattern* matches holds nothing a check of the choice
     reads, by its form: ``None`` (or a flag), or a class the choice holding
-    something never is (:func:`_form_holds_none`).
+    something never is (:func:`_form_holds_none`), the annotation listing
+    such a value (*nontext* of :class:`_Subject`).
     """
     if isinstance(pattern, ast.MatchOr):
         return all(
@@ -3964,11 +3976,13 @@ def _pattern_holds_none(
             pattern.pattern, subject, matched
         )
     if isinstance(pattern, ast.MatchSingleton):
-        return True
+        return subject.nontext
     if isinstance(pattern, ast.MatchClass):
         classes = subject.classes(pattern.cls)
-        return classes is not None and _form_holds_none(
-            subject.forms(matched), classes, truth=True
+        return (
+            subject.nontext
+            and classes is not None
+            and _form_holds_none(subject.forms(matched), classes, truth=True)
         )
     return False
 
@@ -4492,7 +4506,22 @@ def _choice_verdict(
             depth=0,
             options=_literal_options(annotation),
             forms=_forms(annotation, None, collection=collection),
+            nontext=_lists_nontext(annotation),
         )
+    )
+
+
+def _lists_nontext(annotation: str) -> bool:
+    """Whether a union annotation lists a value that is no text beside its texts.
+
+    ``None``, a number, an array or a record beside the ``Literal``: a value
+    of one is the caller's to give, and a path may take it past the check of
+    the text. A ``Literal`` of texts alone takes no other value, and the
+    check refuses one with ``TypeError`` (rule A45).
+    """
+    return any(
+        not member.startswith("Literal[") and member not in _STRING_MEMBERS
+        for member in _members(annotation)
     )
 
 
@@ -4520,6 +4549,7 @@ def _checks_of(
     options: frozenset[str] = frozenset(),
     part: str | None = None,
     forms: tuple[type, ...] | None = None,
+    nontext: bool = True,
 ) -> tuple[_Check, ...]:
     """The checks a choice reaches in *function*, received as parameter (or,
     with *field*, read as ``self.<name>``) *name*.
@@ -4535,7 +4565,8 @@ def _checks_of(
     that hold it from those that do not: ``if isinstance(sides, Mapping):
     return`` leaves no single choice unchecked and every key of the mapping.
     Without them, a single text is a ``str`` and anything else a form no test
-    tells apart.
+    tells apart. *nontext* says whether the annotation of a single choice
+    lists a value that is no text (*nontext* of :class:`_Subject`).
     """
     tree = _parsed(function)
     if tree is None:
@@ -4598,6 +4629,7 @@ def _checks_of(
         target if part in {_ITEMS, _VALUES} else _never,
         forms_of,
         classes_of,
+        nontext=nontext or not (part is None and not collection),
     )
     root = tree.body[0] if isinstance(tree, ast.Module) and tree.body else tree
     parents = _parents(tree)
@@ -4661,8 +4693,10 @@ def _checks_of(
                     options=options,
                     part=handed_part,
                     # The value itself, handed on whole, takes the forms it
-                    # took here; a copy or a part of it, its own.
+                    # took here, and the values its annotation lists; a copy
+                    # or a part of it, its own.
                     forms=forms if base(value) and handed_part == part else None,
+                    nontext=nontext or not (base(value) and handed_part == part),
                 )
             )
         if inner:

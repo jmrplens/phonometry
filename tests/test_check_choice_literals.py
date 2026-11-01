@@ -2092,6 +2092,63 @@ def test_a_test_of_the_form_keeps_only_the_paths_that_hold_nothing() -> None:
         assert _verdict_of(tight, "mode", options=paces) is None, tight
 
 
+def _leaves_untyped_on_anything_but_a_text(mode: _Pace) -> _Pace:
+    if not isinstance(mode, str):
+        return mode
+    require_choice(mode, "mode", _PACES)
+    return mode
+
+
+def _leaves_untyped_on_none(mode: _Pace) -> _Pace | None:
+    if mode is None:
+        return None
+    require_choice(mode, "mode", _PACES)
+    return mode
+
+
+def _leaves_untyped_on_a_matched_number(mode: _Pace) -> _Pace:
+    match mode:
+        case float() | None:
+            return mode
+    require_choice(mode, "mode", _PACES)
+    return mode
+
+
+def _checked_untyped_behind_none(mode: _Pace) -> _Pace:
+    if mode is not None:
+        require_choice(mode, "mode", _PACES)
+    return mode
+
+
+def test_a_choice_of_texts_alone_leaves_through_no_test_of_its_form() -> None:
+    """A value that is not a text is refused with ``TypeError`` (rule A45).
+
+    ``if not isinstance(mode, str): return mode`` before the check sends a
+    number past it, and so do ``if mode is None: return``, ``case float() |
+    None: return`` and a check behind ``if mode is not None``: each value
+    that is no text leaves unrefused. That is a path that holds nothing to
+    check only when the annotation lists a value that is no text, a number
+    or ``None`` beside the ``Literal``; for a ``Literal`` of texts alone it
+    is a path that skips the check.
+    """
+    some_paths = "checked on some paths only, so a misspelling passes on the others"
+    texts = 'Literal["fast", "slow"]'
+    for leaky in (
+        _leaves_untyped_on_anything_but_a_text,
+        _leaves_untyped_on_none,
+        _leaves_untyped_on_a_matched_number,
+        _checked_untyped_behind_none,
+    ):
+        assert ccl._choice_verdict(leaky, "mode", texts, field=False) == some_paths, (
+            leaky
+        )
+        for beside in (f"{texts} | float", f"{texts} | None"):
+            assert ccl._choice_verdict(leaky, "mode", beside, field=False) is None, (
+                leaky,
+                beside,
+            )
+
+
 def _spreads_annotated(x: list[float], mode: str) -> object:
     options: dict[str, str] = {"mode": mode}
     return time_weighting(x, 48000, **options)  # type: ignore[call-overload]

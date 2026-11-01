@@ -2316,6 +2316,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   and the frame takes any sequence of the two pixel counts when it runs as
   well, where it took a tuple or a list alone. A text is refused as before.
 
+- **`emission.reference_source_calibration` refuses an `arrangement` that is
+  no text with `TypeError`.** It handed the arrangement to the helper that
+  also serves the reverberation room, where `None` is an arrangement, so
+  `arrangement=None` came back as a `ValueError` that a hemi-anechoic room
+  needs one, while its annotation, `Literal["paths", "fixed"]`, and its
+  docstring say a value that is no text is the wrong type.
+  `scripts/check_choice_literals.py` now counts a path that leaves before
+  the check with a value that is no text, `if not isinstance(mode, str):
+  return mode` or `if mode is None: return`, as one that holds nothing to
+  check only when the annotation lists such a value (rule A45).
+
 - **The API reference and `help()` show no double hyphen where a sentence
   wanted a colon, and the `fluids` package says what it holds.** Docstrings
   spelt a dash as `--`, which `help()` prints as it is and the site published

@@ -393,7 +393,7 @@ const jsonLd = JSON.stringify({
       codeRepository: repositoryUrl,
       image: socialImage,
       screenshot: socialImage,
-      license: 'https://opensource.org/licenses/MIT',
+      license: 'https://opensource.org/license/MIT',
       isAccessibleForFree: true,
       identifier: {
         '@type': 'PropertyValue',
@@ -433,7 +433,7 @@ const jsonLd = JSON.stringify({
       codeRepository: repositoryUrl,
       programmingLanguage: 'Python',
       runtimePlatform: 'Windows, Linux, macOS',
-      license: 'https://opensource.org/licenses/MIT',
+      license: 'https://opensource.org/license/MIT',
       isPartOf: { '@id': softwareId },
       author: { '@id': authorId },
       // Same three agents jmrp.io/projects/ emits for this @id, so the merged

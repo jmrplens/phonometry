@@ -297,11 +297,11 @@ the ECAC Doc 29 method of [Airport noise](airport-noise.md).
   The measurement-system tolerances checked by the section 4 verifier.
 - SAE International. (2013). *Application of pure-tone atmospheric absorption
   losses to one-third octave-band data* (SAE ARP 5534, reaffirmed 2021).
-  [sae.org](https://www.sae.org/standards/content/arp5534/).
+  [sae.org](https://www.sae.org/standards/arp5534-application-pure-tone-atmospheric-absorption-losses-one-third-octave-band-data/).
   The SAE-Method band attenuation of section 5.
 - SAE International. (2012). *Standard values of atmospheric absorption as a
   function of temperature and humidity* (SAE ARP 866B, stabilized 2012).
-  [sae.org](https://www.sae.org/standards/content/arp866b/).
+  [sae.org](https://www.sae.org/standards/arp866b-standard-values-atmospheric-absorption-a-function-temperature-humidity/).
   The predecessor SAE atmospheric-absorption practice, source of the 50
   dB-limited Approximate Method that section 5 contrasts with the SAE Method.
 

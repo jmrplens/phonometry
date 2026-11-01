@@ -760,13 +760,13 @@ the summation of 4.9, its alias images graded too.
 - International Electrotechnical Commission. (2016). *Electroacoustics —
   Octave-band and fractional-octave-band filters — Part 2: Pattern-evaluation
   tests* (IEC 61260-2:2016).
-  [IEC webstore](https://webstore.iec.ch/en/publication/24560).
+  [IEC webstore](https://webstore.iec.ch/en/publication/24398).
   Its Formulas (1) to (3) are how `verify_filter_class` grades 5.12 and 5.16
   of Part 1, and its swept test of 7.4, with Annexes A and B, is
   `verify_time_invariance`, `swept_band_level` and `swept_level_uncertainty`.
 - International Electrotechnical Commission. (2016). *Electroacoustics —
   Octave-band and fractional-octave-band filters — Part 3: Periodic tests*
-  (IEC 61260-3:2016). [IEC webstore](https://webstore.iec.ch/en/publication/24561).
+  (IEC 61260-3:2016). [IEC webstore](https://webstore.iec.ch/en/publication/24399).
   The periodic tests whose results `verify_filter_periodic` grades, with the
   Formulas (1) and (2) of `periodic_test_frequencies` and the Table 1 of
   `PERIODIC_TEST_ATTENUATION_LIMITS_DB`.

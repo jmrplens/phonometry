@@ -174,7 +174,7 @@ band pairs to ±0.001 STI, the $m$ ↔ STI mapping table, the level-dependent
 masking control points, and Schroeder-form decays at four $T_{60}$ values.
 
 The analyzer is also verified end to end against the **IEC 60268-16 rev 5
-verification test bench** signals from [stipa.info](https://www.stipa.info)
+verification test bench** signals from [stipa.info](https://stipa.info/)
 (Embedded Acoustics BV): the direct-method modulation-depth staircase
 (Annex C.3.2), the indirect-method exponential decays against the closed-form
 Schroeder MTF (C.3.3), the filter-bank slope test with a +41 dB unmodulated

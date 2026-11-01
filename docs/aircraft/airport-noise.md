@@ -271,7 +271,7 @@ events of the reference workbook are reproduced end-to-end in the test suite.
   against.
 - SAE International. (2006). *Method for predicting lateral attenuation of
   airplane noise* (SAE AIR 5662).
-  [sae.org](https://www.sae.org/standards/content/air5662/).
+  [sae.org](https://www.sae.org/standards/air5662-method-predicting-lateral-attenuation-airplane-noise/).
   The soft-ground lateral-attenuation model that Doc 29 §4.5.4 adopts in
   section 2.
 

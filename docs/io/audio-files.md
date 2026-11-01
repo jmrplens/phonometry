@@ -562,7 +562,7 @@ libsndfile under the LGPL, which the base install deliberately avoids.
 - Lipshitz, S. P., Wannamaker, R. A., & Vanderkooy, J. (1992). Quantization
   and dither: A theoretical survey. *Journal of the Audio Engineering
   Society, 40*(5), 355-375.
-  [AES](https://aes2.org/publications/elibrary-page/?id=7047).
+  [AES](https://aes.org/publications/elibrary-page/?id=7047).
   Why the optional dither is triangular-PDF at one LSB, why it is offered
   only when quantising to 16 bits, and why it stays opt-in for data that
   faces numerical analysis.

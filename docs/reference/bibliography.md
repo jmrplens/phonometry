@@ -994,7 +994,7 @@ it; the list grows as guides gain their References sections.
   Cited by [Aircraft noise](../aircraft/aircraft-noise.md).
 - SAE International. (2013). *Application of pure-tone atmospheric absorption
   losses to one-third octave-band data* (SAE ARP 5534, reaffirmed 2021).
-  [sae.org](https://www.sae.org/standards/content/arp5534/).
+  [sae.org](https://www.sae.org/standards/arp5534-application-pure-tone-atmospheric-absorption-losses-one-third-octave-band-data/).
   The SAE-Method one-third-octave-band atmospheric absorption for aircraft
   flyover spectra.
   Cited by [Aircraft noise](../aircraft/aircraft-noise.md),
@@ -1009,13 +1009,13 @@ it; the list grows as guides gain their References sections.
   [Sound power of multisource industrial plants](../devices/emission/sound-power-plant.md).
 - SAE International. (2012). *Standard values of atmospheric absorption as a
   function of temperature and humidity* (SAE ARP 866B, stabilized 2012).
-  [sae.org](https://www.sae.org/standards/content/arp866b/).
+  [sae.org](https://www.sae.org/standards/arp866b-standard-values-atmospheric-absorption-a-function-temperature-humidity/).
   The predecessor SAE atmospheric-absorption practice, source of the older
   50 dB-limited Approximate Method.
   Cited by [Aircraft noise](../aircraft/aircraft-noise.md).
 - SAE International. (2006). *Method for predicting lateral attenuation of
   airplane noise* (SAE AIR 5662).
-  [sae.org](https://www.sae.org/standards/content/air5662/).
+  [sae.org](https://www.sae.org/standards/air5662-method-predicting-lateral-attenuation-airplane-noise/).
   The soft-ground lateral-attenuation model adopted by ECAC Doc 29.
   Cited by [Airport noise](../aircraft/airport-noise.md).
 - European Civil Aviation Conference. (2016). *Report on standard method of

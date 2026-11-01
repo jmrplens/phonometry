@@ -301,7 +301,7 @@ ofrecerlo sería un flaco favor.
 - Lipshitz, S. P., Wannamaker, R. A., & Vanderkooy, J. (1992). Quantization
   and dither: A theoretical survey. *Journal of the Audio Engineering
   Society*, 40(5), 355-375.
-  [aes2.org e-library](https://aes2.org/publications/elibrary-page/?id=7047).
+  [aes.org e-library](https://aes.org/publications/elibrary-page/?id=7047).
   Por qué el dither opcional es triangular de un LSB y se ofrece solo a
   16 bits.
   Citada por [Leer y escribir audio de medición](/phonometry/es/io/audio-files/).
@@ -1169,7 +1169,7 @@ vuelo.
   Citado por [Ruido de aeronaves](/phonometry/es/aircraft/aircraft-noise/).
 - SAE International. (2013). *Application of pure-tone atmospheric absorption
   losses to one-third octave-band data* (SAE ARP 5534, reafirmada en 2021).
-  [sae.org](https://www.sae.org/standards/content/arp5534/).
+  [sae.org](https://www.sae.org/standards/arp5534-application-pure-tone-atmospheric-absorption-losses-one-third-octave-band-data/).
   La absorción atmosférica en bandas de tercio de octava por el método SAE
   para espectros de sobrevuelo.
   Citado por [Ruido de aeronaves](/phonometry/es/aircraft/aircraft-noise/),
@@ -1184,13 +1184,13 @@ vuelo.
   [Potencia acústica de plantas industriales multifuente](/phonometry/es/devices/emission/sound-power-plant/).
 - SAE International. (2012). *Standard values of atmospheric absorption as a
   function of temperature and humidity* (SAE ARP 866B, estabilizada en 2012).
-  [sae.org](https://www.sae.org/standards/content/arp866b/).
+  [sae.org](https://www.sae.org/standards/arp866b-standard-values-atmospheric-absorption-a-function-temperature-humidity/).
   La práctica SAE de absorción atmosférica predecesora, origen del antiguo
   método aproximado limitado a 50 dB.
   Citado por [Ruido de aeronaves](/phonometry/es/aircraft/aircraft-noise/).
 - SAE International. (2006). *Method for predicting lateral attenuation of
   airplane noise* (SAE AIR 5662).
-  [sae.org](https://www.sae.org/standards/content/air5662/).
+  [sae.org](https://www.sae.org/standards/air5662-method-predicting-lateral-attenuation-airplane-noise/).
   El modelo de atenuación lateral sobre suelo blando que adopta la ECAC
   Doc 29.
   Citado por [Ruido de aeropuertos](/phonometry/es/aircraft/airport-noise/).

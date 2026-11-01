@@ -52,7 +52,12 @@ a caller's value that no check has read on every path to it:
   following such calls through the package until no new one turns up): a
   call after an earlier ``return``, in the body of a ``try`` a handler of
   which goes on, or of a parameter rebound before it to another value
-  counts for nothing; or a name rebound to what a check returns. What each check refuses is listed, a complex value, a text or
+  counts for nothing; or a name rebound to what a check returns. A check
+  handed what NumPy made of a caller's value no check has refused a text in
+  (``np.asarray(x)``, ``np.atleast_1d(x)`` and the other NumPy calls that
+  keep its values, given no floating dtype, or a name bound to one) reads a
+  ``bytearray`` as the codes of its characters, and the census lists that
+  reading as a conversion no check precedes. What each check refuses is listed, a complex value, a text or
   both: a conversion to floats needs both refused, one to complex numbers a
   text. A check of an item (``x[0]``) reads that item, not the sequence it
   was taken from.
@@ -559,6 +564,24 @@ def _kept(call: ast.Call, names: _Names) -> list[ast.expr]:
     return call.args[:1]
 
 
+def _numpy_function(call: ast.Call, names: _Names) -> bool:
+    """Whether *call* is a NumPy function that keeps its argument's values,
+    given no floating or complex dtype: ``np.asarray(x)``, ``np.atleast_1d(x)``
+    and their kin, which read a ``bytearray`` as the codes of its characters.
+    """
+    func = call.func
+    through_numpy = (
+        isinstance(func, ast.Attribute)
+        and isinstance(func.value, ast.Name)
+        and func.value.id in {"np", "numpy"}
+    ) or (isinstance(func, ast.Name) and func.id in names.numpy)
+    return (
+        through_numpy
+        and _last_name(func) in _KEEPING_CALLS
+        and converted(call, names) is None
+    )
+
+
 def _ends(block: Sequence[ast.stmt]) -> bool:
     """Whether *block* leaves the function or the loop at its end on every path."""
     if not block:
@@ -609,6 +632,10 @@ class _Flow:
     )
     #: Each ``lambda`` met, with what the names hold where it is written.
     lambdas: list[tuple[ast.Lambda, Env]] = field(default_factory=list)
+    #: The names bound to what NumPy made of a caller's value no check has
+    #: refused a text in, in which a ``bytearray`` is the codes of its
+    #: characters.
+    numpy_read: set[str] = field(default_factory=set)
 
     # What a value holds.
 
@@ -777,8 +804,27 @@ class _Flow:
         if (found := converted(call, self.names)) is not None:
             value, kind = found
             self._record(call, value, kind, self._verdict(value, kind, env))
-        elif sure:
+            return
+        for argument, refused in self.checks(call):
+            # A check handed NumPy's reading of the value reads a bytearray's
+            # codes as numbers: the reading is a conversion no check precedes.
+            if "text" in refused and self._numpy_reading(argument, env):
+                kind: Kind = "real" if "complex" in refused else "complex"
+                self._record(call, argument, kind, "unchecked")
+        if sure:
             self.check(call, env)
+
+    def _numpy_reading(self, node: ast.expr, env: Env) -> bool:
+        """Whether *node* is what NumPy made of a caller's value no check has
+        refused a text in (``np.asarray(x)``, ``np.atleast_1d(x)`` and the
+        other NumPy calls that keep its values), or a name bound to it.
+        """
+        if isinstance(node, ast.Name):
+            return node.id in self.numpy_read
+        if not isinstance(node, ast.Call) or not _numpy_function(node, self.names):
+            return False
+        state = self._joined(_kept(node, self.names), env)
+        return state is not None and "text" not in state
 
     def _verdict(self, value: ast.expr, kind: Kind, env: Env) -> Verdict:
         state = self.state(value, env)
@@ -864,9 +910,15 @@ class _Flow:
         if isinstance(node, ast.AugAssign):
             return env, False
         state = self.state(node.value, env)
+        read = self._numpy_reading(node.value, env)
         targets = node.targets if isinstance(node, ast.Assign) else [node.target]
         for target in targets:
             self.bind(target, node.value, state, env)
+            for name in _targets(target):
+                if read and isinstance(target, ast.Name):
+                    self.numpy_read.add(name)
+                else:
+                    self.numpy_read.discard(name)
         return env, False
 
     def _if(self, node: ast.If, env: Env) -> tuple[Env, bool]:

@@ -488,6 +488,22 @@ _PLANTED_UNCHECKED = {
         def f(levels, apply):
             return apply(lambda: np.asarray(levels, dtype=np.float64))
     """,
+    "a_check_handed_numpy_s_reading": """
+        def f(levels):
+            return real_array(np.asarray(levels), "levels")
+    """,
+    "a_check_handed_a_name_bound_to_numpy_s_reading": """
+        def f(levels):
+            arr = np.atleast_1d(levels)
+            return real_array(arr, "levels")
+    """,
+    "a_helper_handed_numpy_s_reading": """
+        def _read(name, arr):
+            return real_array(arr, name)
+
+        def f(levels):
+            return _read("levels", np.asarray(levels))
+    """,
     "captured_and_used_before_the_check": """
         def f(levels):
             def g():
@@ -583,6 +599,17 @@ _PLANTED_ANSWERED = {
         def f(levels):
             _read(levels)
             return np.asarray(levels, dtype=np.float64)
+    """,
+    "numpy_s_reading_after_a_text_refusal": """
+        def f(levels):
+            refuse_text(levels, "no")
+            return real_array(np.asarray(levels), "levels")
+    """,
+    "numpy_s_reading_rebound_to_a_reading": """
+        def f(levels):
+            arr = np.asarray(levels)
+            arr = real_array(levels, "levels")
+            return refuse_text(arr, "no")
     """,
     "captured_after_the_check": """
         def f(levels):

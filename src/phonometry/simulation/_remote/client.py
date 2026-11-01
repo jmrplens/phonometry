@@ -802,8 +802,8 @@ def _builtin_base(session: Session, entry: Mapping[str, object]) -> type[Warning
     would be, is read as :class:`RuntimeWarning`, so the run the node
     finished is not lost for it.
 
-    :raises ComputeRemoteError: for a base that is no text, or a name this
-        Python holds as something other than a warning.
+    :raises ComputeRemoteError: for a base that is no text, or a name
+        :mod:`builtins` holds that is not one of ``_BUILTIN_WARNINGS``.
     """
     name = session.field(entry, "base", str)
     base = _BUILTIN_WARNINGS.get(name)

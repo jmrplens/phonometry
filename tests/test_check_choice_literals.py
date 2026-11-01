@@ -2303,6 +2303,59 @@ def test_a_check_is_known_by_the_function_it_is_not_by_its_name() -> None:
     assert ccl._choice_verdict(_validated, "mode", texts, field=False) is None
 
 
+def _checked_beside_a_comprehension_namesake(mode: _Pace) -> str:
+    require_choice(mode, "mode", _PACES)
+    return [require_choice.lower() for require_choice in (mode,)][0]
+
+
+def _checked_beside_a_nested_namesake(mode: _Pace) -> _Pace:
+    require_choice(mode, "mode", _PACES)
+
+    def inner() -> None:
+        require_choice = print
+        require_choice()
+
+    inner()
+    return mode
+
+
+def _checked_beside_a_lambda_namesake(mode: _Pace) -> _Pace:
+    require_choice(mode, "mode", _PACES)
+    # ``:=`` in a lambda binds the name in the lambda's own scope.
+    return (lambda: (require_choice := mode))()  # noqa: F841 - the lambda's own name
+
+
+def _checked_beside_a_nested_import(mode: _Pace) -> _Pace:
+    def inner() -> None:
+        from operator import truth as require_choice
+
+        require_choice(1)
+
+    require_choice(mode, "mode", _PACES)
+    inner()
+    return mode
+
+
+def test_a_name_a_scope_inside_the_function_binds_hides_no_check() -> None:
+    """A name bound inside a comprehension, a nested function or a lambda is theirs.
+
+    The names the function binds itself were read from every node of it, so
+    a comprehension's loop target, or a name a nested function or a lambda
+    binds for itself, hid the genuine ``require_choice`` call beside it,
+    and the checked choice was refused as never checked. So did a nested
+    function that imports a namesake: its imports were read as the
+    function's own.
+    """
+    texts = 'Literal["fast", "slow"]'
+    for checked in (
+        _checked_beside_a_comprehension_namesake,
+        _checked_beside_a_nested_namesake,
+        _checked_beside_a_lambda_namesake,
+        _checked_beside_a_nested_import,
+    ):
+        assert ccl._choice_verdict(checked, "mode", texts, field=False) is None, checked
+
+
 def _handed_to_a_namesake_method(mode: str, registry: object) -> str:
     registry.require_choice(mode, "mode", _PACES)  # type: ignore[attr-defined]
     return mode

@@ -41084,7 +41084,7 @@ nodes and the encoders in one place.
 
 ffmpeg is a program, not a Python package, so it is installed apart from
 phonometry: `conda install ffmpeg`, `apt install ffmpeg`,
-`brew install ffmpeg` or `winget install ffmpeg`. phonometry runs the ffmpeg
+`brew install ffmpeg` or `winget install --exact --id Gyan.FFmpeg`. phonometry runs the ffmpeg
 matplotlib would run, the one `rcParams["animation.ffmpeg_path"]` names
 (`"ffmpeg"`, looked up on `PATH`, unless you set it), and raises
 `io.FFmpegNotFoundError` with those install commands when it is not there.
@@ -73258,7 +73258,9 @@ not imported, or of a class that cannot be built from its message, comes back
 as the warning class of Python's own that its class derives from, a
 `UserWarning`, a `DeprecationWarning` or a `RuntimeWarning` among them, with a
 message that starts with the class's path: a filter on that class reaches it
-here as it would on the node.
+here as it would on the node. A warning class of Python's own that only a
+later Python on the node has comes back as a `RuntimeWarning`, its message
+still led by the class's path.
 
 An interrupt, Ctrl-C or the stop button of a notebook, stops ssh at once and
 reaches your code as `KeyboardInterrupt`, `fallback=True` or not. The node

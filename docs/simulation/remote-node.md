@@ -206,7 +206,8 @@ Each run gets a container of its own, removed when the run ends, with no
 network, running as your user on the node, so whatever it writes is yours. Its
 packages live in `~/.cache/phonometry/remote` on the node (under
 `XDG_CACHE_HOME` when that variable holds an absolute path), which the
-container mounts. A run takes one GPU, the one `device_index` picks. Docker
+container mounts, with the kernels CuPy compiles under `cupy-kernels` there,
+so a later run does not compile them again. A run takes one GPU, the one `device_index` picks. Docker
 never pulls the image: a node without it fails the run, and the error says to
 build it.
 

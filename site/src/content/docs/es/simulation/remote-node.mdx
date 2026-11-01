@@ -230,7 +230,9 @@ Cada ejecución tiene un contenedor propio, que se borra cuando termina la
 ejecución, sin red y con tu usuario del nodo, así que todo lo que escribe es
 tuyo. Sus paquetes viven en `~/.cache/phonometry/remote` en el nodo (bajo
 `XDG_CACHE_HOME` cuando esa variable contiene una ruta absoluta), que el
-contenedor monta. Una ejecución ocupa una GPU, la que elige `device_index`.
+contenedor monta, con los kernels que compila CuPy en `cupy-kernels` dentro de
+ese directorio, para que una ejecución posterior no los vuelva a compilar.
+Una ejecución ocupa una GPU, la que elige `device_index`.
 Docker nunca descarga la imagen: en un nodo que no la tiene la ejecución
 falla, y el error dice que la construyas.
 

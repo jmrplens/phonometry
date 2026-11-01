@@ -180,7 +180,7 @@ def test_the_notes_are_written_and_a_missing_section_fails_the_preflight(
 _TRACKED = [
     "phonometry/__init__.py",
     "phonometry/py.typed",
-    "phonometry/building/data/rows.json",
+    "phonometry/building/data/ashrae-2019-table-40.json",
 ]
 
 #: The licence text the built files carry: the repository's.
@@ -263,7 +263,7 @@ def test_a_data_file_the_wheel_left_behind_is_reported(tmp_path: pathlib.Path) -
     _wheel(dist / "phonometry-2.0.0-py3-none-any.whl", "2.0.0", _TRACKED[:2])
     assert artifacts.wheel_problems(
         dist / "phonometry-2.0.0-py3-none-any.whl", "2.0.0", _TRACKED
-    ) == ["the wheel lacks phonometry/building/data/rows.json"]
+    ) == ["the wheel lacks phonometry/building/data/ashrae-2019-table-40.json"]
 
 
 def test_a_file_git_does_not_track_is_reported_in_the_wheel(
@@ -276,6 +276,40 @@ def test_a_file_git_does_not_track_is_reported_in_the_wheel(
     problems = artifacts.wheel_problems(wheel, "2.0.0", _TRACKED)
     assert len(problems) == 2
     assert all("which git does not track" in problem for problem in problems)
+
+
+def test_a_file_git_does_not_track_is_reported_in_the_sdist(
+    tmp_path: pathlib.Path,
+) -> None:
+    """setuptools packs a test module or a module an ignore rule hides all the same.
+
+    What it writes itself, ``PKG-INFO``, ``setup.cfg`` and the ``.egg-info``
+    directory, is no checkout's and passes.
+    """
+    root = _repository(
+        tmp_path,
+        {"pyproject.toml": "", "src/phonometry/__init__.py": "", "tests/test_a.py": ""},
+    )
+    sdist = tmp_path / "phonometry-2.0.0.tar.gz"
+    _sdist(
+        sdist,
+        "2.0.0",
+        [
+            "PKG-INFO",
+            "setup.cfg",
+            "pyproject.toml",
+            "src/phonometry/__init__.py",
+            "src/phonometry.egg-info/SOURCES.txt",
+            "tests/test_a.py",
+            "tests/test_local.py",
+            "src/phonometry/__pycache__/x.cpython-313.pyc",
+        ],
+    )
+    assert artifacts.untracked_sdist_problems(sdist, "2.0.0", root) == [
+        "the sdist carries src/phonometry/__pycache__/x.cpython-313.pyc, "
+        "which git does not track",
+        "the sdist carries tests/test_local.py, which git does not track",
+    ]
 
 
 def test_a_wheel_of_another_version_is_reported(tmp_path: pathlib.Path) -> None:
@@ -304,7 +338,7 @@ def test_an_sdist_that_cannot_rebuild_the_wheel_is_reported(
     assert artifacts.sdist_problems(sdist, "2.0.0", _TRACKED) == [
         "the sdist lacks phonometry-2.0.0/VERSION",
         "the sdist lacks phonometry-2.0.0/src/phonometry/py.typed",
-        "the sdist lacks phonometry-2.0.0/src/phonometry/building/data/rows.json",
+        "the sdist lacks phonometry-2.0.0/src/phonometry/building/data/ashrae-2019-table-40.json",
     ]
 
 
@@ -728,6 +762,8 @@ class _Builder:
         self.calls: list[list[str]] = []
         self.epochs: list[str] = []
         self.umasks: list[int] = []
+        #: The files of the directory each sdist was built from, by name.
+        self.sources: list[dict[str, bytes]] = []
         self.wheel_from_normalised_sdist = False
 
     def __call__(
@@ -739,6 +775,14 @@ class _Builder:
         self.epochs.append(env["SOURCE_DATE_EPOCH"])
         self.umasks.append(_current_umask())
         if "--sdist" in command:
+            source = pathlib.Path(command[-1])
+            self.sources.append(
+                {
+                    path.relative_to(source).as_posix(): path.read_bytes()
+                    for path in source.rglob("*")
+                    if path.is_file()
+                }
+            )
             self.outdir.mkdir(parents=True, exist_ok=True)
             _builder_sdist(
                 self.outdir / f"{_TOP}.tar.gz",
@@ -757,23 +801,72 @@ class _Builder:
             (self.outdir / self.extra).write_bytes(b"")
 
 
+def _checkout(tmp_path: pathlib.Path) -> pathlib.Path:
+    """A checkout of a commit that holds the version file and nothing else."""
+    return _repository(tmp_path, {"VERSION": "2.0.0\n"})
+
+
 def test_the_wheel_is_built_from_the_normalised_sdist_under_the_commit_time(
     tmp_path: pathlib.Path,
 ) -> None:
     outdir = tmp_path / "dist"
     builder = _Builder(outdir)
+    root = _checkout(tmp_path)
     built = build_release.build(
-        outdir, version="2.0.0", epoch=_EPOCH, root=tmp_path, run=builder
+        outdir, version="2.0.0", epoch=_EPOCH, root=root, run=builder
     )
     sdist = outdir / f"{_TOP}.tar.gz"
     assert built == [sdist, outdir / f"{_TOP}-py3-none-any.whl"]
     front_end = [sys.executable, "-m", "build", "--no-isolation"]
+    exported = pathlib.Path(builder.calls[0][-1])
     assert builder.calls == [
-        [*front_end, "--sdist", "--outdir", str(outdir), str(tmp_path)],
+        [*front_end, "--sdist", "--outdir", str(outdir), str(exported)],
         [*front_end, "--wheel", "--outdir", str(outdir), str(sdist)],
     ]
+    assert exported != root
+    assert not exported.exists(), "the export of the commit was left behind"
+    assert builder.sources == [{"VERSION": b"2.0.0\n"}]
     assert builder.epochs == [str(_EPOCH)] * 2
     assert builder.wheel_from_normalised_sdist
+
+
+def test_the_sdist_is_built_from_the_commit_and_nothing_else_the_checkout_holds(
+    tmp_path: pathlib.Path,
+) -> None:
+    """setuptools packs a file the checkout holds even when ``git status`` hides it.
+
+    A test module the builder's own excludes file hides, a ``setup.cfg``,
+    which setuptools reads and merges into the sdist's, and a stale file in
+    the ``.egg-info`` directory, which it grafts whole, all reached the sdist
+    of a checkout ``git status`` called the commit. An attribute file the
+    checkout holds beside the commit's changes no line ending either.
+    """
+    committed = {
+        ".gitignore": "*.egg-info/\n",
+        "VERSION": "2.0.0\n",
+        "src/phonometry/__init__.py": "x = 1\n",
+        "tests/test_release.py": "def test_release():\n    pass\n",
+    }
+    root = _repository(tmp_path, committed)
+    hidden = {
+        "tests/test_local.py": "def test_local():\n    pass\n",
+        "setup.cfg": "[metadata]\nname = something-else\n",
+        "src/phonometry.egg-info/stale.txt": "left by an older build\n",
+        "src/.gitattributes": "* text eol=crlf\n",
+    }
+    with (root / ".git" / "info" / "exclude").open("a", encoding="utf-8") as rules:
+        rules.write("tests/test_local.py\nsetup.cfg\nsrc/.gitattributes\n")
+    for name, text in hidden.items():
+        (root / name).parent.mkdir(parents=True, exist_ok=True)
+        (root / name).write_text(text, encoding="utf-8", newline="\n")
+    assert build_release.checkout_changes(root) == []
+    builder = _Builder(tmp_path / "dist")
+    build_release.build(
+        tmp_path / "dist", version="2.0.0", epoch=_EPOCH, root=root, run=builder
+    )
+    assert builder.sources == [
+        {name: text.encode() for name, text in committed.items()}
+    ]
 
 
 @pytest.mark.skipif(
@@ -787,7 +880,11 @@ def test_both_builds_run_under_umask_022_and_the_callers_is_given_back(
     previous = os.umask(0o002)
     try:
         build_release.build(
-            tmp_path / "dist", version="2.0.0", epoch=_EPOCH, root=tmp_path, run=builder
+            tmp_path / "dist",
+            version="2.0.0",
+            epoch=_EPOCH,
+            root=_checkout(tmp_path),
+            run=builder,
         )
         assert _current_umask() == 0o002
     finally:
@@ -804,7 +901,7 @@ def test_a_build_into_a_directory_that_holds_files_is_refused(
     builder = _Builder(outdir)
     with pytest.raises(ValueError, match="already holds files"):
         build_release.build(
-            outdir, version="2.0.0", epoch=_EPOCH, root=tmp_path, run=builder
+            outdir, version="2.0.0", epoch=_EPOCH, root=_checkout(tmp_path), run=builder
         )
     assert builder.calls == []
 
@@ -814,7 +911,7 @@ def test_a_build_that_leaves_another_file_is_refused(tmp_path: pathlib.Path) -> 
     builder = _Builder(outdir, extra=f"{_TOP}-cp313-cp313-linux_x86_64.whl")
     with pytest.raises(ValueError, match="cp313"):
         build_release.build(
-            outdir, version="2.0.0", epoch=_EPOCH, root=tmp_path, run=builder
+            outdir, version="2.0.0", epoch=_EPOCH, root=_checkout(tmp_path), run=builder
         )
 
 

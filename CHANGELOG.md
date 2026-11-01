@@ -63,8 +63,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   files, and its wheel took the modes of its modules from the builder's
   umask, so a checkout under umask 002 gave another wheel. A release is now
   built by `scripts/build_release.py`, which uses the setuptools that
-  `requirements-release.txt` pins (84.2.1) without build isolation, writes
-  the sdist again with the commit's time, no owner and fixed modes, builds
+  `requirements-release.txt` pins (84.2.1) without build isolation, builds
+  the sdist from the commit's files as `git archive` exports them, so that
+  nothing else the checkout holds reaches it, not even a file git ignores,
+  writes it again with the commit's time, no owner and fixed modes, builds
   the wheel from it under umask 022, and refuses a checkout that differs
   from its commit, a setuptools plugin of another package, and Windows,
   where the operating system reaches the bytes of both files through
@@ -78,7 +80,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `.gitattributes` checks out every file the sdist carries with LF whatever
   `core.autocrlf` or `core.eol` the cloner has set, since `core.autocrlf`
   on writes CRLF on Linux and macOS too, and `check_release_artifacts.py`
-  refuses a release whose sdist carries a file it does not cover. The
+  refuses a release whose sdist carries a file it does not cover, or one
+  git does not track that setuptools did not write. The
   PyOctaveBand bridge is built with the same pinned setuptools, and neither
   package lists `wheel` among its build requirements any more, since
   setuptools builds wheels itself.

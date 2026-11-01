@@ -40,8 +40,13 @@ setuptools gives the wheel's modules the mode Windows reports, and it writes
 the sdist's ``PKG-INFO`` and ``setup.cfg`` in text mode, with CRLF. The script
 refuses to run there.
 
-The checkout has to be the commit and nothing else: a modified or untracked
-file would be packed into the build. ``--check`` then compares what was built
+The sdist is built from the files of the commit, which ``git archive`` writes
+into a temporary directory, and not from the checkout: setuptools packs files
+a checkout can hold beside the commit's that ``git status`` does not report
+when an ignore rule covers them, a test module a builder's own excludes file
+hides or a stale file in the ``.egg-info`` directory. The checkout still has
+to be the commit, so that what is built is what the builder sees: a modified
+or untracked file stops the build. ``--check`` then compares what was built
 with a checksum file in the format ``sha256sum`` writes, the one the GitHub
 Release carries, and ``--check-pypi`` with the digests PyPI publishes for the
 version.
@@ -59,6 +64,7 @@ import pathlib
 import subprocess  # nosec B404 - git and the build front end, with fixed arguments
 import sys
 import tarfile
+import tempfile
 import time
 import urllib.parse
 import urllib.request
@@ -142,9 +148,9 @@ def commit_time(root: pathlib.Path = _ROOT) -> int:
 def checkout_changes(root: pathlib.Path = _ROOT) -> list[str]:
     """Every way the checkout differs from its commit, one ``git status`` line each.
 
-    Files git ignores are left out: the build's own output and leftovers
-    (``build/``, ``dist/``, ``*.egg-info``) are among them, and setuptools
-    packs none of them.
+    Files git ignores are left out: the build's own output (``dist/``) is
+    among them, and the build reads none of them, since it builds from the
+    files :func:`export_commit` writes.
 
     :param root: The repository checkout.
     :return: The modified, added, deleted and untracked paths; empty when the
@@ -158,6 +164,44 @@ def checkout_changes(root: pathlib.Path = _ROOT) -> list[str]:
         timeout=GIT_S,
     ).stdout
     return [line for line in out.splitlines() if line.strip()]
+
+
+def export_commit(target: pathlib.Path, root: pathlib.Path = _ROOT) -> None:
+    """Write the files of the checked-out commit into *target*, and nothing else.
+
+    The sdist is built from these files rather than from the checkout.
+    setuptools packs every module and data file it finds under the package,
+    the top-level ``tests/test*.py``, whatever a ``setup.cfg`` or a
+    ``MANIFEST.in`` names, and the whole ``.egg-info`` directory it finds, so
+    a file a checkout holds beside the commit's would be packed, and ``git
+    status`` does not report one that an ignore rule covers, the repository's
+    own (``*.egg-info/``) or the builder's (``.git/info/exclude``,
+    ``core.excludesFile``). ``git archive`` writes each file of the commit as
+    a checkout of it would, with the line endings the commit's
+    ``.gitattributes`` sets and no other: an attribute file the checkout holds
+    beside the commit's changes nothing.
+
+    :param target: Where the files go; it must not exist yet.
+    :param root: The repository checkout.
+    """
+    archive = target.with_name(f"{target.name}.tar")
+    subprocess.run(  # nosec B603 B607 - fixed git invocation
+        [
+            "git",
+            "-C",
+            str(root),
+            "archive",
+            "--format=tar",
+            f"--output={archive}",
+            "HEAD",
+        ],
+        check=True,
+        capture_output=True,
+        timeout=GIT_S,
+    )
+    with tarfile.open(archive) as source:
+        source.extractall(target, filter="data")
+    archive.unlink()
 
 
 def foreign_plugins(
@@ -251,6 +295,11 @@ def build(
 ) -> list[pathlib.Path]:
     """Build the sdist, normalise it and build the wheel from it, into *outdir*.
 
+    The sdist is built from the commit's files, which :func:`export_commit`
+    writes into a temporary directory, so nothing else the checkout holds
+    reaches either file, and the build writes nothing into the checkout but
+    *outdir*.
+
     :param outdir: Where the two files go; it must be empty or absent.
     :param version: The version being built, which names the files.
     :param epoch: The commit's time, which stamps both files.
@@ -268,12 +317,15 @@ def build(
     sdist = outdir / sdist_name
     umask = os.umask(BUILD_UMASK)
     try:
-        run(
-            _build_command("--sdist", "--outdir", str(outdir), str(root)),
-            check=True,
-            env=environment,
-            timeout=BUILD_S,
-        )
+        with tempfile.TemporaryDirectory(prefix="phonometry-build-") as scratch:
+            source = pathlib.Path(scratch) / "commit"
+            export_commit(source, root)
+            run(
+                _build_command("--sdist", "--outdir", str(outdir), str(source)),
+                check=True,
+                env=environment,
+                timeout=BUILD_S,
+            )
         if sdist.is_file():
             normalise_sdist(sdist, epoch)
         run(

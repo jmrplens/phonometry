@@ -20,6 +20,12 @@ published:
   no test, no second top-level package;
 - the sdist carries what building the wheel from it needs: ``pyproject.toml``,
   ``VERSION`` (the version is read from it) and the PyPI readme;
+- the sdist holds nothing git does not track but what setuptools writes into
+  it itself (``PKG-INFO``, ``setup.cfg`` and the ``.egg-info`` directory):
+  setuptools packs a module or a test file that an ignore rule hides from
+  ``git status`` all the same. ``build_release.py`` builds the sdist from an
+  export of the commit, so no such file reaches a release built with it,
+  and this holds a directory built any other way to the same;
 - both declare the licence, ``License-Expression: MIT`` and ``License-File:
   LICENSE`` in their metadata, and both carry the repository's ``LICENSE``
   where PEP 639 puts it, under ``.dist-info/licenses/`` in the wheel and at the
@@ -49,6 +55,9 @@ _PACKAGE = "phonometry"
 #: What building the wheel from the sdist reads, beside the package itself and
 #: the licence files, which :data:`LICENSE_FILES` names.
 SDIST_SUPPORT = ("pyproject.toml", "VERSION", "README_PYPI.md")
+#: The files setuptools writes into the sdist itself rather than taking from a
+#: checkout, beside the ``.egg-info`` directory next to the package.
+SDIST_WRITTEN = ("PKG-INFO", "setup.cfg")
 #: The SPDX expression phonometry declares.
 LICENSE_EXPRESSION = "MIT"
 #: The licence files it declares, by the path PEP 639 records. Each carries the
@@ -74,6 +83,50 @@ def tracked_package_files(root: pathlib.Path = _ROOT) -> list[str]:
     return sorted(path.removeprefix("src/") for path in out.split("\0") if path)
 
 
+def _carried(sdist: pathlib.Path, version: str) -> list[str]:
+    """The files of the sdist, by their path under its top directory, sorted."""
+    top = f"{_PACKAGE}-{version}/"
+    with tarfile.open(sdist) as archive:
+        return sorted(
+            member.name.removeprefix(top)
+            for member in archive.getmembers()
+            if member.isfile() and member.name.startswith(top)
+        )
+
+
+def _tracked(root: pathlib.Path) -> set[str]:
+    """Every file git tracks in the checkout at *root*."""
+    listed = subprocess.run(  # nosec B603 B607 - fixed git invocation
+        ["git", "-C", str(root), "ls-files", "-z"],
+        check=True,
+        capture_output=True,
+        timeout=_GIT_S,
+    ).stdout.decode("utf-8")
+    return {path for path in listed.split("\0") if path}
+
+
+def untracked_sdist_problems(
+    sdist: pathlib.Path, version: str, root: pathlib.Path = _ROOT
+) -> list[str]:
+    """The files of the sdist that git does not track and setuptools did not write.
+
+    :param sdist: The built source distribution.
+    :param version: The version being released.
+    :param root: The repository checkout whose tracked files are read.
+    :return: One sentence per such file; empty when the sdist holds only files
+        git tracks, :data:`SDIST_WRITTEN` and the ``.egg-info`` directory.
+    """
+    tracked = _tracked(root)
+    egg_info = f"src/{_PACKAGE}.egg-info/"
+    return [
+        f"the sdist carries {path}, which git does not track"
+        for path in _carried(sdist, version)
+        if path not in tracked
+        and path not in SDIST_WRITTEN
+        and not path.startswith(egg_info)
+    ]
+
+
 def line_ending_problems(
     sdist: pathlib.Path, version: str, root: pathlib.Path = _ROOT
 ) -> list[str]:
@@ -81,7 +134,7 @@ def line_ending_problems(
 
     Only the files git tracks are asked about: the ones setuptools writes
     itself (``PKG-INFO``, ``setup.cfg``, the ``.egg-info``) come from no
-    checkout.
+    checkout, and :func:`untracked_sdist_problems` reports any other.
 
     :param sdist: The built source distribution.
     :param version: The version being released.
@@ -89,21 +142,8 @@ def line_ending_problems(
     :return: One sentence per tracked file whose ``eol`` attribute is not
         ``lf``; empty when a checkout anywhere gives every one of them LF.
     """
-    top = f"{_PACKAGE}-{version}/"
-    with tarfile.open(sdist) as archive:
-        carried = sorted(
-            member.name.removeprefix(top)
-            for member in archive.getmembers()
-            if member.isfile() and member.name.startswith(top)
-        )
-    listed = subprocess.run(  # nosec B603 B607 - fixed git invocation
-        ["git", "-C", str(root), "ls-files", "-z"],
-        check=True,
-        capture_output=True,
-        timeout=_GIT_S,
-    ).stdout.decode("utf-8")
-    tracked = set(listed.split("\0"))
-    checked = [path for path in carried if path in tracked]
+    tracked = _tracked(root)
+    checked = [path for path in _carried(sdist, version) if path in tracked]
     if not checked:
         return []
     answer = subprocess.run(  # nosec B603 B607 - fixed git invocation
@@ -246,6 +286,7 @@ def dist_problems(
         problems += wheel_problems(wheel, version, tracked)
     if sdist.is_file():
         problems += sdist_problems(sdist, version, tracked)
+        problems += untracked_sdist_problems(sdist, version, root)
         problems += line_ending_problems(sdist, version, root)
     return problems
 
@@ -268,7 +309,7 @@ def main(argv: list[str] | None = None) -> int:
     if problems:
         return 1
     print(
-        f"The sdist and the wheel of {version} carry the {len(tracked)} files git tracks under src/{_PACKAGE}, and nothing else, declare and carry the {LICENSE_EXPRESSION} licence, and every tracked file of the sdist is checked out with LF everywhere."
+        f"The sdist and the wheel of {version} carry the {len(tracked)} files git tracks under src/{_PACKAGE}, the wheel nothing else and the sdist nothing git does not track but what setuptools writes, declare and carry the {LICENSE_EXPRESSION} licence, and every tracked file of the sdist is checked out with LF everywhere."
     )
     return 0
 

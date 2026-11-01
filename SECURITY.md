@@ -231,14 +231,17 @@ python3.13 -m venv ../phonometry-build
 
 `scripts/build_release.py` builds the sdist with the setuptools that
 `requirements-release.txt` pins, without build isolation, and with every
-time stamp set to the commit's. It writes the sdist again without the time of
-the build, the builder's user or the checkout's modes, builds the wheel from
-that sdist under umask 022, and compares both files with the digests PyPI
-publishes for the version; `--check phonometry-4.0.0.sha256` compares them
-with the release's checksum file instead. It refuses a checkout that differs
-from its commit, and an environment in which another package installs a
-setuptools plugin that could change what is packed, which is why the build
-gets a virtual environment of its own. `core.autocrlf=false` keeps the files
+time stamp set to the commit's, from the commit's files as `git archive`
+exports them rather than from the checkout, so a file the checkout holds
+beside them, one git ignores included, reaches neither file. It writes the
+sdist again without the time of the build, the builder's user or the
+checkout's modes, builds the wheel from that sdist under umask 022, and
+compares both files with the digests PyPI publishes for the version;
+`--check phonometry-4.0.0.sha256` compares them with the release's checksum
+file instead. It refuses a checkout that differs from its commit, and an
+environment in which another package installs a setuptools plugin that could
+change what is packed, which is why the build gets a virtual environment of
+its own. `core.autocrlf=false` keeps the files
 as the commit holds them, and `.gitattributes` checks out every file the sdist
 carries with LF whatever `core.autocrlf` or `core.eol` the cloner has set.
 

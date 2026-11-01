@@ -2296,13 +2296,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 - **A record refuses a container that holds itself by the name of the field
   wherever the container sits.** A field the class's own `__post_init__`
-  fills (`init=False`), an `InitVar` handed to it and a field a pickled or
-  deep-copied record brings back were refused with a `TypeError` that named
-  neither the record nor the field, and a list that held a column whose
-  `__array__` handed back an array of objects holding the list again ran
-  until Python stopped it with a `RecursionError`. Each is now the
-  `TypeError` an init field gives, `Record: 'name' holds a container that
-  holds itself`.
+  fills (`init=False`), an `InitVar` handed to it, a field a pickled or
+  deep-copied record brings back and a deque the record reads member by
+  member (the bands of a `filters.OctaveFilterResult`) were refused with a
+  `TypeError` that named neither the record nor the field, a pair or a grid
+  of arrays given as such a deque was refused as a value of the wrong type,
+  and a list that held a column whose `__array__` handed back an array of
+  objects holding the list again ran until Python stopped it with a
+  `RecursionError`. Each is now the `TypeError` an init field gives,
+  `Record: 'name' holds a container that holds itself`, or `'name' holds a
+  container that holds itself` from the shared check of a pair or a grid.
 
 - **`io.write_sidecar` takes for a type checker the NumPy numbers it takes
   when it runs, and `simulation.AnimationFrame` takes its size as any

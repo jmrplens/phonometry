@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING, Any, Literal, TypeGuard, cast
 
 import numpy as np
 
-from .frozen import given_repr, given_type, owned_members
+from .frozen import _HoldsItself, given_repr, given_type, owned_members
 
 if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
@@ -1274,7 +1274,9 @@ def require_1d_signal(x: ArrayLike, name: str) -> np.ndarray:
     return arr
 
 
-def _members_of(value: object, msg: str, *, owned: bool = False) -> Sequence[object]:
+def _members_of(
+    value: object, msg: str, *, owned_as: str | None = None
+) -> Sequence[object]:
     """The members of a sequence a record takes as one field, refused whole when it is none.
 
     Iterating gives something of many objects that are no sequence of
@@ -1285,21 +1287,26 @@ def _members_of(value: object, msg: str, *, owned: bool = False) -> Sequence[obj
 
     :param value: The caller's value, of any type.
     :param msg: The start of the refusal, worded by the caller.
-    :param owned: Read the members through
+    :param owned_as: The field's name, to read the members through
         :func:`~phonometry._internal.frozen.owned_members`, for a record that
         seals the arrays it holds: an array a deque or a generator holds is
         copied, so the record never seals one of the caller's.
     :return: The members, in order.
-    :raises TypeError: for a text in any form, a mapping, a set, or a value
-        that is not a sequence at all.
+    :raises TypeError: for a text in any form, a mapping, a set, a value
+        that is not a sequence at all, or one that holds a container that
+        holds itself, refused as that, by the field's name.
     """
     refusal = f"{msg}, not {given_type(value)}."
     if holds_text(value) or isinstance(value, bytearray | Mapping | Set):
         raise TypeError(refusal)
     try:
-        if owned:
-            return owned_members(cast("Iterable[object]", value))
+        if owned_as is not None:
+            return owned_members(cast("Iterable[object]", value), owned_as)
         return list(cast("Iterable[object]", value))
+    except _HoldsItself:
+        # A sequence of the right type, with no end to copy: the refusal
+        # names the field already, and says what is wrong with it.
+        raise
     except TypeError:
         raise TypeError(refusal) from None
 
@@ -1342,7 +1349,7 @@ def arrays_of(
     """
     expected = require_count(n_members, "n_members")
     msg = f"'{name}' must be {members}"
-    items = _members_of(value, msg, owned=True)
+    items = _members_of(value, msg, owned_as=name)
     if len(items) != expected:
         msg += f", not {len(items)} of them."
         raise ValueError(msg)

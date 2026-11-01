@@ -118,7 +118,9 @@ def read_only_copy(
     return read_only(copied)
 
 
-def owned_members(value: Iterable[Any]) -> tuple[Any, ...]:
+def owned_members(
+    value: Iterable[Any], name: str, record: object = None
+) -> tuple[Any, ...]:
     """The members of a sequence a record holds, as a tuple, every array its own.
 
     For the ``__post_init__`` of a record that inherits :class:`OwnsArrays`,
@@ -132,13 +134,21 @@ def owned_members(value: Iterable[Any]) -> tuple[Any, ...]:
     caller's.
 
     :param value: The field's value, any iterable.
+    :param name: The field's name, for the refusal of a container that holds
+        itself.
+    :param record: The record, named in that refusal too; left out by a
+        shared check that knows the field alone.
     :return: Its members, as a tuple.
-    :raises TypeError: if *value* is not iterable.
+    :raises TypeError: if *value* is not iterable, or holds a container that
+        holds itself, naming the field.
     """
     if isinstance(value, tuple | list | np.ndarray):
         return tuple(value)
-    # A plain tuple comes back from _owned as a plain tuple.
-    return cast("tuple[Any, ...]", _owned(tuple(value), always=True))
+    try:
+        # A plain tuple comes back from _owned as a plain tuple.
+        return cast("tuple[Any, ...]", _owned(tuple(value), always=True))
+    except _HoldsItself:
+        raise _holds_itself(record, name) from None
 
 
 #: The arrays a function of the library has handed to the record it is
@@ -324,7 +334,12 @@ def _owned(
 
 
 class _HoldsItself(TypeError):
-    """A container a record was given holds itself, so no copy of it ends."""
+    """A container a record was given holds itself, so no copy of it ends.
+
+    Raised by the walk without a name, and again by whoever knows the field
+    with its name (:func:`_holds_itself`), which a shared check lets through
+    as it is rather than read it as a value of the wrong type.
+    """
 
 
 def _entered(container: object, within: frozenset[int]) -> frozenset[int]:
@@ -665,13 +680,18 @@ def _argument_name(hook: Callable[..., None], index: int) -> str:
     return f"argument {index + 1} of __post_init__"
 
 
-def _holds_itself(record: object, name: str) -> TypeError:
-    """The refusal of a field or an argument *name* of *record* that holds itself."""
+def _holds_itself(record: object, name: str) -> _HoldsItself:
+    """The refusal of a field or an argument *name* of *record* that holds itself.
+
+    *record* is ``None`` for a shared check that knows the field alone, and
+    the refusal then names the field only.
+    """
+    owner = "" if record is None else f"{type(record).__name__}: "
     msg = (
-        f"{type(record).__name__}: '{name}' holds a container that holds "
-        "itself, which has no end to copy."
+        f"{owner}'{name}' holds a container that holds itself, which has no "
+        "end to copy."
     )
-    return TypeError(msg)
+    return _HoldsItself(msg)
 
 
 def _composed(hook: Callable[..., None]) -> Callable[..., None]:

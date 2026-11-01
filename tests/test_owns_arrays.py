@@ -35,6 +35,8 @@ import phonometry
 from phonometry import io
 from phonometry._internal import frozen
 from phonometry._internal.frozen import OwnsArrays, read_only
+from phonometry._internal.validation import arrays_of
+from phonometry.electroacoustics import MicrophoneDirectivity
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -334,12 +336,12 @@ def test_the_arrays_a_record_takes_out_of_any_sequence_are_its_own(
 def test_owned_members_hands_back_what_the_record_copied_as_it_is() -> None:
     """A tuple's, a list's or an array's members are the record's copies by then."""
     mine = _writeable([1.0, 2.0])
-    assert frozen.owned_members((mine, 1.0))[0] is mine
-    assert frozen.owned_members([mine])[0] is mine
+    assert frozen.owned_members((mine, 1.0), "levels")[0] is mine
+    assert frozen.owned_members([mine], "levels")[0] is mine
     grid = _writeable([1.0, 2.0, 3.0, 4.0]).reshape(2, 2)
-    assert np.shares_memory(frozen.owned_members(grid)[0], grid)
-    assert frozen.owned_members(deque([mine]))[0] is not mine
-    assert frozen.owned_members(deque(["a", 1.0])) == ("a", 1.0)
+    assert np.shares_memory(frozen.owned_members(grid, "levels")[0], grid)
+    assert frozen.owned_members(deque([mine]), "levels")[0] is not mine
+    assert frozen.owned_members(deque(["a", 1.0]), "levels") == ("a", 1.0)
 
 
 def test_a_read_only_copy_of_an_array_of_objects_holds_copies_of_its_arrays() -> None:
@@ -776,6 +778,40 @@ def test_a_restored_field_that_holds_itself_is_refused_naming_the_field() -> Non
         TypeError, match=r"_Plain: 'levels' holds a container that holds itself"
     ):
         record.__setstate__(state)
+
+
+def test_a_sequence_the_record_reads_member_by_member_names_its_field() -> None:
+    """A container that holds itself inside a deque is refused by its field too.
+
+    The copy before the record's own checks goes into a tuple, a list, a
+    mapping and an array; a deque it hands on as it is, to be read member by
+    member through ``owned_members``, the record's or that of the shared
+    check of a pair or a grid of arrays. Those walked it with no field to
+    name: the band record raised that a record holds no container that holds
+    itself, naming neither, and the shared check said the deque was the
+    wrong type, which a deque of two arrays is not.
+    """
+    endless = _holds_itself("list")
+    with pytest.raises(
+        TypeError,
+        match=r"OctaveFilterResult: 'bands' holds a container that holds itself",
+    ):
+        phonometry.filters.OctaveFilterResult(
+            levels=np.zeros(1),
+            frequencies=(1000.0,),
+            bands=deque([endless]),  # type: ignore[arg-type]
+        )
+    pattern = "a pair (angles_deg, relative_db) of two arrays"
+    with pytest.raises(
+        TypeError, match=r"^'directivity' holds a container that holds itself"
+    ):
+        arrays_of(deque([endless, [1.0]]), "directivity", pattern, 2)
+    with pytest.raises(
+        TypeError, match=r"^'polar' holds a container that holds itself"
+    ):
+        MicrophoneDirectivity(polar=deque([endless, [0.0]]))  # type: ignore[arg-type]
+    pair = arrays_of(deque([[0.0, 1.0], [1.0, 2.0]]), "directivity", pattern, 2)
+    np.testing.assert_array_equal(pair[1], [1.0, 2.0])
 
 
 def test_a_container_held_twice_side_by_side_is_copied_as_any_other() -> None:

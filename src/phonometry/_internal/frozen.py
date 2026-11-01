@@ -143,7 +143,7 @@ def read_only_copy(
 
 
 def owned_members(
-    value: Iterable[Any], name: str, record: object = None
+    value: Iterable[Any], name: str, owner: object = None
 ) -> tuple[Any, ...]:
     """The members of a sequence a record holds, as a tuple, every array its own.
 
@@ -160,7 +160,7 @@ def owned_members(
     :param value: The field's value, any iterable.
     :param name: The field's name, for the refusal of a container that holds
         itself.
-    :param record: The record, named in that refusal too; left out by a
+    :param owner: The record, named in that refusal too; left out by a
         shared check that knows the field alone.
     :return: Its members, as a tuple.
     :raises TypeError: if *value* is not iterable, or holds a container that
@@ -172,7 +172,7 @@ def owned_members(
         # A plain tuple comes back from _owned as a plain tuple.
         return cast("tuple[Any, ...]", _owned(tuple(value), always=True))
     except _HoldsItself:
-        raise _holds_itself(record, name) from None
+        raise _holds_itself(owner, name) from None
 
 
 #: The arrays a function of the library has handed to the record it is

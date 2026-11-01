@@ -98,6 +98,7 @@ from __future__ import annotations
 
 import ast
 import builtins
+import collections
 import collections.abc
 import dataclasses
 import enum
@@ -1303,6 +1304,90 @@ def _call_name(node: ast.Call) -> str:
     if isinstance(node.func, ast.Attribute):
         return node.func.attr
     return ""
+
+
+def _validator_functions() -> tuple[object, ...]:
+    """The shared checks :data:`VALIDATORS` names, as the functions they are."""
+    from phonometry._i18n import check_language
+    from phonometry._internal.validation import check_engine, require_choice
+
+    return (require_choice, check_language, check_engine)
+
+
+@functools.lru_cache(maxsize=256)
+def _bound_in(tree: ast.AST) -> frozenset[str]:
+    """The names a function binds itself, otherwise than by an import.
+
+    Its parameters, every name it stores a value in and every function it
+    defines inside it: a call through one of them reaches what the function
+    put there, never a function of its module of the same name.
+    """
+    root = tree.body[0] if isinstance(tree, ast.Module) and tree.body else tree
+    bound: set[str] = set()
+    if isinstance(root, ast.FunctionDef | ast.AsyncFunctionDef | ast.Lambda):
+        arguments = root.args
+        named = [*arguments.posonlyargs, *arguments.args, *arguments.kwonlyargs]
+        named.extend(each for each in (arguments.vararg, arguments.kwarg) if each)
+        bound.update(parameter.arg for parameter in named)
+    for node in ast.walk(root):
+        if isinstance(node, ast.Name) and isinstance(node.ctx, ast.Store):
+            bound.add(node.id)
+        elif (
+            isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef)
+            and node is not root
+        ):
+            bound.add(node.name)
+    return frozenset(bound)
+
+
+def _calls_a_validator(
+    node: ast.Call, function: ast.AST | None, module_name: str
+) -> bool:
+    """:func:`_is_validator` for a call written in *function* of *module_name*.
+
+    The names are read in the module and in what *function* imports itself.
+    """
+    if _call_name(node) not in VALIDATORS:
+        return False
+    if function is None:
+        empty = ast.Module(body=[], type_ignores=[])
+        return _is_validator(node, _module_names(module_name), empty)
+    return _is_validator(node, _names_read_by(function, module_name), function)
+
+
+@functools.lru_cache(maxsize=256)
+def _names_read_by(function: ast.AST, module_name: str) -> Mapping[str, object]:
+    """The names *function* of *module_name* reads: its own imports, then its module's.
+
+    Kept for the last functions read, which are read whole one after another.
+    """
+    own = _local_imports(function, module_name)
+    return collections.ChainMap(own, _module_names(module_name))
+
+
+@functools.cache
+def _module_names(module_name: str) -> dict[str, object]:
+    """The names the module *module_name* binds: its namespace itself, read only."""
+    module = sys.modules.get(module_name)
+    return vars(module) if module is not None else {}
+
+
+def _is_validator(
+    node: ast.Call, namespace: Mapping[str, object], tree: ast.AST
+) -> bool:
+    """Whether *node* calls one of the shared checks, by the function its name reaches.
+
+    Never by the last part of its name alone: a method of another object, a
+    function imported under the name and a name the function binds itself
+    (:func:`_bound_in`) check nothing, though each is called
+    ``require_choice``.
+    """
+    if _call_name(node) not in VALIDATORS:
+        return False
+    if isinstance(node.func, ast.Name) and node.func.id in _bound_in(tree):
+        return False
+    found = _named_object(node.func, namespace)
+    return any(found is check for check in _validator_functions())
 
 
 #: The set methods that keep what is not, or say whether all is, in a set of
@@ -2555,6 +2640,8 @@ class _Reader(NamedTuple):
     options: frozenset[str]
     collection: bool
     depth: int
+    #: The function's tree, whose own names hide a check's (:func:`_bound_in`).
+    tree: ast.AST = ast.Module(body=[], type_ignores=[])
 
 
 # PLR0913: the recursion carries what it has followed so far.
@@ -2594,6 +2681,7 @@ def _spelling(  # noqa: PLR0913
         options=options,
         collection=collection,
         depth=depth,
+        tree=tree,
     )
     unlisted = _unlisted_items(tree, is_raw, constants) if collection else {}
     folds: list[tuple[tuple[int, int], str]] = []
@@ -2623,7 +2711,11 @@ def _read_call(
     label = _cleaned_up(node, reader.matches, reader.constants, reader.options)
     if label is not None:
         folds.append((_start(node), label))
-    if node.args and reader.is_raw(node.args[0]) and _call_name(node) in VALIDATORS:
+    if (
+        node.args
+        and reader.is_raw(node.args[0])
+        and _is_validator(node, reader.namespace, reader.tree)
+    ):
         checks.append(_end(node))
         wider = _beyond_the_literal(node, reader)
         if wider:
@@ -3432,7 +3524,9 @@ def _source(
                 _source(expression.orelse, function, module_name, depth + 1),
             ]
         )
-    if isinstance(expression, ast.Call) and _call_name(expression) in VALIDATORS:
+    if isinstance(expression, ast.Call) and _calls_a_validator(
+        expression, function, module_name
+    ):
         return _Source("literal", frozenset())
     if isinstance(expression, ast.Call):
         # What a function annotated to return a Literal hands back.
@@ -4646,7 +4740,7 @@ def _checks_of(
                 sites.append((node, (_Check(every_path=True, validator=False),)))
         if not isinstance(node, ast.Call):
             continue
-        if node.args and is_raw(node.args[0]) and _call_name(node) in VALIDATORS:
+        if node.args and is_raw(node.args[0]) and _is_validator(node, namespace, tree):
             sites.append((node, (_Check(every_path=True, validator=True),)))
             continue
         callee = _callee(node, namespace, module_name)

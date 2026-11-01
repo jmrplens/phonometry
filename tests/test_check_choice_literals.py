@@ -2149,6 +2149,40 @@ def test_a_choice_of_texts_alone_leaves_through_no_test_of_its_form() -> None:
             )
 
 
+def _a_method_namesake(mode: _Pace, checker: object) -> _Pace:
+    checker.require_choice(mode, "mode", _PACES)  # type: ignore[attr-defined]
+    return mode
+
+
+def _an_imported_namesake(mode: _Pace) -> _Pace:
+    from operator import truth as require_choice
+
+    require_choice(mode)
+    return mode
+
+
+def _a_parameter_namesake(
+    mode: _Pace, require_choice: Callable[..., object] = print
+) -> _Pace:
+    require_choice(mode, "mode", _PACES)
+    return mode
+
+
+def test_a_check_is_known_by_the_function_it_is_not_by_its_name() -> None:
+    """A call counts as the shared check only when its name reaches it.
+
+    A method of another object called ``require_choice``, a function
+    imported under that name and a parameter of it check nothing, and the
+    guard counted each as the check because of the last part of its name.
+    """
+    texts = 'Literal["fast", "slow"]'
+    for namesake in (_a_method_namesake, _an_imported_namesake, _a_parameter_namesake):
+        assert ccl._choice_verdict(namesake, "mode", texts, field=False) is not None, (
+            namesake
+        )
+    assert ccl._choice_verdict(_validated, "mode", texts, field=False) is None
+
+
 def _spreads_annotated(x: list[float], mode: str) -> object:
     options: dict[str, str] = {"mode": mode}
     return time_weighting(x, 48000, **options)  # type: ignore[call-overload]

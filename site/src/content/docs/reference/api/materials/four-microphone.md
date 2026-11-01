@@ -26,8 +26,8 @@ ansatz of [`impedance_tube`](/phonometry/reference/api/materials/impedance-tube/
 wavenumber is $k_0 = k_0' - jk_0''$ and whose air properties take
 kelvin; the two are **not** interchangeable, so the air-property and
 working-range helpers are named per standard and each stays with the method
-that prescribes it. What the two transfer methods genuinely share - the tube
-cross-section and the plane-wave working-range arithmetic - is imported from
+that prescribes it. What the two transfer methods genuinely share, the tube
+cross-section and the plane-wave working-range arithmetic, is imported from
 that module.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.

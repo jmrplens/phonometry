@@ -414,9 +414,9 @@ practice: the standard-basis line naming the applied ISO method
 whole-body vibration) and the Directive 2002/44/EC it is assessed
 against, an optional metadata header (company, operator/worker,
 workplace, instrumentation, calibration), the per-operation exposure
-analysis (the vibration magnitude - the hand-arm vector total `a_hv`
-or the whole-body Directive Part B dominant-axis value `a_w,max` -
-the daily exposure time `T_i` and
+analysis (the vibration magnitude, which is the hand-arm vector total
+`a_hv` or the whole-body Directive Part B dominant-axis value
+`a_w,max`; the daily exposure time `T_i` and
 the partial exposure `A_i(8)` of ISO 5349-1/-2 Eq. (2), closed by the
 daily total and the combined `A(8)` of Eq. (3)), the per-operation
 contribution chart, the boxed `A(8)` with its exposure zone, an
@@ -567,8 +567,8 @@ frequency_weighting(
 
 Frequency-weighting response `H(f)` (ISO 8041-1:2017, Formula (5)).
 
-Evaluates the overall weighting - band limiting, acceleration-velocity
-transition and upward step - of weighting `name` at `frequencies`.
+Evaluates the overall weighting (band limiting, acceleration-velocity
+transition and upward step) of weighting `name` at `frequencies`.
 
 **Parameters**
 

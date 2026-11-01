@@ -2425,6 +2425,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   system refuses before that left the copy there; it is removed now, and the
   file at `path` is the one python-soundfile wrote, without the bext.
 
+- **The API reference shows the tables its docstrings hold as tables.** A
+  reST simple table, the one written between rules of `=` signs, reached its
+  page as a single run-on paragraph, its rules and `n/a` cells included: nine
+  pages showed one, among them the junction constants of
+  `vibration.structural`, the FRF names of `mechanical_mobility`, the BWF chunk
+  layout of `io` and the maximum uncertainties of `free_field_corrections`.
+  `scripts/generate_api_docs.py` now publishes each as a table, a row whose
+  first cell is blank continuing the row above it as docutils reads it, and a
+  run of `make api-docs` fails on a table it cannot read rather than publish
+  it as text.
+- **Every domain package says what it holds.** Eighteen packages and
+  `simulation` opened their docstring with a placeholder ("building domain of
+  phonometry (see module docstrings).") that `help(phonometry.building)`
+  printed as its first line. Each now opens with one sentence of 155
+  characters or fewer, and `make api-docs` fails on a module or package whose
+  lead is that placeholder.
+- **Docstring prose writes no hyphen as a dash.** A hundred lines of running
+  prose in 33 modules joined a clause with a spaced hyphen ("a construction
+  mistake - and the fiche would have printed it"), which reads as a minus; each
+  is now a comma, a colon, a semicolon or a parenthesis, and a frequency range
+  reads "500 Hz to 6000 Hz". The hyphens that are a minus (`32,3 - 26,3 dB`,
+  `T30/T20 - 1`) stay.
+- **The structure-borne power method is cited as the document it was read
+  in.** The code, the fiche, the guide, the glossary, the conformance report
+  and the errata register cited "EN 15657:2018", an edition CEN never
+  published: the print every value was checked against is UNE-EN 15657:2018,
+  the Spanish version of EN 15657:2017, and each citation now names it.
+- **The determinism page says where the C library still enters a weighting
+  design.** It said every transcendental but the logarithm runs once per
+  design; `exp` runs at every step of the fit and `pow` in every Lawson round,
+  and the page and the docstring of `_scalar_log` now say so, with the counts.
+- **Links that moved point where they land.** Seventeen links to the AES
+  e-library, the IEC webstore, SAE, VDI, the RFC Editor, stipa.info and the
+  OSI licence page answered with a permanent redirect, and the DIN 45692,
+  IEC 61260-2 and IEC 61260-3 catalogue links ended on a missing page; each
+  now names the page it reaches.
+
 - **The API reference and `help()` show no double hyphen where a sentence
   wanted a colon, and the `fluids` package says what it holds.** Docstrings
   spelt a dash as `--`, which `help()` prints as it is and the site published
@@ -11835,7 +11872,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Two defects registered in the errata registry, both from EN 12354-5:2009.
   Table F.1 and clause F.4.2 print the force level "re 1 pN"; the reference is
   10⁻⁶ N, which is what Formulae (D.5a), (D.9a) and (F.10) balance at, what the
-  tapping machine's own hammers produce, and what EN 15657:2018 Formula (15)
+  tapping machine's own hammers produce, and what UNE-EN 15657:2018 Formula (15)
   and ISO 1683 use. And the Key of Figure D.3 labels all three curves
   `L_Ws,c,A` where its own caption names one characteristic power and two
   installed ones.
@@ -15131,7 +15168,7 @@ the whole of the migration.
   render in English or Spanish (`language="es"`).
 - `StructureBornePowerResult.report()`: a one-page PDF structure-borne sound
   power characterization fiche for the power a piece of building service
-  equipment injects into a reception plate (EN 15657:2018 reception-plate
+  equipment injects into a reception plate (UNE-EN 15657:2018 reception-plate
   method, Formula 14), rendered through the shared sound-power report engine.
   The sheet carries the standard-basis line naming the reception-plate method,
   an optional metadata header (client, source equipment, test environment,
@@ -16586,7 +16623,7 @@ the whole of the migration.
   range included) and exposes the spectrum adaptation term CI,delta
   (ISO 717-2:2020 Formula (A.4)) as `ci_delta` /
   `impact_improvement_adaptation_term`.
-- EN 15657:2018 source-quantity chain: `equivalent_blocked_force_level`
+- UNE-EN 15657:2018 source-quantity chain: `equivalent_blocked_force_level`
   (Formula 15), `characteristic_reception_plate_power` (Formula 17,
   Y_R,inf,low = 5e-6 m/(N s)), `equivalent_free_velocity_level` (Formula 18)
   and `source_mobility_from_levels` (Formula 19), plus the EN 12354-5 Annex I

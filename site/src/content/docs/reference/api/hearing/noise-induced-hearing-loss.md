@@ -81,7 +81,7 @@ htlan(
 Hearing threshold level associated with age and noise (clause 6.1).
 
 Combines the age component `H` (HTLA from database A, evaluated from
-ISO 7029:2017 - the edition ISO 1999:2013 references undated in 6.2.2 - at
+ISO 7029:2017, the edition ISO 1999:2013 references undated in 6.2.2, at
 the same population fractile) with the noise component `N` (the NIPTS at
 that fractile) by Formula (1): $H' = H + N - H N / 120$. The
 formula applies
@@ -97,7 +97,7 @@ components.
 | `l_ex` | Noise exposure level normalized to 8 h, `L_EX,8h`, in dB. |
 | `exposure_duration_years` | Exposure duration, in years. |
 | `fractile` | Population fractile in (0, 1) applied to both components. |
-| `frequencies` | Optional subset of the audiometric frequencies, in hertz; `None` uses all six (500 Hz - 6000 Hz). |
+| `frequencies` | Optional subset of the audiometric frequencies, in hertz; `None` uses all six (500 Hz to 6000 Hz). |
 
 **Returns:** An [`HTLANResult`](/phonometry/reference/api/hearing/noise-induced-hearing-loss/#htlanresult) with `htla`, `nipts`, `threshold` and `.plot()`.
 
@@ -237,7 +237,7 @@ zero.
 | `l_ex` | Noise exposure level normalized to a nominal 8 h working day, `L_EX,8h`, in dB. |
 | `exposure_duration_years` | Exposure duration, in years (> 0; the standard establishes 10-40 years and extrapolates 1-10 years by Formula 3, below 1 year the result is a further extrapolation). |
 | `fractile` | Population fractile in the open interval (0, 1); `0.5` gives the median. The reliable range of the standard is 0.05-0.95. |
-| `frequencies` | Optional subset of the audiometric frequencies, in hertz; `None` uses all six (500 Hz - 6000 Hz). |
+| `frequencies` | Optional subset of the audiometric frequencies, in hertz; `None` uses all six (500 Hz to 6000 Hz). |
 
 **Returns:** A [`NIPTSResult`](/phonometry/reference/api/hearing/noise-induced-hearing-loss/#niptsresult) with the distribution and `.plot()`.
 

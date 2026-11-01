@@ -906,16 +906,12 @@ max_expanded_uncertainty(
 The maximum permitted expanded uncertainty of a correction
 (IEC 62585:2012, clauses 9 to 14).
 
-====== ========================================== =========================
-Clause Correction for                             Maximum, dB
-====== ========================================== =========================
-9      reflections from the case, diffraction     0,25 to 4 kHz; 0,35 above
-10     the microphone's non-uniform response      0,25 from 63 Hz to 4 kHz;
-                                                  0,35 to 8 kHz; 0,45 above
-11     windscreens and similar accessories        0,20 to 4 kHz; 0,30 above
-12-14  a calibrator, a coupler, an actuator       0,25 to 4 kHz; 0,35 below
-                                                  10 kHz; 0,50 from 10 kHz
-====== ========================================== =========================
+| Clause | Correction for | Maximum, dB |
+| :--- | :--- | :--- |
+| 9 | reflections from the case, diffraction | 0,25 to 4 kHz; 0,35 above |
+| 10 | the microphone's non-uniform response | 0,25 from 63 Hz to 4 kHz; 0,35 to 8 kHz; 0,45 above |
+| 11 | windscreens and similar accessories | 0,20 to 4 kHz; 0,30 above |
+| 12-14 | a calibrator, a coupler, an actuator | 0,25 to 4 kHz; 0,35 below 10 kHz; 0,50 from 10 kHz |
 
 "To 4 kHz" includes 4 kHz; 10 kHz is in the band "at and above 10 kHz".
 Clauses 10 and 11 exclude the reproducibility component of the samples of

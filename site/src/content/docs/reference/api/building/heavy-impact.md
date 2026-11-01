@@ -43,15 +43,13 @@ Table A.1 and ISO 10140-5:2021 Table F.1 (rubber ball), and in
 JIS A 1418-2:2019 Tables A.2 (rubber ball, *impact force characteristic 2*) and
 A.1 (bang machine, *impact force characteristic 1*):
 
-===========  ====================  =====================
-Octave (Hz)  Rubber ball LFE (dB)  Bang machine LFE (dB)
-===========  ====================  =====================
-31,5         39,0 +/- 1,0          47,0 +/- 1,0
-63           31,0 +/- 1,5          40,0 +/- 1,5
-125          23,0 +/- 1,5          22,0 +/- 1,5
-250          17,0 +/- 2,0          11,5 +/- 2,0
-500          12,5 +/- 2,0          5,5 +/- 2,0
-===========  ====================  =====================
+| Octave (Hz) | Rubber ball LFE (dB) | Bang machine LFE (dB) |
+| :--- | :--- | :--- |
+| 31,5 | 39,0 +/- 1,0 | 47,0 +/- 1,0 |
+| 63 | 31,0 +/- 1,5 | 40,0 +/- 1,5 |
+| 125 | 23,0 +/- 1,5 | 22,0 +/- 1,5 |
+| 250 | 17,0 +/- 2,0 | 11,5 +/- 2,0 |
+| 500 | 12,5 +/- 2,0 | 5,5 +/- 2,0 |
 
 **Standardized maximum impact sound pressure level (ISO 16283-2 Formulae (4),
 (5) and (6)).** Because the rated quantity is a *maximum* of a Fast-weighted

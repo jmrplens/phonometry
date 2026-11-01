@@ -69,14 +69,12 @@ $C = \sqrt{\chi^2 + \sin^2\theta} + \sqrt{\sin^2\theta - \chi^2}$.
 **Junction constants.** `J1`, `J2` set the corner coefficient and `J3` the
 straight one:
 
-===============  ====  =====  =====
-Junction         J1    J2     J3
-===============  ====  =====  =====
-X                1     1      1
-T-junction (1)   2     0.5    0.5
-T-junction (2)   2     2      n/a
-L                4     1      n/a
-===============  ====  =====  =====
+| Junction | J1 | J2 | J3 |
+| :--- | :--- | :--- | :--- |
+| X | 1 | 1 | 1 |
+| T-junction (1) | 2 | 0.5 | 0.5 |
+| T-junction (2) | 2 | 2 | n/a |
+| L | 4 | 1 | n/a |
 
 For T-junction (1) plates 1 and 3 are identical; for T-junction (2) plates 2
 and 4 are identical. The straight section is undefined for T-junction (2) and

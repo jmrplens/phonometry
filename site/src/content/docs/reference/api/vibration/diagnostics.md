@@ -117,17 +117,15 @@ Kinematic frequencies of a rolling-contact bearing (Norton 8.4-8.14).
 Returns the seven lines a bearing generates, named with the acronyms used
 in condition monitoring:
 
-============ ================================================= ==========
-Name         Meaning                                           Norton eq.
-============ ================================================= ==========
-`shaft`    shaft rotational frequency `fs`                  (8.4)
-`FTF`      cage (fundamental train) frequency                 (8.5)/(8.6)
-`FTF_rel`  cage rotation relative to the rotating race        (8.11)/(8.12)
-`BSF`      rolling-element rotational frequency               (8.7)
-`BDF`      rolling-element spin frequency, `2 BSF`          (8.10)
-`BPFO`     element pass frequency on the outer race           (8.8)/(8.14)
-`BPFI`     element pass frequency on the inner race           (8.9)/(8.13)
-============ ================================================= ==========
+| Name | Meaning | Norton eq. |
+| :--- | :--- | :--- |
+| `shaft` | shaft rotational frequency `fs` | (8.4) |
+| `FTF` | cage (fundamental train) frequency | (8.5)/(8.6) |
+| `FTF_rel` | cage rotation relative to the rotating race | (8.11)/(8.12) |
+| `BSF` | rolling-element rotational frequency | (8.7) |
+| `BDF` | rolling-element spin frequency, `2 BSF` | (8.10) |
+| `BPFO` | element pass frequency on the outer race | (8.8)/(8.14) |
+| `BPFI` | element pass frequency on the inner race | (8.9)/(8.13) |
 
 `BPFO` and `BPFI` are the outer- and inner-race defect lines and
 `BDF` the rolling-element/cage defect line; all three are exact

@@ -516,26 +516,24 @@ structure. Offsets are into the chunk payload; the fixed part is 602
 bytes in *every* version, because each revision claimed its new fields
 from the tail of the original reserved block:
 
-=======  ====  =============================  ==========================
-Offset   Size  Field                          Held here as
-=======  ====  =============================  ==========================
-0        256   Description                    `description`
-256      32    Originator                     `originator`
-288      32    OriginatorReference            `originator_reference`
-320      10    OriginationDate (yyyy-mm-dd)   `origination_date`
-330      8     OriginationTime (hh-mm-ss)     `origination_time`
-338      4     TimeReferenceLow               `time_reference` (low)
-342      4     TimeReferenceHigh              `time_reference` (high)
-346      2     Version (0, 1 or 2)            `version`
-348      64    UMID (SMPTE ST 330), v >= 1    `umid`
-412      2     LoudnessValue, v2              `loudness_value`
-414      2     LoudnessRange, v2              `loudness_range`
-416      2     MaxTruePeakLevel, v2           `max_true_peak_level`
-418      2     MaxMomentaryLoudness, v2       `max_momentary_loudness`
-420      2     MaxShortTermLoudness, v2       `max_short_term_loudness`
-422      180   Reserved (zeros)               (dropped)
-602      var   CodingHistory (EBU R98)        `coding_history`
-=======  ====  =============================  ==========================
+| Offset | Size | Field | Held here as |
+| :--- | :--- | :--- | :--- |
+| 0 | 256 | Description | `description` |
+| 256 | 32 | Originator | `originator` |
+| 288 | 32 | OriginatorReference | `originator_reference` |
+| 320 | 10 | OriginationDate (yyyy-mm-dd) | `origination_date` |
+| 330 | 8 | OriginationTime (hh-mm-ss) | `origination_time` |
+| 338 | 4 | TimeReferenceLow | `time_reference` (low) |
+| 342 | 4 | TimeReferenceHigh | `time_reference` (high) |
+| 346 | 2 | Version (0, 1 or 2) | `version` |
+| 348 | 64 | UMID (SMPTE ST 330), v >= 1 | `umid` |
+| 412 | 2 | LoudnessValue, v2 | `loudness_value` |
+| 414 | 2 | LoudnessRange, v2 | `loudness_range` |
+| 416 | 2 | MaxTruePeakLevel, v2 | `max_true_peak_level` |
+| 418 | 2 | MaxMomentaryLoudness, v2 | `max_momentary_loudness` |
+| 420 | 2 | MaxShortTermLoudness, v2 | `max_short_term_loudness` |
+| 422 | 180 | Reserved (zeros) | (dropped) |
+| 602 | var | CodingHistory (EBU R98) | `coding_history` |
 
 * `time_reference` is the two halves joined into one unsigned 64-bit
   count of **samples since midnight** of the origination date: the

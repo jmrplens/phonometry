@@ -31,8 +31,8 @@ frequencies not dropping below 55 dB), which reproduces Table D.1 exactly.
 The balanced noise criteria (NCB), the room noise criterion for fluctuating
 low-frequency noise (RNC, Annex A), the acoustically induced vibration and
 rattle classification (`RV`, clause D.3.4, which needs the Table 6 test)
-and the numeric quality-assessment index (QAI, clause D.5 - deferred by the
-standard to external references) are not implemented here.
+and the numeric quality-assessment index (QAI, clause D.5, which the
+standard defers to external references) are not implemented here.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 

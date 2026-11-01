@@ -60,7 +60,7 @@ Convenience wrapper around
 (FFT) line spectrum is formed and each bin is passed to the exact
 sinusoidal-component method of ISO 532-2:2017 (clauses 5.2/5.4).  Because
 the model computes the excitation pattern per spectral component
-(Formula 5), a pure tone enters as a single line - so a calibrated 1 kHz
+(Formula 5), a pure tone enters as a single line, so a calibrated 1 kHz
 tone at 40 dB SPL yields 1.000 sone / 40 phon (the definitional anchor),
 matching [`loudness_moore_glasberg_from_spectrum`](/phonometry/reference/api/psychoacoustics/moore-glasberg/#loudness_moore_glasberg_from_spectrum).  The signal must be
 calibrated so that `x` is the instantaneous sound pressure in pascals.

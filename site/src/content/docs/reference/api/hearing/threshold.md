@@ -55,7 +55,7 @@ quantile of `fractile` and the spread is the upper one for `z >= 0`
 | `age` | Listener age, in years (must be at least 18). The standard's formulae are established up to 80 years for frequencies at or below 2000 Hz and up to 70 years above; ages beyond that extrapolate. |
 | `sex` | `"male"` or `"female"`. |
 | `fractile` | Population fractile in the open interval (0, 1); `0.5` gives the median. |
-| `frequencies` | Optional subset of the audiometric frequencies, in hertz; `None` uses all eleven (125 Hz - 8000 Hz). |
+| `frequencies` | Optional subset of the audiometric frequencies, in hertz; `None` uses all eleven (125 Hz to 8000 Hz). |
 
 **Returns:** An [`AgeThresholdResult`](/phonometry/reference/api/hearing/threshold/#agethresholdresult) with the distribution and `.plot()`.
 
@@ -230,7 +230,7 @@ frequencies.
 | Name | Description |
 | :--- | :--- |
 | `field` | `"free"` (a free field, frontal incidence) or `"diffuse"` (a diffuse field). |
-| `frequencies` | Optional subset of the audiometric frequencies, in hertz; `None` uses all eleven (125 Hz - 8000 Hz). |
+| `frequencies` | Optional subset of the audiometric frequencies, in hertz; `None` uses all eleven (125 Hz to 8000 Hz). |
 
 **Returns:** The reference threshold, in dB, aligned with the frequencies.
 

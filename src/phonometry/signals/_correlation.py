@@ -464,7 +464,7 @@ def _refine_peak(
 
     Optional band-limited local upsampling first, then three-point
     parabolic interpolation on the (possibly densified) grid. Sub-sample
-    accuracy presumes the peak is oversampled - i.e. the underlying
+    accuracy presumes the peak is oversampled, i.e. the underlying
     signals are band-limited below the Nyquist frequency; on a full-band
     peak one sample wide the refinement degrades gracefully to the sample
     grid.
@@ -520,7 +520,7 @@ class TimeDelayResult(OwnsArrays):
         estimate comes from Eq. 5.101b, not from this curve).
     :ivar peak_correlation: Plain correlation coefficient
         :math:`\hat{\rho}_{xy}` at the
-        estimated delay (rounded to the nearest sample) - the quantity
+        estimated delay (rounded to the nearest sample), the quantity
         entering the B&P error formulas, whatever the method.
     :ivar delay_standard_deviation: Standard deviation of the peak-location estimate,
         :math:`\sigma(\hat{\tau}_0) \approx (3/4)^{1/4}
@@ -772,7 +772,7 @@ def time_delay(
       (1 - \lvert \gamma \rvert^2))`):
       the maximum-likelihood processor that
       weights the phase by its coherence-derived reliability and attains
-      the Cramér-Rao bound - provided the coherence estimate is averaged
+      the Cramér-Rao bound, provided the coherence estimate is averaged
       over at least two segments, the discrete form of Knapp & Carter's
       :math:`\lvert \gamma \rvert^2 \ne 1` existence condition (enforced
       here). The delay must
@@ -906,8 +906,8 @@ def impulse_response_delay(
 
     Without a reference, the arrival time of the IR itself: the
     cross-correlation of an IR with an ideal unit impulse *is* the IR, so
-    its peak magnitude location - refined to sub-sample resolution by
-    band-limited local upsampling plus parabolic interpolation - is the
+    its peak magnitude location, refined to sub-sample resolution by
+    band-limited local upsampling plus parabolic interpolation, is the
     delay relative to :math:`t = 0`. With a ``reference`` IR, the delay of
     ``ir`` relative to it, from the peak of their full-record
     cross-correlation with the same refinement (one-shot transients are

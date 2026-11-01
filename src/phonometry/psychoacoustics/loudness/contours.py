@@ -93,7 +93,7 @@ def _params(frequency: float) -> tuple[float, float, float]:
 
     The 1e-6 relative tolerance only absorbs floating-point representation
     error; adjacent table rows are >20 % apart, so a near-miss can never
-    resolve to the wrong row - anything else raises.
+    resolve to the wrong row; anything else raises.
     """
     require_scalar(frequency, "frequency")
     for f, params in _TABLE1.items():

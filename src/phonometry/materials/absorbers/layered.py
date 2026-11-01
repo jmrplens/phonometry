@@ -222,7 +222,7 @@ class PoroelasticLayer(_DrawableLayer):
 
     Where :class:`PorousLayer` collapses the material into a single wave in an
     equivalent fluid, this layer carries the three Biot waves of Allard &
-    Atalla 2e chapter 6 - two compressional and one shear - so the frame can
+    Atalla 2e chapter 6 (two compressional and one shear), so the frame can
     resonate. It is the only layer type that reproduces the quarter-wavelength
     frame resonance of :func:`~phonometry.materials.absorbers.biot.frame_quarter_wave_resonance`,
     and the only one for which an air gap behind the layer, a bonded backing or

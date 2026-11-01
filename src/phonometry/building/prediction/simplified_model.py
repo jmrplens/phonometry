@@ -222,7 +222,7 @@ class PathContribution(RichDisplay):
 
         :func:`predicted_airborne_insulation` only forms finite contributions
         (every term it combines is checked finite), so a NaN here is a
-        direct-construction mistake - and the fiche's path table rounds each
+        direct-construction mistake, and the fiche's path table rounds each
         ``r_w`` for display, where ``math.floor`` answered a NaN with
         "cannot convert float NaN to integer", naming no field.
 
@@ -253,7 +253,7 @@ class AirbornePredictionResult(RichDisplay):
         """Refuse a non-finite predicted rating.
 
         :func:`predicted_airborne_insulation` checks every input finite before
-        combining, so a NaN here is a direct-construction mistake - and the
+        combining, so a NaN here is a direct-construction mistake, and the
         fiche rounds the boxed ``R'w`` for display, where ``math.floor``
         answered a NaN with "cannot convert float NaN to integer", naming no
         field. The per-path values are guarded by

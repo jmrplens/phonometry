@@ -344,7 +344,7 @@ def age_threshold(
     :param fractile: Population fractile in the open interval (0, 1); ``0.5``
         gives the median.
     :param frequencies: Optional subset of the audiometric frequencies, in
-        hertz; ``None`` uses all eleven (125 Hz - 8000 Hz).
+        hertz; ``None`` uses all eleven (125 Hz to 8000 Hz).
     :return: An :class:`AgeThresholdResult` with the distribution and ``.plot()``.
     :raises ValueError: for an age below 18, an unknown sex, a fractile outside
         (0, 1), or an unknown frequency.
@@ -400,7 +400,7 @@ def reference_threshold(
     :param field: ``"free"`` (a free field, frontal incidence) or
         ``"diffuse"`` (a diffuse field).
     :param frequencies: Optional subset of the audiometric frequencies, in
-        hertz; ``None`` uses all eleven (125 Hz - 8000 Hz).
+        hertz; ``None`` uses all eleven (125 Hz to 8000 Hz).
     :return: The reference threshold, in dB, aligned with the frequencies.
     :raises ValueError: for an unknown field or frequency.
     :raises TypeError: if ``field`` is not a text, or ``frequencies`` holds a text or a

@@ -23,7 +23,7 @@ sound (A.2.1).
 
 Validity flags implement the dynamic-range criterion of ISO 3382-1:2009,
 5.3.3: the background noise must lie at least the evaluation range plus
-15 dB below the maximum of the (squared) impulse response - 25 dB for EDT
+15 dB below the maximum of the (squared) impulse response, and 25 dB below it for EDT
 (equivalently, the noise floor sits at least 10 dB below the lowest
 evaluation point). The +15 dB rule is derived for finite forward
 integration without tail compensation (C = 0), which under-estimates T;

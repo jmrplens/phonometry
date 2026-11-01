@@ -12,9 +12,9 @@ wavenumber is :math:`k_0 = k_0' - jk_0''` with the attenuation constant
 :math:`k_0''` (Clause 2.6, Annex A). Air properties from Clause 7.2,
 Eqs. (5)/(7), use temperature in **kelvin**.
 
-The tube itself is described here as well - its cross-section, the hydraulic
+The tube itself is described here as well (its cross-section, the hydraulic
 diameter a rectangular tube reports, the complex wavenumber, the lower-bound
-wall attenuation and the plane-wave working range - because a specimen is
+wall attenuation and the plane-wave working range), because a specimen is
 characterised only where the field in the tube is a plane wave, and because
 the four-microphone method measures in the same tube and reuses that
 arithmetic.
@@ -434,7 +434,7 @@ def microphone_calibration_factor(
 
     :math:`H_\mathrm{c} = \sqrt{H_{12}^{I} / H_{12}^{II}}` from a transfer function measured on an
     absorptive specimen in the standard configuration (I) and with the two
-    microphones physically interchanged (II) - the cabling to the analyser is
+    microphones physically interchanged (II); the cabling to the analyser is
     **not** swapped (Clause 7.5.2).
 
     :param h12_config1: Transfer function ``H12^I`` in the standard configuration.

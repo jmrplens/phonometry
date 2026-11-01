@@ -38,7 +38,7 @@ shelves only) and one of
 
 For the peaking filter the bandwidth is measured between the midpoint-gain
 (:math:`G/2` dB) frequencies; for band-pass and notch, between the -3 dB
-frequencies - both as the cookbook states.
+frequencies, both as the cookbook states.
 
 The design is exact, not approximate: the cookbook's formulas are the
 bilinear transform of second-order analog prototypes with the frequency
@@ -131,7 +131,7 @@ class EQSection(RichDisplay):
         gain), ``'bandpass_skirt'`` (constant skirt gain, peak gain ``Q``),
         ``'notch'`` or ``'allpass'``.
     :ivar f0: Centre/corner frequency, in Hz (must sit below Nyquist).
-    :ivar gain_db: Gain ``G`` in dB - peaking and shelving types only.
+    :ivar gain_db: Gain ``G`` in dB, for the peaking and shelving types only.
     :ivar q: Quality factor. Exactly one of ``q``, ``bw`` and ``slope`` may
         be given; with none, :math:`q = 1/\sqrt{2}` (Butterworth
         alignment).

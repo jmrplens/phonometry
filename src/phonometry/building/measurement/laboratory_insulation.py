@@ -157,7 +157,7 @@ class LaboratoryAirborneInsulationResult(OwnsArrays):
         Both fields must also be finite. :func:`laboratory_airborne_insulation` can
         only emit finite values (its levels are checked finite and ``A``
         comes from a positive, finite ``T`` and ``V``), so a NaN here is
-        always a construction mistake - and the fiche would have printed it
+        always a construction mistake, and the fiche would have printed it
         as a measured value in the band table, with the boxed rating beside
         it looking untouched.
 
@@ -283,7 +283,7 @@ class LaboratoryImpactInsulationResult(OwnsArrays):
         Both fields must also be finite. :func:`laboratory_impact_insulation` can
         only emit finite values (its levels are checked finite and ``A``
         comes from a positive, finite ``T`` and ``V``), so a NaN here is
-        always a construction mistake - and the fiche would have printed it
+        always a construction mistake, and the fiche would have printed it
         as a measured value in the band table, with the boxed rating beside
         it looking untouched.
 

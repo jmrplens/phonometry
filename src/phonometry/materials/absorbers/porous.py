@@ -1204,12 +1204,12 @@ def microperforated_plate_impedance(
        \frac{J_1(x \sqrt{-j})}{J_0(x \sqrt{-j})}\right]^{-1}
 
     with the perforate constant :math:`x = a \sqrt{\rho \omega / \eta}`.
-    Dividing by the open area and adding Maa's Eq. (5) end corrections - the
+    Dividing by the open area and adding Maa's Eq. (5) end corrections, the
     Rayleigh/Ingard surface resistance
     :math:`\sqrt{2 \omega \rho \eta} / (2 \varepsilon)` and the piston
     end-correction reactance
     :math:`j \omega \rho (2 \delta a) / \varepsilon` (:math:`0.85 d` total
-    for the default :math:`\delta = 0.85` per end) - gives the sheet
+    for the default :math:`\delta = 0.85` per end), gives the sheet
     transfer impedance (Cox & D'Antonio Eq. (7.35)).
 
     :param frequency: Frequency ``f``, in hertz (scalar or array).
@@ -1327,7 +1327,7 @@ def membrane_resonance_frequency(
     r"""Mass-spring resonance of a membrane over a shallow cavity.
 
     :math:`f_0 = (1 / 2 \pi) \sqrt{\rho c^2 / (m d)}` for an adiabatic air
-    spring - numerically the classical :math:`f_0 = 60 / \sqrt{m d}` (Cox &
+    spring, numerically the classical :math:`f_0 = 60 / \sqrt{m d}` (Cox &
     D'Antonio 3e, Eq. (7.9)). With ``isothermal=True`` the spring stiffness
     drops by ``gamma``, giving :math:`\sim 50 / \sqrt{m d}` (Eq. (7.10)),
     the porous-filled cavity case below about 500 Hz.

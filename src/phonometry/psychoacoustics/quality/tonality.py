@@ -379,7 +379,7 @@ def tone_to_noise_ratio(
         :class:`~phonometry.io.Signal` brings its own, and an explicit
         value that disagrees with it raises instead of silently winning.
     :param tone_frequency: Approximate tone frequency in Hz. Default (None)
-        assesses the highest spectral peak in the 89.1 Hz - 11.2 kHz range
+        assesses the highest spectral peak in the 89.1 Hz to 11.2 kHz range
         of interest. For harmonic complexes, call once per component
         (clause 11.7).
     :param resolution_hz: FFT bin spacing (default 1.0 Hz; the tone band
@@ -504,7 +504,7 @@ def prominence_ratio(
     band edges from the fitted Formulae 21-22 with Tables 2-3). For tones
     at or below 171.4 Hz the lower band is truncated at 20 Hz and rescaled
     to a 100 Hz bandwidth (Formula 24; Formula 23 otherwise, per the
-    clause 12.5 prose - the inline condition printed next to Formula 23 in
+    clause 12.5 prose; the inline condition printed next to Formula 23 in
     the PDF is a typo).
 
     :param x: Input signal (1D). Accepts a

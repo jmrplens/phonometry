@@ -390,7 +390,7 @@ class HTLANResult(OwnsArrays):
         The four scalars are pinned finite for a different reason: nothing
         computes with them here, so nothing downstream trips over them. They
         are the listener and exposure conditions the prediction is stated
-        for, and the fiche prints all four verbatim - "Listener: male, age
+        for, and the fiche prints all four verbatim: "Listener: male, age
         nan years", an exposure line, and the population as ISO 1999's
         ``Q = 100 (1 - fractile)`` - as does the plot title. Left unguarded
         they publish a finished, internally consistent-looking accredited
@@ -559,7 +559,7 @@ def nipts(
     :param fractile: Population fractile in the open interval (0, 1); ``0.5``
         gives the median. The reliable range of the standard is 0.05-0.95.
     :param frequencies: Optional subset of the audiometric frequencies, in
-        hertz; ``None`` uses all six (500 Hz - 6000 Hz).
+        hertz; ``None`` uses all six (500 Hz to 6000 Hz).
     :return: A :class:`NIPTSResult` with the distribution and ``.plot()``.
     :raises ValueError: for a non-positive duration, a fractile outside (0, 1),
         or an unknown frequency.
@@ -638,7 +638,7 @@ def htlan(
     r"""Hearing threshold level associated with age and noise (clause 6.1).
 
     Combines the age component ``H`` (HTLA from database A, evaluated from
-    ISO 7029:2017 - the edition ISO 1999:2013 references undated in 6.2.2 - at
+    ISO 7029:2017, the edition ISO 1999:2013 references undated in 6.2.2, at
     the same population fractile) with the noise component ``N`` (the NIPTS at
     that fractile) by Formula (1): :math:`H' = H + N - H N / 120`. The
     formula applies
@@ -651,7 +651,7 @@ def htlan(
     :param exposure_duration_years: Exposure duration, in years.
     :param fractile: Population fractile in (0, 1) applied to both components.
     :param frequencies: Optional subset of the audiometric frequencies, in
-        hertz; ``None`` uses all six (500 Hz - 6000 Hz).
+        hertz; ``None`` uses all six (500 Hz to 6000 Hz).
     :return: An :class:`HTLANResult` with ``htla``, ``nipts``, ``threshold`` and
         ``.plot()``.
     :raises ValueError: for an age below 18, an unknown sex, a non-positive

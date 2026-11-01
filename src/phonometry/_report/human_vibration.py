@@ -14,10 +14,10 @@ assessed against Directive 2002/44/EC (Article 3):
   whole-body vibration) and the Directive it is assessed against;
 * an optional metadata header grid: company, operator/worker, workplace, date
   and the instrumentation and calibration free text;
-* the exposure analysis: a full-width per-operation table (operation, the
-  vibration magnitude - the vector total ``a_hv`` (hand-arm, Directive
-  2002/44/EC Annex Part A) or the dominant-axis value ``a_w,max`` (whole-body,
-  Annex Part B) - the daily
+* the exposure analysis: a full-width per-operation table (operation; the
+  vibration magnitude, which is the vector total ``a_hv`` for hand-arm (Directive
+  2002/44/EC Annex Part A) or the dominant-axis value ``a_w,max`` for whole-body
+  (Annex Part B); the daily
   exposure time ``T_i`` and the partial exposure ``A_i(8)`` of ISO 5349-1/-2
   Eq. (2)) closed by the daily-total row (total exposure time and the combined
   ``A(8)`` of Eq. (3)); ``verbose=True`` adds the per-operation share of the

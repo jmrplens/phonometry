@@ -341,8 +341,8 @@ def _chi2_interval(
     r"""Chi-square confidence interval for the autospectrum (Eq. 8.163).
 
     Interior bins average two squared Gaussian components per segment
-    (:math:`n = 2 n_\mathrm{d}`, Eq. 8.162); the DC bin - and the Nyquist bin when
-    the segment length is even - has a single real Fourier component, so
+    (:math:`n = 2 n_\mathrm{d}`, Eq. 8.162); the DC bin (and the Nyquist bin when
+    the segment length is even) has a single real Fourier component, so
     its estimate carries only :math:`n = n_\mathrm{d}` degrees of freedom and a
     wider interval.
     """
@@ -399,7 +399,7 @@ class SpectralDensityResult(OwnsArrays):
     :ivar confidence_lower: Lower chi-square confidence bound on
         :math:`G_{xx}` (Eq. 8.163;
         the DC bin, and the Nyquist bin for an even segment length, use
-        :math:`n = n_\mathrm{d}` degrees of freedom - a wider interval - because
+        :math:`n = n_\mathrm{d}` degrees of freedom, a wider interval, because
         those bins carry a single real Fourier component).
     :ivar confidence_upper: Upper chi-square confidence bound on :math:`G_{xx}`.
     :ivar confidence: Confidence level of the interval (e.g. ``0.95``).

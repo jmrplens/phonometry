@@ -553,10 +553,10 @@ def _scalar_log(values: np.ndarray) -> np.ndarray:
     first took every one of them from :mod:`math`, one element at a time, and
     the last machine-dependent step on the path was gone.
 
-    For ``log`` the loop then went too, because ``log`` is the one
-    transcendental *inside* the iteration (once per grid point per factor
-    per Levenberg-Marquardt step, three quarters of a million calls per
-    design), and the interpreter overhead of taking it elementwise had
+    For ``log`` the loop then went too, because ``log`` is by far the most
+    called transcendental inside the iteration (once per grid point per
+    factor per Levenberg-Marquardt step, three quarters of a million calls
+    per design), and the interpreter overhead of taking it elementwise had
     multiplied the cost of a design by about four.
     :func:`~phonometry.filters._pinned_log.pinned_log` spells the C library's
     own routine in numpy operations IEEE 754 pins exactly, and returns
@@ -564,11 +564,14 @@ def _scalar_log(values: np.ndarray) -> np.ndarray:
     over the 91 658 333 distinct values the whole corpus evaluates, zero
     mismatches, so the shipped coefficients, the figure corpus and the
     conformance report are untouched by the switch. The other
-    transcendentals stay on the :mod:`math` loop. Most of them a design pays
-    once, but two run inside the iteration as well: ``exp`` of the fitted
+    transcendentals stay on the :mod:`math` loop. Most of them run once per
+    design, but two run inside the iteration as well: ``exp`` of the fitted
     parameters at every evaluation of the response, about ten thousand calls
     a design, and ``**`` of the residual in every Lawson round, about two
     thousand. Elementwise, that is a small fraction of the logarithm's cost.
+    The Lawson exponent, ``_LAWSON_EXPONENT``, is 1, for which glibc's
+    ``pow`` returns its argument unchanged (macOS and Windows were not
+    measured).
 
     :param values: Any real array of positive values.
     :return: Its natural logarithm, elementwise, in the same shape.

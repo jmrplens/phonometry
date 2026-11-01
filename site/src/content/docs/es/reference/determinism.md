@@ -9,11 +9,11 @@ sin AVX-512; cualquier juego de kernels BLAS; cualquier número de hilos;
 cualquier semilla de hash. Entre bibliotecas C todavía no: Linux, macOS y
 Windows diseñan cada uno sus propios bytes para el mismo filtro, porque un
 puñado de trascendentes sigue saliendo del `math` de la plataforma, y esta
-página las nombra y mide lo que hacen. Dentro de una
-plataforma, los coeficientes que diseña un portátil son los que diseña un
-clúster, así que un veredicto de conformidad, una figura publicada o un
-filtro embarcado en una cadena de medida es un artefacto reproducible y no
-el relato de una máquina sobre sí misma.
+página las nombra y mide lo que hacen. Dentro de una plataforma, los
+coeficientes que diseña un portátil son los que diseña un clúster, así que un
+veredicto de conformidad, una figura publicada o un filtro embarcado en una
+cadena de medida es un artefacto reproducible y no el relato de una máquina
+sobre sí misma.
 
 Esa frase no es el comportamiento normal del Python científico, y esta página
 registra lo que costó, con los números.
@@ -74,24 +74,28 @@ El camino de diseño determinista responde a cada puerta en su terreno, en
   el módulo complejo fusionan operaciones de forma distinta por CPU, así que
   los dos puntos donde el camino entregaba a numpy una expresión compleja
   están escritos en aritmética real.
-- **Trascendentes fijadas.** Toda trascendente salvo el logaritmo se toma
-  de la biblioteca C elemento a elemento, así que ningún kernel de CPU la
-  elige. Casi todas esas llamadas un diseño las paga una vez: una `atan` y
-  una `pow` por cada punto de la rejilla de frecuencias, tres `tan`, dos
-  `log10`, unos pocos `log` y dos `sin`. Dos corren también dentro de la
-  iteración, sobre muchos menos elementos que el logaritmo: `exp` de los
-  parámetros ajustados en cada evaluación de la respuesta, unas diez mil
-  llamadas por diseño, y `pow` del residuo en cada ronda de Lawson, unas
-  dos mil. Esas llamadas son el único punto por el que la libm de la
-  plataforma sigue entrando en un diseño, y bastan para separar las
-  plataformas: la evidencia de abajo trae los tres digests. Deletrearlas en numpy fijado como está deletreado
-  el logaritmo es el paso que falta para un único digest en todas partes.
-  Dentro de la iteración, el logaritmo corre
-  tres cuartos de millón de veces por diseño, y el bucle que lo fijaba costó
-  un factor cuatro; ahora es el propio algoritmo de `log` de glibc, el de
-  tablas, deletreado en operaciones numpy que IEEE&nbsp;754 fija
-  exactamente, aritmética simple, trabajo de bits enteros y consultas de
-  tabla, con los multiply-add fusionados del original reproducidos por
+- **Trascendentes fijadas.** Toda trascendente salvo el logaritmo dentro del
+  ajuste se toma de la biblioteca C elemento a elemento, así que ningún
+  kernel de CPU la elige. Casi todas esas funciones corren una vez por
+  diseño: una `atan` y una `pow` por cada punto de la rejilla de
+  frecuencias, tres `tan`, dos `log10`, cinco `log`, dos `sin` y una `exp`
+  de cada parámetro ajustado al convertir los factores en raíces, unas
+  treinta llamadas. Dos corren también dentro de la iteración, sobre muchos
+  menos elementos que el logaritmo: `exp` de los parámetros ajustados en
+  cada evaluación de la respuesta, unas diez mil llamadas por diseño, y
+  `pow` del residuo en cada ronda de Lawson, unas dos mil. El exponente de
+  Lawson es 1, con el que la `pow` de glibc devuelve su argumento sin cambio
+  (macOS y Windows no se midieron), así que esa `pow` no puede separar
+  plataformas cuya biblioteca C haga lo mismo. Las demás son el único punto
+  por el que la libm de la plataforma sigue entrando en un diseño, y bastan
+  para separar las plataformas: la evidencia de abajo trae los tres digests.
+  Deletrearlas en numpy fijado como está deletreado el logaritmo es el paso
+  que falta para un único digest en todas partes. Dentro de la iteración, el
+  logaritmo corre tres cuartos de millón de veces por diseño, y el bucle que
+  lo fijaba costó un factor cuatro; ahora es el propio algoritmo de `log` de
+  glibc, el de tablas, deletreado en operaciones numpy que IEEE&nbsp;754
+  fija exactamente, aritmética simple, trabajo de bits enteros y consultas
+  de tabla, con los multiply-add fusionados del original reproducidos por
   transformaciones exactas libres de error. Sus bits son suyos en toda
   máquina, que es más fuerte que llamar a la libm de nadie.
 - **La rejilla deletreada.** La rejilla geométrica de frecuencias se genera

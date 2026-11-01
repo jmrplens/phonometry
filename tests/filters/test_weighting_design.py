@@ -1029,8 +1029,9 @@ def test_the_design_is_paid_for_once_per_curve_rate_and_mode() -> None:
 #: the C library ``platform.libc_ver()`` names (glibc on the Linux image; the
 #: other two report no name). Within one C library the bytes are the same on
 #: every machine, which is what the rest of this module pins; across C libraries
-#: they differ, because a handful of transcendentals are still taken from the
-#: C library once per design, and this table is that measurement. A musl Linux
+#: they differ, because the transcendentals other than the fit's logarithm are
+#: still taken from the C library, `exp` inside the iteration among them, and
+#: this table is that measurement. A musl Linux
 #: is not in the table and skips rather than being held to glibc's value. The
 #: Linux value is the one the determinism guide prints.
 _DOCUMENTED_A48K_DIGESTS = {

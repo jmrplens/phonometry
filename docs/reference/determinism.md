@@ -7,10 +7,11 @@ on every machine that shares a C library: any CPU, with or without AVX-512;
 any BLAS kernel set; any thread count; any hash seed. Across C libraries it
 is not, yet: Linux, macOS and Windows each design their own bytes for the
 same filter, because a handful of transcendentals still come from the
-platform's `math`, and this page names them and measures what they do. On one platform the coefficients a laptop designs are the
-coefficients a cluster designs, so a conformance verdict, a published figure
-or a filter shipped inside a measurement chain is a reproducible artifact
-rather than one machine's account of itself.
+platform's `math`, and this page names them and measures what they do. On one
+platform the coefficients a laptop designs are the coefficients a cluster
+designs, so a conformance verdict, a published figure or a filter shipped
+inside a measurement chain is a reproducible artifact rather than one
+machine's account of itself.
 
 That sentence is not how scientific Python normally behaves, and this page
 records what it cost, with the numbers.
@@ -66,26 +67,29 @@ The deterministic design path answers each door in kind, in
   and complex magnitude fuse operations differently per CPU, so the two
   places the path handed numpy a complex expression are written out in real
   arithmetic.
-- **Pinned transcendentals.** Every transcendental but the logarithm is
-  taken from the C library one element at a time, so no CPU's kernel
-  chooses it. Most of those calls a design pays once: an `atan` and a `pow`
-  for each point of the frequency grid, three `tan`, two `log10`, a few
-  `log` and two `sin`. Two run inside the iteration as well, on far fewer
-  elements than the logarithm: `exp` of the fitted parameters at every
-  evaluation of the response, about ten thousand calls a design, and `pow`
-  of the residual in every Lawson round, about two thousand. These calls
-  are the one place a platform's libm still enters a design, and they are
-  enough to separate the platforms: the evidence below has the three
-  digests. Spelling them in pinned numpy the way the logarithm is spelled
-  is the remaining step to one digest everywhere. Inside the iteration, the
-  logarithm runs
-  three quarters of a million times per design, and the loop that once pinned
-  it cost a factor of four; it is now glibc's own table-driven `log`
-  algorithm spelled in numpy operations IEEE&nbsp;754 fixes exactly, plain
-  arithmetic, integer bit work and table lookups, with the fused
-  multiply-adds of the original reproduced through exact error-free
-  transformations. Its bits are its own on every machine, which is stronger
-  than calling anyone's libm.
+- **Pinned transcendentals.** Every transcendental but the logarithm inside
+  the fit is taken from the C library one element at a time, so no CPU's
+  kernel chooses it. Most of those functions run once per design: an `atan`
+  and a `pow` for each point of the frequency grid, three `tan`, two
+  `log10`, five `log`, two `sin`, and an `exp` of each fitted parameter when
+  the factors become roots, about thirty calls. Two run inside the iteration
+  as well, on far fewer elements than the logarithm: `exp` of the fitted
+  parameters at every evaluation of the response, about ten thousand calls a
+  design, and `pow` of the residual in every Lawson round, about two
+  thousand. The Lawson exponent is 1, for which glibc's `pow` returns its
+  argument unchanged (macOS and Windows were not measured), so that `pow`
+  cannot separate platforms whose C library does the same. The others are
+  the one place a platform's libm still enters a design, and they are enough
+  to separate the platforms: the evidence below has the three digests.
+  Spelling them in pinned numpy the way the logarithm is spelled is the
+  remaining step to one digest everywhere. Inside the iteration, the
+  logarithm runs three quarters of a million times per design, and the loop
+  that once pinned it cost a factor of four; it is now glibc's own
+  table-driven `log` algorithm spelled in numpy operations IEEE&nbsp;754
+  fixes exactly, plain arithmetic, integer bit work and table lookups, with
+  the fused multiply-adds of the original reproduced through exact
+  error-free transformations. Its bits are its own on every machine, which
+  is stronger than calling anyone's libm.
 - **The grid spelled out.** The geometric frequency grid is generated term
   for term with the endpoints pinned, so the fit evaluates the same
   frequencies everywhere.

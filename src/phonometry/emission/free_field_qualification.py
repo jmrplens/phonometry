@@ -121,6 +121,7 @@ import numpy as np
 
 from .._internal.frozen import OwnsArrays, read_only
 from .._internal.validation import (
+    real_array,
     require_choice,
     require_finite,
     require_positive,
@@ -286,7 +287,7 @@ def _nominal(k: int) -> float:
 
 def _lookup_bands(frequencies: ArrayLike) -> list[int]:
     """Band indices of one frequency or a 1-D array of them, for a table lookup."""
-    freqs = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
+    freqs = np.atleast_1d(real_array(frequencies, "frequencies"))
     if freqs.ndim != 1:
         msg = "'frequencies' must be one frequency or a 1-D array of frequencies."
         raise ValueError(msg)
@@ -295,7 +296,7 @@ def _lookup_bands(frequencies: ArrayLike) -> list[int]:
 
 def _band_indices(frequencies: ArrayLike) -> np.ndarray:
     """Band indices of a 1-D frequency axis, refusing two in one band."""
-    freqs = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
+    freqs = np.atleast_1d(real_array(frequencies, "frequencies"))
     if freqs.ndim != 1 or freqs.size == 0:
         msg = "'frequencies' must be a non-empty 1-D array of frequencies."
         raise ValueError(msg)
@@ -347,7 +348,8 @@ def inverse_square_law_tolerance(
     :return: The half-width of the tolerance band, in dB, per frequency.
     :raises ValueError: for an unknown room, a non-positive frequency or
         frequencies that are not one value or a 1-D array.
-    :raises TypeError: if ``room`` is not a text.
+    :raises TypeError: if ``room`` is not a text, or ``frequencies`` holds a text or a
+        value that is not a real number.
     """
     _check_room(room)
     return np.array(
@@ -365,7 +367,8 @@ def directionality_tolerance(
     :return: The half-width of the tolerance band, in dB, per frequency.
     :raises ValueError: for an unknown room, a non-positive frequency or
         frequencies that are not one value or a 1-D array.
-    :raises TypeError: if ``room`` is not a text.
+    :raises TypeError: if ``room`` is not a text, or ``frequencies`` holds a text or a
+        value that is not a real number.
     """
     _check_room(room)
     return np.array(
@@ -424,7 +427,7 @@ def _wavelength_m(frequency_hz: float, speed_of_sound: float) -> float:
 
 def _as_levels(value: ArrayLike, n_points: int, name: str) -> np.ndarray:
     require_scalar(n_points, "n_points")
-    arr = np.asarray(value, dtype=np.float64)
+    arr = real_array(value, name)
     if arr.ndim == 1:
         arr = arr[:, np.newaxis]
     if arr.ndim != _POSITIONS_RANK or arr.shape[0] != n_points:
@@ -450,7 +453,7 @@ def _checked_targets(
 
 def _checked_positions(value: ArrayLike) -> np.ndarray:
     """An ``(N, 3)`` array of finite coordinates with at least two points."""
-    positions = np.asarray(value, dtype=np.float64)
+    positions = real_array(value, "value")
     if (
         positions.ndim != _POSITIONS_RANK
         or positions.shape[1] != _COORDINATES
@@ -501,7 +504,7 @@ def _checked_monitor(value: ArrayLike, levels: np.ndarray) -> np.ndarray:
 
 def _checked_background(value: ArrayLike, levels: np.ndarray) -> np.ndarray:
     """The background, per point or one row, finite at every measured point."""
-    background = np.asarray(value, dtype=np.float64)
+    background = real_array(value, "value")
     if background.ndim == 1 and background.shape[0] == levels.shape[1]:
         background = np.broadcast_to(background, levels.shape)
     background = _as_levels(background, levels.shape[0], "background_levels")
@@ -581,7 +584,9 @@ class MicrophoneTraverse(OwnsArrays):
             not have one row per point, a level is infinite, a monitor or
             background reading a measured level needs is not finite, or a
             target is not one of A.3.3.
-        :raises TypeError: if an entry of ``targets`` is not a text.
+        :raises TypeError: if an entry of ``targets`` is not a text, or
+            ``background_levels``, ``levels``, ``monitor_levels`` or ``positions_m``
+            holds a text or a value that is not a real number.
         """
         object.__setattr__(self, "targets", _checked_targets(self.targets))
         positions = _checked_positions(self.positions_m)
@@ -622,27 +627,30 @@ class MicrophoneTraverse(OwnsArrays):
         :param targets: As for the class.
         :return: The traverse.
         :raises ValueError: for a direction that is zero or not finite.
+        :raises TypeError: if ``background_levels``, ``direction``, ``distances``,
+            ``levels``, ``monitor_levels`` or ``start_m`` holds a text or a value that
+            is not a real number.
         """
-        unit = np.asarray(direction, dtype=np.float64).reshape(_COORDINATES)
+        unit = real_array(direction, "direction").reshape(_COORDINATES)
         norm = float(np.linalg.norm(unit))
         if not math.isfinite(norm) or norm <= 0.0:
             msg = "'direction' must be a finite, non-zero 3-vector."
             raise ValueError(msg)
         unit = unit / norm
-        s = np.atleast_1d(np.asarray(distances, dtype=np.float64))
-        start = np.asarray(start_m, dtype=np.float64).reshape(_COORDINATES)
+        s = np.atleast_1d(real_array(distances, "distances"))
+        start = real_array(start_m, "start_m").reshape(_COORDINATES)
         return cls(
             positions_m=start[np.newaxis, :] + s[:, np.newaxis] * unit[np.newaxis, :],
-            levels=np.asarray(levels, dtype=np.float64),
+            levels=real_array(levels, "levels"),
             monitor_levels=(
                 None
                 if monitor_levels is None
-                else np.asarray(monitor_levels, dtype=np.float64)
+                else real_array(monitor_levels, "monitor_levels")
             ),
             background_levels=(
                 None
                 if background_levels is None
-                else np.asarray(background_levels, dtype=np.float64)
+                else real_array(background_levels, "background_levels")
             ),
             name=name,
             targets=tuple(targets),
@@ -895,7 +903,7 @@ def _chebyshev_centre(y: np.ndarray, inside: np.ndarray) -> np.ndarray:
 
 def _same_radii(given: ArrayLike, qualified: np.ndarray) -> bool:
     """Whether ``given`` holds the radii :func:`_evaluate` qualified."""
-    radii = np.asarray(given, dtype=np.float64)
+    radii = real_array(given, "given")
     return radii.shape == qualified.shape and bool(
         np.allclose(radii, qualified, rtol=0.0, atol=_SLACK, equal_nan=True)
     )
@@ -970,12 +978,14 @@ class InverseSquareLawResult(OwnsArrays):
 
         :raises ValueError: for an unknown room, a frequency that is not
             positive, or radii other than the ones the levels qualify.
-        :raises TypeError: if ``room`` is not a text.
+        :raises TypeError: if ``room`` is not a text, or ``band_radius_m``,
+            ``frequencies``, ``origin_m`` or ``traverse_radius_m`` holds a text or a
+            value that is not a real number.
         """
         _check_room(self.room)
         _lookup_bands(self.frequencies)
         evaluation = _evaluate(
-            np.asarray(self.origin_m, dtype=np.float64),
+            real_array(self.origin_m, "origin_m"),
             self.positions_m,
             self.levels,
             self.tolerance_db,
@@ -1107,7 +1117,7 @@ def _placed_origin(
         msg = "give 'origin_m' or 'source_box_m', not both."
         raise ValueError(msg)
     if source_box_m is not None:
-        box = np.asarray(source_box_m, dtype=np.float64).reshape(2, _COORDINATES)
+        box = real_array(source_box_m, "source_box_m").reshape(2, _COORDINATES)
         if not np.all(np.isfinite(box)) or np.any(box[1] < box[0]):
             msg = (
                 "'source_box_m' must be ((x_min, y_min, z_min), (x_max, y_max, "
@@ -1119,7 +1129,7 @@ def _placed_origin(
     origin = (
         np.zeros(_COORDINATES)
         if origin_m is None
-        else np.asarray(origin_m, dtype=np.float64).reshape(_COORDINATES)
+        else real_array(origin_m, "origin_m").reshape(_COORDINATES)
     )
     if not np.all(np.isfinite(origin)):
         msg = "'origin_m' must be finite."
@@ -1196,10 +1206,11 @@ def inverse_square_law_deviations(
     :raises ValueError: if both ``origin_m`` and ``source_box_m`` are given, a
         traverse's level columns do not match the frequencies, a traverse has
         no level at a frequency, or a point coincides with the origin.
-    :raises TypeError: if ``room`` is not a text.
+    :raises TypeError: if ``room`` is not a text, or ``frequencies``, ``origin_m`` or
+        ``source_box_m`` holds a text or a value that is not a real number.
     """
     _check_room(room)
-    freqs = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
+    freqs = np.atleast_1d(real_array(frequencies, "frequencies"))
     ks = _band_indices(freqs)
     if len(traverses) == 0:
         msg = "'traverses' must hold at least one MicrophoneTraverse."
@@ -1294,7 +1305,8 @@ class SourceDirectionalityResult(OwnsArrays):
 
         :raises ValueError: for an unknown room or a frequency that is not
             positive.
-        :raises TypeError: if ``room`` is not a text.
+        :raises TypeError: if ``room`` is not a text, or ``frequencies`` holds a text or
+            a value that is not a real number.
         """
         _check_room(self.room)
         _lookup_bands(self.frequencies)
@@ -1380,12 +1392,13 @@ def verify_source_directionality(
     :return: :class:`SourceDirectionalityResult`.
     :raises ValueError: for the wrong number of positions, levels that are not
         finite, or bands that do not match.
-    :raises TypeError: if ``room`` is not a text.
+    :raises TypeError: if ``room`` is not a text, or ``frequencies`` or ``levels`` holds
+        a text or a value that is not a real number.
     """
     _check_room(room)
-    freqs = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
+    freqs = np.atleast_1d(real_array(frequencies, "frequencies"))
     _band_indices(freqs)  # refuses two frequencies in one band
-    levels = np.asarray(levels, dtype=np.float64)
+    levels = real_array(levels, "levels")
     if levels.ndim == 1:
         levels = levels[:, np.newaxis]
     expected = len(_DIRECTIONALITY_POLAR_DEG[room]) * len(_DIRECTIONALITY_AZIMUTH_DEG)

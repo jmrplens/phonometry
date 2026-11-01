@@ -142,7 +142,7 @@ Acceptance limits on relative attenuation at normalized frequencies.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `fraction` is not a single number. |
+| TypeError | if `fraction` is not a single number, or `omega` holds a text or a value that is not a real number. |
 
 :::note
 The exact band-edge point $\Omega = G^{1/2}$ is treated as

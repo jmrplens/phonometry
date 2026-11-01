@@ -104,6 +104,12 @@ area-weighted average (Equation 11).
 
 **Returns:** The mean velocity level, in dB.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `areas` or `levels` holds a text or a value that is not a real number. |
+
 ## NORMALIZED_IMPEDANCE_PA_S_M
 
 *Constant* (`float`).
@@ -153,7 +159,7 @@ With the default `radiation_factor = 1` this is the Part 1 *upper limit*
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive area, reference area or impedance. |
-| TypeError | if `area`, `normalized_impedance`, `reference_area` or `reference_impedance` is not a single number. |
+| TypeError | if `area`, `normalized_impedance`, `reference_area` or `reference_impedance` is not a single number, or `radiation_factor` or `velocity_level` holds a text or a value that is not a real number. |
 
 ## radiation_factor
 
@@ -189,7 +195,7 @@ surface area and the mean-square vibratory velocity.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive area or impedance. |
-| TypeError | if `area` or `impedance` is not a single number. |
+| TypeError | if `area` or `impedance` is not a single number, or `mean_square_velocity` or `sound_power` holds a text or a value that is not a real number. |
 
 ## REFERENCE_VELOCITY_M_S
 
@@ -224,6 +230,12 @@ Bundle a sound-power-from-vibration determination (ISO/TS 7849).
 
 **Returns:** The [`VibrationSoundPowerResult`](/phonometry/reference/api/power/vibration-sound-power/#vibrationsoundpowerresult).
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `frequencies`, `radiation_factor` or `velocity_level` holds a text or a value that is not a real number. |
+
 ## velocity_level
 
 ```python
@@ -252,7 +264,7 @@ $L_v = 20 \log_{10}(v/v_0)$ with `v0` the reference velocity.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive reference. |
-| TypeError | if `reference` is not a single number. |
+| TypeError | if `reference` is not a single number, or `velocity` holds a text or a value that is not a real number. |
 
 ## velocity_level_from_acceleration
 
@@ -285,7 +297,7 @@ r.m.s. velocity level.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive frequency or reference. |
-| TypeError | if `reference` is not a single number. |
+| TypeError | if `reference` is not a single number, or `frequency` or `peak_acceleration` holds a text or a value that is not a real number. |
 
 ## VibrationSoundPowerResult
 

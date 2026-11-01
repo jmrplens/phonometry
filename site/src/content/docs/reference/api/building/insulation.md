@@ -176,7 +176,7 @@ volume is an argument here.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the band counts of `l1`, `l2` and `t2` differ, if only one of `area`/`volume` is supplied, if `t2`/`t0` are not positive, if inputs are non-finite, if a low-frequency argument is given without `frequencies`, if `volume` disagrees with the receiving-room procedure, or if the 63 Hz octave reverberation time is missing from the receiving room or present on the source room. A room that does not round below 25 m³ is refused where the corner measurements are described, by [`LowFrequencyProcedure`](/phonometry/reference/api/building/low-frequency/#lowfrequencyprocedure) itself. |
-| TypeError | if `area`, `t0` or `volume` is not a single number. |
+| TypeError | if `area`, `t0` or `volume` is not a single number, or `frequencies`, `l1`, `l2` or `t2` holds a text or a value that is not a real number. |
 
 **Warns**
 
@@ -308,6 +308,7 @@ $L = 10 \log_{10}\left( \frac{1}{n} \sum_j 10^{L_j/10} \right)$.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `levels` is empty or contains non-finite values. |
+| TypeError | if `levels` holds a text or a value that is not a real number. |
 
 ## facade_insulation
 
@@ -389,7 +390,7 @@ are not the ISO 16283 quantity.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If band counts differ, if `method` is unknown, if `t2`/`t0`/`area`/`volume` are not positive, if `area` is given without `surface_level`, if `surface_level` and `area` are given without `volume`, if `frequencies` does not carry one band centre per measured band, if inputs are non-finite, if `low_frequency` is given without `frequencies` or with `method="road_traffic"`, if `volume` disagrees with the procedure, or if the 63 Hz octave reverberation time is missing. A room that does not round below 25 m³ is refused where the corner measurements are described, by [`LowFrequencyProcedure`](/phonometry/reference/api/building/low-frequency/#lowfrequencyprocedure) itself. Supplying `surface_level` alone is not an error: `r_prime` simply stays `None`. |
-| TypeError | if `area`, `t0` or `volume` is not a single number, or `method` is not a text. |
+| TypeError | if `area`, `t0` or `volume` is not a single number, or `method` is not a text, or `frequencies`, `l1_2m`, `l2`, `surface_level` or `t2` holds a text or a value that is not a real number. |
 
 **Warns**
 
@@ -553,7 +554,7 @@ answers from the default procedure alone and raises a
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the band counts of `li` and `t2` differ, if `t2`/`t0`/`volume` are not positive, if inputs are non-finite, if `low_frequency` is given without `frequencies`, if `volume` disagrees with the procedure, or if the 63 Hz octave reverberation time is missing. A room that does not round below 25 m³ is refused where the corner measurements are described, by [`LowFrequencyProcedure`](/phonometry/reference/api/building/low-frequency/#lowfrequencyprocedure) itself. |
-| TypeError | if `t0` or `volume` is not a single number. |
+| TypeError | if `t0` or `volume` is not a single number, or `frequencies`, `li` or `t2` holds a text or a value that is not a real number. |
 
 **Warns**
 

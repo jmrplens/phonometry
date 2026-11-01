@@ -59,6 +59,7 @@ import numpy as np
 
 from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
+    real_array,
     require_choice,
     require_count,
     require_ranks,
@@ -217,7 +218,7 @@ def _validate_1d_finite(x: Signal | ArrayLike, name: str) -> NDArray[np.float64]
     :class:`phonometry.io.Signal` arrives in pascals here too and a
     multichannel one is refused by the same complaint a 2-D array gets.
     """
-    xa = np.asarray(x, dtype=np.float64)
+    xa = real_array(x, name)
     if xa.ndim != 1:
         msg = f"'{name}' must be one-dimensional."
         raise ValueError(msg)
@@ -645,7 +646,7 @@ def resample_signal(
         rate ratio is not rational within ``max_denominator``.
     :raises TypeError: if ``stopband_attenuation`` or ``transition_width`` is not a
         single number, or ``max_denominator`` is a flag, a text or an array where a
-        count goes.
+        count goes, or ``x`` holds a text or a value that is not a real number.
     """
     from fractions import Fraction
 
@@ -809,7 +810,8 @@ def fractional_delay(
     :param mode: Boundary convention, ``'linear'`` or ``'circular'``.
     :return: The delayed record, same length as ``x``.
     :raises ValueError: If the inputs or parameters are invalid.
-    :raises TypeError: if ``delay`` is not a single number, or ``mode`` is not a text.
+    :raises TypeError: if ``delay`` is not a single number, or ``mode`` is not a text,
+        or ``x`` holds a text or a value that is not a real number.
     """
     xa = _validate_1d_finite(x, "x")
     require_scalar(delay, "delay")

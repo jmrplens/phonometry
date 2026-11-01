@@ -106,6 +106,7 @@ from .._internal.levels_math import energy_mean, weighted_energy_mean
 from .._internal.types import BAND_SET_NAMES, ReportEngine
 from .._internal.validation import (
     check_engine,
+    real_array,
     require_above_absolute_zero,
     require_band_fraction,
     require_equal_shapes,
@@ -483,7 +484,7 @@ def _level_magnitude(values: np.ndarray) -> np.ndarray:
 
 
 def _as_2d(name: str, arr: np.ndarray, n_seg: int, n_bands: int) -> np.ndarray:
-    a = np.atleast_2d(np.asarray(arr, dtype=np.float64))
+    a = np.atleast_2d(real_array(arr, "arr"))
     if a.shape == (1, n_seg) and n_bands != n_seg:
         a = a.T  # a 1D (N_seg,) input arrives as (1, N_seg)
     if a.shape != (n_seg, n_bands):
@@ -508,8 +509,8 @@ def _validate_scan(
     """
     require_band_fraction(fraction, "fraction")
 
-    intensity = np.atleast_2d(np.asarray(normal_intensity, dtype=np.float64))
-    seg = np.asarray(areas, dtype=np.float64)
+    intensity = np.atleast_2d(real_array(normal_intensity, "normal_intensity"))
+    seg = real_array(areas, "areas")
     if seg.ndim != 1:
         msg = "'areas' must be a 1D array of segment areas."
         raise ValueError(msg)
@@ -604,8 +605,9 @@ def sound_power_intensity(
         4 dB reused per band (extrapolated, non-normative).
     :return: :class:`SoundPowerIntensityResult`.
     :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a float), or
-        ``frequencies`` holds a text or a value that is not a real number, or ``grade``
-        is not a text.
+        ``areas``, ``frequencies``, ``normal_intensity``, ``normal_intensity_2``,
+        ``pressure_levels``, ``pressure_residual_index`` or ``repeatability_limit``
+        holds a text or a value that is not a real number, or ``grade`` is not a text.
     """
     grade = _check_grade(grade)
     intensity, seg = _validate_scan(normal_intensity, areas, frequencies, fraction)
@@ -662,12 +664,12 @@ def sound_power_intensity(
     dpi0_arr: np.ndarray | None = None
     if pressure_residual_index is not None:
         dpi0_arr = np.broadcast_to(
-            np.asarray(pressure_residual_index, dtype=np.float64), (n_bands,)
+            real_array(pressure_residual_index, "pressure_residual_index"), (n_bands,)
         )
     s_arr: np.ndarray | None = None
     if repeatability_limit is not None:
         s_arr = np.broadcast_to(
-            np.asarray(repeatability_limit, dtype=np.float64), (n_bands,)
+            real_array(repeatability_limit, "repeatability_limit"), (n_bands,)
         )
 
     # --- warnings ------------------------------------------------------------
@@ -745,7 +747,7 @@ def _classify(
     n_bands = fpi.shape[0]
     if repeatability_limit is not None:
         s_eng = np.broadcast_to(
-            np.asarray(repeatability_limit, dtype=np.float64), (n_bands,)
+            real_array(repeatability_limit, "repeatability_limit"), (n_bands,)
         )
         s_sur = s_eng
     else:
@@ -826,7 +828,7 @@ def _a_weighted_total(
     """
     determinable = ~negative_band
     if frequencies is not None:
-        freqs = np.asarray(frequencies, dtype=np.float64)
+        freqs = real_array(frequencies, "frequencies")
         if omitted is not None:
             determinable = determinable & ~omitted
         ck = _a_weighting_corrections(freqs)
@@ -1150,7 +1152,7 @@ def _check_report_bands(
             if values is not None
         ]
     if residual_index is not None:
-        index = np.atleast_1d(np.asarray(residual_index, dtype=np.float64))
+        index = np.atleast_1d(real_array(residual_index, "residual_index"))
         if index.size not in (1, n_bands):
             msg = (
                 f"'residual_index' must be a scalar or span the {n_bands} "
@@ -1368,6 +1370,8 @@ class PrecisionIntensityResult(OwnsArrays):
             ``residual_index`` does not span the result's bands.
         :raises ImportError: If reportlab (or, for the figure, matplotlib) is
             not installed (``pip install "phonometry[report]"``).
+        :raises TypeError: if ``residual_index`` holds a text or a value that is not a
+            real number.
         """
         from .._i18n import check_language
 
@@ -1427,9 +1431,11 @@ def precision_field_indicators(
     :param segment_pressure_levels: ``(N, NB)`` segment pressure levels, dB.
     :param time_window_intensity: Optional ``(M, NB)`` window intensities for FT.
     :return: :class:`PrecisionFieldIndicators`.
+    :raises TypeError: if ``segment_intensity``, ``segment_pressure_levels`` or
+        ``time_window_intensity`` holds a text or a value that is not a real number.
     """
-    i_n = np.atleast_2d(np.asarray(segment_intensity, dtype=np.float64))
-    lp = np.atleast_2d(np.asarray(segment_pressure_levels, dtype=np.float64))
+    i_n = np.atleast_2d(real_array(segment_intensity, "segment_intensity"))
+    lp = np.atleast_2d(real_array(segment_pressure_levels, "segment_pressure_levels"))
     require_equal_shapes(
         "precision_field_indicators",
         {"segment_intensity": i_n.shape, "segment_pressure_levels": lp.shape},
@@ -1460,7 +1466,7 @@ def precision_field_indicators(
 
     ft: np.ndarray | None = None
     if time_window_intensity is not None:
-        win = np.atleast_2d(np.asarray(time_window_intensity, dtype=np.float64))
+        win = np.atleast_2d(real_array(time_window_intensity, "time_window_intensity"))
         if win.shape[-1] != i_n.shape[-1]:
             msg = "'time_window_intensity' last axis must match the number of bands."
             raise ValueError(msg)
@@ -1512,7 +1518,7 @@ def _spread_over_bands(value: ArrayLike, n_bands: int) -> np.ndarray:
     behind numpy's broadcast message instead of letting it reach the per-band
     check on the result, which names the criterion that does not fit.
     """
-    spectrum = np.asarray(value, dtype=np.float64)
+    spectrum = real_array(value, "value")
     if spectrum.ndim == 0:
         return np.broadcast_to(spectrum, (n_bands,))
     return spectrum
@@ -1569,8 +1575,10 @@ def precision_qualification(
         the criterion-1 limit ``s`` from Table 1.
     :param repeatability_limit: Override for ``s`` (dB), scalar or per band.
     :return: :class:`PrecisionCriteria`.
-    :raises TypeError: if ``frequencies``, ``scan_intensity_level_1`` or
-        ``scan_intensity_level_2`` holds a text or a value that is not a real number.
+    :raises TypeError: if ``field_nonuniformity_1``, ``field_nonuniformity_2``,
+        ``frequencies``, ``pressure_residual_index``, ``repeatability_limit``,
+        ``scan_intensity_level_1`` or ``scan_intensity_level_2`` holds a text or a value
+        that is not a real number.
     """
     f_pi_signed = indicators.f_pi_signed
     n_bands = f_pi_signed.shape[0]
@@ -1581,7 +1589,7 @@ def precision_qualification(
     l1 = l2 = s = None
     if repeatability_limit is not None:
         s = np.broadcast_to(
-            np.asarray(repeatability_limit, dtype=np.float64), (n_bands,)
+            real_array(repeatability_limit, "repeatability_limit"), (n_bands,)
         )
     if scan_intensity_level_1 is not None and scan_intensity_level_2 is not None:
         l1 = require_per_band(
@@ -1607,7 +1615,7 @@ def precision_qualification(
     dpi0 = None
     if pressure_residual_index is not None:
         dpi0 = np.broadcast_to(
-            np.asarray(pressure_residual_index, dtype=np.float64), (n_bands,)
+            real_array(pressure_residual_index, "pressure_residual_index"), (n_bands,)
         )
 
     # Criterion 5 reads FS(1)/FS(2).
@@ -1680,10 +1688,11 @@ def sound_power_intensity_precision(
     :param static_pressure_pa: Barometric pressure ``B`` (Pa), for LW0.
     :return: :class:`PrecisionIntensityResult`.
     :raises TypeError: if ``static_pressure_pa`` or ``temperature_c`` is not a single
-        number.
+        number, or ``areas``, ``frequencies`` or ``partial_intensity`` holds a text or a
+        value that is not a real number.
     """
-    raw_intensity = np.asarray(partial_intensity, dtype=np.float64)
-    seg = np.asarray(areas, dtype=np.float64)
+    raw_intensity = real_array(partial_intensity, "partial_intensity")
+    seg = real_array(areas, "areas")
     if seg.ndim != 1:
         msg = "'areas' must be a 1D array of partial surface areas."
         raise ValueError(msg)
@@ -1731,7 +1740,7 @@ def sound_power_intensity_precision(
 
     # The levels, LW0 (Eq. 10) and the A-weighted total over the applicable
     # bands (clause 9.2 / 4.3) are read by the result from these fields.
-    freqs = None if frequencies is None else np.asarray(frequencies, dtype=np.float64)
+    freqs = None if frequencies is None else real_array(frequencies, "frequencies")
     return PrecisionIntensityResult(
         frequencies=freqs,
         partial_power=np.asarray(partial_power, dtype=np.float64),

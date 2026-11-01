@@ -99,7 +99,7 @@ vibrational absorption terms (Eq. (5)). Fully vectorized over
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `relative_humidity_percent`, `static_pressure_kpa` or `temperature_c` is not a single number. |
+| TypeError | if `relative_humidity_percent`, `static_pressure_kpa` or `temperature_c` is not a single number, or `frequencies` holds a text or a value that is not a real number. |
 
 :::note
 ISO 354:2003 defers its air power-attenuation coefficient `m` (1/m)
@@ -185,6 +185,7 @@ unchanged; this is a thin, plottable wrapper around the existing function
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `distance` is negative or non-finite (NaN/inf); the check lives on [`AtmosphericAttenuation`](/phonometry/reference/api/environment/air-absorption/#atmosphericattenuation) so it also guards direct construction. |
+| TypeError | if `frequencies` holds a text or a value that is not a real number. |
 
 ## AtmosphericAbsorptionWarning
 

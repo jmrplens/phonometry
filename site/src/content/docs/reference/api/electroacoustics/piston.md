@@ -117,6 +117,12 @@ $D(0) = 1$.
 
 **Returns:** `D`; a `float` when `ka` and `theta` are both numbers; an array of their broadcast shape when one is a sequence or an array, a zero-dimensional one included.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `ka` or `theta` holds a text or a value that is not a real number. |
+
 ## piston_directivity_pattern
 
 ```python
@@ -144,6 +150,12 @@ the first zero of `J1` ($ka \sin\theta = 3.8317$).
 | `angles_rad` | Polar angles `theta` from the axis, rad (1-D). `None` (default) uses 361 points spanning the front hemisphere `-90 deg` to `+90 deg`, 0.5 deg apart. |
 
 **Returns:** A [`PistonDirectivity`](/phonometry/reference/api/electroacoustics/piston/#pistondirectivity).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `angles_rad` or `ka` holds a text or a value that is not a real number. |
 
 ## piston_reactance
 
@@ -173,6 +185,12 @@ at high `x`.
 
 **Returns:** `X1(x)`; a `float` for a number; an array for a sequence or an array, a zero-dimensional one included.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `x` holds a text or a value that is not a real number. |
+
 ## piston_resistance
 
 ```python
@@ -199,6 +217,12 @@ high `x`.
 | `x` | Argument $x = 2ka$ (scalar or array), dimensionless. |
 
 **Returns:** `R1(x)`; a `float` for a number; an array for a sequence or an array, a zero-dimensional one included.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `x` holds a text or a value that is not a real number. |
 
 ## PistonDirectivity
 
@@ -313,7 +337,7 @@ normalised far-field lobe is overlaid on the radiation side.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive radius, only one of the lobe pair, a lobe whose two arrays disagree, or a non-finite value in either of them. |
-| TypeError | if `radius` is not a single number. |
+| TypeError | if `radius` is not a single number, or `angles_rad` or `directivity` holds a text or a value that is not a real number. |
 
 ## radiating_piston
 
@@ -354,7 +378,7 @@ the far-field directivity pattern $D(\theta)$.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `density`, `radius` or `speed_of_sound` is not a single number. |
+| TypeError | if `density`, `radius` or `speed_of_sound` is not a single number, or `angles_rad` or `frequencies` holds a text or a value that is not a real number. |
 
 ## RadiatingPistonResult
 

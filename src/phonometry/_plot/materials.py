@@ -7,7 +7,10 @@ from typing import TYPE_CHECKING, Any, overload
 
 import numpy as np
 
-from .._internal.validation import require_equal_shapes
+from .._internal.validation import (
+    real_array,
+    require_equal_shapes,
+)
 from .common import (
     _ABSORPTION_QUANTITY_LABELS,
     _C_MUTED,
@@ -1201,11 +1204,13 @@ def plot_transfer_matrix(
     :return: The axes carrying the transmission-loss curve.
     :raises ValueError: if ``frequencies`` does not match the shape of the
         spectra the four-pole entries produce.
+    :raises TypeError: if ``frequency`` holds a text or a value that is not a real
+        number.
     """
     from .._i18n import localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    freqs = np.asarray(frequency, dtype=np.float64)
+    freqs = real_array(frequency, "frequency")
     tl = np.asarray(
         matrix.transmission_loss(characteristic_impedance), dtype=np.float64
     )

@@ -88,6 +88,7 @@ if TYPE_CHECKING:
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     check_engine,
+    real_array,
     require_finite_array,
     require_per_band,
     require_positive,
@@ -160,9 +161,11 @@ def plate_loss_factor(
     :param frequency: Band centre frequency ``f``, in hertz (scalar or per band).
     :param reverberation_time: Structural reverberation time ``Ts``, in s.
     :return: The loss factor ``eta`` (dimensionless) per band.
+    :raises TypeError: if ``frequency`` or ``reverberation_time`` holds a text or a
+        value that is not a real number.
     """
-    f = np.asarray(frequency, dtype=np.float64)
-    ts = np.asarray(reverberation_time, dtype=np.float64)
+    f = real_array(frequency, "frequency")
+    ts = real_array(reverberation_time, "reverberation_time")
     return total_loss_factor(frequencies=f, structural_reverberation_time=ts)
 
 
@@ -210,20 +213,21 @@ def structure_borne_power_level(
         non-finite velocity level, or per-band inputs whose shapes do not
         broadcast together.
     :raises TypeError: if ``area``, ``mass_per_area`` or ``reference_velocity`` is not a
-        single number.
+        single number, or ``frequency``, ``loss_factor`` or ``velocity_level`` holds a
+        text or a value that is not a real number.
     """
     mass_per_area = require_positive(mass_per_area, "mass_per_area")
     area = require_positive(area, "area")
     reference_velocity = require_positive(reference_velocity, "reference_velocity")
-    f = np.asarray(frequency, dtype=np.float64)
+    f = real_array(frequency, "frequency")
     if not np.all(np.isfinite(f)) or np.any(f <= 0.0):
         msg = "'frequency' must contain positive, finite values."
         raise ValueError(msg)
-    lv = np.asarray(velocity_level, dtype=np.float64)
+    lv = real_array(velocity_level, "velocity_level")
     if not np.all(np.isfinite(lv)):
         msg = "'velocity_level' must contain only finite values."
         raise ValueError(msg)
-    eta = np.asarray(loss_factor, dtype=np.float64)
+    eta = real_array(loss_factor, "loss_factor")
     if not np.all(np.isfinite(eta)) or np.any(eta <= 0.0):
         msg = "'loss_factor' must contain positive, finite values."
         raise ValueError(msg)
@@ -412,10 +416,10 @@ def reception_plate_power(
     :raises ValueError: if neither ``loss_factor`` nor ``reverberation_time``
         is given, or if ``velocity_level`` or ``loss_factor`` is neither a
         scalar nor one value per band.
-    :raises TypeError: if ``loss_factor`` or ``velocity_level`` holds a text or a value
-        that is not a real number.
+    :raises TypeError: if ``frequency``, ``loss_factor`` or ``velocity_level`` holds a
+        text or a value that is not a real number.
     """
-    freq = np.atleast_1d(np.asarray(frequency, dtype=np.float64))
+    freq = np.atleast_1d(real_array(frequency, "frequency"))
     lv = require_per_band(velocity_level, "velocity_level", freq, "frequency")
     if loss_factor is not None:
         eta = require_per_band(loss_factor, "loss_factor", freq, "frequency")
@@ -461,8 +465,10 @@ def equivalent_blocked_force_level(
     :raises ValueError: if ``power_level`` is not finite,
         ``Re{plate_mobility}`` is not positive and finite, or the two shapes
         do not broadcast together.
+    :raises TypeError: if ``power_level`` holds a text or a value that is not a real
+        number.
     """
-    lw = np.asarray(power_level, dtype=np.float64)
+    lw = real_array(power_level, "power_level")
     if not np.all(np.isfinite(lw)):
         msg = "'power_level' must contain only finite values."
         raise ValueError(msg)
@@ -510,12 +516,13 @@ def characteristic_reception_plate_power(
         (Default: 5e-6, clause 7.2.4).
     :return: The characteristic power level ``L_Wsn``, in dB re 1 pW.
     :raises ValueError: for a non-positive characteristic mobility.
-    :raises TypeError: if ``characteristic_mobility`` is not a single number.
+    :raises TypeError: if ``characteristic_mobility`` is not a single number, or
+        ``blocked_force_level`` holds a text or a value that is not a real number.
     """
     characteristic_mobility = require_positive(
         characteristic_mobility, "characteristic_mobility"
     )
-    lf = np.asarray(blocked_force_level, dtype=np.float64)
+    lf = real_array(blocked_force_level, "blocked_force_level")
     return np.asarray(
         lf + 10.0 * np.log10(characteristic_mobility / _REFERENCE_MOBILITY),
         dtype=np.float64,
@@ -545,8 +552,10 @@ def equivalent_free_velocity_level(
     :raises ValueError: if ``power_level`` is not finite,
         ``Re{plate_mobility}`` is not positive and finite, or the two shapes
         do not broadcast together.
+    :raises TypeError: if ``power_level`` holds a text or a value that is not a real
+        number.
     """
-    lw = np.asarray(power_level, dtype=np.float64)
+    lw = real_array(power_level, "power_level")
     if not np.all(np.isfinite(lw)):
         msg = "'power_level' must contain only finite values."
         raise ValueError(msg)
@@ -590,9 +599,11 @@ def source_mobility_from_levels(
     :return: The source mobility magnitude ``|Y_S,eq|``, in m/(N.s).
     :raises ValueError: for a non-finite level, or two shapes that do not
         broadcast together.
+    :raises TypeError: if ``blocked_force_level`` or ``free_velocity_level`` holds a
+        text or a value that is not a real number.
     """
-    lv = np.asarray(free_velocity_level, dtype=np.float64)
-    lf = np.asarray(blocked_force_level, dtype=np.float64)
+    lv = real_array(free_velocity_level, "free_velocity_level")
+    lf = real_array(blocked_force_level, "blocked_force_level")
     if not np.all(np.isfinite(lv)):
         msg = "'free_velocity_level' must contain only finite values."
         raise ValueError(msg)

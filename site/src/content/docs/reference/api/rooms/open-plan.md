@@ -73,6 +73,7 @@ the distraction distance `rD` (STI = 0.50) and privacy distance
 | Exception | When |
 | :--- | :--- |
 | ValueError | If fewer than four positions are given (Clause 5.2.2) or the three arrays differ in shape. |
+| TypeError | if `positions_m`, `spl_a_speech` or `sti_values` holds a text or a value that is not a real number. |
 
 ## OpenPlanResult
 

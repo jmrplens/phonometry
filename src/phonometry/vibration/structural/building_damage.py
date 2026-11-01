@@ -81,6 +81,7 @@ from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
 from ..._internal.types import as_float_or_array
 from ..._internal.validation import (
+    real_array,
     require_choice,
     require_count,
     require_non_negative,
@@ -341,7 +342,7 @@ def guideline_velocity(
         is not positive and finite, or if *massive_structure* is asked for
         outside row 1 of Table 1.
     :raises TypeError: if ``building_class``, ``duration`` or ``location`` is not a
-        text.
+        text, or ``frequency`` holds a text or a value that is not a real number.
     """
     cls = require_choice(building_class, "building_class", BUILDING_CLASSES)
     where = require_choice(location, "location", _LOCATIONS)
@@ -383,7 +384,7 @@ def guideline_velocity(
             "frequency; 'frequency' is required."
         )
         raise ValueError(msg)
-    f = np.asarray(frequency, dtype=np.float64)
+    f = real_array(frequency, "frequency")
     if np.any(f <= 0.0) or not np.all(np.isfinite(f)):
         msg = "'frequency' must be positive and finite."
         raise ValueError(msg)
@@ -680,13 +681,14 @@ def bending_stress(
     :raises ValueError: If a material property, the load ratio or the mode
         factor is not positive and finite, or a velocity is negative.
     :raises TypeError: if ``density``, ``dynamic_modulus_pa``, ``load_ratio`` or
-        ``mode_factor`` is not a single number.
+        ``mode_factor`` is not a single number, or ``peak_velocity_m_s`` holds a text or
+        a value that is not a real number.
     """
     e_dyn = require_positive(dynamic_modulus_pa, "dynamic_modulus_pa")
     rho = require_positive(density, "density")
     ratio = require_positive(load_ratio, "load_ratio")
     k_n = require_positive(mode_factor, "mode_factor")
-    v = np.asarray(peak_velocity_m_s, dtype=np.float64)
+    v = real_array(peak_velocity_m_s, "peak_velocity_m_s")
     if np.any(v < 0.0) or not np.all(np.isfinite(v)):
         msg = "'peak_velocity_m_s' must be non-negative and finite."
         raise ValueError(msg)
@@ -726,13 +728,14 @@ def foundation_guideline_curve(
         :class:`GuidelineCurve`.
     :raises ValueError: If the class is not one of the three, or a frequency
         is not positive and finite.
-    :raises TypeError: if ``building_class`` is not a text.
+    :raises TypeError: if ``building_class`` is not a text, or ``frequency`` holds a
+        text or a value that is not a real number.
     """
     cls = require_choice(building_class, "building_class", BUILDING_CLASSES)
     if frequency is None:
         f = np.asarray(FOUNDATION_FREQUENCIES_HZ, dtype=np.float64)
     else:
-        f = np.atleast_1d(np.asarray(frequency, dtype=np.float64))
+        f = np.atleast_1d(real_array(frequency, "frequency"))
     values = np.atleast_1d(
         np.asarray(guideline_velocity(cls, f, location="foundation"), dtype=np.float64)
     )

@@ -153,7 +153,7 @@ indices (Formulas 11-12) and the standardized level difference (Formula 13).
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `area` or `volume` is not a single number, or `fraction` is not an integer (a word, a flag or a float). |
+| TypeError | if `area` or `volume` is not a single number, or `fraction` is not an integer (a word, a flag or a float), or `frequencies` holds a text or a value that is not a real number. |
 
 ## FacadeElement
 
@@ -384,6 +384,12 @@ scalar broadcasts against an array (e.g. several sides, one common `Atot`).
 
 **Returns:** Exterior sound pressure level `Lp` in dB.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `attenuation` or `l_w` holds a text or a value that is not a real number. |
+
 ## plot_facade_elements
 
 ```python
@@ -459,7 +465,7 @@ the standard's separate segment-of-openings Formula (4).
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `area` is not a single number. |
+| TypeError | if `area` is not a single number, or `lp_in` or `octave_bands` holds a text or a value that is not a real number. |
 
 ## RadiatedPowerResult
 

@@ -38,6 +38,7 @@ if TYPE_CHECKING:
     from ..signals.time_frequency import SpectrogramResult, ZoomFFTResult
     from ..signals.windows import WindowMetricsResult
 
+from .._internal.validation import real_array
 from .common import (
     _C_EDGE,
     _C_MUTED,
@@ -207,7 +208,7 @@ def _finite_db_floor(curves: list[np.ndarray], *, margin: float = 5.0) -> float:
     a fallback when every value is non-finite), giving fills and y-limits a
     baseline that does not depend on autoscale or per-iteration axis state.
     """
-    stacked = np.concatenate([np.asarray(c, dtype=np.float64) for c in curves])
+    stacked = np.concatenate([real_array(c, "curves") for c in curves])
     finite = stacked[np.isfinite(stacked)]
     return float(finite.min()) - margin if finite.size else -100.0
 

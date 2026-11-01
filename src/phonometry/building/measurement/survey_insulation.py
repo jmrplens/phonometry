@@ -75,6 +75,7 @@ import numpy as np
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     check_engine,
+    real_array,
     require_choice,
     require_equal_shapes,
     require_ranks,
@@ -230,7 +231,7 @@ _TABLE3: dict[int, dict[str, tuple[float, float, float, float, float, float]]] =
 
 def _finite_bands(values: ArrayLike, name: str) -> np.ndarray:
     """Return ``values`` as a finite float array, or raise."""
-    a = np.asarray(values, dtype=np.float64)
+    a = real_array(values, name)
     if not np.all(np.isfinite(a)):
         msg = f"'{name}' must contain only finite values."
         raise ValueError(msg)
@@ -269,7 +270,8 @@ def reverberation_index(t: ArrayLike, *, t0: float = _T0) -> np.ndarray:
     :param t0: Reference reverberation time ``T0``, in seconds (Default: 0,5 s).
     :return: The reverberation index ``k`` per band, in dB.
     :raises ValueError: If ``t``/``t0`` are not positive or ``t`` is non-finite.
-    :raises TypeError: if ``t0`` is not a single number.
+    :raises TypeError: if ``t0`` is not a single number, or ``t`` holds a text or a
+        value that is not a real number.
     """
     tt = _finite_bands(t, "t")
     if np.any(tt <= 0.0):
@@ -798,7 +800,8 @@ def survey_airborne_insulation(
     :return: :class:`SurveyAirborneResult`.
     :raises ValueError: If band counts differ, if ``area`` is given without
         ``volume``, or if ``area``/``volume`` are not positive.
-    :raises TypeError: if ``area`` or ``volume`` is not a single number.
+    :raises TypeError: if ``area`` or ``volume`` is not a single number, or
+        ``reverberation_index`` holds a text or a value that is not a real number.
     """
     l1_bands = _as_band_levels(l1, "l1")
     l2_bands = _as_band_levels(l2, "l2")
@@ -858,7 +861,8 @@ def survey_impact_insulation(
     :param volume: Receiving-room volume ``V``, in m³ (required for ``L'n``).
     :return: :class:`SurveyImpactResult`.
     :raises ValueError: If band counts differ or ``volume`` is not positive.
-    :raises TypeError: if ``volume`` is not a single number.
+    :raises TypeError: if ``volume`` is not a single number, or ``reverberation_index``
+        holds a text or a value that is not a real number.
     """
     l_i = _as_band_levels(li, "li")
     k = _validate_index(reverberation_index, int(l_i.size))
@@ -896,7 +900,8 @@ def survey_facade_insulation(
     :param volume: Receiving-room volume ``V``, in m³ (required for ``D2m,n``).
     :return: :class:`SurveyFacadeResult`.
     :raises ValueError: If band counts differ or ``volume`` is not positive.
-    :raises TypeError: if ``volume`` is not a single number.
+    :raises TypeError: if ``volume`` is not a single number, or ``reverberation_index``
+        holds a text or a value that is not a real number.
     """
     out = _as_band_levels(l1_2m, "l1_2m")
     l2_bands = _as_band_levels(l2, "l2")
@@ -947,7 +952,8 @@ def survey_service_equipment_level(
     :return: :class:`SurveyServiceEquipmentResult`.
     :raises ValueError: If not exactly three measurements are given, if shapes
         are inconsistent, or if ``volume`` is not positive.
-    :raises TypeError: if ``volume`` is not a single number.
+    :raises TypeError: if ``volume`` is not a single number, or ``measurements`` or
+        ``reverberation_index`` holds a text or a value that is not a real number.
     """
     m = _finite_bands(measurements, "measurements")
     if m.ndim not in (1, 2) or m.shape[0] != _SERVICE_EQUIPMENT_POSITIONS:

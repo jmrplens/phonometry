@@ -102,7 +102,7 @@ import warnings
 from collections.abc import Sequence
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, ClassVar, Literal
+from typing import TYPE_CHECKING, Any, ClassVar, Literal, cast
 
 import numpy as np
 from scipy.fft import next_fast_len
@@ -111,6 +111,7 @@ from scipy.optimize import minimize_scalar
 from ..._internal.frozen import OwnsArrays, read_only
 from ..._internal.validation import (
     indices_of,
+    real_array,
     require_axis_rank,
     require_choice,
     require_finite_fields,
@@ -726,7 +727,7 @@ def _require_fs(fs: float) -> float:
 
 def _record(values: ArrayLike, name: str) -> NDArray[np.float64]:
     """A finite one-dimensional impulse response."""
-    record = np.asarray(values, dtype=np.float64)
+    record = real_array(values, name)
     if record.ndim != 1 or record.size < _MINIMUM_SAMPLES:
         msg = f"'{name}' must be a one-dimensional impulse response."
         raise ValueError(msg)
@@ -825,6 +826,8 @@ def subtract_direct_sound(
     :return: The :class:`DirectSoundSubtraction`, with ``.plot()``.
     :raises ValueError: If the records are not one-dimensional, finite and of
         equal length, or the rate is missing or not positive.
+    :raises TypeError: if ``free_field_ir`` or ``in_front_ir`` holds a text or a value
+        that is not a real number.
     :warns BarrierReflectionWarning: If :math:`R_\mathrm{sub}` is below 10 dB or the
         sample rate below 44 kHz.
     """
@@ -884,8 +887,8 @@ def _band_energies(
     step = fs / size
     boundaries = np.concatenate(([-0.5 * step], (np.arange(power.size) + 0.5) * step))
     running = np.concatenate(([0.0], np.cumsum(power) * step))
-    upper = np.interp(np.asarray(upper_hz, dtype=np.float64), boundaries, running)
-    lower = np.interp(np.asarray(lower_hz, dtype=np.float64), boundaries, running)
+    upper = np.interp(real_array(upper_hz, "upper_hz"), boundaries, running)
+    lower = np.interp(real_array(lower_hz, "lower_hz"), boundaries, running)
     return np.asarray(upper - lower, dtype=np.float64)
 
 
@@ -912,7 +915,7 @@ def _windowed(
 
 def _per_microphone(value: float | ArrayLike, name: str) -> NDArray[np.float64]:
     """One window length for all nine microphones, or one per microphone."""
-    lengths = np.atleast_1d(np.asarray(value, dtype=np.float64))
+    lengths = np.atleast_1d(real_array(value, name))
     if lengths.size == 1:
         lengths = np.full(_MICROPHONES, float(lengths[0]))
     if lengths.shape != (_MICROPHONES,):
@@ -928,7 +931,7 @@ def _directivity(values: ArrayLike | None) -> NDArray[np.float64]:
     bands = len(_BANDS_HZ)
     if values is None:
         return np.ones((_MICROPHONES, bands))
-    corrections = np.asarray(values, dtype=np.float64)
+    corrections = real_array(values, "values")
     if corrections.shape != (_MICROPHONES, bands):
         msg = (
             f"'directivity_corrections' must be a ({_MICROPHONES}, {bands}) array, "
@@ -978,6 +981,9 @@ def source_directivity_corrections(
     :raises ValueError: If the records are not ``(9, N)``, finite and equal
         in shape, the rate is missing, disagrees or is not positive, or a
         window does not fit its record.
+    :raises TypeError: if ``low_band_window_length_s``, ``microphone_irs``,
+        ``specular_irs`` or ``window_length_s`` holds a text or a value that is not a
+        real number.
     """
     rate = _require_fs(
         float(
@@ -1021,7 +1027,7 @@ def source_directivity_corrections(
 
 def _grid_record(entry: SignalInput, name: str) -> NDArray[np.float64]:
     """The ``(9, N)`` records of one grid position, in pascals when calibrated."""
-    records = np.asarray(entry, dtype=np.float64)
+    records = real_array(entry, name)
     if records.ndim != _ONE_GRID_RANK or records.shape[0] != _MICROPHONES:
         msg = (
             f"'{name}' must be shaped (9, N) for one grid position, a nine-channel "
@@ -1056,7 +1062,7 @@ def _grid_positions(
                 raise TypeError(msg)
             entries.append(entry)
         return entries
-    records = np.asarray(values, dtype=np.float64)
+    records = real_array(cast("ArrayLike", values), name)
     if records.ndim == _GRIDS_RANK:
         if records.shape[1] != _MICROPHONES:
             msg = (
@@ -1451,8 +1457,10 @@ def reflection_index_from_positions(
     :return: The :class:`ReflectionIndexResult` (without microphone detail).
     :raises ValueError: If a row does not have eighteen values, a value is
         negative or infinite, or a band from ``lowest_band_hz`` has no value.
+    :raises TypeError: if ``position_values`` holds a text or a value that is not a real
+        number.
     """
-    values = np.atleast_2d(np.asarray(position_values, dtype=np.float64))
+    values = np.atleast_2d(real_array(position_values, "position_values"))
     bands = len(_BANDS_HZ)
     if values.ndim != _ONE_GRID_RANK or values.shape[1] != bands:
         msg = f"'position_values' must have {bands} values per position; got {values.shape}."
@@ -1524,8 +1532,10 @@ def reflection_index(
         missing or disagrees, a window does not fit its record, or a
         parameter is out of range.
     :raises TypeError: if ``speed_of_sound`` is not a single number, or
-        ``low_band_microphones`` is a text or holds a microphone that is not
-        an integer.
+        ``low_band_microphones`` is a text or holds a microphone that is not an integer,
+        or ``directivity_corrections``, ``free_field_irs``, ``in_front_irs``,
+        ``low_band_window_length_s`` or ``window_length_s`` holds a text or a value that
+        is not a real number.
     :warns BarrierReflectionWarning: For an :math:`R_\mathrm{sub}` below 10 dB, a
         gain factor more than 20 % from 1, or a sample rate below 44 kHz.
     """
@@ -1869,10 +1879,11 @@ class ReflectionGridCheck(OwnsArrays):
 
         :raises ValueError: If the check is not ``"relative"`` or ``"grid"``,
             or there are not nine finite path differences.
-        :raises TypeError: if ``check`` is not a text.
+        :raises TypeError: if ``check`` is not a text, or ``path_differences_m`` holds a
+            text or a value that is not a real number.
         """
         require_choice(self.check, "check", ("relative", "grid"))
-        measured = np.asarray(self.path_differences_m, dtype=np.float64)
+        measured = real_array(self.path_differences_m, "path_differences_m")
         if measured.shape != (_MICROPHONES,) or not np.all(np.isfinite(measured)):
             msg = (
                 "ReflectionGridCheck: 'path_differences_m' must hold nine "
@@ -1986,12 +1997,12 @@ def check_reflection_grid_position(
     :raises ValueError: If there are not nine finite delays, the speed is not
         positive or the check is unknown.
     :raises TypeError: if ``check`` is not a text, or ``speed_of_sound`` is not a single
-        number.
+        number, or ``time_delays_s`` holds a text or a value that is not a real number.
     """
     kind: Literal["relative", "grid"]
     kind = require_choice(check, "check", ("relative", "grid"))
     speed = require_positive(speed_of_sound, "speed_of_sound")
-    delays = np.asarray(time_delays_s, dtype=np.float64)
+    delays = real_array(time_delays_s, "time_delays_s")
     if delays.shape != (_MICROPHONES,) or not np.all(np.isfinite(delays)):
         msg = "'time_delays_s' must hold nine finite delays, microphone 1 first."
         raise ValueError(msg)

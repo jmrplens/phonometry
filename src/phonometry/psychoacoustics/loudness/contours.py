@@ -15,6 +15,7 @@ import numpy as np
 
 from ..._internal.frozen import OwnsArrays, read_only
 from ..._internal.validation import (
+    real_array,
     require_ranks,
     require_same_length,
     require_scalar,
@@ -321,11 +322,13 @@ def equal_loudness_contours(
         one of those preferred frequencies (the standard specifies no
         interpolation between them).
     :return: An :class:`EqualLoudnessContours`.
+    :raises TypeError: if ``frequencies`` holds a text or a value that is not a real
+        number.
     """
     if frequencies is None:
         grid = _FREQUENCIES
     else:
-        grid = np.asarray(frequencies, dtype=float)
+        grid = real_array(frequencies, "frequencies")
         for f in grid:
             _params(float(f))  # reject any non-preferred frequency
 

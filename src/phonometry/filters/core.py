@@ -20,6 +20,7 @@ from .._internal.utils import (
 )
 from .._internal.validation import (
     is_scalar,
+    real_array,
     require_choice,
     require_count,
     require_positive,
@@ -241,7 +242,7 @@ def _spectrogram_axis(
         its axis of ``levels``.
     """
     count = levels.shape[-1 if name == "times" else -2]
-    axis = np.asarray(value, dtype=np.float64)
+    axis = real_array(cast("ArrayLike", value), name)
     if axis.ndim != 1:
         msg = (
             f"OctaveSpectrogramResult: '{name}' must be one-dimensional; "
@@ -343,7 +344,8 @@ class OctaveSpectrogramResult(OwnsArrays):
         frame too many would be stretched across the axes without complaint.
         It is refused here.
 
-        :raises TypeError: if ``lower_edges`` or ``upper_edges`` is ``None``.
+        :raises TypeError: if ``lower_edges`` or ``upper_edges`` is ``None``, or
+            ``levels`` holds a text or a value that is not a real number.
         :raises ValueError: if ``levels`` is neither two- nor
             three-dimensional, an axis is not one-dimensional, the band or
             frame axis of ``levels`` disagrees with ``frequencies``, an edge
@@ -351,7 +353,7 @@ class OctaveSpectrogramResult(OwnsArrays):
             bank (see :func:`_require_bank_edges`).
         """
         require_present(self, "lower_edges", "upper_edges")
-        levels = np.asarray(self.levels, dtype=np.float64)
+        levels = real_array(self.levels, "levels")
         if levels.ndim not in _SPECTROGRAM_RANKS:
             msg = (
                 "OctaveSpectrogramResult: 'levels' must be (bands, frames) or "

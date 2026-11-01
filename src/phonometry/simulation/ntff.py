@@ -70,6 +70,7 @@ from scipy.special import hankel2
 
 from .._internal.frozen import OwnsArrays, read_only
 from .._internal.validation import (
+    real_array,
     refuse_complex,
     refuse_text,
     require_equal_shapes,
@@ -187,8 +188,8 @@ class ContourPhasors(OwnsArrays):
         if not np.isfinite(self.segment) or self.segment <= 0.0:
             msg = "segment must be positive and finite"
             raise ValueError(msg)
-        pos = np.asarray(self.positions, dtype=np.float64)
-        nrm = np.asarray(self.normals, dtype=np.float64)
+        pos = real_array(self.positions, "positions")
+        nrm = real_array(self.normals, "normals")
         p = np.asarray(self.pressure, dtype=np.complex128)
         v = np.asarray(self.normal_velocity, dtype=np.complex128)
         n = p.shape[0] if p.ndim == 1 else -1
@@ -343,7 +344,7 @@ def far_field_from_contour(
     for name, value in (("angles_deg", angles_deg), ("origin", origin)):
         refuse_complex(value, f"{name} must be real, not complex")
         refuse_text(value, f"{name} must be numbers, not text")
-    ang = np.atleast_1d(np.asarray(angles_deg, dtype=np.float64))
+    ang = np.atleast_1d(real_array(angles_deg, "angles_deg"))
     if ang.ndim != 1 or ang.size == 0 or not np.all(np.isfinite(ang)):
         msg = "angles must be a non-empty 1D sequence of finite values in degrees"
         raise ValueError(msg)

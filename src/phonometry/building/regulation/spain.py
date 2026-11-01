@@ -88,6 +88,7 @@ from ..._internal.boundary import round_half_up
 from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
+    real_array,
     require_aliased_choice,
     require_choice,
     require_equal_shapes,
@@ -515,10 +516,11 @@ def db_hr_global_index(
     :return: A :class:`DBHRGlobalIndexResult`.
     :raises ValueError: For an unknown spectrum, a wrong band count, or
         non-finite values.
-    :raises TypeError: if ``spectrum`` is not a text.
+    :raises TypeError: if ``spectrum`` is not a text, or ``band_values`` or
+        ``frequencies`` holds a text or a value that is not a real number.
     """
     key = require_choice(spectrum, "spectrum", _SPECTRA)
-    values = np.asarray(band_values, dtype=np.float64)
+    values = real_array(band_values, "band_values")
     if values.ndim != 1:
         msg = "'band_values' must be one-dimensional."
         raise ValueError(msg)
@@ -537,7 +539,7 @@ def db_hr_global_index(
         freqs = np.asarray(DB_HR_FREQUENCIES_HZ, dtype=np.float64)
         selected = values
     else:
-        given = np.asarray(frequencies, dtype=np.float64)
+        given = real_array(frequencies, "frequencies")
         require_equal_shapes(
             "db_hr_global_index",
             {"band_values": values.shape, "frequencies": given.shape},

@@ -67,6 +67,7 @@ from ..._internal.frozen import OwnsArrays
 from ..._internal.levels_math import energy_sum
 from ..._internal.validation import (
     check_engine,
+    real_array,
     require_choice,
     require_equal_shapes,
     require_finite_array,
@@ -214,10 +215,11 @@ def joint_sound_reduction_index(
     :raises ValueError: If the inputs disagree in band count, a level is not
         finite, an area is not positive, or the length is not positive.
     :raises TypeError: if ``joint_length_m`` is not a single number, or
-        ``absorption_area`` holds a text or a value that is not a real number.
+        ``absorption_area``, ``l1`` or ``l2`` holds a text or a value that is not a real
+        number.
     """
-    l1 = _as_band_levels(np.asarray(l1, dtype=np.float64), "l1")
-    l2 = _as_band_levels(np.asarray(l2, dtype=np.float64), "l2")
+    l1 = _as_band_levels(real_array(l1, "l1"), "l1")
+    l2 = _as_band_levels(real_array(l2, "l2"), "l2")
     area = require_positive_array(absorption_area, "absorption_area")
     require_equal_shapes(
         "joint_sound_reduction_index",
@@ -279,7 +281,7 @@ def _sum_term(
     finite = np.isfinite(values)
     if not np.any(finite):
         return None
-    spec = np.asarray(spectrum, dtype=np.float64)
+    spec = real_array(spectrum, "spectrum")
     x_aj = -energy_sum(spec[finite] - values[finite])
     return math.floor(x_aj + 0.5) - rating
 
@@ -390,6 +392,8 @@ class LaboratoryJointInsulationResult(OwnsArrays):
 
         :raises ValueError: if the per-band columns disagree, or ``r_s`` is
             not the correction the regime of each band gives.
+        :raises TypeError: if ``r_s_max`` or ``r_s_prime`` holds a text or a value that
+            is not a real number.
         """
         require_ranks(
             self,
@@ -400,8 +404,8 @@ class LaboratoryJointInsulationResult(OwnsArrays):
         )
         require_same_length(self, "frequencies", "r_s_prime", "r_s_max", "r_s")
         expected = _correct(
-            np.asarray(self.r_s_prime, dtype=np.float64),
-            np.asarray(self.r_s_max, dtype=np.float64),
+            real_array(self.r_s_prime, "r_s_prime"),
+            real_array(self.r_s_max, "r_s_max"),
             limit_at_max=self.limit_at_max,
         )
         if not np.allclose(

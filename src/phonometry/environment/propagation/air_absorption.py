@@ -74,6 +74,7 @@ import numpy as np
 
 from ..._internal.frozen import OwnsArrays, read_only
 from ..._internal.validation import (
+    real_array,
     require_above_absolute_zero,
     require_same_shape,
     require_scalar,
@@ -267,7 +268,8 @@ def air_attenuation(
     :return: Attenuation coefficient ``alpha``, in dB/m, with the shape of
         ``frequencies``.
     :raises TypeError: if ``relative_humidity_percent``, ``static_pressure_kpa`` or
-        ``temperature_c`` is not a single number.
+        ``temperature_c`` is not a single number, or ``frequencies`` holds a text or a
+        value that is not a real number.
 
     .. note::
         ISO 354:2003 defers its air power-attenuation coefficient ``m`` (1/m)
@@ -276,7 +278,7 @@ def air_attenuation(
         :func:`~phonometry.materials.absorbers.sound_absorption.absorption_area` /
         :func:`~phonometry.materials.absorbers.sound_absorption.absorption_coefficient`.
     """
-    freqs = np.asarray(frequencies, dtype=np.float64)
+    freqs = real_array(frequencies, "frequencies")
     _validate(freqs, temperature_c, relative_humidity_percent, static_pressure_kpa)
     if exact_midband:
         freqs = _exact_midband(freqs)
@@ -544,8 +546,10 @@ def atmospheric_attenuation(
     :raises ValueError: If ``distance`` is negative or non-finite (NaN/inf); the
         check lives on :class:`AtmosphericAttenuation` so it also guards direct
         construction.
+    :raises TypeError: if ``frequencies`` holds a text or a value that is not a real
+        number.
     """
-    freqs = np.asarray(frequencies, dtype=np.float64)
+    freqs = real_array(frequencies, "frequencies")
     alpha = air_attenuation(
         frequencies,
         temperature_c=temperature_c,

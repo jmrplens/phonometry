@@ -80,7 +80,11 @@ from .._internal.boundary import settled
 from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays
 from .._internal.types import as_float_or_array
-from .._internal.validation import require_choice, require_scalar
+from .._internal.validation import (
+    real_array,
+    require_choice,
+    require_scalar,
+)
 from .hearing_protectors import _octave_axis
 
 # Imported to run, not only to type: typing.get_type_hints resolves the
@@ -277,7 +281,11 @@ def _band_axis(frequencies: ArrayLike | None, count: int, owner: str) -> np.ndar
     :return: The frequencies as a float array.
     :raises ValueError: if the count does not match, or no default fits.
     """
-    given = None if frequencies is None else np.array(frequencies, dtype=np.float64)
+    given = (
+        None
+        if frequencies is None
+        else real_array(frequencies, "frequencies", copy=True)
+    )
     return _octave_axis(given, count, owner)
 
 
@@ -290,7 +298,7 @@ def _subject_grid(values: ArrayLike, name: str) -> np.ndarray:
     :raises ValueError: if it is not two-dimensional, holds fewer than two
         subjects, or holds a value that is not finite.
     """
-    grid = np.asarray(values, dtype=np.float64)
+    grid = real_array(values, name)
     if grid.ndim != _GRID_RANK:
         msg = (
             f"'{name}' must be a (subjects, bands) grid: ISO 4869-1 measures "
@@ -401,6 +409,9 @@ def real_ear_attenuation(
         two-dimensional or holds fewer than two subjects or a value that is not
         finite, if the two thresholds differ in shape, or if ``frequencies``
         does not match the grid.
+    :raises TypeError: if ``attenuation``, ``frequencies``,
+        ``occluded_threshold_levels`` or ``open_threshold_levels`` holds a text or a
+        value that is not a real number.
     """
     thresholds = (
         open_threshold_levels is not None or occluded_threshold_levels is not None
@@ -480,7 +491,8 @@ def reat_expanded_uncertainty(
     :return: :math:`U_{95}` per band, in dB.
     :raises ValueError: for a protector type the tables do not list, or for
         frequencies that are not positive and finite.
-    :raises TypeError: if ``protector`` is not a text.
+    :raises TypeError: if ``protector`` is not a text, or ``frequencies`` holds a text
+        or a value that is not a real number.
     """
     table = (
         REAT_BETWEEN_LABORATORY_UNCERTAINTY
@@ -488,7 +500,7 @@ def reat_expanded_uncertainty(
         else REAT_WITHIN_LABORATORY_UNCERTAINTY
     )
     require_choice(protector, "protector", tuple(table))
-    freqs = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
+    freqs = np.atleast_1d(real_array(frequencies, "frequencies"))
     if freqs.ndim != 1 or not np.all(np.isfinite(freqs)) or np.any(freqs <= 0.0):
         msg = "'frequencies' must be positive, finite centre frequencies in hertz."
         raise ValueError(msg)
@@ -538,8 +550,10 @@ def min_significant_difference(
     :return: :math:`\sqrt{2}\,U_{95}`, in dB; a ``float`` for a number; an array for a
         sequence or an array, a zero-dimensional one included.
     :raises ValueError: for an uncertainty that is negative or not finite.
+    :raises TypeError: if ``expanded_uncertainty_db`` holds a text or a value that is
+        not a real number.
     """
-    values = np.asarray(expanded_uncertainty_db, dtype=np.float64)
+    values = real_array(expanded_uncertainty_db, "expanded_uncertainty_db")
     if not np.all(np.isfinite(values)) or np.any(values < 0.0):
         msg = "'expanded_uncertainty_db' must be finite and not negative, in dB."
         raise ValueError(msg)
@@ -655,7 +669,7 @@ def _band_values(values: ArrayLike, count: int | None, name: str) -> np.ndarray:
         finite.
     """
     require_scalar(count, "count")
-    array = np.array(values, dtype=np.float64)
+    array = real_array(values, name, copy=True)
     if array.ndim == 0 and count is not None:
         array = np.full(count, float(array))
     if array.ndim != 1 or array.size == 0 or not np.all(np.isfinite(array)):
@@ -748,6 +762,9 @@ def assess_attenuation_difference(
     :raises ValueError: if an uncertainty is missing for bare means or given
         twice for a result, if the two measurements cover different bands, or
         if a value is not finite.
+    :raises TypeError: if ``first``, ``first_expanded_uncertainty_db``, ``frequencies``,
+        ``second`` or ``second_expanded_uncertainty_db`` holds a text or a value that is
+        not a real number.
     """
     m1, u1, f1 = _mean_and_uncertainty(first, first_expanded_uncertainty_db, "first")
     m2, u2, f2 = _mean_and_uncertainty(second, second_expanded_uncertainty_db, "second")
@@ -986,7 +1003,9 @@ def check_reat_sound_field(
         not match, if a rotation is given without its microphone's rejection
         or the other way round, or if that rejection is below the 10 dB Table 1
         accepts.
-    :raises TypeError: if a position of ``position_levels`` is not a text.
+    :raises TypeError: if a position of ``position_levels`` is not a text, or
+        ``frequencies``, ``reference_levels`` or ``rotation_levels`` holds a text or a
+        value that is not a real number.
     """
     for position in position_levels:
         require_choice(position, "position_levels", _POSITIONS)
@@ -1020,7 +1039,7 @@ def check_reat_sound_field(
     if rotation_levels is not None and free_field_rejection is not None:
         allowable_field_variation(free_field_rejection)
         rejection = float(free_field_rejection)
-        rotation = np.asarray(rotation_levels, dtype=np.float64)
+        rotation = real_array(rotation_levels, "rotation_levels")
         if rotation.ndim != _GRID_RANK or rotation.shape[1] != count:
             msg = (
                 "'rotation_levels' must be a (readings, bands) grid on the "

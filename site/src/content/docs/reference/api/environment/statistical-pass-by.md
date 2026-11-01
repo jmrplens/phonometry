@@ -464,7 +464,7 @@ speed windows are judged, kept on the result and emitted as
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a category the method does not use, rows that do not match, a category with fewer than three pass-bys or all at one speed, or invalid weighting factors or levels. |
-| TypeError | if `road_speed_category` or a key of `corrected_vehicle_sound_levels`, `reference_levels` or `weighting_factors` is not a text, or `reference_levels` or a value of one of those mappings is not a single number. |
+| TypeError | if `road_speed_category` or a key of `corrected_vehicle_sound_levels`, `reference_levels` or `weighting_factors` is not a text, or `reference_levels` or a value of one of those mappings is not a single number, or `max_levels` or `speeds_kmh` holds a text or a value that is not a real number. |
 
 ## statistical_pass_by_index
 

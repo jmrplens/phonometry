@@ -520,7 +520,7 @@ impacts rather than one that overflows partway through it.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If an input is not positive and finite, or `time` contains a negative value. |
-| TypeError | if `contact_stiffness`, `impact_velocity`, `impedance` or `mass` is not a single number. |
+| TypeError | if `contact_stiffness`, `impact_velocity`, `impedance` or `mass` is not a single number, or `time` holds a text or a value that is not a real number. |
 
 ## hammer_impact_velocity
 

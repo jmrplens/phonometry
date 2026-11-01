@@ -57,6 +57,7 @@ import numpy as np
 from .._internal.frozen import OwnsArrays
 from .._internal.types import own_window
 from .._internal.validation import (
+    real_array,
     require_choice,
     require_count,
     require_ranks,
@@ -383,12 +384,14 @@ class EnvelopeSpectrumResult(OwnsArrays):
         :raises ValueError: if the spectrum disagrees with its frequency
             axis, the envelope with its time axis, or ``mean_level`` with the
             envelope it is the mean of.
+        :raises TypeError: if ``envelope`` holds a text or a value that is not a real
+            number.
         """
         object.__setattr__(self, "window", own_window(self.window))
         require_ranks(self, frequencies=1, amplitude=1, times=1, envelope=1)
         require_same_length(self, "frequencies", "amplitude", axis="frequency")
         require_same_length(self, "times", "envelope", axis="sample")
-        detector = np.asarray(self.envelope, dtype=np.float64)
+        detector = real_array(self.envelope, "envelope")
         if detector.size == 0:
             return
         expected = float(np.mean(detector))

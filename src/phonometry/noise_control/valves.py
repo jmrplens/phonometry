@@ -68,6 +68,7 @@ from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
     ABSOLUTE_ZERO_C,
+    real_array,
     require_above_absolute_zero,
     require_choice,
     require_count,
@@ -645,10 +646,11 @@ def internal_spectrum(
     :return: The internal level in each band, in dB.
     :raises ValueError: If the peak frequency is not positive and finite, or
         a band centre is not.
-    :raises TypeError: if ``peak_frequency`` is not a single number.
+    :raises TypeError: if ``peak_frequency`` is not a single number, or ``frequencies``
+        holds a text or a value that is not a real number.
     """
     peak = require_positive(peak_frequency, "peak_frequency")
-    bands = np.asarray(frequencies, dtype=np.float64)
+    bands = real_array(frequencies, "frequencies")
     if not math.isfinite(peak):
         msg = "'peak_frequency' must be a positive, finite frequency in Hz."
         raise ValueError(msg)
@@ -813,9 +815,10 @@ def pipe_transmission_loss(
     :raises ValueError: If an argument is not positive and finite.
     :raises TypeError: if ``atmospheric_pressure_pa``, ``downstream_density``,
         ``downstream_sound_speed``, ``pipe_density``, ``standard_pressure_pa``,
-        ``valve_outlet_diameter_m`` or ``wall_thickness_m`` is not a single number.
+        ``valve_outlet_diameter_m`` or ``wall_thickness_m`` is not a single number, or
+        ``frequencies`` holds a text or a value that is not a real number.
     """
-    bands = np.asarray(frequencies, dtype=np.float64)
+    bands = real_array(frequencies, "frequencies")
     if bands.ndim != 1 or bands.size == 0:
         msg = "'frequencies' must be a non-empty one-dimensional band axis in Hz."
         raise ValueError(msg)
@@ -1209,9 +1212,9 @@ def expander_noise(
         expander's own row prints :math:`A_\eta = -3{,}0`.
     :raises TypeError: if ``downstream_density``, ``downstream_sound_speed``,
         ``internal_diameter_m``, ``mass_flow`` or ``throat_diameter_m`` is not a single
-        number.
+        number, or ``frequencies`` holds a text or a value that is not a real number.
     """
-    bands = np.asarray(frequencies, dtype=np.float64)
+    bands = real_array(frequencies, "frequencies")
     flow = require_positive(mass_flow, "mass_flow")
     rho2 = require_positive(downstream_density, "downstream_density")
     c2 = require_positive(downstream_sound_speed, "downstream_sound_speed")
@@ -1288,8 +1291,9 @@ def combined_internal_levels(
     :raises ValueError: If an entry is a single level rather than a band
         array (one spectrum passed where the sequence of spectra belongs),
         if fewer than two are given, or if they disagree in shape.
+    :raises TypeError: if ``levels`` holds a text or a value that is not a real number.
     """
-    arrays = [np.asarray(level, dtype=np.float64) for level in levels]
+    arrays = [real_array(level, "levels") for level in levels]
     if any(array.ndim == 0 for array in arrays):
         msg = (
             "Each entry of 'levels' is one source's band spectrum, so a single "

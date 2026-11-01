@@ -88,6 +88,7 @@ from .._internal.levels_math import energy_mean, energy_sum
 from .._internal.types import ReportEngine, as_float_or_array
 from .._internal.validation import (
     check_engine,
+    real_array,
     require_choice,
     require_count,
     require_non_negative,
@@ -635,11 +636,11 @@ def background_noise_correction(
     :param background_levels: Background-noise levels, in decibels.
     :param grade: ``'engineering'`` (ISO 3744) or ``'survey'`` (ISO 3746).
     :return: ``K1`` per band, in decibels.
-    :raises TypeError: if ``background_levels`` holds a text or a value that is not a
-        real number, or ``grade`` is not a text.
+    :raises TypeError: if ``background_levels`` or ``source_levels`` holds a text or a
+        value that is not a real number, or ``grade`` is not a text.
     """
     low, high = _K1_CRITERIA[_check_grade(grade)]
-    src = np.asarray(source_levels, dtype=np.float64)
+    src = real_array(source_levels, "source_levels")
     bg = require_per_band(background_levels, "background_levels", src, "source_levels")
     delta = src - bg
     clamped = np.maximum(delta, low)
@@ -722,13 +723,13 @@ def _room_absorption_area(
         "Eq. A.7",
     )
     if reverberation_time is not None and volume is not None:
-        t = np.asarray(reverberation_time, dtype=np.float64)
+        t = real_array(reverberation_time, "reverberation_time")
         if volume <= 0 or np.any(t <= 0.0):
             msg = "reverberation_time and volume must be > 0."
             raise ValueError(msg)
         return np.asarray(0.16 * volume / t, dtype=np.float64)
     if mean_absorption_coefficient is not None and room_surface is not None:
-        alpha = np.asarray(mean_absorption_coefficient, dtype=np.float64)
+        alpha = real_array(mean_absorption_coefficient, "mean_absorption_coefficient")
         if room_surface <= 0 or np.any(alpha <= 0.0) or np.any(alpha > 1.0):
             msg = "mean_absorption_coefficient must be in (0, 1] and room_surface > 0."
             raise ValueError(msg)
@@ -842,7 +843,8 @@ def environmental_correction(
         an array, a zero-dimensional one included. The input of a route that is not
         read does not shape the result.
     :raises TypeError: if ``room_surface``, ``surface_area`` or ``volume`` is not a
-        single number.
+        single number, or ``mean_absorption_coefficient`` or ``reverberation_time``
+        holds a text or a value that is not a real number.
     """
     surface_area = require_positive(surface_area, "surface_area")
     area = absorption_area
@@ -1052,7 +1054,7 @@ def _surface_background_correction(
     n_positions, n_bands = levels.shape
     if background_levels is None:
         return np.zeros(n_bands, dtype=np.float64)
-    bg = np.atleast_2d(np.asarray(background_levels, dtype=np.float64))
+    bg = np.atleast_2d(real_array(background_levels, "background_levels"))
     # A single background spectrum (shape (NB,) or (1, NB)) is broadcast to
     # every microphone position; a full (NM, NB) array is used as given.
     if bg.shape == (1, n_bands) and n_positions != 1:
@@ -1129,7 +1131,7 @@ def _a_weighted_total(
         return None, (float(lw[0]) if n_bands == 1 else float("nan"))
     # A scalar is one band's centre frequency, not a shape mistake: accept it
     # for a single band (as 1-D) and reject it, by name, for several.
-    freqs = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
+    freqs = np.atleast_1d(real_array(frequencies, "frequencies"))
     if freqs.shape[0] != n_bands:
         msg = "'frequencies' length must match the number of bands."
         raise ValueError(msg)
@@ -1185,13 +1187,14 @@ def sound_power_pressure(
     :param sigma_omc_db: ``sigma_omc`` (dB), operating/mounting instability.
     :return: :class:`SoundPowerResult`.
     :raises TypeError: if ``distance``, ``radius`` or ``sigma_omc_db`` is not a single
-        number, or ``dimensions`` holds a text or a value that is not a real number, or
+        number, or ``background_levels``, ``dimensions``, ``frequencies`` or
+        ``levels_positions`` holds a text or a value that is not a real number, or
         ``grade`` is not a text, or ``surface`` is not a text.
     """
     require_choice(surface, "surface", ("hemisphere", "box"))
     grade = require_choice(grade, "grade", ("engineering", "survey"))
     sigma_omc_db = require_non_negative(sigma_omc_db, "sigma_omc_db")
-    levels = np.atleast_2d(np.asarray(levels_positions, dtype=np.float64))
+    levels = np.atleast_2d(real_array(levels_positions, "levels_positions"))
     # The number is a count of array axes, not a quantity.
     if levels.ndim != 2:  # noqa: PLR2004
         msg = "'levels_positions' must be a 2D (positions, bands) array."
@@ -1565,7 +1568,7 @@ def _event_position_levels(
     :raises ValueError: for a rank other than 2 or 3, non-finite levels, or a
         per-event array given together with ``n_events``.
     """
-    arr = np.asarray(levels_positions, dtype=np.float64)
+    arr = real_array(levels_positions, "levels_positions")
     # The number is a count of array axes, not a quantity.
     if arr.ndim == 3:  # noqa: PLR2004
         if n_events is not None:
@@ -1680,8 +1683,9 @@ def sound_energy_pressure(
         ``frequencies`` length.
     :raises TypeError: if ``distance``, ``integration_time``, ``radius`` or
         ``sigma_omc_db`` is not a single number, ``n_events`` is a flag, a text or an
-        array where a count goes, or ``dimensions`` holds a text or a value that is not
-        a real number, or ``grade`` is not a text, or ``surface`` is not a text.
+        array where a count goes, or ``dimensions``, ``frequencies`` or
+        ``levels_positions`` holds a text or a value that is not a real number, or
+        ``grade`` is not a text, or ``surface`` is not a text.
     """
     require_choice(surface, "surface", ("hemisphere", "box"))
     grade = require_choice(grade, "grade", ("engineering", "survey"))

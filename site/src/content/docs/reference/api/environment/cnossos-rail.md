@@ -285,7 +285,7 @@ here to every source, as the Commission's reference module does.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the angle is not finite. |
-| TypeError | if `phi` is not a single number. |
+| TypeError | if `phi` is not a single number, or `frequencies` holds a text or a value that is not a real number. |
 
 ## impact_roughness
 
@@ -357,6 +357,7 @@ band".
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the spectrum is not 24 bands. |
+| TypeError | if `levels` holds a text or a value that is not a real number. |
 
 ## rail_roughness
 
@@ -654,7 +655,7 @@ function. All three sit at source A.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `n_axles` is not a positive number. |
-| TypeError | if `n_axles` is not a single number. |
+| TypeError | if `n_axles` is not a single number, or `roughness` or `transfer` holds a text or a value that is not a real number. |
 
 ## RollingStock
 
@@ -733,7 +734,7 @@ is held.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If an input is invalid. |
-| TypeError | if `speed_kmh` is not a single number. |
+| TypeError | if `speed_kmh` is not a single number, or `frequencies`, `levels` or `wavelengths_mm` holds a text or a value that is not a real number. |
 
 ## RoughnessInterpolation
 
@@ -806,6 +807,7 @@ three spectra must already be on the frequency grid, that is resampled with
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the spectra are not 24 bands each. |
+| TypeError | if `filter_`, `rail` or `wheel` holds a text or a value that is not a real number. |
 
 ## track_transfer
 
@@ -1069,7 +1071,7 @@ other source.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the angle is not finite or the height is not 1 or 2. |
-| TypeError | if `psi` is not a single number, or `height` is a flag, a text or an array where a source height index goes. |
+| TypeError | if `psi` is not a single number, or `height` is a flag, a text or an array where a source height index goes, or `frequencies` holds a text or a value that is not a real number. |
 
 ## WavelengthSpectrum
 

@@ -37,6 +37,7 @@ from numpy.typing import ArrayLike, NDArray
 
 from ..._internal.frozen import OwnsArrays, read_only
 from ..._internal.validation import (
+    real_array,
     require_above_absolute_zero_array,
     require_choice,
     require_positive,
@@ -136,11 +137,11 @@ def air_density_astm_e2611(
     :return: Air density ``rho``, in kilograms per cubic metre.
     :raises ValueError: if any temperature is at or below -273.15 degC, or any
         pressure is not positive.
-    :raises TypeError: if ``temperature_c`` holds a text or a value that is not a real
-        number.
+    :raises TypeError: if ``static_pressure_kpa`` or ``temperature_c`` holds a text or a
+        value that is not a real number.
     """
     t = require_above_absolute_zero_array(temperature_c, "temperature_c")
-    p = np.asarray(static_pressure_kpa, dtype=np.float64)
+    p = real_array(static_pressure_kpa, "static_pressure_kpa")
     if np.any(p <= 0.0):
         msg = "'static_pressure_kpa' must be positive (kPa)."
         raise ValueError(msg)
@@ -504,12 +505,15 @@ class TransferMatrix(OwnsArrays):
         arithmetic (``[a, b] * 2`` repeats the list), and a scalar kept as a
         ``complex`` would make the entries of one matrix differ in kind with
         how it was built. Converting once here gives every entry one form.
+
+        :raises TypeError: if ``frequencies`` holds a text or a value that is not a real
+            number.
         """
         for name in ("t11", "t12", "t21", "t22"):
             entry = np.asarray(getattr(self, name), dtype=np.complex128)
             object.__setattr__(self, name, read_only(entry))
         if self.frequencies is not None:
-            frequencies = np.asarray(self.frequencies, dtype=np.float64)
+            frequencies = real_array(self.frequencies, "frequencies")
             object.__setattr__(self, "frequencies", read_only(frequencies))
 
     def determinant(self) -> Complex:
@@ -637,6 +641,8 @@ class TransferMatrix(OwnsArrays):
         :return: The axes.
         :raises ValueError: If ``frequencies`` or ``characteristic_impedance``
             is neither supplied nor stored on the matrix.
+        :raises TypeError: if ``frequencies`` holds a text or a value that is not a real
+            number.
         """
         if frequencies is None:
             frequencies = self.frequencies
@@ -780,7 +786,7 @@ def _warn_ill_conditioned(
 ) -> None:
     """Flag a near-singular transfer-matrix solve (poor conditioning)."""
     den_mag = np.abs(np.asarray(den, dtype=np.complex128))
-    bad = den_mag < _MATRIX_COND_EPS * np.asarray(scale, dtype=np.float64)
+    bad = den_mag < _MATRIX_COND_EPS * real_array(scale, "scale")
     n = int(np.count_nonzero(bad))
     if n:
         warnings.warn(
@@ -814,7 +820,7 @@ def _measurement_context(
         "diameter_m": diameter_m,
         "shape": shape if diameter_m is not None else None,
         "frequencies": (
-            None if frequencies is None else np.asarray(frequencies, dtype=np.float64)
+            None if frequencies is None else real_array(frequencies, "frequencies")
         ),
         "air_characteristic_impedance": characteristic_impedance,
     }
@@ -870,7 +876,8 @@ def transfer_matrix_two_load(
     :return: The specimen :class:`TransferMatrix` (measurement context
         retained on the result).
     :raises TypeError: if ``diameter_m``, ``s1`` or ``s2`` is not a single number, or
-        ``shape`` is not a text.
+        ``shape`` is not a text, or ``frequencies`` holds a text or a value that is not
+        a real number.
     """
     require_choice(shape, "shape", ("circular", "rectangular", "square"))
     canonical = _canonical_shape(shape)
@@ -978,7 +985,8 @@ def transfer_matrix_one_load(
     :return: The specimen :class:`TransferMatrix` (measurement context
         retained on the result).
     :raises TypeError: if ``diameter_m``, ``s1`` or ``s2`` is not a single number, or
-        ``shape`` is not a text.
+        ``shape`` is not a text, or ``frequencies`` holds a text or a value that is not
+        a real number.
     """
     require_choice(shape, "shape", ("circular", "rectangular", "square"))
     canonical = _canonical_shape(shape)

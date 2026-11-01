@@ -65,7 +65,7 @@ Averaging over several segments is required for a meaningful estimate
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs or parameters are invalid. |
-| TypeError | if `nperseg` is a flag, a text or an array where a count goes. |
+| TypeError | if `nperseg` is a flag, a text or an array where a count goes, or `x` or `y` holds a text or a value that is not a real number. |
 
 ## CoherenceResult
 
@@ -205,4 +205,4 @@ returned alongside as a data-quality indicator.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs or parameters are invalid. |
-| TypeError | if `nperseg` is a flag, a text or an array where a count goes, or `estimator` is not a text. |
+| TypeError | if `nperseg` is a flag, a text or an array where a count goes, or `estimator` is not a text, or `x` or `y` holds a text or a value that is not a real number. |

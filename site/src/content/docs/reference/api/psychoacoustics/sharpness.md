@@ -87,4 +87,4 @@ Sharpness in acum from a specific-loudness pattern (DIN 45692 Eq. 1).
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `method` is not a text. |
+| TypeError | if `method` is not a text, or `specific` holds a text or a value that is not a real number. |

@@ -89,6 +89,7 @@ import numpy as np
 
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
+    real_array,
     require_choice,
     require_finite_array,
     require_non_negative,
@@ -444,7 +445,7 @@ def _levels(values: ArrayLike, name: str) -> NDArray[np.float64]:
 def _nominal(frequencies: ArrayLike, table: tuple[float, ...]) -> NDArray[np.intp]:
     """The index of each frequency in a nominal table, or an error."""
     freqs = require_positive_array(frequencies, "frequencies")
-    grid = np.asarray(table, dtype=np.float64)
+    grid = real_array(table, "table")
     ratio = freqs[:, None] / grid[None, :]
     hit = (ratio < _BAND_TOLERANCE) & (ratio > 1.0 / _BAND_TOLERANCE)
     if not np.all(hit.any(axis=1)):
@@ -499,7 +500,7 @@ def predict_floor_spectrum(
         ("floor_level_difference", floor_level_difference),
         ("mitigation_level_difference", mitigation_level_difference),
     ):
-        values = np.asarray(term, dtype=np.float64)
+        values = real_array(term, "ground_level_difference")
         if not np.all(np.isfinite(values)):
             msg = f"'{name}' must be finite."
             raise ValueError(msg)
@@ -610,13 +611,13 @@ def ground_transmission(
         damping, a damping ratio without a wave speed, or an exponent that
         does not broadcast to the bands.
     :raises TypeError: if ``damping_ratio``, ``distance_m`` or ``reference_distance_m``
-        is not a single number, or ``frequencies`` holds a text or a value that is not a
-        real number.
+        is not a single number, or ``exponent`` or ``frequencies`` holds a text or a
+        value that is not a real number.
     """
     freqs = require_finite_array(frequencies, "frequencies")
     distance = require_positive(distance_m, "distance_m")
     reference = require_positive(reference_distance_m, "reference_distance_m")
-    exponents = np.asarray(exponent, dtype=np.float64)
+    exponents = real_array(exponent, "exponent")
     if not np.all(np.isfinite(exponents)) or np.any(exponents < 0.0):
         msg = "'exponent' must be finite and not negative."
         raise ValueError(msg)

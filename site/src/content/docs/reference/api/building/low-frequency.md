@@ -142,7 +142,7 @@ brings a 63 Hz octave value.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `room` is neither name, if the band counts disagree, if the 50 Hz, 63 Hz or 80 Hz band is absent from `frequencies`, if a receiving room is missing either half of Clause 10.4, or if a source room brings either half of it. |
-| TypeError | if `room` is not a text. |
+| TypeError | if `room` is not a text, or `frequencies`, `levels` or `reverberation_time` holds a text or a value that is not a real number. |
 
 ## corner_level
 
@@ -188,6 +188,7 @@ own where-list.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the array is not two- or three-dimensional, is empty, or holds a non-finite value. |
+| TypeError | if `corner_levels` holds a text or a value that is not a real number. |
 
 ## low_frequency_level
 
@@ -223,6 +224,7 @@ level and can never fall further than $10 \lg(2/3) = -1,76$ dB below
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the two shapes differ, either is empty, or either holds a non-finite value. |
+| TypeError | if `corner` or `level` holds a text or a value that is not a real number. |
 
 ## low_frequency_procedure_applies
 

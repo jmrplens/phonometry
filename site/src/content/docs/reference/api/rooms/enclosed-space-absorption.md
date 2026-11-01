@@ -70,7 +70,7 @@ Equivalent absorption area of the air (Formula 2).
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `object_fraction` or `volume` is not a single number. |
+| TypeError | if `object_fraction` or `volume` is not a single number, or `m` holds a text or a value that is not a real number. |
 
 ## enclosed_space_reverberation
 
@@ -111,7 +111,7 @@ and the reverberation time (Formula 5).
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `air_condition` is not a text. |
+| TypeError | if `air_condition` is not a text, or `frequencies` holds a text or a value that is not a real number. |
 
 ## equivalent_absorption_area
 
@@ -136,6 +136,12 @@ Total equivalent sound absorption area (Formula 1).
 
 **Returns:** The total equivalent absorption area `A`, m2; a `float` when the coefficients, an object's entry and `air_area` are all numbers, a zero-dimensional array when each is one value and one of them is a zero-dimensional array, otherwise a per-band array.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `air_area`, `objects` or `surfaces` holds a text or a value that is not a real number. |
+
 ## hard_object_absorption
 
 ```python
@@ -154,6 +160,12 @@ furniture) whose equivalent area is not otherwise available.
 | `object_volume` | Volume `Vobj` of the hard object(s), m3. |
 
 **Returns:** The equivalent absorption area $A_{\text{obj}} = V_{\text{obj}}^{2/3}$, m2.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `object_volume` holds a text or a value that is not a real number. |
 
 ## object_fraction
 
@@ -176,7 +188,7 @@ Object fraction `psi` of an enclosed space (Formula 3).
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `volume` is not a single number. |
+| TypeError | if `volume` is not a single number, or `object_volumes` holds a text or a value that is not a real number. |
 
 ## reverberation_time
 
@@ -224,7 +236,7 @@ Reverberation time from the equivalent absorption area (Formula 5).
 | Exception | When |
 | :--- | :--- |
 | ValueError | if `absorption_area` is not positive and finite. |
-| TypeError | if `object_fraction`, `speed_of_sound` or `volume` is not a single number. |
+| TypeError | if `object_fraction`, `speed_of_sound` or `volume` is not a single number, or `absorption_area` holds a text or a value that is not a real number. |
 
 ## ReverberationResult
 

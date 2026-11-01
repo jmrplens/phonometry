@@ -122,6 +122,7 @@ import numpy as np
 from .._internal.frozen import OwnsArrays
 from .._internal.levels_math import energy_mean, energy_sum
 from .._internal.validation import (
+    real_array,
     require_choice,
     require_finite_array,
     require_positive,
@@ -231,8 +232,10 @@ def air_absorption_np_per_m(
     :raises ValueError: for a non-positive frequency, a temperature at or
         below absolute zero, a relative humidity outside [0, 100] % or a
         non-positive static pressure.
+    :raises TypeError: if ``frequencies`` holds a text or a value that is not a real
+        number.
     """
-    freqs = np.asarray(frequencies, dtype=np.float64)
+    freqs = real_array(frequencies, "frequencies")
     _validate(
         freqs,
         temperature_c,
@@ -592,7 +595,7 @@ class HighFrequencySoundPowerResult(OwnsArrays):
 
 def _mean_band_level(levels: ArrayLike, name: str) -> NDArray[np.float64]:
     """Formula (1): the energy mean over the rows of a 2-D input."""
-    arr = np.asarray(levels, dtype=np.float64)
+    arr = real_array(levels, name)
     if arr.ndim == _ORIENTATIONS_BY_BANDS:
         if arr.shape[0] == 0 or arr.shape[1] == 0 or not np.all(np.isfinite(arr)):
             msg = f"'{name}' must be a non-empty array of finite levels."
@@ -623,7 +626,7 @@ def _band_frequencies(frequencies: ArrayLike, n_bands: int) -> NDArray[np.float6
 
 def _per_band(value: ArrayLike, name: str, n_bands: int) -> NDArray[np.float64]:
     """A scalar or one value per band, as one value per band."""
-    arr = np.atleast_1d(np.asarray(value, dtype=np.float64))
+    arr = np.atleast_1d(real_array(value, name))
     if arr.ndim != 1 or arr.size not in (1, n_bands):
         msg = f"'{name}' must be a scalar or carry one value per band ({n_bands})."
         raise ValueError(msg)
@@ -669,8 +672,8 @@ def high_frequency_sound_power(
     :raises ValueError: for non-finite levels, a room constant that is not
         positive, frequencies that do not match the bands, or a temperature
         or static pressure ISO 3741 cannot correct from.
-    :raises TypeError: if ``frequencies`` holds a text or a value that is not a real
-        number.
+    :raises TypeError: if ``frequencies``, ``pressure_levels`` or ``room_constant``
+        holds a text or a value that is not a real number.
     """
     _validate_meteorology(temperature_c, static_pressure_kpa)
     mean_level = _mean_band_level(pressure_levels, "pressure_levels")
@@ -749,9 +752,10 @@ def high_frequency_sound_power_comparison(
         ``method='comparison'``, ``tonal`` set when ``noise_bandwidth_hz`` is
         given.
     :raises TypeError: for a band calibration given as the reference when
-        ``noise_bandwidth_hz`` asks for a tonal comparison, which needs levels,
-        a ``noise_bandwidth_hz`` that is not one number, or ``frequencies``
-        that hold a text or a value that is not a number.
+        ``noise_bandwidth_hz`` asks for a tonal comparison, which needs levels, a
+        ``noise_bandwidth_hz`` that is not one number, or ``frequencies`` that hold a
+        text or a value that is not a number, or ``pressure_levels`` or
+        ``reference_pressure_levels`` holds a text or a value that is not a real number.
     :raises ValueError: for non-finite levels, reference levels that do not
         span the same bands, a non-positive bandwidth, or a temperature or
         static pressure ISO 3741 cannot correct from.

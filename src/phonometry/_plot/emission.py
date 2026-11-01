@@ -7,7 +7,10 @@ from typing import TYPE_CHECKING, Any, Final, Literal
 
 import numpy as np
 
-from .._internal.validation import require_choice
+from .._internal.validation import (
+    real_array,
+    require_choice,
+)
 from .common import (
     _C_EDGE,
     _C_MUTED,
@@ -831,6 +834,8 @@ def plot_field_indicators(
     :param kwargs: Forwarded to the F2 curve ``plot`` call.
     :return: The axes.
     :raises ValueError: If the result carries no per-band data.
+    :raises TypeError: if ``dynamic_capability`` holds a text or a value that is not a
+        real number.
     """
     from .._i18n import localize_axes
 
@@ -858,7 +863,7 @@ def plot_field_indicators(
     )
     if dynamic_capability is not None:
         ld = np.broadcast_to(
-            np.asarray(dynamic_capability, dtype=np.float64), freqs.shape
+            real_array(dynamic_capability, "dynamic_capability"), freqs.shape
         )
         ax.plot(
             freqs,

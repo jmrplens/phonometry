@@ -127,7 +127,7 @@ bound (Equation (17.54)).
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `directivity` or `speech_to_noise` is not a single number. |
+| TypeError | if `directivity` or `speech_to_noise` is not a single number, or `distance` holds a text or a value that is not a real number. |
 
 ## COMMUNICATION_SNR_DB
 
@@ -172,7 +172,7 @@ Equation (17.50) at the listener across the table.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `directivity` or `distance` is not a single number. |
+| TypeError | if `directivity` or `distance` is not a single number, or `absorption_areas` or `talkers` holds a text or a value that is not a real number. |
 
 ## crowd_noise_level
 
@@ -222,6 +222,12 @@ counted per occupied table).
 | `sound_power_level` | Sound power level `Lw` of one talker, dB re 1 pW (default [`NORMAL_VOICE_POWER_LEVEL`](/phonometry/reference/api/rooms/crowd-noise/#normal_voice_power_level)). |
 
 **Returns:** The self-generated reverberant level, dB; a `float` when `talkers` and `absorption_area` are both numbers; an array of their broadcast shape when one is a sequence or an array, a zero-dimensional one included.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `absorption_area` or `talkers` holds a text or a value that is not a real number. |
 
 ## CrowdNoiseResult
 
@@ -340,7 +346,7 @@ across the table receives.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `directivity` is not a single number. |
+| TypeError | if `directivity` is not a single number, or `distance` holds a text or a value that is not a real number. |
 
 ## speech_to_noise_ratio
 
@@ -394,7 +400,7 @@ number of talkers appears: a busier room brings its own absorption with it.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `directivity` is not a single number. |
+| TypeError | if `directivity` is not a single number, or `absorption_per_table` or `distance` holds a text or a value that is not a real number. |
 
 ## TALKER_DIRECTIVITY
 

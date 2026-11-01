@@ -208,7 +208,7 @@ mobility instead of `Y_inf,i` yields the characteristic level
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive receiver or plate mobility. |
-| TypeError | if `plate_mobility` is not a single number. |
+| TypeError | if `plate_mobility` is not a single number, or `reception_plate_level` holds a text or a value that is not a real number. |
 
 ## installed_source_prediction
 
@@ -248,6 +248,7 @@ broadcast to the band count).
 | Exception | When |
 | :--- | :--- |
 | ValueError | if `paths` is empty, a path is missing a required key, or a per-band input matches neither one value nor the band count. |
+| TypeError | if `frequencies` holds a text or a value that is not a real number. |
 
 ## installed_structure_borne_power_level
 
@@ -272,6 +273,12 @@ $$
 | `coupling_term` | Coupling term `D_C,i` (per band), in dB. |
 
 **Returns:** The installed structure-borne power level `L_Ws,inst`, in dB.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `characteristic_power_level` or `coupling_term` holds a text or a value that is not a real number. |
 
 ## InstalledSourceResult
 
@@ -446,7 +453,7 @@ $$
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive area. |
-| TypeError | if `element_area` or `reference_area` is not a single number. |
+| TypeError | if `element_area` or `reference_area` is not a single number, or `adjustment_term`, `flanking_reduction_index` or `installed_power_level` holds a text or a value that is not a real number. |
 
 ## structure_to_airborne_adjustment
 
@@ -493,7 +500,7 @@ sign included.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive frequency, critical frequency, mass or radiation factor. |
-| TypeError | if `critical_frequency` or `mass_per_area` is not a single number. |
+| TypeError | if `critical_frequency` or `mass_per_area` is not a single number, or `frequency` or `radiation_factor` holds a text or a value that is not a real number. |
 
 ## TABLE_D1_QUANTITIES
 
@@ -559,6 +566,7 @@ of Table F.1 against its own printed "re 1 pN" caption.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive frequency. |
+| TypeError | if `force_level` or `frequency` holds a text or a value that is not a real number. |
 
 ## tapping_machine_coupling_term
 
@@ -597,7 +605,7 @@ mobility `Y_i`; Annex F Formulae (F.4) to (F.6b) estimate that `Y_i`.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive frequency, mobility or mass. |
-| TypeError | if `hammer_mass` is not a single number. |
+| TypeError | if `hammer_mass` is not a single number, or `frequency` or `receiver_mobility` holds a text or a value that is not a real number. |
 
 ## tapping_machine_force_level
 
@@ -656,7 +664,7 @@ bands the standard does not tabulate.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive frequency or a band set other than 1 or 3. |
-| TypeError | if `fraction` is not an integer (a word, a flag or a float). |
+| TypeError | if `fraction` is not an integer (a word, a flag or a float), or `frequency` holds a text or a value that is not a real number. |
 
 ## total_structure_borne_pressure_level
 
@@ -677,6 +685,12 @@ $$
 | `path_levels` | Path levels `L_n,s,ij`; sum is over the first axis (paths), broadcasting any trailing band axis. |
 
 **Returns:** The total normalised sound pressure level `L_n,s`, in dB.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `path_levels` holds a text or a value that is not a real number. |
 
 ## typical_element_mobility
 
@@ -767,4 +781,4 @@ which [`coupling_term`](/phonometry/reference/api/building/installed-structure-b
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an unknown row, a missing or surplus describing quantity, a `frequency` that the row does not take (or lacks), or a non-positive value. |
-| TypeError | if `structure` is not a text. |
+| TypeError | if `structure` is not a text, or `frequency` holds a text or a value that is not a real number. |

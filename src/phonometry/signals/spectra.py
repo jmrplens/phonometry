@@ -71,6 +71,7 @@ import numpy as np
 from .._internal.frozen import OwnsArrays
 from .._internal.types import own_window
 from .._internal.validation import (
+    real_array,
     require_choice,
     require_count,
     require_equal_counts,
@@ -146,7 +147,7 @@ def _validate_signal(
     same "must be one-dimensional" as a 2-D array, because these
     estimates are defined on one record.
     """
-    xa = np.asarray(x, dtype=np.float64)
+    xa = real_array(x, name)
     if xa.ndim != 1:
         msg = f"'{name}' must be one-dimensional."
         raise ValueError(msg)
@@ -529,7 +530,7 @@ def power_spectral_density(
     :raises ValueError: If the inputs or parameters are invalid.
     :raises TypeError: if ``confidence`` or ``overlap`` is not a single number, or
         ``nperseg`` is a flag, a text or an array where a count goes, or ``scaling`` is
-        not a text.
+        not a text, or ``x`` holds a text or a value that is not a real number.
     """
     xa = _validate_signal(x, "x")
     fs_v = _positive(resolve_fs(x, fs), "fs")
@@ -753,7 +754,8 @@ def cross_spectral_density(
     :return: A :class:`CrossSpectralDensityResult`.
     :raises ValueError: If the inputs or parameters are invalid.
     :raises TypeError: if ``overlap`` is not a single number, or ``nperseg`` is a flag,
-        a text or an array where a count goes, or ``scaling`` is not a text.
+        a text or an array where a count goes, or ``scaling`` is not a text, or ``x`` or
+        ``y`` holds a text or a value that is not a real number.
     """
     xa = _validate_signal(x, "x")
     ya = _validate_signal(y, "y")
@@ -999,7 +1001,8 @@ def coherent_output_spectrum(
     :return: A :class:`CoherentOutputSpectrumResult`.
     :raises ValueError: If the inputs or parameters are invalid.
     :raises TypeError: if ``overlap`` is not a single number, or ``nperseg`` is a flag,
-        a text or an array where a count goes, or ``scaling`` is not a text.
+        a text or an array where a count goes, or ``scaling`` is not a text, or ``x`` or
+        ``y`` holds a text or a value that is not a real number.
     """
     xa = _validate_signal(x, "x")
     ya = _validate_signal(y, "y")
@@ -1169,10 +1172,11 @@ def fractional_octave_smoothing(
     :return: Smoothed spectrum, same shape and domain as ``values``.
     :raises ValueError: If the inputs or parameters are invalid.
     :raises TypeError: if ``fraction`` is not a single number, or ``domain`` is not a
-        text.
+        text, or ``frequencies`` or ``values`` holds a text or a value that is not a
+        real number.
     """
-    f = np.asarray(frequencies, dtype=np.float64)
-    v = np.asarray(values, dtype=np.float64)
+    f = real_array(frequencies, "frequencies")
+    v = real_array(values, "values")
     _smoothing_validate(f, v)
     frac = _positive(fraction, "fraction")
     power = _smoothing_to_power(v, domain)

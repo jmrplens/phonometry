@@ -361,6 +361,7 @@ response measured at one-third-octave centres is read between them.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a frequency that is not finite and positive, or lies outside the measured range. |
+| TypeError | if `frequency_hz` holds a text or a value that is not a real number. |
 
 ### AmplifierFrequencyResponse.plot()
 
@@ -822,6 +823,12 @@ The magnitude of the impedance at any frequency, in ohms.
 | `frequency_hz` | Frequency or frequencies, in hertz, positive and finite. |
 
 **Returns:** $|Z|$ there, in ohms.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `frequency_hz` holds a text or a value that is not a real number. |
 
 ### LoopImpedance.corner_frequency_hz
 
@@ -1330,7 +1337,7 @@ it. Metal in the building, which Annex F describes, is not modelled.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive dimension, a non-finite coordinate or a point on the conductor, where a filament's field is infinite. |
-| TypeError | if `current_a`, `length_m` or `width_m` is not a single number, or `n_turns` is a flag, a text or an array where a count goes. |
+| TypeError | if `current_a`, `length_m` or `width_m` is not a single number, or `n_turns` is a flag, a text or an array where a count goes, or `x_m`, `y_m` or `z_m` holds a text or a value that is not a real number. |
 
 ## rectangular_loop_inductance
 

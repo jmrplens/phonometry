@@ -56,6 +56,7 @@ import numpy as np
 from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
     check_engine,
+    real_array,
     require_axis_count,
     require_choice,
     require_equal_counts,
@@ -227,7 +228,8 @@ class DuctPathResult(OwnsArrays):
             ``criterion`` is not one of the known families, or
             ``received_level`` carries a non-finite band.
         :raises TypeError: if ``criterion`` is not a text, or ``frequencies`` is a
-            single number where an array goes.
+            single number where an array goes, or ``received_level`` holds a text or a
+            value that is not a real number.
         """
         require_choice(self.criterion, "criterion", CRITERION_FAMILIES)
         require_ranks(
@@ -240,7 +242,7 @@ class DuctPathResult(OwnsArrays):
         require_same_length(
             self, "frequencies", "source_level", "room_effect", "received_level"
         )
-        received = np.asarray(self.received_level, dtype=np.float64)
+        received = real_array(self.received_level, "received_level")
         if not np.all(np.isfinite(received)):
             msg = (
                 "DuctPathResult: 'received_level' must contain only finite "
@@ -531,10 +533,11 @@ def duct_path(
     :raises ValueError: If the spectra do not share one value per band, the
         criterion family is unknown, or a key of ``section`` is not one of
         ``diameter_m``, ``width_m``, ``height_m`` or ``area``.
-    :raises TypeError: If an entry of ``elements`` is not a :class:`DuctElement`,
-        or ``criterion`` or a key of ``section`` is not a text.
+    :raises TypeError: If an entry of ``elements`` is not a :class:`DuctElement`, or
+        ``criterion`` or a key of ``section`` is not a text, or ``frequencies`` holds a
+        text or a value that is not a real number.
     """
-    f = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
+    f = np.atleast_1d(real_array(frequencies, "frequencies"))
     if f.ndim != 1 or f.size == 0:
         msg = "'frequencies' must be a non-empty 1-D array."
         raise ValueError(msg)

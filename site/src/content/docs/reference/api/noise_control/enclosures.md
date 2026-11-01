@@ -102,7 +102,7 @@ constant $R_\mathrm{i} = S_\mathrm{i} \alpha_\mathrm{i} / (1 - \alpha_\mathrm{i}
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `panel_transmission_loss` is none of the forms above, `model` is not a text, or `internal_area` or `external_area` is not one number. |
+| TypeError | if `panel_transmission_loss` is none of the forms above, `model` is not a text, or `internal_area` or `external_area` is not one number, or `frequencies` or `internal_absorption` holds a text or a value that is not a real number. |
 | ValueError | if an area is not positive, `internal_absorption` is not in `(0, 1)` or does not carry one value per band, a callable is given without `frequencies`, or `model` is unknown. |
 
 ## ENCLOSURE_MODELS
@@ -154,7 +154,7 @@ produces in the room and a noise-criterion curve.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `model` is not a text, or `external_area` or `internal_area` is not a single number. |
+| TypeError | if `model` is not a text, or `external_area` or `internal_area` is not a single number, or `frequencies`, `insertion_loss` or `internal_absorption` holds a text or a value that is not a real number. |
 
 ## EnclosureInsertionLossResult
 

@@ -57,6 +57,7 @@ import numpy as np
 from ..._internal.frozen import OwnsArrays, handed_over
 from ..._internal.rays import march_rays
 from ..._internal.validation import (
+    real_array,
     require_choice,
     require_count,
     require_equal_shapes,
@@ -140,8 +141,12 @@ class EffectiveSoundSpeedProfile(OwnsArrays):
         require_same_length(self, "heights_m", "speeds_of_sound", axis="profile node")
 
     def speed_at(self, height_m: ArrayLike) -> NDArray[np.float64]:
-        """Piecewise-linear effective sound speed at one or more heights."""
-        z = np.asarray(height_m, dtype=np.float64)
+        """Piecewise-linear effective sound speed at one or more heights.
+
+        :raises TypeError: if ``height_m`` holds a text or a value that is not a real
+            number.
+        """
+        z = real_array(height_m, "height_m")
         return np.asarray(
             np.interp(z, self.heights_m, self.speeds_of_sound), dtype=np.float64
         )
@@ -507,7 +512,8 @@ def atmospheric_ray_paths(
     :return: An :class:`AtmosphericRayResult`.
     :raises ValueError: If the inputs are invalid.
     :raises TypeError: if ``max_range`` or ``source_height_m`` is not a single number,
-        or ``n_steps`` is a flag, a text or an array where a count goes.
+        or ``n_steps`` is a flag, a text or an array where a count goes, or
+        ``launch_angles_deg`` holds a text or a value that is not a real number.
     """
     z_prof, c_prof = _clean_profile(profile)
     top = float(z_prof[-1])
@@ -521,7 +527,7 @@ def atmospheric_ray_paths(
     if require_count(n_steps, "n_steps", at_least=None) < _MIN_RAY_STEPS:
         msg = "'n_steps' must be at least 2."
         raise ValueError(msg)
-    angles = np.asarray(launch_angles_deg, dtype=np.float64).ravel()
+    angles = real_array(launch_angles_deg, "launch_angles_deg").ravel()
     if angles.size == 0 or not np.all(np.isfinite(angles)):
         msg = "'launch_angles_deg' must be finite and non-empty."
         raise ValueError(msg)

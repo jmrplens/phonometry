@@ -39,6 +39,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from .._internal.validation import real_array
 from ._i18n import decimal_comma, format_number, t
 from ._layout import (
     _ACCENT_HEX,
@@ -124,7 +125,7 @@ def _representative(
     back to the peak value across the available frequencies (flag ``False``),
     reported together with its frequency.
     """
-    vals = np.asarray(values, dtype=np.float64)
+    vals = real_array(values, "values")
     idx = _handicap_indices(frequencies)
     if len(idx) == len(_HANDICAP_SET):
         return True, float(vals[idx].mean()), 0.0

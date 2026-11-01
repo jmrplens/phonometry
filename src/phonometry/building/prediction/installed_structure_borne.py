@@ -92,6 +92,7 @@ if TYPE_CHECKING:
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     check_engine,
+    real_array,
     require_band_fraction,
     require_choice,
     require_count,
@@ -162,7 +163,7 @@ def _positive_values(values: ArrayLike, name: str) -> np.ndarray:
 
     :raises ValueError: for a non-finite or non-positive value.
     """
-    arr = np.asarray(values, dtype=np.float64)
+    arr = real_array(values, name)
     if not np.all(np.isfinite(arr)) or np.any(arr <= 0.0):
         msg = f"'{name}' must be finite and strictly positive."
         raise ValueError(msg)
@@ -598,7 +599,8 @@ def typical_element_mobility(
     :raises ValueError: for an unknown row, a missing or surplus describing
         quantity, a ``frequency`` that the row does not take (or lacks), or a
         non-positive value.
-    :raises TypeError: if ``structure`` is not a text.
+    :raises TypeError: if ``structure`` is not a text, or ``frequency`` holds a text or
+        a value that is not a real number.
     """
     row = require_choice(structure, "structure", tuple(TABLE_D1_QUANTITIES))
     args = _table_d1_arguments(
@@ -755,7 +757,8 @@ def tapping_machine_force_level_estimate(
         "re 1 pN"; see ``docs/ERRATA.md``).
     :raises ValueError: for a non-positive frequency or a band set other than
         1 or 3.
-    :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a float).
+    :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a float), or
+        ``frequency`` holds a text or a value that is not a real number.
     """
     coefficient = _TAPPING_MACHINE_COEFFICIENT[
         require_band_fraction(fraction, "fraction")
@@ -790,9 +793,11 @@ def tapping_machine_characteristic_power_level(
         :func:`tapping_machine_force_level_estimate`).
     :return: The characteristic power level ``L_Ws,c``, in dB re 1 pW.
     :raises ValueError: for a non-positive frequency.
+    :raises TypeError: if ``force_level`` or ``frequency`` holds a text or a value that
+        is not a real number.
     """
     f = _positive_values(frequency, "frequency")
-    lf = np.asarray(force_level, dtype=np.float64)
+    lf = real_array(force_level, "force_level")
     return np.asarray(lf - 5.0 - 10.0 * np.log10(f), dtype=np.float64)
 
 
@@ -822,7 +827,8 @@ def tapping_machine_coupling_term(
         D.1.3 and ISO 10140-5).
     :return: The coupling term ``D_C,i``, in dB.
     :raises ValueError: for a non-positive frequency, mobility or mass.
-    :raises TypeError: if ``hammer_mass`` is not a single number.
+    :raises TypeError: if ``hammer_mass`` is not a single number, or ``frequency`` or
+        ``receiver_mobility`` holds a text or a value that is not a real number.
     """
     f = _positive_values(frequency, "frequency")
     y_i = _positive_values(receiver_mobility, "receiver_mobility")
@@ -909,7 +915,8 @@ def structure_to_airborne_adjustment(
     :raises ValueError: for a non-positive frequency, critical frequency, mass
         or radiation factor.
     :raises TypeError: if ``critical_frequency`` or ``mass_per_area`` is not a single
-        number.
+        number, or ``frequency`` or ``radiation_factor`` holds a text or a value that is
+        not a real number.
     """
     f = _positive_values(frequency, "frequency")
     f_c = require_positive(critical_frequency, "critical_frequency")
@@ -955,10 +962,11 @@ def installed_power_from_reception_plate(
         level).
     :return: The mobility-corrected power level, in dB re 1 pW.
     :raises ValueError: for a non-positive receiver or plate mobility.
-    :raises TypeError: if ``plate_mobility`` is not a single number.
+    :raises TypeError: if ``plate_mobility`` is not a single number, or
+        ``reception_plate_level`` holds a text or a value that is not a real number.
     """
     plate_mobility = require_positive(plate_mobility, "plate_mobility")
-    lw = np.asarray(reception_plate_level, dtype=np.float64)
+    lw = real_array(reception_plate_level, "reception_plate_level")
     y_i = np.abs(np.asarray(receiver_mobility, dtype=np.complex128))
     if not np.all(np.isfinite(y_i)) or np.any(y_i <= 0.0):
         msg = "'receiver_mobility' must be finite and non-zero."
@@ -981,9 +989,11 @@ def installed_structure_borne_power_level(
         docstring), **not** the raw plate-injected Formula (14) level.
     :param coupling_term: Coupling term ``D_C,i`` (per band), in dB.
     :return: The installed structure-borne power level ``L_Ws,inst``, in dB.
+    :raises TypeError: if ``characteristic_power_level`` or ``coupling_term`` holds a
+        text or a value that is not a real number.
     """
-    lw = np.asarray(characteristic_power_level, dtype=np.float64)
-    dc = np.asarray(coupling_term, dtype=np.float64)
+    lw = real_array(characteristic_power_level, "characteristic_power_level")
+    dc = real_array(coupling_term, "coupling_term")
     return np.asarray(lw - dc, dtype=np.float64)
 
 
@@ -1011,13 +1021,15 @@ def structure_borne_pressure_level_path(
     :param reference_area: Reference area :math:`S_0 = A_0` (Default: 10 m^2).
     :return: The normalised path sound pressure level ``L_n,s,ij``, in dB.
     :raises ValueError: for a non-positive area.
-    :raises TypeError: if ``element_area`` or ``reference_area`` is not a single number.
+    :raises TypeError: if ``element_area`` or ``reference_area`` is not a single number,
+        or ``adjustment_term``, ``flanking_reduction_index`` or
+        ``installed_power_level`` holds a text or a value that is not a real number.
     """
     element_area = require_positive(element_area, "element_area")
     reference_area = require_positive(reference_area, "reference_area")
-    lw = np.asarray(installed_power_level, dtype=np.float64)
-    dsa = np.asarray(adjustment_term, dtype=np.float64)
-    rij = np.asarray(flanking_reduction_index, dtype=np.float64)
+    lw = real_array(installed_power_level, "installed_power_level")
+    dsa = real_array(adjustment_term, "adjustment_term")
+    rij = real_array(flanking_reduction_index, "flanking_reduction_index")
     lp = (
         lw
         - dsa
@@ -1038,8 +1050,10 @@ def total_structure_borne_pressure_level(path_levels: ArrayLike) -> np.ndarray:
     :param path_levels: Path levels ``L_n,s,ij``; sum is over the first axis
         (paths), broadcasting any trailing band axis.
     :return: The total normalised sound pressure level ``L_n,s``, in dB.
+    :raises TypeError: if ``path_levels`` holds a text or a value that is not a real
+        number.
     """
-    lp = np.asarray(path_levels, dtype=np.float64)
+    lp = real_array(path_levels, "path_levels")
     return np.asarray(
         10.0 * np.log10(np.sum(10.0 ** (0.1 * lp), axis=0)), dtype=np.float64
     )
@@ -1187,9 +1201,7 @@ def _widest_band_count(n_bands: int, paths: Sequence[Mapping[str, Any]]) -> int:
             msg = f"path {k} is missing required key(s): {', '.join(missing)}."
             raise ValueError(msg)
         for key in _PER_BAND_PATH_KEYS:
-            n_bands = max(
-                n_bands, np.atleast_1d(np.asarray(p[key], dtype=np.float64)).size
-            )
+            n_bands = max(n_bands, np.atleast_1d(real_array(p[key], "paths")).size)
     return n_bands
 
 
@@ -1204,7 +1216,7 @@ def _path_pressure_levels(
     rows = []
     for k, p in enumerate(paths):
         for key in _PER_BAND_PATH_KEYS:
-            values = np.atleast_1d(np.asarray(p[key], dtype=np.float64))
+            values = np.atleast_1d(real_array(p[key], "paths"))
             if values.size not in (1, n_bands):
                 msg = (
                     f"path {k}: {key!r} has {values.size} bands, expected 1 "
@@ -1254,6 +1266,8 @@ def installed_source_prediction(
     :raises ValueError: if ``paths`` is empty, a path is missing a required
         key, or a per-band input matches neither one value nor the band
         count.
+    :raises TypeError: if ``frequencies`` holds a text or a value that is not a real
+        number.
     """
     if not paths:
         msg = "'paths' must contain at least one transmission path."
@@ -1282,7 +1296,7 @@ def installed_source_prediction(
     freq = (
         None
         if frequencies is None
-        else np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
+        else np.atleast_1d(real_array(frequencies, "frequencies"))
     )
     if freq is not None and freq.size != n_bands:
         msg = (

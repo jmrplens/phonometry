@@ -72,6 +72,7 @@ import numpy as np
 from .._internal.frozen import OwnsArrays, given_repr
 from .._internal.validation import (
     check_engine,
+    real_array,
     require_choice,
     require_count,
     require_equal_counts,
@@ -261,7 +262,7 @@ def residual_index_limits(
     :raises ValueError: If ``device`` is unknown, ``spacing_m`` is not positive
         or a frequency is not a tabulated band.
     :raises TypeError: if ``spacing_m`` is not a single number, or ``device`` is not a
-        text.
+        text, or ``frequencies`` holds a text or a value that is not a real number.
     """
     require_choice(device, "device", ("probe", "processor", "instrument"))
     col1, col2 = _check_device(device)
@@ -272,7 +273,7 @@ def residual_index_limits(
     else:
         wanted = [
             _match_band(float(f))
-            for f in np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
+            for f in np.atleast_1d(real_array(frequencies, "frequencies"))
         ]
     freqs = np.asarray(wanted, dtype=np.float64)
     class1 = np.asarray([rows[f][col1] + offset for f in wanted], dtype=np.float64)
@@ -388,11 +389,12 @@ def verify_intensity_class(
     :raises ValueError: If the inputs disagree in length, a frequency is not a
         tabulated band, a band is repeated, or ``device``/``spacing_m`` are
         invalid.
-    :raises TypeError: if ``device`` is not a text.
+    :raises TypeError: if ``device`` is not a text, or ``frequencies`` or
+        ``residual_index`` holds a text or a value that is not a real number.
     """
     require_choice(device, "device", ("probe", "processor", "instrument"))
-    measured = np.atleast_1d(np.asarray(residual_index, dtype=np.float64))
-    supplied = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
+    measured = np.atleast_1d(real_array(residual_index, "residual_index"))
+    supplied = np.atleast_1d(real_array(frequencies, "frequencies"))
     if measured.ndim != 1 or supplied.ndim != 1:
         msg = "verify_intensity_class expects 1D per-band arrays."
         raise ValueError(msg)
@@ -720,7 +722,7 @@ def _plane_wave_phase_deg(
     if not np.isfinite(c) or c <= 0.0:
         msg = "'speed_of_sound' must be a positive, finite speed of sound."
         raise ValueError(msg)
-    freq = np.asarray(frequency, dtype=np.float64)
+    freq = real_array(frequency, "frequency")
     if np.any(~np.isfinite(freq)) or np.any(freq <= 0.0):
         msg = "'frequency' must be finite and positive."
         raise ValueError(msg)
@@ -759,14 +761,16 @@ def phase_mismatch_from_residual_index(
         :class:`numpy.ndarray` (0-d for scalar inputs).
     :raises ValueError: If ``spacing_m``, ``speed_of_sound`` or ``frequency`` are not positive
         and finite, or if ``residual_index`` is not finite.
-    :raises TypeError: if ``spacing_m`` or ``speed_of_sound`` is not a single number.
+    :raises TypeError: if ``spacing_m`` or ``speed_of_sound`` is not a single number, or
+        ``frequency`` or ``residual_index`` holds a text or a value that is not a real
+        number.
     """
-    index = np.asarray(residual_index, dtype=np.float64)
+    index = real_array(residual_index, "residual_index")
     if np.any(~np.isfinite(index)):
         msg = "'residual_index' must be finite."
         raise ValueError(msg)
     kd_deg = _plane_wave_phase_deg(
-        np.asarray(frequency, dtype=np.float64), spacing_m, speed_of_sound
+        real_array(frequency, "frequency"), spacing_m, speed_of_sound
     )
     return np.asarray(kd_deg * 10.0 ** (-index / 10.0), dtype=np.float64)
 
@@ -806,13 +810,15 @@ def residual_index_from_phase_mismatch(
         scalar inputs).
     :raises ValueError: If ``phase_mismatch_deg`` is not positive and finite, or
         if ``spacing_m``, ``speed_of_sound`` or ``frequency`` are not positive and finite.
-    :raises TypeError: if ``spacing_m`` or ``speed_of_sound`` is not a single number.
+    :raises TypeError: if ``spacing_m`` or ``speed_of_sound`` is not a single number, or
+        ``frequency`` or ``phase_mismatch_deg`` holds a text or a value that is not a
+        real number.
     """
-    phi = np.asarray(phase_mismatch_deg, dtype=np.float64)
+    phi = real_array(phase_mismatch_deg, "phase_mismatch_deg")
     if np.any(~np.isfinite(phi)) or np.any(phi <= 0.0):
         msg = "'phase_mismatch_deg' must be finite and positive, in degrees."
         raise ValueError(msg)
     kd_deg = _plane_wave_phase_deg(
-        np.asarray(frequency, dtype=np.float64), spacing_m, speed_of_sound
+        real_array(frequency, "frequency"), spacing_m, speed_of_sound
     )
     return np.asarray(10.0 * np.log10(kd_deg / phi), dtype=np.float64)

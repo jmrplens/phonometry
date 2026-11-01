@@ -76,7 +76,12 @@ if TYPE_CHECKING:
 
 from ..._internal.frozen import OwnsArrays, reduce_with_plain_rows
 from ..._internal.types import as_float_or_array
-from ..._internal.validation import require_ranks, require_same_length, require_scalar
+from ..._internal.validation import (
+    real_array,
+    require_ranks,
+    require_same_length,
+    require_scalar,
+)
 from ...metrology.reference_values import REFERENCE_VALUES
 from .moore_glasberg import (
     _ERB_C1,
@@ -470,7 +475,7 @@ class MooreGlasbergTimeVaryingLoudness(OwnsArrays):
                 f"{self.n_max!r}."
             )
             raise ValueError(msg)
-        long_term = np.asarray(self.long_term_loudness, dtype=np.float64)
+        long_term = real_array(self.long_term_loudness, "long_term_loudness")
         peak = float(long_term.max()) if long_term.size else 0.0
         if not math.isclose(self.n_max, peak, rel_tol=0.0, abs_tol=1e-9):
             msg = (
@@ -617,7 +622,7 @@ def _loudness_level(
     loudness: NDArray[np.float64] | float,
 ) -> NDArray[np.float64] | float:
     """Loudness level L_N in phon from loudness N in sone (invert Table 5)."""
-    values = np.asarray(loudness, dtype=np.float64)
+    values = real_array(loudness, "loudness")
     out = np.zeros_like(values)
     positive = values > 0.0
     out[positive] = np.interp(np.log10(values[positive]), _LOG_T5_SONE, _T5_PHON)
@@ -741,7 +746,7 @@ def _as_two_channels(
     signal: Signal | ArrayLike, presentation: str
 ) -> tuple[np.ndarray, np.ndarray | None]:
     """Split the input into left and (optional) right calibrated pressure signals."""
-    array = apply_calibration(signal, np.asarray(signal, dtype=np.float64))
+    array = apply_calibration(signal, real_array(signal, "x"))
     # The number is a count of array axes, not a quantity.
     if array.ndim == 2:  # noqa: PLR2004
         if array.shape[1] == _N_EARS and array.shape[0] != _N_EARS:
@@ -813,7 +818,7 @@ def loudness_moore_glasberg_time(
         loudness is reported.
     :return: A :class:`MooreGlasbergTimeVaryingLoudness`.
     :raises TypeError: if ``fs`` is not a single number, or ``presentation`` is not a
-        text.
+        text, or ``x`` holds a text or a value that is not a real number.
 
     A steady 1 kHz tone at 40 dB SPL, binaural, free field, yields a peak
     long-term loudness of 1.000 sone (40 phon) by definition of the sone.

@@ -107,6 +107,7 @@ import numpy as np
 from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, read_only
 from .._internal.validation import (
+    real_array,
     require_choice,
     require_count,
     require_positive,
@@ -242,8 +243,10 @@ def program_signal_filter(frequencies: ArrayLike) -> NDArray[np.complex128]:
     :return: The complex response, dimensionless, with the shape of
         ``frequencies``.
     :raises ValueError: If a frequency is not a positive finite number.
+    :raises TypeError: if ``frequencies`` holds a text or a value that is not a real
+        number.
     """
-    f = np.asarray(frequencies, dtype=np.float64)
+    f = real_array(frequencies, "frequencies")
     if f.size and not (np.all(np.isfinite(f)) and np.all(f > 0.0)):
         msg = "'frequencies' must hold positive, finite frequencies."
         raise ValueError(msg)
@@ -492,6 +495,8 @@ class ProgramSignalCheck(OwnsArrays):
 
         :raises ValueError: if a frequency is not a nominal band of Table II,
             or the levels do not hold one finite value per band.
+        :raises TypeError: if ``band_levels`` holds a text or a value that is not a real
+            number.
         """
         for value in np.atleast_1d(self.frequencies):
             if float(value) not in SIMULATED_PROGRAM_SPECTRUM:
@@ -500,7 +505,7 @@ class ProgramSignalCheck(OwnsArrays):
                     "band of IEC 60268-1 Table II."
                 )
                 raise ValueError(msg)
-        levels = np.asarray(self.band_levels, dtype=np.float64)
+        levels = real_array(self.band_levels, "band_levels")
         if levels.shape != np.shape(self.frequencies) or not np.all(
             np.isfinite(levels)
         ):
@@ -638,9 +643,11 @@ def check_program_signal(
     :raises ValueError: If the inputs differ in length, a frequency is not a
         band of Table II or appears twice, a level is not finite, or fewer than
         two bands are given.
+    :raises TypeError: if ``band_levels`` or ``frequencies`` holds a text or a value
+        that is not a real number.
     """
-    f = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
-    levels = np.atleast_1d(np.asarray(band_levels, dtype=np.float64))
+    f = np.atleast_1d(real_array(frequencies, "frequencies"))
+    levels = np.atleast_1d(real_array(band_levels, "band_levels"))
     if f.ndim != 1 or levels.shape != f.shape:
         msg = "'frequencies' and 'band_levels' must be 1-D and of equal length."
         raise ValueError(msg)

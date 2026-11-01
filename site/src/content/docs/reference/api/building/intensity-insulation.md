@@ -121,7 +121,7 @@ $R_{I,\mathrm{M}} = R_I + K_\mathrm{c}$ (Clause 3.10). Two forms are available:
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `frequencies` is not positive/finite, if only one of `boundary_area` / `volume` is supplied, or if either is not positive. |
-| TypeError | if `boundary_area` or `volume` is not a single number. |
+| TypeError | if `boundary_area` or `volume` is not a single number, or `frequencies` holds a text or a value that is not a real number. |
 
 ## intensity_element_normalized_difference
 
@@ -243,7 +243,7 @@ with [`subarea_intensity_level`](/phonometry/reference/api/building/intensity-in
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the band counts differ, if `measurement_area` / `area` are not positive, or if inputs are non-finite. |
-| TypeError | if `area` or `measurement_area` is not a single number. |
+| TypeError | if `area` or `measurement_area` is not a single number, or `kc` holds a text or a value that is not a real number. |
 
 ## IntensityElementNormalizedResult
 
@@ -538,7 +538,7 @@ that range and nowhere else.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-finite or non-positive frequency, surface mass, area below 1 m², or a climate the formulas cannot be evaluated in. |
-| TypeError | if `area`, `static_pressure_pa`, `surface_mass` or `temperature_c` is not a single number. |
+| TypeError | if `area`, `static_pressure_pa`, `surface_mass` or `temperature_c` is not a single number, or `frequencies` holds a text or a value that is not a real number. |
 
 ## low_frequency_element_normalized_difference
 
@@ -591,7 +591,7 @@ disagree on the page, and this is the one that agrees with the physics.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if the band counts differ, if the measurement area is not positive, if `n_elements` is not a positive integer, if any level is non-finite, or if `frequencies` carries a band outside the range this part is defined for. |
-| TypeError | if `measurement_area` is not a single number, or `n_elements` is a flag, a text or an array where a count goes. |
+| TypeError | if `measurement_area` is not a single number, or `n_elements` is a flag, a text or an array where a count goes, or `frequencies` holds a text or a value that is not a real number. |
 
 ## low_frequency_intensity_reduction
 
@@ -667,7 +667,7 @@ energy-averaged. Sub-areas scanned separately are combined first with
 | Exception | When |
 | :--- | :--- |
 | ValueError | if the band counts differ, if either area is not positive, if any level is non-finite, or if `frequencies` carries a band outside the range this part is defined for. |
-| TypeError | if `area` or `measurement_area` is not a single number. |
+| TypeError | if `area` or `measurement_area` is not a single number, or `frequencies` holds a text or a value that is not a real number. |
 
 ## LowFrequencyElementResult
 
@@ -860,6 +860,7 @@ unsigned area sum.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the shapes are inconsistent or values non-finite, if any subarea area is zero, or if the signed energy sum of Formula (11) is not positive in some band (the reverse flows cancel or exceed the forward flow, so no level exists). |
+| TypeError | if `l_in` or `measurement_area` holds a text or a value that is not a real number. |
 
 ## SubareaIntensityLevel
 
@@ -916,3 +917,4 @@ must exceed $F_{pI} + 10$ dB (Clause 4.1).
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the shapes differ or contain non-finite values. |
+| TypeError | if `l_in` or `lp` holds a text or a value that is not a real number. |

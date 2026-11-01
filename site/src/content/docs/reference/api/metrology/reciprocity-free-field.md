@@ -114,7 +114,7 @@ $\mathrm{e}^{\alpha r}$ before it is inverted.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for fewer than three distances, columns of different lengths, values that are not positive and finite, or distances that are all the same. |
-| TypeError | if `attenuation_np_per_m` is not a single number. |
+| TypeError | if `attenuation_np_per_m` is not a single number, or `distances` or `sound_pressures_pa` holds a text or a value that is not a real number. |
 
 ## AcousticCenter
 

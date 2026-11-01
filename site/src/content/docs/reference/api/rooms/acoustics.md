@@ -165,6 +165,7 @@ those two figures sit against the exact IEC 61260 band edges.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `fraction` is not one the clause prints a coefficient for, or a centre frequency is not positive and finite. |
+| TypeError | if `center` holds a text or a value that is not a real number. |
 
 ## FILTER_BANDWIDTH_FRACTION
 
@@ -254,7 +255,7 @@ filtering is time-reversed, which is what
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a bandwidth is not positive and finite, or the detector time is not a finite time of zero seconds or more. |
-| TypeError | if `detector_time` is not a single number. |
+| TypeError | if `detector_time` is not a single number, or `bandwidth` holds a text or a value that is not a real number. |
 
 ## reverberation_time_standard_deviation
 
@@ -306,7 +307,7 @@ larger absolute uncertainty and a smaller relative one.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `evaluation_range` is not one the clause prints coefficients for, if `decays` or `positions` is below one, or if a reverberation time or bandwidth is not positive and finite. An infinite `decays` is taken: it is the limit 7.2 declines to use. |
-| TypeError | if `evaluation_range` is not a single number. |
+| TypeError | if `evaluation_range` is not a single number, or `bandwidth`, `decays`, `positions` or `reverberation_time` holds a text or a value that is not a real number. |
 
 ## room_parameters
 

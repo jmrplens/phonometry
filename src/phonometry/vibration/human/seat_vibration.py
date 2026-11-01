@@ -60,7 +60,10 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from ..._internal.display import RichDisplay
-from ..._internal.validation import require_positive
+from ..._internal.validation import (
+    real_array,
+    require_positive,
+)
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -144,10 +147,11 @@ def mean_of_test_runs(
         two are given, if any is not positive and finite, if the tolerance is
         not positive, or if any value lies outside the tolerance band around
         the mean.
-    :raises TypeError: if ``relative_tolerance`` is not a single number.
+    :raises TypeError: if ``relative_tolerance`` is not a single number, or ``values``
+        holds a text or a value that is not a real number.
     """
     tol = require_positive(relative_tolerance, "relative_tolerance")
-    runs = np.atleast_1d(np.asarray(values, dtype=np.float64))
+    runs = np.atleast_1d(real_array(values, "values"))
     if runs.ndim != 1:
         # A nested shape passes the size check and then fails deep inside the
         # result, where the message names neither the argument nor the test.
@@ -330,9 +334,11 @@ def seat_transmission(
     :return: The test, as a :class:`SeatTransmissionResult`.
     :raises ValueError: For anything :func:`mean_of_test_runs` refuses, or if
         the two sets do not hold the same number of runs.
+    :raises TypeError: if ``platform_runs`` or ``seat_runs`` holds a text or a value
+        that is not a real number.
     """
-    seat = np.atleast_1d(np.asarray(seat_runs, dtype=np.float64))
-    platform = np.atleast_1d(np.asarray(platform_runs, dtype=np.float64))
+    seat = np.atleast_1d(real_array(seat_runs, "seat_runs"))
+    platform = np.atleast_1d(real_array(platform_runs, "platform_runs"))
     if seat.size != platform.size:
         msg = (
             "The seat and the platform are measured in the same runs; got "

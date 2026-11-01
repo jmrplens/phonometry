@@ -46,6 +46,12 @@ $\alpha = 4s/(s + 1)^2$.
 
 **Returns:** Absorption coefficient `alpha` in `[0, 1]`.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `swr` holds a text or a value that is not a real number. |
+
 ## standing_wave_normalized_impedance
 
 ```python
@@ -93,6 +99,12 @@ $\Delta L = L_{\max} - L_{\min}$ in decibels.
 
 **Returns:** Standing-wave ratio `s` (>= 1).
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `level_difference` holds a text or a value that is not a real number. |
+
 ## standing_wave_reflection
 
 ```python
@@ -120,6 +132,12 @@ $\phi = \pi (4 x_{\text{min},1} / \lambda_0 - 1)$ (Eq. (20)).
 
 **Returns:** Complex reflection factor `r`.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `first_min_distance` or `wavelength` holds a text or a value that is not a real number. |
+
 ## standing_wave_reflection_magnitude
 
 ```python
@@ -137,3 +155,9 @@ $|r| = (s - 1) / (s + 1)$.
 | `swr` | Standing-wave ratio `s` (>= 1). |
 
 **Returns:** Reflection magnitude `|r|` in `[0, 1]`.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `swr` holds a text or a value that is not a real number. |

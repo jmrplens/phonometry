@@ -139,6 +139,7 @@ length and does not depend on the pressure, unlike SAE ARP 5534.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if a length is negative or not finite. |
+| TypeError | if `path_length_m` holds a text or a value that is not a real number. |
 
 ### ARP866AAttenuation.plot()
 

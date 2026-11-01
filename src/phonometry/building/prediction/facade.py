@@ -74,6 +74,7 @@ import numpy as np
 
 from ..._internal.frozen import OwnsArrays, read_only, reduce_with_plain_rows
 from ..._internal.validation import (
+    real_array,
     require_axis_count,
     require_choice,
     require_count,
@@ -117,7 +118,7 @@ _T0 = 0.5
 
 def _as_array(value: ArrayLike, name: str) -> np.ndarray:
     """Return *value* as a 1-D float array, raising on non-finite entries."""
-    arr = np.atleast_1d(np.asarray(value, dtype=np.float64))
+    arr = np.atleast_1d(real_array(value, name))
     if not np.all(np.isfinite(arr)):
         msg = f"'{name}' must contain only finite numbers."
         raise ValueError(msg)
@@ -542,7 +543,8 @@ def facade_sound_reduction(
         result for plotting; must match the element band count.
     :return: A :class:`FacadePredictionResult`.
     :raises TypeError: if ``area`` or ``volume`` is not a single number, or ``fraction``
-        is not an integer (a word, a flag or a float).
+        is not an integer (a word, a flag or a float), or ``frequencies`` holds a text
+        or a value that is not a real number.
     """
     delta = float(delta_l_fs)
     require_scalar(volume, "volume")
@@ -553,7 +555,7 @@ def facade_sound_reduction(
     r_prime, element_r = _apparent_reduction(
         elements, float(area), "facade_sound_reduction"
     )
-    bands = None if frequencies is None else np.asarray(frequencies, dtype=np.float64)
+    bands = None if frequencies is None else real_array(frequencies, "frequencies")
     if bands is not None:
         require_equal_counts(
             "facade_sound_reduction",
@@ -610,7 +612,8 @@ def radiated_sound_power(
     :param octave_bands: Optional octave-band centre frequencies (Hz) matching
         the per-band data; enables the A-weighted single number.
     :return: A :class:`RadiatedPowerResult`.
-    :raises TypeError: if ``area`` is not a single number.
+    :raises TypeError: if ``area`` is not a single number, or ``lp_in`` or
+        ``octave_bands`` holds a text or a value that is not a real number.
     """
     r_prime, _ = _apparent_reduction(elements, float(area), "radiated_sound_power")
     if r_prime_cap is not None:
@@ -621,7 +624,7 @@ def radiated_sound_power(
     require_equal_counts(
         "radiated_sound_power", {"lp_in": lp.size, "r_prime": r_prime.size}
     )
-    bands = None if octave_bands is None else np.asarray(octave_bands, dtype=np.float64)
+    bands = None if octave_bands is None else real_array(octave_bands, "octave_bands")
     if bands is not None:
         require_equal_counts(
             "radiated_sound_power",
@@ -793,9 +796,11 @@ def outdoor_level(
     :param l_w: Radiated power level(s) ``LW`` (dB), scalar or per side.
     :param attenuation: Attenuation(s) ``Atot`` (dB), scalar or per side.
     :return: Exterior sound pressure level ``Lp`` in dB.
+    :raises TypeError: if ``attenuation`` or ``l_w`` holds a text or a value that is not
+        a real number.
     """
-    lw = np.atleast_1d(np.asarray(l_w, dtype=np.float64))
-    at = np.atleast_1d(np.asarray(attenuation, dtype=np.float64))
+    lw = np.atleast_1d(real_array(l_w, "l_w"))
+    at = np.atleast_1d(real_array(attenuation, "attenuation"))
     try:
         diff = lw - at  # NumPy broadcasting (scalar vs array is allowed)
     except ValueError as exc:

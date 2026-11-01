@@ -20,7 +20,10 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from ..._internal.validation import require_scalar
+from ..._internal.validation import (
+    real_array,
+    require_scalar,
+)
 from ..common import (
     _C_EDGE,
     _C_MUTED,
@@ -178,12 +181,13 @@ def plot_microphone_positions(
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the microphone ``scatter``.
     :return: The 3-D axes.
-    :raises TypeError: if ``radius`` is not a single number.
+    :raises TypeError: if ``radius`` is not a single number, or ``positions`` holds a
+        text or a value that is not a real number.
     """
     from ..._i18n import localize_axes
 
     _check_language(language)
-    pts = np.asarray(positions, dtype=np.float64)
+    pts = real_array(positions, "positions")
     # The number is a count of array axes, not a quantity.
     if pts.ndim != 2 or pts.shape[1] != 3 or pts.shape[0] == 0:  # noqa: PLR2004
         msg = "'positions' must have shape (N, 3) with N >= 1."

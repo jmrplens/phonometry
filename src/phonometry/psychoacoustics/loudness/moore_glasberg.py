@@ -54,6 +54,7 @@ if TYPE_CHECKING:
 from ..._internal.frozen import OwnsArrays
 from ..._internal.utils import _typesignal
 from ..._internal.validation import (
+    real_array,
     require_1d_signal,
     require_choice,
     require_ranks,
@@ -868,7 +869,7 @@ def _as_components(
     components: ArrayLike,
 ) -> tuple[np.ndarray, np.ndarray]:
     """Split a sequence of (frequency, level) pairs into arrays and validate."""
-    array = np.asarray(components, dtype=np.float64)
+    array = real_array(components, "components")
     if array.size == 0:
         return np.empty(0, dtype=np.float64), np.empty(0, dtype=np.float64)
     # The number is a count of array axes, not a quantity.
@@ -913,7 +914,8 @@ def loudness_moore_glasberg_from_spectrum(
         equivalent alias: the same sound at both ears) or ``"monaural"``
         (one ear only).
     :return: A :class:`MooreGlasbergLoudness`.
-    :raises TypeError: if ``field`` or ``presentation`` is not a text.
+    :raises TypeError: if ``field`` or ``presentation`` is not a text, or ``components``
+        holds a text or a value that is not a real number.
 
     A 1 kHz tone at 40 dB SPL in a free field presented binaurally yields
     1.000 sone / 40 phon by definition of the sone.
@@ -972,10 +974,11 @@ def loudness_moore_glasberg_from_third_octave(
     :param presentation: ``"binaural"`` (default; alias ``"diotic"``) or
         ``"monaural"``.
     :return: A :class:`MooreGlasbergLoudness`.
-    :raises TypeError: if ``field`` or ``presentation`` is not a text.
+    :raises TypeError: if ``field`` or ``presentation`` is not a text, or
+        ``band_levels`` holds a text or a value that is not a real number.
     """
     _validate_conditions(field, presentation)
-    levels = np.asarray(band_levels, dtype=np.float64)
+    levels = real_array(band_levels, "band_levels")
     if levels.ndim != 1 or levels.size != _N_THIRD_OCTAVE:
         msg = (
             f"band_levels must contain exactly {_N_THIRD_OCTAVE} one-third-"

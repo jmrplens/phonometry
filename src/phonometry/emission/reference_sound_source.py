@@ -89,6 +89,7 @@ import numpy as np
 from .._internal.frozen import OwnsArrays
 from .._internal.levels_math import energy_mean, energy_sum
 from .._internal.validation import (
+    real_array,
     require_band_fraction,
     require_choice,
     require_positive,
@@ -239,8 +240,9 @@ def repeatability_standard_deviation(levels: ArrayLike) -> np.ndarray:
         pressure), or ``(N,)`` for one band, in dB.
     :return: :math:`\sigma_r` per band, in dB.
     :raises ValueError: for fewer than two repetitions or non-finite levels.
+    :raises TypeError: if ``levels`` holds a text or a value that is not a real number.
     """
-    levels = np.asarray(levels, dtype=np.float64)
+    levels = real_array(levels, "levels")
     if levels.ndim == 1:
         levels = levels[:, np.newaxis]
     if levels.ndim != _GRID_RANK or levels.shape[0] < _MIN_REPETITIONS:
@@ -310,7 +312,8 @@ def radiation_impedance_correction(
         dipole without frequencies and knee frequency, or a dipole band below
         the knee frequency, for which Annex A gives no formula.
     :raises TypeError: if ``knee_frequency_hz`` is not a single number, or ``radiation``
-        is not a text.
+        is not a text, or ``frequencies`` holds a text or a value that is not a real
+        number.
     """
     _validate_meteorology(temperature_c, static_pressure_kpa)
     theta = temperature_c + _KELVIN_OFFSET
@@ -328,7 +331,7 @@ def radiation_impedance_correction(
             "Annex A switches formula at the knee frequency."
         )
         raise ValueError(msg)
-    freqs = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
+    freqs = np.atleast_1d(real_array(frequencies, "frequencies"))
     knee = require_positive(knee_frequency_hz, "knee_frequency_hz")
     above = freqs >= knee
     if radiation == "dipole":
@@ -366,11 +369,12 @@ def reference_source_reproducibility(
     :return: :math:`\sigma_R` per band, in dB.
     :raises ValueError: for a band outside Table 2 or an unknown option.
     :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a float), or
-        ``arrangement`` or ``environment`` is not a text.
+        ``arrangement`` or ``environment`` is not a text, or ``frequencies`` holds a
+        text or a value that is not a real number.
     """
     require_choice(environment, "environment", ("hemi-anechoic", "reverberation-room"))
     column = _column(environment, arrangement)
-    freqs = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
+    freqs = np.atleast_1d(real_array(frequencies, "frequencies"))
     if require_band_fraction(fraction, "fraction") == _THIRD_OCTAVE:
         rows, low = _TABLE_2_THIRDS, _K_50
     else:
@@ -418,11 +422,15 @@ class CalibrationConditions(OwnsArrays):
     air_absorption_db_per_m: ArrayLike | None = None
 
     def __post_init__(self) -> None:
-        """Refuse the conditions Formula (2) cannot read."""
+        """Refuse the conditions Formula (2) cannot read.
+
+        :raises TypeError: if ``air_absorption_db_per_m`` holds a text or a value that
+            is not a real number.
+        """
         _validate_meteorology(self.temperature_c, self.static_pressure_kpa)
         if self.air_absorption_db_per_m is None:
             return
-        absorption = np.asarray(self.air_absorption_db_per_m, dtype=np.float64)
+        absorption = real_array(self.air_absorption_db_per_m, "air_absorption_db_per_m")
         if not np.all(np.isfinite(absorption)) or np.any(absorption < 0.0):
             msg = "'air_absorption_db_per_m' must be finite and non-negative."
             raise ValueError(msg)
@@ -635,7 +643,8 @@ class ReferenceSourceCalibration(OwnsArrays):
             that used the manufacturer's :math:`C_2`, whose value at the test
             only the manufacturer gives.
         :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a
-            float).
+            float), or ``frequencies`` holds a text or a value that is not a real
+            number.
         """
         fraction = require_band_fraction(fraction, "fraction")
         levels = np.asarray(self.sound_power_level, dtype=np.float64)
@@ -665,7 +674,7 @@ class ReferenceSourceCalibration(OwnsArrays):
             for f, level in zip(self.frequencies, levels, strict=True)
         }
         out = []
-        for f in np.atleast_1d(np.asarray(frequencies, dtype=np.float64)):
+        for f in np.atleast_1d(real_array(frequencies, "frequencies")):
             k = _band_index(float(f))
             if fraction == _THIRD_OCTAVE:
                 wanted = [k]
@@ -750,7 +759,7 @@ def _annex_b(
 
 def _calibration_bands(frequencies: ArrayLike) -> tuple[np.ndarray, np.ndarray]:
     """Ascending one-third octave mid-bands from 50 Hz to 20 kHz, and their indices."""
-    freqs = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
+    freqs = np.atleast_1d(real_array(frequencies, "frequencies"))
     if freqs.ndim != 1 or freqs.size == 0:
         msg = "'frequencies' must be a non-empty 1-D array of mid-band frequencies."
         raise ValueError(msg)
@@ -775,7 +784,7 @@ def _hemisphere_levels(
     ISO 6926 8.3.1 measures "in accordance with ISO 3745", so the background
     criterion of ISO 3745 9.4.2 and its advisory come with the surface level.
     """
-    levels = np.asarray(levels, dtype=np.float64)
+    levels = real_array(levels, "levels")
     if levels.size == 0 or not np.all(np.isfinite(levels)):
         msg = "'levels' must hold the finite levels of at least one position."
         raise ValueError(msg)
@@ -784,7 +793,7 @@ def _hemisphere_levels(
         ("max_levels", max_levels),
     ):
         if extra is not None and not np.all(
-            np.isfinite(np.asarray(extra, dtype=np.float64))
+            np.isfinite(real_array(extra, "background_levels"))
         ):
             msg = f"'{name}' must be finite."
             raise ValueError(msg)
@@ -796,7 +805,7 @@ def _hemisphere_levels(
         levels,
         "hemisphere",
         radius=_RADIUS_M,
-        background_levels=np.asarray(background_levels, dtype=np.float64),
+        background_levels=real_array(background_levels, "background_levels"),
         frequencies=freqs,
     )
 
@@ -813,7 +822,7 @@ def _c3_correction(
         return np.zeros(freqs.size)
     a0 = (
         np.broadcast_to(
-            np.asarray(air_absorption_db_per_m, dtype=np.float64), freqs.shape
+            real_array(air_absorption_db_per_m, "air_absorption_db_per_m"), freqs.shape
         )
         * _RADIUS_M
     )
@@ -831,7 +840,7 @@ def _with_annex_b(
     """
     if intensity_sound_power_level is None:
         return lw, np.zeros(ks.size, dtype=bool), None
-    intensity = np.asarray(intensity_sound_power_level, dtype=np.float64)
+    intensity = real_array(intensity_sound_power_level, "intensity_sound_power_level")
     if intensity.shape != ks.shape:
         msg = "'intensity_sound_power_level' needs one value per band."
         raise ValueError(msg)
@@ -845,7 +854,7 @@ def _calibration_directivity(
     """The directivity index of each position, from the traverse maxima if given (8.3.2)."""
     if max_levels is None:
         return precision.directivity_index
-    maxima = np.asarray(max_levels, dtype=np.float64)
+    maxima = real_array(max_levels, "max_levels")
     if maxima.shape != precision.directivity_index.shape:
         msg = "'max_levels' must have the shape of 'levels'."
         raise ValueError(msg)
@@ -942,7 +951,9 @@ def reference_source_calibration(
         or a manufacturer's :math:`C_2` that are not finite, or inconsistent
         shapes.
     :raises TypeError: if ``coverage_factor`` is not a single number, or ``arrangement``
-        or ``radiation`` is not a text.
+        or ``radiation`` is not a text, or ``background_levels``, ``c2``,
+        ``frequencies``, ``intensity_sound_power_level``, ``levels`` or ``max_levels``
+        holds a text or a value that is not a real number.
     """
     require_choice(radiation, "radiation", ("monopole", "dipole", "unknown"))
     # Checked here as the text it must be: the column helper also serves the
@@ -956,7 +967,7 @@ def reference_source_calibration(
     area = 2.0 * math.pi * _RADIUS_M**2
     c1 = _c1_correction(air.temperature_c, air.static_pressure_kpa)
     if c2 is not None:
-        c2_bands = np.broadcast_to(np.asarray(c2, dtype=np.float64), freqs.shape).copy()
+        c2_bands = np.broadcast_to(real_array(c2, "c2"), freqs.shape).copy()
         if not np.all(np.isfinite(c2_bands)):
             msg = "'c2' must be finite, one value or one per band."
             raise ValueError(msg)
@@ -998,7 +1009,7 @@ def reference_source_calibration(
         intensity_sound_power_level=(
             None
             if intensity_sound_power_level is None
-            else np.asarray(intensity_sound_power_level, dtype=np.float64)
+            else real_array(intensity_sound_power_level, "intensity_sound_power_level")
         ),
         room_qualification=room_qualification,
     )
@@ -1042,9 +1053,11 @@ class ReferenceSoundSourceVerdict(OwnsArrays):
         :raises ValueError: for bands that are not ascending contiguous
             one-third octaves, levels that are not finite and one per band, or
             a per-band figure of another length.
+        :raises TypeError: if ``frequencies`` or ``sound_power_level`` holds a text or a
+            value that is not a real number.
         """
-        freqs = np.atleast_1d(np.asarray(self.frequencies, dtype=np.float64))
-        lw = np.atleast_1d(np.asarray(self.sound_power_level, dtype=np.float64))
+        freqs = np.atleast_1d(real_array(self.frequencies, "frequencies"))
+        lw = np.atleast_1d(real_array(self.sound_power_level, "sound_power_level"))
         if lw.shape != freqs.shape or not np.all(np.isfinite(lw)):
             msg = "the sound power levels must be finite, one per band."
             raise ValueError(msg)
@@ -1283,13 +1296,13 @@ def _clause5_levels(
         if frequencies is None:
             msg = "'frequencies' is required with a plain level array."
             raise ValueError(msg)
-        freqs = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
-        lw = np.atleast_1d(np.asarray(calibration, dtype=np.float64))
+        freqs = np.atleast_1d(real_array(frequencies, "frequencies"))
+        lw = np.atleast_1d(real_array(calibration, "calibration"))
         fallback = None
     directivity = (
         fallback
         if directivity_index is None
-        else np.asarray(directivity_index, dtype=np.float64)
+        else real_array(directivity_index, "directivity_index")
     )
     return freqs, lw, directivity
 
@@ -1315,7 +1328,7 @@ def _repeatability_of(
     require_scalar(n_bands, "n_bands")
     if repeated_levels is None:
         return None
-    repeated = np.asarray(repeated_levels, dtype=np.float64)
+    repeated = real_array(repeated_levels, "repeated_levels")
     if repeated.ndim == 1:
         repeated = repeated[:, np.newaxis]
     if repeated.shape[0] not in _REPETITIONS or repeated.shape[1] != n_bands:
@@ -1333,7 +1346,7 @@ def _supply_variation_of(
     """The change over the declared supply range per band (5.2), if given."""
     if supply_variation_db is None:
         return None
-    supply = np.asarray(supply_variation_db, dtype=np.float64).reshape(-1)
+    supply = real_array(supply_variation_db, "supply_variation_db").reshape(-1)
     if supply.size == 1:
         supply = np.full(freqs.shape, float(supply[0]))
     if supply.shape != freqs.shape or not np.all(np.isfinite(supply)):
@@ -1380,6 +1393,9 @@ def verify_reference_sound_source(
     :raises ValueError: for bands that are not ascending contiguous one-third
         octaves, repetitions other than three or five, or shapes that do not
         match.
+    :raises TypeError: if ``calibration``, ``directivity_index``, ``frequencies``,
+        ``repeated_levels`` or ``supply_variation_db`` holds a text or a value that is
+        not a real number.
     """
     freqs, lw, directivity = _clause5_levels(
         calibration, frequencies, directivity_index
@@ -1419,9 +1435,11 @@ class ReferenceSourceDriftResult(OwnsArrays):
 
         :raises ValueError: for a change per band that does not match the
             bands or is not finite, or a band outside Table 1.
+        :raises TypeError: if ``change_db`` or ``frequencies`` holds a text or a value
+            that is not a real number.
         """
-        freqs = np.atleast_1d(np.asarray(self.frequencies, dtype=np.float64))
-        change = np.atleast_1d(np.asarray(self.change_db, dtype=np.float64))
+        freqs = np.atleast_1d(real_array(self.frequencies, "frequencies"))
+        change = np.atleast_1d(real_array(self.change_db, "change_db"))
         if change.shape != freqs.shape or not np.all(np.isfinite(change)):
             msg = "'change_db' must hold one finite value per band."
             raise ValueError(msg)
@@ -1504,10 +1522,12 @@ def verify_reference_source_drift(
     :return: :class:`ReferenceSourceDriftResult`.
     :raises ValueError: for levels that do not span the bands or are not
         finite.
+    :raises TypeError: if ``frequencies``, ``latest_levels`` or ``reference_levels``
+        holds a text or a value that is not a real number.
     """
-    freqs = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
-    reference = np.atleast_1d(np.asarray(reference_levels, dtype=np.float64))
-    latest = np.atleast_1d(np.asarray(latest_levels, dtype=np.float64))
+    freqs = np.atleast_1d(real_array(frequencies, "frequencies"))
+    reference = np.atleast_1d(real_array(reference_levels, "reference_levels"))
+    latest = np.atleast_1d(real_array(latest_levels, "latest_levels"))
     if reference.shape != freqs.shape or latest.shape != freqs.shape:
         msg = "both level arrays must hold one value per band."
         raise ValueError(msg)

@@ -59,6 +59,7 @@ from ..._internal.boundary import round_half_away_from_zero
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     check_engine,
+    real_array,
     require_axis_count,
     require_equal_counts,
     require_ranks,
@@ -210,7 +211,7 @@ def _coerce(
                 msg = f"{name} mapping is missing band {c} Hz; expected keys {centers}"
                 raise ValueError(msg)
     else:
-        arr = np.asarray(values, dtype=np.float64)
+        arr = real_array(values, name)
         if arr.ndim != 1:
             msg = f"{name} must be 1-D, got shape {arr.shape}."
             raise ValueError(msg)
@@ -369,7 +370,9 @@ class AbsorptionRatingResult(OwnsArrays):
             ``unfavorable_sum`` does not restate the deviations between the
             two octave curves.
         :raises TypeError: if ``alpha_w`` is not a single number, or ``frequencies`` or
-            ``third_octave_alpha_s`` is a single number where an array goes.
+            ``third_octave_alpha_s`` is a single number where an array goes, or
+            ``measured`` or ``shifted_reference`` holds a text or a value that is not a
+            real number.
         """
         require_scalar(self.alpha_w, "alpha_w")
         if not math.isfinite(self.alpha_w) or not 0.0 <= self.alpha_w <= 1.0:
@@ -423,8 +426,8 @@ class AbsorptionRatingResult(OwnsArrays):
                 _THIRD_OCTAVE_AXIS,
             )
         stated = _unfavourable_deviation_sum(
-            np.asarray(self.shifted_reference, dtype=np.float64),
-            np.asarray(self.measured, dtype=np.float64),
+            real_array(self.shifted_reference, "shifted_reference"),
+            real_array(self.measured, "measured"),
         )
         if not math.isclose(self.unfavorable_sum, stated, rel_tol=0.0, abs_tol=1e-9):
             msg = (
@@ -527,6 +530,8 @@ def practical_absorption_coefficient(
         rounded in steps of 0,05.
     :raises ValueError: if any coefficient is negative or the wrong number
         of values is supplied.
+    :raises TypeError: if ``third_octave_alpha_s`` holds a text or a value that is not a
+        real number.
     """
     values = _coerce(
         third_octave_alpha_s, RATING_THIRD_OCTAVE_BANDS_HZ, "third_octave_alpha_s"
@@ -580,6 +585,7 @@ def weighted_absorption(
         the absorption class.
     :raises ValueError: if any coefficient is negative or the wrong number
         of values is supplied.
+    :raises TypeError: if ``alpha_p`` holds a text or a value that is not a real number.
     """
     values = _coerce(alpha_p, RATING_OCTAVE_BANDS_HZ, "alpha_p")
     if any(v < 0.0 for v in values):
@@ -630,7 +636,7 @@ def _rate(
             [u / 20.0 for u in shifted_units], dtype=np.float64
         ),
         third_octave_alpha_s=(
-            None if third_octave is None else np.asarray(third_octave, dtype=np.float64)
+            None if third_octave is None else real_array(third_octave, "third_octave")
         ),
         third_octave_bands=(
             None
@@ -665,6 +671,8 @@ def weighted_absorption_from_third_octave(
         ``third_octave_bands`` (:data:`RATING_THIRD_OCTAVE_BANDS_HZ`).
     :raises ValueError: if any coefficient is negative or the wrong number of
         values is supplied.
+    :raises TypeError: if ``third_octave_alpha_s`` holds a text or a value that is not a
+        real number.
     """
     values = _coerce(
         third_octave_alpha_s, RATING_THIRD_OCTAVE_BANDS_HZ, "third_octave_alpha_s"

@@ -161,7 +161,7 @@ reproduces the Eyring reverberation time of the room (Kuttruff Equation
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a `dimensions` that is not three positive lengths, a non-positive sample rate, a non-integer or negative `max_order`, a source/receiver outside the room, an absorption outside `[0, 1]` or of an unsupported shape, a negative `air_attenuation_per_m`, or a `frequencies` length that does not match the band count. |
-| TypeError | if `duration_s` or `speed_of_sound` is not a single number, or `fs` or `max_order` is a flag, a text or an array where a count goes. |
+| TypeError | if `duration_s` or `speed_of_sound` is not a single number, or `fs` or `max_order` is a flag, a text or an array where a count goes, or `absorption`, `air_attenuation_per_m`, `dimensions`, `frequencies`, `receiver` or `source` holds a text or a value that is not a real number. |
 
 ## ImageSourceResult
 
@@ -315,4 +315,4 @@ up with this density).
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `speed_of_sound` or `volume` is not a single number. |
+| TypeError | if `speed_of_sound` or `volume` is not a single number, or `time` holds a text or a value that is not a real number. |

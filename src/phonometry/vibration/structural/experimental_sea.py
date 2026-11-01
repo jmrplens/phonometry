@@ -81,6 +81,7 @@ import numpy as np
 
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
+    real_array,
     require_band_fraction,
     require_positive,
     require_positive_array,
@@ -603,12 +604,12 @@ def power_injection_matrix(
         the first test (subsystem 1 driven).
     :raises ValueError: for a bad shape, a non-positive value, or a singular
         energy matrix in some band.
-    :raises TypeError: if ``frequencies`` holds a text or a value that is not a real
-        number.
+    :raises TypeError: if ``energies``, ``frequencies`` or ``input_powers`` holds a text
+        or a value that is not a real number.
     """
     f = np.atleast_1d(require_positive_array(frequencies, "frequencies"))
-    e = np.asarray(energies, dtype=np.float64)
-    p = np.asarray(input_powers, dtype=np.float64)
+    e = real_array(energies, "energies")
+    p = real_array(input_powers, "input_powers")
     if e.shape != (2, 2, f.size):
         msg = f"'energies' must have shape (2, 2, {f.size}), got {e.shape}."
         raise ValueError(msg)

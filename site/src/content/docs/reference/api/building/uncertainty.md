@@ -430,6 +430,7 @@ and is not reproduced here.
 | Exception | When |
 | :--- | :--- |
 | ValueError | Mismatched shapes, empty input, or negative `u_i`. |
+| TypeError | if `band_uncertainties` or `reference_differences` holds a text or a value that is not a real number. |
 
 ## uncertain_value
 

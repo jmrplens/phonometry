@@ -450,6 +450,7 @@ and never filled from its neighbours.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a frequency that is not finite and positive, for one that matches none of the bands, naming the nearest, and for a band this row does not print, naming the row, the band and what the page had in that cell. |
+| TypeError | if `frequencies` holds a text or a value that is not a real number. |
 
 ### BandedRow.why_missing()
 
@@ -1588,7 +1589,7 @@ held as a tuple, whatever sequence of texts they were given as.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `calibration_factor` or `fs` is not a single number, or `channel_labels` is one text rather than a sequence of them. |
+| TypeError | if `calibration_factor` or `fs` is not a single number, or `channel_labels` is one text rather than a sequence of them, or `data` holds a text or a value that is not a real number. |
 
 ### Signal.crop()
 

@@ -870,3 +870,39 @@ def test_an_excluded_block_reads_as_excluded() -> None:
     )
     excluded = dataclasses.replace(block, excluded=True, modulation_depth_db=None)
     assert excluded.status is env.ModulationBlockStatus.EXCLUDED
+
+
+@pytest.mark.parametrize(
+    "case_name",
+    [
+        "fundamental under 1.5 dB",
+        "fundamental just over 1.5 dB",
+        "fundamental under 1.5 dB, second harmonic over it",
+    ],
+)
+def test_each_set_of_lines_is_transformed_back_once(
+    case_name: str, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The series of the fundamental's three lines is not transformed back twice.
+
+    Its swing decides whether the harmonics are looked for, and when none is
+    kept it is the series the depth is read from: the block used to call the
+    inverse transform again with the same lines for that. A kept harmonic
+    widens the set, and only then is a second transform of the whole set due.
+    """
+    case = next(c for c in ref.IOA_BLOCK_CASES if c[0] == case_name)
+    calls: list[tuple[int, ...]] = []
+    reconstruct = wtm._reconstruct
+
+    def counted(
+        transform: np.ndarray, lines: tuple[int, ...] | list[int]
+    ) -> np.ndarray:
+        calls.append(tuple(lines))
+        return reconstruct(transform, lines)
+
+    monkeypatch.setattr(wtm, "_reconstruct", counted)
+    block = env.amplitude_modulation_block(
+        np.asarray(case[2]) / 10.0, modulation_frequency_range_hz=case[1]
+    )
+    assert block.modulation_depth_db == pytest.approx(case[5], abs=1e-10)
+    assert len(calls) == len(set(calls)), calls

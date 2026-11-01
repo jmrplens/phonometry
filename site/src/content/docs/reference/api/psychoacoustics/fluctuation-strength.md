@@ -120,7 +120,7 @@ the reference method itself overestimates it above 4 Hz.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the signal is invalid or `fs` is not positive. |
-| TypeError | if `fs` is not a single number. |
+| TypeError | if `fs` is not a single number, or `x` holds a text or a value that is not a real number. |
 
 ## fluctuation_strength_am_noise
 

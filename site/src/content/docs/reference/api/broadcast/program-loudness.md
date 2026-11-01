@@ -87,6 +87,12 @@ altogether (use a weight of 0 for them).
 
 **Returns:** The weight `Gi`: 1.41 where `|elevation| < 30` and `60 <= |azimuth| <= 120`, else 1.0; a `float` when `azimuth` and `elevation` are both numbers; an array of their broadcast shape when one is a sequence or an array, a zero-dimensional one included.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `azimuth` or `elevation` holds a text or a value that is not a real number. |
+
 ## DEFAULT_CHANNEL_WEIGHTS
 
 *Constant* (`mapping`).
@@ -124,6 +130,12 @@ normalises to -23.0 LUFS.
 | `weights` | Per-channel weights `Gi`, or `None` for the Table 3 defaults by channel count (see [`DEFAULT_CHANNEL_WEIGHTS`](/phonometry/reference/api/broadcast/program-loudness/#default_channel_weights) and [`channel_weight`](/phonometry/reference/api/broadcast/program-loudness/#channel_weight)). |
 
 **Returns:** The programme loudness, LUFS (`-inf` when the signal is shorter than one gating block or entirely below the absolute gate).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `weights` holds a text or a value that is not a real number. |
 
 ## k_weighting
 
@@ -221,7 +233,7 @@ RLB high-pass; near 1 kHz it passes through the ~0.69 dB gain that the
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `fs` is below 16 kHz, `n` is not positive, or a supplied frequency is outside `(0, fs/2]`. |
-| TypeError | if `fs` is not a single number, or `n` is a flag, a text or an array where a count goes. |
+| TypeError | if `fs` is not a single number, or `n` is a flag, a text or an array where a count goes, or `frequencies` holds a text or a value that is not a real number. |
 
 ## KWeightingResponse
 
@@ -310,6 +322,12 @@ distribution, following the Tech 3342 reference implementation.
 
 **Returns:** The loudness range, in LU (0.0 when no reading survives the gate).
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `short_term_loudness` holds a text or a value that is not a real number. |
+
 ## program_loudness
 
 ```python
@@ -355,7 +373,7 @@ finished programme:
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `fs`, `momentary_step` or `short_term_step` is not a single number. |
+| TypeError | if `fs`, `momentary_step` or `short_term_step` is not a single number, or `weights` holds a text or a value that is not a real number. |
 
 ## ProgramLoudnessResult
 

@@ -2336,6 +2336,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   return mode` or `if mode is None: return`, as one that holds nothing to
   check only when the annotation lists such a value (rule A45).
 
+- **A complex value, a text or a `bytearray` given where numbers belong is
+  refused by the parameter's name, not read as its real part, parsed or read
+  as the codes of its characters.** In 953 places the library read a caller's
+  numbers with `np.asarray(x, dtype=np.float64)`, which gives back the
+  real part of a complex value with no more than a `ComplexWarning`, parses a
+  text and reads a `bytearray` in a list as a row of the codes of its
+  characters: `environment.method_b_scale_values(0.5 + 0.3j)` rated the mark
+  at 0.5, `building.energy_average_level([bytearray(b"12")])` came back as
+  49.5 dB, and a column of readings left as text passed for numbers. Each
+  reads them now through `real_array` of `_internal/validation.py`, which
+  refuses all three with a `TypeError` naming the parameter ("must be real,
+  not complex", "must be numbers, not text"), and the shared readers and text
+  checks find a `bytearray` at any depth of a sequence, as the choices beside
+  numbers already did. The rank check every scalar guard opens with refuses a
+  complex number of either kind as well, where `float()` kept the real part of
+  a NumPy one, so every public parameter written as one number refuses
+  `np.complex128(v + 1j)` by name. `scripts/check_real_conversions.py` lists
+  every conversion to floats in the tree with what it reads (`--census`) and
+  fails on one that converts a caller's value, a parameter or a field a record
+  is built with, before any check of it (rule A61); on the tree before this
+  change it reports all 953, and the GPU-fingerprinted engines needed none of
+  theirs changed. Each refusal is documented in the `:raises TypeError:` field
+  of the function, and so in the API reference.
+
+- **The modulation depth of an amplitude-modulated block transforms the
+  fundamental's lines back once.** `environment.amplitude_modulation_block`
+  ran the inverse transform of the three lines about the fundamental twice
+  with the same lines when no harmonic was kept, once for the 1.5 dB swing
+  that decides whether harmonics are looked for and again for the depth; it
+  keeps the first series and transforms the set again only when a harmonic
+  widens it.
+
 - **The API reference and `help()` show no double hyphen where a sentence
   wanted a colon, and the `fluids` package says what it holds.** Docstrings
   spelt a dash as `--`, which `help()` prints as it is and the site published

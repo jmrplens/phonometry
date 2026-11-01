@@ -63,6 +63,7 @@ from typing import TYPE_CHECKING, Literal
 import numpy as np
 
 from ..._internal.validation import (
+    real_array,
     require_choice,
     require_positive,
     require_scalar,
@@ -139,7 +140,7 @@ def beam_bending_wave_speed(
     :return: The bending phase speed ``cB``, in m/s.
     :raises ValueError: for a non-positive stiffness, mass or frequency.
     :raises TypeError: if ``bending_stiffness`` or ``mass_per_length`` is not a single
-        number.
+        number, or ``frequency`` holds a text or a value that is not a real number.
     """
     b = require_positive(bending_stiffness, "bending_stiffness")
     m1 = require_positive(mass_per_length, "mass_per_length")
@@ -160,7 +161,7 @@ def plate_bending_wave_speed(
     :return: The bending phase speed ``cB``, in m/s.
     :raises ValueError: for a non-positive stiffness, mass or frequency.
     :raises TypeError: if ``bending_stiffness`` or ``mass_per_area`` is not a single
-        number.
+        number, or ``frequency`` holds a text or a value that is not a real number.
     """
     b = require_positive(bending_stiffness, "bending_stiffness")
     m2 = require_positive(mass_per_area, "mass_per_area")
@@ -170,7 +171,7 @@ def plate_bending_wave_speed(
 
 def _omega(frequency: ArrayLike) -> NDArray[np.float64]:
     r"""Angular frequency :math:`\omega = 2\pi f` (rad/s); rejects f <= 0."""
-    f = np.asarray(frequency, dtype=np.float64)
+    f = real_array(frequency, "frequency")
     if np.any(f <= 0.0):
         msg = "'frequency' must be positive."
         raise ValueError(msg)
@@ -316,7 +317,7 @@ def infinite_beam_moment_mobility(
     :return: The complex moment mobility ``Y_M``, in rad/(N.m.s).
     :raises ValueError: for a non-positive input.
     :raises TypeError: if ``bending_stiffness`` or ``mass_per_length`` is not a single
-        number.
+        number, or ``frequency`` holds a text or a value that is not a real number.
     """
     b = require_positive(bending_stiffness, "bending_stiffness")
     m1 = require_positive(mass_per_length, "mass_per_length")
@@ -411,9 +412,10 @@ def infinite_plate_point_mobility(
     :param mass_per_area: Mass per unit area ``m''``, in kg/m^2.
     :param location: ``"center"`` or ``"edge"``.
     :return: The :class:`MobilityResult` (driving point).
-    :raises TypeError: if ``location`` is not a text.
+    :raises TypeError: if ``location`` is not a text, or ``frequency`` holds a text or a
+        value that is not a real number.
     """
-    freq = np.atleast_1d(np.asarray(frequency, dtype=np.float64))
+    freq = np.atleast_1d(real_array(frequency, "frequency"))
     if np.any(freq <= 0.0):
         msg = "'frequency' must be positive."
         raise ValueError(msg)
@@ -436,9 +438,10 @@ def infinite_beam_point_mobility(
     :param mass_per_length: Mass per unit length ``m'``, in kg/m.
     :param location: ``"center"`` or ``"end"``.
     :return: The :class:`MobilityResult` (driving point).
-    :raises TypeError: if ``location`` is not a text.
+    :raises TypeError: if ``location`` is not a text, or ``frequency`` holds a text or a
+        value that is not a real number.
     """
-    freq = np.atleast_1d(np.asarray(frequency, dtype=np.float64))
+    freq = np.atleast_1d(real_array(frequency, "frequency"))
     mob = infinite_beam_mobility(
         freq, bending_stiffness, mass_per_length, location=location
     )

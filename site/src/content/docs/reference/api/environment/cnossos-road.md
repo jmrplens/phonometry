@@ -99,7 +99,7 @@ methodology". Only the per-metre line power is defined by the method.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `length` is not positive. |
-| TypeError | if `length` is not a single number. |
+| TypeError | if `length` is not a single number, or `line_power` holds a text or a value that is not a real number. |
 
 ## ROAD_COEFFICIENTS
 

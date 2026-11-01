@@ -107,8 +107,8 @@ from scipy.special import fresnel, wofz
 
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
-    _as_float64,
     check_engine,
+    real_array,
     require_choice,
     require_positive,
     require_positive_array,
@@ -523,7 +523,7 @@ def kurze_anderson_attenuation(fresnel_number: ArrayLike) -> Real:
         otherwise not a number.
     :raises ValueError: for a non-finite or ragged ``fresnel_number``.
     """
-    n = _as_float64(fresnel_number, "fresnel_number")
+    n = real_array(fresnel_number, "fresnel_number")
     # A NaN would pass through the closed form and come back as a NaN
     # "attenuation", silently breaking the documented >= 0 dB contract.
     if not np.all(np.isfinite(n)):

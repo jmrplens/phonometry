@@ -320,7 +320,7 @@ resistance. A velocity above the clause 7.5 upper limit (15 mm/s) raises
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `area`, `evaluation_velocity` or `thickness_m` is not a single number. |
+| TypeError | if `area`, `evaluation_velocity` or `thickness_m` is not a single number, or `pressure_drops_pa` or `velocities` holds a text or a value that is not a real number. |
 
 ## StaticAirflowResult
 

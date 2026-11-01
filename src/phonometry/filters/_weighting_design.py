@@ -135,7 +135,10 @@ from dataclasses import dataclass
 import numpy as np
 from scipy import signal
 
-from .._internal.validation import is_positive
+from .._internal.validation import (
+    is_positive,
+    real_array,
+)
 from ._pinned_log import pinned_log
 
 #: Decibels per natural log unit of a squared magnitude: ``10 / ln 10``.
@@ -484,7 +487,7 @@ def _scalar_arctan(values: np.ndarray) -> np.ndarray:
     :param values: Any real array.
     :return: Its arctangent, elementwise, in the same shape.
     """
-    flat = np.asarray(values, dtype=np.float64).reshape(-1)
+    flat = real_array(values, "values").reshape(-1)
     out = np.empty(flat.size, dtype=np.float64)
     for index in range(flat.size):
         out[index] = math.atan(flat[index])
@@ -531,7 +534,7 @@ def _scalar_pow(values: np.ndarray, exponent: float) -> np.ndarray:
     :param exponent: The power to raise each element to.
     :return: The elementwise power, in the same shape.
     """
-    flat = np.asarray(values, dtype=np.float64).reshape(-1)
+    flat = real_array(values, "values").reshape(-1)
     out = np.empty(flat.size, dtype=np.float64)
     for index in range(flat.size):
         out[index] = math.pow(flat[index], exponent)
@@ -576,7 +579,7 @@ def _scalar_exp(values: np.ndarray) -> np.ndarray:
     :param values: Any real array.
     :return: Its exponential, elementwise, in the same shape.
     """
-    flat = np.asarray(values, dtype=np.float64).reshape(-1)
+    flat = real_array(values, "values").reshape(-1)
     out = np.empty(flat.size, dtype=np.float64)
     for index in range(flat.size):
         out[index] = math.exp(flat[index])
@@ -589,7 +592,7 @@ def _scalar_tan(values: np.ndarray) -> np.ndarray:
     :param values: Any real array.
     :return: Its tangent, elementwise, in the same shape.
     """
-    flat = np.asarray(values, dtype=np.float64).reshape(-1)
+    flat = real_array(values, "values").reshape(-1)
     out = np.empty(flat.size, dtype=np.float64)
     for index in range(flat.size):
         out[index] = math.tan(flat[index])
@@ -633,7 +636,7 @@ def _ordered_sum(terms: np.ndarray) -> np.ndarray:
     :param terms: The addends, stacked along axis 0.
     :return: Their sum, shaped like a single term.
     """
-    block = np.asarray(terms, dtype=np.float64)
+    block = real_array(terms, "terms")
     if block.shape[0] < 1:
         return np.zeros(block.shape[1:])
     while block.shape[0] > 1:
@@ -674,8 +677,8 @@ def _solve_dense(matrix: np.ndarray, vector: np.ndarray) -> np.ndarray:
     :param vector: The right-hand side.
     :return: The solution, shaped like *vector*.
     """
-    rows = np.array(matrix, dtype=np.float64)
-    right = np.array(vector, dtype=np.float64)
+    rows = real_array(matrix, "matrix", copy=True)
+    right = real_array(vector, "vector", copy=True)
     order = right.size
     for column in range(order - 1):
         pivot = column + int(np.argmax(np.abs(rows[column:, column])))
@@ -1008,7 +1011,7 @@ def _fitted_zpk(theta: np.ndarray, layout: _Layout) -> tuple[np.ndarray, np.ndar
 
 def _warped(frequencies: np.ndarray, fs: float) -> np.ndarray:
     r"""Analog frequencies the bilinear transform sends *frequencies* to, in rad/s."""
-    return 2.0 * fs * _scalar_tan(np.pi * np.asarray(frequencies, dtype=float) / fs)
+    return 2.0 * fs * _scalar_tan(np.pi * real_array(frequencies, "frequencies") / fs)
 
 
 def _log_distance2(roots: np.ndarray, omega: np.ndarray) -> np.ndarray:
@@ -1028,10 +1031,7 @@ def _log_distance2(roots: np.ndarray, omega: np.ndarray) -> np.ndarray:
     reason the ones inside the fit are.
     """
     real = np.real(np.asarray(roots))[:, None]
-    offset = (
-        np.asarray(omega, dtype=np.float64)[None, :]
-        - np.imag(np.asarray(roots))[:, None]
-    )
+    offset = real_array(omega, "omega")[None, :] - np.imag(np.asarray(roots))[:, None]
     return _ordered_sum(_scalar_log(real * real + offset * offset))
 
 
@@ -1050,7 +1050,7 @@ def _analog_db(
     overflowing a product of factors at the top of the grid, which the complex
     spelling was one decade of sampling rate away from doing.
     """
-    omega = 2.0 * np.pi * np.asarray(frequencies, dtype=float)
+    omega = 2.0 * np.pi * real_array(frequencies, "frequencies")
     omega_ref = np.array([2.0 * np.pi * reference_frequency_hz])
 
     def shape(at: np.ndarray) -> np.ndarray:
@@ -1109,7 +1109,7 @@ def _cascade_magnitude(sections: np.ndarray, frequency: float, fs: float) -> flo
         return real * real + imaginary * imaginary
 
     magnitude = 1.0
-    for section in np.asarray(sections, dtype=np.float64):
+    for section in real_array(sections, "sections"):
         magnitude *= math.sqrt(squared(section[:3]) / squared(section[3:]))
     return magnitude
 

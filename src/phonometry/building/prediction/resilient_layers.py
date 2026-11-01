@@ -80,6 +80,7 @@ import numpy as np
 from ..._internal.boundary import settled
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
+    real_array,
     require_axis_count,
     require_band_fraction,
     require_choice,
@@ -411,7 +412,8 @@ def force_pulse(
     :raises ValueError: If an input is not positive and finite, or ``time``
         contains a negative value.
     :raises TypeError: if ``contact_stiffness``, ``impact_velocity``, ``impedance`` or
-        ``mass`` is not a single number.
+        ``mass`` is not a single number, or ``time`` holds a text or a value that is not
+        a real number.
     """
     k = require_positive(contact_stiffness, "contact_stiffness")
     z = require_positive(impedance, "impedance")
@@ -421,7 +423,7 @@ def force_pulse(
         if impact_velocity is None
         else require_positive(impact_velocity, "impact_velocity")
     )
-    t = np.asarray(time, dtype=np.float64)
+    t = real_array(time, "time")
     if not np.all(np.isfinite(t)) or np.any(t < 0.0):
         msg = "'time' must contain only finite, non-negative values."
         raise ValueError(msg)
@@ -554,7 +556,8 @@ class TappingForceResult(OwnsArrays):
             from them is not what its equation gives.
         :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a
             float), or ``contact_stiffness``, ``impedance``, ``lower_limit`` or ``mass``
-            is not a single number.
+            is not a single number, or ``frequencies`` or ``mean_square_force`` holds a
+            text or a value that is not a real number.
         """
         require_ranks(
             self,
@@ -594,12 +597,12 @@ class TappingForceResult(OwnsArrays):
                     f"{source}; got {getattr(self, name)!r}."
                 )
                 raise ValueError(msg)
-        f = np.asarray(self.frequencies, dtype=np.float64)
+        f = real_array(self.frequencies, "frequencies")
         if f.size == 0:
             return
         # v0 and fi are not kept, but |Fn| scales with their product only.
         peak = _peak_force(f, k, z, m, impact_velocity=lower / m, impact_rate=1.0)
-        mean_square = np.asarray(self.mean_square_force, dtype=np.float64)
+        mean_square = real_array(self.mean_square_force, "mean_square_force")
         rate = factor * f * np.asarray(self.peak_force) ** 2 / (2.0 * mean_square)
         checks = (
             ("peak_force", np.asarray(self.peak_force), peak),

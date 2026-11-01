@@ -872,6 +872,7 @@ or subtract it from the result (`test_environment=`).
 | Exception | When |
 | :--- | :--- |
 | ValueError | for frequencies that are not positive and increasing, a pressure that is not positive, a temperature that is not finite or not above absolute zero, a relative humidity outside 0 % to 100 %, a coefficient that is not finite, or a coefficient column that is not one value per frequency. |
+| TypeError | if `frequencies`, `humidity_coefficient_db_per_percent`, `static_pressure_coefficient_db_per_kpa` or `temperature_coefficient_db_per_k` holds a text or a value that is not a real number. |
 
 ## EnvironmentalSensitivityCorrection
 
@@ -1929,7 +1930,7 @@ same measurement point (7.3), $\arg R_P$ is 0.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an unknown field, a free-field correction on a pressure calibration, an environmental correction made at other frequencies, readings whose numbers of determinations disagree, any column that is not one finite value per frequency, or monitor phases without the output phases. |
-| TypeError | if `field` is not a text. |
+| TypeError | if `field` is not a text, or `expanded_uncertainty_db`, `pressure_level_difference` or `reference_sensitivity_level` holds a text or a value that is not a real number. |
 
 ## SequentialComparisonPhase
 
@@ -2057,7 +2058,7 @@ the complex ratio the sensitivity "both modulus and phase" is.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an unknown field, a pressure calibration without the interchange, a free-field correction on a pressure calibration, an environmental correction made at other frequencies, readings whose numbers of determinations disagree, any column that is not one finite value per frequency, or phase readings that do not follow the level readings. |
-| TypeError | if `field` is not a text. |
+| TypeError | if `field` is not a text, or `expanded_uncertainty_db`, `pressure_level_difference` or `reference_sensitivity_level` holds a text or a value that is not a real number. |
 
 ## SimultaneousComparisonPhase
 
@@ -2265,7 +2266,7 @@ their responses at the calibration frequencies go to
 | Exception | When |
 | :--- | :--- |
 | ValueError | for what [`TimeSelectiveResponse`](/phonometry/reference/api/metrology/comparison-calibration/#timeselectiveresponse) refuses. |
-| TypeError | if `window_shape` is not a text. |
+| TypeError | if `window_shape` is not a text, or `impulse_response` holds a text or a value that is not a real number. |
 
 ## TimeSelectiveResponse
 

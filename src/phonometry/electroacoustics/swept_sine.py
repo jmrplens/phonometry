@@ -62,6 +62,7 @@ import numpy as np
 
 from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
+    real_array,
     require_choice,
     require_count,
     require_ranks,
@@ -519,7 +520,7 @@ def _default_ir_length(min_spacing: int) -> int:
 def _validated_recording(
     recorded: Signal | ArrayLike,
 ) -> NDArray[np.float64]:
-    rec = np.asarray(recorded, dtype=np.float64)
+    rec = real_array(recorded, "recorded")
     if rec.ndim != 1:
         msg = "'recorded' must be one-dimensional."
         raise ValueError(msg)
@@ -707,7 +708,8 @@ def swept_sine_distortion(
         above ``fs/4``, where every order-2 product would exceed Nyquist).
     :raises TypeError: if ``amplitude``, ``duration_s``, ``f1``, ``f2`` or ``fs`` is not
         a single number, or ``ir_length`` or ``n_harmonics`` is a flag, a text or an
-        array where a count goes, or ``method`` is not a text.
+        array where a count goes, or ``method`` is not a text, or ``recorded`` holds a
+        text or a value that is not a real number.
     """
     fs = resolve_fs(recorded, fs, name="recorded")
     rec = apply_calibration(recorded, _validated_recording(recorded))

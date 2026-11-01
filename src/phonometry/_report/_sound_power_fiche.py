@@ -26,7 +26,10 @@ from typing import TYPE_CHECKING, Any, Protocol
 
 import numpy as np
 
-from .._internal.validation import require_scalar
+from .._internal.validation import (
+    real_array,
+    require_scalar,
+)
 from ._i18n import decimal_comma, format_number, t
 from ._layout import (
     _ACCENT_HEX,
@@ -144,12 +147,15 @@ def nominal_bands(
     that reads a band centre back as a quantity, such as the ISO 9614-3 table
     of standard deviations, asks here: the printed label carries a decimal
     comma on a Spanish sheet and is no longer a number ``float`` accepts.
+
+    :raises TypeError: if ``frequencies`` holds a text or a value that is not a real
+        number.
     """
     if frequencies is None:
         return None, 0
     from ..filters.frequencies import _infer_band_fraction, _nominal_freq_for_band
 
-    freqs = np.asarray(frequencies, dtype=np.float64)
+    freqs = real_array(frequencies, "frequencies")
     fraction = (
         _infer_band_fraction(freqs) if freqs.size >= _MIN_BANDS_TO_INFER_FRACTION else 1
     )
@@ -182,8 +188,10 @@ def range_str(values: np.ndarray, language: Language = "en", decimals: int = 1) 
     level in decibels, two for a dimensionless field indicator judged against a
     threshold of 0,6 or 2 (ISO 9614-3:2002 Annex C). A spread below half the
     last printed digit is one value rather than a range.
+
+    :raises TypeError: if ``values`` holds a text or a value that is not a real number.
     """
-    arr = np.asarray(values, dtype=np.float64)
+    arr = real_array(values, "values")
     arr = arr[np.isfinite(arr)]
     if arr.size == 0:
         return "—"
@@ -202,8 +210,10 @@ def energy_sum(levels: ArrayLike) -> float:
     Non-finite bands are skipped: a band the method could not determine
     contributes no energy rather than poisoning the total with ``NaN``. An
     array with no finite band has no total, which is ``NaN``.
+
+    :raises TypeError: if ``levels`` holds a text or a value that is not a real number.
     """
-    arr = np.asarray(levels, dtype=np.float64)
+    arr = real_array(levels, "levels")
     finite = arr[np.isfinite(arr)]
     if finite.size == 0:
         return float("nan")

@@ -159,6 +159,7 @@ of the 16 kHz octave band, so no advisory is raised between 10 kHz and
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive frequency, a temperature at or below absolute zero, a relative humidity outside [0, 100] % or a non-positive static pressure. |
+| TypeError | if `frequencies` holds a text or a value that is not a real number. |
 
 ## free_field_absorption_correction
 
@@ -298,7 +299,7 @@ clause 7).
 | Exception | When |
 | :--- | :--- |
 | ValueError | for non-finite levels, a room constant that is not positive, frequencies that do not match the bands, or a temperature or static pressure ISO 3741 cannot correct from. |
-| TypeError | if `frequencies` holds a text or a value that is not a real number. |
+| TypeError | if `frequencies`, `pressure_levels` or `room_constant` holds a text or a value that is not a real number. |
 
 ## high_frequency_sound_power_comparison
 
@@ -344,7 +345,7 @@ comparison method.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | for a band calibration given as the reference when `noise_bandwidth_hz` asks for a tonal comparison, which needs levels, a `noise_bandwidth_hz` that is not one number, or `frequencies` that hold a text or a value that is not a number. |
+| TypeError | for a band calibration given as the reference when `noise_bandwidth_hz` asks for a tonal comparison, which needs levels, a `noise_bandwidth_hz` that is not one number, or `frequencies` that hold a text or a value that is not a number, or `pressure_levels` or `reference_pressure_levels` holds a text or a value that is not a real number. |
 | ValueError | for non-finite levels, reference levels that do not span the same bands, a non-positive bandwidth, or a temperature or static pressure ISO 3741 cannot correct from. |
 
 ## HighFrequencySoundPowerResult

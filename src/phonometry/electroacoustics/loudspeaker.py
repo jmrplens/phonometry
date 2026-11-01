@@ -58,6 +58,7 @@ from .._internal.frozen import OwnsArrays, read_only
 from .._internal.validation import (
     check_engine,
     pair_of_arrays,
+    real_array,
     require_choice,
     require_equal_shapes,
     require_finite_fields,
@@ -106,8 +107,8 @@ def _as_curve(
     frequencies: ArrayLike, values: ArrayLike, name: str
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """Validate a paired (frequencies, values) curve and sort it by frequency."""
-    f = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
-    v = np.atleast_1d(np.asarray(values, dtype=np.float64))
+    f = np.atleast_1d(real_array(frequencies, name))
+    v = np.atleast_1d(real_array(values, "values"))
     if f.ndim != 1 or v.ndim != 1 or f.shape != v.shape:
         msg = f"'{name}' frequencies and values must be 1-D and equal length."
         raise ValueError(msg)
@@ -909,7 +910,8 @@ def loudspeaker_characteristics(
     :return: A :class:`LoudspeakerCharacteristics`.
     :raises ValueError: If the inputs are invalid.
     :raises TypeError: if ``distance``, ``input_voltage_v``, ``rated_impedance_ohm`` or
-        ``tolerance_db`` is not a single number.
+        ``tolerance_db`` is not a single number, or ``frequencies`` or ``spl`` holds a
+        text or a value that is not a real number.
     """
     f, spl = _as_curve(frequencies, spl, "on-axis response")
     r = require_positive(rated_impedance_ohm, "rated_impedance_ohm")

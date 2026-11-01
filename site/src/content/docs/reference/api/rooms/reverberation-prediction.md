@@ -103,7 +103,7 @@ $\ln(1 - \alpha_i)$, so each must be below 1.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `speed_of_sound` is not a single number, or an entry of `dimensions` is not a real number. |
+| TypeError | if `speed_of_sound` is not a single number, or an entry of `dimensions` is not a real number, or `absorptions` or `air_attenuation_per_m` holds a text or a value that is not a real number. |
 
 ## eyring_reverberation_time
 
@@ -147,7 +147,7 @@ coefficient stays within the shared unit-error ceiling of 2.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `speed_of_sound` or `volume` is not a single number, or an area of `surfaces` is not a real number. |
+| TypeError | if `speed_of_sound` or `volume` is not a single number, or an area of `surfaces` is not a real number, or `air_attenuation_per_m` holds a text or a value that is not a real number. |
 
 ## fitzroy_reverberation_time
 
@@ -187,7 +187,7 @@ must be below 1.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `speed_of_sound` is not a single number, or an entry of `dimensions` is not a real number. |
+| TypeError | if `speed_of_sound` is not a single number, or an entry of `dimensions` is not a real number, or `absorptions` or `air_attenuation_per_m` holds a text or a value that is not a real number. |
 
 ## mean_absorption
 
@@ -256,7 +256,7 @@ this model's domain (use Sabine, or Eyring while the mean stays below 1).
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `speed_of_sound` or `volume` is not a single number, or an area of `surfaces` is not a real number. |
+| TypeError | if `speed_of_sound` or `volume` is not a single number, or an area of `surfaces` is not a real number, or `air_attenuation_per_m` holds a text or a value that is not a real number. |
 
 ## reverberation_time_models
 
@@ -298,7 +298,7 @@ the strictest of the five domains: every absorption below 1.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for `absorptions` that are not the three wall pairs, and for what the five models refuse. |
-| TypeError | if an entry of `dimensions` is not a real number, or `speed_of_sound` is not a single number. |
+| TypeError | if an entry of `dimensions` is not a real number, or `speed_of_sound` is not a single number, or `frequencies` holds a text or a value that is not a real number. |
 
 ## ReverberationModelResult
 
@@ -440,4 +440,4 @@ error (a percentage passed instead of a fraction).
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `speed_of_sound` or `volume` is not a single number, or an area of `surfaces` is not a real number. |
+| TypeError | if `speed_of_sound` or `volume` is not a single number, or an area of `surfaces` is not a real number, or `air_attenuation_per_m` holds a text or a value that is not a real number. |

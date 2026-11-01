@@ -150,7 +150,7 @@ text asks for.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for columns that do not hold one value per frequency, a value that is not finite, a tolerance that is not positive or finite nowhere, or a check frequency that is not among the frequencies. |
-| TypeError | if `calibrator_indicated_level_before` or `calibrator_level` is not a single number, or `free_field_indicated_level`, `frequencies`, `incident_level` or `pressure_indicated_level` holds a text or a value that is not a real number. |
+| TypeError | if `calibrator_indicated_level_before` or `calibrator_level` is not a single number, or `free_field_indicated_level`, `frequencies`, `incident_level`, `pressure_indicated_level` or `tolerance_db` holds a text or a value that is not a real number. |
 
 ## AdjustmentValue
 
@@ -345,7 +345,7 @@ correction is their mean.
 | Exception | When |
 | :--- | :--- |
 | ValueError | as [`sound_calibrator_correction`](/phonometry/reference/api/metrology/free-field-corrections/#sound_calibrator_correction). |
-| TypeError | if `frequencies` or `reference_free_field_correction` holds a text or a value that is not a real number. |
+| TypeError | if `coupler_level_difference`, `free_field_level_difference`, `frequencies` or `reference_free_field_correction` holds a text or a value that is not a real number. |
 
 ## correction_uncertainty_budget
 
@@ -730,7 +730,7 @@ actuator clause 7 asks for.
 | Exception | When |
 | :--- | :--- |
 | ValueError | as [`sound_calibrator_correction`](/phonometry/reference/api/metrology/free-field-corrections/#sound_calibrator_correction), or for an $f_0$ that is not among the frequencies. |
-| TypeError | if `check_frequency_hz` is not a single number, or `frequencies`, `reference_channel_gain_db` or `reference_sensitivity_level` holds a text or a value that is not a real number. |
+| TypeError | if `check_frequency_hz` is not a single number, or `actuator_level`, `free_field_level_difference`, `frequencies`, `reference_channel_gain_db`, `reference_free_field_level`, `reference_sensitivity_level`, `slm_actuator_level` or `slm_free_field_level` holds a text or a value that is not a real number. |
 
 ## exact_frequencies
 
@@ -998,7 +998,7 @@ taken over the three microphones and not over the calibrators as well.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a reading that is not finite, a column count that is not the number of frequencies, readings with different numbers of determinations, or microphones that are not one label per determination. |
-| TypeError | if `frequencies` or `reference_free_field_correction` holds a text or a value that is not a real number. |
+| TypeError | if `calibrator_level_difference`, `free_field_level_difference`, `frequencies` or `reference_free_field_correction` holds a text or a value that is not a real number. |
 
 ## UncertaintyComponentRow
 

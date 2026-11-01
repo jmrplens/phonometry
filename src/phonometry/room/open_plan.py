@@ -41,6 +41,7 @@ from .._internal.boundary import settled
 from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
     check_engine,
+    real_array,
     require_equal_shapes,
     require_present,
 )
@@ -279,10 +280,12 @@ def open_plan_metrics(
         and ``rp``.
     :raises ValueError: If fewer than four positions are given
         (Clause 5.2.2) or the three arrays differ in shape.
+    :raises TypeError: if ``positions_m``, ``spl_a_speech`` or ``sti_values`` holds a
+        text or a value that is not a real number.
     """
-    r = np.asarray(positions_m, dtype=np.float64)
-    lp = np.asarray(spl_a_speech, dtype=np.float64)
-    sti = np.asarray(sti_values, dtype=np.float64)
+    r = real_array(positions_m, "positions_m")
+    lp = real_array(spl_a_speech, "spl_a_speech")
+    sti = real_array(sti_values, "sti_values")
 
     require_equal_shapes(
         "open_plan_metrics",
@@ -328,5 +331,5 @@ def open_plan_metrics(
         lp_as_4m=lp_as_4m,
         rd=rd,
         rp=rp,
-        positions_m=np.asarray(positions_m, dtype=np.float64),
+        positions_m=real_array(positions_m, "positions_m"),
     )

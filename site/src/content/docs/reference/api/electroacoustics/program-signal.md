@@ -138,6 +138,7 @@ table.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs differ in length, a frequency is not a band of Table II or appears twice, a level is not finite, or fewer than two bands are given. |
+| TypeError | if `band_levels` or `frequencies` holds a text or a value that is not a real number. |
 
 ## program_signal_filter
 
@@ -166,6 +167,7 @@ conventions the figure's notes state.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a frequency is not a positive finite number. |
+| TypeError | if `frequencies` holds a text or a value that is not a real number. |
 
 ## ProgramSignalCheck
 

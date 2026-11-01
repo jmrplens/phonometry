@@ -107,7 +107,7 @@ $s'_\mathrm{t} = 4 \pi^2 m'_\mathrm{t} f_\mathrm{r}^2$.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `total_mass_per_area_kg_m2` is not a single number. |
+| TypeError | if `total_mass_per_area_kg_m2` is not a single number, or `resonant_frequency_hz` holds a text or a value that is not a real number. |
 
 ## DynamicStiffnessResult
 
@@ -252,7 +252,7 @@ with the material's structure: $s'_\mathrm{a} = p_0 / (d\,\epsilon)$.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `porosity` or `static_pressure_pa` is not a single number. |
+| TypeError | if `porosity` or `static_pressure_pa` is not a single number, or `thickness_m` holds a text or a value that is not a real number. |
 
 :::note
 With the standard's $p_0 = 0.1$ MPa and $\epsilon = 0.9$
@@ -388,7 +388,7 @@ $f_0 = (1/2\pi)\sqrt{s'/m'}$.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `mass_per_area_kg_m2` is not a single number. |
+| TypeError | if `mass_per_area_kg_m2` is not a single number, or `dynamic_stiffness_n_m3` holds a text or a value that is not a real number. |
 
 ## plot_dynamic_stiffness_rig
 

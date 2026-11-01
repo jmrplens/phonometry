@@ -169,7 +169,7 @@ per one-third-octave band; $\sigma_\mathrm{r} = 0.6\,\sigma_\mathrm{R}$ (Formula
 | Exception | When |
 | :--- | :--- |
 | ValueError | Mismatched shapes, an untabulated frequency, an unknown `condition` or an untabulated `coverage`. |
-| TypeError | if `condition` is not a text. |
+| TypeError | if `condition` is not a text, or `area` or `frequencies` holds a text or a value that is not a real number. |
 
 ## practical_coefficient_uncertainty
 
@@ -203,7 +203,7 @@ $\sigma_\mathrm{r} = 0.6\,\sigma_\mathrm{R}$ (Formula (5)).
 | Exception | When |
 | :--- | :--- |
 | ValueError | Mismatched shapes, an untabulated frequency, an unknown `condition` or an untabulated `coverage`. |
-| TypeError | if `condition` is not a text. |
+| TypeError | if `condition` is not a text, or `alpha_p` or `frequencies` holds a text or a value that is not a real number. |
 
 ## single_number_rating_uncertainty
 
@@ -269,7 +269,7 @@ $\sigma_\mathrm{r} = 0.6\,\sigma_\mathrm{R}$ (Formula (3)).
 | Exception | When |
 | :--- | :--- |
 | ValueError | Mismatched shapes, an untabulated frequency, an unknown `condition` or an untabulated `coverage`. |
-| TypeError | if `condition` is not a text. |
+| TypeError | if `condition` is not a text, or `alpha` or `frequencies` holds a text or a value that is not a real number. |
 
 ## weighted_coefficient_uncertainty
 

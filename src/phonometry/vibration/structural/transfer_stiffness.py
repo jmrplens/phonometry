@@ -97,6 +97,7 @@ from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays, read_only
 from ..._internal.validation import (
     check_engine,
+    real_array,
     require_choice,
     require_finite,
     require_finite_fields,
@@ -236,7 +237,7 @@ def _omega(frequency: ArrayLike, name: str = "frequency") -> NDArray[np.float64]
 
     *name* is the caller's own name for the frequency, for the message.
     """
-    f = np.asarray(frequency, dtype=np.float64)
+    f = real_array(frequency, name)
     if np.any(f <= 0.0):
         msg = f"'{name}' must be positive."
         raise ValueError(msg)
@@ -371,7 +372,8 @@ def transfer_stiffness_indirect(
     :param flange_mass: Output-flange mass ``mf``, in kg (Default: 0.0).
     :return: The dynamic transfer stiffness :math:`k_{2,1}`, in N/m.
     :raises ValueError: for a non-positive frequency or blocking mass.
-    :raises TypeError: if ``blocking_mass`` or ``flange_mass`` is not a single number.
+    :raises TypeError: if ``blocking_mass`` or ``flange_mass`` is not a single number,
+        or ``frequency`` holds a text or a value that is not a real number.
     :warns TransferStiffnessWarning: where any :math:`\lvert T\rvert > 0.1`
         (Inequality (2) violated).
     """
@@ -472,7 +474,8 @@ def base_transmissibility(
     :param stiffness: Element stiffness ``k``, in N/m.
     :param damping: Viscous damping ``c``, in N.s/m (Default: 0.0).
     :return: The complex transmissibility ``T``.
-    :raises TypeError: if ``damping``, ``mass`` or ``stiffness`` is not a single number.
+    :raises TypeError: if ``damping``, ``mass`` or ``stiffness`` is not a single number,
+        or ``frequency`` holds a text or a value that is not a real number.
     """
     mass = require_positive(mass, "mass")
     stiffness = require_positive(stiffness, "stiffness")
@@ -558,8 +561,10 @@ class TransferStiffnessResult(OwnsArrays):
         :raises ValueError: if ``transfer_stiffness`` or ``transmissibility``
             does not carry one value per frequency, a field carries an extra
             axis, or a numeric field carries a non-finite value.
+        :raises TypeError: if ``frequencies`` holds a text or a value that is not a real
+            number.
         """
-        frequencies = np.asarray(self.frequencies, dtype=np.float64)
+        frequencies = real_array(self.frequencies, "frequencies")
         object.__setattr__(self, "frequencies", read_only(frequencies))
         for name in ("transfer_stiffness", "transmissibility"):
             value = getattr(self, name)
@@ -766,11 +771,12 @@ def indirect_transfer_stiffness_result(
     :param blocking_mass: Blocking mass ``m2``, in kg (> 0).
     :param flange_mass: Output-flange mass ``mf``, in kg (Default: 0.0).
     :return: The :class:`TransferStiffnessResult` (indirect method).
-    :raises TypeError: if ``blocking_mass`` or ``flange_mass`` is not a single number.
+    :raises TypeError: if ``blocking_mass`` or ``flange_mass`` is not a single number,
+        or ``frequencies`` holds a text or a value that is not a real number.
     :warns TransferStiffnessWarning: where any :math:`\lvert T\rvert > 0.1`
         (Inequality (2) violated).
     """
-    freq = np.asarray(frequencies, dtype=np.float64)
+    freq = real_array(frequencies, "frequencies")
     k = _indirect_stiffness(
         freq, transmissibility, blocking_mass, flange_mass, "frequencies"
     )
@@ -791,7 +797,7 @@ def indirect_transfer_stiffness_result(
 
 def _frequency_axis(frequencies: ArrayLike, owner: str) -> NDArray[np.float64]:
     """One-dimensional, finite, positive frequencies, in hertz."""
-    freq = np.asarray(frequencies, dtype=np.float64)
+    freq = real_array(frequencies, "frequencies")
     if freq.ndim != 1 or freq.size == 0:
         msg = f"{owner}: 'frequencies' must be a non-empty one-dimensional array."
         raise ValueError(msg)
@@ -882,7 +888,8 @@ class BandAveragedStiffness(OwnsArrays):
         hide a band that was measured. Both are refused, as are fields of
         different lengths and counts that are not whole numbers.
 
-        :raises TypeError: if the counts are not integers.
+        :raises TypeError: if the counts are not integers, or ``stiffness`` holds a text
+            or a value that is not a real number.
         :raises ValueError: if the fields disagree in length or rank, the
             frequencies are not finite and positive, a count is negative,
             or the stiffness is not a positive finite number exactly where
@@ -914,7 +921,7 @@ class BandAveragedStiffness(OwnsArrays):
             raise TypeError(msg)
         if np.any(counts < 0):
             raise ValueError(msg)
-        k = np.asarray(self.stiffness, dtype=np.float64)
+        k = real_array(self.stiffness, "stiffness")
         determined = counts >= MIN_FREQUENCIES_PER_BAND
         value_ok = np.isfinite(k) & (k > 0.0)
         if np.any(value_ok != determined):
@@ -1004,7 +1011,8 @@ def band_averaged_stiffness(
     :param valid: Per frequency, whether the line enters the average
         (Default: ``None``, every line).
     :return: The :class:`BandAveragedStiffness`.
-    :raises TypeError: for a mask that is not boolean.
+    :raises TypeError: for a mask that is not boolean, or ``frequencies`` holds a text
+        or a value that is not a real number.
     :raises ValueError: for frequencies that are not one-dimensional, finite,
         positive and distinct, a stiffness of another length or not finite, a
         mask of another length, or no valid line.
@@ -1146,7 +1154,7 @@ class LevelDifferenceCheck(OwnsArrays):
         require_ranks(self, frequencies=1, difference=1)
         require_same_length(self, "frequencies", "difference", axis="frequency")
         require_finite_fields(self, "frequencies")
-        difference = np.asarray(self.difference, dtype=np.float64)
+        difference = real_array(self.difference, "difference")
         if np.any(np.isnan(difference)) or np.any(np.isneginf(difference)):
             msg = f"{owner}: 'difference' must not hold NaN or -inf."
             raise ValueError(msg)
@@ -1215,7 +1223,7 @@ def _level_spectrum(
     value: ArrayLike, shape: tuple[int, ...], owner: str, name: str
 ) -> NDArray[np.float64]:
     """A level spectrum, one level per frequency (or one row per direction)."""
-    level = np.asarray(value, dtype=np.float64)
+    level = real_array(value, name)
     if level.ndim not in (1, 2) or level.shape[-1:] != shape:
         msg = f"{owner}: '{name}' must carry one level per frequency."
         raise ValueError(msg)
@@ -1276,6 +1284,8 @@ def check_blocked_output(
     :return: The :class:`LevelDifferenceCheck` (``condition="blocked_output"``).
     :raises ValueError: for frequencies that are not finite and positive, or
         level spectra that do not carry one level per frequency.
+    :raises TypeError: if ``frequencies``, ``input_acceleration_level`` or
+        ``output_acceleration_level`` holds a text or a value that is not a real number.
     :warns TransferStiffnessWarning: where :math:`\Delta L_{1,2} < 20` dB.
     """
     owner = "check_blocked_output"
@@ -1340,6 +1350,8 @@ def check_unwanted_input(
     :return: The :class:`LevelDifferenceCheck` (``condition="unwanted_input"``).
     :raises ValueError: for frequencies that are not finite and positive, or
         level spectra that do not carry one level per frequency.
+    :raises TypeError: if ``excitation_level``, ``frequencies`` or ``unwanted_level``
+        holds a text or a value that is not a real number.
     :warns TransferStiffnessWarning: where the difference is below 15 dB.
     """
     owner = "check_unwanted_input"
@@ -1410,7 +1422,9 @@ class OutputMassCheck(OwnsArrays):
         :raises ValueError: if the arrays differ in length or rank, a value
             is not finite, the mass is negative or an apparent mass is not
             positive.
-        :raises TypeError: if ``output_mass_kg`` is not a single number.
+        :raises TypeError: if ``output_mass_kg`` is not a single number, or
+            ``output_apparent_mass_kg`` holds a text or a value that is not a real
+            number.
         """
         require_ranks(self, frequencies=1, output_apparent_mass_kg=1)
         require_same_length(
@@ -1421,7 +1435,9 @@ class OutputMassCheck(OwnsArrays):
             require_non_negative(self.output_mass_kg, "output_mass_kg"),
             "output_mass_kg",
         )
-        if np.any(np.asarray(self.output_apparent_mass_kg, dtype=np.float64) <= 0.0):
+        if np.any(
+            real_array(self.output_apparent_mass_kg, "output_apparent_mass_kg") <= 0.0
+        ):
             msg = "OutputMassCheck: 'output_apparent_mass_kg' must be positive."
             raise ValueError(msg)
 
@@ -1541,7 +1557,8 @@ def check_output_mass(
     :raises ValueError: for frequencies that are not finite and positive, a
         negative mass, or level spectra that do not carry one finite level per
         frequency.
-    :raises TypeError: if ``output_mass_kg`` is not a single number.
+    :raises TypeError: if ``output_mass_kg`` is not a single number, or ``frequencies``
+        holds a text or a value that is not a real number.
     :warns TransferStiffnessWarning: where ``m0`` exceeds its limit.
     """
     owner = "check_output_mass"
@@ -1554,7 +1571,7 @@ def check_output_mass(
         ("output_force_level", output_force_level),
         ("output_acceleration_level", output_acceleration_level),
     ):
-        level = np.asarray(value, dtype=np.float64)
+        level = real_array(value, "output_force_level")
         if level.shape != freq.shape or not np.all(np.isfinite(level)):
             msg = f"{owner}: '{name}' must carry one finite level per frequency."
             raise ValueError(msg)
@@ -1663,7 +1680,9 @@ class EffectiveBlockingMass(OwnsArrays):
         :raises ValueError: if the arrays differ in length or rank, a value is
             not finite, a mass is not positive, or the frequencies do not rise
             strictly.
-        :raises TypeError: if ``blocking_mass`` is not a single number.
+        :raises TypeError: if ``blocking_mass`` is not a single number, or
+            ``effective_mass_kg`` or ``frequencies`` holds a text or a value that is not
+            a real number.
         """
         owner = type(self).__name__
         require_ranks(self, frequencies=1, effective_mass_kg=1)
@@ -1673,7 +1692,7 @@ class EffectiveBlockingMass(OwnsArrays):
             require_positive(self.blocking_mass, "blocking_mass"),
             "blocking_mass",
         )
-        if np.any(np.asarray(self.effective_mass_kg, dtype=np.float64) <= 0.0):
+        if np.any(real_array(self.effective_mass_kg, "effective_mass_kg") <= 0.0):
             msg = f"{owner}: 'effective_mass_kg' must be positive."
             raise ValueError(msg)
         freq = _frequency_axis(self.frequencies, owner)
@@ -1777,7 +1796,8 @@ def effective_blocking_mass(
     :raises ValueError: for frequencies that are not finite, positive and
         strictly increasing, phasors of another length, a zero or non-finite
         effective mass, or a non-positive ``m2``.
-    :raises TypeError: if ``blocking_mass`` is not a single number.
+    :raises TypeError: if ``blocking_mass`` is not a single number, or ``frequencies``
+        holds a text or a value that is not a real number.
     """
     owner = "effective_blocking_mass"
     blocking_mass = require_positive(blocking_mass, "blocking_mass")
@@ -1874,6 +1894,8 @@ class DrivingPointStiffnessResult(OwnsArrays):
             is not finite, a stiffness is zero, the frequencies do not rise
             strictly, a level difference is NaN or ``-inf``, or no adequate
             line lies between 1 Hz and 20 Hz.
+        :raises TypeError: if ``frequencies`` holds a text or a value that is not a real
+            number.
         """
         owner = type(self).__name__
         require_ranks(
@@ -2123,6 +2145,8 @@ def driving_point_stiffness(
         strictly increasing, phasors that do not carry one value per
         frequency, a zero input acceleration, or no adequate line from 1 Hz to
         20 Hz.
+    :raises TypeError: if ``frequencies`` holds a text or a value that is not a real
+        number.
     :warns TransferStiffnessWarning: where Inequality (1) or (2) fails.
     """
     owner = "driving_point_stiffness"

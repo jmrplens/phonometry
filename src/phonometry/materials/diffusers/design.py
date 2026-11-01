@@ -60,13 +60,18 @@ from __future__ import annotations
 
 import math
 from dataclasses import KW_ONLY, dataclass
-from typing import TYPE_CHECKING, Any, overload
+from typing import TYPE_CHECKING, Any, cast, overload
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
 from ..._internal.frozen import OwnsArrays
-from ..._internal.validation import require_count, require_present, require_scalar
+from ..._internal.validation import (
+    real_array,
+    require_count,
+    require_present,
+    require_scalar,
+)
 from .scattering_diffusion import (
     DiffusionSpectrum,
     diffusion_spectrum,
@@ -358,7 +363,7 @@ def _resolve_reflection(
             msg = "'reflection' values must be finite."
             raise ValueError(msg)
         return r
-    d = np.atleast_1d(np.asarray(depths, dtype=np.float64))
+    d = np.atleast_1d(real_array(cast("ArrayLike", depths), "depths"))
     if d.ndim != 1 or d.size < _MIN_WELLS:
         msg = "'depths' must be a 1-D sequence of at least two wells."
         raise ValueError(msg)
@@ -381,7 +386,7 @@ def _prepare_geometry(
     w = _positive_scalar(well_width, "well_width")
     f = _positive_scalar(frequency, "frequency")
     c = _positive_scalar(speed_of_sound, "speed_of_sound")
-    ang = np.atleast_1d(np.asarray(angles_deg, dtype=np.float64))
+    ang = np.atleast_1d(real_array(angles_deg, "angles_deg"))
     if ang.ndim != 1 or ang.size < _MIN_RECEIVERS:
         msg = "'angles_deg' must be a 1-D sequence of at least two angles."
         raise ValueError(msg)
@@ -480,7 +485,8 @@ def predict_diffuser_polar_response(
         and ``reflection`` is supplied.
     :raises TypeError: if ``frequency``, ``source_angle_deg``, ``speed_of_sound`` or
         ``well_width`` is not a single number, or ``n_repetitions`` is a flag, a text or
-        an array where a count goes.
+        an array where a count goes, or ``angles_deg`` or ``depths`` holds a text or a
+        value that is not a real number.
     """
     w, f, ang, psi, n_periods, c = _prepare_geometry(
         well_width,
@@ -511,7 +517,7 @@ def predict_diffuser_polar_response(
         coefficient=coefficient,
         source_angle_deg=psi,
         well_width=w,
-        depths=(np.asarray(depths, dtype=np.float64) if depths is not None else None),
+        depths=(real_array(depths, "depths") if depths is not None else None),
         n_repetitions=n_periods,
     )
 
@@ -565,6 +571,8 @@ def predicted_diffusion_spectrum(
         when ``normalize`` is ``True``, the normalised ``d_n(f)``.
     :raises ValueError: for invalid geometry, an empty ``frequencies`` array, or
         if ``reflection_of`` is not ``None``.
+    :raises TypeError: if ``depths`` or ``frequencies`` holds a text or a value that is
+        not a real number.
     """
     if reflection_of is not None:
         msg = (
@@ -573,11 +581,11 @@ def predicted_diffusion_spectrum(
             "predict_diffuser_polar_response for an explicit reflection model."
         )
         raise ValueError(msg)
-    freqs = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
+    freqs = np.atleast_1d(real_array(frequencies, "frequencies"))
     if freqs.ndim != 1 or freqs.size == 0:
         msg = "'frequencies' must be a non-empty 1-D sequence."
         raise ValueError(msg)
-    d_period = np.atleast_1d(np.asarray(depths, dtype=np.float64))
+    d_period = np.atleast_1d(real_array(depths, "depths"))
     flat = np.zeros_like(d_period)
 
     raw = np.empty(freqs.size, dtype=np.float64)

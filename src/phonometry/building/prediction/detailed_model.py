@@ -103,6 +103,7 @@ from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays, read_only
 from ..._internal.validation import (
     check_engine,
+    real_array,
     require_axis_count,
     require_band_fraction,
     require_choice,
@@ -218,7 +219,7 @@ def _band_array(
 ) -> np.ndarray:
     """Coerce *values* to ``n_bands`` finite floats, broadcasting a scalar."""
     require_scalar(n_bands, "n_bands")
-    data = np.atleast_1d(np.asarray(values, dtype=np.float64))
+    data = np.atleast_1d(real_array(values, name))
     if data.ndim != 1 or data.size == 0:
         msg = f"'{name}' must be a non-empty 1-D array."
         raise ValueError(msg)
@@ -266,7 +267,7 @@ def _rating_slice(
         if match.size == 0:
             return None
         indices.append(int(match[0]))
-    return np.asarray(values[indices], dtype=np.float64)
+    return real_array(values[indices], "values")
 
 
 def _check_report_request(engine: ReportEngine, language: Language) -> None:
@@ -505,7 +506,8 @@ def calculated_sound_reduction_index(
         arrays do not share the band count.
     :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a float),
         ``critical_frequency``, ``density``, ``longitudinal_velocity`` or
-        ``mass_per_area`` is not a single number, or ``frequencies`` holds a text or a
+        ``mass_per_area`` is not a single number, or ``forced_radiation_factor``,
+        ``frequencies``, ``radiation_factor`` or ``total_loss_factor`` holds a text or a
         value that is not a real number.
     """
     f = require_positive_array(frequencies, "frequencies")
@@ -574,8 +576,9 @@ def bare_floor_impact_level(
     :return: The normalized impact sound pressure level ``Ln`` per band, in dB.
     :raises ValueError: If an input is not positive/finite or the per-band
         arrays do not share the band count.
-    :raises TypeError: if ``mass_per_area`` is not a single number, or ``frequencies``
-        holds a text or a value that is not a real number.
+    :raises TypeError: if ``mass_per_area`` is not a single number, or ``frequencies``,
+        ``radiation_factor`` or ``structural_reverberation_time`` holds a text or a
+        value that is not a real number.
     """
     f = require_positive_array(frequencies, "frequencies")
     m = require_positive(mass_per_area, "mass_per_area")
@@ -620,11 +623,13 @@ def perimeter_absorption_coefficient(
         (dimensionless).
     :raises ValueError: If the two sequences differ in length, a critical
         frequency is not positive, or an index is not finite.
-    :raises TypeError: if ``critical_frequencies`` holds a text or a value that is not a
-        real number.
+    :raises TypeError: if ``critical_frequencies`` or ``vibration_reduction_indices``
+        holds a text or a value that is not a real number.
     """
     fc = require_positive_array(critical_frequencies, "critical_frequencies")
-    kij = np.atleast_1d(np.asarray(vibration_reduction_indices, dtype=np.float64))
+    kij = np.atleast_1d(
+        real_array(vibration_reduction_indices, "vibration_reduction_indices")
+    )
     require_equal_shapes(
         "perimeter_absorption_coefficient",
         {
@@ -676,7 +681,8 @@ def in_situ_total_loss_factor(
         is negative, or the band counts disagree.
     :raises TypeError: if ``area``, ``critical_frequency``, ``internal_loss_factor``,
         ``mass_per_area`` or ``perimeter_absorption`` is not a single number, or
-        ``frequencies`` holds a text or a value that is not a real number.
+        ``frequencies`` or ``radiation_factor`` holds a text or a value that is not a
+        real number.
     """
     f = require_positive_array(frequencies, "frequencies")
     eta_int = require_positive(internal_loss_factor, "internal_loss_factor")
@@ -735,8 +741,8 @@ def structural_reverberation_time(
     :return: The structural reverberation time ``Ts`` per band, in s.
     :raises ValueError: If an input is not positive/finite or the band counts
         disagree.
-    :raises TypeError: if ``frequencies`` holds a text or a value that is not a real
-        number.
+    :raises TypeError: if ``frequencies`` or ``total_loss_factor`` holds a text or a
+        value that is not a real number.
     """
     f = require_positive_array(frequencies, "frequencies")
     eta = _band_array(total_loss_factor, f.size, "total_loss_factor", positive=True)
@@ -768,10 +774,10 @@ def in_situ_reduction_index(
     :return: The in-situ index ``Rsitu`` per band, in dB.
     :raises ValueError: If a reverberation time is not positive/finite or the
         band counts disagree.
-    :raises TypeError: if ``laboratory_reverberation_time`` or
-        ``situ_reverberation_time`` holds a text or a value that is not a real number.
+    :raises TypeError: if ``laboratory_reverberation_time``, ``situ_reverberation_time``
+        or ``sound_reduction_index`` holds a text or a value that is not a real number.
     """
-    r = np.atleast_1d(np.asarray(sound_reduction_index, dtype=np.float64))
+    r = np.atleast_1d(real_array(sound_reduction_index, "sound_reduction_index"))
     ratio = _time_ratio(situ_reverberation_time, laboratory_reverberation_time)
     return np.asarray(r - 10.0 * np.log10(ratio), dtype=np.float64)
 
@@ -794,10 +800,10 @@ def in_situ_impact_level(
     :return: The in-situ level ``Ln,situ`` per band, in dB.
     :raises ValueError: If a reverberation time is not positive/finite or the
         band counts disagree.
-    :raises TypeError: if ``laboratory_reverberation_time`` or
+    :raises TypeError: if ``impact_level``, ``laboratory_reverberation_time`` or
         ``situ_reverberation_time`` holds a text or a value that is not a real number.
     """
-    ln = np.atleast_1d(np.asarray(impact_level, dtype=np.float64))
+    ln = np.atleast_1d(real_array(impact_level, "impact_level"))
     ratio = _time_ratio(situ_reverberation_time, laboratory_reverberation_time)
     return np.asarray(ln + 10.0 * np.log10(ratio), dtype=np.float64)
 
@@ -829,8 +835,8 @@ def in_situ_equivalent_absorption_length(
     :return: The equivalent absorption length ``asitu`` per band, in m.
     :raises ValueError: If an input is not positive/finite or the band counts
         disagree.
-    :raises TypeError: if ``frequencies`` holds a text or a value that is not a real
-        number.
+    :raises TypeError: if ``frequencies`` or ``situ_reverberation_time`` holds a text or
+        a value that is not a real number.
     """
     from ..measurement.flanking_transmission import equivalent_absorption_length
 
@@ -871,8 +877,8 @@ def in_situ_velocity_level_difference(
     :raises ValueError: If a length is not positive/finite or the band counts
         disagree.
     :raises TypeError: if ``coupling_length`` is not a single number, or
-        ``absorption_length_i`` or ``absorption_length_j`` holds a text or a value that
-        is not a real number.
+        ``absorption_length_i``, ``absorption_length_j`` or
+        ``vibration_reduction_index`` holds a text or a value that is not a real number.
     """
     a_i_raw = require_positive_array(absorption_length_i, "absorption_length_i")
     a_j_raw = require_positive_array(absorption_length_j, "absorption_length_j")
@@ -906,12 +912,14 @@ def direct_reduction_index(
     :param delta_r_source: ``ΔRD,situ`` on the source side, per band, in dB.
     :param delta_r_receiving: ``ΔRd,situ`` on the receiving side, in dB.
     :return: ``RDd`` per band, in dB.
+    :raises TypeError: if ``delta_r_receiving``, ``delta_r_source`` or
+        ``separating_index`` holds a text or a value that is not a real number.
     """
-    r = np.atleast_1d(np.asarray(separating_index, dtype=np.float64))
+    r = np.atleast_1d(real_array(separating_index, "separating_index"))
     return np.asarray(
         r
-        + np.asarray(delta_r_source, dtype=np.float64)
-        + np.asarray(delta_r_receiving, dtype=np.float64),
+        + real_array(delta_r_source, "delta_r_source")
+        + real_array(delta_r_receiving, "delta_r_receiving"),
         dtype=np.float64,
     )
 
@@ -955,19 +963,22 @@ def flanking_reduction_index(
     :return: ``Rij`` per band, in dB.
     :raises ValueError: If an area is not positive and finite.
     :raises TypeError: if ``area_i``, ``area_j`` or ``separating_area`` is not a single
-        number.
+        number, or ``delta_r_i``, ``delta_r_j``, ``index_i``, ``index_j`` or
+        ``velocity_level_difference`` holds a text or a value that is not a real number.
     """
     ss = require_positive(separating_area, "separating_area")
     si = require_positive(area_i, "area_i")
     sj = require_positive(area_j, "area_j")
-    r_i = np.atleast_1d(np.asarray(index_i, dtype=np.float64))
-    r_j = np.atleast_1d(np.asarray(index_j, dtype=np.float64))
-    dv = np.atleast_1d(np.asarray(velocity_level_difference, dtype=np.float64))
+    r_i = np.atleast_1d(real_array(index_i, "index_i"))
+    r_j = np.atleast_1d(real_array(index_j, "index_j"))
+    dv = np.atleast_1d(
+        real_array(velocity_level_difference, "velocity_level_difference")
+    )
     return np.asarray(
         r_i / 2.0
-        + np.asarray(delta_r_i, dtype=np.float64)
+        + real_array(delta_r_i, "delta_r_i")
         + r_j / 2.0
-        + np.asarray(delta_r_j, dtype=np.float64)
+        + real_array(delta_r_j, "delta_r_j")
         + dv
         + 10.0 * np.log10(ss / np.sqrt(si * sj)),
         dtype=np.float64,
@@ -1008,20 +1019,24 @@ def flanking_reduction_index_from_normalized_difference(
     :return: ``Rij`` per band, in dB.
     :raises ValueError: If a geometry value is not positive and finite.
     :raises TypeError: if ``coupling_length`` or ``separating_area`` is not a single
-        number.
+        number, or ``delta_r_i``, ``delta_r_j``, ``index_i``, ``index_j`` or
+        ``normalized_velocity_level_difference`` holds a text or a value that is not a
+        real number.
     """
     ss = require_positive(separating_area, "separating_area")
     lij = require_positive(coupling_length, "coupling_length")
-    r_i = np.atleast_1d(np.asarray(index_i, dtype=np.float64))
-    r_j = np.atleast_1d(np.asarray(index_j, dtype=np.float64))
+    r_i = np.atleast_1d(real_array(index_i, "index_i"))
+    r_j = np.atleast_1d(real_array(index_j, "index_j"))
     dv = np.atleast_1d(
-        np.asarray(normalized_velocity_level_difference, dtype=np.float64)
+        real_array(
+            normalized_velocity_level_difference, "normalized_velocity_level_difference"
+        )
     )
     return np.asarray(
         r_i / 2.0
-        + np.asarray(delta_r_i, dtype=np.float64)
+        + real_array(delta_r_i, "delta_r_i")
         + r_j / 2.0
-        + np.asarray(delta_r_j, dtype=np.float64)
+        + real_array(delta_r_j, "delta_r_j")
         + dv
         + 10.0 * np.log10(ss / (_REFERENCE_LENGTH * lij)),
         dtype=np.float64,
@@ -1054,13 +1069,16 @@ def flanking_reduction_index_from_flanking_level(
     :return: ``Rij`` per band, in dB.
     :raises ValueError: If a geometry value is not positive and finite.
     :raises TypeError: if ``coupling_length``, ``laboratory_coupling_length``,
-        ``reference_absorption_area`` or ``separating_area`` is not a single number.
+        ``reference_absorption_area`` or ``separating_area`` is not a single number, or
+        ``flanking_level_difference`` holds a text or a value that is not a real number.
     """
     ss = require_positive(separating_area, "separating_area")
     lij = require_positive(coupling_length, "coupling_length")
     llab = require_positive(laboratory_coupling_length, "laboratory_coupling_length")
     a0 = require_positive(reference_absorption_area, "reference_absorption_area")
-    dnf = np.atleast_1d(np.asarray(flanking_level_difference, dtype=np.float64))
+    dnf = np.atleast_1d(
+        real_array(flanking_level_difference, "flanking_level_difference")
+    )
     return np.asarray(dnf + 10.0 * np.log10(ss * llab / (a0 * lij)), dtype=np.float64)
 
 
@@ -1092,7 +1110,8 @@ def resonant_sound_reduction_index(
     :raises ValueError: If an input is not positive/finite or the band counts
         disagree.
     :raises TypeError: if ``critical_frequency`` is not a single number, or
-        ``frequencies`` holds a text or a value that is not a real number.
+        ``correction``, ``frequencies`` or ``sound_reduction_index`` holds a text or a
+        value that is not a real number.
     """
     f = require_positive_array(frequencies, "frequencies")
     fc = require_positive(critical_frequency, "critical_frequency")
@@ -1125,7 +1144,8 @@ def reciprocity_impact_level(
     :raises ValueError: If an input is not positive/finite or the band counts
         disagree.
     :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a float), or
-        ``frequencies`` holds a text or a value that is not a real number.
+        ``frequencies`` or ``sound_reduction_index`` holds a text or a value that is not
+        a real number.
     """
     f = require_positive_array(frequencies, "frequencies")
     r = _band_array(sound_reduction_index, f.size, "sound_reduction_index")
@@ -1151,12 +1171,14 @@ def direct_impact_level(
     :param delta_l_ceiling: Improvement ``ΔLd,situ`` of a layer on the
         receiving side, per band, in dB.
     :return: ``Ln,d`` per band, in dB.
+    :raises TypeError: if ``delta_l``, ``delta_l_ceiling`` or ``floor_level`` holds a
+        text or a value that is not a real number.
     """
-    ln = np.atleast_1d(np.asarray(floor_level, dtype=np.float64))
+    ln = np.atleast_1d(real_array(floor_level, "floor_level"))
     return np.asarray(
         ln
-        - np.asarray(delta_l, dtype=np.float64)
-        - np.asarray(delta_l_ceiling, dtype=np.float64),
+        - real_array(delta_l, "delta_l")
+        - real_array(delta_l_ceiling, "delta_l_ceiling"),
         dtype=np.float64,
     )
 
@@ -1191,19 +1213,23 @@ def flanking_impact_level(
         element, per band, in dB.
     :return: ``Ln,ij`` per band, in dB.
     :raises ValueError: If an area is not positive and finite.
-    :raises TypeError: if ``area_i`` or ``area_j`` is not a single number.
+    :raises TypeError: if ``area_i`` or ``area_j`` is not a single number, or
+        ``delta_l``, ``delta_r_j``, ``floor_level``, ``index_i``, ``index_j`` or
+        ``velocity_level_difference`` holds a text or a value that is not a real number.
     """
     si = require_positive(area_i, "area_i")
     sj = require_positive(area_j, "area_j")
-    ln = np.atleast_1d(np.asarray(floor_level, dtype=np.float64))
-    r_i = np.atleast_1d(np.asarray(index_i, dtype=np.float64))
-    r_j = np.atleast_1d(np.asarray(index_j, dtype=np.float64))
-    dv = np.atleast_1d(np.asarray(velocity_level_difference, dtype=np.float64))
+    ln = np.atleast_1d(real_array(floor_level, "floor_level"))
+    r_i = np.atleast_1d(real_array(index_i, "index_i"))
+    r_j = np.atleast_1d(real_array(index_j, "index_j"))
+    dv = np.atleast_1d(
+        real_array(velocity_level_difference, "velocity_level_difference")
+    )
     return np.asarray(
         ln
-        - np.asarray(delta_l, dtype=np.float64)
+        - real_array(delta_l, "delta_l")
         + (r_i - r_j) / 2.0
-        - np.asarray(delta_r_j, dtype=np.float64)
+        - real_array(delta_r_j, "delta_r_j")
         - dv
         - 10.0 * np.log10(si / np.sqrt(si * sj)),
         dtype=np.float64,
@@ -1241,21 +1267,26 @@ def flanking_impact_level_from_normalized_difference(
         per band, in dB.
     :return: ``Ln,ij`` per band, in dB.
     :raises ValueError: If a geometry value is not positive and finite.
-    :raises TypeError: if ``area_i`` or ``coupling_length`` is not a single number.
+    :raises TypeError: if ``area_i`` or ``coupling_length`` is not a single number, or
+        ``delta_l``, ``delta_r_j``, ``floor_level``, ``index_i``, ``index_j`` or
+        ``normalized_velocity_level_difference`` holds a text or a value that is not a
+        real number.
     """
     si = require_positive(area_i, "area_i")
     lij = require_positive(coupling_length, "coupling_length")
-    ln = np.atleast_1d(np.asarray(floor_level, dtype=np.float64))
-    r_i = np.atleast_1d(np.asarray(index_i, dtype=np.float64))
-    r_j = np.atleast_1d(np.asarray(index_j, dtype=np.float64))
+    ln = np.atleast_1d(real_array(floor_level, "floor_level"))
+    r_i = np.atleast_1d(real_array(index_i, "index_i"))
+    r_j = np.atleast_1d(real_array(index_j, "index_j"))
     dv = np.atleast_1d(
-        np.asarray(normalized_velocity_level_difference, dtype=np.float64)
+        real_array(
+            normalized_velocity_level_difference, "normalized_velocity_level_difference"
+        )
     )
     return np.asarray(
         ln
-        - np.asarray(delta_l, dtype=np.float64)
+        - real_array(delta_l, "delta_l")
         + (r_i - r_j) / 2.0
-        - np.asarray(delta_r_j, dtype=np.float64)
+        - real_array(delta_r_j, "delta_r_j")
         - dv
         - 10.0 * np.log10(si / (_REFERENCE_LENGTH * lij)),
         dtype=np.float64,
@@ -1292,13 +1323,17 @@ def flanking_impact_level_from_flanking_level(
     :return: ``Ln,ij`` per band, in dB.
     :raises ValueError: If a geometry value is not positive and finite.
     :raises TypeError: if ``area``, ``coupling_length``, ``laboratory_area`` or
-        ``laboratory_coupling_length`` is not a single number.
+        ``laboratory_coupling_length`` is not a single number, or
+        ``normalized_flanking_impact_level`` holds a text or a value that is not a real
+        number.
     """
     si = require_positive(area, "area")
     si_lab = require_positive(laboratory_area, "laboratory_area")
     lij = require_positive(coupling_length, "coupling_length")
     llab = require_positive(laboratory_coupling_length, "laboratory_coupling_length")
-    ln = np.atleast_1d(np.asarray(normalized_flanking_impact_level, dtype=np.float64))
+    ln = np.atleast_1d(
+        real_array(normalized_flanking_impact_level, "normalized_flanking_impact_level")
+    )
     return np.asarray(
         ln - 10.0 * np.log10(si * llab / (si_lab * lij)), dtype=np.float64
     )
@@ -1676,10 +1711,11 @@ class BandPath(OwnsArrays):
         The values per band are held as the read-only ``float64`` array the
         path sums read them as, whatever sequence they were given as.
 
-        :raises TypeError: if ``kind`` is not a text.
+        :raises TypeError: if ``kind`` is not a text, or ``values`` holds a text or a
+            value that is not a real number.
         """
         require_choice(self.kind, "kind", ("Dd", "Ff", "Df", "Fd"))
-        values = np.asarray(self.values, dtype=np.float64)
+        values = real_array(self.values, "values")
         object.__setattr__(self, "values", read_only(values))
 
 
@@ -2045,7 +2081,8 @@ def detailed_airborne_prediction(
     :return: The :class:`DetailedAirborneResult`.
     :raises ValueError: If a path does not match the band count.
     :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a float), or
-        ``frequencies`` holds a text or a value that is not a real number.
+        ``direct_index`` or ``frequencies`` holds a text or a value that is not a real
+        number.
     """
     from ..measurement.ratings import weighted_rating
 
@@ -2101,7 +2138,8 @@ def detailed_impact_prediction(
     :raises ValueError: If a path does not match the band count, or if neither
         a direct level nor any flanking path is given.
     :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a float), or
-        ``frequencies`` holds a text or a value that is not a real number.
+        ``direct_level`` or ``frequencies`` holds a text or a value that is not a real
+        number.
     """
     from ..measurement.ratings import weighted_impact_rating
 

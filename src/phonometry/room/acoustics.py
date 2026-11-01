@@ -49,6 +49,7 @@ from .._internal.frozen import OwnsArrays
 from .._internal.types import as_float_or_array
 from .._internal.validation import (
     check_engine,
+    real_array,
     require_ranks,
     require_same_length,
     require_scalar,
@@ -387,7 +388,7 @@ def _band_parameters(x: np.ndarray, fs: float) -> tuple[float, ...]:
     :return: ``(edt, t20, t30, c50, c80, d50, ts, dynamic_range)``.
     """
     nan = float("nan")
-    p2 = x.astype(np.float64) ** 2
+    p2 = real_array(x, "x", copy=True) ** 2
     if not np.any(p2 > 0.0):
         return (nan,) * 7 + (0.0,)
     p2 = p2[onset_index(p2) :]
@@ -712,6 +713,7 @@ def filter_bandwidth(
         an array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: If ``fraction`` is not one the clause prints a
         coefficient for, or a centre frequency is not positive and finite.
+    :raises TypeError: if ``center`` holds a text or a value that is not a real number.
     """
     if fraction not in FILTER_BANDWIDTH_FRACTION:
         msg = (
@@ -720,7 +722,7 @@ def filter_bandwidth(
             f"{sorted(FILTER_BANDWIDTH_FRACTION)}; got {fraction!r}."
         )
         raise ValueError(msg)
-    frequencies = np.asarray(center, dtype=np.float64)
+    frequencies = real_array(center, "center")
     if not np.all(np.isfinite(frequencies)) or np.any(frequencies <= 0.0):
         msg = "'center' must be a positive, finite frequency in Hz."
         raise ValueError(msg)
@@ -778,7 +780,9 @@ def reverberation_time_standard_deviation(
         coefficients for, if ``decays`` or ``positions`` is below one, or if a
         reverberation time or bandwidth is not positive and finite. An
         infinite ``decays`` is taken: it is the limit 7.2 declines to use.
-    :raises TypeError: if ``evaluation_range`` is not a single number.
+    :raises TypeError: if ``evaluation_range`` is not a single number, or ``bandwidth``,
+        ``decays``, ``positions`` or ``reverberation_time`` holds a text or a value that
+        is not a real number.
     """
     require_scalar(evaluation_range, "evaluation_range")
     key = float(evaluation_range)
@@ -790,13 +794,13 @@ def reverberation_time_standard_deviation(
             f"{evaluation_range!r}."
         )
         raise ValueError(msg)
-    counted = np.asarray(decays, dtype=np.float64)
-    places = np.asarray(positions, dtype=np.float64)
+    counted = real_array(decays, "decays")
+    places = real_array(positions, "positions")
     if np.any(np.isnan(counted)) or np.any(counted < 1.0) or np.any(places < 1.0):
         msg = "'decays' and 'positions' count measurements, so both must be at least 1."
         raise ValueError(msg)
-    times = np.asarray(reverberation_time, dtype=np.float64)
-    width = np.asarray(bandwidth, dtype=np.float64)
+    times = real_array(reverberation_time, "reverberation_time")
+    width = real_array(bandwidth, "bandwidth")
     finite = np.all(np.isfinite(times)) and np.all(np.isfinite(width))
     if not finite or np.any(times <= 0.0) or np.any(width <= 0.0):
         msg = "'reverberation_time' and 'bandwidth' must be positive and finite."
@@ -866,9 +870,10 @@ def min_reliable_reverberation_time(
         an array, a zero-dimensional one included.
     :raises ValueError: If a bandwidth is not positive and finite, or the
         detector time is not a finite time of zero seconds or more.
-    :raises TypeError: if ``detector_time`` is not a single number.
+    :raises TypeError: if ``detector_time`` is not a single number, or ``bandwidth``
+        holds a text or a value that is not a real number.
     """
-    width = np.asarray(bandwidth, dtype=np.float64)
+    width = real_array(bandwidth, "bandwidth")
     if not np.all(np.isfinite(width)) or np.any(width <= 0.0):
         msg = "'bandwidth' must be a positive, finite bandwidth in Hz."
         raise ValueError(msg)

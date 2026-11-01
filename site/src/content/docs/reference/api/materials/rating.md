@@ -203,6 +203,7 @@ Practical sound absorption coefficients `alpha_p` (ISO 11654 Clause 4.1).
 | Exception | When |
 | :--- | :--- |
 | ValueError | if any coefficient is negative or the wrong number of values is supplied. |
+| TypeError | if `third_octave_alpha_s` holds a text or a value that is not a real number. |
 
 ## RATING_OCTAVE_BANDS_HZ
 
@@ -256,6 +257,7 @@ unfavourable deviations (measured below the shifted curve) is at most
 | Exception | When |
 | :--- | :--- |
 | ValueError | if any coefficient is negative or the wrong number of values is supplied. |
+| TypeError | if `alpha_p` holds a text or a value that is not a real number. |
 
 ## weighted_absorption_from_third_octave
 
@@ -289,3 +291,4 @@ ISO 354 certificate carries.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if any coefficient is negative or the wrong number of values is supplied. |
+| TypeError | if `third_octave_alpha_s` holds a text or a value that is not a real number. |

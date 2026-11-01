@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Any, Final, overload
 
 import numpy as np
 
+from .._internal.validation import real_array
 from .common import (
     _C_MUTED,
     _C_PRIMARY,
@@ -868,9 +869,9 @@ def _plot_loss_field(
     from .._i18n import localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    r = np.asarray(ranges, dtype=np.float64) / 1000.0
-    z = np.asarray(depths, dtype=np.float64)
-    pl = np.asarray(pl, dtype=np.float64)
+    r = real_array(ranges, "ranges") / 1000.0
+    z = real_array(depths, "depths")
+    pl = real_array(pl, "pl")
     finite = pl[np.isfinite(pl)]
     vmin = float(np.percentile(finite, 5)) if finite.size else 50.0
     vmax = vmin + 50.0
@@ -973,7 +974,7 @@ def _plottable(levels: ArrayLike) -> np.ndarray:
     Band levels carry ``-inf`` where a band holds no energy at all; drawing
     that literally would collapse the vertical scale.
     """
-    values = np.asarray(levels, dtype=np.float64)
+    values = real_array(levels, "levels")
     return np.where(np.isfinite(values), values, np.nan)
 
 

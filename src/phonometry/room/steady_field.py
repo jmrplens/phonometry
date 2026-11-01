@@ -84,6 +84,7 @@ import numpy as np
 from .._internal.frozen import OwnsArrays
 from .._internal.types import as_float_or_array
 from .._internal.validation import (
+    real_array,
     require_choice,
     require_positive,
     require_ranks,
@@ -117,7 +118,7 @@ __all__ = [
 
 def _require_fraction_below_one(value: ArrayLike, name: str) -> NDArray[np.float64]:
     """Validate a mean absorption in ``(0, 1)`` (scalar or per-band)."""
-    arr = np.asarray(value, dtype=np.float64)
+    arr = real_array(value, name)
     if not np.all(np.isfinite(arr)):
         msg = f"'{name}' must be finite."
         raise ValueError(msg)
@@ -140,7 +141,7 @@ def _require_positive_array(value: ArrayLike, name: str) -> NDArray[np.float64]:
     empty level spectrum, which reads as a room with no bands rather than as
     the mistake it is.
     """
-    arr = np.asarray(value, dtype=np.float64)
+    arr = real_array(value, name)
     if arr.ndim > 1 or arr.size == 0:
         msg = f"'{name}' must be a scalar or a non-empty 1-D array."
         raise ValueError(msg)
@@ -206,7 +207,8 @@ def room_constant(
         :func:`phonometry.room.mean_absorption`.
     :return: The room constant ``R``, m2; a ``float`` for a number; an array for a
         sequence or an array, a zero-dimensional one included.
-    :raises TypeError: if ``surface_area`` is not a single number.
+    :raises TypeError: if ``surface_area`` is not a single number, or
+        ``mean_absorption`` holds a text or a value that is not a real number.
     """
     surface_area = require_positive(surface_area, "surface_area")
     alpha = _require_fraction_below_one(mean_absorption, "mean_absorption")
@@ -296,6 +298,8 @@ def critical_distance(
         is a sequence or an array, a zero-dimensional one included.
     :raises ValueError: unless exactly one absorption measure is given, or if
         a value is not positive and finite.
+    :raises TypeError: if ``absorption_area``, ``directivity`` or ``room_constant``
+        holds a text or a value that is not a real number.
     """
     measure = _one_absorption_measure(room_constant, absorption_area)
     q = _require_positive_array(directivity, "directivity")
@@ -349,7 +353,8 @@ def sabine_absorption_area(
         array for a sequence or an array, a zero-dimensional one included.
     :raises ValueError: If the volume, the time or the speed is not positive
         and finite.
-    :raises TypeError: if ``speed_of_sound`` or ``volume`` is not a single number.
+    :raises TypeError: if ``speed_of_sound`` or ``volume`` is not a single number, or
+        ``reverberation_time`` holds a text or a value that is not a real number.
     """
     v = require_positive(volume, "volume")
     c = require_positive(speed_of_sound, "speed_of_sound")
@@ -392,10 +397,11 @@ def schroeder_frequency(
     :param volume: Room volume ``V``, m3.
     :return: The Schroeder frequency, Hz; a ``float`` for a number; an array for a
         sequence or an array, a zero-dimensional one included.
-    :raises TypeError: if ``volume`` is not a single number.
+    :raises TypeError: if ``volume`` is not a single number, or ``reverberation_time``
+        holds a text or a value that is not a real number.
     """
     volume = require_positive(volume, "volume")
-    t = np.asarray(reverberation_time, dtype=np.float64)
+    t = real_array(reverberation_time, "reverberation_time")
     if np.any(t <= 0.0) or not np.all(np.isfinite(t)):
         msg = "'reverberation_time' must be positive and finite."
         raise ValueError(msg)
@@ -503,16 +509,18 @@ def steady_state_spl(
         finite; or if ``source_model`` is not one of
         :data:`SOURCE_POWER_MODELS`.
     :raises TypeError: if ``source_model`` is not a text, or
-        ``characteristic_impedance`` is not a single number.
+        ``characteristic_impedance`` is not a single number, or ``absorption_area``,
+        ``directivity``, ``distance``, ``room_constant`` or ``sound_power_level`` holds
+        a text or a value that is not a real number.
     """
-    lw = np.asarray(sound_power_level, dtype=np.float64)
+    lw = real_array(sound_power_level, "sound_power_level")
     # Named measure (not rc) to avoid confusion with the critical distance rc.
     measure = _one_absorption_measure(room_constant, absorption_area)
     q = _require_positive_array(directivity, "directivity")
     model = require_choice(source_model, "source_model", tuple(SOURCE_POWER_MODELS))
     bracket = 4.0 / measure
     if distance is not None:
-        r = np.asarray(distance, dtype=np.float64)
+        r = real_array(distance, "distance")
         if np.any(r <= 0.0) or not np.all(np.isfinite(r)):
             msg = "'distance' must be positive and finite."
             raise ValueError(msg)
@@ -632,7 +640,8 @@ def steady_state_field(
         :math:`10 \log_{10}(\rho c / 400)` term (``None`` omits it).
     :return: A :class:`SteadyFieldResult`.
     :raises TypeError: if ``characteristic_impedance``, ``directivity``,
-        ``mean_absorption`` or ``sound_power_level`` is not a single number.
+        ``mean_absorption`` or ``sound_power_level`` is not a single number, or
+        ``distances`` holds a text or a value that is not a real number.
     """
     require_scalar(mean_absorption, "mean_absorption")
     require_scalar(sound_power_level, "sound_power_level")
@@ -644,7 +653,7 @@ def steady_state_field(
     if distances is None:
         r = np.geomspace(0.1 * rc, 10.0 * rc, 30)
     else:
-        r = np.asarray(distances, dtype=np.float64)
+        r = real_array(distances, "distances")
         if r.ndim != 1 or r.size == 0:
             msg = "'distances' must be a non-empty 1D array."
             raise ValueError(msg)

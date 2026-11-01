@@ -72,6 +72,7 @@ be dimensionally consistent with the $4 \pi$ factor.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-1-D input or non-positive spacings. |
+| TypeError | if `elevations` holds a text or a value that is not a real number. |
 
 ## diffusion_spectrum
 
@@ -110,6 +111,7 @@ are carried through when supplied.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if the inputs differ in shape, are empty or not 1-D. |
+| TypeError | if `diffusion`, `frequencies` or `normalized` holds a text or a value that is not a real number. |
 
 ## DiffusionResult
 
@@ -319,6 +321,7 @@ keeps the receiver angles alongside the levels and returns a plottable
 | Exception | When |
 | :--- | :--- |
 | ValueError | if `angles_deg` and `levels` differ in length or are shorter than two receivers. |
+| TypeError | if `angles_deg` or `levels` holds a text or a value that is not a real number. |
 
 ## directional_diffusion_coefficient
 
@@ -366,6 +369,7 @@ are equal.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for fewer than two receivers, a non-1-D input, a length mismatch, or non-positive total weight. |
+| TypeError | if `area_weights` or `levels` holds a text or a value that is not a real number. |
 
 ## normalized_diffusion_coefficient
 
@@ -399,6 +403,7 @@ to 0 and $d_\theta = 1$ to 1.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if any reference coefficient equals 1 (undefined ratio). |
+| TypeError | if `d_theta` or `d_theta_reference` holds a text or a value that is not a real number. |
 
 ## plot_goniometer_geometry
 
@@ -476,6 +481,7 @@ measurements use the source weighting of Clause 8.4 - weight 1 for the
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an empty or non-1-D input, a length mismatch, or non-positive total weight. |
+| TypeError | if `directional_coefficients` or `weights` holds a text or a value that is not a real number. |
 
 ## TWO_DIMENSIONAL_SOURCE_WEIGHTS
 

@@ -127,6 +127,7 @@ octave is the 50, 63 and 80 Hz thirds and the 8 kHz octave the 6,3, 8 and
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a frequency outside Table F.1, a repeated frequency, an octave whose three thirds are not all present, or levels that do not carry one value per frequency. |
+| TypeError | if `frequencies` or `levels` holds a text or a value that is not a real number. |
 
 ## OctaveBandLevels
 
@@ -437,7 +438,7 @@ time-averaged correction of 9.1.2.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a malformed or non-finite level array, a non-physical climate, a background without its `integration_time` or without `frequencies`, or mismatched band counts. |
-| TypeError | if `integration_time` is not a single number, or `n_events` is a flag, a text or an array where a count goes. |
+| TypeError | if `integration_time` is not a single number, or `n_events` is a flag, a text or an array where a count goes, or `frequencies`, `levels`, `reference_background_levels` or `reference_levels` holds a text or a value that is not a real number. |
 
 ## sound_energy_reverberation
 
@@ -508,7 +509,7 @@ NOTE 1), so that the energies Eq. (25) subtracts share one reference;
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a malformed or non-finite level array, a non-physical room or climate, a background without its `integration_time`, or mismatched band counts. |
-| TypeError | if `integration_time`, `surface_area` or `volume` is not a single number, or `n_events` is a flag, a text or an array where a count goes. |
+| TypeError | if `integration_time`, `surface_area` or `volume` is not a single number, or `n_events` is a flag, a text or an array where a count goes, or `frequencies`, `levels` or `t60` holds a text or a value that is not a real number. |
 
 ## sound_power_comparison
 
@@ -555,6 +556,12 @@ the two sources, so the room absorption need not be known.
 | `static_pressure_kpa` | Static pressure `ps` in the room, in kilopascals. |
 
 **Returns:** [`ReverberationSoundPowerResult`](/phonometry/reference/api/power/sound-power-reverberation/#reverberationsoundpowerresult) (`method='comparison'`).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `background_levels`, `frequencies`, `levels`, `reference_background_levels` or `reference_levels` holds a text or a value that is not a real number. |
 
 ## sound_power_reverberation
 
@@ -609,4 +616,4 @@ reference meteorological conditions (clause 4).
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `surface_area` or `volume` is not a single number. |
+| TypeError | if `surface_area` or `volume` is not a single number, or `background_levels`, `frequencies`, `levels` or `t60` holds a text or a value that is not a real number. |

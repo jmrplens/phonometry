@@ -108,7 +108,7 @@ refers it to the actual receiver).
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive characteristic mobility. |
-| TypeError | if `characteristic_mobility` is not a single number. |
+| TypeError | if `characteristic_mobility` is not a single number, or `blocked_force_level` holds a text or a value that is not a real number. |
 
 ## equivalent_blocked_force_level
 
@@ -141,6 +141,7 @@ arithmetic mean of Re{Y} over the contact points, Formula 16).
 | Exception | When |
 | :--- | :--- |
 | ValueError | if `power_level` is not finite, `Re{plate_mobility}` is not positive and finite, or the two shapes do not broadcast together. |
+| TypeError | if `power_level` holds a text or a value that is not a real number. |
 
 ## equivalent_free_velocity_level
 
@@ -175,6 +176,7 @@ combine through Formula (19) into $|Y_\mathrm{S,eq}| = v_\mathrm{f} / F_\mathrm{
 | Exception | When |
 | :--- | :--- |
 | ValueError | if `power_level` is not finite, `Re{plate_mobility}` is not positive and finite, or the two shapes do not broadcast together. |
+| TypeError | if `power_level` holds a text or a value that is not a real number. |
 
 ## mean_free_velocity_level
 
@@ -230,6 +232,12 @@ ISO 10848 total loss factor.
 
 **Returns:** The loss factor `eta` (dimensionless) per band.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `frequency` or `reverberation_time` holds a text or a value that is not a real number. |
+
 ## reception_plate_power
 
 ```python
@@ -271,7 +279,7 @@ quantities.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if neither `loss_factor` nor `reverberation_time` is given, or if `velocity_level` or `loss_factor` is neither a scalar nor one value per band. |
-| TypeError | if `loss_factor` or `velocity_level` holds a text or a value that is not a real number. |
+| TypeError | if `frequency`, `loss_factor` or `velocity_level` holds a text or a value that is not a real number. |
 
 ## source_mobility_from_levels
 
@@ -303,6 +311,7 @@ $(10^{-9}/10^{-6})^2 = 10^{-6}$.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-finite level, or two shapes that do not broadcast together. |
+| TypeError | if `blocked_force_level` or `free_velocity_level` holds a text or a value that is not a real number. |
 
 ## spatial_mean_velocity_level
 
@@ -385,7 +394,7 @@ the EN 12354-5 Annex I mobility correction
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive mass, area or reference, a frequency or loss factor that is not positive and finite, a non-finite velocity level, or per-band inputs whose shapes do not broadcast together. |
-| TypeError | if `area`, `mass_per_area` or `reference_velocity` is not a single number. |
+| TypeError | if `area`, `mass_per_area` or `reference_velocity` is not a single number, or `frequency`, `loss_factor` or `velocity_level` holds a text or a value that is not a real number. |
 
 ## StructureBornePowerResult
 

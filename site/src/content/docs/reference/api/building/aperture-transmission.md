@@ -149,7 +149,7 @@ Transmission coefficient of a circular aperture (Hopkins Eq. 4.102).
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive input. |
-| TypeError | if `depth`, `radius` or `speed_of_sound` is not a single number. |
+| TypeError | if `depth`, `radius` or `speed_of_sound` is not a single number, or `frequency` holds a text or a value that is not a real number. |
 
 ## composite_transmission_loss
 
@@ -186,6 +186,7 @@ A bare opening enters with $R = 0$ ($\tau = 1$).
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive area, mismatched shapes, or an empty element set. |
+| TypeError | if `areas` or `reduction_indices` holds a text or a value that is not a real number. |
 
 ## plot_aperture_geometry
 
@@ -309,7 +310,7 @@ Transmission coefficient of a straight-edged slit (Hopkins Eq. 4.99).
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive input or unknown field/position. |
-| TypeError | if `field` or `position` is not a text, or `depth`, `speed_of_sound` or `width_m` is not a single number. |
+| TypeError | if `field` or `position` is not a text, or `depth`, `speed_of_sound` or `width_m` is not a single number, or `frequency` holds a text or a value that is not a real number. |
 
 ## transmission_loss_from_coefficient
 
@@ -333,3 +334,4 @@ coefficient.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive coefficient. |
+| TypeError | if `tau` holds a text or a value that is not a real number. |

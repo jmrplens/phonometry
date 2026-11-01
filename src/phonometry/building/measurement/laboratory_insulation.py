@@ -58,6 +58,7 @@ from ..._internal.boundary import settled
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     check_engine,
+    real_array,
     require_equal_shapes,
     require_ranks,
     require_same_length,
@@ -421,7 +422,7 @@ def _absorption_area(t2: ArrayLike, volume: float, n_bands: int) -> np.ndarray:
     """
     require_scalar(n_bands, "n_bands")
     require_scalar(volume, "volume")
-    t = np.asarray(t2, dtype=np.float64)
+    t = real_array(t2, "t2")
     if t.ndim != 1:
         msg = "'t2' must be one-dimensional (one value per band)."
         raise ValueError(msg)
@@ -478,9 +479,11 @@ def background_correction(
     :param background: Background-noise levels ``Lb`` per band, in dB.
     :return: The background-corrected levels per band, in dB.
     :raises ValueError: If the shapes differ or contain non-finite values.
+    :raises TypeError: if ``background`` or ``signal_and_background`` holds a text or a
+        value that is not a real number.
     """
-    lsb = np.asarray(signal_and_background, dtype=np.float64)
-    lb = np.asarray(background, dtype=np.float64)
+    lsb = real_array(signal_and_background, "signal_and_background")
+    lb = real_array(background, "background")
     require_equal_shapes(
         "background_correction",
         {"signal_and_background": lsb.shape, "background": lb.shape},
@@ -549,7 +552,8 @@ def laboratory_airborne_insulation(
     :raises ValueError: If the band counts of ``l1``, ``l2`` and ``t2``
         differ, if ``area``/``volume``/``t2`` are not positive, or if inputs
         are non-finite.
-    :raises TypeError: if ``area`` or ``volume`` is not a single number.
+    :raises TypeError: if ``area`` or ``volume`` is not a single number, or ``t2`` holds
+        a text or a value that is not a real number.
     """
     require_scalar(area, "area")
     l1_bands = _as_band_levels(l1, "l1")
@@ -605,7 +609,8 @@ def laboratory_impact_insulation(
         ``absorption_area`` and ``rating``.
     :raises ValueError: If the band counts of ``li`` and ``t2`` differ, if
         ``volume``/``t2`` are not positive, or if inputs are non-finite.
-    :raises TypeError: if ``volume`` is not a single number.
+    :raises TypeError: if ``volume`` is not a single number, or ``t2`` holds a text or a
+        value that is not a real number.
     """
     li_bands = _as_band_levels(li, "li")
     absorption = _absorption_area(t2, volume, int(li_bands.size))

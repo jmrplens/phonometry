@@ -115,8 +115,8 @@ from .._internal.boundary import settled
 from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, read_only
 from .._internal.validation import (
-    _as_float64,
     is_at_most,
+    real_array,
     require_choice,
     require_count,
     require_finite,
@@ -383,8 +383,10 @@ def field_strength_level(field_strength_a_per_m: ArrayLike) -> np.ndarray:
 
     :param field_strength_a_per_m: RMS magnetic field strength, in A/m.
     :return: The level, in dB re 400 mA/m.
+    :raises TypeError: if ``field_strength_a_per_m`` holds a text or a value that is not
+        a real number.
     """
-    h = _as_float64(field_strength_a_per_m, "field_strength_a_per_m")
+    h = real_array(field_strength_a_per_m, "field_strength_a_per_m")
     if not np.all(np.isfinite(h)) or np.any(h <= 0.0):
         msg = "'field_strength_a_per_m' must be positive and finite."
         raise ValueError(msg)
@@ -400,8 +402,9 @@ def field_strength(level: ArrayLike) -> np.ndarray:
 
     :param level: Level, in dB re 400 mA/m (scalar or array).
     :return: The RMS field strength, in A/m.
+    :raises TypeError: if ``level`` holds a text or a value that is not a real number.
     """
-    level = _as_float64(level, "level")
+    level = real_array(level, "level")
     if not np.all(np.isfinite(level)):
         msg = "'level' must be finite."
         raise ValueError(msg)
@@ -418,8 +421,10 @@ def magnetic_flux_density(field_strength_a_per_m: ArrayLike) -> np.ndarray:
 
     :param field_strength_a_per_m: Magnetic field strength, in A/m.
     :return: The flux density, in tesla.
+    :raises TypeError: if ``field_strength_a_per_m`` holds a text or a value that is not
+        a real number.
     """
-    h = _as_float64(field_strength_a_per_m, "field_strength_a_per_m")
+    h = real_array(field_strength_a_per_m, "field_strength_a_per_m")
     if not np.all(np.isfinite(h)):
         msg = "'field_strength_a_per_m' must be finite."
         raise ValueError(msg)
@@ -444,8 +449,10 @@ def telecoil_response(angle_deg: ArrayLike) -> np.ndarray:
         degrees.
     :return: The response relative to the one on axis, in dB; minus infinity
         at 90 and 270 degrees.
+    :raises TypeError: if ``angle_deg`` holds a text or a value that is not a real
+        number.
     """
-    angle = _as_float64(angle_deg, "angle_deg")
+    angle = real_array(angle_deg, "angle_deg")
     if not np.all(np.isfinite(angle)):
         msg = "'angle_deg' must be finite."
         raise ValueError(msg)
@@ -1072,7 +1079,7 @@ class InductionLoopVerification(RichDisplay):
 
 def _levels(values: ArrayLike, name: str) -> np.ndarray:
     """A non-empty array of finite, real levels, of any shape."""
-    arr = _as_float64(values, name)
+    arr = real_array(values, name)
     if arr.size == 0 or not np.all(np.isfinite(arr)):
         msg = f"'{name}' must be a non-empty array of finite levels."
         raise ValueError(msg)
@@ -1189,8 +1196,9 @@ def verify_induction_loop_system(
         tonal quality and is not mostly at low frequencies, which withholds
         the 22 dB relaxation of 7.2 (:func:`assess_background_noise`).
     :return: An :class:`InductionLoopVerification`.
-    :raises TypeError: if ``specified_level`` is not a single number, or ``frequencies``
-        or ``system_noise_levels`` holds a text or a value that is not a real number.
+    :raises TypeError: if ``specified_level`` is not a single number, or
+        ``field_strength_levels``, ``frequencies``, ``response_db`` or
+        ``system_noise_levels`` holds a text or a value that is not a real number.
     """
     levels = _levels(field_strength_levels, "field_strength_levels")
     specified = require_finite(specified_level, "specified_level")
@@ -1272,7 +1280,7 @@ def _height_coverage(
             "9.4 asks for one position at least at each height of 9.2 or 9.3."
         )
         raise ValueError(msg)
-    heights = _as_float64(heights_m, "heights_m")
+    heights = real_array(heights_m, "heights_m")
     if not np.all(np.isfinite(heights)):
         msg = "'heights_m' must hold finite heights."
         raise ValueError(msg)
@@ -1351,8 +1359,9 @@ def verify_small_volume_system(
     :return: An :class:`InductionLoopVerification`.
     :raises ValueError: for a fixed layout's levels of the wrong shape, or a
         useful volume without a point at a height of 9.2 or 9.3.
-    :raises TypeError: if ``layout`` is not a text, or ``frequencies`` holds a text or a
-        value that is not a real number.
+    :raises TypeError: if ``layout`` is not a text, or ``field_strength_levels``,
+        ``frequencies``, ``heights_m``, ``response_db`` or ``standing_area_levels``
+        holds a text or a value that is not a real number.
     """
     name = require_choice(layout, "layout", _SMALL_VOLUME_LAYOUTS)
     levels = _levels(field_strength_levels, "field_strength_levels")
@@ -1618,7 +1627,7 @@ def verify_amplifier_overload(
 
     def voltage(f: float | np.ndarray) -> np.ndarray:
         gain = (
-            np.ones_like(np.asarray(f, dtype=np.float64))
+            np.ones_like(real_array(f, "f"))
             if current_response is None
             else 10.0 ** (current_response.at(f) / 20.0)
         )

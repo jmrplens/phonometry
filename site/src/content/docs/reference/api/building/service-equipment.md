@@ -181,7 +181,7 @@ source along that wall's inward normal.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a dimension is not positive, the source lies outside the room, or the position would. |
-| TypeError | if `mounting` is not a text. |
+| TypeError | if `mounting` is not a text, or `room_dimensions_m` or `source_position_m` holds a text or a value that is not a real number. |
 
 ## BackgroundDurationCheck
 
@@ -377,7 +377,7 @@ the same positions, is not a number and is left to the operator.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | If a duration or the tolerance is a text or a flag, or the tolerance is an array. |
+| TypeError | If a duration or the tolerance is a text or a flag, or the tolerance is an array, or `durations_s` or `tolerance_s` holds a text or a value that is not a real number. |
 | ValueError | If a duration is not a positive, finite number, or the tolerance is not a finite number of 0 s or more. |
 
 ## check_instrument_agreement
@@ -456,6 +456,7 @@ the frequency range", which the operator chooses. A difference of exactly
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a level is not finite or the two counts differ. |
+| TypeError | if `equivalent_levels` or `max_levels` holds a text or a value that is not a real number. |
 
 ## check_position_spread
 
@@ -505,6 +506,7 @@ while a later one can still pass, and a spread at a limit does not pass it
 | Exception | When |
 | :--- | :--- |
 | ValueError | If there are not 3, 6 or 9 finite levels. |
+| TypeError | if `levels` holds a text or a value that is not a real number. |
 
 ## check_service_equipment_positions
 
@@ -562,7 +564,7 @@ positions, whose 0,50 m from the room surfaces 7.3 sets instead.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | If `small_room` is not `True` or `False`, or a coordinate or distance is text or not a number. |
+| TypeError | If `small_room` is not `True` or `False`, or a coordinate or distance is text or not a number, or `corner_obstacle_distance_m`, `corner_position_m`, `room_dimensions_m`, `room_positions_m` or `source_positions_m` holds a text or a value that is not a real number. |
 | ValueError | If a dimension is not positive, a coordinate is not finite, no room position is given, a position lies outside the room, or an obstacle distance is not a finite distance of 0 m or more. |
 
 ## check_varying_background
@@ -611,6 +613,7 @@ of the microphone positions"; the draft names the corner.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a level is not finite, the shapes differ, or the observation time is not one positive number. |
+| TypeError | if `background_max_level`, `equipment_levels`, `frequencies` or `observation_time_s` holds a text or a value that is not a real number. |
 
 ## InstrumentAgreementCheck
 
@@ -720,7 +723,7 @@ ventilation outlet for example, is left out.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | If `excluded` is not a sequence, or holds a bool, a text or anything else that is not a number. |
+| TypeError | If `excluded` is not a sequence, or holds a bool, a text or anything else that is not a number, or `c_weighted_levels` holds a text or a value that is not a real number. |
 | ValueError | If a level is not finite, an index is not a whole number or is out of range, or every corner is excluded. |
 
 ## MeasurementDisturbanceCheck
@@ -984,6 +987,7 @@ the equipment, the result stands without correction
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a level is not finite or the shapes differ. |
+| TypeError | if `background_levels`, `frequencies` or `levels` holds a text or a value that is not a real number. |
 
 ## service_equipment_level
 
@@ -1038,7 +1042,7 @@ over the integration time of Annex B for an equivalent level.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a centre is not a nominal band, the bands do not cover the A-weighting range, the shapes disagree, a level is not a finite real number, a reverberation time in the standardization range is not positive, `volume` or `reference_reverberation_time_s` is not one positive number, or `volume` is given without a reverberation time. |
-| TypeError | if `fraction` is not an integer (a word, a flag or a float), or `a_weighting_range` or `quantity` is not a text. |
+| TypeError | if `fraction` is not an integer (a word, a flag or a float), or `a_weighting_range` or `quantity` is not a text, or `background_levels`, `frequencies`, `levels`, `reference_reverberation_time_s`, `reverberation_time` or `volume` holds a text or a value that is not a real number. |
 
 ## SERVICE_EQUIPMENT_OPERATING_CONDITIONS
 
@@ -1622,3 +1626,4 @@ levels are passed instead as each one's departure from its stated level.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a reading is not a finite level, or there is nothing to compare: one reading and no earlier calibration. |
+| TypeError | if `calibration_levels` or `previous_levels` holds a text or a value that is not a real number. |

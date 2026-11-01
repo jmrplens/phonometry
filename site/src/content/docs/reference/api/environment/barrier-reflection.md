@@ -244,7 +244,7 @@ $\pm 25$ mm of Table 3.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If there are not nine finite delays, the speed is not positive or the check is unknown. |
-| TypeError | if `check` is not a text, or `speed_of_sound` is not a single number. |
+| TypeError | if `check` is not a text, or `speed_of_sound` is not a single number, or `time_delays_s` holds a text or a value that is not a real number. |
 
 ## DirectSoundSubtraction
 
@@ -450,7 +450,7 @@ within 5 % of 1; the value computed is always used here.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the records are not shaped as above, the rate is missing or disagrees, a window does not fit its record, or a parameter is out of range. |
-| TypeError | if `speed_of_sound` is not a single number, or `low_band_microphones` is a text or holds a microphone that is not an integer. |
+| TypeError | if `speed_of_sound` is not a single number, or `low_band_microphones` is a text or holds a microphone that is not an integer, or `directivity_corrections`, `free_field_irs`, `in_front_irs`, `low_band_window_length_s` or `window_length_s` holds a text or a value that is not a real number. |
 
 **Warns**
 
@@ -525,6 +525,7 @@ be `nan`; it is left out of that band's mean.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a row does not have eighteen values, a value is negative or infinite, or a band from `lowest_band_hz` has no value. |
+| TypeError | if `position_values` holds a text or a value that is not a real number. |
 
 ## REFLECTION_INDEX_PRECISION
 
@@ -939,6 +940,7 @@ placed on its own record's peak (5.5.6).
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the records are not `(9, N)`, finite and equal in shape, the rate is missing, disagrees or is not positive, or a window does not fit its record. |
+| TypeError | if `low_band_window_length_s`, `microphone_irs`, `specular_irs` or `window_length_s` holds a text or a value that is not a real number. |
 
 ## subtract_direct_sound
 
@@ -976,6 +978,7 @@ the direct sound.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the records are not one-dimensional, finite and of equal length, or the rate is missing or not positive. |
+| TypeError | if `free_field_ir` or `in_front_ir` holds a text or a value that is not a real number. |
 
 **Warns**
 

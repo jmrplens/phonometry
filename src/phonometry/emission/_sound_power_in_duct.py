@@ -97,7 +97,7 @@ import numpy as np
 from .._internal.frozen import OwnsArrays
 from .._internal.levels_math import energy_mean, energy_sum
 from .._internal.validation import (
-    _as_float64,
+    real_array,
     require_choice,
     require_finite_fields,
     require_per_band,
@@ -1083,7 +1083,7 @@ def _position_levels(levels: ArrayLike, n_bands: int) -> np.ndarray:
     sampling the duct, which the caller may have done another way.
     """
     require_scalar(n_bands, "n_bands")
-    arr = _as_float64(levels, "levels")
+    arr = real_array(levels, "levels")
     if arr.ndim not in (1, 2) or arr.size == 0:
         msg = "'levels' must be a (bands,) spectrum or a (positions, bands) array."
         raise ValueError(msg)
@@ -1174,8 +1174,8 @@ def sound_power_in_duct(
         static pressure.
     :raises TypeError: if ``shield`` is not a text, ``duct_diameter_m``,
         ``flow_velocity``, ``static_pressure_kpa`` or ``temperature_c`` is not a single
-        number, or ``frequencies``, ``microphone_correction`` or ``shield_correction``
-        holds a text or a value that is not a real number.
+        number, or ``frequencies``, ``levels``, ``microphone_correction`` or
+        ``shield_correction`` holds a text or a value that is not a real number.
     """
     freqs = _nominal_bands(frequencies)
     _check_shield(shield)

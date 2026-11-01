@@ -203,7 +203,7 @@ line never amplifies).
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `distance` or any frequency is not positive. |
-| TypeError | if `distance` is not a single number. |
+| TypeError | if `distance` is not a single number, or `frequencies` holds a text or a value that is not a real number. |
 
 ## DEFAULT_FREQUENCIES_HZ
 
@@ -357,7 +357,7 @@ with $A_\mathrm{m} = -3q$ at 63 Hz and $A_\mathrm{m} = -3q(1 - G_\mathrm{m})$ ab
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a ground factor is outside `[0, 1]`, `distance` is not positive, a height is negative, or a frequency is not positive. |
-| TypeError | if `distance`, `ground_middle`, `ground_receiver`, `ground_source`, `receiver_height_m` or `source_height_m` is not a single number. |
+| TypeError | if `distance`, `ground_middle`, `ground_receiver`, `ground_source`, `receiver_height_m` or `source_height_m` is not a single number, or `frequencies` holds a text or a value that is not a real number. |
 
 ## ground_attenuation_alternative
 
@@ -572,7 +572,7 @@ barrier $A_\mathrm{bar} = D_z$
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `distance` is not positive. |
-| TypeError | if `distance`, `ground_middle`, `ground_receiver` or `ground_source` is not a single number. |
+| TypeError | if `distance`, `ground_middle`, `ground_receiver` or `ground_source` is not a single number, or `frequencies` holds a text or a value that is not a real number. |
 
 ## OutdoorAttenuation
 
@@ -720,6 +720,12 @@ convenience.
 | `c0` | Meteorological factor `C0`, in decibels; `None` returns the downwind level `LfT(DW)` ($C_\mathrm{met} = 0$). |
 
 **Returns:** Predicted octave-band level per frequency, in decibels.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `sound_power_level` holds a text or a value that is not a real number. |
 
 ## PropagationGeometry
 

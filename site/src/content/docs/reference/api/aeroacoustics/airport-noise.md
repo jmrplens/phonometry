@@ -172,7 +172,7 @@ ground-roll segments, and combines them into the exposure level `SEL`
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
-| TypeError | if `metric` or `mounting` is not a text. |
+| TypeError | if `metric` or `mounting` is not a text, or `distances_m`, `exposure_levels`, `max_levels`, `observer`, `path` or `powers` holds a text or a value that is not a real number. |
 
 ## FlightSegmentState
 
@@ -341,7 +341,7 @@ Evaluates [`event_level`](/phonometry/reference/api/aeroacoustics/airport-noise/
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
-| TypeError | if `metric` or `mounting` is not a text. |
+| TypeError | if `metric` or `mounting` is not a text, or `distances_m`, `exposure_levels`, `max_levels`, `path`, `powers`, `x` or `y` holds a text or a value that is not a real number. |
 
 ## noise_fraction
 
@@ -439,6 +439,7 @@ NPD event level over a distance sweep at one power setting.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
+| TypeError | if `distances_m`, `levels`, `powers` or `query_distances_m` holds a text or a value that is not a real number. |
 
 ## npd_level
 
@@ -475,7 +476,7 @@ tabulated envelope are extrapolated from the terminal segments.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the table or inputs are invalid. |
-| TypeError | if `power` is not a single number. |
+| TypeError | if `power` is not a single number, or `distance_m`, `distances_m`, `levels` or `powers` holds a text or a value that is not a real number. |
 
 ## NPDLevelResult
 

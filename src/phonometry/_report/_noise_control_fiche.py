@@ -29,6 +29,7 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
+from .._internal.validation import real_array
 from ._i18n import t
 from ._layout import (
     _ACCENT_HEX,
@@ -88,8 +89,11 @@ PREDICTION_DISCLAIMER = (
 
 
 def mean_finite(values: np.ndarray) -> float:
-    """Arithmetic mean of the finite entries of a per-band array (``nan`` if none)."""
-    arr = np.asarray(values, dtype=np.float64)
+    """Arithmetic mean of the finite entries of a per-band array (``nan`` if none).
+
+    :raises TypeError: if ``values`` holds a text or a value that is not a real number.
+    """
+    arr = real_array(values, "values")
     arr = arr[np.isfinite(arr)]
     if arr.size == 0:
         return float("nan")

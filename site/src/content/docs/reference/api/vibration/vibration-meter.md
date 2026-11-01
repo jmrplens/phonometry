@@ -672,6 +672,7 @@ pulls the result down instead of leaving it unchanged.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a maximum is negative or not finite. |
+| TypeError | if `maxima` holds a text or a value that is not a real number. |
 
 ## takt_maxima
 

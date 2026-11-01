@@ -490,6 +490,7 @@ days at another).
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the input is empty, non-finite, or the weights do not match the levels or are not positive. |
+| TypeError | if `daily_levels` or `weights` holds a text or a value that is not a real number. |
 
 ## low_frequency_correction
 
@@ -890,6 +891,7 @@ arithmetic mean with 8/5/3 dB thresholds and grades the result 0/3/6 dB.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If fewer than three bands are given, the shapes differ, the frequencies are not positive and strictly ascending, or any value is not finite. |
+| TypeError | if `frequencies` or `levels` holds a text or a value that is not a real number. |
 
 ## TonalCorrectionResult
 

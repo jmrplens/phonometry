@@ -61,6 +61,7 @@ from scipy.special import j1, struve
 
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
+    real_array,
     require_choice,
     require_count,
     require_equal_counts,
@@ -106,8 +107,9 @@ def transmission_loss_from_coefficient(tau: ArrayLike) -> np.ndarray:
         give a negative ``R``.
     :return: The sound reduction index ``R``, in dB.
     :raises ValueError: for a non-positive coefficient.
+    :raises TypeError: if ``tau`` holds a text or a value that is not a real number.
     """
-    t = np.asarray(tau, dtype=np.float64)
+    t = real_array(tau, "tau")
     if np.any(t <= 0.0):
         msg = "'tau' must be positive."
         raise ValueError(msg)
@@ -260,14 +262,15 @@ def slit_transmission_coefficient(
     :return: An :class:`ApertureTransmissionResult` (kind ``"slit"``).
     :raises ValueError: for a non-positive input or unknown field/position.
     :raises TypeError: if ``field`` or ``position`` is not a text, or ``depth``,
-        ``speed_of_sound`` or ``width_m`` is not a single number.
+        ``speed_of_sound`` or ``width_m`` is not a single number, or ``frequency`` holds
+        a text or a value that is not a real number.
     """
     w = require_positive(width_m, "width_m")
     d = require_positive(depth, "depth")
     c0 = require_positive(speed_of_sound, "speed_of_sound")
     field = require_choice(field, "field", tuple(_FIELD_M))
     position = require_choice(position, "position", tuple(_POSITION_N))
-    f = np.atleast_1d(np.asarray(frequency, dtype=np.float64))
+    f = np.atleast_1d(real_array(frequency, "frequency"))
     if f.ndim != 1 or f.size == 0:
         msg = "'frequency' must be a non-empty 1-D array."
         raise ValueError(msg)
@@ -380,12 +383,12 @@ def circular_aperture_transmission_coefficient(
     :return: An :class:`ApertureTransmissionResult` (kind ``"circular"``).
     :raises ValueError: for a non-positive input.
     :raises TypeError: if ``depth``, ``radius`` or ``speed_of_sound`` is not a single
-        number.
+        number, or ``frequency`` holds a text or a value that is not a real number.
     """
     a = require_positive(radius, "radius")
     d = require_positive(depth, "depth")
     c0 = require_positive(speed_of_sound, "speed_of_sound")
-    f = np.atleast_1d(np.asarray(frequency, dtype=np.float64))
+    f = np.atleast_1d(real_array(frequency, "frequency"))
     if f.ndim != 1 or f.size == 0:
         msg = "'frequency' must be a non-empty 1-D array."
         raise ValueError(msg)
@@ -434,15 +437,17 @@ def composite_transmission_loss(
         per band (length ``M``) for 2-D input.
     :raises ValueError: for a non-positive area, mismatched shapes, or an
         empty element set.
+    :raises TypeError: if ``areas`` or ``reduction_indices`` holds a text or a value
+        that is not a real number.
     """
-    s = np.atleast_1d(np.asarray(areas, dtype=np.float64))
+    s = np.atleast_1d(real_array(areas, "areas"))
     if s.ndim != 1 or s.size == 0:
         msg = "'areas' must be a non-empty 1-D array."
         raise ValueError(msg)
     if np.any(s <= 0.0) or not np.all(np.isfinite(s)):
         msg = "'areas' must be positive and finite."
         raise ValueError(msg)
-    r = np.asarray(reduction_indices, dtype=np.float64)
+    r = real_array(reduction_indices, "reduction_indices")
     if r.ndim not in (1, 2):
         msg = "'reduction_indices' must be 1-D or 2-D."
         raise ValueError(msg)

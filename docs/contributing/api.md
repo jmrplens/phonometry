@@ -1687,3 +1687,41 @@ def describe(path: Path) -> object:
 **Enforced by:** `scripts/check_regular_file_reads.py`, `make regular-file-reads`, `CI: Every reader asks what a name holds before it opens it`, `tests/test_check_regular_file_reads.py::test_the_library_reads_every_name_through_the_check`, `tests/io/test_io_regular_files.py`, `tests/aircraft/test_anp_tables_read.py`
 
 **Exceptions.** A read of the library's own files, which no caller names (a published table through `importlib.resources`, the `VERSION` file of a source checkout, the bootstrap module the client sends a node, the video a node's encoder wrote in the scratch directory of the run), is listed in `EXEMPT` of `scripts/check_regular_file_reads.py`, keyed by file and function with the reason; an entry that covers nothing fails. A mode that writes (`"wb"`, `"xb"`, `"ab"`, `"r+b"`) is a writer's and is not read here, and this rule holds no writer: `io.write`, the target of `io.convert` and the figure and report writers open the name they are given as Python opens it, so a pipe there waits for a reader and a directory raises `IsADirectoryError`. The sidecar and catalogue writers are the ones that write beside the name through `write_beside` and rename the file into place, which never opens the name for writing. The check names a call by what the imports, assignments and parameters of its own scope bind it to, as Python looks the name up (the function, the functions around it, then the module; a class body's names are not its methods', a comprehension's loop target is its own, a name declared `global` is the module's, and a name a scope both defines and rebinds names no function), and knows a check by the module that defines it, so a call that only shares a check's name (`np.info(path)` beside the library's `info`, a method of another object called `read_at_most`) checks nothing; it reads the order of the calls in the source, not the paths a function can take; a `.open()` given its mode through a name, and a reader reached through `getattr()` or a `functools.partial`, are not read. The tests of each reader, which put a pipe, a link to a device and a directory at the name and want the refusal within seconds, are what prove it refuses.
+
+<a id="a61"></a>
+### A61. Read a caller's numbers through `real_array`, which refuses a complex value and a text by name
+
+**Why.** `np.asarray(x, dtype=np.float64)` converts three inputs that hold no real numbers into ones that pass every guard after it. A complex value comes back as its real part with no more than a `ComplexWarning`, and a NumPy complex number held in a list or an array of objects the same way; a text is parsed; and a `bytearray`, alone or inside a list, is read as the codes of its characters. `environment.method_b_scale_values(0.5 + 0.3j)` rated the mark at 0.5, `building.energy_average_level([bytearray(b"12")])` came back as 49.5 dB, and a column of readings left as text passed for numbers. The library read a caller's numbers that way in 953 places. `real_array(x, name)`, in `src/phonometry/_internal/validation.py`, is the one reading of a caller's numbers: it refuses each of the three with a `TypeError` that names the parameter, names an element that is no number and a ragged nesting too, and converts an array of numbers as `np.asarray` does, at the cost of a test of its dtype. A function that has checked the value already, through `refuse_complex`, a shared guard or a check of its own module, converts it as it likes.
+
+**Do**
+
+```python
+import numpy as np
+import pytest
+
+from phonometry._internal.validation import real_array
+
+
+def scale_values(marked_fraction):
+    fraction = real_array(marked_fraction, "marked_fraction")
+    return np.round(1.0 + 4.0 * fraction, 1)
+
+
+scale_values([0.25, 0.5])
+with pytest.raises(TypeError, match="'marked_fraction' must be real, not complex"):
+    scale_values([0.5 + 0.3j])
+with pytest.raises(TypeError, match="'marked_fraction' must be numbers, not text"):
+    scale_values([bytearray(b"12")])
+```
+
+**Don't**
+
+```py
+def scale_values(marked_fraction):
+    fraction = np.asarray(marked_fraction, dtype=np.float64)  # 0.5 + 0.3j reads as 0.5
+    return np.round(1.0 + 4.0 * fraction, 1)
+```
+
+**Enforced by:** `scripts/check_real_conversions.py`, `make real-conversions`, `CI: Every conversion to floats reads a caller's value through a check`, `tests/test_check_real_conversions.py::test_the_package_keeps_the_rule`, `tests/test_check_real_conversions.py::test_each_shape_of_a_caller_s_value_is_found`, `tests/test_check_real_conversions.py::test_every_check_the_guard_trusts_refuses_a_complex_value`, `tests/test_real_numbers_read_by_name.py`, `tests/test_scalar_guards.py::test_every_public_scalar_parameter_refuses_an_array_or_a_text_by_name`
+
+**Exceptions.** The check reads every function of `src/phonometry`, private ones included, since a public function hands its caller's value on to the helper that converts it. A caller's value is a parameter of the function that converts it, read bare, through an item, through a call that keeps its dtype (`np.atleast_1d`, `list`, `.ravel()`) or through a loop or a comprehension over it, and in a record's `__post_init__` a field, which the caller set; arithmetic on it computes a value of its own, and a field a method reads outside `__post_init__` was read when the record was built. A check is a call of one of the shared checks the script lists, which `tests/test_check_real_conversions.py` calls with a complex value one by one, or of a function of the package that hands that parameter to one, earlier in the source than the conversion. A conversion of a value that is no caller's number but that the rule cannot tell from one (the samples SciPy decoded from a file, a mask the engine builds, an array of objects an `isinstance` test has read item by item, the quick path of `real_array` itself, and the drawing helpers of `_plot/common.py`, which draw what a result holds and whose source the published clips fingerprint) is listed in `EXEMPT` of the script, keyed by file and function with the reason; an entry that covers nothing fails. A parameter written as one number reads it through a shared scalar guard ([A43](#a43)), which refuses a complex number of either kind the same way.

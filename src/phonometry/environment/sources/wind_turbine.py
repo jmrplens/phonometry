@@ -35,6 +35,7 @@ from ..._internal.boundary import settled
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     check_engine,
+    real_array,
     require_choice,
     require_equal_shapes,
     require_ranks,
@@ -145,9 +146,10 @@ def apparent_sound_power_level(band_levels: ArrayLike, r1: float) -> float:
     :param r1: Slant distance ``R1`` to the rotor centre, in m.
     :return: The apparent sound power level ``L_WA``, in dB re 1 pW.
     :raises ValueError: If the inputs are invalid.
-    :raises TypeError: if ``r1`` is not a single number.
+    :raises TypeError: if ``r1`` is not a single number, or ``band_levels`` holds a text
+        or a value that is not a real number.
     """
-    levels = np.atleast_1d(np.asarray(band_levels, dtype=np.float64))
+    levels = np.atleast_1d(real_array(band_levels, "band_levels"))
     if levels.size == 0 or not np.all(np.isfinite(levels)):
         msg = "'band_levels' must be finite and non-empty."
         raise ValueError(msg)
@@ -323,7 +325,9 @@ class WindTurbineTonalityResult(OwnsArrays):
             narrowband spectrum, a metric of the Formula 30 to 34 chain is not
             finite or not the one the spectrum gives, or the candidate is not a
             line of the spectrum at or above 20 Hz.
-        :raises TypeError: if ``candidate_frequency_hz`` is not a single number.
+        :raises TypeError: if ``candidate_frequency_hz`` is not a single number, or
+            ``frequencies`` or ``levels`` holds a text or a value that is not a real
+            number.
         """
         require_ranks(self, frequencies=1, levels=1)
         require_same_length(self, "frequencies", "levels", axis="spectral line")
@@ -431,8 +435,8 @@ def _validate_narrowband(
     frequencies: ArrayLike,
 ) -> tuple[NDArray[np.float64], NDArray[np.float64], float]:
     """Coerce and validate a uniformly-spaced narrowband spectrum."""
-    lv = np.asarray(levels, dtype=np.float64)
-    fr = np.asarray(frequencies, dtype=np.float64)
+    lv = real_array(levels, "levels")
+    fr = real_array(frequencies, "frequencies")
     require_equal_shapes(
         "wind_turbine_tonality",
         {"levels": lv.shape, "frequencies": fr.shape},
@@ -583,7 +587,8 @@ def wind_turbine_tonality(
     :return: A :class:`WindTurbineTonalityResult`.
     :raises ValueError: If the inputs are invalid or the candidate lies below
         20 Hz.
-    :raises TypeError: if ``tone_frequency`` is not a single number.
+    :raises TypeError: if ``tone_frequency`` is not a single number, or ``frequencies``
+        or ``levels`` holds a text or a value that is not a real number.
     """
     lv, fr, df = _validate_narrowband(levels, frequencies)
 

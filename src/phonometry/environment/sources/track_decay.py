@@ -55,6 +55,7 @@ import numpy as np
 
 from ..._internal.frozen import OwnsArrays, read_only
 from ..._internal.validation import (
+    real_array,
     require_choice,
     require_positive,
     require_positive_array,
@@ -181,7 +182,7 @@ def _response_magnitudes(responses: ArrayLike, band_count: int) -> NDArray[np.fl
         magnitude that is not positive and finite.
     """
     require_scalar(band_count, "band_count")
-    matrix = np.asarray(responses, dtype=np.float64)
+    matrix = real_array(responses, "responses")
     if matrix.ndim == 1:
         matrix = matrix[:, None]
     # The number is a count of array axes, not a quantity.
@@ -205,7 +206,7 @@ def _excitation_grid(distances: ArrayLike) -> NDArray[np.float64]:
 
     :raises ValueError: For a grid that is not that.
     """
-    distances = np.atleast_1d(np.asarray(distances, dtype=np.float64))
+    distances = np.atleast_1d(real_array(distances, "distances"))
     if distances.ndim != 1:
         msg = "'distances' must be one-dimensional, one distance per position."
         raise ValueError(msg)
@@ -286,8 +287,9 @@ class TrackDecayRate(OwnsArrays):
             :func:`track_decay_rate` refuses: a grid that is not finite, has
             fewer than two positions, does not start at 0 m or does not
             strictly increase, or responses that are not positive and finite.
-        :raises TypeError: if ``direction`` is not a text, or ``decay_rates_db_per_m``
-            or ``frequencies`` holds a text or a value that is not a real number.
+        :raises TypeError: if ``direction`` is not a text, or ``decay_rates_db_per_m``,
+            ``distances`` or ``frequencies`` holds a text or a value that is not a real
+            number.
         """
         require_choice(self.direction, "direction", TRACK_DECAY_DIRECTIONS)
         frequencies = require_positive_array(self.frequencies, "frequencies")
@@ -438,8 +440,8 @@ def track_decay_rate(
         grid that is not finite, has fewer than two positions, does not start
         at 0 or does not strictly increase, frequencies that do not name
         distinct bands in increasing order, or shapes that do not agree.
-    :raises TypeError: if ``frequencies`` holds a text or a value that is not a real
-        number, or ``direction`` is not a text.
+    :raises TypeError: if ``frequencies`` or ``responses`` holds a text or a value that
+        is not a real number, or ``direction`` is not a text.
     """
     require_choice(direction, "direction", ("vertical", "lateral"))
     frequencies = require_positive_array(frequencies, "frequencies")

@@ -39,6 +39,7 @@ import numpy as np
 
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
+    real_array,
     require_positive,
     require_ranks,
     require_same_length,
@@ -94,9 +95,10 @@ def reflection_coefficient(
     :param c2: Sound speed in the sediment ``c2``, in m/s.
     :return: The complex reflection coefficient per grazing angle.
     :raises ValueError: If the inputs are invalid.
-    :raises TypeError: if ``c1``, ``c2``, ``rho1`` or ``rho2`` is not a single number.
+    :raises TypeError: if ``c1``, ``c2``, ``rho1`` or ``rho2`` is not a single number,
+        or ``grazing_angle_deg`` holds a text or a value that is not a real number.
     """
-    phi = np.atleast_1d(np.asarray(grazing_angle_deg, dtype=np.float64))
+    phi = np.atleast_1d(real_array(grazing_angle_deg, "grazing_angle_deg"))
     if phi.size == 0 or not np.all(np.isfinite(phi)):
         msg = "'grazing_angle_deg' must be finite and non-empty."
         raise ValueError(msg)
@@ -225,8 +227,10 @@ def bottom_reflection_loss(
     :param c2: Sound speed in the sediment ``c2``, in m/s.
     :return: A :class:`BottomLossResult`.
     :raises ValueError: If the inputs are invalid.
+    :raises TypeError: if ``grazing_angle_deg`` holds a text or a value that is not a
+        real number.
     """
-    phi = np.atleast_1d(np.asarray(grazing_angle_deg, dtype=np.float64))
+    phi = np.atleast_1d(real_array(grazing_angle_deg, "grazing_angle_deg"))
     r = reflection_coefficient(phi, rho1=rho1, c1=c1, rho2=rho2, c2=c2)
     # At an intromission angle |R| = 0 and the bottom loss is legitimately
     # infinite (total transmission); silence the log10(0) warning.
@@ -376,8 +380,10 @@ def seabed_reflection(
     :param c2: Sound speed in the sediment ``c2``, in m/s.
     :return: A frozen :class:`SeabedReflection`.
     :raises ValueError: If the inputs are invalid.
+    :raises TypeError: if ``grazing_angle_deg`` holds a text or a value that is not a
+        real number.
     """
-    phi = np.atleast_1d(np.asarray(grazing_angle_deg, dtype=np.float64))
+    phi = np.atleast_1d(real_array(grazing_angle_deg, "grazing_angle_deg"))
     r = reflection_coefficient(phi, rho1=rho1, c1=c1, rho2=rho2, c2=c2)
     magnitude = np.abs(r)
     # At an intromission angle |R| = 0 and the bottom loss is legitimately

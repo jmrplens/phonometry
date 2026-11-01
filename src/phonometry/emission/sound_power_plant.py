@@ -141,6 +141,7 @@ from .._internal.levels_math import energy_mean, energy_sum
 from .._internal.types import as_float_or_array
 from .._internal.validation import (
     is_at_most,
+    real_array,
     require_choice,
     require_count,
     require_finite,
@@ -338,7 +339,7 @@ def _octave_bands(frequencies: ArrayLike, name: str = "frequencies") -> np.ndarr
     :raises ValueError: for a frequency that names no octave band of the
         method, a band named twice, or bands out of order.
     """
-    freqs = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
+    freqs = np.atleast_1d(real_array(frequencies, name))
     if freqs.ndim != 1 or freqs.size == 0 or not np.all(np.isfinite(freqs)):
         msg = f"'{name}' must be a non-empty 1-D array of finite frequencies."
         raise ValueError(msg)
@@ -394,7 +395,7 @@ def _directional_angles(
     require_scalar(bands, "bands")
     if angle_deg is None:
         return None
-    theta = np.atleast_1d(np.asarray(angle_deg, dtype=np.float64))
+    theta = np.atleast_1d(real_array(angle_deg, "angle_deg"))
     if theta.size == 1:
         theta = np.full(bands, float(theta[0]))
     if theta.ndim != 1 or theta.size != bands or not np.all(np.isfinite(theta)):
@@ -440,9 +441,9 @@ def plant_characteristic_height_m(
     :raises ValueError: for a negative or non-finite height, a count from 1 to
         9, or no sources at all.
     :raises TypeError: if ``n_low_sources`` is a flag, a text or an array where a count
-        goes.
+        goes, or ``source_heights_m`` holds a text or a value that is not a real number.
     """
-    heights = np.atleast_1d(np.asarray(source_heights_m, dtype=np.float64))
+    heights = np.atleast_1d(real_array(source_heights_m, "source_heights_m"))
     if heights.ndim != 1 or not np.all(np.isfinite(heights)) or np.any(heights < 0.0):
         msg = "'source_heights_m' must be a 1-D sequence of finite heights >= 0 m."
         raise ValueError(msg)
@@ -548,8 +549,10 @@ def plant_background_correction(
         one included.
     :raises ValueError: for a non-finite difference or one below 6 dB, which
         the table calls an invalid measurement.
+    :raises TypeError: if ``level_difference`` holds a text or a value that is not a
+        real number.
     """
-    raw = np.asarray(level_difference, dtype=np.float64)
+    raw = real_array(level_difference, "level_difference")
     if not np.all(np.isfinite(raw)):
         msg = "'level_difference' must be finite."
         raise ValueError(msg)
@@ -606,7 +609,8 @@ def plant_air_absorption_db_per_m(
     :raises ValueError: for a band outside the method, only one of the two
         weather values, or a humidity outside 0 % to 100 %.
     :raises TypeError: if ``relative_humidity_percent`` or ``temperature_c`` is not a
-        single number.
+        single number, or ``frequencies`` holds a text or a value that is not a real
+        number.
     """
     bands = _octave_bands(frequencies)
     theta, humidity = _weather(temperature_c, relative_humidity_percent)
@@ -723,7 +727,7 @@ def _vertex_array(vertices: ArrayLike, name: str) -> np.ndarray:
     :raises ValueError: for a shape other than ``(n, 2)``, a non-finite
         coordinate, or fewer than three distinct vertices.
     """
-    arr = np.asarray(vertices, dtype=np.float64)
+    arr = real_array(vertices, name)
     if (
         arr.ndim != _POINT_SIZE
         or arr.shape[1] != _POINT_SIZE
@@ -1037,7 +1041,9 @@ class PlantMeasurementContour(OwnsArrays):
             not enclose the plant area or touches it, a negative height, or a
             layout that leaves nothing to measure.
         :raises TypeError: if ``characteristic_height_m`` is not a single number, or
-            ``n_positions`` is a flag, a text or an array where a count goes.
+            ``n_positions`` is a flag, a text or an array where a count goes, or
+            ``contour_m`` or ``plant_outline_m`` holds a text or a value that is not a
+            real number.
         """
         # The record's own copies of the caller's arrays, made before this
         # hook runs, sealed: every derived quantity is read from these, and
@@ -1385,8 +1391,9 @@ def plant_measurement_contour(
         area, a layout of fewer than three positions, an omitted position that
         is not a whole number from 0, or omitted positions without a layout to
         refer to.
-    :raises TypeError: if ``n_positions`` or an item of ``omitted_positions`` is a
-        flag, a text or an array where a count goes.
+    :raises TypeError: if ``n_positions`` or an item of ``omitted_positions`` is a flag,
+        a text or an array where a count goes, or ``contour_m`` or ``plant_outline_m``
+        holds a text or a value that is not a real number.
     """
     # The record validates the layout again; read here, a NumPy integer is
     # the int the record stores.
@@ -1395,8 +1402,8 @@ def plant_measurement_contour(
     )
     if n_positions is not None:
         return PlantMeasurementContour(
-            plant_outline_m=np.asarray(plant_outline_m, dtype=np.float64),
-            contour_m=np.asarray(contour_m, dtype=np.float64),
+            plant_outline_m=real_array(plant_outline_m, "plant_outline_m"),
+            contour_m=real_array(contour_m, "contour_m"),
             characteristic_height_m=characteristic_height_m,
             n_positions=require_count(
                 n_positions, "n_positions", at_least=_MIN_POSITIONS
@@ -1407,8 +1414,8 @@ def plant_measurement_contour(
         msg = "'omitted_positions' index a layout; give its 'n_positions' with them."
         raise ValueError(msg)
     first = PlantMeasurementContour(
-        plant_outline_m=np.asarray(plant_outline_m, dtype=np.float64),
-        contour_m=np.asarray(contour_m, dtype=np.float64),
+        plant_outline_m=real_array(plant_outline_m, "plant_outline_m"),
+        contour_m=real_array(contour_m, "contour_m"),
         characteristic_height_m=characteristic_height_m,
         n_positions=_MIN_POSITIONS,
     )
@@ -1508,8 +1515,9 @@ class PlantSoundPowerResult(OwnsArrays):
 
         :raises ValueError: for any of the above.
         :raises TypeError: if ``relative_humidity_percent`` or ``temperature_c`` is not
-            a single number, or ``background_levels`` or ``measured_levels`` holds a
-            text or a value that is not a real number.
+            a single number, or ``background_levels``,
+            ``directional_microphone_angle_deg``, ``frequencies`` or ``measured_levels``
+            holds a text or a value that is not a real number.
         """
         bands = read_only(_octave_bands(self.frequencies))
         object.__setattr__(self, "frequencies", bands)
@@ -1815,11 +1823,11 @@ def plant_sound_power(
     :raises ValueError: for levels that do not match the bands, a background
         less than 6 dB below a level, a non-positive geometry, a microphone
         angle outside (0°, 90°], or half a weather.
-    :raises TypeError: if ``background_levels`` or ``levels`` holds a text or a value
-        that is not a real number.
+    :raises TypeError: if ``background_levels``, ``directional_microphone_angle_deg``,
+        ``frequencies`` or ``levels`` holds a text or a value that is not a real number.
     """
     result = PlantSoundPowerResult(
-        frequencies=np.asarray(frequencies, dtype=np.float64),
+        frequencies=real_array(frequencies, "frequencies"),
         measured_levels=require_finite_matrix(levels, "levels"),
         background_levels=(
             None
@@ -1834,7 +1842,9 @@ def plant_sound_power(
         directional_microphone_angle_deg=(
             None
             if directional_microphone_angle_deg is None
-            else np.asarray(directional_microphone_angle_deg, dtype=np.float64)
+            else real_array(
+                directional_microphone_angle_deg, "directional_microphone_angle_deg"
+            )
         ),
         temperature_c=temperature_c,
         relative_humidity_percent=relative_humidity_percent,
@@ -2178,6 +2188,8 @@ def check_plant_measurement(
     :raises ValueError: for a determination whose geometry or number of
         positions is not the contour's, a non-positive time, or a negative
         range.
+    :raises TypeError: if ``leq_range_db`` or ``measurement_time_s`` holds a text or a
+        value that is not a real number.
     """
     height = contour.prescribed_microphone_height_m
     if sound_power is not None:
@@ -2223,7 +2235,7 @@ def _measurement_time_row(measurement_time_s: float | ArrayLike) -> PlantRequire
 
     :raises ValueError: for a time that is not positive and finite.
     """
-    times = np.atleast_1d(np.asarray(measurement_time_s, dtype=np.float64))
+    times = np.atleast_1d(real_array(measurement_time_s, "measurement_time_s"))
     if not np.all(np.isfinite(times)) or np.any(times <= 0.0):
         msg = "'measurement_time_s' must be positive and finite."
         raise ValueError(msg)
@@ -2236,7 +2248,7 @@ def _integrated_reading_row(leq_range_db: float | ArrayLike) -> PlantRequirement
 
     :raises ValueError: for a range that is negative or not finite.
     """
-    spread = np.atleast_1d(np.asarray(leq_range_db, dtype=np.float64))
+    spread = np.atleast_1d(real_array(leq_range_db, "leq_range_db"))
     if not np.all(np.isfinite(spread)) or np.any(spread < 0.0):
         msg = "'leq_range_db' must be finite and >= 0 dB."
         raise ValueError(msg)
@@ -2271,8 +2283,8 @@ class PartialPlantContributions(OwnsArrays):
 
         :raises ValueError: for a name count, a band count or a level matrix
             that disagree, or bands outside the method.
-        :raises TypeError: if ``part_levels`` holds a text or a value that is not a real
-            number.
+        :raises TypeError: if ``frequencies`` or ``part_levels`` holds a text or a value
+            that is not a real number.
         """
         bands = read_only(_octave_bands(self.frequencies))
         object.__setattr__(self, "frequencies", bands)

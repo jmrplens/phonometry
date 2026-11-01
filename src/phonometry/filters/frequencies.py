@@ -11,7 +11,11 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from .._internal.frozen import OwnsArrays, given_repr, read_only
-from .._internal.validation import require_count, require_positive
+from .._internal.validation import (
+    real_array,
+    require_count,
+    require_positive,
+)
 from ._warnings import FilterBankWarning
 
 if TYPE_CHECKING:
@@ -121,9 +125,9 @@ def _band_set(
 ) -> FractionalOctaveBands:
     """A :class:`FractionalOctaveBands` built from the computed columns."""
     return FractionalOctaveBands(
-        frequencies=np.asarray(frequencies, dtype=np.float64),
-        lower_edges=np.asarray(lower_edges, dtype=np.float64),
-        upper_edges=np.asarray(upper_edges, dtype=np.float64),
+        frequencies=real_array(frequencies, "frequencies"),
+        lower_edges=real_array(lower_edges, "lower_edges"),
+        upper_edges=real_array(upper_edges, "upper_edges"),
         labels=tuple(labels),
     )
 
@@ -299,7 +303,7 @@ def _infer_band_fraction(frequency: np.ndarray) -> int:
     conventional default. Shared by the room-acoustics plot renderer and the
     report fiche so they classify a band set identically.
     """
-    freq = np.asarray(frequency, dtype=np.float64)
+    freq = real_array(frequency, "frequency")
     # The fewest values the step below can work with, not a quantity.
     if freq.size < 2:  # noqa: PLR2004
         return 1

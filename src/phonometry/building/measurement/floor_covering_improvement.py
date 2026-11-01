@@ -59,6 +59,7 @@ from ..._internal.boundary import settled
 from ..._internal.frozen import OwnsArrays, given_repr, read_only
 from ..._internal.validation import (
     check_engine,
+    real_array,
     require_choice,
     require_equal_shapes,
     require_present,
@@ -122,7 +123,7 @@ _RATING_FREQS = (
 
 
 def _finite(values: ArrayLike, name: str) -> np.ndarray:
-    a = np.atleast_1d(np.asarray(values, dtype=np.float64))
+    a = np.atleast_1d(real_array(values, name))
     if not np.all(np.isfinite(a)):
         msg = f"'{name}' must contain only finite values."
         raise ValueError(msg)
@@ -143,7 +144,8 @@ def acceleration_level(
     :return: The acceleration level ``La`` per band, in dB.
     :raises ValueError: Non-finite or non-positive acceleration, or a
         non-positive reference.
-    :raises TypeError: if ``reference`` is not a single number.
+    :raises TypeError: if ``reference`` is not a single number, or ``acceleration``
+        holds a text or a value that is not a real number.
     """
     require_scalar(reference, "reference")
     a = _finite(acceleration, "acceleration")
@@ -187,6 +189,8 @@ class BackgroundCorrectedLevel(OwnsArrays):
         :raises ValueError: For readings of different shapes, values that are
             not finite, or band frequencies that are not one positive value per
             band.
+        :raises TypeError: if ``background``, ``frequencies`` or
+            ``signal_and_background`` holds a text or a value that is not a real number.
         """
         lp = _finite(self.signal_and_background, "signal_and_background")
         lb = _finite(self.background, "background")
@@ -285,6 +289,8 @@ def background_corrected_level(
         :math:`> \Delta L`).
     :raises ValueError: Mismatched shapes, non-finite values, or band
         frequencies that are not one positive value per band.
+    :raises TypeError: if ``background``, ``frequencies`` or ``signal_and_background``
+        holds a text or a value that is not a real number.
     """
     lp = _finite(signal_and_background, "signal_and_background")
     lb = _finite(background, "background")
@@ -298,7 +304,7 @@ def background_corrected_level(
         lb,
         frequencies=None
         if frequencies is None
-        else np.asarray(frequencies, dtype=np.float64),
+        else real_array(frequencies, "frequencies"),
     )
 
 
@@ -558,6 +564,8 @@ def impact_improvement(
         are flagged.
     :return: :class:`FloorCoveringImprovementResult` (``ΔL`` per band).
     :raises ValueError: Mismatched shapes or non-finite values.
+    :raises TypeError: if ``background``, ``bare``, ``frequencies`` or ``with_covering``
+        holds a text or a value that is not a real number.
     """
     l0 = _finite(bare, "bare")
     l1 = _finite(with_covering, "with_covering")
@@ -696,7 +704,8 @@ def improvement_octave_bands(
         (``.frequencies``) and the octave values (``.values``).
     :raises ValueError: The thirds do not group into complete octave triplets,
         or ``quantity`` is not one of the three.
-    :raises TypeError: if ``quantity`` is not a text.
+    :raises TypeError: if ``quantity`` is not a text, or ``frequencies`` or
+        ``improvement`` holds a text or a value that is not a real number.
     """
     require_choice(quantity, "quantity", _OCTAVE_BAND_QUANTITIES[:3])
     dl = _finite(improvement, "improvement")

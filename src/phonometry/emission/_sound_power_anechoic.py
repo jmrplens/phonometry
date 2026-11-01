@@ -50,6 +50,7 @@ from .._internal.levels_math import energy_mean, energy_sum, weighted_energy_mea
 from .._internal.types import ReportEngine, as_float_or_array
 from .._internal.validation import (
     check_engine,
+    real_array,
     require_choice,
     require_ranks,
     require_same_length,
@@ -483,7 +484,7 @@ def precision_positions(
 
 def _k1_lower_criterion(frequencies: np.ndarray) -> np.ndarray:
     """Frequency-dependent lower K1 criterion, in dB (clause 9.4.2)."""
-    freqs = np.asarray(frequencies, dtype=np.float64)
+    freqs = real_array(frequencies, "frequencies")
     return np.where(
         (freqs >= _K1_MID_BAND_MIN_HZ) & (freqs <= _K1_MID_BAND_MAX_HZ),
         _K1_LOW_MID,
@@ -516,10 +517,12 @@ def precision_background_correction(
         the per-band lower criterion.
     :return: ``K1i`` per position and band, in decibels, matching the broadcast
         shape of the inputs.
+    :raises TypeError: if ``background_levels``, ``frequencies`` or ``source_levels``
+        holds a text or a value that is not a real number.
     """
-    src = np.asarray(source_levels, dtype=np.float64)
-    bg = np.asarray(background_levels, dtype=np.float64)
-    freqs = np.asarray(frequencies, dtype=np.float64)
+    src = real_array(source_levels, "source_levels")
+    bg = real_array(background_levels, "background_levels")
+    freqs = real_array(frequencies, "frequencies")
     if src.shape[-1] != freqs.shape[0] or bg.shape[-1] != freqs.shape[0]:
         msg = (
             "The last axis of 'source_levels'/'background_levels' must match "
@@ -586,7 +589,8 @@ def meteorological_corrections(
         :math:`A_0 = \alpha(f)\,r`.
     :return: :class:`MeteorologicalCorrection`.
     :raises TypeError: if ``radius``, ``static_pressure_kpa`` or ``temperature_c`` is
-        not a single number.
+        not a single number, or ``air_absorption_db_per_m`` holds a text or a value that
+        is not a real number.
     """
     require_scalar(radius, "radius")
     require_scalar(static_pressure_kpa, "static_pressure_kpa")
@@ -607,7 +611,7 @@ def meteorological_corrections(
     if air_absorption_db_per_m is None:
         c3: float | np.ndarray = 0.0
     else:
-        a0 = np.asarray(air_absorption_db_per_m, dtype=np.float64) * radius
+        a0 = real_array(air_absorption_db_per_m, "air_absorption_db_per_m") * radius
         if np.any(a0 < 0.0):
             msg = "'air_absorption_db_per_m' must be non-negative."
             raise ValueError(msg)
@@ -676,7 +680,7 @@ def precision_uncertainty(
         ``float`` for a number; an array for a sequence or an array, a zero-dimensional
         one included.
     :raises TypeError: if ``coverage_factor`` or ``sigma_omc_db`` is not a single
-        number.
+        number, or ``sigma_r0`` holds a text or a value that is not a real number.
     """
     require_scalar(coverage_factor, "coverage_factor")
     require_scalar(sigma_omc_db, "sigma_omc_db")
@@ -686,7 +690,7 @@ def precision_uncertainty(
     if sigma_omc_db < 0.0:
         msg = "'sigma_omc_db' must be non-negative."
         raise ValueError(msg)
-    sigma_tot = np.hypot(np.asarray(sigma_r0, dtype=np.float64), sigma_omc_db)
+    sigma_tot = np.hypot(real_array(sigma_r0, "sigma_r0"), sigma_omc_db)
     u = coverage_factor * sigma_tot
     return as_float_or_array(u, like=(sigma_r0,))
 
@@ -710,7 +714,7 @@ def _precision_k1(
         )
         raise ValueError(msg)
     n_positions, n_bands = levels.shape
-    bg = np.atleast_2d(np.asarray(background_levels, dtype=np.float64))
+    bg = np.atleast_2d(real_array(background_levels, "background_levels"))
     if bg.shape == (1, n_bands) and n_positions != 1:
         bg = np.broadcast_to(bg, (n_positions, n_bands))
     if bg.shape != levels.shape:
@@ -731,7 +735,7 @@ def _precision_surface_level(
     if areas is None:
         return np.asarray(energy_mean(corrected, axis=0), dtype=np.float64)
     n_positions = corrected.shape[0]
-    seg = np.asarray(areas, dtype=np.float64)
+    seg = real_array(areas, "areas")
     if seg.shape != (n_positions,):
         msg = "'areas' must have one value per microphone position."
         raise ValueError(msg)
@@ -814,7 +818,7 @@ def _room_qualification_warnings(
             stacklevel=3,
         )
     if frequencies is not None:
-        freqs = np.asarray(frequencies, dtype=np.float64)
+        freqs = real_array(frequencies, "frequencies")
         # A band is inside the range when its one-third octave band is: the
         # nominal frequencies and the exact ones differ by under 3 %.
         edge = 10.0 ** (1.0 / 20.0)
@@ -923,7 +927,8 @@ def sound_power_anechoic(
     :return: :class:`PrecisionSoundPowerResult`.
     :raises ValueError: for a room qualification of the other room type.
     :raises TypeError: if ``radius`` is not a single number, or ``surface`` is not a
-        text.
+        text, or ``areas``, ``background_levels``, ``frequencies`` or
+        ``levels_positions`` holds a text or a value that is not a real number.
     """
     require_scalar(radius, "radius")
     require_choice(surface, "surface", ("sphere", "hemisphere"))
@@ -932,7 +937,7 @@ def sound_power_anechoic(
         raise ValueError(msg)
     if room_qualification is not None:
         _room_qualification_warnings(room_qualification, surface, radius, frequencies)
-    levels = np.atleast_2d(np.asarray(levels_positions, dtype=np.float64))
+    levels = np.atleast_2d(real_array(levels_positions, "levels_positions"))
     # The number is a count of array axes, not a quantity.
     if levels.ndim != 2:  # noqa: PLR2004
         msg = "'levels_positions' must be a 2D (positions, bands) array."
@@ -942,7 +947,7 @@ def sound_power_anechoic(
     area = (4.0 if surface == "sphere" else 2.0) * np.pi * radius**2
     room: PrecisionRoom = "anechoic" if surface == "sphere" else "hemi-anechoic"
 
-    freqs = None if frequencies is None else np.asarray(frequencies, dtype=np.float64)
+    freqs = None if frequencies is None else real_array(frequencies, "frequencies")
     if freqs is not None and freqs.shape[0] != n_bands:
         msg = "'frequencies' length must match the number of bands."
         raise ValueError(msg)

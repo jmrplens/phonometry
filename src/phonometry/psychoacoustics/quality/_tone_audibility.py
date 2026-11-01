@@ -102,6 +102,7 @@ import numpy as np
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     check_engine,
+    real_array,
     refuse_text,
     require_choice,
     require_equal_counts,
@@ -308,9 +309,10 @@ def energy_sum_level(
     :return: Corrected energy-sum level, in dB.
     :raises ValueError: If ``line_levels`` is empty/non-finite or the factor is
         not positive/finite.
-    :raises TypeError: if ``effective_bandwidth_factor`` is not a single number.
+    :raises TypeError: if ``effective_bandwidth_factor`` is not a single number, or
+        ``line_levels`` holds a text or a value that is not a real number.
     """
-    levels = np.asarray(line_levels, dtype=np.float64)
+    levels = real_array(line_levels, "line_levels")
     if levels.size == 0:
         msg = "'line_levels' must contain at least one line."
         raise ValueError(msg)
@@ -339,8 +341,8 @@ def _validate_spectrum(
         line-count complaint names the function that was typed rather than
         this validator, which four entry points share.
     """
-    lev = np.asarray(levels, dtype=np.float64)
-    freq = np.asarray(frequencies, dtype=np.float64)
+    lev = real_array(levels, "levels")
+    freq = real_array(frequencies, "frequencies")
     if lev.ndim != 1 or freq.ndim != 1:
         msg = "'levels' and 'frequencies' must be one-dimensional."
         raise ValueError(msg)
@@ -406,7 +408,8 @@ def mean_narrowband_level(
     :raises ValueError: If the spectrum is invalid, the factor is not
         positive/finite, or no lines fall in the critical band.
     :raises TypeError: if ``effective_bandwidth_factor`` or ``tone_frequency`` is not a
-        single number.
+        single number, or ``frequencies`` or ``levels`` holds a text or a value that is
+        not a real number.
     """
     ls, _ = _mean_narrowband_level_lines(
         levels,
@@ -495,7 +498,8 @@ def tone_level(
     :return: Tone level ``LT``, in dB.
     :raises ValueError: If the spectrum is invalid or the levels are not finite.
     :raises TypeError: if ``mean_narrowband_level`` or ``tone_frequency`` is not a
-        single number.
+        single number, or ``frequencies`` or ``levels`` holds a text or a value that is
+        not a real number.
     """
     lev, freq = _validate_spectrum(levels, frequencies, "tone_level")
     ft = _positive(tone_frequency, "tone_frequency")
@@ -734,7 +738,8 @@ def analyze_spectrum(
         their same-band FG combinations.
     :raises ValueError: If the spectrum is invalid or no audible tone is found.
     :raises TypeError: if ``effective_bandwidth_factor`` or ``line_spacing_hz`` is not a
-        single number.
+        single number, or ``frequencies`` or ``levels`` holds a text or a value that is
+        not a real number.
     """
     lev, freq = _validate_spectrum(levels, frequencies, "analyze_spectrum")
     df = _positive(line_spacing_hz, "line_spacing_hz")
@@ -833,10 +838,12 @@ def combined_tone_level(
         for a Hanning window.
     :return: Combined tone level ``LT``, in dB.
     :raises ValueError: If the inputs are invalid or differ in length.
+    :raises TypeError: if ``frequencies``, ``levels``, ``mean_narrowband_levels`` or
+        ``tone_frequencies`` holds a text or a value that is not a real number.
     """
     lev, freq = _validate_spectrum(levels, frequencies, "combined_tone_level")
-    fts = np.asarray(tone_frequencies, dtype=np.float64)
-    lss = np.asarray(mean_narrowband_levels, dtype=np.float64)
+    fts = real_array(tone_frequencies, "tone_frequencies")
+    lss = real_array(mean_narrowband_levels, "mean_narrowband_levels")
     if fts.ndim != 1 or lss.ndim != 1:
         msg = "'tone_frequencies' and 'mean_narrowband_levels' must be one-dimensional."
         raise ValueError(msg)
@@ -974,8 +981,10 @@ def mean_audibility(decisive_audibilities: ArrayLike) -> float:
         in dB.
     :return: Mean audibility ``ΔL``, in dB.
     :raises ValueError: If the input is empty or non-finite.
+    :raises TypeError: if ``decisive_audibilities`` holds a text or a value that is not
+        a real number.
     """
-    deltas = np.asarray(decisive_audibilities, dtype=np.float64)
+    deltas = real_array(decisive_audibilities, "decisive_audibilities")
     if deltas.size == 0:
         msg = "'decisive_audibilities' must not be empty."
         raise ValueError(msg)
@@ -1046,10 +1055,11 @@ def audibility_uncertainty(
     :raises ValueError: If a line set is empty/non-finite or a parameter is
         not positive/finite.
     :raises TypeError: if ``coverage_factor``, ``line_spacing_hz``, ``sigma_level_db``
-        or ``tone_frequency`` is not a single number.
+        or ``tone_frequency`` is not a single number, or ``noise_line_levels`` or
+        ``tone_line_levels`` holds a text or a value that is not a real number.
     """
-    lt = np.asarray(tone_line_levels, dtype=np.float64)
-    ls = np.asarray(noise_line_levels, dtype=np.float64)
+    lt = real_array(tone_line_levels, "tone_line_levels")
+    ls = real_array(noise_line_levels, "noise_line_levels")
     if lt.size == 0 or ls.size == 0:
         msg = "Both line sets must contain at least one line."
         raise ValueError(msg)
@@ -1095,9 +1105,11 @@ def mean_audibility_uncertainty(
     :return: Extended uncertainty of the mean audibility, in dB.
     :raises ValueError: If the arrays are empty, non-finite or of different
         lengths.
+    :raises TypeError: if ``decisive_audibilities`` or ``extended_uncertainties`` holds
+        a text or a value that is not a real number.
     """
-    deltas = np.asarray(decisive_audibilities, dtype=np.float64)
-    uncertainties = np.asarray(extended_uncertainties, dtype=np.float64)
+    deltas = real_array(decisive_audibilities, "decisive_audibilities")
+    uncertainties = real_array(extended_uncertainties, "extended_uncertainties")
     if deltas.size == 0:
         msg = "'decisive_audibilities' must not be empty."
         raise ValueError(msg)
@@ -1172,7 +1184,7 @@ def _require_group_counts(counts: NDArray[np.int_] | None) -> None:
         return
     refuse_text(counts, _GROUP_SIZES_NOT_NUMERIC)
     try:
-        values = np.asarray(counts, dtype=np.float64).ravel()
+        values = real_array(counts, "counts").ravel()
     except TypeError as exc:
         raise TypeError(_GROUP_SIZES_NOT_NUMERIC) from exc
     except (ValueError, OverflowError) as exc:
@@ -1560,11 +1572,13 @@ def assess_tones(
     :return: A :class:`ToneAudibilityResult`.
     :raises ValueError: If the arrays are empty, differ in length, or contain
         non-finite/non-positive values.
-    :raises TypeError: if ``line_spacing_hz`` is not a single number.
+    :raises TypeError: if ``line_spacing_hz`` is not a single number, or
+        ``extended_uncertainties``, ``mean_narrowband_levels``, ``tone_frequencies`` or
+        ``tone_levels`` holds a text or a value that is not a real number.
     """
-    freqs = np.asarray(tone_frequencies, dtype=np.float64)
-    lt = np.asarray(tone_levels, dtype=np.float64)
-    ls = np.asarray(mean_narrowband_levels, dtype=np.float64)
+    freqs = real_array(tone_frequencies, "tone_frequencies")
+    lt = real_array(tone_levels, "tone_levels")
+    ls = real_array(mean_narrowband_levels, "mean_narrowband_levels")
     df = _positive(line_spacing_hz, "line_spacing_hz")
     if freqs.ndim != 1 or lt.ndim != 1 or ls.ndim != 1:
         msg = (
@@ -1593,7 +1607,7 @@ def assess_tones(
 
     uncertainties: NDArray[np.float64] | None = None
     if extended_uncertainties is not None:
-        uncertainties = np.asarray(extended_uncertainties, dtype=np.float64)
+        uncertainties = real_array(extended_uncertainties, "extended_uncertainties")
         require_equal_shapes(
             "assess_tones",
             {

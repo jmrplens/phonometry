@@ -551,7 +551,7 @@ direct way to trade resolution for time.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
-| TypeError | if `frequency_hz`, `max_range`, `range_step` or `source_depth` is not a single number, or `n_depth_points` is a flag, a text or an array where a count goes, `bottom` is not a text, or `absorption` is neither a text nor a [`VolumeAbsorption`](/phonometry/reference/api/underwater/numerical/#volumeabsorption). |
+| TypeError | if `frequency_hz`, `max_range`, `range_step` or `source_depth` is not a single number, or `n_depth_points` is a flag, a text or an array where a count goes, `bottom` is not a text, or `absorption` is neither a text nor a [`VolumeAbsorption`](/phonometry/reference/api/underwater/numerical/#volumeabsorption), or `depths`, `receiver_depths_m` or `speeds_of_sound` holds a text or a value that is not a real number. |
 
 **Warns**
 
@@ -681,7 +681,7 @@ to resolve it).
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
-| TypeError | if `density`, `frequency_hz`, `receiver_depth` or `source_depth` is not a single number, or `n_depth_points` is a flag, a text or an array where a count goes, or `bottom` is not a text. |
+| TypeError | if `density`, `frequency_hz`, `receiver_depth` or `source_depth` is not a single number, or `n_depth_points` is a flag, a text or an array where a count goes, or `bottom` is not a text, or `depths`, `ranges_m` or `speeds_of_sound` holds a text or a value that is not a real number. |
 
 ## NormalModeResult
 
@@ -788,7 +788,7 @@ calibration itself is exact to ~1e-4 dB at the default `range_step`.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
-| TypeError | if `frequency_hz`, `max_range`, `range_step` or `source_depth` is not a single number, or `n_depth_points` is a flag, a text or an array where a count goes. |
+| TypeError | if `frequency_hz`, `max_range`, `range_step` or `source_depth` is not a single number, or `n_depth_points` is a flag, a text or an array where a count goes, or `depths` or `speeds_of_sound` holds a text or a value that is not a real number. |
 
 ## ParabolicEquationResult
 
@@ -916,7 +916,7 @@ per ray, are the entire per-bounce record a downstream amplitude needs.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
-| TypeError | if `max_range` or `source_depth` is not a single number, or `n_steps` is a flag, a text or an array where a count goes. |
+| TypeError | if `max_range` or `source_depth` is not a single number, or `n_steps` is a flag, a text or an array where a count goes, or `depths`, `launch_angles_deg` or `speeds_of_sound` holds a text or a value that is not a real number. |
 
 ## RayTraceResult
 

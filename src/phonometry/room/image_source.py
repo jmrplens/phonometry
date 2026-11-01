@@ -77,6 +77,7 @@ import numpy as np
 from .._internal.frozen import OwnsArrays
 from .._internal.types import as_float_or_array
 from .._internal.validation import (
+    real_array,
     require_axis_count,
     require_axis_rank,
     require_count,
@@ -132,7 +133,7 @@ def _resolve_walls(
         here), or a shape that is neither a scalar, length 6, a band vector
         nor ``(6, n_bands)``.
     """
-    alpha = np.asarray(absorption, dtype=np.float64)
+    alpha = real_array(absorption, "absorption")
     if not np.all(np.isfinite(alpha)):
         msg = "absorption coefficients must be finite."
         raise ValueError(msg)
@@ -409,7 +410,7 @@ def _validate_point(
     point: ArrayLike, dimensions: tuple[float, float, float], name: str
 ) -> NDArray[np.float64]:
     """Validate a 3-vector strictly inside the room box."""
-    p = np.asarray(point, dtype=np.float64)
+    p = real_array(point, name)
     if p.shape != (3,):
         msg = f"'{name}' must be a 3-vector (x, y, z)."
         raise ValueError(msg)
@@ -442,7 +443,7 @@ def _resolve_band_maps(
         attenuation, or an ``absorption`` / ``air_attenuation_per_m`` band count
         that neither is 1 nor matches the resolved band count.
     """
-    m = np.asarray(air_attenuation_per_m, dtype=np.float64)
+    m = real_array(air_attenuation_per_m, "air_attenuation_per_m")
     if m.ndim > 1:
         msg = (
             "'air_attenuation_per_m' must be a scalar or a 1-D per-band vector; "
@@ -642,9 +643,11 @@ def image_source_rir(
         ``air_attenuation_per_m``, or a ``frequencies`` length that does not match
         the band count.
     :raises TypeError: if ``duration_s`` or ``speed_of_sound`` is not a single number,
-        or ``fs`` or ``max_order`` is a flag, a text or an array where a count goes.
+        or ``fs`` or ``max_order`` is a flag, a text or an array where a count goes, or
+        ``absorption``, ``air_attenuation_per_m``, ``dimensions``, ``frequencies``,
+        ``receiver`` or ``source`` holds a text or a value that is not a real number.
     """
-    d = np.asarray(dimensions, dtype=np.float64)
+    d = real_array(dimensions, "dimensions")
     if d.shape != (3,):
         msg = "'dimensions' must be a 3-vector (Lx, Ly, Lz)."
         raise ValueError(msg)
@@ -671,7 +674,7 @@ def image_source_rir(
     freq: np.ndarray | None = None
     n_freq: int | None = None
     if frequencies is not None:
-        freq = np.asarray(frequencies, dtype=np.float64)
+        freq = real_array(frequencies, "frequencies")
         if freq.ndim > 1 or freq.size == 0:
             msg = (
                 "'frequencies' must be a scalar or a non-empty 1-D band "
@@ -770,11 +773,12 @@ def reflection_density(
     :param speed_of_sound: Speed of sound ``c``, m/s.
     :return: ``dN/dt`` in reflections per second; a ``float`` for a number; an array for
         a sequence or an array, a zero-dimensional one included.
-    :raises TypeError: if ``speed_of_sound`` or ``volume`` is not a single number.
+    :raises TypeError: if ``speed_of_sound`` or ``volume`` is not a single number, or
+        ``time`` holds a text or a value that is not a real number.
     """
     volume = require_positive(volume, "volume")
     speed_of_sound = require_positive(speed_of_sound, "speed_of_sound")
-    t = np.asarray(time, dtype=np.float64)
+    t = real_array(time, "time")
     # Physical density is zero before the direct sound; clamp negative times
     # so the t**2 squaring does not report a spurious positive density.
     out = 4.0 * np.pi * speed_of_sound**3 * np.maximum(t, 0.0) ** 2 / volume

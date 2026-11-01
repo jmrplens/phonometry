@@ -345,7 +345,7 @@ one-third-octave bands 100 Hz to 5 kHz (Formulae (A.5) to (A.7)).
 | Exception | When |
 | :--- | :--- |
 | ValueError | For an unknown spectrum, a wrong band count, or non-finite values. |
-| TypeError | if `spectrum` is not a text. |
+| TypeError | if `spectrum` is not a text, or `band_values` or `frequencies` holds a text or a value that is not a real number. |
 
 ## db_hr_impact_requirement
 

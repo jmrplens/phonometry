@@ -194,7 +194,7 @@ Table 3 (`normalized=True`).
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the group is unknown or a frequency is invalid. |
-| TypeError | if `group` is not a text. |
+| TypeError | if `group` is not a text, or `frequency_hz` holds a text or a value that is not a real number. |
 
 ## orca_audiogram
 
@@ -229,6 +229,7 @@ third branch**; evaluating the second one there returns 50.5 dB instead.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a frequency falls outside the fitted range. |
+| TypeError | if `frequency_hz` holds a text or a value that is not a real number. |
 
 ## ORCA_AUDIOGRAM_RANGE_KHZ
 

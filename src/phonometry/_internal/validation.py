@@ -113,14 +113,20 @@ def refuse_text(value: object, msg: str) -> None:
 
     For the conversions that parse what they are given (``np.asarray(x,
     dtype=complex)`` reads ``"1"`` as ``1+0j``) where a number belongs: see
-    :func:`holds_text`. A ragged nesting is left to the conversion that
-    follows, which refuses it on its own terms.
+    :func:`holds_text`. A ``bytearray`` is found at any depth of a sequence
+    or an array of objects, where numpy reads it as the codes of its
+    characters (``[bytearray(b"12")]`` as ``[[49, 50]]``) and no array it
+    gives shows it. A ragged nesting is left to the conversion that follows,
+    which refuses it on its own terms.
 
     :param value: The caller's value, of any type.
     :param msg: The refusal, worded by the guard that owns the parameter.
-    :raises TypeError: with *msg*, for a text or anything that holds one.
+    :raises TypeError: with *msg*, for a text or anything that holds one, a
+        ``bytearray`` at any depth included.
     """
-    if isinstance(value, np.ndarray):
+    if _misread_member(value) == "bytearray":
+        found = True
+    elif isinstance(value, np.ndarray):
         found = holds_text(value)
     elif isinstance(value, (str, bytes)):
         found = True
@@ -195,6 +201,13 @@ def refuse_complex(value: object, msg: str) -> None:
 #: handful, and a sequence that holds itself is nested without end.
 _MOST_AXES = 32
 
+#: The types of a member the walk below passes over at once: a number holds
+#: no member, and a long list of them is read at the cost of the
+#: conversion that follows rather than a call for each.
+_PLAIN_NUMBERS = frozenset(
+    {float, int, bool, complex, np.float64, np.float32, np.int64, np.int32}
+)
+
 
 def _misread_member(
     value: object, depth: int = 0
@@ -240,6 +253,8 @@ def _misread_member(
     if depth > _MOST_AXES:
         return "nesting"
     for member in members:
+        if type(member) in _PLAIN_NUMBERS:
+            continue
         found = _misread_member(member, depth)
         if found is not None:
             return found
@@ -336,19 +351,25 @@ def require_scalar(value: object, name: str) -> None:
 
     An array or a text where one number is asked for is the wrong type, so it
     is refused with :class:`TypeError`, the class numpy 2.4 gives ``float()``
-    of an array and ``math.sqrt`` gives a text. ``None`` passes, for the
-    guards of an optional parameter to settle.
+    of an array and ``math.sqrt`` gives a text. So is a complex number:
+    :func:`float` takes the real part of a NumPy one (``np.complex128(94 +
+    3j)`` as ``94.0``) with no more than a ``ComplexWarning``, and the guard
+    after it would check a value the caller never gave (:func:`holds_complex`).
+    ``None`` passes, for the guards of an optional parameter to settle.
 
     :param value: The caller's value, of any type.
     :param name: Parameter name used in the error message.
     :raises TypeError: for an array of any shape, a ragged sequence included,
-        or a text.
+        a text, or a complex number.
     """
     if not is_scalar(value):
         msg = f"'{name}' must be one number, not an array."
         raise TypeError(msg)
     if holds_text(value):
         msg = f"'{name}' must be one number, not a text."
+        raise TypeError(msg)
+    if holds_complex(value):
+        msg = f"'{name}' must be a number, not a complex one."
         raise TypeError(msg)
 
 
@@ -437,8 +458,9 @@ def require_above_absolute_zero_array(x: ArrayLike, name: str) -> np.ndarray:
     :return: The temperatures as a ``float64`` array.
     :raises ValueError: if any element is non-finite or at or below
         -273,15 degC.
+    :raises TypeError: if ``x`` holds a text or a value that is not a real number.
     """
-    values = _as_float64(x, name)
+    values = real_array(x, name)
     if not np.all(np.isfinite(values)) or np.any(values <= ABSOLUTE_ZERO_C):
         # Phrased so it reads for a single value and for a column alike: the
         # same helper serves 'temperature' and 'temperatures'.
@@ -655,32 +677,66 @@ def check_engine(engine: object) -> ReportEngine:
     raise ValueError(msg)
 
 
+#: The dtype kinds of an array of real numbers: truth values, integers of
+#: either sign and floats. An array of one of them holds nothing the reader
+#: below has to look for.
+_REAL_KINDS = frozenset("biuf")
+#: The types of one real number the reader below converts at once.
+_PLAIN_REALS = frozenset({float, int, np.float64})
+
 #: The rank of a matrix of one row per position and one column per band.
 _MATRIX_RANK = 2
 
 
-def _as_float64(x: ArrayLike, name: str) -> np.ndarray:
-    """Convert *x* to ``float64``, naming the parameter when numpy cannot.
+def real_array(x: ArrayLike, name: str, *, copy: bool = False) -> NDArray[np.float64]:
+    """A caller's numbers as a ``float64`` array, refused by name when they are not.
 
-    An unconvertible element would otherwise raise numpy's anonymous
-    ``TypeError``, and a ragged list its anonymous ``ValueError``; both would
-    escape the array guards below without saying which parameter refused.
+    The one reading of a caller's value where real numbers belong, a number
+    or an array of any rank. ``np.asarray(x, dtype=np.float64)`` is not this
+    reading, though the tree used it as one: it converts three inputs that
+    hold no real numbers into ones that pass every guard after it. A complex
+    value comes back as its real part with no more than a
+    ``ComplexWarning`` (``[1 + 2j]`` as ``[1.0]``, and a NumPy complex
+    number in a list or an array of objects the same way,
+    :func:`holds_complex`). A text is parsed (``["94.0"]`` as ``[94.0]``),
+    so a column of readings left as text passed for numbers while one cell
+    that reads as none raised a ``ValueError``; text is the wrong type where
+    numbers belong whatever it reads as, refused here as :func:`require_real`
+    refuses one text. And a ``bytearray``, on its own or at any depth of a
+    sequence, is read as the codes of its characters (``[bytearray(b"12")]``
+    as ``[[49.0, 50.0]]``), a text no array numpy gives shows. Each is
+    refused with :class:`TypeError` naming the parameter, and so is an
+    element that is no number, which numpy would refuse without a name; a
+    ragged nesting, to which numpy gives no shape, is a :class:`ValueError`
+    naming it.
 
-    Two inputs numpy converts are refused rather than converted. A complex
-    array: ``np.asarray(z, dtype=float64)`` drops the imaginary part with no
-    more than a ``ComplexWarning``, so ``np.array([1 + 2j])`` would arrive at
-    the guards below as ``[1.0]`` and pass every one of them, and an array
-    of objects that holds a NumPy complex number would too
-    (:func:`holds_complex`). And text:
-    ``np.asarray(["94.0"], dtype=float64)`` parses it, so a column of readings
-    left as text passed for numbers while one cell that reads as none raised
-    a ``ValueError``; text is the wrong type where numbers belong whatever it
-    reads as, refused here as :func:`require_real` refuses one text.
-
-    :raises TypeError: for a complex array, text, or an element that is not a
-        number.
+    :param x: The caller's value, of any type.
+    :param name: The parameter's name, for the message.
+    :param copy: Give a new array even when *x* is a ``float64`` array
+        already, as ``np.array`` does, for a caller that writes into what it
+        reads.
+    :return: The numbers, as ``float64``, of the shape numpy gives them.
+    :raises TypeError: for a complex value, a text in any form (a
+        ``bytearray`` at any depth included), an element that is not a
+        number, or a sequence nested more than 32 deep, as one that holds
+        itself is.
     :raises ValueError: for a ragged nesting, to which numpy gives no shape.
     """
+    if isinstance(x, np.ndarray) and x.dtype.kind in _REAL_KINDS:
+        # An array of numbers holds no text, no complex number and no member.
+        return x.astype(np.float64, copy=copy)
+    if type(x) in _PLAIN_REALS:
+        return np.asarray(x, dtype=np.float64)
+    found = _misread_member(x)
+    if found == "bytearray":
+        msg = f"'{name}' must be numbers, not text."
+        raise TypeError(msg)
+    if found == "nesting":
+        msg = (
+            f"'{name}' must be numbers, not a sequence nested more than "
+            f"{_MOST_AXES} deep, as one that holds itself is."
+        )
+        raise TypeError(msg)
     try:
         array = np.asarray(x)
     except ValueError as exc:
@@ -693,7 +749,7 @@ def _as_float64(x: ArrayLike, name: str) -> np.ndarray:
         msg = f"'{name}' must be numbers, not text."
         raise TypeError(msg)
     try:
-        return array.astype(np.float64, copy=False)
+        return array.astype(np.float64, copy=copy)
     except TypeError as exc:
         msg = f"'{name}' must be numeric."
         raise TypeError(msg) from exc
@@ -710,8 +766,9 @@ def require_positive_array(x: ArrayLike, name: str) -> np.ndarray:
     :return: The validated ``float64`` array (at least 1-D).
     :raises ValueError: for a non-numeric, empty, multi-dimensional,
         non-finite or non-positive input.
+    :raises TypeError: if ``x`` holds a text or a value that is not a real number.
     """
-    arr = np.atleast_1d(_as_float64(x, name))
+    arr = np.atleast_1d(real_array(x, name))
     if arr.ndim != 1 or arr.size == 0:
         msg = f"'{name}' must be a non-empty 1-D array."
         raise ValueError(msg)
@@ -736,8 +793,9 @@ def require_finite_array(x: ArrayLike, name: str) -> np.ndarray:
     :return: The validated ``float64`` array (at least 1-D).
     :raises ValueError: for a non-numeric, empty, multi-dimensional or
         non-finite input.
+    :raises TypeError: if ``x`` holds a text or a value that is not a real number.
     """
-    arr = np.atleast_1d(_as_float64(x, name))
+    arr = np.atleast_1d(real_array(x, name))
     if arr.ndim != 1 or arr.size == 0:
         msg = f"'{name}' must be a non-empty 1-D array."
         raise ValueError(msg)
@@ -760,8 +818,9 @@ def require_finite_matrix(x: ArrayLike, name: str) -> np.ndarray:
     :return: The validated ``float64`` array, always 2-D.
     :raises ValueError: for a non-numeric, empty, ragged, higher-dimensional
         or non-finite input.
+    :raises TypeError: if ``x`` holds a text or a value that is not a real number.
     """
-    arr = np.atleast_2d(_as_float64(x, name))
+    arr = np.atleast_2d(real_array(x, name))
     if arr.ndim != _MATRIX_RANK or arr.size == 0:
         msg = f"'{name}' must be a non-empty 2-D array, one row per position."
         raise ValueError(msg)
@@ -1065,11 +1124,16 @@ def _as_numeric_field(owner: object, name: str, value: object) -> np.ndarray:
     An array of objects that holds a complex number is read as complex, so
     both axes are checked: read as ``float64``, NumPy would keep the real
     part of a NumPy complex number with no more than a ``ComplexWarning``.
+    A ``bytearray``, on its own or at any depth of a sequence, is text, as
+    :func:`refuse_text` finds it, and not the codes numpy reads in it.
 
-    :raises TypeError: if the field is text or holds an element that is not a
-        number.
+    :raises TypeError: if the field is text (a ``bytearray`` at any depth
+        included) or holds an element that is not a number.
     :raises ValueError: if the field is a ragged nesting.
     """
+    if _misread_member(value) == "bytearray":
+        msg = f"{type(owner).__name__}: '{name}' must be numeric, not text."
+        raise TypeError(msg)
     try:
         array = np.asarray(value)
     except ValueError as exc:
@@ -1240,8 +1304,9 @@ def require_per_band(
         caller does not take (``frequency`` beside a ``frequencies``).
     :return: The broadcast ``float64`` array, of ``bands.shape``.
     :raises ValueError: if *x* is neither a scalar nor of ``bands``' length.
+    :raises TypeError: if ``x`` holds a text or a value that is not a real number.
     """
-    arr = _as_float64(x, name)
+    arr = real_array(x, name)
     if arr.ndim != 0 and arr.shape != bands.shape:
         msg = (
             f"'{name}' must be a scalar or carry one value per band "
@@ -1263,8 +1328,9 @@ def require_1d_signal(x: ArrayLike, name: str) -> np.ndarray:
         caller does not have.
     :return: The validated ``float64`` array.
     :raises ValueError: for a non-1-D input.
+    :raises TypeError: if ``x`` holds a text or a value that is not a real number.
     """
-    arr = _as_float64(x, name)
+    arr = real_array(x, name)
     if arr.ndim != 1:
         msg = (
             f"'{name}' must be a 1-D time series; got shape {arr.shape}. "
@@ -1330,7 +1396,7 @@ def arrays_of(
     is ``float64`` already, and one a
     deque or a generator holds is copied. A member that is no array, a list
     of numbers, is converted into a new one. A member is converted as
-    :func:`_as_float64` converts, so a text among its numbers is refused,
+    :func:`real_array` converts, so a text among its numbers is refused,
     whatever it reads as, and not parsed into one.
 
     :param value: The sequence.
@@ -1356,7 +1422,7 @@ def arrays_of(
     for item in items:
         refuse_complex(item, f"{msg} of real numbers, not complex ones.")
         refuse_text(item, f"{msg} of numbers, not text.")
-    return tuple(_as_float64(cast("ArrayLike", item), name) for item in items)
+    return tuple(real_array(cast("ArrayLike", item), name) for item in items)
 
 
 def pair_of_arrays(

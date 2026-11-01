@@ -160,7 +160,7 @@ fastest, and flat in between. A machine-specific part that states its own
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a frequency is not positive, a velocity or corner is not positive and finite, or the corners are not in order. |
-| TypeError | if `constant_velocity_mm_s`, `corner_high_hz`, `corner_low_hz` or `zone_factor` is not a single number. |
+| TypeError | if `constant_velocity_mm_s`, `corner_high_hz`, `corner_low_hz` or `zone_factor` is not a single number, or `frequency` holds a text or a value that is not a real number. |
 
 ## assess_operational_change
 
@@ -234,6 +234,7 @@ limit reads in the tables of the machine-specific parts.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a magnitude is negative or not finite. |
+| TypeError | if `magnitude` holds a text or a value that is not a real number. |
 
 ## GEAR_ACCEPTANCE_HEADROOM
 
@@ -355,7 +356,7 @@ by 10 dB per decade, which on an amplitude is an exponent of one half.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a frequency or the rating is not positive. |
-| TypeError | if `rating` is not a single number. |
+| TypeError | if `rating` is not a single number, or `frequency` holds a text or a value that is not a real number. |
 
 ## GEAR_UNIT_CLASSES
 

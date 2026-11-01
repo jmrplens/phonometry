@@ -367,6 +367,41 @@ def _swing(series: NDArray[np.float64]) -> float:
     return float(np.max(series) - np.min(series))
 
 
+def _harmonics_and_series(
+    transform: NDArray[np.complex128],
+    settled: NDArray[np.float64],
+    maxima: NDArray[np.bool_],
+    fundamental: int,
+    last_line: int,
+) -> tuple[tuple[float, ...], NDArray[np.float64]]:
+    """The harmonics kept beside the fundamental, and the series transformed
+    back from the lines of all of them (13.6.2.3).
+
+    The three lines about the fundamental are transformed back once: their
+    swing decides whether the harmonics are looked for at all, and the same
+    series is the result when none is kept. Only a kept harmonic, which
+    widens the set of lines, calls for a second transform of the whole set.
+
+    :return: The frequencies of the kept harmonics, in Hz, and the series.
+    """
+    kept = set(_window(fundamental, last_line))
+    series = _reconstruct(transform, sorted(kept))
+    if _swing(series) <= _HARMONIC_SWING_DB:
+        return (), series
+    harmonics: list[float] = []
+    for order in (2, 3):
+        line = _harmonic_line(settled, maxima, fundamental, order)
+        if line is None:
+            continue
+        window = _window(line, last_line)
+        if _swing(_reconstruct(transform, window)) > _HARMONIC_SWING_DB:
+            kept.update(window)
+            harmonics.append(line / _BLOCK_DURATION_S)
+    if harmonics:
+        series = _reconstruct(transform, sorted(kept))
+    return tuple(harmonics), series
+
+
 @dataclass(frozen=True)
 class ModulationBlock(OwnsArrays):
     r"""The analysis of one 10 s block (IEC TS 61400-11-2:2024, 13.6.2.3).
@@ -627,18 +662,9 @@ def amplitude_modulation_block(
             reconstructed_levels=read_only(np.zeros(0)),
             modulation_depth_db=None,
         )
-    kept = set(_window(fundamental, last_line))
-    harmonics: list[float] = []
-    if _swing(_reconstruct(transform, sorted(kept))) > _HARMONIC_SWING_DB:
-        for order in (2, 3):
-            line = _harmonic_line(settled, maxima, fundamental, order)
-            if line is None:
-                continue
-            window = _window(line, last_line)
-            if _swing(_reconstruct(transform, window)) > _HARMONIC_SWING_DB:
-                kept.update(window)
-                harmonics.append(line / _BLOCK_DURATION_S)
-    reconstructed = _reconstruct(transform, sorted(kept))
+    harmonics, reconstructed = _harmonics_and_series(
+        transform, settled, maxima, fundamental, last_line
+    )
     depth = float(
         np.percentile(reconstructed, _UPPER_PERCENTILE)
         - np.percentile(reconstructed, _LOWER_PERCENTILE)
@@ -647,7 +673,7 @@ def amplitude_modulation_block(
         **common,
         fundamental_frequency_hz=fundamental / _BLOCK_DURATION_S,
         prominence=prominence,
-        harmonic_frequencies_hz=tuple(harmonics),
+        harmonic_frequencies_hz=harmonics,
         reconstructed_levels=read_only(reconstructed),
         modulation_depth_db=depth,
     )

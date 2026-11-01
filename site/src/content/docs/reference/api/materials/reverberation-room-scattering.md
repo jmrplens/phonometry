@@ -76,7 +76,7 @@ the standard is taken as a single (mean) speed of sound.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for non-positive `V`, `S`, `c` or `T`. |
-| TypeError | if `area` or `volume` is not a single number. |
+| TypeError | if `area` or `volume` is not a single number, or `speed_of_sound`, `t_a`, `t_b`, `u_a` or `u_b` holds a text or a value that is not a real number. |
 
 ## BASE_PLATE_BANDS_HZ
 
@@ -257,6 +257,7 @@ there are any.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a mapping missing a band, a sequence of the wrong length, or a coefficient that is not finite (NaN or infinite). |
+| TypeError | if `scattering` holds a text or a value that is not a real number. |
 
 ## random_incidence_absorption
 
@@ -335,6 +336,7 @@ error of the mean.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if fewer than two measurements are supplied. |
+| TypeError | if `times` holds a text or a value that is not a real number. |
 
 ## scattering_coefficient
 
@@ -373,6 +375,7 @@ results table is left to the caller.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if any `alpha_s` equals 1 (undefined ratio). |
+| TypeError | if `alpha_s` or `alpha_spec` holds a text or a value that is not a real number. |
 
 ## scattering_coefficient_spectrum
 
@@ -409,6 +412,7 @@ per-band specular `alpha_spec` (Eq. (4)) and random-incidence `alpha_s`
 | Exception | When |
 | :--- | :--- |
 | ValueError | if the three inputs differ in shape, the band centres are empty or not 1-D, or any `alpha_s` equals 1. |
+| TypeError | if `frequencies`, `random_absorption` or `specular_absorption` holds a text or a value that is not a real number. |
 
 ## scattering_coefficient_uncertainty
 
@@ -445,6 +449,7 @@ with the expanded uncertainty $U = 2 u_s$ (95 % confidence).
 | Exception | When |
 | :--- | :--- |
 | ValueError | if any `alpha_s` equals 1 or any `alpha_spec` equals 1. |
+| TypeError | if `alpha_s`, `alpha_spec`, `u_alpha_s` or `u_alpha_spec` holds a text or a value that is not a real number. |
 
 ## ScatteringDiffusionWarning
 

@@ -87,6 +87,7 @@ from ..._internal.levels_math import energy_sum
 from ..._internal.types import BAND_SET_NAMES, ReportEngine, float_keyed
 from ..._internal.validation import (
     check_engine,
+    real_array,
     require_band_fraction,
     require_choice,
     require_count,
@@ -423,7 +424,7 @@ def _by_band(
     if fraction is not None:
         fraction = require_band_fraction(fraction, "fraction")
     if not isinstance(values, Mapping):
-        return np.asarray(values, dtype=np.float64), fraction
+        return real_array(values, name), fraction
     values = float_keyed(values)
     if fraction is None:
         third = any(centre in values for centre in _THIRD_OCTAVE_ONLY)
@@ -942,7 +943,7 @@ def _adaptation_term(
     measured: np.ndarray, spectrum: tuple[int, ...], rating: int
 ) -> int:
     """Spectrum adaptation term ``Xaj - rating`` (Clause 4.5, Formula (2))."""
-    x_aj = -energy_sum(np.asarray(spectrum, dtype=np.float64) - measured)
+    x_aj = -energy_sum(real_array(spectrum, "spectrum") - measured)
     return math.floor(x_aj + 0.5) - rating
 
 
@@ -978,7 +979,8 @@ def weighted_rating(
     :raises ValueError: If the number of values does not match the band
         set, if a mapping lacks a band of it, or if any value is
         non-finite.
-    :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a float).
+    :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a float), or
+        ``values_by_band`` holds a text or a value that is not a real number.
     """
     data, fraction = _by_band(values_by_band, fraction, "values_by_band")
     if data.ndim != 1:
@@ -1099,7 +1101,8 @@ def weighted_impact_rating(
     :raises ValueError: If the number of values does not match the band
         set, if a mapping lacks a band of it, or if any value is
         non-finite.
-    :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a float).
+    :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a float), or
+        ``values_by_band`` holds a text or a value that is not a real number.
     """
     data, fraction = _by_band(values_by_band, fraction, "values_by_band")
     if data.ndim != 1:
@@ -1416,7 +1419,7 @@ def _validated_extended_input(
     the two spectra names it rather than this validator, which two entry
     points share.
     """
-    data = np.asarray(values_by_band, dtype=np.float64)
+    data = real_array(values_by_band, "values_by_band")
     if data.ndim != 1:
         raise ValueError(_VALUES_1D_MSG)
     if not np.all(np.isfinite(data)):
@@ -1431,7 +1434,7 @@ def _validated_extended_input(
             raise ValueError(msg)
         freqs = np.asarray(_FREQ_THIRD_OCTAVE, dtype=np.float64)
     else:
-        freqs = np.asarray(frequencies, dtype=np.float64)
+        freqs = real_array(frequencies, "frequencies")
         require_equal_shapes(
             owner,
             {"values_by_band": data.shape, "frequencies": freqs.shape},
@@ -1481,6 +1484,8 @@ def weighted_rating_extended(
     :return: An :class:`ExtendedWeightedRatingResult`.
     :raises ValueError: If the input is not one-dimensional and finite, the
         band counts differ, or the core bands are missing.
+    :raises TypeError: if ``frequencies`` or ``values_by_band`` holds a text or a value
+        that is not a real number.
     """
     measured, freqs, core_idx = _validated_extended_input(
         "weighted_rating_extended", values_by_band, frequencies
@@ -1492,7 +1497,7 @@ def weighted_rating_extended(
     rating = float(_REF_THIRD_OCTAVE[_INDEX_500_THIRD]) + shift
 
     def _term(bands: np.ndarray, spectrum: Sequence[int]) -> float:
-        x_aj = -energy_sum(np.asarray(spectrum, dtype=np.float64) - bands)
+        x_aj = -energy_sum(real_array(spectrum, "spectrum") - bands)
         return _reduce(value=float(x_aj), one_decimal=one_decimal) - rating
 
     c = _term(core_measured, _SPECTRUM1_THIRD)
@@ -1521,7 +1526,7 @@ def weighted_rating_extended(
         ctr_50_3150=extended["ctr_50_3150"],
         ctr_50_5000=extended["ctr_50_5000"],
         ctr_100_5000=extended["ctr_100_5000"],
-        core=weighted_rating(np.asarray(values_by_band, dtype=np.float64)[core_idx]),
+        core=weighted_rating(real_array(values_by_band, "values_by_band")[core_idx]),
         frequencies=freqs,
         measured=measured,
     )
@@ -1555,6 +1560,8 @@ def weighted_impact_rating_extended(
     :return: An :class:`ExtendedImpactRatingResult`.
     :raises ValueError: If the input is not one-dimensional and finite, the
         band counts differ, or the core bands are missing.
+    :raises TypeError: if ``frequencies`` or ``values_by_band`` holds a text or a value
+        that is not a real number.
     """
     measured, freqs, core_idx = _validated_extended_input(
         "weighted_impact_rating_extended", values_by_band, frequencies
@@ -1583,7 +1590,7 @@ def weighted_impact_rating_extended(
         ci=ci if one_decimal else int(ci),
         ci_50_2500=ci_50_2500,
         core=weighted_impact_rating(
-            np.asarray(values_by_band, dtype=np.float64)[core_idx]
+            real_array(values_by_band, "values_by_band")[core_idx]
         ),
         frequencies=freqs,
         measured=measured,
@@ -1703,7 +1710,7 @@ def _validated_improvement(
     delta: Sequence[float] | np.ndarray, name: str
 ) -> np.ndarray:
     """The 16 core one-third-octave values of an improvement spectrum."""
-    values = np.asarray(delta, dtype=np.float64)
+    values = real_array(delta, name)
     if values.shape != (_N_THIRD_OCTAVE_BANDS,):
         msg = f"'{name}' must give the 16 one-third-octave values 100-3150 Hz."
         raise ValueError(msg)
@@ -1797,7 +1804,8 @@ def weighted_impact_improvement(
     :raises ValueError: If ``delta_l`` is not 16 finite one-third-octave values,
         a mapping lacks one of them, or ``reference_floor`` is not one of the
         four floors.
-    :raises TypeError: if ``reference_floor`` is not a text.
+    :raises TypeError: if ``reference_floor`` is not a text, or ``delta_l`` holds a text
+        or a value that is not a real number.
     """
     delta_lw, _ = _impact_improvement_ratings(
         delta_l, reference_floor, one_decimal=one_decimal
@@ -1870,7 +1878,8 @@ def impact_improvement_adaptation_term(
     :raises ValueError: If ``delta_l`` is not 16 finite one-third-octave
         values, a mapping lacks one of them, or ``reference_floor`` is not one
         of the four floors.
-    :raises TypeError: if ``reference_floor`` is not a text.
+    :raises TypeError: if ``reference_floor`` is not a text, or ``delta_l`` holds a text
+        or a value that is not a real number.
     """
     _, ci_delta = _impact_improvement_ratings(
         delta_l, reference_floor, one_decimal=one_decimal
@@ -2009,10 +2018,11 @@ def weighted_reduction_improvement(
     :raises ValueError: If ``delta_r`` is not one-dimensional and finite, the
         band counts differ, a band is not in Table E.1, the core bands are
         missing, or ``basic_element`` is not a standard element.
-    :raises TypeError: if ``basic_element`` is not a text.
+    :raises TypeError: if ``basic_element`` is not a text, or ``delta_r`` or
+        ``frequencies`` holds a text or a value that is not a real number.
     """
     require_choice(basic_element, "basic_element", tuple(LINING_REFERENCE_ELEMENTS))
-    delta = np.asarray(delta_r, dtype=np.float64)
+    delta = real_array(delta_r, "delta_r")
     if delta.ndim != 1:
         msg = "'delta_r' must be one-dimensional (one value per band)."
         raise ValueError(msg)
@@ -2022,7 +2032,7 @@ def weighted_reduction_improvement(
     if frequencies is None:
         freqs = np.asarray(_FREQ_THIRD_OCTAVE, dtype=np.float64)
     else:
-        freqs = np.asarray(frequencies, dtype=np.float64)
+        freqs = real_array(frequencies, "frequencies")
     require_equal_shapes(
         "weighted_reduction_improvement",
         {"delta_r": delta.shape, "frequencies": freqs.shape},

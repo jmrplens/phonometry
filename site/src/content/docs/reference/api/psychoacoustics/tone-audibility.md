@@ -151,7 +151,7 @@ the wrong mean narrow-band level for tones near its edges.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the spectrum is invalid or no audible tone is found. |
-| TypeError | if `effective_bandwidth_factor` or `line_spacing_hz` is not a single number. |
+| TypeError | if `effective_bandwidth_factor` or `line_spacing_hz` is not a single number, or `frequencies` or `levels` holds a text or a value that is not a real number. |
 
 ## assess_tones
 
@@ -189,7 +189,7 @@ to every tone and bundles them into a plottable [`ToneAudibilityResult`](/phonom
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the arrays are empty, differ in length, or contain non-finite/non-positive values. |
-| TypeError | if `line_spacing_hz` is not a single number. |
+| TypeError | if `line_spacing_hz` is not a single number, or `extended_uncertainties`, `mean_narrowband_levels`, `tone_frequencies` or `tone_levels` holds a text or a value that is not a real number. |
 
 ## audibility_from_levels
 
@@ -283,7 +283,7 @@ consideration; see [`mean_audibility_uncertainty`](/phonometry/reference/api/psy
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a line set is empty/non-finite or a parameter is not positive/finite. |
-| TypeError | if `coverage_factor`, `line_spacing_hz`, `sigma_level_db` or `tone_frequency` is not a single number. |
+| TypeError | if `coverage_factor`, `line_spacing_hz`, `sigma_level_db` or `tone_frequency` is not a single number, or `noise_line_levels` or `tone_line_levels` holds a text or a value that is not a real number. |
 
 ## combined_tone_level
 
@@ -323,6 +323,7 @@ then rated at the frequency of its most audible tone.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid or differ in length. |
+| TypeError | if `frequencies`, `levels`, `mean_narrowband_levels` or `tone_frequencies` holds a text or a value that is not a real number. |
 
 ## critical_band_corners
 
@@ -455,7 +456,7 @@ spectrum.)
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `line_levels` is empty/non-finite or the factor is not positive/finite. |
-| TypeError | if `effective_bandwidth_factor` is not a single number. |
+| TypeError | if `effective_bandwidth_factor` is not a single number, or `line_levels` holds a text or a value that is not a real number. |
 
 ## HANNING_BANDWIDTH_FACTOR
 
@@ -520,6 +521,7 @@ value explicitly for such spectra.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the input is empty or non-finite. |
+| TypeError | if `decisive_audibilities` holds a text or a value that is not a real number. |
 
 ## mean_audibility_uncertainty
 
@@ -556,6 +558,7 @@ with 12 averages the standard reports ~+/-1.5 dB as typically achieved.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the arrays are empty, non-finite or of different lengths. |
+| TypeError | if `decisive_audibilities` or `extended_uncertainties` holds a text or a value that is not a real number. |
 
 ## mean_narrowband_level
 
@@ -601,7 +604,7 @@ $10 \log_{10}(\Delta f/\Delta f_\mathrm{e})$ is
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the spectrum is invalid, the factor is not positive/finite, or no lines fall in the critical band. |
-| TypeError | if `effective_bandwidth_factor` or `tone_frequency` is not a single number. |
+| TypeError | if `effective_bandwidth_factor` or `tone_frequency` is not a single number, or `frequencies` or `levels` holds a text or a value that is not a real number. |
 
 ## NO_TONE_AUDIBILITY_DB
 
@@ -726,7 +729,7 @@ takes its level unchanged (Formula (7), no bandwidth correction).
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the spectrum is invalid or the levels are not finite. |
-| TypeError | if `mean_narrowband_level` or `tone_frequency` is not a single number. |
+| TypeError | if `mean_narrowband_level` or `tone_frequency` is not a single number, or `frequencies` or `levels` holds a text or a value that is not a real number. |
 
 ## ToneAudibilityResult
 

@@ -52,7 +52,12 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from ..._internal.frozen import OwnsArrays
-from ..._internal.validation import require_ranks, require_same_length, require_scalar
+from ..._internal.validation import (
+    real_array,
+    require_ranks,
+    require_same_length,
+    require_scalar,
+)
 from ...io._resolve import apply_calibration, resolve_fs
 from ...metrology.reference_values import REFERENCE_VALUES
 
@@ -194,7 +199,7 @@ def _terhardt_a0_db(f: NDArray[np.float64]) -> NDArray[np.float64]:
     The frequency-dependent gain from free field to the oval window used by the
     excitation-pattern front-end (Osses 2016 §2.1.1).
     """
-    fk = np.asarray(f, dtype=np.float64) / 1000.0
+    fk = real_array(f, "f") / 1000.0
     a0 = np.zeros_like(fk)
     pos = fk > 0.0
     a0[pos] = (
@@ -308,7 +313,7 @@ def _cross_covariance(x: NDArray[np.float64], y: NDArray[np.float64]) -> float:
 
 
 def _validate_signal(x: Signal | ArrayLike) -> NDArray[np.float64]:
-    sig = np.asarray(x, dtype=np.float64)
+    sig = real_array(x, "x")
     if sig.ndim != 1:
         msg = "'x' must be one-dimensional."
         raise ValueError(msg)
@@ -570,7 +575,8 @@ def fluctuation_strength(
     :param fs: Sample rate, in Hz (resampled to the model rate if needed).
     :return: A :class:`FluctuationStrengthResult`.
     :raises ValueError: If the signal is invalid or ``fs`` is not positive.
-    :raises TypeError: if ``fs`` is not a single number.
+    :raises TypeError: if ``fs`` is not a single number, or ``x`` holds a text or a
+        value that is not a real number.
     """
     from scipy import signal as sp_signal
 

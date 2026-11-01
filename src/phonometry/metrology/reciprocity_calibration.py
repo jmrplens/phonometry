@@ -71,6 +71,7 @@ from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, read_only, reduce_with_plain_rows
 from .._internal.types import CALIBRATION_FIELDS, CalibrationField
 from .._internal.validation import (
+    real_array,
     refuse_text,
     require_choice,
     require_positive,
@@ -363,7 +364,7 @@ def _calibration(
         expanded_uncertainty_db=(
             None
             if expanded_uncertainty_db is None
-            else np.asarray(expanded_uncertainty_db, dtype=np.float64)
+            else real_array(expanded_uncertainty_db, "expanded_uncertainty_db")
         ),
     )
 
@@ -752,7 +753,8 @@ class ReciprocityUncertaintyBudget(OwnsArrays):
             and one column per frequency, an uncertainty that is negative or
             not finite, or a coverage factor that is not positive.
         :raises TypeError: if ``field`` is not a text, or ``coverage_factor`` is not a
-            single number.
+            single number, or ``standard_uncertainties_db`` holds a text or a value that
+            is not a real number.
         """
         require_choice(self.field, "field", CALIBRATION_FIELDS)
         require_positive(self.coverage_factor, "coverage_factor")
@@ -765,8 +767,8 @@ class ReciprocityUncertaintyBudget(OwnsArrays):
                 "the same, non-zero, number of entries."
             )
             raise ValueError(msg)
-        matrix = np.array(
-            self.standard_uncertainties_db, dtype=np.float64, ndmin=2, copy=None
+        matrix = np.atleast_2d(
+            real_array(self.standard_uncertainties_db, "standard_uncertainties_db")
         )
         if matrix.shape != (count, frequencies.size):
             msg = (

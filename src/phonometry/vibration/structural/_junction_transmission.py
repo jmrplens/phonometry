@@ -174,6 +174,7 @@ from scipy.integrate import quad
 
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
+    real_array,
     require_choice,
     require_count,
     require_positive,
@@ -322,7 +323,7 @@ def _obliquity_sum(chi: float, sin2: NDArray[np.float64]) -> NDArray[np.float64]
 
 def _check_angle(angle_rad: ArrayLike) -> NDArray[np.float64]:
     """Incidence angle(s) in radians, restricted to ``[0, pi/2]``."""
-    theta = np.asarray(angle_rad, dtype=np.float64)
+    theta = real_array(angle_rad, "angle_rad")
     if not np.all(np.isfinite(theta)):
         msg = "'angle_rad' must be finite."
         raise ValueError(msg)
@@ -349,7 +350,7 @@ def corner_transmission_coefficient(
     :raises ValueError: for a non-positive ``chi``/``psi``, an out-of-range
         angle or an unknown junction.
     :raises TypeError: if ``chi`` or ``psi`` is not a single number, or ``junction`` is
-        not a text.
+        not a text, or ``angle_rad`` holds a text or a value that is not a real number.
     """
     theta = _check_angle(angle_rad)
     c = require_positive(chi, "chi")
@@ -383,7 +384,7 @@ def straight_transmission_coefficient(
     :raises ValueError: for a non-positive ``chi``/``psi``, an out-of-range
         angle, or a junction without a straight section.
     :raises TypeError: if ``chi`` or ``psi`` is not a single number, or ``junction`` is
-        not a text.
+        not a text, or ``angle_rad`` holds a text or a value that is not a real number.
     """
     theta = _check_angle(angle_rad)
     c = require_positive(chi, "chi")
@@ -507,15 +508,16 @@ def coupling_loss_factor(
     :raises ValueError: for a non-positive input, or a coefficient and a
         frequency whose shapes cannot be broadcast together.
     :raises TypeError: if ``group_velocity``, ``junction_length`` or ``plate_area`` is
-        not a single number.
+        not a single number, or ``frequency`` or ``transmission_coefficient`` holds a
+        text or a value that is not a real number.
     """
-    tau = np.asarray(transmission_coefficient, dtype=np.float64)
+    tau = real_array(transmission_coefficient, "transmission_coefficient")
     if np.any(tau < 0.0):
         msg = "'transmission_coefficient' must be non-negative."
         raise ValueError(msg)
     cg = require_positive(group_velocity, "group_velocity")
     lij = require_positive(junction_length, "junction_length")
-    freq = np.asarray(frequency, dtype=np.float64)
+    freq = real_array(frequency, "frequency")
     if np.any(freq <= 0.0):
         msg = "'frequency' must be positive."
         raise ValueError(msg)
@@ -655,9 +657,9 @@ def point_connection_coupling_loss_factor(
     :raises TypeError: if ``plate_area1``, ``surface_density1``, ``surface_density2``,
         ``thickness1_m``, ``thickness2_m``, ``wave_speed1`` or ``wave_speed2`` is not a
         single number, or ``n_connections`` is a flag, a text or an array where a count
-        goes.
+        goes, or ``frequency`` holds a text or a value that is not a real number.
     """
-    freq = np.asarray(frequency, dtype=np.float64)
+    freq = real_array(frequency, "frequency")
     if np.any(freq <= 0.0):
         msg = "'frequency' must be positive."
         raise ValueError(msg)
@@ -709,9 +711,10 @@ def wave_vibration_reduction_index(
         receiving plate, in hertz (> 0).
     :return: The vibration reduction index ``K_ij``, in dB.
     :raises ValueError: for a non-positive ``tau`` or ``fc_j``.
-    :raises TypeError: if ``critical_frequency_receiver`` is not a single number.
+    :raises TypeError: if ``critical_frequency_receiver`` is not a single number, or
+        ``transmission_coefficient`` holds a text or a value that is not a real number.
     """
-    tau = np.asarray(transmission_coefficient, dtype=np.float64)
+    tau = real_array(transmission_coefficient, "transmission_coefficient")
     if np.any(tau <= 0.0):
         msg = "'transmission_coefficient' must be positive."
         raise ValueError(msg)
@@ -867,7 +870,8 @@ def junction_transmission(
         one-degree steps).
     :return: A :class:`JunctionTransmissionResult`.
     :raises ValueError: for a non-positive input or an unknown junction.
-    :raises TypeError: if ``junction`` is not a text.
+    :raises TypeError: if ``junction`` is not a text, or ``angles_deg`` holds a text or
+        a value that is not a real number.
     """
     name = require_choice(junction, "junction", tuple(_JUNCTIONS))
     params = junction_wave_parameters(
@@ -882,7 +886,7 @@ def junction_transmission(
     if angles_deg is None:
         grid = np.linspace(0.0, 90.0, 91)
     else:
-        grid = np.atleast_1d(np.asarray(angles_deg, dtype=np.float64))
+        grid = np.atleast_1d(real_array(angles_deg, "angles_deg"))
         if grid.ndim != 1 or grid.size == 0:
             msg = "'angles_deg' must be a non-empty 1-D array."
             raise ValueError(msg)

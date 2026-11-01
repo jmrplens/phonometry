@@ -36,6 +36,7 @@ from ..._internal.boundary import settled
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     check_engine,
+    real_array,
     require_equal_counts,
     require_equal_shapes,
     require_ranks,
@@ -127,14 +128,15 @@ class DiffusionResult(OwnsArrays):
         :raises ValueError: if ``angles_deg`` and ``levels`` disagree, if
             ``angles_deg`` / ``coefficient`` is non-finite, or if ``levels``
             carries a ``NaN`` or a ``+inf``.
-        :raises TypeError: if ``coefficient`` is not a single number.
+        :raises TypeError: if ``coefficient`` is not a single number, or ``angles_deg``
+            or ``levels`` holds a text or a value that is not a real number.
         """
         require_ranks(self, angles_deg=1, levels=1)
         require_same_length(self, "angles_deg", "levels", axis="receiver")
-        if not np.all(np.isfinite(np.asarray(self.angles_deg, dtype=np.float64))):
+        if not np.all(np.isfinite(real_array(self.angles_deg, "angles_deg"))):
             msg = "DiffusionResult: 'angles_deg' must contain only finite values."
             raise ValueError(msg)
-        lev = np.asarray(self.levels, dtype=np.float64)
+        lev = real_array(self.levels, "levels")
         if np.any(np.isnan(lev)) or np.any(lev == np.inf):
             msg = (
                 "DiffusionResult: 'levels' must be finite, or -inf for a "
@@ -376,9 +378,11 @@ def diffusion_spectrum(
         band; ``None`` when the reference flat surface was not measured.
     :return: A :class:`DiffusionSpectrum` with ``.plot()`` and ``.report()``.
     :raises ValueError: if the inputs differ in shape, are empty or not 1-D.
+    :raises TypeError: if ``diffusion``, ``frequencies`` or ``normalized`` holds a text
+        or a value that is not a real number.
     """
-    freq = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
-    d = np.atleast_1d(np.asarray(diffusion, dtype=np.float64))
+    freq = np.atleast_1d(real_array(frequencies, "frequencies"))
+    d = np.atleast_1d(real_array(diffusion, "diffusion"))
     if freq.ndim != 1 or freq.size == 0:
         msg = "'frequencies' must be a non-empty 1-D sequence of band centres."
         raise ValueError(msg)
@@ -389,7 +393,7 @@ def diffusion_spectrum(
     )
     d_n: Real | None = None
     if normalized is not None:
-        d_n = np.atleast_1d(np.asarray(normalized, dtype=np.float64))
+        d_n = np.atleast_1d(real_array(normalized, "normalized"))
         require_equal_shapes(
             "diffusion_spectrum",
             {"frequencies": freq.shape, "normalized": d_n.shape},
@@ -421,9 +425,11 @@ def directional_diffusion(
     :return: A :class:`DiffusionResult` with ``.plot()``.
     :raises ValueError: if ``angles_deg`` and ``levels`` differ in length or are
         shorter than two receivers.
+    :raises TypeError: if ``angles_deg`` or ``levels`` holds a text or a value that is
+        not a real number.
     """
-    ang = np.atleast_1d(np.asarray(angles_deg, dtype=np.float64))
-    lev = np.atleast_1d(np.asarray(levels, dtype=np.float64))
+    ang = np.atleast_1d(real_array(angles_deg, "angles_deg"))
+    lev = np.atleast_1d(real_array(levels, "levels"))
     require_equal_shapes(
         "directional_diffusion",
         {"angles_deg": ang.shape, "levels": lev.shape},
@@ -474,8 +480,10 @@ def directional_diffusion_coefficient(
     :return: Directional diffusion coefficient ``d_theta`` (a scalar).
     :raises ValueError: for fewer than two receivers, a non-1-D input, a length
         mismatch, or non-positive total weight.
+    :raises TypeError: if ``area_weights`` or ``levels`` holds a text or a value that is
+        not a real number.
     """
-    lvl = np.asarray(levels, dtype=np.float64)
+    lvl = real_array(levels, "levels")
     if lvl.ndim != 1:
         msg = "'levels' must be a 1-D sequence of receiver SPLs."
         raise ValueError(msg)
@@ -487,7 +495,7 @@ def directional_diffusion_coefficient(
     if area_weights is None:
         weights = np.ones(n, dtype=np.float64)
     else:
-        weights = np.asarray(area_weights, dtype=np.float64)
+        weights = real_array(area_weights, "area_weights")
         if weights.ndim != 1 or weights.size != n:
             msg = (
                 "'area_weights' must match the number of receivers "
@@ -534,9 +542,11 @@ def normalized_diffusion_coefficient(
         reference flat surface ``d_theta_r``.
     :return: Normalised directional diffusion coefficient ``d_theta_n``.
     :raises ValueError: if any reference coefficient equals 1 (undefined ratio).
+    :raises TypeError: if ``d_theta`` or ``d_theta_reference`` holds a text or a value
+        that is not a real number.
     """
-    d = np.asarray(d_theta, dtype=np.float64)
-    d_ref = np.asarray(d_theta_reference, dtype=np.float64)
+    d = real_array(d_theta, "d_theta")
+    d_ref = real_array(d_theta_reference, "d_theta_reference")
     denom = 1.0 - d_ref
     if np.any(np.isclose(denom, 0.0)):
         msg = "'d_theta_reference' must not equal 1 (division by zero)."
@@ -587,8 +597,10 @@ def area_factors(
         receiver.
     :return: Per-receiver area weights ``N_i`` (dimensionless, min value 1).
     :raises ValueError: for a non-1-D input or non-positive spacings.
+    :raises TypeError: if ``elevations`` holds a text or a value that is not a real
+        number.
     """
-    theta_deg = np.asarray(elevations, dtype=np.float64)
+    theta_deg = real_array(elevations, "elevations")
     if theta_deg.ndim != 1 or theta_deg.size == 0:
         msg = "'elevations' must be a non-empty 1-D sequence of angles."
         raise ValueError(msg)
@@ -634,8 +646,10 @@ def random_incidence_diffusion(
     :return: Random-incidence diffusion coefficient ``d`` (a scalar).
     :raises ValueError: for an empty or non-1-D input, a length mismatch, or
         non-positive total weight.
+    :raises TypeError: if ``directional_coefficients`` or ``weights`` holds a text or a
+        value that is not a real number.
     """
-    d = np.asarray(directional_coefficients, dtype=np.float64)
+    d = real_array(directional_coefficients, "directional_coefficients")
     if d.ndim != 1:
         msg = "'directional_coefficients' must be a 1-D sequence."
         raise ValueError(msg)
@@ -645,7 +659,7 @@ def random_incidence_diffusion(
     if weights is None:
         w = np.ones(d.size, dtype=np.float64)
     else:
-        w = np.asarray(weights, dtype=np.float64)
+        w = real_array(weights, "weights")
         if w.ndim != 1:
             msg = f"'weights' must be a 1-D sequence, got shape {w.shape}."
             raise ValueError(msg)

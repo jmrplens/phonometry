@@ -56,7 +56,7 @@ import scipy.signal as sig
 from ..._internal.frozen import OwnsArrays
 from ..._internal.levels_math import energy_mean, energy_sum
 from ..._internal.validation import (
-    _as_float64,
+    real_array,
     require_count,
     require_finite_array,
     require_positive,
@@ -437,9 +437,10 @@ def passage_average_level(
         every value.
     :return: The average level: a float, or one level per band.
     :raises ValueError: For an empty or non-finite input.
-    :raises TypeError: if ``axis`` is a flag, a text or an array where a count goes.
+    :raises TypeError: if ``axis`` is a flag, a text or an array where a count goes, or
+        ``levels`` holds a text or a value that is not a real number.
     """
-    levels = _as_float64(levels, "levels")
+    levels = real_array(levels, "levels")
     if levels.size == 0 or not np.all(np.isfinite(levels)):
         msg = "'levels' must be non-empty and finite."
         raise ValueError(msg)

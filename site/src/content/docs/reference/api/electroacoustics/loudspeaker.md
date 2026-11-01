@@ -100,7 +100,7 @@ distortion and directivity data feed the corresponding report panels.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
-| TypeError | if `distance`, `input_voltage_v`, `rated_impedance_ohm` or `tolerance_db` is not a single number. |
+| TypeError | if `distance`, `input_voltage_v`, `rated_impedance_ohm` or `tolerance_db` is not a single number, or `frequencies` or `spl` holds a text or a value that is not a real number. |
 
 ## LoudspeakerCharacteristics
 

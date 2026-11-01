@@ -64,14 +64,17 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 import numpy as np
 
 from .._internal.boundary import round_half_up
 from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays
-from .._internal.validation import require_scalar
+from .._internal.validation import (
+    real_array,
+    require_scalar,
+)
 from .sound_field_audiometry import (
     _RANDOM_INCIDENCE_CLAUSE,
     DiffuseSoundFieldCheck,
@@ -225,7 +228,7 @@ def _level_grid(values: ArrayLike, name: str) -> np.ndarray:
     :return: A two-dimensional float array of its own.
     :raises ValueError: for another shape or a value that is not finite.
     """
-    grid = np.array(values, dtype=np.float64)
+    grid = real_array(values, name, copy=True)
     if grid.ndim == 1:
         grid = grid[None, :]
     if (
@@ -261,7 +264,7 @@ def _band_axis(frequencies: ArrayLike | None, count: int, owner: str) -> np.ndar
             )
             raise ValueError(msg)
         return np.array(EARMUFF_TEST_BANDS_HZ, dtype=np.float64)
-    freqs = np.array(frequencies, dtype=np.float64)
+    freqs = real_array(frequencies, "frequencies", copy=True)
     if (
         freqs.ndim != 1
         or freqs.size != count
@@ -623,6 +626,8 @@ def earmuff_insertion_loss(
     :raises ValueError: for levels that are not finite, grids of different
         bands, cup levels that do not match, frequencies that do not fit, or an
         uncertainty that is negative or not finite.
+    :raises TypeError: if ``frequencies``, ``isolation_cup_levels``, ``occluded_levels``
+        or ``open_levels`` holds a text or a value that is not a real number.
     """
     open_grid = _level_grid(open_levels, "open_levels")
     occluded = _level_grid(occluded_levels, "occluded_levels")
@@ -636,7 +641,7 @@ def earmuff_insertion_loss(
     freqs = _band_axis(frequencies, count, "earmuff_insertion_loss")
     cup = None
     if isolation_cup_levels is not None:
-        cup = np.array(isolation_cup_levels, dtype=np.float64)
+        cup = real_array(isolation_cup_levels, "isolation_cup_levels", copy=True)
         if cup.shape != (count,) or not np.all(np.isfinite(cup)):
             msg = (
                 "'isolation_cup_levels' must hold one finite level per band, "
@@ -869,8 +874,11 @@ def check_plane_progressive_wave(
     :raises ValueError: for an end-face grid that is not two rows of finite
         levels, directional readings given in part, or arrays that do not
         match.
+    :raises TypeError: if ``end_face_levels``, ``facing_away_levels``,
+        ``facing_levels``, ``frequencies`` or ``front_to_rear_index`` holds a text or a
+        value that is not a real number.
     """
-    faces = np.array(end_face_levels, dtype=np.float64)
+    faces = real_array(end_face_levels, "end_face_levels", copy=True)
     if (
         faces.ndim != _GRID_RANK
         or faces.shape[0] != _END_FACE_POSITIONS
@@ -890,9 +898,15 @@ def check_plane_progressive_wave(
                 "'front_to_rear_index' together."
             )
             raise ValueError(msg)
-        facing = np.array(facing_levels, dtype=np.float64)
-        away = np.array(facing_away_levels, dtype=np.float64)
-        given_index = np.array(front_to_rear_index, dtype=np.float64)
+        facing = real_array(
+            cast("ArrayLike", facing_levels), "facing_levels", copy=True
+        )
+        away = real_array(
+            cast("ArrayLike", facing_away_levels), "facing_away_levels", copy=True
+        )
+        given_index = real_array(
+            cast("ArrayLike", front_to_rear_index), "front_to_rear_index", copy=True
+        )
         if given_index.ndim == 0:
             given_index = np.full(count, float(given_index))
         if (
@@ -1045,6 +1059,8 @@ def verify_fixture_isolation(
     :return: :class:`FixtureIsolationVerification`.
     :raises ValueError: for levels that are not finite or do not match the
         bands.
+    :raises TypeError: if ``cup_levels``, ``frequencies`` or ``open_levels`` holds a
+        text or a value that is not a real number.
     """
     open_levels = _level_grid(open_levels, "open_levels")
     cup = _level_grid(cup_levels, "cup_levels")

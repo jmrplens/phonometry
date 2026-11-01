@@ -238,6 +238,7 @@ requires ("determined at least with one decimal place").
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a fraction outside 0 to 1 or an infinite one. |
+| TypeError | if `marked_fraction` holds a text or a value that is not a real number. |
 
 ## METHOD_B_SCALES
 

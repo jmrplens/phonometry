@@ -82,7 +82,7 @@ $L_a = 10 \log_{10}(a_\mathrm{rms}^2 / a_0^2) = 20 \log_{10}(a_\mathrm{rms} / a_
 | Exception | When |
 | :--- | :--- |
 | ValueError | Non-finite or non-positive acceleration, or a non-positive reference. |
-| TypeError | if `reference` is not a single number. |
+| TypeError | if `reference` is not a single number, or `acceleration` holds a text or a value that is not a real number. |
 
 ## background_corrected_level
 
@@ -112,6 +112,7 @@ Correct a measured level for background noise (ISO 16251-1 F. (2)).
 | Exception | When |
 | :--- | :--- |
 | ValueError | Mismatched shapes, non-finite values, or band frequencies that are not one positive value per band. |
+| TypeError | if `background`, `frequencies` or `signal_and_background` holds a text or a value that is not a real number. |
 
 ## BackgroundCorrectedLevel
 
@@ -343,6 +344,7 @@ over positions $\Delta L = \mathrm{mean}(\Delta L_{t,a})$
 | Exception | When |
 | :--- | :--- |
 | ValueError | Mismatched shapes or non-finite values. |
+| TypeError | if `background`, `bare`, `frequencies` or `with_covering` holds a text or a value that is not a real number. |
 
 ## improvement_octave_bands
 
@@ -376,7 +378,7 @@ each octave.
 | Exception | When |
 | :--- | :--- |
 | ValueError | The thirds do not group into complete octave triplets, or `quantity` is not one of the three. |
-| TypeError | if `quantity` is not a text. |
+| TypeError | if `quantity` is not a text, or `frequencies` or `improvement` holds a text or a value that is not a real number. |
 
 ## OctaveBandSpectrum
 

@@ -89,6 +89,7 @@ from ..._internal.boundary import settled
 from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
+    real_array,
     require_aliased_choice,
     require_choice,
     require_count,
@@ -561,9 +562,11 @@ def tonal_correction(
     :raises ValueError: If fewer than three bands are given, the shapes differ,
         the frequencies are not positive and strictly ascending, or any value
         is not finite.
+    :raises TypeError: if ``frequencies`` or ``levels`` holds a text or a value that is
+        not a real number.
     """
-    band_levels = np.asarray(levels, dtype=np.float64)
-    freqs = np.asarray(frequencies, dtype=np.float64)
+    band_levels = real_array(levels, "levels")
+    freqs = real_array(frequencies, "frequencies")
     _validate_kt_spectrum(band_levels, freqs)
     differences, band_kt = _band_tonal_corrections(band_levels, freqs)
 
@@ -816,8 +819,10 @@ def long_term_corrected_level(
     :return: ``LK,x`` in dB, unrounded.
     :raises ValueError: If the input is empty, non-finite, or the weights do
         not match the levels or are not positive.
+    :raises TypeError: if ``daily_levels`` or ``weights`` holds a text or a value that
+        is not a real number.
     """
-    levels = np.asarray(daily_levels, dtype=np.float64).ravel()
+    levels = real_array(daily_levels, "daily_levels").ravel()
     if levels.size == 0:
         msg = "At least one daily level is required."
         raise ValueError(msg)
@@ -827,7 +832,7 @@ def long_term_corrected_level(
     if weights is None:
         counts = np.ones_like(levels)
     else:
-        counts = np.asarray(weights, dtype=np.float64).ravel()
+        counts = real_array(weights, "weights").ravel()
         require_equal_shapes(
             "long_term_corrected_level",
             {"daily_levels": levels.shape, "weights": counts.shape},

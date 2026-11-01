@@ -96,6 +96,7 @@ from scipy.special import ellipe
 
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
+    real_array,
     require_band_fraction,
     require_choice,
     require_count,
@@ -190,7 +191,7 @@ _GRAZING_INCIDENCE_DEG: float = 90.0
 
 def _band_axis(frequency: ArrayLike) -> np.ndarray:
     """Validate a 1-D array of strictly positive band centre frequencies."""
-    f = np.atleast_1d(np.asarray(frequency, dtype=np.float64))
+    f = np.atleast_1d(real_array(frequency, "frequency"))
     if f.ndim != 1 or f.size == 0:
         raise ValueError(_FREQ_1D_MSG)
     if np.any(f <= 0.0):
@@ -260,13 +261,14 @@ def mass_law_transmission_loss(
         band set other than 1 or 3.
     :raises TypeError: if ``incidence`` is not a text, or ``field_correction`` or
         ``mass_per_area`` is not a single number, or ``fraction`` is not an integer (a
-        word, a flag or a float).
+        word, a flag or a float), or ``frequency`` holds a text or a value that is not a
+        real number.
     """
     incidence = require_choice(incidence, "incidence", ("normal", "field"))
     m2 = require_positive(mass_per_area, "mass_per_area")
     c0 = fluid.speed_of_sound
     rho0 = fluid.density
-    f = np.asarray(frequency, dtype=np.float64)
+    f = real_array(frequency, "frequency")
     if np.any(f <= 0.0):
         raise ValueError(_FREQ_POSITIVE_MSG)
     ratio = np.pi * f * m2 / (rho0 * c0)
@@ -515,7 +517,8 @@ def single_panel_transmission_loss(
     :raises TypeError: if ``coincidence_model`` is not a text, or
         ``critical_frequency``, ``field_correction``, ``loss_factor`` or
         ``mass_per_area`` is not a single number, or ``fraction`` is not an integer (a
-        word, a flag or a float).
+        word, a flag or a float), or ``frequency`` holds a text or a value that is not a
+        real number.
     """
     model = require_choice(coincidence_model, "coincidence_model", ("sharp", "cremer"))
     m2 = require_positive(mass_per_area, "mass_per_area")
@@ -808,7 +811,8 @@ def plateau_transmission_loss(
     :raises TypeError: for a *material* that is neither a name nor a
         :class:`~phonometry.solids.PlateauMaterial`, or a ``thickness_mm``,
         ``mass_per_area``, ``plateau_height_db``, ``frequency_ratio`` or
-        ``field_correction`` that is not one number.
+        ``field_correction`` that is not one number, or ``frequency`` holds a text or a
+        value that is not a real number.
     """
     m2, height, ratio = _resolve_plateau_panel(
         material, thickness_mm, mass_per_area, plateau_height_db, frequency_ratio
@@ -1321,7 +1325,8 @@ def orthotropic_transmission_loss(
     :raises TypeError: if ``method`` is not a text, or ``area``,
         ``critical_frequency_lower``, ``critical_frequency_upper``,
         ``limiting_angle_deg``, ``loss_factor`` or ``mass_per_area`` is not a single
-        number, or ``fraction`` is not an integer (a word, a flag or a float).
+        number, or ``fraction`` is not an integer (a word, a flag or a float), or
+        ``frequency`` holds a text or a value that is not a real number.
     """
     require_scalar(limiting_angle_deg, "limiting_angle_deg")
     chosen = require_choice(method, "method", ("integral", "heckl"))
@@ -1494,7 +1499,8 @@ def double_wall_transmission_loss(
     :return: A :class:`SoundReductionResult` (model ``"double-wall"``).
     :raises ValueError: for a non-positive input.
     :raises TypeError: if ``gap_m``, ``loss_factor``, ``mass1`` or ``mass2`` is not a
-        single number, or ``fraction`` is not an integer (a word, a flag or a float).
+        single number, or ``fraction`` is not an integer (a word, a flag or a float), or
+        ``frequency`` holds a text or a value that is not a real number.
     """
     m1 = require_positive(mass1, "mass1")
     m2 = require_positive(mass2, "mass2")

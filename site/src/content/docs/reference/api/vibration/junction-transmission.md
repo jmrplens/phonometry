@@ -220,7 +220,7 @@ Returns `0` for angles beyond the cut-off $\arcsin(\chi)$
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive `chi`/`psi`, an out-of-range angle or an unknown junction. |
-| TypeError | if `chi` or `psi` is not a single number, or `junction` is not a text. |
+| TypeError | if `chi` or `psi` is not a single number, or `junction` is not a text, or `angle_rad` holds a text or a value that is not a real number. |
 
 ## coupling_loss_factor
 
@@ -258,7 +258,7 @@ source-plate bending-wave group velocity `cg_i`, the junction length
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive input, or a coefficient and a frequency whose shapes cannot be broadcast together. |
-| TypeError | if `group_velocity`, `junction_length` or `plate_area` is not a single number. |
+| TypeError | if `group_velocity`, `junction_length` or `plate_area` is not a single number, or `frequency` or `transmission_coefficient` holds a text or a value that is not a real number. |
 
 ## inline_transmission_coefficient
 
@@ -334,7 +334,7 @@ used by the Eq. 5.116 vibration reduction index. For the in-line junction
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive input or an unknown junction. |
-| TypeError | if `junction` is not a text. |
+| TypeError | if `junction` is not a text, or `angles_deg` holds a text or a value that is not a real number. |
 
 ## junction_wave_parameters
 
@@ -582,7 +582,7 @@ is the one that reproduces the book's own answer to problem 6.13; see
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive or non-integer input. |
-| TypeError | if `plate_area1`, `surface_density1`, `surface_density2`, `thickness1_m`, `thickness2_m`, `wave_speed1` or `wave_speed2` is not a single number, or `n_connections` is a flag, a text or an array where a count goes. |
+| TypeError | if `plate_area1`, `surface_density1`, `surface_density2`, `thickness1_m`, `thickness2_m`, `wave_speed1` or `wave_speed2` is not a single number, or `n_connections` is a flag, a text or an array where a count goes, or `frequency` holds a text or a value that is not a real number. |
 
 ## right_angle_transmission_coefficient
 
@@ -679,7 +679,7 @@ covered.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive `chi`/`psi`, an out-of-range angle, or a junction without a straight section. |
-| TypeError | if `chi` or `psi` is not a single number, or `junction` is not a text. |
+| TypeError | if `chi` or `psi` is not a single number, or `junction` is not a text, or `angle_rad` holds a text or a value that is not a real number. |
 
 ## wave_vibration_reduction_index
 
@@ -714,4 +714,4 @@ $\bar{\tau}_{ij} = \bar{\tau}_{ji} \sqrt{f_{\mathrm{c}j} / f_{\mathrm{c}i}}$
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive `tau` or `fc_j`. |
-| TypeError | if `critical_frequency_receiver` is not a single number. |
+| TypeError | if `critical_frequency_receiver` is not a single number, or `transmission_coefficient` holds a text or a value that is not a real number. |

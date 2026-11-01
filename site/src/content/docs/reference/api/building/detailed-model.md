@@ -205,7 +205,7 @@ check on the pair.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If an input is not positive/finite or the per-band arrays do not share the band count. |
-| TypeError | if `mass_per_area` is not a single number, or `frequencies` holds a text or a value that is not a real number. |
+| TypeError | if `mass_per_area` is not a single number, or `frequencies`, `radiation_factor` or `structural_reverberation_time` holds a text or a value that is not a real number. |
 
 ## bending_radiation_factor
 
@@ -338,7 +338,7 @@ upwards on its lightweight blockwork.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If an input is not positive/finite or the per-band arrays do not share the band count. |
-| TypeError | if `fraction` is not an integer (a word, a flag or a float), `critical_frequency`, `density`, `longitudinal_velocity` or `mass_per_area` is not a single number, or `frequencies` holds a text or a value that is not a real number. |
+| TypeError | if `fraction` is not an integer (a word, a flag or a float), `critical_frequency`, `density`, `longitudinal_velocity` or `mass_per_area` is not a single number, or `forced_radiation_factor`, `frequencies`, `radiation_factor` or `total_loss_factor` holds a text or a value that is not a real number. |
 
 ## detailed_airborne_prediction
 
@@ -380,7 +380,7 @@ the bands cover the rating range (100 Hz to 3150 Hz in one-third octaves,
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a path does not match the band count. |
-| TypeError | if `fraction` is not an integer (a word, a flag or a float), or `frequencies` holds a text or a value that is not a real number. |
+| TypeError | if `fraction` is not an integer (a word, a flag or a float), or `direct_index` or `frequencies` holds a text or a value that is not a real number. |
 
 ## detailed_impact_prediction
 
@@ -422,7 +422,7 @@ carries no direct path at all.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a path does not match the band count, or if neither a direct level nor any flanking path is given. |
-| TypeError | if `fraction` is not an integer (a word, a flag or a float), or `frequencies` holds a text or a value that is not a real number. |
+| TypeError | if `fraction` is not an integer (a word, a flag or a float), or `direct_level` or `frequencies` holds a text or a value that is not a real number. |
 
 ## DetailedAirborneResult
 
@@ -656,6 +656,12 @@ receiving side (a suspended ceiling).
 
 **Returns:** `Ln,d` per band, in dB.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `delta_l`, `delta_l_ceiling` or `floor_level` holds a text or a value that is not a real number. |
+
 ## direct_reduction_index
 
 ```python
@@ -684,6 +690,12 @@ laboratory value, Formula 8).
 | `delta_r_receiving` | `ΔRd,situ` on the receiving side, in dB. |
 
 **Returns:** `RDd` per band, in dB.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `delta_r_receiving`, `delta_r_source` or `separating_index` holds a text or a value that is not a real number. |
 
 ## EN12354_AIR
 
@@ -732,7 +744,7 @@ and `j` the flanking element radiating in the receiving room.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If an area is not positive and finite. |
-| TypeError | if `area_i` or `area_j` is not a single number. |
+| TypeError | if `area_i` or `area_j` is not a single number, or `delta_l`, `delta_r_j`, `floor_level`, `index_i`, `index_j` or `velocity_level_difference` holds a text or a value that is not a real number. |
 
 ## flanking_impact_level_from_flanking_level
 
@@ -774,7 +786,7 @@ ISO 12354-2:2017, Annex D indicates.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a geometry value is not positive and finite. |
-| TypeError | if `area`, `coupling_length`, `laboratory_area` or `laboratory_coupling_length` is not a single number. |
+| TypeError | if `area`, `coupling_length`, `laboratory_area` or `laboratory_coupling_length` is not a single number, or `normalized_flanking_impact_level` holds a text or a value that is not a real number. |
 
 ## flanking_impact_level_from_normalized_difference
 
@@ -820,7 +832,7 @@ normalized direction-averaged velocity level difference instead of
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a geometry value is not positive and finite. |
-| TypeError | if `area_i` or `coupling_length` is not a single number. |
+| TypeError | if `area_i` or `coupling_length` is not a single number, or `delta_l`, `delta_r_j`, `floor_level`, `index_i`, `index_j` or `normalized_velocity_level_difference` holds a text or a value that is not a real number. |
 
 ## flanking_reduction_index
 
@@ -870,7 +882,7 @@ flanking element as `j`.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If an area is not positive and finite. |
-| TypeError | if `area_i`, `area_j` or `separating_area` is not a single number. |
+| TypeError | if `area_i`, `area_j` or `separating_area` is not a single number, or `delta_r_i`, `delta_r_j`, `index_i`, `index_j` or `velocity_level_difference` holds a text or a value that is not a real number. |
 
 ## flanking_reduction_index_from_flanking_level
 
@@ -912,7 +924,7 @@ for vertical ones such as facades.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a geometry value is not positive and finite. |
-| TypeError | if `coupling_length`, `laboratory_coupling_length`, `reference_absorption_area` or `separating_area` is not a single number. |
+| TypeError | if `coupling_length`, `laboratory_coupling_length`, `reference_absorption_area` or `separating_area` is not a single number, or `flanking_level_difference` holds a text or a value that is not a real number. |
 
 ## flanking_reduction_index_from_normalized_difference
 
@@ -960,7 +972,7 @@ transmission only (see [`resonant_sound_reduction_index`](/phonometry/reference/
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a geometry value is not positive and finite. |
-| TypeError | if `coupling_length` or `separating_area` is not a single number. |
+| TypeError | if `coupling_length` or `separating_area` is not a single number, or `delta_r_i`, `delta_r_j`, `index_i`, `index_j` or `normalized_velocity_level_difference` holds a text or a value that is not a real number. |
 
 ## floating_floor_improvement
 
@@ -1273,7 +1285,7 @@ the ISO 12354 value $c_\mathrm{o} = 340$ m/s.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If an input is not positive/finite or the band counts disagree. |
-| TypeError | if `frequencies` holds a text or a value that is not a real number. |
+| TypeError | if `frequencies` or `situ_reverberation_time` holds a text or a value that is not a real number. |
 
 ## in_situ_impact_level
 
@@ -1307,7 +1319,7 @@ than in the laboratory radiates more impact sound.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a reverberation time is not positive/finite or the band counts disagree. |
-| TypeError | if `laboratory_reverberation_time` or `situ_reverberation_time` holds a text or a value that is not a real number. |
+| TypeError | if `impact_level`, `laboratory_reverberation_time` or `situ_reverberation_time` holds a text or a value that is not a real number. |
 
 ## in_situ_reduction_index
 
@@ -1343,7 +1355,7 @@ correction is exactly zero for Type B elements (Clause 4.2.2.3).
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a reverberation time is not positive/finite or the band counts disagree. |
-| TypeError | if `laboratory_reverberation_time` or `situ_reverberation_time` holds a text or a value that is not a real number. |
+| TypeError | if `laboratory_reverberation_time`, `situ_reverberation_time` or `sound_reduction_index` holds a text or a value that is not a real number. |
 
 ## in_situ_total_loss_factor
 
@@ -1390,7 +1402,7 @@ Formula (C.4) absorption coefficients (see
 | Exception | When |
 | :--- | :--- |
 | ValueError | If an input is not positive/finite, the perimeter sum is negative, or the band counts disagree. |
-| TypeError | if `area`, `critical_frequency`, `internal_loss_factor`, `mass_per_area` or `perimeter_absorption` is not a single number, or `frequencies` holds a text or a value that is not a real number. |
+| TypeError | if `area`, `critical_frequency`, `internal_loss_factor`, `mass_per_area` or `perimeter_absorption` is not a single number, or `frequencies` or `radiation_factor` holds a text or a value that is not a real number. |
 
 ## in_situ_velocity_level_difference
 
@@ -1428,7 +1440,7 @@ built.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a length is not positive/finite or the band counts disagree. |
-| TypeError | if `coupling_length` is not a single number, or `absorption_length_i` or `absorption_length_j` holds a text or a value that is not a real number. |
+| TypeError | if `coupling_length` is not a single number, or `absorption_length_i`, `absorption_length_j` or `vibration_reduction_index` holds a text or a value that is not a real number. |
 
 ## InSituElementResult
 
@@ -1549,7 +1561,7 @@ coefficients between 0,05 and 0,5.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the two sequences differ in length, a critical frequency is not positive, or an index is not finite. |
-| TypeError | if `critical_frequencies` holds a text or a value that is not a real number. |
+| TypeError | if `critical_frequencies` or `vibration_reduction_indices` holds a text or a value that is not a real number. |
 
 ## reciprocity_impact_level
 
@@ -1587,7 +1599,7 @@ about 1 kHz, above which the stiffness of the floor's top layer matters).
 | Exception | When |
 | :--- | :--- |
 | ValueError | If an input is not positive/finite or the band counts disagree. |
-| TypeError | if `fraction` is not an integer (a word, a flag or a float), or `frequencies` holds a text or a value that is not a real number. |
+| TypeError | if `fraction` is not an integer (a word, a flag or a float), or `frequencies` or `sound_reduction_index` holds a text or a value that is not a real number. |
 
 ## resonant_sound_reduction_index
 
@@ -1628,7 +1640,7 @@ describes resonant transmission and is returned unchanged.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If an input is not positive/finite or the band counts disagree. |
-| TypeError | if `critical_frequency` is not a single number, or `frequencies` holds a text or a value that is not a real number. |
+| TypeError | if `critical_frequency` is not a single number, or `correction`, `frequencies` or `sound_reduction_index` holds a text or a value that is not a real number. |
 
 ## structural_reverberation_time
 
@@ -1656,4 +1668,4 @@ Structural reverberation time $T_\mathrm{s} = 2.2/(f \eta_\mathrm{tot})$ (C.1).
 | Exception | When |
 | :--- | :--- |
 | ValueError | If an input is not positive/finite or the band counts disagree. |
-| TypeError | if `frequencies` holds a text or a value that is not a real number. |
+| TypeError | if `frequencies` or `total_loss_factor` holds a text or a value that is not a real number. |

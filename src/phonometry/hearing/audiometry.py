@@ -96,7 +96,11 @@ import numpy as np
 from .._internal.boundary import round_half_up, settled
 from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, given_repr, read_only
-from .._internal.validation import require_choice, require_scalar
+from .._internal.validation import (
+    real_array,
+    require_choice,
+    require_scalar,
+)
 from .sound_field_audiometry import (
     SOUND_FIELD_AMBIENT_BANDS_HZ as _SOUND_FIELD_BANDS_HZ,
 )
@@ -357,7 +361,7 @@ def _levels(values: ArrayLike, name: str, *, minimum: int = 1) -> np.ndarray:
         not finite.
     """
     require_scalar(minimum, "minimum")
-    array = np.array(values, dtype=np.float64)
+    array = real_array(values, name, copy=True)
     if array.ndim != 1 or array.size < minimum or not np.all(np.isfinite(array)):
         msg = (
             f"'{name}' must be a one-dimensional array of at least {minimum} "
@@ -498,7 +502,8 @@ def ambient_noise_limits(
         sound field.
     :raises TypeError: if ``allowed_threshold_shift_db``, ``lowest_hearing_level`` or
         ``lowest_test_frequency_hz`` is not a single number, or ``earphone`` or
-        ``presentation`` is not a text.
+        ``presentation`` is not a text, or ``earphone_attenuation`` holds a text or a
+        value that is not a real number.
     """
     require_choice(presentation, "presentation", _PRESENTATIONS)
     require_choice(earphone, "earphone", _EARPHONES)
@@ -813,7 +818,9 @@ def check_audiometric_ambient_noise(
     :raises ValueError: for the reasons :func:`ambient_noise_limits` gives, a
         frequency the table does not list, or levels that do not match the
         bands.
-    :raises TypeError: if ``presentation`` or ``earphone`` is not a text.
+    :raises TypeError: if ``presentation`` or ``earphone`` is not a text, or
+        ``earphone_attenuation``, ``frequencies``, ``levels`` or ``noise_floor_levels``
+        holds a text or a value that is not a real number.
     """
     require_choice(presentation, "presentation", _PRESENTATIONS)
     require_choice(earphone, "earphone", _EARPHONES)
@@ -1163,6 +1170,8 @@ def ascending_method_threshold(
         not match the presentations, a step differs from 6.2.3.2, a
         presentation follows the end of the series, or more ascents are given
         than a series holds.
+    :raises TypeError: if ``ascent_levels`` or ``presentation_levels`` holds a text or a
+        value that is not a real number.
     """
     sequence = presentation_levels is not None or responses is not None
     if ascent_levels is not None and not sequence:
@@ -1189,7 +1198,7 @@ def _threshold_from_ascents(
     :raises ValueError: for levels that are not finite, more ascents than a
         series holds, or ascents after the series ended.
     """
-    levels = np.array(ascent_levels, dtype=np.float64)
+    levels = real_array(ascent_levels, "ascent_levels", copy=True)
     if levels.ndim != 1 or not np.all(np.isfinite(levels)):
         msg = "'ascent_levels' must be a one-dimensional array of finite levels."
         raise ValueError(msg)
@@ -1228,7 +1237,7 @@ def _threshold_from_sequence(
     :raises ValueError: for levels that are not finite, responses that do not
         match them, or a sequence the method does not produce.
     """
-    levels = np.array(presentation_levels, dtype=np.float64)
+    levels = real_array(presentation_levels, "presentation_levels", copy=True)
     heard = np.array(responses, dtype=bool)
     if (
         levels.ndim != 1
@@ -1370,6 +1379,8 @@ def bracketing_method_threshold(
     :return: :class:`BracketingThresholdResult`, which also says whether the
         series is complete and whether 6.2.4.3 advises a repeat.
     :raises ValueError: for an empty or non-finite set of levels.
+    :raises TypeError: if ``ascent_levels`` or ``descent_levels`` holds a text or a
+        value that is not a real number.
     """
     ups = _levels(ascent_levels, "ascent_levels")
     downs = _levels(descent_levels, "descent_levels")
@@ -1477,6 +1488,8 @@ class AutomaticThresholdResult(OwnsArrays):
             not finite, reversals that do not alternate between peaks and
             valleys, a tracing that keeps no peak or no valley after a), or a
             mean or a threshold that is not the one the kept reversals give.
+        :raises TypeError: if ``reversal_levels`` holds a text or a value that is not a
+            real number.
         """
         levels = _levels(self.reversal_levels, "reversal_levels", minimum=3)
         mean = _tracing_mean(levels)
@@ -1596,6 +1609,8 @@ def automatic_audiometry_threshold(
     :raises ValueError: for fewer than three reversals, reversals that do not
         alternate between peaks and valleys, or a tracing that keeps no peak
         or no valley after a).
+    :raises TypeError: if ``reversal_levels`` holds a text or a value that is not a real
+        number.
     """
     levels = _levels(reversal_levels, "reversal_levels", minimum=3)
     mean = _tracing_mean(levels)
@@ -1733,6 +1748,8 @@ class SweepThresholdResult(OwnsArrays):
             alternate between peaks and valleys or keep fewer than three of
             either, a sweep that does not run one way, or a column that is not
             the one the reversals give.
+        :raises TypeError: if ``frequencies``, ``reversal_frequencies`` or
+            ``reversal_levels`` holds a text or a value that is not a real number.
         """
         levels = _levels(self.reversal_levels, "reversal_levels", minimum=6)
         freqs = _sweep_frequencies(self.reversal_frequencies, levels)
@@ -1833,6 +1850,8 @@ def sweep_audiometry_threshold(
     :raises ValueError: for arrays that do not match, fewer than three peaks
         or three valleys, reversals that do not alternate, a sweep that does
         not run one way, or no frequency to determine.
+    :raises TypeError: if ``frequencies``, ``reversal_frequencies`` or
+        ``reversal_levels`` holds a text or a value that is not a real number.
     """
     levels = _levels(reversal_levels, "reversal_levels", minimum=6)
     freqs = _sweep_frequencies(reversal_frequencies, levels)
@@ -2113,7 +2132,8 @@ def audiogram_cautions(
     :raises ValueError: for neither set of levels, levels that do not match
         the frequencies, a frequency that is not positive, or an unknown
         placement.
-    :raises TypeError: if ``vibrator_placement`` is not a text.
+    :raises TypeError: if ``vibrator_placement`` is not a text, or ``frequencies`` holds
+        a text or a value that is not a real number.
     """
     freqs = _levels(frequencies, "frequencies")
     if np.any(freqs <= 0.0):

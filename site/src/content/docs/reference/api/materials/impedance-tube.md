@@ -84,7 +84,7 @@ kelvin.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if any temperature is at or below -273.15 degC, or any pressure is not positive. |
-| TypeError | if `temperature_c` holds a text or a value that is not a real number. |
+| TypeError | if `static_pressure_kpa` or `temperature_c` holds a text or a value that is not a real number. |
 
 ## apply_microphone_calibration
 
@@ -583,7 +583,7 @@ porous-wall and object losses and is therefore a lower limit (Clause A.2.1.5).
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `diameter_m` or `speed_of_sound` is not a single number. |
+| TypeError | if `diameter_m` or `speed_of_sound` is not a single number, or `frequency` holds a text or a value that is not a real number. |
 
 ## tube_wavenumber
 
@@ -616,7 +616,7 @@ constant `k0''` enters with a **minus** sign on the imaginary part
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `speed_of_sound` is not a single number, or `attenuation_np_per_m` holds a text or a value that is not a real number. |
+| TypeError | if `speed_of_sound` is not a single number, or `attenuation_np_per_m` or `frequency` holds a text or a value that is not a real number. |
 
 ## two_microphone_impedance
 
@@ -663,4 +663,4 @@ supplied, frequencies outside the plane-wave range (Eqs. (1)-(4)) raise an
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `shape` is not a text. |
+| TypeError | if `shape` is not a text, or `frequency` holds a text or a value that is not a real number. |

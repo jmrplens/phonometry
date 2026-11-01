@@ -158,7 +158,7 @@ conservative reading.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an unknown presentation, lowest test frequency, earphone or threshold shift, or an earphone with bone conduction or sound field. |
-| TypeError | if `allowed_threshold_shift_db`, `lowest_hearing_level` or `lowest_test_frequency_hz` is not a single number, or `earphone` or `presentation` is not a text. |
+| TypeError | if `allowed_threshold_shift_db`, `lowest_hearing_level` or `lowest_test_frequency_hz` is not a single number, or `earphone` or `presentation` is not a text, or `earphone_attenuation` holds a text or a value that is not a real number. |
 
 ## AmbientNoiseCheck
 
@@ -353,6 +353,7 @@ presentations, a new call with `shortened=False`.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if neither form or both are given, the responses do not match the presentations, a step differs from 6.2.3.2, a presentation follows the end of the series, or more ascents are given than a series holds. |
+| TypeError | if `ascent_levels` or `presentation_levels` holds a text or a value that is not a real number. |
 
 ## AscendingThresholdResult
 
@@ -507,7 +508,7 @@ levels are averages about which individuals vary widely.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for neither set of levels, levels that do not match the frequencies, a frequency that is not positive, or an unknown placement. |
-| TypeError | if `vibrator_placement` is not a text. |
+| TypeError | if `vibrator_placement` is not a text, or `frequencies` holds a text or a value that is not a real number. |
 
 ## AudiogramCautions
 
@@ -792,6 +793,7 @@ is a property of the method, and nothing here corrects for it.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for fewer than three reversals, reversals that do not alternate between peaks and valleys, or a tracing that keeps no peak or no valley after a). |
+| TypeError | if `reversal_levels` holds a text or a value that is not a real number. |
 
 ## AutomaticThresholdResult
 
@@ -935,6 +937,7 @@ the tie.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an empty or non-finite set of levels. |
+| TypeError | if `ascent_levels` or `descent_levels` holds a text or a value that is not a real number. |
 
 ## BracketingThresholdResult
 
@@ -1068,7 +1071,7 @@ a narrow-band noise signal.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for the reasons [`ambient_noise_limits`](/phonometry/reference/api/hearing/audiometry/#ambient_noise_limits) gives, a frequency the table does not list, or levels that do not match the bands. |
-| TypeError | if `presentation` or `earphone` is not a text. |
+| TypeError | if `presentation` or `earphone` is not a text, or `earphone_attenuation`, `frequencies`, `levels` or `noise_floor_levels` holds a text or a value that is not a real number. |
 
 ## check_retest_agreement
 
@@ -1239,6 +1242,7 @@ and the run advances one reversal at a time.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for arrays that do not match, fewer than three peaks or three valleys, reversals that do not alternate, a sweep that does not run one way, or no frequency to determine. |
+| TypeError | if `frequencies`, `reversal_frequencies` or `reversal_levels` holds a text or a value that is not a real number. |
 
 ## SweepThresholdResult
 

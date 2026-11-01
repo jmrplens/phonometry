@@ -1105,6 +1105,30 @@ jobs:
     - name: Check that every read of a file a caller names goes through the shared check
       run: python scripts/check_regular_file_reads.py
 
+  # np.asarray(x, dtype=np.float64) gives back the real part of a complex
+  # value with no more than a ComplexWarning, parses a text and reads a
+  # bytearray in a list as the codes of its characters, and a method of
+  # ISO/TS 12913-3 rated a mark given as 0.5 + 0.3j as the mark at 0.5. Every
+  # caller's value the library converts to floats goes through real_array of
+  # _internal/validation.py, or a check of it first; this fails on a
+  # conversion that does neither. Static and dependency-free, so it runs on
+  # its own.
+  real-conversions:
+    name: Every conversion to floats reads a caller's value through a check
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+    - uses: actions/checkout@v7
+      with:
+        persist-credentials: false
+    - name: Set up Python 3.13
+      uses: actions/setup-python@v7
+      with:
+        python-version: "3.13"
+    - name: Check that no conversion to floats reads a caller's value unchecked
+      run: python scripts/check_real_conversions.py
+
   # A level is a ratio to a reference value, and ISO 1683 fixes one per
   # quantity. The package publishes them once, as
   # phonometry.metrology.REFERENCE_VALUES; before that the same 20 µPa

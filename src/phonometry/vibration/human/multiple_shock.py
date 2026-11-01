@@ -74,6 +74,7 @@ from ..._internal.types import ReportEngine, Sex, as_float_or_array
 from ..._internal.validation import (
     check_engine,
     floats_of,
+    real_array,
     require_1d_signal,
     require_choice,
     require_count,
@@ -179,8 +180,10 @@ def seat_to_spine_transfer(frequencies: ArrayLike) -> np.ndarray:
 
     :param frequencies: Frequencies at which to evaluate ``H``, in hertz.
     :return: The complex frequency response, aligned with ``frequencies``.
+    :raises TypeError: if ``frequencies`` holds a text or a value that is not a real
+        number.
     """
-    freq = np.asarray(frequencies, dtype=np.float64)
+    freq = real_array(frequencies, "frequencies")
     jw = 2.0j * np.pi * freq
 
     w0, z0 = _TRANSFER_ZERO
@@ -273,8 +276,9 @@ def dose_from_peaks(peaks: ArrayLike) -> float:
     :param peaks: The positive response peaks :math:`A_{\mathrm{z},i}`, m/s2.
     :return: The acceleration dose
         :math:`D_\mathrm{z} = 1.07 \left( \sum A_{\mathrm{z},i}^6 \right)^{1/6}`, m/s2.
+    :raises TypeError: if ``peaks`` holds a text or a value that is not a real number.
     """
-    az = np.asarray(peaks, dtype=np.float64).ravel()
+    az = real_array(peaks, "peaks").ravel()
     if az.size == 0:
         return 0.0
     total = float(np.sum(az**_DOSE_EXPONENT))
@@ -335,10 +339,12 @@ def daily_dose_multi(
     :return: The combined daily dose
         :math:`D_\mathrm{zd} = \left[ \sum_j D_{\mathrm{z},j}^6 \,
         (t_{\mathrm{d},j}/t_{\mathrm{m},j}) \right]^{1/6}`, m/s2.
+    :raises TypeError: if ``doses``, ``exposure_times`` or ``measurement_times`` holds a
+        text or a value that is not a real number.
     """
-    dz = np.asarray(doses, dtype=np.float64).ravel()
-    td = np.asarray(exposure_times, dtype=np.float64).ravel()
-    tm = np.asarray(measurement_times, dtype=np.float64).ravel()
+    dz = real_array(doses, "doses").ravel()
+    td = real_array(exposure_times, "exposure_times").ravel()
+    tm = real_array(measurement_times, "measurement_times").ravel()
     require_equal_shapes(
         "daily_dose_multi",
         {
@@ -398,11 +404,12 @@ def ultimate_strength(age: ArrayLike, *, sex: Sex = "male") -> np.ndarray:
         :math:`S_\text{age}`).
     :return: The ultimate strength
         :math:`S_\mathrm{u} = 6.75 - S_\text{age} (b+i)`, MPa.
-    :raises TypeError: if ``sex`` is not a text.
+    :raises TypeError: if ``sex`` is not a text, or ``age`` holds a text or a value that
+        is not a real number.
     """
     require_choice(sex, "sex", _SEXES)
     slope = _STRENGTH_AGE_SLOPE_MALE if sex == "male" else _STRENGTH_AGE_SLOPE_FEMALE
-    years = np.asarray(age, dtype=np.float64)
+    years = real_array(age, "age")
     return _ULTIMATE_STRENGTH_INTERCEPT - slope * years
 
 
@@ -489,11 +496,12 @@ def injury_probability(
     :return: The injury probability :math:`P = 1 - \exp(-(R/\alpha)^\beta)` in 0-1; a
         ``float`` for a number; an array for a sequence or an array, a zero-dimensional
         one included. Negative :math:`R` gives 0.
-    :raises TypeError: if ``sex`` is not a text.
+    :raises TypeError: if ``sex`` is not a text, or ``risk`` holds a text or a value
+        that is not a real number.
     """
     require_choice(sex, "sex", _SEXES)
     alpha, beta = _WEIBULL_MALE if sex == "male" else _WEIBULL_FEMALE
-    r = np.asarray(risk, dtype=np.float64)
+    r = real_array(risk, "risk")
     prob = 1.0 - np.exp(-((np.maximum(r, 0.0) / alpha) ** beta))
     return as_float_or_array(prob, like=(risk,))
 
@@ -572,13 +580,14 @@ class MultipleShockResult(OwnsArrays):
         classification or crashes the rounding with a bare "cannot convert
         float NaN to integer".
 
-        :raises TypeError: if ``risk_thresholds`` is a number, a text or a
-            sequence with a member that is not one number.
+        :raises TypeError: if ``risk_thresholds`` is a number, a text or a sequence with
+            a member that is not one number, or ``peaks`` holds a text or a value that
+            is not a real number.
         :raises ValueError: if any dose, risk, probability or scenario value
             is non-finite, ``peaks`` is not one value per shock, or
             ``risk_thresholds`` holds other than three values.
         """
-        peaks = np.asarray(self.peaks, dtype=np.float64)
+        peaks = real_array(self.peaks, "peaks")
         object.__setattr__(self, "peaks", read_only(peaks))
         r10, r50, r90 = floats_of(
             self.risk_thresholds,

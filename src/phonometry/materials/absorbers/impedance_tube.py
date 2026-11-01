@@ -40,6 +40,7 @@ from numpy.typing import ArrayLike, NDArray
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     check_engine,
+    real_array,
     require_above_absolute_zero_array,
     require_choice,
     require_equal_shapes,
@@ -163,13 +164,13 @@ def air_density_iso10534(
     :return: Air density ``rho``, in kilograms per cubic metre.
     :raises ValueError: if any temperature is at or below -273.15 degC, or any
         pressure is not positive.
-    :raises TypeError: if ``temperature_c`` holds a text or a value that is not a real
-        number.
+    :raises TypeError: if ``static_pressure_kpa`` or ``temperature_c`` holds a text or a
+        value that is not a real number.
     """
     kelvin = _ABSOLUTE_ZERO_C_OFFSET + require_above_absolute_zero_array(
         temperature_c, "temperature_c"
     )
-    pa = np.asarray(static_pressure_kpa, dtype=np.float64)
+    pa = real_array(static_pressure_kpa, "static_pressure_kpa")
     if kelvin.ndim != 0 and pa.ndim != 0:
         require_equal_shapes(
             "air_density_iso10534",
@@ -233,7 +234,8 @@ def tube_attenuation_constant(
         diameter ``4 * area / perimeter`` for a rectangular tube (see
         :func:`hydraulic_diameter`).
     :return: Attenuation constant ``k0''``, in nepers per metre.
-    :raises TypeError: if ``diameter_m`` or ``speed_of_sound`` is not a single number.
+    :raises TypeError: if ``diameter_m`` or ``speed_of_sound`` is not a single number,
+        or ``frequency`` holds a text or a value that is not a real number.
     """
     require_scalar(diameter_m, "diameter_m")
     require_scalar(speed_of_sound, "speed_of_sound")
@@ -241,7 +243,7 @@ def tube_attenuation_constant(
         raise ValueError(_SPEED_OF_SOUND_POSITIVE)
     if diameter_m <= 0.0:
         raise ValueError(_DIAMETER_POSITIVE)
-    f = np.asarray(frequency, dtype=np.float64)
+    f = real_array(frequency, "frequency")
     if np.any(f < 0.0):
         msg = "'frequency' must be non-negative."
         raise ValueError(msg)
@@ -271,12 +273,13 @@ def tube_wavenumber(
         :func:`tube_attenuation_constant`.
     :return: Complex wavenumber ``k0``, in reciprocal metres.
     :raises TypeError: if ``speed_of_sound`` is not a single number, or
-        ``attenuation_np_per_m`` holds a text or a value that is not a real number.
+        ``attenuation_np_per_m`` or ``frequency`` holds a text or a value that is not a
+        real number.
     """
     require_scalar(speed_of_sound, "speed_of_sound")
     if speed_of_sound <= 0.0:
         raise ValueError(_SPEED_OF_SOUND_POSITIVE)
-    f = np.asarray(frequency, dtype=np.float64)
+    f = real_array(frequency, "frequency")
     if not np.all(np.isfinite(f)) or bool(np.any(f < 0.0)):
         msg = "'frequency' must be non-negative."
         raise ValueError(msg)
@@ -766,13 +769,14 @@ def two_microphone_impedance(
     :return: An :class:`ImpedanceTubeResult` (the tube geometry is retained on
         the result).
 
-    :raises TypeError: if ``shape`` is not a text.
+    :raises TypeError: if ``shape`` is not a text, or ``frequency`` holds a text or a
+        value that is not a real number.
     """
     require_choice(shape, "shape", ("circular", "rectangular", "square"))
     # At least 1-D: a single-frequency reduction is legitimate, and the result
     # class pins a non-empty 1-D frequency axis so the fiche table and the
     # figure can always walk it.
-    f = np.atleast_1d(np.asarray(frequency, dtype=np.float64))
+    f = np.atleast_1d(real_array(frequency, "frequency"))
     h = _require_h12_per_band(h12, f, "frequency")
     k0 = tube_wavenumber(f, speed_of_sound, attenuation_np_per_m=attenuation_np_per_m)
     r = reflection_factor(h, spacing_m=spacing_m, x1=x1, wavenumber=k0)

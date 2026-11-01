@@ -83,6 +83,8 @@ from __future__ import annotations
 
 import numpy as np
 
+from .._internal.validation import real_array
+
 __all__ = ["pinned_log"]
 
 # The table and polynomial constants below are copied from ARM's
@@ -581,8 +583,9 @@ def pinned_log(values: np.ndarray) -> np.ndarray:
     :param values: Any real array-like of positive values.
     :return: The natural logarithm, elementwise, in the same shape.
     :raises ValueError: If any element is zero or negative.
+    :raises TypeError: if ``values`` holds a text or a value that is not a real number.
     """
-    x = np.asarray(values, dtype=np.float64)
+    x = real_array(values, "values")
     flat = np.ascontiguousarray(x).reshape(-1)
     if not flat.size:
         return np.empty(np.shape(values), dtype=np.float64)

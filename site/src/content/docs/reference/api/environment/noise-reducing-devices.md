@@ -277,7 +277,7 @@ category ladder.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If there are not eighteen values, a band from `lowest_band_hz` up is not a finite non-negative number, the band is not positive or not one of the eighteen, or the weighted ratio is zero. |
-| TypeError | if `lowest_band_hz` is not a single number. |
+| TypeError | if `lowest_band_hz` is not a single number, or `reflection_indices` holds a text or a value that is not a real number. |
 
 **Warns**
 

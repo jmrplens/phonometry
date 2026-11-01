@@ -448,7 +448,7 @@ bipolar sequence and its (flat) magnitude spectrum.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an unknown `kind`, or an empty signal. |
-| TypeError | if `kind` is not a text. |
+| TypeError | if `kind` is not a text, or `x` holds a text or a value that is not a real number. |
 
 ## shaped_sweep_signal
 

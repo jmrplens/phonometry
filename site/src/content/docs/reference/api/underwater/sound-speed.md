@@ -46,7 +46,7 @@ Evaluate a sound-speed profile over a depth column.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
-| TypeError | if `model` is not a text. |
+| TypeError | if `model` is not a text, or `depths`, `salinities` or `temperatures_c` holds a text or a value that is not a real number. |
 
 ## SoundSpeedProfile
 

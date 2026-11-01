@@ -56,7 +56,7 @@ pressure doubling; $S_0 = 1$ m².
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
-| TypeError | if `r1` is not a single number. |
+| TypeError | if `r1` is not a single number, or `band_levels` holds a text or a value that is not a real number. |
 
 ## slant_distance
 
@@ -147,7 +147,7 @@ critical band would extend to negative frequencies) and are rejected.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid or the candidate lies below 20 Hz. |
-| TypeError | if `tone_frequency` is not a single number. |
+| TypeError | if `tone_frequency` is not a single number, or `frequencies` or `levels` holds a text or a value that is not a real number. |
 
 ## WindTurbineNoiseWarning
 

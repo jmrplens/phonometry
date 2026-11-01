@@ -146,6 +146,7 @@ B.2).
 | Exception | When |
 | :--- | :--- |
 | ValueError | if an uncertainty is missing for bare means or given twice for a result, if the two measurements cover different bands, or if a value is not finite. |
+| TypeError | if `first`, `first_expanded_uncertainty_db`, `frequencies`, `second` or `second_expanded_uncertainty_db` holds a text or a value that is not a real number. |
 
 ## AttenuationDifferenceResult
 
@@ -280,7 +281,7 @@ separate requirements of the test site and are not judged here.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if a position is missing or unknown, if the bands do not match, if a rotation is given without its microphone's rejection or the other way round, or if that rejection is below the 10 dB Table 1 accepts. |
-| TypeError | if a position of `position_levels` is not a text. |
+| TypeError | if a position of `position_levels` is not a text, or `frequencies`, `reference_levels` or `rotation_levels` holds a text or a value that is not a real number. |
 
 ## min_significant_difference
 
@@ -326,6 +327,7 @@ value the comparison should rest on.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an uncertainty that is negative or not finite. |
+| TypeError | if `expanded_uncertainty_db` holds a text or a value that is not a real number. |
 
 ## ProtectorUncertaintyBudget
 
@@ -419,6 +421,7 @@ hearing level give the same difference.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if neither form or both are given, if a grid is not two-dimensional or holds fewer than two subjects or a value that is not finite, if the two thresholds differ in shape, or if `frequencies` does not match the grid. |
+| TypeError | if `attenuation`, `frequencies`, `occluded_threshold_levels` or `open_threshold_levels` holds a text or a value that is not a real number. |
 
 ## RealEarAttenuationResult
 
@@ -520,7 +523,7 @@ to one decimal, as the tables print them (see
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a protector type the tables do not list, or for frequencies that are not positive and finite. |
-| TypeError | if `protector` is not a text. |
+| TypeError | if `protector` is not a text, or `frequencies` holds a text or a value that is not a real number. |
 
 ## REAT_FIELD_VARIATION_LIMITS
 

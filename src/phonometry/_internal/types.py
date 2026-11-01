@@ -16,6 +16,8 @@ from typing import TYPE_CHECKING, Any, Literal, Protocol
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
+from .validation import real_array
+
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
@@ -258,8 +260,9 @@ def as_float_or_array(
     :return: ``float`` for numbers in, a ``float64`` array otherwise.
     :raises ValueError: If every argument in *like* is a single number and
         *values* holds more than one.
+    :raises TypeError: if ``values`` holds a text or a value that is not a real number.
     """
-    result = np.asarray(values, dtype=np.float64)
+    result = real_array(values, "values")
     form = answer_form(like)
     if form == "array":
         return result
@@ -294,6 +297,7 @@ def as_float_if_reduced(values: ArrayLike) -> float | NDArray[np.float64]:
     :param values: The result of the reduction.
     :return: ``float`` when *values* is zero-dimensional, else a ``float64``
         array.
+    :raises TypeError: if ``values`` holds a text or a value that is not a real number.
     """
-    result = np.asarray(values, dtype=np.float64)
+    result = real_array(values, "values")
     return float(result) if result.ndim == 0 else result

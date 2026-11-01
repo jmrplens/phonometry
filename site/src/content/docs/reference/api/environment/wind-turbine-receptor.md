@@ -99,6 +99,7 @@ reconstructed time-series modulation depth of clause 13 (the AM rating of
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a depth is negative or not finite. |
+| TypeError | if `modulation_depth_db` holds a text or a value that is not a real number. |
 
 ## BackgroundCorrectionRegime
 
@@ -166,7 +167,7 @@ whose first member is centred on north. Per bin:
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs disagree in length, a value is not finite, a wind speed or an uncertainty is negative, or `averaging` is unknown. |
-| TypeError | if `bin_width_m_s` or `sector_width_deg` is not a single number, or `levels`, `wind_directions_deg` or `wind_speeds_m_s` holds a text or a value that is not a real number, or `averaging` is not a text. |
+| TypeError | if `bin_width_m_s` or `sector_width_deg` is not a single number, or `levels`, `type_b_uncertainty_db`, `wind_directions_deg` or `wind_speeds_m_s` holds a text or a value that is not a real number, or `averaging` is not a text. |
 
 ## BinnedSoundLevels
 
@@ -350,7 +351,7 @@ brought to 10 m is the binning wind speed $V_\mathrm{bin}$ of
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a height or the roughness length is not positive, a height does not exceed the roughness length, or a speed is negative. |
-| TypeError | if `height_m`, `reference_height_m` or `roughness_length` is not a single number. |
+| TypeError | if `height_m`, `reference_height_m` or `roughness_length` is not a single number, or `reference_speed_m_s` holds a text or a value that is not a real number. |
 
 ## LOW_FREQUENCY_AIR_ATTENUATION_DB_PER_KM
 
@@ -513,7 +514,7 @@ profile of IEC 61400-11:2012 D.3 that Table K.1 evaluates for 120 m and
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a height is not positive, a speed is negative or a value is not finite. |
-| TypeError | if `height_m` or `reference_height_m` is not a single number. |
+| TypeError | if `height_m` or `reference_height_m` is not a single number, or `reference_speed_m_s` or `shear_exponent` holds a text or a value that is not a real number. |
 
 ## predicted_receptor_level
 
@@ -556,7 +557,7 @@ prediction model and the modelling in quadrature.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a value is not finite or an uncertainty is negative. |
-| TypeError | if `modeling_uncertainty_db` or `prediction_model_uncertainty_db` is not a single number, or `turbine_levels` holds a text or a value that is not a real number. |
+| TypeError | if `modeling_uncertainty_db` or `prediction_model_uncertainty_db` is not a single number, or `sound_power_uncertainty_db` or `turbine_levels` holds a text or a value that is not a real number. |
 
 ## PredictedReceptorLevel
 
@@ -954,7 +955,7 @@ other.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs disagree in length or are not finite, or an uncertainty is infinite or negative. |
-| TypeError | if `background_levels`, `total_levels`, `wind_directions_deg` or `wind_speeds_m_s` holds a text or a value that is not a real number. |
+| TypeError | if `background_levels`, `background_uncertainty_db`, `total_levels`, `total_uncertainty_db`, `wind_directions_deg` or `wind_speeds_m_s` holds a text or a value that is not a real number. |
 
 ## TurbineSoundLevels
 
@@ -1135,7 +1136,7 @@ computed; Table K.2 leaves them blank.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a speed or height is not positive, or the two heights are the same. |
-| TypeError | if `height_m` or `reference_height_m` is not a single number. |
+| TypeError | if `height_m` or `reference_height_m` is not a single number, or `reference_speed_m_s` or `speed_m_s` holds a text or a value that is not a real number. |
 
 ## wind_shear_profile
 
@@ -1221,7 +1222,7 @@ criterion of C.6.1 sums 10 Hz to 160 Hz, so pass those bands for it.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | If `weighting` is not a text, or `sound_power_levels`, `frequencies`, `facade_insulation`, `ground_correction` or `air_attenuation_db_per_km` holds a text or a value that is not a number. |
+| TypeError | If `weighting` is not a text, or `sound_power_levels`, `frequencies`, `facade_insulation`, `ground_correction` or `air_attenuation_db_per_km` holds a text or a value that is not a number, or `distance` or `hub_height_m` holds a text or a value that is not a real number. |
 | ValueError | If the shapes disagree, a distance or height is not positive, an air attenuation coefficient is negative, a default table has no value at a supplied band, or `weighting` is neither `"A"` nor `"Z"`. |
 
 ## wind_turbine_rating_level
@@ -1332,6 +1333,12 @@ WindShearProfile.speed_at(
 ```
 
 The power-law wind speed at `height_m` (Equation (K.1)), in m/s.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `height_m` holds a text or a value that is not a real number. |
 
 ### WindShearProfile.typical
 

@@ -156,7 +156,7 @@ but keeps it out of the verdict, the clause saying "should".
 | Exception | When |
 | :--- | :--- |
 | ValueError | for reverberation times that are not positive and finite, a length mismatch, the refusals of [`reverberation_parameter`](/phonometry/reference/api/power/sound-power-special-room/#reverberation_parameter), an unknown method, a climate given in part or out of range, or a source volume that is not positive. |
-| TypeError | if `method` is not a text, or `nominal_reverberation_time_s` or `source_volume_m3` is not a single number. |
+| TypeError | if `method` is not a text, or `nominal_reverberation_time_s` or `source_volume_m3` is not a single number, or `frequencies` or `reverberation_time` holds a text or a value that is not a real number. |
 
 ## check_special_room_suitability
 
@@ -248,6 +248,7 @@ and without them it is the plain mean of the surfaces.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for coefficients outside [0, 1], fewer than two surfaces, mismatched bands, or areas that are not one positive value per surface. |
+| TypeError | if `floor_absorption_coefficients`, `frequencies`, `surface_absorption_coefficients` or `surface_areas_m2` holds a text or a value that is not a real number. |
 
 ## reverberation_parameter
 
@@ -300,7 +301,7 @@ that volume too and nothing is read off the figure.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive frequency, volume, area or speed, or only one of the NOTE's two inputs. |
-| TypeError | if `speed_of_sound`, `surface_area` or `volume` is not a single number. |
+| TypeError | if `speed_of_sound`, `surface_area` or `volume` is not a single number, or `frequencies` holds a text or a value that is not a real number. |
 
 ## sound_power_special_room
 
@@ -459,6 +460,7 @@ table, and that is what is applied.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for non-finite or empty inputs, or shapes that do not broadcast. |
+| TypeError | if `background_levels` or `levels` holds a text or a value that is not a real number. |
 
 ## special_room_source_locations
 

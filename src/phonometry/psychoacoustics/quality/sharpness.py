@@ -18,7 +18,10 @@ from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
-from ..._internal.validation import require_choice
+from ..._internal.validation import (
+    real_array,
+    require_choice,
+)
 from ...metrology.reference_values import REFERENCE_VALUES
 from ..loudness.zwicker import ZwickerLoudness, loudness_zwicker
 
@@ -150,10 +153,11 @@ def sharpness_din_from_specific(
     :param method: ``'din'`` (default, Eq. 1), or the informative Annex B
         variants ``'aures'`` / ``'bismarck'``.
     :return: Sharpness in acum (0.0 for silence).
-    :raises TypeError: if ``method`` is not a text.
+    :raises TypeError: if ``method`` is not a text, or ``specific`` holds a text or a
+        value that is not a real number.
     """
     require_choice(method, "method", ("din", "aures", "bismarck"))
-    specific = np.asarray(specific, dtype=np.float64)
+    specific = real_array(specific, "specific")
     if specific.shape != (240,):
         msg = "specific must be the 240-bin ISO 532-1 pattern."
         raise ValueError(msg)

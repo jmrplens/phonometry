@@ -115,6 +115,7 @@ from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays, read_only, reduce_with_plain_rows
 from ..._internal.types import as_float_or_array
 from ..._internal.validation import (
+    real_array,
     refuse_complex,
     require_choice,
     require_real,
@@ -1299,8 +1300,10 @@ def method_b_scale_values(marked_fraction: ArrayLike) -> float | NDArray[np.floa
     :return: The scale values; a ``float`` for a number; an array for a sequence or an
         array, a zero-dimensional one included.
     :raises ValueError: for a fraction outside 0 to 1 or an infinite one.
+    :raises TypeError: if ``marked_fraction`` holds a text or a value that is not a real
+        number.
     """
-    fraction = np.asarray(marked_fraction, dtype=np.float64)
+    fraction = real_array(marked_fraction, "marked_fraction")
     given = fraction[~np.isnan(fraction)]
     if np.any(np.isinf(given)) or np.any((given < 0.0) | (given > 1.0)):
         msg = (

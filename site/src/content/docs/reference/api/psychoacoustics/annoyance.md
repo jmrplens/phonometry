@@ -131,7 +131,7 @@ variant (see [`fluctuation_strength`](/phonometry/reference/api/psychoacoustics/
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `field` is not a text. |
+| TypeError | if `field` is not a text, or `x` holds a text or a value that is not a real number. |
 
 ## PsychoacousticAnnoyanceResult
 

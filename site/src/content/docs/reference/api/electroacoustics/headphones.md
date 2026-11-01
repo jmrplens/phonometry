@@ -255,6 +255,7 @@ peak over its RMS against the two limits.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the record is not 1-D and finite, or too short. |
+| TypeError | if `x` holds a text or a value that is not a real number. |
 
 ## coupler_frequency_response
 
@@ -288,6 +289,7 @@ the rated source impedance, over "at least the rated frequency range".
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs differ in length or are not finite. |
+| TypeError | if `frequencies` or `sound_pressure_level` holds a text or a value that is not a real number. |
 
 ## CouplerFrequencyResponse
 
@@ -402,6 +404,7 @@ channel", expressed as the difference of the two levels against frequency.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs differ in length or are not finite. |
+| TypeError | if `driven_level`, `frequencies` or `other_level` holds a text or a value that is not a real number. |
 
 ## CrosstalkAttenuation
 
@@ -499,6 +502,7 @@ result also carries the two checks of the procedure: the fittings within
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the shapes disagree, a level is not finite or the reference band is missing. |
+| TypeError | if `frequencies` holds a text or a value that is not a real number. |
 
 ## EarCanalFrequencyResponse
 
@@ -750,7 +754,7 @@ method (8.6.3.3).
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the shapes disagree, a value is out of range or the reference band is missing. |
-| TypeError | if `field` is not a text. |
+| TypeError | if `field` is not a text, or `field_level`, `frequencies` or `source_emf_v` holds a text or a value that is not a real number. |
 
 ## FieldComparisonResponse
 
@@ -1179,7 +1183,7 @@ measurements".
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the shapes disagree, a value is out of range or `weighting` is neither `"A"` nor `"Z"`. |
-| TypeError | if `weighting` is not a text. |
+| TypeError | if `weighting` is not a text, or `band_levels`, `free_field_response_db`, `frequencies` or `source_emf_v` holds a text or a value that is not a real number. |
 
 ## program_signal_level
 
@@ -1224,7 +1228,7 @@ $$
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs differ in length or are not finite, or `weighting` is neither `"A"` nor `"Z"`. |
-| TypeError | if `weighting` is not a text. |
+| TypeError | if `weighting` is not a text, or `band_levels`, `free_field_response_db` or `frequencies` holds a text or a value that is not a real number. |
 
 ## ProgramCharacteristicVoltage
 
@@ -1350,6 +1354,7 @@ between the two steps that straddle it.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs differ in length, are not finite, the e.m.f.s are not positive and ascending, or there are fewer than two. |
+| TypeError | if `sound_pressure_level` or `source_emf_v` holds a text or a value that is not a real number. |
 
 ## ProtectionVoltage
 
@@ -1559,7 +1564,7 @@ certificate, are not numbers.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a value is out of range or the level arrays disagree in length. |
-| TypeError | if `canal_section_area_mm2`, `ear_canal_area_mm2`, `entrance_area_mm2` or `volume_mm3` is not a single number. |
+| TypeError | if `canal_section_area_mm2`, `ear_canal_area_mm2`, `entrance_area_mm2` or `volume_mm3` is not a single number, or `open_levels`, `pink_noise_band_levels` or `sealed_levels` holds a text or a value that is not a real number. |
 
 ## verify_rated_impedance
 
@@ -1597,7 +1602,7 @@ measurement covered 20 Hz to 20 kHz as 8.2.2.2 c) requires.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs differ in length, are not positive and finite, or no measurement frequency falls in the rated range. |
-| TypeError | if `rated_impedance_ohm` is not a single number. |
+| TypeError | if `rated_impedance_ohm` is not a single number, or `frequencies` holds a text or a value that is not a real number. |
 
 ## working_sound_pressure_level
 

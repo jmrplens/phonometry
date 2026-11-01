@@ -37,6 +37,7 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
+from .._internal.validation import real_array
 from ._i18n import t
 from ._noise_control_fiche import (
     band_labels,
@@ -83,7 +84,7 @@ def _a_weighting(frequencies: np.ndarray) -> np.ndarray | None:
         from ..emission._shared import _a_weighting_corrections
 
         return np.asarray(
-            _a_weighting_corrections(np.asarray(frequencies, dtype=np.float64)),
+            _a_weighting_corrections(real_array(frequencies, "frequencies")),
             dtype=np.float64,
         )
     except (ValueError, ImportError):

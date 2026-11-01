@@ -27,7 +27,11 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from .._internal.validation import require_count, require_scalar
+from .._internal.validation import (
+    real_array,
+    require_count,
+    require_scalar,
+)
 from ._i18n import format_number, t
 
 if TYPE_CHECKING:
@@ -488,8 +492,10 @@ def response_decades(frequencies: ArrayLike, where: str) -> float:
     :return: The number of decades the curve spans.
     :raises ValueError: if the axis carries a non-finite frequency, or the
         span is narrower than one-third of an octave.
+    :raises TypeError: if ``frequencies`` holds a text or a value that is not a real
+        number.
     """
-    f = np.asarray(frequencies, dtype=np.float64)
+    f = real_array(frequencies, "frequencies")
     if not np.all(np.isfinite(f)):
         msg = (
             f"{where}: the response frequency axis must contain only finite "
@@ -563,7 +569,7 @@ def _octave_grouping(band_centres: ArrayLike | None) -> int | None:
     """
     if band_centres is None:
         return None
-    centres = np.asarray(band_centres, dtype=np.float64)
+    centres = real_array(band_centres, "band_centres")
     # The fewest values the step below can work with, not a quantity.
     if centres.size < 3 or np.any(centres <= 0.0):  # noqa: PLR2004
         return None
@@ -595,7 +601,8 @@ def band_table(
         ``None`` says the rows are not frequency bands, which is the honest
         answer for a goniometer angle axis or a linear sweep and keeps the
         octave rules off a table that has no octaves.
-    :raises TypeError: if ``n_data`` is not a single number.
+    :raises TypeError: if ``n_data`` is not a single number, or ``band_centres`` holds a
+        text or a value that is not a real number.
     """
     require_scalar(n_data, "n_data")
     from reportlab.lib import colors

@@ -76,6 +76,7 @@ if TYPE_CHECKING:
 from ..._internal.frozen import OwnsArrays
 from ..._internal.utils import _typesignal
 from ..._internal.validation import (
+    real_array,
     require_1d_signal,
     require_choice,
     require_count,
@@ -485,7 +486,7 @@ def _fade_in(x: np.ndarray) -> np.ndarray:
     signal *before* the metric-specific zero-padding (5.1.2.1 for
     tonality/loudness, 5.1.2.2 for roughness). Returns a faded copy.
     """
-    x = np.asarray(x, dtype=np.float64).copy()
+    x = real_array(x, "x").copy()
     n_fade = min(_N_FADE, x.size)
     n_idx = np.arange(n_fade)
     x[:n_fade] *= 0.5 - 0.5 * np.cos(np.pi * n_idx / _N_FADE)
@@ -518,7 +519,7 @@ def _segment_bs(p_band: np.ndarray, block_size: int, n_new: int) -> np.ndarray:
     starts = i_start + s_h * np.arange(l_last + 1)
     starts = starts[starts + block_size <= p_band.size]
     idx = starts[:, None] + np.arange(block_size)[None, :]
-    return np.asarray(p_band[idx], dtype=np.float64)
+    return real_array(p_band[idx], "p_band")
 
 
 def _band_basis_loudness(

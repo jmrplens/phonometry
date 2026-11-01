@@ -126,6 +126,7 @@ from .._internal.frozen import (
 )
 from .._internal.validation import (
     check_engine,
+    real_array,
     require_choice,
     require_count,
     require_ranks,
@@ -324,7 +325,8 @@ def class_limits(
         (IEC 61260:1995 / ANSI S1.11-2004, classes 0/1/2).
     :return: Tuple (minimum, maximum) relative attenuation in dB per point;
         the maximum is ``+inf`` outside the pass-band.
-    :raises TypeError: if ``fraction`` is not a single number.
+    :raises TypeError: if ``fraction`` is not a single number, or ``omega`` holds a text
+        or a value that is not a real number.
 
     .. note::
         The exact band-edge point :math:`\Omega = G^{1/2}` is treated as
@@ -351,7 +353,7 @@ def class_limits(
     passband_max = spec["passband_max"]
     stopband_min = spec["stopband_min"]
 
-    omega_arr = np.asarray(omega, dtype=np.float64)
+    omega_arr = real_array(omega, "omega")
     if np.any(omega_arr <= 0):
         msg = "Normalized frequencies must be positive."
         raise ValueError(msg)
@@ -414,7 +416,7 @@ def _anti_alias_gain(factor: int, fs_hz: float, frequencies: np.ndarray) -> np.n
     :param frequencies: Where to evaluate it.
     :return: :math:`|H_\mathrm{aa}(f)|`, one per frequency.
     """
-    freqs = np.asarray(frequencies, dtype=np.float64)
+    freqs = real_array(frequencies, "frequencies")
     if factor == 1:
         return np.ones(freqs.shape)
     _, h = signal.freqz(_multirate_lowpass(factor), worN=freqs, fs=fs_hz)
@@ -439,7 +441,7 @@ def _band_gain(
     :param frequencies: Input frequencies.
     :return: :math:`|H_\mathrm{aa}(f)\,H_\mathrm{b}(f)|`.
     """
-    freqs = np.asarray(frequencies, dtype=np.float64)
+    freqs = real_array(frequencies, "frequencies")
     _, h = signal.sosfreqz(sos, worN=freqs, fs=fs_hz / factor)
     return np.asarray(_anti_alias_gain(factor, fs_hz, freqs) * np.abs(h))
 
@@ -479,7 +481,7 @@ def _band_relative_attenuation(
     :param frequencies: Where to evaluate it.
     :return: The relative attenuation, ``+inf`` where no input reaches.
     """
-    freqs = np.asarray(frequencies, dtype=np.float64)
+    freqs = real_array(frequencies, "frequencies")
     out = np.full(freqs.shape, np.inf)
     reachable = (freqs > 0.0) & (freqs < fs_hz / 2.0)
     if np.any(reachable):
@@ -708,7 +710,9 @@ def _effective_bandwidth(
     :param relative_attenuation_db: :math:`\Delta A` at each of them.
     :return: The normalized effective bandwidth.
     """
-    power = 10.0 ** (-0.1 * np.asarray(relative_attenuation_db, dtype=np.float64))
+    power = 10.0 ** (
+        -0.1 * real_array(relative_attenuation_db, "relative_attenuation_db")
+    )
     lo, hi = omega[:-1], omega[1:]
     return float(np.sum(2.0 / (lo + hi) * 0.5 * (power[:-1] + power[1:]) * (hi - lo)))
 
@@ -735,7 +739,9 @@ def _effective_bandwidth_1995(
     :param relative_attenuation_db: :math:`\Delta A` at each of them.
     :return: The normalized effective bandwidth.
     """
-    power = 10.0 ** (-0.1 * np.asarray(relative_attenuation_db, dtype=np.float64))
+    power = 10.0 ** (
+        -0.1 * real_array(relative_attenuation_db, "relative_attenuation_db")
+    )
     return float(np.sum(0.5 * (power[:-1] + power[1:]) * np.diff(omega)))
 
 
@@ -773,7 +779,7 @@ def _summation_deviation(relative_attenuations: np.ndarray) -> np.ndarray:
         attenuation of each filter summed at the same ``n`` frequencies.
     :return: :math:`\Delta P_j` at each frequency, dB.
     """
-    power = 10.0 ** (-0.1 * np.asarray(relative_attenuations, dtype=np.float64))
+    power = 10.0 ** (-0.1 * real_array(relative_attenuations, "relative_attenuations"))
     return np.asarray(10.0 * np.log10(np.sum(power, axis=0)))
 
 

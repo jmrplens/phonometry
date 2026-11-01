@@ -274,7 +274,7 @@ equally-contributing critical bands or the 6 octave bands.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if a spectrum has the wrong length or carries a non-finite value, or the method or effort name is unknown. |
-| TypeError | if `method` is not a text, `speech_spectrum` is neither a vocal-effort name nor numbers (a `bytes`, `None`, a text among the levels), or a spectrum, the threshold or the band importance holds a text, a complex value or anything that is not a number. |
+| TypeError | if `method` is not a text, `speech_spectrum` is neither a vocal-effort name nor numbers (a `bytes`, `None`, a text among the levels), or a spectrum, the threshold or the band importance holds a text, a complex value or anything that is not a number, or `band_importance` or `noise_spectrum` holds a text or a value that is not a real number. |
 
 ## standard_speech_spectra
 

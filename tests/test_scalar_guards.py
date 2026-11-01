@@ -1449,18 +1449,31 @@ def _scalar_parameters(
 
 
 def _wrong_types(value: float) -> tuple[object, ...]:
-    """What a one-number parameter must refuse as the wrong type."""
-    return (np.array([value]), np.array([value, value]), str(value), "fifty")
+    """What a one-number parameter must refuse as the wrong type.
+
+    A complex number among them, in both its kinds: :func:`float` refuses a
+    Python ``complex`` without naming the parameter and keeps the real part
+    of a NumPy one, with no more than a ``ComplexWarning``.
+    """
+    return (
+        np.array([value]),
+        np.array([value, value]),
+        str(value),
+        "fifty",
+        complex(value, 1.0),
+        np.complex128(value + 1j),
+    )
 
 
 def _array_refusals() -> tuple[list[str], int]:
-    """Each public one-number parameter an array or a text reaches unrefused.
+    """Each public one-number parameter an array, a text or a complex number reaches unrefused.
 
     For every public function whose required parameters all take one number,
     a call that goes through is found first; then each one-number parameter,
     required or defaulted, is given a one-element and a two-element array, the
-    text of its own number and a text that reads as none, in turn, and must
-    be refused with a ``TypeError`` that names it.
+    text of its own number, a text that reads as none and its number as a
+    Python and as a NumPy complex number, in turn, and must be refused with a
+    ``TypeError`` that names it.
     """
     offences: list[str] = []
     probed = 0

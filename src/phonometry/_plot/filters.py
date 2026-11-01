@@ -27,7 +27,10 @@ if TYPE_CHECKING:
     from ..filters.weighting import TimeWeightedEnvelope
     from ..metrology.conformance import ConformanceVerification
 
-from .._internal.validation import require_count
+from .._internal.validation import (
+    real_array,
+    require_count,
+)
 from .common import (
     _C_EDGE,
     _C_MUTED,
@@ -339,7 +342,7 @@ def _cover(
     A requirement figure is framed on its acceptance limits; a failing band
     lies past them, and it is the one a reader plots the verdict to see.
     """
-    values = np.asarray(data, dtype=np.float64)
+    values = real_array(data, "data")
     values = values[np.isfinite(values)]
     if values.size == 0:
         return low, high

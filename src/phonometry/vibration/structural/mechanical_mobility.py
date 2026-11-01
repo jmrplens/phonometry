@@ -91,6 +91,7 @@ from ..._internal.boundary import settled_ratio
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     check_engine,
+    real_array,
     require_choice,
     require_count,
     require_equal_shapes,
@@ -159,7 +160,7 @@ def _omega(frequency: ArrayLike, name: str = "frequency") -> NDArray[np.float64]
 
     *name* is the caller's own name for the frequency, for the message.
     """
-    f = np.asarray(frequency, dtype=np.float64)
+    f = real_array(frequency, name)
     if np.any(f <= 0.0):
         msg = f"'{name}' must be positive (mobility conversions divide by omega)."
         raise ValueError(msg)
@@ -216,7 +217,8 @@ def convert_frf(
     :raises ValueError: for an unknown FRF name, a non-positive frequency, or
         a zero *value* (dead channel) when the conversion involves a
         force-per-motion reciprocal.
-    :raises TypeError: if ``source`` or ``target`` is not a text.
+    :raises TypeError: if ``source`` or ``target`` is not a text, or ``frequency`` holds
+        a text or a value that is not a real number.
     """
     require_choice(
         source,
@@ -281,7 +283,8 @@ def sdof_receptance(
     :param stiffness: Stiffness ``k``, in N/m.
     :param damping: Viscous damping coefficient ``c``, in N.s/m (>= 0).
     :return: The complex receptance ``H``, in m/N.
-    :raises TypeError: if ``damping``, ``mass`` or ``stiffness`` is not a single number.
+    :raises TypeError: if ``damping``, ``mass`` or ``stiffness`` is not a single number,
+        or ``frequency`` holds a text or a value that is not a real number.
     """
     mass = require_positive(mass, "mass")
     stiffness = require_positive(stiffness, "stiffness")
@@ -377,7 +380,7 @@ class RigidMassCalibrationResult(OwnsArrays):
             that is not positive, or a measurement that does not carry one
             value per frequency.
         :raises TypeError: if ``mass`` is not a single number, or ``quantity`` is not a
-            text.
+            text, or ``frequencies`` holds a text or a value that is not a real number.
         """
         require_choice(self.quantity, "quantity", _RIGID_MASS_QUANTITIES)
         require_positive(self.mass, "mass")
@@ -495,11 +498,11 @@ def verify_rigid_mass_calibration(
     :raises ValueError: for an unknown quantity, non-positive mass or
         frequency, or mismatched shapes.
     :raises TypeError: if ``mass`` is not a single number, or ``quantity`` is not a
-        text.
+        text, or ``frequencies`` holds a text or a value that is not a real number.
     """
     require_choice(quantity, "quantity", _RIGID_MASS_QUANTITIES)
     mass = require_positive(mass, "mass")
-    freq = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
+    freq = np.atleast_1d(real_array(frequencies, "frequencies"))
     measured = np.abs(np.atleast_1d(np.asarray(frf, dtype=np.complex128)))
     require_equal_shapes(
         "verify_rigid_mass_calibration",
@@ -536,14 +539,14 @@ def random_error_percent(
     :return: The normalized random error, in percent (same shape as input).
     :raises ValueError: for a coherence outside (0, 1] or ``n_averages < 1``.
     :raises TypeError: if ``n_averages`` is a flag, a text or an array where a count
-        goes.
+        goes, or ``coherence`` holds a text or a value that is not a real number.
     """
     require_scalar(n_averages, "n_averages")
     n = require_count(n_averages, "n_averages", at_least=None)
     if n < 1:
         msg = "'n_averages' must be at least 1."
         raise ValueError(msg)
-    gamma2 = np.asarray(coherence, dtype=np.float64)
+    gamma2 = real_array(coherence, "coherence")
     if np.any(gamma2 <= 0.0) or np.any(gamma2 > 1.0):
         msg = "'coherence' must lie in (0, 1]."
         raise ValueError(msg)
@@ -735,7 +738,9 @@ def sdof_mobility_result(
     :param stiffness: Stiffness ``k``, N/m.
     :param damping: Viscous damping ``c``, N.s/m.
     :return: The :class:`MobilityResult` (driving point).
+    :raises TypeError: if ``frequency`` holds a text or a value that is not a real
+        number.
     """
-    freq = np.asarray(frequency, dtype=np.float64)
+    freq = real_array(frequency, "frequency")
     y = sdof_mobility(freq, mass, stiffness, damping)
     return MobilityResult(frequencies=freq, mobility=y, driving_point=True)

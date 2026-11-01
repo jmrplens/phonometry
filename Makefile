@@ -307,6 +307,16 @@ raises-blocks:
 regular-file-reads:
 	$(PYTHON) scripts/check_regular_file_reads.py
 
+# np.asarray(x, dtype=np.float64) gives back the real part of a complex value
+# with no more than a ComplexWarning, parses a text and reads a bytearray in a
+# list as the codes of its characters. Every caller's value the library
+# converts to floats goes through real_array of _internal/validation.py, or a
+# check of it first; this fails on a conversion that does neither, and
+# --census lists every conversion to floats with what it reads. Run on the
+# tree before the sweep it found 953. Stdlib only.
+real-conversions:
+	$(PYTHON) scripts/check_real_conversions.py
+
 # Every level is a ratio to an ISO 1683 reference value, and the package
 # publishes them once, in phonometry.metrology.REFERENCE_VALUES. This
 # fails on a reference value in src that is typed out again instead of read
@@ -912,7 +922,7 @@ check: lint security test
 	llms pypi-readme api-docs site-reports conformance install-hooks test test-perf gpu-parity node-image engine-digests coverage check \
 	snippets snippets-static claims subscripts euler-number docstring-math language-forwarding \
 	fence-names fence-readers decimal-comma spanish-accents figure-decimal-point figure-legends figure-tick-clearance \
-	figure-text-clearance figure-minus-sign control-characters hazards dead-constants raises-blocks regular-file-reads reference-values \
+	figure-text-clearance figure-minus-sign control-characters hazards dead-constants raises-blocks regular-file-reads real-conversions reference-values \
 	boundary-comparisons array-aliasing record-display return-overloads parameter-annotations \
 	conformance-rows conformance-vocabulary parameter-units identifier-spelling choice-literals frozen-constants published-sources \
 	solid-agreement shared-sources catalogue-data catalogue-schema published-catalogues

@@ -85,6 +85,7 @@ import numpy as np
 
 from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
+    real_array,
     require_count,
     require_ranks,
     require_same_length,
@@ -139,7 +140,7 @@ def comb_filter_response(
         return values above 1 by a few parts in 1e9).
     :raises ValueError: If the parameters are invalid.
     :raises TypeError: if ``n_averages`` is a flag, a text or an array where a count
-        goes.
+        goes, or ``frequencies`` holds a text or a value that is not a real number.
     """
     period_v = _positive(period_s, "period_s")
     require_scalar(n_averages, "n_averages")
@@ -147,7 +148,7 @@ def comb_filter_response(
     if n < 1:
         msg = "'n_averages' must be a positive integer."
         raise ValueError(msg)
-    freqs = np.asarray(frequencies, dtype=np.float64)
+    freqs = real_array(frequencies, "frequencies")
     if not np.all(np.isfinite(freqs)):
         msg = "'frequencies' must be finite."
         raise ValueError(msg)

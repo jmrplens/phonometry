@@ -169,7 +169,7 @@ cases, so it moves the answer by less than a third.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a material property, the load ratio or the mode factor is not positive and finite, or a velocity is negative. |
-| TypeError | if `density`, `dynamic_modulus_pa`, `load_ratio` or `mode_factor` is not a single number. |
+| TypeError | if `density`, `dynamic_modulus_pa`, `load_ratio` or `mode_factor` is not a single number, or `peak_velocity_m_s` holds a text or a value that is not a real number. |
 
 ## BENDING_STRESS_CONSTANT
 
@@ -325,7 +325,7 @@ draws; pass *frequency* to sample the same polyline elsewhere.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the class is not one of the three, or a frequency is not positive and finite. |
-| TypeError | if `building_class` is not a text. |
+| TypeError | if `building_class` is not a text, or `frequency` holds a text or a value that is not a real number. |
 
 ## guideline_velocity
 
@@ -384,7 +384,7 @@ number for all frequencies, and *frequency* is then not needed.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a name is not one of its choices, if the short-term foundation case is asked for without a frequency, if a frequency is given for a case that does not read one, if a frequency is not positive and finite, or if *massive_structure* is asked for outside row 1 of Table 1. |
-| TypeError | if `building_class`, `duration` or `location` is not a text. |
+| TypeError | if `building_class`, `duration` or `location` is not a text, or `frequency` holds a text or a value that is not a real number. |
 
 ## GuidelineCurve
 

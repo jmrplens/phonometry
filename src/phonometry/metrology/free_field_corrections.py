@@ -100,8 +100,8 @@ import numpy as np
 from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, given_repr, read_only
 from .._internal.validation import (
-    _as_float64,
     check_engine,
+    real_array,
     require_choice,
     require_count,
     require_finite,
@@ -446,7 +446,7 @@ def _determinations(values: ArrayLike, name: str, count: int) -> NDArray[np.floa
         not the number of frequencies, or more than two dimensions.
     """
     require_scalar(count, "count")
-    array = _as_float64(values, name)
+    array = real_array(values, name)
     if array.ndim > _MATRIX_RANK or array.size == 0:
         msg = f"'{name}' must be a scalar, one value per frequency or a matrix."
         raise ValueError(msg)
@@ -606,7 +606,7 @@ def _tolerance_column(
     """
     if tolerance_db is None:
         return None
-    tolerance = np.atleast_1d(_as_float64(tolerance_db, "tolerance_db"))
+    tolerance = np.atleast_1d(real_array(tolerance_db, "tolerance_db"))
     if tolerance.ndim != 1 or tolerance.size not in (1, count):
         msg = (
             f"'tolerance_db' must hold one value per frequency ({count}) or a "
@@ -673,7 +673,8 @@ class AdjustmentValue(OwnsArrays):
             is not positive, or the check frequency is not among the
             frequencies.
         :raises TypeError: if ``check_frequency_hz`` is not a single number, or
-            ``frequencies`` holds a text or a value that is not a real number.
+            ``frequencies`` or ``tolerance_db`` holds a text or a value that is not a
+            real number.
         """
         frequencies = _frequency_axis(self.frequencies)
         object.__setattr__(self, "frequencies", read_only(frequencies))
@@ -861,8 +862,8 @@ def adjustment_value(
         nowhere, or a check frequency that is not among the frequencies.
     :raises TypeError: if ``calibrator_indicated_level_before`` or ``calibrator_level``
         is not a single number, or ``free_field_indicated_level``, ``frequencies``,
-        ``incident_level`` or ``pressure_indicated_level`` holds a text or a value that
-        is not a real number.
+        ``incident_level``, ``pressure_indicated_level`` or ``tolerance_db`` holds a
+        text or a value that is not a real number.
     """
     frequencies = _frequency_axis(frequencies)
     count = frequencies.size
@@ -956,7 +957,7 @@ class FreeFieldCorrection(OwnsArrays):
         require_choice(self.source, "source", tuple(_SOURCES))
         frequencies = _frequency_axis(self.frequencies)
         object.__setattr__(self, "frequencies", read_only(frequencies))
-        corrections = np.array(self.corrections, dtype=np.float64, ndmin=2, copy=None)
+        corrections = np.atleast_2d(real_array(self.corrections, "corrections"))
         if corrections.ndim != _MATRIX_RANK or corrections.shape[1] != frequencies.size:
             msg = (
                 "FreeFieldCorrection: 'corrections' must hold one row per "
@@ -1197,8 +1198,10 @@ def sound_calibrator_correction(
         is not the number of frequencies, readings with different numbers of
         determinations, or microphones that are not one label per
         determination.
-    :raises TypeError: if ``frequencies`` or ``reference_free_field_correction`` holds a
-        text or a value that is not a real number.
+    :raises TypeError: if ``calibrator_level_difference``,
+        ``free_field_level_difference``, ``frequencies`` or
+        ``reference_free_field_correction`` holds a text or a value that is not a real
+        number.
     """
     return _substitution(
         frequencies,
@@ -1273,8 +1276,9 @@ def comparison_coupler_correction(
         row (Default: None, every determination a microphone of its own).
     :return: The :class:`FreeFieldCorrection`.
     :raises ValueError: as :func:`sound_calibrator_correction`.
-    :raises TypeError: if ``frequencies`` or ``reference_free_field_correction`` holds a
-        text or a value that is not a real number.
+    :raises TypeError: if ``coupler_level_difference``, ``free_field_level_difference``,
+        ``frequencies`` or ``reference_free_field_correction`` holds a text or a value
+        that is not a real number.
     """
     return _substitution(
         frequencies,
@@ -1356,9 +1360,10 @@ def electrostatic_actuator_correction(
     :raises ValueError: as :func:`sound_calibrator_correction`, or for an
         :math:`f_0` that is not among the frequencies.
     :raises TypeError: if ``check_frequency_hz`` is not a single number, or
-        ``frequencies``, ``reference_channel_gain_db`` or
-        ``reference_sensitivity_level`` holds a text or a value that is not a real
-        number.
+        ``actuator_level``, ``free_field_level_difference``, ``frequencies``,
+        ``reference_channel_gain_db``, ``reference_free_field_level``,
+        ``reference_sensitivity_level``, ``slm_actuator_level`` or
+        ``slm_free_field_level`` holds a text or a value that is not a real number.
     """
     frequencies = _frequency_axis(frequencies)
     count = frequencies.size
@@ -1791,7 +1796,7 @@ def correction_uncertainty_budget(
     weights = np.array(signs)
 
     def model(*components: float) -> float:
-        return offset + float(np.dot(weights, np.asarray(components, dtype=np.float64)))
+        return offset + float(np.dot(weights, real_array(components, "components")))
 
     result = uncertainty_propagation(model, quantities)
     return CorrectionUncertaintyBudget(

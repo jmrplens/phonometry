@@ -60,7 +60,7 @@ $\rho = 1.290 \, \frac{P}{101.325} \, \frac{273.15}{273.15 + T}$.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if any temperature is at or below -273.15 degC, or any pressure is not positive. |
-| TypeError | if `temperature_c` holds a text or a value that is not a real number. |
+| TypeError | if `static_pressure_kpa` or `temperature_c` holds a text or a value that is not a real number. |
 
 ## air_layer_transfer_matrix
 
@@ -292,7 +292,7 @@ $$
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `diameter_m`, `s1` or `s2` is not a single number, or `shape` is not a text. |
+| TypeError | if `diameter_m`, `s1` or `s2` is not a single number, or `shape` is not a text, or `frequencies` holds a text or a value that is not a real number. |
 
 ## transfer_matrix_two_load
 
@@ -347,7 +347,7 @@ $$
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `diameter_m`, `s1` or `s2` is not a single number, or `shape` is not a text. |
+| TypeError | if `diameter_m`, `s1` or `s2` is not a single number, or `shape` is not a text, or `frequencies` holds a text or a value that is not a real number. |
 
 ## TransferMatrix
 
@@ -503,6 +503,7 @@ Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `frequencies` or `characteristic_impedance` is neither supplied nor stored on the matrix. |
+| TypeError | if `frequencies` holds a text or a value that is not a real number. |
 
 ### TransferMatrix.plot_geometry()
 

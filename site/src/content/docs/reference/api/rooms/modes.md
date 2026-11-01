@@ -118,7 +118,7 @@ between adjacent eigenfrequencies.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `speed_of_sound` is not a single number. |
+| TypeError | if `speed_of_sound` is not a single number, or `dimensions` or `frequency` holds a text or a value that is not a real number. |
 
 ## room_mode_count
 
@@ -170,7 +170,7 @@ fit below `f`; the exact enumeration is [`room_modes`](/phonometry/reference/api
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `speed_of_sound` is not a single number. |
+| TypeError | if `speed_of_sound` is not a single number, or `dimensions` or `frequency` holds a text or a value that is not a real number. |
 
 ## room_mode_frequency
 
@@ -203,7 +203,7 @@ $$
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `speed_of_sound` is not a single number. |
+| TypeError | if `speed_of_sound` is not a single number, or `dimensions` or `orders` holds a text or a value that is not a real number. |
 
 ## room_modes
 
@@ -241,7 +241,7 @@ solution) is excluded.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `max_frequency` or `speed_of_sound` is not a single number. |
+| TypeError | if `max_frequency` or `speed_of_sound` is not a single number, or `dimensions` holds a text or a value that is not a real number. |
 
 ## RoomModesResult
 

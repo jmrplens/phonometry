@@ -82,6 +82,7 @@ import numpy as np
 
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
+    real_array,
     require_choice,
     require_finite_array,
     require_positive,
@@ -460,11 +461,12 @@ def sound_reflection_rating(
         ``lowest_band_hz`` up is not a finite non-negative number, the band is
         not positive or not one of the eighteen, or the weighted ratio is
         zero.
-    :raises TypeError: if ``lowest_band_hz`` is not a single number.
+    :raises TypeError: if ``lowest_band_hz`` is not a single number, or
+        ``reflection_indices`` holds a text or a value that is not a real number.
     :warns RoadDeviceWarning: If the weighted ratio exceeds the maximum of
         0,99 Clause 5.8 limits it to; a ratio of 0,99 itself is not limited.
     """
-    values = np.atleast_1d(np.asarray(reflection_indices, dtype=float))
+    values = np.atleast_1d(real_array(reflection_indices, "reflection_indices"))
     bands = np.asarray(TRAFFIC_NOISE_BANDS_HZ, dtype=float)
     if values.ndim != 1 or values.size != bands.size:
         msg = (

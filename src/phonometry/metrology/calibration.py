@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING, Literal, overload
 
 import numpy as np
 
+from .._internal.validation import real_array
 from .._internal.warnings import PhonometryWarning
 from ..io._resolve import SignalInput, resolve_optional_fs, resolve_samples
 from .reference_values import REFERENCE_VALUES
@@ -249,7 +250,7 @@ def _narrowband_tone_rms(signal_arr: np.ndarray, fs: float, frequency: float) ->
     spectral peak (parabolic interpolation) so calibrator frequency tolerance
     does not bias the estimate.
     """
-    x = np.asarray(signal_arr, dtype=np.float64)
+    x = real_array(signal_arr, "signal_arr")
     if x.ndim > 1:
         per_channel = [_narrowband_tone_rms(row, fs, frequency) for row in x]
         return float(np.sqrt(np.mean(np.square(per_channel))))

@@ -125,7 +125,7 @@ the name used here).
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an unknown FRF name, a non-positive frequency, or a zero *value* (dead channel) when the conversion involves a force-per-motion reciprocal. |
-| TypeError | if `source` or `target` is not a text. |
+| TypeError | if `source` or `target` is not a text, or `frequency` holds a text or a value that is not a real number. |
 
 ## FRF_UNITS
 
@@ -289,7 +289,7 @@ below 5 %: e.g. $\gamma^2 = 0.8$ needs about $n = 75$ spectra
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a coherence outside (0, 1] or `n_averages < 1`. |
-| TypeError | if `n_averages` is a flag, a text or an array where a count goes. |
+| TypeError | if `n_averages` is a flag, a text or an array where a count goes, or `coherence` holds a text or a value that is not a real number. |
 
 ## resonance_frequency
 
@@ -477,6 +477,12 @@ SDOF driving-point mobility bundled as a [`MobilityResult`](/phonometry/referenc
 
 **Returns:** The [`MobilityResult`](/phonometry/reference/api/vibration/mechanical-mobility/#mobilityresult) (driving point).
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `frequency` holds a text or a value that is not a real number. |
+
 ## sdof_receptance
 
 ```python
@@ -509,7 +515,7 @@ ISO 7626-1 (Table 1 / 3.1.2 definitions).
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `damping`, `mass` or `stiffness` is not a single number. |
+| TypeError | if `damping`, `mass` or `stiffness` is not a single number, or `frequency` holds a text or a value that is not a real number. |
 
 ## verify_rigid_mass_calibration
 
@@ -551,4 +557,4 @@ clause's and is not a parameter.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an unknown quantity, non-positive mass or frequency, or mismatched shapes. |
-| TypeError | if `mass` is not a single number, or `quantity` is not a text. |
+| TypeError | if `mass` is not a single number, or `quantity` is not a text, or `frequencies` holds a text or a value that is not a real number. |

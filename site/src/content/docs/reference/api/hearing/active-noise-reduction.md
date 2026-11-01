@@ -124,6 +124,7 @@ earmuffs commonly do above 1 kHz; it is kept as it is.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if neither form or both are given, if a grid has the wrong shape, fewer than two subjects or a value that is not finite, if the two level grids differ in shape, or if `frequencies` does not match. |
+| TypeError | if `active_levels`, `frequencies`, `insertion_loss` or `passive_levels` holds a text or a value that is not a real number. |
 
 ## ActiveInsertionLossResult
 
@@ -221,6 +222,7 @@ attenuation from 63 Hz then still places the 100 Hz band, by interpolation.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if the passive attenuation is not on the octave bands of ISO 4869-1, if the insertion loss does not reach the bands it needs, or if the two do not have the same number of subjects. |
+| TypeError | if `reat` holds a text or a value that is not a real number. |
 
 ## ANR_WITHIN_LABORATORY_UNCERTAINTY
 
@@ -397,3 +399,4 @@ and if it holds up to 110 dB, that is stated.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if the external levels are not 5 dB steps, if they pass 110 dB, if neither or both of the ear-level forms are given, or if the shapes do not match. |
+| TypeError | if `ear_levels`, `ear_third_octave_levels` or `external_levels` holds a text or a value that is not a real number. |

@@ -158,7 +158,7 @@ Four-pole matrix of a straight duct (Bies Eq. (8.143), no flow).
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `area`, `density`, `length` or `speed_of_sound` is not a single number. |
+| TypeError | if `area`, `density`, `length` or `speed_of_sound` is not a single number, or `frequencies` holds a text or a value that is not a real number. |
 
 ## expansion_chamber
 
@@ -197,7 +197,7 @@ Simple expansion-chamber silencer (Bies Eq. (8.111) / four-pole).
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `chamber_area`, `density`, `pipe_area` or `speed_of_sound` is not a single number. |
+| TypeError | if `chamber_area`, `density`, `pipe_area` or `speed_of_sound` is not a single number, or `frequencies` holds a text or a value that is not a real number. |
 
 ## extended_tube_chamber
 
@@ -259,7 +259,7 @@ limit of the cascade; extensions that would overlap are rejected.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `chamber_area`, `density`, `inlet_extension`, `length`, `outlet_extension`, `pipe_area` or `speed_of_sound` is not a single number. |
+| TypeError | if `chamber_area`, `density`, `inlet_extension`, `length`, `outlet_extension`, `pipe_area` or `speed_of_sound` is not a single number, or `frequencies` holds a text or a value that is not a real number. |
 
 ## helmholtz_impedance
 
@@ -305,7 +305,7 @@ its resistance instead, which is what bounds the peak attenuation.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `cavity_volume`, `density`, `neck_area`, `neck_length`, `resistance` or `speed_of_sound` is not a single number. |
+| TypeError | if `cavity_volume`, `density`, `neck_area`, `neck_length`, `resistance` or `speed_of_sound` is not a single number, or `frequencies` holds a text or a value that is not a real number. |
 
 ## helmholtz_resonator
 
@@ -348,7 +348,7 @@ Side-branch Helmholtz resonator on a duct (Bies Eqs. (8.144), (8.152)).
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `density`, `duct_area` or `speed_of_sound` is not a single number. |
+| TypeError | if `density`, `duct_area` or `speed_of_sound` is not a single number, or `frequencies` holds a text or a value that is not a real number. |
 
 ## insertion_loss
 
@@ -464,7 +464,7 @@ pressure node and shorts the duct.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `area`, `density`, `length` or `speed_of_sound` is not a single number. |
+| TypeError | if `area`, `density`, `length` or `speed_of_sound` is not a single number, or `frequencies` holds a text or a value that is not a real number. |
 
 ## quarter_wave_resonator
 
@@ -503,7 +503,7 @@ Closed quarter-wave side-branch tube on a duct (Bies Eqs. (8.144), (8.146)).
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `density`, `duct_area`, `length` or `speed_of_sound` is not a single number. |
+| TypeError | if `density`, `duct_area`, `length` or `speed_of_sound` is not a single number, or `frequencies` holds a text or a value that is not a real number. |
 
 ## ReactiveSilencerResult
 
@@ -703,7 +703,7 @@ invented (see `plot_geometry`).
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `density` or `speed_of_sound` is not a single number. |
+| TypeError | if `density` or `speed_of_sound` is not a single number, or `frequencies` holds a text or a value that is not a real number. |
 
 ### SilencerChain.duct()
 

@@ -48,8 +48,8 @@ import numpy as np
 
 from .._internal.frozen import OwnsArrays, read_only
 from .._internal.validation import (
-    _as_float64,
     check_engine,
+    real_array,
     refuse_text_beside_choice,
     require_axis_count,
     require_choice,
@@ -1059,14 +1059,14 @@ def _as_band_vector(
     points already require of their inputs: one NaN band poisons the upward
     spread of masking of every band above it, and the index, the title of the
     plot and its bar scaling all compute through it in silence. The values
-    are converted as :func:`_as_float64` converts, so a text among them is
+    are converted as :func:`real_array` converts, so a text among them is
     refused whatever it reads as (``["60"] * 18`` was parsed into the levels
     of ``[60.0] * 18``), and so are a complex value, whose imaginary part the
     conversion dropped, and an object that is no number, each by name.
     """
     proc = _PROCEDURES["one-third-octave"] if procedure is None else procedure
     expected = proc.band_importance.size
-    arr = np.atleast_1d(_as_float64(values, name))
+    arr = np.atleast_1d(real_array(values, name))
     if arr.ndim != 1 or arr.size != expected:
         # The nominal centre frequencies, not the band limits: for the
         # one-third-octave procedure the limits are the computed 2**(-+1/6) fi,
@@ -1181,11 +1181,11 @@ def speech_intelligibility_index(
     :return: An :class:`SIIResult` with the overall index and its ``.plot()``.
     :raises ValueError: if a spectrum has the wrong length or carries a
         non-finite value, or the method or effort name is unknown.
-    :raises TypeError: if ``method`` is not a text, ``speech_spectrum`` is
-        neither a vocal-effort name nor numbers (a ``bytes``, ``None``, a text
-        among the levels), or a spectrum, the threshold or the band
-        importance holds a text, a complex value or anything that is not a
-        number.
+    :raises TypeError: if ``method`` is not a text, ``speech_spectrum`` is neither a
+        vocal-effort name nor numbers (a ``bytes``, ``None``, a text among the levels),
+        or a spectrum, the threshold or the band importance holds a text, a complex
+        value or anything that is not a number, or ``band_importance`` or
+        ``noise_spectrum`` holds a text or a value that is not a real number.
     """
     require_choice(
         method,

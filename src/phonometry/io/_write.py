@@ -78,7 +78,12 @@ import numpy as np
 from scipy.io import wavfile
 
 from .._internal.json_input import escaped
-from .._internal.validation import require_choice, require_count, require_scalar
+from .._internal.validation import (
+    real_array,
+    require_choice,
+    require_count,
+    require_scalar,
+)
 from .._internal.warnings import PhonometryWarning
 from ._bext import (
     coding_history_line,
@@ -175,7 +180,7 @@ def _resolve_input(
         msg = "fs must be positive"
         raise ValueError(msg)
     if data.dtype not in _PASSTHROUGH_SUBTYPES:
-        data = np.asarray(data, dtype=np.float64)
+        data = real_array(data, "x")
     data = np.atleast_2d(data)
     # The number is a count of array axes, not a quantity.
     if data.ndim != 2:  # noqa: PLR2004
@@ -459,7 +464,7 @@ def _resolve_bext(
         require_choice(bext, "bext", ("loudness",))
         base = provenance if provenance is not None else fresh_metadata()
         if data.dtype.kind == "f":
-            full_scale = np.asarray(data, dtype=np.float64)
+            full_scale = real_array(data, "data")
         else:
             full_scale = data / float(2 ** (8 * data.dtype.itemsize - 1))
         meta = with_measured_loudness(base, full_scale, fs)
@@ -701,7 +706,9 @@ def _write_through_scipy(
         )
     else:
         _scipy_write(
-            path, rate, data if resolved == "DOUBLE" else data.astype(np.float32)
+            path,
+            rate,
+            data if resolved == "DOUBLE" else real_array(data, "x").astype(np.float32),
         )
 
 

@@ -74,6 +74,7 @@ from .._internal.frozen import OwnsArrays, read_only
 from .._internal.utils import _typesignal
 from .._internal.validation import (
     arrays_of,
+    real_array,
     refuse_text_beside_choice,
     require_choice,
     require_count,
@@ -193,8 +194,10 @@ class ImpulseResponseResult(OwnsArrays):
         Whatever sequence it was given as: a list kept as given would answer
         ``len``, indexing and ``np.asarray`` as the list does, and leave the
         frozen record open to an ``append``.
+
+        :raises TypeError: if ``ir`` holds a text or a value that is not a real number.
         """
-        ir = np.asarray(self.ir, dtype=np.float64)
+        ir = real_array(self.ir, "ir")
         object.__setattr__(self, "ir", read_only(ir))
 
     def __array__(

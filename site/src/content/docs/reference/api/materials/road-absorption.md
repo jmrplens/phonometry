@@ -177,6 +177,7 @@ raise a [`RoadAbsorptionWarning`](/phonometry/reference/api/materials/road-absor
 | Exception | When |
 | :--- | :--- |
 | ValueError | If any frequency is negative. |
+| TypeError | if `frequency` holds a text or a value that is not a real number. |
 
 ## DEFAULT_MICROPHONE_HEIGHT_M
 
@@ -369,7 +370,7 @@ in a plottable [`InSituAbsorptionResult`](/phonometry/reference/api/materials/ro
 | Exception | When |
 | :--- | :--- |
 | ValueError | On empty inputs, invalid geometry, or a non-positive `fs`. |
-| TypeError | if `fs` is not a single number. |
+| TypeError | if `fs` is not a single number, or `incident_ir` or `reflected_ir` holds a text or a value that is not a real number. |
 
 ## in_situ_reflection_factor
 
@@ -420,7 +421,7 @@ Annex C; the frequency-dependent form of Annex G).
 | Exception | When |
 | :--- | :--- |
 | ValueError | On empty inputs, invalid geometry, or `delay` given without `fs`. |
-| TypeError | if `fs` is not a single number. |
+| TypeError | if `fs` is not a single number, or `incident_ir` or `reflected_ir` holds a text or a value that is not a real number. |
 
 ## InSituAbsorptionResult
 
@@ -607,6 +608,7 @@ Clause 6.6 step 5); Part 1 does not mandate clipping, so pass
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `frequencies` and `absorption` differ in shape or are empty. |
+| TypeError | if `absorption` or `frequencies` holds a text or a value that is not a real number. |
 
 ## OneThirdOctaveAbsorption
 
@@ -738,6 +740,12 @@ independent of any reflected-path time offset.
 
 **Returns:** Sound-power reflection factor `QW(f)` (real).
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `incident_ir` or `reflected_ir` holds a text or a value that is not a real number. |
+
 ## reflected_path_delay
 
 ```python
@@ -825,6 +833,7 @@ one-third-octave results are set to zero when `clip_negative` is true
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the two inputs differ in shape. |
+| TypeError | if `measured_absorption` or `system_absorption` holds a text or a value that is not a real number. |
 
 ## spot_microphone_spacing_bounds
 

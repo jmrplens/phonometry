@@ -46,7 +46,12 @@ import numpy as np
 
 from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
-from ..._internal.validation import require_choice, require_ranks, require_same_length
+from ..._internal.validation import (
+    real_array,
+    require_choice,
+    require_ranks,
+    require_same_length,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -250,7 +255,7 @@ class AudiogramResult(OwnsArrays):
 def _frequency_khz(
     frequency_hz: ArrayLike,
 ) -> NDArray[np.float64]:
-    f = np.atleast_1d(np.asarray(frequency_hz, dtype=np.float64))
+    f = np.atleast_1d(real_array(frequency_hz, "frequency_hz"))
     if f.size == 0 or not np.all(np.isfinite(f)):
         msg = "'frequency_hz' must be finite and non-empty."
         raise ValueError(msg)
@@ -297,7 +302,8 @@ def group_audiogram(
     :param normalized: Use the normalised fit (0 dB at best sensitivity).
     :return: An :class:`AudiogramResult`.
     :raises ValueError: If the group is unknown or a frequency is invalid.
-    :raises TypeError: if ``group`` is not a text.
+    :raises TypeError: if ``group`` is not a text, or ``frequency_hz`` holds a text or a
+        value that is not a real number.
     """
     require_choice(group, "group", ("HF", "VHF", "SI", "PCW", "OCW", "PCA", "OCA"))
     params = audiogram_parameters(group, normalized=normalized)
@@ -338,6 +344,8 @@ def orca_audiogram(
         :data:`ORCA_AUDIOGRAM_RANGE_KHZ` scaled to hertz.
     :return: An :class:`AudiogramResult` in dB re 1 µPa.
     :raises ValueError: If a frequency falls outside the fitted range.
+    :raises TypeError: if ``frequency_hz`` holds a text or a value that is not a real
+        number.
     """
     f_khz = _frequency_khz(frequency_hz)
     lo, hi = ORCA_AUDIOGRAM_RANGE_KHZ

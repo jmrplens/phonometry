@@ -78,6 +78,7 @@ from ..._internal.boundary import settled
 from ..._internal.display import RichDisplay
 from ..._internal.validation import (
     check_engine,
+    real_array,
     require_equal_shapes,
     require_scalar,
 )
@@ -495,13 +496,14 @@ def static_airflow_resistance(
     :class:`AirflowResistanceWarning`.
 
     :raises TypeError: if ``area``, ``evaluation_velocity`` or ``thickness_m`` is not a
-        single number.
+        single number, or ``pressure_drops_pa`` or ``velocities`` holds a text or a
+        value that is not a real number.
     """
     require_scalar(area, "area")
     require_scalar(evaluation_velocity, "evaluation_velocity")
     require_scalar(thickness_m, "thickness_m")
-    u = np.asarray(velocities, dtype=np.float64)
-    dp = np.asarray(pressure_drops_pa, dtype=np.float64)
+    u = real_array(velocities, "velocities")
+    dp = real_array(pressure_drops_pa, "pressure_drops_pa")
     if u.ndim != 1 or dp.ndim != 1:
         msg = "'velocities' and 'pressure_drops_pa' must be 1-D."
         raise ValueError(msg)

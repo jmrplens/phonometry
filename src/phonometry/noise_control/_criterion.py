@@ -86,7 +86,7 @@ def as_band_spectrum(
     :return: The validated ``(n,)`` array.
     :raises ValueError: If the shape does not match or a value is not finite.
     :raises TypeError: If the values hold a complex number, a text or a
-        ``bytearray``.
+        ``bytearray``, or ``default`` is not a single number.
     """
     if value is None:
         require_scalar(default, "default")

@@ -774,6 +774,29 @@ def test_the_citation_group_figure_is_found_in_any_sentence() -> None:
     ]
 
 
+def test_a_count_wrapped_at_a_windows_line_end_is_found() -> None:
+    """A file is read with its line endings as they are on disk.
+
+    A checkout on Windows ends its lines with a carriage return and a line
+    feed, and the space between a count and its noun took only a line feed,
+    so a claim wrapped there passed the refusal and the release gate alike;
+    a blank line written that way did not end the sentence either.
+    """
+    text = (
+        f"The suite runs {TOTAL} conformance checks against {CITATION_GROUPS}\r\n"
+        "standards.\r\n"
+    )
+    phrase = f"{CITATION_GROUPS} standards"
+    assert ccc.figures_in(text, {CITATION_GROUPS}) == [(1, phrase)]
+    assert ccc.refused_in(text) == [(1, phrase, ccc.FORBIDDEN[0][1])]
+    apart = (
+        "### Conformance checks\r\n\r\n"
+        "The ISO 3740 series has 7 standards for the sound power of a machine\r\n"
+    )
+    assert ccc.refused_in(apart.replace("\r\n", "\n")) == []
+    assert ccc.refused_in(apart) == []
+
+
 #: The figure every surface gave as its count of standards up to 4.0.0rc1, the
 #: citation groups of the report of that day.
 RETIRED_FIGURE = 523

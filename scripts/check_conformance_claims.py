@@ -131,8 +131,11 @@ WRAPPED: tuple[tuple[re.Pattern[str], str], ...] = tuple(
 )
 
 #: White space within one paragraph: a line may wrap between a count and its
-#: noun, a blank line may not, since what follows it is another paragraph.
-_GAP = r"(?:[ \t]+|[ \t]*\n[ \t]*)"
+#: noun, a blank line may not, since what follows it is another paragraph. A
+#: file is read with its line endings as they are on disk (:func:`_read`), so
+#: a line may end in a carriage return before its line feed, as a checkout on
+#: Windows writes it.
+_GAP = r"(?:[ \t]+|[ \t]*\r?\n[ \t]*)"
 
 #: Words that say how the standards were counted, "N referenced standards",
 #: or what kind they are, "N published international standards". Read in any
@@ -200,9 +203,10 @@ _PLAIN_SPACES = dict.fromkeys(map(ord, _HARD_SPACES), " ")
 _ESCAPE = re.compile(r"&(?:nbsp|#\d+|#[xX][0-9a-fA-F]+);|\\u[0-9a-fA-F]{4}")
 
 #: Where a sentence ends: a full stop, a question or exclamation mark before
-#: white space, a blank line, or a paragraph tag of the HTML the Zenodo
+#: white space, a blank line (its line ends written either way, as
+#: :data:`_GAP` reads them), or a paragraph tag of the HTML the Zenodo
 #: description is written in.
-_SENTENCE_END = re.compile(r"[.!?](?=\s)|\n[ \t]*\n|</?p>")
+_SENTENCE_END = re.compile(r"[.!?](?=\s)|\n[ \t]*\r?\n|</?p>")
 
 #: Generated files the count rewriting leaves alone and the refusal reads, as
 #: paths and as ``(directory, glob)`` pairs: the report's own headline, the

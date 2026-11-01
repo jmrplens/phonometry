@@ -715,7 +715,9 @@ def real_array(x: ArrayLike, name: str, *, copy: bool = False) -> NDArray[np.flo
     :param copy: Give a new array even when *x* is a ``float64`` array
         already, as ``np.array`` does, for a caller that writes into what it
         reads.
-    :return: The numbers, as ``float64``, of the shape numpy gives them.
+    :return: The numbers, as a plain ``float64`` array of the shape numpy
+        gives them, whatever subclass of an array (a matrix, a masked array)
+        *x* is, as ``np.asarray`` reads one.
     :raises TypeError: for a complex value, a text in any form (a
         ``bytearray`` at any depth included), an element that is not a
         number, or a sequence nested more than 32 deep, as one that holds
@@ -724,7 +726,10 @@ def real_array(x: ArrayLike, name: str, *, copy: bool = False) -> NDArray[np.flo
     """
     if isinstance(x, np.ndarray) and x.dtype.kind in _REAL_KINDS:
         # An array of numbers holds no text, no complex number and no member.
-        return x.astype(np.float64, copy=copy)
+        # np.asarray reads a subclass (a matrix, a masked array) as the plain
+        # array of its values; astype would keep the subclass, whose ``**`` is
+        # a matrix power and whose reductions skip the masked values.
+        return np.asarray(x, dtype=np.float64, copy=True if copy else None)
     if type(x) in _PLAIN_REALS:
         return np.asarray(x, dtype=np.float64)
     array = _numbers_read(x, name)
@@ -769,15 +774,17 @@ def complex_array(
     :param name: The parameter's name, for the message.
     :param copy: Give a new array even when *x* is a ``complex128`` array
         already, for a caller that writes into what it reads.
-    :return: The numbers, as ``complex128``, of the shape numpy gives them.
+    :return: The numbers, as a plain ``complex128`` array of the shape numpy
+        gives them, whatever subclass of an array *x* is.
     :raises TypeError: for a text in any form (a ``bytearray`` at any depth
         included), an element that is not a number, or a sequence nested
         more than 32 deep, as one that holds itself is.
     :raises ValueError: for a ragged nesting, to which numpy gives no shape.
     """
     if isinstance(x, np.ndarray) and x.dtype.kind in _NUMBER_KINDS:
-        # An array of numbers holds no text and no member.
-        return x.astype(np.complex128, copy=copy)
+        # An array of numbers holds no text and no member; a subclass of one
+        # is read as the plain array of its values, as real_array reads it.
+        return np.asarray(x, dtype=np.complex128, copy=True if copy else None)
     if type(x) in _PLAIN_NUMBERS_OF_ANY_KIND:
         return np.asarray(x, dtype=np.complex128)
     array = _numbers_read(x, name)

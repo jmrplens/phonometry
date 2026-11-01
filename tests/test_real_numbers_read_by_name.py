@@ -15,6 +15,7 @@ at run time.
 
 from __future__ import annotations
 
+import dataclasses
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -150,6 +151,60 @@ def test_a_text_is_refused_naming_the_parameter(
     texts = given(numbers)
     with pytest.raises(TypeError, match=f"'{name}' must be numbers, not text"):
         call(texts)
+
+
+def _subclassed(numbers: list[float], kind: str) -> np.ndarray:
+    """The numbers as a matrix of one row, or as an array with its last masked."""
+    if kind == "matrix":
+        return np.matrix(numbers)
+    return np.ma.array(numbers, mask=[False] * (len(numbers) - 1) + [True])
+
+
+def _outcome(call: Callable[[object], object], given: object) -> object:
+    """What *call* gives back for *given*, or the refusal it raises, worded."""
+    try:
+        return call(given)
+    except (TypeError, ValueError) as exc:
+        return f"{type(exc).__name__}: {exc}"
+
+
+def _assert_same(got: object, expected: object) -> None:
+    """The same type and the same values, a record's field by field."""
+    assert type(got) is type(expected)
+    if dataclasses.is_dataclass(expected):
+        for field in dataclasses.fields(expected):
+            _assert_same(getattr(got, field.name), getattr(expected, field.name))
+        return
+    np.testing.assert_array_equal(got, expected)  # type: ignore[arg-type]
+
+
+@pytest.mark.parametrize(("label", "call", "numbers", "name"), _CALLS, ids=_IDS)
+@pytest.mark.parametrize("kind", ["matrix", "masked"])
+@pytest.mark.filterwarnings("ignore:the matrix subclass:PendingDeprecationWarning")
+def test_a_subclass_of_an_array_is_read_as_numpy_reads_it(
+    label: str,
+    call: Callable[[object], object],
+    numbers: list[float],
+    name: str,
+    kind: str,
+) -> None:
+    """The conversions the reader replaced read a matrix or a masked array as
+    the plain array of its values; so does the reader, so a matrix's ``**``
+    is no matrix power and a masked value is not skipped by a reduction.
+    """
+    del label, name
+    given = _subclassed(numbers, kind)
+    _assert_same(_outcome(call, given), _outcome(call, np.asarray(given)))
+
+
+@pytest.mark.filterwarnings("ignore:the matrix subclass:PendingDeprecationWarning")
+def test_a_matrix_of_mode_orders_is_read_as_the_array_of_them() -> None:
+    """Read as a matrix, the orders' ``** 2`` was a matrix power, refused for a
+    row of three; read as the array of them, the mode (1, 0, 0) of a 4 m room
+    lies at a speed of sound over 8 m.
+    """
+    got = room.room_mode_frequency(np.matrix([[1, 0, 0]]), [4.0, 5.0, 6.0])
+    _assert_same(got, room.room_mode_frequency(np.array([[1, 0, 0]]), [4.0, 5.0, 6.0]))
 
 
 def test_a_scale_mark_given_as_a_complex_number_is_not_rated() -> None:

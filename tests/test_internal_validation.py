@@ -868,6 +868,32 @@ def test_the_complex_reader_reads_numbers_of_every_kind() -> None:
         complex_array([[1.0], [1.0, 2.0]], "z")
 
 
+@pytest.mark.parametrize("reader", [real_array, complex_array], ids=["real", "complex"])
+@pytest.mark.filterwarnings("ignore:the matrix subclass:PendingDeprecationWarning")
+@pytest.mark.parametrize(
+    "build",
+    [
+        lambda: np.matrix([[1.0, 2.0]]),
+        lambda: np.matrix([[1, 2]]),
+        lambda: np.ma.array([1.0, 2.0], mask=[False, True]),
+    ],
+    ids=["matrix", "integer-matrix", "masked"],
+)
+def test_a_subclass_of_an_array_is_read_as_the_plain_array_of_its_values(
+    reader: Callable[..., np.ndarray], build: Callable[[], np.ndarray]
+) -> None:
+    """``astype`` keeps a subclass, whose ``**`` is a matrix power and whose
+    reductions skip the masked values; both readers give the plain array
+    ``np.asarray`` gives, a copy of it when one is asked for.
+    """
+    given = build()
+    for copy in (False, True):
+        read = reader(given, "x", copy=copy)
+        assert type(read) is np.ndarray
+        np.testing.assert_array_equal(read, np.asarray(given))
+    assert not np.shares_memory(reader(given, "x", copy=True), given)
+
+
 @pytest.mark.parametrize(
     "value",
     [np.complex128(2.0 + 1.0j), np.complex64(2.0), np.array(2.0j), 2.0 + 1.0j],

@@ -171,8 +171,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   the node raises `simulation.ComputeRemoteError`, which carries the node's
   traceback, or with `fallback=True` warns with `ComputeFallbackWarning` and
   runs on NumPy here. Warnings raised on the node are raised here with their
-  own class, or as a `RuntimeWarning` led by the class's path when that
-  class cannot be built here, and an interrupt stops the node's run.
+  own class, or, when that class cannot be built here, as the warning class
+  of Python's own it derives from (a library's `UserWarning` stays a
+  `UserWarning`), led by the class's path, and an interrupt stops the node's
+  run.
   `result.provenance.host` names the node and the new
   `result.provenance.package_sha256` the package that ran; progress goes to
   the `phonometry.simulation` logger, silent unless configured. `Compute`

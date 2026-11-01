@@ -468,10 +468,22 @@ def test_a_frame_that_is_no_job_is_refused() -> None:
         node.serve(job, frames)
 
 
+class _LibraryDeprecation(DeprecationWarning):
+    """A deprecation of a library the client may not have."""
+
+
+class _LibraryNotice(UserWarning, RuntimeWarning):
+    """A warning of a library the client may not have, of two built-in classes."""
+
+
 def _warns_and_returns(**arguments: object) -> tuple[object, None]:
     warnings.warn("device 'cupy' is absent", ComputeFallbackWarning, stacklevel=1)
     warnings.warn("overflow in a sum", RuntimeWarning, stacklevel=1)
     warnings.warn("overflow in a sum", RuntimeWarning, stacklevel=1)
+    # Recorded whatever Python's default filters say of a deprecation.
+    warnings.simplefilter("always")
+    warnings.warn("an old keyword", _LibraryDeprecation, stacklevel=1)
+    warnings.warn("two bases", _LibraryNotice, stacklevel=1)
     here = fdtd_simulation(_ACOUSTIC)
     return SimpleNamespace(
         pressures=here.pressures, snapshots=None, provenance=here.provenance
@@ -491,12 +503,29 @@ def test_the_warnings_of_a_run_travel_once_each_with_their_class(
     code, frames = _serve(_job("fdtd_simulation", {"run": _ACOUSTIC}))
     ((header, _),) = frames
     assert code == 0
+    # Each with the nearest warning class of Python's own its class derives
+    # from, which a client that does not have the class raises it as.
     assert header["warnings"] == [
         {
             "category": "phonometry.simulation.compute:ComputeFallbackWarning",
+            "base": "UserWarning",
             "message": "device 'cupy' is absent",
         },
-        {"category": "builtins:RuntimeWarning", "message": "overflow in a sum"},
+        {
+            "category": "builtins:RuntimeWarning",
+            "base": "RuntimeWarning",
+            "message": "overflow in a sum",
+        },
+        {
+            "category": f"{__name__}:_LibraryDeprecation",
+            "base": "DeprecationWarning",
+            "message": "an old keyword",
+        },
+        {
+            "category": f"{__name__}:_LibraryNotice",
+            "base": "UserWarning",
+            "message": "two bases",
+        },
     ]
 
 
@@ -527,7 +556,11 @@ def test_a_long_warning_travels_cut_to_the_length_of_an_error_message(
     ((header, _),) = frames
     assert code == 0
     assert header["warnings"] == [
-        {"category": "builtins:UserWarning", "message": "x" * bootstrap._MAX_MESSAGE}
+        {
+            "category": "builtins:UserWarning",
+            "base": "UserWarning",
+            "message": "x" * bootstrap._MAX_MESSAGE,
+        }
     ]
 
 

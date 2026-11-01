@@ -205,8 +205,23 @@ def _little_endian(array: NDArray[Any]) -> memoryview:
     return memoryview(little.reshape(-1).view(np.uint8))
 
 
+def _builtin_base(category: type[Warning]) -> str:
+    """The name of the nearest warning class of Python's own that *category* derives from.
+
+    A client that does not have *category* raises the warning as this one,
+    so that a filter on it, and Python's default filters, treat the warning
+    there as they would here: a ``UserWarning`` of a library stays a
+    ``UserWarning``, a ``DeprecationWarning`` a ``DeprecationWarning``.
+    """
+    return next(
+        klass.__name__
+        for klass in category.__mro__
+        if klass.__module__ == "builtins" and issubclass(klass, Warning)
+    )
+
+
 def _caught(records: Sequence[warnings.WarningMessage]) -> list[dict[str, str]]:
-    """The warnings a run raised, once each, as class path and message.
+    """The warnings a run raised, once each, as class path, built-in base and message.
 
     Each message is cut to the length an error frame carries, before two are
     compared: as many long messages as a result takes still fit its header.
@@ -215,6 +230,7 @@ def _caught(records: Sequence[warnings.WarningMessage]) -> list[dict[str, str]]:
     for record in records:
         item = {
             "category": f"{record.category.__module__}:{record.category.__qualname__}",
+            "base": _builtin_base(record.category),
             "message": str(record.message)[: bootstrap._MAX_MESSAGE],
         }
         if item not in seen:

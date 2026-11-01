@@ -312,8 +312,11 @@ Los avisos que lanza la ejecución en el nodo se lanzan aquí, en la línea de
 tu código que llamó a la función, con su propia clase: los de phonometry tal
 como se publican, y los de Python y NumPy como lo que son. Un aviso de una
 biblioteca que este proceso no ha importado, o de una clase que no se puede
-construir a partir de su mensaje, vuelve como un `RuntimeWarning` cuyo
-mensaje empieza por la ruta de la clase.
+construir a partir de su mensaje, vuelve como la clase de aviso propia de
+Python de la que deriva su clase, entre ellas `UserWarning`,
+`DeprecationWarning` y `RuntimeWarning`, con un mensaje que empieza por la
+ruta de la clase: un filtro sobre esa clase lo alcanza aquí como lo haría en
+el nodo.
 
 Una interrupción, Ctrl-C o el botón de parada de un cuaderno, detiene ssh en
 el acto y llega a tu código como `KeyboardInterrupt`, con `fallback=True` o

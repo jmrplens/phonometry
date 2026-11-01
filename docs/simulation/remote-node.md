@@ -282,7 +282,10 @@ Warnings the run raises on the node are raised here, at the line of your code
 that called the function, with their own class: phonometry's as published,
 Python's and NumPy's as themselves. A warning of a library this process has
 not imported, or of a class that cannot be built from its message, comes back
-as a `RuntimeWarning` whose message starts with the class's path.
+as the warning class of Python's own that its class derives from, a
+`UserWarning`, a `DeprecationWarning` or a `RuntimeWarning` among them, with a
+message that starts with the class's path: a filter on that class reaches it
+here as it would on the node.
 
 An interrupt, Ctrl-C or the stop button of a notebook, stops ssh at once and
 reaches your code as `KeyboardInterrupt`, `fallback=True` or not. The node

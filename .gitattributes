@@ -4,3 +4,24 @@
 # repository's.
 *.sh text eol=lf
 docker/node/Dockerfile text eol=lf
+
+# The files the sdist and the wheel are built from are checked out with the
+# bytes the commit holds, LF, whatever core.autocrlf or core.eol the cloner
+# has set: core.autocrlf=true writes CRLF on Linux and macOS too, and a
+# release rebuilt from such a clone would not give the bytes PyPI holds
+# (SECURITY.md, "Rebuilding a release"). setuptools packs README.md and the
+# top-level tests/test*.py beside the package by default. Under src/ git
+# still tells a binary file by its content, so a data file added there one
+# day is left as it is.
+/pyproject.toml text eol=lf
+/VERSION text eol=lf
+/LICENSE text eol=lf
+/README.md text eol=lf
+/README_PYPI.md text eol=lf
+/tests/test*.py text eol=lf
+/src/** text=auto eol=lf
+# The PyOctaveBand stub is built and published the same way, and the test
+# that holds stub/LICENSE to the project's LICENSE compares their bytes, so
+# its files are pinned too: a Windows checkout would otherwise give the copy
+# CRLF and leave the original LF.
+/stub/** text=auto eol=lf

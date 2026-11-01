@@ -2294,6 +2294,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **A record refuses a container that holds itself by the name of the field
+  wherever the container sits.** A field the class's own `__post_init__`
+  fills (`init=False`), an `InitVar` handed to it and a field a pickled or
+  deep-copied record brings back were refused with a `TypeError` that named
+  neither the record nor the field, and a list that held a column whose
+  `__array__` handed back an array of objects holding the list again ran
+  until Python stopped it with a `RecursionError`. Each is now the
+  `TypeError` an init field gives, `Record: 'name' holds a container that
+  holds itself`.
+
 - **The API reference and `help()` show no double hyphen where a sentence
   wanted a colon, and the `fluids` package says what it holds.** Docstrings
   spelt a dash as `--`, which `help()` prints as it is and the site published

@@ -681,15 +681,41 @@ def _holds_itself(kind: str) -> object:
         mapping: dict[str, object] = {}
         mapping["rows"] = [mapping]
         return mapping
+    if kind == "array-like-in-a-list":
+        # numpy reads the column as an array of objects that holds the list.
+        rows: list[object] = []
+        rows.append(_ColumnOf(rows))
+        return rows
     objects = np.empty(2, dtype=object)
     objects[0] = _writeable([1.0])
     objects[1] = objects
     return objects
 
 
+class _ColumnOf:
+    """A column whose ``__array__`` is an array of objects holding *held*."""
+
+    def __init__(self, held: object) -> None:
+        self._held = held
+
+    def __array__(
+        self, dtype: object = None, *, copy: bool | None = None
+    ) -> np.ndarray:
+        column = np.empty(1, dtype=object)
+        column[0] = self._held
+        return column
+
+
 @pytest.mark.parametrize(
     "kind",
-    ["list", "tuple-in-a-list", "mapping", "list-in-a-mapping", "array-of-objects"],
+    [
+        "list",
+        "tuple-in-a-list",
+        "mapping",
+        "list-in-a-mapping",
+        "array-like-in-a-list",
+        "array-of-objects",
+    ],
 )
 def test_a_field_that_holds_itself_is_refused_naming_the_field(kind: str) -> None:
     """A container that holds itself has no end to copy.
@@ -697,7 +723,10 @@ def test_a_field_that_holds_itself_is_refused_naming_the_field(kind: str) -> Non
     The copy went into every tuple, list, mapping and array of objects it
     met, with no bound, so a field that held itself took it on until
     Python's recursion limit raised a ``RecursionError`` that named no
-    field, before the record's own checks ran.
+    field, before the record's own checks ran. An object numpy reads as an
+    array is a way in too: the array of objects its ``__array__`` hands back
+    can hold the list the object sits in, and the walk that went into it
+    starting afresh met the list as new each time round.
     """
     endless = _holds_itself(kind)
     with pytest.raises(
@@ -706,11 +735,45 @@ def test_a_field_that_holds_itself_is_refused_naming_the_field(kind: str) -> Non
         _Plain(levels=endless)  # type: ignore[arg-type]
 
 
-def test_an_init_var_that_holds_itself_is_refused() -> None:
+def test_an_init_var_that_holds_itself_is_refused_naming_it() -> None:
     levels = _writeable([1.0, 2.0])
     endless = _holds_itself("list")
-    with pytest.raises(TypeError, match="holds itself"):
+    with pytest.raises(
+        TypeError,
+        match=r"_WithInitVar: 'offset_db' holds a container that holds itself",
+    ):
         _WithInitVar(levels=levels, offset_db=endless)  # type: ignore[arg-type]
+
+
+@dataclasses.dataclass(frozen=True)
+class _StoresALoop(OwnsArrays):
+    levels: np.ndarray
+    rows: list[object] = dataclasses.field(init=False)
+
+    def __post_init__(self) -> None:
+        # A field the hook fills, which only the last pass of the copy reads.
+        object.__setattr__(self, "rows", _holds_itself("list"))
+
+
+def test_a_field_the_hook_fills_with_a_loop_is_refused_naming_the_field() -> None:
+    """The pass after the hook reads every field, ``init=False`` ones too.
+
+    It called the copy without the name of the field, so the refusal of a
+    container that holds itself said only that a record holds none.
+    """
+    with pytest.raises(
+        TypeError, match=r"_StoresALoop: 'rows' holds a container that holds itself"
+    ):
+        _StoresALoop(levels=_writeable([1.0]))
+
+
+def test_a_restored_field_that_holds_itself_is_refused_naming_the_field() -> None:
+    """A pickled state is copied on its way back in, and refused by name too."""
+    record = _Plain(levels=_writeable([1.0]))
+    with pytest.raises(
+        TypeError, match=r"_Plain: 'levels' holds a container that holds itself"
+    ):
+        record.__setstate__({"levels": _holds_itself("list")})
 
 
 def test_a_container_held_twice_side_by_side_is_copied_as_any_other() -> None:

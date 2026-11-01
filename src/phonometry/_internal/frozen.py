@@ -33,6 +33,7 @@ from __future__ import annotations
 
 import dataclasses
 import functools
+import inspect
 import weakref
 from collections.abc import Buffer, Mapping
 from contextvars import ContextVar
@@ -299,9 +300,11 @@ def _owned(
     list that holds the mapping), has no end to copy, and the walk that
     followed it ran until Python's recursion limit stopped it: it is
     refused instead (:func:`_entered`), and :func:`_take_ownership` names
-    the field. *within* is the containers the walk is inside, by identity;
-    a container held twice side by side, not inside itself, is copied as
-    any other is.
+    the field. *within* is the containers the walk is inside, by identity,
+    and it goes on inside an object numpy reads as an array as well, since
+    the array of objects its ``__array__`` hands back can hold the list the
+    object sits in; a container held twice side by side, not inside itself,
+    is copied as any other is.
     """
     if type(value) in _PLAIN_TYPES:
         return value
@@ -314,7 +317,9 @@ def _owned(
     if isinstance(value, Mapping):
         return _owned_mapping(value, always=always, within=within)
     if _stands_for_an_array(value):
-        return _owned_array(np.asarray(value), always=True)
+        # The walk goes on inside what numpy read: the array of objects an
+        # ``__array__`` hands back can hold the container this one sits in.
+        return _owned_array(np.asarray(value), always=True, within=within)
     return value
 
 
@@ -572,11 +577,14 @@ def _take_ownership(
     ``np.asarray(self.levels)`` is that copy, and ``read_only`` on it
     touches nobody else's array. A ``bytearray`` is held as the ``bytes``
     it spells, which a refusal names as the caller gave it while the checks
-    run (:func:`given_type`), and a field that holds itself is refused,
-    named (:func:`_owned_field`). After,
+    run (:func:`given_type`), and a field or an argument of the hook that
+    holds itself is refused, named (:func:`_owned_field`,
+    :func:`_owned_arguments`). After,
     every field is looked at once more, and an array somebody can still
     write into, one the class built and stored without sealing it or one it
-    took from elsewhere, is copied too.
+    took from elsewhere, is copied too; a container that holds itself, one
+    the hook stored in a field of its own (``init=False``) included, is
+    refused there by the name of its field as well.
     """
     init, every = _field_names(type(record))
     # The bytes held for a caller's bytearray, known while the checks run.
@@ -589,29 +597,81 @@ def _take_ownership(
             if kept is not value:
                 object.__setattr__(record, name, kept)
         if hook is not None:
-            hook(record, *(_owned(arg, always=True) for arg in args))
+            hook(record, *_owned_arguments(record, hook, args))
     finally:
         _SPELT.reset(spelt)
     for name in every:
         value = getattr(record, name, _MISSING)
-        kept = _owned(value, always=False)
+        kept = _owned_field(record, name, value, always=False)
         if kept is not value:
             object.__setattr__(record, name, kept)
 
 
-def _owned_field(record: object, name: str, value: object) -> object:
-    """The init field *name* of *record* as :func:`_owned` holds it, refused by name.
+def _owned_field(
+    record: object, name: str, value: object, *, always: bool = True
+) -> object:
+    """The field *name* of *record* as :func:`_owned` holds it, refused by name.
+
+    An init field before the class's own ``__post_init__`` (*always*), and
+    every field after it, one the hook stored included, or as a pickled
+    state gives it back.
 
     :raises TypeError: if *value* holds itself, naming the field.
     """
     try:
-        return _owned(value, always=True)
+        return _owned(value, always=always)
     except _HoldsItself:
-        msg = (
-            f"{type(record).__name__}: '{name}' holds a container that holds "
-            "itself, which has no end to copy."
-        )
-        raise TypeError(msg) from None
+        raise _holds_itself(record, name) from None
+
+
+def _owned_arguments(
+    record: object, hook: Callable[..., None], args: tuple[object, ...]
+) -> tuple[object, ...]:
+    """The arguments of the class's own ``__post_init__`` as :func:`_owned` holds them.
+
+    Each is what the caller gave for an ``InitVar``, copied always, and one
+    that holds itself is refused by the name the hook gives it.
+
+    :raises TypeError: if an argument holds itself, naming it.
+    """
+    owned: list[object] = []
+    for index, value in enumerate(args):
+        try:
+            owned.append(_owned(value, always=True))
+        except _HoldsItself:
+            raise _holds_itself(record, _argument_name(hook, index)) from None
+    return tuple(owned)
+
+
+def _argument_name(hook: Callable[..., None], index: int) -> str:
+    """The name *hook* gives its argument at *index*, after the record itself.
+
+    Read from its signature only when a refusal needs it; a hook that takes
+    its arguments through ``*args`` names none, and the argument is named by
+    its place.
+    """
+    try:
+        parameters = list(inspect.signature(hook).parameters.values())[1:]
+    except (TypeError, ValueError):
+        parameters = []
+    positional = [
+        parameter.name
+        for parameter in parameters
+        if parameter.kind
+        in (inspect.Parameter.POSITIONAL_ONLY, inspect.Parameter.POSITIONAL_OR_KEYWORD)
+    ]
+    if index < len(positional):
+        return positional[index]
+    return f"argument {index + 1} of __post_init__"
+
+
+def _holds_itself(record: object, name: str) -> TypeError:
+    """The refusal of a field or an argument *name* of *record* that holds itself."""
+    msg = (
+        f"{type(record).__name__}: '{name}' holds a container that holds "
+        "itself, which has no end to copy."
+    )
+    return TypeError(msg)
 
 
 def _composed(hook: Callable[..., None]) -> Callable[..., None]:
@@ -704,7 +764,8 @@ class OwnsArrays(RichDisplay):
             if not isinstance(part, Mapping):
                 continue
             for name, value in part.items():
-                object.__setattr__(self, name, _owned(value, always=False))
+                kept = _owned_field(self, name, value, always=False)
+                object.__setattr__(self, name, kept)
 
 
 _COMPOSED.add(OwnsArrays.__post_init__)

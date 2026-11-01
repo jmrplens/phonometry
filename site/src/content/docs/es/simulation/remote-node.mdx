@@ -104,12 +104,16 @@ python = "venvs/node/bin/python"    # relativo al directorio personal de allí
 | `ssh` | el destino que toma `ssh`: `usuario@dirección`, o un alias `Host` de tu `~/.ssh/config` | obligatoria |
 | `runner` | cómo ejecuta el nodo un trabajo: `"docker"` o `"python"` | obligatoria |
 | `image` | en un nodo Docker, la imagen que hay en el nodo | obligatoria allí |
-| `python` | en un nodo Python, su intérprete: una ruta absoluta, o una relativa al directorio personal en el nodo | obligatoria allí |
+| `python` | en un nodo Python, su intérprete: una ruta absoluta, una ruta relativa al directorio personal en el nodo, o el nombre de un programa, como `python3`, que se busca en el `PATH` que ve la orden que ssh ejecuta allí | obligatoria allí |
 | `label` | cómo nombran el nodo los mensajes y el log | su nombre |
 | `timeout_s` | lo máximo que puede durar una ejecución allí, en segundos | sin límite |
 
 Un nombre lleva letras, dígitos, `.`, `_` y `-`, y empieza por una letra o un
-dígito. Una clave que la tabla no recoge, una `image` en un nodo Python o un
+dígito. Un nombre con un punto va entre comillas en la cabecera de su tabla,
+porque TOML lee un punto suelto como una tabla dentro de otra:
+`[hosts."nas.local"]` nombra el nodo `nas.local`, el que pide
+`Compute(host="nas.local")`, mientras que `[hosts.nas.local]` sería una tabla
+`local` dentro de un nodo `nas`. Una clave que la tabla no recoge, una `image` en un nodo Python o un
 `python` en uno Docker, o una ruta de `python` que empieza por `~` lanzan
 `ValueError` nombrando el fichero: el cliente entrecomilla la ruta en la
 orden que envía, así que el shell del nodo nunca expandiría la `~`. Un

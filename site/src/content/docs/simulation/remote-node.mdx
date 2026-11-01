@@ -95,12 +95,16 @@ python = "venvs/node/bin/python"    # relative to the home directory there
 | `ssh` | the destination `ssh` takes: `user@address`, or a `Host` alias of your `~/.ssh/config` | required |
 | `runner` | how the node runs a job: `"docker"` or `"python"` | required |
 | `image` | for a Docker node, the image on the node | required there |
-| `python` | for a Python node, its interpreter: an absolute path, or one relative to the home directory on the node | required there |
+| `python` | for a Python node, its interpreter: an absolute path, a path relative to the home directory on the node, or a program name such as `python3`, found on the `PATH` the command ssh runs there sees | required there |
 | `label` | how messages and the log name the node | its name |
 | `timeout_s` | the longest a run there may take, in seconds | no limit |
 
 A name holds letters, digits, `.`, `_` and `-`, and starts with a letter or a
-digit. A key the table does not list, an `image` for a Python node or a
+digit. A name with a dot goes in quotes in its table's header, because TOML
+reads a bare dot as a table inside another: `[hosts."nas.local"]` names the
+node `nas.local`, which `Compute(host="nas.local")` asks for, where
+`[hosts.nas.local]` would be a table `local` inside a node `nas`. A key the
+table does not list, an `image` for a Python node or a
 `python` for a Docker one, or a `python` path that starts with `~` raises
 `ValueError` naming the file: the client quotes the path in the command it
 sends, so the node's shell would never expand the `~`. A file saved with a

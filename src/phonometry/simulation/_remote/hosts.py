@@ -7,7 +7,8 @@ r"""The nodes a remote run can go to, named once in a hosts file (private).
     ssh = "root@192.168.0.40"      # what ssh takes: user@address or an alias of ~/.ssh/config
     runner = "docker"              # or "python"
     image = "phonometry-node:gpu"  # for runner = "docker"
-    # python = "/opt/venv/bin/python"  for runner = "python"
+    # python = "/opt/venv/bin/python"  for runner = "python": absolute, relative
+    #                                  to the home directory, or a name on PATH
     label = "RTX 4060 on the NAS"  # how messages name it (default: the name)
     timeout_s = 7200               # the longest a run there may take (default: no limit)
 
@@ -221,7 +222,8 @@ def _target(where: str, table: dict[str, object], runner: Runner) -> str:
         msg = (
             f"{where}: 'python' starts with '~', which the node does not expand; "
             "write the path absolute or relative to the home directory, where "
-            f"ssh runs the command, got {value!r}"
+            "ssh runs the command, or name a program the node finds on its "
+            f"PATH, got {value!r}"
         )
         raise ValueError(msg)
     return value

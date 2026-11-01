@@ -90,6 +90,38 @@ def test_a_python_node_keeps_its_interpreter_path_and_takes_its_name_as_label(
     )
 
 
+@pytest.mark.parametrize(
+    "interpreter", ["/opt/venv/bin/python", "venvs/node/bin/python", "python3"]
+)
+def test_a_python_node_takes_every_interpreter_the_guide_names(
+    hosts_at: Path, interpreter: str
+) -> None:
+    # An absolute path, one relative to the home directory where ssh runs
+    # the command, and a program name the node's shell finds on its PATH.
+    hosts_at.write_text(
+        _PYTHON.replace("/opt/conda envs/node/bin/python", interpreter),
+        encoding="utf-8",
+    )
+    assert hosts.load_host("lab").target == interpreter
+
+
+def test_a_dotted_name_is_read_from_a_quoted_header_and_a_bare_one_is_a_table(
+    hosts_at: Path,
+) -> None:
+    # TOML reads a bare dot in a header as a table inside another, as the
+    # guide says: the quoted header names the node "nas.local".
+    hosts_at.write_text(
+        _DOCKER.replace("[hosts.nas]", '[hosts."nas.local"]')
+        + _PYTHON.replace("[hosts.lab]", "[hosts.lab.local]"),
+        encoding="utf-8",
+    )
+    assert hosts.load_host("nas.local").ssh == "root@192.168.0.40"
+    with pytest.raises(ValueError, match=r"\[hosts\.lab\]: unknown key\(s\) \['local'\]"):
+        hosts.load_host("lab")
+    with pytest.raises(KeyError, match="no host 'lab.local'.*it names lab, nas.local"):
+        hosts.load_host("lab.local")
+
+
 def test_a_hosts_file_with_a_byte_order_mark_reads_normally(hosts_at: Path) -> None:
     hosts_at.write_bytes(b"\xef\xbb\xbf" + _DOCKER.encode("utf-8"))
     assert hosts.load_host("nas").ssh == "root@192.168.0.40"
@@ -196,7 +228,8 @@ def test_a_missing_file_is_a_missing_key_that_names_the_file(hosts_at: Path) -> 
         # The command quotes the path, so the node's shell never expands "~".
         pytest.param(
             _PYTHON.replace("/opt/conda envs", "~/conda envs"),
-            "'python' starts with '~'.*absolute or relative to the home directory",
+            "'python' starts with '~'.*absolute or relative to the home directory"
+            ".*or name a program the node finds on its PATH",
             id="python under a tilde",
         ),
         pytest.param(

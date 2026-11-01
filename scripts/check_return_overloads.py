@@ -79,14 +79,21 @@ import argparse
 import ast
 import builtins
 import copy
-import functools
 import pathlib
 import re
 import sys
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
-from ast_scan import ROOT, exempted, python_files, relative
+from ast_scan import (
+    ROOT,
+    binding_of,
+    exempted,
+    own_names,
+    python_files,
+    relative,
+    scope_nodes,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Iterator, Mapping, Sequence
@@ -492,6 +499,13 @@ class Function:
     owner: str | None
     implementation: ast.FunctionDef | ast.AsyncFunctionDef | None = None
     heads: list[ast.FunctionDef | ast.AsyncFunctionDef] = field(default_factory=list)
+    #: The definition of the function this one is written in, a class body
+    #: around it passed over, as Python passes it over; ``None`` at the top
+    #: of a module or of a class there.
+    parent: Function | None = None
+    #: The functions written in this one's body, by their names, each with
+    #: the key in :attr:`Package.functions` of every definition of it here.
+    nested: dict[str, list[str]] = field(default_factory=dict)
 
     @property
     def definitions(self) -> list[ast.FunctionDef | ast.AsyncFunctionDef]:
@@ -745,6 +759,15 @@ def _entries(node: ast.AST) -> list[tuple[str | None, ast.expr]]:
     return entries
 
 
+def _hidden_inside(function: Function, call: ast.AST, name: str) -> bool:
+    """Whether a lambda or a comprehension around *call*, inside *function*, binds *name*."""
+    node = function.implementation
+    if node is None:
+        return False
+    _how, binder = binding_of(node, call, name)
+    return binder is not None and binder is not node
+
+
 def _bound(node: ast.FunctionDef | ast.AsyncFunctionDef) -> frozenset[str]:
     """The names a function binds itself: its parameters, and what it assigns."""
     names = {
@@ -753,46 +776,6 @@ def _bound(node: ast.FunctionDef | ast.AsyncFunctionDef) -> frozenset[str]:
         if isinstance(child, ast.Name) and isinstance(child.ctx, ast.Store | ast.Del)
     }
     names.update(child.arg for child in ast.walk(node) if isinstance(child, ast.arg))
-    return frozenset(names)
-
-
-#: Nodes whose body is a scope of its own, whose names are not the function's.
-_INNER_SCOPES = (
-    ast.FunctionDef,
-    ast.AsyncFunctionDef,
-    ast.Lambda,
-    ast.ClassDef,
-    ast.ListComp,
-    ast.SetComp,
-    ast.DictComp,
-    ast.GeneratorExp,
-)
-
-
-@functools.lru_cache(maxsize=4096)
-def _bound_here(node: ast.FunctionDef | ast.AsyncFunctionDef) -> frozenset[str]:
-    """The names a function binds in its own scope: its parameters and what it
-    stores, not what a function, a class or a comprehension inside it binds.
-    """
-    arguments = node.args
-    names = {
-        argument.arg
-        for argument in (
-            *arguments.posonlyargs,
-            *arguments.args,
-            *arguments.kwonlyargs,
-            arguments.vararg,
-            arguments.kwarg,
-        )
-        if argument is not None
-    }
-    pending: list[ast.AST] = list(node.body)
-    while pending:
-        child = pending.pop()
-        if isinstance(child, ast.Name) and isinstance(child.ctx, ast.Store | ast.Del):
-            names.add(child.id)
-        if not isinstance(child, _INNER_SCOPES):
-            pending.extend(ast.iter_child_nodes(child))
     return frozenset(names)
 
 
@@ -821,8 +804,16 @@ class Package:
         #: definition in :attr:`functions`: the first under the name, each
         #: later one under the name and its place (``name#2``).
         self.variants: dict[str, list[str]] = {}
-        #: The imports a function makes in its own body.
+        #: The imports a function makes in its own scope, not in a function
+        #: written inside it.
         self.local_imports: dict[ast.AST, dict[str, str]] = {}
+        #: The imports a function makes anywhere in its body, the functions
+        #: written inside it included, for what its whole body asks of
+        #: matplotlib (:meth:`makes_polar`).
+        self.body_imports: dict[ast.AST, dict[str, str]] = {}
+        #: Each definition, its overload heads included, with the function it
+        #: is one definition of.
+        self.by_node: dict[ast.AST, Function] = {}
         for path in files:
             module = _module_name(path, root)
             self.paths[module] = relative(path)
@@ -960,34 +951,69 @@ class Package:
         body: Iterable[ast.stmt],
         scope: str,
         owner: str | None,
+        parent: Function | None = None,
     ) -> None:
         for node in _statements(body):
             if isinstance(node, ast.ClassDef):
                 inner = f"{scope}.{node.name}" if scope else node.name
-                self._read_body(module, package, node.body, inner, inner)
+                self._read_body(module, package, node.body, inner, inner, parent)
             elif isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef):
                 qualname = f"{scope}.{node.name}" if scope else node.name
-                dotted = f"{module}.{qualname}"
-                function = self.functions.setdefault(
-                    dotted, Function(module, qualname, owner)
+                function = self._read_definition(
+                    node, package, Function(module, qualname, owner, parent=parent)
                 )
-                if self.overload(module, node):
-                    function.heads.append(node)
-                elif function.implementation is None:
-                    function.implementation = node
-                else:
-                    self._another_definition(dotted, Function(module, qualname, owner))
-                    self.functions[self.variants[dotted][-1]].implementation = node
-                self.local_imports[node] = _imports(ast.walk(node), package, into={})
-                self._read_body(module, package, node.body, qualname, None)
+                self._read_body(module, package, node.body, qualname, None, function)
 
-    def _another_definition(self, dotted: str, function: Function) -> None:
+    def _read_definition(
+        self,
+        node: ast.FunctionDef | ast.AsyncFunctionDef,
+        package: str,
+        new: Function,
+    ) -> Function:
+        """Keep one definition, a head or an implementation, with the function
+        it belongs to (:meth:`_definition_of`), and what it imports; that
+        function.
+        """
+        key, function = self._definition_of(new)
+        if self.overload(new.module, node):
+            function.heads.append(node)
+        else:
+            function.implementation = node
+        self.by_node[node] = function
+        parent = new.parent
+        if parent is not None and key not in parent.nested.get(node.name, []):
+            parent.nested.setdefault(node.name, []).append(key)
+        self.local_imports[node] = _imports(scope_nodes(node), package, into={})
+        self.body_imports[node] = _imports(ast.walk(node), package, into={})
+        return function
+
+    def _definition_of(self, new: Function) -> tuple[str, Function]:
+        """The function a definition written as *new* belongs to, with its key.
+
+        The one being written, when it has no implementation yet and sits in
+        the same function: its overload heads come before it. Any other is a
+        definition of its own, written in another branch of an ``if`` or a
+        ``try``, or in another definition of the function around it, and is
+        kept beside the first (:meth:`_another_definition`), its heads with it.
+        """
+        dotted = f"{new.module}.{new.qualname}"
+        if dotted not in self.functions:
+            self.functions[dotted] = new
+            return dotted, new
+        key = self.every_definition(dotted)[-1]
+        current = self.functions[key]
+        if current.implementation is None and current.parent is new.parent:
+            return key, current
+        return self._another_definition(dotted, new), new
+
+    def _another_definition(self, dotted: str, function: Function) -> str:
         """Keep a later definition of *dotted*, written in another branch, as
-        a function of its own, so that each is read.
+        a function of its own, so that each is read; its key.
         """
         keys = self.variants.setdefault(dotted, [dotted])
         keys.append(f"{dotted}#{len(keys) + 1}")
         self.functions[keys[-1]] = function
+        return keys[-1]
 
     def every_definition(self, dotted: str) -> list[str]:
         """The key of every definition of *dotted* in :attr:`functions`."""
@@ -1168,77 +1194,132 @@ class Package:
     def call_target(self, function: Function, func: ast.expr) -> str | None:
         """The dotted name a call written in *function* reaches, if any.
 
+        For a function written in a function around the call, the key in
+        :attr:`functions` of its first definition there (:meth:`reached`
+        gives every one).
+        """
+        targets = self._targets(function, func)
+        return targets[0] if targets else None
+
+    def reached(
+        self, function: Function, func: ast.expr, call: ast.AST | None = None
+    ) -> list[str]:
+        """The key in :attr:`functions` of every definition a call can reach.
+
+        A function written in a function around the call is each of its
+        definitions there; one of a module is each definition of it in the
+        module, one in each branch of an ``if`` being either.
+        """
+        targets = self._targets(function, func, call)
+        if len(targets) == 1 and targets[0] in self.functions:
+            return list(self.every_definition(targets[0]))
+        return [target for target in targets if target in self.functions]
+
+    def _targets(
+        self, function: Function, func: ast.expr, call: ast.AST | None = None
+    ) -> tuple[str, ...]:
+        """What a call written in *function* reaches: one dotted name, or the
+        keys of the functions of a scope around it of the name it calls.
+
         A bare name, or the first name of a dotted one, is looked up as
-        Python looks it up: in the function, then in the functions around
-        it (a class body around it is skipped, as Python skips it), then in
-        the module. A scope that imports the name reads it through that
-        import; one that defines a function of that name reaches it; one
-        that binds the name otherwise, by a parameter or an assignment,
-        reaches no function of the package.
+        Python looks it up (:func:`ast_scan.own_names`): a lambda or a
+        comprehension around the call that binds it hides every function;
+        then the function itself and the functions around it, a class body
+        around them passed over, as Python passes it over, each read in the
+        definition the call is written in. A scope that imports the name
+        reads it through that import; one that defines a function of that
+        name reaches it; one that binds the name otherwise, by a parameter or
+        an assignment, or both defines and binds it, reaches no function of
+        the package; one that declares it ``global`` sends it to the module.
         """
         head = func
         while isinstance(head, ast.Attribute):
             head = head.value
         if not isinstance(head, ast.Name):
-            return None
-        for prefix, node in self._scopes_around(function):
-            local = self.local_imports.get(node, {})
-            if head.id in local:
-                return self.resolve(function.module, func, local)
-            nested = f"{function.module}.{prefix}.{head.id}"
-            if func is head and nested in self.functions:
-                return nested
-            if head.id in _bound_here(node):
-                return None
-        return self.resolve(function.module, func)
+            return ()
+        if call is not None and _hidden_inside(function, call, head.id):
+            return ()
+        for scope, node in self._scopes_around(function):
+            names = own_names(node)
+            if head.id in names.declared_global:
+                break
+            if names.binds(head.id):
+                return self._bound_in(scope, node, function.module, func, head)
+        resolved = self.resolve(function.module, func)
+        return (resolved,) if resolved is not None else ()
+
+    def _bound_in(
+        self,
+        scope: Function,
+        node: ast.FunctionDef | ast.AsyncFunctionDef,
+        module: str,
+        func: ast.expr,
+        head: ast.Name,
+    ) -> tuple[str, ...]:
+        """What a call reaches through a name the scope *node* binds itself.
+
+        Its import's target; the functions of the name it defines, for the
+        name called bare; nothing for any other binding.
+        """
+        how = own_names(node).how(head.id)
+        if how == "import":
+            resolved = self.resolve(module, func, self.local_imports.get(node, {}))
+            return (resolved,) if resolved is not None else ()
+        if how == "definition" and func is head:
+            return tuple(scope.nested.get(head.id, ()))
+        return ()
 
     def _scopes_around(
         self, function: Function
-    ) -> Iterator[tuple[str, ast.FunctionDef | ast.AsyncFunctionDef]]:
-        """*function* and the functions around it, innermost first, each with
-        its qualified name; a class body around it is skipped, as Python
-        skips it.
+    ) -> Iterator[tuple[Function, ast.FunctionDef | ast.AsyncFunctionDef]]:
+        """*function* and the definitions of the functions it is written in,
+        innermost first, each with its implementation.
         """
-        parts = function.qualname.split(".")
-        for end in range(len(parts), 0, -1):
-            prefix = ".".join(parts[:end])
-            scope = (
-                function
-                if end == len(parts)
-                else self.functions.get(f"{function.module}.{prefix}")
-            )
-            if scope is not None and scope.implementation is not None:
-                yield prefix, scope.implementation
+        scope: Function | None = function
+        while scope is not None:
+            if scope.implementation is not None:
+                yield scope, scope.implementation
+            scope = scope.parent
 
     def callees(self, function: Function) -> Iterator[str]:
-        """The functions of the package a function's implementation calls."""
+        """The functions of the package a function's implementation calls.
+
+        The calls of the functions written inside it too, each read in the
+        function it is written in.
+        """
         node = function.implementation
         if node is None:
             return
-        for call in ast.walk(node):
-            if not isinstance(call, ast.Call):
-                continue
-            target: str | None = None
-            func = call.func
-            if (
-                isinstance(func, ast.Attribute)
-                and isinstance(func.value, ast.Name)
-                and func.value.id in {"self", "cls"}
-                and function.owner is not None
-            ):
-                target = f"{function.module}.{function.owner}.{func.attr}"
-            else:
-                target = self.call_target(function, func)
-            if target is not None and target in self.functions:
-                # A name defined in each branch of an ``if`` may be either.
-                yield from self.every_definition(target)
+        pending: list[tuple[ast.AST, Function]] = [(node, function)]
+        while pending:
+            current, caller = pending.pop()
+            for child in ast.iter_child_nodes(current):
+                inner = self.by_node.get(child)
+                pending.append((child, inner if inner is not None else caller))
+            if isinstance(current, ast.Call):
+                yield from self._called(caller, current)
+
+    def _called(self, function: Function, call: ast.Call) -> list[str]:
+        """The functions of the package one call written in *function* reaches."""
+        func = call.func
+        if (
+            isinstance(func, ast.Attribute)
+            and isinstance(func.value, ast.Name)
+            and func.value.id in {"self", "cls"}
+            and function.owner is not None
+        ):
+            target = f"{function.module}.{function.owner}.{func.attr}"
+            return (
+                list(self.every_definition(target)) if target in self.functions else []
+            )
+        return self.reached(function, func, call)
 
     def makes_polar(self, function: Function) -> bool:
         """Whether a function's implementation makes a polar axes itself, or may."""
         node = function.implementation
         if node is None:
             return False
-        local = self.local_imports.get(node, {})
+        local = self.body_imports.get(node, {})
         bound = _bound(node) - set(local)
         return self._asks_polar(function.module, node, local, bound, frozenset())
 

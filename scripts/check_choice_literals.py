@@ -1554,9 +1554,15 @@ def code_evidence(
     is_target: Callable[[ast.expr], bool],
     constants: dict[str, ast.expr],
     *,
+    module_name: str,
     collection: bool = False,
 ) -> list[str]:
-    """What in *tree* treats the target as one of a fixed set of strings.
+    """What in *tree*, a function of *module_name*, treats the target as one
+    of a fixed set of strings.
+
+    A shared check counts by the function its name reaches in *tree* and its
+    module (:func:`_calls_a_validator`), never by the last part of its name:
+    ``registry.require_choice(mode, ...)`` says nothing of ``mode``.
 
     A *collection* of strings is one when what is left of it once a set of
     strings is taken away is refused (``set(sides) - set(SIDES)``), when it
@@ -1576,12 +1582,17 @@ def code_evidence(
                 tree,
                 lambda node: isinstance(node, ast.Name) and node.id in items,
                 constants,
+                module_name=module_name,
             )
         )
     for node in ast.walk(tree):
         if isinstance(node, ast.Call):
             name = _call_name(node)
-            if node.args and is_target(node.args[0]) and name in VALIDATORS:
+            if (
+                node.args
+                and is_target(node.args[0])
+                and _calls_a_validator(node, tree, module_name)
+            ):
                 found.append(f"{name}()")
             if (
                 name == "get"
@@ -1866,7 +1877,13 @@ def _checks_received(
         return True
     tree = _parsed(callee)
     return tree is not None and bool(
-        code_evidence(tree, _the_name(received), constants, collection=collection)
+        code_evidence(
+            tree,
+            _the_name(received),
+            constants,
+            module_name=callee.__module__,
+            collection=collection,
+        )
     )
 
 
@@ -2295,7 +2312,11 @@ def compared_in_module(
         found.extend(
             f"{evidence} in {function.name}()"
             for evidence in code_evidence(
-                function, is_field, constants, collection=collection
+                function,
+                is_field,
+                constants,
+                module_name=record.__module__,
+                collection=collection,
             )
         )
     return list(dict.fromkeys(found))
@@ -2318,7 +2339,11 @@ def _field_evidence(
     tree = _parsed(check) if check is not None else None
     if tree is not None:
         evidence = code_evidence(
-            tree, _field_of_self(name), constants, collection=collection
+            tree,
+            _field_of_self(name),
+            constants,
+            module_name=record.__module__,
+            collection=collection,
         )
         if evidence:
             return evidence
@@ -2382,7 +2407,11 @@ def string_choices() -> Iterator[Choice]:
             if collection or takes_any_string(read):
                 if tree is not None:
                     evidence = code_evidence(
-                        tree, _the_name(name), constants, collection=collection
+                        tree,
+                        _the_name(name),
+                        constants,
+                        module_name=getattr(obj, "__module__", home),
+                        collection=collection,
                     )
                 if not evidence:
                     evidence = passed_on_evidence(obj, name, collection=collection)
@@ -4772,6 +4801,8 @@ def _checks_of(
             continue
         inner: list[_Check] = []
         if field and _reads_own_field(node, callee, namespace):
+            # A method of the record reads the field itself back through
+            # ``self``: the value its annotation lists, as here.
             inner.extend(
                 _checks_of(
                     callee,
@@ -4782,6 +4813,7 @@ def _checks_of(
                     options=options,
                     part=part,
                     forms=forms,
+                    nontext=nontext,
                 )
             )
         record = _record_constructor(callee)

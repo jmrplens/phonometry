@@ -210,7 +210,7 @@ def _structure_borne_power_example() -> tuple[object, ReportMetadata, str]:
         operator="phonometry",
         report_id="EXAMPLE-15657",
         notes="Structure-borne sound power injected into the reception plate "
-        "(EN 15657:2018 reception-plate method, Formula 14).",
+        "(UNE-EN 15657:2018 reception-plate method, Formula 14).",
     )
     return result, metadata, "en15657_structure_borne_power_example.pdf"
 

@@ -599,7 +599,7 @@ in the same order.
   that line, which is the roll-off the standard itself flags with "up till
   about 1000 Hz". Re 1 pN the same cells would describe forces of tens of
   micronewtons, which no impact machine produces. **(c) The companion
-  standard.** EN 15657:2018 Formula (15), which is where the structure-borne
+  standard.** UNE-EN 15657:2018 Formula (15), which is where the structure-borne
   source data of Annex D comes from in the first place, writes the same
   force-to-power conversion "in dB re $F_0 = 10^{-6}$ N", and $10^{-6}$ N is
   the preferred reference force of ISO 1683.
@@ -1077,7 +1077,7 @@ in the same order.
   the sentence and the formula were read as images, not from extracted text.
   Verified on PDF page 14 (printed p. 14) and PDF page 15 (printed p. 15) of
   UNE-EN 15657:2018. Only the Spanish-language adoption was read, so this entry
-  does not establish whether the English EN 15657:2018 print carries the same
+  does not establish whether the English text of EN 15657:2017 carries the same
   reference.
 - **Library behaviour:** no change required. `characteristic_reception_plate_power`
   takes `mass_per_area` in $\text{kg/m}^2$ and reproduces the standard's own worked values,

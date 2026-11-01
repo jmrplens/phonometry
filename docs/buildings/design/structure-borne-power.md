@@ -4,7 +4,7 @@
 
 Building service equipment (pumps, fans, boilers, sanitary appliances)
 injects **structure-borne sound power** into the building structure it is fixed
-to, which then re-radiates as airborne noise in adjoining rooms. **EN 15657:2018**
+to, which then re-radiates as airborne noise in adjoining rooms. **UNE-EN 15657:2018**
 measures it with the **reception-plate method**: the source is mounted on a
 plate of known mass per unit area $m$ and area $S$ whose structural loss
 factor $\eta$ is known, and the plate's spatial-average vibratory velocity is
@@ -180,7 +180,7 @@ machinery; its equation (9) position average is `mean_free_velocity_level()`.
 
 A characterization ends as a *document*. `StructureBornePowerResult.report(path)`
 writes a one-page PDF fiche laid out like a sound-power test sheet: the
-standard-basis line naming the EN 15657:2018 reception-plate method (Formula
+standard-basis line naming the UNE-EN 15657:2018 reception-plate method (Formula
 14), an optional metadata header (client, source equipment, test environment,
 instrumentation, climate, date), a per-band table (nominal
 octave/one-third-octave frequency, the spatial mean plate velocity level $L_\mathrm{v}$
@@ -253,9 +253,10 @@ EN 15657 reception-plate characterization with the boxed total L_Ws.*
 
 ## Standards
 
-EN 15657:2018, *Acoustic properties of building elements and
-buildings — Laboratory measurement of structure-borne sound from building
-service equipment for all installation conditions*: the reception-plate method
+UNE-EN 15657:2018, the Spanish version of EN 15657:2017 (*Acoustic properties
+of building elements and buildings — Laboratory measurement of structure-borne
+sound from building service equipment for all installation conditions*), the
+copy the implementation was read from: the reception-plate method
 (clause 7), the spatial mean velocity level (Formula 12), the plate loss factor
 $\eta = 2.2/(f\,T_\mathrm{s})$ (Formula 13), the plate-injected power level $L_\mathrm{Ws}$
 (Formula 14) and the source-quantity chain: equivalent blocked force

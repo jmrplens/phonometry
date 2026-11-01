@@ -794,6 +794,17 @@ def test_a_standard_splits_into_designation_edition_and_clause() -> None:
     )
 
 
+def test_a_national_adoption_keeps_its_number_in_the_designation() -> None:
+    """UNE-EN 15657:2018 was read as the body "UNE-EN" with 15657 in the clause."""
+    document = _first("UNE-EN 15657:2018 Formula (14)")
+    assert document.kind is references.ReferenceKind.STANDARD
+    assert (document.designation, document.edition, document.clause) == (
+        "UNE-EN 15657",
+        "2018",
+        "Formula (14)",
+    )
+
+
 def test_a_book_edition_is_a_string_not_a_year() -> None:
     """An edition has to hold "2e" and "4th ed" as well as "2014"."""
     document = _first("Long, Architectural Acoustics 2e, Table 8.1")

@@ -639,7 +639,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
   debajo de esa recta, que es la caída que la propia norma señala con «up
   till about 1000 Hz». Re 1 pN, las mismas celdas describirían fuerzas de
   decenas de micronewtons, que ninguna máquina de impactos produce. **(c) La
-  norma compañera.** La Fórmula (15) de EN 15657:2018, que es de donde salen
+  norma compañera.** La Fórmula (15) de UNE-EN 15657:2018, que es de donde salen
   en primer lugar los datos de fuente estructural del Anexo D, escribe la
   misma conversión de fuerza a potencia «in dB re $F_0 = 10^{-6}$ N», y
   $10^{-6}$ N es la fuerza de referencia preferida de ISO 1683.
@@ -1159,8 +1159,8 @@ dos ediciones con las mismas entradas y en el mismo orden.
   que cierra; la frase y la fórmula se leyeron como imágenes, no desde el
   texto extraído. Verificado en la página 14 del PDF (p. 14 impresa) y la
   página 15 del PDF (p. 15 impresa) de UNE-EN 15657:2018. Solo se leyó la
-  adopción en español, así que esta entrada no establece si el impreso inglés
-  de EN 15657:2018 lleva la misma referencia.
+  adopción en español, así que esta entrada no establece si el texto inglés
+  de EN 15657:2017 lleva la misma referencia.
 - **Comportamiento de la biblioteca:** no hizo falta ningún cambio.
   `characteristic_reception_plate_power` toma `mass_per_area` en $\text{kg/m}^2$ y
   reproduce los propios valores resueltos de la norma, así que la lectura

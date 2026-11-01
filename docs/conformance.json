@@ -18686,14 +18686,14 @@
       "verdict": "pass"
     },
     {
-      "id": "room-building-acoustics/en-15657-2018-formula-14/reception-plate-l-ws-resonant-plate-power-p-ms-v-round-trip",
+      "id": "room-building-acoustics/une-en-15657-2018-formula-14/reception-plate-l-ws-resonant-plate-power-p-ms-v-round-trip",
       "domain": "room-building-acoustics",
       "reference": {
-        "cite": "EN 15657:2018 Formula (14)",
+        "cite": "UNE-EN 15657:2018 Formula (14)",
         "documents": [
           {
             "kind": "standard",
-            "designation": "EN 15657",
+            "designation": "UNE-EN 15657",
             "edition": "2018",
             "clause": "Formula (14)"
           }
@@ -18719,14 +18719,14 @@
       "verdict": "pass"
     },
     {
-      "id": "room-building-acoustics/en-15657-2018-formula-13/plate-loss-factor-2-2-f-ts-at-1-khz-ts-0-3-s",
+      "id": "room-building-acoustics/une-en-15657-2018-formula-13/plate-loss-factor-2-2-f-ts-at-1-khz-ts-0-3-s",
       "domain": "room-building-acoustics",
       "reference": {
-        "cite": "EN 15657:2018 Formula (13)",
+        "cite": "UNE-EN 15657:2018 Formula (13)",
         "documents": [
           {
             "kind": "standard",
-            "designation": "EN 15657",
+            "designation": "UNE-EN 15657",
             "edition": "2018",
             "clause": "Formula (13)"
           }
@@ -18751,14 +18751,14 @@
       "verdict": "pass"
     },
     {
-      "id": "room-building-acoustics/en-15657-2018-formulae-15-17-en-12354-5-annex-i-3/source-conversion-chain-reproduces-table-i-8-wall-installed",
+      "id": "room-building-acoustics/une-en-15657-2018-formulae-15-17-en-12354-5-annex-i-3/source-conversion-chain-reproduces-table-i-8-wall-installed",
       "domain": "room-building-acoustics",
       "reference": {
-        "cite": "EN 15657:2018 Formulae (15)/(17) + EN 12354-5 Annex I.3",
+        "cite": "UNE-EN 15657:2018 Formulae (15)/(17) + EN 12354-5 Annex I.3",
         "documents": [
           {
             "kind": "standard",
-            "designation": "EN 15657",
+            "designation": "UNE-EN 15657",
             "edition": "2018",
             "clause": "Formulae (15)/(17)"
           },

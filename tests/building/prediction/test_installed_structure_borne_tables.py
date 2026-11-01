@@ -318,7 +318,7 @@ def test_table_f1_is_referred_to_1e_6_newton_not_1_piconewton() -> None:
     harmonic carries an r.m.s. force of ``sqrt(2) m sqrt(2 g h) n``. Summing
     the harmonics that fall in each octave band reproduces the tabulated
     values to 0,5 dB from 31,5 Hz to 1 kHz **only** when the level is read re
-    1e-6 N, the reference force of ISO 1683 that EN 15657:2018 Formula (15)
+    1e-6 N, the reference force of ISO 1683 that UNE-EN 15657:2018 Formula (15)
     also uses. Read re the 1 pN printed in the caption of Table F.1 the same
     cells would be 120 dB away from the machine that produces them; see
     docs/ERRATA.md.

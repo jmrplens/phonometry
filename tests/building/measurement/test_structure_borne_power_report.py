@@ -101,7 +101,7 @@ def test_report_renders_oracle_values(tmp_path: Path) -> None:
     assert "125" in text
     assert "4000" in text
     # Basis prose and the plate parameters in the boxed result.
-    assert "EN 15657:2018" in text
+    assert "UNE-EN 15657:2018" in text
     assert "reception-plate method" in text
     assert "Octave-band structure-borne sound power levels" in text
     assert "25.0" in text  # plate mass per area m

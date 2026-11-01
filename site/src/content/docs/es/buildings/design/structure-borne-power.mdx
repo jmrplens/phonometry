@@ -1,6 +1,6 @@
 ---
 title: "Potencia acústica estructural de equipos (EN 15657)"
-description: "Método de placa receptora de EN 15657:2018: potencia inyectada L_Ws, fuerza bloqueada, potencia característica, y velocidad libre y movilidad de la fuente."
+description: "Método de placa receptora de UNE-EN 15657:2018: potencia inyectada L_Ws, fuerza bloqueada, potencia característica, velocidad libre y movilidad de la fuente."
 references:
   - type: book
     authors: ["Cremer, L.", "Heckl, M.", "Petersson, B. A. T."]
@@ -11,12 +11,12 @@ references:
     doi: "10.1007/b137728"
     note: "El balance de potencia de la placa y el marco de movilidades fuente-receptor que sustentan el método de placa receptora y sus magnitudes de fuente de las Fórmulas 15-19. ISBN 978-3-540-22696-3."
   - type: standard
-    organization: "European Committee for Standardization"
+    organization: "Asociación Española de Normalización"
     year: 2018
-    title: "Acoustic properties of building elements and of buildings — Laboratory measurement of structure-borne sound from building service equipment for all installation conditions"
-    designation: "EN 15657:2018"
+    title: "Propiedades acústicas de los elementos de construcción y de los edificios — Mediciones en laboratorio del ruido estructural de los equipos técnicos de los edificios para todas las condiciones de instalación"
+    designation: "UNE-EN 15657:2018"
     url: "https://www.une.org/encuentra-tu-norma/busca-tu-norma/norma?c=N0059781"
-    note: "El método de la placa receptora (apartado 7): el nivel de velocidad medio espacial (Fórmula 12), el factor de pérdida de la placa η = 2,2/(f·Ts) (Fórmula 13), el nivel de potencia inyectada en la placa L_Ws (Fórmula 14, niveles de velocidad de la placa referidos a v₀ = 10⁻⁹ m/s) y la cadena de magnitudes de fuente: fuerza bloqueada equivalente (Fórmula 15), nivel de potencia característico de placa receptora (Fórmula 17, Y_R,∞,baja = 5·10⁻⁶ m/(N·s)), velocidad libre equivalente (Fórmula 18) y movilidad de la fuente (Fórmula 19). La conformidad se ancla en el balance de potencia de la placa resonante P = ω·η·(m·S)·⟨v²⟩ (del cual la Fórmula 14 es el nivel), en la identidad del factor de pérdida y en la conversión de la fuente de la cisterna de la Tabla I.8 del Anexo I.3 de EN 12354-5. La ficha de catálogo enlazada es la página de UNE de UNE-EN 15657:2018."
+    note: "El método de la placa receptora (apartado 7): el nivel de velocidad medio espacial (Fórmula 12), el factor de pérdida de la placa η = 2,2/(f·Ts) (Fórmula 13), el nivel de potencia inyectada en la placa L_Ws (Fórmula 14, niveles de velocidad de la placa referidos a v₀ = 10⁻⁹ m/s) y la cadena de magnitudes de fuente: fuerza bloqueada equivalente (Fórmula 15), nivel de potencia característico de placa receptora (Fórmula 17, Y_R,∞,baja = 5·10⁻⁶ m/(N·s)), velocidad libre equivalente (Fórmula 18) y movilidad de la fuente (Fórmula 19). La conformidad se ancla en el balance de potencia de la placa resonante P = ω·η·(m·S)·⟨v²⟩ (del cual la Fórmula 14 es el nivel), en la identidad del factor de pérdida y en la conversión de la fuente de la cisterna de la Tabla I.8 del Anexo I.3 de EN 12354-5. Es la versión oficial en español de EN 15657:2017, y la copia de la que se leyó la implementación."
   - type: standard
     organization: "International Organization for Standardization"
     year: 1996
@@ -35,7 +35,7 @@ import ThemeImage from '../../../../../components/ThemeImage.astro';
 Los equipamientos del edificio (bombas, ventiladores, calderas, aparatos
 sanitarios) inyectan **potencia acústica estructural** en la estructura del
 edificio a la que están fijados, que luego se radia como ruido aéreo en los
-recintos contiguos. La **EN 15657:2018** la mide con el **método de la placa
+recintos contiguos. La **UNE-EN 15657:2018** la mide con el **método de la placa
 receptora**: la fuente se monta sobre una placa de masa por unidad de
 superficie $m$ y área $S$ conocidas, cuyo factor de pérdida estructural $\eta$
 se conoce, y se mide la velocidad vibratoria media espacial de la placa. La
@@ -456,7 +456,7 @@ Una caracterización termina como un *documento*. El
 `StructureBornePowerResult` expone un método `.report()` que escribe una ficha
 PDF de una página con el formato de una hoja de ensayo de potencia acústica: la
 línea de base normativa que nombra el método de la placa receptora de la
-EN 15657:2018 (Fórmula 14), una cabecera de metadatos opcional (cliente, equipo
+UNE-EN 15657:2018 (Fórmula 14), una cabecera de metadatos opcional (cliente, equipo
 fuente, entorno de ensayo, instrumentación, clima, fecha), una tabla por bandas
 (frecuencia nominal de octava/tercio de octava, el nivel de velocidad medio
 espacial de la placa $L_\mathrm{v}$ y el nivel de potencia acústica estructural inyectado
@@ -509,7 +509,7 @@ el repositorio; pulsa la vista previa para abrir el PDF.
 <ReportPreview
 	name="en15657_structure_borne_power_example"
 	title="Informe de ejemplo de potencia acústica estructural EN 15657 (PDF)"
-	description="Ficha de una página de potencia acústica estructural por el método de la placa receptora de la EN 15657:2018: una cabecera con el cliente, el equipo fuente, el banco de placa receptora y el acelerómetro y el clima, la tabla en bandas de octava (125 Hz a 4 kHz) de los niveles de velocidad medios de la placa Lv y los niveles de potencia acústica estructural inyectados L_Ws, el espectro L_Ws(f) con un eje de bandas nominal, y el total sumado en bandas L_Ws (dB re 1 pW) recuadrado con la masa por unidad de superficie de la placa m = 230 kg/m2 y el área S = 7,00 m2 de la placa de baja movilidad del apartado 7.2.2, cerrada por una franja de base con la relación de la Fórmula 14 y la conversión a las magnitudes de fuente independientes de la placa requerida antes de la EN 12354-5."
+	description="Ficha de una página de potencia acústica estructural por el método de la placa receptora de la UNE-EN 15657:2018: una cabecera con el cliente, el equipo fuente, el banco de placa receptora y el acelerómetro y el clima, la tabla en bandas de octava (125 Hz a 4 kHz) de los niveles de velocidad medios de la placa Lv y los niveles de potencia acústica estructural inyectados L_Ws, el espectro L_Ws(f) con un eje de bandas nominal, y el total sumado en bandas L_Ws (dB re 1 pW) recuadrado con la masa por unidad de superficie de la placa m = 230 kg/m2 y el área S = 7,00 m2 de la placa de baja movilidad del apartado 7.2.2, cerrada por una franja de base con la relación de la Fórmula 14 y la conversión a las magnitudes de fuente independientes de la placa requerida antes de la EN 12354-5."
 	caption="Ficha de potencia acústica estructural (StructureBornePowerResult.report), una caracterización por placa receptora EN 15657 con el total L_Ws recuadrado."
 />
 
@@ -517,7 +517,7 @@ el repositorio; pulsa la vista previa para abrir el PDF.
 
 <Scope>
 <ScopeClaim status="covered" label="Cubierto">
-El método de la placa receptora de la EN 15657:2018: el nivel de velocidad
+El método de la placa receptora de la UNE-EN 15657:2018: el nivel de velocidad
 medio espacial (`spatial_mean_velocity_level`, Fórmula 12), el factor de
 pérdida de la placa (`plate_loss_factor`, Fórmula 13) y el nivel de potencia
 inyectada en la placa (`reception_plate_power`, `structure_borne_power_level`,

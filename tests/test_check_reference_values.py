@@ -208,7 +208,7 @@ def test_iso_1683_itself_is_not_the_other_document(text: str) -> None:
     [
         "ISO 1683:1983",
         "DIN EN 21683",
-        "EN 15657:2018 clause 7.1; the 1 pW of ISO 1683:2015 Table 1",
+        "UNE-EN 15657:2018 clause 7.1; the 1 pW of ISO 1683:2015 Table 1",
     ],
 )
 def test_an_earlier_edition_or_another_standard_is(text: str) -> None:

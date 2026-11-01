@@ -31,7 +31,7 @@ Procedures* (4th ed., 2010):
   $b[\hat{G}_{xx}] \approx (B_\mathrm{e}^2/24) \, G''_{xx}$
   (Eq. 8.139), which for a resonance peak of half-power bandwidth
   $B_\mathrm{r}$
-  becomes $\varepsilon_\mathrm{b} \approx -(B_\mathrm{e}/B_\mathrm{r})^2/3$ (Eq. 8.141) -
+  becomes $\varepsilon_\mathrm{b} \approx -(B_\mathrm{e}/B_\mathrm{r})^2/3$ (Eq. 8.141),
   exposed here as
   [`resolution_bias_error`](/phonometry/reference/api/signals/spectra/#resolution_bias_error);
 * the **coherent output spectrum**

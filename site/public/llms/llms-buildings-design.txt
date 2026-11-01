@@ -2940,7 +2940,7 @@ EN 15657 reception-plate characterization with the boxed total L_Ws.*
 ## Standards
 
 UNE-EN 15657:2018, the Spanish version of EN 15657:2017 (*Acoustic properties
-of building elements and buildings — Laboratory measurement of structure-borne
+of building elements and of buildings — Laboratory measurement of structure-borne
 sound from building service equipment for all installation conditions*), the
 copy the implementation was read from: the reception-plate method
 (clause 7), the spatial mean velocity level (Formula 12), the plate loss factor

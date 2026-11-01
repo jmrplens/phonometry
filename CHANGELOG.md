@@ -2433,20 +2433,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   layout of `io` and the maximum uncertainties of `free_field_corrections`.
   `scripts/generate_api_docs.py` now publishes each as a table, a row whose
   first cell is blank continuing the row above it as docutils reads it, and a
-  run of `make api-docs` fails on a table it cannot read rather than publish
-  it as text.
+  run of `make api-docs` fails on a table it cannot read, one written under a
+  field such as `:param frequencies:` among them, rather than publish it as
+  text.
 - **Every domain package says what it holds.** Eighteen packages and
   `simulation` opened their docstring with a placeholder ("building domain of
   phonometry (see module docstrings).") that `help(phonometry.building)`
   printed as its first line. Each now opens with one sentence of 155
-  characters or fewer, and `make api-docs` fails on a module or package whose
-  lead is that placeholder.
-- **Docstring prose writes no hyphen as a dash.** A hundred lines of running
-  prose in 33 modules joined a clause with a spaced hyphen ("a construction
-  mistake - and the fiche would have printed it"), which reads as a minus; each
-  is now a comma, a colon, a semicolon or a parenthesis, and a frequency range
-  reads "500 Hz to 6000 Hz". The hyphens that are a minus (`32,3 - 26,3 dB`,
-  `T30/T20 - 1`) stay.
+  characters or fewer, on the first line of the docstring, where `help()` and
+  `pydoc` look for a summary, and `make api-docs` fails on a module or package
+  whose lead is that placeholder.
+- **Docstring prose writes no hyphen as a dash.** Running prose in 36 modules
+  joined a clause with a spaced hyphen on 128 lines ("is largest - the source
+  that dominates that band"), which reads as a minus; each is now a comma, a
+  colon, a semicolon or a parenthesis, and a frequency range reads "500 Hz to
+  6000 Hz" or "89.1 Hz to 11.2 kHz". The hyphens that are a minus
+  (`32,3 - 26,3 dB`, `T30/T20 - 1`) and an interval quoted as printed
+  ("+ 1 to - 5") stay.
 - **The structure-borne power method is cited as the document it was read
   in.** The code, the fiche, the guide, the glossary, the conformance report
   and the errata register cited "EN 15657:2018", an edition CEN never
@@ -2454,12 +2457,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   the Spanish version of EN 15657:2017, and each citation now names it.
 - **The determinism page says where the C library still enters a weighting
   design.** It said every transcendental but the logarithm runs once per
-  design; `exp` runs at every step of the fit and `pow` in every Lawson round,
-  and the page and the docstring of `_scalar_log` now say so, with the counts.
-- **Links that moved point where they land.** Seventeen links to the AES
-  e-library, the IEC webstore, SAE, VDI, the RFC Editor, stipa.info and the
-  OSI licence page answered with a permanent redirect, and the DIN 45692,
-  IEC 61260-2 and IEC 61260-3 catalogue links ended on a missing page; each
+  design; `exp` runs at every step of the fit and `pow`, to the power 1, in
+  every Lawson round, and the page and the docstring of `_scalar_log` now say
+  so, with the counts.
+- **Links that moved point where they land.** Twenty-one links answered with
+  a permanent redirect: seventeen in the docs, the site, the test data and the
+  package (the AES e-library, the IEC webstore, SAE, VDI, the RFC Editor,
+  stipa.info and the OSI licence page), the Codecov badge's link in the
+  README, the example address the documentation issue and discussion forms
+  offer, and the schema the CodeRabbit configuration names. The DIN 45692,
+  IEC 61260-2 and IEC 61260-3 catalogue links ended on a missing page. Each
   now names the page it reaches.
 
 - **The API reference and `help()` show no double hyphen where a sentence
@@ -11001,18 +11008,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   on the design path. The fit also
   batches each evaluation's logarithms into one call and reuses the normal
   equations' index pattern across steps, which is where the rest of the
-  recovery comes from; the transcendentals outside the iteration stay on the
-  `math` loop, where a design pays them once.
+  recovery comes from; the other transcendentals stay on the `math` loop,
+  most of them called once per design, while `exp` and `pow` run inside the
+  iteration too, on far fewer elements than the logarithm.
 
   On platforms whose C library is not glibc the byte-for-byte clause reads
   the other way round, and it is an improvement: Apple's and musl's `log`
   round a handful of inputs to the other neighbouring double, so the retired
   `math.log` loop silently returned different designs on macOS than on
   Linux. The pinned routine returns its own bits everywhere, so `log` no longer
-  separates the platforms. The handful of transcendentals a design still
-  takes from the C library once per design do: the three CI platforms design
-  three different byte strings for the same filter, measured and pinned per
-  platform in the test suite and written up in the determinism guide.
+  separates the platforms. The other transcendentals a design still takes
+  from the C library do, `exp` inside the iteration among them (the `pow` of
+  the Lawson rounds raises to the power 1, for which glibc returns its
+  argument unchanged): the three CI platforms design three different byte
+  strings for the same filter, measured and pinned per platform in the test
+  suite and written up in the determinism guide.
   Spelling those calls the way the logarithm is spelled is the remaining
   step.
 
@@ -15168,7 +15178,7 @@ the whole of the migration.
   render in English or Spanish (`language="es"`).
 - `StructureBornePowerResult.report()`: a one-page PDF structure-borne sound
   power characterization fiche for the power a piece of building service
-  equipment injects into a reception plate (UNE-EN 15657:2018 reception-plate
+  equipment injects into a reception plate (EN 15657:2018 reception-plate
   method, Formula 14), rendered through the shared sound-power report engine.
   The sheet carries the standard-basis line naming the reception-plate method,
   an optional metadata header (client, source equipment, test environment,
@@ -16623,7 +16633,7 @@ the whole of the migration.
   range included) and exposes the spectrum adaptation term CI,delta
   (ISO 717-2:2020 Formula (A.4)) as `ci_delta` /
   `impact_improvement_adaptation_term`.
-- UNE-EN 15657:2018 source-quantity chain: `equivalent_blocked_force_level`
+- EN 15657:2018 source-quantity chain: `equivalent_blocked_force_level`
   (Formula 15), `characteristic_reception_plate_power` (Formula 17,
   Y_R,inf,low = 5e-6 m/(N s)), `equivalent_free_velocity_level` (Formula 18)
   and `source_mobility_from_levels` (Formula 19), plus the EN 12354-5 Annex I

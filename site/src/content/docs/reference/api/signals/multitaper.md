@@ -22,9 +22,9 @@ one step further: the chi-square confidence interval keeps the form of
 Bendat & Piersol Eq. 8.163, but its degrees of freedom are
 per-frequency, because Thomson's adaptive weights (P&W Eq. 368a)
 downweight leakage-prone tapers wherever the spectrum is locally weak
-and that costs degrees of freedom there (P&W Eq. 370b). Calibration -
-no detrending, one-sided `'density'` scaling integrating to the signal
-power, `'spectrum'` scaling reading $A^2/2$ at a tone's peak -
+and that costs degrees of freedom there (P&W Eq. 370b). Calibration
+(no detrending, one-sided `'density'` scaling integrating to the signal
+power, `'spectrum'` scaling reading $A^2/2$ at a tone's peak)
 matches [`phonometry.signals.spectra`](/phonometry/reference/api/signals/spectra/) exactly, so the two estimators
 of the same record are directly comparable.
 
@@ -154,7 +154,7 @@ costs degrees of freedom there (P&W Eq. 370b).
 | `degrees_of_freedom` | Per-frequency equivalent chi-square degrees of freedom $\nu(f) = 2 \left( \sum_k d_k \right)^2 / \sum_k d_k^2$ with $d_k = b_k^2(f) \lambda_k$ (P&W Eq. 370b); $2K \left( \sum \lambda_k / K \right)^2 K / \sum \lambda_k^2 \approx 2K$ for unity weights. The DC bin (and the Nyquist bin for an even record length) carries half (a single real Fourier component per eigenspectrum). |
 | `random_error` | Per-frequency normalized random error $\varepsilon[\hat{S}^{(mt)}] = \sqrt{2/\nu}$ ($\approx 1/\sqrt{K}$), the multitaper counterpart of B&P Eq. 8.158. |
 | `weights` | Normalized combination weights $d_k(f) / \sum_j d_j(f)$, shape `(n_tapers, n_frequencies)`. Adaptive weighting makes them frequency dependent; they converge to $\approx 1/K$ where the spectrum is locally white (exactly uniform weights would be $\lambda_k / \sum \lambda_j$). |
-| `eigenvalues` | Concentration ratios $\lambda_k(N, W)$ of the tapers - the fraction of each taper's spectral-window energy inside the design band $[-W, W]$ (P&W Section 7.1; near unity for $k < 2NW$). |
+| `eigenvalues` | Concentration ratios $\lambda_k(N, W)$ of the tapers: the fraction of each taper's spectral-window energy inside the design band $[-W, W]$ (P&W Section 7.1; near unity for $k < 2NW$). |
 | `time_half_bandwidth` | The duration x half-bandwidth product `NW` (dimensionless; $W = NW/(N \Delta t)$). |
 | `n_tapers` | Number of tapers `K` averaged. |
 | `resolution_bandwidth` | The resolution bandwidth $2W$ of the estimator, in Hz, the multitaper analog of the Welch $B_\mathrm{e}$ (P&W call $2W$ *the* natural resolution measure of the method). |

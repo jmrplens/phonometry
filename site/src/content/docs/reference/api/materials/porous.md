@@ -596,7 +596,7 @@ membrane_impedance(
 
 Transfer impedance of a limp impervious membrane.
 
-$z = r + j \omega m$ - the surface-mass reactance (Cox & D'Antonio
+$z = r + j \omega m$: the surface-mass reactance (Cox & D'Antonio
 3e, Eq. (7.14); Bies 5e Eq. (D.96)) plus an optional empirical
 resistance for the internal/fixing losses.
 

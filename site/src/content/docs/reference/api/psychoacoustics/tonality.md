@@ -144,7 +144,7 @@ ToneAssessment.plot(
 
 Plot the assessed tone against the ECMA-418-1 prominence criterion.
 
-Draws the frequency-dependent criterion curve over the 89.1 Hz -
+Draws the frequency-dependent criterion curve over the 89.1 Hz to
 11.2 kHz range of interest with this tone at its own frequency and
 the margin to the criterion marked; a tone on or above the curve is
 prominent. The criterion family (tone-to-noise ratio, clause 11, or

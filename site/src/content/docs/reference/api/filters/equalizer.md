@@ -83,7 +83,7 @@ Frequency response of a parametric-EQ cascade (RBJ Audio EQ Cookbook).
 | `frequencies` | Evaluation frequencies, in Hz (log-spaced). |
 | `magnitude_db` | Cascade magnitude, in dB. |
 | `phase_rad` | Cascade phase, unwrapped, in radians. |
-| `section_magnitude_db` | Per-section magnitude, in dB, shape `(n_sections, n_frequencies)` - the cascade magnitude is their sum. |
+| `section_magnitude_db` | Per-section magnitude, in dB, shape `(n_sections, n_frequencies)`; the cascade magnitude is their sum. |
 | `sos` | The designed cascade, shape `(n_sections, 6)` (scipy SOS layout, normalized so every section's `a0` is 1). |
 | `fs` | Sample rate, in Hz. |
 | `sections` | The [`EQSection`](/phonometry/reference/api/filters/equalizer/#eqsection) specifications, in cascade order. |

@@ -563,9 +563,12 @@ def _scalar_log(values: np.ndarray) -> np.ndarray:
     :func:`math.log`'s own bits on every input the fit produces: verified
     over the 91 658 333 distinct values the whole corpus evaluates, zero
     mismatches, so the shipped coefficients, the figure corpus and the
-    conformance report are untouched by the switch. The transcendentals
-    outside the iteration stay on the :mod:`math` loop, where a design pays
-    them once.
+    conformance report are untouched by the switch. The other
+    transcendentals stay on the :mod:`math` loop. Most of them a design pays
+    once, but two run inside the iteration as well: ``exp`` of the fitted
+    parameters at every evaluation of the response, about ten thousand calls
+    a design, and ``**`` of the residual in every Lawson round, about two
+    thousand. Elementwise, that is a small fraction of the logarithm's cost.
 
     :param values: Any real array of positive values.
     :return: Its natural logarithm, elementwise, in the same shape.

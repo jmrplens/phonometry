@@ -8,8 +8,8 @@ byte, en cualquier máquina que comparta biblioteca C: cualquier CPU, con o
 sin AVX-512; cualquier juego de kernels BLAS; cualquier número de hilos;
 cualquier semilla de hash. Entre bibliotecas C todavía no: Linux, macOS y
 Windows diseñan cada uno sus propios bytes para el mismo filtro, porque un
-puñado de trascendentes sigue saliendo del `math` de la plataforma una vez
-por diseño, y esta página las nombra y mide lo que hacen. Dentro de una
+puñado de trascendentes sigue saliendo del `math` de la plataforma, y esta
+página las nombra y mide lo que hacen. Dentro de una
 plataforma, los coeficientes que diseña un portátil son los que diseña un
 clúster, así que un veredicto de conformidad, una figura publicada o un
 filtro embarcado en una cadena de medida es un artefacto reproducible y no
@@ -74,12 +74,17 @@ El camino de diseño determinista responde a cada puerta en su terreno, en
   el módulo complejo fusionan operaciones de forma distinta por CPU, así que
   los dos puntos donde el camino entregaba a numpy una expresión compleja
   están escritos en aritmética real.
-- **Trascendentes fijadas.** Fuera de la iteración, cada trascendente se
-  toma de la biblioteca C una vez por diseño. Esas pocas llamadas, un `exp`,
-  una `tan`, una `atan`, una `pow`, un par de `log10` y un par de `sin`,
-  son el único punto por el que la libm de la plataforma sigue entrando en
-  un diseño, y bastan para separar las plataformas: la evidencia de abajo
-  trae los tres digests. Deletrearlas en numpy fijado como está deletreado
+- **Trascendentes fijadas.** Toda trascendente salvo el logaritmo se toma
+  de la biblioteca C elemento a elemento, así que ningún kernel de CPU la
+  elige. Casi todas esas llamadas un diseño las paga una vez: una `atan` y
+  una `pow` por cada punto de la rejilla de frecuencias, tres `tan`, dos
+  `log10`, unos pocos `log` y dos `sin`. Dos corren también dentro de la
+  iteración, sobre muchos menos elementos que el logaritmo: `exp` de los
+  parámetros ajustados en cada evaluación de la respuesta, unas diez mil
+  llamadas por diseño, y `pow` del residuo en cada ronda de Lawson, unas
+  dos mil. Esas llamadas son el único punto por el que la libm de la
+  plataforma sigue entrando en un diseño, y bastan para separar las
+  plataformas: la evidencia de abajo trae los tres digests. Deletrearlas en numpy fijado como está deletreado
   el logaritmo es el paso que falta para un único digest en todas partes.
   Dentro de la iteración, el logaritmo corre
   tres cuartos de millón de veces por diseño, y el bucle que lo fijaba costó
@@ -119,8 +124,8 @@ corren en CI:
   kernels de OpenBLAS seleccionable, cada número de hilos y cada semilla de
   hash; las comparaciones entorno contra entorno están fijadas como tests.
 - **Cada plataforma sus bytes, medidos.** Con el logaritmo fijado, un diseño
-  ya no depende de qué `log` traiga la biblioteca C, pero las llamadas de una
-  vez por diseño sí, y bastan: la ponderación A a 48&nbsp;kHz da
+  ya no depende de qué `log` traiga la biblioteca C, pero las demás
+  trascendentes sí, y bastan: la ponderación A a 48&nbsp;kHz da
   `991833ff389afe91` en Linux (glibc, x86-64), `4efa1818bd80e23a` en macOS
   (arm64) y `79852a57e60961c8` en Windows (x86-64), el mismo valor con
   Python 3.13 y 3.14 en cada una. Los tres digests están fijados como test

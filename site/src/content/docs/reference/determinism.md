@@ -8,8 +8,7 @@ on every machine that shares a C library: any CPU, with or without AVX-512;
 any BLAS kernel set; any thread count; any hash seed. Across C libraries it
 is not, yet: Linux, macOS and Windows each design their own bytes for the
 same filter, because a handful of transcendentals still come from the
-platform's `math` once per design, and this page names them and measures
-what they do. On one platform the coefficients a laptop designs are the
+platform's `math`, and this page names them and measures what they do. On one platform the coefficients a laptop designs are the
 coefficients a cluster designs, so a conformance verdict, a published figure
 or a filter shipped inside a measurement chain is a reproducible artifact
 rather than one machine's account of itself.
@@ -68,13 +67,18 @@ The deterministic design path answers each door in kind, in
   and complex magnitude fuse operations differently per CPU, so the two
   places the path handed numpy a complex expression are written out in real
   arithmetic.
-- **Pinned transcendentals.** Outside the iteration, each transcendental is
-  taken from the C library once per design. Those few calls, an `exp`, a
-  `tan`, an `atan`, a `pow`, a `log10` or two and a `sin` or two, are the
-  one place a platform's libm still enters a design, and they are enough to
-  separate the platforms: the evidence below has the three digests.
-  Spelling them in pinned numpy the way the logarithm is spelled is the
-  remaining step to one digest everywhere. Inside the iteration, the
+- **Pinned transcendentals.** Every transcendental but the logarithm is
+  taken from the C library one element at a time, so no CPU's kernel
+  chooses it. Most of those calls a design pays once: an `atan` and a `pow`
+  for each point of the frequency grid, three `tan`, two `log10`, a few
+  `log` and two `sin`. Two run inside the iteration as well, on far fewer
+  elements than the logarithm: `exp` of the fitted parameters at every
+  evaluation of the response, about ten thousand calls a design, and `pow`
+  of the residual in every Lawson round, about two thousand. These calls
+  are the one place a platform's libm still enters a design, and they are
+  enough to separate the platforms: the evidence below has the three
+  digests. Spelling them in pinned numpy the way the logarithm is spelled
+  is the remaining step to one digest everywhere. Inside the iteration, the
   logarithm runs
   three quarters of a million times per design, and the loop that once pinned
   it cost a factor of four; it is now glibc's own table-driven `log`
@@ -111,7 +115,7 @@ run in CI:
   the environment-versus-environment comparisons are pinned as tests.
 - **Each platform its own bytes, measured.** With the logarithm pinned, a
   design no longer depends on which `log` the C library ships, but the
-  once-per-design calls still do, and they are enough: the A weighting at
+  other transcendentals still do, and they are enough: the A weighting at
   48&nbsp;kHz hashes to `991833ff389afe91` on Linux (glibc, x86-64),
   `4efa1818bd80e23a` on macOS (arm64) and `79852a57e60961c8` on Windows
   (x86-64), the same value under Python 3.13 and 3.14 on each. The three

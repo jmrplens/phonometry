@@ -558,8 +558,9 @@ def test_an_interrupt_once_the_answer_is_in_leaves_no_partial_file(
             raise KeyboardInterrupt
 
         monkeypatch.setattr(io_video, "settle", interrupted_settle)
+    request = Compute(host=node)
     with pytest.raises(KeyboardInterrupt):
-        write_fdtd_animation(target, _RUN, compute=Compute(host=node), frame=_FRAME)
+        write_fdtd_animation(target, _RUN, compute=request, frame=_FRAME)
     assert target.read_bytes() == b"the video that was there"
     assert _partials(tmp_path) == []
 

@@ -1018,8 +1018,9 @@ def test_a_node_s_warning_whose_base_is_no_builtin_warning_breaks_the_protocol(
     entry = {"category": "some.module.nobody.imported:Odd", "message": "strange"}
     if base is not None:
         entry["base"] = base
+    stdout = _result(caught=[entry])
     with pytest.raises(ComputeRemoteError, match=match):
-        _receive(_result(caught=[entry]))
+        _receive(stdout)
 
 
 # A video's own checks on the stream: the bytes its container begins with.

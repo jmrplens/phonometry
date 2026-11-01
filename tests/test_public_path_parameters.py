@@ -159,19 +159,23 @@ def test_a_refusal_names_a_path_of_another_library_by_its_path(
     monkeypatch.chdir(tmp_path)
     # A message printed the object's repr, and convert's left a caller's
     # control characters unescaped.
-    source = tmp_path / "a.wav"
-    io.write(source, io.Signal(np.zeros(48), 48000))
-    marked = tmp_path / "b\x1b[2J.mp3"
+    io.write(tmp_path / "a.wav", io.Signal(np.zeros(48), 48000))
+    source, marked = (
+        _Elsewhere(tmp_path / "a.wav"),
+        _Elsewhere(tmp_path / "b\x1b[2J.mp3"),
+    )
     with pytest.raises(ValueError, match="writing lossy formats") as lossy:
-        io.convert(_Elsewhere(source), _Elsewhere(marked))
+        io.convert(source, marked)
     assert str(lossy.value).startswith(f"{tmp_path}{os.sep}b\\x1b[2J.mp3: ")
+    unknown, silence = _Elsewhere(tmp_path / "z.xyz"), io.Signal(np.zeros(48), 48000)
     with pytest.raises(ValueError, match="unsupported target") as suffix:
-        io.write(_Elsewhere(tmp_path / "z.xyz"), io.Signal(np.zeros(48), 48000))
+        io.write(unknown, silence)
     assert str(suffix.value).startswith(f"{tmp_path}{os.sep}z.xyz: ")
+    elsewhere = _Elsewhere(tmp_path / "elsewhere")
     with pytest.raises(NotADirectoryError, match="is not a directory") as missing:
-        aircraft.load_anp_database(_Elsewhere(tmp_path / "elsewhere"))
+        aircraft.load_anp_database(elsewhere)
     assert f"'{tmp_path}{os.sep}elsewhere'" in str(missing.value)
     (tmp_path / "elsewhere").mkdir()
     with pytest.raises(FileNotFoundError, match="no .csv ANP tables") as empty:
-        aircraft.load_anp_database(_Elsewhere(tmp_path / "elsewhere"))
+        aircraft.load_anp_database(elsewhere)
     assert f"'{tmp_path}{os.sep}elsewhere'" in str(empty.value)

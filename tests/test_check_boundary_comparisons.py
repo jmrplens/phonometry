@@ -406,6 +406,68 @@ def test_a_private_helper_is_judged_by_what_its_callers_pass(
     assert _texts(raw_only, tmp_path) == []
 
 
+def test_a_helper_written_inside_a_block_is_followed(tmp_path: pathlib.Path) -> None:
+    """A helper defined inside an ``if``, a ``try`` or a ``with`` is the scope's own.
+
+    The calls were followed only to the functions directly in a module or a
+    function, so a helper written for one version or as a fallback was
+    reached by no call, and the difference it was handed never judged.
+    """
+    at_the_top = """
+    _LIMIT_DB = 10.0
+    if True:
+        def _exceeds(margin):
+            return margin > _LIMIT_DB
+    def public(signal, background):
+        return _exceeds(signal - background)
+    """
+    assert _texts(at_the_top, tmp_path) == ["margin > _LIMIT_DB"]
+    in_a_function = """
+    import contextlib
+    _LIMIT_DB = 10.0
+    def public(signal, background):
+        with contextlib.suppress(KeyError):
+            def _exceeds(margin):
+                return margin > _LIMIT_DB
+        return _exceeds(signal - background)
+    """
+    assert _texts(in_a_function, tmp_path) == ["margin > _LIMIT_DB"]
+
+
+@pytest.mark.parametrize(
+    "binding",
+    [
+        pytest.param("def public(signal, background, _exceeds):", id="a parameter"),
+        pytest.param(
+            "def public(signal, background):\n"
+            "        from math import isfinite as _exceeds",
+            id="an import",
+        ),
+        pytest.param(
+            "def public(signal, background):\n        _exceeds = print",
+            id="an assignment",
+        ),
+    ],
+)
+def test_a_name_the_caller_binds_itself_reaches_no_function_of_the_module(
+    binding: str, tmp_path: pathlib.Path
+) -> None:
+    """Python finds a name in the calling function before the module.
+
+    A call through a name the caller binds itself was followed to the
+    module's function of the same name, which was then judged by an
+    argument it is never handed.
+    """
+    source = f"""
+    _LIMIT_DB = 10.0
+    def _exceeds(margin):
+        return margin > _LIMIT_DB
+    {binding}
+        return _exceeds(signal - background)
+    """
+    assert _texts(source, tmp_path) == []
+
+
 def test_a_converting_helper_is_read_per_call(tmp_path: pathlib.Path) -> None:
     # Read once for all its callers, _as_float would make the reading look
     # computed because another caller passes it a difference.

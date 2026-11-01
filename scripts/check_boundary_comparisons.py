@@ -674,11 +674,9 @@ class Module:
             for target, value in _assignments(node):
                 self.module_names.setdefault(target, []).append(value)
         self.imports = _imported_names(self.tree, path)
-        self.top_functions = {
-            node.name: node
-            for node in self.tree.body
-            if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef)
-        }
+        # A function written inside an ``if``, a ``try`` or a ``with`` at the
+        # top of the module is the module's own as well.
+        self.top_functions = {node.name: node for node in _own_definitions(self.tree)}
         self.classes = {
             node.name: node
             for node in ast.walk(self.tree)
@@ -730,17 +728,24 @@ class Module:
     def resolve_function(
         self, call: ast.Call, scope: Function | None
     ) -> Function | None:
-        """The function of this file a call reaches, if it reaches one."""
+        """The function of this file a call reaches, if it reaches one.
+
+        A bare name is looked up as Python looks it up: among the functions
+        the calling function and those around it define (inside an ``if``,
+        a ``try`` or a ``with`` too), as far as the nearest of them that
+        binds the name otherwise, by a parameter, an import or an
+        assignment, which reaches no function of the module; then at the
+        top of the module.
+        """
         func = call.func
         if isinstance(func, ast.Name):
             current = scope
             while current is not None:
-                for node in ast.iter_child_nodes(current):
-                    if (
-                        isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef)
-                        and node.name == func.id
-                    ):
+                for node in _own_definitions(current):
+                    if node.name == func.id:
                         return node
+                if self.binds(current, func.id):
+                    return None
                 current = self.enclosing(current)
             return self.top_functions.get(func.id)
         if (
@@ -768,6 +773,27 @@ class Module:
                 owner = self.owner_class(scope)
                 if owner is not None:
                     self.constructions.setdefault(owner.name, []).append((node, scope))
+
+    def binds(self, function: Function, name: str) -> bool:
+        """Whether *function* binds *name* itself, otherwise than by a definition.
+
+        By a parameter, an import or any assignment of its own
+        (:meth:`local_bindings`): the name is then the function's, and a
+        function of the module that shares it is not the one it calls.
+        """
+        arguments = function.args
+        named = [*arguments.posonlyargs, *arguments.args, *arguments.kwonlyargs]
+        named.extend(each for each in (arguments.vararg, arguments.kwarg) if each)
+        if any(parameter.arg == name for parameter in named):
+            return True
+        if name in self.local_bindings(function):
+            return True
+        return any(
+            (alias.asname or alias.name.partition(".")[0]) == name
+            for node in _walk_own(function)
+            if isinstance(node, ast.Import | ast.ImportFrom)
+            for alias in node.names
+        )
 
     def local_bindings(
         self, function: Function
@@ -1472,6 +1498,20 @@ def _imported_names(
 
 #: Nodes that open a scope of their own, whose names are not the function's.
 _NESTED_SCOPES = (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef, ast.Lambda)
+
+
+def _own_definitions(scope: ast.AST) -> Iterator[Function]:
+    """The functions *scope* defines as its own, in the order of the source.
+
+    Those directly in its body and those written inside an ``if``, a
+    ``try``, a ``with`` or a loop in it, which open no scope of their own;
+    not those of a function or a class inside it.
+    """
+    for node in ast.iter_child_nodes(scope):
+        if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef):
+            yield node
+        elif not isinstance(node, _NESTED_SCOPES):
+            yield from _own_definitions(node)
 
 
 def _walk_own(function: Function) -> Iterator[ast.AST]:

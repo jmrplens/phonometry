@@ -4212,16 +4212,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   coefficient at 22.05 kHz, and the response by at most 0.0072 dB, at
   125 Hz (0.0033 dB at 44.1 kHz; 0.000012 dB at 48 kHz, where the digest
   moves from `08f94c9ff182cff1` to `eee92dba5dcc41f7`). The AU weighting
-  at 100 and 200 Hz moves by one or two units in the last place of six and
-  eight coefficients, because numpy's complex magnitude, one unit off the
-  correctly rounded one, had paired two zeros one unit in the last place
-  apart the other way round. Every design that moved stays within the
-  response the tests allow. `electroacoustics.weighting_bs468`, which
+  moves by up to two units in the last place of eight coefficients at
+  100 Hz and one unit of six at 200 Hz, because numpy's complex
+  magnitude, one unit off the correctly rounded one, had paired two zeros
+  one unit in the last place apart the other way round. Every design that
+  moved stays within the response the tests allow. `electroacoustics.weighting_bs468`, which
   evaluates the same prototype, moves by at most 4e-14 dB from 1 Hz to
   100 kHz. The design also takes the number of each prototype's zeros at the
   origin from the prototype, where it tested each zero against zero, and
-  the check against float equality in src refuses a cast to `bool`, which
-  on a float array is the same test.
+  the check against float equality in src refuses an `astype` to `bool` in
+  any spelling, which on a float array is the same test.
 
 - **`vibration.evaluate_train_passage`, `signals.resample_signal` handed a
   Signal and the EN 15610 Method B bank of `environment` run at a fractional

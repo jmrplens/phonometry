@@ -128,13 +128,17 @@ El camino de diseño determinista responde a cada puerta en su terreno, en
   más cercano a la de la raíz exacta, decidido por un certificado: un disco
   alrededor de cada aproximación que contiene, demostrablemente, una raíz y
   ninguna otra, y una extensión en cada coordenada que cae estrictamente
-  entre los puntos medios que rodean a un double. Las secciones de segundo
-  orden eran el `zpk2sos` de SciPy, que forma el polinomio de cada sección
-  con `numpy.convolve`, cuyos productos complejos van al BLAS, y empareja
-  polos con ceros por el módulo complejo propio de numpy, que no está
-  correctamente redondeado. Ahora está escrito paso a paso y rama a rama,
-  cada producto y cada suma redondeados una vez y cada módulo
-  correctamente redondeado.
+  entre los puntos medios que rodean a un double, o una coordenada que la
+  aritmética exacta muestra sobre uno de esos puntos medios, y que se
+  redondea al par. Las secciones de segundo orden eran el `zpk2sos` de
+  SciPy, que forma el polinomio de cada sección con `numpy.convolve`, cuyos
+  productos complejos van al BLAS, y empareja polos con ceros por el módulo
+  complejo propio de numpy, que no está correctamente redondeado. Ahora
+  está escrito paso a paso y rama a rama, cada producto y cada suma
+  redondeados una vez y cada módulo correctamente redondeado; de dos ceros
+  exactamente a la misma distancia de un polo toma el primero, como hace
+  una ordenación estable, donde la elección de SciPy pasa por la ordenación
+  por defecto de numpy, cuyo orden de empates depende del procesador.
 
 ## La evidencia
 
@@ -176,22 +180,24 @@ corren en CI:
   a 250, 400 y 500&nbsp;Hz y a 22,05&nbsp;kHz en casi la mitad del valor de
   un coeficiente pequeño, y la respuesta difiere como mucho
   0,0072&nbsp;dB, a 125&nbsp;Hz (0,0033&nbsp;dB a 44,1&nbsp;kHz,
-  0,000012&nbsp;dB a 48&nbsp;kHz). Movió la ponderación AU a 100 y
-  200&nbsp;Hz en una o dos unidades en el último lugar de seis u ocho
-  coeficientes, donde el módulo complejo de numpy, a una unidad del
-  correctamente redondeado, emparejaba al revés dos ceros separados por
-  una unidad en el último lugar. Los otros 112 diseños comprobados
-  conservan sus bytes, entre ellos la ponderación A a todas las
-  frecuencias, y todo diseño que se movió sigue dentro de las cotas de
+  0,000012&nbsp;dB a 48&nbsp;kHz). Movió la ponderación AU hasta dos
+  unidades en el último lugar de ocho coeficientes a 100&nbsp;Hz y una
+  unidad de seis a 200&nbsp;Hz, donde el módulo complejo de numpy, a una
+  unidad del correctamente redondeado, emparejaba al revés dos ceros
+  separados por una unidad en el último lugar. Los otros 112 diseños
+  comprobados conservan sus bytes, entre ellos la ponderación A a todas
+  las frecuencias, y todo diseño que se movió sigue dentro de las cotas de
   respuesta que sostienen los tests.
 - **Los polos, contra el valor exacto.** Los seis polos son las raíces que
   halla una biblioteca de precisión arbitraria, redondeadas parte a parte,
   y la batería de tests los sostiene en esos doubles. Contra esa misma
-  biblioteca a 3000 bits, el buscador de raíces devolvió el valor
-  correctamente redondeado de cada parte de cada raíz de 10&nbsp;600
-  polinomios aleatorios: 10&nbsp;200 copias de la red 468 con cada
-  componente movido hasta un 30&nbsp;%, 200 de coeficientes enteros hasta
-  grado diez y 200 cuyas raíces se reparten en dieciocho décadas. La
+  biblioteca a 3000 bits, el buscador de raíces tal como se publica
+  devolvió el valor correctamente redondeado de cada parte de cada raíz de
+  10&nbsp;600 polinomios aleatorios, cada uno en menos de medio segundo:
+  10&nbsp;200 copias de la red 468 con cada componente movido hasta un
+  30&nbsp;%, 200 de coeficientes enteros de grado dos a diez, cuatro de
+  ellos con una raíz en cero, y 200 cuyas raíces se reparten en dieciocho
+  décadas. La
   respuesta de numpy difiere de ellos entre 4 y 21 unidades en el último
   lugar del módulo de la raíz, como mucho un 3&nbsp;% del error que el
   solucionador de valores propios de LAPACK, estable hacia atrás, se

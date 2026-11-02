@@ -18,13 +18,16 @@ from __future__ import annotations
 import ast
 import hashlib
 import inspect
+import itertools
 import math
+import operator
 import os
 import subprocess
 import sys
 import textwrap
 import warnings
 from fractions import Fraction
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 import pytest
@@ -59,6 +62,9 @@ from phonometry.filters.weighting import (
     _cached_weighting_sos,
     _fit_band,
 )
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 #: Sample rates the accuracy table below is measured at: the two broadcast
 #: families (32/44.1/48 kHz), their doubles, and 192 kHz.
@@ -1108,29 +1114,63 @@ def _fused(a: float, b: float, c: float) -> float:
     return float(Fraction(a) * Fraction(b) + Fraction(c))
 
 
-def _fused_product(a: complex, b: complex) -> complex:
-    """numpy's complex product as clang contracts its loop into multiply-adds."""
+#: Each part of numpy's complex product as a compiler may leave it: unfused, or
+#: contracted into one multiply-add that keeps the named product exact and
+#: rounds the other first.
+_REAL_PARTS: dict[str, Callable[[complex, complex], float]] = {
+    "unfused": lambda a, b: a.real * b.real - a.imag * b.imag,
+    "a_r b_r": lambda a, b: _fused(a.real, b.real, -(a.imag * b.imag)),
+    "a_i b_i": lambda a, b: _fused(-a.imag, b.imag, a.real * b.real),
+}
+_IMAGINARY_PARTS: dict[str, Callable[[complex, complex], float]] = {
+    "unfused": lambda a, b: a.real * b.imag + a.imag * b.real,
+    "a_r b_i": lambda a, b: _fused(a.real, b.imag, a.imag * b.real),
+    "a_i b_r": lambda a, b: _fused(a.imag, b.real, a.real * b.imag),
+}
+
+#: The three sums of numpy's complex quotient (Smith's algorithm) a compiler
+#: may contract: the denominator's, and the real and imaginary numerators'.
+_QUOTIENT_SITES = frozenset({"denominator", "real", "imaginary"})
+
+
+def _contracted_product(
+    real: str, imaginary: str
+) -> Callable[[complex, complex], complex]:
+    """numpy's complex product with each part as :data:`_REAL_PARTS` names it."""
+    real_part, imaginary_part = _REAL_PARTS[real], _IMAGINARY_PARTS[imaginary]
+    return lambda a, b: complex(real_part(a, b), imaginary_part(a, b))
+
+
+def _contracted_quotient(a: complex, b: complex, fused: frozenset[str]) -> complex:
+    """numpy's complex quotient, with the sums named in ``fused`` contracted."""
+
+    def multiply_add(x: float, y: float, z: float, site: str) -> float:
+        return _fused(x, y, z) if site in fused else x * y + z
+
+    if math.fabs(b.real) >= math.fabs(b.imag):
+        ratio = b.imag / b.real
+        scale = 1.0 / multiply_add(b.imag, ratio, b.real, "denominator")
+        return complex(
+            multiply_add(a.imag, ratio, a.real, "real") * scale,
+            multiply_add(-a.real, ratio, a.imag, "imaginary") * scale,
+        )
+    ratio = b.real / b.imag
+    scale = 1.0 / multiply_add(b.real, ratio, b.imag, "denominator")
     return complex(
-        _fused(a.real, b.real, -(a.imag * b.imag)),
-        _fused(a.real, b.imag, a.imag * b.real),
+        multiply_add(a.real, ratio, a.imag, "real") * scale,
+        multiply_add(a.imag, ratio, -a.real, "imaginary") * scale,
     )
+
+
+#: numpy's complex product as the macOS build contracts it, every part fused.
+#: The Windows build fuses the real part the same way, which is the part the
+#: A weighting at 48 kHz moved by, so both reported the same digest.
+_fused_product = _contracted_product("a_r b_r", "a_r b_i")
 
 
 def _fused_quotient(a: complex, b: complex) -> complex:
-    """numpy's complex quotient, Smith's algorithm, as clang contracts it."""
-    if math.fabs(b.real) >= math.fabs(b.imag):
-        ratio = b.imag / b.real
-        scale = 1.0 / _fused(b.imag, ratio, b.real)
-        return complex(
-            _fused(a.imag, ratio, a.real) * scale,
-            _fused(-a.real, ratio, a.imag) * scale,
-        )
-    ratio = b.real / b.imag
-    scale = 1.0 / _fused(b.real, ratio, b.imag)
-    return complex(
-        _fused(a.real, ratio, a.imag) * scale,
-        _fused(a.imag, ratio, -a.real) * scale,
-    )
+    """numpy's complex quotient, Smith's algorithm, every sum contracted."""
+    return _contracted_quotient(a, b, _QUOTIENT_SITES)
 
 
 def _fused_prod(values: object, *args: object, **kwargs: object) -> object:
@@ -1224,40 +1264,166 @@ _TRANSFORM_CASES = (
 )
 
 
-#: Two complex numbers whose product numpy's loop rounds differently when it
-#: is fused: the probe for whether this numpy is the GCC build.
-_FUSION_PROBE = (
-    complex(
-        float.fromhex("-0x1.815e82fe01948p-1"), float.fromhex("-0x1.3a0e0ba218790p-2")
-    ),
-    complex(
-        float.fromhex("0x1.4f9144cd17b9ap+0"), float.fromhex("-0x1.73eb9b3be35c8p-2")
-    ),
+#: Pairs of complex numbers drawn once, of both signs and up to a few units in
+#: each part. A compiler that contracts a part of the product or a sum of the
+#: quotient into a multiply-add may keep either product exact, and one pair
+#: can round alike under one of those choices: the single pair this probe
+#: used to rest on parted from the unfused product only in its imaginary
+#: part, and only when ``a_r b_i`` is the product kept, as the macOS build
+#: keeps it and the Windows build does not, so on Windows it found nothing
+#: and the comparison with SciPy ran on a fused numpy and failed.
+_FUSION_PROBES: tuple[tuple[complex, complex], ...] = tuple(
+    (complex(a_r, a_i), complex(b_r, b_i))
+    for a_r, a_i, b_r, b_i in np.random.default_rng(1053)
+    .uniform(-4.0, 4.0, (64, 4))
+    .tolist()
 )
 
 
-def _numpy_fuses_complex_products() -> bool:
-    """Whether this numpy's complex product rounds as a fused multiply-add would."""
-    a, b = _FUSION_PROBE
-    unfused = complex(
-        a.real * b.real - a.imag * b.imag, a.real * b.imag + a.imag * b.real
-    )
-    return complex(_UNFUSED_PROD(np.array([a, b]))) != unfused
+def _unfused_product(a: complex, b: complex) -> complex:
+    """numpy's complex product, each operation of Python floats rounded once."""
+    return complex(a.real * b.real - a.imag * b.imag, a.real * b.imag + a.imag * b.real)
 
 
-def test_the_fusion_probe_tells_the_two_roundings_apart() -> None:
-    """The probe pair is one whose fused and unfused products differ."""
-    a, b = _FUSION_PROBE
-    unfused = complex(
-        a.real * b.real - a.imag * b.imag, a.real * b.imag + a.imag * b.real
+def _numpy_fuses_complex_arithmetic(
+    prod: Callable[[np.ndarray], Any] = np.prod,
+    divide: Callable[[Any, Any], Any] = operator.truediv,
+) -> bool:
+    """Whether numpy rounds a complex product or quotient otherwise than step by step.
+
+    SciPy's ``bilinear_zpk`` forms its gain through ``numpy.prod`` and the
+    quotient of two numpy scalars, and maps the roots through the quotient of
+    two arrays, which numpy computes in separate code (its scalar math and its
+    ufunc loop). Each is asked on every probe pair, and the product also over
+    all 64 left factors at once, a reduction longer than any SciPy forms here;
+    one answer that parts from the separately rounded one settles it.
+    """
+    left = np.array([a for a, _ in _FUSION_PROBES])
+    right = np.array([b for _, b in _FUSION_PROBES])
+    chain = complex(left[0])
+    for factor in left[1:].tolist():
+        chain = _unfused_product(chain, factor)
+    if complex(prod(left)) != chain:
+        return True
+    elementwise = np.asarray(divide(left, right)).tolist()
+    for (a, b), quotient in zip(_FUSION_PROBES, elementwise, strict=True):
+        unfused = _contracted_quotient(a, b, frozenset())
+        if (
+            complex(prod(np.array([a, b]))) != _unfused_product(a, b)
+            or complex(divide(np.complex128(a), np.complex128(b))) != unfused
+            or complex(quotient) != unfused
+        ):
+            return True
+    return False
+
+
+def _emulated_prod(
+    product: Callable[[complex, complex], complex],
+) -> Callable[[np.ndarray], np.complex128]:
+    """``numpy.prod`` of a complex array, left to right through ``product``."""
+
+    def prod(values: np.ndarray) -> np.complex128:
+        result = complex(values[0])
+        for value in values[1:].tolist():
+            result = product(result, value)
+        return np.complex128(result)
+
+    return prod
+
+
+#: What numpy's ``/`` is handed in SciPy's transform: two scalars or two arrays.
+_Operand = np.complex128 | np.ndarray
+
+
+def _emulated_divide(
+    scalars: frozenset[str], arrays: frozenset[str]
+) -> Callable[[_Operand, _Operand], _Operand]:
+    """numpy's ``/`` on complex scalars and arrays, each contracted at its own sums."""
+
+    def divide(a: _Operand, b: _Operand) -> _Operand:
+        if isinstance(a, np.complex128) and isinstance(b, np.complex128):
+            return np.complex128(_contracted_quotient(complex(a), complex(b), scalars))
+        return np.array(
+            [
+                _contracted_quotient(x, y, arrays)
+                for x, y in zip(
+                    np.asarray(a).tolist(), np.asarray(b).tolist(), strict=True
+                )
+            ]
+        )
+
+    return divide
+
+
+_UNFUSED_DIVIDE = _emulated_divide(frozenset(), frozenset())
+
+
+def test_the_fusion_probe_finds_nothing_in_separately_rounded_arithmetic() -> None:
+    """Handed numpy's steps each rounded once, the probe does not call them fused.
+
+    A probe that always found fusion would skip the comparison with SciPy on
+    the very build it is for.
+    """
+    assert not _numpy_fuses_complex_arithmetic(
+        prod=_emulated_prod(_unfused_product), divide=_UNFUSED_DIVIDE
     )
-    assert _fused_product(a, b) != unfused
+
+
+@pytest.mark.parametrize(
+    ("real", "imaginary"),
+    [
+        (real, imaginary)
+        for real in _REAL_PARTS
+        for imaginary in _IMAGINARY_PARTS
+        if (real, imaginary) != ("unfused", "unfused")
+    ],
+)
+def test_the_fusion_probe_sees_every_contraction_of_the_product(
+    real: str, imaginary: str
+) -> None:
+    """Whichever product of each part a compiler keeps exact, the probe sees it.
+
+    The Windows build keeps ``a_r b_r`` exact in the real part, as the macOS
+    build does, and not ``a_r b_i`` in the imaginary part: in CI its SciPy
+    transform returned the fused gain of the A, C, G and AU curves, one or
+    two units off in the last place, while the pair the probe used to rest on
+    came back unfused.
+    """
+    assert _numpy_fuses_complex_arithmetic(
+        prod=_emulated_prod(_contracted_product(real, imaginary)),
+        divide=_UNFUSED_DIVIDE,
+    )
+
+
+@pytest.mark.parametrize("operands", ["scalars", "arrays"])
+@pytest.mark.parametrize(
+    "fused",
+    [
+        frozenset(sites)
+        for count in (1, 2, 3)
+        for sites in itertools.combinations(sorted(_QUOTIENT_SITES), count)
+    ],
+    ids=lambda sites: "+".join(sorted(sites)),
+)
+def test_the_fusion_probe_sees_every_contraction_of_the_quotient(
+    fused: frozenset[str], operands: str
+) -> None:
+    """A quotient contracted at any of its sums, on scalars or on arrays, is seen."""
+    nothing: frozenset[str] = frozenset()
+    divide = (
+        _emulated_divide(fused, nothing)
+        if operands == "scalars"
+        else _emulated_divide(nothing, fused)
+    )
+    assert _numpy_fuses_complex_arithmetic(
+        prod=_emulated_prod(_unfused_product), divide=divide
+    )
 
 
 @pytest.mark.skipif(
-    _numpy_fuses_complex_products(),
-    reason="this numpy fuses its complex products, so SciPy's transform is not "
-    "the unfused one the design spells",
+    _numpy_fuses_complex_arithmetic(),
+    reason="this numpy fuses its complex products or quotients, so SciPy's "
+    "transform is not the unfused one the design spells",
 )
 @pytest.mark.parametrize("curve", _PROTOTYPE_CURVES)
 def test_the_bilinear_transform_is_scipy_s_bit_for_bit(curve: str) -> None:

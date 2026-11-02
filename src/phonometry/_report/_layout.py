@@ -27,6 +27,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from .._internal.json_input import writing_beside
 from .._internal.validation import (
     real_array,
     real_number,
@@ -1177,9 +1178,19 @@ def build_document(path: str | os.PathLike[str], flow: list[Any], title: str) ->
 
     Called only after the renderer has imported reportlab, which takes the
     path as a text: any path object is read as the text it stands for
-    (:func:`os.fspath`), and that text is what the fiche returns.
+    (:func:`os.fspath`), and that text is what the fiche returns. The PDF is
+    built beside nothing or a regular file at ``path`` and takes its place
+    whole, so a fiche that fails to build leaves what was there; a link, a
+    pipe or a device at ``path`` is written as Python opens it.
     """
     target = os.fspath(path)
+    with writing_beside(Path(target)) as file:
+        _build_pdf(os.fspath(file), flow, title)
+    return target
+
+
+def _build_pdf(target: str, flow: list[Any], title: str) -> None:
+    """Build the one-page fiche ``flow`` at ``target``, removing a sheet that runs on."""
     from reportlab.lib.pagesizes import A4
     from reportlab.lib.units import mm
     from reportlab.platypus import SimpleDocTemplate
@@ -1224,4 +1235,3 @@ def build_document(path: str | os.PathLike[str], flow: list[Any], title: str) ->
         Path(target).unlink(missing_ok=True)
         msg = f"{too_long} It came to {doc.page} pages."
         raise ValueError(msg)
-    return target

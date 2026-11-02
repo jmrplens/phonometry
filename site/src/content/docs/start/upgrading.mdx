@@ -2741,6 +2741,25 @@ or a `pathlib.Path` behaves as before.
 | the same to `io.read`, or as the source of `io.convert`, and a FLAC to `io.info` or `io.read_blocks` | `FileNotFoundError` naming the repr, or python-soundfile's `LibsndfileError` for a FLAC | the file the object names is read |
 | the same to `io.info` | `AudioFileInfo.path` held the repr | `AudioFileInfo.path` is the path |
 
+## A writer puts its file at the name only once it is whole
+
+`io.write`, the target of `io.convert`, every `.report()` and the response
+plot of a filter bank wrote straight at the name they were given. An error or
+an interrupt half way left a file begun there, over the recording or the fiche
+of an earlier run, and a fiche too long for its page was built at the name and
+removed again, the earlier fiche with it. In 4.0, with nothing at the name or
+a regular file, each writes a hidden file beside it and renames it over the
+name once it is whole, with the old file's permission bits. A link, a pipe, a
+device or a directory at the name is opened there as before, so a recording
+streamed into a pipe on purpose still goes into the pipe.
+
+| Passed | 3.3.0 or 4.0.0rc1 | 4.0 |
+| --- | --- | --- |
+| a write, a conversion, a fiche or a response plot stopped half way by an error or an interrupt | a file begun at the name, in place of what was there | the name as it was, and nothing beside it |
+| a fiche too long for its page, at the name of an earlier fiche | `ValueError`, and the earlier fiche removed | `ValueError`, and the earlier fiche kept |
+| a name whose file has a hard link elsewhere | the new bytes in the file, so under both names | the new file at the name; the other name keeps the old bytes |
+| a writable file in a directory that takes no new file | written in place | the `PermissionError` of the file beside it, the old file kept |
+
 ## The seventy-eight names that are gone
 
 Everything else moved. These seventy-eight exist in no public module:

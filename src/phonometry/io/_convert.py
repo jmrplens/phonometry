@@ -57,7 +57,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from .._internal.json_input import escaped
+from .._internal.json_input import escaped, writing_beside
 from .._internal.validation import require_choice
 from ._audio_file import require_regular_audio
 from ._backends import _FLAC_NAME, _import_soundfile, _sniff, info
@@ -258,8 +258,13 @@ def _stream_to_flac(
     channels: int,
     resolved: str,
     bext_payload: bytes | None,
+    *,
+    named: str | os.PathLike[str],
 ) -> None:
-    """Stream quantised blocks into a FLAC file, then embed the bext."""
+    """Stream quantised blocks into a FLAC file at *target*, then embed the bext.
+
+    *named* is the caller's name for the file, which a refusal gives.
+    """
     sf = _import_soundfile("FLAC")
     with sf.SoundFile(
         os.fspath(target),
@@ -277,7 +282,7 @@ def _stream_to_flac(
             )
             out.write(np.ascontiguousarray(narrowed.T))
     if bext_payload is not None:
-        embed_flac_bext(target, bext_payload)
+        embed_flac_bext(target, bext_payload, named=named)
 
 
 def convert(
@@ -299,7 +304,10 @@ def convert(
     :param src: The file to read (any format the readers accept).
     :param dst: The file to write; the suffix picks the container (WAV
         family or, with the ``[audio]`` extra, FLAC). Lossy suffixes are
-        refused by policy.
+        refused by policy. Nothing or a regular file at the name is
+        replaced only once the new file beside it is whole, as
+        :func:`~phonometry.io.write` does; a link, a pipe, a device or a
+        directory there is opened as Python opens it.
     :param subtype: Target sample format; ``None`` preserves the
         source's depth (the module docstring's mapping). An explicitly
         narrower choice quantises with the clipping count reported.
@@ -355,26 +363,32 @@ def convert(
     )
 
     blocks = _quantised_blocks(source, target, resolved, block_size, frames * channels)
-    if flac:
-        _stream_to_flac(target, blocks, fs, channels, resolved, bext_payload)
-    else:
-        write_wav_stream(
-            target,
-            blocks,
-            fs,
-            channels,
-            resolved,
-            frames,
-            metadata_chunks=(
-                frame_riff_chunk(b"bext", bext_payload)
-                if bext_payload is not None
-                else b""
-            ),
-            # A lossy container's declared frame count is a promise its
-            # decoder need not keep (decoder delay and padding), so the
-            # writer reconciles the header with what actually streamed.
-            frames_are_estimate=kind == "decoded",
-        )
+    # Written beside a regular file at the name, which it replaces whole: a
+    # conversion stopped half way leaves the old file there.
+    with writing_beside(target) as file:
+        if flac:
+            _stream_to_flac(
+                file, blocks, fs, channels, resolved, bext_payload, named=dst
+            )
+        else:
+            write_wav_stream(
+                file,
+                blocks,
+                fs,
+                channels,
+                resolved,
+                frames,
+                metadata_chunks=(
+                    frame_riff_chunk(b"bext", bext_payload)
+                    if bext_payload is not None
+                    else b""
+                ),
+                # A lossy container's declared frame count is a promise its
+                # decoder need not keep (decoder delay and padding), so the
+                # writer reconciles the header with what actually streamed.
+                frames_are_estimate=kind == "decoded",
+                named=dst,
+            )
 
     if carried is not None:
         put_sidecar(target, carried)

@@ -128,7 +128,12 @@ def flac_bext_block(path: str | os.PathLike[str], bext_payload: bytes) -> bytes:
     return chunk
 
 
-def embed_flac_bext(path: str | os.PathLike[str], bext_payload: bytes) -> None:
+def embed_flac_bext(
+    path: str | os.PathLike[str],
+    bext_payload: bytes,
+    *,
+    named: str | os.PathLike[str] | None = None,
+) -> None:
     """Insert the ``bext`` chunk into a finished FLAC file's metadata.
 
     Rewrites the metadata chain (STREAMINFO and friends copied as they
@@ -139,14 +144,17 @@ def embed_flac_bext(path: str | os.PathLike[str], bext_payload: bytes) -> None:
     half-written measurement file in place, nor the temporary file beside
     it.
 
+    :param named: The name a refusal gives the file, the caller's own where
+        *path* is the new file written beside it; *path* when ``None``.
     :raises ValueError: If the file is not FLAC, or the chunk exceeds the
         24-bit block length a FLAC metadata block can hold.
     """
-    chunk = flac_bext_block(path, bext_payload)
+    shown = path if named is None else named
+    chunk = flac_bext_block(shown, bext_payload)
     source = Path(path)
     staging = source.with_name(source.name + ".phonometry-tmp")
     try:
-        _copy_with_block(source, staging, chunk, named=escaped(os.fspath(path)))
+        _copy_with_block(source, staging, chunk, named=escaped(os.fspath(shown)))
         staging.replace(source)
     except BaseException:
         # A refusal, a full disk, an interrupt or a refused rename: the file

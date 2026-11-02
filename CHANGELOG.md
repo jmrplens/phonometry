@@ -2346,6 +2346,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - **The refusals of a band range write it with "to".** The errors of
   the speech transmission index (`speech.sti_from_impulse_response` and its
   kin), `speech.speech_intelligibility_index`,
+- **A recording, a fiche or a response plot stopped half way leaves the file
+  that was at its name.** `io.write`, the target of `io.convert`, every
+  `.report()` and the response plot of a filter bank wrote straight at the
+  name they were given, so an error or an interrupt half way left a file begun
+  there, over the recording or the fiche of an earlier run; a fiche too long
+  for its page was built at the name and removed again, the earlier fiche with
+  it. With nothing at the name, or a regular file, the new file is written
+  beside it and renamed over it once whole, keeping the old file's permission
+  bits; a hard link to the old file keeps the old bytes, and the directory must
+  take a new file. A link, a pipe, a device or a directory at the name is
+  opened there as Python opens a name, as before: a recording streamed into a
+  pipe on purpose still goes into the pipe.
   the noise criteria of `room`, the hearing threshold and the noise-induced
   hearing loss functions of `hearing`, and the tonality warning wrote a range
   as "(125 Hz - 8 kHz)", a spaced hyphen that reads as a minus beside

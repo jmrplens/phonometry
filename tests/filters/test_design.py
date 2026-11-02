@@ -136,6 +136,43 @@ def test_showfilter_saves_shows_and_noops(tmp_path: Path) -> None:
     _showfilter(sos, freq, freq_u, freq_d, fs, factor, show=False, plot_file=None)
 
 
+def _draw_half_then_interrupt(fname: object, **_kwargs: object) -> None:
+    Path(str(fname)).write_bytes(b"\x89PNG half a figure")
+    raise KeyboardInterrupt
+
+
+@pytest.mark.parametrize("before", ["nothing", "a figure"])
+def test_a_response_plot_stopped_half_way_leaves_the_name_as_it_was(
+    before: str, tmp_path: Path
+) -> None:
+    """The figure was drawn at the name, so an interrupt left half of it there."""
+    plot_path = tmp_path / "response.png"
+    if before == "a figure":
+        plot_path.write_bytes(b"\x89PNG the figure of an earlier run")
+    arguments = ([np.array([[1, 0, 0, 1, 0, 0]])], [1000.0], [1414.0], [707.0])
+    with (
+        patch.object(plt, "savefig", _draw_half_then_interrupt),
+        pytest.raises(KeyboardInterrupt),
+    ):
+        _showfilter(*arguments, 8000, np.array([1]), plot_file=plot_path)
+    left = [entry.name for entry in tmp_path.iterdir()]
+    assert left == ([] if before == "nothing" else ["response.png"])
+    if before == "a figure":
+        assert plot_path.read_bytes() == b"\x89PNG the figure of an earlier run"
+
+
+def test_a_response_plot_without_a_suffix_keeps_the_name_matplotlib_gives_it(
+    tmp_path: Path,
+) -> None:
+    """matplotlib appends its default format to a name that has none; the
+    figure drawn beside the name, whose own suffix says no format, keeps it.
+    """
+    arguments = ([np.array([[1, 0, 0, 1, 0, 0]])], [1000.0], [1414.0], [707.0])
+    _showfilter(*arguments, 8000, np.array([1]), plot_file=tmp_path / "response")
+    assert [entry.name for entry in tmp_path.iterdir()] == ["response.png"]
+    assert (tmp_path / "response.png").read_bytes()[:8] == b"\x89PNG\r\n\x1a\n"
+
+
 def test_all_filter_architectures_design() -> None:
     """Verify all supported architectures produce SOS coefficients."""
     filter_types = ["butter", "cheby1", "cheby2", "ellip", "bessel"]

@@ -28,6 +28,13 @@ bytes (on Windows without the read-only flag, which belongs to the file and
 is cleared for the rename). A writer that keeps a file already at the name
 puts the new file there in a step that refuses one, so that a file another
 program makes at the name while the new one is written is kept as well.
+
+A recording the library writes at a name a caller gives (``io.write``, the
+target of ``io.convert``) is written the same way when nothing or a regular
+file is at the name, through :func:`writing_beside`, so that a write stopped
+half way leaves the name as it was. A link, a pipe, a device, a socket or a
+directory at the name is opened there as Python opens it: a caller who names
+a pipe streams the recording into it on purpose.
 """
 
 from __future__ import annotations
@@ -44,6 +51,7 @@ from typing import TYPE_CHECKING
 from .validation import require_scalar
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator
     from pathlib import Path
     from typing import BinaryIO
 
@@ -227,6 +235,57 @@ def write_beside(target: Path, data: bytes, *, replace: bool = True) -> None:
     except BaseException as error:
         _discard(temporary, error)
         raise
+
+
+@contextlib.contextmanager
+def writing_beside(target: Path) -> Iterator[Path]:
+    """The name a writer of *target* writes to, renamed over *target* once it is whole.
+
+    With nothing at *target*, or a regular file there that no link stands
+    for, the writer is handed a new hidden name beside it, and the file it
+    writes there takes the place of *target* only once the writer is done:
+    a writer stopped half way, by an error or an interrupt, leaves *target*
+    as it was, and the new file is removed. The new file is flushed to the
+    disk before the rename and keeps the permission bits of the old one, and
+    a hard link to the old file keeps the old bytes, as :func:`write_beside`
+    says. Anything else at the name, a link, a pipe, a device, a socket or a
+    directory, is handed back as it is, for the writer to open as Python
+    opens a name: a link is followed to what it names, a pipe waits for a
+    reader, and a directory raises :class:`IsADirectoryError`. A writer of a
+    recording streams it into a pipe on purpose; a writer of a file the
+    library reads back (a sidecar, a catalogue) uses :func:`write_beside`,
+    which refuses one.
+
+    :param target: Where the file goes.
+    :return: The name to write to, *target* itself or the new one beside it.
+    :raises OSError: as the file system raises it, untouched; when the new
+        file cannot be removed after a failure, a note on the error names the
+        file left behind.
+    """
+    if target.is_symlink() or not_regular_at(target) is not None:
+        yield target
+        return
+    temporary = target.with_name(f".{target.name}.{secrets.token_hex(8)}.partial")
+    mode = _mode_of(target)
+    try:
+        yield temporary
+        _flushed(temporary, mode)
+        _rename(temporary, target, mode)
+    except BaseException as error:
+        _discard(temporary, error)
+        raise
+
+
+def _flushed(written: Path, mode: int | None) -> None:
+    """Give the file *written* the permission bits *mode* and flush it to the disk.
+
+    On Windows the bits are the read-only flag, which :func:`_rename` sets
+    once the file is in place.
+    """
+    with written.open("r+b") as handle:
+        if mode is not None and not _WINDOWS:
+            os.fchmod(handle.fileno(), mode)
+        os.fsync(handle.fileno())
 
 
 def _mode_of(target: Path) -> int | None:

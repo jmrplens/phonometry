@@ -5,11 +5,13 @@ fractional-octave banks, and the response plot the banks draw with it.
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 import numpy as np
 from scipy import signal
 
+from .._internal.json_input import writing_beside
 from .._internal.validation import require_scalar
 from .frequencies import _format_nominal_freq
 
@@ -168,6 +170,24 @@ def _design_sos_filter(
     return sos
 
 
+def _save_beside(named: Path) -> None:
+    """Save the current figure at *named* through a file beside it, renamed into place.
+
+    The name of the file beside it says no format, so the format is the one
+    *named* says, or matplotlib's default, which matplotlib then appends to
+    a name that has no suffix, as it does when it is handed the name itself.
+    Called once the caller has imported matplotlib.
+    """
+    import matplotlib.pyplot as plt
+
+    drawn = named.suffix[1:].lower()
+    if not drawn:
+        drawn = plt.rcParams["savefig.format"]
+        named = named.with_name(f"{named.name.rstrip('.')}.{drawn}")
+    with writing_beside(named) as file:
+        plt.savefig(file, format=drawn, dpi=150, bbox_inches="tight")
+
+
 def _showfilter(
     sos: list[np.ndarray],
     freq: list[float],
@@ -279,7 +299,7 @@ def _showfilter(
     ax.set_xticklabels(xticklabels)
 
     if plot_file:
-        plt.savefig(plot_file, dpi=150, bbox_inches="tight")
+        _save_beside(Path(plot_file))
     if show:
         plt.show()
     if close:

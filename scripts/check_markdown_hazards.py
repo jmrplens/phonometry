@@ -119,7 +119,7 @@ import re
 import sys
 
 from markdown_fences import code_lines
-from markdown_spans import drop_inline_spans_by_block
+from markdown_spans import drop_inline_spans, drop_inline_spans_by_block
 
 _ROOT = pathlib.Path(__file__).resolve().parent.parent
 
@@ -229,12 +229,14 @@ def _unescaped_dollars(line: str) -> int:
     again, read by :mod:`markdown_spans`: one tick of a longer run never
     closes a shorter one, and a backtick behind a backslash opens no span. A
     ``$`` inside a span is code (the ``$schema`` key of a JSON document), and
-    CommonMark reads the span before any maths could open in it. *line* comes
-    with its spans out already, read over the lines of its paragraph
-    (:func:`markdown_spans.drop_inline_spans_by_block`), so that a span that
-    crosses a line break hides none of its dollars from the other line.
+    CommonMark reads the span before any maths could open in it. The page's
+    reading hands *line* with its spans out already, read over the lines of
+    its paragraph (:func:`markdown_spans.drop_inline_spans_by_block`), so that
+    a span that crosses a line break hides none of its dollars from the other
+    line; a span left whole on the line is taken out here.
     """
-    return len(re.findall(r"(?<!\\)\$", re.sub(r"\$\$", "", line)))
+    prose = drop_inline_spans(line)
+    return len(re.findall(r"(?<!\\)\$", re.sub(r"\$\$", "", prose)))
 
 
 def _blank(match: re.Match[str]) -> str:

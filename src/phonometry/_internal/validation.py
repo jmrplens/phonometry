@@ -449,8 +449,8 @@ def real_number(value: object, name: str) -> float:
     :param value: The caller's value, of any type.
     :param name: Parameter name used in the error message.
     :return: ``float(value)``.
-    :raises TypeError: for an array, a text, or anything whose type
-        :func:`float` refuses.
+    :raises TypeError: for a ``value`` that is an array, a text, or anything
+        whose type :func:`float` refuses.
     :raises ValueError: for a number too large for a float.
     """
     require_scalar(value, name)

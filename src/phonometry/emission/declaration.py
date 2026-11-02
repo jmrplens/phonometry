@@ -285,7 +285,8 @@ class NoiseEmissionDeclaration(RichDisplay):
     def __post_init__(self) -> None:
         """Coerce the sequences to tuples and validate the form and mode count.
 
-        :raises TypeError: if ``form`` is not a text.
+        :raises TypeError: if ``form`` is not a text, or ``basic_standards`` is
+            neither a text nor a sequence of texts.
         """
         modes = tuple(self.modes)
         if not modes:

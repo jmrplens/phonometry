@@ -150,7 +150,7 @@ def test_every_exp_and_pow_input_of_a_real_design_matches(
     _weighting_design._exponentials.cache_clear()
     zeros, poles, _ = _analog_weighting_zpk("A")
     _weighting_design.design_sos(
-        zeros, poles, 48000.0, _fit_band("A", 48000), 4, 1000.0
+        zeros, poles, 48000.0, _fit_band("A", 48000), 4, 1000.0, n_origin_zeros=4
     )
     assert exps, "the design evaluated no exponential"
     assert pows, "the design evaluated no power"

@@ -348,6 +348,8 @@ _EXPONENT = np.uint64(0x7FF)
 _MASK_127 = np.uint64(127)
 _MINUS_ONE = np.uint64(0xFFFFFFFFFFFFFFFF)
 _SIGN = np.uint64(0x8000000000000000)
+#: Every bit of a double but its sign: zero exactly on +0.0 and -0.0.
+_MAGNITUDE = np.uint64(0x7FFFFFFFFFFFFFFF)
 
 
 def _split(value: float) -> tuple[float, float]:
@@ -379,7 +381,10 @@ def _round_to_odd_sum(a: np.ndarray, b: np.ndarray) -> np.ndarray:
     back = total - a
     error = (a - (total - back)) + (b - back)
     bits = total.view(np.uint64)
-    inexact_even = error.astype(bool) & ((bits & _U1) == 0)
+    # Read off the bits, as the parity is: the sum was inexact exactly where
+    # its error has a magnitude bit set, whatever the error's sign.
+    inexact = (error.view(np.uint64) & _MAGNITUDE) != 0
+    inexact_even = inexact & ((bits & _U1) == 0)
     if not inexact_even.any():
         return total
     away = np.signbit(error) == np.signbit(total)
@@ -508,7 +513,10 @@ def _special_case_down(tmp: np.ndarray, sbits: np.ndarray) -> np.ndarray:
     lo = ((one - hi) + y) + lo
     narrowed = (hi + lo) - one
     signed_zero = (shifted & _SIGN).view(np.float64)
-    narrowed = np.where(narrowed.astype(bool), narrowed, signed_zero)
+    # A result that vanished past the subnormals takes the scale's sign, read
+    # off the bits: the magnitude bits are clear only on a signed zero.
+    vanished = (narrowed.view(np.uint64) & _MAGNITUDE) == 0
+    narrowed = np.where(vanished, signed_zero, narrowed)
     return np.where(np.abs(y) < 1.0, narrowed, y) * float.fromhex("0x1p-1022")
 
 

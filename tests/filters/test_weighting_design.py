@@ -61,6 +61,7 @@ from phonometry.filters.weighting import (
     _analog_weighting_zpk,
     _cached_weighting_sos,
     _fit_band,
+    _zeros_at_origin,
 )
 
 if TYPE_CHECKING:
@@ -381,6 +382,7 @@ def test_the_library_carries_no_coefficients_of_its_own(curve: str) -> None:
         _fit_band(curve, fs),
         _FIT_SECTIONS[curve],
         _REFERENCE_HZ.get(curve, 1000.0),
+        n_origin_zeros=_zeros_at_origin(curve),
     )
     np.testing.assert_array_equal(rebuilt, filters.WeightingFilter(fs, curve).sos)
 
@@ -403,6 +405,7 @@ def test_the_design_is_stable_and_minimum_phase(curve: str) -> None:
             _fit_band(curve, fs),
             _FIT_SECTIONS[curve],
             _REFERENCE_HZ.get(curve, 1000.0),
+            n_origin_zeros=_zeros_at_origin(curve),
         )
         assert np.all(fitted_poles.real < 0.0)
         moved = fitted_zeros[np.abs(fitted_zeros) > 0.0]
@@ -597,7 +600,9 @@ def test_repeated_designs_are_bit_identical() -> None:
     """Same inputs, same bits: there is no random state and no clock here."""
     zeros, poles, _ = _analog_weighting_zpk("A")
     args = (zeros, poles, 44100.0, _fit_band("A", 44100), 4, 1000.0)
-    np.testing.assert_array_equal(design_sos(*args), design_sos(*args))
+    np.testing.assert_array_equal(
+        design_sos(*args, n_origin_zeros=4), design_sos(*args, n_origin_zeros=4)
+    )
 
 
 def test_the_design_does_not_depend_on_the_blas_thread_count() -> None:
@@ -831,6 +836,7 @@ def test_no_fitted_corner_leaves_the_representable_band(curve: str) -> None:
             (low, high),
             _FIT_SECTIONS[curve],
             _REFERENCE_HZ.get(curve, 1000.0),
+            n_origin_zeros=_zeros_at_origin(curve),
         )
         corners = np.abs(np.concatenate([fitted_zeros, fitted_poles]))
         top = 2.0 * fs * np.tan(np.pi * high / fs)
@@ -848,7 +854,7 @@ def test_an_empty_band_is_refused() -> None:
     zeros, poles, _ = _analog_weighting_zpk("A")
     band = _fit_band("A", 16)
     with pytest.raises(ValueError, match=r"'band' must span a positive frequency"):
-        fit_prototype(zeros, poles, 16.0, band, 4, 1000.0)
+        fit_prototype(zeros, poles, 16.0, band, 4, 1000.0, n_origin_zeros=4)
 
 
 def test_too_few_sections_is_refused() -> None:
@@ -860,7 +866,41 @@ def test_too_few_sections_is_refused() -> None:
     zeros, poles, _ = _analog_weighting_zpk("AU")
     band = _fit_band("AU", 48000)
     with pytest.raises(ValueError, match=r"'n_sections' is too small"):
-        fit_prototype(zeros, poles, 48000.0, band, 2, 1000.0)
+        fit_prototype(zeros, poles, 48000.0, band, 2, 1000.0, n_origin_zeros=4)
+
+
+@pytest.mark.parametrize("curve", _PROTOTYPE_CURVES)
+def test_each_prototype_states_its_zeros_at_the_origin_first(curve: str) -> None:
+    """The count the design holds at the origin is the one the builder writes.
+
+    The design takes the zeros at the origin as a count, the power of ``s``
+    the prototype's numerator carries, rather than finding them by testing
+    each zero against zero; so the count has to be what the prototype
+    builds, and they have to come first.
+    """
+    zeros, _, _ = _analog_weighting_zpk(curve)
+    count = _zeros_at_origin(curve)
+    assert count >= 1
+    assert np.all(np.abs(zeros[:count]) <= 0.0)
+    assert np.all(np.abs(zeros[count:]) > 0.0)
+
+
+@pytest.mark.parametrize(
+    ("count", "error"),
+    [(5, ValueError), (-1, ValueError), (2.5, ValueError), ("4", TypeError)],
+    ids=["more-than-the-zeros", "negative", "fractional", "text"],
+)
+def test_a_count_of_zeros_at_the_origin_the_prototype_cannot_hold_is_refused(
+    count: object, error: type[Exception]
+) -> None:
+    """A count past the prototype's zeros, or not a count at all, is named."""
+    zeros, poles, _ = _analog_weighting_zpk("A")
+    band = _fit_band("A", 48000)
+    with pytest.raises(error, match="'n_origin_zeros'"):
+        fit_prototype(
+            zeros, poles, 48000.0, band, 4, 1000.0,
+            n_origin_zeros=count,  # type: ignore[arg-type]
+        )  # fmt: skip
 
 
 def test_the_fitted_prototype_is_readable_in_hertz() -> None:
@@ -875,7 +915,7 @@ def test_the_fitted_prototype_is_readable_in_hertz() -> None:
     """
     zeros, poles, _ = _analog_weighting_zpk("A")
     fitted_zeros, fitted_poles = fitted_prototype_hz(
-        zeros, poles, 48000.0, _fit_band("A", 48000), 4, 1000.0
+        zeros, poles, 48000.0, _fit_band("A", 48000), 4, 1000.0, n_origin_zeros=4
     )
     corners = np.sort(np.abs(fitted_poles))
     assert corners[0] == pytest.approx(20.598997, rel=1e-4)
@@ -1438,7 +1478,7 @@ def test_the_bilinear_transform_is_scipy_s_bit_for_bit(curve: str) -> None:
     zeros, poles, gain = _analog_weighting_zpk(curve)
     fitted = fit_prototype(
         zeros, poles, 48000.0, _fit_band(curve, 48000), _FIT_SECTIONS[curve],
-        _REFERENCE_HZ.get(curve, 1000.0),
+        _REFERENCE_HZ.get(curve, 1000.0), n_origin_zeros=_zeros_at_origin(curve),
     )  # fmt: skip
     for case in ((zeros, poles, gain), (*fitted, 1.0), *_TRANSFORM_CASES):
         ours = bilinear_zpk(*case, 48000.0)
@@ -1855,5 +1895,6 @@ def test_a_design_calls_no_math_transcendental(
         _fit_band(curve, fs),
         _FIT_SECTIONS[curve],
         _REFERENCE_HZ.get(curve, 1000.0),
+        n_origin_zeros=_zeros_at_origin(curve),
     )
     assert np.isfinite(sos).all()

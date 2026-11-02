@@ -148,7 +148,13 @@ from dataclasses import dataclass
 import numpy as np
 from scipy import signal
 
-from .._internal.validation import complex_number, is_positive, real_array, real_number
+from .._internal.validation import (
+    complex_number,
+    is_positive,
+    real_array,
+    real_number,
+    require_count,
+)
 from ._pinned_exp import pinned_exp, pinned_pow
 from ._pinned_log import pinned_log, pinned_log10
 from ._pinned_trig import pinned_atan, pinned_hypot, pinned_sin, pinned_tan
@@ -993,15 +999,16 @@ def _start_parameters(
     poles: np.ndarray,
     degree: int,
     placement: tuple[float, float],
+    at_origin: int,
 ) -> tuple[np.ndarray, _Layout]:
     """Parameter vector and layout of the prototype the search starts from.
 
     :param placement: Where the spare factors start; see
         :func:`_spare_placements`.
+    :param at_origin: How many of the first *zeros* sit at the origin, as the
+        prototype states them; they are held there and never read as values.
     """
-    away_from_origin = np.asarray(zeros).astype(bool)
-    at_origin = int(np.count_nonzero(~away_from_origin))
-    finite = np.asarray(zeros)[away_from_origin]
+    finite = np.asarray(zeros)[at_origin:]
     num, num_quad, num_lin = _padded_factors(finite, degree, placement, at_origin)
     den, den_quad, den_lin = _padded_factors(np.asarray(poles), degree, placement)
     theta = _scalar_log(np.concatenate([np.asarray(f, dtype=float) for f in num + den]))
@@ -1307,8 +1314,7 @@ def _cascade_magnitude(sections: np.ndarray, frequency: float, fs: float) -> flo
 
 
 def _fit_from(
-    zeros: np.ndarray,
-    poles: np.ndarray,
+    prototype: tuple[np.ndarray, np.ndarray, int],
     degree: int,
     grid: tuple[np.ndarray, np.ndarray, np.ndarray],
     span: tuple[float, float],
@@ -1316,12 +1322,15 @@ def _fit_from(
 ) -> tuple[float, np.ndarray, _Layout]:
     """One whole fit, from the start *placement* describes.
 
+    :param prototype: ``(zeros, poles, zeros at the origin)``, the last a count
+        of the first zeros, as :func:`fit_prototype` takes them.
     :return: ``(peak residual in dB, parameters, layout)``. The peak is what
         :func:`fit_prototype` compares attempts on, and it is measured on the
         same grid the fit minimised over, so it says how well the search did
         and not how well the design will be graded.
     """
-    theta, layout = _start_parameters(zeros, poles, degree, placement)
+    zeros, poles, at_origin = prototype
+    theta, layout = _start_parameters(zeros, poles, degree, placement, at_origin)
     bounds = _corner_bounds(layout, span)
     fitted = _lawson_fit(np.clip(theta, *bounds), layout, grid, bounds)
     residual = _residual_db(fitted, layout, grid[0], grid[1], grid[2])
@@ -1335,6 +1344,8 @@ def fit_prototype(
     band: tuple[float, float],
     n_sections: int,
     reference_frequency_hz: float,
+    *,
+    n_origin_zeros: int,
 ) -> tuple[np.ndarray, np.ndarray]:
     r"""Analog prototype whose bilinear image tracks *zeros*/*poles* at *fs*.
 
@@ -1357,8 +1368,8 @@ def fit_prototype(
     over one that was chosen against it. It costs eight times the work as well,
     but that is not why it was refused.
 
-    :param zeros: Zeros of the printed prototype, in rad/s. Zeros at the origin
-        are held there.
+    :param zeros: Zeros of the printed prototype, in rad/s, the
+        *n_origin_zeros* of them that sit at the origin first.
     :param poles: Poles of the printed prototype, in rad/s.
     :param fs: Sampling rate in Hz.
     :param band: Frequencies in Hz between which the response is fitted. The
@@ -1369,13 +1380,25 @@ def fit_prototype(
     :param reference_frequency_hz: The standard's reference frequency. The residual is measured
         relative to the response at :func:`_anchor_hz`, which is *reference_frequency_hz* itself
         at every rate that can carry it.
+    :param n_origin_zeros: How many of the first *zeros* sit at the origin,
+        the power of ``s`` the prototype's numerator carries. They are held
+        there, and counted from the prototype rather than recognised by their
+        value.
     :return: ``(zeros, poles)`` of the fitted prototype in rad/s, ready for
-        :func:`scipy.signal.bilinear_zpk`.
-    :raises ValueError: if *band* is empty or *n_sections* cannot hold the
-        prototype's own degree.
-    :raises TypeError: if a coefficient ``poles`` gives the fit is not one real
-        number.
+        :func:`bilinear_zpk`.
+    :raises ValueError: if *band* is empty, *n_sections* cannot hold the
+        prototype's own degree, or *n_origin_zeros* is more than there are
+        zeros.
+    :raises TypeError: if *n_origin_zeros* is not a whole number, or a
+        coefficient ``poles`` gives the fit is not one real number.
     """
+    at_origin = require_count(n_origin_zeros, "n_origin_zeros", at_least=0)
+    if at_origin > len(zeros):
+        msg = (
+            f"'n_origin_zeros' counts {at_origin} zeros at the origin, but the "
+            f"prototype has {len(zeros)} zeros."
+        )
+        raise ValueError(msg)
     low, high = band
     # Spelled out rather than as ``not low < high``: the two differ only on
     # NaN, which the negated comparison happens to refuse, and a guard should
@@ -1395,13 +1418,14 @@ def fit_prototype(
     target_db = _analog_db(np.asarray(zeros), np.asarray(poles), frequencies, anchor)
     grid = (omega, omega_ref, target_db)
     placements = _spare_placements(fs, span)
-    best = _fit_from(zeros, poles, 2 * n_sections, grid, span, placements[0])
+    prototype = (np.asarray(zeros), np.asarray(poles), at_origin)
+    best = _fit_from(prototype, 2 * n_sections, grid, span, placements[0])
     if best[0] > _FIT_FAILED_DB:
         # The closed-form design's own start did not produce a filter, so the
         # question is no longer which start is quickest but which one works:
         # every remaining placement is tried and the best is kept.
         for placement in placements[1:]:
-            attempt = _fit_from(zeros, poles, 2 * n_sections, grid, span, placement)
+            attempt = _fit_from(prototype, 2 * n_sections, grid, span, placement)
             if attempt[0] < best[0]:
                 best = attempt
     return _fitted_zpk(best[1], best[2])
@@ -1414,6 +1438,8 @@ def design_sos(
     band: tuple[float, float],
     n_sections: int,
     reference_frequency_hz: float,
+    *,
+    n_origin_zeros: int,
 ) -> np.ndarray:
     """Second-order sections realising the prototype at *fs*, 0 dB at *reference_frequency_hz*.
 
@@ -1431,10 +1457,18 @@ def design_sos(
     realised response inherits the fit's accuracy at the point it is pinned at
     instead of being pinned somewhere the fit never looked.
 
+    :param n_origin_zeros: How many of the first *zeros* sit at the origin;
+        see :func:`fit_prototype`.
     :return: The cascade.
     """
     fitted_zeros, fitted_poles = fit_prototype(
-        zeros, poles, fs, band, n_sections, reference_frequency_hz
+        zeros,
+        poles,
+        fs,
+        band,
+        n_sections,
+        reference_frequency_hz,
+        n_origin_zeros=n_origin_zeros,
     )
     anchor = _anchor_hz(fs, band, reference_frequency_hz)
     digital = bilinear_zpk(fitted_zeros, fitted_poles, 1.0, fs)
@@ -1454,14 +1488,25 @@ def fitted_prototype_hz(
     band: tuple[float, float],
     n_sections: int,
     reference_frequency_hz: float,
+    *,
+    n_origin_zeros: int,
 ) -> tuple[np.ndarray, np.ndarray]:
     """The fitted prototype's zeros and poles in Hz, for reading beside a table.
 
     The point of fitting a *prototype* rather than digital coefficients is that
     the answer stays comparable with the standard: the poles come back near the
     printed corner frequencies, moved by the warp the fit is undoing.
+
+    :param n_origin_zeros: How many of the first *zeros* sit at the origin;
+        see :func:`fit_prototype`.
     """
     fitted_zeros, fitted_poles = fit_prototype(
-        zeros, poles, fs, band, n_sections, reference_frequency_hz
+        zeros,
+        poles,
+        fs,
+        band,
+        n_sections,
+        reference_frequency_hz,
+        n_origin_zeros=n_origin_zeros,
     )
     return fitted_zeros / (2.0 * np.pi), fitted_poles / (2.0 * np.pi)

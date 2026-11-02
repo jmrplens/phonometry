@@ -51,6 +51,40 @@ def is_positive(value: float) -> bool:
     return value > 0.0
 
 
+#: Every bit of a double but its sign: clear exactly on +0.0 and -0.0.
+_MAGNITUDE_BITS = np.uint64(0x7FFF_FFFF_FFFF_FFFF)
+
+
+def exactly_nonzero(values: NDArray[np.float64]) -> NDArray[np.bool_]:
+    """True where a double is anything but a signed zero, read off its bits.
+
+    The one exact test against zero the tree makes on purpose, named once so
+    that it is not spelt as an equality, a truth value or a cast to ``bool``
+    at every site that needs it. It is the right test only where a zero is
+    exact by construction and any other value, however small, is meant: a
+    level facet's slope that the polyline's own differences make 0.0, a
+    gradient jump of exactly nothing at a node the profile runs straight
+    through, a sign code. A quantity that is merely close to zero is judged
+    by a named threshold instead.
+
+    The magnitude bits are clear on +0.0 and -0.0 and on nothing else, so
+    NaN and the infinities answer ``True``, as ``x != 0`` does.
+
+    :param values: An array of ``float64``.
+    :return: A boolean array of the same shape.
+    :raises TypeError: if *values* is not an array of ``float64``.
+    """
+    if not isinstance(values, np.ndarray) or values.dtype != np.float64:
+        given = (
+            f"an array of {values.dtype}"
+            if isinstance(values, np.ndarray)
+            else given_type(values)
+        )
+        msg = f"'values' must be an array of float64; got {given}."
+        raise TypeError(msg)
+    return np.asarray((values.view(np.uint64) & _MAGNITUDE_BITS) != 0)
+
+
 def is_at_most(value: float, limit: float) -> bool:
     """True when ``value`` is at or below ``limit``. NaN answers ``False``.
 

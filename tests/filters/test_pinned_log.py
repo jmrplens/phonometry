@@ -158,7 +158,9 @@ def test_every_log_input_of_a_real_design_matches(
     monkeypatch.setattr(_weighting_design, "_scalar_log", spy)
     zeros, poles, _ = _analog_weighting_zpk("A")
     band = _fit_band("A", 48000)
-    _weighting_design.design_sos(zeros, poles, 48000.0, band, 4, 1000.0)
+    _weighting_design.design_sos(
+        zeros, poles, 48000.0, band, 4, 1000.0, n_origin_zeros=4
+    )
     assert captured, "the design evaluated no logarithm"
     everything = np.unique(np.concatenate(captured))
     _assert_same_bits(everything)
@@ -242,7 +244,9 @@ def test_every_log10_input_of_a_real_design_matches(
     monkeypatch.setattr(_weighting_design, "pinned_log10", spy)
     zeros, poles, _ = _analog_weighting_zpk("A")
     band = _fit_band("A", 48000)
-    _weighting_design.design_sos(zeros, poles, 48000.0, band, 4, 1000.0)
+    _weighting_design.design_sos(
+        zeros, poles, 48000.0, band, 4, 1000.0, n_origin_zeros=4
+    )
     assert captured, "the design evaluated no base-10 logarithm"
     values = np.concatenate(captured)
     mine = pinned_log10(values)

@@ -868,7 +868,7 @@ def _exclusion_flags(flags: ArrayLike, name: str) -> NDArray[np.bool_]:
         )
         raise TypeError(msg)
     if np.all((array == 0) | (array == 1)):
-        return array.astype(np.bool_).ravel()
+        return np.asarray(array == 1).ravel()
     msg = (
         f"'{name}' must hold booleans (True to exclude), or 0 and 1; got an "
         "integer other than 0 and 1."

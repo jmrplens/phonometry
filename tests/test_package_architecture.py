@@ -1137,10 +1137,44 @@ def _is_float_constant(node: ast.expr) -> bool:
     )
 
 
+#: How a dtype argument spells ``bool``: the builtin, numpy's names for it,
+#: and the strings numpy reads as it.
+_BOOL_DTYPE_NAMES = frozenset({"bool", "bool_", "bool8", "?", "b1"})
+
+
+def _is_bool_dtype(node: ast.expr) -> bool:
+    """Whether *node* names the boolean dtype: ``bool``, ``np.bool_``, ``"?"`` and the like."""
+    if isinstance(node, ast.Name):
+        return node.id == "bool"
+    if isinstance(node, ast.Attribute) and isinstance(node.value, ast.Name):
+        return node.value.id in {"np", "numpy"} and node.attr in _BOOL_DTYPE_NAMES
+    return isinstance(node, ast.Constant) and node.value in _BOOL_DTYPE_NAMES
+
+
+def _is_bool_cast(node: ast.Call) -> bool:
+    """Whether *node* is ``x.astype(bool)`` in any spelling of the dtype.
+
+    A float cast to ``bool`` is ``x != 0.0`` under another name. The source
+    cannot say which arrays are floats, so the cast is refused whatever it
+    is applied to: a boolean array needs none, an integer one says ``!= 0``.
+    """
+    if not (isinstance(node.func, ast.Attribute) and node.func.attr == "astype"):
+        return False
+    dtypes = [*node.args[:1], *(k.value for k in node.keywords if k.arg == "dtype")]
+    return any(_is_bool_dtype(dtype) for dtype in dtypes)
+
+
 def _float_equalities(tree: ast.AST) -> list[str]:
-    """Each ``==`` or ``!=`` of *tree* with a float constant on one side, as ``line source``."""
+    """Each equality with a float constant, or cast to ``bool``, of *tree*, as ``line source``.
+
+    An ``==`` or ``!=`` with a float constant on one side, and every
+    ``astype(bool)``, which on a float array is the same test against zero.
+    """
     found: list[str] = []
     for node in ast.walk(tree):
+        if isinstance(node, ast.Call) and _is_bool_cast(node):
+            found.append(f"{node.lineno} {ast.unparse(node)}")
+            continue
         if not isinstance(node, ast.Compare):
             continue
         left = node.left
@@ -1154,7 +1188,7 @@ def _float_equalities(tree: ast.AST) -> list[str]:
 
 
 def test_the_float_equality_check_sees_every_spelling_of_a_float_constant() -> None:
-    """A literal, a signed one, one named by numpy or math, and ``float("inf")``."""
+    """A literal, a signed one, one named by numpy or math, ``float("inf")``, and a cast to bool."""
     source = "\n".join(
         [
             "a = x == 0.0",
@@ -1167,10 +1201,16 @@ def test_the_float_equality_check_sees_every_spelling_of_a_float_constant() -> N
             "h = x <= np.inf",
             "i = np.isposinf(x)",
             "j = x == other",
+            "k = x.astype(bool)",
+            "l = x.astype(np.bool_)",
+            "m = np.diff(x).astype(dtype='?')",
+            "n = x.astype(numpy.bool)",
+            "o = x.astype(float)",
+            "p = np.asarray(x > 0.5, dtype=bool)",
         ]
     )
     assert [line.split()[0] for line in _float_equalities(ast.parse(source))] == [
-        "1", "2", "3", "4", "5", "6",
+        "1", "2", "3", "4", "5", "6", "11", "12", "13", "14",
     ]  # fmt: skip
 
 
@@ -1183,6 +1223,15 @@ def test_no_source_compares_a_float_for_equality() -> None:
     ``x sinc(x)^2`` removes both the singularity and the comparison. Nothing in
     the repository could see the regression; SonarCloud reported it after the
     branch was already pushed, so the class is closed here instead.
+
+    A cast to ``bool`` is the same test spelt otherwise: on a float array,
+    ``x.astype(bool)`` is ``x != 0.0``, and the literal check let eleven of
+    them through (the pinned exponential's two exactness tests, the weighting
+    design's zeros at the origin, and eight exact tests of the ray and
+    underwater solvers). The exponential's now read the bits, the zeros at the
+    origin are counted from the prototype, and an exact test that is meant
+    names itself through ``exactly_nonzero``. The cast is refused whatever it
+    is applied to, since the source does not say which arrays are floats.
     """
     import pathlib
 

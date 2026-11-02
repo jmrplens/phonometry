@@ -395,16 +395,24 @@ def _fit_band(curve: str, fs: int) -> tuple[float, float]:
     return low, min(high, _FIT_NYQUIST_FRACTION * fs / 2.0)
 
 
-def _a_weighting_zpk() -> tuple[np.ndarray, np.ndarray, float]:
+#: A prototype as each builder below states it: how many zeros sit at the
+#: origin, the zeros away from it, the poles (all in rad/s) and the gain. The
+#: zeros at the origin are a count, the power of ``s`` the standard writes in
+#: the numerator, because the design holds them there and must not have to
+#: recognise them by their value.
+_Prototype = tuple[int, np.ndarray, np.ndarray, float]
+
+
+def _a_weighting_zpk() -> _Prototype:
     """Analog A weighting, IEC 61672-1:2013 Annex E (E.4.2).
 
     ``f1`` and ``f4`` are shared with C (and, through C, with B); ANSI
     S1.4-1983 Appendix C prints the same poles to fewer digits
-    (f1 = 20.598997, f4 = 12194.22).
+    (f1 = 20.598997, f4 = 12194.22). Four zeros, all at the origin.
     """
     f1, f2, f3, f4 = 20.598997, 107.65265, 737.86223, 12194.217
     poles = -2 * np.pi * np.array([f1, f1, f4, f4, f2, f3])
-    return np.zeros(4), poles, 3.5174303309e13
+    return 4, np.zeros(0), poles, 3.5174303309e13
 
 
 def _u_poles() -> np.ndarray:
@@ -431,14 +439,14 @@ def _u_poles() -> np.ndarray:
     )
 
 
-def _c_weighting_zpk() -> tuple[np.ndarray, np.ndarray, float]:
-    """Analog C weighting, IEC 61672-1:2013 Annex E (E.4.1)."""
+def _c_weighting_zpk() -> _Prototype:
+    """Analog C weighting, IEC 61672-1:2013 Annex E (E.4.1): two zeros at the origin."""
     f1, f4 = 20.598997, 12194.217
     poles = -2 * np.pi * np.array([f1, f1, f4, f4])
-    return np.zeros(2), poles, 5.91797e8
+    return 2, np.zeros(0), poles, 5.91797e8
 
 
-def _b_weighting_zpk() -> tuple[np.ndarray, np.ndarray, float]:
+def _b_weighting_zpk() -> _Prototype:
     """Analog B weighting, ANSI S1.4-1983 Appendix C, Formula (C2).
 
     The C weighting times ``f^2 / (f^2 + f5^2)`` in power, i.e. one more zero
@@ -448,13 +456,13 @@ def _b_weighting_zpk() -> tuple[np.ndarray, np.ndarray, float]:
     """
     f1, f4, f5 = 20.598997, 12194.217, 158.48932
     poles = -2 * np.pi * np.array([f1, f1, f4, f4, f5])
-    return np.zeros(3), poles, 1.0
+    return 3, np.zeros(0), poles, 1.0
 
 
-def _d_weighting_zpk() -> tuple[np.ndarray, np.ndarray, float]:
+def _d_weighting_zpk() -> _Prototype:
     """Analog D weighting, withdrawn IEC 537:1976, from the published form.
 
-    Zeros at the origin and at the roots of ``s^2 + 6532 s + 4.0975e7``; poles
+    One zero at the origin and two at the roots of ``s^2 + 6532 s + 4.0975e7``; poles
     at -1776.3, -7288.5 and the roots of ``s^2 + 21514 s + 3.8836e8``, all in
     rad/s (module docstring). The complex pairs are expanded with the quadratic
     formula so the design is exact and deterministic. Corroborated against SQAT
@@ -464,9 +472,7 @@ def _d_weighting_zpk() -> tuple[np.ndarray, np.ndarray, float]:
     zero_imag = math.sqrt(4.0975e7 - zero_real * zero_real)
     pole_real = -21514.0 / 2.0
     pole_imag = math.sqrt(3.8836e8 - pole_real * pole_real)
-    zeros = np.array(
-        [0.0, complex(zero_real, zero_imag), complex(zero_real, -zero_imag)]
-    )
+    zeros = np.array([complex(zero_real, zero_imag), complex(zero_real, -zero_imag)])
     poles = np.array(
         [
             -1776.3,
@@ -475,10 +481,10 @@ def _d_weighting_zpk() -> tuple[np.ndarray, np.ndarray, float]:
             complex(pole_real, -pole_imag),
         ]
     )
-    return zeros, poles, 1.0
+    return 1, zeros, poles, 1.0
 
 
-def _g_weighting_zpk() -> tuple[np.ndarray, np.ndarray, float]:
+def _g_weighting_zpk() -> _Prototype:
     """Analog G weighting, ISO 7196:1995 Table 1 (p. 2).
 
     Nominal pole/zero coordinates in the complex frequency plane, in Hz: four
@@ -498,10 +504,10 @@ def _g_weighting_zpk() -> tuple[np.ndarray, np.ndarray, float]:
             -5.16 - 19.27j,
         ]
     )
-    return np.zeros(4), 2 * np.pi * pole_coords_hz, 1.0
+    return 4, np.zeros(0), 2 * np.pi * pole_coords_hz, 1.0
 
 
-def _itu_r_468_zpk() -> tuple[np.ndarray, np.ndarray, float]:
+def _itu_r_468_zpk() -> _Prototype:
     """Analog 468 weighting, ITU-R BS.468-4 clause 1 via Fig. 1a.
 
     One zero at the origin, because the series capacitor blocks dc, and the six
@@ -512,28 +518,48 @@ def _itu_r_468_zpk() -> tuple[np.ndarray, np.ndarray, float]:
     one place for every curve.
     """
     poles, gain = _itu_r_468_prototype()
-    return np.zeros(1), np.array(poles), gain
+    return 1, np.zeros(0), np.array(poles), gain
+
+
+def _prototype(curve: str) -> _Prototype:
+    """The prototype of *curve* as its builder states it, before normalisation.
+
+    :param curve: An upper-case name in :data:`_PROTOTYPE_CURVES`.
+    :return: ``(zeros at the origin, other zeros, poles, gain)``, rad/s.
+    """
+    if curve == "AU":
+        at_origin, zeros, poles, gain = _a_weighting_zpk()
+        return (
+            at_origin,
+            zeros,
+            np.concatenate([poles.astype(complex), _u_poles()]),
+            gain,
+        )
+    builders = {
+        "A": _a_weighting_zpk,
+        "B": _b_weighting_zpk,
+        "C": _c_weighting_zpk,
+        "D": _d_weighting_zpk,
+        "G": _g_weighting_zpk,
+        "468": _itu_r_468_zpk,
+    }
+    return builders[curve]()
+
+
+def _zeros_at_origin(curve: str) -> int:
+    """How many zeros of *curve*'s prototype sit at the origin, as its builder states."""
+    return _prototype(curve)[0]
 
 
 def _analog_weighting_zpk(curve: str) -> tuple[np.ndarray, np.ndarray, float]:
     """Analog prototype of *curve*, normalised to 0 dB at its reference.
 
     :param curve: An upper-case name in :data:`_PROTOTYPE_CURVES`.
-    :return: ``(zeros, poles, gain)`` in rad/s.
+    :return: ``(zeros, poles, gain)`` in rad/s, the zeros at the origin first,
+        :func:`_zeros_at_origin` of them.
     """
-    if curve == "AU":
-        zeros, poles, gain = _a_weighting_zpk()
-        poles = np.concatenate([poles.astype(complex), _u_poles()])
-    else:
-        builders = {
-            "A": _a_weighting_zpk,
-            "B": _b_weighting_zpk,
-            "C": _c_weighting_zpk,
-            "D": _d_weighting_zpk,
-            "G": _g_weighting_zpk,
-            "468": _itu_r_468_zpk,
-        }
-        zeros, poles, gain = builders[curve]()
+    at_origin, away, poles, gain = _prototype(curve)
+    zeros = np.concatenate((np.zeros(at_origin), away))
     w_ref = 2 * np.pi * _REFERENCE_HZ.get(curve, 1000.0)
     # gain * prod(j w_ref - zeros) / prod(j w_ref - poles), numpy's steps in
     # numpy's order, in the real arithmetic complex_product explains.
@@ -554,6 +580,7 @@ def _cached_weighting_sos(curve: str, fs: int, *, high_accuracy: bool) -> np.nda
             _fit_band(curve, fs),
             _FIT_SECTIONS[curve],
             _REFERENCE_HZ.get(curve, 1000.0),
+            n_origin_zeros=_zeros_at_origin(curve),
         )
     else:
         sos = signal.zpk2sos(*bilinear_zpk(zeros, poles, gain, fs))

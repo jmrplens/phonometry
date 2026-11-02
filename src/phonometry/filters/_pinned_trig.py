@@ -47,6 +47,7 @@ on all of it.
 from __future__ import annotations
 
 import math
+from fractions import Fraction
 
 import numpy as np
 
@@ -68,6 +69,14 @@ _LAST_PRECISION = 1200
 
 #: Largest argument the trigonometric functions accept.
 _TRIG_LIMIT = 1024.0
+
+#: Below this magnitude the sine, the tangent and the arctangent of ``x``
+#: round to ``x`` itself: each differs from ``x`` by less than
+#: :math:`|x|^3/3`, which under :math:`2^{-27}` is less than half the gap to
+#: either neighbour of ``x``, :math:`|x| \cdot 2^{-54}` at the least. The
+#: branch returns the argument, signed zeros and subnormals included, so a
+#: zero is never a case of its own.
+_TINY_ARGUMENT = 2.0**-27
 
 
 def _arctan_reciprocal(n: int, scale: int) -> int:
@@ -114,20 +123,27 @@ _HALF_PI_DOUBLE = _PI / (1 << (_PI_BITS + 1))
 def _round_fixed(value: int, error: int, scale: int) -> float | None:
     """The double ``value / 2**scale`` rounds to, if the error bound cannot move it.
 
-    Integer true division in Python is correctly rounded, so both ends of the
-    interval are rounded exactly; equal ends mean every point inside rounds
-    to the same double.
+    Integer true division in Python is correctly rounded, so the low end of
+    the interval rounds to the double ``low``. Every point of the interval
+    rounds to it when the whole interval lies strictly between the midpoints
+    ``low`` shares with its two neighbours, which is decided in exact
+    rational arithmetic rather than by comparing two doubles; an interval
+    that reaches either midpoint, even exactly, asks for more precision.
 
     :param value: The fixed-point approximation.
     :param error: A bound on its distance from the exact result, in units.
     :param scale: The binary point.
-    :return: The correctly rounded double, or ``None`` if the bound straddles
+    :return: The correctly rounded double, or ``None`` if the bound reaches
         a rounding boundary.
     """
     denominator = 1 << scale
     low = (value - error) / denominator
-    high = (value + error) / denominator
-    return low if low == high else None
+    nearest = Fraction(low)
+    below = (nearest + Fraction(math.nextafter(low, -math.inf))) / 2
+    above = (nearest + Fraction(math.nextafter(low, math.inf))) / 2
+    inside = below < Fraction(value - error, denominator)
+    inside = inside and Fraction(value + error, denominator) < above
+    return low if inside else None
 
 
 def _fixed_argument(x: float, scale: int) -> int:
@@ -179,20 +195,24 @@ def _sin_cos(r: int, scale: int) -> tuple[int, int, int]:
     return sine, cosine, 4 * max(terms, k) + 8
 
 
-def _check_trig_argument(x: float) -> None:
-    """Refuse anything but a finite double inside the domain the routines are proved on."""
+def _trig_argument_is_tiny(x: float) -> bool:
+    """Refuse anything but a finite double inside the proved domain; say if it is tiny.
+
+    :return: Whether ``|x|`` is below :data:`_TINY_ARGUMENT`, where the sine
+        and the tangent of ``x`` round to ``x`` and the routines hand it back.
+    """
     if not isinstance(x, float):
         message = f"pinned trigonometry takes a Python float; got {type(x).__name__}."
         raise TypeError(message)
     if not (math.isfinite(x) and -_TRIG_LIMIT < x < _TRIG_LIMIT):
         message = f"pinned trigonometry takes |x| < {_TRIG_LIMIT:g}; got {x!r}."
         raise ValueError(message)
+    return math.fabs(x) < _TINY_ARGUMENT
 
 
 def _sin_scalar(x: float) -> float:
     """``sin(x)`` correctly rounded, by Ziv's loop."""
-    _check_trig_argument(x)
-    if not x:
+    if _trig_argument_is_tiny(x):
         return x
     precision = _FIRST_PRECISION
     while precision <= _LAST_PRECISION:
@@ -210,8 +230,7 @@ def _sin_scalar(x: float) -> float:
 
 def _tan_scalar(x: float) -> float:
     """``tan(x)`` correctly rounded, by Ziv's loop over a fixed-point quotient."""
-    _check_trig_argument(x)
-    if not x:
+    if _trig_argument_is_tiny(x):
         return x
     precision = _FIRST_PRECISION
     while precision <= _LAST_PRECISION:
@@ -277,16 +296,18 @@ def _atan_fixed(magnitude: float, scale: int) -> tuple[int, int]:
 def _atan_scalar(x: float) -> float:
     r"""``atan(x)`` correctly rounded, by Ziv's loop, over the whole line of doubles.
 
-    A signed zero and a NaN come back as they were handed, an infinity as the
-    double nearest :math:`\pm\pi/2`; every other double is evaluated by
-    :func:`_atan_fixed` at a scale that keeps ``precision`` significant bits
-    however small the argument, subnormals included. The arctangent of a
-    non-zero double is never half way between two doubles, so the loop ends.
+    A NaN comes back as it was handed, and so does an argument below
+    :data:`_TINY_ARGUMENT`, the signed zeros and the subnormals among them,
+    since its arctangent rounds to it; an infinity comes back as the double
+    nearest :math:`\pm\pi/2`; every other double is evaluated by
+    :func:`_atan_fixed` at a scale that keeps ``precision`` significant bits.
+    The arctangent of a non-zero double is never half way between two
+    doubles, so the loop ends.
     """
     if not isinstance(x, float):
         message = f"pinned arctangent takes a Python float; got {type(x).__name__}."
         raise TypeError(message)
-    if math.isnan(x) or not x:
+    if math.isnan(x) or math.fabs(x) < _TINY_ARGUMENT:
         return x
     if math.isinf(x):
         return math.copysign(_HALF_PI_DOUBLE, x)
@@ -308,7 +329,9 @@ def _hypot_scalar(x: float, y: float) -> float:
 
     The exact square root is bracketed by an integer square root with at least
     64 significant bits, and the last bit of the bracket records whether the
-    root was exact, so the one rounding that follows is the correct one.
+    root was exact, so the one rounding that follows is the correct one. A
+    root past the largest double rounds to infinity, as IEEE 754 rounds an
+    overflow and :func:`math.hypot` returns it.
     """
     if not (isinstance(x, float) and isinstance(y, float)):
         message = (
@@ -329,7 +352,13 @@ def _hypot_scalar(x: float, y: float) -> float:
     scaled = total << (2 * shift)
     root = math.isqrt(scaled)
     inexact = root * root != scaled
-    return (2 * root + inexact) / (1 << (exponent + shift + 1))
+    try:
+        return (2 * root + inexact) / (1 << (exponent + shift + 1))
+    except OverflowError:
+        # Python's integer division raises exactly where the correctly rounded
+        # quotient is past the largest double, which IEEE 754 rounds to
+        # infinity, as math.hypot returns it.
+        return math.inf
 
 
 def _elementwise(function: object, values: np.ndarray | float) -> np.ndarray:
@@ -381,7 +410,8 @@ def pinned_hypot(x: float, y: float) -> float:
 
     :param x: A finite Python float.
     :param y: A finite Python float.
-    :return: :math:`\sqrt{x^2 + y^2}` rounded once.
+    :return: :math:`\sqrt{x^2 + y^2}` rounded once, infinity where that is
+        past the largest double.
     :raises TypeError: If ``x`` or ``y`` is not a Python float.
     :raises ValueError: If either argument is not finite.
     """

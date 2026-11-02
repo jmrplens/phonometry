@@ -106,6 +106,20 @@ def test_pow_bits_match_over_the_bases_and_exponents_the_design_uses() -> None:
 
 
 @on_the_pinned_libm
+def test_pow_of_a_subnormal_base_matches() -> None:
+    """A base below the normal range is rescaled by 2**52 first, as the C routine does."""
+    rng = np.random.default_rng(4)
+    n = 20_000
+    base = rng.integers(1, 1 << 52, n).astype(np.float64) * 2.0**-1074
+    exponent = np.concatenate(
+        [rng.uniform(0.001, 1.0, n // 2), rng.uniform(-0.2, -0.001, n // 2)]
+    )
+    assert not _mismatches(
+        pinned_pow(base, exponent), _pow_reference(base, exponent)
+    ).any()
+
+
+@on_the_pinned_libm
 def test_every_exp_and_pow_input_of_a_real_design_matches(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

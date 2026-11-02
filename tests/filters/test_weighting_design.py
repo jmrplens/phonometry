@@ -27,10 +27,10 @@ import warnings
 
 import numpy as np
 import pytest
-from arctan_oracle import correctly_rounded_arctangent
 from libm_identity import TUNABLES, WITHOUT_FMA, glibc_on_x86_64_with_fma
 from reference_data import IEC61672_TABLE3 as TABLE3
 from scipy import signal as sg
+from trig_oracle import correctly_rounded_arctangent
 
 from phonometry import filters
 from phonometry.filters import _weighting_design
@@ -1068,7 +1068,7 @@ def test_with_an_independent_arctangent_the_design_is_the_same(
     """The design's arctangent is the correctly rounded one, found another way.
 
     The arctangent is swapped for
-    :func:`arctan_oracle.correctly_rounded_arctangent`, which starts from the
+    :func:`trig_oracle.correctly_rounded_arctangent`, which starts from the
     local C library's answer and walks to the correctly rounded double by
     exact rational bounds on the tangent, so neither the pinned routine nor
     its algorithm has a part in it. The design lands on the production test's

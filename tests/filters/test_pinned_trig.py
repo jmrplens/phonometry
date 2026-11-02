@@ -5,8 +5,9 @@
 one definition and no platform in it. These tests hold it to that on inputs
 where glibc itself is not correctly rounded (the values were computed at 400
 bits with an independent arbitrary-precision library), check ``hypot`` against
-exact rational arithmetic and ``atan`` against exact rational bounds on the
-tangent (:mod:`arctan_oracle`), and pin what the weighting design relies on:
+exact rational arithmetic, ``atan`` against exact rational bounds on the
+tangent, and ``sin`` and ``tan`` against exact rational enclosures of their
+values (:mod:`trig_oracle`), and pin what the weighting design relies on:
 on every sine, tangent and magnitude a design evaluates, glibc is correctly
 rounded too, so the pinned routines return the C library's own bits there,
 while on 19 of the arctangents the checked designs evaluate it is not, and
@@ -17,16 +18,23 @@ from __future__ import annotations
 
 import math
 import platform
+import sys
 from fractions import Fraction
 
 import numpy as np
 import pytest
-from arctan_oracle import is_correctly_rounded_arctangent
+from trig_oracle import (
+    is_correctly_rounded_arctangent,
+    is_correctly_rounded_sine,
+    is_correctly_rounded_tangent,
+)
 
-from phonometry.filters import _weighting_design
+from phonometry.filters import _pinned_trig, _weighting_design
 from phonometry.filters._pinned_trig import (
     _atan_scalar,
+    _fixed_argument,
     _hypot_scalar,
+    _round_fixed,
     _sin_scalar,
     _tan_scalar,
     pinned_atan,
@@ -129,6 +137,8 @@ _ARCTANGENT_SPECIALS = (
     float.fromhex("0x0.0000000000001p-1022"),
     -float.fromhex("0x0.8000000000001p-1022"),
     float.fromhex("0x0.fffffffffffffp-1022"),
+    math.nextafter(2.0**-27, 0.0),
+    -(2.0**-27),
     math.inf,
     -math.inf,
     math.nan,
@@ -163,7 +173,7 @@ def _neighbours(r: float) -> tuple[float, float]:
 def test_arctangent_is_correctly_rounded_by_rational_bounds() -> None:
     """Every answer lies within half an ulp, decided with no arctangent evaluated.
 
-    :mod:`arctan_oracle` brackets the exact value between the midpoints around
+    :mod:`trig_oracle` brackets the exact value between the midpoints around
     the answer through the tangent of each midpoint, enclosed in exact
     rational arithmetic, so the verdict owes nothing to the routine under test
     or to the C library. The oracle is shown to refuse as well: the doubles on
@@ -317,26 +327,74 @@ def test_glibc_agrees_on_every_input_a_design_evaluates(curve: str, fs: int) -> 
         assert pinned_hypot(root.real, root.imag) == abs(root)
 
 
-def _ordered(values: np.ndarray) -> np.ndarray:
-    as_int = values.view(np.int64)
-    return np.where(as_int < 0, -(as_int & 0x7FFFFFFFFFFFFFFF), as_int)
+#: Arguments whose sine and tangent every check below decides: the signed
+#: zeros, two the routines hand back as the argument itself, and the two
+#: sides of the magnitude below which they do.
+_TRIG_SPECIALS = (
+    0.0,
+    -0.0,
+    2.0**-40,
+    -(2.0**-40),
+    math.nextafter(2.0**-27, 0.0),
+    2.0**-27,
+    -(2.0**-27),
+)
 
 
-def test_within_one_ulp_of_the_local_libm_everywhere() -> None:
-    """On any platform, the correctly rounded value and the local libm stay adjacent."""
-    rng = np.random.default_rng(5)
-    x = np.concatenate(
-        [rng.uniform(0.0, math.pi, 4000), rng.uniform(-1000.0, 1000.0, 1000)]
-    )
-    t = rng.uniform(-1.55, 1.55, 4000)
-    a = rng.uniform(-1.0, 1.0, 4000) * 2.0 ** rng.integers(-30, 60, 4000)
-    gap_sin = np.abs(_ordered(pinned_sin(x)) - _ordered(np.sin(x)))
-    gap_tan = np.abs(_ordered(pinned_tan(t)) - _ordered(np.tan(t)))
-    local_atan = np.array([math.atan(v) for v in a.tolist()])
-    gap_atan = np.abs(_ordered(pinned_atan(a)) - _ordered(local_atan))
-    assert int(gap_sin.max()) <= 1
-    assert int(gap_tan.max()) <= 1
-    assert int(gap_atan.max()) <= 1
+def _trig_draws(seed: int, near: float) -> list[float]:
+    """Draws over ``(-near, near)``, over the whole domain, and the specials."""
+    rng = np.random.default_rng(seed)
+    near_draws = rng.uniform(-near, near, 100)
+    far_draws = rng.uniform(-1000.0, 1000.0, 100)
+    return [*near_draws.tolist(), *far_draws.tolist(), *_TRIG_SPECIALS]
+
+
+@pytest.mark.parametrize(
+    ("function", "oracle", "near"),
+    [
+        (pinned_sin, is_correctly_rounded_sine, math.pi),
+        (pinned_tan, is_correctly_rounded_tangent, 1.55),
+    ],
+    ids=["sin", "tan"],
+)
+def test_sine_and_tangent_are_correctly_rounded_by_rational_bounds(
+    function: object, oracle: object, near: float
+) -> None:
+    """Each answer is the double nearest the exact value, and neither neighbour is.
+
+    :mod:`trig_oracle` decides from exact rational enclosures of pi, the sine
+    and the cosine, so no platform's routine has a say in the verdict. The
+    check this replaces held the routines within one unit in the last place
+    of the local library, which is a claim about that library: on macOS,
+    numpy's tangent of one of its draws came back two units from the answer
+    the oracle confirms is the correctly rounded one.
+    """
+    draws = _trig_draws(7, near)
+    answers = function(np.array(draws)).tolist()  # type: ignore[operator]
+    for x, r in zip(draws, answers, strict=True):
+        assert oracle(x, r), x.hex()  # type: ignore[operator]
+        for neighbour in (math.nextafter(r, -math.inf), math.nextafter(r, math.inf)):
+            assert not oracle(x, neighbour), (x.hex(), neighbour.hex())  # type: ignore[operator]
+
+
+@pytest.mark.parametrize(
+    ("oracle", "cases"),
+    [(is_correctly_rounded_sine, _SIN_HARD), (is_correctly_rounded_tangent, _TAN_HARD)],
+    ids=["sin", "tan"],
+)
+def test_the_trigonometric_oracles_refuse_the_c_library_where_it_misrounds(
+    oracle: object, cases: tuple[tuple[str, str], ...]
+) -> None:
+    """The oracles are not blind: they refuse glibc's answer on its hard cases.
+
+    On each they accept the value computed at 400 bits and refuse both its
+    neighbours, glibc's answer one of them.
+    """
+    for x_hex, r_hex in cases:
+        x, r = float.fromhex(x_hex), float.fromhex(r_hex)
+        assert oracle(x, r), x_hex  # type: ignore[operator]
+        for neighbour in (math.nextafter(r, -math.inf), math.nextafter(r, math.inf)):
+            assert not oracle(x, neighbour), x_hex  # type: ignore[operator]
 
 
 def test_tiny_and_signed_arguments() -> None:
@@ -365,6 +423,96 @@ def test_hypot_refuses_infinities() -> None:
     """The design never asks for the magnitude of an infinite root."""
     with pytest.raises(ValueError, match="finite arguments"):
         pinned_hypot(np.inf, 1.0)
+
+
+@pytest.mark.parametrize(
+    ("x", "y"),
+    [
+        (sys.float_info.max, sys.float_info.max),
+        (sys.float_info.max, 2.0**998),
+        (sys.float_info.max, 2.0**997),
+        (2.0**1023, 2.0**1023),
+        (-(2.0**1023), 1.5 * 2.0**1023),
+    ],
+)
+def test_hypot_rounds_an_overflow_to_infinity(x: float, y: float) -> None:
+    """Finite arguments whose root is past the largest double give infinity.
+
+    The correctly rounded root of ``max**2 + 2**998**2`` is past the
+    midpoint between the largest double and :math:`2^{1024}`, so it rounds
+    to infinity as IEEE 754 rounds an overflow; ``2**997`` leaves it short
+    of the midpoint and the answer is the largest double. Both are
+    :func:`math.hypot`'s answers, and neither is an ``OverflowError``.
+    """
+    assert pinned_hypot(x, y) == math.hypot(x, y)
+
+
+@pytest.mark.parametrize(
+    ("routine", "name"),
+    [(_sin_scalar, "sin"), (_tan_scalar, "tan"), (_atan_scalar, "atan")],
+)
+def test_a_spent_precision_budget_is_refused_rather_than_guessed(
+    routine: object, name: str, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """With no pass left to take, the routine raises instead of returning a guess.
+
+    The budget is never spent in practice, since 1200 bits decide every
+    double these routines take; the refusal is what stands behind that.
+    """
+    monkeypatch.setattr(_pinned_trig, "_LAST_PRECISION", 0)
+    with pytest.raises(ArithmeticError, match=rf"pinned {name} could not round"):
+        routine(0.5)  # type: ignore[operator]
+
+
+@pytest.mark.parametrize(
+    "routine", [_sin_scalar, _tan_scalar, _atan_scalar], ids=["sin", "tan", "atan"]
+)
+def test_a_first_pass_too_short_to_decide_hands_over_to_a_longer_one(
+    routine: object, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Started at four bits, every routine doubles its way to the same double."""
+    arguments = [0.5, 1.25, -2.75, 3.0e-5, 1000.5]
+    expected = [routine(x) for x in arguments]  # type: ignore[operator]
+    monkeypatch.setattr(_pinned_trig, "_FIRST_PRECISION", 4)
+    got = [routine(x) for x in arguments]  # type: ignore[operator]
+    assert [v.hex() for v in got] == [v.hex() for v in expected]
+
+
+def test_the_fixed_point_argument_truncates_past_its_scale() -> None:
+    """``x * 2**scale`` is exact where the scale reaches x's last bit, floored past it."""
+    assert _fixed_argument(0.75, 2) == 3
+    assert _fixed_argument(0.75, 1) == 1
+    assert _fixed_argument(3.0, 0) == 3
+
+
+@pytest.mark.parametrize(
+    ("value", "error", "scale", "expected"),
+    [
+        (3, 0, 1, 1.5),
+        ((1 << 53) + 1, 0, 0, None),
+        (-((1 << 53) + 1), 0, 0, None),
+        ((1 << 54) + 1, 1, 1, None),
+        ((1 << 54) + 4, 1, 1, float((1 << 53) + 2)),
+        ((1 << 54) + 5, 1, 1, None),
+    ],
+)
+def test_rounding_asks_for_more_bits_whenever_the_bound_reaches_a_midpoint(
+    value: int, error: int, scale: int, expected: float | None
+) -> None:
+    """An interval that reaches a midpoint at either end, even exactly, decides nothing.
+
+    ``2**53 + 1`` is the midpoint between ``2**53`` and ``2**53 + 2``: an
+    approximation sitting on it, or a bound reaching it from either side,
+    could be either, and the routine asks for more precision rather than for
+    the tie's even neighbour. An interval strictly between two midpoints
+    decides.
+    """
+    rounded = _round_fixed(value, error, scale)
+    if expected is None:
+        assert rounded is None
+    else:
+        assert rounded is not None
+        assert rounded.hex() == expected.hex()
 
 
 @pytest.mark.parametrize(

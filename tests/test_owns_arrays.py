@@ -757,6 +757,47 @@ def test_an_init_var_that_holds_itself_is_refused_naming_it() -> None:
 
 
 @dataclasses.dataclass(frozen=True)
+class _InitVarByPlace(OwnsArrays):
+    levels: np.ndarray
+    offset_db: dataclasses.InitVar[np.ndarray]
+
+    def __post_init__(self, *values: np.ndarray) -> None:
+        del values
+
+
+def _unreadable_hook(self: object, offset_db: np.ndarray) -> None:
+    del self, offset_db
+
+
+# A signature no reader can take: inspect.signature refuses it with a TypeError.
+_unreadable_hook.__signature__ = "unreadable"  # type: ignore[attr-defined]
+
+
+@dataclasses.dataclass(frozen=True)
+class _InitVarUnread(OwnsArrays):
+    levels: np.ndarray
+    offset_db: dataclasses.InitVar[np.ndarray]
+
+    __post_init__ = _unreadable_hook
+
+
+@pytest.mark.parametrize("record", [_InitVarByPlace, _InitVarUnread])
+def test_an_init_var_the_hook_names_no_way_is_refused_by_its_place(
+    record: type[OwnsArrays],
+) -> None:
+    """An ``InitVar`` the hook takes through ``*args``, or whose signature
+    cannot be read, is named by its place among the hook's arguments.
+    """
+    levels = _writeable([1.0])
+    endless = _holds_itself("list")
+    with pytest.raises(
+        TypeError,
+        match=r"'argument 1 of __post_init__' holds a container that holds itself",
+    ):
+        record(levels=levels, offset_db=endless)  # type: ignore[call-arg]
+
+
+@dataclasses.dataclass(frozen=True)
 class _StoresALoop(OwnsArrays):
     levels: np.ndarray
     rows: list[object] = dataclasses.field(init=False)

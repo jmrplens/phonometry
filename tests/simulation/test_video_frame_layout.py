@@ -14,6 +14,7 @@ import io
 import itertools
 import math
 import warnings
+from collections import UserString
 from typing import TYPE_CHECKING, Any, NamedTuple
 
 import numpy as np
@@ -591,28 +592,50 @@ def test_a_frame_under_the_floor_is_refused_naming_it(size: tuple[int, int]) -> 
 
 
 class _CountedArray(np.ndarray):
-    """A one-axis array that counts the sides read out of it."""
+    """A one-axis array that counts the sides read out of it, and its copies to a list."""
 
     read = 0
+    copied = 0
 
     def __iter__(self) -> Iterator[object]:
         _CountedArray.read += 1
         return super().__iter__()
+
+    def tolist(self) -> object:
+        _CountedArray.copied += 1
+        return super().tolist()
 
 
 def test_an_array_of_sides_is_measured_before_any_side_is_read() -> None:
     """A size given as an array is refused by its length, before it is copied.
 
     The array was turned into a list first, side by side, and only then
-    measured, so a long array was copied whole to be refused for its length.
+    measured, so a long array was copied whole to be refused for its length;
+    neither its iteration nor ``tolist`` runs now.
     """
     _CountedArray.read = 0
+    _CountedArray.copied = 0
     long = np.arange(10_000).view(_CountedArray)
     with pytest.raises(ValueError, match=r"must be a pair \(width, height\)"):
         video_module._frame_pixels(long)
     assert _CountedArray.read == 0
+    assert _CountedArray.copied == 0
     pair = np.array([480, 246]).view(_CountedArray)
     assert video_module._frame_pixels(pair) == (480, 246)
+
+
+@pytest.mark.parametrize(
+    "text", [UserString("480,245"), UserString("480"), UserString("")]
+)
+def test_a_text_wrapper_is_refused_as_a_text(text: UserString) -> None:
+    """A ``UserString`` is a sequence of characters as a ``str`` is: refused as one.
+
+    Python counts it a sequence, so the frame took it for one and measured
+    it, refusing ``"480,245"`` with ``ValueError`` for its seven sides
+    instead of with ``TypeError`` for the text it is.
+    """
+    with pytest.raises(TypeError, match=r"must be a pair \(width, height\)"):
+        AnimationFrame(size=text)  # type: ignore[arg-type]
 
 
 def test_a_frame_at_the_floor_is_built() -> None:

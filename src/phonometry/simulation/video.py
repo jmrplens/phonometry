@@ -75,7 +75,7 @@ from __future__ import annotations
 
 import contextlib
 import math
-from collections import deque
+from collections import UserString, deque
 from collections.abc import Collection, Sequence
 from dataclasses import dataclass, replace
 from fractions import Fraction
@@ -221,12 +221,15 @@ def _frame_sides(size: object) -> Collection[object]:
     An array is not copied into a list: its length is read first, so one of
     any length other than two is refused before any of it is read.
 
-    :raises TypeError: for a text, which Python counts a sequence too, or
-        anything else that is no sequence.
+    :raises TypeError: for a text, which Python counts a sequence too (a
+        ``str``, ``bytes``, a ``bytearray`` or a ``UserString`` wrapping
+        one), or anything else that is no sequence.
     """
     if isinstance(size, np.ndarray) and size.ndim == 1:
         return size
-    if isinstance(size, Sequence) and not isinstance(size, str | bytes | bytearray):
+    if isinstance(size, Sequence) and not isinstance(
+        size, str | bytes | bytearray | UserString
+    ):
         return size
     msg = f"'size' must be a pair (width, height) in pixels, got {size!r}"
     raise TypeError(msg)

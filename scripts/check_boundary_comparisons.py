@@ -819,19 +819,19 @@ class Module:
             if name in names.declared_global:
                 break
             if names.binds(name):
-                return self._bound_as(current, name, node if current is scope else None)
+                return self._bound_as(current, name, node, here=current is scope)
             current = self.enclosing(current)
         return self.top_functions.get(name, ())
 
     def _bound_as(
-        self, function: Function, name: str, node: ast.AST | None = None
+        self, function: Function, name: str, node: ast.AST | None, *, here: bool
     ) -> tuple[Function, ...] | None:
         """The functions *name* stands for in *function*, which binds it itself.
 
         The functions of that name it defines (inside an ``if``, a ``try`` or
         a ``with`` too): those that may have run before *node* and that no
         later one replaced on the way, when *node* is written in *function*
-        (:func:`ast_scan.live_bindings`), or every one; none for an import,
+        (*here*, :func:`ast_scan.live_bindings`), or every one; none for an import,
         which the package follows; and ``None`` for any other binding: the
         name is then the function's, and no function of the module or of an
         import is the one it calls.
@@ -839,7 +839,7 @@ class Module:
         how = own_names(function).how(name)
         if how == "definition":
             defined = _by_name(_own_definitions(function)).get(name, ())
-            if node is None:
+            if node is None or not here:
                 return defined
             return tuple(live_bindings(function, list(defined), node))
         if how == "import":

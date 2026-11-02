@@ -1625,6 +1625,22 @@ class Reader:
                 return (resolved,) if resolved is not None else ()
         return ()
 
+    def reached_by(self, func: ast.expr, call: ast.AST) -> list[FunctionInfo]:
+        """Every definition a call can reach (:meth:`reached`), when each
+        function it may name is a function of the package; none otherwise.
+        """
+        targets = self.callees(func)
+        if any(target not in self.tree.functions for target in targets):
+            return []
+        return [found for target in targets for found in self.reached(target, call)]
+
+    def selects_positions(self, func: ast.expr) -> bool:
+        """Whether every function of the package a call may name returns a
+        mask or positions on every return of its own.
+        """
+        targets = self.callees(func)
+        return bool(targets) and all(key in self.tree.positions for key in targets)
+
     # -- what kind of thing a name holds ----------------------------------
     def indexes(self, node: ast.expr) -> bool:
         """Whether *node* is a mask or an array of positions.
@@ -1665,8 +1681,7 @@ class Reader:
             # A helper of the package selects by position only when every
             # return of its own is a mask or positions; one that hands out a
             # slice, or anything else, is read as a view.
-            keys = self.callees(node.func)
-            return bool(keys) and all(key in self.tree.positions for key in keys)
+            return self.selects_positions(node.func)
         return False
 
     def builds_container(self, node: ast.expr) -> bool:
@@ -2371,13 +2386,10 @@ class Reader:
         info = self.built_record(call)
         if info is not None:
             return self.tree.copies_arrays(info)
-        targets = self.callees(func)
-        if not targets or depth >= 3:
-            return False
-        if any(target not in self.tree.functions for target in targets):
+        if depth >= 3:
             return False
         # Every definition the call can reach only reads what it is given.
-        reached = [d for target in targets for d in self.reached(target, call)]
+        reached = self.reached_by(func, call)
         return bool(reached) and all(
             self._reads_only(function, call, node, keyword, depth)
             for function in reached
@@ -2511,11 +2523,8 @@ class Reader:
                 return False
         if not isinstance(call, ast.Call) or depth >= 3:
             return False
-        targets = self.callees(call.func)
-        if not targets or any(target not in self.tree.functions for target in targets):
-            return False
         # Every definition the call can reach only writes into what it is given.
-        reached = [d for target in targets for d in self.reached(target, call)]
+        reached = self.reached_by(call.func, call)
         return bool(reached) and all(
             self._writes_only(function, call, node, keyword, depth)
             for function in reached

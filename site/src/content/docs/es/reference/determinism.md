@@ -5,9 +5,10 @@ description: "Determinismo: por qué deriva la coma flotante, cómo un filtro si
 
 Un filtro de ponderación diseñado por phonometry es el mismo filtro, byte a
 byte, sean cuales sean la biblioteca C, el número de hilos o la semilla de
-hash con que se diseñe, y en cualquier procesador x86-64, con o sin AVX-512
-o multiply-add fusionado, corra allí el juego de kernels de OpenBLAS que
-corra. La única reserva son dos pasos de la cascada realizada que pasan por
+hash con que se diseñe, sea cual sea el compilador con que se construyó
+numpy, y en cualquier procesador x86-64, con o sin AVX-512 o multiply-add
+fusionado, corra allí el juego de kernels de OpenBLAS que corra. La única
+reserva son dos pasos de la cascada realizada que pasan por
 una biblioteca numérica y no por la biblioteca C, las raíces polinómicas de
 LAPACK y los productos BLAS que forma SciPy, que en ARM de 64 bits, según se
 midió, separan algunos diseños de las otras curvas y ninguno de la
@@ -80,10 +81,17 @@ El camino de diseño determinista responde a cada puerta en su terreno, en
   *más exacto*: un redondeo O(&epsilon;&nbsp;log&nbsp;n) contra el
   O(&epsilon;&nbsp;n) de un acumulador corrido, así que no se sacrificó
   nada.
-- **Aritmética real donde la compleja se despacha.** El producto complejo y
-  el módulo complejo fusionan operaciones de forma distinta por CPU, así que
-  los dos puntos donde el camino entregaba a numpy una expresión compleja
-  están escritos en aritmética real.
+- **Aritmética real donde la compleja se despacha o se fusiona.** El
+  producto complejo y el módulo complejo fusionan operaciones de forma
+  distinta por CPU, y el producto y el cociente complejos de numpy son
+  bucles de C que un compilador puede fusionar en multiply-adds: numpy
+  compilado con clang, como en macOS y Windows, lo hace, y numpy compilado
+  con GCC, como en Linux, no. Así que cada punto donde el camino entregaba a
+  numpy o a SciPy una expresión compleja está escrito en aritmética real,
+  los pasos de numpy en el orden de numpy, cada uno redondeado una vez: la
+  curva impresa a la que apunta el ajuste, la lectura que fija la ganancia
+  que se entrega y la transformada bilineal con su ganancia, que
+  `bilinear_zpk` de SciPy forma como un producto de números complejos.
 - **Trascendentes fijadas.** Dentro de la iteración, el logaritmo corre tres
   cuartos de millón de veces por diseño, la exponencial una vez por factor y
   por evaluación, y la potencia una vez por punto de la rejilla en cada
@@ -200,9 +208,18 @@ corren en CI:
 - **Un digest en tres plataformas.** Con solo el logaritmo fijado, la
   ponderación A a 48&nbsp;kHz daba `991833ff389afe91` en Linux (glibc,
   x86-64), `4efa1818bd80e23a` en macOS (arm64) y `79852a57e60961c8` en
-  Windows (x86-64). Ahora un test de la matriz de CI la diseña tal como se
-  entrega, sin sustituir nada, y sostiene `991833ff389afe91` en las tres
-  plataformas, y la ponderación A a 44,1&nbsp;kHz en `dbea4b7fc4ad972b`; un
+  Windows (x86-64). Con todas las trascendentes fijadas aún daba
+  `5f5e34e5d3a8aa6e` en macOS y en Windows, un mismo valor para los dos: la
+  transformada bilineal de SciPy tomaba la ganancia como un producto de
+  números complejos, por el bucle de numpy que clang fusiona y GCC no. Un
+  test que fusiona esos productos y cocientes en cualquier plataforma
+  reproduce ese digest con el código que llamaba a SciPy, y con la
+  transformada escrita en aritmética real diseña `991833ff389afe91`, y con
+  ella sin cambios los diseños bilineales simples de todas las curvas a
+  48&nbsp;kHz. Un test de la matriz de CI diseña la ponderación A tal como
+  se entrega, sin sustituir nada, y la sostiene en `991833ff389afe91` en las
+  tres plataformas, y la ponderación A a 44,1&nbsp;kHz en
+  `dbea4b7fc4ad972b`; un
   segundo test diseña las dos otra vez con una arcotangente que no le debe
   nada a la rutina fijada, la respuesta de la biblioteca C llevada hasta el
   double correctamente redondeado con cotas racionales exactas, y cae en
@@ -213,8 +230,10 @@ corren en CI:
   compilaciones diseñan ahora el corpus entero con un mismo SHA-256.
   Los tests de respuesta
   que corren en esas tres plataformas sujetan el diseño A a 0,013&nbsp;dB de
-  su prototipo analógico en toda su banda de ajuste, lo que acota lo que
-  pueda suponer en respuesta cualquier diferencia que quede.
+  su prototipo analógico en 20&nbsp;001 frecuencias de su banda de ajuste,
+  en cada una de las seis frecuencias de muestreo que comprueban; dos
+  plataformas cuyos bytes aún difirieran podrían diferir hasta el doble,
+  0,026&nbsp;dB, en una de esas frecuencias.
 
 ## Compruébalo tú
 
@@ -241,8 +260,10 @@ y el cambio es un suceso documentado, nunca una propiedad de tu hardware.
 ## Alcance
 
 La garantía cubre el camino de diseño determinista de ponderaciones de punta
-a punta, en cualquier plataforma, y el procesamiento por bloques compone con
-ella: una cascada con
+a punta, dentro de los dos pasos de biblioteca que siguen: en cualquier
+plataforma para la ponderación A, que la matriz de CI sostiene en Linux,
+macOS y Windows, y para las otras curvas allí donde esos dos pasos dan los
+mismos bytes. El procesamiento por bloques compone con ella: una cascada con
 estado alimentada bloque a bloque es bit-idéntica a una sola pasada sobre el
 registro entero, así que el streaming no gasta la garantía. Las funciones de
 análisis generales construidas sobre numpy y SciPy en su forma corriente

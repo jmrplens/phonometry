@@ -75,13 +75,18 @@ output:
   different filters: 5e-5 apart in the leading coefficient, 0.002 dB apart
   in response, and 0.0225 pt apart in a plotted curve. So the reductions are
   done here instead, by :func:`_ordered_sum` and :func:`_solve_dense`, in an
-  order this module fixes rather than one a library picks, and the two places
+  order this module fixes rather than one a library picks, and the places
   the path used to hand a *complex* expression to numpy (the printed curve
-  the fit aims at, and the one read-back that sets the shipped gain) are
-  written out in real arithmetic by :func:`_log_distance2` and
-  :func:`_cascade_magnitude`, because complex multiplication and complex
+  the fit aims at, the one read-back that sets the shipped gain, and the
+  bilinear transform with its gain) are written out in real arithmetic by
+  :func:`_log_distance2`, :func:`_cascade_magnitude` and
+  :func:`bilinear_zpk`, because complex multiplication and complex
   magnitude are dispatched on what the CPU can do in exactly the same way a
-  BLAS reduction is.
+  BLAS reduction is, and numpy's complex product is a C loop that a
+  compiler may fuse into multiply-adds: numpy built with clang does, on
+  macOS and on Windows, and numpy built with GCC does not, which kept the A
+  weighting at 48 kHz apart on those platforms after every transcendental
+  was pinned.
 
   Fixing the reductions was not enough, and what was left is worth stating
   because it is where an earlier version of this paragraph was wrong. It said
@@ -1128,6 +1133,129 @@ def _analog_db(
     return np.asarray(_DB_PER_LOG * (shape(omega) - shape(omega_ref)[0]))
 
 
+def complex_product(factors: list[tuple[float, float]]) -> tuple[float, float]:
+    r"""``numpy.prod`` of complex numbers, in real arithmetic, one rounding per operation.
+
+    numpy multiplies a complex array left to right, each step
+    :math:`(a_r b_r - a_i b_i) + \mathrm{j}(a_r b_i + a_i b_r)`, and the loop
+    it runs a product through is plain C a compiler may contract: numpy built
+    with clang fuses each of those into a multiply-add wherever the processor
+    has one, on every 64-bit ARM and on x86-64 from AVX2 on, and numpy built
+    with GCC does not. The product a design took through it moved by its last
+    bit between Linux and the macOS and Windows builds, and so did the A
+    weighting at 48 kHz. These are numpy's steps in the order numpy takes
+    them, each a separately rounded Python ``float`` operation, which no
+    compiler contracts, so the answer is the unfused one everywhere.
+
+    :param factors: The complex numbers as ``(real, imaginary)`` pairs.
+    :return: Their product as a pair, ``(1.0, 0.0)`` for none.
+    """
+    if not factors:
+        return 1.0, 0.0
+    real, imaginary = factors[0]
+    for factor_real, factor_imaginary in factors[1:]:
+        real, imaginary = (
+            real * factor_real - imaginary * factor_imaginary,
+            real * factor_imaginary + imaginary * factor_real,
+        )
+    return real, imaginary
+
+
+def complex_quotient(
+    numerator: tuple[float, float], denominator: tuple[float, float]
+) -> tuple[float, float]:
+    """numpy's complex division, Smith's algorithm, in real arithmetic.
+
+    The same steps numpy's loop takes, in the same order, each rounded once,
+    for the reason :func:`complex_product` gives: numpy's loop is C that clang
+    contracts into multiply-adds. The denominator is never zero here, since
+    every root the design maps lies in the closed left half plane and is
+    taken away from a positive ``2 fs``.
+
+    :param numerator: ``(real, imaginary)``.
+    :param denominator: ``(real, imaginary)``, not zero.
+    :return: The quotient as a pair.
+    """
+    real, imaginary = numerator
+    below_real, below_imaginary = denominator
+    if math.fabs(below_real) >= math.fabs(below_imaginary):
+        ratio = below_imaginary / below_real
+        scale = 1.0 / (below_real + below_imaginary * ratio)
+        return (real + imaginary * ratio) * scale, (imaginary - real * ratio) * scale
+    ratio = below_real / below_imaginary
+    scale = 1.0 / (below_imaginary + below_real * ratio)
+    return (real * ratio + imaginary) * scale, (imaginary * ratio - real) * scale
+
+
+def _mapped_roots(roots: np.ndarray, fs2: float) -> np.ndarray:
+    """``(2 fs + r) / (2 fs - r)`` for each root, as numpy computes it unfused.
+
+    A real array is divided as numpy divides reals, which IEEE 754 fixes; a
+    complex one goes through :func:`complex_quotient`, the sums formed as
+    numpy forms them with ``2 fs`` promoted to ``2 fs + 0j``.
+    """
+    if not np.iscomplexobj(roots):
+        return (fs2 + roots) / (fs2 - roots)
+    mapped = [
+        complex(
+            *complex_quotient(
+                (fs2 + root.real, 0.0 + root.imag), (fs2 - root.real, 0.0 - root.imag)
+            )
+        )
+        for root in roots.tolist()
+    ]
+    return np.array(mapped, dtype=np.complex128)
+
+
+def _shifted_product(roots: np.ndarray, fs2: float) -> tuple[float, float] | float:
+    """``prod(2 fs - r)``: a float for real roots, a ``(real, imaginary)`` pair for complex ones.
+
+    numpy's product of reals multiplies left to right from the first element,
+    each step one IEEE 754 multiplication; :func:`math.prod` takes the same
+    steps from ``1.0``, which leaves the first factor exact.
+    """
+    if not np.iscomplexobj(roots):
+        return math.prod((fs2 - roots).tolist(), start=1.0)
+    return complex_product(
+        [(fs2 - root.real, 0.0 - root.imag) for root in roots.tolist()]
+    )
+
+
+def bilinear_zpk(
+    zeros: np.ndarray, poles: np.ndarray, gain: float, fs: float
+) -> tuple[np.ndarray, np.ndarray, float]:
+    """:func:`scipy.signal.bilinear_zpk`, bit for bit where numpy does not fuse, and everywhere.
+
+    SciPy forms the digital roots and the gain with numpy's complex division
+    and complex product, which a numpy built with clang fuses into
+    multiply-adds and one built with GCC does not; see
+    :func:`complex_product`. This is SciPy's transform step for step, with
+    every complex operation spelled in separately rounded real arithmetic,
+    and a real array taken through real arithmetic as SciPy takes it, so it
+    returns what SciPy returns on Linux, and the same on every platform.
+
+    :param zeros: Analog zeros, rad/s, a real or complex one-dimensional array.
+    :param poles: Analog poles, rad/s, likewise, at least as many.
+    :param gain: Analog gain.
+    :param fs: Sampling rate in Hz.
+    :return: ``(zeros, poles, gain)`` of the digital filter, as SciPy gives them.
+    """
+    fs2 = 2.0 * fs
+    digital_zeros = np.concatenate(
+        (_mapped_roots(zeros, fs2), -np.ones(len(poles) - len(zeros)))
+    )
+    above = _shifted_product(zeros, fs2)
+    below = _shifted_product(poles, fs2)
+    if isinstance(above, float) and isinstance(below, float):
+        return digital_zeros, _mapped_roots(poles, fs2), gain * (above / below)
+    if isinstance(above, float):
+        above = (above, 0.0)
+    if isinstance(below, float):
+        below = (below, 0.0)
+    real, _ = complex_quotient(above, below)
+    return digital_zeros, _mapped_roots(poles, fs2), gain * real
+
+
 def _cascade_magnitude(sections: np.ndarray, frequency: float, fs: float) -> float:
     r"""``|H|`` of a biquad cascade at one frequency, in real arithmetic.
 
@@ -1310,7 +1438,7 @@ def design_sos(
         zeros, poles, fs, band, n_sections, reference_frequency_hz
     )
     anchor = _anchor_hz(fs, band, reference_frequency_hz)
-    digital = signal.bilinear_zpk(fitted_zeros, fitted_poles, 1.0, fs)
+    digital = bilinear_zpk(fitted_zeros, fitted_poles, 1.0, fs)
     sos = signal.zpk2sos(*digital)
     printed = _analog_db(
         np.asarray(zeros), np.asarray(poles), np.array([anchor]), reference_frequency_hz

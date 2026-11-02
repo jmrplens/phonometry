@@ -24,10 +24,11 @@ import subprocess
 import sys
 import textwrap
 import warnings
+from fractions import Fraction
 
 import numpy as np
 import pytest
-from libm_identity import TUNABLES, WITHOUT_FMA, glibc_on_x86_64_with_fma
+from libm_identity import TUNABLES, WITHOUT_FMA, runs_the_pinned_routines
 from reference_data import IEC61672_TABLE3 as TABLE3
 from scipy import signal as sg
 from trig_oracle import correctly_rounded_arctangent
@@ -40,6 +41,7 @@ from phonometry.filters._weighting_design import (
     _cascade_magnitude,
     _ordered_sum,
     _solve_dense,
+    bilinear_zpk,
     design_sos,
     fit_prototype,
     fitted_prototype_hz,
@@ -1101,10 +1103,194 @@ def test_with_an_independent_arctangent_the_design_is_the_same(
     )
 
 
+def _fused(a: float, b: float, c: float) -> float:
+    """``a * b + c`` rounded once, as a fused multiply-add returns it, exactly."""
+    return float(Fraction(a) * Fraction(b) + Fraction(c))
+
+
+def _fused_product(a: complex, b: complex) -> complex:
+    """numpy's complex product as clang contracts its loop into multiply-adds."""
+    return complex(
+        _fused(a.real, b.real, -(a.imag * b.imag)),
+        _fused(a.real, b.imag, a.imag * b.real),
+    )
+
+
+def _fused_quotient(a: complex, b: complex) -> complex:
+    """numpy's complex quotient, Smith's algorithm, as clang contracts it."""
+    if math.fabs(b.real) >= math.fabs(b.imag):
+        ratio = b.imag / b.real
+        scale = 1.0 / _fused(b.imag, ratio, b.real)
+        return complex(
+            _fused(a.imag, ratio, a.real) * scale,
+            _fused(-a.real, ratio, a.imag) * scale,
+        )
+    ratio = b.real / b.imag
+    scale = 1.0 / _fused(b.real, ratio, b.imag)
+    return complex(
+        _fused(a.real, ratio, a.imag) * scale,
+        _fused(a.imag, ratio, -a.real) * scale,
+    )
+
+
+def _fused_prod(values: object, *args: object, **kwargs: object) -> object:
+    """``numpy.prod`` as a numpy whose complex loop is fused computes it."""
+    array = np.asarray(values)
+    if not np.iscomplexobj(array) or args or kwargs or array.ndim != 1:
+        return _UNFUSED_PROD(values, *args, **kwargs)
+    result = complex(1.0, 0.0) if not array.size else complex(array[0])
+    for value in array[1:].tolist():
+        result = _fused_product(result, value)
+    return np.complex128(result)
+
+
+def _fused_divide(a: complex, b: complex) -> complex:
+    """``a / b`` on numpy scalars or Python numbers, fused where both are complex."""
+    return _fused_quotient(complex(a), complex(b))
+
+
+def _fused_bilinear_zpk(
+    zeros: np.ndarray, poles: np.ndarray, gain: float, fs: float
+) -> tuple[np.ndarray, np.ndarray, float]:
+    """SciPy's ``bilinear_zpk`` on a numpy built with clang: its products fused."""
+    zeros, poles = np.atleast_1d(zeros), np.atleast_1d(poles)
+    fs2 = 2.0 * fs
+
+    def mapped(roots: np.ndarray) -> np.ndarray:
+        if not np.iscomplexobj(roots):
+            return (fs2 + roots) / (fs2 - roots)
+        return np.array(
+            [_fused_quotient(fs2 + r, fs2 - r) for r in roots.tolist()], dtype=complex
+        )
+
+    above = _fused_prod(fs2 - zeros)
+    below = _fused_prod(fs2 - poles)
+    ratio = (
+        above / below
+        if not (np.iscomplexobj(above) or np.iscomplexobj(below))
+        else _fused_divide(above, below)
+    )
+    digital_zeros = np.concatenate((mapped(zeros), -np.ones(len(poles) - len(zeros))))
+    return digital_zeros, mapped(poles), gain * float(np.real(ratio))
+
+
+_UNFUSED_PROD = np.prod
+
+
+def test_a_numpy_that_fuses_complex_products_designs_the_same_filters(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The design owes nothing to whether numpy's complex loops are fused.
+
+    numpy multiplies and divides complex numbers in a C loop that a compiler
+    may contract into fused multiply-adds: the macOS and Windows builds,
+    compiled with clang, do (on Windows from AVX2 on), the Linux build,
+    compiled with GCC, does not. When the design took SciPy's
+    ``bilinear_zpk``, whose gain is a product of complex numbers, the A
+    weighting at 48 kHz hashed to ``5f5e34e5d3a8aa6e`` on macOS and Windows
+    against the documented ``991833ff389afe91``, and so does this test with
+    that product and quotient fused here, through ``scipy.signal`` and
+    ``numpy.prod``, on any platform. The plain bilinear designs, whose gain
+    the prototype normalises through the same products, are held to their
+    unfused bytes as well.
+    """
+    plain = {
+        curve: _cached_weighting_sos.__wrapped__(curve, 48000, high_accuracy=False)
+        for curve in _PROTOTYPE_CURVES
+    }
+    monkeypatch.setattr(sg, "bilinear_zpk", _fused_bilinear_zpk)
+    monkeypatch.setattr(np, "prod", _fused_prod)
+    weighting_module._itu_r_468_prototype.cache_clear()
+    try:
+        for fs, expected in sorted(_A_DIGESTS.items()):
+            sos = _cached_weighting_sos.__wrapped__("A", fs, high_accuracy=True)
+            assert hashlib.sha256(sos.tobytes()).hexdigest()[:16] == expected, fs
+        for curve, unfused in plain.items():
+            fused = _cached_weighting_sos.__wrapped__(curve, 48000, high_accuracy=False)
+            np.testing.assert_array_equal(
+                fused.view(np.uint64), unfused.view(np.uint64), err_msg=curve
+            )
+    finally:
+        weighting_module._itu_r_468_prototype.cache_clear()
+
+
+#: Roots of every kind the transform's branches take: complex zeros over real
+#: poles, no zeros at all, real zeros over complex poles, and reals only.
+_TRANSFORM_CASES = (
+    (np.array([-3.0 + 4.0j, -3.0 - 4.0j]), np.array([-1.0, -20.0, -300.0]), 2.5),
+    (np.array([], dtype=complex), np.array([-50.0 + 70.0j, -50.0 - 70.0j]), 1.0),
+    (np.array([0.0, -7.0]), np.array([-9.0 + 2.0j, -9.0 - 2.0j, -11.0 + 0.0j]), 0.75),
+    (np.array([0.0, 0.0]), np.array([-120.0, -12_000.0]), 3.0),
+)
+
+
+#: Two complex numbers whose product numpy's loop rounds differently when it
+#: is fused: the probe for whether this numpy is the GCC build.
+_FUSION_PROBE = (
+    complex(
+        float.fromhex("-0x1.815e82fe01948p-1"), float.fromhex("-0x1.3a0e0ba218790p-2")
+    ),
+    complex(
+        float.fromhex("0x1.4f9144cd17b9ap+0"), float.fromhex("-0x1.73eb9b3be35c8p-2")
+    ),
+)
+
+
+def _numpy_fuses_complex_products() -> bool:
+    """Whether this numpy's complex product rounds as a fused multiply-add would."""
+    a, b = _FUSION_PROBE
+    unfused = complex(
+        a.real * b.real - a.imag * b.imag, a.real * b.imag + a.imag * b.real
+    )
+    return complex(_UNFUSED_PROD(np.array([a, b]))) != unfused
+
+
+def test_the_fusion_probe_tells_the_two_roundings_apart() -> None:
+    """The probe pair is one whose fused and unfused products differ."""
+    a, b = _FUSION_PROBE
+    unfused = complex(
+        a.real * b.real - a.imag * b.imag, a.real * b.imag + a.imag * b.real
+    )
+    assert _fused_product(a, b) != unfused
+
+
 @pytest.mark.skipif(
-    not glibc_on_x86_64_with_fma(),
-    reason="needs glibc on an x86-64 processor with FMA, whose other variant "
-    "the child process is handed",
+    _numpy_fuses_complex_products(),
+    reason="this numpy fuses its complex products, so SciPy's transform is not "
+    "the unfused one the design spells",
+)
+@pytest.mark.parametrize("curve", _PROTOTYPE_CURVES)
+def test_the_bilinear_transform_is_scipy_s_bit_for_bit(curve: str) -> None:
+    """Where numpy does not fuse, the design's transform is SciPy's, bit for bit.
+
+    The design spells SciPy's ``bilinear_zpk`` in real arithmetic so that a
+    fused build cannot move it; on the unfused build the two must agree to
+    the last bit on the prototype the plain design transforms and on the one
+    the fit returns, or the spelling has changed the filter it was meant to
+    pin.
+    """
+    zeros, poles, gain = _analog_weighting_zpk(curve)
+    fitted = fit_prototype(
+        zeros, poles, 48000.0, _fit_band(curve, 48000), _FIT_SECTIONS[curve],
+        _REFERENCE_HZ.get(curve, 1000.0),
+    )  # fmt: skip
+    for case in ((zeros, poles, gain), (*fitted, 1.0), *_TRANSFORM_CASES):
+        ours = bilinear_zpk(*case, 48000.0)
+        theirs = sg.bilinear_zpk(*case, 48000.0)
+        for mine, scipy_s in zip(ours[:2], theirs[:2], strict=True):
+            assert mine.dtype == np.asarray(scipy_s).dtype
+            np.testing.assert_array_equal(
+                mine.view(np.uint64), np.asarray(scipy_s).view(np.uint64)
+            )
+        assert np.float64(ours[2]).view(np.uint64) == np.float64(theirs[2]).view(
+            np.uint64
+        )
+
+
+@pytest.mark.skipif(
+    not runs_the_pinned_routines(),
+    reason="needs this process on glibc's FMA variant, on an x86-64 processor "
+    "with FMA, so the child can be handed the other one",
 )
 def test_glibc_without_its_fma_variant_designs_the_documented_bytes() -> None:
     """glibc picks its routines by processor; the design no longer follows it.
@@ -1117,6 +1303,11 @@ def test_glibc_without_its_fma_variant_designs_the_documented_bytes() -> None:
     for A at 48 kHz, and before the pinned arctangent it designed A at
     44.1 kHz differently from this process; now it designs the documented
     bytes at both rates, because no routine of glibc's is left on the path.
+
+    It asks for this process to run the FMA variant, not only for a processor
+    that has one: started under a mask of its own, the parent would run the
+    same variant as the child, and the check that the child's ``exp`` parts
+    from it would fail with both designs right.
     """
     script = textwrap.dedent(
         """
@@ -1155,7 +1346,7 @@ def test_glibc_without_its_fma_variant_designs_the_documented_bytes() -> None:
 #: The :mod:`math` functions the design path may name: IEEE 754 fixes every one
 #: (or, for ``fsum``, CPython computes it exactly), so none depends on the C
 #: library.
-_MATH_ALLOWED = frozenset({"fsum", "fabs", "sqrt", "isfinite"})
+_MATH_ALLOWED = frozenset({"fsum", "fabs", "sqrt", "isfinite", "prod"})
 
 #: numpy names that are a transcendental, a power, or a magnitude that may be
 #: complex, each of which numpy computes with a dispatched kernel or the C
@@ -1167,9 +1358,21 @@ _NUMPY_FORBIDDEN = frozenset(
         "float_power", "sin", "cos", "tan", "arcsin", "arccos", "arctan",
         "arctan2", "sinh", "cosh", "tanh", "arcsinh", "arccosh", "arctanh",
         "hypot", "cbrt", "geomspace", "logspace", "angle", "abs", "absolute",
-        "emath",
+        "emath", "prod", "cumprod", "polyval",
     }
 )  # fmt: skip
+
+#: SciPy's filter routines that evaluate or transform with complex products
+#: and quotients, which numpy computes in a loop a compiler may fuse.
+_SIGNAL_COMPLEX = frozenset(
+    {
+        "bilinear", "bilinear_zpk", "freqs", "freqs_zpk", "freqz", "freqz_zpk",
+        "freqz_sos", "sosfreqz", "group_delay",
+    }
+)  # fmt: skip
+
+#: The names SciPy's filter routines are reached by.
+_SIGNAL_OWNERS = frozenset({"signal", "scipy.signal"})
 
 #: The names numpy is reached by: its alias and its own.
 _NUMPY_OWNERS = frozenset({"np", "numpy"})
@@ -1202,6 +1405,7 @@ def _attribute_finding(owner: str, name: str) -> str | None:
         or owner in _FORBIDDEN_MODULES
         or owner.startswith("scipy.special.")
         or (owner == "operator" and name in _OPERATOR_FORBIDDEN)
+        or (owner in _SIGNAL_OWNERS and name in _SIGNAL_COMPLEX)
     )
     return f"{owner}.{name}" if forbidden else None
 
@@ -1217,6 +1421,7 @@ def _import_from_finding(node: ast.ImportFrom) -> str | None:
         or (module == "scipy" and "special" in names)
         or (module in _NUMPY_OWNERS and bool(names & _NUMPY_FORBIDDEN))
         or (module == "operator" and bool(names & _OPERATOR_FORBIDDEN))
+        or (module == "scipy.signal" and bool(names & _SIGNAL_COMPLEX))
     )
     return f"from {module} import {', '.join(sorted(names))}" if hidden else None
 
@@ -1236,6 +1441,18 @@ def _import_finding(node: ast.Import) -> list[str]:
     return found
 
 
+#: The operators that multiply or divide: on a complex operand, numpy's and
+#: CPython's complex product and quotient, which a compiler may fuse.
+_COMPLEX_PRODUCTS = (ast.Mult, ast.Div, ast.FloorDiv, ast.MatMult)
+
+
+def _is_complex_literal(node: ast.expr) -> bool:
+    """Whether *node* is an imaginary literal such as ``1j``, signed or not."""
+    if isinstance(node, ast.UnaryOp):
+        node = node.operand
+    return isinstance(node, ast.Constant) and isinstance(node.value, complex)
+
+
 class _PlatformOperations(ast.NodeVisitor):
     """Collect every node that hands arithmetic to the platform, as ``line: what``."""
 
@@ -1246,6 +1463,10 @@ class _PlatformOperations(ast.NodeVisitor):
     def visit_BinOp(self, node: ast.BinOp) -> None:  # noqa: N802
         if isinstance(node.op, ast.Pow):
             self.found.add(f"{node.lineno}: the ** operator")
+        if isinstance(node.op, _COMPLEX_PRODUCTS) and any(
+            _is_complex_literal(side) for side in (node.left, node.right)
+        ):
+            self.found.add(f"{node.lineno}: a product or quotient of a complex literal")
         self.generic_visit(node)
 
     # ast.NodeVisitor dispatches on this name.
@@ -1328,7 +1549,7 @@ def _reached_from(module: ast.Module, root: str) -> dict[str, ast.stmt]:
 
 
 def test_the_design_path_hands_no_arithmetic_to_the_platform() -> None:
-    """No transcendental, power or complex magnitude is left to the platform.
+    """No transcendental, power, complex magnitude or complex product is left to the platform.
 
     Read off the source rather than trusted: on the design path a ``**``, a
     builtin ``abs`` or ``pow`` (a complex magnitude is the C library's
@@ -1337,6 +1558,14 @@ def test_the_design_path_hands_no_arithmetic_to_the_platform() -> None:
     an import that hides one under another name, is a platform's answer
     standing in for the design's, and each has a pinned spelling in
     ``_pinned_exp``, ``_pinned_log`` or ``_pinned_trig``, with no exception.
+    So is a complex product or quotient: ``numpy.prod`` of a complex array,
+    SciPy's ``bilinear_zpk`` and the frequency responses that evaluate with
+    complex arithmetic, or ``*`` and ``/`` on an imaginary literal, run a loop
+    a compiler may fuse into multiply-adds, which numpy built with clang does
+    on macOS and on Windows and numpy built with GCC does not. That is how
+    the A weighting at 48 kHz once hashed to ``5f5e34e5d3a8aa6e`` on both of
+    them; the spelling is :func:`~phonometry.filters._weighting_design.complex_product`
+    and its neighbours.
     In ``weighting.py`` the scan covers the imports and everything the cached
     design reaches by name, the prototypes and their helpers included.
     """
@@ -1374,7 +1603,8 @@ def test_the_guard_sees_each_kind_of_platform_operation() -> None:
             e = cmath.phase(z) + special.erf(x) + scipy.special.gamma(x)
             x **= 2
             g = np.emath.log(x) + operator.pow(x, 2) + np.fabs(x)
-            return math.fsum([a, b, c, d, e, g]) + math.sqrt(x)
+            h = np.prod(1j * x - z) / -2j + signal.bilinear_zpk(z, z, 1.0, x)[2]
+            return math.fsum([a, b, c, d, e, g, h]) + math.sqrt(x) + (1 + 2j)
         """
     )
     found = _platform_operations(ast.parse(source))
@@ -1391,6 +1621,9 @@ def test_the_guard_sees_each_kind_of_platform_operation() -> None:
         "14: np.emath",
         "14: np.emath.log",
         "14: operator.pow",
+        "15: a product or quotient of a complex literal",
+        "15: np.prod",
+        "15: signal.bilinear_zpk",
         "2: import cmath as cmath",
         "3: import numpy as numpy",
         "4: import scipy.special as sc",
@@ -1399,6 +1632,9 @@ def test_the_guard_sees_each_kind_of_platform_operation() -> None:
         "8: the ** operator",
         "9: builtin abs()",
     ]
+    assert _platform_operations(
+        ast.parse("from scipy.signal import freqz, zpk2sos\nw = math.prod([2.0])")
+    ) == ["1: from scipy.signal import freqz, zpk2sos"]
     module = ast.parse(
         textwrap.dedent(
             """

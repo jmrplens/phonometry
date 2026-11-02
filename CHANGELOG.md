@@ -4012,11 +4012,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `log10` is glibc's built on the pinned `log`, and the sine, the tangent, the
   arctangent and the magnitude of a complex root are correctly rounded, in
   the package's own exact integer arithmetic (`filters._pinned_trig`). No
-  routine of the C library is left in the fit, so macOS, Windows and glibc on
-  x86-64 without FMA, which runs another build of each routine, design the
-  Linux bytes: the A weighting at 48 kHz moves there from `43f786ffab5c4dd4`
-  on glibc without FMA to `991833ff389afe91`. Tests in the CI matrix hold the
-  A weighting at 48 and 44.1 kHz to one digest on all three platforms. For
+  routine of the C library is left in the fit. SciPy's bilinear transform,
+  whose gain is a product of complex numbers, and the products that
+  normalise the prototypes' gains are spelled in separately rounded real
+  arithmetic as well, numpy's steps in numpy's order: numpy built with clang,
+  as on macOS and Windows, fuses its complex products into multiply-adds and
+  numpy built with GCC, as on Linux, does not, which on its own kept the A
+  weighting at 48 kHz at `5f5e34e5d3a8aa6e` on macOS and Windows. So macOS,
+  Windows and glibc on x86-64 without FMA, which runs another build of each
+  routine, design the Linux bytes: the A weighting at 48 kHz moves there from
+  `43f786ffab5c4dd4` on glibc without FMA to `991833ff389afe91`. Tests in the
+  CI matrix hold the A weighting at 48 and 44.1 kHz to one digest on all
+  three platforms. For
   the other curves the same bytes also take the two library steps of the
   cascade, the sections SciPy forms through the BLAS and the roots LAPACK
   finds for the 468 prototype, giving the bytes they give on x86-64: the
@@ -11065,8 +11072,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   the C library still did, and the three CI platforms designed three
   different byte strings for the same filter; the entry on the pinned
   exponentials, powers, sines, tangents and arctangents pins every one of
-  them, so the three platforms design one, and the determinism guide says
-  how.
+  them, and with the complex products of the bilinear transform written out
+  in real arithmetic the three platforms design one byte string for the A
+  weighting the CI matrix holds; the determinism guide says how, and which
+  library steps the other curves still depend on.
 
 - The frequency weightings are designed at the sample rate instead of being
   outrun at eight times it. Every curve in `filters.weighting` starts as poles

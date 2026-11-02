@@ -113,7 +113,12 @@ from ..io._resolve import (
 )
 from ..io._signal import Signal
 from ._pinned_trig import pinned_hypot
-from ._weighting_design import design_sos
+from ._weighting_design import (
+    bilinear_zpk,
+    complex_product,
+    complex_quotient,
+    design_sos,
+)
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -240,6 +245,11 @@ def _abcd_product(
     ]
 
 
+def _shifted_to(w_ref: float, roots: np.ndarray) -> list[tuple[float, float]]:
+    """``j w_ref - r`` for each root, as ``(real, imaginary)``, formed as numpy forms it."""
+    return [(0.0 - root.real, w_ref - root.imag) for root in roots.tolist()]
+
+
 @lru_cache(maxsize=1)
 def _itu_r_468_prototype() -> tuple[tuple[complex, ...], float]:
     r"""Poles and gain of the ITU-R BS.468-4 weighting network.
@@ -295,8 +305,10 @@ def _itu_r_468_prototype() -> tuple[tuple[complex, ...], float]:
     denominator = np.polyadd(abcd[0][0], abcd[0][1] / _ITU_R_468_LOAD_OHM)
     poles = np.roots(denominator / denominator[0])
     w_ref = 2.0 * np.pi * 1000.0
-    at_reference = complex(np.prod(1j * w_ref - poles))
-    gain = pinned_hypot(at_reference.real, at_reference.imag) / w_ref
+    # prod(j w_ref - poles), spelled in real arithmetic by complex_product
+    # because numpy's own complex product is fused on some builds.
+    at_reference = complex_product(_shifted_to(w_ref, poles))
+    gain = pinned_hypot(*at_reference) / w_ref
     return tuple(sorted((complex(v) for v in poles), key=lambda v: (v.real, v.imag))), (
         gain
     )
@@ -522,8 +534,11 @@ def _analog_weighting_zpk(curve: str) -> tuple[np.ndarray, np.ndarray, float]:
         }
         zeros, poles, gain = builders[curve]()
     w_ref = 2 * np.pi * _REFERENCE_HZ.get(curve, 1000.0)
-    response = complex(gain * np.prod(1j * w_ref - zeros) / np.prod(1j * w_ref - poles))
-    return zeros, poles, gain / pinned_hypot(response.real, response.imag)
+    # gain * prod(j w_ref - zeros) / prod(j w_ref - poles), numpy's steps in
+    # numpy's order, in the real arithmetic complex_product explains.
+    above = complex_product([(gain, 0.0), complex_product(_shifted_to(w_ref, zeros))])
+    response = complex_quotient(above, complex_product(_shifted_to(w_ref, poles)))
+    return zeros, poles, gain / pinned_hypot(*response)
 
 
 @lru_cache(maxsize=64)
@@ -540,7 +555,7 @@ def _cached_weighting_sos(curve: str, fs: int, *, high_accuracy: bool) -> np.nda
             _REFERENCE_HZ.get(curve, 1000.0),
         )
     else:
-        sos = signal.zpk2sos(*signal.bilinear_zpk(zeros, poles, gain, fs))
+        sos = signal.zpk2sos(*bilinear_zpk(zeros, poles, gain, fs))
     shared = np.array(sos, dtype=np.float64)
     shared.flags.writeable = False
     return shared

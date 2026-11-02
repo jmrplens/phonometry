@@ -468,19 +468,23 @@ def backend_for(compute: Compute | None) -> Backend:
 
     :param compute: The ``compute=`` argument the caller passed.
     :raises ComputeImportError: when the device's library is missing or does
-        not import, with the import's own reason.
+        not import, with the import's own reason, unless ``fallback=True``.
     :raises ComputeDeviceError: when the device is absent, reports itself
         available but fails a first small computation, or is not ``"cpu"``
-        in Pyodide. With ``fallback=True`` neither is raised: the run warns
-        with :class:`ComputeFallbackWarning` and goes to NumPy.
+        in Pyodide, unless ``fallback=True``.
     :raises ValueError: when the request names a host: a backend is always
         this machine's.
+    :warns ComputeFallbackWarning: with ``fallback=True``, when it turns a
+        :class:`ComputeImportError` or a :class:`ComputeDeviceError` into a
+        run on NumPy.
     """
     request = _requested(compute)
     if request.host is not None:
         msg = (
             f"host {request.host!r} reached the backend of an engine built here; "
-            "only fdtd_simulation and elastic_fdtd_simulation run on a node"
+            "an engine steps in this process, and only fdtd_simulation, "
+            "elastic_fdtd_simulation, write_fdtd_animation and "
+            "write_elastic_fdtd_animation run on a node"
         )
         raise ValueError(msg)
     try:

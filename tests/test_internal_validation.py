@@ -21,9 +21,12 @@ refused according to a coincidence between its bands.
 
 from __future__ import annotations
 
+import math
 import warnings
 from collections import deque
 from dataclasses import dataclass
+from decimal import Decimal
+from fractions import Fraction
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -552,7 +555,7 @@ def test_indices_are_integers_in_a_sequence_or_a_one_dimensional_integer_array()
     for bad in ([0.5], [1.0], [True], ["1"], [np.array(1)], [None]):
         with pytest.raises(TypeError, match="'rows' must hold integer indices"):
             indices_of(bad, "rows")
-    for bad in ("01", b"01", 3, None):
+    for bad in ("01", b"01", bytearray(b"\x00\x01"), 3, None):
         with pytest.raises(TypeError, match="'rows' must be a sequence of integer"):
             indices_of(bad, "rows")
     for bad in (np.array(1), np.array([[0, 1]]), np.array([1.0]), np.array([True])):
@@ -750,6 +753,72 @@ def test_one_number_is_refused_when_it_is_complex_of_any_kind(value: object) -> 
         require_real(value, "'x' must be real")
     with pytest.raises(TypeError, match="'x' must be a number"):
         require_positive(value, "x")  # type: ignore[arg-type]
+
+
+#: Whether a long double holds numbers a float does not: it does on x86-64
+#: Linux (80 bits), and is a float on Windows and on macOS on Apple silicon.
+_WIDE_LONG_DOUBLE = bool(np.finfo(np.longdouble).max > np.finfo(np.float64).max)
+
+_ONLY_WITH_A_WIDE_LONG_DOUBLE = pytest.mark.skipif(
+    not _WIDE_LONG_DOUBLE, reason="a long double is a float on this platform"
+)
+
+#: Finite numbers no float holds, by how a caller writes them, each built when
+#: it is used: a long double is one only where it is wider than a float.
+_BEYOND_A_FLOAT: dict[str, Callable[[], object]] = {
+    "python integer": lambda: 10**400,
+    "Fraction": lambda: Fraction(10**400, 3),
+    "Decimal": lambda: Decimal("1e400"),
+    "negative Decimal": lambda: Decimal("-1e400"),
+    "long double": lambda: np.longdouble("1e400"),
+    "negative long double": lambda: -np.longdouble("1e400"),
+    "zero-dimensional long double array": lambda: np.array(np.longdouble("1e400")),
+}
+
+
+@pytest.mark.parametrize(
+    "spelling",
+    [
+        pytest.param(
+            spelling,
+            marks=_ONLY_WITH_A_WIDE_LONG_DOUBLE if "long double" in spelling else (),
+        )
+        for spelling in _BEYOND_A_FLOAT
+    ],
+)
+def test_one_number_no_float_holds_is_refused_whatever_its_type(spelling: str) -> None:
+    """A finite number beyond a float's range is refused, as its docstring says.
+
+    :func:`float` refuses a Python integer or a ``Fraction`` beyond its range
+    with ``OverflowError``, which the reader turned into ``ValueError``, but
+    reads a long double or a ``Decimal`` beyond it as an infinity, which the
+    reader handed back as the number: a guard after it took an infinity the
+    caller never gave, and one that admits an infinity kept it.
+    """
+    value = _BEYOND_A_FLOAT[spelling]()
+    with pytest.raises(ValueError, match="'x' must be a number"):
+        require_real(value, "'x' must be a number")
+    with pytest.raises(ValueError, match="'limits' must be a pair"):
+        floats_of([1.0, value], "limits", "a pair of numbers", 2)
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        math.inf,
+        -math.inf,
+        np.float64(np.inf),
+        Decimal("Infinity"),
+        Decimal("-Infinity"),
+        np.longdouble("inf"),
+    ],
+    ids=repr,
+)
+def test_an_infinity_the_caller_gives_is_read_as_that_infinity(value: object) -> None:
+    """Only a finite number read as an infinity is refused; an infinity stays one."""
+    read = require_real(value, "'x' must be a number")
+    assert math.isinf(read)
+    assert (read > 0) is bool(value > 0)  # type: ignore[operator]
 
 
 #: A text that numpy does not see as one: a ``bytearray`` alone, inside a

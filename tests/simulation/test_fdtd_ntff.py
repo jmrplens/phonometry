@@ -69,7 +69,9 @@ from phonometry.materials.diffusers.scattering_diffusion import (
 from phonometry.simulation import (
     FDTD2D,
     ContourPhasors,
+    ContourProbe,
     CWSource,
+    ElasticFDTD2D,
     PlaneWaveSource,
     far_field_from_contour,
 )
@@ -520,6 +522,49 @@ def test_contour_probe_validation() -> None:
         probe.phasors(999.0)
     with pytest.raises(ValueError, match=r"no samples accumulated yet"):
         probe.phasors(F0)
+
+
+def test_a_contour_probe_built_by_hand_samples_as_one_the_engine_adds() -> None:
+    """``ContourProbe(engine, ...)`` registers itself with its engine.
+
+    Only :meth:`FDTD2D.add_contour_probe` registered the probe it built, so a
+    probe built by hand through the public class never sampled: its
+    ``n_samples`` stayed at zero however long the engine ran, and its
+    ``phasors`` refused for want of samples.
+    """
+    sim = FDTD2D(c=C0, dx=0.01, shape=(40, 50))
+    sim.add_source(CWSource(ix=25, iy=20, frequency=F0))
+    added = sim.add_contour_probe(15, 35, 10, 30, frequencies=[F0])
+    by_hand = ContourProbe(sim, 15, 35, 10, 30, [F0])
+    sim.run(40)
+    assert by_hand.n_samples == added.n_samples == 40
+    built, registered = by_hand.phasors(F0), added.phasors(F0)
+    assert np.array_equal(built.pressure, registered.pressure)
+    assert np.array_equal(built.normal_velocity, registered.normal_velocity)
+    assert np.any(built.pressure != 0.0)
+
+
+@pytest.mark.parametrize(
+    "engine",
+    [
+        pytest.param(
+            ElasticFDTD2D(c_p=2000.0, c_s=1000.0, dx=0.01, rho=1000.0, shape=(40, 50)),
+            id="elastic engine",
+        ),
+        pytest.param(None, id="None"),
+        pytest.param(object(), id="object"),
+    ],
+)
+def test_a_contour_probe_refuses_what_is_no_acoustic_engine(engine: object) -> None:
+    """``ContourProbe`` names ``engine`` when it is given anything but an ``FDTD2D``.
+
+    The class is the one public callable that takes an engine object. An
+    elastic engine failed with an ``AttributeError`` naming the private list
+    of probes it lacks, and ``None`` or any other object with one naming
+    ``p``, its pressure field: none of them said which argument was wrong.
+    """
+    with pytest.raises(TypeError, match=r"'engine' must be an FDTD2D, got "):
+        ContourProbe(engine, 15, 35, 10, 30, [F0])  # type: ignore[arg-type]
 
 
 def test_contour_probe_rejects_touching_obstacles() -> None:

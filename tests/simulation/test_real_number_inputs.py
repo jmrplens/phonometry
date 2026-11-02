@@ -21,6 +21,8 @@ from __future__ import annotations
 
 import inspect
 import re
+from dataclasses import dataclass
+from decimal import Decimal
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -143,6 +145,9 @@ _OWNERS: dict[str, Callable[..., object]] = {
     "add_plane_wave": FDTD2D.add_plane_wave,
     "scholte_speed": scholte_speed,
     "from_regions": ElasticFDTD2D.from_regions,
+    "GaussianPulse.value": GaussianPulse.value,
+    "CWSource.value": CWSource.value,
+    "SignalSource.value": SignalSource.value,
     "ContourProbe": ContourProbe,
     "add_contour_probe": FDTD2D.add_contour_probe,
     "phasors": ContourProbe.phasors,
@@ -373,6 +378,44 @@ def _triple_cases() -> Iterator[Case]:
             ),
             rf"'?dx'? must be .*(?:{said})",
         )
+    # The options from_regions hands the engine, each refused as the engine
+    # refuses it.
+    for name in ("cfl", "absorbing_layer_reflection", "damping"):
+        spellings = _spellings(_REALS[name], is_map=name in _MAPS)
+        for spelling, (value, said) in spellings.items():
+            yield (
+                f"from_regions({name}={spelling})",
+                lambda name=name, value=value: ElasticFDTD2D.from_regions(
+                    (_NY, _NX),
+                    0.01,
+                    background=STEEL,
+                    absorbing_layer_cells=2,
+                    **{name: value},
+                ),
+                rf"'?{name}'? must be .*(?:{said})",
+            )
+
+
+def _time_cases() -> Iterator[Case]:
+    """The time each point source's waveform is asked for, ``value(t)``."""
+    sources: dict[str, object] = {
+        "GaussianPulse.value": GaussianPulse(ix=8, iy=8, half_width_s=1e-4),
+        "CWSource.value": CWSource(ix=8, iy=8, frequency=1000.0),
+        "SignalSource.value": SignalSource(ix=8, iy=8, samples=np.ones(8), fs=48000.0),
+    }
+    #: What is no time at all: nothing, and a buffer NumPy reads as an array.
+    not_numbers: dict[str, tuple[object, str]] = {
+        "None": (None, "real number"),
+        "bytearray": (bytearray(b"1"), "real number"),
+    }
+    for owner, source in sources.items():
+        spellings = _spellings(5e-5, is_map=False) | not_numbers
+        for spelling, (value, said) in spellings.items():
+            yield (
+                f"{owner}(t={spelling})",
+                lambda source=source, value=value: source.value(value),  # type: ignore[attr-defined]
+                rf"'?t'? must be .*(?:{said})",
+            )
 
 
 _POSITIONS = np.array([[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]])
@@ -500,7 +543,7 @@ def _contour_cases() -> Iterator[Case]:
         )
 
 
-_CASES = [*_engine_cases(), *_record_cases(), *_contour_cases()]
+_CASES = [*_engine_cases(), *_record_cases(), *_contour_cases(), *_time_cases()]
 
 
 @pytest.mark.parametrize(
@@ -551,3 +594,435 @@ def test_every_real_input_is_held_to_both_refusals() -> None:
     ]
     assert missing == []
     assert untexted == []
+
+
+#: The samples a waveform may wrongly return, by how a caller writes them.
+_WRONG_SAMPLES: dict[str, object] = {
+    "python complex": 1.0 + 1.0j,
+    "numpy complex": np.complex128(1.0 + 1.0j),
+    "complex64": np.complex64(1.0 + 1.0j),
+    "zero-dimensional complex array": np.asarray(1.0 + 1.0j),
+    "text": "1.0",
+    "None": None,
+    "list of one number": [1.0],
+    "array of two numbers": np.array([1.0, 2.0]),
+    "bytearray": bytearray(b"1"),
+}
+
+
+def _step_plane_wave(sample: object) -> None:
+    sim = FDTD2D(c=343.0, dx=0.01, shape=(_NY, _NX), absorbing_layer_cells=4)
+    sim.add_source(PlaneWaveSource(direction="right", waveform=lambda t: sample))
+    sim.step()
+
+
+def _step_explosion(sample: object) -> None:
+    sim = ElasticFDTD2D(c_p=2000.0, c_s=1000.0, dx=0.01, rho=1000.0, shape=(_NY, _NX))
+    sim.add_source(ExplosionSource(ix=8, iy=8, waveform=lambda t: sample))
+    sim.step()
+
+
+def _step_force(sample: object) -> None:
+    sim = ElasticFDTD2D(c_p=2000.0, c_s=1000.0, dx=0.01, rho=1000.0, shape=(_NY, _NX))
+    sim.add_source(ForceSource(ix=8, iy=8, direction="y", waveform=lambda t: sample))
+    sim.step()
+
+
+def _run_explosion(sample: object) -> None:
+    from phonometry.simulation import elastic_fdtd_simulation
+
+    blast = ExplosionSource(ix=8, iy=8, waveform=lambda t: sample)
+    elastic_fdtd_simulation(
+        ElasticRun(
+            c_p=2000.0,
+            c_s=1000.0,
+            dx=0.01,
+            rho=1000.0,
+            shape=(_NY, _NX),
+            duration_s=1e-5,
+            sources=[blast],
+        )
+    )
+
+
+_STEPPERS: dict[str, Callable[[object], None]] = {
+    "PlaneWaveSource": _step_plane_wave,
+    "ExplosionSource": _step_explosion,
+    "ForceSource": _step_force,
+    "elastic_fdtd_simulation": _run_explosion,
+}
+
+
+@pytest.mark.parametrize("spelling", sorted(_WRONG_SAMPLES))
+@pytest.mark.parametrize("stepper", sorted(_STEPPERS))
+def test_a_waveform_that_returns_no_real_number_is_refused_by_name(
+    stepper: str, spelling: str
+) -> None:
+    """A sample that is not one real number stops the step, naming the waveform.
+
+    The engines add each sample into their real fields: the elastic engine
+    stepped the real part of a complex sample with no more than a
+    ``ComplexWarning``, and the plane wave of the acoustic engine failed with
+    NumPy's casting error, which names nothing the caller wrote. ``None``, a
+    list, an array or a ``bytearray`` failed with a ``TypeError`` or a
+    ``ValueError`` of NumPy's or Python's that named nothing either, or
+    broadcast an array into the field.
+    """
+    import warnings
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", np.exceptions.ComplexWarning)
+        with pytest.raises(TypeError, match=r"waveform of .* must return a real"):
+            _STEPPERS[stepper](_WRONG_SAMPLES[spelling])
+
+
+#: Whether a long double holds numbers a float does not: it does on x86-64
+#: Linux (80 bits), and is a float on Windows and on macOS on Apple silicon.
+_WIDE_LONG_DOUBLE = bool(np.finfo(np.longdouble).max > np.finfo(np.float64).max)
+
+_ONLY_WITH_A_WIDE_LONG_DOUBLE = pytest.mark.skipif(
+    not _WIDE_LONG_DOUBLE, reason="a long double is a float on this platform"
+)
+
+#: Finite numbers of the right type that no float holds, by how a caller
+#: writes them, each built when it is used: a long double is one only where
+#: it is wider than a float. ``float()`` refuses the integer with an
+#: ``OverflowError``, and reads the others as an infinity.
+_TOO_LARGE: dict[str, Callable[[], object]] = {
+    "python integer": lambda: 10**400,
+    "Decimal": lambda: Decimal("1e400"),
+    "negative Decimal": lambda: Decimal("-1e400"),
+    "long double": lambda: np.longdouble("1e400"),
+}
+
+_TOO_LARGE_SPELLINGS = [
+    pytest.param(
+        spelling,
+        marks=_ONLY_WITH_A_WIDE_LONG_DOUBLE if "long double" in spelling else (),
+    )
+    for spelling in sorted(_TOO_LARGE)
+]
+
+
+@pytest.mark.parametrize("spelling", _TOO_LARGE_SPELLINGS)
+@pytest.mark.parametrize("stepper", sorted(_STEPPERS))
+def test_a_waveform_sample_no_float_holds_is_refused_by_name(
+    stepper: str, spelling: str
+) -> None:
+    """A number beyond a float's range stops the step, naming the waveform.
+
+    A Python integer passed the check as surely one real number, being an
+    ``int``, and failed in the field update with Python's ``OverflowError``,
+    which names nothing the caller wrote. A long double passed it as a NumPy
+    float, and a ``Decimal`` was read by ``float()`` as an infinity, so both
+    stepped an infinite sample into the field. Each is a value of the right
+    type, refused with ``ValueError`` as :func:`require_real` refuses it.
+    """
+    sample = _TOO_LARGE[spelling]()
+    with pytest.raises(ValueError, match=r"waveform of .* must return a real"):
+        _STEPPERS[stepper](sample)
+
+
+@pytest.mark.parametrize("spelling", _TOO_LARGE_SPELLINGS)
+@pytest.mark.parametrize(
+    "source",
+    [
+        GaussianPulse(ix=8, iy=8, half_width_s=1e-4),
+        CWSource(ix=8, iy=8, frequency=1000.0),
+        SignalSource(ix=8, iy=8, samples=np.ones(8), fs=48000.0),
+    ],
+    ids=type,
+)
+def test_a_time_no_float_holds_is_refused_by_name(
+    source: GaussianPulse | CWSource | SignalSource, spelling: str
+) -> None:
+    """``value(t)`` refuses a number beyond a float's range by the name ``t``."""
+    t = _TOO_LARGE[spelling]()
+    with pytest.raises(ValueError, match=r"t must be one real number"):
+        source.value(t)  # type: ignore[arg-type]
+
+
+@_ONLY_WITH_A_WIDE_LONG_DOUBLE
+def test_a_long_double_is_read_as_the_float_it_rounds_to() -> None:
+    """A long double sample or time is the float it rounds to, as a Python integer is.
+
+    It passed as it was, being a NumPy float, so a sample the engine scaled
+    before adding it into a float field was scaled with the long double's
+    extra digits, and one beyond a float's range became an infinity there.
+    """
+    from phonometry.simulation import fdtd
+
+    value = np.longdouble(1) / np.longdouble(3)
+    source = _blast()
+    for read in (fdtd._real_sample(value, source), fdtd._real_time(value)):  # type: ignore[arg-type]
+        assert type(read) is float
+        assert read == float(value)
+
+
+#: What a waveform returns, and what an engine hands ``value(t)``, when it is
+#: right: a NumPy scalar of another width among them. A Python integer is
+#: not here: it has no width, so it is read as the float it rounds to.
+_FAST_SAMPLES: dict[str, object] = {
+    "python float": 0.5,
+    "float64": np.float64(0.5),
+    "float32": np.float32(0.5),
+    "int64": np.int64(1),
+}
+
+
+@pytest.mark.parametrize("spelling", sorted(_FAST_SAMPLES))
+def test_a_real_number_of_any_numpy_width_passes_without_the_slow_check(
+    spelling: str, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A NumPy float32 or int64 sample or time is handed back as it is, unchecked.
+
+    The engines check every sample a waveform returns, each step, so the
+    check of what is surely one real number is one ``isinstance``. It named
+    only ``float`` and ``int``, so a ``np.float32`` or a ``np.int64`` went
+    through the full check, some twenty times slower, though it is as
+    surely one real number as a ``np.float64``.
+    """
+    from phonometry.simulation import fdtd
+
+    def slow(*args: object, **kwargs: object) -> None:
+        msg = "the slow check was reached"
+        raise AssertionError(msg)
+
+    source = _blast()
+    for name in ("require_real", "refuse_complex", "refuse_text", "_real_numbers"):
+        monkeypatch.setattr(fdtd, name, slow, raising=False)
+    value = _FAST_SAMPLES[spelling]
+    assert fdtd._real_sample(value, source) is value  # type: ignore[arg-type]
+    assert fdtd._real_time(value) is value  # type: ignore[arg-type]
+
+
+@pytest.mark.parametrize("value", [0, 1, -3, True, 2**53 + 1])
+def test_a_python_integer_is_read_as_its_float_without_the_slow_check(
+    value: int, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A Python integer within a float's range steps as the float it rounds to.
+
+    The engine adds it into float fields, where it would round the same way,
+    so the sample and the time are the same number; reading it is one
+    ``float``, not the full check.
+    """
+    from phonometry.simulation import fdtd
+
+    def slow(*args: object, **kwargs: object) -> None:
+        msg = "the slow check was reached"
+        raise AssertionError(msg)
+
+    source = _blast()
+    for name in ("require_real", "refuse_complex", "refuse_text", "_real_numbers"):
+        monkeypatch.setattr(fdtd, name, slow, raising=False)
+    for read in (fdtd._real_sample(value, source), fdtd._real_time(value)):
+        assert type(read) is float
+        assert read == float(value)
+
+
+class _Waveform:
+    """A tone that returns *wrong* instead of its sample while it is refused."""
+
+    def __init__(self, wrong: object = 1.0 + 1.0j) -> None:
+        self.wrong = wrong
+        self.refused = False
+
+    def __call__(self, t: float) -> object:
+        if self.refused:
+            return self.wrong
+        return float(np.sin(2.0 * np.pi * 2000.0 * t))
+
+
+def _engine_driven_by(kind: str, waveform: _Waveform) -> FDTD2D | ElasticFDTD2D:
+    """A small engine one of whose sources is driven by *waveform*."""
+    if kind == "PlaneWaveSource":
+        sim = FDTD2D(c=343.0, dx=0.01, shape=(_NY, _NX), absorbing_layer_cells=4)
+        sim.add_source(PlaneWaveSource(direction="right", waveform=waveform))
+        return sim
+    solid = ElasticFDTD2D(c_p=2000.0, c_s=1000.0, dx=0.01, rho=1000.0, shape=(_NY, _NX))
+    if kind == "ForceSource":
+        solid.add_source(ForceSource(ix=8, iy=8, direction="y", waveform=waveform))
+        return solid
+    if kind == "ExplosionSource after a ForceSource":
+        solid.add_source(ForceSource(ix=5, iy=5, direction="x", waveform=_Waveform()))
+    solid.add_source(ExplosionSource(ix=8, iy=8, waveform=waveform))
+    return solid
+
+
+def _fields(sim: FDTD2D | ElasticFDTD2D) -> dict[str, np.ndarray]:
+    """A copy of every field the engine steps, by name."""
+    names = (
+        ("p", "vx", "vy")
+        if isinstance(sim, FDTD2D)
+        else ("vx", "vy", "txx", "tyy", "txy")
+    )
+    return {name: np.array(getattr(sim, name), copy=True) for name in names}
+
+
+@pytest.mark.parametrize(
+    "kind",
+    [
+        "PlaneWaveSource",
+        "ForceSource",
+        "ExplosionSource",
+        "ExplosionSource after a ForceSource",
+    ],
+)
+def test_a_refused_sample_leaves_the_engine_as_it_was(kind: str) -> None:
+    """A step whose waveform returns no real number changes no field and no count.
+
+    The engines sampled a plane wave, a force and an explosion where they
+    injected it, after the step had already advanced the velocity, the
+    pressure or the stresses, so the refusal left the fields one step on and
+    the step count behind them: a caller that caught it and stepped again
+    stepped the same instant twice. The step now samples every waveform
+    before it moves a field, and a caller that steps again once the
+    waveform is right steps as an engine that was never refused.
+    """
+    waveform = _Waveform()
+    sim = _engine_driven_by(kind, waveform)
+    twin = _engine_driven_by(kind, _Waveform())
+    for _ in range(5):
+        sim.step()
+        twin.step()
+    before = _fields(sim)
+    waveform.refused = True
+    with pytest.raises(TypeError, match=r"waveform of .* must return a real"):
+        sim.step()
+    assert sim.n == 5
+    after = _fields(sim)
+    assert [
+        name for name in before if not np.array_equal(after[name], before[name])
+    ] == []
+    waveform.refused = False
+    sim.step()
+    twin.step()
+    stepped, never_refused = _fields(sim), _fields(twin)
+    assert [
+        name
+        for name in stepped
+        if not np.array_equal(stepped[name], never_refused[name])
+    ] == []
+
+
+class _SecondSampleWrong:
+    """A plane wave's waveform whose pressure sample is right and whose velocity sample is not.
+
+    A step asks the waveform for the pressure line's sample, then for the
+    velocity face's, so every second call returns a complex number.
+    """
+
+    def __init__(self) -> None:
+        self.calls = 0
+
+    def __call__(self, t: float) -> object:
+        self.calls += 1
+        return 0.25 if self.calls % 2 else 1.0 + 1.0j
+
+
+def test_a_refused_velocity_sample_leaves_the_engine_as_it_was() -> None:
+    """The velocity face's sample is checked on its own, before any field moves.
+
+    Every other case hands both samples the same wrong value, so the
+    pressure line's check refuses it first, and a step that checked only
+    that sample would pass them all.
+    """
+    sim = FDTD2D(c=343.0, dx=0.01, shape=(_NY, _NX), absorbing_layer_cells=4)
+    sim.add_source(PlaneWaveSource(direction="right", waveform=_SecondSampleWrong()))
+    before = _fields(sim)
+    with pytest.raises(TypeError, match=r"waveform of .* must return a real"):
+        sim.step()
+    assert sim.n == 0
+    after = _fields(sim)
+    assert [
+        name for name in before if not np.array_equal(after[name], before[name])
+    ] == []
+
+
+def _tone(t: float) -> float:
+    """A 2 kHz tone, the waveform of the plane wave a step adds."""
+    return float(np.sin(2.0 * np.pi * 2000.0 * t))
+
+
+#: The plane wave a waveform adds to its engine while a step runs.
+_ADDED = PlaneWaveSource(direction="down", waveform=_tone)
+
+
+@dataclass(frozen=True, kw_only=True)
+class _PulseThatAddsAPlaneWave(GaussianPulse):
+    """A pulse whose waveform adds a plane wave to its engine the first time it is asked."""
+
+    engine: FDTD2D
+
+    def value(self, t: float) -> float:
+        if _ADDED not in self.engine._plane_sources:
+            self.engine.add_source(_ADDED)
+        return super().value(t)
+
+
+class _ToneThatAddsAPlaneWave:
+    """A plane wave's waveform that adds another plane wave the first time it is asked."""
+
+    def __init__(self, engine: FDTD2D) -> None:
+        self.engine = engine
+
+    def __call__(self, t: float) -> float:
+        if _ADDED not in self.engine._plane_sources:
+            self.engine.add_source(_ADDED)
+        return _tone(t)
+
+
+def _engine_whose_waveform_adds(adder: str) -> FDTD2D:
+    """A small engine one of whose waveforms adds :data:`_ADDED` while it steps."""
+    sim = FDTD2D(c=343.0, dx=0.01, shape=(_NY, _NX), absorbing_layer_cells=4)
+    if adder == "point source":
+        sim.add_source(
+            _PulseThatAddsAPlaneWave(ix=8, iy=8, half_width_s=1e-4, engine=sim)
+        )
+    else:
+        sim.add_source(
+            PlaneWaveSource(direction="right", waveform=_ToneThatAddsAPlaneWave(sim))
+        )
+    return sim
+
+
+def _engine_with_the_same_sources(adder: str) -> FDTD2D:
+    """The same engine with waveforms that add nothing."""
+    sim = FDTD2D(c=343.0, dx=0.01, shape=(_NY, _NX), absorbing_layer_cells=4)
+    if adder == "point source":
+        sim.add_source(GaussianPulse(ix=8, iy=8, half_width_s=1e-4))
+    else:
+        sim.add_source(PlaneWaveSource(direction="right", waveform=_tone))
+    return sim
+
+
+@pytest.mark.parametrize("adder", ["point source", "plane wave"])
+def test_a_plane_wave_added_while_a_step_runs_enters_on_the_next_step(
+    adder: str,
+) -> None:
+    """A step injects the plane waves it began with, so one added during it waits a step.
+
+    The step sampled every plane wave before it moved a field and then
+    paired the samples with the plane waves the engine held by then, so a
+    plane wave added by a point source's waveform, after the sampling and
+    before the injection, stopped the step with ``zip``'s ``ValueError``
+    once the pressure had moved and before the count did; one added by a
+    plane wave's own waveform was sampled and injected in the step that
+    added it. Either enters on the next step now, as one added between the
+    two steps does.
+    """
+    sim = _engine_whose_waveform_adds(adder)
+    twin = _engine_with_the_same_sources(adder)
+    sim.step()
+    twin.step()
+    twin.add_source(_ADDED)
+    for _ in range(3):
+        sim.step()
+        twin.step()
+    stepped, added_between = _fields(sim), _fields(twin)
+    assert sim.n == twin.n == 4
+    assert [
+        name
+        for name in stepped
+        if not np.array_equal(stepped[name], added_between[name])
+    ] == []

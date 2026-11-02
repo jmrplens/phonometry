@@ -315,6 +315,11 @@ def require_real(value: object, msg: str) -> float:
     number or any other object :func:`float` cannot take is the wrong type,
     and is refused with :class:`TypeError`; a number too large for a float
     is a value of the right type, and is refused with :class:`ValueError`.
+    :func:`float` refuses only some of those: it raises ``OverflowError``
+    for a Python integer or a ``Fraction``, but reads a finite
+    ``np.longdouble`` or ``Decimal`` beyond a float's range as an infinity
+    (:func:`_finite_beyond_a_float`), which the guard after it would take
+    for an infinity the caller gave.
     A complex value is refused whatever its kind: :func:`float` refuses a
     Python ``complex``, but takes the real part of a numpy one
     (``np.complex128``, ``np.complex64``, a zero-dimensional complex array)
@@ -326,16 +331,37 @@ def require_real(value: object, msg: str) -> float:
     :return: ``float(value)``.
     :raises TypeError: with *msg*, for an array of any shape, a text, a
         complex value, or anything whose type :func:`float` refuses.
-    :raises ValueError: with *msg*, for a number :func:`float` cannot hold.
+    :raises ValueError: with *msg*, for a number :func:`float` cannot hold,
+        whether it refuses it or reads it as an infinity.
     """
     if not is_scalar(value) or holds_text(value) or holds_complex(value):
         raise TypeError(msg)
     try:
-        return float(cast("float", value))
+        number = float(cast("float", value))
     except TypeError:
         raise TypeError(msg) from None
     except (ValueError, OverflowError):
         raise ValueError(msg) from None
+    if math.isinf(number) and _finite_beyond_a_float(value):
+        raise ValueError(msg)
+    return number
+
+
+def _finite_beyond_a_float(value: object) -> bool:
+    """Whether a value :func:`float` read as an infinity is a finite number.
+
+    A long double (80 bits on x86-64 Linux) or a ``Decimal`` holds finite
+    numbers beyond a float's largest, and :func:`float` reads one as an
+    infinity rather than refusing it. It is finite when its magnitude is
+    below an infinity, which compares on both without a conversion; a value
+    that cannot say so is left as the infinity :func:`float` read.
+
+    :param value: A scalar :func:`float` read as an infinity.
+    """
+    try:
+        return bool(abs(cast("float", value)) < math.inf)
+    except TypeError:
+        return False
 
 
 def require_scalar(value: object, name: str) -> None:
@@ -1314,17 +1340,18 @@ def indices_of(value: object, name: str) -> tuple[int, ...]:
 
     An index picks an item by its place, so each is an integer by its type
     (:func:`is_integer`); a fraction, a whole float, a flag or a text that
-    spells one is refused rather than read through ``int()``, and a text is
-    never read as a sequence of its letters.
+    spells one is refused rather than read through ``int()``, and a text (a
+    ``bytes`` or a ``bytearray`` too) is never read as a sequence of its
+    letters or of their codes.
 
     :param value: A sequence (a list, a tuple, a range) or any other
         iterable of Python or NumPy integers, or a one-dimensional array of
         an integer dtype.
     :param name: Parameter name used in the error message.
     :return: The indices, as Python integers.
-    :raises TypeError: for a text, bytes, an array that has other than one
-        dimension or is not of an integer dtype, a value that holds no
-        items, or an item that is not an integer.
+    :raises TypeError: for a text, a bytes or a bytearray, an array that has
+        other than one dimension or is not of an integer dtype, a value that
+        holds no items, or an item that is not an integer.
     """
     if isinstance(value, np.ndarray):
         if value.ndim != 1 or not np.issubdtype(value.dtype, np.integer):
@@ -1335,7 +1362,7 @@ def indices_of(value: object, name: str) -> tuple[int, ...]:
             )
             raise TypeError(msg)
         return tuple(int(item) for item in value)
-    if isinstance(value, str | bytes) or not isinstance(value, Iterable):
+    if isinstance(value, str | bytes | bytearray) or not isinstance(value, Iterable):
         msg = (
             f"'{name}' must be a sequence of integer indices, got {given_repr(value)}."
         )

@@ -2492,6 +2492,63 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `weighting_filter(x, fs, high_accuracy=True)`, `high_accuracy=1` was. Each
   is now checked before the store is asked.
 
+- **A contour probe built by hand samples, and the FDTD engines refuse by
+  name a time or a waveform sample that is not one real number, and a
+  `bytearray` grid.** `simulation.ContourProbe(engine, ...)` joined its engine
+  only when `FDTD2D.add_contour_probe` built it: one built through the class
+  never sampled, its `n_samples` stayed at zero however long the engine ran
+  and its `phasors` refused for want of samples. A probe now registers itself
+  with the engine it is built for, once every check has passed, and
+  `add_contour_probe` returns the probe the class built; anything but an
+  `FDTD2D` as `engine` raises `TypeError` naming `engine`, where an
+  `ElasticFDTD2D` or another object failed with an `AttributeError` naming a
+  private attribute. The `value(t)` of `GaussianPulse`, `CWSource` and
+  `SignalSource` read a complex time as its real part, with no more than a
+  `ComplexWarning`, and a waveform that returned a complex sample stepped its
+  real part in the elastic engine (an `ExplosionSource` or a `ForceSource`) or
+  failed in the acoustic one (a `PlaneWaveSource`) with NumPy's casting error,
+  which names nothing the caller wrote; `None`, a list, an array or a
+  `bytearray` as a time or a sample failed with an error of Python's or
+  NumPy's that named nothing either. Each now raises `TypeError` naming `t` or
+  the source's waveform for anything but one real number, a text included,
+  and a `Decimal` time or sample, which failed, is read as the float it holds.
+  A whole number no float holds, such as `10**400`, passed as a time or a
+  sample and failed in the arithmetic with Python's `OverflowError`, and a
+  long double or a `Decimal` beyond a float's range was added into a field as
+  an infinity; each raises `ValueError` naming `t` or the waveform now, and a
+  long double within range is read as the float it rounds to. The shared
+  reader of one number behind the library's guards refuses such a long double
+  or `Decimal` with `ValueError` too, where it handed back the infinity
+  `float()` reads it as, which a pair such as the `bulk_density_range_kg_m3`
+  of `materials.absorbers.FiberResistivityFit` kept. A refused sample leaves
+  the engine as it was: each step samples every plane wave, force and
+  explosion before it moves a field, where the refusal came after the step had
+  advanced the fields and left the step count behind them, so a caller that
+  caught it and stepped again stepped the same instant twice. A plane wave a
+  waveform adds while a step runs enters on the next step, where one added by
+  a point source's waveform stopped the step with a `ValueError` of `zip`'s
+  once the pressure had moved.
+  A `bytearray` given as `shape=` to `FDTD2D`, `ElasticFDTD2D` or
+  `ElasticFDTD2D.from_regions` was read as the codes of its characters (two
+  bytes of 16 built a grid of 16 by 16 cells) where a `bytes` was refused; it
+  is a text there now, and so it is where `io.Signal.pick`,
+  `signals.miso_coherence` and `environment.reflection_index` read their
+  indices (`pick(bytearray(b"\x01"))` picked channel 1).
+  `ElasticFDTD2D.from_regions` takes the engine's options by name (`cfl`,
+  `absorbing_layer_cells`, `absorbing_sides`, `absorbing_layer_reflection`,
+  `damping`, `free_sides`, `obstacle_mask`, `compute`), with the engine's
+  defaults, where it forwarded `**kwargs`: a type checker now sees a misspelt
+  option, and the refusal names `from_regions`. The refusal of a host by the
+  backend of an engine built here names the two video writers among what runs
+  on a node, as the engines' docstrings now do, and the engines, the
+  simulation functions, the video writers and the backend loader list
+  `ComputeFallbackWarning` under `:warns`, where a sentence of their
+  `:raises ComputeDeviceError:` hid it from the tables of warnings, and each
+  `:warns` field names the exceptions the fallback turns into a run on NumPy;
+  a check in `tests/test_package_architecture.py` refuses a warning named, or
+  said in words, in any paragraph of a `:raises` field anywhere in the package
+  (rule D12).
+
 - **The FDTD plots document the keywords their figure refuses.**
   `FDTDResult.plot` and `ElasticFDTDResult.plot` raise `TypeError` for a
   `color_limit` with `kind="snapshot"`, whose colour limits the field drawn

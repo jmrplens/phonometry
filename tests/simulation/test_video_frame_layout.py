@@ -14,7 +14,7 @@ import io
 import itertools
 import math
 import warnings
-from collections import UserString
+from collections import Counter, UserString
 from typing import TYPE_CHECKING, Any, NamedTuple
 
 import numpy as np
@@ -593,17 +593,30 @@ def test_a_frame_under_the_floor_is_refused_naming_it(size: tuple[int, int]) -> 
 
 
 class _CountedArray(np.ndarray):
-    """A one-axis array that counts the sides read out of it, and its copies to a list."""
+    """A one-axis array that counts the reads made of it: an iteration, an
+    index or a slice, and a copy to a list.
 
-    read = 0
-    copied = 0
+    Each array keeps its own counts, so one test's reads are not another's,
+    and a view of it, which ``repr`` takes to print a long array, counts its
+    own.
+    """
+
+    reads: Counter[str]
+
+    def __array_finalize__(self, obj: object) -> None:
+        del obj
+        self.reads = Counter()
 
     def __iter__(self) -> Iterator[object]:
-        _CountedArray.read += 1
+        self.reads["iteration"] += 1
         return super().__iter__()
 
+    def __getitem__(self, key: object) -> object:
+        self.reads["index"] += 1
+        return super().__getitem__(key)  # type: ignore[index]
+
     def tolist(self) -> object:
-        _CountedArray.copied += 1
+        self.reads["list"] += 1
         return super().tolist()
 
 
@@ -612,15 +625,16 @@ def test_an_array_of_sides_is_measured_before_any_side_is_read() -> None:
 
     The array was turned into a list first, side by side, and only then
     measured, so a long array was copied whole to be refused for its length;
-    neither its iteration nor ``tolist`` runs now.
+    neither its iteration nor ``tolist`` runs now, and no index is read
+    beyond those the ``repr`` in the refusal reads to print the array.
     """
-    _CountedArray.read = 0
-    _CountedArray.copied = 0
     long = np.arange(10_000).view(_CountedArray)
     with pytest.raises(ValueError, match=r"must be a pair \(width, height\)"):
         video_module._frame_pixels(long)
-    assert _CountedArray.read == 0
-    assert _CountedArray.copied == 0
+    printed = np.arange(10_000).view(_CountedArray)
+    repr(printed)
+    assert long.reads == printed.reads
+    assert long.reads["iteration"] == long.reads["list"] == 0
     pair = np.array([480, 246]).view(_CountedArray)
     assert video_module._frame_pixels(pair) == (480, 246)
 

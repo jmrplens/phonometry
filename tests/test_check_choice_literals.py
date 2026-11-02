@@ -2321,8 +2321,9 @@ def _checked_beside_a_nested_namesake(mode: _Pace) -> _Pace:
 
 def _checked_beside_a_lambda_namesake(mode: _Pace) -> _Pace:
     require_choice(mode, "mode", _PACES)
-    # ``:=`` in a lambda binds the name in the lambda's own scope.
-    return (lambda: (require_choice := mode))()  # noqa: F841 - the lambda's own name
+    # ``:=`` in a lambda binds the name in the lambda's own scope, a local
+    # nothing reads, which is the namesake this test needs.
+    return (lambda: (require_choice := mode))()  # noqa: F841
 
 
 def _checked_beside_a_nested_import(mode: _Pace) -> _Pace:

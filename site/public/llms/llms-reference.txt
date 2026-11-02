@@ -1463,9 +1463,10 @@ Source: https://docs.jmrp.io/phonometry/reference/determinism/
 # Same bits on every machine
 
 A weighting filter designed by phonometry is the same filter, byte for byte,
-whatever C library, thread count or hash seed it is designed under, and on
-any x86-64 processor, with or without AVX-512 or fused multiply-adds,
-whichever OpenBLAS kernel set runs there. The one reservation is two steps
+whatever C library, thread count or hash seed it is designed under,
+whichever compiler built numpy, and on any x86-64 processor, with or without
+AVX-512 or fused multiply-adds, whichever OpenBLAS kernel set runs there.
+The one reservation is two steps
 of the realised cascade that go through a numerical library rather than the
 C library, LAPACK's polynomial roots and the BLAS products SciPy forms,
 which on 64-bit ARM, as measured, part some designs of the other curves and
@@ -1532,10 +1533,16 @@ The deterministic design path answers each door in kind, in
   runs with the order no longer a library's choice. Pairwise folding is also
   the *more accurate* order: O(&epsilon;&nbsp;log&nbsp;n) rounding against
   the O(&epsilon;&nbsp;n) of a running total, so nothing was traded away.
-- **Real arithmetic where complex arithmetic dispatches.** Complex multiply
-  and complex magnitude fuse operations differently per CPU, so the two
-  places the path handed numpy a complex expression are written out in real
-  arithmetic.
+- **Real arithmetic where complex arithmetic dispatches or fuses.** Complex
+  multiply and complex magnitude fuse operations differently per CPU, and
+  numpy's complex product and quotient are C loops a compiler may fuse into
+  multiply-adds: numpy built with clang, as on macOS and Windows, does, and
+  numpy built with GCC, as on Linux, does not. So every place the path
+  handed numpy or SciPy a complex expression is written out in real
+  arithmetic, numpy's own steps in numpy's order, each rounded once: the
+  printed curve the fit aims at, the read-back that sets the shipped gain,
+  and the bilinear transform with its gain, which SciPy's `bilinear_zpk`
+  forms as a product of complex numbers.
 - **Pinned transcendentals.** Inside the iteration, the logarithm runs three
   quarters of a million times per design, the exponential once per factor
   per evaluation, and the power once per grid point in every Lawson round.
@@ -1644,9 +1651,17 @@ run in CI:
 - **One digest on three platforms.** With only the logarithm pinned, the A
   weighting at 48&nbsp;kHz hashed to `991833ff389afe91` on Linux (glibc,
   x86-64), `4efa1818bd80e23a` on macOS (arm64) and `79852a57e60961c8` on
-  Windows (x86-64). Now a test in the CI matrix designs it as it ships,
-  nothing replaced, and holds `991833ff389afe91` on all three platforms,
-  and the A weighting at 44.1&nbsp;kHz to `dbea4b7fc4ad972b`; a second test
+  Windows (x86-64). With every transcendental pinned it still hashed to
+  `5f5e34e5d3a8aa6e` on macOS and on Windows, one value for both: SciPy's
+  bilinear transform took the gain as a product of complex numbers, through
+  the numpy loop clang fuses and GCC does not. A test that fuses those
+  products and quotients on any platform reproduces that digest on the code
+  that called SciPy, and on the transform written out in real arithmetic
+  designs `991833ff389afe91`, the plain bilinear designs of every curve at
+  48&nbsp;kHz unchanged with it. A test in the CI matrix designs the A
+  weighting as it ships, nothing replaced, and holds it to
+  `991833ff389afe91` on all three platforms, and the A weighting at
+  44.1&nbsp;kHz to `dbea4b7fc4ad972b`; a second test
   designs both again with an arctangent that owes nothing to the pinned
   routine, the C library's answer walked to the correctly rounded double by
   exact rational bounds, and lands on the same digests. On glibc x86-64
@@ -1655,8 +1670,10 @@ run in CI:
   the 133 checked designs from the FMA build until it was pinned; the two
   builds now design the whole corpus to one SHA-256. The response tests
   that run on the same three platforms hold the A design within
-  0.013&nbsp;dB of its analog prototype everywhere in its fit band, which
-  bounds what any difference left can amount to in response.
+  0.013&nbsp;dB of its analog prototype at 20&nbsp;001 frequencies across
+  its fit band, at each of the six rates they check; two platforms whose
+  bytes still differed could differ by up to twice that, 0.026&nbsp;dB, at
+  one of those frequencies.
 
 ## See it yourself
 
@@ -1682,8 +1699,11 @@ documented event, never a property of your hardware.
 
 ## Scope
 
-The guarantee covers the deterministic weighting design path end to end, on
-every platform, and block processing composes with it: a stateful cascade fed
+The guarantee covers the deterministic weighting design path end to end,
+within the two library steps below: on every platform for the A weighting,
+which the CI matrix holds on Linux, macOS and Windows, and for the other
+curves wherever those two steps give the same bytes. Block processing
+composes with it: a stateful cascade fed
 block by block is bit-identical to one pass over the whole record, so
 streaming does not spend the guarantee. General analysis functions built on numpy and SciPy in their
 ordinary form remain reproducible on one machine but may differ in the last

@@ -212,23 +212,40 @@ def test_a_refusal_names_a_path_of_another_library_by_its_path(
         "RIFF chunk writer",
     ],
 )
+@pytest.mark.parametrize(
+    "name",
+    [
+        "taken.bin",
+        pytest.param(
+            "taken\x1b.bin",
+            marks=pytest.mark.skipif(
+                sys.platform == "win32",
+                reason="a Windows file name cannot hold a control character",
+            ),
+        ),
+    ],
+    ids=["plain name", "name with ESC"],
+)
 def test_a_file_unlike_the_one_sniffed_or_written_is_named_by_its_path(
     refuse: Callable[[os.PathLike[str]], object],
     content: bytes,
     reason: str,
+    name: str,
     tmp_path: Path,
 ) -> None:
     # The readers and writers behind io.read, io.info, io.write and io.convert
     # refuse a file that is not the FLAC they sniffed or the FLAC or WAV they
     # have just written, which a caller cannot hand them; the refusal printed
-    # a path of another library as the object's repr.
-    path = tmp_path / "taken\x1b.bin"
+    # a path of another library as the object's repr. A control character in
+    # the name is printed as its escape.
+    path = tmp_path / name
     path.write_bytes(content)
     elsewhere = _Elsewhere(path)
     with pytest.raises(ValueError, match=reason) as caught:
         refuse(elsewhere)
-    assert str(caught.value) == f"{tmp_path}{os.sep}taken\\x1b.bin: {reason}"
-    assert [entry.name for entry in tmp_path.iterdir()] == [path.name]
+    escape = ascii(name)[1:-1]
+    assert str(caught.value) == f"{tmp_path}{os.sep}{escape}: {reason}"
+    assert [entry.name for entry in tmp_path.iterdir()] == [name]
 
 
 @pytest.mark.parametrize(

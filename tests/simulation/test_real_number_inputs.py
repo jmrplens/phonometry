@@ -674,11 +674,45 @@ def test_a_waveform_that_returns_no_real_number_is_refused_by_name(
             _STEPPERS[stepper](_WRONG_SAMPLES[spelling])
 
 
+#: A whole number of the right type that no float holds.
+_TOO_LARGE = 10**400
+
+
+@pytest.mark.parametrize("stepper", sorted(_STEPPERS))
+def test_a_waveform_sample_no_float_holds_is_refused_by_name(stepper: str) -> None:
+    """A Python integer beyond a float's range stops the step, naming the waveform.
+
+    It passed the check as surely one real number, being an ``int``, and
+    failed in the field update with Python's ``OverflowError``, which names
+    nothing the caller wrote. It is a value of the right type, refused with
+    ``ValueError`` as :func:`require_real` refuses it.
+    """
+    with pytest.raises(ValueError, match=r"waveform of .* must return a real"):
+        _STEPPERS[stepper](_TOO_LARGE)
+
+
+@pytest.mark.parametrize(
+    "source",
+    [
+        GaussianPulse(ix=8, iy=8, half_width_s=1e-4),
+        CWSource(ix=8, iy=8, frequency=1000.0),
+        SignalSource(ix=8, iy=8, samples=np.ones(8), fs=48000.0),
+    ],
+    ids=type,
+)
+def test_a_time_no_float_holds_is_refused_by_name(
+    source: GaussianPulse | CWSource | SignalSource,
+) -> None:
+    """``value(t)`` refuses a Python integer beyond a float's range by the name ``t``."""
+    with pytest.raises(ValueError, match=r"t must be one real number"):
+        source.value(_TOO_LARGE)
+
+
 #: What a waveform returns, and what an engine hands ``value(t)``, when it is
-#: right: a NumPy scalar of another width among them.
+#: right: a NumPy scalar of another width among them. A Python integer is
+#: not here: it has no width, so it is read as the float it rounds to.
 _FAST_SAMPLES: dict[str, object] = {
     "python float": 0.5,
-    "python int": 1,
     "float64": np.float64(0.5),
     "float32": np.float32(0.5),
     "int64": np.int64(1),
@@ -709,3 +743,112 @@ def test_a_real_number_of_any_numpy_width_passes_without_the_slow_check(
     value = _FAST_SAMPLES[spelling]
     assert fdtd._real_sample(value, source) is value  # type: ignore[arg-type]
     assert fdtd._real_time(value) is value  # type: ignore[arg-type]
+
+
+@pytest.mark.parametrize("value", [0, 1, -3, True, 2**53 + 1])
+def test_a_python_integer_is_read_as_its_float_without_the_slow_check(
+    value: int, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A Python integer within a float's range steps as the float it rounds to.
+
+    The engine adds it into float fields, where it would round the same way,
+    so the sample and the time are the same number; reading it is one
+    ``float``, not the full check.
+    """
+    from phonometry.simulation import fdtd
+
+    def slow(*args: object, **kwargs: object) -> None:
+        msg = "the slow check was reached"
+        raise AssertionError(msg)
+
+    source = _blast()
+    for name in ("require_real", "refuse_complex", "refuse_text", "_real_numbers"):
+        monkeypatch.setattr(fdtd, name, slow, raising=False)
+    for read in (fdtd._real_sample(value, source), fdtd._real_time(value)):
+        assert type(read) is float
+        assert read == float(value)
+
+
+class _Waveform:
+    """A tone that returns *wrong* instead of its sample while it is refused."""
+
+    def __init__(self, wrong: object = 1.0 + 1.0j) -> None:
+        self.wrong = wrong
+        self.refused = False
+
+    def __call__(self, t: float) -> object:
+        if self.refused:
+            return self.wrong
+        return float(np.sin(2.0 * np.pi * 2000.0 * t))
+
+
+def _engine_driven_by(kind: str, waveform: _Waveform) -> FDTD2D | ElasticFDTD2D:
+    """A small engine one of whose sources is driven by *waveform*."""
+    if kind == "PlaneWaveSource":
+        sim = FDTD2D(c=343.0, dx=0.01, shape=(_NY, _NX), absorbing_layer_cells=4)
+        sim.add_source(PlaneWaveSource(direction="right", waveform=waveform))
+        return sim
+    solid = ElasticFDTD2D(c_p=2000.0, c_s=1000.0, dx=0.01, rho=1000.0, shape=(_NY, _NX))
+    if kind == "ForceSource":
+        solid.add_source(ForceSource(ix=8, iy=8, direction="y", waveform=waveform))
+        return solid
+    if kind == "ExplosionSource after a ForceSource":
+        solid.add_source(ForceSource(ix=5, iy=5, direction="x", waveform=_Waveform()))
+    solid.add_source(ExplosionSource(ix=8, iy=8, waveform=waveform))
+    return solid
+
+
+def _fields(sim: FDTD2D | ElasticFDTD2D) -> dict[str, np.ndarray]:
+    """A copy of every field the engine steps, by name."""
+    names = (
+        ("p", "vx", "vy")
+        if isinstance(sim, FDTD2D)
+        else ("vx", "vy", "txx", "tyy", "txy")
+    )
+    return {name: np.array(getattr(sim, name), copy=True) for name in names}
+
+
+@pytest.mark.parametrize(
+    "kind",
+    [
+        "PlaneWaveSource",
+        "ForceSource",
+        "ExplosionSource",
+        "ExplosionSource after a ForceSource",
+    ],
+)
+def test_a_refused_sample_leaves_the_engine_as_it_was(kind: str) -> None:
+    """A step whose waveform returns no real number changes no field and no count.
+
+    The engines sampled a plane wave, a force and an explosion where they
+    injected it, after the step had already advanced the velocity, the
+    pressure or the stresses, so the refusal left the fields one step on and
+    the step count behind them: a caller that caught it and stepped again
+    stepped the same instant twice. The step now samples every waveform
+    before it moves a field, and a caller that steps again once the
+    waveform is right steps as an engine that was never refused.
+    """
+    waveform = _Waveform()
+    sim = _engine_driven_by(kind, waveform)
+    twin = _engine_driven_by(kind, _Waveform())
+    for _ in range(5):
+        sim.step()
+        twin.step()
+    before = _fields(sim)
+    waveform.refused = True
+    with pytest.raises(TypeError, match=r"waveform of .* must return a real"):
+        sim.step()
+    assert sim.n == 5
+    after = _fields(sim)
+    assert [
+        name for name in before if not np.array_equal(after[name], before[name])
+    ] == []
+    waveform.refused = False
+    sim.step()
+    twin.step()
+    stepped, never_refused = _fields(sim), _fields(twin)
+    assert [
+        name
+        for name in stepped
+        if not np.array_equal(stepped[name], never_refused[name])
+    ] == []

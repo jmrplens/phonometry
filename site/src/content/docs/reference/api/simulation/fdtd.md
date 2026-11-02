@@ -75,7 +75,10 @@ On-the-fly DFT of `p` and `v_n` on a closed rectangular contour.
 
 Created by [`FDTD2D.add_contour_probe`](/phonometry/reference/api/simulation/fdtd/#fdtd2dadd_contour_probe), or by hand: a probe
 registers itself with the engine it is built for, so either way the
-engine samples it from its next step. The contour is the closed
+engine samples it from its next step, and at every step after for as
+long as the engine lives. To integrate another window, call
+`reset` on the same probe rather than building a new one, which
+the engine would sample beside it. The contour is the closed
 rectangle of cell faces around the cell block `ix0..ix1` x
 `iy0..iy1` (inclusive); on each face the engine samples the outward
 normal velocity (which lives exactly there on the staggered grid) and

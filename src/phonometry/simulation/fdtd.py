@@ -190,23 +190,33 @@ def _finite(name: str, value: float) -> float:
     return out
 
 
-#: What is surely one real number, handed back after one ``isinstance``: a
-#: Python or NumPy float or integer of any width. A NumPy complex number is
-#: no ``np.floating`` and a NumPy flag no ``np.integer``, so neither passes.
-_SURELY_REAL = float | int | np.floating | np.integer
+#: What is surely one real number a float holds, handed back after one
+#: ``isinstance``: a Python or NumPy float, or a NumPy integer of any width
+#: (the widest, ``np.uint64``, is far inside a float's range). A NumPy
+#: complex number is no ``np.floating`` and a NumPy flag no ``np.integer``,
+#: so neither passes. A Python integer has no width, so it is not here.
+_SURELY_REAL = float | np.floating | np.integer
 
 
 def _one_real(value: object, refusal: Callable[[], str]) -> float:
     """*value* as a ``float`` through :func:`require_real`, its refusal worded only if raised.
 
-    The refusal is worded only when it is raised: showing the value costs
-    more than checking it when the value is an array (a zero-dimensional
-    one included), and a waveform's sample is checked at every step.
+    A Python integer, a flag among them, is read as the float it rounds to
+    with one :func:`float`, which refuses one too large for a float; the
+    engines add it into float fields, where it rounds the same way. The
+    refusal is worded only when it is raised: showing the value costs more
+    than checking it when the value is an array (a zero-dimensional one
+    included), and a waveform's sample is checked at every step.
 
     :param refusal: Words the refusal, given nothing.
     :raises TypeError: for anything but one real number.
     :raises ValueError: for a number too large for a float.
     """
+    if isinstance(value, int):
+        try:
+            return float(value)
+        except OverflowError:
+            raise ValueError(refusal()) from None
     try:
         return require_real(value, "")
     except TypeError:
@@ -218,11 +228,12 @@ def _one_real(value: object, refusal: Callable[[], str]) -> float:
 def _real_time(t: float) -> float:
     """The time a source's waveform is asked for, refused when it is not one real number.
 
-    A Python or NumPy float or integer, what an engine's step hands over,
-    passes as it is after one ``isinstance``. Anything else goes through
-    :func:`require_real`: NumPy reads a complex time as its real part with
-    no more than a ``ComplexWarning``, and a text, an array or ``None``
-    fails where it first meets a number, in a message that names nothing.
+    A Python or NumPy float or a NumPy integer, what an engine's step hands
+    over, passes as it is after one ``isinstance``, and a Python integer is
+    read as its float. Anything else goes through :func:`require_real`:
+    NumPy reads a complex time as its real part with no more than a
+    ``ComplexWarning``, and a text, an array or ``None`` fails where it
+    first meets a number, in a message that names nothing.
 
     :raises TypeError: for anything but one real number: a complex number,
         a text, an array (a ``bytearray`` included) or ``None``.
@@ -242,9 +253,11 @@ def _real_sample(value: float, source: object) -> float:
     real part of a complex one (with no more than a ``ComplexWarning``) or
     fail with a casting error that names nothing; they multiply a text by
     the amplitude, broadcast an array into the field, and fail on ``None``
-    in a message that names nothing. A Python or NumPy float or integer,
-    what a waveform returns, passes as it is after one ``isinstance``, so
-    the step pays nothing more; anything else goes through
+    in a message that names nothing. A Python or NumPy float or a NumPy
+    integer, what a waveform returns, passes as it is after one
+    ``isinstance``, so the step pays nothing more; a Python integer is read
+    as its float, so one no float holds is refused here rather than met by
+    an ``OverflowError`` in the field update; anything else goes through
     :func:`require_real` and steps as the float it reads as.
 
     :param source: The source whose waveform returned *value*, which the
@@ -1244,7 +1257,10 @@ class ContourProbe:
 
     Created by :meth:`FDTD2D.add_contour_probe`, or by hand: a probe
     registers itself with the engine it is built for, so either way the
-    engine samples it from its next step. The contour is the closed
+    engine samples it from its next step, and at every step after for as
+    long as the engine lives. To integrate another window, call
+    :meth:`reset` on the same probe rather than building a new one, which
+    the engine would sample beside it. The contour is the closed
     rectangle of cell faces around the cell block ``ix0..ix1`` x
     ``iy0..iy1`` (inclusive); on each face the engine samples the outward
     normal velocity (which lives exactly there on the staggered grid) and
@@ -1939,7 +1955,15 @@ class FDTD2D:
             self._step()
 
     def _step(self) -> None:
-        """One leapfrog step on the backend's arrays."""
+        """One leapfrog step on the backend's arrays.
+
+        Every plane wave is sampled before any field moves, so a sample the
+        step refuses leaves the engine as it was.
+        """
+        t_next = (self.n + 1) * self.dt
+        plane_samples = [
+            self._plane_samples(plane, t_next) for plane in self._plane_sources
+        ]
         dt_dx = self.dt / self.dx
         # Velocity half-step from the pressure gradient (rigid walls are the
         # implicit zero normal velocity at the domain edge).
@@ -1962,30 +1986,50 @@ class FDTD2D:
         for edge in self._edges:
             edge.add_flux(div)
         self.p -= self._kappa * dt_dx * div
-        t_next = (self.n + 1) * self.dt
         for src in self._sources:
             self.p[src.iy, src.ix] += src.value(t_next)
-        for plane in self._plane_sources:
-            self._inject_plane(plane, t_next)
+        for plane, (value_p, value_v) in zip(
+            self._plane_sources, plane_samples, strict=True
+        ):
+            self._inject_plane(plane, value_p, value_v)
         self.p *= self._decay_p
         self.n += 1
         for probe in self._contour_probes:
             probe._accumulate(self.p, self.vx, self.vy, self.n)
 
-    def _inject_plane(self, plane: PlaneWaveSource, t_next: float) -> None:
+    def _plane_samples(
+        self, plane: PlaneWaveSource, t_next: float
+    ) -> tuple[float, float]:
+        """The two samples of *plane* a step injects: the pressure's, then the velocity's.
+
+        The velocity face sits half a step earlier and half a cell
+        downstream of the pressure line.
+
+        :raises TypeError: if the waveform returns anything but one real
+            number.
+        """
+        c_ref = self._c_ref
+        value_p = _real_sample(plane.waveform(t_next), plane)
+        value_v = _real_sample(
+            plane.waveform(t_next - 0.5 * self.dt + 0.5 * self.dx / c_ref), plane
+        )
+        return value_p, value_v
+
+    def _inject_plane(
+        self, plane: PlaneWaveSource, value_p: float, value_v: float
+    ) -> None:
         r"""Add the incident plane wave on the injection line (one-way).
 
         Simultaneous pressure and adjacent-face velocity increments carry
         the incident wave into the domain only along the travel direction;
         the increments are the discrete equivalent of superimposing
         :math:`p = s(t - d/c)` entering through the line each step.
+
+        :param value_p: The waveform's sample for the pressure line.
+        :param value_v: The waveform's sample for the velocity face.
         """
         c_ref = self._c_ref
         gain = plane.amplitude * self.dt / (self.dx / c_ref)
-        value_p = _real_sample(plane.waveform(t_next), plane)
-        value_v = _real_sample(
-            plane.waveform(t_next - 0.5 * self.dt + 0.5 * self.dx / c_ref), plane
-        )
         direction = plane.direction
         k = plane.offset
         if direction == "down":

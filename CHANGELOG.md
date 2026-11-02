@@ -2512,6 +2512,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   NumPy's that named nothing either. Each now raises `TypeError` naming `t` or
   the source's waveform for anything but one real number, a text included,
   and a `Decimal` time or sample, which failed, is read as the float it holds.
+  A whole number no float holds, such as `10**400`, passed as a time or a
+  sample and failed in the arithmetic with Python's `OverflowError`; it raises
+  `ValueError` naming `t` or the waveform now. A refused sample leaves the
+  engine as it was: each step samples every plane wave, force and explosion
+  before it moves a field, where the refusal came after the step had advanced
+  the fields and left the step count behind them, so a caller that caught it
+  and stepped again stepped the same instant twice.
   A `bytearray` given as `shape=` to `FDTD2D`, `ElasticFDTD2D` or
   `ElasticFDTD2D.from_regions` was read as the codes of its characters (two
   bytes of 16 built a grid of 16 by 16 cells) where a `bytes` was refused; it

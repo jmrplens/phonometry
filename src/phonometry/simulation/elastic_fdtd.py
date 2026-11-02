@@ -1240,7 +1240,14 @@ class ElasticFDTD2D:
             self._step()
 
     def _step(self) -> None:
-        """One leapfrog step on the backend's arrays."""
+        """One leapfrog step on the backend's arrays.
+
+        Every force and explosion is sampled before any field moves, so a
+        sample the step refuses leaves the engine as it was.
+        """
+        t_half = (self.n + 0.5) * self.dt
+        t_next = (self.n + 1) * self.dt
+        forces, explosions = self._source_samples(t_half, t_next)
         dt_dx = self.dt / self.dx
         txx, tyy = self.txx, self.tyy
         # Velocity half-step from the stress gradients; the one-sided txy
@@ -1255,10 +1262,8 @@ class ElasticFDTD2D:
         if self._vx_open is not None and self._vy_open is not None:
             self.vx *= self._vx_open
             self.vy *= self._vy_open
-        t_half = (self.n + 0.5) * self.dt
-        for src in self._sources:
-            if isinstance(src, ForceSource):
-                self._inject_force(src, t_half)
+        for force, sample in forces:
+            self._inject_force(force, sample)
         self.vx *= self._decay_vx
         self.vy *= self._decay_vy
         # Stress step from the velocity gradients (Hooke's law in rate
@@ -1281,12 +1286,10 @@ class ElasticFDTD2D:
         # Pin the free surfaces before the sources, so a stress source on
         # the surface row acts as a boundary traction drive.
         self._apply_free_surfaces(txx_surf, tyy_surf)
-        t_next = (self.n + 1) * self.dt
-        for src in self._sources:
-            if isinstance(src, ExplosionSource):
-                inj = src.amplitude * _real_sample(src.waveform(t_next), src)
-                self.txx[src.iy, src.ix] -= inj
-                self.tyy[src.iy, src.ix] -= inj
+        for blast, sample in explosions:
+            inj = blast.amplitude * sample
+            self.txx[blast.iy, blast.ix] -= inj
+            self.tyy[blast.iy, blast.ix] -= inj
         self.txx *= self._decay_c
         self.tyy *= self._decay_c
         self.txy *= self._decay_xy
@@ -1407,14 +1410,39 @@ class ElasticFDTD2D:
                     self.txx[r, c] = 0.0
                     self.tyy[r, c] = 0.0
 
-    def _inject_force(self, src: ForceSource, t: float) -> None:
+    def _source_samples(
+        self, t_half: float, t_next: float
+    ) -> tuple[list[tuple[ForceSource, float]], list[tuple[ExplosionSource, float]]]:
+        """Each force's sample at *t_half* and each explosion's at *t_next*.
+
+        The waveforms are called in the order the step injects them: every
+        force, in the order the sources were added, then every explosion.
+
+        :raises TypeError: if a waveform returns anything but one real
+            number.
+        """
+        forces = [
+            (src, _real_sample(src.waveform(t_half), src))
+            for src in self._sources
+            if isinstance(src, ForceSource)
+        ]
+        explosions = [
+            (src, _real_sample(src.waveform(t_next), src))
+            for src in self._sources
+            if isinstance(src, ExplosionSource)
+        ]
+        return forces, explosions
+
+    def _inject_force(self, src: ForceSource, sample: float) -> None:
         """Add one body-force increment to the target velocity node.
 
         The face density is read from the host map as a Python float, which
         rounds as the float64 element it is read from, so the increment is
         the same IEEE double arithmetic on every device.
+
+        :param sample: The force's waveform at the half step.
         """
-        f = src.amplitude * _real_sample(src.waveform(t), src)
+        f = src.amplitude * sample
         if src.direction == "x":
             rho = float(self._rho_x_host[src.iy, src.ix])
             self.vx[src.iy, src.ix] += self.dt * f / (rho * self.dx**2)

@@ -189,7 +189,7 @@ def _require_table1_bands(owner: str, frequencies: np.ndarray) -> None:
         return
     msg = (
         f"{owner}: 'frequencies' must be the ten ANSI/ASA S12.2-2019 octave "
-        f"bands 16 Hz - 8000 Hz (Table 1 / Table D.1); got {freqs.tolist()}."
+        f"bands 16 Hz to 8000 Hz (Table 1 / Table D.1); got {freqs.tolist()}."
     )
     raise ValueError(msg)
 
@@ -627,7 +627,7 @@ def _align_levels(
     if frequencies is None:
         if lv.size != _N_BANDS:
             msg = (
-                f"levels must have {_N_BANDS} octave-band values (16 Hz - "
+                f"levels must have {_N_BANDS} octave-band values (16 Hz to "
                 f"8000 Hz) when frequencies are not given; got {lv.size}."
             )
             raise ValueError(msg)
@@ -640,7 +640,7 @@ def _align_levels(
         if not matches.any():
             msg = (
                 f"frequency {f} Hz is not one of the ANSI S12.2 octave bands "
-                f"(16 Hz - 8000 Hz)."
+                f"(16 Hz to 8000 Hz)."
             )
             raise ValueError(msg)
         aligned[np.argmax(matches)] = level

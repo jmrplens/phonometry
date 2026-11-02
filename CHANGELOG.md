@@ -2306,6 +2306,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   measured only once python-soundfile had written the audio at the path, so
   the refusal left a FLAC file without its `bext` behind; the path is
   untouched now.
+- **The refusals of a band range write it with "to".** The errors of
+  the speech transmission index (`speech.sti_from_impulse_response` and its
+  kin), `speech.speech_intelligibility_index`,
+  the noise criteria of `room`, the hearing threshold and the noise-induced
+  hearing loss functions of `hearing`, and the tonality warning wrote a range
+  as "(125 Hz - 8 kHz)", a spaced hyphen that reads as a minus beside
+  numbers; they write "125 Hz to 8 kHz", as the docstrings do.
 - **A record refuses a container that holds itself by the name of the field
   wherever the container sits.** A field the class's own `__post_init__`
   fills (`init=False`), an `InitVar` handed to it, a field a pickled or

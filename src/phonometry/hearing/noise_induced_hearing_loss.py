@@ -499,7 +499,7 @@ def _select(values: np.ndarray, frequencies: ArrayLike | None) -> np.ndarray:
         if not matches.any():
             msg = (
                 f"frequency {f} Hz is not an ISO 1999 audiometric frequency "
-                f"(500 Hz - 6000 Hz)."
+                f"(500 Hz to 6000 Hz)."
             )
             raise ValueError(msg)
         idx.append(int(np.argmax(matches)))

@@ -129,7 +129,7 @@ def _warn_degenerate(ft: float, band_power: float, df: float) -> None:
     if abs(ft - _F_MIN) <= df or abs(ft - _F_MAX) <= df:
         warnings.warn(
             f"The assessed peak at {ft:.1f} Hz lies within one bin of the "
-            "89.1 Hz - 11.2 kHz range-of-interest edge; the prominence "
+            "89.1 Hz to 11.2 kHz range-of-interest edge; the prominence "
             "verdict can flip with the bin snapping. Use a finer "
             "resolution_hz or check the tone frequency.",
             TonalityWarning,
@@ -291,7 +291,7 @@ def _find_peak(
     if tone_frequency is None:
         in_range = (freqs >= _F_MIN) & (freqs <= _F_MAX)
         if not np.any(in_range):
-            msg = "Spectrum has no bins in the 89.1 Hz - 11.2 kHz range."
+            msg = "Spectrum has no bins in the 89.1 Hz to 11.2 kHz range."
             raise ValueError(msg)
         return int(np.flatnonzero(in_range)[np.argmax(power[in_range])])
     _, _, dfc = _critical_band(tone_frequency)

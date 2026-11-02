@@ -4158,14 +4158,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   routine, design the Linux bytes: the A weighting at 48 kHz moves there from
   `43f786ffab5c4dd4` on glibc without FMA to `991833ff389afe91`. Tests in the
   CI matrix hold the A weighting at 48 and 44.1 kHz to one digest on all
-  three platforms. For
-  the other curves the same bytes also take the two library steps of the
-  cascade, the sections SciPy forms through the BLAS and the roots LAPACK
-  finds for the 468 prototype, giving the bytes they give on x86-64: the
-  OpenBLAS of 64-bit ARM, measured in emulation, does so for 100 of the 133
-  checked designs, every A design among them, and not for the other 33 (the
-  nineteen 468 designs and fourteen of B, C, D, G and AU), and Apple's
-  Accelerate is not measured. On Linux,
+  three platforms, and the entry on the library steps after the fit extends
+  that to every curve. On Linux,
   127 of the 133 (curve, rate) designs the library is checked at do not move,
   the A weighting at 48 kHz among them, and six move by their last bits,
   because glibc's arctangent is not correctly rounded on 19 of the
@@ -4189,6 +4183,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   the pinned `hypot` too, which moves the B, C and G designs on Linux by one
   unit in the last place of that gain. A design costs about 270 ms where it
   cost about 200, once per curve, rate and mode as before.
+
+- **The weighting design takes no step from a numerical library either, so
+  every curve has one set of bytes on every platform, and the BS.468-4
+  designs and the AU weighting at 100 and 200 Hz move on Linux.** The two
+  steps after the fit that went through a library are now the package's own
+  arithmetic. The BS.468-4 prototype's six poles, which `numpy.roots` took
+  as eigenvalues from LAPACK, are the correctly rounded roots of the
+  network's denominator, which is built from its seven component values in
+  exact rational arithmetic (`filters._pinned_roots`): each part the double
+  nearest the exact root's, decided by a certificate in exact arithmetic,
+  and within LAPACK's own error of what `numpy.roots` returns. The
+  second-order sections, which SciPy's `zpk2sos` formed with
+  `numpy.convolve` through the BLAS and paired by numpy's complex
+  magnitude, are SciPy's procedure step for step, every product and sum
+  rounded once and every magnitude correctly rounded. On 64-bit ARM under
+  OpenBLAS those two steps parted 33 of the 133 checked designs from the
+  x86-64 bytes; now all 133 are the same bytes there, under glibc and under
+  musl, as on x86-64 under glibc with and without FMA and under musl, and
+  the CI matrix holds every curve at 48 kHz to one digest, where it held
+  only the A weighting. On Linux 21 of the 133 move, and the other 112 keep
+  their bytes, the A weighting at every rate among them. The nineteen
+  BS.468-4 designs move because their poles move by 2 to 36 units in the
+  last place of each part from LAPACK's, and the fit, started from them,
+  settles on other coefficients inside its tolerance: 7 to 13 of each
+  design's 18 move, by their last 9 to 12 bits at 250, 400 and 500 Hz and
+  by more at the other rates, up to nearly half the value of one small
+  coefficient at 22.05 kHz, and the response by at most 0.0072 dB, at
+  125 Hz (0.0033 dB at 44.1 kHz; 0.000012 dB at 48 kHz, where the digest
+  moves from `08f94c9ff182cff1` to `eee92dba5dcc41f7`). The AU weighting
+  at 100 and 200 Hz moves by one or two units in the last place of six and
+  eight coefficients, because numpy's complex magnitude, one unit off the
+  correctly rounded one, had paired two zeros one unit in the last place
+  apart the other way round. Every design that moved stays within the
+  response the tests allow. `electroacoustics.weighting_bs468`, which
+  evaluates the same prototype, moves by at most 4e-14 dB from 1 Hz to
+  100 kHz. The design also takes the number of each prototype's zeros at the
+  origin from the prototype, where it tested each zero against zero, and
+  the check against float equality in src refuses a cast to `bool`, which
+  on a float array is the same test.
 
 - **`vibration.evaluate_train_passage`, `signals.resample_signal` handed a
   Signal and the EN 15610 Method B bank of `environment` run at a fractional
@@ -11208,9 +11241,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   different byte strings for the same filter; the entry on the pinned
   exponentials, powers, sines, tangents and arctangents pins every one of
   them, and with the complex products of the bilinear transform written out
-  in real arithmetic the three platforms design one byte string for the A
-  weighting the CI matrix holds; the determinism guide says how, and which
-  library steps the other curves still depend on.
+  in real arithmetic, and the roots and sections of the cascade spelled in
+  the package's own arithmetic, every platform designs one byte string for
+  every curve; the determinism guide says how.
 
 - The frequency weightings are designed at the sample rate instead of being
   outrun at eight times it. Every curve in `filters.weighting` starts as poles

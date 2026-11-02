@@ -80,7 +80,7 @@ import sys
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, NamedTuple
 
-from ast_scan import ROOT, exempted, own_names, python_files, relative
+from ast_scan import ROOT, exempted, live_bindings, own_names, python_files, relative
 
 if TYPE_CHECKING:
     import pathlib
@@ -790,11 +790,8 @@ def checking_functions(
     # parameter to, worked out once; the search below only grows the set of
     # checks.
     candidates: dict[str, list[set[str]]] = {}
-    for scope in scopes:
-        if isinstance(scope.node, ast.FunctionDef | ast.AsyncFunctionDef):
-            candidates.setdefault(scope.qualified, []).append(
-                _handed_first(scope, exports)
-            )
+    for scope in _reachable(scopes):
+        candidates.setdefault(scope.qualified, []).append(_handed_first(scope, exports))
     found = set(_SHARED_CHECKS)
     grew = True
     while grew:
@@ -808,6 +805,32 @@ def checking_functions(
                 found.add(name)
                 grew = True
     return frozenset(found)
+
+
+def _reachable(scopes: Sequence[_Scope]) -> list[_Scope]:
+    """The functions of *scopes* a call can reach by their names.
+
+    Of the definitions of one name at the top of a module or in a class,
+    those it holds once the module or the class has run
+    (:func:`ast_scan.live_bindings`): one in each branch of an ``if`` is
+    either, and one a later definition replaces is none. Every definition
+    of a function written inside another, which a call may reach before
+    the next one is written.
+    """
+    by_name: dict[str, list[_Scope]] = {}
+    for scope in scopes:
+        if isinstance(scope.node, ast.FunctionDef | ast.AsyncFunctionDef):
+            by_name.setdefault(scope.qualified, []).append(scope)
+    reachable: list[_Scope] = []
+    for same in by_name.values():
+        holder = same[0].around[-2]
+        if len(same) == 1 or isinstance(holder, ast.FunctionDef | ast.AsyncFunctionDef):
+            reachable.extend(same)
+            continue
+        nodes = {scope.node: scope for scope in same}
+        live = live_bindings(same[0].around[0], list(nodes))
+        reachable.extend(nodes[node] for node in live)
+    return reachable
 
 
 def _handed_first(scope: _Scope, exports: Mapping[str, str]) -> set[str]:

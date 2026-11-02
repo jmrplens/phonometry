@@ -859,6 +859,33 @@ def test_a_check_defined_in_two_branches_counts_only_when_both_check(
     assert _found(tmp_path, source, helpers=_CHECK) == [("reader", _FOREIGN)]
 
 
+def test_a_check_a_later_definition_replaces_counts_as_the_later_one(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A name is the definition it holds once the module has run.
+
+    Every definition of a name counted, so a first ``check`` that hands the
+    name back untouched, replaced by a second that asks what the name holds,
+    left the read behind it refused, though no call ever runs the first.
+    """
+    source = """
+        import numpy as np
+
+        from check import require_regular
+
+        def check(path):
+            return path
+
+        def check(path):
+            require_regular(path)
+
+        def reader(path):
+            check(path)
+            return np.load(path)
+        """
+    assert _found(tmp_path, source, helpers=_CHECK) == []
+
+
 def test_the_shared_module_is_the_check_and_is_not_read(tmp_path: pathlib.Path) -> None:
     owner = tmp_path / "phonometry" / "_internal" / "json_input.py"
     owner.parent.mkdir(parents=True)

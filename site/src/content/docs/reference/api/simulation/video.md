@@ -84,7 +84,7 @@ let it go, which hides no error).
 AnimationFrame(
     *,
     language: Literal['en', 'es'] = 'en',
-    size: tuple[int | np.integer[Any], int | np.integer[Any]] | list[int | np.integer[Any]] = (960, 540),
+    size: Sequence[int | np.integer[Any]] | NDArray[np.integer[Any]] = (960, 540),
     color_limit: float | None = None,
 )
 ```
@@ -96,7 +96,7 @@ How each frame of a simulation video is drawn: in which language, at what size, 
 | Name | Description |
 | :--- | :--- |
 | `language` | Label language, `"en"` (default) or `"es"`. |
-| `size` | `(width, height)` of a frame in pixels, at least 479 by 245, the smallest frame in which every text, at its own size, stays clear of the frame's margin and the field still shows (for a grid up to ten times longer one way than the other), on every matplotlib version the library is tested with (default `(960, 540)`). That is for a run whose last frame comes before ten seconds: a later one needs a wider frame for the time its last title writes, which the writers ask for before the run starts. |
+| `size` | `(width, height)` of a frame in pixels, a tuple, a list, a NumPy array or any other sequence of the two whole numbers, at least 479 by 245, the smallest frame in which every text, at its own size, stays clear of the frame's margin and the field still shows (for a grid up to ten times longer one way than the other), on every matplotlib version the library is tested with (default `(960, 540)`). That is for a run whose last frame comes before ten seconds: a later one needs a wider frame for the time its last title writes, which the writers ask for before the run starts. |
 | `color_limit` | The value at either end of the colour scale, fixed for the whole video, in the unit of the field drawn: pascals for an acoustic run ([`write_fdtd_animation`](/phonometry/reference/api/simulation/video/#write_fdtd_animation)), and for an elastic one ([`write_elastic_fdtd_animation`](/phonometry/reference/api/simulation/video/#write_elastic_fdtd_animation)) the unit of `ElasticRecording.snapshot_field`, pascals for `"p"` and metres per second for `"vx"` and `"vy"`. `None` (default) finds it in a first pass over the run. |
 
 **Raises**

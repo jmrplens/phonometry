@@ -384,6 +384,25 @@ def test_the_calibration_bands_must_be_one_third_octaves_from_50_hz() -> None:
         )
 
 
+@pytest.mark.parametrize("given", [None, 1, b"fixed"])
+def test_a_calibration_arrangement_that_is_no_text_is_a_type_error(
+    given: object,
+) -> None:
+    """The arrangement is a ``Literal`` of texts alone, so anything else is the wrong type.
+
+    The calibration handed it to the helper that also serves the
+    reverberation room, where ``None`` is an arrangement, and ``None``
+    came back as a ``ValueError`` that the room needs one.
+    """
+    levels = np.full((20, _THIRDS.size), 80.0)
+    with pytest.raises(TypeError, match="'arrangement' must be one of .*, a text"):
+        emission.reference_source_calibration(
+            levels,
+            frequencies=_THIRDS,
+            arrangement=given,  # type: ignore[arg-type]
+        )
+
+
 def test_a_calibration_needs_bands() -> None:
     levels = np.full((20, 0), 80.0)
     with pytest.raises(ValueError, match="'frequencies' must be a non-empty"):

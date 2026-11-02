@@ -173,6 +173,28 @@ def test_code_on_a_page_is_not_read(tmp_path: pathlib.Path) -> None:
     assert cdm._page_bare_scripts(page) == []
 
 
+def test_an_escaped_backtick_opens_no_code_span(tmp_path: pathlib.Path) -> None:
+    """A backslash shows the backtick after it, so the maths between is read."""
+    page = tmp_path / "page.md"
+    page.write_text("Shown \\`$|dL_n|_\\max$\\` as written.\n", encoding="utf-8")
+    found = cdm._page_bare_scripts(page)
+    assert [(line, command) for line, command, _ in found] == [(1, "max")]
+
+
+def test_a_code_span_joins_no_script_across_it(tmp_path: pathlib.Path) -> None:
+    r"""The text either side of a code span stays apart, as the page shows it.
+
+    The page reader took the span out and joined what stood either side, so
+    ``x_`c`\max`` read as the bare subscript ``x_\max``, which the page
+    never writes: it shows ``x_``, the code and a backslash command apart.
+    """
+    page = tmp_path / "page.md"
+    page.write_text("Read $x_`c`\\max$ as written.\n", encoding="utf-8")
+    assert cdm._page_bare_scripts(page) == []
+    page.write_text("Read $x_\\max$ as written.\n", encoding="utf-8")
+    assert [command for _, command, _ in cdm._page_bare_scripts(page)] == ["max"]
+
+
 def test_a_fence_closes_only_on_its_own_marker(tmp_path: pathlib.Path) -> None:
     """A fence shown inside a tilde fence closes nothing, so what follows is prose."""
     page = tmp_path / "page.md"

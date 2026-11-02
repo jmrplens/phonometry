@@ -302,7 +302,11 @@ def test_a_set_difference_or_subset_against_strings_is_a_choice() -> None:
     constants = ccl._module_constants(sys.modules[__name__])
     for function in (_set_difference, _subset, _issubset, _issuperset):
         found = ccl.code_evidence(
-            _tree(function), ccl._the_name("sides"), constants, collection=True
+            _tree(function),
+            ccl._the_name("sides"),
+            constants,
+            collection=True,
+            module_name=__name__,
         )
         assert found, function.__name__
 
@@ -312,7 +316,11 @@ def test_the_strings_held_in_a_local_are_followed() -> None:
     constants = ccl._module_constants(sys.modules[__name__])
     for function in (_one_or_several, _once_each):
         found = ccl.code_evidence(
-            _tree(function), ccl._the_name("sides"), constants, collection=True
+            _tree(function),
+            ccl._the_name("sides"),
+            constants,
+            collection=True,
+            module_name=__name__,
         )
         assert found, function.__name__
 
@@ -328,7 +336,11 @@ def test_a_table_held_in_a_local_is_the_table_written_in_place() -> None:
         (_one_of_the_tables, "levels"),
     ):
         found = ccl.code_evidence(
-            _tree(function), ccl._the_name(name), constants, collection=True
+            _tree(function),
+            ccl._the_name(name),
+            constants,
+            collection=True,
+            module_name=__name__,
         )
         assert found, function.__name__
 
@@ -349,7 +361,11 @@ def test_a_frozen_table_built_with_code_is_read_off_the_module() -> None:
     constants = ccl._module_constants(sys.modules[__name__])
     assert set(ccl.strings_of(ast.Name(id="_BUILT"), constants)) == {"north", "south"}
     found = ccl.code_evidence(
-        _tree(_built_table), ccl._the_name("sides"), constants, collection=True
+        _tree(_built_table),
+        ccl._the_name("sides"),
+        constants,
+        collection=True,
+        module_name=__name__,
     )
     assert found == ["a set difference with a set of strings"]
 
@@ -361,7 +377,11 @@ def test_a_comprehension_that_copies_the_items_is_followed() -> None:
     constants = ccl._module_constants(sys.modules[__name__])
     for function, name in ((_a_set_copy, "limits"), (_a_list_copy, "sides")):
         found = ccl.code_evidence(
-            _tree(function), ccl._the_name(name), constants, collection=True
+            _tree(function),
+            ccl._the_name(name),
+            constants,
+            collection=True,
+            module_name=__name__,
         )
         assert "a set difference with a set of strings" in found, function.__name__
 
@@ -427,7 +447,11 @@ def test_a_table_imported_from_a_sibling_module_is_followed() -> None:
     }
     tree = ast.parse("def f(sides):\n    return set(sides) - set(_SIDES)\n")
     found = ccl.code_evidence(
-        tree, ccl._the_name("sides"), dict(constants), collection=True
+        tree,
+        ccl._the_name("sides"),
+        dict(constants),
+        collection=True,
+        module_name=__name__,
     )
     assert found == ["a set difference with a set of strings"]
 
@@ -436,7 +460,11 @@ def test_each_item_and_each_key_is_read() -> None:
     """A loop over the items, or over the keys of ``.items()``, checks each."""
     constants = ccl._module_constants(sys.modules[__name__])
     found = ccl.code_evidence(
-        _tree(_item_by_item), ccl._the_name("levels"), constants, collection=True
+        _tree(_item_by_item),
+        ccl._the_name("levels"),
+        constants,
+        collection=True,
+        module_name=__name__,
     )
     assert "each item 'in' a set of strings" in found
 
@@ -462,7 +490,11 @@ def test_a_string_below_the_top_level_is_read_as_it_stands() -> None:
 def test_one_string_looked_for_in_a_collection_is_a_choice() -> None:
     """``"top" in sides`` names one option, as ``side == "top"`` does."""
     found = ccl.code_evidence(
-        _tree(_one_looked_for), ccl._the_name("sides"), {}, collection=True
+        _tree(_one_looked_for),
+        ccl._the_name("sides"),
+        {},
+        collection=True,
+        module_name=__name__,
     )
     assert found == ["'top' 'in' it"]
 
@@ -470,7 +502,11 @@ def test_one_string_looked_for_in_a_collection_is_a_choice() -> None:
 def test_an_empty_text_is_no_option() -> None:
     """``label == ""`` asks whether a label was written, not which."""
     found = ccl.code_evidence(
-        _tree(_a_label), ccl._the_name("labels"), {}, collection=True
+        _tree(_a_label),
+        ccl._the_name("labels"),
+        {},
+        collection=True,
+        module_name=__name__,
     )
     assert found == []
 
@@ -507,19 +543,25 @@ def test_a_catalogue_row_constructor_is_passed_over() -> None:
 
 def test_a_membership_test_against_strings_is_a_choice() -> None:
     """``mode not in ("fast", "slow")`` is the commonest closed choice."""
-    found = ccl.code_evidence(_tree(_compared), ccl._the_name("mode"), {})
+    found = ccl.code_evidence(
+        _tree(_compared), ccl._the_name("mode"), {}, module_name=__name__
+    )
     assert "'in' a set of strings" in found
 
 
 def test_an_equality_with_a_string_is_a_choice() -> None:
     """``mode == "fast"`` names one option, so the set is closed."""
-    found = ccl.code_evidence(_tree(_equal), ccl._the_name("mode"), {})
+    found = ccl.code_evidence(
+        _tree(_equal), ccl._the_name("mode"), {}, module_name=__name__
+    )
     assert "== 'fast'" in found
 
 
 def test_a_shared_validator_is_a_choice() -> None:
     """``require_choice`` refuses anything but its options."""
-    found = ccl.code_evidence(_tree(_validated), ccl._the_name("mode"), {})
+    found = ccl.code_evidence(
+        _tree(_validated), ccl._the_name("mode"), {}, module_name=__name__
+    )
     assert "require_choice()" in found
 
 
@@ -544,13 +586,17 @@ def test_a_str_inside_a_union_is_read_as_a_choice() -> None:
 
 def test_a_text_cleaned_up_before_the_check_is_a_choice() -> None:
     """``str(mode).strip().lower() in (...)`` checks the caller's choice."""
-    found = ccl.code_evidence(_tree(_normalised), ccl._the_name("mode"), {})
+    found = ccl.code_evidence(
+        _tree(_normalised), ccl._the_name("mode"), {}, module_name=__name__
+    )
     assert "'in' a set of strings" in found
 
 
 def test_a_local_bound_from_the_text_is_followed() -> None:
     """``key = _resolve(mode)`` and then ``key not in (...)`` is the same check."""
-    found = ccl.code_evidence(_tree(_derived), ccl._the_name("mode"), {})
+    found = ccl.code_evidence(
+        _tree(_derived), ccl._the_name("mode"), {}, module_name=__name__
+    )
     assert "'in' a set of strings" in found
 
 
@@ -581,7 +627,12 @@ def test_a_str_beside_an_enum_is_a_choice() -> None:
 
 def test_a_free_text_is_not_a_choice() -> None:
     """A label that is only transformed is open text, and nothing is reported."""
-    assert ccl.code_evidence(_tree(_free), ccl._the_name("label"), {}) == []
+    assert (
+        ccl.code_evidence(
+            _tree(_free), ccl._the_name("label"), {}, module_name=__name__
+        )
+        == []
+    )
     assert ccl.passed_on_evidence(_free, "label") == []
 
 
@@ -1051,7 +1102,9 @@ def test_a_table_keyed_by_named_constants_holds_their_strings() -> None:
     """
     constants = ccl._module_constants(sys.modules[__name__])
     assert ccl.strings_of(ast.Name(id="_ROUTES"), constants) == ("per_leaf", "together")
-    found = ccl.code_evidence(_tree(_route), ccl._the_name("quantity"), constants)
+    found = ccl.code_evidence(
+        _tree(_route), ccl._the_name("quantity"), constants, module_name=__name__
+    )
     assert found == ["'in' a set of strings", "a lookup by key"]
 
 
@@ -2090,6 +2143,325 @@ def test_a_test_of_the_form_keeps_only_the_paths_that_hold_nothing() -> None:
         _checked_after_none_is_matched,
     ):
         assert _verdict_of(tight, "mode", options=paces) is None, tight
+
+
+def _leaves_untyped_on_anything_but_a_text(mode: _Pace) -> _Pace:
+    if not isinstance(mode, str):
+        return mode
+    require_choice(mode, "mode", _PACES)
+    return mode
+
+
+def _leaves_untyped_on_none(mode: _Pace) -> _Pace | None:
+    if mode is None:
+        return None
+    require_choice(mode, "mode", _PACES)
+    return mode
+
+
+def _leaves_untyped_on_a_matched_number(mode: _Pace) -> _Pace:
+    match mode:
+        case float() | None:
+            return mode
+    require_choice(mode, "mode", _PACES)
+    return mode
+
+
+def _checked_untyped_behind_none(mode: _Pace) -> _Pace:
+    if mode is not None:
+        require_choice(mode, "mode", _PACES)
+    return mode
+
+
+def test_a_choice_of_texts_alone_leaves_through_no_test_of_its_form() -> None:
+    """A value that is not a text is refused with ``TypeError`` (rule A45).
+
+    ``if not isinstance(mode, str): return mode`` before the check sends a
+    number past it, and so do ``if mode is None: return``, ``case float() |
+    None: return`` and a check behind ``if mode is not None``: each value
+    that is no text leaves unrefused. That is a path that holds nothing to
+    check only when the annotation lists a value that is no text, a number
+    or ``None`` beside the ``Literal``; for a ``Literal`` of texts alone it
+    is a path that skips the check.
+    """
+    some_paths = "checked on some paths only, so a misspelling passes on the others"
+    texts = 'Literal["fast", "slow"]'
+    for leaky in (
+        _leaves_untyped_on_anything_but_a_text,
+        _leaves_untyped_on_none,
+        _leaves_untyped_on_a_matched_number,
+        _checked_untyped_behind_none,
+    ):
+        assert ccl._choice_verdict(leaky, "mode", texts, field=False) == some_paths, (
+            leaky
+        )
+        for beside in (f"{texts} | float", f"{texts} | None"):
+            assert ccl._choice_verdict(leaky, "mode", beside, field=False) is None, (
+                leaky,
+                beside,
+            )
+
+
+def _passes_none_by(mode: _Pace | None) -> None:
+    if mode is None:
+        return
+    require_choice(mode, "mode", _PACES)
+
+
+def _passes_anything_but_a_text_by(mode: object) -> object:
+    if not isinstance(mode, str):
+        return mode
+    return require_choice(mode, "mode", _PACES)
+
+
+def _hands_on_to_a_none_test(mode: _Pace) -> _Pace:
+    _passes_none_by(mode)
+    return mode
+
+
+def _hands_on_to_a_form_test(mode: _Pace) -> _Pace:
+    _passes_anything_but_a_text_by(mode)
+    return mode
+
+
+@dataclass(frozen=True)
+class _ChecksThroughSelf:
+    """A record whose ``__post_init__`` checks its pace in a method of its own,
+    which leaves on ``None`` before the check.
+    """
+
+    mode: _Pace
+
+    def __post_init__(self) -> None:
+        self._check()
+
+    def _check(self) -> None:
+        if self.mode is None:
+            return
+        require_choice(self.mode, "mode", _PACES)
+
+
+def test_a_choice_handed_on_whole_keeps_what_its_annotation_lists() -> None:
+    """The helper a choice is handed to whole, and the method of the record
+    that reads it back through ``self``, test its form as the caller's
+    annotation lists it.
+
+    ``if mode is None: return`` in the helper holds nothing to check only
+    when the caller's annotation lists ``None``; for a ``Literal`` of texts
+    alone it is a path that skips the check, so ``None`` leaves unrefused.
+    The guard read the helper as if its caller had listed a value that is
+    no text, and passed both.
+    """
+    some_paths = "checked on some paths only, so a misspelling passes on the others"
+    texts = 'Literal["fast", "slow"]'
+    for handing in (_hands_on_to_a_none_test, _hands_on_to_a_form_test):
+        assert ccl._choice_verdict(handing, "mode", texts, field=False) == some_paths, (
+            handing
+        )
+        for beside in (f"{texts} | float", f"{texts} | None"):
+            assert ccl._choice_verdict(handing, "mode", beside, field=False) is None, (
+                handing,
+                beside,
+            )
+    check = ccl._post_init(_ChecksThroughSelf)
+    assert check is not None
+    assert ccl._choice_verdict(check, "mode", texts, field=True) == some_paths
+    assert ccl._choice_verdict(check, "mode", f"{texts} | None", field=True) is None
+
+
+def _a_method_namesake(mode: _Pace, checker: object) -> _Pace:
+    checker.require_choice(mode, "mode", _PACES)  # type: ignore[attr-defined]
+    return mode
+
+
+def _an_imported_namesake(mode: _Pace) -> _Pace:
+    from operator import truth as require_choice
+
+    require_choice(mode)
+    return mode
+
+
+def _a_parameter_namesake(
+    mode: _Pace, require_choice: Callable[..., object] = print
+) -> _Pace:
+    require_choice(mode, "mode", _PACES)
+    return mode
+
+
+def test_a_check_is_known_by_the_function_it_is_not_by_its_name() -> None:
+    """A call counts as the shared check only when its name reaches it.
+
+    A method of another object called ``require_choice``, a function
+    imported under that name and a parameter of it check nothing, and the
+    guard counted each as the check because of the last part of its name.
+    """
+    texts = 'Literal["fast", "slow"]'
+    for namesake in (_a_method_namesake, _an_imported_namesake, _a_parameter_namesake):
+        assert ccl._choice_verdict(namesake, "mode", texts, field=False) is not None, (
+            namesake
+        )
+    assert ccl._choice_verdict(_validated, "mode", texts, field=False) is None
+
+
+def _checked_beside_a_comprehension_namesake(mode: _Pace) -> str:
+    require_choice(mode, "mode", _PACES)
+    return [require_choice.lower() for require_choice in (mode,)][0]
+
+
+def _checked_beside_a_nested_namesake(mode: _Pace) -> _Pace:
+    require_choice(mode, "mode", _PACES)
+
+    def inner() -> None:
+        require_choice = print
+        require_choice()
+
+    inner()
+    return mode
+
+
+def _checked_beside_a_lambda_namesake(mode: _Pace) -> _Pace:
+    require_choice(mode, "mode", _PACES)
+    # ``:=`` in a lambda binds the name in the lambda's own scope, a local
+    # nothing reads, which is the namesake this test needs.
+    return (lambda: (require_choice := mode))()  # noqa: F841
+
+
+def _checked_beside_a_nested_import(mode: _Pace) -> _Pace:
+    def inner() -> None:
+        from operator import truth as require_choice
+
+        require_choice(1)
+
+    require_choice(mode, "mode", _PACES)
+    inner()
+    return mode
+
+
+def test_a_name_a_scope_inside_the_function_binds_hides_no_check() -> None:
+    """A name bound inside a comprehension, a nested function or a lambda is theirs.
+
+    The names the function binds itself were read from every node of it, so
+    a comprehension's loop target, or a name a nested function or a lambda
+    binds for itself, hid the genuine ``require_choice`` call beside it,
+    and the checked choice was refused as never checked. So did a nested
+    function that imports a namesake: its imports were read as the
+    function's own.
+    """
+    texts = 'Literal["fast", "slow"]'
+    for checked in (
+        _checked_beside_a_comprehension_namesake,
+        _checked_beside_a_nested_namesake,
+        _checked_beside_a_lambda_namesake,
+        _checked_beside_a_nested_import,
+    ):
+        assert ccl._choice_verdict(checked, "mode", texts, field=False) is None, checked
+
+
+def _checked_through_a_module_imported_as(mode: _Pace) -> _Pace:
+    import phonometry._internal.validation as checks
+
+    checks.require_choice(mode, "mode", _PACES)
+    return mode
+
+
+def _checked_through_a_module_imported_whole(mode: _Pace) -> _Pace:
+    import phonometry._internal.validation
+
+    phonometry._internal.validation.require_choice(mode, "mode", _PACES)
+    return mode
+
+
+def test_a_check_reached_through_a_plain_import_is_a_check() -> None:
+    """``import a.b as c`` inside the function binds ``c`` to the module, and
+    ``import a.b`` binds ``a``: a call of the check through either is the
+    check.
+
+    The function's own imports were read from its ``from ... import``
+    statements alone, so ``checks.require_choice(...)`` reached no function
+    and the checked choice was refused as never checked; before the check
+    was known by the function its name reaches, it passed by its name.
+    """
+    texts = 'Literal["fast", "slow"]'
+    for checked in (
+        _checked_through_a_module_imported_as,
+        _checked_through_a_module_imported_whole,
+    ):
+        assert ccl._choice_verdict(checked, "mode", texts, field=False) is None, checked
+
+
+def _checked_before_a_namesake_is_imported(mode: _Pace, *, again: bool) -> _Pace:
+    from phonometry._internal.validation import require_choice
+
+    checked = require_choice(mode, "mode", _PACES)
+    if again:
+        from operator import truth as require_choice
+
+        require_choice(checked)
+    return checked
+
+
+def _checked_after_a_namesake_is_imported(mode: _Pace) -> _Pace:
+    from operator import truth as require_choice
+
+    require_choice(mode)
+    from phonometry._internal.validation import require_choice
+
+    return require_choice(mode, "mode", _PACES)
+
+
+def test_a_check_is_read_through_the_import_that_stands_for_it_at_the_call() -> None:
+    """Of two imports of one name in a function, a call reads the one it runs after.
+
+    The imports of the function were read into one table, in no order of
+    the source, so the namesake imported in the other branch, or before
+    the check, stood for the check's name at every call, and the checked
+    choice was refused as never checked.
+    """
+    texts = 'Literal["fast", "slow"]'
+    for checked in (
+        _checked_before_a_namesake_is_imported,
+        _checked_after_a_namesake_is_imported,
+    ):
+        assert ccl._choice_verdict(checked, "mode", texts, field=False) is None, checked
+
+
+def _handed_to_a_namesake_method(mode: str, registry: object) -> str:
+    registry.require_choice(mode, "mode", _PACES)  # type: ignore[attr-defined]
+    return mode
+
+
+def _handed_to_the_check_by_another_name(mode: str) -> str:
+    from phonometry._internal.validation import require_choice as pick
+
+    return pick(mode, "mode", _PACES)
+
+
+def test_a_text_is_a_closed_choice_by_the_check_its_call_reaches(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A ``str`` parameter is a closed choice, typed ``str`` against the rule,
+    when a shared check reaches it, read by the function its call reaches.
+
+    ``registry.require_choice(mode, ...)`` calls a method of another object
+    that only shares the name, and says nothing of ``mode``; the guard read
+    the name alone and refused the parameter as a closed choice typed
+    ``str``. The shared check called by another name still makes one.
+    """
+    functions = (_handed_to_a_namesake_method, _handed_to_the_check_by_another_name)
+    monkeypatch.setattr(
+        ccl,
+        "_targets",
+        lambda: iter(
+            [(__name__, function.__qualname__, function) for function in functions]
+        ),
+    )
+    evidence = {
+        choice.qualname: choice.evidence
+        for choice in ccl.string_choices()
+        if choice.name == "mode"
+    }
+    assert evidence["_handed_to_a_namesake_method"] == ()
+    assert evidence["_handed_to_the_check_by_another_name"]
 
 
 def _spreads_annotated(x: list[float], mode: str) -> object:

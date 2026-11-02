@@ -158,6 +158,475 @@ def test_a_validation_helper_carries_the_caller_s_array(tmp_path: pathlib.Path) 
     assert found == {("rating", "BandResult.frequencies", "frequencies")}
 
 
+def test_a_helper_the_function_defines_itself_is_followed(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A bare name is looked up as Python looks it up: the function first.
+
+    A call through a bare name was looked up in the module alone, so a
+    helper written inside the function was followed by no call, and what it
+    hands back of the caller's array reached the record unseen.
+    """
+    found = _findings(
+        tmp_path,
+        rating="""
+        import numpy as np
+
+        from .results import BandResult
+
+        def rating(frequencies, levels):
+            def keep(a):
+                return np.asarray(a, dtype=np.float64)
+
+            f = keep(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+        """,
+    )
+    assert found == {("rating", "BandResult.frequencies", "frequencies")}
+
+
+def test_every_definition_of_a_name_written_in_two_branches_is_read(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A function written in each branch of an ``if`` is either at run time.
+
+    The functions were kept by their qualified name, so the second
+    definition stood for both and the first was never read: the record it
+    builds from the caller's own array passed unseen.
+    """
+    found = _findings(
+        tmp_path,
+        rating="""
+        import sys
+
+        import numpy as np
+
+        from .results import BandResult
+
+        if sys.version_info >= (3, 13):
+            def rating(frequencies, levels):
+                f = np.asarray(frequencies, dtype=np.float64)
+                return BandResult(frequencies=f, levels=f * 0.0)
+        else:
+            def rating(frequencies, levels):
+                f = np.array(frequencies, dtype=np.float64)
+                return BandResult(frequencies=f, levels=f * 0.0)
+
+        if sys.version_info >= (3, 13):
+            def keep(a):
+                return np.array(a)
+        else:
+            def keep(a):
+                return np.asarray(a)
+
+        def kept(frequencies, levels):
+            f = keep(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+        """,
+    )
+    assert found == {
+        ("rating", "BandResult.frequencies", "frequencies"),
+        ("kept", "BandResult.frequencies", "frequencies"),
+    }
+
+
+def test_a_name_the_function_imports_itself_hides_the_module_s(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A name the function binds itself is not the module's function of that name.
+
+    The function imports the validation helper as ``keep``, which hands back
+    the caller's array, and the module defines a ``keep`` of its own that
+    copies: the call was followed to the module's, and the record seemed to
+    keep a copy.
+    """
+    found = _findings(
+        tmp_path,
+        rating="""
+        import numpy as np
+
+        from .results import BandResult
+
+        def keep(a):
+            return np.array(a)
+
+        def rating(frequencies, levels):
+            from ._internal.validation import require_finite_array as keep
+
+            f = keep(frequencies, "frequencies")
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        def copied(frequencies, levels):
+            f = keep(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        def handed(frequencies, levels, keep):
+            f = keep(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+        """,
+    )
+    assert found == {("rating", "BandResult.frequencies", "frequencies")}
+
+
+def test_each_definition_reads_its_own_parameter_annotation(
+    tmp_path: pathlib.Path,
+) -> None:
+    """What a parameter carries is read through the definition's own annotation.
+
+    The shape a record annotation gives a parameter was kept by the
+    function's module, name and parameter, so the second of two definitions
+    in the branches of an ``if`` took the first's: a parameter annotated
+    with a record that keeps the caller's array read as one that copies it,
+    and the array handed on to another record passed unseen.
+    """
+    found = _findings(
+        tmp_path,
+        combine="""
+        import sys
+        from dataclasses import dataclass
+
+        import numpy as np
+
+        from ._internal.frozen import read_only_copy
+
+        @dataclass(frozen=True)
+        class Sealed:
+            data: np.ndarray
+
+            def __post_init__(self):
+                object.__setattr__(self, "data", read_only_copy(self.data))
+
+        @dataclass(frozen=True)
+        class Loose:
+            data: np.ndarray
+
+        @dataclass(frozen=True)
+        class Kept:
+            data: np.ndarray
+
+        if sys.version_info >= (3, 13):
+            def combine(source: Sealed):
+                return Kept(data=source.data)
+        else:
+            def combine(source: Loose):
+                return Kept(data=source.data)
+        """,
+    )
+    assert found == {("combine", "Kept.data", "source")}
+
+
+def test_a_call_reaches_the_definitions_it_can_run(tmp_path: pathlib.Path) -> None:
+    """A call is bound to each definition it can reach, with that one's parameters.
+
+    The definitions of one name were summarised together and bound to the
+    last one's parameters, so a first definition that hands back its
+    argument under another parameter name lost what it carries, and a
+    helper written in one branch of a function was read with what the
+    helper of the other branch returns, though the call runs only its own.
+    """
+    found = _findings(
+        tmp_path,
+        rating="""
+        import sys
+
+        import numpy as np
+
+        from .results import BandResult
+
+        if sys.version_info >= (3, 13):
+            def keep(a):
+                return a
+        else:
+            def keep(b):
+                return np.array(b)
+
+        def kept(frequencies, levels):
+            f = keep(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        def branched(frequencies, levels, fast):
+            if fast:
+                def pick(a):
+                    return np.array(a)
+
+                f = pick(frequencies)
+            else:
+                def pick(a):
+                    return a
+
+                f = np.array(pick(frequencies))
+            return BandResult(frequencies=f, levels=f * 0.0)
+        """,
+    )
+    assert found == {("kept", "BandResult.frequencies", "frequencies")}
+
+
+def test_a_name_declared_global_or_imported_elsewhere_is_read_as_python_reads_it(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``global`` sends a name to the module, and an import binds it in its scope.
+
+    A name a function declares ``global`` was taken for the function's own
+    binding, so a call through it reached no function and the caller's
+    array it hands back passed, though a name the function rebinds after
+    declaring it ``global`` is what the function put there; a ``nonlocal``
+    name stopped the lookup the same way. The imports of a module were read from every node of it, so
+    an import written inside one function replaced the module's own import
+    of the name for every other function.
+    """
+    found = _findings(
+        tmp_path,
+        rating="""
+        import numpy as np
+
+        from ._internal.frozen import read_only_copy as copied
+        from .results import BandResult
+
+        def hand(a):
+            from ._internal.validation import require_finite_array
+
+            return require_finite_array(a, "a")
+
+        def through_global(frequencies, levels):
+            global hand
+            f = hand(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        def through_a_rebound_global(frequencies, levels):
+            global hand
+            hand = np.array
+            f = hand(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        def through_nonlocal(frequencies, levels):
+            def pick(a):
+                return a
+
+            def inner():
+                nonlocal pick
+                return pick(frequencies)
+
+            f = inner()
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        def other(a):
+            from ._internal.validation import require_finite_array as copied
+
+            return copied(a, "a")
+
+        def beside_an_import(frequencies, levels):
+            f = copied(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+        """,
+    )
+    assert found == {
+        ("through_global", "BandResult.frequencies", "frequencies"),
+        ("through_nonlocal", "BandResult.frequencies", "frequencies"),
+    }
+
+
+def test_a_helper_with_no_parameter_hands_back_what_its_closure_holds(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A helper written in the function is read with what its closure holds.
+
+    A call of a function written in the caller was read through that
+    function's summary, made without its closure, so a helper with no
+    parameter that hands back the caller's array was read as returning
+    nothing of it, and the record that keeps it passed.
+    """
+    found = _findings(
+        tmp_path,
+        rating="""
+        import numpy as np
+
+        from .results import BandResult
+
+        def rating(frequencies, levels):
+            def keep():
+                return frequencies
+
+            f = keep()
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        def copied(frequencies, levels):
+            def keep():
+                return np.array(frequencies)
+
+            f = keep()
+            return BandResult(frequencies=f, levels=f * 0.0)
+        """,
+    )
+    assert found == {("rating", "BandResult.frequencies", "frequencies")}
+
+
+def test_a_definition_a_later_one_replaces_is_never_reached(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A call reaches the definition a name holds once the module has run.
+
+    Every definition of a module's name, or of a class's method, was read as
+    one the call may run, so a first ``keep`` that hands back its argument,
+    replaced by a second that copies it, made the record that keeps the
+    result refused for code that never runs. One in each branch of an
+    ``if`` is still either.
+    """
+    found = _findings(
+        tmp_path,
+        rating="""
+        import numpy as np
+
+        from .results import BandResult
+
+        def keep(a):
+            return a
+
+        def keep(a):
+            return np.array(a)
+
+        def kept(frequencies, levels):
+            f = keep(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        class Builder:
+            def pick(self, a):
+                return a
+
+            def pick(self, a):
+                return np.array(a)
+
+            def build(self, frequencies):
+                f = self.pick(frequencies)
+                return BandResult(frequencies=f, levels=f * 0.0)
+        """,
+    )
+    assert found == set()
+
+
+def test_a_call_reaches_a_definition_an_if_may_have_put_before_it(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A helper rebound inside an ``if`` before the call may be the one it runs.
+
+    The call was bound to the last definition written before it in a block
+    it sits in alone, so the copying ``pick`` hid the one the ``if`` may
+    have put in its place, which hands back the caller's array.
+    """
+    found = _findings(
+        tmp_path,
+        rating="""
+        import numpy as np
+
+        from .results import BandResult
+
+        def rebound(frequencies, levels, fast):
+            def pick(a):
+                return np.array(a)
+
+            if fast:
+                def pick(a):
+                    return a
+
+            f = pick(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        def replaced(frequencies, levels, fast):
+            if fast:
+                def pick(a):
+                    return a
+
+            def pick(a):
+                return np.array(a)
+
+            f = pick(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+        """,
+    )
+    assert found == {("rebound", "BandResult.frequencies", "frequencies")}
+
+
+def test_a_call_reaches_the_import_of_its_own_branch(tmp_path: pathlib.Path) -> None:
+    """Two branches that import two helpers under one name each call their own.
+
+    Every call of the name was read through the first import of it in the
+    function, so a call in the second branch took the first branch's
+    helper: a copy there hid the array the second hands back, and a
+    pass-through there refused the copy the second makes.
+    """
+    found = _findings(
+        tmp_path,
+        helpers="""
+        def passthrough(a):
+            return a
+        """,
+        rating="""
+        from .results import BandResult
+
+        def copied_first(frequencies, levels, fast):
+            if fast:
+                from ._internal.frozen import read_only_copy as pick
+
+                f = pick(frequencies)
+            else:
+                from .helpers import passthrough as pick
+
+                f = pick(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        def passed_first(frequencies, levels, fast):
+            if fast:
+                from .helpers import passthrough as pick
+
+                return pick(frequencies)
+            from ._internal.frozen import read_only_copy as pick
+
+            f = pick(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+        """,
+    )
+    assert found == {("copied_first", "BandResult.frequencies", "frequencies")}
+
+
+def test_a_helper_hands_back_what_a_sibling_helper_s_closure_holds(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A helper that returns what a sibling helper returns hands back its closure too.
+
+    The sibling was read through its summary, made without its closure, so
+    the caller's array it hands back was lost one call down, and the record
+    that keeps it passed.
+    """
+    found = _findings(
+        tmp_path,
+        rating="""
+        import numpy as np
+
+        from .results import BandResult
+
+        def sibling(frequencies, levels):
+            def keep():
+                return frequencies
+
+            def hand():
+                return keep()
+
+            f = hand()
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        def copied_sibling(frequencies, levels):
+            def keep():
+                return np.array(frequencies)
+
+            def hand():
+                return keep()
+
+            f = hand()
+            return BandResult(frequencies=f, levels=f * 0.0)
+        """,
+    )
+    assert found == {("sibling", "BandResult.frequencies", "frequencies")}
+
+
 def test_a_record_that_freezes_the_caller_s_column_is_refused(
     tmp_path: pathlib.Path,
 ) -> None:

@@ -2005,10 +2005,10 @@ the reader's own words and naming the file.
 ```python
 write_sidecar(
     audio_path: str | Path,
-    calibration_factor: float,
+    calibration_factor: float | np.floating[Any] | np.integer[Any] | NDArray[np.floating[Any] | np.integer[Any]],
     *,
-    reference_spl: float | None = None,
-    calibrator_frequency: float | None = None,
+    reference_spl: float | np.floating[Any] | np.integer[Any] | NDArray[np.floating[Any] | np.integer[Any]] | None = None,
+    calibrator_frequency: float | np.floating[Any] | np.integer[Any] | NDArray[np.floating[Any] | np.integer[Any]] | None = None,
     calibrator_model: str | None = None,
     channel_labels: tuple[str, ...] | list[str] | None = None,
 ) -> Path
@@ -2037,9 +2037,9 @@ is at *audio_path* and its channels can be read.
 | Name | Description |
 | :--- | :--- |
 | `audio_path` | The audio file the sidecar belongs to (it need not exist yet; writing the sidecar first is fine). |
-| `calibration_factor` | Digital-to-pascal multiplier (required, a real number, finite and positive). |
-| `reference_spl` | The calibrator's known SPL, dB (e.g. 94.0), a real number. |
-| `calibrator_frequency` | The calibrator tone's nominal frequency, Hz (e.g. 1000.0), a real number. |
+| `calibration_factor` | Digital-to-pascal multiplier (required, a real number as [`CalibrationSidecar`](/phonometry/reference/api/io/io/#calibrationsidecar) takes one, finite and positive). |
+| `reference_spl` | The calibrator's known SPL, dB (e.g. 94.0), a real number as [`CalibrationSidecar`](/phonometry/reference/api/io/io/#calibrationsidecar) takes one. |
+| `calibrator_frequency` | The calibrator tone's nominal frequency, Hz (e.g. 1000.0), a real number as [`CalibrationSidecar`](/phonometry/reference/api/io/io/#calibrationsidecar) takes one. |
 | `calibrator_model` | Free-text calibrator identification. |
 | `channel_labels` | One label per channel of the audio file, a tuple or a list of texts. |
 

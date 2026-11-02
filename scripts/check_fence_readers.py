@@ -145,7 +145,13 @@ _SCRIPT_COMMENTS = ("//", "/*", "*", "<!--")
 
 #: Readers that keep their own fence logic, and why, keyed by the file relative
 #: to the repository and the name of the function that holds the reading.
-EXEMPT: dict[tuple[str, str], str] = {}
+EXEMPT: dict[tuple[str, str], str] = {
+    ("site/scripts/shared/page-prose.test.mjs", "<script>"): (
+        "a test of the figure check hands it a page that holds a fenced "
+        "block, written out as a page writes it, to see the shared reader "
+        "step over it; it reads no fence itself"
+    ),
+}
 
 #: The strings a name in scope stands for.
 type Lookup = Callable[[str], frozenset[str]]

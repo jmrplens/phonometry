@@ -18,6 +18,7 @@ from typing import Any
 
 import numpy as np
 import pytest
+from numpy.typing import NDArray
 from special_files import (
     SPECIAL_KINDS,
     make_special,
@@ -26,6 +27,7 @@ from special_files import (
 )
 
 from phonometry._internal import json_input
+from phonometry._internal.types import RealScalar
 from phonometry.io import (
     CalibrationSidecar,
     Signal,
@@ -175,8 +177,11 @@ def test_the_labels_a_writer_takes_are_annotated_as_it_documents() -> None:
     the type check of its caller. A text is still not labels, so the
     annotation names a list and not every sequence of texts.
     """
+    # The numbers' annotations name types imported for the type checker
+    # alone; they are handed in so that every hint of the writer resolves.
+    names = {"RealScalar": RealScalar, "NDArray": NDArray}
     for writer in (write_sidecar, _sidecar.sidecar_file):
-        hint = typing.get_type_hints(writer)["channel_labels"]
+        hint = typing.get_type_hints(writer, localns=names)["channel_labels"]
         assert set(typing.get_args(hint)) == {tuple[str, ...], list[str], type(None)}
 
 

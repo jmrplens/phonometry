@@ -406,6 +406,207 @@ def test_a_private_helper_is_judged_by_what_its_callers_pass(
     assert _texts(raw_only, tmp_path) == []
 
 
+def test_a_helper_written_inside_a_block_is_followed(tmp_path: pathlib.Path) -> None:
+    """A helper defined inside an ``if``, a ``try`` or a ``with`` is the scope's own.
+
+    The calls were followed only to the functions directly in a module or a
+    function, so a helper written for one version or as a fallback was
+    reached by no call, and the difference it was handed never judged.
+    """
+    at_the_top = """
+    _LIMIT_DB = 10.0
+    if True:
+        def _exceeds(margin):
+            return margin > _LIMIT_DB
+    def public(signal, background):
+        return _exceeds(signal - background)
+    """
+    assert _texts(at_the_top, tmp_path) == ["margin > _LIMIT_DB"]
+    in_a_function = """
+    import contextlib
+    _LIMIT_DB = 10.0
+    def public(signal, background):
+        with contextlib.suppress(KeyError):
+            def _exceeds(margin):
+                return margin > _LIMIT_DB
+        return _exceeds(signal - background)
+    """
+    assert _texts(in_a_function, tmp_path) == ["margin > _LIMIT_DB"]
+
+
+@pytest.mark.parametrize(
+    "binding",
+    [
+        pytest.param("def public(signal, background, _exceeds):", id="a parameter"),
+        pytest.param(
+            "def public(signal, background):\n"
+            "        from math import isfinite as _exceeds",
+            id="an import",
+        ),
+        pytest.param(
+            "def public(signal, background):\n        _exceeds = print",
+            id="an assignment",
+        ),
+    ],
+)
+def test_a_name_the_caller_binds_itself_reaches_no_function_of_the_module(
+    binding: str, tmp_path: pathlib.Path
+) -> None:
+    """Python finds a name in the calling function before the module.
+
+    A call through a name the caller binds itself was followed to the
+    module's function of the same name, which was then judged by an
+    argument it is never handed.
+    """
+    source = f"""
+    _LIMIT_DB = 10.0
+    def _exceeds(margin):
+        return margin > _LIMIT_DB
+    {binding}
+        return _exceeds(signal - background)
+    """
+    assert _texts(source, tmp_path) == []
+
+
+def test_every_definition_of_a_helper_written_in_two_branches_is_followed(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A helper defined in each branch of an ``if`` is either one at run time.
+
+    The functions of a module, and those of a function, were kept by their
+    name, so the last definition stood for both: a call read only what the
+    second returns, and only the second was handed what the calls pass, so
+    a difference that the first returns unsettled, or that the first
+    compares, passed unseen.
+    """
+    returned = """
+    import sys
+    from phonometry._internal.boundary import settled
+    _LIMIT_DB = 10.0
+    if sys.version_info >= (3, 13):
+        def _margin(signal, background):
+            return signal - background
+    else:
+        def _margin(signal, background):
+            return settled(signal - background)
+    def public(signal, background):
+        return _margin(signal, background) > _LIMIT_DB
+    """
+    assert _texts(returned, tmp_path) == ["_margin(signal, background) > _LIMIT_DB"]
+    compared = """
+    import sys
+    _LIMIT_DB = 10.0
+    def public(signal, background):
+        if sys.version_info >= (3, 13):
+            def _exceeds(margin):
+                return margin > _LIMIT_DB
+        else:
+            def _exceeds(margin):
+                return False
+        return _exceeds(signal - background)
+    """
+    assert _texts(compared, tmp_path) == ["margin > _LIMIT_DB"]
+    in_a_class = """
+    import sys
+    _LIMIT_DB = 10.0
+    class _Judge:
+        if sys.version_info >= (3, 13):
+            def _exceeds(self, margin):
+                return margin > _LIMIT_DB
+        else:
+            def _exceeds(self, margin):
+                return False
+        def judge(self, signal, background):
+            return self._exceeds(signal - background)
+    def public(signal, background):
+        return _Judge().judge(signal, background)
+    """
+    assert _texts(in_a_class, tmp_path) == ["margin > _LIMIT_DB"]
+
+
+def test_a_definition_a_later_one_replaces_is_never_followed(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A call reaches the definitions a name may hold where it runs.
+
+    Every definition of a name in a module, a class or a function was
+    followed, so a first ``_margin`` that hands back the bare difference,
+    replaced by a second that settles it, made the comparison of its result
+    refused, and a first ``_exceeds`` that compares what it is handed was
+    judged by calls that only ever reach the second.
+    """
+    at_the_top = """
+    from phonometry._internal.boundary import settled
+    _LIMIT_DB = 10.0
+    def _margin(signal, background):
+        return signal - background
+    def _margin(signal, background):
+        return settled(signal - background)
+    def public(signal, background):
+        return _margin(signal, background) > _LIMIT_DB
+    """
+    assert _texts(at_the_top, tmp_path) == []
+    in_a_class = """
+    _LIMIT_DB = 10.0
+    class _Judge:
+        def _exceeds(self, margin):
+            return margin > _LIMIT_DB
+        def _exceeds(self, margin):
+            return False
+        def judge(self, signal, background):
+            return self._exceeds(signal - background)
+    def public(signal, background):
+        return _Judge().judge(signal, background)
+    """
+    assert _texts(in_a_class, tmp_path) == []
+    in_a_function = """
+    _LIMIT_DB = 10.0
+    def public(signal, background):
+        def _exceeds(margin):
+            return margin > _LIMIT_DB
+        def _exceeds(margin):
+            return False
+        return _exceeds(signal - background)
+    """
+    assert _texts(in_a_function, tmp_path) == []
+
+
+def test_a_name_a_function_imports_is_read_through_its_own_import(
+    tmp_path: pathlib.Path,
+) -> None:
+    """An import a function makes binds the name for that function alone.
+
+    The imports of a file were read from every node of it into one table, so
+    the last function to import a name under an alias gave every other
+    function that alias, and a function that imports a helper that hands
+    back a difference was read through a sibling's helper that counts.
+    """
+    package = tmp_path / "package"
+    package.mkdir()
+    (package / "__init__.py").write_text("", encoding="utf-8")
+    (package / "helpers.py").write_text(
+        "def spread(levels):\n"
+        "    return max(levels) - min(levels)\n"
+        "def count(levels):\n"
+        "    return len(levels)\n",
+        encoding="utf-8",
+    )
+    (package / "verdict.py").write_text(
+        "_SPREAD_DB = 3.0\n"
+        "def spread_judged(levels):\n"
+        "    from .helpers import spread as measure\n"
+        "    return measure(levels) <= _SPREAD_DB\n"
+        "def count_judged(levels):\n"
+        "    from .helpers import count as measure\n"
+        "    return measure(levels) <= _SPREAD_DB\n",
+        encoding="utf-8",
+    )
+    found = cbc.scan(package)
+    assert [(f.path, f.scope, f.text) for f in found] == [
+        ("verdict.py", "spread_judged", "measure(levels) <= _SPREAD_DB")
+    ]
+
+
 def test_a_converting_helper_is_read_per_call(tmp_path: pathlib.Path) -> None:
     # Read once for all its callers, _as_float would make the reading look
     # computed because another caller passes it a difference.
@@ -608,6 +809,72 @@ def test_the_validation_predicates_are_comparisons(tmp_path: pathlib.Path) -> No
     assert _texts(source, tmp_path) == [
         "is_at_most(a / b, _LIMIT)",
         "is_positive(sum([a, -b, a]))",
+    ]
+
+
+def test_a_name_is_looked_up_in_the_scopes_the_call_runs_in(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A comprehension's loop target is its own, and ``global`` sends a name out.
+
+    The names a function binds itself were read with the loop targets of
+    its comprehensions among them, so a module function called beside a
+    comprehension that reuses its name was taken for a binding of the
+    caller, and the difference it returns was never compared. A name a
+    nested function declares ``global`` was looked up in the function
+    around it, whose namesake hands back a constant.
+    """
+    source = """
+    _SPREAD_DB = 3.0
+    def _spread(levels):
+        return max(levels) - min(levels)
+    def beside_a_comprehension(levels, others):
+        names = [_spread.name for _spread in others]
+        return _spread(levels) <= _SPREAD_DB, names
+    def outer(levels):
+        def _spread(levels):
+            return 0.0
+        def inner():
+            global _spread
+            return _spread(levels) <= _SPREAD_DB
+        return inner
+    """
+    assert _texts(source, tmp_path) == [
+        "_spread(levels) <= _SPREAD_DB",
+        "_spread(levels) <= _SPREAD_DB",
+    ]
+
+
+def test_a_name_the_caller_binds_is_not_the_module_s_import(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A parameter or an assignment hides an imported function of the same name.
+
+    The functions of the file were looked up past the caller's own
+    bindings, but the imports of the module were then looked up anyway, so
+    a parameter called like the imported helper was read as the helper.
+    """
+    package = tmp_path / "package"
+    package.mkdir()
+    (package / "__init__.py").write_text("", encoding="utf-8")
+    (package / "helpers.py").write_text(
+        "def spread(levels):\n    return max(levels) - min(levels)\n", encoding="utf-8"
+    )
+    (package / "verdict.py").write_text(
+        "from .helpers import spread\n"
+        "_SPREAD_DB = 3.0\n"
+        "def by_a_parameter(levels, spread):\n"
+        "    return spread(levels) <= _SPREAD_DB\n"
+        "def by_an_assignment(levels, make):\n"
+        "    spread = make()\n"
+        "    return spread(levels) <= _SPREAD_DB\n"
+        "def through_the_import(levels):\n"
+        "    return spread(levels) <= _SPREAD_DB\n",
+        encoding="utf-8",
+    )
+    found = cbc.scan(package)
+    assert [(f.path, f.scope, f.text) for f in found] == [
+        ("verdict.py", "through_the_import", "spread(levels) <= _SPREAD_DB")
     ]
 
 

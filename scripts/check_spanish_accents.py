@@ -131,6 +131,8 @@ import re
 import sys
 from typing import TYPE_CHECKING, NamedTuple
 
+from markdown_spans import blank_inline_spans
+
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
@@ -732,11 +734,6 @@ ALLOWED: dict[tuple[str, str], str] = {}
 #: does not open it.
 _NOT_PROSE = re.compile(r"\{[^{}]*\}|<[^<>]*>|&#?\w+;|`[^`]*`")
 
-#: What is not prose in a page: an inline code span on one line. A page's tags
-#: stay, because the alternative text of a figure is Spanish a reader hears,
-#: and so does a fenced block, whose comments and labels are Spanish too.
-_NOT_PAGE_PROSE = re.compile(r"`[^`\n]*`")
-
 #: A paragraph of a page: a run of lines up to the next blank one. Mathematics
 #: is paired inside a paragraph, so one stray dollar cannot hide the page.
 _PARAGRAPH = re.compile(r"(?:[^\n]|\n(?![ \t]*\n))+")
@@ -824,9 +821,14 @@ def words_needing_marks(text: str) -> list[tuple[str, str]]:
 def page_prose(text: str, *, script: bool = False) -> str:
     """A page paragraph with its mathematics and its inline code blanked.
 
-    Unlike :func:`prose`, a tag and a fenced block stay readable: the
-    alternative text of a figure and the comments of an example are Spanish a
-    reader meets (see :data:`_NOT_PAGE_PROSE`).
+    The spans are read as the site reads them (:mod:`markdown_spans`): a
+    backtick or a dollar sign behind a backslash opens none, and inside a
+    span a backslash escapes nothing. The code spans are read a line at a
+    time, so that the run of backticks a fence opens with is no span and the
+    fence stays, then the mathematics across the paragraph. Unlike
+    :func:`prose`, a tag and a fenced block stay readable: the alternative
+    text of a figure and the comments of an example are Spanish a reader
+    meets.
 
     :param text: The paragraph as written.
     :param script: The page is not Markdown (see :data:`_MARKDOWN`), and
@@ -834,10 +836,8 @@ def page_prose(text: str, *, script: bool = False) -> str:
     """
     if script:
         return text
-    chars = list(text)
-    for lo, hi in _maths_runs(text):
-        chars[lo : hi + 1] = " " * (hi + 1 - lo)
-    return _NOT_PAGE_PROSE.sub(lambda m: " " * len(m.group(0)), "".join(chars))
+    lines = [blank_inline_spans(line) for line in text.split("\n")]
+    return blank_inline_spans("\n".join(lines), "$")
 
 
 def _cased(word: str, right: str) -> str:

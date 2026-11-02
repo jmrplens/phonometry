@@ -61,6 +61,8 @@ import re
 import sys
 from typing import TYPE_CHECKING, Literal
 
+from markdown_spans import drop_inline_spans
+
 if TYPE_CHECKING:
     from collections.abc import Iterable, Sequence
 
@@ -923,8 +925,14 @@ _MDX_HAZARD = re.compile(r"[{}<]")
 
 
 def _mdx_safe(text: str, *, where: str) -> str:
+    """*text*, or the run stopped at a brace or a ``<`` MDX would read as code.
+
+    Inline code is stepped over as the site reads it
+    (:mod:`markdown_spans`): a backtick behind a backslash is shown and opens
+    no span, so a brace after it is refused.
+    """
     for line_number, line in enumerate(text.splitlines(), start=1):
-        prose = re.sub(r"`[^`]*`", "", line)
+        prose = drop_inline_spans(line)
         if _MDX_HAZARD.search(prose):
             sys.exit(
                 f"{where}, line {line_number}: {line.strip()!r} carries a brace "

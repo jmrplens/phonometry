@@ -35,6 +35,8 @@ import phonometry
 from phonometry import io
 from phonometry._internal import frozen
 from phonometry._internal.frozen import OwnsArrays, read_only
+from phonometry._internal.validation import arrays_of
+from phonometry.electroacoustics import MicrophoneDirectivity
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -334,12 +336,12 @@ def test_the_arrays_a_record_takes_out_of_any_sequence_are_its_own(
 def test_owned_members_hands_back_what_the_record_copied_as_it_is() -> None:
     """A tuple's, a list's or an array's members are the record's copies by then."""
     mine = _writeable([1.0, 2.0])
-    assert frozen.owned_members((mine, 1.0))[0] is mine
-    assert frozen.owned_members([mine])[0] is mine
+    assert frozen.owned_members((mine, 1.0), "levels")[0] is mine
+    assert frozen.owned_members([mine], "levels")[0] is mine
     grid = _writeable([1.0, 2.0, 3.0, 4.0]).reshape(2, 2)
-    assert np.shares_memory(frozen.owned_members(grid)[0], grid)
-    assert frozen.owned_members(deque([mine]))[0] is not mine
-    assert frozen.owned_members(deque(["a", 1.0])) == ("a", 1.0)
+    assert np.shares_memory(frozen.owned_members(grid, "levels")[0], grid)
+    assert frozen.owned_members(deque([mine]), "levels")[0] is not mine
+    assert frozen.owned_members(deque(["a", 1.0]), "levels") == ("a", 1.0)
 
 
 def test_a_read_only_copy_of_an_array_of_objects_holds_copies_of_its_arrays() -> None:
@@ -681,15 +683,48 @@ def _holds_itself(kind: str) -> object:
         mapping: dict[str, object] = {}
         mapping["rows"] = [mapping]
         return mapping
+    if kind == "array-like-in-a-list":
+        # numpy reads the column as an array of objects that holds the list.
+        rows: list[object] = []
+        rows.append(_ColumnOf(rows))
+        return rows
+    if kind == "array-like-that-holds-itself":
+        # numpy reads the column as a new array of objects each time, and
+        # each holds the column again.
+        column = _ColumnOf(None)
+        column._held = column
+        return column
     objects = np.empty(2, dtype=object)
     objects[0] = _writeable([1.0])
     objects[1] = objects
     return objects
 
 
+class _ColumnOf:
+    """A column whose ``__array__`` is an array of objects holding *held*."""
+
+    def __init__(self, held: object) -> None:
+        self._held = held
+
+    def __array__(
+        self, dtype: object = None, *, copy: bool | None = None
+    ) -> np.ndarray:
+        column = np.empty(1, dtype=object)
+        column[0] = self._held
+        return column
+
+
 @pytest.mark.parametrize(
     "kind",
-    ["list", "tuple-in-a-list", "mapping", "list-in-a-mapping", "array-of-objects"],
+    [
+        "list",
+        "tuple-in-a-list",
+        "mapping",
+        "list-in-a-mapping",
+        "array-like-in-a-list",
+        "array-like-that-holds-itself",
+        "array-of-objects",
+    ],
 )
 def test_a_field_that_holds_itself_is_refused_naming_the_field(kind: str) -> None:
     """A container that holds itself has no end to copy.
@@ -697,7 +732,12 @@ def test_a_field_that_holds_itself_is_refused_naming_the_field(kind: str) -> Non
     The copy went into every tuple, list, mapping and array of objects it
     met, with no bound, so a field that held itself took it on until
     Python's recursion limit raised a ``RecursionError`` that named no
-    field, before the record's own checks ran.
+    field, before the record's own checks ran. An object numpy reads as an
+    array is a way in too: the array of objects its ``__array__`` hands back
+    can hold the list the object sits in, and the walk that went into it
+    starting afresh met the list as new each time round; it can hold the
+    object itself, too, in a new array each time numpy reads it, so the
+    object is entered as a container is.
     """
     endless = _holds_itself(kind)
     with pytest.raises(
@@ -706,11 +746,118 @@ def test_a_field_that_holds_itself_is_refused_naming_the_field(kind: str) -> Non
         _Plain(levels=endless)  # type: ignore[arg-type]
 
 
-def test_an_init_var_that_holds_itself_is_refused() -> None:
+def test_an_init_var_that_holds_itself_is_refused_naming_it() -> None:
     levels = _writeable([1.0, 2.0])
     endless = _holds_itself("list")
-    with pytest.raises(TypeError, match="holds itself"):
+    with pytest.raises(
+        TypeError,
+        match=r"_WithInitVar: 'offset_db' holds a container that holds itself",
+    ):
         _WithInitVar(levels=levels, offset_db=endless)  # type: ignore[arg-type]
+
+
+@dataclasses.dataclass(frozen=True)
+class _StoresALoop(OwnsArrays):
+    levels: np.ndarray
+    rows: list[object] = dataclasses.field(init=False)
+
+    def __post_init__(self) -> None:
+        # A field the hook fills, which only the last pass of the copy reads.
+        object.__setattr__(self, "rows", _holds_itself("list"))
+
+
+def test_a_field_the_hook_fills_with_a_loop_is_refused_naming_the_field() -> None:
+    """The pass after the hook reads every field, ``init=False`` ones too.
+
+    It called the copy without the name of the field, so the refusal of a
+    container that holds itself said only that a record holds none.
+    """
+    levels = _writeable([1.0])
+    with pytest.raises(
+        TypeError, match=r"_StoresALoop: 'rows' holds a container that holds itself"
+    ):
+        _StoresALoop(levels=levels)
+
+
+def test_a_restored_field_that_holds_itself_is_refused_naming_the_field() -> None:
+    """A pickled state is copied on its way back in, and refused by name too."""
+    record = _Plain(levels=_writeable([1.0]))
+    state = {"levels": _holds_itself("list")}
+    with pytest.raises(
+        TypeError, match=r"_Plain: 'levels' holds a container that holds itself"
+    ):
+        record.__setstate__(state)
+
+
+def test_a_sequence_the_record_reads_member_by_member_names_its_field() -> None:
+    """A container that holds itself inside a deque is refused by its field too.
+
+    The copy before the record's own checks goes into a tuple, a list, a
+    mapping and an array; a deque it hands on as it is, to be read member by
+    member through ``owned_members``, the record's or that of the shared
+    check of a pair or a grid of arrays. Those walked it with no field to
+    name: the band record raised that a record holds no container that holds
+    itself, naming neither, and the shared check said the deque was the
+    wrong type, which a deque of two arrays is not.
+    """
+    endless = _holds_itself("list")
+    levels = np.zeros(1)
+    bands = deque([endless])
+    with pytest.raises(
+        TypeError,
+        match=r"OctaveFilterResult: 'bands' holds a container that holds itself",
+    ):
+        phonometry.filters.OctaveFilterResult(
+            levels=levels,
+            frequencies=(1000.0,),
+            bands=bands,  # type: ignore[arg-type]
+        )
+    pattern = "a pair (angles_deg, relative_db) of two arrays"
+    endless_pair = deque([endless, [1.0]])
+    with pytest.raises(
+        TypeError, match=r"^'directivity' holds a container that holds itself"
+    ):
+        arrays_of(endless_pair, "directivity", pattern, 2)
+    polar = deque([endless, [0.0]])
+    with pytest.raises(
+        TypeError, match=r"^'polar' holds a container that holds itself"
+    ):
+        MicrophoneDirectivity(polar=polar)  # type: ignore[arg-type]
+    pair = arrays_of(deque([[0.0, 1.0], [1.0, 2.0]]), "directivity", pattern, 2)
+    np.testing.assert_array_equal(pair[1], [1.0, 2.0])
+
+
+def test_a_plain_class_names_the_argument_that_holds_itself() -> None:
+    """``read_only_copy`` refuses an array of objects that holds itself by name.
+
+    A plain class keeps an array through ``read_only_copy``, which copies an
+    array of objects member by member as a record does; one that held
+    itself was refused with the record's wording and no name, though no
+    record was being built. The fleet database names the table it was
+    given.
+    """
+    endless = np.empty(2, dtype=object)
+    endless[0] = 1.0
+    endless[1] = endless
+    with pytest.raises(
+        TypeError,
+        match=r"^ANPDatabase: 'distances_m' holds a container that holds itself",
+    ):
+        phonometry.aircraft.ANPDatabase({}, {}, endless, {})
+    npd = {("a", "b", "c"): (endless, np.zeros(2))}
+    with pytest.raises(
+        TypeError, match=r"^ANPDatabase: 'npd' holds a container that holds itself"
+    ):
+        phonometry.aircraft.ANPDatabase({}, npd, [1.0], {})
+    with pytest.raises(TypeError, match="no container that holds itself"):
+        frozen.read_only_copy(endless)
+    # A column numpy reads as a new array that holds the column, each time.
+    column = _holds_itself("array-like-that-holds-itself")
+    with pytest.raises(
+        TypeError,
+        match=r"^ANPDatabase: 'distances_m' holds a container that holds itself",
+    ):
+        phonometry.aircraft.ANPDatabase({}, {}, column, {})
 
 
 def test_a_container_held_twice_side_by_side_is_copied_as_any_other() -> None:

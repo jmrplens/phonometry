@@ -98,6 +98,7 @@ from __future__ import annotations
 
 import ast
 import builtins
+import collections
 import collections.abc
 import dataclasses
 import enum
@@ -112,7 +113,9 @@ import sys
 import textwrap
 import typing
 from types import MappingProxyType
-from typing import TYPE_CHECKING, NamedTuple
+from typing import TYPE_CHECKING, Any, NamedTuple
+
+from ast_scan import binding_of, imported_names, live_bindings, scope_nodes
 
 import phonometry
 from phonometry._internal.catalogue import CatalogueRow
@@ -1305,6 +1308,104 @@ def _call_name(node: ast.Call) -> str:
     return ""
 
 
+def _validator_functions() -> tuple[object, ...]:
+    """The shared checks :data:`VALIDATORS` names, as the functions they are."""
+    from phonometry._i18n import check_language
+    from phonometry._internal.validation import check_engine, require_choice
+
+    return (require_choice, check_language, check_engine)
+
+
+def _names_for_call(
+    node: ast.Call,
+    namespace: Mapping[str, object],
+    tree: ast.AST,
+    module_name: str | None,
+) -> Mapping[str, object] | None:
+    """The names the first name of a call is read in, where *tree*'s function makes it.
+
+    Looked up as Python looks it up (:func:`ast_scan.binding_of`), from the
+    scope the call runs in out to the function: ``None`` when a scope binds
+    it by a parameter, a value it stores or a function or a class it
+    defines, which reaches what the function put there, never a function of
+    its module of the same name; the imports of the scope that imports it,
+    those that may stand for it at the call (:func:`_imports_at`); and the
+    module's own names when no scope binds it, or one declares it
+    ``global``. What a function, a class or a comprehension inside the
+    function binds or imports for itself hides nothing outside it. A module
+    that is not loaded is read in *namespace*.
+    """
+    head: ast.expr = node.func
+    while isinstance(head, ast.Attribute):
+        head = head.value
+    if not isinstance(head, ast.Name):
+        return namespace
+    root = tree.body[0] if isinstance(tree, ast.Module) and tree.body else tree
+    how, scope = binding_of(root, node, head.id)
+    if how in {"definition", "binding"}:
+        return None
+    if how == "import" and scope is not None and module_name is not None:
+        return _imports_at(scope, node, head.id, module_name)
+    module = _module_names(module_name) if module_name else {}
+    return module or namespace
+
+
+def _calls_a_validator(
+    node: ast.Call, function: ast.AST | None, module_name: str
+) -> bool:
+    """:func:`_is_validator` for a call written in *function* of *module_name*.
+
+    The names are read in the module and in what *function* imports itself.
+    """
+    if _call_name(node) not in VALIDATORS:
+        return False
+    if function is None:
+        empty = ast.Module(body=[], type_ignores=[])
+        return _is_validator(node, _module_names(module_name), empty, module_name)
+    return _is_validator(
+        node, _names_read_by(function, module_name), function, module_name
+    )
+
+
+@functools.lru_cache(maxsize=256)
+def _names_read_by(function: ast.AST, module_name: str) -> Mapping[str, object]:
+    """The names *function* of *module_name* reads: its own imports, then its module's.
+
+    Kept for the last functions read, which are read whole one after another.
+    """
+    own = _local_imports(function, module_name)
+    return collections.ChainMap(own, _module_names(module_name))
+
+
+@functools.cache
+def _module_names(module_name: str) -> dict[str, object]:
+    """The names the module *module_name* binds: its namespace itself, read only."""
+    module = sys.modules.get(module_name)
+    return vars(module) if module is not None else {}
+
+
+def _is_validator(
+    node: ast.Call,
+    namespace: Mapping[str, object],
+    tree: ast.AST,
+    module_name: str | None = None,
+) -> bool:
+    """Whether *node* calls one of the shared checks, by the function its name reaches.
+
+    Never by the last part of its name alone: a method of another object, a
+    function imported under the name and a name the function binds itself
+    (:func:`_names_for_call`) check nothing, though each is called
+    ``require_choice``.
+    """
+    if _call_name(node) not in VALIDATORS:
+        return False
+    names = _names_for_call(node, namespace, tree, module_name)
+    if names is None:
+        return False
+    found = _named_object(node.func, names)
+    return any(found is check for check in _validator_functions())
+
+
 #: The set methods that keep what is not, or say whether all is, in a set of
 #: strings: ``set(sides).difference(SIDES)``, ``set(sides).issubset(SIDES)``.
 _SET_TESTS = frozenset({"difference", "issubset"})
@@ -1469,9 +1570,15 @@ def code_evidence(
     is_target: Callable[[ast.expr], bool],
     constants: dict[str, ast.expr],
     *,
+    module_name: str,
     collection: bool = False,
 ) -> list[str]:
-    """What in *tree* treats the target as one of a fixed set of strings.
+    """What in *tree*, a function of *module_name*, treats the target as one
+    of a fixed set of strings.
+
+    A shared check counts by the function its name reaches in *tree* and its
+    module (:func:`_calls_a_validator`), never by the last part of its name:
+    ``registry.require_choice(mode, ...)`` says nothing of ``mode``.
 
     A *collection* of strings is one when what is left of it once a set of
     strings is taken away is refused (``set(sides) - set(SIDES)``), when it
@@ -1491,12 +1598,17 @@ def code_evidence(
                 tree,
                 lambda node: isinstance(node, ast.Name) and node.id in items,
                 constants,
+                module_name=module_name,
             )
         )
     for node in ast.walk(tree):
         if isinstance(node, ast.Call):
             name = _call_name(node)
-            if node.args and is_target(node.args[0]) and name in VALIDATORS:
+            if (
+                node.args
+                and is_target(node.args[0])
+                and _calls_a_validator(node, tree, module_name)
+            ):
                 found.append(f"{name}()")
             if (
                 name == "get"
@@ -1533,24 +1645,79 @@ def code_evidence(
 _PASS_DEPTH = 6
 
 
-def _local_imports(tree: ast.AST, module_name: str) -> dict[str, object]:
-    """The names a function body imports itself, resolved to their objects."""
+def _local_imports(
+    tree: ast.AST, module_name: str, *, own: bool = False
+) -> dict[str, object]:
+    """The names a function body imports itself, resolved to their objects.
+
+    Those of the functions written inside it too, whose calls are read as
+    the function's; with *own*, those of its own scope alone
+    (:func:`ast_scan.scope_nodes`), what a call written in it reads.
+    """
     module = sys.modules.get(module_name)
     package = getattr(module, "__package__", None) or module_name.rpartition(".")[0]
     found: dict[str, object] = {}
-    for node in ast.walk(tree):
-        if not isinstance(node, ast.ImportFrom):
-            continue
-        source = "." * node.level + (node.module or "")
-        try:
-            imported = importlib.import_module(
-                importlib.util.resolve_name(source, package)
-            )
-        except (ImportError, ValueError):
-            continue
-        for alias in node.names:
-            found[alias.asname or alias.name] = getattr(imported, alias.name, None)
+    for node in scope_nodes(tree) if own else ast.walk(tree):
+        if isinstance(node, ast.Import):
+            found.update(_plain_imports(node))
+        elif isinstance(node, ast.ImportFrom):
+            found.update(_from_imports(node, package))
     return found
+
+
+def _imports_at(
+    scope: ast.AST, node: ast.AST, name: str, module_name: str
+) -> Mapping[str, object] | None:
+    """What the imports of *name* that *scope* makes, and that may stand for it
+    at *node* (:func:`ast_scan.live_bindings`), bind it to; ``None`` when two
+    of them bind it to different objects, which the call may reach either.
+    """
+    imports = sorted(
+        (
+            statement
+            for statement in scope_nodes(scope)
+            if isinstance(statement, ast.Import | ast.ImportFrom)
+            and name in imported_names(statement)
+        ),
+        key=lambda statement: (statement.lineno, statement.col_offset),
+    )
+    found = [
+        _local_imports(ast.Module(body=[statement], type_ignores=[]), module_name)
+        for statement in live_bindings(scope, imports, node)
+    ]
+    objects = {id(names.get(name)) for names in found}
+    return found[-1] if len(objects) == 1 else None
+
+
+def _plain_imports(node: ast.Import) -> dict[str, object]:
+    """What an ``import`` binds, by name: ``import a.b as c`` binds ``c`` to
+    the module ``a.b``, ``import a.b`` binds ``a`` to the package ``a``.
+    """
+    found: dict[str, object] = {}
+    for alias in node.names:
+        try:
+            imported = importlib.import_module(alias.name)
+        except ImportError:
+            continue
+        if alias.asname:
+            found[alias.asname] = imported
+        else:
+            top = alias.name.partition(".")[0]
+            found[top] = sys.modules.get(top)
+    return found
+
+
+def _from_imports(node: ast.ImportFrom, package: str) -> dict[str, object]:
+    """What a ``from ... import`` binds, by name, read from *package* when relative."""
+    source = "." * node.level + (node.module or "")
+    try:
+        imported = importlib.import_module(importlib.util.resolve_name(source, package))
+    except (ImportError, ValueError):
+        return {}
+    return {
+        alias.asname or alias.name: getattr(imported, alias.name, None)
+        for alias in node.names
+    }
 
 
 def _spread_dicts(tree: ast.AST) -> dict[str, dict[str, ast.expr]]:
@@ -1781,7 +1948,13 @@ def _checks_received(
         return True
     tree = _parsed(callee)
     return tree is not None and bool(
-        code_evidence(tree, _the_name(received), constants, collection=collection)
+        code_evidence(
+            tree,
+            _the_name(received),
+            constants,
+            module_name=callee.__module__,
+            collection=collection,
+        )
     )
 
 
@@ -2210,7 +2383,11 @@ def compared_in_module(
         found.extend(
             f"{evidence} in {function.name}()"
             for evidence in code_evidence(
-                function, is_field, constants, collection=collection
+                function,
+                is_field,
+                constants,
+                module_name=record.__module__,
+                collection=collection,
             )
         )
     return list(dict.fromkeys(found))
@@ -2233,7 +2410,11 @@ def _field_evidence(
     tree = _parsed(check) if check is not None else None
     if tree is not None:
         evidence = code_evidence(
-            tree, _field_of_self(name), constants, collection=collection
+            tree,
+            _field_of_self(name),
+            constants,
+            module_name=record.__module__,
+            collection=collection,
         )
         if evidence:
             return evidence
@@ -2297,7 +2478,11 @@ def string_choices() -> Iterator[Choice]:
             if collection or takes_any_string(read):
                 if tree is not None:
                     evidence = code_evidence(
-                        tree, _the_name(name), constants, collection=collection
+                        tree,
+                        _the_name(name),
+                        constants,
+                        module_name=getattr(obj, "__module__", home),
+                        collection=collection,
                     )
                 if not evidence:
                     evidence = passed_on_evidence(obj, name, collection=collection)
@@ -2555,6 +2740,8 @@ class _Reader(NamedTuple):
     options: frozenset[str]
     collection: bool
     depth: int
+    #: The function's tree, whose own names hide a check's (:func:`_names_for_call`).
+    tree: ast.AST = ast.Module(body=[], type_ignores=[])
 
 
 # PLR0913: the recursion carries what it has followed so far.
@@ -2594,6 +2781,7 @@ def _spelling(  # noqa: PLR0913
         options=options,
         collection=collection,
         depth=depth,
+        tree=tree,
     )
     unlisted = _unlisted_items(tree, is_raw, constants) if collection else {}
     folds: list[tuple[tuple[int, int], str]] = []
@@ -2623,7 +2811,11 @@ def _read_call(
     label = _cleaned_up(node, reader.matches, reader.constants, reader.options)
     if label is not None:
         folds.append((_start(node), label))
-    if node.args and reader.is_raw(node.args[0]) and _call_name(node) in VALIDATORS:
+    if (
+        node.args
+        and reader.is_raw(node.args[0])
+        and _is_validator(node, reader.namespace, reader.tree, reader.module_name)
+    ):
         checks.append(_end(node))
         wider = _beyond_the_literal(node, reader)
         if wider:
@@ -3432,7 +3624,9 @@ def _source(
                 _source(expression.orelse, function, module_name, depth + 1),
             ]
         )
-    if isinstance(expression, ast.Call) and _call_name(expression) in VALIDATORS:
+    if isinstance(expression, ast.Call) and _calls_a_validator(
+        expression, function, module_name
+    ):
         return _Source("literal", frozenset())
     if isinstance(expression, ast.Call):
         # What a function annotated to return a Literal hands back.
@@ -3790,8 +3984,12 @@ class _Subject(NamedTuple):
     the whole value, which hold none of them when they equal a text
     (*textless*), the classes of the values an expression that holds the
     choice takes that hold what the check reads (*forms*: a text for one
-    choice, a mapping for the keys of ``Mapping[Side, ...]``), and the
-    classes a test of the form names (*classes*).
+    choice, a mapping for the keys of ``Mapping[Side, ...]``), the classes
+    a test of the form names (*classes*), and whether a value that holds
+    nothing to check is one the annotation lists (*nontext*): a single
+    choice of texts alone takes no other value, so one that is no text is
+    refused with ``TypeError`` by the check (rule A45) and is no value to
+    leave with before it.
     """
 
     raw: Callable[[ast.expr], bool]
@@ -3800,6 +3998,7 @@ class _Subject(NamedTuple):
     textless: Callable[[ast.expr], bool] = _never
     forms: Callable[[ast.expr], tuple[type, ...]] = _one_text
     classes: Callable[[ast.expr], tuple[type, ...] | None] = _classes_named
+    nontext: bool = True
 
 
 def _overlaps(form: type, cls: type) -> bool:
@@ -3842,7 +4041,11 @@ def _holds_none(test: ast.expr, subject: _Subject, *, truth: bool) -> bool:
     text is not None: check``, ``if text is None: return``, ``if not
     isinstance(text, str): return``, ``if not texts: return`` (of a
     collection, which holds nothing to check when it is empty), and ``not``,
-    ``and`` and ``or`` of such tests. The way the test comes out is what
+    ``and`` and ``or`` of such tests. A path that holds no text holds
+    nothing to check only when the annotation lists such a value
+    (*nontext* of :class:`_Subject`): for a ``Literal`` of texts alone, a
+    number or ``None`` is refused with ``TypeError`` by the check, and a
+    path that leaves with it before the check leaves it unrefused. The way the test comes out is what
     counts: ``if text is not None: return`` and ``if isinstance(text, str):
     return`` leave with the text, ``if texts: return`` with the items, and
     ``if isinstance(sides, Mapping): return`` with the keys of the mapping
@@ -3863,15 +4066,7 @@ def _holds_none(test: ast.expr, subject: _Subject, *, truth: bool) -> bool:
         # A collection that tests false is empty.
         return not truth
     if isinstance(test, ast.Compare):
-        sides = [test.left, *test.comparators]
-        if (
-            len(test.ops) == 1
-            and isinstance(test.ops[0], ast.Is | ast.IsNot)
-            and any(subject.raw(side) for side in sides)
-            and any(_is_none(side) for side in sides)
-        ):
-            return truth == isinstance(test.ops[0], ast.Is)
-        return False
+        return _none_holds_none(test, subject, truth=truth)
     if not (
         isinstance(test, ast.Call)
         and isinstance(test.func, ast.Name)
@@ -3881,9 +4076,28 @@ def _holds_none(test: ast.expr, subject: _Subject, *, truth: bool) -> bool:
     ):
         return False
     classes = subject.classes(test.args[1])
-    return classes is not None and _form_holds_none(
-        subject.forms(test.args[0]), classes, truth=truth
+    return (
+        subject.nontext
+        and classes is not None
+        and _form_holds_none(subject.forms(test.args[0]), classes, truth=truth)
     )
+
+
+def _none_holds_none(test: ast.Compare, subject: _Subject, *, truth: bool) -> bool:
+    """:func:`_holds_none` for a comparison: ``text is None`` holding, or
+    ``text is not None`` failing, leaves with ``None``, which holds nothing
+    to check when the annotation lists it (*nontext*); any other comparison
+    is no test of the form.
+    """
+    sides = [test.left, *test.comparators]
+    if (
+        len(test.ops) == 1
+        and isinstance(test.ops[0], ast.Is | ast.IsNot)
+        and any(subject.raw(side) for side in sides)
+        and any(_is_none(side) for side in sides)
+    ):
+        return subject.nontext and truth == isinstance(test.ops[0], ast.Is)
+    return False
 
 
 def _texts_of(node: ast.expr) -> frozenset[str]:
@@ -3953,7 +4167,8 @@ def _pattern_holds_none(
 ) -> bool:
     """Whether a value *pattern* matches holds nothing a check of the choice
     reads, by its form: ``None`` (or a flag), or a class the choice holding
-    something never is (:func:`_form_holds_none`).
+    something never is (:func:`_form_holds_none`), the annotation listing
+    such a value (*nontext* of :class:`_Subject`).
     """
     if isinstance(pattern, ast.MatchOr):
         return all(
@@ -3964,11 +4179,13 @@ def _pattern_holds_none(
             pattern.pattern, subject, matched
         )
     if isinstance(pattern, ast.MatchSingleton):
-        return True
+        return subject.nontext
     if isinstance(pattern, ast.MatchClass):
         classes = subject.classes(pattern.cls)
-        return classes is not None and _form_holds_none(
-            subject.forms(matched), classes, truth=True
+        return (
+            subject.nontext
+            and classes is not None
+            and _form_holds_none(subject.forms(matched), classes, truth=True)
         )
     return False
 
@@ -4492,7 +4709,37 @@ def _choice_verdict(
             depth=0,
             options=_literal_options(annotation),
             forms=_forms(annotation, None, collection=collection),
+            # A collection is read item by item, each a text or no item.
+            nontext=collection or _lists_nontext(annotation),
         )
+    )
+
+
+def _as_handed(
+    forms: tuple[type, ...] | None, *, nontext: bool, whole: bool
+) -> dict[str, Any]:
+    """What a function handed the choice knows of it from its caller.
+
+    The value itself, handed on whole, takes the forms it took there and the
+    values its annotation lists (:func:`_checks_of`); a copy or a part of it
+    takes its own, and any value that is no text is the callee's to pass by.
+    """
+    if whole:
+        return {"forms": forms, "nontext": nontext}
+    return {"forms": None, "nontext": True}
+
+
+def _lists_nontext(annotation: str) -> bool:
+    """Whether a union annotation lists a value that is no text beside its texts.
+
+    ``None``, a number, an array or a record beside the ``Literal``: a value
+    of one is the caller's to give, and a path may take it past the check of
+    the text. A ``Literal`` of texts alone takes no other value, and the
+    check refuses one with ``TypeError`` (rule A45).
+    """
+    return any(
+        not member.startswith("Literal[") and member not in _STRING_MEMBERS
+        for member in _members(annotation)
     )
 
 
@@ -4520,6 +4767,7 @@ def _checks_of(
     options: frozenset[str] = frozenset(),
     part: str | None = None,
     forms: tuple[type, ...] | None = None,
+    nontext: bool = True,
 ) -> tuple[_Check, ...]:
     """The checks a choice reaches in *function*, received as parameter (or,
     with *field*, read as ``self.<name>``) *name*.
@@ -4535,7 +4783,8 @@ def _checks_of(
     that hold it from those that do not: ``if isinstance(sides, Mapping):
     return`` leaves no single choice unchecked and every key of the mapping.
     Without them, a single text is a ``str`` and anything else a form no test
-    tells apart.
+    tells apart. *nontext* says whether the annotation of a single choice
+    lists a value that is no text (*nontext* of :class:`_Subject`).
     """
     tree = _parsed(function)
     if tree is None:
@@ -4598,6 +4847,7 @@ def _checks_of(
         target if part in {_ITEMS, _VALUES} else _never,
         forms_of,
         classes_of,
+        nontext=nontext,
     )
     root = tree.body[0] if isinstance(tree, ast.Module) and tree.body else tree
     parents = _parents(tree)
@@ -4614,7 +4864,11 @@ def _checks_of(
                 sites.append((node, (_Check(every_path=True, validator=False),)))
         if not isinstance(node, ast.Call):
             continue
-        if node.args and is_raw(node.args[0]) and _call_name(node) in VALIDATORS:
+        if (
+            node.args
+            and is_raw(node.args[0])
+            and _is_validator(node, namespace, tree, module_name)
+        ):
             sites.append((node, (_Check(every_path=True, validator=True),)))
             continue
         callee = _callee(node, namespace, module_name)
@@ -4622,6 +4876,8 @@ def _checks_of(
             continue
         inner: list[_Check] = []
         if field and _reads_own_field(node, callee, namespace):
+            # A method of the record reads the field itself back through
+            # ``self``: the value its annotation lists, as here.
             inner.extend(
                 _checks_of(
                     callee,
@@ -4632,6 +4888,7 @@ def _checks_of(
                     options=options,
                     part=part,
                     forms=forms,
+                    nontext=nontext,
                 )
             )
         record = _record_constructor(callee)
@@ -4661,8 +4918,13 @@ def _checks_of(
                     options=options,
                     part=handed_part,
                     # The value itself, handed on whole, takes the forms it
-                    # took here; a copy or a part of it, its own.
-                    forms=forms if base(value) and handed_part == part else None,
+                    # took here, and the values its annotation lists; a copy
+                    # or a part of it, its own.
+                    **_as_handed(
+                        forms,
+                        nontext=nontext,
+                        whole=base(value) and handed_part == part,
+                    ),
                 )
             )
         if inner:

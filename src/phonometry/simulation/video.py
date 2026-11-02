@@ -75,7 +75,8 @@ from __future__ import annotations
 
 import contextlib
 import math
-from collections import deque
+from collections import UserString, deque
+from collections.abc import Collection, Sequence
 from dataclasses import dataclass, replace
 from fractions import Fraction
 from types import MappingProxyType
@@ -192,15 +193,18 @@ _SIDE_BANDS: Final[Mapping[str, Callable[[int], tuple[slice, slice]]]] = (
 
 
 def _frame_pixels(size: object) -> tuple[int, int]:
-    """The frame's width and height, whole numbers of pixels, at least 479 by 245."""
-    if not isinstance(size, (tuple, list)):
-        msg = f"'size' must be a pair (width, height) in pixels, got {size!r}"
-        raise TypeError(msg)
+    """The frame's width and height, whole numbers of pixels, at least 479 by 245.
+
+    Any sequence of the two is taken, a tuple, a list or any other, and a
+    NumPy array of one axis; a text is refused, though Python counts it a
+    sequence too.
+    """
+    sides = _frame_sides(size)
     # The length of a fixed-size argument, not a quantity.
-    if len(size) != 2:  # noqa: PLR2004
+    if len(sides) != 2:  # noqa: PLR2004
         msg = f"'size' must be a pair (width, height) in pixels, got {size!r}"
         raise ValueError(msg)
-    width, height = (require_count(side, "size", at_least=None) for side in size)
+    width, height = (require_count(side, "size", at_least=None) for side in sides)
     if width < _MIN_WIDTH or height < _MIN_HEIGHT:
         msg = (
             f"'size' must be at least {_MIN_WIDTH} by {_MIN_HEIGHT} pixels, the "
@@ -211,12 +215,34 @@ def _frame_pixels(size: object) -> tuple[int, int]:
     return width, height
 
 
+def _frame_sides(size: object) -> Collection[object]:
+    """The sides *size* holds: a sequence, or a one-axis array, as it is.
+
+    An array is not copied into a list: its length is read first, so one of
+    any length other than two is refused before any of it is read.
+
+    :raises TypeError: for a text, which Python counts a sequence too (a
+        ``str``, ``bytes``, a ``bytearray`` or a ``UserString`` wrapping
+        one), or anything else that is no sequence.
+    """
+    if isinstance(size, np.ndarray) and size.ndim == 1:
+        return size
+    if isinstance(size, Sequence) and not isinstance(
+        size, str | bytes | bytearray | UserString
+    ):
+        return size
+    msg = f"'size' must be a pair (width, height) in pixels, got {size!r}"
+    raise TypeError(msg)
+
+
 @dataclass(frozen=True, kw_only=True)
 class AnimationFrame(RichDisplay):
     """How each frame of a simulation video is drawn: in which language, at what size, on what scale.
 
     :param language: Label language, ``"en"`` (default) or ``"es"``.
-    :param size: ``(width, height)`` of a frame in pixels, at least 479 by
+    :param size: ``(width, height)`` of a frame in pixels, a tuple, a list,
+        a NumPy array or any other sequence of the two whole numbers, at
+        least 479 by
         245, the smallest frame in which every text, at its own size, stays
         clear of the frame's margin and the field still shows (for a grid up
         to ten times longer one way than the other), on every matplotlib
@@ -250,10 +276,10 @@ class AnimationFrame(RichDisplay):
             self,
             *,
             language: Language = "en",
-            size: (
-                tuple[int | np.integer[Any], int | np.integer[Any]]
-                | list[int | np.integer[Any]]
-            ) = (960, 540),
+            size: Sequence[int | np.integer[Any]] | NDArray[np.integer[Any]] = (
+                960,
+                540,
+            ),
             color_limit: float | None = None,
         ) -> None: ...
 

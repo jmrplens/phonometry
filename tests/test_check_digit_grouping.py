@@ -47,6 +47,14 @@ def test_an_integer_grouped_with_a_plain_space_is_refused(
     assert gate._findings(_file("at 101 325 Pa\n", tmp_path)) == [(1, "101 325")]
 
 
+def test_a_grouping_between_escaped_backticks_is_prose(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A backslash shows the backtick after it and opens no code span."""
+    text = "at \\`101 325 Pa\\` and `[0.404 0.512]`\n"
+    assert gate._findings(_file(text, tmp_path)) == [(1, "101 325")]
+
+
 def test_the_narrow_no_break_space_passes(tmp_path: pathlib.Path) -> None:
     text = f"sum to 6,251{NNBSP}5 dB at 101{NNBSP}325 Pa\n"
     assert gate._findings(_file(text, tmp_path)) == []

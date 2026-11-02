@@ -165,7 +165,7 @@ class OctaveFilterResult(OwnsArrays):
         """Hold the band centres and the waveforms as tuples, every array its own."""
         object.__setattr__(self, "frequencies", tuple(self.frequencies))
         if self.bands is not None:
-            object.__setattr__(self, "bands", owned_members(self.bands))
+            object.__setattr__(self, "bands", owned_members(self.bands, "bands", self))
 
     def require_levels(self) -> np.ndarray:
         """The band levels, or a clear error when the call asked for none.

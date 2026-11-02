@@ -61,6 +61,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from markdown_fences import code_lines
+from markdown_spans import drop_inline_spans
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -166,10 +167,6 @@ BARE_SCRIPT_COMMANDS = frozenset(
 #: The inline mathematics of a docstring, as ``generate_api_docs.py`` reads it.
 _MATH_ROLE = re.compile(r":math:`([^`]+)`")
 
-#: An inline code span in a page: a run of backticks, its text, and a run of
-#: the same length again.
-_CODE_SPAN = re.compile(r"(?<!`)(`+)(?!`)(.+?)(?<!`)\1(?!`)")
-
 #: How much of the line to show either side of the hit.
 _CONTEXT = 30
 
@@ -268,7 +265,9 @@ def _page_bare_scripts(path: Path) -> list[tuple[int, str, str]]:
     ):
         if code:
             continue
-        prose = _CODE_SPAN.sub("", line)
+        # The inline code spans, read by markdown_spans: a backtick behind a
+        # backslash opens none.
+        prose = drop_inline_spans(line)
         for match in bare_script_commands(prose):
             excerpt = _excerpt(prose, match.start(), match.end())
             found.append((number, match.group(1), excerpt))

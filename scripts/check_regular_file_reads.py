@@ -78,9 +78,9 @@ import argparse
 import ast
 import sys
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, NamedTuple
 
-from ast_scan import ROOT, exempted, python_files, relative
+from ast_scan import ROOT, exempted, live_bindings, own_names, python_files, relative
 
 if TYPE_CHECKING:
     import pathlib
@@ -363,16 +363,48 @@ def _parameters(scope: ast.AST) -> set[str]:
     """The names a function binds as its parameters; none for a class or a module."""
     if not isinstance(scope, ast.FunctionDef | ast.AsyncFunctionDef):
         return set()
-    arguments = scope.args
-    named = [*arguments.posonlyargs, *arguments.args, *arguments.kwonlyargs]
-    named.extend(each for each in (arguments.vararg, arguments.kwarg) if each)
-    return {parameter.arg for parameter in named}
+    return set(own_names(scope).parameters)
 
 
-def _bound(scope: ast.AST, package: str, outer: Mapping[str, str]) -> dict[str, str]:
+def _stored(scope: ast.AST) -> set[str]:
+    """The names *scope* stores a value in by its own code, a definition aside.
+
+    An assignment, a loop, a ``with ... as``, an ``except ... as`` and the
+    other statements that bind a name, read as Python reads the scope
+    (:func:`ast_scan.own_names`): a comprehension's loop target is the
+    comprehension's, and what a lambda binds is the lambda's. The imports
+    are read by :func:`_imported`, and the functions and classes defined
+    in *scope* are the scope's definitions (:func:`_defined_here`).
+    """
+    return set(own_names(scope).stored)
+
+
+def _bound_here(scope: ast.AST) -> frozenset[str]:
+    """The names *scope* binds by anything but a definition, its parameters included.
+
+    What makes a name of the scope its own, so that a function of the module
+    of the same name around it is not the one a call reaches. A name the
+    scope declares ``global`` or ``nonlocal`` and stores nothing in is not
+    its own; one it stores in is still taken as bound, to what the guard
+    cannot tell.
+    """
+    names = own_names(scope)
+    sent_out = names.declared_global | names.declared_nonlocal
+    return frozenset(names.parameters | names.stored | (names.imported - sent_out))
+
+
+def _bound(
+    scope: ast.AST,
+    package: str,
+    outer: Mapping[str, str],
+    top: Mapping[str, str] | None = None,
+) -> dict[str, str]:
     """What each name stands for inside *scope*, given what it stands for around it.
 
-    A parameter hides the name around it; then the imports of the scope as
+    A parameter hides the name around it, and so does a name the scope
+    stores anything in (:func:`_stored`); a name the scope declares
+    ``global`` and stores nothing in stands for what it stands for at the
+    top of the module, *top*; then the imports of the scope as
     :func:`_imported` reads them, the relative ones from *package*; then a
     name bound by an assignment to a dotted name (``snd = soundfile``,
     ``reader = sf.read``) stands for what that name stands for, the
@@ -380,7 +412,11 @@ def _bound(scope: ast.AST, package: str, outer: Mapping[str, str]) -> dict[str, 
     classes in *scope* bind is theirs.
     """
     aliases = dict(outer)
-    for name in _parameters(scope):
+    for name in own_names(scope).declared_global:
+        aliases.pop(name, None)
+        if top is not None and name in top:
+            aliases[name] = top[name]
+    for name in _parameters(scope) | _stored(scope):
         aliases.pop(name, None)
     assignments: list[tuple[str, list[str], tuple[int, int]]] = []
     for node in _own_nodes(scope):
@@ -406,7 +442,7 @@ def aliases_of(tree: ast.AST, package: str = "") -> dict[ast.AST, dict[str, str]
     it bind and, at the top, the module (:func:`_bound`). A class body is
     skipped by the functions in it, as Python skips it: an import in a class
     body is not seen by the class's methods. A name a function declares
-    ``global`` is still taken as the function's own.
+    ``global`` is the module's, unless the function stores in it.
     """
     module = _bound(tree, package, {})
     found: dict[ast.AST, dict[str, str]] = {tree: module}
@@ -417,7 +453,7 @@ def aliases_of(tree: ast.AST, package: str = "") -> dict[ast.AST, dict[str, str]
             if not isinstance(child, _SCOPES):
                 pending.append((child, outer))
                 continue
-            found[child] = _bound(child, package, outer)
+            found[child] = _bound(child, package, outer, module)
             inner = outer if isinstance(child, ast.ClassDef) else found[child]
             pending.append((child, inner))
     return found
@@ -475,18 +511,32 @@ def _foreign_read(call: ast.Call, aliases: Mapping[str, str]) -> bool:
     return position is None or _reads_only(_mode(call, position))
 
 
-def _functions(tree: ast.AST) -> Iterator[tuple[str, ast.AST]]:
-    """Every function and class body with its qualified name, and the module as ``<module>``."""
+def _functions(
+    tree: ast.AST,
+) -> Iterator[tuple[str, ast.AST, tuple[ast.AST, ...]]]:
+    """Every function and class body with its qualified name, and the module as ``<module>``.
 
-    def walk(node: ast.AST, scope: str) -> Iterator[tuple[str, ast.AST]]:
+    Each with the scopes it sits in, the module first and itself last. A
+    function written inside an ``if``, a ``try``, a ``with`` or a loop (one
+    for a version of Python, or a fallback) is read as well, named as Python
+    names it, by the functions and classes around it alone.
+    """
+
+    def walk(
+        node: ast.AST, scope: str, around: tuple[ast.AST, ...]
+    ) -> Iterator[tuple[str, ast.AST, tuple[ast.AST, ...]]]:
         for child in ast.iter_child_nodes(node):
             if isinstance(child, _SCOPES):
                 inner = f"{scope}.{child.name}" if scope else child.name
-                yield inner, child
-                yield from walk(child, inner)
+                yield inner, child, (*around, child)
+                yield from walk(child, inner, (*around, child))
+            else:
+                # An ``if``, a ``try`` or a ``with`` opens no scope: a
+                # function written in one is the scope's own.
+                yield from walk(child, scope, around)
 
-    yield "<module>", tree
-    yield from walk(tree, "")
+    yield "<module>", tree, (tree,)
+    yield from walk(tree, "", (tree,))
 
 
 def _own_calls(scope: ast.AST) -> list[ast.Call]:
@@ -497,6 +547,17 @@ def _own_calls(scope: ast.AST) -> list[ast.Call]:
     calls = [node for node in _own_nodes(scope) if isinstance(node, ast.Call)]
     calls.sort(key=lambda call: (call.lineno, call.col_offset))
     return calls
+
+
+class _Names(NamedTuple):
+    """What one scope binds: the functions and classes it defines, the
+    names it binds otherwise (:func:`_bound_here`), and those it declares
+    ``global``, which the module's own binding stands for.
+    """
+
+    defines: frozenset[str]
+    binds: frozenset[str]
+    declared_global: frozenset[str] = frozenset()
 
 
 @dataclass(frozen=True)
@@ -510,9 +571,13 @@ class _Scope:
     aliases: Mapping[str, str]
     #: The dotted name the module is imported by.
     module: str = ""
-    #: The functions and classes the module defines, by their qualified
-    #: names, ``True`` for a class.
-    defined: Mapping[str, bool] = field(default_factory=dict)
+    #: The scopes the scope sits in, the module first and the scope itself
+    #: last, one for each part of its qualified name and the module.
+    around: tuple[ast.AST, ...] = ()
+    #: What each scope of the module binds (:class:`_Names`), by the scope
+    #: itself: two definitions of one name, one in each branch of an ``if``,
+    #: keep each its own.
+    names: Mapping[ast.AST, _Names] = field(default_factory=dict)
 
     @property
     def qualified(self) -> str:
@@ -542,19 +607,28 @@ def _package_of(path: pathlib.Path, module: str) -> str:
     return module.rpartition(".")[0]
 
 
-def _definitions(tree: ast.AST) -> dict[str, bool]:
-    """Each function and class *tree* defines, by its qualified name, ``True`` for a class."""
-    defined: dict[str, bool] = {}
+def _defined_here(scope: ast.AST) -> frozenset[str]:
+    """The functions and classes *scope* defines itself.
 
-    def walk(node: ast.AST, scope: str) -> None:
-        for child in ast.iter_child_nodes(node):
-            if isinstance(child, ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef):
-                inner = f"{scope}.{child.name}" if scope else child.name
-                defined[inner] = isinstance(child, ast.ClassDef)
-                walk(child, inner)
+    One written inside an ``if``, a ``try`` or a ``with`` too, as
+    :func:`_functions` reads it; not those defined inside them.
+    """
+    return own_names(scope).defined
 
-    walk(tree, "")
-    return defined
+
+def _names_of(scope: ast.AST) -> _Names:
+    """What *scope* binds, as :class:`_Names` keeps it.
+
+    A name it declares ``global`` and binds all the same is bound otherwise:
+    at a call it may be what the module bound or what the scope put there.
+    """
+    names = own_names(scope)
+    rebound = frozenset(name for name in names.declared_global if names.rebinds(name))
+    return _Names(
+        _defined_here(scope) - rebound,
+        _bound_here(scope) | rebound,
+        names.declared_global - rebound,
+    )
 
 
 def _top_level_imports(tree: ast.Module) -> Iterator[ast.Import | ast.ImportFrom]:
@@ -612,23 +686,42 @@ def _local(name: str, scope: _Scope) -> str | None:
 
     Looked up as Python looks a name up: in the function or class body
     itself, in the functions around it (a class around it is skipped, as
-    Python skips it), then at the top of the module.
+    Python skips it), then at the top of the module. A scope that binds the
+    name otherwise, by a parameter, an import or an assignment, ends the
+    search with none: the name is that binding's, which *scope*'s aliases
+    say, not a function of the module further out. So does a scope that
+    both defines the name and binds it otherwise, which may stand for
+    either at the call. A scope that declares the name ``global`` sends
+    the search to the top of the module.
     """
     parts = [] if scope.name == "<module>" else scope.name.split(".")
-    for end in range(len(parts), -1, -1):
-        prefix = ".".join(parts[:end])
-        if end < len(parts) and scope.defined.get(prefix):
+    for end in range(len(scope.around) - 1, -1, -1):
+        holder = scope.around[end]
+        if end < len(parts) and isinstance(holder, ast.ClassDef):
             continue
-        candidate = f"{prefix}.{name}" if prefix else name
-        if candidate in scope.defined:
-            return f"{scope.module}.{candidate}"
+        own = scope.names.get(holder, _Names(frozenset(), frozenset()))
+        if name in own.declared_global:
+            return _at_the_top(name, scope)
+        if name in own.binds:
+            return None
+        if name in own.defines:
+            return ".".join([scope.module, *parts[:end], name])
+    return None
+
+
+def _at_the_top(name: str, scope: _Scope) -> str | None:
+    """The function or class of the module *name* is at its top, from *scope*."""
+    own = scope.names.get(scope.around[0], _Names(frozenset(), frozenset()))
+    if name in own.defines and name not in own.binds:
+        return f"{scope.module}.{name}"
     return None
 
 
 def _owner(scope: _Scope) -> str | None:
     """The class *scope* is a method of, by its qualified name, or ``None``."""
-    owner = scope.name.rpartition(".")[0]
-    return owner if owner and scope.defined.get(owner) else None
+    if len(scope.around) < 2 or not isinstance(scope.around[-2], ast.ClassDef):
+        return None
+    return scope.name.rpartition(".")[0]
 
 
 def qualified_callee(
@@ -638,8 +731,11 @@ def qualified_callee(
 
     ``self.f()`` and ``cls.f()`` in a method reach ``f`` of its class; a bare
     or dotted name is read through the functions of the module and the
-    functions around the call, then through what the module imports, and
-    followed through :func:`exports_of`. A call that starts from anything
+    functions around the call, as far as the nearest scope that binds the
+    name otherwise (:func:`_local`), then through what that scope's imports
+    and assignments make it, and followed through :func:`exports_of`; a
+    parameter, or a name stored from a call, is no function of the library.
+    A call that starts from anything
     else (``handle.read_at_most(path)``, ``np.info(path)`` once ``np`` is
     NumPy) reaches no function of the library.
     """
@@ -662,10 +758,11 @@ def _scopes(path: pathlib.Path, tree: ast.AST) -> list[_Scope]:
     """Every function and class body of *tree*, and the module, each with its own calls and names."""
     module = module_name(path)
     aliases = aliases_of(tree, _package_of(path, module))
-    defined = _definitions(tree)
+    functions = list(_functions(tree))
+    names = {node: _names_of(node) for _name, node, _around in functions}
     return [
-        _Scope(path, name, node, _own_calls(node), aliases[node], module, defined)
-        for name, node in _functions(tree)
+        _Scope(path, name, node, _own_calls(node), aliases[node], module, around, names)
+        for name, node, around in functions
     ]
 
 
@@ -689,33 +786,65 @@ def checking_functions(
     a helper counts as a check for its own callers, and a function that hands
     its name to a namesake of a check (``np.info``) does not.
     """
-    # Each function with the callees it hands its first parameter to, worked
-    # out once; the search below only grows the set of checks.
-    candidates: list[tuple[str, set[str]]] = []
-    for scope in scopes:
-        parameter = _first_parameter(scope.node)
-        if parameter is None or not isinstance(
-            scope.node, ast.FunctionDef | ast.AsyncFunctionDef
-        ):
-            continue
-        handed = {
-            callee
-            for call in scope.calls
-            if (argument := _first_argument(call)) is not None
-            and _subject(argument) == parameter
-            and (callee := qualified_callee(call, scope, exports)) is not None
-        }
-        if handed:
-            candidates.append((scope.qualified, handed))
+    # Each function with the callees each definition of it hands its first
+    # parameter to, worked out once; the search below only grows the set of
+    # checks.
+    candidates: dict[str, list[set[str]]] = {}
+    for scope in _reachable(scopes):
+        candidates.setdefault(scope.qualified, []).append(_handed_first(scope, exports))
     found = set(_SHARED_CHECKS)
     grew = True
     while grew:
         grew = False
-        for name, handed in candidates:
-            if name not in found and not handed.isdisjoint(found):
+        for name, definitions in candidates.items():
+            # A name defined in each branch of an ``if`` is a check only when
+            # every definition of it is: the others leave the read unchecked.
+            if name not in found and all(
+                not handed.isdisjoint(found) for handed in definitions
+            ):
                 found.add(name)
                 grew = True
     return frozenset(found)
+
+
+def _reachable(scopes: Sequence[_Scope]) -> list[_Scope]:
+    """The functions of *scopes* a call can reach by their names.
+
+    Of the definitions of one name at the top of a module or in a class,
+    those it holds once the module or the class has run
+    (:func:`ast_scan.live_bindings`): one in each branch of an ``if`` is
+    either, and one a later definition replaces is none. Every definition
+    of a function written inside another, which a call may reach before
+    the next one is written.
+    """
+    by_name: dict[str, list[_Scope]] = {}
+    for scope in scopes:
+        if isinstance(scope.node, ast.FunctionDef | ast.AsyncFunctionDef):
+            by_name.setdefault(scope.qualified, []).append(scope)
+    reachable: list[_Scope] = []
+    for same in by_name.values():
+        holder = same[0].around[-2]
+        if len(same) == 1 or isinstance(holder, ast.FunctionDef | ast.AsyncFunctionDef):
+            reachable.extend(same)
+            continue
+        nodes = {scope.node: scope for scope in same}
+        live = live_bindings(same[0].around[0], list(nodes))
+        reachable.extend(nodes[node] for node in live)
+    return reachable
+
+
+def _handed_first(scope: _Scope, exports: Mapping[str, str]) -> set[str]:
+    """The functions of the library *scope* hands its first parameter to."""
+    parameter = _first_parameter(scope.node)
+    if parameter is None:
+        return set()
+    return {
+        callee
+        for call in scope.calls
+        if (argument := _first_argument(call)) is not None
+        and _subject(argument) == parameter
+        and (callee := qualified_callee(call, scope, exports)) is not None
+    }
 
 
 def _checked_before(

@@ -10,7 +10,7 @@ import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join, relative, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { prose } from "../src/lib/markdown-fences.mjs";
+import { authorsFigure } from "./shared/page-prose.mjs";
 
 const docsDir = fileURLToPath(new URL("../src/content/docs", import.meta.url));
 const esDir = join(docsDir, "es");
@@ -88,20 +88,9 @@ if (missingEs.length || orphanEs.length) {
 // the build if the plugin ever renames it, so every figure goes through it.
 const figures = [];
 for (const page of esPages) {
-	// Fenced blocks and inline code are samples of markup, not markup.
-	const source = prose(readFileSync(join(esDir, page), "utf8")).replace(
-		/`[^`\n]*`/g,
-		"",
-	);
-	// Every markdown image opens with the same two characters, whatever comes
-	// after them: the inline `![alt](src)`, the two reference forms
-	// `![alt][label]` and `![alt][]`, and the shortcut `![label]` whose target
-	// is a link definition somewhere else in the file. Only the inline form
-	// used to be looked for, so a figure written as a reference walked past
-	// this check and shipped the English zoom control anyway. Matching what
-	// opens all four is both shorter and complete, and Spanish prose has no
-	// other use for the sequence once code has been taken out above.
-	if (source.includes("![") || /<img\b/.test(source)) {
+	// Fenced blocks and inline code are samples of markup, not markup; the
+	// page is read as shared/page-prose.mjs reads it, figures in every form.
+	if (authorsFigure(readFileSync(join(esDir, page), "utf8"))) {
 		figures.push(page);
 	}
 }

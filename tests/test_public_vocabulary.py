@@ -43,6 +43,7 @@ if _SCRIPTS not in sys.path:
     sys.path.insert(0, _SCRIPTS)
 
 from check_parameter_units import DIMENSIONLESS
+from markdown_spans import blank_inline_spans
 
 import phonometry
 
@@ -2348,11 +2349,10 @@ _ROOT = Path(__file__).resolve().parent.parent
 #: word-boundary pattern rewrites the noun in every sentence around it too.
 _COUNT_AS_NOUN = re.compile(r"[A-Za-z]\s+(n_[a-z_]*[a-z]s)\b(?!\s*=)")
 
-#: Spans that hold code or mathematics, where an identifier is what is meant,
-#: and the field name a docstring opens a line with (``:param n_planes:``).
-_CODE_SPANS = re.compile(
-    r":math:`[^`]*`|``[^`]*``|`[^`]*`|\$[^$]*\$|^:\w+(?:\s+[\w.]+)?:"
-)
+#: The field name a docstring opens a line with (``:param n_planes:``), where
+#: an identifier is what is meant. The spans that hold code or mathematics
+#: are read by ``scripts/markdown_spans.py``, as the site reads them.
+_FIELD_NAME = re.compile(r"^:\w+(?:\s+[\w.]+)?:")
 
 
 def _prose_lines(text: str, *, docstring: bool) -> Iterator[str]:
@@ -2379,7 +2379,7 @@ def _prose_lines(text: str, *, docstring: bool) -> Iterator[str]:
         if docstring and stripped.startswith(".. math::"):
             math_indent = indent
             continue
-        yield _CODE_SPANS.sub(" ", stripped)
+        yield blank_inline_spans(_FIELD_NAME.sub(" ", stripped), "`$")
 
 
 def _docstrings() -> Iterator[tuple[str, str]]:
@@ -2431,6 +2431,12 @@ def test_the_rule_tells_a_count_named_in_prose_from_one_used_as_a_noun() -> None
         "n_sections",
         "n_axles",
     ]
+
+
+def test_an_escaped_backtick_hides_no_prose_from_the_rule() -> None:
+    """A backslash shows the backtick after it and opens no code span."""
+    text = "Read \\`the number of n_planes\\` here, and `the n_axles` as code.\n"
+    assert count_names_written_as_nouns(text, docstring=False) == ["n_planes"]
 
 
 def test_a_count_name_never_stands_in_for_its_noun_in_prose() -> None:

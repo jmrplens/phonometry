@@ -18,6 +18,7 @@ found the same function.
 
 from __future__ import annotations
 
+import ast
 import pathlib
 import sys
 import textwrap
@@ -632,6 +633,259 @@ def test_a_polar_axes_reached_through_other_functions_is_refused(
         "plot_through_module",
         "plot_two_calls_away",
     ]
+
+
+def test_a_name_the_function_binds_itself_reaches_no_function_of_the_package(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A call is looked up as Python looks it up: the function first.
+
+    A call through a parameter, an assignment or a function defined inside
+    the caller was followed to the module's function of the same name, so a
+    function that never reaches it was refused for the polar axes it makes.
+    """
+    refused = _refused(
+        tmp_path,
+        plots="""
+        import matplotlib.pyplot as plt
+
+        def new_polar() -> PolarAxes:
+            return plt.subplots(subplot_kw={"projection": "polar"})[1]
+
+        def by_a_parameter(result: object, new_polar: Any) -> Axes:
+            return new_polar()
+
+        def by_an_assignment(result: object) -> Axes:
+            new_polar = plt.gca
+            return new_polar()
+
+        def by_a_nested_function(result: object) -> Axes:
+            def new_polar() -> Axes:
+                return plt.subplots()[1]
+
+            return new_polar()
+
+        def through_the_module(result: object) -> Axes:
+            return new_polar()
+        """,
+    )
+    assert sorted(refused) == ["through_the_module"]
+
+
+def test_every_definition_of_a_function_written_in_two_branches_is_read(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A function written in each branch of an ``if`` is either at run time.
+
+    The functions were kept by their dotted name and the second definition
+    took the place of the first, so a union the first returns without
+    overloads passed, and a helper that makes a polar axes in one branch
+    only made no caller of it reach one.
+    """
+    refused = _refused(
+        tmp_path,
+        plots="""
+        import sys
+
+        import matplotlib.pyplot as plt
+
+        if sys.version_info >= (3, 13):
+            def plot_pair(
+                result: object, ax: Axes | None = None
+            ) -> Axes | tuple[Axes, Axes]:
+                return ax
+        else:
+            def plot_pair(result: object, ax: Axes | None = None) -> Axes:
+                return ax
+
+        if sys.version_info >= (3, 13):
+            def _new_axes():
+                return plt.subplots(subplot_kw={"projection": "polar"})[1]
+        else:
+            def _new_axes():
+                return plt.subplots()[1]
+
+        def plot_polar(result: object) -> Axes:
+            return _new_axes()
+        """,
+    )
+    assert sorted(refused) == ["plot_pair", "plot_polar"]
+
+
+def test_a_definition_a_later_one_replaces_is_never_reached(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A call reaches the definitions a name may hold where it runs.
+
+    A later ``def`` of a name was kept beside the earlier one as a second
+    definition, though it replaces it unconditionally, so a caller of the
+    plain helper was refused for the polar axes of code that never runs, at
+    the top of a module and in a class. Of two imports of one name in the
+    caller, the call read the first of the function, not the one written
+    last before it.
+    """
+    refused = _refused(
+        tmp_path,
+        helpers="""
+        import matplotlib.pyplot as plt
+
+        def new_polar() -> PolarAxes:
+            return plt.subplots(subplot_kw={"projection": "polar"})[1]
+
+        def new_plain() -> Axes:
+            return plt.subplots()[1]
+        """,
+        plots="""
+        import matplotlib.pyplot as plt
+
+        def _new_axes():
+            return plt.subplots(subplot_kw={"projection": "polar"})[1]
+
+        def _new_axes():
+            return plt.subplots()[1]
+
+        def plot_replaced(result: object) -> Axes:
+            return _new_axes()
+
+        class Result:
+            def _draw(self):
+                return plt.subplots(subplot_kw={"projection": "polar"})[1]
+
+            def _draw(self):
+                return plt.subplots()[1]
+
+            def plot(self) -> Axes:
+                return self._draw()
+
+        if FAST:
+            def _maybe_polar():
+                return plt.subplots(subplot_kw={"projection": "polar"})[1]
+
+        def plot_maybe(result: object) -> Axes:
+            return _maybe_polar()
+
+        def plot_imported(result: object, fast: bool) -> Axes:
+            if fast:
+                from .helpers import new_polar as make
+
+                return plt.gca()
+            from .helpers import new_plain as make
+
+            return make()
+        """,
+    )
+    assert sorted(refused) == ["plot_maybe"]
+
+
+def test_each_branch_keeps_its_own_overload_heads(tmp_path: pathlib.Path) -> None:
+    """Overloads written in each branch of an ``if`` belong to that branch's function.
+
+    The heads of the second branch joined the first branch's function, and
+    the second implementation was kept with none, so a union it returns
+    under heads of its own was refused for having no overloads.
+    """
+    refused = _refused(
+        tmp_path,
+        levels="""
+        import sys
+
+        if sys.version_info >= (3, 13):
+            @overload
+            def level(x: float) -> float: ...
+            @overload
+            def level(x: NDArray[np.float64]) -> NDArray[np.float64]: ...
+            def level(x: float | NDArray[np.float64]) -> float | NDArray[np.float64]:
+                return x
+        else:
+            @overload
+            def level(x: float) -> float: ...
+            @overload
+            def level(x: NDArray[np.float64]) -> NDArray[np.float64]: ...
+            def level(x: float | NDArray[np.float64]) -> float | NDArray[np.float64]:
+                return x
+        """,
+    )
+    assert refused == {}
+
+
+def _package_of(tmp_path: pathlib.Path, **modules: str) -> cro.Package:
+    root = _package(tmp_path, **modules)
+    return cro.Package(sorted(root.rglob("*.py")), root)
+
+
+def _call_in(package: cro.Package, key: str) -> tuple[cro.Function, ast.expr]:
+    """The function under *key* and the callee of the one call it writes."""
+    function = package.functions[key]
+    assert function.implementation is not None
+    calls = [
+        node
+        for node in ast.walk(function.implementation)
+        if isinstance(node, ast.Call) and isinstance(node.func, ast.Name)
+    ]
+    return function, calls[-1].func
+
+
+def test_a_call_is_read_in_the_scope_it_is_written_in(tmp_path: pathlib.Path) -> None:
+    """An import counts only in the function that makes it, and a nested
+    function reads the names of the definition it is written in.
+
+    The imports of a function were read from every node of it, those of the
+    functions written inside it included, so a call beside them in the
+    function, or in a sibling, reached what another function imported. A
+    function written in the second definition of the function around it
+    read that function's names in the first definition.
+    """
+    package = _package_of(
+        tmp_path,
+        polar="""
+        def new_axes():
+            return None
+        """,
+        plots="""
+        import sys
+
+        def new_axes():
+            return None
+
+        def beside_a_nested_import(result: object) -> Axes:
+            def make() -> None:
+                from .polar import new_axes
+
+                del new_axes
+
+            return new_axes()
+
+        if sys.version_info >= (3, 13):
+            def outer(result: object) -> Axes:
+                from .polar import new_axes
+
+                def inner() -> Axes:
+                    return new_axes()
+
+                return inner()
+        else:
+            def outer(result: object) -> Axes:
+                def inner() -> Axes:
+                    return new_axes()
+
+                return inner()
+        """,
+    )
+    function, func = _call_in(package, "pkg.plots.beside_a_nested_import")
+    assert package.call_target(function, func) == "pkg.plots.new_axes"
+    first = package.functions["pkg.plots.outer.inner"]
+    second = package.functions["pkg.plots.outer.inner#2"]
+    for inner, reached in (
+        (first, "pkg.polar.new_axes"),
+        (second, "pkg.plots.new_axes"),
+    ):
+        assert inner.implementation is not None
+        call = next(
+            node
+            for node in ast.walk(inner.implementation)
+            if isinstance(node, ast.Call)
+        )
+        assert package.call_target(inner, call.func) == reached
 
 
 def test_a_polar_axes_typed_polar_or_overloaded_on_it_is_let_through(

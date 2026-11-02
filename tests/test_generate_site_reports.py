@@ -444,3 +444,18 @@ def test_a_family_page_is_ranked_by_no_title_and_shown_by_its_own() -> None:
     ).split("---")[1]
     assert "searchTitle" not in plain_frontmatter
     assert f"searchWeight: {generate_site_reports.SEARCH_WEIGHT}\n" in plain_frontmatter
+
+
+def test_an_escaped_backtick_hides_no_brace_from_the_mdx_check() -> None:
+    """The index page is MDX, which reads a brace in prose as code.
+
+    The check took every backtick for a code marker, so a brace between two
+    escaped backticks, which the page shows as prose, passed it and broke
+    the page it is written into.
+    """
+    with pytest.raises(SystemExit, match="carries a brace"):
+        generate_site_reports._mdx_safe(r"An escaped \`{x}\` brace.", where="t")
+    with pytest.raises(SystemExit, match="carries a brace"):
+        generate_site_reports._mdx_safe("A bare {x} brace.", where="t")
+    kept = "A `{x}` in code and ``a ` {b}`` in a longer run."
+    assert generate_site_reports._mdx_safe(kept, where="t") == kept

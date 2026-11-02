@@ -228,6 +228,15 @@ EXEMPT: dict[tuple[str, str, str], str] = {
         "only in its item, and a label is str"
     ),
     (
+        "src/phonometry/io/_sidecar.py",
+        "CalibrationSidecar.__init__",
+        "channel_labels",
+    ): (
+        "the labels write_sidecar hands to the record, held to the same two "
+        "containers for the same reason: one text, a Sequence[str] too, stays "
+        "a type error as it is a ValueError when the record is built"
+    ),
+    (
         "src/phonometry/vibration/human/exposure.py",
         "daily_vibration_exposure",
         "labels",
@@ -2105,12 +2114,7 @@ class Reader:
                 return None
             node = self.package.functions[method].implementation
             return method, node is not None and not _is_static(node)
-        local = (
-            self.package.local_imports.get(function.implementation, {})
-            if function.implementation is not None
-            else {}
-        )
-        target = self.package.resolve(function.module, func, local)
+        target = self.package.call_target(function, func)
         if target is None:
             return None
         if target in ends or target == "builtins.isinstance":
@@ -2699,12 +2703,15 @@ def public_functions(package: overloads.Package) -> Iterator[overloads.Function]
             target = package.canonical(f"{module}.{name}")
             if target in package.functions and target not in seen:
                 seen.add(target)
-                yield package.functions[target]
+                # Every definition of a name written in two branches.
+                for key in package.every_definition(target):
+                    yield package.functions[key]
             elif target in annotations.classes:
                 for method in _methods(package, annotations, target):
                     if method not in seen:
                         seen.add(method)
-                        yield package.functions[method]
+                        for key in package.every_definition(method):
+                            yield package.functions[key]
 
 
 def _exported(tree: ast.Module) -> list[str]:
@@ -2729,12 +2736,18 @@ def _methods(
     owner: str,
     depth: int = 0,
 ) -> Iterator[str]:
-    """The public methods a class defines or takes from the package's classes it extends."""
+    """The public methods a class defines or takes from the package's classes it extends.
+
+    The branches of an ``if`` and a ``try`` in the class body are read
+    through, so the constructor a record declares under ``if TYPE_CHECKING:``
+    (a dataclass's own ``__init__`` written out for the type checker) is read
+    by the function rules as any other method is.
+    """
     found = annotations.classes.get(owner)
     if found is None or depth > _HIERARCHY:
         return
     module, node = found
-    for child in node.body:
+    for child in overloads._statements(node.body):
         if not isinstance(child, ast.FunctionDef | ast.AsyncFunctionDef):
             continue
         if child.name.startswith("_") and child.name not in _CALLED_DUNDERS:
@@ -3317,13 +3330,54 @@ def _items_take(
     )
 
 
+#: The spellings of a callable type, whose items are its parameters and its return.
+_CALLABLES = frozenset({"collections.abc.Callable", "typing.Callable"})
+
+
+#: A bare ``Callable``, as a type checker reads it: ``Callable[..., Any]``.
+_ANY_CALLABLE: tuple[object, ...] = (_ANY_COUNT, frozenset({("typing.Any", ())}))
+
+
+def _callable_takes(mine: tuple[object, ...], theirs: tuple[object, ...]) -> bool:
+    """Whether a callable of items *mine* takes every callable of items *theirs*.
+
+    Its return covariantly, so a callable that returns a ``float`` is one
+    that returns a ``complex``, and its parameters contravariantly, so one
+    that takes a ``float`` is one that takes an ``int``, the count of them
+    the same; ``...`` for the parameters takes or is taken by any. A bare
+    ``Callable`` is ``Callable[..., Any]`` on either side, and a return of
+    ``Any`` is taken only by a return of ``Any`` or ``object``, as the rest
+    of the guard reads ``Any``, where a type checker takes it anywhere.
+    """
+    mine = mine or _ANY_CALLABLE
+    theirs = theirs or _ANY_CALLABLE
+    if len(mine) != _SHAPE_MEMBER or len(theirs) != _SHAPE_MEMBER:
+        return mine == theirs
+    (my_parameters, my_return), (their_parameters, their_return) = mine, theirs
+    if not _shape_takes(my_return, their_return):
+        return False
+    if _ANY_COUNT in (my_parameters, their_parameters):
+        return True
+    if not (
+        isinstance(my_parameters, tuple)
+        and isinstance(their_parameters, tuple)
+        and len(my_parameters) == len(their_parameters)
+    ):
+        return False
+    return all(
+        _shape_takes(their, my)
+        for my, their in zip(my_parameters, their_parameters, strict=True)
+    )
+
+
 def _member_takes(mine: object, theirs: object) -> bool:
     """Whether one member of a shape takes every value another does.
 
     The same member; a type a choice is a value of, or a number promoted to
-    (:func:`_wider`); or a standard container that *theirs* is
+    (:func:`_wider`); a standard container that *theirs* is
     (:func:`_read_as`), whose items take *theirs*' as the container reads
-    them (:data:`_VARIANCE`).
+    them (:data:`_VARIANCE`); or a callable that takes the callables
+    *theirs* is (:func:`_callable_takes`).
     """
     if mine == theirs:
         return True
@@ -3335,6 +3389,9 @@ def _member_takes(mine: object, theirs: object) -> bool:
         return False
     origin = _origin(mine[0])
     items = tuple(mine[1]) if isinstance(mine[1], tuple) else ()
+    if origin in _CALLABLES:
+        their_items = tuple(theirs[1]) if isinstance(theirs[1], tuple) else ()
+        return theirs[0] in _CALLABLES and _callable_takes(items, their_items)
     if not items and origin in _wider(theirs):
         return True
     if origin != "builtins.tuple" and origin not in _VARIANCE:
@@ -3965,6 +4022,17 @@ def _arm_needs_context(annotations: Annotations, module: str, arm: ast.expr) -> 
 #: ``dict`` display read on its own is taken by.
 _READ_MAPPINGS = frozenset({"typing.Mapping", "collections.abc.Mapping"})
 
+#: The mappings a ``dict`` is that are invariant in their values: a ``dict``
+#: display read on its own is taken by one of its own key and value only.
+_MUTABLE_MAPPINGS = frozenset(
+    {
+        "typing.MutableMapping",
+        "collections.abc.MutableMapping",
+        "typing.Dict",
+        "builtins.dict",
+    }
+)
+
 #: The types a key written as a number of a narrower one is read as: a
 #: ``float`` key written ``125`` is read as an ``int``.
 _WRITTEN_NARROWER = frozenset({"builtins.float", "builtins.complex"})
@@ -4069,19 +4137,45 @@ def _written_taken(
             key is not None
             and isinstance(taker, frozenset)
             and any(
-                isinstance(member, tuple)
-                and member[0] in _READ_MAPPINGS
-                and isinstance(member[1], tuple)
-                and len(member[1]) == _MAPPING_ITEMS
-                and member[1][0] == key
-                and _written_taken(
-                    annotations, where, items[1], member[1][1], depth + 1
-                )
+                _mapping_takes_written(annotations, where, items[1], member, key, depth)
                 for member in taker
             )
         )
     written = _written_type(annotations, present, key=False)
     return written is not None and _shape_takes(taker, written)
+
+
+def _mapping_takes_written(
+    annotations: Annotations,
+    module: str,
+    value: ast.expr,
+    member: object,
+    key: frozenset[object],
+    depth: int,
+) -> bool:
+    """Whether one member of a taker is a mapping that takes a ``dict`` written for a mapping.
+
+    *key* is the type the ``dict``'s keys are read as on their own, and
+    *value* the annotation of the values written. A ``Mapping`` of that key
+    takes the values as :func:`_written_taken` reads them, covariantly; a
+    ``MutableMapping`` or a ``dict``, invariant in its value, takes them
+    only when they are read as its own value type.
+    """
+    if not (
+        isinstance(member, tuple)
+        and isinstance(member[1], tuple)
+        and len(member[1]) == _MAPPING_ITEMS
+        and member[1][0] == key
+    ):
+        return False
+    if member[0] in _READ_MAPPINGS:
+        return _written_taken(annotations, module, value, member[1][1], depth + 1)
+    if member[0] in _MUTABLE_MAPPINGS:
+        written = _written_type(
+            annotations, annotations.members(module, value), key=False
+        )
+        return written is not None and written == member[1][1]
+    return False
 
 
 def _covered(
@@ -4097,7 +4191,7 @@ def _covered(
     the call runs and type checks with no head of its own.
     """
     return any(
-        annotations.resolve(where, other) in _READ_MAPPINGS
+        annotations.resolve(where, other) in _READ_MAPPINGS | _MUTABLE_MAPPINGS
         and _written_taken(annotations, module, arm, _shape(annotations, where, other))
         for where, other in arms
     )
@@ -5303,12 +5397,7 @@ def _given_back(
             return True
         if not (isinstance(value, ast.Call) and value.args):
             return False
-        local = (
-            reader.package.local_imports.get(function.implementation, {})
-            if function.implementation is not None
-            else {}
-        )
-        dotted = reader.package.resolve(function.module, value.func, local)
+        dotted = reader.package.call_target(function, value.func)
         if dotted is None:
             return False
         below = dotted.removeprefix(f"{reader.root}.")

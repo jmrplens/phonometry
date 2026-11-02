@@ -92,7 +92,7 @@ def test_a_name_reaches_the_scope_python_reads_it_in() -> None:
         outer, "keep"
     )
     # A method does not see its class body: the parameter of ``outer``.
-    assert ast_scan.binding_of(outer, method, "keep")[0] == "binding"
+    assert ast_scan.binding_of(outer, method, "keep") == ("binding", outer)
     assert ast_scan.binding_of(outer, through_global, "keep") == ("global", None)
     how, scope = ast_scan.binding_of(outer, comprehension, "keep")
     assert (how, type(scope)) == ("binding", ast.ListComp)
@@ -120,3 +120,154 @@ def test_a_name_bound_two_ways_names_no_one_binding() -> None:
     tree = ast.parse("def f():\n    def g(): pass\n    g = make()\n")
     function = tree.body[0]
     assert ast_scan.own_names(function).how("g") == "binding"
+
+
+_LIVE = """
+def first(x):
+    return x
+
+
+def first(x):
+    return x.copy()
+
+
+if FAST:
+
+    def branch(x):
+        return x
+
+else:
+
+    def branch(x):
+        return x.copy()
+
+
+def then(x):
+    return x
+
+
+if FAST:
+
+    def then(x):
+        return x.copy()
+
+
+try:
+
+    def tried(x):
+        return x
+
+    def tried(x):
+        return x.copy()
+
+except ImportError:
+    pass
+
+
+def caller(values):
+    def helper(v):
+        return v.copy()
+
+    if values:
+
+        def helper(v):
+            return v
+
+    a = helper(values)
+
+    def helper(v):
+        return v + 1
+
+    b = helper(values)
+    if values:
+
+        def other(v):
+            return v
+
+        c = other(values)
+    else:
+
+        def other(v):
+            return v.copy()
+
+        d = other(values)
+    e = other(values)
+    for item in values:
+        f = late(item)
+
+        def late(v):
+            return v
+
+    g = [helper(item) for item in values]
+"""
+
+
+def _definitions(root: ast.AST, name: str) -> list[ast.FunctionDef]:
+    """Every ``def`` of *name* under *root*, in the order of the source."""
+    found = [
+        node
+        for node in ast.walk(root)
+        if isinstance(node, ast.FunctionDef) and node.name == name
+    ]
+    return sorted(found, key=lambda node: node.lineno)
+
+
+def _call_stored_in(root: ast.AST, target: str) -> ast.Call:
+    """The call whose result the assignment to *target* stores."""
+    for node in ast.walk(root):
+        if (
+            isinstance(node, ast.Assign)
+            and isinstance(node.targets[0], ast.Name)
+            and node.targets[0].id == target
+        ):
+            found = [
+                part for part in ast.walk(node.value) if isinstance(part, ast.Call)
+            ]
+            return found[0]
+    raise AssertionError(target)
+
+
+def test_a_later_def_replaces_an_earlier_one_where_it_always_runs_after() -> None:
+    """Once the module has run, a name holds the ``def`` no later one replaces.
+
+    A later ``def`` in the same block replaces an earlier one; one in each
+    branch of an ``if`` is either; one inside an ``if`` after an
+    unconditional one may or may not have replaced it; and two in the body
+    of a ``try`` are both kept, since an exception may leave the first.
+    """
+    tree = ast.parse(textwrap.dedent(_LIVE))
+    first, second = _definitions(tree, "first")
+    assert ast_scan.live_bindings(tree, [first, second]) == [second]
+    for name in ("branch", "then", "tried"):
+        both = _definitions(tree, name)
+        assert ast_scan.live_bindings(tree, both) == both, name
+
+
+def test_a_call_reaches_the_defs_that_may_run_before_it() -> None:
+    """A call reaches each ``def`` that may have run before it and that no
+    later one replaced on the way: the one written last before it, and one
+    inside an ``if`` written after that one.
+
+    The function-local reading kept the last ``def`` before the call in a
+    block the call sits in alone, so a ``def`` inside an ``if`` between it
+    and the call, which may have run, was never read.
+    """
+    tree = ast.parse(textwrap.dedent(_LIVE))
+    caller = next(node for node in tree.body if getattr(node, "name", "") == "caller")
+    one, two, three = _definitions(caller, "helper")
+    either, other = _definitions(caller, "other")
+    (late,) = _definitions(caller, "late")
+    expected = {
+        "a": [one, two],
+        "b": [three],
+        "c": [either],
+        "d": [other],
+        "e": [either, other],
+        "f": [late],
+        "g": [three],
+    }
+    for target, reached in expected.items():
+        call = _call_stored_in(caller, target)
+        assert isinstance(call.func, ast.Name)
+        bindings = _definitions(caller, call.func.id)
+        assert ast_scan.live_bindings(tree, bindings, call) == reached, target

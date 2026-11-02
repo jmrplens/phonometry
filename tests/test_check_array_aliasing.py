@@ -460,6 +460,173 @@ def test_a_helper_with_no_parameter_hands_back_what_its_closure_holds(
     assert found == {("rating", "BandResult.frequencies", "frequencies")}
 
 
+def test_a_definition_a_later_one_replaces_is_never_reached(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A call reaches the definition a name holds once the module has run.
+
+    Every definition of a module's name, or of a class's method, was read as
+    one the call may run, so a first ``keep`` that hands back its argument,
+    replaced by a second that copies it, made the record that keeps the
+    result refused for code that never runs. One in each branch of an
+    ``if`` is still either.
+    """
+    found = _findings(
+        tmp_path,
+        rating="""
+        import numpy as np
+
+        from .results import BandResult
+
+        def keep(a):
+            return a
+
+        def keep(a):
+            return np.array(a)
+
+        def kept(frequencies, levels):
+            f = keep(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        class Builder:
+            def pick(self, a):
+                return a
+
+            def pick(self, a):
+                return np.array(a)
+
+            def build(self, frequencies):
+                f = self.pick(frequencies)
+                return BandResult(frequencies=f, levels=f * 0.0)
+        """,
+    )
+    assert found == set()
+
+
+def test_a_call_reaches_a_definition_an_if_may_have_put_before_it(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A helper rebound inside an ``if`` before the call may be the one it runs.
+
+    The call was bound to the last definition written before it in a block
+    it sits in alone, so the copying ``pick`` hid the one the ``if`` may
+    have put in its place, which hands back the caller's array.
+    """
+    found = _findings(
+        tmp_path,
+        rating="""
+        import numpy as np
+
+        from .results import BandResult
+
+        def rebound(frequencies, levels, fast):
+            def pick(a):
+                return np.array(a)
+
+            if fast:
+                def pick(a):
+                    return a
+
+            f = pick(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        def replaced(frequencies, levels, fast):
+            if fast:
+                def pick(a):
+                    return a
+
+            def pick(a):
+                return np.array(a)
+
+            f = pick(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+        """,
+    )
+    assert found == {("rebound", "BandResult.frequencies", "frequencies")}
+
+
+def test_a_call_reaches_the_import_of_its_own_branch(tmp_path: pathlib.Path) -> None:
+    """Two branches that import two helpers under one name each call their own.
+
+    Every call of the name was read through the first import of it in the
+    function, so a call in the second branch took the first branch's
+    helper: a copy there hid the array the second hands back, and a
+    pass-through there refused the copy the second makes.
+    """
+    found = _findings(
+        tmp_path,
+        helpers="""
+        def passthrough(a):
+            return a
+        """,
+        rating="""
+        from .results import BandResult
+
+        def copied_first(frequencies, levels, fast):
+            if fast:
+                from ._internal.frozen import read_only_copy as pick
+
+                f = pick(frequencies)
+            else:
+                from .helpers import passthrough as pick
+
+                f = pick(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        def passed_first(frequencies, levels, fast):
+            if fast:
+                from .helpers import passthrough as pick
+
+                return pick(frequencies)
+            from ._internal.frozen import read_only_copy as pick
+
+            f = pick(frequencies)
+            return BandResult(frequencies=f, levels=f * 0.0)
+        """,
+    )
+    assert found == {("copied_first", "BandResult.frequencies", "frequencies")}
+
+
+def test_a_helper_hands_back_what_a_sibling_helper_s_closure_holds(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A helper that returns what a sibling helper returns hands back its closure too.
+
+    The sibling was read through its summary, made without its closure, so
+    the caller's array it hands back was lost one call down, and the record
+    that keeps it passed.
+    """
+    found = _findings(
+        tmp_path,
+        rating="""
+        import numpy as np
+
+        from .results import BandResult
+
+        def sibling(frequencies, levels):
+            def keep():
+                return frequencies
+
+            def hand():
+                return keep()
+
+            f = hand()
+            return BandResult(frequencies=f, levels=f * 0.0)
+
+        def copied_sibling(frequencies, levels):
+            def keep():
+                return np.array(frequencies)
+
+            def hand():
+                return keep()
+
+            f = hand()
+            return BandResult(frequencies=f, levels=f * 0.0)
+        """,
+    )
+    assert found == {("sibling", "BandResult.frequencies", "frequencies")}
+
+
 def test_a_record_that_freezes_the_caller_s_column_is_refused(
     tmp_path: pathlib.Path,
 ) -> None:

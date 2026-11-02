@@ -14,7 +14,10 @@ The guards that follow a call to the function it reaches look its name up as
 Python does, and what a scope binds of its own is read here once
 (:func:`own_names`, :func:`binding_of`): a function, a lambda, a class body or
 a comprehension inside a scope binds its names for itself, and a ``global``
-or a ``nonlocal`` statement sends the name out.
+or a ``nonlocal`` statement sends the name out. Of two statements of one
+scope that bind one name, a ``def`` or an import in each branch of an ``if``
+or one after the other, which the name holds at a call, or once the scope
+has run, is read here too (:func:`live_bindings`).
 """
 
 from __future__ import annotations
@@ -427,3 +430,159 @@ def binding_of(
         if names.binds(name):
             return names.how(name), scope
     return "outside", None
+
+
+#: The fields of a node that hold a block of statements: a compound
+#: statement's, an ``except`` clause's and a ``case``'s.
+_BLOCKS = ("body", "orelse", "finalbody", "handlers", "cases")
+
+#: The order a ``try``, a loop or an ``if`` runs its blocks in: a block runs
+#: after those of a lower rank of the same statement, when it runs at all.
+_RANK = {"body": 0, "handlers": 1, "orelse": 2, "finalbody": 3}
+
+#: The scopes whose bodies are blocks of statements: where a binding is read.
+_STATEMENT_SCOPES = (ast.Module, ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)
+
+#: One block a statement is written in: the node whose field holds it, the
+#: field, and the place of the statement (or of the clause around it) there.
+type Frame = tuple[ast.AST, str, int]
+
+
+@functools.cache
+def _blocks(root: ast.AST) -> dict[ast.AST, Frame]:
+    """Each statement under *root*, and each ``except`` clause and ``case``,
+    with the block that holds it; read once for each root, through the
+    blocks alone, never into an expression.
+    """
+    found: dict[ast.AST, Frame] = {}
+    pending = [root]
+    while pending:
+        holder = pending.pop()
+        for field in _BLOCKS:
+            block = getattr(holder, field, None)
+            if not isinstance(block, list):
+                continue
+            for index, item in enumerate(block):
+                found[item] = (holder, field, index)
+                pending.append(item)
+    return found
+
+
+def _frames(root: ast.AST, node: ast.AST) -> tuple[Frame, ...]:
+    """The blocks *node* is written in, outermost first, up to its scope.
+
+    The scope is the function, the class body or the module whose own
+    statements hold *node*; an expression is read in the statement that
+    holds it, through a lambda or a comprehension around it, which holds no
+    statement.
+    """
+    blocks = _blocks(root)
+    current: ast.AST | None = node
+    if current not in blocks:
+        parents = _parents(root)
+        while current is not None and current not in blocks:
+            current = parents.get(current)
+    found: list[Frame] = []
+    while current is not None and current in blocks:
+        frame = blocks[current]
+        found.append(frame)
+        current = None if isinstance(frame[0], _STATEMENT_SCOPES) else frame[0]
+    return tuple(reversed(found))
+
+
+def _shared(one: Sequence[Frame], other: Sequence[Frame]) -> int:
+    """How many blocks, from the outside in, *one* and *other* are written in alike."""
+    count = 0
+    for mine, theirs in zip(one, other, strict=False):
+        if mine[0] is not theirs[0] or mine[1:] != theirs[1:]:
+            break
+        count += 1
+    return count
+
+
+def _runs_into(holder: ast.AST, field: str, later: str) -> bool:
+    """Whether a statement of block *field* of *holder* may run before one of
+    its block *later*: not across the branches of an ``if``, nor from an
+    ``except`` clause to the ``else`` of a ``try``, which never both run.
+    """
+    if isinstance(holder, ast.If) or {field, later} == {"handlers", "orelse"}:
+        return False
+    return _RANK.get(field, 0) < _RANK.get(later, 0)
+
+
+def _may_run_before(binding: Sequence[Frame], point: Sequence[Frame]) -> bool:
+    """Whether a statement written at *binding* may run before *point* does.
+
+    Before it in a block they share, or in a block of their statement that
+    runs first. Not when one holds the other, a binding in the body of the
+    statement whose header reads the name; nor between two ``except``
+    clauses or two ``case`` blocks, of which one runs.
+    """
+    shared = _shared(binding, point)
+    if shared in {len(binding), len(point)}:
+        return False
+    holder, field, index = binding[shared]
+    _, other, place = point[shared]
+    if field == other:
+        return field not in {"handlers", "cases"} and index < place
+    return _runs_into(holder, field, other)
+
+
+def _replaces(
+    later: Sequence[Frame], earlier: Sequence[Frame], point: Sequence[Frame] | None
+) -> bool:
+    """Whether the binding at *later* runs after the one at *earlier* on every
+    way from it to *point*, or to the end of the scope when *point* is None.
+
+    *later* sits after *earlier*, or after the statement that holds it, in a
+    block they share; not in a block of a ``try``, which an exception may
+    leave between the two. A *point* between them in that block is reached
+    before *later* runs; one outside the statement that holds the block, or
+    in a block of it that runs after, is reached after.
+    """
+    depth = len(later) - 1
+    holder, field, index = later[-1]
+    if len(earlier) <= depth or _shared(later, earlier) < depth:
+        return False
+    _, written_in, place = earlier[depth]
+    if written_in != field or place >= index:
+        return False
+    if isinstance(holder, ast.Try | ast.TryStar):
+        return False
+    if point is None or len(point) <= depth or _shared(point, later) < depth:
+        return True
+    _, read_in, read_at = point[depth]
+    return read_in != field or read_at > index
+
+
+def live_bindings[NodeT: ast.AST](
+    root: ast.AST, bindings: Sequence[NodeT], point: ast.AST | None = None
+) -> list[NodeT]:
+    """Of *bindings*, statements of one scope under *root* that bind one name
+    (a ``def`` of it, an import of it), those the name may hold at *point*,
+    or once the scope has run to its end when *point* is None.
+
+    A binding that runs before the point and that no other one replaces on
+    the way to it (:func:`_replaces`): one in each branch of an ``if`` is
+    either, and a later one in a block that holds an earlier one, or the
+    statement around it, replaces it. When none runs before the point (a
+    call in a loop, read before the binding it reaches on a later turn),
+    every one may be what it holds.
+    """
+    frames = {binding: _frames(root, binding) for binding in bindings}
+    target = _frames(root, point) if point is not None else None
+    candidates = [
+        binding
+        for binding in bindings
+        if target is None or _may_run_before(frames[binding], target)
+    ]
+    if not candidates:
+        return list(bindings)
+    return [
+        binding
+        for binding in candidates
+        if not any(
+            other is not binding and _replaces(frames[other], frames[binding], target)
+            for other in candidates
+        )
+    ]

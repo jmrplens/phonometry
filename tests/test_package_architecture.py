@@ -1141,38 +1141,76 @@ def _is_float_constant(node: ast.expr) -> bool:
 #: and the strings numpy reads as it.
 _BOOL_DTYPE_NAMES = frozenset({"bool", "bool_", "bool8", "?", "b1"})
 
+#: The byte-order marks numpy reads before a dtype string, ``"|b1"`` or
+#: ``"=?"``, which change nothing for a boolean.
+_BYTE_ORDER_MARKS = "|=<>"
 
-def _is_bool_dtype(node: ast.expr) -> bool:
-    """Whether *node* names the boolean dtype: ``bool``, ``np.bool_``, ``"?"`` and the like."""
+
+def _bool_aliases(tree: ast.AST) -> frozenset[str]:
+    """The names a ``from numpy import bool_ as b`` binds to the boolean dtype in *tree*."""
+    return frozenset(
+        alias.asname or alias.name
+        for node in ast.walk(tree)
+        if isinstance(node, ast.ImportFrom) and node.module in {"numpy", "np"}
+        for alias in node.names
+        if alias.name in _BOOL_DTYPE_NAMES
+    )
+
+
+def _is_bool_dtype(node: ast.expr, aliases: frozenset[str] = frozenset()) -> bool:
+    """Whether *node* names the boolean dtype, in any spelling.
+
+    ``bool``, a name bound to numpy's boolean by an import, an attribute
+    ``bool``, ``bool_`` or ``bool8`` of whatever owner (``np``, ``numpy``,
+    an array namespace ``xp``), ``np.dtype`` of any of them, and the strings
+    numpy reads as it with or without a byte-order mark.
+    """
+    if (
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Attribute)
+        and node.func.attr == "dtype"
+        and node.args
+    ):
+        return _is_bool_dtype(node.args[0], aliases)
     if isinstance(node, ast.Name):
-        return node.id == "bool"
-    if isinstance(node, ast.Attribute) and isinstance(node.value, ast.Name):
-        return node.value.id in {"np", "numpy"} and node.attr in _BOOL_DTYPE_NAMES
-    return isinstance(node, ast.Constant) and node.value in _BOOL_DTYPE_NAMES
+        return node.id == "bool" or node.id in aliases
+    if isinstance(node, ast.Attribute):
+        return node.attr in _BOOL_DTYPE_NAMES
+    return (
+        isinstance(node, ast.Constant)
+        and isinstance(node.value, str)
+        and node.value.lstrip(_BYTE_ORDER_MARKS) in _BOOL_DTYPE_NAMES
+    )
 
 
-def _is_bool_cast(node: ast.Call) -> bool:
-    """Whether *node* is ``x.astype(bool)`` in any spelling of the dtype.
+def _is_bool_cast(node: ast.Call, aliases: frozenset[str] = frozenset()) -> bool:
+    """Whether *node* is an ``astype`` to ``bool``, in any spelling of the call or the dtype.
 
-    A float cast to ``bool`` is ``x != 0.0`` under another name. The source
-    cannot say which arrays are floats, so the cast is refused whatever it
-    is applied to: a boolean array needs none, an integer one says ``!= 0``.
+    ``x.astype(bool)``, ``np.astype(x, bool)`` and ``np.ndarray.astype(x,
+    bool)`` alike: the dtype is read from the first two arguments, where the
+    method form's second is its order string, never a dtype, and from
+    ``dtype=``. A float cast to ``bool`` is ``x != 0.0`` under another name.
+    The source cannot say which arrays are floats, so the cast is refused
+    whatever it is applied to: a boolean array needs none, an integer one
+    says ``!= 0``.
     """
     if not (isinstance(node.func, ast.Attribute) and node.func.attr == "astype"):
         return False
-    dtypes = [*node.args[:1], *(k.value for k in node.keywords if k.arg == "dtype")]
-    return any(_is_bool_dtype(dtype) for dtype in dtypes)
+    dtypes = [*node.args[:2], *(k.value for k in node.keywords if k.arg == "dtype")]
+    return any(_is_bool_dtype(dtype, aliases) for dtype in dtypes)
 
 
 def _float_equalities(tree: ast.AST) -> list[str]:
     """Each equality with a float constant, or cast to ``bool``, of *tree*, as ``line source``.
 
     An ``==`` or ``!=`` with a float constant on one side, and every
-    ``astype(bool)``, which on a float array is the same test against zero.
+    ``astype`` to ``bool``, which on a float array is the same test against
+    zero.
     """
+    aliases = _bool_aliases(tree)
     found: list[str] = []
     for node in ast.walk(tree):
-        if isinstance(node, ast.Call) and _is_bool_cast(node):
+        if isinstance(node, ast.Call) and _is_bool_cast(node, aliases):
             found.append(f"{node.lineno} {ast.unparse(node)}")
             continue
         if not isinstance(node, ast.Compare):
@@ -1188,7 +1226,13 @@ def _float_equalities(tree: ast.AST) -> list[str]:
 
 
 def test_the_float_equality_check_sees_every_spelling_of_a_float_constant() -> None:
-    """A literal, a signed one, one named by numpy or math, ``float("inf")``, and a cast to bool."""
+    """A literal, a signed one, one named by numpy or math, ``float("inf")``, and a cast to bool.
+
+    The cast in every spelling of the call (the method, ``np.astype`` and
+    ``np.ndarray.astype``) and of the dtype (``np.dtype(bool)``, a string
+    with a byte-order mark, an array namespace's ``bool``, a name imported
+    from numpy); an array built with a boolean dtype is left to review.
+    """
     source = "\n".join(
         [
             "a = x == 0.0",
@@ -1207,10 +1251,22 @@ def test_the_float_equality_check_sees_every_spelling_of_a_float_constant() -> N
             "n = x.astype(numpy.bool)",
             "o = x.astype(float)",
             "p = np.asarray(x > 0.5, dtype=bool)",
+            "q = np.astype(x, bool)",
+            "r = np.ndarray.astype(x, 'b1')",
+            "s = x.astype(np.dtype(bool))",
+            "t = x.astype(dtype=numpy.dtype('?'))",
+            "u = x.astype('|b1')",
+            "v = x.astype('=?')",
+            "w = x.astype(xp.bool)",
+            "from numpy import bool_ as flag, float64",
+            "y = x.astype(flag)",
+            "z = x.astype(np.float64, 'K')",
+            "aa = np.astype(x, float64)",
         ]
     )
     assert [line.split()[0] for line in _float_equalities(ast.parse(source))] == [
-        "1", "2", "3", "4", "5", "6", "11", "12", "13", "14",
+        "1", "2", "3", "4", "5", "6", "11", "12", "13", "14", "17", "18", "19",
+        "20", "21", "22", "23", "25",
     ]  # fmt: skip
 
 

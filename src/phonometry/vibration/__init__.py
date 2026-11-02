@@ -1,5 +1,5 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
-"""vibration domain of phonometry (see module docstrings).
+"""Vibration: structural acoustics for building prediction, human exposure to vibration, machinery condition monitoring and the immission-control chain.
 
 Four families, by who reads them: :mod:`~phonometry.vibration.structural`
 is the structural acoustics that feeds building prediction (mobility, junctions,

@@ -26,7 +26,7 @@ The analytic signal is computed the way the book recommends
 (Section 13.1.1): the one-sided spectrum construction
 $Z(f) = 2 X(f)$ for $f > 0$, $X(0)$ at DC and `0`
 for $f < 0$
-(Eq. 13.25) - which is exactly what `scipy.signal.hilbert`
+(Eq. 13.25), which is exactly what `scipy.signal.hilbert`
 implements, and the same construction the ECMA-418-2 psychoacoustic chain
 of `phonometry.psychoacoustics` applies per auditory band (its
 Formulae 65/119 take `|hilbert|` and subsample by 32; the standard can
@@ -80,7 +80,7 @@ boundaries.
 
 The optional decimation reduces the output rate by an integer factor:
 the envelope is anti-alias filtered with a zero-phase FIR decimator
-by default, or plainly subsampled with `antialias=False` - the
+by default, or plainly subsampled with `antialias=False`, the
 convention the ECMA-418-2 loudness/roughness chain applies internally
 after its auditory bandpass, appropriate when the input is already
 narrowband. The phase and instantaneous frequency, smooth after

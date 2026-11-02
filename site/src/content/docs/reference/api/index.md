@@ -192,7 +192,7 @@ A choice is checked as written: a text it does not offer is a `ValueError` and a
 | [`building.measurement.floor_covering_improvement`](/phonometry/reference/api/building/floor-covering-improvement/) | Impact-sound improvement of floor coverings on a small mock-up (ISO 16251-1:2014). |
 | [`building.prediction.resilient_layers`](/phonometry/reference/api/building/resilient-layers/) | Prediction of resilient-layer performance: tapping force, floor coverings, floating floors. |
 | [`building.prediction.linings`](/phonometry/reference/api/building/linings/) | Prediction of wall and ceiling linings: the weighted improvement an additional layer gives the element behind it (ISO 12354-1:2017 Annex D). |
-| [`building.measurement.structure_borne_power`](/phonometry/reference/api/building/structure-borne-power/) | Structure-borne sound power of building equipment (EN 15657:2018; ISO 9611). |
+| [`building.measurement.structure_borne_power`](/phonometry/reference/api/building/structure-borne-power/) | Structure-borne sound power of building equipment (UNE-EN 15657:2018; ISO 9611). |
 | [`building.prediction.installed_structure_borne`](/phonometry/reference/api/building/installed-structure-borne/) | Installed structure-borne sound from service equipment (EN 12354-5:2009). |
 | [`building.regulation.spain`](/phonometry/reference/api/building/spain/) | Spanish building code CTE DB-HR: global indices and requirement checks. |
 

@@ -596,7 +596,7 @@ membrane_impedance(
 
 Transfer impedance of a limp impervious membrane.
 
-$z = r + j \omega m$ - the surface-mass reactance (Cox & D'Antonio
+$z = r + j \omega m$: the surface-mass reactance (Cox & D'Antonio
 3e, Eq. (7.14); Bies 5e Eq. (D.96)) plus an optional empirical
 resistance for the internal/fixing losses.
 
@@ -631,7 +631,7 @@ membrane_resonance_frequency(
 Mass-spring resonance of a membrane over a shallow cavity.
 
 $f_0 = (1 / 2 \pi) \sqrt{\rho c^2 / (m d)}$ for an adiabatic air
-spring - numerically the classical $f_0 = 60 / \sqrt{m d}$ (Cox &
+spring, numerically the classical $f_0 = 60 / \sqrt{m d}$ (Cox &
 D'Antonio 3e, Eq. (7.9)). With `isothermal=True` the spring stiffness
 drops by `gamma`, giving $\sim 50 / \sqrt{m d}$ (Eq. (7.10)),
 the porous-filled cavity case below about 500 Hz.
@@ -678,12 +678,12 @@ z_1 = j \omega \rho t \left[1 - \frac{2}{x \sqrt{-j}} \frac{J_1(x \sqrt{-j})}{J_
 $$
 
 with the perforate constant $x = a \sqrt{\rho \omega / \eta}$.
-Dividing by the open area and adding Maa's Eq. (5) end corrections - the
+Dividing by the open area and adding Maa's Eq. (5) end corrections, the
 Rayleigh/Ingard surface resistance
 $\sqrt{2 \omega \rho \eta} / (2 \varepsilon)$ and the piston
 end-correction reactance
 $j \omega \rho (2 \delta a) / \varepsilon$ ($0.85 d$ total
-for the default $\delta = 0.85$ per end) - gives the sheet
+for the default $\delta = 0.85$ per end), gives the sheet
 transfer impedance (Cox & D'Antonio Eq. (7.35)).
 
 **Parameters**

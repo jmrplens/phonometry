@@ -463,7 +463,7 @@ Random-incidence diffusion coefficient `d` (ISO 17497-2, Clause 8.4).
 The (normalised or non-normalised) directional coefficients are averaged
 over the source positions. Hemispherical measurements use **equal**
 weightings (`weights is None`); two-dimensional (single-plane)
-measurements use the source weighting of Clause 8.4 - weight 1 for the
+measurements use the source weighting of Clause 8.4: weight 1 for the
 0 deg source and weight 3 for each of the four +/-30 deg, +/-60 deg sources
 (see [`TWO_DIMENSIONAL_SOURCE_WEIGHTS`](/phonometry/reference/api/materials/scattering-diffusion/#two_dimensional_source_weights)).
 

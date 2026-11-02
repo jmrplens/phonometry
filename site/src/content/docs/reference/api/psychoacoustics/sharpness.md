@@ -10,8 +10,8 @@ Sharpness per DIN 45692:2009-08.
 Sharpness rates the high-frequency emphasis of a sound in acum, computed
 as the g(z)-weighted first moment of the specific loudness pattern
 (DIN 45692 Equation 1) over the 24 Bark critical-band scale, normalized so
-the reference sound - critical-band-wide narrowband noise at 1 kHz
-(920 Hz to 1080 Hz) at 60 dB overall level - yields exactly 1.00 acum
+the reference sound, critical-band-wide narrowband noise at 1 kHz
+(920 Hz to 1080 Hz) at 60 dB overall level, yields exactly 1.00 acum
 (clause 6). The informative Annex B variants of Aures and von Bismarck are
 provided as alternative methods with the literal factor 0.11 printed in
 Formulas (B.1)/(B.2); with it the reference sound lands near, not exactly

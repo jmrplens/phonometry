@@ -1,5 +1,5 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
-"""building domain of phonometry (see module docstrings).
+"""Building acoustics: measuring the insulation of a building that exists, predicting one that does not yet, and checking either against a national code.
 
 Three subgroups since 4.0, by what the acoustician is doing: measuring a
 building that exists (:mod:`~phonometry.building.measurement`, the ISO 16283,

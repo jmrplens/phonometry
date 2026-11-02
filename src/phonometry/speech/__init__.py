@@ -1,5 +1,5 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
-"""speech domain of phonometry (see module docstrings)."""
+"""Speech intelligibility of a transmission channel: the speech transmission index (STI and STIPA), the speech intelligibility index (SII) and STOI."""
 
 from __future__ import annotations
 

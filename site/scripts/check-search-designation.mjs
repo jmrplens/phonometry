@@ -167,7 +167,7 @@ const ISSUER_WORDS = new Set([
   'acou', 'aes', 'ahri', 'ansi', 'arp', 'asa', 'astm', 'ceac', 'cira', 'cte',
   'dbhr', 'din', 'ebu', 'ecac', 'en', 'icao', 'iec', 'iso', 'itu', 'jcgm', 'jis',
   'nasa', 'noaa', 'npl', 'nt', 'oj', 'pas', 'rd', 'rfc', 'sae', 'tr', 'ts', 'uit',
-  'vdi',
+  'une', 'vdi',
 ]);
 
 /** Score ratio a declaring page must keep over the best page that does not declare. */

@@ -19,8 +19,8 @@ The historical **B weighting** is verified against ANSI S1.4-1983: design
 goals from the B column of **Table IV** (whose A and C columns equal IEC
 61672-1:2013 Table 3 digit for digit) and tolerance limits from **Table V**,
 whose instrument Types 1 and 2 fill the class 1 / class 2 verdict slots. The
-ANSI Type 0 column is a *different* mask from the IEC 651 one - two-sided and
-stricter at 10/12.5/16 Hz where IEC 651 is upper-only - so the two are carried
+ANSI Type 0 column is a *different* mask from the IEC 651 one (two-sided, and
+stricter at 10/12.5/16 Hz where IEC 651 is upper-only), so the two are carried
 as the two editions they are and never merged.
 The **AU weighting** is verified against IEC 61012:1990: design goals are the
 sum of the nominal A response and the **Table 1** nominal U response (with the
@@ -604,7 +604,7 @@ def _curve_design_and_limits(
     The mask is the edition's own tolerance table, with one exception: under
     the 2013 edition B has no mask of its own there (IEC 61672-1 dropped the
     weighting), so it borrows ANSI S1.4-1983 Table V, whose Types 1 and 2 fill
-    the class 1 / class 2 slots. Under the 1979 edition B needs no exception -
+    the class 1 / class 2 slots. Under the 1979 edition B needs no exception:
     the Table V footnote makes that one mask govern every weighting
     characteristic.
     """
@@ -943,7 +943,7 @@ def verify_weighting_class(
     design goals equal the ones used above digit for digit): its Table V
     footnote makes one mask govern every weighting characteristic, so ``B``
     does not borrow the ANSI limits there. It is a genuinely different mask,
-    not a rename - Type 0 is +2/-3 dB at 16 kHz and at 20 kHz, where class 1
+    not a rename: Type 0 is +2/-3 dB at 16 kHz and at 20 kHz, where class 1
     is +2.5/-16 and +3/-inf, so an error class 1 cannot see is visible under
     Type 0.
 

@@ -3,7 +3,7 @@
 ## What this folder contains
 
 `stipa_certified_extract.zip` holds **27 of the 49 signals** of the certified
-STIPA verification bench published on [stipa.info](https://www.stipa.info), the
+STIPA verification bench published on [stipa.info](https://stipa.info/), the
 test signals IEC 60268-16:2020 (rev 5) Annexes A and C prescribe for verifying a
 STIPA implementation. They are consumed by
 `tests/speech/test_stipa_certified.py`.
@@ -36,19 +36,23 @@ python tests/data/stipa/make_extract.py tests/data-local/stipa-verification
 
 - The verification test signals were developed and are published by
   **Embedded Acoustics BV** (Jan Verhave), Delft, the Netherlands, on the
-  download page of <https://www.stipa.info>, together with the signal
+  download page of <https://stipa.info/>, together with the signal
   description *IEC-60268-16 revision 5 test signal description*, v1.0,
   3 June 2020.
 - **Authoritative record of the terms** (cite this one): Internet Archive
   capture of `stipa.info/index.php/download-test-signals` taken
   **2025-09-10**,
   <https://web.archive.org/web/20250910080127/https://www.stipa.info/index.php/download-test-signals>.
-  The live page at
-  <https://www.stipa.info/index.php/download-test-signals> carries the same
-  text but **is currently defaced** (checked 2026-07-30: it serves an injected
-  script that rewrites the document to "Hacked By Simsimi"). A licence claim
-  should not rest on a page an attacker has had write access to, so the
-  archived copy is the citation of record here. The Archive holds captures
+  On 2026-07-30 the live page, then at
+  `www.stipa.info/index.php/download-test-signals`, was **defaced**: it served
+  an injected script that rewrote the document to "Hacked By Simsimi". That
+  address now redirects to <https://stipa.info/download-test-signals/>, which,
+  checked on 2026-11-01, carries no script at all and states the terms word
+  for word as the capture does ("may be used for commercial and non-commercial
+  use free of charge"), with the same note on STIPA measurement signals and
+  only a new heading between the two. A licence claim should not rest on a
+  site an attacker has had write access to, so the archived copy stays the
+  citation of record here. The Archive holds captures
   from 2022-04-23 to 2025-09-10, all predating the compromise; the terms below
   are identical in the first and the last of them.
 - Terms, quoted from that capture: *"All of the above verification test signals

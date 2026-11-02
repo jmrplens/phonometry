@@ -377,8 +377,8 @@ class MooreGlasbergTimeVaryingLoudness(OwnsArrays):
     short-term ``S'(t)`` (clause 7.8) and long-term ``S''(t)`` (clause 7.9)
     loudness traces in sone; ``short_term_loudness_level`` and
     ``long_term_loudness_level`` are the corresponding loudness levels in phon
-    (Table 5).  ``n_max`` is the maximum of the long-term loudness (sone) - the
-    predictor of the loudness of sounds up to about 5 s (clause 7.9) - and
+    (Table 5).  ``n_max`` is the maximum of the long-term loudness (sone), the
+    predictor of the loudness of sounds up to about 5 s (clause 7.9), and
     ``loudness_level_max`` the phon value it maps to.  ``percentiles`` gives the
     long-term-loudness values (sone) exceeded for the stated fraction of the
     active trace (e.g. ``percentiles[5]`` is the level exceeded 5 % of the
@@ -405,7 +405,7 @@ class MooreGlasbergTimeVaryingLoudness(OwnsArrays):
         and the chart pairs it with the short-term and the long-term traces to
         draw them, so a trace of another length stops the figure with a
         matplotlib complaint about a first dimension rather than anything
-        naming the field - and stops it only when someone draws it, while
+        naming the field, and it stops the figure only when someone draws it, while
         ``n_max`` and the percentiles quoted from that trace were taken over
         the whole of it either way.
 
@@ -434,7 +434,7 @@ class MooreGlasbergTimeVaryingLoudness(OwnsArrays):
         reports the same way: an all-infinite trace restates its own infinite
         maximum, and :func:`_loudness_level` reads flat off both ends of
         Table 5, so ``inf`` sone states 120.0 phon and every negative sone
-        states 0.0 phon - each pair agreeing with itself while the title
+        states 0.0 phon, each pair agreeing with itself while the title
         prints ``N = inf sone`` over a plot with no finite peak to draw. A
         NaN escapes the other way, comparing equal to nothing at all. The
         producer emits none of these: the trace is a maximum of non-negative
@@ -645,7 +645,7 @@ def _spectral_plan(fs: float) -> tuple[np.ndarray, list[_Plan], np.ndarray]:
 
     The FFT length is per window: the nominal ``_N_FFT`` (2048) when the
     segment fits, otherwise the next power of two that is >= the segment length.
-    This keeps the Hann window intact - at 44.1/48 kHz the 64 ms segment is
+    This keeps the Hann window intact: at 44.1/48 kHz the 64 ms segment is
     2822/3072 samples, longer than 2048, and a fixed 2048-point FFT would
     truncate the window tail while ``sum_w2`` still normalises the full window,
     skewing the 20-80 Hz band levels.

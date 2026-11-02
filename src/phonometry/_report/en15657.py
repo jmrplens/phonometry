@@ -6,7 +6,7 @@ Renders a
 (the structure-borne sound power a piece of building service equipment injects
 into a reception plate of known mass per area ``m`` and area ``S`` from the
 spatial-average plate velocity level ``Lv`` and the plate loss factor ``eta``,
-EN 15657:2018 reception-plate method, Formula 14) to a one-page test sheet laid
+UNE-EN 15657:2018 reception-plate method, Formula 14) to a one-page test sheet laid
 out like a sound-power determination:
 
 * a title and the standard-basis line naming the EN 15657 reception-plate
@@ -67,7 +67,7 @@ def _basis(language: Language = "en") -> str:
     """The standard-basis line naming the EN 15657 reception-plate method."""
     return t(
         "Determination of the structure-borne sound power injected into the "
-        "reception plate by building service equipment (EN 15657:2018 "
+        "reception plate by building service equipment (UNE-EN 15657:2018 "
         "reception-plate method, Formula 14).",
         language,
     )
@@ -165,7 +165,7 @@ def _relation_strip(language: Language = "en") -> str:
     return t(
         "L<sub>Ws</sub> = 10 lg(2&#960; f &#951; m S / (f<sub>0</sub> "
         "m<sub>0</sub> S<sub>0</sub>)) + L<sub>v</sub> - 60 dB re 1 pW "
-        "(EN 15657:2018 Formula 14), with the references f<sub>0</sub> = 1 Hz, "
+        "(UNE-EN 15657:2018 Formula 14), with the references f<sub>0</sub> = 1 Hz, "
         "m<sub>0</sub> = 1 kg, S<sub>0</sub> = 1 m<super>2</super>, the plate "
         "loss factor &#951; = 2,2/(f T<sub>s</sub>) (Formula 13) and the "
         "spatial mean velocity level L<sub>v</sub> = 10 lg((1/N) &#931; "

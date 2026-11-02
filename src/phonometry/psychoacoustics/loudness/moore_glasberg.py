@@ -571,9 +571,9 @@ class MooreGlasbergLoudness(OwnsArrays):
     def __post_init__(self) -> None:
         """Reject a pattern that does not run over one ERB-number grid.
 
-        The three arrays are one axis read three ways - the sample i of the
+        The three arrays are one axis read three ways: the sample i of the
         ERB-number scale, the centre frequency fc(i) of the auditory filter
-        sitting there, and the specific loudness N'(i) that filter produced -
+        sitting there, and the specific loudness N'(i) that filter produced,
         so they mean something only index for index. The chart pairs the
         scale with the pattern and takes the ends of the scale for its x
         limits, so a disagreement between those two surfaces late and
@@ -589,8 +589,8 @@ class MooreGlasbergLoudness(OwnsArrays):
         loudness, and Table 5 tabulates that correspondence, which
         :func:`_loudness_level` reads. Both numbers go into the chart title
         together, so a pair that disagrees is printed side by side without a
-        word: a result carrying 1.00 sone - the loudness of 40 phon by the
-        definition of the sone - beside 100.0 phon titles itself
+        word: a result carrying 1.00 sone (the loudness of 40 phon by the
+        definition of the sone) beside 100.0 phon titles itself
         ``ISO 532-2 loudness N = 1.00 sone (100.0 phon)``, in which each
         figure alone is a plausible reading and only the pairing is wrong.
         The pin restates the field through the same Table 5 mapping the
@@ -1005,8 +1005,8 @@ def _signal_components(pressure: np.ndarray, fs: float) -> np.ndarray:
     (FFT) line spectrum: every FFT bin becomes one component at its own
     frequency with its calibrated sound pressure level re 20 uPa.  A pure tone
     then enters the excitation model (Formula 5, evaluated per component) as a
-    single line at its frequency and level - as the standard's convention
-    requires - rather than being smeared over a one-third-octave band.
+    single line at its frequency and level, as the standard's convention
+    requires, rather than being smeared over a one-third-octave band.
 
     The single-sided power spectrum uses the power-preserving (Parseval)
     window normalisation :math:`\lvert X \rvert^2 / (N \sum w^2)` so that the
@@ -1046,7 +1046,7 @@ def loudness_moore_glasberg(
     (FFT) line spectrum is formed and each bin is passed to the exact
     sinusoidal-component method of ISO 532-2:2017 (clauses 5.2/5.4).  Because
     the model computes the excitation pattern per spectral component
-    (Formula 5), a pure tone enters as a single line - so a calibrated 1 kHz
+    (Formula 5), a pure tone enters as a single line, so a calibrated 1 kHz
     tone at 40 dB SPL yields 1.000 sone / 40 phon (the definitional anchor),
     matching :func:`loudness_moore_glasberg_from_spectrum`.  The signal must be
     calibrated so that ``x`` is the instantaneous sound pressure in pascals.

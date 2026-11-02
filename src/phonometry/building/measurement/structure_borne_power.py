@@ -1,5 +1,5 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
-r"""Structure-borne sound power of building equipment (EN 15657:2018; ISO 9611).
+r"""Structure-borne sound power of building equipment (UNE-EN 15657:2018; ISO 9611).
 
 Building service equipment (pumps, fans, boilers, sanitary appliances) injects
 **structure-borne sound power** into the building structure it is fixed to.
@@ -114,7 +114,7 @@ __all__ = [
 
 #: EN 15657 vibratory velocity reference ``v0`` (= ISO 1683 10^-9 m/s), m/s.
 _REFERENCE_VELOCITY: float = REFERENCE_VALUES["solid"]["velocity"].value
-#: Reference structure-borne sound power ``P0``, W: the 10⁻¹² W EN 15657:2018
+#: Reference structure-borne sound power ``P0``, W: the 10⁻¹² W UNE-EN 15657:2018
 #: clause 7.1 counts the power level ``L_Ws`` from. ISO 1683 lists no
 #: structure-borne power; the number is the airborne 1 pW of its Table 1, and
 #: it is read from there.
@@ -125,7 +125,7 @@ _REFERENCE_MOBILITY: float = 1.0
 #: the 1 µN of ISO 1683:2015 Table 3.
 _REFERENCE_FORCE: float = REFERENCE_VALUES["solid"]["force"].value
 #: Characteristic mobility ``Y_R,inf,low`` of the standard 10 cm concrete
-#: reception plate (EN 15657:2018, clause 7.2.4), m/(N.s).
+#: reception plate (UNE-EN 15657:2018, clause 7.2.4), m/(N.s).
 _CHARACTERISTIC_PLATE_MOBILITY: float = 5.0e-6
 #: ISO 9611:1996 free-velocity reference ``v0`` (clause 7), m/s: the 50 nm/s
 #: ISO 1683:2015 keeps for structure-borne sound in note b of Table 3.
@@ -344,7 +344,7 @@ class StructureBornePowerResult(OwnsArrays):
         """Render an EN 15657 structure-borne sound power fiche to ``path``.
 
         Writes a one-page reception-plate characterization sheet: the
-        standard-basis line naming the EN 15657:2018 reception-plate method
+        standard-basis line naming the UNE-EN 15657:2018 reception-plate method
         (Formula 14), an optional metadata header (client, source equipment,
         test environment, instrumentation, climate, date), a per-band table
         (nominal octave/one-third-octave frequency, the spatial mean plate
@@ -449,7 +449,7 @@ def equivalent_blocked_force_level(
     power_level: ArrayLike,
     plate_mobility: ArrayLike,
 ) -> np.ndarray:
-    r"""Equivalent blocked force level, squared (EN 15657:2018, Formula 15).
+    r"""Equivalent blocked force level, squared (UNE-EN 15657:2018, Formula 15).
 
     :math:`L_\mathrm{Fb,eq} = L_\mathrm{Ws,low}
     - 10 \log_{10}(\operatorname{Re}\{Y_\mathrm{R,low,eq}\}/Y_0)`
@@ -500,7 +500,7 @@ def characteristic_reception_plate_power(
     *,
     characteristic_mobility: float = _CHARACTERISTIC_PLATE_MOBILITY,
 ) -> np.ndarray:
-    r"""Characteristic reception-plate power level (EN 15657:2018, Formula 17).
+    r"""Characteristic reception-plate power level (UNE-EN 15657:2018, Formula 17).
 
     :math:`L_\mathrm{Wsn} = L_\mathrm{Fb,eq} + 10 \log_{10}(|Y_{\mathrm{R},\infty,\mathrm{low}}|/Y_0)`
     with the characteristic mobility of the standard 10 cm concrete reception
@@ -534,7 +534,7 @@ def equivalent_free_velocity_level(
     power_level: ArrayLike,
     plate_mobility: ArrayLike,
 ) -> np.ndarray:
-    r"""Equivalent free velocity level of the source (EN 15657:2018, Formula 18).
+    r"""Equivalent free velocity level of the source (UNE-EN 15657:2018, Formula 18).
 
     :math:`L_\mathrm{vf,eq} = L_\mathrm{Ws,high} + 10 \log_{10}\left( |Y_\mathrm{R,high,eq}|^2 /
     (\operatorname{Re}\{Y_\mathrm{R,high,eq}\}\, Y_0) \right) + 60~\text{dB}`
@@ -585,7 +585,7 @@ def source_mobility_from_levels(
     free_velocity_level: ArrayLike,
     blocked_force_level: ArrayLike,
 ) -> np.ndarray:
-    r"""Equivalent source mobility magnitude (EN 15657:2018, Formula 19).
+    r"""Equivalent source mobility magnitude (UNE-EN 15657:2018, Formula 19).
 
     :math:`|Y_\mathrm{S,eq}|^2 / Y_0^2 = 10^{(L_\mathrm{vf,eq} - L_\mathrm{Fb,eq})/10} \cdot
     10^{-6}`, the ratio

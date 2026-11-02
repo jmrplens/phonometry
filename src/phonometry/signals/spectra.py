@@ -29,7 +29,7 @@ Procedures* (4th ed., 2010):
   :math:`b[\hat{G}_{xx}] \approx (B_\mathrm{e}^2/24) \, G''_{xx}`
   (Eq. 8.139), which for a resonance peak of half-power bandwidth
   :math:`B_\mathrm{r}`
-  becomes :math:`\varepsilon_\mathrm{b} \approx -(B_\mathrm{e}/B_\mathrm{r})^2/3` (Eq. 8.141) -
+  becomes :math:`\varepsilon_\mathrm{b} \approx -(B_\mathrm{e}/B_\mathrm{r})^2/3` (Eq. 8.141),
   exposed here as
   :func:`resolution_bias_error`;
 * the **coherent output spectrum**
@@ -341,8 +341,8 @@ def _chi2_interval(
     r"""Chi-square confidence interval for the autospectrum (Eq. 8.163).
 
     Interior bins average two squared Gaussian components per segment
-    (:math:`n = 2 n_\mathrm{d}`, Eq. 8.162); the DC bin - and the Nyquist bin when
-    the segment length is even - has a single real Fourier component, so
+    (:math:`n = 2 n_\mathrm{d}`, Eq. 8.162); the DC bin (and the Nyquist bin when
+    the segment length is even) has a single real Fourier component, so
     its estimate carries only :math:`n = n_\mathrm{d}` degrees of freedom and a
     wider interval.
     """
@@ -399,7 +399,7 @@ class SpectralDensityResult(OwnsArrays):
     :ivar confidence_lower: Lower chi-square confidence bound on
         :math:`G_{xx}` (Eq. 8.163;
         the DC bin, and the Nyquist bin for an even segment length, use
-        :math:`n = n_\mathrm{d}` degrees of freedom - a wider interval - because
+        :math:`n = n_\mathrm{d}` degrees of freedom, a wider interval, because
         those bins carry a single real Fourier component).
     :ivar confidence_upper: Upper chi-square confidence bound on :math:`G_{xx}`.
     :ivar confidence: Confidence level of the interval (e.g. ``0.95``).
@@ -653,7 +653,7 @@ class CrossSpectralDensityResult(OwnsArrays):
         ``magnitude``, ``phase_rad``, ``phase_standard_deviation_rad`` and ``coherence``, so any of
         those five out of step raises, short or long, ``IndexError: boolean
         index did not match indexed array along axis 0; size of axis is 128
-        but size of corresponding boolean axis is 129`` from inside numpy -
+        but size of corresponding boolean axis is 129`` from inside numpy:
         two sizes, and neither the field nor the result.
 
         The other two are worse off, because nothing draws them. A wrong

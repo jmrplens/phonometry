@@ -1,5 +1,5 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
-"""electroacoustics domain of phonometry (see module docstrings)."""
+"""Electroacoustic equipment: loudspeakers, microphones, headphones and induction loops, their distortion and frequency response, and sound reinforcement."""
 
 from __future__ import annotations
 

@@ -347,8 +347,8 @@ Sub-sample delay of an impulse response, in seconds.
 
 Without a reference, the arrival time of the IR itself: the
 cross-correlation of an IR with an ideal unit impulse *is* the IR, so
-its peak magnitude location - refined to sub-sample resolution by
-band-limited local upsampling plus parabolic interpolation - is the
+its peak magnitude location, refined to sub-sample resolution by
+band-limited local upsampling plus parabolic interpolation, is the
 delay relative to $t = 0$. With a `reference` IR, the delay of
 `ir` relative to it, from the peak of their full-record
 cross-correlation with the same refinement (one-shot transients are
@@ -422,7 +422,7 @@ $y(t) = \alpha x(t - \tau_0) + n(t)$ (B&P Section 5.1.4):
   $\lvert \gamma \rvert^2 / (\lvert G_{xy} \rvert (1 - \lvert \gamma \rvert^2))$):
   the maximum-likelihood processor that
   weights the phase by its coherence-derived reliability and attains
-  the Cramér-Rao bound - provided the coherence estimate is averaged
+  the Cramér-Rao bound, provided the coherence estimate is averaged
   over at least two segments, the discrete form of Knapp & Carter's
   $\lvert \gamma \rvert^2 \ne 1$ existence condition (enforced
   here). The delay must
@@ -498,7 +498,7 @@ Time-delay estimate between two records.
 | `weighting` | GCC weighting name (`None` unless `method='gcc'`). |
 | `lags` | Lag axis of [`correlation`](/phonometry/reference/api/signals/correlation/#correlation), in seconds. |
 | `correlation` | The correlation function whose peak was located: the correlation coefficient $\hat{\rho}_{xy}(\tau)$ for `'direct'`, the weighted GCC $\hat{R}_\psi(\tau)$ (normalized to unit peak magnitude) for `'gcc'`, and the unweighted equivalent for `'phase'` (whose estimate comes from Eq. 5.101b, not from this curve). |
-| `peak_correlation` | Plain correlation coefficient $\hat{\rho}_{xy}$ at the estimated delay (rounded to the nearest sample) - the quantity entering the B&P error formulas, whatever the method. |
+| `peak_correlation` | Plain correlation coefficient $\hat{\rho}_{xy}$ at the estimated delay (rounded to the nearest sample), the quantity entering the B&P error formulas, whatever the method. |
 | `delay_standard_deviation` | Standard deviation of the peak-location estimate, $\sigma(\hat{\tau}_0) \approx (3/4)^{1/4} \sqrt{\varepsilon} / (\pi B)$ (Eq. 8.129), in seconds; `None` unless `signal_bandwidth` was given. |
 | `delay_interval` | Approximate 95 % confidence interval $\hat{\tau}_0 \pm 2\sigma$ (Eq. 8.130), in seconds; `None` without a bandwidth. |
 | `signal_bandwidth` | The bandwidth `B` used for the error, Hz. |

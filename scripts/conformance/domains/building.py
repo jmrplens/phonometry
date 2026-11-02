@@ -3260,7 +3260,7 @@ def _chk_iso7849_impedance_term() -> Outcome:
 # --- Structure-borne sound power of building equipment (EN 15657) ---
 @register(
     "Room & building acoustics",
-    "EN 15657:2018 Formula (14)",
+    "UNE-EN 15657:2018 Formula (14)",
     "Reception-plate L_Ws = resonant-plate power P = ωη(mS)⟨v²⟩  (round-trip)",
 )
 def _chk_en15657_power_balance() -> Outcome:
@@ -3277,7 +3277,7 @@ def _chk_en15657_power_balance() -> Outcome:
 
 @register(
     "Room & building acoustics",
-    "EN 15657:2018 Formula (13)",
+    "UNE-EN 15657:2018 Formula (13)",
     "Plate loss factor η = 2,2/(f·Ts) at 1 kHz, Ts = 0,3 s",
 )
 def _chk_en15657_loss_factor() -> Outcome:
@@ -3289,7 +3289,7 @@ def _chk_en15657_loss_factor() -> Outcome:
 
 @register(
     "Room & building acoustics",
-    "EN 15657:2018 Formulae (15)/(17) + EN 12354-5 Annex I.3",
+    "UNE-EN 15657:2018 Formulae (15)/(17) + EN 12354-5 Annex I.3",
     "Source conversion chain reproduces Table I.8 (wall, installed)",
 )
 def _chk_en15657_conversion_chain() -> Outcome:

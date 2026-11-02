@@ -524,8 +524,8 @@ def frequency_weighting(
 ) -> WeightingResponse:
     """Frequency-weighting response ``H(f)`` (ISO 8041-1:2017, Formula (5)).
 
-    Evaluates the overall weighting - band limiting, acceleration-velocity
-    transition and upward step - of weighting ``name`` at ``frequencies``.
+    Evaluates the overall weighting (band limiting, acceleration-velocity
+    transition and upward step) of weighting ``name`` at ``frequencies``.
 
     :param name: Weighting name (one of :data:`WEIGHTING_NAMES`).
     :param frequencies: Frequencies at which to evaluate, in hertz (> 0).
@@ -1067,7 +1067,7 @@ def vibration_total_value(
 def wbv_exposure_basis(a_wx: float, a_wy: float, a_wz: float) -> float:
     r"""Whole-body exposure basis of Directive 2002/44/EC (Annex, Part B).
 
-    :math:`\max(1.4 a_{\mathrm{w}x}, 1.4 a_{\mathrm{w}y}, a_{\mathrm{w}z})` - the Directive bases
+    :math:`\max(1.4 a_{\mathrm{w}x}, 1.4 a_{\mathrm{w}y}, a_{\mathrm{w}z})`: the Directive bases
     the whole-body daily exposure ``A(8)`` on the *highest* of the
     frequency-weighted axis values :math:`1.4 a_{\mathrm{w}x}`,
     :math:`1.4 a_{\mathrm{w}y}`, :math:`a_{\mathrm{w}z}` for a seated or standing worker
@@ -1216,7 +1216,7 @@ def hav_vwf_lifetime_years(a8: float) -> float:
     r"""Years to 10 % vibration-white-finger prevalence (ISO 5349-1
     Eq. (C.1)).
 
-    :math:`D_\mathrm{y} = 31.8 \, A(8)^{-1.06}` - the group-mean lifetime exposure
+    :math:`D_\mathrm{y} = 31.8 \, A(8)^{-1.06}`: the group-mean lifetime exposure
     that produces finger blanching in 10 % of an exposed group
     (informative Annex C).
 
@@ -1447,9 +1447,9 @@ class DailyVibrationExposure(OwnsArrays):
         whole-body vibration) and the Directive 2002/44/EC it is assessed
         against, an optional metadata header (company, operator/worker,
         workplace, instrumentation, calibration), the per-operation exposure
-        analysis (the vibration magnitude - the hand-arm vector total ``a_hv``
-        or the whole-body Directive Part B dominant-axis value ``a_w,max`` -
-        the daily exposure time ``T_i`` and
+        analysis (the vibration magnitude, which is the hand-arm vector total
+        ``a_hv`` or the whole-body Directive Part B dominant-axis value
+        ``a_w,max``; the daily exposure time ``T_i`` and
         the partial exposure ``A_i(8)`` of ISO 5349-1/-2 Eq. (2), closed by the
         daily total and the combined ``A(8)`` of Eq. (3)), the per-operation
         contribution chart, the boxed ``A(8)`` with its exposure zone, an

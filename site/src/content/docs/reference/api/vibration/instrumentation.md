@@ -99,19 +99,17 @@ indication is `a_ref |H(f_ref)| / |H_BL(f_ref)|`: the factor that makes
 the identity true is the **ratio** of the two responses at the reference
 frequency, which is what this function returns.
 
-==========  ==================  ===================
-Weighting   This ratio          Table 1 prints
-==========  ==================  ===================
-`Wb`      0,812 819           0,812 6
-`Wc`      0,514 617           0,514 5
-`Wd`      0,126 120           0,126 1
-`We`      0,062 891           0,062 87
-`Wf`      0,418 982           0,388 8
-`Wh`      0,202 025           0,202 0
-`Wj`      1,018 841           1,019
-`Wk`      0,772 066           0,771 8
-`Wm`      0,336 336           0,336 2
-==========  ==================  ===================
+| Weighting | This ratio | Table 1 prints |
+| :--- | :--- | :--- |
+| `Wb` | 0,812 819 | 0,812 6 |
+| `Wc` | 0,514 617 | 0,514 5 |
+| `Wd` | 0,126 120 | 0,126 1 |
+| `We` | 0,062 891 | 0,062 87 |
+| `Wf` | 0,418 982 | 0,388 8 |
+| `Wh` | 0,202 025 | 0,202 0 |
+| `Wj` | 1,018 841 | 1,019 |
+| `Wk` | 0,772 066 | 0,771 8 |
+| `Wm` | 0,336 336 | 0,336 2 |
 
 For eight of the nine the distinction is academic: their band-limiting
 weighting is between 0,999 68 and 0,999 97 at their reference frequency,

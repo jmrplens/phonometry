@@ -19,7 +19,7 @@ Fine-band time-frequency views of a record, following Bendat & Piersol,
   normalized random error of :math:`1/\sqrt{n_\mathrm{d}} = 1` with
   :math:`n_\mathrm{d} = 1` (Eq. 8.158),
   and the magnitude display an error of
-  :math:`\sqrt{2}/1.25 \approx 1.13` - the
+  :math:`\sqrt{2}/1.25 \approx 1.13`, the
   Rayleigh-ratio result Bendat & Piersol quote in Section 12.6.4.2.
   Deterministic structure (tones, sweeps, transients) is unaffected by
   that caveat and is what the spectrogram is for.
@@ -27,10 +27,10 @@ Fine-band time-frequency views of a record, following Bendat & Piersol,
 * the **zoom FFT** (Section 11.5.4): the spectrum of a narrow band
   :math:`[f_{\min}, f_{\max}]` computed on an arbitrarily fine frequency
   grid without the giant FFT block a full-band analysis would need
-  (Eq. 11.122). The book's procedure - bandpass, complex demodulation by
+  (Eq. 11.122). The book's procedure (bandpass, complex demodulation by
   :math:`\exp(-j 2 \pi f_1 t)`, decimation by
   :math:`d = k_2/(k_2 - k_1)` and an FFT of the
-  decimated record (Eqs. 11.123-11.130) - is realized here in its exact
+  decimated record, Eqs. 11.123-11.130) is realized here in its exact
   single-pass digital equivalent, the chirp-Z evaluation of the DFT on
   the zoom grid (:func:`scipy.signal.zoom_fft`): both compute the same
   DFT samples of the record, which the test suite verifies to machine
@@ -44,7 +44,7 @@ Fine-band time-frequency views of a record, following Bendat & Piersol,
 Amplitudes are calibrated so that a sine of peak amplitude ``A`` on an
 analysis frequency reads :math:`\lvert \text{spectrum} \rvert = A`,
 :math:`\text{power} = A^2/2` (its mean
-square) - consistent with the ``'spectrum'`` scaling of the Welch module.
+square), consistent with the ``'spectrum'`` scaling of the Welch module.
 """
 
 from __future__ import annotations
@@ -127,9 +127,9 @@ class SpectrogramResult(OwnsArrays):
         are under-weighted: about 1-2 % low for typical records).
     :ivar time_resolution: Segment duration
         :math:`T_B = \text{nperseg}/f_\mathrm{s}`, in
-        seconds - the time resolution of the display.
+        seconds, the time resolution of the display.
     :ivar resolution_bandwidth: Effective noise bandwidth :math:`B_\mathrm{e}` of
-        the tapered segment, in Hz - the frequency resolution
+        the tapered segment, in Hz, the frequency resolution
         (:math:`\approx 1/T_B`
         for a light taper; the :math:`B_\mathrm{e} T_B` product per cell is close
         to 1).
@@ -214,15 +214,15 @@ def spectrogram(
     r"""Calibrated STFT power spectrogram (Bendat & Piersol 12.6.4.2).
 
     The record is split into tapered (Hann by default), overlapped
-    segments - exactly the segmentation of
-    :func:`~phonometry.signals.spectra.power_spectral_density` - and
+    segments, exactly the segmentation of
+    :func:`~phonometry.signals.spectra.power_spectral_density`, and
     each segment's one-sided periodogram becomes one column of the
     time-frequency display, without the averaging that the Welch
     estimate applies (averaging the columns reproduces it bin by bin).
     No detrending is applied, so absolute calibration is preserved: a
     signal in pascals yields Pa²/Hz (``'density'``) or Pa²
     (``'spectrum'``), and a sine of amplitude ``A`` on an analysis
-    frequency reads :math:`A^2/2` - its mean square - in every
+    frequency reads :math:`A^2/2`, its mean square, in every
     ``'spectrum'`` column it spans.
 
     The display trades time against frequency resolution through the
@@ -234,8 +234,8 @@ def spectrogram(
     (:math:`B_\mathrm{e} T_B \approx 1`), random
     data carries a per-cell normalized random error of 1 (Eq. 8.158 with
     :math:`n_\mathrm{d} = 1`): the spectrogram is a tool for deterministic
-    structure -
-    tones, sweeps, transients - not a low-variance spectral estimator.
+    structure
+    (tones, sweeps, transients), not a low-variance spectral estimator.
 
     :param x: Signal, 1-D. Accepts a :class:`phonometry.io.Signal`, whose
         calibration is applied to the samples, so every frame's power come out in
@@ -309,17 +309,17 @@ class ZoomFFTResult(OwnsArrays):
         :math:`\lvert \text{spectrum} \rvert = A` (calibration
         :math:`2 X(f) / \sum w`; no one-sided
         doubling at exactly 0 Hz or the Nyquist frequency).
-    :ivar amplitude: :math:`\lvert \text{spectrum} \rvert` -
+    :ivar amplitude: :math:`\lvert \text{spectrum} \rvert`, the
         peak-amplitude spectrum.
     :ivar power: Mean-square spectrum :math:`\text{amplitude}^2/2`
         (:math:`\text{amplitude}^2`
         at DC/Nyquist), consistent with the ``'spectrum'`` scaling of
         the Welch module: a tone reads its mean square :math:`A^2/2`.
-    :ivar bin_spacing_hz: Grid spacing, in Hz - freely chosen, finer than
+    :ivar bin_spacing_hz: Grid spacing, in Hz: freely chosen, finer than
         :math:`f_\mathrm{s}/N` if requested (the zoom gain of Eq. 11.127).
     :ivar resolution_bandwidth: Effective noise bandwidth
         :math:`B_\mathrm{e} = f_\mathrm{s} \sum w^2 / \left( \sum w \right)^2` of the
-        tapered record, in Hz - the true
+        tapered record, in Hz: the true
         resolution, set by the record length and taper, that no grid
         refinement improves.
     :ivar window: The taper, a window name or a tuple of a name and its
@@ -347,7 +347,7 @@ class ZoomFFTResult(OwnsArrays):
         the first and last grid point, so a disagreement between those two
         raises, short or long, ``ValueError: x and y must have same first
         dimension, but have shapes (201,) and (200,)`` from inside
-        matplotlib before the limits are reached - two shapes, and neither
+        matplotlib before the limits are reached: two shapes, and neither
         the field that carries the wrong one nor the result it came from,
         with the figure already created and left open.
 
@@ -359,8 +359,8 @@ class ZoomFFTResult(OwnsArrays):
         reads its frequency off the grid is answered with a neighbour's:
         with one grid point dropped, the 1000 Hz tone of a 1 Hz zoom reads
         999 Hz. The whole point of the zoom is that a line's position on
-        that grid is the answer - which of two sidebands is which, how far
-        the hum sits from the tone - so that offset is the measurement, not
+        that grid is the answer (which of two sidebands is which, how far
+        the hum sits from the tone), so that offset is the measurement, not
         a cosmetic slip.
 
         :raises ValueError: if any spectral quantity disagrees with the zoom
@@ -402,8 +402,8 @@ def zoom_fft(
 ) -> ZoomFFTResult:
     r"""Zoom FFT: the spectrum of a narrow band on a fine grid (B&P 11.5.4).
 
-    Resolves closely spaced tones - gear sidebands, twin machines, power
-    hum - separated by less than a practical full-band FFT bin, without
+    Resolves closely spaced tones (gear sidebands, twin machines, power
+    hum) separated by less than a practical full-band FFT bin, without
     the giant block size Eq. 11.122 would demand. Bendat & Piersol's
     procedure (bandpass, complex demodulation to shift ``f_min`` to zero,
     decimation by the bandwidth ratio, FFT of the decimated record;

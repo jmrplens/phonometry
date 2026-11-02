@@ -13,7 +13,7 @@ the estimators of [`phonometry.signals.spectra`](/phonometry/reference/api/signa
 analysis with the discrete Fourier transform*) turned that choice into a
 table of numbers: equivalent noise bandwidth, coherent gain, scalloping
 loss, worst-case processing loss, highest sidelobe level and the -3 dB
-main-lobe width - the trade-off between resolution, leakage and
+main-lobe width: the trade-off between resolution, leakage and
 amplitude accuracy, read rather than guessed.
 
 [`window_metrics`](/phonometry/reference/api/signals/windows/#window_metrics) computes those figures for any taper

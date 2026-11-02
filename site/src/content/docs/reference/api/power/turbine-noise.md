@@ -56,19 +56,17 @@ they move the sound power level by no more than 1,0 dB (NOTE of 7.2.2).
 closed form $-10 \lg(1 - 10^{-0.1 \Delta L})$ of ISO 3746:2010
 Equation (12), which is applied to the surface-averaged level:
 
-====================  ==============
-Difference, dB        Correction, dB
-====================  ==============
-3                     3
-4                     2
-5                     2
-6                     1
-7                     1
-8                     1
-9                     0,5
-10                    0,5
-> 10                  0,0
-====================  ==============
+| Difference, dB | Correction, dB |
+| :--- | :--- |
+| 3 | 3 |
+| 4 | 2 |
+| 5 | 2 |
+| 6 | 1 |
+| 7 | 1 |
+| 8 | 1 |
+| 9 | 0,5 |
+| 10 | 0,5 |
+| > 10 | 0,0 |
 
 The background shall be at least 3 dB below the level with the source
 operating (4.2); below that no valid measurement can be made, and the result

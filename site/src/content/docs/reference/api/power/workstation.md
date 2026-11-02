@@ -16,19 +16,13 @@ library declaring $L_{p\mathrm{A}}$; nothing computed it until now.
 Five standards determine it, and they differ only in how they get rid of the
 room:
 
-======================  =====================================================
-ISO 11201:2010          Free field over a reflecting plane, so there is no
-                        room to get rid of and $K_3 = 0$.
-ISO 11202:2010          Two approximate routes to $K_3$, one for a
-                        machine with a dominating source and one from the
-                        directivity the work station sees.
-ISO 11203:1995          No sound-pressure measurement at the work station:
-                        the level is derived from the sound power level,
-                        which was itself determined somehow.
-ISO 11204:2010          The same piecewise $K_3$ as ISO 11202 method
-                        A.2, reached accurately rather than approximately.
-ISO 11205:2003          By sound intensity, and not implemented here.
-======================  =====================================================
+| Part | How it gets rid of the room |
+| :--- | :--- |
+| ISO 11201:2010 | Free field over a reflecting plane, so there is no room to get rid of and $K_3 = 0$. |
+| ISO 11202:2010 | Two approximate routes to $K_3$, one for a machine with a dominating source and one from the directivity the work station sees. |
+| ISO 11203:1995 | No sound-pressure measurement at the work station: the level is derived from the sound power level, which was itself determined somehow. |
+| ISO 11204:2010 | The same piecewise $K_3$ as ISO 11202 method A.2, reached accurately rather than approximately. |
+| ISO 11205:2003 | By sound intensity, and not implemented here. |
 
 Everything they share is in this module, transcribed once, and each part's own
 method sits beside it in its own module.

@@ -8,7 +8,7 @@ is the whole-record alternative to the Welch segment averaging of
 spheroidal (Slepian) tapers of time-half-bandwidth ``NW`` produce ``K``
 nearly uncorrelated eigenspectra whose (adaptively weighted) average
 carries about :math:`2K` chi-square degrees of freedom *without*
-splitting the record - the estimator of choice for short records where
+splitting the record, which makes it the estimator of choice for short records where
 Welch would leave too few segments.
 
 The statistical apparatus is the same as that of the Welch estimators,
@@ -16,9 +16,9 @@ one step further: the chi-square confidence interval keeps the form of
 Bendat & Piersol Eq. 8.163, but its degrees of freedom are
 per-frequency, because Thomson's adaptive weights (P&W Eq. 368a)
 downweight leakage-prone tapers wherever the spectrum is locally weak
-and that costs degrees of freedom there (P&W Eq. 370b). Calibration -
-no detrending, one-sided ``'density'`` scaling integrating to the signal
-power, ``'spectrum'`` scaling reading :math:`A^2/2` at a tone's peak -
+and that costs degrees of freedom there (P&W Eq. 370b). Calibration
+(no detrending, one-sided ``'density'`` scaling integrating to the signal
+power, ``'spectrum'`` scaling reading :math:`A^2/2` at a tone's peak)
 matches :mod:`phonometry.signals.spectra` exactly, so the two estimators
 of the same record are directly comparable.
 """
@@ -71,7 +71,7 @@ class MultitaperSpectralDensityResult(OwnsArrays):
     One whole-record estimate from ``K`` orthogonal Slepian (dpss) tapers:
     the ``K`` eigenspectra are nearly uncorrelated, so their weighted
     average trades the two chi-square degrees of freedom of a periodogram
-    for about :math:`2K` - without segmenting the record as Welch's
+    for about :math:`2K`, without segmenting the record as Welch's
     method does. The chi-square machinery mirrors
     :class:`~phonometry.signals.spectra.SpectralDensityResult`, but here
     the degrees of freedom are
@@ -96,7 +96,7 @@ class MultitaperSpectralDensityResult(OwnsArrays):
         (P&W Eq. 370b);
         :math:`2K \left( \sum \lambda_k / K \right)^2 K /
         \sum \lambda_k^2 \approx 2K` for unity weights.
-        The DC bin - and the Nyquist bin for an even record length -
+        The DC bin (and the Nyquist bin for an even record length)
         carries half (a single real Fourier component per eigenspectrum).
     :ivar random_error: Per-frequency normalized random error
         :math:`\varepsilon[\hat{S}^{(mt)}] = \sqrt{2/\nu}`
@@ -110,15 +110,14 @@ class MultitaperSpectralDensityResult(OwnsArrays):
         is locally white (exactly uniform weights would be
         :math:`\lambda_k / \sum \lambda_j`).
     :ivar eigenvalues: Concentration ratios :math:`\lambda_k(N, W)` of
-        the tapers -
-        the fraction of each taper's spectral-window energy inside the
-        design band :math:`[-W, W]` (P&W Section 7.1; near unity for
-        :math:`k < 2NW`).
+        the tapers: the fraction of each taper's spectral-window energy
+        inside the design band :math:`[-W, W]` (P&W Section 7.1; near
+        unity for :math:`k < 2NW`).
     :ivar time_half_bandwidth: The duration x half-bandwidth product
         ``NW`` (dimensionless; :math:`W = NW/(N \Delta t)`).
     :ivar n_tapers: Number of tapers ``K`` averaged.
     :ivar resolution_bandwidth: The resolution bandwidth :math:`2W` of
-        the estimator, in Hz - the multitaper analog of the Welch
+        the estimator, in Hz, the multitaper analog of the Welch
         :math:`B_\mathrm{e}`
         (P&W call :math:`2W` *the* natural resolution measure of the
         method).
@@ -302,9 +301,9 @@ def _adaptive_multitaper_weights(
     estimator of Eq. 370a,
     :math:`\hat{S} = \sum_k d_k \hat{S}_k / \sum_k d_k`, seeded with the
     eigenvalue-weighted average of the two lowest-order eigenspectra
-    (P&W's recipe). :math:`\sigma^2 \Delta t` - the flat density carrying
+    (P&W's recipe). :math:`\sigma^2 \Delta t`, the flat density carrying
     the process
-    power - is the broad-band bias scale: high-order tapers (smaller
+    power, is the broad-band bias scale: high-order tapers (smaller
     :math:`\lambda_k`) are downweighted wherever the local spectrum falls
     below the
     leakage that the total power could push through their sidelobes.
@@ -344,8 +343,8 @@ def _multitaper_dof(
 
     P&W Eq. 370b: each eigenspectrum contributes two chi-square degrees
     of freedom (one complex Fourier component), combined with weights
-    :math:`d_k`. The DC bin - and the Nyquist bin when the record length
-    is even - has a single real component per eigenspectrum, so its
+    :math:`d_k`. The DC bin (and the Nyquist bin when the record length
+    is even) has a single real component per eigenspectrum, so its
     :math:`\nu` is halved (same convention as the Welch estimators of
     :mod:`phonometry.signals.spectra`).
     """
@@ -396,9 +395,9 @@ def multitaper_psd(
 
     Implements the multitaper estimator of Thomson (1982) as developed in
     Percival & Walden (1993, Chapter 7): the record is multiplied by
-    ``K`` orthogonal discrete prolate spheroidal (Slepian) data tapers -
-    the sequences that maximize spectral concentration in the design band
-    :math:`[-W, W]`, computed by :func:`scipy.signal.windows.dpss` - and
+    ``K`` orthogonal discrete prolate spheroidal (Slepian) data tapers
+    (the sequences that maximize spectral concentration in the design band
+    :math:`[-W, W]`, computed by :func:`scipy.signal.windows.dpss`), and
     the
     ``K`` resulting eigenspectra (P&W Eq. 333) are averaged. Because the
     tapers are orthogonal the eigenspectra are nearly uncorrelated, so the

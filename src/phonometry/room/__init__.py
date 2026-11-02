@@ -1,5 +1,5 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
-"""room domain of phonometry (see module docstrings)."""
+"""Room acoustics: impulse responses and the parameters drawn from them, reverberation and sound fields predicted, room modes and room noise criteria."""
 
 from __future__ import annotations
 

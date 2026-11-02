@@ -133,7 +133,7 @@ __all__ = [
 REFERENCE_AREA_M2: float = 10.0
 
 #: Characteristic mobility ``Y_inf,rec`` of the EN 15657 reference reception
-#: plate (10 cm concrete; EN 12354-5 Annex I / EN 15657:2018 7.2.4), m/(N.s).
+#: plate (10 cm concrete; EN 12354-5 Annex I / UNE-EN 15657:2018 7.2.4), m/(N.s).
 _REFERENCE_PLATE_MOBILITY: float = 5.0e-6
 
 
@@ -679,7 +679,7 @@ def typical_element_mobility(
 # closed form of :func:`tapping_machine_force_level_estimate`.
 #
 # The reference the table caption prints, "re 1 pN", is a defect: the values
-# are re 1e-6 N, the reference force of ISO 1683 that EN 15657:2018 Formula
+# are re 1e-6 N, the reference force of ISO 1683 that UNE-EN 15657:2018 Formula
 # (15) also uses. See docs/ERRATA.md. The tabulated numbers are unaffected.
 
 #: The ``10^-12`` the closed form under Table F.1 divides by, in N²: the square

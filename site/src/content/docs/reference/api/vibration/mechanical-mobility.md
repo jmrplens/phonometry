@@ -15,14 +15,11 @@ member is used depends only on whether the motion is expressed as displacement,
 velocity or acceleration, and each has a force-per-motion reciprocal
 (ISO 7626-1, Table 1):
 
-===============  =====================  ===========  =========================
-Motion           FRF (motion / force)   Unit          Reciprocal (force / motion)
-===============  =====================  ===========  =========================
-displacement     dynamic compliance /   m/N           dynamic stiffness  (N/m)
-                 receptance `H`
-velocity         mobility `Y`         m/(N.s)        impedance          (N.s/m)
-acceleration     accelerance `A`      1/kg           apparent mass      (kg)
-===============  =====================  ===========  =========================
+| Motion | FRF (motion / force) | Unit | Reciprocal (force / motion) |
+| :--- | :--- | :--- | :--- |
+| displacement | dynamic compliance / receptance `H` | m/N | dynamic stiffness (N/m) |
+| velocity | mobility `Y` | m/(N.s) | impedance (N.s/m) |
+| acceleration | accelerance `A` | 1/kg | apparent mass (kg) |
 
 For a harmonic motion $x \mathrm{e}^{j \omega t}$ the velocity is
 $j \omega x$ and the acceleration $-\omega^2 x$, so every FRF

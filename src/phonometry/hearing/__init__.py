@@ -1,5 +1,5 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
-"""hearing domain of phonometry (see module docstrings).
+"""Hearing conservation: audiometric thresholds and how they are measured, noise-induced hearing loss, occupational exposure and hearing protectors.
 
 Narrowed in 4.0 to hearing conservation: audiometric thresholds and the test
 methods and rooms that measure them (ISO 8253-1 and -2), noise-induced hearing

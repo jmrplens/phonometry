@@ -25,7 +25,7 @@ Fine-band time-frequency views of a record, following Bendat & Piersol,
   normalized random error of $1/\sqrt{n_\mathrm{d}} = 1$ with
   $n_\mathrm{d} = 1$ (Eq. 8.158),
   and the magnitude display an error of
-  $\sqrt{2}/1.25 \approx 1.13$ - the
+  $\sqrt{2}/1.25 \approx 1.13$, the
   Rayleigh-ratio result Bendat & Piersol quote in Section 12.6.4.2.
   Deterministic structure (tones, sweeps, transients) is unaffected by
   that caveat and is what the spectrogram is for.
@@ -33,10 +33,10 @@ Fine-band time-frequency views of a record, following Bendat & Piersol,
 * the **zoom FFT** (Section 11.5.4): the spectrum of a narrow band
   $[f_{\min}, f_{\max}]$ computed on an arbitrarily fine frequency
   grid without the giant FFT block a full-band analysis would need
-  (Eq. 11.122). The book's procedure - bandpass, complex demodulation by
+  (Eq. 11.122). The book's procedure (bandpass, complex demodulation by
   $\exp(-j 2 \pi f_1 t)$, decimation by
   $d = k_2/(k_2 - k_1)$ and an FFT of the
-  decimated record (Eqs. 11.123-11.130) - is realized here in its exact
+  decimated record, Eqs. 11.123-11.130) is realized here in its exact
   single-pass digital equivalent, the chirp-Z evaluation of the DFT on
   the zoom grid ([`scipy.signal.zoom_fft`](/phonometry/reference/api/signals/time-frequency/#zoom_fft)): both compute the same
   DFT samples of the record, which the test suite verifies to machine
@@ -50,7 +50,7 @@ Fine-band time-frequency views of a record, following Bendat & Piersol,
 Amplitudes are calibrated so that a sine of peak amplitude `A` on an
 analysis frequency reads $\lvert \text{spectrum} \rvert = A$,
 $\text{power} = A^2/2$ (its mean
-square) - consistent with the `'spectrum'` scaling of the Welch module.
+square), consistent with the `'spectrum'` scaling of the Welch module.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
@@ -71,15 +71,15 @@ spectrogram(
 Calibrated STFT power spectrogram (Bendat & Piersol 12.6.4.2).
 
 The record is split into tapered (Hann by default), overlapped
-segments - exactly the segmentation of
-[`power_spectral_density`](/phonometry/reference/api/signals/spectra/#power_spectral_density) - and
+segments, exactly the segmentation of
+[`power_spectral_density`](/phonometry/reference/api/signals/spectra/#power_spectral_density), and
 each segment's one-sided periodogram becomes one column of the
 time-frequency display, without the averaging that the Welch
 estimate applies (averaging the columns reproduces it bin by bin).
 No detrending is applied, so absolute calibration is preserved: a
 signal in pascals yields Pa²/Hz (`'density'`) or Pa²
 (`'spectrum'`), and a sine of amplitude `A` on an analysis
-frequency reads $A^2/2$ - its mean square - in every
+frequency reads $A^2/2$, its mean square, in every
 `'spectrum'` column it spans.
 
 The display trades time against frequency resolution through the
@@ -91,8 +91,8 @@ each cell is a single unaveraged estimate
 ($B_\mathrm{e} T_B \approx 1$), random
 data carries a per-cell normalized random error of 1 (Eq. 8.158 with
 $n_\mathrm{d} = 1$): the spectrogram is a tool for deterministic
-structure -
-tones, sweeps, transients - not a low-variance spectral estimator.
+structure
+(tones, sweeps, transients), not a low-variance spectral estimator.
 
 **Parameters**
 
@@ -142,8 +142,8 @@ Calibrated STFT power spectrogram (B&P Section 12.6.4.2).
 | `times` | Segment-centre times, in seconds (one per column). |
 | `frequencies` | One-sided frequency axis, in Hz (one per row). |
 | `power` | Power spectrogram, shape `(frequencies, times)` (units²/Hz for `'density'` scaling, units² for `'spectrum'`). Each column is the tapered periodogram of one segment, with the exact calibration of [`power_spectral_density`](/phonometry/reference/api/signals/spectra/#power_spectral_density): the column mean over time reproduces the Welch spectrum bin by bin. Integrating a `'density'` column over frequency gives that segment's taper-weighted mean square $\sum (x w)^2 / \sum w^2$; summing those over time *and multiplying by the hop duration* `hop/fs` recovers the record energy $\sum x^2 / f_\mathrm{s}$ when the squared taper overlap-adds to a constant (e.g. Hann at 75 % overlap), up to the taper roll-off at the record edges (the first and last segments are under-weighted: about 1-2 % low for typical records). |
-| `time_resolution` | Segment duration $T_B = \text{nperseg}/f_\mathrm{s}$, in seconds - the time resolution of the display. |
-| `resolution_bandwidth` | Effective noise bandwidth $B_\mathrm{e}$ of the tapered segment, in Hz - the frequency resolution ($\approx 1/T_B$ for a light taper; the $B_\mathrm{e} T_B$ product per cell is close to 1). |
+| `time_resolution` | Segment duration $T_B = \text{nperseg}/f_\mathrm{s}$, in seconds, the time resolution of the display. |
+| `resolution_bandwidth` | Effective noise bandwidth $B_\mathrm{e}$ of the tapered segment, in Hz, the frequency resolution ($\approx 1/T_B$ for a light taper; the $B_\mathrm{e} T_B$ product per cell is close to 1). |
 | `random_error` | Normalized random error of each (unaveraged) power cell for random data, $1/\sqrt{n_\mathrm{d}} = 1$ with $n_\mathrm{d} = 1$ (Eq. 8.158); Bendat & Piersol quote $\sqrt{2}/1.25 \approx 1.13$ for the magnitude display (Section 12.6.4.2). Deterministic components are unaffected. |
 | `n_segments` | Number of segments (columns). |
 | `hop` | Hop between segment starts, in samples. |
@@ -187,8 +187,8 @@ zoom_fft(
 
 Zoom FFT: the spectrum of a narrow band on a fine grid (B&P 11.5.4).
 
-Resolves closely spaced tones - gear sidebands, twin machines, power
-hum - separated by less than a practical full-band FFT bin, without
+Resolves closely spaced tones (gear sidebands, twin machines, power
+hum) separated by less than a practical full-band FFT bin, without
 the giant block size Eq. 11.122 would demand. Bendat & Piersol's
 procedure (bandpass, complex demodulation to shift `f_min` to zero,
 decimation by the bandwidth ratio, FFT of the decimated record;
@@ -250,10 +250,10 @@ Narrow-band zoom spectrum on a fine frequency grid (B&P 11.5.4).
 | :--- | :--- |
 | `frequencies` | Zoom frequency grid from `f_min` to `f_max` inclusive, in Hz. |
 | `spectrum` | Complex amplitude-calibrated coefficients: a sine of peak amplitude `A` on an analysis frequency reads $\lvert \text{spectrum} \rvert = A$ (calibration $2 X(f) / \sum w$; no one-sided doubling at exactly 0 Hz or the Nyquist frequency). |
-| `amplitude` | $\lvert \text{spectrum} \rvert$ - peak-amplitude spectrum. |
+| `amplitude` | $\lvert \text{spectrum} \rvert$, the peak-amplitude spectrum. |
 | `power` | Mean-square spectrum $\text{amplitude}^2/2$ ($\text{amplitude}^2$ at DC/Nyquist), consistent with the `'spectrum'` scaling of the Welch module: a tone reads its mean square $A^2/2$. |
-| `bin_spacing_hz` | Grid spacing, in Hz - freely chosen, finer than $f_\mathrm{s}/N$ if requested (the zoom gain of Eq. 11.127). |
-| `resolution_bandwidth` | Effective noise bandwidth $B_\mathrm{e} = f_\mathrm{s} \sum w^2 / \left( \sum w \right)^2$ of the tapered record, in Hz - the true resolution, set by the record length and taper, that no grid refinement improves. |
+| `bin_spacing_hz` | Grid spacing, in Hz: freely chosen, finer than $f_\mathrm{s}/N$ if requested (the zoom gain of Eq. 11.127). |
+| `resolution_bandwidth` | Effective noise bandwidth $B_\mathrm{e} = f_\mathrm{s} \sum w^2 / \left( \sum w \right)^2$ of the tapered record, in Hz: the true resolution, set by the record length and taper, that no grid refinement improves. |
 | `window` | The taper, a window name or a tuple of a name and its parameters, as given (a list parameter as a tuple). |
 | `n_points` | Number of grid points. |
 

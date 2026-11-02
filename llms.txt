@@ -436,7 +436,7 @@ The theory pages travel in their own shard (https://docs.jmrp.io/phonometry/llms
 - [Changelog](https://github.com/jmrplens/phonometry/blob/main/CHANGELOG.md)
 - [Cite this software](https://github.com/jmrplens/phonometry/blob/main/CITATION.cff)
 - [Archived release (DOI)](https://doi.org/10.5281/zenodo.21215280)
-- [Licence: MIT](https://opensource.org/licenses/MIT)
+- [Licence: MIT](https://opensource.org/license/MIT)
 
 ## Full text
 

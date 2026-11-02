@@ -185,7 +185,7 @@ To run a suite against the full original set, drop it in `tests/data-local/`:
 
 | Dataset | `tests/data-local/…` | Environment override |
 | :--- | :--- | :--- |
-| [stipa.info STIPA verification bench](https://www.stipa.info/index.php/download-test-signals) | `stipa-verification/` | `STIPA_VERIFICATION_DATA` |
+| [stipa.info STIPA verification bench](https://stipa.info/download-test-signals/) | `stipa-verification/` | `STIPA_VERIFICATION_DATA` |
 | [EBU loudness test set](https://tech.ebu.ch/publications/ebu_loudness_test_set) | `ebu-loudness-test-set/` | `EBU_LOUDNESS_TEST_SET` |
 | NORAH2 V2.0.74 public release | `norah2/NORAH2_V2.0.74_public.zip` | `NORAH2_DATA` (extraction root) |
 

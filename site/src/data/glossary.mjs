@@ -2388,7 +2388,7 @@ export const glossary = [
         id: "l-ws",
         symbol: "$L_\\mathrm{Ws}$",
         unit: "dB re 1 pW",
-        standard: "EN 15657:2018",
+        standard: "UNE-EN 15657:2018",
         clause: {
           en: "Formula 14",
           es: "Fórmula 14",

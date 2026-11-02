@@ -522,7 +522,7 @@ def impulse_response(
         Farina method requires ``f_range`` and the **exact-length, unpadded**
         excitation sweep as ``reference`` (it rebuilds the inverse filter from
         ``reference.size/fs`` as the sweep duration); a reference zero-padded
-        to the recording length - the correct input for the spectral method -
+        to the recording length, the correct input for the spectral method,
         is rejected with a ``ValueError`` because it would silently produce a
         wrong inverse filter. It also assumes the reference sweep was
         generated with the default ``amplitude``/``fade`` of

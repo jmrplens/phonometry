@@ -13,8 +13,8 @@ That is the whole method, and it is why it is one module: it consumes a
 standing-wave ratio and a distance, and needs neither a measured transfer
 function nor the complex wavenumber and air properties every broadband
 reduction in the tube goes through. The quantities are the same
-normal-incidence quantities the two-microphone method reports -
-:math:`\alpha = 1 - \lvert r\rvert^2` is Eq. (9) here and Eq. (18) there -
+normal-incidence quantities the two-microphone method reports
+(:math:`\alpha = 1 - \lvert r\rvert^2` is Eq. (9) here and Eq. (18) there),
 measured one frequency at a time; see
 :mod:`~phonometry.materials.absorbers.impedance_tube`.
 """

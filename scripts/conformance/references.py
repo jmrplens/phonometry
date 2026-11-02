@@ -146,6 +146,7 @@ _BODIES = (
     "BS EN ISO",
     "BS EN",
     "UNE-EN ISO",
+    "UNE-EN",
     "EN ISO",
     "ISO/IEC Guide",
     "ISO/IEC",

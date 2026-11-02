@@ -1,5 +1,5 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
-"""environment domain of phonometry (see module docstrings).
+"""Environmental noise: what a source emits, what the path to the receiver does to it, and what the law and the people there make of the result.
 
 Renamed from ``environmental`` in 4.0 and given three subgroups, which is how
 an environmental study is written: what the source emits

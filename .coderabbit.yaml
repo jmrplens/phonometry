@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+# yaml-language-server: $schema=https://www.coderabbit.ai/integrations/schema.v2.json
 #
 # Review guidance that would otherwise be retyped in every pull request. The
 # first entries send every review of code, tests, scripts and docs to the

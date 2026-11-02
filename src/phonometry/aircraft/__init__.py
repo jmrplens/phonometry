@@ -1,5 +1,5 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
-"""aircraft domain of phonometry (see module docstrings)."""
+"""Aircraft noise: ECAC Doc 29 airport noise with the EASA ANP fleet, ICAO Annex 16 certification, rotorcraft noise and atmospheric absorption."""
 
 from __future__ import annotations
 

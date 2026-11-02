@@ -14,7 +14,7 @@ is the whole-record alternative to the Welch segment averaging of
 spheroidal (Slepian) tapers of time-half-bandwidth `NW` produce `K`
 nearly uncorrelated eigenspectra whose (adaptively weighted) average
 carries about $2K$ chi-square degrees of freedom *without*
-splitting the record - the estimator of choice for short records where
+splitting the record, which makes it the estimator of choice for short records where
 Welch would leave too few segments.
 
 The statistical apparatus is the same as that of the Welch estimators,
@@ -22,9 +22,9 @@ one step further: the chi-square confidence interval keeps the form of
 Bendat & Piersol Eq. 8.163, but its degrees of freedom are
 per-frequency, because Thomson's adaptive weights (P&W Eq. 368a)
 downweight leakage-prone tapers wherever the spectrum is locally weak
-and that costs degrees of freedom there (P&W Eq. 370b). Calibration -
-no detrending, one-sided `'density'` scaling integrating to the signal
-power, `'spectrum'` scaling reading $A^2/2$ at a tone's peak -
+and that costs degrees of freedom there (P&W Eq. 370b). Calibration
+(no detrending, one-sided `'density'` scaling integrating to the signal
+power, `'spectrum'` scaling reading $A^2/2$ at a tone's peak)
 matches [`phonometry.signals.spectra`](/phonometry/reference/api/signals/spectra/) exactly, so the two estimators
 of the same record are directly comparable.
 
@@ -49,9 +49,9 @@ Thomson multitaper spectral density with chi-square interval.
 
 Implements the multitaper estimator of Thomson (1982) as developed in
 Percival & Walden (1993, Chapter 7): the record is multiplied by
-`K` orthogonal discrete prolate spheroidal (Slepian) data tapers -
-the sequences that maximize spectral concentration in the design band
-$[-W, W]$, computed by `scipy.signal.windows.dpss` - and
+`K` orthogonal discrete prolate spheroidal (Slepian) data tapers
+(the sequences that maximize spectral concentration in the design band
+$[-W, W]$, computed by `scipy.signal.windows.dpss`), and
 the
 `K` resulting eigenspectra (P&W Eq. 333) are averaged. Because the
 tapers are orthogonal the eigenspectra are nearly uncorrelated, so the
@@ -134,7 +134,7 @@ Thomson multitaper spectral density (Percival & Walden Ch. 7).
 One whole-record estimate from `K` orthogonal Slepian (dpss) tapers:
 the `K` eigenspectra are nearly uncorrelated, so their weighted
 average trades the two chi-square degrees of freedom of a periodogram
-for about $2K$ - without segmenting the record as Welch's
+for about $2K$, without segmenting the record as Welch's
 method does. The chi-square machinery mirrors
 [`SpectralDensityResult`](/phonometry/reference/api/signals/spectra/#spectraldensityresult), but here
 the degrees of freedom are
@@ -151,13 +151,13 @@ costs degrees of freedom there (P&W Eq. 370b).
 | `confidence_lower` | Lower chi-square confidence bound, $\nu \hat{S}/\chi^2_{\nu;\alpha/2}$ with the per-frequency $\nu$ (the same interval form as B&P Eq. 8.163, with $\nu$ from P&W Eq. 370b). |
 | `confidence_upper` | Upper chi-square confidence bound. |
 | `confidence` | Confidence level of the interval (e.g. `0.95`). |
-| `degrees_of_freedom` | Per-frequency equivalent chi-square degrees of freedom $\nu(f) = 2 \left( \sum_k d_k \right)^2 / \sum_k d_k^2$ with $d_k = b_k^2(f) \lambda_k$ (P&W Eq. 370b); $2K \left( \sum \lambda_k / K \right)^2 K / \sum \lambda_k^2 \approx 2K$ for unity weights. The DC bin - and the Nyquist bin for an even record length - carries half (a single real Fourier component per eigenspectrum). |
+| `degrees_of_freedom` | Per-frequency equivalent chi-square degrees of freedom $\nu(f) = 2 \left( \sum_k d_k \right)^2 / \sum_k d_k^2$ with $d_k = b_k^2(f) \lambda_k$ (P&W Eq. 370b); $2K \left( \sum \lambda_k / K \right)^2 K / \sum \lambda_k^2 \approx 2K$ for unity weights. The DC bin (and the Nyquist bin for an even record length) carries half (a single real Fourier component per eigenspectrum). |
 | `random_error` | Per-frequency normalized random error $\varepsilon[\hat{S}^{(mt)}] = \sqrt{2/\nu}$ ($\approx 1/\sqrt{K}$), the multitaper counterpart of B&P Eq. 8.158. |
 | `weights` | Normalized combination weights $d_k(f) / \sum_j d_j(f)$, shape `(n_tapers, n_frequencies)`. Adaptive weighting makes them frequency dependent; they converge to $\approx 1/K$ where the spectrum is locally white (exactly uniform weights would be $\lambda_k / \sum \lambda_j$). |
-| `eigenvalues` | Concentration ratios $\lambda_k(N, W)$ of the tapers - the fraction of each taper's spectral-window energy inside the design band $[-W, W]$ (P&W Section 7.1; near unity for $k < 2NW$). |
+| `eigenvalues` | Concentration ratios $\lambda_k(N, W)$ of the tapers: the fraction of each taper's spectral-window energy inside the design band $[-W, W]$ (P&W Section 7.1; near unity for $k < 2NW$). |
 | `time_half_bandwidth` | The duration x half-bandwidth product `NW` (dimensionless; $W = NW/(N \Delta t)$). |
 | `n_tapers` | Number of tapers `K` averaged. |
-| `resolution_bandwidth` | The resolution bandwidth $2W$ of the estimator, in Hz - the multitaper analog of the Welch $B_\mathrm{e}$ (P&W call $2W$ *the* natural resolution measure of the method). |
+| `resolution_bandwidth` | The resolution bandwidth $2W$ of the estimator, in Hz, the multitaper analog of the Welch $B_\mathrm{e}$ (P&W call $2W$ *the* natural resolution measure of the method). |
 | `adaptive` | Whether Thomson's adaptive weights were used. |
 | `scaling` | `'density'` or `'spectrum'`. |
 

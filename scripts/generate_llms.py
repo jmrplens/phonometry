@@ -920,7 +920,7 @@ def _provenance_section() -> list[str]:
         f"- [Changelog]({REPO_URL}/blob/main/CHANGELOG.md)",
         f"- [Cite this software]({REPO_URL}/blob/main/CITATION.cff)",
         f"- [Archived release (DOI)](https://doi.org/{DOI})",
-        "- [Licence: MIT](https://opensource.org/licenses/MIT)",
+        "- [Licence: MIT](https://opensource.org/license/MIT)",
         "",
     ]
 

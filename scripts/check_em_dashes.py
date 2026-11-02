@@ -1234,6 +1234,14 @@ def iter_files(roots: tuple[str, ...]) -> list[pathlib.Path]:
     return files
 
 
+#: What a clean run says: every form the guard refuses, so a green run does
+#: not read as narrower than the check it ran.
+GREEN = (
+    "No em dash, no double hyphen and no spaced hyphen after a list item's head "
+    "in the published prose."
+)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     parser.add_argument("paths", nargs="*", default=DEFAULT_ROOTS)
@@ -1261,7 +1269,7 @@ def main() -> int:
             file=sys.stderr,
         )
         return 1
-    print("No em dash and no double hyphen in the published prose.")
+    print(GREEN)
     return 0
 
 

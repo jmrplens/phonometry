@@ -554,9 +554,9 @@ class TransferStiffnessResult(OwnsArrays):
         stiffness disagrees with three frequencies exactly as two do.
 
         Both fields must also be finite. Neither determination can emit a
-        non-finite stiffness from valid data - the direct method refuses a
+        non-finite stiffness from valid data (the direct method refuses a
         dead input channel and the indirect method multiplies finite
-        inertia terms by the measured transmissibility - so an ``inf`` here
+        inertia terms by the measured transmissibility), so an ``inf`` here
         is always an overflowed or clipped channel, not an undeterminable
         band. Admitting it printed ``Lk = inf dB re 1 N/m`` boxed as the
         fiche headline, with a loss factor of ``nan`` beside it and nothing

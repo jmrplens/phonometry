@@ -36,6 +36,7 @@ import importlib.util
 import inspect
 import itertools
 import json
+import pkgutil
 import re
 import shutil
 import sys
@@ -54,6 +55,7 @@ from api_taxonomy import (
     module_section,
     public_names,
 )
+from markdown_fences import code_lines
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -415,17 +417,162 @@ def _doctest_run(
     return end, _fenced(block, "python", " " * indent, code)
 
 
-def rest_blocks_to_markdown(text: str, code: list[str]) -> str:
+#: The border of a reST simple table: two or more runs of ``=`` side by side,
+#: each run one column. CommonMark reads it as neither a table nor a setext
+#: underline (the spaces inside it forbid both), so a table left alone
+#: reaches the page as one run-on paragraph.
+_SIMPLE_TABLE_RULE_RE = re.compile(r"^( *)=+(?: +=+)+ *$")
+
+
+def _plain_cell(text: str) -> str:
+    """A cell's text with its pipes escaped, for a caller that renders no roles."""
+    return text.replace("|", "\\|")
+
+
+def _table_columns(rule: str) -> list[tuple[int, int]]:
+    """The ``(start, end)`` of every column a simple table's border marks."""
+    return [match.span() for match in re.finditer(r"=+", rule)]
+
+
+def _cell_text(text: str) -> str:
+    """A cell's text with its runs of spaces closed up.
+
+    Only the ASCII space is touched: the narrow no-break space that groups
+    the digits of a number (P8) is part of the number.
+    """
+    return re.sub(" {2,}", " ", text).strip(" ")
+
+
+def _table_cells(line: str, columns: list[tuple[int, int]]) -> list[str] | None:
+    """One text line of a simple table cut at its columns, or None.
+
+    The text between two columns must be blank; text there belongs to
+    neither, and docutils refuses such a table, so it is not read here
+    either. The last column runs to the end of the line, as docutils reads it.
+    """
+    starts = [start for start, _ in columns]
+    cells = []
+    for index, (start, end) in enumerate(columns):
+        if index + 1 < len(columns):
+            if line[end : starts[index + 1]].strip():
+                return None
+            cells.append(_cell_text(line[start : starts[index + 1]]))
+        else:
+            cells.append(_cell_text(line[start:]))
+    return cells
+
+
+def _table_rows(
+    lines: list[str], columns: list[tuple[int, int]]
+) -> list[list[str]] | None:
+    """The rows of one part of a simple table, continuation lines folded in.
+
+    A line whose first cell is blank continues the row above it, each cell's
+    text appended to the cell above, which is the rule docutils applies.
+    """
+    rows: list[list[str]] = []
+    for line in lines:
+        if not line.strip():
+            continue
+        cells = _table_cells(line, columns)
+        if cells is None:
+            return None
+        if cells[0] or not rows:
+            rows.append(cells)
+            continue
+        rows[-1] = [
+            " ".join(filter(None, pair)) for pair in zip(rows[-1], cells, strict=True)
+        ]
+    return rows
+
+
+def _simple_table_end(
+    lines: list[str], start: int, rule: str
+) -> tuple[int, int] | None:
+    """Where the header rule and the bottom border of a simple table stand.
+
+    Returns ``(header_rule, bottom)``, the index of the rule under the header
+    (equal to ``start`` for a table with no header) and of the bottom border,
+    or None when no border closes the table. A rule followed by a blank line,
+    or by nothing, is the bottom border; one followed by text is the rule
+    under the header.
+    """
+    rules = [
+        index
+        for index in range(start + 1, len(lines))
+        if lines[index].rstrip() == rule.rstrip()
+    ]
+    for index in rules:
+        following = lines[index + 1] if index + 1 < len(lines) else ""
+        if not following.strip():
+            header = next((r for r in rules if r < index), start)
+            return header, index
+    return None
+
+
+def _simple_table(
+    lines: list[str], start: int, cell: Callable[[str], str]
+) -> tuple[int, list[str]] | None:
+    """A reST simple table at ``lines[start]`` as a pipe table, or None.
+
+    Returns the index just past its bottom border and the lines of the pipe
+    table, each cell rendered by ``cell``. A table with no header row gets an
+    empty one, because a pipe table cannot do without it. None leaves the
+    lines as they stand, for :func:`leaked_tables` to report.
+    """
+    match = _SIMPLE_TABLE_RULE_RE.match(lines[start])
+    if match is None:
+        return None
+    rule = lines[start]
+    ends = _simple_table_end(lines, start, rule)
+    if ends is None:
+        return None
+    header_rule, bottom = ends
+    columns = _table_columns(rule)
+    header = _table_rows(lines[start + 1 : header_rule], columns)
+    body = _table_rows(lines[header_rule + 1 : bottom], columns)
+    if header is None or body is None or len(header) > 1:
+        return None
+    pad = match.group(1)
+    head = header[0] if header else [""] * len(columns)
+    table = [
+        f"{pad}| {' | '.join(cell(text) for text in head)} |",
+        f"{pad}|{' :--- |' * len(columns)}",
+        *(f"{pad}| {' | '.join(cell(text) for text in row)} |" for row in body),
+    ]
+    return bottom + 1, table
+
+
+def _table_block(
+    lines: list[str], start: int, code: list[str], cell: Callable[[str], str]
+) -> tuple[int, list[str]] | None:
+    """A simple table at ``lines[start]`` stored in ``code``, or None.
+
+    Returns the index just past the table and the placeholder that stands
+    for it, the shape :func:`_code_directive` returns.
+    """
+    table = _simple_table(lines, start, cell)
+    if table is None:
+        return None
+    end, rows = table
+    code.append("\n".join(rows))
+    return end, ["", f"\x00CODE{len(code) - 1}\x00", ""]
+
+
+def rest_blocks_to_markdown(
+    text: str, code: list[str], cell: Callable[[str], str] = _plain_cell
+) -> str:
     """Convert reST block constructs to Markdown structure.
 
     ``.. note::`` directives and the other admonitions (``.. warning::``,
     ``.. important::`` and their kin) become Starlight asides of the kind
     :data:`_ASIDES` gives, ``::``
     literal blocks, code directives (``.. code-block::`` and its kin) and
-    doctests become fenced code blocks and ``.. math::`` directives
+    doctests become fenced code blocks, ``.. math::`` directives
     become ``$$`` display-math blocks (one per blank-line-separated equation,
-    the Sphinx convention). Fenced code and math are stored in ``code`` and
-    replaced by placeholders so the inline pass (roles, escaping) cannot
+    the Sphinx convention) and simple tables become pipe tables, each cell
+    rendered by ``cell``. Fenced code, math and tables are stored in ``code``
+    and replaced by placeholders so the inline pass (roles, escaping) cannot
     touch them; ``_restore_code`` swaps them back.
     """
     lines = text.splitlines()
@@ -433,7 +580,11 @@ def rest_blocks_to_markdown(text: str, code: list[str]) -> str:
     i = 0
     while i < len(lines):
         line = lines[i]
-        fenced = _code_directive(lines, i, code) or _doctest_run(lines, i, code)
+        fenced = (
+            _code_directive(lines, i, code)
+            or _doctest_run(lines, i, code)
+            or _table_block(lines, i, code, cell)
+        )
         if fenced is not None:
             i, rendered = fenced
             out.extend(rendered)
@@ -466,7 +617,7 @@ def rest_blocks_to_markdown(text: str, code: list[str]) -> str:
             content = _dedent_block(lines[i + 1 : end])
             if note.group(3).strip():
                 content = [note.group(3).strip(), *content]
-            inner = rest_blocks_to_markdown("\n".join(content).strip("\n"), code)
+            inner = rest_blocks_to_markdown("\n".join(content).strip("\n"), code, cell)
             out.extend(["", f":::{_ASIDES[note.group(2)]}", inner, ":::", ""])
             i = end
             continue
@@ -547,7 +698,8 @@ def _inline_markdown(text: str, xref: dict[str, str], stats: RoleStats) -> str:
 def render_prose(text: str, xref: dict[str, str], stats: RoleStats) -> str:
     """Full reST -> Markdown pipeline for block prose."""
     code: list[str] = []
-    text = rest_blocks_to_markdown(text, code)
+    cell = functools.partial(render_cell, xref=xref, stats=stats)
+    text = rest_blocks_to_markdown(text, code, cell)
     text = _inline_markdown(text, xref, stats)
     text = _restore_code(text, code)
     return re.sub(r"\n{3,}", "\n\n", text).strip("\n")
@@ -1968,6 +2120,40 @@ def _description_problem(page: ModuleDoc) -> str | None:
     )
 
 
+#: The placeholder nineteen package docstrings opened with before each had a
+#: lead of its own. It says nothing a reader can use, yet ``help()`` shows it
+#: and a page made from the package would take it for its description, as one
+#: did for fluids.
+_PLACEHOLDER_LEAD = "(see module docstrings)"
+
+
+def _lead_paragraph(doc: str | None) -> str:
+    """The first paragraph of a docstring, on one line."""
+    return inspect.cleandoc(doc or "").split("\n\n", 1)[0].replace("\n", " ").strip()
+
+
+def placeholder_leads(pages: list[ModuleDoc]) -> list[str]:
+    """The modules whose lead paragraph is the placeholder instead of a lead.
+
+    Every page's module is read, and so is every public package, because a
+    package with no page of its own is still what ``help()`` shows and the
+    next page made from it.
+    """
+    leads = {page.module: page.intro for page in pages}
+    package = importlib.import_module("phonometry")
+    for info in pkgutil.walk_packages(package.__path__, "phonometry."):
+        if info.ispkg and _is_public_module(info.name):
+            leads.setdefault(
+                info.name, importlib.import_module(info.name).__doc__ or ""
+            )
+    return [
+        f"{module}: the lead paragraph says {_PLACEHOLDER_LEAD!r}; write a "
+        f"one-sentence lead of {_MAX_DESCRIPTION} characters or fewer"
+        for module, doc in sorted(leads.items())
+        if _PLACEHOLDER_LEAD in _lead_paragraph(doc)
+    ]
+
+
 def render_module_page(
     page: ModuleDoc,
     xref: dict[str, str],
@@ -2259,6 +2445,41 @@ def leaked_roles(relpath: str, rendered: str) -> list[str]:
     ]
 
 
+#: A border of a reST simple table run into a line of text: two or more runs
+#: of ``=`` with only spaces between them, at least one run longer than one.
+_INLINE_TABLE_RULE_RE = re.compile(r"(?<!\S)=+(?: +=+)+(?!\S)")
+
+
+def _holds_table_rule(line: str) -> bool:
+    """Whether a rendered line holds a simple table's border, alone or in text."""
+    if _SIMPLE_TABLE_RULE_RE.match(line):
+        return True
+    return any(
+        max(len(run) for run in rule.group().split()) > 1
+        for rule in _INLINE_TABLE_RULE_RE.finditer(line)
+    )
+
+
+def leaked_tables(relpath: str, rendered: str) -> list[str]:
+    """Report every border of a reST simple table left standing in one page.
+
+    A table :func:`_simple_table` cannot read (text between two columns, or
+    a header two rows deep) stays as it was written, and the page shows it as
+    one run-on paragraph. A table written under a field (``:param x:``)
+    cannot be read at all: the field's body is joined into one line of its
+    cell, borders and rows together, and that line is reported too. A border
+    inside fenced code is an example and is left alone.
+    """
+    lines = rendered.splitlines()
+    return [
+        f"{relpath}:{number}: {line.strip()}"
+        for number, (line, code) in enumerate(
+            zip(lines, code_lines(lines), strict=True), start=1
+        )
+        if not code and _holds_table_rule(line)
+    ]
+
+
 @dataclasses.dataclass
 class Report:
     """What a generation run produced (printed by main, asserted by tests)."""
@@ -2269,7 +2490,9 @@ class Report:
     failures: list[str]
     issues: list[str]
     leaked_roles: list[str]
+    leaked_tables: list[str]
     long_descriptions: list[str]
+    placeholder_leads: list[str]
 
 
 def generate(content_dir: Path, sidebar_path: Path) -> Report:
@@ -2279,6 +2502,7 @@ def generate(content_dir: Path, sidebar_path: Path) -> Report:
     failures: list[str] = []
 
     leaked: list[str] = []
+    tables: list[str] = []
     long_descriptions: list[str] = []
 
     if content_dir.exists():
@@ -2292,6 +2516,7 @@ def generate(content_dir: Path, sidebar_path: Path) -> Report:
         path.parent.mkdir(parents=True, exist_ok=True)
         rendered = render_module_page(page, xref, stats, failures)
         leaked += leaked_roles(page.relpath, rendered)
+        tables += leaked_tables(page.relpath, rendered)
         if (problem := _description_problem(page)) is not None:
             long_descriptions.append(problem)
         path.write_text(rendered, encoding="utf-8", newline="\n")
@@ -2305,7 +2530,9 @@ def generate(content_dir: Path, sidebar_path: Path) -> Report:
         failures=failures,
         issues=issues,
         leaked_roles=leaked,
+        leaked_tables=tables,
         long_descriptions=long_descriptions,
+        placeholder_leads=placeholder_leads(pages),
     )
 
 
@@ -2323,22 +2550,31 @@ def main() -> int:
         for failure in report.failures:
             print(f"  - {failure}")
     status = 0
-    if report.leaked_roles:
-        print(
+    for heading, problems in (
+        (
             "reST roles and directives this generator does not convert, so they "
-            "ship as text:"
-        )
-        for leak in report.leaked_roles:
-            print(f"  - {leak}")
-        status = 1
-    if report.long_descriptions:
-        print(
+            "ship as text:",
+            report.leaked_roles,
+        ),
+        (
+            "reST simple tables this generator could not read, so they ship as text:",
+            report.leaked_tables,
+        ),
+        (
             f"Pages with no description of {_MAX_DESCRIPTION} characters or fewer "
-            "(the generator never cuts one mid-sentence):"
-        )
-        for problem in report.long_descriptions:
-            print(f"  - {problem}")
-        status = 1
+            "(the generator never cuts one mid-sentence):",
+            report.long_descriptions,
+        ),
+        (
+            "Modules that open with a placeholder instead of a lead:",
+            report.placeholder_leads,
+        ),
+    ):
+        if problems:
+            print(heading)
+            for problem in problems:
+                print(f"  - {problem}")
+            status = 1
     return status
 
 

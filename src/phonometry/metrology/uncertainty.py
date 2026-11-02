@@ -12,7 +12,7 @@ Uncertainty in Measurement*:
   (Welch-Satterthwaite, Annex G.4) and the expanded uncertainty
   :math:`U = k u_\mathrm{c}` with a coverage factor from the t-distribution
   (clause 6);
-* the **Monte Carlo method** (ISO/IEC Guide 98-3-1:2008, Supplement 1) - the
+* the **Monte Carlo method** (ISO/IEC Guide 98-3-1:2008, Supplement 1): the
   numerical propagation of the input probability density functions, giving the
   estimate, its standard uncertainty and a probabilistically symmetric coverage
   interval (clause 7.7).

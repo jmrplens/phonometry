@@ -18,7 +18,7 @@ with their accuracy stated instead of implied.
   bin by bin (a zero-phase FIR filter applied circularly), so the *expected*
   spectrum follows the power law exactly at every synthesis bin above DC and
   a measured slope deviates only by the random error of the spectral
-  estimate - not the piecewise or few-pole approximations whose pink slope
+  estimate, not the piecewise or few-pole approximations whose pink slope
   ripples by fractions of a dB. The DC bin is zeroed for the colored
   variants (a power law has no finite DC value) and the record is rescaled
   to the requested RMS exactly. With the same ``seed`` the generator is
@@ -34,9 +34,9 @@ with their accuracy stated instead of implied.
 
 * :func:`resample_signal`: polyphase resampling behind an explicit
   anti-alias specification. The lowpass FIR is designed here (Kaiser
-  window method) from two numbers the caller controls - the stopband
+  window method) from two numbers the caller controls (the stopband
   attenuation in dB and the transition-band fraction of the target
-  Nyquist - and the designed filter is returned with the result, so the
+  Nyquist), and the designed filter is returned with the result, so the
   alias rejection of a resampled record is a documented property, not a
   library default.
 
@@ -786,11 +786,11 @@ def fractional_delay(
 
     * ``'linear'`` (default): the record is zero-padded past the shift
       before the ramp, so samples leaving one end land in the padding
-      instead of wrapping around - use it for transients and impulse
+      instead of wrapping around; use it for transients and impulse
       responses. Content shifted beyond the record length is discarded
       (the output keeps the input length).
     * ``'circular'``: the ramp is applied over the record itself and the
-      shift wraps around - use it for periodic records. For a tone
+      shift wraps around; use it for periodic records. For a tone
       centered on a DFT bin the delayed record equals the analytically
       delayed tone to machine precision.
 
@@ -799,8 +799,8 @@ def fractional_delay(
 
     A real record of even length cannot carry a fractionally delayed
     Nyquist-bin component (the inverse real FFT keeps its real part), so
-    keep the signal band-limited below Nyquist - as any properly sampled
-    signal is - or use odd lengths, and the operation is exact.
+    keep the signal band-limited below Nyquist, as any properly sampled
+    signal is, or use odd lengths, and the operation is exact.
 
     :param x: Input record, 1-D. Accepts a :class:`phonometry.io.Signal`, whose
         calibration is applied to the samples, so the delayed record comes

@@ -128,8 +128,8 @@ Result of an ISO 532-3:2023 time-varying loudness calculation.
 short-term `S'(t)` (clause 7.8) and long-term `S''(t)` (clause 7.9)
 loudness traces in sone; `short_term_loudness_level` and
 `long_term_loudness_level` are the corresponding loudness levels in phon
-(Table 5).  `n_max` is the maximum of the long-term loudness (sone) - the
-predictor of the loudness of sounds up to about 5 s (clause 7.9) - and
+(Table 5).  `n_max` is the maximum of the long-term loudness (sone), the
+predictor of the loudness of sounds up to about 5 s (clause 7.9), and
 `loudness_level_max` the phon value it maps to.  `percentiles` gives the
 long-term-loudness values (sone) exceeded for the stated fraction of the
 active trace (e.g. `percentiles[5]` is the level exceeded 5 % of the

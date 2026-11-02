@@ -7,7 +7,7 @@ the estimators of :mod:`phonometry.signals.spectra` leave open in their
 analysis with the discrete Fourier transform*) turned that choice into a
 table of numbers: equivalent noise bandwidth, coherent gain, scalloping
 loss, worst-case processing loss, highest sidelobe level and the -3 dB
-main-lobe width - the trade-off between resolution, leakage and
+main-lobe width: the trade-off between resolution, leakage and
 amplitude accuracy, read rather than guessed.
 
 :func:`window_metrics` computes those figures for any taper

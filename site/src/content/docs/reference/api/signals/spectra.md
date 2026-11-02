@@ -31,7 +31,7 @@ Procedures* (4th ed., 2010):
   $b[\hat{G}_{xx}] \approx (B_\mathrm{e}^2/24) \, G''_{xx}$
   (Eq. 8.139), which for a resonance peak of half-power bandwidth
   $B_\mathrm{r}$
-  becomes $\varepsilon_\mathrm{b} \approx -(B_\mathrm{e}/B_\mathrm{r})^2/3$ (Eq. 8.141) -
+  becomes $\varepsilon_\mathrm{b} \approx -(B_\mathrm{e}/B_\mathrm{r})^2/3$ (Eq. 8.141),
   exposed here as
   [`resolution_bias_error`](/phonometry/reference/api/signals/spectra/#resolution_bias_error);
 * the **coherent output spectrum**
@@ -473,7 +473,7 @@ Welch autospectral density with its statistical error (B&P Ch. 8).
 | :--- | :--- |
 | `frequencies` | One-sided frequency axis, in Hz. |
 | `psd` | Autospectral density $\hat{G}_{xx}(f)$ (units²/Hz for `'density'` scaling, units² for `'spectrum'`). |
-| `confidence_lower` | Lower chi-square confidence bound on $G_{xx}$ (Eq. 8.163; the DC bin, and the Nyquist bin for an even segment length, use $n = n_\mathrm{d}$ degrees of freedom - a wider interval - because those bins carry a single real Fourier component). |
+| `confidence_lower` | Lower chi-square confidence bound on $G_{xx}$ (Eq. 8.163; the DC bin, and the Nyquist bin for an even segment length, use $n = n_\mathrm{d}$ degrees of freedom, a wider interval, because those bins carry a single real Fourier component). |
 | `confidence_upper` | Upper chi-square confidence bound on $G_{xx}$. |
 | `confidence` | Confidence level of the interval (e.g. `0.95`). |
 | `random_error` | Normalized random error $\varepsilon[\hat{G}_{xx}] = 1/\sqrt{n_\mathrm{d}}$ (Eq. 8.158) of the interior bins ($\sqrt{2/n_\mathrm{d}}$ at DC/Nyquist). |

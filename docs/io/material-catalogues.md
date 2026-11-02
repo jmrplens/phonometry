@@ -1117,13 +1117,13 @@ or a pull request is never merged.
 ## References
 
 - Internet Engineering Task Force. (2017). *The JavaScript Object Notation (JSON) Data Interchange Format* (RFC 8259).
-  [rfc-editor.org](https://www.rfc-editor.org/rfc/rfc8259).
+  [rfc-editor.org](https://www.rfc-editor.org/info/rfc8259/).
   The text a catalogue file is. The reader holds a file to it strictly: a NaN or an Infinity, which only some readers accept, and a name written twice in one object, whose meaning RFC 8259 leaves to the reader, are refused.
 - Internet Engineering Task Force. (2013). *JavaScript Object Notation (JSON) Pointer* (RFC 6901).
-  [rfc-editor.org](https://www.rfc-editor.org/rfc/rfc6901).
+  [rfc-editor.org](https://www.rfc-editor.org/info/rfc6901/).
   How every problem in a file is located: /rows/1/porosity is the porosity of the second row.
 - Internet Engineering Task Force. (2005). *Common Format and MIME Type for Comma-Separated Values (CSV) Files* (RFC 4180).
-  [rfc-editor.org](https://www.rfc-editor.org/rfc/rfc4180).
+  [rfc-editor.org](https://www.rfc-editor.org/info/rfc4180/).
   The CSV file a spreadsheet saves: one record per line ending in CRLF, the same number of fields on every line, and a field that holds a line break, a double quote or the delimiter enclosed in double quotes, with a quote inside it doubled. The reader takes a semicolon or a tab as the delimiter too, as the header declares.
 - International Organization for Standardization. (1997). *Acoustics — Sound absorbers for use in buildings — Rating of sound absorption* (ISO 11654:1997).
   [iso.org catalogue](https://www.iso.org/standard/19583.html).

@@ -1,11 +1,11 @@
 ---
 title: "building.measurement.structure_borne_power"
-description: "Structure-borne sound power of building equipment (EN 15657:2018; ISO 9611)."
+description: "Structure-borne sound power of building equipment (UNE-EN 15657:2018; ISO 9611)."
 sidebar:
   label: "structure_borne_power"
 ---
 
-Structure-borne sound power of building equipment (EN 15657:2018; ISO 9611).
+Structure-borne sound power of building equipment (UNE-EN 15657:2018; ISO 9611).
 
 Building service equipment (pumps, fans, boilers, sanitary appliances) injects
 **structure-borne sound power** into the building structure it is fixed to.
@@ -84,7 +84,7 @@ characteristic_reception_plate_power(
 ) -> np.ndarray
 ```
 
-Characteristic reception-plate power level (EN 15657:2018, Formula 17).
+Characteristic reception-plate power level (UNE-EN 15657:2018, Formula 17).
 
 $L_\mathrm{Wsn} = L_\mathrm{Fb,eq} + 10 \log_{10}(|Y_{\mathrm{R},\infty,\mathrm{low}}|/Y_0)$
 with the characteristic mobility of the standard 10 cm concrete reception
@@ -119,7 +119,7 @@ equivalent_blocked_force_level(
 ) -> np.ndarray
 ```
 
-Equivalent blocked force level, squared (EN 15657:2018, Formula 15).
+Equivalent blocked force level, squared (UNE-EN 15657:2018, Formula 15).
 
 $L_\mathrm{Fb,eq} = L_\mathrm{Ws,low} - 10 \log_{10}(\operatorname{Re}\{Y_\mathrm{R,low,eq}\}/Y_0)$
 in dB re $F_0 = 10^{-6}$ N,
@@ -152,7 +152,7 @@ equivalent_free_velocity_level(
 ) -> np.ndarray
 ```
 
-Equivalent free velocity level of the source (EN 15657:2018, Formula 18).
+Equivalent free velocity level of the source (UNE-EN 15657:2018, Formula 18).
 
 $L_\mathrm{vf,eq} = L_\mathrm{Ws,high} + 10 \log_{10}\left( |Y_\mathrm{R,high,eq}|^2 / (\operatorname{Re}\{Y_\mathrm{R,high,eq}\}\, Y_0) \right) + 60~\text{dB}$
 in dB re 1e-9 m/s, from the power injected into the
@@ -290,7 +290,7 @@ source_mobility_from_levels(
 ) -> np.ndarray
 ```
 
-Equivalent source mobility magnitude (EN 15657:2018, Formula 19).
+Equivalent source mobility magnitude (UNE-EN 15657:2018, Formula 19).
 
 $|Y_\mathrm{S,eq}|^2 / Y_0^2 = 10^{(L_\mathrm{vf,eq} - L_\mathrm{Fb,eq})/10} \cdot 10^{-6}$, the ratio
 of the free-velocity (re 1e-9 m/s) and blocked-force (re 1e-6 N)
@@ -459,7 +459,7 @@ StructureBornePowerResult.report(
 Render an EN 15657 structure-borne sound power fiche to `path`.
 
 Writes a one-page reception-plate characterization sheet: the
-standard-basis line naming the EN 15657:2018 reception-plate method
+standard-basis line naming the UNE-EN 15657:2018 reception-plate method
 (Formula 14), an optional metadata header (client, source equipment,
 test environment, instrumentation, climate, date), a per-band table
 (nominal octave/one-third-octave frequency, the spatial mean plate

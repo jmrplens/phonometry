@@ -3,7 +3,7 @@
 
 Clean-room implementation of the loudness signal chain of ECMA-418-2:2025:
 
-* the shared auditory *front-end* of Clause 5 - trigonometric fade-in and
+* the shared auditory *front-end* of Clause 5: trigonometric fade-in and
   zero-padding (5.1.2), the cascaded outer & middle/inner ear filter
   (5.1.3, Table 1), the 53-band gammatone-like auditory filter bank
   (5.1.4, Formulae 6-17), band-dependent segmentation (5.1.5, Table 4),
@@ -18,7 +18,7 @@ Clean-room implementation of the loudness signal chain of ECMA-418-2:2025:
   cross-block-size-group ACF recomputation (Clause 6.2.2-6.2.7,
   Formulae 27-48; :func:`_tonal_noise_split`, shared with the tonality
   metric so both report the same underlying N'_tonal); and
-* the loudness assembly of Clause 8 - the tonal/noise power average
+* the loudness assembly of Clause 8: the tonal/noise power average
   (8.1.1, Formulae 113-114), the average specific loudness (8.1.2),
   the time-dependent loudness (8.1.3, Formula 116) and the single
   representative value (8.1.4, Formula 117).

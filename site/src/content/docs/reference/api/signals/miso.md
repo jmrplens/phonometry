@@ -180,8 +180,8 @@ MISOCoherenceResult.dominant_input() -> NDArray[np.intp]
 Index of the input contributing the most output power per bin.
 
 Returns, for every frequency, the original input index whose partial
-coherent output spectrum `coherent_output_spectra` is largest -
-the source that dominates that band. Bins where every contribution is
+coherent output spectrum `coherent_output_spectra` is largest
+(the source that dominates that band). Bins where every contribution is
 zero report the first input (index 0).
 
 **Returns:** Integer array of length `len(frequencies)`.

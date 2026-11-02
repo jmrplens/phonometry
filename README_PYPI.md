@@ -21,7 +21,7 @@
 <!-- Quality -->
 [![CI](https://github.com/jmrplens/phonometry/actions/workflows/python-app.yml/badge.svg)](https://github.com/jmrplens/phonometry/actions/workflows/python-app.yml)
 [![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=jmrplens_phonometry&metric=alert_status)](https://sonarcloud.io/summary/overall?id=jmrplens_phonometry)
-[![codecov](https://codecov.io/gh/jmrplens/phonometry/branch/main/graph/badge.svg)](https://codecov.io/gh/jmrplens/phonometry)
+[![codecov](https://codecov.io/gh/jmrplens/phonometry/branch/main/graph/badge.svg)](https://app.codecov.io/gh/jmrplens/phonometry)
 
 <!-- Citation & support -->
 [![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.21215280-blue?logo=doi&logoColor=white)](https://doi.org/10.5281/zenodo.21215280)

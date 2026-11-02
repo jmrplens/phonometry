@@ -134,7 +134,7 @@ sti_from_impulse_response(
 
 Full STI from a room/system impulse response (indirect method).
 
-The impulse response is filtered into the seven octave bands 125 Hz -
+The impulse response is filtered into the seven octave bands 125 Hz to
 8 kHz (IEC 61260-1 filters) and the modulation transfer function is
 obtained from the Schroeder integral (IEC 60268-16, indirect method):
 
@@ -220,8 +220,8 @@ depths at the two Table B.1 modulation frequencies of each band are
 measured with the sine/cosine correlation over an integer number of
 periods (Ed.4 A.5.2 = Ed.5). The modulation transfer values are the
 measured depths normalized by the source modulation index 0,55
-(Annex B) - or by the depths measured on `reference` when the
-actually emitted signal is supplied - and feed the same masking /
+(Annex B), or by the depths measured on `reference` when the
+actually emitted signal is supplied, and feed the same masking /
 threshold / TI / STI chain as the full method.
 
 Physical background noise is already contained in the recording; use
@@ -231,7 +231,7 @@ level-dependent corrections, which are otherwise skipped.
 An [`STIWarning`](/phonometry/reference/api/speech/sti/#stiwarning) is emitted when the recording is shorter than
 the recommended 15 s (IEC 60268-16 STIPA practice, 15 s to 25 s),
 because the slow modulation components are then averaged over too few
-periods and the recovered modulation depths - and hence the STI - are
+periods and the recovered modulation depths, and hence the STI, are
 biased low (an ideal loopback gives STI ~0.956 at 5 s vs ~0.998 at 18 s).
 
 **Parameters**
@@ -270,7 +270,7 @@ Pink-noise carriers are band-limited to half-octave bands centred on
 the seven octave-band frequencies (clause A.4), set to the Ed.5 male
 speech spectrum of clause A.6.1 (`-2,5; 0,5; 0; -6; -12; -18; -24`
 dB re the 500 Hz band) and intensity-modulated with
-`0,5 (1 + 0,55 (sin 2 pi f1 t - sin 2 pi f2 t))` - the Table B.1
+`0,5 (1 + 0,55 (sin 2 pi f1 t - sin 2 pi f2 t))`: the Table B.1
 frequency pair of each band, 180 degrees between components, applied
 in amplitude through its square root (Annex B).
 

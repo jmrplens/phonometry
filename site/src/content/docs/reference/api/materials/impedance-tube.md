@@ -18,9 +18,9 @@ wavenumber is $k_0 = k_0' - jk_0''$ with the attenuation constant
 $k_0''$ (Clause 2.6, Annex A). Air properties from Clause 7.2,
 Eqs. (5)/(7), use temperature in **kelvin**.
 
-The tube itself is described here as well - its cross-section, the hydraulic
+The tube itself is described here as well (its cross-section, the hydraulic
 diameter a rectangular tube reports, the complex wavenumber, the lower-bound
-wall attenuation and the plane-wave working range - because a specimen is
+wall attenuation and the plane-wave working range), because a specimen is
 characterised only where the field in the tube is a plane wave, and because
 the four-microphone method measures in the same tube and reuses that
 arithmetic.
@@ -178,7 +178,7 @@ $\alpha = 1 - \lvert r\rvert^2$ (Eq. (18)).
 The trailing fields retain the tube geometry the reduction was run with
 (microphone `spacing_m` `s`, distance `x1` from the sample to the
 farther microphone, tube `diameter_m` and cross-section `shape`, stored
-canonically as `"circular"`/`"rectangular"` - a `"square"` input is
+canonically as `"circular"`/`"rectangular"`; a `"square"` input is
 kept as `"rectangular"`). The diameter and the shape are `None` when
 they were not supplied to [`two_microphone_impedance`](/phonometry/reference/api/materials/impedance-tube/#two_microphone_impedance); the spacing
 and `x1` are always there, because the reduction cannot run without
@@ -280,7 +280,7 @@ Microphone-mismatch calibration factor `Hc` (ISO 10534-2, Eq. (10)).
 
 $H_\mathrm{c} = \sqrt{H_{12}^{I} / H_{12}^{II}}$ from a transfer function measured on an
 absorptive specimen in the standard configuration (I) and with the two
-microphones physically interchanged (II) - the cabling to the analyser is
+microphones physically interchanged (II); the cabling to the analyser is
 **not** swapped (Clause 7.5.2).
 
 **Parameters**

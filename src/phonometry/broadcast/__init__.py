@@ -1,5 +1,5 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
-"""broadcast domain of phonometry (see module docstrings)."""
+"""Broadcast audio levels: programme loudness and true peak by ITU-R BS.1770 and EBU R 128, and the quasi-peak programme meter of ITU-R BS.468."""
 
 from __future__ import annotations
 
